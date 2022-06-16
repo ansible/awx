@@ -136,7 +136,7 @@ msgid "About"
 msgstr "情報"
 
 #: routeConfig.js:92
-#: screens/ActivityStream/ActivityStream.js:173
+#: screens/ActivityStream/ActivityStream.js:179
 #: screens/Credential/Credential.js:73
 #: screens/Credential/Credentials.js:28
 #: screens/Inventory/Inventories.js:58
@@ -176,13 +176,14 @@ msgstr "アクション"
 #: components/RelatedTemplateList/RelatedTemplateList.js:174
 #: components/Schedule/ScheduleList/ScheduleList.js:171
 #: components/Schedule/ScheduleList/ScheduleListItem.js:114
+#: components/SelectedList/DraggableSelectedList.js:101
 #: components/TemplateList/TemplateList.js:245
 #: components/TemplateList/TemplateListItem.js:186
-#: screens/ActivityStream/ActivityStream.js:260
+#: screens/ActivityStream/ActivityStream.js:266
 #: screens/ActivityStream/ActivityStreamListItem.js:49
 #: screens/Application/ApplicationsList/ApplicationListItem.js:48
 #: screens/Application/ApplicationsList/ApplicationsList.js:160
-#: screens/Credential/CredentialList/CredentialList.js:163
+#: screens/Credential/CredentialList/CredentialList.js:167
 #: screens/Credential/CredentialList/CredentialListItem.js:66
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.js:177
 #: screens/CredentialType/CredentialTypeList/CredentialTypeListItem.js:38
@@ -194,7 +195,7 @@ msgstr "アクション"
 #: screens/Host/HostList/HostListItem.js:64
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:214
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:75
-#: screens/InstanceGroup/Instances/InstanceList.js:258
+#: screens/InstanceGroup/Instances/InstanceList.js:260
 #: screens/InstanceGroup/Instances/InstanceListItem.js:171
 #: screens/Instances/InstanceList/InstanceList.js:155
 #: screens/Instances/InstanceList/InstanceListItem.js:183
@@ -219,7 +220,7 @@ msgstr "アクション"
 #: screens/Organization/OrganizationList/OrganizationList.js:146
 #: screens/Organization/OrganizationList/OrganizationListItem.js:69
 #: screens/Organization/OrganizationTeams/OrganizationTeamList.js:86
-#: screens/Organization/OrganizationTeams/OrganizationTeamListItem.js:17
+#: screens/Organization/OrganizationTeams/OrganizationTeamListItem.js:19
 #: screens/Project/ProjectList/ProjectList.js:225
 #: screens/Project/ProjectList/ProjectListItem.js:214
 #: screens/Team/TeamList/TeamList.js:144
@@ -247,17 +248,17 @@ msgid "Activity"
 msgstr "アクティビティー"
 
 #: routeConfig.js:49
-#: screens/ActivityStream/ActivityStream.js:35
-#: screens/ActivityStream/ActivityStream.js:113
+#: screens/ActivityStream/ActivityStream.js:43
+#: screens/ActivityStream/ActivityStream.js:121
 #: screens/Setting/Settings.js:43
 msgid "Activity Stream"
 msgstr "アクティビティーストリーム"
 
-#: screens/ActivityStream/ActivityStream.js:116
+#: screens/ActivityStream/ActivityStream.js:124
 msgid "Activity Stream type selector"
 msgstr "アクティビティーストリームのタイプセレクター"
 
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:107
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:133
 msgid "Actor"
 msgstr "アクター"
 
@@ -352,21 +353,21 @@ msgid "Add workflow template"
 msgstr "ワークフローテンプレートの追加"
 
 #: routeConfig.js:113
-#: screens/ActivityStream/ActivityStream.js:184
+#: screens/ActivityStream/ActivityStream.js:190
 msgid "Administration"
 msgstr "管理"
 
-#: components/DataListToolbar/DataListToolbar.js:138
+#: components/DataListToolbar/DataListToolbar.js:136
 #: screens/Job/JobOutput/JobOutputSearch.js:137
 msgid "Advanced"
 msgstr "詳細"
 
-#: components/Search/AdvancedSearch.js:313
+#: components/Search/AdvancedSearch.js:319
 msgid "Advanced search documentation"
 msgstr "高度な検索に関するドキュメント"
 
-#: components/Search/AdvancedSearch.js:206
-#: components/Search/AdvancedSearch.js:220
+#: components/Search/AdvancedSearch.js:211
+#: components/Search/AdvancedSearch.js:225
 msgid "Advanced search value input"
 msgstr "詳細な検索値の入力"
 
@@ -491,7 +492,7 @@ msgstr "アプリケーションが見つかりません。"
 msgid "Applications"
 msgstr "アプリケーション"
 
-#: screens/ActivityStream/ActivityStream.js:205
+#: screens/ActivityStream/ActivityStream.js:211
 msgid "Applications & Tokens"
 msgstr "アプリケーションおよびトークン"
 
@@ -502,26 +503,27 @@ msgstr "アプリケーションおよびトークン"
 msgid "Approval"
 msgstr "承認"
 
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:176
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:181
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListApproveButton.js:31
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListApproveButton.js:47
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListApproveButton.js:55
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListApproveButton.js:59
+#: screens/WorkflowApproval/shared/WorkflowApprovalControls.js:99
+#: screens/WorkflowApproval/shared/WorkflowApprovalControls.js:106
+#: screens/WorkflowApproval/shared/WorkflowApprovalControls.js:130
 msgid "Approve"
 msgstr "承認"
 
-#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:59
+#: screens/WorkflowApproval/shared/WorkflowApprovalControls.js:115
+msgid "Approve, cancel or deny"
+msgstr "承認、キャンセル、または拒否"
+
+#: components/StatusLabel/StatusLabel.js:31
 msgid "Approved"
 msgstr "承認済"
 
-#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:52
+#: screens/WorkflowApproval/shared/WorkflowApprovalUtils.js:11
 msgid "Approved - {0}.  See the Activity Stream for more information."
 msgstr "承認済み - {0}。詳細は、アクティビティーストリームを参照してください。"
 
-#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:49
+#: screens/WorkflowApproval/shared/WorkflowApprovalUtils.js:7
 msgid "Approved by {0} - {1}"
-msgstr "{0} - {1} により承認済"
+msgstr "{0} により承認済 - {1}"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:125
 msgid "April"
@@ -571,7 +573,7 @@ msgstr "{1} から {0} のアクセスを削除しますか? これを行うと�
 msgid "Are you sure you want to remove {0} access from {username}?"
 msgstr "{username} からの {0} のアクセスを削除してもよろしいですか?"
 
-#: screens/Job/JobOutput/JobOutput.js:802
+#: screens/Job/JobOutput/JobOutput.js:764
 msgid "Are you sure you want to submit the request to cancel this job?"
 msgstr "このジョブを取り消す要求を送信してよろしいですか?"
 
@@ -580,7 +582,7 @@ msgstr "このジョブを取り消す要求を送信してよろしいですか
 msgid "Arguments"
 msgstr "引数"
 
-#: screens/Job/JobDetail/JobDetail.js:456
+#: screens/Job/JobDetail/JobDetail.js:463
 msgid "Artifacts"
 msgstr "アーティファクト"
 
@@ -625,6 +627,15 @@ msgstr "認証付与タイプ"
 #: screens/Instances/InstanceList/InstanceListItem.js:219
 msgid "Auto"
 msgstr "自動"
+
+#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:71
+#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:72
+msgid "Automation Analytics"
+msgstr "自動化アナリティクス"
+
+#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:111
+msgid "Automation Analytics dashboard"
+msgstr "自動化アナリティクスダッシュボード"
 
 #: screens/Setting/Settings.js:46
 msgid "Azure AD"
@@ -793,8 +804,8 @@ msgid "Browse…"
 msgstr "参照…"
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:36
-msgid "By default, we collect and transmit analytics data on the serice usage to Red Hat. There are two categories of data collected by the service. For more information, see <0>this Tower documentation page</0>. Uncheck the following boxes to disable this feature."
-msgstr "デフォルトでは、サービスの使用状況に関する解析データを収集して、Red Hat に送信します。サービスが収集するデータにはカテゴリーが 2 種類あります。詳細情報は、<0>Tower ドキュメントのページ<</0> を参照してください。この機能を無効にするには、以下のボックスのチェックを解除します。"
+msgid "By default, we collect and transmit analytics data on the service usage to Red Hat. There are two categories of data collected by the service. For more information, see <0>this Tower documentation page</0>. Uncheck the following boxes to disable this feature."
+msgstr "デフォルトでは、サービスの使用状況に関する解析データを収集して、Red Hat に送信します。サービスが収集するデータにはカテゴリーが 2 種類あります。詳細情報は、<0>Tower のドキュメントページ<</0> を参照してください。この機能を無効にするには、以下のボックスのチェックを解除します。"
 
 #: screens/TopologyView/Legend.js:74
 msgid "C"
@@ -868,6 +879,8 @@ msgstr "キャッシュのタイムアウト (秒)"
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeModal.js:165
 #: screens/User/UserRoles/UserRolesList.js:224
 #: screens/User/UserRoles/UserRolesList.js:227
+#: screens/WorkflowApproval/shared/WorkflowApprovalControls.js:84
+#: screens/WorkflowApproval/shared/WorkflowApprovalControls.js:92
 msgid "Cancel"
 msgstr "取り消し"
 
@@ -877,8 +890,8 @@ msgid "Cancel Inventory Source Sync"
 msgstr "インベントリーソース同期の取り消し"
 
 #: components/JobCancelButton/JobCancelButton.js:52
-#: screens/Job/JobOutput/JobOutput.js:778
-#: screens/Job/JobOutput/JobOutput.js:779
+#: screens/Job/JobOutput/JobOutput.js:740
+#: screens/Job/JobOutput/JobOutput.js:741
 msgid "Cancel Job"
 msgstr "ジョブの取り消し"
 
@@ -892,8 +905,8 @@ msgstr "プロジェクトの同期の取り消し"
 msgid "Cancel Sync"
 msgstr "同期の取り消し"
 
-#: screens/Job/JobOutput/JobOutput.js:786
-#: screens/Job/JobOutput/JobOutput.js:789
+#: screens/Job/JobOutput/JobOutput.js:748
+#: screens/Job/JobOutput/JobOutput.js:751
 msgid "Cancel job"
 msgstr "ジョブの取り消し"
 
@@ -931,28 +944,31 @@ msgid "Cancel subscription edit"
 msgstr "サブスクリプションの編集の取り消し"
 
 #: components/JobList/JobListItem.js:113
-#: screens/Job/JobDetail/JobDetail.js:497
+#: screens/Job/JobDetail/JobDetail.js:504
 #: screens/Job/JobOutput/shared/OutputToolbar.js:137
 msgid "Cancel {0}"
 msgstr "{0} の取り消し"
 
 #: components/JobList/JobList.js:230
-#: components/StatusLabel/StatusLabel.js:40
+#: components/StatusLabel/StatusLabel.js:46
 #: components/Workflow/WorkflowNodeHelp.js:111
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:163
-#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:20
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:189
 msgid "Canceled"
 msgstr "取り消し済み"
+
+#: screens/WorkflowApproval/shared/WorkflowApprovalControls.js:58
+msgid "Cannot approve, cancel or deny completed workflow approvals"
+msgstr "完了したワークフローの承認を承認、キャンセル、または拒否することはできません"
 
 #: screens/Setting/Logging/LoggingEdit/LoggingEdit.js:129
 msgid ""
 "Cannot enable log aggregator without providing\n"
 "logging aggregator host and logging aggregator type."
-msgstr "ログアグリゲーターホストとログアグリゲータータイプを指定せずにログアグリゲーターを有効にすることはできません。"
+msgstr "ログアグリゲーターホストとログアグリゲータータイプを指定せずに、ログアグリゲーターを有効にすることはできません。"
 
 #: screens/Instances/InstanceList/InstanceList.js:148
 msgid "Cannot run health check on hop nodes."
-msgstr "ホップノードで可用性をチェックをできません。"
+msgstr "ホップノードでは可用性をチェックできません。"
 
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:213
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:74
@@ -960,7 +976,7 @@ msgid "Capacity"
 msgstr "容量"
 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:214
-#: screens/InstanceGroup/Instances/InstanceList.js:256
+#: screens/InstanceGroup/Instances/InstanceList.js:258
 #: screens/InstanceGroup/Instances/InstanceListItem.js:143
 #: screens/Instances/InstanceDetail/InstanceDetail.js:164
 #: screens/Instances/InstanceList/InstanceList.js:153
@@ -994,7 +1010,7 @@ msgid ""
 "{brandName} to change this location."
 msgstr "この場所を変更するには {brandName} のデプロイ時に PROJECTS_ROOT を変更します。"
 
-#: components/StatusLabel/StatusLabel.js:41
+#: components/StatusLabel/StatusLabel.js:47
 #: screens/Job/JobOutput/shared/HostStatusBar.js:43
 msgid "Changed"
 msgstr "変更済み"
@@ -1086,7 +1102,7 @@ msgstr "クリーニング"
 msgid "Clear"
 msgstr "消去"
 
-#: components/DataListToolbar/DataListToolbar.js:96
+#: components/DataListToolbar/DataListToolbar.js:94
 #: screens/Job/JobOutput/JobOutputSearch.js:145
 msgid "Clear all filters"
 msgstr "すべてのフィルターの解除"
@@ -1099,7 +1115,7 @@ msgstr "サブスクリプションの解除"
 msgid "Clear subscription selection"
 msgstr "サブスクリプションの選択解除"
 
-#: screens/Template/WorkflowJobTemplateVisualizer/VisualizerGraph.js:232
+#: screens/Template/WorkflowJobTemplateVisualizer/VisualizerGraph.js:245
 msgid "Click an available node to create a new link.  Click outside the graph to cancel."
 msgstr "使用可能なノードをクリックして、新しいリンクを作成します。キャンセルするには、グラフの外側をクリックしてください。"
 
@@ -1251,7 +1267,7 @@ msgstr "すべて元に戻すことを確認"
 msgid "Confirm selection"
 msgstr "選択の確認"
 
-#: screens/Job/JobDetail/JobDetail.js:290
+#: screens/Job/JobDetail/JobDetail.js:297
 msgid "Container Group"
 msgstr "コンテナーグループ"
 
@@ -1483,7 +1499,7 @@ msgstr "ユーザートークンの作成"
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:261
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:149
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.js:47
-#: screens/Job/JobDetail/JobDetail.js:432
+#: screens/Job/JobDetail/JobDetail.js:439
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:378
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:105
 #: screens/Project/ProjectDetail/ProjectDetail.js:231
@@ -1493,7 +1509,7 @@ msgstr "ユーザートークンの作成"
 #: screens/User/UserDetail/UserDetail.js:82
 #: screens/User/UserTokenDetail/UserTokenDetail.js:57
 #: screens/User/UserTokenList/UserTokenList.js:146
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:150
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:176
 msgid "Created"
 msgstr "作成日時"
 
@@ -1578,13 +1594,14 @@ msgid "Credential Name"
 msgstr "認証情報名"
 
 #: screens/Credential/CredentialDetail/CredentialDetail.js:231
+#: screens/Credential/CredentialList/CredentialList.js:159
 #: screens/Credential/shared/CredentialForm.js:128
 #: screens/Credential/shared/CredentialForm.js:196
 msgid "Credential Type"
 msgstr "認証情報タイプ"
 
 #: routeConfig.js:117
-#: screens/ActivityStream/ActivityStream.js:186
+#: screens/ActivityStream/ActivityStream.js:192
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.js:118
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.js:161
 #: screens/CredentialType/CredentialTypes.js:13
@@ -1628,11 +1645,11 @@ msgstr "認証情報タイプが見つかりません。"
 #: components/TemplateList/TemplateListItem.js:326
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:77
 #: routeConfig.js:70
-#: screens/ActivityStream/ActivityStream.js:161
-#: screens/Credential/CredentialList/CredentialList.js:192
+#: screens/ActivityStream/ActivityStream.js:167
+#: screens/Credential/CredentialList/CredentialList.js:196
 #: screens/Credential/Credentials.js:13
 #: screens/Credential/Credentials.js:23
-#: screens/Job/JobDetail/JobDetail.js:334
+#: screens/Job/JobDetail/JobDetail.js:341
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:347
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/JobTemplatesList.js:51
 #: screens/Template/shared/JobTemplateForm.js:373
@@ -1685,7 +1702,7 @@ msgstr "削除済み"
 msgid "Dashboard"
 msgstr "ダッシュボード"
 
-#: screens/ActivityStream/ActivityStream.js:141
+#: screens/ActivityStream/ActivityStream.js:147
 msgid "Dashboard (all activity)"
 msgstr "ダッシュボード (すべてのアクティビティー)"
 
@@ -1720,7 +1737,7 @@ msgstr "残りの日数"
 msgid "Days to keep"
 msgstr "保持する日数"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:128
+#: screens/Job/JobOutput/JobOutputSearch.js:103
 msgid "Debug"
 msgstr "デバッグ"
 
@@ -1782,7 +1799,7 @@ msgstr "システムレベルの機能および関数の定義"
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:73
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:78
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:102
-#: screens/Job/JobDetail/JobDetail.js:509
+#: screens/Job/JobDetail/JobDetail.js:516
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:420
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:188
 #: screens/Project/ProjectDetail/ProjectDetail.js:279
@@ -1794,7 +1811,7 @@ msgstr "システムレベルの機能および関数の定義"
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:249
 #: screens/User/UserDetail/UserDetail.js:107
 #: screens/User/UserTokenDetail/UserTokenDetail.js:74
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:203
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:219
 msgid "Delete"
 msgstr "削除"
 
@@ -1819,7 +1836,7 @@ msgstr "ホストの削除"
 msgid "Delete Inventory"
 msgstr "インベントリーの削除"
 
-#: screens/Job/JobDetail/JobDetail.js:505
+#: screens/Job/JobDetail/JobDetail.js:512
 #: screens/Job/JobOutput/shared/OutputToolbar.js:195
 #: screens/Job/JobOutput/shared/OutputToolbar.js:199
 msgid "Delete Job"
@@ -1865,7 +1882,7 @@ msgstr "ユーザーの削除"
 msgid "Delete User Token"
 msgstr "ユーザートークンの削除"
 
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:199
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:215
 msgid "Delete Workflow Approval"
 msgstr "ワークフロー承認の削除"
 
@@ -1933,13 +1950,13 @@ msgid "Delete {pluralizedItemName}?"
 msgstr "{pluralizedItemName} を削除しますか?"
 
 #: components/DetailList/DeletedDetail.js:15
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:131
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.js:72
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:157
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.js:46
 msgid "Deleted"
 msgstr "削除済み"
 
 #: components/TemplateList/TemplateList.js:295
-#: screens/Credential/CredentialList/CredentialList.js:208
+#: screens/Credential/CredentialList/CredentialList.js:212
 #: screens/Inventory/InventoryList/InventoryList.js:284
 #: screens/Project/ProjectList/ProjectList.js:290
 msgid "Deletion Error"
@@ -1951,28 +1968,24 @@ msgstr "削除エラー"
 msgid "Deletion error"
 msgstr "削除エラー"
 
-#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:38
+#: components/StatusLabel/StatusLabel.js:32
 msgid "Denied"
 msgstr "拒否済み"
 
-#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:31
+#: screens/WorkflowApproval/shared/WorkflowApprovalUtils.js:21
 msgid "Denied - {0}.  See the Activity Stream for more information."
 msgstr "拒否されました - {0}。詳細については、アクティビティーストリームを参照してください。"
 
-#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:28
+#: screens/WorkflowApproval/shared/WorkflowApprovalUtils.js:17
 msgid "Denied by {0} - {1}"
 msgstr "{0} - {1} により拒否済み"
 
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:185
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:190
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListDenyButton.js:31
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListDenyButton.js:47
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListDenyButton.js:55
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListDenyButton.js:59
+#: screens/WorkflowApproval/shared/WorkflowApprovalControls.js:72
+#: screens/WorkflowApproval/shared/WorkflowApprovalControls.js:80
 msgid "Deny"
 msgstr "拒否"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:130
+#: screens/Job/JobOutput/JobOutputSearch.js:104
 msgid "Deprecated"
 msgstr "非推奨"
 
@@ -2040,8 +2053,8 @@ msgstr "非推奨"
 #: screens/User/UserTokenDetail/UserTokenDetail.js:42
 #: screens/User/UserTokenList/UserTokenList.js:128
 #: screens/User/shared/UserTokenForm.js:60
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:81
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:175
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:109
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:209
 msgid "Description"
 msgstr "説明"
 
@@ -2162,7 +2175,7 @@ msgstr "詳細"
 msgid "Details tab"
 msgstr "詳細タブ"
 
-#: components/Search/AdvancedSearch.js:266
+#: components/Search/AdvancedSearch.js:272
 msgid "Direct Keys"
 msgstr "ダイレクトキー"
 
@@ -2182,12 +2195,12 @@ msgid "Disable SSL verification"
 msgstr "SSL 検証の無効化"
 
 #: components/InstanceToggle/InstanceToggle.js:56
-#: components/StatusLabel/StatusLabel.js:39
+#: components/StatusLabel/StatusLabel.js:45
 #: screens/TopologyView/Legend.js:133
 msgid "Disabled"
 msgstr "無効化"
 
-#: components/DisassociateButton/DisassociateButton.js:69
+#: components/DisassociateButton/DisassociateButton.js:73
 #: components/DisassociateButton/DisassociateButton.js:97
 #: components/DisassociateButton/DisassociateButton.js:109
 #: components/DisassociateButton/DisassociateButton.js:113
@@ -2206,8 +2219,8 @@ msgstr "グループのホストとの関連付けを解除しますか?"
 msgid "Disassociate host from group?"
 msgstr "ホストのグループとの関連付けを解除しますか?"
 
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:282
-#: screens/InstanceGroup/Instances/InstanceList.js:233
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:283
+#: screens/InstanceGroup/Instances/InstanceList.js:234
 msgid "Disassociate instance from instance group?"
 msgstr "インスタンスグループへのインスタンスの関連付けを解除しますか?"
 
@@ -2265,6 +2278,22 @@ msgstr "出力のダウンロード"
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:112
 msgid "Drag a file here or browse to upload"
 msgstr "ここにファイルをドラッグするか、参照してアップロード"
+
+#: components/SelectedList/DraggableSelectedList.js:68
+msgid "Draggable list to reorder and remove selected items."
+msgstr "選択した項目を並べ替えたり削除したりできるドラッグ可能なリスト。"
+
+#: components/SelectedList/DraggableSelectedList.js:43
+msgid "Dragging cancelled. List is unchanged."
+msgstr "ドラッグがキャンセルされました。リストは変更されていません。"
+
+#: components/SelectedList/DraggableSelectedList.js:38
+msgid "Dragging item {id}. Item with index {oldIndex} in now {newIndex}."
+msgstr "項目の {id} をドラッグする。項目のインデックスが {oldIndex} から {newIndex} に変わりました。"
+
+#: components/SelectedList/DraggableSelectedList.js:32
+msgid "Dragging started for item id: {newId}."
+msgstr "項目 ID: {newId} のドラッグが開始しました。"
 
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.js:81
 msgid "E-mail"
@@ -2468,8 +2497,8 @@ msgstr "ソースの編集"
 msgid "Edit Survey"
 msgstr "Survey の編集"
 
-#: screens/Organization/OrganizationTeams/OrganizationTeamListItem.js:20
-#: screens/Organization/OrganizationTeams/OrganizationTeamListItem.js:24
+#: screens/Organization/OrganizationTeams/OrganizationTeamListItem.js:22
+#: screens/Organization/OrganizationTeams/OrganizationTeamListItem.js:26
 #: screens/Team/TeamList/TeamListItem.js:50
 #: screens/Team/TeamList/TeamListItem.js:54
 msgid "Edit Team"
@@ -2539,7 +2568,7 @@ msgstr "ワークフローの編集"
 
 #: components/Workflow/WorkflowNodeHelp.js:168
 #: screens/Job/JobOutput/shared/OutputToolbar.js:125
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:167
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:193
 msgid "Elapsed"
 msgstr "経過時間"
 
@@ -2601,7 +2630,7 @@ msgstr "権限昇格の有効化"
 
 #: screens/Setting/SettingList.js:53
 msgid "Enable simplified login for your {brandName} applications"
-msgstr "{brandName} アプリケーションのログインの簡素化の有効化"
+msgstr "{brandName} アプリケーションの簡単ログインの有効化"
 
 #: screens/Template/shared/JobTemplateForm.js:589
 msgid "Enable webhook for this template."
@@ -2678,7 +2707,7 @@ msgstr "終了が期待値と一致しませんでした"
 
 #: components/Schedule/shared/DateTimePicker.js:61
 msgid "End time"
-msgstr "終了時間"
+msgstr "終了時刻"
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.js:209
 msgid "End user license agreement"
@@ -2783,7 +2812,7 @@ msgid "Enter variables using either JSON or YAML syntax. Use the radio button to
 msgstr "JSON または YAML 構文のいずれかを使用して変数を入力します。ラジオボタンを使用してこの構文を切り替えます。"
 
 #: components/JobList/JobList.js:229
-#: components/StatusLabel/StatusLabel.js:33
+#: components/StatusLabel/StatusLabel.js:38
 #: components/Workflow/WorkflowNodeHelp.js:108
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:131
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.js:205
@@ -2792,7 +2821,7 @@ msgstr "JSON または YAML 構文のいずれかを使用して変数を入力�
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:121
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:131
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:236
-#: screens/Job/JobOutput/JobOutputSearch.js:133
+#: screens/Job/JobOutput/JobOutputSearch.js:105
 #: screens/TopologyView/Legend.js:124
 msgid "Error"
 msgstr "エラー"
@@ -2840,13 +2869,13 @@ msgstr "ワークフローの保存中にエラー!"
 #: screens/Application/ApplicationTokens/ApplicationTokenList.js:155
 #: screens/Application/ApplicationsList/ApplicationsList.js:185
 #: screens/Credential/CredentialDetail/CredentialDetail.js:305
-#: screens/Credential/CredentialList/CredentialList.js:211
+#: screens/Credential/CredentialList/CredentialList.js:215
 #: screens/Host/HostDetail/HostDetail.js:56
 #: screens/Host/HostDetail/HostDetail.js:120
 #: screens/Host/HostGroups/HostGroupsList.js:244
 #: screens/Host/HostList/HostList.js:232
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:296
-#: screens/InstanceGroup/Instances/InstanceList.js:295
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:297
+#: screens/InstanceGroup/Instances/InstanceList.js:297
 #: screens/InstanceGroup/Instances/InstanceListItem.js:218
 #: screens/Instances/InstanceDetail/InstanceDetail.js:243
 #: screens/Instances/InstanceList/InstanceList.js:178
@@ -2897,11 +2926,14 @@ msgstr "ワークフローの保存中にエラー!"
 #: screens/User/UserTeams/UserTeamList.js:259
 #: screens/User/UserTokenDetail/UserTokenDetail.js:81
 #: screens/User/UserTokenList/UserTokenList.js:209
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:211
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:222
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:233
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:246
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:257
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:227
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:238
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:249
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:260
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:281
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:292
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:303
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:314
 msgid "Error!"
 msgstr "エラー!"
 
@@ -2914,7 +2946,7 @@ msgstr "エラー:"
 msgid "Errors"
 msgstr "エラー"
 
-#: screens/ActivityStream/ActivityStream.js:259
+#: screens/ActivityStream/ActivityStream.js:265
 #: screens/ActivityStream/ActivityStreamListItem.js:46
 #: screens/Job/JobOutput/JobOutputSearch.js:100
 msgid "Event"
@@ -2932,7 +2964,7 @@ msgstr "イベント詳細モーダル"
 msgid "Event summary not available"
 msgstr "イベントの概要はありません"
 
-#: screens/ActivityStream/ActivityStream.js:228
+#: screens/ActivityStream/ActivityStream.js:234
 msgid "Events"
 msgstr "イベント"
 
@@ -2946,7 +2978,7 @@ msgstr "Ex"
 
 #: components/Search/LookupTypeInput.js:39
 msgid "Exact match (default lookup if not specified)."
-msgstr "完全一致 (指定されない場合のデフォルトのルックアップ)"
+msgstr "完全一致 (指定されない場合のデフォルトのルックアップ)。"
 
 #: components/Search/RelatedLookupTypeInput.js:38
 msgid "Exact search on id field."
@@ -3008,7 +3040,7 @@ msgstr "実行環境がありません"
 
 #: components/AdHocCommands/AdHocExecutionEnvironmentStep.js:103
 #: routeConfig.js:147
-#: screens/ActivityStream/ActivityStream.js:211
+#: screens/ActivityStream/ActivityStream.js:217
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:129
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:191
 #: screens/ExecutionEnvironment/ExecutionEnvironments.js:13
@@ -3021,7 +3053,7 @@ msgstr "実行環境がありません"
 msgid "Execution Environments"
 msgstr "実行環境"
 
-#: screens/Job/JobDetail/JobDetail.js:277
+#: screens/Job/JobDetail/JobDetail.js:284
 msgid "Execution Node"
 msgstr "実行ノード"
 
@@ -3050,7 +3082,7 @@ msgstr "保存せずに終了"
 msgid "Expand"
 msgstr "展開"
 
-#: components/DataListToolbar/DataListToolbar.js:106
+#: components/DataListToolbar/DataListToolbar.js:104
 msgid "Expand all rows"
 msgstr "全列を展開"
 
@@ -3072,7 +3104,7 @@ msgid "Expected at least one of client_email, project_id or private_key to be pr
 msgstr "client_email、project_id、または private_key の少なくとも 1 つがファイルに存在する必要があります。"
 
 #: screens/Application/ApplicationTokens/ApplicationTokenList.js:137
-#: screens/Application/ApplicationTokens/ApplicationTokenListItem.js:32
+#: screens/Application/ApplicationTokens/ApplicationTokenListItem.js:34
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.js:148
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.js:172
 #: screens/User/UserTokenDetail/UserTokenDetail.js:52
@@ -3080,7 +3112,7 @@ msgstr "client_email、project_id、または private_key の少なくとも 1 �
 #: screens/User/UserTokenList/UserTokenList.js:185
 #: screens/User/UserTokenList/UserTokenListItem.js:32
 #: screens/User/UserTokens/UserTokens.js:89
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:87
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:115
 msgid "Expires"
 msgstr "有効期限"
 
@@ -3090,15 +3122,14 @@ msgstr "有効期限:"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:94
 msgid "Expires on UTC"
-msgstr "UTC の有効期限"
+msgstr "有効期限 (UTC)"
 
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.js:34
-#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:11
+#: screens/WorkflowApproval/shared/WorkflowApprovalUtils.js:50
 msgid "Expires on {0}"
 msgstr "{0} の有効期限"
 
 #: components/JobList/JobListItem.js:306
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:119
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:145
 msgid "Explanation"
 msgstr "説明"
 
@@ -3134,7 +3165,7 @@ msgid "Facts"
 msgstr "ファクト"
 
 #: components/JobList/JobList.js:228
-#: components/StatusLabel/StatusLabel.js:32
+#: components/StatusLabel/StatusLabel.js:37
 #: components/Workflow/WorkflowNodeHelp.js:105
 #: screens/Dashboard/shared/ChartTooltip.js:66
 #: screens/Job/JobOutput/shared/HostStatusBar.js:47
@@ -3159,11 +3190,12 @@ msgstr "失敗したホスト"
 msgid "Failed jobs"
 msgstr "失敗したジョブ"
 
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:261
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:295
 msgid "Failed to approve one or more workflow approval."
 msgstr "1 つ以上のワークフロー承認を承認できませんでした。"
 
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:225
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:241
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:252
 msgid "Failed to approve workflow approval."
 msgstr "ワークフローの承認を承認できませんでした。"
 
@@ -3177,7 +3209,7 @@ msgid "Failed to associate role"
 msgstr "ロールの関連付けに失敗しました"
 
 #: screens/Host/HostGroups/HostGroupsList.js:248
-#: screens/InstanceGroup/Instances/InstanceList.js:298
+#: screens/InstanceGroup/Instances/InstanceList.js:300
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.js:287
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.js:265
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.js:268
@@ -3199,8 +3231,12 @@ msgstr "プロジェクトの同期の取り消しに失敗しました。"
 msgid "Failed to cancel one or more jobs."
 msgstr "1 つ以上のジョブを取り消すことができませんでした。"
 
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:306
+msgid "Failed to cancel one or more workflow approval."
+msgstr "1 つ以上のワークフロー承認を取り消すことができませんでした。"
+
 #: components/JobList/JobListItem.js:114
-#: screens/Job/JobDetail/JobDetail.js:498
+#: screens/Job/JobDetail/JobDetail.js:505
 #: screens/Job/JobOutput/shared/OutputToolbar.js:138
 msgid "Failed to cancel {0}"
 msgstr "{0} を取り消すことができませんでした。"
@@ -3267,7 +3303,7 @@ msgstr "1 つ以上のアプリケーションを削除できませんでした�
 msgid "Failed to delete one or more credential types."
 msgstr "1 つ以上の認証情報タイプを削除できませんでした。"
 
-#: screens/Credential/CredentialList/CredentialList.js:214
+#: screens/Credential/CredentialList/CredentialList.js:218
 msgid "Failed to delete one or more credentials."
 msgstr "1 つ以上の認証情報を削除できませんでした。"
 
@@ -3340,7 +3376,7 @@ msgstr "1 つ以上のユーザートークンを削除できませんでした�
 msgid "Failed to delete one or more users."
 msgstr "1 人以上のユーザーを削除できませんでした。"
 
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:249
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:284
 msgid "Failed to delete one or more workflow approval."
 msgstr "1 つ以上のワークフロー承認を削除できませんでした。"
 
@@ -3377,7 +3413,7 @@ msgstr "チームを削除できませんでした。"
 msgid "Failed to delete user."
 msgstr "ユーザーを削除できませんでした。"
 
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:214
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:230
 msgid "Failed to delete workflow approval."
 msgstr "ワークフロー承認を削除できませんでした。"
 
@@ -3390,11 +3426,11 @@ msgstr "ワークフロージョブテンプレートを削除できませんで
 msgid "Failed to delete {name}."
 msgstr "{name} を削除できませんでした。"
 
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:262
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:317
 msgid "Failed to deny one or more workflow approval."
 msgstr "1 つ以上のワークフロー承認を拒否できませんでした。"
 
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:236
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:263
 msgid "Failed to deny workflow approval."
 msgstr "ワークフローの承認を拒否できませんでした。"
 
@@ -3408,8 +3444,8 @@ msgstr "1 つ以上のグループの関連付けを解除できませんでし�
 msgid "Failed to disassociate one or more hosts."
 msgstr "1 つ以上のホストの関連付けを解除できませんでした。"
 
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:301
-#: screens/InstanceGroup/Instances/InstanceList.js:300
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:302
+#: screens/InstanceGroup/Instances/InstanceList.js:302
 #: screens/Instances/InstanceDetail/InstanceDetail.js:248
 msgid "Failed to disassociate one or more instances."
 msgstr "1 つ以上のインスタンスの関連付けを解除できませんでした。"
@@ -3444,7 +3480,7 @@ msgstr "フルノードリソースオブジェクトを取得できませんで
 msgid "Failed to retrieve node credentials."
 msgstr "ノード認証情報を取得できませんでした。"
 
-#: screens/InstanceGroup/Instances/InstanceList.js:302
+#: screens/InstanceGroup/Instances/InstanceList.js:304
 #: screens/Instances/InstanceList/InstanceList.js:181
 msgid "Failed to run a health check on one or more instances."
 msgstr "1 つ以上のインスタンスで可用性をチェックできませんでした。"
@@ -3481,7 +3517,7 @@ msgstr "通知の切り替えに失敗しました。"
 msgid "Failed to toggle schedule."
 msgstr "スケジュールの切り替えに失敗しました。"
 
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:300
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:301
 #: screens/InstanceGroup/Instances/InstanceListItem.js:222
 #: screens/Instances/InstanceDetail/InstanceDetail.js:247
 #: screens/Instances/InstanceList/InstanceListItem.js:238
@@ -3539,7 +3575,7 @@ msgstr "値で開始するフィールド。"
 msgid "Fifth"
 msgstr "第 5"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:117
+#: screens/Job/JobOutput/JobOutputSearch.js:106
 msgid "File Difference"
 msgstr "ファイルの相違点"
 
@@ -3551,18 +3587,18 @@ msgstr "ファイルのアップロードが拒否されました。単一の .j
 msgid "File, directory or script"
 msgstr "ファイル、ディレクトリー、またはスクリプト"
 
-#: components/Search/Search.js:187
-#: components/Search/Search.js:211
+#: components/Search/Search.js:198
+#: components/Search/Search.js:222
 msgid "Filter By {name}"
 msgstr "{name} 別にフィルター"
 
 #: components/JobList/JobList.js:244
 #: components/JobList/JobListItem.js:100
 msgid "Finish Time"
-msgstr "終了時間"
+msgstr "終了時刻"
 
-#: screens/Job/JobDetail/JobDetail.js:117
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:159
+#: screens/Job/JobDetail/JobDetail.js:142
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:185
 msgid "Finished"
 msgstr "終了日時"
 
@@ -3590,8 +3626,8 @@ msgstr "初回実行日時"
 msgid "First name"
 msgstr "名"
 
-#: components/Search/AdvancedSearch.js:208
-#: components/Search/AdvancedSearch.js:222
+#: components/Search/AdvancedSearch.js:213
+#: components/Search/AdvancedSearch.js:227
 msgid "First, select a key"
 msgstr "先にキーを選択"
 
@@ -3678,7 +3714,7 @@ msgstr "Galaxy 認証情報"
 msgid "Galaxy credentials must be owned by an Organization."
 msgstr "Galaxy 認証情報は組織が所有している必要があります。"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:125
+#: screens/Job/JobOutput/JobOutputSearch.js:107
 msgid "Gathering Facts"
 msgstr "ファクトの収集"
 
@@ -3844,7 +3880,7 @@ msgstr "HTTP メソッド"
 msgid "Health Check"
 msgstr "可用性チェック"
 
-#: components/StatusLabel/StatusLabel.js:29
+#: components/StatusLabel/StatusLabel.js:34
 #: screens/TopologyView/Legend.js:118
 msgid "Healthy"
 msgstr "利用可能"
@@ -3881,11 +3917,11 @@ msgstr "ホップノード"
 msgid "Host"
 msgstr "ホスト"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:112
+#: screens/Job/JobOutput/JobOutputSearch.js:108
 msgid "Host Async Failure"
 msgstr "ホストの非同期失敗"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:111
+#: screens/Job/JobOutput/JobOutputSearch.js:109
 msgid "Host Async OK"
 msgstr "ホストの非同期 OK"
 
@@ -3903,11 +3939,11 @@ msgstr "ホスト数"
 msgid "Host Details"
 msgstr "ホストの詳細"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:103
+#: screens/Job/JobOutput/JobOutputSearch.js:110
 msgid "Host Failed"
 msgstr "ホストの失敗"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:106
+#: screens/Job/JobOutput/JobOutputSearch.js:111
 msgid "Host Failure"
 msgstr "ホストの障害"
 
@@ -3921,27 +3957,27 @@ msgstr "ホストフィルター"
 msgid "Host Name"
 msgstr "ホスト名"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:105
+#: screens/Job/JobOutput/JobOutputSearch.js:112
 msgid "Host OK"
 msgstr "ホスト OK"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:110
+#: screens/Job/JobOutput/JobOutputSearch.js:113
 msgid "Host Polling"
 msgstr "ホストのポーリング"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:116
+#: screens/Job/JobOutput/JobOutputSearch.js:114
 msgid "Host Retry"
 msgstr "ホストの再試行"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:107
+#: screens/Job/JobOutput/JobOutputSearch.js:115
 msgid "Host Skipped"
 msgstr "ホストがスキップされました"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:104
+#: screens/Job/JobOutput/JobOutputSearch.js:116
 msgid "Host Started"
 msgstr "ホストの開始"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:108
+#: screens/Job/JobOutput/JobOutputSearch.js:117
 msgid "Host Unreachable"
 msgstr "ホストに到達できません"
 
@@ -3963,7 +3999,7 @@ msgid "Host status information for this job is unavailable."
 msgstr "このジョブのホストのステータス情報は利用できません。"
 
 #: routeConfig.js:85
-#: screens/ActivityStream/ActivityStream.js:170
+#: screens/ActivityStream/ActivityStream.js:176
 #: screens/Dashboard/Dashboard.js:81
 #: screens/Host/HostList/HostList.js:143
 #: screens/Host/HostList/HostList.js:190
@@ -4172,11 +4208,11 @@ msgstr "起動時およびプロジェクトの更新時にインベントリー
 #: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.js:96
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.js:89
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.js:108
-#: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvListItem.js:19
+#: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvListItem.js:21
 msgid "Image"
 msgstr "イメージ"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:120
+#: screens/Job/JobOutput/JobOutputSearch.js:118
 msgid "Including File"
 msgstr "組み込みファイル"
 
@@ -4195,13 +4231,13 @@ msgstr "情報"
 msgid "Initiated By"
 msgstr "開始:"
 
-#: screens/ActivityStream/ActivityStream.js:247
-#: screens/ActivityStream/ActivityStream.js:257
+#: screens/ActivityStream/ActivityStream.js:253
+#: screens/ActivityStream/ActivityStream.js:263
 #: screens/ActivityStream/ActivityStreamDetailButton.js:44
 msgid "Initiated by"
 msgstr "開始:"
 
-#: screens/ActivityStream/ActivityStream.js:237
+#: screens/ActivityStream/ActivityStream.js:243
 msgid "Initiated by (username)"
 msgstr "開始者 (ユーザー名)"
 
@@ -4219,15 +4255,6 @@ msgstr "入力の設定"
 msgid "Insights Credential"
 msgstr "Insights 認証情報"
 
-#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:71
-#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:72
-msgid "Insights for Ansible Automation Platform"
-msgstr "Insights for Ansible Automation Platform"
-
-#: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:111
-msgid "Insights for Ansible Automation Platform dashboard"
-msgstr "Insights for Ansible Automation Platform ダッシュボード"
-
 #: components/Lookup/HostFilterLookup.js:123
 msgid "Insights system ID"
 msgstr "Insights システム ID"
@@ -4240,7 +4267,7 @@ msgstr "インスタンス"
 msgid "Instance Filters"
 msgstr "インスタンスフィルター"
 
-#: screens/Job/JobDetail/JobDetail.js:283
+#: screens/Job/JobDetail/JobDetail.js:290
 msgid "Instance Group"
 msgstr "インスタンスグループ"
 
@@ -4249,7 +4276,7 @@ msgstr "インスタンスグループ"
 #: components/Lookup/InstanceGroupsLookup.js:121
 #: components/PromptDetail/PromptJobTemplateDetail.js:229
 #: routeConfig.js:132
-#: screens/ActivityStream/ActivityStream.js:199
+#: screens/ActivityStream/ActivityStream.js:205
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:111
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:193
 #: screens/InstanceGroup/InstanceGroups.js:44
@@ -4287,13 +4314,13 @@ msgid "Instance groups"
 msgstr "インスタンスグループ"
 
 #: routeConfig.js:137
-#: screens/ActivityStream/ActivityStream.js:197
+#: screens/ActivityStream/ActivityStream.js:203
 #: screens/InstanceGroup/InstanceGroup.js:73
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:212
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:73
 #: screens/InstanceGroup/InstanceGroups.js:59
 #: screens/InstanceGroup/Instances/InstanceList.js:181
-#: screens/InstanceGroup/Instances/InstanceList.js:277
+#: screens/InstanceGroup/Instances/InstanceList.js:279
 #: screens/Instances/InstanceList/InstanceList.js:101
 #: screens/Instances/Instances.js:11
 #: screens/Instances/Instances.js:19
@@ -4326,7 +4353,7 @@ msgstr "無効なユーザー名またはパスワードです。やり直して
 
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:119
 #: routeConfig.js:80
-#: screens/ActivityStream/ActivityStream.js:167
+#: screens/ActivityStream/ActivityStream.js:173
 #: screens/Dashboard/Dashboard.js:92
 #: screens/Inventory/Inventories.js:16
 #: screens/Inventory/InventoryList/InventoryList.js:174
@@ -4367,9 +4394,9 @@ msgstr "ソースを含むインベントリーはコピーできません。"
 #: screens/Inventory/InventoryList/InventoryListItem.js:117
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.js:39
 #: screens/Inventory/SmartInventoryHosts/SmartInventoryHostList.js:113
-#: screens/Inventory/SmartInventoryHosts/SmartInventoryHostListItem.js:39
-#: screens/Job/JobDetail/JobDetail.js:165
-#: screens/Job/JobDetail/JobDetail.js:179
+#: screens/Inventory/SmartInventoryHosts/SmartInventoryHostListItem.js:41
+#: screens/Job/JobDetail/JobDetail.js:100
+#: screens/Job/JobDetail/JobDetail.js:114
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:213
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:221
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:140
@@ -4389,11 +4416,11 @@ msgstr "インベントリーファイル"
 msgid "Inventory ID"
 msgstr "インベントリー ID"
 
-#: screens/Job/JobDetail/JobDetail.js:185
+#: screens/Job/JobDetail/JobDetail.js:192
 msgid "Inventory Source"
 msgstr "インベントリーソース"
 
-#: screens/Job/JobDetail/JobDetail.js:208
+#: screens/Job/JobDetail/JobDetail.js:215
 msgid "Inventory Source Project"
 msgstr "インベントリーソースのプロジェクト"
 
@@ -4450,23 +4477,23 @@ msgstr "インベントリーの同期"
 msgid "Inventory sync failures"
 msgstr "インベントリーの同期の失敗"
 
-#: components/DataListToolbar/DataListToolbar.js:111
+#: components/DataListToolbar/DataListToolbar.js:109
 msgid "Is expanded"
 msgstr "展開"
 
-#: components/DataListToolbar/DataListToolbar.js:113
+#: components/DataListToolbar/DataListToolbar.js:111
 msgid "Is not expanded"
 msgstr "展開なし"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:114
+#: screens/Job/JobOutput/JobOutputSearch.js:119
 msgid "Item Failed"
 msgstr "項目の失敗"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:113
+#: screens/Job/JobOutput/JobOutputSearch.js:120
 msgid "Item OK"
 msgstr "項目 OK"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:115
+#: screens/Job/JobOutput/JobOutputSearch.js:121
 msgid "Item Skipped"
 msgstr "項目のスキップ"
 
@@ -4477,7 +4504,7 @@ msgstr "項目"
 
 #: components/Pagination/Pagination.js:27
 msgid "Items per page"
-msgstr "ページ別の項目"
+msgstr "項目/ページ"
 
 #: components/Sparkline/Sparkline.js:28
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:159
@@ -4503,26 +4530,21 @@ msgstr "JSON:"
 msgid "January"
 msgstr "1 月"
 
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:221
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.js:66
-msgid "Job"
-msgstr "Job"
-
 #: components/JobList/JobListItem.js:112
-#: screens/Job/JobDetail/JobDetail.js:496
-#: screens/Job/JobOutput/JobOutput.js:821
-#: screens/Job/JobOutput/JobOutput.js:822
+#: screens/Job/JobDetail/JobDetail.js:503
+#: screens/Job/JobOutput/JobOutput.js:783
+#: screens/Job/JobOutput/JobOutput.js:784
 #: screens/Job/JobOutput/shared/OutputToolbar.js:136
 msgid "Job Cancel Error"
 msgstr "ジョブキャンセルエラー"
 
-#: screens/Job/JobDetail/JobDetail.js:518
-#: screens/Job/JobOutput/JobOutput.js:810
-#: screens/Job/JobOutput/JobOutput.js:811
+#: screens/Job/JobDetail/JobDetail.js:525
+#: screens/Job/JobOutput/JobOutput.js:772
+#: screens/Job/JobOutput/JobOutput.js:773
 msgid "Job Delete Error"
 msgstr "ジョブ削除エラー"
 
-#: screens/Job/JobDetail/JobDetail.js:98
+#: screens/Job/JobDetail/JobDetail.js:123
 msgid "Job ID"
 msgstr "ジョブ ID:"
 
@@ -4531,12 +4553,12 @@ msgid "Job Runs"
 msgstr "ジョブの実行"
 
 #: components/JobList/JobListItem.js:313
-#: screens/Job/JobDetail/JobDetail.js:298
+#: screens/Job/JobDetail/JobDetail.js:305
 msgid "Job Slice"
 msgstr "ジョブスライス"
 
 #: components/JobList/JobListItem.js:318
-#: screens/Job/JobDetail/JobDetail.js:305
+#: screens/Job/JobDetail/JobDetail.js:312
 msgid "Job Slice Parent"
 msgstr "ジョブスライスの親"
 
@@ -4555,7 +4577,7 @@ msgstr "ジョブステータス"
 #: components/PromptDetail/PromptDetail.js:235
 #: components/PromptDetail/PromptJobTemplateDetail.js:248
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:353
-#: screens/Job/JobDetail/JobDetail.js:377
+#: screens/Job/JobDetail/JobDetail.js:384
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:418
 #: screens/Template/shared/JobTemplateForm.js:519
 msgid "Job Tags"
@@ -4566,8 +4588,8 @@ msgstr "ジョブタグ"
 #: components/Workflow/WorkflowLegend.js:92
 #: components/Workflow/WorkflowNodeHelp.js:59
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.js:97
-#: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateListItem.js:17
-#: screens/Job/JobDetail/JobDetail.js:124
+#: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateListItem.js:19
+#: screens/Job/JobDetail/JobDetail.js:149
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:93
 msgid "Job Template"
 msgstr "ジョブテンプレート"
@@ -4602,7 +4624,7 @@ msgstr "ノードの作成時または編集時に、パスワードの入力を
 #: components/PromptDetail/PromptDetail.js:183
 #: components/PromptDetail/PromptJobTemplateDetail.js:107
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:293
-#: screens/Job/JobDetail/JobDetail.js:158
+#: screens/Job/JobDetail/JobDetail.js:183
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:192
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:137
 #: screens/Template/shared/JobTemplateForm.js:250
@@ -4626,7 +4648,7 @@ msgstr "ジョブテンプレート"
 #: components/JobList/JobList.js:187
 #: components/JobList/JobList.js:270
 #: routeConfig.js:39
-#: screens/ActivityStream/ActivityStream.js:144
+#: screens/ActivityStream/ActivityStream.js:150
 #: screens/Dashboard/shared/LineChart.js:64
 #: screens/Host/Host.js:72
 #: screens/Host/Hosts.js:31
@@ -4661,19 +4683,19 @@ msgstr "7 月"
 msgid "June"
 msgstr "6 月"
 
-#: components/Search/AdvancedSearch.js:256
+#: components/Search/AdvancedSearch.js:262
 msgid "Key"
 msgstr "キー"
 
-#: components/Search/AdvancedSearch.js:247
+#: components/Search/AdvancedSearch.js:253
 msgid "Key select"
 msgstr "キー選択"
 
-#: components/Search/AdvancedSearch.js:250
+#: components/Search/AdvancedSearch.js:256
 msgid "Key typeahead"
 msgstr "キー先行入力"
 
-#: screens/ActivityStream/ActivityStream.js:232
+#: screens/ActivityStream/ActivityStream.js:238
 msgid "Keyword"
 msgstr "キーワード"
 
@@ -4745,7 +4767,7 @@ msgstr "ラベル名"
 #: components/TemplateList/TemplateListItem.js:349
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:108
 #: screens/Inventory/shared/InventoryForm.js:74
-#: screens/Job/JobDetail/JobDetail.js:357
+#: screens/Job/JobDetail/JobDetail.js:364
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:372
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:188
 #: screens/Template/shared/JobTemplateForm.js:391
@@ -4790,7 +4812,7 @@ msgstr "前回のログイン"
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:136
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.js:45
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.js:85
-#: screens/Job/JobDetail/JobDetail.js:436
+#: screens/Job/JobDetail/JobDetail.js:443
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:383
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:110
 #: screens/Project/ProjectDetail/ProjectDetail.js:236
@@ -4798,9 +4820,9 @@ msgstr "前回のログイン"
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:332
 #: screens/User/UserDetail/UserDetail.js:84
 #: screens/User/UserTokenDetail/UserTokenDetail.js:62
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:155
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:181
 msgid "Last Modified"
-msgstr "最終更新日"
+msgstr "最終変更日時"
 
 #: components/AddRole/AddResourceRole.js:31
 #: components/AddRole/AddResourceRole.js:45
@@ -4831,7 +4853,7 @@ msgstr "最後のジョブ"
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.js:50
 #: screens/Project/ProjectList/ProjectListItem.js:300
 msgid "Last modified"
-msgstr "最終更新日"
+msgstr "最終変更日時"
 
 #: components/ResourceAccessList/ResourceAccessList.js:182
 #: components/ResourceAccessList/ResourceAccessListItem.js:68
@@ -4892,8 +4914,8 @@ msgid "Launched By (Username)"
 msgstr "起動者 (ユーザー名)"
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:120
-msgid "Learn more about Insights for Ansible Automation Platform"
-msgstr "Insights for Ansible Automation Platform の詳細"
+msgid "Learn more about Automation Analytics"
+msgstr "自動化アナリティクスについて"
 
 #: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.js:67
 msgid "Leave this field blank to make the execution environment globally available."
@@ -4922,7 +4944,7 @@ msgstr "Less than or equal to の比較条件"
 #: components/PromptDetail/PromptJobTemplateDetail.js:155
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:88
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:321
-#: screens/Job/JobDetail/JobDetail.js:262
+#: screens/Job/JobDetail/JobDetail.js:269
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:259
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:147
 #: screens/Template/shared/JobTemplateForm.js:440
@@ -4995,7 +5017,7 @@ msgstr "直近の同期"
 #: components/AdHocCommands/AdHocCredentialStep.js:97
 #: components/AdHocCommands/AdHocCredentialStep.js:98
 #: components/AdHocCommands/AdHocCredentialStep.js:112
-#: screens/Job/JobDetail/JobDetail.js:313
+#: screens/Job/JobDetail/JobDetail.js:320
 msgid "Machine Credential"
 msgstr "マシンの認証情報"
 
@@ -5155,7 +5177,7 @@ msgstr "不足しているリソース"
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:178
 #: screens/User/UserTokenList/UserTokenList.js:150
 msgid "Modified"
-msgstr "修正済み"
+msgstr "変更日時"
 
 #: components/AdHocCommands/AdHocCredentialStep.js:126
 #: components/AdHocCommands/AdHocExecutionEnvironmentStep.js:116
@@ -5212,11 +5234,11 @@ msgstr "変更者 (ユーザー名)"
 msgid "Module"
 msgstr "モジュール"
 
-#: screens/Job/JobDetail/JobDetail.js:428
+#: screens/Job/JobDetail/JobDetail.js:435
 msgid "Module Arguments"
 msgstr "モジュール引数"
 
-#: screens/Job/JobDetail/JobDetail.js:423
+#: screens/Job/JobDetail/JobDetail.js:430
 msgid "Module Name"
 msgstr "モジュール名"
 
@@ -5340,7 +5362,7 @@ msgstr "多項選択法オプション"
 #: screens/Application/shared/ApplicationForm.js:52
 #: screens/Credential/CredentialDetail/CredentialDetail.js:207
 #: screens/Credential/CredentialList/CredentialList.js:142
-#: screens/Credential/CredentialList/CredentialList.js:161
+#: screens/Credential/CredentialList/CredentialList.js:165
 #: screens/Credential/CredentialList/CredentialListItem.js:58
 #: screens/Credential/shared/CredentialForm.js:161
 #: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialsStep.js:71
@@ -5372,8 +5394,8 @@ msgstr "多項選択法オプション"
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:61
 #: screens/InstanceGroup/Instances/InstanceList.js:188
 #: screens/InstanceGroup/Instances/InstanceList.js:204
-#: screens/InstanceGroup/Instances/InstanceList.js:253
-#: screens/InstanceGroup/Instances/InstanceList.js:286
+#: screens/InstanceGroup/Instances/InstanceList.js:255
+#: screens/InstanceGroup/Instances/InstanceList.js:288
 #: screens/InstanceGroup/Instances/InstanceListItem.js:124
 #: screens/InstanceGroup/shared/ContainerGroupForm.js:44
 #: screens/InstanceGroup/shared/InstanceGroupForm.js:19
@@ -5475,10 +5497,10 @@ msgstr "多項選択法オプション"
 #: screens/User/UserTeams/UserTeamList.js:232
 #: screens/User/UserTeams/UserTeamListItem.js:18
 #: screens/User/UserTokenList/UserTokenListItem.js:22
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:76
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:170
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:220
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.js:59
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:104
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:204
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:255
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.js:35
 msgid "Name"
 msgstr "名前"
 
@@ -5488,7 +5510,7 @@ msgstr "ナビゲーション"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:502
 #: screens/Dashboard/shared/ChartTooltip.js:106
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:91
+#: screens/WorkflowApproval/shared/WorkflowApprovalUtils.js:57
 msgid "Never"
 msgstr "なし"
 
@@ -5496,8 +5518,7 @@ msgstr "なし"
 msgid "Never Updated"
 msgstr "未更新"
 
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.js:44
-#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:12
+#: screens/WorkflowApproval/shared/WorkflowApprovalUtils.js:47
 msgid "Never expires"
 msgstr "期限切れなし"
 
@@ -5527,16 +5548,16 @@ msgstr "次へ"
 msgid "Next Run"
 msgstr "次回実行日時"
 
-#: components/Search/Search.js:221
+#: components/Search/Search.js:232
 msgid "No"
 msgstr "不可"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:121
+#: screens/Job/JobOutput/JobOutputSearch.js:122
 msgid "No Hosts Matched"
 msgstr "一致するホストがありません"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:109
-#: screens/Job/JobOutput/JobOutputSearch.js:122
+#: screens/Job/JobOutput/JobOutputSearch.js:123
+#: screens/Job/JobOutput/JobOutputSearch.js:124
 msgid "No Hosts Remaining"
 msgstr "残りのホストがありません"
 
@@ -5566,7 +5587,7 @@ msgstr "項目は見つかりません。"
 
 #: screens/Host/HostList/HostListItem.js:94
 msgid "No job data available"
-msgstr "利用可能なジョブデータがありません。"
+msgstr "利用可能なジョブデータがありません"
 
 #: screens/Job/JobOutput/EmptyOutput.js:25
 msgid "No output found for this job."
@@ -5581,13 +5602,13 @@ msgstr "結果が見つかりません"
 #: components/LaunchPrompt/steps/SurveyStep.js:193
 #: components/MultiSelect/TagMultiSelect.js:60
 #: components/Search/AdvancedSearch.js:151
-#: components/Search/AdvancedSearch.js:261
+#: components/Search/AdvancedSearch.js:267
 #: components/Search/LookupTypeInput.js:33
 #: components/Search/RelatedLookupTypeInput.js:26
-#: components/Search/Search.js:142
-#: components/Search/Search.js:191
-#: components/Search/Search.js:215
-#: screens/ActivityStream/ActivityStream.js:136
+#: components/Search/Search.js:153
+#: components/Search/Search.js:202
+#: components/Search/Search.js:226
+#: screens/ActivityStream/ActivityStream.js:142
 #: screens/Credential/shared/CredentialForm.js:143
 #: screens/Credential/shared/CredentialFormFields/BecomeMethodField.js:65
 #: screens/Dashboard/DashboardGraph.js:106
@@ -5620,8 +5641,8 @@ msgstr "ノードのエイリアス"
 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:212
 #: screens/InstanceGroup/Instances/InstanceList.js:193
-#: screens/InstanceGroup/Instances/InstanceList.js:255
-#: screens/InstanceGroup/Instances/InstanceList.js:287
+#: screens/InstanceGroup/Instances/InstanceList.js:257
+#: screens/InstanceGroup/Instances/InstanceList.js:289
 #: screens/InstanceGroup/Instances/InstanceListItem.js:142
 #: screens/Instances/InstanceDetail/InstanceDetail.js:150
 #: screens/Instances/InstanceList/InstanceList.js:113
@@ -5717,7 +5738,7 @@ msgstr "通知の色"
 msgid "Notification Template not found."
 msgstr "通知テンプレートテストは見つかりません。"
 
-#: screens/ActivityStream/ActivityStream.js:192
+#: screens/ActivityStream/ActivityStream.js:198
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.js:117
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.js:171
 #: screens/NotificationTemplate/NotificationTemplates.js:13
@@ -5771,7 +5792,7 @@ msgstr "通知"
 msgid "November"
 msgstr "11 月"
 
-#: components/StatusLabel/StatusLabel.js:31
+#: components/StatusLabel/StatusLabel.js:36
 #: components/Workflow/WorkflowNodeHelp.js:117
 #: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialPluginPrompt.js:66
 #: screens/Job/JobOutput/shared/HostStatusBar.js:35
@@ -5945,7 +5966,7 @@ msgstr "組織が見つかりません。"
 
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:188
 #: routeConfig.js:96
-#: screens/ActivityStream/ActivityStream.js:175
+#: screens/ActivityStream/ActivityStream.js:181
 #: screens/Organization/OrganizationList/OrganizationList.js:117
 #: screens/Organization/OrganizationList/OrganizationList.js:163
 #: screens/Organization/Organizations.js:16
@@ -6072,7 +6093,7 @@ msgid "Past week"
 msgstr "過去 1 週間"
 
 #: components/JobList/JobList.js:224
-#: components/StatusLabel/StatusLabel.js:36
+#: components/StatusLabel/StatusLabel.js:41
 #: components/Workflow/WorkflowNodeHelp.js:93
 msgid "Pending"
 msgstr "保留中"
@@ -6106,12 +6127,12 @@ msgstr "プレイ"
 msgid "Play Count"
 msgstr "再生回数"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:126
+#: screens/Job/JobOutput/JobOutputSearch.js:125
 msgid "Play Started"
 msgstr "プレイの開始"
 
 #: components/PromptDetail/PromptJobTemplateDetail.js:153
-#: screens/Job/JobDetail/JobDetail.js:259
+#: screens/Job/JobDetail/JobDetail.js:266
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:250
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/JobTemplatesList.js:43
 #: screens/Template/shared/JobTemplateForm.js:354
@@ -6123,7 +6144,7 @@ msgstr "Playbook"
 msgid "Playbook Check"
 msgstr "Playbook チェック"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:127
+#: screens/Job/JobOutput/JobOutputSearch.js:126
 msgid "Playbook Complete"
 msgstr "Playbook の完了"
 
@@ -6140,7 +6161,7 @@ msgstr "Playbook ディレクトリー"
 msgid "Playbook Run"
 msgstr "Playbook 実行"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:118
+#: screens/Job/JobOutput/JobOutputSearch.js:127
 msgid "Playbook Started"
 msgstr "Playbook の開始"
 
@@ -6274,6 +6295,14 @@ msgstr "Enter キーを押して、回答の選択肢をさらに追加します
 msgid "Press Enter to edit. Press ESC to stop editing."
 msgstr "Enter キーを押して編集します。編集を終了するには、ESC キーを押します。"
 
+#: components/SelectedList/DraggableSelectedList.js:85
+msgid ""
+"Press space or enter to begin dragging,\n"
+"and use the arrow keys to navigate up or down.\n"
+"Press enter to confirm the drag, or any other key to\n"
+"cancel the drag operation."
+msgstr "スペースまたは Enter キーを押してドラッグを開始し、矢印キーを使用して上下に移動します。Enter キーを押してドラッグを確認するか、その他のキーを押してドラッグ操作をキャンセルします。"
+
 #: components/AdHocCommands/useAdHocPreviewStep.js:17
 #: components/LaunchPrompt/steps/usePreviewStep.js:23
 msgid "Preview"
@@ -6302,8 +6331,8 @@ msgstr "権限昇格のパスワード"
 #: components/PromptDetail/PromptJobTemplateDetail.js:146
 #: components/TemplateList/TemplateListItem.js:303
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:218
-#: screens/Job/JobDetail/JobDetail.js:225
-#: screens/Job/JobDetail/JobDetail.js:243
+#: screens/Job/JobDetail/JobDetail.js:232
+#: screens/Job/JobDetail/JobDetail.js:250
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:225
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:234
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/JobTemplatesList.js:38
@@ -6316,7 +6345,7 @@ msgstr "プロジェクト"
 msgid "Project Base Path"
 msgstr "プロジェクトのベースパス"
 
-#: screens/Job/JobDetail/JobDetail.js:230
+#: screens/Job/JobDetail/JobDetail.js:237
 msgid "Project Status"
 msgstr "プロジェクトのステータス"
 
@@ -6348,7 +6377,7 @@ msgstr "プロジェクトの同期の失敗"
 
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:146
 #: routeConfig.js:75
-#: screens/ActivityStream/ActivityStream.js:164
+#: screens/ActivityStream/ActivityStream.js:170
 #: screens/Dashboard/Dashboard.js:103
 #: screens/Project/ProjectList/ProjectList.js:180
 #: screens/Project/ProjectList/ProjectList.js:249
@@ -6421,11 +6450,11 @@ msgid ""
 "below and you can choose from a list of your available subscriptions.\n"
 "The credentials you use will be stored for future use in\n"
 "retrieving renewal or expanded subscriptions."
-msgstr "以下に Red Hat または Red Hat Satellite の認証情報を指定して、利用可能なライセンス一覧から選択してください。使用する認証情報は、更新または延長サブスクリプションの取得で将来使用するために保存されます。"
+msgstr "以下に Red Hat または Red Hat Satellite の認証情報を指定して、利用可能なサブスクリプション一覧から選択してください。使用する認証情報は、将来、更新または拡張されたサブスクリプションを取得する際に使用するために保存されます。"
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:83
-msgid "Provide your Red Hat or Red Hat Satellite credentials to enable Insights for Ansible Automation Platform."
-msgstr "Red Hat または Red Hat Satellite の認証情報を提供して、Insights for Ansible Automation Platform を有効にします。"
+msgid "Provide your Red Hat or Red Hat Satellite credentials to enable Automation Analytics."
+msgstr "Red Hat または Red Hat Satellite の認証情報を提供して、自動化アナリティクスを有効にします。"
 
 #: components/PromptDetail/PromptJobTemplateDetail.js:164
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:288
@@ -6490,7 +6519,7 @@ msgstr "最近のテンプレートリストタブ"
 
 #: components/RelatedTemplateList/RelatedTemplateList.js:173
 #: screens/Inventory/SmartInventoryHosts/SmartInventoryHostList.js:112
-#: screens/Inventory/SmartInventoryHosts/SmartInventoryHostListItem.js:36
+#: screens/Inventory/SmartInventoryHosts/SmartInventoryHostListItem.js:38
 msgid "Recent jobs"
 msgstr "最近のジョブ"
 
@@ -6590,7 +6619,7 @@ msgstr "一致するホスト名のみがインポートされる正規表現。
 msgid "Related Groups"
 msgstr "関連するグループ"
 
-#: components/Search/AdvancedSearch.js:282
+#: components/Search/AdvancedSearch.js:288
 msgid "Related Keys"
 msgstr "関連するキー"
 
@@ -6605,8 +6634,8 @@ msgstr "関連する検索タイプの先行入力"
 
 #: components/JobList/JobListItem.js:146
 #: components/LaunchButton/ReLaunchDropDown.js:82
-#: screens/Job/JobDetail/JobDetail.js:477
-#: screens/Job/JobDetail/JobDetail.js:485
+#: screens/Job/JobDetail/JobDetail.js:484
+#: screens/Job/JobDetail/JobDetail.js:492
 #: screens/Job/JobOutput/shared/OutputToolbar.js:167
 msgid "Relaunch"
 msgstr "再起動"
@@ -6642,7 +6671,7 @@ msgstr "ホストパラメーターを使用した再起動"
 msgid "Remote Archive"
 msgstr "リモートアーカイブ"
 
-#: components/SelectedList/DraggableSelectedList.js:83
+#: components/SelectedList/DraggableSelectedList.js:105
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/DeleteAllNodesModal.js:21
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/LinkModals/LinkDeleteModal.js:29
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeDeleteModal.js:40
@@ -6665,7 +6694,7 @@ msgstr "ノード {nodeName} の削除"
 msgid "Remove any local modifications prior to performing an update."
 msgstr "更新の実行前にローカルの変更を削除します。"
 
-#: components/Search/AdvancedSearch.js:201
+#: components/Search/AdvancedSearch.js:206
 msgid "Remove the current search related to ansible facts to enable another search using this key."
 msgstr "Ansible ファクトに関連する現在の検索を削除して、このキーを使用して別の検索ができるようにします。"
 
@@ -6680,6 +6709,10 @@ msgstr "{0} チップの削除"
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/LinkModals/LinkDeleteModal.js:48
 msgid "Removing this link will orphan the rest of the branch and cause it to be executed immediately on launch."
 msgstr "このリンクを削除すると、ブランチの残りの部分が孤立し、起動直後に実行します。"
+
+#: components/SelectedList/DraggableSelectedList.js:83
+msgid "Reorder"
+msgstr "並べ替え"
 
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:271
 msgid "Repeat Frequency"
@@ -6720,7 +6753,7 @@ msgid "Resource deleted"
 msgstr "リソースが削除されました"
 
 #: routeConfig.js:61
-#: screens/ActivityStream/ActivityStream.js:153
+#: screens/ActivityStream/ActivityStream.js:159
 msgid "Resources"
 msgstr "リソース"
 
@@ -6742,8 +6775,8 @@ msgstr "ホスト変数の指定された辞書から有効な状態を取得し
 #: components/JobCancelButton/JobCancelButton.js:82
 #: components/JobList/JobListCancelButton.js:160
 #: components/JobList/JobListCancelButton.js:163
-#: screens/Job/JobOutput/JobOutput.js:795
-#: screens/Job/JobOutput/JobOutput.js:798
+#: screens/Job/JobOutput/JobOutput.js:757
+#: screens/Job/JobOutput/JobOutput.js:760
 msgid "Return"
 msgstr "戻る"
 
@@ -6753,7 +6786,7 @@ msgstr "サブスクリプション管理へ戻る"
 
 #: components/Search/AdvancedSearch.js:171
 msgid "Returns results that have values other than this one as well as other filters."
-msgstr "これ以外の値と他のフィルターが含まれる結果を返します。"
+msgstr "このフィルターおよび他のフィルター以外の値が含まれる結果を返します。"
 
 #: components/Search/AdvancedSearch.js:158
 msgid "Returns results that satisfy this one as well as other filters.  This is the default set type if nothing is selected."
@@ -6761,7 +6794,7 @@ msgstr "このフィルターおよび他のフィルターに該当する結果
 
 #: components/Search/AdvancedSearch.js:164
 msgid "Returns results that satisfy this one or any other filters."
-msgstr "この 1 つまたは他のフィルターに該当する結果を返します。"
+msgstr "このフィルターまたは他のフィルターに該当する結果を返します。"
 
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:50
 #: screens/Setting/shared/RevertButton.js:53
@@ -6790,7 +6823,7 @@ msgstr "設定を元に戻す"
 msgid "Revert to factory default."
 msgstr "工場出荷時のデフォルトに戻します。"
 
-#: screens/Job/JobDetail/JobDetail.js:254
+#: screens/Job/JobDetail/JobDetail.js:261
 #: screens/Project/ProjectList/ProjectList.js:224
 #: screens/Project/ProjectList/ProjectListItem.js:213
 msgid "Revision"
@@ -6874,13 +6907,13 @@ msgid "Run type"
 msgstr "実行タイプ"
 
 #: components/JobList/JobList.js:226
-#: components/StatusLabel/StatusLabel.js:35
+#: components/StatusLabel/StatusLabel.js:40
 #: components/TemplateList/TemplateListItem.js:118
 #: components/Workflow/WorkflowNodeHelp.js:99
 msgid "Running"
 msgstr "実行中"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:119
+#: screens/Job/JobOutput/JobOutputSearch.js:128
 msgid "Running Handlers"
 msgstr "実行中のハンドラー"
 
@@ -7010,7 +7043,7 @@ msgstr "スケジュールが見つかりません。"
 #: components/Schedule/ScheduleList/ScheduleList.js:163
 #: components/Schedule/ScheduleList/ScheduleList.js:228
 #: routeConfig.js:44
-#: screens/ActivityStream/ActivityStream.js:147
+#: screens/ActivityStream/ActivityStream.js:153
 #: screens/Inventory/Inventories.js:88
 #: screens/Inventory/InventorySource/InventorySource.js:88
 #: screens/ManagementJob/ManagementJob.js:107
@@ -7025,7 +7058,7 @@ msgid "Schedules"
 msgstr "スケジュール"
 
 #: screens/Application/ApplicationTokens/ApplicationTokenList.js:136
-#: screens/Application/ApplicationTokens/ApplicationTokenListItem.js:31
+#: screens/Application/ApplicationTokens/ApplicationTokenListItem.js:33
 #: screens/User/UserTokenDetail/UserTokenDetail.js:47
 #: screens/User/UserTokenList/UserTokenList.js:138
 #: screens/User/UserTokenList/UserTokenList.js:184
@@ -7059,12 +7092,12 @@ msgstr "検索"
 msgid "Search is disabled while the job is running"
 msgstr "ジョブの実行中は検索が無効になっています"
 
-#: components/Search/AdvancedSearch.js:306
-#: components/Search/Search.js:248
+#: components/Search/AdvancedSearch.js:312
+#: components/Search/Search.js:259
 msgid "Search submit button"
 msgstr "検索送信ボタン"
 
-#: components/Search/Search.js:237
+#: components/Search/Search.js:248
 msgid "Search text input"
 msgstr "テキスト入力の検索"
 
@@ -7113,7 +7146,7 @@ msgstr "ホストの選択"
 msgid "Select Input"
 msgstr "入力の選択"
 
-#: screens/InstanceGroup/Instances/InstanceList.js:282
+#: screens/InstanceGroup/Instances/InstanceList.js:284
 msgid "Select Instances"
 msgstr "インスタンスの選択"
 
@@ -7169,7 +7202,7 @@ msgstr "認証情報タイプの選択"
 
 #: components/JobList/JobListCancelButton.js:98
 msgid "Select a job to cancel"
-msgstr "取り消すジョブの選択"
+msgstr "取り消すジョブを選択してください"
 
 #: screens/Metrics/Metrics.js:211
 msgid "Select a metric"
@@ -7190,24 +7223,16 @@ msgstr "実行環境を編集する前にプロジェクトを選択してくだ
 
 #: screens/Template/Survey/SurveyToolbar.js:82
 msgid "Select a question to delete"
-msgstr "削除する質問を選択してください"
-
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListApproveButton.js:19
-msgid "Select a row to approve"
-msgstr "承認する行の選択"
+msgstr "削除する質問の選択"
 
 #: components/PaginatedTable/ToolbarDeleteButton.js:160
 #: screens/Inventory/InventoryGroups/InventoryGroupsList.js:103
 msgid "Select a row to delete"
-msgstr "削除する行の選択"
+msgstr "削除する行を選択してください"
 
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListDenyButton.js:19
-msgid "Select a row to deny"
-msgstr "拒否する行の選択"
-
-#: components/DisassociateButton/DisassociateButton.js:71
+#: components/DisassociateButton/DisassociateButton.js:75
 msgid "Select a row to disassociate"
-msgstr "関連付けを解除する行の選択"
+msgstr "関連付けを解除する行を選択してください"
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionModal.js:87
 msgid "Select a subscription"
@@ -7251,12 +7276,12 @@ msgstr "このフィールドの値の選択"
 msgid "Select a webhook service."
 msgstr "Webhook サービスを選択します。"
 
-#: components/DataListToolbar/DataListToolbar.js:125
+#: components/DataListToolbar/DataListToolbar.js:123
 #: screens/Template/Survey/SurveyToolbar.js:49
 msgid "Select all"
 msgstr "すべて選択"
 
-#: screens/ActivityStream/ActivityStream.js:123
+#: screens/ActivityStream/ActivityStream.js:129
 msgid "Select an activity type"
 msgstr "アクティビティータイプの選択"
 
@@ -7270,7 +7295,7 @@ msgstr "グラフを表示するインスタンスとメトリクスを選択し
 
 #: components/HealthCheckButton/HealthCheckButton.js:19
 msgid "Select an instance to run a health check."
-msgstr "可用性チェックを実行するインスタンスを選択します。"
+msgstr "可用性チェックを実行するインスタンスを選択してください。"
 
 #: screens/Template/shared/WorkflowJobTemplateForm.js:140
 msgid "Select an inventory for the workflow. This inventory is applied to all workflow nodes that prompt for an inventory."
@@ -7302,7 +7327,11 @@ msgstr "プロジェクトのベースパスにあるデイレクトリーの一
 
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.js:99
 msgid "Select items from list"
-msgstr "リストから項目の選択"
+msgstr "リストの項目の選択"
+
+#: screens/WorkflowApproval/shared/WorkflowApprovalControls.js:55
+msgid "Select items to approve, deny, or cancel"
+msgstr "承認、拒否、またはキャンセルする項目の選択"
 
 #: screens/Dashboard/DashboardGraph.js:124
 #: screens/Dashboard/DashboardGraph.js:125
@@ -7311,7 +7340,7 @@ msgstr "ジョブタイプの選択"
 
 #: components/LaunchPrompt/steps/SurveyStep.js:177
 msgid "Select option(s)"
-msgstr "オプションを選択してください"
+msgstr "オプションの選択"
 
 #: screens/Dashboard/DashboardGraph.js:95
 #: screens/Dashboard/DashboardGraph.js:96
@@ -7437,7 +7466,7 @@ msgstr "{0} の選択"
 #: screens/Team/TeamList/TeamListItem.js:31
 #: screens/Template/Survey/SurveyListItem.js:34
 #: screens/User/UserTokenList/UserTokenListItem.js:19
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.js:57
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.js:33
 msgid "Selected"
 msgstr "選択済み"
 
@@ -7498,7 +7527,7 @@ msgstr "クライアントデバイスのセキュリティーレベルに応じ
 msgid "Set type"
 msgstr "タイプの設定"
 
-#: components/Search/AdvancedSearch.js:233
+#: components/Search/AdvancedSearch.js:239
 msgid "Set type disabled for related search field fuzzy searches"
 msgstr "関連する検索フィールドのあいまい検索でタイプを無効に設定"
 
@@ -7528,8 +7557,8 @@ msgstr "名前の設定"
 
 #: routeConfig.js:159
 #: routeConfig.js:163
-#: screens/ActivityStream/ActivityStream.js:214
-#: screens/ActivityStream/ActivityStream.js:216
+#: screens/ActivityStream/ActivityStream.js:220
+#: screens/ActivityStream/ActivityStream.js:222
 #: screens/Setting/Settings.js:42
 msgid "Settings"
 msgstr "設定"
@@ -7605,8 +7634,8 @@ msgstr "SAML でサインイン"
 msgid "Sign in with SAML {samlIDP}"
 msgstr "SAML {samlIDP} でサインイン"
 
-#: components/Search/Search.js:134
-#: components/Search/Search.js:135
+#: components/Search/Search.js:145
+#: components/Search/Search.js:146
 msgid "Simple key select"
 msgstr "簡易キー選択"
 
@@ -7615,11 +7644,11 @@ msgstr "簡易キー選択"
 #: components/PromptDetail/PromptDetail.js:263
 #: components/PromptDetail/PromptJobTemplateDetail.js:267
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:376
-#: screens/Job/JobDetail/JobDetail.js:401
+#: screens/Job/JobDetail/JobDetail.js:408
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:442
 #: screens/Template/shared/JobTemplateForm.js:535
 msgid "Skip Tags"
-msgstr "スキップタグ"
+msgstr "タグのスキップ"
 
 #: screens/Template/shared/JobTemplateForm.js:538
 msgid ""
@@ -7628,7 +7657,7 @@ msgid ""
 "play or task. Use commas to separate multiple tags. Refer\n"
 "to the documentation for details on the usage\n"
 "of tags."
-msgstr "スキップタグは、Playbook のサイズが大きい場合にプレイまたはタスクの特定の部分をスキップする必要がある場合に役立ちます。コンマを使用して複数のタグを区切ります。タグの使用方法の詳細については、ドキュメントを参照してください。"
+msgstr "タグのスキップは、Playbook のサイズが大きい場合にプレイまたはタスクの特定の部分をスキップする必要がある場合に役立ちます。コンマを使用して複数のタグを区切ります。タグの使用方法の詳細は、ドキュメントを参照してください。"
 
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:70
 msgid ""
@@ -7636,13 +7665,13 @@ msgid ""
 "playbook, and you want to skip specific parts of a play or task.\n"
 "Use commas to separate multiple tags. Refer to Ansible Tower\n"
 "documentation for details on the usage of tags."
-msgstr "スキップタグは、Playbook のサイズが大きい場合にプレイまたはタスクの特定の部分をスキップする必要がある場合に役立ちます。コンマを使用して複数のタグを区切ります。タグの使用方法の詳細については、Ansible Tower ドキュメントを参照してください。"
+msgstr "タグのスキップは、Playbook のサイズが大きい場合にプレイまたはタスクの特定の部分をスキップする必要がある場合に役立ちます。コンマを使用して複数のタグを区切ります。タグの使用方法の詳細は、Ansible Tower ドキュメントを参照してください。"
 
 #: screens/Job/JobOutput/shared/HostStatusBar.js:39
 msgid "Skipped"
 msgstr "スキップ済"
 
-#: components/StatusLabel/StatusLabel.js:37
+#: components/StatusLabel/StatusLabel.js:42
 msgid "Skipped'"
 msgstr "スキップ済'"
 
@@ -7697,7 +7726,7 @@ msgstr "並び替え"
 #: components/PromptDetail/PromptInventorySourceDetail.js:102
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:201
 #: screens/Inventory/shared/InventorySourceForm.js:131
-#: screens/Job/JobDetail/JobDetail.js:197
+#: screens/Job/JobDetail/JobDetail.js:204
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.js:93
 msgid "Source"
 msgstr "ソース"
@@ -7708,7 +7737,7 @@ msgstr "ソース"
 #: components/PromptDetail/PromptProjectDetail.js:106
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:87
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:319
-#: screens/Job/JobDetail/JobDetail.js:248
+#: screens/Job/JobDetail/JobDetail.js:255
 #: screens/Project/ProjectDetail/ProjectDetail.js:201
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:245
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:133
@@ -7769,7 +7798,7 @@ msgid "Source Variables"
 msgstr "ソース変数"
 
 #: components/JobList/JobListItem.js:213
-#: screens/Job/JobDetail/JobDetail.js:148
+#: screens/Job/JobDetail/JobDetail.js:173
 msgid "Source Workflow Job"
 msgstr "ソースワークフローのジョブ"
 
@@ -7845,7 +7874,7 @@ msgstr "開始"
 #: components/JobList/JobList.js:243
 #: components/JobList/JobListItem.js:99
 msgid "Start Time"
-msgstr "開始時間"
+msgstr "開始時刻"
 
 #: components/Schedule/shared/DateTimePicker.js:51
 msgid "Start date"
@@ -7875,11 +7904,11 @@ msgstr "同期ソースの開始"
 
 #: components/Schedule/shared/DateTimePicker.js:61
 msgid "Start time"
-msgstr "開始時間"
+msgstr "開始時刻"
 
-#: screens/Job/JobDetail/JobDetail.js:111
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:222
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.js:76
+#: screens/Job/JobDetail/JobDetail.js:136
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:257
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.js:49
 msgid "Started"
 msgstr "開始"
 
@@ -7887,7 +7916,7 @@ msgstr "開始"
 #: components/JobList/JobList.js:241
 #: components/JobList/JobListItem.js:95
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:197
-#: screens/InstanceGroup/Instances/InstanceList.js:254
+#: screens/InstanceGroup/Instances/InstanceList.js:256
 #: screens/InstanceGroup/Instances/InstanceListItem.js:129
 #: screens/Instances/InstanceDetail/InstanceDetail.js:145
 #: screens/Instances/InstanceList/InstanceList.js:151
@@ -7896,7 +7925,7 @@ msgstr "開始"
 #: screens/Inventory/InventoryList/InventoryListItem.js:101
 #: screens/Inventory/InventorySources/InventorySourceList.js:213
 #: screens/Inventory/InventorySources/InventorySourceListItem.js:87
-#: screens/Job/JobDetail/JobDetail.js:102
+#: screens/Job/JobDetail/JobDetail.js:127
 #: screens/Job/JobOutput/HostEventModal.js:115
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:114
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.js:179
@@ -7905,9 +7934,9 @@ msgstr "開始"
 #: screens/Project/ProjectList/ProjectListItem.js:197
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:45
 #: screens/TopologyView/Tooltip.js:98
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:98
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:223
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.js:79
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:126
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:258
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.js:52
 msgid "Status"
 msgstr "ステータス"
 
@@ -7980,7 +8009,7 @@ msgstr "Subversion"
 
 #: components/NotificationList/NotificationListItem.js:71
 #: components/NotificationList/NotificationListItem.js:72
-#: components/StatusLabel/StatusLabel.js:28
+#: components/StatusLabel/StatusLabel.js:33
 msgid "Success"
 msgstr "成功"
 
@@ -7995,7 +8024,7 @@ msgid "Success message body"
 msgstr "成功メッセージボディー"
 
 #: components/JobList/JobList.js:227
-#: components/StatusLabel/StatusLabel.js:30
+#: components/StatusLabel/StatusLabel.js:35
 #: components/Workflow/WorkflowNodeHelp.js:102
 #: screens/Dashboard/shared/ChartTooltip.js:59
 msgid "Successful"
@@ -8101,7 +8130,7 @@ msgstr "システム管理者"
 msgid "System Auditor"
 msgstr "システム監査者"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:132
+#: screens/Job/JobOutput/JobOutputSearch.js:129
 msgid "System Warning"
 msgstr "システム警告"
 
@@ -8165,7 +8194,7 @@ msgstr "タスク"
 msgid "Task Count"
 msgstr "タスク数"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:123
+#: screens/Job/JobOutput/JobOutputSearch.js:130
 msgid "Task Started"
 msgstr "タスクの開始"
 
@@ -8189,7 +8218,7 @@ msgstr "チームが見つかりません。"
 #: components/AddRole/AddResourceRole.js:207
 #: components/AddRole/AddResourceRole.js:208
 #: routeConfig.js:106
-#: screens/ActivityStream/ActivityStream.js:181
+#: screens/ActivityStream/ActivityStream.js:187
 #: screens/Organization/Organization.js:124
 #: screens/Organization/OrganizationList/OrganizationList.js:145
 #: screens/Organization/OrganizationList/OrganizationListItem.js:66
@@ -8207,7 +8236,7 @@ msgstr "チームが見つかりません。"
 msgid "Teams"
 msgstr "チーム"
 
-#: screens/Setting/Jobs/JobsEdit/JobsEdit.js:129
+#: screens/Setting/Jobs/JobsEdit/JobsEdit.js:130
 msgid "Template"
 msgstr "テンプレート"
 
@@ -8224,7 +8253,7 @@ msgstr "テンプレートが見つかりません。"
 #: components/TemplateList/TemplateList.js:200
 #: components/TemplateList/TemplateList.js:262
 #: routeConfig.js:65
-#: screens/ActivityStream/ActivityStream.js:158
+#: screens/ActivityStream/ActivityStream.js:164
 #: screens/ExecutionEnvironment/ExecutionEnvironment.js:69
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.js:83
 #: screens/Template/Templates.js:16
@@ -8323,7 +8352,11 @@ msgid ""
 "The first fetches all references. The second\n"
 "fetches the Github pull request number 62, in this example\n"
 "the branch needs to be \"pull/62/head\"."
-msgstr "最初は全参照を取得します。2 番目は Github のプル要求の 62 番を取得します。この例では、ブランチは \"pull/62/head\" である必要があります。"
+msgstr "1 番目はすべての参照を取得します。2 番目は Github のプル要求の 62 番を取得します。この例では、ブランチは \"pull/62/head\" である必要があります。"
+
+#: screens/WorkflowApproval/shared/WorkflowApprovalControls.js:66
+msgid "The following selected items are complete and cannot be acted on: {completedItems}"
+msgstr "以下の選択項目は完了しているため、アクションを起こすことはできません: {completedItems}"
 
 #: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.js:104
 msgid "The full image location, including the container registry, image name, and version tag."
@@ -8374,7 +8407,7 @@ msgstr "プロジェクトのリビジョンが現在古くなっています。
 #: components/Workflow/WorkflowNodeHelp.js:138
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:131
 msgid "The resource associated with this node has been deleted."
-msgstr "このノードに関連付けられているリソースは削除されました。"
+msgstr "このノードに関連付けられているリソースは、削除されました。"
 
 #: screens/Job/JobOutput/EmptyOutput.js:19
 msgid "The search filter did not produce any results…"
@@ -8475,8 +8508,8 @@ msgstr "この認証タイプは、現在一部の認証情報で使用されて
 msgid ""
 "This data is used to enhance\n"
 "future releases of the Software and to provide\n"
-"Insights for Ansible Automation Platform."
-msgstr "このデータは、ソフトウェアの今後のリリースを強化し、Insights for Ansible Automation Platform を提供するために使用されます。"
+"Automation Analytics."
+msgstr "このデータは、ソフトウェアの今後のリリースを強化し、自動化アナリティクスを提供するために使用されます。"
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:62
 msgid ""
@@ -8633,11 +8666,23 @@ msgstr "このステップにはエラーが含まれています"
 msgid "This value does not match the password you entered previously. Please confirm that password."
 msgstr "この値は、以前に入力されたパスワードと一致しません。パスワードを確認してください。"
 
+#: screens/WorkflowApproval/shared/WorkflowApprovalControls.js:90
+msgid "This will cancel the workflow and no subsequent nodes will execute."
+msgstr "これによりワークフローが取り消され、後続のノードは実行されません。"
+
+#: screens/WorkflowApproval/shared/WorkflowApprovalControls.js:105
+msgid "This will continue the workflow"
+msgstr "これにより、ワークフローが続行されます。"
+
+#: screens/WorkflowApproval/shared/WorkflowApprovalControls.js:78
+msgid "This will continue the workflow along failure and always paths."
+msgstr "これにより、失敗や常時パスに沿ったワークフローが継続されます。"
+
 #: screens/Setting/shared/RevertAllAlert.js:36
 msgid ""
 "This will revert all configuration values on this page to\n"
 "their factory defaults. Are you sure you want to proceed?"
-msgstr "これにより、このページのすべての設定値が出荷時の設定に戻ります。続行してもよいですか?"
+msgstr "これにより、このページのすべての設定値が出荷時の設定に戻ります。続行してもよろしいですか?"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerStartScreen.js:40
 msgid "This workflow does not have any nodes configured."
@@ -8656,12 +8701,12 @@ msgstr "木"
 msgid "Thursday"
 msgstr "木曜"
 
-#: screens/ActivityStream/ActivityStream.js:243
-#: screens/ActivityStream/ActivityStream.js:255
+#: screens/ActivityStream/ActivityStream.js:249
+#: screens/ActivityStream/ActivityStream.js:261
 #: screens/ActivityStream/ActivityStreamDetailButton.js:41
 #: screens/ActivityStream/ActivityStreamListItem.js:42
 msgid "Time"
-msgstr "時間"
+msgstr "日時"
 
 #: screens/Project/shared/ProjectSubForms/SharedFields.js:122
 msgid ""
@@ -8682,7 +8727,7 @@ msgid ""
 "inventory sync will be performed."
 msgstr "インベントリーの同期が最新の状態であることを判別するために使用される時間 (秒単位) です。ジョブの実行およびコールバック時に、タスクシステムは最新の同期のタイムスタンプを評価します。これがキャッシュタイムアウトよりも古い場合は最新とは見なされず、インベントリーの同期が新たに実行されます。"
 
-#: screens/WorkflowApproval/shared/WorkflowApprovalStatus.js:16
+#: components/StatusLabel/StatusLabel.js:43
 msgid "Timed out"
 msgstr "タイムアウト"
 
@@ -8701,7 +8746,7 @@ msgstr "タイムアウト (分)"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:198
 msgid "Timeout seconds"
-msgstr "タイムアウトの秒"
+msgstr "タイムアウトの秒数"
 
 #: screens/Host/HostList/SmartInventoryButton.js:20
 msgid "To create a smart inventory using ansible facts, go to the smart inventory screen."
@@ -8713,7 +8758,7 @@ msgstr "Survey の質問を並べ替えるには、目的の場所にドラッ�
 
 #: screens/Job/WorkflowOutput/WorkflowOutputToolbar.js:94
 msgid "Toggle Legend"
-msgstr "凡例の切り替え"
+msgstr "凡例の表示/非表示"
 
 #: components/FormField/PasswordInput.js:39
 msgid "Toggle Password"
@@ -8736,7 +8781,7 @@ msgstr "インスタンスの切り替え"
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerToolbar.js:82
 #: screens/TopologyView/Header.js:99
 msgid "Toggle legend"
-msgstr "凡例の切り替え"
+msgstr "凡例の表示/非表示"
 
 #: components/NotificationList/NotificationListItem.js:50
 msgid "Toggle notification approvals"
@@ -8791,10 +8836,6 @@ msgstr "トークン"
 msgid "Tools"
 msgstr "ツール"
 
-#: components/PaginatedTable/PaginatedTable.js:133
-msgid "Top Pagination"
-msgstr "トップページネーション"
-
 #: routeConfig.js:152
 #: screens/TopologyView/TopologyView.js:40
 msgid "Topology View"
@@ -8833,7 +8874,7 @@ msgstr "トライアル"
 
 #: components/JobList/JobListItem.js:318
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:63
-#: screens/Job/JobDetail/JobDetail.js:306
+#: screens/Job/JobDetail/JobDetail.js:313
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:201
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:230
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:260
@@ -8873,11 +8914,11 @@ msgstr "Twilio"
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:154
 #: components/Workflow/WorkflowNodeHelp.js:158
 #: components/Workflow/WorkflowNodeHelp.js:192
-#: screens/Credential/CredentialList/CredentialList.js:162
+#: screens/Credential/CredentialList/CredentialList.js:166
 #: screens/Credential/CredentialList/CredentialListItem.js:63
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.js:94
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.js:116
-#: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateListItem.js:15
+#: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateListItem.js:17
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:46
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:54
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:209
@@ -8949,7 +8990,7 @@ msgstr "フォロー解除"
 msgid "Unlimited"
 msgstr "制限なし"
 
-#: components/StatusLabel/StatusLabel.js:34
+#: components/StatusLabel/StatusLabel.js:39
 #: screens/Job/JobOutput/shared/HostStatusBar.js:51
 #: screens/Job/JobOutput/shared/OutputToolbar.js:103
 msgid "Unreachable"
@@ -9034,7 +9075,7 @@ msgid ""
 msgstr "カスタムメッセージを使用して、ジョブの開始時、成功時、または失敗時に送信する通知内容を変更します。波括弧を使用してジョブに関する情報にアクセスします:"
 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:238
-#: screens/InstanceGroup/Instances/InstanceList.js:257
+#: screens/InstanceGroup/Instances/InstanceList.js:259
 #: screens/Instances/InstanceDetail/InstanceDetail.js:188
 #: screens/Instances/InstanceList/InstanceList.js:154
 msgid "Used Capacity"
@@ -9086,12 +9127,12 @@ msgstr "ユーザーアナリティクス"
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:34
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.js:202
-msgid "User and Insights analytics"
-msgstr "ユーザーと Insights のアナリティクス"
+msgid "User and Automation Analytics"
+msgstr "ユーザーおよび自動化アナリティクス"
 
 #: components/AppContainer/PageHeaderToolbar.js:159
 msgid "User details"
-msgstr "エラーの詳細"
+msgstr "ユーザーの詳細"
 
 #: screens/User/User.js:95
 msgid "User not found."
@@ -9131,7 +9172,7 @@ msgstr "ユーザー名 / パスワード"
 #: components/AddRole/AddResourceRole.js:197
 #: components/AddRole/AddResourceRole.js:198
 #: routeConfig.js:101
-#: screens/ActivityStream/ActivityStream.js:178
+#: screens/ActivityStream/ActivityStream.js:184
 #: screens/Team/Teams.js:29
 #: screens/User/UserList/UserList.js:110
 #: screens/User/UserList/UserList.js:153
@@ -9161,7 +9202,7 @@ msgstr "VMware vCenter"
 #: screens/Inventory/shared/InventoryForm.js:95
 #: screens/Inventory/shared/InventoryGroupForm.js:46
 #: screens/Inventory/shared/SmartInventoryForm.js:93
-#: screens/Job/JobDetail/JobDetail.js:444
+#: screens/Job/JobDetail/JobDetail.js:451
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:466
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:206
 #: screens/Template/shared/JobTemplateForm.js:411
@@ -9169,7 +9210,7 @@ msgstr "VMware vCenter"
 msgid "Variables"
 msgstr "変数"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:124
+#: screens/Job/JobOutput/JobOutputSearch.js:131
 msgid "Variables Prompted"
 msgstr "変数のプロモート"
 
@@ -9181,7 +9222,7 @@ msgstr "Vault パスワード"
 msgid "Vault password | {credId}"
 msgstr "Vault パスワード | {credId}"
 
-#: screens/Job/JobOutput/JobOutputSearch.js:129
+#: screens/Job/JobOutput/JobOutputSearch.js:132
 msgid "Verbose"
 msgstr "詳細"
 
@@ -9193,7 +9234,7 @@ msgstr "詳細"
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:316
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:232
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:87
-#: screens/Job/JobDetail/JobDetail.js:265
+#: screens/Job/JobDetail/JobDetail.js:272
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:261
 #: screens/Template/shared/JobTemplateForm.js:461
 msgid "Verbosity"
@@ -9236,7 +9277,7 @@ msgstr "インスタンスの詳細の表示"
 #: screens/Inventory/InventoryGroup/InventoryGroup.js:142
 #: screens/Inventory/SmartInventory.js:175
 msgid "View Inventory Details"
-msgstr "インベントリー詳細の表示"
+msgstr "インベントリーの詳細の表示"
 
 #: screens/Inventory/InventoryGroup/InventoryGroup.js:92
 msgid "View Inventory Groups"
@@ -9452,7 +9493,7 @@ msgid "View smart inventory host details"
 msgstr "スマートインベントリーホストの詳細の表示"
 
 #: routeConfig.js:30
-#: screens/ActivityStream/ActivityStream.js:139
+#: screens/ActivityStream/ActivityStream.js:145
 msgid "Views"
 msgstr "ビュー"
 
@@ -9467,7 +9508,7 @@ msgid "WARNING:"
 msgstr "警告:"
 
 #: components/JobList/JobList.js:225
-#: components/StatusLabel/StatusLabel.js:38
+#: components/StatusLabel/StatusLabel.js:44
 #: components/Workflow/WorkflowNodeHelp.js:96
 msgid "Waiting"
 msgstr "待機中"
@@ -9477,7 +9518,7 @@ msgid "Waiting for job output…"
 msgstr "ジョブの出力を待機中…"
 
 #: components/Workflow/WorkflowLegend.js:118
-#: screens/Job/JobOutput/JobOutputSearch.js:131
+#: screens/Job/JobOutput/JobOutputSearch.js:133
 msgid "Warning"
 msgstr "警告"
 
@@ -9613,9 +9654,9 @@ msgid "Workflow Approval not found."
 msgstr "ワークフローの承認が見つかりません。"
 
 #: routeConfig.js:54
-#: screens/ActivityStream/ActivityStream.js:150
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:165
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:202
+#: screens/ActivityStream/ActivityStream.js:156
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:199
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:237
 #: screens/WorkflowApproval/WorkflowApprovals.js:12
 #: screens/WorkflowApproval/WorkflowApprovals.js:21
 msgid "Workflow Approvals"
@@ -9625,16 +9666,17 @@ msgstr "ワークフローの承認"
 #: components/JobList/JobListItem.js:47
 #: components/Schedule/ScheduleList/ScheduleListItem.js:40
 #: screens/Job/JobDetail/JobDetail.js:75
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:124
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:150
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:256
 msgid "Workflow Job"
 msgstr "ワークフロージョブ"
 
 #: components/JobList/JobListItem.js:201
 #: components/Workflow/WorkflowNodeHelp.js:63
-#: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateListItem.js:18
-#: screens/Job/JobDetail/JobDetail.js:135
+#: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateListItem.js:20
+#: screens/Job/JobDetail/JobDetail.js:160
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:111
-#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:137
+#: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:163
 #: util/getRelatedResourceDeleteDetails.js:104
 msgid "Workflow Job Template"
 msgstr "ワークフロージョブテンプレート"
@@ -9727,17 +9769,9 @@ msgstr "YAML:"
 msgid "Year"
 msgstr "年"
 
-#: components/Search/Search.js:218
+#: components/Search/Search.js:229
 msgid "Yes"
 msgstr "はい"
-
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListApproveButton.js:28
-msgid "You are unable to act on the following workflow approvals: {itemsUnableToApprove}"
-msgstr "次のワークフロー承認に基づいて行動することはできません: {itemsUnableToApprove}"
-
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListDenyButton.js:28
-msgid "You are unable to act on the following workflow approvals: {itemsUnableToDeny}"
-msgstr "次のワークフロー承認に基づいて行動することはできません: {itemsUnableToDeny}"
 
 #: components/Lookup/MultiCredentialsLookup.js:154
 msgid "You cannot select multiple vault credentials with the same vault ID. Doing so will automatically deselect the other with the same vault ID."
@@ -9751,7 +9785,7 @@ msgstr "次のグループを削除する権限がありません: {itemsUnableT
 msgid "You do not have permission to delete {pluralizedItemName}: {itemsUnableToDelete}"
 msgstr "{pluralizedItemName} を削除するパーミッションがありません: {itemsUnableToDelete}"
 
-#: components/DisassociateButton/DisassociateButton.js:62
+#: components/DisassociateButton/DisassociateButton.js:66
 msgid "You do not have permission to disassociate the following: {itemsUnableToDisassociate}"
 msgstr "以下の関連付けを解除する権限がありません: {itemsUnableToDisassociate}"
 
@@ -9949,7 +9983,7 @@ msgstr "ページ"
 
 #: components/Pagination/Pagination.js:28
 msgid "per page"
-msgstr "ページ別"
+msgstr "項目/ページ"
 
 #: components/LaunchButton/ReLaunchDropDown.js:77
 #: components/LaunchButton/ReLaunchDropDown.js:100
@@ -9974,7 +10008,7 @@ msgstr "冗長性の選択"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:135
 msgid "since"
-msgstr "次以降"
+msgstr "次の日時以降"
 
 #: screens/User/UserList/UserListItem.js:49
 msgid "social login"
@@ -10007,76 +10041,76 @@ msgstr "ワークフロージョブテンプレートの Wbhook キー"
 
 #: screens/Inventory/InventoryList/InventoryListItem.js:65
 msgid "{0, plural, one {# source with sync failures.} other {# sources with sync failures.}}"
-msgstr "{0, plural, one {# source with sync failures.} other {# sources with sync failures.}}"
+msgstr "{0, plural, one {同期に失敗したソース: #} other {同期に失敗したソース: #}}"
 
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:115
 msgid "{0, plural, one {Are you sure you want delete the group below?} other {Are you sure you want delete the groups below?}}"
-msgstr "{0, plural, one {Are you sure you want delete the group below?} other {Are you sure you want delete the groups below?}}"
+msgstr "{0, plural, one {以下のグループを削除してもよろしいですか?} other {以下のグループを削除してもよろしいですか?}}"
 
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:86
 msgid "{0, plural, one {Delete Group?} other {Delete Groups?}}"
-msgstr "{0, plural, one {Delete Group?} other {Delete Groups?}}"
+msgstr "{0, plural, one {グループを削除しますか?} other {グループを削除しますか?}}"
 
 #: util/validators.js:138
 msgid "{0, plural, one {Please enter a valid phone number.} other {Please enter valid phone numbers.}}"
-msgstr "{0, plural, one {Please enter a valid phone number.} other {Please enter valid phone numbers.}}"
+msgstr "{0, plural, one {有効な電話番号を入力してください。} other {有効な電話番号を入力してください。}}"
 
 #: screens/Inventory/InventoryList/InventoryList.js:247
 msgid "{0, plural, one {The inventory will be in a pending status until the final delete is processed.} other {The inventories will be in a pending status until the final delete is processed.}}"
-msgstr "{0, plural, one {The inventory will be in a pending status until the final delete is processed.} other {The inventories will be in a pending status until the final delete is processed.}}"
+msgstr "{0, plural, one {削除が最終的に処理されるまで、インベントリーは保留中のステータスにあります。} other {削除が最終的に処理されるまで、インベントリーは保留中のステータスにあります。}}"
 
 #: components/JobList/JobList.js:276
 msgid "{0, plural, one {The selected job cannot be deleted due to insufficient permission or a running job status} other {The selected jobs cannot be deleted due to insufficient permissions or a running job status}}"
-msgstr "{0, plural, one {The selected job cannot be deleted due to insufficient permission or a running job status} other {The selected jobs cannot be deleted due to insufficient permissions or a running job status}}"
+msgstr "{0, plural, one {パーミッションが不十分か、ジョブが実行中のステータスにあるため、選択したジョブを削除できません} other {パーミッションが不十分か、ジョブが実行中のステータスにあるため、選択したジョブを削除できません}}"
 
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:208
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:243
 msgid "{0, plural, one {This approval cannot be deleted due to insufficient permissions or a pending job status} other {These approvals cannot be deleted due to insufficient permissions or a pending job status}}"
-msgstr "{0, plural, one {This approval cannot be deleted due to insufficient permissions or a pending job status} other {These approvals cannot be deleted due to insufficient permissions or a pending job status}}"
+msgstr "{0, plural, one {パーミッションが不十分か、ジョブが保留中のステータスにあるため、この承認を削除できません} other {パーミッションが不十分か、ジョブが保留中のステータスにあるため、これらの承認を削除できません}}"
 
-#: screens/Credential/CredentialList/CredentialList.js:195
+#: screens/Credential/CredentialList/CredentialList.js:199
 msgid "{0, plural, one {This credential is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these credentials could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
-msgstr "{0, plural, one {This credential is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these credentials could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
+msgstr "{0, plural, one {この認証情報は、現在他のリソースによって使用されています。削除してもよろしいですか?} other {これらの認証情報を削除すると、その認証情報に依存する他のリソースに影響が及ぶ可能性があります。それでも削除してよろしいですか?}}"
 
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.js:164
 msgid "{0, plural, one {This credential type is currently being used by some credentials and cannot be deleted.} other {Credential types that are being used by credentials cannot be deleted. Are you sure you want to delete anyway?}}"
-msgstr "{0, plural, one {This credential type is currently being used by some credentials and cannot be deleted.} other {Credential types that are being used by credentials cannot be deleted. Are you sure you want to delete anyway?}}"
+msgstr "{0, plural, one {この認証情報タイプは現在いくつかの認証情報によって使用されており、削除することができません。} other {認証情報によって使用されている認証情報タイプを削除することはできません。それでも削除してよろしいですか?}}"
 
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:194
 msgid "{0, plural, one {This execution environment is currently being used by other resources. Are you sure you want to delete it?} other {These execution environments could be in use by other resources that rely on them. Are you sure you want to delete them anyway?}}"
-msgstr "{0, plural, one {This execution environment is currently being used by other resources. Are you sure you want to delete it?} other {These execution environments could be in use by other resources that rely on them. Are you sure you want to delete them anyway?}}"
+msgstr "{0, plural, one {この実行環境は、現在他のリソースによって使用されています。削除してもよろしいですか?} other {これらの実行環境は、その実行環境に依存する他のリソースによって使用されている可能性があります。それでも削除してよろしいですか?}}"
 
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:196
 msgid "{0, plural, one {This instance group is currently being by other resources. Are you sure you want to delete it?} other {Deleting these instance groups could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
-msgstr "{0, plural, one {This instance group is currently being by other resources. Are you sure you want to delete it?} other {Deleting these instance groups could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
+msgstr "{0, plural, one {このインスタンスグループは、現在他のリソースによって使用されています。削除してもよろしいですか?} other {これらのインスタンスグループを削除すると、そのインスタンスグループに依存する他のリソースに影響が及ぶ可能性があります。それでも削除してよろしいですか?}}"
 
 #: screens/Inventory/InventoryList/InventoryList.js:240
 msgid "{0, plural, one {This inventory is currently being used by some templates. Are you sure you want to delete it?} other {Deleting these inventories could impact some templates that rely on them. Are you sure you want to delete anyway?}}"
-msgstr "{0, plural, one {This inventory is currently being used by some templates. Are you sure you want to delete it?} other {Deleting these inventories could impact some templates that rely on them. Are you sure you want to delete anyway?}}"
+msgstr "{0, plural, one {このインベントリーは、現在いくつかのテンプレートによって使用されています。削除してもよろしいですか?} other {これらのインベントリーを削除すると、そのインベントリーに依存するテンプレートに影響が及ぶ可能性があります。それでも削除してよろしいですか?}}"
 
 #: screens/Inventory/InventorySources/InventorySourceList.js:197
 msgid "{0, plural, one {This inventory source is currently being used by other resources that rely on it. Are you sure you want to delete it?} other {Deleting these inventory sources could impact other resources that rely on them. Are you sure you want to delete anyway}}"
-msgstr "{0, plural, one {This inventory source is currently being used by other resources that rely on it. Are you sure you want to delete it?} other {Deleting these inventory sources could impact other resources that rely on them. Are you sure you want to delete anyway}}"
+msgstr "{0, plural, one {このインベントリーソースは、現在そのインベントリーソースに依存する他のリソースによって使用されています。削除してもよろしいですか?} other {これらのインベントリーソースを削除すると、そのインベントリーソースに依存する他のリソースに影響が及ぶ可能性があります。それでも削除してよろしいですか}}"
 
 #: screens/Organization/OrganizationList/OrganizationList.js:166
 msgid "{0, plural, one {This organization is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these organizations could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
-msgstr "{0, plural, one {This organization is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these organizations could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
+msgstr "{0, plural, one {この組織は、現在他のリソースによって使用されています。削除してもよろしいですか?} other {これらの組織を削除すると、その組織に依存する他のリソースに影響が及ぶ可能性があります。それでも削除してよろしいですか?}}"
 
 #: screens/Project/ProjectList/ProjectList.js:252
 msgid "{0, plural, one {This project is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these projects could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
-msgstr "{0, plural, one {This project is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these projects could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
+msgstr "{0, plural, one {このプロジェクトは、現在他のリソースによって使用されています。削除してもよろしいですか?} other {これらのプロジェクトを削除すると、そのプロジェクトに依存する他のリソースに影響が及ぶ可能性があります。それでも削除してよろしいですか?}}"
 
 #: components/RelatedTemplateList/RelatedTemplateList.js:194
 #: components/TemplateList/TemplateList.js:265
 msgid "{0, plural, one {This template is currently being used by some workflow nodes. Are you sure you want to delete it?} other {Deleting these templates could impact some workflow nodes that rely on them. Are you sure you want to delete anyway?}}"
-msgstr "{0, plural, one {This template is currently being used by some workflow nodes. Are you sure you want to delete it?} other {Deleting these templates could impact some workflow nodes that rely on them. Are you sure you want to delete anyway?}}"
+msgstr "{0, plural, one {このテンプレートは、現在いくつかのワークフローノードによって使用されています。削除してもよろしいですか?} other {これらのテンプレートを削除すると、そのテンプレートに依存するワークフローノードに影響が及ぶ可能性があります。それでも削除してよろしいですか?}}"
 
 #: components/JobList/JobListCancelButton.js:72
 msgid "{0, plural, one {You cannot cancel the following job because it is not running:} other {You cannot cancel the following jobs because they are not running:}}"
-msgstr "{0, plural, one {You cannot cancel the following job because it is not running:} other {You cannot cancel the following jobs because they are not running:}}"
+msgstr "{0, plural, one {実行中ではないので、以下のジョブを取り消すことはできません。} other {実行中ではないので、以下のジョブを取り消すことはできません。}}"
 
 #: components/JobList/JobListCancelButton.js:56
 msgid "{0, plural, one {You do not have permission to cancel the following job:} other {You do not have permission to cancel the following jobs:}}"
-msgstr "{0, plural, one {You do not have permission to cancel the following job:} other {You do not have permission to cancel the following jobs:}}"
+msgstr "{0, plural, one {以下のジョブを取り消すパーミッションがありません。} other {以下のジョブを取り消すパーミッションがありません。}}"
 
 #: screens/ActivityStream/ActivityStreamListItem.js:28
 msgid "{0} (deleted)"
@@ -10099,31 +10133,31 @@ msgstr "{dateStr} (<0>{username}</0> による)"
 #: screens/Instances/InstanceDetail/InstanceDetail.js:170
 #: screens/Instances/InstanceList/InstanceListItem.js:158
 msgid "{forks, plural, one {# fork} other {# forks}}"
-msgstr "{forks, plural, one {# fork} other {# forks}}"
+msgstr "{forks, plural, one {# フォーク} other {# フォーク}}"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:190
 msgid "{intervalValue, plural, one {day} other {days}}"
-msgstr "{intervalValue, plural, one {day} other {days}}"
+msgstr "{intervalValue, plural, one {日} other {日}}"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:188
 msgid "{intervalValue, plural, one {hour} other {hours}}"
-msgstr "{intervalValue, plural, one {hour} other {hours}}"
+msgstr "{intervalValue, plural, one {時間} other {時間}}"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:186
 msgid "{intervalValue, plural, one {minute} other {minutes}}"
-msgstr "{intervalValue, plural, one {minute} other {minutes}}"
+msgstr "{intervalValue, plural, one {分} other {分}}"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:194
 msgid "{intervalValue, plural, one {month} other {months}}"
-msgstr "{intervalValue, plural, one {month} other {months}}"
+msgstr "{intervalValue, plural, one {カ月} other {カ月}}"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:192
 msgid "{intervalValue, plural, one {week} other {weeks}}"
-msgstr "{intervalValue, plural, one {week} other {weeks}}"
+msgstr "{intervalValue, plural, one {週間} other {週間}}"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:196
 msgid "{intervalValue, plural, one {year} other {years}}"
-msgstr "{intervalValue, plural, one {year} other {years}}"
+msgstr "{intervalValue, plural, one {年} other {年}}"
 
 #: components/PromptDetail/PromptDetail.js:40
 msgid "{minutes} min {seconds} sec"
@@ -10131,11 +10165,11 @@ msgstr "{minutes} 分 {seconds} 秒"
 
 #: components/JobList/JobListCancelButton.js:106
 msgid "{numJobsToCancel, plural, one {Cancel job} other {Cancel jobs}}"
-msgstr "{numJobsToCancel, plural, one {Cancel job} other {Cancel jobs}}"
+msgstr "{numJobsToCancel, plural, one {ジョブの取り消し} other {ジョブの取り消し}}"
 
 #: components/JobList/JobListCancelButton.js:168
 msgid "{numJobsToCancel, plural, one {This action will cancel the following job:} other {This action will cancel the following jobs:}}"
-msgstr "{numJobsToCancel, plural, one {This action will cancel the following job:} other {This action will cancel the following jobs:}}"
+msgstr "{numJobsToCancel, plural, one {このアクションにより、以下のジョブが取り消されます。} other {このアクションにより、以下のジョブが取り消されます。}}"
 
 #: components/JobList/JobListCancelButton.js:91
 msgid "{numJobsToCancel, plural, one {{0}} other {{1}}}"
@@ -10147,8 +10181,8 @@ msgstr "{pluralizedItemName} 一覧"
 
 #: components/HealthCheckButton/HealthCheckButton.js:13
 msgid "{selectedItemsCount, plural, one {Click to run a health check on the selected instance.} other {Click to run a health check on the selected instances.}}"
-msgstr "{selectedItemsCount, plural, one {Click to run a health check on the selected instance.} other {Click to run a health check on the selected instances.}}"
+msgstr "{selectedItemsCount, plural, one {クリックして、選択したインスタンスの可用性チェックを実行します。} other {クリックして、選択したインスタンスの可用性チェックを実行します。}}"
 
 #: components/AppContainer/AppContainer.js:154
 msgid "{sessionCountdown, plural, one {You will be logged out in # second due to inactivity} other {You will be logged out in # seconds due to inactivity}}"
-msgstr "{sessionCountdown, plural, one {You will be logged out in # second due to inactivity} other {You will be logged out in # seconds due to inactivity}}"
+msgstr "{sessionCountdown, plural, one {操作が行われていないので、あと # 秒でログアウトします} other {操作が行われていないので、あと # 秒でログアウトします}}"
