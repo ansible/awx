@@ -164,6 +164,8 @@ services:
       SPLUNK_PASSWORD: splunk_admin
     links:
       - prometheus
+    depends_on:
+      - prometheus
 {% endif %}
   # A useful container that simply passes through log messages to the console
   # helpful for testing awx/tower logging

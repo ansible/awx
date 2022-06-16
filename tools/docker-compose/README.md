@@ -464,25 +464,27 @@ Once the playbook is done running Splunk should now be setup in your development
 ### Prometheus and Grafana integration
 
 Prometheus is a metrics collecting tool, and we support prometheus formatted data at the `api/v2/metrics` endpoint.
+
+Before you run anything, you should perform this basic setup:
+
+1. Change the `username` and `password` in `tools/prometheus/prometheus.yml`. You can also change the scrape interval.
+2. (optional) if you are in a clustered environment, you can change the target to `haproxy:8043` so that the incoming prometheus requests go through the load balancer. Leaving it set to `awx1` also works.
+
 You can use this as part of the docker-compose target:
 
 ```
 PROMETHEUS=true GRAFANA=true make docker-compose
 ```
-
-TODO, internal, delete
-PROMETHEUS=true GRAFANA=true MAIN_NODE_TYPE=hybrid EXECUTION_NODE_COUNT=0 COMPOSE_TAG=devel make docker-compose
+Once you've done that, you should be able to navigate to http://localhost:9090/targets and http://localhost:3001.
 
 Alternatively, you can run as separate commands (deprecated, may be deleted in future).
 
-1. Change the `username` and `password` in `tools/prometheus/prometheus.yml`. You can also change the scrape interval.
-2. (optional) if you are in a clustered environment, you can change the target to `haproxy:8043` so that the incoming prometheus requests go through the load balancer. Leaving it set to `awx1` also works.
 3. run `make prometheus`
 4. navigate to `http://localhost:9090/targets` and check that the metrics endpoint State is Up.
 5. Click the Graph tab, start typing a metric name, or use the Open metrics explorer button to find a metric to display (next to `Execute` button)
 
 Prometheus can display basic graphs of your data, but it is minimal. Often Prometheus is paired with an app like Grafana for better visualization features.
 
-1. `make grafana` to run a local docker grafana instance.
-2. Navigate to `http://localhost:3001`. Sign in, using `admin` for both username and password.
-4. Now you can create a dashboard and add panels for whichever metrics you like.
+6. `make grafana` to run a local docker grafana instance.
+7. Navigate to `http://localhost:3001`. Sign in, using `admin` for both username and password.
+8. Now you can create a dashboard and add panels for whichever metrics you like.
