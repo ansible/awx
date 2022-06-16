@@ -17,6 +17,10 @@ KEYCLOAK ?= false
 LDAP ?= false
 # If set to true docker-compose will also start a splunk instance
 SPLUNK ?= false
+# If set to true docker-compose will also start a prometheus instance
+PROMETHEUS ?= false
+# If set to true docker-compose will also start a grafana instance
+GRAFANA ?= false
 
 VENV_BASE ?= /var/lib/awx/venv
 
