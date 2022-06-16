@@ -404,7 +404,7 @@ Anytime you want to run an OpenLDAP instance alongside AWX we can start docker-c
 LDAP=true make docker-compose
 ```
 
-Once the containers come up two new ports (389, 636) should be exposed and the LDAP server should be running on those ports. The first port (389) is non-SSL and the second port (636) is SSL enabled. 
+Once the containers come up two new ports (389, 636) should be exposed and the LDAP server should be running on those ports. The first port (389) is non-SSL and the second port (636) is SSL enabled.
 
 Now we are ready to configure and plumb OpenLDAP with AWX. To do this we have provided a playbook which will:
 * Backup and configure the LDAP adapter in AWX. NOTE: this will back up your existing settings but the password fields can not be backed up through the API, you need a DB backup to recover this.
@@ -427,7 +427,7 @@ Once the playbook is done running LDAP should now be setup in your development e
 3. awx_ldap_auditor:audit123
 4. awx_ldap_org_admin:orgadmin123
 
-The first account is a normal user. The second account will be a super user in AWX. The third account will be a system auditor in AWX. The fourth account is an org admin. All users belong to an org called "LDAP Organization". To log in with one of these users go to the AWX login screen enter the username/password. 
+The first account is a normal user. The second account will be a super user in AWX. The third account will be a system auditor in AWX. The fourth account is an org admin. All users belong to an org called "LDAP Organization". To log in with one of these users go to the AWX login screen enter the username/password.
 
 
 ### Splunk Integration
@@ -449,7 +449,7 @@ Once the containers are up we are ready to configure and plumb Splunk with AWX. 
 * Backup and configure the External Logging adapter in AWX. NOTE: this will back up your existing settings but the password fields can not be backed up through the API, you need a DB backup to recover this.
 * Create a TCP port in Splunk for log forwarding
 
-For routing traffic between AWX and Splunk we will use the internal docker compose network. The `Logging Aggregator` will be configured using the internal network machine name of `splunk`. 
+For routing traffic between AWX and Splunk we will use the internal docker compose network. The `Logging Aggregator` will be configured using the internal network machine name of `splunk`.
 
 Once you have have the collections installed (from above) you can run the playbook like:
 ```bash
@@ -465,14 +465,26 @@ Once the playbook is done running Splunk should now be setup in your development
 
 Prometheus is a metrics collecting tool, and we support prometheus formatted data at the `api/v2/metrics` endpoint.
 
-1. Change the `username` and `password` in `tools/prometheus/prometheus.yml`. You can also change the scrape interval.
+Before you run anything, you should perform this basic setup:
+
+1. Copy the prometheus configuration:
+
+```
+cp tools/prometheus/prometheus.yml.example tools/prometheus/prometheus.yml
+```
+
+Set the `username` and `password` in that file to your AWX user. You can also change the scrape interval.
+
 2. (optional) if you are in a clustered environment, you can change the target to `haproxy:8043` so that the incoming prometheus requests go through the load balancer. Leaving it set to `awx1` also works.
-3. run `make prometheus`
-4. navigate to `http://localhost:9090/targets` and check that the metrics endpoint State is Up.
-5. Click the Graph tab, start typing a metric name, or use the Open metrics explorer button to find a metric to display (next to `Execute` button)
 
-Prometheus can display basic graphs of your data, but it is minimal. Often Prometheus is paired with an app like Grafana for better visualization features.
+You can use this as part of the docker-compose target:
 
-1. `make grafana` to run a local docker grafana instance.
-2. Navigate to `http://localhost:3001`. Sign in, using `admin` for both username and password.
-4. Now you can create a dashboard and add panels for whichever metrics you like.
+```
+PROMETHEUS=true GRAFANA=true make docker-compose
+```
+
+3. navigate to `http://localhost:9090/targets` and check that the metrics endpoint State is Up.
+4. Click the Graph tab, start typing a metric name, or use the Open metrics explorer button to find a metric to display (next to `Execute` button)
+5. Navigate to `http://localhost:3001`. Sign in, using `admin` for both username and password.
+6. In the left navigation menu go to Dashboards->Browse, find the "awx-demo" and click. These should have graphs.
+6. Now you can modify these and add panels for whichever metrics you like.

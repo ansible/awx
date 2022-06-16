@@ -38,7 +38,6 @@ awx/ui/build
 awx/ui/.env.local
 awx/ui/instrumented
 rsyslog.pid
-tools/prometheus
 tools/docker-compose/ansible/awx_dump.sql
 tools/docker-compose/Dockerfile
 tools/docker-compose/_build
@@ -153,6 +152,9 @@ use_dev_supervisor.txt
 /awx_collection/*.tar.gz
 /sanity/
 /awx_collection_build/
+
+# Setup for metrics gathering
+tools/prometheus/prometheus.yml
 
 .idea/*
 *.unison.tmp

@@ -14,5 +14,5 @@ scrape_configs:
     params:
       format: ['txt']
     basic_auth:
-      username: awxuser  # change this
+      username: admin  # change this
       password: password  # change this

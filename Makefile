@@ -17,6 +17,10 @@ KEYCLOAK ?= false
 LDAP ?= false
 # If set to true docker-compose will also start a splunk instance
 SPLUNK ?= false
+# If set to true docker-compose will also start a prometheus instance
+PROMETHEUS ?= false
+# If set to true docker-compose will also start a grafana instance
+GRAFANA ?= false
 
 VENV_BASE ?= /var/lib/awx/venv
 
@@ -470,7 +474,9 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e minikube_container_group=$(MINIKUBE_CONTAINER_GROUP) \
 	    -e enable_keycloak=$(KEYCLOAK) \
 	    -e enable_ldap=$(LDAP) \
-	    -e enable_splunk=$(SPLUNK)
+	    -e enable_splunk=$(SPLUNK) \
+	    -e enable_prometheus=$(PROMETHEUS) \
+	    -e enable_grafana=$(GRAFANA)
 
 
 docker-compose: awx/projects docker-compose-sources
@@ -518,7 +524,7 @@ docker-clean:
 	fi
 
 docker-clean-volumes: docker-compose-clean docker-compose-container-group-clean
-	docker volume rm tools_awx_db
+	docker volume rm -f tools_awx_db tools_grafana_storage tools_prometheus_storage $(docker volume ls --filter name=tools_redis_socket_ -q)
 
 docker-refresh: docker-clean docker-compose
 
@@ -528,14 +534,6 @@ docker-compose-elk: awx/projects docker-compose-sources
 
 docker-compose-cluster-elk: awx/projects docker-compose-sources
 	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
-
-prometheus:
-	docker volume create prometheus
-	docker run -d --rm --net=_sources_default --link=awx_1:awx1 --volume prometheus-storage:/prometheus --volume `pwd`/tools/prometheus:/etc/prometheus --name prometheus -p 9090:9090 prom/prometheus
-
-grafana:
-	docker volume create grafana
-	docker run -d --rm --net=_sources_default --volume grafana-storage:/var/lib/grafana --volume `pwd`/tools/grafana:/etc/grafana/provisioning --name grafana -p 3001:3000 grafana/grafana-enterprise
 
 docker-compose-container-group:
 	MINIKUBE_CONTAINER_GROUP=true make docker-compose
