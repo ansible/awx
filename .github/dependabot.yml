@@ -13,7 +13,6 @@ updates:
       - "kialam"
       - "mabashian"
       - "marshmalien"
-      - "nixocio"
     labels:
       - "component:ui"
       - "dependencies"
