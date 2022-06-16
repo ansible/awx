@@ -40,7 +40,9 @@ class BaseM:
     def to_prometheus(self, instance_data):
         output_text = f"# HELP {self.field} {self.help_text}\n# TYPE {self.field} gauge\n"
         for instance in instance_data:
-            output_text += f'{self.field}{{node="{instance}"}} {instance_data[instance][self.field]}\n'
+            if self.field in instance_data[instance]:
+                # on upgrade, if there are stale instances, we can end up with issues where new metrics are not present
+                output_text += f'{self.field}{{node="{instance}"}} {instance_data[instance][self.field]}\n'
         return output_text
 
 
