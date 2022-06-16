@@ -475,16 +475,9 @@ You can use this as part of the docker-compose target:
 ```
 PROMETHEUS=true GRAFANA=true make docker-compose
 ```
-Once you've done that, you should be able to navigate to http://localhost:9090/targets and http://localhost:3001.
 
-Alternatively, you can run as separate commands (deprecated, may be deleted in future).
-
-3. run `make prometheus`
-4. navigate to `http://localhost:9090/targets` and check that the metrics endpoint State is Up.
-5. Click the Graph tab, start typing a metric name, or use the Open metrics explorer button to find a metric to display (next to `Execute` button)
-
-Prometheus can display basic graphs of your data, but it is minimal. Often Prometheus is paired with an app like Grafana for better visualization features.
-
-6. `make grafana` to run a local docker grafana instance.
-7. Navigate to `http://localhost:3001`. Sign in, using `admin` for both username and password.
-8. Now you can create a dashboard and add panels for whichever metrics you like.
+3. navigate to `http://localhost:9090/targets` and check that the metrics endpoint State is Up.
+4. Click the Graph tab, start typing a metric name, or use the Open metrics explorer button to find a metric to display (next to `Execute` button)
+5. Navigate to `http://localhost:3001`. Sign in, using `admin` for both username and password.
+6. In the left navigation menu go to Dashboards->Browse, find the "awx-demo" and click. These should have graphs.
+6. Now you can modify these and add panels for whichever metrics you like.
