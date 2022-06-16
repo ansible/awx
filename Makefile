@@ -520,7 +520,7 @@ docker-clean:
 	fi
 
 docker-clean-volumes: docker-compose-clean docker-compose-container-group-clean
-	docker volume rm tools_awx_db
+	docker volume rm -f tools_awx_db tools_grafana_storage tools_prometheus_storage $(docker volume ls --filter name=tools_redis_socket_ -q)
 
 docker-refresh: docker-clean docker-compose
 
