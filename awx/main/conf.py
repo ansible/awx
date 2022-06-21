@@ -512,6 +512,16 @@ register(
 )
 
 register(
+    'START_TASK_LIMIT',
+    field_class=fields.IntegerField,
+    label=_('Task Manager Start Task Limit'),
+    help_text=_('Maximum number of jobs to start in a single pass of the task manager.'),
+    min_value=1,
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
     'LOG_AGGREGATOR_HOST',
     field_class=fields.CharField,
     allow_null=True,
