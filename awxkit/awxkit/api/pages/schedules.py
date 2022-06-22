@@ -1,6 +1,7 @@
 from contextlib import suppress
 
-from awxkit.api.pages import UnifiedJob
+from awxkit.api.pages import SystemJobTemplate
+from awxkit.api.mixins import HasCreate
 from awxkit.api.resources import resources
 from awxkit.config import config
 import awxkit.exceptions as exc
@@ -9,8 +10,8 @@ from . import page
 from . import base
 
 
-class Schedule(UnifiedJob):
-
+class Schedule(HasCreate, base.Base):
+    dependencies = [SystemJobTemplate]
     NATURAL_KEY = ('unified_job_template', 'name')
 
     def silent_delete(self):
