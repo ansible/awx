@@ -6,7 +6,7 @@ import {
   SelectVariant,
 } from '@patternfly/react-core';
 
-export default function Select({
+export default function FrequencySelect({
   value,
   onChange,
   onBlur,
@@ -51,12 +51,12 @@ export default function Select({
   );
 }
 
-Select.propTypes = {
+FrequencySelect.propTypes = {
   variant: oneOf(Object.values(SelectVariant)),
   value: arrayOf(string).isRequired,
 };
 
-Select.defaultProps = {
+FrequencySelect.defaultProps = {
   variant: SelectVariant.single,
 };
 

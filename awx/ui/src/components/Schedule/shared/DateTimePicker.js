@@ -16,11 +16,11 @@ const DateTimeGroup = styled.span`
 `;
 function DateTimePicker({ dateFieldName, timeFieldName, label }) {
   const [dateField, dateMeta, dateHelpers] = useField({
-    name: `${dateFieldName}`,
+    name: dateFieldName,
     validate: combine([required(null), isValidDate]),
   });
   const [timeField, timeMeta, timeHelpers] = useField({
-    name: `${timeFieldName}`,
+    name: timeFieldName,
     validate: combine([required(null), validateTime()]),
   });
 

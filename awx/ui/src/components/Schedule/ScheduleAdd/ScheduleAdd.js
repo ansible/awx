@@ -34,6 +34,7 @@ function ScheduleAdd({
     launchConfiguration,
     surveyConfiguration
   ) => {
+    console.log(values);
     const {
       inventory,
       extra_vars,

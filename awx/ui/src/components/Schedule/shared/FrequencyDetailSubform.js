@@ -62,47 +62,44 @@ export function requiredPositiveInteger() {
   };
 }
 
-const FrequencyDetailSubform = ({ frequency }) => {
+const FrequencyDetailSubform = ({ frequency, prefix }) => {
   const [runOnDayMonth] = useField({
-    name: 'runOnDayMonth',
+    name: `${prefix}_runOnDayMonth`,
   });
   const [runOnDayNumber] = useField({
-    name: 'runOnDayNumber',
+    name: `${prefix}_runOnDayNumber`,
   });
   const [runOnTheOccurrence] = useField({
-    name: 'runOnTheOccurrence',
+    name: `${prefix}_runOnTheOccurrence`,
   });
   const [runOnTheDay] = useField({
-    name: 'runOnTheDay',
+    name: `${prefix}_runOnTheDay`,
   });
   const [runOnTheMonth] = useField({
-    name: 'runOnTheMonth',
+    name: `${prefix}_runOnTheMonth`,
   });
-  const [startDate] = useField('startDate');
-  const [{ name: dateFieldName }] = useField('endDate');
-  const [{ name: timeFieldName }] = useField('endTime');
+  const [startDate] = useField(`${prefix}_startDate`);
+  const [{ name: dateFieldName }] = useField(`${prefix}_endDate`);
+  const [{ name: timeFieldName }] = useField(`${prefix}_endTime`);
 
   const [daysOfWeek, daysOfWeekMeta, daysOfWeekHelpers] = useField({
-    name: 'daysOfWeek',
+    name: `${prefix}_daysOfWeek`,
     validate: required(t`Select a value for this field`),
   });
   const [end, endMeta] = useField({
-    name: 'end',
+    name: `${prefix}_end`,
     validate: required(t`Select a value for this field`),
   });
   const [interval, intervalMeta] = useField({
-    name: 'interval',
+    name: `${prefix}_interval`,
     validate: requiredPositiveInteger(),
   });
   const [runOn, runOnMeta] = useField({
-    name: 'runOn',
+    name: `${prefix}_runOn`,
     validate: required(t`Select a value for this field`),
   });
-  // const [frequency] = useField({
-  //   name: 'frequency',
-  // });
   useField({
-    name: 'occurrences',
+    name: `${prefix}_occurrences`,
     validate: requiredPositiveInteger(),
   });
 
@@ -208,7 +205,7 @@ const FrequencyDetailSubform = ({ frequency }) => {
         <b>{frequency}</b>
       </p>
       <FormGroup
-        name="interval"
+        name={`${prefix}_interval`}
         fieldId="schedule-run-every"
         helperTextInvalid={intervalMeta.error}
         isRequired
@@ -234,7 +231,7 @@ const FrequencyDetailSubform = ({ frequency }) => {
       </FormGroup>
       {frequency === 'week' && (
         <FormGroup
-          name="daysOfWeek"
+          name={`${prefix}_daysOfWeek`}
           fieldId="schedule-days-of-week"
           helperTextInvalid={daysOfWeekMeta.error}
           isRequired
@@ -248,80 +245,80 @@ const FrequencyDetailSubform = ({ frequency }) => {
           <div css="display: flex">
             <Checkbox
               label={t`Sun`}
-              isChecked={daysOfWeek.value.includes(RRule.SU)}
+              isChecked={daysOfWeek.value?.includes(RRule.SU)}
               onChange={(checked) => {
                 updateDaysOfWeek(RRule.SU, checked);
               }}
               aria-label={t`Sunday`}
               id="schedule-days-of-week-sun"
               ouiaId="schedule-days-of-week-sun"
-              name="daysOfWeek"
+              name={`${prefix}_daysOfWeek`}
             />
             <Checkbox
               label={t`Mon`}
-              isChecked={daysOfWeek.value.includes(RRule.MO)}
+              isChecked={daysOfWeek.value?.includes(RRule.MO)}
               onChange={(checked) => {
                 updateDaysOfWeek(RRule.MO, checked);
               }}
               aria-label={t`Monday`}
               id="schedule-days-of-week-mon"
               ouiaId="schedule-days-of-week-mon"
-              name="daysOfWeek"
+              name={`${prefix}_daysOfWeek`}
             />
             <Checkbox
               label={t`Tue`}
-              isChecked={daysOfWeek.value.includes(RRule.TU)}
+              isChecked={daysOfWeek.value?.includes(RRule.TU)}
               onChange={(checked) => {
                 updateDaysOfWeek(RRule.TU, checked);
               }}
               aria-label={t`Tuesday`}
               id="schedule-days-of-week-tue"
               ouiaId="schedule-days-of-week-tue"
-              name="daysOfWeek"
+              name={`${prefix}_daysOfWeek`}
             />
             <Checkbox
               label={t`Wed`}
-              isChecked={daysOfWeek.value.includes(RRule.WE)}
+              isChecked={daysOfWeek.value?.includes(RRule.WE)}
               onChange={(checked) => {
                 updateDaysOfWeek(RRule.WE, checked);
               }}
               aria-label={t`Wednesday`}
               id="schedule-days-of-week-wed"
               ouiaId="schedule-days-of-week-wed"
-              name="daysOfWeek"
+              name={`${prefix}_daysOfWeek`}
             />
             <Checkbox
               label={t`Thu`}
-              isChecked={daysOfWeek.value.includes(RRule.TH)}
+              isChecked={daysOfWeek.value?.includes(RRule.TH)}
               onChange={(checked) => {
                 updateDaysOfWeek(RRule.TH, checked);
               }}
               aria-label={t`Thursday`}
               id="schedule-days-of-week-thu"
               ouiaId="schedule-days-of-week-thu"
-              name="daysOfWeek"
+              name={`${prefix}_daysOfWeek`}
             />
             <Checkbox
               label={t`Fri`}
-              isChecked={daysOfWeek.value.includes(RRule.FR)}
+              isChecked={daysOfWeek.value?.includes(RRule.FR)}
               onChange={(checked) => {
                 updateDaysOfWeek(RRule.FR, checked);
               }}
               aria-label={t`Friday`}
               id="schedule-days-of-week-fri"
               ouiaId="schedule-days-of-week-fri"
-              name="daysOfWeek"
+              name={`${prefix}_daysOfWeek`}
             />
             <Checkbox
               label={t`Sat`}
-              isChecked={daysOfWeek.value.includes(RRule.SA)}
+              isChecked={daysOfWeek.value?.includes(RRule.SA)}
               onChange={(checked) => {
                 updateDaysOfWeek(RRule.SA, checked);
               }}
               aria-label={t`Saturday`}
               id="schedule-days-of-week-sat"
               ouiaId="schedule-days-of-week-sat"
-              name="daysOfWeek"
+              name={`${prefix}_daysOfWeek`}
             />
           </div>
         </FormGroup>
@@ -329,7 +326,7 @@ const FrequencyDetailSubform = ({ frequency }) => {
       {(frequency === 'month' || frequency === 'year') &&
         !Number.isNaN(new Date(startDate.value)) && (
           <FormGroup
-            name="runOn"
+            name={`${prefix}_runOn`}
             fieldId="schedule-run-on"
             helperTextInvalid={runOnMeta.error}
             isRequired
@@ -340,7 +337,7 @@ const FrequencyDetailSubform = ({ frequency }) => {
           >
             <RunOnRadio
               id="schedule-run-on-day"
-              name="runOn"
+              name={`${prefix}_runOn`}
               label={
                 <div css="display: flex;align-items: center;">
                   {frequency === 'month' && (
@@ -383,7 +380,7 @@ const FrequencyDetailSubform = ({ frequency }) => {
             />
             <RunOnRadio
               id="schedule-run-on-the"
-              name="runOn"
+              name={`${prefix}_runOn`}
               label={
                 <div css="display: flex;align-items: center;">
                   <span
@@ -494,7 +491,7 @@ const FrequencyDetailSubform = ({ frequency }) => {
           </FormGroup>
         )}
       <FormGroup
-        name="end"
+        name={`${prefix}_end`}
         fieldId="schedule-end"
         helperTextInvalid={endMeta.error}
         isRequired
@@ -503,7 +500,7 @@ const FrequencyDetailSubform = ({ frequency }) => {
       >
         <Radio
           id="end-never"
-          name="end"
+          name={`${prefix}_end`}
           label={t`Never`}
           value="never"
           isChecked={end.value === 'never'}
@@ -515,7 +512,7 @@ const FrequencyDetailSubform = ({ frequency }) => {
         />
         <Radio
           id="end-after"
-          name="end"
+          name={`${prefix}_end`}
           label={t`After number of occurrences`}
           value="after"
           isChecked={end.value === 'after'}
@@ -527,7 +524,7 @@ const FrequencyDetailSubform = ({ frequency }) => {
         />
         <Radio
           id="end-on-date"
-          name="end"
+          name={`${prefix}_end`}
           label={t`On date`}
           value="onDate"
           isChecked={end.value === 'onDate'}
@@ -542,7 +539,7 @@ const FrequencyDetailSubform = ({ frequency }) => {
         <FormField
           id="schedule-occurrences"
           label={t`Occurrences`}
-          name="occurrences"
+          name={`${prefix}_occurrences`}
           type="number"
           min="1"
           step="1"

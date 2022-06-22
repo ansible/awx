@@ -27,7 +27,7 @@ function ScheduleEdit({
   const history = useHistory();
   const location = useLocation();
   const { pathname } = location;
-  const pathRoot = pathname.substr(0, pathname.indexOf('schedules'));
+  const pathRoot = pathname.substring(0, pathname.indexOf('schedules'));
 
   const handleSubmit = async (
     values,

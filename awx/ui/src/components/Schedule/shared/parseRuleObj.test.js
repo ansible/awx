@@ -41,12 +41,4 @@ describe(parseRuleObj, () => {
       startTime: '1:00 PM',
     });
   });
-
-  // none (run once)
-  // minute
-  // hour
-  // day
-  // week
-  // month
-  // year
 });

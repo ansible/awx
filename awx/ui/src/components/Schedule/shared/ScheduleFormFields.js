@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
-import { useField } from 'formik';
+import { useField, useFormikContext } from 'formik';
 import { FormGroup, Title } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
+import FormField from 'components/FormField';
 import { required } from 'util/validators';
 import { useConfig } from 'contexts/Config';
 import Popover from '../../Popover';
 import AnsibleSelect from '../../AnsibleSelect';
-import FormField, {
-  Select,
+import FrequencySelect, {
   SelectOption,
   SelectVariant,
-} from '../../FormField';
+} from './FrequencySelect';
 import helpText from '../../../screens/Template/shared/JobTemplate.helptext';
 import { SubFormLayout, FormColumnLayout } from '../../FormLayout';
 import FrequencyDetailSubform from './FrequencyDetailSubform';
@@ -28,6 +28,7 @@ export default function ScheduleFormFields({
   zoneOptions,
   zoneLinks,
 }) {
+  const { values, setFieldValue } = useFormikContext();
   const [timezone, timezoneMeta] = useField({
     name: 'timezone',
     validate: required(t`Select a value for this field`),
@@ -62,6 +63,32 @@ export default function ScheduleFormFields({
   }
   const config = useConfig();
 
+  const [exceptionFrequency, exceptionFrequencyMeta, exceptionFrequencyHelper] =
+    useField({
+      name: 'exceptionFrequency',
+      validate: required(t`Select a value for this field`),
+    });
+
+  const initField = (fieldName, value) => {
+    if (typeof values[fieldName] === 'undefined') {
+      setFieldValue(fieldName, value, false);
+    }
+  };
+
+  const initFrequencyFields = (prefix, freq) => {
+    initField(`${prefix}_${freq}_end`, 'never');
+    // initField(`${prefix}_${freq}_endTime`, '');
+    initField(`${prefix}_${freq}_interval`, 1);
+    initField(`${prefix}_${freq}_occurences`, 1);
+    initField(`${prefix}_${freq}_runOnDayMonth`, 1);
+    initField(`${prefix}_${freq}_runOnDayNumber`, 1);
+    initField(`${prefix}_${freq}_runOnTheDay`, 'sunday');
+    initField(`${prefix}_${freq}_runOnTheMonth`, 1);
+    initField(`${prefix}_${freq}_runOnTheOccurence`, 1);
+    initField(`${prefix}_${freq}_daysOfWeek`, []);
+    initField(`${prefix}_${freq}_runOn`, 'day');
+  };
+
   return (
     <>
       <FormField
@@ -79,8 +106,8 @@ export default function ScheduleFormFields({
         type="text"
       />
       <DateTimePicker
-        dateFieldName={dateFieldName}
-        timeFieldName={timeFieldName}
+        dateFieldName="startDate"
+        timeFieldName="startTime"
         label={t`Start date/time`}
       />
       <FormGroup
@@ -102,17 +129,24 @@ export default function ScheduleFormFields({
       </FormGroup>
       <FormGroup
         name="frequency"
-        fieldId="schedule-requency"
+        fieldId="schedule-frequency"
         helperTextInvalid={frequencyMeta.error}
-        isRequired
         validated={
           !frequencyMeta.touched || !frequencyMeta.error ? 'default' : 'error'
         }
         label={t`Repeat frequency`}
       >
-        <Select
+        <FrequencySelect
           variant={SelectVariant.checkbox}
-          onChange={frequencyHelper.setValue}
+          onChange={(newFrequency) => {
+            initFrequencyFields('frequency', newFrequency);
+            if (
+              typeof values[`frequency_${newFrequency}_end`] === 'undefined'
+            ) {
+              setFieldValue(`frequency_${newFrequency}_end`, '');
+            }
+            frequencyHelper.setValue(newFrequency);
+          }}
           value={frequency.value}
           placeholderText={
             frequency.value.length ? t`Select frequency` : t`None (run once)`
@@ -126,36 +160,7 @@ export default function ScheduleFormFields({
           <SelectOption value="week">{t`Week`}</SelectOption>
           <SelectOption value="month">{t`Month`}</SelectOption>
           <SelectOption value="year">{t`Year`}</SelectOption>
-        </Select>
-        {/* <Select
-          variant={SelectVariant.checkbox}
-          onSelect={(a, b) => console.log({ a, b })}
-          selections={[]}
-          placeholderText={t`Select frequency`}
-          onToggle={(val) => setIsOpen(val)}
-          isOpen={isOpen}
-        >
-          <SelectOption value="none">{t`None (run once)`}</SelectOption>
-          <SelectOption value="minute">{t`Minute`}</SelectOption>
-          <SelectOption value="hour">{t`Hour`}</SelectOption>
-          <SelectOption value="day">{t`Day`}</SelectOption>
-          <SelectOption value="week">{t`Week`}</SelectOption>
-          <SelectOption value="month">{t`Month`}</SelectOption>
-          <SelectOption value="year">{t`Year`}</SelectOption>
-        </Select>
-        <AnsibleSelect
-          id="schedule-frequency"
-          data={[
-            { value: 'none', key: 'none', label: t`None (run once)` },
-            { value: 'minute', key: 'minute', label: t`Minute` },
-            { value: 'hour', key: 'hour', label: t`Hour` },
-            { value: 'day', key: 'day', label: t`Day` },
-            { value: 'week', key: 'week', label: t`Week` },
-            { value: 'month', key: 'month', label: t`Month` },
-            { value: 'year', key: 'year', label: t`Year` },
-          ]}
-          {...frequency}
-        /> */}
+        </FrequencySelect>
       </FormGroup>
       {hasDaysToKeepField ? (
         <FormField
@@ -175,7 +180,46 @@ export default function ScheduleFormFields({
           {/* TODO: sort into predictable/logical order */}
           {frequency.value.map((val) => (
             <FormColumnLayout key={val} stacked>
-              <FrequencyDetailSubform frequency={val} />
+              <FrequencyDetailSubform
+                frequency={val}
+                prefix={`frequency_${val}`}
+              />
+            </FormColumnLayout>
+          ))}
+          <Title size="md" headingLevel="h4">{t`Exceptions`}</Title>
+          <FormGroup
+            name="exceptions"
+            fieldId="exception-frequency"
+            helperTextInvalid={exceptionFrequencyMeta.error}
+            validated={
+              !exceptionFrequencyMeta.touched || !exceptionFrequencyMeta.error
+                ? 'default'
+                : 'error'
+            }
+            label={t`Add exceptions`}
+          >
+            <FrequencySelect
+              variant={SelectVariant.checkbox}
+              onChange={exceptionFrequencyHelper.setValue}
+              value={exceptionFrequency.value}
+              placeholderText={t`None`}
+              onBlur={exceptionFrequencyHelper.setTouched}
+            >
+              <SelectClearOption value="none">{t`None`}</SelectClearOption>
+              <SelectOption value="minute">{t`Minute`}</SelectOption>
+              <SelectOption value="hour">{t`Hour`}</SelectOption>
+              <SelectOption value="day">{t`Day`}</SelectOption>
+              <SelectOption value="week">{t`Week`}</SelectOption>
+              <SelectOption value="month">{t`Month`}</SelectOption>
+              <SelectOption value="year">{t`Year`}</SelectOption>
+            </FrequencySelect>
+          </FormGroup>
+          {exceptionFrequency.value.map((val) => (
+            <FormColumnLayout key={val} stacked>
+              <FrequencyDetailSubform
+                frequency={val}
+                prefix={`exception_${val}`}
+              />
             </FormColumnLayout>
           ))}
         </SubFormLayout>
