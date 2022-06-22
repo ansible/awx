@@ -73,13 +73,21 @@ This workflow will:
 
 Once staging is complete we can complete the release of awx and the operator.
 
-1. navigate to the [Releases page](https://github.com/ansible/awx/releases) for AWX and verify things look ok. The changelog is automatically generated using the [special comment in our Pull Request template](https://github.com/ansible/awx/commit/dc0cc0f910900c506fb6f6ce4366e0e0d1d0ee87).
+1. navigate to the [Releases page](https://github.com/ansible/awx/releases) for AWX and verify things look ok.
 
-2. If things look ok, click the pencil icon on the draft:
+2. Click the pencil icon on the draft:
 
 ![Verify draft release](img/verify-draft-release.png)
 
-3. Click "Publish Release":
+3. Click the generate release notes button (turns grey after clicking once)
+
+4. Add in a message of what operator version is release with this AWX version (if applicable):
+```
+## AWX Operator
+Released with AWX Operator v0.23.0
+```
+
+5. Click "Publish Release":
 
 ![Publish release](img/publish-release.png)
 
@@ -89,15 +97,15 @@ Once the release is published, another workflow called [Promote Release](https:/
 
 This workflow will take the generated images and promote them to quay.io in addition it will also release awxkit and the awx.awx collection. The overall process will not take long.
 
-4. Once the workflow is finished, verify that the new image is present on the [Repository Tags](https://quay.io/repository/ansible/awx?tag=latest&tab=tags) on Quay:
+6. Once the workflow is finished, verify that the new image is present on the [Repository Tags](https://quay.io/repository/ansible/awx?tag=latest&tab=tags) on Quay:
 
 ![Verify released AWX image](img/verify-released-awx-image.png)
 
-5. Go to the awx.awx collection on [Ansible Galaxy](https://galaxy.ansible.com/awx/awx) and validate the latest version matches and was updated recently:
+7. Go to the awx.awx collection on [Ansible Galaxy](https://galaxy.ansible.com/awx/awx) and validate the latest version matches and was updated recently:
 
 ![Verify release awx.awx collection](img/galaxy.png)
 
-6. Go to awxkit's page on [PiPy](https://pypi.org/project/awxkit/#history) and validate the latest release is there:
+8. Go to awxkit's page on [PiPy](https://pypi.org/project/awxkit/#history) and validate the latest release is there:
 
 ![Verify awxkit](img/pypi.png)
 
@@ -105,7 +113,7 @@ This workflow will take the generated images and promote them to quay.io in addi
 
 Once the AWX image is live, we can now release the AWX operator.
 
-1. Navigate to the [Releases page](https://github.com/ansible/awx-operator/releases) for AWX operator and follow the same process used for publishing the AWX draft.
+1. Navigate to the [Releases page](https://github.com/ansible/awx-operator/releases) for AWX operator and follow the same process used for publishing the AWX draft except note the version of AWX released with Operator.
 
 Once published, the workflow [Promote AWX Operator image](https://github.com/ansible/awx-operator/actions/workflows/promote.yaml) will run:
 
@@ -117,11 +125,13 @@ This workflow will take the generated images and promote them to quay.io.
 
 ![Verify released awx-operator image](img/verify-released-awx-operator-image.png)
 
-## Notify the AWX mailing list and bullhorn
+## Notify the AWX mailing list
 Send an email to the [AWX Mailing List](mailto:awx-project@googlegroups.com) with a message format of type "AWX Release" from the [mailing list triage standard replies](../.github/triage_replies.md#awx-release)
 
-## Send an IRC message over matrix to #social:ansible.com:
+## Send an IRC message over matrix to #social:ansible.com for bullhorn:
 
 @newsbot
 We're happy to announce that [AWX version 21.1.0](https://github.com/ansible/awx/releases/tag/21.1.0) is now available!
 We're happy to announce that [AWX Operator version 0.22.0](https://github.com/ansible/awx-operator/releases/tag/0.22.0) is now available!
+
+## Send the same IRC message (less the @newsbot) to #awx:ansible.com

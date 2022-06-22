@@ -78,6 +78,8 @@ Thank you once again for this and your interest in AWX!
 - AWX-Operator: https://github.com/ansible/awx-operator/blob/devel/CONTRIBUTING.md
 
 ### AWX Release
+Subject: Announcing AWX X.Y.z
+
 - Hi all, \
 \
 We're happy to announce that the next release of AWX, version <X> is now available! \
