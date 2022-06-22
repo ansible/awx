@@ -121,7 +121,7 @@ function OrganizationDetail({ organization }) {
           date={modified}
           user={summary_fields.modified_by}
         />
-        {instanceGroups && instanceGroups.length > 0 && (
+        {instanceGroups && (
           <Detail
             fullWidth
             label={t`Instance Groups`}
@@ -145,9 +145,10 @@ function OrganizationDetail({ organization }) {
                 ))}
               </ChipGroup>
             }
+            isEmpty={instanceGroups.length === 0}
           />
         )}
-        {galaxy_credentials && galaxy_credentials.length > 0 && (
+        {galaxy_credentials && (
           <Detail
             fullWidth
             label={t`Galaxy Credentials`}
@@ -172,6 +173,7 @@ function OrganizationDetail({ organization }) {
                 ))}
               </ChipGroup>
             }
+            isEmpty={galaxy_credentials.length === 0}
           />
         )}
       </DetailList>

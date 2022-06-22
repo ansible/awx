@@ -44,8 +44,7 @@ function TemplatePopoverContent({ template }) {
         value={template?.playbook}
         dataCy={`template-${template.id}-playbook`}
       />
-      {template.summary_fields?.credentials &&
-      template.summary_fields.credentials.length ? (
+      {template.summary_fields?.credentials ? (
         <Detail
           fullWidth
           label={t`Credentials`}
@@ -66,6 +65,7 @@ function TemplatePopoverContent({ template }) {
               ))}
             </ChipGroup>
           }
+          isEmpty={template.summary_fields.credentials.length === 0}
         />
       ) : null}
     </DetailList>

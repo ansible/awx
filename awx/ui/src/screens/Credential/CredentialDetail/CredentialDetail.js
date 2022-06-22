@@ -264,20 +264,19 @@ function CredentialDetail({ credential }) {
           date={modified}
           user={modified_by}
         />
-        {enabledBooleanFields.length > 0 && (
-          <Detail
-            label={t`Enabled Options`}
-            value={
-              <TextList component={TextListVariants.ul}>
-                {enabledBooleanFields.map(({ id, label }) => (
-                  <TextListItem key={id} component={TextListItemVariants.li}>
-                    {label}
-                  </TextListItem>
-                ))}
-              </TextList>
-            }
-          />
-        )}
+        <Detail
+          label={t`Enabled Options`}
+          value={
+            <TextList component={TextListVariants.ul}>
+              {enabledBooleanFields.map(({ id, label }) => (
+                <TextListItem key={id} component={TextListItemVariants.li}>
+                  {label}
+                </TextListItem>
+              ))}
+            </TextList>
+          }
+          isEmpty={enabledBooleanFields.length === 0}
+        />
       </DetailList>
       {Object.keys(inputSources).length > 0 && (
         <PluginFieldText>

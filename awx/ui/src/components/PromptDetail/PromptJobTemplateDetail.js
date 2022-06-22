@@ -26,7 +26,7 @@ function PromptJobTemplateDetail({ resource }) {
     extra_vars,
     forks,
     host_config_key,
-    instance_groups,
+    instance_groups = [],
     job_slice_count,
     job_tags,
     job_type,
@@ -94,9 +94,11 @@ function PromptJobTemplateDetail({ resource }) {
 
   return (
     <>
-      {summary_fields.recent_jobs?.length > 0 && (
-        <Detail value={<Sparkline jobs={recentJobs} />} label={t`Activity`} />
-      )}
+      <Detail
+        label={t`Activity`}
+        value={<Sparkline jobs={recentJobs} />}
+        isEmpty={summary_fields.recent_jobs?.length === 0}
+      />
       <Detail label={t`Job Type`} value={toTitleCase(job_type)} />
       {summary_fields?.organization ? (
         <Detail
@@ -180,99 +182,94 @@ function PromptJobTemplateDetail({ resource }) {
         />
       )}
       {optionsList && <Detail label={t`Enabled Options`} value={optionsList} />}
-      {summary_fields?.credentials?.length > 0 && (
-        <Detail
-          fullWidth
-          label={t`Credentials`}
-          value={
-            <ChipGroup
-              numChips={5}
-              totalChips={summary_fields.credentials.length}
-              ouiaId="prompt-jt-credential-chips"
-            >
-              {summary_fields.credentials.map((cred) => (
-                <CredentialChip key={cred.id} credential={cred} isReadOnly />
-              ))}
-            </ChipGroup>
-          }
-        />
-      )}
-      {summary_fields?.labels?.results?.length > 0 && (
-        <Detail
-          fullWidth
-          label={t`Labels`}
-          value={
-            <ChipGroup
-              numChips={5}
-              totalChips={summary_fields.labels.results.length}
-              ouiaId="prompt-jt-label-chips"
-            >
-              {summary_fields.labels.results.map((label) => (
-                <Chip key={label.id} isReadOnly>
-                  {label.name}
-                </Chip>
-              ))}
-            </ChipGroup>
-          }
-        />
-      )}
-      {instance_groups?.length > 0 && (
-        <Detail
-          fullWidth
-          label={t`Instance Groups`}
-          value={
-            <ChipGroup
-              numChips={5}
-              totalChips={instance_groups.length}
-              ouiaId="prompt-jt-instance-group-chips"
-            >
-              {instance_groups.map((ig) => (
-                <Chip key={ig.id} isReadOnly>
-                  {ig.name}
-                </Chip>
-              ))}
-            </ChipGroup>
-          }
-        />
-      )}
-      {job_tags?.length > 0 && (
-        <Detail
-          fullWidth
-          label={t`Job Tags`}
-          value={
-            <ChipGroup
-              numChips={5}
-              totalChips={job_tags.split(',').length}
-              ouiaId="prompt-jt-job-tag-chips"
-            >
-              {job_tags.split(',').map((jobTag) => (
-                <Chip key={jobTag} isReadOnly>
-                  {jobTag}
-                </Chip>
-              ))}
-            </ChipGroup>
-          }
-        />
-      )}
-      {skip_tags?.length > 0 && (
-        <Detail
-          fullWidth
-          label={t`Skip Tags`}
-          value={
-            <ChipGroup
-              numChips={5}
-              totalChips={skip_tags.split(',').length}
-              ouiaId="prompt-jt-skip-tag-chips"
-            >
-              {skip_tags.split(',').map((skipTag) => (
-                <Chip key={skipTag} isReadOnly>
-                  {skipTag}
-                </Chip>
-              ))}
-            </ChipGroup>
-          }
-        />
-      )}
+      <Detail
+        fullWidth
+        label={t`Credentials`}
+        value={
+          <ChipGroup
+            numChips={5}
+            totalChips={summary_fields.credentials.length}
+            ouiaId="prompt-jt-credential-chips"
+          >
+            {summary_fields.credentials.map((cred) => (
+              <CredentialChip key={cred.id} credential={cred} isReadOnly />
+            ))}
+          </ChipGroup>
+        }
+        isEmpty={summary_fields?.credentials?.length === 0}
+      />
+      <Detail
+        fullWidth
+        label={t`Labels`}
+        value={
+          <ChipGroup
+            numChips={5}
+            totalChips={summary_fields.labels.results.length}
+            ouiaId="prompt-jt-label-chips"
+          >
+            {summary_fields.labels.results.map((label) => (
+              <Chip key={label.id} isReadOnly>
+                {label.name}
+              </Chip>
+            ))}
+          </ChipGroup>
+        }
+        isEmpty={summary_fields?.labels?.results?.length === 0}
+      />
+      <Detail
+        fullWidth
+        label={t`Instance Groups`}
+        value={
+          <ChipGroup
+            numChips={5}
+            totalChips={instance_groups?.length}
+            ouiaId="prompt-jt-instance-group-chips"
+          >
+            {instance_groups?.map((ig) => (
+              <Chip key={ig.id} isReadOnly>
+                {ig.name}
+              </Chip>
+            ))}
+          </ChipGroup>
+        }
+        isEmpty={instance_groups?.length === 0}
+      />
+      <Detail
+        fullWidth
+        label={t`Job Tags`}
+        value={
+          <ChipGroup
+            numChips={5}
+            totalChips={job_tags.split(',').length}
+            ouiaId="prompt-jt-job-tag-chips"
+          >
+            {job_tags.split(',').map((jobTag) => (
+              <Chip key={jobTag} isReadOnly>
+                {jobTag}
+              </Chip>
+            ))}
+          </ChipGroup>
+        }
+        isEmpty={job_tags?.length === 0}
+      />
+      <Detail
+        fullWidth
+        label={t`Skip Tags`}
+        value={
+          <ChipGroup
+            numChips={5}
+            totalChips={skip_tags.split(',').length}
+            ouiaId="prompt-jt-skip-tag-chips"
+          >
+            {skip_tags.split(',').map((skipTag) => (
+              <Chip key={skipTag} isReadOnly>
+                {skipTag}
+              </Chip>
+            ))}
+          </ChipGroup>
+        }
+        isEmpty={skip_tags?.length === 0}
+      />
       {extra_vars && (
         <VariablesDetail
           label={t`Variables`}

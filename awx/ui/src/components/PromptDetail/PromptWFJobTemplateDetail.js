@@ -57,9 +57,11 @@ function PromptWFJobTemplateDetail({ resource }) {
 
   return (
     <>
-      {summary_fields?.recent_jobs?.length > 0 && (
-        <Detail value={<Sparkline jobs={recentJobs} />} label={t`Activity`} />
-      )}
+      <Detail
+        label={t`Activity`}
+        value={<Sparkline jobs={recentJobs} />}
+        isEmpty={summary_fields?.recent_jobs?.length === 0}
+      />
       {summary_fields?.organization && (
         <Detail
           label={t`Organization`}
@@ -108,25 +110,24 @@ function PromptWFJobTemplateDetail({ resource }) {
           }
         />
       )}
-      {summary_fields?.labels?.results?.length > 0 && (
-        <Detail
-          fullWidth
-          label={t`Labels`}
-          value={
-            <ChipGroup
-              numChips={5}
-              totalChips={summary_fields.labels.results.length}
-              ouiaId="prompt-wf-jt-label-chips"
-            >
-              {summary_fields.labels.results.map((label) => (
-                <Chip key={label.id} isReadOnly>
-                  {label.name}
-                </Chip>
-              ))}
-            </ChipGroup>
-          }
-        />
-      )}
+      <Detail
+        fullWidth
+        label={t`Labels`}
+        value={
+          <ChipGroup
+            numChips={5}
+            totalChips={summary_fields.labels.results.length}
+            ouiaId="prompt-wf-jt-label-chips"
+          >
+            {summary_fields.labels.results.map((label) => (
+              <Chip key={label.id} isReadOnly>
+                {label.name}
+              </Chip>
+            ))}
+          </ChipGroup>
+        }
+        isEmpty={summary_fields?.labels?.results?.length === 0}
+      />
       {extra_vars && (
         <VariablesDetail
           label={t`Variables`}

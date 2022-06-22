@@ -41,11 +41,16 @@ const Detail = ({
   className,
   dataCy,
   alwaysVisible,
+  isEmpty,
   helpText,
   isEncrypted,
   isNotConfigured,
 }) => {
   if (!value && typeof value !== 'number' && !alwaysVisible) {
+    return null;
+  }
+
+  if (isEmpty && !alwaysVisible) {
     return null;
   }
 

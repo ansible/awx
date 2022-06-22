@@ -79,49 +79,48 @@ function InventoryDetail({ inventory }) {
           }
         />
         <Detail label={t`Total hosts`} value={inventory.total_hosts} />
-        {instanceGroups && instanceGroups.length > 0 && (
+        <Detail
+          fullWidth
+          label={t`Instance Groups`}
+          value={
+            <ChipGroup
+              numChips={5}
+              totalChips={instanceGroups?.length}
+              ouiaId="instance-group-chips"
+            >
+              {instanceGroups?.map((ig) => (
+                <Chip
+                  key={ig.id}
+                  isReadOnly
+                  ouiaId={`instance-group-${ig.id}-chip`}
+                >
+                  {ig.name}
+                </Chip>
+              ))}
+            </ChipGroup>
+          }
+          isEmpty={instanceGroups?.length === 0}
+        />
+        {inventory.summary_fields.labels && (
           <Detail
             fullWidth
-            label={t`Instance Groups`}
+            helpText={helpText.labels}
+            label={t`Labels`}
             value={
               <ChipGroup
                 numChips={5}
-                totalChips={instanceGroups.length}
-                ouiaId="instance-group-chips"
+                totalChips={inventory.summary_fields.labels.results.length}
               >
-                {instanceGroups.map((ig) => (
-                  <Chip
-                    key={ig.id}
-                    isReadOnly
-                    ouiaId={`instance-group-${ig.id}-chip`}
-                  >
-                    {ig.name}
+                {inventory.summary_fields.labels.results.map((l) => (
+                  <Chip key={l.id} isReadOnly>
+                    {l.name}
                   </Chip>
                 ))}
               </ChipGroup>
             }
+            isEmpty={inventory.summary_fields.labels?.results?.length === 0}
           />
         )}
-        {inventory.summary_fields.labels &&
-          inventory.summary_fields.labels?.results?.length > 0 && (
-            <Detail
-              fullWidth
-              helpText={helpText.labels}
-              label={t`Labels`}
-              value={
-                <ChipGroup
-                  numChips={5}
-                  totalChips={inventory.summary_fields.labels.results.length}
-                >
-                  {inventory.summary_fields.labels.results.map((l) => (
-                    <Chip key={l.id} isReadOnly>
-                      {l.name}
-                    </Chip>
-                  ))}
-                </ChipGroup>
-              }
-            />
-          )}
         <VariablesDetail
           label={t`Variables`}
           helpText={helpText.variables()}

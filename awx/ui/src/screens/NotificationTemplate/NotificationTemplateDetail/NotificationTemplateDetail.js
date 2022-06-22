@@ -109,12 +109,11 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
           value={template.description}
           dataCy="nt-detail-description"
         />
-        {summary_fields.recent_notifications.length ? (
-          <Detail
-            label={t`Status`}
-            value={<StatusLabel status={testStatus} />}
-          />
-        ) : null}
+        <Detail
+          label={t`Status`}
+          value={<StatusLabel status={testStatus} />}
+          isEmpty={summary_fields.recent_notifications.length === 0}
+        />
         {summary_fields.organization ? (
           <Detail
             label={t`Organization`}

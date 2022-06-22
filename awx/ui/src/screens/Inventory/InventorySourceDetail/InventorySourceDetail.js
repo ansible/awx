@@ -268,15 +268,14 @@ function InventorySourceDetail({ inventorySource }) {
           helpText={helpText.enabledValue}
           value={enabled_value}
         />
-        {credentials?.length > 0 && (
-          <Detail
-            fullWidth
-            label={t`Credential`}
-            value={credentials.map((cred) => (
-              <CredentialChip key={cred?.id} credential={cred} isReadOnly />
-            ))}
-          />
-        )}
+        <Detail
+          fullWidth
+          label={t`Credential`}
+          value={credentials?.map((cred) => (
+            <CredentialChip key={cred?.id} credential={cred} isReadOnly />
+          ))}
+          isEmpty={credentials?.length === 0}
+        />
         {optionsList && (
           <Detail fullWidth label={t`Enabled Options`} value={optionsList} />
         )}

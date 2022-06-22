@@ -354,7 +354,7 @@ function JobTemplateDetail({ template }) {
             helpText={helpText.enabledOptions}
           />
         )}
-        {summary_fields.credentials && summary_fields.credentials.length > 0 && (
+        {summary_fields.credentials && (
           <Detail
             fullWidth
             label={t`Credentials`}
@@ -378,9 +378,10 @@ function JobTemplateDetail({ template }) {
                 ))}
               </ChipGroup>
             }
+            isEmpty={summary_fields.credentials.length === 0}
           />
         )}
-        {summary_fields.labels && summary_fields.labels.results.length > 0 && (
+        {summary_fields.labels && (
           <Detail
             fullWidth
             label={t`Labels`}
@@ -399,36 +400,36 @@ function JobTemplateDetail({ template }) {
                 ))}
               </ChipGroup>
             }
+            isEmpty={summary_fields.labels.results.length === 0}
           />
         )}
-        {instanceGroups.length > 0 && (
-          <Detail
-            fullWidth
-            label={t`Instance Groups`}
-            dataCy="jt-detail-instance-groups"
-            helpText={helpText.instanceGroups}
-            value={
-              <ChipGroup
-                numChips={5}
-                totalChips={instanceGroups.length}
-                ouiaId="instance-group-chips"
-              >
-                {instanceGroups.map((ig) => (
-                  <Link to={`${buildLinkURL(ig)}${ig.id}/details`} key={ig.id}>
-                    <Chip
-                      key={ig.id}
-                      ouiaId={`instance-group-${ig.id}-chip`}
-                      isReadOnly
-                    >
-                      {ig.name}
-                    </Chip>
-                  </Link>
-                ))}
-              </ChipGroup>
-            }
-          />
-        )}
-        {job_tags && job_tags.length > 0 && (
+        <Detail
+          fullWidth
+          label={t`Instance Groups`}
+          dataCy="jt-detail-instance-groups"
+          helpText={helpText.instanceGroups}
+          value={
+            <ChipGroup
+              numChips={5}
+              totalChips={instanceGroups.length}
+              ouiaId="instance-group-chips"
+            >
+              {instanceGroups.map((ig) => (
+                <Link to={`${buildLinkURL(ig)}${ig.id}/details`} key={ig.id}>
+                  <Chip
+                    key={ig.id}
+                    ouiaId={`instance-group-${ig.id}-chip`}
+                    isReadOnly
+                  >
+                    {ig.name}
+                  </Chip>
+                </Link>
+              ))}
+            </ChipGroup>
+          }
+          isEmpty={instanceGroups.length === 0}
+        />
+        {job_tags && (
           <Detail
             fullWidth
             label={t`Job Tags`}
@@ -451,9 +452,10 @@ function JobTemplateDetail({ template }) {
                 ))}
               </ChipGroup>
             }
+            isEmpty={job_tags.length === 0}
           />
         )}
-        {skip_tags && skip_tags.length > 0 && (
+        {skip_tags && (
           <Detail
             fullWidth
             label={t`Skip Tags`}
@@ -476,6 +478,7 @@ function JobTemplateDetail({ template }) {
                 ))}
               </ChipGroup>
             }
+            isEmpty={skip_tags.length === 0}
           />
         )}
         <VariablesDetail
