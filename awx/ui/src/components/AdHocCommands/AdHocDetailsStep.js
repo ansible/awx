@@ -280,7 +280,6 @@ function AdHocDetailsStep({ moduleOptions }) {
 
 AdHocDetailsStep.propTypes = {
   moduleOptions: PropTypes.arrayOf(PropTypes.array).isRequired,
-  // verbosityOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
 export default AdHocDetailsStep;
