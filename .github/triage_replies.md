@@ -29,7 +29,7 @@ In the future, sometimes starting a discussion on the development list prior to 
 Thank you once again for this and your interest in AWX!
 
 
-### No Progress
+### No Progress (Pull Request)
 - Hi! \
 \
 Thank you very much for your submission to AWX. It means a lot to us that you have taken time to contribute. \
@@ -40,6 +40,9 @@ https://github.com/ansible/awx/#get-involved \
 \
 Thank you once again for this and your interest in AWX!
 
+### No Progress (Issue)
+
+Closing issue due to inactivity. If this is still an issue that needs to be addressed, feel free to open a new issue. Or, it may be a question best suited for our mailing list, https://groups.google.com/g/awx-project.
 
 
 
@@ -50,7 +53,6 @@ Thank you once again for this and your interest in AWX!
 
 ### Code of Conduct
 - Hello. Please keep in mind that Ansible adheres to a Code of Conduct in its community spaces. The spirit of the code of conduct is to be kind, and this is your friendly reminder to be so. Please see the full code of conduct here if you have questions: https://docs.ansible.com/ansible/latest/community/code_of_conduct.html 
-
 
 
 
@@ -91,3 +93,9 @@ The AWX team.
 
 ## Try latest version
 - Hello, this issue pertains to an older version of AWX. Try upgrading to the latest version and let us know if that resolves your issue.
+
+
+## Other
+
+### Denying requests to add modules to awx-ee
+- Hello. While we understand how this could be useful, we feel that this could end up with a fairly bloated Execution Environment. The awx-ee contains the collections and dependencies needed for supported AWX features to function. Anything beyond that will require you to build your own EE. For information on how to do that, see https://ansible-builder.readthedocs.io/en/stable/
