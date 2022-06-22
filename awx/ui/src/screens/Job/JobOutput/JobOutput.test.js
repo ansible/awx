@@ -134,4 +134,20 @@ describe('<JobOutput />', () => {
     });
     await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
   });
+  test('should show failed empty output screen', async () => {
+    JobsAPI.readEvents.mockResolvedValue({
+      data: {
+        count: 0,
+        next: null,
+        previous: null,
+        results: [],
+      },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <JobOutput job={{ ...mockJob, status: 'failed' }} />
+      );
+    });
+    await waitForElement(wrapper, 'EmptyOutput', (el) => el.length === 1);
+  });
 });
