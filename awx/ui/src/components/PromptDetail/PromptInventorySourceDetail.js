@@ -13,7 +13,7 @@ import { VariablesDetail } from '../CodeEditor';
 import CredentialChip from '../CredentialChip';
 import ChipGroup from '../ChipGroup';
 import ExecutionEnvironmentDetail from '../ExecutionEnvironmentDetail';
-import { VERBOSITY } from '../../constants';
+import { VERBOSITY } from '../VerbositySelectField';
 
 function PromptInventorySourceDetail({ resource }) {
   const {
@@ -108,7 +108,7 @@ function PromptInventorySourceDetail({ resource }) {
         executionEnvironment={summary_fields?.execution_environment}
       />
       <Detail label={t`Inventory File`} value={source_path} />
-      <Detail label={t`Verbosity`} value={VERBOSITY[verbosity]} />
+      <Detail label={t`Verbosity`} value={VERBOSITY()[verbosity]} />
       <Detail
         label={t`Cache Timeout`}
         value={`${update_cache_timeout} ${t`Seconds`}`}

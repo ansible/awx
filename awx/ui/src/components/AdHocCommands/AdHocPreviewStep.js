@@ -3,6 +3,7 @@ import { t } from '@lingui/macro';
 import { Tooltip } from '@patternfly/react-core';
 import { ExclamationCircleIcon as PFExclamationCircleIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
+import { VERBOSITY } from '../VerbositySelectField';
 import { toTitleCase } from '../../util/strings';
 import { VariablesDetail } from '../CodeEditor';
 import { jsonToYaml } from '../../util/yaml';
@@ -21,7 +22,7 @@ const ErrorMessageWrapper = styled.div`
   margin-bottom: 10px;
 `;
 function AdHocPreviewStep({ hasErrors, values }) {
-  const { credential, execution_environment, extra_vars } = values;
+  const { credential, execution_environment, extra_vars, verbosity } = values;
 
   const items = Object.entries(values);
   return (
@@ -44,6 +45,7 @@ function AdHocPreviewStep({ hasErrors, values }) {
             key !== 'extra_vars' &&
             key !== 'execution_environment' &&
             key !== 'credentials' &&
+            key !== 'verbosity' &&
             !key.startsWith('credential_passwords') && (
               <Detail key={key} label={toTitleCase(key)} value={value} />
             )
@@ -56,6 +58,9 @@ function AdHocPreviewStep({ hasErrors, values }) {
             label={t`Execution Environment`}
             value={execution_environment[0]?.name}
           />
+        )}
+        {verbosity && (
+          <Detail label={t`Verbosity`} value={VERBOSITY()[values.verbosity]} />
         )}
         {extra_vars && (
           <VariablesDetail

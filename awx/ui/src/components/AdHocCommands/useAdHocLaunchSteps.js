@@ -24,7 +24,6 @@ function showCredentialPasswordsStep(credential) {
 
 export default function useAdHocLaunchSteps(
   moduleOptions,
-  verbosityOptions,
   organizationId,
   credentialTypeId
 ) {
@@ -32,7 +31,7 @@ export default function useAdHocLaunchSteps(
 
   const [visited, setVisited] = useState({});
   const steps = [
-    useAdHocDetailsStep(visited, moduleOptions, verbosityOptions),
+    useAdHocDetailsStep(visited, moduleOptions),
     useAdHocExecutionEnvironmentStep(organizationId),
     useAdHocCredentialStep(visited, credentialTypeId),
     useCredentialPasswordsStep(

@@ -14,8 +14,6 @@ import ErrorDetail from '../ErrorDetail';
 import AdHocCommandsWizard from './AdHocCommandsWizard';
 import ContentError from '../ContentError';
 
-import { VERBOSE_OPTIONS } from '../../constants';
-
 function AdHocCommands({
   adHocItems,
   hasListItems,
@@ -154,7 +152,6 @@ function AdHocCommands({
           adHocItems={adHocItems}
           organizationId={organizationId}
           moduleOptions={moduleOptions}
-          verbosityOptions={VERBOSE_OPTIONS}
           credentialTypeId={credentialTypeId}
           onCloseWizard={() => setIsWizardOpen(false)}
           onLaunch={handleSubmit}

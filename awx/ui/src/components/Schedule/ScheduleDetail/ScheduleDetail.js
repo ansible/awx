@@ -23,7 +23,7 @@ import DeleteButton from '../../DeleteButton';
 import ErrorDetail from '../../ErrorDetail';
 import ChipGroup from '../../ChipGroup';
 import { VariablesDetail } from '../../CodeEditor';
-import { VERBOSITY } from '../../../constants';
+import { VERBOSITY } from '../../VerbositySelectField';
 
 const PromptDivider = styled(Divider)`
   margin-top: var(--pf-global--spacer--lg);
@@ -209,7 +209,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
   const showLimitDetail = ask_limit_on_launch && limit;
   const showJobTypeDetail = ask_job_type_on_launch && job_type;
   const showSCMBranchDetail = ask_scm_branch_on_launch && scm_branch;
-  const showVerbosityDetail = ask_verbosity_on_launch && VERBOSITY[verbosity];
+  const showVerbosityDetail = ask_verbosity_on_launch && VERBOSITY()[verbosity];
 
   const showPromptedFields =
     showCredentialsDetail ||
@@ -306,7 +306,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
               />
             )}
             {ask_verbosity_on_launch && (
-              <Detail label={t`Verbosity`} value={VERBOSITY[verbosity]} />
+              <Detail label={t`Verbosity`} value={VERBOSITY()[verbosity]} />
             )}
             {ask_scm_branch_on_launch && (
               <Detail label={t`Source Control Branch`} value={scm_branch} />

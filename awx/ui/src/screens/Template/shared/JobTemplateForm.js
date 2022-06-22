@@ -43,10 +43,10 @@ import Popover from 'components/Popover';
 import { JobTemplatesAPI } from 'api';
 import useIsMounted from 'hooks/useIsMounted';
 import LabelSelect from 'components/LabelSelect';
+import { VerbositySelectField } from 'components/VerbositySelectField';
 import PlaybookSelect from './PlaybookSelect';
 import WebhookSubForm from './WebhookSubForm';
 import helpText from './JobTemplate.helptext';
-import { VERBOSE_OPTIONS } from '../../../constants';
 
 const { origin } = document.location;
 
@@ -86,7 +86,6 @@ function JobTemplateForm({
   const [credentialField, , credentialHelpers] = useField('credentials');
   const [labelsField, , labelsHelpers] = useField('labels');
   const [limitField, limitMeta, limitHelpers] = useField('limit');
-  const [verbosityField] = useField('verbosity');
   const [diffModeField, , diffModeHelpers] = useField('diff_mode');
   const [instanceGroupsField, , instanceGroupsHelpers] =
     useField('instanceGroups');
@@ -422,19 +421,12 @@ function JobTemplateForm({
                 }}
               />
             </FieldWithPrompt>
-            <FieldWithPrompt
+            <VerbositySelectField
               fieldId="template-verbosity"
-              label={t`Verbosity`}
               promptId="template-ask-verbosity-on-launch"
               promptName="ask_verbosity_on_launch"
               tooltip={helpText.verbosity}
-            >
-              <AnsibleSelect
-                id="template-verbosity"
-                data={VERBOSE_OPTIONS}
-                {...verbosityField}
-              />
-            </FieldWithPrompt>
+            />
             <FormField
               id="template-job-slicing"
               name="job_slice_count"

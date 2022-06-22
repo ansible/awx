@@ -14,7 +14,7 @@ import PromptProjectDetail from './PromptProjectDetail';
 import PromptInventorySourceDetail from './PromptInventorySourceDetail';
 import PromptJobTemplateDetail from './PromptJobTemplateDetail';
 import PromptWFJobTemplateDetail from './PromptWFJobTemplateDetail';
-import { VERBOSITY } from '../../constants';
+import { VERBOSITY } from '../VerbositySelectField';
 
 const PromptTitle = styled(Title)`
   margin-top: var(--pf-global--spacer--xl);
@@ -219,7 +219,7 @@ function PromptDetail({
               launchConfig.ask_verbosity_on_launch ? (
                 <Detail
                   label={t`Verbosity`}
-                  value={VERBOSITY[overrides.verbosity]}
+                  value={VERBOSITY()[overrides.verbosity]}
                 />
               ) : null}
               {launchConfig.ask_tags_on_launch && (

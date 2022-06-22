@@ -6,7 +6,6 @@ import {
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
 import AdHocCommandsWizard from './AdHocCommandsWizard';
-import { VERBOSE_OPTIONS } from '../../constants';
 
 jest.mock('../../api/models/CredentialTypes');
 jest.mock('../../api/models/Inventories');
@@ -38,7 +37,6 @@ describe('<AdHocCommandsWizard/>', () => {
           adHocItems={adHocItems}
           onLaunch={onLaunch}
           moduleOptions={moduleOptions}
-          verbosityOptions={VERBOSE_OPTIONS}
           onCloseWizard={() => {}}
           credentialTypeId={1}
           organizationId={1}

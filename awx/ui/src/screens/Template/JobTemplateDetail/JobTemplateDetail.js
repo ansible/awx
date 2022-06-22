@@ -28,12 +28,12 @@ import DeleteButton from 'components/DeleteButton';
 import ErrorDetail from 'components/ErrorDetail';
 import { LaunchButton } from 'components/LaunchButton';
 import { VariablesDetail } from 'components/CodeEditor';
+import { VERBOSITY } from 'components/VerbositySelectField';
 import { JobTemplatesAPI } from 'api';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import useBrandName from 'hooks/useBrandName';
 import ExecutionEnvironmentDetail from 'components/ExecutionEnvironmentDetail';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
-import { VERBOSITY } from '../../../constants';
 import helpText from '../shared/JobTemplate.helptext';
 
 function JobTemplateDetail({ template }) {
@@ -262,7 +262,7 @@ function JobTemplateDetail({ template }) {
         />
         <Detail
           label={t`Verbosity`}
-          value={VERBOSITY[verbosity]}
+          value={VERBOSITY()[verbosity]}
           dataCy="jt-detail-verbosity"
           helpText={helpText.verbosity}
         />
