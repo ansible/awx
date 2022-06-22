@@ -1354,14 +1354,8 @@ class RunProjectUpdate(BaseTask):
                 branch=source_branch,
                 depth=1,
                 single_branch=True,  # shallow, do not copy full history
+                recursive=True,
             )
-            # submodules copied in loop because shallow copies from local HEADs are ideal
-            # and no git clone submodule options are compatible with minimum requirements
-            for submodule in git_repo.submodules:
-                subrepo_path = os.path.abspath(os.path.join(project_path, submodule.path))
-                subrepo_destination_folder = os.path.abspath(os.path.join(destination_folder, submodule.path))
-                subrepo_uri = Path(subrepo_path).as_uri()
-                git.Repo.clone_from(subrepo_uri, subrepo_destination_folder, depth=1, single_branch=True)
             # force option is necessary because remote refs are not counted, although no information is lost
             git_repo.delete_head(tmp_branch_name, force=True)
         else:
