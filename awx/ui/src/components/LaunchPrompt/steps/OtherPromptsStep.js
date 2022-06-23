@@ -58,7 +58,7 @@ function OtherPromptsStep({ launchConfig, variablesMode, onVarModeChange }) {
           aria-label={t`Job Tags`}
           tooltip={t`Tags are useful when you have a large
             playbook, and you want to run a specific part of a play or task.
-            Use commas to separate multiple tags. Refer to Ansible Tower
+            Use commas to separate multiple tags. Refer to Ansible Controller
             documentation for details on the usage of tags.`}
         />
       )}
@@ -70,7 +70,7 @@ function OtherPromptsStep({ launchConfig, variablesMode, onVarModeChange }) {
           aria-label={t`Skip Tags`}
           tooltip={t`Skip tags are useful when you have a large
             playbook, and you want to skip specific parts of a play or task.
-            Use commas to separate multiple tags. Refer to Ansible Tower
+            Use commas to separate multiple tags. Refer to Ansible Controller
             documentation for details on the usage of tags.`}
         />
       )}

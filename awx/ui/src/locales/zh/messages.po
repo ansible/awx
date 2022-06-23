@@ -411,8 +411,8 @@ msgid "An inventory must be selected"
 msgstr "必须选择一个清单"
 
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:96
-msgid "Ansible Tower Documentation."
-msgstr "Ansible Tower 文档"
+msgid "Ansible Controller Documentation."
+msgstr "Ansible Controller 文档"
 
 #: screens/Template/Survey/SurveyQuestionForm.js:43
 msgid "Answer type"
@@ -1053,9 +1053,9 @@ msgstr "选择 HTTP 方法"
 #: screens/Template/Survey/SurveyQuestionForm.js:46
 msgid ""
 "Choose an answer type or format you want as the prompt for the user.\n"
-"Refer to the Ansible Tower Documentation for more additional\n"
+"Refer to the Ansible Controller Documentation for more additional\n"
 "information about each option."
-msgstr "选择您想要作为用户提示的回答类型或格式。请参阅 Ansible Tower 文档来了解每个选项的更多其他信息。"
+msgstr "选择您想要作为用户提示的回答类型或格式。请参阅 Ansible Controller 文档来了解每个选项的更多其他信息。"
 
 #: components/AddRole/SelectRoleStep.js:20
 msgid "Choose roles to apply to the selected resources.  Note that all selected roles will be applied to all selected resources."
@@ -2747,23 +2747,23 @@ msgid "Enter at least one search filter to create a new Smart Inventory"
 msgstr "请至少输入一个搜索过滤来创建一个新的智能清单。"
 
 #: screens/CredentialType/shared/CredentialTypeForm.js:43
-msgid "Enter injectors using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax."
-msgstr "使用 JSON 或 YAML 语法输入注入程序。示例语法请参阅 Ansible Tower 文档。"
+msgid "Enter injectors using either JSON or YAML syntax. Refer to the Ansible Controller documentation for example syntax."
+msgstr "使用 JSON 或 YAML 语法输入注入程序。示例语法请参阅 Ansible Controller 文档。"
 
 #: screens/CredentialType/shared/CredentialTypeForm.js:35
-msgid "Enter inputs using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax."
-msgstr "使用 JSON 或 YAML 语法进行输入。示例语法请参阅 Ansible Tower 文档。"
+msgid "Enter inputs using either JSON or YAML syntax. Refer to the Ansible Controller documentation for example syntax."
+msgstr "使用 JSON 或 YAML 语法进行输入。示例语法请参阅 Ansible Controller 文档。"
 
 #: screens/Inventory/shared/SmartInventoryForm.js:94
 msgid ""
 "Enter inventory variables using either JSON or YAML syntax.\n"
 "Use the radio button to toggle between the two. Refer to the\n"
-"Ansible Tower documentation for example syntax."
-msgstr "使用 JSON 或 YAML 语法输入清单变量。使用单选按钮在两者之间切换。示例语法请参阅 Ansible Tower 文档。"
+"Ansible Controller documentation for example syntax."
+msgstr "使用 JSON 或 YAML 语法输入清单变量。使用单选按钮在两者之间切换。示例语法请参阅 Ansible Controller 文档。"
 
 #: screens/Inventory/shared/InventoryForm.js:92
-#~ msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax"
-#~ msgstr "使用 JSON 或 YAML 语法输入清单变量。使用单选按钮在两者之间切换。示例语法请参阅 Ansible Tower 文档"
+msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Controller documentation for example syntax"
+msgstr "使用 JSON 或 YAML 语法输入清单变量。使用单选按钮在两者之间切换。示例语法请参阅 Ansible Controller 文档"
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:181
 #~ msgid "Enter one Annotation Tag per line, without commas."
@@ -6164,18 +6164,17 @@ msgid "Pass extra command line changes. There are two ansible command line param
 msgstr "传递额外的命令行更改。有两个 ansible 命令行参数："
 
 #: screens/Template/shared/JobTemplateForm.js:413
-#~ msgid ""
-#~ "Pass extra command line variables to the playbook. This is the\n"
-#~ "-e or --extra-vars command line parameter for ansible-playbook.\n"
-#~ "Provide key/value pairs using either YAML or JSON. Refer to the\n"
-#~ "documentation for example syntax."
-#~ msgstr ""
-#~ "向 playbook 传递额外的命令行变量。这是 ansible-playbook 的 -e 或 --extra-vars 命令行参数。使用 YAML \n"
-#~ "或 JSON 提供键/值对。示例语法请参阅相关文档。"
+msgid ""
+"Pass extra command line variables to the playbook. This is the\n"
+"-e or --extra-vars command line parameter for ansible-playbook.\n"
+"Provide key/value pairs using either YAML or JSON. Refer to the\n"
+"documentation for example syntax."
+msgstr "向 playbook 传递额外的命令行变量。这是 ansible-playbook 的 -e 或 --extra-vars 命令行参数。使用 YAML \n"
+"或 JSON 提供键/值对。示例语法请参阅相关文档。"
 
-#: screens/Template/shared/WorkflowJobTemplate.helptext.js:14
-msgid "Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentation for example syntax."
-msgstr "向 playbook 传递额外的命令行变量。这是 ansible-playbook 的 -e 或 --extra-vars 命令行参数。使用 YAML 或 JSON 提供键/值对。示例语法请参阅 Ansible Tower 文档。"
+#: screens/Template/shared/WorkflowJobTemplateForm.js:215
+msgid "Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Controller documentation for example syntax."
+msgstr "向 playbook 传递额外的命令行变量。这是 ansible-playbook 的 -e 或 --extra-vars 命令行参数。使用 YAML 或 JSON 提供键/值对。示例语法请参阅 Ansible Controller 文档。"
 
 #: screens/Job/Job.helptext.js:12
 #: screens/Template/shared/JobTemplate.helptext.js:13
@@ -6387,9 +6386,9 @@ msgid ""
 "Populate the hosts for this inventory by using a search\n"
 "filter. Example: ansible_facts__ansible_distribution:\"RedHat\".\n"
 "Refer to the documentation for further syntax and\n"
-"examples.  Refer to the Ansible Tower documentation for further syntax and\n"
+"examples.  Refer to the Ansible Controller documentation for further syntax and\n"
 "examples."
-msgstr "使用搜索过滤器填充此清单的主机。例如：ansible_facts__ansible_distribution:\"RedHat\"。如需语法和实例的更多信息，请参阅相关文档。请参阅 Ansible Tower  文档来获得更多信息。"
+msgstr "使用搜索过滤器填充此清单的主机。例如：ansible_facts__ansible_distribution:\"RedHat\"。如需语法和实例的更多信息，请参阅相关文档。请参阅 Ansible Controller  文档来获得更多信息。"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:164
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:102
@@ -7865,9 +7864,9 @@ msgstr "跳过标签"
 msgid ""
 "Skip tags are useful when you have a large\n"
 "playbook, and you want to skip specific parts of a play or task.\n"
-"Use commas to separate multiple tags. Refer to Ansible Tower\n"
+"Use commas to separate multiple tags. Refer to Ansible Controller\n"
 "documentation for details on the usage of tags."
-msgstr "如果有一个大的 playbook，而您想要跳过某个 play 或任务的特定部分，则跳过标签会很有用。使用逗号分隔多个标签。请参阅 Ansible Tower 文档了解使用标签的详情。"
+msgstr "如果有一个大的 playbook，而您想要跳过某个 play 或任务的特定部分，则跳过标签会很有用。使用逗号分隔多个标签。请参阅 Ansible Controller 文档了解使用标签的详情。"
 
 #: screens/Job/Job.helptext.js:19
 #: screens/Template/shared/JobTemplate.helptext.js:21
@@ -8040,8 +8039,8 @@ msgstr "源"
 #: screens/NotificationTemplate/shared/Notifications.helptext.js:30
 msgid ""
 "Specify HTTP Headers in JSON format. Refer to\n"
-"the Ansible Tower documentation for example syntax."
-msgstr "以 JSON 格式指定 HTTP 标头。示例语法请参阅 Ansible Tower 文档。"
+"the Ansible Controller documentation for example syntax."
+msgstr "以 JSON 格式指定 HTTP 标头。示例语法请参阅 Ansible Controller 文档。"
 
 #: screens/NotificationTemplate/shared/Notifications.helptext.js:24
 msgid ""
@@ -8363,21 +8362,21 @@ msgid "Tabs"
 msgstr "制表符"
 
 #: screens/Template/shared/JobTemplateForm.js:522
-#~ msgid ""
-#~ "Tags are useful when you have a large\n"
-#~ "playbook, and you want to run a specific part of a\n"
-#~ "play or task. Use commas to separate multiple tags.\n"
-#~ "Refer to the documentation for details on\n"
-#~ "the usage of tags."
-#~ msgstr "如果有一个大的 playbook，而您想要运行某个 play 或任务的特定部分，则标签会很有用。使用逗号分隔多个标签。请参阅 Ansible Tower 文档了解使用标签的详情。"
+msgid ""
+"Tags are useful when you have a large\n"
+"playbook, and you want to run a specific part of a\n"
+"play or task. Use commas to separate multiple tags.\n"
+"Refer to the documentation for details on\n"
+"the usage of tags."
+msgstr "如果有一个大的 playbook，而您想要运行某个 play 或任务的特定部分，则标签会很有用。使用逗号分隔多个标签。请参阅 Ansible Controller 文档了解使用标签的详情。"
 
-#: components/LaunchPrompt/steps/OtherPromptsStep.js:59
+#: components/LaunchPrompt/steps/OtherPromptsStep.js:58
 msgid ""
 "Tags are useful when you have a large\n"
 "playbook, and you want to run a specific part of a play or task.\n"
-"Use commas to separate multiple tags. Refer to Ansible Tower\n"
+"Use commas to separate multiple tags. Refer to Ansible Controller\n"
 "documentation for details on the usage of tags."
-msgstr "如果有一个大的 playbook，而您想要运行某个 play 或任务的特定部分，则标签会很有用。使用逗号分隔多个标签。请参阅 Ansible Tower 文档了解使用标签的详情。"
+msgstr "如果有一个大的 playbook，而您想要运行某个 play 或任务的特定部分，则标签会很有用。使用逗号分隔多个标签。请参阅 Ansible Controller 文档了解使用标签的详情。"
 
 #: screens/Job/Job.helptext.js:18
 #: screens/Template/shared/JobTemplate.helptext.js:20

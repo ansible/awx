@@ -411,8 +411,8 @@ msgid "An inventory must be selected"
 msgstr "インベントリーを選択する必要があります"
 
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:96
-msgid "Ansible Tower Documentation."
-msgstr "Ansible Tower ドキュメント。"
+msgid "Ansible Controller Documentation."
+msgstr "Ansible Controller ドキュメント。"
 
 #: screens/Template/Survey/SurveyQuestionForm.js:43
 msgid "Answer type"
@@ -1053,9 +1053,9 @@ msgstr "HTTP メソッドの選択"
 #: screens/Template/Survey/SurveyQuestionForm.js:46
 msgid ""
 "Choose an answer type or format you want as the prompt for the user.\n"
-"Refer to the Ansible Tower Documentation for more additional\n"
+"Refer to the Ansible Controller Documentation for more additional\n"
 "information about each option."
-msgstr "ユーザーに表示されるプロンプトとして使用する回答タイプまたは形式を選択します。各オプションの詳細については、Ansible Tower のドキュメントを参照してください。"
+msgstr "ユーザーに表示されるプロンプトとして使用する回答タイプまたは形式を選択します。各オプションの詳細については、Ansible Controller のドキュメントを参照してください。"
 
 #: components/AddRole/SelectRoleStep.js:20
 msgid "Choose roles to apply to the selected resources.  Note that all selected roles will be applied to all selected resources."
@@ -2747,23 +2747,23 @@ msgid "Enter at least one search filter to create a new Smart Inventory"
 msgstr "新規スマートインベントリーを作成するために 1 つ以上の検索フィルターを入力してください。"
 
 #: screens/CredentialType/shared/CredentialTypeForm.js:43
-msgid "Enter injectors using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax."
-msgstr "JSON または YAML 構文のいずれかを使用してインジェクターを入力します。構文のサンプルについては Ansible Tower ドキュメントを参照してください。"
+msgid "Enter injectors using either JSON or YAML syntax. Refer to the Ansible Controller documentation for example syntax."
+msgstr "JSON または YAML 構文のいずれかを使用してインジェクターを入力します。構文のサンプルについては Ansible Controller ドキュメントを参照してください。"
 
 #: screens/CredentialType/shared/CredentialTypeForm.js:35
-msgid "Enter inputs using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax."
-msgstr "JSON または YAML 構文のいずれかを使用して入力を行います。構文のサンプルについては Ansible Tower ドキュメントを参照してください。"
+msgid "Enter inputs using either JSON or YAML syntax. Refer to the Ansible Controller documentation for example syntax."
+msgstr "JSON または YAML 構文のいずれかを使用して入力を行います。構文のサンプルについては Ansible Controller ドキュメントを参照してください。"
 
 #: screens/Inventory/shared/SmartInventoryForm.js:94
 msgid ""
 "Enter inventory variables using either JSON or YAML syntax.\n"
 "Use the radio button to toggle between the two. Refer to the\n"
-"Ansible Tower documentation for example syntax."
-msgstr "JSON または YAML 構文のいずれかを使用してインベントリー変数を入力します。ラジオボタンを使用して構文間で切り替えを行います。構文のサンプルについては Ansible Tower ドキュメントを参照してください。"
+"Ansible Controller documentation for example syntax."
+msgstr "JSON または YAML 構文のいずれかを使用してインベントリー変数を入力します。ラジオボタンを使用して構文間で切り替えを行います。構文のサンプルについては Ansible Controller ドキュメントを参照してください。"
 
 #: screens/Inventory/shared/InventoryForm.js:92
-#~ msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax"
-#~ msgstr "JSON または YAML 構文のいずれかを使用してインベントリー変数を入力します。ラジオボタンを使用して構文で切り替えを行います。構文のサンプルについては Ansible Tower ドキュメントを参照してください。"
+msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Controller documentation for example syntax"
+msgstr "JSON または YAML 構文のいずれかを使用してインベントリー変数を入力します。ラジオボタンを使用して構文で切り替えを行います。構文のサンプルについては Ansible Controller ドキュメントを参照してください。"
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:181
 #~ msgid "Enter one Annotation Tag per line, without commas."
@@ -6164,16 +6164,16 @@ msgid "Pass extra command line changes. There are two ansible command line param
 msgstr "追加のコマンドライン変更を渡します。2 つの Ansible コマンドラインパラメーターがあります。"
 
 #: screens/Template/shared/JobTemplateForm.js:413
-#~ msgid ""
-#~ "Pass extra command line variables to the playbook. This is the\n"
-#~ "-e or --extra-vars command line parameter for ansible-playbook.\n"
-#~ "Provide key/value pairs using either YAML or JSON. Refer to the\n"
-#~ "documentation for example syntax."
-#~ msgstr "追加のコマンドライン変数を Playbook に渡します。これは、ansible-playbook の -e または --extra-vars コマンドラインパラメーターです。YAML または JSON のいずれかを使用してキーと値のペアを指定します。構文のサンプルについてはドキュメントを参照してください。"
+msgid ""
+"Pass extra command line variables to the playbook. This is the\n"
+"-e or --extra-vars command line parameter for ansible-playbook.\n"
+"Provide key/value pairs using either YAML or JSON. Refer to the\n"
+"documentation for example syntax."
+msgstr "追加のコマンドライン変数を Playbook に渡します。これは、ansible-playbook の -e または --extra-vars コマンドラインパラメーターです。YAML または JSON のいずれかを使用してキーと値のペアを指定します。構文のサンプルについてはドキュメントを参照してください。"
 
-#: screens/Template/shared/WorkflowJobTemplate.helptext.js:14
-msgid "Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentation for example syntax."
-msgstr "追加のコマンドライン変数を Playbook に渡します。これは、ansible-playbook の -e または --extra-vars コマンドラインパラメーターです。YAML または JSON のいずれかを使用してキーと値のペアを指定します。構文のサンプルについては Ansible Tower ドキュメントを参照してください。"
+#: screens/Template/shared/WorkflowJobTemplateForm.js:215
+msgid "Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Controller documentation for example syntax."
+msgstr "追加のコマンドライン変数を Playbook に渡します。これは、ansible-playbook の -e または --extra-vars コマンドラインパラメーターです。YAML または JSON のいずれかを使用してキーと値のペアを指定します。構文のサンプルについては Ansible Controller ドキュメントを参照してください。"
 
 #: screens/Job/Job.helptext.js:12
 #: screens/Template/shared/JobTemplate.helptext.js:13
@@ -6385,9 +6385,9 @@ msgid ""
 "Populate the hosts for this inventory by using a search\n"
 "filter. Example: ansible_facts__ansible_distribution:\"RedHat\".\n"
 "Refer to the documentation for further syntax and\n"
-"examples.  Refer to the Ansible Tower documentation for further syntax and\n"
+"examples.  Refer to the Ansible Controller documentation for further syntax and\n"
 "examples."
-msgstr "検索フィルターを使用して、このインベントリーのホストにデータを入力します (例: ansible_facts__ansible_distribution:\"RedHat\")。詳細な構文と例については、ドキュメントを参照してください。構文と例の詳細については、Ansible Tower のドキュメントを参照してください。"
+msgstr "検索フィルターを使用して、このインベントリーのホストにデータを入力します (例: ansible_facts__ansible_distribution:\"RedHat\")。詳細な構文と例については、ドキュメントを参照してください。構文と例の詳細については、Ansible Controller のドキュメントを参照してください。"
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:164
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:102
@@ -7861,9 +7861,9 @@ msgstr "スキップタグ"
 msgid ""
 "Skip tags are useful when you have a large\n"
 "playbook, and you want to skip specific parts of a play or task.\n"
-"Use commas to separate multiple tags. Refer to Ansible Tower\n"
+"Use commas to separate multiple tags. Refer to Ansible Controller\n"
 "documentation for details on the usage of tags."
-msgstr "スキップタグは、Playbook のサイズが大きい場合にプレイまたはタスクの特定の部分をスキップする必要がある場合に役立ちます。コンマを使用して複数のタグを区切ります。タグの使用方法の詳細については、Ansible Tower ドキュメントを参照してください。"
+msgstr "スキップタグは、Playbook のサイズが大きい場合にプレイまたはタスクの特定の部分をスキップする必要がある場合に役立ちます。コンマを使用して複数のタグを区切ります。タグの使用方法の詳細については、Ansible Controller ドキュメントを参照してください。"
 
 #: screens/Job/Job.helptext.js:19
 #: screens/Template/shared/JobTemplate.helptext.js:21
@@ -8036,8 +8036,8 @@ msgstr "ソース"
 #: screens/NotificationTemplate/shared/Notifications.helptext.js:30
 msgid ""
 "Specify HTTP Headers in JSON format. Refer to\n"
-"the Ansible Tower documentation for example syntax."
-msgstr "JSON 形式で HTTP ヘッダーを指定します。構文のサンプルについては Ansible Tower ドキュメントを参照してください。"
+"the Ansible Controller documentation for example syntax."
+msgstr "JSON 形式で HTTP ヘッダーを指定します。構文のサンプルについては Ansible Controller ドキュメントを参照してください。"
 
 #: screens/NotificationTemplate/shared/Notifications.helptext.js:24
 msgid ""
@@ -8371,9 +8371,9 @@ msgstr "タブ"
 msgid ""
 "Tags are useful when you have a large\n"
 "playbook, and you want to run a specific part of a play or task.\n"
-"Use commas to separate multiple tags. Refer to Ansible Tower\n"
+"Use commas to separate multiple tags. Refer to Ansible Controller\n"
 "documentation for details on the usage of tags."
-msgstr "タグは、Playbook のサイズが大きい場合にプレイまたはタスクの特定の部分を実行する必要がある場合に役立ちます。コンマを使用して複数のタグを区切ります。タグの使用方法の詳細については、Ansible Tower ドキュメントを参照してください。"
+msgstr "タグは、Playbook のサイズが大きい場合にプレイまたはタスクの特定の部分を実行する必要がある場合に役立ちます。コンマを使用して複数のタグを区切ります。タグの使用方法の詳細については、Ansible Controller ドキュメントを参照してください。"
 
 #: screens/Job/Job.helptext.js:18
 #: screens/Template/shared/JobTemplate.helptext.js:20

@@ -28,7 +28,7 @@ const helpText = {
   twilioDestinationNumbers: t`Use one phone number per line to specify where to
           route SMS messages. Phone numbers should be formatted +11231231234. For more information see Twilio documentation`,
   webhookHeaders: t`Specify HTTP Headers in JSON format. Refer to
-        the Ansible Tower documentation for example syntax.`,
+        the Ansible Controller documentation for example syntax.`,
 };
 
 export default helpText;

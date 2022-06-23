@@ -93,7 +93,7 @@ function CustomMessagesSubForm({ defaultMessages, type }) {
                   config
                 )}/html/userguide/notifications.html#create-custom-notifications`}
               >
-                {t`Ansible Tower Documentation.`}
+                {t`Ansible Controller Documentation.`}
               </a>
             </small>
           </Text>

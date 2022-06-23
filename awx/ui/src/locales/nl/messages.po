@@ -411,8 +411,8 @@ msgid "An inventory must be selected"
 msgstr "Er moet een inventaris worden gekozen"
 
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:96
-msgid "Ansible Tower Documentation."
-msgstr "Documentatie Ansible Tower."
+msgid "Ansible Controller Documentation."
+msgstr "Documentatie Ansible Controller."
 
 #: screens/Template/Survey/SurveyQuestionForm.js:43
 msgid "Answer type"
@@ -1055,9 +1055,9 @@ msgstr "Kies een HTTP-methode"
 #: screens/Template/Survey/SurveyQuestionForm.js:46
 msgid ""
 "Choose an answer type or format you want as the prompt for the user.\n"
-"Refer to the Ansible Tower Documentation for more additional\n"
+"Refer to the Ansible Controller Documentation for more additional\n"
 "information about each option."
-msgstr "Kies een antwoordtype of -formaat dat u als melding voor de gebruiker wilt. Raadpleeg de documentatie van Ansible Tower voor meer informatie over iedere optie."
+msgstr "Kies een antwoordtype of -formaat dat u als melding voor de gebruiker wilt. Raadpleeg de documentatie van Ansible Controller voor meer informatie over iedere optie."
 
 #: components/AddRole/SelectRoleStep.js:20
 msgid "Choose roles to apply to the selected resources.  Note that all selected roles will be applied to all selected resources."
@@ -2753,23 +2753,23 @@ msgid "Enter at least one search filter to create a new Smart Inventory"
 msgstr "Voer ten minste één zoekfilter in om een nieuwe Smart-inventaris te maken."
 
 #: screens/CredentialType/shared/CredentialTypeForm.js:43
-msgid "Enter injectors using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax."
-msgstr "Geef injectoren op met JSON- of YAML-syntaxis. Raadpleeg de documentatie voor Ansible Tower voor voorbeeldsyntaxis."
+msgid "Enter injectors using either JSON or YAML syntax. Refer to the Ansible Controller documentation for example syntax."
+msgstr "Geef injectoren op met JSON- of YAML-syntaxis. Raadpleeg de documentatie voor Ansible Controller voor voorbeeldsyntaxis."
 
 #: screens/CredentialType/shared/CredentialTypeForm.js:35
-msgid "Enter inputs using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax."
-msgstr "Geef inputs op met JSON- of YAML-syntaxis. Raadpleeg de documentatie voor Ansible Tower voor voorbeeldsyntaxis."
+msgid "Enter inputs using either JSON or YAML syntax. Refer to the Ansible Controller documentation for example syntax."
+msgstr "Geef inputs op met JSON- of YAML-syntaxis. Raadpleeg de documentatie voor Ansible Controller voor voorbeeldsyntaxis."
 
 #: screens/Inventory/shared/SmartInventoryForm.js:94
 msgid ""
 "Enter inventory variables using either JSON or YAML syntax.\n"
 "Use the radio button to toggle between the two. Refer to the\n"
-"Ansible Tower documentation for example syntax."
-msgstr "Voer de variabelen van het inventaris in met JSON- of YAML-syntaxis. Gebruik de radio-knop om tussen de twee te wisselen. Raadpleeg de documentatie van Ansible Tower voor voorbeeldsyntaxis."
+"Ansible Controller documentation for example syntax."
+msgstr "Voer de variabelen van het inventaris in met JSON- of YAML-syntaxis. Gebruik de radio-knop om tussen de twee te wisselen. Raadpleeg de documentatie van Ansible Controller voor voorbeeldsyntaxis."
 
 #: screens/Inventory/shared/InventoryForm.js:92
-#~ msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax"
-#~ msgstr "Voer de variabelen van het inventaris in met JSON- of YAML-syntaxis. Gebruik de radio-knop om tussen de twee te wisselen. Raadpleeg de documentatie van Ansible Tower voor voorbeeldsyntaxis."
+msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Controller documentation for example syntax"
+msgstr "Voer de variabelen van het inventaris in met JSON- of YAML-syntaxis. Gebruik de radio-knop om tussen de twee te wisselen. Raadpleeg de documentatie van Ansible Controller voor voorbeeldsyntaxis."
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:181
 #~ msgid "Enter one Annotation Tag per line, without commas."
@@ -6180,16 +6180,16 @@ msgid "Pass extra command line changes. There are two ansible command line param
 msgstr "Geef extra opdrachtregelwijzigingen in door. Er zijn twee opdrachtregelparameters voor Ansible:"
 
 #: screens/Template/shared/JobTemplateForm.js:413
-#~ msgid ""
-#~ "Pass extra command line variables to the playbook. This is the\n"
-#~ "-e or --extra-vars command line parameter for ansible-playbook.\n"
-#~ "Provide key/value pairs using either YAML or JSON. Refer to the\n"
-#~ "documentation for example syntax."
-#~ msgstr "Geef extra opdrachtregelvariabelen op in het draaiboek. Dit is de opdrachtregelparameter -e of --extra-vars voor het Ansible-draaiboek. Geef sleutel/waarde-paren op met YAML of JSON. Raadpleeg de documentatie voor voorbeeldsyntaxis"
+msgid ""
+"Pass extra command line variables to the playbook. This is the\n"
+"-e or --extra-vars command line parameter for ansible-playbook.\n"
+"Provide key/value pairs using either YAML or JSON. Refer to the\n"
+"documentation for example syntax."
+msgstr "Geef extra opdrachtregelvariabelen op in het draaiboek. Dit is de opdrachtregelparameter -e of --extra-vars voor het Ansible-draaiboek. Geef sleutel/waarde-paren op met YAML of JSON. Raadpleeg de documentatie voor voorbeeldsyntaxis"
 
-#: screens/Template/shared/WorkflowJobTemplate.helptext.js:14
-msgid "Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentation for example syntax."
-msgstr "Geef extra commandoregelvariabelen op in het draaiboek. Dit is de commandoregelparameter -e of --extra-vars voor het ansible-draaiboek. Geef sleutel/waarde-paren op met YAML of JSON. Raadpleeg de documentatie van Ansible Tower voor voorbeeldsyntaxis"
+#: screens/Template/shared/WorkflowJobTemplateForm.js:215
+msgid "Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Controller documentation for example syntax."
+msgstr "Geef extra commandoregelvariabelen op in het draaiboek. Dit is de commandoregelparameter -e of --extra-vars voor het ansible-draaiboek. Geef sleutel/waarde-paren op met YAML of JSON. Raadpleeg de documentatie van Ansible Controller voor voorbeeldsyntaxis"
 
 #: screens/Job/Job.helptext.js:12
 #: screens/Template/shared/JobTemplate.helptext.js:13
@@ -6401,12 +6401,12 @@ msgid ""
 "Populate the hosts for this inventory by using a search\n"
 "filter. Example: ansible_facts__ansible_distribution:\"RedHat\".\n"
 "Refer to the documentation for further syntax and\n"
-"examples.  Refer to the Ansible Tower documentation for further syntax and\n"
+"examples.  Refer to the Ansible Controller documentation for further syntax and\n"
 "examples."
 msgstr ""
 "Vul de hosts voor deze inventaris door gebruik te maken van een zoekfilter. Voorbeeld: ansible_facts.ansible_distribution: \"RedHat\".\n"
 "Raadpleeg de documentatie voor verdere syntaxis en\n"
-"voorbeelden. Raadpleeg de documentatie  van Ansible Tower voor verdere syntaxis en\n"
+"voorbeelden. Raadpleeg de documentatie  van Ansible Controller voor verdere syntaxis en\n"
 "voorbeelden."
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:164
@@ -7883,9 +7883,9 @@ msgstr "Tags overslaan"
 msgid ""
 "Skip tags are useful when you have a large\n"
 "playbook, and you want to skip specific parts of a play or task.\n"
-"Use commas to separate multiple tags. Refer to Ansible Tower\n"
+"Use commas to separate multiple tags. Refer to Ansible Controller\n"
 "documentation for details on the usage of tags."
-msgstr "Tags overslaan is nuttig wanneer u een groot draaiboek heeft en specifieke delen van het draaiboek of een taak wilt overslaan. Gebruik een komma om meerdere tags van elkaar te scheiden. Raadpleeg de documentatie van Ansible Tower voor meer informatie over het gebruik van tags."
+msgstr "Tags overslaan is nuttig wanneer u een groot draaiboek heeft en specifieke delen van het draaiboek of een taak wilt overslaan. Gebruik een komma om meerdere tags van elkaar te scheiden. Raadpleeg de documentatie van Ansible Controller voor meer informatie over het gebruik van tags."
 
 #: screens/Job/Job.helptext.js:19
 #: screens/Template/shared/JobTemplate.helptext.js:21
@@ -8058,8 +8058,8 @@ msgstr "Bronnen"
 #: screens/NotificationTemplate/shared/Notifications.helptext.js:30
 msgid ""
 "Specify HTTP Headers in JSON format. Refer to\n"
-"the Ansible Tower documentation for example syntax."
-msgstr "Specificeer HTTP-koppen in JSON-formaat. Raadpleeg de documentatie van Ansible Tower voor voorbeeldsyntaxis."
+"the Ansible Controller documentation for example syntax."
+msgstr "Specificeer HTTP-koppen in JSON-formaat. Raadpleeg de documentatie van Ansible Controller voor voorbeeldsyntaxis."
 
 #: screens/NotificationTemplate/shared/Notifications.helptext.js:24
 msgid ""
@@ -8397,9 +8397,9 @@ msgstr "Tabbladen"
 msgid ""
 "Tags are useful when you have a large\n"
 "playbook, and you want to run a specific part of a play or task.\n"
-"Use commas to separate multiple tags. Refer to Ansible Tower\n"
+"Use commas to separate multiple tags. Refer to Ansible Controller\n"
 "documentation for details on the usage of tags."
-msgstr "Tags zijn nuttig wanneer u een groot draaiboek heeft en specifieke delen van het draaiboek of een taak wilt uitvoeren. Gebruik een komma om meerdere tags van elkaar te scheiden. Raadpleeg de documentatie van Ansible Tower voor meer informatie over het gebruik van tags."
+msgstr "Tags zijn nuttig wanneer u een groot draaiboek heeft en specifieke delen van het draaiboek of een taak wilt uitvoeren. Gebruik een komma om meerdere tags van elkaar te scheiden. Raadpleeg de documentatie van Ansible Controller voor meer informatie over het gebruik van tags."
 
 #: screens/Job/Job.helptext.js:18
 #: screens/Template/shared/JobTemplate.helptext.js:20

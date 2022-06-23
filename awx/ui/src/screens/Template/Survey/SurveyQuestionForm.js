@@ -44,7 +44,7 @@ function AnswerTypeField() {
       labelIcon={
         <Popover
           content={t`Choose an answer type or format you want as the prompt for the user.
-          Refer to the Ansible Tower Documentation for more additional
+          Refer to the Ansible Controller Documentation for more additional
           information about each option.`}
         />
       }
