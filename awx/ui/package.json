@@ -20,7 +20,7 @@
     "dompurify": "2.3.8",
     "formik": "2.2.9",
     "has-ansi": "5.0.1",
-    "html-entities": "2.3.2",
+    "html-entities": "2.3.3",
     "js-yaml": "4.1.0",
     "luxon": "^2.4.0",
     "prop-types": "^15.6.2",
