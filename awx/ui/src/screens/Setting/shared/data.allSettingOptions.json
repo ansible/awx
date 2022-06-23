@@ -422,6 +422,15 @@
         "category_slug": "jobs",
         "default": 200
       },
+      "START_TASK_LIMIT": {
+        "type": "integer",
+        "required": false,
+        "label": "Task Manager Start Task Limit",
+        "help_text": "Maximum number of jobs to start in a single pass of the task manager.",
+        "category": "Jobs",
+        "category_slug": "jobs",
+        "default": 200
+      },
       "LOG_AGGREGATOR_HOST": {
         "type": "string",
         "required": false,

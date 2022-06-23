@@ -180,6 +180,11 @@ function JobsEdit() {
                   config={jobs.MAX_FORKS}
                   type="number"
                 />
+                <InputField
+                  name="START_TASK_LIMIT"
+                  config={jobs.START_TASK_LIMIT}
+                  type="number"
+                />
                 <ChoiceField name="ALLOW_JINJA_IN_EXTRA_VARS" config={jinja} />
                 <BooleanField
                   name="PROJECT_UPDATE_VVV"
