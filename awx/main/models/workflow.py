@@ -318,8 +318,8 @@ class WorkflowJobNode(WorkflowNodeBase):
         for parent_node in self.get_parent_nodes():
             is_root_node = False
             aa_dict.update(parent_node.ancestor_artifacts)
-            if parent_node.job and hasattr(parent_node.job, 'artifacts'):
-                aa_dict.update(parent_node.job.artifacts)
+            if parent_node.job:
+                aa_dict.update(parent_node.job.get_effective_artifacts(parents_set=set([self.workflow_job_id])))
         if aa_dict and not is_root_node:
             self.ancestor_artifacts = aa_dict
             self.save(update_fields=['ancestor_artifacts'])
@@ -681,6 +681,27 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
             ancestors.append(wj.workflow_job_template)
             wj = wj.get_workflow_job()
         return ancestors
+
+    def get_effective_artifacts(self, **kwargs):
+        """
+        For downstream jobs of a workflow nested inside of a workflow,
+        we send aggregated artifacts from the nodes inside of the nested workflow
+        """
+        artifacts = {}
+        job_queryset = (
+            UnifiedJob.objects.filter(unified_job_node__workflow_job=self)
+            .defer('job_args', 'job_cwd', 'start_args', 'result_traceback')
+            .order_by('finished', 'id')
+            .filter(status__in=['successful', 'failed'])
+            .iterator()
+        )
+        parents_set = kwargs.get('parents_set', set())
+        new_parents_set = parents_set | {self.id}
+        for job in job_queryset:
+            if job.id in parents_set:
+                continue
+            artifacts.update(job.get_effective_artifacts(parents_set=new_parents_set))
+        return artifacts
 
     def get_notification_templates(self):
         return self.workflow_job_template.notification_templates
