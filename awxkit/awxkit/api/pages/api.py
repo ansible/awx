@@ -79,6 +79,7 @@ class ApiV2(base.Base):
             return None
         if post_fields is None:  # Deprecated endpoint or insufficient permissions
             log.error("Object export failed: %s", _page.endpoint)
+            self._has_error = True
             return None
 
         # Note: doing _page[key] automatically parses json blob strings, which can be a problem.
@@ -99,6 +100,7 @@ class ApiV2(base.Base):
                             pass
                     if resource is None:
                         log.error("Unable to infer endpoint for %r on %s.", key, _page.endpoint)
+                        self._has_error = True
                         continue
                     related = self._filtered_list(resource, _page.json[key]).results[0]
                 else:
@@ -108,12 +110,14 @@ class ApiV2(base.Base):
             if rel_endpoint is None:  # This foreign key is unreadable
                 if post_fields[key].get('required'):
                     log.error("Foreign key %r export failed for object %s.", key, _page.endpoint)
+                    self._has_error = True
                     return None
                 log.warning("Foreign key %r export failed for object %s, setting to null", key, _page.endpoint)
                 continue
             rel_natural_key = rel_endpoint.get_natural_key(self._cache)
             if rel_natural_key is None:
                 log.error("Unable to construct a natural key for foreign key %r of object %s.", key, _page.endpoint)
+                self._has_error = True
                 return None  # This foreign key has unresolvable dependencies
             fields[key] = rel_natural_key
 
@@ -158,6 +162,7 @@ class ApiV2(base.Base):
         natural_key = _page.get_natural_key(self._cache)
         if natural_key is None:
             log.error("Unable to construct a natural key for object %s.", _page.endpoint)
+            self._has_error = True
             return None
         fields['natural_key'] = natural_key
 
@@ -249,6 +254,7 @@ class ApiV2(base.Base):
             except (exc.Common, AssertionError) as e:
                 identifier = asset.get("name", None) or asset.get("username", None) or asset.get("hostname", None)
                 log.error(f"{endpoint} \"{identifier}\": {e}.")
+                self._has_error = True
                 log.debug("post_data: %r", post_data)
                 continue
 
@@ -283,6 +289,7 @@ class ApiV2(base.Base):
             pass
         except exc.Common as e:
             log.error("Role assignment failed: %s.", e)
+            self._has_error = True
             log.debug("post_data: %r", {'id': role_page['id']})
 
     def _assign_membership(self):
@@ -313,17 +320,21 @@ class ApiV2(base.Base):
                 for item in related_set:
                     rel_page = self._cache.get_by_natural_key(item)
                     if rel_page is None:
-                        continue  # FIXME
+                        log.error("Could not find matching object in Tower for imported relation, item: %r", item)
+                        self._has_error = True
+                        continue
                     if rel_page['id'] in existing:
                         continue
                     try:
                         post_data = {'id': rel_page['id']}
                         endpoint.post(post_data)
                         log.error("endpoint: %s, id: %s", endpoint.endpoint, rel_page['id'])
+                        self._has_error = True
                     except exc.NoContent:  # desired exception on successful (dis)association
                         pass
                     except exc.Common as e:
                         log.error("Object association failed: %s.", e)
+                        self._has_error = True
                         log.debug("post_data: %r", post_data)
             else:  # It is a create set
                 self._cache.get_page(endpoint)
