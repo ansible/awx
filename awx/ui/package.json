@@ -13,7 +13,7 @@
     "@patternfly/react-table": "4.83.1",
     "ace-builds": "^1.6.0",
     "ansi-to-html": "0.7.2",
-    "axios": "0.22.0",
+    "axios": "0.27.2",
     "codemirror": "^5.65.4",
     "d3": "7.4.4",
     "dagre": "^0.8.4",
