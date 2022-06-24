@@ -15,6 +15,7 @@ import Sparkline from '../Sparkline';
 import { Detail, DeletedDetail } from '../DetailList';
 import { VariablesDetail } from '../CodeEditor';
 import ExecutionEnvironmentDetail from '../ExecutionEnvironmentDetail';
+import { VERBOSITY } from '../VerbositySelectField';
 
 function PromptJobTemplateDetail({ resource }) {
   const {
@@ -41,14 +42,6 @@ function PromptJobTemplateDetail({ resource }) {
     webhook_service,
     custom_virtualenv,
   } = resource;
-
-  const VERBOSITY = {
-    0: t`0 (Normal)`,
-    1: t`1 (Verbose)`,
-    2: t`2 (More Verbose)`,
-    3: t`3 (Debug)`,
-    4: t`4 (Connection Debug)`,
-  };
 
   let optionsList = '';
   if (
@@ -153,7 +146,7 @@ function PromptJobTemplateDetail({ resource }) {
       <Detail label={t`Playbook`} value={playbook} />
       <Detail label={t`Forks`} value={forks || '0'} />
       <Detail label={t`Limit`} value={limit} />
-      <Detail label={t`Verbosity`} value={VERBOSITY[verbosity]} />
+      <Detail label={t`Verbosity`} value={VERBOSITY()[verbosity]} />
       {typeof diff_mode === 'boolean' && (
         <Detail label={t`Show Changes`} value={diff_mode ? t`On` : t`Off`} />
       )}

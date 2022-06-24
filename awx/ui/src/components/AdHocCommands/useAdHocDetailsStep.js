@@ -5,11 +5,7 @@ import StepName from '../LaunchPrompt/steps/StepName';
 import AdHocDetailsStep from './AdHocDetailsStep';
 
 const STEP_ID = 'details';
-export default function useAdHocDetailsStep(
-  visited,
-  moduleOptions,
-  verbosityOptions
-) {
+export default function useAdHocDetailsStep(visited, moduleOptions) {
   const { values, touched, setFieldError } = useFormikContext();
 
   const hasError = () => {
@@ -39,12 +35,7 @@ export default function useAdHocDetailsStep(
           {t`Details`}
         </StepName>
       ),
-      component: (
-        <AdHocDetailsStep
-          moduleOptions={moduleOptions}
-          verbosityOptions={verbosityOptions}
-        />
-      ),
+      component: <AdHocDetailsStep moduleOptions={moduleOptions} />,
       enableNext: true,
       nextButtonText: t`Next`,
     },

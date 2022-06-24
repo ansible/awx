@@ -29,6 +29,7 @@ import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDeta
 import useIsMounted from 'hooks/useIsMounted';
 import { formatDateString } from 'util/dates';
 import Popover from 'components/Popover';
+import { VERBOSITY } from 'components/VerbositySelectField';
 import InventorySourceSyncButton from '../shared/InventorySourceSyncButton';
 import useWsInventorySourcesDetails from '../InventorySources/useWsInventorySourcesDetails';
 import helpText from '../shared/Inventory.helptext';
@@ -110,12 +111,6 @@ function InventorySourceDetail({ inventorySource }) {
   const deleteDetailsRequests = relatedResourceDeleteRequests.inventorySource(
     inventorySource.id
   );
-
-  const VERBOSITY = {
-    0: t`0 (Warning)`,
-    1: t`1 (Info)`,
-    2: t`2 (Debug)`,
-  };
 
   let optionsList = '';
   if (
@@ -251,7 +246,7 @@ function InventorySourceDetail({ inventorySource }) {
         <Detail
           label={t`Verbosity`}
           helpText={helpText.subFormVerbosityFields}
-          value={VERBOSITY[verbosity]}
+          value={VERBOSITY()[verbosity]}
         />
         <Detail
           label={t`Cache timeout`}

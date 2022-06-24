@@ -25,6 +25,7 @@ import { LaunchButton, ReLaunchDropDown } from 'components/LaunchButton';
 import StatusLabel from 'components/StatusLabel';
 import JobCancelButton from 'components/JobCancelButton';
 import ExecutionEnvironmentDetail from 'components/ExecutionEnvironmentDetail';
+import { VERBOSITY } from 'components/VerbositySelectField';
 import { getJobModel, isJobRunning } from 'util/jobs';
 import { formatDateString } from 'util/dates';
 import { Job } from 'types';
@@ -36,14 +37,6 @@ const StatusDetailValue = styled.div`
   grid-gap: 10px;
   grid-template-columns: auto auto;
 `;
-
-const VERBOSITY = {
-  0: '0 (Normal)',
-  1: '1 (Verbose)',
-  2: '2 (More Verbose)',
-  3: '3 (Debug)',
-  4: '4 (Connection Debug)',
-};
 
 function JobDetail({ job, inventorySourceLabels }) {
   const { me } = useConfig();
@@ -332,7 +325,7 @@ function JobDetail({ job, inventorySourceLabels }) {
           dataCy="job-verbosity"
           label={t`Verbosity`}
           helpText={jobHelpText.verbosity}
-          value={VERBOSITY[job.verbosity]}
+          value={VERBOSITY()[job.verbosity]}
         />
         {job.type !== 'workflow_job' && !isJobRunning(job.status) && (
           <ExecutionEnvironmentDetail

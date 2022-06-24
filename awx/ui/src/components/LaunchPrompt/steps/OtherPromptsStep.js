@@ -9,6 +9,7 @@ import { TagMultiSelect } from '../../MultiSelect';
 import AnsibleSelect from '../../AnsibleSelect';
 import { VariablesField } from '../../CodeEditor';
 import Popover from '../../Popover';
+import { VerbositySelectField } from '../../VerbositySelectField';
 
 const FieldHeader = styled.div`
   display: flex;
@@ -129,36 +130,16 @@ function JobTypeField() {
 }
 
 function VerbosityField() {
-  const [field, meta, helpers] = useField('verbosity');
-  const options = [
-    { value: '0', key: '0', label: t`0 (Normal)` },
-    { value: '1', key: '1', label: t`1 (Verbose)` },
-    { value: '2', key: '2', label: t`2 (More Verbose)` },
-    { value: '3', key: '3', label: t`3 (Debug)` },
-    { value: '4', key: '4', label: t`4 (Connection Debug)` },
-  ];
-
+  const [, meta] = useField('verbosity');
   const isValid = !(meta.touched && meta.error);
 
   return (
-    <FormGroup
+    <VerbositySelectField
       fieldId="prompt-verbosity"
-      validated={isValid ? 'default' : 'error'}
-      label={t`Verbosity`}
-      labelIcon={
-        <Popover
-          content={t`Control the level of output ansible
+      tooltip={t`Control the level of output ansible
           will produce as the playbook executes.`}
-        />
-      }
-    >
-      <AnsibleSelect
-        id="prompt-verbosity"
-        data={options}
-        {...field}
-        onChange={(event, value) => helpers.setValue(value)}
-      />
-    </FormGroup>
+      isValid={isValid ? 'default' : 'error'}
+    />
   );
 }
 

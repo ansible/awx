@@ -85,7 +85,7 @@ describe('OtherPromptsStep', () => {
     expect(wrapper.find('VerbosityField')).toHaveLength(1);
     expect(
       wrapper.find('VerbosityField AnsibleSelect').prop('data')
-    ).toHaveLength(5);
+    ).toHaveLength(6);
   });
 
   test('should render show changes toggle', async () => {
