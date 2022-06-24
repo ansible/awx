@@ -76,6 +76,24 @@ Try upgrading OpenSSH or providing your private key in an different format. \
 '''
 
 
+def startup_reaping():
+    """
+    If this particular instance is starting, then we know that any running jobs are invalid
+    so we will reap those jobs as a special action here
+    """
+    me = Instance.objects.me()
+    jobs = UnifiedJob.objects.filter(status='running', controller_node=me.hostname)
+    for j in jobs:
+        j.status = 'failed'
+        j.start_args = ''
+        j.job_explanation += 'Task was stopped due to a service disruption.'
+        j.save(update_fields=['status', 'start_args', 'job_explanation'])
+        if hasattr(j, 'send_notification_templates'):
+            j.send_notification_templates('failed')
+        j.websocket_emit_status('failed')
+        logger.error(f'unified job {j.id} was reaped on dispatch startup')
+
+
 def dispatch_startup():
     startup_logger = logging.getLogger('awx.main.tasks')
 
@@ -102,6 +120,7 @@ def dispatch_startup():
     # no-op.
     #
     apply_cluster_membership_policies()
+    startup_reaping()
     cluster_node_heartbeat()
     m = Metrics()
     m.reset_values()
