@@ -3,3 +3,9 @@ line-length = 160
 fast = true
 skip-string-normalization = true
 exclude = "awx_collection"
+
+[build-system]
+requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
+
+
+[tool.setuptools_scm]
