@@ -129,7 +129,7 @@ def config(since, **kwargs):
     }
 
 
-@register('counts', '1.1', description=_('Counts of objects such as organizations, inventories, and projects'))
+@register('counts', '1.2', description=_('Counts of objects such as organizations, inventories, and projects'))
 def counts(since, **kwargs):
     counts = {}
     for cls in (
