@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useField, useFormikContext } from 'formik';
+import { useField } from 'formik';
 import { FormGroup, Title } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
@@ -28,7 +28,6 @@ export default function ScheduleFormFields({
   zoneOptions,
   zoneLinks,
 }) {
-  const { values, setFieldValue } = useFormikContext();
   const [timezone, timezoneMeta] = useField({
     name: 'timezone',
     validate: required(t`Select a value for this field`),
@@ -42,8 +41,6 @@ export default function ScheduleFormFields({
   //     name: 'exempt_frequency',
   //     validate: required(t`Select a value for this field`),
   //   });
-  const [{ name: dateFieldName }] = useField('startDate');
-  const [{ name: timeFieldName }] = useField('startTime');
   const [timezoneMessage, setTimezoneMessage] = useState('');
   const warnLinkedTZ = (event, selectedValue) => {
     if (zoneLinks[selectedValue]) {
@@ -69,24 +66,17 @@ export default function ScheduleFormFields({
       validate: required(t`Select a value for this field`),
     });
 
-  const initField = (fieldName, value) => {
-    if (typeof values[fieldName] === 'undefined') {
-      setFieldValue(fieldName, value, false);
-    }
-  };
-
-  const initFrequencyFields = (prefix, freq) => {
-    initField(`${prefix}_${freq}_end`, 'never');
-    // initField(`${prefix}_${freq}_endTime`, '');
-    initField(`${prefix}_${freq}_interval`, 1);
-    initField(`${prefix}_${freq}_occurences`, 1);
-    initField(`${prefix}_${freq}_runOnDayMonth`, 1);
-    initField(`${prefix}_${freq}_runOnDayNumber`, 1);
-    initField(`${prefix}_${freq}_runOnTheDay`, 'sunday');
-    initField(`${prefix}_${freq}_runOnTheMonth`, 1);
-    initField(`${prefix}_${freq}_runOnTheOccurence`, 1);
-    initField(`${prefix}_${freq}_daysOfWeek`, []);
-    initField(`${prefix}_${freq}_runOn`, 'day');
+  const updateFrequency = (setFrequency) => {
+    const frequencies = ['minute', 'hour', 'day', 'week', 'month', 'year'];
+    return (values) => {
+      const sortedValues = [];
+      frequencies.forEach((freq) => {
+        if (values.includes(freq)) {
+          sortedValues.push(freq);
+        }
+      });
+      setFrequency(sortedValues);
+    };
   };
 
   return (
@@ -138,15 +128,7 @@ export default function ScheduleFormFields({
       >
         <FrequencySelect
           variant={SelectVariant.checkbox}
-          onChange={(newFrequency) => {
-            initFrequencyFields('frequency', newFrequency);
-            if (
-              typeof values[`frequency_${newFrequency}_end`] === 'undefined'
-            ) {
-              setFieldValue(`frequency_${newFrequency}_end`, '');
-            }
-            frequencyHelper.setValue(newFrequency);
-          }}
+          onChange={updateFrequency(frequencyHelper.setValue)}
           value={frequency.value}
           placeholderText={
             frequency.value.length ? t`Select frequency` : t`None (run once)`
@@ -182,7 +164,7 @@ export default function ScheduleFormFields({
             <FormColumnLayout key={val} stacked>
               <FrequencyDetailSubform
                 frequency={val}
-                prefix={`frequency_${val}`}
+                prefix={`frequencyOptions.${val}`}
               />
             </FormColumnLayout>
           ))}
@@ -218,7 +200,7 @@ export default function ScheduleFormFields({
             <FormColumnLayout key={val} stacked>
               <FrequencyDetailSubform
                 frequency={val}
-                prefix={`exception_${val}`}
+                prefix={`exceptionOptions.${val}`}
               />
             </FormColumnLayout>
           ))}

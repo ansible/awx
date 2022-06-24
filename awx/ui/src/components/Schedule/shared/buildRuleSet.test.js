@@ -6,14 +6,18 @@ describe('buildRuleSet', () => {
     const values = {
       startDate: '2022-06-13',
       startTime: '12:30 PM',
-      interval: 1,
       frequency: ['minute'],
-      frequency_minute_end: 'never',
+      frequencyOptions: {
+        minute: {
+          interval: 1,
+          end: 'never',
+        },
+      },
     };
 
     const ruleSet = buildRuleSet(values);
     expect(ruleSet.toString()).toEqual(
-      'DTSTART:20220613T123000Z\nRRULE:FREQ=MINUTELY'
+      'DTSTART:20220613T123000Z\nRRULE:INTERVAL=1;FREQ=MINUTELY'
     );
   });
 
@@ -21,14 +25,18 @@ describe('buildRuleSet', () => {
     const values = {
       startDate: '2022-06-13',
       startTime: '12:30 PM',
-      interval: 1,
       frequency: ['hour'],
-      frequency_hour_end: 'never',
+      frequencyOptions: {
+        hour: {
+          interval: 1,
+          end: 'never',
+        },
+      },
     };
 
     const ruleSet = buildRuleSet(values);
     expect(ruleSet.toString()).toEqual(
-      'DTSTART:20220613T123000Z\nRRULE:FREQ=HOURLY'
+      'DTSTART:20220613T123000Z\nRRULE:INTERVAL=1;FREQ=HOURLY'
     );
   });
 
@@ -36,14 +44,18 @@ describe('buildRuleSet', () => {
     const values = {
       startDate: '2022-06-13',
       startTime: '12:30 PM',
-      interval: 1,
       frequency: ['day'],
-      frequency_day_end: 'never',
+      frequencyOptions: {
+        day: {
+          interval: 1,
+          end: 'never',
+        },
+      },
     };
 
     const ruleSet = buildRuleSet(values);
     expect(ruleSet.toString()).toEqual(
-      'DTSTART:20220613T123000Z\nRRULE:FREQ=DAILY'
+      'DTSTART:20220613T123000Z\nRRULE:INTERVAL=1;FREQ=DAILY'
     );
   });
 
@@ -51,15 +63,19 @@ describe('buildRuleSet', () => {
     const values = {
       startDate: '2022-06-13',
       startTime: '12:30 PM',
-      interval: 1,
       frequency: ['week'],
-      frequency_week_end: 'never',
-      frequency_week_daysOfWeek: [RRule.SU],
+      frequencyOptions: {
+        week: {
+          interval: 1,
+          end: 'never',
+          daysOfWeek: [RRule.SU],
+        },
+      },
     };
 
     const ruleSet = buildRuleSet(values);
     expect(ruleSet.toString()).toEqual(
-      'DTSTART:20220613T123000Z\nRRULE:FREQ=WEEKLY;BYDAY=SU'
+      'DTSTART:20220613T123000Z\nRRULE:INTERVAL=1;FREQ=WEEKLY;BYDAY=SU'
     );
   });
 
@@ -68,15 +84,19 @@ describe('buildRuleSet', () => {
       startDate: '2022-06-13',
       startTime: '12:30 PM',
       frequency: ['month'],
-      interval: 1,
-      frequency_month_end: 'never',
-      frequency_month_runOn: 'day',
-      frequency_month_runOnDayNumber: 15,
+      frequencyOptions: {
+        month: {
+          interval: 1,
+          end: 'never',
+          runOn: 'day',
+          runOnDayNumber: 15,
+        },
+      },
     };
 
     const ruleSet = buildRuleSet(values);
     expect(ruleSet.toString()).toEqual(
-      'DTSTART:20220613T123000Z\nRRULE:FREQ=MONTHLY;BYMONTHDAY=15'
+      'DTSTART:20220613T123000Z\nRRULE:INTERVAL=1;FREQ=MONTHLY;BYMONTHDAY=15'
     );
   });
 
@@ -85,17 +105,20 @@ describe('buildRuleSet', () => {
       startDate: '2022-06-13',
       startTime: '12:30 PM',
       frequency: ['month'],
-      interval: 1,
-      frequency_minute_end: 'never',
-      frequency_month_end: 'never',
-      frequency_month_runOn: 'the',
-      frequency_month_runOnTheOccurrence: 2,
-      frequency_month_runOnTheDay: 'monday',
+      frequencyOptions: {
+        month: {
+          interval: 1,
+          end: 'never',
+          runOn: 'the',
+          runOnTheOccurrence: 2,
+          runOnTheDay: 'monday',
+        },
+      },
     };
 
     const ruleSet = buildRuleSet(values);
     expect(ruleSet.toString()).toEqual(
-      'DTSTART:20220613T123000Z\nRRULE:FREQ=MONTHLY;BYSETPOS=2;BYDAY=MO'
+      'DTSTART:20220613T123000Z\nRRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=2;BYDAY=MO'
     );
   });
 
@@ -104,16 +127,20 @@ describe('buildRuleSet', () => {
       startDate: '2022-06-13',
       startTime: '12:30 PM',
       frequency: ['year'],
-      interval: 1,
-      frequency_year_end: 'never',
-      frequency_year_runOn: 'day',
-      frequency_year_runOnDayMonth: 3,
-      frequency_year_runOnDayNumber: 15,
+      frequencyOptions: {
+        year: {
+          interval: 1,
+          end: 'never',
+          runOn: 'day',
+          runOnDayMonth: 3,
+          runOnDayNumber: 15,
+        },
+      },
     };
 
     const ruleSet = buildRuleSet(values);
     expect(ruleSet.toString()).toEqual(
-      'DTSTART:20220613T123000Z\nRRULE:FREQ=YEARLY;BYMONTH=3;BYMONTHDAY=15'
+      'DTSTART:20220613T123000Z\nRRULE:INTERVAL=1;FREQ=YEARLY;BYMONTH=3;BYMONTHDAY=15'
     );
   });
 
@@ -122,17 +149,21 @@ describe('buildRuleSet', () => {
       startDate: '2022-06-13',
       startTime: '12:30 PM',
       frequency: ['year'],
-      interval: 1,
-      frequency_year_end: 'never',
-      frequency_year_runOn: 'the',
-      frequency_year_runOnTheOccurrence: 4,
-      frequency_year_runOnTheDay: 'monday',
-      frequency_year_runOnTheMonth: 6,
+      frequencyOptions: {
+        year: {
+          interval: 1,
+          end: 'never',
+          runOn: 'the',
+          runOnTheOccurrence: 4,
+          runOnTheDay: 'monday',
+          runOnTheMonth: 6,
+        },
+      },
     };
 
     const ruleSet = buildRuleSet(values);
     expect(ruleSet.toString()).toEqual(
-      'DTSTART:20220613T123000Z\nRRULE:FREQ=YEARLY;BYSETPOS=4;BYDAY=MO;BYMONTH=6'
+      'DTSTART:20220613T123000Z\nRRULE:INTERVAL=1;FREQ=YEARLY;BYSETPOS=4;BYDAY=MO;BYMONTH=6'
     );
   });
 
@@ -141,18 +172,25 @@ describe('buildRuleSet', () => {
       startDate: '2022-06-13',
       startTime: '12:30 PM',
       frequency: ['minute', 'month'],
-      interval: 1,
-      frequency_minute_end: 'never',
-      frequency_month_end: 'never',
-      frequency_month_runOn: 'the',
-      frequency_month_runOnTheOccurrence: 2,
-      frequency_month_runOnTheDay: 'monday',
+      frequencyOptions: {
+        minute: {
+          interval: 1,
+          end: 'never',
+        },
+        month: {
+          interval: 1,
+          end: 'never',
+          runOn: 'the',
+          runOnTheOccurrence: 2,
+          runOnTheDay: 'monday',
+        },
+      },
     };
 
     const ruleSet = buildRuleSet(values);
     expect(ruleSet.toString()).toEqual(`DTSTART:20220613T123000Z
-RRULE:FREQ=MINUTELY
+RRULE:INTERVAL=1;FREQ=MINUTELY
 DTSTART:20220613T123000Z
-RRULE:FREQ=MONTHLY;BYSETPOS=2;BYDAY=MO`);
+RRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=2;BYDAY=MO`);
   });
 });

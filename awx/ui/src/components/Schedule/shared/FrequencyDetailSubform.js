@@ -11,7 +11,7 @@ import {
   Radio,
   TextInput,
 } from '@patternfly/react-core';
-import { required } from 'util/validators';
+import { required, requiredPositiveInteger } from 'util/validators';
 import AnsibleSelect from '../../AnsibleSelect';
 import FormField from '../../FormField';
 import DateTimePicker from './DateTimePicker';
@@ -45,61 +45,52 @@ const Checkbox = styled(_Checkbox)`
   }
 `;
 
-export function requiredPositiveInteger() {
-  return (value) => {
-    if (typeof value === 'number') {
-      if (!Number.isInteger(value)) {
-        return t`This field must be an integer`;
-      }
-      if (value < 1) {
-        return t`This field must be greater than 0`;
-      }
-    }
-    if (!value) {
-      return t`Select a value for this field`;
-    }
-    return undefined;
-  };
-}
-
 const FrequencyDetailSubform = ({ frequency, prefix }) => {
   const [runOnDayMonth] = useField({
-    name: `${prefix}_runOnDayMonth`,
+    name: `${prefix}.runOnDayMonth`,
   });
   const [runOnDayNumber] = useField({
-    name: `${prefix}_runOnDayNumber`,
+    name: `${prefix}.runOnDayNumber`,
   });
   const [runOnTheOccurrence] = useField({
-    name: `${prefix}_runOnTheOccurrence`,
+    name: `${prefix}.runOnTheOccurrence`,
   });
   const [runOnTheDay] = useField({
-    name: `${prefix}_runOnTheDay`,
+    name: `${prefix}.runOnTheDay`,
   });
   const [runOnTheMonth] = useField({
-    name: `${prefix}_runOnTheMonth`,
+    name: `${prefix}.runOnTheMonth`,
   });
-  const [startDate] = useField(`${prefix}_startDate`);
-  const [{ name: dateFieldName }] = useField(`${prefix}_endDate`);
-  const [{ name: timeFieldName }] = useField(`${prefix}_endTime`);
+  const [startDate] = useField(`${prefix}.startDate`);
 
   const [daysOfWeek, daysOfWeekMeta, daysOfWeekHelpers] = useField({
-    name: `${prefix}_daysOfWeek`,
-    validate: required(t`Select a value for this field`),
+    name: `${prefix}.daysOfWeek`,
+    validate: (val) => {
+      if (frequency === 'week') {
+        return required(t`Select a value for this field`)(val.length > 0);
+      }
+      return undefined;
+    },
   });
   const [end, endMeta] = useField({
-    name: `${prefix}_end`,
+    name: `${prefix}.end`,
     validate: required(t`Select a value for this field`),
   });
   const [interval, intervalMeta] = useField({
-    name: `${prefix}_interval`,
+    name: `${prefix}.interval`,
     validate: requiredPositiveInteger(),
   });
   const [runOn, runOnMeta] = useField({
-    name: `${prefix}_runOn`,
-    validate: required(t`Select a value for this field`),
+    name: `${prefix}.runOn`,
+    validate: (val) => {
+      if (frequency === 'month' || frequency === 'year') {
+        return required(t`Select a value for this field`)(val);
+      }
+      return undefined;
+    },
   });
   useField({
-    name: `${prefix}_occurrences`,
+    name: `${prefix}.occurrences`,
     validate: requiredPositiveInteger(),
   });
 
@@ -168,6 +159,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
 
   const updateDaysOfWeek = (day, checked) => {
     const newDaysOfWeek = [...daysOfWeek.value];
+    daysOfWeekHelpers.setTouched(true);
     if (checked) {
       newDaysOfWeek.push(day);
       daysOfWeekHelpers.setValue(newDaysOfWeek);
@@ -175,6 +167,25 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
       daysOfWeekHelpers.setValue(
         newDaysOfWeek.filter((selectedDay) => selectedDay !== day)
       );
+    }
+  };
+
+  const getPeriodLabel = () => {
+    switch (frequency) {
+      case 'minute':
+        return t`Minute`;
+      case 'hour':
+        return t`Hour`;
+      case 'day':
+        return t`Day`;
+      case 'week':
+        return t`Week`;
+      case 'month':
+        return t`Month`;
+      case 'year':
+        return t`Year`;
+      default:
+        throw new Error(t`Frequency did not match an expected value`);
     }
   };
 
@@ -202,10 +213,10 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
   return (
     <>
       <p css="grid-column: 1/-1">
-        <b>{frequency}</b>
+        <b>{getPeriodLabel()}</b>
       </p>
       <FormGroup
-        name={`${prefix}_interval`}
+        name={`${prefix}.interval`}
         fieldId="schedule-run-every"
         helperTextInvalid={intervalMeta.error}
         isRequired
@@ -231,7 +242,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
       </FormGroup>
       {frequency === 'week' && (
         <FormGroup
-          name={`${prefix}_daysOfWeek`}
+          name={`${prefix}.daysOfWeek`}
           fieldId="schedule-days-of-week"
           helperTextInvalid={daysOfWeekMeta.error}
           isRequired
@@ -252,7 +263,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
               aria-label={t`Sunday`}
               id="schedule-days-of-week-sun"
               ouiaId="schedule-days-of-week-sun"
-              name={`${prefix}_daysOfWeek`}
+              name={`${prefix}.daysOfWeek`}
             />
             <Checkbox
               label={t`Mon`}
@@ -263,7 +274,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
               aria-label={t`Monday`}
               id="schedule-days-of-week-mon"
               ouiaId="schedule-days-of-week-mon"
-              name={`${prefix}_daysOfWeek`}
+              name={`${prefix}.daysOfWeek`}
             />
             <Checkbox
               label={t`Tue`}
@@ -274,7 +285,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
               aria-label={t`Tuesday`}
               id="schedule-days-of-week-tue"
               ouiaId="schedule-days-of-week-tue"
-              name={`${prefix}_daysOfWeek`}
+              name={`${prefix}.daysOfWeek`}
             />
             <Checkbox
               label={t`Wed`}
@@ -285,7 +296,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
               aria-label={t`Wednesday`}
               id="schedule-days-of-week-wed"
               ouiaId="schedule-days-of-week-wed"
-              name={`${prefix}_daysOfWeek`}
+              name={`${prefix}.daysOfWeek`}
             />
             <Checkbox
               label={t`Thu`}
@@ -296,7 +307,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
               aria-label={t`Thursday`}
               id="schedule-days-of-week-thu"
               ouiaId="schedule-days-of-week-thu"
-              name={`${prefix}_daysOfWeek`}
+              name={`${prefix}.daysOfWeek`}
             />
             <Checkbox
               label={t`Fri`}
@@ -307,7 +318,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
               aria-label={t`Friday`}
               id="schedule-days-of-week-fri"
               ouiaId="schedule-days-of-week-fri"
-              name={`${prefix}_daysOfWeek`}
+              name={`${prefix}.daysOfWeek`}
             />
             <Checkbox
               label={t`Sat`}
@@ -318,7 +329,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
               aria-label={t`Saturday`}
               id="schedule-days-of-week-sat"
               ouiaId="schedule-days-of-week-sat"
-              name={`${prefix}_daysOfWeek`}
+              name={`${prefix}.daysOfWeek`}
             />
           </div>
         </FormGroup>
@@ -326,7 +337,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
       {(frequency === 'month' || frequency === 'year') &&
         !Number.isNaN(new Date(startDate.value)) && (
           <FormGroup
-            name={`${prefix}_runOn`}
+            name={`${prefix}.runOn`}
             fieldId="schedule-run-on"
             helperTextInvalid={runOnMeta.error}
             isRequired
@@ -337,7 +348,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
           >
             <RunOnRadio
               id="schedule-run-on-day"
-              name={`${prefix}_runOn`}
+              name={`${prefix}.runOn`}
               label={
                 <div css="display: flex;align-items: center;">
                   {frequency === 'month' && (
@@ -380,7 +391,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
             />
             <RunOnRadio
               id="schedule-run-on-the"
-              name={`${prefix}_runOn`}
+              name={`${prefix}.runOn`}
               label={
                 <div css="display: flex;align-items: center;">
                   <span
@@ -491,7 +502,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
           </FormGroup>
         )}
       <FormGroup
-        name={`${prefix}_end`}
+        name={`${prefix}.end`}
         fieldId="schedule-end"
         helperTextInvalid={endMeta.error}
         isRequired
@@ -500,7 +511,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
       >
         <Radio
           id="end-never"
-          name={`${prefix}_end`}
+          name={`${prefix}.end`}
           label={t`Never`}
           value="never"
           isChecked={end.value === 'never'}
@@ -512,7 +523,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
         />
         <Radio
           id="end-after"
-          name={`${prefix}_end`}
+          name={`${prefix}.end`}
           label={t`After number of occurrences`}
           value="after"
           isChecked={end.value === 'after'}
@@ -524,7 +535,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
         />
         <Radio
           id="end-on-date"
-          name={`${prefix}_end`}
+          name={`${prefix}.end`}
           label={t`On date`}
           value="onDate"
           isChecked={end.value === 'onDate'}
@@ -539,7 +550,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
         <FormField
           id="schedule-occurrences"
           label={t`Occurrences`}
-          name={`${prefix}_occurrences`}
+          name={`${prefix}.occurrences`}
           type="number"
           min="1"
           step="1"
@@ -549,8 +560,8 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
       )}
       {end?.value === 'onDate' && (
         <DateTimePicker
-          dateFieldName={dateFieldName}
-          timeFieldName={timeFieldName}
+          dateFieldName={`${prefix}.endDate`}
+          timeFieldName={`${prefix}.endTime`}
           label={t`End date/time`}
         />
       )}

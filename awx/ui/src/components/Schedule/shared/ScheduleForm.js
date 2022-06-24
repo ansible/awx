@@ -238,25 +238,70 @@ function ScheduleForm({
   const [currentDate, time] = dateToInputDateTime(closestQuarterHour.toISO());
 
   const [tomorrowDate] = dateToInputDateTime(tomorrow.toISO());
+  const initialFrequencyOptions = {
+    minute: {
+      interval: 1,
+      end: 'never',
+      occurrences: 1,
+      endDate: tomorrowDate,
+      endTime: time,
+    },
+    hour: {
+      interval: 1,
+      end: 'never',
+      occurrences: 1,
+      endDate: tomorrowDate,
+      endTime: time,
+    },
+    day: {
+      interval: 1,
+      end: 'never',
+      occurrences: 1,
+      endDate: tomorrowDate,
+      endTime: time,
+    },
+    week: {
+      interval: 1,
+      end: 'never',
+      occurrences: 1,
+      endDate: tomorrowDate,
+      endTime: time,
+      daysOfWeek: [],
+    },
+    month: {
+      interval: 1,
+      end: 'never',
+      occurrences: 1,
+      endDate: tomorrowDate,
+      endTime: time,
+      runOn: 'day',
+      runOnTheOccurrence: 1,
+      runOnTheDay: 'sunday',
+      runOnDayNumber: 1,
+    },
+    year: {
+      interval: 1,
+      end: 'never',
+      occurrences: 1,
+      endDate: tomorrowDate,
+      endTime: time,
+      runOn: 'day',
+      runOnTheOccurrence: 1,
+      runOnTheDay: 'sunday',
+      runOnTheMonth: 1,
+      runOnDayMonth: 1,
+      runOnDayNumber: 1,
+    },
+  };
+
   const initialValues = {
-    daysOfWeek: [],
     description: schedule.description || '',
-    // end: 'never',
     endDate: tomorrowDate,
-    // endTime: time,
     frequency: [],
     exceptionFrequency: [],
-    frequencyOptions: {},
-    exceptionOptions: {},
-    // interval: 1,
+    frequencyOptions: initialFrequencyOptions,
+    exceptionOptions: initialFrequencyOptions,
     name: schedule.name || '',
-    // occurrences: 1,
-    // runOn: 'day',
-    // runOnDayMonth: 1,
-    // runOnDayNumber: 1,
-    // runOnTheDay: 'sunday',
-    // runOnTheMonth: 1,
-    // runOnTheOccurrence: 1,
     startDate: currentDate,
     startTime: time,
     timezone: schedule.timezone || 'America/New_York',
@@ -338,6 +383,66 @@ function ScheduleForm({
     return <ContentLoading />;
   }
 
+  const validate = (values) => {
+    const errors = {};
+
+    values.frequency.forEach((freq) => {
+      const options = values.frequencyOptions[freq];
+      const freqErrors = {};
+
+      if (
+        (freq === 'month' || freq === 'year') &&
+        options.runOn === 'day' &&
+        (options.runOnDayNumber < 1 || options.runOnDayNumber > 31)
+      ) {
+        errors.frequencyOptions[
+          freq
+        ].runOn = t`Please select a day number between 1 and 31.`;
+      }
+
+      if (options.end !== 'onDate') {
+        return;
+      }
+
+      if (
+        DateTime.fromISO(values.startDate) >= DateTime.fromISO(options.endDate)
+      ) {
+        errors.frequencyOptions[
+          freq
+        ].endDate = t`Please select an end date/time that comes after the start date/time.`;
+      }
+
+      if (
+        DateTime.fromISO(options.endDate)
+          .diff(DateTime.fromISO(values.startDate), 'days')
+          .toObject().days < NUM_DAYS_PER_FREQUENCY[freq]
+      ) {
+        const rule = new RRule(
+          buildRuleObj({
+            startDate: values.startDate,
+            startTime: values.startTime,
+            frequency: freq,
+            ...options,
+          })
+        );
+        if (rule.all().length === 0) {
+          errors.startDate = t`Selected date range must have at least 1 schedule occurrence.`;
+          errors.frequencyOptions[
+            freq
+          ].endDate = t`Selected date range must have at least 1 schedule occurrence.`;
+        }
+      }
+      if (Object.keys(freqErrors).length > 0) {
+        if (!errors.frequencyOptions) {
+          errors.frequencyOptions = {};
+        }
+        errors.frequencyOptions[freq] = freqErrors;
+      }
+    });
+
+    return errors;
+  };
+
   return (
     <Config>
       {() => (
@@ -346,46 +451,7 @@ function ScheduleForm({
           onSubmit={(values) => {
             submitSchedule(values, launchConfig, surveyConfig, credentials);
           }}
-          validate={(values) => {
-            const errors = {};
-            const {
-              end,
-              endDate,
-              frequency,
-              runOn,
-              runOnDayNumber,
-              startDate,
-            } = values;
-
-            if (
-              end === 'onDate' &&
-              DateTime.fromISO(endDate)
-                .diff(DateTime.fromISO(startDate), 'days')
-                .toObject().days < NUM_DAYS_PER_FREQUENCY[frequency]
-            ) {
-              const rule = new RRule(buildRuleObj(values));
-              if (rule.all().length === 0) {
-                errors.startDate = t`Selected date range must have at least 1 schedule occurrence.`;
-                errors.endDate = t`Selected date range must have at least 1 schedule occurrence.`;
-              }
-            }
-
-            if (
-              end === 'onDate' &&
-              DateTime.fromISO(startDate) >= DateTime.fromISO(endDate)
-            ) {
-              errors.endDate = t`Please select an end date/time that comes after the start date/time.`;
-            }
-
-            if (
-              (frequency === 'month' || frequency === 'year') &&
-              runOn === 'day' &&
-              (runOnDayNumber < 1 || runOnDayNumber > 31)
-            ) {
-              errors.runOn = t`Please select a day number between 1 and 31.`;
-            }
-            return errors;
-          }}
+          validate={validate}
         >
           {(formik) => (
             <Form autoComplete="off" onSubmit={formik.handleSubmit}>
