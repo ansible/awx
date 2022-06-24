@@ -172,6 +172,9 @@ def counts(since, **kwargs):
         .count()
     )
     counts['pending_jobs'] = models.UnifiedJob.objects.exclude(launch_type='sync').filter(status__in=('pending',)).count()
+    with connection.cursor() as cursor:
+        cursor.execute(f"select count(*) from pg_stat_activity where datname=\'{connection.settings_dict['NAME']}\'")
+        counts['database_connections'] = cursor.fetchone()[0]
     return counts
 
 

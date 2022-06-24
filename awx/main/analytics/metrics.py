@@ -126,6 +126,8 @@ def metrics():
     LICENSE_INSTANCE_TOTAL = Gauge('awx_license_instance_total', 'Total number of managed hosts provided by your license', registry=REGISTRY)
     LICENSE_INSTANCE_FREE = Gauge('awx_license_instance_free', 'Number of remaining managed hosts provided by your license', registry=REGISTRY)
 
+    DATABASE_CONNECTIONS = Gauge('awx_database_connections_total', 'Number of connections to database', registry=REGISTRY)
+
     license_info = get_license()
     SYSTEM_INFO.info(
         {
@@ -162,6 +164,8 @@ def metrics():
     USER_SESSIONS.labels(type='all').set(current_counts['active_sessions'])
     USER_SESSIONS.labels(type='user').set(current_counts['active_user_sessions'])
     USER_SESSIONS.labels(type='anonymous').set(current_counts['active_anonymous_sessions'])
+
+    DATABASE_CONNECTIONS.set(current_counts['database_connections'])
 
     all_job_data = job_counts(None)
     statuses = all_job_data.get('status', {})
