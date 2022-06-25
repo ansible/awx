@@ -246,6 +246,7 @@ $ make docker-compose
 - [Keycloak Integration](#keycloak-integration)
 - [OpenLDAP Integration](#openldap-integration)
 - [Splunk Integration](#splunk-integration)
+- [Add awx logos](#add-awx-logos)
 
 ### Start a Shell
 
@@ -488,3 +489,46 @@ PROMETHEUS=true GRAFANA=true make docker-compose
 5. Navigate to `http://localhost:3001`. Sign in, using `admin` for both username and password.
 6. In the left navigation menu go to Dashboards->Browse, find the "awx-demo" and click. These should have graphs.
 6. Now you can modify these and add panels for whichever metrics you like.
+
+### Add awx logos
+
+#### Upload logos
+First step, upload the custom logos to Ansible AWX machine. There are two different logos, the login logo and the header logo.
+
+#### Copy logos to awxcompose
+Copy both logos to your compose dir :
+
+```
+cp /tmp/custom-logo-login.svg  /root/.awx/awxcompose
+cp /tmp/custom-logo-header.svg  /root/.awx/awxcompose
+```
+#### Modify docker-compose.yml
+Modify docker-compose.yml file and add the following information in the section « awx_web » :
+```
+cd /root/.awx/awxcompose
+vi docker-compose.yml
+```
+…
+```
+LOGO custom-logo.svg
+      - "~/.awx/awxcompose/custom-logo-login.svg:/var/lib/awx/venv/awx/lib/python3.6/site-packages/awx/ui/static/assets/logo-login.svg"
+      - "~/.awx/awxcompose/custom-logo-header.svg:/var/lib/awx/venv/awx/lib/python3.6/site-packages/awx/ui/static/assets/logo-header.svg"
+```
+#### Modify template docker-compose.yml.j2
+Modify also the template docker-compose.yml.j2 file with same information :
+```
+cd /opt/ansible-awx/awx/installer/roles/local_docker/templates
+vi docker-compose.yml.j2
+```
+…
+```
+LOGO custom-logo.svg
+      - "~/.awx/awxcompose/custom-logo-login.svg:/var/lib/awx/venv/awx/lib/python3.6/site-packages/awx/ui/static/assets/logo-login.svg"
+      - "~/.awx/awxcompose/custom-logo-header.svg:/var/lib/awx/venv/awx/lib/python3.6/site-packages/awx/ui/static/assets/logo-header.svg"
+```
+#### Launch installation
+Launch the installation to rebuild the containers with the updated information :
+```
+cd /opt/ansible-awx/awx/installer
+ansible-playbook -i inventory install.yml
+```
