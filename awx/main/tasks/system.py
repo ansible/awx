@@ -667,7 +667,7 @@ def handle_work_success(task_actual):
     if not instance:
         return
 
-    schedule_task_manager()
+    schedule_task_manager(manager=True)
 
 
 @task(queue=get_local_queuename)
@@ -709,7 +709,7 @@ def handle_work_error(task_id, *args, **kwargs):
     # what the job complete message handler does then we may want to send a
     # completion event for each job here.
     if first_instance:
-        schedule_task_manager()
+        schedule_task_manager(manager=True)
         pass
 
 

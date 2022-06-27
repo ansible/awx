@@ -49,5 +49,6 @@ def run_continuously():
     for task in settings.CELERYBEAT_SCHEDULE.values():
         apply_async = TaskWorker.resolve_callable(task['task']).apply_async
         total_seconds = task['schedule'].total_seconds()
-        scheduler.every(total_seconds).seconds.do(apply_async)
+        kwargs = task.get("task_kwargs", None)
+        scheduler.every(total_seconds).seconds.do(apply_async, kwargs=kwargs)
     scheduler.run_continuously()
