@@ -179,7 +179,11 @@ class RunnerCallback:
         Ansible runner callback to tell the job when/if it is canceled
         """
         unified_job_id = self.instance.pk
-        self.instance = self.update_model(unified_job_id)
+        try:
+            self.instance = self.update_model(unified_job_id)
+        except Exception:
+            logger.exception(f'Encountered error during cancel check for {unified_job_id}, canceling now')
+            return True
         if not self.instance:
             logger.error('unified job {} was deleted while running, canceling'.format(unified_job_id))
             return True
