@@ -1026,7 +1026,6 @@ class UnifiedJob(
             event_qs = self.get_event_queryset()
         except NotImplementedError:
             return True  # Model without events, such as WFJT
-        self.log_lifecycle("event_processing_finished")
         return self.emitted_events == event_qs.count()
 
     def result_stdout_raw_handle(self, enforce_max_bytes=True):
@@ -1358,7 +1357,7 @@ class UnifiedJob(
         self.update_fields(start_args=json.dumps(kwargs), status='pending')
         self.websocket_emit_status("pending")
 
-        schedule_task_manager(manager=False)
+        schedule_task_manager()
 
         # Each type of unified job has a different Task class; get the
         # appropirate one.
