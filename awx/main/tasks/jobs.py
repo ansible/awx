@@ -551,7 +551,6 @@ class BaseTask(object):
                 self.instance = self.update_model(pk)
                 if self.instance.cancel_flag is False:
                     status = 'failed'
-                    self.runner_callback.delay_update(job_explanation="Aborted job due to receiving shutdown signal")
         except ReceptorNodeNotFound as exc:
             self.runner_callback.delay_update(job_explanation=str(exc))
         except Exception:
