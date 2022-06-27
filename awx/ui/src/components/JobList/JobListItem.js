@@ -1,11 +1,12 @@
 import React from 'react';
+import { CSSTransition } from 'react-transition-group';
 import { Link } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import { Button, Chip } from '@patternfly/react-core';
-import { Tr, Td, ExpandableRowContent } from '@patternfly/react-table';
+import { Tr as PFTr, Td, ExpandableRowContent } from '@patternfly/react-table';
 import { RocketIcon } from '@patternfly/react-icons';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import { formatDateString } from 'util/dates';
 import { isJobRunning } from 'util/jobs';
 import getScheduleUrl from 'util/getScheduleUrl';
@@ -25,8 +26,30 @@ import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
 import JobCancelButton from '../JobCancelButton';
 
 const Dash = styled.span``;
+const addRow = keyframes`
+  0% {
+    transform: scale(1, 0);
+    line-height: 0px;
+    visibility: collapse;
+  }
+  100% {
+    transform: scale(1, 1);
+    line-height: 18px; /* font-size(16px) + border-top(1px) + border-bottom(1px) */
+    visibility: visible;
+  }
+`;
+
+const Tr = styled(PFTr)`
+  &.jobItem-enter-done {
+    transition-duration: 1s;
+    animation: ${addRow} 500ms 1 ease-in-out;
+    transform-origin: top;
+  }
+`;
+
 function JobListItem({
   isExpanded,
+  inProp,
   onExpand,
   job,
   rowIndex,
@@ -67,94 +90,101 @@ function JobListItem({
 
   return (
     <>
-      <Tr id={`job-row-${job.id}`} ouiaId={`job-row-${job.id}`}>
-        <Td
-          expand={{
-            rowIndex: job.id,
-            isExpanded,
-            onToggle: onExpand,
-          }}
-        />
-        <Td
-          select={{
-            rowIndex,
-            isSelected,
-            onSelect,
-          }}
-          dataLabel={t`Select`}
-        />
-        <TdBreakWord id={labelId} dataLabel={t`Name`}>
-          <span>
-            <Link to={`/jobs/${JOB_TYPE_URL_SEGMENTS[job.type]}/${job.id}`}>
-              <b>
-                {job.id} <Dash>&mdash;</Dash> {job.name}
-              </b>
-            </Link>
-          </span>
-        </TdBreakWord>
-        <Td dataLabel={t`Status`}>
-          {job.status && <StatusLabel status={job.status} />}
-        </Td>
-        {showTypeColumn && <Td dataLabel={t`Type`}>{jobTypes[job.type]}</Td>}
-        <Td dataLabel={t`Start Time`}>{formatDateString(job.started)}</Td>
-        <Td dataLabel={t`Finish Time`}>
-          {job.finished ? formatDateString(job.finished) : ''}
-        </Td>
-        <ActionsTd dataLabel={t`Actions`}>
-          <ActionItem
-            visible={
-              ['pending', 'waiting', 'running'].includes(job.status) &&
-              (job.type === 'system_job' ? isSuperUser : true)
-            }
-          >
-            <JobCancelButton
-              job={job}
-              errorTitle={t`Job Cancel Error`}
-              title={t`Cancel ${job.name}`}
-              errorMessage={t`Failed to cancel ${job.name}`}
-              showIconButton
+    <CSSTransition
+      classNames = "jobItem"
+      timeout={500}
+      in={inProp}
+    >
+          <Tr id={`job-row-${job.id}`} ouiaId={`job-row-${job.id}`}>
+            <Td
+              expand={{
+                rowIndex: job.id,
+                isExpanded,
+                onToggle: onExpand,
+              }}
             />
-          </ActionItem>
-          <ActionItem
-            visible={
-              job.type !== 'system_job' &&
-              job.summary_fields?.user_capabilities?.start
-            }
-            tooltip={
-              job.status === 'failed' && job.type === 'job'
-                ? t`Relaunch using host parameters`
-                : t`Relaunch Job`
-            }
-          >
-            {job.status === 'failed' && job.type === 'job' ? (
-              <LaunchButton resource={job}>
-                {({ handleRelaunch, isLaunching }) => (
-                  <ReLaunchDropDown
-                    handleRelaunch={handleRelaunch}
-                    isLaunching={isLaunching}
-                    id={`relaunch-job-${job.id}`}
-                  />
+            <Td
+              select={{
+                rowIndex,
+                isSelected,
+                onSelect,
+              }}
+              dataLabel={t`Select`}
+            />
+            <TdBreakWord id={labelId} dataLabel={t`Name`}>
+              <span>
+                <Link to={`/jobs/${JOB_TYPE_URL_SEGMENTS[job.type]}/${job.id}`}>
+                  <b>
+                    {job.id} <Dash>&mdash;</Dash> {job.name}
+                  </b>
+                </Link>
+              </span>
+            </TdBreakWord>
+            <Td dataLabel={t`Status`}>
+              {job.status && <StatusLabel status={job.status} />}
+            </Td>
+            {showTypeColumn && <Td dataLabel={t`Type`}>{jobTypes[job.type]}</Td>}
+            <Td dataLabel={t`Start Time`}>{formatDateString(job.started)}</Td>
+            <Td dataLabel={t`Finish Time`}>
+              {job.finished ? formatDateString(job.finished) : ''}
+            </Td>
+            <ActionsTd dataLabel={t`Actions`}>
+              <ActionItem
+                visible={
+                  ['pending', 'waiting', 'running'].includes(job.status) &&
+                  (job.type === 'system_job' ? isSuperUser : true)
+                }
+              >
+                <JobCancelButton
+                  job={job}
+                  errorTitle={t`Job Cancel Error`}
+                  title={t`Cancel ${job.name}`}
+                  errorMessage={t`Failed to cancel ${job.name}`}
+                  showIconButton
+                />
+              </ActionItem>
+              <ActionItem
+                visible={
+                  job.type !== 'system_job' &&
+                  job.summary_fields?.user_capabilities?.start
+                }
+                tooltip={
+                  job.status === 'failed' && job.type === 'job'
+                    ? t`Relaunch using host parameters`
+                    : t`Relaunch Job`
+                }
+              >
+                {job.status === 'failed' && job.type === 'job' ? (
+                  <LaunchButton resource={job}>
+                    {({ handleRelaunch, isLaunching }) => (
+                      <ReLaunchDropDown
+                        handleRelaunch={handleRelaunch}
+                        isLaunching={isLaunching}
+                        id={`relaunch-job-${job.id}`}
+                      />
+                    )}
+                  </LaunchButton>
+                ) : (
+                  <LaunchButton resource={job}>
+                    {({ handleRelaunch, isLaunching }) => (
+                      <Button
+                        ouiaId={`${job.id}-relaunch-button`}
+                        variant="plain"
+                        onClick={() => handleRelaunch()}
+                        aria-label={t`Relaunch`}
+                        isDisabled={isLaunching}
+                      >
+                        <RocketIcon />
+                      </Button>
+                    )}
+                  </LaunchButton>
                 )}
-              </LaunchButton>
-            ) : (
-              <LaunchButton resource={job}>
-                {({ handleRelaunch, isLaunching }) => (
-                  <Button
-                    ouiaId={`${job.id}-relaunch-button`}
-                    variant="plain"
-                    onClick={() => handleRelaunch()}
-                    aria-label={t`Relaunch`}
-                    isDisabled={isLaunching}
-                  >
-                    <RocketIcon />
-                  </Button>
-                )}
-              </LaunchButton>
-            )}
-          </ActionItem>
-        </ActionsTd>
-      </Tr>
+              </ActionItem>
+            </ActionsTd>
+          </Tr>
+    </CSSTransition>
       <Tr
+        key = {job.id}
         isExpanded={isExpanded}
         id={`expanded-job-row-${job.id}`}
         ouiaId={`expanded-job-row-${job.id}`}
