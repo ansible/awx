@@ -1,7 +1,7 @@
 from awx.main.tasks.callback import RunnerCallback
 from awx.main.constants import ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE
 
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 
 def test_delay_update(mock_me):
