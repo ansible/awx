@@ -10,10 +10,17 @@ logger = logging.getLogger('awx.main.scheduler')
 
 
 @task(queue=get_local_queuename)
-def run_task_manager(manager=True):
-    if manager:
-        logger.debug("=== Running task manager.")
-        TaskManager().schedule()
-    else:
-        logger.debug("=== Running task prepper.")
-        TaskPrepper().schedule()
+def task_manager():
+    logger.debug("=== Running task manager.")
+    TaskManager().schedule()
+
+
+@task(queue=get_local_queuename)
+def task_prepper():
+    logger.debug("=== Running task prepper.")
+    TaskPrepper().schedule()
+
+
+def run_task_manager():
+    task_manager()
+    task_prepper()
