@@ -861,16 +861,16 @@ def ignore_inventory_computed_fields():
         _inventory_updates.is_updating = previous_value
 
 
-def _schedule_task_manager():
+def _schedule_task_manager(manager=True):
     from awx.main.scheduler.tasks import run_task_manager
     from django.db import connection
 
     # runs right away if not in transaction
-    connection.on_commit(lambda: run_task_manager.delay())
+    connection.on_commit(lambda: run_task_manager.delay(manager=manager))
 
 
 @contextlib.contextmanager
-def task_manager_bulk_reschedule():
+def task_manager_bulk_reschedule(manager=True):
     """Context manager to avoid submitting task multiple times."""
     try:
         previous_flag = getattr(_task_manager, 'bulk_reschedule', False)
@@ -881,15 +881,15 @@ def task_manager_bulk_reschedule():
     finally:
         _task_manager.bulk_reschedule = previous_flag
         if _task_manager.needs_scheduling:
-            _schedule_task_manager()
+            _schedule_task_manager(manager=manager)
         _task_manager.needs_scheduling = previous_value
 
 
-def schedule_task_manager():
+def schedule_task_manager(manager=True):
     if getattr(_task_manager, 'bulk_reschedule', False):
         _task_manager.needs_scheduling = True
         return
-    _schedule_task_manager()
+    _schedule_task_manager(manager=manager)
 
 
 @contextlib.contextmanager

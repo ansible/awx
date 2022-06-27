@@ -197,6 +197,19 @@ class Metrics:
             SetIntM('task_manager_running_processed', 'Number of running tasks processed'),
             SetIntM('task_manager_pending_processed', 'Number of pending tasks processed'),
             SetIntM('task_manager_tasks_blocked', 'Number of tasks blocked from running'),
+            SetFloatM('task_prepper_get_tasks_seconds', 'Time spent in loading all tasks from db'),
+            SetFloatM('task_prepper_start_task_seconds', 'Time spent starting task'),
+            SetFloatM('task_prepper_process_running_tasks_seconds', 'Time spent processing running tasks'),
+            SetFloatM('task_prepper_process_pending_tasks_seconds', 'Time spent processing pending tasks'),
+            SetFloatM('task_prepper_generate_dependencies_seconds', 'Time spent generating dependencies for pending tasks'),
+            SetFloatM('task_prepper_spawn_workflow_graph_jobs_seconds', 'Time spent spawning workflow jobs'),
+            SetFloatM('task_prepper__schedule_seconds', 'Time spent in running the entire _schedule'),
+            IntM('task_prepper_schedule_calls', 'Number of calls to task manager schedule'),
+            SetFloatM('task_prepper_recorded_timestamp', 'Unix timestamp when metrics were last recorded'),
+            SetIntM('task_prepper_tasks_started', 'Number of tasks started'),
+            SetIntM('task_prepper_running_processed', 'Number of running tasks processed'),
+            SetIntM('task_prepper_pending_processed', 'Number of pending tasks processed'),
+            SetIntM('task_prepper_tasks_blocked', 'Number of tasks blocked from running'),
         ]
         # turn metric list into dictionary with the metric name as a key
         self.METRICS = {}

@@ -1358,7 +1358,7 @@ class UnifiedJob(
         self.update_fields(start_args=json.dumps(kwargs), status='pending')
         self.websocket_emit_status("pending")
 
-        schedule_task_manager()
+        schedule_task_manager(manager=False)
 
         # Each type of unified job has a different Task class; get the
         # appropirate one.
