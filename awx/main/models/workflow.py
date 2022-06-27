@@ -816,7 +816,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         self.save()
         self.send_approval_notification('approved')
         self.websocket_emit_status(self.status)
-        schedule_task_manager()
+        schedule_task_manager(manager=False)
         return reverse('api:workflow_approval_approve', kwargs={'pk': self.pk}, request=request)
 
     def deny(self, request=None):
@@ -825,7 +825,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         self.save()
         self.send_approval_notification('denied')
         self.websocket_emit_status(self.status)
-        schedule_task_manager()
+        schedule_task_manager(manager=False)
         return reverse('api:workflow_approval_deny', kwargs={'pk': self.pk}, request=request)
 
     def signal_start(self, **kwargs):
