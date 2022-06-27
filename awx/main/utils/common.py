@@ -862,11 +862,13 @@ def ignore_inventory_computed_fields():
 
 
 def _schedule_task_manager():
-    from awx.main.scheduler.tasks import run_task_manager
+    from awx.main.scheduler.tasks import task_manager, dependency_manager, workflow_manager
     from django.db import connection
 
     # runs right away if not in transaction
-    connection.on_commit(lambda: run_task_manager.delay())
+    connection.on_commit(lambda: task_manager.delay())
+    connection.on_commit(lambda: dependency_manager.delay())
+    connection.on_commit(lambda: workflow_manager.delay())
 
 
 @contextlib.contextmanager
