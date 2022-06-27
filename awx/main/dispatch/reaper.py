@@ -10,6 +10,24 @@ from awx.main.models import Instance, UnifiedJob, WorkflowJob
 logger = logging.getLogger('awx.main.dispatch')
 
 
+def startup_reaping():
+    """
+    If this particular instance is starting, then we know that any running jobs are invalid
+    so we will reap those jobs as a special action here
+    """
+    me = Instance.objects.me()
+    jobs = UnifiedJob.objects.filter(status='running', controller_node=me.hostname)
+    for j in jobs:
+        j.status = 'failed'
+        j.start_args = ''
+        j.job_explanation += 'Task was stopped due to a service disruption.'
+        j.save(update_fields=['status', 'start_args', 'job_explanation'])
+        if hasattr(j, 'send_notification_templates'):
+            j.send_notification_templates('failed')
+        j.websocket_emit_status('failed')
+    logger.error(f'unified jobs {j.id for j in jobs} were reaped on dispatch startup')
+
+
 def reap_job(j, status):
     if UnifiedJob.objects.get(id=j.id).status not in ('running', 'waiting'):
         # just in case, don't reap jobs that aren't running
