@@ -25,7 +25,6 @@ from awx.main.utils.common import (
     cleanup_new_process,
 )
 from awx.main.constants import MAX_ISOLATED_PATH_COLON_DELIMITER
-from awx.main.tasks.signals import sleep_with_signal_handling
 
 # Receptorctl
 from receptorctl.socket_interface import ReceptorControl
@@ -451,7 +450,7 @@ class AWXReceptorJob:
                 result = namedtuple('result', ['status', 'rc'])
                 return result('canceled', 1)
 
-            sleep_with_signal_handling(1)
+            time.sleep(1)
 
     @property
     def pod_definition(self):

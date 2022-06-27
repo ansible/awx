@@ -181,7 +181,6 @@ class RunnerCallback:
         """
         unified_job_id = self.instance.pk
         if signal_callback():
-            self.delay_update(job_explanation="Aborted job due to receiving shutdown signal")
             return True
         try:
             self.instance = self.update_model(unified_job_id)

@@ -1,9 +1,12 @@
 import signal
-import time
 import functools
+import logging
 
 
-__all__ = ['with_signal_handling', 'sleep_with_signal_handling', 'signal_callback']
+logger = logging.getLogger('awx.main.tasks.signals')
+
+
+__all__ = ['with_signal_handling', 'signal_callback']
 
 
 class SignalState:
@@ -12,7 +15,6 @@ class SignalState:
         self.is_active = False
         self.original_sigterm = None
         self.original_sigint = None
-        self.raise_exception = False
 
     def __init__(self):
         self.reset()
@@ -20,8 +22,6 @@ class SignalState:
     def set_flag(self, *args):
         """Method to pass into the python signal.signal method to receive signals"""
         self.sigterm_flag = True
-        if self.raise_exception:
-            raise Exception('Exit signal received')
 
     def connect_signals(self):
         self.original_sigterm = signal.getsignal(signal.SIGTERM)
@@ -61,17 +61,3 @@ def with_signal_handling(f):
                 signal_state.restore_signals()
 
     return _wrapped
-
-
-def sleep_with_signal_handling(seconds):
-    """
-    Method can only be used while @with_signal_handling decorator is active.
-    Will raise an exception if SIGTERM or SIGINT received while sleeping.
-    """
-    if not signal_state.is_active:
-        raise RuntimeError('This method can only be used inside of signal handling decorator')
-    try:
-        signal_state.raise_exception = True
-        time.sleep(seconds)
-    finally:
-        signal_state.raise_exception = False
