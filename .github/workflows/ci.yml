@@ -113,7 +113,7 @@ jobs:
 
       - name: Install playbook dependencies
         run: |
-          python3 -m pip install docker
+          python3 -m pip install docker setuptools_scm
 
       - name: Build AWX image
         working-directory: awx

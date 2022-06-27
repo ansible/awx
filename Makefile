@@ -5,8 +5,8 @@ NPM_BIN ?= npm
 CHROMIUM_BIN=/tmp/chrome-linux/chrome
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 MANAGEMENT_COMMAND ?= awx-manage
-VERSION := $(shell $(PYTHON) -m setuptools_scm)
-COLLECTION_VERSION := $(shell $(PYTHON) -m setuptools_scm | cut -d . -f 1-3)
+VERSION := $(shell $(PYTHON) tools/scripts/scm_version.py)
+COLLECTION_VERSION := $(shell $(PYTHON) tools/scripts/scm_version.py | cut -d . -f 1-3)
 
 # NOTE: This defaults the container image version to the branch that's active
 COMPOSE_TAG ?= $(GIT_BRANCH)
@@ -45,7 +45,7 @@ I18N_FLAG_FILE = .i18n_built
 .PHONY: awx-link clean clean-tmp clean-venv requirements requirements_dev \
 	develop refresh adduser migrate dbchange \
 	receiver test test_unit test_coverage coverage_html \
-	dev_build release_build sdist \
+	sdist \
 	ui-release ui-devel \
 	VERSION PYTHON_VERSION docker-compose-sources \
 	.git/hooks/pre-commit
@@ -269,7 +269,7 @@ api-lint:
 	yamllint -s .
 
 awx-link:
-	[ -d "/awx_devel/awx.egg-info" ] || $(PYTHON) /awx_devel/setup.py egg_info_dev
+	[ -d "/awx_devel/awx.egg-info" ] || $(PYTHON) /awx_devel/tools/scripts/setup.py egg_info_dev
 	cp -f /tmp/awx.egg-link /var/lib/awx/venv/awx/lib/$(PYTHON)/site-packages/awx.egg-link
 
 TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/sso/tests
@@ -420,21 +420,13 @@ ui-test-general:
 	$(NPM_BIN) run --prefix awx/ui pretest
 	$(NPM_BIN) run --prefix awx/ui/ test-general --runInBand
 
-# Build a pip-installable package into dist/ with a timestamped version number.
-dev_build:
-	$(PYTHON) setup.py dev_build
-
-# Build a pip-installable package into dist/ with the release version number.
-release_build:
-	$(PYTHON) setup.py release_build
-
 HEADLESS ?= no
 ifeq ($(HEADLESS), yes)
 dist/$(SDIST_TAR_FILE):
 else
 dist/$(SDIST_TAR_FILE): $(UI_BUILD_FLAG_FILE)
 endif
-	$(PYTHON) setup.py $(SDIST_COMMAND)
+	$(PYTHON) -m build -s
 	ln -sf $(SDIST_TAR_FILE) dist/awx.tar.gz
 
 sdist: dist/$(SDIST_TAR_FILE)
