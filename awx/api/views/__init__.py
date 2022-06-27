@@ -3391,7 +3391,7 @@ class WorkflowJobCancel(RetrieveAPIView):
         obj = self.get_object()
         if obj.can_cancel:
             obj.cancel()
-            schedule_task_manager(manager=False)
+            schedule_task_manager()
             return Response(status=status.HTTP_202_ACCEPTED)
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
