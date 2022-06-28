@@ -19,7 +19,7 @@ def startup_reaping():
     jobs = UnifiedJob.objects.filter(status='running', controller_node=me.hostname)
     job_ids = []
     for j in jobs:
-        job_ids.ids.append(j.id)
+        job_ids.append(j.id)
         j.status = 'failed'
         j.start_args = ''
         j.job_explanation += 'Task was marked as running on system startup, so it has been marked as failed.'
