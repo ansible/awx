@@ -12,7 +12,7 @@ export default function buildRuleSet(values) {
     const rule = buildRuleObj({
       startDate: values.startDate,
       startTime: values.startTime,
-      timezone: values.timezone,
+      startInfo: values.timezone,
       frequency,
       ...values.frequencyOptions[frequency],
     });

@@ -40,6 +40,7 @@ function ErrorDetail({ error }) {
   if (!error) {
     return null;
   }
+  console.error(error);
 
   const handleToggle = () => {
     setIsExpanded(!isExpanded);

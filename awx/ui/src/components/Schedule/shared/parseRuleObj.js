@@ -1,8 +1,58 @@
-import { RRule } from 'rrule';
+import { RRule, rrulestr } from 'rrule';
 import { dateToInputDateTime } from 'util/dates';
+import sortFrequencies from './sortFrequencies';
 
 export default function parseRuleObj(schedule) {
-  const values = {};
+  let values = {
+    frequency: [],
+    frequencyOptions: {},
+    exceptionFrequency: [],
+    exceptionOptions: {},
+  };
+  const ruleset = rrulestr(schedule.rrule.replace(' ', '\n'), {
+    forceset: true,
+  });
+
+  const ruleStrings = ruleset.valueOf();
+  ruleStrings.forEach((ruleString) => {
+    const type = ruleString.match(/^[A-Z]+/)[0];
+    switch (type) {
+      case 'DTSTART':
+        values = parseDtstart(schedule, values);
+        break;
+      case 'RRULE':
+        values = parseRrule(ruleString, schedule, values);
+        break;
+      default:
+        throw new Error(`Unsupported rrule type: ${type}`);
+    }
+  });
+
+  return values;
+}
+
+function parseDtstart(schedule, values) {
+  const [startDate, startTime] = dateToInputDateTime(
+    schedule.dtstart,
+    schedule.timezone
+  );
+  return {
+    ...values,
+    startDate,
+    startTime,
+  };
+}
+
+const frequencyTypes = {
+  [RRule.MINUTELY]: 'minute',
+  [RRule.HOURLY]: 'hour',
+  [RRule.DAILY]: 'day',
+  [RRule.WEEKLY]: 'week',
+  [RRule.MONTHLY]: 'month',
+  [RRule.YEARLY]: 'year',
+};
+
+function parseRrule(rruleString, schedule, values) {
   const {
     origOptions: {
       bymonth,
@@ -10,88 +60,65 @@ export default function parseRuleObj(schedule) {
       bysetpos,
       byweekday,
       count,
-      dtstart,
       freq,
       interval,
     },
-  } = RRule.fromString(schedule.rrule.replace(' ', '\n'));
+  } = RRule.fromString(rruleString);
 
-  if (dtstart) {
-    const [startDate, startTime] = dateToInputDateTime(
-      schedule.dtstart,
-      schedule.timezone
-    );
-
-    values.startDate = startDate;
-    values.startTime = startTime;
-  }
+  const options = {};
 
   if (schedule.until) {
-    values.end = 'onDate';
+    options.end = 'onDate';
 
-    const [endDate, endTime] = dateToInputDateTime(
-      schedule.until,
-      schedule.timezone
-    );
-
-    values.endDate = endDate;
-    values.endTime = endTime;
+    // options.endDate = ?;
+    // options.endTime = ?;
   } else if (count) {
-    values.end = 'after';
-    values.occurrences = count;
+    options.end = 'after';
+    options.occurrences = count;
   }
 
   if (interval) {
-    values.interval = interval;
+    options.interval = interval;
   }
 
-  if (typeof freq === 'number') {
-    switch (freq) {
-      case RRule.MINUTELY:
-        if (schedule.dtstart !== schedule.dtend) {
-          values.frequency = 'minute';
-        }
-        break;
-      case RRule.HOURLY:
-        values.frequency = 'hour';
-        break;
-      case RRule.DAILY:
-        values.frequency = 'day';
-        break;
-      case RRule.WEEKLY:
-        values.frequency = 'week';
-        if (byweekday) {
-          values.daysOfWeek = byweekday;
-        }
-        break;
-      case RRule.MONTHLY:
-        values.frequency = 'month';
-        if (bymonthday) {
-          values.runOnDayNumber = bymonthday;
-        } else if (bysetpos) {
-          values.runOn = 'the';
-          values.runOnTheOccurrence = bysetpos;
-          values.runOnTheDay = generateRunOnTheDay(byweekday);
-        }
-        break;
-      case RRule.YEARLY:
-        values.frequency = 'year';
-        if (bymonthday) {
-          values.runOnDayNumber = bymonthday;
-          values.runOnDayMonth = bymonth;
-        } else if (bysetpos) {
-          values.runOn = 'the';
-          values.runOnTheOccurrence = bysetpos;
-          values.runOnTheDay = generateRunOnTheDay(byweekday);
-          values.runOnTheMonth = bymonth;
-        }
-        break;
-      default:
-        break;
-    }
+  if (typeof freq !== 'number') {
+    throw new Error(`Unexpected rrule frequency: ${freq}`);
+  }
+  const frequency = frequencyTypes[freq];
+  if (values.frequency.includes(frequency)) {
+    throw new Error(`Duplicate frequency types not supported (${frequency})`);
   }
 
-  return values;
+  if (frequency === RRule.WEEKLY && byweekday) {
+    options.daysOfWeek = byweekday;
+  }
+  if (frequency === RRule.MONTHLY && bymonthday) {
+    options.runOnDayNumber = bymonthday;
+  }
+  if (frequency === RRule.MONTHLY && bysetpos) {
+    options.runOn = 'the';
+    options.runOnTheOccurrence = bysetpos;
+    options.runOnTheDay = generateRunOnTheDay(byweekday);
+  }
+  if (frequency === RRule.YEARLY && bymonthday) {
+    options.runOnDayNumber = bymonthday;
+    options.runOnDayMonth = bymonth;
+  }
+  if (frequency === RRule.YEARLY && bysetpos) {
+    options.runOn = 'the';
+    options.runOnTheOccurrence = bysetpos;
+    options.runOnTheDay = generateRunOnTheDay(byweekday);
+    options.runOnTheMonth = bymonth;
+  }
+
+  return {
+    ...values,
+    frequency: [...values.frequency, frequency].sort(sortFrequencies),
+    frequencyOptions: {
+      ...values.frequencyOptions,
+      [frequency]: options,
+    },
+  };
 }
 
 function generateRunOnTheDay(days = []) {

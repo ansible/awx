@@ -15,11 +15,16 @@ describe(parseRuleObj, () => {
     const parsed = parseRuleObj(schedule);
 
     expect(parsed).toEqual({
-      daysOfWeek: [{ weekday: 0, n: undefined }],
-      frequency: 'week',
-      interval: 1,
       startDate: '2022-06-13',
       startTime: '12:30 PM',
+      frequency: ['week'],
+      frequencyOptions: {
+        week: {
+          interval: 1,
+          daysOfWeek: [{ weekday: 0, n: undefined }],
+          end: 'never',
+        },
+      },
     });
   });
 
@@ -35,10 +40,9 @@ describe(parseRuleObj, () => {
 
     expect(parseRuleObj(schedule)).toEqual({
       end: 'after',
-      interval: 1,
-      occurrences: 1,
       startDate: '2022-06-10',
       startTime: '1:00 PM',
+      frequency: [],
     });
   });
 });

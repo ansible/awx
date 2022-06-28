@@ -16,6 +16,7 @@ import helpText from '../../../screens/Template/shared/JobTemplate.helptext';
 import { SubFormLayout, FormColumnLayout } from '../../FormLayout';
 import FrequencyDetailSubform from './FrequencyDetailSubform';
 import DateTimePicker from './DateTimePicker';
+import sortFrequencies from './sortFrequencies';
 
 const SelectClearOption = styled(SelectOption)`
   & > input[type='checkbox'] {
@@ -66,17 +67,8 @@ export default function ScheduleFormFields({
       validate: required(t`Select a value for this field`),
     });
 
-  const updateFrequency = (setFrequency) => {
-    const frequencies = ['minute', 'hour', 'day', 'week', 'month', 'year'];
-    return (values) => {
-      const sortedValues = [];
-      frequencies.forEach((freq) => {
-        if (values.includes(freq)) {
-          sortedValues.push(freq);
-        }
-      });
-      setFrequency(sortedValues);
-    };
+  const updateFrequency = (setFrequency) => (values) => {
+    setFrequency(values.sort(sortFrequencies));
   };
 
   return (

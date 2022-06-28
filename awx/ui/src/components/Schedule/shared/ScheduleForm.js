@@ -367,7 +367,9 @@ function ScheduleForm({
     // }
 
     try {
+      // TODO: memoize?
       overriddenValues = parseRuleObj(schedule);
+      console.log(overriddenValues);
     } catch (error) {
       rruleError = error;
     }
