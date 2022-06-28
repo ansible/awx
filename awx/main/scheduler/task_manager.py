@@ -53,11 +53,7 @@ def timeit(func):
         t_now = time.perf_counter()
         result = func(*args, **kwargs)
         dur = time.perf_counter() - t_now
-        if func.__qualname__.startswith("TaskManager"):
-            prefix = "task_manager"
-        else:
-            prefix = "task_prepper"
-        args[0].subsystem_metrics.inc(f"{prefix}_{func.__name__}_seconds", dur)
+        args[0].subsystem_metrics.inc(f"{args[0].prefix}_{func.__name__}_seconds", dur)
         return result
 
     return inner
@@ -129,9 +125,160 @@ class TaskBase:
                 logger.debug(f"Finishing {self.prefix} Scheduler")
 
 
-class TaskPrepper(TaskBase):
+class WorkflowManager(TaskBase):
     def __init__(self):
-        self.prefix = "task_prepper"
+        self.prefix = "workflow_manager"
+        super().__init__()
+
+    @timeit
+    def spawn_workflow_graph_jobs(self, workflow_jobs):
+        logger.debug(f"=== {workflow_jobs}")
+        for workflow_job in workflow_jobs:
+            if workflow_job.cancel_flag:
+                logger.debug('Not spawning jobs for %s because it is pending cancelation.', workflow_job.log_format)
+                continue
+            dag = WorkflowDAG(workflow_job)
+            spawn_nodes = dag.bfs_nodes_to_run()
+            if spawn_nodes:
+                logger.debug('Spawning jobs for %s', workflow_job.log_format)
+            else:
+                logger.debug('No nodes to spawn for %s', workflow_job.log_format)
+            for spawn_node in spawn_nodes:
+                if spawn_node.unified_job_template is None:
+                    continue
+                kv = spawn_node.get_job_kwargs()
+                job = spawn_node.unified_job_template.create_unified_job(**kv)
+                spawn_node.job = job
+                spawn_node.save()
+                logger.debug('Spawned %s in %s for node %s', job.log_format, workflow_job.log_format, spawn_node.pk)
+                can_start = True
+                if isinstance(spawn_node.unified_job_template, WorkflowJobTemplate):
+                    workflow_ancestors = job.get_ancestor_workflows()
+                    if spawn_node.unified_job_template in set(workflow_ancestors):
+                        can_start = False
+                        logger.info(
+                            'Refusing to start recursive workflow-in-workflow id={}, wfjt={}, ancestors={}'.format(
+                                job.id, spawn_node.unified_job_template.pk, [wa.pk for wa in workflow_ancestors]
+                            )
+                        )
+                        display_list = [spawn_node.unified_job_template] + workflow_ancestors
+                        job.job_explanation = gettext_noop(
+                            "Workflow Job spawned from workflow could not start because it " "would result in recursion (spawn order, most recent first: {})"
+                        ).format(', '.join(['<{}>'.format(tmp) for tmp in display_list]))
+                    else:
+                        logger.debug(
+                            'Starting workflow-in-workflow id={}, wfjt={}, ancestors={}'.format(
+                                job.id, spawn_node.unified_job_template.pk, [wa.pk for wa in workflow_ancestors]
+                            )
+                        )
+                if not job._resources_sufficient_for_launch():
+                    can_start = False
+                    job.job_explanation = gettext_noop(
+                        "Job spawned from workflow could not start because it " "was missing a related resource such as project or inventory"
+                    )
+                if can_start:
+                    if workflow_job.start_args:
+                        start_args = json.loads(decrypt_field(workflow_job, 'start_args'))
+                    else:
+                        start_args = {}
+                    can_start = job.signal_start(**start_args)
+                    if not can_start:
+                        job.job_explanation = gettext_noop(
+                            "Job spawned from workflow could not start because it " "was not in the right state or required manual credentials"
+                        )
+                if not can_start:
+                    job.status = 'failed'
+                    job.save(update_fields=['status', 'job_explanation'])
+                    job.websocket_emit_status('failed')
+
+                # TODO: should we emit a status on the socket here similar to tasks.py awx_periodic_scheduler() ?
+                # emit_websocket_notification('/socket.io/jobs', '', dict(id=))
+
+    def process_finished_workflow_jobs(self, workflow_jobs):
+        result = []
+        for workflow_job in workflow_jobs:
+            dag = WorkflowDAG(workflow_job)
+            status_changed = False
+            if workflow_job.cancel_flag:
+                workflow_job.workflow_nodes.filter(do_not_run=False, job__isnull=True).update(do_not_run=True)
+                logger.debug('Canceling spawned jobs of %s due to cancel flag.', workflow_job.log_format)
+                cancel_finished = dag.cancel_node_jobs()
+                if cancel_finished:
+                    logger.info('Marking %s as canceled, all spawned jobs have concluded.', workflow_job.log_format)
+                    workflow_job.status = 'canceled'
+                    workflow_job.start_args = ''  # blank field to remove encrypted passwords
+                    workflow_job.save(update_fields=['status', 'start_args'])
+                    status_changed = True
+            else:
+                workflow_nodes = dag.mark_dnr_nodes()
+                for n in workflow_nodes:
+                    n.save(update_fields=['do_not_run'])
+                is_done = dag.is_workflow_done()
+                if not is_done:
+                    continue
+                has_failed, reason = dag.has_workflow_failed()
+                logger.debug('Marking %s as %s.', workflow_job.log_format, 'failed' if has_failed else 'successful')
+                result.append(workflow_job.id)
+                new_status = 'failed' if has_failed else 'successful'
+                logger.debug("Transitioning {} to {} status.".format(workflow_job.log_format, new_status))
+                update_fields = ['status', 'start_args']
+                workflow_job.status = new_status
+                if reason:
+                    logger.info(f'Workflow job {workflow_job.id} failed due to reason: {reason}')
+                    workflow_job.job_explanation = gettext_noop("No error handling paths found, marking workflow as failed")
+                    update_fields.append('job_explanation')
+                workflow_job.start_args = ''  # blank field to remove encrypted passwords
+                workflow_job.save(update_fields=update_fields)
+                status_changed = True
+            if status_changed:
+                if workflow_job.spawned_by_workflow:
+                    schedule_task_manager()
+                workflow_job.websocket_emit_status(workflow_job.status)
+                # Operations whose queries rely on modifications made during the atomic scheduling session
+                workflow_job.send_notification_templates('succeeded' if workflow_job.status == 'successful' else 'failed')
+        return result
+
+    def timeout_approval_node(self):
+        workflow_approvals = WorkflowApproval.objects.filter(status='pending')
+        now = tz_now()
+        for task in workflow_approvals:
+            approval_timeout_seconds = timedelta(seconds=task.timeout)
+            if task.timeout == 0:
+                continue
+            if (now - task.created) >= approval_timeout_seconds:
+                timeout_message = _("The approval node {name} ({pk}) has expired after {timeout} seconds.").format(
+                    name=task.name, pk=task.pk, timeout=task.timeout
+                )
+                logger.warning(timeout_message)
+                task.timed_out = True
+                task.status = 'failed'
+                task.send_approval_notification('timed_out')
+                task.websocket_emit_status(task.status)
+                task.job_explanation = timeout_message
+                task.save(update_fields=['status', 'job_explanation', 'timed_out'])
+
+    @timeit
+    def _schedule(self):
+        running_workflow_tasks = self.get_running_workflow_jobs()
+        if len(running_workflow_tasks) > 0:
+            self.process_finished_workflow_jobs(running_workflow_tasks)
+
+            previously_running_workflow_tasks = running_workflow_tasks
+            running_workflow_tasks = []
+            for workflow_job in previously_running_workflow_tasks:
+                if workflow_job.status == 'running':
+                    running_workflow_tasks.append(workflow_job)
+                else:
+                    logger.debug('Removed %s from job spawning consideration.', workflow_job.log_format)
+
+            self.spawn_workflow_graph_jobs(running_workflow_tasks)
+
+            self.timeout_approval_node()
+
+
+class DependencyManager(TaskBase):
+    def __init__(self):
+        self.prefix = "dependency_manager"
         super().__init__()
 
     def create_project_update(self, task, project_id=None):
@@ -434,133 +581,6 @@ class TaskManager(TaskBase):
         connection.on_commit(post_commit)
 
     @timeit
-    def spawn_workflow_graph_jobs(self, workflow_jobs):
-        logger.debug(f"=== {workflow_jobs}")
-        for workflow_job in workflow_jobs:
-            if workflow_job.cancel_flag:
-                logger.debug('Not spawning jobs for %s because it is pending cancelation.', workflow_job.log_format)
-                continue
-            dag = WorkflowDAG(workflow_job)
-            spawn_nodes = dag.bfs_nodes_to_run()
-            if spawn_nodes:
-                logger.debug('Spawning jobs for %s', workflow_job.log_format)
-            else:
-                logger.debug('No nodes to spawn for %s', workflow_job.log_format)
-            for spawn_node in spawn_nodes:
-                if spawn_node.unified_job_template is None:
-                    continue
-                kv = spawn_node.get_job_kwargs()
-                job = spawn_node.unified_job_template.create_unified_job(**kv)
-                spawn_node.job = job
-                spawn_node.save()
-                logger.debug('Spawned %s in %s for node %s', job.log_format, workflow_job.log_format, spawn_node.pk)
-                can_start = True
-                if isinstance(spawn_node.unified_job_template, WorkflowJobTemplate):
-                    workflow_ancestors = job.get_ancestor_workflows()
-                    if spawn_node.unified_job_template in set(workflow_ancestors):
-                        can_start = False
-                        logger.info(
-                            'Refusing to start recursive workflow-in-workflow id={}, wfjt={}, ancestors={}'.format(
-                                job.id, spawn_node.unified_job_template.pk, [wa.pk for wa in workflow_ancestors]
-                            )
-                        )
-                        display_list = [spawn_node.unified_job_template] + workflow_ancestors
-                        job.job_explanation = gettext_noop(
-                            "Workflow Job spawned from workflow could not start because it " "would result in recursion (spawn order, most recent first: {})"
-                        ).format(', '.join(['<{}>'.format(tmp) for tmp in display_list]))
-                    else:
-                        logger.debug(
-                            'Starting workflow-in-workflow id={}, wfjt={}, ancestors={}'.format(
-                                job.id, spawn_node.unified_job_template.pk, [wa.pk for wa in workflow_ancestors]
-                            )
-                        )
-                if not job._resources_sufficient_for_launch():
-                    can_start = False
-                    job.job_explanation = gettext_noop(
-                        "Job spawned from workflow could not start because it " "was missing a related resource such as project or inventory"
-                    )
-                if can_start:
-                    if workflow_job.start_args:
-                        start_args = json.loads(decrypt_field(workflow_job, 'start_args'))
-                    else:
-                        start_args = {}
-                    can_start = job.signal_start(**start_args)
-                    if not can_start:
-                        job.job_explanation = gettext_noop(
-                            "Job spawned from workflow could not start because it " "was not in the right state or required manual credentials"
-                        )
-                if not can_start:
-                    job.status = 'failed'
-                    job.save(update_fields=['status', 'job_explanation'])
-                    job.websocket_emit_status('failed')
-
-                # TODO: should we emit a status on the socket here similar to tasks.py awx_periodic_scheduler() ?
-                # emit_websocket_notification('/socket.io/jobs', '', dict(id=))
-
-    def process_finished_workflow_jobs(self, workflow_jobs):
-        result = []
-        for workflow_job in workflow_jobs:
-            dag = WorkflowDAG(workflow_job)
-            status_changed = False
-            if workflow_job.cancel_flag:
-                workflow_job.workflow_nodes.filter(do_not_run=False, job__isnull=True).update(do_not_run=True)
-                logger.debug('Canceling spawned jobs of %s due to cancel flag.', workflow_job.log_format)
-                cancel_finished = dag.cancel_node_jobs()
-                if cancel_finished:
-                    logger.info('Marking %s as canceled, all spawned jobs have concluded.', workflow_job.log_format)
-                    workflow_job.status = 'canceled'
-                    workflow_job.start_args = ''  # blank field to remove encrypted passwords
-                    workflow_job.save(update_fields=['status', 'start_args'])
-                    status_changed = True
-            else:
-                workflow_nodes = dag.mark_dnr_nodes()
-                for n in workflow_nodes:
-                    n.save(update_fields=['do_not_run'])
-                is_done = dag.is_workflow_done()
-                if not is_done:
-                    continue
-                has_failed, reason = dag.has_workflow_failed()
-                logger.debug('Marking %s as %s.', workflow_job.log_format, 'failed' if has_failed else 'successful')
-                result.append(workflow_job.id)
-                new_status = 'failed' if has_failed else 'successful'
-                logger.debug("Transitioning {} to {} status.".format(workflow_job.log_format, new_status))
-                update_fields = ['status', 'start_args']
-                workflow_job.status = new_status
-                if reason:
-                    logger.info(f'Workflow job {workflow_job.id} failed due to reason: {reason}')
-                    workflow_job.job_explanation = gettext_noop("No error handling paths found, marking workflow as failed")
-                    update_fields.append('job_explanation')
-                workflow_job.start_args = ''  # blank field to remove encrypted passwords
-                workflow_job.save(update_fields=update_fields)
-                status_changed = True
-            if status_changed:
-                if workflow_job.spawned_by_workflow:
-                    schedule_task_manager()
-                workflow_job.websocket_emit_status(workflow_job.status)
-                # Operations whose queries rely on modifications made during the atomic scheduling session
-                workflow_job.send_notification_templates('succeeded' if workflow_job.status == 'successful' else 'failed')
-        return result
-
-    def timeout_approval_node(self):
-        workflow_approvals = WorkflowApproval.objects.filter(status='pending')
-        now = tz_now()
-        for task in workflow_approvals:
-            approval_timeout_seconds = timedelta(seconds=task.timeout)
-            if task.timeout == 0:
-                continue
-            if (now - task.created) >= approval_timeout_seconds:
-                timeout_message = _("The approval node {name} ({pk}) has expired after {timeout} seconds.").format(
-                    name=task.name, pk=task.pk, timeout=task.timeout
-                )
-                logger.warning(timeout_message)
-                task.timed_out = True
-                task.status = 'failed'
-                task.send_approval_notification('timed_out')
-                task.websocket_emit_status(task.status)
-                task.job_explanation = timeout_message
-                task.save(update_fields=['status', 'job_explanation', 'timed_out'])
-
-    @timeit
     def process_running_tasks(self, running_tasks):
         for task in running_tasks:
             self.dependency_graph.add_job(task)
@@ -713,19 +733,4 @@ class TaskManager(TaskBase):
         self.reap_jobs_from_orphaned_instances()
 
         if len(all_sorted_tasks) > 0:
-            running_workflow_tasks = self.get_running_workflow_jobs()
-            self.process_finished_workflow_jobs(running_workflow_tasks)
-
-            previously_running_workflow_tasks = running_workflow_tasks
-            running_workflow_tasks = []
-            for workflow_job in previously_running_workflow_tasks:
-                if workflow_job.status == 'running':
-                    running_workflow_tasks.append(workflow_job)
-                else:
-                    logger.debug('Removed %s from job spawning consideration.', workflow_job.log_format)
-
-            self.spawn_workflow_graph_jobs(running_workflow_tasks)
-
-            self.timeout_approval_node()
-
             self.process_tasks(all_sorted_tasks)
