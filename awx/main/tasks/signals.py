@@ -49,13 +49,13 @@ def with_signal_handling(f):
     """
 
     @functools.wraps(f)
-    def _wrapped(self, *args, **kwargs):
+    def _wrapped(*args, **kwargs):
         try:
             this_is_outermost_caller = False
             if not signal_state.is_active:
                 signal_state.connect_signals()
                 this_is_outermost_caller = True
-            return f(self, *args, **kwargs)
+            return f(*args, **kwargs)
         finally:
             if this_is_outermost_caller:
                 signal_state.restore_signals()
