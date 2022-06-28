@@ -17,7 +17,9 @@ def startup_reaping():
     """
     me = Instance.objects.me()
     jobs = UnifiedJob.objects.filter(status='running', controller_node=me.hostname)
+    job_ids = []
     for j in jobs:
+        job_ids.ids.append(j.id)
         j.status = 'failed'
         j.start_args = ''
         j.job_explanation += 'Task was stopped due to a service disruption.'
@@ -25,7 +27,8 @@ def startup_reaping():
         if hasattr(j, 'send_notification_templates'):
             j.send_notification_templates('failed')
         j.websocket_emit_status('failed')
-    logger.error(f'unified jobs {j.id for j in jobs} were reaped on dispatch startup')
+    if job_ids:
+        logger.error(f'Unified jobs {job_ids} were reaped on dispatch startup')
 
 
 def reap_job(j, status):
