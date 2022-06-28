@@ -2,8 +2,13 @@ import React from 'react';
 import { shape, string, number, arrayOf, node, oneOfType } from 'prop-types';
 import { Tab, Tabs, TabTitleText } from '@patternfly/react-core';
 import { useHistory, useLocation } from 'react-router-dom';
+import styled from 'styled-components';
 
-function RoutedTabs({ tabsArray }) {
+const Wrapper = styled.div`
+  display: flex;
+`;
+
+function RoutedTabs({ tabsArray, isWorkflow, children }) {
   const history = useHistory();
   const location = useLocation();
 
@@ -31,8 +36,28 @@ function RoutedTabs({ tabsArray }) {
       history.push(link);
     }
   };
-
-  return (
+  return children ? (
+    <Wrapper>
+      <Tabs
+        activeKey={getActiveTabId()}
+        onSelect={handleTabSelect}
+        ouiaId="routed-tabs"
+      >
+        {tabsArray.map((tab) => (
+          <Tab
+            aria-label={typeof tab.name === 'string' ? tab.name : null}
+            eventKey={tab.id}
+            key={tab.id}
+            href={`#${tab.link}`}
+            title={<TabTitleText>{tab.name}</TabTitleText>}
+            aria-controls=""
+            ouiaId={`${tab.name}-tab`}
+          />
+        ))}
+      </Tabs>
+      {children}
+    </Wrapper>
+  ) : (
     <Tabs
       activeKey={getActiveTabId()}
       onSelect={handleTabSelect}

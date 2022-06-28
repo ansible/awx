@@ -22,6 +22,7 @@ import JobDetail from './JobDetail';
 import JobOutput from './JobOutput';
 import { WorkflowOutput } from './WorkflowOutput';
 import useWsJob from './useWsJob';
+import WorkflowOutputNavigation from 'components/WorkflowOutputNavigation';
 
 // maps the displayed url segments to actual api types
 export const JOB_URL_SEGMENT_MAP = {
@@ -148,7 +149,12 @@ function Job({ setBreadcrumb }) {
   return (
     <PageSection>
       <Card>
-        <RoutedTabs tabsArray={tabsArray} />
+        <RoutedTabs
+          isWorkflow={match.url.startsWith('/jobs/workflow')}
+          tabsArray={tabsArray}
+        >
+          <WorkflowOutputNavigation css="margin-left:auto" job={jobDetail} />
+        </RoutedTabs>
         <Switch>
           <Redirect from="/jobs/system/:id" to="/jobs/management/:id" exact />
           <Redirect
