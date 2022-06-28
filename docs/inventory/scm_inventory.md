@@ -17,21 +17,6 @@ Additionally:
 
  - `source_vars` - if these are set on a "file" type inventory source
    then they will be passed to the environment vars when running
- - `update_on_project_update` - if set, a project update of the source
-   project will automatically update this inventory source as a side effect
-
-If `update_on_project_update` is not set, then they can manually update
-just the inventory source with a POST to its update endpoint,
-`/inventory_sources/N/update/`.
-
-If `update_on_project_update` is set, the POST to the inventory source's
-update endpoint will trigger an update of the source project, which may,
-in turn, trigger an update of the inventory source.
-Also, with this flag set, an update _of the project_ is
-scheduled immediately after creation of the inventory source.
-Also, if this flag is set, no inventory updates will be triggered
-_unless the SCM revision of the project changes_.
-
 
 ### RBAC
 
@@ -51,17 +36,6 @@ This listing should be refreshed to the latest SCM info on a project update.
 
 If no inventory sources use a project as an SCM inventory source, then
 the inventory listing may not be refreshed on update.
-
-
-### Inventory Source Restriction
-
-Since automatic inventory updates (triggered by a project update) do not
-go through the task system, typical protection against conflicting updates
-is not available. To avoid problems, only one inventory source is allowed for
-inventories that use this feature. That means that if an inventory source
-has `source=scm` and `update_on_project_update=true`, it can be the only
-inventory source for its inventory.
-
 
 ## Supported File Syntax
 

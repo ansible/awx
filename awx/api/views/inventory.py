@@ -41,7 +41,7 @@ from awx.api.serializers import (
     JobTemplateSerializer,
     LabelSerializer,
 )
-from awx.api.views.mixin import RelatedJobsPreventDeleteMixin, ControlledByScmMixin
+from awx.api.views.mixin import RelatedJobsPreventDeleteMixin
 
 from awx.api.pagination import UnifiedJobEventPagination
 
@@ -75,7 +75,7 @@ class InventoryList(ListCreateAPIView):
     serializer_class = InventorySerializer
 
 
-class InventoryDetail(RelatedJobsPreventDeleteMixin, ControlledByScmMixin, RetrieveUpdateDestroyAPIView):
+class InventoryDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
 
     model = Inventory
     serializer_class = InventorySerializer

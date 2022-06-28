@@ -533,7 +533,7 @@ class UnifiedJob(
         ('workflow', _('Workflow')),  # Job was started from a workflow job.
         ('webhook', _('Webhook')),  # Job was started from a webhook event.
         ('sync', _('Sync')),  # Job was started from a project sync.
-        ('scm', _('SCM Update')),  # Job was created as an Inventory SCM sync.
+        ('scm', _('SCM Update')),  # (deprecated) Job was created as an Inventory SCM sync.
     ]
 
     PASSWORD_FIELDS = ('start_args',)
