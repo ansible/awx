@@ -412,11 +412,11 @@ msgid "An inventory must be selected"
 msgstr ""
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.js:105
-#~ msgid "Ansible Tower"
+#~ msgid "Ansible Controller"
 #~ msgstr ""
 
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:96
-msgid "Ansible Tower Documentation."
+msgid "Ansible Controller Documentation."
 msgstr ""
 
 #: screens/Template/Survey/SurveyQuestionForm.js:43
@@ -1058,7 +1058,7 @@ msgstr ""
 #: screens/Template/Survey/SurveyQuestionForm.js:46
 msgid ""
 "Choose an answer type or format you want as the prompt for the user.\n"
-"Refer to the Ansible Tower Documentation for more additional\n"
+"Refer to the Ansible Controller Documentation for more additional\n"
 "information about each option."
 msgstr ""
 
@@ -2764,23 +2764,23 @@ msgid "Enter at least one search filter to create a new Smart Inventory"
 msgstr ""
 
 #: screens/CredentialType/shared/CredentialTypeForm.js:43
-msgid "Enter injectors using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax."
+msgid "Enter injectors using either JSON or YAML syntax. Refer to the Ansible Controller documentation for example syntax."
 msgstr ""
 
 #: screens/CredentialType/shared/CredentialTypeForm.js:35
-msgid "Enter inputs using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax."
+msgid "Enter inputs using either JSON or YAML syntax. Refer to the Ansible Controller documentation for example syntax."
 msgstr ""
 
 #: screens/Inventory/shared/SmartInventoryForm.js:94
 msgid ""
 "Enter inventory variables using either JSON or YAML syntax.\n"
 "Use the radio button to toggle between the two. Refer to the\n"
-"Ansible Tower documentation for example syntax."
+"Ansible Controller documentation for example syntax."
 msgstr ""
 
 #: screens/Inventory/shared/InventoryForm.js:65
-#~ msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax"
-#~ msgstr ""
+msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Controller documentation for example syntax"
+msgstr ""
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:181
 #~ msgid "Enter one Annotation Tag per line, without commas."
@@ -6218,8 +6218,8 @@ msgstr ""
 #~ "documentation for example syntax."
 #~ msgstr ""
 
-#: screens/Template/shared/WorkflowJobTemplate.helptext.js:14
-msgid "Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentation for example syntax."
+#: screens/Template/shared/WorkflowJobTemplateForm.js:215
+msgid "Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Controller documentation for example syntax."
 msgstr ""
 
 #: screens/Job/Job.helptext.js:12
@@ -6441,7 +6441,7 @@ msgid ""
 "Populate the hosts for this inventory by using a search\n"
 "filter. Example: ansible_facts__ansible_distribution:\"RedHat\".\n"
 "Refer to the documentation for further syntax and\n"
-"examples.  Refer to the Ansible Tower documentation for further syntax and\n"
+"examples.  Refer to the Ansible Controller documentation for further syntax and\n"
 "examples."
 msgstr ""
 
@@ -7943,7 +7943,7 @@ msgstr ""
 msgid ""
 "Skip tags are useful when you have a large\n"
 "playbook, and you want to skip specific parts of a play or task.\n"
-"Use commas to separate multiple tags. Refer to Ansible Tower\n"
+"Use commas to separate multiple tags. Refer to Ansible Controller\n"
 "documentation for details on the usage of tags."
 msgstr ""
 
@@ -8127,7 +8127,7 @@ msgstr ""
 #: screens/NotificationTemplate/shared/Notifications.helptext.js:30
 msgid ""
 "Specify HTTP Headers in JSON format. Refer to\n"
-"the Ansible Tower documentation for example syntax."
+"the Ansible Controller documentation for example syntax."
 msgstr ""
 
 #: screens/NotificationTemplate/shared/Notifications.helptext.js:24
@@ -8474,7 +8474,7 @@ msgstr ""
 msgid ""
 "Tags are useful when you have a large\n"
 "playbook, and you want to run a specific part of a play or task.\n"
-"Use commas to separate multiple tags. Refer to Ansible Tower\n"
+"Use commas to separate multiple tags. Refer to Ansible Controller\n"
 "documentation for details on the usage of tags."
 msgstr ""
 

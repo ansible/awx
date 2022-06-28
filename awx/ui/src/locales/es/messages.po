@@ -413,8 +413,8 @@ msgid "An inventory must be selected"
 msgstr "Debe seleccionar un inventario"
 
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:96
-msgid "Ansible Tower Documentation."
-msgstr "Documentación de Ansible Tower."
+msgid "Ansible Controller Documentation."
+msgstr "Documentación de Ansible Controller."
 
 #: screens/Template/Survey/SurveyQuestionForm.js:43
 msgid "Answer type"
@@ -1063,9 +1063,9 @@ msgstr "Elegir un método HTTP"
 #: screens/Template/Survey/SurveyQuestionForm.js:46
 msgid ""
 "Choose an answer type or format you want as the prompt for the user.\n"
-"Refer to the Ansible Tower Documentation for more additional\n"
+"Refer to the Ansible Controller Documentation for more additional\n"
 "information about each option."
-msgstr "Elija el tipo o formato de respuesta que desee como indicador para el usuario. Consulte la documentación de Ansible Tower para obtener más información sobre cada una de las opciones."
+msgstr "Elija el tipo o formato de respuesta que desee como indicador para el usuario. Consulte la documentación de Ansible Controller para obtener más información sobre cada una de las opciones."
 
 #: components/AddRole/SelectRoleStep.js:20
 msgid "Choose roles to apply to the selected resources.  Note that all selected roles will be applied to all selected resources."
@@ -2774,26 +2774,25 @@ msgid "Enter at least one search filter to create a new Smart Inventory"
 msgstr "Ingresar al menos un filtro de búsqueda para crear un nuevo inventario inteligente"
 
 #: screens/CredentialType/shared/CredentialTypeForm.js:43
-msgid "Enter injectors using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax."
-msgstr "Ingrese inyectores a través de la sintaxis JSON o YAML. Consulte la documentación de Ansible Tower para ver la sintaxis de ejemplo."
+msgid "Enter injectors using either JSON or YAML syntax. Refer to the Ansible Controller documentation for example syntax."
+msgstr "Ingrese inyectores a través de la sintaxis JSON o YAML. Consulte la documentación de Ansible Controller para ver la sintaxis de ejemplo."
 
 #: screens/CredentialType/shared/CredentialTypeForm.js:35
-msgid "Enter inputs using either JSON or YAML syntax. Refer to the Ansible Tower documentation for example syntax."
-msgstr "Ingrese entradas a través de la sintaxis JSON o YAML. Consulte la documentación de Ansible Tower para ver la sintaxis de ejemplo."
+msgid "Enter inputs using either JSON or YAML syntax. Refer to the Ansible Controller documentation for example syntax."
+msgstr "Ingrese entradas a través de la sintaxis JSON o YAML. Consulte la documentación de Ansible Controller para ver la sintaxis de ejemplo."
 
 #: screens/Inventory/shared/SmartInventoryForm.js:94
 msgid ""
 "Enter inventory variables using either JSON or YAML syntax.\n"
 "Use the radio button to toggle between the two. Refer to the\n"
-"Ansible Tower documentation for example syntax."
-msgstr ""
-"Ingrese variables de inventario mediante el uso de la sintaxis JSON o YAML.\n"
+"Ansible Controller documentation for example syntax."
+msgstr "Ingrese variables de inventario mediante el uso de la sintaxis JSON o YAML.\n"
 "Utilice el botón de selección para alternar entre las dos opciones. Consulte la\n"
-"documentación de Ansible Tower para acceder a ejemplos de sintaxis."
+"documentación de Ansible Controller para acceder a ejemplos de sintaxis."
 
 #: screens/Inventory/shared/InventoryForm.js:92
-#~ msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax"
-#~ msgstr "Ingrese variables de inventario mediante el uso de la sintaxis JSON o YAML. Utilice el botón de selección para alternar entre las dos opciones. Consulte la documentación de Ansible Tower para acceder a ejemplos de sintaxis"
+msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Controller documentation for example syntax"
+msgstr "Ingrese variables de inventario mediante el uso de la sintaxis JSON o YAML. Utilice el botón de selección para alternar entre las dos opciones. Consulte la documentación de Ansible Controller para acceder a ejemplos de sintaxis"
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:181
 #~ msgid "Enter one Annotation Tag per line, without commas."
@@ -6258,20 +6257,19 @@ msgid "Pass extra command line changes. There are two ansible command line param
 msgstr "Trasladar cambios adicionales en la línea de comandos. Hay dos parámetros de línea de comandos de Ansible:"
 
 #: screens/Template/shared/JobTemplateForm.js:413
-#~ msgid ""
-#~ "Pass extra command line variables to the playbook. This is the\n"
-#~ "-e or --extra-vars command line parameter for ansible-playbook.\n"
-#~ "Provide key/value pairs using either YAML or JSON. Refer to the\n"
-#~ "documentation for example syntax."
-#~ msgstr ""
-#~ "Traslade variables de línea de comando adicionales al playbook. Este es el\n"
-#~ "parámetro de línea de comando -e o --extra-vars para el playbook de Ansible.\n"
-#~ "Proporcione pares de claves/valores utilizando YAML o JSON. Consulte la\n"
-#~ "documentación para ver ejemplos de sintaxis."
+msgid ""
+"Pass extra command line variables to the playbook. This is the\n"
+"-e or --extra-vars command line parameter for ansible-playbook.\n"
+"Provide key/value pairs using either YAML or JSON. Refer to the\n"
+"documentation for example syntax."
+msgstr "Traslade variables de línea de comando adicionales al playbook. Este es el\n"
+"parámetro de línea de comando -e o --extra-vars para el playbook de Ansible.\n"
+"Proporcione pares de claves/valores utilizando YAML o JSON. Consulte la\n"
+"documentación para ver ejemplos de sintaxis."
 
-#: screens/Template/shared/WorkflowJobTemplate.helptext.js:14
-msgid "Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentation for example syntax."
-msgstr "Traslade variables de línea de comando adicionales al cuaderno de estrategias. Este es el parámetro de línea de comando -e o --extra-vars para el cuaderno de estrategias de Ansible. Proporcione pares de claves/valores utilizando YAML o JSON. Consulte la documentación de Ansible Tower para ver ejemplos de sintaxis."
+#: screens/Template/shared/WorkflowJobTemplateForm.js:215
+msgid "Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Controller documentation for example syntax."
+msgstr "Traslade variables de línea de comando adicionales al cuaderno de estrategias. Este es el parámetro de línea de comando -e o --extra-vars para el cuaderno de estrategias de Ansible. Proporcione pares de claves/valores utilizando YAML o JSON. Consulte la documentación de Ansible Controller para ver ejemplos de sintaxis."
 
 #: screens/Job/Job.helptext.js:12
 #: screens/Template/shared/JobTemplate.helptext.js:13
@@ -6483,13 +6481,13 @@ msgid ""
 "Populate the hosts for this inventory by using a search\n"
 "filter. Example: ansible_facts__ansible_distribution:\"RedHat\".\n"
 "Refer to the documentation for further syntax and\n"
-"examples.  Refer to the Ansible Tower documentation for further syntax and\n"
+"examples.  Refer to the Ansible Controller documentation for further syntax and\n"
 "examples."
 msgstr ""
 "Complete los hosts para este inventario utilizando un filtro de búsqueda\n"
 "de búsqueda. Ejemplo: ansible_facts.ansible_distribution: \"RedHat\".\n"
 "Consulte la documentación para obtener más sintaxis y\n"
-"ejemplos. Consulte la documentación de Ansible Tower para obtener más sintaxis y\n"
+"ejemplos. Consulte la documentación de Ansible Controller para obtener más sintaxis y\n"
 "ejemplos."
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:164
@@ -8008,13 +8006,13 @@ msgstr "Omitir etiquetas"
 msgid ""
 "Skip tags are useful when you have a large\n"
 "playbook, and you want to skip specific parts of a play or task.\n"
-"Use commas to separate multiple tags. Refer to Ansible Tower\n"
+"Use commas to separate multiple tags. Refer to Ansible Controller\n"
 "documentation for details on the usage of tags."
 msgstr ""
 "La omisión de etiquetas resulta útil cuando tiene un playbook\n"
 "de gran tamaño y desea omitir partes específicas de la tarea o la jugada.\n"
 "Utilice comas para separar las distintas etiquetas. Consulte la documentación\n"
-"de Ansible Tower para obtener información detallada sobre el uso de etiquetas."
+"de Ansible Controller para obtener información detallada sobre el uso de etiquetas."
 
 #: screens/Job/Job.helptext.js:19
 #: screens/Template/shared/JobTemplate.helptext.js:21
@@ -8187,10 +8185,9 @@ msgstr "Fuentes"
 #: screens/NotificationTemplate/shared/Notifications.helptext.js:30
 msgid ""
 "Specify HTTP Headers in JSON format. Refer to\n"
-"the Ansible Tower documentation for example syntax."
-msgstr ""
-"Especifique los encabezados HTTP en formato JSON. Consulte la\n"
-"documentación de Ansible Tower para obtener ejemplos de sintaxis."
+"the Ansible Controller documentation for example syntax."
+msgstr "Especifique los encabezados HTTP en formato JSON. Consulte la\n"
+"documentación de Ansible Controller para obtener ejemplos de sintaxis."
 
 #: screens/NotificationTemplate/shared/Notifications.helptext.js:24
 msgid ""
@@ -8536,12 +8533,12 @@ msgstr "Pestañas"
 msgid ""
 "Tags are useful when you have a large\n"
 "playbook, and you want to run a specific part of a play or task.\n"
-"Use commas to separate multiple tags. Refer to Ansible Tower\n"
+"Use commas to separate multiple tags. Refer to Ansible Controller\n"
 "documentation for details on the usage of tags."
 msgstr ""
 "Las etiquetas resultan útiles cuando tiene un playbook de gran tamaño\n"
 "y desea ejecutar una parte específica de la tarea o la jugada. Utilice comas\n"
-"para separar varias etiquetas. Consulte la documentación de Ansible Tower\n"
+"para separar varias etiquetas. Consulte la documentación de Ansible Controller\n"
 "para obtener información detallada sobre el uso de etiquetas."
 
 #: screens/Job/Job.helptext.js:18

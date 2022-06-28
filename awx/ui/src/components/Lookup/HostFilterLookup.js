@@ -349,7 +349,7 @@ function HostFilterLookup({
           content={t`Populate the hosts for this inventory by using a search
               filter. Example: ansible_facts__ansible_distribution:"RedHat".
               Refer to the documentation for further syntax and
-              examples.  Refer to the Ansible Tower documentation for further syntax and
+              examples.  Refer to the Ansible Controller documentation for further syntax and
               examples.`}
         />
       }
