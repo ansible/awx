@@ -432,6 +432,10 @@ class AutoscalePool(WorkerPool):
             idx = random.choice(range(len(self.workers)))
             self.write(idx, m)
 
+        # if we are not in the dangerous situation of queue backup then clear old waiting jobs
+        if self.workers and max(len(w.managed_tasks) for w in self.workers) <= 1:
+            reaper.reap_waiting()
+
         # if the database says a job is running on this node, but it's *not*,
         # then reap it
         running_uuids = []
