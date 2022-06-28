@@ -163,6 +163,7 @@
     - name: Disable a schedule
       schedule:
         name: "{{ sched1 }}"
+        unified_job_template: "{{ jt1 }}"
         state: present
         enabled: "false"
       register: result
@@ -187,6 +188,29 @@
         unified_job_template: "{{ jt2 }}"
         rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
       register: result
+
+    - name: Verify we can't find the schedule without the UJT lookup
+      schedule:
+        name: "{{ sched1 }}"
+        state: present
+        rrule: "DTSTART:20201219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
+      register: result
+      ignore_errors: true
+
+    - assert:
+        that:
+          - result is failed
+
+    - name: Verify we can find the schedule with the UJT lookup and delete it
+      schedule:
+        name: "{{ sched1 }}"
+        state: absent
+        unified_job_template: "{{ jt2 }}"
+      register: result
+
+    - assert:
+        that:
+          - result is changed
 
   always:
     - name: Delete the schedule

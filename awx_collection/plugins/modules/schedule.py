@@ -105,7 +105,7 @@ options:
         - 5
     unified_job_template:
       description:
-        - Name of unified job template to schedule.
+        - Name of unified job template to schedule. Used to look up an already existing schedule.
       required: False
       type: str
     organization:
@@ -158,6 +158,12 @@ EXAMPLES = '''
         every: 1
         on_days: 'sunday'
         include: False
+
+- name: Delete 'my_schedule' schedule for my_workflow
+  schedule:
+    name: "my_schedule"
+    state: absent
+    unified_job_template: my_workflow
 '''
 
 from ..module_utils.controller_api import ControllerAPIModule
@@ -214,14 +220,16 @@ def main():
     if inventory:
         inventory_id = module.resolve_name_to_id('inventories', inventory)
     search_fields = {}
+    sched_search_fields = {}
     if organization:
         search_fields['organization'] = module.resolve_name_to_id('organizations', organization)
     unified_job_template_id = None
     if unified_job_template:
         search_fields['name'] = unified_job_template
         unified_job_template_id = module.get_one('unified_job_templates', **{'data': search_fields})['id']
+        sched_search_fields['unified_job_template'] = unified_job_template_id
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('schedules', name_or_id=name)
+    existing_item = module.get_one('schedules', name_or_id=name, **{'data': sched_search_fields})
 
     association_fields = {}
 
