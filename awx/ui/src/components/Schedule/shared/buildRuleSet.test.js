@@ -190,7 +190,6 @@ describe('buildRuleSet', () => {
     const ruleSet = buildRuleSet(values);
     expect(ruleSet.toString()).toEqual(`DTSTART:20220613T123000Z
 RRULE:INTERVAL=1;FREQ=MINUTELY
-DTSTART:20220613T123000Z
 RRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=2;BYDAY=MO`);
   });
 });

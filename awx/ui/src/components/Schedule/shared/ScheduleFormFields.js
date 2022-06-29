@@ -151,7 +151,6 @@ export default function ScheduleFormFields({
           <Title size="md" headingLevel="h4">
             {t`Frequency Details`}
           </Title>
-          {/* TODO: sort into predictable/logical order */}
           {frequency.value.map((val) => (
             <FormColumnLayout key={val} stacked>
               <FrequencyDetailSubform

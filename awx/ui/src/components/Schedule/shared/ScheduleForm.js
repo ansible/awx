@@ -336,7 +336,7 @@ function ScheduleForm({
     initialValues.daysToKeep = initialDaysToKeep;
   }
 
-  let overriddenValues;
+  let overriddenValues = {};
   if (schedule.rrule) {
     // if (schedule.rrule.split(/\s+/).length > 2) {
     //   return (
@@ -369,7 +369,6 @@ function ScheduleForm({
     try {
       // TODO: memoize?
       overriddenValues = parseRuleObj(schedule);
-      console.log(overriddenValues);
     } catch (error) {
       rruleError = error;
     }
@@ -397,41 +396,38 @@ function ScheduleForm({
         options.runOn === 'day' &&
         (options.runOnDayNumber < 1 || options.runOnDayNumber > 31)
       ) {
-        errors.frequencyOptions[
-          freq
-        ].runOn = t`Please select a day number between 1 and 31.`;
+        freqErrors.runOn = t`Please select a day number between 1 and 31.`;
       }
 
-      if (options.end !== 'onDate') {
-        return;
+      if (options.end === 'after' && !options.occurrences) {
+        freqErrors.occurrences = t`Please enter a number of occurrences.`;
       }
 
-      if (
-        DateTime.fromISO(values.startDate) >= DateTime.fromISO(options.endDate)
-      ) {
-        errors.frequencyOptions[
-          freq
-        ].endDate = t`Please select an end date/time that comes after the start date/time.`;
-      }
+      if (options.end === 'onDate') {
+        if (
+          DateTime.fromISO(values.startDate) >=
+          DateTime.fromISO(options.endDate)
+        ) {
+          freqErrors.endDate = t`Please select an end date/time that comes after the start date/time.`;
+        }
 
-      if (
-        DateTime.fromISO(options.endDate)
-          .diff(DateTime.fromISO(values.startDate), 'days')
-          .toObject().days < NUM_DAYS_PER_FREQUENCY[freq]
-      ) {
-        const rule = new RRule(
-          buildRuleObj({
-            startDate: values.startDate,
-            startTime: values.startTime,
-            frequency: freq,
-            ...options,
-          })
-        );
-        if (rule.all().length === 0) {
-          errors.startDate = t`Selected date range must have at least 1 schedule occurrence.`;
-          errors.frequencyOptions[
-            freq
-          ].endDate = t`Selected date range must have at least 1 schedule occurrence.`;
+        if (
+          DateTime.fromISO(options.endDate)
+            .diff(DateTime.fromISO(values.startDate), 'days')
+            .toObject().days < NUM_DAYS_PER_FREQUENCY[freq]
+        ) {
+          const rule = new RRule(
+            buildRuleObj({
+              startDate: values.startDate,
+              startTime: values.startTime,
+              frequency: freq,
+              ...options,
+            })
+          );
+          if (rule.all().length === 0) {
+            errors.startDate = t`Selected date range must have at least 1 schedule occurrence.`;
+            freqErrors.endDate = t`Selected date range must have at least 1 schedule occurrence.`;
+          }
         }
       }
       if (Object.keys(freqErrors).length > 0) {
@@ -449,7 +445,18 @@ function ScheduleForm({
     <Config>
       {() => (
         <Formik
-          initialValues={Object.assign(initialValues, overriddenValues)}
+          initialValues={{
+            ...initialValues,
+            ...overriddenValues,
+            frequencyOptions: {
+              ...initialValues.frequencyOptions,
+              ...overriddenValues.frequencyOptions,
+            },
+            exceptionOptions: {
+              ...initialValues.exceptionOptions,
+              ...overriddenValues.exceptionOptions,
+            },
+          }}
           onSubmit={(values) => {
             submitSchedule(values, launchConfig, surveyConfig, credentials);
           }}

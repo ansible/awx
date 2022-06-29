@@ -1,5 +1,6 @@
 import { RRule, rrulestr } from 'rrule';
 import { dateToInputDateTime } from 'util/dates';
+import { DateTime } from 'luxon';
 import sortFrequencies from './sortFrequencies';
 
 export default function parseRuleObj(schedule) {
@@ -62,16 +63,32 @@ function parseRrule(rruleString, schedule, values) {
       count,
       freq,
       interval,
+      until,
     },
   } = RRule.fromString(rruleString);
 
-  const options = {};
+  const now = DateTime.now();
+  const closestQuarterHour = DateTime.fromMillis(
+    Math.ceil(now.ts / 900000) * 900000
+  );
+  const tomorrow = closestQuarterHour.plus({ days: 1 });
+  const [, time] = dateToInputDateTime(closestQuarterHour.toISO());
+  const [tomorrowDate] = dateToInputDateTime(tomorrow.toISO());
 
-  if (schedule.until) {
+  const options = {
+    endDate: tomorrowDate,
+    endTime: time,
+    occurrences: 1,
+    interval: 1,
+    end: 'never',
+  };
+
+  if (until) {
     options.end = 'onDate';
-
-    // options.endDate = ?;
-    // options.endTime = ?;
+    const end = new DateTime(until);
+    const [endDate, endTime] = dateToInputDateTime(end, schedule.timezone);
+    options.endDate = endDate;
+    options.endTime = endTime;
   } else if (count) {
     options.end = 'after';
     options.occurrences = count;
@@ -89,26 +106,44 @@ function parseRrule(rruleString, schedule, values) {
     throw new Error(`Duplicate frequency types not supported (${frequency})`);
   }
 
-  if (frequency === RRule.WEEKLY && byweekday) {
+  if (freq === RRule.WEEKLY && byweekday) {
     options.daysOfWeek = byweekday;
   }
-  if (frequency === RRule.MONTHLY && bymonthday) {
-    options.runOnDayNumber = bymonthday;
+
+  if (freq === RRule.MONTHLY) {
+    options.runOn = 'day';
+    options.runOnTheOccurrence = 1;
+    options.runOnTheDay = 'sunday';
+    options.runOnDayNumber = 1;
+
+    if (bymonthday) {
+      options.runOnDayNumber = bymonthday;
+    }
+    if (bysetpos) {
+      options.runOn = 'the';
+      options.runOnTheOccurrence = bysetpos;
+      options.runOnTheDay = generateRunOnTheDay(byweekday);
+    }
   }
-  if (frequency === RRule.MONTHLY && bysetpos) {
-    options.runOn = 'the';
-    options.runOnTheOccurrence = bysetpos;
-    options.runOnTheDay = generateRunOnTheDay(byweekday);
-  }
-  if (frequency === RRule.YEARLY && bymonthday) {
-    options.runOnDayNumber = bymonthday;
-    options.runOnDayMonth = bymonth;
-  }
-  if (frequency === RRule.YEARLY && bysetpos) {
-    options.runOn = 'the';
-    options.runOnTheOccurrence = bysetpos;
-    options.runOnTheDay = generateRunOnTheDay(byweekday);
-    options.runOnTheMonth = bymonth;
+
+  if (freq === RRule.YEARLY) {
+    options.runOn = 'day';
+    options.runOnTheOccurrence = 1;
+    options.runOnTheDay = 'sunday';
+    options.runOnTheMonth = 1;
+    options.runOnDayMonth = 1;
+    options.runOnDayNumber = 1;
+
+    if (bymonthday) {
+      options.runOnDayNumber = bymonthday;
+      options.runOnDayMonth = bymonth;
+    }
+    if (bysetpos) {
+      options.runOn = 'the';
+      options.runOnTheOccurrence = bysetpos;
+      options.runOnTheDay = generateRunOnTheDay(byweekday);
+      options.runOnTheMonth = bymonth;
+    }
   }
 
   return {

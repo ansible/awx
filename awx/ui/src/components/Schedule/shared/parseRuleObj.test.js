@@ -1,8 +1,19 @@
 import UnifiedJobTemplates from 'api/models/UnifiedJobTemplates';
 import parseRuleObj from './parseRuleObj';
+import { DateTime, Settings } from 'luxon';
 
 describe(parseRuleObj, () => {
-  test('should parse recurring rrule', () => {
+  let origNow = Settings.now;
+  beforeEach(() => {
+    const expectedNow = DateTime.local(2022, 6, 1, 13, 0, 0);
+    Settings.now = () => expectedNow.toMillis();
+  });
+
+  afterEach(() => {
+    Settings.now = origNow;
+  });
+
+  test('should parse weekly recurring rrule', () => {
     const schedule = {
       rrule:
         'DTSTART;TZID=America/New_York:20220608T123000 RRULE:INTERVAL=1;FREQ=WEEKLY;BYDAY=MO',
@@ -21,10 +32,15 @@ describe(parseRuleObj, () => {
       frequencyOptions: {
         week: {
           interval: 1,
-          daysOfWeek: [{ weekday: 0, n: undefined }],
           end: 'never',
+          occurrences: 1,
+          endDate: '2022-06-02',
+          endTime: '1:00 PM',
+          daysOfWeek: [{ weekday: 0, n: undefined }],
         },
       },
+      exceptionFrequency: [],
+      exceptionOptions: {},
     });
   });
 
@@ -43,6 +59,9 @@ describe(parseRuleObj, () => {
       startDate: '2022-06-10',
       startTime: '1:00 PM',
       frequency: [],
+      frequencyOptions: {},
+      exceptionFrequency: [],
+      exceptionOptions: {},
     });
   });
 });

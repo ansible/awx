@@ -8,16 +8,18 @@ const parseTime = (time) => [
   DateTime.fromFormat(time, 'h:mm a').minute,
 ];
 
-export default function buildRuleObj(values) {
-  // Dates are formatted like "YYYY-MM-DD"
-  const [startYear, startMonth, startDay] = values.startDate.split('-');
-  // Times are formatted like "HH:MM:SS" or "HH:MM" if no seconds
-  // have been specified
-  const [startHour, startMinute] = parseTime(values.startTime);
-
+export default function buildRuleObj(values, includeStart) {
   const ruleObj = {
     interval: values.interval,
-    dtstart: new Date(
+  };
+
+  if (includeStart) {
+    // Dates are formatted like "YYYY-MM-DD"
+    const [startYear, startMonth, startDay] = values.startDate.split('-');
+    // Times are formatted like "HH:MM:SS" or "HH:MM" if no seconds
+    // have been specified
+    const [startHour, startMinute] = parseTime(values.startTime);
+    ruleObj.dtstart = new Date(
       Date.UTC(
         startYear,
         parseInt(startMonth, 10) - 1,
@@ -25,9 +27,9 @@ export default function buildRuleObj(values) {
         startHour,
         startMinute
       )
-    ),
-    tzid: values.timezone,
-  };
+    );
+    ruleObj.tzid = values.timezone;
+  }
 
   switch (values.frequency) {
     case 'none':

@@ -54,7 +54,7 @@ function SchedulePromptableFields({
         runOnDayNumber: values.runOnDayNumber,
         runOnTheDay: values.runOnTheDay,
         runOnTheMonth: values.runOnTheMonth,
-        runOnTheOccurence: values.runOnTheOccurance,
+        runOnTheOccurrence: values.runOnTheOccurrance,
         startDateTime: values.startDateTime,
         timezone: values.timezone,
       },
