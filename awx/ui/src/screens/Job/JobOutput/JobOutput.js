@@ -687,6 +687,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
               ) {
                 return (
                   <EmptyOutput
+                    job={job}
                     hasQueryParams={location.search.length > 1}
                     isJobRunning={isJobRunning(jobStatus)}
                     onUnmount={() => {
