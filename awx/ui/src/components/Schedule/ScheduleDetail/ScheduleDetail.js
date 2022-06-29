@@ -24,6 +24,8 @@ import ErrorDetail from '../../ErrorDetail';
 import ChipGroup from '../../ChipGroup';
 import { VariablesDetail } from '../../CodeEditor';
 import { VERBOSITY } from '../../VerbositySelectField';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
+import { useConfig } from 'contexts/Config';
 
 const PromptDivider = styled(Divider)`
   margin-top: var(--pf-global--spacer--lg);
@@ -39,7 +41,6 @@ const PromptTitle = styled(Title)`
 const PromptDetailList = styled(DetailList)`
   padding: 0px 20px;
 `;
-
 function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
   const {
     id,
@@ -67,6 +68,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
   const history = useHistory();
   const { pathname } = useLocation();
   const pathRoot = pathname.substr(0, pathname.indexOf('schedules'));
+  const config = useConfig();
 
   const {
     request: deleteSchedule,
@@ -260,7 +262,25 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
           value={formatDateString(next_run, timezone)}
         />
         <Detail label={t`Last Run`} value={formatDateString(dtend, timezone)} />
-        <Detail label={t`Local Time Zone`} value={timezone} />
+        <Detail 
+          label={t`Local Time Zone`} 
+          value={timezone} 
+          helpText={
+            <>
+              <span>{t`Refer to the`} </span>
+              <a
+                href={`${getDocsBaseUrl(
+                  config
+                )}/html/userguide/scheduling.html`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {t`documentation`}
+              </a>
+              {' '}{t`for more information.`}
+            </>
+          }
+        />
         <Detail label={t`Repeat Frequency`} value={repeatFrequency} />
         {hasDaysToKeepField ? (
           <Detail label={t`Days of Data to Keep`} value={daysToKeep} />

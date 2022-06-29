@@ -33,6 +33,9 @@ import FrequencyDetailSubform from './FrequencyDetailSubform';
 import SchedulePromptableFields from './SchedulePromptableFields';
 import DateTimePicker from './DateTimePicker';
 import buildRuleObj from './buildRuleObj';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
+import { useConfig } from 'contexts/Config';
+import Popover from '../../Popover';
 
 const NUM_DAYS_PER_FREQUENCY = {
   week: 7,
@@ -118,6 +121,9 @@ function ScheduleFormFields({ hasDaysToKeepField, zoneOptions, zoneLinks }) {
   } else if (timezoneMessage) {
     timezoneValidatedStatus = 'warning';
   }
+
+  const config = useConfig();
+
   return (
     <>
       <FormField
@@ -147,6 +153,21 @@ function ScheduleFormFields({ hasDaysToKeepField, zoneOptions, zoneLinks }) {
         validated={timezoneValidatedStatus}
         label={t`Local time zone`}
         helperText={timezoneMessage}
+        labelIcon={<Popover content={
+          <>
+            <span>{t`Refer to the`} </span>
+            <a
+              href={`${getDocsBaseUrl(
+                config
+              )}/html/userguide/scheduling.html`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {t`documentation`}
+            </a>
+            {' '}{t`for more information.`}
+          </>}
+        />}
       >
         <AnsibleSelect
           id="schedule-timezone"
