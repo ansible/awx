@@ -43,7 +43,7 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     xmlsec1-devel \
     xmlsec1-openssl-devel
 
-RUN pip3 install virtualenv
+RUN pip3 install virtualenv setuptools_scm build
 
 
 # Install & build requirements
