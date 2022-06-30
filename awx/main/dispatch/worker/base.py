@@ -169,8 +169,9 @@ class AWXConsumerPG(AWXConsumerBase):
                     logger.exception(f"Error consuming new events from postgres, will retry for {self.pg_max_wait} s")
                     self.pg_down_time = time.time()
                     self.pg_is_down = True
-                if time.time() - self.pg_down_time > self.pg_max_wait:
-                    logger.warning(f"Postgres event consumer has not recovered in {self.pg_max_wait} s, exiting")
+                current_downtime = time.time() - self.pg_down_time
+                if current_downtime > self.pg_max_wait:
+                    logger.exception(f"Postgres event consumer has not recovered in {current_downtime} s, exiting")
                     raise
                 # Wait for a second before next attempt, but still listen for any shutdown signals
                 for i in range(10):
@@ -179,6 +180,10 @@ class AWXConsumerPG(AWXConsumerBase):
                     time.sleep(0.1)
                 for conn in db.connections.all():
                     conn.close_if_unusable_or_obsolete()
+            except Exception:
+                # Log unanticipated exception in addition to writing to stderr to get timestamps and other metadata
+                logger.exception('Encountered unhandled error in dispatcher main loop')
+                raise
 
 
 class BaseWorker(object):

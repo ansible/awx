@@ -10,6 +10,27 @@ from awx.main.models import Instance, UnifiedJob, WorkflowJob
 logger = logging.getLogger('awx.main.dispatch')
 
 
+def startup_reaping():
+    """
+    If this particular instance is starting, then we know that any running jobs are invalid
+    so we will reap those jobs as a special action here
+    """
+    me = Instance.objects.me()
+    jobs = UnifiedJob.objects.filter(status='running', controller_node=me.hostname)
+    job_ids = []
+    for j in jobs:
+        job_ids.append(j.id)
+        j.status = 'failed'
+        j.start_args = ''
+        j.job_explanation += 'Task was marked as running at system start up. The system must have not shut down properly, so it has been marked as failed.'
+        j.save(update_fields=['status', 'start_args', 'job_explanation'])
+        if hasattr(j, 'send_notification_templates'):
+            j.send_notification_templates('failed')
+        j.websocket_emit_status('failed')
+    if job_ids:
+        logger.error(f'Unified jobs {job_ids} were reaped on dispatch startup')
+
+
 def reap_job(j, status):
     if UnifiedJob.objects.get(id=j.id).status not in ('running', 'waiting'):
         # just in case, don't reap jobs that aren't running

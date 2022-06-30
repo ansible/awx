@@ -3,6 +3,8 @@ from django.db import transaction, DatabaseError, InterfaceError
 import logging
 import time
 
+from awx.main.tasks.signals import signal_callback
+
 
 logger = logging.getLogger('awx.main.tasks.utils')
 
@@ -37,7 +39,10 @@ def update_model(model, pk, _attempt=0, _max_attempts=5, select_for_update=False
         # Attempt to retry the update, assuming we haven't already
         # tried too many times.
         if _attempt < _max_attempts:
-            time.sleep(5)
+            for i in range(5):
+                time.sleep(1)
+                if signal_callback():
+                    raise RuntimeError(f'Could not fetch {pk} because of receiving abort signal')
             return update_model(model, pk, _attempt=_attempt + 1, _max_attempts=_max_attempts, **updates)
         else:
             logger.error('Failed to update %s after %d retries.', model._meta.object_name, _attempt)
