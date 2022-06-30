@@ -164,6 +164,9 @@ describe('<ScheduleDetail />', () => {
     expect(
       wrapper.find('Detail[label="Local Time Zone"]').find('dd').text()
     ).toBe('America/New_York');
+    expect(
+      wrapper.find('Detail[label="Local Time Zone"]').prop('helpText')
+    ).toBeDefined();
     expect(wrapper.find('Detail[label="Repeat Frequency"]').length).toBe(1);
     expect(wrapper.find('Detail[label="Created"]').length).toBe(1);
     expect(wrapper.find('Detail[label="Last Modified"]').length).toBe(1);
