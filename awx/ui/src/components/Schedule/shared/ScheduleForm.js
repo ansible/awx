@@ -14,12 +14,13 @@ import {
   // To be removed once UI completes complex schedules
   Alert,
 } from '@patternfly/react-core';
-import { Config } from 'contexts/Config';
+import { Config, useConfig } from 'contexts/Config';
 import { SchedulesAPI } from 'api';
 import { dateToInputDateTime } from 'util/dates';
 import useRequest from 'hooks/useRequest';
 import { required } from 'util/validators';
 import { parseVariableField } from 'util/yaml';
+import Popover from '../../Popover';
 import AnsibleSelect from '../../AnsibleSelect';
 import ContentError from '../../ContentError';
 import ContentLoading from '../../ContentLoading';
@@ -33,9 +34,7 @@ import FrequencyDetailSubform from './FrequencyDetailSubform';
 import SchedulePromptableFields from './SchedulePromptableFields';
 import DateTimePicker from './DateTimePicker';
 import buildRuleObj from './buildRuleObj';
-import getDocsBaseUrl from 'util/getDocsBaseUrl';
-import { useConfig } from 'contexts/Config';
-import Popover from '../../Popover';
+import helpText from '../../../screens/Template/shared/JobTemplate.helptext';
 
 const NUM_DAYS_PER_FREQUENCY = {
   week: 7,
@@ -153,21 +152,7 @@ function ScheduleFormFields({ hasDaysToKeepField, zoneOptions, zoneLinks }) {
         validated={timezoneValidatedStatus}
         label={t`Local time zone`}
         helperText={timezoneMessage}
-        labelIcon={<Popover content={
-          <>
-            <span>{t`Refer to the`} </span>
-            <a
-              href={`${getDocsBaseUrl(
-                config
-              )}/html/userguide/scheduling.html`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {t`documentation`}
-            </a>
-            {' '}{t`for more information.`}
-          </>}
-        />}
+        labelIcon={<Popover content={helpText.localTimeZone(config)} />}
       >
         <AnsibleSelect
           id="schedule-timezone"

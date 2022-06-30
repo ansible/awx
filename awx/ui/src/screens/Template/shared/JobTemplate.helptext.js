@@ -1,5 +1,6 @@
 import React from 'react';
 import { t } from '@lingui/macro';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
 
 const jtHelpTextStrings = {
   jobType: t`For job templates, select run to execute the playbook. Select check to only check playbook syntax, test environment setup, and report problems without executing the playbook.`,
@@ -44,6 +45,19 @@ const jtHelpTextStrings = {
       {t`The number of parallel or simultaneous processes to use while executing the playbook. An empty value, or a value less than 1 will use the Ansible default which is usually 5. The default number of forks can be overwritten with a change to`}{' '}
       <code>ansible.cfg</code>.{' '}
       {t`Refer to the Ansible documentation for details about the configuration file.`}
+    </span>
+  ),
+  localTimeZone: (config = '') => (
+    <span>
+      {t`Refer to the`}{' '}
+      <a
+        href={`${getDocsBaseUrl(config)}/html/userguide/scheduling.html`}
+        target="_blank"
+        rel="noreferrer"
+      >
+        {t`documentation`}
+      </a>{' '}
+      {t`for more information.`}
     </span>
   ),
 };

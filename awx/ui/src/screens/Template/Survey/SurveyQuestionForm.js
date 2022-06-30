@@ -267,8 +267,8 @@ function SurveyQuestionForm({
                       rel="noreferrer"
                     >
                       {t`documentation`}
-                    </a>
-                    {' '}{t`for more information.`}
+                    </a>{' '}
+                    {t`for more information.`}
                   </>
                 }
               />

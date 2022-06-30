@@ -11,6 +11,7 @@ import { formatDateString } from 'util/dates';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { JobTemplatesAPI, SchedulesAPI, WorkflowJobTemplatesAPI } from 'api';
 import { parseVariableField, jsonToYaml } from 'util/yaml';
+import { useConfig } from 'contexts/Config';
 import AlertModal from '../../AlertModal';
 import { CardBody, CardActionsRow } from '../../Card';
 import ContentError from '../../ContentError';
@@ -24,8 +25,7 @@ import ErrorDetail from '../../ErrorDetail';
 import ChipGroup from '../../ChipGroup';
 import { VariablesDetail } from '../../CodeEditor';
 import { VERBOSITY } from '../../VerbositySelectField';
-import getDocsBaseUrl from 'util/getDocsBaseUrl';
-import { useConfig } from 'contexts/Config';
+import helpText from '../../../screens/Template/shared/JobTemplate.helptext';
 
 const PromptDivider = styled(Divider)`
   margin-top: var(--pf-global--spacer--lg);
@@ -262,24 +262,10 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
           value={formatDateString(next_run, timezone)}
         />
         <Detail label={t`Last Run`} value={formatDateString(dtend, timezone)} />
-        <Detail 
-          label={t`Local Time Zone`} 
-          value={timezone} 
-          helpText={
-            <>
-              <span>{t`Refer to the`} </span>
-              <a
-                href={`${getDocsBaseUrl(
-                  config
-                )}/html/userguide/scheduling.html`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {t`documentation`}
-              </a>
-              {' '}{t`for more information.`}
-            </>
-          }
+        <Detail
+          label={t`Local Time Zone`}
+          value={timezone}
+          helpText={helpText.localTimeZone(config)}
         />
         <Detail label={t`Repeat Frequency`} value={repeatFrequency} />
         {hasDaysToKeepField ? (
