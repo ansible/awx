@@ -25,7 +25,6 @@ analytics_logger = logging.getLogger('awx.analytics.job_events')
 
 logger = logging.getLogger('awx.main.models.events')
 
-
 __all__ = ['JobEvent', 'ProjectUpdateEvent', 'AdHocCommandEvent', 'InventoryUpdateEvent', 'SystemJobEvent']
 
 
@@ -486,12 +485,14 @@ class JobEvent(BasePlaybookEvent):
         editable=False,
         db_index=False,
     )
-    host = models.ForeignKey(
-        'Host',
-        related_name='job_events_as_primary_host',
+    # When we partitioned the table we accidentally "lost" the foreign key constraint.
+    # However this is good because the cascade on delete at the django layer was causing DB issues
+    # And instead of remaking this foreign key and doing a DB cascade on delete
+    #  we are going to allow for referential inconsistency because massive jobs may take some time
+    #  for the cascading to complete at any layer.
+    host = models.IntegerField(
         null=True,
         default=None,
-        on_delete=models.SET_NULL,
         editable=False,
     )
     host_name = models.CharField(
@@ -505,6 +506,14 @@ class JobEvent(BasePlaybookEvent):
         editable=False,
     )
     job_created = models.DateTimeField(null=True, editable=False)
+
+    def __init__(self, *args, **kwargs):
+        r = super(JobEvent, self).__init__(*args, **kwargs)
+        # Because host used to be a foreign key there was a host_id field.
+        # Now that its an integer field we want to add a host_id field to this object
+        #   for backwards compatibility
+        self.host_id = self.host
+        return r
 
     def get_absolute_url(self, request=None):
         return reverse('api:job_event_detail', kwargs={'pk': self.pk}, request=request)
@@ -794,6 +803,10 @@ class AdHocCommandEvent(BaseCommandEvent):
         editable=False,
         db_index=False,
     )
+    # We need to keep this as an FK in the model because AdHocCommand uses a ManyToMany field
+    #   to hosts through adhoc_events. But in https://github.com/ansible/awx/pull/8236/ we
+    #   removed the nulling of the field in case of a host going away before an event is saved
+    #   so we need to not make it a DB enforced FK.
     host = models.ForeignKey(
         'Host',
         related_name='ad_hoc_command_events',

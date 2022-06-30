@@ -427,7 +427,6 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
                     continue
                 summary_fields[fk] = OrderedDict()
                 for field in related_fields:
-
                     fval = getattr(fkval, field, None)
 
                     if fval is None and field == 'type':
@@ -3954,12 +3953,23 @@ class JobEventSerializer(BaseSerializer):
         res = super(JobEventSerializer, self).get_related(obj)
         res.update(dict(job=self.reverse('api:job_detail', kwargs={'pk': obj.job_id})))
         res['children'] = self.reverse('api:job_event_children_list', kwargs={'pk': obj.pk})
-        if obj.host_id:
-            res['host'] = self.reverse('api:host_detail', kwargs={'pk': obj.host_id})
+        if getattr(obj, 'host_id', None):
+            try:
+                Host.objects.get(id=obj.host_id)
+                res['host'] = self.reverse('api:host_detail', kwargs={'pk': obj.host_id})
+            except ObjectDoesNotExist:
+                pass
         return res
 
     def get_summary_fields(self, obj):
         d = super(JobEventSerializer, self).get_summary_fields(obj)
+        if getattr(obj, 'host_id', None):
+            try:
+                host = Host.objects.get(id=obj.host_id)
+                for field in SUMMARIZABLE_FK_FIELDS['host']:
+                    d['host'][field] = getattr(host, field, None)
+            except ObjectDoesNotExist:
+                pass
         try:
             d['job']['job_template_id'] = obj.job.job_template.id
             d['job']['job_template_name'] = obj.job.job_template.name
