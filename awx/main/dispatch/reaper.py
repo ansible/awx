@@ -22,7 +22,7 @@ def startup_reaping():
         job_ids.append(j.id)
         j.status = 'failed'
         j.start_args = ''
-        j.job_explanation += 'Task was marked as running on system startup, so it has been marked as failed.'
+        j.job_explanation += 'Task was marked as running at system start up. The system must have previously not shut down properly, so it has been marked as failed.'
         j.save(update_fields=['status', 'start_args', 'job_explanation'])
         if hasattr(j, 'send_notification_templates'):
             j.send_notification_templates('failed')
