@@ -90,8 +90,6 @@ function ScheduleEdit({
       };
       delete requestData.startDate;
       delete requestData.startTime;
-      delete requestData.endDate;
-      delete requestData.endTime;
 
       if (Object.keys(values).includes('daysToKeep')) {
         if (!requestData.extra_data) {

@@ -29,7 +29,23 @@ export default function parseRuleObj(schedule) {
     }
   });
 
+  if (isSingleOccurrence(values)) {
+    values.frequency = [];
+    values.frequencyOptions = {};
+  }
+
   return values;
+}
+
+function isSingleOccurrence(values) {
+  if (values.frequency.length > 1) {
+    return false;
+  }
+  if (values.frequency[0] !== 'minute') {
+    return false;
+  }
+  const options = values.frequencyOptions.minute;
+  return options.end === 'after' && options.occurrences === 1;
 }
 
 function parseDtstart(schedule, values) {

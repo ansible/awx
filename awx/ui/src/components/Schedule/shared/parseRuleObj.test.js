@@ -55,7 +55,6 @@ describe(parseRuleObj, () => {
     };
 
     expect(parseRuleObj(schedule)).toEqual({
-      end: 'after',
       startDate: '2022-06-10',
       startTime: '1:00 PM',
       frequency: [],

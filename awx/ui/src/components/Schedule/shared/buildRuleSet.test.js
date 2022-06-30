@@ -192,4 +192,17 @@ describe('buildRuleSet', () => {
 RRULE:INTERVAL=1;FREQ=MINUTELY
 RRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=2;BYDAY=MO`);
   });
+
+  test('should build single occurence', () => {
+    const values = {
+      startDate: '2022-06-13',
+      startTime: '12:30 PM',
+      frequency: [],
+      frequencyOptions: {},
+    };
+
+    const ruleSet = buildRuleSet(values);
+    expect(ruleSet.toString()).toEqual(`DTSTART:20220613T123000Z
+RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY`);
+  });
 });
