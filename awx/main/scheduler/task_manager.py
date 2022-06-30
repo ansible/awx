@@ -258,8 +258,12 @@ class WorkflowManager(TaskBase):
                 task.save(update_fields=['status', 'job_explanation', 'timed_out'])
 
     @timeit
+    def get_tasks(self):
+        return self.get_running_workflow_jobs()
+
+    @timeit
     def _schedule(self):
-        running_workflow_tasks = self.get_running_workflow_jobs()
+        running_workflow_tasks = self.get_tasks()
         if len(running_workflow_tasks) > 0:
             self.process_finished_workflow_jobs(running_workflow_tasks)
 
