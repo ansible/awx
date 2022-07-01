@@ -109,7 +109,12 @@ class TaskBase:
         self.record_aggregate_metrics()
         sys.exit(1)
 
-    def schedule(self):
+    def schedule(self, debug=False):
+
+        if settings.SETTINGS_MODULE == 'awx.settings.development' and settings.AWX_DISABLE_TASK_MANAGERS and not debug:
+            logger.debug(f"Not running {self.prefix} scheduler, AWX_DISABLE_TASK_MANAGERS is True. Trigger with GET to /api/{self.prefix}_manager_debug/")
+            return
+
         # Lock
         with advisory_lock(f"{self.prefix}_lock", wait=False) as acquired:
             with transaction.atomic():
