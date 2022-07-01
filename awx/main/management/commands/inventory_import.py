@@ -862,7 +862,7 @@ class Command(BaseCommand):
                     overwrite_vars=bool(options.get('overwrite_vars', False)),
                 )
                 inventory_update = inventory_source.create_inventory_update(
-                    _eager_fields=dict(job_args=json.dumps(sys.argv), job_env=dict(os.environ.items()), job_cwd=os.getcwd())
+                    _eager_fields=dict(status='running', job_args=json.dumps(sys.argv), job_env=dict(os.environ.items()), job_cwd=os.getcwd())
                 )
 
             data = AnsibleInventoryLoader(source=source, verbosity=verbosity).load()
