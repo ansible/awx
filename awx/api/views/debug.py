@@ -16,7 +16,7 @@ class TaskManagerDebugView(APIView):
     prefix = 'Task'
 
     def get(self, request):
-        TaskManager().schedule(debug=True)
+        TaskManager().schedule()
         if not settings.AWX_DISABLE_TASK_MANAGERS:
             msg = f"Running {self.prefix} manager. To disable other triggers to the {self.prefix} manager, set AWX_DISABLE_TASK_MANAGERS to True"
         else:
@@ -31,7 +31,7 @@ class DependencyManagerDebugView(APIView):
     prefix = 'Dependency'
 
     def get(self, request):
-        DependencyManager().schedule(debug=True)
+        DependencyManager().schedule()
         if not settings.AWX_DISABLE_TASK_MANAGERS:
             msg = f"Running {self.prefix} manager. To disable other triggers to the {self.prefix} manager, set AWX_DISABLE_TASK_MANAGERS to True"
         else:
@@ -46,7 +46,7 @@ class WorkflowManagerDebugView(APIView):
     prefix = 'Workflow'
 
     def get(self, request):
-        WorkflowManager().schedule(debug=True)
+        WorkflowManager().schedule()
         if not settings.AWX_DISABLE_TASK_MANAGERS:
             msg = f"Running {self.prefix} manager. To disable other triggers to the {self.prefix} manager, set AWX_DISABLE_TASK_MANAGERS to True"
         else:
