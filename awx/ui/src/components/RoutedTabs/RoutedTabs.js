@@ -1,14 +1,24 @@
 import React from 'react';
 import { shape, string, number, arrayOf, node, oneOfType } from 'prop-types';
-import { Tab, Tabs, TabTitleText } from '@patternfly/react-core';
+import {
+  Tab as PFTab,
+  Tabs as PFTabs,
+  TabTitleText,
+} from '@patternfly/react-core';
 import { useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
-const Wrapper = styled.div`
-  display: flex;
+const Tabs = styled(PFTabs)`
+  & > ul {
+    flex-grow: 1;
+  }
 `;
 
-function RoutedTabs({ tabsArray, isWorkflow, children }) {
+const Tab = styled(PFTab)`
+  ${(props) => props.hasstyle && `${props.hasstyle}`}
+`;
+
+function RoutedTabs({ tabsArray }) {
   const history = useHistory();
   const location = useLocation();
 
@@ -36,28 +46,7 @@ function RoutedTabs({ tabsArray, isWorkflow, children }) {
       history.push(link);
     }
   };
-  return children ? (
-    <Wrapper>
-      <Tabs
-        activeKey={getActiveTabId()}
-        onSelect={handleTabSelect}
-        ouiaId="routed-tabs"
-      >
-        {tabsArray.map((tab) => (
-          <Tab
-            aria-label={typeof tab.name === 'string' ? tab.name : null}
-            eventKey={tab.id}
-            key={tab.id}
-            href={`#${tab.link}`}
-            title={<TabTitleText>{tab.name}</TabTitleText>}
-            aria-controls=""
-            ouiaId={`${tab.name}-tab`}
-          />
-        ))}
-      </Tabs>
-      {children}
-    </Wrapper>
-  ) : (
+  return (
     <Tabs
       activeKey={getActiveTabId()}
       onSelect={handleTabSelect}
@@ -68,10 +57,11 @@ function RoutedTabs({ tabsArray, isWorkflow, children }) {
           aria-label={typeof tab.name === 'string' ? tab.name : null}
           eventKey={tab.id}
           key={tab.id}
-          href={`#${tab.link}`}
+          href={!tab.hasstyle && `#${tab.link}`}
           title={<TabTitleText>{tab.name}</TabTitleText>}
           aria-controls=""
           ouiaId={`${tab.name}-tab`}
+          hasstyle={tab.hasstyle}
         />
       ))}
     </Tabs>
@@ -82,7 +72,6 @@ RoutedTabs.propTypes = {
   tabsArray: arrayOf(
     shape({
       id: number.isRequired,
-      link: string.isRequired,
       name: oneOfType([string.isRequired, node.isRequired]),
     })
   ).isRequired,
