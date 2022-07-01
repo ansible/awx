@@ -78,18 +78,6 @@ include(optional('/etc/tower/conf.d/*.py'), scope=locals())
 BASE_VENV_PATH = "/var/lib/awx/venv/"
 AWX_VENV_PATH = os.path.join(BASE_VENV_PATH, "awx")
 
-# If any local_*.py files are present in awx/settings/, use them to override
-# default settings for development.  If not present, we can still run using
-# only the defaults.
-try:
-    if os.getenv('AWX_KUBE_DEVEL', False):
-        include(optional('minikube.py'), scope=locals())
-    else:
-        include(optional('local_*.py'), scope=locals())
-except ImportError:
-    traceback.print_exc()
-    sys.exit(1)
-
 # Use SQLite for unit tests instead of PostgreSQL.  If the lines below are
 # commented out, Django will create the test_awx-dev database in PostgreSQL to
 # run unit tests.
@@ -114,8 +102,22 @@ AWX_CALLBACK_PROFILE = True
 # Disable normal scheduled/triggered task managers (DependencyManager, TaskManager, WorkflowManager).
 # Allows user to trigger task managers directly for debugging and profiling purposes.
 # Only works in combination with settings.SETTINGS_MODULE == 'awx.settings.development'
-AWX_DISABLE_TASK_MANAGERS = os.getenv('AWX_DISABLE_TASK_MANAGERS', False)
+AWX_DISABLE_TASK_MANAGERS = False
 # ======================!!!!!!! FOR DEVELOPMENT ONLY !!!!!!!=================================
 
 if 'sqlite3' not in DATABASES['default']['ENGINE']:  # noqa
     DATABASES['default'].setdefault('OPTIONS', dict()).setdefault('application_name', f'{CLUSTER_HOST_ID}-{os.getpid()}-{" ".join(sys.argv)}'[:63])  # noqa
+
+
+# If any local_*.py files are present in awx/settings/, use them to override
+# default settings for development.  If not present, we can still run using
+# only the defaults.
+# this needs to stay at the bottom of this file
+try:
+    if os.getenv('AWX_KUBE_DEVEL', False):
+        include(optional('minikube.py'), scope=locals())
+    else:
+        include(optional('local_*.py'), scope=locals())
+except ImportError:
+    traceback.print_exc()
+    sys.exit(1)
