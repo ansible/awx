@@ -5,6 +5,7 @@ from __future__ import absolute_import, unicode_literals
 from django.conf import settings
 from django.urls import include, re_path
 
+from awx import MODE
 from awx.api.generics import LoggedLoginView, LoggedLogoutView
 from awx.api.views import (
     ApiRootView,
@@ -145,7 +146,12 @@ urlpatterns = [
     re_path(r'^logout/$', LoggedLogoutView.as_view(next_page='/api/', redirect_field_name='next'), name='logout'),
     re_path(r'^o/', include(oauth2_root_urls)),
 ]
-if settings.SETTINGS_MODULE == 'awx.settings.development':
+if MODE == 'development':
+    # Only include these if we are in the development environment
     from awx.api.swagger import SwaggerSchemaView
 
     urlpatterns += [re_path(r'^swagger/$', SwaggerSchemaView.as_view(), name='swagger_view')]
+
+    from awx.api.urls.debug import urls as debug_urls
+
+    urlpatterns += [re_path(r'^debug/', include(debug_urls))]
