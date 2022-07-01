@@ -110,5 +110,12 @@ CLUSTER_HOST_ID = socket.gethostname()
 
 AWX_CALLBACK_PROFILE = True
 
+# ======================!!!!!!! FOR DEVELOPMENT ONLY !!!!!!!=================================
+# Disable normal scheduled/triggered task managers (DependencyManager, TaskManager, WorkflowManager).
+# Allows user to trigger task managers directly for debugging and profiling purposes.
+# Only works in combination with settings.SETTINGS_MODULE == 'awx.settings.development'
+AWX_DISABLE_TASK_MANAGERS = os.getenv('AWX_DISABLE_TASK_MANAGERS', False)
+# ======================!!!!!!! FOR DEVELOPMENT ONLY !!!!!!!=================================
+
 if 'sqlite3' not in DATABASES['default']['ENGINE']:  # noqa
     DATABASES['default'].setdefault('OPTIONS', dict()).setdefault('application_name', f'{CLUSTER_HOST_ID}-{os.getpid()}-{" ".join(sys.argv)}'[:63])  # noqa
