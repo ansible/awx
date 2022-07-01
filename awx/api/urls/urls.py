@@ -149,3 +149,7 @@ if settings.SETTINGS_MODULE == 'awx.settings.development':
     from awx.api.swagger import SwaggerSchemaView
 
     urlpatterns += [re_path(r'^swagger/$', SwaggerSchemaView.as_view(), name='swagger_view')]
+
+    from awx.api.urls.debug import urls as debug_urls
+
+    urlpatterns += [re_path(r'^debug/', include(debug_urls))]
