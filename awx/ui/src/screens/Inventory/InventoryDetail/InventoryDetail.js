@@ -79,28 +79,29 @@ function InventoryDetail({ inventory }) {
           }
         />
         <Detail label={t`Total hosts`} value={inventory.total_hosts} />
-        <Detail
-          fullWidth
-          label={t`Instance Groups`}
-          value={
-            <ChipGroup
-              numChips={5}
-              totalChips={instanceGroups?.length}
-              ouiaId="instance-group-chips"
-            >
-              {instanceGroups?.map((ig) => (
-                <Chip
-                  key={ig.id}
-                  isReadOnly
-                  ouiaId={`instance-group-${ig.id}-chip`}
-                >
-                  {ig.name}
-                </Chip>
-              ))}
-            </ChipGroup>
-          }
-          isEmpty={instanceGroups?.length === 0}
-        />
+        {instanceGroups && instanceGroups.length > 0 && (
+          <Detail
+            fullWidth
+            label={t`Instance Groups`}
+            value={
+              <ChipGroup
+                numChips={5}
+                totalChips={instanceGroups?.length}
+                ouiaId="instance-group-chips"
+              >
+                {instanceGroups?.map((ig) => (
+                  <Chip
+                    key={ig.id}
+                    isReadOnly
+                    ouiaId={`instance-group-${ig.id}-chip`}
+                  >
+                    {ig.name}
+                  </Chip>
+                ))}
+              </ChipGroup>
+            }
+          />
+        )}
         {inventory.summary_fields.labels && (
           <Detail
             fullWidth
@@ -109,9 +110,9 @@ function InventoryDetail({ inventory }) {
             value={
               <ChipGroup
                 numChips={5}
-                totalChips={inventory.summary_fields.labels.results.length}
+                totalChips={inventory.summary_fields.labels?.results?.length}
               >
-                {inventory.summary_fields.labels.results.map((l) => (
+                {inventory.summary_fields.labels?.results?.map((l) => (
                   <Chip key={l.id} isReadOnly>
                     {l.name}
                   </Chip>

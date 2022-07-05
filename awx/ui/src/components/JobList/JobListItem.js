@@ -163,16 +163,16 @@ function JobListItem({
         <Td colSpan={showTypeColumn ? 6 : 5}>
           <ExpandableRowContent>
             <DetailList>
-              {job.type === 'inventory_update' &&
-                inventorySourceLabels.length > 0 && (
-                  <Detail
-                    dataCy="job-inventory-source-type"
-                    label={t`Source`}
-                    value={inventorySourceLabels.map(([string, label]) =>
-                      string === job.source ? label : null
-                    )}
-                  />
-                )}
+              {job.type === 'inventory_update' && (
+                <Detail
+                  dataCy="job-inventory-source-type"
+                  label={t`Source`}
+                  value={inventorySourceLabels?.map(([string, label]) =>
+                    string === job.source ? label : null
+                  )}
+                  isEmpty={inventorySourceLabels?.length === 0}
+                />
+              )}
               <LaunchedByDetail job={job} />
               {job.launch_type === 'scheduled' &&
                 (schedule ? (
@@ -254,7 +254,7 @@ function JobListItem({
                     dataCy={`execution-environment-detail-${job.id}`}
                   />
                 )}
-              {credentials && credentials.length > 0 && (
+              {credentials && (
                 <Detail
                   fullWidth
                   label={t`Credentials`}
@@ -275,6 +275,7 @@ function JobListItem({
                       ))}
                     </ChipGroup>
                   }
+                  isEmpty={credentials.length === 0}
                 />
               )}
               {labels && labels.count > 0 && (

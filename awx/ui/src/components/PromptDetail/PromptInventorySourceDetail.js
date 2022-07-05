@@ -116,7 +116,7 @@ function PromptInventorySourceDetail({ resource }) {
       <Detail
         fullWidth
         label={t`Credential`}
-        value={summary_fields.credentials.map((cred) => (
+        value={summary_fields?.credentials?.map((cred) => (
           <CredentialChip key={cred?.id} credential={cred} isReadOnly />
         ))}
         isEmpty={summary_fields?.credentials?.length === 0}

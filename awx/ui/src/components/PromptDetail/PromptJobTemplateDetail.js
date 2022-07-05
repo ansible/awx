@@ -182,40 +182,44 @@ function PromptJobTemplateDetail({ resource }) {
         />
       )}
       {optionsList && <Detail label={t`Enabled Options`} value={optionsList} />}
-      <Detail
-        fullWidth
-        label={t`Credentials`}
-        value={
-          <ChipGroup
-            numChips={5}
-            totalChips={summary_fields.credentials.length}
-            ouiaId="prompt-jt-credential-chips"
-          >
-            {summary_fields.credentials.map((cred) => (
-              <CredentialChip key={cred.id} credential={cred} isReadOnly />
-            ))}
-          </ChipGroup>
-        }
-        isEmpty={summary_fields?.credentials?.length === 0}
-      />
-      <Detail
-        fullWidth
-        label={t`Labels`}
-        value={
-          <ChipGroup
-            numChips={5}
-            totalChips={summary_fields.labels.results.length}
-            ouiaId="prompt-jt-label-chips"
-          >
-            {summary_fields.labels.results.map((label) => (
-              <Chip key={label.id} isReadOnly>
-                {label.name}
-              </Chip>
-            ))}
-          </ChipGroup>
-        }
-        isEmpty={summary_fields?.labels?.results?.length === 0}
-      />
+      {summary_fields?.credentials && (
+        <Detail
+          fullWidth
+          label={t`Credentials`}
+          value={
+            <ChipGroup
+              numChips={5}
+              totalChips={summary_fields.credentials.length}
+              ouiaId="prompt-jt-credential-chips"
+            >
+              {summary_fields.credentials.map((cred) => (
+                <CredentialChip key={cred.id} credential={cred} isReadOnly />
+              ))}
+            </ChipGroup>
+          }
+          isEmpty={summary_fields?.credentials?.length === 0}
+        />
+      )}
+      {summary_fields?.labels?.results && (
+        <Detail
+          fullWidth
+          label={t`Labels`}
+          value={
+            <ChipGroup
+              numChips={5}
+              totalChips={summary_fields.labels.results.length}
+              ouiaId="prompt-jt-label-chips"
+            >
+              {summary_fields.labels.results.map((label) => (
+                <Chip key={label.id} isReadOnly>
+                  {label.name}
+                </Chip>
+              ))}
+            </ChipGroup>
+          }
+          isEmpty={summary_fields?.labels?.results?.length === 0}
+        />
+      )}
       <Detail
         fullWidth
         label={t`Instance Groups`}
@@ -234,42 +238,46 @@ function PromptJobTemplateDetail({ resource }) {
         }
         isEmpty={instance_groups?.length === 0}
       />
-      <Detail
-        fullWidth
-        label={t`Job Tags`}
-        value={
-          <ChipGroup
-            numChips={5}
-            totalChips={job_tags.split(',').length}
-            ouiaId="prompt-jt-job-tag-chips"
-          >
-            {job_tags.split(',').map((jobTag) => (
-              <Chip key={jobTag} isReadOnly>
-                {jobTag}
-              </Chip>
-            ))}
-          </ChipGroup>
-        }
-        isEmpty={job_tags?.length === 0}
-      />
-      <Detail
-        fullWidth
-        label={t`Skip Tags`}
-        value={
-          <ChipGroup
-            numChips={5}
-            totalChips={skip_tags.split(',').length}
-            ouiaId="prompt-jt-skip-tag-chips"
-          >
-            {skip_tags.split(',').map((skipTag) => (
-              <Chip key={skipTag} isReadOnly>
-                {skipTag}
-              </Chip>
-            ))}
-          </ChipGroup>
-        }
-        isEmpty={skip_tags?.length === 0}
-      />
+      {job_tags && (
+        <Detail
+          fullWidth
+          label={t`Job Tags`}
+          value={
+            <ChipGroup
+              numChips={5}
+              totalChips={job_tags.split(',').length}
+              ouiaId="prompt-jt-job-tag-chips"
+            >
+              {job_tags.split(',').map((jobTag) => (
+                <Chip key={jobTag} isReadOnly>
+                  {jobTag}
+                </Chip>
+              ))}
+            </ChipGroup>
+          }
+          isEmpty={job_tags?.length === 0}
+        />
+      )}
+      {skip_tags && (
+        <Detail
+          fullWidth
+          label={t`Skip Tags`}
+          value={
+            <ChipGroup
+              numChips={5}
+              totalChips={skip_tags.split(',').length}
+              ouiaId="prompt-jt-skip-tag-chips"
+            >
+              {skip_tags.split(',').map((skipTag) => (
+                <Chip key={skipTag} isReadOnly>
+                  {skipTag}
+                </Chip>
+              ))}
+            </ChipGroup>
+          }
+          isEmpty={skip_tags?.length === 0}
+        />
+      )}
       {extra_vars && (
         <VariablesDetail
           label={t`Variables`}

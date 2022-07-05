@@ -110,24 +110,26 @@ function PromptWFJobTemplateDetail({ resource }) {
           }
         />
       )}
-      <Detail
-        fullWidth
-        label={t`Labels`}
-        value={
-          <ChipGroup
-            numChips={5}
-            totalChips={summary_fields.labels.results.length}
-            ouiaId="prompt-wf-jt-label-chips"
-          >
-            {summary_fields.labels.results.map((label) => (
-              <Chip key={label.id} isReadOnly>
-                {label.name}
-              </Chip>
-            ))}
-          </ChipGroup>
-        }
-        isEmpty={summary_fields?.labels?.results?.length === 0}
-      />
+      {summary_fields?.labels?.results && (
+        <Detail
+          fullWidth
+          label={t`Labels`}
+          value={
+            <ChipGroup
+              numChips={5}
+              totalChips={summary_fields.labels.results.length}
+              ouiaId="prompt-wf-jt-label-chips"
+            >
+              {summary_fields.labels.results.map((label) => (
+                <Chip key={label.id} isReadOnly>
+                  {label.name}
+                </Chip>
+              ))}
+            </ChipGroup>
+          }
+          isEmpty={summary_fields?.labels?.results?.length === 0}
+        />
+      )}
       {extra_vars && (
         <VariablesDetail
           label={t`Variables`}
