@@ -1,5 +1,4 @@
 import React from 'react';
-import { CSSTransition } from 'react-transition-group';
 import { Link } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
@@ -28,28 +27,31 @@ import JobCancelButton from '../JobCancelButton';
 const Dash = styled.span``;
 const addRow = keyframes`
   0% {
+    padding-top: 0;
+    padding-buttom: 0;
     transform: scale(1, 0);
     line-height: 0px;
     visibility: collapse;
   }
   100% {
+    padding-top: 24px;
+    padding-buttom: 24px;
     transform: scale(1, 1);
-    line-height: 18px; /* font-size(16px) + border-top(1px) + border-bottom(1px) */
+    line-height: 24px;
     visibility: visible;
   }
 `;
 
 const Tr = styled(PFTr)`
-  &.jobItem-enter-done {
+  &.isNew > td {
     transition-duration: 1s;
-    animation: ${addRow} 500ms 1 ease-in-out;
+    animation: ${addRow} 700ms 1 ease-in;
     transform-origin: top;
   }
 `;
 
 function JobListItem({
   isExpanded,
-  inProp,
   onExpand,
   job,
   rowIndex,
@@ -90,101 +92,98 @@ function JobListItem({
 
   return (
     <>
-    <CSSTransition
-      classNames = "jobItem"
-      timeout={500}
-      in={inProp}
-    >
-          <Tr id={`job-row-${job.id}`} ouiaId={`job-row-${job.id}`}>
-            <Td
-              expand={{
-                rowIndex: job.id,
-                isExpanded,
-                onToggle: onExpand,
-              }}
-            />
-            <Td
-              select={{
-                rowIndex,
-                isSelected,
-                onSelect,
-              }}
-              dataLabel={t`Select`}
-            />
-            <TdBreakWord id={labelId} dataLabel={t`Name`}>
-              <span>
-                <Link to={`/jobs/${JOB_TYPE_URL_SEGMENTS[job.type]}/${job.id}`}>
-                  <b>
-                    {job.id} <Dash>&mdash;</Dash> {job.name}
-                  </b>
-                </Link>
-              </span>
-            </TdBreakWord>
-            <Td dataLabel={t`Status`}>
-              {job.status && <StatusLabel status={job.status} />}
-            </Td>
-            {showTypeColumn && <Td dataLabel={t`Type`}>{jobTypes[job.type]}</Td>}
-            <Td dataLabel={t`Start Time`}>{formatDateString(job.started)}</Td>
-            <Td dataLabel={t`Finish Time`}>
-              {job.finished ? formatDateString(job.finished) : ''}
-            </Td>
-            <ActionsTd dataLabel={t`Actions`}>
-              <ActionItem
-                visible={
-                  ['pending', 'waiting', 'running'].includes(job.status) &&
-                  (job.type === 'system_job' ? isSuperUser : true)
-                }
-              >
-                <JobCancelButton
-                  job={job}
-                  errorTitle={t`Job Cancel Error`}
-                  title={t`Cancel ${job.name}`}
-                  errorMessage={t`Failed to cancel ${job.name}`}
-                  showIconButton
-                />
-              </ActionItem>
-              <ActionItem
-                visible={
-                  job.type !== 'system_job' &&
-                  job.summary_fields?.user_capabilities?.start
-                }
-                tooltip={
-                  job.status === 'failed' && job.type === 'job'
-                    ? t`Relaunch using host parameters`
-                    : t`Relaunch Job`
-                }
-              >
-                {job.status === 'failed' && job.type === 'job' ? (
-                  <LaunchButton resource={job}>
-                    {({ handleRelaunch, isLaunching }) => (
-                      <ReLaunchDropDown
-                        handleRelaunch={handleRelaunch}
-                        isLaunching={isLaunching}
-                        id={`relaunch-job-${job.id}`}
-                      />
-                    )}
-                  </LaunchButton>
-                ) : (
-                  <LaunchButton resource={job}>
-                    {({ handleRelaunch, isLaunching }) => (
-                      <Button
-                        ouiaId={`${job.id}-relaunch-button`}
-                        variant="plain"
-                        onClick={() => handleRelaunch()}
-                        aria-label={t`Relaunch`}
-                        isDisabled={isLaunching}
-                      >
-                        <RocketIcon />
-                      </Button>
-                    )}
-                  </LaunchButton>
-                )}
-              </ActionItem>
-            </ActionsTd>
-          </Tr>
-    </CSSTransition>
       <Tr
-        key = {job.id}
+        id={`job-row-${job.id}`}
+        ouiaId={`job-row-${job.id}`}
+        className={job.isNew ? 'isNew' : null}
+      >
+        <Td
+          expand={{
+            rowIndex: job.id,
+            isExpanded,
+            onToggle: onExpand,
+          }}
+        />
+        <Td
+          select={{
+            rowIndex,
+            isSelected,
+            onSelect,
+          }}
+          dataLabel={t`Select`}
+        />
+        <TdBreakWord id={labelId} dataLabel={t`Name`}>
+          <span>
+            <Link to={`/jobs/${JOB_TYPE_URL_SEGMENTS[job.type]}/${job.id}`}>
+              <b>
+                {job.id} <Dash>&mdash;</Dash> {job.name}
+              </b>
+            </Link>
+          </span>
+        </TdBreakWord>
+        <Td dataLabel={t`Status`}>
+          {job.status && <StatusLabel status={job.status} />}
+        </Td>
+        {showTypeColumn && <Td dataLabel={t`Type`}>{jobTypes[job.type]}</Td>}
+        <Td dataLabel={t`Start Time`}>{formatDateString(job.started)}</Td>
+        <Td dataLabel={t`Finish Time`}>
+          {job.finished ? formatDateString(job.finished) : ''}
+        </Td>
+        <ActionsTd dataLabel={t`Actions`}>
+          <ActionItem
+            visible={
+              ['pending', 'waiting', 'running'].includes(job.status) &&
+              (job.type === 'system_job' ? isSuperUser : true)
+            }
+          >
+            <JobCancelButton
+              job={job}
+              errorTitle={t`Job Cancel Error`}
+              title={t`Cancel ${job.name}`}
+              errorMessage={t`Failed to cancel ${job.name}`}
+              showIconButton
+            />
+          </ActionItem>
+          <ActionItem
+            visible={
+              job.type !== 'system_job' &&
+              job.summary_fields?.user_capabilities?.start
+            }
+            tooltip={
+              job.status === 'failed' && job.type === 'job'
+                ? t`Relaunch using host parameters`
+                : t`Relaunch Job`
+            }
+          >
+            {job.status === 'failed' && job.type === 'job' ? (
+              <LaunchButton resource={job}>
+                {({ handleRelaunch, isLaunching }) => (
+                  <ReLaunchDropDown
+                    handleRelaunch={handleRelaunch}
+                    isLaunching={isLaunching}
+                    id={`relaunch-job-${job.id}`}
+                  />
+                )}
+              </LaunchButton>
+            ) : (
+              <LaunchButton resource={job}>
+                {({ handleRelaunch, isLaunching }) => (
+                  <Button
+                    ouiaId={`${job.id}-relaunch-button`}
+                    variant="plain"
+                    onClick={() => handleRelaunch()}
+                    aria-label={t`Relaunch`}
+                    isDisabled={isLaunching}
+                  >
+                    <RocketIcon />
+                  </Button>
+                )}
+              </LaunchButton>
+            )}
+          </ActionItem>
+        </ActionsTd>
+      </Tr>
+      <Tr
         isExpanded={isExpanded}
         id={`expanded-job-row-${job.id}`}
         ouiaId={`expanded-job-row-${job.id}`}

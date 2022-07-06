@@ -1,5 +1,4 @@
-import React, { useEffect, useCallback, useRef } from 'react';
-import { TransitionGroup } from 'react-transition-group';
+import React, { useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { t, Plural } from '@lingui/macro';
 
@@ -46,8 +45,6 @@ function JobList({
 
   const { me } = useConfig();
   const location = useLocation();
-  const inProp = useRef(false);
-
   const {
     result: {
       results,
@@ -120,7 +117,6 @@ function JobList({
   );
 
   const jobs = useWsJobs(results, fetchJobsById, qsConfig);
-  inProp.current = true;
 
   const { selected, isAllSelected, handleSelect, selectAll, clearSelected } =
     useSelected(jobs);
@@ -186,7 +182,6 @@ function JobList({
   return (
     <>
       <Card>
-        <TransitionGroup>
         <PaginatedTable
           contentError={contentError}
           hasContentLoading={isLoading || isDeleteLoading || isCancelLoading}
@@ -299,7 +294,6 @@ function JobList({
           )}
           renderRow={(job, index) => (
             <JobListItem
-              inProp={inProp}
               key={job.id}
               inventorySourceLabels={inventorySourceChoices}
               job={job}
@@ -313,7 +307,6 @@ function JobList({
             />
           )}
         />
-        </TransitionGroup>
       </Card>
       {deletionError && (
         <AlertModal
