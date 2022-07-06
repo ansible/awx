@@ -9,6 +9,7 @@ export default function parseRuleObj(schedule) {
     frequencyOptions: {},
     exceptionFrequency: [],
     exceptionOptions: {},
+    timezone: schedule.timezone,
   };
   const ruleset = rrulestr(schedule.rrule.replace(' ', '\n'), {
     forceset: true,
@@ -49,6 +50,7 @@ function isSingleOccurrence(values) {
 }
 
 function parseDtstart(schedule, values) {
+  // TODO: should this rely on DTSTART in rruleset rather than schedule.dtstart?
   const [startDate, startTime] = dateToInputDateTime(
     schedule.dtstart,
     schedule.timezone
@@ -101,7 +103,7 @@ function parseRrule(rruleString, schedule, values) {
 
   if (until) {
     options.end = 'onDate';
-    const end = new DateTime(until);
+    const end = DateTime.fromISO(until.toISOString());
     const [endDate, endTime] = dateToInputDateTime(end, schedule.timezone);
     options.endDate = endDate;
     options.endTime = endTime;

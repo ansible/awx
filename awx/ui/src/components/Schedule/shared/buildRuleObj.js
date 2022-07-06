@@ -11,6 +11,7 @@ const parseTime = (time) => [
 export default function buildRuleObj(values, includeStart) {
   const ruleObj = {
     interval: values.interval,
+    tzid: values.timezone,
   };
 
   if (includeStart) {
@@ -28,7 +29,6 @@ export default function buildRuleObj(values, includeStart) {
         startMinute
       )
     );
-    ruleObj.tzid = values.timezone;
   }
 
   switch (values.frequency) {
@@ -81,18 +81,28 @@ export default function buildRuleObj(values, includeStart) {
         ruleObj.count = values.occurrences;
         break;
       case 'onDate': {
-        const [endYear, endMonth, endDay] = values.endDate.split('-');
-
         const [endHour, endMinute] = parseTime(values.endTime);
-        ruleObj.until = new Date(
-          Date.UTC(
-            endYear,
-            parseInt(endMonth, 10) - 1,
-            endDay,
-            endHour,
-            endMinute
-          )
-        );
+        const localEndDate = DateTime.fromISO(`${values.endDate}T000000`);
+        const localEndTime = localEndDate.set({
+          hour: endHour,
+          minute: endMinute,
+          second: 0,
+        });
+        const utcEndTime = localEndTime.setZone('UTC');
+        ruleObj.until = utcEndTime.toJSDate();
+
+        // const [endYear, endMonth, endDay] = values.endDate.split('-');
+
+        // const [endHour, endMinute] = parseTime(values.endTime);
+        // ruleObj.until = new Date(
+        //   Date.UTC(
+        //     endYear,
+        //     parseInt(endMonth, 10) - 1,
+        //     endDay,
+        //     endHour,
+        //     endMinute
+        //   )
+        // );
         break;
       }
       default:
