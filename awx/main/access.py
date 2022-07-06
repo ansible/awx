@@ -2342,7 +2342,10 @@ class JobEventAccess(BaseAccess):
     """
 
     model = JobEvent
-    prefetch_related = ('job__job_template',)
+    prefetch_related = (
+        'job__job_template',
+        'host',
+    )
 
     def filtered_queryset(self):
         return self.model.objects.filter(
