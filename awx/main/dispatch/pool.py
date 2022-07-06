@@ -401,13 +401,15 @@ class AutoscalePool(WorkerPool):
                 # the task manager to never do more work
                 current_task = w.current_task
                 if current_task and isinstance(current_task, dict):
-                    if current_task.get('task', '').endswith('tasks.run_task_manager'):
+                    endings = ['tasks.task_manager', 'tasks.dependency_manager', 'tasks.workflow_manager']
+                    current_task_name = current_task.get('task', '')
+                    if any([current_task_name.endswith(e) for e in endings]):
                         if 'started' not in current_task:
                             w.managed_tasks[current_task['uuid']]['started'] = time.time()
                         age = time.time() - current_task['started']
                         w.managed_tasks[current_task['uuid']]['age'] = age
                         if age > (settings.TASK_MANAGER_TIMEOUT + settings.TASK_MANAGER_TIMEOUT_GRACE_PERIOD):
-                            logger.error(f'run_task_manager has held the advisory lock for {age}, sending SIGTERM to {w.pid}')  # noqa
+                            logger.error(f'{current_task_name} has held the advisory lock for {age}, sending SIGTERM to {w.pid}')  # noqa
                             os.kill(w.pid, signal.SIGTERM)
 
         for m in orphaned:

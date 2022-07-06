@@ -59,7 +59,8 @@ def timeit(func):
 
 
 class TaskBase:
-    def __init__(self):
+    def __init__(self, prefix=""):
+        self.prefix = prefix
         # initialize each metric to 0 and force metric_has_changed to true. This
         # ensures each task manager metric will be overridden when pipe_execute
         # is called later.
@@ -127,8 +128,7 @@ class TaskBase:
 
 class WorkflowManager(TaskBase):
     def __init__(self):
-        self.prefix = "workflow_manager"
-        super().__init__()
+        super().__init__(prefix="workflow_manager")
 
     @timeit
     def spawn_workflow_graph_jobs(self, workflow_jobs):
@@ -298,8 +298,7 @@ class WorkflowManager(TaskBase):
 
 class DependencyManager(TaskBase):
     def __init__(self):
-        self.prefix = "dependency_manager"
-        super().__init__()
+        super().__init__(prefix="dependency_manager")
 
     def create_project_update(self, task, project_id=None):
         if project_id is None:
@@ -497,8 +496,7 @@ class TaskManager(TaskBase):
         # 5 minutes to start pending jobs. If this limit is reached, pending jobs
         # will no longer be started and will be started on the next task manager cycle.
         self.time_delta_job_explanation = timedelta(seconds=30)
-        self.prefix = "task_manager"
-        super().__init__()
+        super().__init__(prefix="task_manager")
 
     def after_lock_init(self, all_sorted_tasks):
         """
