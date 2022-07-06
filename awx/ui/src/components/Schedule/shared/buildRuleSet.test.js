@@ -227,51 +227,8 @@ RRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=2;BYDAY=MO`);
 
     const ruleSet = buildRuleSet(values);
     expect(ruleSet.toString()).toEqual(`DTSTART;TZID=US/Eastern:20220601T123000
-RRULE:INTERVAL=2;FREQ=HOURLY;UNTIL=20260702T130000
-RRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=2;BYDAY=MO;UNTIL=20260602T130000`);
-  });
-
-  test.skip('-- experimenting --', () => {
-    const values = {
-      endDate: '2022-07-06',
-      exceptionFrequency: [],
-      exceptionOptions: {},
-      frequency: ['hour', 'month'],
-      frequencyOptions: {
-        day: {},
-        hour: {
-          end: 'onDate',
-          endDate: '2023-07-05',
-          endTime: '1:00 PM',
-          interval: 2,
-          occurrences: 1,
-        },
-        minute: {},
-        month: {
-          end: 'onDate',
-          endDate: '2023-07-05',
-          endTime: '1:00 PM',
-          interval: 1,
-          occurrences: 1,
-          runOn: 'the',
-          runOnDayNumber: 1,
-          runOnTheDay: 'monday',
-          runOnTheOccurrence: 2,
-        },
-        week: {},
-        year: {},
-      },
-      name: 'end dates',
-      startDate: '2022-06-28',
-      startTime: '1:00 PM',
-      timezone: 'US/Eastern',
-    };
-
-    const ruleSet = buildRuleSet(values);
-    // this is what the browser currently produces... incorrect & doesn't match test env?
-    expect(ruleSet.toString()).toEqual(`DTSTART;TZID=US/Eastern:20220628T130000
-RRULE:INTERVAL=2;FREQ=HOURLY;UNTIL=20230705T200000
-RRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=2;BYDAY=MO;UNTIL=20230705T200000`);
+RRULE:INTERVAL=2;FREQ=HOURLY;UNTIL=20260702T170000Z
+RRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=2;BYDAY=MO;UNTIL=20260602T170000Z`);
   });
 
   test('should build single occurence', () => {

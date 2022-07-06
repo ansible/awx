@@ -88,7 +88,6 @@ function ScheduleEdit({
         ...submitValues,
         rrule: ruleSet.toString().replace(/\n/g, ' '),
       };
-      console.log('values', values, requestData.rrule);
       delete requestData.startDate;
       delete requestData.startTime;
 

@@ -3,33 +3,43 @@ import { RRule } from 'rrule';
 import { DateTime } from 'luxon';
 import { getRRuleDayConstants } from 'util/dates';
 
+window.RRule = RRule;
+window.DateTime = DateTime;
+
 const parseTime = (time) => [
   DateTime.fromFormat(time, 'h:mm a').hour,
   DateTime.fromFormat(time, 'h:mm a').minute,
 ];
 
-export default function buildRuleObj(values, includeStart) {
+export function buildDtStartObj(values) {
+  // Dates are formatted like "YYYY-MM-DD"
+  const [startYear, startMonth, startDay] = values.startDate.split('-');
+  // Times are formatted like "HH:MM:SS" or "HH:MM" if no seconds
+  // have been specified
+  const [startHour, startMinute] = parseTime(values.startTime);
+
+  const dateString = `${startYear}${pad(startMonth)}${pad(startDay)}T${pad(
+    startHour
+  )}${pad(startMinute)}00`;
+  const rruleString = values.timezone
+    ? `DTSTART;TZID=${values.timezone}:${dateString}`
+    : `DTSTART:${dateString}Z`;
+  const rule = RRule.fromString(rruleString);
+
+  return rule;
+}
+
+function pad(num) {
+  if (typeof num === 'string') {
+    return num;
+  }
+  return num < 10 ? `0${num}` : num;
+}
+
+export default function buildRuleObj(values) {
   const ruleObj = {
     interval: values.interval,
-    tzid: values.timezone,
   };
-
-  if (includeStart) {
-    // Dates are formatted like "YYYY-MM-DD"
-    const [startYear, startMonth, startDay] = values.startDate.split('-');
-    // Times are formatted like "HH:MM:SS" or "HH:MM" if no seconds
-    // have been specified
-    const [startHour, startMinute] = parseTime(values.startTime);
-    ruleObj.dtstart = new Date(
-      Date.UTC(
-        startYear,
-        parseInt(startMonth, 10) - 1,
-        startDay,
-        startHour,
-        startMinute
-      )
-    );
-  }
 
   switch (values.frequency) {
     case 'none':
@@ -82,27 +92,15 @@ export default function buildRuleObj(values, includeStart) {
         break;
       case 'onDate': {
         const [endHour, endMinute] = parseTime(values.endTime);
-        const localEndDate = DateTime.fromISO(`${values.endDate}T000000`);
+        const localEndDate = DateTime.fromISO(`${values.endDate}T000000`, {
+          zone: values.timezone,
+        });
         const localEndTime = localEndDate.set({
           hour: endHour,
           minute: endMinute,
           second: 0,
         });
-        const utcEndTime = localEndTime.setZone('UTC');
-        ruleObj.until = utcEndTime.toJSDate();
-
-        // const [endYear, endMonth, endDay] = values.endDate.split('-');
-
-        // const [endHour, endMinute] = parseTime(values.endTime);
-        // ruleObj.until = new Date(
-        //   Date.UTC(
-        //     endYear,
-        //     parseInt(endMonth, 10) - 1,
-        //     endDay,
-        //     endHour,
-        //     endMinute
-        //   )
-        // );
+        ruleObj.until = localEndTime.toJSDate();
         break;
       }
       default:
