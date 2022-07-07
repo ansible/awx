@@ -2,7 +2,6 @@
 # All Rights Reserved.
 
 from __future__ import absolute_import, unicode_literals
-from django.conf import settings
 from django.urls import include, re_path
 
 from awx import MODE
