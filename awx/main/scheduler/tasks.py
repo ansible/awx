@@ -43,7 +43,7 @@ def workflow_manager():
 
 def run_task_manager():
     if MODE == 'development' and settings.AWX_DISABLE_TASK_MANAGERS:
-        logger.debug(f"Not running task managers, AWX_DISABLE_TASK_MANAGERS is True. Trigger with GET to /api/debug/{prefix}_manager/")
+        logger.debug("Not running task managers, AWX_DISABLE_TASK_MANAGERS is True. Trigger with GET to /api/debug/{prefix}_manager/")
         return
     task_manager()
     dependency_manager()
