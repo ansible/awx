@@ -19,14 +19,12 @@ from django.conf import settings
 # AWX
 from awx.main.dispatch.reaper import reap_job
 from awx.main.models import (
-    AdHocCommand,
     Instance,
     InventorySource,
     InventoryUpdate,
     Job,
     Project,
     ProjectUpdate,
-    SystemJob,
     UnifiedJob,
     WorkflowApproval,
     WorkflowJob,
