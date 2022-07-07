@@ -1,21 +1,22 @@
-/* eslint-disable no-undef */
-importScripts('https://d3js.org/d3-collection.v1.min.js');
-importScripts('https://d3js.org/d3-dispatch.v1.min.js');
-importScripts('https://d3js.org/d3-quadtree.v1.min.js');
-importScripts('https://d3js.org/d3-timer.v1.min.js');
-importScripts('https://d3js.org/d3-force.v1.min.js');
+import * as d3 from 'd3';
+import { MESH_FORCE_LAYOUT } from '../screens/TopologyView/constants';
 
 onmessage = function calculateLayout({ data: { nodes, links } }) {
   const simulation = d3
     .forceSimulation(nodes)
-    .force('charge', d3.forceManyBody(15).strength(-50))
+    .force(
+      'charge',
+      d3
+        .forceManyBody(MESH_FORCE_LAYOUT.defaultForceBody)
+        .strength(MESH_FORCE_LAYOUT.defaultForceStrength)
+    )
     .force(
       'link',
       d3.forceLink(links).id((d) => d.hostname)
     )
-    .force('collide', d3.forceCollide(62))
-    .force('forceX', d3.forceX(0))
-    .force('forceY', d3.forceY(0))
+    .force('collide', d3.forceCollide(MESH_FORCE_LAYOUT.defaultCollisionFactor))
+    .force('forceX', d3.forceX(MESH_FORCE_LAYOUT.defaultForceX))
+    .force('forceY', d3.forceY(MESH_FORCE_LAYOUT.defaultForceY))
     .stop();
 
   for (
