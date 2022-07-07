@@ -7,6 +7,11 @@ from awx.main.models import (
     WorkflowJob,
 )
 
+import logging
+
+
+logger = logging.getLogger('awx.main.scheduler.dependency_graph')
+
 
 class DependencyGraph(object):
     PROJECT_UPDATES = 'project_updates'
@@ -36,6 +41,9 @@ class DependencyGraph(object):
         self.data[self.WORKFLOW_JOB_TEMPLATES_JOBS] = {}
 
     def mark_if_no_key(self, job_type, id, job):
+        if id is None:
+            logger.warning(f'Null dependency graph key from {job}, could be integrity error or bug, ignoring')
+            return
         # only mark first occurrence of a task. If 10 of JobA are launched
         # (concurrent disabled), the dependency graph should return that jobs
         # 2 through 10 are blocked by job1
@@ -66,7 +74,10 @@ class DependencyGraph(object):
         self.mark_if_no_key(self.JOB_TEMPLATE_JOBS, job.job_template_id, job)
 
     def mark_workflow_job(self, job):
-        self.mark_if_no_key(self.WORKFLOW_JOB_TEMPLATES_JOBS, job.workflow_job_template_id, job)
+        if job.workflow_job_template_id:
+            self.mark_if_no_key(self.WORKFLOW_JOB_TEMPLATES_JOBS, job.workflow_job_template_id, job)
+        elif job.unified_job_template_id:  # for sliced jobs
+            self.mark_if_no_key(self.WORKFLOW_JOB_TEMPLATES_JOBS, job.unified_job_template_id, job)
 
     def project_update_blocked_by(self, job):
         return self.get_item(self.PROJECT_UPDATES, job.project_id)
