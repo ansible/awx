@@ -248,6 +248,11 @@ SUBSYSTEM_METRICS_TASK_MANAGER_RECORD_INTERVAL = 15
 # The maximum allowed jobs to start on a given task manager cycle
 START_TASK_LIMIT = 100
 
+# Time out task managers if they take longer than this many seconds, plus TASK_MANAGER_TIMEOUT_GRACE_PERIOD
+# We have the grace period so the task manager can bail out before the timeout.
+TASK_MANAGER_TIMEOUT = 300
+TASK_MANAGER_TIMEOUT_GRACE_PERIOD = 60
+
 # Disallow sending session cookies over insecure connections
 SESSION_COOKIE_SECURE = True
 
