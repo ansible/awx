@@ -16,7 +16,6 @@ class DependencyGraph(object):
 
     SYSTEM_JOB = 'system_job'
     INVENTORY_SOURCE_UPDATES = 'inventory_source_updates'
-    WORKFLOW_JOB_TEMPLATES_JOBS = 'workflow_job_template_jobs'
 
     INVENTORY_SOURCES = 'inventory_source_ids'
 
@@ -33,7 +32,6 @@ class DependencyGraph(object):
         self.data[self.INVENTORY_SOURCE_UPDATES] = {}
         self.data[self.JOB_TEMPLATE_JOBS] = {}
         self.data[self.SYSTEM_JOB] = {}
-        self.data[self.WORKFLOW_JOB_TEMPLATES_JOBS] = {}
 
     def mark_if_no_key(self, job_type, id, job):
         # only mark first occurrence of a task. If 10 of JobA are launched
@@ -65,9 +63,6 @@ class DependencyGraph(object):
     def mark_job_template_job(self, job):
         self.mark_if_no_key(self.JOB_TEMPLATE_JOBS, job.job_template_id, job)
 
-    def mark_workflow_job(self, job):
-        self.mark_if_no_key(self.WORKFLOW_JOB_TEMPLATES_JOBS, job.workflow_job_template_id, job)
-
     def project_update_blocked_by(self, job):
         return self.get_item(self.PROJECT_UPDATES, job.project_id)
 
@@ -82,11 +77,6 @@ class DependencyGraph(object):
         else:
             job_block = None
         return project_block or inventory_block or job_block
-
-    def workflow_job_blocked_by(self, job):
-        if job.allow_simultaneous is False:
-            return self.get_item(self.WORKFLOW_JOB_TEMPLATES_JOBS, job.workflow_job_template_id)
-        return None
 
     def system_job_blocked_by(self, job):
         return self.get_item(self.SYSTEM_JOB, 'system_job')
@@ -105,8 +95,10 @@ class DependencyGraph(object):
             return self.system_job_blocked_by(job)
         elif type(job) is AdHocCommand:
             return self.ad_hoc_command_blocked_by(job)
-        elif type(job) is WorkflowJob:
-            return self.workflow_job_blocked_by(job)
+        # Alternatively we could raise an exception here if
+        # we have come across a job that does not meet our expected job types
+        # e.g. workflows, which we now explicitly filter out of the TaskManager which uses this class
+        return False
 
     def add_job(self, job):
         if type(job) is ProjectUpdate:
@@ -116,8 +108,6 @@ class DependencyGraph(object):
             self.mark_inventory_source_update(job)
         elif type(job) is Job:
             self.mark_job_template_job(job)
-        elif type(job) is WorkflowJob:
-            self.mark_workflow_job(job)
         elif type(job) is SystemJob:
             self.mark_system_job(job)
         elif type(job) is AdHocCommand:

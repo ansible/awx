@@ -15,6 +15,7 @@ from django.db import transaction, connection
 from django.utils.translation import gettext_lazy as _, gettext_noop
 from django.utils.timezone import now as tz_now
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 
 # AWX
 from awx.main.dispatch.reaper import reap_job
@@ -78,14 +79,20 @@ class TaskBase:
             return True
         return False
 
-    def get_running_workflow_jobs(self):
-        graph_workflow_jobs = [wf for wf in WorkflowJob.objects.filter(status='running')]
-        return graph_workflow_jobs
-
     @timeit
     def get_tasks(self, filter_args):
-        qs = UnifiedJob.objects.filter(**filter_args).exclude(launch_type='sync').order_by('created').prefetch_related('instance_group')
-        return [task for task in qs if not type(task) is WorkflowJob]
+        # We exclude workflows (both from WorkflowJobTemplates as well as sliced jobs)
+        workflow_ctype_id = ContentType.objects.get_for_model(WorkflowJob).id
+        workflow_approval_ctype_id = ContentType.objects.get_for_model(WorkflowApproval).id
+        qs = (
+            UnifiedJob.objects.filter(**filter_args)
+            .exclude(launch_type='sync')
+            .exclude(polymorphic_ctype=workflow_ctype_id)
+            .exclude(polymorphic_ctype=workflow_approval_ctype_id)
+            .order_by('created')
+            .prefetch_related('instance_group')
+        )
+        return [task for task in qs]
 
     def record_aggregate_metrics(self, *args):
         if not settings.IS_TESTING():
@@ -267,7 +274,16 @@ class WorkflowManager(TaskBase):
     def get_tasks(self):
         workflow_jobs_running = [wf for wf in WorkflowJob.objects.filter(status='running')]
         workflow_jobs_pending = [wf for wf in WorkflowJob.objects.filter(status='pending')]
+        return workflow_jobs_running, workflow_jobs_pending
+
+    def start_pending_workflows(self, workflow_jobs_running, workflow_jobs_pending):
+        """Take in list of currently pending and running workflows.
+
+        Start the workflows that we can and send any notifications or websockets needed.
+        Return list of the now running workflows.
+        """
         workflow_to_start = []
+        workflow_blocked = []
         running_wfjt_ids = {wf.unified_job_template_id for wf in workflow_jobs_running}
         for wf in workflow_jobs_pending:
             if wf.allow_simultaneous or wf.unified_job_template_id not in running_wfjt_ids:
@@ -282,15 +298,27 @@ class WorkflowManager(TaskBase):
                     logger.warning(f"Workflow manager has reached time out processing pending workflows, exiting loop early")
                     break
             else:
-                logger.debug('Workflow %s staying in pending, blocked by another running workflow from the same workflow job template', wf.log_format)
+                wf.job_explanation = 'Blocked by another running workflow from the same unified job template'
+                workflow_blocked.append(wf)
+                logger.debug('workflow %s staying in pending, blocked by another running workflow from the same unified job template', wf.log_format)
 
         WorkflowJob.objects.bulk_update(workflow_to_start, ['status'])
+        WorkflowJob.objects.bulk_update(workflow_blocked, ['job_explanation'])
+
+        # We could do the following in the previous loop
+        # Doing it in a loop after the bulk_update preserves previous behavior
+        # of not sending the notifications until after the status of running has been saved.
+        for wf in workflow_to_start:
+            wf.send_notification_templates('running')
+            wf.websocket_emit_status(wf.status)
+
         workflow_jobs_running.extend(workflow_to_start)
         return workflow_jobs_running
 
     @timeit
     def _schedule(self):
-        running_workflow_tasks = self.get_tasks()
+        running_workflow_tasks, pending_workflow_tasks = self.get_tasks()
+        running_workflow_tasks = self.start_pending_workflows(running_workflow_tasks, pending_workflow_tasks)
         if len(running_workflow_tasks) > 0:
             self.spawn_workflow_graph_jobs(running_workflow_tasks)
             self.timeout_approval_node()
