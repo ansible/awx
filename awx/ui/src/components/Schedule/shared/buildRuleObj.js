@@ -104,7 +104,7 @@ export default function buildRuleObj(values) {
         break;
       }
       default:
-        throw new Error(t`End did not match an expected value`);
+        throw new Error(t`End did not match an expected value (${values.end})`);
     }
   }
 

@@ -296,7 +296,6 @@ function ScheduleForm({
 
   const initialValues = {
     description: schedule.description || '',
-    endDate: tomorrowDate,
     frequency: [],
     exceptionFrequency: [],
     frequencyOptions: initialFrequencyOptions,

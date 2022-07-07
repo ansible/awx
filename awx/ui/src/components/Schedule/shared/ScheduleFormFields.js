@@ -46,7 +46,7 @@ export default function ScheduleFormFields({
   const warnLinkedTZ = (event, selectedValue) => {
     if (zoneLinks[selectedValue]) {
       setTimezoneMessage(
-        `Warning: ${selectedValue} is a link to ${zoneLinks[selectedValue]} and will be saved as that.`
+        t`Warning: ${selectedValue} is a link to ${zoneLinks[selectedValue]} and will be saved as that.`
       );
     } else {
       setTimezoneMessage('');

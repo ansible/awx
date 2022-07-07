@@ -72,7 +72,6 @@ function ScheduleAdd({
       submitValues.inventory = inventory.id;
     }
 
-    console.log(values);
     try {
       const ruleSet = buildRuleSet(values);
       const requestData = {
