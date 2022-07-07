@@ -406,8 +406,8 @@ class AutoscalePool(WorkerPool):
                             w.managed_tasks[current_task['uuid']]['started'] = time.time()
                         age = time.time() - current_task['started']
                         w.managed_tasks[current_task['uuid']]['age'] = age
-                        if age > (60 * 5):
-                            logger.error(f'run_task_manager has held the advisory lock for >5m, sending SIGTERM to {w.pid}')  # noqa
+                        if age > (settings.TASK_MANAGER_TIMEOUT + settings.TASK_MANAGER_TIMEOUT_GRACE_PERIOD):
+                            logger.error(f'run_task_manager has held the advisory lock for {age}, sending SIGTERM to {w.pid}')  # noqa
                             os.kill(w.pid, signal.SIGTERM)
 
         for m in orphaned:
