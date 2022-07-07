@@ -119,7 +119,7 @@ export default function ScheduleFormFields({
         label={t`Repeat frequency`}
       >
         <FrequencySelect
-          variant={SelectVariant.checkbox}
+          id="schedule-frequency"
           onChange={updateFrequency(frequencyHelper.setValue)}
           value={frequency.value}
           placeholderText={

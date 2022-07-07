@@ -1,18 +1,14 @@
 import React, { useState } from 'react';
 import { arrayOf, oneOf, string } from 'prop-types';
-import {
-  Select as PFSelect,
-  SelectOption,
-  SelectVariant,
-} from '@patternfly/react-core';
+import { Select, SelectOption, SelectVariant } from '@patternfly/react-core';
 
 export default function FrequencySelect({
+  id,
   value,
   onChange,
   onBlur,
   placeholderText,
   children,
-  variant,
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -38,26 +34,22 @@ export default function FrequencySelect({
   };
 
   return (
-    <PFSelect
-      variant={variant}
+    <Select
+      variant={SelectVariant.checkbox}
       onSelect={onSelect}
       selections={value}
       placeholderText={placeholderText}
       onToggle={onToggle}
       isOpen={isOpen}
+      ouiaId={`frequency-select-${id}`}
     >
       {children}
-    </PFSelect>
+    </Select>
   );
 }
 
 FrequencySelect.propTypes = {
-  variant: oneOf(Object.values(SelectVariant)),
   value: arrayOf(string).isRequired,
-};
-
-FrequencySelect.defaultProps = {
-  variant: SelectVariant.single,
 };
 
 export { SelectOption, SelectVariant };

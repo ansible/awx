@@ -258,7 +258,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
               }}
               aria-label={t`Sunday`}
               id={`schedule-days-of-week-sun-${prefix}`}
-              ouiaId="schedule-days-of-week-sun"
+              ouiaId={`schedule-days-of-week-sun-${prefix}`}
               name={`${prefix}.daysOfWeek`}
             />
             <Checkbox
@@ -269,7 +269,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
               }}
               aria-label={t`Monday`}
               id={`schedule-days-of-week-mon-${prefix}`}
-              ouiaId="schedule-days-of-week-mon"
+              ouiaId={`schedule-days-of-week-mon-${prefix}`}
               name={`${prefix}.daysOfWeek`}
             />
             <Checkbox
@@ -280,7 +280,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
               }}
               aria-label={t`Tuesday`}
               id={`schedule-days-of-week-tue-${prefix}`}
-              ouiaId="schedule-days-of-week-tue"
+              ouiaId={`schedule-days-of-week-tue-${prefix}`}
               name={`${prefix}.daysOfWeek`}
             />
             <Checkbox
@@ -291,7 +291,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
               }}
               aria-label={t`Wednesday`}
               id={`schedule-days-of-week-wed-${prefix}`}
-              ouiaId="schedule-days-of-week-wed"
+              ouiaId={`schedule-days-of-week-wed-${prefix}`}
               name={`${prefix}.daysOfWeek`}
             />
             <Checkbox
@@ -302,7 +302,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
               }}
               aria-label={t`Thursday`}
               id={`schedule-days-of-week-thu-${prefix}`}
-              ouiaId="schedule-days-of-week-thu"
+              ouiaId={`schedule-days-of-week-thu-${prefix}`}
               name={`${prefix}.daysOfWeek`}
             />
             <Checkbox
@@ -313,7 +313,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
               }}
               aria-label={t`Friday`}
               id={`schedule-days-of-week-fri-${prefix}`}
-              ouiaId="schedule-days-of-week-fri"
+              ouiaId={`schedule-days-of-week-fri-${prefix}`}
               name={`${prefix}.daysOfWeek`}
             />
             <Checkbox
@@ -324,7 +324,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
               }}
               aria-label={t`Saturday`}
               id={`schedule-days-of-week-sat-${prefix}`}
-              ouiaId="schedule-days-of-week-sat"
+              ouiaId={`schedule-days-of-week-sat-${prefix}`}
               name={`${prefix}.daysOfWeek`}
             />
           </div>
@@ -515,7 +515,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
             event.target.value = 'never';
             end.onChange(event);
           }}
-          ouiaId="end-never-radio-button"
+          ouiaId={`end-never-radio-button-${prefix}`}
         />
         <Radio
           id={`end-after-${prefix}`}
@@ -527,7 +527,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
             event.target.value = 'after';
             end.onChange(event);
           }}
-          ouiaId="end-after-radio-button"
+          ouiaId={`end-after-radio-button-${prefix}`}
         />
         <Radio
           id={`end-on-date-${prefix}`}
@@ -539,7 +539,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
             event.target.value = 'onDate';
             end.onChange(event);
           }}
-          ouiaId="end-on-radio-button"
+          ouiaId={`end-on-radio-button-${prefix}`}
         />
       </FormGroup>
       {end?.value === 'after' && (
