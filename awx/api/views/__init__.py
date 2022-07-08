@@ -93,7 +93,7 @@ from awx.main.utils import (
     get_object_or_400,
     getattrd,
     get_pk_from_dict,
-    schedule_task_manager,
+    ScheduleWorkflowManager,
     ignore_inventory_computed_fields,
 )
 from awx.main.utils.encryption import encrypt_value
@@ -3391,7 +3391,7 @@ class WorkflowJobCancel(RetrieveAPIView):
         obj = self.get_object()
         if obj.can_cancel:
             obj.cancel()
-            schedule_task_manager()
+            ScheduleWorkflowManager().schedule()
             return Response(status=status.HTTP_202_ACCEPTED)
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)

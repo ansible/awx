@@ -40,7 +40,7 @@ from awx.main.models.mixins import (
 from awx.main.models.jobs import LaunchTimeConfigBase, LaunchTimeConfig, JobTemplate
 from awx.main.models.credential import Credential
 from awx.main.redact import REPLACE_STR
-from awx.main.utils import schedule_task_manager
+from awx.main.utils import ScheduleWorkflowManager
 
 
 __all__ = [
@@ -816,7 +816,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         self.save()
         self.send_approval_notification('approved')
         self.websocket_emit_status(self.status)
-        schedule_task_manager()
+        ScheduleWorkflowManager().schedule()
         return reverse('api:workflow_approval_approve', kwargs={'pk': self.pk}, request=request)
 
     def deny(self, request=None):
@@ -825,7 +825,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         self.save()
         self.send_approval_notification('denied')
         self.websocket_emit_status(self.status)
-        schedule_task_manager()
+        ScheduleWorkflowManager().schedule()
         return reverse('api:workflow_approval_deny', kwargs={'pk': self.pk}, request=request)
 
     def signal_start(self, **kwargs):
