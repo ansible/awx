@@ -13,38 +13,23 @@ from awx.main.dispatch import get_local_queuename
 logger = logging.getLogger('awx.main.scheduler')
 
 
-@task(queue=get_local_queuename)
-def task_manager():
-    prefix = 'task'
+def run_manager(manager, prefix):
     if MODE == 'development' and settings.AWX_DISABLE_TASK_MANAGERS:
         logger.debug(f"Not running {prefix} manager, AWX_DISABLE_TASK_MANAGERS is True. Trigger with GET to /api/debug/{prefix}_manager/")
         return
+    manager().schedule()
 
-    TaskManager().schedule()
+
+@task(queue=get_local_queuename)
+def task_manager():
+    run_manager(TaskManager, "task")
 
 
 @task(queue=get_local_queuename)
 def dependency_manager():
-    prefix = 'dependency'
-    if MODE == 'development' and settings.AWX_DISABLE_TASK_MANAGERS:
-        logger.debug(f"Not running {prefix} manager, AWX_DISABLE_TASK_MANAGERS is True. Trigger with GET to /api/debug/{prefix}_manager/")
-        return
-    DependencyManager().schedule()
+    run_manager(DependencyManager, "dependency")
 
 
 @task(queue=get_local_queuename)
 def workflow_manager():
-    prefix = 'workflow'
-    if MODE == 'development' and settings.AWX_DISABLE_TASK_MANAGERS:
-        logger.debug(f"Not running {prefix} manager, AWX_DISABLE_TASK_MANAGERS is True. Trigger with GET to /api/debug/{prefix}_manager/")
-        return
-    WorkflowManager().schedule()
-
-
-def run_task_manager():
-    if MODE == 'development' and settings.AWX_DISABLE_TASK_MANAGERS:
-        logger.debug("Not running task managers, AWX_DISABLE_TASK_MANAGERS is True. Trigger with GET to /api/debug/{prefix}_manager/")
-        return
-    task_manager()
-    dependency_manager()
-    workflow_manager()
+    run_manager(WorkflowManager, "workflow")

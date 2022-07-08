@@ -53,7 +53,7 @@ from awx.main.dispatch import get_local_queuename, reaper
 from awx.main.utils.common import (
     ignore_inventory_computed_fields,
     ignore_inventory_group_removal,
-    schedule_task_manager,
+    ScheduleWorkflowManager,
 )
 
 from awx.main.utils.external_logging import reconfigure_rsyslog
@@ -667,7 +667,7 @@ def handle_work_success(task_actual):
     if not instance:
         return
 
-    schedule_task_manager()
+    ScheduleWorkflowManager().schedule()
 
 
 @task(queue=get_local_queuename)
@@ -709,7 +709,7 @@ def handle_work_error(task_id, *args, **kwargs):
     # what the job complete message handler does then we may want to send a
     # completion event for each job here.
     if first_instance:
-        schedule_task_manager()
+        ScheduleWorkflowManager().schedule()
         pass
 
 
