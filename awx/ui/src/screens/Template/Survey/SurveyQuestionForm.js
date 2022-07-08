@@ -266,8 +266,8 @@ function SurveyQuestionForm({
                       target="_blank"
                       rel="noreferrer"
                     >
-                      {t`documentation`}{' '}
-                    </a>
+                      {t`documentation`}
+                    </a>{' '}
                     {t`for more information.`}
                   </>
                 }
