@@ -134,22 +134,23 @@ function SubscriptionDetail() {
             label={t`Hosts imported`}
             value={license_info.current_instances}
           />
-          {typeof automatedInstancesCount !== 'undefined' && (
-            <Detail
-              dataCy="subscription-hosts-automated"
-              label={t`Hosts automated`}
-              value={
-                automated_since ? (
-                  <Trans>
-                    {automatedInstancesCount} since{' '}
-                    {automatedInstancesSinceDateTime}
-                  </Trans>
-                ) : (
-                  automatedInstancesCount
-                )
-              }
-            />
-          )}
+          {typeof automatedInstancesCount !== 'undefined' &&
+            automatedInstancesCount !== null && (
+              <Detail
+                dataCy="subscription-hosts-automated"
+                label={t`Hosts automated`}
+                value={
+                  automated_since ? (
+                    <Trans>
+                      {automatedInstancesCount} since{' '}
+                      {automatedInstancesSinceDateTime}
+                    </Trans>
+                  ) : (
+                    automatedInstancesCount
+                  )
+                }
+              />
+            )}
           <Detail
             dataCy="subscription-hosts-remaining"
             label={t`Hosts remaining`}

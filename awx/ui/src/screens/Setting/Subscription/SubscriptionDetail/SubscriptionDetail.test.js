@@ -82,4 +82,17 @@ describe('<SubscriptionDetail />', () => {
 
     expect(wrapper.find('Button[aria-label="edit"]').length).toBe(1);
   });
+
+  test('should not render Hosts Automated Detail if license_info.automated_instances is undefined', () => {
+    wrapper = mountWithContexts(<SubscriptionDetail />, {
+      context: {
+        config: {
+          ...config,
+          license_info: { ...config.license_info, automated_instances: null },
+        },
+      },
+    });
+
+    expect(wrapper.find(`Detail[label="Hosts automated"]`).length).toBe(0);
+  });
 });
