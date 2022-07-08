@@ -270,7 +270,7 @@ class WorkflowManager(TaskBase):
         workflow_to_start = []
         running_wfjt_ids = {wf.unified_job_template_id for wf in workflow_jobs_running}
         for wf in workflow_jobs_pending:
-            if wf.allow_simultaneous or wf.pk not in running_wfjt_ids:
+            if wf.allow_simultaneous or wf.unified_job_template_id not in running_wfjt_ids:
                 wf.status = 'running'
                 workflow_to_start.append(wf)
                 running_wfjt_ids.add(wf.unified_job_template_id)
