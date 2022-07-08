@@ -166,7 +166,11 @@ class Metrics:
         elif settings.IS_TESTING():
             self.instance_name = "awx_testing"
         else:
-            self.instance_name = Instance.objects.me().hostname
+            try:
+                self.instance_name = Instance.objects.me().hostname
+            except Exception as e:
+                self.instance_name = settings.CLUSTER_HOST_ID
+                logger.info(f'Instance {self.instance_name} seems to be unregistered, error: {e}')
 
         # metric name, help_text
         METRICSLIST = [

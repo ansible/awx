@@ -15,7 +15,11 @@ def startup_reaping():
     If this particular instance is starting, then we know that any running jobs are invalid
     so we will reap those jobs as a special action here
     """
-    me = Instance.objects.me()
+    try:
+        me = Instance.objects.me()
+    except RuntimeError as e:
+        logger.warning(f'Local instance is not registered, not running startup reaper: {e}')
+        return
     jobs = UnifiedJob.objects.filter(status='running', controller_node=me.hostname)
     job_ids = []
     for j in jobs:

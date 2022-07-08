@@ -103,6 +103,7 @@ def dispatch_startup():
     #
     apply_cluster_membership_policies()
     cluster_node_heartbeat()
+    reaper.startup_reaping()
     m = Metrics()
     m.reset_values()
 
@@ -504,7 +505,13 @@ def cluster_node_heartbeat():
             logger.warning('Rejoining the cluster as instance {}.'.format(this_inst.hostname))
             return
     else:
-        raise RuntimeError("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
+        if settings.AWX_AUTO_DEPROVISION_INSTANCES:
+            (changed, this_inst) = Instance.objects.register(ip_address=os.environ.get('MY_POD_IP'), node_type='control', uuid=settings.SYSTEM_UUID)
+            if changed:
+                logger.warning(f'Recreated instance record {this_inst.hostname} after unexpected removal')
+            this_inst.local_health_check()
+        else:
+            raise RuntimeError("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
     # IFF any node has a greater version than we do, then we'll shutdown services
     for other_inst in instance_list:
         if other_inst.node_type in ('execution', 'hop'):

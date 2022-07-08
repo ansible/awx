@@ -7,7 +7,7 @@ from django.core.cache import cache as django_cache
 from django.core.management.base import BaseCommand
 from django.db import connection as django_connection
 
-from awx.main.dispatch import get_local_queuename, reaper
+from awx.main.dispatch import get_local_queuename
 from awx.main.dispatch.control import Control
 from awx.main.dispatch.pool import AutoscalePool
 from awx.main.dispatch.worker import AWXConsumerPG, TaskWorker
@@ -53,7 +53,6 @@ class Command(BaseCommand):
         # (like the node heartbeat)
         periodic.run_continuously()
 
-        reaper.startup_reaping()
         consumer = None
 
         try:
