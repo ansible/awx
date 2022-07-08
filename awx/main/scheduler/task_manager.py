@@ -33,7 +33,12 @@ from awx.main.models import (
 )
 from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.main.utils.pglock import advisory_lock
-from awx.main.utils import get_type_for_model, task_manager_bulk_reschedule, schedule_task_manager
+from awx.main.utils import (
+    get_type_for_model,
+    ScheduleTaskManager,
+    ScheduleDependencyManager,
+    ScheduleWorkflowManager,
+)
 from awx.main.utils.common import create_partition
 from awx.main.signals import disable_activity_stream
 from awx.main.constants import ACTIVE_STATES
@@ -118,7 +123,7 @@ class TaskBase:
                     logger.debug(f"Not running {self.prefix} scheduler, another task holds lock")
                     return
                 logger.debug(f"Starting {self.prefix} Scheduler")
-                with task_manager_bulk_reschedule():
+                with self.schedule_manager.task_manager_bulk_reschedule():
                     # if sigterm due to timeout, still record metrics
                     signal.signal(signal.SIGTERM, self.record_aggregate_metrics_and_exit)
                     self._schedule()
@@ -128,6 +133,7 @@ class TaskBase:
 
 class WorkflowManager(TaskBase):
     def __init__(self):
+        self.schedule_manager = ScheduleWorkflowManager()
         super().__init__(prefix="workflow_manager")
 
     @timeit
@@ -136,6 +142,7 @@ class WorkflowManager(TaskBase):
         for workflow_job in workflow_jobs:
             if self.timed_out():
                 logger.warning("Workflow manager has reached time out while processing running workflows, exiting loop early")
+                self.schedule_manager.schedule()
                 # Do not process any more workflow jobs. Stop here.
                 # Maybe we should schedule another WorkflowManager run
                 break
@@ -174,7 +181,7 @@ class WorkflowManager(TaskBase):
 
             if status_changed:
                 if workflow_job.spawned_by_workflow:
-                    schedule_task_manager()
+                    ScheduleWorkflowManager().schedule()
                 workflow_job.websocket_emit_status(workflow_job.status)
                 # Operations whose queries rely on modifications made during the atomic scheduling session
                 workflow_job.send_notification_templates('succeeded' if workflow_job.status == 'successful' else 'failed')
@@ -298,6 +305,7 @@ class WorkflowManager(TaskBase):
 
 class DependencyManager(TaskBase):
     def __init__(self):
+        self.schedule_manager = ScheduleDependencyManager()
         super().__init__(prefix="dependency_manager")
 
     def create_project_update(self, task, project_id=None):
@@ -476,7 +484,7 @@ class DependencyManager(TaskBase):
         if len(all_sorted_tasks) > 0:
             self.all_inventory_sources = self.get_inventory_source_tasks(all_sorted_tasks)
             self.process_tasks(all_sorted_tasks)
-            schedule_task_manager()
+            ScheduleTaskManager().schedule()
 
 
 class TaskManager(TaskBase):
@@ -496,6 +504,7 @@ class TaskManager(TaskBase):
         # 5 minutes to start pending jobs. If this limit is reached, pending jobs
         # will no longer be started and will be started on the next task manager cycle.
         self.time_delta_job_explanation = timedelta(seconds=30)
+        self.schedule_manager = ScheduleTaskManager()
         super().__init__(prefix="task_manager")
 
     def after_lock_init(self, all_sorted_tasks):
@@ -541,7 +550,7 @@ class TaskManager(TaskBase):
         self.start_task_limit -= 1
         if self.start_task_limit == 0:
             # schedule another run immediately after this task manager
-            schedule_task_manager()
+            ScheduleTaskManager().schedule()
         from awx.main.tasks.system import handle_work_error, handle_work_success
 
         dependent_tasks = dependent_tasks or []
