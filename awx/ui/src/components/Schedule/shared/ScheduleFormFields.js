@@ -8,10 +8,7 @@ import { required } from 'util/validators';
 import { useConfig } from 'contexts/Config';
 import Popover from '../../Popover';
 import AnsibleSelect from '../../AnsibleSelect';
-import FrequencySelect, {
-  SelectOption,
-  SelectVariant,
-} from './FrequencySelect';
+import FrequencySelect, { SelectOption } from './FrequencySelect';
 import helpText from '../../../screens/Template/shared/JobTemplate.helptext';
 import { SubFormLayout, FormColumnLayout } from '../../FormLayout';
 import FrequencyDetailSubform from './FrequencyDetailSubform';
@@ -37,11 +34,6 @@ export default function ScheduleFormFields({
     name: 'frequency',
     validate: required(t`Select a value for this field`),
   });
-  // const [exemptFrequency, exemptFrequencyMeta, exemptFrequencyHelper] =
-  //   useField({
-  //     name: 'exempt_frequency',
-  //     validate: required(t`Select a value for this field`),
-  //   });
   const [timezoneMessage, setTimezoneMessage] = useState('');
   const warnLinkedTZ = (event, selectedValue) => {
     if (zoneLinks[selectedValue]) {
@@ -61,11 +53,11 @@ export default function ScheduleFormFields({
   }
   const config = useConfig();
 
-  const [exceptionFrequency, exceptionFrequencyMeta, exceptionFrequencyHelper] =
-    useField({
-      name: 'exceptionFrequency',
-      validate: required(t`Select a value for this field`),
-    });
+  // const [exceptionFrequency, exceptionFrequencyMeta, exceptionFrequencyHelper] =
+  //   useField({
+  //     name: 'exceptionFrequency',
+  //     validate: required(t`Select a value for this field`),
+  //   });
 
   const updateFrequency = (setFrequency) => (values) => {
     setFrequency(values.sort(sortFrequencies));
@@ -159,7 +151,7 @@ export default function ScheduleFormFields({
               />
             </FormColumnLayout>
           ))}
-          <Title size="md" headingLevel="h4">{t`Exceptions`}</Title>
+          {/* <Title size="md" headingLevel="h4">{t`Exceptions`}</Title>
           <FormGroup
             name="exceptions"
             fieldId="exception-frequency"
@@ -194,7 +186,7 @@ export default function ScheduleFormFields({
                 prefix={`exceptionOptions.${val}`}
               />
             </FormColumnLayout>
-          ))}
+          ))} */}
         </SubFormLayout>
       ) : null}
     </>
