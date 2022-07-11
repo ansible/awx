@@ -512,6 +512,12 @@ class TaskManager(TaskBase):
             ScheduleTaskManager().schedule()
         from awx.main.tasks.system import handle_work_error, handle_work_success
 
+        # update capacity for control node and execution node
+        if task.controller_node:
+            self.instances[task.controller_node].consume_capacity(settings.AWX_CONTROL_NODE_TASK_IMPACT)
+        if task.execution_node:
+            self.instances[task.execution_node].consume_capacity(task.task_impact)
+
         dependent_tasks = dependent_tasks or []
 
         task_actual = {
@@ -598,7 +604,8 @@ class TaskManager(TaskBase):
                 continue
 
             found_acceptable_queue = False
-            preferred_instance_groups = task.preferred_instance_groups
+
+            preferred_instance_groups = self.instance_groups.get_instance_groups_from_task_cache(task)
 
             # Determine if there is control capacity for the task
             if task.capacity_type == 'control':
@@ -618,7 +625,6 @@ class TaskManager(TaskBase):
             # All task.capacity_type == 'control' jobs should run on control plane, no need to loop over instance groups
             if task.capacity_type == 'control':
                 task.execution_node = control_instance.hostname
-                control_instance.consume_capacity(control_impact)
                 execution_instance = self.instances[control_instance.hostname].obj
                 task.log_lifecycle("controller_node_chosen")
                 task.log_lifecycle("execution_node_chosen")
@@ -649,9 +655,7 @@ class TaskManager(TaskBase):
                         control_instance = execution_instance
                         task.controller_node = execution_instance.hostname
 
-                    control_instance.consume_capacity(settings.AWX_CONTROL_NODE_TASK_IMPACT)
                     task.log_lifecycle("controller_node_chosen")
-                    execution_instance.consume_capacity(task.task_impact)
                     task.log_lifecycle("execution_node_chosen")
                     logger.debug(
                         "Starting {} in group {} instance {} (remaining_capacity={})".format(

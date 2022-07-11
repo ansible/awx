@@ -1213,6 +1213,9 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 
+    def _set_default_dependencies_processed(self):
+        self.dependencies_processed = True
+
     @classmethod
     def _get_parent_field_name(cls):
         return 'system_job_template'

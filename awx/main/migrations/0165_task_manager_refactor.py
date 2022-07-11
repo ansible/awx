@@ -20,4 +20,11 @@ class Migration(migrations.Migration):
                 null=True,
             ),
         ),
+        migrations.AddField(
+            model_name='unifiedjob',
+            name='preferred_instance_groups_cache',
+            field=models.JSONField(
+                blank=True, default=None, editable=False, help_text='A cached list with pk values from preferred instance groups.', null=True
+            ),
+        ),
     ]
