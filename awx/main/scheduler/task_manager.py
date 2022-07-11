@@ -275,12 +275,12 @@ class WorkflowManager(TaskBase):
                 task.save(update_fields=['status', 'job_explanation', 'timed_out'])
 
     @timeit
-    def get_tasks(self):
-        self.all_tasks = [wf for wf in WorkflowJob.objects.filter(status='running')]
+    def get_tasks(self, filter_args):
+        self.all_tasks = [wf for wf in WorkflowJob.objects.filter(**filter_args)]
 
     @timeit
     def _schedule(self):
-        self.get_tasks()
+        self.get_tasks(dict(status__in=["running"], dependencies_processed=True))
         if len(self.all_tasks) > 0:
             self.spawn_workflow_graph_jobs()
             self.timeout_approval_node()
