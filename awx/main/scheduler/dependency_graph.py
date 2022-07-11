@@ -96,7 +96,11 @@ class DependencyGraph(object):
 
     def workflow_job_blocked_by(self, job):
         if job.allow_simultaneous is False:
-            return self.get_item(self.WORKFLOW_JOB_TEMPLATES_JOBS, job.workflow_job_template_id)
+            if job.workflow_job_template_id:
+                return self.get_item(self.WORKFLOW_JOB_TEMPLATES_JOBS, job.workflow_job_template_id)
+            elif job.unified_job_template_id:
+                # Sliced jobs are WorkflowJob type but do not have a workflow_job_template_id
+                return self.get_item(self.WORKFLOW_JOB_TEMPLATES_JOBS, job.unified_job_template_id)
         return None
 
     def system_job_blocked_by(self, job):
