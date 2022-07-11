@@ -381,6 +381,8 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
             unified_job.survey_passwords = new_job_passwords
             kwargs['survey_passwords'] = new_job_passwords  # saved in config object for relaunch
 
+        unified_job.preferred_instance_groups_cache = [ig.pk for ig in unified_job.preferred_instance_groups]
+
         from awx.main.signals import disable_activity_stream, activity_stream_create
 
         with disable_activity_stream():
@@ -692,6 +694,13 @@ class UnifiedJob(
         default=None,
         on_delete=polymorphic.SET_NULL,
         help_text=_('The Instance group the job was run under'),
+    )
+    preferred_instance_groups_cache = models.JSONField(
+        blank=True,
+        null=True,
+        default=None,
+        editable=False,
+        help_text=_("A cached list with pk values from preferred instance groups."),
     )
     organization = models.ForeignKey(
         'Organization',
@@ -1514,8 +1523,8 @@ class UnifiedJob(
             'state': state,
             'work_unit_id': self.work_unit_id,
         }
-        if self.unified_job_template:
-            extra["template_name"] = self.unified_job_template.name
+        if self.name:
+            extra["task_name"] = self.name
         if state == "blocked" and blocked_by:
             blocked_by_msg = f"{blocked_by._meta.model_name}-{blocked_by.id}"
             msg = f"{self._meta.model_name}-{self.id} blocked by {blocked_by_msg}"
