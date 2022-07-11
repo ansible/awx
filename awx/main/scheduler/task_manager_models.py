@@ -67,6 +67,7 @@ class TaskManagerInstanceGroups:
     def __init__(self, instances_by_hostname=None, instance_groups=None, instance_groups_queryset=None):
         self.instance_groups = dict()
         self.controlplane_ig = None
+        self.pk_ig_map = dict()
 
         if instance_groups is not None:  # for testing
             self.instance_groups = instance_groups
@@ -81,6 +82,7 @@ class TaskManagerInstanceGroups:
                         instances_by_hostname[instance.hostname] for instance in instance_group.instances.all() if instance.hostname in instances_by_hostname
                     ],
                 )
+                self.pk_ig_map[instance_group.pk] = instance_group
 
     def get_remaining_capacity(self, group_name):
         instances = self.instance_groups[group_name]['instances']
@@ -121,3 +123,17 @@ class TaskManagerInstanceGroups:
                 elif i.capacity > largest_instance.capacity:
                     largest_instance = i
         return largest_instance
+
+    def get_instance_groups_from_task_cache(self, task):
+        igs = []
+        if task.preferred_instance_groups_cache:
+            for pk in task.preferred_instance_groups_cache:
+                ig = self.pk_ig_map.get(pk, None)
+                if ig:
+                    igs.append(ig)
+                else:
+                    logger.warn(f"Unknown instance group with pk {pk} for task {task}")
+        if len(igs) == 0:
+            logger.warn(f"No instance groups in cache exist, defaulting to global instance groups for task {task}")
+            return task.global_instance_groups
+        return igs

@@ -598,8 +598,8 @@ class TaskManager(TaskBase):
                 continue
 
             found_acceptable_queue = False
-            preferred_instance_groups = task.preferred_instance_groups
 
+            preferred_instance_groups = self.instance_groups.get_instance_groups_from_task_cache(task)
             # Determine if there is control capacity for the task
             if task.capacity_type == 'control':
                 control_impact = task.task_impact + settings.AWX_CONTROL_NODE_TASK_IMPACT
