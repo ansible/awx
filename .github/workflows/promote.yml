@@ -21,7 +21,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python${{ env.py_version }} -m pip install wheel twine
+          python${{ env.py_version }} -m pip install wheel twine setuptools-scm
 
       - name: Set official collection namespace
         run: echo collection_namespace=awx >> $GITHUB_ENV
@@ -70,4 +70,4 @@ jobs:
           docker tag ghcr.io/${{ github.repository }}:${{ github.event.release.tag_name }} quay.io/${{ github.repository }}:latest
           docker push quay.io/${{ github.repository }}:${{ github.event.release.tag_name }}
           docker push quay.io/${{ github.repository }}:latest
-          
+
