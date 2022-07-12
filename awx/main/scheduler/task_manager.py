@@ -250,30 +250,6 @@ class WorkflowManager(TaskBase):
 
         return result
 
-    def timeout_approval_node(self):
-        workflow_approvals = WorkflowApproval.objects.filter(status='pending')
-        now = tz_now()
-        for task in workflow_approvals:
-            if self.timed_out():
-                logger.warning("Workflow manager has reached time out while processing approval nodes, exiting loop early")
-                # Do not process any more workflow approval nodes. Stop here.
-                # Maybe we should schedule another WorkflowManager run
-                break
-            approval_timeout_seconds = timedelta(seconds=task.timeout)
-            if task.timeout == 0:
-                continue
-            if (now - task.created) >= approval_timeout_seconds:
-                timeout_message = _("The approval node {name} ({pk}) has expired after {timeout} seconds.").format(
-                    name=task.name, pk=task.pk, timeout=task.timeout
-                )
-                logger.warning(timeout_message)
-                task.timed_out = True
-                task.status = 'failed'
-                task.send_approval_notification('timed_out')
-                task.websocket_emit_status(task.status)
-                task.job_explanation = timeout_message
-                task.save(update_fields=['status', 'job_explanation', 'timed_out'])
-
     @timeit
     def get_tasks(self, filter_args):
         self.all_tasks = [wf for wf in WorkflowJob.objects.filter(**filter_args)]
@@ -283,7 +259,6 @@ class WorkflowManager(TaskBase):
         self.get_tasks(dict(status__in=["running"], dependencies_processed=True))
         if len(self.all_tasks) > 0:
             self.spawn_workflow_graph_jobs()
-            self.timeout_approval_node()
 
 
 class DependencyManager(TaskBase):
@@ -731,6 +706,26 @@ class TaskManager(TaskBase):
         self.process_pending_tasks(pending_tasks)
         self.subsystem_metrics.inc(f"{self.prefix}_pending_processed", len(pending_tasks))
 
+    def timeout_approval_node(self, task):
+        if self.timed_out():
+            logger.warning("Task manager has reached time out while processing approval nodes, exiting loop early")
+            # Do not process any more workflow approval nodes. Stop here.
+            # Maybe we should schedule another TaskManager run
+            return
+        timeout_message = _("The approval node {name} ({pk}) has expired after {timeout} seconds.").format(name=task.name, pk=task.pk, timeout=task.timeout)
+        logger.warning(timeout_message)
+        task.timed_out = True
+        task.status = 'failed'
+        task.send_approval_notification('timed_out')
+        task.websocket_emit_status(task.status)
+        task.job_explanation = timeout_message
+        task.save(update_fields=['status', 'job_explanation', 'timed_out'])
+
+    def get_expired_workflow_approvals(self):
+        # timeout of 0 indicates that it never expires
+        qs = WorkflowApproval.objects.filter(status='pending').exclude(timeout=0).filter(expires__lt=tz_now())
+        return qs
+
     @timeit
     def _schedule(self):
         self.get_tasks(dict(status__in=["pending", "waiting", "running"], dependencies_processed=True))
@@ -740,3 +735,6 @@ class TaskManager(TaskBase):
 
         if len(self.all_tasks) > 0:
             self.process_tasks()
+
+        for workflow_approval in self.get_expired_workflow_approvals():
+            self.timeout_approval_node(workflow_approval)
