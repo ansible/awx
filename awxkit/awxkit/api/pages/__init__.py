@@ -40,3 +40,4 @@ from .instance_groups import *  # NOQA
 from .credential_input_sources import *  # NOQA
 from .metrics import *  # NOQA
 from .subscriptions import *  # NOQA
+from .workflow_approval_templates import *  # NOQA

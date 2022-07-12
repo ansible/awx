@@ -36,14 +36,15 @@ EXPORTABLE_RELATIONS = ['Roles', 'NotificationTemplates', 'WorkflowJobTemplateNo
 # These are special-case related objects, where we want only in this
 # case to export a full object instead of a natural key reference.
 DEPENDENT_EXPORT = [
-    ('JobTemplate', 'labels'),
-    ('JobTemplate', 'survey_spec'),
-    ('WorkflowJobTemplate', 'labels'),
-    ('WorkflowJobTemplate', 'survey_spec'),
-    ('WorkflowJobTemplate', 'workflow_nodes'),
-    ('Inventory', 'groups'),
-    ('Inventory', 'hosts'),
-    ('Inventory', 'labels'),
+    ('JobTemplate', 'Label'),
+    ('JobTemplate', 'SurveySpec'),
+    ('WorkflowJobTemplate', 'Label'),
+    ('WorkflowJobTemplate', 'SurveySpec'),
+    ('WorkflowJobTemplate', 'WorkflowJobTemplateNode'),
+    ('Inventory', 'Group'),
+    ('Inventory', 'Host'),
+    ('Inventory', 'Label'),
+    ('WorkflowJobTemplateNode', 'WorkflowApprovalTemplate'),
 ]
 
 
@@ -57,6 +58,7 @@ DEPENDENT_NONEXPORT = [
     ('Group', 'all_hosts'),
     ('Group', 'potential_children'),
     ('Host', 'all_groups'),
+    ('WorkflowJobTemplateNode', 'create_approval_template'),
 ]
 
 
@@ -85,6 +87,7 @@ class ApiV2(base.Base):
         # Note: doing _page[key] automatically parses json blob strings, which can be a problem.
         fields = {key: _page.json[key] for key in post_fields if key in _page.json and key not in _page.related and key != 'id'}
 
+        # iterate over direct fields in the object
         for key in post_fields:
             if key in _page.related:
                 related = _page.related[key]
@@ -114,6 +117,12 @@ class ApiV2(base.Base):
                     return None
                 log.warning("Foreign key %r export failed for object %s, setting to null", key, _page.endpoint)
                 continue
+
+            # Workflow approval templates have a special creation endpoint,
+            # therefore we are skipping the export via natural key.
+            if rel_endpoint.__item_class__.__name__ == 'WorkflowApprovalTemplate':
+                continue
+
             rel_natural_key = rel_endpoint.get_natural_key(self._cache)
             if rel_natural_key is None:
                 log.error("Unable to construct a natural key for foreign key %r of object %s.", key, _page.endpoint)
@@ -121,19 +130,38 @@ class ApiV2(base.Base):
                 return None  # This foreign key has unresolvable dependencies
             fields[key] = rel_natural_key
 
+        # iterate over related fields in the object
         related = {}
         for key, rel_endpoint in _page.related.items():
-            if key in post_fields or not rel_endpoint:
+            # skip if no endpoint for this related object
+            if not rel_endpoint:
                 continue
 
             rel = rel_endpoint._create()
+
+            if rel.__item_class__.__name__ != 'WorkflowApprovalTemplate':
+                if key in post_fields:
+                    continue
+
             is_relation = rel.__class__.__name__ in EXPORTABLE_RELATIONS
-            is_dependent = (_page.__item_class__.__name__, key) in DEPENDENT_EXPORT
+
+            # determine if the parent object and the related object that we are processing through are related
+            # if this tuple is in the DEPENDENT_EXPORT than we output the full object
+            # else we output the natural key
+            is_dependent = (_page.__item_class__.__name__, rel.__item_class__.__name__) in DEPENDENT_EXPORT
+
             is_blocked = (_page.__item_class__.__name__, key) in DEPENDENT_NONEXPORT
             if is_blocked or not (is_relation or is_dependent):
                 continue
 
-            rel_post_fields = utils.get_post_fields(rel_endpoint, self._cache)
+            # if the rel is of WorkflowApprovalTemplate type, get rel_post_fields from create_approval_template endpoint
+            rel_option_endpoint = rel_endpoint
+            export_key = key
+            if rel.__item_class__.__name__ == 'WorkflowApprovalTemplate':
+                export_key = 'create_approval_template'
+                rel_option_endpoint = _page.related.get('create_approval_template')
+
+            rel_post_fields = utils.get_post_fields(rel_option_endpoint, self._cache)
             if rel_post_fields is None:
                 log.debug("%s is a read-only endpoint.", rel_endpoint)
                 continue
@@ -147,24 +175,28 @@ class ApiV2(base.Base):
                 continue
 
             rel_page = self._cache.get_page(rel_endpoint)
+
             if rel_page is None:
                 continue
 
             if 'results' in rel_page:
                 results = (x.get_natural_key(self._cache) if by_natural_key else self._export(x, rel_post_fields) for x in rel_page.results)
-                related[key] = [x for x in results if x is not None]
+                related[export_key] = [x for x in results if x is not None]
+            elif rel.__item_class__.__name__ == 'WorkflowApprovalTemplate':
+                related[export_key] = self._export(rel_page, rel_post_fields)
             else:
-                related[key] = rel_page.json
+                related[export_key] = rel_page.json
 
         if related:
             fields['related'] = related
 
-        natural_key = _page.get_natural_key(self._cache)
-        if natural_key is None:
-            log.error("Unable to construct a natural key for object %s.", _page.endpoint)
-            self._has_error = True
-            return None
-        fields['natural_key'] = natural_key
+        if _page.__item_class__.__name__ != 'WorkflowApprovalTemplate':
+            natural_key = _page.get_natural_key(self._cache)
+            if natural_key is None:
+                log.error("Unable to construct a natural key for object %s.", _page.endpoint)
+                self._has_error = True
+                return None
+            fields['natural_key'] = natural_key
 
         return utils.remove_encrypted(fields)
 
