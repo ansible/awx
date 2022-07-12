@@ -29,7 +29,6 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.encoding import force_str
 from django.utils.text import capfirst
 from django.utils.timezone import now
-from django.utils.functional import cached_property
 
 # Django REST Framework
 from rest_framework.exceptions import ValidationError, PermissionDenied
