@@ -383,6 +383,8 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
 
         unified_job.preferred_instance_groups_cache = [ig.pk for ig in unified_job.preferred_instance_groups]
 
+        unified_job._set_default_dependencies_processed()
+
         from awx.main.signals import disable_activity_stream, activity_stream_create
 
         with disable_activity_stream():
@@ -816,6 +818,9 @@ class UnifiedJob(
         if parent_instance:
             update_fields = self._update_parent_instance_no_save(parent_instance)
             parent_instance.save(update_fields=update_fields)
+
+    def _set_default_dependencies_processed(self):
+        pass
 
     def save(self, *args, **kwargs):
         """Save the job, with current status, to the database.
