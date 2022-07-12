@@ -1,5 +1,6 @@
 {
   "name": "ui",
+  "homepage": ".",
   "private": true,
   "engines": {
     "node": ">=16.13.1"
