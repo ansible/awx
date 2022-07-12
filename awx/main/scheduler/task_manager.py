@@ -12,7 +12,6 @@ import signal
 
 # Django
 from django.db import transaction, connection
-from django.db.models import F, Func, DateTimeField, ExpressionWrapper
 from django.utils.translation import gettext_lazy as _, gettext_noop
 from django.utils.timezone import now as tz_now
 from django.conf import settings
@@ -63,12 +62,6 @@ def timeit(func):
         return result
 
     return inner
-
-
-class IntervalSeconds(Func):
-
-    function = 'INTERVAL'
-    template = "(%(expressions)s * %(function)s '1 seconds')"
 
 
 class TaskBase:
@@ -729,13 +722,8 @@ class TaskManager(TaskBase):
         task.save(update_fields=['status', 'job_explanation', 'timed_out'])
 
     def get_expired_workflow_approvals(self):
-        wf_approval_ctype_id = ContentType.objects.get_for_model(WorkflowApproval).id
-        qs = (
-            UnifiedJob.objects.filter(polymorphic_ctype_id=wf_approval_ctype_id, status='pending')
-            .exclude(workflowapproval__timeout=0)  # indicates that it never expires
-            .annotate(expires=ExpressionWrapper(F('created') + IntervalSeconds(F('workflowapproval__timeout')), output_field=DateTimeField()))
-            .filter(expires__lt=tz_now())
-        )
+        # timeout of 0 indicates that it never expires
+        qs = WorkflowApproval.objects.filter(status='pending').exclude(timeout=0).filter(expires__lt=tz_now())
         return qs
 
     @timeit
