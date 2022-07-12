@@ -13,6 +13,7 @@ from django.db import connection, models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils.timezone import now, timedelta
 
 # from django import settings as tower_settings
 
@@ -783,6 +784,12 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         default=0,
         help_text=_("The amount of time (in seconds) before the approval node expires and fails."),
     )
+    expires = models.DateTimeField(
+        default=None,
+        null=True,
+        editable=False,
+        help_text=_("The time this approval will expire. This is the created time plus timeout, used for filtering."),
+    )
     timed_out = models.BooleanField(default=False, help_text=_("Shows when an approval node (with a timeout assigned to it) has timed out."))
     approved_or_denied_by = models.ForeignKey(
         'auth.User',
@@ -809,6 +816,25 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
 
     def _get_parent_field_name(self):
         return 'workflow_approval_template'
+
+    def save(self, *args, **kwargs):
+        update_fields = list(kwargs.get('update_fields', []))
+        if self.timeout != 0 and ((not self.pk) or (not update_fields) or ('timeout' in update_fields)):
+            if not self.created:  # on creation, created will be set by parent class, so we fudge it here
+                created = now()
+            else:
+                created = self.created
+            new_expires = created + timedelta(seconds=self.timeout)
+            if new_expires != self.expires:
+                self.expires = new_expires
+                if update_fields and 'expires' not in update_fields:
+                    update_fields.append('expires')
+        elif self.timeout == 0 and ((not update_fields) or ('timeout' in update_fields)):
+            if self.expires:
+                self.expires = None
+                if update_fields and 'expires' not in update_fields:
+                    update_fields.append('expires')
+        super(WorkflowApproval, self).save(*args, **kwargs)
 
     def approve(self, request=None):
         self.status = 'successful'
