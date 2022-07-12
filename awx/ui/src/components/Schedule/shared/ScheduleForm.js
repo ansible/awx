@@ -344,7 +344,8 @@ function ScheduleForm({
     //         variant="danger"
     //         isInline
     //         ouiaId="form-submit-error-alert"
-    //         title={t`Complex schedules are not supported in the UI yet, please use the API to manage this schedule.`}
+    //         title={t`Complex schedules are not supported in the
+    // UI yet, please use the API to manage this schedule.`}
     //       />
     //       <b>{t`Schedule Rules`}:</b>
     //       <pre css="white-space: pre; font-family: var(--pf-global--FontFamily--monospace)">

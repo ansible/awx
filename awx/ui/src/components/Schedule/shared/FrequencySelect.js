@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { arrayOf, oneOf, string } from 'prop-types';
+import { arrayOf, string } from 'prop-types';
 import { Select, SelectOption, SelectVariant } from '@patternfly/react-core';
 
 export default function FrequencySelect({

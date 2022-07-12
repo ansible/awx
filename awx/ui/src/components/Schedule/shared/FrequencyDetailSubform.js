@@ -46,6 +46,7 @@ const Checkbox = styled(_Checkbox)`
 `;
 
 const FrequencyDetailSubform = ({ frequency, prefix }) => {
+  const id = prefix.replace('.', '-');
   const [runOnDayMonth] = useField({
     name: `${prefix}.runOnDayMonth`,
   });
@@ -213,7 +214,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
       </p>
       <FormGroup
         name={`${prefix}.interval`}
-        fieldId={`schedule-run-every-${prefix}`}
+        fieldId={`schedule-run-every-${id}`}
         helperTextInvalid={intervalMeta.error}
         isRequired
         validated={
@@ -224,7 +225,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
         <div css="display: flex">
           <TextInput
             css="margin-right: 10px;"
-            id={`schedule-run-every-${prefix}`}
+            id={`schedule-run-every-${id}`}
             type="number"
             min="1"
             step="1"
@@ -239,7 +240,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
       {frequency === 'week' && (
         <FormGroup
           name={`${prefix}.daysOfWeek`}
-          fieldId={`schedule-days-of-week-${prefix}`}
+          fieldId={`schedule-days-of-week-${id}`}
           helperTextInvalid={daysOfWeekMeta.error}
           isRequired
           validated={
@@ -257,8 +258,8 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
                 updateDaysOfWeek(RRule.SU, checked);
               }}
               aria-label={t`Sunday`}
-              id={`schedule-days-of-week-sun-${prefix}`}
-              ouiaId={`schedule-days-of-week-sun-${prefix}`}
+              id={`schedule-days-of-week-sun-${id}`}
+              ouiaId={`schedule-days-of-week-sun-${id}`}
               name={`${prefix}.daysOfWeek`}
             />
             <Checkbox
@@ -268,8 +269,8 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
                 updateDaysOfWeek(RRule.MO, checked);
               }}
               aria-label={t`Monday`}
-              id={`schedule-days-of-week-mon-${prefix}`}
-              ouiaId={`schedule-days-of-week-mon-${prefix}`}
+              id={`schedule-days-of-week-mon-${id}`}
+              ouiaId={`schedule-days-of-week-mon-${id}`}
               name={`${prefix}.daysOfWeek`}
             />
             <Checkbox
@@ -279,8 +280,8 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
                 updateDaysOfWeek(RRule.TU, checked);
               }}
               aria-label={t`Tuesday`}
-              id={`schedule-days-of-week-tue-${prefix}`}
-              ouiaId={`schedule-days-of-week-tue-${prefix}`}
+              id={`schedule-days-of-week-tue-${id}`}
+              ouiaId={`schedule-days-of-week-tue-${id}`}
               name={`${prefix}.daysOfWeek`}
             />
             <Checkbox
@@ -290,8 +291,8 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
                 updateDaysOfWeek(RRule.WE, checked);
               }}
               aria-label={t`Wednesday`}
-              id={`schedule-days-of-week-wed-${prefix}`}
-              ouiaId={`schedule-days-of-week-wed-${prefix}`}
+              id={`schedule-days-of-week-wed-${id}`}
+              ouiaId={`schedule-days-of-week-wed-${id}`}
               name={`${prefix}.daysOfWeek`}
             />
             <Checkbox
@@ -301,8 +302,8 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
                 updateDaysOfWeek(RRule.TH, checked);
               }}
               aria-label={t`Thursday`}
-              id={`schedule-days-of-week-thu-${prefix}`}
-              ouiaId={`schedule-days-of-week-thu-${prefix}`}
+              id={`schedule-days-of-week-thu-${id}`}
+              ouiaId={`schedule-days-of-week-thu-${id}`}
               name={`${prefix}.daysOfWeek`}
             />
             <Checkbox
@@ -312,8 +313,8 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
                 updateDaysOfWeek(RRule.FR, checked);
               }}
               aria-label={t`Friday`}
-              id={`schedule-days-of-week-fri-${prefix}`}
-              ouiaId={`schedule-days-of-week-fri-${prefix}`}
+              id={`schedule-days-of-week-fri-${id}`}
+              ouiaId={`schedule-days-of-week-fri-${id}`}
               name={`${prefix}.daysOfWeek`}
             />
             <Checkbox
@@ -323,8 +324,8 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
                 updateDaysOfWeek(RRule.SA, checked);
               }}
               aria-label={t`Saturday`}
-              id={`schedule-days-of-week-sat-${prefix}`}
-              ouiaId={`schedule-days-of-week-sat-${prefix}`}
+              id={`schedule-days-of-week-sat-${id}`}
+              ouiaId={`schedule-days-of-week-sat-${id}`}
               name={`${prefix}.daysOfWeek`}
             />
           </div>
@@ -334,7 +335,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
         !Number.isNaN(new Date(startDate.value)) && (
           <FormGroup
             name={`${prefix}.runOn`}
-            fieldId={`schedule-run-on-${prefix}`}
+            fieldId={`schedule-run-on-${id}`}
             helperTextInvalid={runOnMeta.error}
             isRequired
             validated={
@@ -343,7 +344,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
             label={t`Run on`}
           >
             <RunOnRadio
-              id={`schedule-run-on-day-${prefix}`}
+              id={`schedule-run-on-day-${id}`}
               name={`${prefix}.runOn`}
               label={
                 <div css="display: flex;align-items: center;">
@@ -357,7 +358,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
                   )}
                   {frequency === 'year' && (
                     <AnsibleSelect
-                      id={`schedule-run-on-day-month-${prefix}`}
+                      id={`schedule-run-on-day-month-${id}`}
                       css="margin-right: 10px"
                       isDisabled={runOn.value !== 'day'}
                       data={monthOptions}
@@ -365,7 +366,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
                     />
                   )}
                   <TextInput
-                    id={`schedule-run-on-day-number-${prefix}`}
+                    id={`schedule-run-on-day-number-${id}`}
                     type="number"
                     min="1"
                     max="31"
@@ -386,18 +387,18 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
               }}
             />
             <RunOnRadio
-              id={`schedule-run-on-the-${prefix}`}
+              id={`schedule-run-on-the-${id}`}
               name={`${prefix}.runOn`}
               label={
                 <div css="display: flex;align-items: center;">
                   <span
-                    id={`radio-schedule-run-on-the-${prefix}`}
+                    id={`radio-schedule-run-on-the-${id}`}
                     css="margin-right: 10px;"
                   >
                     <Trans>The</Trans>
                   </span>
                   <AnsibleSelect
-                    id={`schedule-run-on-the-occurrence-${prefix}`}
+                    id={`schedule-run-on-the-occurrence-${id}`}
                     isDisabled={runOn.value !== 'the'}
                     data={[
                       { value: 1, key: 'first', label: t`First` },
@@ -418,7 +419,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
                     {...runOnTheOccurrence}
                   />
                   <AnsibleSelect
-                    id={`schedule-run-on-the-day-${prefix}`}
+                    id={`schedule-run-on-the-day-${id}`}
                     isDisabled={runOn.value !== 'the'}
                     data={[
                       {
@@ -473,13 +474,13 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
                   {frequency === 'year' && (
                     <>
                       <span
-                        id={`of-schedule-run-on-the-month-${prefix}`}
+                        id={`of-schedule-run-on-the-month-${id}`}
                         css="margin-left: 10px;"
                       >
                         <Trans>of</Trans>
                       </span>
                       <AnsibleSelect
-                        id={`schedule-run-on-the-month-${prefix}`}
+                        id={`schedule-run-on-the-month-${id}`}
                         isDisabled={runOn.value !== 'the'}
                         data={monthOptions}
                         {...runOnTheMonth}
@@ -499,14 +500,14 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
         )}
       <FormGroup
         name={`${prefix}.end`}
-        fieldId={`schedule-end-${prefix}`}
+        fieldId={`schedule-end-${id}`}
         helperTextInvalid={endMeta.error}
         isRequired
         validated={!endMeta.touched || !endMeta.error ? 'default' : 'error'}
         label={t`End`}
       >
         <Radio
-          id={`end-never-${prefix}`}
+          id={`end-never-${id}`}
           name={`${prefix}.end`}
           label={t`Never`}
           value="never"
@@ -515,10 +516,10 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
             event.target.value = 'never';
             end.onChange(event);
           }}
-          ouiaId={`end-never-radio-button-${prefix}`}
+          ouiaId={`end-never-radio-button-${id}`}
         />
         <Radio
-          id={`end-after-${prefix}`}
+          id={`end-after-${id}`}
           name={`${prefix}.end`}
           label={t`After number of occurrences`}
           value="after"
@@ -527,10 +528,10 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
             event.target.value = 'after';
             end.onChange(event);
           }}
-          ouiaId={`end-after-radio-button-${prefix}`}
+          ouiaId={`end-after-radio-button-${id}`}
         />
         <Radio
-          id={`end-on-date-${prefix}`}
+          id={`end-on-date-${id}`}
           name={`${prefix}.end`}
           label={t`On date`}
           value="onDate"
@@ -539,12 +540,12 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
             event.target.value = 'onDate';
             end.onChange(event);
           }}
-          ouiaId={`end-on-radio-button-${prefix}`}
+          ouiaId={`end-on-radio-button-${id}`}
         />
       </FormGroup>
       {end?.value === 'after' && (
         <FormField
-          id={`schedule-occurrences-${prefix}`}
+          id={`schedule-occurrences-${id}`}
           label={t`Occurrences`}
           name={`${prefix}.occurrences`}
           type="number"

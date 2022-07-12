@@ -7,12 +7,12 @@ const frequencies = ['minute', 'hour', 'day', 'week', 'month', 'year'];
 export default function buildRuleSet(values) {
   const set = new RRuleSet();
 
-  const rule = buildDtStartObj({
+  const startRule = buildDtStartObj({
     startDate: values.startDate,
     startTime: values.startTime,
     timezone: values.timezone,
   });
-  set.rrule(rule);
+  set.rrule(startRule);
 
   if (values.frequency.length === 0) {
     const rule = buildRuleObj({

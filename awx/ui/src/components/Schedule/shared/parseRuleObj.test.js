@@ -38,7 +38,37 @@ describe(parseRuleObj, () => {
           occurrences: 1,
           endDate: '2022-06-02',
           endTime: '1:00 PM',
-          daysOfWeek: [{ weekday: 0, n: undefined }],
+          daysOfWeek: [RRule.MO],
+        },
+      },
+      exceptionFrequency: [],
+      exceptionOptions: {},
+    });
+  });
+
+  test('should parse weekly recurring rrule with end date', () => {
+    const schedule = {
+      rrule:
+        'DTSTART;TZID=America/New_York:20200402T144500 RRULE:INTERVAL=1;FREQ=WEEKLY;BYDAY=MO,WE,FR;UNTIL=20210101T050000Z',
+      dtstart: '2020-04-02T18:45:00Z',
+      timezone: 'America/New_York',
+    };
+
+    const parsed = parseRuleObj(schedule);
+
+    expect(parsed).toEqual({
+      startDate: '2020-04-02',
+      startTime: '2:45 PM',
+      timezone: 'America/New_York',
+      frequency: ['week'],
+      frequencyOptions: {
+        week: {
+          interval: 1,
+          end: 'onDate',
+          occurrences: 1,
+          endDate: '2021-01-01',
+          endTime: '12:00 AM',
+          daysOfWeek: [RRule.MO, RRule.WE, RRule.FR],
         },
       },
       exceptionFrequency: [],
