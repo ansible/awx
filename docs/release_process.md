@@ -2,6 +2,7 @@
 
 The release process for AWX is completely automated as of version 19.5.0.
 
+If you need to revert a release, please refer to the [Revert a Release](#revert-a-release) section.
 ## Get latest release version and list of new work
 
 1. Open the main project page for [AWX](https://github.com/ansible/awx/releases) and [AWX Operator](https://github.com/ansible/awx-operator/releases).
@@ -135,3 +136,33 @@ We're happy to announce that [AWX version 21.1.0](https://github.com/ansible/awx
 We're happy to announce that [AWX Operator version 0.22.0](https://github.com/ansible/awx-operator/releases/tag/0.22.0) is now available!
 
 ## Send the same IRC message (less the @newsbot) to #awx:ansible.com
+
+## Revert a Release
+
+Decide whether or not you can just fall-forward with a new AWX Release to fix a bad release. If you need to remove published artifacts from publically facing repositories, follow the steps below.
+
+Here are the steps needed to revert an AWX and an AWX-Operator release. Depending on your use case, follow the steps for reverting just an AWX release, an Operator release or both.
+
+
+1. Navigate to the [AWX Release Page](https://github.com/ansible/awx/releases) and delete the AWX Release that needs to be removed.
+
+![Revert-1-Image](img/revert-1.png)
+
+2. Navigate to the [AWX Tags Page](https://github.com/ansible/awx/tags) and delete the AWX Tag that got created by the Github Actions Workflow from when you originally tried to release AWX. You need delete the release in step 1 before you can do this step. The tag must not be tied to a release if you want to delete a tag.
+
+![Tag-Revert-1-Image](img/tag-revert-1.png)
+[comment]: <> (Need an image here for actually deleting an orphaned tag, place here during next release)
+
+3. Navigate to the [AWX Operator Release Page]() and delete the AWX-Operator release that needss to tbe removed.
+
+![Revert-2-Image](img/revert-2.png)
+
+4. Navigate to [quay.io](https://quay.io/repository/ansible/awx?tag=latest&tab=tags) and delete the published AWX image(s) and tags.
+
+5. Navigate to [quay.io](https://github.com/ansible/awx-operator/releases) and delete the published AWX Operator image(s) and tags.
+
+6. Navigate to the [Ansible Galaxy Collections](https://galaxy.ansible.com/awx/awx) website and remove the published AWX collection with the bad tag.
+
+7. Navigate to the [PyPi](https://pypi.org/project/awxkit/#history) and delete the bad AWX tag and release that got published.
+
+8. [Restart the Release Process](#releasing-awx-and-awx-operator)
