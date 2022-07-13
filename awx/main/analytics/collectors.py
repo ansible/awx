@@ -396,7 +396,7 @@ def events_table_partitioned_modified(since, full_path, until, **kwargs):
     return _events_table(since, full_path, until, 'main_jobevent', 'modified', project_job_created=True, **kwargs)
 
 
-@register('unified_jobs_table', '1.3', format='csv', description=_('Data on jobs run'), expensive=four_hour_slicing)
+@register('unified_jobs_table', '1.4', format='csv', description=_('Data on jobs run'), expensive=four_hour_slicing)
 def unified_jobs_table(since, full_path, until, **kwargs):
     unified_job_query = '''COPY (SELECT main_unifiedjob.id,
                                  main_unifiedjob.polymorphic_ctype_id,
@@ -422,7 +422,8 @@ def unified_jobs_table(since, full_path, until, **kwargs):
                                  main_unifiedjob.job_explanation,
                                  main_unifiedjob.instance_group_id,
                                  main_unifiedjob.installed_collections,
-                                 main_unifiedjob.ansible_version
+                                 main_unifiedjob.ansible_version,
+                                 main_job.forks
                                  FROM main_unifiedjob
                                  JOIN django_content_type ON main_unifiedjob.polymorphic_ctype_id = django_content_type.id
                                  LEFT JOIN main_job ON main_unifiedjob.id = main_job.unifiedjob_ptr_id
