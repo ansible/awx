@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0158_make_instance_cpu_decimal'),
+        ('main', '0164_remove_inventorysource_update_on_project_update'),
     ]
 
     operations = [
