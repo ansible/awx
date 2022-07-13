@@ -344,10 +344,6 @@ class AutoscalePool(WorkerPool):
         # max workers can't be less than min_workers
         self.max_workers = max(self.min_workers, self.max_workers)
 
-    def debug(self, *args, **kwargs):
-        self.cleanup()
-        return super(AutoscalePool, self).debug(*args, **kwargs)
-
     @property
     def should_grow(self):
         if len(self.workers) < self.min_workers:
