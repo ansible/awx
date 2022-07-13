@@ -11,6 +11,7 @@ import { formatDateString } from 'util/dates';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { JobTemplatesAPI, SchedulesAPI, WorkflowJobTemplatesAPI } from 'api';
 import { parseVariableField, jsonToYaml } from 'util/yaml';
+import { useConfig } from 'contexts/Config';
 import AlertModal from '../../AlertModal';
 import { CardBody, CardActionsRow } from '../../Card';
 import ContentError from '../../ContentError';
@@ -23,6 +24,8 @@ import DeleteButton from '../../DeleteButton';
 import ErrorDetail from '../../ErrorDetail';
 import ChipGroup from '../../ChipGroup';
 import { VariablesDetail } from '../../CodeEditor';
+import { VERBOSITY } from '../../VerbositySelectField';
+import helpText from '../../../screens/Template/shared/JobTemplate.helptext';
 
 const PromptDivider = styled(Divider)`
   margin-top: var(--pf-global--spacer--lg);
@@ -38,7 +41,6 @@ const PromptTitle = styled(Title)`
 const PromptDetailList = styled(DetailList)`
   padding: 0px 20px;
 `;
-
 function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
   const {
     id,
@@ -66,14 +68,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
   const history = useHistory();
   const { pathname } = useLocation();
   const pathRoot = pathname.substr(0, pathname.indexOf('schedules'));
-
-  const VERBOSITY = {
-    0: t`0 (Normal)`,
-    1: t`1 (Verbose)`,
-    2: t`2 (More Verbose)`,
-    3: t`3 (Debug)`,
-    4: t`4 (Connection Debug)`,
-  };
+  const config = useConfig();
 
   const {
     request: deleteSchedule,
@@ -216,7 +211,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
   const showLimitDetail = ask_limit_on_launch && limit;
   const showJobTypeDetail = ask_job_type_on_launch && job_type;
   const showSCMBranchDetail = ask_scm_branch_on_launch && scm_branch;
-  const showVerbosityDetail = ask_verbosity_on_launch && VERBOSITY[verbosity];
+  const showVerbosityDetail = ask_verbosity_on_launch && VERBOSITY()[verbosity];
 
   const showPromptedFields =
     showCredentialsDetail ||
@@ -267,7 +262,11 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
           value={formatDateString(next_run, timezone)}
         />
         <Detail label={t`Last Run`} value={formatDateString(dtend, timezone)} />
-        <Detail label={t`Local Time Zone`} value={timezone} />
+        <Detail
+          label={t`Local Time Zone`}
+          value={timezone}
+          helpText={helpText.localTimeZone(config)}
+        />
         <Detail label={t`Repeat Frequency`} value={repeatFrequency} />
         {hasDaysToKeepField ? (
           <Detail label={t`Days of Data to Keep`} value={daysToKeep} />
@@ -313,7 +312,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
               />
             )}
             {ask_verbosity_on_launch && (
-              <Detail label={t`Verbosity`} value={VERBOSITY[verbosity]} />
+              <Detail label={t`Verbosity`} value={VERBOSITY()[verbosity]} />
             )}
             {ask_scm_branch_on_launch && (
               <Detail label={t`Source Control Branch`} value={scm_branch} />

@@ -105,9 +105,6 @@ options:
       description:
         - Project to use as source with scm option
       type: str
-    update_on_project_update:
-      description: Update this source when the related project updates if source is C(scm)
-      type: bool
     state:
       description:
         - Desired state of the resource.
@@ -181,7 +178,6 @@ def main():
         update_on_launch=dict(type='bool'),
         update_cache_timeout=dict(type='int'),
         source_project=dict(),
-        update_on_project_update=dict(type='bool'),
         notification_templates_started=dict(type="list", elements='str'),
         notification_templates_success=dict(type="list", elements='str'),
         notification_templates_error=dict(type="list", elements='str'),
@@ -273,7 +269,6 @@ def main():
         'verbosity',
         'update_on_launch',
         'update_cache_timeout',
-        'update_on_project_update',
         'enabled_var',
         'enabled_value',
         'host_filter',

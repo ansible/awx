@@ -91,6 +91,9 @@ const defaultFieldsVisible = () => {
   expect(wrapper.find('FormGroup[label="Description"]').length).toBe(1);
   expect(wrapper.find('FormGroup[label="Start date/time"]').length).toBe(1);
   expect(wrapper.find('FormGroup[label="Local time zone"]').length).toBe(1);
+  expect(
+    wrapper.find('FormGroup[label="Local time zone"]').find('HelpIcon').length
+  ).toBe(1);
   expect(wrapper.find('FormGroup[label="Run frequency"]').length).toBe(1);
 };
 

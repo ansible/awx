@@ -93,7 +93,7 @@ describe('InventorySourceDetail', () => {
     assertDetail(wrapper, 'Organization', 'Mock Org');
     assertDetail(wrapper, 'Project', 'Mock Project');
     assertDetail(wrapper, 'Inventory file', 'foo');
-    assertDetail(wrapper, 'Verbosity', '2 (Debug)');
+    assertDetail(wrapper, 'Verbosity', '2 (More Verbose)');
     assertDetail(wrapper, 'Cache timeout', '2 seconds');
     const executionEnvironment = wrapper.find('ExecutionEnvironmentDetail');
     expect(executionEnvironment).toHaveLength(1);

@@ -16,6 +16,7 @@ from awx.main.redact import UriCleaner
 from awx.main.constants import MINIMAL_EVENTS, ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE
 from awx.main.utils.update_model import update_model
 from awx.main.queue import CallbackQueueDispatcher
+from awx.main.tasks.signals import signal_callback
 
 logger = logging.getLogger('awx.main.tasks.callback')
 
@@ -179,7 +180,13 @@ class RunnerCallback:
         Ansible runner callback to tell the job when/if it is canceled
         """
         unified_job_id = self.instance.pk
-        self.instance = self.update_model(unified_job_id)
+        if signal_callback():
+            return True
+        try:
+            self.instance = self.update_model(unified_job_id)
+        except Exception:
+            logger.exception(f'Encountered error during cancel check for {unified_job_id}, canceling now')
+            return True
         if not self.instance:
             logger.error('unified job {} was deleted while running, canceling'.format(unified_job_id))
             return True

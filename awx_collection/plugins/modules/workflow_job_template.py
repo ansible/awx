@@ -736,7 +736,7 @@ def main():
 
     webhook_credential = module.params.get('webhook_credential')
     if webhook_credential:
-        new_fields['webhook_credential'] = module.resolve_name_to_id('webhook_credential', webhook_credential)
+        new_fields['webhook_credential'] = module.resolve_name_to_id('credentials', webhook_credential)
 
     # Create the data that gets sent for create and update
     new_fields['name'] = new_name if new_name else (module.get_item_name(existing_item) if existing_item else name)

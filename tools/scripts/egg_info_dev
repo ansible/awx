@@ -1,0 +1,21 @@
+#!/bin/env python3
+
+import setuptools
+from setuptools.command.egg_info import egg_info as _egg_info
+
+
+class egg_info_dev(_egg_info):
+    def find_sources(self):
+        # when we generate a .egg-info for the development
+        # environment, it's not really critical that we
+        # parse the MANIFEST.in (which is actually quite expensive
+        # in Docker for Mac)
+        pass
+
+
+if __name__ == "__main__":
+    setuptools.setup(
+        script_name = 'setup.py',
+        script_args = ['egg_info_dev'],
+        cmdclass={'egg_info_dev': egg_info_dev},
+    )

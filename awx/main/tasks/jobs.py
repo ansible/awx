@@ -19,7 +19,6 @@ from uuid import uuid4
 
 # Django
 from django.conf import settings
-from django.db import transaction
 
 
 # Runner
@@ -34,7 +33,6 @@ from gitdb.exc import BadName as BadGitName
 from awx.main.dispatch.publish import task
 from awx.main.dispatch import get_local_queuename
 from awx.main.constants import (
-    ACTIVE_STATES,
     PRIVILEGE_ESCALATION_METHODS,
     STANDARD_INVENTORY_UPDATE_ENV,
     JOB_FOLDER_PREFIX,
@@ -64,6 +62,7 @@ from awx.main.tasks.callback import (
     RunnerCallbackForProjectUpdate,
     RunnerCallbackForSystemJob,
 )
+from awx.main.tasks.signals import with_signal_handling, signal_callback
 from awx.main.tasks.receptor import AWXReceptorJob
 from awx.main.exceptions import AwxTaskError, PostRunError, ReceptorNodeNotFound
 from awx.main.utils.ansible import read_ansible_config
@@ -394,6 +393,7 @@ class BaseTask(object):
                 instance.save(update_fields=['ansible_version'])
 
     @with_path_cleanup
+    @with_signal_handling
     def run(self, pk, **kwargs):
         """
         Run the job/task and capture its output.
@@ -425,7 +425,7 @@ class BaseTask(object):
             private_data_dir = self.build_private_data_dir(self.instance)
             self.pre_run_hook(self.instance, private_data_dir)
             self.instance.log_lifecycle("preparing_playbook")
-            if self.instance.cancel_flag:
+            if self.instance.cancel_flag or signal_callback():
                 self.instance = self.update_model(self.instance.pk, status='canceled')
             if self.instance.status != 'running':
                 # Stop the task chain and prevent starting the job if it has
@@ -546,6 +546,11 @@ class BaseTask(object):
             if status in ('timeout', 'error'):
                 self.runner_callback.delay_update(skip_if_already_set=True, job_explanation=f"Job terminated due to {status}")
                 if status == 'timeout':
+                    status = 'failed'
+            elif status == 'canceled':
+                self.instance = self.update_model(pk)
+                if (getattr(self.instance, 'cancel_flag', False) is False) and signal_callback():
+                    self.runner_callback.delay_update(job_explanation="Task was canceled due to receiving a shutdown signal.")
                     status = 'failed'
         except ReceptorNodeNotFound as exc:
             self.runner_callback.delay_update(job_explanation=str(exc))
@@ -1168,64 +1173,6 @@ class RunProjectUpdate(BaseTask):
         d[r'^Are you sure you want to continue connecting \(yes/no\)\?\s*?$'] = 'yes'
         return d
 
-    def _update_dependent_inventories(self, project_update, dependent_inventory_sources):
-        scm_revision = project_update.project.scm_revision
-        inv_update_class = InventoryUpdate._get_task_class()
-        for inv_src in dependent_inventory_sources:
-            if not inv_src.update_on_project_update:
-                continue
-            if inv_src.scm_last_revision == scm_revision:
-                logger.debug('Skipping SCM inventory update for `{}` because ' 'project has not changed.'.format(inv_src.name))
-                continue
-            logger.debug('Local dependent inventory update for `{}`.'.format(inv_src.name))
-            with transaction.atomic():
-                if InventoryUpdate.objects.filter(inventory_source=inv_src, status__in=ACTIVE_STATES).exists():
-                    logger.debug('Skipping SCM inventory update for `{}` because ' 'another update is already active.'.format(inv_src.name))
-                    continue
-
-                if settings.IS_K8S:
-                    instance_group = InventoryUpdate(inventory_source=inv_src).preferred_instance_groups[0]
-                else:
-                    instance_group = project_update.instance_group
-
-                local_inv_update = inv_src.create_inventory_update(
-                    _eager_fields=dict(
-                        launch_type='scm',
-                        status='running',
-                        instance_group=instance_group,
-                        execution_node=project_update.execution_node,
-                        controller_node=project_update.execution_node,
-                        source_project_update=project_update,
-                        celery_task_id=project_update.celery_task_id,
-                    )
-                )
-                local_inv_update.log_lifecycle("controller_node_chosen")
-                local_inv_update.log_lifecycle("execution_node_chosen")
-            try:
-                create_partition(local_inv_update.event_class._meta.db_table, start=local_inv_update.created)
-                inv_update_class().run(local_inv_update.id)
-            except Exception:
-                logger.exception('{} Unhandled exception updating dependent SCM inventory sources.'.format(project_update.log_format))
-
-            try:
-                project_update.refresh_from_db()
-            except ProjectUpdate.DoesNotExist:
-                logger.warning('Project update deleted during updates of dependent SCM inventory sources.')
-                break
-            try:
-                local_inv_update.refresh_from_db()
-            except InventoryUpdate.DoesNotExist:
-                logger.warning('%s Dependent inventory update deleted during execution.', project_update.log_format)
-                continue
-            if project_update.cancel_flag:
-                logger.info('Project update {} was canceled while updating dependent inventories.'.format(project_update.log_format))
-                break
-            if local_inv_update.cancel_flag:
-                logger.info('Continuing to process project dependencies after {} was canceled'.format(local_inv_update.log_format))
-            if local_inv_update.status == 'successful':
-                inv_src.scm_last_revision = scm_revision
-                inv_src.save(update_fields=['scm_last_revision'])
-
     def release_lock(self, instance):
         try:
             fcntl.lockf(self.lock_fd, fcntl.LOCK_UN)
@@ -1435,12 +1382,6 @@ class RunProjectUpdate(BaseTask):
             p.inventory_files = p.inventories
             p.save(update_fields=['scm_revision', 'playbook_files', 'inventory_files'])
 
-        # Update any inventories that depend on this project
-        dependent_inventory_sources = p.scm_inventory_sources.filter(update_on_project_update=True)
-        if len(dependent_inventory_sources) > 0:
-            if status == 'successful' and instance.launch_type != 'sync':
-                self._update_dependent_inventories(instance, dependent_inventory_sources)
-
     def build_execution_environment_params(self, instance, private_data_dir):
         if settings.IS_K8S:
             return {}
@@ -1620,9 +1561,7 @@ class RunInventoryUpdate(BaseTask):
         source_project = None
         if inventory_update.inventory_source:
             source_project = inventory_update.inventory_source.source_project
-        if (
-            inventory_update.source == 'scm' and inventory_update.launch_type != 'scm' and source_project and source_project.scm_type
-        ):  # never ever update manual projects
+        if inventory_update.source == 'scm' and source_project and source_project.scm_type:  # never ever update manual projects
 
             # Check if the content cache exists, so that we do not unnecessarily re-download roles
             sync_needs = ['update_{}'.format(source_project.scm_type)]
@@ -1655,8 +1594,6 @@ class RunInventoryUpdate(BaseTask):
                 sync_task = project_update_task(job_private_data_dir=private_data_dir)
                 sync_task.run(local_project_sync.id)
                 local_project_sync.refresh_from_db()
-                inventory_update.inventory_source.scm_last_revision = local_project_sync.scm_revision
-                inventory_update.inventory_source.save(update_fields=['scm_last_revision'])
             except Exception:
                 inventory_update = self.update_model(
                     inventory_update.pk,
@@ -1667,9 +1604,6 @@ class RunInventoryUpdate(BaseTask):
                     ),
                 )
                 raise
-        elif inventory_update.source == 'scm' and inventory_update.launch_type == 'scm' and source_project:
-            # This follows update, not sync, so make copy here
-            RunProjectUpdate.make_local_copy(source_project, private_data_dir)
 
     def post_run_hook(self, inventory_update, status):
         super(RunInventoryUpdate, self).post_run_hook(inventory_update, status)

@@ -6,9 +6,40 @@ import os
 import sys
 import warnings
 
-from pkg_resources import get_distribution
 
-__version__ = get_distribution('awx').version
+def get_version():
+    version_from_file = get_version_from_file()
+    if version_from_file:
+        return version_from_file
+    else:
+        from setuptools_scm import get_version
+
+        version = get_version(root='..', relative_to=__file__)
+        return version
+
+
+def get_version_from_file():
+    vf = version_file()
+    if vf:
+        with open(vf, 'r') as file:
+            return file.read().strip()
+
+
+def version_file():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    version_file = os.path.join(current_dir, '..', 'VERSION')
+
+    if os.path.exists(version_file):
+        return version_file
+
+
+try:
+    import pkg_resources
+
+    __version__ = pkg_resources.get_distribution('awx').version
+except pkg_resources.DistributionNotFound:
+    __version__ = get_version()
+
 __all__ = ['__version__']
 
 
@@ -20,7 +51,6 @@ try:
     MODE = 'development'
 except ImportError:  # pragma: no cover
     MODE = 'production'
-
 
 import hashlib
 

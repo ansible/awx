@@ -35,6 +35,13 @@ function SubscriptionDetail() {
     },
   ];
 
+  const { automated_instances: automatedInstancesCount, automated_since } =
+    license_info;
+
+  const automatedInstancesSinceDateTime = automated_since
+    ? formatDateString(new Date(automated_since * 1000).toISOString())
+    : null;
+
   return (
     <>
       <RoutedTabs tabsArray={tabsArray} />
@@ -127,19 +134,23 @@ function SubscriptionDetail() {
             label={t`Hosts imported`}
             value={license_info.current_instances}
           />
-          <Detail
-            dataCy="subscription-hosts-automated"
-            label={t`Hosts automated`}
-            value={
-              <>
-                {license_info.automated_instances} <Trans>since</Trans>{' '}
-                {license_info.automated_since &&
-                  formatDateString(
-                    new Date(license_info.automated_since * 1000).toISOString()
-                  )}
-              </>
-            }
-          />
+          {typeof automatedInstancesCount !== 'undefined' &&
+            automatedInstancesCount !== null && (
+              <Detail
+                dataCy="subscription-hosts-automated"
+                label={t`Hosts automated`}
+                value={
+                  automated_since ? (
+                    <Trans>
+                      {automatedInstancesCount} since{' '}
+                      {automatedInstancesSinceDateTime}
+                    </Trans>
+                  ) : (
+                    automatedInstancesCount
+                  )
+                }
+              />
+            )}
           <Detail
             dataCy="subscription-hosts-remaining"
             label={t`Hosts remaining`}

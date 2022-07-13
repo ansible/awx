@@ -743,6 +743,12 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             return "$hidden due to Ansible no_log flag$"
         return artifacts
 
+    def get_effective_artifacts(self, **kwargs):
+        """Return unified job artifacts (from set_stats) to pass downstream in workflows"""
+        if isinstance(self.artifacts, dict):
+            return self.artifacts
+        return {}
+
     @property
     def is_container_group_task(self):
         return bool(self.instance_group and self.instance_group.is_container_group)

@@ -248,11 +248,11 @@ class TaskManager:
                 workflow_job.save(update_fields=update_fields)
                 status_changed = True
             if status_changed:
+                if workflow_job.spawned_by_workflow:
+                    schedule_task_manager()
                 workflow_job.websocket_emit_status(workflow_job.status)
                 # Operations whose queries rely on modifications made during the atomic scheduling session
                 workflow_job.send_notification_templates('succeeded' if workflow_job.status == 'successful' else 'failed')
-                if workflow_job.spawned_by_workflow:
-                    schedule_task_manager()
         return result
 
     @timeit

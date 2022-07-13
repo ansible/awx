@@ -29,12 +29,24 @@ In the future, sometimes starting a discussion on the development list prior to 
 Thank you once again for this and your interest in AWX!
 
 
-### No Progress
+### No Progress Issue
+- Hi! \
+\
+Thank you very much for for this issue. It means a lot to us that you have taken time to contribute by opening this report. \
+\
+On this issue, there were comments added but it has been some time since then without response. At this time we are closing this issue. If you get time to address the comments we can reopen the issue if you can contact us by using any of the communication methods listed in the page below: \
+\
+https://github.com/ansible/awx/#get-involved \
+\
+Thank you once again for this and your interest in AWX!
+
+
+### No Progress PR
 - Hi! \
 \
 Thank you very much for your submission to AWX. It means a lot to us that you have taken time to contribute. \
 \
-On this PR, changes were requested but it has been some time since then. We think this PR has merit but without the requested changes we are unable to merge it. At this time we are closing you PR. If you get time to address the changes you are welcome to open another PR or we can reopen this PR upon request if you contact us by using any of the communication methods listed in the page below: \
+On this PR, changes were requested but it has been some time since then. We think this PR has merit but without the requested changes we are unable to merge it. At this time we are closing your PR. If you get time to address the changes you are welcome to open another PR or we can reopen this PR upon request if you contact us by using any of the communication methods listed in the page below: \
 \
 https://github.com/ansible/awx/#get-involved \
 \
@@ -51,6 +63,10 @@ Thank you once again for this and your interest in AWX!
 ### Code of Conduct
 - Hello. Please keep in mind that Ansible adheres to a Code of Conduct in its community spaces. The spirit of the code of conduct is to be kind, and this is your friendly reminder to be so. Please see the full code of conduct here if you have questions: https://docs.ansible.com/ansible/latest/community/code_of_conduct.html 
 
+### EE Contents / Community General
+- Hello. The awx-ee contains the collections and dependencies needed for supported AWX features to function. Anything beyond that (like the community.general package) will require you to build your own EE. For information on how to do that, see https://ansible-builder.readthedocs.io/en/stable/ \
+\
+The Ansible Community is looking at building an EE that corresponds to all of the collections inside the ansible package. That may help you if and when it happens; see https://github.com/ansible-community/community-topics/issues/31 for details.
 
 
 

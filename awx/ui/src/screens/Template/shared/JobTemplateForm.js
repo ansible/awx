@@ -43,6 +43,7 @@ import Popover from 'components/Popover';
 import { JobTemplatesAPI } from 'api';
 import useIsMounted from 'hooks/useIsMounted';
 import LabelSelect from 'components/LabelSelect';
+import { VerbositySelectField } from 'components/VerbositySelectField';
 import PlaybookSelect from './PlaybookSelect';
 import WebhookSubForm from './WebhookSubForm';
 import helpText from './JobTemplate.helptext';
@@ -85,7 +86,6 @@ function JobTemplateForm({
   const [credentialField, , credentialHelpers] = useField('credentials');
   const [labelsField, , labelsHelpers] = useField('labels');
   const [limitField, limitMeta, limitHelpers] = useField('limit');
-  const [verbosityField] = useField('verbosity');
   const [diffModeField, , diffModeHelpers] = useField('diff_mode');
   const [instanceGroupsField, , instanceGroupsHelpers] =
     useField('instanceGroups');
@@ -214,13 +214,6 @@ function JobTemplateForm({
       label: t`Check`,
       isDisabled: false,
     },
-  ];
-  const verbosityOptions = [
-    { value: '0', key: '0', label: t`0 (Normal)` },
-    { value: '1', key: '1', label: t`1 (Verbose)` },
-    { value: '2', key: '2', label: t`2 (More Verbose)` },
-    { value: '3', key: '3', label: t`3 (Debug)` },
-    { value: '4', key: '4', label: t`4 (Connection Debug)` },
   ];
   let callbackUrl;
   if (template?.related) {
@@ -428,19 +421,12 @@ function JobTemplateForm({
                 }}
               />
             </FieldWithPrompt>
-            <FieldWithPrompt
+            <VerbositySelectField
               fieldId="template-verbosity"
-              label={t`Verbosity`}
               promptId="template-ask-verbosity-on-launch"
               promptName="ask_verbosity_on_launch"
               tooltip={helpText.verbosity}
-            >
-              <AnsibleSelect
-                id="template-verbosity"
-                data={verbosityOptions}
-                {...verbosityField}
-              />
-            </FieldWithPrompt>
+            />
             <FormField
               id="template-job-slicing"
               name="job_slice_count"

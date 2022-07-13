@@ -13,9 +13,7 @@ from awx.main.models import InventorySource, Inventory, ActivityStream
 @pytest.fixture
 def scm_inventory(inventory, project):
     with mock.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.update'):
-        inventory.inventory_sources.create(
-            name='foobar', update_on_project_update=True, source='scm', source_project=project, scm_last_revision=project.scm_revision
-        )
+        inventory.inventory_sources.create(name='foobar', source='scm', source_project=project)
     return inventory
 
 
@@ -23,9 +21,7 @@ def scm_inventory(inventory, project):
 def factory_scm_inventory(inventory, project):
     def fn(**kwargs):
         with mock.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.update'):
-            return inventory.inventory_sources.create(
-                source_project=project, overwrite_vars=True, source='scm', scm_last_revision=project.scm_revision, **kwargs
-            )
+            return inventory.inventory_sources.create(source_project=project, overwrite_vars=True, source='scm', **kwargs)
 
     return fn
 
@@ -544,15 +540,12 @@ class TestControlledBySCM:
     def test_safe_method_works(self, get, options, scm_inventory, admin_user):
         get(scm_inventory.get_absolute_url(), admin_user, expect=200)
         options(scm_inventory.get_absolute_url(), admin_user, expect=200)
-        assert InventorySource.objects.get(inventory=scm_inventory.pk).scm_last_revision != ''
 
     def test_vars_edit_reset(self, patch, scm_inventory, admin_user):
         patch(scm_inventory.get_absolute_url(), {'variables': 'hello: world'}, admin_user, expect=200)
-        assert InventorySource.objects.get(inventory=scm_inventory.pk).scm_last_revision == ''
 
     def test_name_edit_allowed(self, patch, scm_inventory, admin_user):
         patch(scm_inventory.get_absolute_url(), {'variables': '---', 'name': 'newname'}, admin_user, expect=200)
-        assert InventorySource.objects.get(inventory=scm_inventory.pk).scm_last_revision != ''
 
     def test_host_associations_reset(self, post, scm_inventory, admin_user):
         inv_src = scm_inventory.inventory_sources.first()
@@ -560,14 +553,12 @@ class TestControlledBySCM:
         g = inv_src.groups.create(name='fooland', inventory=scm_inventory)
         post(reverse('api:host_groups_list', kwargs={'pk': h.id}), {'id': g.id}, admin_user, expect=204)
         post(reverse('api:group_hosts_list', kwargs={'pk': g.id}), {'id': h.id}, admin_user, expect=204)
-        assert InventorySource.objects.get(inventory=scm_inventory.pk).scm_last_revision == ''
 
     def test_group_group_associations_reset(self, post, scm_inventory, admin_user):
         inv_src = scm_inventory.inventory_sources.first()
         g1 = inv_src.groups.create(name='barland', inventory=scm_inventory)
         g2 = inv_src.groups.create(name='fooland', inventory=scm_inventory)
         post(reverse('api:group_children_list', kwargs={'pk': g1.id}), {'id': g2.id}, admin_user, expect=204)
-        assert InventorySource.objects.get(inventory=scm_inventory.pk).scm_last_revision == ''
 
     def test_host_group_delete_reset(self, delete, scm_inventory, admin_user):
         inv_src = scm_inventory.inventory_sources.first()
@@ -575,7 +566,6 @@ class TestControlledBySCM:
         g = inv_src.groups.create(name='fooland', inventory=scm_inventory)
         delete(h.get_absolute_url(), admin_user, expect=204)
         delete(g.get_absolute_url(), admin_user, expect=204)
-        assert InventorySource.objects.get(inventory=scm_inventory.pk).scm_last_revision == ''
 
     def test_remove_scm_inv_src(self, delete, scm_inventory, admin_user):
         inv_src = scm_inventory.inventory_sources.first()
@@ -588,7 +578,6 @@ class TestControlledBySCM:
             {
                 'name': 'new inv src',
                 'source_project': project.pk,
-                'update_on_project_update': False,
                 'source': 'scm',
                 'overwrite_vars': True,
                 'source_vars': 'plugin: a.b.c',
@@ -596,27 +585,6 @@ class TestControlledBySCM:
             admin_user,
             expect=201,
         )
-
-    def test_adding_inv_src_prohibited(self, post, scm_inventory, project, admin_user):
-        post(
-            reverse('api:inventory_inventory_sources_list', kwargs={'pk': scm_inventory.id}),
-            {'name': 'new inv src', 'source_project': project.pk, 'update_on_project_update': True, 'source': 'scm', 'overwrite_vars': True},
-            admin_user,
-            expect=400,
-        )
-
-    def test_two_update_on_project_update_inv_src_prohibited(self, patch, scm_inventory, factory_scm_inventory, project, admin_user):
-        scm_inventory2 = factory_scm_inventory(name="scm_inventory2")
-        res = patch(
-            reverse('api:inventory_source_detail', kwargs={'pk': scm_inventory2.id}),
-            {
-                'update_on_project_update': True,
-            },
-            admin_user,
-            expect=400,
-        )
-        content = json.loads(res.content)
-        assert content['update_on_project_update'] == ["More than one SCM-based inventory source with update on project update " "per-inventory not allowed."]
 
     def test_adding_inv_src_without_proj_access_prohibited(self, post, project, inventory, rando):
         inventory.admin_role.members.add(rando)

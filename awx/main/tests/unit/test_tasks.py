@@ -922,7 +922,8 @@ class TestJobCredentials(TestJobExecution):
         assert env['AWS_SECURITY_TOKEN'] == 'token'
         assert safe_env['AWS_SECRET_ACCESS_KEY'] == HIDDEN_PASSWORD
 
-    def test_gce_credentials(self, private_data_dir, job, mock_me):
+    @pytest.mark.parametrize("cred_env_var", ['GCE_CREDENTIALS_FILE_PATH', 'GOOGLE_APPLICATION_CREDENTIALS'])
+    def test_gce_credentials(self, cred_env_var, private_data_dir, job, mock_me):
         gce = CredentialType.defaults['gce']()
         credential = Credential(pk=1, credential_type=gce, inputs={'username': 'bob', 'project': 'some-project', 'ssh_key_data': self.EXAMPLE_PRIVATE_KEY})
         credential.inputs['ssh_key_data'] = encrypt_field(credential, 'ssh_key_data')
@@ -931,7 +932,7 @@ class TestJobCredentials(TestJobExecution):
         env = {}
         safe_env = {}
         credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
-        runner_path = env['GCE_CREDENTIALS_FILE_PATH']
+        runner_path = env[cred_env_var]
         local_path = to_host_path(runner_path, private_data_dir)
         json_data = json.load(open(local_path, 'rb'))
         assert json_data['type'] == 'service_account'
@@ -1316,6 +1317,7 @@ class TestJobCredentials(TestJobExecution):
         assert env['AZURE_AD_USER'] == 'bob'
         assert env['AZURE_PASSWORD'] == 'secret'
 
+        # Because this is testing a mix of multiple cloud creds, we are not going to test the GOOGLE_APPLICATION_CREDENTIALS here
         path = to_host_path(env['GCE_CREDENTIALS_FILE_PATH'], private_data_dir)
         json_data = json.load(open(path, 'rb'))
         assert json_data['type'] == 'service_account'
@@ -1645,7 +1647,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
         assert safe_env['AZURE_PASSWORD'] == HIDDEN_PASSWORD
 
-    def test_gce_source(self, inventory_update, private_data_dir, mocker, mock_me):
+    @pytest.mark.parametrize("cred_env_var", ['GCE_CREDENTIALS_FILE_PATH', 'GOOGLE_APPLICATION_CREDENTIALS'])
+    def test_gce_source(self, cred_env_var, inventory_update, private_data_dir, mocker, mock_me):
         task = jobs.RunInventoryUpdate()
         task.instance = inventory_update
         gce = CredentialType.defaults['gce']()
@@ -1669,7 +1672,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
                     credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
 
             assert env['GCE_ZONE'] == expected_gce_zone
-            json_data = json.load(open(env['GCE_CREDENTIALS_FILE_PATH'], 'rb'))
+            json_data = json.load(open(env[cred_env_var], 'rb'))
             assert json_data['type'] == 'service_account'
             assert json_data['private_key'] == self.EXAMPLE_PRIVATE_KEY
             assert json_data['client_email'] == 'bob'
