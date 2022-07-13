@@ -15,7 +15,7 @@ from distutils.version import LooseVersion as Version
 from django.conf import settings
 from django.db import transaction, DatabaseError, IntegrityError
 from django.db.models.fields.related import ForeignKey
-from django.utils.timezone import now
+from django.utils.timezone import now, timedelta
 from django.utils.encoding import smart_str
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
@@ -608,7 +608,8 @@ def awx_k8s_reaper():
     for group in InstanceGroup.objects.filter(is_container_group=True).iterator():
         logger.debug("Checking for orphaned k8s pods for {}.".format(group))
         pods = PodManager.list_active_jobs(group)
-        for job in UnifiedJob.objects.filter(pk__in=pods.keys()).exclude(status__in=ACTIVE_STATES):
+        time_cutoff = now() - timedelta(seconds=settings.K8S_POD_REAPER_GRACE_PERIOD)
+        for job in UnifiedJob.objects.filter(pk__in=pods.keys(), finished__lte=time_cutoff).exclude(status__in=ACTIVE_STATES):
             logger.debug('{} is no longer active, reaping orphaned k8s pod'.format(job.log_format))
             try:
                 pm = PodManager(job)
