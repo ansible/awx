@@ -22,7 +22,7 @@ import psutil
 
 from awx.main.models import UnifiedJob
 from awx.main.dispatch import reaper
-from awx.main.utils.common import convert_mem_str_to_bytes, get_mem_effective_capacity
+from awx.main.utils.common import convert_mem_str_to_bytes, get_mem_effective_capacity, log_excess_runtime
 
 if 'run_callback_receiver' in sys.argv:
     logger = logging.getLogger('awx.main.commands.run_callback_receiver')
@@ -364,6 +364,7 @@ class AutoscalePool(WorkerPool):
     def debug_meta(self):
         return 'min={} max={}'.format(self.min_workers, self.max_workers)
 
+    @log_excess_runtime(logger)
     def cleanup(self):
         """
         Perform some internal account and cleanup.  This is run on
@@ -380,6 +381,7 @@ class AutoscalePool(WorkerPool):
         if there's an outage, this method _can_ throw various
         django.db.utils.Error exceptions.  Act accordingly.
         """
+        start_time = time.time()
         orphaned = []
         for w in self.workers[::]:
             if not w.alive:
@@ -432,16 +434,16 @@ class AutoscalePool(WorkerPool):
             idx = random.choice(range(len(self.workers)))
             self.write(idx, m)
 
-        # if we are not in the dangerous situation of queue backup then clear old waiting jobs
-        if self.workers and max(len(w.managed_tasks) for w in self.workers) <= 1:
-            reaper.reap_waiting()
-
-        # if the database says a job is running on this node, but it's *not*,
+        # if the database says a job is running or queued on this node, but it's *not*,
         # then reap it
         running_uuids = []
         for worker in self.workers:
             worker.calculate_managed_tasks()
             running_uuids.extend(list(worker.managed_tasks.keys()))
+        delta = time.time() - start_time
+        if delta > 1.0:
+            logger.warning(f'Took {delta} for internal part of cleanup')
+        start_time = time.time()
         reaper.reap(excluded_uuids=running_uuids)
 
     def up(self):
@@ -471,6 +473,10 @@ class AutoscalePool(WorkerPool):
                     w.put(body)
                     break
             else:
+                task_name = 'unknown'
+                if isinstance(body, dict):
+                    task_name = body.get('task')
+                logger.warn(f'Workers maxed, queuing {task_name}, load: {sum(len(w.managed_tasks) for w in self.workers)} / {len(self.workers)}')
                 return super(AutoscalePool, self).write(preferred_queue, body)
         except Exception:
             for conn in connections.all():

@@ -2,6 +2,7 @@ import inspect
 import logging
 import sys
 import json
+import time
 from uuid import uuid4
 
 from django.conf import settings
@@ -75,7 +76,7 @@ class task:
                     msg = f'{cls.name}: Queue value required and may not be None'
                     logger.error(msg)
                     raise ValueError(msg)
-                obj = {'uuid': task_id, 'args': args, 'kwargs': kwargs, 'task': cls.name}
+                obj = {'uuid': task_id, 'args': args, 'kwargs': kwargs, 'task': cls.name, 'time_pub': time.time()}
                 guid = get_guid()
                 if guid:
                     obj['guid'] = guid
