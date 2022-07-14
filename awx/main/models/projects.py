@@ -287,7 +287,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
     # indicate if content signature validation is enabled
     signature_validation = models.BooleanField(
         default=False,
-        help_text=_('TODO'),
+        help_text=_('TODO:djyasin'),
     )
     # credential (keys) used to validate content signature
     signature_validation_credential = models.ForeignKey(
