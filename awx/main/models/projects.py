@@ -284,6 +284,17 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         help_text=_('Allow changing the SCM branch or revision in a job template ' 'that uses this project.'),
     )
 
+    # credential (keys) used to validate content signature
+    signature_validation_credential = models.ForeignKey(
+        'Credential',
+        related_name='%(class)ss_signature_validation',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+        help_text=_('An optional credential used for validating files in the project against unexpected changes.'),
+    )
+
     scm_revision = models.CharField(
         max_length=1024,
         blank=True,
