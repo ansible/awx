@@ -875,14 +875,17 @@ class ScheduleManager:
         self.manager = manager
         self.manager_threading_local = manager_threading_local
 
-    def schedule(self):
-        if getattr(self.manager_threading_local, 'bulk_reschedule', False):
-            self.manager_threading_local.needs_scheduling = True
-            return
+    def _schedule(self):
         from django.db import connection
 
         # runs right away if not in transaction
         connection.on_commit(lambda: self.manager.delay())
+
+    def schedule(self):
+        if getattr(self.manager_threading_local, 'bulk_reschedule', False):
+            self.manager_threading_local.needs_scheduling = True
+            return
+        self._schedule()
 
 
 class ScheduleTaskManager(ScheduleManager):
