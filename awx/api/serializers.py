@@ -1474,6 +1474,8 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
         ) + (
             'last_update_failed',
             'last_updated',
+            'signature_validation',
+            'signature_validation_credential',
         )  # Backwards compatibility
         read_only_fields = ('*', 'custom_virtualenv')
 
