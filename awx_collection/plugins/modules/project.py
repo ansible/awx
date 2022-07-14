@@ -169,6 +169,12 @@ options:
       required: False
       default: 2
       type: float
+    signature_validation_credential:
+      description:
+        - Name of the credential to use for signature validation.
+        - If signature validation credential is provided, signature validation will be enabled. 
+      type: str
+
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -279,10 +285,13 @@ def main():
         wait=dict(type='bool', default=True),
         update_project=dict(default=False, type='bool'),
         interval=dict(default=2.0, type='float'),
+        signature_validation_credential=dict(type='str'),
     )
 
     # Create a module for ourselves
-    module = ControllerAPIModule(argument_spec=argument_spec)
+    module = ControllerAPIModule(
+        argument_spec=argument_spec,
+    )
 
     # Extract our parameters
     name = module.params.get('name')
@@ -300,6 +309,8 @@ def main():
     state = module.params.get('state')
     wait = module.params.get('wait')
     update_project = module.params.get('update_project')
+
+    signature_validation_credential = module.params.get('signature_validation_credential')
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     lookup_data = {}
@@ -330,6 +341,9 @@ def main():
     if credential is not None:
         credential = module.resolve_name_to_id('credentials', credential)
 
+    if signature_validation_credential is not None:
+        signature_validation_credential = module.resolve_name_to_id('credentials', signature_validation_credential)
+
     # Attempt to look up associated field items the user specified.
     association_fields = {}
 
@@ -358,6 +372,7 @@ def main():
         'organization': org_id,
         'scm_update_on_launch': scm_update_on_launch,
         'scm_update_cache_timeout': scm_update_cache_timeout,
+        'signature_validation_credential': signature_validation_credential,
     }
 
     for field_name in (
