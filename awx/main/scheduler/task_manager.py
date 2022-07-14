@@ -37,7 +37,6 @@ from awx.main.utils.pglock import advisory_lock
 from awx.main.utils import (
     get_type_for_model,
     ScheduleTaskManager,
-    ScheduleDependencyManager,
     ScheduleWorkflowManager,
 )
 from awx.main.utils.common import create_partition, task_manager_bulk_reschedule

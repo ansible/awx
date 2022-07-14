@@ -55,7 +55,6 @@ from awx.main.utils.common import (
     ignore_inventory_group_removal,
     ScheduleWorkflowManager,
     ScheduleTaskManager,
-    ScheduleDependencyManager,
 )
 
 from awx.main.utils.external_logging import reconfigure_rsyslog
