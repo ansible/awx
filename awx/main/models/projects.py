@@ -284,6 +284,26 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         help_text=_('Allow changing the SCM branch or revision in a job template ' 'that uses this project.'),
     )
 
+    # indicate if content signature validation is enabled
+    signature_validation = models.BooleanField(
+        default=False,
+        help_text=_('TODO'),
+    )
+    # credential (keys) used to validate content signature
+    signature_validation_credential = models.ForeignKey(
+        'Credential',
+        related_name='%(class)ss_signature_validation',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    )
+    # result of the signature validation
+    signature_validation_result = models.BooleanField(
+        default=False,
+        help_text=_('TODO'),
+    )
+
     scm_revision = models.CharField(
         max_length=1024,
         blank=True,
