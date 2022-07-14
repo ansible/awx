@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0164_remove_inventorysource_update_on_project_update'),
+        ('main', '0165_added_contentsigning_to_project_model'),
     ]
 
     operations = [
