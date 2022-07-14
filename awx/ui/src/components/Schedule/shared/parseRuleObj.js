@@ -3,6 +3,13 @@ import { dateToInputDateTime } from 'util/dates';
 import { DateTime } from 'luxon';
 import sortFrequencies from './sortFrequencies';
 
+export class UnsupportedRRuleError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'UnsupportedRRuleError';
+  }
+}
+
 export default function parseRuleObj(schedule) {
   let values = {
     frequency: [],
@@ -26,7 +33,7 @@ export default function parseRuleObj(schedule) {
         values = parseRrule(ruleString, schedule, values);
         break;
       default:
-        throw new Error(`Unsupported rrule type: ${type}`);
+        throw new UnsupportedRRuleError(`Unsupported rrule type: ${type}`);
     }
   });
 
@@ -162,6 +169,10 @@ function parseRrule(rruleString, schedule, values) {
       options.runOnTheDay = generateRunOnTheDay(byweekday);
       options.runOnTheMonth = bymonth;
     }
+  }
+
+  if (values.frequencyOptions.frequency) {
+    throw new UnsupportedRRuleError('Duplicate frequency types not supported');
   }
 
   return {
