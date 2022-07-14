@@ -341,6 +341,10 @@ class AutoscalePool(WorkerPool):
             # Get same number as max forks based on memory, this function takes memory as bytes
             self.max_workers = get_mem_effective_capacity(total_memory_gb * 2**30)
 
+            # add magic prime number of extra workers to ensure
+            # we have a few extra workers to run the heartbeat
+            self.max_workers += 7
+
         # max workers can't be less than min_workers
         self.max_workers = max(self.min_workers, self.max_workers)
 
