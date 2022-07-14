@@ -153,6 +153,9 @@ describe('<InventoryDetail />', () => {
     expect(InventoriesAPI.readInstanceGroups).toHaveBeenCalledWith(
       mockInventory.id
     );
-    expect(wrapper.find(`Detail[label="Instance Groups"]`)).toHaveLength(0);
+    const instance_groups_detail = wrapper
+      .find(`Detail[label="Instance Groups"]`)
+      .at(0);
+    expect(instance_groups_detail.prop('isEmpty')).toEqual(true);
   });
 });

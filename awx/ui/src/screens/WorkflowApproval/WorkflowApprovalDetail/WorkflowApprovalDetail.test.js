@@ -482,6 +482,33 @@ describe('<WorkflowApprovalDetail />', () => {
     expect(wrapper.find('DeleteButton').length).toBe(1);
   });
 
+  test('should not load Labels', async () => {
+    WorkflowJobTemplatesAPI.readDetail.mockResolvedValue({
+      data: workflowJobTemplate,
+    });
+    WorkflowJobsAPI.readDetail.mockResolvedValue({
+      data: {
+        ...workflowApproval,
+        summary_fields: {
+          ...workflowApproval.summary_fields,
+          labels: {
+            results: [],
+          },
+        },
+      },
+    });
+
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <WorkflowApprovalDetail workflowApproval={workflowApproval} />
+      );
+    });
+    waitForElement(wrapper, 'WorkflowApprovalDetail', (el) => el.length > 0);
+    const labels_detail = wrapper.find(`Detail[label="Labels"]`).at(0);
+    expect(labels_detail.prop('isEmpty')).toEqual(true);
+  });
+
   test('Error dialog shown for failed approval', async () => {
     WorkflowApprovalsAPI.approve.mockImplementationOnce(() =>
       Promise.reject(new Error())

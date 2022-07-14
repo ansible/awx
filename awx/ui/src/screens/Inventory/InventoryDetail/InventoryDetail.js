@@ -79,7 +79,7 @@ function InventoryDetail({ inventory }) {
           }
         />
         <Detail label={t`Total hosts`} value={inventory.total_hosts} />
-        {instanceGroups && instanceGroups.length > 0 && (
+        {instanceGroups && (
           <Detail
             fullWidth
             label={t`Instance Groups`}
@@ -100,6 +100,7 @@ function InventoryDetail({ inventory }) {
                 ))}
               </ChipGroup>
             }
+            isEmpty={instanceGroups.length === 0}
           />
         )}
         {inventory.summary_fields.labels && (

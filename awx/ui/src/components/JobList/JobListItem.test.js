@@ -203,6 +203,49 @@ describe('<JobListItem />', () => {
       wrapper.find('Detail[label="Execution Environment"] dd').text()
     ).toBe('Missing resource');
   });
+
+  test('should not load Source', () => {
+    wrapper = mountWithContexts(
+      <table>
+        <tbody>
+          <JobListItem
+            inventorySourceLabels={[]}
+            job={{
+              ...mockJob,
+              type: 'inventory_update',
+              summary_fields: {
+                user_capabilities: {},
+              },
+            }}
+          />
+        </tbody>
+      </table>
+    );
+    const source_detail = wrapper.find(`Detail[label="Source"]`).at(0);
+    expect(source_detail.prop('isEmpty')).toEqual(true);
+  });
+
+  test('should not load Credentials', () => {
+    wrapper = mountWithContexts(
+      <table>
+        <tbody>
+          <JobListItem
+            job={{
+              ...mockJob,
+              type: 'inventory_update',
+              summary_fields: {
+                credentials: [],
+              },
+            }}
+          />
+        </tbody>
+      </table>
+    );
+    const credentials_detail = wrapper
+      .find(`Detail[label="Credentials"]`)
+      .at(0);
+    expect(credentials_detail.prop('isEmpty')).toEqual(true);
+  });
 });
 
 describe('<JobListItem with failed job />', () => {

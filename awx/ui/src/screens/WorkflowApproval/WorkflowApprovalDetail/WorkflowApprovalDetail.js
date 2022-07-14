@@ -325,7 +325,7 @@ function WorkflowApprovalDetail({ workflowApproval }) {
               ))}
             </ChipGroup>
           }
-          isEmpty={workflowJob?.summary_fields?.labels?.results?.length === 0}
+          isEmpty={!workflowJob?.summary_fields?.labels?.results?.length}
         />
         {workflowJob?.extra_vars ? (
           <VariablesDetail

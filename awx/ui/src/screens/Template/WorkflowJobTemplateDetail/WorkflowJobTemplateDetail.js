@@ -218,7 +218,7 @@ function WorkflowJobTemplateDetail({ template }) {
               ))}
             </ChipGroup>
           }
-          isEmpty={summary_fields.labels?.results?.length === 0}
+          isEmpty={!summary_fields.labels?.results?.length}
         />
         <VariablesDetail
           dataCy="workflow-job-template-detail-extra-vars"

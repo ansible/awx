@@ -465,4 +465,68 @@ describe('<TemplateListItem />', () => {
     ).toEqual(true);
     expect(wrapper.find(`Detail[label="Activity"] Sparkline`)).toHaveLength(1);
   });
+
+  test('should not load Activity', async () => {
+    const wrapper = mountWithContexts(
+      <table>
+        <tbody>
+          <TemplateListItem
+            template={{
+              ...mockJobTemplateData,
+              summary_fields: {
+                user_capabilities: {},
+                recent_jobs: [],
+              },
+            }}
+          />
+        </tbody>
+      </table>
+    );
+    const activity_detail = wrapper.find(`Detail[label="Activity"]`).at(0);
+    expect(activity_detail.prop('isEmpty')).toEqual(true);
+  });
+
+  test('should not load Credentials', async () => {
+    const wrapper = mountWithContexts(
+      <table>
+        <tbody>
+          <TemplateListItem
+            template={{
+              ...mockJobTemplateData,
+              summary_fields: {
+                user_capabilities: {},
+                credentials: [],
+              },
+            }}
+          />
+        </tbody>
+      </table>
+    );
+    const credentials_detail = wrapper
+      .find(`Detail[label="Credentials"]`)
+      .at(0);
+    expect(credentials_detail.prop('isEmpty')).toEqual(true);
+  });
+
+  test('should not load Labels', async () => {
+    const wrapper = mountWithContexts(
+      <table>
+        <tbody>
+          <TemplateListItem
+            template={{
+              ...mockJobTemplateData,
+              summary_fields: {
+                user_capabilities: {},
+                labels: {
+                  results: [],
+                },
+              },
+            }}
+          />
+        </tbody>
+      </table>
+    );
+    const labels_detail = wrapper.find(`Detail[label="Labels"]`).at(0);
+    expect(labels_detail.prop('isEmpty')).toEqual(true);
+  });
 });
