@@ -542,8 +542,9 @@ def cluster_node_heartbeat():
 
     for other_inst in lost_instances:
         try:
-            reaper.reap(other_inst)
-            reaper.reap_waiting(this_inst, grace_period=0)
+            explanation = "Job reaped due to instance shutdown"
+            reaper.reap(other_inst, job_explanation=explanation)
+            reaper.reap_waiting(other_inst, grace_period=0, job_explanation=explanation)
         except Exception:
             logger.exception('failed to reap jobs for {}'.format(other_inst.hostname))
         try:

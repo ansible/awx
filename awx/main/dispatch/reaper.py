@@ -34,20 +34,20 @@ def startup_reaping():
         logger.error(f'Unified jobs {job_ids} were reaped on dispatch startup')
 
 
-def reap_job(j, status):
-    j.refresh_from_db(fields=['status'])
+def reap_job(j, status, job_explanation=None):
+    j.refresh_from_db(fields=['status', 'job_explanation'])
     status_before = j.status
     if status_before not in ('running', 'waiting'):
         # just in case, don't reap jobs that aren't running
         return
     j.status = status
     j.start_args = ''  # blank field to remove encrypted passwords
-    j.job_explanation += ' '.join(
-        (
-            'Task was marked as running but was not present in',
-            'the job queue, so it has been marked as failed.',
-        )
-    )
+    if j.job_explanation:
+        j.job_explanation += ' '  # Separate messages for readability
+    if job_explanation is None:
+        j.job_explanation += 'Task was marked as running but was not present in the job queue, so it has been marked as failed.'
+    else:
+        j.job_explanation += job_explanation
     j.save(update_fields=['status', 'start_args', 'job_explanation'])
     if hasattr(j, 'send_notification_templates'):
         j.send_notification_templates('failed')
@@ -55,7 +55,7 @@ def reap_job(j, status):
     logger.error(f'{j.log_format} is no longer {status_before}; reaping')
 
 
-def reap_waiting(instance=None, status='failed', grace_period=None, excluded_uuids=None):
+def reap_waiting(instance=None, status='failed', job_explanation=None, grace_period=None, excluded_uuids=None):
     """
     Reap all jobs in waiting for this instance.
     """
@@ -74,10 +74,10 @@ def reap_waiting(instance=None, status='failed', grace_period=None, excluded_uui
     if excluded_uuids:
         jobs = jobs.exclude(celery_task_id__in=excluded_uuids)
     for j in jobs:
-        reap_job(j, status)
+        reap_job(j, status, job_explanation=job_explanation)
 
 
-def reap(instance=None, status='failed', excluded_uuids=None):
+def reap(instance=None, status='failed', job_explanation=None, excluded_uuids=None):
     """
     Reap all jobs in running for this instance.
     """
@@ -95,4 +95,4 @@ def reap(instance=None, status='failed', excluded_uuids=None):
     if excluded_uuids:
         jobs = jobs.exclude(celery_task_id__in=excluded_uuids)
     for j in jobs:
-        reap_job(j, status)
+        reap_job(j, status, job_explanation=job_explanation)
