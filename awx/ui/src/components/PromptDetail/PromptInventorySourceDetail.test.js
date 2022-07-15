@@ -67,7 +67,6 @@ describe('PromptInventorySourceDetail', () => {
           </li>,
           <li>Overwrite local variables from remote inventory source</li>,
           <li>Update on launch</li>,
-          <li>Update on project update</li>,
         ])
     ).toEqual(true);
   });

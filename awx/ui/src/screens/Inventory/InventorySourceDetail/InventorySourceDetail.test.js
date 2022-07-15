@@ -113,7 +113,6 @@ describe('InventorySourceDetail', () => {
         'Overwrite local groups and hosts from remote inventory source',
         'Overwrite local variables from remote inventory source',
         'Update on launch',
-        'Update on project update',
       ]).toContain(option.text());
     });
   });

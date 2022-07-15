@@ -53,11 +53,10 @@ export const VerbosityField = () => {
   );
 };
 
-export const OptionsField = ({ showProjectUpdate = false }) => {
+export const OptionsField = () => {
   const [updateOnLaunchField] = useField('update_on_launch');
   const [, , updateCacheTimeoutHelper] = useField('update_cache_timeout');
   const [projectField] = useField('source_project');
-  const [updatedOnProjectUpdateField] = useField('update_on_project_update');
 
   useEffect(() => {
     if (!updateOnLaunchField.value) {
@@ -83,23 +82,11 @@ export const OptionsField = ({ showProjectUpdate = false }) => {
               tooltip={helpText.subFormOptions.overwriteVariables}
             />
             <CheckboxField
-              isDisabled={updatedOnProjectUpdateField.value}
               id="update_on_launch"
               name="update_on_launch"
               label={t`Update on launch`}
               tooltip={helpText.subFormOptions.updateOnLaunch(projectField)}
             />
-            {showProjectUpdate && (
-              <CheckboxField
-                isDisabled={updateOnLaunchField.value}
-                id="update_on_project_update"
-                name="update_on_project_update"
-                label={t`Update on project update`}
-                tooltip={helpText.subFormOptions.updateOnProjectUpdate(
-                  projectField
-                )}
-              />
-            )}
           </FormCheckboxLayout>
         </FormGroup>
       </FormFullWidthLayout>

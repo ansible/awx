@@ -49,7 +49,6 @@ function InventorySourceDetail({ inventorySource }) {
     source_vars,
     update_cache_timeout,
     update_on_launch,
-    update_on_project_update,
     verbosity,
     enabled_var,
     enabled_value,
@@ -113,12 +112,7 @@ function InventorySourceDetail({ inventorySource }) {
   );
 
   let optionsList = '';
-  if (
-    overwrite ||
-    overwrite_vars ||
-    update_on_launch ||
-    update_on_project_update
-  ) {
+  if (overwrite || overwrite_vars || update_on_launch) {
     optionsList = (
       <TextList component={TextListVariants.ul}>
         {overwrite && (
@@ -138,16 +132,6 @@ function InventorySourceDetail({ inventorySource }) {
             {t`Update on launch`}
             <Popover
               content={helpText.subFormOptions.updateOnLaunch({
-                value: source_project,
-              })}
-            />
-          </TextListItem>
-        )}
-        {update_on_project_update && (
-          <TextListItem component={TextListItemVariants.li}>
-            {t`Update on project update`}
-            <Popover
-              content={helpText.subFormOptions.updateOnProjectUpdate({
                 value: source_project,
               })}
             />

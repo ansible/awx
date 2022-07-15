@@ -112,7 +112,6 @@
   "update_on_launch":true,
   "update_cache_timeout":2,
   "source_project":8,
-  "update_on_project_update":true,
   "last_update_failed": true,
   "last_updated":null
 }
