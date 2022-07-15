@@ -312,7 +312,12 @@ class Metrics:
                 self.previous_send_metrics.set(current_time)
                 self.previous_send_metrics.store_value(self.conn)
         finally:
-            lock.release()
+            try:
+                lock.release()
+            except Exception as exc:
+                # After system failures, we might throw redis.exceptions.LockNotOwnedError
+                # this is to avoid print a Traceback, and importantly, avoid raising an exception into parent context
+                logger.warning(f'Error releasing subsystem metrics redis lock, error: {str(exc)}')
 
     def load_other_metrics(self, request):
         # data received from other nodes are stored in their own keys

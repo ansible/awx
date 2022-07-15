@@ -95,8 +95,13 @@ class Command(BaseCommand):
         # database migrations are still running
         from awx.main.models.ha import Instance
 
-        executor = MigrationExecutor(connection)
-        migrating = bool(executor.migration_plan(executor.loader.graph.leaf_nodes()))
+        try:
+            executor = MigrationExecutor(connection)
+            migrating = bool(executor.migration_plan(executor.loader.graph.leaf_nodes()))
+        except Exception as exc:
+            logger.info(f'Error on startup of run_wsbroadcast (error: {exc}), retry in 10s...')
+            time.sleep(10)
+            return
 
         # In containerized deployments, migrations happen in the task container,
         # and the services running there don't start until migrations are

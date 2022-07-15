@@ -167,17 +167,27 @@ class CallbackBrokerWorker(BaseWorker):
                 try:
                     cls.objects.bulk_create(events)
                     metrics_bulk_events_saved += len(events)
-                except Exception:
+                except Exception as exc:
+                    logger.warning(f'Error in events bulk_create, will try indiviually up to 5 errors, error {str(exc)}')
                     # if an exception occurs, we should re-attempt to save the
                     # events one-by-one, because something in the list is
                     # broken/stale
+                    consecutive_errors = 0
+                    events_saved = 0
                     metrics_events_batch_save_errors += 1
                     for e in events:
                         try:
                             e.save()
-                            metrics_singular_events_saved += 1
-                        except Exception:
-                            logger.exception('Database Error Saving Job Event')
+                            events_saved += 0
+                            consecutive_errors = 0
+                        except Exception as exc_indv:
+                            consecutive_errors += 1
+                            if consecutive_errors >= 5:
+                                raise
+                            logger.info(f'Database Error Saving individual Job Event, error {str(exc_indv)}')
+                    metrics_singular_events_saved += events_saved
+                    if events_saved == 0:
+                        raise
                 metrics_duration_to_save = time.perf_counter() - metrics_duration_to_save
                 for e in events:
                     if not getattr(e, '_skip_websocket_message', False):
@@ -257,17 +267,18 @@ class CallbackBrokerWorker(BaseWorker):
                 try:
                     self.flush(force=flush)
                     break
-                except (OperationalError, InterfaceError, InternalError):
+                except (OperationalError, InterfaceError, InternalError) as exc:
                     if retries >= self.MAX_RETRIES:
                         logger.exception('Worker could not re-establish database connectivity, giving up on one or more events.')
                         return
                     delay = 60 * retries
-                    logger.exception('Database Error Saving Job Event, retry #{i} in {delay} seconds:'.format(i=retries + 1, delay=delay))
+                    logger.warning(f'Database Error Flushing Job Events, retry #{retries + 1} in {delay} seconds: {str(exc)}')
                     django_connection.close()
                     time.sleep(delay)
                     retries += 1
                 except DatabaseError:
-                    logger.exception('Database Error Saving Job Event')
+                    logger.exception('Database Error Flushing Job Events')
+                    django_connection.close()
                     break
         except Exception as exc:
             tb = traceback.format_exc()
