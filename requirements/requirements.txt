@@ -258,8 +258,9 @@ pycparser==2.20
     # via cffi
 pygerduty==0.38.2
     # via -r /awx_devel/requirements/requirements.in
-pyjwt==2.3.0
+pyjwt==2.4.0
     # via
+    #   -r /awx_devel/requirements/requirements.in
     #   adal
     #   social-auth-core
     #   twilio

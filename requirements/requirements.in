@@ -38,6 +38,7 @@ prometheus_client
 psycopg2
 psutil
 pygerduty
+pyjwt>=2.4.0 # https://github.com/ansible/awx/security/dependabot/58
 pyparsing
 python3-saml==1.13.0
 python-dsv-sdk
