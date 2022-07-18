@@ -24,7 +24,7 @@
       </script>
       <meta
         http-equiv="Content-Security-Policy"
-        content="default-src 'self'; connect-src 'self' ws: wss:; style-src 'self' 'unsafe-inline'; script-src 'self' 'nonce-{{ csp_nonce }}' *.pendo.io https://d3js.org; img-src 'self' *.pendo.io data:; worker-src 'self' blob: ;"
+        content="default-src 'self'; connect-src 'self' ws: wss:; style-src 'self' 'unsafe-inline'; script-src 'self' 'nonce-{{ csp_nonce }}' *.pendo.io; img-src 'self' *.pendo.io data:; worker-src 'self' blob: ;"
       />
       <link rel="shortcut icon" href="{% static 'media/favicon.ico' %}" />
     <% } else { %>
