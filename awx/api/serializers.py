@@ -1378,6 +1378,9 @@ class ProjectOptionsSerializer(BaseSerializer):
             'credential',
             'timeout',
             'scm_revision',
+            'signature_validation',
+            'signature_validation_credential',
+            'signature_validation_result'
         )
 
     def get_related(self, obj):
