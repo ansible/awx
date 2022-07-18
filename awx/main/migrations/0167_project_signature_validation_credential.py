@@ -4,6 +4,14 @@ from django.db import migrations, models
 import django.db.models.deletion
 from django.utils.translation import gettext_lazy as _
 
+from awx.main.models import CredentialType
+from awx.main.utils.common import set_current_apps
+
+
+def setup_tower_managed_defaults(apps, schema_editor):
+    set_current_apps(apps)
+    CredentialType.setup_tower_managed_defaults(apps)
+
 
 class Migration(migrations.Migration):
 
@@ -25,4 +33,5 @@ class Migration(migrations.Migration):
                 help_text=_('An optional credential used for validating files in the project against unexpected changes.'),
             ),
         ),
+        migrations.RunPython(setup_tower_managed_defaults),
     ]
