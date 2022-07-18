@@ -659,6 +659,13 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
                 node_job_description = 'job #{0}, "{1}", which finished with status {2}.'.format(node.job.id, node.job.name, node.job.status)
             str_arr.append("- node #{0} spawns {1}".format(node.id, node_job_description))
         result['body'] = '\n'.join(str_arr)
+        result.update(
+            dict(
+                inventory=self.inventory.name if self.inventory else None,
+                limit=self.limit,
+                extra_vars=self.display_extra_vars(),
+            )
+        )
         return result
 
     @property
@@ -906,3 +913,12 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
     @property
     def workflow_job(self):
         return self.unified_job_node.workflow_job
+
+    def notification_data(self):
+        result = super(WorkflowApproval, self).notification_data()
+        result.update(
+            dict(
+                extra_vars=self.workflow_job.display_extra_vars(),
+            )
+        )
+        return result
