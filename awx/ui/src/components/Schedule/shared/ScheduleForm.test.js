@@ -498,7 +498,7 @@ describe('<ScheduleForm />', () => {
       expect(wrapper.find('DatePicker').prop('value')).toMatch(`${date}`);
       expect(wrapper.find('TimePicker').prop('time')).toMatch(`${time}`);
       expect(wrapper.find('select#schedule-timezone').prop('value')).toBe(
-        'America/New_York'
+        'UTC'
       );
       expect(
         wrapper.find('FrequencySelect#schedule-frequency').prop('value')

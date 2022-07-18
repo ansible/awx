@@ -298,7 +298,7 @@ function ScheduleForm({
     name: schedule.name || '',
     startDate: currentDate,
     startTime: time,
-    timezone: schedule.timezone || 'America/New_York',
+    timezone: schedule.timezone || now.zoneName,
   };
   const submitSchedule = (
     values,
