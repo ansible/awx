@@ -58,6 +58,13 @@ class InstanceLink(BaseModel):
     source = models.ForeignKey('Instance', on_delete=models.CASCADE, related_name='+')
     target = models.ForeignKey('Instance', on_delete=models.CASCADE, related_name='reverse_peers')
 
+    class States(models.TextChoices):
+        ADDING = 'adding', _('Adding')
+        ESTABLISHED = 'established', _('Established')
+        REMOVING = 'removing', _('Removing')
+
+    link_state = models.CharField(choices=States.choices, default=States.ESTABLISHED, max_length=16)
+
     class Meta:
         unique_together = ('source', 'target')
 
@@ -126,13 +133,25 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         default=0,
         editable=False,
     )
-    NODE_TYPE_CHOICES = [
-        ("control", "Control plane node"),
-        ("execution", "Execution plane node"),
-        ("hybrid", "Controller and execution"),
-        ("hop", "Message-passing node, no execution capability"),
-    ]
-    node_type = models.CharField(default='hybrid', choices=NODE_TYPE_CHOICES, max_length=16)
+
+    class Types(models.TextChoices):
+        CONTROL = 'control', _("Control plane node")
+        EXECUTION = 'execution', _("Execution plane node")
+        HYBRID = 'hybrid', _("Controller and execution")
+        HOP = 'hop', _("Message-passing node, no execution capability")
+
+    node_type = models.CharField(default=Types.HYBRID, choices=Types.choices, max_length=16)
+
+    class States(models.TextChoices):
+        PROVISIONING = 'provisioning', _('Provisioning')
+        PROVISION_FAIL = 'provision-fail', _('Provisioning Failure')
+        INSTALLED = 'installed', _('Installed')
+        READY = 'ready', _('Ready')
+        UNAVAILABLE = 'unavailable', _('Unavailable')
+        DEPROVISIONING = 'deprovisioning', _('De-provisioning')
+        DEPROVISION_FAIL = 'deprovision-fail', _('De-provisioning Failure')
+
+    node_state = models.CharField(choices=States.choices, default=States.READY, max_length=16)
 
     peers = models.ManyToManyField('self', symmetrical=False, through=InstanceLink, through_fields=('source', 'target'))
 
