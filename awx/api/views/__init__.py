@@ -174,6 +174,7 @@ from awx.api.views.webhooks import WebhookKeyView, GithubWebhookReceiver, Gitlab
 from awx.api.pagination import UnifiedJobEventPagination
 from awx.main.utils import set_environ
 
+from awx.api.views.instance_install_bundle import InstanceInstallBundle  # noqa
 
 logger = logging.getLogger('awx.api.views')
 
