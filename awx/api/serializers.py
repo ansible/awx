@@ -1380,7 +1380,7 @@ class ProjectOptionsSerializer(BaseSerializer):
             'scm_revision',
             'signature_validation',
             'signature_validation_credential',
-            'signature_validation_result'
+            'signature_validation_result',
         )
 
     def get_related(self, obj):
