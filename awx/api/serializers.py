@@ -4859,7 +4859,7 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
 class InstanceLinkSerializer(BaseSerializer):
     class Meta:
         model = InstanceLink
-        fields = ('source', 'target')
+        fields = ('source', 'target', 'link_state')
 
     source = serializers.SlugRelatedField(slug_field="hostname", read_only=True)
     target = serializers.SlugRelatedField(slug_field="hostname", read_only=True)
@@ -4868,31 +4868,25 @@ class InstanceLinkSerializer(BaseSerializer):
 class InstanceNodeSerializer(BaseSerializer):
     class Meta:
         model = Instance
-        fields = ('id', 'hostname', 'node_type', 'node_state')
-
-    node_state = serializers.SerializerMethodField()
-
-    def get_node_state(self, obj):
-        if not obj.enabled:
-            return "disabled"
-        return "error" if obj.errors else "healthy"
+        fields = ('id', 'hostname', 'node_type', 'node_state', 'enabled')
 
 
 class InstanceSerializer(BaseSerializer):
 
     consumed_capacity = serializers.SerializerMethodField()
     percent_capacity_remaining = serializers.SerializerMethodField()
-    jobs_running = serializers.IntegerField(help_text=_('Count of jobs in the running or waiting state that ' 'are targeted for this instance'), read_only=True)
+    jobs_running = serializers.IntegerField(help_text=_('Count of jobs in the running or waiting state that are targeted for this instance'), read_only=True)
     jobs_total = serializers.IntegerField(help_text=_('Count of all jobs that target this instance'), read_only=True)
 
     class Meta:
         model = Instance
-        read_only_fields = ('uuid', 'hostname', 'version', 'node_type')
+        read_only_fields = ('uuid', 'hostname', 'version', 'node_type', 'node_state')
         fields = (
             "id",
             "type",
             "url",
             "related",
+            "summary_fields",
             "uuid",
             "hostname",
             "created",
@@ -4914,6 +4908,7 @@ class InstanceSerializer(BaseSerializer):
             "enabled",
             "managed_by_policy",
             "node_type",
+            "node_state",
         )
 
     def get_related(self, obj):
@@ -4924,6 +4919,14 @@ class InstanceSerializer(BaseSerializer):
             if obj.node_type != 'hop':
                 res['health_check'] = self.reverse('api:instance_health_check', kwargs={'pk': obj.pk})
         return res
+
+    def get_summary_fields(self, obj):
+        summary = super().get_summary_fields(obj)
+
+        if self.is_detail_view:
+            summary['links'] = InstanceLinkSerializer(InstanceLink.objects.select_related('target', 'source').filter(source=obj), many=True).data
+
+        return summary
 
     def get_consumed_capacity(self, obj):
         return obj.consumed_capacity
