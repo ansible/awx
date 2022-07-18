@@ -1,9 +1,9 @@
 /* eslint-disable no-undef */
-importScripts('d3-collection.v1.min.js');
-importScripts('d3-dispatch.v1.min.js');
-importScripts('d3-quadtree.v1.min.js');
-importScripts('d3-timer.v1.min.js');
-importScripts('d3-force.v1.min.js');
+importScripts('https://d3js.org/d3-collection.v1.min.js');
+importScripts('https://d3js.org/d3-dispatch.v1.min.js');
+importScripts('https://d3js.org/d3-quadtree.v1.min.js');
+importScripts('https://d3js.org/d3-timer.v1.min.js');
+importScripts('https://d3js.org/d3-force.v1.min.js');
 
 onmessage = function calculateLayout({ data: { nodes, links } }) {
   const simulation = d3
