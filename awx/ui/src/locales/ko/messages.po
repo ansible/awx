@@ -10,7 +10,6 @@ msgstr ""
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"Plural-Forms: \n"
 
 #: components/Schedule/ScheduleOccurrences/ScheduleOccurrences.js:43
 msgid "(Limited to first 10)"
@@ -410,9 +409,13 @@ msgstr "오류가 발생했습니다."
 msgid "An inventory must be selected"
 msgstr "인벤토리를 선택해야 합니다"
 
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.js:105
+#~ msgid "Ansible Controller"
+#~ msgstr "Ansible Controller"
+
 #: screens/NotificationTemplate/shared/CustomMessagesSubForm.js:96
 msgid "Ansible Controller Documentation."
-msgstr "Ansible Controller 설명서"
+msgstr "Ansible 컨트롤러 설명서"
 
 #: screens/Template/Survey/SurveyQuestionForm.js:43
 msgid "Answer type"
@@ -480,7 +483,7 @@ msgstr "승인"
 
 #: screens/WorkflowApproval/shared/WorkflowApprovalControls.js:115
 msgid "Approve, cancel or deny"
-msgstr ""
+msgstr "승인, 취소 또는 거부"
 
 #: components/StatusLabel/StatusLabel.js:31
 msgid "Approved"
@@ -600,11 +603,11 @@ msgstr "Auto"
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:71
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:72
 msgid "Automation Analytics"
-msgstr ""
+msgstr "자동화 분석"
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:111
 msgid "Automation Analytics dashboard"
-msgstr ""
+msgstr "자동화 분석 대시보드"
 
 #: screens/Setting/Settings.js:46
 msgid "Azure AD"
@@ -774,11 +777,11 @@ msgstr "검색 중..."
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:36
 #~ msgid "By default, we collect and transmit analytics data on the serice usage to Red Hat. There are two categories of data collected by the service. For more information, see <0>this Tower documentation page</0>. Uncheck the following boxes to disable this feature."
-#~ msgstr "기본적으로 Red Hat은 서비스 사용에 대한 분석 데이터를 수집하여 전송합니다. 서비스에서 수집하는 데이터에는 두 가지 카테고리가 있습니다. 자세한 내용은 <0>Tower 설명서 페이지</0>를 참조하십시오. 이 기능을 비활성화하려면 다음 확인란을 선택 해제하십시오."
+#~ msgstr "By default, we collect and transmit analytics data on the serice usage to Red Hat. There are two categories of data collected by the service. For more information, see <0>this Tower documentation page</0>. Uncheck the following boxes to disable this feature."
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:36
 msgid "By default, we collect and transmit analytics data on the service usage to Red Hat. There are two categories of data collected by the service. For more information, see <0>this Tower documentation page</0>. Uncheck the following boxes to disable this feature."
-msgstr ""
+msgstr "기본적으로 Red Hat은 서비스 사용에 대한 분석 데이터를 수집하여 전송합니다. 서비스에서 수집하는 데이터에는 두 가지 카테고리가 있습니다. 자세한 내용은 <0>Tower 설명서 페이지</0>를 참조하십시오. 이 기능을 비활성화하려면 다음 확인란을 선택 해제하십시오."
 
 #: screens/TopologyView/Legend.js:74
 msgid "C"
@@ -934,7 +937,7 @@ msgstr "취소됨"
 
 #: screens/WorkflowApproval/shared/WorkflowApprovalControls.js:58
 msgid "Cannot approve, cancel or deny completed workflow approvals"
-msgstr ""
+msgstr "완료된 워크플로우 승인을 승인, 취소 또는 거부할 수 없습니다."
 
 #: screens/Setting/Logging/LoggingEdit/LoggingEdit.js:129
 msgid ""
@@ -1178,7 +1181,7 @@ msgstr "명령"
 
 #: components/Schedule/shared/ScheduleForm.js:453
 msgid "Complex schedules are not supported in the UI yet, please use the API to manage this schedule."
-msgstr ""
+msgstr "아직 UI에서 복잡한 일정이 지원되지 않습니다. API를 사용하여 이 일정을 관리하십시오."
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:49
 msgid "Compliant"
@@ -1194,11 +1197,11 @@ msgstr "동시 작업"
 
 #: screens/Template/shared/JobTemplate.helptext.js:35
 msgid "Concurrent jobs: If enabled, simultaneous runs of this job template will be allowed."
-msgstr ""
+msgstr "동시 작업: 활성화하면 이 작업 템플릿을 동시에 실행할 수 있습니다."
 
 #: screens/Template/shared/WorkflowJobTemplate.helptext.js:23
 msgid "Concurrent jobs: If enabled, simultaneous runs of this workflow job template will be allowed."
-msgstr ""
+msgstr "동시 작업: 활성화하면 이 워크플로 작업 템플릿을 동시에 실행할 수 있습니다."
 
 #: screens/Setting/shared/SharedFields.js:121
 #: screens/Setting/shared/SharedFields.js:127
@@ -1303,16 +1306,18 @@ msgstr "플레이북이 실행되면 ansible이 생성되는 출력 수준을 �
 #~ msgid ""
 #~ "Control the level of output ansible will\n"
 #~ "produce as the playbook executes."
-#~ msgstr "플레이북이 실행되면 ansible이 생성되는 출력 수준을 제어합니다."
+#~ msgstr ""
+#~ "Control the level of output ansible will\n"
+#~ "produce as the playbook executes."
 
 #: screens/Job/Job.helptext.js:14
 #: screens/Template/shared/JobTemplate.helptext.js:15
 msgid "Control the level of output ansible will produce as the playbook executes."
-msgstr ""
+msgstr "플레이북이 실행되면 ansible이 생성되는 출력 수준을 제어합니다."
 
 #: screens/Job/JobDetail/JobDetail.js:346
 msgid "Controller Node"
-msgstr ""
+msgstr "컨트롤러 노드"
 
 #: components/PromptDetail/PromptDetail.js:121
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:225
@@ -1622,7 +1627,7 @@ msgstr "인증 정보 암호"
 
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:53
 msgid "Credential to authenticate with Kubernetes or OpenShift"
-msgstr ""
+msgstr "Kubernetes 또는 OpenShift로 인증하는 인증 정보"
 
 #: screens/InstanceGroup/shared/ContainerGroupForm.js:57
 msgid "Credential to authenticate with Kubernetes or OpenShift. Must be of type \"Kubernetes/OpenShift API Bearer Token\". If left blank, the underlying Pod's service account will be used."
@@ -1669,7 +1674,7 @@ msgstr "현재 페이지"
 
 #: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:85
 msgid "Custom Kubernetes or OpenShift Pod specification."
-msgstr ""
+msgstr "사용자 정의 Kubernetes 또는 OpenShift Pod 사양"
 
 #: screens/InstanceGroup/shared/ContainerGroupForm.js:79
 msgid "Custom pod spec"
@@ -2276,12 +2281,15 @@ msgstr "동기화 전에 로컬 변경 사항 삭제"
 #~ "Divide the work done by this job template\n"
 #~ "into the specified number of job slices, each running the\n"
 #~ "same tasks against a portion of the inventory."
-#~ msgstr "이 작업 템플릿으로 수행한 작업을 지정된 수의 작업 슬라이스로 나눕니다. 각각 인벤토리의 일부에 대해 동일한 작업을 실행합니다."
+#~ msgstr ""
+#~ "Divide the work done by this job template\n"
+#~ "into the specified number of job slices, each running the\n"
+#~ "same tasks against a portion of the inventory."
 
 #: screens/Job/Job.helptext.js:15
 #: screens/Template/shared/JobTemplate.helptext.js:16
 msgid "Divide the work done by this job template into the specified number of job slices, each running the same tasks against a portion of the inventory."
-msgstr ""
+msgstr "이 작업 템플릿으로 수행한 작업을 지정된 수의 작업 슬라이스로 나눕니다. 각각 인벤토리의 일부에 대해 동일한 작업을 실행합니다."
 
 #: screens/Project/shared/Project.helptext.js:100
 msgid "Documentation."
@@ -2306,19 +2314,19 @@ msgstr "여기에 파일을 드래그하거나 업로드할 파일을 찾습니�
 
 #: components/SelectedList/DraggableSelectedList.js:68
 msgid "Draggable list to reorder and remove selected items."
-msgstr ""
+msgstr "선택한 항목을 다시 정렬하고 제거하기 위한 드래그 가능한 목록입니다."
 
 #: components/SelectedList/DraggableSelectedList.js:43
 msgid "Dragging cancelled. List is unchanged."
-msgstr ""
+msgstr "드래그 앤 드롭이 취소되었습니다. 목록은 변경되지 않습니다."
 
 #: components/SelectedList/DraggableSelectedList.js:38
 msgid "Dragging item {id}. Item with index {oldIndex} in now {newIndex}."
-msgstr ""
+msgstr "{id} 항목을 드래그합니다. 색인이 {oldIndex} 인 항목은 이제 {newIndex}입니다."
 
 #: components/SelectedList/DraggableSelectedList.js:32
 msgid "Dragging started for item id: {newId}."
-msgstr ""
+msgstr "드래그 앤 드롭 항목 ID: {newId} 가 시작되었습니다."
 
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.js:81
 msgid "E-mail"
@@ -2653,6 +2661,10 @@ msgstr "로그 시스템 추적 사실을 개별적으로 활성화"
 msgid "Enable privilege escalation"
 msgstr "권한 에스컬레이션 활성화"
 
+#: screens/Setting/SettingList.js:52
+#~ msgid "Enable simplified login for your {0} applications"
+#~ msgstr "Enable simplified login for your {0} applications"
+
 #: screens/Setting/SettingList.js:53
 msgid "Enable simplified login for your {brandName} applications"
 msgstr "{brandName} 애플리케이션에 대한 간편 로그인 활성화"
@@ -2689,6 +2701,18 @@ msgstr "활성화된 값"
 msgid "Enabled Variable"
 msgstr "활성화된 변수"
 
+#: screens/Template/shared/JobTemplateForm.js:568
+#~ msgid ""
+#~ "Enables creation of a provisioning\n"
+#~ "callback URL. Using the URL a host can contact {0}\n"
+#~ "and request a configuration update using this job\n"
+#~ "template."
+#~ msgstr ""
+#~ "Enables creation of a provisioning\n"
+#~ "callback URL. Using the URL a host can contact {0}\n"
+#~ "and request a configuration update using this job\n"
+#~ "template."
+
 #: components/AdHocCommands/AdHocDetailsStep.js:209
 msgid ""
 "Enables creation of a provisioning\n"
@@ -2703,11 +2727,15 @@ msgstr "프로비저닝 콜백 URL 생성을 활성화합니다. 호스트에서
 #~ "callback URL. Using the URL a host can contact {brandName}\n"
 #~ "and request a configuration update using this job\n"
 #~ "template."
-#~ msgstr "프로비저닝 콜백 URL 생성을 활성화합니다. 호스트에서 URL을 사용하면 {brandName} 에 연락하여 이 작업 템플릿을 사용하여 구성 업데이트를 요청할 수 있습니다."
+#~ msgstr ""
+#~ "Enables creation of a provisioning\n"
+#~ "callback URL. Using the URL a host can contact {brandName}\n"
+#~ "and request a configuration update using this job\n"
+#~ "template."
 
 #: screens/Template/shared/JobTemplate.helptext.js:28
 msgid "Enables creation of a provisioning callback URL. Using the URL a host can contact {brandName} and request a configuration update using this job template."
-msgstr ""
+msgstr "프로비저닝 콜백 URL 생성을 활성화합니다. 호스트에서 URL을 사용하면 {brandName} 에 연락하여 이 작업 템플릿을 사용하여 구성 업데이트를 요청할 수 있습니다."
 
 #: screens/Credential/CredentialDetail/CredentialDetail.js:160
 #: screens/Setting/shared/SettingDetail.js:87
@@ -2761,88 +2789,123 @@ msgid ""
 "Ansible Controller documentation for example syntax."
 msgstr "JSON 또는 YAML 구문을 사용하여 인벤토리 변수를 입력합니다. 라디오 버튼을 사용하여 두 항목 사이를 전환합니다. 구문 예제는 Ansible Controller 설명서를 참조하십시오."
 
-#: screens/Inventory/shared/InventoryForm.js:92
+#: screens/Inventory/shared/InventoryForm.js:65
 msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Controller documentation for example syntax"
 msgstr "JSON 또는 YAML 구문을 사용하여 인벤토리 변수를 입력합니다. 라디오 버튼을 사용하여 두 항목 사이를 전환합니다. 구문 예제는 Ansible Controller 설명서를 참조하십시오."
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:181
 #~ msgid "Enter one Annotation Tag per line, without commas."
-#~ msgstr "쉼표 없이 한 줄에 하나의 주석 태그를 입력합니다."
+#~ msgstr "Enter one Annotation Tag per line, without commas."
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:232
 #~ msgid ""
 #~ "Enter one IRC channel or username per line. The pound\n"
 #~ "symbol (#) for channels, and the at (@) symbol for users, are not\n"
 #~ "required."
-#~ msgstr "한 줄에 하나의 IRC 채널 또는 사용자 이름을 입력합니다. 채널에는 # 기호가 필요하지 않으며 사용자의 경우 @ 기호는 필요하지 않습니다."
+#~ msgstr ""
+#~ "Enter one IRC channel or username per line. The pound\n"
+#~ "symbol (#) for channels, and the at (@) symbol for users, are not\n"
+#~ "required."
+
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:365
+#~ msgid ""
+#~ "Enter one Slack channel per line. The pound symbol (#)\n"
+#~ "is required for channels."
+#~ msgstr ""
+#~ "Enter one Slack channel per line. The pound symbol (#)\n"
+#~ "is required for channels."
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:367
 #~ msgid ""
 #~ "Enter one Slack channel per line. The pound symbol (#)\n"
 #~ "is required for channels. To respond to or start a thread to a specific message add the parent message Id to the channel where the parent message Id is 16 digits. A dot (.) must be manually inserted after the 10th digit.  ie:#destination-channel, 1231257890.006423. See Slack"
-#~ msgstr "한 줄에 하나의 Slack 채널을 입력합니다. 채널에 대해 파운드 기호(#)가 필요합니다. 특정 메시지에 응답하거나 스레드를 시작하려면 상위 메시지 ID가16자리인 채널에 상위 메시지 ID를 추가합니다. 10 번째 자리 숫자 뒤에 점(.)을 수동으로 삽입해야 합니다. 예:#destination-channel, 1231257890.006423. Slack 참조"
+#~ msgstr ""
+#~ "Enter one Slack channel per line. The pound symbol (#)\n"
+#~ "is required for channels. To respond to or start a thread to a specific message add the parent message Id to the channel where the parent message Id is 16 digits. A dot (.) must be manually inserted after the 10th digit.  ie:#destination-channel, 1231257890.006423. See Slack"
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:90
 #~ msgid ""
 #~ "Enter one email address per line to create a recipient\n"
 #~ "list for this type of notification."
-#~ msgstr "이 유형의 알림에 대한 수신자 목록을 만들려면 한 줄에 하나의 이메일 주소를 입력합니다."
+#~ msgstr ""
+#~ "Enter one email address per line to create a recipient\n"
+#~ "list for this type of notification."
+
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:413
+#~ msgid ""
+#~ "Enter one phone number per line to specify where to\n"
+#~ "route SMS messages."
+#~ msgstr ""
+#~ "Enter one phone number per line to specify where to\n"
+#~ "route SMS messages."
+
+#: screens/NotificationTemplate/shared/TypeInputsSubForm.js:416
+#~ msgid ""
+#~ "Enter one phone number per line to specify where to\n"
+#~ "route SMS messages. Phone numbers should be formatted +11231231234. For more information see"
+#~ msgstr ""
+#~ "Enter one phone number per line to specify where to\n"
+#~ "route SMS messages. Phone numbers should be formatted +11231231234. For more information see"
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:420
 #~ msgid ""
 #~ "Enter one phone number per line to specify where to\n"
 #~ "route SMS messages. Phone numbers should be formatted +11231231234. For more information see Twilio documentation"
-#~ msgstr "SMS 메시지를 라우팅할 위치를 지정하려면 한 줄에 하나의 전화 번호를 입력합니다. 전화 번호는 +11231231234 형식이어야 합니다. 자세한 내용은 Twilio 문서를 참조하십시오."
+#~ msgstr ""
+#~ "Enter one phone number per line to specify where to\n"
+#~ "route SMS messages. Phone numbers should be formatted +11231231234. For more information see Twilio documentation"
 
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:410
 #~ msgid ""
 #~ "Enter the number associated with the \"Messaging\n"
 #~ "Service\" in Twilio in the format +18005550199."
-#~ msgstr "+18005550199 형식으로 Twilio의 \"메시징 서비스(Messaging Service)\"와 연결된 번호를 입력합니다."
+#~ msgstr ""
+#~ "Enter the number associated with the \"Messaging\n"
+#~ "Service\" in Twilio in the format +18005550199."
 
 #: screens/Inventory/shared/InventorySourceSubForms/InsightsSubForm.js:60
 #~ msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>Insights</1> plugin configuration guide."
-#~ msgstr "인벤토리 소스를 구성할 변수를 입력합니다. 이 플러그인을 구성하는 방법에 대한 자세한 내용은 설명서의 <0>인벤토리 플러그인</0> 섹션과 <1>Insights</1> 플러그인 구성 가이드를 참조하십시오."
+#~ msgstr "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>Insights</1> plugin configuration guide."
 
 #: screens/Inventory/shared/InventorySourceSubForms/ControllerSubForm.js:60
 #~ msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>Tower</1> plugin configuration guide."
-#~ msgstr "인벤토리 소스를 구성할 변수를 입력합니다. 이 플러그인을 구성하는 방법에 대한 자세한 내용은 설명서의 <0>인벤토리 플러그인</0> 섹션과 <1>Tower</1> 플러그인 구성 가이드를 참조하십시오."
+#~ msgstr "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>Tower</1> plugin configuration guide."
 
 #: screens/Inventory/shared/InventorySourceSubForms/EC2SubForm.js:53
 #~ msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>aws_ec2</1> plugin configuration guide."
-#~ msgstr "인벤토리 소스를 구성할 변수를 입력합니다. 이 플러그인을 구성하는 방법에 대한 자세한 내용은 설명서의 <0>인벤토리 플러그인</0> 섹션과 <1>aws_ec2</1> 플러그인 구성 가이드를 참조하십시오."
+#~ msgstr "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>aws_ec2</1> plugin configuration guide."
 
 #: screens/Inventory/shared/InventorySourceSubForms/AzureSubForm.js:59
 #~ msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>azure_rm</1> plugin configuration guide."
-#~ msgstr "인벤토리 소스를 구성할 변수를 입력합니다. 이 플러그인을 구성하는 방법에 대한 자세한 내용은 설명서의 <0>인벤토리 플러그인</0> 섹션과 <1>azure_rm</1> 플러그인 구성 가이드를 참조하십시오."
+#~ msgstr "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>azure_rm</1> plugin configuration guide."
 
 #: screens/Inventory/shared/InventorySourceSubForms/SatelliteSubForm.js:59
 #~ msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>foreman</1> plugin configuration guide."
-#~ msgstr "인벤토리 소스를 구성할 변수를 입력합니다. 이 플러그인을 구성하는 방법에 대한 자세한 내용은 설명서의 <0>인벤토리 플러그인</0> 섹션과 <1>foreman</1> 플러그인 구성 가이드를 참조하십시오."
+#~ msgstr "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>foreman</1> plugin configuration guide."
 
 #: screens/Inventory/shared/InventorySourceSubForms/GCESubForm.js:59
 #~ msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>gcp_compute</1> plugin configuration guide."
-#~ msgstr "인벤토리 소스를 구성할 변수를 입력합니다. 이 플러그인을 구성하는 방법에 대한 자세한 내용은 설명서의 <0>인벤토리 플러그인</0> 섹션과 <1>gcp_compute</1> 플러그인 구성 가이드를 참조하십시오."
+#~ msgstr "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>gcp_compute</1> plugin configuration guide."
 
 #: screens/Inventory/shared/InventorySourceSubForms/OpenStackSubForm.js:59
 #~ msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>openstack</1> plugin configuration guide."
-#~ msgstr "인벤토리 소스를 구성할 변수를 입력합니다. 이 플러그인을 구성하는 방법에 대한 자세한 내용은 설명서의 <0>인벤토리 플러그인</0> 섹션과 <1>openstack</1> 플러그인 구성 가이드를 참조하십시오."
+#~ msgstr "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>openstack</1> plugin configuration guide."
 
 #: screens/Inventory/shared/InventorySourceSubForms/VirtualizationSubForm.js:59
 #~ msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>ovirt</1> plugin configuration guide."
-#~ msgstr "인벤토리 소스를 구성할 변수를 입력합니다. 이 플러그인을 구성하는 방법에 대한 자세한 내용은 설명서의 <0>인벤토리 플러그인</0> 섹션과 <1>ovirt</1> 플러그인 구성 가이드를 참조하십시오."
+#~ msgstr "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>ovirt</1> plugin configuration guide."
 
 #: screens/Inventory/shared/InventorySourceSubForms/VMwareSubForm.js:59
 #~ msgid "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>vmware_vm_inventory</1> plugin configuration guide."
-#~ msgstr "인벤토리 소스를 구성할 변수를 입력합니다. 이 플러그인을 구성하는 방법에 대한 자세한 내용은 설명서의 <0>인벤토리 플러그인</0> 섹션과 <1>vmware_vm_inventory</1> 플러그인 구성 가이드를 참조하십시오."
+#~ msgstr "Enter variables to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>vmware_vm_inventory</1> plugin configuration guide."
 
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:35
 #~ msgid "Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two."
-#~ msgstr "JSON 또는 YAML 구문을 사용하여 변수를 입력합니다. 라디오 버튼을 사용하여 둘 사이를 전환합니다."
+#~ msgstr "Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two."
 
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:87
 msgid "Environment variables or extra variables that specify the values a credential type can inject."
-msgstr ""
+msgstr "인증 정보 유형에서 삽입할 수 있는 값을 지정하는 환경 변수 또는 추가 변수입니다."
 
 #: components/JobList/JobList.js:233
 #: components/StatusLabel/StatusLabel.js:38
@@ -3190,7 +3253,7 @@ msgstr "실제 스토리지"
 
 #: screens/Template/shared/JobTemplate.helptext.js:36
 msgid "Fact storage: If enabled, this will store gathered facts so they can be viewed at the host level. Facts are persisted and injected into the fact cache at runtime.."
-msgstr ""
+msgstr "팩트 스토리지: 활성화하면 수집된 사실이 저장되어 호스트 수준에서 볼 수 있습니다. 팩트는 지속되며 런타임 시 팩트 캐시에 주입됩니다."
 
 #: screens/Host/Host.js:63
 #: screens/Host/HostFacts/HostFacts.js:45
@@ -3199,7 +3262,7 @@ msgstr ""
 #: screens/Inventory/InventoryHost/InventoryHost.js:78
 #: screens/Inventory/InventoryHostFacts/InventoryHostFacts.js:39
 msgid "Facts"
-msgstr "실제"
+msgstr "팩트"
 
 #: components/JobList/JobList.js:232
 #: components/StatusLabel/StatusLabel.js:37
@@ -3270,7 +3333,7 @@ msgstr "하나 이상의 작업을 취소하지 못했습니다."
 
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:302
 msgid "Failed to cancel one or more workflow approval."
-msgstr ""
+msgstr "하나 이상의 워크플로우 승인을 취소하지 못했습니다."
 
 #: components/JobList/JobListItem.js:114
 #: screens/Job/JobDetail/JobDetail.js:583
@@ -3692,7 +3755,11 @@ msgstr "팔로우"
 #~ "the playbook. Select check to only check playbook syntax,\n"
 #~ "test environment setup, and report problems without\n"
 #~ "executing the playbook."
-#~ msgstr "작업 템플릿의 경우 실행을 선택하여 플레이북을 실행합니다. 플레이북을 실행하지 않고 플레이북 구문만 확인하고, 환경 설정을 테스트하고, 문제를 보고하려면 확인을 선택합니다."
+#~ msgstr ""
+#~ "For job templates, select run to execute\n"
+#~ "the playbook. Select check to only check playbook syntax,\n"
+#~ "test environment setup, and report problems without\n"
+#~ "executing the playbook."
 
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:114
 msgid ""
@@ -3704,7 +3771,7 @@ msgstr "작업 템플릿의 경우 실행을 선택하여 플레이북을 실행
 #: screens/Job/Job.helptext.js:5
 #: screens/Template/shared/JobTemplate.helptext.js:5
 msgid "For job templates, select run to execute the playbook. Select check to only check playbook syntax, test environment setup, and report problems without executing the playbook."
-msgstr ""
+msgstr "작업 템플릿의 경우 실행을 선택하여 플레이북을 실행합니다. 플레이북을 실행하지 않고 플레이북 구문만 확인하고, 환경 설정을 테스트하고, 문제를 보고하려면 확인을 선택합니다."
 
 #: screens/Project/shared/Project.helptext.js:98
 msgid "For more information, refer to the"
@@ -3787,7 +3854,7 @@ msgstr "GitHub"
 #: screens/Setting/GitHub/GitHubDetail/GitHubDetail.js:85
 #: screens/Setting/Settings.js:50
 msgid "GitHub Default"
-msgstr "GitHub Default"
+msgstr "GitHub 기본값"
 
 #: screens/Setting/GitHub/GitHubDetail/GitHubDetail.js:100
 #: screens/Setting/Settings.js:59
@@ -3797,22 +3864,22 @@ msgstr "GitHub Enterprise"
 #: screens/Setting/GitHub/GitHubDetail/GitHubDetail.js:105
 #: screens/Setting/Settings.js:62
 msgid "GitHub Enterprise Organization"
-msgstr "GitHub Enterprise Organization"
+msgstr "GitHub Enterprise 조직"
 
 #: screens/Setting/GitHub/GitHubDetail/GitHubDetail.js:110
 #: screens/Setting/Settings.js:65
 msgid "GitHub Enterprise Team"
-msgstr "GitHub Enterprise Team"
+msgstr "GitHub Enterprise 팀"
 
 #: screens/Setting/GitHub/GitHubDetail/GitHubDetail.js:90
 #: screens/Setting/Settings.js:53
 msgid "GitHub Organization"
-msgstr "GitHub Organization"
+msgstr "GitHub 조직"
 
 #: screens/Setting/GitHub/GitHubDetail/GitHubDetail.js:95
 #: screens/Setting/Settings.js:56
 msgid "GitHub Team"
-msgstr "GitHub Team"
+msgstr "GitHub 팀"
 
 #: screens/Setting/SettingList.js:61
 msgid "GitHub settings"
@@ -3822,6 +3889,10 @@ msgstr "GitHub 설정"
 #: screens/Template/shared/WebhookSubForm.js:111
 msgid "GitLab"
 msgstr "GitLab"
+
+#: components/Lookup/ExecutionEnvironmentLookup.js:206
+#~ msgid "Global Default Execution Environment"
+#~ msgstr "Global Default Execution Environment"
 
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:78
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:84
@@ -3923,7 +3994,7 @@ msgstr "HTTP 방법"
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:273
 #: screens/Instances/InstanceDetail/InstanceDetail.js:228
 #~ msgid "Health Check"
-#~ msgstr "상태 점검"
+#~ msgstr "Health Check"
 
 #: components/StatusLabel/StatusLabel.js:34
 #: screens/TopologyView/Legend.js:118
@@ -4183,11 +4254,13 @@ msgstr "이 옵션을 선택하면 이전에 외부 소스에 있었지만 지�
 #~ msgid ""
 #~ "If enabled, run this playbook as an\n"
 #~ "administrator."
-#~ msgstr "활성화하면 이 플레이북을 관리자로 실행합니다."
+#~ msgstr ""
+#~ "If enabled, run this playbook as an\n"
+#~ "administrator."
 
 #: screens/Template/shared/JobTemplate.helptext.js:29
 msgid "If enabled, run this playbook as an administrator."
-msgstr ""
+msgstr "활성화하면 이 플레이북을 관리자로 실행합니다."
 
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:156
 msgid ""
@@ -4201,11 +4274,14 @@ msgstr "활성화된 경우 지원되는 Ansible 작업에서 변경한 내용�
 #~ "If enabled, show the changes made by\n"
 #~ "Ansible tasks, where supported. This is equivalent\n"
 #~ "to Ansible's --diff mode."
-#~ msgstr "활성화된 경우 지원되는 Ansible 작업에서 변경한 내용을 표시합니다. 이는 Ansible의 --diff 모드와 동일합니다."
+#~ msgstr ""
+#~ "If enabled, show the changes made by\n"
+#~ "Ansible tasks, where supported. This is equivalent\n"
+#~ "to Ansible's --diff mode."
 
 #: screens/Template/shared/JobTemplate.helptext.js:18
 msgid "If enabled, show the changes made by Ansible tasks, where supported. This is equivalent to Ansible's --diff mode."
-msgstr ""
+msgstr "활성화된 경우 지원되는 Ansible 작업에서 변경한 내용을 표시합니다. 이는 Ansible의 --diff 모드와 동일합니다."
 
 #: components/AdHocCommands/AdHocDetailsStep.js:181
 msgid "If enabled, show the changes made by Ansible tasks, where supported. This is equivalent to Ansible’s --diff mode."
@@ -4215,11 +4291,13 @@ msgstr "활성화된 경우 지원되는 Ansible 작업에서 변경한 내용�
 #~ msgid ""
 #~ "If enabled, simultaneous runs of this job\n"
 #~ "template will be allowed."
-#~ msgstr "활성화하면 이 작업 템플릿을 동시에 실행할 수 있습니다."
+#~ msgstr ""
+#~ "If enabled, simultaneous runs of this job\n"
+#~ "template will be allowed."
 
 #: screens/Template/shared/JobTemplate.helptext.js:31
 msgid "If enabled, simultaneous runs of this job template will be allowed."
-msgstr ""
+msgstr "활성화하면 이 작업 템플릿을 동시에 실행할 수 있습니다."
 
 #: screens/Template/shared/WorkflowJobTemplate.helptext.js:16
 msgid "If enabled, simultaneous runs of this workflow job template will be allowed."
@@ -4230,11 +4308,14 @@ msgstr "활성화하면 이 워크플로 작업 템플릿을 동시에 실행할
 #~ "If enabled, this will store gathered facts so they can\n"
 #~ "be viewed at the host level. Facts are persisted and\n"
 #~ "injected into the fact cache at runtime."
-#~ msgstr "활성화하면 수집된 사실이 저장되어 호스트 수준에서 볼 수 있습니다. 팩트는 지속되며 런타임 시 팩트 캐시에 주입됩니다."
+#~ msgstr ""
+#~ "If enabled, this will store gathered facts so they can\n"
+#~ "be viewed at the host level. Facts are persisted and\n"
+#~ "injected into the fact cache at runtime."
 
 #: screens/Template/shared/JobTemplate.helptext.js:32
 msgid "If enabled, this will store gathered facts so they can be viewed at the host level. Facts are persisted and injected into the fact cache at runtime."
-msgstr ""
+msgstr "활성화하면 수집된 사실이 저장되어 호스트 수준에서 볼 수 있습니다. 팩트는 지속되며 런타임 시 팩트 캐시에 주입됩니다."
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:275
 msgid "If specified, this field will be shown on the node instead of the resource name when viewing the workflow"
@@ -4314,7 +4395,7 @@ msgstr "입력 구성"
 
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:79
 msgid "Input schema which defines a set of ordered fields for that type."
-msgstr ""
+msgstr "해당 유형에 대해 정렬된 필드 집합을 정의하는 입력 스키마입니다."
 
 #: screens/Project/shared/ProjectSubForms/InsightsSubForm.js:31
 msgid "Insights Credential"
@@ -4327,7 +4408,7 @@ msgstr "Insights 인증 정보"
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:111
 #~ msgid "Insights for Ansible Automation Platform dashboard"
-#~ msgstr "Insights for Ansible Automation Platform 대시보드"
+#~ msgstr "Insights for Ansible Automation Platform dashboard"
 
 #: components/Lookup/HostFilterLookup.js:123
 msgid "Insights system ID"
@@ -4412,6 +4493,10 @@ msgstr "잘못된 이메일 주소"
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:116
 msgid "Invalid file format. Please upload a valid Red Hat Subscription Manifest."
 msgstr "잘못된 파일 형식입니다. 유효한 Red Hat 서브스크립션 목록을 업로드하십시오."
+
+#: screens/Template/WorkflowJobTemplateVisualizer/VisualizerNode.js:151
+#~ msgid "Invalid link target.  Unable to link to children or ancestor nodes.  Graph cycles are not supported."
+#~ msgstr "Invalid link target.  Unable to link to children or ancestor nodes.  Graph cycles are not supported."
 
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerNode.js:151
 msgid "Invalid link target. Unable to link to children or ancestor nodes. Graph cycles are not supported."
@@ -4609,7 +4694,7 @@ msgstr "1월"
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:221
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.js:66
 #~ msgid "Job"
-#~ msgstr "작업"
+#~ msgstr "Job"
 
 #: components/JobList/JobListItem.js:112
 #: screens/Job/JobDetail/JobDetail.js:581
@@ -4960,7 +5045,7 @@ msgstr "시작"
 
 #: screens/ManagementJob/ManagementJobList/ManagementJobListItem.js:74
 #~ msgid "Launch Management Job"
-#~ msgstr "관리 작업 시작"
+#~ msgstr "Launch Management Job"
 
 #: components/TemplateList/TemplateListItem.js:214
 msgid "Launch Template"
@@ -4998,11 +5083,11 @@ msgstr "(사용자 이름)에 의해 시작됨"
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:120
 msgid "Learn more about Automation Analytics"
-msgstr ""
+msgstr "Automation Analytics에 대해 자세히 알아보기"
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:120
 #~ msgid "Learn more about Insights for Ansible Automation Platform"
-#~ msgstr "Insights for Ansible Automation Platform 관련 상세 정보"
+#~ msgstr "Learn more about Insights for Ansible Automation Platform"
 
 #: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.js:68
 msgid "Leave this field blank to make the execution environment globally available."
@@ -5595,6 +5680,10 @@ msgstr "다중 선택 옵션"
 msgid "Name"
 msgstr "이름"
 
+#: screens/InstanceGroup/shared/InstanceGroupForm.js:21
+#~ msgid "Name cannot be changed on this Instance Group"
+#~ msgstr "Name cannot be changed on this Instance Group"
+
 #: components/AppContainer/AppContainer.js:95
 msgid "Navigation"
 msgstr "탐색"
@@ -5662,11 +5751,11 @@ msgstr "작업 없음"
 
 #: screens/Job/JobOutput/HostEventModal.js:185
 #~ msgid "No Standard Error Available"
-#~ msgstr "사용할 수 있는 표준 오류 없음"
+#~ msgstr "No Standard Error Available"
 
 #: screens/Job/JobOutput/HostEventModal.js:166
 #~ msgid "No Standard Out Available"
-#~ msgstr "사용할 수 있는 표준 오류 없음"
+#~ msgstr "No Standard Out Available"
 
 #: screens/Inventory/InventoryList/InventoryListItem.js:72
 msgid "No inventory sync failures."
@@ -5957,7 +6046,7 @@ msgstr "요일에"
 msgid ""
 "One Slack channel per line. The pound symbol (#)\n"
 "is required for channels. To respond to or start a thread to a specific message add the parent message Id to the channel where the parent message Id is 16 digits. A dot (.) must be manually inserted after the 10th digit.  ie:#destination-channel, 1231257890.006423. See Slack"
-msgstr ""
+msgstr "한 줄에 하나의 Slack 채널입니다. 채널에 대해 파운드 기호(#)가 필요합니다. 특정 메시지에 응답하거나 스레드를 시작하려면 상위 메시지 ID가16자리인 채널에 상위 메시지 ID를 추가합니다. 10 번째 자리 숫자 뒤에 점(.)을 수동으로 삽입해야 합니다. 예:#destination-channel, 1231257890.006423. Slack 참조"
 
 #: components/PromptDetail/PromptInventorySourceDetail.js:166
 msgid "Only Group By"
@@ -5988,7 +6077,7 @@ msgstr "'dev' 또는 'test'와 같이 이 작업 템플릿을 설명하는 선�
 #: screens/Job/Job.helptext.js:11
 #: screens/Template/shared/JobTemplate.helptext.js:12
 msgid "Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs."
-msgstr ""
+msgstr "'dev' 또는 'test'와 같이 이 작업 템플릿을 설명하는 선택적 레이블입니다. 레이블을 사용하여 작업 템플릿과 완료된 작업을 그룹화하고 필터링할 수 있습니다."
 
 #: screens/Template/shared/JobTemplate.helptext.js:25
 #: screens/Template/shared/WorkflowJobTemplate.helptext.js:19
@@ -6098,7 +6187,7 @@ msgstr "출력"
 
 #: screens/Job/JobOutput/HostEventModal.js:157
 msgid "Output tab"
-msgstr ""
+msgstr "출력 탭"
 
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:76
 msgid "Overwrite"
@@ -6164,12 +6253,16 @@ msgid "Pass extra command line changes. There are two ansible command line param
 msgstr "추가 명령줄 변경 사항을 전달합니다. 두 가지 ansible 명령행 매개변수가 있습니다."
 
 #: screens/Template/shared/JobTemplateForm.js:413
-msgid ""
-"Pass extra command line variables to the playbook. This is the\n"
-"-e or --extra-vars command line parameter for ansible-playbook.\n"
-"Provide key/value pairs using either YAML or JSON. Refer to the\n"
-"documentation for example syntax."
-msgstr "플레이북에 추가 명령줄 변수를 전달합니다. ansible-playbook에 대해 -e 또는 --extra-vars 명령줄 매개 변수입니다. YAML 또는 JSON을 사용하여 키/값 쌍을 제공합니다. 예제 구문에 대한 설명서를 참조하십시오."
+#~ msgid ""
+#~ "Pass extra command line variables to the playbook. This is the\n"
+#~ "-e or --extra-vars command line parameter for ansible-playbook.\n"
+#~ "Provide key/value pairs using either YAML or JSON. Refer to the\n"
+#~ "documentation for example syntax."
+#~ msgstr ""
+#~ "Pass extra command line variables to the playbook. This is the\n"
+#~ "-e or --extra-vars command line parameter for ansible-playbook.\n"
+#~ "Provide key/value pairs using either YAML or JSON. Refer to the\n"
+#~ "documentation for example syntax."
 
 #: screens/Template/shared/WorkflowJobTemplateForm.js:215
 msgid "Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Controller documentation for example syntax."
@@ -6178,7 +6271,7 @@ msgstr "플레이북에 추가 명령줄 변수를 전달합니다. ansible-play
 #: screens/Job/Job.helptext.js:12
 #: screens/Template/shared/JobTemplate.helptext.js:13
 msgid "Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the documentation for example syntax."
-msgstr ""
+msgstr "플레이북에 추가 명령줄 변수를 전달합니다. ansible-playbook에 대해 -e 또는 --extra-vars 명령줄 매개 변수입니다. YAML 또는 JSON을 사용하여 키/값 쌍을 제공합니다. 예제 구문에 대한 설명서를 참조하십시오."
 
 #: screens/Login/Login.js:205
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:71
@@ -6380,6 +6473,20 @@ msgstr "정책 인스턴스 백분율"
 msgid "Populate field from an external secret management system"
 msgstr "외부 보안 관리 시스템에서 필드 채우기"
 
+#: components/Lookup/HostFilterLookup.js:322
+#~ msgid ""
+#~ "Populate the hosts for this inventory by using a search\n"
+#~ "filter. Example: ansible_facts.ansible_distribution:\"RedHat\".\n"
+#~ "Refer to the documentation for further syntax and\n"
+#~ "examples.  Refer to the Ansible Tower documentation for further syntax and\n"
+#~ "examples."
+#~ msgstr ""
+#~ "Populate the hosts for this inventory by using a search\n"
+#~ "filter. Example: ansible_facts.ansible_distribution:\"RedHat\".\n"
+#~ "Refer to the documentation for further syntax and\n"
+#~ "examples.  Refer to the Ansible Tower documentation for further syntax and\n"
+#~ "examples."
+
 #: components/Lookup/HostFilterLookup.js:348
 msgid ""
 "Populate the hosts for this inventory by using a search\n"
@@ -6414,7 +6521,7 @@ msgid ""
 "and use the arrow keys to navigate up or down.\n"
 "Press enter to confirm the drag, or any other key to\n"
 "cancel the drag operation."
-msgstr ""
+msgstr "스페이스바 또는 Enter 키를 눌러 드래그를 시작하고 화살표 키를 사용하여 위로 또는 아래로 이동합니다. Enter 키를 눌러 끌어오기하거나 다른 키를 눌러 끌어오기 작업을 취소합니다."
 
 #: components/AdHocCommands/useAdHocPreviewStep.js:17
 #: components/LaunchPrompt/steps/usePreviewStep.js:23
@@ -6437,7 +6544,7 @@ msgstr "권한 에스컬레이션 암호"
 
 #: screens/Template/shared/JobTemplate.helptext.js:37
 msgid "Privilege escalation: If enabled, run this playbook as an administrator."
-msgstr ""
+msgstr "권한 에스컬레이션: 활성화하면 이 플레이북을 관리자로 실행합니다."
 
 #: components/JobList/JobListItem.js:239
 #: components/Lookup/ProjectLookup.js:104
@@ -6462,9 +6569,9 @@ msgstr "프로젝트"
 msgid "Project Base Path"
 msgstr "프로젝트 기본 경로"
 
-#: screens/Job/JobDetail/JobDetail.js:230
+#: screens/Job/JobDetail/JobDetail.js:227
 #~ msgid "Project Status"
-#~ msgstr "프로젝트 상태"
+#~ msgstr "Project Status"
 
 #: components/Workflow/WorkflowLegend.js:104
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:85
@@ -6482,11 +6589,11 @@ msgstr "프로젝트 업데이트"
 
 #: screens/Job/JobDetail/JobDetail.js:164
 msgid "Project Update Status"
-msgstr ""
+msgstr "프로젝트 업데이트 상태"
 
 #: screens/Job/Job.helptext.js:21
 msgid "Project checkout results"
-msgstr ""
+msgstr "프로젝트 체크아웃 결과"
 
 #: screens/Project/ProjectList/ProjectList.js:132
 msgid "Project copied successfully"
@@ -6561,7 +6668,7 @@ msgstr "플레이북에 의해 관리 또는 영향을 받는 호스트 목록�
 #: screens/Job/Job.helptext.js:13
 #: screens/Template/shared/JobTemplate.helptext.js:14
 msgid "Provide a host pattern to further constrain the list of hosts that will be managed or affected by the playbook. Multiple patterns are allowed. Refer to Ansible documentation for more information and examples on patterns."
-msgstr ""
+msgstr "플레이북에 의해 관리 또는 영향을 받는 호스트 목록을 추가로 제한하기 위해 호스트 패턴을 제공합니다. 여러 패턴이 허용됩니다. 패턴에 대한 자세한 정보와 예제는 Ansible 문서를 참조하십시오."
 
 #: screens/Credential/shared/CredentialFormFields/CredentialField.js:179
 msgid "Provide a value for this field or select the Prompt on launch option."
@@ -6583,11 +6690,11 @@ msgstr "아래에서 Red Hat 또는 Red Hat Satellite 인증 정보를 제공하
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:83
 msgid "Provide your Red Hat or Red Hat Satellite credentials to enable Automation Analytics."
-msgstr ""
+msgstr "Automation Analytics를 활성화하려면 Red Hat 또는 Red Hat Satellite 인증 정보를 제공합니다."
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:83
 #~ msgid "Provide your Red Hat or Red Hat Satellite credentials to enable Insights for Ansible Automation Platform."
-#~ msgstr "Ansible Automation Platform의 Insights를 사용할 수 있도록 Red Hat 또는 Red Hat Satellite 인증 정보를 제공합니다."
+#~ msgstr "Provide your Red Hat or Red Hat Satellite credentials to enable Insights for Ansible Automation Platform."
 
 #: components/PromptDetail/PromptJobTemplateDetail.js:157
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:295
@@ -6608,7 +6715,7 @@ msgstr "프로비저닝 콜백"
 
 #: screens/Template/shared/JobTemplate.helptext.js:38
 msgid "Provisioning callbacks: Enables creation of a provisioning callback URL. Using the URL a host can contact Ansible AWX and request a configuration update using this job template."
-msgstr ""
+msgstr "프로비저닝 콜백: 프로비저닝 콜백 URL 생성을 활성화합니다. 호스트에서 URL을 사용하면 Ansible AWX에 연락하고 이 작업 템플릿을 사용하여 구성 업데이트를 요청할 수 있습니다."
 
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:85
 #: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.js:113
@@ -6700,11 +6807,11 @@ msgstr "Red Hat, Inc."
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:93
 #: screens/Application/shared/ApplicationForm.js:106
 msgid "Redirect URIs"
-msgstr "URI 리디렉션"
+msgstr "리디렉션 URI"
 
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:91
 #~ msgid "Redirect uris"
-#~ msgstr "URI 리디렉션"
+#~ msgstr "Redirect uris"
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.js:259
 msgid "Redirecting to dashboard"
@@ -6722,12 +6829,14 @@ msgstr "참조"
 #~ msgid ""
 #~ "Refer to the Ansible documentation for details\n"
 #~ "about the configuration file."
-#~ msgstr "구성 파일에 대한 자세한 내용은 Ansible 설명서를 참조하십시오."
+#~ msgstr ""
+#~ "Refer to the Ansible documentation for details\n"
+#~ "about the configuration file."
 
 #: screens/Job/Job.helptext.js:26
 #: screens/Template/shared/JobTemplate.helptext.js:46
 msgid "Refer to the Ansible documentation for details about the configuration file."
-msgstr ""
+msgstr "구성 파일에 대한 자세한 내용은 Ansible 설명서를 참조하십시오."
 
 #: screens/User/UserTokens/UserTokens.js:77
 msgid "Refresh Token"
@@ -6832,6 +6941,10 @@ msgstr "모든 노드 제거"
 msgid "Remove Link"
 msgstr "링크 제거"
 
+#: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeDeleteModal.js:18
+#~ msgid "Remove Node"
+#~ msgstr "Remove Node"
+
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeDeleteModal.js:28
 msgid "Remove Node {nodeName}"
 msgstr "{nodeName} 노드 제거"
@@ -6858,7 +6971,7 @@ msgstr "이 링크를 제거하면 나머지 분기가 분리되고 시작 시 �
 
 #: components/SelectedList/DraggableSelectedList.js:83
 msgid "Reorder"
-msgstr ""
+msgstr "재정렬"
 
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:264
 msgid "Repeat Frequency"
@@ -7049,7 +7162,7 @@ msgstr "실행 빈도"
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:279
 #: screens/Instances/InstanceDetail/InstanceDetail.js:234
 msgid "Run health check"
-msgstr ""
+msgstr "실행 상태 점검"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:337
 msgid "Run on"
@@ -7068,7 +7181,7 @@ msgstr "실행 중"
 
 #: screens/Job/JobOutput/JobOutputSearch.js:128
 msgid "Running Handlers"
-msgstr "Handlers 실행"
+msgstr "실행 중인 Handlers"
 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:210
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:210
@@ -7076,12 +7189,12 @@ msgstr "Handlers 실행"
 #: screens/Instances/InstanceDetail/InstanceDetail.js:161
 #: screens/Instances/InstanceList/InstanceListItem.js:209
 msgid "Running Jobs"
-msgstr "작업 실행"
+msgstr "실행 중인 작업"
 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:277
 #: screens/Instances/InstanceDetail/InstanceDetail.js:232
 msgid "Running health check"
-msgstr ""
+msgstr "실행 중인 상태 점검"
 
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:71
 msgid "Running jobs"
@@ -7171,7 +7284,7 @@ msgstr "성공적으로 저장했습니다!"
 #: components/JobList/JobListItem.js:181
 #: components/JobList/JobListItem.js:187
 msgid "Schedule"
-msgstr "일정"
+msgstr "스케줄"
 
 #: screens/Project/Projects.js:34
 #: screens/Template/Templates.js:54
@@ -7180,7 +7293,7 @@ msgstr "일정 세부 정보"
 
 #: components/Schedule/shared/ScheduleForm.js:455
 msgid "Schedule Rules"
-msgstr ""
+msgstr "일정 규칙"
 
 #: screens/Inventory/Inventories.js:92
 msgid "Schedule details"
@@ -7231,7 +7344,7 @@ msgstr "범위"
 
 #: screens/User/shared/User.helptext.js:5
 msgid "Scope for the token's access"
-msgstr ""
+msgstr "토큰 액세스 범위"
 
 #: screens/Job/JobOutput/PageControls.js:79
 msgid "Scroll first"
@@ -7352,7 +7465,9 @@ msgstr "리소스 유형 선택"
 #~ msgid ""
 #~ "Select a branch for the job template. This branch is applied to\n"
 #~ "all job template nodes that prompt for a branch."
-#~ msgstr "작업 템플릿에 대한 분기를 선택합니다. 이 분기는 분기를 요청하는 모든 작업 템플릿 노드에 적용됩니다."
+#~ msgstr ""
+#~ "Select a branch for the job template. This branch is applied to\n"
+#~ "all job template nodes that prompt for a branch."
 
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:48
 msgid "Select a branch for the workflow. This branch is applied to all job template nodes that prompt for a branch"
@@ -7367,6 +7482,10 @@ msgstr "워크플로의 분기를 선택합니다. 이 분기는 분기를 요�
 #: screens/Credential/shared/CredentialForm.js:139
 msgid "Select a credential Type"
 msgstr "인증 정보 유형 선택"
+
+#: screens/Metrics/Metrics.js:193
+#~ msgid "Select a instance"
+#~ msgstr "Select a instance"
 
 #: components/JobList/JobListCancelButton.js:98
 msgid "Select a job to cancel"
@@ -7395,7 +7514,7 @@ msgstr "삭제할 질문을 선택"
 
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListApproveButton.js:19
 #~ msgid "Select a row to approve"
-#~ msgstr "승인할 행을 선택"
+#~ msgstr "Select a row to approve"
 
 #: components/PaginatedTable/ToolbarDeleteButton.js:160
 #: screens/Inventory/InventoryGroups/InventoryGroupsList.js:103
@@ -7404,7 +7523,7 @@ msgstr "삭제할 행 선택"
 
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListDenyButton.js:19
 #~ msgid "Select a row to deny"
-#~ msgstr "거부할 행 선택"
+#~ msgstr "Select a row to deny"
 
 #: components/DisassociateButton/DisassociateButton.js:75
 msgid "Select a row to disassociate"
@@ -7494,12 +7613,17 @@ msgstr "기본 실행 환경을 편집하기 전에 조직을 선택합니다."
 #~ "checking \"Prompt on launch\" without selecting credentials will require you to select a machine\n"
 #~ "credential at run time. If you select credentials and check \"Prompt on launch\", the selected\n"
 #~ "credential(s) become the defaults that can be updated at run time."
-#~ msgstr "이 작업이 실행될 노드에 액세스하기 위한 인증 정보를 선택합니다. 각 유형에 대해 하나의 인증 정보만 선택할 수 있습니다. 시스템 인증 정보 (SSH)의 경우 인증 정보를 선택하지 않으면 런타임에 시스템 인증 정보를 선택해야합니다. 인증 정보를 선택하고 \"시작 시 프롬프트\"를 선택하면 선택한 인증 정보를 런타임에 업데이트할 수 있는 기본값이 됩니다."
+#~ msgstr ""
+#~ "Select credentials for accessing the nodes this job will be ran\n"
+#~ "against. You can only select one credential of each type. For machine credentials (SSH),\n"
+#~ "checking \"Prompt on launch\" without selecting credentials will require you to select a machine\n"
+#~ "credential at run time. If you select credentials and check \"Prompt on launch\", the selected\n"
+#~ "credential(s) become the defaults that can be updated at run time."
 
 #: screens/Job/Job.helptext.js:10
 #: screens/Template/shared/JobTemplate.helptext.js:11
 msgid "Select credentials for accessing the nodes this job will be ran against. You can only select one credential of each type. For machine credentials (SSH), checking \"Prompt on launch\" without selecting credentials will require you to select a machine credential at run time. If you select credentials and check \"Prompt on launch\", the selected credential(s) become the defaults that can be updated at run time."
-msgstr ""
+msgstr "이 작업이 실행될 노드에 액세스하기 위한 인증 정보를 선택합니다. 각 유형에 대해 하나의 인증 정보만 선택할 수 있습니다. 시스템 인증 정보 (SSH)의 경우 인증 정보를 선택하지 않으면 런타임에 시스템 인증 정보를 선택해야합니다. 인증 정보를 선택하고 \"시작 시 프롬프트\"를 선택하면 선택한 인증 정보를 런타임에 업데이트할 수 있는 기본값이 됩니다."
 
 #: screens/Project/shared/Project.helptext.js:18
 msgid ""
@@ -7514,7 +7638,7 @@ msgstr "목록에서 항목 선택"
 
 #: screens/WorkflowApproval/shared/WorkflowApprovalControls.js:55
 msgid "Select items to approve, deny, or cancel"
-msgstr ""
+msgstr "승인, 거부 또는 취소할 항목 선택"
 
 #: screens/Dashboard/DashboardGraph.js:124
 #: screens/Dashboard/DashboardGraph.js:125
@@ -7562,12 +7686,22 @@ msgstr "이 인벤토리의 인스턴스 그룹을 선택하여 실행할 인스
 #~ msgid ""
 #~ "Select the Instance Groups for this Job Template\n"
 #~ "to run on."
-#~ msgstr "이 작업 템플릿의 인스턴스 그룹을 선택합니다."
+#~ msgstr ""
+#~ "Select the Instance Groups for this Job Template\n"
+#~ "to run on."
 
 #: screens/Job/Job.helptext.js:17
 #: screens/Template/shared/JobTemplate.helptext.js:19
 msgid "Select the Instance Groups for this Job Template to run on."
-msgstr ""
+msgstr "이 작업 템플릿의 인스턴스 그룹을 선택합니다."
+
+#: screens/Template/shared/JobTemplateForm.js:513
+#~ msgid ""
+#~ "Select the Instance Groups for this Organization\n"
+#~ "to run on."
+#~ msgstr ""
+#~ "Select the Instance Groups for this Organization\n"
+#~ "to run on."
 
 #: screens/Organization/shared/OrganizationForm.js:83
 msgid "Select the Instance Groups for this Organization to run on."
@@ -7575,7 +7709,11 @@ msgstr "이 조직에서 실행할 인스턴스 그룹을 선택합니다."
 
 #: screens/User/shared/UserTokenForm.js:49
 #~ msgid "Select the application that this token will belong to, or leave this field empty to create a Personal Access Token."
-#~ msgstr "이 토큰이 속한 애플리케이션을 선택하거나 이 필드를 비워 개인 액세스 토큰을 만듭니다."
+#~ msgstr "Select the application that this token will belong to, or leave this field empty to create a Personal Access Token."
+
+#: screens/User/shared/UserTokenForm.js:49
+#~ msgid "Select the application that this token will belong to."
+#~ msgstr "Select the application that this token will belong to."
 
 #: components/AdHocCommands/AdHocCredentialStep.js:104
 msgid "Select the credential you want to use when accessing the remote hosts to run the command. Choose the credential containing the username and SSH key or password that Ansible will need to log into the remote hosts."
@@ -7594,14 +7732,17 @@ msgstr "이 작업을 관리할 호스트가 포함된 인벤토리를 선택합
 #: screens/Job/Job.helptext.js:6
 #: screens/Template/shared/JobTemplate.helptext.js:6
 msgid "Select the inventory containing the hosts you want this job to manage."
-msgstr ""
+msgstr "이 작업을 관리할 호스트가 포함된 인벤토리를 선택합니다."
 
 #: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:107
 #~ msgid ""
 #~ "Select the inventory file\n"
 #~ "to be synced by this source. You can select from\n"
 #~ "the dropdown or enter a file within the input."
-#~ msgstr "이 소스에서 동기화할 인벤토리 파일을 선택합니다. 드롭다운에서 선택하거나 입력 란에 파일을 입력할 수 있습니다."
+#~ msgstr ""
+#~ "Select the inventory file\n"
+#~ "to be synced by this source. You can select from\n"
+#~ "the dropdown or enter a file within the input."
 
 #: components/HostForm/HostForm.js:32
 #: components/HostForm/HostForm.js:51
@@ -7617,12 +7758,14 @@ msgstr "이 작업에서 실행할 플레이북을 선택합니다."
 #~ msgid ""
 #~ "Select the project containing the playbook\n"
 #~ "you want this job to execute."
-#~ msgstr "이 작업을 실행할 플레이북을 포함하는 프로젝트를 선택합니다."
+#~ msgstr ""
+#~ "Select the project containing the playbook\n"
+#~ "you want this job to execute."
 
 #: screens/Job/Job.helptext.js:7
 #: screens/Template/shared/JobTemplate.helptext.js:7
 msgid "Select the project containing the playbook you want this job to execute."
-msgstr ""
+msgstr "이 작업을 실행할 플레이북을 포함하는 프로젝트를 선택합니다."
 
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionStep.js:79
 msgid "Select your Ansible Automation Platform subscription to use."
@@ -7717,6 +7860,10 @@ msgstr "소스 경로 설정"
 msgid "Set the instance enabled or disabled. If disabled, jobs will not be assigned to this instance."
 msgstr "인스턴스 활성화 또는 비활성화를 설정합니다. 비활성화된 경우 작업이 이 인스턴스에 할당되지 않습니다."
 
+#: components/InstanceToggle/InstanceToggle.js:48
+#~ msgid "Set the instance online or offline. If offline, jobs will not be assigned to this instance."
+#~ msgstr "Set the instance online or offline. If offline, jobs will not be assigned to this instance."
+
 #: screens/Application/shared/Application.helptext.js:5
 msgid "Set to Public or Confidential depending on how secure the client device is."
 msgstr "클라이언트 장치의 보안에 따라 공개 또는 기밀로 설정합니다."
@@ -7774,6 +7921,10 @@ msgstr "표시"
 msgid "Show Changes"
 msgstr "변경 사항 표시"
 
+#: screens/Inventory/InventoryGroups/InventoryGroupsList.js:131
+#~ msgid "Show all groups"
+#~ msgstr "Show all groups"
+
 #: components/AdHocCommands/AdHocDetailsStep.js:177
 #: components/AdHocCommands/AdHocDetailsStep.js:178
 msgid "Show changes"
@@ -7806,11 +7957,11 @@ msgstr "GitHub Enterprise로 로그인"
 
 #: screens/Login/Login.js:311
 msgid "Sign in with GitHub Enterprise Organizations"
-msgstr "GitHub Enterprise Organizations으로 로그인"
+msgstr "GitHub Enterprise 조직으로 로그인"
 
 #: screens/Login/Login.js:327
 msgid "Sign in with GitHub Enterprise Teams"
-msgstr "GitHub Enterprise Teams로 로그인"
+msgstr "GitHub Enterprise 팀으로 로그인"
 
 #: screens/Login/Login.js:268
 msgid "Sign in with GitHub Organizations"
@@ -7818,7 +7969,7 @@ msgstr "GitHub 조직으로 로그인"
 
 #: screens/Login/Login.js:282
 msgid "Sign in with GitHub Teams"
-msgstr "GitHub Teams로 로그인"
+msgstr "GitHub 팀으로 로그인"
 
 #: screens/Login/Login.js:342
 msgid "Sign in with Google"
@@ -7855,7 +8006,12 @@ msgstr "태그 건너뛰기"
 #~ "play or task. Use commas to separate multiple tags. Refer\n"
 #~ "to the documentation for details on the usage\n"
 #~ "of tags."
-#~ msgstr "건너뛰기 태그는 대용량 플레이북이 있고 플레이 또는 작업의 특정 부분을 건너뛰려는 경우 유용합니다. 쉼표를 사용하여 여러 태그를 구분합니다. 태그 사용에 대한 자세한 내용은 문서를 참조하십시오."
+#~ msgstr ""
+#~ "Skip tags are useful when you have a\n"
+#~ "large playbook, and you want to skip specific parts of a\n"
+#~ "play or task. Use commas to separate multiple tags. Refer\n"
+#~ "to the documentation for details on the usage\n"
+#~ "of tags."
 
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:71
 msgid ""
@@ -7868,7 +8024,7 @@ msgstr "건너뛰기 태그는 대용량 플레이북이 있고 플레이 또는
 #: screens/Job/Job.helptext.js:19
 #: screens/Template/shared/JobTemplate.helptext.js:21
 msgid "Skip tags are useful when you have a large playbook, and you want to skip specific parts of a play or task. Use commas to separate multiple tags. Refer to the documentation for details on the usage of tags."
-msgstr ""
+msgstr "건너뛰기 태그는 대용량 플레이북이 있고 플레이 또는 작업의 특정 부분을 건너뛰려는 경우 유용합니다. 쉼표를 사용하여 여러 태그를 구분합니다. 태그 사용에 대한 자세한 내용은 문서를 참조하십시오."
 
 #: screens/Job/JobOutput/shared/HostStatusBar.js:39
 msgid "Skipped"
@@ -7925,6 +8081,11 @@ msgstr "문제가 발생했습니다.."
 msgid "Sort"
 msgstr "분류"
 
+#: screens/Template/Survey/SurveyListItem.js:72
+#: screens/Template/Survey/SurveyListItem.js:73
+#~ msgid "Sort question order"
+#~ msgstr "Sort question order"
+
 #: components/JobList/JobListItem.js:170
 #: components/PromptDetail/PromptInventorySourceDetail.js:95
 #: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:214
@@ -7958,6 +8119,10 @@ msgstr "소스 제어 분기/태그/커밋"
 #: screens/Project/shared/ProjectSubForms/SharedFields.js:53
 msgid "Source Control Credential"
 msgstr "소스 제어 인증 정보"
+
+#: screens/Project/shared/ProjectForm.js:214
+#~ msgid "Source Control Credential Type"
+#~ msgstr "Source Control Credential Type"
 
 #: components/PromptDetail/PromptProjectDetail.js:111
 #: screens/Project/ProjectDetail/ProjectDetail.js:234
@@ -8047,7 +8212,7 @@ msgstr "알림 색상을 지정합니다. 허용되는 색상은 16진수 색상
 
 #: screens/User/shared/UserTokenForm.js:71
 #~ msgid "Specify a scope for the token's access"
-#~ msgstr "토큰 액세스 범위를 지정합니다."
+#~ msgstr "Specify a scope for the token's access"
 
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/RunStep.js:26
 msgid "Specify the conditions under which this node should be executed"
@@ -8059,7 +8224,7 @@ msgstr "표준 오류"
 
 #: screens/Job/JobOutput/HostEventModal.js:152
 #~ msgid "Standard Out"
-#~ msgstr "표준 아웃"
+#~ msgstr "Standard Out"
 
 #: screens/Job/JobOutput/HostEventModal.js:174
 msgid "Standard error tab"
@@ -8067,7 +8232,7 @@ msgstr "표준 오류 탭"
 
 #: screens/Job/JobOutput/HostEventModal.js:153
 #~ msgid "Standard out tab"
-#~ msgstr "표준 아웃 탭"
+#~ msgstr "Standard out tab"
 
 #: components/NotificationList/NotificationListItem.js:57
 #: components/NotificationList/NotificationListItem.js:58
@@ -8269,6 +8434,14 @@ msgstr "설문 조사 비활성화"
 msgid "Survey Enabled"
 msgstr "설문 조사 활성화"
 
+#: screens/Template/Survey/SurveyList.js:132
+#~ msgid "Survey List"
+#~ msgstr "Survey List"
+
+#: screens/Template/Survey/SurveyPreviewModal.js:31
+#~ msgid "Survey Preview"
+#~ msgstr "Survey Preview"
+
 #: screens/Template/Survey/SurveyReorderModal.js:191
 msgid "Survey Question Order"
 msgstr "설문 조사 질문 순서"
@@ -8280,6 +8453,10 @@ msgstr "설문조사 토글"
 #: screens/Template/Survey/SurveyReorderModal.js:192
 msgid "Survey preview modal"
 msgstr "설문 조사 프리뷰 모달"
+
+#: screens/Template/Survey/SurveyListItem.js:66
+#~ msgid "Survey questions"
+#~ msgstr "Survey questions"
 
 #: screens/Inventory/InventorySources/InventorySourceListItem.js:120
 #: screens/Inventory/shared/InventorySourceSyncButton.js:41
@@ -8365,7 +8542,12 @@ msgstr "탭"
 #~ "play or task. Use commas to separate multiple tags.\n"
 #~ "Refer to the documentation for details on\n"
 #~ "the usage of tags."
-#~ msgstr "태그는 대용량 플레이북이 있고 플레이 또는 작업의 특정 부분을 실행하려는 경우 유용합니다. 쉼표를 사용하여 여러 태그를 구분합니다. 태그 사용에 대한 자세한 내용은 문서를 참조하십시오."
+#~ msgstr ""
+#~ "Tags are useful when you have a large\n"
+#~ "playbook, and you want to run a specific part of a\n"
+#~ "play or task. Use commas to separate multiple tags.\n"
+#~ "Refer to the documentation for details on\n"
+#~ "the usage of tags."
 
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:59
 msgid ""
@@ -8378,7 +8560,7 @@ msgstr "태그는 대용량 플레이북이 있고 플레이 또는 작업의 �
 #: screens/Job/Job.helptext.js:18
 #: screens/Template/shared/JobTemplate.helptext.js:20
 msgid "Tags are useful when you have a large playbook, and you want to run a specific part of a play or task. Use commas to separate multiple tags. Refer to the documentation for details on the usage of tags."
-msgstr ""
+msgstr "태그는 대용량 플레이북이 있고 플레이 또는 작업의 특정 부분을 실행하려는 경우 유용합니다. 쉼표를 사용하여 여러 태그를 구분합니다. 태그 사용에 대한 자세한 내용은 문서를 참조하십시오."
 
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:198
 msgid "Tags for the Annotation"
@@ -8517,13 +8699,21 @@ msgstr "이 값을 찾을 수 없습니다. 유효한 값을 입력하거나 선
 msgid "The"
 msgstr "The"
 
+#: screens/Setting/MiscSystem/MiscSystemEdit/MiscSystemEdit.js:200
+#~ msgid "The Execution Environment to be used when one has not been configured for a job template."
+#~ msgstr "The Execution Environment to be used when one has not been configured for a job template."
+
+#: screens/Application/shared/ApplicationForm.js:86
+#~ msgid "The Grant type the user must use for acquire tokens for this application"
+#~ msgstr "The Grant type the user must use for acquire tokens for this application"
+
 #: screens/Application/shared/Application.helptext.js:4
 msgid "The Grant type the user must use to acquire tokens for this application"
 msgstr "사용자가 이 애플리케이션의 토큰을 얻는 데 사용해야 하는 Grant 유형"
 
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:128
 msgid "The Instance Groups for this Organization to run on."
-msgstr ""
+msgstr "이 조직에서 실행할 인스턴스 그룹입니다."
 
 #: screens/NotificationTemplate/shared/Notifications.helptext.js:6
 msgid ""
@@ -8537,16 +8727,19 @@ msgstr "이메일 알림에서 호스트에 도달하려는 시도를 중지하�
 #~ "The amount of time (in seconds) to run\n"
 #~ "before the job is canceled. Defaults to 0 for no job\n"
 #~ "timeout."
-#~ msgstr "작업이 취소되기 전에 실행할 시간(초)입니다. 작업 제한 시간이 없는 경우 기본값은 0입니다."
+#~ msgstr ""
+#~ "The amount of time (in seconds) to run\n"
+#~ "before the job is canceled. Defaults to 0 for no job\n"
+#~ "timeout."
 
 #: screens/Job/Job.helptext.js:16
 #: screens/Template/shared/JobTemplate.helptext.js:17
 msgid "The amount of time (in seconds) to run before the job is canceled. Defaults to 0 for no job timeout."
-msgstr ""
+msgstr "작업이 취소되기 전에 실행할 시간(초)입니다. 작업 제한 시간이 없는 경우 기본값은 0입니다."
 
 #: screens/User/shared/User.helptext.js:4
 msgid "The application that this token belongs to, or leave this field empty to create a Personal Access Token."
-msgstr ""
+msgstr "이 토큰이 속한 애플리케이션이나 이 필드를 비워 개인 액세스 토큰을 만듭니다."
 
 #: screens/NotificationTemplate/shared/Notifications.helptext.js:9
 msgid ""
@@ -8561,7 +8754,7 @@ msgid ""
 "inside of this organization. This will be used a fallback when\n"
 "an execution environment has not been explicitly assigned at the\n"
 "project, job template or workflow level."
-msgstr ""
+msgstr "이 조직 내의 작업에 사용할 실행 환경입니다. 실행 환경이 프로젝트, 작업 템플릿 또는 워크플로 수준에서 명시적으로 할당되지 않은 경우 폴백으로 사용됩니다."
 
 #: screens/Organization/shared/OrganizationForm.js:93
 msgid "The execution environment that will be used for jobs inside of this organization. This will be used a fallback when an execution environment has not been explicitly assigned at the project, job template or workflow level."
@@ -8576,12 +8769,15 @@ msgstr "이 프로젝트를 사용하는 작업에 사용할 실행 환경입니
 #~ "The execution environment that will be used when launching\n"
 #~ "this job template. The resolved execution environment can be overridden by\n"
 #~ "explicitly assigning a different one to this job template."
-#~ msgstr "이 작업 템플릿을 시작할 때 사용할 실행 환경입니다. 해결된 실행 환경은 이 작업 템플릿에 다른 실행 환경을 명시적으로 할당하여 재정의할 수 있습니다."
+#~ msgstr ""
+#~ "The execution environment that will be used when launching\n"
+#~ "this job template. The resolved execution environment can be overridden by\n"
+#~ "explicitly assigning a different one to this job template."
 
 #: screens/Job/Job.helptext.js:8
 #: screens/Template/shared/JobTemplate.helptext.js:9
 msgid "The execution environment that will be used when launching this job template. The resolved execution environment can be overridden by explicitly assigning a different one to this job template."
-msgstr ""
+msgstr "이 작업 템플릿을 시작할 때 사용할 실행 환경입니다. 해결된 실행 환경은 이 작업 템플릿에 다른 실행 환경을 명시적으로 할당하여 재정의할 수 있습니다."
 
 #: screens/Project/shared/Project.helptext.js:93
 msgid ""
@@ -8592,7 +8788,7 @@ msgstr "모든 참조에 대한 첫 번째 참조를 가져옵니다. Github pul
 
 #: screens/WorkflowApproval/shared/WorkflowApprovalControls.js:66
 msgid "The following selected items are complete and cannot be acted on: {completedItems}"
-msgstr ""
+msgstr "다음 선택된 항목은 완료되었으며 다음 작업을 수행할 수 없습니다. {completedItems}"
 
 #: screens/ExecutionEnvironment/shared/ExecutionEnvironment.helptext.js:7
 msgid "The full image location, including the container registry, image name, and version tag."
@@ -8603,18 +8799,18 @@ msgid ""
 "The inventory file\n"
 "to be synced by this source. You can select from\n"
 "the dropdown or enter a file within the input."
-msgstr ""
+msgstr "이 소스에서 동기화할 인벤토리 파일입니다. 드롭다운에서 선택하거나 입력 란에 파일을 입력할 수 있습니다."
 
 #: screens/Host/HostDetail/HostDetail.js:77
 msgid "The inventory that this host belongs to."
-msgstr ""
+msgstr "이 호스트가 속할 인벤토리입니다."
 
 #: screens/Organization/OrganizationDetail/OrganizationDetail.js:100
 msgid ""
 "The maximum number of hosts allowed to be managed by\n"
 "this organization. Value defaults to 0 which means no limit.\n"
 "Refer to the Ansible documentation for more details."
-msgstr ""
+msgstr "이 조직에서 관리할 수 있는 최대 호스트 수입니다. 기본값은 0이며 이는 제한이 없음을 의미합니다. 자세한 내용은 Ansible 설명서를 참조하십시오."
 
 #: screens/Organization/shared/OrganizationForm.js:72
 msgid ""
@@ -8627,7 +8823,7 @@ msgstr "이 조직에서 관리할 수 있는 최대 호스트 수입니다. 기
 msgid ""
 "The number associated with the \"Messaging\n"
 "Service\" in Twilio with the format +18005550199."
-msgstr ""
+msgstr "+18005550199 형식으로 Twilio의 \"메시징 서비스(Messaging Service)\"와 연결된 번호입니다."
 
 #: screens/Template/shared/JobTemplateForm.js:427
 #~ msgid ""
@@ -8636,12 +8832,17 @@ msgstr ""
 #~ "or a value less than 1 will use the Ansible default which is\n"
 #~ "usually 5. The default number of forks can be overwritten\n"
 #~ "with a change to"
-#~ msgstr "플레이북을 실행하는 동안 사용할 병렬 또는 동시 프로세스 수입니다. 비어 있는 값 또는 1보다 작은 값은 Ansible 기본값(일반적으로 5)을 사용합니다. 기본 포크 수는 다음과 같이 변경합니다."
+#~ msgstr ""
+#~ "The number of parallel or simultaneous\n"
+#~ "processes to use while executing the playbook. An empty value,\n"
+#~ "or a value less than 1 will use the Ansible default which is\n"
+#~ "usually 5. The default number of forks can be overwritten\n"
+#~ "with a change to"
 
 #: screens/Job/Job.helptext.js:24
 #: screens/Template/shared/JobTemplate.helptext.js:44
 msgid "The number of parallel or simultaneous processes to use while executing the playbook. An empty value, or a value less than 1 will use the Ansible default which is usually 5. The default number of forks can be overwritten with a change to"
-msgstr ""
+msgstr "플레이북을 실행하는 동안 사용할 병렬 또는 동시 프로세스 수입니다. 비어 있는 값 또는 1보다 작은 값은 Ansible 기본값(일반적으로 5)을 사용합니다. 기본 포크 수는 다음과 같이 변경합니다."
 
 #: components/AdHocCommands/AdHocDetailsStep.js:164
 msgid "The number of parallel or simultaneous processes to use while executing the playbook. Inputting no value will use the default value from the ansible configuration file.  You can find more information"
@@ -8685,6 +8886,22 @@ msgid ""
 "etc.). Variable names with spaces are not allowed."
 msgstr "변수 이름에 대한 권장되는 형식은 소문자 및 밑줄로 구분되어 있습니다(예: foo_bar, user_id, host_name 등). 공백이 있는 변수 이름은 허용되지 않습니다."
 
+#: screens/Project/shared/ProjectSubForms/ManualSubForm.js:47
+#~ msgid ""
+#~ "There are no available playbook directories in {project_base_dir}.\n"
+#~ "Either that directory is empty, or all of the contents are already\n"
+#~ "assigned to other projects. Create a new directory there and make\n"
+#~ "sure the playbook files can be read by the \"awx\" system user,\n"
+#~ "or have {0} directly retrieve your playbooks from\n"
+#~ "source control using the Source Control Type option above."
+#~ msgstr ""
+#~ "There are no available playbook directories in {project_base_dir}.\n"
+#~ "Either that directory is empty, or all of the contents are already\n"
+#~ "assigned to other projects. Create a new directory there and make\n"
+#~ "sure the playbook files can be read by the \"awx\" system user,\n"
+#~ "or have {0} directly retrieve your playbooks from\n"
+#~ "source control using the Source Control Type option above."
+
 #: screens/Project/shared/ProjectSubForms/ManualSubForm.js:49
 msgid ""
 "There are no available playbook directories in {project_base_dir}.\n"
@@ -8715,6 +8932,10 @@ msgstr "파일을 구문 분석하는 동안 오류가 발생했습니다. 파�
 msgid "There was an error saving the workflow."
 msgstr "워크플로를 저장하는 동안 오류가 발생했습니다."
 
+#: components/AdHocCommands/AdHocDetailsStep.js:68
+#~ msgid "These are the modules that {0} supports running commands against."
+#~ msgstr "These are the modules that {0} supports running commands against."
+
 #: components/AdHocCommands/AdHocDetailsStep.js:69
 msgid "These are the modules that {brandName} supports running commands against."
 msgstr "다음은 {brandName}에서 명령 실행을 지원하는 모듈입니다."
@@ -8734,7 +8955,7 @@ msgstr "이러한 인수는 지정된 모듈과 함께 사용됩니다. {0} 에 
 
 #: screens/Job/Job.helptext.js:32
 msgid "These arguments are used with the specified module. You can find information about {moduleName} by clicking"
-msgstr ""
+msgstr "이러한 인수는 지정된 모듈과 함께 사용됩니다. {moduleName} 에 대한 정보를 클릭하면 확인할 수 있습니다."
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:403
 msgid "Third"
@@ -8779,14 +9000,19 @@ msgid ""
 "This data is used to enhance\n"
 "future releases of the Software and to provide\n"
 "Automation Analytics."
-msgstr ""
+msgstr "이 데이터는\n"
+"향후 소프트웨어 릴리스를 개선하고\n"
+"Automation Analytics를 제공하는 데 사용됩니다."
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:74
 #~ msgid ""
 #~ "This data is used to enhance\n"
 #~ "future releases of the Software and to provide\n"
 #~ "Insights for Ansible Automation Platform."
-#~ msgstr "이 데이터는 향후 소프트웨어 릴리스를 개선하고 Ansible Automation Platform에 Insights를 제공하는 데 사용됩니다."
+#~ msgstr ""
+#~ "This data is used to enhance\n"
+#~ "future releases of the Software and to provide\n"
+#~ "Insights for Ansible Automation Platform."
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:62
 msgid ""
@@ -8810,11 +9036,11 @@ msgstr "활성화된 변수가 설정되지 않은 경우 이 필드는 무시�
 
 #: components/AdHocCommands/useAdHocDetailsStep.js:61
 #~ msgid "This field is must not be blank"
-#~ msgstr "이 필드는 비워 둘 수 없습니다."
+#~ msgstr "This field is must not be blank"
 
 #: components/AdHocCommands/useAdHocDetailsStep.js:55
 #~ msgid "This field is must not be blank."
-#~ msgstr "이 필드는 비워 둘 수 없습니다."
+#~ msgstr "This field is must not be blank."
 
 #: components/AdHocCommands/useAdHocCredentialPasswordStep.js:44
 #: components/LaunchPrompt/steps/useCredentialPasswordsStep.js:50
@@ -8874,7 +9100,7 @@ msgstr "이 필드는 비워 둘 수 없습니다."
 
 #: components/AdHocCommands/useAdHocDetailsStep.js:46
 msgid "This field must not be blank."
-msgstr ""
+msgstr "이 필드는 비워 둘 수 없습니다."
 
 #: util/validators.js:101
 msgid "This field must not contain spaces"
@@ -8950,15 +9176,15 @@ msgstr "이 값은 이전에 입력한 암호와 일치하지 않습니다. 암�
 
 #: screens/WorkflowApproval/shared/WorkflowApprovalControls.js:90
 msgid "This will cancel the workflow and no subsequent nodes will execute."
-msgstr ""
+msgstr "이렇게 하면 워크플로우가 취소되고 후속 노드가 실행되지 않습니다."
 
 #: screens/WorkflowApproval/shared/WorkflowApprovalControls.js:105
 msgid "This will continue the workflow"
-msgstr ""
+msgstr "이렇게 하면 워크플로우가 계속됩니다."
 
 #: screens/WorkflowApproval/shared/WorkflowApprovalControls.js:78
 msgid "This will continue the workflow along failure and always paths."
-msgstr ""
+msgstr "이렇게 하면 실패 및 항상 경로를 따라 워크플로우가 계속됩니다."
 
 #: screens/Setting/shared/RevertAllAlert.js:36
 msgid ""
@@ -9033,6 +9259,10 @@ msgstr "시간 제한 (초)"
 #: screens/Host/HostList/SmartInventoryButton.js:20
 msgid "To create a smart inventory using ansible facts, go to the smart inventory screen."
 msgstr "ansible 팩트를 사용하여 스마트 인벤토리를 생성하려면 스마트 인벤토리 화면으로 이동합니다."
+
+#: screens/Template/Survey/SurveyReorderModal.js:182
+#~ msgid "To reoder the survey questions drag and drop them in the desired location."
+#~ msgstr "To reoder the survey questions drag and drop them in the desired location."
 
 #: screens/Template/Survey/SurveyReorderModal.js:194
 msgid "To reorder the survey questions drag and drop them in the desired location."
@@ -9120,7 +9350,7 @@ msgstr "툴"
 
 #: components/PaginatedTable/PaginatedTable.js:133
 #~ msgid "Top Pagination"
-#~ msgstr "상단 페이지 번호 매기기"
+#~ msgstr "Top Pagination"
 
 #: routeConfig.js:152
 #: screens/TopologyView/TopologyView.js:40
@@ -9143,7 +9373,7 @@ msgstr "총 노드"
 #: screens/Inventory/InventoryDetail/InventoryDetail.js:81
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:120
 msgid "Total hosts"
-msgstr ""
+msgstr "총 호스트"
 
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:72
 msgid "Total jobs"
@@ -9261,7 +9491,7 @@ msgstr "호스트에서 인벤토리를 변경할 수 없음"
 
 #: screens/Project/ProjectList/ProjectListItem.js:211
 msgid "Unable to load last job update"
-msgstr ""
+msgstr "마지막 작업 업데이트를 로드할 수 없음"
 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:253
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:87
@@ -9271,6 +9501,10 @@ msgstr ""
 #: screens/Instances/InstanceList/InstanceListItem.js:77
 msgid "Unavailable"
 msgstr "사용할 수 없음"
+
+#: components/StatusLabel/StatusLabel.js:67
+#~ msgid "Undefined"
+#~ msgstr "Undefined"
 
 #: screens/Setting/shared/RevertButton.js:53
 #: screens/Setting/shared/RevertButton.js:62
@@ -9332,6 +9566,10 @@ msgstr "업데이트 옵션"
 msgid "Update revision on job launch"
 msgstr "작업 시작 시 버전 업데이트"
 
+#: screens/Setting/SettingList.js:87
+#~ msgid "Update settings pertaining to Jobs within {0}"
+#~ msgstr "Update settings pertaining to Jobs within {0}"
+
 #: screens/Setting/SettingList.js:88
 msgid "Update settings pertaining to Jobs within {brandName}"
 msgstr "{brandName}의 작업 관련 설정 업데이트"
@@ -9371,24 +9609,24 @@ msgstr "사용자 지정 메시지를 사용하여 작업이 시작, 성공 또�
 
 #: screens/NotificationTemplate/shared/Notifications.helptext.js:12
 msgid "Use one Annotation Tag per line, without commas."
-msgstr ""
+msgstr "쉼표 없이 한 줄에 하나의 주석 태그를 사용합니다."
 
 #: screens/NotificationTemplate/shared/Notifications.helptext.js:13
 msgid ""
 "Use one IRC channel or username per line. The pound\n"
 "symbol (#) for channels, and the at (@) symbol for users, are not\n"
 "required."
-msgstr ""
+msgstr "한 줄에 하나의 IRC 채널 또는 사용자 이름을 사용합니다. 채널에는 # 기호가 필요하지 않으며 사용자의 경우 @ 기호는 필요하지 않습니다."
 
 #: screens/NotificationTemplate/shared/Notifications.helptext.js:5
 msgid "Use one email address per line to create a recipient list for this type of notification."
-msgstr ""
+msgstr "이 유형의 알림에 대한 수신자 목록을 만들려면 한 줄에 하나의 이메일 주소를 사용합니다."
 
 #: screens/NotificationTemplate/shared/Notifications.helptext.js:28
 msgid ""
 "Use one phone number per line to specify where to\n"
 "route SMS messages. Phone numbers should be formatted +11231231234. For more information see Twilio documentation"
-msgstr ""
+msgstr "SMS 메시지를 라우팅할 위치를 지정하려면 한 줄에 하나의 전화 번호를 사용합니다. 전화 번호는 +11231231234 형식이어야 합니다. 자세한 내용은 Twilio 문서를 참조하십시오."
 
 #: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:242
 #: screens/InstanceGroup/Instances/InstanceList.js:259
@@ -9444,12 +9682,12 @@ msgstr "사용자 분석"
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:34
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.js:202
 msgid "User and Automation Analytics"
-msgstr ""
+msgstr "사용자 및 자동화 분석"
 
 #: screens/Setting/Subscription/SubscriptionEdit/AnalyticsStep.js:34
 #: screens/Setting/Subscription/SubscriptionEdit/SubscriptionEdit.js:202
 #~ msgid "User and Insights analytics"
-#~ msgstr "사용자 및 Insights 분석"
+#~ msgstr "User and Insights analytics"
 
 #: components/AppContainer/PageHeaderToolbar.js:159
 msgid "User details"
@@ -9538,11 +9776,11 @@ msgstr "프롬프트 변수"
 
 #: screens/Inventory/shared/Inventory.helptext.js:43
 msgid "Variables must be in JSON or YAML syntax. Use the radio button to toggle between the two."
-msgstr ""
+msgstr "변수는 JSON 또는 YAML 구문이어야 합니다. 라디오 버튼을 사용하여 둘 사이를 전환합니다."
 
 #: screens/Inventory/shared/Inventory.helptext.js:166
 msgid "Variables used to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>{sourceType}</1> plugin configuration guide."
-msgstr ""
+msgstr "인벤토리 소스를 구성하는데 사용되는 변수입니다. 이 플러그인을 구성하는 방법에 대한 자세한 내용은 설명서의 <0>인벤토리 플러그인</0> 섹션과 <1>{sourceType}</1> 플러그인 구성 가이드를 참조하십시오."
 
 #: components/LaunchPrompt/steps/CredentialPasswordsStep.js:121
 msgid "Vault password"
@@ -9930,11 +10168,11 @@ msgstr "Webhook"
 
 #: screens/Template/shared/WorkflowJobTemplate.helptext.js:24
 msgid "Webhooks: Enable Webhook for this workflow job template."
-msgstr ""
+msgstr "Webhook: 이 워크플로 작업 템플릿에 대한 Webhook을 활성화합니다."
 
 #: screens/Template/shared/JobTemplate.helptext.js:39
 msgid "Webhooks: Enable webhook for this template."
-msgstr ""
+msgstr "Webhook: 이 템플릿에 대한 Webhook을 활성화합니다."
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:281
 msgid "Wed"
@@ -10067,7 +10305,7 @@ msgstr "워크플로우 문서"
 
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:261
 msgid "Workflow job details"
-msgstr ""
+msgstr "워크플로우 작업 세부 정보"
 
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:46
 msgid "Workflow job templates"
@@ -10119,11 +10357,11 @@ msgstr "제공됨"
 
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListApproveButton.js:28
 #~ msgid "You are unable to act on the following workflow approvals: {itemsUnableToApprove}"
-#~ msgstr "다음과 같은 워크플로우 승인에 대해 조치를 취할 수 없습니다. {itemsUnableToApprove}"
+#~ msgstr "You are unable to act on the following workflow approvals: {itemsUnableToApprove}"
 
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListDenyButton.js:28
 #~ msgid "You are unable to act on the following workflow approvals: {itemsUnableToDeny}"
-#~ msgstr "다음과 같은 워크플로우 승인에 대해 조치를 취할 수 없습니다. {itemsUnableToDeny}"
+#~ msgstr "You are unable to act on the following workflow approvals: {itemsUnableToDeny}"
 
 #: components/Lookup/MultiCredentialsLookup.js:154
 msgid "You cannot select multiple vault credentials with the same vault ID. Doing so will automatically deselect the other with the same vault ID."
@@ -10182,6 +10420,10 @@ msgstr "저장 시 새 Webhook 키가 생성됩니다."
 #: screens/Template/shared/WebhookSubForm.js:139
 msgid "a new webhook url will be generated on save."
 msgstr "저장 시 새 Webhook URL이 생성됩니다."
+
+#: screens/Template/Survey/SurveyListItem.js:157
+#~ msgid "actions"
+#~ msgstr "actions"
 
 #: screens/Inventory/shared/Inventory.helptext.js:123
 #: screens/Inventory/shared/Inventory.helptext.js:142
@@ -10260,6 +10502,10 @@ msgstr "문서"
 msgid "edit"
 msgstr "편집"
 
+#: screens/Template/Survey/SurveyListItem.js:163
+#~ msgid "edit survey"
+#~ msgstr "edit survey"
+
 #: screens/Template/Survey/SurveyListItem.js:65
 #: screens/Template/Survey/SurveyReorderModal.js:125
 msgid "encrypted"
@@ -10291,11 +10537,11 @@ msgstr "여기."
 
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostListItem.js:49
 msgid "host-description-{0}"
-msgstr ""
+msgstr "host-description-{0}"
 
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostListItem.js:44
 msgid "host-name-{0}"
-msgstr ""
+msgstr "host-name-{0}"
 
 #: components/Lookup/HostFilterLookup.js:417
 msgid "hosts"
@@ -10316,6 +10562,14 @@ msgstr "로그인 유형"
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:203
 msgid "min"
 msgstr "분"
+
+#: screens/Template/Survey/SurveyListItem.js:91
+#~ msgid "move down"
+#~ msgstr "move down"
+
+#: screens/Template/Survey/SurveyListItem.js:80
+#~ msgid "move up"
+#~ msgstr "move up"
 
 #: screens/Template/Survey/MultipleChoiceField.js:76
 msgid "new choice"
@@ -10365,7 +10619,7 @@ msgstr "모듈 선택"
 
 #: components/AdHocCommands/AdHocDetailsStep.js:127
 #~ msgid "select verbosity"
-#~ msgstr "상세 정보 표시 선택"
+#~ msgstr "select verbosity"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:135
 msgid "since"
@@ -10408,6 +10662,10 @@ msgstr "{0, plural, one {# source with sync failures.} other {# sources with syn
 msgid "{0, plural, one {Are you sure you want delete the group below?} other {Are you sure you want delete the groups below?}}"
 msgstr "{0, plural, one {Are you sure you want delete the group below?} other {Are you sure you want delete the groups below?}}"
 
+#: components/HealthCheckButton/HealthCheckButton.js:23
+#~ msgid "{0, plural, one {Click to run a health check on the selected instance.} other {Click to run a health check on the selected instances.}}"
+#~ msgstr "{0, plural, one {Click to run a health check on the selected instance.} other {Click to run a health check on the selected instances.}}"
+
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:86
 msgid "{0, plural, one {Delete Group?} other {Delete Groups?}}"
 msgstr "{0, plural, one {Delete Group?} other {Delete Groups?}}"
@@ -10415,6 +10673,10 @@ msgstr "{0, plural, one {Delete Group?} other {Delete Groups?}}"
 #: util/validators.js:138
 msgid "{0, plural, one {Please enter a valid phone number.} other {Please enter valid phone numbers.}}"
 msgstr "{0, plural, one {Please enter a valid phone number.} other {Please enter valid phone numbers.}}"
+
+#: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:175
+#~ msgid "{0, plural, one {The following Instance Group cannot be deleted} other {The following Instance Groups cannot be deleted}}"
+#~ msgstr "{0, plural, one {The following Instance Group cannot be deleted} other {The following Instance Groups cannot be deleted}}"
 
 #: screens/Inventory/InventoryList/InventoryList.js:247
 msgid "{0, plural, one {The inventory will be in a pending status until the final delete is processed.} other {The inventories will be in a pending status until the final delete is processed.}}"
@@ -10453,6 +10715,10 @@ msgid "{0, plural, one {This inventory source is currently being used by other r
 msgstr "{0, plural, one {This inventory source is currently being used by other resources that rely on it. Are you sure you want to delete it?} other {Deleting these inventory sources could impact other resources that rely on them. Are you sure you want to delete anyway}}"
 
 #: screens/Organization/OrganizationList/OrganizationList.js:166
+#~ msgid "{0, plural, one {This organization is currently being by other resources. Are you sure you want to delete it?} other {Deleting these organizations could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
+#~ msgstr "{0, plural, one {This organization is currently being by other resources. Are you sure you want to delete it?} other {Deleting these organizations could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
+
+#: screens/Organization/OrganizationList/OrganizationList.js:166
 msgid "{0, plural, one {This organization is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these organizations could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
 msgstr "{0, plural, one {This organization is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these organizations could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
 
@@ -10481,6 +10747,14 @@ msgstr "{0} (삭제됨)"
 msgid "{0} more"
 msgstr "{0} 기타 정보"
 
+#: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:138
+#~ msgid "{0} since {1}"
+#~ msgstr "{0} since {1}"
+
+#: screens/Inventory/InventoryList/InventoryListItem.js:61
+#~ msgid "{0} sources with sync failures."
+#~ msgstr "{0} sources with sync failures."
+
 #: components/AppContainer/AppContainer.js:55
 msgid "{brandName} logo"
 msgstr "{brandName} 로고"
@@ -10495,6 +10769,10 @@ msgstr "{dateStr} (<0>{username}</0> 기준)"
 #: screens/Instances/InstanceList/InstanceListItem.js:158
 msgid "{forks, plural, one {# fork} other {# forks}}"
 msgstr "{forks, plural, one {# fork} other {# forks}}"
+
+#: components/HealthCheckButton/HealthCheckButton.js:15
+#~ msgid "{hopNodeSelected, plural, one {Cannot run health check on a hop node.  Deselect the hop node to run a health check.} other {Cannot run health check on hop nodes.  Deselect the hop nodes to run health checks.}}"
+#~ msgstr "{hopNodeSelected, plural, one {Cannot run health check on a hop node.  Deselect the hop node to run a health check.} other {Cannot run health check on hop nodes.  Deselect the hop nodes to run health checks.}}"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:193
 msgid "{intervalValue, plural, one {day} other {days}}"
@@ -10520,6 +10798,14 @@ msgstr "{intervalValue, plural, one {week} other {weeks}}"
 msgid "{intervalValue, plural, one {year} other {years}}"
 msgstr "{intervalValue, plural, one {year} other {years}}"
 
+#: components/Schedule/shared/DateTimePicker.js:49
+#~ msgid "{label} date"
+#~ msgstr "{label} date"
+
+#: components/Schedule/shared/DateTimePicker.js:57
+#~ msgid "{label} time"
+#~ msgstr "{label} time"
+
 #: components/PromptDetail/PromptDetail.js:41
 msgid "{minutes} min {seconds} sec"
 msgstr "{minutes} 분 {seconds} 초"
@@ -10536,6 +10822,10 @@ msgstr "{numJobsToCancel, plural, one {This action will cancel the following job
 msgid "{numJobsToCancel, plural, one {{0}} other {{1}}}"
 msgstr "{numJobsToCancel, plural, one {{0}} other {{1}}}"
 
+#: components/DetailList/NumberSinceDetail.js:19
+#~ msgid "{number} since {dateStr}"
+#~ msgstr "{number} since {dateStr}"
+
 #: components/PaginatedTable/PaginatedTable.js:79
 msgid "{pluralizedItemName} List"
 msgstr "{pluralizedItemName} 목록"
@@ -10547,3 +10837,4 @@ msgstr "{selectedItemsCount, plural, one {Click to run a health check on the sel
 #: components/AppContainer/AppContainer.js:154
 msgid "{sessionCountdown, plural, one {You will be logged out in # second due to inactivity} other {You will be logged out in # seconds due to inactivity}}"
 msgstr "{sessionCountdown, plural, one {You will be logged out in # second due to inactivity} other {You will be logged out in # seconds due to inactivity}}"
+

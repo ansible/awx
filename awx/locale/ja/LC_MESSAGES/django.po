@@ -1440,7 +1440,7 @@ msgstr "指定した認証情報は無効 (HTTP 401) です。"
 
 #: awx/api/views/root.py:193 awx/api/views/root.py:234
 msgid "Unable to connect to proxy server."
-msgstr "プロキシサーバーに接続できません。"
+msgstr "プロキシーサーバーに接続できません。"
 
 #: awx/api/views/root.py:195 awx/api/views/root.py:236
 msgid "Could not connect to subscription service."
@@ -1976,7 +1976,7 @@ msgstr "リモートホスト名または IP を判別するために検索す�
 
 #: awx/main/conf.py:85
 msgid "Proxy IP Allowed List"
-msgstr "プロキシ IP 許可リスト"
+msgstr "プロキシー IP 許可リスト"
 
 #: awx/main/conf.py:87
 msgid ""
@@ -2198,7 +2198,7 @@ msgid ""
 "Follow symbolic links when scanning for playbooks. Be aware that setting "
 "this to True can lead to infinite recursion if a link points to a parent "
 "directory of itself."
-msgstr "Playbook をスキャンするときは、シンボリックリンクをたどってください。リンクがそれ自体の親ディレクトリーを指している場合は、これを True に設定すると、無限再帰が発生する可能性があることに注意してください。"
+msgstr "Playbook のスキャン時にシンボリックリンクをたどります。リンクが親ディレクトリーを参照している場合には、この設定を True に指定すると無限再帰が発生する可能性があります。"
 
 #: awx/main/conf.py:337
 msgid "Ignore Ansible Galaxy SSL Certificate Verification"
@@ -2499,7 +2499,7 @@ msgstr "Insights for Ansible Automation Platform の最終収集日。"
 msgid ""
 "Last gathered entries for expensive collectors for Insights for Ansible "
 "Automation Platform."
-msgstr "Insights for Ansible Automation Platform の高価なコレクターの最後に収集されたエントリー。"
+msgstr "Insights for Ansible Automation Platform でコストがかかっているコレクターに関して最後に収集されたエントリー"
 
 #: awx/main/conf.py:686
 msgid "Insights for Ansible Automation Platform Gather Interval"
@@ -3692,7 +3692,7 @@ msgstr "タスクの開始"
 
 #: awx/main/models/events.py:189
 msgid "Variables Prompted"
-msgstr "変数のプロモート"
+msgstr "提示される変数"
 
 #: awx/main/models/events.py:190
 msgid "Gathering Facts"
@@ -3741,15 +3741,15 @@ msgstr "エラー"
 
 #: awx/main/models/execution_environments.py:17
 msgid "Always pull container before running."
-msgstr "実行前に必ずコンテナーをプルしてください。"
+msgstr "実行前に必ずコンテナーをプルする"
 
 #: awx/main/models/execution_environments.py:18
 msgid "Only pull the image if not present before running."
-msgstr "実行する前に、存在しない場合にのみイメージをプルしてください。"
+msgstr "イメージが存在しない場合のみ実行前にプルする"
 
 #: awx/main/models/execution_environments.py:19
 msgid "Never pull container before running."
-msgstr "実行前にコンテナーをプルしないでください。"
+msgstr "実行前にコンテナーをプルしない"
 
 #: awx/main/models/execution_environments.py:29
 msgid ""
@@ -5228,7 +5228,7 @@ msgid ""
 "SSL) or \"ldaps://ldap.example.com:636\" (SSL). Multiple LDAP servers may be "
 "specified by separating with spaces or commas. LDAP authentication is "
 "disabled if this parameter is empty."
-msgstr "\"ldap://ldap.example.com:389\" (非 SSL) または \"ldaps://ldap.example.com:636\" (SSL) などの LDAP サーバーに接続する URI です。複数の LDAP サーバーをスペースまたはカンマで区切って指定できます。LDAP 認証は、このパラメーターが空の場合は無効になります。"
+msgstr "\"ldap://ldap.example.com:389\" (非 SSL) または \"ldaps://ldap.example.com:636\" (SSL) などの LDAP サーバーに接続する URI です。複数の LDAP サーバーをスペースまたはコンマで区切って指定できます。LDAP 認証は、このパラメーターが空の場合は無効になります。"
 
 #: awx/sso/conf.py:170 awx/sso/conf.py:187 awx/sso/conf.py:198
 #: awx/sso/conf.py:209 awx/sso/conf.py:226 awx/sso/conf.py:244
@@ -6237,3 +6237,4 @@ msgstr "%s が現在アップグレード中です。"
 #: awx/ui/urls.py:24
 msgid "This page will refresh when complete."
 msgstr "このページは完了すると更新されます。"
+
