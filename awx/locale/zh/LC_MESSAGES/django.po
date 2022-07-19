@@ -348,7 +348,7 @@ msgstr "SCM track_submodules 只能用于 git 项目。"
 msgid ""
 "Only Container Registry credentials can be associated with an Execution "
 "Environment"
-msgstr "只有容器 registry 凭证可以与执行环境关联"
+msgstr "只有容器注册表凭证才可以与执行环境关联"
 
 #: awx/api/serializers.py:1440
 msgid "Cannot change the organization of an execution environment"
@@ -629,7 +629,7 @@ msgstr "不支持在不替换的情况下在启动时删除 {} 凭证。提供�
 
 #: awx/api/serializers.py:4338
 msgid "The inventory associated with this Workflow is being deleted."
-msgstr "与此 Workflow 关联的清单将被删除。"
+msgstr "与此工作流关联的清单将被删除。"
 
 #: awx/api/serializers.py:4405
 msgid "Message type '{}' invalid, must be either 'message' or 'body'"
@@ -3229,7 +3229,7 @@ msgstr "云"
 #: awx/main/models/credential/__init__.py:336
 #: awx/main/models/credential/__init__.py:1113
 msgid "Container Registry"
-msgstr "容器 Registry"
+msgstr "容器注册表"
 
 #: awx/main/models/credential/__init__.py:337
 msgid "Personal Access Token"
@@ -3560,7 +3560,7 @@ msgstr "身份验证 URL"
 
 #: awx/main/models/credential/__init__.py:1120
 msgid "Authentication endpoint for the container registry."
-msgstr "容器 registry 的身份验证端点。"
+msgstr "容器注册表的身份验证端点。"
 
 #: awx/main/models/credential/__init__.py:1130
 msgid "Password or Token"
@@ -3764,7 +3764,7 @@ msgstr "镜像位置"
 msgid ""
 "The full image location, including the container registry, image name, and "
 "version tag."
-msgstr "完整镜像位置，包括容器 registry、镜像名称和版本标签。"
+msgstr "完整镜像位置，包括容器注册表、镜像名称和版本标签。"
 
 #: awx/main/models/execution_environments.py:51
 msgid "Pull image before running?"
@@ -6239,3 +6239,4 @@ msgstr "%s 当前正在升级。"
 #: awx/ui/urls.py:24
 msgid "This page will refresh when complete."
 msgstr "完成后，此页面会刷新。"
+
