@@ -181,8 +181,7 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
     def get_passwords_needed_to_start(self):
         return self.passwords_needed_to_start
 
-    @property
-    def task_impact(self):
+    def _get_task_impact(self):
         # NOTE: We sorta have to assume the host count matches and that forks default to 5
         from awx.main.models.inventory import Host
 
