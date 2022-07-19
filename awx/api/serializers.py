@@ -1378,9 +1378,6 @@ class ProjectOptionsSerializer(BaseSerializer):
             'credential',
             'timeout',
             'scm_revision',
-            'signature_validation',
-            'signature_validation_credential',
-            'signature_validation_result',
         )
 
     def get_related(self, obj):
@@ -1477,6 +1474,9 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
         ) + (
             'last_update_failed',
             'last_updated',
+            'signature_validation',
+            'signature_validation_credential',
+            'signature_validation_result',
         )  # Backwards compatibility
         read_only_fields = ('*', 'custom_virtualenv')
 
