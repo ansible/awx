@@ -12,6 +12,7 @@ from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.utils.timezone import now, timedelta
+from django.db.models import Sum
 
 import redis
 from solo.models import SingletonModel
@@ -149,10 +150,13 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     def consumed_capacity(self):
         capacity_consumed = 0
         if self.node_type in ('hybrid', 'execution'):
-            capacity_consumed += sum(x.task_impact for x in UnifiedJob.objects.filter(execution_node=self.hostname, status__in=('running', 'waiting')))
+            capacity_consumed += (
+                UnifiedJob.objects.filter(execution_node=self.hostname, status__in=('running', 'waiting')).aggregate(Sum("task_impact"))["task_impact__sum"]
+                or 0
+            )
         if self.node_type in ('hybrid', 'control'):
-            capacity_consumed += sum(
-                settings.AWX_CONTROL_NODE_TASK_IMPACT for x in UnifiedJob.objects.filter(controller_node=self.hostname, status__in=('running', 'waiting'))
+            capacity_consumed += (
+                settings.AWX_CONTROL_NODE_TASK_IMPACT * UnifiedJob.objects.filter(controller_node=self.hostname, status__in=('running', 'waiting')).count()
             )
         return capacity_consumed
 
