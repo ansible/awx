@@ -608,9 +608,15 @@ class BaseTask(object):
                     status = 'failed'
             elif status == 'canceled':
                 self.instance = self.update_model(pk)
-                if (getattr(self.instance, 'cancel_flag', False) is False) and signal_callback():
-                    # MERGE: prefer devel over this with runner_callback.delay_update()
+                cancel_flag_value = getattr(self.instance, 'cancel_flag', False)
+                if (cancel_flag_value is False) and signal_callback():
+                    # MERGE: prefer devel over this with runner_callback.delay_update(), and for elif case too
                     job_explanation = "Task was canceled due to receiving a shutdown signal."
+                    self.instance.job_explanation = self.instance.job_explanation or job_explanation
+                    extra_update_fields['job_explanation'] = self.instance.job_explanation
+                    status = 'failed'
+                elif cancel_flag_value is False:
+                    job_explanation = "The running ansible process received a shutdown signal."
                     self.instance.job_explanation = self.instance.job_explanation or job_explanation
                     extra_update_fields['job_explanation'] = self.instance.job_explanation
                     status = 'failed'
