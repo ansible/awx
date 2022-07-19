@@ -46,6 +46,7 @@ from awx.main.utils.common import (
     parse_yaml_or_json,
     getattr_dne,
     ScheduleDependencyManager,
+    ScheduleTaskManager,
     get_event_partition_epoch,
     get_capacity_type,
 )
@@ -381,9 +382,10 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
             unified_job.survey_passwords = new_job_passwords
             kwargs['survey_passwords'] = new_job_passwords  # saved in config object for relaunch
 
-        unified_job.preferred_instance_groups_cache = [ig.pk for ig in unified_job.preferred_instance_groups]
+        unified_job.preferred_instance_groups_cache = unified_job._get_preferred_instance_group_cache()
 
         unified_job._set_default_dependencies_processed()
+        unified_job.task_impact = unified_job._get_task_impact()
 
         from awx.main.signals import disable_activity_stream, activity_stream_create
 
@@ -704,6 +706,10 @@ class UnifiedJob(
         editable=False,
         help_text=_("A cached list with pk values from preferred instance groups."),
     )
+    task_impact = models.PositiveIntegerField(
+        default=0,
+        editable=False,
+    )
     organization = models.ForeignKey(
         'Organization',
         blank=True,
@@ -764,6 +770,9 @@ class UnifiedJob(
 
     def _get_parent_field_name(self):
         return 'unified_job_template'  # Override in subclasses.
+
+    def _get_preferred_instance_group_cache(self):
+        return [ig.pk for ig in self.preferred_instance_groups]
 
     @classmethod
     def _get_unified_job_template_class(cls):
@@ -1254,9 +1263,8 @@ class UnifiedJob(
         except JobLaunchConfig.DoesNotExist:
             return False
 
-    @property
-    def task_impact(self):
-        raise NotImplementedError  # Implement in subclass.
+    def _get_task_impact(self):
+        return self.task_impact  # return default, should implement in subclass.
 
     def websocket_emit_data(self):
         '''Return extra data that should be included when submitting data to the browser over the websocket connection'''
@@ -1371,7 +1379,10 @@ class UnifiedJob(
         self.update_fields(start_args=json.dumps(kwargs), status='pending')
         self.websocket_emit_status("pending")
 
-        ScheduleDependencyManager().schedule()
+        if self.dependencies_processed:
+            ScheduleTaskManager().schedule()
+        else:
+            ScheduleDependencyManager().schedule()
 
         # Each type of unified job has a different Task class; get the
         # appropirate one.

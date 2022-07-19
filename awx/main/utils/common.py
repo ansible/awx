@@ -851,34 +851,41 @@ _dependency_manager = threading.local()
 _workflow_manager = threading.local()
 
 
+@contextlib.contextmanager
+def task_manager_bulk_reschedule():
+    managers = [ScheduleTaskManager(), ScheduleWorkflowManager(), ScheduleDependencyManager()]
+    """Context manager to avoid submitting task multiple times."""
+    try:
+        for m in managers:
+            m.previous_flag = getattr(m.manager_threading_local, 'bulk_reschedule', False)
+            m.previous_value = getattr(m.manager_threading_local, 'needs_scheduling', False)
+            m.manager_threading_local.bulk_reschedule = True
+            m.manager_threading_local.needs_scheduling = False
+        yield
+    finally:
+        for m in managers:
+            m.manager_threading_local.bulk_reschedule = m.previous_flag
+            if m.manager_threading_local.needs_scheduling:
+                m.schedule()
+            m.manager_threading_local.needs_scheduling = m.previous_value
+
+
 class ScheduleManager:
     def __init__(self, manager, manager_threading_local):
         self.manager = manager
         self.manager_threading_local = manager_threading_local
 
-    def schedule(self):
-        if getattr(self.manager_threading_local, 'bulk_reschedule', False):
-            self.manager_threading_local.needs_scheduling = True
-            return
+    def _schedule(self):
         from django.db import connection
 
         # runs right away if not in transaction
         connection.on_commit(lambda: self.manager.delay())
 
-    @contextlib.contextmanager
-    def task_manager_bulk_reschedule(self):
-        """Context manager to avoid submitting task multiple times."""
-        try:
-            previous_flag = getattr(self.manager_threading_local, 'bulk_reschedule', False)
-            previous_value = getattr(self.manager_threading_local, 'needs_scheduling', False)
-            self.manager_threading_local.bulk_reschedule = True
-            self.manager_threading_local.needs_scheduling = False
-            yield
-        finally:
-            self.manager_threading_local.bulk_reschedule = previous_flag
-            if self.manager_threading_local.needs_scheduling:
-                self.schedule()
-            self.manager_threading_local.needs_scheduling = previous_value
+    def schedule(self):
+        if getattr(self.manager_threading_local, 'bulk_reschedule', False):
+            self.manager_threading_local.needs_scheduling = True
+            return
+        self._schedule()
 
 
 class ScheduleTaskManager(ScheduleManager):

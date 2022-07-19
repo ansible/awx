@@ -337,9 +337,14 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         else:
             active_inventory_sources = self.inventory_sources.filter(source__in=CLOUD_INVENTORY_SOURCES)
         failed_inventory_sources = active_inventory_sources.filter(last_job_failed=True)
+        total_hosts = active_hosts.count()
+        if total_hosts != self.total_hosts:
+            update_task_impact = True
+        else:
+            update_task_impact = False
         computed_fields = {
             'has_active_failures': bool(failed_hosts.count()),
-            'total_hosts': active_hosts.count(),
+            'total_hosts': total_hosts,
             'hosts_with_active_failures': failed_hosts.count(),
             'total_groups': active_groups.count(),
             'has_inventory_sources': bool(active_inventory_sources.count()),
@@ -357,6 +362,14 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
                 computed_fields.pop(field)
         if computed_fields:
             iobj.save(update_fields=computed_fields.keys())
+        if update_task_impact:
+            # if total hosts count has changed, re-calculate task_impact for any
+            # job that is still in pending for this inventory, since task_impact
+            # is cached on task creation and used in task management system
+            tasks = self.jobs.filter(status="pending")
+            for t in tasks:
+                t.task_impact = t._get_task_impact()
+            UnifiedJob.objects.bulk_update(tasks, ['task_impact'])
         logger.debug("Finished updating inventory computed fields, pk={0}, in " "{1:.3f} seconds".format(self.pk, time.time() - start_time))
 
     def websocket_emit_status(self, status):
@@ -1220,8 +1233,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
             return UnpartitionedInventoryUpdateEvent
         return InventoryUpdateEvent
 
-    @property
-    def task_impact(self):
+    def _get_task_impact(self):
         return 1
 
     # InventoryUpdate credential required

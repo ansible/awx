@@ -644,8 +644,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             raise ParseError(_('{status_value} is not a valid status option.').format(status_value=status))
         return self._get_hosts(**kwargs)
 
-    @property
-    def task_impact(self):
+    def _get_task_impact(self):
         if self.launch_type == 'callback':
             count_hosts = 2
         else:
@@ -1241,8 +1240,7 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
             return UnpartitionedSystemJobEvent
         return SystemJobEvent
 
-    @property
-    def task_impact(self):
+    def _get_task_impact(self):
         return 5
 
     @property
