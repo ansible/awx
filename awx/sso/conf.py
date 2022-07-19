@@ -1535,12 +1535,12 @@ register(
     category_slug='saml',
     placeholder=[
         ('is_superuser_attr', 'saml_attr'),
-        ('is_superuser_value', 'value'),
-        ('is_superuser_role', 'saml_role'),
+        ('is_superuser_value', ['value']),
+        ('is_superuser_role', ['saml_role']),
         ('remove_superusers', True),
         ('is_system_auditor_attr', 'saml_attr'),
-        ('is_system_auditor_value', 'value'),
-        ('is_system_auditor_role', 'saml_role'),
+        ('is_system_auditor_value', ['value']),
+        ('is_system_auditor_role', ['saml_role']),
         ('remove_system_auditors', True),
     ],
 )
