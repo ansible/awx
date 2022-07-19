@@ -113,15 +113,14 @@ function PromptInventorySourceDetail({ resource }) {
         label={t`Cache Timeout`}
         value={`${update_cache_timeout} ${t`Seconds`}`}
       />
-      {summary_fields?.credentials?.length > 0 && (
-        <Detail
-          fullWidth
-          label={t`Credential`}
-          value={summary_fields.credentials.map((cred) => (
-            <CredentialChip key={cred?.id} credential={cred} isReadOnly />
-          ))}
-        />
-      )}
+      <Detail
+        fullWidth
+        label={t`Credential`}
+        value={summary_fields?.credentials?.map((cred) => (
+          <CredentialChip key={cred?.id} credential={cred} isReadOnly />
+        ))}
+        isEmpty={summary_fields?.credentials?.length === 0}
+      />
       {source_regions && (
         <Detail
           fullWidth

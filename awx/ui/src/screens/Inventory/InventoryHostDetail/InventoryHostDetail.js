@@ -72,12 +72,11 @@ function InventoryHostDetail({ host }) {
       <HostToggle host={host} css="padding-bottom: 40px" />
       <DetailList gutter="sm">
         <Detail label={t`Name`} value={name} />
-        {recentPlaybookJobs?.length > 0 && (
-          <Detail
-            label={t`Activity`}
-            value={<Sparkline jobs={recentPlaybookJobs} />}
-          />
-        )}
+        <Detail
+          label={t`Activity`}
+          value={<Sparkline jobs={recentPlaybookJobs} />}
+          isEmpty={recentPlaybookJobs?.length === 0}
+        />
         <Detail label={t`Description`} value={description} />
         <UserDateDetail date={created} label={t`Created`} user={created_by} />
         <UserDateDetail

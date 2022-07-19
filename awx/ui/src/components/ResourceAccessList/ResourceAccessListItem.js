@@ -68,34 +68,32 @@ function ResourceAccessListItem({ accessRecord, onRoleDelete }) {
       <Td dataLabel={t`Last name`}>{accessRecord.last_name}</Td>
       <Td dataLabel={t`Roles`}>
         <DetailList stacked>
-          {userRoles.length > 0 && (
-            <Detail
-              label={t`User Roles`}
-              value={
-                <ChipGroup
-                  numChips={5}
-                  totalChips={userRoles.length}
-                  ouiaId="user-role-chips"
-                >
-                  {userRoles.map(renderChip)}
-                </ChipGroup>
-              }
-            />
-          )}
-          {teamRoles.length > 0 && (
-            <Detail
-              label={t`Team Roles`}
-              value={
-                <ChipGroup
-                  numChips={5}
-                  totalChips={teamRoles.length}
-                  ouiaId="team-role-chips"
-                >
-                  {teamRoles.map(renderChip)}
-                </ChipGroup>
-              }
-            />
-          )}
+          <Detail
+            label={t`User Roles`}
+            value={
+              <ChipGroup
+                numChips={5}
+                totalChips={userRoles.length}
+                ouiaId="user-role-chips"
+              >
+                {userRoles.map(renderChip)}
+              </ChipGroup>
+            }
+            isEmpty={userRoles.length === 0}
+          />
+          <Detail
+            label={t`Team Roles`}
+            value={
+              <ChipGroup
+                numChips={5}
+                totalChips={teamRoles.length}
+                ouiaId="team-role-chips"
+              >
+                {teamRoles.map(renderChip)}
+              </ChipGroup>
+            }
+            isEmpty={teamRoles.length === 0}
+          />
         </DetailList>
       </Td>
     </Tr>

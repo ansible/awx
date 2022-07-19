@@ -548,4 +548,64 @@ describe('<JobDetail />', () => {
     assertDetail('Inventory', 'Demo Inventory');
     assertDetail('Job Slice Parent', 'True');
   });
+
+  test('should not load Source', () => {
+    wrapper = mountWithContexts(
+      <JobDetail
+        job={{
+          ...mockJobData,
+          summary_fields: {
+            inventory_source: {},
+            user_capabilities: {},
+            inventory: { id: 1 },
+          },
+        }}
+        inventorySourceLabels={[]}
+      />
+    );
+    const source_detail = wrapper.find(`Detail[label="Source"]`).at(0);
+    expect(source_detail.prop('isEmpty')).toEqual(true);
+  });
+
+  test('should not load Credentials', () => {
+    wrapper = mountWithContexts(
+      <JobDetail
+        job={{
+          ...mockJobData,
+          summary_fields: {
+            user_capabilities: {},
+            credentials: [],
+          },
+        }}
+      />
+    );
+    const credentials_detail = wrapper
+      .find(`Detail[label="Credentials"]`)
+      .at(0);
+    expect(credentials_detail.prop('isEmpty')).toEqual(true);
+  });
+
+  test('should not load Job Tags', () => {
+    wrapper = mountWithContexts(
+      <JobDetail
+        job={{
+          ...mockJobData,
+          job_tags: '',
+        }}
+      />
+    );
+    expect(wrapper.find('Detail[label="Job Tags"]').length).toBe(0);
+  });
+
+  test('should not load Skip Tags', () => {
+    wrapper = mountWithContexts(
+      <JobDetail
+        job={{
+          ...mockJobData,
+          skip_tags: '',
+        }}
+      />
+    );
+    expect(wrapper.find('Detail[label="Skip Tags"]').length).toBe(0);
+  });
 });

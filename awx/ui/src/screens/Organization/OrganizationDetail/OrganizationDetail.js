@@ -30,7 +30,7 @@ function OrganizationDetail({ organization }) {
     created,
     modified,
     summary_fields,
-    galaxy_credentials,
+    galaxy_credentials = [],
   } = organization;
   const [contentError, setContentError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(true);
@@ -121,7 +121,7 @@ function OrganizationDetail({ organization }) {
           date={modified}
           user={summary_fields.modified_by}
         />
-        {instanceGroups && instanceGroups.length > 0 && (
+        {instanceGroups && (
           <Detail
             fullWidth
             label={t`Instance Groups`}
@@ -145,35 +145,35 @@ function OrganizationDetail({ organization }) {
                 ))}
               </ChipGroup>
             }
+            isEmpty={instanceGroups.length === 0}
           />
         )}
-        {galaxy_credentials && galaxy_credentials.length > 0 && (
-          <Detail
-            fullWidth
-            label={t`Galaxy Credentials`}
-            value={
-              <ChipGroup
-                numChips={5}
-                totalChips={galaxy_credentials.length}
-                ouiaId="galaxy-credential-chips"
-              >
-                {galaxy_credentials.map((credential) => (
-                  <Link
+        <Detail
+          fullWidth
+          label={t`Galaxy Credentials`}
+          value={
+            <ChipGroup
+              numChips={5}
+              totalChips={galaxy_credentials?.length}
+              ouiaId="galaxy-credential-chips"
+            >
+              {galaxy_credentials?.map((credential) => (
+                <Link
+                  key={credential.id}
+                  to={`/credentials/${credential.id}/details`}
+                >
+                  <CredentialChip
+                    credential={credential}
                     key={credential.id}
-                    to={`/credentials/${credential.id}/details`}
-                  >
-                    <CredentialChip
-                      credential={credential}
-                      key={credential.id}
-                      isReadOnly
-                      ouiaId={`galaxy-credential-${credential.id}-chip`}
-                    />
-                  </Link>
-                ))}
-              </ChipGroup>
-            }
-          />
-        )}
+                    isReadOnly
+                    ouiaId={`galaxy-credential-${credential.id}-chip`}
+                  />
+                </Link>
+              ))}
+            </ChipGroup>
+          }
+          isEmpty={galaxy_credentials?.length === 0}
+        />
       </DetailList>
       <CardActionsRow>
         {summary_fields.user_capabilities.edit && (

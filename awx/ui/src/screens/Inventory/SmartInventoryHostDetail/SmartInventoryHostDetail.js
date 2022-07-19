@@ -28,12 +28,11 @@ function SmartInventoryHostDetail({ host }) {
     <CardBody>
       <DetailList gutter="sm">
         <Detail label={t`Name`} value={name} />
-        {recentPlaybookJobs?.length > 0 && (
-          <Detail
-            label={t`Activity`}
-            value={<Sparkline jobs={recentPlaybookJobs} />}
-          />
-        )}
+        <Detail
+          label={t`Activity`}
+          value={<Sparkline jobs={recentPlaybookJobs} />}
+          isEmpty={recentPlaybookJobs?.length === 0}
+        />
         <Detail label={t`Description`} value={description} />
         <Detail
           label={t`Inventory`}

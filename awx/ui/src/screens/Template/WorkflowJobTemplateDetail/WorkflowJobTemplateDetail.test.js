@@ -178,4 +178,46 @@ describe('<WorkflowJobTemplateDetail/>', () => {
     expect(inventory.prop('to')).toEqual('/inventories/inventory/1/details');
     expect(organization.prop('to')).toEqual('/organizations/1/details');
   });
+
+  test('should not load Activity', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <WorkflowJobTemplateDetail
+          template={{
+            ...template,
+            summary_fields: {
+              ...template.summary_fields,
+              recent_jobs: [],
+            },
+          }}
+          hasContentLoading={false}
+          onSetContentLoading={() => {}}
+        />
+      );
+    });
+    const activity_detail = wrapper.find(`Detail[label="Activity"]`).at(0);
+    expect(activity_detail.prop('isEmpty')).toEqual(true);
+  });
+
+  test('should not load Labels', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <WorkflowJobTemplateDetail
+          template={{
+            ...template,
+            summary_fields: {
+              ...template.summary_fields,
+              labels: {
+                results: [],
+              },
+            },
+          }}
+          hasContentLoading={false}
+          onSetContentLoading={() => {}}
+        />
+      );
+    });
+    const labels_detail = wrapper.find(`Detail[label="Labels"]`).at(0);
+    expect(labels_detail.prop('isEmpty')).toEqual(true);
+  });
 });

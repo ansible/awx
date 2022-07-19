@@ -81,6 +81,8 @@ describe('<HostDetail />', () => {
       expect(wrapper.find(`Detail[label="Activity"] Sparkline`)).toHaveLength(
         0
       );
+      const activity_detail = wrapper.find(`Detail[label="Activity"]`).at(0);
+      expect(activity_detail.prop('isEmpty')).toEqual(true);
     });
 
     test('should hide edit button for users without edit permission', async () => {

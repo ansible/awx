@@ -268,15 +268,14 @@ function JobDetail({ job, inventorySourceLabels }) {
                 </Link>
               }
             />
-            {inventorySourceLabels.length > 0 && (
-              <Detail
-                dataCy="job-inventory-source-type"
-                label={t`Source`}
-                value={inventorySourceLabels.map(([string, label]) =>
-                  string === job.source ? label : null
-                )}
-              />
-            )}
+            <Detail
+              dataCy="job-inventory-source-type"
+              label={t`Source`}
+              value={inventorySourceLabels.map(([string, label]) =>
+                string === job.source ? label : null
+              )}
+              isEmpty={inventorySourceLabels.length === 0}
+            />
           </>
         )}
         {inventory_source && inventory_source.source === 'scm' && (
@@ -406,7 +405,7 @@ function JobDetail({ job, inventorySourceLabels }) {
             }
           />
         )}
-        {credentials && credentials.length > 0 && (
+        {credentials && (
           <Detail
             dataCy="job-credentials"
             fullWidth
@@ -428,6 +427,7 @@ function JobDetail({ job, inventorySourceLabels }) {
                 ))}
               </ChipGroup>
             }
+            isEmpty={credentials.length === 0}
           />
         )}
         {labels && labels.count > 0 && (
@@ -451,7 +451,7 @@ function JobDetail({ job, inventorySourceLabels }) {
             }
           />
         )}
-        {job.job_tags && job.job_tags.length > 0 && (
+        {job.job_tags && (
           <Detail
             dataCy="job-tags"
             fullWidth
@@ -474,9 +474,10 @@ function JobDetail({ job, inventorySourceLabels }) {
                 ))}
               </ChipGroup>
             }
+            isEmpty={job.job_tags.length === 0}
           />
         )}
-        {job.skip_tags && job.skip_tags.length > 0 && (
+        {job.skip_tags && (
           <Detail
             dataCy="job-skip-tags"
             fullWidth
@@ -499,6 +500,7 @@ function JobDetail({ job, inventorySourceLabels }) {
                 ))}
               </ChipGroup>
             }
+            isEmpty={job.skip_tags.length === 0}
           />
         )}
         <Detail

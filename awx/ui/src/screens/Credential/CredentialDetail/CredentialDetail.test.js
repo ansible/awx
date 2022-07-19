@@ -149,4 +149,23 @@ describe('<CredentialDetail />', () => {
       wrapper.find('ModalBoxCloseButton').invoke('onClose')();
     });
   });
+
+  test('should not load enabled options', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <CredentialDetail
+          credential={{
+            ...mockCredential,
+            results: {
+              inputs: null,
+            },
+          }}
+        />
+      );
+    });
+    const enabled_options_detail = wrapper
+      .find(`Detail[label="Enabled Options"]`)
+      .at(0);
+    expect(enabled_options_detail.prop('isEmpty')).toEqual(true);
+  });
 });

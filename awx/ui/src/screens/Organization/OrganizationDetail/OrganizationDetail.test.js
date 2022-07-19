@@ -216,4 +216,44 @@ describe('<OrganizationDetail />', () => {
       (el) => el.length === 0
     );
   });
+
+  test('should not load instance groups', async () => {
+    OrganizationsAPI.readInstanceGroups.mockResolvedValue({
+      data: {
+        results: [],
+      },
+    });
+
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <OrganizationDetail organization={mockOrganization} />
+      );
+    });
+    wrapper.update();
+    const instance_groups_detail = wrapper
+      .find(`Detail[label="Instance Groups"]`)
+      .at(0);
+    expect(instance_groups_detail.prop('isEmpty')).toEqual(true);
+  });
+
+  test('should not load galaxy credentials', async () => {
+    OrganizationsAPI.readInstanceGroups.mockResolvedValue({ data: {} });
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <OrganizationDetail
+          organization={{
+            ...mockOrganization,
+            credential: [],
+          }}
+        />
+      );
+    });
+    wrapper.update();
+    const galaxy_credentials_detail = wrapper
+      .find(`Detail[label="Galaxy Credentials"]`)
+      .at(0);
+    expect(galaxy_credentials_detail.prop('isEmpty')).toEqual(true);
+  });
 });

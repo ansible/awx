@@ -237,4 +237,21 @@ describe('InventorySourceDetail', () => {
       (el) => el.length === 0
     );
   });
+
+  test('should not load Credentials', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <InventorySourceDetail
+          inventorySource={{
+            ...mockInvSource,
+            summary_fields: {
+              credentials: [],
+            },
+          }}
+        />
+      );
+    });
+    const credentials_detail = wrapper.find(`Detail[label="Credential"]`).at(0);
+    expect(credentials_detail.prop('isEmpty')).toEqual(true);
+  });
 });

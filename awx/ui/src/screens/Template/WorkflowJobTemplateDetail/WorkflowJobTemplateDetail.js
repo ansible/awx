@@ -110,12 +110,11 @@ function WorkflowJobTemplateDetail({ template }) {
       <DetailList gutter="sm">
         <Detail label={t`Name`} value={name} dataCy="jt-detail-name" />
         <Detail label={t`Description`} value={description} />
-        {summary_fields.recent_jobs?.length > 0 && (
-          <Detail
-            value={<Sparkline jobs={recentPlaybookJobs} />}
-            label={t`Activity`}
-          />
-        )}
+        <Detail
+          value={<Sparkline jobs={recentPlaybookJobs} />}
+          label={t`Activity`}
+          isEmpty={summary_fields.recent_jobs?.length === 0}
+        />
         {summary_fields.organization && (
           <Detail
             label={t`Organization`}
@@ -202,26 +201,25 @@ function WorkflowJobTemplateDetail({ template }) {
             helpText={helpText.enabledOptions}
           />
         )}
-        {summary_fields.labels?.results?.length > 0 && (
-          <Detail
-            fullWidth
-            label={t`Labels`}
-            helpText={helpText.labels}
-            value={
-              <ChipGroup
-                numChips={3}
-                totalChips={summary_fields.labels.results.length}
-                ouiaId="workflow-job-template-detail-label-chips"
-              >
-                {summary_fields.labels.results.map((l) => (
-                  <Chip key={l.id} ouiaId={`${l.name}-label-chip`} isReadOnly>
-                    {l.name}
-                  </Chip>
-                ))}
-              </ChipGroup>
-            }
-          />
-        )}
+        <Detail
+          fullWidth
+          label={t`Labels`}
+          helpText={helpText.labels}
+          value={
+            <ChipGroup
+              numChips={3}
+              totalChips={summary_fields.labels.results.length}
+              ouiaId="workflow-job-template-detail-label-chips"
+            >
+              {summary_fields.labels.results.map((l) => (
+                <Chip key={l.id} ouiaId={`${l.name}-label-chip`} isReadOnly>
+                  {l.name}
+                </Chip>
+              ))}
+            </ChipGroup>
+          }
+          isEmpty={!summary_fields.labels?.results?.length}
+        />
         <VariablesDetail
           dataCy="workflow-job-template-detail-extra-vars"
           helpText={helpText.variables}

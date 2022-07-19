@@ -96,12 +96,11 @@ function SmartInventoryDetail({ inventory }) {
       <CardBody>
         <DetailList>
           <Detail label={t`Name`} value={name} />
-          {recentJobs.length > 0 && (
-            <Detail
-              label={t`Activity`}
-              value={<Sparkline jobs={recentJobs} />}
-            />
-          )}
+          <Detail
+            label={t`Activity`}
+            value={<Sparkline jobs={recentJobs} />}
+            isEmpty={recentJobs.length === 0}
+          />
           <Detail label={t`Description`} value={description} />
           <Detail label={t`Type`} value={t`Smart inventory`} />
           <Detail
@@ -118,29 +117,28 @@ function SmartInventoryDetail({ inventory }) {
             value={<Label variant="outline">{host_filter}</Label>}
           />
           <Detail label={t`Total hosts`} value={total_hosts} />
-          {instanceGroups.length > 0 && (
-            <Detail
-              fullWidth
-              label={t`Instance groups`}
-              value={
-                <ChipGroup
-                  numChips={5}
-                  totalChips={instanceGroups.length}
-                  ouiaId="instance-group-chips"
-                >
-                  {instanceGroups.map((ig) => (
-                    <Chip
-                      key={ig.id}
-                      isReadOnly
-                      ouiaId={`instance-group-${ig.id}-chip`}
-                    >
-                      {ig.name}
-                    </Chip>
-                  ))}
-                </ChipGroup>
-              }
-            />
-          )}
+          <Detail
+            fullWidth
+            label={t`Instance groups`}
+            value={
+              <ChipGroup
+                numChips={5}
+                totalChips={instanceGroups.length}
+                ouiaId="instance-group-chips"
+              >
+                {instanceGroups.map((ig) => (
+                  <Chip
+                    key={ig.id}
+                    isReadOnly
+                    ouiaId={`instance-group-${ig.id}-chip`}
+                  >
+                    {ig.name}
+                  </Chip>
+                ))}
+              </ChipGroup>
+            }
+            isEmpty={instanceGroups.length === 0}
+          />
           <VariablesDetail
             label={t`Variables`}
             value={variables}

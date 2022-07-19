@@ -272,11 +272,12 @@ function TemplateListItem({
                 value={template.description}
                 dataCy={`template-${template.id}-description`}
               />
-              {summaryFields.recent_jobs && summaryFields.recent_jobs.length ? (
+              {summaryFields.recent_jobs ? (
                 <Detail
                   label={t`Activity`}
                   value={<Sparkline jobs={summaryFields.recent_jobs} />}
                   dataCy={`template-${template.id}-activity`}
+                  isEmpty={summaryFields.recent_jobs.length === 0}
                 />
               ) : null}
               {summaryFields.inventory ? (
@@ -316,7 +317,7 @@ function TemplateListItem({
                 value={formatDateString(template.modified)}
                 dataCy={`template-${template.id}-last-modified`}
               />
-              {summaryFields.credentials && summaryFields.credentials.length ? (
+              {summaryFields.credentials ? (
                 <Detail
                   fullWidth
                   label={t`Credentials`}
@@ -337,9 +338,10 @@ function TemplateListItem({
                     </ChipGroup>
                   }
                   dataCy={`template-${template.id}-credentials`}
+                  isEmpty={summaryFields.credentials.length === 0}
                 />
               ) : null}
-              {summaryFields.labels && summaryFields.labels.results.length > 0 && (
+              {summaryFields.labels && (
                 <Detail
                   fullWidth
                   label={t`Labels`}
@@ -361,6 +363,7 @@ function TemplateListItem({
                     </ChipGroup>
                   }
                   dataCy={`template-${template.id}-labels`}
+                  isEmpty={summaryFields.labels.results.length === 0}
                 />
               )}
             </DetailList>

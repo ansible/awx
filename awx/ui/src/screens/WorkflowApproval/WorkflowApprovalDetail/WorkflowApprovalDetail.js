@@ -309,25 +309,24 @@ function WorkflowApprovalDetail({ workflowApproval }) {
             dataCy="wa-detail-inventory"
           />
         ) : null}
-        {workflowJob?.summary_fields?.labels?.results?.length > 0 && (
-          <Detail
-            fullWidth
-            label={t`Labels`}
-            value={
-              <ChipGroup
-                numChips={5}
-                totalChips={workflowJob.summary_fields.labels.results.length}
-                ouiaId="wa-detail-label-chips"
-              >
-                {workflowJob.summary_fields.labels.results.map((label) => (
-                  <Chip key={label.id} isReadOnly>
-                    {label.name}
-                  </Chip>
-                ))}
-              </ChipGroup>
-            }
-          />
-        )}
+        <Detail
+          fullWidth
+          label={t`Labels`}
+          value={
+            <ChipGroup
+              numChips={5}
+              totalChips={workflowJob.summary_fields.labels.results.length}
+              ouiaId="wa-detail-label-chips"
+            >
+              {workflowJob.summary_fields.labels.results.map((label) => (
+                <Chip key={label.id} isReadOnly>
+                  {label.name}
+                </Chip>
+              ))}
+            </ChipGroup>
+          }
+          isEmpty={!workflowJob?.summary_fields?.labels?.results?.length}
+        />
         {workflowJob?.extra_vars ? (
           <VariablesDetail
             dataCy="wa-detail-variables"
