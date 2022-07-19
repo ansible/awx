@@ -29,7 +29,6 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.encoding import force_str
 from django.utils.text import capfirst
 from django.utils.timezone import now
-from django.utils.functional import cached_property
 
 # Django REST Framework
 from rest_framework.exceptions import ValidationError, PermissionDenied
@@ -5008,8 +5007,7 @@ class ActivityStreamSerializer(BaseSerializer):
     object_association = serializers.SerializerMethodField(help_text=_("When present, shows the field name of the role or relationship that changed."))
     object_type = serializers.SerializerMethodField(help_text=_("When present, shows the model on which the role or relationship was defined."))
 
-    @cached_property
-    def _local_summarizable_fk_fields(self):
+    def _local_summarizable_fk_fields(self, obj):
         summary_dict = copy.copy(SUMMARIZABLE_FK_FIELDS)
         # Special requests
         summary_dict['group'] = summary_dict['group'] + ('inventory_id',)
@@ -5029,7 +5027,13 @@ class ActivityStreamSerializer(BaseSerializer):
             ('workflow_approval', ('id', 'name', 'unified_job_id')),
             ('instance', ('id', 'hostname')),
         ]
-        return field_list
+        # Optimization - do not attempt to summarize all fields, pair down to only relations that exist
+        if not obj:
+            return field_list
+        existing_association_types = [obj.object1, obj.object2]
+        if 'user' in existing_association_types:
+            existing_association_types.append('role')
+        return [entry for entry in field_list if entry[0] in existing_association_types]
 
     class Meta:
         model = ActivityStream
@@ -5113,7 +5117,7 @@ class ActivityStreamSerializer(BaseSerializer):
         data = {}
         if obj.actor is not None:
             data['actor'] = self.reverse('api:user_detail', kwargs={'pk': obj.actor.pk})
-        for fk, __ in self._local_summarizable_fk_fields:
+        for fk, __ in self._local_summarizable_fk_fields(obj):
             if not hasattr(obj, fk):
                 continue
             m2m_list = self._get_related_objects(obj, fk)
@@ -5170,7 +5174,7 @@ class ActivityStreamSerializer(BaseSerializer):
 
     def get_summary_fields(self, obj):
         summary_fields = OrderedDict()
-        for fk, related_fields in self._local_summarizable_fk_fields:
+        for fk, related_fields in self._local_summarizable_fk_fields(obj):
             try:
                 if not hasattr(obj, fk):
                     continue
