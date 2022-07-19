@@ -283,9 +283,11 @@ class ApiV2(base.Base):
 
                     _page = _page.put(post_data)
                     changed = True
+            except exc.NoContent:  # desired exception under some circumstances, e.g. labels that already exist
+                pass
             except (exc.Common, AssertionError) as e:
                 identifier = asset.get("name", None) or asset.get("username", None) or asset.get("hostname", None)
-                log.error(f"{endpoint} \"{identifier}\": {e}.")
+                log.error(f'{endpoint} "{identifier}": {e}.')
                 self._has_error = True
                 log.debug("post_data: %r", post_data)
                 continue
