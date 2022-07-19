@@ -956,7 +956,7 @@ msgstr "인스턴스 그룹의 인스턴스"
 
 #: awx/api/views/__init__.py:450
 msgid "Schedules"
-msgstr "일정"
+msgstr "스케줄"
 
 #: awx/api/views/__init__.py:464
 msgid "Schedule Recurrence Rule Preview"
@@ -3261,7 +3261,7 @@ msgstr "JSON 또는 YAML 구문을 사용하여 인젝터를 입력합니다. �
 #: awx/main/models/credential/__init__.py:412
 #, python-format
 msgid "adding %s credential type"
-msgstr "인증 정보 유형 %s 추가 중"
+msgstr "인증 정보 유형  %s 추가 중"
 
 #: awx/main/models/credential/__init__.py:590
 #: awx/main/models/credential/__init__.py:672
