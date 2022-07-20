@@ -20,6 +20,7 @@ describe('<ProjectAdd />', () => {
     scm_clean: true,
     scm_track_submodules: false,
     credential: 100,
+    signature_validation_credential: 200,
     local_path: '',
     organization: { id: 2, name: 'Bar' },
     scm_update_on_launch: true,
@@ -73,15 +74,31 @@ describe('<ProjectAdd />', () => {
     },
   };
 
+  const cryptographyCredentialResolve = {
+    data: {
+      results: [
+        {
+          id: 6,
+          name: 'GPG Public Key',
+          kind: 'cryptography',
+        },
+      ],
+      count: 1,
+    },
+  };
+
   beforeEach(async () => {
     await ProjectsAPI.readOptions.mockImplementation(
       () => projectOptionsResolve
     );
-    await CredentialTypesAPI.read.mockImplementationOnce(
+    await CredentialTypesAPI.read.mockImplementation(
       () => scmCredentialResolve
     );
-    await CredentialTypesAPI.read.mockImplementationOnce(
+    await CredentialTypesAPI.read.mockImplementation(
       () => insightsCredentialResolve
+    );
+    await CredentialTypesAPI.read.mockImplementation(
+      () => cryptographyCredentialResolve
     );
   });
 
@@ -110,6 +127,7 @@ describe('<ProjectAdd />', () => {
       ...projectData,
       organization: 2,
       default_environment: 1,
+      signature_validation_credential: 200,
     });
   });
 

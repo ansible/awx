@@ -105,6 +105,10 @@ const projectHelpTextStrings = {
         you can input tags, commit hashes, and arbitrary refs. Some
         commit hashes and refs may not be available unless you also
         provide a custom refspec.`,
+  signatureValidation: t`Enable content signing to verify that the content 
+                    has remained secure when a project is synced. 
+                    If the content has been tampered with, the 
+                    job will not run.`,
   options: {
     clean: t`Remove any local modifications prior to performing an update.`,
     delete: t`Delete the local repository in its entirety prior to
