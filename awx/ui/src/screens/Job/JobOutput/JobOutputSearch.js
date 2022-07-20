@@ -30,8 +30,7 @@ function JobOutputSearch({
   job,
   eventRelatedSearchableKeys,
   eventSearchableKeys,
-  remoteRowCount,
-  scrollToRow,
+  scrollToEnd,
   isFollowModeEnabled,
   setIsFollowModeEnabled,
 }) {
@@ -83,7 +82,7 @@ function JobOutputSearch({
       setIsFollowModeEnabled(false);
     } else {
       setIsFollowModeEnabled(true);
-      scrollToRow(remoteRowCount - 1);
+      scrollToEnd();
     }
   };
 
