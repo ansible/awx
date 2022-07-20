@@ -244,7 +244,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       if (data.group_name === `${job.type}_events`) {
         batchedEvents.push(data);
         clearTimeout(batchTimeout);
-        if (batchedEvents.length >= 25) {
+        if (batchedEvents.length >= 10) {
           addBatchedEvents();
         } else {
           batchTimeout = setTimeout(addBatchedEvents, 500);
