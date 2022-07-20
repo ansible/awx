@@ -78,10 +78,11 @@ no_api_parameter_ok = {
 # When this tool was created we were not feature complete. Adding something in here indicates a module
 # that needs to be developed. If the module is found on the file system it will auto-detect that the
 # work is being done and will bypass this check. At some point this module should be removed from this list.
-needs_development = ['inventory_script']
+needs_development = ['inventory_script', 'instance']
 needs_param_development = {
     'host': ['instance_id'],
     'workflow_approval': ['description', 'execution_environment'],
+    'instances': ['capacity_adjustment', 'enabled', 'hostname', 'ip_address', 'managed_by_policy', 'node_state', 'node_type'],
 }
 # -----------------------------------------------------------------------------------------------------------
 
