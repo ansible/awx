@@ -15,6 +15,9 @@ function JobCancelButton({
   buttonText,
   style = {},
   job = {},
+  isDisabled,
+  tooltip,
+  cancelationMessage,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const { error: cancelError, request: cancelJob } = useRequest(
@@ -28,33 +31,40 @@ function JobCancelButton({
     useDismissableError(cancelError);
 
   const isAlreadyCancelled = cancelError?.response?.status === 405;
-
+  const renderTooltip = () => {
+    if (tooltip) {
+      return tooltip;
+    }
+    return isAlreadyCancelled ? null : title;
+  };
   return (
     <>
-      <Tooltip content={isAlreadyCancelled ? null : title}>
-        {showIconButton ? (
-          <Button
-            isDisabled={isAlreadyCancelled}
-            aria-label={title}
-            ouiaId="cancel-job-button"
-            onClick={() => setIsOpen(true)}
-            variant="plain"
-            style={style}
-          >
-            <MinusCircleIcon />
-          </Button>
-        ) : (
-          <Button
-            isDisabled={isAlreadyCancelled}
-            aria-label={title}
-            variant="secondary"
-            ouiaId="cancel-job-button"
-            onClick={() => setIsOpen(true)}
-            style={style}
-          >
-            {buttonText || t`Cancel Job`}
-          </Button>
-        )}
+      <Tooltip content={renderTooltip()}>
+        <div>
+          {showIconButton ? (
+            <Button
+              isDisabled={isDisabled || isAlreadyCancelled}
+              aria-label={title}
+              ouiaId="cancel-job-button"
+              onClick={() => setIsOpen(true)}
+              variant="plain"
+              style={style}
+            >
+              <MinusCircleIcon />
+            </Button>
+          ) : (
+            <Button
+              isDisabled={isDisabled || isAlreadyCancelled}
+              aria-label={title}
+              variant="secondary"
+              ouiaId="cancel-job-button"
+              onClick={() => setIsOpen(true)}
+              style={style}
+            >
+              {buttonText || t`Cancel Job`}
+            </Button>
+          )}
+        </div>
       </Tooltip>
       {isOpen && (
         <AlertModal
@@ -86,7 +96,7 @@ function JobCancelButton({
             </Button>,
           ]}
         >
-          {t`Are you sure you want to cancel this job?`}
+          {cancelationMessage ?? t`Are you sure you want to cancel this job?`}
         </AlertModal>
       )}
       {error && !isAlreadyCancelled && (

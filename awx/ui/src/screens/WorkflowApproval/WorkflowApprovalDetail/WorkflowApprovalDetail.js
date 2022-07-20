@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 
 import { t } from '@lingui/macro';
 import { Link, useHistory, useParams } from 'react-router-dom';
@@ -26,12 +26,13 @@ import {
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { WorkflowApproval } from 'types';
 import StatusLabel from 'components/StatusLabel';
+import JobCancelButton from 'components/JobCancelButton';
+import WorkflowApprovalButton from '../shared/WorkflowApprovalButton';
+import WorkflowDenyButton from '../shared/WorkflowDenyButton';
 import {
   getDetailPendingLabel,
   getStatus,
 } from '../shared/WorkflowApprovalUtils';
-
-import WorkflowApprovalControls from '../shared/WorkflowApprovalControls';
 
 const Divider = styled(PFDivider)`
   margin-top: var(--pf-global--spacer--lg);
@@ -49,7 +50,6 @@ const WFDetailList = styled(DetailList)`
 
 function WorkflowApprovalDetail({ workflowApproval }) {
   const { id: workflowApprovalId } = useParams();
-  const [isKebabOpen, setIsKebabModalOpen] = useState(false);
   const history = useHistory();
   const {
     request: deleteWorkflowApproval,
@@ -64,50 +64,6 @@ function WorkflowApprovalDetail({ workflowApproval }) {
 
   const { error: deleteError, dismissError: dismissDeleteError } =
     useDismissableError(deleteApprovalError);
-
-  const {
-    error: approveApprovalError,
-    isLoading: isApproveLoading,
-    request: approveWorkflowApproval,
-  } = useRequest(
-    useCallback(async () => {
-      await WorkflowApprovalsAPI.approve(workflowApprovalId);
-      history.push(`/workflow_approvals/${workflowApprovalId}`);
-    }, [workflowApprovalId, history]),
-    {}
-  );
-
-  const { error: approveError, dismissError: dismissApproveError } =
-    useDismissableError(approveApprovalError);
-
-  const {
-    error: denyApprovalError,
-    isLoading: isDenyLoading,
-    request: denyWorkflowApproval,
-  } = useRequest(
-    useCallback(async () => {
-      await WorkflowApprovalsAPI.deny(workflowApprovalId);
-      history.push(`/workflow_approvals/${workflowApprovalId}`);
-    }, [workflowApprovalId, history]),
-    {}
-  );
-
-  const { error: denyError, dismissError: dismissDenyError } =
-    useDismissableError(denyApprovalError);
-
-  const {
-    error: cancelApprovalError,
-    isLoading: isCancelLoading,
-    request: cancelWorkflowApprovals,
-  } = useRequest(
-    useCallback(async () => {
-      await WorkflowJobsAPI.cancel(
-        workflowApproval.summary_fields.source_workflow_job.id
-      );
-      history.push(`/workflow_approvals/${workflowApprovalId}`);
-    }, [workflowApproval, workflowApprovalId, history]),
-    {}
-  );
 
   const workflowJobTemplateId =
     workflowApproval.summary_fields.workflow_job_template.id;
@@ -146,26 +102,13 @@ function WorkflowApprovalDetail({ workflowApproval }) {
     fetchWorkflowJob();
   }, [fetchWorkflowJob]);
 
-  const handleCancel = async () => {
-    setIsKebabModalOpen(false);
-    await cancelWorkflowApprovals();
-  };
-
-  const { error: cancelError, dismissError: dismissCancelError } =
-    useDismissableError(cancelApprovalError);
-
   const sourceWorkflowJob =
     workflowApproval?.summary_fields?.source_workflow_job;
 
   const sourceWorkflowJobTemplate =
     workflowApproval?.summary_fields?.workflow_job_template;
 
-  const isLoading =
-    isApproveLoading ||
-    isCancelLoading ||
-    isDeleteLoading ||
-    isDenyLoading ||
-    isLoadingWorkflowJob;
+  const isLoading = isDeleteLoading || isLoadingWorkflowJob;
 
   if (isLoadingWorkflowJob) {
     return <ContentLoading />;
@@ -342,16 +285,23 @@ function WorkflowApprovalDetail({ workflowApproval }) {
       <CardActionsRow>
         {workflowApproval.status === 'pending' &&
           workflowApproval.can_approve_or_deny && (
-            <WorkflowApprovalControls
-              selected={[workflowApproval]}
-              onHandleApprove={approveWorkflowApproval}
-              onHandleDeny={denyWorkflowApproval}
-              onHandleCancel={handleCancel}
-              onHandleToggleToolbarKebab={(isOpen) =>
-                setIsKebabModalOpen(isOpen)
-              }
-              isKebabOpen={isKebabOpen}
-            />
+            <>
+              <WorkflowApprovalButton
+                workflowApproval={workflowApproval}
+                isDetailView
+              />
+              <WorkflowDenyButton
+                workflowApproval={workflowApproval}
+                isDetailView
+              />
+              <JobCancelButton
+                title={t`Cancel Workflow`}
+                job={workflowApproval.summary_fields.source_workflow_job}
+                buttonText={t`Cancel Workflow`}
+                cancelationMessage={t`This will cancel all subsequent nodes in this workflow.
+            `}
+              />
+            </>
           )}
         {workflowApproval.status !== 'pending' &&
           workflowApproval.summary_fields?.user_capabilities?.delete && (
@@ -374,39 +324,6 @@ function WorkflowApprovalDetail({ workflowApproval }) {
         >
           {t`Failed to delete workflow approval.`}
           <ErrorDetail error={deleteError} />
-        </AlertModal>
-      )}
-      {approveError && (
-        <AlertModal
-          isOpen={approveError}
-          variant="error"
-          title={t`Error!`}
-          onClose={dismissApproveError}
-        >
-          {t`Failed to approve workflow approval.`}
-          <ErrorDetail error={approveError} />
-        </AlertModal>
-      )}
-      {cancelError && (
-        <AlertModal
-          isOpen={cancelError}
-          variant="error"
-          title={t`Error!`}
-          onClose={dismissCancelError}
-        >
-          {t`Failed to approve workflow approval.`}
-          <ErrorDetail error={cancelError} />
-        </AlertModal>
-      )}
-      {denyError && (
-        <AlertModal
-          isOpen={denyError}
-          variant="error"
-          title={t`Error!`}
-          onClose={dismissDenyError}
-        >
-          {t`Failed to deny workflow approval.`}
-          <ErrorDetail error={denyError} />
         </AlertModal>
       )}
     </CardBody>
