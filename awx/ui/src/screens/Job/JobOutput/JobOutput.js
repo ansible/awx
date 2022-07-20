@@ -165,7 +165,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     setOnReadyEvents([]);
     if (isFollowModeEnabled) {
       setTimeout(() => {
-        scrollToRow(-1);
+        scrollToEnd();
       }, 0);
     }
   }, [isTreeReady, onReadyEvents]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -272,7 +272,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
 
   useEffect(() => {
     if (isFollowModeEnabled) {
-      handleScrollLast();
+      scrollToEnd();
     }
   }, [wsEvents.length, isFollowModeEnabled]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -573,6 +573,9 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     loadRange.forEach((n) => {
       cache.clear(n);
     });
+    if (isFollowModeEnabled) {
+      scrollToEnd();
+    }
   };
 
   const scrollToRow = (rowIndex) => {
@@ -585,14 +588,16 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const handleScrollPrevious = () => {
     const startIndex = listRef.current.Grid._renderedRowStartIndex;
     const stopIndex = listRef.current.Grid._renderedRowStopIndex;
-    const scrollRange = stopIndex - startIndex + 1;
+    const scrollRange = stopIndex - startIndex;
     scrollToRow(Math.max(0, startIndex - scrollRange));
     setIsFollowModeEnabled(false);
   };
 
   const handleScrollNext = () => {
+    const startIndex = listRef.current.Grid._renderedRowStartIndex;
     const stopIndex = listRef.current.Grid._renderedRowStopIndex;
-    scrollToRow(stopIndex - 1);
+    const scrollRange = stopIndex - startIndex;
+    scrollToRow(stopIndex + scrollRange);
   };
 
   const handleScrollFirst = () => {
@@ -600,9 +605,14 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     setIsFollowModeEnabled(false);
   };
 
-  const handleScrollLast = () => {
+  const scrollToEnd = () => {
     scrollToRow(-1);
     setTimeout(() => scrollToRow(-1), 100);
+  };
+
+  const handleScrollLast = () => {
+    scrollToEnd();
+    setIsFollowModeEnabled(true);
   };
 
   const handleResize = ({ width }) => {
@@ -625,6 +635,9 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     }
     scrollTop.current = e.scrollTop;
     scrollHeight.current = e.scrollHeight;
+    if (e.scrollTop + e.clientHeight >= e.scrollHeight) {
+      setIsFollowModeEnabled(true);
+    }
   };
 
   const handleExpandCollapseAll = () => {
@@ -664,7 +677,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           job={job}
           eventRelatedSearchableKeys={eventRelatedSearchableKeys}
           eventSearchableKeys={eventSearchableKeys}
-          scrollToEnd={handleScrollLast}
+          scrollToEnd={scrollToEnd}
           isFollowModeEnabled={isFollowModeEnabled}
           setIsFollowModeEnabled={setIsFollowModeEnabled}
         />
