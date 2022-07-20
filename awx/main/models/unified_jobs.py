@@ -384,6 +384,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         unified_job.preferred_instance_groups_cache = [ig.pk for ig in unified_job.preferred_instance_groups]
 
         unified_job._set_default_dependencies_processed()
+        unified_job.task_impact = unified_job._get_task_impact()
 
         from awx.main.signals import disable_activity_stream, activity_stream_create
 
@@ -703,6 +704,10 @@ class UnifiedJob(
         default=None,
         editable=False,
         help_text=_("A cached list with pk values from preferred instance groups."),
+    )
+    task_impact = models.PositiveIntegerField(
+        default=0,
+        editable=False,
     )
     organization = models.ForeignKey(
         'Organization',
@@ -1254,9 +1259,8 @@ class UnifiedJob(
         except JobLaunchConfig.DoesNotExist:
             return False
 
-    @property
-    def task_impact(self):
-        raise NotImplementedError  # Implement in subclass.
+    def _get_task_impact(self):
+        return self.task_impact  # return default, should implement in subclass.
 
     def websocket_emit_data(self):
         '''Return extra data that should be included when submitting data to the browser over the websocket connection'''

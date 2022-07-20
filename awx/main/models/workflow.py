@@ -665,8 +665,7 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
         result['body'] = '\n'.join(str_arr)
         return result
 
-    @property
-    def task_impact(self):
+    def _get_task_impact(self):
         return 0
 
     def get_ancestor_workflows(self):

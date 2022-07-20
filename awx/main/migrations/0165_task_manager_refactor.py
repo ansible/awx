@@ -27,4 +27,9 @@ class Migration(migrations.Migration):
                 blank=True, default=None, editable=False, help_text='A cached list with pk values from preferred instance groups.', null=True
             ),
         ),
+        migrations.AddField(
+            model_name='unifiedjob',
+            name='task_impact',
+            field=models.PositiveIntegerField(default=0, editable=False),
+        ),
     ]
