@@ -40,7 +40,7 @@ from awx.main.utils import (
     ScheduleDependencyManager,
     ScheduleWorkflowManager,
 )
-from awx.main.utils.common import create_partition
+from awx.main.utils.common import create_partition, task_manager_bulk_reschedule
 from awx.main.signals import disable_activity_stream
 from awx.main.constants import ACTIVE_STATES
 from awx.main.scheduler.dependency_graph import DependencyGraph
@@ -121,23 +121,22 @@ class TaskBase:
 
     def schedule(self):
         # Lock
-        with advisory_lock(f"{self.prefix}_lock", wait=False) as acquired:
-            with transaction.atomic():
-                if acquired is False:
-                    logger.debug(f"Not running {self.prefix} scheduler, another task holds lock")
-                    return
-                logger.debug(f"Starting {self.prefix} Scheduler")
-                with self.schedule_manager.task_manager_bulk_reschedule():
+        with task_manager_bulk_reschedule():
+            with advisory_lock(f"{self.prefix}_lock", wait=False) as acquired:
+                with transaction.atomic():
+                    if acquired is False:
+                        logger.debug(f"Not running {self.prefix} scheduler, another task holds lock")
+                        return
+                    logger.debug(f"Starting {self.prefix} Scheduler")
                     # if sigterm due to timeout, still record metrics
                     signal.signal(signal.SIGTERM, self.record_aggregate_metrics_and_exit)
                     self._schedule()
                     self.record_aggregate_metrics()
-                logger.debug(f"Finishing {self.prefix} Scheduler")
+                    logger.debug(f"Finishing {self.prefix} Scheduler")
 
 
 class WorkflowManager(TaskBase):
     def __init__(self):
-        self.schedule_manager = ScheduleWorkflowManager()
         super().__init__(prefix="workflow_manager")
 
     @timeit
@@ -146,7 +145,7 @@ class WorkflowManager(TaskBase):
         for workflow_job in self.all_tasks:
             if self.timed_out():
                 logger.warning("Workflow manager has reached time out while processing running workflows, exiting loop early")
-                self.schedule_manager.schedule()
+                ScheduleWorkflowManager().schedule()
                 # Do not process any more workflow jobs. Stop here.
                 # Maybe we should schedule another WorkflowManager run
                 break
@@ -263,7 +262,6 @@ class WorkflowManager(TaskBase):
 
 class DependencyManager(TaskBase):
     def __init__(self):
-        self.schedule_manager = ScheduleDependencyManager()
         super().__init__(prefix="dependency_manager")
 
     def create_project_update(self, task, project_id=None):
@@ -462,7 +460,6 @@ class TaskManager(TaskBase):
         # 5 minutes to start pending jobs. If this limit is reached, pending jobs
         # will no longer be started and will be started on the next task manager cycle.
         self.time_delta_job_explanation = timedelta(seconds=30)
-        self.schedule_manager = ScheduleTaskManager()
         super().__init__(prefix="task_manager")
 
     def after_lock_init(self):
