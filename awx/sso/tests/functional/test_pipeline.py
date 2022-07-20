@@ -4,8 +4,8 @@ from unittest import mock
 
 from django.utils.timezone import now
 
+from awx.conf.registry import settings_registry
 from awx.sso.pipeline import update_user_orgs, update_user_teams, update_user_orgs_by_saml_attr, update_user_teams_by_saml_attr, _check_flag
-
 from awx.main.models import User, Team, Organization, Credential, CredentialType
 
 
@@ -92,8 +92,13 @@ class TestSAMLMap:
         assert Organization.objects.get(name="Default_Alias") is not None
 
         for o in Organization.objects.all():
-            assert o.galaxy_credentials.count() == 1
-            assert o.galaxy_credentials.first().name == 'Ansible Galaxy'
+            if o.name == 'Default':
+                # The default org was already created and should not have a galaxy credential
+                assert o.galaxy_credentials.count() == 0
+            else:
+                # The Default_Alias was created by SAML and should get the galaxy credential
+                assert o.galaxy_credentials.count() == 1
+                assert o.galaxy_credentials.first().name == 'Ansible Galaxy'
 
     def test_update_user_teams(self, backend, users, galaxy_credential):
         u1, u2, u3 = users
@@ -203,7 +208,13 @@ class TestSAMLAttr:
                 ],
             }
 
-        return MockSettings()
+        mock_settings_obj = MockSettings()
+        for key in settings_registry.get_registered_settings(category_slug='logging'):
+            value = settings_registry.get_setting_field(key).get_default()
+            setattr(mock_settings_obj, key, value)
+        setattr(mock_settings_obj, 'DEBUG', True)
+
+        return mock_settings_obj
 
     @pytest.fixture
     def backend(self):
@@ -263,8 +274,13 @@ class TestSAMLAttr:
             assert Organization.objects.get(name="o1_alias").member_role.members.count() == 1
 
         for o in Organization.objects.all():
-            assert o.galaxy_credentials.count() == 1
-            assert o.galaxy_credentials.first().name == 'Ansible Galaxy'
+            if o.id in [o1.id, o2.id, o3.id]:
+                # o[123] were created without a default galaxy cred
+                assert o.galaxy_credentials.count() == 0
+            else:
+                # anything else created should have a default galaxy cred
+                assert o.galaxy_credentials.count() == 1
+                assert o.galaxy_credentials.first().name == 'Ansible Galaxy'
 
     def test_update_user_teams_by_saml_attr(self, orgs, users, galaxy_credential, kwargs, mock_settings):
         with mock.patch('django.conf.settings', mock_settings):
@@ -322,8 +338,13 @@ class TestSAMLAttr:
             assert Team.objects.get(name='Green', organization__name='Default3').member_role.members.count() == 3
 
         for o in Organization.objects.all():
-            assert o.galaxy_credentials.count() == 1
-            assert o.galaxy_credentials.first().name == 'Ansible Galaxy'
+            if o.id in [o1.id, o2.id, o3.id]:
+                # o[123] were created without a default galaxy cred
+                assert o.galaxy_credentials.count() == 0
+            else:
+                # anything else created should have a default galaxy cred
+                assert o.galaxy_credentials.count() == 1
+                assert o.galaxy_credentials.first().name == 'Ansible Galaxy'
 
     def test_update_user_teams_alias_by_saml_attr(self, orgs, users, galaxy_credential, kwargs, mock_settings):
         with mock.patch('django.conf.settings', mock_settings):
@@ -395,6 +416,23 @@ class TestSAMLAttr:
         for o in Organization.objects.all():
             assert o.galaxy_credentials.count() == 1
             assert o.galaxy_credentials.first().name == 'Ansible Galaxy'
+
+    def test_galaxy_credential_no_auto_assign(self, users, kwargs, galaxy_credential, mock_settings):
+        # A Galaxy credential should not be added to an existing org
+        o = Organization.objects.create(name='Default1')
+        o = Organization.objects.create(name='Default2')
+        o = Organization.objects.create(name='Default3')
+        o = Organization.objects.create(name='Default4')
+        kwargs['response']['attributes']['memberOf'] = ['Default1']
+        kwargs['response']['attributes']['groups'] = ['Blue']
+        with mock.patch('django.conf.settings', mock_settings):
+            for u in users:
+                update_user_orgs_by_saml_attr(None, None, u, **kwargs)
+                update_user_teams_by_saml_attr(None, None, u, **kwargs)
+
+        assert Organization.objects.count() == 4
+        for o in Organization.objects.all():
+            assert o.galaxy_credentials.count() == 0
 
 
 @pytest.mark.django_db

@@ -78,11 +78,17 @@ def _update_m2m_from_expression(user, related, expr, remove=True):
 
 
 def get_or_create_with_default_galaxy_cred(**kwargs):
-    from awx.main.models import Organization
+    from awx.main.models import Organization, Credential
 
-    (org, org_created) = Organization.objects.get_or_create(kwargs)
+    (org, org_created) = Organization.objects.get_or_create(**kwargs)
     if org_created:
-        org.create_default_galaxy_credential()
+        logger.debug("Created org {} (id {}) from {}".format(org.name, org.id, kwargs))
+        public_galaxy_credential = Credential.objects.filter(managed=True, name='Ansible Galaxy').first()
+        if public_galaxy_credential is not None:
+            org.galaxy_credentials.add(public_galaxy_credential)
+            logger.debug("Added default Ansible Galaxy credential to org")
+        else:
+            logger.debug("Could not find default Ansible Galaxy credential to add to org")
     return org
 
 
