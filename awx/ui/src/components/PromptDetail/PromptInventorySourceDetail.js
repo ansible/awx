@@ -29,17 +29,11 @@ function PromptInventorySourceDetail({ resource }) {
     summary_fields,
     update_cache_timeout,
     update_on_launch,
-    update_on_project_update,
     verbosity,
   } = resource;
 
   let optionsList = '';
-  if (
-    overwrite ||
-    overwrite_vars ||
-    update_on_launch ||
-    update_on_project_update
-  ) {
+  if (overwrite || overwrite_vars || update_on_launch) {
     optionsList = (
       <TextList component={TextListVariants.ul}>
         {overwrite && (
@@ -55,11 +49,6 @@ function PromptInventorySourceDetail({ resource }) {
         {update_on_launch && (
           <TextListItem component={TextListItemVariants.li}>
             {t`Update on launch`}
-          </TextListItem>
-        )}
-        {update_on_project_update && (
-          <TextListItem component={TextListItemVariants.li}>
-            {t`Update on project update`}
           </TextListItem>
         )}
       </TextList>
