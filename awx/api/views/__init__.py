@@ -358,7 +358,7 @@ class DashboardJobsGraphView(APIView):
         return Response(dashboard_data)
 
 
-class InstanceList(ListAPIView):
+class InstanceList(ListCreateAPIView):
 
     name = _("Instances")
     model = models.Instance
