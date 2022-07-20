@@ -37,15 +37,22 @@ const fetchCredentials = async (credential) => {
         results: [insightsCredentialType],
       },
     },
+    {
+      data: {
+        results: [cryptographyCredentialType],
+      },
+    },
   ] = await Promise.all([
     CredentialTypesAPI.read({ kind: 'scm' }),
     CredentialTypesAPI.read({ name: 'Insights' }),
+    CredentialTypesAPI.read({ kind: 'cryptography' }),
   ]);
 
   if (!credential) {
     return {
       scm: { typeId: scmCredentialType.id },
       insights: { typeId: insightsCredentialType.id },
+      cryptography: { typeId: cryptographyCredentialType.id },
     };
   }
 
@@ -60,6 +67,13 @@ const fetchCredentials = async (credential) => {
       value:
         credential_type_id === insightsCredentialType.id ? credential : null,
     },
+    cryptography: {
+      typeId: cryptographyCredentialType.id,
+      value:
+        credential_type_id === cryptographyCredentialType.id
+          ? credential
+          : null,
+    },
   };
 };
 
@@ -69,7 +83,9 @@ function ProjectFormFields({
   project_local_paths,
   formik,
   setCredentials,
+  setSignatureValidationCredentials,
   credentials,
+  signatureValidationCredentials,
   scmTypeOptions,
   setScmSubFormState,
   scmSubFormState,
@@ -79,6 +95,7 @@ function ProjectFormFields({
     scm_branch: '',
     scm_refspec: '',
     credential: '',
+    signature_validation_credential: '',
     scm_clean: false,
     scm_delete_on_update: false,
     scm_track_submodules: false,
@@ -86,7 +103,6 @@ function ProjectFormFields({
     allow_override: false,
     scm_update_cache_timeout: 0,
   };
-
   const { setFieldValue, setFieldTouched } = useFormikContext();
 
   const [scmTypeField, scmTypeMeta, scmTypeHelpers] = useField({
@@ -145,6 +161,19 @@ function ProjectFormFields({
       });
     },
     [credentials, setCredentials]
+  );
+
+  const handleSignatureValidationCredentialSelection = useCallback(
+    (type, value) => {
+      setSignatureValidationCredentials({
+        ...signatureValidationCredentials,
+        [type]: {
+          ...signatureValidationCredentials[type],
+          value,
+        },
+      });
+    },
+    [signatureValidationCredentials, setSignatureValidationCredentials]
   );
 
   const handleOrganizationUpdate = useCallback(
@@ -259,7 +288,13 @@ function ProjectFormFields({
                 git: (
                   <GitSubForm
                     credential={credentials.scm}
+                    signature_validation_credential={
+                      signatureValidationCredentials.cryptography
+                    }
                     onCredentialSelection={handleCredentialSelection}
+                    onSignatureValidationCredentialSelection={
+                      handleSignatureValidationCredentialSelection
+                    }
                     scmUpdateOnLaunch={formik.values.scm_update_on_launch}
                   />
                 ),
@@ -295,7 +330,6 @@ function ProjectFormFields({
     </>
   );
 }
-
 function ProjectForm({ project, submitError, ...props }) {
   const { handleCancel, handleSubmit } = props;
   const { summary_fields = {} } = project;
@@ -307,6 +341,7 @@ function ProjectForm({ project, submitError, ...props }) {
     scm_branch: '',
     scm_refspec: '',
     credential: '',
+    signature_validation_credential: '',
     scm_clean: false,
     scm_delete_on_update: false,
     scm_track_submodules: false,
@@ -318,12 +353,22 @@ function ProjectForm({ project, submitError, ...props }) {
   const [credentials, setCredentials] = useState({
     scm: { typeId: null, value: null },
     insights: { typeId: null, value: null },
+    cryptography: { typeId: null, value: null },
   });
+  const [signatureValidationCredentials, setSignatureValidationCredentials] =
+    useState({
+      scm: { typeId: null, value: null },
+      insights: { typeId: null, value: null },
+      cryptography: { typeId: null, value: null },
+    });
 
   useEffect(() => {
     async function fetchData() {
       try {
         const credentialResponse = fetchCredentials(summary_fields.credential);
+        const signatureValidationCredentialResponse = fetchCredentials(
+          summary_fields.signature_validation_credential
+        );
         const {
           data: {
             actions: {
@@ -335,6 +380,9 @@ function ProjectForm({ project, submitError, ...props }) {
         } = await ProjectsAPI.readOptions();
 
         setCredentials(await credentialResponse);
+        setSignatureValidationCredentials(
+          await signatureValidationCredentialResponse
+        );
         setScmTypeOptions(choices);
       } catch (error) {
         setContentError(error);
@@ -344,7 +392,10 @@ function ProjectForm({ project, submitError, ...props }) {
     }
 
     fetchData();
-  }, [summary_fields.credential]);
+  }, [
+    summary_fields.credential,
+    summary_fields.signature_validation_credential,
+  ]);
 
   if (isLoading) {
     return <ContentLoading />;
@@ -378,6 +429,8 @@ function ProjectForm({ project, submitError, ...props }) {
         scm_update_cache_timeout: project.scm_update_cache_timeout || 0,
         scm_update_on_launch: project.scm_update_on_launch || false,
         scm_url: project.scm_url || '',
+        signature_validation_credential:
+          project.signature_validation_credential || '',
         default_environment:
           project.summary_fields?.default_environment || null,
       }}
@@ -392,7 +445,11 @@ function ProjectForm({ project, submitError, ...props }) {
               project_local_paths={project_local_paths}
               formik={formik}
               setCredentials={setCredentials}
+              setSignatureValidationCredentials={
+                setSignatureValidationCredentials
+              }
               credentials={credentials}
+              signatureValidationCredentials={signatureValidationCredentials}
               scmTypeOptions={scmTypeOptions}
               setScmSubFormState={setScmSubFormState}
               scmSubFormState={scmSubFormState}

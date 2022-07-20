@@ -124,7 +124,6 @@ function ProjectDetail({ project }) {
       </TextList>
     );
   }
-
   const generateLastJobTooltip = (job) => (
     <>
       <div>{t`MOST RECENT SYNC`}</div>
@@ -149,6 +148,7 @@ function ProjectDetail({ project }) {
   } else if (summary_fields?.last_job) {
     job = summary_fields.last_job;
   }
+
   const getSourceControlUrlHelpText = () =>
     scm_type === 'git'
       ? projectHelpText.githubSourceControlUrl
@@ -234,6 +234,22 @@ function ProjectDetail({ project }) {
           label={t`Source Control Refspec`}
           value={scm_refspec}
         />
+        {summary_fields.signature_validation_credential && (
+          <Detail
+            label={t`Content Signature Validation Credential`}
+            helpText={projectHelpText.signatureValidation}
+            value={
+              <CredentialChip
+                key={summary_fields.signature_validation_credential.id}
+                credential={summary_fields.signature_validation_credential}
+                isReadOnly
+              />
+            }
+            isEmpty={
+              summary_fields.signature_validation_credential.length === 0
+            }
+          />
+        )}
         {summary_fields.credential && (
           <Detail
             label={t`Source Control Credential`}
@@ -244,6 +260,7 @@ function ProjectDetail({ project }) {
                 isReadOnly
               />
             }
+            isEmpty={summary_fields.credential.length === 0}
           />
         )}
         <Detail
