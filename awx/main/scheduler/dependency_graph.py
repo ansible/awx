@@ -99,8 +99,10 @@ class DependencyGraph(object):
             if job.workflow_job_template_id:
                 return self.get_item(self.WORKFLOW_JOB_TEMPLATES_JOBS, job.workflow_job_template_id)
             elif job.unified_job_template_id:
-                # Sliced jobs are WorkflowJob type but do not have a workflow_job_template_id
-                return self.get_item(self.WORKFLOW_JOB_TEMPLATES_JOBS, job.unified_job_template_id)
+                # Sliced jobs can be either Job or WorkflowJob type, and either should block a sliced WorkflowJob
+                return self.get_item(self.WORKFLOW_JOB_TEMPLATES_JOBS, job.unified_job_template_id) or self.get_item(
+                    self.JOB_TEMPLATE_JOBS, job.unified_job_template_id
+                )
         return None
 
     def system_job_blocked_by(self, job):
