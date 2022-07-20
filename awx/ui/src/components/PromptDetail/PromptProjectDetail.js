@@ -125,6 +125,21 @@ function PromptProjectDetail({ resource }) {
           }
         />
       )}
+      {summary_fields?.signature_validation_credential?.id && (
+        <Detail
+          label={t`Content Signature Validation Credential`}
+          dataCy={`${prefixCy}-content-signature-validation-credential`}
+          value={
+            <CredentialChip
+              key={resource.summary_fields.signature_validation_credential.id}
+              credential={
+                resource.summary_fields.signature_validation_credential
+              }
+              isReadOnly
+            />
+          }
+        />
+      )}
       {optionsList && (
         <Detail
           label={t`Enabled Options`}
