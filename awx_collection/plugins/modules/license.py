@@ -23,7 +23,7 @@ options:
     manifest:
       description:
         - file path to a Red Hat subscription manifest (a .zip file)
-      required: True
+      required: False
       type: str
     force:
       description:
@@ -31,6 +31,11 @@ options:
           unlicensed or trial licensed.  When force=true, the license is always applied.
       type: bool
       default: 'False'
+    pool_id:
+      description:
+        - Red Hat or Red Hat Satellite pool_id to attach to
+      required: False
+      type: str
     state:
       description:
         - Desired state of the resource.
@@ -47,6 +52,10 @@ EXAMPLES = '''
   license:
     manifest: "/tmp/my_manifest.zip"
 
+- name: Attach to a pool
+  license:
+    pool_id: 123456
+
 - name: Remove license
   license:
     state: absent
@@ -61,12 +70,14 @@ def main():
     module = ControllerAPIModule(
         argument_spec=dict(
             manifest=dict(type='str', required=False),
+            pool_id=dict(type='str', required=False),
             force=dict(type='bool', default=False),
             state=dict(choices=['present', 'absent'], default='present'),
         ),
         required_if=[
-            ['state', 'present', ['manifest']],
+            ['state', 'present', ['manifest', 'pool_id'], True],
         ],
+        mutually_exclusive=[("manifest", "pool_id")],
     )
 
     json_output = {'changed': False}
@@ -77,11 +88,12 @@ def main():
         module.delete_endpoint('config')
         module.exit_json(**json_output)
 
-    try:
-        with open(module.params.get('manifest'), 'rb') as fid:
-            manifest = base64.b64encode(fid.read())
-    except OSError as e:
-        module.fail_json(msg=str(e))
+    if module.params.get('manifest', None):
+        try:
+            with open(module.params.get('manifest'), 'rb') as fid:
+                manifest = base64.b64encode(fid.read())
+        except OSError as e:
+            module.fail_json(msg=str(e))
 
     # Check if Tower is already licensed
     config = module.get_endpoint('config')['json']
@@ -104,7 +116,10 @@ def main():
     # Do the actual install, if we need to
     if perform_install:
         json_output['changed'] = True
-        module.post_endpoint('config', data={'manifest': manifest.decode()})
+        if module.params.get('manifest', None):
+            module.post_endpoint('config', data={'manifest': manifest.decode()})
+        else:
+            module.post_endpoint('config/attach', data={'pool_id': module.params.get('pool_id')})
 
     module.exit_json(**json_output)
 

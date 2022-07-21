@@ -41,6 +41,7 @@ no_endpoint_for_module = [
     'workflow_template',
     'ad_hoc_command_wait',
     'ad_hoc_command_cancel',
+    'subscriptions',  # Subscription deals with config/subscriptions
 ]
 
 # Global module parameters we can ignore
