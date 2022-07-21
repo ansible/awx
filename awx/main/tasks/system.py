@@ -54,6 +54,8 @@ from awx.main.utils.common import (
     ignore_inventory_computed_fields,
     ignore_inventory_group_removal,
     ScheduleWorkflowManager,
+    ScheduleTaskManager,
+    ScheduleDependencyManager,
 )
 
 from awx.main.utils.external_logging import reconfigure_rsyslog
@@ -657,6 +659,13 @@ def awx_periodic_scheduler():
         state.save()
 
 
+def schedule_manager_success_or_error(instance):
+    if instance.unifiedjob_blocked_jobs.exists():
+        ScheduleTaskManager().schedule()
+    if instance.spawned_by_workflow:
+        ScheduleWorkflowManager().schedule()
+
+
 @task(queue=get_local_queuename)
 def handle_work_success(task_actual):
     try:
@@ -666,8 +675,7 @@ def handle_work_success(task_actual):
         return
     if not instance:
         return
-
-    ScheduleWorkflowManager().schedule()
+    schedule_manager_success_or_error(instance)
 
 
 @task(queue=get_local_queuename)
@@ -709,8 +717,7 @@ def handle_work_error(task_id, *args, **kwargs):
     # what the job complete message handler does then we may want to send a
     # completion event for each job here.
     if first_instance:
-        ScheduleWorkflowManager().schedule()
-        pass
+        schedule_manager_success_or_error(first_instance)
 
 
 @task(queue=get_local_queuename)
