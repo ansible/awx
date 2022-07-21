@@ -430,8 +430,9 @@ class DependencyManager(TaskBase):
         return created_dependencies
 
     def process_tasks(self):
-        self.generate_dependencies(self.all_tasks)
-        self.subsystem_metrics.inc(f"{self.prefix}_pending_processed", len(self.all_tasks))
+        deps = self.generate_dependencies(self.all_tasks)
+        self.generate_dependencies(deps)
+        self.subsystem_metrics.inc(f"{self.prefix}_pending_processed", len(self.all_tasks) + len(deps))
 
     @timeit
     def _schedule(self):
@@ -572,6 +573,8 @@ class TaskManager(TaskBase):
     @timeit
     def process_running_tasks(self, running_tasks):
         for task in running_tasks:
+            if type(task) is WorkflowJob:
+                ScheduleWorkflowManager().schedule()
             self.dependency_graph.add_job(task)
 
     @timeit
