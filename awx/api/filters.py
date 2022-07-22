@@ -232,6 +232,9 @@ class FieldLookupBackend(BaseFilterBackend):
                 re.compile(value)
             except re.error as e:
                 raise ValueError(e.args[0])
+        elif new_lookup.endswith('__iexact'):
+            if not isinstance(field, (CharField, TextField)):
+                raise ValueError(f'{field.name} is not a text field and cannot be filtered by case-insensitive search')
         elif new_lookup.endswith('__search'):
             related_model = getattr(field, 'related_model', None)
             if not related_model:
@@ -258,8 +261,8 @@ class FieldLookupBackend(BaseFilterBackend):
             search_filters = {}
             needs_distinct = False
             # Can only have two values: 'AND', 'OR'
-            # If 'AND' is used, an iterm must satisfy all condition to show up in the results.
-            # If 'OR' is used, an item just need to satisfy one condition to appear in results.
+            # If 'AND' is used, an item must satisfy all conditions to show up in the results.
+            # If 'OR' is used, an item just needs to satisfy one condition to appear in results.
             search_filter_relation = 'OR'
             for key, values in request.query_params.lists():
                 if key in self.RESERVED_NAMES:
