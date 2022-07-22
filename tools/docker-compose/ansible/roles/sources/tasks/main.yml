@@ -56,9 +56,9 @@
     path: "{{ playbook_dir }}/../../../awx/settings/local_settings.py"
     state: absent
 
-- name: Copy local_settings.py
-  copy:
-    src: "local_settings.py"
+- name: Template local_settings.py
+  template:
+    src: "local_settings.py.j2"
     dest: "{{ sources_dest }}/local_settings.py"
 
 - name: Get OS info for sdb
