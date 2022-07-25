@@ -46,6 +46,7 @@ from awx.main.utils.common import (
     parse_yaml_or_json,
     getattr_dne,
     ScheduleDependencyManager,
+    ScheduleTaskManager,
     get_event_partition_epoch,
     get_capacity_type,
 )
@@ -1375,7 +1376,10 @@ class UnifiedJob(
         self.update_fields(start_args=json.dumps(kwargs), status='pending')
         self.websocket_emit_status("pending")
 
-        ScheduleDependencyManager().schedule()
+        if self.dependencies_processed:
+            ScheduleTaskManager().schedule()
+        else:
+            ScheduleDependencyManager().schedule()
 
         # Each type of unified job has a different Task class; get the
         # appropirate one.
