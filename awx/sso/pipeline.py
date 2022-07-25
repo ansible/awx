@@ -77,6 +77,21 @@ def _update_m2m_from_expression(user, related, expr, remove=True):
         related.remove(user)
 
 
+def get_or_create_with_default_galaxy_cred(**kwargs):
+    from awx.main.models import Organization, Credential
+
+    (org, org_created) = Organization.objects.get_or_create(**kwargs)
+    if org_created:
+        logger.debug("Created org {} (id {}) from {}".format(org.name, org.id, kwargs))
+        public_galaxy_credential = Credential.objects.filter(managed=True, name='Ansible Galaxy').first()
+        if public_galaxy_credential is not None:
+            org.galaxy_credentials.add(public_galaxy_credential)
+            logger.debug("Added default Ansible Galaxy credential to org")
+        else:
+            logger.debug("Could not find default Ansible Galaxy credential to add to org")
+    return org
+
+
 def _update_org_from_attr(user, related, attr, remove, remove_admins, remove_auditors, backend):
     from awx.main.models import Organization
     from django.conf import settings
@@ -94,8 +109,7 @@ def _update_org_from_attr(user, related, attr, remove, remove_admins, remove_aud
                         organization_name = org_name
                 except Exception:
                     organization_name = org_name
-                org = Organization.objects.get_or_create(name=organization_name)[0]
-                org.create_default_galaxy_credential()
+                org = get_or_create_with_default_galaxy_cred(name=organization_name)
             else:
                 org = Organization.objects.get(name=org_name)
         except ObjectDoesNotExist:
@@ -121,7 +135,6 @@ def update_user_orgs(backend, details, user=None, *args, **kwargs):
     """
     if not user:
         return
-    from awx.main.models import Organization
 
     org_map = backend.setting('ORGANIZATION_MAP') or {}
     for org_name, org_opts in org_map.items():
@@ -130,8 +143,7 @@ def update_user_orgs(backend, details, user=None, *args, **kwargs):
             organization_name = organization_alias
         else:
             organization_name = org_name
-        org = Organization.objects.get_or_create(name=organization_name)[0]
-        org.create_default_galaxy_credential()
+        org = get_or_create_with_default_galaxy_cred(name=organization_name)
 
         # Update org admins from expression(s).
         remove = bool(org_opts.get('remove', True))
@@ -152,15 +164,14 @@ def update_user_teams(backend, details, user=None, *args, **kwargs):
     """
     if not user:
         return
-    from awx.main.models import Organization, Team
+    from awx.main.models import Team
 
     team_map = backend.setting('TEAM_MAP') or {}
     for team_name, team_opts in team_map.items():
         # Get or create the org to update.
         if 'organization' not in team_opts:
             continue
-        org = Organization.objects.get_or_create(name=team_opts['organization'])[0]
-        org.create_default_galaxy_credential()
+        org = get_or_create_with_default_galaxy_cred(name=team_opts['organization'])
 
         # Update team members from expression(s).
         team = Team.objects.get_or_create(name=team_name, organization=org)[0]
@@ -216,8 +227,7 @@ def update_user_teams_by_saml_attr(backend, details, user=None, *args, **kwargs)
 
             try:
                 if settings.SAML_AUTO_CREATE_OBJECTS:
-                    org = Organization.objects.get_or_create(name=organization_name)[0]
-                    org.create_default_galaxy_credential()
+                    org = get_or_create_with_default_galaxy_cred(name=organization_name)
                 else:
                     org = Organization.objects.get(name=organization_name)
             except ObjectDoesNotExist:
