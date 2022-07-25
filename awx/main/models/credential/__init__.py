@@ -1171,6 +1171,25 @@ ManagedCredentialType(
     },
 )
 
+ManagedCredentialType(
+    namespace='gpg_public_key',
+    kind='cryptography',
+    name=gettext_noop('GPG Public Key'),
+    inputs={
+        'fields': [
+            {
+                'id': 'gpg_public_key',
+                'label': gettext_noop('GPG Public Key'),
+                'type': 'string',
+                'secret': True,
+                'multiline': True,
+                'help_text': gettext_noop('GPG Public Key used to validate content signatures.'),
+            },
+        ],
+        'required': ['gpg_public_key'],
+    },
+)
+
 
 class CredentialInputSource(PrimordialModel):
     class Meta:
