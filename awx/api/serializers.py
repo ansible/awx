@@ -1473,6 +1473,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             'default_environment',
             'signature_validation',
             'signature_validation_credential',
+            'signature_validation_result',
         ) + (
             'last_update_failed',
             'last_updated',
@@ -1588,7 +1589,7 @@ class ProjectUpdateViewSerializer(ProjectSerializer):
 class ProjectUpdateSerializer(UnifiedJobSerializer, ProjectOptionsSerializer):
     class Meta:
         model = ProjectUpdate
-        fields = ('*', 'project', 'job_type', 'job_tags', '-controller_node')
+        fields = ('*', 'project', 'job_type', 'job_tags', '-controller_node', 'signature_validation_result',)
 
     def get_related(self, obj):
         res = super(ProjectUpdateSerializer, self).get_related(obj)
@@ -3036,6 +3037,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             'webhook_service',
             'webhook_credential',
             'webhook_guid',
+            'signature_validation_result',
         )
 
     def get_related(self, obj):
