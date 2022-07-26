@@ -413,6 +413,9 @@ class BaseTask(object):
         """
         instance.log_lifecycle("pre_run")
 
+        # Before task is started, ensure that job_event partitions exist
+        create_partition(instance.event_class._meta.db_table, start=instance.created)
+
     def post_run_hook(self, instance, status):
         """
         Hook for any steps to run before job/task is marked as complete.
