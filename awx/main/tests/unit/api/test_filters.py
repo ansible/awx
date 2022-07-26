@@ -79,6 +79,19 @@ def test_invalid_field():
     assert 'is not an allowed field name. Must be ascii encodable.' in str(excinfo.value)
 
 
+def test_valid_iexact():
+    field_lookup = FieldLookupBackend()
+    value, new_lookup, _ = field_lookup.value_to_python(JobTemplate, 'project__name__iexact', 'foo')
+    assert 'foo' in value
+
+
+def test_invalid_iexact():
+    field_lookup = FieldLookupBackend()
+    with pytest.raises(ValueError) as excinfo:
+        field_lookup.value_to_python(Job, 'id__iexact', '1')
+    assert 'is not a text field and cannot be filtered by case-insensitive search' in str(excinfo.value)
+
+
 @pytest.mark.parametrize('lookup_suffix', ['', 'contains', 'startswith', 'in'])
 @pytest.mark.parametrize('password_field', Credential.PASSWORD_FIELDS)
 def test_filter_on_password_field(password_field, lookup_suffix):
