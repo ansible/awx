@@ -298,6 +298,13 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         default=None,
         on_delete=models.SET_NULL,
     )
+    # credential validation results 
+    signature_validation_result = JSONBlob(
+        blank=True,
+        default=None,
+        null=True,
+        editable=False,
+    )
 
     scm_revision = models.CharField(
         max_length=1024,
