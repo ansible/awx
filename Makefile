@@ -585,3 +585,7 @@ messages:
 
 print-%:
 	@echo $($*)
+
+check-pr-body:
+	ansible-playbook -i localhost tools/ansible/check_pr.yml -eurl=${URL}
+

@@ -18,27 +18,30 @@ jobs:
           - name: api-test
             command: /start_tests.sh
             label: Run API Tests
-          - name: api-lint
-            command: /var/lib/awx/venv/awx/bin/tox -e linters
-            label: Run API Linters
-          - name: api-swagger
-            command: /start_tests.sh swagger
-            label: Generate API Reference
-          - name: awx-collection
-            command: /start_tests.sh test_collection_all
-            label: Run Collection Tests
-          - name: api-schema
-            label: Check API Schema
-            command: /start_tests.sh detect-schema-change SCHEMA_DIFF_BASE_BRANCH=${{ github.event.pull_request.base.ref }}
-          - name: ui-lint
-            label: Run UI Linters
-            command: make ui-lint
-          - name: ui-test-screens
-            label: Run UI Screens Tests
-            command: make ui-test-screens
-          - name: ui-test-general
-            label: Run UI General Tests
-            command: make ui-test-general
+#          - name: api-lint
+#            command: /var/lib/awx/venv/awx/bin/tox -e linters
+#            label: Run API Linters
+#          - name: api-swagger
+#            command: /start_tests.sh swagger
+#            label: Generate API Reference
+#          - name: awx-collection
+#            command: /start_tests.sh test_collection_all
+#            label: Run Collection Tests
+#          - name: api-schema
+#            label: Check API Schema
+#            command: /start_tests.sh detect-schema-change SCHEMA_DIFF_BASE_BRANCH=${{ github.event.pull_request.base.ref }}
+#          - name: ui-lint
+#            label: Run UI Linters
+#            command: make ui-lint
+#          - name: ui-test-screens
+#            label: Run UI Screens Tests
+#            command: make ui-test-screens
+#          - name: ui-test-general
+#            label: Run UI General Tests
+#            command: make ui-test-general
+#          - name: validate-pr-body
+#            label: Validate PR Body
+#            command: /start_tests.sh check-pr-body URL=${{ github.event.pull_request.url }}
     steps:
       - uses: actions/checkout@v2
 
@@ -97,41 +100,41 @@ jobs:
           export COMPOSE_TAG=${{ env.BRANCH }}
           ansible-playbook tools/docker-compose/ansible/smoke-test.yml -e repo_dir=$(pwd) -v
 
-  awx-operator:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout awx
-        uses: actions/checkout@v2
-        with:
-          path: awx
-
-      - name: Checkout awx-operator
-        uses: actions/checkout@v2
-        with:
-          repository: ansible/awx-operator
-          path: awx-operator
-
-      - name: Install playbook dependencies
-        run: |
-          python3 -m pip install docker setuptools_scm
-
-      - name: Build AWX image
-        working-directory: awx
-        run: |
-          ansible-playbook -v tools/ansible/build.yml \
-            -e headless=yes \
-            -e awx_image=awx \
-            -e awx_image_tag=ci \
-            -e ansible_python_interpreter=$(which python3)
-
-      - name: Run test deployment with awx-operator
-        working-directory: awx-operator
-        run: |
-          python3 -m pip install -r molecule/requirements.txt
-          ansible-galaxy collection install -r molecule/requirements.yml
-          sudo rm -f $(which kustomize)
-          make kustomize
-          KUSTOMIZE_PATH=$(readlink -f bin/kustomize) molecule -v test -s kind
-        env:
-          AWX_TEST_IMAGE: awx
-          AWX_TEST_VERSION: ci
+#  awx-operator:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout awx
+#        uses: actions/checkout@v2
+#        with:
+#          path: awx
+#
+#      - name: Checkout awx-operator
+#        uses: actions/checkout@v2
+#        with:
+#          repository: ansible/awx-operator
+#          path: awx-operator
+#
+#      - name: Install playbook dependencies
+#        run: |
+#          python3 -m pip install docker setuptools_scm
+#
+#      - name: Build AWX image
+#        working-directory: awx
+#        run: |
+#          ansible-playbook -v tools/ansible/build.yml \
+#            -e headless=yes \
+#            -e awx_image=awx \
+#            -e awx_image_tag=ci \
+#            -e ansible_python_interpreter=$(which python3)
+#
+#      - name: Run test deployment with awx-operator
+#        working-directory: awx-operator
+#        run: |
+#          python3 -m pip install -r molecule/requirements.txt
+#          ansible-galaxy collection install -r molecule/requirements.yml
+#          sudo rm -f $(which kustomize)
+#          make kustomize
+#          KUSTOMIZE_PATH=$(readlink -f bin/kustomize) molecule -v test -s kind
+#        env:
+#          AWX_TEST_IMAGE: awx
+#          AWX_TEST_VERSION: ci

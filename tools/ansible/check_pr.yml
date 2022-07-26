@@ -1,0 +1,46 @@
+---
+- name: Check an AWX PR
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars:
+    change_strings:
+      - Breaking Change
+      - New or Enhanced Feature
+      - Bug or Docs Fix
+    is_x: True
+    is_y: True
+    is_z: True
+  tasks:
+    - name: Fail if URL is not provided
+      fail:
+        msg: "The URL to the PR must be passed into this playbook"
+      when: "url is not defined or url == ''"
+
+    - name: Get the PR information
+      uri:
+        url: https://api.github.com/repos/john-westcott-iv/awx/pulls/28
+      register: pr_info
+
+    - debug:
+        msg: "{{ pr_info['json']['body'] | split('\n') }}"
+
+    - name: Check PR body for strings
+      set_fact:
+        checks: "{{ [ (is_x | ternary('yes', 'no')), (is_y | ternary('yes', 'no')), (is_z | ternary('yes', 'no')) ] }}"
+      vars:
+        body: "{{ pr_info['json']['body'] }}"
+        is_x: "{{ change_strings[0] in body }}"
+        is_y: "{{ change_strings[1] in body }}"
+        is_z: "{{ change_strings[2] in body }}"
+
+    - debug:
+        msg:
+          - "{{ counts }}"
+          - "{{ counts.get('yes', 0) }}"
+      vars:
+        counts: "{{ checks | community.general.counter }}"
+
+    - fail:
+        msg: "The PR body must have exactly one of {{ change_strings | join(', ') }}"
+      when: (checks | community.general.counter).get('yes', 0) != 1

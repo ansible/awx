@@ -1,0 +1,19 @@
+---
+name: PR Check
+env:
+  BRANCH: ${{ github.base_ref || 'devel' }}
+on:
+  pull_request:
+jobs:
+  pr-check:
+    name: Check PR for X,Y,Z properties
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Write PR body to a file
+        run: echo ${{ github.event.pull_request.body }} >> pr.body
+
+      - name: Check for exactly one item
+        run: if [ $(grep -E "Bug or Docs Fix|New or Enhanced Feature|Breaking Change" pr.body | wc -l) != 1 ] ; then exit 255; else exit 0; filogout
