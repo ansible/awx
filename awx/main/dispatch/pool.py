@@ -16,6 +16,7 @@ from queue import Full as QueueFull, Empty as QueueEmpty
 from django.conf import settings
 from django.db import connection as django_connection, connections
 from django.core.cache import cache as django_cache
+from django.utils.timezone import now as tz_now
 from django_guid import set_guid
 from jinja2 import Template
 import psutil
@@ -437,18 +438,17 @@ class AutoscalePool(WorkerPool):
             idx = random.choice(range(len(self.workers)))
             self.write(idx, m)
 
-        # if the database says a job is running or queued on this node, but it's *not*,
-        # then reap it
-        running_uuids = []
-        for worker in self.workers:
-            worker.calculate_managed_tasks()
-            running_uuids.extend(list(worker.managed_tasks.keys()))
-
-        # if we are not in the dangerous situation of queue backup then clear old waiting jobs
-        if self.workers and max(len(w.managed_tasks) for w in self.workers) <= 1:
-            reaper.reap_waiting(excluded_uuids=running_uuids)
-
-        reaper.reap(excluded_uuids=running_uuids)
+    def add_bind_kwargs(self, body):
+        bind_kwargs = body.pop('bind_kwargs', [])
+        body.setdefault('kwargs', {})
+        if 'dispatch_time' in bind_kwargs:
+            body['kwargs']['dispatch_time'] = tz_now().isoformat()
+        if 'active_task_ids' in bind_kwargs:
+            active_task_ids = []
+            for worker in self.workers:
+                worker.calculate_managed_tasks()
+                active_task_ids.extend(list(worker.managed_tasks.keys()))
+            body['kwargs']['active_task_ids'] = active_task_ids
 
     def up(self):
         if self.full:
@@ -463,9 +463,8 @@ class AutoscalePool(WorkerPool):
         if 'guid' in body:
             set_guid(body['guid'])
         try:
-            # when the cluster heartbeat occurs, clean up internally
-            if isinstance(body, dict) and 'cluster_node_heartbeat' in body['task']:
-                self.cleanup()
+            if isinstance(body, dict) and body.get('bind_kwargs'):
+                self.add_bind_kwargs(body)
             if self.should_grow:
                 self.up()
             # we don't care about "preferred queue" round robin distribution, just

@@ -55,7 +55,7 @@ def reap_job(j, status, job_explanation=None):
     logger.error(f'{j.log_format} is no longer {status_before}; reaping')
 
 
-def reap_waiting(instance=None, status='failed', job_explanation=None, grace_period=None, excluded_uuids=None):
+def reap_waiting(instance=None, status='failed', job_explanation=None, grace_period=None, excluded_uuids=None, ref_time=None):
     """
     Reap all jobs in waiting for this instance.
     """
@@ -69,8 +69,9 @@ def reap_waiting(instance=None, status='failed', job_explanation=None, grace_per
         except RuntimeError as e:
             logger.warning(f'Local instance is not registered, not running reaper: {e}')
             return
-    now = tz_now()
-    jobs = UnifiedJob.objects.filter(status='waiting', modified__lte=now - timedelta(seconds=grace_period), controller_node=me.hostname)
+    if ref_time is None:
+        ref_time = tz_now()
+    jobs = UnifiedJob.objects.filter(status='waiting', modified__lte=ref_time - timedelta(seconds=grace_period), controller_node=me.hostname)
     if excluded_uuids:
         jobs = jobs.exclude(celery_task_id__in=excluded_uuids)
     for j in jobs:

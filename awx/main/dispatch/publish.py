@@ -50,13 +50,21 @@ class task:
     @task(queue='tower_broadcast')
     def announce():
         print("Run this everywhere!")
+
+    # The special parameter bind_kwargs tells the main dispatcher process to add certain kwargs
+
+    @task(bind_kwargs=['dispatch_time'])
+    def print_time(dispatch_time=None):
+        print(f"Time I was dispatched: {dispatch_time}")
     """
 
-    def __init__(self, queue=None):
+    def __init__(self, queue=None, bind_kwargs=None):
         self.queue = queue
+        self.bind_kwargs = bind_kwargs
 
     def __call__(self, fn=None):
         queue = self.queue
+        bind_kwargs = self.bind_kwargs
 
         class PublisherMixin(object):
 
@@ -80,6 +88,8 @@ class task:
                 guid = get_guid()
                 if guid:
                     obj['guid'] = guid
+                if bind_kwargs:
+                    obj['bind_kwargs'] = bind_kwargs
                 obj.update(**kw)
                 if callable(queue):
                     queue = queue()
