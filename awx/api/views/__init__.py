@@ -440,6 +440,7 @@ class InstanceHealthCheck(GenericAPIView):
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
 
+        # Note: hop nodes are already excluded by the get_queryset method
         if obj.node_type == 'execution':
             from awx.main.tasks.system import execution_node_health_check
 
