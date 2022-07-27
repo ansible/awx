@@ -242,15 +242,18 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         return self.last_seen < ref_time - timedelta(seconds=grace_period)
 
     def mark_offline(self, update_last_seen=False, perform_save=True, errors=''):
-        if self.cpu_capacity == 0 and self.mem_capacity == 0 and self.capacity == 0 and self.errors == errors and (not update_last_seen):
+        if self.node_state not in (Instance.States.READY, Instance.States.UNAVAILABLE, Instance.States.INSTALLED):
             return
+        if self.node_state == Instance.States.UNAVAILABLE and self.errors == errors and (not update_last_seen):
+            return
+        self.node_state = Instance.States.UNAVAILABLE
         self.cpu_capacity = self.mem_capacity = self.capacity = 0
         self.errors = errors
         if update_last_seen:
             self.last_seen = now()
 
         if perform_save:
-            update_fields = ['capacity', 'cpu_capacity', 'mem_capacity', 'errors']
+            update_fields = ['node_state', 'capacity', 'cpu_capacity', 'mem_capacity', 'errors']
             if update_last_seen:
                 update_fields += ['last_seen']
             self.save(update_fields=update_fields)
@@ -307,6 +310,9 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         if not errors:
             self.refresh_capacity_fields()
             self.errors = ''
+            if self.node_state in (Instance.States.UNAVAILABLE, Instance.States.INSTALLED):
+                self.node_state = Instance.States.READY
+                update_fields.append('node_state')
         else:
             self.mark_offline(perform_save=False, errors=errors)
         update_fields.extend(['cpu_capacity', 'mem_capacity', 'capacity'])
@@ -325,7 +331,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
             # playbook event data; we should consider this a zero capacity event
             redis.Redis.from_url(settings.BROKER_URL).ping()
         except redis.ConnectionError:
-            errors = _('Failed to connect ot Redis')
+            errors = _('Failed to connect to Redis')
 
         self.save_health_data(awx_application_version, get_cpu_count(), get_mem_in_bytes(), update_last_seen=True, errors=errors)
 
