@@ -4,6 +4,7 @@ import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import {
   Button,
+  Chip,
   ClipboardCopy,
   TextList,
   TextListItem,
@@ -15,6 +16,7 @@ import { Project } from 'types';
 import { Config, useConfig } from 'contexts/Config';
 import AlertModal from 'components/AlertModal';
 import { CardBody, CardActionsRow } from 'components/Card';
+import ChipGroup from 'components/ChipGroup';
 import DeleteButton from 'components/DeleteButton';
 import { DetailList, Detail, UserDateDetail } from 'components/DetailList';
 import ErrorDetail from 'components/ErrorDetail';
@@ -124,7 +126,6 @@ function ProjectDetail({ project }) {
       </TextList>
     );
   }
-
   const generateLastJobTooltip = (job) => (
     <>
       <div>{t`MOST RECENT SYNC`}</div>
@@ -149,6 +150,7 @@ function ProjectDetail({ project }) {
   } else if (summary_fields?.last_job) {
     job = summary_fields.last_job;
   }
+
   const getSourceControlUrlHelpText = () =>
     scm_type === 'git'
       ? projectHelpText.githubSourceControlUrl
@@ -244,6 +246,21 @@ function ProjectDetail({ project }) {
                 isReadOnly
               />
             }
+            isEmpty={summary_fields.credential.length === 0}
+          />
+        )}
+        {summary_fields.signature_validation_credential && (
+          <Detail
+            label={t`Content Signature Validation Credential`}
+            helpText={projectHelpText.signatureValidation}
+            value={
+              <CredentialChip
+                key={summary_fields.signature_validation_credential.id}
+                credential={summary_fields.signature_validation_credential}
+                isReadOnly
+              />
+            }
+            isEmpty={summary_fields.signature_validation_credential.length === 0}
           />
         )}
         <Detail

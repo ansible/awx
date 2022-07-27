@@ -80,6 +80,18 @@ describe('<ProjectForm />', () => {
     },
   };
 
+  const cryptographyCredentialResolve = {
+    data: {
+      results: [
+        {
+          id: 6,
+          name: 'GPG Public Key',
+          kind: 'cryptography',
+        },
+      ],
+    },
+  };
+
   beforeEach(async () => {
     RootAPI.readAssetVariables.mockResolvedValue({
       data: {
@@ -94,6 +106,9 @@ describe('<ProjectForm />', () => {
     );
     await CredentialTypesAPI.read.mockImplementationOnce(
       () => insightsCredentialResolve
+    );
+    await CredentialTypesAPI.read.mockImplementationOnce(
+      () => cryptographyCredentialResolve
     );
   });
 
@@ -155,6 +170,10 @@ describe('<ProjectForm />', () => {
     ).toBe(1);
     expect(
       wrapper.find('FormGroup[label="Source Control Credential"]').length
+    ).toBe(1);
+    expect(
+      wrapper.find('FormGroup[label="Content Signature Validation Credential"]')
+        .length
     ).toBe(1);
     expect(wrapper.find('FormGroup[label="Options"]').length).toBe(1);
   });
