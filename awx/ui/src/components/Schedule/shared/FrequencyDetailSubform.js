@@ -68,7 +68,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
     name: `${prefix}.daysOfWeek`,
     validate: (val) => {
       if (frequency === 'week') {
-        return required(t`Select a value for this field`)(val.length > 0);
+        return required(t`Select a value for this field`)(val?.length > 0);
       }
       return undefined;
     },
@@ -155,7 +155,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
   ];
 
   const updateDaysOfWeek = (day, checked) => {
-    const newDaysOfWeek = [...daysOfWeek.value];
+    const newDaysOfWeek = daysOfWeek.value ? [...daysOfWeek.value] : [];
     daysOfWeekHelpers.setTouched(true);
     if (checked) {
       newDaysOfWeek.push(day);
