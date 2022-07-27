@@ -199,10 +199,7 @@ class TestAutoScaling:
         assert len(self.pool) == 10
 
         # cleanup should scale down to 8 workers
-        with mock.patch('awx.main.dispatch.reaper.reap') as reap:
-            with mock.patch('awx.main.dispatch.reaper.reap_waiting') as reap:
-                self.pool.cleanup()
-        reap.assert_called()
+        self.pool.cleanup()
         assert len(self.pool) == 2
 
     def test_max_scale_up(self):
@@ -250,10 +247,7 @@ class TestAutoScaling:
         time.sleep(1)  # wait a moment for sigterm
 
         # clean up and the dead worker
-        with mock.patch('awx.main.dispatch.reaper.reap') as reap:
-            with mock.patch('awx.main.dispatch.reaper.reap_waiting') as reap:
-                self.pool.cleanup()
-        reap.assert_called()
+        self.pool.cleanup()
         assert len(self.pool) == 1
         assert self.pool.workers[0].pid == alive_pid
 
