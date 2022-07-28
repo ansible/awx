@@ -11,7 +11,7 @@ the change does.
 <!--- Pick one below and delete the rest: -->
  - Breaking Change 
  - New or Enhanced Feature
- - Bug or Docs Fix
+ - Bug, Docs Fix or other nominal change
 
 ##### COMPONENT NAME
 <!--- Name of the module/plugin/module/task -->
