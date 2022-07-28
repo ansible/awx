@@ -1596,7 +1596,6 @@ class ProjectUpdateSerializer(UnifiedJobSerializer, ProjectOptionsSerializer):
             'job_type',
             'job_tags',
             '-controller_node',
-            'signature_validation_result',
         )
 
     def get_related(self, obj):
@@ -3045,7 +3044,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             'webhook_service',
             'webhook_credential',
             'webhook_guid',
-            'signature_validation_result',
+            'validation_result',
         )
 
     def get_related(self, obj):
