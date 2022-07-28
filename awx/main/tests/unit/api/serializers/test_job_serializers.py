@@ -1,5 +1,3 @@
-# Revert this later
-
 # Python
 import pytest
 from unittest import mock
