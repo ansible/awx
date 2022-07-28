@@ -367,6 +367,9 @@ class InstanceList(ListCreateAPIView):
     search_fields = ('hostname',)
     ordering = ('id',)
 
+    def perform_create(self, serializer):
+        serializer.save(node_state=models.Instance.States.INSTALLED)
+
 
 class InstanceDetail(RetrieveUpdateAPIView):
 

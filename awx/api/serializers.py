@@ -4877,40 +4877,40 @@ class InstanceSerializer(BaseSerializer):
     percent_capacity_remaining = serializers.SerializerMethodField()
     jobs_running = serializers.IntegerField(help_text=_('Count of jobs in the running or waiting state that are targeted for this instance'), read_only=True)
     jobs_total = serializers.IntegerField(help_text=_('Count of all jobs that target this instance'), read_only=True)
-    ip_address = serializers.IPAddressField(required=False)
 
     class Meta:
         model = Instance
-        read_only_fields = ('uuid', 'version')
+        read_only_fields = ('ip_address', 'uuid', 'version', 'node_state')
         fields = (
-            "id",
-            "type",
-            "url",
-            "related",
-            "summary_fields",
-            "uuid",
-            "hostname",
-            "created",
-            "modified",
-            "last_seen",
-            "last_health_check",
-            "errors",
+            'id',
+            'type',
+            'url',
+            'related',
+            'summary_fields',
+            'uuid',
+            'hostname',
+            'created',
+            'modified',
+            'last_seen',
+            'last_health_check',
+            'errors',
             'capacity_adjustment',
-            "version",
-            "capacity",
-            "consumed_capacity",
-            "percent_capacity_remaining",
-            "jobs_running",
-            "jobs_total",
-            "cpu",
-            "memory",
-            "cpu_capacity",
-            "mem_capacity",
-            "enabled",
-            "managed_by_policy",
-            "node_type",
-            "node_state",
-            "ip_address",
+            'version',
+            'capacity',
+            'consumed_capacity',
+            'percent_capacity_remaining',
+            'jobs_running',
+            'jobs_total',
+            'cpu',
+            'memory',
+            'cpu_capacity',
+            'mem_capacity',
+            'enabled',
+            'managed_by_policy',
+            'node_type',
+            'node_state',
+            'ip_address',
+            'listener_port',
         )
 
     def get_related(self, obj):
@@ -4940,30 +4940,20 @@ class InstanceSerializer(BaseSerializer):
         else:
             return float("{0:.2f}".format(((float(obj.capacity) - float(obj.consumed_capacity)) / (float(obj.capacity))) * 100))
 
+    def validate(self, data):
+        if not self.instance and not settings.IS_K8S:
+            raise serializers.ValidationError("Can only create instances on Kubernetes or OpenShift.")
+        return data
+
     def validate_node_type(self, value):
-        # ensure that new node type is execution node-only
         if not self.instance:
             if value not in [Instance.Types.EXECUTION, Instance.Types.HOP]:
-                raise serializers.ValidationError('invalid node_type; can only create execution and hop nodes')
+                raise serializers.ValidationError("Can only create execution and hop nodes.")
         else:
             if self.instance.node_type != value:
-                raise serializers.ValidationError('cannot change node_type')
+                raise serializers.ValidationError("Cannot change node type.")
 
-    def validate_node_state(self, value):
-        if not self.instance:
-            if value not in [Instance.States.PROVISIONING, Instance.States.INSTALLED]:
-                raise serializers.ValidationError('net new execution node creation must be in installed or provisioning node_state')
-        else:
-            if self.instance.node_state != value and value not in [Instance.States.PROVISIONING, Instance.States.INSTALLED, Instance.States.DEPROVISIONING]:
-                raise serializers.ValidationError('modifying an existing instance can only be in provisioning or deprovisoning node_states')
-
-    def validate_peers(self, value):
-        pass
-        # 1- dont wanna remove links between two control plane nodes
-        # 2- can of worms - reversing links
-
-    def validate_instance_group(self, value):
-        pass
+        return value
 
 
 class InstanceHealthCheckSerializer(BaseSerializer):
