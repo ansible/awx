@@ -438,69 +438,92 @@ class TestSAMLAttr:
 @pytest.mark.django_db
 class TestSAMLUserFlags:
     @pytest.mark.parametrize(
-        "user_flags_settings, expected",
+        "user_flags_settings, expected, is_superuser",
         [
             # In this case we will pass no user flags so new_flag should be false and changed will def be false
             (
                 {},
                 (False, False),
+                False,
             ),
             # In this case we will give the user a group to make them an admin
             (
                 {'is_superuser_role': 'test-role-1'},
                 (True, True),
+                False,
             ),
             # In this case we will give the user a flag that will make then an admin
             (
                 {'is_superuser_attr': 'is_superuser'},
                 (True, True),
+                False,
             ),
             # In this case we will give the user a flag but the wrong value
             (
                 {'is_superuser_attr': 'is_superuser', 'is_superuser_value': 'junk'},
                 (False, False),
+                False,
             ),
             # In this case we will give the user a flag and the right value
             (
                 {'is_superuser_attr': 'is_superuser', 'is_superuser_value': 'true'},
                 (True, True),
+                False,
             ),
             # In this case we will give the user a proper role and an is_superuser_attr role that they dont have, this should make them an admin
             (
                 {'is_superuser_role': 'test-role-1', 'is_superuser_attr': 'gibberish', 'is_superuser_value': 'true'},
                 (True, True),
+                False,
             ),
             # In this case we will give the user a proper role and an is_superuser_attr role that they have, this should make them an admin
             (
                 {'is_superuser_role': 'test-role-1', 'is_superuser_attr': 'test-role-1'},
                 (True, True),
+                False,
             ),
             # In this case we will give the user a proper role and an is_superuser_attr role that they have but a bad value, this should make them an admin
             (
                 {'is_superuser_role': 'test-role-1', 'is_superuser_attr': 'is_superuser', 'is_superuser_value': 'junk'},
                 (False, False),
+                False,
             ),
             # In this case we will give the user everything
             (
                 {'is_superuser_role': 'test-role-1', 'is_superuser_attr': 'is_superuser', 'is_superuser_value': 'true'},
                 (True, True),
+                False,
             ),
             # In this test case we will validate that a single attribute (instead of a list) still works
             (
                 {'is_superuser_attr': 'name_id', 'is_superuser_value': 'test_id'},
                 (True, True),
+                False,
             ),
             # This will be a negative test for a single atrribute
             (
                 {'is_superuser_attr': 'name_id', 'is_superuser_value': 'junk'},
                 (False, False),
+                False,
+            ),
+            # The user is already a superuser so we should remove them
+            (
+                {'is_superuser_attr': 'name_id', 'is_superuser_value': 'junk', 'remove_superusers': True},
+                (False, True),
+                True,
+            ),
+            # The user is already a superuser but we don't have a remove field
+            (
+                {'is_superuser_attr': 'name_id', 'is_superuser_value': 'junk', 'remove_superusers': False},
+                (True, False),
+                True,
             ),
         ],
     )
-    def test__check_flag(self, user_flags_settings, expected):
+    def test__check_flag(self, user_flags_settings, expected, is_superuser):
         user = User()
         user.username = 'John'
-        user.is_superuser = False
+        user.is_superuser = is_superuser
 
         attributes = {
             'email': ['noone@nowhere.com'],

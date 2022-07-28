@@ -255,6 +255,7 @@ def _check_flag(user, flag, attributes, user_flags_settings):
     is_role_key = "is_%s_role" % (flag)
     is_attr_key = "is_%s_attr" % (flag)
     is_value_key = "is_%s_value" % (flag)
+    remove_setting = "remove_%ss" % (flag)
 
     # Check to see if we are respecting a role and, if so, does our user have that role?
     role_setting = user_flags_settings.get(is_role_key, None)
@@ -286,7 +287,7 @@ def _check_flag(user, flag, attributes, user_flags_settings):
             # if they don't match make sure that new_flag is false
             else:
                 logger.debug(
-                    "Refusing %s for %s because attr %s (%s) did not match value '%s'"
+                    "For %s on %s attr %s (%s) did not match expected value '%s'"
                     % (flag, user.username, attr_setting, attribute_value, user_flags_settings.get(is_value_key))
                 )
                 new_flag = False
@@ -295,8 +296,16 @@ def _check_flag(user, flag, attributes, user_flags_settings):
             logger.debug("Giving %s %s from attribute %s" % (user.username, flag, attr_setting))
             new_flag = True
 
-    # If the user was flagged and we are going to make them not flagged make sure there is a message
+    # Get the users old flag
     old_value = getattr(user, "is_%s" % (flag))
+
+    # If we are not removing the flag and they were a system admin and now we don't want them to be just return
+    remove_flag = user_flags_settings.get(remove_setting, True)
+    if not remove_flag and (old_value and not new_flag):
+        logger.debug("Remove flag %s preventing removal of %s for %s" % (remove_flag, flag, user.username))
+        return old_value, False
+
+    # If the user was flagged and we are going to make them not flagged make sure there is a message
     if old_value and not new_flag:
         logger.debug("Revoking %s from %s" % (flag, user.username))
 
