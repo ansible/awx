@@ -155,6 +155,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'project_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed'),
     'credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'kubernetes', 'credential_type_id'),
     'signature_validation_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'credential_type_id'),
+    'signature_validation_result': DEFAULT_SUMMARY_FIELDS + ('status', 'failed'),
     'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'elapsed', 'type', 'canceled_on'),
     'job_template': DEFAULT_SUMMARY_FIELDS,
     'workflow_job_template': DEFAULT_SUMMARY_FIELDS,
@@ -1589,7 +1590,14 @@ class ProjectUpdateViewSerializer(ProjectSerializer):
 class ProjectUpdateSerializer(UnifiedJobSerializer, ProjectOptionsSerializer):
     class Meta:
         model = ProjectUpdate
-        fields = ('*', 'project', 'job_type', 'job_tags', '-controller_node', 'signature_validation_result',)
+        fields = (
+            '*',
+            'project',
+            'job_type',
+            'job_tags',
+            '-controller_node',
+            'signature_validation_result',
+        )
 
     def get_related(self, obj):
         res = super(ProjectUpdateSerializer, self).get_related(obj)
