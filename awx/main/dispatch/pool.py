@@ -403,7 +403,7 @@ class AutoscalePool(WorkerPool):
                 if current_task and isinstance(current_task, dict):
                     endings = ['tasks.task_manager', 'tasks.dependency_manager', 'tasks.workflow_manager']
                     current_task_name = current_task.get('task', '')
-                    if any([current_task_name.endswith(e) for e in endings]):
+                    if any(current_task_name.endswith(e) for e in endings):
                         if 'started' not in current_task:
                             w.managed_tasks[current_task['uuid']]['started'] = time.time()
                         age = time.time() - current_task['started']

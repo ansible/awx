@@ -706,10 +706,7 @@ class UnifiedJob(
         editable=False,
         help_text=_("A cached list with pk values from preferred instance groups."),
     )
-    task_impact = models.PositiveIntegerField(
-        default=0,
-        editable=False,
-    )
+    task_impact = models.PositiveIntegerField(default=0, editable=False, help_text=_("Number of forks an instance consumes when running this job."))
     organization = models.ForeignKey(
         'Organization',
         blank=True,

@@ -338,10 +338,8 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
             active_inventory_sources = self.inventory_sources.filter(source__in=CLOUD_INVENTORY_SOURCES)
         failed_inventory_sources = active_inventory_sources.filter(last_job_failed=True)
         total_hosts = active_hosts.count()
-        if total_hosts != self.total_hosts:
-            update_task_impact = True
-        else:
-            update_task_impact = False
+        # if total_hosts has changed, set update_task_impact to True
+        update_task_impact = total_hosts != self.total_hosts
         computed_fields = {
             'has_active_failures': bool(failed_hosts.count()),
             'total_hosts': total_hosts,

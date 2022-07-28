@@ -92,7 +92,7 @@ class TaskBase:
             .exclude(launch_type='sync')
             .exclude(polymorphic_ctype_id=wf_approval_ctype_id)
             .order_by('created')
-            .prefetch_related('instance_group')
+            .prefetch_related('dependent_jobs')
         )
         self.all_tasks = [t for t in qs]
 
@@ -100,7 +100,7 @@ class TaskBase:
         if not settings.IS_TESTING():
             # increment task_manager_schedule_calls regardless if the other
             # metrics are recorded
-            s_metrics.Metrics(auto_pipe_execute=True).inc(f"{self.prefix}_schedule_calls", 1)
+            s_metrics.Metrics(auto_pipe_execute=True).inc(f"{self.prefix}__schedule_calls", 1)
             # Only record metrics if the last time recording was more
             # than SUBSYSTEM_METRICS_TASK_MANAGER_RECORD_INTERVAL ago.
             # Prevents a short-duration task manager that runs directly after a
@@ -216,7 +216,7 @@ class WorkflowManager(TaskBase):
                             job.job_explanation = gettext_noop(
                                 "Workflow Job spawned from workflow could not start because it "
                                 "would result in recursion (spawn order, most recent first: {})"
-                            ).format(', '.join(['<{}>'.format(tmp) for tmp in display_list]))
+                            ).format(', '.join('<{}>'.format(tmp) for tmp in display_list))
                         else:
                             logger.debug(
                                 'Starting workflow-in-workflow id={}, wfjt={}, ancestors={}'.format(
@@ -226,7 +226,7 @@ class WorkflowManager(TaskBase):
                     if not job._resources_sufficient_for_launch():
                         can_start = False
                         job.job_explanation = gettext_noop(
-                            "Job spawned from workflow could not start because it " "was missing a related resource such as project or inventory"
+                            "Job spawned from workflow could not start because it was missing a related resource such as project or inventory"
                         )
                     if can_start:
                         if workflow_job.start_args:
@@ -236,7 +236,7 @@ class WorkflowManager(TaskBase):
                         can_start = job.signal_start(**start_args)
                         if not can_start:
                             job.job_explanation = gettext_noop(
-                                "Job spawned from workflow could not start because it " "was not in the right state or required manual credentials"
+                                "Job spawned from workflow could not start because it was not in the right state or required manual credentials"
                             )
                     if not can_start:
                         job.status = 'failed'
