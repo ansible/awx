@@ -92,7 +92,7 @@ class TaskBase:
             .exclude(launch_type='sync')
             .exclude(polymorphic_ctype_id=wf_approval_ctype_id)
             .order_by('created')
-            .prefetch_related('instance_group')
+            .prefetch_related('dependent_jobs')
         )
         self.all_tasks = [t for t in qs]
 
