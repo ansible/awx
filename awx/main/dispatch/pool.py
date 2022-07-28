@@ -195,7 +195,7 @@ class PoolWorker(object):
         return not self.busy
 
     @property
-    def lazy(self):
+    def ready_to_scale_down(self):
         if self.busy:
             return False
         if self.last_finished is None:
@@ -398,12 +398,12 @@ class AutoscalePool(WorkerPool):
                             logger.exception('failed to reap job UUID {}'.format(w.current_task['uuid']))
                 orphaned.extend(w.orphaned_tasks)
                 self.workers.remove(w)
-            elif w.lazy and len(self.workers) > self.min_workers:
+            elif (len(self.workers) > self.min_workers) and w.ready_to_scale_down:
                 # the process has an empty queue (it's idle) and we have
                 # more processes in the pool than we need (> min)
                 # send this process a message so it will exit gracefully
                 # at the next opportunity
-                logger.info(f'scaling down worker pid:{w.pid} from:{len(self.workers)}')
+                logger.info(f'scaling down worker pid:{w.pid} prior total:{len(self.workers)}')
                 w.quit()
                 self.workers.remove(w)
             if w.alive:
