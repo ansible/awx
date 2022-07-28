@@ -33,6 +33,7 @@ action_groups:
     - role
     - schedule
     - settings
+    - subscriptions
     - team
     - token
     - user
