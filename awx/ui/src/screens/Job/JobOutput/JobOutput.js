@@ -163,6 +163,11 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     }
     addEvents(onReadyEvents);
     setOnReadyEvents([]);
+    if (isFollowModeEnabled) {
+      setTimeout(() => {
+        scrollToEnd();
+      }, 0);
+    }
   }, [isTreeReady, onReadyEvents]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const totalNonCollapsedRows = Math.max(
@@ -188,9 +193,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   }, [location.search]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (!isJobRunning(jobStatus)) {
-      setIsFollowModeEnabled(false);
-    }
     rebuildEventsTree();
   }, [isFlatMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -242,7 +244,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       if (data.group_name === `${job.type}_events`) {
         batchedEvents.push(data);
         clearTimeout(batchTimeout);
-        if (batchedEvents.length >= 25) {
+        if (batchedEvents.length >= 10) {
           addBatchedEvents();
         } else {
           batchTimeout = setTimeout(addBatchedEvents, 500);
@@ -267,6 +269,12 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       isMounted.current = false;
     };
   }, [isJobRunning(jobStatus)]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (isFollowModeEnabled) {
+      scrollToEnd();
+    }
+  }, [wsEvents.length, isFollowModeEnabled]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (listRef.current?.recomputeRowHeights) {
@@ -419,9 +427,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   };
 
   const rowRenderer = ({ index, parent, key, style }) => {
-    if (listRef.current && isFollowModeEnabled) {
-      setTimeout(() => scrollToRow(remoteRowCount - 1), 0);
-    }
     let event;
     let node;
     try {
@@ -568,6 +573,9 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     loadRange.forEach((n) => {
       cache.clear(n);
     });
+    if (isFollowModeEnabled) {
+      scrollToEnd();
+    }
   };
 
   const scrollToRow = (rowIndex) => {
@@ -580,14 +588,16 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const handleScrollPrevious = () => {
     const startIndex = listRef.current.Grid._renderedRowStartIndex;
     const stopIndex = listRef.current.Grid._renderedRowStopIndex;
-    const scrollRange = stopIndex - startIndex + 1;
+    const scrollRange = stopIndex - startIndex;
     scrollToRow(Math.max(0, startIndex - scrollRange));
     setIsFollowModeEnabled(false);
   };
 
   const handleScrollNext = () => {
+    const startIndex = listRef.current.Grid._renderedRowStartIndex;
     const stopIndex = listRef.current.Grid._renderedRowStopIndex;
-    scrollToRow(stopIndex - 1);
+    const scrollRange = stopIndex - startIndex;
+    scrollToRow(stopIndex + scrollRange);
   };
 
   const handleScrollFirst = () => {
@@ -595,8 +605,14 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     setIsFollowModeEnabled(false);
   };
 
+  const scrollToEnd = () => {
+    scrollToRow(-1);
+    setTimeout(() => scrollToRow(-1), 100);
+  };
+
   const handleScrollLast = () => {
-    scrollToRow(totalNonCollapsedRows + wsEvents.length);
+    scrollToEnd();
+    setIsFollowModeEnabled(true);
   };
 
   const handleResize = ({ width }) => {
@@ -619,6 +635,9 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     }
     scrollTop.current = e.scrollTop;
     scrollHeight.current = e.scrollHeight;
+    if (e.scrollTop + e.clientHeight >= e.scrollHeight) {
+      setIsFollowModeEnabled(true);
+    }
   };
 
   const handleExpandCollapseAll = () => {
@@ -658,8 +677,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           job={job}
           eventRelatedSearchableKeys={eventRelatedSearchableKeys}
           eventSearchableKeys={eventSearchableKeys}
-          remoteRowCount={remoteRowCount}
-          scrollToRow={scrollToRow}
+          scrollToEnd={scrollToEnd}
           isFollowModeEnabled={isFollowModeEnabled}
           setIsFollowModeEnabled={setIsFollowModeEnabled}
         />
@@ -718,7 +736,6 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
                           rowCount={totalNonCollapsedRows + wsEvents.length}
                           rowHeight={cache.rowHeight}
                           rowRenderer={rowRenderer}
-                          scrollToAlignment="start"
                           width={width || 1}
                           overscanRowCount={20}
                           onScroll={handleScroll}
