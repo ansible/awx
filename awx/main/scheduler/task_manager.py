@@ -20,7 +20,6 @@ from django.contrib.contenttypes.models import ContentType
 # AWX
 from awx.main.dispatch.reaper import reap_job
 from awx.main.models import (
-    Instance,
     InventorySource,
     InventoryUpdate,
     Job,
@@ -687,16 +686,26 @@ class TaskManager(TaskBase):
         logger.debug("{} couldn't be scheduled on graph, waiting for next cycle".format(task.log_format))
 
     def reap_jobs_from_orphaned_instances(self):
-        # discover jobs that are in running state but aren't on an execution node
-        # that we know about; this is a fairly rare event, but it can occur if you,
-        # for example, SQL backup an awx install with running jobs and restore it
-        # elsewhere
-        for j in UnifiedJob.objects.filter(
-            status__in=['pending', 'waiting', 'running'],
-        ).exclude(execution_node__in=Instance.objects.exclude(node_type='hop').values_list('hostname', flat=True)):
-            if j.execution_node and not j.is_container_group_task:
-                logger.error(f'{j.execution_node} is not a registered instance; reaping {j.log_format}')
-                reap_job(j, 'failed')
+        # discover jobs that are in running state but have an unregistered controller node, execution node, or container group
+        # that we know about; it can occur if a running OCP node misses heartbeat and gets deleted,
+        # or, SQL backup an awx install with running jobs and restore it elsewhere
+
+        # TODO: after merging other resillency changes, add job_explanation to all these cases
+        for task in self.all_tasks:
+            if task.controller_node:
+                if task.controller_node not in self.instances:
+                    self.all_tasks.remove(task)
+                    reap_job(task, 'failed')
+
+            if task.execution_node:
+                if task.execution_node not in self.instances:
+                    self.all_tasks.remove(task)
+                    reap_job(task, 'failed')
+            elif task.instance_group_id:
+                # for container group jobs
+                if task.instance_group_id not in self.instance_groups.pk_ig_map:
+                    self.all_tasks.remove(task)
+                    reap_job(task, 'failed')
 
     def process_tasks(self):
         running_tasks = [t for t in self.all_tasks if t.status in ['waiting', 'running']]
