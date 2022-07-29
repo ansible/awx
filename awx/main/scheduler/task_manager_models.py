@@ -37,7 +37,11 @@ class TaskManagerInstances:
     def __init__(self, active_tasks, instances=None, instance_fields=('node_type', 'capacity', 'hostname', 'enabled')):
         self.instances_by_hostname = dict()
         if instances is None:
-            instances = Instance.objects.filter(hostname__isnull=False, enabled=True).exclude(node_type='hop').only(*instance_fields)
+            instances = (
+                Instance.objects.filter(hostname__isnull=False, node_state=Instance.States.READY, enabled=True)
+                .exclude(node_type='hop')
+                .only('node_type', 'node_state', 'capacity', 'hostname', 'enabled')
+            )
         for instance in instances:
             self.instances_by_hostname[instance.hostname] = TaskManagerInstance(instance)
 
