@@ -435,6 +435,7 @@ def inspect_execution_nodes(instance_list):
 
         nowtime = now()
         workers = mesh_status['Advertisements']
+
         for ad in workers:
             hostname = ad['NodeID']
 
@@ -448,9 +449,7 @@ def inspect_execution_nodes(instance_list):
             if instance.node_type in ('control', 'hybrid'):
                 continue
 
-            was_lost = instance.is_lost(ref_time=nowtime)
             last_seen = parse_date(ad['Time'])
-
             if instance.last_seen and instance.last_seen >= last_seen:
                 continue
             instance.last_seen = last_seen
@@ -458,12 +457,12 @@ def inspect_execution_nodes(instance_list):
 
             # Only execution nodes should be dealt with by execution_node_health_check
             if instance.node_type == 'hop':
-                if was_lost:
+                if instance.node_state in (Instance.States.UNAVAILABLE, Instance.States.INSTALLED):
                     logger.warning(f'Hop node {hostname}, has rejoined the receptor mesh')
                     instance.save_health_data(errors='')
                 continue
 
-            if was_lost:
+            if instance.node_state in (Instance.States.UNAVAILABLE, Instance.States.INSTALLED):
                 # if the instance *was* lost, but has appeared again,
                 # attempt to re-establish the initial capacity and version
                 # check
