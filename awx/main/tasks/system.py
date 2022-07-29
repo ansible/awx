@@ -341,9 +341,13 @@ def _cleanup_images_and_files(**kwargs):
             logger.info(f'Performed local cleanup with kwargs {kwargs}, output:\n{stdout}')
 
     # if we are the first instance alphabetically, then run cleanup on execution nodes
-    checker_instance = Instance.objects.filter(node_type__in=['hybrid', 'control'], enabled=True, capacity__gt=0).order_by('-hostname').first()
+    checker_instance = (
+        Instance.objects.filter(node_type__in=['hybrid', 'control'], node_state=Instance.States.READY, enabled=True, capacity__gt=0)
+        .order_by('-hostname')
+        .first()
+    )
     if checker_instance and this_inst.hostname == checker_instance.hostname:
-        for inst in Instance.objects.filter(node_type='execution', enabled=True, capacity__gt=0):
+        for inst in Instance.objects.filter(node_type='execution', node_state=Instance.States.READY, enabled=True, capacity__gt=0):
             runner_cleanup_kwargs = inst.get_cleanup_task_kwargs(**kwargs)
             if not runner_cleanup_kwargs:
                 continue
