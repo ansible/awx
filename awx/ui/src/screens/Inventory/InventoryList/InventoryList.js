@@ -216,7 +216,7 @@ function InventoryList() {
             headerRow={
               <HeaderRow qsConfig={QS_CONFIG}>
                 <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
-                <HeaderCell>{t`Status`}</HeaderCell>
+                <HeaderCell>{t`Sync Status`}</HeaderCell>
                 <HeaderCell>{t`Type`}</HeaderCell>
                 <HeaderCell>{t`Organization`}</HeaderCell>
                 <HeaderCell>{t`Actions`}</HeaderCell>
