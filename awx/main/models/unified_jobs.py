@@ -382,7 +382,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
             unified_job.survey_passwords = new_job_passwords
             kwargs['survey_passwords'] = new_job_passwords  # saved in config object for relaunch
 
-        unified_job.preferred_instance_groups_cache = [ig.pk for ig in unified_job.preferred_instance_groups]
+        unified_job.preferred_instance_groups_cache = unified_job._get_preferred_instance_group_cache()
 
         unified_job._set_default_dependencies_processed()
         unified_job.task_impact = unified_job._get_task_impact()
@@ -770,6 +770,9 @@ class UnifiedJob(
 
     def _get_parent_field_name(self):
         return 'unified_job_template'  # Override in subclasses.
+
+    def _get_preferred_instance_group_cache(self):
+        return [ig.pk for ig in self.preferred_instance_groups]
 
     @classmethod
     def _get_unified_job_template_class(cls):
