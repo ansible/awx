@@ -156,6 +156,26 @@
 - hosts: localhost
   gather_facts: false
   connection: local
+  name: Validate project content integrity
+  tasks:
+    - block:
+        - name: verify project integrity
+          playbook_integrity:
+            project_path: "{{ project_path | quote }}"
+            sig_type: gpg # TODO: unhardcode
+            gpg_pubkey: "{{ gpg_pubkey }}"
+            scm_type: git # TODO: unhardcode
+          register: playbook_integrity_check
+        - name: show integrity check result
+          debug:
+            var: playbook_integrity_check
+      tags:
+        - playbook_integrity_gpg
+        - playbook_integrity
+
+- hosts: localhost
+  gather_facts: false
+  connection: local
   name: Install content with ansible-galaxy command if necessary
   vars:
     galaxy_task_env:  # configure in settings

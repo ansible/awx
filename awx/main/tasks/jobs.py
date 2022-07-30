@@ -1270,6 +1270,10 @@ class RunProjectUpdate(BaseTask):
             # for raw archive, prevent error moving files between volumes
             extra_vars['ansible_remote_tmp'] = os.path.join(project_update.get_project_path(check_if_exists=False), '.ansible_awx', 'tmp')
 
+        if project_update.project.signature_validation_credential is not None:
+            pubkey = project_update.project.signature_validation_credential.get_input('gpg_public_key')
+            extra_vars['gpg_pubkey'] = pubkey
+
         self._write_extra_vars_file(private_data_dir, extra_vars)
 
     def build_playbook_path_relative_to_cwd(self, project_update, private_data_dir):
