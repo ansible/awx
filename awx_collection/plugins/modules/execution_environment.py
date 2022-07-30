@@ -115,12 +115,14 @@ def main():
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     organization = module.params.get('organization')
+    search_fields = {}
     if organization:
-        new_fields['organization'] = module.resolve_name_to_id('organizations', organization)
+        search_fields['organization'] = new_fields['organization'] = module.resolve_name_to_id('organizations', organization)
 
     credential = module.params.get('credential')
     if credential:
-        new_fields['credential'] = module.resolve_name_to_id('credentials', credential)
+        credential_object =  module.get_one('credentials', name_or_id=credential, **{'data': search_fields})
+        new_fields['credential'] = credential_object['id']
 
     module.create_or_update_if_needed(existing_item, new_fields, endpoint='execution_environments', item_type='execution_environment')
 

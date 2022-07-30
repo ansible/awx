@@ -6,13 +6,30 @@
 
 - name: Generate names
   set_fact:
+    registry_cred_name1: "AWX-Collection-tests-credential-registry-cred1-{{ test_id }}"
+
+- name: Generate names
+  set_fact:
     ee_name: "AWX-Collection-tests-ee-{{ test_id }}"
 
 - block:
+    - name: Create Registry cred
+      credential:
+        name: "{{ registry_cred_name1 }}"
+        organization: Default
+        credential_type: Container Registry
+        inputs:
+          host: quay.io
+          username: ""
+          verify_ssl: true
+        state: present
+      register: result
+
     - name: Add an EE
       execution_environment:
         name: "{{ ee_name }}"
         description: "EE for Testing"
+        credential: "{{ registry_cred_name1 }}"
         image: quay.io/ansible/awx-ee
         pull: always
         organization: Default
@@ -55,6 +72,18 @@
       loop:
         - "{{ ee_name }}"
         - "{{ ee_name }}a"
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Delete Registry cred
+      credential:
+        name: "{{ registry_cred_name1 }}"
+        organization: Default
+        credential_type: Container Registry
+        state: absent
+      register: result
 
     - assert:
         that:

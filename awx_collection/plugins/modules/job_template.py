@@ -507,32 +507,25 @@ def main():
     webhook_credential = module.params.get('webhook_credential')
 
     if inventory is not None:
-        new_fields['inventory'] = module.resolve_name_to_id('inventories', inventory)
+        inventory_data = module.get_one('inventories', name_or_id=inventory, data=search_fields)
+        if not inventory_data:
+            module.fail_json(msg="The inventory {0} in organization {1} was not found on the controller instance server".format(inventory, organization))
+        new_fields['inventory'] = inventory_data['id']
     if project is not None:
-        if organization_id is not None:
-            project_data = module.get_one(
-                'projects',
-                name_or_id=project,
-                **{
-                    'data': {
-                        'organization': organization_id,
-                    }
-                }
-            )
-            if project_data is None:
-                module.fail_json(msg="The project {0} in organization {1} was not found on the controller instance server".format(project, organization))
-            new_fields['project'] = project_data['id']
-        else:
-            new_fields['project'] = module.resolve_name_to_id('projects', project)
+        project_data = module.get_one('projects', name_or_id=project, data=search_fields)
+        if not project_data:
+            module.fail_json(msg="The project {0} in organization {1} was not found on the controller instance server".format(project, organization))
+        new_fields['project'] = project_data['id']
     if webhook_credential is not None:
-        new_fields['webhook_credential'] = module.resolve_name_to_id('credentials', webhook_credential)
-
+        webhook_data = module.get_one('credentials', name_or_id=webhook_credential, **{'data': search_fields})
+        new_fields['webhook_credential'] = webhook_data['id']
     association_fields = {}
 
     if credentials is not None:
         association_fields['credentials'] = []
         for item in credentials:
-            association_fields['credentials'].append(module.resolve_name_to_id('credentials', item))
+            credential_data = module.get_one('credentials', name_or_id=item, **{'data': search_fields})
+            association_fields['credentials'].append(credential_data['id'])
 
     labels = module.params.get('labels')
     if labels is not None:
