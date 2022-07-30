@@ -261,7 +261,7 @@ options:
             type:
               description:
                 - Name of unified job template type to run in the workflow.
-                - Can be a job_template, project, inventory_source, system_job, workflow_approval, workflow_job_template.
+                - Can be a job_template, project, inventory_source, system_job_template, workflow_approval, workflow_job_template.
               type: str
             timeout:
               description:
@@ -489,6 +489,7 @@ def create_workflow_nodes(module, response, workflow_nodes, workflow_id):
         if workflow_node['unified_job_template']['name']:
             if workflow_node['unified_job_template']['type'] is None:
                 module.fail_json(msg='Could not find unified job template type in workflow_nodes {1}'.format(workflow_node))
+            search_fields['type'] = workflow_node['unified_job_template']['type']
             if workflow_node['unified_job_template']['type'] == 'inventory_source':
                 if 'inventory' in workflow_node['unified_job_template']:
                     if 'organization' in workflow_node['unified_job_template']['inventory']:
