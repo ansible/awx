@@ -132,6 +132,8 @@ docutils==0.16
     # via python-daemon
 ecdsa==0.18.0
     # via python-jose
+filelock==3.8.0
+    # via -r /awx_devel/requirements/requirements.in
     # via
     #   -r /awx_devel/requirements/requirements_git.txt
     #   django-radius
