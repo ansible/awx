@@ -35,16 +35,7 @@ For the following playbooks to work, you will need to:
 $ pip install openshift
 ```
 
-If you are not changing any code in the operator itself, git checkout the latest version from https://github.com/ansible/awx-operator/releases, and then run the following command (from the awx-operator repo):
-
-```
-$ alias kubectl="minikube kubectl --"
-$ export NAMESPACE=my-namespace
-$ kubectl create namespace $NAMESPACE
-$ kubectl config set-context --current --namespace=$NAMESPACE
-$ make deploy
-
-```
+If you are not changing any code in the operator itself, git checkout the latest version from https://github.com/ansible/awx-operator/releases, and then follow the instructions in the awx-operator [README](https://github.com/ansible/awx-operator#basic-install).
 
 If making changes to the operator itself, run the following command in the root
 of the awx-operator repo. If not, continue to the next section.
@@ -57,7 +48,6 @@ $ export IMAGE_TAG_BASE=quay.io/<username>/awx-operator
 $ export VERSION=<cusom-tag>
 $ make docker-build
 $ docker push ${IMAGE_TAG_BASE}:${VERSION}
-$ make deploy
 ```
 
 ## Deploy AWX into Minikube using the AWX Operator
