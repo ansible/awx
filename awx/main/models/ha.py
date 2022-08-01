@@ -419,6 +419,12 @@ def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs
 
 @receiver(post_save, sender=Instance)
 def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
+    # TODO: this needs to be smarter. Did the port change, etc?
+    if settings.IS_K8S and created and instance.node_type == 'execution':
+        from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
+
+        write_receptor_config.apply_async(queue='tower_broadcast_all')
+
     if created or instance.has_policy_changes():
         schedule_policy_task()
 
