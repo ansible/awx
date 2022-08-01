@@ -93,6 +93,9 @@ The Ansible Community is looking at building an EE that corresponds to all of th
 - AWX: https://github.com/ansible/awx/blob/devel/CONTRIBUTING.md
 - AWX-Operator: https://github.com/ansible/awx-operator/blob/devel/CONTRIBUTING.md
 
+### Oracle AWX
+We'd be happy to help if you can reproduce this with AWX since we do not have Oracle's Linux Automation Manager. If you need help with this specific version of Oracles Linux Automation Manager you will need to contact your Oracle for support. 
+
 ### AWX Release
 Subject: Announcing AWX Xa.Ya.za and AWX-Operator Xb.Yb.zb
 
