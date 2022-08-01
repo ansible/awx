@@ -27,12 +27,17 @@ from awx.main.utils.common import (
 )
 from awx.main.constants import MAX_ISOLATED_PATH_COLON_DELIMITER
 from awx.main.tasks.signals import signal_state, signal_callback, SignalExit
+from awx.main.models import Instance
+from awx.main.dispatch.publish import task
 
 # Receptorctl
 from receptorctl.socket_interface import ReceptorControl
 
+from filelock import FileLock
+
 logger = logging.getLogger('awx.main.tasks.receptor')
 __RECEPTOR_CONF = '/etc/receptor/receptor.conf'
+__RECEPTOR_CONF_LOCKFILE = f'{__RECEPTOR_CONF}.lock'
 RECEPTOR_ACTIVE_STATES = ('Pending', 'Running')
 
 
@@ -43,8 +48,10 @@ class ReceptorConnectionType(Enum):
 
 
 def get_receptor_sockfile():
-    with open(__RECEPTOR_CONF, 'r') as f:
-        data = yaml.safe_load(f)
+    lock = FileLock(__RECEPTOR_CONF_LOCKFILE)
+    with lock:
+        with open(__RECEPTOR_CONF, 'r') as f:
+            data = yaml.safe_load(f)
     for section in data:
         for entry_name, entry_data in section.items():
             if entry_name == 'control-service':
@@ -60,8 +67,10 @@ def get_tls_client(use_stream_tls=None):
     if not use_stream_tls:
         return None
 
-    with open(__RECEPTOR_CONF, 'r') as f:
-        data = yaml.safe_load(f)
+    lock = FileLock(__RECEPTOR_CONF_LOCKFILE)
+    with lock:
+        with open(__RECEPTOR_CONF, 'r') as f:
+            data = yaml.safe_load(f)
     for section in data:
         for entry_name, entry_data in section.items():
             if entry_name == 'tls-client':
@@ -78,12 +87,25 @@ def get_receptor_ctl():
         return ReceptorControl(receptor_sockfile)
 
 
+def find_node_in_mesh(node_name, receptor_ctl):
+    attempts = 10
+    backoff = 1
+    for attempt in range(attempts):
+        all_nodes = receptor_ctl.simple_command("status").get('Advertisements', None)
+        for node in all_nodes:
+            if node.get('NodeID') == node_name:
+                return node
+        else:
+            logger.warning(f"Instance {node_name} is not in the receptor mesh. {attempts-attempt} attempts left.")
+            time.sleep(backoff)
+            backoff += 1
+    else:
+        raise ReceptorNodeNotFound(f'Instance {node_name} is not in the receptor mesh')
+
+
 def get_conn_type(node_name, receptor_ctl):
-    all_nodes = receptor_ctl.simple_command("status").get('Advertisements', None)
-    for node in all_nodes:
-        if node.get('NodeID') == node_name:
-            return ReceptorConnectionType(node.get('ConnType'))
-    raise ReceptorNodeNotFound(f'Instance {node_name} is not in the receptor mesh')
+    node = find_node_in_mesh(node_name, receptor_ctl)
+    return ReceptorConnectionType(node.get('ConnType'))
 
 
 def administrative_workunit_reaper(work_list=None):
@@ -574,3 +596,66 @@ class AWXReceptorJob:
         else:
             config["clusters"][0]["cluster"]["insecure-skip-tls-verify"] = True
         return config
+
+
+RECEPTOR_CONFIG_STARTER = (
+    {'control-service': {'service': 'control', 'filename': '/var/run/receptor/receptor.sock', 'permissions': '0600'}},
+    {'local-only': None},
+    {'work-command': {'worktype': 'local', 'command': 'ansible-runner', 'params': 'worker', 'allowruntimeparams': True}},
+    {
+        'work-kubernetes': {
+            'worktype': 'kubernetes-runtime-auth',
+            'authmethod': 'runtime',
+            'allowruntimeauth': True,
+            'allowruntimepod': True,
+            'allowruntimeparams': True,
+        }
+    },
+    {
+        'work-kubernetes': {
+            'worktype': 'kubernetes-incluster-auth',
+            'authmethod': 'incluster',
+            'allowruntimeauth': True,
+            'allowruntimepod': True,
+            'allowruntimeparams': True,
+        }
+    },
+    {
+        'tls-client': {
+            'name': 'tlsclient',
+            'rootcas': '/etc/receptor/tls/ca/receptor-ca.crt',
+            'cert': '/etc/receptor/tls/receptor.crt',
+            'key': '/etc/receptor/tls/receptor.key',
+        }
+    },
+)
+
+
+@task()
+def write_receptor_config():
+    receptor_config = list(RECEPTOR_CONFIG_STARTER)
+
+    instances = Instance.objects.exclude(node_type='control')
+    for instance in instances:
+        peer = {'tcp-peer': {'address': f'{instance.hostname}:{instance.listener_port}', 'tls': 'tlsclient'}}
+        receptor_config.append(peer)
+
+    lock = FileLock(__RECEPTOR_CONF_LOCKFILE)
+    with lock:
+        with open(__RECEPTOR_CONF, 'w') as file:
+            yaml.dump(receptor_config, file, default_flow_style=False)
+
+    receptor_ctl = get_receptor_ctl()
+
+    attempts = 10
+    backoff = 1
+    for attempt in range(attempts):
+        try:
+            receptor_ctl.simple_command("reload")
+            break
+        except ValueError:
+            logger.warning(f"Unable to reload Receptor configuration. {attempts-attempt} attempts left.")
+            time.sleep(backoff)
+            backoff += 1
+    else:
+        raise RuntimeError("Receptor reload failed")
