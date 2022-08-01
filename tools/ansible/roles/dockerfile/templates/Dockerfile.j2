@@ -152,7 +152,7 @@ RUN dnf -y install \
     unzip && \
     npm install -g n && n 16.13.1 && npm install -g npm@8.5.0 && dnf remove -y nodejs
 
-RUN pip3 install black git+https://github.com/coderanger/supervisor-stdout
+RUN pip3 install black git+https://github.com/coderanger/supervisor-stdout setuptools-scm
 
 # This package randomly fails to download.
 # It is nice to have in the dev env, but not necessary.
@@ -246,6 +246,7 @@ RUN for dir in \
       /etc/containers \
       /var/lib/awx/.config/containers \
       /var/lib/awx/.config/cni \
+      /var/lib/awx/.local \
       /var/lib/awx/venv \
       /var/lib/awx/venv/awx/bin \
       /var/lib/awx/venv/awx/lib/python3.9 \
