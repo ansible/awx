@@ -145,7 +145,7 @@ class BaseTask(object):
         """
         Return params structure to be executed by the container runtime
         """
-        if settings.IS_K8S:
+        if settings.IS_K8S and instance.instance_group.is_container_group:
             return {}
 
         image = instance.execution_environment.image

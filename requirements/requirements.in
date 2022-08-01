@@ -25,6 +25,7 @@ django-split-settings
 django-taggit
 djangorestframework==3.13.1
 djangorestframework-yaml
+filelock
 GitPython>=3.1.1  # minimum to fix https://github.com/ansible/awx/issues/6119
 irc
 jinja2>=2.11.3  # CVE-2020-28493

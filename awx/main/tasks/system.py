@@ -61,7 +61,7 @@ from awx.main.utils.common import (
 from awx.main.utils.external_logging import reconfigure_rsyslog
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
-from awx.main.tasks.receptor import get_receptor_ctl, worker_info, worker_cleanup, administrative_workunit_reaper
+from awx.main.tasks.receptor import get_receptor_ctl, worker_info, worker_cleanup, administrative_workunit_reaper, write_receptor_config
 from awx.main.consumers import emit_channel_notification
 from awx.main import analytics
 from awx.conf import settings_registry
@@ -80,6 +80,10 @@ Try upgrading OpenSSH or providing your private key in an different format. \
 
 def dispatch_startup():
     startup_logger = logging.getLogger('awx.main.tasks')
+
+    # TODO: Enable this on VM installs
+    if settings.IS_K8S:
+        write_receptor_config()
 
     startup_logger.debug("Syncing Schedules")
     for sch in Schedule.objects.all():
@@ -555,7 +559,7 @@ def cluster_node_heartbeat(dispatch_time=None, worker_tasks=None):
         except Exception:
             logger.exception('failed to reap jobs for {}'.format(other_inst.hostname))
         try:
-            if settings.AWX_AUTO_DEPROVISION_INSTANCES:
+            if settings.AWX_AUTO_DEPROVISION_INSTANCES and other_inst.node_type == "control":
                 deprovision_hostname = other_inst.hostname
                 other_inst.delete()  # FIXME: what about associated inbound links?
                 logger.info("Host {} Automatically Deprovisioned.".format(deprovision_hostname))
