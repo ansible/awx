@@ -7,7 +7,7 @@ on:
     types: [opened, edited, reopened, synchronize]
 jobs:
   pr-check:
-    name: Check PR for X,Y,Z properties
+    name: Scan PR description for semantic versioning keywords
     runs-on: ubuntu-latest
     permissions:
       packages: write
