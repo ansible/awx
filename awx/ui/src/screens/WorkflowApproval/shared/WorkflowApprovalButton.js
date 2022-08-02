@@ -9,9 +9,15 @@ import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';
 import { getStatus } from './WorkflowApprovalUtils';
 
-function WorkflowApprovalButton({ isDetailView, workflowApproval }) {
+function WorkflowApprovalButton({
+  isDetailView,
+  workflowApproval,
+  onHandleToast,
+}) {
   const { id } = workflowApproval;
-  const hasBeenActedOn = workflowApproval.status === 'successful';
+  const hasBeenActedOn =
+    Object.keys(workflowApproval.summary_fields.approved_or_denied_by || {})
+      .length > 0 || workflowApproval.status === 'canceled';
   const { error: approveApprovalError, request: approveWorkflowApprovals } =
     useRequest(
       useCallback(async () => WorkflowApprovalsAPI.approve(id), [id]),
@@ -20,6 +26,7 @@ function WorkflowApprovalButton({ isDetailView, workflowApproval }) {
 
   const handleApprove = async () => {
     await approveWorkflowApprovals();
+    onHandleToast(workflowApproval.id, t`Successfully Approved`);
   };
 
   const { error: approveError, dismissError: dismissApproveError } =

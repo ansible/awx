@@ -100,7 +100,10 @@ function WorkflowApprovalListItem({
           <JobCancelButton
             title={t`Cancel Workflow`}
             showIconButton
-            job={workflowApproval.summary_fields.source_workflow_job}
+            job={{
+              ...workflowApproval.summary_fields.source_workflow_job,
+              type: 'workflow_job',
+            }}
             buttonText={t`Cancel Workflow`}
             isDisabled={hasBeenActedOn}
             tooltip={

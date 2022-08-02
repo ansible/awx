@@ -39,7 +39,10 @@ describe('<WorkflowDenyButton/>, full mount', () => {
 
   test('should be disabled', () => {
     wrapper = mountWithContexts(
-      <WorkflowDenyButton workflowApproval={mockApprovalList[1]} />
+      <WorkflowDenyButton
+        workflowApproval={mockApprovalList[2]}
+        onHandleToast={jest.fn()}
+      />
     );
     expect(wrapper.find(denyButton)).toHaveLength(1);
     expect(wrapper.find(denyButton).prop('isDisabled')).toBe(true);
@@ -48,7 +51,10 @@ describe('<WorkflowDenyButton/>, full mount', () => {
   test('should handle deny', async () => {
     act(() => {
       wrapper = mountWithContexts(
-        <WorkflowDenyButton workflowApproval={mockApprovalList[0]} />
+        <WorkflowDenyButton
+          workflowApproval={mockApprovalList[0]}
+          onHandleToast={jest.fn()}
+        />
       );
     });
     await act(() => wrapper.find(denyButton).prop('onClick')());
@@ -70,7 +76,10 @@ describe('<WorkflowDenyButton/>, full mount', () => {
     );
     act(() => {
       wrapper = mountWithContexts(
-        <WorkflowDenyButton workflowApproval={mockApprovalList[0]} />
+        <WorkflowDenyButton
+          workflowApproval={mockApprovalList[0]}
+          onHandleToast={jest.fn()}
+        />
       );
     });
     await act(() => wrapper.find(denyButton).prop('onClick')());

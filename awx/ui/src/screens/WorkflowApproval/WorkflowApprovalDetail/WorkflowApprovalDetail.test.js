@@ -515,7 +515,10 @@ describe('<WorkflowApprovalDetail />', () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(
-        <WorkflowApprovalDetail workflowApproval={workflowApproval} />
+        <WorkflowApprovalDetail
+          workflowApproval={workflowApproval}
+          fetchWorkflowApproval={jest.fn()}
+        />
       );
     });
     waitForElement(wrapper, 'WorkflowApprovalDetail', (el) => el.length > 0);
@@ -548,7 +551,10 @@ describe('<WorkflowApprovalDetail />', () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(
-        <WorkflowApprovalDetail workflowApproval={workflowApproval} />
+        <WorkflowApprovalDetail
+          workflowApproval={workflowApproval}
+          fetchWorkflowApproval={jest.fn()}
+        />
       );
     });
     waitForElement(wrapper, 'WorkflowApprovalDetail', (el) => el.length > 0);

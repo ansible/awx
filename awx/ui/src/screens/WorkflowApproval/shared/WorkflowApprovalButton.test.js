@@ -18,7 +18,10 @@ describe('<WorkflowApprovalButton/> shallow mount', () => {
 
   test('initially render successfully', () => {
     wrapper = shallowWithContexts(
-      <WorkflowApprovalButton workflowApproval={mockApprovalList[0]} />
+      <WorkflowApprovalButton
+        workflowApproval={mockApprovalList[0]}
+        onHandleToast={jest.fn()}
+      />
     );
 
     expect(wrapper.find('WorkflowApprovalButton')).toHaveLength(1);
@@ -39,7 +42,10 @@ describe('<WorkflowApprovalButton/>, full mount', () => {
 
   test('should be disabled', () => {
     wrapper = mountWithContexts(
-      <WorkflowApprovalButton workflowApproval={mockApprovalList[2]} />
+      <WorkflowApprovalButton
+        workflowApproval={mockApprovalList[2]}
+        onHandleToast={jest.fn()}
+      />
     );
     expect(wrapper.find(approveButton)).toHaveLength(1);
     expect(wrapper.find(approveButton).prop('isDisabled')).toBe(true);
@@ -47,7 +53,10 @@ describe('<WorkflowApprovalButton/>, full mount', () => {
   test('should handle approve', async () => {
     act(() => {
       wrapper = mountWithContexts(
-        <WorkflowApprovalButton workflowApproval={mockApprovalList[0]} />
+        <WorkflowApprovalButton
+          workflowApproval={mockApprovalList[0]}
+          onHandleToast={jest.fn()}
+        />
       );
     });
     await act(() => wrapper.find(approveButton).prop('onClick')());

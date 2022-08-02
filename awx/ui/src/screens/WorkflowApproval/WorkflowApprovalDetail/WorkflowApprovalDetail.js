@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect } from 'react';
-
 import { t } from '@lingui/macro';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -27,6 +26,7 @@ import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { WorkflowApproval } from 'types';
 import StatusLabel from 'components/StatusLabel';
 import JobCancelButton from 'components/JobCancelButton';
+import useToast, { AlertVariant } from 'hooks/useToast';
 import WorkflowApprovalButton from '../shared/WorkflowApprovalButton';
 import WorkflowDenyButton from '../shared/WorkflowDenyButton';
 import {
@@ -48,9 +48,11 @@ const WFDetailList = styled(DetailList)`
   padding: 0px var(--pf-global--spacer--lg);
 `;
 
-function WorkflowApprovalDetail({ workflowApproval }) {
+function WorkflowApprovalDetail({ workflowApproval, fetchWorkflowApproval }) {
   const { id: workflowApprovalId } = useParams();
   const history = useHistory();
+  const { addToast, Toast, toastProps } = useToast();
+
   const {
     request: deleteWorkflowApproval,
     isLoading: isDeleteLoading,
@@ -102,6 +104,18 @@ function WorkflowApprovalDetail({ workflowApproval }) {
     fetchWorkflowJob();
   }, [fetchWorkflowJob]);
 
+  const handleToast = useCallback(
+    (id, title) => {
+      addToast({
+        id,
+        title,
+        variant: AlertVariant.success,
+        hasTimeout: true,
+      });
+      fetchWorkflowApproval();
+    },
+    [addToast, fetchWorkflowApproval]
+  );
   const sourceWorkflowJob =
     workflowApproval?.summary_fields?.source_workflow_job;
 
@@ -116,7 +130,9 @@ function WorkflowApprovalDetail({ workflowApproval }) {
   if (fetchWorkflowJobError) {
     return <ContentError error={fetchWorkflowJobError} />;
   }
-
+  const showDeleteButton =
+    workflowApproval.status !== 'pending' &&
+    workflowApproval.summary_fields?.user_capabilities?.delete;
   return (
     <CardBody>
       <DetailList gutter="sm">
@@ -289,31 +305,35 @@ function WorkflowApprovalDetail({ workflowApproval }) {
               <WorkflowApprovalButton
                 workflowApproval={workflowApproval}
                 isDetailView
+                onHandleToast={handleToast}
               />
               <WorkflowDenyButton
                 workflowApproval={workflowApproval}
                 isDetailView
+                onHandleToast={handleToast}
               />
               <JobCancelButton
                 title={t`Cancel Workflow`}
-                job={workflowApproval.summary_fields.source_workflow_job}
+                job={{
+                  ...workflowApproval.summary_fields.source_workflow_job,
+                  type: 'workflow_job',
+                }}
                 buttonText={t`Cancel Workflow`}
                 cancelationMessage={t`This will cancel all subsequent nodes in this workflow.
             `}
               />
             </>
           )}
-        {workflowApproval.status !== 'pending' &&
-          workflowApproval.summary_fields?.user_capabilities?.delete && (
-            <DeleteButton
-              name={workflowApproval.name}
-              modalTitle={t`Delete Workflow Approval`}
-              onConfirm={deleteWorkflowApproval}
-              isDisabled={isLoading}
-            >
-              {t`Delete`}
-            </DeleteButton>
-          )}
+        {showDeleteButton && (
+          <DeleteButton
+            name={workflowApproval.name}
+            modalTitle={t`Delete Workflow Approval`}
+            onConfirm={deleteWorkflowApproval}
+            isDisabled={isLoading}
+          >
+            {t`Delete`}
+          </DeleteButton>
+        )}
       </CardActionsRow>
       {deleteError && (
         <AlertModal
@@ -326,6 +346,7 @@ function WorkflowApprovalDetail({ workflowApproval }) {
           <ErrorDetail error={deleteError} />
         </AlertModal>
       )}
+      <Toast {...toastProps} />
     </CardBody>
   );
 }
