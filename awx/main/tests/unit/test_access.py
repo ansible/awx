@@ -196,6 +196,7 @@ def test_jt_can_add_bad_data(user_unit):
     assert not access.can_add({'asdf': 'asdf'})
 
 
+@pytest.mark.django_db
 class TestWorkflowAccessMethods:
     @pytest.fixture
     def workflow(self, workflow_job_template_factory):

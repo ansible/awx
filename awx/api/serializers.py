@@ -3199,7 +3199,7 @@ class JobRelaunchSerializer(BaseSerializer):
         return attrs
 
 
-class JobCreateScheduleSerializer(BaseSerializer):
+class JobCreateScheduleSerializer(LabelsListMixin, BaseSerializer):
 
     can_schedule = serializers.SerializerMethodField()
     prompts = serializers.SerializerMethodField()
@@ -3230,6 +3230,8 @@ class JobCreateScheduleSerializer(BaseSerializer):
             if 'credentials' in ret:
                 all_creds = [self._summarize('credential', cred) for cred in ret['credentials']]
                 ret['credentials'] = all_creds
+            if 'labels' in ret:
+                ret['labels'] = self._summary_field_labels(obj)
             return ret
         except JobLaunchConfig.DoesNotExist:
             return {'all': _('Unknown, job may have been ran before launch configurations were saved.')}
@@ -3402,6 +3404,9 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
     limit = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     scm_branch = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
 
+    skip_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
+    job_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
+
     class Meta:
         model = WorkflowJobTemplate
         fields = (
@@ -3420,6 +3425,11 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
             'webhook_service',
             'webhook_credential',
             '-execution_environment',
+            'ask_labels_on_launch',
+            'ask_skip_tags_on_launch',
+            'ask_tags_on_launch',
+            'skip_tags',
+            'job_tags',
         )
 
     def get_related(self, obj):
@@ -3458,12 +3468,13 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
     def validate_extra_vars(self, value):
         return vars_validate_or_raise(value)
 
+    # posting
     def validate(self, attrs):
         attrs = super(WorkflowJobTemplateSerializer, self).validate(attrs)
 
         # process char_prompts, these are not direct fields on the model
         mock_obj = self.Meta.model()
-        for field_name in ('scm_branch', 'limit'):
+        for field_name in ('scm_branch', 'limit', 'skip_tags', 'job_tags'):
             if field_name in attrs:
                 setattr(mock_obj, field_name, attrs[field_name])
                 attrs.pop(field_name)
@@ -3489,6 +3500,9 @@ class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
     limit = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     scm_branch = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
 
+    skip_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
+    job_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
+
     class Meta:
         model = WorkflowJob
         fields = (
@@ -3508,6 +3522,8 @@ class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
             'webhook_service',
             'webhook_credential',
             'webhook_guid',
+            'skip_tags',
+            'job_tags',
         )
 
     def get_related(self, obj):
@@ -4333,6 +4349,10 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
     scm_branch = serializers.CharField(required=False, write_only=True, allow_blank=True)
     workflow_job_template_data = serializers.SerializerMethodField()
 
+    labels = serializers.PrimaryKeyRelatedField(many=True, queryset=Label.objects.all(), required=False, write_only=True)
+    skip_tags = serializers.CharField(required=False, write_only=True, allow_blank=True)
+    job_tags = serializers.CharField(required=False, write_only=True, allow_blank=True)
+
     class Meta:
         model = WorkflowJobTemplate
         fields = (
@@ -4352,8 +4372,22 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
             'workflow_job_template_data',
             'survey_enabled',
             'ask_variables_on_launch',
+            'ask_labels_on_launch',
+            'labels',
+            'ask_skip_tags_on_launch',
+            'ask_tags_on_launch',
+            'skip_tags',
+            'job_tags',
         )
-        read_only_fields = ('ask_inventory_on_launch', 'ask_variables_on_launch')
+        read_only_fields = (
+            'ask_inventory_on_launch',
+            'ask_variables_on_launch',
+            'ask_skip_tags_on_launch',
+            'ask_labels_on_launch',
+            'ask_limit_on_launch',
+            'ask_scm_branch_on_launch',
+            'ask_tags_on_launch',
+        )
 
     def get_survey_enabled(self, obj):
         if obj:
@@ -4361,10 +4395,15 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
         return False
 
     def get_defaults(self, obj):
+
         defaults_dict = {}
         for field_name in WorkflowJobTemplate.get_ask_mapping().keys():
             if field_name == 'inventory':
                 defaults_dict[field_name] = dict(name=getattrd(obj, '%s.name' % field_name, None), id=getattrd(obj, '%s.pk' % field_name, None))
+            elif field_name == 'labels':
+                for label in obj.labels.all():
+                    label_dict = {"id": label.id, "name": label.name}
+                    defaults_dict.setdefault(field_name, []).append(label_dict)
             else:
                 defaults_dict[field_name] = getattr(obj, field_name)
         return defaults_dict
@@ -4373,6 +4412,7 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
         return dict(name=obj.name, id=obj.id, description=obj.description)
 
     def validate(self, attrs):
+
         template = self.instance
 
         accepted, rejected, errors = template._accept_or_ignore_job_kwargs(**attrs)
@@ -4390,6 +4430,7 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
         WFJT_inventory = template.inventory
         WFJT_limit = template.limit
         WFJT_scm_branch = template.scm_branch
+
         super(WorkflowJobLaunchSerializer, self).validate(attrs)
         template.extra_vars = WFJT_extra_vars
         template.inventory = WFJT_inventory

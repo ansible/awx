@@ -107,4 +107,20 @@ class Migration(migrations.Migration):
                 blank=True, editable=False, related_name='joblaunchconfigs', through='main.JobLaunchConfigInstanceGroupMembership', to='main.InstanceGroup'
             ),
         ),
+        # added WFJT prompts
+        migrations.AddField(
+            model_name='workflowjobtemplate',
+            name='ask_labels_on_launch',
+            field=awx.main.fields.AskForField(blank=True, default=False),
+        ),
+        migrations.AddField(
+            model_name='workflowjobtemplate',
+            name='ask_skip_tags_on_launch',
+            field=awx.main.fields.AskForField(blank=True, default=False),
+        ),
+        migrations.AddField(
+            model_name='workflowjobtemplate',
+            name='ask_tags_on_launch',
+            field=awx.main.fields.AskForField(blank=True, default=False),
+        ),
     ]

@@ -189,7 +189,9 @@ describe('<WorkflowJobTemplateForm/>', () => {
       'FieldWithPrompt[label="Inventory"]',
       'FieldWithPrompt[label="Limit"]',
       'FieldWithPrompt[label="Source control branch"]',
-      'FormGroup[label="Labels"]',
+      'FieldWithPrompt[label="Labels"]',
+      'FieldWithPrompt[label="Skip Tags"]',
+      'FieldWithPrompt[label="Job Tags"]',
       'VariablesField',
     ];
 
