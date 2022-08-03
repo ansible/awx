@@ -305,13 +305,13 @@ describe('<Login />', () => {
           router: { history },
           session: {
             authRedirectTo: '/projects',
-            handleSessionContinue: () => {},
+            handleSessionContinue: () => { },
             isSessionExpired: false,
             isUserBeingLoggedOut: false,
             loginRedirectOverride: null,
-            logout: () => {},
+            logout: () => { },
             sessionCountdown: 60,
-            setAuthRedirectTo: () => {},
+            setAuthRedirectTo: () => { },
           },
         },
       });
@@ -337,13 +337,13 @@ describe('<Login />', () => {
           router: { history },
           session: {
             authRedirectTo: '/projects',
-            handleSessionContinue: () => {},
+            handleSessionContinue: () => { },
             isSessionExpired: false,
             isUserBeingLoggedOut: false,
             loginRedirectOverride: null,
-            logout: () => {},
+            logout: () => { },
             sessionCountdown: 60,
-            setAuthRedirectTo: () => {},
+            setAuthRedirectTo: () => { },
           },
         },
       });
@@ -364,7 +364,7 @@ describe('<Login />', () => {
     );
   });
 
-  test('GitHub auth buttons shown', async () => {
+  test('GitHub dropdown auth buttons shown', async () => {
     AuthAPI.read.mockResolvedValue({
       data: {
         github: {
@@ -379,6 +379,21 @@ describe('<Login />', () => {
           login_url: '/sso/login/github-team/',
           complete_url: 'https://localhost:8043/sso/complete/github-team/',
         },
+        'github-enterprise': {
+          login_url: '/sso/login/github-enterprise/',
+          complete_url:
+            'https://localhost:8043/sso/complete/github-enterprise/',
+        },
+        'github-enterprise-org': {
+          login_url: '/sso/login/github-enterprise-org/',
+          complete_url:
+            'https://localhost:8043/sso/complete/github-enterprise-org/',
+        },
+        'github-enterprise-team': {
+          login_url: '/sso/login/github-enterprise-team/',
+          complete_url:
+            'https://localhost:8043/sso/complete/github-enterprise-team/',
+        },
       },
     });
 
@@ -387,10 +402,15 @@ describe('<Login />', () => {
       wrapper = mountWithContexts(<AWXLogin isAuthenticated={() => false} />);
     });
     wrapper.update();
-    expect(wrapper.find('GithubIcon').length).toBe(3);
+    expect(wrapper.find('GithubIcon').length).toBe(1);
     expect(wrapper.find('AzureIcon').length).toBe(0);
     expect(wrapper.find('GoogleIcon').length).toBe(0);
     expect(wrapper.find('UserCircleIcon').length).toBe(0);
+
+    const dropdown = wrapper.find('Dropdown');
+    dropdown.find('button').simulate('click');
+    wrapper.update();
+    expect(wrapper.find('DropdownItem')).toHaveLength(6);
   });
 
   test('Google auth button shown', async () => {
@@ -412,6 +432,9 @@ describe('<Login />', () => {
     expect(wrapper.find('AzureIcon').length).toBe(0);
     expect(wrapper.find('GoogleIcon').length).toBe(1);
     expect(wrapper.find('UserCircleIcon').length).toBe(0);
+    expect(wrapper.find('Button[ouiaId="social-auth-google"]').text()).toBe(
+      'Google'
+    );
   });
 
   test('Azure AD auth button shown', async () => {
@@ -433,6 +456,9 @@ describe('<Login />', () => {
     expect(wrapper.find('AzureIcon').length).toBe(1);
     expect(wrapper.find('GoogleIcon').length).toBe(0);
     expect(wrapper.find('UserCircleIcon').length).toBe(0);
+    expect(wrapper.find('Button[ouiaId="social-auth-azure"]').text()).toBe(
+      'Azure AD'
+    );
   });
 
   test('SAML auth buttons shown', async () => {
@@ -465,5 +491,12 @@ describe('<Login />', () => {
     expect(wrapper.find('AzureIcon').length).toBe(0);
     expect(wrapper.find('GoogleIcon').length).toBe(0);
     expect(wrapper.find('UserCircleIcon').length).toBe(3);
+    expect(wrapper.find('a[href="/sso/login/saml/"]').text()).toBe('SAML');
+    expect(wrapper.find('a[href="/sso/login/saml/?idp=onelogin"]').text()).toBe(
+      'SAML'
+    );
+    expect(
+      wrapper.find('a[href="/sso/login/saml/?idp=someotheridp"]').text()
+    ).toBe('SAML');
   });
 });

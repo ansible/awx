@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-no-useless-fragment */
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { Redirect, withRouter } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
@@ -10,15 +10,21 @@ import DOMPurify from 'dompurify';
 import {
   Alert,
   Brand,
-  LoginMainFooterLinksItem,
+  Button as PFButton,
+  Divider,
+  Dropdown,
+  DropdownItem,
+  DropdownToggle as PFDropdownToggle,
+  LoginMainFooterBandItem as PFLoginMainFooterBandItem,
   LoginForm,
   Login as PFLogin,
   LoginHeader,
   LoginFooter,
   LoginMainHeader,
   LoginMainBody,
-  LoginMainFooter,
+  LoginMainFooter as PFLoginMainFooter,
   Tooltip,
+  Title as PFTitle,
 } from '@patternfly/react-core';
 
 import {
@@ -43,10 +49,47 @@ const Login = styled(PFLogin)`
   }
 `;
 
+const LoginMainFooterBandItem = styled(PFLoginMainFooterBandItem)`
+  padding-bottom: 24px;
+`;
+
+const LoginMainFooter = styled(PFLoginMainFooter)`
+  & .pf-c-login__main-footer-links {
+    padding-left: 48px !important;
+    padding-right: 48px !important;
+    justify-content: space-between !important;
+  }
+`;
+
+const Button = styled(PFButton)`
+  min-width: 200px;
+`;
+
+const DropdownToggle = styled(PFDropdownToggle)`
+  --pf-c-dropdown__toggle--MinWidth: 200px;
+  --pf-c-dropdown__toggle--FontSize: 14px;
+  padding-right: 0px;
+  padding-left: 26px;
+  justify-content: center !important;
+`;
+
+const Title = styled(PFTitle)`
+  text-align: left !important;
+  width: 100% !important;
+  padding-bottom: 8px;
+  padding-top: 24px;
+`;
+
 function AWXLogin({ alt, isAuthenticated }) {
   const { authRedirectTo, isSessionExpired, setAuthRedirectTo } = useSession();
   const isNewUser = useRef(true);
   const hasVerifiedUser = useRef(false);
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleSelect = () => {
+    setIsOpen(!isOpen);
+  };
 
   const {
     isLoading: isCustomLoginInfoLoading,
@@ -162,6 +205,11 @@ function AWXLogin({ alt, isAuthenticated }) {
     window.sessionStorage.setItem(SESSION_REDIRECT_URL, authRedirectTo);
   };
 
+  const dropdownItems = [];
+  const githubCount = Object.keys(socialAuthOptions).filter((item) =>
+    item.includes('github')
+  ).length;
+
   return (
     <Login header={Header} footer={Footer}>
       <LoginMainHeader
@@ -173,7 +221,6 @@ function AWXLogin({ alt, isAuthenticated }) {
         {isSessionExpired.current ? (
           <Alert
             variant="warning"
-            isInline
             title={t`Your session has expired. Please log in to continue where you left off.`}
             ouiaId="session-expired-warning-alert"
           />
@@ -227,147 +274,158 @@ function AWXLogin({ alt, isAuthenticated }) {
       <LoginMainFooter
         socialMediaLoginContent={
           <>
+            {Object.keys(socialAuthOptions).length === 0 ? null : (
+              <>
+                <Divider />
+                <Title size="md" headingLevel="h6">
+                  {t`Log in with`}
+                </Title>
+              </>
+            )}
             {socialAuthOptions &&
               Object.keys(socialAuthOptions).map((authKey) => {
                 const loginUrl = socialAuthOptions[authKey].login_url;
                 if (authKey === 'azuread-oauth2') {
                   return (
-                    <LoginMainFooterLinksItem
+                    <LoginMainFooterBandItem
                       data-cy="social-auth-azure"
-                      href={loginUrl}
                       key={authKey}
-                      onClick={setSessionRedirect}
                     >
-                      <Tooltip content={t`Sign in with Azure AD`}>
-                        <AzureIcon size="lg" />
+                      <Tooltip content={t`Log in with Azure AD`}>
+                        <Button
+                          ouiaId="social-auth-azure"
+                          aria-label={t`Azure AD`}
+                          variant="secondary"
+                          icon={<AzureIcon />}
+                          isSmall
+                          component="a"
+                          href={loginUrl}
+                          onClick={setSessionRedirect}
+                        >
+                          {t`Azure AD`}
+                        </Button>
                       </Tooltip>
-                    </LoginMainFooterLinksItem>
-                  );
-                }
-                if (authKey === 'github') {
-                  return (
-                    <LoginMainFooterLinksItem
-                      data-cy="social-auth-github"
-                      href={loginUrl}
-                      key={authKey}
-                      onClick={setSessionRedirect}
-                    >
-                      <Tooltip content={t`Sign in with GitHub`}>
-                        <GithubIcon size="lg" />
-                      </Tooltip>
-                    </LoginMainFooterLinksItem>
-                  );
-                }
-                if (authKey === 'github-org') {
-                  return (
-                    <LoginMainFooterLinksItem
-                      data-cy="social-auth-github-org"
-                      href={loginUrl}
-                      key={authKey}
-                      onClick={setSessionRedirect}
-                    >
-                      <Tooltip content={t`Sign in with GitHub Organizations`}>
-                        <GithubIcon size="lg" />
-                      </Tooltip>
-                    </LoginMainFooterLinksItem>
-                  );
-                }
-                if (authKey === 'github-team') {
-                  return (
-                    <LoginMainFooterLinksItem
-                      data-cy="social-auth-github-team"
-                      href={loginUrl}
-                      key={authKey}
-                      onClick={setSessionRedirect}
-                    >
-                      <Tooltip content={t`Sign in with GitHub Teams`}>
-                        <GithubIcon size="lg" />
-                      </Tooltip>
-                    </LoginMainFooterLinksItem>
-                  );
-                }
-                if (authKey === 'github-enterprise') {
-                  return (
-                    <LoginMainFooterLinksItem
-                      data-cy="social-auth-github-enterprise"
-                      href={loginUrl}
-                      key={authKey}
-                      onClick={setSessionRedirect}
-                    >
-                      <Tooltip content={t`Sign in with GitHub Enterprise`}>
-                        <GithubIcon size="lg" />
-                      </Tooltip>
-                    </LoginMainFooterLinksItem>
-                  );
-                }
-                if (authKey === 'github-enterprise-org') {
-                  return (
-                    <LoginMainFooterLinksItem
-                      data-cy="social-auth-github-enterprise-org"
-                      href={loginUrl}
-                      key={authKey}
-                      onClick={setSessionRedirect}
-                    >
-                      <Tooltip
-                        content={t`Sign in with GitHub Enterprise Organizations`}
-                      >
-                        <GithubIcon size="lg" />
-                      </Tooltip>
-                    </LoginMainFooterLinksItem>
-                  );
-                }
-                if (authKey === 'github-enterprise-team') {
-                  return (
-                    <LoginMainFooterLinksItem
-                      data-cy="social-auth-github-enterprise-team"
-                      href={loginUrl}
-                      key={authKey}
-                      onClick={setSessionRedirect}
-                    >
-                      <Tooltip
-                        content={t`Sign in with GitHub Enterprise Teams`}
-                      >
-                        <GithubIcon size="lg" />
-                      </Tooltip>
-                    </LoginMainFooterLinksItem>
+                    </LoginMainFooterBandItem>
                   );
                 }
                 if (authKey === 'google-oauth2') {
                   return (
-                    <LoginMainFooterLinksItem
+                    <LoginMainFooterBandItem
                       data-cy="social-auth-google"
-                      href={loginUrl}
                       key={authKey}
-                      onClick={setSessionRedirect}
                     >
-                      <Tooltip content={t`Sign in with Google`}>
-                        <GoogleIcon size="lg" />
+                      <Tooltip content={t`Log in with Google`}>
+                        <Button
+                          ouiaId="social-auth-google"
+                          aria-label={t`Google`}
+                          variant="secondary"
+                          icon={<GoogleIcon />}
+                          isSmall
+                          component="a"
+                          href={loginUrl}
+                          onClick={setSessionRedirect}
+                        >
+                          {t`Google`}
+                        </Button>
                       </Tooltip>
-                    </LoginMainFooterLinksItem>
+                    </LoginMainFooterBandItem>
                   );
                 }
                 if (authKey.startsWith('saml')) {
                   const samlIDP = authKey.split(':')[1] || null;
                   return (
-                    <LoginMainFooterLinksItem
+                    <LoginMainFooterBandItem
                       data-cy="social-auth-saml"
-                      href={loginUrl}
                       key={authKey}
-                      onClick={setSessionRedirect}
                     >
                       <Tooltip
                         content={
                           samlIDP
-                            ? t`Sign in with SAML ${samlIDP}`
-                            : t`Sign in with SAML`
+                            ? t`Log in with SAML ${samlIDP}`
+                            : t`Log in with SAML`
                         }
                       >
-                        <UserCircleIcon size="lg" />
+                        <Button
+                          ouiaId="social-auth-saml"
+                          aria-label={t`SAML`}
+                          variant="secondary"
+                          icon={<UserCircleIcon />}
+                          isSmall
+                          component="a"
+                          href={loginUrl}
+                          onClick={setSessionRedirect}
+                        >
+                          {t`SAML`}
+                        </Button>
                       </Tooltip>
-                    </LoginMainFooterLinksItem>
+                    </LoginMainFooterBandItem>
                   );
                 }
-
+                if (authKey.includes('github')) {
+                  const githubtype = authKey.split('-');
+                  for (let i = 0; i < githubtype.length; i++) {
+                    githubtype[i] =
+                      githubtype[i][0].toUpperCase() +
+                      githubtype[i].substring(1);
+                  }
+                  if (githubCount === 1) {
+                    return (
+                      <LoginMainFooterBandItem
+                        data-cy="social-auth-github"
+                        key={authKey}
+                      >
+                        <Tooltip
+                          content={t`Log in with GitHub ${githubtype[1]} ${githubtype[2]}`}
+                        >
+                          <Button
+                            ouiaId="social-auth-github"
+                            aria-label={t`GitHub ${githubtype[1]} ${githubtype[2]}`}
+                            variant="secondary"
+                            icon={<GithubIcon />}
+                            isSmall
+                            component="a"
+                            href={loginUrl}
+                            onClick={setSessionRedirect}
+                          >
+                            {t`GitHub ${githubtype[1]} ${githubtype[2]}`}
+                          </Button>
+                        </Tooltip>
+                      </LoginMainFooterBandItem>
+                    );
+                  }
+                  dropdownItems.push(
+                    <DropdownItem
+                      href={loginUrl}
+                      key={authKey}
+                      onClick={setSessionRedirect}
+                      ouiaId={authKey}
+                    >
+                      {t`GitHub ${githubtype[1]} ${githubtype[2]}`}
+                    </DropdownItem>
+                  );
+                }
+                if (dropdownItems.length === githubCount && githubCount > 1) {
+                  return (
+                    <Dropdown
+                      ouiaId="github-dropdown"
+                      key="github-selection-dropdown"
+                      isOpen={isOpen}
+                      onSelect={handleSelect}
+                      toggle={
+                        <DropdownToggle
+                          onToggle={setIsOpen}
+                          id="toggle-split-button-action-secondary"
+                          toggleVariant="secondary"
+                          ouiaId="github-dropdown-toggle"
+                        >
+                          <GithubIcon />
+                          {' '}{`GitHub`}
+                        </DropdownToggle>
+                      }
+                      dropdownItems={dropdownItems}
+                    />
+                  );
+                }
                 return null;
               })}
           </>
