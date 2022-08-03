@@ -25,6 +25,7 @@ import {
   twilioPhoneNumber,
 } from 'util/validators';
 import { NotificationType } from 'types';
+import Popover from '../../../components/Popover/Popover';
 import helpText from './Notifications.helptext';
 
 const TypeFields = {
@@ -118,7 +119,11 @@ function EmailFields() {
         max="120"
         tooltip={helpText.emailTimeout}
       />
-      <FormGroup fieldId="email-options" label={t`E-mail options`}>
+      <FormGroup
+        fieldId="email-options"
+        label={t`Email Options`}
+        labelIcon={<Popover content={helpText.emailOptions} />}
+      >
         <FormCheckboxLayout>
           <CheckboxField
             id="option-use-ssl"
