@@ -592,7 +592,7 @@ class AWXReceptorJob:
         return config
 
 
-RECEPTOR_CONFIG_STARTER = [
+RECEPTOR_CONFIG_STARTER = (
     {'control-service': {'service': 'control', 'filename': '/var/run/receptor/receptor.sock', 'permissions': '0600'}},
     {'local-only': None},
     {'work-command': {'worktype': 'local', 'command': 'ansible-runner', 'params': 'worker', 'allowruntimeparams': True}},
@@ -622,23 +622,23 @@ RECEPTOR_CONFIG_STARTER = [
             'key': '/etc/receptor/tls/receptor.key',
         }
     },
-]
+)
 
 
 @task()
 def write_receptor_config():
-    receptor_config = RECEPTOR_CONFIG_STARTER
+    receptor_config = list(RECEPTOR_CONFIG_STARTER)
 
     instances = Instance.objects.exclude(node_type='control')
     for instance in instances:
         # TODO: Stop hardcoding the port
-        peer = {'tcp-peer': {'address': f'{instance.hostname}:2222', 'tls': 'tlsclient'}}
+        peer = {'tcp-peer': {'address': f'{instance.hostname}:{instance.listener_port}', 'tls': 'tlsclient'}}
         receptor_config.append(peer)
 
     lock = FileLock(__RECEPTOR_CONF_LOCKFILE)
     with lock:
         with open(__RECEPTOR_CONF, 'w') as file:
-            yaml.dump(RECEPTOR_CONFIG_STARTER, file, default_flow_style=False)
+            yaml.dump(receptor_config, file, default_flow_style=False)
 
     receptor_ctl = get_receptor_ctl()
 
