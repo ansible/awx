@@ -4774,35 +4774,37 @@ class InstanceSerializer(BaseSerializer):
 
     class Meta:
         model = Instance
-        read_only_fields = ('uuid', 'hostname', 'version', 'node_type', 'node_state')
+        read_only_fields = ('ip_address', 'uuid', 'version', 'node_state')
         fields = (
-            "id",
-            "type",
-            "url",
-            "related",
-            "summary_fields",
-            "uuid",
-            "hostname",
-            "created",
-            "modified",
-            "last_seen",
-            "last_health_check",
-            "errors",
+            'id',
+            'type',
+            'url',
+            'related',
+            'summary_fields',
+            'uuid',
+            'hostname',
+            'created',
+            'modified',
+            'last_seen',
+            'last_health_check',
+            'errors',
             'capacity_adjustment',
-            "version",
-            "capacity",
-            "consumed_capacity",
-            "percent_capacity_remaining",
-            "jobs_running",
-            "jobs_total",
-            "cpu",
-            "memory",
-            "cpu_capacity",
-            "mem_capacity",
-            "enabled",
-            "managed_by_policy",
-            "node_type",
-            "node_state",
+            'version',
+            'capacity',
+            'consumed_capacity',
+            'percent_capacity_remaining',
+            'jobs_running',
+            'jobs_total',
+            'cpu',
+            'memory',
+            'cpu_capacity',
+            'mem_capacity',
+            'enabled',
+            'managed_by_policy',
+            'node_type',
+            'node_state',
+            'ip_address',
+            'listener_port',
         )
 
     def get_related(self, obj):
@@ -4817,6 +4819,7 @@ class InstanceSerializer(BaseSerializer):
     def get_summary_fields(self, obj):
         summary = super().get_summary_fields(obj)
 
+        # use this handle to distinguish between a listView and a detailView
         if self.is_detail_view:
             summary['links'] = InstanceLinkSerializer(InstanceLink.objects.select_related('target', 'source').filter(source=obj), many=True).data
 
@@ -4831,10 +4834,20 @@ class InstanceSerializer(BaseSerializer):
         else:
             return float("{0:.2f}".format(((float(obj.capacity) - float(obj.consumed_capacity)) / (float(obj.capacity))) * 100))
 
-    def validate(self, attrs):
-        if self.instance.node_type == 'hop':
-            raise serializers.ValidationError(_('Hop node instances may not be changed.'))
-        return attrs
+    def validate(self, data):
+        if not self.instance and not settings.IS_K8S:
+            raise serializers.ValidationError("Can only create instances on Kubernetes or OpenShift.")
+        return data
+
+    def validate_node_type(self, value):
+        if not self.instance:
+            if value not in [Instance.Types.EXECUTION, Instance.Types.HOP]:
+                raise serializers.ValidationError("Can only create execution and hop nodes.")
+        else:
+            if self.instance.node_type != value:
+                raise serializers.ValidationError("Cannot change node type.")
+
+        return value
 
 
 class InstanceHealthCheckSerializer(BaseSerializer):

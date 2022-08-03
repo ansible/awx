@@ -358,13 +358,16 @@ class DashboardJobsGraphView(APIView):
         return Response(dashboard_data)
 
 
-class InstanceList(ListAPIView):
+class InstanceList(ListCreateAPIView):
 
     name = _("Instances")
     model = models.Instance
     serializer_class = serializers.InstanceSerializer
     search_fields = ('hostname',)
     ordering = ('id',)
+
+    def perform_create(self, serializer):
+        serializer.save(node_state=models.Instance.States.INSTALLED)
 
 
 class InstanceDetail(RetrieveUpdateAPIView):
