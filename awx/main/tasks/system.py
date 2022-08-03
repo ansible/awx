@@ -114,7 +114,7 @@ def inform_cluster_of_shutdown():
     try:
         this_inst = Instance.objects.get(hostname=settings.CLUSTER_HOST_ID)
         this_inst.mark_offline(update_last_seen=True, errors=_('Instance received normal shutdown signal'))
-        logger.warning('Normal shutdown signal for instance {}, ' 'removed self from capacity pool.'.format(this_inst.hostname))
+        logger.warning('Normal shutdown signal for instance {}, removed self from capacity pool.'.format(this_inst.hostname))
     except Exception:
         logger.exception('Encountered problem with normal shutdown signal.')
 
@@ -341,9 +341,13 @@ def _cleanup_images_and_files(**kwargs):
             logger.info(f'Performed local cleanup with kwargs {kwargs}, output:\n{stdout}')
 
     # if we are the first instance alphabetically, then run cleanup on execution nodes
-    checker_instance = Instance.objects.filter(node_type__in=['hybrid', 'control'], enabled=True, capacity__gt=0).order_by('-hostname').first()
+    checker_instance = (
+        Instance.objects.filter(node_type__in=['hybrid', 'control'], node_state=Instance.States.READY, enabled=True, capacity__gt=0)
+        .order_by('-hostname')
+        .first()
+    )
     if checker_instance and this_inst.hostname == checker_instance.hostname:
-        for inst in Instance.objects.filter(node_type='execution', enabled=True, capacity__gt=0):
+        for inst in Instance.objects.filter(node_type='execution', node_state=Instance.States.READY, enabled=True, capacity__gt=0):
             runner_cleanup_kwargs = inst.get_cleanup_task_kwargs(**kwargs)
             if not runner_cleanup_kwargs:
                 continue
@@ -399,6 +403,9 @@ def execution_node_health_check(node):
     if instance.node_type != 'execution':
         raise RuntimeError(f'Execution node health check ran against {instance.node_type} node {instance.hostname}')
 
+    if instance.node_state not in (Instance.States.READY, Instance.States.UNAVAILABLE, Instance.States.INSTALLED):
+        raise RuntimeError(f"Execution node health check ran against node {instance.hostname} in state {instance.node_state}")
+
     data = worker_info(node)
 
     prior_capacity = instance.capacity
@@ -432,6 +439,7 @@ def inspect_execution_nodes(instance_list):
 
         nowtime = now()
         workers = mesh_status['Advertisements']
+
         for ad in workers:
             hostname = ad['NodeID']
 
@@ -445,9 +453,7 @@ def inspect_execution_nodes(instance_list):
             if instance.node_type in ('control', 'hybrid'):
                 continue
 
-            was_lost = instance.is_lost(ref_time=nowtime)
             last_seen = parse_date(ad['Time'])
-
             if instance.last_seen and instance.last_seen >= last_seen:
                 continue
             instance.last_seen = last_seen
@@ -455,12 +461,12 @@ def inspect_execution_nodes(instance_list):
 
             # Only execution nodes should be dealt with by execution_node_health_check
             if instance.node_type == 'hop':
-                if was_lost and (not instance.is_lost(ref_time=nowtime)):
+                if instance.node_state in (Instance.States.UNAVAILABLE, Instance.States.INSTALLED):
                     logger.warning(f'Hop node {hostname}, has rejoined the receptor mesh')
                     instance.save_health_data(errors='')
                 continue
 
-            if was_lost:
+            if instance.node_state in (Instance.States.UNAVAILABLE, Instance.States.INSTALLED):
                 # if the instance *was* lost, but has appeared again,
                 # attempt to re-establish the initial capacity and version
                 # check
@@ -479,7 +485,7 @@ def inspect_execution_nodes(instance_list):
 def cluster_node_heartbeat():
     logger.debug("Cluster node heartbeat task.")
     nowtime = now()
-    instance_list = list(Instance.objects.all())
+    instance_list = list(Instance.objects.filter(node_state__in=(Instance.States.READY, Instance.States.UNAVAILABLE, Instance.States.INSTALLED)))
     this_inst = None
     lost_instances = []
 
@@ -530,9 +536,9 @@ def cluster_node_heartbeat():
         try:
             if settings.AWX_AUTO_DEPROVISION_INSTANCES:
                 deprovision_hostname = other_inst.hostname
-                other_inst.delete()
+                other_inst.delete()  # FIXME: what about associated inbound links?
                 logger.info("Host {} Automatically Deprovisioned.".format(deprovision_hostname))
-            elif other_inst.capacity != 0 or (not other_inst.errors):
+            elif other_inst.node_state == Instance.States.READY:
                 other_inst.mark_offline(errors=_('Another cluster node has determined this instance to be unresponsive'))
                 logger.error("Host {} last checked in at {}, marked as lost.".format(other_inst.hostname, other_inst.last_seen))
 
