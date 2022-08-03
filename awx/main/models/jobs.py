@@ -227,15 +227,6 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         blank=True,
         default=False,
     )
-    ask_limit_on_launch = AskForField(
-        blank=True,
-        default=False,
-    )
-    ask_tags_on_launch = AskForField(blank=True, default=False, allows_field='job_tags')
-    ask_skip_tags_on_launch = AskForField(
-        blank=True,
-        default=False,
-    )
     ask_job_type_on_launch = AskForField(
         blank=True,
         default=False,
@@ -244,17 +235,8 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         blank=True,
         default=False,
     )
-    ask_inventory_on_launch = AskForField(
-        blank=True,
-        default=False,
-    )
     ask_credential_on_launch = AskForField(blank=True, default=False, allows_field='credentials')
-    ask_scm_branch_on_launch = AskForField(blank=True, default=False, allows_field='scm_branch')
     ask_execution_environment_on_launch = AskForField(
-        blank=True,
-        default=False,
-    )
-    ask_labels_on_launch = AskForField(
         blank=True,
         default=False,
     )

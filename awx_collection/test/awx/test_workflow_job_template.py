@@ -18,6 +18,8 @@ def test_create_workflow_job_template(run_module, admin_user, organization, surv
             'survey_spec': survey_spec,
             'survey_enabled': True,
             'state': 'present',
+            'job_tags': '',
+            'skip_tags': '',
         },
         admin_user,
     )
@@ -35,7 +37,16 @@ def test_create_workflow_job_template(run_module, admin_user, organization, surv
 
 @pytest.mark.django_db
 def test_create_modify_no_survey(run_module, admin_user, organization, survey_spec):
-    result = run_module('workflow_job_template', {'name': 'foo-workflow', 'organization': organization.name}, admin_user)
+    result = run_module(
+        'workflow_job_template',
+        {
+            'name': 'foo-workflow',
+            'organization': organization.name,
+            'job_tags': '',
+            'skip_tags': '',
+        },
+        admin_user,
+    )
     assert not result.get('failed', False), result.get('msg', result)
     assert result.get('changed', False), result
 

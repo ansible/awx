@@ -706,7 +706,7 @@ def jt_linked(organization, project, inventory, machine_credential, credential, 
 
 @pytest.fixture
 def workflow_job_template(organization):
-    wjt = WorkflowJobTemplate(name='test-workflow_job_template', organization=organization)
+    wjt = WorkflowJobTemplate.objects.create(name='test-workflow_job_template', organization=organization)
     wjt.save()
 
     return wjt

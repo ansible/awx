@@ -287,12 +287,25 @@ class TestWorkflowJobTemplatePrompts:
     @pytest.fixture
     def wfjt_prompts(self):
         return WorkflowJobTemplate.objects.create(
-            ask_inventory_on_launch=True, ask_variables_on_launch=True, ask_limit_on_launch=True, ask_scm_branch_on_launch=True
+            ask_variables_on_launch=True,
+            ask_inventory_on_launch=True,
+            ask_tags_on_launch=True,
+            ask_labels_on_launch=True,
+            ask_limit_on_launch=True,
+            ask_scm_branch_on_launch=True,
+            ask_skip_tags_on_launch=True,
         )
 
     @pytest.fixture
     def prompts_data(self, inventory):
-        return dict(inventory=inventory, extra_vars={'foo': 'bar'}, limit='webservers', scm_branch='release-3.3')
+        return dict(
+            inventory=inventory,
+            extra_vars={'foo': 'bar'},
+            limit='webservers',
+            scm_branch='release-3.3',
+            job_tags='foo',
+            skip_tags='bar',
+        )
 
     def test_apply_workflow_job_prompts(self, workflow_job_template, wfjt_prompts, prompts_data, inventory):
         # null or empty fields used
@@ -300,6 +313,9 @@ class TestWorkflowJobTemplatePrompts:
         assert workflow_job.limit is None
         assert workflow_job.inventory is None
         assert workflow_job.scm_branch is None
+        assert workflow_job.job_tags is None
+        assert workflow_job.skip_tags is None
+        assert len(workflow_job.labels.all()) is 0
 
         # fields from prompts used
         workflow_job = workflow_job_template.create_unified_job(**prompts_data)
@@ -307,15 +323,21 @@ class TestWorkflowJobTemplatePrompts:
         assert workflow_job.limit == 'webservers'
         assert workflow_job.inventory == inventory
         assert workflow_job.scm_branch == 'release-3.3'
+        assert workflow_job.job_tags == 'foo'
+        assert workflow_job.skip_tags == 'bar'
 
         # non-null fields from WFJT used
         workflow_job_template.inventory = inventory
         workflow_job_template.limit = 'fooo'
         workflow_job_template.scm_branch = 'bar'
+        workflow_job_template.job_tags = 'baz'
+        workflow_job_template.skip_tags = 'dinosaur'
         workflow_job = workflow_job_template.create_unified_job()
         assert workflow_job.limit == 'fooo'
         assert workflow_job.inventory == inventory
         assert workflow_job.scm_branch == 'bar'
+        assert workflow_job.job_tags == 'baz'
+        assert workflow_job.skip_tags == 'dinosaur'
 
     @pytest.mark.django_db
     def test_process_workflow_job_prompts(self, inventory, workflow_job_template, wfjt_prompts, prompts_data):
@@ -340,12 +362,19 @@ class TestWorkflowJobTemplatePrompts:
                 ask_limit_on_launch=True,
                 scm_branch='bar',
                 ask_scm_branch_on_launch=True,
+                job_tags='foo',
+                skip_tags='bar',
             ),
             user=org_admin,
             expect=201,
         )
         wfjt = WorkflowJobTemplate.objects.get(id=r.data['id'])
-        assert wfjt.char_prompts == {'limit': 'foooo', 'scm_branch': 'bar'}
+        assert wfjt.char_prompts == {
+            'limit': 'foooo',
+            'scm_branch': 'bar',
+            'job_tags': 'foo',
+            'skip_tags': 'bar',
+        }
         assert wfjt.ask_scm_branch_on_launch is True
         assert wfjt.ask_limit_on_launch is True
 
@@ -354,6 +383,67 @@ class TestWorkflowJobTemplatePrompts:
             r = post(url=launch_url, data=dict(scm_branch='prompt_branch', limit='prompt_limit'), user=org_admin, expect=201)
         assert r.data['limit'] == 'prompt_limit'
         assert r.data['scm_branch'] == 'prompt_branch'
+
+    @pytest.mark.django_db
+    def test_set_all_ask_for_prompts_false_from_post(self, post, organization, inventory, org_admin):
+        '''
+        Tests default behaviour and values of ask_for_* fields on WFJT via POST
+        '''
+        r = post(
+            url=reverse('api:workflow_job_template_list'),
+            data=dict(
+                name='workflow that tests ask_for prompts',
+                organization=organization.id,
+                inventory=inventory.id,
+                job_tags='',
+                skip_tags='',
+            ),
+            user=org_admin,
+            expect=201,
+        )
+        wfjt = WorkflowJobTemplate.objects.get(id=r.data['id'])
+
+        assert wfjt.ask_inventory_on_launch is False
+        assert wfjt.ask_labels_on_launch is False
+        assert wfjt.ask_limit_on_launch is False
+        assert wfjt.ask_scm_branch_on_launch is False
+        assert wfjt.ask_skip_tags_on_launch is False
+        assert wfjt.ask_tags_on_launch is False
+        assert wfjt.ask_variables_on_launch is False
+
+    @pytest.mark.django_db
+    def test_set_all_ask_for_prompts_true_from_post(self, post, organization, inventory, org_admin):
+        '''
+        Tests behaviour and values of ask_for_* fields on WFJT via POST
+        '''
+        r = post(
+            url=reverse('api:workflow_job_template_list'),
+            data=dict(
+                name='workflow that tests ask_for prompts',
+                organization=organization.id,
+                inventory=inventory.id,
+                job_tags='',
+                skip_tags='',
+                ask_inventory_on_launch=True,
+                ask_labels_on_launch=True,
+                ask_limit_on_launch=True,
+                ask_scm_branch_on_launch=True,
+                ask_skip_tags_on_launch=True,
+                ask_tags_on_launch=True,
+                ask_variables_on_launch=True,
+            ),
+            user=org_admin,
+            expect=201,
+        )
+        wfjt = WorkflowJobTemplate.objects.get(id=r.data['id'])
+
+        assert wfjt.ask_inventory_on_launch is True
+        assert wfjt.ask_labels_on_launch is True
+        assert wfjt.ask_limit_on_launch is True
+        assert wfjt.ask_scm_branch_on_launch is True
+        assert wfjt.ask_skip_tags_on_launch is True
+        assert wfjt.ask_tags_on_launch is True
+        assert wfjt.ask_variables_on_launch is True
 
 
 @pytest.mark.django_db

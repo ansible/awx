@@ -29,7 +29,7 @@ from awx.main.models import prevent_search, accepts_json, UnifiedJobTemplate, Un
 from awx.main.models.notifications import NotificationTemplate, JobNotificationMixin
 from awx.main.models.base import CreatedModifiedModel, VarsDictProperty
 from awx.main.models.rbac import ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
-from awx.main.fields import ImplicitRoleField, AskForField, JSONBlob
+from awx.main.fields import ImplicitRoleField, JSONBlob
 from awx.main.models.mixins import (
     ResourceMixin,
     SurveyJobTemplateMixin,
@@ -385,7 +385,7 @@ class WorkflowJobOptions(LaunchTimeConfigBase):
     @classmethod
     def _get_unified_job_field_names(cls):
         r = set(f.name for f in WorkflowJobOptions._meta.fields) | set(
-            ['name', 'description', 'organization', 'survey_passwords', 'labels', 'limit', 'scm_branch']
+            ['name', 'description', 'organization', 'survey_passwords', 'labels', 'limit', 'scm_branch', 'job_tags', 'skip_tags']
         )
         r.remove('char_prompts')  # needed due to copying launch config to launch config
         return r
@@ -425,26 +425,28 @@ class WorkflowJobOptions(LaunchTimeConfigBase):
 class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTemplateMixin, ResourceMixin, RelatedJobsMixin, WebhookTemplateMixin):
 
     SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name', 'organization')]
-    FIELDS_TO_PRESERVE_AT_COPY = ['labels', 'organization', 'instance_groups', 'workflow_job_template_nodes', 'credentials', 'survey_spec']
+    FIELDS_TO_PRESERVE_AT_COPY = [
+        'labels',
+        'organization',
+        'instance_groups',
+        'workflow_job_template_nodes',
+        'credentials',
+        'survey_spec',
+        'skip_tags',
+        'job_tags',
+    ]
 
     class Meta:
         app_label = 'main'
 
-    ask_inventory_on_launch = AskForField(
+    notification_templates_approvals = models.ManyToManyField(
+        "NotificationTemplate",
         blank=True,
-        default=False,
+        related_name='%(class)s_notification_templates_for_approvals',
     )
-    ask_limit_on_launch = AskForField(
-        blank=True,
-        default=False,
+    admin_role = ImplicitRoleField(
+        parent_role=['singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, 'organization.workflow_admin_role'],
     )
-    ask_scm_branch_on_launch = AskForField(
-        blank=True,
-        default=False,
-    )
-    notification_templates_approvals = models.ManyToManyField("NotificationTemplate", blank=True, related_name='%(class)s_notification_templates_for_approvals')
-
-    admin_role = ImplicitRoleField(parent_role=['singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, 'organization.workflow_admin_role'])
     execute_role = ImplicitRoleField(
         parent_role=[
             'admin_role',
