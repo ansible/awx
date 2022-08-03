@@ -18,6 +18,7 @@ const wfHelpTextStrings = () => ({
   webhookKey: t`Webhook services can use this as a shared secret.`,
   webhookCredential: t`Optionally select the credential to use to send status updates back to the webhook service.`,
   webhookService: t`Select a webhook service.`,
+  skipTags: t`Skip tags are useful when you have a large playbook, and you want to skip specific parts of a play or task. Use commas to separate multiple tags. Refer to the documentation for details on the usage of tags.`,
   enabledOptions: (
     <>
       <p>{t`Concurrent jobs: If enabled, simultaneous runs of this workflow job template will be allowed.`}</p>

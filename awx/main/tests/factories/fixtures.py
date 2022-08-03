@@ -210,7 +210,7 @@ def mk_workflow_job_template(name, extra_vars='', spec=None, organization=None, 
     if extra_vars:
         extra_vars = json.dumps(extra_vars)
 
-    wfjt = WorkflowJobTemplate(name=name, extra_vars=extra_vars, organization=organization, webhook_service=webhook_service)
+    wfjt = WorkflowJobTemplate.objects.create(name=name, extra_vars=extra_vars, organization=organization, webhook_service=webhook_service)
 
     if spec:
         wfjt.survey_spec = spec

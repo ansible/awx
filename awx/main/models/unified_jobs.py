@@ -422,6 +422,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         if unified_job.__class__ in activity_stream_registrar.models:
             activity_stream_create(None, unified_job, True)
         unified_job.log_lifecycle("created")
+
         return unified_job
 
     @classmethod

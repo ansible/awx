@@ -3197,13 +3197,17 @@ class WorkflowJobTemplateLaunch(RetrieveAPIView):
                 data['extra_vars'] = extra_vars
             modified_ask_mapping = models.WorkflowJobTemplate.get_ask_mapping()
             modified_ask_mapping.pop('extra_vars')
-            for field_name, ask_field_name in obj.get_ask_mapping().items():
+
+            for field, ask_field_name in modified_ask_mapping.items():
                 if not getattr(obj, ask_field_name):
-                    data.pop(field_name, None)
-                elif field_name == 'inventory':
-                    data[field_name] = getattrd(obj, "%s.%s" % (field_name, 'id'), None)
+                    data.pop(field, None)
+                elif isinstance(getattr(obj.__class__, field).field, ForeignKey):
+                    data[field] = getattrd(obj, "%s.%s" % (field, 'id'), None)
+                elif isinstance(getattr(obj.__class__, field).field, ManyToManyField):
+                    data[field] = [item.id for item in getattr(obj, field).all()]
                 else:
-                    data[field_name] = getattr(obj, field_name)
+                    data[field] = getattr(obj, field)
+
         return data
 
     def post(self, request, *args, **kwargs):
