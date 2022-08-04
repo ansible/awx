@@ -40,3 +40,36 @@ body:
         - label: CLI
         - label: Other
 
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to reproduce
+      description: >-
+        Starting from a new installation of the system, describe exactly how a developer or quality engineer can reproduce the scenario
+        on infrastructure that isn't yours. Include any and all resources created, input values, test users, roles assigned, playbooks used, etc.
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-results
+    attributes:
+      label: Current results
+      description: What happens when running the steps above?
+    validations:
+      required: true
+
+  - type: textarea
+    id: sugested-results
+    attributes:
+      label: Sugested feature result
+      description: What could happen to improve the system or user experience?
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-information
+    attributes:
+      label: Additional information
+      description: Include any relevant log output, links to sosreport, database dumps, screenshots, or other information.
+    validations:
+      required: false
