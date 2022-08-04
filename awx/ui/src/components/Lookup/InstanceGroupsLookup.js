@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { arrayOf, string, func, bool } from 'prop-types';
 import { withRouter } from 'react-router-dom';
-
 import { t, Trans } from '@lingui/macro';
 import { FormGroup } from '@patternfly/react-core';
 import { InstanceGroupsAPI } from 'api';
@@ -13,6 +12,7 @@ import Popover from '../Popover';
 import OptionsList from '../OptionsList';
 import Lookup from './Lookup';
 import LookupErrorMessage from './shared/LookupErrorMessage';
+import FieldWithPrompt from '../FieldWithPrompt';
 
 const QS_CONFIG = getQSConfig('instance-groups', {
   page: 1,
@@ -21,6 +21,7 @@ const QS_CONFIG = getQSConfig('instance-groups', {
 });
 
 function InstanceGroupsLookup({
+  id,
   value,
   onChange,
   tooltip,
@@ -29,6 +30,9 @@ function InstanceGroupsLookup({
   history,
   fieldName,
   validate,
+  isPromptableField,
+  promptId,
+  promptName,
 }) {
   const {
     result: { instanceGroups, count, relatedSearchableKeys, searchableKeys },
@@ -63,13 +67,8 @@ function InstanceGroupsLookup({
     fetchInstanceGroups();
   }, [fetchInstanceGroups]);
 
-  return (
-    <FormGroup
-      className={className}
-      label={t`Instance Groups`}
-      labelIcon={tooltip && <Popover content={tooltip} />}
-      fieldId="org-instance-groups"
-    >
+  const renderLookup = () => (
+    <>
       <Lookup
         id="org-instance-groups"
         header={t`Instance Groups`}
@@ -133,11 +132,33 @@ function InstanceGroupsLookup({
         )}
       />
       <LookupErrorMessage error={error} />
+    </>
+  );
+
+  return isPromptableField ? (
+    <FieldWithPrompt
+      fieldId={id}
+      label={t`Instance Groups`}
+      promptId={promptId}
+      promptName={promptName}
+      tooltip={tooltip}
+    >
+      {renderLookup()}
+    </FieldWithPrompt>
+  ) : (
+    <FormGroup
+      className={className}
+      label={t`Instance Groups`}
+      labelIcon={tooltip && <Popover content={tooltip} />}
+      fieldId={id}
+    >
+      {renderLookup()}
     </FormGroup>
   );
 }
 
 InstanceGroupsLookup.propTypes = {
+  id: string,
   value: arrayOf(InstanceGroup).isRequired,
   tooltip: string,
   onChange: func.isRequired,
@@ -148,6 +169,7 @@ InstanceGroupsLookup.propTypes = {
 };
 
 InstanceGroupsLookup.defaultProps = {
+  id: 'org-instance-groups',
   tooltip: '',
   className: '',
   required: false,
