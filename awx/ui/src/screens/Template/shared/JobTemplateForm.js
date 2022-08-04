@@ -320,6 +320,9 @@ function JobTemplateForm({
           globallyAvailable
           isDisabled={!projectField.value?.id}
           projectId={projectField.value?.id}
+          promptId="template-ask-execution-environment-on-launch"
+          promptName="ask_execution_environment_on_launch"
+          isPromptableField
         />
 
         {projectField.value?.allow_override && (
