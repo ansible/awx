@@ -87,6 +87,7 @@ def get_receptor_ctl():
 
 def find_node_in_mesh(node_name, receptor_ctl):
     attempts = 10
+    backoff = 1
     for attempt in range(attempts):
         all_nodes = receptor_ctl.simple_command("status").get('Advertisements', None)
         for node in all_nodes:
@@ -94,7 +95,8 @@ def find_node_in_mesh(node_name, receptor_ctl):
                 return node
         else:
             logger.warning(f"Instance {node_name} is not in the receptor mesh. {attempts-attempt} attempts left.")
-            time.sleep(1)
+            time.sleep(backoff)
+            backoff += 1
     else:
         raise ReceptorNodeNotFound(f'Instance {node_name} is not in the receptor mesh')
 
@@ -631,7 +633,6 @@ def write_receptor_config():
 
     instances = Instance.objects.exclude(node_type='control')
     for instance in instances:
-        # TODO: Stop hardcoding the port
         peer = {'tcp-peer': {'address': f'{instance.hostname}:{instance.listener_port}', 'tls': 'tlsclient'}}
         receptor_config.append(peer)
 
@@ -643,18 +644,14 @@ def write_receptor_config():
     receptor_ctl = get_receptor_ctl()
 
     attempts = 10
+    backoff = 1
     for attempt in range(attempts):
         try:
             receptor_ctl.simple_command("reload")
             break
         except ValueError:
             logger.warning(f"Unable to reload Receptor configuration. {attempts-attempt} attempts left.")
-            time.sleep(1)
+            time.sleep(backoff)
+            backoff += 1
     else:
-        raise RuntimeError("Failed to reload Receptor configuration. Is it running?")
-
-    from awx.main.tasks.system import execution_node_health_check
-
-    for instance in instances:
-        if instance.node_state in (Instance.States.UNAVAILABLE, Instance.States.INSTALLED):
-            execution_node_health_check.apply_async([instance.hostname])
+        raise RuntimeError("Receptor reload failed")
