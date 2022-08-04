@@ -8,17 +8,11 @@ function InstanceAdd() {
   const history = useHistory();
   const [formError, setFormError] = useState();
   const handleSubmit = async (values) => {
-    const { instanceGroups, executionEnvironment } = values;
-    values.execution_environment = executionEnvironment?.id;
-
     try {
       const {
         data: { id },
-      } = await InstancesAPI.create();
+      } = await InstancesAPI.create(values);
 
-      for (const group of instanceGroups) {
-        await InstancesAPI.associateInstanceGroup(id, group.id);
-      }
       history.push(`/instances/${id}/details`);
     } catch (err) {
       setFormError(err);
