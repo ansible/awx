@@ -24,6 +24,12 @@ function canLaunchWithoutPrompt(launchData) {
     !launchData.ask_variables_on_launch &&
     !launchData.ask_limit_on_launch &&
     !launchData.ask_scm_branch_on_launch &&
+    !launchData.ask_execution_environment_on_launch &&
+    !launchData.ask_labels_on_launch &&
+    !launchData.ask_forks_on_launch &&
+    !launchData.ask_job_slicing_on_launch &&
+    !launchData.ask_timeout_on_launch &&
+    !launchData.ask_instance_groups_on_launch &&
     !launchData.survey_enabled &&
     (!launchData.passwords_needed_to_start ||
       launchData.passwords_needed_to_start.length === 0) &&
