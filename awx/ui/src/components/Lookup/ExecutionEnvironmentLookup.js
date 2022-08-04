@@ -153,49 +153,52 @@ function ExecutionEnvironmentLookup({
   }, [fetchExecutionEnvironments]);
 
   const renderLookup = () => (
-    <Lookup
-      id={id}
-      header={t`Execution Environment`}
-      value={value}
-      onBlur={onBlur}
-      onChange={onChange}
-      onUpdate={fetchExecutionEnvironments}
-      onDebounce={checkExecutionEnvironmentName}
-      fieldName={fieldName}
-      validate={validate}
-      qsConfig={QS_CONFIG}
-      isLoading={isLoading || isProjectLoading}
-      isDisabled={isDisabled}
-      renderOptionsList={({ state, dispatch, canDelete }) => (
-        <OptionsList
-          value={state.selectedItems}
-          options={executionEnvironments}
-          optionCount={count}
-          searchColumns={[
-            {
-              name: t`Name`,
-              key: 'name__icontains',
-              isDefault: true,
-            },
-          ]}
-          sortColumns={[
-            {
-              name: t`Name`,
-              key: 'name',
-            },
-          ]}
-          searchableKeys={searchableKeys}
-          relatedSearchableKeys={relatedSearchableKeys}
-          multiple={state.multiple}
-          header={t`Execution Environment`}
-          name="executionEnvironments"
-          qsConfig={QS_CONFIG}
-          readOnly={!canDelete}
-          selectItem={(item) => dispatch({ type: 'SELECT_ITEM', item })}
-          deselectItem={(item) => dispatch({ type: 'DESELECT_ITEM', item })}
-        />
-      )}
-    />
+    <>
+      <Lookup
+        id={id}
+        header={t`Execution Environment`}
+        value={value}
+        onBlur={onBlur}
+        onChange={onChange}
+        onUpdate={fetchExecutionEnvironments}
+        onDebounce={checkExecutionEnvironmentName}
+        fieldName={fieldName}
+        validate={validate}
+        qsConfig={QS_CONFIG}
+        isLoading={isLoading || isProjectLoading}
+        isDisabled={isDisabled}
+        renderOptionsList={({ state, dispatch, canDelete }) => (
+          <OptionsList
+            value={state.selectedItems}
+            options={executionEnvironments}
+            optionCount={count}
+            searchColumns={[
+              {
+                name: t`Name`,
+                key: 'name__icontains',
+                isDefault: true,
+              },
+            ]}
+            sortColumns={[
+              {
+                name: t`Name`,
+                key: 'name',
+              },
+            ]}
+            searchableKeys={searchableKeys}
+            relatedSearchableKeys={relatedSearchableKeys}
+            multiple={state.multiple}
+            header={t`Execution Environment`}
+            name="executionEnvironments"
+            qsConfig={QS_CONFIG}
+            readOnly={!canDelete}
+            selectItem={(item) => dispatch({ type: 'SELECT_ITEM', item })}
+            deselectItem={(item) => dispatch({ type: 'DESELECT_ITEM', item })}
+          />
+        )}
+      />
+      <LookupErrorMessage error={error || fetchProjectError} />
+    </>
   );
 
   const renderLabel = () => {
@@ -218,7 +221,6 @@ function ExecutionEnvironmentLookup({
       ) : (
         renderLookup()
       )}
-      <LookupErrorMessage error={error || fetchProjectError} />
     </FieldWithPrompt>
   ) : (
     <FormGroup
