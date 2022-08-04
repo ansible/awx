@@ -1,40 +1,36 @@
 import React from 'react';
 import { t } from '@lingui/macro';
 import { Formik, useField } from 'formik';
-import { Form, FormGroup, CardBody } from '@patternfly/react-core';
+import {
+  Form,
+  FormGroup,
+  CardBody,
+  Switch,
+  Popover,
+} from '@patternfly/react-core';
 import { FormColumnLayout } from 'components/FormLayout';
 import FormField, { FormSubmitError } from 'components/FormField';
 import FormActionGroup from 'components/FormActionGroup';
 import { required } from 'util/validators';
 import AnsibleSelect from 'components/AnsibleSelect';
-import {
-  ExecutionEnvironmentLookup,
-  InstanceGroupsLookup,
-} from 'components/Lookup';
 
 // This is hard coded because the API does not have the ability to send us a list that contains
 // only the types of instances that can be added.  Control and Hybrid instances cannot be added.
 
 const INSTANCE_TYPES = [
-  { id: 2, name: t`Execution`, value: 'execution' },
-  { id: 3, name: t`Hop`, value: 'hop' },
+  { id: 'execution', name: t`Execution` },
+  { id: 'hop', name: t`Hop` },
 ];
 
 function InstanceFormFields() {
-  const [instanceType, , instanceTypeHelpers] = useField('type');
-  const [instanceGroupsField, , instanceGroupsHelpers] =
-    useField('instanceGroups');
-  const [
-    executionEnvironmentField,
-    executionEnvironmentMeta,
-    executionEnvironmentHelpers,
-  ] = useField('executionEnvironment');
+  const [instanceType, , instanceTypeHelpers] = useField('node_type');
+  const [enabled, , enabledHelpers] = useField('enabled');
   return (
     <>
       <FormField
-        id="instance-name"
+        id="name"
         label={t`Name`}
-        name="name"
+        name="hostname"
         type="text"
         validate={required(null)}
         isRequired
@@ -44,6 +40,20 @@ function InstanceFormFields() {
         label={t`Description`}
         name="description"
         type="text"
+      />
+      <FormField
+        id="instance-state"
+        label={t`Instance State`}
+        name="node_state"
+        type="text"
+        isDisabled
+      />
+      <FormField
+        id="instance-port"
+        label={t`Listener Port`}
+        name="listener_port"
+        type="number"
+        isRequired
       />
       <FormGroup
         fieldId="instanceType"
@@ -57,9 +67,8 @@ function InstanceFormFields() {
           id="instanceType-select"
           data={INSTANCE_TYPES.map((type) => ({
             key: type.id,
-            value: type.value,
+            value: type.id,
             label: type.name,
-            isDisabled: false,
           }))}
           value={instanceType.value}
           onChange={(e, opt) => {
@@ -67,25 +76,27 @@ function InstanceFormFields() {
           }}
         />
       </FormGroup>
-      <InstanceGroupsLookup
-        value={instanceGroupsField.value}
-        onChange={(value) => {
-          instanceGroupsHelpers.setValue(value);
-        }}
-        fieldName="instanceGroups"
-      />
-      <ExecutionEnvironmentLookup
-        helperTextInvalid={executionEnvironmentMeta.error}
-        isValid={
-          !executionEnvironmentMeta.touched || !executionEnvironmentMeta.error
+      <FormGroup
+        label={t`Enable Instance`}
+        aria-label={t`Enable Instance`}
+        labelIcon={
+          <Popover
+            content={t`If enabled, the instance will be ready to accept work.`}
+          />
         }
-        fieldName={executionEnvironmentField.name}
-        onBlur={() => executionEnvironmentHelpers.setTouched()}
-        value={executionEnvironmentField.value}
-        onChange={(value) => {
-          executionEnvironmentHelpers.setValue(value);
-        }}
-      />
+      >
+        <Switch
+          css="display: inline-flex;"
+          id="enabled"
+          label={t`Enabled`}
+          labelOff={t`Disabled`}
+          isChecked={enabled.value}
+          onChange={() => {
+            enabledHelpers.setValue(!enabled.value);
+          }}
+          ouiaId="enable-instance-switch"
+        />
+      </FormGroup>
     </>
   );
 }
@@ -100,11 +111,12 @@ function InstanceForm({
     <CardBody>
       <Formik
         initialValues={{
-          name: instance.name || '',
-          description: instance.description || '',
-          type: instance.type || 'execution',
-          instanceGroups: instance.instance_groups || [],
-          executionEnvironment: instance.execution_environment || null,
+          hostname: '',
+          description: '',
+          node_type: 'execution',
+          node_state: 'Installed',
+          listener_port: 27199,
+          enabled: true,
         }}
         onSubmit={(values) => {
           handleSubmit(values);

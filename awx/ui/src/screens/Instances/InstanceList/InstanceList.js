@@ -10,12 +10,14 @@ import PaginatedTable, {
   HeaderRow,
   HeaderCell,
   getSearchableKeys,
+  ToolbarAddButton,
 } from 'components/PaginatedTable';
 import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';
+import { useConfig } from 'contexts/Config';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import useSelected from 'hooks/useSelected';
-import { InstancesAPI } from 'api';
+import { InstancesAPI, SettingsAPI } from 'api';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import HealthCheckButton from 'components/HealthCheckButton';
 import InstanceListItem from './InstanceListItem';
@@ -28,21 +30,24 @@ const QS_CONFIG = getQSConfig('instance', {
 
 function InstanceList() {
   const location = useLocation();
+  const { me } = useConfig();
 
   const {
-    result: { instances, count, relatedSearchableKeys, searchableKeys },
+    result: { instances, count, relatedSearchableKeys, searchableKeys, isK8 },
     error: contentError,
     isLoading,
     request: fetchInstances,
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
-      const [response, responseActions] = await Promise.all([
+      const [response, responseActions, sysSettings] = await Promise.all([
         InstancesAPI.read(params),
         InstancesAPI.readOptions(),
+        SettingsAPI.readCategory('system'),
       ]);
       return {
         instances: response.data.results,
+        isK8: sysSettings.data.IS_K8S,
         count: response.data.count,
         actions: responseActions.data.actions,
         relatedSearchableKeys: (
@@ -57,6 +62,7 @@ function InstanceList() {
       actions: {},
       relatedSearchableKeys: [],
       searchableKeys: [],
+      isK8: false,
     }
   );
 
@@ -89,6 +95,7 @@ function InstanceList() {
 
   const { expanded, isAllExpanded, handleExpand, expandAll } =
     useExpanded(instances);
+
   return (
     <>
       <PageSection>
@@ -135,6 +142,15 @@ function InstanceList() {
                 onExpandAll={expandAll}
                 qsConfig={QS_CONFIG}
                 additionalControls={[
+                  ...(isK8 && me.is_superuser
+                    ? [
+                        <ToolbarAddButton
+                          ouiaId="instances-add-button"
+                          key="add"
+                          linkTo="/instances/add"
+                        />,
+                      ]
+                    : []),
                   <HealthCheckButton
                     onClick={handleHealthCheck}
                     selectedItems={selected}
