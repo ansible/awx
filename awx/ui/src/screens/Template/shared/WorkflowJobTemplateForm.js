@@ -186,10 +186,12 @@ function WorkflowJobTemplateForm({
         </FieldWithPrompt>
       </FormColumnLayout>
       <FormFullWidthLayout>
-        <FormGroup
-          label={t`Labels`}
-          labelIcon={<Popover content={helpText.labels} />}
+        <FieldWithPrompt
           fieldId="template-labels"
+          label={t`Labels`}
+          promptId="template-ask-labels-on-launch"
+          promptName="ask_labels_on_launch"
+          tooltip={helpText.labels}
         >
           <LabelSelect
             value={labelsField.value}
@@ -197,7 +199,7 @@ function WorkflowJobTemplateForm({
             onError={setContentError}
             createText={t`Create`}
           />
-        </FormGroup>
+        </FieldWithPrompt>
       </FormFullWidthLayout>
       <FormFullWidthLayout>
         <VariablesField
@@ -283,6 +285,7 @@ const FormikApp = withFormik({
       allow_simultaneous: template.allow_simultaneous || false,
       webhook_credential: template?.summary_fields?.webhook_credential || null,
       webhook_service: template.webhook_service || '',
+      ask_labels_on_launch: template.ask_labels_on_launch || false,
       ask_limit_on_launch: template.ask_limit_on_launch || false,
       ask_inventory_on_launch: template.ask_inventory_on_launch || false,
       ask_variables_on_launch: template.ask_variables_on_launch || false,
