@@ -972,10 +972,12 @@ class UnifiedJob(
             valid_fields.extend(['survey_passwords', 'extra_vars'])
         else:
             kwargs.pop('survey_passwords', None)
+        many_to_many_fields = []
         for field_name, value in kwargs.items():
             if field_name not in valid_fields:
                 raise Exception('Unrecognized launch config field {}.'.format(field_name))
-            if field_name == 'credentials':
+            if isinstance(getattr(self.__class__, field_name).field, (models.ManyToManyField, models.ForeignKey)):
+                many_to_many_fields.append(field_name)
                 continue
             key = field_name
             if key == 'extra_vars':
@@ -983,11 +985,22 @@ class UnifiedJob(
             setattr(config, key, value)
         config.save()
 
-        job_creds = set(kwargs.get('credentials', []))
-        if 'credentials' in [field.name for field in parent._meta.get_fields()]:
-            job_creds = job_creds - set(parent.credentials.all())
-        if job_creds:
-            config.credentials.add(*job_creds)
+        for field_name in many_to_many_fields:
+            if field_name == 'credentials':
+                # Credentials are a special case of many to many because of how they function
+                # (i.e. you can't have > 1 machine cred)
+                job_item = set(kwargs.get(field_name, []))
+                if field_name in [field.name for field in parent._meta.get_fields()]:
+                    job_item = job_item - set(getattr(parent, field_name).all())
+                if job_item:
+                    getattr(config, field_name).add(*job_item)
+            else:
+                # Here we may be handling an ordered field so we want to preserve order from the input
+                job_item = kwargs.get(field_name, [])
+                if job_item:
+                    for item in job_item:
+                        getattr(config, field_name).add(item)
+
         return config
 
     @property
