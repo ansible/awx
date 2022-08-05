@@ -225,6 +225,12 @@ function ScheduleForm({
       launchConfig.ask_scm_branch_on_launch ||
       launchConfig.ask_tags_on_launch ||
       launchConfig.ask_skip_tags_on_launch ||
+      launchConfig.ask_execution_environment_on_launch ||
+      launchConfig.ask_labels_on_launch ||
+      launchConfig.ask_forks_on_launch ||
+      launchConfig.ask_job_slicing_on_launch ||
+      launchConfig.ask_timeout_on_launch ||
+      launchConfig.ask_instance_groups_on_launch ||
       launchConfig.survey_enabled ||
       launchConfig.inventory_needed_to_start ||
       launchConfig.variables_needed_to_start?.length > 0)
