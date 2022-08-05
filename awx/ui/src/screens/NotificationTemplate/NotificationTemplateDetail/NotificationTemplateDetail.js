@@ -172,7 +172,11 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
               dataCy="nt-detail-timeout"
             />
             {renderOptionsField && (
-              <Detail label={t`Email Options`} value={renderOptions} />
+              <Detail
+                label={t`Email Options`}
+                value={renderOptions}
+                helpText={helpText.emailOptions}
+              />
             )}
           </>
         )}
