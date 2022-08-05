@@ -71,7 +71,13 @@ function hasPromptData(launchData) {
     launchData.ask_skip_tags_on_launch ||
     launchData.ask_tags_on_launch ||
     launchData.ask_variables_on_launch ||
-    launchData.ask_verbosity_on_launch
+    launchData.ask_verbosity_on_launch ||
+    launchData.ask_execution_environment_on_launch ||
+    launchData.ask_labels_on_launch ||
+    launchData.ask_forks_on_launch ||
+    launchData.ask_job_slicing_on_launch ||
+    launchData.ask_timeout_on_launch ||
+    launchData.ask_instance_groups_on_launch
   );
 }
 
