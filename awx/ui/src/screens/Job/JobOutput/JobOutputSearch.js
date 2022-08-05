@@ -61,7 +61,7 @@ function JobOutputSearch({
       [key]: value,
     });
     const qs = updateQueryString(qsConfig, location.search, updatedParams);
-    pushHistoryState(qs ? qs : '');
+    pushHistoryState(qs ?? '');
   };
 
   const handleRemoveAllSearchTerms = () => {
