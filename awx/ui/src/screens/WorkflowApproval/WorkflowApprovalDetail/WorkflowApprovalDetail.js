@@ -313,6 +313,12 @@ function WorkflowApprovalDetail({ workflowApproval, fetchWorkflowApproval }) {
                 onHandleToast={handleToast}
               />
               <JobCancelButton
+                onCancelWorkflow={() =>
+                  handleToast(
+                    workflowApproval.summary_fields.source_workflow_job.id,
+                    'Workflow Cancelled '
+                  )
+                }
                 title={t`Cancel Workflow`}
                 job={{
                   ...workflowApproval.summary_fields.source_workflow_job,

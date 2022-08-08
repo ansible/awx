@@ -18,13 +18,18 @@ function JobCancelButton({
   isDisabled,
   tooltip,
   cancelationMessage,
+  onCancelWorkflow,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const { error: cancelError, request: cancelJob } = useRequest(
     useCallback(async () => {
       setIsOpen(false);
       await getJobModel(job.type).cancel(job.id);
-    }, [job.id, job.type]),
+
+      if (onCancelWorkflow) {
+        onCancelWorkflow();
+      }
+    }, [job.id, job.type, onCancelWorkflow]),
     {}
   );
   const { error, dismissError: dismissCancelError } =
