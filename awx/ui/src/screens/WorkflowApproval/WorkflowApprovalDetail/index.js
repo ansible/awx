@@ -1,3 +1,1 @@
-import WorkflowApprovalDetail from './WorkflowApprovalDetail';
-
-export default WorkflowApprovalDetail;
+export { default } from './WorkflowApprovalDetail';

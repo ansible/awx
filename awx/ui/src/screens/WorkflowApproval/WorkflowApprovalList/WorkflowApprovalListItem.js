@@ -6,11 +6,15 @@ import { Link } from 'react-router-dom';
 import { WorkflowApproval } from 'types';
 import { formatDateString } from 'util/dates';
 import StatusLabel from 'components/StatusLabel';
+import JobCancelButton from 'components/JobCancelButton';
+import { ActionItem, ActionsTd } from 'components/PaginatedTable';
 import {
   getPendingLabel,
   getStatus,
   getTooltip,
 } from '../shared/WorkflowApprovalUtils';
+import WorkflowApprovalButton from '../shared/WorkflowApprovalButton';
+import WorkflowDenyButton from '../shared/WorkflowDenyButton';
 
 function WorkflowApprovalListItem({
   workflowApproval,
@@ -19,8 +23,13 @@ function WorkflowApprovalListItem({
   detailUrl,
   rowIndex,
 }) {
+  const hasBeenActedOn =
+    workflowApproval.status === 'successful' ||
+    workflowApproval.status === 'failed' ||
+    workflowApproval.status === 'canceled';
   const labelId = `check-action-${workflowApproval.id}`;
   const workflowJob = workflowApproval?.summary_fields?.source_workflow_job;
+  const status = getStatus(workflowApproval);
   return (
     <Tr id={`workflow-approval-row-${workflowApproval.id}`}>
       <Td
@@ -62,10 +71,51 @@ function WorkflowApprovalListItem({
         ) : (
           <StatusLabel
             tooltipContent={getTooltip(workflowApproval)}
-            status={getStatus(workflowApproval)}
+            status={status}
           />
         )}
       </Td>
+      <ActionsTd dataLabel={t`Actions`}>
+        <ActionItem
+          visible
+          tooltip={
+            hasBeenActedOn
+              ? t`This workflow has already been ${status}`
+              : t`Approve`
+          }
+        >
+          <WorkflowApprovalButton workflowApproval={workflowApproval} />
+        </ActionItem>
+        <ActionItem
+          visible
+          tooltip={
+            hasBeenActedOn
+              ? t`This workflow has already been ${status}`
+              : t`Deny`
+          }
+        >
+          <WorkflowDenyButton workflowApproval={workflowApproval} />
+        </ActionItem>
+        <ActionItem visible>
+          <JobCancelButton
+            title={t`Cancel Workflow`}
+            showIconButton
+            job={{
+              ...workflowApproval.summary_fields.source_workflow_job,
+              type: 'workflow_job',
+            }}
+            buttonText={t`Cancel Workflow`}
+            isDisabled={hasBeenActedOn}
+            tooltip={
+              hasBeenActedOn
+                ? t`This workflow has already been ${status}`
+                : t`Cancel`
+            }
+            cancelationMessage={t`This will cancel all subsequent nodes in this workflow
+            `}
+          />
+        </ActionItem>
+      </ActionsTd>
     </Tr>
   );
 }

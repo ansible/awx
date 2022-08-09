@@ -79,27 +79,7 @@ describe('<WorkflowApprovalList />', () => {
     ).toEqual(true);
   });
 
-  test('WorkflowapprovalControls is inactive.  Delete button is active', async () => {
-    await act(async () => {
-      wrapper = mountWithContexts(<WorkflowApprovalList />);
-    });
-    wrapper.update();
-    await act(async () => {
-      wrapper.find('WorkflowApprovalListItem').first().invoke('onSelect')();
-    });
-    wrapper.update();
-    expect(wrapper.find('Button[aria-label="Delete"]').prop('isDisabled')).toBe(
-      true
-    );
-    expect(
-      wrapper
-        .find('WorkflowApprovalControls')
-        .find('DropdownToggle')
-        .prop('isDisabled')
-    ).toBe(false);
-  });
-
-  test('WorkflowapprovalControls is inactive.  Delete button is active', async () => {
+  test('Delete button is active', async () => {
     await act(async () => {
       wrapper = mountWithContexts(<WorkflowApprovalList />);
     });
@@ -108,33 +88,6 @@ describe('<WorkflowApprovalList />', () => {
       wrapper.find('WorkflowApprovalListItem').at(1).invoke('onSelect')();
     });
     wrapper.update();
-    expect(wrapper.find('Button[aria-label="Delete"]').prop('isDisabled')).toBe(
-      false
-    );
-    expect(
-      wrapper
-        .find('WorkflowApprovalControls')
-        .find('DropdownToggle')
-        .prop('isDisabled')
-    ).toBe(true);
-  });
-
-  test('should disable WorkflowApprovalControls toggle with active delete button', async () => {
-    await act(async () => {
-      wrapper = mountWithContexts(<WorkflowApprovalList />);
-    });
-    wrapper.update();
-
-    await act(async () => {
-      wrapper.find('WorkflowApprovalListItem').at(3).invoke('onSelect')();
-    });
-    wrapper.update();
-    expect(
-      wrapper
-        .find('WorkflowApprovalControls')
-        .find('DropdownToggle')
-        .prop('isDisabled')
-    ).toEqual(true);
     expect(wrapper.find('Button[aria-label="Delete"]').prop('isDisabled')).toBe(
       false
     );
