@@ -7,7 +7,6 @@ import useRequest, { useDismissableError } from 'hooks/useRequest';
 
 import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';
-import { getStatus } from './WorkflowApprovalUtils';
 
 function WorkflowApprovalButton({
   isDetailView,
@@ -41,7 +40,7 @@ function WorkflowApprovalButton({
         onClick={() => handleApprove()}
         aria-label={
           hasBeenActedOn
-            ? t`This workflow has already been ${getStatus(workflowApproval)}`
+            ? t`This workflow has already been acted on`
             : t`Approve`
         }
       >

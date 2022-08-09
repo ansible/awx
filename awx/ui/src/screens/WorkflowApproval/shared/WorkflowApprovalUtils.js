@@ -31,10 +31,10 @@ export function getStatus(workflowApproval) {
   }
 
   if (workflowApproval.canceled_on) {
-    return 'canceled';
+    return t`canceled`;
   }
   if (workflowApproval.status === 'failed' && workflowApproval.failed) {
-    return 'denied';
+    return t`denied`;
   }
   if (workflowApproval.status === 'successful') {
     return 'approved';

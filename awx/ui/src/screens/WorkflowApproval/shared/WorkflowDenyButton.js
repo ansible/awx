@@ -7,7 +7,6 @@ import useRequest, { useDismissableError } from 'hooks/useRequest';
 
 import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';
-import { getStatus } from './WorkflowApprovalUtils';
 
 function WorkflowDenyButton({ isDetailView, workflowApproval, onHandleToast }) {
   const hasBeenActedOn =
@@ -33,9 +32,7 @@ function WorkflowDenyButton({ isDetailView, workflowApproval, onHandleToast }) {
     <>
       <Button
         aria-label={
-          hasBeenActedOn
-            ? t`This workflow has already been ${getStatus(workflowApproval)}`
-            : t`Deny`
+          hasBeenActedOn ? t`This workflow has already been acted on` : t`Deny`
         }
         ouiaId="workflow-deny-button"
         isDisabled={hasBeenActedOn}

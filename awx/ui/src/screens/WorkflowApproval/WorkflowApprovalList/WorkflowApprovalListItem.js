@@ -79,20 +79,14 @@ function WorkflowApprovalListItem({
         <ActionItem
           visible
           tooltip={
-            hasBeenActedOn
-              ? t`This workflow has already been ${status}`
-              : t`Approve`
+            hasBeenActedOn ? t`This has already been acted on` : t`Approve`
           }
         >
           <WorkflowApprovalButton workflowApproval={workflowApproval} />
         </ActionItem>
         <ActionItem
           visible
-          tooltip={
-            hasBeenActedOn
-              ? t`This workflow has already been ${status}`
-              : t`Deny`
-          }
+          tooltip={hasBeenActedOn ? t`This has already been acted on` : t`Deny`}
         >
           <WorkflowDenyButton workflowApproval={workflowApproval} />
         </ActionItem>
@@ -107,9 +101,7 @@ function WorkflowApprovalListItem({
             buttonText={t`Cancel Workflow`}
             isDisabled={hasBeenActedOn}
             tooltip={
-              hasBeenActedOn
-                ? t`This workflow has already been ${status}`
-                : t`Cancel`
+              hasBeenActedOn ? t`This has already been acted on` : t`Cancel`
             }
             cancelationMessage={t`This will cancel all subsequent nodes in this workflow
             `}
