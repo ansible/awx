@@ -11,6 +11,9 @@ import {
   renderLabelText,
   renderNodeType,
   renderNodeIcon,
+  renderLinkState,
+  renderLabelIcons,
+  renderIconPosition,
   redirectToDetailsPage,
   getHeight,
   getWidth,
@@ -20,7 +23,8 @@ import {
   DEFAULT_RADIUS,
   DEFAULT_NODE_COLOR,
   DEFAULT_NODE_HIGHLIGHT_COLOR,
-  DEFAULT_NODE_LABEL_TEXT_COLOR,
+  DEFAULT_NODE_SYMBOL_TEXT_COLOR,
+  DEFAULT_NODE_STROKE_COLOR,
   DEFAULT_FONT_SIZE,
   SELECTOR,
 } from './constants';
@@ -95,6 +99,24 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
         .forceSimulation(nodes)
         .force('center', d3.forceCenter(width / 2, height / 2));
       simulation.tick();
+      // build the arrow.
+      mesh
+        .append('defs')
+        .selectAll('marker')
+        .data(['end', 'end-active'])
+        .join('marker')
+        .attr('id', String)
+        .attr('viewBox', '0 -5 10 10')
+        .attr('refY', 0)
+        .attr('markerWidth', 6)
+        .attr('markerHeight', 6)
+        .attr('orient', 'auto')
+        .append('path')
+        .attr('d', 'M0,-5L10,0L0,5');
+
+      mesh.select('#end').attr('refX', 23).attr('fill', '#ccc');
+      mesh.select('#end-active').attr('refX', 18).attr('fill', '#0066CC');
+
       // Add links
       mesh
         .append('g')
@@ -108,11 +130,13 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
         .attr('y1', (d) => d.source.y)
         .attr('x2', (d) => d.target.x)
         .attr('y2', (d) => d.target.y)
+        .attr('marker-end', 'url(#end)')
         .attr('class', (_, i) => `link-${i}`)
         .attr('data-cy', (d) => `${d.source.hostname}-${d.target.hostname}`)
         .style('fill', 'none')
         .style('stroke', '#ccc')
         .style('stroke-width', '2px')
+        .style('stroke-dasharray', (d) => renderLinkState(d.link_state))
         .attr('pointer-events', 'none')
         .on('mouseover', function showPointer() {
           d3.select(this).transition().style('cursor', 'pointer');
@@ -147,7 +171,7 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
         .attr('class', (d) => d.node_type)
         .attr('class', (d) => `id-${d.id}`)
         .attr('fill', DEFAULT_NODE_COLOR)
-        .attr('stroke', DEFAULT_NODE_LABEL_TEXT_COLOR);
+        .attr('stroke', DEFAULT_NODE_STROKE_COLOR);
 
       // node type labels
       node
@@ -157,41 +181,65 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
         .attr('y', (d) => d.y)
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'central')
-        .attr('fill', DEFAULT_NODE_LABEL_TEXT_COLOR);
+        .attr('fill', DEFAULT_NODE_SYMBOL_TEXT_COLOR);
 
-      // node hostname labels
-      const hostNames = node.append('g');
-      hostNames
+      const placeholder = node.append('g').attr('class', 'placeholder');
+
+      placeholder
         .append('text')
+        .text((d) => renderLabelText(d.node_state, d.hostname))
         .attr('x', (d) => d.x)
         .attr('y', (d) => d.y + 40)
-        .text((d) => renderLabelText(d.node_state, d.hostname))
-        .attr('class', 'placeholder')
-        .attr('fill', DEFAULT_NODE_LABEL_TEXT_COLOR)
+        .attr('fill', 'black')
+        .attr('font-size', '18px')
         .attr('text-anchor', 'middle')
         .each(function calculateLabelWidth() {
           // eslint-disable-next-line react/no-this-in-sfc
           const bbox = this.getBBox();
           // eslint-disable-next-line react/no-this-in-sfc
           d3.select(this.parentNode)
-            .append('rect')
-            .attr('x', bbox.x)
-            .attr('y', bbox.y)
-            .attr('width', bbox.width)
-            .attr('height', bbox.height)
-            .attr('rx', 8)
-            .attr('ry', 8)
-            .style('fill', (d) => renderStateColor(d.node_state));
+            .append('path')
+            .attr('d', (d) => renderLabelIcons(d.node_state))
+            .attr('transform', (d) => renderIconPosition(d.node_state, bbox))
+            .style('fill', 'black');
         });
-      svg.selectAll('text.placeholder').remove();
+
+      placeholder.each(function calculateLabelWidth() {
+        // eslint-disable-next-line react/no-this-in-sfc
+        const bbox = this.getBBox();
+        // eslint-disable-next-line react/no-this-in-sfc
+        d3.select(this.parentNode)
+          .append('rect')
+          .attr('x', (d) => d.x - bbox.width / 2)
+          .attr('y', bbox.y + 5)
+          .attr('width', bbox.width)
+          .attr('height', bbox.height)
+          .attr('rx', 8)
+          .attr('ry', 8)
+          .style('fill', (d) => renderStateColor(d.node_state));
+      });
+
+      const hostNames = node.append('g');
       hostNames
         .append('text')
-        .attr('x', (d) => d.x)
-        .attr('y', (d) => d.y + 38)
         .text((d) => renderLabelText(d.node_state, d.hostname))
+        .attr('x', (d) => d.x + 6)
+        .attr('y', (d) => d.y + 42)
+        .attr('fill', 'white')
         .attr('font-size', DEFAULT_FONT_SIZE)
-        .attr('fill', DEFAULT_NODE_LABEL_TEXT_COLOR)
-        .attr('text-anchor', 'middle');
+        .attr('text-anchor', 'middle')
+        .each(function calculateLabelWidth() {
+          // eslint-disable-next-line react/no-this-in-sfc
+          const bbox = this.getBBox();
+          // eslint-disable-next-line react/no-this-in-sfc
+          d3.select(this.parentNode)
+            .append('path')
+            .attr('class', (d) => `icon-${d.node_state}`)
+            .attr('d', (d) => renderLabelIcons(d.node_state))
+            .attr('transform', (d) => renderIconPosition(d.node_state, bbox))
+            .attr('fill', 'white');
+        });
+      svg.selectAll('g.placeholder').remove();
 
       svg.call(zoom);
 
@@ -208,7 +256,8 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
             .selectAll(`.link-${s.index}`)
             .transition()
             .style('stroke', '#0066CC')
-            .style('stroke-width', '3px');
+            .style('stroke-width', '3px')
+            .attr('marker-end', 'url(#end-active)');
         });
       }
 
@@ -222,25 +271,33 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
           svg
             .selectAll(`.link-${s.index}`)
             .transition()
+            .duration(50)
             .style('stroke', '#ccc')
-            .style('stroke-width', '2px');
+            .style('stroke-width', '2px')
+            .attr('marker-end', 'url(#end)');
         });
       }
 
       function highlightSelected(n) {
         if (svg.select(`circle.id-${n.id}`).attr('stroke-width') !== null) {
           // toggle rings
-          svg.select(`circle.id-${n.id}`).attr('stroke-width', null);
+          svg
+            .select(`circle.id-${n.id}`)
+            .attr('stroke', '#ccc')
+            .attr('stroke-width', null);
           // show default empty state of tooltip
           setIsNodeSelected(false);
           setSelectedNode(null);
           return;
         }
-        svg.selectAll('circle').attr('stroke-width', null);
+        svg
+          .selectAll('circle')
+          .attr('stroke', '#ccc')
+          .attr('stroke-width', null);
         svg
           .select(`circle.id-${n.id}`)
           .attr('stroke-width', '5px')
-          .attr('stroke', '#D2D2D2');
+          .attr('stroke', '#0066CC');
         setIsNodeSelected(true);
         setSelectedNode(n);
       }
