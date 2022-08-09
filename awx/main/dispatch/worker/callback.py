@@ -178,7 +178,7 @@ class CallbackBrokerWorker(BaseWorker):
                     for e in events:
                         try:
                             e.save()
-                            events_saved += 0
+                            events_saved += 1
                             consecutive_errors = 0
                         except Exception as exc_indv:
                             consecutive_errors += 1
