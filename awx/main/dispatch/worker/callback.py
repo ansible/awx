@@ -182,9 +182,10 @@ class CallbackBrokerWorker(BaseWorker):
                             consecutive_errors = 0
                         except Exception as exc_indv:
                             consecutive_errors += 1
-                            if consecutive_errors >= 5:
-                                raise
                             logger.info(f'Database Error Saving individual Job Event, error {str(exc_indv)}')
+
+                        if consecutive_errors >= 5:
+                            raise
                     metrics_singular_events_saved += events_saved
                     if events_saved == 0:
                         raise
