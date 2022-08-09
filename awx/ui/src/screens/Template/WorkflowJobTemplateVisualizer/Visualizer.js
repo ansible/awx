@@ -53,14 +53,7 @@ const Wrapper = styled.div`
 `;
 
 const replaceIdentifier = (node) => {
-  if (stringIsUUID(node.originalNodeObject.identifier) && node.identifier) {
-    return true;
-  }
-
-  if (
-    !stringIsUUID(node.originalNodeObject.identifier) &&
-    node.identifier !== node.originalNodeObject.identifier
-  ) {
+  if (stringIsUUID(node.originalNodeObject.identifier) || node.identifier) {
     return true;
   }
 
