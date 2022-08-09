@@ -10,7 +10,7 @@ import {
 
 describe('renderStateColor', () => {
   test('returns correct node state color', () => {
-    expect(renderStateColor('healthy')).toBe('#3E8635');
+    expect(renderStateColor('ready')).toBe('#3E8635');
   });
   test('returns empty string if state is not found', () => {
     expect(renderStateColor('foo')).toBe('');
@@ -68,10 +68,10 @@ describe('getHeight', () => {
 });
 describe('renderLabelText', () => {
   test('returns label text correctly', () => {
-    expect(renderLabelText('error', 'foo')).toBe('! foo');
+    expect(renderLabelText('error', 'foo')).toBe('foo');
   });
   test('returns label text if invalid node state is passed', () => {
-    expect(renderLabelText('foo', 'bar')).toBe(' bar');
+    expect(renderLabelText('foo', 'bar')).toBe('bar');
   });
   test('returns empty string if non string params are passed', () => {
     expect(renderLabelText(0, null)).toBe('');
