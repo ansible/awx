@@ -43,7 +43,7 @@ from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
 )
-from awx.main.utils import parse_yaml_or_json, getattr_dne, NullablePromptPseudoField
+from awx.main.utils import parse_yaml_or_json, getattr_dne, NullablePromptPseudoField, polymorphic
 from awx.main.fields import ImplicitRoleField, AskForField, JSONBlob, OrderedManyToManyField
 from awx.main.models.mixins import (
     ResourceMixin,
@@ -1059,6 +1059,10 @@ class JobLaunchConfig(LaunchTimeConfig):
     # Instance Groups needed for non-unified job / unified JT models
     instance_groups = OrderedManyToManyField(
         'InstanceGroup', related_name='%(class)ss', blank=True, editable=False, through='JobLaunchConfigInstanceGroupMembership'
+    )
+
+    execution_environment = models.ForeignKey(
+        'ExecutionEnvironment', null=True, blank=True, default=None, on_delete=polymorphic.SET_NULL, related_name='execution_environment'
     )
 
     def has_user_prompts(self, template):
