@@ -15,27 +15,31 @@ from django.db import transaction, connection
 from django.utils.translation import gettext_lazy as _, gettext_noop
 from django.utils.timezone import now as tz_now
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 
 # AWX
 from awx.main.dispatch.reaper import reap_job
 from awx.main.models import (
-    AdHocCommand,
     Instance,
     InventorySource,
     InventoryUpdate,
     Job,
     Project,
     ProjectUpdate,
-    SystemJob,
     UnifiedJob,
     WorkflowApproval,
     WorkflowJob,
+    WorkflowJobNode,
     WorkflowJobTemplate,
 )
 from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.main.utils.pglock import advisory_lock
-from awx.main.utils import get_type_for_model, task_manager_bulk_reschedule, schedule_task_manager
-from awx.main.utils.common import create_partition
+from awx.main.utils import (
+    get_type_for_model,
+    ScheduleTaskManager,
+    ScheduleWorkflowManager,
+)
+from awx.main.utils.common import create_partition, task_manager_bulk_reschedule
 from awx.main.signals import disable_activity_stream
 from awx.main.constants import ACTIVE_STATES
 from awx.main.scheduler.dependency_graph import DependencyGraph
@@ -53,167 +57,97 @@ def timeit(func):
         t_now = time.perf_counter()
         result = func(*args, **kwargs)
         dur = time.perf_counter() - t_now
-        args[0].subsystem_metrics.inc("task_manager_" + func.__name__ + "_seconds", dur)
+        args[0].subsystem_metrics.inc(f"{args[0].prefix}_{func.__name__}_seconds", dur)
         return result
 
     return inner
 
 
-class TaskManager:
-    def __init__(self):
-        """
-        Do NOT put database queries or other potentially expensive operations
-        in the task manager init. The task manager object is created every time a
-        job is created, transitions state, and every 30 seconds on each tower node.
-        More often then not, the object is destroyed quickly because the NOOP case is hit.
-
-        The NOOP case is short-circuit logic. If the task manager realizes that another instance
-        of the task manager is already running, then it short-circuits and decides not to run.
-        """
-        # start task limit indicates how many pending jobs can be started on this
-        # .schedule() run. Starting jobs is expensive, and there is code in place to reap
-        # the task manager after 5 minutes. At scale, the task manager can easily take more than
-        # 5 minutes to start pending jobs. If this limit is reached, pending jobs
-        # will no longer be started and will be started on the next task manager cycle.
-        self.start_task_limit = settings.START_TASK_LIMIT
-        self.time_delta_job_explanation = timedelta(seconds=30)
-        self.subsystem_metrics = s_metrics.Metrics(auto_pipe_execute=False)
+class TaskBase:
+    def __init__(self, prefix=""):
+        self.prefix = prefix
         # initialize each metric to 0 and force metric_has_changed to true. This
         # ensures each task manager metric will be overridden when pipe_execute
         # is called later.
+        self.subsystem_metrics = s_metrics.Metrics(auto_pipe_execute=False)
+        self.start_time = time.time()
+        self.start_task_limit = settings.START_TASK_LIMIT
         for m in self.subsystem_metrics.METRICS:
-            if m.startswith("task_manager"):
+            if m.startswith(self.prefix):
                 self.subsystem_metrics.set(m, 0)
 
-    def after_lock_init(self, all_sorted_tasks):
-        """
-        Init AFTER we know this instance of the task manager will run because the lock is acquired.
-        """
-        self.dependency_graph = DependencyGraph()
-        self.instances = TaskManagerInstances(all_sorted_tasks)
-        self.instance_groups = TaskManagerInstanceGroups(instances_by_hostname=self.instances)
-        self.controlplane_ig = self.instance_groups.controlplane_ig
-
-    def job_blocked_by(self, task):
-        # TODO: I'm not happy with this, I think blocking behavior should be decided outside of the dependency graph
-        #       in the old task manager this was handled as a method on each task object outside of the graph and
-        #       probably has the side effect of cutting down *a lot* of the logic from this task manager class
-        blocked_by = self.dependency_graph.task_blocked_by(task)
-        if blocked_by:
-            return blocked_by
-
-        for dep in task.dependent_jobs.all():
-            if dep.status in ACTIVE_STATES:
-                return dep
-            # if we detect a failed or error dependency, go ahead and fail this
-            # task. The errback on the dependency takes some time to trigger,
-            # and we don't want the task to enter running state if its
-            # dependency has failed or errored.
-            elif dep.status in ("error", "failed"):
-                task.status = 'failed'
-                task.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (
-                    get_type_for_model(type(dep)),
-                    dep.name,
-                    dep.id,
-                )
-                task.save(update_fields=['status', 'job_explanation'])
-                task.websocket_emit_status('failed')
-                return dep
-
-        return None
+    def timed_out(self):
+        """Return True/False if we have met or exceeded the timeout for the task manager."""
+        elapsed = time.time() - self.start_time
+        if elapsed >= settings.TASK_MANAGER_TIMEOUT:
+            logger.warning(f"{self.prefix} manager has run for {elapsed} which is greater than TASK_MANAGER_TIMEOUT of {settings.TASK_MANAGER_TIMEOUT}.")
+            return True
+        return False
 
     @timeit
-    def get_tasks(self, status_list=('pending', 'waiting', 'running')):
-        jobs = [j for j in Job.objects.filter(status__in=status_list).prefetch_related('instance_group')]
-        inventory_updates_qs = (
-            InventoryUpdate.objects.filter(status__in=status_list).exclude(source='file').prefetch_related('inventory_source', 'instance_group')
+    def get_tasks(self, filter_args):
+        wf_approval_ctype_id = ContentType.objects.get_for_model(WorkflowApproval).id
+        qs = (
+            UnifiedJob.objects.filter(**filter_args)
+            .exclude(launch_type='sync')
+            .exclude(polymorphic_ctype_id=wf_approval_ctype_id)
+            .order_by('created')
+            .prefetch_related('dependent_jobs')
         )
-        inventory_updates = [i for i in inventory_updates_qs]
-        # Notice the job_type='check': we want to prevent implicit project updates from blocking our jobs.
-        project_updates = [p for p in ProjectUpdate.objects.filter(status__in=status_list, job_type='check').prefetch_related('instance_group')]
-        system_jobs = [s for s in SystemJob.objects.filter(status__in=status_list).prefetch_related('instance_group')]
-        ad_hoc_commands = [a for a in AdHocCommand.objects.filter(status__in=status_list).prefetch_related('instance_group')]
-        workflow_jobs = [w for w in WorkflowJob.objects.filter(status__in=status_list)]
-        all_tasks = sorted(jobs + project_updates + inventory_updates + system_jobs + ad_hoc_commands + workflow_jobs, key=lambda task: task.created)
-        return all_tasks
+        self.all_tasks = [t for t in qs]
 
-    def get_running_workflow_jobs(self):
-        graph_workflow_jobs = [wf for wf in WorkflowJob.objects.filter(status='running')]
-        return graph_workflow_jobs
+    def record_aggregate_metrics(self, *args):
+        if not settings.IS_TESTING():
+            # increment task_manager_schedule_calls regardless if the other
+            # metrics are recorded
+            s_metrics.Metrics(auto_pipe_execute=True).inc(f"{self.prefix}__schedule_calls", 1)
+            # Only record metrics if the last time recording was more
+            # than SUBSYSTEM_METRICS_TASK_MANAGER_RECORD_INTERVAL ago.
+            # Prevents a short-duration task manager that runs directly after a
+            # long task manager to override useful metrics.
+            current_time = time.time()
+            time_last_recorded = current_time - self.subsystem_metrics.decode(f"{self.prefix}_recorded_timestamp")
+            if time_last_recorded > settings.SUBSYSTEM_METRICS_TASK_MANAGER_RECORD_INTERVAL:
+                logger.debug(f"recording {self.prefix} metrics, last recorded {time_last_recorded} seconds ago")
+                self.subsystem_metrics.set(f"{self.prefix}_recorded_timestamp", current_time)
+                self.subsystem_metrics.pipe_execute()
+            else:
+                logger.debug(f"skipping recording {self.prefix} metrics, last recorded {time_last_recorded} seconds ago")
 
-    def get_inventory_source_tasks(self, all_sorted_tasks):
-        inventory_ids = set()
-        for task in all_sorted_tasks:
-            if isinstance(task, Job):
-                inventory_ids.add(task.inventory_id)
-        return [invsrc for invsrc in InventorySource.objects.filter(inventory_id__in=inventory_ids, update_on_launch=True)]
+    def record_aggregate_metrics_and_exit(self, *args):
+        self.record_aggregate_metrics()
+        sys.exit(1)
+
+    def schedule(self):
+        # Lock
+        with task_manager_bulk_reschedule():
+            with advisory_lock(f"{self.prefix}_lock", wait=False) as acquired:
+                with transaction.atomic():
+                    if acquired is False:
+                        logger.debug(f"Not running {self.prefix} scheduler, another task holds lock")
+                        return
+                    logger.debug(f"Starting {self.prefix} Scheduler")
+                    # if sigterm due to timeout, still record metrics
+                    signal.signal(signal.SIGTERM, self.record_aggregate_metrics_and_exit)
+                    self._schedule()
+                    self.record_aggregate_metrics()
+                    logger.debug(f"Finishing {self.prefix} Scheduler")
+
+
+class WorkflowManager(TaskBase):
+    def __init__(self):
+        super().__init__(prefix="workflow_manager")
 
     @timeit
-    def spawn_workflow_graph_jobs(self, workflow_jobs):
-        for workflow_job in workflow_jobs:
-            if workflow_job.cancel_flag:
-                logger.debug('Not spawning jobs for %s because it is pending cancelation.', workflow_job.log_format)
-                continue
-            dag = WorkflowDAG(workflow_job)
-            spawn_nodes = dag.bfs_nodes_to_run()
-            if spawn_nodes:
-                logger.debug('Spawning jobs for %s', workflow_job.log_format)
-            else:
-                logger.debug('No nodes to spawn for %s', workflow_job.log_format)
-            for spawn_node in spawn_nodes:
-                if spawn_node.unified_job_template is None:
-                    continue
-                kv = spawn_node.get_job_kwargs()
-                job = spawn_node.unified_job_template.create_unified_job(**kv)
-                spawn_node.job = job
-                spawn_node.save()
-                logger.debug('Spawned %s in %s for node %s', job.log_format, workflow_job.log_format, spawn_node.pk)
-                can_start = True
-                if isinstance(spawn_node.unified_job_template, WorkflowJobTemplate):
-                    workflow_ancestors = job.get_ancestor_workflows()
-                    if spawn_node.unified_job_template in set(workflow_ancestors):
-                        can_start = False
-                        logger.info(
-                            'Refusing to start recursive workflow-in-workflow id={}, wfjt={}, ancestors={}'.format(
-                                job.id, spawn_node.unified_job_template.pk, [wa.pk for wa in workflow_ancestors]
-                            )
-                        )
-                        display_list = [spawn_node.unified_job_template] + workflow_ancestors
-                        job.job_explanation = gettext_noop(
-                            "Workflow Job spawned from workflow could not start because it " "would result in recursion (spawn order, most recent first: {})"
-                        ).format(', '.join(['<{}>'.format(tmp) for tmp in display_list]))
-                    else:
-                        logger.debug(
-                            'Starting workflow-in-workflow id={}, wfjt={}, ancestors={}'.format(
-                                job.id, spawn_node.unified_job_template.pk, [wa.pk for wa in workflow_ancestors]
-                            )
-                        )
-                if not job._resources_sufficient_for_launch():
-                    can_start = False
-                    job.job_explanation = gettext_noop(
-                        "Job spawned from workflow could not start because it " "was missing a related resource such as project or inventory"
-                    )
-                if can_start:
-                    if workflow_job.start_args:
-                        start_args = json.loads(decrypt_field(workflow_job, 'start_args'))
-                    else:
-                        start_args = {}
-                    can_start = job.signal_start(**start_args)
-                    if not can_start:
-                        job.job_explanation = gettext_noop(
-                            "Job spawned from workflow could not start because it " "was not in the right state or required manual credentials"
-                        )
-                if not can_start:
-                    job.status = 'failed'
-                    job.save(update_fields=['status', 'job_explanation'])
-                    job.websocket_emit_status('failed')
-
-                # TODO: should we emit a status on the socket here similar to tasks.py awx_periodic_scheduler() ?
-                # emit_websocket_notification('/socket.io/jobs', '', dict(id=))
-
-    def process_finished_workflow_jobs(self, workflow_jobs):
+    def spawn_workflow_graph_jobs(self):
         result = []
-        for workflow_job in workflow_jobs:
+        for workflow_job in self.all_tasks:
+            if self.timed_out():
+                logger.warning("Workflow manager has reached time out while processing running workflows, exiting loop early")
+                ScheduleWorkflowManager().schedule()
+                # Do not process any more workflow jobs. Stop here.
+                # Maybe we should schedule another WorkflowManager run
+                break
             dag = WorkflowDAG(workflow_job)
             status_changed = False
             if workflow_job.cancel_flag:
@@ -228,99 +162,106 @@ class TaskManager:
                     status_changed = True
             else:
                 workflow_nodes = dag.mark_dnr_nodes()
-                for n in workflow_nodes:
-                    n.save(update_fields=['do_not_run'])
+                WorkflowJobNode.objects.bulk_update(workflow_nodes, ['do_not_run'])
+                # If workflow is now done, we do special things to mark it as done.
                 is_done = dag.is_workflow_done()
-                if not is_done:
-                    continue
-                has_failed, reason = dag.has_workflow_failed()
-                logger.debug('Marking %s as %s.', workflow_job.log_format, 'failed' if has_failed else 'successful')
-                result.append(workflow_job.id)
-                new_status = 'failed' if has_failed else 'successful'
-                logger.debug("Transitioning {} to {} status.".format(workflow_job.log_format, new_status))
-                update_fields = ['status', 'start_args']
-                workflow_job.status = new_status
-                if reason:
-                    logger.info(f'Workflow job {workflow_job.id} failed due to reason: {reason}')
-                    workflow_job.job_explanation = gettext_noop("No error handling paths found, marking workflow as failed")
-                    update_fields.append('job_explanation')
-                workflow_job.start_args = ''  # blank field to remove encrypted passwords
-                workflow_job.save(update_fields=update_fields)
-                status_changed = True
+                if is_done:
+                    has_failed, reason = dag.has_workflow_failed()
+                    logger.debug('Marking %s as %s.', workflow_job.log_format, 'failed' if has_failed else 'successful')
+                    result.append(workflow_job.id)
+                    new_status = 'failed' if has_failed else 'successful'
+                    logger.debug("Transitioning {} to {} status.".format(workflow_job.log_format, new_status))
+                    update_fields = ['status', 'start_args']
+                    workflow_job.status = new_status
+                    if reason:
+                        logger.info(f'Workflow job {workflow_job.id} failed due to reason: {reason}')
+                        workflow_job.job_explanation = gettext_noop("No error handling paths found, marking workflow as failed")
+                        update_fields.append('job_explanation')
+                    workflow_job.start_args = ''  # blank field to remove encrypted passwords
+                    workflow_job.save(update_fields=update_fields)
+                    status_changed = True
+
             if status_changed:
                 if workflow_job.spawned_by_workflow:
-                    schedule_task_manager()
+                    ScheduleWorkflowManager().schedule()
                 workflow_job.websocket_emit_status(workflow_job.status)
                 # Operations whose queries rely on modifications made during the atomic scheduling session
                 workflow_job.send_notification_templates('succeeded' if workflow_job.status == 'successful' else 'failed')
+
+            if workflow_job.status == 'running':
+                spawn_nodes = dag.bfs_nodes_to_run()
+                if spawn_nodes:
+                    logger.debug('Spawning jobs for %s', workflow_job.log_format)
+                else:
+                    logger.debug('No nodes to spawn for %s', workflow_job.log_format)
+                for spawn_node in spawn_nodes:
+                    if spawn_node.unified_job_template is None:
+                        continue
+                    kv = spawn_node.get_job_kwargs()
+                    job = spawn_node.unified_job_template.create_unified_job(**kv)
+                    spawn_node.job = job
+                    spawn_node.save()
+                    logger.debug('Spawned %s in %s for node %s', job.log_format, workflow_job.log_format, spawn_node.pk)
+                    can_start = True
+                    if isinstance(spawn_node.unified_job_template, WorkflowJobTemplate):
+                        workflow_ancestors = job.get_ancestor_workflows()
+                        if spawn_node.unified_job_template in set(workflow_ancestors):
+                            can_start = False
+                            logger.info(
+                                'Refusing to start recursive workflow-in-workflow id={}, wfjt={}, ancestors={}'.format(
+                                    job.id, spawn_node.unified_job_template.pk, [wa.pk for wa in workflow_ancestors]
+                                )
+                            )
+                            display_list = [spawn_node.unified_job_template] + workflow_ancestors
+                            job.job_explanation = gettext_noop(
+                                "Workflow Job spawned from workflow could not start because it "
+                                "would result in recursion (spawn order, most recent first: {})"
+                            ).format(', '.join('<{}>'.format(tmp) for tmp in display_list))
+                        else:
+                            logger.debug(
+                                'Starting workflow-in-workflow id={}, wfjt={}, ancestors={}'.format(
+                                    job.id, spawn_node.unified_job_template.pk, [wa.pk for wa in workflow_ancestors]
+                                )
+                            )
+                    if not job._resources_sufficient_for_launch():
+                        can_start = False
+                        job.job_explanation = gettext_noop(
+                            "Job spawned from workflow could not start because it was missing a related resource such as project or inventory"
+                        )
+                    if can_start:
+                        if workflow_job.start_args:
+                            start_args = json.loads(decrypt_field(workflow_job, 'start_args'))
+                        else:
+                            start_args = {}
+                        can_start = job.signal_start(**start_args)
+                        if not can_start:
+                            job.job_explanation = gettext_noop(
+                                "Job spawned from workflow could not start because it was not in the right state or required manual credentials"
+                            )
+                    if not can_start:
+                        job.status = 'failed'
+                        job.save(update_fields=['status', 'job_explanation'])
+                        job.websocket_emit_status('failed')
+
+                    # TODO: should we emit a status on the socket here similar to tasks.py awx_periodic_scheduler() ?
+                    # emit_websocket_notification('/socket.io/jobs', '', dict(id=))
+
         return result
 
     @timeit
-    def start_task(self, task, instance_group, dependent_tasks=None, instance=None):
-        self.subsystem_metrics.inc("task_manager_tasks_started", 1)
-        self.start_task_limit -= 1
-        if self.start_task_limit == 0:
-            # schedule another run immediately after this task manager
-            schedule_task_manager()
-        from awx.main.tasks.system import handle_work_error, handle_work_success
-
-        dependent_tasks = dependent_tasks or []
-
-        task_actual = {
-            'type': get_type_for_model(type(task)),
-            'id': task.id,
-        }
-        dependencies = [{'type': get_type_for_model(type(t)), 'id': t.id} for t in dependent_tasks]
-
-        task.status = 'waiting'
-
-        (start_status, opts) = task.pre_start()
-        if not start_status:
-            task.status = 'failed'
-            if task.job_explanation:
-                task.job_explanation += ' '
-            task.job_explanation += 'Task failed pre-start check.'
-            task.save()
-            # TODO: run error handler to fail sub-tasks and send notifications
-        else:
-            if type(task) is WorkflowJob:
-                task.status = 'running'
-                task.send_notification_templates('running')
-                logger.debug('Transitioning %s to running status.', task.log_format)
-                schedule_task_manager()
-            # at this point we already have control/execution nodes selected for the following cases
-            else:
-                task.instance_group = instance_group
-                execution_node_msg = f' and execution node {task.execution_node}' if task.execution_node else ''
-                logger.debug(
-                    f'Submitting job {task.log_format} controlled by {task.controller_node} to instance group {instance_group.name}{execution_node_msg}.'
-                )
-            with disable_activity_stream():
-                task.celery_task_id = str(uuid.uuid4())
-                task.save()
-                task.log_lifecycle("waiting")
-
-        def post_commit():
-            if task.status != 'failed' and type(task) is not WorkflowJob:
-                # Before task is dispatched, ensure that job_event partitions exist
-                create_partition(task.event_class._meta.db_table, start=task.created)
-                task_cls = task._get_task_class()
-                task_cls.apply_async(
-                    [task.pk],
-                    opts,
-                    queue=task.get_queue_name(),
-                    uuid=task.celery_task_id,
-                    callbacks=[{'task': handle_work_success.name, 'kwargs': {'task_actual': task_actual}}],
-                    errbacks=[{'task': handle_work_error.name, 'args': [task.celery_task_id], 'kwargs': {'subtasks': [task_actual] + dependencies}}],
-                )
-
-        task.websocket_emit_status(task.status)  # adds to on_commit
-        connection.on_commit(post_commit)
+    def get_tasks(self, filter_args):
+        self.all_tasks = [wf for wf in WorkflowJob.objects.filter(**filter_args)]
 
     @timeit
-    def process_running_tasks(self, running_tasks):
-        for task in running_tasks:
-            self.dependency_graph.add_job(task)
+    def _schedule(self):
+        self.get_tasks(dict(status__in=["running"], dependencies_processed=True))
+        if len(self.all_tasks) > 0:
+            self.spawn_workflow_graph_jobs()
+
+
+class DependencyManager(TaskBase):
+    def __init__(self):
+        super().__init__(prefix="dependency_manager")
 
     def create_project_update(self, task, project_id=None):
         if project_id is None:
@@ -341,13 +282,19 @@ class TaskManager:
         inventory_task.status = 'pending'
         inventory_task.save()
         logger.debug('Spawned {} as dependency of {}'.format(inventory_task.log_format, task.log_format))
-        # inventory_sources = self.get_inventory_source_tasks([task])
-        # self.process_inventory_sources(inventory_sources)
+
         return inventory_task
 
     def add_dependencies(self, task, dependencies):
         with disable_activity_stream():
             task.dependent_jobs.add(*dependencies)
+
+    def get_inventory_source_tasks(self):
+        inventory_ids = set()
+        for task in self.all_tasks:
+            if isinstance(task, Job):
+                inventory_ids.add(task.inventory_id)
+        self.all_inventory_sources = [invsrc for invsrc in InventorySource.objects.filter(inventory_id__in=inventory_ids, update_on_launch=True)]
 
     def get_latest_inventory_update(self, inventory_source):
         latest_inventory_update = InventoryUpdate.objects.filter(inventory_source=inventory_source).order_by("-created")
@@ -481,16 +428,166 @@ class TaskManager:
 
         return created_dependencies
 
+    def process_tasks(self):
+        deps = self.generate_dependencies(self.all_tasks)
+        self.generate_dependencies(deps)
+        self.subsystem_metrics.inc(f"{self.prefix}_pending_processed", len(self.all_tasks) + len(deps))
+
+    @timeit
+    def _schedule(self):
+        self.get_tasks(dict(status__in=["pending"], dependencies_processed=False))
+
+        if len(self.all_tasks) > 0:
+            self.get_inventory_source_tasks()
+            self.process_tasks()
+            ScheduleTaskManager().schedule()
+
+
+class TaskManager(TaskBase):
+    def __init__(self):
+        """
+        Do NOT put database queries or other potentially expensive operations
+        in the task manager init. The task manager object is created every time a
+        job is created, transitions state, and every 30 seconds on each tower node.
+        More often then not, the object is destroyed quickly because the NOOP case is hit.
+
+        The NOOP case is short-circuit logic. If the task manager realizes that another instance
+        of the task manager is already running, then it short-circuits and decides not to run.
+        """
+        # start task limit indicates how many pending jobs can be started on this
+        # .schedule() run. Starting jobs is expensive, and there is code in place to reap
+        # the task manager after 5 minutes. At scale, the task manager can easily take more than
+        # 5 minutes to start pending jobs. If this limit is reached, pending jobs
+        # will no longer be started and will be started on the next task manager cycle.
+        self.time_delta_job_explanation = timedelta(seconds=30)
+        super().__init__(prefix="task_manager")
+
+    def after_lock_init(self):
+        """
+        Init AFTER we know this instance of the task manager will run because the lock is acquired.
+        """
+        self.dependency_graph = DependencyGraph()
+        self.instances = TaskManagerInstances(self.all_tasks)
+        self.instance_groups = TaskManagerInstanceGroups(instances_by_hostname=self.instances)
+        self.controlplane_ig = self.instance_groups.controlplane_ig
+
+    def job_blocked_by(self, task):
+        # TODO: I'm not happy with this, I think blocking behavior should be decided outside of the dependency graph
+        #       in the old task manager this was handled as a method on each task object outside of the graph and
+        #       probably has the side effect of cutting down *a lot* of the logic from this task manager class
+        blocked_by = self.dependency_graph.task_blocked_by(task)
+        if blocked_by:
+            return blocked_by
+
+        for dep in task.dependent_jobs.all():
+            if dep.status in ACTIVE_STATES:
+                return dep
+            # if we detect a failed or error dependency, go ahead and fail this
+            # task. The errback on the dependency takes some time to trigger,
+            # and we don't want the task to enter running state if its
+            # dependency has failed or errored.
+            elif dep.status in ("error", "failed"):
+                task.status = 'failed'
+                task.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (
+                    get_type_for_model(type(dep)),
+                    dep.name,
+                    dep.id,
+                )
+                task.save(update_fields=['status', 'job_explanation'])
+                task.websocket_emit_status('failed')
+                return dep
+
+        return None
+
+    @timeit
+    def start_task(self, task, instance_group, dependent_tasks=None, instance=None):
+        self.dependency_graph.add_job(task)
+        self.subsystem_metrics.inc(f"{self.prefix}_tasks_started", 1)
+        self.start_task_limit -= 1
+        if self.start_task_limit == 0:
+            # schedule another run immediately after this task manager
+            ScheduleTaskManager().schedule()
+        from awx.main.tasks.system import handle_work_error, handle_work_success
+
+        # update capacity for control node and execution node
+        if task.controller_node:
+            self.instances[task.controller_node].consume_capacity(settings.AWX_CONTROL_NODE_TASK_IMPACT)
+        if task.execution_node:
+            self.instances[task.execution_node].consume_capacity(task.task_impact)
+
+        dependent_tasks = dependent_tasks or []
+
+        task_actual = {
+            'type': get_type_for_model(type(task)),
+            'id': task.id,
+        }
+        dependencies = [{'type': get_type_for_model(type(t)), 'id': t.id} for t in dependent_tasks]
+
+        task.status = 'waiting'
+
+        (start_status, opts) = task.pre_start()
+        if not start_status:
+            task.status = 'failed'
+            if task.job_explanation:
+                task.job_explanation += ' '
+            task.job_explanation += 'Task failed pre-start check.'
+            task.save()
+            # TODO: run error handler to fail sub-tasks and send notifications
+        else:
+            if type(task) is WorkflowJob:
+                task.status = 'running'
+                task.send_notification_templates('running')
+                logger.debug('Transitioning %s to running status.', task.log_format)
+                # Call this to ensure Workflow nodes get spawned in timely manner
+                ScheduleWorkflowManager().schedule()
+            # at this point we already have control/execution nodes selected for the following cases
+            else:
+                task.instance_group = instance_group
+                execution_node_msg = f' and execution node {task.execution_node}' if task.execution_node else ''
+                logger.debug(
+                    f'Submitting job {task.log_format} controlled by {task.controller_node} to instance group {instance_group.name}{execution_node_msg}.'
+                )
+            with disable_activity_stream():
+                task.celery_task_id = str(uuid.uuid4())
+                task.save()
+                task.log_lifecycle("waiting")
+
+        def post_commit():
+            if task.status != 'failed' and type(task) is not WorkflowJob:
+                # Before task is dispatched, ensure that job_event partitions exist
+                create_partition(task.event_class._meta.db_table, start=task.created)
+                task_cls = task._get_task_class()
+                task_cls.apply_async(
+                    [task.pk],
+                    opts,
+                    queue=task.get_queue_name(),
+                    uuid=task.celery_task_id,
+                    callbacks=[{'task': handle_work_success.name, 'kwargs': {'task_actual': task_actual}}],
+                    errbacks=[{'task': handle_work_error.name, 'args': [task.celery_task_id], 'kwargs': {'subtasks': [task_actual] + dependencies}}],
+                )
+
+        task.websocket_emit_status(task.status)  # adds to on_commit
+        connection.on_commit(post_commit)
+
+    @timeit
+    def process_running_tasks(self, running_tasks):
+        for task in running_tasks:
+            if type(task) is WorkflowJob:
+                ScheduleWorkflowManager().schedule()
+            self.dependency_graph.add_job(task)
+
     @timeit
     def process_pending_tasks(self, pending_tasks):
-        running_workflow_templates = {wf.unified_job_template_id for wf in self.get_running_workflow_jobs()}
         tasks_to_update_job_explanation = []
         for task in pending_tasks:
             if self.start_task_limit <= 0:
                 break
+            if self.timed_out():
+                logger.warning("Task manager has reached time out while processing pending jobs, exiting loop early")
+                break
             blocked_by = self.job_blocked_by(task)
             if blocked_by:
-                self.subsystem_metrics.inc("task_manager_tasks_blocked", 1)
+                self.subsystem_metrics.inc(f"{self.prefix}_tasks_blocked", 1)
                 task.log_lifecycle("blocked", blocked_by=blocked_by)
                 job_explanation = gettext_noop(f"waiting for {blocked_by._meta.model_name}-{blocked_by.id} to finish")
                 if task.job_explanation != job_explanation:
@@ -499,18 +596,15 @@ class TaskManager:
                         tasks_to_update_job_explanation.append(task)
                 continue
 
-            found_acceptable_queue = False
-            preferred_instance_groups = task.preferred_instance_groups
-
             if isinstance(task, WorkflowJob):
-                if task.unified_job_template_id in running_workflow_templates:
-                    if not task.allow_simultaneous:
-                        logger.debug("{} is blocked from running, workflow already running".format(task.log_format))
-                        continue
-                else:
-                    running_workflow_templates.add(task.unified_job_template_id)
+                # Previously we were tracking allow_simultaneous blocking both here and in DependencyGraph.
+                # Double check that using just the DependencyGraph works for Workflows and Sliced Jobs.
                 self.start_task(task, None, task.get_jobs_fail_chain(), None)
                 continue
+
+            found_acceptable_queue = False
+
+            preferred_instance_groups = self.instance_groups.get_instance_groups_from_task_cache(task)
 
             # Determine if there is control capacity for the task
             if task.capacity_type == 'control':
@@ -530,8 +624,6 @@ class TaskManager:
             # All task.capacity_type == 'control' jobs should run on control plane, no need to loop over instance groups
             if task.capacity_type == 'control':
                 task.execution_node = control_instance.hostname
-                control_instance.consume_capacity(control_impact)
-                self.dependency_graph.add_job(task)
                 execution_instance = self.instances[control_instance.hostname].obj
                 task.log_lifecycle("controller_node_chosen")
                 task.log_lifecycle("execution_node_chosen")
@@ -541,7 +633,6 @@ class TaskManager:
 
             for instance_group in preferred_instance_groups:
                 if instance_group.is_container_group:
-                    self.dependency_graph.add_job(task)
                     self.start_task(task, instance_group, task.get_jobs_fail_chain(), None)
                     found_acceptable_queue = True
                     break
@@ -563,9 +654,7 @@ class TaskManager:
                         control_instance = execution_instance
                         task.controller_node = execution_instance.hostname
 
-                    control_instance.consume_capacity(settings.AWX_CONTROL_NODE_TASK_IMPACT)
                     task.log_lifecycle("controller_node_chosen")
-                    execution_instance.consume_capacity(task.task_impact)
                     task.log_lifecycle("execution_node_chosen")
                     logger.debug(
                         "Starting {} in group {} instance {} (remaining_capacity={})".format(
@@ -573,7 +662,6 @@ class TaskManager:
                         )
                     )
                     execution_instance = self.instances[execution_instance.hostname].obj
-                    self.dependency_graph.add_job(task)
                     self.start_task(task, instance_group, task.get_jobs_fail_chain(), execution_instance)
                     found_acceptable_queue = True
                     break
@@ -599,25 +687,6 @@ class TaskManager:
                 tasks_to_update_job_explanation.append(task)
         logger.debug("{} couldn't be scheduled on graph, waiting for next cycle".format(task.log_format))
 
-    def timeout_approval_node(self):
-        workflow_approvals = WorkflowApproval.objects.filter(status='pending')
-        now = tz_now()
-        for task in workflow_approvals:
-            approval_timeout_seconds = timedelta(seconds=task.timeout)
-            if task.timeout == 0:
-                continue
-            if (now - task.created) >= approval_timeout_seconds:
-                timeout_message = _("The approval node {name} ({pk}) has expired after {timeout} seconds.").format(
-                    name=task.name, pk=task.pk, timeout=task.timeout
-                )
-                logger.warning(timeout_message)
-                task.timed_out = True
-                task.status = 'failed'
-                task.send_approval_notification('timed_out')
-                task.websocket_emit_status(task.status)
-                task.job_explanation = timeout_message
-                task.save(update_fields=['status', 'job_explanation', 'timed_out'])
-
     def reap_jobs_from_orphaned_instances(self):
         # discover jobs that are in running state but aren't on an execution node
         # that we know about; this is a fairly rare event, but it can occur if you,
@@ -630,92 +699,45 @@ class TaskManager:
                 logger.error(f'{j.execution_node} is not a registered instance; reaping {j.log_format}')
                 reap_job(j, 'failed')
 
-    def process_tasks(self, all_sorted_tasks):
-        running_tasks = [t for t in all_sorted_tasks if t.status in ['waiting', 'running']]
+    def process_tasks(self):
+        running_tasks = [t for t in self.all_tasks if t.status in ['waiting', 'running']]
         self.process_running_tasks(running_tasks)
-        self.subsystem_metrics.inc("task_manager_running_processed", len(running_tasks))
+        self.subsystem_metrics.inc(f"{self.prefix}_running_processed", len(running_tasks))
 
-        pending_tasks = [t for t in all_sorted_tasks if t.status == 'pending']
-
-        undeped_tasks = [t for t in pending_tasks if not t.dependencies_processed]
-        dependencies = self.generate_dependencies(undeped_tasks)
-        deps_of_deps = self.generate_dependencies(dependencies)
-        dependencies += deps_of_deps
-        self.process_pending_tasks(dependencies)
-        self.subsystem_metrics.inc("task_manager_pending_processed", len(dependencies))
+        pending_tasks = [t for t in self.all_tasks if t.status == 'pending']
 
         self.process_pending_tasks(pending_tasks)
-        self.subsystem_metrics.inc("task_manager_pending_processed", len(pending_tasks))
+        self.subsystem_metrics.inc(f"{self.prefix}_pending_processed", len(pending_tasks))
+
+    def timeout_approval_node(self, task):
+        if self.timed_out():
+            logger.warning("Task manager has reached time out while processing approval nodes, exiting loop early")
+            # Do not process any more workflow approval nodes. Stop here.
+            # Maybe we should schedule another TaskManager run
+            return
+        timeout_message = _("The approval node {name} ({pk}) has expired after {timeout} seconds.").format(name=task.name, pk=task.pk, timeout=task.timeout)
+        logger.warning(timeout_message)
+        task.timed_out = True
+        task.status = 'failed'
+        task.send_approval_notification('timed_out')
+        task.websocket_emit_status(task.status)
+        task.job_explanation = timeout_message
+        task.save(update_fields=['status', 'job_explanation', 'timed_out'])
+
+    def get_expired_workflow_approvals(self):
+        # timeout of 0 indicates that it never expires
+        qs = WorkflowApproval.objects.filter(status='pending').exclude(timeout=0).filter(expires__lt=tz_now())
+        return qs
 
     @timeit
     def _schedule(self):
-        finished_wfjs = []
-        all_sorted_tasks = self.get_tasks()
+        self.get_tasks(dict(status__in=["pending", "waiting", "running"], dependencies_processed=True))
 
-        self.after_lock_init(all_sorted_tasks)
+        self.after_lock_init()
+        self.reap_jobs_from_orphaned_instances()
 
-        if len(all_sorted_tasks) > 0:
-            # TODO: Deal with
-            # latest_project_updates = self.get_latest_project_update_tasks(all_sorted_tasks)
-            # self.process_latest_project_updates(latest_project_updates)
+        if len(self.all_tasks) > 0:
+            self.process_tasks()
 
-            # latest_inventory_updates = self.get_latest_inventory_update_tasks(all_sorted_tasks)
-            # self.process_latest_inventory_updates(latest_inventory_updates)
-
-            self.all_inventory_sources = self.get_inventory_source_tasks(all_sorted_tasks)
-
-            running_workflow_tasks = self.get_running_workflow_jobs()
-            finished_wfjs = self.process_finished_workflow_jobs(running_workflow_tasks)
-
-            previously_running_workflow_tasks = running_workflow_tasks
-            running_workflow_tasks = []
-            for workflow_job in previously_running_workflow_tasks:
-                if workflow_job.status == 'running':
-                    running_workflow_tasks.append(workflow_job)
-                else:
-                    logger.debug('Removed %s from job spawning consideration.', workflow_job.log_format)
-
-            self.spawn_workflow_graph_jobs(running_workflow_tasks)
-
-            self.timeout_approval_node()
-            self.reap_jobs_from_orphaned_instances()
-
-            self.process_tasks(all_sorted_tasks)
-        return finished_wfjs
-
-    def record_aggregate_metrics(self, *args):
-        if not settings.IS_TESTING():
-            # increment task_manager_schedule_calls regardless if the other
-            # metrics are recorded
-            s_metrics.Metrics(auto_pipe_execute=True).inc("task_manager_schedule_calls", 1)
-            # Only record metrics if the last time recording was more
-            # than SUBSYSTEM_METRICS_TASK_MANAGER_RECORD_INTERVAL ago.
-            # Prevents a short-duration task manager that runs directly after a
-            # long task manager to override useful metrics.
-            current_time = time.time()
-            time_last_recorded = current_time - self.subsystem_metrics.decode("task_manager_recorded_timestamp")
-            if time_last_recorded > settings.SUBSYSTEM_METRICS_TASK_MANAGER_RECORD_INTERVAL:
-                logger.debug(f"recording metrics, last recorded {time_last_recorded} seconds ago")
-                self.subsystem_metrics.set("task_manager_recorded_timestamp", current_time)
-                self.subsystem_metrics.pipe_execute()
-            else:
-                logger.debug(f"skipping recording metrics, last recorded {time_last_recorded} seconds ago")
-
-    def record_aggregate_metrics_and_exit(self, *args):
-        self.record_aggregate_metrics()
-        sys.exit(1)
-
-    def schedule(self):
-        # Lock
-        with advisory_lock('task_manager_lock', wait=False) as acquired:
-            with transaction.atomic():
-                if acquired is False:
-                    logger.debug("Not running scheduler, another task holds lock")
-                    return
-                logger.debug("Starting Scheduler")
-                with task_manager_bulk_reschedule():
-                    # if sigterm due to timeout, still record metrics
-                    signal.signal(signal.SIGTERM, self.record_aggregate_metrics_and_exit)
-                    self._schedule()
-                    self.record_aggregate_metrics()
-                logger.debug("Finishing Scheduler")
+        for workflow_approval in self.get_expired_workflow_approvals():
+            self.timeout_approval_node(workflow_approval)

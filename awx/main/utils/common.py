@@ -78,8 +78,9 @@ __all__ = [
     'IllegalArgumentError',
     'get_custom_venv_choices',
     'get_external_account',
-    'task_manager_bulk_reschedule',
-    'schedule_task_manager',
+    'ScheduleTaskManager',
+    'ScheduleDependencyManager',
+    'ScheduleWorkflowManager',
     'classproperty',
     'create_temporary_fifo',
     'truncate_stdout',
@@ -846,6 +847,66 @@ def get_mem_effective_capacity(mem_bytes):
 
 _inventory_updates = threading.local()
 _task_manager = threading.local()
+_dependency_manager = threading.local()
+_workflow_manager = threading.local()
+
+
+@contextlib.contextmanager
+def task_manager_bulk_reschedule():
+    managers = [ScheduleTaskManager(), ScheduleWorkflowManager(), ScheduleDependencyManager()]
+    """Context manager to avoid submitting task multiple times."""
+    try:
+        for m in managers:
+            m.previous_flag = getattr(m.manager_threading_local, 'bulk_reschedule', False)
+            m.previous_value = getattr(m.manager_threading_local, 'needs_scheduling', False)
+            m.manager_threading_local.bulk_reschedule = True
+            m.manager_threading_local.needs_scheduling = False
+        yield
+    finally:
+        for m in managers:
+            m.manager_threading_local.bulk_reschedule = m.previous_flag
+            if m.manager_threading_local.needs_scheduling:
+                m.schedule()
+            m.manager_threading_local.needs_scheduling = m.previous_value
+
+
+class ScheduleManager:
+    def __init__(self, manager, manager_threading_local):
+        self.manager = manager
+        self.manager_threading_local = manager_threading_local
+
+    def _schedule(self):
+        from django.db import connection
+
+        # runs right away if not in transaction
+        connection.on_commit(lambda: self.manager.delay())
+
+    def schedule(self):
+        if getattr(self.manager_threading_local, 'bulk_reschedule', False):
+            self.manager_threading_local.needs_scheduling = True
+            return
+        self._schedule()
+
+
+class ScheduleTaskManager(ScheduleManager):
+    def __init__(self):
+        from awx.main.scheduler.tasks import task_manager
+
+        super().__init__(task_manager, _task_manager)
+
+
+class ScheduleDependencyManager(ScheduleManager):
+    def __init__(self):
+        from awx.main.scheduler.tasks import dependency_manager
+
+        super().__init__(dependency_manager, _dependency_manager)
+
+
+class ScheduleWorkflowManager(ScheduleManager):
+    def __init__(self):
+        from awx.main.scheduler.tasks import workflow_manager
+
+        super().__init__(workflow_manager, _workflow_manager)
 
 
 @contextlib.contextmanager
@@ -859,37 +920,6 @@ def ignore_inventory_computed_fields():
         yield
     finally:
         _inventory_updates.is_updating = previous_value
-
-
-def _schedule_task_manager():
-    from awx.main.scheduler.tasks import run_task_manager
-    from django.db import connection
-
-    # runs right away if not in transaction
-    connection.on_commit(lambda: run_task_manager.delay())
-
-
-@contextlib.contextmanager
-def task_manager_bulk_reschedule():
-    """Context manager to avoid submitting task multiple times."""
-    try:
-        previous_flag = getattr(_task_manager, 'bulk_reschedule', False)
-        previous_value = getattr(_task_manager, 'needs_scheduling', False)
-        _task_manager.bulk_reschedule = True
-        _task_manager.needs_scheduling = False
-        yield
-    finally:
-        _task_manager.bulk_reschedule = previous_flag
-        if _task_manager.needs_scheduling:
-            _schedule_task_manager()
-        _task_manager.needs_scheduling = previous_value
-
-
-def schedule_task_manager():
-    if getattr(_task_manager, 'bulk_reschedule', False):
-        _task_manager.needs_scheduling = True
-        return
-    _schedule_task_manager()
 
 
 @contextlib.contextmanager

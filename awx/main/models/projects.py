@@ -513,6 +513,9 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         help_text=_('The SCM Revision discovered by this update for the given project and branch.'),
     )
 
+    def _set_default_dependencies_processed(self):
+        self.dependencies_processed = True
+
     def _get_parent_field_name(self):
         return 'project'
 
@@ -560,8 +563,7 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
             return UnpartitionedProjectUpdateEvent
         return ProjectUpdateEvent
 
-    @property
-    def task_impact(self):
+    def _get_task_impact(self):
         return 0 if self.job_type == 'run' else 1
 
     @property
