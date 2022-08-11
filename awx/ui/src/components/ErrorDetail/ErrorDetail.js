@@ -24,6 +24,7 @@ const CardBody = styled(PFCardBody)`
 
 const Expandable = styled(PFExpandable)`
   text-align: left;
+  max-width: 75vw;
 
   & .pf-c-expandable__toggle {
     padding-left: 10px;
@@ -54,7 +55,7 @@ function ErrorDetail({ error }) {
           {response?.config?.method.toUpperCase()} {response?.config?.url}{' '}
           <strong>{response?.status}</strong>
         </CardBody>
-        <CardBody>
+        <CardBody css="max-width: 70vw">
           {Array.isArray(message) ? (
             <ul>
               {message.map((m) =>
@@ -70,9 +71,16 @@ function ErrorDetail({ error }) {
   };
 
   const renderStack = () => (
-    <CardBody css="white-space: pre; font-family: var(--pf-global--FontFamily--monospace)">
-      {error.stack}
-    </CardBody>
+    <>
+      <CardBody>
+        <strong>
+          {error.name}: {error.message}
+        </strong>
+      </CardBody>
+      <CardBody css="white-space: pre; font-family: var(--pf-global--FontFamily--monospace)">
+        {error.stack}
+      </CardBody>
+    </>
   );
 
   return (

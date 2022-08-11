@@ -3,211 +3,29 @@ import { shape, func } from 'prop-types';
 
 import { DateTime } from 'luxon';
 import { t } from '@lingui/macro';
-import { Formik, useField } from 'formik';
+import { Formik } from 'formik';
 import { RRule } from 'rrule';
-import {
-  Button,
-  Form,
-  FormGroup,
-  Title,
-  ActionGroup,
-  // To be removed once UI completes complex schedules
-  Alert,
-} from '@patternfly/react-core';
-import { Config, useConfig } from 'contexts/Config';
+import { Button, Form, ActionGroup } from '@patternfly/react-core';
+import { Config } from 'contexts/Config';
 import { SchedulesAPI } from 'api';
 import { dateToInputDateTime } from 'util/dates';
 import useRequest from 'hooks/useRequest';
-import { required } from 'util/validators';
 import { parseVariableField } from 'util/yaml';
-import Popover from '../../Popover';
-import AnsibleSelect from '../../AnsibleSelect';
 import ContentError from '../../ContentError';
 import ContentLoading from '../../ContentLoading';
-import FormField, { FormSubmitError } from '../../FormField';
-import {
-  FormColumnLayout,
-  SubFormLayout,
-  FormFullWidthLayout,
-} from '../../FormLayout';
-import FrequencyDetailSubform from './FrequencyDetailSubform';
+import { FormSubmitError } from '../../FormField';
+import { FormColumnLayout, FormFullWidthLayout } from '../../FormLayout';
 import SchedulePromptableFields from './SchedulePromptableFields';
-import DateTimePicker from './DateTimePicker';
+import ScheduleFormFields from './ScheduleFormFields';
+import UnsupportedScheduleForm from './UnsupportedScheduleForm';
+import parseRuleObj, { UnsupportedRRuleError } from './parseRuleObj';
 import buildRuleObj from './buildRuleObj';
-import helpText from '../../../screens/Template/shared/JobTemplate.helptext';
 
 const NUM_DAYS_PER_FREQUENCY = {
   week: 7,
   month: 31,
   year: 365,
 };
-
-const generateRunOnTheDay = (days = []) => {
-  if (
-    [
-      RRule.MO,
-      RRule.TU,
-      RRule.WE,
-      RRule.TH,
-      RRule.FR,
-      RRule.SA,
-      RRule.SU,
-    ].every((element) => days.indexOf(element) > -1)
-  ) {
-    return 'day';
-  }
-  if (
-    [RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR].every(
-      (element) => days.indexOf(element) > -1
-    )
-  ) {
-    return 'weekday';
-  }
-  if ([RRule.SA, RRule.SU].every((element) => days.indexOf(element) > -1)) {
-    return 'weekendDay';
-  }
-  if (days.indexOf(RRule.MO) > -1) {
-    return 'monday';
-  }
-  if (days.indexOf(RRule.TU) > -1) {
-    return 'tuesday';
-  }
-  if (days.indexOf(RRule.WE) > -1) {
-    return 'wednesday';
-  }
-  if (days.indexOf(RRule.TH) > -1) {
-    return 'thursday';
-  }
-  if (days.indexOf(RRule.FR) > -1) {
-    return 'friday';
-  }
-  if (days.indexOf(RRule.SA) > -1) {
-    return 'saturday';
-  }
-  if (days.indexOf(RRule.SU) > -1) {
-    return 'sunday';
-  }
-
-  return null;
-};
-
-function ScheduleFormFields({ hasDaysToKeepField, zoneOptions, zoneLinks }) {
-  const [timezone, timezoneMeta] = useField({
-    name: 'timezone',
-    validate: required(t`Select a value for this field`),
-  });
-  const [frequency, frequencyMeta] = useField({
-    name: 'frequency',
-    validate: required(t`Select a value for this field`),
-  });
-  const [{ name: dateFieldName }] = useField('startDate');
-  const [{ name: timeFieldName }] = useField('startTime');
-  const [timezoneMessage, setTimezoneMessage] = useState('');
-  const warnLinkedTZ = (event, selectedValue) => {
-    if (zoneLinks[selectedValue]) {
-      setTimezoneMessage(
-        `Warning: ${selectedValue} is a link to ${zoneLinks[selectedValue]} and will be saved as that.`
-      );
-    } else {
-      setTimezoneMessage('');
-    }
-    timezone.onChange(event, selectedValue);
-  };
-
-  let timezoneValidatedStatus = 'default';
-  if (timezoneMeta.touched && timezoneMeta.error) {
-    timezoneValidatedStatus = 'error';
-  } else if (timezoneMessage) {
-    timezoneValidatedStatus = 'warning';
-  }
-
-  const config = useConfig();
-
-  return (
-    <>
-      <FormField
-        id="schedule-name"
-        label={t`Name`}
-        name="name"
-        type="text"
-        validate={required(null)}
-        isRequired
-      />
-      <FormField
-        id="schedule-description"
-        label={t`Description`}
-        name="description"
-        type="text"
-      />
-      <DateTimePicker
-        dateFieldName={dateFieldName}
-        timeFieldName={timeFieldName}
-        label={t`Start date/time`}
-      />
-      <FormGroup
-        name="timezone"
-        fieldId="schedule-timezone"
-        helperTextInvalid={timezoneMeta.error || timezoneMessage}
-        isRequired
-        validated={timezoneValidatedStatus}
-        label={t`Local time zone`}
-        helperText={timezoneMessage}
-        labelIcon={<Popover content={helpText.localTimeZone(config)} />}
-      >
-        <AnsibleSelect
-          id="schedule-timezone"
-          data={zoneOptions}
-          {...timezone}
-          onChange={warnLinkedTZ}
-        />
-      </FormGroup>
-      <FormGroup
-        name="frequency"
-        fieldId="schedule-requency"
-        helperTextInvalid={frequencyMeta.error}
-        isRequired
-        validated={
-          !frequencyMeta.touched || !frequencyMeta.error ? 'default' : 'error'
-        }
-        label={t`Run frequency`}
-      >
-        <AnsibleSelect
-          id="schedule-frequency"
-          data={[
-            { value: 'none', key: 'none', label: t`None (run once)` },
-            { value: 'minute', key: 'minute', label: t`Minute` },
-            { value: 'hour', key: 'hour', label: t`Hour` },
-            { value: 'day', key: 'day', label: t`Day` },
-            { value: 'week', key: 'week', label: t`Week` },
-            { value: 'month', key: 'month', label: t`Month` },
-            { value: 'year', key: 'year', label: t`Year` },
-          ]}
-          {...frequency}
-        />
-      </FormGroup>
-      {hasDaysToKeepField ? (
-        <FormField
-          id="schedule-days-to-keep"
-          label={t`Days of Data to Keep`}
-          name="daysToKeep"
-          type="number"
-          validate={required(null)}
-          isRequired
-        />
-      ) : null}
-      {frequency.value !== 'none' && (
-        <SubFormLayout>
-          <Title size="md" headingLevel="h4">
-            {t`Frequency Details`}
-          </Title>
-          <FormColumnLayout>
-            <FrequencyDetailSubform />
-          </FormColumnLayout>
-        </SubFormLayout>
-      )}
-    </>
-  );
-}
 
 function ScheduleForm({
   hasDaysToKeepField,
@@ -415,25 +233,72 @@ function ScheduleForm({
   const [currentDate, time] = dateToInputDateTime(closestQuarterHour.toISO());
 
   const [tomorrowDate] = dateToInputDateTime(tomorrow.toISO());
+  const initialFrequencyOptions = {
+    minute: {
+      interval: 1,
+      end: 'never',
+      occurrences: 1,
+      endDate: tomorrowDate,
+      endTime: time,
+    },
+    hour: {
+      interval: 1,
+      end: 'never',
+      occurrences: 1,
+      endDate: tomorrowDate,
+      endTime: time,
+    },
+    day: {
+      interval: 1,
+      end: 'never',
+      occurrences: 1,
+      endDate: tomorrowDate,
+      endTime: time,
+    },
+    week: {
+      interval: 1,
+      end: 'never',
+      occurrences: 1,
+      endDate: tomorrowDate,
+      endTime: time,
+      daysOfWeek: [],
+    },
+    month: {
+      interval: 1,
+      end: 'never',
+      occurrences: 1,
+      endDate: tomorrowDate,
+      endTime: time,
+      runOn: 'day',
+      runOnTheOccurrence: 1,
+      runOnTheDay: 'sunday',
+      runOnDayNumber: 1,
+    },
+    year: {
+      interval: 1,
+      end: 'never',
+      occurrences: 1,
+      endDate: tomorrowDate,
+      endTime: time,
+      runOn: 'day',
+      runOnTheOccurrence: 1,
+      runOnTheDay: 'sunday',
+      runOnTheMonth: 1,
+      runOnDayMonth: 1,
+      runOnDayNumber: 1,
+    },
+  };
+
   const initialValues = {
-    daysOfWeek: [],
     description: schedule.description || '',
-    end: 'never',
-    endDate: tomorrowDate,
-    endTime: time,
-    frequency: 'none',
-    interval: 1,
+    frequency: [],
+    exceptionFrequency: [],
+    frequencyOptions: initialFrequencyOptions,
+    exceptionOptions: initialFrequencyOptions,
     name: schedule.name || '',
-    occurrences: 1,
-    runOn: 'day',
-    runOnDayMonth: 1,
-    runOnDayNumber: 1,
-    runOnTheDay: 'sunday',
-    runOnTheMonth: 1,
-    runOnTheOccurrence: 1,
     startDate: currentDate,
     startTime: time,
-    timezone: schedule.timezone || 'America/New_York',
+    timezone: schedule.timezone || now.zoneName,
   };
   const submitSchedule = (
     values,
@@ -465,132 +330,23 @@ function ScheduleForm({
     initialValues.daysToKeep = initialDaysToKeep;
   }
 
-  const overriddenValues = {};
-
-  if (Object.keys(schedule).length > 0) {
-    if (schedule.rrule) {
-      if (schedule.rrule.split(/\s+/).length > 2) {
+  let overriddenValues = {};
+  if (schedule.rrule) {
+    try {
+      overriddenValues = parseRuleObj(schedule);
+    } catch (error) {
+      if (error instanceof UnsupportedRRuleError) {
         return (
-          <Form autoComplete="off">
-            <Alert
-              variant="danger"
-              isInline
-              ouiaId="form-submit-error-alert"
-              title={t`Complex schedules are not supported in the UI yet, please use the API to manage this schedule.`}
-            />
-            <b>{t`Schedule Rules`}:</b>
-            <pre css="white-space: pre; font-family: var(--pf-global--FontFamily--monospace)">
-              {schedule.rrule}
-            </pre>
-            <ActionGroup>
-              <Button
-                ouiaId="schedule-form-cancel-button"
-                aria-label={t`Cancel`}
-                variant="secondary"
-                type="button"
-                onClick={handleCancel}
-              >
-                {t`Cancel`}
-              </Button>
-            </ActionGroup>
-          </Form>
+          <UnsupportedScheduleForm
+            schedule={schedule}
+            handleCancel={handleCancel}
+          />
         );
       }
-
-      try {
-        const {
-          origOptions: {
-            bymonth,
-            bymonthday,
-            bysetpos,
-            byweekday,
-            count,
-            dtstart,
-            freq,
-            interval,
-          },
-        } = RRule.fromString(schedule.rrule.replace(' ', '\n'));
-
-        if (dtstart) {
-          const [startDate, startTime] = dateToInputDateTime(
-            schedule.dtstart,
-            schedule.timezone
-          );
-
-          overriddenValues.startDate = startDate;
-          overriddenValues.startTime = startTime;
-        }
-
-        if (schedule.until) {
-          overriddenValues.end = 'onDate';
-
-          const [endDate, endTime] = dateToInputDateTime(
-            schedule.until,
-            schedule.timezone
-          );
-
-          overriddenValues.endDate = endDate;
-          overriddenValues.endTime = endTime;
-        } else if (count) {
-          overriddenValues.end = 'after';
-          overriddenValues.occurrences = count;
-        }
-
-        if (interval) {
-          overriddenValues.interval = interval;
-        }
-
-        if (typeof freq === 'number') {
-          switch (freq) {
-            case RRule.MINUTELY:
-              if (schedule.dtstart !== schedule.dtend) {
-                overriddenValues.frequency = 'minute';
-              }
-              break;
-            case RRule.HOURLY:
-              overriddenValues.frequency = 'hour';
-              break;
-            case RRule.DAILY:
-              overriddenValues.frequency = 'day';
-              break;
-            case RRule.WEEKLY:
-              overriddenValues.frequency = 'week';
-              if (byweekday) {
-                overriddenValues.daysOfWeek = byweekday;
-              }
-              break;
-            case RRule.MONTHLY:
-              overriddenValues.frequency = 'month';
-              if (bymonthday) {
-                overriddenValues.runOnDayNumber = bymonthday;
-              } else if (bysetpos) {
-                overriddenValues.runOn = 'the';
-                overriddenValues.runOnTheOccurrence = bysetpos;
-                overriddenValues.runOnTheDay = generateRunOnTheDay(byweekday);
-              }
-              break;
-            case RRule.YEARLY:
-              overriddenValues.frequency = 'year';
-              if (bymonthday) {
-                overriddenValues.runOnDayNumber = bymonthday;
-                overriddenValues.runOnDayMonth = bymonth;
-              } else if (bysetpos) {
-                overriddenValues.runOn = 'the';
-                overriddenValues.runOnTheOccurrence = bysetpos;
-                overriddenValues.runOnTheDay = generateRunOnTheDay(byweekday);
-                overriddenValues.runOnTheMonth = bymonth;
-              }
-              break;
-            default:
-              break;
-          }
-        }
-      } catch (error) {
-        rruleError = error;
-      }
-    } else {
-      rruleError = new Error(t`Schedule is missing rrule`);
+      rruleError = error;
     }
+  } else if (schedule.id) {
+    rruleError = new Error(t`Schedule is missing rrule`);
   }
 
   if (contentError || rruleError) {
@@ -601,54 +357,83 @@ function ScheduleForm({
     return <ContentLoading />;
   }
 
+  const validate = (values) => {
+    const errors = {};
+
+    values.frequency.forEach((freq) => {
+      const options = values.frequencyOptions[freq];
+      const freqErrors = {};
+
+      if (
+        (freq === 'month' || freq === 'year') &&
+        options.runOn === 'day' &&
+        (options.runOnDayNumber < 1 || options.runOnDayNumber > 31)
+      ) {
+        freqErrors.runOn = t`Please select a day number between 1 and 31.`;
+      }
+
+      if (options.end === 'after' && !options.occurrences) {
+        freqErrors.occurrences = t`Please enter a number of occurrences.`;
+      }
+
+      if (options.end === 'onDate') {
+        if (
+          DateTime.fromISO(values.startDate) >=
+          DateTime.fromISO(options.endDate)
+        ) {
+          freqErrors.endDate = t`Please select an end date/time that comes after the start date/time.`;
+        }
+
+        if (
+          DateTime.fromISO(options.endDate)
+            .diff(DateTime.fromISO(values.startDate), 'days')
+            .toObject().days < NUM_DAYS_PER_FREQUENCY[freq]
+        ) {
+          const rule = new RRule(
+            buildRuleObj({
+              startDate: values.startDate,
+              startTime: values.startTime,
+              frequency: freq,
+              ...options,
+            })
+          );
+          if (rule.all().length === 0) {
+            errors.startDate = t`Selected date range must have at least 1 schedule occurrence.`;
+            freqErrors.endDate = t`Selected date range must have at least 1 schedule occurrence.`;
+          }
+        }
+      }
+      if (Object.keys(freqErrors).length > 0) {
+        if (!errors.frequencyOptions) {
+          errors.frequencyOptions = {};
+        }
+        errors.frequencyOptions[freq] = freqErrors;
+      }
+    });
+
+    return errors;
+  };
+
   return (
     <Config>
       {() => (
         <Formik
-          initialValues={Object.assign(initialValues, overriddenValues)}
+          initialValues={{
+            ...initialValues,
+            ...overriddenValues,
+            frequencyOptions: {
+              ...initialValues.frequencyOptions,
+              ...overriddenValues.frequencyOptions,
+            },
+            exceptionOptions: {
+              ...initialValues.exceptionOptions,
+              ...overriddenValues.exceptionOptions,
+            },
+          }}
           onSubmit={(values) => {
             submitSchedule(values, launchConfig, surveyConfig, credentials);
           }}
-          validate={(values) => {
-            const errors = {};
-            const {
-              end,
-              endDate,
-              frequency,
-              runOn,
-              runOnDayNumber,
-              startDate,
-            } = values;
-
-            if (
-              end === 'onDate' &&
-              DateTime.fromISO(endDate)
-                .diff(DateTime.fromISO(startDate), 'days')
-                .toObject().days < NUM_DAYS_PER_FREQUENCY[frequency]
-            ) {
-              const rule = new RRule(buildRuleObj(values));
-              if (rule.all().length === 0) {
-                errors.startDate = t`Selected date range must have at least 1 schedule occurrence.`;
-                errors.endDate = t`Selected date range must have at least 1 schedule occurrence.`;
-              }
-            }
-
-            if (
-              end === 'onDate' &&
-              DateTime.fromISO(startDate) >= DateTime.fromISO(endDate)
-            ) {
-              errors.endDate = t`Please select an end date/time that comes after the start date/time.`;
-            }
-
-            if (
-              (frequency === 'month' || frequency === 'year') &&
-              runOn === 'day' &&
-              (runOnDayNumber < 1 || runOnDayNumber > 31)
-            ) {
-              errors.runOn = t`Please select a day number between 1 and 31.`;
-            }
-            return errors;
-          }}
+          validate={validate}
         >
           {(formik) => (
             <Form autoComplete="off" onSubmit={formik.handleSubmit}>
