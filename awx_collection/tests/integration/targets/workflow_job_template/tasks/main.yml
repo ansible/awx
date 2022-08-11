@@ -110,6 +110,20 @@
         that:
           - "result is changed"
 
+    - name: Create a 3rd Demo Project in another org with inventory source name
+      project:
+        name: "{{ project_inv_source }}"
+        organization: "{{ org_name }}"
+        state: present
+        scm_type: git
+        scm_url: https://github.com/ansible/ansible-tower-samples.git
+        scm_credential: "{{ scm_cred_name }}"
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
     - name: Add an inventory
       inventory:
         description: Test inventory
@@ -573,8 +587,8 @@
           - identifier: node202
             unified_job_template:
               organization:
-                name: Default
-              name: "{{ demo_project_name }}"
+                name: "{{ org_name }}"
+              name: "{{ project_inv_source }}"
               type: project
           - all_parents_must_converge: false
             identifier: node301
@@ -586,7 +600,7 @@
           - identifier: Cleanup Job
             unified_job_template:
               name: Cleanup Activity Stream
-              type: system_job
+              type: system_job_template
       register: result
 
     - assert:
@@ -754,6 +768,16 @@
     - name: Delete the 2nd Demo Project
       project:
         name: "{{ demo_project_name_2 }}"
+        organization: "{{ org_name }}"
+        scm_type: git
+        scm_url: https://github.com/ansible/ansible-tower-samples.git
+        scm_credential: "{{ scm_cred_name }}"
+        state: absent
+      ignore_errors: True
+
+    - name: Delete the 3rd Demo Project
+      project:
+        name: "{{ project_inv_source }}"
         organization: "{{ org_name }}"
         scm_type: git
         scm_url: https://github.com/ansible/ansible-tower-samples.git
