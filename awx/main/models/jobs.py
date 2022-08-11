@@ -805,11 +805,8 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
 
     @property
     def preferred_instance_groups(self):
-        # If the user specified instance groups then just return those
-        if self.instance_groups is not None and self.instance_groups.count() > 0:
-            # Do we want to do a hard return here or just add it to the list of possible groups.
-            # This might be related to https://github.com/ansible/awx/issues/6134
-            return self.instance_groups.all()
+        # If the user specified instance groups those will be handled by the unified_job.create_unified_job
+        # This function handles only the defaults for a template w/o user specification
         if self.organization is not None:
             organization_groups = [x for x in self.organization.instance_groups.all()]
         else:
