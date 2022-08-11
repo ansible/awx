@@ -565,7 +565,7 @@ class TaskManager(TaskBase):
                 opts,
                 queue=task.get_queue_name(),
                 uuid=task.celery_task_id,
-                db_conn=connection,
+                new_connection=False,  # we want the message to be contingent on transaction commit
                 callbacks=[{'task': handle_work_success.name, 'kwargs': {'task_actual': task_actual}}],
                 errbacks=[{'task': handle_work_error.name, 'args': [task.celery_task_id], 'kwargs': {'subtasks': [task_actual] + dependencies}}],
             )

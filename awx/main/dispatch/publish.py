@@ -67,7 +67,7 @@ class task:
                 return cls.apply_async(args, kwargs)
 
             @classmethod
-            def apply_async(cls, args=None, kwargs=None, queue=None, uuid=None, db_conn=None, **kw):
+            def apply_async(cls, args=None, kwargs=None, queue=None, uuid=None, new_connection=True, **kw):
                 task_id = uuid or str(uuid4())
                 args = args or []
                 kwargs = kwargs or {}
@@ -84,7 +84,7 @@ class task:
                 if callable(queue):
                     queue = queue()
                 if not settings.IS_TESTING(sys.argv):
-                    with pg_bus_conn(conn=db_conn) as conn:
+                    with pg_bus_conn(new_connection=new_connection) as conn:
                         conn.notify(queue, json.dumps(obj))
                 return (obj, queue)
 
