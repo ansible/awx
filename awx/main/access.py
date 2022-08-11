@@ -1833,6 +1833,8 @@ class JobLaunchConfigAccess(BaseAccess):
     In order to create a new object with a copy of this launch config, I need:
      - use access to related inventory (if present)
      - use role to many-related credentials (if any present)
+     - use role to Execution Environment (if present)
+     - use role to many-related instance groups (if any present)
     """
 
     model = JobLaunchConfig
@@ -1850,6 +1852,7 @@ class JobLaunchConfigAccess(BaseAccess):
     def can_add(self, data, template=None):
         # This is a special case, we don't check related many-to-many elsewhere
         # launch RBAC checks use this
+        permission_error = False
         if 'credentials' in data and data['credentials'] or 'reference_obj' in data:
             if 'reference_obj' in data:
                 prompted_cred_qs = data['reference_obj'].credentials.all()
@@ -1862,12 +1865,42 @@ class JobLaunchConfigAccess(BaseAccess):
                             cred_pks.remove(cred.pk)
                 prompted_cred_qs = Credential.objects.filter(pk__in=cred_pks)
             if self._unusable_creds_exist(prompted_cred_qs):
-                return False
+                credential_names = [cred.name for cred in prompted_cred_qs]
+                logger.debug("User {} not allowed to access credentials in {}".format(self.user.username, credential_names))
+                permission_error = True
+        if 'execution_environment' in data and data['execution_environment'] or 'reference_obj' in data:
+            if 'reference_obj' in data:
+                ee = data['reference_obj'].execution_environment
+            else:
+                ee = data['execution_environment']
+            if not self.user.can_access(ExecutionEnvironment, 'read', ee):
+                logger.debug("User {} not allowed access to ee {}".format(self.user.username, ee.name))
+                permission_error = True
+        if 'labels' in data and data['labels'] or 'reference_obj' in data:
+            if 'reference_obj' in data:
+                labels = data['reference_obj'].labels.all()
+            else:
+                labels = data['labels']
+            for a_label in labels:
+                if not self.user.can_access(Label, 'read', a_label):
+                    logger.debug("User {} not allowed access to label {}".format(self.user.username, a_label.name))
+                    permission_error = True
+        if permission_error:
+            return False
         return self.check_related('inventory', Inventory, data, role_field='use_role')
 
     @check_superuser
     def can_use(self, obj):
-        return self.check_related('inventory', Inventory, {}, obj=obj, role_field='use_role', mandatory=True) and self.has_credentials_access(obj)
+        inventory_check = self.check_related('inventory', Inventory, {}, obj=obj, role_field='use_role', mandatory=True)
+        # TODO: Test this
+        ee_check = False
+        ee = obj.get('execution_environment', None)
+        if ee:
+            ee_check = self.user.can_access(ExecutionEnvironment, 'read', ee)
+        ee_check = self.check_related('execution_environment', ExecutionEnvironment, {}, obj=obj, role_field='use_role', mandatory=True)
+        # TODO: Fix this
+        ig_check = False
+        return inventory_check and self.has_credentials_access(obj) and ee_check and ig_check
 
     def can_change(self, obj, data):
         return self.check_related('inventory', Inventory, data, obj=obj, role_field='use_role')
