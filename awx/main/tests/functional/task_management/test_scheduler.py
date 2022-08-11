@@ -66,7 +66,7 @@ class TestJobLifeCycle:
         # Submits jobs
         # intermission - jobs will run and reschedule TM when finished
         self.run_tm(DependencyManager())  # flip dependencies_processed to True
-        self.run_tm(TaskManager(), [mock.call('waiting'), mock.call('waiting')])
+        self.run_tm(TaskManager())
         # I am the job runner
         for job in jt.jobs.all():
             job.status = 'successful'
