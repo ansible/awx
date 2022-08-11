@@ -261,5 +261,6 @@ def test_inventory_update_injected_content(this_kind, inventory, fake_credential
         with mock.patch.object(UnifiedJob, 'websocket_emit_status', mock.Mock()):
             # The point of this test is that we replace run with assertions
             with mock.patch('awx.main.tasks.receptor.AWXReceptorJob.run', substitute_run):
-                # so this sets up everything for a run and then yields control over to substitute_run
-                task.run(inventory_update.pk)
+                with mock.patch('awx.main.tasks.jobs.create_partition'):
+                    # so this sets up everything for a run and then yields control over to substitute_run
+                    task.run(inventory_update.pk)
