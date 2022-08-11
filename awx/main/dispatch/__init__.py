@@ -1,4 +1,3 @@
-import psycopg2
 import select
 
 from contextlib import contextmanager
@@ -15,11 +14,11 @@ def get_local_queuename():
 
 
 class PubSub(object):
-    def __init__(self, conn=None):
-        if conn is None:
-            self.conn = pg_connection.connection  # not using multiple connections
-        else:
-            self.conn = conn
+    @property
+    def conn(self):
+        if pg_connection.connection is None:
+            pg_connection.connect()
+        return pg_connection.connection
 
     def listen(self, channel):
         with self.conn.cursor() as cur:
@@ -48,18 +47,6 @@ class PubSub(object):
 
 
 @contextmanager
-def pg_bus_conn(new_connection=False):
-    conn = None
-    if new_connection:
-        conf = settings.DATABASES['default']
-        conn = psycopg2.connect(
-            dbname=conf['NAME'], host=conf['HOST'], user=conf['USER'], password=conf['PASSWORD'], port=conf['PORT'], **conf.get("OPTIONS", {})
-        )
-        # Django connection.cursor().connection doesn't have autocommit=True on
-        conn.set_session(autocommit=True)
-    elif pg_connection.connection is None:
-        pg_connection.connect()
-    pubsub = PubSub(conn)
+def pg_bus_conn():
+    pubsub = PubSub()
     yield pubsub
-    if new_connection:
-        conn.close()

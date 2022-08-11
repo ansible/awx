@@ -127,11 +127,6 @@ def inform_cluster_of_shutdown():
 
 
 @task(queue=get_local_queuename)
-def test_alan():
-    logger.info('the alan method has been called')
-
-
-@task(queue=get_local_queuename)
 def apply_cluster_membership_policies():
     from awx.main.signals import disable_activity_stream
 
