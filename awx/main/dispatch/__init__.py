@@ -15,7 +15,7 @@ def get_local_queuename():
 
 class PubSub(object):
     def __init__(self, conn):
-        assert conn.autocommit, "Connection must be in autocommit mode."
+        # assert conn.autocommit, "Connection must be in autocommit mode."
         self.conn = conn
 
     def listen(self, channel):
@@ -45,11 +45,14 @@ class PubSub(object):
 
 
 @contextmanager
-def pg_bus_conn():
-    conf = settings.DATABASES['default']
-    conn = psycopg2.connect(dbname=conf['NAME'], host=conf['HOST'], user=conf['USER'], password=conf['PASSWORD'], port=conf['PORT'], **conf.get("OPTIONS", {}))
-    # Django connection.cursor().connection doesn't have autocommit=True on
-    conn.set_session(autocommit=True)
+def pg_bus_conn(conn=None):
+    if conn is None:
+        conf = settings.DATABASES['default']
+        conn = psycopg2.connect(
+            dbname=conf['NAME'], host=conf['HOST'], user=conf['USER'], password=conf['PASSWORD'], port=conf['PORT'], **conf.get("OPTIONS", {})
+        )
+        # Django connection.cursor().connection doesn't have autocommit=True on
+        conn.set_session(autocommit=True)
     pubsub = PubSub(conn)
     yield pubsub
     conn.close()
