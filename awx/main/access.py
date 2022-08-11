@@ -1833,8 +1833,9 @@ class JobLaunchConfigAccess(BaseAccess):
     In order to create a new object with a copy of this launch config, I need:
      - use access to related inventory (if present)
      - use role to many-related credentials (if any present)
-     - use role to Execution Environment (if present)
-     - use role to many-related instance groups (if any present)
+     - use role to Execution Environment (if present), unless the specified ee is already in the template
+     - use role to many-related labels (if any present), unless the specified label is already in the template
+     - use role to many-related instance groups (if any present), unless the specified instance group is already in the template
     """
 
     model = JobLaunchConfig
@@ -1873,9 +1874,14 @@ class JobLaunchConfigAccess(BaseAccess):
                 ee = data['reference_obj'].execution_environment
             else:
                 ee = data['execution_environment']
-            if not self.user.can_access(ExecutionEnvironment, 'read', ee):
-                logger.debug("User {} not allowed access to ee {}".format(self.user.username, ee.name))
-                permission_error = True
+            if ee and not self.user.can_access(ExecutionEnvironment, 'read', ee):
+                if not template or ee != template.execution_environment:
+                    logger.debug("User {} not allowed access to ee {}".format(self.user.username, ee.name))
+                    permission_error = True
+                else:
+                    logger.debug(
+                        "User {} does not have permissions to execution_environment {} but its part of the template".format(self.user.username, ee.name)
+                    )
         if 'labels' in data and data['labels'] or 'reference_obj' in data:
             if 'reference_obj' in data:
                 labels = data['reference_obj'].labels.all()
@@ -1883,8 +1889,27 @@ class JobLaunchConfigAccess(BaseAccess):
                 labels = data['labels']
             for a_label in labels:
                 if not self.user.can_access(Label, 'read', a_label):
-                    logger.debug("User {} not allowed access to label {}".format(self.user.username, a_label.name))
-                    permission_error = True
+                    # This if allows a template admin who can see labels to specify a list and the executor to select a subset of the list
+                    if not template or a_label not in template.labels.all():
+                        logger.debug("User {} not allowed access to label {}".format(self.user.username, a_label.name))
+                        permission_error = True
+                    else:
+                        logger.debug("User {} does not have permissions to label {} but its part of the template".format(self.user.username, a_label.name))
+        if 'instance_groups' in data and data['instance_groups'] or 'reference_obj' in data:
+            if 'reference_obj' in data:
+                instance_groups = data['reference_obj'].labels.all()
+            else:
+                instance_groups = data['instance_groups']
+            for an_ig in instance_groups:
+                if not an_ig in self.user.get_queryset(InstanceGroup):
+                    # This if allows a template admin who can see IGs to specify a list and the executor to select a subset of the list
+                    if not template or an_ig not in template.instance_groups.all():
+                        logger.debug("user {} not allowed access to instance group {}".format(self.user.username, an_ig.name))
+                        permission_error = True
+                    else:
+                        logger.debug(
+                            "User {} does not have permissions to instance_group {} but its part of the template".format(self.user.username, an_ig.name)
+                        )
         if permission_error:
             return False
         return self.check_related('inventory', Inventory, data, role_field='use_role')
@@ -1892,14 +1917,6 @@ class JobLaunchConfigAccess(BaseAccess):
     @check_superuser
     def can_use(self, obj):
         inventory_check = self.check_related('inventory', Inventory, {}, obj=obj, role_field='use_role', mandatory=True)
-        # TODO: Test this
-        ee_check = False
-        ee = obj.get('execution_environment', None)
-        if ee:
-            ee_check = self.user.can_access(ExecutionEnvironment, 'read', ee)
-        ee_check = self.check_related('execution_environment', ExecutionEnvironment, {}, obj=obj, role_field='use_role', mandatory=True)
-        # TODO: Fix this
-        ig_check = False
         return inventory_check and self.has_credentials_access(obj) and ee_check and ig_check
 
     def can_change(self, obj, data):
