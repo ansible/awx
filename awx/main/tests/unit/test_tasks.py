@@ -34,13 +34,15 @@ from awx.main.models import (
 )
 from awx.main.models.credential import HIDDEN_PASSWORD, ManagedCredentialType
 
-from awx.main.tasks import jobs, system
+from awx.main.tasks import jobs, system, receptor
 from awx.main.utils import encrypt_field, encrypt_value
 from awx.main.utils.safe_yaml import SafeLoader
 from awx.main.utils.execution_environments import CONTAINER_ROOT
 
 from awx.main.utils.licensing import Licenser
 from awx.main.constants import JOB_VARIABLE_PREFIXES
+
+from receptorctl.socket_interface import ReceptorControl
 
 
 def to_host_path(path, private_data_dir):
@@ -1965,3 +1967,120 @@ def test_project_update_no_ee(mock_me):
         task.build_env(job, {})
 
     assert 'The project could not sync because there is no Execution Environment' in str(e.value)
+
+
+@pytest.mark.parametrize(
+    'work_unit_data, expected_function_call',
+    [
+        [
+            # if (extra_data is None): continue
+            {
+                'zpdFi4BX': {
+                    'ExtraData': None,
+                }
+            },
+            False,
+        ],
+        [
+            # Extra data is a string and StateName is None
+            {
+                "y4NgMKKW": {
+                    "ExtraData": "Unknown WorkType",
+                }
+            },
+            False,
+        ],
+        [
+            # Extra data is a string and StateName in RECEPTOR_ACTIVE_STATES
+            {
+                "y4NgMKKW": {
+                    "ExtraData": "Unknown WorkType",
+                    "StateName": "Running",
+                }
+            },
+            False,
+        ],
+        [
+            # Extra data is a string and StateName not in RECEPTOR_ACTIVE_STATES
+            {
+                "y4NgMKKW": {
+                    "ExtraData": "Unknown WorkType",
+                    "StateName": "Succeeded",
+                }
+            },
+            True,
+        ],
+        [
+            # Extra data is a dict but RemoteWorkType is not ansible-runner
+            {
+                "y4NgMKKW": {
+                    'ExtraData': {
+                        'RemoteWorkType': 'not-ansible-runner',
+                    },
+                }
+            },
+            False,
+        ],
+        [
+            # Extra data is a dict and its an ansible-runner but we have no params
+            {
+                'zpdFi4BX': {
+                    'ExtraData': {
+                        'RemoteWorkType': 'ansible-runner',
+                    },
+                }
+            },
+            False,
+        ],
+        [
+            # Extra data is a dict and its an ansible-runner but params is not --worker-info
+            {
+                'zpdFi4BX': {
+                    'ExtraData': {'RemoteWorkType': 'ansible-runner', 'RemoteParams': {'params': '--not-worker-info'}},
+                }
+            },
+            False,
+        ],
+        [
+            # Extra data is a dict and its an ansible-runner but params starts without cleanup
+            {
+                'zpdFi4BX': {
+                    'ExtraData': {'RemoteWorkType': 'ansible-runner', 'RemoteParams': {'params': 'not cleanup stuff'}},
+                }
+            },
+            False,
+        ],
+        [
+            # Extra data is a dict and its an ansible-runner w/ params but still running
+            {
+                'zpdFi4BX': {
+                    'ExtraData': {'RemoteWorkType': 'ansible-runner', 'RemoteParams': {'params': '--worker-info'}},
+                    "StateName": "Running",
+                }
+            },
+            False,
+        ],
+        [
+            # Extra data is a dict and its an ansible-runner w/ params and completed
+            {
+                'zpdFi4BX': {
+                    'ExtraData': {'RemoteWorkType': 'ansible-runner', 'RemoteParams': {'params': '--worker-info'}},
+                    "StateName": "Succeeded",
+                }
+            },
+            True,
+        ],
+    ],
+)
+def test_administrative_workunit_reaper(work_unit_data, expected_function_call):
+    # Mock the get_receptor_ctl call and let it return a dummy object
+    # It does not matter what file name we return as the socket because we won't actually call receptor (unless something is broken)
+    with mock.patch('awx.main.tasks.receptor.get_receptor_ctl') as mock_get_receptor_ctl:
+        mock_get_receptor_ctl.return_value = ReceptorControl('/var/run/awx-receptor/receptor.sock')
+        with mock.patch('receptorctl.socket_interface.ReceptorControl.simple_command') as simple_command:
+            receptor.administrative_workunit_reaper(work_list=work_unit_data)
+
+    if expected_function_call:
+        simple_command.assert_called()
+    else:
+        simple_command.assert_not_called()
