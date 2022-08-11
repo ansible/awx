@@ -1917,7 +1917,7 @@ class JobLaunchConfigAccess(BaseAccess):
     @check_superuser
     def can_use(self, obj):
         inventory_check = self.check_related('inventory', Inventory, {}, obj=obj, role_field='use_role', mandatory=True)
-        return inventory_check and self.has_credentials_access(obj) and ee_check and ig_check
+        return inventory_check and self.has_credentials_access(obj)
 
     def can_change(self, obj, data):
         return self.check_related('inventory', Inventory, data, obj=obj, role_field='use_role')
