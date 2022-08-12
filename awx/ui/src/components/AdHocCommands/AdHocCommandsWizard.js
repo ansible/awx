@@ -62,7 +62,7 @@ const FormikApp = withFormik({
       limit: adHocItemStrings || 'all',
       credentials: [],
       module_args: '',
-      verbosity: VERBOSITY()[0],
+      verbosity: VERBOSITY()[0].value,
       forks: 0,
       diff_mode: false,
       become_enabled: '',
