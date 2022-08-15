@@ -535,8 +535,6 @@ class BaseTask(object):
             else:
                 receptor_job = AWXReceptorJob(self, params)
                 res = receptor_job.run()
-                self.unit_id = receptor_job.unit_id
-
                 if not res:
                     return
 
