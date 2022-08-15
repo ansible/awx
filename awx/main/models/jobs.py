@@ -620,7 +620,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         default=1,
         help_text=_("If ran as part of sliced jobs, the total number of slices. " "If 1, job is not part of a sliced job."),
     )
-    # TODO: Should this be ordered? Or will the prompt not respect order?
     instance_groups = OrderedManyToManyField(
         'InstanceGroup',
         related_name='job_instance_groups',
