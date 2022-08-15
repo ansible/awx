@@ -14,11 +14,8 @@ def get_local_queuename():
 
 
 class PubSub(object):
-    @property
-    def conn(self):
-        if pg_connection.connection is None:
-            pg_connection.connect()
-        return pg_connection.connection
+    def __init__(self, conn):
+        self.conn = conn
 
     def listen(self, channel):
         with self.conn.cursor() as cur:
@@ -33,6 +30,9 @@ class PubSub(object):
             cur.execute('SELECT pg_notify(%s, %s);', (channel, payload))
 
     def events(self, select_timeout=5, yield_timeouts=False):
+        if not pg_connection.get_autocommit():
+            raise RuntimeError('Listening for events can only be done in autocommit mode')
+
         while True:
             if select.select([self.conn], [], [], select_timeout) == NOT_READY:
                 if yield_timeouts:
@@ -48,5 +48,11 @@ class PubSub(object):
 
 @contextmanager
 def pg_bus_conn():
-    pubsub = PubSub()
+
+    if pg_connection.connection is None:
+        pg_connection.connect()
+    if pg_connection.connection is None:
+        raise RuntimeError('Unexpectedly could not connect to postgres for pg_notify actions')
+
+    pubsub = PubSub(pg_connection.connection)
     yield pubsub
