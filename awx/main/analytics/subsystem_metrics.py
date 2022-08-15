@@ -195,6 +195,7 @@ class Metrics:
             SetIntM('task_manager_running_processed', 'Number of running tasks processed'),
             SetIntM('task_manager_pending_processed', 'Number of pending tasks processed'),
             SetIntM('task_manager_tasks_blocked', 'Number of tasks blocked from running'),
+            SetFloatM('task_manager_commit_seconds', 'Time spent in db transaction, including on_commit calls'),
             SetFloatM('dependency_manager_get_tasks_seconds', 'Time spent loading pending tasks from db'),
             SetFloatM('dependency_manager_generate_dependencies_seconds', 'Time spent generating dependencies for pending tasks'),
             SetFloatM('dependency_manager__schedule_seconds', 'Time spent in running the entire _schedule'),
