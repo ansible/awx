@@ -1,3 +1,4 @@
+import psycopg2
 import select
 
 from contextlib import contextmanager
@@ -47,12 +48,32 @@ class PubSub(object):
 
 
 @contextmanager
-def pg_bus_conn():
+def pg_bus_conn(new_connection=False):
+    '''
+    Any listeners probably want to establish a new database connection,
+    separate from the Django connection used for queries, because that will prevent
+    losing connection to the channel whenever a .close() happens.
 
-    if pg_connection.connection is None:
-        pg_connection.connect()
-    if pg_connection.connection is None:
-        raise RuntimeError('Unexpectedly could not connect to postgres for pg_notify actions')
+    Any publishers probably want to use the existing connection
+    so that messages follow postgres transaction rules
+    https://www.postgresql.org/docs/current/sql-notify.html
+    '''
 
-    pubsub = PubSub(pg_connection.connection)
+    if new_connection:
+        conf = settings.DATABASES['default']
+        conn = psycopg2.connect(
+            dbname=conf['NAME'], host=conf['HOST'], user=conf['USER'], password=conf['PASSWORD'], port=conf['PORT'], **conf.get("OPTIONS", {})
+        )
+        # Django connection.cursor().connection doesn't have autocommit=True on by default
+        conn.set_session(autocommit=True)
+    else:
+        if pg_connection.connection is None:
+            pg_connection.connect()
+        if pg_connection.connection is None:
+            raise RuntimeError('Unexpectedly could not connect to postgres for pg_notify actions')
+        conn = pg_connection.connection
+
+    pubsub = PubSub(conn)
     yield pubsub
+    if new_connection:
+        conn.close()
