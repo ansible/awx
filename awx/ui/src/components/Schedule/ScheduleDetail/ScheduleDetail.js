@@ -2,7 +2,6 @@ import 'styled-components/macro';
 import React, { useCallback, useEffect } from 'react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-
 import { t } from '@lingui/macro';
 import { Chip, Divider, Title, Button } from '@patternfly/react-core';
 import { Schedule } from 'types';
@@ -70,10 +69,14 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
     diff_mode,
     dtend,
     dtstart,
+    execution_environment,
     extra_data,
+    forks,
     inventory,
+    job_slice_count,
     job_tags,
     job_type,
+    labels,
     limit,
     modified,
     name,
@@ -82,6 +85,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
     scm_branch,
     skip_tags,
     summary_fields,
+    timeout,
     timezone,
     verbosity,
   } = schedule;
@@ -178,6 +182,11 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
     ask_tags_on_launch,
     ask_variables_on_launch,
     ask_verbosity_on_launch,
+    ask_execution_environment_on_launch,
+    ask_labels_on_launch,
+    ask_forks_on_launch,
+    ask_job_slicing_on_launch,
+    ask_timeout_on_launch,
     survey_enabled,
   } = launchData || {};
 
@@ -232,6 +241,12 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
   const showJobTypeDetail = ask_job_type_on_launch && job_type;
   const showSCMBranchDetail = ask_scm_branch_on_launch && scm_branch;
   const showVerbosityDetail = ask_verbosity_on_launch && VERBOSITY()[verbosity];
+  const showExecutionEnvironmentDetail =
+    ask_execution_environment_on_launch && execution_environment;
+  const showLabelsDetail = ask_labels_on_launch && labels && labels.length > 0;
+  const showForksDetail = ask_forks_on_launch;
+  const showJobSlicingDetail = ask_job_slicing_on_launch;
+  const showTimeoutDetail = ask_timeout_on_launch;
 
   const showPromptedFields =
     showCredentialsDetail ||
@@ -243,7 +258,12 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
     showSkipTagsDetail ||
     showTagsDetail ||
     showVerbosityDetail ||
-    showVariablesDetail;
+    showVariablesDetail ||
+    showExecutionEnvironmentDetail ||
+    showLabelsDetail ||
+    showForksDetail ||
+    showJobSlicingDetail ||
+    showTimeoutDetail;
 
   if (isLoading) {
     return <ContentLoading />;
@@ -349,18 +369,41 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
                 }
               />
             )}
-            {ask_verbosity_on_launch && (
-              <Detail label={t`Verbosity`} value={VERBOSITY()[verbosity]} />
+            {showExecutionEnvironmentDetail && (
+              <Detail
+                label={t`Execution Environment`}
+                value={
+                  summary_fields?.execution_environment ? (
+                    <Link
+                      to={`/execution_environments/${summary_fields?.execution_environment?.id}/details`}
+                    >
+                      {summary_fields?.execution_environment?.name}
+                    </Link>
+                  ) : (
+                    ' '
+                  )
+                }
+              />
             )}
             {ask_scm_branch_on_launch && (
               <Detail label={t`Source Control Branch`} value={scm_branch} />
             )}
+            {ask_forks_on_launch && <Detail label={t`Forks`} value={forks} />}
             {ask_limit_on_launch && <Detail label={t`Limit`} value={limit} />}
+            {ask_verbosity_on_launch && (
+              <Detail label={t`Verbosity`} value={VERBOSITY()[verbosity]} />
+            )}
+            {ask_timeout_on_launch && (
+              <Detail label={t`Timeout`} value={timeout} />
+            )}
             {showDiffModeDetail && (
               <Detail
                 label={t`Show Changes`}
                 value={diff_mode ? t`On` : t`Off`}
               />
+            )}
+            {ask_job_slicing_on_launch && (
+              <Detail label={t`Job Slicing`} value={job_slice_count} />
             )}
             {showCredentialsDetail && (
               <Detail
@@ -382,6 +425,26 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
                     ))}
                   </ChipGroup>
                 }
+              />
+            )}
+            {showLabelsDetail && (
+              <Detail
+                fullWidth
+                label={t`Labels`}
+                value={
+                  <ChipGroup
+                    numChips={5}
+                    totalChips={summary_fields.labels.results.length}
+                    ouiaId="schedule-label-chips"
+                  >
+                    {summary_fields.labels.results.map((l) => (
+                      <Chip key={l.id} ouiaId={`label-${l.id}-chip`} isReadOnly>
+                        {l.name}
+                      </Chip>
+                    ))}
+                  </ChipGroup>
+                }
+                isEmpty={summary_fields.labels.results.length === 0}
               />
             )}
             {showTagsDetail && (
