@@ -4811,6 +4811,7 @@ class InstanceSerializer(BaseSerializer):
         res = super(InstanceSerializer, self).get_related(obj)
         res['jobs'] = self.reverse('api:instance_unified_jobs_list', kwargs={'pk': obj.pk})
         res['instance_groups'] = self.reverse('api:instance_instance_groups_list', kwargs={'pk': obj.pk})
+        res['peers'] = self.reverse('api:instance_peers_list', kwargs={"pk": obj.pk})
         if self.context['request'].user.is_superuser or self.context['request'].user.is_system_auditor:
             if obj.node_type != 'hop':
                 res['health_check'] = self.reverse('api:instance_health_check', kwargs={'pk': obj.pk})
@@ -4849,6 +4850,55 @@ class InstanceSerializer(BaseSerializer):
 
         return value
 
+# class InstancePeersSerializer(BaseSerializer):
+
+#     # links = serializers.SerializerMethodField(help_text=_('Array of peers to this instance.'))
+
+#     class Meta:
+#         model = Instance
+#         read_only_fields = ('ip_address', 'uuid', 'version', 'node_state')
+#         fields = (
+#             'id',
+#             'type',
+#             'url',
+#             'related',
+#             'summary_fields',
+#             'uuid',
+#             'hostname',
+#             'created',
+#             'modified',
+#             'last_seen',
+#             'last_health_check',
+#             'errors',
+#             'capacity_adjustment',
+#             'version',
+#             'capacity',
+#             'consumed_capacity',
+#             'jobs_running',
+#             'jobs_total',
+#             'cpu',
+#             'memory',
+#             'cpu_capacity',
+#             'mem_capacity',
+#             'enabled',
+#             'managed_by_policy',
+#             'node_type',
+#             'node_state',
+#             'ip_address',
+#             'listener_port',
+#             # 'peers',
+#         )
+
+#     def get_links(self, obj):
+#         return obj.links if len(obj.links) else []
+
+#     @property
+#     def data(self, obj):
+#         ret = super(InstancePeersSerializer, self).data
+#         ret['links'] = InstanceLinkSerializer(InstanceLink.objects.select_related('target', 'source').filter(source=obj), many=True).data
+
+#         # ret = ret.get('links', [])
+#         return ReturnList(ret, serializer=self)
 
 class InstanceHealthCheckSerializer(BaseSerializer):
     class Meta:

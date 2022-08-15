@@ -399,6 +399,38 @@ class InstanceUnifiedJobsList(SubListAPIView):
         qs = qs.filter(execution_node=po.hostname)
         return qs
 
+class InstancePeersList(SubListAPIView):
+
+    name = _("Instance Peers")
+    parent_model = models.Instance
+    model = models.InstanceLink
+    serializer_class = serializers.InstanceLinkSerializer
+    # permission_classes = (IsSystemAdminOrAuditor,)
+    # relationship = 'target'
+    # def get_queryset(self):
+    # # FIXME: For now, we don't have a good way of checking the health of a hop node.
+    # return super().get_queryset().exclude(node_type='hop')
+    def get_queryset(self):
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        my_qs = models.InstanceLink.accessible_objects(self.request.user, 'hostname')
+        # user_qs = models.InstanceLinks.objects.filter(member_role__members=parent)
+        return my_qs
+
+    def get_queryset(self):
+
+        peer = self
+        content_type = ContentType.objects.get_for_model(self.parent_model)
+        import sdb
+        sdb.set_trace()
+        return self.model.objects.filter(self.target.id==peer.id)
+
+    # def get(self, request, *args, **kwargs):
+    #     obj = self.get_object()
+    #     data = self.get_serializer(data=request.data).to_representation(obj)
+    #     return Response(data, status=status.HTTP_200_OK)
+
+
 
 class InstanceInstanceGroupsList(InstanceGroupMembershipMixin, SubListCreateAttachDetachAPIView):
 
