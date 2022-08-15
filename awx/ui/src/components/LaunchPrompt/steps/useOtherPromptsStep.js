@@ -27,6 +27,10 @@ const FIELD_NAMES = [
   'job_tags',
   'skip_tags',
   'extra_vars',
+  'labels',
+  'timeout',
+  'job_slice_count',
+  'forks',
 ];
 
 export default function useOtherPromptsStep(launchConfig, resource) {
@@ -105,7 +109,11 @@ function shouldShowPrompt(launchConfig) {
     launchConfig.ask_skip_tags_on_launch ||
     launchConfig.ask_variables_on_launch ||
     launchConfig.ask_scm_branch_on_launch ||
-    launchConfig.ask_diff_mode_on_launch
+    launchConfig.ask_diff_mode_on_launch ||
+    launchConfig.ask_labels_on_launch ||
+    launchConfig.ask_forks_on_launch ||
+    launchConfig.ask_job_slicing_on_launch ||
+    launchConfig.ask_timeout_on_launch
   );
 }
 
@@ -139,6 +147,15 @@ function getInitialValues(launchConfig, resource) {
   }
   if (launchConfig.ask_diff_mode_on_launch) {
     initialValues.diff_mode = resource?.diff_mode || false;
+  }
+  if (launchConfig.ask_forks_on_launch) {
+    initialValues.forks = resource?.forks || 0;
+  }
+  if (launchConfig.ask_job_slicing_on_launch) {
+    initialValues.job_slice_count = resource?.job_slice_count || 1;
+  }
+  if (launchConfig.ask_timeout_on_launch) {
+    initialValues.timeout = resource?.timeout || 0;
   }
   return initialValues;
 }
