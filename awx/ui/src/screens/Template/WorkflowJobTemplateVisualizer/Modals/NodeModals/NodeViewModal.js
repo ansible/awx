@@ -1,12 +1,10 @@
 import React, { useContext, useEffect, useCallback } from 'react';
-
 import { t } from '@lingui/macro';
 import { Button, Modal } from '@patternfly/react-core';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
 } from 'contexts/Workflow';
-
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import PromptDetail from 'components/PromptDetail';
@@ -156,6 +154,22 @@ function NodeViewModal({ readOnly }) {
     ) {
       if (launchConfig.ask_inventory_on_launch) {
         overrides.inventory = originalNodeObject.summary_fields.inventory;
+      }
+      if (launchConfig.ask_execution_environment_on_launch) {
+        overrides.execution_environment =
+          originalNodeObject.summary_fields.execution_environment;
+      }
+      if (launchConfig.ask_labels_on_launch) {
+        overrides.labels = originalNodeObject.labels;
+      }
+      if (launchConfig.ask_forks_on_launch) {
+        overrides.forks = originalNodeObject.forks;
+      }
+      if (launchConfig.ask_job_slicing_on_launch) {
+        overrides.job_slice_count = originalNodeObject.job_slice_count;
+      }
+      if (launchConfig.ask_timeout_on_launch) {
+        overrides.timeout = originalNodeObject.timeout;
       }
       if (launchConfig.ask_scm_branch_on_launch) {
         overrides.scm_branch = originalNodeObject.scm_branch;
