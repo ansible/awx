@@ -58,8 +58,8 @@ body:
     attributes:
       label: Steps to reproduce
       description: >-
-        Starting from a new installation of the system, describe exactly how a developer or quality engineer can reproduce the scenario
-        on infrastructure that isn't yours. Include any and all resources created, input values, test users, roles assigned, playbooks used, etc.
+        Describe the necessary steps to understand the scenario of the requested enhancement. 
+        Include all the steps that will help the developer and QE team understand what you are requesting.
     validations:
       required: true
 
@@ -67,7 +67,7 @@ body:
     id: current-results
     attributes:
       label: Current results
-      description: What happens when running the steps above?
+      description: What is currently happening on the scenario?
     validations:
       required: true
 
@@ -75,7 +75,7 @@ body:
     id: sugested-results
     attributes:
       label: Sugested feature result
-      description: What is the result expected for this new feature?
+      description: What is the result this new feature will bring?
     validations:
       required: true
 
