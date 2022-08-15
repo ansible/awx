@@ -3,6 +3,7 @@ import { useFormikContext } from 'formik';
 import useInventoryStep from './steps/useInventoryStep';
 import useCredentialsStep from './steps/useCredentialsStep';
 import useCredentialPasswordsStep from './steps/useCredentialPasswordsStep';
+import useExecutionEnvironmentStep from './steps/useExecutionEnvironmentStep';
 import useOtherPromptsStep from './steps/useOtherPromptsStep';
 import useSurveyStep from './steps/useSurveyStep';
 import usePreviewStep from './steps/usePreviewStep';
@@ -56,6 +57,7 @@ export default function useLaunchSteps(launchConfig, surveyConfig, resource) {
       showCredentialPasswordsStep(launchConfig, formikValues.credentials),
       visited
     ),
+    useExecutionEnvironmentStep(launchConfig, resource),
     useOtherPromptsStep(launchConfig, resource),
     useSurveyStep(launchConfig, surveyConfig, resource, visited),
   ];
@@ -143,6 +145,7 @@ export default function useLaunchSteps(launchConfig, surveyConfig, resource) {
         inventory: true,
         credentials: true,
         credentialPasswords: true,
+        executionEnvironment: true,
         other: true,
         survey: true,
         preview: true,

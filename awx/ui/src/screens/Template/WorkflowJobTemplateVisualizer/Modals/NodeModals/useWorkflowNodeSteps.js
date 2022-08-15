@@ -3,6 +3,7 @@ import { useFormikContext } from 'formik';
 import { t } from '@lingui/macro';
 import useInventoryStep from 'components/LaunchPrompt/steps/useInventoryStep';
 import useCredentialsStep from 'components/LaunchPrompt/steps/useCredentialsStep';
+import useExecutionEnvironmentStep from 'components/LaunchPrompt/steps/useExecutionEnvironmentStep';
 import useOtherPromptsStep from 'components/LaunchPrompt/steps/useOtherPromptsStep';
 import useSurveyStep from 'components/LaunchPrompt/steps/useSurveyStep';
 import usePreviewStep from 'components/LaunchPrompt/steps/usePreviewStep';
@@ -287,6 +288,7 @@ export default function useWorkflowNodeSteps(
     useDaysToKeepStep(),
     useInventoryStep(launchConfig, resource, visited),
     useCredentialsStep(launchConfig, resource, resourceDefaultCredentials),
+    useExecutionEnvironmentStep(launchConfig, resource),
     useOtherPromptsStep(launchConfig, resource),
     useSurveyStep(launchConfig, surveyConfig, resource, visited),
   ];
@@ -377,6 +379,7 @@ export default function useWorkflowNodeSteps(
       setVisited({
         inventory: true,
         credentials: true,
+        executionEnvironment: true,
         other: true,
         survey: true,
         preview: true,
