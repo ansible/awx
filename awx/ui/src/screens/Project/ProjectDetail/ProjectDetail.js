@@ -4,7 +4,6 @@ import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import {
   Button,
-  Chip,
   ClipboardCopy,
   TextList,
   TextListItem,
@@ -16,7 +15,6 @@ import { Project } from 'types';
 import { Config, useConfig } from 'contexts/Config';
 import AlertModal from 'components/AlertModal';
 import { CardBody, CardActionsRow } from 'components/Card';
-import ChipGroup from 'components/ChipGroup';
 import DeleteButton from 'components/DeleteButton';
 import { DetailList, Detail, UserDateDetail } from 'components/DetailList';
 import ErrorDetail from 'components/ErrorDetail';
@@ -236,19 +234,6 @@ function ProjectDetail({ project }) {
           label={t`Source Control Refspec`}
           value={scm_refspec}
         />
-        {summary_fields.credential && (
-          <Detail
-            label={t`Source Control Credential`}
-            value={
-              <CredentialChip
-                key={summary_fields.credential.id}
-                credential={summary_fields.credential}
-                isReadOnly
-              />
-            }
-            isEmpty={summary_fields.credential.length === 0}
-          />
-        )}
         {summary_fields.signature_validation_credential && (
           <Detail
             label={t`Content Signature Validation Credential`}
@@ -260,7 +245,22 @@ function ProjectDetail({ project }) {
                 isReadOnly
               />
             }
-            isEmpty={summary_fields.signature_validation_credential.length === 0}
+            isEmpty={
+              summary_fields.signature_validation_credential.length === 0
+            }
+          />
+        )}
+        {summary_fields.credential && (
+          <Detail
+            label={t`Source Control Credential`}
+            value={
+              <CredentialChip
+                key={summary_fields.credential.id}
+                credential={summary_fields.credential}
+                isReadOnly
+              />
+            }
+            isEmpty={summary_fields.credential.length === 0}
           />
         )}
         <Detail

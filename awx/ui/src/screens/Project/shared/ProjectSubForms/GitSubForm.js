@@ -50,15 +50,16 @@ const GitSubForm = ({
         tooltipMaxWidth="400px"
         tooltip={projectHelpStrings.sourceControlRefspec(docsURL)}
       />
-      <ScmCredentialFormField
-        credential={credential}
-        onCredentialSelection={onCredentialSelection}
-      />
       <CredentialLookup
         credentialTypeId={signature_validation_credential.typeId}
         label={t`Content Signature Validation Credential`}
         onChange={onCredentialChange}
         value={signature_validation_credential.value}
+        tooltip={projectHelpStrings.signatureValidation}
+      />
+      <ScmCredentialFormField
+        credential={credential}
+        onCredentialSelection={onCredentialSelection}
       />
       <ScmTypeOptions scmUpdateOnLaunch={scmUpdateOnLaunch} />
     </>

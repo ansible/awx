@@ -21,6 +21,7 @@ describe('<ProjectEdit />', () => {
     scm_clean: true,
     scm_track_submodules: false,
     credential: 100,
+    signature_validation_credential: 200,
     local_path: 'bar',
     organization: 2,
     scm_update_on_launch: true,
@@ -32,6 +33,12 @@ describe('<ProjectEdit />', () => {
         id: 100,
         credential_type_id: 5,
         kind: 'insights',
+      },
+      signature_validation_credential: {
+        id: 200,
+        credential_type_id: 6,
+        kind: 'cryptography',
+        name: 'foo',
       },
       organization: {
         id: 2,
@@ -60,6 +67,7 @@ describe('<ProjectEdit />', () => {
 
   const scmCredentialResolve = {
     data: {
+      count: 1,
       results: [
         {
           id: 4,
@@ -72,11 +80,25 @@ describe('<ProjectEdit />', () => {
 
   const insightsCredentialResolve = {
     data: {
+      count: 1,
       results: [
         {
           id: 5,
           name: 'Insights',
           kind: 'insights',
+        },
+      ],
+    },
+  };
+
+  const cryptographyCredentialResolve = {
+    data: {
+      count: 1,
+      results: [
+        {
+          id: 6,
+          name: 'GPG Public Key',
+          kind: 'cryptography',
         },
       ],
     },
@@ -91,11 +113,14 @@ describe('<ProjectEdit />', () => {
     await ProjectsAPI.readOptions.mockImplementation(
       () => projectOptionsResolve
     );
-    await CredentialTypesAPI.read.mockImplementationOnce(
+    await CredentialTypesAPI.read.mockImplementation(
       () => scmCredentialResolve
     );
-    await CredentialTypesAPI.read.mockImplementationOnce(
+    await CredentialTypesAPI.read.mockImplementation(
       () => insightsCredentialResolve
+    );
+    await CredentialTypesAPI.read.mockImplementation(
+      () => cryptographyCredentialResolve
     );
   });
 
