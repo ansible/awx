@@ -24,7 +24,7 @@ const jtHelpTextStrings = () => ({
   webhookURL: t`Webhook services can launch jobs with this workflow job template by making a POST request to this URL.`,
   webhookKey: t`Webhook services can use this as a shared secret.`,
   webhookCredential: t`Optionally select the credential to use to send status updates back to the webhook service.`,
-  sourceControlBranch: t`Select a branch for the workflow. This branch is applied to all job template nodes that prompt for a branch.`,
+  sourceControlBranch: t`Branch to use in job run. Project default used if blank. Only allowed if project allow_override field is set to true.`,
   provisioningCallbacks: (brandName = '') =>
     t`Enables creation of a provisioning callback URL. Using the URL a host can contact ${brandName} and request a configuration update using this job template.`,
   privilegeEscalation: t`If enabled, run this playbook as an administrator.`,

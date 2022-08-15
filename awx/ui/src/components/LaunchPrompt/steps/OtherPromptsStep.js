@@ -29,6 +29,23 @@ function OtherPromptsStep({ launchConfig, variablesMode, onVarModeChange }) {
       }}
     >
       {launchConfig.ask_job_type_on_launch && <JobTypeField />}
+      {launchConfig.ask_scm_branch_on_launch && (
+        <FormField
+          id="prompt-scm-branch"
+          name="scm_branch"
+          label={t`Source Control Branch`}
+          tooltip={t`Select a branch for the workflow. This branch is applied to all job template nodes that prompt for a branch`}
+        />
+      )}
+      {launchConfig.ask_forks_on_launch && (
+        <FormField
+          id="prompt-forks"
+          name="forks"
+          label={t`Forks`}
+          type="number"
+          min="0"
+        />
+      )}
       {launchConfig.ask_limit_on_launch && (
         <FormField
           id="prompt-limit"
@@ -40,15 +57,25 @@ function OtherPromptsStep({ launchConfig, variablesMode, onVarModeChange }) {
           information and examples on patterns.`}
         />
       )}
-      {launchConfig.ask_scm_branch_on_launch && (
+      {launchConfig.ask_verbosity_on_launch && <VerbosityField />}
+      {launchConfig.ask_job_slicing_on_launch && (
         <FormField
-          id="prompt-scm-branch"
-          name="scm_branch"
-          label={t`Source Control Branch`}
-          tooltip={t`Select a branch for the workflow. This branch is applied to all job template nodes that prompt for a branch`}
+          id="prompt-job-slicing"
+          name="job_slice_count"
+          label={t`Job Slicing`}
+          type="number"
+          min="1"
         />
       )}
-      {launchConfig.ask_verbosity_on_launch && <VerbosityField />}
+      {launchConfig.ask_timeout_on_launch && (
+        <FormField
+          id="prompt-timeout"
+          name="timeout"
+          label={t`Timeout`}
+          type="number"
+          min="0"
+        />
+      )}
       {launchConfig.ask_diff_mode_on_launch && <ShowChangesToggle />}
       {launchConfig.ask_tags_on_launch && (
         <TagField
