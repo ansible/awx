@@ -130,8 +130,12 @@ class TaskBase:
                     # if sigterm due to timeout, still record metrics
                     signal.signal(signal.SIGTERM, self.record_aggregate_metrics_and_exit)
                     self._schedule()
-                    self.record_aggregate_metrics()
-                    logger.debug(f"Finishing {self.prefix} Scheduler")
+                    commit_start = time.time()
+
+                if self.prefix == "task_manager":
+                    self.subsystem_metrics.set(f"{self.prefix}_commit_seconds", time.time() - commit_start)
+                self.record_aggregate_metrics()
+                logger.debug(f"Finishing {self.prefix} Scheduler")
 
 
 class WorkflowManager(TaskBase):
