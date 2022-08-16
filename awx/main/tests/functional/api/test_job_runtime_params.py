@@ -304,9 +304,7 @@ def test_job_launch_works_without_access_to_ig_if_ig_in_template(job_template_pr
     job_template.execute_role.members.add(rando)
 
     # Make sure we get a 201 instead of a 403 since we are providing an override of just a subset of the instance gorup that was already added
-    response = post(
-        reverse('api:job_template_launch', kwargs={'pk': job_template.pk}), dict(instance_groups=runtime_data['instance_groups']), rando, expect=201
-    )
+    post(reverse('api:job_template_launch', kwargs={'pk': job_template.pk}), dict(instance_groups=runtime_data['instance_groups']), rando, expect=201)
 
 
 @pytest.mark.django_db
@@ -319,7 +317,7 @@ def test_job_launch_works_without_access_to_label_if_label_in_template(job_templ
     job_template.execute_role.members.add(rando)
 
     # Make sure we get a 201 instead of a 403 since we are providing an override of just a subset of the instance gorup that was already added
-    response = post(reverse('api:job_template_launch', kwargs={'pk': job_template.pk}), dict(labels=runtime_data['labels']), rando, expect=201)
+    post(reverse('api:job_template_launch', kwargs={'pk': job_template.pk}), dict(labels=runtime_data['labels']), rando, expect=201)
 
 
 @pytest.mark.django_db
@@ -329,7 +327,7 @@ def test_job_launch_works_without_access_to_ee_if_ee_in_template(job_template_pr
     job_template.execute_role.members.add(rando)
 
     # Make sure we get a 201 instead of a 403 since we are providing an override that is already in the template
-    response = post(
+    post(
         reverse('api:job_template_launch', kwargs={'pk': job_template.pk}), dict(execution_environment=runtime_data['execution_environment']), rando, expect=201
     )
 
