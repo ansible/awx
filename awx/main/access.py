@@ -1833,6 +1833,9 @@ class JobLaunchConfigAccess(BaseAccess):
     In order to create a new object with a copy of this launch config, I need:
      - use access to related inventory (if present)
      - use role to many-related credentials (if any present)
+     - use role to Execution Environment (if present), unless the specified ee is already in the template
+     - use role to many-related labels (if any present), unless the specified label is already in the template
+     - use role to many-related instance groups (if any present), unless the specified instance group is already in the template
     """
 
     model = JobLaunchConfig
@@ -1850,6 +1853,7 @@ class JobLaunchConfigAccess(BaseAccess):
     def can_add(self, data, template=None):
         # This is a special case, we don't check related many-to-many elsewhere
         # launch RBAC checks use this
+        permission_error = False
         if 'credentials' in data and data['credentials'] or 'reference_obj' in data:
             if 'reference_obj' in data:
                 prompted_cred_qs = data['reference_obj'].credentials.all()
@@ -1862,12 +1866,58 @@ class JobLaunchConfigAccess(BaseAccess):
                             cred_pks.remove(cred.pk)
                 prompted_cred_qs = Credential.objects.filter(pk__in=cred_pks)
             if self._unusable_creds_exist(prompted_cred_qs):
-                return False
+                credential_names = [cred.name for cred in prompted_cred_qs]
+                logger.debug("User {} not allowed to access credentials in {}".format(self.user.username, credential_names))
+                permission_error = True
+        if 'execution_environment' in data and data['execution_environment'] or 'reference_obj' in data:
+            if 'reference_obj' in data:
+                ee = data['reference_obj'].execution_environment
+            else:
+                ee = data['execution_environment']
+            if ee and not self.user.can_access(ExecutionEnvironment, 'read', ee):
+                if not template or ee != template.execution_environment:
+                    logger.debug("User {} not allowed access to ee {}".format(self.user.username, ee.name))
+                    permission_error = True
+                else:
+                    logger.debug(
+                        "User {} does not have permissions to execution_environment {} but its part of the template".format(self.user.username, ee.name)
+                    )
+        if 'labels' in data and data['labels'] or 'reference_obj' in data:
+            if 'reference_obj' in data:
+                labels = data['reference_obj'].labels.all()
+            else:
+                labels = data['labels']
+            for a_label in labels:
+                if not self.user.can_access(Label, 'read', a_label):
+                    # This if allows a template admin who can see labels to specify a list and the executor to select a subset of the list
+                    if not template or a_label not in template.labels.all():
+                        logger.debug("User {} not allowed access to label {}".format(self.user.username, a_label.name))
+                        permission_error = True
+                    else:
+                        logger.debug("User {} does not have permissions to label {} but its part of the template".format(self.user.username, a_label.name))
+        if 'instance_groups' in data and data['instance_groups'] or 'reference_obj' in data:
+            if 'reference_obj' in data:
+                instance_groups = data['reference_obj'].labels.all()
+            else:
+                instance_groups = data['instance_groups']
+            for an_ig in instance_groups:
+                if not an_ig in self.user.get_queryset(InstanceGroup):
+                    # This if allows a template admin who can see IGs to specify a list and the executor to select a subset of the list
+                    if not template or an_ig not in template.instance_groups.all():
+                        logger.debug("user {} not allowed access to instance group {}".format(self.user.username, an_ig.name))
+                        permission_error = True
+                    else:
+                        logger.debug(
+                            "User {} does not have permissions to instance_group {} but its part of the template".format(self.user.username, an_ig.name)
+                        )
+        if permission_error:
+            return False
         return self.check_related('inventory', Inventory, data, role_field='use_role')
 
     @check_superuser
     def can_use(self, obj):
-        return self.check_related('inventory', Inventory, {}, obj=obj, role_field='use_role', mandatory=True) and self.has_credentials_access(obj)
+        inventory_check = self.check_related('inventory', Inventory, {}, obj=obj, role_field='use_role', mandatory=True)
+        return inventory_check and self.has_credentials_access(obj)
 
     def can_change(self, obj, data):
         return self.check_related('inventory', Inventory, data, obj=obj, role_field='use_role')

@@ -22,6 +22,7 @@ from django.conf import settings
 from django.core.exceptions import FieldError, ObjectDoesNotExist
 from django.db.models import Q, Sum
 from django.db import IntegrityError, ProgrammingError, transaction, connection
+from django.db.models.fields.related import ManyToManyField, ForeignKey
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
@@ -2381,10 +2382,10 @@ class JobTemplateLaunch(RetrieveAPIView):
             for field, ask_field_name in modified_ask_mapping.items():
                 if not getattr(obj, ask_field_name):
                     data.pop(field, None)
-                elif field == 'inventory':
+                elif isinstance(getattr(obj.__class__, field).field, ForeignKey):
                     data[field] = getattrd(obj, "%s.%s" % (field, 'id'), None)
-                elif field == 'credentials':
-                    data[field] = [cred.id for cred in obj.credentials.all()]
+                elif isinstance(getattr(obj.__class__, field).field, ManyToManyField):
+                    data[field] = [item.id for item in getattr(obj, field).all()]
                 else:
                     data[field] = getattr(obj, field)
         return data
@@ -3534,6 +3535,15 @@ class JobLabelList(SubListAPIView):
     serializer_class = serializers.LabelSerializer
     parent_model = models.Job
     relationship = 'labels'
+    parent_key = 'job'
+
+
+class JobInstanceGroupList(SubListAPIView):
+
+    model = models.InstanceGroup
+    serializer_class = serializers.InstanceGroupSerializer
+    parent_model = models.Job
+    relationship = 'instance_groups'
     parent_key = 'job'
 
 

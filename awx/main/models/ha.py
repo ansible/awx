@@ -434,3 +434,25 @@ class InventoryInstanceGroupMembership(models.Model):
         default=None,
         db_index=True,
     )
+
+
+class JobInstanceGroupMembership(models.Model):
+
+    unifiedjob = models.ForeignKey('Job', on_delete=models.CASCADE)
+    instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
+    position = models.PositiveIntegerField(
+        null=True,
+        default=None,
+        db_index=True,
+    )
+
+
+class JobLaunchConfigInstanceGroupMembership(models.Model):
+
+    joblaunchconfig = models.ForeignKey('JobLaunchConfig', on_delete=models.CASCADE)
+    instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
+    position = models.PositiveIntegerField(
+        null=True,
+        default=None,
+        db_index=True,
+    )
