@@ -19,6 +19,7 @@ describe('<ProjectForm />', () => {
     scm_clean: true,
     scm_track_submodules: false,
     credential: 100,
+    signature_validation_credential: 200,
     organization: 2,
     scm_update_on_launch: true,
     scm_update_cache_timeout: 3,
@@ -34,6 +35,12 @@ describe('<ProjectForm />', () => {
       organization: {
         id: 2,
         name: 'Default',
+      },
+      signature_validation_credential: {
+        id: 200,
+        credential_type_id: 6,
+        kind: 'cryptography',
+        name: 'Svc',
       },
     },
   };
@@ -58,6 +65,7 @@ describe('<ProjectForm />', () => {
 
   const scmCredentialResolve = {
     data: {
+      count: 1,
       results: [
         {
           id: 4,
@@ -70,6 +78,7 @@ describe('<ProjectForm />', () => {
 
   const insightsCredentialResolve = {
     data: {
+      count: 1,
       results: [
         {
           id: 5,
@@ -82,6 +91,7 @@ describe('<ProjectForm />', () => {
 
   const cryptographyCredentialResolve = {
     data: {
+      count: 1,
       results: [
         {
           id: 6,
@@ -101,13 +111,13 @@ describe('<ProjectForm />', () => {
     await ProjectsAPI.readOptions.mockImplementation(
       () => projectOptionsResolve
     );
-    await CredentialTypesAPI.read.mockImplementationOnce(
+    await CredentialTypesAPI.read.mockImplementation(
       () => scmCredentialResolve
     );
-    await CredentialTypesAPI.read.mockImplementationOnce(
+    await CredentialTypesAPI.read.mockImplementation(
       () => insightsCredentialResolve
     );
-    await CredentialTypesAPI.read.mockImplementationOnce(
+    await CredentialTypesAPI.read.mockImplementation(
       () => cryptographyCredentialResolve
     );
   });
@@ -169,6 +179,10 @@ describe('<ProjectForm />', () => {
       wrapper.find('FormGroup[label="Source Control Refspec"]').length
     ).toBe(1);
     expect(
+      wrapper.find('FormGroup[label="Content Signature Validation Credential"]')
+        .length
+    ).toBe(1);
+    expect(
       wrapper.find('FormGroup[label="Source Control Credential"]').length
     ).toBe(1);
     expect(
@@ -196,10 +210,27 @@ describe('<ProjectForm />', () => {
         id: 1,
         name: 'organization',
       });
-      wrapper.find('CredentialLookup').invoke('onBlur')();
-      wrapper.find('CredentialLookup').invoke('onChange')({
+      wrapper
+        .find('CredentialLookup[label="Source Control Credential"]')
+        .invoke('onBlur')();
+      wrapper
+        .find('CredentialLookup[label="Source Control Credential"]')
+        .invoke('onChange')({
         id: 10,
         name: 'credential',
+      });
+      wrapper
+        .find(
+          'CredentialLookup[label="Content Signature Validation Credential"]'
+        )
+        .invoke('onBlur')();
+      wrapper
+        .find(
+          'CredentialLookup[label="Content Signature Validation Credential"]'
+        )
+        .invoke('onChange')({
+        id: 20,
+        name: 'signature_validation_credential',
       });
     });
     wrapper.update();
@@ -207,9 +238,23 @@ describe('<ProjectForm />', () => {
       id: 1,
       name: 'organization',
     });
-    expect(wrapper.find('CredentialLookup').prop('value')).toEqual({
+    expect(
+      wrapper
+        .find('CredentialLookup[label="Source Control Credential"]')
+        .prop('value')
+    ).toEqual({
       id: 10,
       name: 'credential',
+    });
+    expect(
+      wrapper
+        .find(
+          'CredentialLookup[label="Content Signature Validation Credential"]'
+        )
+        .prop('value')
+    ).toEqual({
+      id: 20,
+      name: 'signature_validation_credential',
     });
   });
 
@@ -377,7 +422,9 @@ describe('<ProjectForm />', () => {
   });
 
   test('should display ContentError on throw', async () => {
-    CredentialTypesAPI.read = () => Promise.reject(new Error());
+    CredentialTypesAPI.read.mockImplementationOnce(() =>
+      Promise.reject(new Error())
+    );
     await act(async () => {
       wrapper = mountWithContexts(
         <ProjectForm handleSubmit={jest.fn()} handleCancel={jest.fn()} />

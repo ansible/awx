@@ -116,7 +116,7 @@ describe('<ProjectDetail />', () => {
     );
     assertDetail(
       'Content Signature Validation Credential',
-      `Gpg Public Key: ${mockProject.summary_fields.signature_validation_credential.name}`
+      `Cryptography: ${mockProject.summary_fields.signature_validation_credential.name}`
     );
     assertDetail(
       'Cache Timeout',
