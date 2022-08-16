@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0164_remove_inventorysource_update_on_project_update'),
+        ('main', '0165_task_manager_refactor'),
     ]
 
     operations = [
