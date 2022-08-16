@@ -21,7 +21,10 @@ fi
 
 if output=$(awx-manage createsuperuser --noinput --username=admin --email=admin@localhost 2> /dev/null); then
     echo $output
-    admin_password=$(openssl rand -base64 12)
+    admin_password=$ADMIN_PASSWORD
+    if [[ -z "$ADMIN_PASSWORD" ]]; then
+        admin_password=$(openssl rand -base64 12)
+    fi
     echo "Admin password: ${admin_password}"
     awx-manage update_password --username=admin --password=${admin_password}
 fi

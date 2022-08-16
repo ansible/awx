@@ -21,6 +21,7 @@ services:
       RECEPTORCTL_SOCKET: {{ receptor_socket_file }}
       CONTROL_PLANE_NODE_COUNT: {{ control_plane_node_count|int }}
       EXECUTION_NODE_COUNT: {{ execution_node_count|int }}
+      ADMIN_PASSWORD: {{ admin_password }}
 {% if loop.index == 1 %}
       RUN_MIGRATIONS: 1
 {% endif %}
