@@ -159,19 +159,32 @@
   name: Validate project content integrity
   tasks:
     - block:
-        - name: verify project integrity
+        - name: verify project integrity using GPG signature
           playbook_integrity:
             project_path: "{{ project_path | quote }}"
-            sig_type: gpg # TODO: unhardcode
+            validation_type: gpg
             gpg_pubkey: "{{ gpg_pubkey }}"
-            scm_type: git # TODO: unhardcode
-          register: playbook_integrity_check
-        - name: show integrity check result
+          register: gpg_result
+
+        - name: GPG result
           debug:
-            var: playbook_integrity_check
+            var: gpg_result
       tags:
-        - playbook_integrity_gpg
-        - playbook_integrity
+        - validation_gpg_public_key
+
+    - block:
+        - name: verify project integrity using checksum manifest
+          playbook_integrity:
+            project_path: "{{ project_path | quote }}"
+            validation_type: checksum_manifest
+          register: checksum_result
+
+        - name: Checksum manifest result
+          debug:
+            var: checksum_result
+
+      tags:
+        - validation_checksum_manifest
 
 - hosts: localhost
   gather_facts: false
