@@ -244,18 +244,6 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "builder",
-          "expr": "task_manager_generate_dependencies_seconds",
-          "hide": false,
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "editorMode": "builder",
           "expr": "task_manager_get_tasks_seconds",
           "hide": false,
           "legendFormat": "__auto",
@@ -268,7 +256,19 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "builder",
-          "expr": "task_manager_spawn_workflow_graph_jobs_seconds",
+          "expr": "task_manager_commit_seconds",
+          "hide": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "builder",
+          "expr": "task_manager__schedule_seconds",
           "hide": false,
           "legendFormat": "__auto",
           "range": true,
