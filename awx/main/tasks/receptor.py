@@ -290,7 +290,7 @@ class AWXReceptorJob:
         # This ThreadPoolExecutor runs for the duration of the job.
         # The cancel_func pattern is intended to guard againsnt any situation where we may
         # end up stuck while reading or writing from the receptor socket.
-        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             # Launch transmitter and submitter at the same time so the payload
             # can be read by receptor while it's still being written.
             transmitter_future = executor.submit(self.transmitter, payload_writer)
@@ -310,8 +310,7 @@ class AWXReceptorJob:
                 self.receptor_ctl._sockfile.close()
 
             # This will return either when the job is canceled, or when the transmitter and submitter futures return.
-            cancel_watcher_future = executor.submit(self.cancel_watcher, [transmitter_future, submitter_future], cancel_func)
-            res = cancel_watcher_future.result()
+            res = self.cancel_watcher([transmitter_future, submitter_future], cancel_func)
             if res and res.status == "canceled":
                 return res, None
 
@@ -328,9 +327,8 @@ class AWXReceptorJob:
                 self.receptor_ctl._socket.close()
                 self.receptor_ctl._sockfile.close()
 
-            cancel_watcher_future = executor.submit(self.cancel_watcher, [work_results_future], cancel_func)
+            res = self.cancel_watcher([work_results_future], cancel_func)
             # This will return either when the job is canceled, or when the worker_results future returns.
-            res = cancel_watcher_future.result()
             if res and res.status == "canceled":
                 return res, unit_id
 
@@ -343,7 +341,7 @@ class AWXReceptorJob:
                 resultsock.shutdown(socket.SHUT_RDWR)
                 resultfile.close()
 
-            cancel_watcher_future = executor.submit(self.cancel_watcher, [processor_future], cancel_func)
+            res = self.cancel_watcher([processor_future], cancel_func)
             # This will return either when the job is canceled, or when the processor future returns.
             if res and res.status == "canceled":
                 return res, unit_id
@@ -492,14 +490,13 @@ class AWXReceptorJob:
             return 'local'
         return 'ansible-runner'
 
-    @cleanup_new_process
     def cancel_watcher(self, futures_to_watch, cancel_func=None):
         while True:
             if self.task.runner_callback.cancel_callback():
                 if cancel_func is not None:
                     try:
                         cancel_func()
-                    except Exception as e:
+                    except Exception:
                         logger.exception("error canceling work")
                 result = namedtuple('result', ['status', 'rc'])
                 return result('canceled', 1)
