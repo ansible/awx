@@ -1,10 +1,16 @@
 # Copyright (c) 2017 Ansible, Inc.
 # All Rights Reserved.
 
+from awx.api.views import (
+    InstanceDetail,
+    InstanceHealthCheck,
+    InstanceInstanceGroupsList,
+    InstanceInstanceLinksList,
+    InstanceList,
+    InstancePeersList,
+    InstanceUnifiedJobsList,
+)
 from django.urls import re_path
-
-from awx.api.views import InstanceList, InstanceDetail, InstanceUnifiedJobsList, InstanceInstanceGroupsList, InstanceHealthCheck, InstancePeersList
-
 
 urls = [
     re_path(r'^$', InstanceList.as_view(), name='instance_list'),
@@ -12,6 +18,7 @@ urls = [
     re_path(r'^(?P<pk>[0-9]+)/jobs/$', InstanceUnifiedJobsList.as_view(), name='instance_unified_jobs_list'),
     re_path(r'^(?P<pk>[0-9]+)/instance_groups/$', InstanceInstanceGroupsList.as_view(), name='instance_instance_groups_list'),
     re_path(r'^(?P<pk>[0-9]+)/health_check/$', InstanceHealthCheck.as_view(), name='instance_health_check'),
+    re_path(r'^(?P<pk>[0-9]+)/instance_links/$', InstanceInstanceLinksList.as_view(), name='instance_instance_links_list'),
     re_path(r'^(?P<pk>[0-9]+)/peers/$', InstancePeersList.as_view(), name='instance_peers_list'),
 ]
 

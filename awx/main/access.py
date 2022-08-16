@@ -38,6 +38,7 @@ from awx.main.models import (
     Group,
     Host,
     Instance,
+    InstanceLink,
     InstanceGroup,
     Inventory,
     InventorySource,
@@ -559,6 +560,10 @@ class InstanceAccess(BaseAccess):
 
     def can_delete(self, obj):
         return False
+
+
+class InstanceLinkAccess(BaseAccess):
+    model = InstanceLink
 
 
 class InstanceGroupAccess(BaseAccess):
