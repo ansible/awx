@@ -18,6 +18,7 @@
 # galaxy_task_env: environment variables to use specifically for ansible-galaxy commands
 # awx_version: Current running version of the awx or tower as a string
 # awx_license_type: "open" for AWX; else presume Tower
+# gpg_pubkey: the GPG public key to use for validation, when enabled
 
 - hosts: localhost
   gather_facts: false
@@ -156,22 +157,24 @@
 - hosts: localhost
   gather_facts: false
   connection: local
-  name: Validate project content integrity
+  name: Perform project signature/checksum verification
   tasks:
-    - block:
-        - name: verify project integrity
-          playbook_integrity:
-            project_path: "{{ project_path | quote }}"
-            sig_type: gpg # TODO: unhardcode
-            gpg_pubkey: "{{ gpg_pubkey }}"
-            scm_type: git # TODO: unhardcode
-          register: playbook_integrity_check
-        - name: show integrity check result
-          debug:
-            var: playbook_integrity_check
+    - name: Verify project content using GPG signature
+      playbook_integrity:
+        project_path: "{{ project_path | quote }}"
+        validation_type: gpg
+        gpg_pubkey: "{{ gpg_pubkey }}"
+      register: gpg_result
       tags:
-        - playbook_integrity_gpg
-        - playbook_integrity
+        - validation_gpg_public_key
+
+    - name: Verify project content against checksum manifest
+      playbook_integrity:
+        project_path: "{{ project_path | quote }}"
+        validation_type: checksum_manifest
+      register: checksum_result
+      tags:
+        - validation_checksum_manifest
 
 - hosts: localhost
   gather_facts: false
