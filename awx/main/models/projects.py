@@ -631,8 +631,10 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         added_update_fields = []
         if not self.job_tags:
             job_tags = ['update_{}'.format(self.scm_type), 'install_roles', 'install_collections']
-            if self.project.signature_validation:
-                job_tags.append('playbook_integrity')
+            if self.project.signature_validation_credential is not None:
+                credential_type = self.project.signature_validation_credential.credential_type.namespace
+                job_tags.append(f'validation_{credential_type}')
+                job_tags.append('validation_checksum_manifest')
             self.job_tags = ','.join(job_tags)
             added_update_fields.append('job_tags')
         if self.scm_delete_on_update and 'delete' not in self.job_tags and self.job_type == 'check':
