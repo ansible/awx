@@ -16,6 +16,7 @@ from awx.api.views import (
     JobStdout,
     JobNotificationsList,
     JobLabelList,
+    JobInstanceGroupList,
     JobHostSummaryDetail,
 )
 
@@ -33,6 +34,7 @@ urls = [
     re_path(r'^(?P<pk>[0-9]+)/stdout/$', JobStdout.as_view(), name='job_stdout'),
     re_path(r'^(?P<pk>[0-9]+)/notifications/$', JobNotificationsList.as_view(), name='job_notifications_list'),
     re_path(r'^(?P<pk>[0-9]+)/labels/$', JobLabelList.as_view(), name='job_label_list'),
+    re_path(r'^(?P<pk>[0-9]+)/instance_groups/$', JobInstanceGroupList.as_view(), name='job_instance_group_list'),
     re_path(r'^(?P<pk>[0-9]+)/$', JobHostSummaryDetail.as_view(), name='job_host_summary_detail'),
 ]
 

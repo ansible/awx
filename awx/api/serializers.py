@@ -2923,6 +2923,12 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
             'ask_verbosity_on_launch',
             'ask_inventory_on_launch',
             'ask_credential_on_launch',
+            'ask_execution_environment_on_launch',
+            'ask_labels_on_launch',
+            'ask_forks_on_launch',
+            'ask_job_slice_count_on_launch',
+            'ask_timeout_on_launch',
+            'ask_instance_groups_on_launch',
             'survey_enabled',
             'become_enabled',
             'diff_mode',
@@ -3036,6 +3042,9 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             'webhook_service',
             'webhook_credential',
             'webhook_guid',
+            # TODO: Do we want these here or just in the summary fields?
+            'labels',
+            'instance_groups',
         )
 
     def get_related(self, obj):
@@ -3060,6 +3069,11 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
         try:
             if obj.project_update:
                 res['project_update'] = self.reverse('api:project_update_detail', kwargs={'pk': obj.project_update.pk})
+        except ObjectDoesNotExist:
+            pass
+        try:
+            if obj.instance_groups:
+                res['instance_groups'] = self.reverse('api:job_instance_group_list', kwargs={'pk': obj.pk})
         except ObjectDoesNotExist:
             pass
         res['relaunch'] = self.reverse('api:job_relaunch', kwargs={'pk': obj.pk})
@@ -4083,7 +4097,6 @@ class SystemJobEventSerializer(AdHocCommandEventSerializer):
 
 
 class JobLaunchSerializer(BaseSerializer):
-
     # Representational fields
     passwords_needed_to_start = serializers.ReadOnlyField()
     can_start_without_user_input = serializers.BooleanField(read_only=True)
@@ -4106,6 +4119,12 @@ class JobLaunchSerializer(BaseSerializer):
     skip_tags = serializers.CharField(required=False, write_only=True, allow_blank=True)
     limit = serializers.CharField(required=False, write_only=True, allow_blank=True)
     verbosity = serializers.ChoiceField(required=False, choices=VERBOSITY_CHOICES, write_only=True)
+    execution_environment = serializers.PrimaryKeyRelatedField(queryset=ExecutionEnvironment.objects.all(), required=False, write_only=True)
+    labels = serializers.PrimaryKeyRelatedField(many=True, queryset=Label.objects.all(), required=False, write_only=True)
+    forks = serializers.IntegerField(required=False, write_only=True, default=1)
+    job_slice_count = serializers.IntegerField(required=False, write_only=True, default=0)
+    timeout = serializers.IntegerField(required=False, write_only=True, default=0)
+    instance_groups = serializers.PrimaryKeyRelatedField(many=True, queryset=InstanceGroup.objects.all(), required=False, write_only=True)
 
     class Meta:
         model = JobTemplate
@@ -4133,6 +4152,12 @@ class JobLaunchSerializer(BaseSerializer):
             'ask_verbosity_on_launch',
             'ask_inventory_on_launch',
             'ask_credential_on_launch',
+            'ask_execution_environment_on_launch',
+            'ask_labels_on_launch',
+            'ask_forks_on_launch',
+            'ask_job_slice_count_on_launch',
+            'ask_timeout_on_launch',
+            'ask_instance_groups_on_launch',
             'survey_enabled',
             'variables_needed_to_start',
             'credential_needed_to_start',
@@ -4140,6 +4165,12 @@ class JobLaunchSerializer(BaseSerializer):
             'job_template_data',
             'defaults',
             'verbosity',
+            'execution_environment',
+            'labels',
+            'forks',
+            'job_slice_count',
+            'timeout',
+            'instance_groups',
         )
         read_only_fields = (
             'ask_scm_branch_on_launch',
@@ -4152,6 +4183,12 @@ class JobLaunchSerializer(BaseSerializer):
             'ask_verbosity_on_launch',
             'ask_inventory_on_launch',
             'ask_credential_on_launch',
+            'ask_execution_environment_on_launch',
+            'ask_labels_on_launch',
+            'ask_forks_on_launch',
+            'ask_job_slice_count_on_launch',
+            'ask_timeout_on_launch',
+            'ask_instance_groups_on_launch',
         )
 
     def get_credential_needed_to_start(self, obj):
@@ -4176,6 +4213,19 @@ class JobLaunchSerializer(BaseSerializer):
                     if cred.credential_type.managed and 'vault_id' in cred.credential_type.defined_fields:
                         cred_dict['vault_id'] = cred.get_input('vault_id', default=None)
                     defaults_dict.setdefault(field_name, []).append(cred_dict)
+            elif field_name == 'execution_environment':
+                if obj.execution_environment_id:
+                    defaults_dict[field_name] = {'id': obj.execution_environment.id, 'name': obj.execution_environment.name}
+                else:
+                    defaults_dict[field_name] = {}
+            elif field_name == 'labels':
+                for label in obj.labels.all():
+                    label_dict = {'id': label.id, 'name': label.name}
+                    defaults_dict.setdefault(field_name, []).append(label_dict)
+            elif field_name == 'instance_groups':
+                for instance_group in obj.instance_groups.all():
+                    ig_dict = {'id': instance_group.id, 'name': instance_group.name}
+                    defaults_dict.setdefault(field_name, []).append(ig_dict)
             else:
                 defaults_dict[field_name] = getattr(obj, field_name)
         return defaults_dict

@@ -3,7 +3,20 @@ import pytest
 from unittest import mock
 import json
 
-from awx.main.models import Job, Instance, JobHostSummary, InventoryUpdate, InventorySource, Project, ProjectUpdate, SystemJob, AdHocCommand
+from awx.main.models import (
+    Job,
+    Instance,
+    JobHostSummary,
+    InventoryUpdate,
+    InventorySource,
+    Project,
+    ProjectUpdate,
+    SystemJob,
+    AdHocCommand,
+    InstanceGroup,
+    Label,
+    ExecutionEnvironment,
+)
 from awx.main.tasks.system import cluster_node_heartbeat
 from django.test.utils import override_settings
 
@@ -103,14 +116,87 @@ def test_job_notification_host_data(inventory, machine_credential, project, job_
 class TestLaunchConfig:
     def test_null_creation_from_prompts(self):
         job = Job.objects.create()
-        data = {"credentials": [], "extra_vars": {}, "limit": None, "job_type": None}
+        data = {
+            "credentials": [],
+            "extra_vars": {},
+            "limit": None,
+            "job_type": None,
+            "execution_environment": None,
+            "instance_groups": None,
+            "labels": None,
+            "forks": None,
+            "timeout": None,
+            "job_slice_count": None,
+        }
         config = job.create_config_from_prompts(data)
         assert config is None
 
     def test_only_limit_defined(self, job_template):
         job = Job.objects.create(job_template=job_template)
-        data = {"credentials": [], "extra_vars": {}, "job_tags": None, "limit": ""}
+        data = {
+            "credentials": [],
+            "extra_vars": {},
+            "job_tags": None,
+            "limit": "",
+            "execution_environment": None,
+            "instance_groups": None,
+            "labels": None,
+            "forks": None,
+            "timeout": None,
+            "job_slice_count": None,
+        }
         config = job.create_config_from_prompts(data)
         assert config.char_prompts == {"limit": ""}
         assert not config.credentials.exists()
         assert config.prompts_dict() == {"limit": ""}
+
+    def test_many_to_many_fields(self, job_template, organization):
+        job = Job.objects.create(job_template=job_template)
+        ig1 = InstanceGroup.objects.create(name='bar')
+        ig2 = InstanceGroup.objects.create(name='foo')
+        label1 = Label.objects.create(name='foo', description='bar', organization=organization)
+        label2 = Label.objects.create(name='faz', description='baz', organization=organization)
+        # Order should matter here which is why we do 2 and then 1
+        data = {
+            "credentials": [],
+            "extra_vars": {},
+            "job_tags": None,
+            "limit": None,
+            "execution_environment": None,
+            "instance_groups": [ig2, ig1],
+            "labels": [label2, label1],
+            "forks": None,
+            "timeout": None,
+            "job_slice_count": None,
+        }
+        config = job.create_config_from_prompts(data)
+
+        assert config.instance_groups.exists()
+        config_instance_group_ids = [item.id for item in config.instance_groups.all()]
+        assert config_instance_group_ids == [ig2.id, ig1.id]
+
+        assert config.labels.exists()
+        config_label_ids = [item.id for item in config.labels.all()]
+        assert config_label_ids == [label2.id, label1.id]
+
+    def test_pk_field(self, job_template, organization):
+        job = Job.objects.create(job_template=job_template)
+        ee = ExecutionEnvironment.objects.create(name='test-ee', image='quay.io/foo/bar')
+        # Order should matter here which is why we do 2 and then 1
+        data = {
+            "credentials": [],
+            "extra_vars": {},
+            "job_tags": None,
+            "limit": None,
+            "execution_environment": ee,
+            "instance_groups": [],
+            "labels": [],
+            "forks": None,
+            "timeout": None,
+            "job_slice_count": None,
+        }
+        config = job.create_config_from_prompts(data)
+
+        assert config.execution_environment
+        # We just write the PK instead of trying to assign an item, that happens on the save
+        assert config.execution_environment_id == ee.id
