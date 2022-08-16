@@ -43,8 +43,8 @@ from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
 )
-from awx.main.utils import parse_yaml_or_json, getattr_dne, NullablePromptPseudoField
-from awx.main.fields import ImplicitRoleField, AskForField, JSONBlob
+from awx.main.utils import parse_yaml_or_json, getattr_dne, NullablePromptPseudoField, polymorphic
+from awx.main.fields import ImplicitRoleField, AskForField, JSONBlob, OrderedManyToManyField
 from awx.main.models.mixins import (
     ResourceMixin,
     SurveyJobTemplateMixin,
@@ -250,6 +250,30 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     )
     ask_credential_on_launch = AskForField(blank=True, default=False, allows_field='credentials')
     ask_scm_branch_on_launch = AskForField(blank=True, default=False, allows_field='scm_branch')
+    ask_execution_environment_on_launch = AskForField(
+        blank=True,
+        default=False,
+    )
+    ask_labels_on_launch = AskForField(
+        blank=True,
+        default=False,
+    )
+    ask_forks_on_launch = AskForField(
+        blank=True,
+        default=False,
+    )
+    ask_job_slice_count_on_launch = AskForField(
+        blank=True,
+        default=False,
+    )
+    ask_timeout_on_launch = AskForField(
+        blank=True,
+        default=False,
+    )
+    ask_instance_groups_on_launch = AskForField(
+        blank=True,
+        default=False,
+    )
     job_slice_count = models.PositiveIntegerField(
         blank=True,
         default=1,
@@ -276,7 +300,18 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     @classmethod
     def _get_unified_job_field_names(cls):
         return set(f.name for f in JobOptions._meta.fields) | set(
-            ['name', 'description', 'organization', 'survey_passwords', 'labels', 'credentials', 'job_slice_number', 'job_slice_count', 'execution_environment']
+            [
+                'name',
+                'description',
+                'organization',
+                'survey_passwords',
+                'labels',
+                'credentials',
+                'job_slice_number',
+                'job_slice_count',
+                'execution_environment',
+                'instance_groups',
+            ]
         )
 
     @property
@@ -314,10 +349,13 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         actual_inventory = self.inventory
         if self.ask_inventory_on_launch and 'inventory' in kwargs:
             actual_inventory = kwargs['inventory']
+        actual_slice_count = self.job_slice_count
+        if self.ask_job_slice_count_on_launch and 'slice_count' in kwargs:
+            actual_slice_count = kwargs['slice_count']
         if actual_inventory:
-            return min(self.job_slice_count, actual_inventory.hosts.count())
+            return min(actual_slice_count, actual_inventory.hosts.count())
         else:
-            return self.job_slice_count
+            return actual_slice_count
 
     def save(self, *args, **kwargs):
         update_fields = kwargs.get('update_fields', [])
@@ -425,10 +463,15 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
 
             field = self._meta.get_field(field_name)
             if isinstance(field, models.ManyToManyField):
-                old_value = set(old_value.all())
-                new_value = set(kwargs[field_name]) - old_value
-                if not new_value:
-                    continue
+                if field_name == 'instance_groups':
+                    # Instance groups are ordered so we can't make a set out of them
+                    old_value = old_value.all()
+                elif field_name == 'credentials':
+                    # Credentials have a weird pattern because of how they are layered
+                    old_value = set(old_value.all())
+                    new_value = set(kwargs[field_name]) - old_value
+                    if not new_value:
+                        continue
 
             if new_value == old_value:
                 # no-op case: Fields the same as template's value
@@ -576,6 +619,13 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         blank=True,
         default=1,
         help_text=_("If ran as part of sliced jobs, the total number of slices. " "If 1, job is not part of a sliced job."),
+    )
+    instance_groups = OrderedManyToManyField(
+        'InstanceGroup',
+        related_name='job_instance_groups',
+        blank=True,
+        editable=False,
+        through='JobInstanceGroupMembership',
     )
 
     def _get_parent_field_name(self):
@@ -767,6 +817,8 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
 
     @property
     def preferred_instance_groups(self):
+        # If the user specified instance groups those will be handled by the unified_job.create_unified_job
+        # This function handles only the defaults for a template w/o user specification
         if self.organization is not None:
             organization_groups = [x for x in self.organization.instance_groups.all()]
         else:
@@ -919,7 +971,9 @@ class LaunchTimeConfigBase(BaseModel):
                     continue  # unsaved object can't have related many-to-many
                 prompt_val = set(getattr(self, prompt_name).all())
                 if len(prompt_val) > 0:
-                    data[prompt_name] = prompt_val
+                    # We used to return a set but that will cause issues with order for ordered fields (like instance_groups)
+                    # So instead we will return an array of items
+                    data[prompt_name] = [item for item in getattr(self, prompt_name).all()]
             elif prompt_name == 'extra_vars':
                 if self.extra_vars:
                     if display:
@@ -968,6 +1022,9 @@ class LaunchTimeConfig(LaunchTimeConfigBase):
     # Credentials needed for non-unified job / unified JT models
     credentials = models.ManyToManyField('Credential', related_name='%(class)ss')
 
+    # Labels needed for non-unified job / unified JT models
+    labels = models.ManyToManyField('Label', related_name='%(class)s_labels')
+
     @property
     def extra_vars(self):
         return self.extra_data
@@ -1008,6 +1065,15 @@ class JobLaunchConfig(LaunchTimeConfig):
         related_name='launch_config',
         on_delete=models.CASCADE,
         editable=False,
+    )
+
+    # Instance Groups needed for non-unified job / unified JT models
+    instance_groups = OrderedManyToManyField(
+        'InstanceGroup', related_name='%(class)ss', blank=True, editable=False, through='JobLaunchConfigInstanceGroupMembership'
+    )
+
+    execution_environment = models.ForeignKey(
+        'ExecutionEnvironment', null=True, blank=True, default=None, on_delete=polymorphic.SET_NULL, related_name='execution_environment'
     )
 
     def has_user_prompts(self, template):

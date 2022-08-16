@@ -3,7 +3,20 @@ import pytest
 from rest_framework.exceptions import PermissionDenied
 
 from awx.main.access import JobAccess, JobLaunchConfigAccess, AdHocCommandAccess, InventoryUpdateAccess, ProjectUpdateAccess
-from awx.main.models import Job, JobLaunchConfig, JobTemplate, AdHocCommand, InventoryUpdate, InventorySource, ProjectUpdate, User, Credential
+from awx.main.models import (
+    Job,
+    JobLaunchConfig,
+    JobTemplate,
+    AdHocCommand,
+    InventoryUpdate,
+    InventorySource,
+    ProjectUpdate,
+    User,
+    Credential,
+    ExecutionEnvironment,
+    InstanceGroup,
+    Label,
+)
 
 from crum import impersonate
 
@@ -309,6 +322,26 @@ class TestLaunchConfigAccess:
         assert not access.has_credentials_access(config)  # lacks access to 1
         cred2.use_role.members.add(rando)
         assert access.has_credentials_access(config)  # has access to both
+
+    def test_new_execution_environment_access(self, rando):
+        ee = ExecutionEnvironment.objects.create(name='test-ee', image='quay.io/foo/bar')
+        access = JobLaunchConfigAccess(rando)
+
+        assert access.can_add({'execution_environment': ee})  # can add because access to ee will be granted
+
+    def test_new_label_access(self, rando, organization):
+        label = Label.objects.create(name='foo', description='bar', organization=organization)
+        access = JobLaunchConfigAccess(rando)
+
+        assert not access.can_add({'labels': [label]})  # can't add because no access to label
+        # We assert in JT unit tests that the access will be granted if label is in JT
+
+    def test_new_instance_group_access(self, rando):
+        ig = InstanceGroup.objects.create(name='bar', policy_instance_percentage=100, policy_instance_minimum=2)
+        access = JobLaunchConfigAccess(rando)
+
+        assert not access.can_add({'instance_groups': [ig]})  # can't add because no access to ig
+        # We assert in JT unit tests that the access will be granted if instance group is in JT
 
     def test_can_use_minor(self, rando):
         # Config object only has flat-field overrides, no RBAC restrictions

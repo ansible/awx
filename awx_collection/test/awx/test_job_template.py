@@ -46,6 +46,12 @@ def test_resets_job_template_values(run_module, admin_user, project, inventory):
         'timeout': 50,
         'allow_simultaneous': True,
         'ask_limit_on_launch': True,
+        'ask_execution_environment_on_launch': True,
+        'ask_forks_on_launch': True,
+        'ask_instance_groups_on_launch': True,
+        'ask_job_slice_count_on_launch': True,
+        'ask_labels_on_launch': True,
+        'ask_timeout_on_launch': True,
     }
 
     result = run_module('job_template', module_args, admin_user)
@@ -55,6 +61,12 @@ def test_resets_job_template_values(run_module, admin_user, project, inventory):
     assert jt.timeout == 50
     assert jt.allow_simultaneous
     assert jt.ask_limit_on_launch
+    assert jt.ask_execution_environment_on_launch
+    assert jt.ask_forks_on_launch
+    assert jt.ask_instance_groups_on_launch
+    assert jt.ask_job_slice_count_on_launch
+    assert jt.ask_labels_on_launch
+    assert jt.ask_timeout_on_launch
 
     module_args = {
         'name': 'foo',
@@ -68,6 +80,12 @@ def test_resets_job_template_values(run_module, admin_user, project, inventory):
         'timeout': 0,
         'allow_simultaneous': False,
         'ask_limit_on_launch': False,
+        'ask_execution_environment_on_launch': False,
+        'ask_forks_on_launch': False,
+        'ask_instance_groups_on_launch': False,
+        'ask_job_slice_count_on_launch': False,
+        'ask_labels_on_launch': False,
+        'ask_timeout_on_launch': False,
     }
 
     result = run_module('job_template', module_args, admin_user)
@@ -78,6 +96,12 @@ def test_resets_job_template_values(run_module, admin_user, project, inventory):
     assert jt.timeout == 0
     assert not jt.allow_simultaneous
     assert not jt.ask_limit_on_launch
+    assert not jt.ask_execution_environment_on_launch
+    assert not jt.ask_forks_on_launch
+    assert not jt.ask_instance_groups_on_launch
+    assert not jt.ask_job_slice_count_on_launch
+    assert not jt.ask_labels_on_launch
+    assert not jt.ask_timeout_on_launch
 
 
 @pytest.mark.django_db
