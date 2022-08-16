@@ -1,7 +1,7 @@
 import pytest
 
 # AWX
-from awx.main.models import JobTemplate, JobLaunchConfig
+from awx.main.models import JobTemplate, JobLaunchConfig, ExecutionEnvironment
 
 
 @pytest.fixture
@@ -61,7 +61,17 @@ class TestConfigReversibility:
         config = config_factory({'limit': 'foobar'})
         assert config.prompts_dict() == {'limit': 'foobar'}
 
-    def test_related_objects(self, config_factory, inventory, credential):
-        prompts = {'limit': 'foobar', 'inventory': inventory, 'credentials': set([credential])}
+    def test_related_objects(self, config_factory, inventory, credential, label, default_instance_group):
+        ee = ExecutionEnvironment.objects.create(name='test-ee', image='quay.io/foo/bar')
+        prompts = {
+            'limit': 'foobar',
+            'inventory': inventory,
+            'credentials': [credential],
+            'execution_environment': ee,
+            'labels': [label],
+            'instance_groups': [default_instance_group],
+        }
         config = config_factory(prompts)
+        print(prompts)
+        print(config.prompts_dict())
         assert config.prompts_dict() == prompts

@@ -983,7 +983,8 @@ class UnifiedJob(
                 many_to_many_fields.append(field_name)
                 continue
             if isinstance(getattr(self.__class__, field_name).field, (models.ForeignKey)):
-                setattr(config, "{}_id".format(field_name), value.id)
+                if value:
+                    setattr(config, "{}_id".format(field_name), value.id)
                 continue
             key = field_name
             if key == 'extra_vars':
@@ -992,7 +993,6 @@ class UnifiedJob(
         config.save()
 
         for field_name in many_to_many_fields:
-            logger.warning(field_name)
             if field_name == 'credentials':
                 # Credentials are a special case of many to many because of how they function
                 # (i.e. you can't have > 1 machine cred)
