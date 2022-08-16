@@ -531,6 +531,12 @@ def copy_m2m_relationships(obj1, obj2, fields, kwargs=None):
                 src_field_value = getattr(obj1, field_name)
                 if kwargs and field_name in kwargs:
                     override_field_val = kwargs[field_name]
+                    # TODO: Should we spike this our or just put the for loop inside the next if and make everything respect order?
+                    if field_name == 'instance_groups':
+                        # instance_groups are a list but we need to preserve the order
+                        for ig_id in override_field_val:
+                            getattr(obj2, field_name).add(ig_id)
+                        continue
                     if isinstance(override_field_val, (set, list, QuerySet)):
                         getattr(obj2, field_name).add(*override_field_val)
                         continue

@@ -208,6 +208,42 @@ options:
       type: bool
       aliases:
         - ask_credential
+    ask_execution_environment_on_launch:
+      description:
+        - Prompt user for execution environment on launch.
+      type: bool
+      aliases:
+        - ask_execution_environment
+    ask_forks_on_launch:
+      description:
+        - Prompt user for forks on launch.
+      type: bool
+      aliases:
+        - ask_forks
+    ask_instance_groups_on_launch:
+      description:
+        - Prompt user for instance groups on launch.
+      type: bool
+      aliases:
+        - ask_instance_groups
+    ask_job_slice_count_on_launch:
+      description:
+        - Prompt user for job slice count on launch.
+      type: bool
+      aliases:
+        - ask_job_slice_count
+    ask_labels_on_launch:
+      description:
+        - Prompt user for labels on launch.
+      type: bool
+      aliases:
+        - ask_labels
+    ask_timeout_on_launch:
+      description:
+        - Prompt user for timeout on launch.
+      type: bool
+      aliases:
+        - ask_timeout
     survey_enabled:
       description:
         - Enable a survey on the job template.
@@ -385,6 +421,12 @@ def main():
         ask_verbosity_on_launch=dict(type='bool', aliases=['ask_verbosity']),
         ask_inventory_on_launch=dict(type='bool', aliases=['ask_inventory']),
         ask_credential_on_launch=dict(type='bool', aliases=['ask_credential']),
+        ask_execution_environment_on_launch=dict(type='bool', aliases=['ask_execution_environment']),
+        ask_forks_on_launch=dict(type='bool', aliases=['ask_forks']),
+        ask_instance_groups_on_launch=dict(type='bool', aliases=['ask_instance_groups']),
+        ask_job_slice_count_on_launch=dict(type='bool', aliases=['ask_job_slice_count']),
+        ask_labels_on_launch=dict(type='bool', aliases=['ask_labels']),
+        ask_timeout_on_launch=dict(type='bool', aliases=['ask_timeout']),
         survey_enabled=dict(type='bool'),
         survey_spec=dict(type="dict"),
         become_enabled=dict(type='bool'),
@@ -484,6 +526,12 @@ def main():
         'ask_verbosity_on_launch',
         'ask_inventory_on_launch',
         'ask_credential_on_launch',
+        'ask_execution_environment_on_launch',
+        'ask_forks_on_launch',
+        'ask_instance_groups_on_launch',
+        'ask_job_slice_count_on_launch',
+        'ask_labels_on_launch',
+        'ask_timeout_on_launch',
         'survey_enabled',
         'become_enabled',
         'diff_mode',

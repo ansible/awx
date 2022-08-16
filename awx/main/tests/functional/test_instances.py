@@ -417,3 +417,31 @@ class TestInstanceGroupOrdering:
         assert job.preferred_instance_groups == [ig_inv, ig_org]
         job.job_template.instance_groups.add(ig_tmp)
         assert job.preferred_instance_groups == [ig_tmp, ig_inv, ig_org]
+
+    def test_job_instance_groups_cache_default(self, instance_group_factory, inventory, project, default_instance_group):
+        jt = JobTemplate.objects.create(inventory=inventory, project=project)
+        job = jt.create_unified_job()
+        print(job.preferred_instance_groups_cache)
+        print(default_instance_group)
+        assert job.preferred_instance_groups_cache == [default_instance_group.id]
+
+    def test_job_instance_groups_cache_default_additional_items(self, instance_group_factory, inventory, project, default_instance_group):
+        ig_org = instance_group_factory("OrgIstGrp", [default_instance_group.instances.first()])
+        ig_inv = instance_group_factory("InvIstGrp", [default_instance_group.instances.first()])
+        ig_tmp = instance_group_factory("TmpIstGrp", [default_instance_group.instances.first()])
+        project.organization.instance_groups.add(ig_org)
+        inventory.instance_groups.add(ig_inv)
+        jt = JobTemplate.objects.create(inventory=inventory, project=project)
+        jt.instance_groups.add(ig_tmp)
+        job = jt.create_unified_job()
+        assert job.preferred_instance_groups_cache == [ig_tmp.id, ig_inv.id, ig_org.id]
+
+    def test_job_instance_groups_cache_prompt(self, instance_group_factory, inventory, project, default_instance_group):
+        ig_org = instance_group_factory("OrgIstGrp", [default_instance_group.instances.first()])
+        ig_inv = instance_group_factory("InvIstGrp", [default_instance_group.instances.first()])
+        ig_tmp = instance_group_factory("TmpIstGrp", [default_instance_group.instances.first()])
+        project.organization.instance_groups.add(ig_org)
+        inventory.instance_groups.add(ig_inv)
+        jt = JobTemplate.objects.create(inventory=inventory, project=project)
+        job = jt.create_unified_job(instance_groups=[ig_tmp])
+        assert job.preferred_instance_groups_cache == [ig_tmp.id]
