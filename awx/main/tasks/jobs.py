@@ -610,15 +610,10 @@ class BaseTask(object):
                 self.instance = self.update_model(pk)
                 cancel_flag_value = getattr(self.instance, 'cancel_flag', False)
                 if (cancel_flag_value is False) and signal_callback():
-                    # MERGE: prefer devel over this with runner_callback.delay_update(), and for elif case too
-                    job_explanation = "Task was canceled due to receiving a shutdown signal."
-                    self.instance.job_explanation = self.instance.job_explanation or job_explanation
-                    extra_update_fields['job_explanation'] = self.instance.job_explanation
+                    self.runner_callback.delay_update(skip_if_already_set=True, job_explanation="Task was canceled due to receiving a shutdown signal.")
                     status = 'failed'
                 elif cancel_flag_value is False:
-                    job_explanation = "The running ansible process received a shutdown signal."
-                    self.instance.job_explanation = self.instance.job_explanation or job_explanation
-                    extra_update_fields['job_explanation'] = self.instance.job_explanation
+                    self.runner_callback.delay_update(skip_if_already_set=True, job_explanation="The running ansible process received a shutdown signal.")
                     status = 'failed'
         except ReceptorNodeNotFound as exc:
             self.runner_callback.delay_update(job_explanation=str(exc))
