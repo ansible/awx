@@ -27,7 +27,7 @@ function canLaunchWithoutPrompt(launchData) {
     !launchData.ask_execution_environment_on_launch &&
     !launchData.ask_labels_on_launch &&
     !launchData.ask_forks_on_launch &&
-    !launchData.ask_job_slicing_on_launch &&
+    !launchData.ask_job_slice_count_on_launch &&
     !launchData.ask_timeout_on_launch &&
     !launchData.ask_instance_groups_on_launch &&
     !launchData.survey_enabled &&

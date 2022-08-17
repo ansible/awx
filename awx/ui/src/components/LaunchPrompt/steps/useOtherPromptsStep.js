@@ -112,7 +112,7 @@ function shouldShowPrompt(launchConfig) {
     launchConfig.ask_diff_mode_on_launch ||
     launchConfig.ask_labels_on_launch ||
     launchConfig.ask_forks_on_launch ||
-    launchConfig.ask_job_slicing_on_launch ||
+    launchConfig.ask_job_slice_count_on_launch ||
     launchConfig.ask_timeout_on_launch
   );
 }
@@ -151,7 +151,7 @@ function getInitialValues(launchConfig, resource) {
   if (launchConfig.ask_forks_on_launch) {
     initialValues.forks = resource?.forks || 0;
   }
-  if (launchConfig.ask_job_slicing_on_launch) {
+  if (launchConfig.ask_job_slice_count_on_launch) {
     initialValues.job_slice_count = resource?.job_slice_count || 1;
   }
   if (launchConfig.ask_timeout_on_launch) {
