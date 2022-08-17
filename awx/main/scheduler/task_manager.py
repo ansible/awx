@@ -689,17 +689,15 @@ class TaskManager(TaskBase):
         # discover jobs that are in running state but have an unregistered controller node or execution node
         # that we know about; it can occur if a running OCP node misses heartbeat and gets deleted,
         # or, SQL backup an awx install with running jobs and restore it elsewhere
-
-        # TODO: after merging other resillency changes, add job_explanation to all these cases
         for task in self.all_tasks:
             if task.controller_node:
-                if task.controller_node not in self.instances:
+                if (task.controller_node not in self.instances) and (task.controller_node not in self.instances.all_hostnames):
                     self.all_tasks.remove(task)
                     reap_job(task, 'failed', job_explanation=f'The controller node for this task, {task.controller_node}, has been deleted.')
                     continue
 
             if task.execution_node:
-                if task.execution_node not in self.instances:
+                if (task.execution_node not in self.instances) and (task.controller_node not in self.instances.all_hostnames):
                     self.all_tasks.remove(task)
                     reap_job(task, 'failed', job_explanation=f'The execution node for this task, {task.execution_node}, has been deleted.')
                     continue

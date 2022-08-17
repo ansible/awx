@@ -3,6 +3,7 @@
 import logging
 
 from django.conf import settings
+from django.utils.functional import cached_property
 
 from awx.main.models import (
     Instance,
@@ -61,6 +62,14 @@ class TaskManagerInstances:
 
     def __contains__(self, hostname):
         return hostname in self.instances_by_hostname
+
+    @cached_property
+    def all_hostnames(self):
+        """
+        This is a somewhat-cheap way to access the full list of hostnames, including the dead or disabled instances
+        the main instance list does not include these, because they will not accept new jobs
+        """
+        return list(Instance.objects.values_list('hostname', flat=True))
 
 
 class TaskManagerInstanceGroups:
