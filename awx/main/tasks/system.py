@@ -15,7 +15,7 @@ from distutils.version import LooseVersion as Version
 from django.conf import settings
 from django.db import transaction, DatabaseError, IntegrityError
 from django.db.models.fields.related import ForeignKey
-from django.utils.timezone import now
+from django.utils.timezone import now, timedelta
 from django.utils.encoding import smart_str
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
@@ -506,10 +506,15 @@ def cluster_node_heartbeat():
 
     if this_inst:
         startup_event = this_inst.is_lost(ref_time=nowtime)
+        last_last_seen = this_inst.last_seen
         this_inst.local_health_check()
         if startup_event and this_inst.capacity != 0:
-            logger.warning('Rejoining the cluster as instance {}.'.format(this_inst.hostname))
+            logger.warning(f'Rejoining the cluster as instance {this_inst.hostname}. Prior last_seen {last_last_seen}')
             return
+        elif not last_last_seen:
+            logger.warning(f'Instance does not have recorded last_seen, updating to {nowtime}')
+        elif (nowtime - last_last_seen) > timedelta(seconds=settings.CLUSTER_NODE_HEARTBEAT_PERIOD + 2):
+            logger.warning(f'Heartbeat skew - interval={(nowtime - last_last_seen).total_seconds():.4f}, expected={settings.CLUSTER_NODE_HEARTBEAT_PERIOD}')
     else:
         if settings.AWX_AUTO_DEPROVISION_INSTANCES:
             (changed, this_inst) = Instance.objects.register(ip_address=os.environ.get('MY_POD_IP'), node_type='control', uuid=settings.SYSTEM_UUID)
@@ -537,8 +542,9 @@ def cluster_node_heartbeat():
 
     for other_inst in lost_instances:
         try:
-            reaper.reap(other_inst)
-            reaper.reap_waiting(this_inst, grace_period=0)
+            explanation = "Job reaped due to instance shutdown"
+            reaper.reap(other_inst, job_explanation=explanation)
+            reaper.reap_waiting(other_inst, grace_period=0, job_explanation=explanation)
         except Exception:
             logger.exception('failed to reap jobs for {}'.format(other_inst.hostname))
         try:
@@ -603,7 +609,8 @@ def awx_k8s_reaper():
     for group in InstanceGroup.objects.filter(is_container_group=True).iterator():
         logger.debug("Checking for orphaned k8s pods for {}.".format(group))
         pods = PodManager.list_active_jobs(group)
-        for job in UnifiedJob.objects.filter(pk__in=pods.keys()).exclude(status__in=ACTIVE_STATES):
+        time_cutoff = now() - timedelta(seconds=settings.K8S_POD_REAPER_GRACE_PERIOD)
+        for job in UnifiedJob.objects.filter(pk__in=pods.keys(), finished__lte=time_cutoff).exclude(status__in=ACTIVE_STATES):
             logger.debug('{} is no longer active, reaping orphaned k8s pod'.format(job.log_format))
             try:
                 pm = PodManager(job)

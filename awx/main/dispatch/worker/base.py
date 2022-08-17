@@ -17,6 +17,7 @@ from django.conf import settings
 
 from awx.main.dispatch.pool import WorkerPool
 from awx.main.dispatch import pg_bus_conn
+from awx.main.utils.common import log_excess_runtime
 
 if 'run_callback_receiver' in sys.argv:
     logger = logging.getLogger('awx.main.commands.run_callback_receiver')
@@ -81,6 +82,9 @@ class AWXConsumerBase(object):
             logger.error('unrecognized control message: {}'.format(control))
 
     def process_task(self, body):
+        if isinstance(body, dict):
+            body['time_ack'] = time.time()
+
         if 'control' in body:
             try:
                 return self.control(body)
@@ -101,6 +105,7 @@ class AWXConsumerBase(object):
         self.total_messages += 1
         self.record_statistics()
 
+    @log_excess_runtime(logger)
     def record_statistics(self):
         if time.time() - self.last_stats > 1:  # buffer stat recording to once per second
             try:

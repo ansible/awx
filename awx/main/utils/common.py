@@ -6,6 +6,7 @@ from datetime import timedelta
 import json
 import yaml
 import logging
+import time
 import os
 import subprocess
 import re
@@ -1183,3 +1184,19 @@ def cleanup_new_process(func):
         return func(*args, **kwargs)
 
     return wrapper_cleanup_new_process
+
+
+def log_excess_runtime(func_logger, cutoff=5.0):
+    def log_excess_runtime_decorator(func):
+        @wraps(func)
+        def _new_func(*args, **kwargs):
+            start_time = time.time()
+            return_value = func(*args, **kwargs)
+            delta = time.time() - start_time
+            if delta > cutoff:
+                logger.info(f'Running {func.__name__!r} took {delta:.2f}s')
+            return return_value
+
+        return _new_func
+
+    return log_excess_runtime_decorator

@@ -432,6 +432,10 @@ os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 
 # heartbeat period can factor into some forms of logic, so it is maintained as a setting here
 CLUSTER_NODE_HEARTBEAT_PERIOD = 60
+
+# Number of missed heartbeats until a node gets marked as lost
+CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE = 2
+
 RECEPTOR_SERVICE_ADVERTISEMENT_PERIOD = 60  # https://github.com/ansible/receptor/blob/aa1d589e154d8a0cb99a220aff8f98faf2273be6/pkg/netceptor/netceptor.go#L34
 EXECUTION_NODE_REMEDIATION_CHECKS = 60 * 30  # once every 30 minutes check if an execution node errors have been resolved
 
@@ -1028,3 +1032,14 @@ DEFAULT_CONTAINER_RUN_OPTIONS = ['--network', 'slirp4netns:enable_ipv6=true']
 
 # Mount exposed paths as hostPath resource in k8s/ocp
 AWX_MOUNT_ISOLATED_PATHS_ON_K8S = False
+
+# Time out task managers if they take longer than this many seconds
+TASK_MANAGER_TIMEOUT = 300
+
+# Number of seconds _in addition to_ the task manager timeout a job can stay
+# in waiting without being reaped
+JOB_WAITING_GRACE_PERIOD = 60
+
+# Number of seconds after a container group job finished time to wait
+# before the awx_k8s_reaper task will tear down the pods
+K8S_POD_REAPER_GRACE_PERIOD = 60

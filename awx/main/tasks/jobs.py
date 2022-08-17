@@ -608,8 +608,12 @@ class BaseTask(object):
                     status = 'failed'
             elif status == 'canceled':
                 self.instance = self.update_model(pk)
-                if (getattr(self.instance, 'cancel_flag', False) is False) and signal_callback():
-                    self.runner_callback.delay_update(job_explanation="Task was canceled due to receiving a shutdown signal.")
+                cancel_flag_value = getattr(self.instance, 'cancel_flag', False)
+                if (cancel_flag_value is False) and signal_callback():
+                    self.runner_callback.delay_update(skip_if_already_set=True, job_explanation="Task was canceled due to receiving a shutdown signal.")
+                    status = 'failed'
+                elif cancel_flag_value is False:
+                    self.runner_callback.delay_update(skip_if_already_set=True, job_explanation="The running ansible process received a shutdown signal.")
                     status = 'failed'
         except ReceptorNodeNotFound as exc:
             self.runner_callback.delay_update(job_explanation=str(exc))

@@ -22,7 +22,7 @@ import psutil
 
 from awx.main.models import UnifiedJob
 from awx.main.dispatch import reaper
-from awx.main.utils.common import convert_mem_str_to_bytes, get_mem_effective_capacity
+from awx.main.utils.common import convert_mem_str_to_bytes, get_mem_effective_capacity, log_excess_runtime
 
 if 'run_callback_receiver' in sys.argv:
     logger = logging.getLogger('awx.main.commands.run_callback_receiver')
@@ -341,12 +341,16 @@ class AutoscalePool(WorkerPool):
             # Get same number as max forks based on memory, this function takes memory as bytes
             self.max_workers = get_mem_effective_capacity(total_memory_gb * 2**30)
 
+            # add magic prime number of extra workers to ensure
+            # we have a few extra workers to run the heartbeat
+            self.max_workers += 7
+
         # max workers can't be less than min_workers
         self.max_workers = max(self.min_workers, self.max_workers)
 
-    def debug(self, *args, **kwargs):
-        self.cleanup()
-        return super(AutoscalePool, self).debug(*args, **kwargs)
+        # the task manager enforces settings.TASK_MANAGER_TIMEOUT on its own
+        # but if the task takes longer than the time defined here, we will force it to stop here
+        self.task_manager_timeout = settings.TASK_MANAGER_TIMEOUT + settings.TASK_MANAGER_TIMEOUT_GRACE_PERIOD
 
     @property
     def should_grow(self):
@@ -364,6 +368,7 @@ class AutoscalePool(WorkerPool):
     def debug_meta(self):
         return 'min={} max={}'.format(self.min_workers, self.max_workers)
 
+    @log_excess_runtime(logger)
     def cleanup(self):
         """
         Perform some internal account and cleanup.  This is run on
@@ -421,8 +426,8 @@ class AutoscalePool(WorkerPool):
                             w.managed_tasks[current_task['uuid']]['started'] = time.time()
                         age = time.time() - current_task['started']
                         w.managed_tasks[current_task['uuid']]['age'] = age
-                        if age > (settings.TASK_MANAGER_TIMEOUT + settings.TASK_MANAGER_TIMEOUT_GRACE_PERIOD):
-                            logger.error(f'{current_task_name} has held the advisory lock for {age}, sending SIGTERM to {w.pid}')  # noqa
+                        if age > self.task_manager_timeout:
+                            logger.error(f'{current_task_name} has held the advisory lock for {age}, sending SIGTERM to {w.pid}')
                             os.kill(w.pid, signal.SIGTERM)
 
         for m in orphaned:
@@ -432,16 +437,17 @@ class AutoscalePool(WorkerPool):
             idx = random.choice(range(len(self.workers)))
             self.write(idx, m)
 
-        # if we are not in the dangerous situation of queue backup then clear old waiting jobs
-        if self.workers and max(len(w.managed_tasks) for w in self.workers) <= 1:
-            reaper.reap_waiting()
-
-        # if the database says a job is running on this node, but it's *not*,
+        # if the database says a job is running or queued on this node, but it's *not*,
         # then reap it
         running_uuids = []
         for worker in self.workers:
             worker.calculate_managed_tasks()
             running_uuids.extend(list(worker.managed_tasks.keys()))
+
+        # if we are not in the dangerous situation of queue backup then clear old waiting jobs
+        if self.workers and max(len(w.managed_tasks) for w in self.workers) <= 1:
+            reaper.reap_waiting(excluded_uuids=running_uuids)
+
         reaper.reap(excluded_uuids=running_uuids)
 
     def up(self):
@@ -471,6 +477,10 @@ class AutoscalePool(WorkerPool):
                     w.put(body)
                     break
             else:
+                task_name = 'unknown'
+                if isinstance(body, dict):
+                    task_name = body.get('task')
+                logger.warn(f'Workers maxed, queuing {task_name}, load: {sum(len(w.managed_tasks) for w in self.workers)} / {len(self.workers)}')
                 return super(AutoscalePool, self).write(preferred_queue, body)
         except Exception:
             for conn in connections.all():
