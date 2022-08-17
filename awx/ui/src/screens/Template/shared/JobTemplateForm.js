@@ -452,7 +452,7 @@ function JobTemplateForm({
               fieldId="template-job-slicing"
               label={t`Job Slicing`}
               promptId="template-ask-job-slicing-on-launch"
-              promptName="ask_job_slicing_on_launch"
+              promptName="ask_job_slice_count_on_launch"
               tooltip={helpText.jobSlicing}
             >
               <TextInput
@@ -703,7 +703,8 @@ const FormikApp = withFormik({
       ask_instance_groups_on_launch:
         template.ask_instance_groups_on_launch || false,
       ask_inventory_on_launch: template.ask_inventory_on_launch || false,
-      ask_job_slicing_on_launch: template.ask_job_slicing_on_launch || false,
+      ask_job_slice_count_on_launch:
+        template.ask_job_slice_count_on_launch || false,
       ask_job_type_on_launch: template.ask_job_type_on_launch || false,
       ask_labels_on_launch: template.ask_labels_on_launch || false,
       ask_limit_on_launch: template.ask_limit_on_launch || false,

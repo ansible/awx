@@ -58,7 +58,7 @@ function OtherPromptsStep({ launchConfig, variablesMode, onVarModeChange }) {
         />
       )}
       {launchConfig.ask_verbosity_on_launch && <VerbosityField />}
-      {launchConfig.ask_job_slicing_on_launch && (
+      {launchConfig.ask_job_slice_count_on_launch && (
         <FormField
           id="prompt-job-slicing"
           name="job_slice_count"
