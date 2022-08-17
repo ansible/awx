@@ -30,7 +30,7 @@ function showPreviewStep(nodeType, launchConfig) {
     launchConfig.ask_execution_environment_on_launch ||
     launchConfig.ask_labels_on_launch ||
     launchConfig.ask_forks_on_launch ||
-    launchConfig.ask_job_slicing_on_launch ||
+    launchConfig.ask_job_slice_count_on_launch ||
     launchConfig.ask_timeout_on_launch ||
     launchConfig.ask_instance_groups_on_launch ||
     launchConfig.survey_enabled ||
@@ -221,7 +221,7 @@ const getNodeToEditDefaultValues = (
   if (launchConfig.ask_forks_on_launch) {
     initialValues.forks = sourceOfValues?.forks || 0;
   }
-  if (launchConfig.ask_job_slicing_on_launch) {
+  if (launchConfig.ask_job_slice_count_on_launch) {
     initialValues.job_slice_count = sourceOfValues?.job_slice_count || 1;
   }
   if (launchConfig.ask_timeout_on_launch) {
