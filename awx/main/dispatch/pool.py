@@ -441,12 +441,12 @@ class AutoscalePool(WorkerPool):
         body.setdefault('kwargs', {})
         if 'dispatch_time' in bind_kwargs:
             body['kwargs']['dispatch_time'] = tz_now().isoformat()
-        if 'active_task_ids' in bind_kwargs:
-            active_task_ids = []
+        if 'worker_tasks' in bind_kwargs:
+            worker_tasks = {}
             for worker in self.workers:
                 worker.calculate_managed_tasks()
-                active_task_ids.extend(list(worker.managed_tasks.keys()))
-            body['kwargs']['active_task_ids'] = active_task_ids
+                worker_tasks[worker.pid] = list(worker.managed_tasks.keys())
+            body['kwargs']['worker_tasks'] = worker_tasks
 
     def up(self):
         if self.full:
