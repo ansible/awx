@@ -2,12 +2,9 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-import base64
 import gnupg
-import hashlib
 import os
 import tempfile
-import traceback
 from ansible.module_utils.basic import *
 from ansible.plugins.action import ActionBase
 from ansible.utils.display import Display
@@ -33,7 +30,7 @@ class ActionModule(ActionBase):
     def run(self, tmp=None, task_vars=None):
         self._supports_check_mode = False
 
-        result = super(ActionModule, self).run(tmp, task_vars)
+        super(ActionModule, self).run(tmp, task_vars)
 
         self.params = self._task.args
 
