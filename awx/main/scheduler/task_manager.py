@@ -686,7 +686,7 @@ class TaskManager(TaskBase):
         logger.debug("{} couldn't be scheduled on graph, waiting for next cycle".format(task.log_format))
 
     def reap_jobs_from_orphaned_instances(self):
-        # discover jobs that are in running state but have an unregistered controller node, execution node, or container group
+        # discover jobs that are in running state but have an unregistered controller node or execution node
         # that we know about; it can occur if a running OCP node misses heartbeat and gets deleted,
         # or, SQL backup an awx install with running jobs and restore it elsewhere
 
@@ -695,17 +695,14 @@ class TaskManager(TaskBase):
             if task.controller_node:
                 if task.controller_node not in self.instances:
                     self.all_tasks.remove(task)
-                    reap_job(task, 'failed')
+                    reap_job(task, 'failed', job_explanation=f'The controller node for this task, {task.controller_node}, has been deleted.')
+                    continue
 
             if task.execution_node:
                 if task.execution_node not in self.instances:
                     self.all_tasks.remove(task)
-                    reap_job(task, 'failed')
-            elif task.instance_group_id:
-                # for container group jobs
-                if task.instance_group_id not in self.instance_groups.pk_ig_map:
-                    self.all_tasks.remove(task)
-                    reap_job(task, 'failed')
+                    reap_job(task, 'failed', job_explanation=f'The execution node for this task, {task.execution_node}, has been deleted.')
+                    continue
 
     def process_tasks(self):
         running_tasks = [t for t in self.all_tasks if t.status in ['waiting', 'running']]
