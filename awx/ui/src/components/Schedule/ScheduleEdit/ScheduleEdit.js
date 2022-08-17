@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-
 import { useHistory, useLocation } from 'react-router-dom';
 import { shape } from 'prop-types';
 import { Card } from '@patternfly/react-core';
 import yaml from 'js-yaml';
-import { SchedulesAPI } from 'api';
+import { LabelsAPI, OrganizationsAPI, SchedulesAPI } from 'api';
 import { getAddedAndRemoved } from 'util/lists';
-
 import { parseVariableField } from 'util/yaml';
 import mergeExtraVars from 'util/prompt/mergeExtraVars';
 import getSurveyValues from 'util/prompt/getSurveyValues';
@@ -35,6 +33,8 @@ function ScheduleEdit({
     scheduleCredentials = []
   ) => {
     const {
+      execution_environment,
+      instance_groups,
       inventory,
       credentials = [],
       frequency,
@@ -82,7 +82,60 @@ function ScheduleEdit({
       submitValues.inventory = inventory.id;
     }
 
+    if (execution_environment) {
+      submitValues.execution_environment = execution_environment.id;
+    }
+
+    submitValues.instance_groups = instance_groups
+      ? instance_groups.map((s) => s.id)
+      : [];
+
     try {
+      if (launchConfiguration?.ask_labels_on_launch) {
+        const labelIds = [];
+        const newLabels = [];
+        const labelRequests = [];
+        let organizationId = resource.organization;
+        if (values.labels) {
+          values.labels.forEach((label) => {
+            if (typeof label.id !== 'number') {
+              newLabels.push(label);
+            } else {
+              labelIds.push(label.id);
+            }
+          });
+        }
+
+        if (newLabels.length > 0) {
+          if (!organizationId) {
+            // eslint-disable-next-line no-useless-catch
+            try {
+              const {
+                data: { results },
+              } = await OrganizationsAPI.read();
+              organizationId = results[0].id;
+            } catch (err) {
+              throw err;
+            }
+          }
+        }
+
+        newLabels.forEach((label) => {
+          labelRequests.push(
+            LabelsAPI.create({
+              name: label.name,
+              organization: organizationId,
+            }).then(({ data }) => {
+              labelIds.push(data.id);
+            })
+          );
+        });
+
+        await Promise.all(labelRequests);
+
+        submitValues.labels = labelIds;
+      }
+
       const ruleSet = buildRuleSet(values);
       const requestData = {
         ...submitValues,

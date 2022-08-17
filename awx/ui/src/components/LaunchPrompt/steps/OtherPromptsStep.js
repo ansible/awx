@@ -1,9 +1,9 @@
 import React from 'react';
-
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import { Form, FormGroup, Switch } from '@patternfly/react-core';
 import styled from 'styled-components';
+import LabelSelect from '../../LabelSelect';
 import FormField from '../../FormField';
 import { TagMultiSelect } from '../../MultiSelect';
 import AnsibleSelect from '../../AnsibleSelect';
@@ -37,6 +37,7 @@ function OtherPromptsStep({ launchConfig, variablesMode, onVarModeChange }) {
           tooltip={t`Select a branch for the workflow. This branch is applied to all job template nodes that prompt for a branch`}
         />
       )}
+      {launchConfig.ask_labels_on_launch && <LabelsField />}
       {launchConfig.ask_forks_on_launch && (
         <FormField
           id="prompt-forks"
@@ -58,7 +59,7 @@ function OtherPromptsStep({ launchConfig, variablesMode, onVarModeChange }) {
         />
       )}
       {launchConfig.ask_verbosity_on_launch && <VerbosityField />}
-      {launchConfig.ask_job_slicing_on_launch && (
+      {launchConfig.ask_job_slice_count_on_launch && (
         <FormField
           id="prompt-job-slicing"
           name="job_slice_count"
@@ -209,6 +210,29 @@ function TagField({ id, name, label, tooltip }) {
       labelIcon={<Popover content={tooltip} />}
     >
       <TagMultiSelect value={field.value} onChange={helpers.setValue} />
+    </FormGroup>
+  );
+}
+
+function LabelsField() {
+  const [field, , helpers] = useField('labels');
+
+  return (
+    <FormGroup
+      fieldId="propmt-labels"
+      label={t`Labels`}
+      labelIcon={
+        <Popover
+          content={t`Optional labels that describe this job, such as 'dev' or 'test'. Labels can be used to group and filter completed jobs.`}
+        />
+      }
+    >
+      <LabelSelect
+        value={field.value}
+        onChange={(labels) => helpers.setValue(labels)}
+        createText={t`Create`}
+        onError={() => alert('error')}
+      />
     </FormGroup>
   );
 }

@@ -1,13 +1,12 @@
 import React, { useEffect, useCallback, useState } from 'react';
 import { shape, func } from 'prop-types';
-
 import { DateTime } from 'luxon';
 import { t } from '@lingui/macro';
 import { Formik } from 'formik';
 import { RRule } from 'rrule';
 import { Button, Form, ActionGroup } from '@patternfly/react-core';
 import { Config } from 'contexts/Config';
-import { SchedulesAPI } from 'api';
+import { JobTemplatesAPI, SchedulesAPI, WorkflowJobTemplatesAPI } from 'api';
 import { dateToInputDateTime } from 'util/dates';
 import useRequest from 'hooks/useRequest';
 import { parseVariableField } from 'util/yaml';
@@ -31,7 +30,7 @@ const NUM_DAYS_PER_FREQUENCY = {
 function ScheduleForm({
   hasDaysToKeepField,
   handleCancel,
-  handleSubmit,
+  handleSubmit: submitSchedule,
   schedule,
   submitError,
   resource,
@@ -55,17 +54,48 @@ function ScheduleForm({
     request: loadScheduleData,
     error: contentError,
     isLoading: contentLoading,
-    result: { zoneOptions, zoneLinks, credentials },
+    result: { zoneOptions, zoneLinks, credentials, labels },
   } = useRequest(
     useCallback(async () => {
       const { data } = await SchedulesAPI.readZoneInfo();
 
       let creds;
+      let allLabels;
       if (schedule.id) {
-        const {
-          data: { results },
-        } = await SchedulesAPI.readCredentials(schedule.id);
-        creds = results;
+        if (
+          resource.type === 'job_template' &&
+          launchConfig.ask_credential_on_launch
+        ) {
+          const {
+            data: { results },
+          } = await SchedulesAPI.readCredentials(schedule.id);
+          creds = results;
+        }
+        if (launchConfig.ask_labels_on_launch) {
+          const {
+            data: { results },
+          } = await SchedulesAPI.readAllLabels(schedule.id);
+          allLabels = results;
+        }
+      } else {
+        if (
+          resource.type === 'job_template' &&
+          launchConfig.ask_labels_on_launch
+        ) {
+          const {
+            data: { results },
+          } = await JobTemplatesAPI.readAllLabels(resource.id);
+          allLabels = results;
+        }
+        if (
+          resource.type === 'workflow_job_template' &&
+          launchConfig.ask_labels_on_launch
+        ) {
+          const {
+            data: { results },
+          } = await WorkflowJobTemplatesAPI.readAllLabels(resource.id);
+          allLabels = results;
+        }
       }
 
       const zones = (data.zones || []).map((zone) => ({
@@ -78,13 +108,21 @@ function ScheduleForm({
         zoneOptions: zones,
         zoneLinks: data.links,
         credentials: creds || [],
+        labels: allLabels || [],
       };
-    }, [schedule]),
+    }, [
+      schedule,
+      resource.id,
+      resource.type,
+      launchConfig.ask_labels_on_launch,
+      launchConfig.ask_credential_on_launch,
+    ]),
     {
       zonesOptions: [],
       zoneLinks: {},
       credentials: [],
       isLoading: true,
+      labels: [],
     }
   );
 
@@ -228,7 +266,7 @@ function ScheduleForm({
       launchConfig.ask_execution_environment_on_launch ||
       launchConfig.ask_labels_on_launch ||
       launchConfig.ask_forks_on_launch ||
-      launchConfig.ask_job_slicing_on_launch ||
+      launchConfig.ask_job_slice_count_on_launch ||
       launchConfig.ask_timeout_on_launch ||
       launchConfig.ask_instance_groups_on_launch ||
       launchConfig.survey_enabled ||
@@ -306,19 +344,6 @@ function ScheduleForm({
     startDate: currentDate,
     startTime: time,
     timezone: schedule.timezone || now.zoneName,
-  };
-  const submitSchedule = (
-    values,
-    launchConfiguration,
-    surveyConfiguration,
-    scheduleCredentials
-  ) => {
-    handleSubmit(
-      values,
-      launchConfiguration,
-      surveyConfiguration,
-      scheduleCredentials
-    );
   };
 
   if (hasDaysToKeepField) {
@@ -469,6 +494,7 @@ function ScheduleForm({
                       setIsSaveDisabled(false);
                     }}
                     resourceDefaultCredentials={resourceDefaultCredentials}
+                    labels={labels}
                   />
                 )}
                 <FormSubmitError error={submitError} />

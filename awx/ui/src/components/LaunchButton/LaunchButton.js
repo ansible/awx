@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { number, shape } from 'prop-types';
-
 import { t } from '@lingui/macro';
-
 import {
   AdHocCommandsAPI,
   InventorySourcesAPI,
@@ -27,7 +25,7 @@ function canLaunchWithoutPrompt(launchData) {
     !launchData.ask_execution_environment_on_launch &&
     !launchData.ask_labels_on_launch &&
     !launchData.ask_forks_on_launch &&
-    !launchData.ask_job_slicing_on_launch &&
+    !launchData.ask_job_slice_count_on_launch &&
     !launchData.ask_timeout_on_launch &&
     !launchData.ask_instance_groups_on_launch &&
     !launchData.survey_enabled &&
@@ -43,6 +41,7 @@ function LaunchButton({ resource, children }) {
   const [showLaunchPrompt, setShowLaunchPrompt] = useState(false);
   const [launchConfig, setLaunchConfig] = useState(null);
   const [surveyConfig, setSurveyConfig] = useState(null);
+  const [labels, setLabels] = useState([]);
   const [isLaunching, setIsLaunching] = useState(false);
   const [error, setError] = useState(null);
 
@@ -56,6 +55,11 @@ function LaunchButton({ resource, children }) {
       resource.type === 'workflow_job_template'
         ? WorkflowJobTemplatesAPI.readSurvey(resource.id)
         : JobTemplatesAPI.readSurvey(resource.id);
+    const readLabels =
+      resource.type === 'workflow_job_template'
+        ? WorkflowJobTemplatesAPI.readAllLabels(resource.id)
+        : JobTemplatesAPI.readAllLabels(resource.id);
+
     try {
       const { data: launch } = await readLaunch;
       setLaunchConfig(launch);
@@ -64,6 +68,14 @@ function LaunchButton({ resource, children }) {
         const { data } = await readSurvey;
 
         setSurveyConfig(data);
+      }
+
+      if (launch.ask_labels_on_launch) {
+        const {
+          data: { results },
+        } = await readLabels;
+
+        setLabels(results);
       }
 
       if (canLaunchWithoutPrompt(launch)) {
@@ -177,6 +189,7 @@ function LaunchButton({ resource, children }) {
           launchConfig={launchConfig}
           surveyConfig={surveyConfig}
           resource={resource}
+          labels={labels}
           onLaunch={launchWithParams}
           onCancel={() => setShowLaunchPrompt(false)}
         />

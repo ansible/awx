@@ -193,7 +193,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
     ask_execution_environment_on_launch,
     ask_labels_on_launch,
     ask_forks_on_launch,
-    ask_job_slicing_on_launch,
+    ask_job_slice_count_on_launch,
     ask_timeout_on_launch,
     survey_enabled,
   } = launchData || {};
@@ -253,7 +253,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
     ask_execution_environment_on_launch && execution_environment;
   const showLabelsDetail = ask_labels_on_launch && labels && labels.length > 0;
   const showForksDetail = ask_forks_on_launch;
-  const showJobSlicingDetail = ask_job_slicing_on_launch;
+  const showJobSlicingDetail = ask_job_slice_count_on_launch;
   const showTimeoutDetail = ask_timeout_on_launch;
 
   const showPromptedFields =
@@ -468,7 +468,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
                 dataCy="schedule-show-changes"
               />
             )}
-            {ask_job_slicing_on_launch && (
+            {ask_job_slice_count_on_launch && (
               <Detail label={t`Job Slicing`} value={job_slice_count} />
             )}
             {showCredentialsDetail && (

@@ -2,43 +2,41 @@ import React, { useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
-import { ExecutionEnvironmentsAPI } from 'api';
+import { InstanceGroupsAPI } from 'api';
 import { getSearchableKeys } from 'components/PaginatedTable';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import useRequest from 'hooks/useRequest';
+import useSelected from 'hooks/useSelected';
 import OptionsList from '../../OptionsList';
 import ContentLoading from '../../ContentLoading';
 import ContentError from '../../ContentError';
 
-const QS_CONFIG = getQSConfig('execution_environment', {
+const QS_CONFIG = getQSConfig('instance-groups', {
   page: 1,
   page_size: 5,
+  order_by: 'name',
 });
 
-function ExecutionEnvironmentStep() {
-  const [field, , helpers] = useField('execution_environment');
+function InstanceGroupsStep() {
+  const [field, , helpers] = useField('instance_groups');
+  const { selected, handleSelect, setSelected } = useSelected([]);
 
   const history = useHistory();
 
   const {
-    isLoading,
+    result: { instance_groups, count, relatedSearchableKeys, searchableKeys },
+    request: fetchInstanceGroups,
     error,
-    result: {
-      execution_environments,
-      count,
-      relatedSearchableKeys,
-      searchableKeys,
-    },
-    request: fetchExecutionEnvironments,
+    isLoading,
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, history.location.search);
       const [{ data }, actionsResponse] = await Promise.all([
-        ExecutionEnvironmentsAPI.read(params),
-        ExecutionEnvironmentsAPI.readOptions(),
+        InstanceGroupsAPI.read(params),
+        InstanceGroupsAPI.readOptions(),
       ]);
       return {
-        execution_environments: data.results,
+        instance_groups: data.results,
         count: data.count,
         relatedSearchableKeys: (
           actionsResponse?.data?.related_search_fields || []
@@ -47,16 +45,20 @@ function ExecutionEnvironmentStep() {
       };
     }, [history.location]),
     {
+      instance_groups: [],
       count: 0,
-      execution_environments: [],
       relatedSearchableKeys: [],
       searchableKeys: [],
     }
   );
 
   useEffect(() => {
-    fetchExecutionEnvironments();
-  }, [fetchExecutionEnvironments]);
+    fetchInstanceGroups();
+  }, [fetchInstanceGroups]);
+
+  useEffect(() => {
+    helpers.setValue(selected);
+  }, [selected]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (isLoading) {
     return <ContentLoading />;
@@ -67,19 +69,9 @@ function ExecutionEnvironmentStep() {
 
   return (
     <OptionsList
-      value={field.value ? [field.value] : []}
-      options={execution_environments}
+      value={field.value}
+      options={instance_groups}
       optionCount={count}
-      columns={[
-        {
-          name: t`Name`,
-          key: 'name',
-        },
-        {
-          name: t`Image`,
-          key: 'image',
-        },
-      ]}
       searchColumns={[
         {
           name: t`Name`,
@@ -87,8 +79,8 @@ function ExecutionEnvironmentStep() {
           isDefault: true,
         },
         {
-          name: t`Image`,
-          key: 'image__icontains',
+          name: t`Credential Name`,
+          key: 'credential__name__icontains',
         },
       ]}
       sortColumns={[
@@ -96,21 +88,19 @@ function ExecutionEnvironmentStep() {
           name: t`Name`,
           key: 'name',
         },
-        {
-          name: t`Image`,
-          key: 'image',
-        },
       ]}
       searchableKeys={searchableKeys}
       relatedSearchableKeys={relatedSearchableKeys}
-      header={t`Execution Environments`}
-      name="execution_environment"
+      multiple
+      header={t`Instance Groups`}
+      name="instanceGroups"
       qsConfig={QS_CONFIG}
-      readOnly
-      selectItem={helpers.setValue}
-      deselectItem={() => helpers.setValue(null)}
+      selectItem={handleSelect}
+      deselectItem={handleSelect}
+      sortSelectedItems={(selectedItems) => setSelected(selectedItems)}
+      isSelectedDraggable
     />
   );
 }
 
-export default ExecutionEnvironmentStep;
+export default InstanceGroupsStep;

@@ -165,7 +165,7 @@ function NodeViewModal({ readOnly }) {
       if (launchConfig.ask_forks_on_launch) {
         overrides.forks = originalNodeObject.forks;
       }
-      if (launchConfig.ask_job_slicing_on_launch) {
+      if (launchConfig.ask_job_slice_count_on_launch) {
         overrides.job_slice_count = originalNodeObject.job_slice_count;
       }
       if (launchConfig.ask_timeout_on_launch) {

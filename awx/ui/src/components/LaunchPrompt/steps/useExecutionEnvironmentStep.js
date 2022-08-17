@@ -19,7 +19,7 @@ export default function useExecutionEnvironmentStep(launchConfig, resource) {
   };
 }
 function getStep(launchConfig) {
-  if (!launchConfig.ask_inventory_on_launch) {
+  if (!launchConfig.ask_execution_environment_on_launch) {
     return null;
   }
   return {
@@ -40,6 +40,7 @@ function getInitialValues(launchConfig, resource) {
   }
 
   return {
-    inventory: resource?.summary_fields?.execution_environment || null,
+    execution_environment:
+      resource?.summary_fields?.execution_environment || null,
   };
 }

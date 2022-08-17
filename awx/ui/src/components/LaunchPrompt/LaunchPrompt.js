@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ExpandableSection, Wizard } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 import { Formik, useFormikContext } from 'formik';
+import { LabelsAPI, OrganizationsAPI } from 'api';
 import { useDismissableError } from 'hooks/useRequest';
 import mergeExtraVars from 'util/prompt/mergeExtraVars';
 import getSurveyValues from 'util/prompt/getSurveyValues';
@@ -15,6 +16,7 @@ function PromptModalForm({
   onCancel,
   onSubmit,
   resource,
+  labels,
   surveyConfig,
 }) {
   const { setFieldTouched, values } = useFormikContext();
@@ -27,9 +29,9 @@ function PromptModalForm({
     visitStep,
     visitAllSteps,
     contentError,
-  } = useLaunchSteps(launchConfig, surveyConfig, resource);
+  } = useLaunchSteps(launchConfig, surveyConfig, resource, labels);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const postValues = {};
     const setValue = (key, value) => {
       if (typeof value !== 'undefined' && value !== null) {
@@ -53,6 +55,61 @@ function PromptModalForm({
     setValue('extra_vars', mergeExtraVars(extraVars, surveyValues));
     setValue('scm_branch', values.scm_branch);
     setValue('verbosity', values.verbosity);
+    setValue('timeout', values.timeout);
+    setValue('forks', values.forks);
+    setValue('job_slice_count', values.job_slice_count);
+    setValue('execution_environment', values.execution_environment?.id);
+
+    if (launchConfig.ask_instance_groups_on_launch) {
+      const instanceGroupIds = [];
+      values.instance_groups.forEach((instance_group) => {
+        instanceGroupIds.push(instance_group.id);
+      });
+      setValue('instance_groups', instanceGroupIds);
+    }
+
+    if (launchConfig.ask_labels_on_launch) {
+      const labelIds = [];
+      const newLabels = [];
+      const labelRequests = [];
+      let organizationId = resource.organization;
+      values.labels.forEach((label) => {
+        if (typeof label.id !== 'number') {
+          newLabels.push(label);
+        } else {
+          labelIds.push(label.id);
+        }
+      });
+
+      if (newLabels.length > 0) {
+        if (!organizationId) {
+          // eslint-disable-next-line no-useless-catch
+          try {
+            const {
+              data: { results },
+            } = await OrganizationsAPI.read();
+            organizationId = results[0].id;
+          } catch (err) {
+            throw err;
+          }
+        }
+      }
+
+      newLabels.forEach((label) => {
+        labelRequests.push(
+          LabelsAPI.create({
+            name: label.name,
+            organization: organizationId,
+          }).then(({ data }) => {
+            labelIds.push(data.id);
+          })
+        );
+      });
+
+      await Promise.all(labelRequests);
+
+      setValue('labels', labelIds);
+    }
 
     onSubmit(postValues);
   };
@@ -137,6 +194,7 @@ function LaunchPrompt({
   onCancel,
   onLaunch,
   resource = {},
+  labels = [],
   surveyConfig,
   resourceDefaultCredentials = [],
 }) {
@@ -148,6 +206,7 @@ function LaunchPrompt({
         launchConfig={launchConfig}
         surveyConfig={surveyConfig}
         resource={resource}
+        labels={labels}
         resourceDefaultCredentials={resourceDefaultCredentials}
       />
     </Formik>
