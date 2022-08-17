@@ -500,7 +500,7 @@ class TestGenericRun:
             with pytest.raises(Exception):
                 task.run(1)
 
-        for c in [mock.call(1, status='running', start_args=''), mock.call(1, status='canceled')]:
+        for c in [mock.call(1, start_args='', status='canceled')]:
             assert c in task.update_model.call_args_list
 
     def test_event_count(self, mock_me):

@@ -24,13 +24,11 @@ def startup_reaping():
     job_ids = []
     for j in jobs:
         job_ids.append(j.id)
-        j.status = 'failed'
-        j.start_args = ''
-        j.job_explanation += 'Task was marked as running at system start up. The system must have not shut down properly, so it has been marked as failed.'
-        j.save(update_fields=['status', 'start_args', 'job_explanation'])
-        if hasattr(j, 'send_notification_templates'):
-            j.send_notification_templates('failed')
-        j.websocket_emit_status('failed')
+        reap_job(
+            j,
+            'failed',
+            job_explanation='Task was marked as running at system start up. The system must have not shut down properly, so it has been marked as failed.',
+        )
     if job_ids:
         logger.error(f'Unified jobs {job_ids} were reaped on dispatch startup')
 
@@ -54,9 +52,9 @@ def reap_job(j, status):
     logger.error('{} is no longer running; reaping'.format(j.log_format))
 
 
-def reap(instance=None, status='failed', excluded_uuids=[]):
+def reap_waiting(instance=None, status='failed', grace_period=60):
     """
-    Reap all jobs in waiting|running for this instance.
+    Reap all jobs in waiting for this instance.
     """
     me = instance
     if me is None:
@@ -66,11 +64,25 @@ def reap(instance=None, status='failed', excluded_uuids=[]):
             logger.warning(f'Local instance is not registered, not running reaper: {e}')
             return
     now = tz_now()
+    jobs = UnifiedJob.objects.filter(status='waiting', modified__lte=now - timedelta(seconds=grace_period), controller_node=me.hostname)
+    for j in jobs:
+        reap_job(j, status)
+
+
+def reap(instance=None, status='failed', excluded_uuids=[]):
+    """
+    Reap all jobs in running for this instance.
+    """
+    me = instance
+    if me is None:
+        try:
+            me = Instance.objects.me()
+        except RuntimeError as e:
+            logger.warning(f'Local instance is not registered, not running reaper: {e}')
+            return
     workflow_ctype_id = ContentType.objects.get_for_model(WorkflowJob).id
     jobs = UnifiedJob.objects.filter(
-        (Q(status='running') | Q(status='waiting', modified__lte=now - timedelta(seconds=60)))
-        & (Q(execution_node=me.hostname) | Q(controller_node=me.hostname))
-        & ~Q(polymorphic_ctype_id=workflow_ctype_id)
+        Q(status='running') & (Q(execution_node=me.hostname) | Q(controller_node=me.hostname)) & ~Q(polymorphic_ctype_id=workflow_ctype_id)
     ).exclude(celery_task_id__in=excluded_uuids)
     for j in jobs:
         reap_job(j, status)

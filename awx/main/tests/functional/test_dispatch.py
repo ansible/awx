@@ -200,7 +200,8 @@ class TestAutoScaling:
 
         # cleanup should scale down to 8 workers
         with mock.patch('awx.main.dispatch.reaper.reap') as reap:
-            self.pool.cleanup()
+            with mock.patch('awx.main.dispatch.reaper.reap_waiting') as reap:
+                self.pool.cleanup()
         reap.assert_called()
         assert len(self.pool) == 2
 
@@ -250,7 +251,8 @@ class TestAutoScaling:
 
         # clean up and the dead worker
         with mock.patch('awx.main.dispatch.reaper.reap') as reap:
-            self.pool.cleanup()
+            with mock.patch('awx.main.dispatch.reaper.reap_waiting') as reap:
+                self.pool.cleanup()
         reap.assert_called()
         assert len(self.pool) == 1
         assert self.pool.workers[0].pid == alive_pid
@@ -353,7 +355,7 @@ class TestJobReaper(object):
             ('waiting', '', '', None, False),  # waiting, not assigned to the instance
             ('waiting', 'awx', '', None, False),  # waiting, was edited less than a minute ago
             ('waiting', '', 'awx', None, False),  # waiting, was edited less than a minute ago
-            ('waiting', 'awx', '', yesterday, True),  # waiting, assigned to the execution_node, stale
+            ('waiting', 'awx', '', yesterday, False),  # waiting, managed by another node, ignore
             ('waiting', '', 'awx', yesterday, True),  # waiting, assigned to the controller_node, stale
         ],
     )
@@ -372,6 +374,7 @@ class TestJobReaper(object):
             # (because .save() overwrites it to _now_)
             Job.objects.filter(id=j.id).update(modified=modified)
         reaper.reap(i)
+        reaper.reap_waiting(i)
         job = Job.objects.first()
         if fail:
             assert job.status == 'failed'
