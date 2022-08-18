@@ -53,8 +53,8 @@ class GrafanaBackend(AWXBaseEmailBackend, CustomNotificationBase):
     ):
         super(GrafanaBackend, self).__init__(fail_silently=fail_silently)
         self.grafana_key = grafana_key
-        self.dashboardId = int(dashboardId) if dashboardId is not None else None
-        self.panelId = int(panelId) if panelId is not None else None
+        self.dashboardId = int(dashboardId) if dashboardId is not None and len(dashboardId) else None
+        self.panelId = int(panelId) if panelId is not None and len(panelId) else None
         self.annotation_tags = annotation_tags if annotation_tags is not None else []
         self.grafana_no_verify_ssl = grafana_no_verify_ssl
         self.isRegion = isRegion
