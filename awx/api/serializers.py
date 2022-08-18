@@ -1471,7 +1471,6 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             'allow_override',
             'custom_virtualenv',
             'default_environment',
-            'signature_validation',
             'signature_validation_credential',
         ) + (
             'last_update_failed',
