@@ -1274,7 +1274,7 @@ class UnifiedJob(
     def _websocket_emit_status(self, status):
         try:
             status_data = dict(unified_job_id=self.id, status=status)
-            if status == 'waiting':
+            if status == 'running':
                 if self.instance_group:
                     status_data['instance_group_name'] = self.instance_group.name
                 else:

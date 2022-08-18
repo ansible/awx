@@ -413,6 +413,9 @@ class BaseTask(object):
         """
         instance.log_lifecycle("pre_run")
 
+        # Before task is started, ensure that job_event partitions exist
+        create_partition(instance.event_class._meta.db_table, start=instance.created)
+
     def post_run_hook(self, instance, status):
         """
         Hook for any steps to run before job/task is marked as complete.
@@ -718,7 +721,6 @@ class SourceControlMixin(BaseTask):
         local_project_sync = project.create_project_update(_eager_fields=sync_metafields)
         local_project_sync.log_lifecycle("controller_node_chosen")
         local_project_sync.log_lifecycle("execution_node_chosen")
-        create_partition(local_project_sync.event_class._meta.db_table, start=local_project_sync.created)
         return local_project_sync
 
     def sync_and_copy_without_lock(self, project, private_data_dir, scm_branch=None):

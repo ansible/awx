@@ -81,6 +81,12 @@ def patch_Job():
 
 
 @pytest.fixture
+def mock_create_partition():
+    with mock.patch('awx.main.tasks.jobs.create_partition') as cp_mock:
+        yield cp_mock
+
+
+@pytest.fixture
 def patch_Organization():
     _credentials = []
     credentials_mock = mock.Mock(
@@ -463,7 +469,7 @@ class TestExtraVarSanitation(TestJobExecution):
 
 
 class TestGenericRun:
-    def test_generic_failure(self, patch_Job, execution_environment, mock_me):
+    def test_generic_failure(self, patch_Job, execution_environment, mock_me, mock_create_partition):
         job = Job(status='running', inventory=Inventory(), project=Project(local_path='/projects/_23_foo'))
         job.websocket_emit_status = mock.Mock()
         job.execution_environment = execution_environment
@@ -483,7 +489,7 @@ class TestGenericRun:
         assert update_model_call['status'] == 'error'
         assert update_model_call['emitted_events'] == 0
 
-    def test_cancel_flag(self, job, update_model_wrapper, execution_environment, mock_me):
+    def test_cancel_flag(self, job, update_model_wrapper, execution_environment, mock_me, mock_create_partition):
         job.status = 'running'
         job.cancel_flag = True
         job.websocket_emit_status = mock.Mock()
@@ -582,7 +588,7 @@ class TestGenericRun:
 
 @pytest.mark.django_db
 class TestAdhocRun(TestJobExecution):
-    def test_options_jinja_usage(self, adhoc_job, adhoc_update_model_wrapper, mock_me):
+    def test_options_jinja_usage(self, adhoc_job, adhoc_update_model_wrapper, mock_me, mock_create_partition):
         ExecutionEnvironment.objects.create(name='Control Plane EE', managed=True)
         ExecutionEnvironment.objects.create(name='Default Job EE', managed=False)
 
@@ -1936,7 +1942,7 @@ def test_managed_injector_redaction(injector_cls):
     assert 'very_secret_value' not in str(build_safe_env(env))
 
 
-def test_job_run_no_ee(mock_me):
+def test_job_run_no_ee(mock_me, mock_create_partition):
     org = Organization(pk=1)
     proj = Project(pk=1, organization=org)
     job = Job(project=proj, organization=org, inventory=Inventory(pk=1))
