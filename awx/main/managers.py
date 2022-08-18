@@ -99,9 +99,12 @@ class InstanceManager(models.Manager):
     instance or role.
     """
 
+    def my_hostname(self):
+        return settings.CLUSTER_HOST_ID
+
     def me(self):
         """Return the currently active instance."""
-        node = self.filter(hostname=settings.CLUSTER_HOST_ID)
+        node = self.filter(hostname=self.my_hostname())
         if node.exists():
             return node[0]
         raise RuntimeError("No instance found with the current cluster host id")

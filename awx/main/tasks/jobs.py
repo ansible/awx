@@ -700,7 +700,7 @@ class SourceControlMixin(BaseTask):
 
     def spawn_project_sync(self, project, sync_needs, scm_branch=None):
         pu_ig = self.instance.instance_group
-        pu_en = Instance.objects.me().hostname
+        pu_en = Instance.objects.my_hostname()
 
         sync_metafields = dict(
             launch_type="sync",
