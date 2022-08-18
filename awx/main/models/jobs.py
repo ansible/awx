@@ -859,7 +859,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
                             continue
                         host.ansible_facts = ansible_facts
                         host.ansible_facts_modified = now()
-                        host.save()
+                        host.save(update_fields=['ansible_facts', 'ansible_facts_modified'])
                         system_tracking_logger.info(
                             'New fact for inventory {} host {}'.format(smart_str(host.inventory.name), smart_str(host.name)),
                             extra=dict(
