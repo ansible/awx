@@ -169,12 +169,6 @@ options:
       required: False
       default: 2
       type: float
-    signature_validation:
-      description:
-        - Whether to validate the signature during project update.
-      required: False
-      default: False
-      type: bool
     signature_validation_credential:
       description:
         - Name of the credential to use for signature validation.
@@ -291,7 +285,6 @@ def main():
         wait=dict(type='bool', default=True),
         update_project=dict(default=False, type='bool'),
         interval=dict(default=2.0, type='float'),
-        signature_validation=dict(type='bool', default=False),
         signature_validation_credential=dict(type='str'),
     )
 
@@ -299,7 +292,7 @@ def main():
     module = ControllerAPIModule(
         argument_spec=argument_spec,
         required_if=[
-            ("signature_validation", True, ["signature_validation_credential"]),
+            (signature_validation_credential is not None),
         ],
     )
 
