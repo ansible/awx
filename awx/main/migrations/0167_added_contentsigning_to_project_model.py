@@ -37,4 +37,13 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.RunPython(setup_tower_managed_defaults),
+        migrations.RemoveField(
+            model_name='project',
+            name='signature_validation',
+        ),
+        migrations.AlterField(
+            model_name='project',
+            name='signature_validation_credential',
+            field=models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, to='main.credential'),
+        ),
     ]
