@@ -19,7 +19,7 @@ export default function useExecutionEnvironmentStep(launchConfig, resource) {
   };
 }
 function getStep(launchConfig) {
-  if (!launchConfig.ask_inventory_on_launch) {
+  if (!launchConfig.ask_execution_environment_on_launch) {
     return null;
   }
   return {
