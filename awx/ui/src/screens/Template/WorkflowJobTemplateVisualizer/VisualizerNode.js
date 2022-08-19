@@ -170,14 +170,14 @@ function VisualizerNode({
 
   let nodeName;
 
-  if (
-    node?.identifier ||
-    (node?.originalNodeObject?.identifier &&
-      !stringIsUUID(node.originalNodeObject.identifier))
+  if (node?.identifier && node.identifier !== '') {
+    nodeName = node.identifier;
+  } else if (
+    node?.identifier !== '' &&
+    node?.originalNodeObject?.identifier &&
+    !stringIsUUID(node.originalNodeObject.identifier)
   ) {
-    nodeName = node?.identifier
-      ? node?.identifier
-      : node?.originalNodeObject?.identifier;
+    nodeName = node?.originalNodeObject?.identifier;
   } else {
     nodeName =
       node?.fullUnifiedJobTemplate?.name ||

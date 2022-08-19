@@ -1,7 +1,6 @@
 import 'styled-components/macro';
 import React, { useCallback, useEffect } from 'react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
-import { RRule, rrulestr } from 'rrule';
 import styled from 'styled-components';
 
 import { t } from '@lingui/macro';
@@ -12,6 +11,8 @@ import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { JobTemplatesAPI, SchedulesAPI, WorkflowJobTemplatesAPI } from 'api';
 import { parseVariableField, jsonToYaml } from 'util/yaml';
 import { useConfig } from 'contexts/Config';
+import parseRuleObj from '../shared/parseRuleObj';
+import FrequencyDetails from './FrequencyDetails';
 import AlertModal from '../../AlertModal';
 import { CardBody, CardActionsRow } from '../../Card';
 import ContentError from '../../ContentError';
@@ -41,6 +42,26 @@ const PromptTitle = styled(Title)`
 const PromptDetailList = styled(DetailList)`
   padding: 0px 20px;
 `;
+
+const FrequencyDetailsContainer = styled.div`
+  background-color: var(--pf-global--palette--black-150);
+  margin-top: var(--pf-global--spacer--lg);
+  margin-bottom: var(--pf-global--spacer--lg);
+  margin-right: calc(var(--pf-c-card--child--PaddingRight) * -1);
+  margin-left: calc(var(--pf-c-card--child--PaddingLeft) * -1);
+  padding: var(--pf-c-card--child--PaddingRight);
+
+  & > p {
+    margin-bottom: var(--pf-global--spacer--md);
+  }
+
+  & > *:not(:first-child):not(:last-child) {
+    margin-bottom: var(--pf-global--spacer--md);
+    padding-bottom: var(--pf-global--spacer--md);
+    border-bottom: 1px solid var(--pf-global--palette--black-300);
+  }
+`;
+
 function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
   const {
     id,
@@ -132,19 +153,18 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
     fetchCredentialsAndPreview();
   }, [fetchCredentialsAndPreview]);
 
-  const rule = rrulestr(rrule);
-  let repeatFrequency =
-    rule.options.freq === RRule.MINUTELY && dtstart === dtend
-      ? t`None (Run Once)`
-      : rule.toText().replace(/^\w/, (c) => c.toUpperCase());
-  // We should allow rrule tot handle this issue, and they have in version 2.6.8.
-  // (https://github.com/jakubroztocil/rrule/commit/ab9c564a83de2f9688d6671f2a6df273ceb902bf)
-  // However, we are unable to upgrade to that version because that
-  // version throws and unexpected warning.
-  // (https://github.com/jakubroztocil/rrule/issues/427)
-  if (repeatFrequency.split(' ')[1] === 'minutes') {
-    repeatFrequency = t`Every minute for ${rule.options.count} times`;
-  }
+  const frequencies = {
+    minute: t`Minute`,
+    hour: t`Hour`,
+    day: t`Day`,
+    week: t`Week`,
+    month: t`Month`,
+    year: t`Year`,
+  };
+  const { frequency, frequencyOptions } = parseRuleObj(schedule);
+  const repeatFrequency = frequency.length
+    ? frequency.map((f) => frequencies[f]).join(', ')
+    : t`None (Run Once)`;
 
   const {
     ask_credential_on_launch,
@@ -268,6 +288,24 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
           helpText={helpText.localTimeZone(config)}
         />
         <Detail label={t`Repeat Frequency`} value={repeatFrequency} />
+      </DetailList>
+      {frequency.length ? (
+        <FrequencyDetailsContainer>
+          <p>
+            <strong>{t`Frequency Details`}</strong>
+          </p>
+          {frequency.map((freq) => (
+            <FrequencyDetails
+              key={freq}
+              type={freq}
+              label={frequencies[freq]}
+              options={frequencyOptions[freq]}
+              timezone={timezone}
+            />
+          ))}
+        </FrequencyDetailsContainer>
+      ) : null}
+      <DetailList gutter="sm">
         {hasDaysToKeepField ? (
           <Detail label={t`Days of Data to Keep`} value={daysToKeep} />
         ) : null}

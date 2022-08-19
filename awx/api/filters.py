@@ -157,7 +157,7 @@ class FieldLookupBackend(BaseFilterBackend):
 
     # A list of fields that we know can be filtered on without the possiblity
     # of introducing duplicates
-    NO_DUPLICATES_ALLOW_LIST = (CharField, IntegerField, BooleanField)
+    NO_DUPLICATES_ALLOW_LIST = (CharField, IntegerField, BooleanField, TextField)
 
     def get_fields_from_lookup(self, model, lookup):
 

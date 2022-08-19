@@ -16,13 +16,14 @@ from queue import Full as QueueFull, Empty as QueueEmpty
 from django.conf import settings
 from django.db import connection as django_connection, connections
 from django.core.cache import cache as django_cache
+from django.utils.timezone import now as tz_now
 from django_guid import set_guid
 from jinja2 import Template
 import psutil
 
 from awx.main.models import UnifiedJob
 from awx.main.dispatch import reaper
-from awx.main.utils.common import convert_mem_str_to_bytes, get_mem_effective_capacity
+from awx.main.utils.common import convert_mem_str_to_bytes, get_mem_effective_capacity, log_excess_runtime
 
 if 'run_callback_receiver' in sys.argv:
     logger = logging.getLogger('awx.main.commands.run_callback_receiver')
@@ -71,9 +72,11 @@ class PoolWorker(object):
         self.messages_finished = 0
         self.managed_tasks = collections.OrderedDict()
         self.finished = MPQueue(queue_size) if self.track_managed_tasks else NoOpResultQueue()
+        self.last_finished = None
         self.queue = MPQueue(queue_size)
         self.process = Process(target=target, args=(self.queue, self.finished) + args)
         self.process.daemon = True
+        self.scale_down_in = settings.DISPATCHER_SCALE_DOWN_WAIT_TIME
 
     def start(self):
         self.process.start()
@@ -144,6 +147,9 @@ class PoolWorker(object):
                 # state of which events are *currently* being processed.
                 logger.warning('Event UUID {} appears to be have been duplicated.'.format(uuid))
 
+        if finished:
+            self.last_finished = time.time()
+
     @property
     def current_task(self):
         if not self.track_managed_tasks:
@@ -188,6 +194,14 @@ class PoolWorker(object):
     @property
     def idle(self):
         return not self.busy
+
+    @property
+    def ready_to_scale_down(self):
+        if self.busy:
+            return False
+        if self.last_finished is None:
+            return True
+        return time.time() - self.last_finished > self.scale_down_in
 
 
 class StatefulPoolWorker(PoolWorker):
@@ -249,7 +263,7 @@ class WorkerPool(object):
         except Exception:
             logger.exception('could not fork')
         else:
-            logger.debug('scaling up worker pid:{}'.format(worker.pid))
+            logger.info(f'scaling up worker pid:{worker.pid} total:{len(self.workers)}')
         return idx, worker
 
     def debug(self, *args, **kwargs):
@@ -328,12 +342,16 @@ class AutoscalePool(WorkerPool):
             # Get same number as max forks based on memory, this function takes memory as bytes
             self.max_workers = get_mem_effective_capacity(total_memory_gb * 2**30)
 
+            # add magic prime number of extra workers to ensure
+            # we have a few extra workers to run the heartbeat
+            self.max_workers += 7
+
         # max workers can't be less than min_workers
         self.max_workers = max(self.min_workers, self.max_workers)
 
-    def debug(self, *args, **kwargs):
-        self.cleanup()
-        return super(AutoscalePool, self).debug(*args, **kwargs)
+        # the task manager enforces settings.TASK_MANAGER_TIMEOUT on its own
+        # but if the task takes longer than the time defined here, we will force it to stop here
+        self.task_manager_timeout = settings.TASK_MANAGER_TIMEOUT + settings.TASK_MANAGER_TIMEOUT_GRACE_PERIOD
 
     @property
     def should_grow(self):
@@ -351,6 +369,7 @@ class AutoscalePool(WorkerPool):
     def debug_meta(self):
         return 'min={} max={}'.format(self.min_workers, self.max_workers)
 
+    @log_excess_runtime(logger)
     def cleanup(self):
         """
         Perform some internal account and cleanup.  This is run on
@@ -359,8 +378,6 @@ class AutoscalePool(WorkerPool):
         1.  Discover worker processes that exited, and recover messages they
             were handling.
         2.  Clean up unnecessary, idle workers.
-        3.  Check to see if the database says this node is running any tasks
-            that aren't actually running.  If so, reap them.
 
         IMPORTANT: this function is one of the few places in the dispatcher
         (aside from setting lookups) where we talk to the database.  As such,
@@ -385,12 +402,12 @@ class AutoscalePool(WorkerPool):
                             logger.exception('failed to reap job UUID {}'.format(w.current_task['uuid']))
                 orphaned.extend(w.orphaned_tasks)
                 self.workers.remove(w)
-            elif w.idle and len(self.workers) > self.min_workers:
+            elif (len(self.workers) > self.min_workers) and w.ready_to_scale_down:
                 # the process has an empty queue (it's idle) and we have
                 # more processes in the pool than we need (> min)
                 # send this process a message so it will exit gracefully
                 # at the next opportunity
-                logger.debug('scaling down worker pid:{}'.format(w.pid))
+                logger.info(f'scaling down worker pid:{w.pid} prior total:{len(self.workers)}')
                 w.quit()
                 self.workers.remove(w)
             if w.alive:
@@ -401,13 +418,15 @@ class AutoscalePool(WorkerPool):
                 # the task manager to never do more work
                 current_task = w.current_task
                 if current_task and isinstance(current_task, dict):
-                    if current_task.get('task', '').endswith('tasks.run_task_manager'):
+                    endings = ['tasks.task_manager', 'tasks.dependency_manager', 'tasks.workflow_manager']
+                    current_task_name = current_task.get('task', '')
+                    if any(current_task_name.endswith(e) for e in endings):
                         if 'started' not in current_task:
                             w.managed_tasks[current_task['uuid']]['started'] = time.time()
                         age = time.time() - current_task['started']
                         w.managed_tasks[current_task['uuid']]['age'] = age
-                        if age > (60 * 5):
-                            logger.error(f'run_task_manager has held the advisory lock for >5m, sending SIGTERM to {w.pid}')  # noqa
+                        if age > self.task_manager_timeout:
+                            logger.error(f'{current_task_name} has held the advisory lock for {age}, sending SIGTERM to {w.pid}')
                             os.kill(w.pid, signal.SIGTERM)
 
         for m in orphaned:
@@ -417,13 +436,17 @@ class AutoscalePool(WorkerPool):
             idx = random.choice(range(len(self.workers)))
             self.write(idx, m)
 
-        # if the database says a job is running on this node, but it's *not*,
-        # then reap it
-        running_uuids = []
-        for worker in self.workers:
-            worker.calculate_managed_tasks()
-            running_uuids.extend(list(worker.managed_tasks.keys()))
-        reaper.reap(excluded_uuids=running_uuids)
+    def add_bind_kwargs(self, body):
+        bind_kwargs = body.pop('bind_kwargs', [])
+        body.setdefault('kwargs', {})
+        if 'dispatch_time' in bind_kwargs:
+            body['kwargs']['dispatch_time'] = tz_now().isoformat()
+        if 'worker_tasks' in bind_kwargs:
+            worker_tasks = {}
+            for worker in self.workers:
+                worker.calculate_managed_tasks()
+                worker_tasks[worker.pid] = list(worker.managed_tasks.keys())
+            body['kwargs']['worker_tasks'] = worker_tasks
 
     def up(self):
         if self.full:
@@ -438,6 +461,8 @@ class AutoscalePool(WorkerPool):
         if 'guid' in body:
             set_guid(body['guid'])
         try:
+            if isinstance(body, dict) and body.get('bind_kwargs'):
+                self.add_bind_kwargs(body)
             # when the cluster heartbeat occurs, clean up internally
             if isinstance(body, dict) and 'cluster_node_heartbeat' in body['task']:
                 self.cleanup()
@@ -452,6 +477,10 @@ class AutoscalePool(WorkerPool):
                     w.put(body)
                     break
             else:
+                task_name = 'unknown'
+                if isinstance(body, dict):
+                    task_name = body.get('task')
+                logger.warn(f'Workers maxed, queuing {task_name}, load: {sum(len(w.managed_tasks) for w in self.workers)} / {len(self.workers)}')
                 return super(AutoscalePool, self).write(preferred_queue, body)
         except Exception:
             for conn in connections.all():

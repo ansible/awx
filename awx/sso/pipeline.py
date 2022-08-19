@@ -250,7 +250,25 @@ def update_user_teams_by_saml_attr(backend, details, user=None, *args, **kwargs)
         [t.member_role.members.remove(user) for t in Team.objects.filter(Q(member_role__members=user) & ~Q(id__in=team_ids))]
 
 
+def _get_matches(list1, list2):
+    # Because we are just doing an intersection here we don't really care which list is in which parameter
+
+    # A SAML provider could return either a string or a list of items so we need to coerce the SAML value into a list (if needed)
+    if not isinstance(list1, (list, tuple)):
+        list1 = [list1]
+
+    # In addition, we used to allow strings in the SAML config instead of Lists. The migration should take case of that but just in case, we will convert our list too
+    if not isinstance(list2, (list, tuple)):
+        list2 = [list2]
+
+    return set(list1).intersection(set(list2))
+
+
 def _check_flag(user, flag, attributes, user_flags_settings):
+    '''
+    Helper function to set the is_superuser is_system_auditor flags for the SAML adapter
+    Returns the new flag and whether or not it changed the flag
+    '''
     new_flag = False
     is_role_key = "is_%s_role" % (flag)
     is_attr_key = "is_%s_attr" % (flag)
@@ -258,37 +276,35 @@ def _check_flag(user, flag, attributes, user_flags_settings):
     remove_setting = "remove_%ss" % (flag)
 
     # Check to see if we are respecting a role and, if so, does our user have that role?
-    role_setting = user_flags_settings.get(is_role_key, None)
-    if role_setting:
+    required_roles = user_flags_settings.get(is_role_key, None)
+    if required_roles:
+        matching_roles = _get_matches(required_roles, attributes.get('Role', []))
+
         # We do a 2 layer check here so that we don't spit out the else message if there is no role defined
-        if role_setting in attributes.get('Role', []):
-            logger.debug("User %s has %s role %s" % (user.username, flag, role_setting))
+        if matching_roles:
+            logger.debug("User %s has %s role(s) %s" % (user.username, flag, ', '.join(matching_roles)))
             new_flag = True
         else:
-            logger.debug("User %s is missing the %s role %s" % (user.username, flag, role_setting))
+            logger.debug("User %s is missing the %s role(s) %s" % (user.username, flag, ', '.join(required_roles)))
 
     # Next, check to see if we are respecting an attribute; this will take priority over the role if its defined
     attr_setting = user_flags_settings.get(is_attr_key, None)
     if attr_setting and attributes.get(attr_setting, None):
         # Do we have a required value for the attribute
-        if user_flags_settings.get(is_value_key, None):
+        required_value = user_flags_settings.get(is_value_key, None)
+        if required_value:
             # If so, check and see if the value of the attr matches the required value
-            attribute_value = attributes.get(attr_setting, None)
-            attribute_matches = False
-            if isinstance(attribute_value, (list, tuple)):
-                if user_flags_settings.get(is_value_key) in attribute_value:
-                    attribute_matches = True
-            elif attribute_value == user_flags_settings.get(is_value_key):
-                attribute_matches = True
+            saml_user_attribute_value = attributes.get(attr_setting, None)
+            matching_values = _get_matches(required_value, saml_user_attribute_value)
 
-            if attribute_matches:
-                logger.debug("Giving %s %s from attribute %s with matching value" % (user.username, flag, attr_setting))
+            if matching_values:
+                logger.debug("Giving %s %s from attribute %s with matching values %s" % (user.username, flag, attr_setting, ', '.join(matching_values)))
                 new_flag = True
             # if they don't match make sure that new_flag is false
             else:
                 logger.debug(
-                    "For %s on %s attr %s (%s) did not match expected value '%s'"
-                    % (flag, user.username, attr_setting, attribute_value, user_flags_settings.get(is_value_key))
+                    "Refusing %s for %s because attr %s (%s) did not match value(s) %s"
+                    % (flag, user.username, attr_setting, ", ".join(saml_user_attribute_value), ', '.join(required_value))
                 )
                 new_flag = False
         # If there was no required value then we can just allow them in because of the attribute

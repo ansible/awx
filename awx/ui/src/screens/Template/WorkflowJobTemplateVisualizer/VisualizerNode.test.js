@@ -270,6 +270,31 @@ describe('VisualizerNode', () => {
     });
   });
 
+  describe('Node with empty string alias', () => {
+    test('Displays unified job template name inside node', () => {
+      const wrapper = mountWithContexts(
+        <svg>
+          <WorkflowStateContext.Provider value={mockedContext}>
+            <VisualizerNode
+              node={{
+                id: 2,
+                identifier: '',
+                fullUnifiedJobTemplate: {
+                  name: 'foobar',
+                },
+              }}
+              readOnly={false}
+              updateHelpText={() => {}}
+              updateNodeHelp={() => {}}
+            />
+          </WorkflowStateContext.Provider>
+        </svg>
+      );
+      expect(wrapper).toHaveLength(1);
+      expect(wrapper.find('NodeResourceName').text()).toBe('foobar');
+    });
+  });
+
   describe('Node should display convergence label', () => {
     test('Should display ALL convergence label', async () => {
       const wrapper = mountWithContexts(

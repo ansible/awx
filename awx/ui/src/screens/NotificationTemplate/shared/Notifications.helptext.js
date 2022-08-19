@@ -29,6 +29,17 @@ const helpText = {
           route SMS messages. Phone numbers should be formatted +11231231234. For more information see Twilio documentation`,
   webhookHeaders: t`Specify HTTP Headers in JSON format. Refer to
         the Ansible Controller documentation for example syntax.`,
+  emailOptions: (
+    <>
+      {t`See Django`}{' '}
+      <a
+        href="https://docs.djangoproject.com/en/4.0/ref/settings/#std:setting-EMAIL_USE_TLS"
+        target="_blank"
+        rel="noreferrer"
+      >{t`documentation`}</a>{' '}
+      <span>{t`for more information.`}</span>
+    </>
+  ),
 };
 
 export default helpText;

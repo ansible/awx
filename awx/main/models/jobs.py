@@ -600,6 +600,19 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     def get_ui_url(self):
         return urljoin(settings.TOWER_URL_BASE, "/#/jobs/playbook/{}".format(self.pk))
 
+    def _set_default_dependencies_processed(self):
+        """
+        This sets the initial value of dependencies_processed
+        and here we use this as a shortcut to avoid the DependencyManager for jobs that do not need it
+        """
+        if (not self.project) or self.project.scm_update_on_launch:
+            self.dependencies_processed = False
+        elif (not self.inventory) or self.inventory.inventory_sources.filter(update_on_launch=True).exists():
+            self.dependencies_processed = False
+        else:
+            # No dependencies to process
+            self.dependencies_processed = True
+
     @property
     def event_class(self):
         if self.has_unpartitioned_events:
@@ -644,8 +657,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             raise ParseError(_('{status_value} is not a valid status option.').format(status_value=status))
         return self._get_hosts(**kwargs)
 
-    @property
-    def task_impact(self):
+    def _get_task_impact(self):
         if self.launch_type == 'callback':
             count_hosts = 2
         else:
@@ -847,7 +859,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
                             continue
                         host.ansible_facts = ansible_facts
                         host.ansible_facts_modified = now()
-                        host.save()
+                        host.save(update_fields=['ansible_facts', 'ansible_facts_modified'])
                         system_tracking_logger.info(
                             'New fact for inventory {} host {}'.format(smart_str(host.inventory.name), smart_str(host.name)),
                             extra=dict(
@@ -1213,6 +1225,9 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 
+    def _set_default_dependencies_processed(self):
+        self.dependencies_processed = True
+
     @classmethod
     def _get_parent_field_name(cls):
         return 'system_job_template'
@@ -1238,8 +1253,7 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
             return UnpartitionedSystemJobEvent
         return SystemJobEvent
 
-    @property
-    def task_impact(self):
+    def _get_task_impact(self):
         return 5
 
     @property

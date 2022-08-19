@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import {
   Route,
   Switch,
@@ -18,6 +18,7 @@ import RoutedTabs from 'components/RoutedTabs';
 import { getSearchableKeys } from 'components/PaginatedTable';
 import useRequest from 'hooks/useRequest';
 import { getJobModel } from 'util/jobs';
+import WorkflowOutputNavigation from 'components/WorkflowOutputNavigation';
 import JobDetail from './JobDetail';
 import JobOutput from './JobOutput';
 import { WorkflowOutput } from './WorkflowOutput';
@@ -49,16 +50,26 @@ function Job({ setBreadcrumb }) {
       eventRelatedSearchableKeys,
       eventSearchableKeys,
       inventorySourceChoices,
+      relatedJobs,
     },
   } = useRequest(
     useCallback(async () => {
       let eventOptions = {};
+      let relatedJobData = {};
       const { data: jobDetailData } = await getJobModel(type).readDetail(id);
       if (type !== 'workflow_job') {
         const { data: jobEventOptions } = await getJobModel(
           type
         ).readEventOptions(id);
         eventOptions = jobEventOptions;
+      }
+      if (jobDetailData.related.source_workflow_job) {
+        const {
+          data: { results },
+        } = await getJobModel('workflow_job').readNodes(
+          jobDetailData.summary_fields.source_workflow_job.id
+        );
+        relatedJobData = results;
       }
       if (
         jobDetailData?.summary_fields?.credentials?.find(
@@ -82,6 +93,7 @@ function Job({ setBreadcrumb }) {
         inventorySourceChoices:
           choices?.data?.actions?.GET?.source?.choices || [],
         jobDetail: jobDetailData,
+        relatedJobs: relatedJobData,
         eventRelatedSearchableKeys: (
           eventOptions?.related_search_fields || []
         ).map((val) => val.slice(0, -8)),
@@ -93,6 +105,7 @@ function Job({ setBreadcrumb }) {
       inventorySourceChoices: [],
       eventRelatedSearchableKeys: [],
       eventSearchableKeys: [],
+      relatedJobs: [],
     }
   );
 
@@ -101,7 +114,7 @@ function Job({ setBreadcrumb }) {
   }, [fetchJob]);
 
   const job = useWsJob(jobDetail);
-
+  const ref = useRef(null);
   const tabsArray = [
     {
       name: (
@@ -117,6 +130,16 @@ function Job({ setBreadcrumb }) {
     { name: t`Details`, link: `${match.url}/details`, id: 0 },
     { name: t`Output`, link: `${match.url}/output`, id: 1 },
   ];
+  if (relatedJobs?.length > 0) {
+    tabsArray.push({
+      name: (
+        <WorkflowOutputNavigation parentRef={ref} relatedJobs={relatedJobs} />
+      ),
+      link: undefined,
+      id: 2,
+      hasstyle: 'margin-left: auto',
+    });
+  }
 
   if (isLoading) {
     return (
@@ -147,46 +170,53 @@ function Job({ setBreadcrumb }) {
 
   return (
     <PageSection>
-      <Card>
-        <RoutedTabs tabsArray={tabsArray} />
-        <Switch>
-          <Redirect from="/jobs/system/:id" to="/jobs/management/:id" exact />
-          <Redirect
-            from="/jobs/:typeSegment/:id"
-            to="/jobs/:typeSegment/:id/output"
-            exact
+      <div ref={ref}>
+        <Card>
+          <RoutedTabs
+            isWorkflow={match.url.startsWith('/jobs/workflow')}
+            tabsArray={tabsArray}
           />
-          {job && [
-            <Route
-              key={job.type === 'workflow_job' ? 'workflow-details' : 'details'}
-              path="/jobs/:typeSegment/:id/details"
-            >
-              <JobDetail
-                job={job}
-                inventorySourceLabels={inventorySourceChoices}
-              />
-            </Route>,
-            <Route key="output" path="/jobs/:typeSegment/:id/output">
-              {job.type === 'workflow_job' ? (
-                <WorkflowOutput job={job} />
-              ) : (
-                <JobOutput
+          <Switch>
+            <Redirect from="/jobs/system/:id" to="/jobs/management/:id" exact />
+            <Redirect
+              from="/jobs/:typeSegment/:id"
+              to="/jobs/:typeSegment/:id/output"
+              exact
+            />
+            {job && [
+              <Route
+                key={
+                  job.type === 'workflow_job' ? 'workflow-details' : 'details'
+                }
+                path="/jobs/:typeSegment/:id/details"
+              >
+                <JobDetail
                   job={job}
-                  eventRelatedSearchableKeys={eventRelatedSearchableKeys}
-                  eventSearchableKeys={eventSearchableKeys}
+                  inventorySourceLabels={inventorySourceChoices}
                 />
-              )}
-            </Route>,
-            <Route key="not-found" path="*">
-              <ContentError isNotFound>
-                <Link to={`/jobs/${typeSegment}/${id}/details`}>
-                  {t`View Job Details`}
-                </Link>
-              </ContentError>
-            </Route>,
-          ]}
-        </Switch>
-      </Card>
+              </Route>,
+              <Route key="output" path="/jobs/:typeSegment/:id/output">
+                {job.type === 'workflow_job' ? (
+                  <WorkflowOutput job={job} />
+                ) : (
+                  <JobOutput
+                    job={job}
+                    eventRelatedSearchableKeys={eventRelatedSearchableKeys}
+                    eventSearchableKeys={eventSearchableKeys}
+                  />
+                )}
+              </Route>,
+              <Route key="not-found" path="*">
+                <ContentError isNotFound>
+                  <Link to={`/jobs/${typeSegment}/${id}/details`}>
+                    {t`View Job Details`}
+                  </Link>
+                </ContentError>
+              </Route>,
+            ]}
+          </Switch>
+        </Card>
+      </div>
     </PageSection>
   );
 }

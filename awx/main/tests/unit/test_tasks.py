@@ -34,13 +34,15 @@ from awx.main.models import (
 )
 from awx.main.models.credential import HIDDEN_PASSWORD, ManagedCredentialType
 
-from awx.main.tasks import jobs, system
+from awx.main.tasks import jobs, system, receptor
 from awx.main.utils import encrypt_field, encrypt_value
 from awx.main.utils.safe_yaml import SafeLoader
 from awx.main.utils.execution_environments import CONTAINER_ROOT
 
 from awx.main.utils.licensing import Licenser
 from awx.main.constants import JOB_VARIABLE_PREFIXES
+
+from receptorctl.socket_interface import ReceptorControl
 
 
 def to_host_path(path, private_data_dir):
@@ -76,6 +78,12 @@ def patch_Job():
         with mock.patch.object(Job, 'network_credentials') as mock_net:
             mock_net.__get__ = lambda *args, **kwargs: []
             yield
+
+
+@pytest.fixture
+def mock_create_partition():
+    with mock.patch('awx.main.tasks.jobs.create_partition') as cp_mock:
+        yield cp_mock
 
 
 @pytest.fixture
@@ -461,7 +469,7 @@ class TestExtraVarSanitation(TestJobExecution):
 
 
 class TestGenericRun:
-    def test_generic_failure(self, patch_Job, execution_environment, mock_me):
+    def test_generic_failure(self, patch_Job, execution_environment, mock_me, mock_create_partition):
         job = Job(status='running', inventory=Inventory(), project=Project(local_path='/projects/_23_foo'))
         job.websocket_emit_status = mock.Mock()
         job.execution_environment = execution_environment
@@ -472,7 +480,7 @@ class TestGenericRun:
         task.model.objects.get = mock.Mock(return_value=job)
         task.build_private_data_files = mock.Mock(side_effect=OSError())
 
-        with mock.patch('awx.main.tasks.jobs.copy_tree'):
+        with mock.patch('awx.main.tasks.jobs.shutil.copytree'):
             with pytest.raises(Exception):
                 task.run(1)
 
@@ -481,7 +489,7 @@ class TestGenericRun:
         assert update_model_call['status'] == 'error'
         assert update_model_call['emitted_events'] == 0
 
-    def test_cancel_flag(self, job, update_model_wrapper, execution_environment, mock_me):
+    def test_cancel_flag(self, job, update_model_wrapper, execution_environment, mock_me, mock_create_partition):
         job.status = 'running'
         job.cancel_flag = True
         job.websocket_emit_status = mock.Mock()
@@ -494,11 +502,11 @@ class TestGenericRun:
         task.model.objects.get = mock.Mock(return_value=job)
         task.build_private_data_files = mock.Mock()
 
-        with mock.patch('awx.main.tasks.jobs.copy_tree'):
+        with mock.patch('awx.main.tasks.jobs.shutil.copytree'):
             with pytest.raises(Exception):
                 task.run(1)
 
-        for c in [mock.call(1, status='running', start_args=''), mock.call(1, status='canceled')]:
+        for c in [mock.call(1, start_args='', status='canceled')]:
             assert c in task.update_model.call_args_list
 
     def test_event_count(self, mock_me):
@@ -580,7 +588,7 @@ class TestGenericRun:
 
 @pytest.mark.django_db
 class TestAdhocRun(TestJobExecution):
-    def test_options_jinja_usage(self, adhoc_job, adhoc_update_model_wrapper, mock_me):
+    def test_options_jinja_usage(self, adhoc_job, adhoc_update_model_wrapper, mock_me, mock_create_partition):
         ExecutionEnvironment.objects.create(name='Control Plane EE', managed=True)
         ExecutionEnvironment.objects.create(name='Default Job EE', managed=False)
 
@@ -1934,7 +1942,7 @@ def test_managed_injector_redaction(injector_cls):
     assert 'very_secret_value' not in str(build_safe_env(env))
 
 
-def test_job_run_no_ee(mock_me):
+def test_job_run_no_ee(mock_me, mock_create_partition):
     org = Organization(pk=1)
     proj = Project(pk=1, organization=org)
     job = Job(project=proj, organization=org, inventory=Inventory(pk=1))
@@ -1944,7 +1952,7 @@ def test_job_run_no_ee(mock_me):
     task.update_model = mock.Mock(return_value=job)
     task.model.objects.get = mock.Mock(return_value=job)
 
-    with mock.patch('awx.main.tasks.jobs.copy_tree'):
+    with mock.patch('awx.main.tasks.jobs.shutil.copytree'):
         with pytest.raises(RuntimeError) as e:
             task.pre_run_hook(job, private_data_dir)
 
@@ -1965,3 +1973,120 @@ def test_project_update_no_ee(mock_me):
         task.build_env(job, {})
 
     assert 'The project could not sync because there is no Execution Environment' in str(e.value)
+
+
+@pytest.mark.parametrize(
+    'work_unit_data, expected_function_call',
+    [
+        [
+            # if (extra_data is None): continue
+            {
+                'zpdFi4BX': {
+                    'ExtraData': None,
+                }
+            },
+            False,
+        ],
+        [
+            # Extra data is a string and StateName is None
+            {
+                "y4NgMKKW": {
+                    "ExtraData": "Unknown WorkType",
+                }
+            },
+            False,
+        ],
+        [
+            # Extra data is a string and StateName in RECEPTOR_ACTIVE_STATES
+            {
+                "y4NgMKKW": {
+                    "ExtraData": "Unknown WorkType",
+                    "StateName": "Running",
+                }
+            },
+            False,
+        ],
+        [
+            # Extra data is a string and StateName not in RECEPTOR_ACTIVE_STATES
+            {
+                "y4NgMKKW": {
+                    "ExtraData": "Unknown WorkType",
+                    "StateName": "Succeeded",
+                }
+            },
+            True,
+        ],
+        [
+            # Extra data is a dict but RemoteWorkType is not ansible-runner
+            {
+                "y4NgMKKW": {
+                    'ExtraData': {
+                        'RemoteWorkType': 'not-ansible-runner',
+                    },
+                }
+            },
+            False,
+        ],
+        [
+            # Extra data is a dict and its an ansible-runner but we have no params
+            {
+                'zpdFi4BX': {
+                    'ExtraData': {
+                        'RemoteWorkType': 'ansible-runner',
+                    },
+                }
+            },
+            False,
+        ],
+        [
+            # Extra data is a dict and its an ansible-runner but params is not --worker-info
+            {
+                'zpdFi4BX': {
+                    'ExtraData': {'RemoteWorkType': 'ansible-runner', 'RemoteParams': {'params': '--not-worker-info'}},
+                }
+            },
+            False,
+        ],
+        [
+            # Extra data is a dict and its an ansible-runner but params starts without cleanup
+            {
+                'zpdFi4BX': {
+                    'ExtraData': {'RemoteWorkType': 'ansible-runner', 'RemoteParams': {'params': 'not cleanup stuff'}},
+                }
+            },
+            False,
+        ],
+        [
+            # Extra data is a dict and its an ansible-runner w/ params but still running
+            {
+                'zpdFi4BX': {
+                    'ExtraData': {'RemoteWorkType': 'ansible-runner', 'RemoteParams': {'params': '--worker-info'}},
+                    "StateName": "Running",
+                }
+            },
+            False,
+        ],
+        [
+            # Extra data is a dict and its an ansible-runner w/ params and completed
+            {
+                'zpdFi4BX': {
+                    'ExtraData': {'RemoteWorkType': 'ansible-runner', 'RemoteParams': {'params': '--worker-info'}},
+                    "StateName": "Succeeded",
+                }
+            },
+            True,
+        ],
+    ],
+)
+def test_administrative_workunit_reaper(work_unit_data, expected_function_call):
+    # Mock the get_receptor_ctl call and let it return a dummy object
+    # It does not matter what file name we return as the socket because we won't actually call receptor (unless something is broken)
+    with mock.patch('awx.main.tasks.receptor.get_receptor_ctl') as mock_get_receptor_ctl:
+        mock_get_receptor_ctl.return_value = ReceptorControl('/var/run/awx-receptor/receptor.sock')
+        with mock.patch('receptorctl.socket_interface.ReceptorControl.simple_command') as simple_command:
+            receptor.administrative_workunit_reaper(work_list=work_unit_data)
+
+    if expected_function_call:
+        simple_command.assert_called()
+    else:
+        simple_command.assert_not_called()

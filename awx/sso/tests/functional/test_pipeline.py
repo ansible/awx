@@ -446,6 +446,10 @@ class TestSAMLUserFlags:
                 (False, False),
                 False,
             ),
+            # NOTE: The first handful of tests test role/value as string instead of lists.
+            #       This was from the initial implementation of these fields but the code should be able to handle this
+            #       There are a couple tests at the end of this which will validate arrays in these values.
+            #
             # In this case we will give the user a group to make them an admin
             (
                 {'is_superuser_role': 'test-role-1'},
@@ -516,6 +520,30 @@ class TestSAMLUserFlags:
             (
                 {'is_superuser_attr': 'name_id', 'is_superuser_value': 'junk', 'remove_superusers': False},
                 (True, False),
+                True,
+            ),
+            # Positive test for multiple values for is_superuser_value
+            (
+                {'is_superuser_attr': 'is_superuser', 'is_superuser_value': ['junk', 'junk2', 'else', 'junk']},
+                (True, True),
+                False,
+            ),
+            # Negative test for multiple values for is_superuser_value
+            (
+                {'is_superuser_attr': 'is_superuser', 'is_superuser_value': ['junk', 'junk2', 'junk']},
+                (False, True),
+                True,
+            ),
+            # Positive test for multiple values of is_superuser_role
+            (
+                {'is_superuser_role': ['junk', 'junk2', 'something', 'junk']},
+                (True, True),
+                False,
+            ),
+            # Negative test for multiple values of is_superuser_role
+            (
+                {'is_superuser_role': ['junk', 'junk2', 'junk']},
+                (False, True),
                 True,
             ),
         ],

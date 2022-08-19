@@ -20,6 +20,19 @@ body:
         - label: I understand that AWX is open source software provided for free and that I might not receive a timely response.
           required: true
 
+  - type: dropdown
+    id: feature-type
+    attributes:
+      label: Feature type
+      description: >-
+        What kind of feature is this?
+      multiple: false
+      options:
+        - "New Feature"
+        - "Enhancement to Existing Feature"
+    validations:
+      required: true
+
   - type: textarea
     id: summary
     attributes:
@@ -40,3 +53,36 @@ body:
         - label: CLI
         - label: Other
 
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to reproduce
+      description: >-
+        Describe the necessary steps to understand the scenario of the requested enhancement. 
+        Include all the steps that will help the developer and QE team understand what you are requesting.
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-results
+    attributes:
+      label: Current results
+      description: What is currently happening on the scenario?
+    validations:
+      required: true
+
+  - type: textarea
+    id: sugested-results
+    attributes:
+      label: Sugested feature result
+      description: What is the result this new feature will bring?
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-information
+    attributes:
+      label: Additional information
+      description: Please provide any other information you think is relevant that could help us understand your feature request.
+    validations:
+      required: false

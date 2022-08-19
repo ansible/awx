@@ -186,3 +186,20 @@ export function regExp() {
     return undefined;
   };
 }
+
+export function requiredPositiveInteger() {
+  return (value) => {
+    if (typeof value === 'number') {
+      if (!Number.isInteger(value)) {
+        return t`This field must be an integer`;
+      }
+      if (value < 1) {
+        return t`This field must be greater than 0`;
+      }
+    }
+    if (!value) {
+      return t`Select a value for this field`;
+    }
+    return undefined;
+  };
+}

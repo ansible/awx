@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { func, shape } from 'prop-types';
 
 import { useHistory, useLocation } from 'react-router-dom';
-import { RRule } from 'rrule';
 import { Card } from '@patternfly/react-core';
 import yaml from 'js-yaml';
 import { parseVariableField } from 'util/yaml';
@@ -12,7 +11,7 @@ import mergeExtraVars from 'util/prompt/mergeExtraVars';
 import getSurveyValues from 'util/prompt/getSurveyValues';
 import { getAddedAndRemoved } from 'util/lists';
 import ScheduleForm from '../shared/ScheduleForm';
-import buildRuleObj from '../shared/buildRuleObj';
+import buildRuleSet from '../shared/buildRuleSet';
 import { CardBody } from '../../Card';
 
 function ScheduleAdd({
@@ -36,21 +35,12 @@ function ScheduleAdd({
   ) => {
     const {
       inventory,
-      extra_vars,
-      originalCredentials,
-      end,
       frequency,
-      interval,
+      frequencyOptions,
+      exceptionFrequency,
+      exceptionOptions,
       timezone,
-      occurrences,
-      runOn,
-      runOnTheDay,
-      runOnTheMonth,
-      runOnDayMonth,
-      runOnDayNumber,
-      runOnTheOccurrence,
       credentials,
-      daysOfWeek,
       ...submitValues
     } = values;
     const { added } = getAddedAndRemoved(
@@ -83,11 +73,13 @@ function ScheduleAdd({
     }
 
     try {
-      const rule = new RRule(buildRuleObj(values));
+      const ruleSet = buildRuleSet(values);
       const requestData = {
         ...submitValues,
-        rrule: rule.toString().replace(/\n/g, ' '),
+        rrule: ruleSet.toString().replace(/\n/g, ' '),
       };
+      delete requestData.startDate;
+      delete requestData.startTime;
 
       if (Object.keys(values).includes('daysToKeep')) {
         if (requestData.extra_data) {
@@ -98,10 +90,6 @@ function ScheduleAdd({
           });
         }
       }
-      delete requestData.startDate;
-      delete requestData.startTime;
-      delete requestData.endDate;
-      delete requestData.endTime;
 
       const {
         data: { id: scheduleId },

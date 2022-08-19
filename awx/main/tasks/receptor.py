@@ -99,16 +99,22 @@ def administrative_workunit_reaper(work_list=None):
 
     for unit_id, work_data in work_list.items():
         extra_data = work_data.get('ExtraData')
-        if (extra_data is None) or (extra_data.get('RemoteWorkType') != 'ansible-runner'):
+        if extra_data is None:
             continue  # if this is not ansible-runner work, we do not want to touch it
-        params = extra_data.get('RemoteParams', {}).get('params')
-        if not params:
-            continue
-        if not (params == '--worker-info' or params.startswith('cleanup')):
-            continue  # if this is not a cleanup or health check, we do not want to touch it
-        if work_data.get('StateName') in RECEPTOR_ACTIVE_STATES:
-            continue  # do not want to touch active work units
-        logger.info(f'Reaping orphaned work unit {unit_id} with params {params}')
+        if isinstance(extra_data, str):
+            if not work_data.get('StateName', None) or work_data.get('StateName') in RECEPTOR_ACTIVE_STATES:
+                continue
+        else:
+            if extra_data.get('RemoteWorkType') != 'ansible-runner':
+                continue
+            params = extra_data.get('RemoteParams', {}).get('params')
+            if not params:
+                continue
+            if not (params == '--worker-info' or params.startswith('cleanup')):
+                continue  # if this is not a cleanup or health check, we do not want to touch it
+            if work_data.get('StateName') in RECEPTOR_ACTIVE_STATES:
+                continue  # do not want to touch active work units
+            logger.info(f'Reaping orphaned work unit {unit_id} with params {params}')
         receptor_ctl.simple_command(f"work release {unit_id}")
 
 

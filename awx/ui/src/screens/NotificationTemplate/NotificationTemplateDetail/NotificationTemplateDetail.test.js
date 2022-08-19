@@ -95,6 +95,9 @@ describe('<NotificationTemplateDetail />', () => {
         .find('Detail[label="Email Options"]')
         .containsAllMatchingElements([<li>Use SSL</li>, <li>Use TLS</li>])
     ).toEqual(true);
+    expect(
+      wrapper.find('Detail[label="Email Options"]').prop('helpText')
+    ).toBeDefined();
   });
 
   test('should render Details when defaultMessages is missing', async () => {
@@ -118,5 +121,8 @@ describe('<NotificationTemplateDetail />', () => {
         .find('Detail[label="Email Options"]')
         .containsAllMatchingElements([<li>Use SSL</li>, <li>Use TLS</li>])
     ).toEqual(true);
+    expect(
+      wrapper.find('Detail[label="Email Options"]').prop('helpText')
+    ).toBeDefined();
   });
 });

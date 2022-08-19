@@ -91,7 +91,10 @@ function WorkflowApproval({ setBreadcrumb }) {
           />
           {workflowApproval && (
             <Route path="/workflow_approvals/:id/details">
-              <WorkflowApprovalDetail workflowApproval={workflowApproval} />
+              <WorkflowApprovalDetail
+                fetchWorkflowApproval={fetchWorkflowApproval}
+                workflowApproval={workflowApproval}
+              />
             </Route>
           )}
           <Route key="not-found" path="*">
