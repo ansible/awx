@@ -402,6 +402,10 @@ class BaseTask(object):
                     raise
                 else:
                     time.sleep(1.0)
+            self.instance.refresh_from_db(fields=['cancel_flag'])
+            if self.instance.cancel_flag or signal_callback():
+                logger.debug(f"Unified job {self.instance.id} was canceled while waiting for project file lock")
+                return
         waiting_time = time.time() - start_time
 
         if waiting_time > 1.0:
@@ -1294,10 +1298,6 @@ class RunProjectUpdate(BaseTask):
         # re-create root project folder if a natural disaster has destroyed it
         project_path = instance.project.get_project_path(check_if_exists=False)
 
-        instance.refresh_from_db(fields=['cancel_flag'])
-        if instance.cancel_flag:
-            logger.debug("ProjectUpdate({0}) was canceled".format(instance.pk))
-            return
         if instance.launch_type != 'sync':
             self.acquire_lock(instance.project, instance.id)
 
