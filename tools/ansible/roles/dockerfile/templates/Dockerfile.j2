@@ -10,6 +10,7 @@ FROM quay.io/centos/centos:stream9 as builder
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
+ENV AWX_LOGGING_MODE stdout
 
 
 USER root
@@ -88,6 +89,7 @@ FROM quay.io/centos/centos:stream9
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
+ENV AWX_LOGGING_MODE stdout
 
 USER root
 
