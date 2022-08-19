@@ -38,5 +38,21 @@ class PostRunError(Exception):
         super(PostRunError, self).__init__(msg)
 
 
-class ReceptorNodeNotFound(RuntimeError):
+class ReceptorServiceError(RuntimeError):
+    pass
+
+
+class ReceptorNodeNotFound(ReceptorServiceError):
+    pass
+
+
+class ReceptorNotConfigured(ReceptorServiceError):
+    pass
+
+
+class ReceptorConnectionRefusedError(ReceptorServiceError):
+    pass
+
+
+class ReceptorSocketMissing(ReceptorServiceError):
     pass

@@ -61,8 +61,9 @@ from awx.main.utils.common import (
 from awx.main.utils.external_logging import reconfigure_rsyslog
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
-from awx.main.tasks.receptor import get_receptor_ctl, worker_info, worker_cleanup, administrative_workunit_reaper
+from awx.main.tasks.receptor import get_receptor_ctl, worker_info, worker_cleanup, administrative_workunit_reaper, wrapped_receptor_command
 from awx.main.consumers import emit_channel_notification
+from awx.main.exceptions import ReceptorServiceError
 from awx.main import analytics
 from awx.conf import settings_registry
 from awx.main.analytics.subsystem_metrics import Metrics
@@ -436,7 +437,7 @@ def inspect_execution_nodes(instance_list):
         node_lookup = {inst.hostname: inst for inst in instance_list}
 
         ctl = get_receptor_ctl()
-        mesh_status = ctl.simple_command('status')
+        mesh_status = wrapped_receptor_command(ctl, 'status')
 
         nowtime = now()
         workers = mesh_status['Advertisements']
@@ -496,7 +497,12 @@ def cluster_node_heartbeat(dispatch_time=None, worker_tasks=None):
             this_inst = inst
             break
 
-    inspect_execution_nodes(instance_list)
+    if this_inst is not None:
+        try:
+            inspect_execution_nodes(instance_list)
+        except ReceptorServiceError as exc:
+            this_inst.save_health_data(update_last_seen=True, errors=str(exc))
+            return
 
     for inst in list(instance_list):
         if inst == this_inst:
@@ -596,8 +602,12 @@ def awx_receptor_workunit_reaper():
     if not settings.RECEPTOR_RELEASE_WORK:
         return
     logger.debug("Checking for unreleased receptor work units")
-    receptor_ctl = get_receptor_ctl()
-    receptor_work_list = receptor_ctl.simple_command("work list")
+    try:
+        receptor_ctl = get_receptor_ctl()
+        receptor_work_list = wrapped_receptor_command(receptor_ctl, "work list")
+    except ReceptorServiceError as exc:
+        logger.warning(f'Could not clean up work units due to receptor error: {str(exc)}')
+        return
 
     unit_ids = [id for id in receptor_work_list]
     jobs_with_unreleased_receptor_units = UnifiedJob.objects.filter(work_unit_id__in=unit_ids).exclude(status__in=ACTIVE_STATES)
