@@ -428,15 +428,9 @@ class BaseTask(object):
         """
         instance.log_lifecycle("finalize_run")
         artifact_dir = os.path.join(private_data_dir, 'artifacts', str(self.instance.id))
-        job_profiling_dir = os.path.join(artifact_dir, 'playbook_profiling')
-        awx_profiling_dir = '/var/log/tower/playbook_profiling/'
         collections_info = os.path.join(artifact_dir, 'collections.json')
         ansible_version_file = os.path.join(artifact_dir, 'ansible_version.txt')
 
-        if not os.path.exists(awx_profiling_dir):
-            os.mkdir(awx_profiling_dir)
-        if os.path.isdir(job_profiling_dir):
-            shutil.copytree(job_profiling_dir, os.path.join(awx_profiling_dir, str(instance.pk)))
         if os.path.exists(collections_info):
             with open(collections_info) as ee_json_info:
                 ee_collections_info = json.loads(ee_json_info.read())
