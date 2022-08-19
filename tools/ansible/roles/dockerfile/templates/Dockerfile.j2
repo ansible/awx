@@ -77,8 +77,7 @@ WORKDIR /tmp/src/
 RUN make sdist && /var/lib/awx/venv/awx/bin/pip install dist/awx.tar.gz
 
 {% if not headless|bool %}
-ADD tools/ansible/roles/dockerfile/files/settings.py /etc/tower/settings.py
-RUN SKIP_PG_VERSION_CHECK=yes /var/lib/awx/venv/awx/bin/awx-manage collectstatic --noinput --clear
+RUN AWX_SETTINGS_FILE=/dev/null SKIP_SECRET_KEY_CHECK=yes SKIP_PG_VERSION_CHECK=yes /var/lib/awx/venv/awx/bin/awx-manage collectstatic --noinput --clear
 {% endif %}
 
 {% endif %}
@@ -210,7 +209,6 @@ ADD https://raw.githubusercontent.com/containers/libpod/master/contrib/podmanima
 {% else %}
 ADD tools/ansible/roles/dockerfile/files/launch_awx.sh /usr/bin/launch_awx.sh
 ADD tools/ansible/roles/dockerfile/files/launch_awx_task.sh /usr/bin/launch_awx_task.sh
-ADD tools/ansible/roles/dockerfile/files/settings.py /etc/tower/settings.py
 ADD tools/ansible/roles/dockerfile/files/uwsgi.ini /etc/tower/uwsgi.ini
 ADD {{ template_dest }}/supervisor.conf /etc/supervisord.conf
 ADD {{ template_dest }}/supervisor_task.conf /etc/supervisord_task.conf
@@ -228,7 +226,6 @@ RUN for dir in \
       /var/lib/awx/rsyslog/conf.d \
       /var/lib/awx/.local/share/containers/storage \
       /var/run/awx-rsyslog \
-      /var/log/tower \
       /var/log/nginx \
       /var/lib/postgresql \
       /var/run/supervisor \
