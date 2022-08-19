@@ -31,9 +31,10 @@ const FIELD_NAMES = [
   'timeout',
   'job_slice_count',
   'forks',
+  'labels',
 ];
 
-export default function useOtherPromptsStep(launchConfig, resource) {
+export default function useOtherPromptsStep(launchConfig, resource, labels) {
   const [variablesField] = useField('extra_vars');
   const [variablesMode, setVariablesMode] = useState(null);
   const [isTouched, setIsTouched] = useState(false);
@@ -63,7 +64,7 @@ export default function useOtherPromptsStep(launchConfig, resource) {
 
   return {
     step: getStep(launchConfig, hasError, variablesMode, handleModeChange),
-    initialValues: getInitialValues(launchConfig, resource),
+    initialValues: getInitialValues(launchConfig, resource, labels),
     isReady: true,
     contentError: null,
     hasError,
@@ -117,7 +118,7 @@ function shouldShowPrompt(launchConfig) {
   );
 }
 
-function getInitialValues(launchConfig, resource) {
+function getInitialValues(launchConfig, resource, labels) {
   const initialValues = {};
 
   if (!launchConfig) {
@@ -156,6 +157,9 @@ function getInitialValues(launchConfig, resource) {
   }
   if (launchConfig.ask_timeout_on_launch) {
     initialValues.timeout = resource?.timeout || 0;
+  }
+  if (launchConfig.ask_labels_on_launch) {
+    initialValues.labels = labels || [];
   }
   return initialValues;
 }

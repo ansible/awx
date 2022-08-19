@@ -102,6 +102,12 @@ class WorkflowJobTemplates extends SchedulesMixin(NotificationsMixin(Base)) {
       }
     );
   }
+
+  readLabels(id, params) {
+    return this.http.get(`${this.baseUrl}${id}/labels/`, {
+      params,
+    });
+  }
 }
 
 export default WorkflowJobTemplates;

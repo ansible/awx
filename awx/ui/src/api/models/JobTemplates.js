@@ -101,6 +101,12 @@ class JobTemplates extends SchedulesMixin(
   updateWebhookKey(id) {
     return this.http.post(`${this.baseUrl}${id}/webhook_key/`);
   }
+
+  readLabels(id, params) {
+    return this.http.get(`${this.baseUrl}${id}/labels/`, {
+      params,
+    });
+  }
 }
 
 export default JobTemplates;
