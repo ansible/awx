@@ -38,11 +38,27 @@ function canLaunchWithoutPrompt(launchData) {
   );
 }
 
+const fetchLabels = async (resource, pageNo = 1, labels = []) => {
+  const resourceModel =
+    resource.type === 'workflow_job_template'
+      ? WorkflowJobTemplatesAPI
+      : JobTemplatesAPI;
+  const { data } = await resourceModel.readLabels(resource.id, {
+    page_size: 200,
+    page: pageNo,
+  });
+  if (data.next) {
+    return fetchLabels(resource.id, pageNo + 1, labels.concat(data.results));
+  }
+  return labels.concat(data.results);
+};
+
 function LaunchButton({ resource, children }) {
   const history = useHistory();
   const [showLaunchPrompt, setShowLaunchPrompt] = useState(false);
   const [launchConfig, setLaunchConfig] = useState(null);
   const [surveyConfig, setSurveyConfig] = useState(null);
+  const [labels, setLabels] = useState([]);
   const [isLaunching, setIsLaunching] = useState(false);
   const [error, setError] = useState(null);
 
@@ -56,6 +72,7 @@ function LaunchButton({ resource, children }) {
       resource.type === 'workflow_job_template'
         ? WorkflowJobTemplatesAPI.readSurvey(resource.id)
         : JobTemplatesAPI.readSurvey(resource.id);
+
     try {
       const { data: launch } = await readLaunch;
       setLaunchConfig(launch);
@@ -64,6 +81,12 @@ function LaunchButton({ resource, children }) {
         const { data } = await readSurvey;
 
         setSurveyConfig(data);
+      }
+
+      if (launch.ask_labels_on_launch) {
+        const allLabels = await fetchLabels(resource);
+
+        setLabels(allLabels);
       }
 
       if (canLaunchWithoutPrompt(launch)) {
@@ -177,6 +200,7 @@ function LaunchButton({ resource, children }) {
           launchConfig={launchConfig}
           surveyConfig={surveyConfig}
           resource={resource}
+          labels={labels}
           onLaunch={launchWithParams}
           onCancel={() => setShowLaunchPrompt(false)}
         />
