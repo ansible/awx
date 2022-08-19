@@ -183,7 +183,11 @@ function ProjectFormFields({
       setFieldValue('signature_validation_credential', value);
       setFieldTouched('signature_validation_credential', true, false);
     },
-    [handleSignatureValidationCredentialSelection, setFieldValue, setFieldTouched]
+    [
+      handleSignatureValidationCredentialSelection,
+      setFieldValue,
+      setFieldTouched,
+    ]
   );
 
   const handleOrganizationUpdate = useCallback(

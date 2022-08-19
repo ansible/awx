@@ -19,7 +19,6 @@ const GitSubForm = ({
   onCredentialSelection,
   scmUpdateOnLaunch,
 }) => {
-
   const docsURL = `${getDocsBaseUrl(
     useConfig()
   )}/html/userguide/projects.html#manage-playbooks-using-source-control`;
