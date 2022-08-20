@@ -15,13 +15,15 @@ class Schedule(HasCreate, base.Base):
     NATURAL_KEY = ('unified_job_template', 'name')
 
     def silent_delete(self):
-        """If we are told to prevent_teardown of schedules, then keep them
-        but do not leave them activated, or system will be swamped quickly"""
+        """
+        In every case, we start by disabling the schedule
+        to avoid cascading errors from a cleanup failure.
+        Then, if we are told to prevent_teardown of schedules, we keep them
+        """
         try:
+            self.patch(enabled=False)
             if not config.prevent_teardown:
                 return self.delete()
-            else:
-                self.patch(enabled=False)
         except (exc.NoContent, exc.NotFound, exc.Forbidden):
             pass
 
