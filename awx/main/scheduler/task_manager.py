@@ -11,7 +11,7 @@ import sys
 import signal
 
 # Django
-from django.db import transaction, connection
+from django.db import transaction
 from django.utils.translation import gettext_lazy as _, gettext_noop
 from django.utils.timezone import now as tz_now
 from django.conf import settings
@@ -39,7 +39,7 @@ from awx.main.utils import (
     ScheduleTaskManager,
     ScheduleWorkflowManager,
 )
-from awx.main.utils.common import create_partition, task_manager_bulk_reschedule
+from awx.main.utils.common import task_manager_bulk_reschedule
 from awx.main.signals import disable_activity_stream
 from awx.main.constants import ACTIVE_STATES
 from awx.main.scheduler.dependency_graph import DependencyGraph
@@ -130,8 +130,12 @@ class TaskBase:
                     # if sigterm due to timeout, still record metrics
                     signal.signal(signal.SIGTERM, self.record_aggregate_metrics_and_exit)
                     self._schedule()
-                    self.record_aggregate_metrics()
-                    logger.debug(f"Finishing {self.prefix} Scheduler")
+                    commit_start = time.time()
+
+                if self.prefix == "task_manager":
+                    self.subsystem_metrics.set(f"{self.prefix}_commit_seconds", time.time() - commit_start)
+                self.record_aggregate_metrics()
+                logger.debug(f"Finishing {self.prefix} Scheduler")
 
 
 class WorkflowManager(TaskBase):
@@ -552,22 +556,23 @@ class TaskManager(TaskBase):
                 task.save()
                 task.log_lifecycle("waiting")
 
-        def post_commit():
-            if task.status != 'failed' and type(task) is not WorkflowJob:
-                # Before task is dispatched, ensure that job_event partitions exist
-                create_partition(task.event_class._meta.db_table, start=task.created)
-                task_cls = task._get_task_class()
-                task_cls.apply_async(
-                    [task.pk],
-                    opts,
-                    queue=task.get_queue_name(),
-                    uuid=task.celery_task_id,
-                    callbacks=[{'task': handle_work_success.name, 'kwargs': {'task_actual': task_actual}}],
-                    errbacks=[{'task': handle_work_error.name, 'args': [task.celery_task_id], 'kwargs': {'subtasks': [task_actual] + dependencies}}],
-                )
+        # apply_async does a NOTIFY to the channel dispatcher is listening to
+        # postgres will treat this as part of the transaction, which is what we want
+        if task.status != 'failed' and type(task) is not WorkflowJob:
+            task_cls = task._get_task_class()
+            task_cls.apply_async(
+                [task.pk],
+                opts,
+                queue=task.get_queue_name(),
+                uuid=task.celery_task_id,
+                callbacks=[{'task': handle_work_success.name, 'kwargs': {'task_actual': task_actual}}],
+                errbacks=[{'task': handle_work_error.name, 'args': [task.celery_task_id], 'kwargs': {'subtasks': [task_actual] + dependencies}}],
+            )
 
-        task.websocket_emit_status(task.status)  # adds to on_commit
-        connection.on_commit(post_commit)
+        # In exception cases, like a job failing pre-start checks, we send the websocket status message
+        # for jobs going into waiting, we omit this because of performance issues, as it should go to running quickly
+        if task.status != 'waiting':
+            task.websocket_emit_status(task.status)  # adds to on_commit
 
     @timeit
     def process_running_tasks(self, running_tasks):

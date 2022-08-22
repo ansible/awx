@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 
 import { useHistory, useLocation } from 'react-router-dom';
-import { RRule } from 'rrule';
 import { shape } from 'prop-types';
 import { Card } from '@patternfly/react-core';
 import yaml from 'js-yaml';
@@ -12,7 +11,7 @@ import { parseVariableField } from 'util/yaml';
 import mergeExtraVars from 'util/prompt/mergeExtraVars';
 import getSurveyValues from 'util/prompt/getSurveyValues';
 import ScheduleForm from '../shared/ScheduleForm';
-import buildRuleObj from '../shared/buildRuleObj';
+import buildRuleSet from '../shared/buildRuleSet';
 import { CardBody } from '../../Card';
 
 function ScheduleEdit({
@@ -27,7 +26,7 @@ function ScheduleEdit({
   const history = useHistory();
   const location = useLocation();
   const { pathname } = location;
-  const pathRoot = pathname.substr(0, pathname.indexOf('schedules'));
+  const pathRoot = pathname.substring(0, pathname.indexOf('schedules'));
 
   const handleSubmit = async (
     values,
@@ -38,18 +37,11 @@ function ScheduleEdit({
     const {
       inventory,
       credentials = [],
-      end,
       frequency,
-      interval,
+      frequencyOptions,
+      exceptionFrequency,
+      exceptionOptions,
       timezone,
-      occurences,
-      runOn,
-      runOnTheDay,
-      runOnTheMonth,
-      runOnDayMonth,
-      runOnDayNumber,
-      runOnTheOccurence,
-      daysOfWeek,
       ...submitValues
     } = values;
     const { added, removed } = getAddedAndRemoved(
@@ -91,15 +83,13 @@ function ScheduleEdit({
     }
 
     try {
-      const rule = new RRule(buildRuleObj(values));
+      const ruleSet = buildRuleSet(values);
       const requestData = {
         ...submitValues,
-        rrule: rule.toString().replace(/\n/g, ' '),
+        rrule: ruleSet.toString().replace(/\n/g, ' '),
       };
       delete requestData.startDate;
       delete requestData.startTime;
-      delete requestData.endDate;
-      delete requestData.endTime;
 
       if (Object.keys(values).includes('daysToKeep')) {
         if (!requestData.extra_data) {

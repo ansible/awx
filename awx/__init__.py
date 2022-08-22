@@ -190,7 +190,7 @@ def manage():
         sys.stdout.write('%s\n' % __version__)
     # If running as a user without permission to read settings, display an
     # error message.  Allow --help to still work.
-    elif settings.SECRET_KEY == 'permission-denied':
+    elif not os.getenv('SKIP_SECRET_KEY_CHECK', False) and settings.SECRET_KEY == 'permission-denied':
         if len(sys.argv) == 1 or len(sys.argv) >= 2 and sys.argv[1] in ('-h', '--help', 'help'):
             execute_from_command_line(sys.argv)
             sys.stdout.write('\n')

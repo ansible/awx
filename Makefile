@@ -72,7 +72,7 @@ clean-languages:
 	rm -f $(I18N_FLAG_FILE)
 	find ./awx/locale/ -type f -regex ".*\.mo$" -delete
 
-# Remove temporary build files, compiled Python files.
+## Remove temporary build files, compiled Python files.
 clean: clean-ui clean-api clean-awxkit clean-dist
 	rm -rf awx/public
 	rm -rf awx/lib/site-packages
@@ -94,7 +94,7 @@ clean-api:
 clean-awxkit:
 	rm -rf awxkit/*.egg-info awxkit/.tox awxkit/build/*
 
-# convenience target to assert environment variables are defined
+## convenience target to assert environment variables are defined
 guard-%:
 	@if [ "$${$*}" = "" ]; then \
 	    echo "The required environment variable '$*' is not set"; \
@@ -117,7 +117,7 @@ virtualenv_awx:
 		fi; \
 	fi
 
-# Install third-party requirements needed for AWX's environment.
+## Install third-party requirements needed for AWX's environment. 
 # this does not use system site packages intentionally
 requirements_awx: virtualenv_awx
 	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
@@ -136,7 +136,7 @@ requirements_dev: requirements_awx requirements_awx_dev
 
 requirements_test: requirements
 
-# "Install" awx package in development mode.
+## "Install" awx package in development mode.
 develop:
 	@if [ "$(VIRTUAL_ENV)" ]; then \
 	    pip uninstall -y awx; \
@@ -153,21 +153,21 @@ version_file:
 	fi; \
 	$(PYTHON) -c "import awx; print(awx.__version__)" > /var/lib/awx/.awx_version; \
 
-# Refresh development environment after pulling new code.
+## Refresh development environment after pulling new code.
 refresh: clean requirements_dev version_file develop migrate
 
-# Create Django superuser.
+## Create Django superuser.
 adduser:
 	$(MANAGEMENT_COMMAND) createsuperuser
 
-# Create database tables and apply any new migrations.
+## Create database tables and apply any new migrations.
 migrate:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(MANAGEMENT_COMMAND) migrate --noinput
 
-# Run after making changes to the models to create a new migration.
+## Run after making changes to the models to create a new migration.
 dbchange:
 	$(MANAGEMENT_COMMAND) makemigrations
 
@@ -218,7 +218,7 @@ wsbroadcast:
 	fi; \
 	$(PYTHON) manage.py run_wsbroadcast
 
-# Run to start the background task dispatcher for development.
+## Run to start the background task dispatcher for development.
 dispatcher:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
@@ -226,7 +226,7 @@ dispatcher:
 	$(PYTHON) manage.py run_dispatcher
 
 
-# Run to start the zeromq callback receiver
+## Run to start the zeromq callback receiver
 receiver:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
@@ -278,7 +278,7 @@ awx-link:
 
 TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/sso/tests
 PYTEST_ARGS ?= -n auto
-# Run all API unit tests.
+## Run all API unit tests.
 test:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
@@ -341,23 +341,24 @@ test_unit:
 	fi; \
 	py.test awx/main/tests/unit awx/conf/tests/unit awx/sso/tests/unit
 
-# Run all API unit tests with coverage enabled.
+## Run all API unit tests with coverage enabled.
 test_coverage:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	py.test --create-db --cov=awx --cov-report=xml --junitxml=./reports/junit.xml $(TEST_DIRS)
 
-# Output test coverage as HTML (into htmlcov directory).
+## Output test coverage as HTML (into htmlcov directory).
 coverage_html:
 	coverage html
 
-# Run API unit tests across multiple Python/Django versions with Tox.
+## Run API unit tests across multiple Python/Django versions with Tox.
 test_tox:
 	tox -v
 
-# Make fake data
+
 DATA_GEN_PRESET = ""
+## Make fake data
 bulk_data:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
@@ -502,7 +503,7 @@ docker-compose-container-group-clean:
 	fi
 	rm -rf tools/docker-compose-minikube/_sources/
 
-# Base development image build
+## Base development image build
 docker-compose-build:
 	ansible-playbook tools/ansible/dockerfile.yml -e build_dev=True -e receptor_image=$(RECEPTOR_IMAGE)
 	DOCKER_BUILDKIT=1 docker build -t $(DEVEL_IMAGE_NAME) \
@@ -520,7 +521,7 @@ docker-clean-volumes: docker-compose-clean docker-compose-container-group-clean
 
 docker-refresh: docker-clean docker-compose
 
-# Docker Development Environment with Elastic Stack Connected
+## Docker Development Environment with Elastic Stack Connected
 docker-compose-elk: awx/projects docker-compose-sources
 	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/elastic/docker-compose.logstash-link.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
 
@@ -567,16 +568,16 @@ awx-kube-dev-build: Dockerfile.kube-dev
 # Translation TASKS
 # --------------------------------------
 
-# generate UI .pot file, an empty template of strings yet to be translated
+## generate UI .pot file, an empty template of strings yet to be translated
 pot: $(UI_BUILD_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run extract-template --clean
 
-# generate UI .po files for each locale (will update translated strings for `en`)
+## generate UI .po files for each locale (will update translated strings for `en`)
 po: $(UI_BUILD_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run extract-strings -- --clean
 
-# generate API django .pot .po
 LANG = "en-us"
+## generate API django .pot .po
 messages:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
@@ -585,3 +586,38 @@ messages:
 
 print-%:
 	@echo $($*)
+
+# HELP related targets
+# --------------------------------------
+
+HELP_FILTER=.PHONY
+
+## Display help targets
+help:
+	@printf "Available targets:\n"
+	@make -s help/generate | grep -vE "\w($(HELP_FILTER))"
+
+## Display help for all targets
+help/all:
+	@printf "Available targets:\n"
+	@make -s help/generate
+
+## Generate help output from MAKEFILE_LIST
+help/generate:
+	@awk '/^[-a-zA-Z_0-9%:\\\.\/]+:/ { \
+		helpMessage = match(lastLine, /^## (.*)/); \
+		if (helpMessage) { \
+			helpCommand = $$1; \
+			helpMessage = substr(lastLine, RSTART + 3, RLENGTH); \
+			gsub("\\\\", "", helpCommand); \
+			gsub(":+$$", "", helpCommand); \
+			printf "  \x1b[32;01m%-35s\x1b[0m %s\n", helpCommand, helpMessage; \
+		} else { \
+			helpCommand = $$1; \
+			gsub("\\\\", "", helpCommand); \
+			gsub(":+$$", "", helpCommand); \
+			printf "  \x1b[32;01m%-35s\x1b[0m %s\n", helpCommand, "No help available"; \
+		} \
+	} \
+	{ lastLine = $$0 }' $(MAKEFILE_LIST) | sort -u
+	@printf "\n"
