@@ -61,7 +61,7 @@ from awx.main.utils.pglock import advisory_lock
 from awx.main.tasks.helpers import is_run_threshold_reached
 from awx.main.tasks.receptor import get_receptor_ctl, worker_info, worker_cleanup, administrative_workunit_reaper, write_receptor_config
 from awx.main.consumers import emit_channel_notification
-from awx.main import analytics
+from awx.main.analytics import AnalyticsCollector
 from awx.conf import settings_registry
 from awx.main.analytics.subsystem_metrics import DispatcherMetrics
 
@@ -364,7 +364,7 @@ def send_notifications(notification_list, job_id=None):
 @task(queue=get_task_queuename)
 def gather_analytics():
     if is_run_threshold_reached(getattr(settings, 'AUTOMATION_ANALYTICS_LAST_GATHER', None), settings.AUTOMATION_ANALYTICS_GATHER_INTERVAL):
-        analytics.gather()
+        AnalyticsCollector(collection_type=AnalyticsCollector.SCHEDULED_COLLECTION).gather()
 
 
 @task(queue=get_task_queuename)

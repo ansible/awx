@@ -1,6 +1,6 @@
 import logging
 
-from awx.main import analytics
+from awx.main.analytics import AnalyticsCollector
 from dateutil import parser
 from django.core.management.base import BaseCommand
 from django.utils import timezone
@@ -46,7 +46,9 @@ class Command(BaseCommand):
         if opt_ship and opt_dry_run:
             self.logger.error('Both --ship and --dry-run cannot be processed at the same time.')
             return
-        tgzfiles = analytics.gather(collection_type='manual' if opt_ship else 'dry-run', since=since, until=until)
+        collector = AnalyticsCollector(collection_type=AnalyticsCollector.MANUAL_COLLECTION if opt_ship else AnalyticsCollector.DRY_RUN)
+
+        tgzfiles = collector.gather(since=since, until=until)
         if tgzfiles:
             for tgz in tgzfiles:
                 self.logger.info(tgz)
