@@ -15,7 +15,7 @@ def setup_tower_managed_defaults(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0164_remove_inventorysource_update_on_project_update'),
+        ('main', '0166_alter_jobevent_host'),
     ]
 
     operations = [
