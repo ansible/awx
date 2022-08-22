@@ -12,7 +12,7 @@ from ansible.module_utils.six.moves.http_cookiejar import CookieJar
 from ansible.module_utils.six.moves.urllib.parse import urlparse, urlencode
 from ansible.module_utils.six.moves.configparser import ConfigParser, NoOptionError
 from distutils.version import LooseVersion as Version
-from socket import gethostbyname
+from socket import getaddrinfo, IPPROTO_TCP
 import time
 import re
 from json import loads, dumps
@@ -138,12 +138,17 @@ class ControllerModule(AnsibleModule):
         except Exception as e:
             self.fail_json(msg="Unable to parse controller_host as a URL ({1}): {0}".format(self.host, e))
 
+        # Remove ipv6 square brackets
+        remove_target = '[]'
+        for char in remove_target:
+            self.url.hostname.replace(char, "")
         # Try to resolve the hostname
-        hostname = self.url.netloc.split(':')[0]
         try:
-            gethostbyname(hostname)
+            addrinfolist = getaddrinfo(self.url.hostname, self.url.port, proto=IPPROTO_TCP)
+            for family, kind, proto, canonical, sockaddr in addrinfolist:
+                sockaddr[0]
         except Exception as e:
-            self.fail_json(msg="Unable to resolve controller_host ({1}): {0}".format(hostname, e))
+            self.fail_json(msg="Unable to resolve controller_host ({1}): {0}".format(self.url.hostname, e))
 
     def build_url(self, endpoint, query_params=None):
         # Make sure we start with /api/vX
