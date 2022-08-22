@@ -68,6 +68,7 @@ class LDAPSettings(BaseLDAPSettings):
 
 
 class LDAPBackend(BaseLDAPBackend):
+
     """
     Custom LDAP backend for AWX.
     """
@@ -116,7 +117,17 @@ class LDAPBackend(BaseLDAPBackend):
             for setting_name, type_ in [('GROUP_SEARCH', 'LDAPSearch'), ('GROUP_TYPE', 'LDAPGroupType')]:
                 if getattr(self.settings, setting_name) is None:
                     raise ImproperlyConfigured("{} must be an {} instance.".format(setting_name, type_))
-            return super(LDAPBackend, self).authenticate(request, username, password)
+            ldap_user = super(LDAPBackend, self).authenticate(request, username, password)
+            # If we have an LDAP user and that user we found has an ldap_user internal object and that object has a bound connection
+            # Then we can try and force an unbind to close the sticky connection
+            if ldap_user and ldap_user.ldap_user and ldap_user.ldap_user._connection_bound:
+                logger.debug("Forcing LDAP connection to close")
+                try:
+                    ldap_user.ldap_user._connection.unbind_s()
+                    ldap_user.ldap_user._connection_bound = False
+                except Exception:
+                    logger.exception(f"Got unexpected LDAP exception when forcing LDAP disconnect for user {ldap_user}, login will still proceed")
+            return ldap_user
         except Exception:
             logger.exception("Encountered an error authenticating to LDAP")
             return None

@@ -80,9 +80,7 @@ describe('<ScheduleAdd />', () => {
     await act(async () => {
       wrapper.find('Formik').invoke('onSubmit')({
         description: 'test description',
-        end: 'never',
-        frequency: 'none',
-        interval: 1,
+        frequency: [],
         name: 'Run once schedule',
         startDate: '2020-03-25',
         startTime: '10:00 AM',
@@ -98,15 +96,19 @@ describe('<ScheduleAdd />', () => {
     });
   });
 
-  test('Successfully creates a schedule with 10 minute repeat frequency after 10 occurrences', async () => {
+  test('Successfully creates a schedule with 10 minute repeat frequency and 10 occurrences', async () => {
     await act(async () => {
       wrapper.find('Formik').invoke('onSubmit')({
         description: 'test description',
-        end: 'after',
-        frequency: 'minute',
-        interval: 10,
+        frequency: ['minute'],
+        frequencyOptions: {
+          minute: {
+            end: 'after',
+            interval: 10,
+            occurrences: 10,
+          },
+        },
         name: 'Run every 10 minutes 10 times',
-        occurrences: 10,
         startDate: '2020-03-25',
         startTime: '10:30 AM',
         timezone: 'America/New_York',
@@ -125,11 +127,15 @@ describe('<ScheduleAdd />', () => {
     await act(async () => {
       wrapper.find('Formik').invoke('onSubmit')({
         description: 'test description',
-        end: 'onDate',
-        endDate: '2020-03-26',
-        endTime: '10:45 AM',
-        frequency: 'hour',
-        interval: 1,
+        frequency: ['hour'],
+        frequencyOptions: {
+          hour: {
+            end: 'onDate',
+            interval: 1,
+            endDate: '2020-03-26',
+            endTime: '10:45 AM',
+          },
+        },
         name: 'Run every hour until date',
         startDate: '2020-03-25',
         startTime: '10:45 AM',
@@ -141,7 +147,7 @@ describe('<ScheduleAdd />', () => {
       name: 'Run every hour until date',
       extra_data: {},
       rrule:
-        'DTSTART;TZID=America/New_York:20200325T104500 RRULE:INTERVAL=1;FREQ=HOURLY;UNTIL=20200326T104500',
+        'DTSTART;TZID=America/New_York:20200325T104500 RRULE:INTERVAL=1;FREQ=HOURLY;UNTIL=20200326T144500Z',
     });
   });
 
@@ -149,9 +155,13 @@ describe('<ScheduleAdd />', () => {
     await act(async () => {
       wrapper.find('Formik').invoke('onSubmit')({
         description: 'test description',
-        end: 'never',
-        frequency: 'day',
-        interval: 1,
+        frequency: ['day'],
+        frequencyOptions: {
+          day: {
+            end: 'never',
+            interval: 1,
+          },
+        },
         name: 'Run daily',
         startDate: '2020-03-25',
         startTime: '10:45 AM',
@@ -170,13 +180,17 @@ describe('<ScheduleAdd />', () => {
   test('Successfully creates a schedule with weekly repeat frequency on mon/wed/fri', async () => {
     await act(async () => {
       wrapper.find('Formik').invoke('onSubmit')({
-        daysOfWeek: [RRule.MO, RRule.WE, RRule.FR],
         description: 'test description',
-        end: 'never',
-        frequency: 'week',
-        interval: 1,
+        frequency: ['week'],
+        frequencyOptions: {
+          week: {
+            end: 'never',
+            interval: 1,
+            occurrences: 1,
+            daysOfWeek: [RRule.MO, RRule.WE, RRule.FR],
+          },
+        },
         name: 'Run weekly on mon/wed/fri',
-        occurrences: 1,
         startDate: '2020-03-25',
         startTime: '10:45 AM',
         timezone: 'America/New_York',
@@ -194,13 +208,17 @@ describe('<ScheduleAdd />', () => {
     await act(async () => {
       wrapper.find('Formik').invoke('onSubmit')({
         description: 'test description',
-        end: 'never',
-        frequency: 'month',
-        interval: 1,
+        frequency: ['month'],
+        frequencyOptions: {
+          month: {
+            end: 'never',
+            occurrences: 1,
+            interval: 1,
+            runOn: 'day',
+            runOnDayNumber: 1,
+          },
+        },
         name: 'Run on the first day of the month',
-        occurrences: 1,
-        runOn: 'day',
-        runOnDayNumber: 1,
         startTime: '10:45 AM',
         startDate: '2020-04-01',
         timezone: 'America/New_York',
@@ -219,16 +237,20 @@ describe('<ScheduleAdd />', () => {
     await act(async () => {
       wrapper.find('Formik').invoke('onSubmit')({
         description: 'test description',
-        end: 'never',
-        endDate: '2020-03-26',
-        endTime: '11:00 AM',
-        frequency: 'month',
-        interval: 1,
+        frequency: ['month'],
+        frequencyOptions: {
+          month: {
+            end: 'never',
+            endDate: '2020-03-26',
+            endTime: '11:00 AM',
+            interval: 1,
+            occurrences: 1,
+            runOn: 'the',
+            runOnTheDay: 'tuesday',
+            runOnTheOccurrence: -1,
+          },
+        },
         name: 'Run monthly on the last Tuesday',
-        occurrences: 1,
-        runOn: 'the',
-        runOnTheDay: 'tuesday',
-        runOnTheOccurrence: -1,
         startDate: '2020-03-31',
         startTime: '11:00 AM',
         timezone: 'America/New_York',
@@ -242,18 +264,23 @@ describe('<ScheduleAdd />', () => {
         'DTSTART;TZID=America/New_York:20200331T110000 RRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=-1;BYDAY=TU',
     });
   });
+
   test('Successfully creates a schedule with yearly repeat frequency on the first day of March', async () => {
     await act(async () => {
       wrapper.find('Formik').invoke('onSubmit')({
         description: 'test description',
-        end: 'never',
-        frequency: 'year',
-        interval: 1,
+        frequency: ['year'],
+        frequencyOptions: {
+          year: {
+            end: 'never',
+            interval: 1,
+            occurrences: 1,
+            runOn: 'day',
+            runOnDayMonth: 3,
+            runOnDayNumber: 1,
+          },
+        },
         name: 'Yearly on the first day of March',
-        occurrences: 1,
-        runOn: 'day',
-        runOnDayMonth: 3,
-        runOnDayNumber: 1,
         startDate: '2020-03-01',
         startTime: '12:00 AM',
         timezone: 'America/New_York',
@@ -272,15 +299,19 @@ describe('<ScheduleAdd />', () => {
     await act(async () => {
       wrapper.find('Formik').invoke('onSubmit')({
         description: 'test description',
-        end: 'never',
-        frequency: 'year',
-        interval: 1,
+        frequency: ['year'],
+        frequencyOptions: {
+          year: {
+            end: 'never',
+            interval: 1,
+            occurrences: 1,
+            runOn: 'the',
+            runOnTheOccurrence: 2,
+            runOnTheDay: 'friday',
+            runOnTheMonth: 4,
+          },
+        },
         name: 'Yearly on the second Friday in April',
-        occurrences: 1,
-        runOn: 'the',
-        runOnTheOccurrence: 2,
-        runOnTheDay: 'friday',
-        runOnTheMonth: 4,
         startDate: '2020-04-10',
         startTime: '11:15 AM',
         timezone: 'America/New_York',
@@ -299,15 +330,19 @@ describe('<ScheduleAdd />', () => {
     await act(async () => {
       wrapper.find('Formik').invoke('onSubmit')({
         description: 'test description',
-        end: 'never',
-        frequency: 'year',
-        interval: 1,
+        frequency: ['year'],
+        frequencyOptions: {
+          year: {
+            end: 'never',
+            interval: 1,
+            occurrences: 1,
+            runOn: 'the',
+            runOnTheOccurrence: 1,
+            runOnTheDay: 'weekday',
+            runOnTheMonth: 10,
+          },
+        },
         name: 'Yearly on the first weekday in October',
-        occurrences: 1,
-        runOn: 'the',
-        runOnTheOccurrence: 1,
-        runOnTheDay: 'weekday',
-        runOnTheMonth: 10,
         startDate: '2020-04-10',
         startTime: '11:15 AM',
         timezone: 'America/New_York',
@@ -376,17 +411,7 @@ describe('<ScheduleAdd />', () => {
     await act(async () => {
       wrapper.find('Formik').invoke('onSubmit')({
         name: 'Schedule',
-        end: 'never',
-        endDate: '2021-01-29',
-        endTime: '2:15 PM',
-        frequency: 'none',
-        occurrences: 1,
-        runOn: 'day',
-        runOnDayMonth: 1,
-        runOnDayNumber: 1,
-        runOnTheDay: 'sunday',
-        runOnTheMonth: 1,
-        runOnTheOccurrence: 1,
+        frequency: [],
         skip_tags: '',
         inventory: { name: 'inventory', id: 45 },
         credentials: [
@@ -405,7 +430,7 @@ describe('<ScheduleAdd />', () => {
       inventory: 45,
       name: 'Schedule',
       rrule:
-        'DTSTART;TZID=America/New_York:20210128T141500 RRULE:COUNT=1;FREQ=MINUTELY',
+        'DTSTART;TZID=America/New_York:20210128T141500 RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY',
       skip_tags: '',
     });
     expect(SchedulesAPI.associateCredential).toBeCalledWith(3, 10);
@@ -462,9 +487,7 @@ describe('<ScheduleAdd />', () => {
     await act(async () => {
       scheduleSurveyWrapper.find('Formik').invoke('onSubmit')({
         description: 'test description',
-        end: 'never',
-        frequency: 'none',
-        interval: 1,
+        frequency: [],
         name: 'Run once schedule',
         startDate: '2020-03-25',
         startTime: '10:00 AM',

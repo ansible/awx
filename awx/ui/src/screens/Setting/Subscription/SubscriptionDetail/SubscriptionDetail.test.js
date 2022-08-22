@@ -53,8 +53,14 @@ describe('<SubscriptionDetail />', () => {
       expect(wrapper.find(`Detail[label="${label}"] dt`).text()).toBe(label);
       expect(wrapper.find(`Detail[label="${label}"] dd`).text()).toBe(value);
     }
-    assertDetail('Status', 'Compliant');
-    assertDetail('Version', '1.2.3');
+    expect(wrapper.find(`Detail[label="Status"] dt`).text()).toBe('Status');
+    expect(wrapper.find(`Detail[label="Status"] dd`).text()).toContain(
+      'Compliant'
+    );
+    expect(wrapper.find(`Detail[label="Status"] dd`).text()).toContain(
+      'The number of hosts you have automated against is below your subscription count.'
+    );
+    assertDetail('Automation controller version', '1.2.3');
     assertDetail('Subscription type', 'enterprise');
     assertDetail(
       'Subscription',

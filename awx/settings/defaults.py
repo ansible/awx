@@ -6,6 +6,7 @@ import os
 import re  # noqa
 import sys
 import tempfile
+import socket
 from datetime import timedelta
 
 
@@ -432,11 +433,19 @@ os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 
 # heartbeat period can factor into some forms of logic, so it is maintained as a setting here
 CLUSTER_NODE_HEARTBEAT_PERIOD = 60
+
+# Number of missed heartbeats until a node gets marked as lost
+CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE = 2
+
 RECEPTOR_SERVICE_ADVERTISEMENT_PERIOD = 60  # https://github.com/ansible/receptor/blob/aa1d589e154d8a0cb99a220aff8f98faf2273be6/pkg/netceptor/netceptor.go#L34
 EXECUTION_NODE_REMEDIATION_CHECKS = 60 * 30  # once every 30 minutes check if an execution node errors have been resolved
 
 # Amount of time dispatcher will try to reconnect to database for jobs and consuming new work
 DISPATCHER_DB_DOWNTOWN_TOLLERANCE = 40
+
+# Minimum time to wait after last job finished before scaling down a worker
+# A higher value will free up memory more agressively, but a lower value will require less forking
+DISPATCHER_SCALE_DOWN_WAIT_TIME = 60
 
 BROKER_URL = 'unix:///var/run/redis/redis.sock'
 CELERYBEAT_SCHEDULE = {
@@ -813,85 +822,24 @@ LOGGING = {
         'dispatcher': {'format': '%(asctime)s %(levelname)-8s [%(guid)s] %(name)s PID:%(process)d %(message)s'},
         'job_lifecycle': {'()': 'awx.main.utils.formatters.JobLifeCycleFormatter'},
     },
+    # Extended below based on install scenario. You probably don't want to add something directly here.
+    # See 'handler_config' below.
     'handlers': {
         'console': {
             '()': 'logging.StreamHandler',
             'level': 'DEBUG',
-            'filters': ['require_debug_true_or_test', 'dynamic_level_filter', 'guid'],
+            'filters': ['dynamic_level_filter', 'guid'],
             'formatter': 'simple',
         },
         'null': {'class': 'logging.NullHandler'},
         'file': {'class': 'logging.NullHandler', 'formatter': 'simple'},
         'syslog': {'level': 'WARNING', 'filters': ['require_debug_false'], 'class': 'logging.NullHandler', 'formatter': 'simple'},
+        'inventory_import': {'level': 'DEBUG', 'class': 'logging.StreamHandler', 'formatter': 'timed_import'},
         'external_logger': {
             'class': 'awx.main.utils.handlers.RSysLogHandler',
             'formatter': 'json',
             'address': '/var/run/awx-rsyslog/rsyslog.sock',
             'filters': ['external_log_enabled', 'dynamic_level_filter', 'guid'],
-        },
-        'tower_warnings': {
-            # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
-            'class': 'logging.handlers.WatchedFileHandler',
-            'filters': ['require_debug_false', 'dynamic_level_filter', 'guid'],
-            'filename': os.path.join(LOG_ROOT, 'tower.log'),
-            'formatter': 'simple',
-        },
-        'callback_receiver': {
-            # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
-            'class': 'logging.handlers.WatchedFileHandler',
-            'filters': ['require_debug_false', 'dynamic_level_filter', 'guid'],
-            'filename': os.path.join(LOG_ROOT, 'callback_receiver.log'),
-            'formatter': 'simple',
-        },
-        'dispatcher': {
-            # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
-            'class': 'logging.handlers.WatchedFileHandler',
-            'filters': ['require_debug_false', 'dynamic_level_filter', 'guid'],
-            'filename': os.path.join(LOG_ROOT, 'dispatcher.log'),
-            'formatter': 'dispatcher',
-        },
-        'wsbroadcast': {
-            # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
-            'class': 'logging.handlers.WatchedFileHandler',
-            'filters': ['require_debug_false', 'dynamic_level_filter', 'guid'],
-            'filename': os.path.join(LOG_ROOT, 'wsbroadcast.log'),
-            'formatter': 'simple',
-        },
-        'celery.beat': {'class': 'logging.StreamHandler', 'level': 'ERROR'},  # don't log every celerybeat wakeup
-        'inventory_import': {'level': 'DEBUG', 'class': 'logging.StreamHandler', 'formatter': 'timed_import'},
-        'task_system': {
-            # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
-            'class': 'logging.handlers.WatchedFileHandler',
-            'filters': ['require_debug_false', 'dynamic_level_filter', 'guid'],
-            'filename': os.path.join(LOG_ROOT, 'task_system.log'),
-            'formatter': 'simple',
-        },
-        'management_playbooks': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.WatchedFileHandler',
-            'filters': ['require_debug_false'],
-            'filename': os.path.join(LOG_ROOT, 'management_playbooks.log'),
-            'formatter': 'simple',
-        },
-        'system_tracking_migrations': {
-            'level': 'WARNING',
-            'class': 'logging.handlers.WatchedFileHandler',
-            'filters': ['require_debug_false'],
-            'filename': os.path.join(LOG_ROOT, 'tower_system_tracking_migrations.log'),
-            'formatter': 'simple',
-        },
-        'rbac_migrations': {
-            'level': 'WARNING',
-            'class': 'logging.handlers.WatchedFileHandler',
-            'filters': ['require_debug_false'],
-            'filename': os.path.join(LOG_ROOT, 'tower_rbac_migrations.log'),
-            'formatter': 'simple',
-        },
-        'job_lifecycle': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.WatchedFileHandler',
-            'filename': os.path.join(LOG_ROOT, 'job_lifecycle.log'),
-            'formatter': 'job_lifecycle',
         },
     },
     'loggers': {
@@ -924,6 +872,40 @@ LOGGING = {
         'rbac_migrations': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
     },
 }
+
+# Log handler configuration. Keys are the name of the handler. Be mindful when renaming things here.
+# People might have created custom settings files that augments the behavior of these.
+# Specify 'filename' (used if the environment variable AWX_LOGGING_MODE is unset or 'file')
+# and an optional 'formatter'. If no formatter is specified, 'simple' is used.
+handler_config = {
+    'tower_warnings': {'filename': 'tower.log'},
+    'callback_receiver': {'filename': 'callback_receiver.log'},
+    'dispatcher': {'filename': 'dispatcher.log', 'formatter': 'dispatcher'},
+    'wsbroadcast': {'filename': 'wsbroadcast.log'},
+    'task_system': {'filename': 'task_system.log'},
+    'rbac_migrations': {'filename': 'tower_rbac_migrations.log'},
+    'job_lifecycle': {'filename': 'job_lifecycle.log', 'formatter': 'job_lifecycle'},
+}
+
+# If running on a VM, we log to files. When running in a container, we log to stdout.
+logging_mode = os.getenv('AWX_LOGGING_MODE', 'file')
+if logging_mode not in ('file', 'stdout'):
+    raise Exception("AWX_LOGGING_MODE must be 'file' or 'stdout'")
+
+for name, config in handler_config.items():
+    # Common log handler config. Don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
+    LOGGING['handlers'][name] = {'filters': ['dynamic_level_filter', 'guid'], 'formatter': config.get('formatter', 'simple')}
+
+    if logging_mode == 'file':
+        LOGGING['handlers'][name]['class'] = 'logging.handlers.WatchedFileHandler'
+        LOGGING['handlers'][name]['filename'] = os.path.join(LOG_ROOT, config['filename'])
+
+    if logging_mode == 'stdout':
+        LOGGING['handlers'][name]['class'] = 'logging.NullHandler'
+
+# Prevents logging to stdout on traditional VM installs
+if logging_mode == 'file':
+    LOGGING['handlers']['console']['filters'].insert(0, 'require_debug_true_or_test')
 
 # Apply coloring to messages logged to the console
 COLOR_LOGS = False
@@ -1024,3 +1006,17 @@ DEFAULT_CONTAINER_RUN_OPTIONS = ['--network', 'slirp4netns:enable_ipv6=true']
 
 # Mount exposed paths as hostPath resource in k8s/ocp
 AWX_MOUNT_ISOLATED_PATHS_ON_K8S = False
+
+# Time out task managers if they take longer than this many seconds
+TASK_MANAGER_TIMEOUT = 300
+
+# Number of seconds _in addition to_ the task manager timeout a job can stay
+# in waiting without being reaped
+JOB_WAITING_GRACE_PERIOD = 60
+
+# Number of seconds after a container group job finished time to wait
+# before the awx_k8s_reaper task will tear down the pods
+K8S_POD_REAPER_GRACE_PERIOD = 60
+
+# This is overridden downstream via /etc/tower/conf.d/cluster_host_id.py
+CLUSTER_HOST_ID = socket.gethostname()

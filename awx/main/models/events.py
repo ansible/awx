@@ -25,7 +25,6 @@ analytics_logger = logging.getLogger('awx.analytics.job_events')
 
 logger = logging.getLogger('awx.main.models.events')
 
-
 __all__ = ['JobEvent', 'ProjectUpdateEvent', 'AdHocCommandEvent', 'InventoryUpdateEvent', 'SystemJobEvent']
 
 
@@ -486,13 +485,18 @@ class JobEvent(BasePlaybookEvent):
         editable=False,
         db_index=False,
     )
+    # When we partitioned the table we accidentally "lost" the foreign key constraint.
+    # However this is good because the cascade on delete at the django layer was causing DB issues
+    # We are going to leave this as a foreign key but mark it as not having a DB relation and
+    #  prevent cascading on delete.
     host = models.ForeignKey(
         'Host',
         related_name='job_events_as_primary_host',
         null=True,
         default=None,
-        on_delete=models.SET_NULL,
+        on_delete=models.DO_NOTHING,
         editable=False,
+        db_constraint=False,
     )
     host_name = models.CharField(
         max_length=1024,
@@ -794,6 +798,10 @@ class AdHocCommandEvent(BaseCommandEvent):
         editable=False,
         db_index=False,
     )
+    # We need to keep this as a FK in the model because AdHocCommand uses a ManyToMany field
+    #   to hosts through adhoc_events. But in https://github.com/ansible/awx/pull/8236/ we
+    #   removed the nulling of the field in case of a host going away before an event is saved
+    #   so this needs to stay SET_NULL on the ORM level
     host = models.ForeignKey(
         'Host',
         related_name='ad_hoc_command_events',
@@ -801,6 +809,7 @@ class AdHocCommandEvent(BaseCommandEvent):
         default=None,
         on_delete=models.SET_NULL,
         editable=False,
+        db_constraint=False,
     )
     host_name = models.CharField(
         max_length=1024,

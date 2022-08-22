@@ -446,7 +446,7 @@ register(
     label=_('Default Job Idle Timeout'),
     help_text=_(
         'If no output is detected from ansible in this number of seconds the execution will be terminated. '
-        'Use value of 0 to used default idle_timeout is 600s.'
+        'Use value of 0 to indicate that no idle timeout should be imposed.'
     ),
     category=_('Jobs'),
     category_slug='jobs',

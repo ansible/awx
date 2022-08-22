@@ -21,6 +21,7 @@ services:
       RECEPTORCTL_SOCKET: {{ receptor_socket_file }}
       CONTROL_PLANE_NODE_COUNT: {{ control_plane_node_count|int }}
       EXECUTION_NODE_COUNT: {{ execution_node_count|int }}
+      AWX_LOGGING_MODE: stdout
 {% if loop.index == 1 %}
       RUN_MIGRATIONS: 1
 {% endif %}
@@ -176,6 +177,8 @@ services:
   postgres:
     image: postgres:12
     container_name: tools_postgres_1
+    # additional logging settings for postgres can be found https://www.postgresql.org/docs/current/runtime-config-logging.html
+    command: postgres -c log_destination=stderr -c log_min_messages=info -c log_min_duration_statement={{ pg_log_min_duration_statement|default(1000) }}
     environment:
       POSTGRES_HOST_AUTH_METHOD: trust
       POSTGRES_USER: {{ pg_username }}

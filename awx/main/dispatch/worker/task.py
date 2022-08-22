@@ -3,6 +3,7 @@ import logging
 import importlib
 import sys
 import traceback
+import time
 
 from kubernetes.config import kube_config
 
@@ -60,8 +61,19 @@ class TaskWorker(BaseWorker):
             # the callable is a class, e.g., RunJob; instantiate and
             # return its `run()` method
             _call = _call().run
+
+        log_extra = ''
+        logger_method = logger.debug
+        if ('time_ack' in body) and ('time_pub' in body):
+            time_publish = body['time_ack'] - body['time_pub']
+            time_waiting = time.time() - body['time_ack']
+            if time_waiting > 5.0 or time_publish > 5.0:
+                # If task too a very long time to process, add this information to the log
+                log_extra = f' took {time_publish:.4f} to ack, {time_waiting:.4f} in local dispatcher'
+                logger_method = logger.info
         # don't print kwargs, they often contain launch-time secrets
-        logger.debug('task {} starting {}(*{})'.format(uuid, task, args))
+        logger_method(f'task {uuid} starting {task}(*{args}){log_extra}')
+
         return _call(*args, **kwargs)
 
     def perform_work(self, body):

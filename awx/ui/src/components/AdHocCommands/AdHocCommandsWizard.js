@@ -2,8 +2,6 @@ import React from 'react';
 import { t } from '@lingui/macro';
 import { withFormik, useFormikContext } from 'formik';
 import PropTypes from 'prop-types';
-
-import { VERBOSITY } from 'components/VerbositySelectField';
 import Wizard from '../Wizard';
 import useAdHocLaunchSteps from './useAdHocLaunchSteps';
 
@@ -62,7 +60,7 @@ const FormikApp = withFormik({
       limit: adHocItemStrings || 'all',
       credentials: [],
       module_args: '',
-      verbosity: VERBOSITY()[0],
+      verbosity: 0,
       forks: 0,
       diff_mode: false,
       become_enabled: '',

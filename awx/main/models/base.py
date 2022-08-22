@@ -316,16 +316,17 @@ class PrimordialModel(HasEditsMixin, CreatedModifiedModel):
         user = get_current_user()
         if user and not user.id:
             user = None
-        if not self.pk and not self.created_by:
+        if (not self.pk) and (user is not None) and (not self.created_by):
             self.created_by = user
             if 'created_by' not in update_fields:
                 update_fields.append('created_by')
         # Update modified_by if any editable fields have changed
         new_values = self._get_fields_snapshot()
         if (not self.pk and not self.modified_by) or self._values_have_edits(new_values):
-            self.modified_by = user
-            if 'modified_by' not in update_fields:
-                update_fields.append('modified_by')
+            if self.modified_by != user:
+                self.modified_by = user
+                if 'modified_by' not in update_fields:
+                    update_fields.append('modified_by')
         super(PrimordialModel, self).save(*args, **kwargs)
         self._prior_values_store = new_values
 

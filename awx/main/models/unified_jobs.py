@@ -841,7 +841,8 @@ class UnifiedJob(
 
         # If this job already exists in the database, retrieve a copy of
         # the job in its prior state.
-        if self.pk:
+        # If update_fields are given without status, then that indicates no change
+        if self.pk and ((not update_fields) or ('status' in update_fields)):
             self_before = self.__class__.objects.get(pk=self.pk)
             if self_before.status != self.status:
                 status_before = self_before.status
@@ -1273,7 +1274,7 @@ class UnifiedJob(
     def _websocket_emit_status(self, status):
         try:
             status_data = dict(unified_job_id=self.id, status=status)
-            if status == 'waiting':
+            if status == 'running':
                 if self.instance_group:
                     status_data['instance_group_name'] = self.instance_group.name
                 else:
@@ -1549,7 +1550,7 @@ class UnifiedJob(
             extra["controller_node"] = self.controller_node or "NOT_SET"
         elif state == "execution_node_chosen":
             extra["execution_node"] = self.execution_node or "NOT_SET"
-        logger_job_lifecycle.debug(msg, extra=extra)
+        logger_job_lifecycle.info(msg, extra=extra)
 
     @property
     def launched_by(self):

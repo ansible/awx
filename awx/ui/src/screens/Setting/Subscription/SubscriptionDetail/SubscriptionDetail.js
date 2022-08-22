@@ -1,8 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-
 import { t, Trans } from '@lingui/macro';
-import { Button, Label } from '@patternfly/react-core';
+import styled from 'styled-components';
+import {
+  Button,
+  HelperText as PFHelperText,
+  HelperTextItem,
+  Label,
+} from '@patternfly/react-core';
 import {
   CaretLeftIcon,
   CheckIcon,
@@ -13,6 +18,10 @@ import { CardBody, CardActionsRow } from 'components/Card';
 import { DetailList, Detail } from 'components/DetailList';
 import { useConfig } from 'contexts/Config';
 import { formatDateString, secondsToDays } from 'util/dates';
+
+const HelperText = styled(PFHelperText)`
+  margin-top: 10px;
+`;
 
 function SubscriptionDetail() {
   const { me = {}, license_info, version } = useConfig();
@@ -52,25 +61,71 @@ function SubscriptionDetail() {
             label={t`Status`}
             value={
               license_info.compliant ? (
-                <Label variant="outline" color="green" icon={<CheckIcon />}>
-                  {t`Compliant`}
-                </Label>
+                <>
+                  <Label variant="outline" color="green" icon={<CheckIcon />}>
+                    {t`Compliant`}
+                  </Label>
+                  <HelperText>
+                    <HelperTextItem>{t`The number of hosts you have automated against is below your subscription count.`}</HelperTextItem>
+                  </HelperText>
+                </>
               ) : (
-                <Label
-                  variant="outline"
-                  color="red"
-                  icon={<ExclamationCircleIcon />}
-                >
-                  {t`Out of compliance`}
-                </Label>
+                <>
+                  <Label
+                    variant="outline"
+                    color="red"
+                    icon={<ExclamationCircleIcon />}
+                  >
+                    {t`Out of compliance`}
+                  </Label>
+                  <HelperText>
+                    <HelperTextItem>{t`You have automated against more hosts than your subscription allows.`}</HelperTextItem>
+                  </HelperText>
+                </>
               )
             }
           />
+          {typeof automatedInstancesCount !== 'undefined' &&
+            automatedInstancesCount !== null && (
+              <Detail
+                dataCy="subscription-hosts-automated"
+                label={t`Hosts automated`}
+                value={
+                  automated_since ? (
+                    <Trans>
+                      {automatedInstancesCount} since{' '}
+                      {automatedInstancesSinceDateTime}
+                    </Trans>
+                  ) : (
+                    automatedInstancesCount
+                  )
+                }
+              />
+            )}
           <Detail
-            dataCy="subscription-version"
-            label={t`Version`}
-            value={version}
+            dataCy="subscription-hosts-imported"
+            label={t`Hosts imported`}
+            value={license_info.current_instances}
           />
+          <Detail
+            dataCy="subscription-hosts-remaining"
+            label={t`Hosts remaining`}
+            value={license_info.free_instances}
+          />
+          {license_info.instance_count < 9999999 && (
+            <Detail
+              dataCy="subscription-hosts-available"
+              label={t`Hosts available`}
+              value={license_info.available_instances}
+            />
+          )}
+          {license_info.instance_count >= 9999999 && (
+            <Detail
+              dataCy="subscription-unlimited-hosts-available"
+              label={t`Hosts available`}
+              value={t`Unlimited`}
+            />
+          )}
           <Detail
             dataCy="subscription-type"
             label={t`Subscription type`}
@@ -115,46 +170,10 @@ function SubscriptionDetail() {
               secondsToDays(license_info.time_remaining)
             }
           />
-          {license_info.instance_count < 9999999 && (
-            <Detail
-              dataCy="subscription-hosts-available"
-              label={t`Hosts available`}
-              value={license_info.available_instances}
-            />
-          )}
-          {license_info.instance_count >= 9999999 && (
-            <Detail
-              dataCy="subscription-unlimited-hosts-available"
-              label={t`Hosts available`}
-              value={t`Unlimited`}
-            />
-          )}
           <Detail
-            dataCy="subscription-hosts-imported"
-            label={t`Hosts imported`}
-            value={license_info.current_instances}
-          />
-          {typeof automatedInstancesCount !== 'undefined' &&
-            automatedInstancesCount !== null && (
-              <Detail
-                dataCy="subscription-hosts-automated"
-                label={t`Hosts automated`}
-                value={
-                  automated_since ? (
-                    <Trans>
-                      {automatedInstancesCount} since{' '}
-                      {automatedInstancesSinceDateTime}
-                    </Trans>
-                  ) : (
-                    automatedInstancesCount
-                  )
-                }
-              />
-            )}
-          <Detail
-            dataCy="subscription-hosts-remaining"
-            label={t`Hosts remaining`}
-            value={license_info.free_instances}
+            dataCy="subscription-version"
+            label={t`Automation controller version`}
+            value={version}
           />
         </DetailList>
         <br />

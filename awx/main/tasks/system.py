@@ -10,12 +10,13 @@ from contextlib import redirect_stdout
 import shutil
 import time
 from distutils.version import LooseVersion as Version
+from datetime import datetime
 
 # Django
 from django.conf import settings
 from django.db import transaction, DatabaseError, IntegrityError
 from django.db.models.fields.related import ForeignKey
-from django.utils.timezone import now
+from django.utils.timezone import now, timedelta
 from django.utils.encoding import smart_str
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
@@ -104,6 +105,8 @@ def dispatch_startup():
     #
     apply_cluster_membership_policies()
     cluster_node_heartbeat()
+    reaper.startup_reaping()
+    reaper.reap_waiting(grace_period=0)
     m = Metrics()
     m.reset_values()
 
@@ -115,6 +118,10 @@ def inform_cluster_of_shutdown():
     try:
         this_inst = Instance.objects.get(hostname=settings.CLUSTER_HOST_ID)
         this_inst.mark_offline(update_last_seen=True, errors=_('Instance received normal shutdown signal'))
+        try:
+            reaper.reap_waiting(this_inst, grace_period=0)
+        except Exception:
+            logger.exception('failed to reap waiting jobs for {}'.format(this_inst.hostname))
         logger.warning('Normal shutdown signal for instance {}, ' 'removed self from capacity pool.'.format(this_inst.hostname))
     except Exception:
         logger.exception('Encountered problem with normal shutdown signal.')
@@ -476,8 +483,8 @@ def inspect_execution_nodes(instance_list):
                     execution_node_health_check.apply_async([hostname])
 
 
-@task(queue=get_local_queuename)
-def cluster_node_heartbeat():
+@task(queue=get_local_queuename, bind_kwargs=['dispatch_time', 'worker_tasks'])
+def cluster_node_heartbeat(dispatch_time=None, worker_tasks=None):
     logger.debug("Cluster node heartbeat task.")
     nowtime = now()
     instance_list = list(Instance.objects.all())
@@ -500,12 +507,23 @@ def cluster_node_heartbeat():
 
     if this_inst:
         startup_event = this_inst.is_lost(ref_time=nowtime)
+        last_last_seen = this_inst.last_seen
         this_inst.local_health_check()
         if startup_event and this_inst.capacity != 0:
-            logger.warning('Rejoining the cluster as instance {}.'.format(this_inst.hostname))
+            logger.warning(f'Rejoining the cluster as instance {this_inst.hostname}. Prior last_seen {last_last_seen}')
             return
+        elif not last_last_seen:
+            logger.warning(f'Instance does not have recorded last_seen, updating to {nowtime}')
+        elif (nowtime - last_last_seen) > timedelta(seconds=settings.CLUSTER_NODE_HEARTBEAT_PERIOD + 2):
+            logger.warning(f'Heartbeat skew - interval={(nowtime - last_last_seen).total_seconds():.4f}, expected={settings.CLUSTER_NODE_HEARTBEAT_PERIOD}')
     else:
-        raise RuntimeError("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
+        if settings.AWX_AUTO_DEPROVISION_INSTANCES:
+            (changed, this_inst) = Instance.objects.register(ip_address=os.environ.get('MY_POD_IP'), node_type='control', uuid=settings.SYSTEM_UUID)
+            if changed:
+                logger.warning(f'Recreated instance record {this_inst.hostname} after unexpected removal')
+            this_inst.local_health_check()
+        else:
+            raise RuntimeError("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
     # IFF any node has a greater version than we do, then we'll shutdown services
     for other_inst in instance_list:
         if other_inst.node_type in ('execution', 'hop'):
@@ -525,7 +543,9 @@ def cluster_node_heartbeat():
 
     for other_inst in lost_instances:
         try:
-            reaper.reap(other_inst)
+            explanation = "Job reaped due to instance shutdown"
+            reaper.reap(other_inst, job_explanation=explanation)
+            reaper.reap_waiting(other_inst, grace_period=0, job_explanation=explanation)
         except Exception:
             logger.exception('failed to reap jobs for {}'.format(other_inst.hostname))
         try:
@@ -542,6 +562,15 @@ def cluster_node_heartbeat():
                 logger.debug('Another instance has marked {} as lost'.format(other_inst.hostname))
             else:
                 logger.exception('Error marking {} as lost'.format(other_inst.hostname))
+
+    # Run local reaper
+    if worker_tasks is not None:
+        active_task_ids = []
+        for task_list in worker_tasks.values():
+            active_task_ids.extend(task_list)
+        reaper.reap(instance=this_inst, excluded_uuids=active_task_ids)
+        if max(len(task_list) for task_list in worker_tasks.values()) <= 1:
+            reaper.reap_waiting(instance=this_inst, excluded_uuids=active_task_ids, ref_time=datetime.fromisoformat(dispatch_time))
 
 
 @task(queue=get_local_queuename)
@@ -590,7 +619,8 @@ def awx_k8s_reaper():
     for group in InstanceGroup.objects.filter(is_container_group=True).iterator():
         logger.debug("Checking for orphaned k8s pods for {}.".format(group))
         pods = PodManager.list_active_jobs(group)
-        for job in UnifiedJob.objects.filter(pk__in=pods.keys()).exclude(status__in=ACTIVE_STATES):
+        time_cutoff = now() - timedelta(seconds=settings.K8S_POD_REAPER_GRACE_PERIOD)
+        for job in UnifiedJob.objects.filter(pk__in=pods.keys(), finished__lte=time_cutoff).exclude(status__in=ACTIVE_STATES):
             logger.debug('{} is no longer active, reaping orphaned k8s pod'.format(job.log_format))
             try:
                 pm = PodManager(job)

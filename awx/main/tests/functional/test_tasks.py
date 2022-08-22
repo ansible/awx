@@ -4,6 +4,7 @@ import os
 import tempfile
 import shutil
 
+from awx.main.tasks.jobs import RunJob
 from awx.main.tasks.system import execution_node_health_check, _cleanup_images_and_files
 from awx.main.models import Instance, Job
 
@@ -61,3 +62,16 @@ def test_folder_cleanup_running_job(mock_job_folder, mock_me):
         job.save(update_fields=['status'])
         _cleanup_images_and_files(grace_period=0)
         assert not os.path.exists(mock_job_folder)  # job is finished and no grace period, should delete
+
+
+@pytest.mark.django_db
+def test_does_not_run_reaped_job(mocker, mock_me):
+    job = Job.objects.create(status='failed', job_explanation='This job has been reaped.')
+    mock_run = mocker.patch('awx.main.tasks.jobs.ansible_runner.interface.run')
+    try:
+        RunJob().run(job.id)
+    except Exception:
+        pass
+    job.refresh_from_db()
+    assert job.status == 'failed'
+    mock_run.assert_not_called()
