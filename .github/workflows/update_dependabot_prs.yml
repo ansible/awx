@@ -23,4 +23,4 @@ jobs:
             PR: ${{github.event.pull_request}}
         run: |
           gh pr checkout ${{ env.BRANCH }}
-          gh pr edit --body "${{ env.PR }} Bug, Docs Fix or other nominal change"
+          gh pr edit --body "${{ env.PR }}\nBug, Docs Fix or other nominal change"
