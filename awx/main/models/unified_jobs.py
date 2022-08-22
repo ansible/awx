@@ -1550,7 +1550,7 @@ class UnifiedJob(
             extra["controller_node"] = self.controller_node or "NOT_SET"
         elif state == "execution_node_chosen":
             extra["execution_node"] = self.execution_node or "NOT_SET"
-        logger_job_lifecycle.debug(msg, extra=extra)
+        logger_job_lifecycle.info(msg, extra=extra)
 
     @property
     def launched_by(self):
