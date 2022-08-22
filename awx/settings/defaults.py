@@ -6,6 +6,7 @@ import os
 import re  # noqa
 import sys
 import tempfile
+import socket
 from datetime import timedelta
 
 
@@ -1016,3 +1017,6 @@ JOB_WAITING_GRACE_PERIOD = 60
 # Number of seconds after a container group job finished time to wait
 # before the awx_k8s_reaper task will tear down the pods
 K8S_POD_REAPER_GRACE_PERIOD = 60
+
+# This is overridden downstream via /etc/tower/conf.d/cluster_host_id.py
+CLUSTER_HOST_ID = socket.gethostname()
