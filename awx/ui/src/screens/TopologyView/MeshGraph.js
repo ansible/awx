@@ -1,8 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
+import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import debounce from 'util/debounce';
 import * as d3 from 'd3';
+import { InstancesAPI } from 'api';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
+import AlertModal from 'components/AlertModal';
+import ErrorDetail from 'components/ErrorDetail';
 import Legend from './Legend';
 import Tooltip from './Tooltip';
 import ContentLoading from './ContentLoading';
@@ -38,9 +43,38 @@ const Loader = styled(ContentLoading)`
 function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
   const [isNodeSelected, setIsNodeSelected] = useState(false);
   const [selectedNode, setSelectedNode] = useState(null);
-  const [nodeDetail, setNodeDetail] = useState(null);
   const [simulationProgress, setSimulationProgress] = useState(null);
   const history = useHistory();
+  const {
+    result: { instance, instanceGroups },
+    error: fetchError,
+    isLoading,
+    request: fetchDetails,
+  } = useRequest(
+    useCallback(async () => {
+      const { data: instanceData } = await InstancesAPI.readDetail(
+        selectedNode.id
+      );
+      const { data: instanceGroupsData } = await InstancesAPI.readInstanceGroup(
+        selectedNode.id
+      );
+
+      return {
+        instance: instanceData,
+        instanceGroups: instanceGroupsData,
+      };
+    }, [selectedNode]),
+    {
+      result: {},
+    }
+  );
+
+  const { error: fetchInstanceError, dismissError } =
+    useDismissableError(fetchError);
+
+  useEffect(() => {
+    fetchDetails();
+  }, [selectedNode, fetchDetails]);
 
   const draw = () => {
     let width;
@@ -134,7 +168,9 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
         .attr('class', (_, i) => `link-${i}`)
         .attr('data-cy', (d) => `${d.source.hostname}-${d.target.hostname}`)
         .style('fill', 'none')
-        .style('stroke', '#ccc')
+        .style('stroke', (d) =>
+          d.link_state === 'removing' ? '#C9190B' : '#CCC'
+        )
         .style('stroke-width', '2px')
         .style('stroke-dasharray', (d) => renderLinkState(d.link_state))
         .attr('pointer-events', 'none')
@@ -158,7 +194,6 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
           deselectSiblings(d);
         })
         .on('click', (_, d) => {
-          setNodeDetail(d);
           highlightSelected(d);
         });
 
@@ -272,7 +307,9 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
             .selectAll(`.link-${s.index}`)
             .transition()
             .duration(50)
-            .style('stroke', '#ccc')
+            .style('stroke', (d) =>
+              d.link_state === 'removing' ? '#C9190B' : '#CCC'
+            )
             .style('stroke-width', '2px')
             .attr('marker-end', 'url(#end)');
         });
@@ -319,14 +356,33 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
   return (
     <div id="chart" style={{ position: 'relative', height: '100%' }}>
       {showLegend && <Legend />}
-      <Tooltip
-        isNodeSelected={isNodeSelected}
-        renderNodeIcon={renderNodeIcon(selectedNode)}
-        nodeDetail={nodeDetail}
-        redirectToDetailsPage={() =>
-          redirectToDetailsPage(selectedNode, history)
-        }
-      />
+      {instance && (
+        <>
+          {fetchInstanceError && (
+            <AlertModal
+              variant="error"
+              title={t`Error!`}
+              isOpen
+              onClose={dismissError}
+            >
+              {t`Failed to update instance.`}
+              <ErrorDetail error={fetchInstanceError} />
+            </AlertModal>
+          )}
+          <Tooltip
+            isNodeSelected={isNodeSelected}
+            renderNodeIcon={renderNodeIcon(selectedNode)}
+            selectedNode={selectedNode}
+            fetchInstance={fetchDetails}
+            instanceGroups={instanceGroups}
+            instanceDetail={instance}
+            isLoading={isLoading}
+            redirectToDetailsPage={() =>
+              redirectToDetailsPage(selectedNode, history)
+            }
+          />
+        </>
+      )}
       <Loader className="simulation-loader" progress={simulationProgress} />
     </div>
   );
