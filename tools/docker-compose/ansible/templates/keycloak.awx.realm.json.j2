@@ -321,7 +321,10 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "7b1c3527-8702-4742-af69-2b74ee5742e8",
       "redirectUris": [
-        "https://{{ oidc_reference | default(container_reference) }}:8043/sso/complete/oidc/"
+        {% if oidc_reference is defined %}
+        "https://{{ oidc_reference }}:8043/sso/complete/oidc/",
+        {% endif %}
+        "https://{{ container_reference }}:8043/sso/complete/oidc/"
       ],
       "webOrigins": [],
       "notBefore": 0,
