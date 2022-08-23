@@ -379,6 +379,7 @@ AUTHENTICATION_BACKENDS = (
     'social_core.backends.github_enterprise.GithubEnterpriseOAuth2',
     'social_core.backends.github_enterprise.GithubEnterpriseOrganizationOAuth2',
     'social_core.backends.github_enterprise.GithubEnterpriseTeamOAuth2',
+    'social_core.backends.open_id_connect.OpenIdConnectAuth',
     'social_core.backends.azuread.AzureADOAuth2',
     'awx.sso.backends.SAMLAuth',
     'awx.main.backends.AWXModelBackend',

@@ -346,6 +346,20 @@ function AWXLogin({ alt, isAuthenticated }) {
                     </LoginMainFooterLinksItem>
                   );
                 }
+                if (authKey === 'oidc') {
+                  return (
+                    <LoginMainFooterLinksItem
+                      data-cy="social-auth-oidc"
+                      href={loginUrl}
+                      key={authKey}
+                      onClick={setSessionRedirect}
+                    >
+                      <Tooltip content={t`Sign in with OIDC`}>
+                        <UserCircleIcon size="lg" />
+                      </Tooltip>
+                    </LoginMainFooterLinksItem>
+                  );
+                }
                 if (authKey.startsWith('saml')) {
                   const samlIDP = authKey.split(':')[1] || null;
                   return (
