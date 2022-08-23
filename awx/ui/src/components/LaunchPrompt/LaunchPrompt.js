@@ -55,6 +55,17 @@ function PromptModalForm({
     setValue('extra_vars', mergeExtraVars(extraVars, surveyValues));
     setValue('scm_branch', values.scm_branch);
     setValue('verbosity', values.verbosity);
+    setValue('timeout', values.timeout);
+    setValue('forks', values.forks);
+    setValue('job_slice_count', values.job_slice_count);
+
+    if (launchConfig.ask_instance_groups_on_launch) {
+      const instanceGroupIds = [];
+      values.instance_groups.forEach((instance_group) => {
+        instanceGroupIds.push(instance_group.id);
+      });
+      setValue('instance_groups', instanceGroupIds);
+    }
 
     if (launchConfig.ask_labels_on_launch) {
       const labelIds = [];

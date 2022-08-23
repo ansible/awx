@@ -40,6 +40,7 @@ function getInitialValues(launchConfig, resource) {
   }
 
   return {
-    inventory: resource?.summary_fields?.execution_environment || null,
+    execution_environment:
+      resource?.summary_fields?.execution_environment || null,
   };
 }
