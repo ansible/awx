@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { number, shape } from 'prop-types';
-
 import { t } from '@lingui/macro';
-
 import {
   AdHocCommandsAPI,
   InventorySourcesAPI,
@@ -38,21 +36,6 @@ function canLaunchWithoutPrompt(launchData) {
   );
 }
 
-const fetchLabels = async (resource, pageNo = 1, labels = []) => {
-  const resourceModel =
-    resource.type === 'workflow_job_template'
-      ? WorkflowJobTemplatesAPI
-      : JobTemplatesAPI;
-  const { data } = await resourceModel.readLabels(resource.id, {
-    page_size: 200,
-    page: pageNo,
-  });
-  if (data.next) {
-    return fetchLabels(resource.id, pageNo + 1, labels.concat(data.results));
-  }
-  return labels.concat(data.results);
-};
-
 function LaunchButton({ resource, children }) {
   const history = useHistory();
   const [showLaunchPrompt, setShowLaunchPrompt] = useState(false);
@@ -72,6 +55,10 @@ function LaunchButton({ resource, children }) {
       resource.type === 'workflow_job_template'
         ? WorkflowJobTemplatesAPI.readSurvey(resource.id)
         : JobTemplatesAPI.readSurvey(resource.id);
+    const readLabels =
+      resource.type === 'workflow_job_template'
+        ? WorkflowJobTemplatesAPI.readAllLabels(resource.id)
+        : JobTemplatesAPI.readAllLabels(resource.id);
 
     try {
       const { data: launch } = await readLaunch;
@@ -84,9 +71,11 @@ function LaunchButton({ resource, children }) {
       }
 
       if (launch.ask_labels_on_launch) {
-        const allLabels = await fetchLabels(resource);
+        const {
+          data: { results },
+        } = await readLabels;
 
-        setLabels(allLabels);
+        setLabels(results);
       }
 
       if (canLaunchWithoutPrompt(launch)) {
