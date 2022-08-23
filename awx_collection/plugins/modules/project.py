@@ -387,7 +387,6 @@ def main():
         'custom_virtualenv',
         'description',
         'allow_override',
-        'signature_validation',
     ):
         field_val = module.params.get(field_name)
         if field_val is not None:
