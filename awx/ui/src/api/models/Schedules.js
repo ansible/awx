@@ -1,6 +1,7 @@
 import Base from '../Base';
+import LabelsMixin from '../mixins/Labels.mixin';
 
-class Schedules extends Base {
+class Schedules extends LabelsMixin(Base) {
   constructor(http) {
     super(http);
     this.baseUrl = 'api/v2/schedules/';

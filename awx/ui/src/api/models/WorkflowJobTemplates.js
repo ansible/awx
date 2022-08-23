@@ -1,8 +1,11 @@
 import Base from '../Base';
 import SchedulesMixin from '../mixins/Schedules.mixin';
 import NotificationsMixin from '../mixins/Notifications.mixin';
+import LabelsMixin from '../mixins/Labels.mixin';
 
-class WorkflowJobTemplates extends SchedulesMixin(NotificationsMixin(Base)) {
+class WorkflowJobTemplates extends SchedulesMixin(
+  NotificationsMixin(LabelsMixin(Base))
+) {
   constructor(http) {
     super(http);
     this.baseUrl = 'api/v2/workflow_job_templates/';
@@ -101,37 +104,6 @@ class WorkflowJobTemplates extends SchedulesMixin(NotificationsMixin(Base)) {
         disassociate: true,
       }
     );
-  }
-
-  readLabels(id, params) {
-    return this.http.get(`${this.baseUrl}${id}/labels/`, {
-      params,
-    });
-  }
-
-  readAllLabels(id) {
-    const fetchLabels = async (pageNo = 1, labels = []) => {
-      try {
-        const { data } = await this.http.get(`${this.baseUrl}${id}/labels/`, {
-          params: {
-            page: pageNo,
-            page_size: 200,
-          },
-        });
-        if (data?.next) {
-          return fetchLabels(pageNo + 1, labels.concat(data.results));
-        }
-        return Promise.resolve({
-          data: {
-            results: labels.concat(data.results),
-          },
-        });
-      } catch (error) {
-        return Promise.reject(error);
-      }
-    };
-
-    return fetchLabels();
   }
 }
 
