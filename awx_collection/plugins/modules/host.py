@@ -44,6 +44,11 @@ options:
         - If the host should be enabled.
       type: bool
       default: 'yes'
+    merge_variables:
+      description:
+        - To use when adding variables to existing ones.
+      type: bool
+      default: 'no'
     variables:
       description:
         - Variables to use for the host.
@@ -84,6 +89,7 @@ def main():
         inventory=dict(required=True),
         enabled=dict(type='bool', default=True),
         variables=dict(type='dict'),
+        merge_variables=dict(type='bool', default=False),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -98,6 +104,7 @@ def main():
     enabled = module.params.get('enabled')
     state = module.params.get('state')
     variables = module.params.get('variables')
+    merge_variables = module.params.get('merge_variables')
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     inventory_id = module.resolve_name_to_id('inventories', inventory)
@@ -117,7 +124,16 @@ def main():
     }
     if description is not None:
         host_fields['description'] = description
+
     if variables is not None:
+        # pre existing variables
+        if host:
+            old_vars = host["variables"]
+            if old_vars and merge_variables:
+                old_variables = json.loads(old_vars)
+                old_variables.update(variables)
+                variables = old_variables.copy()
+
         host_fields['variables'] = json.dumps(variables)
 
     # If the state was present and we can let the module build or update the existing host, this will return on its own
