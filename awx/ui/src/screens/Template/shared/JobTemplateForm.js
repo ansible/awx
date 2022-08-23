@@ -597,6 +597,12 @@ function JobTemplateForm({
                     label={t`Enable Fact Storage`}
                     tooltip={helpText.enableFactStorage}
                   />
+                  <CheckboxField
+                    id="option-prevent-instance-group-fallback"
+                    name="prevent_instance_group_fallback"
+                    label={t`Prevent Instance Group Fallback`}
+                    tooltip={helpText.preventInstanceGroupFallback}
+                  />
                 </FormCheckboxLayout>
               </FormGroup>
             </FormFullWidthLayout>
@@ -731,6 +737,8 @@ const FormikApp = withFormik({
       limit: template.limit || '',
       name: template.name || '',
       playbook: template.playbook || '',
+      prevent_instance_group_fallback:
+        template.prevent_instance_group_fallback || false,
       project: summary_fields?.project || projectValues || null,
       scm_branch: template.scm_branch || '',
       skip_tags: template.skip_tags || '',

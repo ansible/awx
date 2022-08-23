@@ -1680,6 +1680,7 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
             'total_inventory_sources',
             'inventory_sources_with_failures',
             'pending_deletion',
+            'prevent_instance_group_fallback',
         )
 
     def get_related(self, obj):
@@ -2937,6 +2938,7 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
             'job_slice_count',
             'webhook_service',
             'webhook_credential',
+            'prevent_instance_group_fallback',
         )
         read_only_fields = ('*', 'custom_virtualenv')
 

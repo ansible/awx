@@ -5,7 +5,10 @@ import { func, shape } from 'prop-types';
 import { Form, FormGroup } from '@patternfly/react-core';
 import { VariablesField } from 'components/CodeEditor';
 import Popover from 'components/Popover';
-import FormField, { FormSubmitError } from 'components/FormField';
+import FormField, {
+  CheckboxField,
+  FormSubmitError,
+} from 'components/FormField';
 import FormActionGroup from 'components/FormActionGroup';
 import { required } from 'util/validators';
 import LabelSelect from 'components/LabelSelect';
@@ -71,6 +74,12 @@ function InventoryFormFields({ inventory }) {
         }}
         fieldName="instanceGroups"
       />
+      <CheckboxField
+        id="option-prevent-instance-group-fallback"
+        name="prevent_instance_group_fallback"
+        label={t`Prevent Instance Group Fallback`}
+        tooltip={helpText.preventInstanceGroupFallback}
+      />
       <FormFullWidthLayout>
         <FormGroup
           label={t`Labels`}
@@ -112,6 +121,8 @@ function InventoryForm({
       null,
     instanceGroups: instanceGroups || [],
     labels: inventory?.summary_fields?.labels?.results || [],
+    prevent_instance_group_fallback:
+      inventory.prevent_instance_group_fallback || false,
   };
   return (
     <Formik

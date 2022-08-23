@@ -175,6 +175,13 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         related_name='inventory_labels',
         help_text=_('Labels associated with this inventory.'),
     )
+    prevent_instance_group_fallback = models.BooleanField(
+        default=False,
+        help_text=(
+            "If enabled, the job template will prevent adding any inventory or organization "
+            "instance groups to the list of preferred instances groups to run on."
+        ),
+    )
 
     def get_absolute_url(self, request=None):
         return reverse('api:inventory_detail', kwargs={'pk': self.pk}, request=request)
