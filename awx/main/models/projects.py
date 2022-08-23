@@ -287,6 +287,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
     # credential (keys) used to validate content signature
     signature_validation_credential = models.ForeignKey(
         'Credential',
+        related_name='%(class)ss_signature_validation_credential',
         blank=True,
         null=True,
         default=None,
