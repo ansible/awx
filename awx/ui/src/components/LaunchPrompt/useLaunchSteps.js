@@ -7,6 +7,7 @@ import useExecutionEnvironmentStep from './steps/useExecutionEnvironmentStep';
 import useOtherPromptsStep from './steps/useOtherPromptsStep';
 import useSurveyStep from './steps/useSurveyStep';
 import usePreviewStep from './steps/usePreviewStep';
+import useInstanceGroupsStep from './steps/useInstanceGroupsStep';
 
 function showCredentialPasswordsStep(launchConfig, credentials = []) {
   if (
@@ -63,6 +64,7 @@ export default function useLaunchSteps(
       visited
     ),
     useExecutionEnvironmentStep(launchConfig, resource),
+    useInstanceGroupsStep(launchConfig, resource),
     useOtherPromptsStep(launchConfig, resource, labels),
     useSurveyStep(launchConfig, surveyConfig, resource, visited),
   ];
@@ -151,6 +153,7 @@ export default function useLaunchSteps(
         credentials: true,
         credentialPasswords: true,
         executionEnvironment: true,
+        instanceGroups: true,
         other: true,
         survey: true,
         preview: true,
