@@ -172,7 +172,7 @@ options:
     signature_validation_credential:
       description:
         - Name of the credential to use for signature validation.
-        - Required if C(signature_validation=True)
+        - If signature valdiation credential is provided, signature validation will be enabled. 
       type: str
 
 extends_documentation_fragment: awx.awx.auth
@@ -291,9 +291,6 @@ def main():
     # Create a module for ourselves
     module = ControllerAPIModule(
         argument_spec=argument_spec,
-        required_if=[
-            (signature_validation_credential is not None),
-        ],
     )
 
     # Extract our parameters
