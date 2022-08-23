@@ -1,3 +1,4 @@
+import contextlib
 import json
 import logging
 from django.conf import settings
@@ -14,6 +15,7 @@ from awx.main.analytics import collectors
 from awx.main.analytics.package import Package
 from awx.main.analytics.collection_json import CollectionJSON
 from awx.main.utils import datetime_hook
+from awx.main.utils.pglock import advisory_lock
 
 logger = logging.getLogger('awx.main.analytics')
 
@@ -53,6 +55,12 @@ class AnalyticsCollector(base.Collector):
         from awx.main.analytics import collectors
 
         return base.Collector.registered_collectors(collectors)
+
+    @contextlib.contextmanager
+    def _pg_advisory_lock(self, key, wait=False):
+        """Use awx specific implementation to pass tests with sqlite3"""
+        with advisory_lock(key, wait=False) as lock:
+            yield lock
 
     def _last_gathering(self):
         return settings.AUTOMATION_ANALYTICS_LAST_GATHER
