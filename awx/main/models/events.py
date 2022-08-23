@@ -6,7 +6,7 @@ from collections import defaultdict
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import models, DatabaseError
+from django.db import models, DatabaseError, transaction
 from django.utils.dateparse import parse_datetime
 from django.utils.text import Truncator
 from django.utils.timezone import utc, now
@@ -573,14 +573,19 @@ class JobEvent(BasePlaybookEvent):
                     h.last_job_host_summary_id = host_mapping[h.id]
                     updated_hosts.add(h)
 
-            Host.objects.bulk_update(list(updated_hosts), ['last_job_id', 'last_job_host_summary_id'], batch_size=100)
+            with transaction.atomic():
+                hosts = Host.objects.select_for_update().filter(id__in=[h.id for h in updated_hosts])
+                hosts.bulk_update(list(updated_hosts), ['last_job_id', 'last_job_host_summary_id'], batch_size=100)
 
             # bulk-create
             current_time = now()
             HostMetric.objects.bulk_create(
                 [HostMetric(hostname=hostname, last_automation=current_time) for hostname in updated_hosts_list], ignore_conflicts=True, batch_size=100
             )
-            HostMetric.objects.filter(hostname__in=updated_hosts_list).update(last_automation=current_time)
+
+            with transaction.atomic():
+                host_metrics = HostMetric.objects.select_for_update().filter(hostname__in=updated_hosts_list)
+                host_metrics.update(last_automation=current_time)
 
     @property
     def job_verbosity(self):
