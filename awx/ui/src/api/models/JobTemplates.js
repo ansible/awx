@@ -1,10 +1,11 @@
 import Base from '../Base';
 import NotificationsMixin from '../mixins/Notifications.mixin';
 import InstanceGroupsMixin from '../mixins/InstanceGroups.mixin';
+import LabelsMixin from '../mixins/Labels.mixin';
 import SchedulesMixin from '../mixins/Schedules.mixin';
 
 class JobTemplates extends SchedulesMixin(
-  InstanceGroupsMixin(NotificationsMixin(Base))
+  InstanceGroupsMixin(NotificationsMixin(LabelsMixin(Base)))
 ) {
   constructor(http) {
     super(http);
@@ -100,37 +101,6 @@ class JobTemplates extends SchedulesMixin(
 
   updateWebhookKey(id) {
     return this.http.post(`${this.baseUrl}${id}/webhook_key/`);
-  }
-
-  readLabels(id, params) {
-    return this.http.get(`${this.baseUrl}${id}/labels/`, {
-      params,
-    });
-  }
-
-  readAllLabels(id) {
-    const fetchLabels = async (pageNo = 1, labels = []) => {
-      try {
-        const { data } = await this.http.get(`${this.baseUrl}${id}/labels/`, {
-          params: {
-            page: pageNo,
-            page_size: 200,
-          },
-        });
-        if (data?.next) {
-          return fetchLabels(pageNo + 1, labels.concat(data.results));
-        }
-        return Promise.resolve({
-          data: {
-            results: labels.concat(data.results),
-          },
-        });
-      } catch (error) {
-        return Promise.reject(error);
-      }
-    };
-
-    return fetchLabels();
   }
 }
 
