@@ -1007,6 +1007,10 @@ class LaunchTimeConfig(LaunchTimeConfigBase):
     # Labels needed for non-unified job / unified JT models
     labels = models.ManyToManyField('Label', related_name='%(class)s_labels')
 
+    execution_environment = models.ForeignKey(
+        'ExecutionEnvironment', null=True, blank=True, default=None, on_delete=polymorphic.SET_NULL, related_name='%(class)s_as_prompt'
+    )
+
     @property
     def extra_vars(self):
         return self.extra_data
@@ -1052,10 +1056,6 @@ class JobLaunchConfig(LaunchTimeConfig):
     # Instance Groups needed for non-unified job / unified JT models
     instance_groups = OrderedManyToManyField(
         'InstanceGroup', related_name='%(class)ss', blank=True, editable=False, through='JobLaunchConfigInstanceGroupMembership'
-    )
-
-    execution_environment = models.ForeignKey(
-        'ExecutionEnvironment', null=True, blank=True, default=None, on_delete=polymorphic.SET_NULL, related_name='execution_environment'
     )
 
     def has_user_prompts(self, template):
