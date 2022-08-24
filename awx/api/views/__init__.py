@@ -384,7 +384,7 @@ class InstanceDetail(RetrieveUpdateAPIView):
             obj.set_capacity_value()
             obj.save(update_fields=['capacity'])
             for instance in models.Instance.objects.filter(node_type__in=['control', 'hybrid']):
-                models.InstanceLink.object.create(source=instance, target=obj)
+                models.InstanceLink.objects.create(source=instance, target=obj)
             r.data = serializers.InstanceSerializer(obj, context=self.get_serializer_context()).to_representation(obj)
         return r
 
@@ -410,6 +410,7 @@ class InstancePeersList(SubListAPIView):
     model = models.Instance
     serializer_class = serializers.InstanceSerializer
     parent_access = 'read'
+    search_fields = {'hostname'}
     relationship = 'peers'
 
 
