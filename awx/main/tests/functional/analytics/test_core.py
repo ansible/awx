@@ -9,6 +9,11 @@ from awx.main.analytics import AnalyticsCollector
 from insights_analytics_collector import register
 
 
+@register('config', '1.0', config=True)
+def config(since, **kwargs):
+    return {'required': 'yes'}
+
+
 @register('example', '1.0')
 def example(since, **kwargs):
     return {'awx': 123}
@@ -36,7 +41,6 @@ def collector(mocker):
 @pytest.mark.django_db
 def test_gather(collector):
     settings.INSIGHTS_TRACKING_STATE = True
-
     tgzfiles = collector.gather()
     files = {}
     with tarfile.open(tgzfiles[0], "r:gz") as archive:
@@ -44,6 +48,8 @@ def test_gather(collector):
             files[member.name] = archive.extractfile(member)
 
         # functions that returned valid JSON should show up
+        assert './config.json' in files.keys()
+        assert json.loads(files['./config.json'].read()) == {'required': 'yes'}
         assert './example.json' in files.keys()
         assert json.loads(files['./example.json'].read()) == {'awx': 123}
 

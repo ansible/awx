@@ -59,7 +59,7 @@ class AnalyticsCollector(base.Collector):
     @contextlib.contextmanager
     def _pg_advisory_lock(self, key, wait=False):
         """Use awx specific implementation to pass tests with sqlite3"""
-        with advisory_lock(key, wait=False) as lock:
+        with advisory_lock(key, wait=wait) as lock:
             yield lock
 
     def _last_gathering(self):
