@@ -14,6 +14,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='project',
             name='signature_validation_credential',
-            field=models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='projects_signature_validation', to='main.credential'),
+            field=models.ForeignKey(
+                blank=True,
+                default=None,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='projects_signature_validation',
+                to='main.credential',
+            ),
         ),
     ]
