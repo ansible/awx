@@ -9,6 +9,7 @@ import { useConfig } from 'contexts/Config';
 import AnsibleSelect from 'components/AnsibleSelect';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
+import CredentialLookup from 'components/Lookup/CredentialLookup';
 import FormActionGroup from 'components/FormActionGroup/FormActionGroup';
 import FormField, { FormSubmitError } from 'components/FormField';
 import OrganizationLookup from 'components/Lookup/OrganizationLookup';
@@ -176,6 +177,19 @@ function ProjectFormFields({
     [signatureValidationCredentials, setSignatureValidationCredentials]
   );
 
+  const handleSignatureValidationCredentialChange = useCallback(
+    (value) => {
+      handleSignatureValidationCredentialSelection('cryptography', value);
+      setFieldValue('signature_validation_credential', value);
+      setFieldTouched('signature_validation_credential', true, false);
+    },
+    [
+      handleSignatureValidationCredentialSelection,
+      setFieldValue,
+      setFieldTouched,
+    ]
+  );
+
   const handleOrganizationUpdate = useCallback(
     (value) => {
       setFieldValue('organization', value);
@@ -270,6 +284,13 @@ function ProjectFormFields({
           }}
         />
       </FormGroup>
+      <CredentialLookup
+        credentialTypeId={signatureValidationCredentials.cryptography.typeId}
+        label={t`Content Signature Validation Credential`}
+        onChange={handleSignatureValidationCredentialChange}
+        value={signatureValidationCredentials.cryptography.value}
+        tooltip={projectHelpText.signatureValidation}
+      />
       {formik.values.scm_type !== '' && (
         <SubFormLayout>
           <Title size="md" headingLevel="h4">
@@ -288,13 +309,7 @@ function ProjectFormFields({
                 git: (
                   <GitSubForm
                     credential={credentials.scm}
-                    signature_validation_credential={
-                      signatureValidationCredentials.cryptography
-                    }
                     onCredentialSelection={handleCredentialSelection}
-                    onSignatureValidationCredentialSelection={
-                      handleSignatureValidationCredentialSelection
-                    }
                     scmUpdateOnLaunch={formik.values.scm_update_on_launch}
                   />
                 ),
