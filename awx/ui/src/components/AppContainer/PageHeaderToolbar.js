@@ -87,7 +87,7 @@ function PageHeaderToolbar({
                 <BellIcon color="white" />
                 <PendingWorkflowApprovalBadge
                   id="toolbar-workflow-approval-badge"
-                  isRead
+                  isRead={pendingApprovalsCount === 0}
                 >
                   {pendingApprovalsCount}
                 </PendingWorkflowApprovalBadge>
