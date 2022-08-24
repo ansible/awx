@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { t, Plural } from '@lingui/macro';
 import styled from 'styled-components';
+import { useConfig } from 'contexts/Config';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import useDebounce from 'hooks/useDebounce';
 import { InstancesAPI } from 'api';
@@ -103,6 +104,8 @@ function Tooltip({
   isLoading,
   redirectToDetailsPage,
 }) {
+  const { me = {} } = useConfig();
+
   const [forks, setForks] = useState(
     computeForks(
       instanceDetail.mem_capacity,
@@ -265,8 +268,9 @@ function Tooltip({
                             step={0.1}
                             value={instanceDetail.capacity_adjustment}
                             onChange={handleChangeValue}
-                            isDisabled={!instanceDetail.enabled}
-                            // isDisabled={!me?.is_superuser || !instance.enabled}
+                            isDisabled={
+                              !me?.is_superuser || !instanceDetail.enabled
+                            }
                             data-cy="slider"
                           />
                         </SliderForks>
