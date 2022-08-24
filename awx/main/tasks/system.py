@@ -413,10 +413,12 @@ def execution_node_health_check(node):
         return
 
     if instance.node_type != 'execution':
-        raise RuntimeError(f'Execution node health check ran against {instance.node_type} node {instance.hostname}')
+        logger.warning(f'Execution node health check ran against {instance.node_type} node {instance.hostname}')
+        return
 
     if instance.node_state not in (Instance.States.READY, Instance.States.UNAVAILABLE, Instance.States.INSTALLED):
-        raise RuntimeError(f"Execution node health check ran against node {instance.hostname} in state {instance.node_state}")
+        logger.warning(f"Execution node health check ran against node {instance.hostname} in state {instance.node_state}")
+        return
 
     data = worker_info(node)
 
