@@ -42,7 +42,6 @@ export function renderNodeIcon(selectedNode) {
 export function renderLabelIcons(nodeState) {
   if (nodeState) {
     const nodeLabelIconMapper = {
-      unavailable: 'empty',
       ready: 'checkmark',
       installed: 'clock',
       'provision-fail': 'exclaimation',
@@ -59,7 +58,6 @@ export function renderLabelIcons(nodeState) {
 export function renderIconPosition(nodeState, bbox) {
   if (nodeState) {
     const iconPositionMapper = {
-      unavailable: `translate(${bbox.x - 12}, ${bbox.y + 3}), scale(0.01)`,
       ready: `translate(${bbox.x - 15}, ${bbox.y + 3}), scale(0.02)`,
       installed: `translate(${bbox.x - 18}, ${bbox.y + 1}), scale(0.03)`,
       'provision-fail': `translate(${bbox.x - 9}, ${bbox.y + 3}), scale(0.02)`,
@@ -128,10 +126,9 @@ export const generateRandomNodes = (n) => {
       'provisioning',
       'deprovisioning',
       'installed',
-      'unavailable',
       'provision-fail',
       'deprovision-fail',
-    ][getRandomInt(0, 6)];
+    ][getRandomInt(0, 5)];
   }
   for (let i = 0; i < n; i++) {
     const id = i + 1;
@@ -142,6 +139,7 @@ export const generateRandomNodes = (n) => {
       hostname: `node-${id}`,
       node_type: randomType,
       node_state: randomState,
+      enabled: Math.random() < 0.5,
     };
     nodes.push(node);
   }

@@ -58,7 +58,6 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
       const { data: instanceGroupsData } = await InstancesAPI.readInstanceGroup(
         selectedNode.id
       );
-
       return {
         instance: instanceData,
         instanceGroups: instanceGroupsData,
@@ -206,6 +205,7 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
         .attr('class', (d) => d.node_type)
         .attr('class', (d) => `id-${d.id}`)
         .attr('fill', DEFAULT_NODE_COLOR)
+        .attr('stroke-dasharray', (d) => (d.enabled ? null : 3))
         .attr('stroke', DEFAULT_NODE_STROKE_COLOR);
 
       // node type labels
