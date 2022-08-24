@@ -19,7 +19,6 @@ import {
   OutlinedClockIcon,
   PlusIcon,
   MinusIcon,
-  ResourcesEmptyIcon,
 } from '@patternfly/react-icons';
 
 const Wrapper = styled.div`
@@ -161,20 +160,6 @@ function Legend() {
             />
           </DescriptionListTerm>
           <DescriptionListDescription>{t`Deprovisioning`}</DescriptionListDescription>
-        </DescriptionListGroup>
-        <DescriptionListGroup>
-          <DescriptionListTerm>
-            <Button
-              icon={
-                <ResourcesEmptyIcon
-                  style={{ fill: 'white', marginLeft: '3px', marginTop: '3px' }}
-                />
-              }
-              isSmall
-              style={{ backgroundColor: '#F0AB00' }}
-            />
-          </DescriptionListTerm>
-          <DescriptionListDescription>{t`Unavailable`}</DescriptionListDescription>
         </DescriptionListGroup>
         <DescriptionListGroup>
           <DescriptionListTerm>
