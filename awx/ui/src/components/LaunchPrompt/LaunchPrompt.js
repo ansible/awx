@@ -58,6 +58,7 @@ function PromptModalForm({
     setValue('timeout', values.timeout);
     setValue('forks', values.forks);
     setValue('job_slice_count', values.job_slice_count);
+    setValue('execution_environment', values.execution_environment?.id);
 
     if (launchConfig.ask_instance_groups_on_launch) {
       const instanceGroupIds = [];

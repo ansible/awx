@@ -108,7 +108,7 @@ function ExecutionEnvironmentStep() {
       qsConfig={QS_CONFIG}
       readOnly
       selectItem={helpers.setValue}
-      deselectItem={() => field.onChange(null)}
+      deselectItem={() => helpers.setValue(null)}
     />
   );
 }
