@@ -276,14 +276,22 @@ describe('<ProjectForm />', () => {
       1
     );
     await act(async () => {
-      wrapper.find('CredentialLookup').invoke('onBlur')();
-      wrapper.find('CredentialLookup').invoke('onChange')({
+      wrapper
+        .find('CredentialLookup[label="Insights Credential"]')
+        .invoke('onBlur')();
+      wrapper
+        .find('CredentialLookup[label="Insights Credential"]')
+        .invoke('onChange')({
         id: 123,
         name: 'credential',
       });
     });
     wrapper.update();
-    expect(wrapper.find('CredentialLookup').prop('value')).toEqual({
+    expect(
+      wrapper
+        .find('CredentialLookup[label="Insights Credential"]')
+        .prop('value')
+    ).toEqual({
       id: 123,
       name: 'credential',
     });

@@ -22,15 +22,11 @@ function ProjectAdd() {
     } else if (typeof values.credential.id === 'number') {
       values.credential = values.credential.id;
     }
-    if (values.scm_type === 'git') {
-      if (!values.signature_validation_credential) {
-        values.signature_validation_credential = null;
-      } else if (
-        typeof values.signature_validation_credential.id === 'number'
-      ) {
-        values.signature_validation_credential =
-          values.signature_validation_credential.id;
-      }
+    if (!values.signature_validation_credential) {
+      values.signature_validation_credential = null;
+    } else if (typeof values.signature_validation_credential.id === 'number') {
+      values.signature_validation_credential =
+        values.signature_validation_credential.id;
     }
     setFormSubmitError(null);
     try {
