@@ -3639,6 +3639,12 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
     skip_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     diff_mode = serializers.BooleanField(required=False, allow_null=True, default=None)
     verbosity = serializers.ChoiceField(allow_null=True, required=False, default=None, choices=VERBOSITY_CHOICES)
+    execution_environment = serializers.PrimaryKeyRelatedField(queryset=ExecutionEnvironment.objects.all(), required=False, allow_null=True, default=None)
+    labels = serializers.PrimaryKeyRelatedField(many=True, queryset=Label.objects.all(), required=False, allow_null=True, default=None)
+    forks = serializers.IntegerField(required=False, allow_null=True, default=None)
+    job_slice_count = serializers.IntegerField(required=False, allow_null=True, default=None)
+    timeout = serializers.IntegerField(required=False, allow_null=True, default=None)
+    instance_groups = serializers.PrimaryKeyRelatedField(many=True, queryset=InstanceGroup.objects.all(), required=False, allow_null=True, default=None)
     exclude_errors = ()
 
     class Meta:
@@ -3654,6 +3660,12 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
             'skip_tags',
             'diff_mode',
             'verbosity',
+            'execution_environment',
+            'forks',
+            'job_slice_count',
+            'timeout',
+            'labels',
+            'instance_groups',
         )
 
     def get_related(self, obj):
@@ -3661,6 +3673,8 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
         if obj.inventory_id:
             res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory_id})
         res['credentials'] = self.reverse('api:{}_credentials_list'.format(get_type_for_model(self.Meta.model)), kwargs={'pk': obj.pk})
+        res['labels'] = self.reverse('api:schedule_label_list', kwargs={'pk': obj.pk})
+        res['instance_groups'] = self.reverse('api:schedule_instance_group_list', kwargs={'pk': obj.pk})
         return res
 
     def _build_mock_obj(self, attrs):
@@ -3670,7 +3684,16 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
                 setattr(mock_obj, field.name, getattr(self.instance, field.name))
         field_names = set(field.name for field in self.Meta.model._meta.fields)
         for field_name, value in list(attrs.items()):
-            setattr(mock_obj, field_name, value)
+            if field_name == 'labels':
+                for item in value:
+                    getattr(mock_obj, field_name).add(item)
+            elif field_name == 'instance_groups':
+                for item in value:
+                    getattr(mock_obj, field_name).append(item)
+            elif field_name == 'execution_environment':
+                setattr(mock_obj, field_name, value.id)
+            else:
+                setattr(mock_obj, field_name, value)
             if field_name not in field_names:
                 attrs.pop(field_name)
         return mock_obj
@@ -4134,12 +4157,12 @@ class JobLaunchSerializer(BaseSerializer):
     skip_tags = serializers.CharField(required=False, write_only=True, allow_blank=True)
     limit = serializers.CharField(required=False, write_only=True, allow_blank=True)
     verbosity = serializers.ChoiceField(required=False, choices=VERBOSITY_CHOICES, write_only=True)
-    execution_environment = serializers.PrimaryKeyRelatedField(queryset=ExecutionEnvironment.objects.all(), required=False, write_only=True)
-    labels = serializers.PrimaryKeyRelatedField(many=True, queryset=Label.objects.all(), required=False, write_only=True)
+    execution_environment = serializers.PrimaryKeyRelatedField(queryset=ExecutionEnvironment.objects.all(), required=False)
+    labels = serializers.PrimaryKeyRelatedField(many=True, queryset=Label.objects.all(), required=False)
     forks = serializers.IntegerField(required=False, write_only=True, default=1)
     job_slice_count = serializers.IntegerField(required=False, write_only=True, default=0)
     timeout = serializers.IntegerField(required=False, write_only=True, default=0)
-    instance_groups = serializers.PrimaryKeyRelatedField(many=True, queryset=InstanceGroup.objects.all(), required=False, write_only=True)
+    instance_groups = serializers.PrimaryKeyRelatedField(many=True, queryset=InstanceGroup.objects.all(), required=False)
 
     class Meta:
         model = JobTemplate

@@ -618,6 +618,23 @@ class ScheduleCredentialsList(LaunchConfigCredentialsBase):
     parent_model = models.Schedule
 
 
+class ScheduleLabelsList(SubListAPIView):
+    model = models.Label
+    serializer_class = serializers.LabelSerializer
+    parent_model = models.Schedule
+    relationship = 'labels'
+    parent_key = 'schedule'
+
+
+class ScheduleInstanceGroupList(SubListAPIView):
+
+    model = models.InstanceGroup
+    serializer_class = serializers.InstanceGroupSerializer
+    parent_model = models.Schedule
+    relationship = 'instance_groups'
+    parent_key = 'schedule'
+
+
 class ScheduleUnifiedJobsList(SubListAPIView):
 
     model = models.UnifiedJob
