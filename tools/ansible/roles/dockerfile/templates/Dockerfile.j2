@@ -46,6 +46,13 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
 
 RUN pip3 install virtualenv build
 
+{% if image_architecture == 'ppc64le'  %}
+    RUN dnf -y update && dnf install -y wget && \
+    wget https://static.rust-lang.org/dist/rust-1.41.0-powerpc64le-unknown-linux-gnu.tar.gz && \
+    tar -zxvf rust-1.41.0-powerpc64le-unknown-linux-gnu.tar.gz && \
+    cd rust-1.41.0-powerpc64le-unknown-linux-gnu && \
+    sh install.sh ;
+{% endif %}
 
 # Install & build requirements
 ADD Makefile /tmp/Makefile

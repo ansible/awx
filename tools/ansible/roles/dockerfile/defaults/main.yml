@@ -9,5 +9,4 @@ template_dest: '_build'
 receptor_image: quay.io/ansible/receptor:devel
 
 # Helper vars to construct the proper download URL for the current architecture
-tini_architecture: '{{ { "x86_64": "amd64", "aarch64": "arm64", "armv7": "arm" }[ansible_facts.architecture] }}'
-kubectl_architecture: '{{ { "x86_64": "amd64", "aarch64": "arm64", "armv7": "arm" }[ansible_facts.architecture] }}'
+image_architecture: '{{ { "x86_64": "amd64", "aarch64": "arm64", "armv7": "arm", "ppc64le": "ppc64le" }[ansible_facts.architecture] }}'
