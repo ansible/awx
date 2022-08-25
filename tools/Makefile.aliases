@@ -1,0 +1,53 @@
+## ALIAS for docker-compose/sources for backwards compatibility
+docker-compose-sources: docker-compose/sources
+
+## ALIAS for docker-compose/bash for backwards compatibility
+docker-compose-test: docker-compose/bash
+
+## ALIAS for docker-compose/test for backwards compatibility
+docker-compose-runtest: docker-compose/test
+
+## ALIAS for docker-compose/swagger for backwards compatibility
+docker-compose-build-swagger: docker-compose/swagger
+
+## ALIAS for docker-compose/image-build for backwards compatibility
+docker-compose-build: docker-compose/image-build
+
+## ALIAS for docker-compose/elk for backwards compatibility
+docker-compose-elk: docker-compose/elk
+
+## ALIAS for docker-compose-cluster-elk for backwards compatibility
+docker-compose-cluster-elk: docker-compose/elk-cluster
+
+## ALIAS for docker-compose/container-group for backwards compatibility
+docker-compose-container-group: docker-compose/container-group
+
+## ALIAS for Dockerfile.docker-compose for backwards compatibility
+Dockerfile: Dockerfile.docker-compose
+
+## ALIAS for docker-compose/credential-plugins for backwards compatibility
+docker-compose-credential-plugins: docker-compose/credential-plugins
+
+## ALIAS for docker-compose/remove for backwards compatibility
+docker-compose-clean: docker-compose/remove
+
+## ALIAS for docker-compose/container-group/remove for backwards compatibility
+docker-compose-container-group-clean: docker-compose/container-group/remove
+
+## ALIAS for docker-compose/clean-volumes for backwards compatibility
+docker-compose-clean-volumes: docker-compose/clean-volumes
+
+## ALIAS for docker-compose/clean-volumes for backwards compatibility
+docker-clean-volumes: docker-compose/clean-volumes
+
+## ALIAS for docker-compose/force-clean-images for backwards compatibility
+docker-clean: docker-compose/force-clean-images
+
+## ALIAS for docker-compose/elk/remove for backwards compatibility
+clean-elk: docker-compose/elk/remove
+
+## ALIAS for docker-compose/refresh for backwards compatibility
+docker-refresh: docker-compose/refresh
+
+## ALIAS for kube-dev/image-build for backwards compatibility
+awx-kube-dev-build: kube-dev/image-build

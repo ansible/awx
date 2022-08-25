@@ -1,33 +1,17 @@
+-include tools/Makefile
+-include tools/Makefile.aliases
+
 PYTHON ?= python3.9
 OFFICIAL ?= no
+
 NODE ?= node
 NPM_BIN ?= npm
 CHROMIUM_BIN=/tmp/chrome-linux/chrome
-GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
-MANAGEMENT_COMMAND ?= awx-manage
+
 VERSION := $(shell $(PYTHON) tools/scripts/scm_version.py)
 COLLECTION_VERSION := $(shell $(PYTHON) tools/scripts/scm_version.py | cut -d . -f 1-3)
 
-# NOTE: This defaults the container image version to the branch that's active
-COMPOSE_TAG ?= $(GIT_BRANCH)
-MAIN_NODE_TYPE ?= hybrid
-# If set to true docker-compose will also start a keycloak instance
-KEYCLOAK ?= false
-# If set to true docker-compose will also start an ldap instance
-LDAP ?= false
-# If set to true docker-compose will also start a splunk instance
-SPLUNK ?= false
-# If set to true docker-compose will also start a prometheus instance
-PROMETHEUS ?= false
-# If set to true docker-compose will also start a grafana instance
-GRAFANA ?= false
-
 VENV_BASE ?= /var/lib/awx/venv
-
-DEV_DOCKER_TAG_BASE ?= ghcr.io/ansible
-DEVEL_IMAGE_NAME ?= $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
-
-RECEPTOR_IMAGE ?= quay.io/ansible/receptor:devel
 
 # Python packages to install only from source (not from binary wheels)
 # Comma separated list
@@ -45,14 +29,6 @@ SDIST_COMMAND ?= sdist
 SDIST_TAR_FILE ?= $(SDIST_TAR_NAME).tar.gz
 
 I18N_FLAG_FILE = .i18n_built
-
-.PHONY: awx-link clean clean-tmp clean-venv requirements requirements_dev \
-	develop refresh adduser migrate dbchange \
-	receiver test test_unit test_coverage coverage_html \
-	sdist \
-	ui-release ui-devel \
-	VERSION PYTHON_VERSION docker-compose-sources \
-	.git/hooks/pre-commit
 
 clean-tmp:
 	rm -rf tmp/
@@ -146,101 +122,8 @@ develop:
 	    $(PYTHON) setup.py develop; \
 	fi
 
-version_file:
-	mkdir -p /var/lib/awx/; \
-	if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	$(PYTHON) -c "import awx; print(awx.__version__)" > /var/lib/awx/.awx_version; \
-
 ## Refresh development environment after pulling new code.
 refresh: clean requirements_dev version_file develop migrate
-
-## Create Django superuser.
-adduser:
-	$(MANAGEMENT_COMMAND) createsuperuser
-
-## Create database tables and apply any new migrations.
-migrate:
-	if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	$(MANAGEMENT_COMMAND) migrate --noinput
-
-## Run after making changes to the models to create a new migration.
-dbchange:
-	$(MANAGEMENT_COMMAND) makemigrations
-
-supervisor:
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	supervisord --pidfile=/tmp/supervisor_pid -n
-
-collectstatic:
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	mkdir -p awx/public/static && $(PYTHON) manage.py collectstatic --clear --noinput > /dev/null 2>&1
-
-DEV_RELOAD_COMMAND ?= supervisorctl restart tower-processes:*
-
-uwsgi: collectstatic
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	uwsgi -b 32768 \
-	    --socket 127.0.0.1:8050 \
-	    --module=awx.wsgi:application \
-	    --home=/var/lib/awx/venv/awx \
-	    --chdir=/awx_devel/ \
-	    --vacuum \
-	    --processes=5 \
-	    --harakiri=120 --master \
-	    --no-orphans \
-	    --max-requests=1000 \
-	    --stats /tmp/stats.socket \
-	    --lazy-apps \
-	    --logformat "%(addr) %(method) %(uri) - %(proto) %(status)"
-
-awx-autoreload:
-	@/awx_devel/tools/docker-compose/awx-autoreload /awx_devel/awx "$(DEV_RELOAD_COMMAND)"
-
-daphne:
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	daphne -b 127.0.0.1 -p 8051 awx.asgi:channel_layer
-
-wsbroadcast:
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	$(PYTHON) manage.py run_wsbroadcast
-
-## Run to start the background task dispatcher for development.
-dispatcher:
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	$(PYTHON) manage.py run_dispatcher
-
-
-## Run to start the zeromq callback receiver
-receiver:
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	$(PYTHON) manage.py run_callback_receiver
-
-nginx:
-	nginx -g "daemon off;"
-
-jupyter:
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	$(MANAGEMENT_COMMAND) shell_plus --notebook
 
 reports:
 	mkdir -p $@
@@ -248,6 +131,8 @@ reports:
 black: reports
 	@command -v black >/dev/null 2>&1 || { echo "could not find black on your PATH, you may need to \`pip install black\`, or set AWX_IGNORE_BLACK=1" && exit 1; }
 	@(set -o pipefail && $@ $(BLACK_ARGS) awx awxkit awx_collection | tee reports/$@.report)
+
+check: black
 
 .git/hooks/pre-commit:
 	@echo "if [ -x pre-commit.sh ]; then" > .git/hooks/pre-commit
@@ -264,8 +149,6 @@ swagger: reports
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	(set -o pipefail && py.test $(PYTEST_ARGS) awx/conf/tests/functional awx/main/tests/functional/api awx/main/tests/docs --release=$(VERSION_TARGET) | tee reports/$@.report)
-
-check: black
 
 api-lint:
 	BLACK_ARGS="--check" make black
@@ -393,8 +276,6 @@ $(UI_BUILD_FLAG_FILE): awx/ui/node_modules
 	cp -r awx/ui/build/static/media/* awx/public/static/media
 	touch $@
 
-
-
 ui-release: $(UI_BUILD_FLAG_FILE)
 
 ui-devel: awx/ui/node_modules
@@ -441,52 +322,7 @@ sdist: dist/$(SDIST_TAR_FILE)
 	@echo dist/$(SDIST_TAR_FILE)
 	@echo "#############################################"
 
-# This directory is bind-mounted inside of the development container and
-# needs to be pre-created for permissions to be set correctly. Otherwise,
-# Docker will create this directory as root.
-awx/projects:
-	@mkdir -p $@
 
-COMPOSE_UP_OPTS ?=
-COMPOSE_OPTS ?=
-CONTROL_PLANE_NODE_COUNT ?= 1
-EXECUTION_NODE_COUNT ?= 2
-MINIKUBE_CONTAINER_GROUP ?= false
-
-docker-compose-sources: .git/hooks/pre-commit
-	@if [ $(MINIKUBE_CONTAINER_GROUP) = true ]; then\
-	    ansible-playbook -i tools/docker-compose/inventory tools/docker-compose-minikube/deploy.yml; \
-	fi;
-
-	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/sources.yml \
-	    -e awx_image=$(DEV_DOCKER_TAG_BASE)/awx_devel \
-	    -e awx_image_tag=$(COMPOSE_TAG) \
-	    -e receptor_image=$(RECEPTOR_IMAGE) \
-	    -e control_plane_node_count=$(CONTROL_PLANE_NODE_COUNT) \
-	    -e execution_node_count=$(EXECUTION_NODE_COUNT) \
-	    -e minikube_container_group=$(MINIKUBE_CONTAINER_GROUP) \
-	    -e enable_keycloak=$(KEYCLOAK) \
-	    -e enable_ldap=$(LDAP) \
-	    -e enable_splunk=$(SPLUNK) \
-	    -e enable_prometheus=$(PROMETHEUS) \
-	    -e enable_grafana=$(GRAFANA)
-
-
-docker-compose: awx/projects docker-compose-sources
-	docker-compose -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_OPTS) up $(COMPOSE_UP_OPTS) --remove-orphans
-
-docker-compose-credential-plugins: awx/projects docker-compose-sources
-	echo -e "\033[0;31mTo generate a CyberArk Conjur API key: docker exec -it tools_conjur_1 conjurctl account create quick-start\033[0m"
-	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/docker-credential-plugins-override.yml up --no-recreate awx_1 --remove-orphans
-
-docker-compose-test: awx/projects docker-compose-sources
-	docker-compose -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports awx_1 /bin/bash
-
-docker-compose-runtest: awx/projects docker-compose-sources
-	docker-compose -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports awx_1 /start_tests.sh
-
-docker-compose-build-swagger: awx/projects docker-compose-sources
-	docker-compose -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports --no-deps awx_1 /start_tests.sh swagger
 
 SCHEMA_DIFF_BASE_BRANCH ?= devel
 detect-schema-change: genschema
@@ -494,75 +330,11 @@ detect-schema-change: genschema
 	# Ignore differences in whitespace with -b
 	diff -u -b reference-schema.json schema.json
 
-docker-compose-clean: awx/projects
-	docker-compose -f tools/docker-compose/_sources/docker-compose.yml rm -sf
-
-docker-compose-container-group-clean:
-	@if [ -f "tools/docker-compose-minikube/_sources/minikube" ]; then \
-	    tools/docker-compose-minikube/_sources/minikube delete; \
-	fi
-	rm -rf tools/docker-compose-minikube/_sources/
-
-## Base development image build
-docker-compose-build:
-	ansible-playbook tools/ansible/dockerfile.yml -e build_dev=True -e receptor_image=$(RECEPTOR_IMAGE)
-	DOCKER_BUILDKIT=1 docker build -t $(DEVEL_IMAGE_NAME) \
-	    --build-arg BUILDKIT_INLINE_CACHE=1 \
-	    --cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .
-
-docker-clean:
-	$(foreach container_id,$(shell docker ps -f name=tools_awx -aq && docker ps -f name=tools_receptor -aq),docker stop $(container_id); docker rm -f $(container_id);)
-	if [ "$(shell docker images | grep awx_devel)" ]; then \
-	  docker images | grep awx_devel | awk '{print $$3}' | xargs docker rmi --force; \
-	fi
-
-docker-clean-volumes: docker-compose-clean docker-compose-container-group-clean
-	docker volume rm -f tools_awx_db tools_grafana_storage tools_prometheus_storage $(docker volume ls --filter name=tools_redis_socket_ -q)
-
-docker-refresh: docker-clean docker-compose
-
-## Docker Development Environment with Elastic Stack Connected
-docker-compose-elk: awx/projects docker-compose-sources
-	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/elastic/docker-compose.logstash-link.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
-
-docker-compose-cluster-elk: awx/projects docker-compose-sources
-	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
-
-docker-compose-container-group:
-	MINIKUBE_CONTAINER_GROUP=true make docker-compose
-
-clean-elk:
-	docker stop tools_kibana_1
-	docker stop tools_logstash_1
-	docker stop tools_elasticsearch_1
-	docker rm tools_logstash_1
-	docker rm tools_elasticsearch_1
-	docker rm tools_kibana_1
-
-psql-container:
-	docker run -it --net tools_default --rm postgres:12 sh -c 'exec psql -h "postgres" -p "5432" -U postgres'
-
 VERSION:
 	@echo "awx: $(VERSION)"
 
 PYTHON_VERSION:
 	@echo "$(PYTHON)" | sed 's:python::'
-
-Dockerfile: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
-	ansible-playbook tools/ansible/dockerfile.yml -e receptor_image=$(RECEPTOR_IMAGE)
-
-Dockerfile.kube-dev: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
-	ansible-playbook tools/ansible/dockerfile.yml \
-	    -e dockerfile_name=Dockerfile.kube-dev \
-	    -e kube_dev=True \
-	    -e template_dest=_build_kube_dev \
-	    -e receptor_image=$(RECEPTOR_IMAGE)
-
-awx-kube-dev-build: Dockerfile.kube-dev
-	DOCKER_BUILDKIT=1 docker build -f Dockerfile.kube-dev \
-	    --build-arg BUILDKIT_INLINE_CACHE=1 \
-	    --cache-from=$(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) \
-	    -t $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) .
 
 
 # Translation TASKS
@@ -578,29 +350,28 @@ po: $(UI_BUILD_FLAG_FILE)
 
 LANG = "en_us"
 ## generate API django .pot .po
-messages:
+messages: ## messages
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(PYTHON) manage.py makemessages -l $(LANG) --keep-pot
 
+## ¯\_(ツ)_/¯ dont know what this does
 print-%:
 	@echo $($*)
 
-# HELP related targets
-# --------------------------------------
-
-HELP_FILTER=.PHONY
+# ------------------------------------------------------------------------------#
+# Help related targets                                                          #
+# ------------------------------------------------------------------------------#
 
 ## Display help targets
 help:
-	@printf "Available targets:\n"
-	@make -s help/generate | grep -vE "\w($(HELP_FILTER))"
+	@make -s help/all | grep -v "ALIAS"
 
 ## Display help for all targets
 help/all:
 	@printf "Available targets:\n"
-	@make -s help/generate
+	@make -s help/generate | grep -v ".PHONY"
 
 ## Generate help output from MAKEFILE_LIST
 help/generate:
@@ -621,3 +392,11 @@ help/generate:
 	} \
 	{ lastLine = $$0 }' $(MAKEFILE_LIST) | sort -u
 	@printf "\n"
+
+## Display help for a specific target folder
+help/%:
+	@make -s help MAKEFILE_LIST="$*/Makefile"
+
+## Display help for a specific target folder
+help/%/aliases:
+	@make -s help/all MAKEFILE_LIST="$*/Makefile.aliases"
