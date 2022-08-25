@@ -76,7 +76,9 @@ function ScheduleAdd({
       submitValues.execution_environment = execution_environment.id;
     }
 
-    submitValues.instance_groups = instance_groups.map((s) => s.id);
+    submitValues.instance_groups = instance_groups
+      ? instance_groups.map((s) => s.id)
+      : [];
 
     try {
       if (launchConfiguration?.ask_labels_on_launch) {
@@ -84,13 +86,15 @@ function ScheduleAdd({
         const newLabels = [];
         const labelRequests = [];
         let organizationId = resource.organization;
-        values.labels.forEach((label) => {
-          if (typeof label.id !== 'number') {
-            newLabels.push(label);
-          } else {
-            labelIds.push(label.id);
-          }
-        });
+        if (values.labels) {
+          values.labels.forEach((label) => {
+            if (typeof label.id !== 'number') {
+              newLabels.push(label);
+            } else {
+              labelIds.push(label.id);
+            }
+          });
+        }
 
         if (newLabels.length > 0) {
           if (!organizationId) {
