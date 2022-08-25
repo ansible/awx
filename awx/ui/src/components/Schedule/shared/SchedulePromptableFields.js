@@ -17,6 +17,7 @@ function SchedulePromptableFields({
   credentials,
   resource,
   resourceDefaultCredentials,
+  labels,
 }) {
   const { setFieldTouched, values, initialValues, resetForm } =
     useFormikContext();
@@ -33,7 +34,8 @@ function SchedulePromptableFields({
     schedule,
     resource,
     credentials,
-    resourceDefaultCredentials
+    resourceDefaultCredentials,
+    labels
   );
   const [showDescription, setShowDescription] = useState(false);
   const { error, dismissError } = useDismissableError(contentError);
