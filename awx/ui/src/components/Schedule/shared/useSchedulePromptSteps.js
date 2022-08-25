@@ -3,6 +3,8 @@ import { useFormikContext } from 'formik';
 import { t } from '@lingui/macro';
 import useInventoryStep from '../../LaunchPrompt/steps/useInventoryStep';
 import useCredentialsStep from '../../LaunchPrompt/steps/useCredentialsStep';
+import useExecutionEnvironmentStep from '../../LaunchPrompt/steps/useExecutionEnvironmentStep';
+import useInstanceGroupsStep from '../../LaunchPrompt/steps/useInstanceGroupsStep';
 import useOtherPromptsStep from '../../LaunchPrompt/steps/useOtherPromptsStep';
 import useSurveyStep from '../../LaunchPrompt/steps/useSurveyStep';
 import usePreviewStep from '../../LaunchPrompt/steps/usePreviewStep';
@@ -12,9 +14,9 @@ export default function useSchedulePromptSteps(
   launchConfig,
   schedule,
   resource,
-
   scheduleCredentials,
-  resourceDefaultCredentials
+  resourceDefaultCredentials,
+  labels
 ) {
   const sourceOfValues =
     (Object.keys(schedule).length > 0 && schedule) || resource;
@@ -28,7 +30,9 @@ export default function useSchedulePromptSteps(
       sourceOfValues,
       resourceDefaultCredentials
     ),
-    useOtherPromptsStep(launchConfig, sourceOfValues),
+    useExecutionEnvironmentStep(launchConfig, resource),
+    useInstanceGroupsStep(launchConfig, resource),
+    useOtherPromptsStep(launchConfig, sourceOfValues, labels),
     useSurveyStep(launchConfig, surveyConfig, sourceOfValues, visited),
   ];
 
@@ -37,7 +41,6 @@ export default function useSchedulePromptSteps(
   steps.push(
     usePreviewStep(
       launchConfig,
-
       resource,
       surveyConfig,
       hasErrors,
@@ -130,6 +133,8 @@ export default function useSchedulePromptSteps(
       setVisited({
         inventory: true,
         credentials: true,
+        executionEnvironment: true,
+        instanceGroups: true,
         other: true,
         survey: true,
         preview: true,
