@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { t, Plural } from '@lingui/macro';
 import {
   Button,
@@ -11,7 +11,9 @@ import {
   CodeBlockCode,
   Tooltip,
   Slider,
+  Chip,
 } from '@patternfly/react-core';
+import { DownloadIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 
 import { useConfig } from 'contexts/Config';
@@ -27,6 +29,7 @@ import ContentLoading from 'components/ContentLoading';
 import { Detail, DetailList } from 'components/DetailList';
 import StatusLabel from 'components/StatusLabel';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
+import ChipGroup from 'components/ChipGroup';
 
 const Unavailable = styled.span`
   color: var(--pf-global--danger-color--200);
@@ -65,10 +68,18 @@ function InstanceDetail({ setBreadcrumb }) {
     isLoading,
     error: contentError,
     request: fetchDetails,
-    result: instance,
+    result: { instance, instanceGroups },
   } = useRequest(
     useCallback(async () => {
-      const { data: details } = await InstancesAPI.readDetail(id);
+      const [
+        { data: details },
+        {
+          data: { results },
+        },
+      ] = await Promise.all([
+        InstancesAPI.readDetail(id),
+        InstancesAPI.readInstanceGroup(id),
+      ]);
 
       if (details.node_type !== 'hop') {
         const { data: healthCheckData } =
@@ -83,9 +94,12 @@ function InstanceDetail({ setBreadcrumb }) {
           details.capacity_adjustment
         )
       );
-      return details;
+      return {
+        instance: details,
+        instanceGroups: results,
+      };
     }, [id]),
-    {}
+    { instance: {}, instanceGroups: [] }
   );
   useEffect(() => {
     fetchDetails();
@@ -127,6 +141,11 @@ function InstanceDetail({ setBreadcrumb }) {
     debounceUpdateInstance({ capacity_adjustment: roundedValue });
   };
 
+  const buildLinkURL = (inst) =>
+    inst.is_container_group
+      ? '/instance_groups/container_group/'
+      : '/instance_groups/';
+
   const { error, dismissError } = useDismissableError(
     updateInstanceError || healthCheckError
   );
@@ -137,6 +156,7 @@ function InstanceDetail({ setBreadcrumb }) {
     return <ContentLoading />;
   }
   const isHopNode = instance.node_type === 'hop';
+
   return (
     <CardBody>
       <DetailList gutter="sm">
@@ -158,12 +178,60 @@ function InstanceDetail({ setBreadcrumb }) {
               label={t`Policy Type`}
               value={instance.managed_by_policy ? t`Auto` : t`Manual`}
             />
+            <Detail label={t`Host`} value={instance.ip_address} />
             <Detail label={t`Running Jobs`} value={instance.jobs_running} />
             <Detail label={t`Total Jobs`} value={instance.jobs_total} />
+            {instanceGroups && (
+              <Detail
+                fullWidth
+                label={t`Instance Groups`}
+                helpText={t`The Instance Groups to which this instance belongs.`}
+                value={
+                  <ChipGroup
+                    numChips={5}
+                    totalChips={instanceGroups.length}
+                    ouiaId="instance-group-chips"
+                  >
+                    {instanceGroups.map((ig) => (
+                      <Link
+                        to={`${buildLinkURL(ig)}${ig.id}/details`}
+                        key={ig.id}
+                      >
+                        <Chip
+                          key={ig.id}
+                          isReadOnly
+                          ouiaId={`instance-group-${ig.id}-chip`}
+                        >
+                          {ig.name}
+                        </Chip>
+                      </Link>
+                    ))}
+                  </ChipGroup>
+                }
+                isEmpty={instanceGroups.length === 0}
+              />
+            )}
             <Detail
               label={t`Last Health Check`}
               value={formatDateString(healthCheck?.last_health_check)}
             />
+            {instance.related?.install_bundle && (
+              <Detail
+                label={t`Install Bundle`}
+                value={
+                  <Tooltip content={t`Click to download bundle`}>
+                    <Button
+                      component="a"
+                      href={`${instance.related?.install_bundle}`}
+                      target="_blank"
+                      variant="secondary"
+                    >
+                      <DownloadIcon />
+                    </Button>
+                  </Tooltip>
+                }
+              />
+            )}
             <Detail
               label={t`Capacity Adjustment`}
               value={
