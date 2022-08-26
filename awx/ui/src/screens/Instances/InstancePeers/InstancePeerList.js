@@ -112,6 +112,19 @@ function InstancePeerList() {
             key: 'hostname',
           },
         ]}
+        headerRow={
+          <HeaderRow qsConfig={QS_CONFIG} isExpandable>
+            <HeaderCell
+              tooltip={t`Cannot run health check on hop nodes.`}
+              sortKey="hostname"
+            >{t`Name`}</HeaderCell>
+            <HeaderCell sortKey="errors">{t`Status`}</HeaderCell>
+            <HeaderCell sortKey="node_type">{t`Node Type`}</HeaderCell>
+            <HeaderCell>{t`Capacity Adjustment`}</HeaderCell>
+            <HeaderCell>{t`Used Capacity`}</HeaderCell>
+            <HeaderCell>{t`Actions`}</HeaderCell>
+          </HeaderRow>
+        }
         renderToolbar={(props) => (
           <DataListToolbar
             {...props}
@@ -128,11 +141,6 @@ function InstancePeerList() {
             ]}
           />
         )}
-        headerRow={
-          <HeaderRow qsConfig={QS_CONFIG}>
-            <HeaderCell sortKey="hostname">{t`Name`}</HeaderCell>
-          </HeaderRow>
-        }
         renderRow={(peer, index) => (
           <InstancePeerListItem
             onSelect={() => handleSelect(peer)}
