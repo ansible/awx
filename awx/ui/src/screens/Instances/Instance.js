@@ -37,7 +37,9 @@ function Instance({ setBreadcrumb }) {
   } = useRequest(
     useCallback(async () => {
       const { data } = await SettingsAPI.readCategory('system');
-      return data.IS_K8S;
+      return {
+        isK8s: data.IS_K8S,
+      };
     }, []),
     { isK8s: false, isLoading: true }
   );
