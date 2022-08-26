@@ -25,6 +25,7 @@ describe('<InstanceDetail/>', () => {
 
     InstancesAPI.readDetail.mockResolvedValue({
       data: {
+        related: {},
         id: 1,
         type: 'instance',
         url: '/api/v2/instances/1/',
@@ -49,6 +50,16 @@ describe('<InstanceDetail/>', () => {
         enabled: true,
         managed_by_policy: true,
         node_type: 'hybrid',
+      },
+    });
+    InstancesAPI.readInstanceGroup.mockResolvedValue({
+      data: {
+        results: [
+          {
+            id: 1,
+            name: 'Foo',
+          },
+        ],
       },
     });
     InstancesAPI.readHealthCheckDetail.mockResolvedValue({
