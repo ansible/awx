@@ -442,6 +442,12 @@ def on_instance_group_deleted(sender, instance, using, **kwargs):
 
 @receiver(post_delete, sender=Instance)
 def on_instance_deleted(sender, instance, using, **kwargs):
+    if settings.IS_K8S and instance.node_type in ('execution', 'hop'):
+        from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
+
+        # on removal broadcast to all control instance to update their receptor configs
+        connection.on_commit(lambda: write_receptor_config.apply_async(queue='tower_broadcast_all'))
+
     schedule_policy_task()
 
 
