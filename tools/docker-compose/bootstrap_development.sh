@@ -21,10 +21,9 @@ fi
 
 if output=$(awx-manage createsuperuser --noinput --username=admin --email=admin@localhost 2> /dev/null); then
     echo $output
-    admin_password=$(openssl rand -base64 12)
-    echo "Admin password: ${admin_password}"
-    awx-manage update_password --username=admin --password=${admin_password}
 fi
+echo "Admin password: ${DJANGO_SUPERUSER_PASSWORD}"
+
 awx-manage create_preload_data
 awx-manage register_default_execution_environments
 
