@@ -469,7 +469,8 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e enable_ldap=$(LDAP) \
 	    -e enable_splunk=$(SPLUNK) \
 	    -e enable_prometheus=$(PROMETHEUS) \
-	    -e enable_grafana=$(GRAFANA)
+	    -e enable_grafana=$(GRAFANA) \
+	    -e admin_password=$(ADMIN_PASSWORD)
 
 
 docker-compose: awx/projects docker-compose-sources
