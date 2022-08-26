@@ -384,6 +384,8 @@ class InstanceDetail(RetrieveUpdateAPIView):
             obj = self.get_object()
             obj.set_capacity_value()
             obj.save(update_fields=['capacity'])
+            for instance in models.Instance.objects.filter(node_type__in=['control', 'hybrid']):
+                models.InstanceLink.objects.create(source=instance, target=obj)
             r.data = serializers.InstanceSerializer(obj, context=self.get_serializer_context()).to_representation(obj)
         return r
 
@@ -400,6 +402,17 @@ class InstanceUnifiedJobsList(SubListAPIView):
         qs = get_user_queryset(self.request.user, models.UnifiedJob)
         qs = qs.filter(execution_node=po.hostname)
         return qs
+
+
+class InstancePeersList(SubListAPIView):
+
+    name = _("Instance Peers")
+    parent_model = models.Instance
+    model = models.Instance
+    serializer_class = serializers.InstanceSerializer
+    parent_access = 'read'
+    search_fields = {'hostname'}
+    relationship = 'peers'
 
 
 class InstanceInstanceGroupsList(InstanceGroupMembershipMixin, SubListCreateAttachDetachAPIView):

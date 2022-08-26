@@ -579,6 +579,7 @@ class InstanceAccess(BaseAccess):
         return super(InstanceAccess, self).can_unattach(obj, sub_obj, relationship, relationship, data=data)
 
     def can_add(self, data):
+
         return self.user.is_superuser
 
     def can_change(self, obj, data):
