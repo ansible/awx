@@ -19,12 +19,11 @@ def scm_revision_file(tmpdir_factory):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('node_type', ('control', 'hybrid'))
+@pytest.mark.parametrize('node_type', ('control. hybrid'))
 def test_no_worker_info_on_AWX_nodes(node_type):
     hostname = 'us-south-3-compute.invalid'
     Instance.objects.create(hostname=hostname, node_type=node_type)
-    with pytest.raises(RuntimeError):
-        execution_node_health_check(hostname)
+    assert execution_node_health_check(hostname) is None
 
 
 @pytest.fixture

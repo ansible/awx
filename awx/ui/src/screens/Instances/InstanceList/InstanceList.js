@@ -33,7 +33,7 @@ function InstanceList() {
   const { me } = useConfig();
 
   const {
-    result: { instances, count, relatedSearchableKeys, searchableKeys, isK8 },
+    result: { instances, count, relatedSearchableKeys, searchableKeys, isK8s },
     error: contentError,
     isLoading,
     request: fetchInstances,
@@ -47,7 +47,7 @@ function InstanceList() {
       ]);
       return {
         instances: response.data.results,
-        isK8: sysSettings.data.IS_K8S,
+        isK8s: sysSettings.data.IS_K8S,
         count: response.data.count,
         actions: responseActions.data.actions,
         relatedSearchableKeys: (
@@ -62,7 +62,7 @@ function InstanceList() {
       actions: {},
       relatedSearchableKeys: [],
       searchableKeys: [],
-      isK8: false,
+      isK8s: false,
     }
   );
 
@@ -142,7 +142,7 @@ function InstanceList() {
                 onExpandAll={expandAll}
                 qsConfig={QS_CONFIG}
                 additionalControls={[
-                  ...(isK8 && me.is_superuser
+                  ...(isK8s && me.is_superuser
                     ? [
                         <ToolbarAddButton
                           ouiaId="instances-add-button"
