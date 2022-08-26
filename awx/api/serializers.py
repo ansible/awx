@@ -4881,7 +4881,7 @@ class InstanceSerializer(BaseSerializer):
 
     class Meta:
         model = Instance
-        read_only_fields = ('ip_address', 'uuid', 'version', 'node_state')
+        read_only_fields = ('ip_address', 'uuid', 'version')
         fields = (
             'id',
             'type',
@@ -4956,6 +4956,21 @@ class InstanceSerializer(BaseSerializer):
         else:
             if self.instance.node_type != value:
                 raise serializers.ValidationError("Cannot change node type.")
+
+        return value
+
+    def validate_node_state(self, value):
+        if self.instance:
+            if value != self.instance.node_state:
+                if not settings.IS_K8S:
+                    raise serializers.ValidationError("Can only change the state on Kubernetes or OpenShift.")
+                if value != Instance.States.DEPROVISIONING:
+                    raise serializers.ValidationError("Can only change instances to the 'deprovisioning' state.")
+                if self.instance.node_type not in (Instance.Types.EXECUTION,):
+                    raise serializers.ValidationError("Can only deprovision execution nodes.")
+        else:
+            if value and value != Instance.States.INSTALLED:
+                raise serializers.ValidationError("Can only create instances in the 'installed' state.")
 
         return value
 
