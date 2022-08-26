@@ -39,7 +39,19 @@ export default function buildRuleSet(values) {
     set.rrule(new RRule(rule));
   });
 
-  // TODO: exclusions
+  frequencies.forEach((frequency) => {
+    if (!values.exceptionFrequency?.includes(frequency)) {
+      return;
+    }
+    const rule = buildRuleObj({
+      startDate: values.startDate,
+      startTime: values.startTime,
+      timezone: values.timezone,
+      frequency,
+      ...values.exceptionOptions[frequency],
+    });
+    set.exrule(new RRule(rule));
+  });
 
   return set;
 }
