@@ -5,7 +5,6 @@ import { t } from '@lingui/macro';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import {
-  Badge,
   Dropdown,
   DropdownItem,
   DropdownToggle,
@@ -14,12 +13,10 @@ import {
   PageHeaderToolsGroup,
   PageHeaderToolsItem,
   Tooltip,
+  NotificationBadge,
+  NotificationBadgeVariant,
 } from '@patternfly/react-core';
-import {
-  BellIcon,
-  QuestionCircleIcon,
-  UserIcon,
-} from '@patternfly/react-icons';
+import { QuestionCircleIcon, UserIcon } from '@patternfly/react-icons';
 import { WorkflowApprovalsAPI } from 'api';
 import useRequest from 'hooks/useRequest';
 import getDocsBaseUrl from 'util/getDocsBaseUrl';
@@ -31,10 +28,6 @@ const PendingWorkflowApprovals = styled.div`
   align-items: center;
   padding: 10px;
   margin-right: 10px;
-`;
-
-const PendingWorkflowApprovalBadge = styled(Badge)`
-  margin-left: 10px;
 `;
 
 function PageHeaderToolbar({
@@ -84,13 +77,15 @@ function PageHeaderToolbar({
           <PageHeaderToolsItem>
             <Link to="/workflow_approvals?workflow_approvals.status=pending">
               <PendingWorkflowApprovals>
-                <BellIcon color="white" />
-                <PendingWorkflowApprovalBadge
+                <NotificationBadge
                   id="toolbar-workflow-approval-badge"
-                  isRead={pendingApprovalsCount === 0}
-                >
-                  {pendingApprovalsCount}
-                </PendingWorkflowApprovalBadge>
+                  count={pendingApprovalsCount}
+                  variant={
+                    pendingApprovalsCount === 0
+                      ? NotificationBadgeVariant.read
+                      : NotificationBadgeVariant.unread
+                  }
+                />
               </PendingWorkflowApprovals>
             </Link>
           </PageHeaderToolsItem>
