@@ -9,12 +9,12 @@ import {
   DropdownItem,
   DropdownToggle,
   DropdownPosition,
+  NotificationBadge,
+  NotificationBadgeVariant,
   PageHeaderTools,
   PageHeaderToolsGroup,
   PageHeaderToolsItem,
   Tooltip,
-  NotificationBadge,
-  NotificationBadgeVariant,
 } from '@patternfly/react-core';
 import { QuestionCircleIcon, UserIcon } from '@patternfly/react-icons';
 import { WorkflowApprovalsAPI } from 'api';
