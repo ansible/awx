@@ -1,14 +1,8 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { t } from '@lingui/macro';
 import { Route, Switch, useLocation } from 'react-router-dom';
-import { Card, PageSection } from '@patternfly/react-core';
-
-import { useUserProfile } from 'contexts/Config';
-import useRequest from 'hooks/useRequest';
-import { SettingsAPI } from 'api';
 import ScreenHeader from 'components/ScreenHeader';
-import ContentLoading from 'components/ContentLoading';
 import PersistentFilters from 'components/PersistentFilters';
 import InstanceGroupAdd from './InstanceGroupAdd';
 import InstanceGroupList from './InstanceGroupList';
@@ -18,29 +12,6 @@ import ContainerGroup from './ContainerGroup';
 
 function InstanceGroups() {
   const { pathname } = useLocation();
-  const { isSuperUser, isSystemAuditor } = useUserProfile();
-  const userCanReadSettings = isSuperUser || isSystemAuditor;
-
-  const {
-    request: settingsRequest,
-    isLoading: isSettingsRequestLoading,
-    error: settingsRequestError,
-    result: { isKubernetes },
-  } = useRequest(
-    useCallback(async () => {
-      const {
-        data: { IS_K8S },
-      } = await SettingsAPI.readCategory('all');
-      return {
-        isKubernetes: IS_K8S,
-      };
-    }, []),
-    { isKubernetes: false }
-  );
-  useEffect(() => {
-    userCanReadSettings && settingsRequest();
-  }, [settingsRequest, userCanReadSettings]);
-
   const [breadcrumbConfig, setBreadcrumbConfig] = useState({
     '/instance_groups': t`Instance Groups`,
     '/instance_groups/add': t`Create new instance group`,
@@ -81,39 +52,25 @@ function InstanceGroups() {
         streamType={streamType}
         breadcrumbConfig={breadcrumbConfig}
       />
-      {isSettingsRequestLoading ? (
-        <PageSection>
-          <Card>
-            <ContentLoading />
-          </Card>
-        </PageSection>
-      ) : (
-        <Switch>
-          <Route path="/instance_groups/container_group/add">
-            <ContainerGroupAdd />
-          </Route>
-          <Route path="/instance_groups/container_group/:id">
-            <ContainerGroup setBreadcrumb={buildBreadcrumbConfig} />
-          </Route>
-          {!isKubernetes && (
-            <Route path="/instance_groups/add">
-              <InstanceGroupAdd />
-            </Route>
-          )}
-          <Route path="/instance_groups/:id">
-            <InstanceGroup setBreadcrumb={buildBreadcrumbConfig} />
-          </Route>
-          <Route path="/instance_groups">
-            <PersistentFilters pageKey="instanceGroups">
-              <InstanceGroupList
-                isKubernetes={isKubernetes}
-                isSettingsRequestLoading={isSettingsRequestLoading}
-                settingsRequestError={settingsRequestError}
-              />
-            </PersistentFilters>
-          </Route>
-        </Switch>
-      )}
+      <Switch>
+        <Route path="/instance_groups/container_group/add">
+          <ContainerGroupAdd />
+        </Route>
+        <Route path="/instance_groups/container_group/:id">
+          <ContainerGroup setBreadcrumb={buildBreadcrumbConfig} />
+        </Route>
+        <Route path="/instance_groups/add">
+          <InstanceGroupAdd />
+        </Route>
+        <Route path="/instance_groups/:id">
+          <InstanceGroup setBreadcrumb={buildBreadcrumbConfig} />
+        </Route>
+        <Route path="/instance_groups">
+          <PersistentFilters pageKey="instanceGroups">
+            <InstanceGroupList />
+          </PersistentFilters>
+        </Route>
+      </Switch>
     </>
   );
 }
