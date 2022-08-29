@@ -7,6 +7,7 @@ import {
   ClockIcon,
   MinusCircleIcon,
   InfoCircleIcon,
+  PlusCircleIcon,
 } from '@patternfly/react-icons';
 
 const Spin = keyframes`
@@ -40,5 +41,12 @@ const icons = {
   skipped: MinusCircleIcon,
   canceled: ExclamationTriangleIcon,
   changed: ExclamationTriangleIcon,
+  /* Instance statuses */
+  ready: CheckCircleIcon,
+  installed: ClockIcon,
+  provisioning: PlusCircleIcon,
+  deprovisioning: MinusCircleIcon,
+  'provision-fail': ExclamationCircleIcon,
+  'deprovision-fail': ExclamationCircleIcon,
 };
 export default icons;
