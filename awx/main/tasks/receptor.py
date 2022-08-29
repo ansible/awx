@@ -1,6 +1,6 @@
 # Python
 from base64 import b64encode
-from collections import namedtuple, OrderedDict
+from collections import namedtuple
 import concurrent.futures
 from enum import Enum
 import logging
@@ -599,43 +599,42 @@ class AWXReceptorJob:
         return config
 
 
+# TODO: receptor reload expects ordering within config items to be preserved
+# if python dictionary is not preserving order properly, may need to find a
+# solution. yaml.dump does not seem to work well with OrderedDict. below line may help
+# yaml.add_representer(OrderedDict, lambda dumper, data: dumper.represent_mapping('tag:yaml.org,2002:map', data.items()))
+#
 RECEPTOR_CONFIG_STARTER = (
     {'local-only': None},
     {'log-level': 'debug'},
-    {'control-service': OrderedDict({'service': 'control', 'filename': '/var/run/receptor/receptor.sock', 'permissions': '0660'})},
-    {'work-command': OrderedDict({'worktype': 'local', 'command': 'ansible-runner', 'params': 'worker', 'allowruntimeparams': True})},
-    {'work-signing': OrderedDict({'privatekey': '/etc/receptor/signing/work-private-key.pem', 'tokenexpiration': '1m'})},
+    {'control-service': {'service': 'control', 'filename': '/var/run/receptor/receptor.sock', 'permissions': '0660'}},
+    {'work-command': {'worktype': 'local', 'command': 'ansible-runner', 'params': 'worker', 'allowruntimeparams': True}},
+    {'work-signing': {'privatekey': '/etc/receptor/signing/work-private-key.pem', 'tokenexpiration': '1m'}},
     {
-        'work-kubernetes': OrderedDict(
-            {
-                'worktype': 'kubernetes-runtime-auth',
-                'authmethod': 'runtime',
-                'allowruntimeauth': True,
-                'allowruntimepod': True,
-                'allowruntimeparams': True,
-            }
-        )
+        'work-kubernetes': {
+            'worktype': 'kubernetes-runtime-auth',
+            'authmethod': 'runtime',
+            'allowruntimeauth': True,
+            'allowruntimepod': True,
+            'allowruntimeparams': True,
+        }
     },
     {
-        'work-kubernetes': OrderedDict(
-            {
-                'worktype': 'kubernetes-incluster-auth',
-                'authmethod': 'incluster',
-                'allowruntimeauth': True,
-                'allowruntimepod': True,
-                'allowruntimeparams': True,
-            }
-        )
+        'work-kubernetes': {
+            'worktype': 'kubernetes-incluster-auth',
+            'authmethod': 'incluster',
+            'allowruntimeauth': True,
+            'allowruntimepod': True,
+            'allowruntimeparams': True,
+        }
     },
     {
-        'tls-client': OrderedDict(
-            {
-                'name': 'tlsclient',
-                'rootcas': '/etc/receptor/tls/ca/receptor-ca.crt',
-                'cert': '/etc/receptor/tls/receptor.crt',
-                'key': '/etc/receptor/tls/receptor.key',
-            }
-        )
+        'tls-client': {
+            'name': 'tlsclient',
+            'rootcas': '/etc/receptor/tls/ca/receptor-ca.crt',
+            'cert': '/etc/receptor/tls/receptor.crt',
+            'key': '/etc/receptor/tls/receptor.key',
+        }
     },
 )
 
@@ -646,7 +645,7 @@ def write_receptor_config():
 
     instances = Instance.objects.exclude(node_type='control')
     for instance in instances:
-        peer = {'tcp-peer': OrderedDict({'address': f'{instance.hostname}:{instance.listener_port}', 'tls': 'tlsclient'})}
+        peer = {'tcp-peer': {'address': f'{instance.hostname}:{instance.listener_port}', 'tls': 'tlsclient'}}
         receptor_config.append(peer)
 
     lock = FileLock(__RECEPTOR_CONF_LOCKFILE)
