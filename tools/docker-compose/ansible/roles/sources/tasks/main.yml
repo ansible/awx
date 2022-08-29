@@ -122,3 +122,9 @@
     mode: '0600'
   with_sequence: start=1 end={{ execution_node_count if execution_node_count | int > 0 else 1}}
   when: execution_node_count | int > 0
+
+- name: Render prometheus config
+  template:
+    src: "prometheus.yml.j2"
+    dest: "{{ sources_dest }}/prometheus.yml"
+  when: enable_prometheus|bool

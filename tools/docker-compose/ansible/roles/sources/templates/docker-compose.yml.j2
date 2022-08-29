@@ -1,3 +1,4 @@
+#jinja2: lstrip_blocks: True
 ---
 version: '2.1'
 services:
@@ -142,28 +143,27 @@ services:
   prometheus:
     image: prom/prometheus:latest
     container_name: tools_prometheus_1
-    hostname: splunk
+    hostname: prometheus
     ports:
       - "9090:9090"
     volumes:
-      - "../../prometheus:/etc/prometheus"
+      - "../../docker-compose/_sources/prometheus.yml:/etc/prometheus/prometheus.yml"
       - "prometheus_storage:/prometheus:rw"
     links:
-      - awx_1:awx1
+{% for i in range(control_plane_node_count|int) %}
+      - awx_{{ loop.index }}:awx{{ loop.index }} # because underscores are not valid in hostnames
+{% endfor %}
 {% endif %}
 {% if enable_grafana|bool %}
   grafana:
     image: grafana/grafana-enterprise:latest
     container_name: tools_grafana_1
-    hostname: splunk
+    hostname: grafana
     ports:
       - "3001:3000"
     volumes:
       - "../../grafana:/etc/grafana/provisioning"
       - "grafana_storage:/var/lib/grafana:rw"
-    environment:
-      SPLUNK_START_ARGS: --accept-license
-      SPLUNK_PASSWORD: splunk_admin
     links:
       - prometheus
     depends_on:
@@ -200,7 +200,7 @@ services:
       - "5555:5555"
     volumes:
       - "../../docker-compose/_sources/receptor/receptor-hop.conf:/etc/receptor/receptor.conf"
-  {% for i in range(execution_node_count|int) -%}
+  {% for i in range(execution_node_count|int) %}
   receptor-{{ loop.index }}:
     image: "{{ awx_image }}:{{ awx_image_tag }}"
     user: "{{ ansible_user_uid }}"

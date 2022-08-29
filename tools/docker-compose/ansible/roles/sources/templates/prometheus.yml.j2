@@ -1,3 +1,4 @@
+#jinja2: lstrip_blocks: True
 ---
 global:
   scrape_interval: 15s  # Set the scrape interval to every 15 seconds. Default is every 1 minute.
@@ -5,14 +6,15 @@ global:
 scrape_configs:
   - job_name: 'awx'
     static_configs:
-      - targets: ['awx1:8043']  # or haproxy:8043 in cluster env
-    tls_config:
-      insecure_skip_verify: true
+    - targets:
+      # metrics are broadcast to all nodes in the cluster,
+      # so no need to track nodes individually.
+      - awx1:8013
     metrics_path: /api/v2/metrics
     scrape_interval: 5s
-    scheme: https
+    scheme: http
     params:
       format: ['txt']
     basic_auth:
-      username: admin  # change this
-      password: password  # change this
+      username: admin
+      password: {{ admin_password }}

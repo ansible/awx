@@ -365,7 +365,7 @@ Before we can run the playbook we need to understand that SAML works by sending 
 * If you develop on a mac which runs a Fedora VM which has AWX running within that and the browser you use to access AWX runs on the mac. The the VM with the container has its own IP that is mapped to a name like `tower.home.net`. In this scenario your "container_reference" could be either the IP of the VM or the tower.home.net friendly name.
 * If you are on a Fedora work station running AWX and also using a browser on your workstation you could use localhost, your work stations IP or hostname as the container_reference.
 
-In addition, OIDC works similar but slightly differently. OIDC has browser redirection but OIDC will also communicate from the AWX docker instance to the Keycloak docker instance directly. Any hostnames you might have are likely not propagated down into the AWX container. So we need a method for both the browser and AWX container to talk to Keycloak. For this we will likely use your machines IP address. This can be passed in as a variable called `oidc_reference`. If unset this will default to container_reference which may be viable for some configurations. 
+In addition, OIDC works similar but slightly differently. OIDC has browser redirection but OIDC will also communicate from the AWX docker instance to the Keycloak docker instance directly. Any hostnames you might have are likely not propagated down into the AWX container. So we need a method for both the browser and AWX container to talk to Keycloak. For this we will likely use your machines IP address. This can be passed in as a variable called `oidc_reference`. If unset this will default to container_reference which may be viable for some configurations.
 
 In addition to container_reference, there are some additional variables which you can override if you need/choose to do so. Here are their names and default values:
 ```yaml
@@ -469,28 +469,14 @@ Once the playbook is done running Splunk should now be setup in your development
 
 ### Prometheus and Grafana integration
 
-Prometheus is a metrics collecting tool, and we support prometheus formatted data at the `api/v2/metrics` endpoint.
-
-Before you run anything, you should perform this basic setup:
-
-1. Copy the prometheus configuration:
+Prometheus is a metrics collecting tool, and we support prometheus formatted data at the `api/v2/metrics` endpoint. To run the development environment (see [docs](https://github.com/ansible/awx/blob/devel/tools/docker-compose/README.md)) with Prometheus and Grafana enabled, set the following variables:
 
 ```
-cp tools/prometheus/prometheus.yml.example tools/prometheus/prometheus.yml
+$ PROMETHEUS=yes GRAFANA=yes make docker-compose
 ```
 
-Set the `username` and `password` in that file to your AWX user. You can also change the scrape interval.
-
-2. (optional) if you are in a clustered environment, you can change the target to `haproxy:8043` so that the incoming prometheus requests go through the load balancer. Leaving it set to `awx1` also works.
-
-You can use this as part of the docker-compose target:
-
-```
-PROMETHEUS=true GRAFANA=true make docker-compose
-```
-
-3. navigate to `http://localhost:9090/targets` and check that the metrics endpoint State is Up.
-4. Click the Graph tab, start typing a metric name, or use the Open metrics explorer button to find a metric to display (next to `Execute` button)
-5. Navigate to `http://localhost:3001`. Sign in, using `admin` for both username and password.
-6. In the left navigation menu go to Dashboards->Browse, find the "awx-demo" and click. These should have graphs.
-6. Now you can modify these and add panels for whichever metrics you like.
+1. navigate to `http://localhost:9090/targets` and check that the metrics endpoint State is Up.
+2. Click the Graph tab, start typing a metric name, or use the Open metrics explorer button to find a metric to display (next to `Execute` button)
+3. Navigate to `http://localhost:3001`. Sign in, using `admin` for both username and password.
+4. In the left navigation menu go to Dashboards->Browse, find the "awx-demo" and click. These should have graphs.
+5. Now you can modify these and add panels for whichever metrics you like.
