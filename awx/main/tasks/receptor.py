@@ -158,8 +158,7 @@ def run_until_complete(node, timing_data=None, **kwargs):
     kwargs.setdefault('payload', '')
 
     transmit_start = time.time()
-    sign_work = False if settings.IS_K8S else True
-    result = receptor_ctl.submit_work(worktype='ansible-runner', node=node, signwork=sign_work, **kwargs)
+    result = receptor_ctl.submit_work(worktype='ansible-runner', node=node, signwork=True, **kwargs)
 
     unit_id = result['unitid']
     run_start = time.time()
@@ -304,10 +303,6 @@ class AWXReceptorJob:
                     receptor_ctl.simple_command(f"work release {self.unit_id}")
                 except Exception:
                     logger.exception(f"Error releasing work unit {self.unit_id}.")
-
-    @property
-    def sign_work(self):
-        return False if settings.IS_K8S else True
 
     def _run_internal(self, receptor_ctl):
         # Create a socketpair. Where the left side will be used for writing our payload
@@ -469,6 +464,10 @@ class AWXReceptorJob:
         return receptor_params
 
     @property
+    def sign_work(self):
+        return True if self.work_type in ('ansible-runner', 'local') else False
+
+    @property
     def work_type(self):
         if self.task.instance.is_container_group_task:
             if self.credential:
@@ -598,10 +597,17 @@ class AWXReceptorJob:
         return config
 
 
+# TODO: receptor reload expects ordering within config items to be preserved
+# if python dictionary is not preserving order properly, may need to find a
+# solution. yaml.dump does not seem to work well with OrderedDict. below line may help
+# yaml.add_representer(OrderedDict, lambda dumper, data: dumper.represent_mapping('tag:yaml.org,2002:map', data.items()))
+#
 RECEPTOR_CONFIG_STARTER = (
-    {'control-service': {'service': 'control', 'filename': '/var/run/receptor/receptor.sock', 'permissions': '0600'}},
     {'local-only': None},
+    {'log-level': 'debug'},
+    {'control-service': {'service': 'control', 'filename': '/var/run/receptor/receptor.sock', 'permissions': '0660'}},
     {'work-command': {'worktype': 'local', 'command': 'ansible-runner', 'params': 'worker', 'allowruntimeparams': True}},
+    {'work-signing': {'privatekey': '/etc/receptor/signing/work-private-key.pem', 'tokenexpiration': '1m'}},
     {
         'work-kubernetes': {
             'worktype': 'kubernetes-runtime-auth',
