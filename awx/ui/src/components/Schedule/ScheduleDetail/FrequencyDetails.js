@@ -10,7 +10,13 @@ const Label = styled.div`
   font-weight: var(--pf-global--FontWeight--bold);
 `;
 
-export default function FrequencyDetails({ type, label, options, timezone }) {
+export default function FrequencyDetails({
+  type,
+  label,
+  options,
+  timezone,
+  isException,
+}) {
   const getRunEveryLabel = () => {
     const { interval } = options;
     switch (type) {
@@ -81,7 +87,10 @@ export default function FrequencyDetails({ type, label, options, timezone }) {
     <div>
       <Label>{label}</Label>
       <DetailList gutter="sm">
-        <Detail label={t`Run every`} value={getRunEveryLabel()} />
+        <Detail
+          label={isException ? t`Skip every` : t`Run every`}
+          value={getRunEveryLabel()}
+        />
         {type === 'week' ? (
           <Detail
             label={t`On days`}

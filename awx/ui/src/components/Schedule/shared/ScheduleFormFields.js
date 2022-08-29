@@ -191,6 +191,7 @@ export default function ScheduleFormFields({
               <FrequencyDetailSubform
                 frequency={val}
                 prefix={`exceptionOptions.${val}`}
+                isException
               />
             </FormColumnLayout>
           ))}

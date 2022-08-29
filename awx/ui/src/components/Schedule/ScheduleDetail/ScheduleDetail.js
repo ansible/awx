@@ -2,7 +2,6 @@ import 'styled-components/macro';
 import React, { useCallback, useEffect } from 'react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-
 import { t } from '@lingui/macro';
 import { Chip, Divider, Title, Button } from '@patternfly/react-core';
 import { Schedule } from 'types';
@@ -59,6 +58,10 @@ const FrequencyDetailsContainer = styled.div`
     margin-bottom: var(--pf-global--spacer--md);
     padding-bottom: var(--pf-global--spacer--md);
     border-bottom: 1px solid var(--pf-global--palette--black-300);
+  }
+
+  & + & {
+    margin-top: calc(var(--pf-global--spacer--lg) * -1);
   }
 `;
 
@@ -161,9 +164,13 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
     month: t`Month`,
     year: t`Year`,
   };
-  const { frequency, frequencyOptions } = parseRuleObj(schedule);
+  const { frequency, frequencyOptions, exceptionFrequency, exceptionOptions } =
+    parseRuleObj(schedule);
   const repeatFrequency = frequency.length
     ? frequency.map((f) => frequencies[f]).join(', ')
+    : t`None (Run Once)`;
+  const exceptionRepeatFrequency = exceptionFrequency.length
+    ? exceptionFrequency.map((f) => frequencies[f]).join(', ')
     : t`None (Run Once)`;
 
   const {
@@ -288,6 +295,10 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
           helpText={helpText.localTimeZone(config)}
         />
         <Detail label={t`Repeat Frequency`} value={repeatFrequency} />
+        <Detail
+          label={t`Exception Frequency`}
+          value={exceptionRepeatFrequency}
+        />
       </DetailList>
       {frequency.length ? (
         <FrequencyDetailsContainer>
@@ -301,6 +312,23 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
               label={frequencies[freq]}
               options={frequencyOptions[freq]}
               timezone={timezone}
+            />
+          ))}
+        </FrequencyDetailsContainer>
+      ) : null}
+      {exceptionFrequency.length ? (
+        <FrequencyDetailsContainer>
+          <p css="border-top: 0">
+            <strong>{t`Frequency Exception Details`}</strong>
+          </p>
+          {exceptionFrequency.map((freq) => (
+            <FrequencyDetails
+              key={freq}
+              type={freq}
+              label={frequencies[freq]}
+              options={exceptionOptions[freq]}
+              timezone={timezone}
+              isException
             />
           ))}
         </FrequencyDetailsContainer>

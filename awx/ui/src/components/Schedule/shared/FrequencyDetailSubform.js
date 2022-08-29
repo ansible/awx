@@ -45,7 +45,7 @@ const Checkbox = styled(_Checkbox)`
   }
 `;
 
-const FrequencyDetailSubform = ({ frequency, prefix }) => {
+const FrequencyDetailSubform = ({ frequency, prefix, isException }) => {
   const id = prefix.replace('.', '-');
   const [runOnDayMonth] = useField({
     name: `${prefix}.runOnDayMonth`,
@@ -220,7 +220,7 @@ const FrequencyDetailSubform = ({ frequency, prefix }) => {
         validated={
           !intervalMeta.touched || !intervalMeta.error ? 'default' : 'error'
         }
-        label={t`Run every`}
+        label={isException ? t`Skip every` : t`Run every`}
       >
         <div css="display: flex">
           <TextInput
