@@ -7,6 +7,7 @@ import useExecutionEnvironmentStep from 'components/LaunchPrompt/steps/useExecut
 import useOtherPromptsStep from 'components/LaunchPrompt/steps/useOtherPromptsStep';
 import useSurveyStep from 'components/LaunchPrompt/steps/useSurveyStep';
 import usePreviewStep from 'components/LaunchPrompt/steps/usePreviewStep';
+import useInstanceGroupsStep from 'components/LaunchPrompt/steps/useInstanceGroupsStep';
 import { WorkflowStateContext } from 'contexts/Workflow';
 import { jsonToYaml } from 'util/yaml';
 import { stringIsUUID } from 'util/strings';
@@ -272,7 +273,8 @@ export default function useWorkflowNodeSteps(
   surveyConfig,
   resource,
   askLinkType,
-  resourceDefaultCredentials
+  resourceDefaultCredentials,
+  labels
 ) {
   const { nodeToEdit } = useContext(WorkflowStateContext);
   const {
@@ -289,7 +291,8 @@ export default function useWorkflowNodeSteps(
     useInventoryStep(launchConfig, resource, visited),
     useCredentialsStep(launchConfig, resource, resourceDefaultCredentials),
     useExecutionEnvironmentStep(launchConfig, resource),
-    useOtherPromptsStep(launchConfig, resource),
+    useInstanceGroupsStep(launchConfig, resource),
+    useOtherPromptsStep(launchConfig, resource, labels),
     useSurveyStep(launchConfig, surveyConfig, resource, visited),
   ];
 
@@ -380,6 +383,7 @@ export default function useWorkflowNodeSteps(
         inventory: true,
         credentials: true,
         executionEnvironment: true,
+        instanceGroups: true,
         other: true,
         survey: true,
         preview: true,
