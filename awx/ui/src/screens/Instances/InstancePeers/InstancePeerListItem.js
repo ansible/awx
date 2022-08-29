@@ -144,7 +144,7 @@ function InstancePeerListItem({
               </div>
             }
           >
-            <StatusLabel status={peerInstance.errors ? 'error' : 'healthy'} />
+            <StatusLabel status={peerInstance.node_state} />
           </Tooltip>
         </Td>
 
