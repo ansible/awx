@@ -10,6 +10,9 @@
 ### Visit our mailing list
 - Hello, this appears to be less of a bug report or feature request and more of a question. Could you please ask this on our mailing list? See https://github.com/ansible/awx/#get-involved for information for ways to connect with us.
 
+### Contact Customer Support
+- Hello, I see you mentioned Controller and/or the Ansible Automation Platform. This bug tracker is for reporting issues in the open source AWX project, not Controller/Ansible Automation Platform. If you are a customer and need help troubleshooting Controller and/or the Ansible Automation Platform, you should reach out to Red Hat support.
+
 ### Denied Submission
 
 - Hi! \
