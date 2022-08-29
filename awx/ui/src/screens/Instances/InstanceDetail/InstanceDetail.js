@@ -11,7 +11,7 @@ import {
   CodeBlockCode,
   Tooltip,
   Slider,
-  Chip,
+  Label,
 } from '@patternfly/react-core';
 import { DownloadIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
@@ -29,7 +29,6 @@ import ContentLoading from 'components/ContentLoading';
 import { Detail, DetailList } from 'components/DetailList';
 import StatusLabel from 'components/StatusLabel';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
-import ChipGroup from 'components/ChipGroup';
 
 const Unavailable = styled.span`
   color: var(--pf-global--danger-color--200);
@@ -186,28 +185,25 @@ function InstanceDetail({ setBreadcrumb }) {
                 fullWidth
                 label={t`Instance Groups`}
                 helpText={t`The Instance Groups to which this instance belongs.`}
-                value={
-                  <ChipGroup
-                    numChips={5}
-                    totalChips={instanceGroups.length}
-                    ouiaId="instance-group-chips"
-                  >
-                    {instanceGroups.map((ig) => (
-                      <Link
-                        to={`${buildLinkURL(ig)}${ig.id}/details`}
-                        key={ig.id}
-                      >
-                        <Chip
-                          key={ig.id}
-                          isReadOnly
-                          ouiaId={`instance-group-${ig.id}-chip`}
+                value={instanceGroups.map((ig) => (
+                  <React.Fragment key={ig.id}>
+                    <Label
+                      color="blue"
+                      isTruncated
+                      render={({ className, content, componentRef }) => (
+                        <Link
+                          to={`${buildLinkURL(ig)}${ig.id}/details`}
+                          className={className}
+                          innerRef={componentRef}
                         >
-                          {ig.name}
-                        </Chip>
-                      </Link>
-                    ))}
-                  </ChipGroup>
-                }
+                          {content}
+                        </Link>
+                      )}
+                    >
+                      {ig.name}
+                    </Label>{' '}
+                  </React.Fragment>
+                ))}
                 isEmpty={instanceGroups.length === 0}
               />
             )}
