@@ -1,6 +1,7 @@
 aiohttp>=3.7.4
 ansiconv==1.0.0  # UPGRADE BLOCKER: from 2013, consider replacing instead of upgrading
 asciichartpy
+asn1
 autobahn>=20.12.3  # CVE-2020-35678
 azure-keyvault==1.1.0  # see UPGRADE BLOCKERs
 channels
