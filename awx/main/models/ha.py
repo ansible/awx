@@ -423,12 +423,19 @@ def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs
 
 @receiver(post_save, sender=Instance)
 def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
-    # TODO: handle update to instance
-    if settings.IS_K8S and created and instance.node_type in (Instance.Types.EXECUTION,):
-        from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
+    if settings.IS_K8S and instance.node_type in (Instance.Types.EXECUTION,):
+        if instance.node_state == Instance.States.DEPROVISIONING:
+            from awx.main.tasks.receptor import wait_for_jobs  # prevents circular import
 
-        # on commit broadcast to all control instance to update their receptor configs
-        connection.on_commit(lambda: write_receptor_config.apply_async(queue='tower_broadcast_all'))
+            # wait for jobs on the node to complete, then delete the
+            # node and kick off write_receptor_config
+            connection.on_commit(lambda: wait_for_jobs.apply_async(instance.hostname))
+
+        if instance.node_state == Instance.States.INSTALLED:
+            from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
+
+            # broadcast to all control instances to update their receptor configs
+            connection.on_commit(lambda: write_receptor_config.apply_async(queue='tower_broadcast_all'))
 
     if created or instance.has_policy_changes():
         schedule_policy_task()
