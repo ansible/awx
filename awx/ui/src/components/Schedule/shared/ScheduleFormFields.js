@@ -173,7 +173,11 @@ export default function ScheduleFormFields({
                 id="exception-frequency"
                 onChange={exceptionFrequencyHelper.setValue}
                 value={exceptionFrequency.value}
-                placeholderText={t`None`}
+                placeholderText={
+                  exceptionFrequency.value.length
+                    ? t`Select frequency`
+                    : t`None`
+                }
                 onBlur={exceptionFrequencyHelper.setTouched}
               >
                 <SelectClearOption value="none">{t`None`}</SelectClearOption>
