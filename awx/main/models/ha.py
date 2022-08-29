@@ -456,3 +456,14 @@ class JobLaunchConfigInstanceGroupMembership(models.Model):
         default=None,
         db_index=True,
     )
+
+
+class ScheduleInstanceGroupMembership(models.Model):
+
+    schedule = models.ForeignKey('Schedule', on_delete=models.CASCADE)
+    instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
+    position = models.PositiveIntegerField(
+        null=True,
+        default=None,
+        db_index=True,
+    )

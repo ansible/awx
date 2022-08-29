@@ -3687,9 +3687,10 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
                     getattr(mock_obj, field_name).add(item)
             elif field_name == 'instance_groups':
                 for item in value:
-                    getattr(mock_obj, field_name).append(item)
+                    getattr(mock_obj, field_name).add(item)
             elif field_name == 'execution_environment':
-                setattr(mock_obj, field_name, value.id)
+                if value:
+                    setattr(mock_obj, field_name, value.id)
             else:
                 setattr(mock_obj, field_name, value)
             if field_name not in field_names:
