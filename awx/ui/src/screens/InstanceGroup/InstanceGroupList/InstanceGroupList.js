@@ -11,7 +11,6 @@ import useSelected from 'hooks/useSelected';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
-  ToolbarAddButton,
   ToolbarDeleteButton,
   getSearchableKeys,
 } from 'components/PaginatedTable';
@@ -27,11 +26,7 @@ const QS_CONFIG = getQSConfig('instance-group', {
   page_size: 20,
 });
 
-function InstanceGroupList({
-  isKubernetes,
-  isSettingsRequestLoading,
-  settingsRequestError,
-}) {
+function InstanceGroupList() {
   const location = useLocation();
   const match = useRouteMatch();
 
@@ -113,39 +108,32 @@ function InstanceGroupList({
   const addContainerGroup = t`Add container group`;
   const addInstanceGroup = t`Add instance group`;
 
-  const addButton =
-    !isSettingsRequestLoading && !isKubernetes ? (
-      <AddDropDownButton
-        ouiaId="add-instance-group-button"
-        key="add"
-        dropdownItems={[
-          <DropdownItem
-            ouiaId="add-container-group-item"
-            to="/instance_groups/container_group/add"
-            component={Link}
-            key={addContainerGroup}
-            aria-label={addContainerGroup}
-          >
-            {addContainerGroup}
-          </DropdownItem>,
-          <DropdownItem
-            ouiaId="add-instance-group-item"
-            to="/instance_groups/add"
-            component={Link}
-            key={addInstanceGroup}
-            aria-label={addInstanceGroup}
-          >
-            {addInstanceGroup}
-          </DropdownItem>,
-        ]}
-      />
-    ) : (
-      <ToolbarAddButton
-        key="add"
-        ouiaId="add-container-group-button"
-        linkTo={`${match.url}/container_group/add`}
-      />
-    );
+  const addButton = (
+    <AddDropDownButton
+      ouiaId="add-instance-group-button"
+      key="add"
+      dropdownItems={[
+        <DropdownItem
+          ouiaId="add-container-group-item"
+          to="/instance_groups/container_group/add"
+          component={Link}
+          key={addContainerGroup}
+          aria-label={addContainerGroup}
+        >
+          {addContainerGroup}
+        </DropdownItem>,
+        <DropdownItem
+          ouiaId="add-instance-group-item"
+          to="/instance_groups/add"
+          component={Link}
+          key={addInstanceGroup}
+          aria-label={addInstanceGroup}
+        >
+          {addInstanceGroup}
+        </DropdownItem>,
+      ]}
+    />
+  );
 
   const getDetailUrl = (item) =>
     item.is_container_group
@@ -159,10 +147,8 @@ function InstanceGroupList({
       <PageSection>
         <Card>
           <PaginatedTable
-            contentError={contentError || settingsRequestError}
-            hasContentLoading={
-              isLoading || deleteLoading || isSettingsRequestLoading
-            }
+            contentError={contentError}
+            hasContentLoading={isLoading || deleteLoading}
             items={instanceGroups}
             itemCount={instanceGroupsCount}
             pluralizedItemName={pluralizedItemName}
