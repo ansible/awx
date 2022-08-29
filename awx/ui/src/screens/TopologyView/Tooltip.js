@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { t, Plural } from '@lingui/macro';
 import styled from 'styled-components';
 import { useConfig } from 'contexts/Config';
@@ -20,6 +21,7 @@ import {
   TextContent,
   Text as PFText,
   TextVariants,
+  Label,
 } from '@patternfly/react-core';
 import { DownloadIcon } from '@patternfly/react-icons';
 import ContentLoading from 'components/ContentLoading';
@@ -77,8 +79,19 @@ const SliderForks = styled.div`
   text-align: center;
 `;
 
+const buildLinkURL = (inst) =>
+  inst.is_container_group
+    ? '/instance_groups/container_group/'
+    : '/instance_groups/';
+
 function renderInstanceGroups(instanceGroups) {
-  return instanceGroups.map((g) => <StatusLabel status={g.name} />);
+  return instanceGroups.map((ig) => (
+    <Link to={`${buildLinkURL(ig)}${ig.id}/details`} key={ig.id}>
+      <Label color="blue" href="#filled">
+        {ig.name}
+      </Label>{' '}
+    </Link>
+  ));
 }
 
 function usedCapacity(instance) {
