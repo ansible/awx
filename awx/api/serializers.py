@@ -3682,10 +3682,8 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
                 setattr(mock_obj, field.name, getattr(self.instance, field.name))
         field_names = set(field.name for field in self.Meta.model._meta.fields)
         for field_name, value in list(attrs.items()):
-            if field_name == 'labels':
-                for item in value:
-                    getattr(mock_obj, field_name).add(item)
-            elif field_name == 'instance_groups':
+            if field_name in ['labels', 'instance_groups']:
+                getattr(mock_obj, field_name).clear()
                 for item in value:
                     getattr(mock_obj, field_name).add(item)
             elif field_name == 'execution_environment':
