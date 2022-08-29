@@ -34,14 +34,12 @@ class TaskManagerInstance:
 
 
 class TaskManagerInstances:
-    def __init__(self, active_tasks, instances=None, instance_fields=['node_type', 'capacity', 'hostname', 'enabled']):
+    def __init__(self, active_tasks, instances=None, instance_fields=('node_type', 'capacity', 'hostname', 'enabled')):
         self.instances_by_hostname = dict()
-        self.instance_objects = []
         if instances is None:
             instances = Instance.objects.filter(hostname__isnull=False, enabled=True).exclude(node_type='hop').only(*instance_fields)
         for instance in instances:
             self.instances_by_hostname[instance.hostname] = TaskManagerInstance(instance)
-            self.instance_objects.append(instance)
 
         # initialize remaining capacity based on currently waiting and running tasks
         for task in active_tasks:
