@@ -1406,9 +1406,10 @@ class UnifiedJob(
             timeout = 5
             try:
                 running = self.celery_task_id in ControlDispatcher('dispatcher', self.controller_node or self.execution_node).running(timeout=timeout)
-            except (socket.timeout, RuntimeError):
+            except socket.timeout:
                 logger.error('could not reach dispatcher on {} within {}s'.format(self.execution_node, timeout))
-                running = False
+            except Exception:
+                logger.exception("error encountered when checking task status")
         return running
 
     @property
