@@ -1,6 +1,6 @@
 # Python
 from base64 import b64encode
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 import concurrent.futures
 from enum import Enum
 import logging
@@ -156,8 +156,7 @@ def run_until_complete(node, timing_data=None, **kwargs):
     kwargs.setdefault('payload', '')
 
     transmit_start = time.time()
-    sign_work = False if settings.IS_K8S else True
-    result = receptor_ctl.submit_work(worktype='ansible-runner', node=node, signwork=sign_work, **kwargs)
+    result = receptor_ctl.submit_work(worktype='ansible-runner', node=node, signwork=True, **kwargs)
 
     unit_id = result['unitid']
     run_start = time.time()
@@ -302,10 +301,6 @@ class AWXReceptorJob:
                     receptor_ctl.simple_command(f"work release {self.unit_id}")
                 except Exception:
                     logger.exception(f"Error releasing work unit {self.unit_id}.")
-
-    @property
-    def sign_work(self):
-        return False if settings.IS_K8S else True
 
     def _run_internal(self, receptor_ctl):
         # Create a socketpair. Where the left side will be used for writing our payload
@@ -459,6 +454,10 @@ class AWXReceptorJob:
         return receptor_params
 
     @property
+    def sign_work(self):
+        return True if self.work_type in ('ansible-runner', 'local') else False
+
+    @property
     def work_type(self):
         if self.task.instance.is_container_group_task:
             if self.credential:
@@ -601,34 +600,42 @@ class AWXReceptorJob:
 
 
 RECEPTOR_CONFIG_STARTER = (
-    {'control-service': {'service': 'control', 'filename': '/var/run/receptor/receptor.sock', 'permissions': '0600'}},
     {'local-only': None},
-    {'work-command': {'worktype': 'local', 'command': 'ansible-runner', 'params': 'worker', 'allowruntimeparams': True}},
+    {'log-level': 'debug'},
+    {'control-service': OrderedDict({'service': 'control', 'filename': '/var/run/receptor/receptor.sock', 'permissions': '0660'})},
+    {'work-command': OrderedDict({'worktype': 'local', 'command': 'ansible-runner', 'params': 'worker', 'allowruntimeparams': True})},
+    {'work-signing': OrderedDict({'privatekey': '/etc/receptor/signing/work-private-key.pem', 'tokenexpiration': '1m'})},
     {
-        'work-kubernetes': {
-            'worktype': 'kubernetes-runtime-auth',
-            'authmethod': 'runtime',
-            'allowruntimeauth': True,
-            'allowruntimepod': True,
-            'allowruntimeparams': True,
-        }
+        'work-kubernetes': OrderedDict(
+            {
+                'worktype': 'kubernetes-runtime-auth',
+                'authmethod': 'runtime',
+                'allowruntimeauth': True,
+                'allowruntimepod': True,
+                'allowruntimeparams': True,
+            }
+        )
     },
     {
-        'work-kubernetes': {
-            'worktype': 'kubernetes-incluster-auth',
-            'authmethod': 'incluster',
-            'allowruntimeauth': True,
-            'allowruntimepod': True,
-            'allowruntimeparams': True,
-        }
+        'work-kubernetes': OrderedDict(
+            {
+                'worktype': 'kubernetes-incluster-auth',
+                'authmethod': 'incluster',
+                'allowruntimeauth': True,
+                'allowruntimepod': True,
+                'allowruntimeparams': True,
+            }
+        )
     },
     {
-        'tls-client': {
-            'name': 'tlsclient',
-            'rootcas': '/etc/receptor/tls/ca/receptor-ca.crt',
-            'cert': '/etc/receptor/tls/receptor.crt',
-            'key': '/etc/receptor/tls/receptor.key',
-        }
+        'tls-client': OrderedDict(
+            {
+                'name': 'tlsclient',
+                'rootcas': '/etc/receptor/tls/ca/receptor-ca.crt',
+                'cert': '/etc/receptor/tls/receptor.crt',
+                'key': '/etc/receptor/tls/receptor.key',
+            }
+        )
     },
 )
 
@@ -639,7 +646,7 @@ def write_receptor_config():
 
     instances = Instance.objects.exclude(node_type='control')
     for instance in instances:
-        peer = {'tcp-peer': {'address': f'{instance.hostname}:{instance.listener_port}', 'tls': 'tlsclient'}}
+        peer = {'tcp-peer': OrderedDict({'address': f'{instance.hostname}:{instance.listener_port}', 'tls': 'tlsclient'})}
         receptor_config.append(peer)
 
     lock = FileLock(__RECEPTOR_CONF_LOCKFILE)
