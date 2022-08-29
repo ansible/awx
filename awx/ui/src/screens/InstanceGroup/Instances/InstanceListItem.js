@@ -136,7 +136,7 @@ function InstanceListItem({
               </div>
             }
           >
-            <StatusLabel status={instance.errors ? 'error' : 'healthy'} />
+            <StatusLabel status={instance.node_state} />
           </Tooltip>
         </Td>
         <Td dataLabel={t`Node Type`}>{instance.node_type}</Td>
