@@ -22,6 +22,13 @@ const colors = {
   disabled: gray,
   canceled: orange,
   changed: orange,
+  /* Instance statuses */
+  ready: green,
+  installed: blue,
+  provisioning: gray,
+  deprovisioning: gray,
+  'provision-fail': red,
+  'deprovision-fail': red,
 };
 
 function StatusIcon({ status, ...props }) {

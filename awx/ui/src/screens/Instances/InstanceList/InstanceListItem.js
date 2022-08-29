@@ -143,7 +143,7 @@ function InstanceListItem({
               </div>
             }
           >
-            <StatusLabel status={instance.errors ? 'error' : 'healthy'} />
+            <StatusLabel status={instance.node_state} />
           </Tooltip>
         </Td>
 
