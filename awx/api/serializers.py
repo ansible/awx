@@ -3684,16 +3684,16 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
         for field_name, value in list(attrs.items()):
             if field_name in ['labels', 'instance_groups']:
                 # if we have an object we want to clear it but...
-                # we might not have a valid object at all (RelatedObjectDoesNotExist: Schedule has no unified_job_template)
+                # we might not have a valid object yet which means we couldn't add many to many fields
                 # or its possible that the related field was never initialized yet
                 try:
                     getattr(mock_obj, field_name).clear()
+                    # Now if we have values we can loop over them and add them
+                    if value:
+                        for item in value:
+                            getattr(mock_obj, field_name).add(item)
                 except:
                     pass
-                # Now if we have values we can loop over them and add them
-                if value:
-                    for item in value:
-                        getattr(mock_obj, field_name).add(item)
             elif field_name == 'execution_environment':
                 if value:
                     setattr(mock_obj, field_name, value.id)
