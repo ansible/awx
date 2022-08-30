@@ -565,12 +565,20 @@ Dockerfile.kube-dev: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
 	    -e template_dest=_build_kube_dev \
 	    -e receptor_image=$(RECEPTOR_IMAGE)
 
+## Build awx_kube_devel image for development on local Kubernetes environment.
 awx-kube-dev-build: Dockerfile.kube-dev
 	DOCKER_BUILDKIT=1 docker build -f Dockerfile.kube-dev \
 	    --build-arg BUILDKIT_INLINE_CACHE=1 \
 	    --cache-from=$(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) \
 	    -t $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) .
 
+## Build awx image for deployment on Kubernetes environment.
+awx-kube-build: Dockerfile
+	DOCKER_BUILDKIT=1 docker build -f Dockerfile \
+		--build-arg VERSION=$(VERSION) \
+		--build-arg SETUPTOOLS_SCM_PRETEND_VERSION=$(VERSION) \
+		--build-arg HEADLESS=$(HEADLESS) \
+		-t $(DEV_DOCKER_TAG_BASE)/awx:$(COMPOSE_TAG) .
 
 # Translation TASKS
 # --------------------------------------
