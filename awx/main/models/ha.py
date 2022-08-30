@@ -424,7 +424,7 @@ def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs
 @receiver(post_save, sender=Instance)
 def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
     # TODO: handle update to instance
-    if settings.IS_K8S and created and instance.node_type in ('execution', 'hop'):
+    if settings.IS_K8S and created and instance.node_type in (Instance.Types.EXECUTION,):
         from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
 
         # on commit broadcast to all control instance to update their receptor configs

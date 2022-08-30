@@ -4872,6 +4872,7 @@ class InstanceNodeSerializer(BaseSerializer):
 
 
 class InstanceSerializer(BaseSerializer):
+    show_capabilities = ['edit']
 
     consumed_capacity = serializers.SerializerMethodField()
     percent_capacity_remaining = serializers.SerializerMethodField()
@@ -4917,7 +4918,7 @@ class InstanceSerializer(BaseSerializer):
         res = super(InstanceSerializer, self).get_related(obj)
         res['jobs'] = self.reverse('api:instance_unified_jobs_list', kwargs={'pk': obj.pk})
         res['instance_groups'] = self.reverse('api:instance_instance_groups_list', kwargs={'pk': obj.pk})
-        if settings.IS_K8S and obj.node_type in ('execution', 'hop'):
+        if settings.IS_K8S and obj.node_type in (Instance.Types.EXECUTION,):
             res['install_bundle'] = self.reverse('api:instance_install_bundle', kwargs={'pk': obj.pk})
         res['peers'] = self.reverse('api:instance_peers_list', kwargs={"pk": obj.pk})
         if self.context['request'].user.is_superuser or self.context['request'].user.is_system_auditor:
@@ -4950,8 +4951,8 @@ class InstanceSerializer(BaseSerializer):
 
     def validate_node_type(self, value):
         if not self.instance:
-            if value not in [Instance.Types.EXECUTION, Instance.Types.HOP]:
-                raise serializers.ValidationError("Can only create execution and hop nodes.")
+            if value not in (Instance.Types.EXECUTION,):
+                raise serializers.ValidationError("Can only create execution nodes.")
         else:
             if self.instance.node_type != value:
                 raise serializers.ValidationError("Cannot change node type.")
