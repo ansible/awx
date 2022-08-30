@@ -814,7 +814,8 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     def _get_inventory_hosts(self, only=['name', 'ansible_facts', 'ansible_facts_modified', 'modified', 'inventory_id']):
         if not self.inventory:
             return []
-        return self.inventory.hosts.only(*only)
+        host_queryset = self.inventory.hosts.only(*only)
+        return self.inventory.get_sliced_hosts(host_queryset, self.job_slice_number, self.job_slice_count)
 
     def start_job_fact_cache(self, destination, modification_times, timeout=None):
         self.log_lifecycle("start_job_fact_cache")

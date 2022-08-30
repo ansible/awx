@@ -236,6 +236,12 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
             raise ParseError(_('Slice number must be 1 or higher.'))
         return (number, step)
 
+    def get_sliced_hosts(self, host_queryset, slice_number, slice_count):
+        if slice_count > 1 and slice_number > 0:
+            offset = slice_number - 1
+            host_queryset = host_queryset[offset::slice_count]
+        return host_queryset
+
     def get_script_data(self, hostvars=False, towervars=False, show_all=False, slice_number=1, slice_count=1):
         hosts_kw = dict()
         if not show_all:
@@ -243,10 +249,8 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         fetch_fields = ['name', 'id', 'variables', 'inventory_id']
         if towervars:
             fetch_fields.append('enabled')
-        hosts = self.hosts.filter(**hosts_kw).order_by('name').only(*fetch_fields)
-        if slice_count > 1 and slice_number > 0:
-            offset = slice_number - 1
-            hosts = hosts[offset::slice_count]
+        host_queryset = self.hosts.filter(**hosts_kw).order_by('name').only(*fetch_fields)
+        hosts = self.get_sliced_hosts(host_queryset, slice_number, slice_count)
 
         data = dict()
         all_group = data.setdefault('all', dict())
