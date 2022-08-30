@@ -452,6 +452,11 @@ COMPOSE_OPTS ?=
 CONTROL_PLANE_NODE_COUNT ?= 1
 EXECUTION_NODE_COUNT ?= 2
 MINIKUBE_CONTAINER_GROUP ?= false
+EXTRA_SOURCES_ANSIBLE_OPTS ?=
+
+ifneq ($(ADMIN_PASSWORD),)
+	EXTRA_SOURCES_ANSIBLE_OPTS := -e admin_password=$(ADMIN_PASSWORD) $(EXTRA_SOURCES_ANSIBLE_OPTS)
+endif
 
 docker-compose-sources: .git/hooks/pre-commit
 	@if [ $(MINIKUBE_CONTAINER_GROUP) = true ]; then\
@@ -469,7 +474,8 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e enable_ldap=$(LDAP) \
 	    -e enable_splunk=$(SPLUNK) \
 	    -e enable_prometheus=$(PROMETHEUS) \
-	    -e enable_grafana=$(GRAFANA)
+	    -e enable_grafana=$(GRAFANA) $(EXTRA_SOURCES_ANSIBLE_OPTS)
+
 
 
 docker-compose: awx/projects docker-compose-sources
@@ -576,7 +582,7 @@ pot: $(UI_BUILD_FLAG_FILE)
 po: $(UI_BUILD_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run extract-strings -- --clean
 
-LANG = "en-us"
+LANG = "en_us"
 ## generate API django .pot .po
 messages:
 	@if [ "$(VENV_BASE)" ]; then \

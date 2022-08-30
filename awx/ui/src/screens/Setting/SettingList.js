@@ -81,6 +81,10 @@ function SettingList() {
           title: t`TACACS+ settings`,
           path: '/settings/tacacs',
         },
+        {
+          title: t`Generic OIDC settings`,
+          path: '/settings/oidc',
+        },
       ],
     },
     {

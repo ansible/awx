@@ -105,7 +105,7 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, 'ui', 'build', 'static'), os.path.joi
 
 # Absolute filesystem path to the directory where static file are collected via
 # the collectstatic command.
-STATIC_ROOT = os.path.join(BASE_DIR, 'public', 'static')
+STATIC_ROOT = '/var/lib/awx/public/static'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/dev/howto/static-files/
@@ -379,6 +379,7 @@ AUTHENTICATION_BACKENDS = (
     'social_core.backends.github_enterprise.GithubEnterpriseOAuth2',
     'social_core.backends.github_enterprise.GithubEnterpriseOrganizationOAuth2',
     'social_core.backends.github_enterprise.GithubEnterpriseTeamOAuth2',
+    'social_core.backends.open_id_connect.OpenIdConnectAuth',
     'social_core.backends.azuread.AzureADOAuth2',
     'awx.sso.backends.SAMLAuth',
     'awx.main.backends.AWXModelBackend',
@@ -442,10 +443,6 @@ EXECUTION_NODE_REMEDIATION_CHECKS = 60 * 30  # once every 30 minutes check if an
 
 # Amount of time dispatcher will try to reconnect to database for jobs and consuming new work
 DISPATCHER_DB_DOWNTOWN_TOLLERANCE = 40
-
-# Minimum time to wait after last job finished before scaling down a worker
-# A higher value will free up memory more agressively, but a lower value will require less forking
-DISPATCHER_SCALE_DOWN_WAIT_TIME = 60
 
 BROKER_URL = 'unix:///var/run/redis/redis.sock'
 CELERYBEAT_SCHEDULE = {

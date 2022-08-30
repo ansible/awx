@@ -2,7 +2,7 @@
 	This template is an export from Keycloak.
 	See https://github.com/keycloak/keycloak-documentation/blob/main/server_admin/topics/export-import.adoc for instructions on how to run the export.
 	Once you have the export you want to variablize the public cert, private cert, and the endpoints.
-	The endpoints should be replaced with the variable {{ container_reference }}
+	The endpoints should be replaced with either the variable {{ container_reference }} or {{ oidc_reference }}
 	Some of the keys have \n's in there and some references do not.
 	The ones with the \n can be variablized by {{ private_key }} and {{ public_key }}.
 	The public key in the setting `saml.signing.certificate` should be replaced with {{ public_key_trimmed }}
@@ -65,7 +65,8 @@
         "composite": true,
         "composites": {
           "realm": [
-            "offline_access"
+            "offline_access",
+            "uma_authorization"
           ],
           "client": {
             "account": [
@@ -75,12 +76,31 @@
           }
         },
         "clientRole": false,
-        "containerId": "Tower Realm",
+        "containerId": "AWX Realm",
+        "attributes": {}
+      },
+      {
+        "id": "ea2c2864-93b0-4022-9ef1-202bc2f9c87a",
+        "name": "uma_authorization",
+        "description": "${role_uma_authorization}",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "AWX Realm",
+        "attributes": {}
+      },
+      {
+        "id": "3764c3ca-d706-424e-8802-65be0d2e060d",
+        "name": "offline_access",
+        "description": "${role_offline-access}",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "AWX Realm",
         "attributes": {}
       }
     ],
     "client": {
-      "{{ container_reference }}:8043": []
+      "{{ container_reference }}:8043": [],
+      "awx_oidc_client": []
     }
   },
   "groups": [],
@@ -90,7 +110,7 @@
     "description": "${role_default-roles}",
     "composite": true,
     "clientRole": false,
-    "containerId": "Tower Realm"
+    "containerId": "AWX Realm"
   },
   "requiredCredentials": [
     "password"
@@ -290,6 +310,88 @@
         "role_list"
       ],
       "optionalClientScopes": []
+    },
+    {
+      "id": "525e0eeb-56ee-429f-a040-c6fc18072dc4",
+      "clientId": "awx_oidc_client",
+      "baseUrl": "",
+      "surrogateAuthRequired": false,
+      "enabled": true,
+      "alwaysDisplayInConsole": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "7b1c3527-8702-4742-af69-2b74ee5742e8",
+      "redirectUris": [
+        {% if oidc_reference is defined %}
+        "https://{{ oidc_reference }}:8043/sso/complete/oidc/",
+        {% endif %}
+        "https://{{ container_reference }}:8043/sso/complete/oidc/"
+      ],
+      "webOrigins": [],
+      "notBefore": 0,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "publicClient": false,
+      "frontchannelLogout": false,
+      "protocol": "openid-connect",
+      "attributes": {
+        "id.token.as.detached.signature": "false",
+        "saml.assertion.signature": "false",
+        "saml.force.post.binding": "false",
+        "saml.multivalued.roles": "false",
+        "saml.encrypt": "false",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "backchannel.logout.revoke.offline.tokens": "false",
+        "saml.server.signature": "false",
+        "saml.server.signature.keyinfo.ext": "false",
+        "use.refresh.tokens": "true",
+        "exclude.session.state.from.auth.response": "false",
+        "oidc.ciba.grant.enabled": "false",
+        "saml.artifact.binding": "false",
+        "backchannel.logout.session.required": "true",
+        "client_credentials.use_refresh_token": "false",
+        "saml_force_name_id_format": "false",
+        "require.pushed.authorization.requests": "false",
+        "saml.client.signature": "false",
+        "tls.client.certificate.bound.access.tokens": "false",
+        "saml.authnstatement": "false",
+        "display.on.consent.screen": "false",
+        "saml.onetimeuse.condition": "false"
+      },
+      "authenticationFlowBindingOverrides": {},
+      "fullScopeAllowed": true,
+      "nodeReRegistrationTimeout": -1,
+      "protocolMappers": [
+        {
+          "id": "a8f4a0a8-ece4-4a9d-9e7b-830f23ba0067",
+          "name": "AWX OIDC Group Membership",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-group-membership-mapper",
+          "consentRequired": false,
+          "config": {
+            "full.path": "false",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "Group",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ],
+      "defaultClientScopes": [
+        "web-origins",
+        "profile",
+        "roles",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
+      ]
     }
   ],
   "clientScopes": [
@@ -626,6 +728,7 @@
           "consentRequired": false,
           "config": {
             "multivalued": "true",
+            "userinfo.token.claim": "true",
             "user.attribute": "foo",
             "id.token.claim": "true",
             "access.token.claim": "true",
@@ -1686,7 +1789,7 @@
     "clientOfflineSessionIdleTimeout": "0",
     "cibaInterval": "5"
   },
-  "keycloakVersion": "15.0.2.redhat-00001",
+  "keycloakVersion": "15.0.2",
   "userManagedAccessAllowed": false,
   "clientProfiles": {
     "profiles": []

@@ -253,6 +253,10 @@
   "SOCIAL_AUTH_SAML_ORGANIZATION_ATTR":{},
   "SOCIAL_AUTH_SAML_TEAM_ATTR":{},
   "SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR":{},
+  "SOCIAL_AUTH_OIDC_KEY":"",
+  "SOCIAL_AUTH_OIDC_SECRET":"",
+  "SOCIAL_AUTH_OIDC_OIDC_ENDPOINT":"",
+  "SOCIAL_AUTH_OIDC_VERIFY_SSL":true,
   "NAMED_URL_FORMATS":{
     "organizations":"<name>",
     "teams":"<name>++<organization.name>",

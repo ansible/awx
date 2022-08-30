@@ -108,6 +108,9 @@ AWX_DISABLE_TASK_MANAGERS = False
 if 'sqlite3' not in DATABASES['default']['ENGINE']:  # noqa
     DATABASES['default'].setdefault('OPTIONS', dict()).setdefault('application_name', f'{CLUSTER_HOST_ID}-{os.getpid()}-{" ".join(sys.argv)}'[:63])  # noqa
 
+# Everywhere else we use /var/lib/awx/public/static/ - but this requires running collectstatic.
+# This makes the browsable API work in the dev env without any additional steps.
+STATIC_ROOT = os.path.join(BASE_DIR, 'public', 'static')
 
 # If any local_*.py files are present in awx/settings/, use them to override
 # default settings for development.  If not present, we can still run using
