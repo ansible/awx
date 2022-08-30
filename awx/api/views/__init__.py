@@ -368,7 +368,9 @@ class InstanceList(ListCreateAPIView):
     ordering = ('id',)
 
     def perform_create(self, serializer):
-        serializer.save(node_state=models.Instance.States.INSTALLED)
+        obj = serializer.save(node_state=models.Instance.States.INSTALLED)
+        for instance in models.Instance.objects.filter(node_type__in=[models.Instance.Types.CONTROL, models.Instance.Types.HYBRID]):
+            models.InstanceLink.objects.create(source=instance, target=obj, link_state=models.InstanceLink.States.ADDING)
 
 
 class InstanceDetail(RetrieveUpdateAPIView):
@@ -383,8 +385,6 @@ class InstanceDetail(RetrieveUpdateAPIView):
             obj = self.get_object()
             obj.set_capacity_value()
             obj.save(update_fields=['capacity'])
-            for instance in models.Instance.objects.filter(node_type__in=['control', 'hybrid']):
-                models.InstanceLink.objects.create(source=instance, target=obj)
             r.data = serializers.InstanceSerializer(obj, context=self.get_serializer_context()).to_representation(obj)
         return r
 
