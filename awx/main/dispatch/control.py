@@ -46,7 +46,7 @@ class Control(object):
         reply_queue = Control.generate_reply_queue_name()
         self.result = None
 
-        with pg_bus_conn() as conn:
+        with pg_bus_conn(new_connection=True) as conn:
             conn.listen(reply_queue)
             conn.notify(self.queuename, json.dumps({'control': command, 'reply_to': reply_queue}))
 
