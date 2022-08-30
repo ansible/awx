@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { Link, useParams } from 'react-router-dom';
+import { Link, useHistory, useParams } from 'react-router-dom';
 import { t, Plural } from '@lingui/macro';
 import {
   Button,
@@ -28,7 +28,11 @@ import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import { Detail, DetailList } from 'components/DetailList';
 import StatusLabel from 'components/StatusLabel';
-import useRequest, { useDismissableError } from 'hooks/useRequest';
+import useRequest, {
+  useDeleteItems,
+  useDismissableError,
+} from 'hooks/useRequest';
+import RemoveInstanceButton from '../Shared/RemoveInstanceButton';
 
 const Unavailable = styled.span`
   color: var(--pf-global--danger-color--200);
@@ -56,11 +60,11 @@ function computeForks(memCapacity, cpuCapacity, selectedCapacityAdjustment) {
   );
 }
 
-function InstanceDetail({ setBreadcrumb }) {
+function InstanceDetail({ setBreadcrumb, isK8s }) {
   const { me = {} } = useConfig();
   const { id } = useParams();
   const [forks, setForks] = useState();
-
+  const history = useHistory();
   const [healthCheck, setHealthCheck] = useState({});
 
   const {
@@ -148,10 +152,25 @@ function InstanceDetail({ setBreadcrumb }) {
   const { error, dismissError } = useDismissableError(
     updateInstanceError || healthCheckError
   );
+  const {
+    isLoading: isRemoveLoading,
+    deleteItems: removeInstances,
+    deletionError: removeError,
+    clearDeletionError,
+  } = useDeleteItems(
+    async () => {
+      await InstancesAPI.deprovisionInstance(instance.id);
+      history.push('/instances');
+    },
+    {
+      fetchItems: fetchDetails,
+    }
+  );
+
   if (contentError) {
     return <ContentError error={contentError} />;
   }
-  if (isLoading) {
+  if (isLoading || isRemoveLoading) {
     return <ContentLoading />;
   }
   const isHopNode = instance.node_type === 'hop';
@@ -218,6 +237,7 @@ function InstanceDetail({ setBreadcrumb }) {
                   <Tooltip content={t`Click to download bundle`}>
                     <Button
                       component="a"
+                      isSmall
                       href={`${instance.related?.install_bundle}`}
                       target="_blank"
                       variant="secondary"
@@ -286,6 +306,13 @@ function InstanceDetail({ setBreadcrumb }) {
       </DetailList>
       {!isHopNode && (
         <CardActionsRow>
+          {me.is_superuser && isK8s && instance.node_type === 'execution' && (
+            <RemoveInstanceButton
+              itemsToRemove={[instance]}
+              isK8s={isK8s}
+              onRemove={removeInstances}
+            />
+          )}
           <Tooltip content={t`Run a health check on the instance`}>
             <Button
               isDisabled={!me.is_superuser || isRunningHealthCheck}
@@ -317,6 +344,19 @@ function InstanceDetail({ setBreadcrumb }) {
             ? t`Failed to update capacity adjustment.`
             : t`Failed to disassociate one or more instances.`}
           <ErrorDetail error={error} />
+        </AlertModal>
+      )}
+
+      {removeError && (
+        <AlertModal
+          isOpen={removeError}
+          variant="error"
+          aria-label={t`Removal Error`}
+          title={t`Error!`}
+          onClose={clearDeletionError}
+        >
+          {t`Failed to remove one or more instances.`}
+          <ErrorDetail error={removeError} />
         </AlertModal>
       )}
     </CardBody>
