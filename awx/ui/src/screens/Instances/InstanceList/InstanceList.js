@@ -15,12 +15,16 @@ import PaginatedTable, {
 import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';
 import { useConfig } from 'contexts/Config';
-import useRequest, { useDismissableError } from 'hooks/useRequest';
+import useRequest, {
+  useDismissableError,
+  useDeleteItems,
+} from 'hooks/useRequest';
 import useSelected from 'hooks/useSelected';
 import { InstancesAPI, SettingsAPI } from 'api';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import HealthCheckButton from 'components/HealthCheckButton';
 import InstanceListItem from './InstanceListItem';
+import RemoveInstanceButton from '../Shared/RemoveInstanceButton';
 
 const QS_CONFIG = getQSConfig('instance', {
   page: 1,
@@ -66,12 +70,12 @@ function InstanceList() {
     }
   );
 
-  const { selected, isAllSelected, handleSelect, clearSelected, selectAll } =
-    useSelected(instances.filter((i) => i.node_type !== 'hop'));
-
   useEffect(() => {
     fetchInstances();
   }, [fetchInstances]);
+
+  const { selected, isAllSelected, handleSelect, clearSelected, selectAll } =
+    useSelected(instances.filter((i) => i.node_type !== 'hop'));
 
   const {
     error: healthCheckError,
@@ -96,13 +100,28 @@ function InstanceList() {
   const { expanded, isAllExpanded, handleExpand, expandAll } =
     useExpanded(instances);
 
+  const {
+    isLoading: isRemoveLoading,
+    deleteItems: handleRemoveInstances,
+    deletionError: removeError,
+    clearDeletionError,
+  } = useDeleteItems(
+    () =>
+      Promise.all(
+        selected.map(({ id }) => InstancesAPI.deprovisionInstance(id))
+      ),
+    { fetchItems: fetchInstances }
+  );
+
   return (
     <>
       <PageSection>
         <Card>
           <PaginatedTable
-            contentError={contentError}
-            hasContentLoading={isLoading || isHealthCheckLoading}
+            contentError={contentError || removeError}
+            hasContentLoading={
+              isLoading || isHealthCheckLoading || isRemoveLoading
+            }
             items={instances}
             itemCount={count}
             pluralizedItemName={t`Instances`}
@@ -149,10 +168,17 @@ function InstanceList() {
                           key="add"
                           linkTo="/instances/add"
                         />,
+                        <RemoveInstanceButton
+                          itemsToRemove={selected}
+                          isK8s={isK8s}
+                          key="remove"
+                          onRemove={handleRemoveInstances}
+                        />,
                       ]
                     : []),
                   <HealthCheckButton
                     onClick={handleHealthCheck}
+                    key="healthCheck"
                     selectedItems={selected}
                   />,
                 ]}
@@ -196,6 +222,18 @@ function InstanceList() {
         >
           {t`Failed to run a health check on one or more instances.`}
           <ErrorDetail error={error} />
+        </AlertModal>
+      )}
+      {removeError && (
+        <AlertModal
+          isOpen={removeError}
+          variant="error"
+          aria-label={t`Removal Error`}
+          title={t`Error!`}
+          onClose={clearDeletionError}
+        >
+          {t`Failed to remove one or more instances.`}
+          <ErrorDetail error={removeError} />
         </AlertModal>
       )}
     </>

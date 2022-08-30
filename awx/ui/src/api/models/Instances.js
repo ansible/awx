@@ -25,6 +25,12 @@ class Instances extends Base {
   readInstanceGroup(instanceId) {
     return this.http.get(`${this.baseUrl}${instanceId}/instance_groups/`);
   }
+
+  deprovisionInstance(instanceId) {
+    return this.http.post(`${this.baseUrl}${instanceId}`, {
+      node_state: 'deprovisioning',
+    });
+  }
 }
 
 export default Instances;
