@@ -186,11 +186,23 @@ function InstanceDetail({ setBreadcrumb }) {
                 label={t`Instance Groups`}
                 helpText={t`The Instance Groups to which this instance belongs.`}
                 value={instanceGroups.map((ig) => (
-                  <Link to={`${buildLinkURL(ig)}${ig.id}/details`} key={ig.id}>
-                    <Label color="blue" href="#filled">
+                  <React.Fragment key={ig.id}>
+                    <Label
+                      color="blue"
+                      isTruncated
+                      render={({ className, content, componentRef }) => (
+                        <Link
+                          to={`${buildLinkURL(ig)}${ig.id}/details`}
+                          className={className}
+                          innerRef={componentRef}
+                        >
+                          {content}
+                        </Link>
+                      )}
+                    >
                       {ig.name}
                     </Label>{' '}
-                  </Link>
+                  </React.Fragment>
                 ))}
                 isEmpty={instanceGroups.length === 0}
               />

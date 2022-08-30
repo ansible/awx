@@ -86,11 +86,23 @@ const buildLinkURL = (inst) =>
 
 function renderInstanceGroups(instanceGroups) {
   return instanceGroups.map((ig) => (
-    <Link to={`${buildLinkURL(ig)}${ig.id}/details`} key={ig.id}>
-      <Label color="blue" href="#filled">
+    <React.Fragment key={ig.id}>
+      <Label
+        color="blue"
+        isTruncated
+        render={({ className, content, componentRef }) => (
+          <Link
+            to={`${buildLinkURL(ig)}${ig.id}/details`}
+            className={className}
+            innerRef={componentRef}
+          >
+            {content}
+          </Link>
+        )}
+      >
         {ig.name}
       </Label>{' '}
-    </Link>
+    </React.Fragment>
   ));
 }
 
