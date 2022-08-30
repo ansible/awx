@@ -3638,11 +3638,9 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
     diff_mode = serializers.BooleanField(required=False, allow_null=True, default=None)
     verbosity = serializers.ChoiceField(allow_null=True, required=False, default=None, choices=VERBOSITY_CHOICES)
     execution_environment = serializers.PrimaryKeyRelatedField(queryset=ExecutionEnvironment.objects.all(), required=False, allow_null=True, default=None)
-    labels = serializers.PrimaryKeyRelatedField(many=True, queryset=Label.objects.all(), required=False, allow_null=True, default=None)
     forks = serializers.IntegerField(required=False, allow_null=True, default=None)
     job_slice_count = serializers.IntegerField(required=False, allow_null=True, default=None)
     timeout = serializers.IntegerField(required=False, allow_null=True, default=None)
-    instance_groups = serializers.PrimaryKeyRelatedField(many=True, queryset=InstanceGroup.objects.all(), required=False, allow_null=True, default=None)
     exclude_errors = ()
 
     class Meta:
@@ -3662,8 +3660,6 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
             'forks',
             'job_slice_count',
             'timeout',
-            'labels',
-            'instance_groups',
         )
 
     def get_related(self, obj):
@@ -3673,6 +3669,8 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
         res['credentials'] = self.reverse('api:{}_credentials_list'.format(get_type_for_model(self.Meta.model)), kwargs={'pk': obj.pk})
         res['labels'] = self.reverse('api:schedule_label_list', kwargs={'pk': obj.pk})
         res['instance_groups'] = self.reverse('api:schedule_instance_group_list', kwargs={'pk': obj.pk})
+        if obj.execution_environment_id:
+            res['execution_environment'] = self.reverse('api:execution_environment_detail', kwargs={'pk': obj.execution_environment_id})
         return res
 
     def _build_mock_obj(self, attrs):
@@ -3682,21 +3680,9 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
                 setattr(mock_obj, field.name, getattr(self.instance, field.name))
         field_names = set(field.name for field in self.Meta.model._meta.fields)
         for field_name, value in list(attrs.items()):
-            if field_name in ['labels', 'instance_groups']:
-                # if we have an object we want to clear it but...
-                # we might not have a valid object yet which means we couldn't add many to many fields
-                # or its possible that the related field was never initialized yet
-                try:
-                    getattr(mock_obj, field_name).clear()
-                    # Now if we have values we can loop over them and add them
-                    if value:
-                        for item in value:
-                            getattr(mock_obj, field_name).add(item)
-                except:
-                    pass
-            elif field_name == 'execution_environment':
+            if field_name == 'execution_environment':
                 if value:
-                    setattr(mock_obj, field_name, value.id)
+                    setattr(mock_obj, field_name, value)
             else:
                 setattr(mock_obj, field_name, value)
             if field_name not in field_names:
