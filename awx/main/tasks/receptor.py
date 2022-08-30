@@ -641,7 +641,7 @@ RECEPTOR_CONFIG_STARTER = (
 def write_receptor_config():
     receptor_config = list(RECEPTOR_CONFIG_STARTER)
 
-    instances = Instance.objects.exclude(node_type='control')
+    instances = Instance.objects.filter(node_type=Instance.Types.EXECUTION)
     for instance in instances:
         peer = {'tcp-peer': {'address': f'{instance.hostname}:{instance.listener_port}', 'tls': 'tlsclient'}}
         receptor_config.append(peer)
