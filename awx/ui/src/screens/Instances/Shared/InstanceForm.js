@@ -12,18 +12,8 @@ import { FormColumnLayout } from 'components/FormLayout';
 import FormField, { FormSubmitError } from 'components/FormField';
 import FormActionGroup from 'components/FormActionGroup';
 import { required } from 'util/validators';
-import AnsibleSelect from 'components/AnsibleSelect';
-
-// This is hard coded because the API does not have the ability to send us a list that contains
-// only the types of instances that can be added.  Control and Hybrid instances cannot be added.
-
-const INSTANCE_TYPES = [
-  { id: 'execution', name: t`Execution` },
-  { id: 'hop', name: t`Hop` },
-];
 
 function InstanceFormFields() {
-  const [instanceType, , instanceTypeHelpers] = useField('node_type');
   const [enabled, , enabledHelpers] = useField('enabled');
   return (
     <>
@@ -55,27 +45,13 @@ function InstanceFormFields() {
         type="number"
         isRequired
       />
-      <FormGroup
-        fieldId="instanceType"
+      <FormField
+        id="instance-type"
         label={t`Instance Type`}
-        name="type"
-        isRequired
-        validated={required(null)}
-      >
-        <AnsibleSelect
-          {...instanceType}
-          id="instanceType-select"
-          data={INSTANCE_TYPES.map((type) => ({
-            key: type.id,
-            value: type.id,
-            label: type.name,
-          }))}
-          value={instanceType.value}
-          onChange={(e, opt) => {
-            instanceTypeHelpers.setValue(opt);
-          }}
-        />
-      </FormGroup>
+        name="node_type"
+        type="text"
+        isDisabled
+      />
       <FormGroup
         label={t`Enable Instance`}
         aria-label={t`Enable Instance`}
