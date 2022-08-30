@@ -1,7 +1,7 @@
 import React from 'react';
 import { t } from '@lingui/macro';
 
-const wfHelpTextStrings = {
+const wfHelpTextStrings = () => ({
   inventory: t`Select an inventory for the workflow. This inventory is applied to all workflow nodes that prompt for an inventory.`,
   limit: t`Provide a host pattern to further constrain
   the list of hosts that will be managed or affected by the
@@ -24,6 +24,6 @@ const wfHelpTextStrings = {
       <p>{t`Webhooks: Enable Webhook for this workflow job template.`}</p>
     </>
   ),
-};
+});
 
 export default wfHelpTextStrings;

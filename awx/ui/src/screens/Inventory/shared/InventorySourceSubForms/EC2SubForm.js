@@ -12,9 +12,10 @@ import {
   EnabledValueField,
   HostFilterField,
 } from './SharedFields';
-import helpText from '../Inventory.helptext';
+import getHelpText from '../Inventory.helptext';
 
 const EC2SubForm = () => {
+  const helpText = getHelpText();
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [credentialField, credentialMeta] = useField('credential');
   const config = useConfig();

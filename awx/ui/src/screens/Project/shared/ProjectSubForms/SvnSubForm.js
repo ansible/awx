@@ -1,7 +1,7 @@
 import 'styled-components/macro';
 import React from 'react';
 import { t } from '@lingui/macro';
-import projectHelpStrings from '../Project.helptext';
+import getProjectHelpStrings from '../Project.helptext';
 
 import {
   UrlFormField,
@@ -14,16 +14,19 @@ const SvnSubForm = ({
   credential,
   onCredentialSelection,
   scmUpdateOnLaunch,
-}) => (
-  <>
-    <UrlFormField tooltip={projectHelpStrings.svnSourceControlUrl} />
-    <BranchFormField label={t`Revision #`} />
-    <ScmCredentialFormField
-      credential={credential}
-      onCredentialSelection={onCredentialSelection}
-    />
-    <ScmTypeOptions scmUpdateOnLaunch={scmUpdateOnLaunch} />
-  </>
-);
+}) => {
+  const projectHelpStrings = getProjectHelpStrings();
+  return (
+    <>
+      <UrlFormField tooltip={projectHelpStrings.svnSourceControlUrl} />
+      <BranchFormField label={t`Revision #`} />
+      <ScmCredentialFormField
+        credential={credential}
+        onCredentialSelection={onCredentialSelection}
+      />
+      <ScmTypeOptions scmUpdateOnLaunch={scmUpdateOnLaunch} />
+    </>
+  );
+};
 
 export default SvnSubForm;

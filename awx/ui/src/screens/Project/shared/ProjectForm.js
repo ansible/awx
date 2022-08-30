@@ -17,7 +17,7 @@ import ExecutionEnvironmentLookup from 'components/Lookup/ExecutionEnvironmentLo
 import { CredentialTypesAPI, ProjectsAPI } from 'api';
 import { required } from 'util/validators';
 import { FormColumnLayout, SubFormLayout } from 'components/FormLayout';
-import projectHelpText from './Project.helptext';
+import getProjectHelpText from './Project.helptext';
 import {
   GitSubForm,
   SvnSubForm,
@@ -91,6 +91,7 @@ function ProjectFormFields({
   setScmSubFormState,
   scmSubFormState,
 }) {
+  const projectHelpText = getProjectHelpText();
   const scmFormFields = {
     scm_url: '',
     scm_branch: '',

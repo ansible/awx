@@ -12,9 +12,10 @@ import { TokensAPI } from 'api';
 import { formatDateString } from 'util/dates';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { toTitleCase } from 'util/strings';
-import helptext from '../shared/User.helptext';
+import getHelptext from '../shared/User.helptext';
 
 function UserTokenDetail({ token }) {
+  const helptext = getHelptext();
   const { scope, description, created, modified, expires, summary_fields } =
     token;
   const history = useHistory();

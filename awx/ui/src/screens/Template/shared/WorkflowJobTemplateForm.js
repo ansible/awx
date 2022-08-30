@@ -28,7 +28,7 @@ import Popover from 'components/Popover';
 import { WorkFlowJobTemplate } from 'types';
 import LabelSelect from 'components/LabelSelect';
 import WebhookSubForm from './WebhookSubForm';
-import helpText from './WorkflowJobTemplate.helptext';
+import getHelpText from './WorkflowJobTemplate.helptext';
 
 const urlOrigin = window.location.origin;
 
@@ -39,6 +39,7 @@ function WorkflowJobTemplateForm({
   submitError,
   isOrgAdmin,
 }) {
+  const helpText = getHelpText();
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [enableWebhooks, setEnableWebhooks] = useState(
     Boolean(template.webhook_service)

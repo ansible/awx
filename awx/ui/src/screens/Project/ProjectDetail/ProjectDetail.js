@@ -31,7 +31,7 @@ import { formatDateString } from 'util/dates';
 import Popover from 'components/Popover';
 import getDocsBaseUrl from 'util/getDocsBaseUrl';
 import ProjectSyncButton from '../shared/ProjectSyncButton';
-import projectHelpText from '../shared/Project.helptext';
+import getProjectHelpText from '../shared/Project.helptext';
 import useWsProject from './useWsProject';
 
 const Label = styled.span`
@@ -39,6 +39,7 @@ const Label = styled.span`
 `;
 
 function ProjectDetail({ project }) {
+  const projectHelpText = getProjectHelpText();
   const {
     allow_override,
     created,

@@ -29,7 +29,7 @@ import { VERBOSITY } from 'components/VerbositySelectField';
 import { getJobModel, isJobRunning } from 'util/jobs';
 import { formatDateString } from 'util/dates';
 import { Job } from 'types';
-import jobHelpText from '../Job.helptext';
+import getJobHelpText from '../Job.helptext';
 
 const StatusDetailValue = styled.div`
   align-items: center;
@@ -39,6 +39,7 @@ const StatusDetailValue = styled.div`
 `;
 
 function JobDetail({ job, inventorySourceLabels }) {
+  const jobHelpText = getJobHelpText();
   const { me } = useConfig();
   const {
     created_by,

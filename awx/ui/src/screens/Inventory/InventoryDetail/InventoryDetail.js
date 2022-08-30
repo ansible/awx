@@ -16,10 +16,11 @@ import { InventoriesAPI } from 'api';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { Inventory } from 'types';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
-import helpText from '../shared/Inventory.helptext';
+import getHelpText from '../shared/Inventory.helptext';
 
 function InventoryDetail({ inventory }) {
   const history = useHistory();
+  const helpText = getHelpText();
   const {
     result: instanceGroups,
     isLoading,

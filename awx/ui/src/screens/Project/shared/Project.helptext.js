@@ -1,7 +1,7 @@
 import React from 'react';
 import { t } from '@lingui/macro';
 
-const projectHelpTextStrings = {
+const projectHelpTextStrings = () => ({
   executionEnvironment: t`The execution environment that will be used for jobs that use this project. This will be used as fallback when an execution environment has not been explicitly assigned at the job template or workflow level.`,
   projectBasePath: (brandName = '') => (
     <span>
@@ -132,6 +132,6 @@ const projectHelpTextStrings = {
                     considered current, and a new project update will be
                     performed.`,
   },
-};
+});
 
 export default projectHelpTextStrings;

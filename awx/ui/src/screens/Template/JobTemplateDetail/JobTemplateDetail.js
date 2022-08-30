@@ -34,7 +34,7 @@ import useRequest, { useDismissableError } from 'hooks/useRequest';
 import useBrandName from 'hooks/useBrandName';
 import ExecutionEnvironmentDetail from 'components/ExecutionEnvironmentDetail';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
-import helpText from '../shared/JobTemplate.helptext';
+import getHelpText from '../shared/JobTemplate.helptext';
 
 function JobTemplateDetail({ template }) {
   const {
@@ -68,7 +68,7 @@ function JobTemplateDetail({ template }) {
   const { id: templateId } = useParams();
   const history = useHistory();
   const brandName = useBrandName();
-
+  const helpText = getHelpText();
   const {
     isLoading: isLoadingInstanceGroups,
     request: fetchInstanceGroups,

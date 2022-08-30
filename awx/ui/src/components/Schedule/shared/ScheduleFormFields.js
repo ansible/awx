@@ -9,7 +9,7 @@ import { useConfig } from 'contexts/Config';
 import Popover from '../../Popover';
 import AnsibleSelect from '../../AnsibleSelect';
 import FrequencySelect, { SelectOption } from './FrequencySelect';
-import helpText from '../../../screens/Template/shared/JobTemplate.helptext';
+import getHelpText from '../../../screens/Template/shared/JobTemplate.helptext';
 import { SubFormLayout, FormColumnLayout } from '../../FormLayout';
 import FrequencyDetailSubform from './FrequencyDetailSubform';
 import DateTimePicker from './DateTimePicker';
@@ -26,6 +26,7 @@ export default function ScheduleFormFields({
   zoneOptions,
   zoneLinks,
 }) {
+  const helpText = getHelpText();
   const [timezone, timezoneMeta] = useField({
     name: 'timezone',
     validate: required(t`Select a value for this field`),

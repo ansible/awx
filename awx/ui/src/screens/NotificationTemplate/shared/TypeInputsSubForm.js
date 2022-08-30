@@ -26,7 +26,7 @@ import {
 } from 'util/validators';
 import { NotificationType } from 'types';
 import Popover from '../../../components/Popover/Popover';
-import helpText from './Notifications.helptext';
+import getHelpText from './Notifications.helptext';
 
 const TypeFields = {
   email: EmailFields,
@@ -59,6 +59,7 @@ TypeInputsSubForm.propTypes = {
 export default TypeInputsSubForm;
 
 function EmailFields() {
+  const helpText = getHelpText();
   return (
     <>
       <FormField
@@ -142,6 +143,7 @@ function EmailFields() {
 }
 
 function GrafanaFields() {
+  const helpText = getHelpText();
   return (
     <>
       <FormField
@@ -190,6 +192,8 @@ function GrafanaFields() {
 }
 
 function IRCFields() {
+  const helpText = getHelpText();
+
   return (
     <>
       <PasswordField
@@ -351,6 +355,8 @@ function RocketChatFields() {
 }
 
 function SlackFields() {
+  const helpText = getHelpText();
+
   return (
     <>
       <ArrayTextField
@@ -381,6 +387,8 @@ function SlackFields() {
 }
 
 function TwilioFields() {
+  const helpText = getHelpText();
+
   return (
     <>
       <PasswordField
@@ -421,6 +429,8 @@ function TwilioFields() {
 }
 
 function WebhookFields() {
+  const helpText = getHelpText();
+
   const [methodField, methodMeta] = useField({
     name: 'notification_configuration.http_method',
     validate: required(t`Select a value for this field`),
