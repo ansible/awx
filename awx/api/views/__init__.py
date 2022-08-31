@@ -618,21 +618,36 @@ class ScheduleCredentialsList(LaunchConfigCredentialsBase):
     parent_model = models.Schedule
 
 
-class ScheduleLabelsList(SubListAPIView):
+class ScheduleLabelsList(DeleteLastUnattachLabelMixin, SubListCreateAttachDetachAPIView):
+
     model = models.Label
     serializer_class = serializers.LabelSerializer
     parent_model = models.Schedule
     relationship = 'labels'
-    parent_key = 'schedule'
+
+    def post(self, request, *args, **kwargs):
+        # If a label already exists in the database, attach it instead of erroring out
+        # that it already exists
+        if 'id' not in request.data and 'name' in request.data and 'organization' in request.data:
+            existing = models.Label.objects.filter(name=request.data['name'], organization_id=request.data['organization'])
+            if existing.exists():
+                existing = existing[0]
+                request.data['id'] = existing.id
+                del request.data['name']
+                del request.data['organization']
+        if models.Label.objects.filter(schedule_labels=self.kwargs['pk']).count() > 100:
+            return Response(
+                dict(msg=_('Maximum number of labels for {} reached.'.format(self.parent_model._meta.verbose_name_raw))), status=status.HTTP_400_BAD_REQUEST
+            )
+        return super(ScheduleLabelsList, self).post(request, *args, **kwargs)
 
 
-class ScheduleInstanceGroupList(SubListAPIView):
+class ScheduleInstanceGroupList(SubListAttachDetachAPIView):
 
     model = models.InstanceGroup
     serializer_class = serializers.InstanceGroupSerializer
     parent_model = models.Schedule
     relationship = 'instance_groups'
-    parent_key = 'schedule'
 
 
 class ScheduleUnifiedJobsList(SubListAPIView):
