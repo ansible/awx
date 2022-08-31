@@ -118,10 +118,6 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     xmlsec1-openssl && \
     dnf -y clean all
 
-RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 && \
-    chmod 700 get_helm.sh && \
-    ./get_helm.sh
-
 RUN pip3 install virtualenv supervisor dumb-init
 
 RUN rm -rf /root/.cache && rm -rf /tmp/*
