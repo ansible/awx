@@ -652,21 +652,22 @@ def write_receptor_config():
         with open(__RECEPTOR_CONF, 'w') as file:
             yaml.dump(receptor_config, file, default_flow_style=False)
 
-        receptor_ctl = get_receptor_ctl()
+    # This needs to be outside of the lock because this function itself will acquire the lock.
+    receptor_ctl = get_receptor_ctl()
 
-        attempts = 10
-        for backoff in range(1, attempts + 1):
-            try:
-                receptor_ctl.simple_command("reload")
-                break
-            except ValueError:
-                logger.warning(f"Unable to reload Receptor configuration. {attempts-backoff} attempts left.")
-                time.sleep(backoff)
-        else:
-            raise RuntimeError("Receptor reload failed")
+    attempts = 10
+    for backoff in range(1, attempts + 1):
+        try:
+            receptor_ctl.simple_command("reload")
+            break
+        except ValueError:
+            logger.warning(f"Unable to reload Receptor configuration. {attempts-backoff} attempts left.")
+            time.sleep(backoff)
+    else:
+        raise RuntimeError("Receptor reload failed")
 
-        links = InstanceLink.objects.filter(source=this_inst, target__in=instances, link_state=InstanceLink.States.ADDING)
-        links.update(link_state=InstanceLink.States.ESTABLISHED)
+    links = InstanceLink.objects.filter(source=this_inst, target__in=instances, link_state=InstanceLink.States.ADDING)
+    links.update(link_state=InstanceLink.States.ESTABLISHED)
 
 
 @task()
