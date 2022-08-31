@@ -381,7 +381,8 @@ clean-ui:
 awx/ui/node_modules:
 	NODE_OPTIONS=--max-old-space-size=6144 $(NPM_BIN) --prefix awx/ui --loglevel warn ci
 
-$(UI_BUILD_FLAG_FILE): awx/ui/node_modules
+$(UI_BUILD_FLAG_FILE):
+	$(MAKE) awx/ui/node_modules
 	$(PYTHON) tools/scripts/compilemessages.py
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run compile-strings
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run build
@@ -452,6 +453,11 @@ COMPOSE_OPTS ?=
 CONTROL_PLANE_NODE_COUNT ?= 1
 EXECUTION_NODE_COUNT ?= 2
 MINIKUBE_CONTAINER_GROUP ?= false
+EXTRA_SOURCES_ANSIBLE_OPTS ?=
+
+ifneq ($(ADMIN_PASSWORD),)
+	EXTRA_SOURCES_ANSIBLE_OPTS := -e admin_password=$(ADMIN_PASSWORD) $(EXTRA_SOURCES_ANSIBLE_OPTS)
+endif
 
 docker-compose-sources: .git/hooks/pre-commit
 	@if [ $(MINIKUBE_CONTAINER_GROUP) = true ]; then\
@@ -469,7 +475,8 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e enable_ldap=$(LDAP) \
 	    -e enable_splunk=$(SPLUNK) \
 	    -e enable_prometheus=$(PROMETHEUS) \
-	    -e enable_grafana=$(GRAFANA)
+	    -e enable_grafana=$(GRAFANA) $(EXTRA_SOURCES_ANSIBLE_OPTS)
+
 
 
 docker-compose: awx/projects docker-compose-sources
@@ -558,12 +565,20 @@ Dockerfile.kube-dev: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
 	    -e template_dest=_build_kube_dev \
 	    -e receptor_image=$(RECEPTOR_IMAGE)
 
+## Build awx_kube_devel image for development on local Kubernetes environment.
 awx-kube-dev-build: Dockerfile.kube-dev
 	DOCKER_BUILDKIT=1 docker build -f Dockerfile.kube-dev \
 	    --build-arg BUILDKIT_INLINE_CACHE=1 \
 	    --cache-from=$(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) \
 	    -t $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) .
 
+## Build awx image for deployment on Kubernetes environment.
+awx-kube-build: Dockerfile
+	DOCKER_BUILDKIT=1 docker build -f Dockerfile \
+		--build-arg VERSION=$(VERSION) \
+		--build-arg SETUPTOOLS_SCM_PRETEND_VERSION=$(VERSION) \
+		--build-arg HEADLESS=$(HEADLESS) \
+		-t $(DEV_DOCKER_TAG_BASE)/awx:$(COMPOSE_TAG) .
 
 # Translation TASKS
 # --------------------------------------
