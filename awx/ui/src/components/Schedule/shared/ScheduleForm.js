@@ -58,7 +58,7 @@ function ScheduleForm({
     useCallback(async () => {
       const { data } = await SchedulesAPI.readZoneInfo();
 
-      let creds;
+      let creds = [];
       let allLabels;
       if (schedule.id) {
         if (
@@ -106,7 +106,7 @@ function ScheduleForm({
       return {
         zoneOptions: zones,
         zoneLinks: data.links,
-        credentials: creds || [],
+        credentials: creds,
         labels: allLabels || [],
       };
     }, [
@@ -462,7 +462,13 @@ function ScheduleForm({
             },
           }}
           onSubmit={(values) => {
-            submitSchedule(values, launchConfig, surveyConfig, credentials);
+            submitSchedule(
+              values,
+              launchConfig,
+              surveyConfig,
+              credentials,
+              labels
+            );
           }}
           validate={validate}
         >
