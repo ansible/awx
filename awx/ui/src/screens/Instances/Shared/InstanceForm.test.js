@@ -91,7 +91,7 @@ describe('<InstanceForm />', () => {
       enabled: true,
       hostname: 'new Foo',
       listener_port: 'This is a repeat song',
-      node_state: 'Installed',
+      node_state: 'installed',
       node_type: 'execution',
     });
   });

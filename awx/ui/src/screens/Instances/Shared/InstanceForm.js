@@ -114,7 +114,7 @@ function InstanceForm({
           hostname: '',
           description: '',
           node_type: 'execution',
-          node_state: 'Installed',
+          node_state: 'installed',
           listener_port: 27199,
           enabled: true,
         }}
