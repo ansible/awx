@@ -34,20 +34,6 @@ class JobTemplates extends SchedulesMixin(
     return this.http.get(`${this.baseUrl}${id}/launch/`);
   }
 
-  associateLabel(id, label, orgId) {
-    return this.http.post(`${this.baseUrl}${id}/labels/`, {
-      name: label.name,
-      organization: orgId,
-    });
-  }
-
-  disassociateLabel(id, label) {
-    return this.http.post(`${this.baseUrl}${id}/labels/`, {
-      id: label.id,
-      disassociate: true,
-    });
-  }
-
   readCredentials(id, params) {
     return this.http.get(`${this.baseUrl}${id}/credentials/`, {
       params,
