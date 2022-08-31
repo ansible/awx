@@ -1924,18 +1924,80 @@ class JobLaunchConfigAccess(BaseAccess):
 
     def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
         if isinstance(sub_obj, Credential) and relationship == 'credentials':
-            return self.user in sub_obj.use_role
-        else:
-            raise NotImplementedError('Only credentials can be attached to launch configurations.')
+            if not self.user in sub_obj.use_role:
+                logger.debug(
+                    "User {} not allowed access to credential {} for {} {} ({})".format(self.user.username, sub_obj.name, obj.__class__, obj.name, obj.id)
+                )
+                return False
+            return True
+
+        if isinstance(sub_obj, Label) and relationship == 'labels':
+            if not self.user.can_access(Label, 'read', sub_obj):
+                logger.debug("User {} not allowed access to label {} for {} {} ({})".format(self.user.username, sub_obj.name, obj.__class__, obj.name, obj.id))
+                return False
+            return True
+
+        if isinstance(sub_obj, InstanceGroup) and relationship == 'instance_groups':
+            if not sub_obj in self.user.get_queryset(InstanceGroup):
+                logger.debug(
+                    "User {} not allowed access to instance_group {} for {} {} ({})".format(self.user.username, sub_obj.name, obj.__class__, obj.name, obj.id)
+                )
+                return False
+            return True
+
+        raise NotImplementedError('Only credentials, labels and instance groups can be attached to launch configurations.')
 
     def can_unattach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
         if isinstance(sub_obj, Credential) and relationship == 'credentials':
-            if skip_sub_obj_read_check:
+            if not skip_sub_obj_read_check:
+                logger.debug(
+                    "Skipping check if user {} can access credential {} ({}) for removal from {} {} ({})".format(
+                        self.user.username, sub_obj.name, sub_obj.id, obj.__class__, obj.name, obj.id
+                    )
+                )
                 return True
-            else:
-                return self.user in sub_obj.read_role
-        else:
-            raise NotImplementedError('Only credentials can be attached to launch configurations.')
+            if not self.user in sub_obj.read_role:
+                logger.debug(
+                    "User {} can not read credential {} ({}) for removal from {} {} ({})".format(
+                        self.user.username, sub_obj.name, sub_obj.id, obj.__class__, obj.name, obj.id
+                    )
+                )
+                return False
+            return True
+        if isinstance(sub_obj, Label) and relationship == 'labels':
+            if skip_sub_obj_read_check:
+                logger.debug(
+                    "Skipping check if user {} can access label {} ({}) for removal from {} {} ({})".format(
+                        self.user.username, sub_obj.name, sub_obj.id, obj.__class__, obj.name, obj.id
+                    )
+                )
+                return True
+            if self.user.can_access(Label, 'read', sub_obj):
+                return True
+            logger.debug(
+                "User {} can not read label {} ({}) for removal from {} {} ({})".format(
+                    self.user.username, sub_obj.name, sub_obj.id, obj.__class__, obj.name, obj.id
+                )
+            )
+            return False
+        if isinstance(sub_obj, InstanceGroup) and relationship == 'instance_groups':
+            if skip_sub_obj_read_check:
+                logger.debug(
+                    "Skipping check if user {} can access instance_group {} ({}) for removal from {} {} ({})".format(
+                        self.user.username, sub_obj.name, sub_obj.id, obj.__class__, obj.name, obj.id
+                    )
+                )
+                return True
+            if sub_obj in self.user.get_queryset(InstanceGroup):
+                return True
+            logger.debug(
+                "User {} can not read instance_group {} ({}) for removal from {} {} ({})".format(
+                    self.user.username, sub_obj.name, sub_obj.id, obj.__class__, obj.name, obj.id
+                )
+            )
+            return False
+
+        raise NotImplementedError('Only credentials, labels and instance groups can be attached to launch configurations.')
 
 
 class WorkflowJobTemplateNodeAccess(BaseAccess):

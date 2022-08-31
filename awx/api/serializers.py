@@ -4794,7 +4794,7 @@ class SchedulePreviewSerializer(BaseSerializer):
         return value
 
 
-class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSerializer):
+class ScheduleSerializer(LabelsListMixin, LaunchConfigurationBaseSerializer, SchedulePreviewSerializer):
     show_capabilities = ['edit', 'delete']
 
     timezone = serializers.SerializerMethodField(
@@ -4837,6 +4837,8 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
 
         if isinstance(obj.unified_job_template, SystemJobTemplate):
             summary_fields['unified_job_template']['job_type'] = obj.unified_job_template.job_type
+
+        # We are not showing instance groups on summary fields because JTs don't either
 
         if 'inventory' in summary_fields:
             return summary_fields
