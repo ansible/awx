@@ -467,3 +467,25 @@ class ScheduleInstanceGroupMembership(models.Model):
         default=None,
         db_index=True,
     )
+
+
+class WorkflowJobTemplateNodeBaseInstanceGroupMembership(models.Model):
+
+    schedule = models.ForeignKey('WorkflowJobTemplateNode', on_delete=models.CASCADE)
+    instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
+    position = models.PositiveIntegerField(
+        null=True,
+        default=None,
+        db_index=True,
+    )
+
+
+class WorkflowJobNodeBaseInstanceGroupMembership(models.Model):
+
+    schedule = models.ForeignKey('WorkflowJobNode', on_delete=models.CASCADE)
+    instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
+    position = models.PositiveIntegerField(
+        null=True,
+        default=None,
+        db_index=True,
+    )

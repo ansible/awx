@@ -29,7 +29,7 @@ from awx.main.models import prevent_search, accepts_json, UnifiedJobTemplate, Un
 from awx.main.models.notifications import NotificationTemplate, JobNotificationMixin
 from awx.main.models.base import CreatedModifiedModel, VarsDictProperty
 from awx.main.models.rbac import ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
-from awx.main.fields import ImplicitRoleField, JSONBlob
+from awx.main.fields import ImplicitRoleField, AskForField, JSONBlob, OrderedManyToManyField
 from awx.main.models.mixins import (
     ResourceMixin,
     SurveyJobTemplateMixin,
@@ -167,6 +167,13 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         blank=False,
         help_text=_('An identifier for this node that is unique within its workflow. ' 'It is copied to workflow job nodes corresponding to this node.'),
     )
+    instance_groups = OrderedManyToManyField(
+        'InstanceGroup',
+        related_name='workflow_job_template_node_instance_groups',
+        blank=True,
+        editable=False,
+        through='WorkflowJobTemplateNodeBaseInstanceGroupMembership',
+    )
 
     class Meta:
         app_label = 'main'
@@ -249,6 +256,9 @@ class WorkflowJobNode(WorkflowNodeBase):
         max_length=512,
         blank=True,  # blank denotes pre-migration job nodes
         help_text=_('An identifier coresponding to the workflow job template node that this node was created from.'),
+    )
+    instance_groups = OrderedManyToManyField(
+        'InstanceGroup', related_name='workflow_job_node_instance_groups', blank=True, editable=False, through='WorkflowJobNodeBaseInstanceGroupMembership'
     )
 
     class Meta:
