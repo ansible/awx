@@ -336,9 +336,11 @@ def main():
         if execution_environment == '':
             new_fields['execution_environment'] = ''
         else:
-            new_fields['execution_environment'] = module.get_one('execution_environments', name_or_id=execution_environment, **{'data': search_fields})['id']
-            if new_fields['execution_environment'] is None:
+            ee = module.get_one('execution_environments', name_or_id=execution_environment, **{'data': search_fields})
+            if ee is None:
                 module.fail_json(msg='could not find execution_environment entry with name {0}'.format(execution_environment))
+            else:
+                new_fields['execution_environment'] = ee['id']
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
