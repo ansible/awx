@@ -4,7 +4,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { Card } from '@patternfly/react-core';
 import yaml from 'js-yaml';
 import { parseVariableField } from 'util/yaml';
-import { LabelsAPI, OrganizationsAPI, SchedulesAPI } from 'api';
+import { OrganizationsAPI, SchedulesAPI } from 'api';
 import mergeExtraVars from 'util/prompt/mergeExtraVars';
 import getSurveyValues from 'util/prompt/getSurveyValues';
 import { getAddedAndRemoved } from 'util/lists';
@@ -41,6 +41,7 @@ function ScheduleAdd({
       exceptionOptions,
       timezone,
       credentials,
+      labels,
       ...submitValues
     } = values;
     const { added } = getAddedAndRemoved(
@@ -76,56 +77,7 @@ function ScheduleAdd({
       submitValues.execution_environment = execution_environment.id;
     }
 
-    submitValues.instance_groups = instance_groups
-      ? instance_groups.map((s) => s.id)
-      : [];
-
     try {
-      if (launchConfiguration?.ask_labels_on_launch) {
-        const labelIds = [];
-        const newLabels = [];
-        const labelRequests = [];
-        let organizationId = resource.organization;
-        if (values.labels) {
-          values.labels.forEach((label) => {
-            if (typeof label.id !== 'number') {
-              newLabels.push(label);
-            } else {
-              labelIds.push(label.id);
-            }
-          });
-        }
-
-        if (newLabels.length > 0) {
-          if (!organizationId) {
-            // eslint-disable-next-line no-useless-catch
-            try {
-              const {
-                data: { results },
-              } = await OrganizationsAPI.read();
-              organizationId = results[0].id;
-            } catch (err) {
-              throw err;
-            }
-          }
-        }
-
-        newLabels.forEach((label) => {
-          labelRequests.push(
-            LabelsAPI.create({
-              name: label.name,
-              organization: organizationId,
-            }).then(({ data }) => {
-              labelIds.push(data.id);
-            })
-          );
-        });
-
-        await Promise.all(labelRequests);
-
-        submitValues.labels = labelIds;
-      }
-
       const ruleSet = buildRuleSet(values);
       const requestData = {
         ...submitValues,
@@ -147,13 +99,46 @@ function ScheduleAdd({
       const {
         data: { id: scheduleId },
       } = await apiModel.createSchedule(resource.id, requestData);
-      if (credentials?.length > 0) {
-        await Promise.all(
-          added.map(({ id: credentialId }) =>
-            SchedulesAPI.associateCredential(scheduleId, credentialId)
-          )
+
+      let labelsPromises = [];
+      let credentialsPromises = [];
+
+      if (launchConfiguration?.ask_labels_on_launch && labels) {
+        let organizationId = resource.organization;
+        if (!organizationId) {
+          // eslint-disable-next-line no-useless-catch
+          try {
+            const {
+              data: { results },
+            } = await OrganizationsAPI.read();
+            organizationId = results[0].id;
+          } catch (err) {
+            throw err;
+          }
+        }
+
+        labelsPromises = labels.map((label) =>
+          SchedulesAPI.associateLabel(scheduleId, label, organizationId)
         );
       }
+
+      if (launchConfiguration?.ask_credential_on_launch && added?.length > 0) {
+        credentialsPromises = added.map(({ id: credentialId }) =>
+          SchedulesAPI.associateCredential(scheduleId, credentialId)
+        );
+      }
+      await Promise.all([labelsPromises, credentialsPromises]);
+
+      if (
+        launchConfiguration?.ask_instance_groups_on_launch &&
+        instance_groups
+      ) {
+        /* eslint-disable no-await-in-loop, no-restricted-syntax */
+        for (const group of instance_groups) {
+          await SchedulesAPI.associateInstanceGroup(scheduleId, group.id);
+        }
+      }
+
       history.push(`${pathRoot}schedules/${scheduleId}`);
     } catch (err) {
       setFormSubmitError(err);
