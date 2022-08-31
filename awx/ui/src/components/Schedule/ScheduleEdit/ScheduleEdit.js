@@ -30,7 +30,8 @@ function ScheduleEdit({
     values,
     launchConfiguration,
     surveyConfiguration,
-    scheduleCredentials = []
+    scheduleCredentials = [],
+    originalLabels = []
   ) => {
     const {
       execution_environment,
@@ -42,13 +43,9 @@ function ScheduleEdit({
       exceptionFrequency,
       exceptionOptions,
       timezone,
+      labels,
       ...submitValues
     } = values;
-    const { added, removed } = getAddedAndRemoved(
-      [...(resource?.summary_fields.credentials || []), ...scheduleCredentials],
-      credentials
-    );
-
     let extraVars;
     const surveyValues = getSurveyValues(values);
 
@@ -85,10 +82,6 @@ function ScheduleEdit({
     if (execution_environment) {
       submitValues.execution_environment = execution_environment.id;
     }
-
-    submitValues.instance_groups = instance_groups
-      ? instance_groups.map((s) => s.id)
-      : [];
 
     try {
       if (launchConfiguration?.ask_labels_on_launch) {
@@ -157,16 +150,51 @@ function ScheduleEdit({
       const {
         data: { id: scheduleId },
       } = await SchedulesAPI.update(schedule.id, requestData);
-      if (values.credentials?.length > 0) {
-        await Promise.all([
-          ...removed.map(({ id }) =>
-            SchedulesAPI.disassociateCredential(scheduleId, id)
-          ),
-          ...added.map(({ id }) =>
-            SchedulesAPI.associateCredential(scheduleId, id)
-          ),
-        ]);
+
+      const { added: addedCredentials, removed: removedCredentials } =
+        getAddedAndRemoved(
+          [
+            ...(resource?.summary_fields.credentials || []),
+            ...scheduleCredentials,
+          ],
+          credentials
+        );
+
+      const { added: addedLabels, removed: removedLabels } = getAddedAndRemoved(
+        originalLabels,
+        labels
+      );
+
+      let organizationId = resource.organization;
+
+      if (addedLabels.length > 0) {
+        if (!organizationId) {
+          const {
+            data: { results },
+          } = await OrganizationsAPI.read();
+          organizationId = results[0].id;
+        }
       }
+
+      await Promise.all([
+        ...removedCredentials.map(({ id }) =>
+          SchedulesAPI.disassociateCredential(scheduleId, id)
+        ),
+        ...addedCredentials.map(({ id }) =>
+          SchedulesAPI.associateCredential(scheduleId, id)
+        ),
+        ...removedLabels.map((label) =>
+          SchedulesAPI.disassociateLabel(scheduleId, label)
+        ),
+        ...addedLabels.map((label) =>
+          SchedulesAPI.associateLabel(scheduleId, label, organizationId)
+        ),
+        SchedulesAPI.orderInstanceGroups(
+          scheduleId,
+          instance_groups,
+          resource?.summary_fields.instance_groups || []
+        ),
+      ]);
 
       history.push(`${pathRoot}schedules/${scheduleId}/details`);
     } catch (err) {

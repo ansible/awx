@@ -231,7 +231,7 @@ function LabelsField() {
         value={field.value}
         onChange={(labels) => helpers.setValue(labels)}
         createText={t`Create`}
-        onError={() => alert('error')}
+        onError={() => {}}
       />
     </FormGroup>
   );
