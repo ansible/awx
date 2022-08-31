@@ -3669,8 +3669,8 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
         if obj.inventory_id:
             res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory_id})
         res['credentials'] = self.reverse('api:{}_credentials_list'.format(get_type_for_model(self.Meta.model)), kwargs={'pk': obj.pk})
-        res['labels'] = self.reverse('api:schedule_label_list', kwargs={'pk': obj.pk})
-        res['instance_groups'] = self.reverse('api:schedule_instance_group_list', kwargs={'pk': obj.pk})
+        res['labels'] = self.reverse('api:{}_labels_list'.format(get_type_for_model(self.Meta.model)), kwargs={'pk': obj.pk})
+        res['instance_groups'] = self.reverse('api:{}_instance_groups_list'.format(get_type_for_model(self.Meta.model)), kwargs={'pk': obj.pk})
         if obj.execution_environment_id:
             res['execution_environment'] = self.reverse('api:execution_environment_detail', kwargs={'pk': obj.execution_environment_id})
         return res
