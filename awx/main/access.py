@@ -2076,6 +2076,24 @@ class WorkflowJobTemplateNodeAccess(BaseAccess):
             return JobLaunchConfigAccess(self.user).can_attach(obj, sub_obj, relationship, data, skip_sub_obj_read_check=skip_sub_obj_read_check)
         elif relationship in ('success_nodes', 'failure_nodes', 'always_nodes'):
             return self.check_same_WFJT(obj, sub_obj)
+        elif relationship == 'labels':
+            if self.user.can_access(Label, 'read', sub_obj):
+                return True
+            logger.debug(
+                "User {} can not read label {} ({}) for removal from {} {} ({})".format(
+                    self.user.username, sub_obj.name, sub_obj.id, obj.__class__, obj.name, obj.id
+                )
+            )
+            return False
+        elif relationship == 'instance_groups':
+            if sub_obj in self.user.get_queryset(InstanceGroup):
+                return True
+            logger.debug(
+                "User {} can not read instance_group {} ({}) for removal from {} {} ({})".format(
+                    self.user.username, sub_obj.name, sub_obj.id, obj.__class__, obj.name, obj.id
+                )
+            )
+            return False
         else:
             raise NotImplementedError('Relationship {} not understood for WFJT nodes.'.format(relationship))
 
@@ -2088,6 +2106,24 @@ class WorkflowJobTemplateNodeAccess(BaseAccess):
             return JobLaunchConfigAccess(self.user).can_unattach(obj, sub_obj, relationship, data, skip_sub_obj_read_check=skip_sub_obj_read_check)
         elif relationship in ('success_nodes', 'failure_nodes', 'always_nodes'):
             return self.check_same_WFJT(obj, sub_obj)
+        elif relationship == 'labels':
+            if self.user.can_access(Label, 'read', sub_obj):
+                return True
+            logger.debug(
+                "User {} can not read label {} ({}) for removal from {} {} ({})".format(
+                    self.user.username, sub_obj.name, sub_obj.id, obj.__class__, obj.name, obj.id
+                )
+            )
+            return False
+        elif relationship == 'instance_groups':
+            if sub_obj in self.user.get_queryset(InstanceGroup):
+                return True
+            logger.debug(
+                "User {} can not read instance_group {} ({}) for removal from {} {} ({})".format(
+                    self.user.username, sub_obj.name, sub_obj.id, obj.__class__, obj.name, obj.id
+                )
+            )
+            return False
         else:
             raise NotImplementedError('Relationship {} not understood for WFJT nodes.'.format(relationship))
 
