@@ -36,7 +36,7 @@ def create_clearsessions_jt(apps, schema_editor):
     if created:
         sched = Schedule(
             name='Cleanup Expired Sessions',
-            rrule='DTSTART:%s RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1' % schedule_time,
+            rrule='DTSTART:%s RRULE:FREQ=WEEKLY;INTERVAL=1' % schedule_time,
             description='Cleans out expired browser sessions',
             enabled=True,
             created=now_dt,
@@ -69,7 +69,7 @@ def create_cleartokens_jt(apps, schema_editor):
     if created:
         sched = Schedule(
             name='Cleanup Expired OAuth 2 Tokens',
-            rrule='DTSTART:%s RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1' % schedule_time,
+            rrule='DTSTART:%s RRULE:FREQ=WEEKLY;INTERVAL=1' % schedule_time,
             description='Removes expired OAuth 2 access and refresh tokens',
             enabled=True,
             created=now_dt,
