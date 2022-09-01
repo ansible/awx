@@ -1270,7 +1270,6 @@ class RunProjectUpdate(BaseTask):
             # for raw archive, prevent error moving files between volumes
             extra_vars['ansible_remote_tmp'] = os.path.join(project_update.get_project_path(check_if_exists=False), '.ansible_awx', 'tmp')
 
-        # TODO: Is this the right way to do this? -relrod
         if project_update.project.signature_validation_credential is not None:
             pubkey = project_update.project.signature_validation_credential.get_input('gpg_public_key')
             extra_vars['gpg_pubkey'] = pubkey
