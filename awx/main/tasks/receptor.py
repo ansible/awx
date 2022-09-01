@@ -646,9 +646,15 @@ def write_receptor_config():
 
         this_inst = Instance.objects.me()
         instances = Instance.objects.filter(node_type=Instance.Types.EXECUTION)
+        existing_peers = {link.target_id for link in InstanceLink.objects.filter(source=this_inst)}
+        new_links = []
         for instance in instances:
             peer = {'tcp-peer': {'address': f'{instance.hostname}:{instance.listener_port}', 'tls': 'tlsclient'}}
             receptor_config.append(peer)
+            if instance.id not in existing_peers:
+                new_links.append(InstanceLink(source=this_inst, target=instance, link_state=InstanceLink.States.ADDING))
+
+        InstanceLink.objects.bulk_create(new_links)
 
         with open(__RECEPTOR_CONF, 'w') as file:
             yaml.dump(receptor_config, file, default_flow_style=False)
@@ -672,7 +678,10 @@ def write_receptor_config():
 
 
 @task(queue=get_local_queuename)
-def wait_for_jobs(hostname):
+def remove_deprovisioned_node(hostname):
+    InstanceLink.objects.filter(source__hostname=hostname).update(link_state=InstanceLink.States.REMOVING)
+    InstanceLink.objects.filter(target__hostname=hostname).update(link_state=InstanceLink.States.REMOVING)
+
     node_jobs = UnifiedJob.objects.filter(
         execution_node=hostname,
         status__in=(
