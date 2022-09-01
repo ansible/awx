@@ -292,6 +292,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         null=True,
         default=None,
         on_delete=models.SET_NULL,
+        help_text=_('An optional credential used for validating files in the project against unexpected changes.'),
     )
 
     scm_revision = models.CharField(
