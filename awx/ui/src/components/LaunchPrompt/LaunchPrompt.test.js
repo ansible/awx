@@ -16,8 +16,12 @@ import CredentialsStep from './steps/CredentialsStep';
 import CredentialPasswordsStep from './steps/CredentialPasswordsStep';
 import OtherPromptsStep from './steps/OtherPromptsStep';
 import PreviewStep from './steps/PreviewStep';
+import executionEnvironmentHelpTextStrings from 'screens/ExecutionEnvironment/shared/ExecutionEnvironment.helptext';
+import { ExecutionEnvironment } from 'types';
+import ExecutionEnvironmentStep from './steps/ExecutionEnvironmentStep';
 
 jest.mock('../../api/models/Inventories');
+jest.mock('../../api/models/ExecutionEnvironments');
 jest.mock('../../api/models/CredentialTypes');
 jest.mock('../../api/models/Credentials');
 jest.mock('../../api/models/JobTemplates');
@@ -150,13 +154,14 @@ describe('LaunchPrompt', () => {
     const wizard = await waitForElement(wrapper, 'Wizard');
     const steps = wizard.prop('steps');
 
-    expect(steps).toHaveLength(6);
+    expect(steps).toHaveLength(7);
     expect(steps[0].name.props.children).toEqual('Inventory');
     expect(steps[1].name.props.children).toEqual('Credentials');
     expect(steps[2].name.props.children).toEqual('Credential passwords');
-    expect(steps[3].name.props.children).toEqual('Other prompts');
-    expect(steps[4].name.props.children).toEqual('Survey');
-    expect(steps[5].name.props.children).toEqual('Preview');
+    expect(steps[3].name.props.children).toEqual('Execution Environment');
+    expect(steps[4].name.props.children).toEqual('Other prompts');
+    expect(steps[5].name.props.children).toEqual('Survey');
+    expect(steps[6].name.props.children).toEqual('Preview');
     expect(wizard.find('WizardHeader').prop('title')).toBe('Launch | Foobar');
     expect(wizard.find('WizardHeader').prop('description')).toBe(
       'Foo Description'

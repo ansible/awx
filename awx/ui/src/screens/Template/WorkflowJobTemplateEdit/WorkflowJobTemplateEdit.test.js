@@ -161,6 +161,7 @@ describe('<WorkflowJobTemplateEdit/>', () => {
     expect(WorkflowJobTemplatesAPI.update).toHaveBeenCalledWith(6, {
       name: 'Alex',
       description: 'Apollo and Athena',
+      skip_tags: '',
       inventory: 1,
       organization: 1,
       scm_branch: 'main',
@@ -174,6 +175,11 @@ describe('<WorkflowJobTemplateEdit/>', () => {
       ask_limit_on_launch: false,
       ask_scm_branch_on_launch: false,
       ask_variables_on_launch: false,
+      ask_labels_on_launch: false,
+      ask_skip_tags_on_launch: false,
+      ask_tags_on_launch: false,
+      job_tags: '',
+      skip_tags: '',
     });
     wrapper.update();
     await expect(WorkflowJobTemplatesAPI.disassociateLabel).toBeCalledWith(6, {
@@ -273,16 +279,21 @@ describe('<WorkflowJobTemplateEdit/>', () => {
     expect(WorkflowJobTemplatesAPI.update).toBeCalledWith(6, {
       allow_simultaneous: false,
       ask_inventory_on_launch: false,
+      ask_labels_on_launch: false,
       ask_limit_on_launch: false,
       ask_scm_branch_on_launch: false,
+      ask_skip_tags_on_launch: false,
+      ask_tags_on_launch: false,
       ask_variables_on_launch: false,
       description: 'bar',
       extra_vars: '---',
       inventory: 1,
+      job_tags: '',
       limit: '5000',
       name: 'Foo',
       organization: 1,
       scm_branch: 'devel',
+      skip_tags: '',
       webhook_credential: null,
       webhook_service: '',
       webhook_url: '',
