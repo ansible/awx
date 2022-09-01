@@ -2,6 +2,7 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
+from django.utils.translation import gettext_lazy as _
 
 from awx.main.models import CredentialType
 from awx.main.utils.common import set_current_apps
@@ -29,6 +30,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name='projects_signature_validation',
                 to='main.credential',
+                help_text=_('An optional credential used for validating files in the project against unexpected changes.'),
             ),
         ),
         migrations.RunPython(setup_tower_managed_defaults),
