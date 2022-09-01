@@ -10,7 +10,7 @@ import {
   InfiniteLoader,
   List,
 } from 'react-virtualized';
-import { Button } from '@patternfly/react-core';
+import { Button, Alert } from '@patternfly/react-core';
 
 import AlertModal from 'components/AlertModal';
 import { CardBody as _CardBody } from 'components/Card';
@@ -99,6 +99,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   const scrollHeight = useRef(0);
   const history = useHistory();
   const eventByUuidRequests = useRef([]);
+  const eventsProcessedDelay = useRef(250);
 
   const fetchEventByUuid = async (uuid) => {
     let promise = eventByUuidRequests.current[uuid];
@@ -156,6 +157,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   );
   const [isMonitoringWebsocket, setIsMonitoringWebsocket] = useState(false);
   const [lastScrollPosition, setLastScrollPosition] = useState(0);
+  const [showEventsRefresh, setShowEventsRefresh] = useState(false);
 
   useEffect(() => {
     if (!isTreeReady || !onReadyEvents.length) {
@@ -196,14 +198,28 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     rebuildEventsTree();
   }, [isFlatMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const pollForEventsProcessed = useCallback(async () => {
+    const {
+      data: { event_processing_finished },
+    } = await getJobModel(job.type).readDetail(job.id);
+    if (event_processing_finished) {
+      setShowEventsRefresh(true);
+      return;
+    }
+    const fiveMinutes = 1000 * 60 * 5;
+    if (eventsProcessedDelay.current >= fiveMinutes) {
+      return;
+    }
+    setTimeout(pollForEventsProcessed, eventsProcessedDelay.current);
+    eventsProcessedDelay.current *= 2;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [job.id, job.type, lastScrollPosition]);
+
   useEffect(() => {
     if (!isJobRunning(jobStatus)) {
-      setTimeout(() => {
-        loadJobEvents().then(() => {
-          setWsEvents([]);
-          scrollToRow(lastScrollPosition);
-        });
-      }, 500);
+      if (wsEvents.length) {
+        pollForEventsProcessed();
+      }
       return;
     }
     let batchTimeout;
@@ -268,7 +284,8 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
       setIsMonitoringWebsocket(false);
       isMounted.current = false;
     };
-  }, [isJobRunning(jobStatus)]); // eslint-disable-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isJobRunning(jobStatus), pollForEventsProcessed]);
 
   useEffect(() => {
     if (isFollowModeEnabled) {
@@ -681,6 +698,26 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
           isFollowModeEnabled={isFollowModeEnabled}
           setIsFollowModeEnabled={setIsFollowModeEnabled}
         />
+        {showEventsRefresh ? (
+          <Alert
+            variant="default"
+            title={
+              <>
+                {t`Events processing complete.`}{' '}
+                <Button
+                  variant="link"
+                  isInline
+                  onClick={() => {
+                    loadJobEvents().then(() => {
+                      setWsEvents([]);
+                    });
+                    setShowEventsRefresh(false);
+                  }}
+                >{t`Reload output`}</Button>
+              </>
+            }
+          />
+        ) : null}
         <PageControls
           onScrollFirst={handleScrollFirst}
           onScrollLast={handleScrollLast}
