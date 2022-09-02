@@ -1,7 +1,7 @@
 #jinja2: lstrip_blocks: True
 ---
 global:
-  scrape_interval: 15s  # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  scrape_interval: {{ scrape_interval }}  # Set the scrape interval to something faster. Default is every 1 minute.
 
 scrape_configs:
   - job_name: 'awx'
@@ -11,7 +11,7 @@ scrape_configs:
       # so no need to track nodes individually.
       - awx1:8013
     metrics_path: /api/v2/metrics
-    scrape_interval: 5s
+    scrape_interval: {{ scrape_interval }}
     scheme: http
     params:
       format: ['txt']
