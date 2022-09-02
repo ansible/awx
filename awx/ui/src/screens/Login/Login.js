@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-no-useless-fragment */
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { Redirect, withRouter } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
@@ -28,11 +28,11 @@ import {
   UserCircleIcon,
 } from '@patternfly/react-icons';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
-import { AuthAPI, RootAPI } from 'api';
+import { AuthAPI, RootAPI, MeAPI } from 'api';
 import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';
 import { useSession } from 'contexts/Session';
-import { getCurrentUserId } from 'util/auth';
+import LoadingSpinner from 'components/LoadingSpinner';
 import { SESSION_REDIRECT_URL, SESSION_USER_ID } from '../../constants';
 
 const loginLogoSrc = 'static/media/logo-login.svg';
@@ -44,7 +44,8 @@ const Login = styled(PFLogin)`
 `;
 
 function AWXLogin({ alt, isAuthenticated }) {
-  const { authRedirectTo, isSessionExpired, setAuthRedirectTo } = useSession();
+  const [userId, setUserId] = useState(null);
+  const { authRedirectTo, isSessionExpired } = useSession();
   const isNewUser = useRef(true);
   const hasVerifiedUser = useRef(false);
 
@@ -107,36 +108,45 @@ function AWXLogin({ alt, isAuthenticated }) {
   const { error: authError, dismissError: dismissAuthError } =
     useDismissableError(authenticationError);
 
+  const { isLoading: isUserIdLoading, request: fetchUserId } = useRequest(
+    useCallback(async () => {
+      if (isAuthenticated(document.cookie)) {
+        const { data } = await MeAPI.read();
+        setUserId(data.results[0].id);
+      }
+    }, [isAuthenticated])
+  );
+
   const handleSubmit = async (values) => {
     dismissAuthError();
     await authenticate(values);
-    setAuthRedirectTo('/home');
+    await fetchUserId();
   };
 
-  if (isCustomLoginInfoLoading) {
-    return null;
-  }
+  useEffect(() => {
+    fetchUserId();
+  }, [fetchUserId]);
 
-  if (isAuthenticated(document.cookie) && !hasVerifiedUser.current) {
-    const currentUserId = getCurrentUserId(document.cookie);
-    const verifyIsNewUser = () => {
-      const previousUserId = JSON.parse(
-        window.localStorage.getItem(SESSION_USER_ID)
-      );
-      if (previousUserId === null) {
-        return true;
-      }
-      return currentUserId.toString() !== previousUserId.toString();
-    };
-    isNewUser.current = verifyIsNewUser();
-    hasVerifiedUser.current = true;
-    window.localStorage.setItem(SESSION_USER_ID, JSON.stringify(currentUserId));
-  }
+  const setLocalStorageAndRedirect = useCallback(() => {
+    if (userId && !hasVerifiedUser.current) {
+      const verifyIsNewUser = () => {
+        const previousUserId = JSON.parse(
+          window.localStorage.getItem(SESSION_USER_ID)
+        );
+        if (previousUserId === null) {
+          return true;
+        }
+        return userId.toString() !== previousUserId.toString();
+      };
+      isNewUser.current = verifyIsNewUser();
+      hasVerifiedUser.current = true;
+      window.localStorage.setItem(SESSION_USER_ID, JSON.stringify(userId));
+    }
+  }, [userId]);
 
-  if (isAuthenticated(document.cookie) && hasVerifiedUser.current) {
-    const redirect = isNewUser.current ? '/' : authRedirectTo;
-    return <Redirect to={redirect} />;
-  }
+  useEffect(() => {
+    setLocalStorageAndRedirect();
+  }, [userId, setLocalStorageAndRedirect]);
 
   let helperText;
   if (authError?.response?.status === 401) {
@@ -162,6 +172,17 @@ function AWXLogin({ alt, isAuthenticated }) {
     window.sessionStorage.setItem(SESSION_REDIRECT_URL, authRedirectTo);
   };
 
+  if (isCustomLoginInfoLoading) {
+    return null;
+  }
+  if (isUserIdLoading) {
+    return <LoadingSpinner />;
+  }
+  if (userId && hasVerifiedUser.current) {
+    const redirect = isNewUser.current ? '/home' : authRedirectTo;
+
+    return <Redirect to={redirect} />;
+  }
   return (
     <Login header={Header} footer={Footer}>
       <LoginMainHeader
