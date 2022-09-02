@@ -113,7 +113,6 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
       setBreadcrumb(instance);
     }
   }, [instance, setBreadcrumb]);
-
   const {
     error: healthCheckError,
     isLoading: isRunningHealthCheck,
@@ -186,7 +185,9 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
         <Detail
           label={t`Status`}
           value={
-            <StatusLabel status={healthCheck?.errors ? 'error' : 'healthy'} />
+            instance.node_state ? (
+              <StatusLabel status={instance.node_state} />
+            ) : null
           }
         />
         <Detail label={t`Node Type`} value={instance.node_type} />
