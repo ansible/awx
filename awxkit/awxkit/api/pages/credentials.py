@@ -45,6 +45,7 @@ credential_input_fields = (
     'username',
     'vault_password',
     'vault_id',
+    'gpg_public_key',
 )
 
 
