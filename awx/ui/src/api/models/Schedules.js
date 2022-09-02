@@ -1,6 +1,5 @@
 import Base from '../Base';
 import InstanceGroupsMixin from '../mixins/InstanceGroups.mixin';
-import LabelsMixin from '../mixins/Labels.mixin';
 
 class Schedules extends InstanceGroupsMixin(LabelsMixin(Base)) {
   constructor(http) {

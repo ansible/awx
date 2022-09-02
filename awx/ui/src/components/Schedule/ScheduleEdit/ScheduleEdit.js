@@ -83,6 +83,10 @@ function ScheduleEdit({
       submitValues.execution_environment = execution_environment.id;
     }
 
+    submitValues.instance_groups = instance_groups
+      ? instance_groups.map((s) => s.id)
+      : [];
+
     try {
       if (launchConfiguration?.ask_labels_on_launch) {
         const labelIds = [];
