@@ -115,7 +115,6 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
   useEffect(() => {
     fetchDetails();
   }, [fetchDetails]);
-
   const {
     error: healthCheckError,
     isLoading: isRunningHealthCheck,
@@ -148,7 +147,6 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
       [instance]
     )
   );
-
   const debounceUpdateInstance = useDebounce(updateInstance, 200);
 
   const handleChangeValue = (value) => {
@@ -200,7 +198,9 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
           <Detail
             label={t`Status`}
             value={
-              <StatusLabel status={healthCheck?.errors ? 'error' : 'healthy'} />
+              instance.node_state ? (
+                <StatusLabel status={instance.node_state} />
+              ) : null
             }
           />
           <Detail
