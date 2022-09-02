@@ -186,11 +186,14 @@ function WorkflowJobTemplateForm({
             aria-label={t`source control branch`}
           />
         </FieldWithPrompt>
+      </FormColumnLayout>
+      <FormFullWidthLayout>
         <FieldWithPrompt
-          label={t`Labels`}
           fieldId="template-labels"
+          label={t`Labels`}
           promptId="template-ask-labels-on-launch"
           promptName="ask_labels_on_launch"
+          tooltip={helpText.labels}
         >
           <LabelSelect
             value={labelsField.value}
@@ -199,29 +202,29 @@ function WorkflowJobTemplateForm({
             createText={t`Create`}
           />
         </FieldWithPrompt>
-        <FormFullWidthLayout>
-          <VariablesField
-            id="wfjt-variables"
-            name="extra_vars"
-            label={t`Variables`}
-            promptId="template-ask-variables-on-launch"
-            tooltip={helpText.variables}
+      </FormFullWidthLayout>
+      <FormFullWidthLayout>
+        <VariablesField
+          id="wfjt-variables"
+          name="extra_vars"
+          label={t`Variables`}
+          promptId="template-ask-variables-on-launch"
+          tooltip={helpText.variables}
+        />
+      </FormFullWidthLayout>
+      <FormColumnLayout>
+        <FieldWithPrompt
+          fieldId="template-tags"
+          label={t`Job Tags`}
+          promptId="template-ask-tags-on-launch"
+          promptName="ask_tags_on_launch"
+          tooltip={helpText.jobTags}
+        >
+          <TagMultiSelect
+            value={jobTagsField.value}
+            onChange={(value) => jobTagsHelpers.setValue(value)}
           />
-        </FormFullWidthLayout>
-        <FormColumnLayout>
-          <FieldWithPrompt
-            fieldId="template-tags"
-            label={t`Job Tags`}
-            promptId="template-ask-tags-on-launch"
-            promptName="ask_tags_on_launch"
-            tooltip={helpText.jobTags}
-          >
-            <TagMultiSelect
-              value={jobTagsField.value}
-              onChange={(value) => jobTagsHelpers.setValue(value)}
-            />
-          </FieldWithPrompt>
-        </FormColumnLayout>
+        </FieldWithPrompt>
         <FieldWithPrompt
           fieldId="template-skip-tags"
           label={t`Skip Tags`}

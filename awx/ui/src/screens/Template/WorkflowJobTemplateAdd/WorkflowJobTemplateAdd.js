@@ -1,9 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-
 import { Card, PageSection } from '@patternfly/react-core';
 import { CardBody } from 'components/Card';
-
 import { WorkflowJobTemplatesAPI, OrganizationsAPI, UsersAPI } from 'api';
 import { useConfig } from 'contexts/Config';
 import useRequest from 'hooks/useRequest';
