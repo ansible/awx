@@ -54,45 +54,6 @@ I18N_FLAG_FILE = .i18n_built
 	VERSION PYTHON_VERSION docker-compose-sources \
 	.git/hooks/pre-commit
 
-clean-tmp:
-	rm -rf tmp/
-
-clean-venv:
-	rm -rf venv/
-
-clean-dist:
-	rm -rf dist
-
-clean-schema:
-	rm -rf swagger.json
-	rm -rf schema.json
-	rm -rf reference-schema.json
-
-clean-languages:
-	rm -f $(I18N_FLAG_FILE)
-	find ./awx/locale/ -type f -regex ".*\.mo$" -delete
-
-## Remove temporary build files, compiled Python files.
-clean: clean-ui clean-api clean-awxkit clean-dist
-	rm -rf awx/public
-	rm -rf awx/lib/site-packages
-	rm -rf awx/job_status
-	rm -rf awx/job_output
-	rm -rf reports
-	rm -rf tmp
-	rm -rf $(I18N_FLAG_FILE)
-	mkdir tmp
-
-clean-api:
-	rm -rf build $(NAME)-$(VERSION) *.egg-info
-	find . -type f -regex ".*\.py[co]$$" -delete
-	find . -type d -name "__pycache__" -delete
-	rm -f awx/awx_test.sqlite3*
-	rm -rf requirements/vendor
-	rm -rf awx/projects
-
-clean-awxkit:
-	rm -rf awxkit/*.egg-info awxkit/.tox awxkit/build/*
 
 ## convenience target to assert environment variables are defined
 guard-%:
@@ -117,7 +78,7 @@ virtualenv_awx:
 		fi; \
 	fi
 
-## Install third-party requirements needed for AWX's environment. 
+## Install third-party requirements needed for AWX's environment.
 # this does not use system site packages intentionally
 requirements_awx: virtualenv_awx
 	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
@@ -365,13 +326,75 @@ bulk_data:
 	fi; \
 	$(PYTHON) tools/data_generators/rbac_dummy_data_generator.py --preset=$(DATA_GEN_PRESET)
 
+# CLEANUP COMMANDS
+# --------------------------------------
+
+## Clean everything. Including temporary build files, compiled Python files.
+clean: clean-tmp clean-ui clean-api clean-awxkit clean-dist
+	rm -rf awx/public
+	rm -rf awx/lib/site-packages
+	rm -rf awx/job_status
+	rm -rf awx/job_output
+	rm -rf reports
+	rm -rf $(I18N_FLAG_FILE)
+
+clean-tmp:
+	rm -rf tmp/
+	mkdir tmp
+
+clean-venv:
+	rm -rf venv/
+
+clean-dist:
+	rm -rf dist
+
+clean-schema:
+	rm -rf swagger.json
+	rm -rf schema.json
+	rm -rf reference-schema.json
+
+clean-languages:
+	rm -f $(I18N_FLAG_FILE)
+	find ./awx/locale/ -type f -regex ".*\.mo$" -delete
+
+clean-api:
+	rm -rf build $(NAME)-$(VERSION) *.egg-info
+	find . -type f -regex ".*\.py[co]$$" -delete
+	find . -type d -name "__pycache__" -delete
+	rm -f awx/awx_test.sqlite3*
+	rm -rf requirements/vendor
+	rm -rf awx/projects
+
+## Clean UI builded static files (alias for ui-clean)
+clean-ui: ui-clean
+
+## Clean temp build files from the awxkit
+clean-awxkit:
+	rm -rf awxkit/*.egg-info awxkit/.tox awxkit/build/*
+
+clean-docker-images:
+	IMAGES_TO_BE_DELETE='  \
+		quay.io/ansible/receptor \
+		quay.io/awx/awx_devel \
+		ansible/receptor \
+		postgres \
+		redis \
+	' && \
+	for IMAGE in $$IMAGES_TO_BE_DELETE; do \
+		echo "Removing image '$$IMAGE'" && \
+		IMAGE_IDS=$$(docker image ls -a | grep $$IMAGE | awk '{print $$3}') echo "oi" \
+	done
+
+clean-docker-containers:
+clean-docker-volumes:
+
 
 # UI TASKS
 # --------------------------------------
 
 UI_BUILD_FLAG_FILE = awx/ui/.ui-built
 
-clean-ui:
+ui-clean:
 	rm -rf node_modules
 	rm -rf awx/ui/node_modules
 	rm -rf awx/ui/build
