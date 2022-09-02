@@ -88,6 +88,7 @@ describe('<InstanceDetails/>', () => {
         enabled: true,
         managed_by_policy: true,
         node_type: 'hybrid',
+        node_state: 'ready',
       },
     });
     InstancesAPI.readHealthCheckDetail.mockResolvedValue({
