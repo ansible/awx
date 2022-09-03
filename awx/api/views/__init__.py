@@ -460,41 +460,16 @@ class InstanceHealthCheck(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-
         # Note: hop nodes are already excluded by the get_queryset method
         if obj.node_type == 'execution':
             from awx.main.tasks.system import execution_node_health_check
 
-            runner_data = execution_node_health_check(obj.hostname)
-            obj.refresh_from_db()
-            data = self.get_serializer(data=request.data).to_representation(obj)
-            # Add in some extra unsaved fields
-            for extra_field in ('transmit_timing', 'run_timing'):
-                if extra_field in runner_data:
-                    data[extra_field] = runner_data[extra_field]
+            execution_node_health_check.apply_async([obj.hostname])
         else:
             from awx.main.tasks.system import cluster_node_health_check
 
-            if settings.CLUSTER_HOST_ID == obj.hostname:
-                cluster_node_health_check(obj.hostname)
-            else:
-                cluster_node_health_check.apply_async([obj.hostname], queue=obj.hostname)
-                start_time = time.time()
-                prior_check_time = obj.last_health_check
-                while time.time() - start_time < 50.0:
-                    obj.refresh_from_db(fields=['last_health_check'])
-                    if obj.last_health_check != prior_check_time:
-                        break
-                    if time.time() - start_time < 1.0:
-                        time.sleep(0.1)
-                    else:
-                        time.sleep(1.0)
-                else:
-                    obj.mark_offline(errors=_('Health check initiated by user determined this instance to be unresponsive'))
-            obj.refresh_from_db()
-            data = self.get_serializer(data=request.data).to_representation(obj)
-
-        return Response(data, status=status.HTTP_200_OK)
+            cluster_node_health_check.apply_async([obj.hostname], queue=obj.hostname)
+        return Response(dict(msg=f"Health check is running for {obj.hostname}."), status=status.HTTP_200_OK)
 
 
 class InstanceGroupList(ListCreateAPIView):
