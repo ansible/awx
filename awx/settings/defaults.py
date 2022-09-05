@@ -418,6 +418,9 @@ AUTH_BASIC_ENABLED = True
 # when trying to access a UI page that requries authentication.
 LOGIN_REDIRECT_OVERRIDE = ''
 
+# Note: This setting may be overridden by database settings.
+ALLOW_METRICS_FOR_ANONYMOUS_USERS = False
+
 DEVSERVER_DEFAULT_ADDR = '0.0.0.0'
 DEVSERVER_DEFAULT_PORT = '8013'
 
