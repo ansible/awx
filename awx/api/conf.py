@@ -96,6 +96,15 @@ register(
     category=_('Authentication'),
     category_slug='authentication',
 )
+register(
+    'ALLOW_METRICS_FOR_ANONYMOUS_USERS',
+    field_class=fields.BooleanField,
+    default=False,
+    label=_('Allow anonymous users to poll metrics'),
+    help_text=_('If false, only superusers and system auditors are allowed to poll metrics.'),
+    category=_('Authentication'),
+    category_slug='authentication',
+)
 
 
 def authentication_validate(serializer, attrs):
