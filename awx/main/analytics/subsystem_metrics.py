@@ -311,7 +311,14 @@ class Metrics:
                 }
                 # store a local copy as well
                 self.store_metrics(json.dumps(payload))
-                emit_channel_notification("metrics", payload)
+
+                # 🚨🚨🚨🚨🚨🚨🚨🚨
+                # TODO: rework how metrics are emitted and recorded. we used to exploit wsbroadcast's behavior of
+                # sending the same data out to  every other node.
+                # Should we increment this data in redis but ultimately just store it in the database?
+                # emit_channel_notification("metrics", payload)
+                # 🚨🚨🚨🚨🚨🚨🚨🚨
+
                 self.previous_send_metrics.set(current_time)
                 self.previous_send_metrics.store_value(self.conn)
         finally:
