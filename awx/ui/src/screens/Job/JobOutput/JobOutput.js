@@ -187,6 +187,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   useEffect(() => {
     const pendingRequests = Object.values(eventByUuidRequests.current || {});
     setHasContentLoading(true); // prevents "no content found" screen from flashing
+    setIsFollowModeEnabled(false);
     Promise.allSettled(pendingRequests).then(() => {
       setRemoteRowCount(0);
       clearLoadedEvents();
