@@ -228,7 +228,7 @@ volumes:
   redis_socket_{{ container_postfix }}:
     name: tools_redis_socket_{{ container_postfix }}
 {% endfor -%}
-{% if enable_ldap %}
+{% if enable_ldap|bool %}
   openldap_data:
     name: tools_ldap_1
     driver: local
