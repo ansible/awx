@@ -412,6 +412,11 @@ class TaskManagerJobMixin(TaskManagerUnifiedJobMixin):
     class Meta:
         abstract = True
 
+    def get_jobs_fail_chain(self):
+        if self.project_update_id:
+            return [self.project_update]
+        return []
+
 
 class TaskManagerUpdateOnLaunchMixin(TaskManagerUnifiedJobMixin):
     class Meta:
