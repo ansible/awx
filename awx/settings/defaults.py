@@ -850,7 +850,7 @@ LOGGING = {
         'awx.main.commands.run_callback_receiver': {'handlers': ['callback_receiver']},  # level handled by dynamic_level_filter
         'awx.main.dispatch': {'handlers': ['dispatcher']},
         'awx.main.consumers': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'INFO'},
-        'awx.main.wsbroadcast': {'handlers': ['wsbroadcast']},
+        'awx.main.wsrelay': {'handlers': ['wsrelay']},
         'awx.main.rsyslog_configurer': {'handlers': ['rsyslog_configurer']},
         'awx.main.cache_clear': {'handlers': ['cache_clear']},
         'awx.main.commands.inventory_import': {'handlers': ['inventory_import'], 'propagate': False},
@@ -879,7 +879,7 @@ handler_config = {
     'tower_warnings': {'filename': 'tower.log'},
     'callback_receiver': {'filename': 'callback_receiver.log'},
     'dispatcher': {'filename': 'dispatcher.log', 'formatter': 'dispatcher'},
-    'wsbroadcast': {'filename': 'wsbroadcast.log'},
+    'wsrelay': {'filename': 'wsrelay.log'},
     'task_system': {'filename': 'task_system.log'},
     'rbac_migrations': {'filename': 'tower_rbac_migrations.log'},
     'job_lifecycle': {'filename': 'job_lifecycle.log', 'formatter': 'job_lifecycle'},

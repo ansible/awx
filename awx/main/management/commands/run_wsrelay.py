@@ -16,10 +16,10 @@ from awx.main.analytics.broadcast_websocket import (
     BroadcastWebsocketStatsManager,
     safe_name,
 )
-from awx.main.wsbroadcast import BroadcastWebsocketManager
+from awx.main.wsrelay import WebSocketRelayManager
 
 
-logger = logging.getLogger('awx.main.wsbroadcast')
+logger = logging.getLogger('awx.main.wsrelay')
 
 
 class Command(BaseCommand):
@@ -99,7 +99,7 @@ class Command(BaseCommand):
             executor = MigrationExecutor(connection)
             migrating = bool(executor.migration_plan(executor.loader.graph.leaf_nodes()))
         except Exception as exc:
-            logger.info(f'Error on startup of run_wsbroadcast (error: {exc}), retry in 10s...')
+            logger.info(f'Error on startup of run_wsrelay (error: {exc}), retry in 10s...')
             time.sleep(10)
             return
 
@@ -163,10 +163,7 @@ class Command(BaseCommand):
             return
 
         try:
-            broadcast_websocket_mgr = BroadcastWebsocketManager()
-            task = broadcast_websocket_mgr.start()
-
-            loop = asyncio.get_event_loop()
-            loop.run_until_complete(task)
+            websocket_relay_manager = WebSocketRelayManager()
+            asyncio.run(websocket_relay_manager.run())
         except KeyboardInterrupt:
             logger.debug('Terminating Websocket Broadcaster')
