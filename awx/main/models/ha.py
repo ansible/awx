@@ -471,7 +471,7 @@ class ScheduleInstanceGroupMembership(models.Model):
 
 class WorkflowJobTemplateNodeBaseInstanceGroupMembership(models.Model):
 
-    schedule = models.ForeignKey('WorkflowJobTemplateNode', on_delete=models.CASCADE)
+    workflowjobtemplatenode = models.ForeignKey('WorkflowJobTemplateNode', on_delete=models.CASCADE)
     instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
     position = models.PositiveIntegerField(
         null=True,
@@ -482,7 +482,7 @@ class WorkflowJobTemplateNodeBaseInstanceGroupMembership(models.Model):
 
 class WorkflowJobNodeBaseInstanceGroupMembership(models.Model):
 
-    schedule = models.ForeignKey('WorkflowJobNode', on_delete=models.CASCADE)
+    workflowjobnode = models.ForeignKey('WorkflowJobNode', on_delete=models.CASCADE)
     instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
     position = models.PositiveIntegerField(
         null=True,
