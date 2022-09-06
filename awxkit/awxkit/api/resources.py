@@ -53,6 +53,8 @@ class Resources(object):
     _instance_group = r'instance_groups/\d+/'
     _instance_group_related_jobs = r'instance_groups/\d+/jobs/'
     _instance_groups = 'instance_groups/'
+    _instance_install_bundle = r'instances/\d+/install_bundle/'
+    _instance_peers = r'instances/\d+/peers/'
     _instance_related_jobs = r'instances/\d+/jobs/'
     _instances = 'instances/'
     _inventories = 'inventories/'
