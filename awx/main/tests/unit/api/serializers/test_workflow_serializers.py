@@ -27,6 +27,7 @@ class TestWorkflowJobTemplateSerializerGetRelated:
             'launch',
             'workflow_nodes',
             'webhook_key',
+            'labels',
         ],
     )
     def test_get_related(self, mocker, test_get_related, workflow_job_template, related_resource_name):
@@ -89,6 +90,8 @@ class TestWorkflowJobTemplateNodeSerializerGetRelated:
             'success_nodes',
             'failure_nodes',
             'always_nodes',
+            'labels',
+            'instance_groups',
         ],
     )
     def test_get_related(self, test_get_related, workflow_job_template_node, related_resource_name):
@@ -233,6 +236,8 @@ class TestWorkflowJobNodeSerializerGetRelated:
             'success_nodes',
             'failure_nodes',
             'always_nodes',
+            'labels',
+            'instance_groups',
         ],
     )
     def test_get_related(self, test_get_related, workflow_job_node, related_resource_name):
