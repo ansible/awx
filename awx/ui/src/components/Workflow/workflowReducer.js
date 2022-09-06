@@ -8,6 +8,7 @@ export function initReducer() {
     addNodeTarget: null,
     addingLink: false,
     contentError: null,
+    defaultOrganization: null,
     isLoading: true,
     linkToDelete: null,
     linkToEdit: null,
@@ -63,6 +64,11 @@ export default function visualizerReducer(state, action) {
       return {
         ...state,
         contentError: action.value,
+      };
+    case 'SET_DEFAULT_ORGANIZATION':
+      return {
+        ...state,
+        defaultOrganization: action.value,
       };
     case 'SET_IS_LOADING':
       return {

@@ -228,6 +228,12 @@ const getNodeToEditDefaultValues = (
   if (launchConfig.ask_timeout_on_launch) {
     initialValues.timeout = sourceOfValues?.timeout || 0;
   }
+  if (launchConfig.ask_labels_on_launch) {
+    initialValues.labels = sourceOfValues?.labels || [];
+  }
+  if (launchConfig.ask_instance_groups_on_launch) {
+    initialValues.instance_groups = sourceOfValues?.instance_groups || [];
+  }
 
   if (launchConfig.ask_variables_on_launch) {
     const newExtraData = { ...sourceOfValues.extra_data };
@@ -274,7 +280,8 @@ export default function useWorkflowNodeSteps(
   resource,
   askLinkType,
   resourceDefaultCredentials,
-  labels
+  labels,
+  instanceGroups
 ) {
   const { nodeToEdit } = useContext(WorkflowStateContext);
   const {
@@ -291,7 +298,7 @@ export default function useWorkflowNodeSteps(
     useInventoryStep(launchConfig, resource, visited),
     useCredentialsStep(launchConfig, resource, resourceDefaultCredentials),
     useExecutionEnvironmentStep(launchConfig, resource),
-    useInstanceGroupsStep(launchConfig, resource),
+    useInstanceGroupsStep(launchConfig, resource, instanceGroups),
     useOtherPromptsStep(launchConfig, resource, labels),
     useSurveyStep(launchConfig, surveyConfig, resource, visited),
   ];

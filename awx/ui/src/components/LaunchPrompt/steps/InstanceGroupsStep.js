@@ -19,7 +19,7 @@ const QS_CONFIG = getQSConfig('instance-groups', {
 
 function InstanceGroupsStep() {
   const [field, , helpers] = useField('instance_groups');
-  const { selected, handleSelect, setSelected } = useSelected([]);
+  const { selected, handleSelect, setSelected } = useSelected([], field.value);
 
   const history = useHistory();
 
@@ -69,7 +69,7 @@ function InstanceGroupsStep() {
 
   return (
     <OptionsList
-      value={field.value}
+      value={selected}
       options={instance_groups}
       optionCount={count}
       searchColumns={[

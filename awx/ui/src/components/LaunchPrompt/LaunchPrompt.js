@@ -18,6 +18,7 @@ function PromptModalForm({
   resource,
   labels,
   surveyConfig,
+  instanceGroups,
 }) {
   const { setFieldTouched, values } = useFormikContext();
   const [showDescription, setShowDescription] = useState(false);
@@ -29,7 +30,13 @@ function PromptModalForm({
     visitStep,
     visitAllSteps,
     contentError,
-  } = useLaunchSteps(launchConfig, surveyConfig, resource, labels);
+  } = useLaunchSteps(
+    launchConfig,
+    surveyConfig,
+    resource,
+    labels,
+    instanceGroups
+  );
 
   const handleSubmit = async () => {
     const postValues = {};
@@ -197,6 +204,7 @@ function LaunchPrompt({
   labels = [],
   surveyConfig,
   resourceDefaultCredentials = [],
+  instanceGroups = [],
 }) {
   return (
     <Formik initialValues={{}} onSubmit={(values) => onLaunch(values)}>
@@ -208,6 +216,7 @@ function LaunchPrompt({
         resource={resource}
         labels={labels}
         resourceDefaultCredentials={resourceDefaultCredentials}
+        instanceGroups={instanceGroups}
       />
     </Formik>
   );

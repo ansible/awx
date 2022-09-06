@@ -42,6 +42,7 @@ function LaunchButton({ resource, children }) {
   const [launchConfig, setLaunchConfig] = useState(null);
   const [surveyConfig, setSurveyConfig] = useState(null);
   const [labels, setLabels] = useState([]);
+  const [instanceGroups, setInstanceGroups] = useState([]);
   const [isLaunching, setIsLaunching] = useState(false);
   const [error, setError] = useState(null);
 
@@ -81,6 +82,14 @@ function LaunchButton({ resource, children }) {
         }));
 
         setLabels(allLabels);
+      }
+
+      if (launch.ask_instance_groups_on_launch) {
+        const {
+          data: { results },
+        } = await JobTemplatesAPI.readInstanceGroups(resource.id);
+
+        setInstanceGroups(results);
       }
 
       if (canLaunchWithoutPrompt(launch)) {
@@ -197,6 +206,7 @@ function LaunchButton({ resource, children }) {
           labels={labels}
           onLaunch={launchWithParams}
           onCancel={() => setShowLaunchPrompt(false)}
+          instanceGroups={instanceGroups}
         />
       )}
     </>

@@ -7,6 +7,7 @@ const defaultState = {
   addNodeTarget: null,
   addingLink: false,
   contentError: null,
+  defaultOrganization: null,
   isLoading: true,
   linkToDelete: null,
   linkToEdit: null,
@@ -1278,6 +1279,18 @@ describe('Workflow reducer', () => {
       expect(result).toEqual({
         ...defaultState,
         contentError: new Error('Test Error'),
+      });
+    });
+  });
+  describe('SET_DEFAULT_ORGANIZATION', () => {
+    it('should set the state variable', () => {
+      const result = workflowReducer(defaultState, {
+        type: 'SET_DEFAULT_ORGANIZATION',
+        value: 1,
+      });
+      expect(result).toEqual({
+        ...defaultState,
+        defaultOrganization: 1,
       });
     });
   });

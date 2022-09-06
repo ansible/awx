@@ -45,7 +45,8 @@ export default function useLaunchSteps(
   launchConfig,
   surveyConfig,
   resource,
-  labels
+  labels,
+  instanceGroups
 ) {
   const [visited, setVisited] = useState({});
   const [isReady, setIsReady] = useState(false);
@@ -64,7 +65,7 @@ export default function useLaunchSteps(
       visited
     ),
     useExecutionEnvironmentStep(launchConfig, resource),
-    useInstanceGroupsStep(launchConfig, resource),
+    useInstanceGroupsStep(launchConfig, resource, instanceGroups),
     useOtherPromptsStep(launchConfig, resource, labels),
     useSurveyStep(launchConfig, surveyConfig, resource, visited),
   ];

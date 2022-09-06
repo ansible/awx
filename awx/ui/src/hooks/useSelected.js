@@ -12,8 +12,8 @@ import { useState, useCallback } from 'react';
  * }
  */
 
-export default function useSelected(list = []) {
-  const [selected, setSelected] = useState([]);
+export default function useSelected(list = [], defaultSelected = []) {
+  const [selected, setSelected] = useState(defaultSelected);
   const isAllSelected = selected.length > 0 && selected.length === list.length;
 
   const handleSelect = (row) => {
