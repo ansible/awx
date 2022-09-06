@@ -63,7 +63,7 @@ class HasStatus(object):
             status_list = [status_list]
         if self.status in status_list:
             # include corner cases in is_successful logic
-            if 'successful' not in status_list or self.is_successful:
+            if self.status != 'successful' or self.is_successful:
                 return
         if msg is None:
             msg = ''
