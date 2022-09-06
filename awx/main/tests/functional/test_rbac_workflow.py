@@ -101,6 +101,80 @@ class TestWorkflowJobTemplateNodeAccess:
         access = WorkflowJobTemplateNodeAccess(rando)
         assert access.can_delete(wfjt_node)
 
+    @pytest.mark.parametrize(
+        "add_wfjt_admin, add_jt_admin, permission_type, expected_result, method_type",
+        [
+            (False, False, None, False, 'can_attach'),
+            (True, False, 'credentials', False, 'can_attach'),
+            (True, True, 'credentials', True, 'can_attach'),
+            (True, False, 'labels', False, 'can_attach'),
+            (True, True, 'labels', True, 'can_attach'),
+            (True, False, 'instance_groups', False, 'can_attach'),
+            (True, True, 'instance_groups', True, 'can_attach'),
+            (False, False, None, False, 'can_unattach'),
+            (True, False, 'credentials', False, 'can_unattach'),
+            (True, True, 'credentials', True, 'can_unattach'),
+            (True, False, 'labels', False, 'can_unattach'),
+            (True, True, 'labels', True, 'can_unattach'),
+            (True, False, 'instance_groups', False, 'can_unattach'),
+            (True, True, 'instance_groups', True, 'can_unattach'),
+        ],
+    )
+    def test_attacher_permissions(self, wfjt_node, job_template, rando, add_wfjt_admin, permission_type, add_jt_admin, expected_result, mocker, method_type):
+        wfjt = wfjt_node.workflow_job_template
+        if add_wfjt_admin:
+            wfjt.admin_role.members.add(rando)
+            wfjt.unified_job_template = job_template
+        if add_jt_admin:
+            job_template.execute_role.members.add(rando)
+
+        # We have to mock the JobLaunchConfigAccess because the attachment methods will look at the object type and the relation
+        # Since we pass None as the second param this will trigger an NotImplementedError from that object
+        with mocker.patch('awx.main.access.JobLaunchConfigAccess.{}'.format(method_type), return_value=True):
+            access = WorkflowJobTemplateNodeAccess(rando)
+            assert getattr(access, method_type)(wfjt_node, None, permission_type, None) == expected_result
+
+    # The actual attachment of labels, credentials and instance groups are tested from JobLaunchConfigAccess
+
+    @pytest.mark.parametrize(
+        "attachment_type, expect_exception, method_type",
+        [
+            ("credentials", False, 'can_attach'),
+            ("labels", False, 'can_attach'),
+            ("instance_groups", False, 'can_attach'),
+            ("success_nodes", False, 'can_attach'),
+            ("failure_nodes", False, 'can_attach'),
+            ("always_nodes", False, 'can_attach'),
+            ("junk", True, 'can_attach'),
+            ("credentials", False, 'can_unattach'),
+            ("labels", False, 'can_unattach'),
+            ("instance_groups", False, 'can_unattach'),
+            ("success_nodes", False, 'can_unattach'),
+            ("failure_nodes", False, 'can_unattach'),
+            ("always_nodes", False, 'can_unattach'),
+            ("junk", True, 'can_unattach'),
+        ],
+    )
+    def test_attacher_raise_not_implemented(self, wfjt_node, rando, attachment_type, expect_exception, method_type):
+        wfjt = wfjt_node.workflow_job_template
+        wfjt.admin_role.members.add(rando)
+        access = WorkflowJobTemplateNodeAccess(rando)
+        if expect_exception:
+            with pytest.raises(NotImplementedError):
+                access.can_attach(wfjt_node, None, attachment_type, None)
+        else:
+            try:
+                getattr(access, method_type)(wfjt_node, None, attachment_type, None)
+            except NotImplementedError:
+                # We explicitly catch NotImplemented because the _nodes type will raise a different exception
+                assert False, "Exception was raised when it should not have been"
+            except Exception:
+                #  File "/awx_devel/awx/main/access.py", line 2074, in check_same_WFJT
+                #    raise Exception('Attaching workflow nodes only allowed for other nodes')
+                pass
+
+    # TODO: Implement additional tests for _nodes attachments here
+
 
 @pytest.mark.django_db
 class TestWorkflowJobAccess:

@@ -332,8 +332,11 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         if self.ask_inventory_on_launch and 'inventory' in kwargs:
             actual_inventory = kwargs['inventory']
         actual_slice_count = self.job_slice_count
-        if self.ask_job_slice_count_on_launch and 'slice_count' in kwargs:
-            actual_slice_count = kwargs['slice_count']
+        if self.ask_job_slice_count_on_launch and 'job_slice_count' in kwargs:
+            actual_slice_count = kwargs['job_slice_count']
+            # Set the eager fields if its there as well
+            if '_eager_fields' in kwargs and 'job_slice_count' in kwargs['_eager_fields']:
+                kwargs['_eager_fields']['job_slice_count'] = actual_slice_count
         if actual_inventory:
             return min(actual_slice_count, actual_inventory.hosts.count())
         else:

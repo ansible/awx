@@ -172,6 +172,8 @@ options:
     labels:
       description:
         - List of labels applied as a prompt, assuming job template prompts for labels
+      type: list
+      elements: str
     timeout:
       description:
         - Timeout applied as a prompt, assuming job template prompts for timeout

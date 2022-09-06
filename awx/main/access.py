@@ -1923,24 +1923,29 @@ class JobLaunchConfigAccess(BaseAccess):
         return self.check_related('inventory', Inventory, data, obj=obj, role_field='use_role')
 
     def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
+        try:
+            obj_name = obj.name
+        except AttributeError:
+            obj_name = obj.identifier
+
         if isinstance(sub_obj, Credential) and relationship == 'credentials':
             if not self.user in sub_obj.use_role:
                 logger.debug(
-                    "User {} not allowed access to credential {} for {} {} ({})".format(self.user.username, sub_obj.name, obj.__class__, obj.name, obj.id)
+                    "User {} not allowed access to credential {} for {} {} ({})".format(self.user.username, sub_obj.name, obj.__class__, obj_name, obj.id)
                 )
                 return False
             return True
 
         if isinstance(sub_obj, Label) and relationship == 'labels':
             if not self.user.can_access(Label, 'read', sub_obj):
-                logger.debug("User {} not allowed access to label {} for {} {} ({})".format(self.user.username, sub_obj.name, obj.__class__, obj.name, obj.id))
+                logger.debug("User {} not allowed access to label {} for {} {} ({})".format(self.user.username, sub_obj.name, obj.__class__, obj_name, obj.id))
                 return False
             return True
 
         if isinstance(sub_obj, InstanceGroup) and relationship == 'instance_groups':
             if not sub_obj in self.user.get_queryset(InstanceGroup):
                 logger.debug(
-                    "User {} not allowed access to instance_group {} for {} {} ({})".format(self.user.username, sub_obj.name, obj.__class__, obj.name, obj.id)
+                    "User {} not allowed access to instance_group {} for {} {} ({})".format(self.user.username, sub_obj.name, obj.__class__, obj_name, obj.id)
                 )
                 return False
             return True
@@ -1948,18 +1953,23 @@ class JobLaunchConfigAccess(BaseAccess):
         raise NotImplementedError('Only credentials, labels and instance groups can be attached to launch configurations.')
 
     def can_unattach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
+        try:
+            obj_name = obj.name
+        except AttributeError:
+            obj_name = obj.identifier
+
         if isinstance(sub_obj, Credential) and relationship == 'credentials':
             if not skip_sub_obj_read_check:
                 logger.debug(
                     "Skipping check if user {} can access credential {} ({}) for removal from {} {} ({})".format(
-                        self.user.username, sub_obj.name, sub_obj.id, obj.__class__, obj.name, obj.id
+                        self.user.username, sub_obj.name, sub_obj.id, obj.__class__, obj_name, obj.id
                     )
                 )
                 return True
             if not self.user in sub_obj.read_role:
                 logger.debug(
                     "User {} can not read credential {} ({}) for removal from {} {} ({})".format(
-                        self.user.username, sub_obj.name, sub_obj.id, obj.__class__, obj.name, obj.id
+                        self.user.username, sub_obj.name, sub_obj.id, obj.__class__, obj_name, obj.id
                     )
                 )
                 return False
@@ -1968,7 +1978,7 @@ class JobLaunchConfigAccess(BaseAccess):
             if skip_sub_obj_read_check:
                 logger.debug(
                     "Skipping check if user {} can access label {} ({}) for removal from {} {} ({})".format(
-                        self.user.username, sub_obj.name, sub_obj.id, obj.__class__, obj.name, obj.id
+                        self.user.username, sub_obj.name, sub_obj.id, obj.__class__, obj_name, obj.id
                     )
                 )
                 return True
@@ -1976,7 +1986,7 @@ class JobLaunchConfigAccess(BaseAccess):
                 return True
             logger.debug(
                 "User {} can not read label {} ({}) for removal from {} {} ({})".format(
-                    self.user.username, sub_obj.name, sub_obj.id, obj.__class__, obj.name, obj.id
+                    self.user.username, sub_obj.name, sub_obj.id, obj.__class__, obj_name, obj.id
                 )
             )
             return False
@@ -1984,7 +1994,7 @@ class JobLaunchConfigAccess(BaseAccess):
             if skip_sub_obj_read_check:
                 logger.debug(
                     "Skipping check if user {} can access instance_group {} ({}) for removal from {} {} ({})".format(
-                        self.user.username, sub_obj.name, sub_obj.id, obj.__class__, obj.name, obj.id
+                        self.user.username, sub_obj.name, sub_obj.id, obj.__class__, obj_name, obj.id
                     )
                 )
                 return True
@@ -1992,7 +2002,7 @@ class JobLaunchConfigAccess(BaseAccess):
                 return True
             logger.debug(
                 "User {} can not read instance_group {} ({}) for removal from {} {} ({})".format(
-                    self.user.username, sub_obj.name, sub_obj.id, obj.__class__, obj.name, obj.id
+                    self.user.username, sub_obj.name, sub_obj.id, obj.__class__, obj_name, obj.id
                 )
             )
             return False
@@ -2069,61 +2079,25 @@ class WorkflowJobTemplateNodeAccess(BaseAccess):
     def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
         if not self.wfjt_admin(obj):
             return False
-        if relationship == 'credentials':
+        if relationship in ['credentials', 'labels', 'instance_groups']:
             # Need permission to related template to attach a credential
             if not self.ujt_execute(obj):
                 return False
             return JobLaunchConfigAccess(self.user).can_attach(obj, sub_obj, relationship, data, skip_sub_obj_read_check=skip_sub_obj_read_check)
         elif relationship in ('success_nodes', 'failure_nodes', 'always_nodes'):
             return self.check_same_WFJT(obj, sub_obj)
-        elif relationship == 'labels':
-            if self.user.can_access(Label, 'read', sub_obj):
-                return True
-            logger.debug(
-                "User {} can not read label {} ({}) for removal from {} {} ({})".format(
-                    self.user.username, sub_obj.name, sub_obj.id, obj.__class__, obj.name, obj.id
-                )
-            )
-            return False
-        elif relationship == 'instance_groups':
-            if sub_obj in self.user.get_queryset(InstanceGroup):
-                return True
-            logger.debug(
-                "User {} can not read instance_group {} ({}) for removal from {} {} ({})".format(
-                    self.user.username, sub_obj.name, sub_obj.id, obj.__class__, obj.name, obj.id
-                )
-            )
-            return False
         else:
             raise NotImplementedError('Relationship {} not understood for WFJT nodes.'.format(relationship))
 
     def can_unattach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
         if not self.wfjt_admin(obj):
             return False
-        if relationship == 'credentials':
+        if relationship in ['credentials', 'labels', 'instance_groups']:
             if not self.ujt_execute(obj):
                 return False
             return JobLaunchConfigAccess(self.user).can_unattach(obj, sub_obj, relationship, data, skip_sub_obj_read_check=skip_sub_obj_read_check)
         elif relationship in ('success_nodes', 'failure_nodes', 'always_nodes'):
             return self.check_same_WFJT(obj, sub_obj)
-        elif relationship == 'labels':
-            if self.user.can_access(Label, 'read', sub_obj):
-                return True
-            logger.debug(
-                "User {} can not read label {} ({}) for removal from {} {} ({})".format(
-                    self.user.username, sub_obj.name, sub_obj.id, obj.__class__, obj.name, obj.id
-                )
-            )
-            return False
-        elif relationship == 'instance_groups':
-            if sub_obj in self.user.get_queryset(InstanceGroup):
-                return True
-            logger.debug(
-                "User {} can not read instance_group {} ({}) for removal from {} {} ({})".format(
-                    self.user.username, sub_obj.name, sub_obj.id, obj.__class__, obj.name, obj.id
-                )
-            )
-            return False
         else:
             raise NotImplementedError('Relationship {} not understood for WFJT nodes.'.format(relationship))
 
