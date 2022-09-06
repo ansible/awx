@@ -5,6 +5,8 @@ import threading
 import time
 import os
 
+from concurrent.futures import ThreadPoolExecutor
+
 # Django
 from django.conf import LazySettings
 from django.conf import settings, UserSettingsHolder
@@ -157,7 +159,7 @@ class EncryptedCacheProxy(object):
             obj_id = self.cache.get(Setting.get_cache_id_key(key), default=empty)
             if obj_id is empty:
                 logger.info('Efficiency notice: Corresponding id not stored in cache %s', Setting.get_cache_id_key(key))
-                obj_id = getattr(self._get_setting_from_db(key), 'pk', None)
+                obj_id = getattr(_get_setting_from_db(self.registry, key), 'pk', None)
             elif obj_id == SETTING_CACHE_NONE:
                 obj_id = None
             return method(TransientSetting(pk=obj_id, value=value), 'value')
@@ -165,11 +167,6 @@ class EncryptedCacheProxy(object):
         # If the field in question isn't an "encrypted" field, this function is
         # a no-op; it just returns the provided value
         return value
-
-    def _get_setting_from_db(self, key):
-        field = self.registry.get_setting_field(key)
-        if not field.read_only:
-            return Setting.objects.filter(key=key, user__isnull=True).order_by('pk').first()
 
     def __getattr__(self, name):
         return getattr(self.cache, name)
@@ -184,6 +181,18 @@ def get_writeable_settings(registry):
 
 def get_settings_to_cache(registry):
     return dict([(key, SETTING_CACHE_NOTSET) for key in get_writeable_settings(registry)])
+
+
+# HACK: runs in thread in order to work in an asyncio context
+def _get_setting_from_db(registry, key):
+    def wrapped(registry, key):
+        field = registry.get_setting_field(key)
+        if not field.read_only:
+            return Setting.objects.filter(key=key, user__isnull=True).order_by('pk').first()
+
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        future = executor.submit(wrapped, registry, key)
+        return future.result()
 
 
 def get_cache_value(value):
@@ -345,7 +354,7 @@ class SettingsWrapper(UserSettingsHolder):
             setting_id = None
             # this value is read-only, however we *do* want to fetch its value from the database
             if not field.read_only or name == 'INSTALL_UUID':
-                setting = Setting.objects.filter(key=name, user__isnull=True).order_by('pk').first()
+                setting = _get_setting_from_db(self.registry, name)
             if setting:
                 if getattr(field, 'encrypted', False):
                     value = decrypt_field(setting, 'value')

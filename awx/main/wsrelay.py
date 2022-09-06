@@ -7,28 +7,24 @@ from aiohttp import client_exceptions
 from asgiref.sync import sync_to_async
 
 from channels.layers import get_channel_layer
+from channels.db import database_sync_to_async
 
 from django.conf import settings
 from django.apps import apps
-from django.core.serializers.json import DjangoJSONEncoder
 
 from awx.main.analytics.broadcast_websocket import (
-    BroadcastWebsocketStats,
-    BroadcastWebsocketStatsManager,
+    RelayWebsocketStats,
+    RelayWebsocketStatsManager,
 )
 import awx.main.analytics.subsystem_metrics as s_metrics
 
-logger = logging.getLogger('awx.main.wsbroadcast')
+logger = logging.getLogger('awx.main.wsrelay')
 
 
 def wrap_broadcast_msg(group, message: str):
     # TODO: Maybe wrap as "group","message" so that we don't need to
     # encode/decode as json.
-    return json.dumps(dict(group=group, message=message), cls=DjangoJSONEncoder)
-
-
-def unwrap_broadcast_msg(payload: dict):
-    return (payload['group'], payload['message'])
+    return dict(group=group, message=message)
 
 
 @sync_to_async
@@ -50,28 +46,26 @@ def get_local_host():
     return Instance.objects.my_hostname()
 
 
-class WebsocketTask:
+class WebsocketRelayConnection:
     def __init__(
         self,
         name,
-        event_loop,
-        stats: BroadcastWebsocketStats,
+        stats: RelayWebsocketStats,
         remote_host: str,
         remote_port: int = settings.BROADCAST_WEBSOCKET_PORT,
         protocol: str = settings.BROADCAST_WEBSOCKET_PROTOCOL,
         verify_ssl: bool = settings.BROADCAST_WEBSOCKET_VERIFY_CERT,
-        endpoint: str = 'broadcast',
     ):
         self.name = name
-        self.event_loop = event_loop
+        self.event_loop = asyncio.get_event_loop()
         self.stats = stats
         self.remote_host = remote_host
         self.remote_port = remote_port
-        self.endpoint = endpoint
         self.protocol = protocol
         self.verify_ssl = verify_ssl
         self.channel_layer = None
         self.subsystem_metrics = s_metrics.Metrics(instance_name=name)
+        self.producers = dict()
 
     async def run_loop(self, websocket: aiohttp.ClientWebSocketResponse):
         raise RuntimeError("Implement me")
@@ -95,7 +89,7 @@ class WebsocketTask:
             logger.warning(f"Connection from {self.name} to {self.remote_host} cancelled")
             raise
 
-        uri = f"{self.protocol}://{self.remote_host}:{self.remote_port}/websocket/{self.endpoint}/"
+        uri = f"{self.protocol}://{self.remote_host}:{self.remote_port}/websocket/relay/"
         timeout = aiohttp.ClientTimeout(total=10)
 
         secret_val = WebsocketSecretAuthHelper.construct_secret()
@@ -105,7 +99,7 @@ class WebsocketTask:
                     logger.info(f"Connection from {self.name} to {self.remote_host} established.")
                     self.stats.record_connection_established()
                     attempt = 0
-                    await self.run_loop(websocket)
+                    await self.run_connection(websocket)
         except asyncio.CancelledError:
             # TODO: Check if connected and disconnect
             # Possibly use run_until_complete() if disconnect is async
@@ -128,12 +122,12 @@ class WebsocketTask:
     def start(self, attempt=0):
         self.async_task = self.event_loop.create_task(self.connect(attempt=attempt))
 
+        return self.async_task
+
     def cancel(self):
         self.async_task.cancel()
 
-
-class BroadcastWebsocketTask(WebsocketTask):
-    async def run_loop(self, websocket: aiohttp.ClientWebSocketResponse):
+    async def run_connection(self, websocket: aiohttp.ClientWebSocketResponse):
         async for msg in websocket:
             self.stats.record_message_received()
 
@@ -148,38 +142,79 @@ class BroadcastWebsocketTask(WebsocketTask):
                         logmsg = "{} {}".format(logmsg, payload)
                     logger.warning(logmsg)
                     continue
-                (group, message) = unwrap_broadcast_msg(payload)
-                if group == "metrics":
-                    self.subsystem_metrics.store_metrics(message)
+
+            from remote_pdb import RemotePdb
+
+            RemotePdb('127.0.0.1', 4444).set_trace()
+
+            if payload.get("type") == "consumer.subscribe":
+                for group in payload['groups']:
+                    name = f"{self.remote_host}-{group}"
+                    origin_channel = payload['origin_channel']
+                    if not self.producers.get(name):
+                        producer = self.event_loop.create_task(self.run_producer(name, websocket, group))
+
+                        self.producers[name] = {"task": producer, "subscriptions": {origin_channel}}
+                    else:
+                        self.producers[name]["subscriptions"].add(origin_channel)
+
+            if payload.get("type") == "consumer.unsubscribe":
+                for group in payload['groups']:
+                    name = f"{self.remote_host}-{group}"
+                    origin_channel = payload['origin_channel']
+                    self.producers[name]["subscriptions"].remove(origin_channel)
+
+    async def run_producer(self, name, websocket, group):
+        try:
+            logger.info(f"Starting producer for {name}")
+
+            consumer_channel = await self.channel_layer.new_channel()
+            await self.channel_layer.group_add(group, consumer_channel)
+
+            while True:
+                try:
+                    msg = await asyncio.wait_for(self.channel_layer.receive(consumer_channel), timeout=10)
+                except asyncio.TimeoutError:
+                    current_subscriptions = self.producers[name]["subscriptions"]
+                    if len(current_subscriptions) == 0:
+                        logger.info(f"Producer {name} has no subscribers, shutting down.")
+                        return
+
                     continue
-                await self.channel_layer.group_send(group, {"type": "internal.message", "text": message})
+
+                await websocket.send_json(wrap_broadcast_msg(group, msg))
+        except Exception:
+            # Note, this is very intentional and important since we do not otherwise
+            # ever check the result of this future. Without this line you will not see an error if
+            # something goes wrong in here.
+            logger.exception(f"Event relay producer {name} crashed")
+        finally:
+            await self.channel_layer.group_discard(group, consumer_channel)
+            del self.producers[name]
 
 
-class BroadcastWebsocketManager(object):
+class WebSocketRelayManager(object):
     def __init__(self):
-        self.event_loop = asyncio.get_event_loop()
-        '''
-        {
-            'hostname1': BroadcastWebsocketTask(),
-            'hostname2': BroadcastWebsocketTask(),
-            'hostname3': BroadcastWebsocketTask(),
-        }
-        '''
-        self.broadcast_tasks = dict()
-        self.local_hostname = get_local_host()
-        self.stats_mgr = BroadcastWebsocketStatsManager(self.event_loop, self.local_hostname)
 
-    async def run_per_host_websocket(self):
+        self.relay_connections = dict()
+        self.local_hostname = get_local_host()
+        self.event_loop = asyncio.get_event_loop()
+        self.stats_mgr = RelayWebsocketStatsManager(self.event_loop, self.local_hostname)
+
+    async def run(self):
+        self.stats_mgr.start()
+
+        # Establishes a websocket connection to /websocket/relay on all API servers
         while True:
             known_hosts = await get_broadcast_hosts()
             future_remote_hosts = known_hosts.keys()
-            current_remote_hosts = self.broadcast_tasks.keys()
+            current_remote_hosts = self.relay_connections.keys()
             deleted_remote_hosts = set(current_remote_hosts) - set(future_remote_hosts)
             new_remote_hosts = set(future_remote_hosts) - set(current_remote_hosts)
 
-            remote_addresses = {k: v.remote_host for k, v in self.broadcast_tasks.items()}
+            remote_addresses = {k: v.remote_host for k, v in self.relay_connections.items()}
             for hostname, address in known_hosts.items():
-                if hostname in self.broadcast_tasks and address != remote_addresses[hostname]:
+                if hostname in self.relay_connections and address != remote_addresses[hostname]:
                     deleted_remote_hosts.add(hostname)
                     new_remote_hosts.add(hostname)
 
@@ -189,20 +224,17 @@ class BroadcastWebsocketManager(object):
                 logger.warning(f"Adding {new_remote_hosts} to websocket broadcast list")
 
             for h in deleted_remote_hosts:
-                self.broadcast_tasks[h].cancel()
-                del self.broadcast_tasks[h]
+                self.relay_connections[h].cancel()
+                del self.relay_connections[h]
                 self.stats_mgr.delete_remote_host_stats(h)
 
             for h in new_remote_hosts:
                 stats = self.stats_mgr.new_remote_host_stats(h)
-                broadcast_task = BroadcastWebsocketTask(name=self.local_hostname, event_loop=self.event_loop, stats=stats, remote_host=known_hosts[h])
-                broadcast_task.start()
-                self.broadcast_tasks[h] = broadcast_task
+                relay_connection = WebsocketRelayConnection(name=self.local_hostname, stats=stats, remote_host=known_hosts[h])
+                relay_connection.start()
+                self.relay_connections[h] = relay_connection
+
+            # for host, conn in self.relay_connections.items():
+            #     logger.info(f"Current producers for {host}: {conn.producers}")
 
             await asyncio.sleep(settings.BROADCAST_WEBSOCKET_NEW_INSTANCE_POLL_RATE_SECONDS)
-
-    def start(self):
-        self.stats_mgr.start()
-
-        self.async_task = self.event_loop.create_task(self.run_per_host_websocket())
-        return self.async_task
