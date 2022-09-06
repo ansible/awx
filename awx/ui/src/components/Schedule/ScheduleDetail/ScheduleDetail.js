@@ -27,6 +27,11 @@ import { VariablesDetail } from '../../CodeEditor';
 import { VERBOSITY } from '../../VerbositySelectField';
 import helpText from '../../../screens/Template/shared/JobTemplate.helptext';
 
+const buildLinkURL = (instance) =>
+  instance.is_container_group
+    ? '/instance_groups/container_group/'
+    : '/instance_groups/';
+
 const PromptDivider = styled(Divider)`
   margin-top: var(--pf-global--spacer--lg);
   margin-bottom: var(--pf-global--spacer--lg);
@@ -109,7 +114,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
   const { error, dismissError } = useDismissableError(deleteError);
 
   const {
-    result: [credentials, preview, launchData],
+    result: [credentials, preview, launchData, instanceGroups],
     isLoading,
     error: readContentError,
     request: fetchCredentialsAndPreview,
@@ -129,7 +134,8 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
         promises.push(
           JobTemplatesAPI.readLaunch(
             schedule.summary_fields.unified_job_template.id
-          )
+          ),
+          SchedulesAPI.readInstanceGroups(id)
         );
       } else if (
         schedule?.summary_fields?.unified_job_template?.unified_job_type ===
@@ -144,11 +150,19 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
         promises.push(Promise.resolve());
       }
 
-      const [{ data }, { data: schedulePreview }, launch] = await Promise.all(
-        promises
-      );
+      const [
+        { data },
+        { data: schedulePreview },
+        launch,
+        instanceGroupsResults,
+      ] = await Promise.all(promises);
 
-      return [data.results, schedulePreview, launch?.data];
+      return [
+        data.results,
+        schedulePreview,
+        launch?.data,
+        instanceGroupsResults?.data?.results,
+      ];
     }, [id, schedule, rrule]),
     []
   );
@@ -187,6 +201,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
     ask_forks_on_launch,
     ask_job_slice_count_on_launch,
     ask_timeout_on_launch,
+    ask_instance_groups_on_launch,
     survey_enabled,
   } = launchData || {};
 
@@ -247,6 +262,8 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
   const showForksDetail = ask_forks_on_launch;
   const showJobSlicingDetail = ask_job_slice_count_on_launch;
   const showTimeoutDetail = ask_timeout_on_launch;
+  const showInstanceGroupsDetail =
+    ask_instance_groups_on_launch && instanceGroups.length > 0;
 
   const showPromptedFields =
     showCredentialsDetail ||
@@ -263,7 +280,8 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
     showLabelsDetail ||
     showForksDetail ||
     showJobSlicingDetail ||
-    showTimeoutDetail;
+    showTimeoutDetail ||
+    showInstanceGroupsDetail;
 
   if (isLoading) {
     return <ContentLoading />;
@@ -404,6 +422,35 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
             )}
             {ask_job_slice_count_on_launch && (
               <Detail label={t`Job Slicing`} value={job_slice_count} />
+            )}
+            {showInstanceGroupsDetail && (
+              <Detail
+                fullWidth
+                label={t`Instance Groups`}
+                value={
+                  <ChipGroup
+                    numChips={5}
+                    totalChips={instanceGroups.length}
+                    ouiaId="instance-group-chips"
+                  >
+                    {instanceGroups.map((ig) => (
+                      <Link
+                        to={`${buildLinkURL(ig)}${ig.id}/details`}
+                        key={ig.id}
+                      >
+                        <Chip
+                          key={ig.id}
+                          ouiaId={`instance-group-${ig.id}-chip`}
+                          isReadOnly
+                        >
+                          {ig.name}
+                        </Chip>
+                      </Link>
+                    ))}
+                  </ChipGroup>
+                }
+                isEmpty={instanceGroups.length === 0}
+              />
             )}
             {showCredentialsDetail && (
               <Detail

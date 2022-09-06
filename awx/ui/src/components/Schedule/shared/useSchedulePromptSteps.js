@@ -16,7 +16,8 @@ export default function useSchedulePromptSteps(
   resource,
   scheduleCredentials,
   resourceDefaultCredentials,
-  labels
+  labels,
+  instanceGroups
 ) {
   const sourceOfValues =
     (Object.keys(schedule).length > 0 && schedule) || resource;
@@ -31,7 +32,7 @@ export default function useSchedulePromptSteps(
       resourceDefaultCredentials
     ),
     useExecutionEnvironmentStep(launchConfig, resource),
-    useInstanceGroupsStep(launchConfig, resource),
+    useInstanceGroupsStep(launchConfig, resource, instanceGroups),
     useOtherPromptsStep(launchConfig, sourceOfValues, labels),
     useSurveyStep(launchConfig, surveyConfig, sourceOfValues, visited),
   ];

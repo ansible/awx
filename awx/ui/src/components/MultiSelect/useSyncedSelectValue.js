@@ -17,7 +17,7 @@ export default function useSyncedSelectValue(value, onChange) {
       return;
     }
     const newOptions = [];
-    if (value !== selections && options.length) {
+    if (value && value !== selections && options.length) {
       const syncedValue = value.map((item) => {
         const match = options.find((i) => i.id === item.id);
         if (!match) {

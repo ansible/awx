@@ -210,8 +210,6 @@ function WorkflowJobTemplateForm({
           promptId="template-ask-variables-on-launch"
           tooltip={helpText.variables}
         />
-      </FormFullWidthLayout>
-      <FormColumnLayout>
         <FieldWithPrompt
           fieldId="template-tags"
           label={t`Job Tags`}
@@ -236,7 +234,7 @@ function WorkflowJobTemplateForm({
             onChange={(value) => skipTagsHelpers.setValue(value)}
           />
         </FieldWithPrompt>
-      </FormColumnLayout>
+      </FormFullWidthLayout>
       <FormGroup fieldId="options" label={t`Options`}>
         <FormCheckboxLayout isInline>
           <Checkbox

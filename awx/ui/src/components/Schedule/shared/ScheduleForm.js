@@ -53,13 +53,14 @@ function ScheduleForm({
     request: loadScheduleData,
     error: contentError,
     isLoading: contentLoading,
-    result: { zoneOptions, zoneLinks, credentials, labels },
+    result: { zoneOptions, zoneLinks, credentials, labels, instanceGroups },
   } = useRequest(
     useCallback(async () => {
       const { data } = await SchedulesAPI.readZoneInfo();
 
       let creds = [];
-      let allLabels;
+      let allLabels = [];
+      let allInstanceGroups = [];
       if (schedule.id) {
         if (
           resource.type === 'job_template' &&
@@ -76,15 +77,30 @@ function ScheduleForm({
           } = await SchedulesAPI.readAllLabels(schedule.id);
           allLabels = results;
         }
-      } else {
         if (
           resource.type === 'job_template' &&
-          launchConfig.ask_labels_on_launch
+          launchConfig.ask_instance_groups_on_launch
         ) {
           const {
             data: { results },
-          } = await JobTemplatesAPI.readAllLabels(resource.id);
-          allLabels = results;
+          } = await SchedulesAPI.readInstanceGroups(schedule.id);
+          allInstanceGroups = results;
+        }
+      } else {
+        if (resource.type === 'job_template') {
+          if (launchConfig.ask_labels_on_launch) {
+            const {
+              data: { results },
+            } = await JobTemplatesAPI.readAllLabels(resource.id);
+            allLabels = results;
+          }
+
+          if (launchConfig.ask_instance_groups_on_launch) {
+            const {
+              data: { results },
+            } = await JobTemplatesAPI.readInstanceGroups(resource.id);
+            allInstanceGroups = results;
+          }
         }
         if (
           resource.type === 'workflow_job_template' &&
@@ -107,13 +123,15 @@ function ScheduleForm({
         zoneOptions: zones,
         zoneLinks: data.links,
         credentials: creds,
-        labels: allLabels || [],
+        labels: allLabels,
+        instanceGroups: allInstanceGroups,
       };
     }, [
       schedule,
       resource.id,
       resource.type,
       launchConfig.ask_labels_on_launch,
+      launchConfig.ask_instance_groups_on_launch,
       launchConfig.ask_credential_on_launch,
     ]),
     {
@@ -122,6 +140,7 @@ function ScheduleForm({
       credentials: [],
       isLoading: true,
       labels: [],
+      instanceGroups: [],
     }
   );
 
@@ -496,6 +515,7 @@ function ScheduleForm({
                     }}
                     resourceDefaultCredentials={resourceDefaultCredentials}
                     labels={labels}
+                    instanceGroups={instanceGroups}
                   />
                 )}
                 <FormSubmitError error={submitError} />
