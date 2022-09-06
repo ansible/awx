@@ -64,7 +64,7 @@ function Instance({ setBreadcrumb }) {
         <Switch>
           <Redirect from="/instances/:id" to="/instances/:id/details" exact />
           <Route path="/instances/:id/details" key="details">
-            <InstanceDetail setBreadcrumb={setBreadcrumb} />
+            <InstanceDetail isK8s={isK8s} setBreadcrumb={setBreadcrumb} />
           </Route>
           {isK8s && (
             <Route path="/instances/:id/peers" key="peers">
