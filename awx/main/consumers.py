@@ -80,7 +80,7 @@ class WebsocketSecretAuthHelper:
         WebsocketSecretAuthHelper.verify_secret(secret)
 
 
-class BroadcastConsumer(AsyncJsonWebsocketConsumer):
+class RelayConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         try:
             WebsocketSecretAuthHelper.is_authorized(self.scope)
@@ -99,6 +99,16 @@ class BroadcastConsumer(AsyncJsonWebsocketConsumer):
 
     async def internal_message(self, event):
         await self.send(event['text'])
+
+    async def receive_json(self, data):
+        (group, message) = unwrap_broadcast_msg(data)
+        await self.channel_layer.group_send(group, message)
+
+    async def consumer_subscribe(self, event):
+        await self.send_json(event)
+
+    async def consumer_unsubscribe(self, event):
+        await self.send_json(event)
 
 
 class EventConsumer(AsyncJsonWebsocketConsumer):
@@ -127,6 +137,11 @@ class EventConsumer(AsyncJsonWebsocketConsumer):
                 group_name,
                 self.channel_name,
             )
+
+        await self.channel_layer.group_send(
+            settings.BROADCAST_WEBSOCKET_GROUP_NAME,
+            {"type": "consumer.unsubscribe", "groups": list(current_groups), "origin_channel": self.channel_name},
+        )
 
     @database_sync_to_async
     def user_can_see_object_id(self, user_access, oid):
@@ -176,9 +191,20 @@ class EventConsumer(AsyncJsonWebsocketConsumer):
                     self.channel_name,
                 )
 
+            if len(old_groups):
+                await self.channel_layer.group_send(
+                    settings.BROADCAST_WEBSOCKET_GROUP_NAME,
+                    {"type": "consumer.unsubscribe", "groups": list(old_groups), "origin_channel": self.channel_name},
+                )
+
             new_groups_exclusive = new_groups - current_groups
             for group_name in new_groups_exclusive:
                 await self.channel_layer.group_add(group_name, self.channel_name)
+
+                await self.channel_layer.group_send(
+                    settings.BROADCAST_WEBSOCKET_GROUP_NAME,
+                    {"type": "consumer.subscribe", "groups": list(new_groups), "origin_channel": self.channel_name},
+                )
             self.scope['session']['groups'] = new_groups
             await self.send_json({"groups_current": list(new_groups), "groups_left": list(old_groups), "groups_joined": list(new_groups_exclusive)})
 
@@ -200,9 +226,11 @@ def _dump_payload(payload):
         return None
 
 
-def emit_channel_notification(group, payload):
-    from awx.main.wsbroadcast import wrap_broadcast_msg  # noqa
+def unwrap_broadcast_msg(payload: dict):
+    return (payload['group'], payload['message'])
 
+
+def emit_channel_notification(group, payload):
     payload_dumped = _dump_payload(payload)
     if payload_dumped is None:
         return
@@ -213,15 +241,5 @@ def emit_channel_notification(group, payload):
         channel_layer.group_send(
             group,
             {"type": "internal.message", "text": payload_dumped},
-        )
-    )
-
-    run_sync(
-        channel_layer.group_send(
-            settings.BROADCAST_WEBSOCKET_GROUP_NAME,
-            {
-                "type": "internal.message",
-                "text": wrap_broadcast_msg(group, payload_dumped),
-            },
         )
     )
