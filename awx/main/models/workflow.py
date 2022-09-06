@@ -29,7 +29,7 @@ from awx.main.models import prevent_search, accepts_json, UnifiedJobTemplate, Un
 from awx.main.models.notifications import NotificationTemplate, JobNotificationMixin
 from awx.main.models.base import CreatedModifiedModel, VarsDictProperty
 from awx.main.models.rbac import ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
-from awx.main.fields import ImplicitRoleField, AskForField, JSONBlob, OrderedManyToManyField
+from awx.main.fields import ImplicitRoleField, JSONBlob, OrderedManyToManyField
 from awx.main.models.mixins import (
     ResourceMixin,
     SurveyJobTemplateMixin,
