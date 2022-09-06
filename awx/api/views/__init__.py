@@ -209,6 +209,26 @@ def api_exception_handler(exc, context):
     return exception_handler(exc, context)
 
 
+class LabelList(DeleteLastUnattachLabelMixin, SubListCreateAttachDetachAPIView):
+    def post(self, request, *args, **kwargs):
+        # If a label already exists in the database, attach it instead of erroring out
+        # that it already exists
+        if not getattr(self, 'label_filter', None):
+            return Response(dict(msg=_('Class {} missing label filter.'.format(self.__class__.__name__))), status=status.HTTP_400_BAD_REQUEST)
+        if 'id' not in request.data and 'name' in request.data and 'organization' in request.data:
+            existing = models.Label.objects.filter(name=request.data['name'], organization_id=request.data['organization'])
+            if existing.exists():
+                existing = existing[0]
+                request.data['id'] = existing.id
+                del request.data['name']
+                del request.data['organization']
+        if models.Label.objects.filter(**{self.label_filter: self.kwargs['pk']}).count() > 100:
+            return Response(
+                dict(msg=_('Maximum number of labels for {} reached.'.format(self.parent_model._meta.verbose_name_raw))), status=status.HTTP_400_BAD_REQUEST
+            )
+        return super().post(request, *args, **kwargs)
+
+
 class DashboardView(APIView):
 
     deprecated = True
@@ -618,28 +638,13 @@ class ScheduleCredentialsList(LaunchConfigCredentialsBase):
     parent_model = models.Schedule
 
 
-class ScheduleLabelsList(DeleteLastUnattachLabelMixin, SubListCreateAttachDetachAPIView):
+class ScheduleLabelsList(LabelList):
 
     model = models.Label
     serializer_class = serializers.LabelSerializer
     parent_model = models.Schedule
     relationship = 'labels'
-
-    def post(self, request, *args, **kwargs):
-        # If a label already exists in the database, attach it instead of erroring out
-        # that it already exists
-        if 'id' not in request.data and 'name' in request.data and 'organization' in request.data:
-            existing = models.Label.objects.filter(name=request.data['name'], organization_id=request.data['organization'])
-            if existing.exists():
-                existing = existing[0]
-                request.data['id'] = existing.id
-                del request.data['name']
-                del request.data['organization']
-        if models.Label.objects.filter(schedule_labels=self.kwargs['pk']).count() > 100:
-            return Response(
-                dict(msg=_('Maximum number of labels for {} reached.'.format(self.parent_model._meta.verbose_name_raw))), status=status.HTTP_400_BAD_REQUEST
-            )
-        return super(ScheduleLabelsList, self).post(request, *args, **kwargs)
+    label_filter = 'schedule_labels'
 
 
 class ScheduleInstanceGroupList(SubListAttachDetachAPIView):
@@ -2752,28 +2757,13 @@ class JobTemplateCredentialsList(SubListCreateAttachDetachAPIView):
         return super(JobTemplateCredentialsList, self).is_valid_relation(parent, sub, created)
 
 
-class JobTemplateLabelList(DeleteLastUnattachLabelMixin, SubListCreateAttachDetachAPIView):
+class JobTemplateLabelList(LabelList):
 
     model = models.Label
     serializer_class = serializers.LabelSerializer
     parent_model = models.JobTemplate
     relationship = 'labels'
-
-    def post(self, request, *args, **kwargs):
-        # If a label already exists in the database, attach it instead of erroring out
-        # that it already exists
-        if 'id' not in request.data and 'name' in request.data and 'organization' in request.data:
-            existing = models.Label.objects.filter(name=request.data['name'], organization_id=request.data['organization'])
-            if existing.exists():
-                existing = existing[0]
-                request.data['id'] = existing.id
-                del request.data['name']
-                del request.data['organization']
-        if models.Label.objects.filter(unifiedjobtemplate_labels=self.kwargs['pk']).count() > 100:
-            return Response(
-                dict(msg=_('Maximum number of labels for {} reached.'.format(self.parent_model._meta.verbose_name_raw))), status=status.HTTP_400_BAD_REQUEST
-            )
-        return super(JobTemplateLabelList, self).post(request, *args, **kwargs)
+    label_filter = 'unifiedjobtemplate_labels'
 
 
 class JobTemplateCallback(GenericAPIView):
@@ -2999,28 +2989,13 @@ class WorkflowJobNodeCredentialsList(SubListAPIView):
     relationship = 'credentials'
 
 
-class WorkflowJobNodeLabelsList(DeleteLastUnattachLabelMixin, SubListCreateAttachDetachAPIView):
+class WorkflowJobNodeLabelsList(LabelList):
 
     model = models.Label
     serializer_class = serializers.LabelSerializer
     parent_model = models.WorkflowJobNode
     relationship = 'labels'
-
-    def post(self, request, *args, **kwargs):
-        # If a label already exists in the database, attach it instead of erroring out
-        # that it already exists
-        if 'id' not in request.data and 'name' in request.data and 'organization' in request.data:
-            existing = models.Label.objects.filter(name=request.data['name'], organization_id=request.data['organization'])
-            if existing.exists():
-                existing = existing[0]
-                request.data['id'] = existing.id
-                del request.data['name']
-                del request.data['organization']
-        if models.Label.objects.filter(workflowjobnode_labels=self.kwargs['pk']).count() > 100:
-            return Response(
-                dict(msg=_('Maximum number of labels for {} reached.'.format(self.parent_model._meta.verbose_name_raw))), status=status.HTTP_400_BAD_REQUEST
-            )
-        return super(WorkflowJobNodeLabelsList, self).post(request, *args, **kwargs)
+    label_filter = 'workflowjobnode_labels'
 
 
 class WorkflowJobNodeInstanceGroupsList(SubListAttachDetachAPIView):
@@ -3049,28 +3024,13 @@ class WorkflowJobTemplateNodeCredentialsList(LaunchConfigCredentialsBase):
     parent_model = models.WorkflowJobTemplateNode
 
 
-class WorkflowJobTemplateNodeLabelsList(DeleteLastUnattachLabelMixin, SubListCreateAttachDetachAPIView):
+class WorkflowJobTemplateNodeLabelsList(LabelList):
 
     model = models.Label
     serializer_class = serializers.LabelSerializer
     parent_model = models.WorkflowJobTemplateNode
     relationship = 'labels'
-
-    def post(self, request, *args, **kwargs):
-        # If a label already exists in the database, attach it instead of erroring out
-        # that it already exists
-        if 'id' not in request.data and 'name' in request.data and 'organization' in request.data:
-            existing = models.Label.objects.filter(name=request.data['name'], organization_id=request.data['organization'])
-            if existing.exists():
-                existing = existing[0]
-                request.data['id'] = existing.id
-                del request.data['name']
-                del request.data['organization']
-        if models.Label.objects.filter(workflowjobtemplatenode_labels=self.kwargs['pk']).count() > 100:
-            return Response(
-                dict(msg=_('Maximum number of labels for {} reached.'.format(self.parent_model._meta.verbose_name_raw))), status=status.HTTP_400_BAD_REQUEST
-            )
-        return super(WorkflowJobTemplateNodeLabelsList, self).post(request, *args, **kwargs)
+    label_filter = 'workflowjobtemplatenode_labels'
 
 
 class WorkflowJobTemplateNodeInstanceGroupsList(SubListAttachDetachAPIView):
