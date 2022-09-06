@@ -1,6 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import {
+  OrganizationsAPI,
   WorkflowApprovalTemplatesAPI,
   WorkflowJobTemplateNodesAPI,
   WorkflowJobTemplatesAPI,
@@ -104,6 +105,12 @@ const mockWorkflowNodes = [
 describe('Visualizer', () => {
   let wrapper;
   beforeEach(() => {
+    OrganizationsAPI.read.mockResolvedValue({
+      data: {
+        count: 1,
+        results: [{ id: 1, name: 'Default' }],
+      },
+    });
     WorkflowJobTemplatesAPI.readNodes.mockResolvedValue({
       data: {
         count: mockWorkflowNodes.length,

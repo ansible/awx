@@ -91,11 +91,8 @@ function LabelSelect({ value, placeholder, onChange, onError, createText }) {
         <Chip
           isReadOnly={currentChip.isReadOnly}
           key={currentChip.name}
-          onClick={(e, item) => {
-            if (typeof item === 'string') {
-              item = { id: item, name: item };
-            }
-            onSelect(e, item);
+          onClick={(e) => {
+            onSelect(e, currentChip);
           }}
         >
           {currentChip.name}

@@ -39,6 +39,7 @@ function NodeModalForm({
   isLaunchLoading,
   resourceDefaultCredentials,
   labels,
+  instanceGroups,
 }) {
   const history = useHistory();
   const dispatch = useContext(WorkflowDispatchContext);
@@ -68,7 +69,8 @@ function NodeModalForm({
     values.nodeResource,
     askLinkType,
     resourceDefaultCredentials,
-    labels
+    labels,
+    instanceGroups
   );
 
   const handleSaveNode = () => {
@@ -243,7 +245,13 @@ const NodeModalInner = ({ title, ...rest }) => {
   const {
     request: readLaunchConfigs,
     error: launchConfigError,
-    result: { launchConfig, surveyConfig, resourceDefaultCredentials, labels },
+    result: {
+      launchConfig,
+      surveyConfig,
+      resourceDefaultCredentials,
+      labels,
+      instanceGroups,
+    },
     isLoading,
   } = useRequest(
     useCallback(async () => {
@@ -263,6 +271,7 @@ const NodeModalInner = ({ title, ...rest }) => {
           surveyConfig: {},
           resourceDefaultCredentials: [],
           labels: [],
+          instanceGroups: [],
         };
       }
 
@@ -309,11 +318,27 @@ const NodeModalInner = ({ title, ...rest }) => {
         defaultLabels = results;
       }
 
+      let defaultInstanceGroups = [];
+
+      if (launch.ask_instance_groups_on_launch) {
+        const {
+          data: { results },
+        } = await await JobTemplatesAPI.readInstanceGroups(
+          values?.nodeResource?.id,
+          {
+            page_size: 200,
+          }
+        );
+
+        defaultInstanceGroups = results;
+      }
+
       return {
         launchConfig: launch,
         surveyConfig: survey,
         resourceDefaultCredentials: defaultCredentials,
         labels: defaultLabels,
+        instanceGroups: defaultInstanceGroups,
       };
 
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -367,11 +392,12 @@ const NodeModalInner = ({ title, ...rest }) => {
       isLaunchLoading={isLoading}
       title={wizardTitle}
       labels={labels}
+      instanceGroups={instanceGroups}
     />
   );
 };
 
-const NodeModal = ({ onSave, askLinkType, title, labels }) => {
+const NodeModal = ({ onSave, askLinkType, title }) => {
   const { nodeToEdit } = useContext(WorkflowStateContext);
   const onSaveForm = (values, config) => {
     onSave(values, config);
@@ -398,7 +424,6 @@ const NodeModal = ({ onSave, askLinkType, title, labels }) => {
             onSave={onSaveForm}
             title={title}
             askLinkType={askLinkType}
-            labels={labels}
           />
         </Form>
       )}
