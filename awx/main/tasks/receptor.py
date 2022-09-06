@@ -12,6 +12,7 @@ import yaml
 
 # Django
 from django.conf import settings
+from django.db import connections
 
 # Runner
 import ansible_runner
@@ -25,6 +26,7 @@ from awx.main.utils.common import (
     cleanup_new_process,
 )
 from awx.main.constants import MAX_ISOLATED_PATH_COLON_DELIMITER
+from awx.main.tasks.signals import signal_state, signal_callback, SignalExit
 
 # Receptorctl
 from receptorctl.socket_interface import ReceptorControl
@@ -335,24 +337,32 @@ class AWXReceptorJob:
             shutil.rmtree(artifact_dir)
 
         resultsock, resultfile = receptor_ctl.get_work_results(self.unit_id, return_socket=True, return_sockfile=True)
-        # Both "processor" and "cancel_watcher" are spawned in separate threads.
-        # We wait for the first one to return. If cancel_watcher returns first,
-        # we yank the socket out from underneath the processor, which will cause it
-        # to exit. A reference to the processor_future is passed into the cancel_watcher_future,
-        # Which exits if the job has finished normally. The context manager ensures we do not
-        # leave any threads laying around.
-        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-            processor_future = executor.submit(self.processor, resultfile)
-            cancel_watcher_future = executor.submit(self.cancel_watcher, processor_future)
-            futures = [processor_future, cancel_watcher_future]
-            first_future = concurrent.futures.wait(futures, return_when=concurrent.futures.FIRST_COMPLETED)
 
-            res = list(first_future.done)[0].result()
-            if res.status == 'canceled':
+        connections.close_all()
+
+        # "processor" and the main thread will be separate threads.
+        # If a cancel happens, the main thread will encounter an exception, in which case
+        # we yank the socket out from underneath the processor, which will cause it to exit.
+        # The ThreadPoolExecutor context manager ensures we do not leave any threads laying around.
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+            processor_future = executor.submit(self.processor, resultfile)
+
+            try:
+                signal_state.raise_exception = True
+                # address race condition where SIGTERM was issued after this dispatcher task started
+                if signal_callback():
+                    raise SignalExit()
+                res = processor_future.result()
+            except SignalExit:
                 receptor_ctl.simple_command(f"work cancel {self.unit_id}")
                 resultsock.shutdown(socket.SHUT_RDWR)
                 resultfile.close()
-            elif res.status == 'error':
+                result = namedtuple('result', ['status', 'rc'])
+                res = result('canceled', 1)
+            finally:
+                signal_state.raise_exception = False
+
+            if res.status == 'error':
                 # If ansible-runner ran, but an error occured at runtime, the traceback information
                 # is saved via the status_handler passed in to the processor.
                 if 'result_traceback' in self.task.runner_callback.extra_update_fields:
@@ -445,18 +455,6 @@ class AWXReceptorJob:
         if self.task.instance.execution_node == settings.CLUSTER_HOST_ID or self.task.instance.execution_node == self.task.instance.controller_node:
             return 'local'
         return 'ansible-runner'
-
-    @cleanup_new_process
-    def cancel_watcher(self, processor_future):
-        while True:
-            if processor_future.done():
-                return processor_future.result()
-
-            if self.task.runner_callback.cancel_callback():
-                result = namedtuple('result', ['status', 'rc'])
-                return result('canceled', 1)
-
-            time.sleep(1)
 
     @property
     def pod_definition(self):

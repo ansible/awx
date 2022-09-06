@@ -487,6 +487,7 @@ class BaseTask(object):
             self.instance.log_lifecycle("preparing_playbook")
             if self.instance.cancel_flag or signal_callback():
                 self.instance = self.update_model(self.instance.pk, status='canceled')
+
             if self.instance.status != 'running':
                 # Stop the task chain and prevent starting the job if it has
                 # already been canceled.
@@ -589,7 +590,7 @@ class BaseTask(object):
                     event_handler=self.runner_callback.event_handler,
                     finished_callback=self.runner_callback.finished_callback,
                     status_handler=self.runner_callback.status_handler,
-                    cancel_callback=self.runner_callback.cancel_callback,
+                    cancel_callback=signal_callback,
                     **params,
                 )
             else:
@@ -1626,7 +1627,7 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
 
         handler = SpecialInventoryHandler(
             self.runner_callback.event_handler,
-            self.runner_callback.cancel_callback,
+            signal_callback,
             verbosity=inventory_update.verbosity,
             job_timeout=self.get_instance_timeout(self.instance),
             start_time=inventory_update.started,

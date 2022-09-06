@@ -1396,23 +1396,6 @@ class UnifiedJob(
         return True
 
     @property
-    def actually_running(self):
-        # returns True if the job is running in the appropriate dispatcher process
-        running = False
-        if all([self.status == 'running', self.celery_task_id, self.execution_node]):
-            # If the job is marked as running, but the dispatcher
-            # doesn't know about it (or the dispatcher doesn't reply),
-            # then cancel the job
-            timeout = 5
-            try:
-                running = self.celery_task_id in ControlDispatcher('dispatcher', self.controller_node or self.execution_node).running(timeout=timeout)
-            except socket.timeout:
-                logger.error('could not reach dispatcher on {} within {}s'.format(self.execution_node, timeout))
-            except Exception:
-                logger.exception("error encountered when checking task status")
-        return running
-
-    @property
     def can_cancel(self):
         return bool(self.status in CAN_CANCEL)
 
@@ -1421,27 +1404,61 @@ class UnifiedJob(
             return 'Previous Task Canceled: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (self.model_to_str(), self.name, self.id)
         return None
 
+    def fallback_cancel(self):
+        if not self.celery_task_id:
+            self.refresh_from_db(fields=['celery_task_id'])
+        self.cancel_dispatcher_process()
+
+    def cancel_dispatcher_process(self):
+        """Returns True if dispatcher running this job acknowledged request and sent SIGTERM"""
+        if not self.celery_task_id:
+            return
+        canceled = []
+        try:
+            # Use control and reply mechanism to cancel and obtain confirmation
+            timeout = 5
+            canceled = ControlDispatcher('dispatcher', self.controller_node).cancel([self.celery_task_id])
+        except socket.timeout:
+            logger.error(f'could not reach dispatcher on {self.controller_node} within {timeout}s')
+        except Exception:
+            logger.exception("error encountered when checking task status")
+        return bool(self.celery_task_id in canceled)  # True or False, whether confirmation was obtained
+
     def cancel(self, job_explanation=None, is_chain=False):
         if self.can_cancel:
             if not is_chain:
                 for x in self.get_jobs_fail_chain():
                     x.cancel(job_explanation=self._build_job_explanation(), is_chain=True)
 
+            cancel_fields = []
             if not self.cancel_flag:
                 self.cancel_flag = True
                 self.start_args = ''  # blank field to remove encrypted passwords
-                cancel_fields = ['cancel_flag', 'start_args']
-                if self.status in ('pending', 'waiting', 'new'):
-                    self.status = 'canceled'
-                    cancel_fields.append('status')
-                if self.status == 'running' and not self.actually_running:
-                    self.status = 'canceled'
-                    cancel_fields.append('status')
+                cancel_fields.extend(['cancel_flag', 'start_args'])
+                connection.on_commit(lambda: self.websocket_emit_status("canceled"))
+
                 if job_explanation is not None:
                     self.job_explanation = job_explanation
                     cancel_fields.append('job_explanation')
-                self.save(update_fields=cancel_fields)
-                self.websocket_emit_status("canceled")
+
+            controller_notified = False
+            if self.celery_task_id:
+                controller_notified = self.cancel_dispatcher_process()
+
+            else:
+                # Avoid race condition where we have stale model from pending state but job has already started,
+                # its checking signal but not cancel_flag, so re-send signal after this database commit
+                connection.on_commit(self.fallback_cancel)
+
+            # If a SIGTERM signal was sent to the control process, and acked by the dispatcher
+            # then we want to let its own cleanup change status, otherwise change status now
+            if not controller_notified:
+                if self.status != 'canceled':
+                    self.status = 'canceled'
+                    cancel_fields.append('status')
+
+            self.save(update_fields=cancel_fields)
+
         return self.cancel_flag
 
     @property
