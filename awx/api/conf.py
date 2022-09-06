@@ -101,7 +101,7 @@ register(
     field_class=fields.BooleanField,
     default=False,
     label=_('Allow anonymous users to poll metrics'),
-    help_text=_('If false, only superusers and system auditors are allowed to poll metrics.'),
+    help_text=_('If true, anonymous users are allowed to poll metrics.'),
     category=_('Authentication'),
     category_slug='authentication',
 )
