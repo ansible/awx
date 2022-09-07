@@ -336,6 +336,7 @@ class CredentialType(CommonModelNameNotUnique):
         ('external', _('External')),
         ('kubernetes', _('Kubernetes')),
         ('galaxy', _('Galaxy/Automation Hub')),
+        ('cryptography', _('Cryptography')),
     )
 
     kind = models.CharField(max_length=32, choices=KIND_CHOICES)
