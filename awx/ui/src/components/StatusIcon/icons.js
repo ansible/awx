@@ -46,6 +46,7 @@ const icons = {
   installed: ClockIcon,
   provisioning: PlusCircleIcon,
   deprovisioning: MinusCircleIcon,
+  unavailable: ExclamationCircleIcon,
   'provision-fail': ExclamationCircleIcon,
   'deprovision-fail': ExclamationCircleIcon,
 };
