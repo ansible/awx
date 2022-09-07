@@ -27,6 +27,7 @@ const colors = {
   installed: blue,
   provisioning: gray,
   deprovisioning: gray,
+  unavailable: red,
   'provision-fail': red,
   'deprovision-fail': red,
 };

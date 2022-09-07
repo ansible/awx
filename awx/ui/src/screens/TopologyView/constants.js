@@ -21,6 +21,7 @@ export const NODE_STATE_COLOR_KEY = {
   ready: '#3E8635',
   'provision-fail': '#C9190B',
   'deprovision-fail': '#C9190B',
+  unavailable: '#C9190B',
   installed: '#0066CC',
   provisioning: '#666',
   deprovisioning: '#666',
