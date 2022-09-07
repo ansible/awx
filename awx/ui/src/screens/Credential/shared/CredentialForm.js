@@ -234,7 +234,7 @@ function CredentialForm({
     name: credential.name || '',
     description: credential.description || '',
     organization: credential?.summary_fields?.organization || null,
-    credential_type: credentialTypes[initialTypeId]?.name || '',
+    credential_type: credentialTypes[initialTypeId]?.id || '',
     inputs: { ...credential?.inputs },
     passwordPrompts: {},
     isOrgLookupDisabled: isOrgLookupDisabled || false,
