@@ -243,20 +243,21 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
     def mark_offline(self, update_last_seen=False, perform_save=True, errors=''):
         if self.node_state not in (Instance.States.READY, Instance.States.UNAVAILABLE, Instance.States.INSTALLED):
-            return
+            return []
         if self.node_state == Instance.States.UNAVAILABLE and self.errors == errors and (not update_last_seen):
-            return
+            return []
         self.node_state = Instance.States.UNAVAILABLE
         self.cpu_capacity = self.mem_capacity = self.capacity = 0
         self.errors = errors
         if update_last_seen:
             self.last_seen = now()
 
+        update_fields = ['node_state', 'capacity', 'cpu_capacity', 'mem_capacity', 'errors']
+        if update_last_seen:
+            update_fields += ['last_seen']
         if perform_save:
-            update_fields = ['node_state', 'capacity', 'cpu_capacity', 'mem_capacity', 'errors']
-            if update_last_seen:
-                update_fields += ['last_seen']
             self.save(update_fields=update_fields)
+        return update_fields
 
     def set_capacity_value(self):
         """Sets capacity according to capacity adjustment rule (no save)"""
@@ -314,7 +315,8 @@ class Instance(HasPolicyEditsMixin, BaseModel):
                 self.node_state = Instance.States.READY
                 update_fields.append('node_state')
         else:
-            self.mark_offline(perform_save=False, errors=errors)
+            fields_to_update = self.mark_offline(perform_save=False, errors=errors)
+            update_fields.extend(fields_to_update)
         update_fields.extend(['cpu_capacity', 'mem_capacity', 'capacity'])
 
         # disabling activity stream will avoid extra queries, which is important for heatbeat actions
