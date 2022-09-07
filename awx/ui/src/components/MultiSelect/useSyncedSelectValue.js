@@ -23,7 +23,15 @@ export default function useSyncedSelectValue(value, onChange) {
         if (!match) {
           newOptions.push(item);
         }
-        return match || item;
+
+        if (match) {
+          if (item.isReadOnly) {
+            match.isReadOnly = true;
+          }
+          return match;
+        }
+
+        return item;
       });
       setSelections(syncedValue);
     }
