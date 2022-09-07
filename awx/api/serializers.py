@@ -4201,7 +4201,7 @@ class JobLaunchSerializer(BaseSerializer):
             if latest_update is not None and latest_update.failed:
                 failed_validation_tasks = latest_update.project_update_events.filter(
                     event='runner_on_failed',
-                    play="Validate project content integrity",
+                    play="Perform project signature/checksum verification",
                 )
                 if failed_validation_tasks:
                     errors['playbook'] = _("Last project update failed due to signature validation failure.")
