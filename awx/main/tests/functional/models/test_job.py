@@ -78,4 +78,4 @@ class TestSlicingModels:
         # The inventory slice count will be the min of the number of nodes (4) or the job slice (2)
         assert job_template.get_effective_slice_ct({'inventory': inventory2}) == 2
         # Now we are going to pass in an override (like the prompt would) and as long as that is < host count we expect that back
-        assert job_template.get_effective_slice_ct({'inventory': inventory2, 'slice_count': 3}) == 3
+        assert job_template.get_effective_slice_ct({'inventory': inventory2, 'job_slice_count': 3}) == 3
