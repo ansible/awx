@@ -1,0 +1,145 @@
+---
+apiVersion: 1
+groups:
+  - folder: awx
+    interval: 60s
+    name: awx_rules
+    orgId: 1
+    rules:
+      - condition: A
+        dashboardUid: awx
+        data:
+          - datasourceUid: PBFA97CFB590B2093
+            model:
+              editorMode: code
+              expr: irate(callback_receiver_events_insert_db{node='awx_1'}[1m])
+              hide: false
+              intervalMs: 1000
+              legendFormat: __auto
+              maxDataPoints: 43200
+              range: true
+              refId: events_insertion_rate_per_second
+            queryType: ""
+            refId: events_insertion_rate_per_second
+            relativeTimeRange:
+              from: 300
+              to: 0
+          - datasourceUid: -100
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 3
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - event_insertion_rate
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: -100
+              expression: events_insertion_rate_per_second
+              hide: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+              reducer: mean
+              refId: mean_event_insertion_rate
+              type: reduce
+            queryType: ""
+            refId: mean_event_insertion_rate
+            relativeTimeRange:
+              from: 0
+              to: 0
+          - datasourceUid: PBFA97CFB590B2093
+            model:
+              datasource:
+                type: prometheus
+                uid: PBFA97CFB590B2093
+              editorMode: code
+              expr: callback_receiver_events_queue_size_redis{node='awx_1'}
+              hide: false
+              intervalMs: 1000
+              legendFormat: __auto
+              maxDataPoints: 43200
+              range: true
+              refId: redis_queue_size
+            queryType: ""
+            refId: redis_queue_size
+            relativeTimeRange:
+              from: 300
+              to: 0
+          - datasourceUid: -100
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 3
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - event_insertion_rate
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: -100
+              expression: redis_queue_size
+              hide: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+              reducer: last
+              refId: mean_redis_queue_size
+              type: reduce
+            queryType: ""
+            refId: mean_redis_queue_size
+            relativeTimeRange:
+              from: 0
+              to: 0
+          - datasourceUid: -100
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 0
+                      - 0
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - mean_redis_queue_size
+                  reducer:
+                    params: []
+                    type: avg
+                  type: query
+              datasource:
+                name: Expression
+                type: __expr__
+                uid: __expr__
+              expression: '(
+                ${mean_redis_queue_size} >
+                ($mean_event_insertion_rate\ * 120))'
+              hide: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: redis_queue_growing_faster_than_insertion_rate
+              type: math
+            queryType: ""
+            refId: redis_queue_growing_faster_than_insertion_rate
+            relativeTimeRange:
+              from: 0
+              to: 0
+        for: 60s
+        noDataState: OK
+        panelId: 1
+        title: redis_queue_too_large_to_clear_in_2_min
+        uid: redis_queue_too_large_to_clear_in_2_min
