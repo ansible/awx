@@ -75,7 +75,12 @@ function LaunchButton({ resource, children }) {
           data: { results },
         } = await readLabels;
 
-        setLabels(results);
+        const allLabels = results.map((label) => ({
+          ...label,
+          isReadOnly: true,
+        }));
+
+        setLabels(allLabels);
       }
 
       if (canLaunchWithoutPrompt(launch)) {
