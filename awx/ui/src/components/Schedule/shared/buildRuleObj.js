@@ -36,10 +36,18 @@ function pad(num) {
   return num < 10 ? `0${num}` : num;
 }
 
-export default function buildRuleObj(values) {
+export default function buildRuleObj(values, includeStart) {
   const ruleObj = {
     interval: values.interval,
   };
+
+  if (includeStart) {
+    ruleObj.dtstart = buildDateTime(
+      values.startDate,
+      values.startTime,
+      values.timezone
+    );
+  }
 
   switch (values.frequency) {
     case 'none':
@@ -91,16 +99,11 @@ export default function buildRuleObj(values) {
         ruleObj.count = values.occurrences;
         break;
       case 'onDate': {
-        const [endHour, endMinute] = parseTime(values.endTime);
-        const localEndDate = DateTime.fromISO(`${values.endDate}T000000`, {
-          zone: values.timezone,
-        });
-        const localEndTime = localEndDate.set({
-          hour: endHour,
-          minute: endMinute,
-          second: 0,
-        });
-        ruleObj.until = localEndTime.toJSDate();
+        ruleObj.until = buildDateTime(
+          values.endDate,
+          values.endTime,
+          values.timezone
+        );
         break;
       }
       default:
@@ -109,4 +112,17 @@ export default function buildRuleObj(values) {
   }
 
   return ruleObj;
+}
+
+function buildDateTime(dateString, timeString, timezone) {
+  const localDate = DateTime.fromISO(`${dateString}T000000`, {
+    zone: timezone,
+  });
+  const [hour, minute] = parseTime(timeString);
+  const localTime = localDate.set({
+    hour,
+    minute,
+    second: 0,
+  });
+  return localTime.toJSDate();
 }

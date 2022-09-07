@@ -4,7 +4,7 @@ import buildRuleObj, { buildDtStartObj } from './buildRuleObj';
 window.RRuleSet = RRuleSet;
 
 const frequencies = ['minute', 'hour', 'day', 'week', 'month', 'year'];
-export default function buildRuleSet(values) {
+export default function buildRuleSet(values, includeStart) {
   const set = new RRuleSet();
 
   const startRule = buildDtStartObj({
@@ -15,13 +15,16 @@ export default function buildRuleSet(values) {
   set.rrule(startRule);
 
   if (values.frequency.length === 0) {
-    const rule = buildRuleObj({
-      startDate: values.startDate,
-      startTime: values.startTime,
-      timezone: values.timezone,
-      frequency: 'none',
-      interval: 1,
-    });
+    const rule = buildRuleObj(
+      {
+        startDate: values.startDate,
+        startTime: values.startTime,
+        timezone: values.timezone,
+        frequency: 'none',
+        interval: 1,
+      },
+      includeStart
+    );
     set.rrule(new RRule(rule));
   }
 
@@ -29,13 +32,16 @@ export default function buildRuleSet(values) {
     if (!values.frequency.includes(frequency)) {
       return;
     }
-    const rule = buildRuleObj({
-      startDate: values.startDate,
-      startTime: values.startTime,
-      timezone: values.timezone,
-      frequency,
-      ...values.frequencyOptions[frequency],
-    });
+    const rule = buildRuleObj(
+      {
+        startDate: values.startDate,
+        startTime: values.startTime,
+        timezone: values.timezone,
+        frequency,
+        ...values.frequencyOptions[frequency],
+      },
+      includeStart
+    );
     set.rrule(new RRule(rule));
   });
 
@@ -43,13 +49,16 @@ export default function buildRuleSet(values) {
     if (!values.exceptionFrequency?.includes(frequency)) {
       return;
     }
-    const rule = buildRuleObj({
-      startDate: values.startDate,
-      startTime: values.startTime,
-      timezone: values.timezone,
-      frequency,
-      ...values.exceptionOptions[frequency],
-    });
+    const rule = buildRuleObj(
+      {
+        startDate: values.startDate,
+        startTime: values.startTime,
+        timezone: values.timezone,
+        frequency,
+        ...values.exceptionOptions[frequency],
+      },
+      includeStart
+    );
     set.exrule(new RRule(rule));
   });
 
