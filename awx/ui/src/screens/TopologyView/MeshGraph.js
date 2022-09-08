@@ -41,6 +41,7 @@ const Loader = styled(ContentLoading)`
   background: white;
 `;
 function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
+  const [storedNodes, setStoredNodes] = useState(null);
   const [isNodeSelected, setIsNodeSelected] = useState(false);
   const [selectedNode, setSelectedNode] = useState(null);
   const [simulationProgress, setSimulationProgress] = useState(null);
@@ -74,6 +75,42 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
   useEffect(() => {
     fetchDetails();
   }, [selectedNode, fetchDetails]);
+
+  function updateNodeSVG(nodes) {
+    if (nodes) {
+      d3.selectAll('[class*="id-"]')
+        .data(nodes)
+        .attr('stroke-dasharray', (d) => (d.enabled ? `1 0` : `5`));
+    }
+  }
+
+  useEffect(() => {
+    function handleResize() {
+      d3.select('.simulation-loader').style('visibility', 'visible');
+      setSelectedNode(null);
+      setIsNodeSelected(false);
+      draw();
+    }
+    window.addEventListener('resize', debounce(handleResize, 500));
+    handleResize();
+    return () => window.removeEventListener('resize', handleResize);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // update mesh when user toggles enabled/disabled slider
+  useEffect(() => {
+    if (instance?.id) {
+      const updatedNodes = storedNodes.map((n) =>
+        n.id === instance.id ? { ...n, enabled: instance.enabled } : n
+      );
+      setStoredNodes(updatedNodes);
+    }
+  }, [instance]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (storedNodes) {
+      updateNodeSVG(storedNodes);
+    }
+  }, [storedNodes]);
 
   const draw = () => {
     let width;
@@ -124,6 +161,7 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
     }
 
     function ended({ nodes, links }) {
+      setStoredNodes(nodes);
       // Remove loading screen
       d3.select('.simulation-loader').style('visibility', 'hidden');
       setShowZoomControls(true);
@@ -205,7 +243,7 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
         .attr('class', (d) => d.node_type)
         .attr('class', (d) => `id-${d.id}`)
         .attr('fill', DEFAULT_NODE_COLOR)
-        .attr('stroke-dasharray', (d) => (d.enabled ? null : 3))
+        .attr('stroke-dasharray', (d) => (d.enabled ? `1 0` : `5`))
         .attr('stroke', DEFAULT_NODE_STROKE_COLOR);
 
       // node type labels
@@ -340,18 +378,6 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
       }
     }
   };
-
-  useEffect(() => {
-    function handleResize() {
-      d3.select('.simulation-loader').style('visibility', 'visible');
-      setSelectedNode(null);
-      setIsNodeSelected(false);
-      draw();
-    }
-    window.addEventListener('resize', debounce(handleResize, 500));
-    handleResize();
-    return () => window.removeEventListener('resize', handleResize);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div id="chart" style={{ position: 'relative', height: '100%' }}>
