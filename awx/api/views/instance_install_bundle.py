@@ -110,7 +110,7 @@ def generate_playbook():
         name: "{{ receptor_user }}"
         shell: /bin/bash
     - import_role:
-        name: ansible.receptor.receptor
+        name: ansible.receptor.setup
     - name: Install ansible-runner
       pip:
         name: ansible-runner
