@@ -1,3 +1,4 @@
+/* eslint i18next/no-literal-string: "off" */
 import React from 'react';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
@@ -70,14 +71,14 @@ function Legend() {
       <DescriptionList isHorizontal isFluid>
         <DescriptionListGroup>
           <DescriptionListTerm>
-            <Button isSmall>{t`C`}</Button>
+            <Button isSmall>C</Button>
           </DescriptionListTerm>
           <DescriptionListDescription>{t`Control node`}</DescriptionListDescription>
         </DescriptionListGroup>
         <DescriptionListGroup>
           <DescriptionListTerm>
             <Button variant="primary" isSmall>
-              {t`Ex`}
+              Ex
             </Button>
           </DescriptionListTerm>
           <DescriptionListDescription>
@@ -87,7 +88,7 @@ function Legend() {
         <DescriptionListGroup>
           <DescriptionListTerm>
             <Button variant="primary" isSmall>
-              {t`Hy`}
+              Hy
             </Button>
           </DescriptionListTerm>
           <DescriptionListDescription>{t`Hybrid node`}</DescriptionListDescription>
@@ -95,7 +96,7 @@ function Legend() {
         <DescriptionListGroup>
           <DescriptionListTerm>
             <Button variant="primary" isSmall>
-              {t`h`}
+              h
             </Button>
           </DescriptionListTerm>
           <DescriptionListDescription>{t`Hop node`}</DescriptionListDescription>
@@ -183,18 +184,18 @@ function Legend() {
                 cx="10"
                 cy="10"
                 fill="transparent"
-                stroke-width="1px"
+                strokeWidth="1px"
                 stroke="#ccc"
-              ></circle>
+              />
               <text
                 x="10"
                 y="10"
-                text-anchor="middle"
-                dominant-baseline="central"
+                textAnchor="middle"
+                dominantBaseline="central"
                 fill="black"
-                font-size="11px"
-                font-family="inherit"
-                font-weight="400"
+                fontSize="11px"
+                fontFamily="inherit"
+                fontWeight="400"
               >
                 C
               </text>
@@ -210,19 +211,19 @@ function Legend() {
                 cx="10"
                 cy="10"
                 fill="transparent"
-                stroke-dasharray="3"
-                stroke-width="1px"
+                strokeDasharray="5"
+                strokeWidth="1px"
                 stroke="#ccc"
-              ></circle>
+              />
               <text
                 x="10"
                 y="10"
-                text-anchor="middle"
-                dominant-baseline="central"
+                textAnchor="middle"
+                dominantBaseline="central"
                 fill="black"
-                font-size="11px"
-                font-family="inherit"
-                font-weight="400"
+                fontSize="11px"
+                fontFamily="inherit"
+                fontWeight="400"
               >
                 C
               </text>
