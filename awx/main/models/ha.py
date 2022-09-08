@@ -489,3 +489,14 @@ class WorkflowJobNodeBaseInstanceGroupMembership(models.Model):
         default=None,
         db_index=True,
     )
+
+
+class WorkflowJobInstanceGroupMembership(models.Model):
+
+    workflowjobnode = models.ForeignKey('WorkflowJob', on_delete=models.CASCADE)
+    instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
+    position = models.PositiveIntegerField(
+        null=True,
+        default=None,
+        db_index=True,
+    )
