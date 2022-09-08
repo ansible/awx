@@ -27,3 +27,4 @@ ratelimit==2.2.1
 typer==0.4.1
 boto3==1.22.5
 dnspython==2.2.1
+paramiko==2.11.0
