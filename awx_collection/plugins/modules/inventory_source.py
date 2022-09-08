@@ -97,6 +97,10 @@ options:
       description:
         - Refresh inventory data from its source each time a job is run.
       type: bool
+    update_on_project_update:
+      description:
+        - Automatically update the inventory source on project update.
+      type: bool
     update_cache_timeout:
       description:
         - Time in seconds to consider an inventory sync to be current.
@@ -176,6 +180,7 @@ def main():
         timeout=dict(type='int'),
         verbosity=dict(type='int', choices=[0, 1, 2]),
         update_on_launch=dict(type='bool'),
+        update_on_project_update=dict(type='bool'),
         update_cache_timeout=dict(type='int'),
         source_project=dict(),
         notification_templates_started=dict(type="list", elements='str'),
@@ -268,6 +273,7 @@ def main():
         'timeout',
         'verbosity',
         'update_on_launch',
+        'update_on_project_update',
         'update_cache_timeout',
         'enabled_var',
         'enabled_value',

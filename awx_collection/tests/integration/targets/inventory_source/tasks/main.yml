@@ -33,6 +33,7 @@
     credential: "{{ credential_result.id }}"
     overwrite: true
     update_on_launch: true
+    update_on_project_update: true
     source_vars:
       private: false
     source: openstack
