@@ -1191,6 +1191,14 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
         default=None,
         null=True,
     )
+    scm_revision = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        editable=False,
+        verbose_name=_('SCM Revision'),
+        help_text=_('The SCM Revision from the Project used for this inventory update.  Only applicable to inventories source from scm'),
+    )
 
     @property
     def is_container_group_task(self):

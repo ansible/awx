@@ -739,8 +739,7 @@ class SourceControlMixin(BaseTask):
                 sync_task = RunProjectUpdate(job_private_data_dir=private_data_dir)
                 sync_task.run(local_project_sync.id)
                 local_project_sync.refresh_from_db()
-                if isinstance(self.instance, Job):
-                    self.instance = self.update_model(self.instance.pk, scm_revision=local_project_sync.scm_revision)
+                self.instance = self.update_model(self.instance.pk, scm_revision=local_project_sync.scm_revision)
             except Exception:
                 local_project_sync.refresh_from_db()
                 if local_project_sync.status != 'canceled':
@@ -759,8 +758,7 @@ class SourceControlMixin(BaseTask):
         else:
             # Case where a local sync is not needed, meaning that local tree is
             # up-to-date with project, job is running project current version
-            if isinstance(self.instance, Job):
-                self.instance = self.update_model(self.instance.pk, scm_revision=project.scm_revision)
+            self.instance = self.update_model(self.instance.pk, scm_revision=project.scm_revision)
             # Project update does not copy the folder, so copy here
             RunProjectUpdate.make_local_copy(project, private_data_dir)
 
