@@ -214,4 +214,24 @@ class Migration(migrations.Migration):
                 to='main.InstanceGroup',
             ),
         ),
+        migrations.CreateModel(
+            name='WorkflowJobInstanceGroupMembership',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('position', models.PositiveIntegerField(db_index=True, default=None, null=True)),
+                ('instancegroup', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='main.instancegroup')),
+                ('workflowjobnode', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='main.workflowjob')),
+            ],
+        ),
+        migrations.AddField(
+            model_name='workflowjob',
+            name='instance_groups',
+            field=awx.main.fields.OrderedManyToManyField(
+                blank=True,
+                editable=False,
+                related_name='workflow_job_instance_groups',
+                through='main.WorkflowJobInstanceGroupMembership',
+                to='main.InstanceGroup',
+            ),
+        ),
     ]
