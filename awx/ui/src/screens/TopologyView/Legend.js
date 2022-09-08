@@ -183,18 +183,18 @@ function Legend() {
                 cx="10"
                 cy="10"
                 fill="transparent"
-                stroke-width="1px"
+                strokeWidth="1px"
                 stroke="#ccc"
               ></circle>
               <text
                 x="10"
                 y="10"
-                text-anchor="middle"
-                dominant-baseline="central"
+                textAnchor="middle"
+                dominantBaseline="central"
                 fill="black"
-                font-size="11px"
-                font-family="inherit"
-                font-weight="400"
+                fontSize="11px"
+                fontFamily="inherit"
+                fontWeight="400"
               >
                 C
               </text>
@@ -210,19 +210,19 @@ function Legend() {
                 cx="10"
                 cy="10"
                 fill="transparent"
-                stroke-dasharray="3"
-                stroke-width="1px"
+                strokeDasharray="5"
+                strokeWidth="1px"
                 stroke="#ccc"
               ></circle>
               <text
                 x="10"
                 y="10"
-                text-anchor="middle"
-                dominant-baseline="central"
+                textAnchor="middle"
+                dominantBaseline="central"
                 fill="black"
-                font-size="11px"
-                font-family="inherit"
-                font-weight="400"
+                fontSize="11px"
+                fontFamily="inherit"
+                fontWeight="400"
               >
                 C
               </text>
