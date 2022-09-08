@@ -225,39 +225,45 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     }
     let batchTimeout;
     let batchedEvents = [];
-    connectJobSocket(job, (data) => {
-      const addBatchedEvents = () => {
-        let min;
-        let max;
-        let newCssMap;
-        batchedEvents.forEach((event) => {
-          if (!min || event.counter < min) {
-            min = event.counter;
-          }
-          if (!max || event.counter > max) {
-            max = event.counter;
-          }
-          const { lineCssMap } = getLineTextHtml(event);
-          newCssMap = {
-            ...newCssMap,
-            ...lineCssMap,
-          };
-        });
-        setWsEvents((oldWsEvents) => {
-          const updated = oldWsEvents.concat(batchedEvents);
-          jobSocketCounter.current = updated.length;
-          return updated.sort((a, b) => a.counter - b.counter);
-        });
-        setCssMap((prevCssMap) => ({
-          ...prevCssMap,
-          ...newCssMap,
-        }));
-        if (max > jobSocketCounter.current) {
-          jobSocketCounter.current = max;
+    const addBatchedEvents = () => {
+      let min;
+      let max;
+      let newCssMap;
+      batchedEvents.forEach((event) => {
+        if (!min || event.counter < min) {
+          min = event.counter;
         }
-        batchedEvents = [];
-      };
+        if (!max || event.counter > max) {
+          max = event.counter;
+        }
+        const { lineCssMap } = getLineTextHtml(event);
+        newCssMap = {
+          ...newCssMap,
+          ...lineCssMap,
+        };
+      });
+      setWsEvents((oldWsEvents) => {
+        const newEvents = [];
+        batchedEvents.forEach((event) => {
+          if (!oldWsEvents.find((e) => e.id === event.id)) {
+            newEvents.push(event);
+          }
+        });
+        const updated = oldWsEvents.concat(newEvents);
+        jobSocketCounter.current = updated.length;
+        return updated.sort((a, b) => a.counter - b.counter);
+      });
+      setCssMap((prevCssMap) => ({
+        ...prevCssMap,
+        ...newCssMap,
+      }));
+      if (max > jobSocketCounter.current) {
+        jobSocketCounter.current = max;
+      }
+      batchedEvents = [];
+    };
 
+    connectJobSocket(job, (data) => {
       if (data.group_name === `${job.type}_events`) {
         batchedEvents.push(data);
         clearTimeout(batchTimeout);
