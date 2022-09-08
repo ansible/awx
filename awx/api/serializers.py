@@ -4197,6 +4197,15 @@ class JobLaunchSerializer(BaseSerializer):
         elif template.project.status in ('error', 'failed'):
             errors['playbook'] = _("Missing a revision to run due to failed project update.")
 
+            latest_update = template.project.project_updates.last()
+            if latest_update is not None and latest_update.failed:
+                failed_validation_tasks = latest_update.project_update_events.filter(
+                    event='runner_on_failed',
+                    play="Perform project signature/checksum verification",
+                )
+                if failed_validation_tasks:
+                    errors['playbook'] = _("Last project update failed due to signature validation failure.")
+
         # cannot run a playbook without an inventory
         if template.inventory and template.inventory.pending_deletion is True:
             errors['inventory'] = _("The inventory associated with this Job Template is being deleted.")
