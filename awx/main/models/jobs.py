@@ -943,6 +943,28 @@ class LaunchTimeConfigBase(BaseModel):
     # This is a solution to the nullable CharField problem, specific to prompting
     char_prompts = JSONBlob(default=dict, blank=True)
 
+    # Define fields that are not really fields, but alias to char_prompts lookups
+    limit = NullablePromptPseudoField('limit')
+    scm_branch = NullablePromptPseudoField('scm_branch')
+    job_tags = NullablePromptPseudoField('job_tags')
+    skip_tags = NullablePromptPseudoField('skip_tags')
+    diff_mode = NullablePromptPseudoField('diff_mode')
+    job_type = NullablePromptPseudoField('job_type')
+    verbosity = NullablePromptPseudoField('verbosity')
+    forks = NullablePromptPseudoField('forks')
+    job_slice_count = NullablePromptPseudoField('job_slice_count')
+    timeout = NullablePromptPseudoField('timeout')
+
+    # NOTE: additional fields are assumed to exist but must be defined in subclasses
+    # due to technical limitations
+    SUBCLASS_FIELDS = (
+        'instance_groups',  # needs a through model defined
+        'extra_vars',  # alternates between extra_vars and extra_data
+        'credentials',  # already a unified job and unified JT field
+        'labels',  # already a unified job and unified JT field
+        'execution_environment',  # already a unified job and unified JT field
+    )
+
     def prompts_dict(self, display=False):
         data = {}
         # Some types may have different prompts, but always subset of JT prompts
@@ -977,15 +999,6 @@ class LaunchTimeConfigBase(BaseModel):
         return data
 
 
-for field_name in JobTemplate.get_ask_mapping().keys():
-    if field_name == 'extra_vars':
-        continue
-    try:
-        LaunchTimeConfigBase._meta.get_field(field_name)
-    except FieldDoesNotExist:
-        setattr(LaunchTimeConfigBase, field_name, NullablePromptPseudoField(field_name))
-
-
 class LaunchTimeConfig(LaunchTimeConfigBase):
     """
     Common model for all objects that save details of a saved launch config
@@ -1004,12 +1017,9 @@ class LaunchTimeConfig(LaunchTimeConfigBase):
             blank=True,
         )
     )
-    # Credentials needed for non-unified job / unified JT models
+    # Fields needed for non-unified job / unified JT models, because they are defined on unified models
     credentials = models.ManyToManyField('Credential', related_name='%(class)ss')
-
-    # Labels needed for non-unified job / unified JT models
     labels = models.ManyToManyField('Label', related_name='%(class)s_labels')
-
     execution_environment = models.ForeignKey(
         'ExecutionEnvironment', null=True, blank=True, default=None, on_delete=polymorphic.SET_NULL, related_name='%(class)s_as_prompt'
     )
