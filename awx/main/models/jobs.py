@@ -976,11 +976,11 @@ class LaunchTimeConfigBase(BaseModel):
             if isinstance(field, models.ManyToManyField):
                 if not self.pk:
                     continue  # unsaved object can't have related many-to-many
-                prompt_val = set(getattr(self, prompt_name).all())
-                if len(prompt_val) > 0:
-                    # We used to return a set but that will cause issues with order for ordered fields (like instance_groups)
-                    # So instead we will return an array of items
-                    data[prompt_name] = [item for item in getattr(self, prompt_name).all()]
+                prompt_values = list(getattr(self, prompt_name).all())
+                # Many to manys can't distinguish between None and []
+                # Because of this, from a config perspective, we assume [] is none and we don't save [] into the config
+                if len(prompt_values) > 0:
+                    data[prompt_name] = prompt_values
             elif prompt_name == 'extra_vars':
                 if self.extra_vars:
                     if display:
