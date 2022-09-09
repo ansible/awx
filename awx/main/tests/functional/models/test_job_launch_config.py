@@ -1,7 +1,8 @@
 import pytest
 
 # AWX
-from awx.main.models import JobTemplate, JobLaunchConfig, ExecutionEnvironment
+from awx.main.models.jobs import JobTemplate, JobLaunchConfig, LaunchTimeConfigBase
+from awx.main.models.execution_environments import ExecutionEnvironment
 
 
 @pytest.fixture
@@ -75,3 +76,28 @@ class TestConfigReversibility:
         print(prompts)
         print(config.prompts_dict())
         assert config.prompts_dict() == prompts
+
+
+@pytest.mark.django_db
+class TestLaunchConfigModels:
+    def get_concrete_subclasses(self, cls):
+        r = []
+        for c in cls.__subclasses__():
+            if c._meta.abstract:
+                r.extend(self.get_concrete_subclasses(c))
+            else:
+                r.append(c)
+        return r
+
+    def test_non_job_config_complete(self):
+        """This performs model validation which replaces code that used run on import."""
+        for field_name in JobTemplate.get_ask_mapping().keys():
+            if field_name in LaunchTimeConfigBase.SUBCLASS_FIELDS:
+                assert not hasattr(LaunchTimeConfigBase, field_name)
+            else:
+                assert hasattr(LaunchTimeConfigBase, field_name)
+
+    def test_subclass_fields_complete(self):
+        for cls in self.get_concrete_subclasses(LaunchTimeConfigBase):
+            for field_name in LaunchTimeConfigBase.SUBCLASS_FIELDS:
+                assert hasattr(cls, field_name)

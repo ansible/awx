@@ -384,6 +384,10 @@ class WorkflowJobOptions(LaunchTimeConfigBase):
             )
         )
     )
+    # Workflow jobs are used for sliced jobs, and thus, must be a conduit for any JT prompts
+    instance_groups = OrderedManyToManyField(
+        'InstanceGroup', related_name='workflow_job_instance_groups', blank=True, editable=False, through='WorkflowJobInstanceGroupMembership'
+    )
     allow_simultaneous = models.BooleanField(default=False)
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
