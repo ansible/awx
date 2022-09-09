@@ -44,7 +44,7 @@ Have questions about this document or anything not covered here? Feel free to re
   - functions should adopt camelCase
   - constructors/classes should adopt PascalCase
   - constants to be exported should adopt UPPERCASE
-- For strings, we adopt the `sentence capitalization` since it is a [Patternfly style guide](https://www.patternfly.org/v4/design-guidelines/content/grammar-and-terminology#capitalization).
+- For strings, we adopt the `sentence capitalization` since it is a [Patternfly style guide](https://www.patternfly.org/v4/ux-writing/capitalization).
 
 ## Setting up your development environment
 
