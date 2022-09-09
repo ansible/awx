@@ -102,7 +102,7 @@ function Legend() {
         </DescriptionListGroup>
       </DescriptionList>
       <TextContent>
-        <Text component={TextVariants.small}>{t`Status types`}</Text>
+        <Text component={TextVariants.small}>{t`Node state types`}</Text>
       </TextContent>
       <DescriptionList isHorizontal isFluid>
         <DescriptionListGroup>
@@ -175,6 +175,66 @@ function Legend() {
           </DescriptionListTerm>
           <DescriptionListDescription>{t`Error`}</DescriptionListDescription>
         </DescriptionListGroup>
+        <DescriptionListGroup>
+          <DescriptionListTerm>
+            <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+              <circle
+                r="9"
+                cx="10"
+                cy="10"
+                fill="transparent"
+                strokeWidth="1px"
+                stroke="#ccc"
+              ></circle>
+              <text
+                x="10"
+                y="10"
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill="black"
+                fontSize="11px"
+                fontFamily="inherit"
+                fontWeight="400"
+              >
+                C
+              </text>
+            </svg>
+          </DescriptionListTerm>
+          <DescriptionListDescription>{t`Enabled`}</DescriptionListDescription>
+        </DescriptionListGroup>
+        <DescriptionListGroup>
+          <DescriptionListTerm>
+            <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+              <circle
+                r="9"
+                cx="10"
+                cy="10"
+                fill="transparent"
+                strokeDasharray="5"
+                strokeWidth="1px"
+                stroke="#ccc"
+              ></circle>
+              <text
+                x="10"
+                y="10"
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill="black"
+                fontSize="11px"
+                fontFamily="inherit"
+                fontWeight="400"
+              >
+                C
+              </text>
+            </svg>
+          </DescriptionListTerm>
+          <DescriptionListDescription>{t`Disabled`}</DescriptionListDescription>
+        </DescriptionListGroup>
+      </DescriptionList>
+      <TextContent>
+        <Text component={TextVariants.small}>{t`Link state types`}</Text>
+      </TextContent>
+      <DescriptionList isHorizontal isFluid>
         <DescriptionListGroup>
           <DescriptionListTerm>
             <svg width="20" height="15" xmlns="http://www.w3.org/2000/svg">
