@@ -29,6 +29,7 @@ const colors = {
   installed: 'blue',
   provisioning: 'gray',
   deprovisioning: 'gray',
+  unavailable: 'red',
   'provision-fail': 'red',
   'deprovision-fail': 'red',
 };
@@ -57,6 +58,7 @@ export default function StatusLabel({ status, tooltipContent = '', children }) {
     installed: t`Installed`,
     provisioning: t`Provisioning`,
     deprovisioning: t`Deprovisioning`,
+    unavailable: t`Unavailable`,
     'provision-fail': t`Provisioning fail`,
     'deprovision-fail': t`Deprovisioning fail`,
   };
@@ -106,6 +108,7 @@ StatusLabel.propTypes = {
     'installed',
     'provisioning',
     'deprovisioning',
+    'unavailable',
     'provision-fail',
     'deprovision-fail',
   ]).isRequired,
