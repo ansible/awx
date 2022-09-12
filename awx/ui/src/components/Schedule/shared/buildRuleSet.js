@@ -4,15 +4,17 @@ import buildRuleObj, { buildDtStartObj } from './buildRuleObj';
 window.RRuleSet = RRuleSet;
 
 const frequencies = ['minute', 'hour', 'day', 'week', 'month', 'year'];
-export default function buildRuleSet(values, includeStart) {
+export default function buildRuleSet(values, useUTCStart) {
   const set = new RRuleSet();
 
-  const startRule = buildDtStartObj({
-    startDate: values.startDate,
-    startTime: values.startTime,
-    timezone: values.timezone,
-  });
-  set.rrule(startRule);
+  if (!useUTCStart) {
+    const startRule = buildDtStartObj({
+      startDate: values.startDate,
+      startTime: values.startTime,
+      timezone: values.timezone,
+    });
+    set.rrule(startRule);
+  }
 
   if (values.frequency.length === 0) {
     const rule = buildRuleObj(
@@ -23,7 +25,7 @@ export default function buildRuleSet(values, includeStart) {
         frequency: 'none',
         interval: 1,
       },
-      includeStart
+      useUTCStart
     );
     set.rrule(new RRule(rule));
   }
@@ -40,7 +42,7 @@ export default function buildRuleSet(values, includeStart) {
         frequency,
         ...values.frequencyOptions[frequency],
       },
-      includeStart
+      useUTCStart
     );
     set.rrule(new RRule(rule));
   });
@@ -57,7 +59,7 @@ export default function buildRuleSet(values, includeStart) {
         frequency,
         ...values.exceptionOptions[frequency],
       },
-      includeStart
+      useUTCStart
     );
     set.exrule(new RRule(rule));
   });
