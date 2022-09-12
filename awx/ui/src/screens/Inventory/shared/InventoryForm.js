@@ -15,7 +15,11 @@ import LabelSelect from 'components/LabelSelect';
 import InstanceGroupsLookup from 'components/Lookup/InstanceGroupsLookup';
 import OrganizationLookup from 'components/Lookup/OrganizationLookup';
 import ContentError from 'components/ContentError';
-import { FormColumnLayout, FormFullWidthLayout } from 'components/FormLayout';
+import {
+  FormColumnLayout,
+  FormFullWidthLayout,
+  FormCheckboxLayout,
+} from 'components/FormLayout';
 import getHelpText from './Inventory.helptext';
 
 function InventoryFormFields({ inventory }) {
@@ -74,12 +78,6 @@ function InventoryFormFields({ inventory }) {
         }}
         fieldName="instanceGroups"
       />
-      <CheckboxField
-        id="option-prevent-instance-group-fallback"
-        name="prevent_instance_group_fallback"
-        label={t`Prevent Instance Group Fallback`}
-        tooltip={helpText.preventInstanceGroupFallback}
-      />
       <FormFullWidthLayout>
         <FormGroup
           label={t`Labels`}
@@ -92,6 +90,16 @@ function InventoryFormFields({ inventory }) {
             onError={setContentError}
             createText={t`Create`}
           />
+        </FormGroup>
+        <FormGroup fieldId="inventory-option-checkboxes" label={t`Options`}>
+          <FormCheckboxLayout>
+            <CheckboxField
+              id="option-prevent-instance-group-fallback"
+              name="prevent_instance_group_fallback"
+              label={t`Prevent Instance Group Fallback`}
+              tooltip={helpText.preventInstanceGroupFallback}
+            />
+          </FormCheckboxLayout>
         </FormGroup>
         <VariablesField
           tooltip={helpText.variables()}
