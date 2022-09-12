@@ -110,7 +110,7 @@ function InstanceList() {
       Promise.all(
         selected.map(({ id }) => InstancesAPI.deprovisionInstance(id))
       ),
-    { fetchItems: fetchInstances }
+    { fetchItems: fetchInstances, qsConfig: QS_CONFIG }
   );
 
   return (
