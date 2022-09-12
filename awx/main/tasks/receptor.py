@@ -19,7 +19,7 @@ import ansible_runner
 
 # AWX
 from awx.main.utils.execution_environments import get_default_pod_spec
-from awx.main.exceptions import ReceptorNodeNotFound
+from awx.main.exceptions import ReceptorNodeNotFound, ReceptorNotConfigured, ReceptorConnectionRefusedError, ReceptorSocketMissing
 from awx.main.utils.common import (
     deepmerge,
     parse_yaml_or_json,
@@ -43,8 +43,12 @@ class ReceptorConnectionType(Enum):
 
 
 def get_receptor_sockfile():
-    with open(__RECEPTOR_CONF, 'r') as f:
-        data = yaml.safe_load(f)
+    try:
+        with open(__RECEPTOR_CONF, 'r') as f:
+            data = yaml.safe_load(f)
+    except FileNotFoundError:
+        raise ReceptorNotConfigured(f'Receptor has not been configured, did not find config at {__RECEPTOR_CONF}')
+
     for section in data:
         for entry_name, entry_data in section.items():
             if entry_name == 'control-service':
@@ -84,6 +88,20 @@ def get_conn_type(node_name, receptor_ctl):
         if node.get('NodeID') == node_name:
             return ReceptorConnectionType(node.get('ConnType'))
     raise ReceptorNodeNotFound(f'Instance {node_name} is not in the receptor mesh')
+
+
+def wrapped_receptor_command(receptor_ctl, command):
+    """
+    Run receptor command and raise any known service exceptions that happen as a result
+    """
+    try:
+        return receptor_ctl.simple_command(command)
+    except ValueError as exc:
+        if 'Socket path does not exist' in str(exc):
+            raise ReceptorSocketMissing(f'Receptor error: {str(exc)}')
+        raise
+    except ConnectionRefusedError as exc:
+        raise ReceptorConnectionRefusedError(f'Could not connect to the receptor service: {str(exc)}')
 
 
 def administrative_workunit_reaper(work_list=None):

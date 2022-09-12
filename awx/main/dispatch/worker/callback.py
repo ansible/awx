@@ -86,6 +86,7 @@ class CallbackBrokerWorker(BaseWorker):
         return os.getpid()
 
     def read(self, queue):
+        has_redis_error = False
         try:
             res = self.redis.blpop(self.queue_name, timeout=1)
             if res is None:
@@ -97,12 +98,14 @@ class CallbackBrokerWorker(BaseWorker):
             return json.loads(res[1])
         except redis.exceptions.RedisError:
             logger.exception("encountered an error communicating with redis")
+            has_redis_error = True
             time.sleep(1)
         except (json.JSONDecodeError, KeyError):
             logger.exception("failed to decode JSON message from redis")
         finally:
-            self.record_statistics()
-            self.record_read_metrics()
+            if not has_redis_error:
+                self.record_statistics()
+                self.record_read_metrics()
 
         return {'event': 'FLUSH'}
 
