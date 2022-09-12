@@ -13,6 +13,11 @@ describe('OtherPromptsStep', () => {
           <OtherPromptsStep
             launchConfig={{
               ask_job_type_on_launch: true,
+              job_template_data: {
+                name: 'Demo Job Template',
+                id: 1,
+                description: '',
+              },
             }}
           />
         </Formik>
@@ -36,6 +41,11 @@ describe('OtherPromptsStep', () => {
           <OtherPromptsStep
             launchConfig={{
               ask_limit_on_launch: true,
+              job_template_data: {
+                name: 'Demo Job Template',
+                id: 1,
+                description: '',
+              },
             }}
           />
         </Formik>
@@ -56,6 +66,11 @@ describe('OtherPromptsStep', () => {
           <OtherPromptsStep
             launchConfig={{
               ask_scm_branch_on_launch: true,
+              job_template_data: {
+                name: 'Demo Job Template',
+                id: 1,
+                description: '',
+              },
             }}
           />
         </Formik>
@@ -76,6 +91,11 @@ describe('OtherPromptsStep', () => {
           <OtherPromptsStep
             launchConfig={{
               ask_verbosity_on_launch: true,
+              job_template_data: {
+                name: 'Demo Job Template',
+                id: 1,
+                description: '',
+              },
             }}
           />
         </Formik>
@@ -96,6 +116,11 @@ describe('OtherPromptsStep', () => {
           <OtherPromptsStep
             launchConfig={{
               ask_diff_mode_on_launch: true,
+              job_template_data: {
+                name: 'Demo Job Template',
+                id: 1,
+                description: '',
+              },
             }}
           />
         </Formik>
@@ -119,6 +144,11 @@ describe('OtherPromptsStep', () => {
             onVarModeChange={onModeChange}
             launchConfig={{
               ask_variables_on_launch: true,
+              job_template_data: {
+                name: 'Demo Job Template',
+                id: 1,
+                description: '',
+              },
             }}
           />
         </Formik>
