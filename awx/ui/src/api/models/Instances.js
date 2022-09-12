@@ -8,6 +8,7 @@ class Instances extends Base {
     this.readHealthCheckDetail = this.readHealthCheckDetail.bind(this);
     this.healthCheck = this.healthCheck.bind(this);
     this.readInstanceGroup = this.readInstanceGroup.bind(this);
+    this.deprovisionInstance = this.deprovisionInstance.bind(this);
   }
 
   healthCheck(instanceId) {
