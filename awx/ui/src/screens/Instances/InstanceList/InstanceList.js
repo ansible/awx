@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { t } from '@lingui/macro';
 import { useLocation } from 'react-router-dom';
 import 'styled-components/macro';
@@ -23,6 +23,7 @@ import useSelected from 'hooks/useSelected';
 import { InstancesAPI, SettingsAPI } from 'api';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import HealthCheckButton from 'components/HealthCheckButton';
+import HealthCheckAlert from 'components/HealthCheckAlert';
 import InstanceListItem from './InstanceListItem';
 import RemoveInstanceButton from '../Shared/RemoveInstanceButton';
 
@@ -35,6 +36,7 @@ const QS_CONFIG = getQSConfig('instance', {
 function InstanceList() {
   const location = useLocation();
   const { me } = useConfig();
+  const [showHealthCheckAlert, setShowHealthCheckAlert] = useState(false);
 
   const {
     result: { instances, count, relatedSearchableKeys, searchableKeys, isK8s },
@@ -83,18 +85,23 @@ function InstanceList() {
     isLoading: isHealthCheckLoading,
   } = useRequest(
     useCallback(async () => {
-      await Promise.all(
+      const [...response] = await Promise.all(
         selected
           .filter(({ node_type }) => node_type !== 'hop')
           .map(({ id }) => InstancesAPI.healthCheck(id))
       );
-      fetchInstances();
-    }, [selected, fetchInstances])
+      if (response) {
+        setShowHealthCheckAlert(true);
+      }
+
+      return response;
+    }, [selected])
   );
   const handleHealthCheck = async () => {
     await fetchHealthCheck();
     clearSelected();
   };
+
   const { error, dismissError } = useDismissableError(healthCheckError);
 
   const { expanded, isAllExpanded, handleExpand, expandAll } =
@@ -115,6 +122,9 @@ function InstanceList() {
 
   return (
     <>
+      {showHealthCheckAlert ? (
+        <HealthCheckAlert onSetHealthCheckAlert={setShowHealthCheckAlert} />
+      ) : null}
       <PageSection>
         <Card>
           <PaginatedTable
@@ -204,7 +214,9 @@ function InstanceList() {
                 key={instance.id}
                 value={instance.hostname}
                 instance={instance}
-                onSelect={() => handleSelect(instance)}
+                onSelect={() => {
+                  handleSelect(instance);
+                }}
                 isSelected={selected.some((row) => row.id === instance.id)}
                 fetchInstances={fetchInstances}
                 rowIndex={index}
