@@ -38,7 +38,7 @@ function RemoveInstanceButton({ itemsToRemove, onRemove, isK8s }) {
   const toggleModal = async (isOpen) => {
     setRemoveDetails(null);
     setIsLoading(true);
-    if (isOpen && itemsToRemove.length === 1) {
+    if (isOpen && itemsToRemove.length > 0) {
       const { results, error } = await getRelatedResourceDeleteCounts(
         relatedResourceDeleteRequests.instance(itemsToRemove[0])
       );
@@ -85,7 +85,7 @@ function RemoveInstanceButton({ itemsToRemove, onRemove, isK8s }) {
       <Plural
         value={itemsToRemove.length}
         one="This intance is currently being used by other resources. Are you sure you want to delete it?"
-        other="Deleting these instances could impact other resources that rely on them. Are you sure you want to delete anyway?"
+        other="Deprovisioning these instances could impact other resources that rely on them. Are you sure you want to delete anyway?"
       />
       {removeDetails &&
         Object.entries(removeDetails).map(([key, value]) => (
