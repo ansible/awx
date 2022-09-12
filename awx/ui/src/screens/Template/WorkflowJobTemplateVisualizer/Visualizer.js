@@ -606,13 +606,15 @@ function Visualizer({ template }) {
                   );
                 }
 
-                instanceGroupRequests.push(
-                  WorkflowJobTemplateNodesAPI.orderInstanceGroups(
-                    node.originalNodeObject.id,
-                    node.promptValues?.instance_groups,
-                    node?.originalNodeInstanceGroups || []
-                  )
-                );
+                if (node.promptValues?.instance_groups) {
+                  instanceGroupRequests.push(
+                    WorkflowJobTemplateNodesAPI.orderInstanceGroups(
+                      node.originalNodeObject.id,
+                      node.promptValues?.instance_groups,
+                      node?.originalNodeInstanceGroups || []
+                    )
+                  );
+                }
               })
             );
           }

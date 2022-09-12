@@ -81,7 +81,6 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
     job_slice_count,
     job_tags,
     job_type,
-    labels,
     limit,
     modified,
     name,
@@ -114,7 +113,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
   const { error, dismissError } = useDismissableError(deleteError);
 
   const {
-    result: [credentials, preview, launchData, instanceGroups],
+    result: [credentials, preview, launchData, labels, instanceGroups],
     isLoading,
     error: readContentError,
     request: fetchCredentialsAndPreview,
@@ -135,6 +134,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
           JobTemplatesAPI.readLaunch(
             schedule.summary_fields.unified_job_template.id
           ),
+          SchedulesAPI.readAllLabels(id),
           SchedulesAPI.readInstanceGroups(id)
         );
       } else if (
@@ -144,7 +144,8 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
         promises.push(
           WorkflowJobTemplatesAPI.readLaunch(
             schedule.summary_fields.unified_job_template.id
-          )
+          ),
+          SchedulesAPI.readAllLabels(id)
         );
       } else {
         promises.push(Promise.resolve());
@@ -154,6 +155,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
         { data },
         { data: schedulePreview },
         launch,
+        allLabelsResults,
         instanceGroupsResults,
       ] = await Promise.all(promises);
 
@@ -161,6 +163,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
         data.results,
         schedulePreview,
         launch?.data,
+        allLabelsResults?.data?.results,
         instanceGroupsResults?.data?.results,
       ];
     }, [id, schedule, rrule]),
