@@ -83,6 +83,8 @@ export default function FrequencyDetails({
     6: t`Sunday`,
   };
 
+  const prefix = isException ? `exception-${type}` : `frequency-${type}`;
+
   return (
     <div>
       <Label>{label}</Label>
@@ -90,6 +92,7 @@ export default function FrequencyDetails({
         <Detail
           label={isException ? t`Skip every` : t`Run every`}
           value={getRunEveryLabel()}
+          dataCy={`${prefix}-run-every`}
         />
         {type === 'week' ? (
           <Detail
@@ -98,10 +101,15 @@ export default function FrequencyDetails({
               .sort(sortWeekday)
               .map((d) => weekdays[d.weekday])
               .join(', ')}
+            dataCy={`${prefix}-days-of-week`}
           />
         ) : null}
-        <RunOnDetail type={type} options={options} />
-        <Detail label={t`End`} value={getEndValue(type, options, timezone)} />
+        <RunOnDetail type={type} options={options} prefix={prefix} />
+        <Detail
+          label={t`End`}
+          value={getEndValue(type, options, timezone)}
+          dataCy={`${prefix}-end`}
+        />
       </DetailList>
     </div>
   );
@@ -113,11 +121,15 @@ function sortWeekday(a, b) {
   return a.weekday - b.weekday;
 }
 
-function RunOnDetail({ type, options }) {
+function RunOnDetail({ type, options, prefix }) {
   if (type === 'month') {
     if (options.runOn === 'day') {
       return (
-        <Detail label={t`Run on`} value={t`Day ${options.runOnDayNumber}`} />
+        <Detail
+          label={t`Run on`}
+          value={t`Day ${options.runOnDayNumber}`}
+          dataCy={`${prefix}-run-on-day`}
+        />
       );
     }
     const dayOfWeek = options.runOnTheDay;
@@ -138,6 +150,7 @@ function RunOnDetail({ type, options }) {
             />
           )
         }
+        dataCy={`${prefix}-run-on-day`}
       />
     );
   }
@@ -161,6 +174,7 @@ function RunOnDetail({ type, options }) {
         <Detail
           label={t`Run on`}
           value={`${months[options.runOnTheMonth]} ${options.runOnDayMonth}`}
+          dataCy={`${prefix}-run-on-day`}
         />
       );
     }
@@ -195,6 +209,7 @@ function RunOnDetail({ type, options }) {
             />
           )
         }
+        dataCy={`${prefix}-run-on-day`}
       />
     );
   }
