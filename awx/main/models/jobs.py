@@ -279,6 +279,8 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         help_text=(
             "If enabled, the job template will prevent adding any inventory or organization "
             "instance groups to the list of preferred instances groups to run on."
+            "If this setting is enabled and you provided an empty list, the global instance "
+            "groups will be applied."
         ),
     )
 
@@ -810,7 +812,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
                 for instance_group in getattr(self, obj_type).instance_groups.all():
                     selected_groups.append(instance_group)
                 if getattr(getattr(self, obj_type), 'prevent_instance_group_fallback', False):
-                    logger.error("Breaking in preferred instance group at {}".format(obj_type))
                     break
         if not selected_groups:
             return self.global_instance_groups

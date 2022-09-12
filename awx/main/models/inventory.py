@@ -181,6 +181,8 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
             "If enabled, the inventory will prevent adding any organization "
             "instance groups to the list of preferred instances groups to run "
             "associated job templates on."
+            "If this setting is enabled and you provided an empty list, the global instance "
+            "groups will be applied."
         ),
     )
 

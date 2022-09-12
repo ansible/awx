@@ -30,7 +30,8 @@ const jtHelpTextStrings = () => ({
   privilegeEscalation: t`If enabled, run this playbook as an administrator.`,
   enableWebhook: t`Enable webhook for this template.`,
   concurrentJobs: t`If enabled, simultaneous runs of this job template will be allowed.`,
-  preventInstanceGroupFallback: t`If enabled, the job template will prevent adding any inventory or organization instance groups to the list of preferred instances groups to run on.`,
+  preventInstanceGroupFallback: t`If enabled, the job template will prevent adding any inventory or organization instance groups to the list of preferred instances groups to run on.
+      Note: If this setting is enabled and you provided an empty list, the global instance groups will be applied.`,
   enableFactStorage: t`If enabled, this will store gathered facts so they can be viewed at the host level. Facts are persisted and injected into the fact cache at runtime.`,
   enabledOptions: (
     <>
