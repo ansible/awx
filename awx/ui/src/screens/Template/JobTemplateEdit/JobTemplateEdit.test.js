@@ -68,6 +68,7 @@ const mockJobTemplate = {
   limit: '',
   name: 'Foo',
   playbook: 'Baz',
+  prevent_instance_group_fallback: false,
   project: 3,
   scm_branch: '',
   skip_tags: '',
