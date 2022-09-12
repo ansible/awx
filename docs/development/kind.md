@@ -1,7 +1,7 @@
 # Running Development Environment in Kubernetes using Kind Cluster
 
 ## Start Kind Cluster
-Note: This environment has only been tested on MacOS with Docker.
+Note: This environment has been tested on MacOS and Fedora with Docker. 
 
 If you do not already have Kind, install it from:
 https://kind.sigs.k8s.io/docs/user/quick-start/
