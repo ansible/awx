@@ -315,13 +315,13 @@ class TestLaunchConfigAccess:
         access = JobLaunchConfigAccess(rando)
         cred1, cred2 = self._make_two_credentials(credentialtype_ssh)
 
-        assert access.has_credentials_access(config)  # has access if 0 creds
+        assert access.has_obj_m2m_access(config)  # has access if 0 creds
         config.credentials.add(cred1, cred2)
-        assert not access.has_credentials_access(config)  # lacks access to both
+        assert not access.has_obj_m2m_access(config)  # lacks access to both
         cred1.use_role.members.add(rando)
-        assert not access.has_credentials_access(config)  # lacks access to 1
+        assert not access.has_obj_m2m_access(config)  # lacks access to 1
         cred2.use_role.members.add(rando)
-        assert access.has_credentials_access(config)  # has access to both
+        assert access.has_obj_m2m_access(config)  # has access to both
 
     def test_new_execution_environment_access(self, rando):
         ee = ExecutionEnvironment.objects.create(name='test-ee', image='quay.io/foo/bar')
