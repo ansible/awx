@@ -121,7 +121,10 @@ def generate_playbook():
 def generate_requirements_yml():
     return """---
 collections:
-  - name: ansible.receptor     
+  - name: ansible.receptor
+    source: https://github.com/ansible/receptor-collection/
+    type: git
+    version: 0.1.0
 """
 
 
