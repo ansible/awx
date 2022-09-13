@@ -26,7 +26,6 @@ function InventoryLookup({
   hideSmartInventories,
   history,
   isDisabled,
-  isOverrideDisabled,
   isPromptableField,
   onBlur,
   onChange,
@@ -120,7 +119,7 @@ function InventoryLookup({
       label={t`Inventory`}
       promptId={promptId}
       promptName={promptName}
-      isDisabled={isOverrideDisabled || isDisabled}
+      isDisabled={isDisabled}
       tooltip={t`Select the inventory containing the hosts
             you want this job to manage.`}
     >
@@ -136,7 +135,7 @@ function InventoryLookup({
         fieldName={fieldName}
         validate={validate}
         isLoading={isLoading}
-        isDisabled={isOverrideDisabled || isDisabled}
+        isDisabled={isDisabled}
         qsConfig={QS_CONFIG}
         renderOptionsList={({ state, dispatch, canDelete }) => (
           <OptionsList
@@ -191,7 +190,7 @@ function InventoryLookup({
         onBlur={onBlur}
         required={required}
         isLoading={isLoading}
-        isDisabled={isOverrideDisabled || isDisabled}
+        isDisabled={isDisabled}
         qsConfig={QS_CONFIG}
         renderOptionsList={({ state, dispatch, canDelete }) => (
           <OptionsList
@@ -242,7 +241,6 @@ InventoryLookup.propTypes = {
   fieldName: string,
   hideSmartInventories: bool,
   isDisabled: bool,
-  isOverrideDisabled: bool,
   onChange: func.isRequired,
   required: bool,
   validate: func,
@@ -255,7 +253,6 @@ InventoryLookup.defaultProps = {
   fieldName: 'inventory',
   hideSmartInventories: false,
   isDisabled: false,
-  isOverrideDisabled: false,
   required: false,
   validate: () => {},
   value: null,

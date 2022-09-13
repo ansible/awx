@@ -151,7 +151,7 @@ function WorkflowJobTemplateForm({
             onChange={handleInventoryUpdate}
             touched={inventoryMeta.touched}
             error={inventoryMeta.error}
-            isOverrideDisabled={isInventoryDisabled}
+            isDisabled={isInventoryDisabled}
           />
         </FormGroup>
         <FieldWithPrompt

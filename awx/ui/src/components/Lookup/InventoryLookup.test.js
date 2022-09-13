@@ -99,7 +99,7 @@ describe('InventoryLookup', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <Formik>
-          <InventoryLookup isOverrideDisabled onChange={() => {}} />
+          <InventoryLookup onChange={() => {}} />
         </Formik>
       );
     });
@@ -121,7 +121,7 @@ describe('InventoryLookup', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <Formik>
-          <InventoryLookup onChange={() => {}} />
+          <InventoryLookup isDisabled onChange={() => {}} />
         </Formik>
       );
     });
