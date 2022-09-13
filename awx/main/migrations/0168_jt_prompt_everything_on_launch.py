@@ -16,7 +16,14 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='joblaunchconfig',
             name='execution_environment',
-            field=models.ForeignKey(blank=True, default=None, null=True, on_delete=awx.main.utils.polymorphic.SET_NULL, related_name='joblaunchconfig_as_prompt', to='main.executionenvironment'),
+            field=models.ForeignKey(
+                blank=True,
+                default=None,
+                null=True,
+                on_delete=awx.main.utils.polymorphic.SET_NULL,
+                related_name='joblaunchconfig_as_prompt',
+                to='main.executionenvironment',
+            ),
         ),
         migrations.AddField(
             model_name='joblaunchconfig',
@@ -56,7 +63,14 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='schedule',
             name='execution_environment',
-            field=models.ForeignKey(blank=True, default=None, null=True, on_delete=awx.main.utils.polymorphic.SET_NULL, related_name='schedule_as_prompt', to='main.executionenvironment'),
+            field=models.ForeignKey(
+                blank=True,
+                default=None,
+                null=True,
+                on_delete=awx.main.utils.polymorphic.SET_NULL,
+                related_name='schedule_as_prompt',
+                to='main.executionenvironment',
+            ),
         ),
         migrations.AddField(
             model_name='schedule',
@@ -66,7 +80,14 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workflowjobnode',
             name='execution_environment',
-            field=models.ForeignKey(blank=True, default=None, null=True, on_delete=awx.main.utils.polymorphic.SET_NULL, related_name='workflowjobnode_as_prompt', to='main.executionenvironment'),
+            field=models.ForeignKey(
+                blank=True,
+                default=None,
+                null=True,
+                on_delete=awx.main.utils.polymorphic.SET_NULL,
+                related_name='workflowjobnode_as_prompt',
+                to='main.executionenvironment',
+            ),
         ),
         migrations.AddField(
             model_name='workflowjobnode',
@@ -91,7 +112,14 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workflowjobtemplatenode',
             name='execution_environment',
-            field=models.ForeignKey(blank=True, default=None, null=True, on_delete=awx.main.utils.polymorphic.SET_NULL, related_name='workflowjobtemplatenode_as_prompt', to='main.executionenvironment'),
+            field=models.ForeignKey(
+                blank=True,
+                default=None,
+                null=True,
+                on_delete=awx.main.utils.polymorphic.SET_NULL,
+                related_name='workflowjobtemplatenode_as_prompt',
+                to='main.executionenvironment',
+            ),
         ),
         migrations.AddField(
             model_name='workflowjobtemplatenode',
@@ -155,31 +183,55 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='job',
             name='instance_groups',
-            field=awx.main.fields.OrderedManyToManyField(blank=True, editable=False, related_name='job_instance_groups', through='main.JobInstanceGroupMembership', to='main.InstanceGroup'),
+            field=awx.main.fields.OrderedManyToManyField(
+                blank=True, editable=False, related_name='job_instance_groups', through='main.JobInstanceGroupMembership', to='main.InstanceGroup'
+            ),
         ),
         migrations.AddField(
             model_name='joblaunchconfig',
             name='instance_groups',
-            field=awx.main.fields.OrderedManyToManyField(blank=True, editable=False, related_name='joblaunchconfigs', through='main.JobLaunchConfigInstanceGroupMembership', to='main.InstanceGroup'),
+            field=awx.main.fields.OrderedManyToManyField(
+                blank=True, editable=False, related_name='joblaunchconfigs', through='main.JobLaunchConfigInstanceGroupMembership', to='main.InstanceGroup'
+            ),
         ),
         migrations.AddField(
             model_name='schedule',
             name='instance_groups',
-            field=awx.main.fields.OrderedManyToManyField(blank=True, editable=False, related_name='schedule_instance_groups', through='main.ScheduleInstanceGroupMembership', to='main.InstanceGroup'),
+            field=awx.main.fields.OrderedManyToManyField(
+                blank=True, editable=False, related_name='schedule_instance_groups', through='main.ScheduleInstanceGroupMembership', to='main.InstanceGroup'
+            ),
         ),
         migrations.AddField(
             model_name='workflowjob',
             name='instance_groups',
-            field=awx.main.fields.OrderedManyToManyField(blank=True, editable=False, related_name='workflow_job_instance_groups', through='main.WorkflowJobInstanceGroupMembership', to='main.InstanceGroup'),
+            field=awx.main.fields.OrderedManyToManyField(
+                blank=True,
+                editable=False,
+                related_name='workflow_job_instance_groups',
+                through='main.WorkflowJobInstanceGroupMembership',
+                to='main.InstanceGroup',
+            ),
         ),
         migrations.AddField(
             model_name='workflowjobnode',
             name='instance_groups',
-            field=awx.main.fields.OrderedManyToManyField(blank=True, editable=False, related_name='workflow_job_node_instance_groups', through='main.WorkflowJobNodeBaseInstanceGroupMembership', to='main.InstanceGroup'),
+            field=awx.main.fields.OrderedManyToManyField(
+                blank=True,
+                editable=False,
+                related_name='workflow_job_node_instance_groups',
+                through='main.WorkflowJobNodeBaseInstanceGroupMembership',
+                to='main.InstanceGroup',
+            ),
         ),
         migrations.AddField(
             model_name='workflowjobtemplatenode',
             name='instance_groups',
-            field=awx.main.fields.OrderedManyToManyField(blank=True, editable=False, related_name='workflow_job_template_node_instance_groups', through='main.WorkflowJobTemplateNodeBaseInstanceGroupMembership', to='main.InstanceGroup'),
+            field=awx.main.fields.OrderedManyToManyField(
+                blank=True,
+                editable=False,
+                related_name='workflow_job_template_node_instance_groups',
+                through='main.WorkflowJobTemplateNodeBaseInstanceGroupMembership',
+                to='main.InstanceGroup',
+            ),
         ),
     ]
