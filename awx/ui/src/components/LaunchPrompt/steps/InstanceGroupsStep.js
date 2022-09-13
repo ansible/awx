@@ -68,38 +68,40 @@ function InstanceGroupsStep() {
   }
 
   return (
-    <OptionsList
-      value={selected}
-      options={instance_groups}
-      optionCount={count}
-      searchColumns={[
-        {
-          name: t`Name`,
-          key: 'name__icontains',
-          isDefault: true,
-        },
-        {
-          name: t`Credential Name`,
-          key: 'credential__name__icontains',
-        },
-      ]}
-      sortColumns={[
-        {
-          name: t`Name`,
-          key: 'name',
-        },
-      ]}
-      searchableKeys={searchableKeys}
-      relatedSearchableKeys={relatedSearchableKeys}
-      multiple
-      header={t`Instance Groups`}
-      name="instanceGroups"
-      qsConfig={QS_CONFIG}
-      selectItem={handleSelect}
-      deselectItem={handleSelect}
-      sortSelectedItems={(selectedItems) => setSelected(selectedItems)}
-      isSelectedDraggable
-    />
+    <div data-cy="instance-groups-prompt">
+      <OptionsList
+        value={selected}
+        options={instance_groups}
+        optionCount={count}
+        searchColumns={[
+          {
+            name: t`Name`,
+            key: 'name__icontains',
+            isDefault: true,
+          },
+          {
+            name: t`Credential Name`,
+            key: 'credential__name__icontains',
+          },
+        ]}
+        sortColumns={[
+          {
+            name: t`Name`,
+            key: 'name',
+          },
+        ]}
+        searchableKeys={searchableKeys}
+        relatedSearchableKeys={relatedSearchableKeys}
+        multiple
+        header={t`Instance Groups`}
+        name="instanceGroups"
+        qsConfig={QS_CONFIG}
+        selectItem={handleSelect}
+        deselectItem={handleSelect}
+        sortSelectedItems={(selectedItems) => setSelected(selectedItems)}
+        isSelectedDraggable
+      />
+    </div>
   );
 }
 

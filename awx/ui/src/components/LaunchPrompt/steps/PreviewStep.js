@@ -52,7 +52,7 @@ function PreviewStep({ resource, launchConfig, surveyConfig, formErrors }) {
   }
 
   return (
-    <>
+    <div data-cy="prompt-preview">
       {formErrors && (
         <ErrorMessageWrapper>
           {t`Some of the previous step(s) have errors`}
@@ -70,7 +70,7 @@ function PreviewStep({ resource, launchConfig, surveyConfig, formErrors }) {
         launchConfig={launchConfig}
         overrides={overrides}
       />
-    </>
+    </div>
   );
 }
 

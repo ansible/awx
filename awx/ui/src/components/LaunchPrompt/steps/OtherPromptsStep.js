@@ -28,95 +28,97 @@ function OtherPromptsStep({ launchConfig, variablesMode, onVarModeChange }) {
     ? jobHelpText
     : workflowHelpText;
   return (
-    <Form
-      onSubmit={(e) => {
-        e.preventDefault();
-      }}
-    >
-      {launchConfig.ask_job_type_on_launch && (
-        <JobTypeField helpTextSource={helpTextSource} />
-      )}
-      {launchConfig.ask_scm_branch_on_launch && (
-        <FormField
-          id="prompt-scm-branch"
-          name="scm_branch"
-          label={t`Source Control Branch`}
-          tooltip={helpTextSource.sourceControlBranch}
-        />
-      )}
-      {launchConfig.ask_labels_on_launch && (
-        <LabelsField helpTextSource={helpTextSource} />
-      )}
-      {launchConfig.ask_forks_on_launch && (
-        <FormField
-          id="prompt-forks"
-          name="forks"
-          label={t`Forks`}
-          type="number"
-          min="0"
-          tooltip={helpTextSource.forks}
-        />
-      )}
-      {launchConfig.ask_limit_on_launch && (
-        <FormField
-          id="prompt-limit"
-          name="limit"
-          label={t`Limit`}
-          tooltip={helpTextSource.limit}
-        />
-      )}
-      {launchConfig.ask_verbosity_on_launch && (
-        <VerbosityField helpTextSource={helpTextSource} />
-      )}
-      {launchConfig.ask_job_slice_count_on_launch && (
-        <FormField
-          id="prompt-job-slicing"
-          name="job_slice_count"
-          label={t`Job Slicing`}
-          type="number"
-          min="1"
-          tooltip={helpTextSource.jobSlicing}
-        />
-      )}
-      {launchConfig.ask_timeout_on_launch && (
-        <FormField
-          id="prompt-timeout"
-          name="timeout"
-          label={t`Timeout`}
-          type="number"
-          min="0"
-          tooltip={helpTextSource.timeout}
-        />
-      )}
-      {launchConfig.ask_diff_mode_on_launch && <ShowChangesToggle />}
-      {launchConfig.ask_tags_on_launch && (
-        <TagField
-          id="prompt-job-tags"
-          name="job_tags"
-          label={t`Job Tags`}
-          aria-label={t`Job Tags`}
-          tooltip={helpTextSource.jobTags}
-        />
-      )}
-      {launchConfig.ask_skip_tags_on_launch && (
-        <TagField
-          id="prompt-skip-tags"
-          name="skip_tags"
-          label={t`Skip Tags`}
-          aria-label={t`Skip Tags`}
-          tooltip={helpTextSource.skipTags}
-        />
-      )}
-      {launchConfig.ask_variables_on_launch && (
-        <VariablesField
-          id="prompt-variables"
-          name="extra_vars"
-          label={t`Variables`}
-          initialMode={variablesMode}
-          onModeChange={onVarModeChange}
-        />
-      )}
-    </Form>
+    <div data-cy="other-prompts">
+      <Form
+        onSubmit={(e) => {
+          e.preventDefault();
+        }}
+      >
+        {launchConfig.ask_job_type_on_launch && (
+          <JobTypeField helpTextSource={helpTextSource} />
+        )}
+        {launchConfig.ask_scm_branch_on_launch && (
+          <FormField
+            id="prompt-scm-branch"
+            name="scm_branch"
+            label={t`Source Control Branch`}
+            tooltip={helpTextSource.sourceControlBranch}
+          />
+        )}
+        {launchConfig.ask_labels_on_launch && (
+          <LabelsField helpTextSource={helpTextSource} />
+        )}
+        {launchConfig.ask_forks_on_launch && (
+          <FormField
+            id="prompt-forks"
+            name="forks"
+            label={t`Forks`}
+            type="number"
+            min="0"
+            tooltip={helpTextSource.forks}
+          />
+        )}
+        {launchConfig.ask_limit_on_launch && (
+          <FormField
+            id="prompt-limit"
+            name="limit"
+            label={t`Limit`}
+            tooltip={helpTextSource.limit}
+          />
+        )}
+        {launchConfig.ask_verbosity_on_launch && (
+          <VerbosityField helpTextSource={helpTextSource} />
+        )}
+        {launchConfig.ask_job_slice_count_on_launch && (
+          <FormField
+            id="prompt-job-slicing"
+            name="job_slice_count"
+            label={t`Job Slicing`}
+            type="number"
+            min="1"
+            tooltip={helpTextSource.jobSlicing}
+          />
+        )}
+        {launchConfig.ask_timeout_on_launch && (
+          <FormField
+            id="prompt-timeout"
+            name="timeout"
+            label={t`Timeout`}
+            type="number"
+            min="0"
+            tooltip={helpTextSource.timeout}
+          />
+        )}
+        {launchConfig.ask_diff_mode_on_launch && <ShowChangesToggle />}
+        {launchConfig.ask_tags_on_launch && (
+          <TagField
+            id="prompt-job-tags"
+            name="job_tags"
+            label={t`Job Tags`}
+            aria-label={t`Job Tags`}
+            tooltip={helpTextSource.jobTags}
+          />
+        )}
+        {launchConfig.ask_skip_tags_on_launch && (
+          <TagField
+            id="prompt-skip-tags"
+            name="skip_tags"
+            label={t`Skip Tags`}
+            aria-label={t`Skip Tags`}
+            tooltip={helpTextSource.skipTags}
+          />
+        )}
+        {launchConfig.ask_variables_on_launch && (
+          <VariablesField
+            id="prompt-variables"
+            name="extra_vars"
+            label={t`Variables`}
+            initialMode={variablesMode}
+            onModeChange={onVarModeChange}
+          />
+        )}
+      </Form>
+    </div>
   );
 }
 
