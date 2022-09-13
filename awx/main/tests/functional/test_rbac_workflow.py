@@ -104,14 +104,12 @@ class TestWorkflowJobTemplateNodeAccess:
     @pytest.mark.parametrize(
         "add_wfjt_admin, add_jt_admin, permission_type, expected_result, method_type",
         [
-            (False, False, None, False, 'can_attach'),
             (True, False, 'credentials', False, 'can_attach'),
             (True, True, 'credentials', True, 'can_attach'),
             (True, False, 'labels', False, 'can_attach'),
             (True, True, 'labels', True, 'can_attach'),
             (True, False, 'instance_groups', False, 'can_attach'),
             (True, True, 'instance_groups', True, 'can_attach'),
-            (False, False, None, False, 'can_unattach'),
             (True, False, 'credentials', False, 'can_unattach'),
             (True, True, 'credentials', True, 'can_unattach'),
             (True, False, 'labels', False, 'can_unattach'),
@@ -128,11 +126,25 @@ class TestWorkflowJobTemplateNodeAccess:
         if add_jt_admin:
             job_template.execute_role.members.add(rando)
 
-        # We have to mock the JobLaunchConfigAccess because the attachment methods will look at the object type and the relation
-        # Since we pass None as the second param this will trigger an NotImplementedError from that object
-        with mocker.patch('awx.main.access.JobLaunchConfigAccess.{}'.format(method_type), return_value=True):
-            access = WorkflowJobTemplateNodeAccess(rando)
-            assert getattr(access, method_type)(wfjt_node, None, permission_type, None) == expected_result
+        from awx.main.models import Credential, Label, InstanceGroup, Organization, CredentialType
+
+        if permission_type == 'credentials':
+            sub_obj = Credential.objects.create(credential_type=CredentialType.objects.create())
+            sub_obj.use_role.members.add(rando)
+        elif permission_type == 'labels':
+            sub_obj = Label.objects.create(organization=Organization.objects.create())
+            sub_obj.organization.member_role.members.add(rando)
+        elif permission_type == 'instance_groups':
+            sub_obj = InstanceGroup.objects.create()
+            org = Organization.objects.create()
+            org.admin_role.members.add(rando)  # only admins can see IGs
+            org.instance_groups.add(sub_obj)
+
+        access = WorkflowJobTemplateNodeAccess(rando)
+        if method_type == 'can_unattach':
+            assert getattr(access, method_type)(wfjt_node, sub_obj, permission_type) == expected_result
+        else:
+            assert getattr(access, method_type)(wfjt_node, sub_obj, permission_type, {}) == expected_result
 
     # The actual attachment of labels, credentials and instance groups are tested from JobLaunchConfigAccess
 
