@@ -23,6 +23,7 @@ import useSelected from 'hooks/useSelected';
 import { InstanceGroupsAPI, InstancesAPI } from 'api';
 import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
 import HealthCheckButton from 'components/HealthCheckButton/HealthCheckButton';
+import HealthCheckAlert from 'components/HealthCheckAlert';
 import InstanceListItem from './InstanceListItem';
 
 const QS_CONFIG = getQSConfig('instance', {
@@ -33,6 +34,7 @@ const QS_CONFIG = getQSConfig('instance', {
 
 function InstanceList({ instanceGroup }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showHealthCheckAlert, setShowHealthCheckAlert] = useState(false);
   const location = useLocation();
   const { id: instanceGroupId } = useParams();
 
@@ -86,9 +88,15 @@ function InstanceList({ instanceGroup }) {
     isLoading: isHealthCheckLoading,
   } = useRequest(
     useCallback(async () => {
-      await Promise.all(selected.map(({ id }) => InstancesAPI.healthCheck(id)));
-      fetchInstances();
-    }, [selected, fetchInstances])
+      const [...response] = await Promise.all(
+        selected
+          .filter(({ node_type }) => node_type !== 'hop')
+          .map(({ id }) => InstancesAPI.healthCheck(id))
+      );
+      if (response) {
+        setShowHealthCheckAlert(true);
+      }
+    }, [selected])
   );
 
   const handleHealthCheck = async () => {
@@ -171,6 +179,9 @@ function InstanceList({ instanceGroup }) {
 
   return (
     <>
+      {showHealthCheckAlert ? (
+        <HealthCheckAlert onSetHealthCheckAlert={setShowHealthCheckAlert} />
+      ) : null}
       <PaginatedTable
         contentError={contentError}
         hasContentLoading={

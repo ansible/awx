@@ -32,6 +32,7 @@ import useRequest, {
   useDeleteItems,
   useDismissableError,
 } from 'hooks/useRequest';
+import HealthCheckAlert from 'components/HealthCheckAlert';
 import RemoveInstanceButton from '../Shared/RemoveInstanceButton';
 
 const Unavailable = styled.span`
@@ -66,6 +67,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
   const [forks, setForks] = useState();
   const history = useHistory();
   const [healthCheck, setHealthCheck] = useState({});
+  const [showHealthCheckAlert, setShowHealthCheckAlert] = useState(false);
 
   const {
     isLoading,
@@ -119,8 +121,12 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
     request: fetchHealthCheck,
   } = useRequest(
     useCallback(async () => {
-      const { data } = await InstancesAPI.healthCheck(id);
+      const { status } = await InstancesAPI.healthCheck(id);
+      const { data } = await InstancesAPI.readHealthCheckDetail(id);
       setHealthCheck(data);
+      if (status === 200) {
+        setShowHealthCheckAlert(true);
+      }
     }, [id])
   );
 
@@ -175,192 +181,197 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
   const isHopNode = instance.node_type === 'hop';
 
   return (
-    <CardBody>
-      <DetailList gutter="sm">
-        <Detail
-          label={t`Host Name`}
-          value={instance.hostname}
-          dataCy="instance-detail-name"
-        />
-        <Detail
-          label={t`Status`}
-          value={
-            instance.node_state ? (
-              <StatusLabel status={instance.node_state} />
-            ) : null
-          }
-        />
-        <Detail label={t`Node Type`} value={instance.node_type} />
-        {!isHopNode && (
-          <>
-            <Detail
-              label={t`Policy Type`}
-              value={instance.managed_by_policy ? t`Auto` : t`Manual`}
-            />
-            <Detail label={t`Host`} value={instance.ip_address} />
-            <Detail label={t`Running Jobs`} value={instance.jobs_running} />
-            <Detail label={t`Total Jobs`} value={instance.jobs_total} />
-            {instanceGroups && (
-              <Detail
-                fullWidth
-                label={t`Instance Groups`}
-                helpText={t`The Instance Groups to which this instance belongs.`}
-                value={instanceGroups.map((ig) => (
-                  <React.Fragment key={ig.id}>
-                    <Label
-                      color="blue"
-                      isTruncated
-                      render={({ className, content, componentRef }) => (
-                        <Link
-                          to={`${buildLinkURL(ig)}${ig.id}/details`}
-                          className={className}
-                          innerRef={componentRef}
-                        >
-                          {content}
-                        </Link>
-                      )}
-                    >
-                      {ig.name}
-                    </Label>{' '}
-                  </React.Fragment>
-                ))}
-                isEmpty={instanceGroups.length === 0}
-              />
-            )}
-            <Detail
-              label={t`Last Health Check`}
-              value={formatDateString(healthCheck?.last_health_check)}
-            />
-            {instance.related?.install_bundle && (
-              <Detail
-                label={t`Install Bundle`}
-                value={
-                  <Tooltip content={t`Click to download bundle`}>
-                    <Button
-                      component="a"
-                      isSmall
-                      href={`${instance.related?.install_bundle}`}
-                      target="_blank"
-                      variant="secondary"
-                    >
-                      <DownloadIcon />
-                    </Button>
-                  </Tooltip>
-                }
-              />
-            )}
-            <Detail
-              label={t`Capacity Adjustment`}
-              value={
-                <SliderHolder data-cy="slider-holder">
-                  <div data-cy="cpu-capacity">{t`CPU ${instance.cpu_capacity}`}</div>
-                  <SliderForks data-cy="slider-forks">
-                    <div data-cy="number-forks">
-                      <Plural value={forks} one="# fork" other="# forks" />
-                    </div>
-                    <Slider
-                      areCustomStepsContinuous
-                      max={1}
-                      min={0}
-                      step={0.1}
-                      value={instance.capacity_adjustment}
-                      onChange={handleChangeValue}
-                      isDisabled={!me?.is_superuser || !instance.enabled}
-                      data-cy="slider"
-                    />
-                  </SliderForks>
-                  <div data-cy="mem-capacity">{t`RAM ${instance.mem_capacity}`}</div>
-                </SliderHolder>
-              }
-            />
-            <Detail
-              label={t`Used Capacity`}
-              value={
-                instance.enabled ? (
-                  <Progress
-                    title={t`Used capacity`}
-                    value={Math.round(
-                      100 - instance.percent_capacity_remaining
-                    )}
-                    measureLocation={ProgressMeasureLocation.top}
-                    size={ProgressSize.sm}
-                    aria-label={t`Used capacity`}
-                  />
-                ) : (
-                  <Unavailable>{t`Unavailable`}</Unavailable>
-                )
-              }
-            />
-          </>
-        )}
-        {healthCheck?.errors && (
+    <>
+      {showHealthCheckAlert ? (
+        <HealthCheckAlert onSetHealthCheckAlert={setShowHealthCheckAlert} />
+      ) : null}
+      <CardBody>
+        <DetailList gutter="sm">
           <Detail
-            fullWidth
-            label={t`Errors`}
+            label={t`Host Name`}
+            value={instance.hostname}
+            dataCy="instance-detail-name"
+          />
+          <Detail
+            label={t`Status`}
             value={
-              <CodeBlock>
-                <CodeBlockCode>{healthCheck?.errors}</CodeBlockCode>
-              </CodeBlock>
+              instance.node_state ? (
+                <StatusLabel status={instance.node_state} />
+              ) : null
             }
           />
-        )}
-      </DetailList>
-      {!isHopNode && (
-        <CardActionsRow>
-          {me.is_superuser && isK8s && instance.node_type === 'execution' && (
-            <RemoveInstanceButton
-              itemsToRemove={[instance]}
-              isK8s={isK8s}
-              onRemove={removeInstances}
+          <Detail label={t`Node Type`} value={instance.node_type} />
+          {!isHopNode && (
+            <>
+              <Detail
+                label={t`Policy Type`}
+                value={instance.managed_by_policy ? t`Auto` : t`Manual`}
+              />
+              <Detail label={t`Host`} value={instance.ip_address} />
+              <Detail label={t`Running Jobs`} value={instance.jobs_running} />
+              <Detail label={t`Total Jobs`} value={instance.jobs_total} />
+              {instanceGroups && (
+                <Detail
+                  fullWidth
+                  label={t`Instance Groups`}
+                  helpText={t`The Instance Groups to which this instance belongs.`}
+                  value={instanceGroups.map((ig) => (
+                    <React.Fragment key={ig.id}>
+                      <Label
+                        color="blue"
+                        isTruncated
+                        render={({ className, content, componentRef }) => (
+                          <Link
+                            to={`${buildLinkURL(ig)}${ig.id}/details`}
+                            className={className}
+                            innerRef={componentRef}
+                          >
+                            {content}
+                          </Link>
+                        )}
+                      >
+                        {ig.name}
+                      </Label>{' '}
+                    </React.Fragment>
+                  ))}
+                  isEmpty={instanceGroups.length === 0}
+                />
+              )}
+              <Detail
+                label={t`Last Health Check`}
+                value={formatDateString(healthCheck?.last_health_check)}
+              />
+              {instance.related?.install_bundle && (
+                <Detail
+                  label={t`Install Bundle`}
+                  value={
+                    <Tooltip content={t`Click to download bundle`}>
+                      <Button
+                        component="a"
+                        isSmall
+                        href={`${instance.related?.install_bundle}`}
+                        target="_blank"
+                        variant="secondary"
+                      >
+                        <DownloadIcon />
+                      </Button>
+                    </Tooltip>
+                  }
+                />
+              )}
+              <Detail
+                label={t`Capacity Adjustment`}
+                value={
+                  <SliderHolder data-cy="slider-holder">
+                    <div data-cy="cpu-capacity">{t`CPU ${instance.cpu_capacity}`}</div>
+                    <SliderForks data-cy="slider-forks">
+                      <div data-cy="number-forks">
+                        <Plural value={forks} one="# fork" other="# forks" />
+                      </div>
+                      <Slider
+                        areCustomStepsContinuous
+                        max={1}
+                        min={0}
+                        step={0.1}
+                        value={instance.capacity_adjustment}
+                        onChange={handleChangeValue}
+                        isDisabled={!me?.is_superuser || !instance.enabled}
+                        data-cy="slider"
+                      />
+                    </SliderForks>
+                    <div data-cy="mem-capacity">{t`RAM ${instance.mem_capacity}`}</div>
+                  </SliderHolder>
+                }
+              />
+              <Detail
+                label={t`Used Capacity`}
+                value={
+                  instance.enabled ? (
+                    <Progress
+                      title={t`Used capacity`}
+                      value={Math.round(
+                        100 - instance.percent_capacity_remaining
+                      )}
+                      measureLocation={ProgressMeasureLocation.top}
+                      size={ProgressSize.sm}
+                      aria-label={t`Used capacity`}
+                    />
+                  ) : (
+                    <Unavailable>{t`Unavailable`}</Unavailable>
+                  )
+                }
+              />
+            </>
+          )}
+          {healthCheck?.errors && (
+            <Detail
+              fullWidth
+              label={t`Errors`}
+              value={
+                <CodeBlock>
+                  <CodeBlockCode>{healthCheck?.errors}</CodeBlockCode>
+                </CodeBlock>
+              }
             />
           )}
-          <Tooltip content={t`Run a health check on the instance`}>
-            <Button
-              isDisabled={!me.is_superuser || isRunningHealthCheck}
-              variant="primary"
-              ouiaId="health-check-button"
-              onClick={fetchHealthCheck}
-              isLoading={isRunningHealthCheck}
-              spinnerAriaLabel={t`Running health check`}
-            >
-              {t`Run health check`}
-            </Button>
-          </Tooltip>
-          <InstanceToggle
-            css="display: inline-flex;"
-            fetchInstances={fetchDetails}
-            instance={instance}
-          />
-        </CardActionsRow>
-      )}
+        </DetailList>
+        {!isHopNode && (
+          <CardActionsRow>
+            {me.is_superuser && isK8s && instance.node_type === 'execution' && (
+              <RemoveInstanceButton
+                itemsToRemove={[instance]}
+                isK8s={isK8s}
+                onRemove={removeInstances}
+              />
+            )}
+            <Tooltip content={t`Run a health check on the instance`}>
+              <Button
+                isDisabled={!me.is_superuser || isRunningHealthCheck}
+                variant="primary"
+                ouiaId="health-check-button"
+                onClick={fetchHealthCheck}
+                isLoading={isRunningHealthCheck}
+                spinnerAriaLabel={t`Running health check`}
+              >
+                {t`Run health check`}
+              </Button>
+            </Tooltip>
+            <InstanceToggle
+              css="display: inline-flex;"
+              fetchInstances={fetchDetails}
+              instance={instance}
+            />
+          </CardActionsRow>
+        )}
 
-      {error && (
-        <AlertModal
-          isOpen={error}
-          onClose={dismissError}
-          title={t`Error!`}
-          variant="error"
-        >
-          {updateInstanceError
-            ? t`Failed to update capacity adjustment.`
-            : t`Failed to disassociate one or more instances.`}
-          <ErrorDetail error={error} />
-        </AlertModal>
-      )}
+        {error && (
+          <AlertModal
+            isOpen={error}
+            onClose={dismissError}
+            title={t`Error!`}
+            variant="error"
+          >
+            {updateInstanceError
+              ? t`Failed to update capacity adjustment.`
+              : t`Failed to disassociate one or more instances.`}
+            <ErrorDetail error={error} />
+          </AlertModal>
+        )}
 
-      {removeError && (
-        <AlertModal
-          isOpen={removeError}
-          variant="error"
-          aria-label={t`Removal Error`}
-          title={t`Error!`}
-          onClose={clearDeletionError}
-        >
-          {t`Failed to remove one or more instances.`}
-          <ErrorDetail error={removeError} />
-        </AlertModal>
-      )}
-    </CardBody>
+        {removeError && (
+          <AlertModal
+            isOpen={removeError}
+            variant="error"
+            aria-label={t`Removal Error`}
+            title={t`Error!`}
+            onClose={clearDeletionError}
+          >
+            {t`Failed to remove one or more instances.`}
+            <ErrorDetail error={removeError} />
+          </AlertModal>
+        )}
+      </CardBody>
+    </>
   );
 }
 
