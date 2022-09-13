@@ -7,8 +7,8 @@ import PaginatedTable, {
   HeaderRow,
 } from 'components/PaginatedTable';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
-import { getQSConfig } from 'util/qs';
-import { useParams } from 'react-router-dom';
+import { getQSConfig, parseQueryString } from 'util/qs';
+import { useLocation, useParams } from 'react-router-dom';
 import DataListToolbar from 'components/DataListToolbar';
 import { InstancesAPI } from 'api';
 import useExpanded from 'hooks/useExpanded';
@@ -25,6 +25,7 @@ const QS_CONFIG = getQSConfig('peer', {
 });
 
 function InstancePeerList() {
+  const location = useLocation();
   const { id } = useParams();
   const {
     isLoading,
@@ -33,13 +34,14 @@ function InstancePeerList() {
     result: { peers, count, relatedSearchableKeys, searchableKeys },
   } = useRequest(
     useCallback(async () => {
+      const params = parseQueryString(QS_CONFIG, location.search);
       const [
         {
           data: { results, count: itemNumber },
         },
         actions,
       ] = await Promise.all([
-        InstancesAPI.readPeers(id),
+        InstancesAPI.readPeers(id, params),
         InstancesAPI.readOptions(),
       ]);
       return {
@@ -50,7 +52,7 @@ function InstancePeerList() {
         ),
         searchableKeys: getSearchableKeys(actions.data.actions?.GET),
       };
-    }, [id]),
+    }, [id, location]),
     {
       peers: [],
       count: 0,
@@ -59,7 +61,9 @@ function InstancePeerList() {
     }
   );
 
-  useEffect(() => fetchPeers(), [fetchPeers, id]);
+  useEffect(() => {
+    fetchPeers();
+  }, [fetchPeers]);
 
   const { selected, isAllSelected, handleSelect, clearSelected, selectAll } =
     useSelected(peers.filter((i) => i.node_type !== 'hop'));
