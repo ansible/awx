@@ -131,6 +131,13 @@ EXAMPLES = '''
       url: http://www.example.com/hook
       headers:
         X-Custom-Header: value123
+    messages:
+      started:
+        body: !unsafe '{"msg": "{{ job_friendly_name }}{{ job.id }} started"}'
+      success:
+        body: !unsafe '{"msg": "{{ job_friendly_name }} completed in {{ job.elapsed }} seconds"}'
+      error:
+        body: !unsafe '{"msg": "{{ job_friendly_name }} FAILED! Please look at {{ job.url }}"}'
     state: present
     controller_config_file: "~/tower_cli.cfg"
 
