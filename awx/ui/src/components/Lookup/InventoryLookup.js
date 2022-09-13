@@ -39,13 +39,7 @@ function InventoryLookup({
   const autoPopulateLookup = useAutoPopulateLookup(onChange);
 
   const {
-    result: {
-      inventories,
-      count,
-      relatedSearchableKeys,
-      searchableKeys,
-      canEdit,
-    },
+    result: { inventories, count, relatedSearchableKeys, searchableKeys },
     request: fetchInventories,
     error,
     isLoading,
@@ -85,8 +79,6 @@ function InventoryLookup({
             key,
             type: actionsResponse.data.actions?.GET[key].type,
           })),
-        canEdit:
-          Boolean(actionsResponse.data.actions.POST) || isOverrideDisabled,
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [autoPopulate, autoPopulateLookup, history.location]),
@@ -95,7 +87,6 @@ function InventoryLookup({
       count: 0,
       relatedSearchableKeys: [],
       searchableKeys: [],
-      canEdit: false,
     }
   );
 
@@ -129,7 +120,7 @@ function InventoryLookup({
       label={t`Inventory`}
       promptId={promptId}
       promptName={promptName}
-      isDisabled={!canEdit || isDisabled}
+      isDisabled={isOverrideDisabled || isDisabled}
       tooltip={t`Select the inventory containing the hosts
             you want this job to manage.`}
     >
@@ -145,7 +136,7 @@ function InventoryLookup({
         fieldName={fieldName}
         validate={validate}
         isLoading={isLoading}
-        isDisabled={!canEdit || isDisabled}
+        isDisabled={isOverrideDisabled || isDisabled}
         qsConfig={QS_CONFIG}
         renderOptionsList={({ state, dispatch, canDelete }) => (
           <OptionsList
@@ -200,7 +191,7 @@ function InventoryLookup({
         onBlur={onBlur}
         required={required}
         isLoading={isLoading}
-        isDisabled={!canEdit || isDisabled}
+        isDisabled={isOverrideDisabled || isDisabled}
         qsConfig={QS_CONFIG}
         renderOptionsList={({ state, dispatch, canDelete }) => (
           <OptionsList

@@ -3,7 +3,12 @@ import { useHistory } from 'react-router-dom';
 
 import { CardBody } from 'components/Card';
 import { getAddedAndRemoved } from 'util/lists';
-import { WorkflowJobTemplatesAPI, OrganizationsAPI, UsersAPI } from 'api';
+import {
+  InventoriesAPI,
+  WorkflowJobTemplatesAPI,
+  OrganizationsAPI,
+  UsersAPI,
+} from 'api';
 import { useConfig } from 'contexts/Config';
 import useRequest from 'hooks/useRequest';
 import ContentError from 'components/ContentError';
@@ -80,15 +85,16 @@ function WorkflowJobTemplateEdit({ template }) {
   };
 
   const {
-    isLoading,
+    isLoading: isFetchUserRoleLoading,
     request: fetchUserRole,
     result: { orgAdminResults, isOrgAdmin },
-    error: contentError,
+    error: fetchUserRoleError,
   } = useRequest(
     useCallback(async () => {
       const {
         data: { results, count },
       } = await UsersAPI.readAdminOfOrganizations(me?.id);
+
       return { isOrgAdmin: count > 0, orgAdminResults: results };
     }, [me.id]),
     { isOrgAdmin: false, orgAdminResults: null }
@@ -98,11 +104,37 @@ function WorkflowJobTemplateEdit({ template }) {
     fetchUserRole();
   }, [fetchUserRole]);
 
-  if (contentError) {
-    return <ContentError error={contentError} />;
+  const {
+    isLoading: isFetchInventoryLoading,
+    request: fetchInventory,
+    result: { canChangeInventory },
+    error: fetchInventoryError,
+  } = useRequest(
+    useCallback(async () => {
+      if (template.inventory) {
+        const {
+          data: { count },
+        } = await InventoriesAPI.read({
+          role_level: 'use_role',
+          id: template.inventory,
+        });
+        return { canChangeInventory: count && count > 0 };
+      }
+
+      return { canChangeInventory: true };
+    }, [template.inventory]),
+    { canChangeInventory: false }
+  );
+
+  useEffect(() => {
+    fetchInventory();
+  }, [fetchInventory]);
+
+  if (fetchUserRoleError || fetchInventoryError) {
+    return <ContentError error={fetchUserRoleError || fetchInventoryError} />;
   }
 
-  if (isLoading || !orgAdminResults) {
+  if (isFetchUserRoleLoading || isFetchInventoryLoading || !orgAdminResults) {
     return <ContentLoading />;
   }
 
@@ -114,6 +146,7 @@ function WorkflowJobTemplateEdit({ template }) {
         template={template}
         submitError={formSubmitError}
         isOrgAdmin={isOrgAdmin}
+        isInventoryDisabled={!canChangeInventory}
       />
     </CardBody>
   );
