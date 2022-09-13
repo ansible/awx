@@ -1947,14 +1947,14 @@ class WorkflowJobTemplateNodeAccess(UnifiedCredentialsMixin, BaseAccess):
         else:
             return self.user in obj.workflow_job_template.admin_role
 
-    def ujt_execute(self, obj):
+    def ujt_execute(self, obj, data=None):
         if not obj.unified_job_template:
             return True
-        return self.check_related('unified_job_template', UnifiedJobTemplate, {}, obj=obj, role_field='execute_role', mandatory=True)
+        return self.check_related('unified_job_template', UnifiedJobTemplate, data, obj=obj, role_field='execute_role', mandatory=True)
 
     def can_change(self, obj, data):
         # should not be able to edit the prompts if lacking access to UJT or WFJT
-        return self.ujt_execute(obj) and self.wfjt_admin(obj) and JobLaunchConfigAccess(self.user).can_change(obj, data)
+        return self.ujt_execute(obj, data=data) and self.wfjt_admin(obj) and JobLaunchConfigAccess(self.user).can_change(obj, data)
 
     def can_delete(self, obj):
         return self.wfjt_admin(obj)

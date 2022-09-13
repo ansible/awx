@@ -6,6 +6,7 @@ from awx.main.access import (
     WorkflowJobAccess,
     # WorkflowJobNodeAccess
 )
+from awx.main.models import JobTemplate, WorkflowJobTemplateNode
 
 from rest_framework.exceptions import PermissionDenied
 
@@ -86,6 +87,16 @@ class TestWorkflowJobTemplateNodeAccess:
         access = WorkflowJobTemplateNodeAccess(rando)
         job_template.read_role.members.add(rando)
         assert not access.can_add({'workflow_job_template': wfjt, 'unified_job_template': job_template})
+
+    def test_change_JT_no_start_perm(self, wfjt, rando):
+        wfjt.admin_role.members.add(rando)
+        access = WorkflowJobTemplateNodeAccess(rando)
+        jt1 = JobTemplate.objects.create()
+        jt1.execute_role.members.add(rando)
+        assert access.can_add({'workflow_job_template': wfjt, 'unified_job_template': jt1})
+        node = WorkflowJobTemplateNode.objects.create(workflow_job_template=wfjt, unified_job_template=jt1)
+        jt2 = JobTemplate.objects.create()
+        assert not access.can_change(node, {'unified_job_template': jt2.id})
 
     def test_add_node_with_minimum_permissions(self, wfjt, job_template, inventory, rando):
         wfjt.admin_role.members.add(rando)
