@@ -93,10 +93,9 @@ function InstanceList() {
       if (response) {
         setShowHealthCheckAlert(true);
       }
-
-      return response;
     }, [selected])
   );
+
   const handleHealthCheck = async () => {
     await fetchHealthCheck();
     clearSelected();
