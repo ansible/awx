@@ -382,7 +382,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
             unified_job.survey_passwords = new_job_passwords
             kwargs['survey_passwords'] = new_job_passwords  # saved in config object for relaunch
 
-        if 'instance_groups' in kwargs:
+        if kwargs.get('instance_groups'):
             unified_job.preferred_instance_groups_cache = [ig.id for ig in kwargs['instance_groups']]
         else:
             unified_job.preferred_instance_groups_cache = unified_job._get_preferred_instance_group_cache()
