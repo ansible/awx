@@ -18,8 +18,8 @@ class Instances extends Base {
     return this.http.get(`${this.baseUrl}${instanceId}/health_check/`);
   }
 
-  readPeers(instanceId) {
-    return this.http.get(`${this.baseUrl}${instanceId}/peers`);
+  readPeers(instanceId, params) {
+    return this.http.get(`${this.baseUrl}${instanceId}/peers/`, { params });
   }
 
   readInstanceGroup(instanceId) {
