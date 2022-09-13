@@ -4794,7 +4794,7 @@ class SchedulePreviewSerializer(BaseSerializer):
         return value
 
 
-class ScheduleSerializer(LabelsListMixin, LaunchConfigurationBaseSerializer, SchedulePreviewSerializer):
+class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSerializer):
     show_capabilities = ['edit', 'delete']
 
     timezone = serializers.SerializerMethodField(

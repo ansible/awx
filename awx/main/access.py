@@ -1925,7 +1925,7 @@ class WorkflowJobTemplateNodeAccess(UnifiedCredentialsMixin, BaseAccess):
     """
 
     model = WorkflowJobTemplateNode
-    prefetch_related = ('success_nodes', 'failure_nodes', 'always_nodes', 'unified_job_template', 'credentials', 'workflow_job_template')
+    prefetch_related = ('success_nodes', 'failure_nodes', 'always_nodes', 'unified_job_template', 'workflow_job_template')
 
     def filtered_queryset(self):
         return self.model.objects.filter(workflow_job_template__in=WorkflowJobTemplate.accessible_objects(self.user, 'read_role'))
@@ -1973,7 +1973,7 @@ class WorkflowJobTemplateNodeAccess(UnifiedCredentialsMixin, BaseAccess):
 
     def can_unattach(self, obj, sub_obj, relationship, data=None):
         if relationship in ('success_nodes', 'failure_nodes', 'always_nodes'):
-            return self.wfjt_admin(obj) and self.check_same_WFJT(obj, sub_obj)
+            return self.wfjt_admin(obj)
         return super().can_unattach(obj, sub_obj, relationship, data=None)
 
 
