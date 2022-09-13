@@ -132,7 +132,7 @@ function CredentialsStep({
   );
 
   return (
-    <>
+    <div data-cy="credentials-prompt">
       {meta.error && (
         <CredentialErrorAlert variant="danger" isInline title={meta.error} />
       )}
@@ -208,7 +208,7 @@ function CredentialsStep({
         }}
         renderItemChip={renderChip}
       />
-    </>
+    </div>
   );
 }
 

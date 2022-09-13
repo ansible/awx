@@ -70,7 +70,7 @@ function InventoryStep({ warningMessage = null }) {
   }
 
   return (
-    <>
+    <div data-cy="inventory-prompt">
       {meta.touched && meta.error && (
         <InventoryErrorAlert variant="danger" isInline title={meta.error} />
       )}
@@ -109,7 +109,7 @@ function InventoryStep({ warningMessage = null }) {
         selectItem={helpers.setValue}
         deselectItem={() => field.onChange(null)}
       />
-    </>
+    </div>
   );
 }
 

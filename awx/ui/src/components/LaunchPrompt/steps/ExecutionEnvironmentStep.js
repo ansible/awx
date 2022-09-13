@@ -66,50 +66,52 @@ function ExecutionEnvironmentStep() {
   }
 
   return (
-    <OptionsList
-      value={field.value ? [field.value] : []}
-      options={execution_environments}
-      optionCount={count}
-      columns={[
-        {
-          name: t`Name`,
-          key: 'name',
-        },
-        {
-          name: t`Image`,
-          key: 'image',
-        },
-      ]}
-      searchColumns={[
-        {
-          name: t`Name`,
-          key: 'name__icontains',
-          isDefault: true,
-        },
-        {
-          name: t`Image`,
-          key: 'image__icontains',
-        },
-      ]}
-      sortColumns={[
-        {
-          name: t`Name`,
-          key: 'name',
-        },
-        {
-          name: t`Image`,
-          key: 'image',
-        },
-      ]}
-      searchableKeys={searchableKeys}
-      relatedSearchableKeys={relatedSearchableKeys}
-      header={t`Execution Environments`}
-      name="execution_environment"
-      qsConfig={QS_CONFIG}
-      readOnly
-      selectItem={helpers.setValue}
-      deselectItem={() => helpers.setValue(null)}
-    />
+    <div data-cy="execution-environment-prompt">
+      <OptionsList
+        value={field.value ? [field.value] : []}
+        options={execution_environments}
+        optionCount={count}
+        columns={[
+          {
+            name: t`Name`,
+            key: 'name',
+          },
+          {
+            name: t`Image`,
+            key: 'image',
+          },
+        ]}
+        searchColumns={[
+          {
+            name: t`Name`,
+            key: 'name__icontains',
+            isDefault: true,
+          },
+          {
+            name: t`Image`,
+            key: 'image__icontains',
+          },
+        ]}
+        sortColumns={[
+          {
+            name: t`Name`,
+            key: 'name',
+          },
+          {
+            name: t`Image`,
+            key: 'image',
+          },
+        ]}
+        searchableKeys={searchableKeys}
+        relatedSearchableKeys={relatedSearchableKeys}
+        header={t`Execution Environments`}
+        name="execution_environment"
+        qsConfig={QS_CONFIG}
+        readOnly
+        selectItem={helpers.setValue}
+        deselectItem={() => helpers.setValue(null)}
+      />
+    </div>
   );
 }
 
