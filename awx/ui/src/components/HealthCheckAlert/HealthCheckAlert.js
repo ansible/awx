@@ -1,7 +1,15 @@
 import React from 'react';
 import { t } from '@lingui/macro';
-import { Alert, Button, AlertActionCloseButton } from '@patternfly/react-core';
+import {
+  Alert as PFAlert,
+  Button,
+  AlertActionCloseButton,
+} from '@patternfly/react-core';
+import styled from 'styled-components';
 
+const Alert = styled(PFAlert)`
+  z-index: 1;
+`;
 function HealthCheckAlert({ onSetHealthCheckAlert }) {
   return (
     <Alert
@@ -15,7 +23,7 @@ function HealthCheckAlert({ onSetHealthCheckAlert }) {
           <Button
             variant="link"
             isInline
-            onClick={() => window.location.reload(false)}
+            onClick={() => window.location.reload()}
           >{t`Reload`}</Button>
         </>
       }
