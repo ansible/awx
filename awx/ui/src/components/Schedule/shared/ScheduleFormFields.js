@@ -171,7 +171,7 @@ export default function ScheduleFormFields({
             >
               <FrequencySelect
                 id="exception-frequency"
-                onChange={exceptionFrequencyHelper.setValue}
+                onChange={updateFrequency(exceptionFrequencyHelper.setValue)}
                 value={exceptionFrequency.value}
                 placeholderText={
                   exceptionFrequency.value.length
