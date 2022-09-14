@@ -1490,6 +1490,7 @@ class rhv(PluginFileInjector):
     collection = 'ovirt'
     downstream_namespace = 'redhat'
     downstream_collection = 'rhv'
+    use_fqcn = True
 
 
 class satellite6(PluginFileInjector):
