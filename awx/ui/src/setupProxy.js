@@ -8,6 +8,7 @@ module.exports = (app) => {
       target: TARGET,
       secure: false,
       ws: true,
+      changeOrigin: true,
     })
   );
 };
