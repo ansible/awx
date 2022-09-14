@@ -270,9 +270,11 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
   const showExecutionEnvironmentDetail =
     ask_execution_environment_on_launch && execution_environment;
   const showLabelsDetail = ask_labels_on_launch && labels && labels.length > 0;
-  const showForksDetail = ask_forks_on_launch;
-  const showJobSlicingDetail = ask_job_slice_count_on_launch;
-  const showTimeoutDetail = ask_timeout_on_launch;
+  const showForksDetail = ask_forks_on_launch && typeof forks === 'number';
+  const showJobSlicingDetail =
+    ask_job_slice_count_on_launch && typeof job_slice_count === 'number';
+  const showTimeoutDetail =
+    ask_timeout_on_launch && typeof timeout === 'number';
   const showInstanceGroupsDetail =
     ask_instance_groups_on_launch && instanceGroups.length > 0;
 
@@ -551,17 +553,17 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
                 value={
                   <ChipGroup
                     numChips={5}
-                    totalChips={summary_fields.labels.results.length}
+                    totalChips={labels.length}
                     ouiaId="schedule-label-chips"
                   >
-                    {summary_fields.labels.results.map((l) => (
+                    {labels.map((l) => (
                       <Chip key={l.id} ouiaId={`label-${l.id}-chip`} isReadOnly>
                         {l.name}
                       </Chip>
                     ))}
                   </ChipGroup>
                 }
-                isEmpty={summary_fields.labels.results.length === 0}
+                isEmpty={labels.length === 0}
               />
             )}
             {showTagsDetail && (
