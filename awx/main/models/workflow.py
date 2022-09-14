@@ -218,7 +218,7 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         approval_template = WorkflowApprovalTemplate(**kwargs)
         approval_template.save()
         self.unified_job_template = approval_template
-        self.save()
+        self.save(update_fields=['unified_job_template'])
         return approval_template
 
 
