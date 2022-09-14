@@ -178,8 +178,8 @@ describe('<WorkflowJobTemplateEdit/>', () => {
       ask_labels_on_launch: false,
       ask_skip_tags_on_launch: false,
       ask_tags_on_launch: false,
-      job_tags: '',
-      skip_tags: '',
+      job_tags: null,
+      skip_tags: null,
     });
     wrapper.update();
     await expect(WorkflowJobTemplatesAPI.disassociateLabel).toBeCalledWith(6, {
@@ -288,12 +288,12 @@ describe('<WorkflowJobTemplateEdit/>', () => {
       description: 'bar',
       extra_vars: '---',
       inventory: 1,
-      job_tags: '',
+      job_tags: null,
       limit: '5000',
       name: 'Foo',
       organization: 1,
       scm_branch: 'devel',
-      skip_tags: '',
+      skip_tags: null,
       webhook_credential: null,
       webhook_service: '',
       webhook_url: '',
