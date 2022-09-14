@@ -39,7 +39,7 @@ from awx.main.utils import (
     ScheduleTaskManager,
     ScheduleWorkflowManager,
 )
-from awx.main.utils.common import task_manager_bulk_reschedule
+from awx.main.utils.common import task_manager_bulk_reschedule, is_testing
 from awx.main.signals import disable_activity_stream
 from awx.main.constants import ACTIVE_STATES
 from awx.main.scheduler.dependency_graph import DependencyGraph
@@ -97,7 +97,7 @@ class TaskBase:
         self.all_tasks = [t for t in qs]
 
     def record_aggregate_metrics(self, *args):
-        if not settings.IS_TESTING():
+        if not is_testing():
             # increment task_manager_schedule_calls regardless if the other
             # metrics are recorded
             s_metrics.Metrics(auto_pipe_execute=True).inc(f"{self.prefix}__schedule_calls", 1)
