@@ -35,6 +35,9 @@ function formatTimeout(timeout) {
   if (typeof timeout === 'undefined' || timeout === null) {
     return null;
   }
+  if (typeof timeout === 'string') {
+    return timeout;
+  }
   const minutes = Math.floor(timeout / 60);
   const seconds = timeout - Math.floor(timeout / 60) * 60;
   return (
@@ -348,7 +351,10 @@ function PromptDetail({
                 />
               )}
               {launchConfig.ask_timeout_on_launch && (
-                <Detail label={t`Timeout`} value={overrides.timeout} />
+                <Detail
+                  label={t`Timeout`}
+                  value={formatTimeout(overrides?.timeout)}
+                />
               )}
               {launchConfig.ask_diff_mode_on_launch && (
                 <Detail
