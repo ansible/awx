@@ -19,6 +19,8 @@ function NodeViewModal({ readOnly }) {
   const {
     fullUnifiedJobTemplate,
     originalNodeCredentials,
+    originalNodeInstanceGroups,
+    originalNodeLabels,
     originalNodeObject,
     promptValues,
   } = nodeToView;
@@ -160,7 +162,7 @@ function NodeViewModal({ readOnly }) {
           originalNodeObject.summary_fields.execution_environment;
       }
       if (launchConfig.ask_labels_on_launch) {
-        overrides.labels = originalNodeObject.labels;
+        overrides.labels = originalNodeLabels || [];
       }
       if (launchConfig.ask_forks_on_launch) {
         overrides.forks = originalNodeObject.forks;
@@ -203,6 +205,9 @@ function NodeViewModal({ readOnly }) {
       }
       if (launchConfig.ask_credential_on_launch) {
         overrides.credentials = originalNodeCredentials || [];
+      }
+      if (launchConfig.ask_instance_groups_on_launch) {
+        overrides.instance_groups = originalNodeInstanceGroups || [];
       }
     }
 
