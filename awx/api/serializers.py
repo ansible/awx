@@ -4790,12 +4790,12 @@ class InstanceSerializer(BaseSerializer):
         read_only_fields = ('ip_address', 'uuid', 'version')
         fields = (
             'id',
+            'hostname',
             'type',
             'url',
             'related',
             'summary_fields',
             'uuid',
-            'hostname',
             'created',
             'modified',
             'last_seen',
@@ -4819,6 +4819,7 @@ class InstanceSerializer(BaseSerializer):
             'ip_address',
             'listener_port',
         )
+        extra_kwargs = {'node_type': {'default': 'execution'}, 'node_state': {'default': 'installed'}}
 
     def get_related(self, obj):
         res = super(InstanceSerializer, self).get_related(obj)
@@ -4877,6 +4878,18 @@ class InstanceSerializer(BaseSerializer):
         else:
             if value and value != Instance.States.INSTALLED:
                 raise serializers.ValidationError("Can only create instances in the 'installed' state.")
+
+        return value
+
+    def validate_hostname(self, value):
+        if self.instance and self.instance.hostname != value:
+            raise serializers.ValidationError("Cannot change hostname.")
+
+        return value
+
+    def validate_listener_port(self, value):
+        if self.instance and self.instance.listener_port != value:
+            raise serializers.ValidationError("Cannot change listener port.")
 
         return value
 
