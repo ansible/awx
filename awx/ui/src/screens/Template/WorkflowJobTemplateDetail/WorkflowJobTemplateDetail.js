@@ -25,7 +25,7 @@ import Sparkline from 'components/Sparkline';
 import { toTitleCase } from 'util/strings';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
-import helpText from '../shared/WorkflowJobTemplate.helptext';
+import getHelpText from '../shared/WorkflowJobTemplate.helptext';
 
 function WorkflowJobTemplateDetail({ template }) {
   const {
@@ -44,7 +44,7 @@ function WorkflowJobTemplateDetail({ template }) {
     scm_branch: scmBranch,
     limit,
   } = template;
-
+  const helpText = getHelpText();
   const urlOrigin = window.location.origin;
   const history = useHistory();
 

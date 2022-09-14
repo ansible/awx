@@ -1,7 +1,7 @@
 import React from 'react';
 import { t } from '@lingui/macro';
 
-const helpText = {
+const helpText = () => ({
   emailRecepients: t`Use one email address per line to create a recipient list for this type of notification.`,
   emailTimeout: t`The amount of time (in seconds) before the email
           notification stops trying to reach the host and times out. Ranges
@@ -40,6 +40,6 @@ const helpText = {
       <span>{t`for more information.`}</span>
     </>
   ),
-};
+});
 
 export default helpText;

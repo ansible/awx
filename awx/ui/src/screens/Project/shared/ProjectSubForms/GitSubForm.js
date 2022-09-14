@@ -11,8 +11,7 @@ import {
   ScmCredentialFormField,
   ScmTypeOptions,
 } from './SharedFields';
-
-import projectHelpStrings from '../Project.helptext';
+import getProjectHelpStrings from '../Project.helptext';
 
 const GitSubForm = ({
   credential,
@@ -22,6 +21,7 @@ const GitSubForm = ({
   const docsURL = `${getDocsBaseUrl(
     useConfig()
   )}/html/userguide/projects.html#manage-playbooks-using-source-control`;
+  const projectHelpStrings = getProjectHelpStrings();
 
   return (
     <>

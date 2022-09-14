@@ -21,7 +21,7 @@ const ansibleDocUrls = {
     'https://docs.ansible.com/ansible/latest/collections/community/vmware/vmware_vm_inventory_inventory.html',
 };
 
-const getInventoryHelpTextStrings = {
+const getInventoryHelpTextStrings = () => ({
   labels: t`Optional labels that describe this inventory,
           such as 'dev' or 'test'. Labels can be used to group and filter
           inventories and completed jobs.`,
@@ -191,6 +191,6 @@ const getInventoryHelpTextStrings = {
   sourcePath: t`The inventory file
           to be synced by this source. You can select from
           the dropdown or enter a file within the input.`,
-};
+});
 
 export default getInventoryHelpTextStrings;

@@ -26,7 +26,7 @@ import ErrorDetail from '../../ErrorDetail';
 import ChipGroup from '../../ChipGroup';
 import { VariablesDetail } from '../../CodeEditor';
 import { VERBOSITY } from '../../VerbositySelectField';
-import helpText from '../../../screens/Template/shared/JobTemplate.helptext';
+import getHelpText from '../../../screens/Template/shared/JobTemplate.helptext';
 
 const PromptDivider = styled(Divider)`
   margin-top: var(--pf-global--spacer--lg);
@@ -85,7 +85,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
     timezone,
     verbosity,
   } = schedule;
-
+  const helpText = getHelpText();
   const history = useHistory();
   const { pathname } = useLocation();
   const pathRoot = pathname.substr(0, pathname.indexOf('schedules'));

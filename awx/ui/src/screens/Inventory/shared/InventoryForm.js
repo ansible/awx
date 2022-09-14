@@ -13,9 +13,10 @@ import InstanceGroupsLookup from 'components/Lookup/InstanceGroupsLookup';
 import OrganizationLookup from 'components/Lookup/OrganizationLookup';
 import ContentError from 'components/ContentError';
 import { FormColumnLayout, FormFullWidthLayout } from 'components/FormLayout';
-import helpText from './Inventory.helptext';
+import getHelpText from './Inventory.helptext';
 
 function InventoryFormFields({ inventory }) {
+  const helpText = getHelpText();
   const [contentError, setContentError] = useState(false);
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [organizationField, organizationMeta, organizationHelpers] =

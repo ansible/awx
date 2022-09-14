@@ -2,7 +2,7 @@ import React from 'react';
 import { t } from '@lingui/macro';
 import getDocsBaseUrl from 'util/getDocsBaseUrl';
 
-const jtHelpTextStrings = {
+const jtHelpTextStrings = () => ({
   jobType: t`For job templates, select run to execute the playbook. Select check to only check playbook syntax, test environment setup, and report problems without executing the playbook.`,
   inventory: t`Select the inventory containing the hosts you want this job to manage.`,
   project: t`Select the project containing the playbook you want this job to execute.`,
@@ -60,6 +60,6 @@ const jtHelpTextStrings = {
       {t`for more information.`}
     </span>
   ),
-};
+});
 
 export default jtHelpTextStrings;

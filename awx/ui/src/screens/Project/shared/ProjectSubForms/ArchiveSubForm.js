@@ -1,6 +1,6 @@
 import 'styled-components/macro';
 import React from 'react';
-import projectHelpText from '../Project.helptext';
+import getProjectHelpText from '../Project.helptext';
 
 import {
   UrlFormField,
@@ -12,15 +12,18 @@ const ArchiveSubForm = ({
   credential,
   onCredentialSelection,
   scmUpdateOnLaunch,
-}) => (
-  <>
-    <UrlFormField tooltip={projectHelpText.archiveUrl} />
-    <ScmCredentialFormField
-      credential={credential}
-      onCredentialSelection={onCredentialSelection}
-    />
-    <ScmTypeOptions scmUpdateOnLaunch={scmUpdateOnLaunch} />
-  </>
-);
+}) => {
+  const projectHelpText = getProjectHelpText();
+  return (
+    <>
+      <UrlFormField tooltip={projectHelpText.archiveUrl} />
+      <ScmCredentialFormField
+        credential={credential}
+        onCredentialSelection={onCredentialSelection}
+      />
+      <ScmTypeOptions scmUpdateOnLaunch={scmUpdateOnLaunch} />
+    </>
+  );
+};
 
 export default ArchiveSubForm;

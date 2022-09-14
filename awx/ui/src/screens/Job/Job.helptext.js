@@ -1,7 +1,7 @@
 import React from 'react';
 import { t } from '@lingui/macro';
 
-const jobHelpText = {
+const jobHelpText = () => ({
   jobType: t`For job templates, select run to execute the playbook. Select check to only check playbook syntax, test environment setup, and report problems without executing the playbook.`,
   inventory: t`Select the inventory containing the hosts you want this job to manage.`,
   project: t`Select the project containing the playbook you want this job to execute.`,
@@ -41,6 +41,6 @@ const jobHelpText = {
     ) : (
       t`These arguments are used with the specified module.`
     ),
-};
+});
 
 export default jobHelpText;

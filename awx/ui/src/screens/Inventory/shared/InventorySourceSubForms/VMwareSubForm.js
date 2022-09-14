@@ -13,9 +13,10 @@ import {
   EnabledValueField,
   HostFilterField,
 } from './SharedFields';
-import helpText from '../Inventory.helptext';
+import getHelpText from '../Inventory.helptext';
 
 const VMwareSubForm = ({ autoPopulateCredential }) => {
+  const helpText = getHelpText();
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [credentialField, credentialMeta, credentialHelpers] =
     useField('credential');

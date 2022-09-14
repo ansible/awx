@@ -32,9 +32,10 @@ import Popover from 'components/Popover';
 import { VERBOSITY } from 'components/VerbositySelectField';
 import InventorySourceSyncButton from '../shared/InventorySourceSyncButton';
 import useWsInventorySourcesDetails from '../InventorySources/useWsInventorySourcesDetails';
-import helpText from '../shared/Inventory.helptext';
+import getHelpText from '../shared/Inventory.helptext';
 
 function InventorySourceDetail({ inventorySource }) {
+  const helpText = getHelpText();
   const {
     created,
     custom_virtualenv,

@@ -46,7 +46,7 @@ import LabelSelect from 'components/LabelSelect';
 import { VerbositySelectField } from 'components/VerbositySelectField';
 import PlaybookSelect from './PlaybookSelect';
 import WebhookSubForm from './WebhookSubForm';
-import helpText from './JobTemplate.helptext';
+import getHelpText from './JobTemplate.helptext';
 
 const { origin } = document.location;
 
@@ -60,6 +60,7 @@ function JobTemplateForm({
   validateField,
   isOverrideDisabledLookup, // TODO: this is a confusing variable name
 }) {
+  const helpText = getHelpText();
   const [contentError, setContentError] = useState(false);
   const [allowCallbacks, setAllowCallbacks] = useState(
     Boolean(template?.host_config_key)

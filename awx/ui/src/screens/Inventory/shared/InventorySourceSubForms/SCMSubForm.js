@@ -21,9 +21,10 @@ import {
   EnabledValueField,
   HostFilterField,
 } from './SharedFields';
-import helpText from '../Inventory.helptext';
+import getHelpText from '../Inventory.helptext';
 
 const SCMSubForm = ({ autoPopulateProject }) => {
+  const helpText = getHelpText();
   const [isOpen, setIsOpen] = useState(false);
   const [sourcePath, setSourcePath] = useState([]);
   const { setFieldValue, setFieldTouched } = useFormikContext();
