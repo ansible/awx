@@ -20,6 +20,7 @@ import OtherPromptsStep from './steps/OtherPromptsStep';
 import PreviewStep from './steps/PreviewStep';
 import ExecutionEnvironmentStep from './steps/ExecutionEnvironmentStep';
 import InstanceGroupsStep from './steps/InstanceGroupsStep';
+import SurveyStep from './steps/SurveyStep';
 
 jest.mock('../../api/models/Inventories');
 jest.mock('../../api/models/ExecutionEnvironments');
@@ -376,6 +377,48 @@ describe('LaunchPrompt', () => {
     expect(steps).toHaveLength(2);
     expect(steps[0].name.props.children).toEqual('Other prompts');
     expect(isElementOfType(steps[0].component, OtherPromptsStep)).toEqual(true);
+    expect(isElementOfType(steps[1].component, PreviewStep)).toEqual(true);
+  });
+
+  test('should add survey step', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <LaunchPrompt
+          launchConfig={{
+            ...config,
+            survey_enabled: true,
+          }}
+          resource={resource}
+          onLaunch={noop}
+          onCancel={noop}
+          surveyConfig={{
+            name: '',
+            description: '',
+            spec: [
+              {
+                choices: '',
+                default: '',
+                max: 1024,
+                min: 0,
+                new_question: false,
+                question_description: '',
+                question_name: 'foo',
+                required: true,
+                type: 'text',
+                variable: 'foo',
+              },
+            ],
+          }}
+        />
+      );
+    });
+    const wizard = await waitForElement(wrapper, 'Wizard');
+    const steps = wizard.prop('steps');
+
+    expect(steps).toHaveLength(2);
+    expect(steps[0].name.props.children).toEqual('Survey');
+    expect(isElementOfType(steps[0].component, SurveyStep)).toEqual(true);
     expect(isElementOfType(steps[1].component, PreviewStep)).toEqual(true);
   });
 });
