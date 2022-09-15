@@ -48,11 +48,22 @@ class ReceptorConnectionType(Enum):
     STREAMTLS = 2
 
 
-def get_receptor_sockfile():
-    lock = FileLock(__RECEPTOR_CONF_LOCKFILE)
-    with lock:
+def read_receptor_config():
+    # for K8S deployments, getting a lock is necessary as another process
+    # may be re-writing the config at this time
+    if settings.IS_K8S:
+        lock = FileLock(__RECEPTOR_CONF_LOCKFILE)
+        with lock:
+            with open(__RECEPTOR_CONF, 'r') as f:
+                return yaml.safe_load(f)
+    else:
         with open(__RECEPTOR_CONF, 'r') as f:
-            data = yaml.safe_load(f)
+            return yaml.safe_load(f)
+
+
+def get_receptor_sockfile():
+    data = read_receptor_config()
+
     for section in data:
         for entry_name, entry_data in section.items():
             if entry_name == 'control-service':
@@ -68,10 +79,7 @@ def get_tls_client(use_stream_tls=None):
     if not use_stream_tls:
         return None
 
-    lock = FileLock(__RECEPTOR_CONF_LOCKFILE)
-    with lock:
-        with open(__RECEPTOR_CONF, 'r') as f:
-            data = yaml.safe_load(f)
+    data = read_receptor_config()
     for section in data:
         for entry_name, entry_data in section.items():
             if entry_name == 'tls-client':
