@@ -36,17 +36,6 @@ class Label(CommonModelNameNotUnique):
     def get_absolute_url(self, request=None):
         return reverse('api:label_detail', kwargs={'pk': self.pk}, request=request)
 
-    @staticmethod
-    def get_orphaned_labels():
-        return Label.objects.filter(
-            organization=None,
-            unifiedjobtemplate_labels__isnull=True,
-            inventory_labels__isnull=True,
-            schedule_labels__isnull=True,
-            workflowjobtemplatenode_labels__isnull=True,
-            workflowjobnode_labels=True,
-        )
-
     def is_detached(self):
         return Label.objects.filter(
             id=self.id,
