@@ -3220,6 +3220,8 @@ class JobCreateScheduleSerializer(LabelsListMixin, BaseSerializer):
             ret = config.prompts_dict(display=True)
             if 'inventory' in ret:
                 ret['inventory'] = self._summarize('inventory', ret['inventory'])
+            if 'execution_environment' in ret:
+                ret['execution_environment'] = self._summarize('execution_environment', ret['execution_environment'])
             if 'credentials' in ret:
                 all_creds = [self._summarize('credential', cred) for cred in ret['credentials']]
                 ret['credentials'] = all_creds
