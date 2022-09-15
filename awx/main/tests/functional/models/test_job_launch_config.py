@@ -73,8 +73,6 @@ class TestConfigReversibility:
             'instance_groups': [default_instance_group],
         }
         config = config_factory(prompts)
-        print(prompts)
-        print(config.prompts_dict())
         assert config.prompts_dict() == prompts
 
 
