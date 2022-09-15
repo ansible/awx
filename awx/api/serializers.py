@@ -3068,11 +3068,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
                 res['project_update'] = self.reverse('api:project_update_detail', kwargs={'pk': obj.project_update.pk})
         except ObjectDoesNotExist:
             pass
-        try:
-            if obj.instance_groups:
-                res['instance_groups'] = self.reverse('api:job_instance_group_list', kwargs={'pk': obj.pk})
-        except ObjectDoesNotExist:
-            pass
+        res['instance_groups'] = self.reverse('api:job_instance_group_list', kwargs={'pk': obj.pk})
         res['relaunch'] = self.reverse('api:job_relaunch', kwargs={'pk': obj.pk})
         return res
 
@@ -3224,6 +3220,8 @@ class JobCreateScheduleSerializer(LabelsListMixin, BaseSerializer):
             ret = config.prompts_dict(display=True)
             if 'inventory' in ret:
                 ret['inventory'] = self._summarize('inventory', ret['inventory'])
+            if 'execution_environment' in ret:
+                ret['execution_environment'] = self._summarize('execution_environment', ret['execution_environment'])
             if 'credentials' in ret:
                 all_creds = [self._summarize('credential', cred) for cred in ret['credentials']]
                 ret['credentials'] = all_creds
@@ -3636,7 +3634,6 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
     skip_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     diff_mode = serializers.BooleanField(required=False, allow_null=True, default=None)
     verbosity = serializers.ChoiceField(allow_null=True, required=False, default=None, choices=VERBOSITY_CHOICES)
-    execution_environment = serializers.PrimaryKeyRelatedField(queryset=ExecutionEnvironment.objects.all(), required=False, allow_null=True, default=None)
     forks = serializers.IntegerField(required=False, allow_null=True, default=None)
     job_slice_count = serializers.IntegerField(required=False, allow_null=True, default=None)
     timeout = serializers.IntegerField(required=False, allow_null=True, default=None)
@@ -3665,11 +3662,11 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
         res = super(LaunchConfigurationBaseSerializer, self).get_related(obj)
         if obj.inventory_id:
             res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory_id})
-        res['credentials'] = self.reverse('api:{}_credentials_list'.format(get_type_for_model(self.Meta.model)), kwargs={'pk': obj.pk})
-        res['labels'] = self.reverse('api:{}_labels_list'.format(get_type_for_model(self.Meta.model)), kwargs={'pk': obj.pk})
-        res['instance_groups'] = self.reverse('api:{}_instance_groups_list'.format(get_type_for_model(self.Meta.model)), kwargs={'pk': obj.pk})
         if obj.execution_environment_id:
             res['execution_environment'] = self.reverse('api:execution_environment_detail', kwargs={'pk': obj.execution_environment_id})
+        res['labels'] = self.reverse('api:{}_labels_list'.format(get_type_for_model(self.Meta.model)), kwargs={'pk': obj.pk})
+        res['credentials'] = self.reverse('api:{}_credentials_list'.format(get_type_for_model(self.Meta.model)), kwargs={'pk': obj.pk})
+        res['instance_groups'] = self.reverse('api:{}_instance_groups_list'.format(get_type_for_model(self.Meta.model)), kwargs={'pk': obj.pk})
         return res
 
     def _build_mock_obj(self, attrs):
@@ -3679,11 +3676,7 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
                 setattr(mock_obj, field.name, getattr(self.instance, field.name))
         field_names = set(field.name for field in self.Meta.model._meta.fields)
         for field_name, value in list(attrs.items()):
-            if field_name == 'execution_environment':
-                if value:
-                    setattr(mock_obj, field_name, value)
-            else:
-                setattr(mock_obj, field_name, value)
+            setattr(mock_obj, field_name, value)
             if field_name not in field_names:
                 attrs.pop(field_name)
         return mock_obj
