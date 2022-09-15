@@ -20,19 +20,6 @@ mock_objects = mock.MagicMock(filter=mock.MagicMock(return_value=mock_query_set)
 @pytest.mark.django_db
 @mock.patch('awx.main.models.label.Label.objects', mock_objects)
 class TestLabelFilterMocked:
-    def test_get_orphaned_labels(self, mocker):
-        ret = Label.get_orphaned_labels()
-
-        assert mock_query_set == ret
-        Label.objects.filter.assert_called_with(
-            organization=None,
-            unifiedjobtemplate_labels__isnull=True,
-            inventory_labels__isnull=True,
-            schedule_labels__isnull=True,
-            workflowjobtemplatenode_labels__isnull=True,
-            workflowjobnode_labels=True,
-        )
-
     def test_is_detached(self, mocker):
         mock_query_set.exists.return_value = True
 
