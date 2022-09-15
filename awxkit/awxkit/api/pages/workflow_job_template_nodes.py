@@ -92,6 +92,12 @@ class WorkflowJobTemplateNode(HasCreate, base.Base):
         candidates = workflow_job.get_related('workflow_nodes', identifier=self.identifier)
         return candidates.results.pop()
 
+    def add_label(self, label):
+        if isinstance(label, page.Page):
+            label = label.json
+        with suppress(exc.NoContent):
+            self.related.labels.post(label)
+
 
 page.register_page(
     [resources.workflow_job_template_node, (resources.workflow_job_template_nodes, 'post'), (resources.workflow_job_template_workflow_nodes, 'post')],
