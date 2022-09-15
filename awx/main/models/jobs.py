@@ -1021,7 +1021,13 @@ class LaunchTimeConfig(LaunchTimeConfigBase):
     credentials = models.ManyToManyField('Credential', related_name='%(class)ss')
     labels = models.ManyToManyField('Label', related_name='%(class)s_labels')
     execution_environment = models.ForeignKey(
-        'ExecutionEnvironment', null=True, blank=True, default=None, on_delete=polymorphic.SET_NULL, related_name='%(class)s_as_prompt'
+        'ExecutionEnvironment',
+        null=True,
+        blank=True,
+        default=None,
+        on_delete=polymorphic.SET_NULL,
+        related_name='%(class)s_as_prompt',
+        help_text="The container image to be used for execution.",
     )
 
     @property
