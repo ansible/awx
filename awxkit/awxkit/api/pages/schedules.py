@@ -47,6 +47,12 @@ class Schedules(page.PageList, Schedule):
         with suppress(exc.NoContent):
             self.related.credentials.post(dict(id=cred.id, disassociate=True))
 
+    def add_label(self, label):
+        if isinstance(label, page.Page):
+            label = label.json
+        with suppress(exc.NoContent):
+            self.related.labels.post(label)
+
 
 page.register_page([resources.schedules, resources.related_schedules], Schedules)
 
