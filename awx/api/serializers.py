@@ -3468,7 +3468,6 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
     def validate_extra_vars(self, value):
         return vars_validate_or_raise(value)
 
-    # posting
     def validate(self, attrs):
         attrs = super(WorkflowJobTemplateSerializer, self).validate(attrs)
 
