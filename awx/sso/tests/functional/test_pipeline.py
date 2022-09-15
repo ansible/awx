@@ -163,9 +163,9 @@ class TestSAMLAttr:
                     'PersonImmutableID': [],
                 },
             },
-            #'social': <UserSocialAuth: cmeyers@redhat.com>,
+            # 'social': <UserSocialAuth: cmeyers@redhat.com>,
             'social': None,
-            #'strategy': <awx.sso.strategies.django_strategy.AWXDjangoStrategy object at 0x8523a10>,
+            # 'strategy': <awx.sso.strategies.django_strategy.AWXDjangoStrategy object at 0x8523a10>,
             'strategy': None,
             'new_association': False,
         }

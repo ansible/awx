@@ -53,7 +53,7 @@ SOCIAL_AUTH_ORGANIZATION_MAP_HELP_TEXT = _(
     '''\
 Mapping to organization admins/users from social auth accounts. This setting
 controls which users are placed into which organizations based on their
-username and email address. Configuration details are available in the 
+username and email address. Configuration details are available in the
 documentation.\
 '''
 )

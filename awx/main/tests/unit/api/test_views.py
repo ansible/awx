@@ -23,7 +23,7 @@ class TestApiRootView:
         endpoints = [
             'ping',
             'config',
-            #'settings',
+            # 'settings',
             'me',
             'dashboard',
             'organizations',
