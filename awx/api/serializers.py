@@ -3042,9 +3042,6 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             'webhook_service',
             'webhook_credential',
             'webhook_guid',
-            # TODO: Do we want these here or just in the summary fields?
-            'labels',
-            'instance_groups',
         )
 
     def get_related(self, obj):
