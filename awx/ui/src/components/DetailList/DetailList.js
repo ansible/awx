@@ -29,4 +29,8 @@ export default styled(DetailList)`
       --column-count: 3;
     }
   `}
+
+  & + & {
+    margin-top: 20px;
+  }
 `;
