@@ -18,8 +18,6 @@ from rest_framework import status
 # AWX
 from awx.main.models import ActivityStream, Inventory, JobTemplate, Role, User, InstanceGroup, InventoryUpdateEvent, InventoryUpdate
 
-from awx.main.models.label import Label
-
 from awx.api.generics import (
     ListCreateAPIView,
     RetrieveUpdateDestroyAPIView,
@@ -27,9 +25,8 @@ from awx.api.generics import (
     SubListAttachDetachAPIView,
     ResourceAccessList,
     CopyAPIView,
-    DeleteLastUnattachLabelMixin,
-    SubListCreateAttachDetachAPIView,
 )
+from awx.api.views.labels import LabelSubListCreateAttachDetachView
 
 
 from awx.api.serializers import (
@@ -39,7 +36,6 @@ from awx.api.serializers import (
     InstanceGroupSerializer,
     InventoryUpdateEventSerializer,
     JobTemplateSerializer,
-    LabelSerializer,
 )
 from awx.api.views.mixin import RelatedJobsPreventDeleteMixin
 
@@ -157,28 +153,9 @@ class InventoryJobTemplateList(SubListAPIView):
         return qs.filter(inventory=parent)
 
 
-class InventoryLabelList(DeleteLastUnattachLabelMixin, SubListCreateAttachDetachAPIView, SubListAPIView):
+class InventoryLabelList(LabelSubListCreateAttachDetachView):
 
-    model = Label
-    serializer_class = LabelSerializer
     parent_model = Inventory
-    relationship = 'labels'
-
-    def post(self, request, *args, **kwargs):
-        # If a label already exists in the database, attach it instead of erroring out
-        # that it already exists
-        if 'id' not in request.data and 'name' in request.data and 'organization' in request.data:
-            existing = Label.objects.filter(name=request.data['name'], organization_id=request.data['organization'])
-            if existing.exists():
-                existing = existing[0]
-                request.data['id'] = existing.id
-                del request.data['name']
-                del request.data['organization']
-        if Label.objects.filter(inventory_labels=self.kwargs['pk']).count() > 100:
-            return Response(
-                dict(msg=_('Maximum number of labels for {} reached.'.format(self.parent_model._meta.verbose_name_raw))), status=status.HTTP_400_BAD_REQUEST
-            )
-        return super(InventoryLabelList, self).post(request, *args, **kwargs)
 
 
 class InventoryCopy(CopyAPIView):
