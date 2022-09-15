@@ -3728,13 +3728,18 @@ class JobCreateSchedule(RetrieveAPIView):
             inventory=config.inventory,
             char_prompts=config.char_prompts,
             credentials=set(config.credentials.all()),
+            labels=set(config.labels.all()),
+            instance_groups=list(config.instance_groups.all()),
         )
         if not request.user.can_access(models.Schedule, 'add', schedule_data):
             raise PermissionDenied()
 
-        creds_list = schedule_data.pop('credentials')
+        related_fields = ('credentials', 'labels', 'instance_groups')
+        related = [schedule_data.pop(relationship) for relationship in related_fields]
         schedule = models.Schedule.objects.create(**schedule_data)
-        schedule.credentials.add(*creds_list)
+        for relationship, items in zip(related_fields, related):
+            for item in items:
+                getattr(schedule, relationship).add(item)
 
         data = serializers.ScheduleSerializer(schedule, context=self.get_serializer_context()).data
         data.serializer.instance = None  # hack to avoid permissions.py assuming this is Job model
