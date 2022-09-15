@@ -32,6 +32,9 @@ export default function parseRuleObj(schedule) {
       case 'RRULE':
         values = parseRrule(ruleString, schedule, values);
         break;
+      case 'EXRULE':
+        values = parseExRule(ruleString, schedule, values);
+        break;
       default:
         throw new UnsupportedRRuleError(`Unsupported rrule type: ${type}`);
     }
@@ -79,6 +82,54 @@ const frequencyTypes = {
 };
 
 function parseRrule(rruleString, schedule, values) {
+  const { frequency, options } = parseRule(
+    rruleString,
+    schedule,
+    values.exceptionFrequency
+  );
+
+  if (values.frequencyOptions[frequency]) {
+    throw new UnsupportedRRuleError(
+      'Duplicate exception frequency types not supported'
+    );
+  }
+
+  return {
+    ...values,
+    frequency: [...values.frequency, frequency].sort(sortFrequencies),
+    frequencyOptions: {
+      ...values.frequencyOptions,
+      [frequency]: options,
+    },
+  };
+}
+
+function parseExRule(exruleString, schedule, values) {
+  const { frequency, options } = parseRule(
+    exruleString,
+    schedule,
+    values.exceptionFrequency
+  );
+
+  if (values.exceptionOptions[frequency]) {
+    throw new UnsupportedRRuleError(
+      'Duplicate exception frequency types not supported'
+    );
+  }
+
+  return {
+    ...values,
+    exceptionFrequency: [...values.exceptionFrequency, frequency].sort(
+      sortFrequencies
+    ),
+    exceptionOptions: {
+      ...values.exceptionOptions,
+      [frequency]: options,
+    },
+  };
+}
+
+function parseRule(ruleString, schedule, frequencies) {
   const {
     origOptions: {
       bymonth,
@@ -90,7 +141,7 @@ function parseRrule(rruleString, schedule, values) {
       interval,
       until,
     },
-  } = RRule.fromString(rruleString);
+  } = RRule.fromString(ruleString);
 
   const now = DateTime.now();
   const closestQuarterHour = DateTime.fromMillis(
@@ -127,7 +178,7 @@ function parseRrule(rruleString, schedule, values) {
     throw new Error(`Unexpected rrule frequency: ${freq}`);
   }
   const frequency = frequencyTypes[freq];
-  if (values.frequency.includes(frequency)) {
+  if (frequencies.includes(frequency)) {
     throw new Error(`Duplicate frequency types not supported (${frequency})`);
   }
 
@@ -171,17 +222,9 @@ function parseRrule(rruleString, schedule, values) {
     }
   }
 
-  if (values.frequencyOptions.frequency) {
-    throw new UnsupportedRRuleError('Duplicate frequency types not supported');
-  }
-
   return {
-    ...values,
-    frequency: [...values.frequency, frequency].sort(sortFrequencies),
-    frequencyOptions: {
-      ...values.frequencyOptions,
-      [frequency]: options,
-    },
+    frequency,
+    options,
   };
 }
 

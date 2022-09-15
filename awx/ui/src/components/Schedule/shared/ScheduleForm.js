@@ -20,6 +20,7 @@ import ScheduleFormFields from './ScheduleFormFields';
 import UnsupportedScheduleForm from './UnsupportedScheduleForm';
 import parseRuleObj, { UnsupportedRRuleError } from './parseRuleObj';
 import buildRuleObj from './buildRuleObj';
+import buildRuleSet from './buildRuleSet';
 
 const NUM_DAYS_PER_FREQUENCY = {
   week: 7,
@@ -411,6 +412,10 @@ function ScheduleForm({
       }
     });
 
+    if (values.exceptionFrequency.length > 0 && !scheduleHasInstances(values)) {
+      errors.exceptionFrequency = t`This schedule has no occurrences due to the selected exceptions.`;
+    }
+
     return errors;
   };
 
@@ -518,3 +523,24 @@ ScheduleForm.defaultProps = {
 };
 
 export default ScheduleForm;
+
+function scheduleHasInstances(values) {
+  let rangeToCheck = 1;
+  values.frequency.forEach((freq) => {
+    if (NUM_DAYS_PER_FREQUENCY[freq] > rangeToCheck) {
+      rangeToCheck = NUM_DAYS_PER_FREQUENCY[freq];
+    }
+  });
+
+  const ruleSet = buildRuleSet(values, true);
+  const startDate = DateTime.fromISO(values.startDate);
+  const endDate = startDate.plus({ days: rangeToCheck });
+  const instances = ruleSet.between(
+    startDate.toJSDate(),
+    endDate.toJSDate(),
+    true,
+    (date, i) => i === 0
+  );
+
+  return instances.length > 0;
+}

@@ -86,7 +86,7 @@ const mockSchedule = {
 
 let wrapper;
 
-const defaultFieldsVisible = () => {
+const defaultFieldsVisible = (isExceptionsVisible) => {
   expect(wrapper.find('FormGroup[label="Name"]').length).toBe(1);
   expect(wrapper.find('FormGroup[label="Description"]').length).toBe(1);
   expect(wrapper.find('FormGroup[label="Start date/time"]').length).toBe(1);
@@ -94,7 +94,11 @@ const defaultFieldsVisible = () => {
   expect(
     wrapper.find('FormGroup[label="Local time zone"]').find('HelpIcon').length
   ).toBe(1);
-  expect(wrapper.find('FrequencySelect').length).toBe(1);
+  if (isExceptionsVisible) {
+    expect(wrapper.find('FrequencySelect').length).toBe(2);
+  } else {
+    expect(wrapper.find('FrequencySelect').length).toBe(1);
+  }
 };
 
 const nonRRuleValuesMatch = () => {
@@ -513,7 +517,7 @@ describe('<ScheduleForm />', () => {
         runFrequencySelect.invoke('onChange')(['minute']);
       });
       wrapper.update();
-      defaultFieldsVisible();
+      defaultFieldsVisible(true);
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="On days"]').length).toBe(0);
@@ -547,7 +551,7 @@ describe('<ScheduleForm />', () => {
         runFrequencySelect.invoke('onChange')(['hour']);
       });
       wrapper.update();
-      defaultFieldsVisible();
+      defaultFieldsVisible(true);
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="On days"]').length).toBe(0);
@@ -579,7 +583,7 @@ describe('<ScheduleForm />', () => {
         runFrequencySelect.invoke('onChange')(['day']);
       });
       wrapper.update();
-      defaultFieldsVisible();
+      defaultFieldsVisible(true);
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="On days"]').length).toBe(0);
@@ -611,7 +615,7 @@ describe('<ScheduleForm />', () => {
         runFrequencySelect.invoke('onChange')(['week']);
       });
       wrapper.update();
-      defaultFieldsVisible();
+      defaultFieldsVisible(true);
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="On days"]').length).toBe(1);
@@ -643,7 +647,7 @@ describe('<ScheduleForm />', () => {
         runFrequencySelect.invoke('onChange')(['month']);
       });
       wrapper.update();
-      defaultFieldsVisible();
+      defaultFieldsVisible(true);
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="On days"]').length).toBe(0);
@@ -692,7 +696,7 @@ describe('<ScheduleForm />', () => {
         runFrequencySelect.invoke('onChange')(['year']);
       });
       wrapper.update();
-      defaultFieldsVisible();
+      defaultFieldsVisible(true);
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="On days"]').length).toBe(0);
@@ -1058,7 +1062,7 @@ describe('<ScheduleForm />', () => {
       wrapper.update();
 
       expect(wrapper.find('ScheduleForm').length).toBe(1);
-      defaultFieldsVisible();
+      defaultFieldsVisible(true);
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="Occurrences"]').length).toBe(0);
@@ -1113,7 +1117,7 @@ describe('<ScheduleForm />', () => {
       wrapper.update();
 
       expect(wrapper.find('ScheduleForm').length).toBe(1);
-      defaultFieldsVisible();
+      defaultFieldsVisible(true);
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="Occurrences"]').length).toBe(1);
@@ -1171,7 +1175,7 @@ describe('<ScheduleForm />', () => {
       wrapper.update();
 
       expect(wrapper.find('ScheduleForm').length).toBe(1);
-      defaultFieldsVisible();
+      defaultFieldsVisible(true);
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="On days"]').length).toBe(0);
@@ -1224,7 +1228,7 @@ describe('<ScheduleForm />', () => {
       wrapper.update();
 
       expect(wrapper.find('ScheduleForm').length).toBe(1);
-      defaultFieldsVisible();
+      defaultFieldsVisible(true);
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="End date/time"]').length).toBe(1);
@@ -1318,10 +1322,7 @@ describe('<ScheduleForm />', () => {
       wrapper.update();
 
       expect(wrapper.find('ScheduleForm').length).toBe(1);
-      defaultFieldsVisible();
-
-      expect(wrapper.find('ScheduleForm').length).toBe(1);
-      defaultFieldsVisible();
+      defaultFieldsVisible(true);
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="Run on"]').length).toBe(1);
@@ -1394,7 +1395,7 @@ describe('<ScheduleForm />', () => {
       wrapper.update();
 
       expect(wrapper.find('ScheduleForm').length).toBe(1);
-      defaultFieldsVisible();
+      defaultFieldsVisible(true);
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="Run on"]').length).toBe(1);

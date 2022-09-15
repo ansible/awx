@@ -2,7 +2,6 @@ import 'styled-components/macro';
 import React, { useCallback, useEffect } from 'react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-
 import { t } from '@lingui/macro';
 import { Chip, Divider, Title, Button } from '@patternfly/react-core';
 import { Schedule } from 'types';
@@ -59,6 +58,10 @@ const FrequencyDetailsContainer = styled.div`
     margin-bottom: var(--pf-global--spacer--md);
     padding-bottom: var(--pf-global--spacer--md);
     border-bottom: 1px solid var(--pf-global--palette--black-300);
+  }
+
+  & + & {
+    margin-top: calc(var(--pf-global--spacer--lg) * -1);
   }
 `;
 
@@ -161,9 +164,13 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
     month: t`Month`,
     year: t`Year`,
   };
-  const { frequency, frequencyOptions } = parseRuleObj(schedule);
+  const { frequency, frequencyOptions, exceptionFrequency, exceptionOptions } =
+    parseRuleObj(schedule);
   const repeatFrequency = frequency.length
     ? frequency.map((f) => frequencies[f]).join(', ')
+    : t`None (Run Once)`;
+  const exceptionRepeatFrequency = exceptionFrequency.length
+    ? exceptionFrequency.map((f) => frequencies[f]).join(', ')
     : t`None (Run Once)`;
 
   const {
@@ -271,43 +278,84 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
         isDisabled={isDisabled}
       />
       <DetailList gutter="sm">
-        <Detail label={t`Name`} value={name} />
-        <Detail label={t`Description`} value={description} />
+        <Detail label={t`Name`} value={name} dataCy="schedule-name" />
+        <Detail
+          label={t`Description`}
+          value={description}
+          dataCy="schedule-description"
+        />
         <Detail
           label={t`First Run`}
           value={formatDateString(dtstart, timezone)}
+          dataCy="schedule-first-run"
         />
         <Detail
           label={t`Next Run`}
           value={formatDateString(next_run, timezone)}
+          dataCy="schedule-next-run"
         />
         <Detail label={t`Last Run`} value={formatDateString(dtend, timezone)} />
         <Detail
           label={t`Local Time Zone`}
           value={timezone}
           helpText={helpText.localTimeZone(config)}
+          dataCy="schedule-timezone"
         />
-        <Detail label={t`Repeat Frequency`} value={repeatFrequency} />
+        <Detail
+          label={t`Repeat Frequency`}
+          value={repeatFrequency}
+          dataCy="schedule-repeat-frequency"
+        />
+        <Detail
+          label={t`Exception Frequency`}
+          value={exceptionRepeatFrequency}
+          dataCy="schedule-exception-frequency"
+        />
       </DetailList>
       {frequency.length ? (
         <FrequencyDetailsContainer>
-          <p>
-            <strong>{t`Frequency Details`}</strong>
-          </p>
-          {frequency.map((freq) => (
-            <FrequencyDetails
-              key={freq}
-              type={freq}
-              label={frequencies[freq]}
-              options={frequencyOptions[freq]}
-              timezone={timezone}
-            />
-          ))}
+          <div ouia-component-id="schedule-frequency-details">
+            <p>
+              <strong>{t`Frequency Details`}</strong>
+            </p>
+            {frequency.map((freq) => (
+              <FrequencyDetails
+                key={freq}
+                type={freq}
+                label={frequencies[freq]}
+                options={frequencyOptions[freq]}
+                timezone={timezone}
+              />
+            ))}
+          </div>
+        </FrequencyDetailsContainer>
+      ) : null}
+      {exceptionFrequency.length ? (
+        <FrequencyDetailsContainer>
+          <div ouia-component-id="schedule-exception-details">
+            <p css="border-top: 0">
+              <strong>{t`Frequency Exception Details`}</strong>
+            </p>
+            {exceptionFrequency.map((freq) => (
+              <FrequencyDetails
+                key={freq}
+                type={freq}
+                label={frequencies[freq]}
+                options={exceptionOptions[freq]}
+                timezone={timezone}
+                isException
+              />
+            ))}
+          </div>
         </FrequencyDetailsContainer>
       ) : null}
       <DetailList gutter="sm">
         {hasDaysToKeepField ? (
-          <Detail label={t`Days of Data to Keep`} value={daysToKeep} />
+          <Detail
+            label={t`Days of Data to Keep`}
+            value={daysToKeep}
+            dataCy="schedule-days-to-keep"
+          />
         ) : null}
         <ScheduleOccurrences preview={preview} tz={timezone} />
         <UserDateDetail
@@ -327,7 +375,11 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
           <PromptDivider />
           <PromptDetailList>
             {ask_job_type_on_launch && (
-              <Detail label={t`Job Type`} value={job_type} />
+              <Detail
+                label={t`Job Type`}
+                value={job_type}
+                dataCy="shedule-job-type"
+              />
             )}
             {showInventoryDetail && (
               <Detail
@@ -347,19 +399,31 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
                     ' '
                   )
                 }
+                dataCy="schedule-inventory"
               />
             )}
             {ask_verbosity_on_launch && (
-              <Detail label={t`Verbosity`} value={VERBOSITY()[verbosity]} />
+              <Detail
+                label={t`Verbosity`}
+                value={VERBOSITY()[verbosity]}
+                dataCy="schedule-verbosity"
+              />
             )}
             {ask_scm_branch_on_launch && (
-              <Detail label={t`Source Control Branch`} value={scm_branch} />
+              <Detail
+                label={t`Source Control Branch`}
+                value={scm_branch}
+                dataCy="schedule-scm-branch"
+              />
             )}
-            {ask_limit_on_launch && <Detail label={t`Limit`} value={limit} />}
+            {ask_limit_on_launch && (
+              <Detail label={t`Limit`} value={limit} dataCy="schedule-limit" />
+            )}
             {showDiffModeDetail && (
               <Detail
                 label={t`Show Changes`}
                 value={diff_mode ? t`On` : t`Off`}
+                dataCy="schedule-show-changes"
               />
             )}
             {showCredentialsDetail && (
@@ -382,6 +446,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
                     ))}
                   </ChipGroup>
                 }
+                dataCy="schedule-credentials"
               />
             )}
             {showTagsDetail && (
@@ -405,6 +470,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
                     ))}
                   </ChipGroup>
                 }
+                dataCy="schedule-job-tags"
               />
             )}
             {showSkipTagsDetail && (
@@ -428,6 +494,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
                     ))}
                   </ChipGroup>
                 }
+                dataCy="schedule-skip-tags"
               />
             )}
             {showVariablesDetail && (

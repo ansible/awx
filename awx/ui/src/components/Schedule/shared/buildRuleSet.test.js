@@ -243,4 +243,257 @@ RRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=2;BYDAY=MO;UNTIL=20260602T170000Z`);
     expect(ruleSet.toString()).toEqual(`DTSTART:20220613T123000Z
 RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY`);
   });
+
+  test('should build minutely exception', () => {
+    const values = {
+      startDate: '2022-06-13',
+      startTime: '12:30 PM',
+      frequency: ['minute'],
+      frequencyOptions: {
+        minute: {
+          interval: 1,
+          end: 'never',
+        },
+      },
+      exceptionFrequency: ['minute'],
+      exceptionOptions: {
+        minute: {
+          interval: 3,
+          end: 'never',
+        },
+      },
+    };
+
+    const ruleSet = buildRuleSet(values);
+    expect(ruleSet.toString()).toEqual(
+      [
+        'DTSTART:20220613T123000Z',
+        'RRULE:INTERVAL=1;FREQ=MINUTELY',
+        'EXRULE:INTERVAL=3;FREQ=MINUTELY',
+      ].join('\n')
+    );
+  });
+
+  test('should build hourly exception', () => {
+    const values = {
+      startDate: '2022-06-13',
+      startTime: '12:30 PM',
+      frequency: ['minute'],
+      frequencyOptions: {
+        minute: {
+          interval: 1,
+          end: 'never',
+        },
+      },
+      exceptionFrequency: ['hour'],
+      exceptionOptions: {
+        hour: {
+          interval: 3,
+          end: 'never',
+        },
+      },
+    };
+
+    const ruleSet = buildRuleSet(values);
+    expect(ruleSet.toString()).toEqual(
+      [
+        'DTSTART:20220613T123000Z',
+        'RRULE:INTERVAL=1;FREQ=MINUTELY',
+        'EXRULE:INTERVAL=3;FREQ=HOURLY',
+      ].join('\n')
+    );
+  });
+
+  test('should build daily exception', () => {
+    const values = {
+      startDate: '2022-06-13',
+      startTime: '12:30 PM',
+      frequency: ['minute'],
+      frequencyOptions: {
+        minute: {
+          interval: 1,
+          end: 'never',
+        },
+      },
+      exceptionFrequency: ['day'],
+      exceptionOptions: {
+        day: {
+          interval: 3,
+          end: 'never',
+        },
+      },
+    };
+
+    const ruleSet = buildRuleSet(values);
+    expect(ruleSet.toString()).toEqual(
+      [
+        'DTSTART:20220613T123000Z',
+        'RRULE:INTERVAL=1;FREQ=MINUTELY',
+        'EXRULE:INTERVAL=3;FREQ=DAILY',
+      ].join('\n')
+    );
+  });
+
+  test('should build weekly exception', () => {
+    const values = {
+      startDate: '2022-06-13',
+      startTime: '12:30 PM',
+      frequency: ['minute'],
+      frequencyOptions: {
+        minute: {
+          interval: 1,
+          end: 'never',
+        },
+      },
+      exceptionFrequency: ['week'],
+      exceptionOptions: {
+        week: {
+          interval: 3,
+          end: 'never',
+          daysOfWeek: [RRule.SU],
+        },
+      },
+    };
+
+    const ruleSet = buildRuleSet(values);
+    expect(ruleSet.toString()).toEqual(
+      [
+        'DTSTART:20220613T123000Z',
+        'RRULE:INTERVAL=1;FREQ=MINUTELY',
+        'EXRULE:INTERVAL=3;FREQ=WEEKLY;BYDAY=SU',
+      ].join('\n')
+    );
+  });
+
+  test('should build monthly exception by day', () => {
+    const values = {
+      startDate: '2022-06-13',
+      startTime: '12:30 PM',
+      frequency: ['minute'],
+      frequencyOptions: {
+        minute: {
+          interval: 1,
+          end: 'never',
+        },
+      },
+      exceptionFrequency: ['month'],
+      exceptionOptions: {
+        month: {
+          interval: 3,
+          end: 'never',
+          runOn: 'day',
+          runOnDayNumber: 15,
+        },
+      },
+    };
+
+    const ruleSet = buildRuleSet(values);
+    expect(ruleSet.toString()).toEqual(
+      [
+        'DTSTART:20220613T123000Z',
+        'RRULE:INTERVAL=1;FREQ=MINUTELY',
+        'EXRULE:INTERVAL=3;FREQ=MONTHLY;BYMONTHDAY=15',
+      ].join('\n')
+    );
+  });
+
+  test('should build monthly exception by weekday', () => {
+    const values = {
+      startDate: '2022-06-13',
+      startTime: '12:30 PM',
+      frequency: ['minute'],
+      frequencyOptions: {
+        minute: {
+          interval: 1,
+          end: 'never',
+        },
+      },
+      exceptionFrequency: ['month'],
+      exceptionOptions: {
+        month: {
+          interval: 3,
+          end: 'never',
+          runOn: 'the',
+          runOnTheOccurrence: 2,
+          runOnTheDay: 'monday',
+        },
+      },
+    };
+
+    const ruleSet = buildRuleSet(values);
+    expect(ruleSet.toString()).toEqual(
+      [
+        'DTSTART:20220613T123000Z',
+        'RRULE:INTERVAL=1;FREQ=MINUTELY',
+        'EXRULE:INTERVAL=3;FREQ=MONTHLY;BYSETPOS=2;BYDAY=MO',
+      ].join('\n')
+    );
+  });
+
+  test('should build annual exception by day', () => {
+    const values = {
+      startDate: '2022-06-13',
+      startTime: '12:30 PM',
+      frequency: ['minute'],
+      frequencyOptions: {
+        minute: {
+          interval: 1,
+          end: 'never',
+        },
+      },
+      exceptionFrequency: ['year'],
+      exceptionOptions: {
+        year: {
+          interval: 1,
+          end: 'never',
+          runOn: 'day',
+          runOnDayMonth: 3,
+          runOnDayNumber: 15,
+        },
+      },
+    };
+
+    const ruleSet = buildRuleSet(values);
+    expect(ruleSet.toString()).toEqual(
+      [
+        'DTSTART:20220613T123000Z',
+        'RRULE:INTERVAL=1;FREQ=MINUTELY',
+        'EXRULE:INTERVAL=1;FREQ=YEARLY;BYMONTH=3;BYMONTHDAY=15',
+      ].join('\n')
+    );
+  });
+
+  test('should build annual exception by weekday', () => {
+    const values = {
+      startDate: '2022-06-13',
+      startTime: '12:30 PM',
+      frequency: ['minute'],
+      frequencyOptions: {
+        minute: {
+          interval: 1,
+          end: 'never',
+        },
+      },
+      exceptionFrequency: ['year'],
+      exceptionOptions: {
+        year: {
+          interval: 1,
+          end: 'never',
+          runOn: 'the',
+          runOnTheOccurrence: 4,
+          runOnTheDay: 'monday',
+          runOnTheMonth: 6,
+        },
+      },
+    };
+
+    const ruleSet = buildRuleSet(values);
+    expect(ruleSet.toString()).toEqual(
+      [
+        'DTSTART:20220613T123000Z',
+        'RRULE:INTERVAL=1;FREQ=MINUTELY',
+        'EXRULE:INTERVAL=1;FREQ=YEARLY;BYSETPOS=4;BYDAY=MO;BYMONTH=6',
+      ].join('\n')
+    );
+  });
 });

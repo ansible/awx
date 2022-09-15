@@ -241,4 +241,51 @@ RRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=2;BYDAY=MO;UNTIL=20260602T170000Z`;
 
     expect(parsed).toEqual(values);
   });
+
+  test('should parse exemptions', () => {
+    const schedule = {
+      rrule: [
+        'DTSTART;TZID=US/Eastern:20220608T123000',
+        'RRULE:INTERVAL=1;FREQ=WEEKLY;BYDAY=MO',
+        'EXRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=1;BYDAY=MO',
+      ].join(' '),
+      dtstart: '2022-06-13T16:30:00Z',
+      timezone: 'US/Eastern',
+      until: '',
+      dtend: null,
+    };
+
+    const parsed = parseRuleObj(schedule);
+
+    expect(parsed).toEqual({
+      startDate: '2022-06-13',
+      startTime: '12:30 PM',
+      timezone: 'US/Eastern',
+      frequency: ['week'],
+      frequencyOptions: {
+        week: {
+          interval: 1,
+          end: 'never',
+          occurrences: 1,
+          endDate: '2022-06-02',
+          endTime: '1:00 PM',
+          daysOfWeek: [RRule.MO],
+        },
+      },
+      exceptionFrequency: ['month'],
+      exceptionOptions: {
+        month: {
+          interval: 1,
+          end: 'never',
+          endDate: '2022-06-02',
+          endTime: '1:00 PM',
+          occurrences: 1,
+          runOn: 'the',
+          runOnDayNumber: 1,
+          runOnTheOccurrence: 1,
+          runOnTheDay: 'monday',
+        },
+      },
+    });
+  });
 });
