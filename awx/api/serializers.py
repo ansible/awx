@@ -3218,13 +3218,12 @@ class JobCreateScheduleSerializer(LabelsListMixin, BaseSerializer):
         try:
             config = obj.launch_config
             ret = config.prompts_dict(display=True)
-            if 'inventory' in ret:
-                ret['inventory'] = self._summarize('inventory', ret['inventory'])
-            if 'execution_environment' in ret:
-                ret['execution_environment'] = self._summarize('execution_environment', ret['execution_environment'])
-            if 'credentials' in ret:
-                all_creds = [self._summarize('credential', cred) for cred in ret['credentials']]
-                ret['credentials'] = all_creds
+            for field_name in ('inventory', 'execution_environment'):
+                if field_name in ret:
+                    ret[field_name] = self._summarize(field_name, ret[field_name])
+            for field_name, singular in (('credentials', 'credential'), ('instance_groups', 'instance_group')):
+                if field_name in ret:
+                    ret[field_name] = [self._summarize(singular, cred) for cred in ret[field_name]]
             if 'labels' in ret:
                 ret['labels'] = self._summary_field_labels(obj)
             return ret
