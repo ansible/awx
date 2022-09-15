@@ -69,7 +69,6 @@ from awx.api.generics import (
     APIView,
     BaseUsersList,
     CopyAPIView,
-    DeleteLastUnattachLabelMixin,
     GenericAPIView,
     ListAPIView,
     ListCreateAPIView,
@@ -86,6 +85,7 @@ from awx.api.generics import (
     SubListCreateAttachDetachAPIView,
     SubListDestroyAPIView,
 )
+from awx.api.views.labels import LabelSubListCreateAttachDetachView
 from awx.api.versioning import reverse
 from awx.main import models
 from awx.main.utils import (
@@ -207,26 +207,6 @@ def api_exception_handler(exc, context):
             if exc.status_code == 403:
                 exc = NotFound(detail=_('Not found.'))
     return exception_handler(exc, context)
-
-
-class LabelList(DeleteLastUnattachLabelMixin, SubListCreateAttachDetachAPIView):
-    def post(self, request, *args, **kwargs):
-        # If a label already exists in the database, attach it instead of erroring out
-        # that it already exists
-        if not getattr(self, 'label_filter', None):
-            return Response(dict(msg=_('Class {} missing label filter.'.format(self.__class__.__name__))), status=status.HTTP_400_BAD_REQUEST)
-        if 'id' not in request.data and 'name' in request.data and 'organization' in request.data:
-            existing = models.Label.objects.filter(name=request.data['name'], organization_id=request.data['organization'])
-            if existing.exists():
-                existing = existing[0]
-                request.data['id'] = existing.id
-                del request.data['name']
-                del request.data['organization']
-        if models.Label.objects.filter(**{self.label_filter: self.kwargs['pk']}).count() > 100:
-            return Response(
-                dict(msg=_('Maximum number of labels for {} reached.'.format(self.parent_model._meta.verbose_name_raw))), status=status.HTTP_400_BAD_REQUEST
-            )
-        return super().post(request, *args, **kwargs)
 
 
 class DashboardView(APIView):
@@ -638,13 +618,9 @@ class ScheduleCredentialsList(LaunchConfigCredentialsBase):
     parent_model = models.Schedule
 
 
-class ScheduleLabelsList(LabelList):
+class ScheduleLabelsList(LabelSubListCreateAttachDetachView):
 
-    model = models.Label
-    serializer_class = serializers.LabelSerializer
     parent_model = models.Schedule
-    relationship = 'labels'
-    label_filter = 'schedule_labels'
 
 
 class ScheduleInstanceGroupList(SubListAttachDetachAPIView):
@@ -2757,13 +2733,9 @@ class JobTemplateCredentialsList(SubListCreateAttachDetachAPIView):
         return super(JobTemplateCredentialsList, self).is_valid_relation(parent, sub, created)
 
 
-class JobTemplateLabelList(LabelList):
+class JobTemplateLabelList(LabelSubListCreateAttachDetachView):
 
-    model = models.Label
-    serializer_class = serializers.LabelSerializer
     parent_model = models.JobTemplate
-    relationship = 'labels'
-    label_filter = 'unifiedjobtemplate_labels'
 
 
 class JobTemplateCallback(GenericAPIView):
@@ -2989,13 +2961,12 @@ class WorkflowJobNodeCredentialsList(SubListAPIView):
     relationship = 'credentials'
 
 
-class WorkflowJobNodeLabelsList(LabelList):
+class WorkflowJobNodeLabelsList(SubListAPIView):
 
     model = models.Label
     serializer_class = serializers.LabelSerializer
     parent_model = models.WorkflowJobNode
     relationship = 'labels'
-    label_filter = 'workflowjobnode_labels'
 
 
 class WorkflowJobNodeInstanceGroupsList(SubListAttachDetachAPIView):
@@ -3024,13 +2995,9 @@ class WorkflowJobTemplateNodeCredentialsList(LaunchConfigCredentialsBase):
     parent_model = models.WorkflowJobTemplateNode
 
 
-class WorkflowJobTemplateNodeLabelsList(LabelList):
+class WorkflowJobTemplateNodeLabelsList(LabelSubListCreateAttachDetachView):
 
-    model = models.Label
-    serializer_class = serializers.LabelSerializer
     parent_model = models.WorkflowJobTemplateNode
-    relationship = 'labels'
-    label_filter = 'workflowjobtemplatenode_labels'
 
 
 class WorkflowJobTemplateNodeInstanceGroupsList(SubListAttachDetachAPIView):
@@ -4496,18 +4463,6 @@ class NotificationDetail(RetrieveAPIView):
 
     model = models.Notification
     serializer_class = serializers.NotificationSerializer
-
-
-class LabelList(ListCreateAPIView):
-
-    model = models.Label
-    serializer_class = serializers.LabelSerializer
-
-
-class LabelDetail(RetrieveUpdateAPIView):
-
-    model = models.Label
-    serializer_class = serializers.LabelSerializer
 
 
 class ActivityStreamList(SimpleListAPIView):
