@@ -114,6 +114,9 @@ class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
             'credentials',
             'char_prompts',
             'all_parents_must_converge',
+            'labels',
+            'instance_groups',
+            'execution_environment',
         ]
 
     def create_workflow_job_node(self, **kwargs):
@@ -122,7 +125,7 @@ class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
         """
         create_kwargs = {}
         for field_name in self._get_workflow_job_field_names():
-            if field_name == 'credentials':
+            if field_name in ['credentials', 'labels', 'instance_groups']:
                 continue
             if field_name in kwargs:
                 create_kwargs[field_name] = kwargs[field_name]
@@ -132,10 +135,20 @@ class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
         new_node = WorkflowJobNode.objects.create(**create_kwargs)
         if self.pk:
             allowed_creds = self.credentials.all()
+            allowed_labels = self.labels.all()
+            allowed_instance_groups = self.instance_groups.all()
         else:
             allowed_creds = []
+            allowed_labels = []
+            allowed_instance_groups = []
         for cred in allowed_creds:
             new_node.credentials.add(cred)
+
+        for label in allowed_labels:
+            new_node.labels.add(label)
+        for instance_group in allowed_instance_groups:
+            new_node.instance_groups.add(instance_group)
+
         return new_node
 
 
