@@ -10,6 +10,8 @@ from awx.api.versioning import reverse
 from awx.main.models.base import CommonModelNameNotUnique
 from awx.main.models.unified_jobs import UnifiedJobTemplate, UnifiedJob
 from awx.main.models.inventory import Inventory
+from awx.main.models.schedules import Schedule
+from awx.main.models.workflow import WorkflowJobTemplateNode, WorkflowJobNode
 
 __all__ = ('Label',)
 
@@ -34,16 +36,22 @@ class Label(CommonModelNameNotUnique):
     def get_absolute_url(self, request=None):
         return reverse('api:label_detail', kwargs={'pk': self.pk}, request=request)
 
-    @staticmethod
-    def get_orphaned_labels():
-        return Label.objects.filter(organization=None, unifiedjobtemplate_labels__isnull=True, inventory_labels__isnull=True)
-
     def is_detached(self):
-        return Label.objects.filter(id=self.id, unifiedjob_labels__isnull=True, unifiedjobtemplate_labels__isnull=True, inventory_labels__isnull=True).exists()
+        return Label.objects.filter(
+            id=self.id,
+            unifiedjob_labels__isnull=True,
+            unifiedjobtemplate_labels__isnull=True,
+            inventory_labels__isnull=True,
+            schedule_labels__isnull=True,
+            workflowjobtemplatenode_labels__isnull=True,
+            workflowjobnode_labels=True,
+        ).exists()
 
     def is_candidate_for_detach(self):
-
-        c1 = UnifiedJob.objects.filter(labels__in=[self.id]).count()
-        c2 = UnifiedJobTemplate.objects.filter(labels__in=[self.id]).count()
-        c3 = Inventory.objects.filter(labels__in=[self.id]).count()
-        return (c1 + c2 + c3 - 1) == 0
+        count = UnifiedJob.objects.filter(labels__in=[self.id]).count()  # Both Jobs and WFJobs
+        count += UnifiedJobTemplate.objects.filter(labels__in=[self.id]).count()  # Both JTs and WFJT
+        count += Inventory.objects.filter(labels__in=[self.id]).count()
+        count += Schedule.objects.filter(labels__in=[self.id]).count()
+        count += WorkflowJobTemplateNode.objects.filter(labels__in=[self.id]).count()
+        count += WorkflowJobNode.objects.filter(labels__in=[self.id]).count()
+        return (count - 1) == 0

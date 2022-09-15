@@ -3633,8 +3633,8 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
     skip_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     diff_mode = serializers.BooleanField(required=False, allow_null=True, default=None)
     verbosity = serializers.ChoiceField(allow_null=True, required=False, default=None, choices=VERBOSITY_CHOICES)
-    forks = serializers.IntegerField(required=False, allow_null=True, default=None)
-    job_slice_count = serializers.IntegerField(required=False, allow_null=True, default=None)
+    forks = serializers.IntegerField(required=False, allow_null=True, min_value=0, default=None)
+    job_slice_count = serializers.IntegerField(required=False, allow_null=True, min_value=0, default=None)
     timeout = serializers.IntegerField(required=False, allow_null=True, default=None)
     exclude_errors = ()
 
@@ -4141,8 +4141,8 @@ class JobLaunchSerializer(BaseSerializer):
     verbosity = serializers.ChoiceField(required=False, choices=VERBOSITY_CHOICES, write_only=True)
     execution_environment = serializers.PrimaryKeyRelatedField(queryset=ExecutionEnvironment.objects.all(), required=False)
     labels = serializers.PrimaryKeyRelatedField(many=True, queryset=Label.objects.all(), required=False)
-    forks = serializers.IntegerField(required=False, write_only=True, default=1)
-    job_slice_count = serializers.IntegerField(required=False, write_only=True, default=0)
+    forks = serializers.IntegerField(required=False, write_only=True, min_value=0, default=1)
+    job_slice_count = serializers.IntegerField(required=False, write_only=True, min_value=0, default=0)
     timeout = serializers.IntegerField(required=False, write_only=True, default=0)
     instance_groups = serializers.PrimaryKeyRelatedField(many=True, queryset=InstanceGroup.objects.all(), required=False)
 
