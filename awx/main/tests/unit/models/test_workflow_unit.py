@@ -166,6 +166,7 @@ class TestWorkflowJobCreate:
                 unified_job_template=wfjt_node_no_prompts.unified_job_template,
                 workflow_job=workflow_job_unit,
                 identifier=mocker.ANY,
+                execution_environment=None,
             )
 
     def test_create_with_prompts(self, wfjt_node_with_prompts, workflow_job_unit, credential, mocker):
@@ -181,6 +182,7 @@ class TestWorkflowJobCreate:
                 unified_job_template=wfjt_node_with_prompts.unified_job_template,
                 workflow_job=workflow_job_unit,
                 identifier=mocker.ANY,
+                execution_environment=None,
             )
 
 
