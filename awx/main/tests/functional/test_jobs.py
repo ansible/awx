@@ -222,23 +222,6 @@ def test_update_hosts_resolved_deadlock(inventory, mocker):
 
 @pytest.mark.django_db
 class TestLaunchConfig:
-    def test_null_creation_from_prompts(self):
-        job = Job.objects.create()
-        data = {
-            "credentials": [],
-            "extra_vars": {},
-            "limit": None,
-            "job_type": None,
-            "execution_environment": None,
-            "instance_groups": None,
-            "labels": None,
-            "forks": None,
-            "timeout": None,
-            "job_slice_count": None,
-        }
-        config = job.create_config_from_prompts(data)
-        assert config is None
-
     def test_only_limit_defined(self, job_template):
         job = Job.objects.create(job_template=job_template)
         data = {
@@ -253,7 +236,7 @@ class TestLaunchConfig:
             "timeout": None,
             "job_slice_count": None,
         }
-        config = job.create_config_from_prompts(data)
+        config = job.save_prompts_data(parent=job_template, **data)
         assert config.char_prompts == {"limit": ""}
         assert not config.credentials.exists()
         assert config.prompts_dict() == {"limit": ""}
@@ -278,7 +261,7 @@ class TestLaunchConfig:
             "timeout": None,
             "job_slice_count": None,
         }
-        config = job.create_config_from_prompts(data)
+        config = job.save_prompts_data(parent=job_template, **data)
 
         assert config.instance_groups.exists()
         config_instance_group_ids = [item.id for item in config.instance_groups.all()]
@@ -304,7 +287,7 @@ class TestLaunchConfig:
             "timeout": None,
             "job_slice_count": None,
         }
-        config = job.create_config_from_prompts(data)
+        config = job.save_prompts_data(parent=job_template, **data)
 
         assert config.execution_environment
         # We just write the PK instead of trying to assign an item, that happens on the save
