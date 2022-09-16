@@ -288,19 +288,6 @@ class WorkflowJobNode(WorkflowNodeBase):
     def get_absolute_url(self, request=None):
         return reverse('api:workflow_job_node_detail', kwargs={'pk': self.pk}, request=request)
 
-    def prompts_dict(self, *args, **kwargs):
-        r = super(WorkflowJobNode, self).prompts_dict(*args, **kwargs)
-        # Explanation - WFJT extra_vars still break pattern, so they are not
-        # put through prompts processing, but inventory and others are only accepted
-        # if JT prompts for it, so it goes through this mechanism
-        if self.workflow_job:
-            if self.workflow_job.inventory_id:
-                # workflow job inventory takes precedence
-                r['inventory'] = self.workflow_job.inventory
-            if self.workflow_job.char_prompts:
-                r.update(self.workflow_job.char_prompts)
-        return r
-
     def get_job_kwargs(self):
         """
         In advance of creating a new unified job as part of a workflow,
@@ -312,14 +299,30 @@ class WorkflowJobNode(WorkflowNodeBase):
         data = {}
         ujt_obj = self.unified_job_template
         if ujt_obj is not None:
-            # MERGE note: move this to prompts_dict method on node when merging
-            # with the workflow inventory branch
-            prompts_data = self.prompts_dict()
-            if isinstance(ujt_obj, WorkflowJobTemplate):
-                if self.workflow_job.extra_vars:
-                    prompts_data.setdefault('extra_vars', {})
-                    prompts_data['extra_vars'].update(self.workflow_job.extra_vars_dict)
-            accepted_fields, ignored_fields, errors = ujt_obj._accept_or_ignore_job_kwargs(**prompts_data)
+            node_prompts_data = self.prompts_dict()
+            wj_prompts_data = self.workflow_job.prompts_dict()
+            # Explanation - special historical case
+            # WFJT extra_vars ignored JobTemplate.ask_variables_on_launch, bypassing _accept_or_ignore_job_kwargs
+            # inventory and others are only accepted if JT prompts for it with related ask_ field
+            # this is inconsistent, but maintained
+            vars_special_precedence = {}
+            if not isinstance(ujt_obj, WorkflowJobTemplate):
+                if wj_prompts_data.get('extra_vars'):
+                    vars_special_precedence = wj_prompts_data.pop('extra_vars')
+
+            # Follow the credential combination rules
+            if ('credentials' in wj_prompts_data) and ('credentials' in node_prompts_data):
+                wj_pivoted_creds = Credential.unique_dict(wj_prompts_data['credentials'])
+                node_pivoted_creds = Credential.unique_dict(node_prompts_data['credentials'])
+                node_pivoted_creds.update(wj_pivoted_creds)
+                wj_prompts_data['credentials'] = [cred for cred in node_pivoted_creds.values()]
+
+            # NOTE: no special rules for instance_groups, because they do not merge
+            # or labels, because they do not propogate WFJT-->node at all
+
+            # Combine WFJT prompts with node here, WFJT at higher level
+            node_prompts_data.update(wj_prompts_data)
+            accepted_fields, ignored_fields, errors = ujt_obj._accept_or_ignore_job_kwargs(**node_prompts_data)
             if errors:
                 logger.info(
                     _('Bad launch configuration starting template {template_pk} as part of ' 'workflow {workflow_pk}. Errors:\n{error_text}').format(
@@ -327,15 +330,6 @@ class WorkflowJobNode(WorkflowNodeBase):
                     )
                 )
             data.update(accepted_fields)  # missing fields are handled in the scheduler
-            try:
-                # config saved on the workflow job itself
-                wj_config = self.workflow_job.launch_config
-            except ObjectDoesNotExist:
-                wj_config = None
-            if wj_config:
-                accepted_fields, ignored_fields, errors = ujt_obj._accept_or_ignore_job_kwargs(**wj_config.prompts_dict())
-                accepted_fields.pop('extra_vars', None)  # merge handled with other extra_vars later
-                data.update(accepted_fields)
         # build ancestor artifacts, save them to node model for later
         aa_dict = {}
         is_root_node = True
@@ -366,12 +360,12 @@ class WorkflowJobNode(WorkflowNodeBase):
                 functional_aa_dict = copy(aa_dict)
                 functional_aa_dict.pop('_ansible_no_log', None)
                 extra_vars.update(functional_aa_dict)
-        if ujt_obj and isinstance(ujt_obj, JobTemplate):
-            # Workflow Job extra_vars higher precedence than ancestor artifacts
-            if self.workflow_job and self.workflow_job.extra_vars:
-                extra_vars.update(self.workflow_job.extra_vars_dict)
+
+        # Workflow Job extra_vars higher precedence than ancestor artifacts
+        extra_vars.update(vars_special_precedence)
         if extra_vars:
             data['extra_vars'] = extra_vars
+
         # ensure that unified jobs created by WorkflowJobs are marked
         data['_eager_fields'] = {'launch_type': 'workflow'}
         if self.workflow_job and self.workflow_job.created_by:
@@ -741,6 +735,25 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
                 continue
             artifacts.update(job.get_effective_artifacts(parents_set=new_parents_set))
         return artifacts
+
+    def prompts_dict(self, *args, **kwargs):
+        if self.job_template_id:
+            # HACK: Exception for sliced jobs here, this is bad
+            # when sliced jobs were introduced, workflows did not have all the prompted JT fields
+            # so to support prompting with slicing, we abused the workflow job launch config
+            # these would be more properly saved on the workflow job, but it gets the wrong fields now
+            try:
+                wj_config = self.launch_config
+                r = wj_config.prompts_dict(*args, **kwargs)
+            except ObjectDoesNotExist:
+                r = {}
+        else:
+            r = super().prompts_dict(*args, **kwargs)
+            # Workflow labels and job labels are treated separately
+            # that means that they do not propogate from WFJT / workflow job to jobs in workflow
+            r.pop('labels', None)
+
+        return r
 
     def get_notification_templates(self):
         return self.workflow_job_template.notification_templates
