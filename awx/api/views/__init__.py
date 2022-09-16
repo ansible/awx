@@ -3726,6 +3726,7 @@ class JobCreateSchedule(RetrieveAPIView):
             extra_data=config.extra_data,
             survey_passwords=config.survey_passwords,
             inventory=config.inventory,
+            execution_environment=config.execution_environment,
             char_prompts=config.char_prompts,
             credentials=set(config.credentials.all()),
             labels=set(config.labels.all()),
