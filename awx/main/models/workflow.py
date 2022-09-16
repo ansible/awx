@@ -166,6 +166,9 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         'char_prompts',
         'all_parents_must_converge',
         'identifier',
+        'labels',
+        'execution_environment',
+        'instance_groups',
     ]
     REENCRYPTION_BLOCKLIST_AT_COPY = ['extra_data', 'survey_passwords']
 
@@ -455,6 +458,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         'survey_spec',
         'skip_tags',
         'job_tags',
+        'execution_environment',
     ]
 
     class Meta:
