@@ -2200,13 +2200,16 @@ class WorkflowJobAccess(BaseAccess):
             return False
 
         # Obtain prompts used to start original job
-        JobLaunchConfig = obj._meta.get_field('launch_config').related_model
-        try:
-            config = JobLaunchConfig.objects.get(job=obj)
-        except JobLaunchConfig.DoesNotExist:
-            if self.save_messages:
-                self.messages['detail'] = _('Workflow Job was launched with unknown prompts.')
-            return False
+        if obj.is_sliced_job:
+            config = obj
+        else:
+            JobLaunchConfig = obj._meta.get_field('launch_config').related_model
+            try:
+                config = JobLaunchConfig.objects.get(job=obj)
+            except JobLaunchConfig.DoesNotExist:
+                if self.save_messages:
+                    self.messages['detail'] = _('Workflow Job was launched with unknown prompts.')
+                return False
 
         # execute permission to WFJT is mandatory for any relaunch
         if self.user not in template.execute_role:

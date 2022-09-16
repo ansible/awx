@@ -1,6 +1,6 @@
 import pytest
 
-from awx.main.models import JobTemplate, Job, JobHostSummary, WorkflowJob, Inventory, Project, Organization
+from awx.main.models import JobTemplate, Job, JobHostSummary, WorkflowJob, Inventory, Project, Organization, JobLaunchConfig
 
 
 @pytest.mark.django_db
@@ -47,9 +47,21 @@ class TestSlicingModels:
         assert job.unified_job_template == slice_jt
         assert job.workflow_nodes.count() == 3
 
+    def test_slices_with_JT_values_no_prompts(self, slice_job_factory):
+        job = slice_job_factory(3, jt_kwargs={'limit': 'foobar'}, spawn=True)
+        assert job.prompts_dict() == {}
+        with pytest.raises(JobLaunchConfig.DoesNotExist):
+            assert job.launch_config
+        for node in job.workflow_nodes.all():
+            assert node.limit is None  # data not saved in node prompts
+            job = node.job
+            assert job.limit == 'foobar'
+
     def test_slices_with_JT_and_prompts(self, slice_job_factory):
         job = slice_job_factory(3, jt_kwargs={'ask_limit_on_launch': True}, prompts={'limit': 'foobar'}, spawn=True)
-        assert job.launch_config.prompts_dict() == {'limit': 'foobar'}
+        assert job.prompts_dict() == {'limit': 'foobar'}
+        with pytest.raises(JobLaunchConfig.DoesNotExist):
+            assert job.launch_config
         for node in job.workflow_nodes.all():
             assert node.limit is None  # data not saved in node prompts
             job = node.job
