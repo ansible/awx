@@ -63,6 +63,7 @@ function JobTemplateDetail({ template }) {
     webhook_service,
     related: { webhook_receiver },
     webhook_key,
+    prevent_instance_group_fallback,
     custom_virtualenv,
   } = template;
   const { id: templateId } = useParams();
@@ -111,7 +112,8 @@ function JobTemplateDetail({ template }) {
     host_config_key ||
     allow_simultaneous ||
     use_fact_cache ||
-    webhook_service;
+    webhook_service ||
+    prevent_instance_group_fallback;
 
   const renderOptions = (
     <TextList component={TextListVariants.ul}>
@@ -138,6 +140,11 @@ function JobTemplateDetail({ template }) {
       {webhook_service && (
         <TextListItem component={TextListItemVariants.li}>
           {t`Webhooks`}
+        </TextListItem>
+      )}
+      {prevent_instance_group_fallback && (
+        <TextListItem component={TextListItemVariants.li}>
+          {t`Prevent Instance Group Fallback`}
         </TextListItem>
       )}
     </TextList>
@@ -333,6 +340,13 @@ function JobTemplateDetail({ template }) {
                 <Label>{summary_fields.webhook_credential.name}</Label>
               </Link>
             }
+          />
+        )}
+        {prevent_instance_group_fallback && (
+          <Detail
+            label={t`Prevent Instance Group Fallback`}
+            dataCy="jt-detail-prevent-instnace-group-fallback"
+            helpText={helpText.preventInstanceGroupFallback}
           />
         )}
         <UserDateDetail
