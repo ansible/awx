@@ -47,7 +47,7 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
   const [simulationProgress, setSimulationProgress] = useState(null);
   const history = useHistory();
   const {
-    result: { instance, instanceGroups },
+    result: { instance = {}, instanceGroups },
     error: fetchError,
     isLoading,
     request: fetchDetails,
@@ -68,12 +68,13 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
       result: {},
     }
   );
-
   const { error: fetchInstanceError, dismissError } =
     useDismissableError(fetchError);
 
   useEffect(() => {
-    fetchDetails();
+    if (selectedNode) {
+      fetchDetails();
+    }
   }, [selectedNode, fetchDetails]);
 
   function updateNodeSVG(nodes) {
@@ -383,33 +384,31 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
     <div id="chart" style={{ position: 'relative', height: '100%' }}>
       {showLegend && <Legend />}
       {instance && (
-        <>
-          {fetchInstanceError && (
-            <AlertModal
-              variant="error"
-              title={t`Error!`}
-              isOpen
-              onClose={dismissError}
-            >
-              {t`Failed to update instance.`}
-              <ErrorDetail error={fetchInstanceError} />
-            </AlertModal>
-          )}
-          <Tooltip
-            isNodeSelected={isNodeSelected}
-            renderNodeIcon={renderNodeIcon(selectedNode)}
-            selectedNode={selectedNode}
-            fetchInstance={fetchDetails}
-            instanceGroups={instanceGroups}
-            instanceDetail={instance}
-            isLoading={isLoading}
-            redirectToDetailsPage={() =>
-              redirectToDetailsPage(selectedNode, history)
-            }
-          />
-        </>
+        <Tooltip
+          isNodeSelected={isNodeSelected}
+          renderNodeIcon={renderNodeIcon(selectedNode)}
+          selectedNode={selectedNode}
+          fetchInstance={fetchDetails}
+          instanceGroups={instanceGroups}
+          instanceDetail={instance}
+          isLoading={isLoading}
+          redirectToDetailsPage={() =>
+            redirectToDetailsPage(selectedNode, history)
+          }
+        />
       )}
       <Loader className="simulation-loader" progress={simulationProgress} />
+      {fetchInstanceError && (
+        <AlertModal
+          variant="error"
+          title={t`Error!`}
+          isOpen
+          onClose={dismissError}
+        >
+          {t`Failed to get instance.`}
+          <ErrorDetail error={fetchInstanceError} />
+        </AlertModal>
+      )}
     </div>
   );
 }
