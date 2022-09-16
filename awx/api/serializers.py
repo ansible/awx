@@ -3223,9 +3223,9 @@ class JobCreateScheduleSerializer(LabelsListMixin, BaseSerializer):
                     ret[field_name] = self._summarize(field_name, ret[field_name])
             for field_name, singular in (('credentials', 'credential'), ('instance_groups', 'instance_group')):
                 if field_name in ret:
-                    ret[field_name] = [self._summarize(singular, cred) for cred in ret[field_name]]
+                    ret[field_name] = [self._summarize(singular, obj) for obj in ret[field_name]]
             if 'labels' in ret:
-                ret['labels'] = self._summary_field_labels(obj)
+                ret['labels'] = self._summary_field_labels(config)
             return ret
         except JobLaunchConfig.DoesNotExist:
             return {'all': _('Unknown, job may have been ran before launch configurations were saved.')}
