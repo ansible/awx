@@ -57,8 +57,7 @@ function InventoryDetail({ inventory }) {
   const { organization, user_capabilities: userCapabilities } =
     inventory.summary_fields;
 
-  const prevent_instance_group_fallback =
-    inventory.prevent_instance_group_fallback;
+  const { prevent_instance_group_fallback } = inventory;
 
   const deleteDetailsRequests =
     relatedResourceDeleteRequests.inventory(inventory);
