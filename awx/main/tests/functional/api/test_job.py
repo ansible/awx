@@ -13,17 +13,11 @@ from django.utils import timezone
 # AWX
 from awx.api.versioning import reverse
 from awx.api.views import RelatedJobsPreventDeleteMixin, UnifiedJobDeletionMixin
-from awx.main.models import (
-    JobTemplate,
-    User,
-    Job,
-    AdHocCommand,
-    ProjectUpdate,
-)
+from awx.main.models import JobTemplate, User, Job, AdHocCommand, ProjectUpdate, InstanceGroup, Label, Organization
 
 
 @pytest.mark.django_db
-def test_job_relaunch_permission_denied_response(post, get, inventory, project, credential, net_credential, machine_credential):
+def test_job_relaunch_permission_denied_response(post, get, inventory, project, net_credential, machine_credential):
     jt = JobTemplate.objects.create(name='testjt', inventory=inventory, project=project, ask_credential_on_launch=True)
     jt.credentials.add(machine_credential)
     jt_user = User.objects.create(username='jobtemplateuser')
@@ -39,6 +33,22 @@ def test_job_relaunch_permission_denied_response(post, get, inventory, project, 
     job.launch_config.credentials.add(net_credential)
     r = post(reverse('api:job_relaunch', kwargs={'pk': job.pk}), {}, jt_user, expect=403)
     assert 'launched with prompted fields you do not have access to' in r.data['detail']
+    job.launch_config.credentials.clear()
+
+    # Job has prompted instance group that user cannot see
+    job.launch_config.instance_groups.add(InstanceGroup.objects.create())
+    r = post(reverse('api:job_relaunch', kwargs={'pk': job.pk}), {}, jt_user, expect=403)
+    assert 'launched with prompted fields you do not have access to' in r.data['detail']
+    job.launch_config.instance_groups.clear()
+
+    # Job has prompted label that user cannot see
+    job.launch_config.labels.add(Label.objects.create(organization=Organization.objects.create()))
+    r = post(reverse('api:job_relaunch', kwargs={'pk': job.pk}), {}, jt_user, expect=403)
+    assert 'launched with prompted fields you do not have access to' in r.data['detail']
+    job.launch_config.labels.clear()
+
+    # without any of those prompts, user can launch
+    r = post(reverse('api:job_relaunch', kwargs={'pk': job.pk}), {}, jt_user, expect=201)
 
 
 @pytest.mark.django_db
