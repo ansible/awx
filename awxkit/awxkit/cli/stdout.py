@@ -48,7 +48,7 @@ def monitor_workflow(response, session, print_stdout=True, action_timeout=None, 
     while True:
         if action_timeout and time.time() - started > action_timeout:
             if print_stdout:
-                cprint('Monitoring aborted due to timeout.', 'red')
+                cprint('Monitoring aborted due to action-timeout.', 'red')
             break
 
         if sys.stdout.isatty():
@@ -99,7 +99,7 @@ def monitor(response, session, print_stdout=True, action_timeout=None, interval=
     while True:
         if action_timeout and time.time() - started > action_timeout:
             if print_stdout:
-                cprint('Monitoring aborted due to timeout.', 'red')
+                cprint('Monitoring aborted due to action-timeout.', 'red')
             break
         next_line = fetch(next_line)
         if next_line:
