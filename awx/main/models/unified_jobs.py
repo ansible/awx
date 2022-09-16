@@ -1007,7 +1007,7 @@ class UnifiedJob(
                 # Here we are doing a loop to make sure we preserve order in case this is a Ordered field
                 job_item = kwargs.get(field_name, [])
                 if job_item:
-                    parent_items = getattr(parent, field_name, []).all()
+                    parent_items = list(getattr(parent, field_name, []).all())
                     for item in job_item:
                         # Do not include this item in the config if its in the parent
                         if item not in parent_items:
