@@ -9,7 +9,7 @@ from .utils import cprint, color_enabled, STATUS_COLORS
 from awxkit.utils import to_str
 
 
-def monitor_workflow(response, session, print_stdout=True, timeout=None, interval=0.25):
+def monitor_workflow(response, session, print_stdout=True, action_timeout=None, interval=0.25):
     get = response.url.get
     payload = {
         'order_by': 'finished',
@@ -46,7 +46,7 @@ def monitor_workflow(response, session, print_stdout=True, timeout=None, interva
     started = time.time()
     seen = set()
     while True:
-        if timeout and time.time() - started > timeout:
+        if action_timeout and time.time() - started > action_timeout:
             if print_stdout:
                 cprint('Monitoring aborted due to timeout.', 'red')
             break
@@ -68,7 +68,7 @@ def monitor_workflow(response, session, print_stdout=True, timeout=None, interva
     return get().json.status
 
 
-def monitor(response, session, print_stdout=True, timeout=None, interval=0.25):
+def monitor(response, session, print_stdout=True, action_timeout=None, interval=0.25):
     get = response.url.get
     payload = {'order_by': 'start_line', 'no_truncate': True}
     if response.type == 'job':
@@ -97,7 +97,7 @@ def monitor(response, session, print_stdout=True, timeout=None, interval=0.25):
 
     started = time.time()
     while True:
-        if timeout and time.time() - started > timeout:
+        if action_timeout and time.time() - started > action_timeout:
             if print_stdout:
                 cprint('Monitoring aborted due to timeout.', 'red')
             break
