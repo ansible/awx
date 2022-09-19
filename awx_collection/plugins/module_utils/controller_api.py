@@ -903,6 +903,8 @@ class ControllerAPIModule(ControllerModule):
                     item_name = existing_item['identifier']
                 elif item_type == 'credential_input_source':
                     item_name = existing_item['id']
+                elif item_type == 'instance':
+                    item_name = existing_item['hostname']
                 else:
                     item_name = existing_item['name']
                 item_id = existing_item['id']
