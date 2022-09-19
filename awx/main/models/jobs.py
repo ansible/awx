@@ -965,10 +965,14 @@ class LaunchTimeConfigBase(BaseModel):
         'execution_environment',  # already a unified job and unified JT field
     )
 
-    def prompts_dict(self, display=False):
+    def prompts_dict(self, display=False, for_cls=None):
         data = {}
+        if for_cls:
+            cls = for_cls
+        else:
+            cls = JobTemplate
         # Some types may have different prompts, but always subset of JT prompts
-        for prompt_name in JobTemplate.get_ask_mapping().keys():
+        for prompt_name in cls.get_ask_mapping().keys():
             try:
                 field = self._meta.get_field(prompt_name)
             except FieldDoesNotExist:

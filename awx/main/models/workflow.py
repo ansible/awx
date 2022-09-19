@@ -304,8 +304,8 @@ class WorkflowJobNode(WorkflowNodeBase):
         wj_special_passwords = {}
         ujt_obj = self.unified_job_template
         if ujt_obj is not None:
-            node_prompts_data = self.prompts_dict()
-            wj_prompts_data = self.workflow_job.prompts_dict()
+            node_prompts_data = self.prompts_dict(for_cls=ujt_obj.__class__)
+            wj_prompts_data = self.workflow_job.prompts_dict(for_cls=ujt_obj.__class__)
             # Explanation - special historical case
             # WFJT extra_vars ignored JobTemplate.ask_variables_on_launch, bypassing _accept_or_ignore_job_kwargs
             # inventory and others are only accepted if JT prompts for it with related ask_ field
