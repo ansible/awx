@@ -1,0 +1,55 @@
+---
+- name: Generate hostnames
+  set_fact:
+    hostname1: "AWX-Collection-tests-instance1.{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}.example.com"
+    hostname2: "AWX-Collection-tests-instance2.{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}.example.com"
+    hostname3: "AWX-Collection-tests-instance3.{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}.example.com"
+  register: facts
+
+- name: Show hostnames
+  debug:
+    var: facts
+
+- block:
+    - name: Create an instance
+      awx.awx.instance:
+        hostname: "{{ item }}"
+      with_items:
+        - "{{ hostname1 }}"
+        - "{{ hostname2 }}"
+      register: result
+
+    - assert:
+        that:
+          - result is changed
+
+    - name: Create an instance with non-default config
+      awx.awx.instance:
+        hostname: "{{ hostname3 }}"
+        capacity_adjustment: 0.4
+        listener_port: 31337
+      register: result
+
+    - assert:
+        that:
+          - result is changed
+
+    - name: Update an instance
+      awx.awx.instance:
+        hostname: "{{ hostname1 }}"
+        capacity_adjustment: 0.7
+      register: result
+
+    - assert:
+        that:
+          - result is changed
+
+  always:
+    - name: Deprovision the instances
+      awx.awx.instance:
+        hostname: "{{ item }}"
+        node_state: deprovisioning
+      with_items:
+        - "{{ hostname1 }}"
+        - "{{ hostname2 }}"
+        - "{{ hostname3 }}"

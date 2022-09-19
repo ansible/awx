@@ -82,7 +82,6 @@ needs_development = ['inventory_script', 'instance']
 needs_param_development = {
     'host': ['instance_id'],
     'workflow_approval': ['description', 'execution_environment'],
-    'instances': ['capacity_adjustment', 'enabled', 'hostname', 'ip_address', 'managed_by_policy', 'node_state', 'node_type'],
 }
 # -----------------------------------------------------------------------------------------------------------
 
