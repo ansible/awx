@@ -12,6 +12,9 @@ from awx.main.models.workflow import (
 )
 from awx.main.models.jobs import JobTemplate, Job
 from awx.main.models.projects import ProjectUpdate
+from awx.main.models.credential import Credential, CredentialType
+from awx.main.models.label import Label
+from awx.main.models.ha import InstanceGroup
 from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.api.versioning import reverse
 from awx.api.views import WorkflowJobTemplateNodeSuccessNodesList
@@ -228,6 +231,65 @@ class TestWorkflowJob:
         mocker.patch.object(queued_node, 'get_parent_nodes', lambda: [project_node])
         assert queued_node.get_job_kwargs()['extra_vars'] == {'a': 42, 'b': 43}
         assert queued_node.ancestor_artifacts == {'a': 42, 'b': 43}
+
+    def test_combine_prompts_WFJT_to_node(self, project, inventory, organization):
+        """
+        Test that complex prompts like variables, credentials, labels, etc
+        are properly combined from the workflow-level with the node-level
+        """
+        jt = JobTemplate.objects.create(
+            project=project,
+            inventory=inventory,
+            ask_variables_on_launch=True,
+            ask_credential_on_launch=True,
+            ask_instance_groups_on_launch=True,
+            ask_labels_on_launch=True,
+            ask_limit_on_launch=True,
+        )
+        wj = WorkflowJob.objects.create(name='test-wf-job', extra_vars='{}')
+
+        common_ig = InstanceGroup.objects.create(name='common')
+        common_ct = CredentialType.objects.create(name='common')
+
+        node = WorkflowJobNode.objects.create(workflow_job=wj, unified_job_template=jt, extra_vars={'node_key': 'node_val'})
+        node.limit = 'node_limit'
+        node.save()
+        node_cred_unique = Credential.objects.create(credential_type=CredentialType.objects.create(name='node'))
+        node_cred_conflicting = Credential.objects.create(credential_type=common_ct)
+        node.credentials.add(node_cred_unique, node_cred_conflicting)
+        node_labels = [Label.objects.create(name='node1', organization=organization), Label.objects.create(name='node2', organization=organization)]
+        node.labels.add(*node_labels)
+        node_igs = [common_ig, InstanceGroup.objects.create(name='node')]
+        for ig in node_igs:
+            node.instance_groups.add(ig)
+
+        # assertions for where node has prompts but workflow job does not
+        data = node.get_job_kwargs()
+        assert data['extra_vars'] == {'node_key': 'node_val'}
+        assert set(data['credentials']) == set([node_cred_conflicting, node_cred_unique])
+        assert data['instance_groups'] == node_igs
+        assert set(data['labels']) == set(node_labels)
+        assert data['limit'] == 'node_limit'
+
+        # add prompts to the WorkflowJob
+        wj.limit = 'wj_limit'
+        wj.extra_vars = {'wj_key': 'wj_val'}
+        wj.save()
+        wj_cred_unique = Credential.objects.create(credential_type=CredentialType.objects.create(name='wj'))
+        wj_cred_conflicting = Credential.objects.create(credential_type=common_ct)
+        wj.credentials.add(wj_cred_unique, wj_cred_conflicting)
+        wj.labels.add(Label.objects.create(name='wj1', organization=organization), Label.objects.create(name='wj2', organization=organization))
+        wj_igs = [InstanceGroup.objects.create(name='wj'), common_ig]
+        for ig in wj_igs:
+            wj.instance_groups.add(ig)
+
+        # assertions for behavior where node and workflow jobs have prompts
+        data = node.get_job_kwargs()
+        assert data['extra_vars'] == {'node_key': 'node_val', 'wj_key': 'wj_val'}
+        assert set(data['credentials']) == set([wj_cred_unique, wj_cred_conflicting, node_cred_unique])
+        assert data['instance_groups'] == wj_igs
+        assert set(data['labels']) == set(node_labels)  # as exception, WFJT labels not applied
+        assert data['limit'] == 'wj_limit'
 
 
 @pytest.mark.django_db
