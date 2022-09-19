@@ -313,9 +313,10 @@ class WorkflowJobNode(WorkflowNodeBase):
             if not isinstance(ujt_obj, WorkflowJobTemplate):
                 wj_special_vars = wj_prompts_data.pop('extra_vars', {})
                 wj_special_passwords = wj_prompts_data.pop('survey_passwords', {})
-            else:
+            elif 'extra_vars' in node_prompts_data:
                 # Follow the vars combination rules
                 node_prompts_data['extra_vars'].update(wj_prompts_data.pop('extra_vars', {}))
+            elif 'survey_passwords' in node_prompts_data:
                 node_prompts_data['survey_passwords'].update(wj_prompts_data.pop('survey_passwords', {}))
 
             # Follow the credential combination rules
