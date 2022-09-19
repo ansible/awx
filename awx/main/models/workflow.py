@@ -300,6 +300,8 @@ class WorkflowJobNode(WorkflowNodeBase):
         """
         # reject/accept prompted fields
         data = {}
+        wj_special_vars = {}
+        wj_special_passwords = {}
         ujt_obj = self.unified_job_template
         if ujt_obj is not None:
             node_prompts_data = self.prompts_dict()
@@ -308,10 +310,13 @@ class WorkflowJobNode(WorkflowNodeBase):
             # WFJT extra_vars ignored JobTemplate.ask_variables_on_launch, bypassing _accept_or_ignore_job_kwargs
             # inventory and others are only accepted if JT prompts for it with related ask_ field
             # this is inconsistent, but maintained
-            vars_special_precedence = {}
             if not isinstance(ujt_obj, WorkflowJobTemplate):
-                if wj_prompts_data.get('extra_vars'):
-                    vars_special_precedence = wj_prompts_data.pop('extra_vars')
+                wj_special_vars = wj_prompts_data.pop('extra_vars', {})
+                wj_special_passwords = wj_prompts_data.pop('survey_passwords', {})
+            else:
+                # Follow the vars combination rules
+                node_prompts_data['extra_vars'].update(wj_prompts_data.pop('extra_vars', {}))
+                node_prompts_data['survey_passwords'].update(wj_prompts_data.pop('survey_passwords', {}))
 
             # Follow the credential combination rules
             if ('credentials' in wj_prompts_data) and ('credentials' in node_prompts_data):
@@ -345,15 +350,12 @@ class WorkflowJobNode(WorkflowNodeBase):
             self.ancestor_artifacts = aa_dict
             self.save(update_fields=['ancestor_artifacts'])
         # process password list
-        password_dict = {}
+        password_dict = data.get('survey_passwords', {})
         if '_ansible_no_log' in aa_dict:
             for key in aa_dict:
                 if key != '_ansible_no_log':
                     password_dict[key] = REPLACE_STR
-        if self.workflow_job.survey_passwords:
-            password_dict.update(self.workflow_job.survey_passwords)
-        if self.survey_passwords:
-            password_dict.update(self.survey_passwords)
+        password_dict.update(wj_special_passwords)
         if password_dict:
             data['survey_passwords'] = password_dict
         # process extra_vars
@@ -365,7 +367,7 @@ class WorkflowJobNode(WorkflowNodeBase):
                 extra_vars.update(functional_aa_dict)
 
         # Workflow Job extra_vars higher precedence than ancestor artifacts
-        extra_vars.update(vars_special_precedence)
+        extra_vars.update(wj_special_vars)
         if extra_vars:
             data['extra_vars'] = extra_vars
 
