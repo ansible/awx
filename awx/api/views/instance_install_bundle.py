@@ -3,9 +3,9 @@
 
 import datetime
 import io
+import ipaddress
 import os
 import tarfile
-import ipaddress
 
 import asn1
 from awx.api import serializers
@@ -18,6 +18,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509 import DNSName, IPAddress, ObjectIdentifier, OtherName
 from cryptography.x509.oid import NameOID
 from django.http import HttpResponse
+from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 
@@ -27,9 +28,8 @@ RECEPTOR_OID = "1.3.6.1.4.1.2312.19.1"
 # generate install bundle for the instance
 # install bundle directory structure
 # ├── install_receptor.yml (playbook)
-# ├── inventory.ini
+# ├── inventory.yml
 # ├── receptor
-# │   ├── vars.yml
 # │   ├── tls
 # │   │   ├── ca
 # │   │   │   └── receptor-ca.crt
@@ -101,63 +101,15 @@ class InstanceInstallBundle(GenericAPIView):
 
 
 def generate_playbook():
-    return """---
-- hosts: all
-  become: yes
-  tasks:
-    - name: Create the receptor user
-      user:
-        name: "{{ receptor_user }}"
-        shell: /bin/bash
-    - import_role:
-        name: ansible.receptor.setup
-    - name: Install ansible-runner
-      pip:
-        name: ansible-runner
-        executable: pip3.9
-"""
+    return render_to_string("instance_install_bundle/install_receptor.yml")
 
 
 def generate_requirements_yml():
-    return """---
-collections:
-  - name: ansible.receptor
-    source: https://github.com/ansible/receptor-collection/
-    type: git
-    version: 0.1.0
-"""
+    return render_to_string("instance_install_bundle/requirements.yml")
 
 
 def generate_inventory_yml(instance_obj):
-    return f"""---
-all:
-  hosts:
-    remote-execution:
-      ansible_host: {instance_obj.hostname}
-      ansible_user: <username> # user provided
-      ansible_ssh_private_key_file: ~/.ssh/id_rsa
-      receptor_verify: true
-      receptor_tls: true
-      receptor_work_commands:
-        ansible-runner:
-          command: ansible-runner
-          params: worker
-          allowruntimeparams: true
-          verifysignature: true
-      custom_worksign_public_keyfile: receptor/work-public-key.pem
-      custom_tls_certfile: receptor/tls/receptor.crt
-      custom_tls_keyfile: receptor/tls/receptor.key
-      custom_ca_certfile: receptor/tls/ca/receptor-ca.crt
-      receptor_user: awx
-      receptor_group: awx
-      receptor_protocol: 'tcp'
-      receptor_listener: true
-      receptor_port: {instance_obj.listener_port}
-      receptor_dependencies:
-        - podman
-        - crun
-        - python39-pip
-"""
+    return render_to_string("instance_install_bundle/inventory.yml", context=dict(instance=instance_obj))
 
 
 def generate_receptor_tls(instance_obj):
