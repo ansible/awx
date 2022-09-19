@@ -483,5 +483,11 @@ $ PROMETHEUS=yes GRAFANA=yes make docker-compose
 
 ### Alerts in Grafana
 
-We are configuring alerts in grafana using the provisioning files method. This feature is new in Grafana as of August, 2022. Documentation can be found: https://grafana.com/docs/grafana/latest/administration/provisioning/#alerting however it does not fully show all parameters to the config. One way to understand how to build rules is to build them in the UI and use chrometools to inspect the payload as you save the rules. It appears that the "data" portion of the payload for each rule is the same syntax as needed in the provisioning file config. To reload the alerts without restarting the container, from within the container you can send a POST with `curl -X POST http://admin:admin@localhost:3000/api/admin/provisioning/alerting/relo
-ad`. Keep in mind the grafana container does not default contain `curl` and you can get it with `apk add curl`. 
+We are configuring alerts in grafana using the provisioning files method. This feature is new in Grafana as of August, 2022. Documentation can be found: https://grafana.com/docs/grafana/latest/administration/provisioning/#alerting however it does not fully show all parameters to the config.
+
+One way to understand how to build rules is to build them in the UI and use chrometools to inspect the payload as you save the rules. It appears that the "data" portion of the payload for each rule is the same syntax as needed in the provisioning file config. To reload the alerts without restarting the container, from within the container you can send a POST with `curl -X POST http://admin:admin@localhost:3000/api/admin/provisioning/alerting/reload`. Keep in mind the grafana container does not contain `curl`. You can install it with the command `apk add curl`.
+
+Another way to export rules is explore the api.
+1. Get all the folders:  `GET` to `/api/folders`
+2. Get the rules `GET` to `/api/ruler/grafana/api/v1/rules/{{ Folder }}`
+
