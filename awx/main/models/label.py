@@ -44,7 +44,7 @@ class Label(CommonModelNameNotUnique):
             inventory_labels__isnull=True,
             schedule_labels__isnull=True,
             workflowjobtemplatenode_labels__isnull=True,
-            workflowjobnode_labels=True,
+            workflowjobnode_labels__isnull=True,
         ).exists()
 
     def is_candidate_for_detach(self):
