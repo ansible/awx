@@ -1,25 +1,21 @@
 import React from 'react';
 import { t } from '@lingui/macro';
-import { Formik, useField } from 'formik';
-import {
-  Form,
-  FormGroup,
-  CardBody,
-  Switch,
-  Popover,
-} from '@patternfly/react-core';
+import { Formik } from 'formik';
+import { Form, FormGroup, CardBody } from '@patternfly/react-core';
 import { FormColumnLayout } from 'components/FormLayout';
-import FormField, { FormSubmitError } from 'components/FormField';
+import FormField, {
+  FormSubmitError,
+  CheckboxField,
+} from 'components/FormField';
 import FormActionGroup from 'components/FormActionGroup';
 import { required } from 'util/validators';
 
 function InstanceFormFields() {
-  const [enabled, , enabledHelpers] = useField('enabled');
   return (
     <>
       <FormField
-        id="name"
-        label={t`Name`}
+        id="hostname"
+        label={t`Host Name`}
         name="hostname"
         type="text"
         validate={required(null)}
@@ -36,6 +32,7 @@ function InstanceFormFields() {
         label={t`Instance State`}
         name="node_state"
         type="text"
+        tooltip={t`Sets the current life cycle stage of this instance. Default is "installed."`}
         isDisabled
       />
       <FormField
@@ -43,6 +40,7 @@ function InstanceFormFields() {
         label={t`Listener Port`}
         name="listener_port"
         type="number"
+        tooltip={t`Select the port that Receptor will listen on for incoming connections. Default is 27199.`}
         isRequired
       />
       <FormField
@@ -50,27 +48,15 @@ function InstanceFormFields() {
         label={t`Instance Type`}
         name="node_type"
         type="text"
+        tooltip={t`Sets the role that this instance will play within mesh topology. Default is "execution."`}
         isDisabled
       />
-      <FormGroup
-        label={t`Enable Instance`}
-        aria-label={t`Enable Instance`}
-        labelIcon={
-          <Popover
-            content={t`If enabled, the instance will be ready to accept work.`}
-          />
-        }
-      >
-        <Switch
-          css="display: inline-flex;"
+      <FormGroup fieldId="instance-option-checkboxes" label={t`Options`}>
+        <CheckboxField
           id="enabled"
-          label={t`Enabled`}
-          labelOff={t`Disabled`}
-          isChecked={enabled.value}
-          onChange={() => {
-            enabledHelpers.setValue(!enabled.value);
-          }}
-          ouiaId="enable-instance-switch"
+          name="enabled"
+          label={t`Enable Instance`}
+          tooltip={t`Set the instance enabled or disabled. If disabled, jobs will not be assigned to this instance.`}
         />
       </FormGroup>
     </>
