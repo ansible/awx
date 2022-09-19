@@ -46,19 +46,12 @@ plugin_routing:
   inventory:
     tower:
       redirect: awx.awx.controller
-    awx.awx.tower:
-      redirect: awx.awx.controller
   lookup:
     tower_api:
       redirect: awx.awx.controller_api
     tower_schedule_rrule:
       redirect: awx.awx.schedule_rrule
-    awx.awx.tower_api:
-      redirect: awx.awx.controller_api
-    awx.awx.tower_schedule_rrule:
-      redirect: awx.awx.tower_schedule_rrule
   modules:
-    # if playbook does not specify a FQCN
     tower_ad_hoc_command_cancel:
       redirect: awx.awx.ad_hoc_command_cancel
     tower_ad_hoc_command_wait:
@@ -138,85 +131,4 @@ plugin_routing:
     tower_workflow_launch:
       redirect: awx.awx.workflow_launch
     tower_workflow_node_wait:
-      redirect: awx.awx.workflow_node_wait
-    # if playbook specifies a FQCN
-    awx.awx.tower_ad_hoc_command_cancel:
-      redirect: awx.awx.ad_hoc_command_cancel
-    awx.awx.tower_ad_hoc_command_wait:
-      redirect: awx.awx.ad_hoc_command_wait
-    awx.awx.tower_ad_hoc_command:
-      redirect: awx.awx.ad_hoc_command
-    awx.awx.tower_application:
-      redirect: awx.awx.application
-    awx.awx.tower_meta:
-      redirect: awx.awx.controller_meta
-    awx.awx.tower_credential_input_source:
-      redirect: awx.awx.credential_input_source
-    awx.awx.tower_credential_type:
-      redirect: awx.awx.credential_type
-    awx.awx.tower_credential:
-      redirect: awx.awx.credential
-    awx.awx.tower_execution_environment:
-      redirect: awx.awx.execution_environment
-    awx.awx.tower_export:
-      redirect: awx.awx.export
-    awx.awx.tower_group:
-      redirect: awx.awx.group
-    awx.awx.tower_host:
-      redirect: awx.awx.host
-    awx.awx.tower_import:
-      redirect: awx.awx.import
-    awx.awx.tower_instance_group:
-      redirect: awx.awx.instance_group
-    awx.awx.tower_inventory_source_update:
-      redirect: awx.awx.inventory_source_update
-    awx.awx.tower_inventory_source:
-      redirect: awx.awx.inventory_source
-    awx.awx.tower_inventory:
-      redirect: awx.awx.inventory
-    awx.awx.tower_job_cancel:
-      redirect: awx.awx.job_cancel
-    awx.awx.tower_job_launch:
-      redirect: awx.awx.job_launch
-    awx.awx.tower_job_list:
-      redirect: awx.awx.job_list
-    awx.awx.tower_job_template:
-      redirect: awx.awx.job_template
-    awx.awx.tower_job_wait:
-      redirect: awx.awx.job_wait
-    awx.awx.tower_label:
-      redirect: awx.awx.label
-    awx.awx.tower_license:
-      redirect: awx.awx.license
-    awx.awx.tower_notification_template:
-      redirect: awx.awx.notification_template
-    awx.awx.tower_notification:
-      redirect: awx.awx.notification_template
-    awx.awx.tower_organization:
-      redirect: awx.awx.organization
-    awx.awx.tower_project_update:
-      redirect: awx.awx.project_update
-    awx.awx.tower_project:
-      redirect: awx.awx.project
-    awx.awx.tower_role:
-      redirect: awx.awx.role
-    awx.awx.tower_schedule:
-      redirect: awx.awx.schedule
-    awx.awx.tower_settings:
-      redirect: awx.awx.settings
-    awx.awx.tower_team:
-      redirect: awx.awx.team
-    awx.awx.tower_token:
-      redirect: awx.awx.token
-    awx.awx.tower_user:
-      redirect: awx.awx.user
-    awx.awx.tower_workflow_approval:
-      redirect: awx.awx.workflow_approval
-    awx.awx.tower_workflow_job_template_node:
-      redirect: awx.awx.workflow_job_template_node
-    awx.awx.tower_workflow_job_template:
-      redirect: awx.awx.workflow_job_template
-    awx.awx.tower_workflow_launch:
-      redirect: awx.awx.workflow_launch
-    awx.awx.tower_workflow_node_wait:
       redirect: awx.awx.workflow_node_wait
