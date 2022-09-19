@@ -246,7 +246,7 @@ class TestWorkflowJob:
             ask_labels_on_launch=True,
             ask_limit_on_launch=True,
         )
-        wj = WorkflowJob.objects.create(name='test-wf-job')
+        wj = WorkflowJob.objects.create(name='test-wf-job', extra_vars='{}')
 
         common_ig = InstanceGroup.objects.create(name='common')
         common_ct = CredentialType.objects.create(name='common')
