@@ -24,11 +24,12 @@ import {
 
 const Wrapper = styled.div`
   position: absolute;
-  top: -20px;
   left: 0;
-  padding: 10px;
+  padding: 0 10px;
   width: 150px;
   background-color: rgba(255, 255, 255, 0.85);
+  overflow: scroll;
+  height: 100%;
 `;
 const Button = styled(PFButton)`
   &&& {
@@ -61,7 +62,7 @@ function Legend() {
       <TextContent>
         <Text
           component={TextVariants.small}
-          style={{ fontWeight: 'bold', color: 'black' }}
+          style={{ fontWeight: 'bold', color: 'black', marginTop: 0 }}
         >
           {t`Legend`}
         </Text>
