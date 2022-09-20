@@ -4140,9 +4140,9 @@ class JobLaunchSerializer(BaseSerializer):
     verbosity = serializers.ChoiceField(required=False, choices=VERBOSITY_CHOICES, write_only=True)
     execution_environment = serializers.PrimaryKeyRelatedField(queryset=ExecutionEnvironment.objects.all(), required=False, write_only=True)
     labels = serializers.PrimaryKeyRelatedField(many=True, queryset=Label.objects.all(), required=False, write_only=True)
-    forks = serializers.IntegerField(required=False, write_only=True, min_value=0, default=1)
-    job_slice_count = serializers.IntegerField(required=False, write_only=True, min_value=0, default=0)
-    timeout = serializers.IntegerField(required=False, write_only=True, default=0)
+    forks = serializers.IntegerField(required=False, write_only=True, min_value=0)
+    job_slice_count = serializers.IntegerField(required=False, write_only=True, min_value=0)
+    timeout = serializers.IntegerField(required=False, write_only=True)
     instance_groups = serializers.PrimaryKeyRelatedField(many=True, queryset=InstanceGroup.objects.all(), required=False, write_only=True)
 
     class Meta:
