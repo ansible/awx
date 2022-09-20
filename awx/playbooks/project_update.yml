@@ -160,19 +160,17 @@
   name: Perform project signature/checksum verification
   tasks:
     - name: Verify project content using GPG signature
-      playbook_integrity:
+      verify_project:
         project_path: "{{ project_path | quote }}"
         validation_type: gpg
         gpg_pubkey: "{{ gpg_pubkey }}"
-      register: gpg_result
       tags:
         - validation_gpg_public_key
 
     - name: Verify project content against checksum manifest
-      playbook_integrity:
+      verify_project:
         project_path: "{{ project_path | quote }}"
         validation_type: checksum_manifest
-      register: checksum_result
       tags:
         - validation_checksum_manifest
 

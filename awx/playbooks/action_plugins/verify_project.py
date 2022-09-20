@@ -88,7 +88,7 @@ class ActionModule(ActionBase):
         if not os.path.exists(manifest_file):
             return {
                 "failed": True,
-                "msg": f"Expected file not found: {path}",
+                "msg": f"Expected file not found: {manifest_file}",
             }
 
         checksum_file_contents = open(manifest_file, "r").read()
