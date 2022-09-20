@@ -9,7 +9,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0167_project_signature_validation_credential'),
+        ('main', '0168_inventoryupdate_scm_revision'),
     ]
 
     operations = [
