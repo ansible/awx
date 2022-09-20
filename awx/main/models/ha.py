@@ -436,6 +436,7 @@ class InventoryInstanceGroupMembership(models.Model):
     )
 
 
+# TODO: delete after migration sorted out
 class JobInstanceGroupMembership(models.Model):
 
     unifiedjob = models.ForeignKey('Job', on_delete=models.CASCADE)
