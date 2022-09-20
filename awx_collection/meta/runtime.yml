@@ -15,6 +15,7 @@ action_groups:
     - group
     - host
     - import
+    - instance
     - instance_group
     - inventory
     - inventory_source
