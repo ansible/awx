@@ -8,6 +8,8 @@ ignore: |
   awx/ui/test/e2e/tests/smoke-vars.yml
   awx/ui/node_modules
   tools/docker-compose/_sources
+  # django template files
+  awx/api/templates/instance_install_bundle/**
 
 extends: default
 
