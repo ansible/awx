@@ -170,7 +170,6 @@ function LaunchPrompt({
   labels = [],
   surveyConfig,
   resourceDefaultCredentials = [],
-  instanceGroups = [],
 }) {
   return (
     <Formik initialValues={{}} onSubmit={(values) => onLaunch(values)}>
@@ -182,7 +181,7 @@ function LaunchPrompt({
         resource={resource}
         labels={labels}
         resourceDefaultCredentials={resourceDefaultCredentials}
-        instanceGroups={instanceGroups}
+        instanceGroups={[]}
       />
     </Formik>
   );

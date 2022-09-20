@@ -42,7 +42,6 @@ function LaunchButton({ resource, children }) {
   const [launchConfig, setLaunchConfig] = useState(null);
   const [surveyConfig, setSurveyConfig] = useState(null);
   const [labels, setLabels] = useState([]);
-  const [instanceGroups, setInstanceGroups] = useState([]);
   const [isLaunching, setIsLaunching] = useState(false);
   const [error, setError] = useState(null);
 
@@ -71,35 +70,17 @@ function LaunchButton({ resource, children }) {
         setSurveyConfig(data);
       }
 
-      const relatedPromises = [];
-
       if (launch.ask_labels_on_launch) {
-        relatedPromises.push(readLabels);
-      } else {
-        relatedPromises.push(null);
-      }
+        const {
+          data: { results },
+        } = await readLabels;
 
-      if (launch.ask_instance_groups_on_launch) {
-        relatedPromises.push(JobTemplatesAPI.readInstanceGroups(resource.id));
-      } else {
-        relatedPromises.push(null);
-      }
-
-      const [labelsResponse, instanceGroupsResponse] = await Promise.all(
-        relatedPromises
-      );
-
-      if (launch.ask_labels_on_launch) {
-        const allLabels = labelsResponse?.data?.results.map((label) => ({
+        const allLabels = results.map((label) => ({
           ...label,
           isReadOnly: true,
         }));
 
         setLabels(allLabels);
-      }
-
-      if (launch.ask_instance_groups_on_launch) {
-        setInstanceGroups(instanceGroupsResponse?.data?.results);
       }
 
       if (canLaunchWithoutPrompt(launch)) {
@@ -216,7 +197,6 @@ function LaunchButton({ resource, children }) {
           labels={labels}
           onLaunch={launchWithParams}
           onCancel={() => setShowLaunchPrompt(false)}
-          instanceGroups={instanceGroups}
         />
       )}
     </>
