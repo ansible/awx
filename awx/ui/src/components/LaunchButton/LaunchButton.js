@@ -71,12 +71,26 @@ function LaunchButton({ resource, children }) {
         setSurveyConfig(data);
       }
 
-      if (launch.ask_labels_on_launch) {
-        const {
-          data: { results },
-        } = await readLabels;
+      const relatedPromises = [];
 
-        const allLabels = results.map((label) => ({
+      if (launch.ask_labels_on_launch) {
+        relatedPromises.push(readLabels);
+      } else {
+        relatedPromises.push(null);
+      }
+
+      if (launch.ask_instance_groups_on_launch) {
+        relatedPromises.push(JobTemplatesAPI.readInstanceGroups(resource.id));
+      } else {
+        relatedPromises.push(null);
+      }
+
+      const [labelsResponse, instanceGroupsResponse] = await Promise.all(
+        relatedPromises
+      );
+
+      if (launch.ask_labels_on_launch) {
+        const allLabels = labelsResponse?.data?.results.map((label) => ({
           ...label,
           isReadOnly: true,
         }));
@@ -85,11 +99,7 @@ function LaunchButton({ resource, children }) {
       }
 
       if (launch.ask_instance_groups_on_launch) {
-        const {
-          data: { results },
-        } = await JobTemplatesAPI.readInstanceGroups(resource.id);
-
-        setInstanceGroups(results);
+        setInstanceGroups(instanceGroupsResponse?.data?.results);
       }
 
       if (canLaunchWithoutPrompt(launch)) {
