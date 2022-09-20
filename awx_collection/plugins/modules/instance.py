@@ -48,10 +48,7 @@ options:
       description:
         - Role that this node plays in the mesh.
       choices:
-        - control
         - execution
-        - hybrid
-        - hop
       required: False
       type: str
       default: execution
@@ -59,13 +56,8 @@ options:
       description:
         - Indicates the current life cycle stage of this instance.
       choices:
-        - provisioning
-        - provision-fail
-        - installed
-        - ready
-        - unavailable
         - deprovisioning
-        - deprovision-fail
+        - installed
       required: False
       default: installed
       type: str
@@ -101,8 +93,8 @@ def main():
         capacity_adjustment=dict(type='float'),
         enabled=dict(type='bool'),
         managed_by_policy=dict(type='bool'),
-        node_type=dict(type='str', choices=['control', 'execution', 'hybrid', 'hop']),
-        node_state=dict(type='str', choices=['provisioning', 'provision-fail', 'installed', 'ready', 'unavailable', 'deprovisioning', 'deprovision-fail']),
+        node_type=dict(type='str', choices=['execution']),
+        node_state=dict(type='str', choices=['deprovisioning', 'installed']),
         listener_port=dict(type='int'),
     )
 
