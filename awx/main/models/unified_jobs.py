@@ -332,10 +332,11 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
 
         return NotificationTemplate.objects.none()
 
-    def create_unified_job(self, **kwargs):
+    def create_unified_job(self, instance_groups=None, **kwargs):
         """
         Create a new unified job based on this unified job template.
         """
+        # TODO: rename kwargs to prompts, to set expectation that these are runtime values
         new_job_passwords = kwargs.pop('survey_passwords', {})
         eager_fields = kwargs.pop('_eager_fields', None)
 
@@ -382,8 +383,8 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
             unified_job.survey_passwords = new_job_passwords
             kwargs['survey_passwords'] = new_job_passwords  # saved in config object for relaunch
 
-        if kwargs.get('instance_groups'):
-            unified_job.preferred_instance_groups_cache = [ig.id for ig in kwargs['instance_groups']]
+        if instance_groups:
+            unified_job.preferred_instance_groups_cache = [ig.id for ig in instance_groups]
         else:
             unified_job.preferred_instance_groups_cache = unified_job._get_preferred_instance_group_cache()
 
@@ -415,7 +416,10 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
             unified_job.handle_extra_data(validated_kwargs['extra_vars'])
 
         # Create record of provided prompts for relaunch and rescheduling
-        unified_job.create_config_from_prompts(kwargs, parent=self)
+        config = unified_job.create_config_from_prompts(kwargs, parent=self)
+        if instance_groups:
+            for ig in instance_groups:
+                config.instance_groups.add(ig)
 
         # manually issue the create activity stream entry _after_ M2M relations
         # have been associated to the UJ

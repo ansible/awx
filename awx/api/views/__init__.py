@@ -2398,6 +2398,9 @@ class JobTemplateLaunch(RetrieveAPIView):
                 elif isinstance(getattr(obj.__class__, field).field, ForeignKey):
                     data[field] = getattrd(obj, "%s.%s" % (field, 'id'), None)
                 elif isinstance(getattr(obj.__class__, field).field, ManyToManyField):
+                    if field == 'instance_groups':
+                        data[field] = []
+                        continue
                     data[field] = [item.id for item in getattr(obj, field).all()]
                 else:
                     data[field] = getattr(obj, field)
