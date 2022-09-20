@@ -14,6 +14,8 @@ from awx.api.versioning import reverse
 def runtime_data(organization, credentialtype_ssh):
     cred_obj = Credential.objects.create(name='runtime-cred', credential_type=credentialtype_ssh, inputs={'username': 'test_user2', 'password': 'pas4word2'})
     inv_obj = organization.inventories.create(name="runtime-inv")
+    inv_obj.hosts.create(name='foo1')
+    inv_obj.hosts.create(name='foo2')
     ee_obj = ExecutionEnvironment.objects.create(name='test-ee', image='quay.io/foo/bar')
     ig_obj = InstanceGroup.objects.create(name='bar', policy_instance_percentage=100, policy_instance_minimum=2)
     labels_obj = Label.objects.create(name='foo', description='bar', organization=organization)
@@ -30,7 +32,7 @@ def runtime_data(organization, credentialtype_ssh):
         execution_environment=ee_obj.pk,
         labels=[labels_obj.pk],
         forks=7,
-        job_slice_count=12,
+        job_slice_count=2,
         timeout=10,
         instance_groups=[ig_obj.pk],
     )
@@ -189,7 +191,7 @@ def test_job_accept_empty_tags(job_template_prompts, post, admin_user, mocker):
         with mocker.patch('awx.api.serializers.JobSerializer.to_representation'):
             post(reverse('api:job_template_launch', kwargs={'pk': job_template.pk}), {'job_tags': '', 'skip_tags': ''}, admin_user, expect=201)
             assert JobTemplate.create_unified_job.called
-            assert JobTemplate.create_unified_job.call_args == ({'job_tags': '', 'skip_tags': '', 'forks': 1, 'job_slice_count': 0},)
+            assert JobTemplate.create_unified_job.call_args == ({'job_tags': '', 'skip_tags': ''},)
 
     mock_job.signal_start.assert_called_once()
 
@@ -209,6 +211,17 @@ def test_slice_timeout_forks_need_int(job_template_prompts, post, admin_user, mo
             assert 'forks' in response.data and response.data['forks'][0] == 'A valid integer is required.'
             assert 'job_slice_count' in response.data and response.data['job_slice_count'][0] == 'A valid integer is required.'
             assert 'timeout' in response.data and response.data['timeout'][0] == 'A valid integer is required.'
+
+
+@pytest.mark.django_db
+@pytest.mark.job_runtime_vars
+def test_slice_count_not_supported(job_template_prompts, post, admin_user):
+    job_template = job_template_prompts(True)
+    assert job_template.inventory.hosts.count() == 0
+    job_template.inventory.hosts.create(name='foo')
+
+    response = post(reverse('api:job_template_launch', kwargs={'pk': job_template.pk}), {'job_slice_count': 8}, admin_user, expect=400)
+    assert response.data['job_slice_count'][0] == 'Job inventory does not have enough hosts for slicing'
 
 
 @pytest.mark.django_db
