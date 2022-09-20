@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState, useRef } from 'react';
 import { shape, func } from 'prop-types';
 import { DateTime } from 'luxon';
 import { t } from '@lingui/macro';
@@ -40,6 +40,8 @@ function ScheduleForm({
 }) {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isSaveDisabled, setIsSaveDisabled] = useState(false);
+  const originalLabels = useRef([]);
+  const originalInstanceGroups = useRef([]);
 
   let rruleError;
   const now = DateTime.now();
@@ -54,7 +56,7 @@ function ScheduleForm({
     request: loadScheduleData,
     error: contentError,
     isLoading: contentLoading,
-    result: { zoneOptions, zoneLinks, credentials, labels, instanceGroups },
+    result: { zoneOptions, zoneLinks, credentials },
   } = useRequest(
     useCallback(async () => {
       const { data } = await SchedulesAPI.readZoneInfo();
@@ -95,13 +97,6 @@ function ScheduleForm({
             } = await JobTemplatesAPI.readAllLabels(resource.id);
             allLabels = results;
           }
-
-          if (launchConfig.ask_instance_groups_on_launch) {
-            const {
-              data: { results },
-            } = await JobTemplatesAPI.readInstanceGroups(resource.id);
-            allInstanceGroups = results;
-          }
         }
         if (
           resource.type === 'workflow_job_template' &&
@@ -120,12 +115,13 @@ function ScheduleForm({
         label: zone,
       }));
 
+      originalLabels.current = allLabels;
+      originalInstanceGroups.current = allInstanceGroups;
+
       return {
         zoneOptions: zones,
         zoneLinks: data.links,
         credentials: creds,
-        labels: allLabels,
-        instanceGroups: allInstanceGroups,
       };
     }, [
       schedule,
@@ -140,8 +136,6 @@ function ScheduleForm({
       zoneLinks: {},
       credentials: [],
       isLoading: true,
-      labels: [],
-      instanceGroups: [],
     }
   );
 
@@ -490,8 +484,9 @@ function ScheduleForm({
               values,
               launchConfig,
               surveyConfig,
-              credentials,
-              labels
+              originalInstanceGroups.current,
+              originalLabels.current,
+              credentials
             );
           }}
           validate={validate}
@@ -519,8 +514,8 @@ function ScheduleForm({
                       setIsSaveDisabled(false);
                     }}
                     resourceDefaultCredentials={resourceDefaultCredentials}
-                    labels={labels}
-                    instanceGroups={instanceGroups}
+                    labels={originalLabels.current}
+                    instanceGroups={originalInstanceGroups.current}
                   />
                 )}
                 <FormSubmitError error={submitError} />

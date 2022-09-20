@@ -31,8 +31,9 @@ function ScheduleEdit({
     values,
     launchConfiguration,
     surveyConfiguration,
-    scheduleCredentials = [],
-    originalLabels = []
+    originalInstanceGroups,
+    originalLabels,
+    scheduleCredentials = []
   ) => {
     const {
       execution_environment,
@@ -160,8 +161,8 @@ function ScheduleEdit({
         ),
         SchedulesAPI.orderInstanceGroups(
           scheduleId,
-          instance_groups,
-          resource?.summary_fields.instance_groups || []
+          instance_groups || [],
+          originalInstanceGroups
         ),
       ]);
 

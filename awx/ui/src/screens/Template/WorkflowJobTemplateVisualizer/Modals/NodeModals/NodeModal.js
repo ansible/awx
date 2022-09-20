@@ -245,13 +245,7 @@ const NodeModalInner = ({ title, ...rest }) => {
   const {
     request: readLaunchConfigs,
     error: launchConfigError,
-    result: {
-      launchConfig,
-      surveyConfig,
-      resourceDefaultCredentials,
-      labels,
-      instanceGroups,
-    },
+    result: { launchConfig, surveyConfig, resourceDefaultCredentials, labels },
     isLoading,
   } = useRequest(
     useCallback(async () => {
@@ -271,7 +265,6 @@ const NodeModalInner = ({ title, ...rest }) => {
           surveyConfig: {},
           resourceDefaultCredentials: [],
           labels: [],
-          instanceGroups: [],
         };
       }
 
@@ -318,27 +311,11 @@ const NodeModalInner = ({ title, ...rest }) => {
         defaultLabels = results;
       }
 
-      let defaultInstanceGroups = [];
-
-      if (launch.ask_instance_groups_on_launch) {
-        const {
-          data: { results },
-        } = await await JobTemplatesAPI.readInstanceGroups(
-          values?.nodeResource?.id,
-          {
-            page_size: 200,
-          }
-        );
-
-        defaultInstanceGroups = results;
-      }
-
       return {
         launchConfig: launch,
         surveyConfig: survey,
         resourceDefaultCredentials: defaultCredentials,
         labels: defaultLabels,
-        instanceGroups: defaultInstanceGroups,
       };
 
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -392,7 +369,7 @@ const NodeModalInner = ({ title, ...rest }) => {
       isLaunchLoading={isLoading}
       title={wizardTitle}
       labels={labels}
-      instanceGroups={instanceGroups}
+      instanceGroups={[]}
     />
   );
 };
