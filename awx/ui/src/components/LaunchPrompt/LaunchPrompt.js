@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { ExpandableSection, Wizard } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 import { Formik, useFormikContext } from 'formik';
-import { LabelsAPI, OrganizationsAPI } from 'api';
 import { useDismissableError } from 'hooks/useRequest';
 import mergeExtraVars from 'util/prompt/mergeExtraVars';
 import getSurveyValues from 'util/prompt/getSurveyValues';
+import createNewLabels from 'util/labels';
 import ContentLoading from '../ContentLoading';
 import ContentError from '../ContentError';
 import useLaunchSteps from './useLaunchSteps';
@@ -76,44 +76,10 @@ function PromptModalForm({
     }
 
     if (launchConfig.ask_labels_on_launch) {
-      const labelIds = [];
-      const newLabels = [];
-      const labelRequests = [];
-      let organizationId = resource.organization;
-      values.labels.forEach((label) => {
-        if (typeof label.id !== 'number') {
-          newLabels.push(label);
-        } else {
-          labelIds.push(label.id);
-        }
-      });
-
-      if (newLabels.length > 0) {
-        if (!organizationId) {
-          // eslint-disable-next-line no-useless-catch
-          try {
-            const {
-              data: { results },
-            } = await OrganizationsAPI.read();
-            organizationId = results[0].id;
-          } catch (err) {
-            throw err;
-          }
-        }
-      }
-
-      newLabels.forEach((label) => {
-        labelRequests.push(
-          LabelsAPI.create({
-            name: label.name,
-            organization: organizationId,
-          }).then(({ data }) => {
-            labelIds.push(data.id);
-          })
-        );
-      });
-
-      await Promise.all(labelRequests);
+      const { labelIds } = createNewLabels(
+        values.labels,
+        resource.organization
+      );
 
       setValue('labels', labelIds);
     }
