@@ -52,7 +52,7 @@ class TestLabelFilterMocked:
             inventory_labels__isnull=True,
             schedule_labels__isnull=True,
             workflowjobtemplatenode_labels__isnull=True,
-            workflowjobnode_labels_isnull=True,
+            workflowjobnode_labels__isnull=True,
         )
 
         mock_query_set.exists.assert_called_with()
