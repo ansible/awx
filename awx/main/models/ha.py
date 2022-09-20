@@ -436,18 +436,6 @@ class InventoryInstanceGroupMembership(models.Model):
     )
 
 
-# TODO: delete after migration sorted out
-class JobInstanceGroupMembership(models.Model):
-
-    unifiedjob = models.ForeignKey('Job', on_delete=models.CASCADE)
-    instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
-    position = models.PositiveIntegerField(
-        null=True,
-        default=None,
-        db_index=True,
-    )
-
-
 class JobLaunchConfigInstanceGroupMembership(models.Model):
 
     joblaunchconfig = models.ForeignKey('JobLaunchConfig', on_delete=models.CASCADE)

@@ -175,22 +175,6 @@ class Migration(migrations.Migration):
                 ('joblaunchconfig', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='main.joblaunchconfig')),
             ],
         ),
-        migrations.CreateModel(
-            name='JobInstanceGroupMembership',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('position', models.PositiveIntegerField(db_index=True, default=None, null=True)),
-                ('instancegroup', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='main.instancegroup')),
-                ('unifiedjob', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='main.job')),
-            ],
-        ),
-        migrations.AddField(
-            model_name='job',
-            name='instance_groups',
-            field=awx.main.fields.OrderedManyToManyField(
-                blank=True, editable=False, related_name='job_instance_groups', through='main.JobInstanceGroupMembership', to='main.InstanceGroup'
-            ),
-        ),
         migrations.AddField(
             model_name='joblaunchconfig',
             name='instance_groups',
