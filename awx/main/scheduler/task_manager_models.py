@@ -132,6 +132,10 @@ class TaskManagerInstanceGroups:
                 else:
                     logger.warn(f"Unknown instance group with pk {pk} for task {task}")
         if len(igs) == 0:
+            # TODO: change behavior here, options are
+            # (1) fail the job
+            # (2) re-compute the list
+            # if re-computing: [ig.pk for ig in job.launch_config.instance_groups.all()] OR task.preferred_instance_groups
             logger.warn(f"No instance groups in cache exist, defaulting to global instance groups for task {task}")
             return task.global_instance_groups
         return igs
