@@ -4946,8 +4946,12 @@ class InstanceSerializer(BaseSerializer):
             return float("{0:.2f}".format(((float(obj.capacity) - float(obj.consumed_capacity)) / (float(obj.capacity))) * 100))
 
     def validate(self, data):
-        if not self.instance and not settings.IS_K8S:
-            raise serializers.ValidationError("Can only create instances on Kubernetes or OpenShift.")
+        if self.instance:
+            if self.instance.node_type == Instance.Types.HOP:
+                raise serializers.ValidationError("Hop node instances may not be changed.")
+        else:
+            if not settings.IS_K8S:
+                raise serializers.ValidationError("Can only create instances on Kubernetes or OpenShift.")
         return data
 
     def validate_node_type(self, value):
