@@ -473,7 +473,6 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
               <Detail label={t`Limit`} value={limit} dataCy="schedule-limit" />
             )}
             {ask_forks_on_launch && <Detail label={t`Forks`} value={forks} />}
-            {ask_limit_on_launch && <Detail label={t`Limit`} value={limit} />}
             {ask_verbosity_on_launch && (
               <Detail
                 label={t`Verbosity`}

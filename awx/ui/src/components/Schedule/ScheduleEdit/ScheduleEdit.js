@@ -3,11 +3,12 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { shape } from 'prop-types';
 import { Card } from '@patternfly/react-core';
 import yaml from 'js-yaml';
-import { LabelsAPI, OrganizationsAPI, SchedulesAPI } from 'api';
+import { OrganizationsAPI, SchedulesAPI } from 'api';
 import { getAddedAndRemoved } from 'util/lists';
 import { parseVariableField } from 'util/yaml';
 import mergeExtraVars from 'util/prompt/mergeExtraVars';
 import getSurveyValues from 'util/prompt/getSurveyValues';
+import createNewLabels from 'util/labels';
 import ScheduleForm from '../shared/ScheduleForm';
 import buildRuleSet from '../shared/buildRuleSet';
 import { CardBody } from '../../Card';
@@ -85,48 +86,16 @@ function ScheduleEdit({
 
     try {
       if (launchConfiguration?.ask_labels_on_launch) {
-        const labelIds = [];
-        const newLabels = [];
-        const labelRequests = [];
-        let organizationId = resource.organization;
-        if (values.labels) {
-          values.labels.forEach((label) => {
-            if (typeof label.id !== 'number') {
-              newLabels.push(label);
-            } else {
-              labelIds.push(label.id);
-            }
-          });
+        const { labelIds, error } = createNewLabels(
+          values.labels,
+          resource.organization
+        );
+
+        if (error) {
+          setFormSubmitError(error);
+        } else {
+          submitValues.labels = labelIds;
         }
-
-        if (newLabels.length > 0) {
-          if (!organizationId) {
-            // eslint-disable-next-line no-useless-catch
-            try {
-              const {
-                data: { results },
-              } = await OrganizationsAPI.read();
-              organizationId = results[0].id;
-            } catch (err) {
-              throw err;
-            }
-          }
-        }
-
-        newLabels.forEach((label) => {
-          labelRequests.push(
-            LabelsAPI.create({
-              name: label.name,
-              organization: organizationId,
-            }).then(({ data }) => {
-              labelIds.push(data.id);
-            })
-          );
-        });
-
-        await Promise.all(labelRequests);
-
-        submitValues.labels = labelIds;
       }
 
       const ruleSet = buildRuleSet(values);
