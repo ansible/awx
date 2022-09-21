@@ -4913,7 +4913,7 @@ class InstanceSerializer(BaseSerializer):
             'ip_address',
             'listener_port',
         )
-        extra_kwargs = {'node_type': {'default': 'execution'}, 'node_state': {'default': 'installed'}}
+        extra_kwargs = {'node_type': {'initial': 'execution'}, 'node_state': {'initial': 'installed'}}
 
     def get_related(self, obj):
         res = super(InstanceSerializer, self).get_related(obj)
