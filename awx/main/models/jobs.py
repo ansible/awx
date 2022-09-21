@@ -333,9 +333,6 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         actual_slice_count = self.job_slice_count
         if self.ask_job_slice_count_on_launch and 'job_slice_count' in kwargs:
             actual_slice_count = kwargs['job_slice_count']
-            # Set the eager fields if its there as well
-            if '_eager_fields' in kwargs and 'job_slice_count' in kwargs['_eager_fields']:
-                kwargs['_eager_fields']['job_slice_count'] = actual_slice_count
         if actual_inventory:
             return min(actual_slice_count, actual_inventory.hosts.count())
         else:
@@ -476,6 +473,10 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                         rejected_data[field_name] = new_value
                         errors_dict[field_name] = _('Project does not allow override of branch.')
                         continue
+                elif field_name == 'job_slice_count' and (new_value > 1) and (self.get_effective_slice_ct(kwargs) <= 1):
+                    rejected_data[field_name] = new_value
+                    errors_dict[field_name] = _('Job inventory does not have enough hosts for slicing')
+                    continue
                 # accepted prompt
                 prompted_data[field_name] = new_value
             else:

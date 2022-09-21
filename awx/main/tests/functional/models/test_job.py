@@ -79,3 +79,11 @@ class TestSlicingModels:
         assert job_template.get_effective_slice_ct({'inventory': inventory2}) == 2
         # Now we are going to pass in an override (like the prompt would) and as long as that is < host count we expect that back
         assert job_template.get_effective_slice_ct({'inventory': inventory2, 'job_slice_count': 3}) == 3
+
+    def test_slice_count_prompt_limited_by_inventory(self, job_template, inventory, organization):
+        assert inventory.hosts.count() == 0
+        job_template.inventory = inventory
+        inventory.hosts.create(name='foo')
+
+        unified_job = job_template.create_unified_job(job_slice_count=2)
+        assert isinstance(unified_job, Job)

@@ -985,37 +985,33 @@ class UnifiedJob(
         for field_name, value in kwargs.items():
             if field_name not in valid_fields:
                 raise Exception('Unrecognized launch config field {}.'.format(field_name))
-            if isinstance(getattr(self.__class__, field_name).field, models.ManyToManyField):
+            field = None
+            # may use extra_data as a proxy for extra_vars
+            if field_name in config.SUBCLASS_FIELDS and field_name != 'extra_vars':
+                field = config._meta.get_field(field_name)
+            if isinstance(field, models.ManyToManyField):
                 many_to_many_fields.append(field_name)
                 continue
-            if isinstance(getattr(self.__class__, field_name).field, (models.ForeignKey)):
-                if value:
-                    setattr(config, "{}_id".format(field_name), value.id)
-                continue
-            key = field_name
-            if key == 'extra_vars':
-                key = 'extra_data'
-            setattr(config, key, value)
+            if isinstance(field, (models.ForeignKey)) and (value is None):
+                continue  # the null value indicates not-provided for ForeignKey case
+            setattr(config, field_name, value)
         config.save()
 
         for field_name in many_to_many_fields:
-            if field_name == 'credentials':
-                # Credentials are a special case of many to many because of how they function
-                # (i.e. you can't have > 1 machine cred)
-                job_item = set(kwargs.get(field_name, []))
-                if field_name in [field.name for field in parent._meta.get_fields()]:
-                    job_item = job_item - set(getattr(parent, field_name).all())
-                if job_item:
-                    getattr(config, field_name).add(*job_item)
+            prompted_items = kwargs.get(field_name, [])
+            if not prompted_items:
+                continue
+            if field_name == 'instance_groups':
+                # Here we are doing a loop to make sure we preserve order for this Ordered field
+                # also do not merge IGs with parent, so this saves the literal list
+                for item in prompted_items:
+                    getattr(config, field_name).add(item)
             else:
-                # Here we are doing a loop to make sure we preserve order in case this is a Ordered field
-                job_item = kwargs.get(field_name, [])
-                if job_item:
-                    parent_items = list(getattr(parent, field_name, []).all())
-                    for item in job_item:
-                        # Do not include this item in the config if its in the parent
-                        if item not in parent_items:
-                            getattr(config, field_name).add(item)
+                # Assuming this field merges prompts with parent, save just the diff
+                if field_name in [field.name for field in parent._meta.get_fields()]:
+                    prompted_items = set(prompted_items) - set(getattr(parent, field_name).all())
+                if prompted_items:
+                    getattr(config, field_name).add(*prompted_items)
 
         return config
 
