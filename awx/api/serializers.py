@@ -3068,7 +3068,6 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
                 res['project_update'] = self.reverse('api:project_update_detail', kwargs={'pk': obj.project_update.pk})
         except ObjectDoesNotExist:
             pass
-        res['instance_groups'] = self.reverse('api:job_instance_group_list', kwargs={'pk': obj.pk})
         res['relaunch'] = self.reverse('api:job_relaunch', kwargs={'pk': obj.pk})
         return res
 

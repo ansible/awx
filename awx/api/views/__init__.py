@@ -3568,15 +3568,6 @@ class JobLabelList(SubListAPIView):
     parent_key = 'job'
 
 
-class JobInstanceGroupList(SubListAPIView):
-
-    model = models.InstanceGroup
-    serializer_class = serializers.InstanceGroupSerializer
-    parent_model = models.Job
-    relationship = 'instance_groups'
-    parent_key = 'job'
-
-
 class WorkflowJobLabelList(JobLabelList):
     parent_model = models.WorkflowJob
 
