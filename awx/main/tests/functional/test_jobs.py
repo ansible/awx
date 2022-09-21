@@ -154,6 +154,7 @@ class TestLaunchConfig:
         job = Job.objects.create(job_template=job_template)
         ig1 = InstanceGroup.objects.create(name='bar')
         ig2 = InstanceGroup.objects.create(name='foo')
+        job_template.instance_groups.add(ig2)
         label1 = Label.objects.create(name='foo', description='bar', organization=organization)
         label2 = Label.objects.create(name='faz', description='baz', organization=organization)
         # Order should matter here which is why we do 2 and then 1
