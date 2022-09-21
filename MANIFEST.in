@@ -3,7 +3,7 @@ recursive-include awx *.po
 recursive-include awx *.mo
 recursive-include awx/static *
 recursive-include awx/templates *.html
-recursive-include awx/api/templates *.md *.html
+recursive-include awx/api/templates *.md *.html *.yml
 recursive-include awx/ui/build *.html
 recursive-include awx/ui/build *
 recursive-include awx/playbooks *.yml
