@@ -55,7 +55,6 @@ class TestJobSerializerGetRelated:
             'job_events',
             'relaunch',
             'labels',
-            'instance_groups',
         ],
     )
     def test_get_related(self, test_get_related, job, related_resource_name):
