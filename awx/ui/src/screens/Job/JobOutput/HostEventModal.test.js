@@ -52,6 +52,10 @@ const hostEvent = {
   },
 };
 
+/*
+Some libraries return a list of string in stdout
+Example: https://github.com/ansible-collections/cisco.ios/blob/main/plugins/modules/ios_command.py#L124-L128
+*/
 const hostEventWithArray = {
   changed: true,
   event: 'runner_on_ok',
