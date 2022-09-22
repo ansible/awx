@@ -18,6 +18,9 @@
     label2: "AWX-Collection-tests-schedule-l2-{{ test_id }}"
     ig1: "AWX-Collection-tests-schedule-ig1-{{ test_id }}"
     ig2: "AWX-Collection-tests-schedule-ig2-{{ test_id }}"
+    slice_inventory: "AWX-Collection-tests-schedule-slice-inv-{{ test_id }}"
+    host_name: "AWX-Collection-tests-schedule-host-{{ test_id }}"
+    slice_num: 10
 
 - block:
     - name: Try to create without an rrule
@@ -164,6 +167,23 @@
         - "{{ ig1 }}"
         - "{{ ig2 }}"
 
+    - name: Create proper inventory for slice count
+      inventory:
+        name: "{{ slice_inventory }}"
+        organization: "{{ org_name }}"
+        state: present
+      register: result
+
+    - name: Create a Host
+      host:
+        name: "{{ host_name }}-{{ item }}"
+        inventory: "{{ slice_inventory }}"
+        state: present
+        variables:
+          ansible_connection: local
+      loop: "{{ range(slice_num)|list }}"
+      register: result
+
     - name: Create with options that the JT does support
       schedule:
         name: "{{ sched2 }}"
@@ -173,7 +193,7 @@
         description: "This hopefully will work"
         extra_data:
           some: var
-        inventory: Demo Inventory
+        inventory: "{{ slice_inventory }}"
         scm_branch: asdf1234
         credentials:
           - "{{ cred1 }}"
@@ -189,7 +209,7 @@
         instance_groups:
           - "{{ ig1 }}"
           - "{{ ig2 }}"
-        job_slice_count: 10
+        job_slice_count: "{{ slice_num }}"
         labels:
           - "{{ label1 }}"
           - "{{ label2 }}"
@@ -344,4 +364,19 @@
       organization:
         name: "{{ org_name }}"
         state: absent
+      ignore_errors: True
+
+    - name: "Delete slice inventory"
+      inventory:
+        name: "{{ slice_inventory }}"
+        organization: "{{ org_name }}"
+        state: absent
+      ignore_errors: True
+
+    - name: Delete slice hosts
+      host:
+        name: "{{ host_name }}-{{ item }}"
+        inventory: "{{ slice_inventory }}"
+        state: absent
+      loop: "{{ range(slice_num)|list }}"
       ignore_errors: True
