@@ -25,6 +25,7 @@
     label2: "AWX-Collection-tests-workflow_job_template-l2-{{ test_id }}"
     ig1: "AWX-Collection-tests-workflow_job_template-ig1-{{ test_id }}"
     ig2: "AWX-Collection-tests-workflow_job_template-ig2-{{ test_id }}"
+    host1: "AWX-Collection-tests-workflow_job_template-h1-{{ test_id }}"
 
 - block:
     - name: "Create a new organization"
@@ -149,6 +150,18 @@
     - assert:
         that:
           - "project_inv_source_result is changed"
+
+    - name: Add a node to demo inventory so we can use a slice count properly
+      host:
+        name: "{{ host1 }}"
+        inventory: Demo Inventory
+        variables:
+          ansible_connection: local
+      register: results
+
+    - assert:
+        that:
+          - "result is changed"
 
     - name: Create a Job Template
       job_template:
@@ -906,5 +919,12 @@
     - name: "Remove the organization"
       organization:
         name: "{{ org_name }}"
+        state: absent
+      ignore_errors: True
+
+    - name: Remove node
+      host:
+        name: "{{ host1 }}"
+        inventory: Demo Inventory
         state: absent
       ignore_errors: True
