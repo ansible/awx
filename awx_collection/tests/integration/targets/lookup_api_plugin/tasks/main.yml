@@ -40,7 +40,7 @@
 
     - assert:
         that:
-          - "'DNE' in results.msg"
+          - "'dne' in (results.msg | lower)"
 
     - name: Create our hosts
       host:
