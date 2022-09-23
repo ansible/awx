@@ -327,13 +327,13 @@ class SAMLAuth(BaseSAMLAuth):
         return super(SAMLAuth, self).get_user(user_id)
 
 
-def _update_m2m_from_groups(user, ldap_user, related, opts, remove=True):
+def _update_m2m_from_groups(ldap_user_group_dns, opts, remove=True):
     """
     Hepler function to update m2m relationship based on LDAP group membership.
     """
     should_add = False
     if opts is None:
-        return
+        return None
     elif not opts:
         pass
     elif opts is True:
@@ -341,17 +341,12 @@ def _update_m2m_from_groups(user, ldap_user, related, opts, remove=True):
     else:
         if isinstance(opts, str):
             opts = [opts]
-        for group_dn in opts:
-            if not isinstance(group_dn, str):
-                continue
-            if ldap_user._get_groups().is_member_of(group_dn):
-                should_add = True
+        # If any of the users groups matches any of the list options
+        if list(set.intersection(set(ldap_user_group_dns), set(opts))):
+            should_add = True
     if should_add:
-        user.save()
-        related.add(user)
-    elif remove and user in related.all():
-        user.save()
-        related.remove(user)
+        return True
+    return False
 
 
 @receiver(populate_user, dispatch_uid='populate-ldap-user')
@@ -372,7 +367,7 @@ def on_populate_user(sender, **kwargs):
 
     # Prefetch user's groups to prevent LDAP queries for each org/team when
     # checking membership.
-    ldap_user._get_groups().get_group_dns()
+    ldap_user_group_dns = ldap_user._get_groups().get_group_dns()
 
     # If the LDAP user has a first or last name > $maxlen chars, truncate it
     for field in ('first_name', 'last_name'):
@@ -383,31 +378,70 @@ def on_populate_user(sender, **kwargs):
             force_user_update = True
             logger.warning('LDAP user {} has {} > max {} characters'.format(user.username, field, max_len))
 
-    # Update organization membership based on group memberships.
     org_map = getattr(backend.settings, 'ORGANIZATION_MAP', {})
-    for org_name, org_opts in org_map.items():
-        org, created = Organization.objects.get_or_create(name=org_name)
-        remove = bool(org_opts.get('remove', True))
-        admins_opts = org_opts.get('admins', None)
-        remove_admins = bool(org_opts.get('remove_admins', remove))
-        _update_m2m_from_groups(user, ldap_user, org.admin_role.members, admins_opts, remove_admins)
-        auditors_opts = org_opts.get('auditors', None)
-        remove_auditors = bool(org_opts.get('remove_auditors', remove))
-        _update_m2m_from_groups(user, ldap_user, org.auditor_role.members, auditors_opts, remove_auditors)
-        users_opts = org_opts.get('users', None)
-        remove_users = bool(org_opts.get('remove_users', remove))
-        _update_m2m_from_groups(user, ldap_user, org.member_role.members, users_opts, remove_users)
-
-    # Update team membership based on group memberships.
     team_map = getattr(backend.settings, 'TEAM_MAP', {})
+
+    # Move this junk into save of the settings for performance later, there is no need to do that here
+    #    with maybe the exception of someone defining this in settings before the server is started?
+    # ==============================================================================================================
+    # Get all of the orgs in the DB by name and create any new org defined in LDAP
+
+    # IS THIS ACTUALLY GETTING JUST NAMES OR DOES IT GET ALL AND THEN GET NAMES FORM THEM ALL?
+    existing_org_names = list(Organization.objects.all().values_list('name', flat=True))
+    for org_name in org_map.keys():
+        if org_name not in existing_org_names:
+            Organization.objects.get_or_create(name=org_name)
+            # Add the org name to the existing orgs since we created it and we may need it to build the teams below
+            existing_org_names.append(org_name)
+
+    existing_team_names = list(Team.objects.all().values_list('name', flat=True))
     for team_name, team_opts in team_map.items():
         if 'organization' not in team_opts:
             continue
-        org, created = Organization.objects.get_or_create(name=team_opts['organization'])
-        team, created = Team.objects.get_or_create(name=team_name, organization=org)
+        if team_opts['organization'] not in existing_org_names:
+            Organization.objects.get_or_create(name=team_opts['organization'])
+            # Append it to the list so that we don't try and create this again (if we needed to)
+            existing_org_names.append(team_opts['organization'])
+        if team_name not in existing_team_names:
+            # Going a little inefficient here, we could prob name/ids above and then set this by ID but I've got limited time r/n
+            org, created = Organization.objects.get_or_create(name=team_opts['organization'])
+            Team.objects.get_or_create(name=team_name, organization=org)
+    # End move some day
+    # ==============================================================================================================
+
+    # Compute in memory what the state is of the different LDAP orgs
+    desired_org_states = {}
+    for org_name, org_opts in org_map.items():
+        remove = bool(org_opts.get('remove', True))
+        admins_opts = org_opts.get('admins', None)
+        remove_admins = bool(org_opts.get('remove_admins', remove))
+        desired_org_states[org_name] = {}
+        desired_org_states[org_name]['admin_role'] = _update_m2m_from_groups(ldap_user_group_dns, admins_opts, remove_admins)
+        auditors_opts = org_opts.get('auditors', None)
+        remove_auditors = bool(org_opts.get('remove_auditors', remove))
+        desired_org_states[org_name]['auditor_role'] = _update_m2m_from_groups(ldap_user_group_dns, auditors_opts, remove_auditors)
+        users_opts = org_opts.get('users', None)
+        remove_users = bool(org_opts.get('remove_users', remove))
+        desired_org_states[org_name]['member_role'] = _update_m2m_from_groups(ldap_user_group_dns, users_opts, remove_users)
+
+        # If everything returned None (because there was no configuration) we can skip this host
+        if (
+            desired_org_states[org_name]['admin_role'] == None
+            and desired_org_states[org_name]['auditor_role'] == None
+            and desired_org_states[org_name]['member_role'] == None
+        ):
+            del desired_org_states[org_name]
+
+    # Compute in memory what the state is of the different LDAP teams
+    desired_team_states = {}
+    for team_name, team_opts in team_map.items():
+        if 'organization' not in team_opts:
+            continue
         users_opts = team_opts.get('users', None)
         remove = bool(team_opts.get('remove', True))
-        _update_m2m_from_groups(user, ldap_user, team.member_role.members, users_opts, remove)
+        state = _update_m2m_from_groups(ldap_user_group_dns, users_opts, remove)
+        if state is not None:
+            desired_team_states[team_name] = state
 
     # Check if user.profile is available, otherwise force user.save()
     try:
@@ -423,3 +457,28 @@ def on_populate_user(sender, **kwargs):
     if profile.ldap_dn != ldap_user.dn:
         profile.ldap_dn = ldap_user.dn
         profile.save()
+
+    # Get all of the orgs listed in LDAP from the database
+    roles = ['admin_role', 'auditor_role', 'member_role']
+    prefetch_roles = ["{}__members".format(role_name) for role_name in roles]
+    orgs_tied_to_ldap = Organization.objects.filter(name__in=desired_org_states.keys()).prefetch_related(*prefecth_roles)
+    # Set the state from memory into the org objects
+    for org in orgs_tied_to_ldap:
+        for role in roles:
+            if desired_org_states[org.name][role] is None:
+                # If something got a none we just need to continue on
+                pass
+            elif desired_org_states[org.name][role]:
+                getattr(org, role).members.add(user)
+            elif user in getattr(org, role).members.all():
+                getattr(org, role).members.remove(user)
+
+    # Get all of the teams listed in LDAP from the database
+    teams_tied_to_ldap = Team.objects.filter(name__in=desired_team_states.keys()).prefetch_related('member_role__members')
+    # Set the state from memory into the team objects
+    for team in teams_tied_to_ldap:
+        # We don't need a None check here because it just would have never made it into the dict
+        if desired_team_states[team.name]:
+            team.member_role.members.add(user)
+        elif user in team.member_role.members.all():
+            team.member_role.remove(user)
