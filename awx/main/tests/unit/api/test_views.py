@@ -59,7 +59,7 @@ class TestApiRootView:
 
 class TestJobTemplateLabelList:
     def test_inherited_mixin_unattach(self):
-        with mock.patch('awx.api.generics.DeleteLastUnattachLabelMixin.unattach') as mixin_unattach:
+        with mock.patch('awx.api.views.labels.LabelSubListCreateAttachDetachView.unattach') as mixin_unattach:
             view = JobTemplateLabelList()
             mock_request = mock.MagicMock()
 

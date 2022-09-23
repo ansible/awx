@@ -27,6 +27,11 @@ import { VariablesDetail } from '../../CodeEditor';
 import { VERBOSITY } from '../../VerbositySelectField';
 import getHelpText from '../../../screens/Template/shared/JobTemplate.helptext';
 
+const buildLinkURL = (instance) =>
+  instance.is_container_group
+    ? '/instance_groups/container_group/'
+    : '/instance_groups/';
+
 const PromptDivider = styled(Divider)`
   margin-top: var(--pf-global--spacer--lg);
   margin-bottom: var(--pf-global--spacer--lg);
@@ -73,8 +78,11 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
     diff_mode,
     dtend,
     dtstart,
+    execution_environment,
     extra_data,
+    forks,
     inventory,
+    job_slice_count,
     job_tags,
     job_type,
     limit,
@@ -85,6 +93,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
     scm_branch,
     skip_tags,
     summary_fields,
+    timeout,
     timezone,
     verbosity,
   } = schedule;
@@ -108,7 +117,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
   const { error, dismissError } = useDismissableError(deleteError);
 
   const {
-    result: [credentials, preview, launchData],
+    result: [credentials, preview, launchData, labels, instanceGroups],
     isLoading,
     error: readContentError,
     request: fetchCredentialsAndPreview,
@@ -128,7 +137,9 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
         promises.push(
           JobTemplatesAPI.readLaunch(
             schedule.summary_fields.unified_job_template.id
-          )
+          ),
+          SchedulesAPI.readAllLabels(id),
+          SchedulesAPI.readInstanceGroups(id)
         );
       } else if (
         schedule?.summary_fields?.unified_job_template?.unified_job_type ===
@@ -137,17 +148,28 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
         promises.push(
           WorkflowJobTemplatesAPI.readLaunch(
             schedule.summary_fields.unified_job_template.id
-          )
+          ),
+          SchedulesAPI.readAllLabels(id)
         );
       } else {
         promises.push(Promise.resolve());
       }
 
-      const [{ data }, { data: schedulePreview }, launch] = await Promise.all(
-        promises
-      );
+      const [
+        { data },
+        { data: schedulePreview },
+        launch,
+        allLabelsResults,
+        instanceGroupsResults,
+      ] = await Promise.all(promises);
 
-      return [data.results, schedulePreview, launch?.data];
+      return [
+        data.results,
+        schedulePreview,
+        launch?.data,
+        allLabelsResults?.data?.results,
+        instanceGroupsResults?.data?.results,
+      ];
     }, [id, schedule, rrule]),
     []
   );
@@ -185,6 +207,12 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
     ask_tags_on_launch,
     ask_variables_on_launch,
     ask_verbosity_on_launch,
+    ask_execution_environment_on_launch,
+    ask_labels_on_launch,
+    ask_forks_on_launch,
+    ask_job_slice_count_on_launch,
+    ask_timeout_on_launch,
+    ask_instance_groups_on_launch,
     survey_enabled,
   } = launchData || {};
 
@@ -239,6 +267,16 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
   const showJobTypeDetail = ask_job_type_on_launch && job_type;
   const showSCMBranchDetail = ask_scm_branch_on_launch && scm_branch;
   const showVerbosityDetail = ask_verbosity_on_launch && VERBOSITY()[verbosity];
+  const showExecutionEnvironmentDetail =
+    ask_execution_environment_on_launch && execution_environment;
+  const showLabelsDetail = ask_labels_on_launch && labels && labels.length > 0;
+  const showForksDetail = ask_forks_on_launch && typeof forks === 'number';
+  const showJobSlicingDetail =
+    ask_job_slice_count_on_launch && typeof job_slice_count === 'number';
+  const showTimeoutDetail =
+    ask_timeout_on_launch && typeof timeout === 'number';
+  const showInstanceGroupsDetail =
+    ask_instance_groups_on_launch && instanceGroups.length > 0;
 
   const showPromptedFields =
     showCredentialsDetail ||
@@ -250,7 +288,13 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
     showSkipTagsDetail ||
     showTagsDetail ||
     showVerbosityDetail ||
-    showVariablesDetail;
+    showVariablesDetail ||
+    showExecutionEnvironmentDetail ||
+    showLabelsDetail ||
+    showForksDetail ||
+    showJobSlicingDetail ||
+    showTimeoutDetail ||
+    showInstanceGroupsDetail;
 
   if (isLoading) {
     return <ContentLoading />;
@@ -402,11 +446,20 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
                 dataCy="schedule-inventory"
               />
             )}
-            {ask_verbosity_on_launch && (
+            {showExecutionEnvironmentDetail && (
               <Detail
-                label={t`Verbosity`}
-                value={VERBOSITY()[verbosity]}
-                dataCy="schedule-verbosity"
+                label={t`Execution Environment`}
+                value={
+                  summary_fields?.execution_environment ? (
+                    <Link
+                      to={`/execution_environments/${summary_fields?.execution_environment?.id}/details`}
+                    >
+                      {summary_fields?.execution_environment?.name}
+                    </Link>
+                  ) : (
+                    ' '
+                  )
+                }
               />
             )}
             {ask_scm_branch_on_launch && (
@@ -419,11 +472,54 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
             {ask_limit_on_launch && (
               <Detail label={t`Limit`} value={limit} dataCy="schedule-limit" />
             )}
+            {ask_forks_on_launch && <Detail label={t`Forks`} value={forks} />}
+            {ask_verbosity_on_launch && (
+              <Detail
+                label={t`Verbosity`}
+                value={VERBOSITY()[verbosity]}
+                dataCy="schedule-verbosity"
+              />
+            )}
+            {ask_timeout_on_launch && (
+              <Detail label={t`Timeout`} value={timeout} />
+            )}
             {showDiffModeDetail && (
               <Detail
                 label={t`Show Changes`}
                 value={diff_mode ? t`On` : t`Off`}
                 dataCy="schedule-show-changes"
+              />
+            )}
+            {ask_job_slice_count_on_launch && (
+              <Detail label={t`Job Slicing`} value={job_slice_count} />
+            )}
+            {showInstanceGroupsDetail && (
+              <Detail
+                fullWidth
+                label={t`Instance Groups`}
+                value={
+                  <ChipGroup
+                    numChips={5}
+                    totalChips={instanceGroups.length}
+                    ouiaId="instance-group-chips"
+                  >
+                    {instanceGroups.map((ig) => (
+                      <Link
+                        to={`${buildLinkURL(ig)}${ig.id}/details`}
+                        key={ig.id}
+                      >
+                        <Chip
+                          key={ig.id}
+                          ouiaId={`instance-group-${ig.id}-chip`}
+                          isReadOnly
+                        >
+                          {ig.name}
+                        </Chip>
+                      </Link>
+                    ))}
+                  </ChipGroup>
+                }
+                isEmpty={instanceGroups.length === 0}
               />
             )}
             {showCredentialsDetail && (
@@ -447,6 +543,26 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
                   </ChipGroup>
                 }
                 dataCy="schedule-credentials"
+              />
+            )}
+            {showLabelsDetail && (
+              <Detail
+                fullWidth
+                label={t`Labels`}
+                value={
+                  <ChipGroup
+                    numChips={5}
+                    totalChips={labels.length}
+                    ouiaId="schedule-label-chips"
+                  >
+                    {labels.map((l) => (
+                      <Chip key={l.id} ouiaId={`label-${l.id}-chip`} isReadOnly>
+                        {l.name}
+                      </Chip>
+                    ))}
+                  </ChipGroup>
+                }
+                isEmpty={labels.length === 0}
               />
             )}
             {showTagsDetail && (

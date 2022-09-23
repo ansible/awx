@@ -63,7 +63,7 @@ describe('<LabelSelect />', () => {
     const selectOptions = wrapper.find('SelectOption');
     expect(selectOptions).toHaveLength(4);
   });
-  test('Generate a label  ', async () => {
+  test('Generate a label', async () => {
     let wrapper;
     const onChange = jest.fn();
     LabelsAPI.read.mockReturnValue({
@@ -78,5 +78,34 @@ describe('<LabelSelect />', () => {
     });
     await wrapper.find('Select').invoke('onSelect')({}, 'foo');
     expect(onChange).toBeCalledWith([{ id: 'foo', name: 'foo' }]);
+  });
+  test('should handle read-only labels', async () => {
+    let wrapper;
+    const onChange = jest.fn();
+    LabelsAPI.read.mockReturnValue({
+      data: {
+        results: [
+          { id: 1, name: 'read only' },
+          { id: 2, name: 'not read only' },
+        ],
+      },
+    });
+    await act(async () => {
+      wrapper = mount(
+        <LabelSelect
+          value={[
+            { id: 1, name: 'read only', isReadOnly: true },
+            { id: 2, name: 'not read only' },
+          ]}
+          onError={() => {}}
+          onChange={onChange}
+        />
+      );
+    });
+    wrapper.find('SelectToggle').simulate('click');
+    const selectOptions = wrapper.find('SelectOption');
+    expect(selectOptions).toHaveLength(2);
+    expect(selectOptions.at(0).prop('isDisabled')).toBe(true);
+    expect(selectOptions.at(1).prop('isDisabled')).toBe(false);
   });
 });

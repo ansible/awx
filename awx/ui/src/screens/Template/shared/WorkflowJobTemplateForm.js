@@ -27,6 +27,7 @@ import CheckboxField from 'components/FormField/CheckboxField';
 import Popover from 'components/Popover';
 import { WorkFlowJobTemplate } from 'types';
 import LabelSelect from 'components/LabelSelect';
+import { TagMultiSelect } from 'components/MultiSelect';
 import WebhookSubForm from './WebhookSubForm';
 import getHelpText from './WorkflowJobTemplate.helptext';
 
@@ -59,6 +60,8 @@ function WorkflowJobTemplateForm({
   const [, webhookKeyMeta, webhookKeyHelpers] = useField('webhook_key');
   const [, webhookCredentialMeta, webhookCredentialHelpers] =
     useField('webhook_credential');
+  const [skipTagsField, , skipTagsHelpers] = useField('skip_tags');
+  const [jobTagsField, , jobTagsHelpers] = useField('job_tags');
 
   useEffect(() => {
     if (enableWebhooks) {
@@ -167,7 +170,6 @@ function WorkflowJobTemplateForm({
             }}
           />
         </FieldWithPrompt>
-
         <FieldWithPrompt
           fieldId="wfjt-scm-branch"
           label={t`Source control branch`}
@@ -186,10 +188,12 @@ function WorkflowJobTemplateForm({
         </FieldWithPrompt>
       </FormColumnLayout>
       <FormFullWidthLayout>
-        <FormGroup
-          label={t`Labels`}
-          labelIcon={<Popover content={helpText.labels} />}
+        <FieldWithPrompt
           fieldId="template-labels"
+          label={t`Labels`}
+          promptId="template-ask-labels-on-launch"
+          promptName="ask_labels_on_launch"
+          tooltip={helpText.labels}
         >
           <LabelSelect
             value={labelsField.value}
@@ -197,7 +201,7 @@ function WorkflowJobTemplateForm({
             onError={setContentError}
             createText={t`Create`}
           />
-        </FormGroup>
+        </FieldWithPrompt>
       </FormFullWidthLayout>
       <FormFullWidthLayout>
         <VariablesField
@@ -207,6 +211,30 @@ function WorkflowJobTemplateForm({
           promptId="template-ask-variables-on-launch"
           tooltip={helpText.variables}
         />
+        <FieldWithPrompt
+          fieldId="template-tags"
+          label={t`Job Tags`}
+          promptId="template-ask-tags-on-launch"
+          promptName="ask_tags_on_launch"
+          tooltip={helpText.jobTags}
+        >
+          <TagMultiSelect
+            value={jobTagsField.value}
+            onChange={(value) => jobTagsHelpers.setValue(value)}
+          />
+        </FieldWithPrompt>
+        <FieldWithPrompt
+          fieldId="template-skip-tags"
+          label={t`Skip Tags`}
+          promptId="template-ask-skip-tags-on-launch"
+          promptName="ask_skip_tags_on_launch"
+          tooltip={helpText.skipTags}
+        >
+          <TagMultiSelect
+            value={skipTagsField.value}
+            onChange={(value) => skipTagsHelpers.setValue(value)}
+          />
+        </FieldWithPrompt>
       </FormFullWidthLayout>
       <FormGroup fieldId="options" label={t`Options`}>
         <FormCheckboxLayout isInline>
@@ -280,13 +308,18 @@ const FormikApp = withFormik({
       extra_vars: template.extra_vars || '---',
       limit: template.limit || '',
       scm_branch: template.scm_branch || '',
+      skip_tags: template.skip_tags || '',
+      job_tags: template.job_tags || '',
       allow_simultaneous: template.allow_simultaneous || false,
       webhook_credential: template?.summary_fields?.webhook_credential || null,
       webhook_service: template.webhook_service || '',
+      ask_labels_on_launch: template.ask_labels_on_launch || false,
       ask_limit_on_launch: template.ask_limit_on_launch || false,
       ask_inventory_on_launch: template.ask_inventory_on_launch || false,
       ask_variables_on_launch: template.ask_variables_on_launch || false,
       ask_scm_branch_on_launch: template.ask_scm_branch_on_launch || false,
+      ask_skip_tags_on_launch: template.ask_skip_tags_on_launch || false,
+      ask_tags_on_launch: template.ask_tags_on_launch || false,
       webhook_url: template?.related?.webhook_receiver
         ? `${urlOrigin}${template.related.webhook_receiver}`
         : '',

@@ -434,3 +434,58 @@ class InventoryInstanceGroupMembership(models.Model):
         default=None,
         db_index=True,
     )
+
+
+class JobLaunchConfigInstanceGroupMembership(models.Model):
+
+    joblaunchconfig = models.ForeignKey('JobLaunchConfig', on_delete=models.CASCADE)
+    instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
+    position = models.PositiveIntegerField(
+        null=True,
+        default=None,
+        db_index=True,
+    )
+
+
+class ScheduleInstanceGroupMembership(models.Model):
+
+    schedule = models.ForeignKey('Schedule', on_delete=models.CASCADE)
+    instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
+    position = models.PositiveIntegerField(
+        null=True,
+        default=None,
+        db_index=True,
+    )
+
+
+class WorkflowJobTemplateNodeBaseInstanceGroupMembership(models.Model):
+
+    workflowjobtemplatenode = models.ForeignKey('WorkflowJobTemplateNode', on_delete=models.CASCADE)
+    instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
+    position = models.PositiveIntegerField(
+        null=True,
+        default=None,
+        db_index=True,
+    )
+
+
+class WorkflowJobNodeBaseInstanceGroupMembership(models.Model):
+
+    workflowjobnode = models.ForeignKey('WorkflowJobNode', on_delete=models.CASCADE)
+    instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
+    position = models.PositiveIntegerField(
+        null=True,
+        default=None,
+        db_index=True,
+    )
+
+
+class WorkflowJobInstanceGroupMembership(models.Model):
+
+    workflowjobnode = models.ForeignKey('WorkflowJob', on_delete=models.CASCADE)
+    instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
+    position = models.PositiveIntegerField(
+        null=True,
+        default=None,
+        db_index=True,
+    )

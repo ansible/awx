@@ -1,9 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-
 import { Card, PageSection } from '@patternfly/react-core';
 import { CardBody } from 'components/Card';
-
 import { WorkflowJobTemplatesAPI, OrganizationsAPI, UsersAPI } from 'api';
 import { useConfig } from 'contexts/Config';
 import useRequest from 'hooks/useRequest';
@@ -24,12 +22,16 @@ function WorkflowJobTemplateAdd() {
       webhook_credential,
       webhook_key,
       limit,
+      job_tags,
+      skip_tags,
       ...templatePayload
     } = values;
     templatePayload.inventory = inventory?.id;
     templatePayload.organization = organization?.id;
     templatePayload.webhook_credential = webhook_credential?.id;
     templatePayload.limit = limit === '' ? null : limit;
+    templatePayload.job_tags = job_tags === '' ? null : job_tags;
+    templatePayload.skip_tags = skip_tags === '' ? null : skip_tags;
     const organizationId =
       organization?.id || inventory?.summary_fields?.organization.id;
     try {

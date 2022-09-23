@@ -3,9 +3,11 @@ import { useFormikContext } from 'formik';
 import { t } from '@lingui/macro';
 import useInventoryStep from 'components/LaunchPrompt/steps/useInventoryStep';
 import useCredentialsStep from 'components/LaunchPrompt/steps/useCredentialsStep';
+import useExecutionEnvironmentStep from 'components/LaunchPrompt/steps/useExecutionEnvironmentStep';
 import useOtherPromptsStep from 'components/LaunchPrompt/steps/useOtherPromptsStep';
 import useSurveyStep from 'components/LaunchPrompt/steps/useSurveyStep';
 import usePreviewStep from 'components/LaunchPrompt/steps/usePreviewStep';
+import useInstanceGroupsStep from 'components/LaunchPrompt/steps/useInstanceGroupsStep';
 import { WorkflowStateContext } from 'contexts/Workflow';
 import { jsonToYaml } from 'util/yaml';
 import { stringIsUUID } from 'util/strings';
@@ -26,6 +28,12 @@ function showPreviewStep(nodeType, launchConfig) {
     launchConfig.ask_variables_on_launch ||
     launchConfig.ask_limit_on_launch ||
     launchConfig.ask_scm_branch_on_launch ||
+    launchConfig.ask_execution_environment_on_launch ||
+    launchConfig.ask_labels_on_launch ||
+    launchConfig.ask_forks_on_launch ||
+    launchConfig.ask_job_slice_count_on_launch ||
+    launchConfig.ask_timeout_on_launch ||
+    launchConfig.ask_instance_groups_on_launch ||
     launchConfig.survey_enabled ||
     (launchConfig.variables_needed_to_start &&
       launchConfig.variables_needed_to_start.length > 0)
@@ -129,6 +137,20 @@ const getNodeToEditDefaultValues = (
     }
   }
 
+  if (launchConfig.ask_execution_environment_on_launch) {
+    if (nodeToEdit?.promptValues) {
+      initialValues.execution_environment =
+        nodeToEdit?.promptValues?.execution_environment;
+    } else if (
+      nodeToEdit?.originalNodeObject?.summary_fields?.execution_environment
+    ) {
+      initialValues.execution_environment =
+        nodeToEdit?.originalNodeObject?.summary_fields?.execution_environment;
+    } else {
+      initialValues.execution_environment = null;
+    }
+  }
+
   if (launchConfig.ask_credential_on_launch) {
     if (nodeToEdit?.promptValues?.credentials) {
       initialValues.credentials = nodeToEdit?.promptValues?.credentials;
@@ -197,6 +219,21 @@ const getNodeToEditDefaultValues = (
   if (launchConfig.ask_diff_mode_on_launch) {
     initialValues.diff_mode = sourceOfValues?.diff_mode || false;
   }
+  if (launchConfig.ask_forks_on_launch) {
+    initialValues.forks = sourceOfValues?.forks || 0;
+  }
+  if (launchConfig.ask_job_slice_count_on_launch) {
+    initialValues.job_slice_count = sourceOfValues?.job_slice_count || 1;
+  }
+  if (launchConfig.ask_timeout_on_launch) {
+    initialValues.timeout = sourceOfValues?.timeout || 0;
+  }
+  if (launchConfig.ask_labels_on_launch) {
+    initialValues.labels = sourceOfValues?.labels || [];
+  }
+  if (launchConfig.ask_instance_groups_on_launch) {
+    initialValues.instance_groups = sourceOfValues?.instance_groups || [];
+  }
 
   if (launchConfig.ask_variables_on_launch) {
     const newExtraData = { ...sourceOfValues.extra_data };
@@ -242,7 +279,9 @@ export default function useWorkflowNodeSteps(
   surveyConfig,
   resource,
   askLinkType,
-  resourceDefaultCredentials
+  resourceDefaultCredentials,
+  labels,
+  instanceGroups
 ) {
   const { nodeToEdit } = useContext(WorkflowStateContext);
   const {
@@ -258,7 +297,9 @@ export default function useWorkflowNodeSteps(
     useDaysToKeepStep(),
     useInventoryStep(launchConfig, resource, visited),
     useCredentialsStep(launchConfig, resource, resourceDefaultCredentials),
-    useOtherPromptsStep(launchConfig, resource),
+    useExecutionEnvironmentStep(launchConfig, resource),
+    useInstanceGroupsStep(launchConfig, resource, instanceGroups),
+    useOtherPromptsStep(launchConfig, resource, labels),
     useSurveyStep(launchConfig, surveyConfig, resource, visited),
   ];
 
@@ -348,6 +389,8 @@ export default function useWorkflowNodeSteps(
       setVisited({
         inventory: true,
         credentials: true,
+        executionEnvironment: true,
+        instanceGroups: true,
         other: true,
         survey: true,
         preview: true,

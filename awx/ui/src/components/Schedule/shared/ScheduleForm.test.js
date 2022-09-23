@@ -17,11 +17,35 @@ jest.mock('../../../api/models/Inventories');
 const credentials = {
   data: {
     results: [
-      { id: 1, kind: 'cloud', name: 'Cred 1', url: 'www.google.com' },
-      { id: 2, kind: 'ssh', name: 'Cred 2', url: 'www.google.com' },
-      { id: 3, kind: 'Ansible', name: 'Cred 3', url: 'www.google.com' },
-      { id: 4, kind: 'Machine', name: 'Cred 4', url: 'www.google.com' },
-      { id: 5, kind: 'Machine', name: 'Cred 5', url: 'www.google.com' },
+      {
+        id: 1,
+        kind: 'cloud',
+        name: 'Cred 1',
+        url: 'www.google.com',
+        inputs: {},
+      },
+      { id: 2, kind: 'ssh', name: 'Cred 2', url: 'www.google.com', inputs: {} },
+      {
+        id: 3,
+        kind: 'Ansible',
+        name: 'Cred 3',
+        url: 'www.google.com',
+        inputs: {},
+      },
+      {
+        id: 4,
+        kind: 'Machine',
+        name: 'Cred 4',
+        url: 'www.google.com',
+        inputs: {},
+      },
+      {
+        id: 5,
+        kind: 'Machine',
+        name: 'Cred 5',
+        url: 'www.google.com',
+        inputs: {},
+      },
     ],
   },
 };
@@ -39,6 +63,12 @@ const launchData = {
     ask_verbosity_on_launch: false,
     ask_inventory_on_launch: true,
     ask_credential_on_launch: false,
+    ask_execution_environment_on_launch: false,
+    ask_labels_on_launch: false,
+    ask_forks_on_launch: false,
+    ask_job_slice_count_on_launch: false,
+    ask_timeout_on_launch: false,
+    ask_instance_groups_on_launch: false,
     survey_enabled: false,
     variables_needed_to_start: [],
     credential_needed_to_start: false,
@@ -153,6 +183,12 @@ describe('<ScheduleForm />', () => {
               ask_verbosity_on_launch: false,
               ask_inventory_on_launch: true,
               ask_credential_on_launch: false,
+              ask_execution_environment_on_launch: false,
+              ask_labels_on_launch: false,
+              ask_forks_on_launch: false,
+              ask_job_slice_count_on_launch: false,
+              ask_timeout_on_launch: false,
+              ask_instance_groups_on_launch: false,
               survey_enabled: false,
               variables_needed_to_start: [],
               credential_needed_to_start: false,
@@ -208,6 +244,12 @@ describe('<ScheduleForm />', () => {
               ask_verbosity_on_launch: false,
               ask_inventory_on_launch: true,
               ask_credential_on_launch: false,
+              ask_execution_environment_on_launch: false,
+              ask_labels_on_launch: false,
+              ask_forks_on_launch: false,
+              ask_job_slice_count_on_launch: false,
+              ask_timeout_on_launch: false,
+              ask_instance_groups_on_launch: false,
               survey_enabled: false,
               variables_needed_to_start: [],
               credential_needed_to_start: false,
@@ -275,6 +317,12 @@ describe('<ScheduleForm />', () => {
               ask_verbosity_on_launch: false,
               ask_inventory_on_launch: true,
               ask_credential_on_launch: false,
+              ask_execution_environment_on_launch: false,
+              ask_labels_on_launch: false,
+              ask_forks_on_launch: false,
+              ask_job_slice_count_on_launch: false,
+              ask_timeout_on_launch: false,
+              ask_instance_groups_on_launch: false,
               survey_enabled: false,
               variables_needed_to_start: [],
               credential_needed_to_start: false,
@@ -406,6 +454,12 @@ describe('<ScheduleForm />', () => {
               ask_verbosity_on_launch: false,
               ask_inventory_on_launch: true,
               ask_credential_on_launch: false,
+              ask_execution_environment_on_launch: false,
+              ask_labels_on_launch: false,
+              ask_forks_on_launch: false,
+              ask_job_slice_count_on_launch: false,
+              ask_timeout_on_launch: false,
+              ask_instance_groups_on_launch: false,
               survey_enabled: false,
               variables_needed_to_start: [],
               credential_needed_to_start: false,
@@ -465,6 +519,12 @@ describe('<ScheduleForm />', () => {
               ask_verbosity_on_launch: false,
               ask_inventory_on_launch: false,
               ask_credential_on_launch: false,
+              ask_execution_environment_on_launch: false,
+              ask_labels_on_launch: false,
+              ask_forks_on_launch: false,
+              ask_job_slice_count_on_launch: false,
+              ask_timeout_on_launch: false,
+              ask_instance_groups_on_launch: false,
               survey_enabled: false,
               variables_needed_to_start: [],
               credential_needed_to_start: false,
@@ -894,7 +954,7 @@ describe('<ScheduleForm />', () => {
       jest.clearAllMocks();
     });
 
-    test('should make API calls to fetch credentials, launch configuration, and survey configuration', async () => {
+    test('should make API calls to fetch credentials, labels, and zone info', async () => {
       await act(async () => {
         wrapper = mountWithContexts(
           <ScheduleForm
@@ -906,6 +966,9 @@ describe('<ScheduleForm />', () => {
               type: 'job_template',
               name: 'Foo Job Template',
               description: '',
+              summary_fields: {
+                credentials: [],
+              },
             }}
             launchConfig={{
               can_start_without_user_input: true,
@@ -919,7 +982,13 @@ describe('<ScheduleForm />', () => {
               ask_limit_on_launch: false,
               ask_verbosity_on_launch: false,
               ask_inventory_on_launch: false,
-              ask_credential_on_launch: false,
+              ask_credential_on_launch: true,
+              ask_execution_environment_on_launch: false,
+              ask_labels_on_launch: true,
+              ask_forks_on_launch: false,
+              ask_job_slice_count_on_launch: false,
+              ask_timeout_on_launch: false,
+              ask_instance_groups_on_launch: false,
               survey_enabled: false,
               variables_needed_to_start: [],
               credential_needed_to_start: false,
@@ -933,7 +1002,9 @@ describe('<ScheduleForm />', () => {
           />
         );
       });
+      expect(SchedulesAPI.readZoneInfo).toBeCalled();
       expect(SchedulesAPI.readCredentials).toBeCalledWith(27);
+      expect(SchedulesAPI.readAllLabels).toBeCalledWith(27);
     });
 
     test('should not call API to get credentials ', async () => {
@@ -961,6 +1032,12 @@ describe('<ScheduleForm />', () => {
               ask_verbosity_on_launch: false,
               ask_inventory_on_launch: false,
               ask_credential_on_launch: false,
+              ask_execution_environment_on_launch: false,
+              ask_labels_on_launch: false,
+              ask_forks_on_launch: false,
+              ask_job_slice_count_on_launch: false,
+              ask_timeout_on_launch: false,
+              ask_instance_groups_on_launch: false,
               survey_enabled: false,
               variables_needed_to_start: [],
               credential_needed_to_start: false,
@@ -990,6 +1067,30 @@ describe('<ScheduleForm />', () => {
               inventory: 2,
               name: 'Foo Project',
               description: '',
+            }}
+            launchConfig={{
+              can_start_without_user_input: true,
+              passwords_needed_to_start: [],
+              ask_scm_branch_on_launch: false,
+              ask_variables_on_launch: false,
+              ask_tags_on_launch: false,
+              ask_diff_mode_on_launch: false,
+              ask_skip_tags_on_launch: false,
+              ask_job_type_on_launch: false,
+              ask_limit_on_launch: false,
+              ask_verbosity_on_launch: false,
+              ask_inventory_on_launch: false,
+              ask_credential_on_launch: false,
+              ask_execution_environment_on_launch: false,
+              ask_labels_on_launch: false,
+              ask_forks_on_launch: false,
+              ask_job_slice_count_on_launch: false,
+              ask_timeout_on_launch: false,
+              ask_instance_groups_on_launch: false,
+              survey_enabled: false,
+              variables_needed_to_start: [],
+              credential_needed_to_start: false,
+              inventory_needed_to_start: false,
             }}
           />
         );

@@ -146,7 +146,10 @@ function PromptJobTemplateDetail({ resource }) {
       />
       <Detail label={t`Source Control Branch`} value={scm_branch} />
       <Detail label={t`Playbook`} value={playbook} />
-      <Detail label={t`Forks`} value={forks || '0'} />
+      <Detail
+        label={t`Forks`}
+        value={typeof forks === 'number' ? forks.toString() : forks}
+      />
       <Detail label={t`Limit`} value={limit} />
       <Detail label={t`Verbosity`} value={VERBOSITY()[verbosity]} />
       {typeof diff_mode === 'boolean' && (

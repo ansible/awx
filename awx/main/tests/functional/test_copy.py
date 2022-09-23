@@ -6,12 +6,19 @@ from awx.main.utils import decrypt_field
 from awx.main.models.workflow import WorkflowJobTemplate, WorkflowJobTemplateNode, WorkflowApprovalTemplate
 from awx.main.models.jobs import JobTemplate
 from awx.main.tasks.system import deep_copy_model_obj
+from awx.main.models import Label, ExecutionEnvironment, InstanceGroup
 
 
 @pytest.mark.django_db
-def test_job_template_copy(post, get, project, inventory, machine_credential, vault_credential, credential, alice, job_template_with_survey_passwords, admin):
+def test_job_template_copy(
+    post, get, project, inventory, machine_credential, vault_credential, credential, alice, job_template_with_survey_passwords, admin, organization
+):
+    label = Label.objects.create(name="foobar", organization=organization)
+    ig = InstanceGroup.objects.create(name="bazbar", organization=organization)
     job_template_with_survey_passwords.project = project
     job_template_with_survey_passwords.inventory = inventory
+    job_template_with_survey_passwords.labels.add(label)
+    job_template_with_survey_passwords.instance_groups.add(ig)
     job_template_with_survey_passwords.save()
     job_template_with_survey_passwords.credentials.add(credential)
     job_template_with_survey_passwords.credentials.add(machine_credential)
@@ -54,6 +61,10 @@ def test_job_template_copy(post, get, project, inventory, machine_credential, va
         assert vault_credential in jt_copy.credentials.all()
         assert machine_credential in jt_copy.credentials.all()
         assert job_template_with_survey_passwords.survey_spec == jt_copy.survey_spec
+        assert jt_copy.labels.count() != 0
+        assert jt_copy.labels.get(pk=label.pk) == label
+        assert jt_copy.instance_groups.count() != 0
+        assert jt_copy.instance_groups.get(pk=ig.pk) == ig
 
 
 @pytest.mark.django_db
@@ -109,8 +120,22 @@ def test_inventory_copy(inventory, group_factory, post, get, alice, organization
 
 @pytest.mark.django_db
 def test_workflow_job_template_copy(workflow_job_template, post, get, admin, organization):
+    '''
+    Tests the FIELDS_TO_PRESERVE_AT_COPY attribute on WFJTs
+    '''
     workflow_job_template.organization = organization
+
+    label = Label.objects.create(name="foobar", organization=organization)
+    workflow_job_template.labels.add(label)
+
+    ee = ExecutionEnvironment.objects.create(name="barfoo", organization=organization)
+    workflow_job_template.execution_environment = ee
+
+    ig = InstanceGroup.objects.create(name="bazbar", organization=organization)
+    workflow_job_template.instance_groups.add(ig)
+
     workflow_job_template.save()
+
     jts = [JobTemplate.objects.create(name='test-jt-{}'.format(i)) for i in range(0, 5)]
     nodes = [WorkflowJobTemplateNode.objects.create(workflow_job_template=workflow_job_template, unified_job_template=jts[i]) for i in range(0, 5)]
     nodes[0].success_nodes.add(nodes[1])
@@ -124,9 +149,16 @@ def test_workflow_job_template_copy(workflow_job_template, post, get, admin, org
         wfjt_copy = type(workflow_job_template).objects.get(pk=wfjt_copy_id)
         args, kwargs = deep_copy_mock.call_args
         deep_copy_model_obj(*args, **kwargs)
+
     assert wfjt_copy.organization == organization
     assert wfjt_copy.created_by == admin
     assert wfjt_copy.name == 'new wfjt name'
+    assert wfjt_copy.labels.count() != 0
+    assert wfjt_copy.labels.get(pk=label.pk) == label
+    assert wfjt_copy.execution_environment == ee
+    assert wfjt_copy.instance_groups.count() != 0
+    assert wfjt_copy.instance_groups.get(pk=ig.pk) == ig
+
     copied_node_list = [x for x in wfjt_copy.workflow_job_template_nodes.all()]
     copied_node_list.sort(key=lambda x: int(x.unified_job_template.name[-1]))
     for node, success_count, failure_count, always_count in zip(copied_node_list, [1, 1, 0, 0, 0], [1, 0, 0, 1, 0], [0, 0, 0, 0, 0]):

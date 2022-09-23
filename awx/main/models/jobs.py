@@ -43,8 +43,8 @@ from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
 )
-from awx.main.utils import parse_yaml_or_json, getattr_dne, NullablePromptPseudoField
-from awx.main.fields import ImplicitRoleField, AskForField, JSONBlob
+from awx.main.utils import parse_yaml_or_json, getattr_dne, NullablePromptPseudoField, polymorphic
+from awx.main.fields import ImplicitRoleField, AskForField, JSONBlob, OrderedManyToManyField
 from awx.main.models.mixins import (
     ResourceMixin,
     SurveyJobTemplateMixin,
@@ -227,15 +227,6 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         blank=True,
         default=False,
     )
-    ask_limit_on_launch = AskForField(
-        blank=True,
-        default=False,
-    )
-    ask_tags_on_launch = AskForField(blank=True, default=False, allows_field='job_tags')
-    ask_skip_tags_on_launch = AskForField(
-        blank=True,
-        default=False,
-    )
     ask_job_type_on_launch = AskForField(
         blank=True,
         default=False,
@@ -244,12 +235,27 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         blank=True,
         default=False,
     )
-    ask_inventory_on_launch = AskForField(
+    ask_credential_on_launch = AskForField(blank=True, default=False, allows_field='credentials')
+    ask_execution_environment_on_launch = AskForField(
         blank=True,
         default=False,
     )
-    ask_credential_on_launch = AskForField(blank=True, default=False, allows_field='credentials')
-    ask_scm_branch_on_launch = AskForField(blank=True, default=False, allows_field='scm_branch')
+    ask_forks_on_launch = AskForField(
+        blank=True,
+        default=False,
+    )
+    ask_job_slice_count_on_launch = AskForField(
+        blank=True,
+        default=False,
+    )
+    ask_timeout_on_launch = AskForField(
+        blank=True,
+        default=False,
+    )
+    ask_instance_groups_on_launch = AskForField(
+        blank=True,
+        default=False,
+    )
     job_slice_count = models.PositiveIntegerField(
         blank=True,
         default=1,
@@ -276,7 +282,17 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     @classmethod
     def _get_unified_job_field_names(cls):
         return set(f.name for f in JobOptions._meta.fields) | set(
-            ['name', 'description', 'organization', 'survey_passwords', 'labels', 'credentials', 'job_slice_number', 'job_slice_count', 'execution_environment']
+            [
+                'name',
+                'description',
+                'organization',
+                'survey_passwords',
+                'labels',
+                'credentials',
+                'job_slice_number',
+                'job_slice_count',
+                'execution_environment',
+            ]
         )
 
     @property
@@ -314,10 +330,13 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         actual_inventory = self.inventory
         if self.ask_inventory_on_launch and 'inventory' in kwargs:
             actual_inventory = kwargs['inventory']
+        actual_slice_count = self.job_slice_count
+        if self.ask_job_slice_count_on_launch and 'job_slice_count' in kwargs:
+            actual_slice_count = kwargs['job_slice_count']
         if actual_inventory:
-            return min(self.job_slice_count, actual_inventory.hosts.count())
+            return min(actual_slice_count, actual_inventory.hosts.count())
         else:
-            return self.job_slice_count
+            return actual_slice_count
 
     def save(self, *args, **kwargs):
         update_fields = kwargs.get('update_fields', [])
@@ -425,10 +444,15 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
 
             field = self._meta.get_field(field_name)
             if isinstance(field, models.ManyToManyField):
-                old_value = set(old_value.all())
-                new_value = set(kwargs[field_name]) - old_value
-                if not new_value:
-                    continue
+                if field_name == 'instance_groups':
+                    # Instance groups are ordered so we can't make a set out of them
+                    old_value = old_value.all()
+                elif field_name == 'credentials':
+                    # Credentials have a weird pattern because of how they are layered
+                    old_value = set(old_value.all())
+                    new_value = set(kwargs[field_name]) - old_value
+                    if not new_value:
+                        continue
 
             if new_value == old_value:
                 # no-op case: Fields the same as template's value
@@ -449,6 +473,10 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                         rejected_data[field_name] = new_value
                         errors_dict[field_name] = _('Project does not allow override of branch.')
                         continue
+                elif field_name == 'job_slice_count' and (new_value > 1) and (self.get_effective_slice_ct(kwargs) <= 1):
+                    rejected_data[field_name] = new_value
+                    errors_dict[field_name] = _('Job inventory does not have enough hosts for slicing')
+                    continue
                 # accepted prompt
                 prompted_data[field_name] = new_value
             else:
@@ -767,6 +795,8 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
 
     @property
     def preferred_instance_groups(self):
+        # If the user specified instance groups those will be handled by the unified_job.create_unified_job
+        # This function handles only the defaults for a template w/o user specification
         if self.organization is not None:
             organization_groups = [x for x in self.organization.instance_groups.all()]
         else:
@@ -906,10 +936,36 @@ class LaunchTimeConfigBase(BaseModel):
     # This is a solution to the nullable CharField problem, specific to prompting
     char_prompts = JSONBlob(default=dict, blank=True)
 
-    def prompts_dict(self, display=False):
+    # Define fields that are not really fields, but alias to char_prompts lookups
+    limit = NullablePromptPseudoField('limit')
+    scm_branch = NullablePromptPseudoField('scm_branch')
+    job_tags = NullablePromptPseudoField('job_tags')
+    skip_tags = NullablePromptPseudoField('skip_tags')
+    diff_mode = NullablePromptPseudoField('diff_mode')
+    job_type = NullablePromptPseudoField('job_type')
+    verbosity = NullablePromptPseudoField('verbosity')
+    forks = NullablePromptPseudoField('forks')
+    job_slice_count = NullablePromptPseudoField('job_slice_count')
+    timeout = NullablePromptPseudoField('timeout')
+
+    # NOTE: additional fields are assumed to exist but must be defined in subclasses
+    # due to technical limitations
+    SUBCLASS_FIELDS = (
+        'instance_groups',  # needs a through model defined
+        'extra_vars',  # alternates between extra_vars and extra_data
+        'credentials',  # already a unified job and unified JT field
+        'labels',  # already a unified job and unified JT field
+        'execution_environment',  # already a unified job and unified JT field
+    )
+
+    def prompts_dict(self, display=False, for_cls=None):
         data = {}
+        if for_cls:
+            cls = for_cls
+        else:
+            cls = JobTemplate
         # Some types may have different prompts, but always subset of JT prompts
-        for prompt_name in JobTemplate.get_ask_mapping().keys():
+        for prompt_name in cls.get_ask_mapping().keys():
             try:
                 field = self._meta.get_field(prompt_name)
             except FieldDoesNotExist:
@@ -917,18 +973,23 @@ class LaunchTimeConfigBase(BaseModel):
             if isinstance(field, models.ManyToManyField):
                 if not self.pk:
                     continue  # unsaved object can't have related many-to-many
-                prompt_val = set(getattr(self, prompt_name).all())
-                if len(prompt_val) > 0:
-                    data[prompt_name] = prompt_val
+                prompt_values = list(getattr(self, prompt_name).all())
+                # Many to manys can't distinguish between None and []
+                # Because of this, from a config perspective, we assume [] is none and we don't save [] into the config
+                if len(prompt_values) > 0:
+                    data[prompt_name] = prompt_values
             elif prompt_name == 'extra_vars':
                 if self.extra_vars:
+                    extra_vars = {}
                     if display:
-                        data[prompt_name] = self.display_extra_vars()
+                        extra_vars = self.display_extra_vars()
                     else:
-                        data[prompt_name] = self.extra_vars
+                        extra_vars = self.extra_vars
                     # Depending on model, field type may save and return as string
-                    if isinstance(data[prompt_name], str):
-                        data[prompt_name] = parse_yaml_or_json(data[prompt_name])
+                    if isinstance(extra_vars, str):
+                        extra_vars = parse_yaml_or_json(extra_vars)
+                    if extra_vars:
+                        data['extra_vars'] = extra_vars
                 if self.survey_passwords and not display:
                     data['survey_passwords'] = self.survey_passwords
             else:
@@ -936,15 +997,6 @@ class LaunchTimeConfigBase(BaseModel):
                 if prompt_val is not None:
                     data[prompt_name] = prompt_val
         return data
-
-
-for field_name in JobTemplate.get_ask_mapping().keys():
-    if field_name == 'extra_vars':
-        continue
-    try:
-        LaunchTimeConfigBase._meta.get_field(field_name)
-    except FieldDoesNotExist:
-        setattr(LaunchTimeConfigBase, field_name, NullablePromptPseudoField(field_name))
 
 
 class LaunchTimeConfig(LaunchTimeConfigBase):
@@ -965,8 +1017,18 @@ class LaunchTimeConfig(LaunchTimeConfigBase):
             blank=True,
         )
     )
-    # Credentials needed for non-unified job / unified JT models
+    # Fields needed for non-unified job / unified JT models, because they are defined on unified models
     credentials = models.ManyToManyField('Credential', related_name='%(class)ss')
+    labels = models.ManyToManyField('Label', related_name='%(class)s_labels')
+    execution_environment = models.ForeignKey(
+        'ExecutionEnvironment',
+        null=True,
+        blank=True,
+        default=None,
+        on_delete=polymorphic.SET_NULL,
+        related_name='%(class)s_as_prompt',
+        help_text="The container image to be used for execution.",
+    )
 
     @property
     def extra_vars(self):
@@ -1008,6 +1070,11 @@ class JobLaunchConfig(LaunchTimeConfig):
         related_name='launch_config',
         on_delete=models.CASCADE,
         editable=False,
+    )
+
+    # Instance Groups needed for non-unified job / unified JT models
+    instance_groups = OrderedManyToManyField(
+        'InstanceGroup', related_name='%(class)ss', blank=True, editable=False, through='JobLaunchConfigInstanceGroupMembership'
     )
 
     def has_user_prompts(self, template):

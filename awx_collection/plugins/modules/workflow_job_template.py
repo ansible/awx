@@ -47,6 +47,16 @@ options:
       description:
         - Variables which will be made available to jobs ran inside the workflow.
       type: dict
+    job_tags:
+      description:
+        - Comma separated list of the tags to use for the job template.
+      type: str
+    ask_tags_on_launch:
+      description:
+        - Prompt user for job tags on launch.
+      type: bool
+      aliases:
+        - ask_tags
     organization:
       description:
         - Organization the workflow job template exists in.
@@ -85,6 +95,22 @@ options:
       description:
         - Prompt user for limit on launch of this workflow job template
       type: bool
+    ask_labels_on_launch:
+      description:
+        - Prompt user for labels on launch.
+      type: bool
+      aliases:
+        - ask_labels
+    ask_skip_tags_on_launch:
+      description:
+        - Prompt user for job tags to skip on launch.
+      type: bool
+      aliases:
+        - ask_skip_tags
+    skip_tags:
+      description:
+        - Comma separated list of the tags to skip for the job template.
+      type: str
     webhook_service:
       description:
         - Service that webhook requests will be accepted from
@@ -665,11 +691,15 @@ def main():
         copy_from=dict(),
         description=dict(),
         extra_vars=dict(type='dict'),
+        job_tags=dict(),
+        skip_tags=dict(),
         organization=dict(),
         survey_spec=dict(type='dict', aliases=['survey']),
         survey_enabled=dict(type='bool'),
         allow_simultaneous=dict(type='bool'),
         ask_variables_on_launch=dict(type='bool'),
+        ask_labels_on_launch=dict(type='bool', aliases=['ask_labels']),
+        ask_skip_tags_on_launch=dict(type='bool', aliases=['ask_skip_tags']),
         inventory=dict(),
         limit=dict(),
         scm_branch=dict(),
@@ -752,7 +782,11 @@ def main():
         'ask_scm_branch_on_launch',
         'ask_limit_on_launch',
         'ask_variables_on_launch',
+        'ask_labels_on_launch',
+        'ask_skip_tags_on_launch',
         'webhook_service',
+        'job_tags',
+        'skip_tags',
     ):
         field_val = module.params.get(field_name)
         if field_val is not None:

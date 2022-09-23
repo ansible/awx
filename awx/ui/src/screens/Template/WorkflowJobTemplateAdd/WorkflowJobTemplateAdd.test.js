@@ -82,7 +82,7 @@ describe('<WorkflowJobTemplateAdd/>', () => {
   test('calls workflowJobTemplatesAPI with correct information on submit', async () => {
     await act(async () => {
       wrapper.find('input#wfjt-name').simulate('change', {
-        target: { value: 'Alex', name: 'name' },
+        target: { value: 'Alex Singh', name: 'name' },
       });
 
       wrapper.find('LabelSelect').find('SelectToggle').simulate('click');
@@ -104,18 +104,23 @@ describe('<WorkflowJobTemplateAdd/>', () => {
       wrapper.find('form').simulate('submit');
     });
     await expect(WorkflowJobTemplatesAPI.create).toHaveBeenCalledWith({
-      name: 'Alex',
+      name: 'Alex Singh',
       allow_simultaneous: false,
       ask_inventory_on_launch: false,
+      ask_labels_on_launch: false,
       ask_limit_on_launch: false,
       ask_scm_branch_on_launch: false,
+      ask_skip_tags_on_launch: false,
+      ask_tags_on_launch: false,
       ask_variables_on_launch: false,
       description: '',
       extra_vars: '---',
       inventory: undefined,
+      job_tags: null,
       limit: null,
       organization: undefined,
       scm_branch: '',
+      skip_tags: null,
       webhook_credential: undefined,
       webhook_service: '',
       webhook_url: '',

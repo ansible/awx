@@ -35,6 +35,9 @@ function formatTimeout(timeout) {
   if (typeof timeout === 'undefined' || timeout === null) {
     return null;
   }
+  if (typeof timeout === 'string') {
+    return timeout;
+  }
   const minutes = Math.floor(timeout / 60);
   const seconds = timeout - Math.floor(timeout / 60) * 60;
   return (
@@ -71,7 +74,13 @@ function hasPromptData(launchData) {
     launchData.ask_skip_tags_on_launch ||
     launchData.ask_tags_on_launch ||
     launchData.ask_variables_on_launch ||
-    launchData.ask_verbosity_on_launch
+    launchData.ask_verbosity_on_launch ||
+    launchData.ask_execution_environment_on_launch ||
+    launchData.ask_labels_on_launch ||
+    launchData.ask_forks_on_launch ||
+    launchData.ask_job_slice_count_on_launch ||
+    launchData.ask_timeout_on_launch ||
+    launchData.ask_instance_groups_on_launch
   );
 }
 
@@ -206,6 +215,36 @@ function PromptDetail({
                   value={overrides.inventory?.name}
                 />
               )}
+              {launchConfig.ask_execution_environment_on_launch && (
+                <Detail
+                  label={t`Execution Environment`}
+                  value={overrides.execution_environment?.name}
+                />
+              )}
+              {launchConfig.ask_instance_groups_on_launch && (
+                <Detail
+                  fullWidth
+                  label={t`Instance Groups`}
+                  rows={4}
+                  value={
+                    <ChipGroup
+                      numChips={5}
+                      totalChips={overrides.instance_groups.length}
+                      ouiaId="prompt-instance-groups-chips"
+                    >
+                      {overrides.instance_groups.map((instance_group) => (
+                        <Chip
+                          key={instance_group.id}
+                          ouiaId={`instance-group-${instance_group.id}-chip`}
+                          isReadOnly
+                        >
+                          {instance_group.name}
+                        </Chip>
+                      ))}
+                    </ChipGroup>
+                  }
+                />
+              )}
               {launchConfig.ask_scm_branch_on_launch && (
                 <Detail
                   label={t`Source Control Branch`}
@@ -276,6 +315,45 @@ function PromptDetail({
                         ))}
                     </ChipGroup>
                   }
+                />
+              )}
+              {launchConfig.ask_labels_on_launch && (
+                <Detail
+                  fullWidth
+                  label={t`Labels`}
+                  value={
+                    <ChipGroup
+                      numChips={5}
+                      totalChips={overrides.labels.length}
+                      ouiaId="prompt-label-chips"
+                    >
+                      {overrides.labels.map((label) => (
+                        <Chip
+                          key={label.id}
+                          ouiaId={`label-${label.id}-chip`}
+                          isReadOnly
+                        >
+                          {label.name}
+                        </Chip>
+                      ))}
+                    </ChipGroup>
+                  }
+                  isEmpty={overrides.labels.length === 0}
+                />
+              )}
+              {launchConfig.ask_forks_on_launch && (
+                <Detail label={t`Forks`} value={overrides.forks} />
+              )}
+              {launchConfig.ask_job_slice_count_on_launch && (
+                <Detail
+                  label={t`Job Slicing`}
+                  value={overrides.job_slice_count}
+                />
+              )}
+              {launchConfig.ask_timeout_on_launch && (
+                <Detail
+                  label={t`Timeout`}
+                  value={formatTimeout(overrides?.timeout)}
                 />
               )}
               {launchConfig.ask_diff_mode_on_launch && (

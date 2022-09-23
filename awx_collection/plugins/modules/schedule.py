@@ -42,17 +42,39 @@ options:
         - Optional description of this schedule.
       required: False
       type: str
+    execution_environment:
+      description:
+        - Execution Environment applied as a prompt, assuming jot template prompts for execution environment
+      type: str
     extra_data:
       description:
         - Specify C(extra_vars) for the template.
       required: False
       type: dict
       default: {}
+    forks:
+      description:
+        - Forks applied as a prompt, assuming job template prompts for forks
+      type: int
+    instance_groups:
+      description:
+        - List of Instance Groups applied as a prompt, assuming job template prompts for instance groups
+      type: list
+      elements: str
     inventory:
       description:
         - Inventory applied as a prompt, assuming job template prompts for inventory
       required: False
       type: str
+    job_slice_count:
+      description:
+        - Job Slice Count applied as a prompt, assuming job template prompts for job slice count
+      type: int
+    labels:
+      description:
+        - List of labels applied as a prompt, assuming job template prompts for labels
+      type: list
+      elements: str
     credentials:
       description:
         - List of credentials applied as a prompt, assuming job template prompts for credentials
@@ -63,6 +85,10 @@ options:
         - Branch to use in job run. Project default used if blank. Only allowed if project allow_override field is set to true.
       required: False
       type: str
+    timeout:
+      description:
+        - Timeout applied as a prompt, assuming job template prompts for timeout
+      type: int
     job_type:
       description:
         - The job type to use for the job template.
@@ -176,8 +202,14 @@ def main():
         name=dict(required=True),
         new_name=dict(),
         description=dict(),
+        execution_environment=dict(type='str'),
         extra_data=dict(type='dict'),
+        forks=dict(type='int'),
+        instance_groups=dict(type='list', elements='str'),
         inventory=dict(),
+        job_slice_count=dict(type='int'),
+        labels=dict(type='list', elements='str'),
+        timeout=dict(type='int'),
         credentials=dict(type='list', elements='str'),
         scm_branch=dict(),
         job_type=dict(choices=['run', 'check']),
@@ -200,8 +232,14 @@ def main():
     name = module.params.get('name')
     new_name = module.params.get("new_name")
     description = module.params.get('description')
+    execution_environment = module.params.get('execution_environment')
     extra_data = module.params.get('extra_data')
+    forks = module.params.get('forks')
+    instance_groups = module.params.get('instance_groups')
     inventory = module.params.get('inventory')
+    job_slice_count = module.params.get('job_slice_count')
+    labels = module.params.get('labels')
+    timeout = module.params.get('timeout')
     credentials = module.params.get('credentials')
     scm_branch = module.params.get('scm_branch')
     job_type = module.params.get('job_type')
@@ -238,6 +276,28 @@ def main():
         for item in credentials:
             association_fields['credentials'].append(module.resolve_name_to_id('credentials', item))
 
+    # We need to clear out the name from the search fields so we can use name_or_id in the following searches
+    if 'name' in search_fields:
+        del search_fields['name']
+
+    if labels is not None:
+        association_fields['labels'] = []
+        for item in labels:
+            label_id = module.get_one('labels', name_or_id=item, **{'data': search_fields})
+            if label_id is None:
+                module.fail_json(msg='Could not find label entry with name {0}'.format(item))
+            else:
+                association_fields['labels'].append(label_id['id'])
+
+    if instance_groups is not None:
+        association_fields['instance_groups'] = []
+        for item in instance_groups:
+            instance_group_id = module.get_one('instance_groups', name_or_id=item, **{'data': search_fields})
+            if instance_group_id is None:
+                module.fail_json(msg='Could not find instance_group entry with name {0}'.format(item))
+            else:
+                association_fields['instance_groups'].append(instance_group_id['id'])
+
     # Create the data that gets sent for create and update
     new_fields = {}
     if rrule is not None:
@@ -267,6 +327,22 @@ def main():
         new_fields['unified_job_template'] = unified_job_template_id
     if enabled is not None:
         new_fields['enabled'] = enabled
+    if forks is not None:
+        new_fields['forks'] = forks
+    if job_slice_count is not None:
+        new_fields['job_slice_count'] = job_slice_count
+    if timeout is not None:
+        new_fields['timeout'] = timeout
+
+    if execution_environment is not None:
+        if execution_environment == '':
+            new_fields['execution_environment'] = ''
+        else:
+            ee = module.get_one('execution_environments', name_or_id=execution_environment, **{'data': search_fields})
+            if ee is None:
+                module.fail_json(msg='could not find execution_environment entry with name {0}'.format(execution_environment))
+            else:
+                new_fields['execution_environment'] = ee['id']
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

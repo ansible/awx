@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
-
 import { useHistory, useLocation } from 'react-router-dom';
 import { shape } from 'prop-types';
 import { Card } from '@patternfly/react-core';
 import yaml from 'js-yaml';
-import { SchedulesAPI } from 'api';
+import { OrganizationsAPI, SchedulesAPI } from 'api';
 import { getAddedAndRemoved } from 'util/lists';
-
 import { parseVariableField } from 'util/yaml';
 import mergeExtraVars from 'util/prompt/mergeExtraVars';
 import getSurveyValues from 'util/prompt/getSurveyValues';
+import createNewLabels from 'util/labels';
 import ScheduleForm from '../shared/ScheduleForm';
 import buildRuleSet from '../shared/buildRuleSet';
 import { CardBody } from '../../Card';
@@ -32,9 +31,13 @@ function ScheduleEdit({
     values,
     launchConfiguration,
     surveyConfiguration,
+    originalInstanceGroups,
+    originalLabels,
     scheduleCredentials = []
   ) => {
     const {
+      execution_environment,
+      instance_groups,
       inventory,
       credentials = [],
       frequency,
@@ -42,13 +45,9 @@ function ScheduleEdit({
       exceptionFrequency,
       exceptionOptions,
       timezone,
+      labels,
       ...submitValues
     } = values;
-    const { added, removed } = getAddedAndRemoved(
-      [...(resource?.summary_fields.credentials || []), ...scheduleCredentials],
-      credentials
-    );
-
     let extraVars;
     const surveyValues = getSurveyValues(values);
 
@@ -82,7 +81,24 @@ function ScheduleEdit({
       submitValues.inventory = inventory.id;
     }
 
+    if (execution_environment) {
+      submitValues.execution_environment = execution_environment.id;
+    }
+
     try {
+      if (launchConfiguration?.ask_labels_on_launch) {
+        const { labelIds, error } = createNewLabels(
+          values.labels,
+          resource.organization
+        );
+
+        if (error) {
+          setFormSubmitError(error);
+        } else {
+          submitValues.labels = labelIds;
+        }
+      }
+
       const ruleSet = buildRuleSet(values);
       const requestData = {
         ...submitValues,
@@ -104,16 +120,51 @@ function ScheduleEdit({
       const {
         data: { id: scheduleId },
       } = await SchedulesAPI.update(schedule.id, requestData);
-      if (values.credentials?.length > 0) {
-        await Promise.all([
-          ...removed.map(({ id }) =>
-            SchedulesAPI.disassociateCredential(scheduleId, id)
-          ),
-          ...added.map(({ id }) =>
-            SchedulesAPI.associateCredential(scheduleId, id)
-          ),
-        ]);
+
+      const { added: addedCredentials, removed: removedCredentials } =
+        getAddedAndRemoved(
+          [
+            ...(resource?.summary_fields.credentials || []),
+            ...scheduleCredentials,
+          ],
+          credentials
+        );
+
+      const { added: addedLabels, removed: removedLabels } = getAddedAndRemoved(
+        originalLabels,
+        labels
+      );
+
+      let organizationId = resource.organization;
+
+      if (addedLabels.length > 0) {
+        if (!organizationId) {
+          const {
+            data: { results },
+          } = await OrganizationsAPI.read();
+          organizationId = results[0].id;
+        }
       }
+
+      await Promise.all([
+        ...removedCredentials.map(({ id }) =>
+          SchedulesAPI.disassociateCredential(scheduleId, id)
+        ),
+        ...addedCredentials.map(({ id }) =>
+          SchedulesAPI.associateCredential(scheduleId, id)
+        ),
+        ...removedLabels.map((label) =>
+          SchedulesAPI.disassociateLabel(scheduleId, label)
+        ),
+        ...addedLabels.map((label) =>
+          SchedulesAPI.associateLabel(scheduleId, label, organizationId)
+        ),
+        SchedulesAPI.orderInstanceGroups(
+          scheduleId,
+          instance_groups || [],
+          originalInstanceGroups
+        ),
+      ]);
 
       history.push(`${pathRoot}schedules/${scheduleId}/details`);
     } catch (err) {

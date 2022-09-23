@@ -391,6 +391,16 @@ function JobDetail({ job, inventorySourceLabels }) {
             helpText={jobHelpText.forks}
           />
         )}
+        {typeof job.timeout === 'number' && (
+          <Detail
+            dataCy="timeout"
+            label={t`Timeout`}
+            value={
+              job.timeout ? t`${job.timeout} seconds` : t`No timeout specified`
+            }
+            helpText={jobHelpText.timeout}
+          />
+        )}
         {credential && (
           <Detail
             dataCy="job-machine-credential"

@@ -6,7 +6,7 @@ const jtHelpTextStrings = () => ({
   jobType: t`For job templates, select run to execute the playbook. Select check to only check playbook syntax, test environment setup, and report problems without executing the playbook.`,
   inventory: t`Select the inventory containing the hosts you want this job to manage.`,
   project: t`Select the project containing the playbook you want this job to execute.`,
-  executionEnvironmentForm: t`Select the execution environment for this job template.`,
+  executionEnvironmentForm: t`The container image to be used for execution.`,
   executionEnvironmentDetail: t`The execution environment that will be used when launching this job template. The resolved execution environment can be overridden by explicitly assigning a different one to this job template.`,
   playbook: t`Select the playbook to be executed by this job.`,
   credentials: t`Select credentials for accessing the nodes this job will be ran against. You can only select one credential of each type. For machine credentials (SSH), checking "Prompt on launch" without selecting credentials will require you to select a machine credential at run time. If you select credentials and check "Prompt on launch", the selected credential(s) become the defaults that can be updated at run time.`,
@@ -24,7 +24,7 @@ const jtHelpTextStrings = () => ({
   webhookURL: t`Webhook services can launch jobs with this workflow job template by making a POST request to this URL.`,
   webhookKey: t`Webhook services can use this as a shared secret.`,
   webhookCredential: t`Optionally select the credential to use to send status updates back to the webhook service.`,
-  sourceControlBranch: t`Select a branch for the workflow. This branch is applied to all job template nodes that prompt for a branch.`,
+  sourceControlBranch: t`Branch to use in job run. Project default used if blank. Only allowed if project allow_override field is set to true.`,
   provisioningCallbacks: (brandName = '') =>
     t`Enables creation of a provisioning callback URL. Using the URL a host can contact ${brandName} and request a configuration update using this job template.`,
   privilegeEscalation: t`If enabled, run this playbook as an administrator.`,

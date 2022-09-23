@@ -1,10 +1,11 @@
 import Base from '../Base';
 import NotificationsMixin from '../mixins/Notifications.mixin';
 import InstanceGroupsMixin from '../mixins/InstanceGroups.mixin';
+import LabelsMixin from '../mixins/Labels.mixin';
 import SchedulesMixin from '../mixins/Schedules.mixin';
 
 class JobTemplates extends SchedulesMixin(
-  InstanceGroupsMixin(NotificationsMixin(Base))
+  InstanceGroupsMixin(NotificationsMixin(LabelsMixin(Base)))
 ) {
   constructor(http) {
     super(http);
@@ -31,20 +32,6 @@ class JobTemplates extends SchedulesMixin(
 
   readLaunch(id) {
     return this.http.get(`${this.baseUrl}${id}/launch/`);
-  }
-
-  associateLabel(id, label, orgId) {
-    return this.http.post(`${this.baseUrl}${id}/labels/`, {
-      name: label.name,
-      organization: orgId,
-    });
-  }
-
-  disassociateLabel(id, label) {
-    return this.http.post(`${this.baseUrl}${id}/labels/`, {
-      id: label.id,
-      disassociate: true,
-    });
   }
 
   readCredentials(id, params) {

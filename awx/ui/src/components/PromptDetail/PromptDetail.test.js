@@ -15,6 +15,12 @@ const mockPromptLaunch = {
   ask_tags_on_launch: true,
   ask_variables_on_launch: true,
   ask_verbosity_on_launch: true,
+  ask_execution_environment_on_launch: true,
+  ask_labels_on_launch: true,
+  ask_forks_on_launch: true,
+  ask_job_slice_count_on_launch: true,
+  ask_timeout_on_launch: true,
+  ask_instance_groups_on_launch: true,
   defaults: {
     extra_vars: '---foo: bar',
     diff_mode: false,
@@ -40,6 +46,10 @@ const mockPromptLaunch = {
       },
     ],
     scm_branch: 'Foo branch',
+    execution_environment: 1,
+    forks: 1,
+    job_slice_count: 1,
+    timeout: 100,
   },
 };
 
@@ -73,9 +83,20 @@ describe('PromptDetail', () => {
       assertDetail('Limit', 'localhost');
       assertDetail('Verbosity', '3 (Debug)');
       assertDetail('Show Changes', 'Off');
+      assertDetail('Timeout', '1 min 40 sec');
+      assertDetail('Forks', '1');
+      assertDetail('Job Slicing', '1');
       expect(wrapper.find('VariablesDetail').prop('value')).toEqual(
         '---foo: bar'
       );
+      expect(
+        wrapper
+          .find('Detail[label="Labels"]')
+          .containsAllMatchingElements([
+            <span>L_91o2</span>,
+            <span>L_91o3</span>,
+          ])
+      ).toEqual(true);
       expect(
         wrapper
           .find('Detail[label="Credentials"]')
@@ -151,6 +172,19 @@ describe('PromptDetail', () => {
       job_type: 'check',
       scm_branch: 'Bar branch',
       diff_mode: true,
+      forks: 2,
+      job_slice_count: 2,
+      timeout: 160,
+      labels: [
+        { name: 'foo', id: 1 },
+        { name: 'bar', id: 2 },
+      ],
+      instance_groups: [
+        {
+          id: 1,
+          name: 'controlplane',
+        },
+      ],
     };
 
     beforeAll(() => {
@@ -182,9 +216,17 @@ describe('PromptDetail', () => {
       assertDetail('Limit', 'otherlimit');
       assertDetail('Verbosity', '0 (Normal)');
       assertDetail('Show Changes', 'On');
+      assertDetail('Timeout', '2 min 40 sec');
+      assertDetail('Forks', '2');
+      assertDetail('Job Slicing', '2');
       expect(wrapper.find('VariablesDetail').prop('value')).toEqual(
         '---one: two\nbar: baz'
       );
+      expect(
+        wrapper
+          .find('Detail[label="Labels"]')
+          .containsAllMatchingElements([<span>foo</span>, <span>bar</span>])
+      ).toEqual(true);
       expect(
         wrapper
           .find('Detail[label="Credentials"]')

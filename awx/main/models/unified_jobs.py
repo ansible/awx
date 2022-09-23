@@ -332,10 +332,11 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
 
         return NotificationTemplate.objects.none()
 
-    def create_unified_job(self, **kwargs):
+    def create_unified_job(self, instance_groups=None, **kwargs):
         """
         Create a new unified job based on this unified job template.
         """
+        # TODO: rename kwargs to prompts, to set expectation that these are runtime values
         new_job_passwords = kwargs.pop('survey_passwords', {})
         eager_fields = kwargs.pop('_eager_fields', None)
 
@@ -382,7 +383,10 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
             unified_job.survey_passwords = new_job_passwords
             kwargs['survey_passwords'] = new_job_passwords  # saved in config object for relaunch
 
-        unified_job.preferred_instance_groups_cache = unified_job._get_preferred_instance_group_cache()
+        if instance_groups:
+            unified_job.preferred_instance_groups_cache = [ig.id for ig in instance_groups]
+        else:
+            unified_job.preferred_instance_groups_cache = unified_job._get_preferred_instance_group_cache()
 
         unified_job._set_default_dependencies_processed()
         unified_job.task_impact = unified_job._get_task_impact()
@@ -412,13 +416,17 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
             unified_job.handle_extra_data(validated_kwargs['extra_vars'])
 
         # Create record of provided prompts for relaunch and rescheduling
-        unified_job.create_config_from_prompts(kwargs, parent=self)
+        config = unified_job.create_config_from_prompts(kwargs, parent=self)
+        if instance_groups:
+            for ig in instance_groups:
+                config.instance_groups.add(ig)
 
         # manually issue the create activity stream entry _after_ M2M relations
         # have been associated to the UJ
         if unified_job.__class__ in activity_stream_registrar.models:
             activity_stream_create(None, unified_job, True)
         unified_job.log_lifecycle("created")
+
         return unified_job
 
     @classmethod
@@ -973,22 +981,38 @@ class UnifiedJob(
             valid_fields.extend(['survey_passwords', 'extra_vars'])
         else:
             kwargs.pop('survey_passwords', None)
+        many_to_many_fields = []
         for field_name, value in kwargs.items():
             if field_name not in valid_fields:
                 raise Exception('Unrecognized launch config field {}.'.format(field_name))
-            if field_name == 'credentials':
+            field = None
+            # may use extra_data as a proxy for extra_vars
+            if field_name in config.SUBCLASS_FIELDS and field_name != 'extra_vars':
+                field = config._meta.get_field(field_name)
+            if isinstance(field, models.ManyToManyField):
+                many_to_many_fields.append(field_name)
                 continue
-            key = field_name
-            if key == 'extra_vars':
-                key = 'extra_data'
-            setattr(config, key, value)
+            if isinstance(field, (models.ForeignKey)) and (value is None):
+                continue  # the null value indicates not-provided for ForeignKey case
+            setattr(config, field_name, value)
         config.save()
 
-        job_creds = set(kwargs.get('credentials', []))
-        if 'credentials' in [field.name for field in parent._meta.get_fields()]:
-            job_creds = job_creds - set(parent.credentials.all())
-        if job_creds:
-            config.credentials.add(*job_creds)
+        for field_name in many_to_many_fields:
+            prompted_items = kwargs.get(field_name, [])
+            if not prompted_items:
+                continue
+            if field_name == 'instance_groups':
+                # Here we are doing a loop to make sure we preserve order for this Ordered field
+                # also do not merge IGs with parent, so this saves the literal list
+                for item in prompted_items:
+                    getattr(config, field_name).add(item)
+            else:
+                # Assuming this field merges prompts with parent, save just the diff
+                if field_name in [field.name for field in parent._meta.get_fields()]:
+                    prompted_items = set(prompted_items) - set(getattr(parent, field_name).all())
+                if prompted_items:
+                    getattr(config, field_name).add(*prompted_items)
+
         return config
 
     @property

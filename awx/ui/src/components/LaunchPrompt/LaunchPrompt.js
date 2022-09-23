@@ -5,6 +5,7 @@ import { Formik, useFormikContext } from 'formik';
 import { useDismissableError } from 'hooks/useRequest';
 import mergeExtraVars from 'util/prompt/mergeExtraVars';
 import getSurveyValues from 'util/prompt/getSurveyValues';
+import createNewLabels from 'util/labels';
 import ContentLoading from '../ContentLoading';
 import ContentError from '../ContentError';
 import useLaunchSteps from './useLaunchSteps';
@@ -15,7 +16,9 @@ function PromptModalForm({
   onCancel,
   onSubmit,
   resource,
+  labels,
   surveyConfig,
+  instanceGroups,
 }) {
   const { setFieldTouched, values } = useFormikContext();
   const [showDescription, setShowDescription] = useState(false);
@@ -27,9 +30,15 @@ function PromptModalForm({
     visitStep,
     visitAllSteps,
     contentError,
-  } = useLaunchSteps(launchConfig, surveyConfig, resource);
+  } = useLaunchSteps(
+    launchConfig,
+    surveyConfig,
+    resource,
+    labels,
+    instanceGroups
+  );
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const postValues = {};
     const setValue = (key, value) => {
       if (typeof value !== 'undefined' && value !== null) {
@@ -53,6 +62,27 @@ function PromptModalForm({
     setValue('extra_vars', mergeExtraVars(extraVars, surveyValues));
     setValue('scm_branch', values.scm_branch);
     setValue('verbosity', values.verbosity);
+    setValue('timeout', values.timeout);
+    setValue('forks', values.forks);
+    setValue('job_slice_count', values.job_slice_count);
+    setValue('execution_environment', values.execution_environment?.id);
+
+    if (launchConfig.ask_instance_groups_on_launch) {
+      const instanceGroupIds = [];
+      values.instance_groups.forEach((instance_group) => {
+        instanceGroupIds.push(instance_group.id);
+      });
+      setValue('instance_groups', instanceGroupIds);
+    }
+
+    if (launchConfig.ask_labels_on_launch) {
+      const { labelIds } = createNewLabels(
+        values.labels,
+        resource.organization
+      );
+
+      setValue('labels', labelIds);
+    }
 
     onSubmit(postValues);
   };
@@ -137,6 +167,7 @@ function LaunchPrompt({
   onCancel,
   onLaunch,
   resource = {},
+  labels = [],
   surveyConfig,
   resourceDefaultCredentials = [],
 }) {
@@ -148,7 +179,9 @@ function LaunchPrompt({
         launchConfig={launchConfig}
         surveyConfig={surveyConfig}
         resource={resource}
+        labels={labels}
         resourceDefaultCredentials={resourceDefaultCredentials}
+        instanceGroups={[]}
       />
     </Formik>
   );

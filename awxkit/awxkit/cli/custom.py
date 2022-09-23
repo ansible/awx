@@ -50,7 +50,7 @@ class Launchable(object):
         if with_pk:
             parser.choices[self.action].add_argument('id', type=functools.partial(pk_or_name, None, self.resource, page=self.page), help='')
         parser.choices[self.action].add_argument('--monitor', action='store_true', help='If set, prints stdout of the launched job until it finishes.')
-        parser.choices[self.action].add_argument('--timeout', type=int, help='If set with --monitor or --wait, time out waiting on job completion.')  # noqa
+        parser.choices[self.action].add_argument('--action-timeout', type=int, help='If set with --monitor or --wait, time out waiting on job completion.')
         parser.choices[self.action].add_argument('--wait', action='store_true', help='If set, waits until the launched job finishes.')
 
         launch_time_options = self.page.connection.options(self.page.endpoint + '1/{}/'.format(self.action))
@@ -66,7 +66,7 @@ class Launchable(object):
                 response,
                 self.page.connection.session,
                 print_stdout=not kwargs.get('wait'),
-                timeout=kwargs.get('timeout'),
+                action_timeout=kwargs.get('action_timeout'),
             )
             if status:
                 response.json['status'] = status
@@ -78,7 +78,7 @@ class Launchable(object):
         monitor_kwargs = {
             'monitor': kwargs.pop('monitor', False),
             'wait': kwargs.pop('wait', False),
-            'timeout': kwargs.pop('timeout', False),
+            'action_timeout': kwargs.pop('action_timeout', False),
         }
         response = self.page.get().related.get(self.action).post(kwargs)
         self.monitor(response, **monitor_kwargs)

@@ -3,9 +3,11 @@ import { useFormikContext } from 'formik';
 import useInventoryStep from './steps/useInventoryStep';
 import useCredentialsStep from './steps/useCredentialsStep';
 import useCredentialPasswordsStep from './steps/useCredentialPasswordsStep';
+import useExecutionEnvironmentStep from './steps/useExecutionEnvironmentStep';
 import useOtherPromptsStep from './steps/useOtherPromptsStep';
 import useSurveyStep from './steps/useSurveyStep';
 import usePreviewStep from './steps/usePreviewStep';
+import useInstanceGroupsStep from './steps/useInstanceGroupsStep';
 
 function showCredentialPasswordsStep(launchConfig, credentials = []) {
   if (
@@ -39,7 +41,13 @@ function showCredentialPasswordsStep(launchConfig, credentials = []) {
   return credentialPasswordStepRequired;
 }
 
-export default function useLaunchSteps(launchConfig, surveyConfig, resource) {
+export default function useLaunchSteps(
+  launchConfig,
+  surveyConfig,
+  resource,
+  labels,
+  instanceGroups
+) {
   const [visited, setVisited] = useState({});
   const [isReady, setIsReady] = useState(false);
   const { touched, values: formikValues } = useFormikContext();
@@ -56,7 +64,9 @@ export default function useLaunchSteps(launchConfig, surveyConfig, resource) {
       showCredentialPasswordsStep(launchConfig, formikValues.credentials),
       visited
     ),
-    useOtherPromptsStep(launchConfig, resource),
+    useExecutionEnvironmentStep(launchConfig, resource),
+    useInstanceGroupsStep(launchConfig, resource, instanceGroups),
+    useOtherPromptsStep(launchConfig, resource, labels),
     useSurveyStep(launchConfig, surveyConfig, resource, visited),
   ];
   const { resetForm } = useFormikContext();
@@ -143,6 +153,8 @@ export default function useLaunchSteps(launchConfig, surveyConfig, resource) {
         inventory: true,
         credentials: true,
         credentialPasswords: true,
+        executionEnvironment: true,
+        instanceGroups: true,
         other: true,
         survey: true,
         preview: true,

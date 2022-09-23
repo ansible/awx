@@ -152,6 +152,32 @@ options:
         - Uniqueness is not handled rigorously.
       type: list
       elements: str
+    execution_environment:
+      description:
+        - Execution Environment applied as a prompt, assuming jot template prompts for execution environment
+      type: str
+    forks:
+      description:
+        - Forks applied as a prompt, assuming job template prompts for forks
+      type: int
+    instance_groups:
+      description:
+        - List of Instance Groups applied as a prompt, assuming job template prompts for instance groups
+      type: list
+      elements: str
+    job_slice_count:
+      description:
+        - Job Slice Count applied as a prompt, assuming job template prompts for job slice count
+      type: int
+    labels:
+      description:
+        - List of labels applied as a prompt, assuming job template prompts for labels
+      type: list
+      elements: str
+    timeout:
+      description:
+        - Timeout applied as a prompt, assuming job template prompts for timeout
+      type: int
     state:
       description:
         - Desired state of the resource.
@@ -255,6 +281,12 @@ def main():
         always_nodes=dict(type='list', elements='str'),
         failure_nodes=dict(type='list', elements='str'),
         credentials=dict(type='list', elements='str'),
+        execution_environment=dict(type='str'),
+        forks=dict(type='int'),
+        instance_groups=dict(type='list', elements='str'),
+        job_slice_count=dict(type='int'),
+        labels=dict(type='list', elements='str'),
+        timeout=dict(type='int'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
     mutually_exclusive = [("unified_job_template", "approval_node")]
@@ -327,32 +359,44 @@ def main():
         'diff_mode',
         'verbosity',
         'all_parents_must_converge',
+        'forks',
+        'job_slice_count',
+        'timeout',
     ):
         field_val = module.params.get(field_name)
         if field_val:
             new_fields[field_name] = field_val
 
     association_fields = {}
-    for association in ('always_nodes', 'success_nodes', 'failure_nodes', 'credentials'):
+    for association in ('always_nodes', 'success_nodes', 'failure_nodes', 'credentials', 'instance_groups', 'labels'):
         name_list = module.params.get(association)
         if name_list is None:
             continue
         id_list = []
         for sub_name in name_list:
-            if association == 'credentials':
-                endpoint = 'credentials'
-                lookup_data = {'name': sub_name}
+            if association in ['credentials', 'instance_groups', 'labels']:
+                sub_obj = module.get_one(association, name_or_id=sub_name)
             else:
                 endpoint = 'workflow_job_template_nodes'
                 lookup_data = {'identifier': sub_name}
                 if workflow_job_template_id:
                     lookup_data['workflow_job_template'] = workflow_job_template_id
-            sub_obj = module.get_one(endpoint, **{'data': lookup_data})
+                sub_obj = module.get_one(endpoint, **{'data': lookup_data})
             if sub_obj is None:
                 module.fail_json(msg='Could not find {0} entry with name {1}'.format(association, sub_name))
             id_list.append(sub_obj['id'])
-        if id_list:
-            association_fields[association] = id_list
+        association_fields[association] = id_list
+
+    execution_environment = module.params.get('execution_environment')
+    if execution_environment is not None:
+        if execution_environment == '':
+            new_fields['execution_environment'] = ''
+        else:
+            ee = module.get_one('execution_environments', name_or_id=execution_environment)
+            if ee is None:
+                module.fail_json(msg='could not find execution_environment entry with name {0}'.format(execution_environment))
+            else:
+                new_fields['execution_environment'] = ee['id']
 
     # In the case of a new object, the utils need to know it is a node
     new_fields['type'] = 'workflow_job_template_node'
