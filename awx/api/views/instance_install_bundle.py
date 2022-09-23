@@ -47,7 +47,6 @@ class InstanceInstallBundle(GenericAPIView):
     def get(self, request, *args, **kwargs):
         instance_obj = self.get_object()
 
-        # if the instance is not a hop or execution node than return 400
         if instance_obj.node_type not in ('execution',):
             return Response(
                 data=dict(msg=_('Install bundle can only be generated for execution nodes.')),
