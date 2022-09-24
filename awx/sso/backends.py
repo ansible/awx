@@ -336,7 +336,7 @@ def _update_m2m_from_groups(ldap_user_group_dns, opts, remove=True):
         return None
     elif not opts:
         pass
-    elif opts is True:
+    elif isinstance(opts, bool) and opts is True:
         should_add = True
     else:
         if isinstance(opts, str):
@@ -384,9 +384,8 @@ def on_populate_user(sender, **kwargs):
     # Move this junk into save of the settings for performance later, there is no need to do that here
     #    with maybe the exception of someone defining this in settings before the server is started?
     # ==============================================================================================================
-    # Get all of the orgs in the DB by name and create any new org defined in LDAP
 
-    # IS THIS ACTUALLY GETTING JUST NAMES OR DOES IT GET ALL AND THEN GET NAMES FORM THEM ALL?
+    # Get all of the names of orgs in the DB and create any new org defined in LDAP that does not exist in the DB
     existing_org_names = list(Organization.objects.all().values_list('name', flat=True))
     for org_name in org_map.keys():
         if org_name not in existing_org_names:
@@ -394,16 +393,20 @@ def on_populate_user(sender, **kwargs):
             # Add the org name to the existing orgs since we created it and we may need it to build the teams below
             existing_org_names.append(org_name)
 
+    # Do the same for teams
     existing_team_names = list(Team.objects.all().values_list('name', flat=True))
     for team_name, team_opts in team_map.items():
         if 'organization' not in team_opts:
+            logger.debug("Team named {} in LDAP team map settings is invalid due to missing organization".format(team_name))
             continue
+        # A team may have an org that we didn't previously evaluate
         if team_opts['organization'] not in existing_org_names:
             Organization.objects.get_or_create(name=team_opts['organization'])
-            # Append it to the list so that we don't try and create this again (if we needed to)
+            # Append it to the list so that we don't try and create this again if its used by another team
             existing_org_names.append(team_opts['organization'])
         if team_name not in existing_team_names:
-            # Going a little inefficient here, we could prob name/ids above and then set this by ID but I've got limited time r/n
+            # Going a little inefficient here, we could prob get name/ids above and then set this by ID but I've got limited time r/n
+            #    and this code should only really be getting hit once if an LDAP config change adds a team with an org not built.
             org, created = Organization.objects.get_or_create(name=team_opts['organization'])
             Team.objects.get_or_create(name=team_name, organization=org)
     # End move some day
@@ -461,7 +464,7 @@ def on_populate_user(sender, **kwargs):
     # Get all of the orgs listed in LDAP from the database
     roles = ['admin_role', 'auditor_role', 'member_role']
     prefetch_roles = ["{}__members".format(role_name) for role_name in roles]
-    orgs_tied_to_ldap = Organization.objects.filter(name__in=desired_org_states.keys()).prefetch_related(*prefecth_roles)
+    orgs_tied_to_ldap = Organization.objects.filter(name__in=desired_org_states.keys()).prefetch_related(*prefetch_roles)
     # Set the state from memory into the org objects
     for org in orgs_tied_to_ldap:
         for role in roles:
@@ -469,8 +472,11 @@ def on_populate_user(sender, **kwargs):
                 # If something got a none we just need to continue on
                 pass
             elif desired_org_states[org.name][role]:
-                getattr(org, role).members.add(user)
+                if user not in getattr(org, role).members.all():
+                    logger.debug("Adding LDAP user {} to {} as {}".format(user.username, org.name, role))
+                    getattr(org, role).members.add(user)
             elif user in getattr(org, role).members.all():
+                logger.debug("Removing LDAP user {} from {} in {}".format(user.username, role, org.name))
                 getattr(org, role).members.remove(user)
 
     # Get all of the teams listed in LDAP from the database
@@ -479,6 +485,9 @@ def on_populate_user(sender, **kwargs):
     for team in teams_tied_to_ldap:
         # We don't need a None check here because it just would have never made it into the dict
         if desired_team_states[team.name]:
-            team.member_role.members.add(user)
+            if user not in team.member_role.members.all():
+                logger.debug("Adding LDAP user {} to team {}".format(user.username, team.name))
+                team.member_role.members.add(user)
         elif user in team.member_role.members.all():
-            team.member_role.remove(user)
+            logger.debug("Removing LDAP user {} from team {}".format(user.username, team.name))
+            team.member_role.members.remove(user)
