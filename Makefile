@@ -21,6 +21,8 @@ SPLUNK ?= false
 PROMETHEUS ?= false
 # If set to true docker-compose will also start a grafana instance
 GRAFANA ?= false
+# Set to true to enable postgres debugging on startup
+PG_DEBUG ?= false
 
 VENV_BASE ?= /var/lib/awx/venv
 
@@ -475,7 +477,9 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e enable_ldap=$(LDAP) \
 	    -e enable_splunk=$(SPLUNK) \
 	    -e enable_prometheus=$(PROMETHEUS) \
-	    -e enable_grafana=$(GRAFANA) $(EXTRA_SOURCES_ANSIBLE_OPTS)
+	    -e enable_grafana=$(GRAFANA) \
+            -e pg_debug=$(PG_DEBUG) \
+            $(EXTRA_SOURCES_ANSIBLE_OPTS)
 
 
 

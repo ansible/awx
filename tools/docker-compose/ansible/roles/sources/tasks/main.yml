@@ -96,6 +96,10 @@
   include_tasks: ldap.yml
   when: enable_ldap | bool
 
+- name: Enable SQL debugging
+  include_tasks: sql_debug.yml
+  when: pg_debug | bool
+
 - name: Render Docker-Compose
   template:
     src: docker-compose.yml.j2
