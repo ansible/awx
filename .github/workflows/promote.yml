@@ -4,6 +4,9 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: read # to fetch code (actions/checkout)
+
 jobs:
   promote:
     runs-on: ubuntu-latest
