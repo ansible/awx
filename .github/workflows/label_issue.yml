@@ -6,6 +6,10 @@ on:
       - opened
       - reopened
 
+    permissions:
+      contents: read # to fetch code
+      issues: write # to label issues
+
 jobs:
   triage:
     runs-on: ubuntu-latest
