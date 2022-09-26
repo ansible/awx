@@ -1278,15 +1278,19 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
 
     @property
     def preferred_instance_groups(self):
-        if self.inventory_source.inventory is not None and self.inventory_source.inventory.organization is not None:
-            organization_groups = [x for x in self.inventory_source.inventory.organization.instance_groups.all()]
-        else:
-            organization_groups = []
+        selected_groups = []
         if self.inventory_source.inventory is not None:
-            inventory_groups = [x for x in self.inventory_source.inventory.instance_groups.all()]
-        else:
-            inventory_groups = []
-        selected_groups = inventory_groups + organization_groups
+            # Add the inventory sources IG to the selected IGs first
+            for instance_group in self.inventory_source.inventory.instance_groups.all():
+                selected_groups.append(instance_group)
+            # If the inventory allows for fallback and we have an organization then also append the orgs IGs to the end of the list
+            if (
+                not getattr(self.inventory_source.inventory, 'prevent_instance_group_fallback', False)
+                and self.inventory_source.inventory.organization is not None
+            ):
+                for instance_group in self.inventory_source.inventory.organization.instance_groups.all():
+                    selected_groups.append(instance_group)
+
         if not selected_groups:
             return self.global_instance_groups
         return selected_groups

@@ -391,6 +391,8 @@ class TestInstanceGroupOrdering:
         assert ad_hoc.preferred_instance_groups == [ig_org]
         inventory.instance_groups.add(ig_inv)
         assert ad_hoc.preferred_instance_groups == [ig_inv, ig_org]
+        inventory.prevent_instance_group_fallback = True
+        assert ad_hoc.preferred_instance_groups == [ig_inv]
 
     def test_inventory_update_instance_groups(self, instance_group_factory, inventory_source, default_instance_group):
         iu = InventoryUpdate.objects.create(inventory_source=inventory_source, source=inventory_source.source)
@@ -404,6 +406,8 @@ class TestInstanceGroupOrdering:
         inventory_source.instance_groups.add(ig_tmp)
         # API does not allow setting IGs on inventory source, so ignore those
         assert iu.preferred_instance_groups == [ig_inv, ig_org]
+        inventory_source.inventory.prevent_instance_group_fallback = True
+        assert iu.preferred_instance_groups == [ig_inv]
 
     def test_job_instance_groups(self, instance_group_factory, inventory, project, default_instance_group):
         jt = JobTemplate.objects.create(inventory=inventory, project=project)
