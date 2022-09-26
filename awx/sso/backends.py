@@ -329,23 +329,26 @@ class SAMLAuth(BaseSAMLAuth):
 
 def _update_m2m_from_groups(ldap_user_group_dns, opts, remove=True):
     """
-    Hepler function to update m2m relationship based on LDAP group membership.
+    Hepler function to evaluate the LDAP team/org options to determine if LDAP user should
+      be a member of the team/org based on their ldap group dns.
+
+    Returns:
+        True - User should be added
+        False - User should be removed
+        None - Users membership should not be changed
     """
-    should_add = False
     if opts is None:
         return None
     elif not opts:
         pass
     elif isinstance(opts, bool) and opts is True:
-        should_add = True
+        return True
     else:
         if isinstance(opts, str):
             opts = [opts]
         # If any of the users groups matches any of the list options
         if list(set.intersection(set(ldap_user_group_dns), set(opts))):
-            should_add = True
-    if should_add:
-        return True
+            return True
     return False
 
 
@@ -427,7 +430,7 @@ def on_populate_user(sender, **kwargs):
         remove_users = bool(org_opts.get('remove_users', remove))
         desired_org_states[org_name]['member_role'] = _update_m2m_from_groups(ldap_user_group_dns, users_opts, remove_users)
 
-        # If everything returned None (because there was no configuration) we can skip this host
+        # If everything returned None (because there was no configuration) we can remove this org from our map
         if (
             desired_org_states[org_name]['admin_role'] == None
             and desired_org_states[org_name]['auditor_role'] == None
