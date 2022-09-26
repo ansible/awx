@@ -122,6 +122,22 @@ from awx.api.views.mixin import (
     UnifiedJobDeletionMixin,
     NoTruncateMixin,
 )
+from awx.api.views.instance_install_bundle import InstanceInstallBundle  # noqa
+from awx.api.views.inventory import (  # noqa
+    InventoryList,
+    InventoryDetail,
+    InventoryUpdateEventsList,
+    InventoryList,
+    InventoryDetail,
+    InventoryActivityStreamList,
+    InventoryInstanceGroupsList,
+    InventoryAccessList,
+    InventoryObjectRolesList,
+    InventoryJobTemplateList,
+    InventoryLabelList,
+    InventoryCopy,
+)
+from awx.api.views.mesh_visualizer import MeshVisualizer  # noqa
 from awx.api.views.organization import (  # noqa
     OrganizationList,
     OrganizationDetail,
@@ -145,21 +161,6 @@ from awx.api.views.organization import (  # noqa
     OrganizationAccessList,
     OrganizationObjectRolesList,
 )
-from awx.api.views.inventory import (  # noqa
-    InventoryList,
-    InventoryDetail,
-    InventoryUpdateEventsList,
-    InventoryList,
-    InventoryDetail,
-    InventoryActivityStreamList,
-    InventoryInstanceGroupsList,
-    InventoryAccessList,
-    InventoryObjectRolesList,
-    InventoryJobTemplateList,
-    InventoryLabelList,
-    InventoryCopy,
-)
-from awx.api.views.mesh_visualizer import MeshVisualizer  # noqa
 from awx.api.views.root import (  # noqa
     ApiRootView,
     ApiOAuthAuthorizationRootView,
@@ -173,8 +174,6 @@ from awx.api.views.root import (  # noqa
 from awx.api.views.webhooks import WebhookKeyView, GithubWebhookReceiver, GitlabWebhookReceiver  # noqa
 from awx.api.pagination import UnifiedJobEventPagination
 from awx.main.utils import set_environ
-
-from awx.api.views.instance_install_bundle import InstanceInstallBundle  # noqa
 
 logger = logging.getLogger('awx.api.views')
 
