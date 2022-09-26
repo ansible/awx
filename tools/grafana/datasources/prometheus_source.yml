@@ -10,3 +10,4 @@ datasources:
     editable: true
     jsonData:
       timeInterval: 5s
+    uid: awx_alert

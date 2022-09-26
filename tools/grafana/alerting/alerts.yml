@@ -6,10 +6,167 @@ groups:
     name: awx_rules
     orgId: 1
     rules:
-      - condition: A
+      - condition: if_failures_too_high
         dashboardUid: awx
         data:
-          - datasourceUid: PBFA97CFB590B2093
+          - refId: total_errors
+            queryType: ''
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: awx_alert
+            model:
+              editorMode: code
+              expr: >-
+                max(delta(awx_instance_status_total{instance="awx1:8013",
+                status="failed|error"}[30m]))
+              hide: false
+              intervalMs: 1000
+              legendFormat: __auto
+              maxDataPoints: 43200
+              range: true
+              refId: total_errors
+          - refId: max_errors
+            queryType: ''
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: '-100'
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 80
+                      - 0
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - total_errors
+                  reducer:
+                    params: []
+                    type: max
+                  type: query
+              datasource:
+                name: Expression
+                type: __expr__
+                uid: __expr__
+              expression: total_errors
+              hide: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+              reducer: max
+              refId: max_errors
+              type: reduce
+          - refId: total_success
+            queryType: ''
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: awx_alert
+            model:
+              datasource:
+                type: prometheus
+                uid: awx_alert
+              editorMode: code
+              expr: >-
+                max(delta(awx_instance_status_total{instance="awx1:8013",
+                status="successful"}[30m]))
+              hide: false
+              intervalMs: 1000
+              legendFormat: __auto
+              maxDataPoints: 43200
+              range: true
+              refId: total_success
+          - refId: max_success
+            queryType: ''
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: '-100'
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 0
+                      - 0
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - total_success
+                  reducer:
+                    params: []
+                    type: max
+                  type: query
+              datasource:
+                name: Expression
+                type: __expr__
+                uid: __expr__
+              expression: total_success
+              hide: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+              reducer: max
+              refId: max_success
+              type: reduce
+          - refId: compare
+            queryType: ''
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: '-100'
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 0
+                      - 0
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - max_success
+                  reducer:
+                    params: []
+                    type: avg
+                  type: query
+                - evaluator:
+                    params:
+                      - 0
+                      - 0
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - max_success
+                  reducer:
+                    params: []
+                    type: avg
+                  type: query
+              datasource:
+                name: Expression
+                type: __expr__
+                uid: __expr__
+              expression: $max_errors / ($max_errors+$max_success) >= .2
+              hide: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: compare
+              type: math
+        for: 30m
+        noDataState: OK
+        panelId: 2
+        title: failure_rate_exceeded_20_percent
+        uid: failure_rate_exceeded_20_percent
+      - condition: if_redis_queue_too_large
+        dashboardUid: awx
+        data:
+          - datasourceUid: awx_alert
             model:
               editorMode: code
               expr: irate(callback_receiver_events_insert_db{node='awx_1'}[1m])
@@ -55,11 +212,11 @@ groups:
             relativeTimeRange:
               from: 0
               to: 0
-          - datasourceUid: PBFA97CFB590B2093
+          - datasourceUid: awx_alert
             model:
               datasource:
                 type: prometheus
-                uid: PBFA97CFB590B2093
+                uid: awx_alert
               editorMode: code
               expr: callback_receiver_events_queue_size_redis{node='awx_1'}
               hide: false
@@ -125,9 +282,7 @@ groups:
                 name: Expression
                 type: __expr__
                 uid: __expr__
-              expression: '(
-                ${mean_redis_queue_size} >
-                ($mean_event_insertion_rate\ * 120))'
+              expression: '($mean_redis_queue_size > ($mean_event_insertion_rate * 120))'
               hide: false
               intervalMs: 1000
               maxDataPoints: 43200
@@ -143,3 +298,58 @@ groups:
         panelId: 1
         title: redis_queue_too_large_to_clear_in_2_min
         uid: redis_queue_too_large_to_clear_in_2_min
+      - condition: if_capacity_is_too_low
+        dashboardUid: awx
+        no_data_state: OK
+        exec_err_state: Error
+        data:
+          - refId: remaining_capacity
+            queryType: ''
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: awx_alert
+            model:
+              editorMode: builder
+              expr: awx_instance_remaining_capacity{instance="awx1:8013"}
+              hide: false
+              intervalMs: 1000
+              legendFormat: __auto
+              maxDataPoints: 43200
+              range: true
+              refId: remaining_capacity
+          - refId: if_capacity_is_too_low
+            queryType: ''
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: "-100"
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 20
+                      - 0
+                    type: lt
+                  operator:
+                    type: when
+                  query:
+                    params:
+                      - remaining_capacity
+                  reducer:
+                    params: []
+                    type: avg
+                  type: query
+              datasource:
+                name: Expression
+                type: __expr__
+                uid: __expr__
+              expression: remaining_capacity
+              hide: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: if_capacity_is_too_low
+              type: classic_conditions
+        for: 30m
+        title: if_capacity_is_too_low
+        uid: if_capacity_is_too_low
