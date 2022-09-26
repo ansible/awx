@@ -33,11 +33,12 @@ import { formatDateString } from 'util/dates';
 
 const Wrapper = styled.div`
   position: absolute;
-  top: -20px;
   right: 0;
-  padding: 10px;
+  padding: 0 10px;
   width: 25%;
   background-color: rgba(255, 255, 255, 0.85);
+  overflow: scroll;
+  height: 100%;
 `;
 const Button = styled(PFButton)`
   &&& {
@@ -181,7 +182,7 @@ function Tooltip({
         <TextContent>
           <Text
             component={TextVariants.small}
-            style={{ fontWeight: 'bold', color: 'black' }}
+            style={{ fontWeight: 'bold', color: 'black', marginTop: 0 }}
           >
             {t`Details`}
           </Text>
