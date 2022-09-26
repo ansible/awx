@@ -79,6 +79,7 @@ class JobTemplate(HasCopy, HasCreate, HasInstanceGroups, HasNotifications, HasSu
             'webhook_service',
             'webhook_credential',
             'scm_branch',
+            'prevent_instance_group_fallback',
         )
 
         update_payload(payload, optional_fields, kwargs)
