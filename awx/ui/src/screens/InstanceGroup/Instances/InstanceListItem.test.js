@@ -44,6 +44,7 @@ const instance = [
     enabled: true,
     managed_by_policy: true,
     node_type: 'hybrid',
+    node_state: 'ready',
   },
   {
     id: 2,
@@ -72,6 +73,7 @@ const instance = [
     enabled: true,
     managed_by_policy: true,
     node_type: 'control',
+    node_state: 'ready',
   },
 ];
 

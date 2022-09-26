@@ -27,12 +27,18 @@ from awx.main.utils.common import (
 )
 from awx.main.constants import MAX_ISOLATED_PATH_COLON_DELIMITER
 from awx.main.tasks.signals import signal_state, signal_callback, SignalExit
+from awx.main.models import Instance, InstanceLink, UnifiedJob
+from awx.main.dispatch import get_local_queuename
+from awx.main.dispatch.publish import task
 
 # Receptorctl
 from receptorctl.socket_interface import ReceptorControl
 
+from filelock import FileLock
+
 logger = logging.getLogger('awx.main.tasks.receptor')
 __RECEPTOR_CONF = '/etc/receptor/receptor.conf'
+__RECEPTOR_CONF_LOCKFILE = f'{__RECEPTOR_CONF}.lock'
 RECEPTOR_ACTIVE_STATES = ('Pending', 'Running')
 
 
@@ -42,9 +48,22 @@ class ReceptorConnectionType(Enum):
     STREAMTLS = 2
 
 
+def read_receptor_config():
+    # for K8S deployments, getting a lock is necessary as another process
+    # may be re-writing the config at this time
+    if settings.IS_K8S:
+        lock = FileLock(__RECEPTOR_CONF_LOCKFILE)
+        with lock:
+            with open(__RECEPTOR_CONF, 'r') as f:
+                return yaml.safe_load(f)
+    else:
+        with open(__RECEPTOR_CONF, 'r') as f:
+            return yaml.safe_load(f)
+
+
 def get_receptor_sockfile():
-    with open(__RECEPTOR_CONF, 'r') as f:
-        data = yaml.safe_load(f)
+    data = read_receptor_config()
+
     for section in data:
         for entry_name, entry_data in section.items():
             if entry_name == 'control-service':
@@ -60,8 +79,7 @@ def get_tls_client(use_stream_tls=None):
     if not use_stream_tls:
         return None
 
-    with open(__RECEPTOR_CONF, 'r') as f:
-        data = yaml.safe_load(f)
+    data = read_receptor_config()
     for section in data:
         for entry_name, entry_data in section.items():
             if entry_name == 'tls-client':
@@ -78,12 +96,25 @@ def get_receptor_ctl():
         return ReceptorControl(receptor_sockfile)
 
 
+def find_node_in_mesh(node_name, receptor_ctl):
+    attempts = 10
+    backoff = 1
+    for attempt in range(attempts):
+        all_nodes = receptor_ctl.simple_command("status").get('Advertisements', None)
+        for node in all_nodes:
+            if node.get('NodeID') == node_name:
+                return node
+        else:
+            logger.warning(f"Instance {node_name} is not in the receptor mesh. {attempts-attempt} attempts left.")
+            time.sleep(backoff)
+            backoff += 1
+    else:
+        raise ReceptorNodeNotFound(f'Instance {node_name} is not in the receptor mesh')
+
+
 def get_conn_type(node_name, receptor_ctl):
-    all_nodes = receptor_ctl.simple_command("status").get('Advertisements', None)
-    for node in all_nodes:
-        if node.get('NodeID') == node_name:
-            return ReceptorConnectionType(node.get('ConnType'))
-    raise ReceptorNodeNotFound(f'Instance {node_name} is not in the receptor mesh')
+    node = find_node_in_mesh(node_name, receptor_ctl)
+    return ReceptorConnectionType(node.get('ConnType'))
 
 
 def administrative_workunit_reaper(work_list=None):
@@ -136,8 +167,7 @@ def run_until_complete(node, timing_data=None, **kwargs):
     kwargs.setdefault('payload', '')
 
     transmit_start = time.time()
-    sign_work = False if settings.IS_K8S else True
-    result = receptor_ctl.submit_work(worktype='ansible-runner', node=node, signwork=sign_work, **kwargs)
+    result = receptor_ctl.submit_work(worktype='ansible-runner', node=node, signwork=True, **kwargs)
 
     unit_id = result['unitid']
     run_start = time.time()
@@ -212,7 +242,7 @@ def worker_info(node_name, work_type='ansible-runner'):
         else:
             error_list.append(details)
 
-    except (ReceptorNodeNotFound, RuntimeError) as exc:
+    except Exception as exc:
         error_list.append(str(exc))
 
     # If we have a connection error, missing keys would be trivial consequence of that
@@ -282,10 +312,6 @@ class AWXReceptorJob:
                     receptor_ctl.simple_command(f"work release {self.unit_id}")
                 except Exception:
                     logger.exception(f"Error releasing work unit {self.unit_id}.")
-
-    @property
-    def sign_work(self):
-        return False if settings.IS_K8S else True
 
     def _run_internal(self, receptor_ctl):
         # Create a socketpair. Where the left side will be used for writing our payload
@@ -447,6 +473,10 @@ class AWXReceptorJob:
         return receptor_params
 
     @property
+    def sign_work(self):
+        return True if self.work_type in ('ansible-runner', 'local') else False
+
+    @property
     def work_type(self):
         if self.task.instance.is_container_group_task:
             if self.credential:
@@ -574,3 +604,105 @@ class AWXReceptorJob:
         else:
             config["clusters"][0]["cluster"]["insecure-skip-tls-verify"] = True
         return config
+
+
+# TODO: receptor reload expects ordering within config items to be preserved
+# if python dictionary is not preserving order properly, may need to find a
+# solution. yaml.dump does not seem to work well with OrderedDict. below line may help
+# yaml.add_representer(OrderedDict, lambda dumper, data: dumper.represent_mapping('tag:yaml.org,2002:map', data.items()))
+#
+RECEPTOR_CONFIG_STARTER = (
+    {'local-only': None},
+    {'log-level': 'debug'},
+    {'node': {'firewallrules': [{'action': 'reject', 'tonode': settings.CLUSTER_HOST_ID, 'toservice': 'control'}]}},
+    {'control-service': {'service': 'control', 'filename': '/var/run/receptor/receptor.sock', 'permissions': '0660'}},
+    {'work-command': {'worktype': 'local', 'command': 'ansible-runner', 'params': 'worker', 'allowruntimeparams': True}},
+    {'work-signing': {'privatekey': '/etc/receptor/signing/work-private-key.pem', 'tokenexpiration': '1m'}},
+    {
+        'work-kubernetes': {
+            'worktype': 'kubernetes-runtime-auth',
+            'authmethod': 'runtime',
+            'allowruntimeauth': True,
+            'allowruntimepod': True,
+            'allowruntimeparams': True,
+        }
+    },
+    {
+        'work-kubernetes': {
+            'worktype': 'kubernetes-incluster-auth',
+            'authmethod': 'incluster',
+            'allowruntimeauth': True,
+            'allowruntimepod': True,
+            'allowruntimeparams': True,
+        }
+    },
+    {
+        'tls-client': {
+            'name': 'tlsclient',
+            'rootcas': '/etc/receptor/tls/ca/receptor-ca.crt',
+            'cert': '/etc/receptor/tls/receptor.crt',
+            'key': '/etc/receptor/tls/receptor.key',
+        }
+    },
+)
+
+
+@task()
+def write_receptor_config():
+    lock = FileLock(__RECEPTOR_CONF_LOCKFILE)
+    with lock:
+        receptor_config = list(RECEPTOR_CONFIG_STARTER)
+
+        this_inst = Instance.objects.me()
+        instances = Instance.objects.filter(node_type=Instance.Types.EXECUTION)
+        existing_peers = {link.target_id for link in InstanceLink.objects.filter(source=this_inst)}
+        new_links = []
+        for instance in instances:
+            peer = {'tcp-peer': {'address': f'{instance.hostname}:{instance.listener_port}', 'tls': 'tlsclient'}}
+            receptor_config.append(peer)
+            if instance.id not in existing_peers:
+                new_links.append(InstanceLink(source=this_inst, target=instance, link_state=InstanceLink.States.ADDING))
+
+        InstanceLink.objects.bulk_create(new_links)
+
+        with open(__RECEPTOR_CONF, 'w') as file:
+            yaml.dump(receptor_config, file, default_flow_style=False)
+
+    # This needs to be outside of the lock because this function itself will acquire the lock.
+    receptor_ctl = get_receptor_ctl()
+
+    attempts = 10
+    for backoff in range(1, attempts + 1):
+        try:
+            receptor_ctl.simple_command("reload")
+            break
+        except ValueError:
+            logger.warning(f"Unable to reload Receptor configuration. {attempts-backoff} attempts left.")
+            time.sleep(backoff)
+    else:
+        raise RuntimeError("Receptor reload failed")
+
+    links = InstanceLink.objects.filter(source=this_inst, target__in=instances, link_state=InstanceLink.States.ADDING)
+    links.update(link_state=InstanceLink.States.ESTABLISHED)
+
+
+@task(queue=get_local_queuename)
+def remove_deprovisioned_node(hostname):
+    InstanceLink.objects.filter(source__hostname=hostname).update(link_state=InstanceLink.States.REMOVING)
+    InstanceLink.objects.filter(target__hostname=hostname).update(link_state=InstanceLink.States.REMOVING)
+
+    node_jobs = UnifiedJob.objects.filter(
+        execution_node=hostname,
+        status__in=(
+            'running',
+            'waiting',
+        ),
+    )
+    while node_jobs.exists():
+        time.sleep(60)
+
+    # This will as a side effect also delete the InstanceLinks that are tied to it.
+    Instance.objects.filter(hostname=hostname).delete()
+
+    # Update the receptor configs for all of the control-plane.
+    write_receptor_config.apply_async(queue='tower_broadcast_all')

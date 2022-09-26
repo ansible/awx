@@ -28,6 +28,7 @@ import RoutedTabs from 'components/RoutedTabs';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import { Detail, DetailList } from 'components/DetailList';
+import HealthCheckAlert from 'components/HealthCheckAlert';
 import StatusLabel from 'components/StatusLabel';
 import useRequest, {
   useDeleteItems,
@@ -66,6 +67,7 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
   const history = useHistory();
 
   const [healthCheck, setHealthCheck] = useState({});
+  const [showHealthCheckAlert, setShowHealthCheckAlert] = useState(false);
   const [forks, setForks] = useState();
 
   const {
@@ -79,7 +81,6 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
         data: { results },
       } = await InstanceGroupsAPI.readInstances(instanceGroup.id);
       let instanceDetails;
-      let healthCheckDetails;
       const isAssociated = results.some(
         ({ id: instId }) => instId === parseInt(instanceId, 10)
       );
@@ -92,7 +93,7 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
           ]);
 
         instanceDetails = details;
-        healthCheckDetails = healthCheckData;
+        setHealthCheck(healthCheckData);
       } else {
         throw new Error(
           `This instance is not associated with this instance group`
@@ -100,7 +101,6 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
       }
 
       setBreadcrumb(instanceGroup, instanceDetails);
-      setHealthCheck(healthCheckDetails);
       setForks(
         computeForks(
           instanceDetails.mem_capacity,
@@ -115,15 +115,18 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
   useEffect(() => {
     fetchDetails();
   }, [fetchDetails]);
-
   const {
     error: healthCheckError,
     isLoading: isRunningHealthCheck,
     request: fetchHealthCheck,
   } = useRequest(
     useCallback(async () => {
-      const { data } = await InstancesAPI.healthCheck(instanceId);
+      const { status } = await InstancesAPI.healthCheck(instanceId);
+      const { data } = await InstancesAPI.readHealthCheckDetail(instanceId);
       setHealthCheck(data);
+      if (status === 200) {
+        setShowHealthCheckAlert(true);
+      }
     }, [instanceId])
   );
 
@@ -148,7 +151,6 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
       [instance]
     )
   );
-
   const debounceUpdateInstance = useDebounce(updateInstance, 200);
 
   const handleChangeValue = (value) => {
@@ -190,6 +192,9 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
   return (
     <>
       <RoutedTabs tabsArray={tabsArray} />
+      {showHealthCheckAlert ? (
+        <HealthCheckAlert onSetHealthCheckAlert={setShowHealthCheckAlert} />
+      ) : null}
       <CardBody>
         <DetailList gutter="sm">
           <Detail
@@ -200,7 +205,9 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
           <Detail
             label={t`Status`}
             value={
-              <StatusLabel status={healthCheck?.errors ? 'error' : 'healthy'} />
+              instance.node_state ? (
+                <StatusLabel status={instance.node_state} />
+              ) : null
             }
           />
           <Detail

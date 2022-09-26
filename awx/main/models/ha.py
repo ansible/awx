@@ -5,7 +5,7 @@ from decimal import Decimal
 import logging
 import os
 
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models, connection
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
@@ -58,6 +58,15 @@ class HasPolicyEditsMixin(HasEditsMixin):
 class InstanceLink(BaseModel):
     source = models.ForeignKey('Instance', on_delete=models.CASCADE, related_name='+')
     target = models.ForeignKey('Instance', on_delete=models.CASCADE, related_name='reverse_peers')
+
+    class States(models.TextChoices):
+        ADDING = 'adding', _('Adding')
+        ESTABLISHED = 'established', _('Established')
+        REMOVING = 'removing', _('Removing')
+
+    link_state = models.CharField(
+        choices=States.choices, default=States.ESTABLISHED, max_length=16, help_text=_("Indicates the current life cycle stage of this peer link.")
+    )
 
     class Meta:
         unique_together = ('source', 'target')
@@ -127,13 +136,33 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         default=0,
         editable=False,
     )
-    NODE_TYPE_CHOICES = [
-        ("control", "Control plane node"),
-        ("execution", "Execution plane node"),
-        ("hybrid", "Controller and execution"),
-        ("hop", "Message-passing node, no execution capability"),
-    ]
-    node_type = models.CharField(default='hybrid', choices=NODE_TYPE_CHOICES, max_length=16)
+
+    class Types(models.TextChoices):
+        CONTROL = 'control', _("Control plane node")
+        EXECUTION = 'execution', _("Execution plane node")
+        HYBRID = 'hybrid', _("Controller and execution")
+        HOP = 'hop', _("Message-passing node, no execution capability")
+
+    node_type = models.CharField(default=Types.HYBRID, choices=Types.choices, max_length=16, help_text=_("Role that this node plays in the mesh."))
+
+    class States(models.TextChoices):
+        PROVISIONING = 'provisioning', _('Provisioning')
+        PROVISION_FAIL = 'provision-fail', _('Provisioning Failure')
+        INSTALLED = 'installed', _('Installed')
+        READY = 'ready', _('Ready')
+        UNAVAILABLE = 'unavailable', _('Unavailable')
+        DEPROVISIONING = 'deprovisioning', _('De-provisioning')
+        DEPROVISION_FAIL = 'deprovision-fail', _('De-provisioning Failure')
+
+    node_state = models.CharField(
+        choices=States.choices, default=States.READY, max_length=16, help_text=_("Indicates the current life cycle stage of this instance.")
+    )
+    listener_port = models.PositiveIntegerField(
+        blank=True,
+        default=27199,
+        validators=[MinValueValidator(1), MaxValueValidator(65535)],
+        help_text=_("Port that Receptor will listen for incoming connections on."),
+    )
 
     peers = models.ManyToManyField('self', symmetrical=False, through=InstanceLink, through_fields=('source', 'target'))
 
@@ -213,18 +242,22 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         return self.last_seen < ref_time - timedelta(seconds=grace_period)
 
     def mark_offline(self, update_last_seen=False, perform_save=True, errors=''):
-        if self.cpu_capacity == 0 and self.mem_capacity == 0 and self.capacity == 0 and self.errors == errors and (not update_last_seen):
-            return
+        if self.node_state not in (Instance.States.READY, Instance.States.UNAVAILABLE, Instance.States.INSTALLED):
+            return []
+        if self.node_state == Instance.States.UNAVAILABLE and self.errors == errors and (not update_last_seen):
+            return []
+        self.node_state = Instance.States.UNAVAILABLE
         self.cpu_capacity = self.mem_capacity = self.capacity = 0
         self.errors = errors
         if update_last_seen:
             self.last_seen = now()
 
+        update_fields = ['node_state', 'capacity', 'cpu_capacity', 'mem_capacity', 'errors']
+        if update_last_seen:
+            update_fields += ['last_seen']
         if perform_save:
-            update_fields = ['capacity', 'cpu_capacity', 'mem_capacity', 'errors']
-            if update_last_seen:
-                update_fields += ['last_seen']
             self.save(update_fields=update_fields)
+        return update_fields
 
     def set_capacity_value(self):
         """Sets capacity according to capacity adjustment rule (no save)"""
@@ -278,8 +311,12 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         if not errors:
             self.refresh_capacity_fields()
             self.errors = ''
+            if self.node_state in (Instance.States.UNAVAILABLE, Instance.States.INSTALLED):
+                self.node_state = Instance.States.READY
+                update_fields.append('node_state')
         else:
-            self.mark_offline(perform_save=False, errors=errors)
+            fields_to_update = self.mark_offline(perform_save=False, errors=errors)
+            update_fields.extend(fields_to_update)
         update_fields.extend(['cpu_capacity', 'mem_capacity', 'capacity'])
 
         # disabling activity stream will avoid extra queries, which is important for heatbeat actions
@@ -296,7 +333,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
             # playbook event data; we should consider this a zero capacity event
             redis.Redis.from_url(settings.BROKER_URL).ping()
         except redis.ConnectionError:
-            errors = _('Failed to connect ot Redis')
+            errors = _('Failed to connect to Redis')
 
         self.save_health_data(awx_application_version, get_cpu_count(), get_mem_in_bytes(), update_last_seen=True, errors=errors)
 
@@ -388,6 +425,20 @@ def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs
 
 @receiver(post_save, sender=Instance)
 def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
+    if settings.IS_K8S and instance.node_type in (Instance.Types.EXECUTION,):
+        if instance.node_state == Instance.States.DEPROVISIONING:
+            from awx.main.tasks.receptor import remove_deprovisioned_node  # prevents circular import
+
+            # wait for jobs on the node to complete, then delete the
+            # node and kick off write_receptor_config
+            connection.on_commit(lambda: remove_deprovisioned_node.apply_async([instance.hostname]))
+
+        if instance.node_state == Instance.States.INSTALLED:
+            from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
+
+            # broadcast to all control instances to update their receptor configs
+            connection.on_commit(lambda: write_receptor_config.apply_async(queue='tower_broadcast_all'))
+
     if created or instance.has_policy_changes():
         schedule_policy_task()
 

@@ -15,6 +15,7 @@ import {
   ExecutionEnvironmentsAPI,
   ApplicationsAPI,
   OrganizationsAPI,
+  InstanceGroupsAPI,
 } from 'api';
 
 export async function getRelatedResourceDeleteCounts(requests) {
@@ -272,6 +273,13 @@ export const relatedResourceDeleteRequests = {
       request: () =>
         UnifiedJobTemplatesAPI.read({ instance_groups: selected.id }),
       label: t`Templates`,
+    },
+  ],
+
+  instance: (selected) => [
+    {
+      request: () => InstanceGroupsAPI.read({ instances: selected.id }),
+      label: t`Instance Groups`,
     },
   ],
 };

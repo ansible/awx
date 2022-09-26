@@ -24,6 +24,14 @@ const colors = {
   disabled: 'grey',
   canceled: 'orange',
   changed: 'orange',
+  /* Instance statuses */
+  ready: 'green',
+  installed: 'blue',
+  provisioning: 'gray',
+  deprovisioning: 'gray',
+  unavailable: 'red',
+  'provision-fail': 'red',
+  'deprovision-fail': 'red',
 };
 
 export default function StatusLabel({ status, tooltipContent = '', children }) {
@@ -45,6 +53,14 @@ export default function StatusLabel({ status, tooltipContent = '', children }) {
     disabled: t`Disabled`,
     canceled: t`Canceled`,
     changed: t`Changed`,
+    /* Instance statuses */
+    ready: t`Ready`,
+    installed: t`Installed`,
+    provisioning: t`Provisioning`,
+    deprovisioning: t`Deprovisioning`,
+    unavailable: t`Unavailable`,
+    'provision-fail': t`Provisioning fail`,
+    'deprovision-fail': t`Deprovisioning fail`,
   };
   const label = upperCaseStatus[status] || status;
   const color = colors[status] || 'grey';
@@ -88,5 +104,12 @@ StatusLabel.propTypes = {
     'disabled',
     'canceled',
     'changed',
+    'ready',
+    'installed',
+    'provisioning',
+    'deprovisioning',
+    'unavailable',
+    'provision-fail',
+    'deprovision-fail',
   ]).isRequired,
 };

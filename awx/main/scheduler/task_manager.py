@@ -642,10 +642,6 @@ class TaskManager(TaskBase):
                     found_acceptable_queue = True
                     break
 
-                # TODO: remove this after we have confidence that OCP control nodes are reporting node_type=control
-                if settings.IS_K8S and task.capacity_type == 'execution':
-                    logger.debug("Skipping group {}, task cannot run on control plane".format(instance_group.name))
-                    continue
                 # at this point we know the instance group is NOT a container group
                 # because if it was, it would have started the task and broke out of the loop.
                 execution_instance = self.instance_groups.fit_task_to_most_remaining_capacity_instance(

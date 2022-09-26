@@ -1,8 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
+import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import debounce from 'util/debounce';
 import * as d3 from 'd3';
+import { InstancesAPI } from 'api';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
+import AlertModal from 'components/AlertModal';
+import ErrorDetail from 'components/ErrorDetail';
 import Legend from './Legend';
 import Tooltip from './Tooltip';
 import ContentLoading from './ContentLoading';
@@ -11,6 +16,9 @@ import {
   renderLabelText,
   renderNodeType,
   renderNodeIcon,
+  renderLinkState,
+  renderLabelIcons,
+  renderIconPosition,
   redirectToDetailsPage,
   getHeight,
   getWidth,
@@ -20,7 +28,8 @@ import {
   DEFAULT_RADIUS,
   DEFAULT_NODE_COLOR,
   DEFAULT_NODE_HIGHLIGHT_COLOR,
-  DEFAULT_NODE_LABEL_TEXT_COLOR,
+  DEFAULT_NODE_SYMBOL_TEXT_COLOR,
+  DEFAULT_NODE_STROKE_COLOR,
   DEFAULT_FONT_SIZE,
   SELECTOR,
 } from './constants';
@@ -32,11 +41,77 @@ const Loader = styled(ContentLoading)`
   background: white;
 `;
 function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
+  const [storedNodes, setStoredNodes] = useState(null);
   const [isNodeSelected, setIsNodeSelected] = useState(false);
   const [selectedNode, setSelectedNode] = useState(null);
-  const [nodeDetail, setNodeDetail] = useState(null);
   const [simulationProgress, setSimulationProgress] = useState(null);
   const history = useHistory();
+  const {
+    result: { instance = {}, instanceGroups },
+    error: fetchError,
+    isLoading,
+    request: fetchDetails,
+  } = useRequest(
+    useCallback(async () => {
+      const { data: instanceData } = await InstancesAPI.readDetail(
+        selectedNode.id
+      );
+      const { data: instanceGroupsData } = await InstancesAPI.readInstanceGroup(
+        selectedNode.id
+      );
+      return {
+        instance: instanceData,
+        instanceGroups: instanceGroupsData,
+      };
+    }, [selectedNode]),
+    {
+      result: {},
+    }
+  );
+  const { error: fetchInstanceError, dismissError } =
+    useDismissableError(fetchError);
+
+  useEffect(() => {
+    if (selectedNode) {
+      fetchDetails();
+    }
+  }, [selectedNode, fetchDetails]);
+
+  function updateNodeSVG(nodes) {
+    if (nodes) {
+      d3.selectAll('[class*="id-"]')
+        .data(nodes)
+        .attr('stroke-dasharray', (d) => (d.enabled ? `1 0` : `5`));
+    }
+  }
+
+  useEffect(() => {
+    function handleResize() {
+      d3.select('.simulation-loader').style('visibility', 'visible');
+      setSelectedNode(null);
+      setIsNodeSelected(false);
+      draw();
+    }
+    window.addEventListener('resize', debounce(handleResize, 500));
+    handleResize();
+    return () => window.removeEventListener('resize', handleResize);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // update mesh when user toggles enabled/disabled slider
+  useEffect(() => {
+    if (instance?.id) {
+      const updatedNodes = storedNodes.map((n) =>
+        n.id === instance.id ? { ...n, enabled: instance.enabled } : n
+      );
+      setStoredNodes(updatedNodes);
+    }
+  }, [instance]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (storedNodes) {
+      updateNodeSVG(storedNodes);
+    }
+  }, [storedNodes]);
 
   const draw = () => {
     let width;
@@ -87,6 +162,7 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
     }
 
     function ended({ nodes, links }) {
+      setStoredNodes(nodes);
       // Remove loading screen
       d3.select('.simulation-loader').style('visibility', 'hidden');
       setShowZoomControls(true);
@@ -95,6 +171,24 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
         .forceSimulation(nodes)
         .force('center', d3.forceCenter(width / 2, height / 2));
       simulation.tick();
+      // build the arrow.
+      mesh
+        .append('defs')
+        .selectAll('marker')
+        .data(['end', 'end-active'])
+        .join('marker')
+        .attr('id', String)
+        .attr('viewBox', '0 -5 10 10')
+        .attr('refY', 0)
+        .attr('markerWidth', 6)
+        .attr('markerHeight', 6)
+        .attr('orient', 'auto')
+        .append('path')
+        .attr('d', 'M0,-5L10,0L0,5');
+
+      mesh.select('#end').attr('refX', 23).attr('fill', '#ccc');
+      mesh.select('#end-active').attr('refX', 18).attr('fill', '#0066CC');
+
       // Add links
       mesh
         .append('g')
@@ -108,11 +202,15 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
         .attr('y1', (d) => d.source.y)
         .attr('x2', (d) => d.target.x)
         .attr('y2', (d) => d.target.y)
+        .attr('marker-end', 'url(#end)')
         .attr('class', (_, i) => `link-${i}`)
         .attr('data-cy', (d) => `${d.source.hostname}-${d.target.hostname}`)
         .style('fill', 'none')
-        .style('stroke', '#ccc')
+        .style('stroke', (d) =>
+          d.link_state === 'removing' ? '#C9190B' : '#CCC'
+        )
         .style('stroke-width', '2px')
+        .style('stroke-dasharray', (d) => renderLinkState(d.link_state))
         .attr('pointer-events', 'none')
         .on('mouseover', function showPointer() {
           d3.select(this).transition().style('cursor', 'pointer');
@@ -134,7 +232,6 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
           deselectSiblings(d);
         })
         .on('click', (_, d) => {
-          setNodeDetail(d);
           highlightSelected(d);
         });
 
@@ -147,7 +244,8 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
         .attr('class', (d) => d.node_type)
         .attr('class', (d) => `id-${d.id}`)
         .attr('fill', DEFAULT_NODE_COLOR)
-        .attr('stroke', DEFAULT_NODE_LABEL_TEXT_COLOR);
+        .attr('stroke-dasharray', (d) => (d.enabled ? `1 0` : `5`))
+        .attr('stroke', DEFAULT_NODE_STROKE_COLOR);
 
       // node type labels
       node
@@ -157,41 +255,65 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
         .attr('y', (d) => d.y)
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'central')
-        .attr('fill', DEFAULT_NODE_LABEL_TEXT_COLOR);
+        .attr('fill', DEFAULT_NODE_SYMBOL_TEXT_COLOR);
 
-      // node hostname labels
-      const hostNames = node.append('g');
-      hostNames
+      const placeholder = node.append('g').attr('class', 'placeholder');
+
+      placeholder
         .append('text')
+        .text((d) => renderLabelText(d.node_state, d.hostname))
         .attr('x', (d) => d.x)
         .attr('y', (d) => d.y + 40)
-        .text((d) => renderLabelText(d.node_state, d.hostname))
-        .attr('class', 'placeholder')
-        .attr('fill', DEFAULT_NODE_LABEL_TEXT_COLOR)
+        .attr('fill', 'black')
+        .attr('font-size', '18px')
         .attr('text-anchor', 'middle')
         .each(function calculateLabelWidth() {
           // eslint-disable-next-line react/no-this-in-sfc
           const bbox = this.getBBox();
           // eslint-disable-next-line react/no-this-in-sfc
           d3.select(this.parentNode)
-            .append('rect')
-            .attr('x', bbox.x)
-            .attr('y', bbox.y)
-            .attr('width', bbox.width)
-            .attr('height', bbox.height)
-            .attr('rx', 8)
-            .attr('ry', 8)
-            .style('fill', (d) => renderStateColor(d.node_state));
+            .append('path')
+            .attr('d', (d) => renderLabelIcons(d.node_state))
+            .attr('transform', (d) => renderIconPosition(d.node_state, bbox))
+            .style('fill', 'black');
         });
-      svg.selectAll('text.placeholder').remove();
+
+      placeholder.each(function calculateLabelWidth() {
+        // eslint-disable-next-line react/no-this-in-sfc
+        const bbox = this.getBBox();
+        // eslint-disable-next-line react/no-this-in-sfc
+        d3.select(this.parentNode)
+          .append('rect')
+          .attr('x', (d) => d.x - bbox.width / 2)
+          .attr('y', bbox.y + 5)
+          .attr('width', bbox.width)
+          .attr('height', bbox.height)
+          .attr('rx', 8)
+          .attr('ry', 8)
+          .style('fill', (d) => renderStateColor(d.node_state));
+      });
+
+      const hostNames = node.append('g');
       hostNames
         .append('text')
-        .attr('x', (d) => d.x)
-        .attr('y', (d) => d.y + 38)
         .text((d) => renderLabelText(d.node_state, d.hostname))
+        .attr('x', (d) => d.x + 6)
+        .attr('y', (d) => d.y + 42)
+        .attr('fill', 'white')
         .attr('font-size', DEFAULT_FONT_SIZE)
-        .attr('fill', DEFAULT_NODE_LABEL_TEXT_COLOR)
-        .attr('text-anchor', 'middle');
+        .attr('text-anchor', 'middle')
+        .each(function calculateLabelWidth() {
+          // eslint-disable-next-line react/no-this-in-sfc
+          const bbox = this.getBBox();
+          // eslint-disable-next-line react/no-this-in-sfc
+          d3.select(this.parentNode)
+            .append('path')
+            .attr('class', (d) => `icon-${d.node_state}`)
+            .attr('d', (d) => renderLabelIcons(d.node_state))
+            .attr('transform', (d) => renderIconPosition(d.node_state, bbox))
+            .attr('fill', 'white');
+        });
+      svg.selectAll('g.placeholder').remove();
 
       svg.call(zoom);
 
@@ -208,7 +330,8 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
             .selectAll(`.link-${s.index}`)
             .transition()
             .style('stroke', '#0066CC')
-            .style('stroke-width', '3px');
+            .style('stroke-width', '3px')
+            .attr('marker-end', 'url(#end-active)');
         });
       }
 
@@ -222,55 +345,70 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
           svg
             .selectAll(`.link-${s.index}`)
             .transition()
-            .style('stroke', '#ccc')
-            .style('stroke-width', '2px');
+            .duration(50)
+            .style('stroke', (d) =>
+              d.link_state === 'removing' ? '#C9190B' : '#CCC'
+            )
+            .style('stroke-width', '2px')
+            .attr('marker-end', 'url(#end)');
         });
       }
 
       function highlightSelected(n) {
         if (svg.select(`circle.id-${n.id}`).attr('stroke-width') !== null) {
           // toggle rings
-          svg.select(`circle.id-${n.id}`).attr('stroke-width', null);
+          svg
+            .select(`circle.id-${n.id}`)
+            .attr('stroke', '#ccc')
+            .attr('stroke-width', null);
           // show default empty state of tooltip
           setIsNodeSelected(false);
           setSelectedNode(null);
           return;
         }
-        svg.selectAll('circle').attr('stroke-width', null);
+        svg
+          .selectAll('circle')
+          .attr('stroke', '#ccc')
+          .attr('stroke-width', null);
         svg
           .select(`circle.id-${n.id}`)
           .attr('stroke-width', '5px')
-          .attr('stroke', '#D2D2D2');
+          .attr('stroke', '#0066CC');
         setIsNodeSelected(true);
         setSelectedNode(n);
       }
     }
   };
 
-  useEffect(() => {
-    function handleResize() {
-      d3.select('.simulation-loader').style('visibility', 'visible');
-      setSelectedNode(null);
-      setIsNodeSelected(false);
-      draw();
-    }
-    window.addEventListener('resize', debounce(handleResize, 500));
-    handleResize();
-    return () => window.removeEventListener('resize', handleResize);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
   return (
     <div id="chart" style={{ position: 'relative', height: '100%' }}>
       {showLegend && <Legend />}
-      <Tooltip
-        isNodeSelected={isNodeSelected}
-        renderNodeIcon={renderNodeIcon(selectedNode)}
-        nodeDetail={nodeDetail}
-        redirectToDetailsPage={() =>
-          redirectToDetailsPage(selectedNode, history)
-        }
-      />
+      {instance && (
+        <Tooltip
+          isNodeSelected={isNodeSelected}
+          renderNodeIcon={renderNodeIcon(selectedNode)}
+          selectedNode={selectedNode}
+          fetchInstance={fetchDetails}
+          instanceGroups={instanceGroups}
+          instanceDetail={instance}
+          isLoading={isLoading}
+          redirectToDetailsPage={() =>
+            redirectToDetailsPage(selectedNode, history)
+          }
+        />
+      )}
       <Loader className="simulation-loader" progress={simulationProgress} />
+      {fetchInstanceError && (
+        <AlertModal
+          variant="error"
+          title={t`Error!`}
+          isOpen
+          onClose={dismissError}
+        >
+          {t`Failed to get instance.`}
+          <ErrorDetail error={fetchInstanceError} />
+        </AlertModal>
+      )}
     </div>
   );
 }

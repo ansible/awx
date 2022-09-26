@@ -4859,7 +4859,7 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
 class InstanceLinkSerializer(BaseSerializer):
     class Meta:
         model = InstanceLink
-        fields = ('source', 'target')
+        fields = ('source', 'target', 'link_state')
 
     source = serializers.SlugRelatedField(slug_field="hostname", read_only=True)
     target = serializers.SlugRelatedField(slug_field="hostname", read_only=True)
@@ -4868,62 +4868,73 @@ class InstanceLinkSerializer(BaseSerializer):
 class InstanceNodeSerializer(BaseSerializer):
     class Meta:
         model = Instance
-        fields = ('id', 'hostname', 'node_type', 'node_state')
-
-    node_state = serializers.SerializerMethodField()
-
-    def get_node_state(self, obj):
-        if not obj.enabled:
-            return "disabled"
-        return "error" if obj.errors else "healthy"
+        fields = ('id', 'hostname', 'node_type', 'node_state', 'enabled')
 
 
 class InstanceSerializer(BaseSerializer):
+    show_capabilities = ['edit']
 
     consumed_capacity = serializers.SerializerMethodField()
     percent_capacity_remaining = serializers.SerializerMethodField()
-    jobs_running = serializers.IntegerField(help_text=_('Count of jobs in the running or waiting state that ' 'are targeted for this instance'), read_only=True)
+    jobs_running = serializers.IntegerField(help_text=_('Count of jobs in the running or waiting state that are targeted for this instance'), read_only=True)
     jobs_total = serializers.IntegerField(help_text=_('Count of all jobs that target this instance'), read_only=True)
 
     class Meta:
         model = Instance
-        read_only_fields = ('uuid', 'hostname', 'version', 'node_type')
+        read_only_fields = ('ip_address', 'uuid', 'version')
         fields = (
-            "id",
-            "type",
-            "url",
-            "related",
-            "uuid",
-            "hostname",
-            "created",
-            "modified",
-            "last_seen",
-            "last_health_check",
-            "errors",
+            'id',
+            'hostname',
+            'type',
+            'url',
+            'related',
+            'summary_fields',
+            'uuid',
+            'created',
+            'modified',
+            'last_seen',
+            'last_health_check',
+            'errors',
             'capacity_adjustment',
-            "version",
-            "capacity",
-            "consumed_capacity",
-            "percent_capacity_remaining",
-            "jobs_running",
-            "jobs_total",
-            "cpu",
-            "memory",
-            "cpu_capacity",
-            "mem_capacity",
-            "enabled",
-            "managed_by_policy",
-            "node_type",
+            'version',
+            'capacity',
+            'consumed_capacity',
+            'percent_capacity_remaining',
+            'jobs_running',
+            'jobs_total',
+            'cpu',
+            'memory',
+            'cpu_capacity',
+            'mem_capacity',
+            'enabled',
+            'managed_by_policy',
+            'node_type',
+            'node_state',
+            'ip_address',
+            'listener_port',
         )
+        extra_kwargs = {'node_type': {'initial': 'execution'}, 'node_state': {'initial': 'installed'}}
 
     def get_related(self, obj):
         res = super(InstanceSerializer, self).get_related(obj)
         res['jobs'] = self.reverse('api:instance_unified_jobs_list', kwargs={'pk': obj.pk})
         res['instance_groups'] = self.reverse('api:instance_instance_groups_list', kwargs={'pk': obj.pk})
+        if settings.IS_K8S and obj.node_type in (Instance.Types.EXECUTION,):
+            res['install_bundle'] = self.reverse('api:instance_install_bundle', kwargs={'pk': obj.pk})
+        res['peers'] = self.reverse('api:instance_peers_list', kwargs={"pk": obj.pk})
         if self.context['request'].user.is_superuser or self.context['request'].user.is_system_auditor:
             if obj.node_type != 'hop':
                 res['health_check'] = self.reverse('api:instance_health_check', kwargs={'pk': obj.pk})
         return res
+
+    def get_summary_fields(self, obj):
+        summary = super().get_summary_fields(obj)
+
+        # use this handle to distinguish between a listView and a detailView
+        if self.is_detail_view:
+            summary['links'] = InstanceLinkSerializer(InstanceLink.objects.select_related('target', 'source').filter(source=obj), many=True).data
+
+        return summary
 
     def get_consumed_capacity(self, obj):
         return obj.consumed_capacity
@@ -4934,10 +4945,51 @@ class InstanceSerializer(BaseSerializer):
         else:
             return float("{0:.2f}".format(((float(obj.capacity) - float(obj.consumed_capacity)) / (float(obj.capacity))) * 100))
 
-    def validate(self, attrs):
-        if self.instance.node_type == 'hop':
-            raise serializers.ValidationError(_('Hop node instances may not be changed.'))
-        return attrs
+    def validate(self, data):
+        if self.instance:
+            if self.instance.node_type == Instance.Types.HOP:
+                raise serializers.ValidationError("Hop node instances may not be changed.")
+        else:
+            if not settings.IS_K8S:
+                raise serializers.ValidationError("Can only create instances on Kubernetes or OpenShift.")
+        return data
+
+    def validate_node_type(self, value):
+        if not self.instance:
+            if value not in (Instance.Types.EXECUTION,):
+                raise serializers.ValidationError("Can only create execution nodes.")
+        else:
+            if self.instance.node_type != value:
+                raise serializers.ValidationError("Cannot change node type.")
+
+        return value
+
+    def validate_node_state(self, value):
+        if self.instance:
+            if value != self.instance.node_state:
+                if not settings.IS_K8S:
+                    raise serializers.ValidationError("Can only change the state on Kubernetes or OpenShift.")
+                if value != Instance.States.DEPROVISIONING:
+                    raise serializers.ValidationError("Can only change instances to the 'deprovisioning' state.")
+                if self.instance.node_type not in (Instance.Types.EXECUTION,):
+                    raise serializers.ValidationError("Can only deprovision execution nodes.")
+        else:
+            if value and value != Instance.States.INSTALLED:
+                raise serializers.ValidationError("Can only create instances in the 'installed' state.")
+
+        return value
+
+    def validate_hostname(self, value):
+        if self.instance and self.instance.hostname != value:
+            raise serializers.ValidationError("Cannot change hostname.")
+
+        return value
+
+    def validate_listener_port(self, value):
+        if self.instance and self.instance.listener_port != value:
+            raise serializers.ValidationError("Cannot change listener port.")
+
+        return value
 
 
 class InstanceHealthCheckSerializer(BaseSerializer):
