@@ -194,6 +194,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
           />
           <Detail
             label={t`Status`}
+            dataCy="status"
             value={
               instance.node_state ? (
                 <StatusLabel status={instance.node_state} />
@@ -214,6 +215,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
                 <Detail
                   fullWidth
                   label={t`Instance Groups`}
+                  dataCy="instance-groups"
                   helpText={t`The Instance Groups to which this instance belongs.`}
                   value={instanceGroups.map((ig) => (
                     <React.Fragment key={ig.id}>
@@ -239,6 +241,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
               )}
               <Detail
                 label={t`Last Health Check`}
+                dataCy="last-health-check"
                 value={formatDateString(healthCheck?.last_health_check)}
               />
               {instance.related?.install_bundle && (
@@ -252,6 +255,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
                         href={`${instance.related?.install_bundle}`}
                         target="_blank"
                         variant="secondary"
+                        dataCy="install-bundle-download-button"
                       >
                         <DownloadIcon />
                       </Button>
@@ -261,6 +265,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
               )}
               <Detail
                 label={t`Capacity Adjustment`}
+                dataCy="capacity-adjustment"
                 value={
                   <SliderHolder data-cy="slider-holder">
                     <div data-cy="cpu-capacity">{t`CPU ${instance.cpu_capacity}`}</div>
@@ -285,6 +290,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
               />
               <Detail
                 label={t`Used Capacity`}
+                dataCy="used-capacity"
                 value={
                   instance.enabled ? (
                     <Progress
@@ -307,6 +313,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
             <Detail
               fullWidth
               label={t`Errors`}
+              dataCy="errors"
               value={
                 <CodeBlock>
                   <CodeBlockCode>{healthCheck?.errors}</CodeBlockCode>
@@ -319,6 +326,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
           <CardActionsRow>
             {me.is_superuser && isK8s && instance.node_type === 'execution' && (
               <RemoveInstanceButton
+                dataCy="remove-instance-button"
                 itemsToRemove={[instance]}
                 isK8s={isK8s}
                 onRemove={removeInstances}
@@ -340,6 +348,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
               css="display: inline-flex;"
               fetchInstances={fetchDetails}
               instance={instance}
+              dataCy="enable-instance"
             />
           </CardActionsRow>
         )}

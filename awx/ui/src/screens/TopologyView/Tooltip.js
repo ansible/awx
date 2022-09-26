@@ -198,6 +198,7 @@ function Tooltip({
               title={t`Error!`}
               isOpen
               onClose={dismissUpdateError}
+              dataCy="update-instance-alert"
             >
               {t`Failed to update instance.`}
               <ErrorDetail error={updateError} />
@@ -222,6 +223,7 @@ function Tooltip({
                     variant="link"
                     isInline
                     onClick={redirectToDetailsPage}
+                    dataCy="redirect-to-details-button"
                   >
                     {instanceDetail.hostname}
                   </PFButton>
@@ -229,13 +231,13 @@ function Tooltip({
               </DescriptionListGroup>
               <DescriptionListGroup>
                 <DescriptionListTerm>{t`Instance status`}</DescriptionListTerm>
-                <DescriptionListDescription>
+                <DescriptionListDescription dataCy="node-state">
                   <StatusLabel status={instanceDetail.node_state} />
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
                 <DescriptionListTerm>{t`Instance type`}</DescriptionListTerm>
-                <DescriptionListDescription>
+                <DescriptionListDescription dataCy="node-type">
                   {instanceDetail.node_type}
                 </DescriptionListDescription>
               </DescriptionListGroup>
@@ -243,15 +245,17 @@ function Tooltip({
                 <DescriptionListGroup>
                   <DescriptionListTerm>{t`Download bundle`}</DescriptionListTerm>
                   <DescriptionListDescription>
-                    <a href={`${instanceDetail.related.install_bundle}`}>
-                      <PFButton
-                        ouiaId="job-output-download-button"
-                        variant="plain"
-                        aria-label={t`Download Bundle`}
-                      >
-                        <DownloadIcon />
-                      </PFButton>
-                    </a>
+                    <PFButton
+                      dataCy="install-bundle-download-button"
+                      aria-label={t`Download Bundle`}
+                      component="a"
+                      isSmall
+                      href={`${instanceDetail.related?.install_bundle}`}
+                      target="_blank"
+                      variant="secondary"
+                    >
+                      <DownloadIcon />
+                    </PFButton>
                   </DescriptionListDescription>
                 </DescriptionListGroup>
               )}
@@ -266,7 +270,7 @@ function Tooltip({
               {instanceGroups && (
                 <DescriptionListGroup>
                   <DescriptionListTerm>{t`Instance groups`}</DescriptionListTerm>
-                  <DescriptionListDescription>
+                  <DescriptionListDescription dataCy="instance-groups">
                     {renderInstanceGroups(instanceGroups.results)}
                   </DescriptionListDescription>
                 </DescriptionListGroup>
@@ -305,7 +309,7 @@ function Tooltip({
                   </DescriptionListGroup>
                   <DescriptionListGroup>
                     <DescriptionListTerm>{t`Capacity`}</DescriptionListTerm>
-                    <DescriptionListDescription>
+                    <DescriptionListDescription dataCy="used-capacity">
                       {usedCapacity(instanceDetail)}
                     </DescriptionListDescription>
                   </DescriptionListGroup>
@@ -315,6 +319,7 @@ function Tooltip({
                         css="display: inline-flex;"
                         fetchInstances={fetchInstance}
                         instance={instanceDetail}
+                        dataCy="enable-instance"
                       />
                     </DescriptionListDescription>
                   </DescriptionListGroup>
@@ -323,13 +328,13 @@ function Tooltip({
 
               <DescriptionListGroup>
                 <DescriptionListTerm>{t`Last modified`}</DescriptionListTerm>
-                <DescriptionListDescription>
+                <DescriptionListDescription dataCy="last-modified">
                   {formatDateString(instanceDetail.modified)}
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
                 <DescriptionListTerm>{t`Last seen`}</DescriptionListTerm>
-                <DescriptionListDescription>
+                <DescriptionListDescription dataCy="last-seen">
                   {instanceDetail.last_seen
                     ? formatDateString(instanceDetail.last_seen)
                     : `not found`}
