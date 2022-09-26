@@ -224,6 +224,7 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
         .data(nodes)
         .enter()
         .append('g')
+        .attr('data-cy', (d) => `node-${d.id}`)
         .on('mouseenter', function handleNodeHover(_, d) {
           d3.select(this).transition().style('cursor', 'pointer');
           highlightSiblings(d);
