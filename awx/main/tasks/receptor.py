@@ -411,9 +411,11 @@ class AWXReceptorJob:
                     unit_status = receptor_ctl.simple_command(f'work status {self.unit_id}')
                     detail = unit_status.get('Detail', None)
                     state_name = unit_status.get('StateName', None)
+                    stdout_size = unit_status.get('StdoutSize', 0)
                 except Exception:
                     detail = ''
                     state_name = ''
+                    stdout_size = 0
                     logger.exception(f'An error was encountered while getting status for work unit {self.unit_id}')
 
                 if 'exceeded quota' in detail:
@@ -424,9 +426,16 @@ class AWXReceptorJob:
                     return
 
                 try:
-                    resultsock = receptor_ctl.get_work_results(self.unit_id, return_sockfile=True)
-                    lines = resultsock.readlines()
-                    receptor_output = b"".join(lines).decode()
+                    receptor_output = ''
+                    if state_name == 'Failed' and self.task.runner_callback.event_ct == 0:
+                        # if receptor work unit failed and no events were emitted, work results may
+                        # contain useful information about why the job failed. In case stdout is
+                        # massive, only ask for last 1000 bytes
+                        startpos = max(stdout_size - 1000, 0)
+                        resultsock, resultfile = receptor_ctl.get_work_results(self.unit_id, startpos=startpos, return_socket=True, return_sockfile=True)
+                        resultsock.setblocking(False)  # this makes resultfile reads non blocking
+                        lines = resultfile.readlines()
+                        receptor_output = b"".join(lines).decode()
                     if receptor_output:
                         self.task.runner_callback.delay_update(result_traceback=receptor_output)
                     elif detail:
