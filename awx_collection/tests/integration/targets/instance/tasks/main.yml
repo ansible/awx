@@ -14,6 +14,8 @@
     - name: Create an instance
       awx.awx.instance:
         hostname: "{{ item }}"
+        node_type: execution
+        node_state: installed
       with_items:
         - "{{ hostname1 }}"
         - "{{ hostname2 }}"
@@ -26,6 +28,8 @@
     - name: Create an instance with non-default config
       awx.awx.instance:
         hostname: "{{ hostname3 }}"
+        node_type: execution
+        node_state: installed
         capacity_adjustment: 0.4
         listener_port: 31337
       register: result
