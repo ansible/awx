@@ -469,25 +469,4 @@ Once the playbook is done running Splunk should now be setup in your development
 
 ### Prometheus and Grafana integration
 
-Prometheus is a metrics collecting tool, and we support prometheus formatted data at the `api/v2/metrics` endpoint. To run the development environment (see [docs](https://github.com/ansible/awx/blob/devel/tools/docker-compose/README.md)) with Prometheus and Grafana enabled, set the following variables:
-
-```
-$ PROMETHEUS=yes GRAFANA=yes make docker-compose
-```
-
-1. navigate to `http://localhost:9090/targets` and check that the metrics endpoint State is Up.
-2. Click the Graph tab, start typing a metric name, or use the Open metrics explorer button to find a metric to display (next to `Execute` button)
-3. Navigate to `http://localhost:3001`. Sign in, using `admin` for both username and password.
-4. In the left navigation menu go to Dashboards->Browse, find the "awx-demo" and click. These should have graphs.
-5. Now you can modify these and add panels for whichever metrics you like.
-
-### Alerts in Grafana
-
-We are configuring alerts in grafana using the provisioning files method. This feature is new in Grafana as of August, 2022. Documentation can be found: https://grafana.com/docs/grafana/latest/administration/provisioning/#alerting however it does not fully show all parameters to the config.
-
-One way to understand how to build rules is to build them in the UI and use chrometools to inspect the payload as you save the rules. It appears that the "data" portion of the payload for each rule is the same syntax as needed in the provisioning file config. To reload the alerts without restarting the container, from within the container you can send a POST with `curl -X POST http://admin:admin@localhost:3000/api/admin/provisioning/alerting/reload`. Keep in mind the grafana container does not contain `curl`. You can install it with the command `apk add curl`.
-
-Another way to export rules is explore the api.
-1. Get all the folders:  `GET` to `/api/folders`
-2. Get the rules `GET` to `/api/ruler/grafana/api/v1/rules/{{ Folder }}`
-
+See docs at https://github.com/ansible/awx/blob/devel/tools/grafana/README.md
