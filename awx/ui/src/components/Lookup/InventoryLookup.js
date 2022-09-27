@@ -26,7 +26,6 @@ function InventoryLookup({
   hideSmartInventories,
   history,
   isDisabled,
-  isOverrideDisabled,
   isPromptableField,
   onBlur,
   onChange,
@@ -39,13 +38,7 @@ function InventoryLookup({
   const autoPopulateLookup = useAutoPopulateLookup(onChange);
 
   const {
-    result: {
-      inventories,
-      count,
-      relatedSearchableKeys,
-      searchableKeys,
-      canEdit,
-    },
+    result: { inventories, count, relatedSearchableKeys, searchableKeys },
     request: fetchInventories,
     error,
     isLoading,
@@ -85,8 +78,6 @@ function InventoryLookup({
             key,
             type: actionsResponse.data.actions?.GET[key].type,
           })),
-        canEdit:
-          Boolean(actionsResponse.data.actions.POST) || isOverrideDisabled,
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [autoPopulate, autoPopulateLookup, history.location]),
@@ -95,7 +86,6 @@ function InventoryLookup({
       count: 0,
       relatedSearchableKeys: [],
       searchableKeys: [],
-      canEdit: false,
     }
   );
 
@@ -129,7 +119,7 @@ function InventoryLookup({
       label={t`Inventory`}
       promptId={promptId}
       promptName={promptName}
-      isDisabled={!canEdit || isDisabled}
+      isDisabled={isDisabled}
       tooltip={t`Select the inventory containing the hosts
             you want this job to manage.`}
     >
@@ -145,7 +135,7 @@ function InventoryLookup({
         fieldName={fieldName}
         validate={validate}
         isLoading={isLoading}
-        isDisabled={!canEdit || isDisabled}
+        isDisabled={isDisabled}
         qsConfig={QS_CONFIG}
         renderOptionsList={({ state, dispatch, canDelete }) => (
           <OptionsList
@@ -200,7 +190,7 @@ function InventoryLookup({
         onBlur={onBlur}
         required={required}
         isLoading={isLoading}
-        isDisabled={!canEdit || isDisabled}
+        isDisabled={isDisabled}
         qsConfig={QS_CONFIG}
         renderOptionsList={({ state, dispatch, canDelete }) => (
           <OptionsList
@@ -251,7 +241,6 @@ InventoryLookup.propTypes = {
   fieldName: string,
   hideSmartInventories: bool,
   isDisabled: bool,
-  isOverrideDisabled: bool,
   onChange: func.isRequired,
   required: bool,
   validate: func,
@@ -264,7 +253,6 @@ InventoryLookup.defaultProps = {
   fieldName: 'inventory',
   hideSmartInventories: false,
   isDisabled: false,
-  isOverrideDisabled: false,
   required: false,
   validate: () => {},
   value: null,

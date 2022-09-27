@@ -39,6 +39,7 @@ function WorkflowJobTemplateForm({
   handleCancel,
   submitError,
   isOrgAdmin,
+  isInventoryDisabled,
 }) {
   const helpText = getHelpText();
   const { setFieldValue, setFieldTouched } = useFormikContext();
@@ -150,6 +151,7 @@ function WorkflowJobTemplateForm({
             onChange={handleInventoryUpdate}
             touched={inventoryMeta.touched}
             error={inventoryMeta.error}
+            isDisabled={isInventoryDisabled}
           />
         </FormGroup>
         <FieldWithPrompt
@@ -284,6 +286,7 @@ WorkflowJobTemplateForm.propTypes = {
   handleCancel: PropTypes.func.isRequired,
   submitError: shape({}),
   isOrgAdmin: PropTypes.bool,
+  isInventoryDisabled: PropTypes.bool,
 };
 
 WorkflowJobTemplateForm.defaultProps = {
@@ -295,6 +298,7 @@ WorkflowJobTemplateForm.defaultProps = {
     project: undefined,
   },
   isOrgAdmin: false,
+  isInventoryDisabled: false,
 };
 
 const FormikApp = withFormik({
