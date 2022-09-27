@@ -97,6 +97,13 @@ const hostEventWithArray = {
   task: 'command',
   type: 'job_event',
   url: '/api/v2/job_events/123/',
+  summary_fields: {
+    host: {
+      id: 1,
+      name: 'foo',
+      description: 'Bar',
+    },
+  },
 };
 
 /* eslint-disable no-useless-escape */
