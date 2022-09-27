@@ -1,7 +1,7 @@
 # Running Development Environment in Kubernetes using Kind Cluster
 
 ## Start Kind Cluster
-Note: This environment has been tested on MacOS and Fedora with Docker. 
+Note: This environment has been tested on MacOS and Fedora with Docker.
 
 If you do not already have Kind, install it from:
 https://kind.sigs.k8s.io/docs/user/quick-start/
@@ -62,7 +62,7 @@ awx-operator-controller-manager   1/1     1            1           16h
 
 ## Deploy AWX into Kind Cluster using the AWX Operator
 
-If have have not made any changes to the AWX Dockerfile, run the following
+If you have not made any changes to the AWX Dockerfile, run the following
 command. If you need to test out changes to the Dockerfile, see the
 "Custom AWX Development Image for Kubernetes" section below.
 
@@ -103,7 +103,7 @@ export COMPOSE_TAG=<IMAGE_TAG>
 In the root of the AWX repo:
 
 ```bash
-make awx-kube-dev-build 
+make awx-kube-dev-build
 docker push $DEV_DOCKER_TAG_BASE/awx_kube_devel:$COMPOSE_TAG
 ```
 

@@ -37,12 +37,10 @@ options:
         - If true, the instance will be enabled and used.
       required: False
       type: bool
-      default: True
     managed_by_policy:
       description:
         - Managed by policy
       required: False
-      default: True
       type: bool
     node_type:
       description:
@@ -51,7 +49,6 @@ options:
         - execution
       required: False
       type: str
-      default: execution
     node_state:
       description:
         - Indicates the current life cycle stage of this instance.
@@ -59,13 +56,11 @@ options:
         - deprovisioning
         - installed
       required: False
-      default: installed
       type: str
     listener_port:
       description:
         - Port that Receptor will listen for incoming connections on.
       required: False
-      default: 27199
       type: int
 extends_documentation_fragment: awx.awx.auth
 '''
