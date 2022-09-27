@@ -14,7 +14,7 @@ groups:
             relativeTimeRange:
               from: 600
               to: 0
-            datasourceUid: awx_alert
+            datasourceUid: awx_prometheus
             model:
               editorMode: code
               expr: >-
@@ -64,11 +64,11 @@ groups:
             relativeTimeRange:
               from: 600
               to: 0
-            datasourceUid: awx_alert
+            datasourceUid: awx_prometheus
             model:
               datasource:
                 type: prometheus
-                uid: awx_alert
+                uid: awx_prometheus
               editorMode: code
               expr: >-
                 max(delta(awx_instance_status_total{instance="awx1:8013",
@@ -166,7 +166,7 @@ groups:
       - condition: if_redis_queue_too_large
         dashboardUid: awx
         data:
-          - datasourceUid: awx_alert
+          - datasourceUid: awx_prometheus
             model:
               editorMode: code
               expr: irate(callback_receiver_events_insert_db{node='awx_1'}[1m])
@@ -212,11 +212,11 @@ groups:
             relativeTimeRange:
               from: 0
               to: 0
-          - datasourceUid: awx_alert
+          - datasourceUid: awx_prometheus
             model:
               datasource:
                 type: prometheus
-                uid: awx_alert
+                uid: awx_prometheus
               editorMode: code
               expr: callback_receiver_events_queue_size_redis{node='awx_1'}
               hide: false
@@ -308,7 +308,7 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: awx_alert
+            datasourceUid: awx_prometheus
             model:
               editorMode: builder
               expr: awx_instance_remaining_capacity{instance="awx1:8013"}

@@ -31,7 +31,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "awx_prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -108,7 +108,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "awx_prometheus"
           },
           "expr": "awx_status_total",
           "refId": "A"
@@ -120,7 +120,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "awx_prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -232,7 +232,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "awx_prometheus"
           },
           "editorMode": "builder",
           "expr": "callback_receiver_events_queue_size_redis",
@@ -243,7 +243,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "awx_prometheus"
           },
           "editorMode": "code",
           "expr": "irate(callback_receiver_events_insert_db[1m])*60",
@@ -259,7 +259,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "awx_prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -336,7 +336,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "awx_prometheus"
           },
           "editorMode": "builder",
           "expr": "awx_instance_consumed_capacity",
@@ -351,7 +351,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "awx_prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -451,7 +451,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "awx_prometheus"
           },
           "editorMode": "builder",
           "expr": "callback_receiver_event_processing_avg_seconds",
@@ -466,7 +466,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "awx_prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -570,7 +570,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "awx_prometheus"
           },
           "expr": "task_manager_running_processed",
           "refId": "A"
@@ -578,7 +578,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "awx_prometheus"
           },
           "expr": "task_manager_pending_processed",
           "hide": false,
@@ -587,7 +587,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "awx_prometheus"
           },
           "expr": "task_manager_tasks_blocked",
           "hide": false,
@@ -596,7 +596,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "awx_prometheus"
           },
           "expr": "task_manager_tasks_started",
           "hide": false,
@@ -609,7 +609,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "awx_prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -687,7 +687,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "awx_prometheus"
           },
           "editorMode": "builder",
           "expr": "dependency_manager__schedule_seconds",
@@ -698,7 +698,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "awx_prometheus"
           },
           "editorMode": "builder",
           "expr": "dependency_manager_generate_dependencies_seconds",
@@ -710,7 +710,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "awx_prometheus"
           },
           "editorMode": "builder",
           "expr": "dependency_manager_get_tasks_seconds",
@@ -722,7 +722,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "awx_prometheus"
           },
           "hide": false,
           "refId": "D"
@@ -734,7 +734,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "awx_prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -811,7 +811,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "awx_prometheus"
           },
           "editorMode": "builder",
           "expr": "task_manager_process_pending_tasks_seconds",
@@ -822,7 +822,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "awx_prometheus"
           },
           "editorMode": "builder",
           "expr": "task_manager_process_running_tasks_seconds",
@@ -834,7 +834,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "awx_prometheus"
           },
           "editorMode": "builder",
           "expr": "task_manager_get_tasks_seconds",
@@ -846,7 +846,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "awx_prometheus"
           },
           "editorMode": "builder",
           "expr": "task_manager_commit_seconds",
@@ -858,7 +858,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "awx_prometheus"
           },
           "editorMode": "builder",
           "expr": "task_manager__schedule_seconds",
@@ -874,7 +874,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "awx_prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -951,7 +951,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "awx_prometheus"
           },
           "editorMode": "builder",
           "expr": "workflow_manager__schedule_seconds",
@@ -962,7 +962,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "awx_prometheus"
           },
           "hide": false,
           "refId": "B"
@@ -974,7 +974,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "awx_prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -1051,7 +1051,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "awx_prometheus"
           },
           "editorMode": "builder",
           "expr": "awx_database_connections_total",
