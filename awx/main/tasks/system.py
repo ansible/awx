@@ -464,7 +464,7 @@ def inspect_execution_nodes(instance_list):
                 continue
 
             # Control-plane nodes are dealt with via local_health_check instead.
-            if instance.node_type in ('control', 'hybrid'):
+            if instance.node_type in (Instance.Types.CONTROL, Instance.Types.HYBRID):
                 continue
 
             last_seen = parse_date(ad['Time'])
@@ -474,7 +474,7 @@ def inspect_execution_nodes(instance_list):
             instance.save(update_fields=['last_seen'])
 
             # Only execution nodes should be dealt with by execution_node_health_check
-            if instance.node_type == 'hop':
+            if instance.node_type == Instance.Types.HOP:
                 if instance.node_state in (Instance.States.UNAVAILABLE, Instance.States.INSTALLED):
                     logger.warning(f'Hop node {hostname}, has rejoined the receptor mesh')
                     instance.save_health_data(errors='')

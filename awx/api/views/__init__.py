@@ -451,8 +451,13 @@ class InstanceHealthCheck(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
+        if obj.health_check_pending:
+            return Response({'msg': f"Health check was already in progress for {obj.hostname}."}, status=status.HTTP_200_OK)
+
         # Note: hop nodes are already excluded by the get_queryset method
-        if obj.node_type == 'execution':
+        obj.health_check_started = now()
+        obj.save(update_fields=['health_check_started'])
+        if obj.node_type == models.Instance.Types.EXECUTION:
             from awx.main.tasks.system import execution_node_health_check
 
             execution_node_health_check.apply_async([obj.hostname])
@@ -460,7 +465,7 @@ class InstanceHealthCheck(GenericAPIView):
             from awx.main.tasks.system import cluster_node_health_check
 
             cluster_node_health_check.apply_async([obj.hostname], queue=obj.hostname)
-        return Response(dict(msg=f"Health check is running for {obj.hostname}."), status=status.HTTP_200_OK)
+        return Response({'msg': f"Health check is running for {obj.hostname}."}, status=status.HTTP_200_OK)
 
 
 class InstanceGroupList(ListCreateAPIView):
