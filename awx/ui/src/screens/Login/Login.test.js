@@ -1,7 +1,7 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
-import { AuthAPI, RootAPI } from 'api';
+import { AuthAPI, RootAPI, MeAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
@@ -12,7 +12,9 @@ import { getCurrentUserId } from 'util/auth';
 
 import { SESSION_USER_ID } from '../../constants';
 
-jest.mock('../../api');
+jest.mock('../../api/models/Auth.js');
+jest.mock('../../api/models/Root.js');
+jest.mock('../../api/models/Me.js');
 
 jest.mock('util/auth', () => ({
   getCurrentUserId: jest.fn(),
@@ -294,7 +296,7 @@ describe('<Login />', () => {
   });
 
   test('render Redirect to / when already authenticated as a new user', async () => {
-    getCurrentUserId.mockReturnValue(1);
+    MeAPI.read.mockResolvedValue({ data: { results: [{ id: 1 }] } });
     const history = createMemoryHistory({
       initialEntries: ['/login'],
     });
@@ -316,17 +318,22 @@ describe('<Login />', () => {
         },
       });
     });
+    expect(MeAPI.read).toHaveBeenCalled();
     expect(window.localStorage.getItem).toHaveBeenCalledWith(SESSION_USER_ID);
     expect(window.localStorage.setItem).toHaveBeenCalledWith(
       SESSION_USER_ID,
       '1'
     );
     await waitForElement(wrapper, 'Redirect', (el) => el.length === 1);
-    await waitForElement(wrapper, 'Redirect', (el) => el.props().to === '/');
+    await waitForElement(
+      wrapper,
+      'Redirect',
+      (el) => el.props().to === '/home'
+    );
   });
 
   test('render redirect to authRedirectTo when authenticated as a previous user', async () => {
-    getCurrentUserId.mockReturnValue(42);
+    MeAPI.read.mockResolvedValue({ data: { results: [{ id: 42 }] } });
     const history = createMemoryHistory({
       initialEntries: ['/login'],
     });
