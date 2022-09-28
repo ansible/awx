@@ -3,6 +3,7 @@ from prometheus_client import CollectorRegistry, Gauge, Info, generate_latest
 
 from awx.conf.license import get_license
 from awx.main.utils import get_awx_version
+from awx.main.models import UnifiedJob
 from awx.main.analytics.collectors import (
     counts,
     instance_info,
@@ -169,8 +170,9 @@ def metrics():
 
     all_job_data = job_counts(None)
     statuses = all_job_data.get('status', {})
-    for status, value in statuses.items():
-        STATUS.labels(status=status).set(value)
+    states = set(dict(UnifiedJob.STATUS_CHOICES).keys()) - set(['new'])
+    for state in states:
+        STATUS.labels(status=state).set(statuses.get(state, 0))
 
     RUNNING_JOBS.set(current_counts['running_jobs'])
     PENDING_JOBS.set(current_counts['pending_jobs'])
