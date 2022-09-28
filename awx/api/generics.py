@@ -6,7 +6,6 @@ import inspect
 import logging
 import time
 import uuid
-import urllib.parse
 
 # Django
 from django.conf import settings
@@ -30,7 +29,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import views
 from rest_framework.permissions import AllowAny
-from rest_framework.renderers import StaticHTMLRenderer, JSONRenderer
+from rest_framework.renderers import StaticHTMLRenderer
 from rest_framework.negotiation import DefaultContentNegotiation
 
 # AWX
@@ -41,7 +40,7 @@ from awx.main.utils import camelcase_to_underscore, get_search_fields, getattrd,
 from awx.main.utils.db import get_all_field_names
 from awx.main.utils.licensing import server_product_name
 from awx.main.views import ApiErrorView
-from awx.api.serializers import ResourceAccessListElementSerializer, CopySerializer, UserSerializer
+from awx.api.serializers import ResourceAccessListElementSerializer, CopySerializer
 from awx.api.versioning import URLPathVersioning
 from awx.api.metadata import SublistAttachDetatchMetadata, Metadata
 from awx.conf import settings_registry
@@ -90,13 +89,9 @@ class LoggedLoginView(auth_views.LoginView):
 
     def post(self, request, *args, **kwargs):
         ret = super(LoggedLoginView, self).post(request, *args, **kwargs)
-        current_user = getattr(request, 'user', None)
         if request.user.is_authenticated:
             logger.info(smart_str(u"User {} logged in from {}".format(self.request.user.username, request.META.get('REMOTE_ADDR', None))))
             ret.set_cookie('userLoggedIn', 'true')
-            current_user = UserSerializer(self.request.user)
-            current_user = smart_str(JSONRenderer().render(current_user.data))
-            current_user = urllib.parse.quote('%s' % current_user, '')
             ret.setdefault('X-API-Session-Cookie-Name', getattr(settings, 'SESSION_COOKIE_NAME', 'awx_sessionid'))
 
             return ret
