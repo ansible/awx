@@ -164,7 +164,7 @@ options:
       elements: str
     notification_templates_approvals:
       description:
-        - list of notifications to send on start
+        - list of notifications to send on approval
       type: list
       elements: str
     workflow_nodes:
