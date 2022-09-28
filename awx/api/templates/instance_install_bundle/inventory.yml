@@ -5,24 +5,3 @@ all:
       ansible_host: {{ instance.hostname }}
       ansible_user: <username> # user provided
       ansible_ssh_private_key_file: ~/.ssh/id_rsa
-      receptor_verify: true
-      receptor_tls: true
-      receptor_work_commands:
-        ansible-runner:
-          command: ansible-runner
-          params: worker
-          allowruntimeparams: true
-          verifysignature: true
-      custom_worksign_public_keyfile: receptor/work-public-key.pem
-      custom_tls_certfile: receptor/tls/receptor.crt
-      custom_tls_keyfile: receptor/tls/receptor.key
-      custom_ca_certfile: receptor/tls/ca/receptor-ca.crt
-      receptor_user: awx
-      receptor_group: awx
-      receptor_protocol: 'tcp'
-      receptor_listener: true
-      receptor_port: {{ instance.listener_port }}
-      receptor_dependencies:
-        - podman
-        - crun
-        - python39-pip
