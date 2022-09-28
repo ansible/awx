@@ -79,7 +79,7 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false }) {
 
   const jsonObj = processCodeEditorValue(hostEvent?.event_data?.res);
   const stdErr = hostEvent?.event_data?.res?.stderr;
-  const stdOut = processCodeEditorValue(getStdOutValue(hostEvent));
+  const stdOut = getStdOutValue(hostEvent);
 
   return (
     <Modal
