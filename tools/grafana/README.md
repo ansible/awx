@@ -10,7 +10,7 @@ We use the "provisioning files" functionality in Grafana to be able to deploy al
 
 These config files are located in directories that are mounted into the container in `tools/grafana`.
 
-### How to run docker-compoes with Grafana and Prometheus
+### How to run docker-compose with Grafana and Prometheus
 
 To run the development environment (see [docs](https://github.com/ansible/awx/blob/devel/tools/docker-compose/README.md)) with Prometheus and Grafana enabled, set the following variables:
 
