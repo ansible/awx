@@ -6,13 +6,15 @@ from django.urls import include, re_path
 
 from awx import MODE
 from awx.api.generics import LoggedLoginView, LoggedLogoutView
-from awx.api.views import (
+from awx.api.views.root import (
     ApiRootView,
     ApiV2RootView,
     ApiV2PingView,
     ApiV2ConfigView,
     ApiV2SubscriptionView,
     ApiV2AttachView,
+)
+from awx.api.views import (
     AuthView,
     UserMeList,
     DashboardView,
@@ -28,8 +30,8 @@ from awx.api.views import (
     OAuth2TokenList,
     ApplicationOAuth2TokenList,
     OAuth2ApplicationDetail,
-    MeshVisualizer,
 )
+from awx.api.views.mesh_visualizer import MeshVisualizer
 
 from awx.api.views.metrics import MetricsView
 

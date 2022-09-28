@@ -3,7 +3,7 @@
 
 from django.urls import re_path
 
-from awx.api.views import (
+from awx.api.views.organization import (
     OrganizationList,
     OrganizationDetail,
     OrganizationUsersList,
@@ -14,7 +14,6 @@ from awx.api.views import (
     OrganizationJobTemplatesList,
     OrganizationWorkflowJobTemplatesList,
     OrganizationTeamsList,
-    OrganizationCredentialList,
     OrganizationActivityStreamList,
     OrganizationNotificationTemplatesList,
     OrganizationNotificationTemplatesErrorList,
@@ -25,8 +24,8 @@ from awx.api.views import (
     OrganizationGalaxyCredentialsList,
     OrganizationObjectRolesList,
     OrganizationAccessList,
-    OrganizationApplicationList,
 )
+from awx.api.views import OrganizationCredentialList, OrganizationApplicationList
 
 
 urls = [

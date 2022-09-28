@@ -3,6 +3,9 @@
 
 from django.urls import re_path
 
+from awx.api.views.inventory import (
+    InventoryUpdateEventsList,
+)
 from awx.api.views import (
     InventoryUpdateList,
     InventoryUpdateDetail,
@@ -10,7 +13,6 @@ from awx.api.views import (
     InventoryUpdateStdout,
     InventoryUpdateNotificationsList,
     InventoryUpdateCredentialsList,
-    InventoryUpdateEventsList,
 )
 
 

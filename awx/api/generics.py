@@ -248,7 +248,7 @@ class APIView(views.APIView):
             response['X-API-Query-Time'] = '%0.3fs' % sum(q_times)
 
         if getattr(self, 'deprecated', False):
-            response['Warning'] = '299 awx "This resource has been deprecated and will be removed in a future release."'  # noqa
+            response['Warning'] = '299 awx "This resource has been deprecated and will be removed in a future release."'
 
         return response
 

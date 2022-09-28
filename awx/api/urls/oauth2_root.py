@@ -10,7 +10,7 @@ from oauthlib import oauth2
 from oauth2_provider import views
 
 from awx.main.models import RefreshToken
-from awx.api.views import ApiOAuthAuthorizationRootView
+from awx.api.views.root import ApiOAuthAuthorizationRootView
 
 
 class TokenView(views.TokenView):
