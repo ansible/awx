@@ -327,7 +327,7 @@ class SAMLAuth(BaseSAMLAuth):
         return super(SAMLAuth, self).get_user(user_id)
 
 
-def _update_m2m_from_groups(ldap_user_group_dns, opts, remove=True):
+def _update_m2m_from_groups(ldap_user, opts, remove=True):
     """
     Hepler function to evaluate the LDAP team/org options to determine if LDAP user should
       be a member of the team/org based on their ldap group dns.
@@ -347,8 +347,11 @@ def _update_m2m_from_groups(ldap_user_group_dns, opts, remove=True):
         if isinstance(opts, str):
             opts = [opts]
         # If any of the users groups matches any of the list options
-        if list(set.intersection(set(ldap_user_group_dns), set(opts))):
-            return True
+        for group_dn in opts:
+            if not isinstance(group_dn, str):
+                continue
+            if ldap_user._get_groups().is_member_of(group_dn):
+                return True
     return False
 
 
@@ -370,7 +373,7 @@ def on_populate_user(sender, **kwargs):
 
     # Prefetch user's groups to prevent LDAP queries for each org/team when
     # checking membership.
-    ldap_user_group_dns = ldap_user._get_groups().get_group_dns()
+    ldap_user._get_groups().get_group_dns()
 
     # If the LDAP user has a first or last name > $maxlen chars, truncate it
     for field in ('first_name', 'last_name'):
@@ -422,13 +425,13 @@ def on_populate_user(sender, **kwargs):
         admins_opts = org_opts.get('admins', None)
         remove_admins = bool(org_opts.get('remove_admins', remove))
         desired_org_states[org_name] = {}
-        desired_org_states[org_name]['admin_role'] = _update_m2m_from_groups(ldap_user_group_dns, admins_opts, remove_admins)
+        desired_org_states[org_name]['admin_role'] = _update_m2m_from_groups(ldap_user, admins_opts, remove_admins)
         auditors_opts = org_opts.get('auditors', None)
         remove_auditors = bool(org_opts.get('remove_auditors', remove))
-        desired_org_states[org_name]['auditor_role'] = _update_m2m_from_groups(ldap_user_group_dns, auditors_opts, remove_auditors)
+        desired_org_states[org_name]['auditor_role'] = _update_m2m_from_groups(ldap_user, auditors_opts, remove_auditors)
         users_opts = org_opts.get('users', None)
         remove_users = bool(org_opts.get('remove_users', remove))
-        desired_org_states[org_name]['member_role'] = _update_m2m_from_groups(ldap_user_group_dns, users_opts, remove_users)
+        desired_org_states[org_name]['member_role'] = _update_m2m_from_groups(ldap_user, users_opts, remove_users)
 
         # If everything returned None (because there was no configuration) we can remove this org from our map
         if (
@@ -445,7 +448,7 @@ def on_populate_user(sender, **kwargs):
             continue
         users_opts = team_opts.get('users', None)
         remove = bool(team_opts.get('remove', True))
-        state = _update_m2m_from_groups(ldap_user_group_dns, users_opts, remove)
+        state = _update_m2m_from_groups(ldap_user, users_opts, remove)
         if state is not None:
             desired_team_states[team_name] = state
 
