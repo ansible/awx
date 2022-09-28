@@ -40,7 +40,7 @@ describe('<InstanceForm />', () => {
 
   test('should display form fields properly', async () => {
     await waitForElement(wrapper, 'InstanceForm', (el) => el.length > 0);
-    expect(wrapper.find('FormGroup[label="Name"]').length).toBe(1);
+    expect(wrapper.find('FormGroup[label="Host Name"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Description"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Instance State"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Listener Port"]').length).toBe(1);
@@ -49,13 +49,13 @@ describe('<InstanceForm />', () => {
 
   test('should update form values', async () => {
     await act(async () => {
-      wrapper.find('input#name').simulate('change', {
+      wrapper.find('input#hostname').simulate('change', {
         target: { value: 'new Foo', name: 'hostname' },
       });
     });
 
     wrapper.update();
-    expect(wrapper.find('input#name').prop('value')).toEqual('new Foo');
+    expect(wrapper.find('input#hostname').prop('value')).toEqual('new Foo');
   });
 
   test('should call handleCancel when Cancel button is clicked', async () => {
@@ -68,7 +68,7 @@ describe('<InstanceForm />', () => {
   test('should call handleSubmit when Cancel button is clicked', async () => {
     expect(handleSubmit).not.toHaveBeenCalled();
     await act(async () => {
-      wrapper.find('input#name').simulate('change', {
+      wrapper.find('input#hostname').simulate('change', {
         target: { value: 'new Foo', name: 'hostname' },
       });
       wrapper.find('input#instance-description').simulate('change', {
