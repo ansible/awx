@@ -114,6 +114,11 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         editable=False,
         help_text=_('Last time instance ran its heartbeat task for main cluster nodes. Last known connection to receptor mesh for execution nodes.'),
     )
+    health_check_started = models.DateTimeField(
+        null=True,
+        editable=False,
+        help_text=_("The last time a health check was initiated on this instance."),
+    )
     last_health_check = models.DateTimeField(
         null=True,
         editable=False,
@@ -206,6 +211,14 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     @property
     def jobs_total(self):
         return UnifiedJob.objects.filter(execution_node=self.hostname).count()
+
+    @property
+    def health_check_pending(self):
+        if self.health_check_started is None:
+            return False
+        if self.last_health_check is None:
+            return True
+        return self.health_check_started > self.last_health_check
 
     def get_cleanup_task_kwargs(self, **kwargs):
         """
