@@ -24,7 +24,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 1,
+  "id": 2,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -73,8 +73,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -83,10 +82,56 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "failed"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "semi-dark-red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "running"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "canceled"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "super-light-yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
-        "h": 8,
+        "h": 6,
         "w": 12,
         "x": 0,
         "y": 0
@@ -110,11 +155,196 @@
             "type": "prometheus",
             "uid": "awx_prometheus"
           },
+          "editorMode": "code",
           "expr": "awx_status_total",
+          "legendFormat": "{{status}}",
+          "range": true,
           "refId": "A"
         }
       ],
       "title": "job status",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "awx_prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 27,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "awx_prometheus"
+          },
+          "editorMode": "builder",
+          "expr": "awx_instance_remaining_capacity",
+          "legendFormat": "remaining_capacity_{{hostname}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Remaining Instance Capacity",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "awx_prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 6
+      },
+      "id": 20,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "awx_prometheus"
+          },
+          "editorMode": "builder",
+          "expr": "awx_instance_consumed_capacity",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Consumed Instance Capacity",
       "type": "timeseries"
     },
     {
@@ -162,8 +392,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               }
             ]
           }
@@ -213,7 +442,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 0
+        "y": 6
       },
       "id": 24,
       "options": {
@@ -301,8 +530,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -311,15 +539,42 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  "task_manager_pending_processed{instance=\"awx1:8013\", job=\"awx\", node=\"awx_1\"}",
+                  "task_manager_running_processed{instance=\"awx1:8013\", job=\"awx\", node=\"awx_1\"}",
+                  "task_manager_tasks_started{instance=\"awx1:8013\", job=\"awx\", node=\"awx_1\"}"
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": true
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 8
+        "y": 14
       },
-      "id": 20,
+      "id": 12,
       "options": {
         "legend": {
           "calcs": [],
@@ -338,14 +593,38 @@
             "type": "prometheus",
             "uid": "awx_prometheus"
           },
-          "editorMode": "builder",
-          "expr": "awx_instance_consumed_capacity",
-          "legendFormat": "__auto",
-          "range": true,
+          "expr": "task_manager_running_processed",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "awx_prometheus"
+          },
+          "expr": "task_manager_pending_processed",
+          "hide": false,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "awx_prometheus"
+          },
+          "expr": "task_manager_tasks_blocked",
+          "hide": false,
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "awx_prometheus"
+          },
+          "expr": "task_manager_tasks_started",
+          "hide": false,
+          "refId": "C"
         }
       ],
-      "title": "Consumed Instance Capacity",
+      "title": "Task manager workload",
       "type": "timeseries"
     },
     {
@@ -396,8 +675,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -432,7 +710,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 8
+        "y": 14
       },
       "id": 26,
       "options": {
@@ -508,8 +786,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -518,42 +795,15 @@
             ]
           }
         },
-        "overrides": [
-          {
-            "__systemRef": "hideSeriesFrom",
-            "matcher": {
-              "id": "byNames",
-              "options": {
-                "mode": "exclude",
-                "names": [
-                  "task_manager_pending_processed{instance=\"awx1:8013\", job=\"awx\", node=\"awx_1\"}",
-                  "task_manager_running_processed{instance=\"awx1:8013\", job=\"awx\", node=\"awx_1\"}",
-                  "task_manager_tasks_started{instance=\"awx1:8013\", job=\"awx\", node=\"awx_1\"}"
-                ],
-                "prefix": "All except:",
-                "readOnly": true
-              }
-            },
-            "properties": [
-              {
-                "id": "custom.hideFrom",
-                "value": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": true
-                }
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 16
+        "y": 22
       },
-      "id": 12,
+      "id": 10,
       "options": {
         "legend": {
           "calcs": [],
@@ -572,7 +822,10 @@
             "type": "prometheus",
             "uid": "awx_prometheus"
           },
-          "expr": "task_manager_running_processed",
+          "editorMode": "builder",
+          "expr": "task_manager_process_pending_tasks_seconds",
+          "legendFormat": "__auto",
+          "range": true,
           "refId": "A"
         },
         {
@@ -580,8 +833,11 @@
             "type": "prometheus",
             "uid": "awx_prometheus"
           },
-          "expr": "task_manager_pending_processed",
+          "editorMode": "builder",
+          "expr": "task_manager_process_running_tasks_seconds",
           "hide": false,
+          "legendFormat": "__auto",
+          "range": true,
           "refId": "B"
         },
         {
@@ -589,8 +845,11 @@
             "type": "prometheus",
             "uid": "awx_prometheus"
           },
-          "expr": "task_manager_tasks_blocked",
+          "editorMode": "builder",
+          "expr": "task_manager_get_tasks_seconds",
           "hide": false,
+          "legendFormat": "__auto",
+          "range": true,
           "refId": "D"
         },
         {
@@ -598,12 +857,27 @@
             "type": "prometheus",
             "uid": "awx_prometheus"
           },
-          "expr": "task_manager_tasks_started",
+          "editorMode": "builder",
+          "expr": "task_manager_commit_seconds",
           "hide": false,
+          "legendFormat": "__auto",
+          "range": true,
           "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "awx_prometheus"
+          },
+          "editorMode": "builder",
+          "expr": "task_manager__schedule_seconds",
+          "hide": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "E"
         }
       ],
-      "title": "Task manager workload",
+      "title": "Task manager timings",
       "type": "timeseries"
     },
     {
@@ -652,8 +926,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -668,7 +941,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 16
+        "y": 22
       },
       "id": 16,
       "options": {
@@ -776,8 +1049,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -792,9 +1064,9 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 24
+        "y": 30
       },
-      "id": 10,
+      "id": 14,
       "options": {
         "legend": {
           "calcs": [],
@@ -814,61 +1086,13 @@
             "uid": "awx_prometheus"
           },
           "editorMode": "builder",
-          "expr": "task_manager_process_pending_tasks_seconds",
+          "expr": "awx_database_connections_total",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "awx_prometheus"
-          },
-          "editorMode": "builder",
-          "expr": "task_manager_process_running_tasks_seconds",
-          "hide": false,
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "awx_prometheus"
-          },
-          "editorMode": "builder",
-          "expr": "task_manager_get_tasks_seconds",
-          "hide": false,
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "D"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "awx_prometheus"
-          },
-          "editorMode": "builder",
-          "expr": "task_manager_commit_seconds",
-          "hide": false,
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "awx_prometheus"
-          },
-          "editorMode": "builder",
-          "expr": "task_manager__schedule_seconds",
-          "hide": false,
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "E"
         }
       ],
-      "title": "Task manager timings",
+      "title": "Database",
       "type": "timeseries"
     },
     {
@@ -916,8 +1140,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -932,7 +1155,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 24
+        "y": 30
       },
       "id": 18,
       "options": {
@@ -970,101 +1193,9 @@
       ],
       "title": "Workflow Manager Timings",
       "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "awx_prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 32
-      },
-      "id": 14,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "awx_prometheus"
-          },
-          "editorMode": "builder",
-          "expr": "awx_database_connections_total",
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Database",
-      "type": "timeseries"
     }
   ],
-  "refresh": false,
+  "refresh": "5s",
   "schemaVersion": 37,
   "style": "dark",
   "tags": [],
@@ -1079,6 +1210,6 @@
   "timezone": "",
   "title": "awx-demo",
   "uid": "GISWZOXnk",
-  "version": 9,
+  "version": 2,
   "weekStart": ""
 }
