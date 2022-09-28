@@ -232,7 +232,7 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
         if self.inventory is not None:
             for instance_group in self.inventory.instance_groups.all():
                 selected_groups.append(instance_group)
-            if not getattr(self.inventory, 'prevent_instance_group_fallback', False) and self.inventory.organization is not None:
+            if not self.inventory.prevent_instance_group_fallback and self.inventory.organization is not None:
                 for instance_group in self.inventory.organization.instance_groups.all():
                     selected_groups.append(instance_group)
 
