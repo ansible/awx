@@ -440,11 +440,8 @@ def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs
 def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
     if settings.IS_K8S and instance.node_type in (Instance.Types.EXECUTION,):
         if instance.node_state == Instance.States.DEPROVISIONING:
-            from awx.main.tasks.receptor import remove_deprovisioned_node  # prevents circular import
-
-            # wait for jobs on the node to complete, then delete the
-            # node and kick off write_receptor_config
-            connection.on_commit(lambda: remove_deprovisioned_node.apply_async([instance.hostname]))
+            InstanceLink.objects.filter(source__hostname=instance.hostname).update(link_state=InstanceLink.States.REMOVING)
+            InstanceLink.objects.filter(target__hostname=instance.hostname).update(link_state=InstanceLink.States.REMOVING)
 
         if instance.node_state == Instance.States.INSTALLED:
             from awx.main.tasks.receptor import write_receptor_config  # prevents circular import

@@ -33,6 +33,7 @@ from awx.main.models import (
     WorkflowJobTemplate,
 )
 from awx.main.scheduler.dag_workflow import WorkflowDAG
+from awx.main.tasks.receptor import remove_deprovisioned_node
 from awx.main.utils.pglock import advisory_lock
 from awx.main.utils import (
     get_type_for_model,
@@ -686,14 +687,27 @@ class TaskManager(TaskBase):
                 tasks_to_update_job_explanation.append(task)
         logger.debug("{} couldn't be scheduled on graph, waiting for next cycle".format(task.log_format))
 
-    def reap_jobs_from_orphaned_instances(self):
-        # discover jobs that are in running state but aren't on an execution node
+    def reap(self):
+        # Finalize deprovisioned nodes that are no longer running jobs.
+        # Also, discover jobs that are in running state but aren't on an execution node
         # that we know about; this is a fairly rare event, but it can occur if you,
         # for example, SQL backup an awx install with running jobs and restore it
         # elsewhere
-        for j in UnifiedJob.objects.filter(
-            status__in=['pending', 'waiting', 'running'],
-        ).exclude(execution_node__in=Instance.objects.exclude(node_type='hop').values_list('hostname', flat=True)):
+
+        instances = Instance.objects.only('hostname', 'node_state')
+        jobs = UnifiedJob.objects.filter(status__in=['pending', 'waiting', 'running']).select_related('instance_group')
+
+        # Finalize deprovisioned nodes
+        job_execution_nodes = {j.execution_node for j in jobs if j.execution_node}
+        for i in instances:
+            if i.node_state == Instance.States.DEPROVISIONING and i.hostname not in job_execution_nodes:
+                remove_deprovisioned_node.apply_async([i.hostname])
+
+        # Reap orphaned jobs
+        instances = {i.hostname for i in instances}
+        for j in jobs:
+            if j.execution_node in instances:
+                continue
             if j.execution_node and not j.is_container_group_task:
                 logger.error(f'{j.execution_node} is not a registered instance; reaping {j.log_format}')
                 reap_job(j, 'failed')
@@ -733,7 +747,7 @@ class TaskManager(TaskBase):
         self.get_tasks(dict(status__in=["pending", "waiting", "running"], dependencies_processed=True))
 
         self.after_lock_init()
-        self.reap_jobs_from_orphaned_instances()
+        self.reap()
 
         if len(self.all_tasks) > 0:
             self.process_tasks()

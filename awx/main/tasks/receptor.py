@@ -27,7 +27,7 @@ from awx.main.utils.common import (
 )
 from awx.main.constants import MAX_ISOLATED_PATH_COLON_DELIMITER
 from awx.main.tasks.signals import signal_state, signal_callback, SignalExit
-from awx.main.models import Instance, InstanceLink, UnifiedJob
+from awx.main.models import Instance, InstanceLink
 from awx.main.dispatch import get_local_queuename
 from awx.main.dispatch.publish import task
 
@@ -688,19 +688,6 @@ def write_receptor_config():
 
 @task(queue=get_local_queuename)
 def remove_deprovisioned_node(hostname):
-    InstanceLink.objects.filter(source__hostname=hostname).update(link_state=InstanceLink.States.REMOVING)
-    InstanceLink.objects.filter(target__hostname=hostname).update(link_state=InstanceLink.States.REMOVING)
-
-    node_jobs = UnifiedJob.objects.filter(
-        execution_node=hostname,
-        status__in=(
-            'running',
-            'waiting',
-        ),
-    )
-    while node_jobs.exists():
-        time.sleep(60)
-
     # This will as a side effect also delete the InstanceLinks that are tied to it.
     Instance.objects.filter(hostname=hostname).delete()
 
