@@ -254,10 +254,10 @@ groups:
               intervalMs: 1000
               maxDataPoints: 43200
               reducer: last
-              refId: mean_redis_queue_size
+              refId: last_redis_queue_size
               type: reduce
             queryType: ""
-            refId: mean_redis_queue_size
+            refId: last_redis_queue_size
             relativeTimeRange:
               from: 0
               to: 0
@@ -273,7 +273,7 @@ groups:
                     type: and
                   query:
                     params:
-                      - mean_redis_queue_size
+                      - last_redis_queue_size
                   reducer:
                     params: []
                     type: avg
@@ -282,7 +282,7 @@ groups:
                 name: Expression
                 type: __expr__
                 uid: __expr__
-              expression: '($mean_redis_queue_size > ($mean_event_insertion_rate * 120))'
+              expression: '($last_redis_queue_size > ($mean_event_insertion_rate * 120))'
               hide: false
               intervalMs: 1000
               maxDataPoints: 43200
