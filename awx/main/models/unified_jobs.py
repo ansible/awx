@@ -53,7 +53,7 @@ from awx.main.utils.common import (
 from awx.main.utils.encryption import encrypt_dict, decrypt_field
 from awx.main.utils import polymorphic
 from awx.main.constants import ACTIVE_STATES, CAN_CANCEL, JOB_VARIABLE_PREFIXES
-from awx.main.redact import UriCleaner, REPLACE_STR
+from awx.main.redact import UriCleaner
 from awx.main.consumers import emit_channel_notification
 from awx.main.fields import AskForField, OrderedManyToManyField, JSONBlob
 
@@ -336,8 +336,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         """
         Create a new unified job based on this unified job template.
         """
-        # TODO: rename kwargs to prompts, to set expectation that these are runtime values
-        new_job_passwords = kwargs.pop('survey_passwords', {})
+        # TODO: rename kwargs to prompts, to set expectation tha
         eager_fields = kwargs.pop('_eager_fields', None)
 
         # automatically encrypt survey fields
@@ -374,14 +373,6 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         if not parent_field_name:
             parent_field_name = unified_job._get_parent_field_name()
         setattr(unified_job, parent_field_name, self)
-
-        # For JobTemplate-based jobs with surveys, add passwords to list for perma-redaction
-        if hasattr(self, 'survey_spec') and getattr(self, 'survey_enabled', False):
-            for password in self.survey_password_variables():
-                new_job_passwords[password] = REPLACE_STR
-        if new_job_passwords:
-            unified_job.survey_passwords = new_job_passwords
-            kwargs['survey_passwords'] = new_job_passwords  # saved in config object for relaunch
 
         if instance_groups:
             unified_job.preferred_instance_groups_cache = [ig.id for ig in instance_groups]
@@ -471,7 +462,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
                 errors[field_name] = [_("Field is not allowed on launch.")]
         return ({}, kwargs, errors)
 
-    def accept_or_ignore_variables(self, data, errors=None, _exclude_errors=(), extra_passwords=None):
+    def accept_or_ignore_variables(self, data, errors=None, _exclude_errors=()):
         """
         If subclasses accept any `variables` or `extra_vars`, they should
         define _accept_or_ignore_variables to place those variables in the accepted dict,
@@ -489,10 +480,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
             # SurveyJobTemplateMixin cannot override any methods because of
             # resolution order, forced by how metaclass processes fields,
             # thus the need for hasattr check
-            if extra_passwords:
-                return self._accept_or_ignore_variables(data, errors, _exclude_errors=_exclude_errors, extra_passwords=extra_passwords)
-            else:
-                return self._accept_or_ignore_variables(data, errors, _exclude_errors=_exclude_errors)
+            return self._accept_or_ignore_variables(data, errors, _exclude_errors=_exclude_errors)
         elif data:
             errors['extra_vars'] = [
                 _('Variables {list_of_keys} provided, but this template cannot accept variables.'.format(list_of_keys=', '.join(data.keys())))
@@ -976,11 +964,11 @@ class UnifiedJob(
         if parent is None:
             return
         valid_fields = list(parent.get_ask_mapping().keys())
-        # Special cases allowed for workflows
-        if hasattr(self, 'extra_vars'):
-            valid_fields.extend(['survey_passwords', 'extra_vars'])
-        else:
-            kwargs.pop('survey_passwords', None)
+
+        # HACK to make system job templates work
+        if hasattr(self, 'extra_vars') and ('extra_vars' not in valid_fields):
+            valid_fields.extend(['extra_vars'])
+
         many_to_many_fields = []
         for field_name, value in kwargs.items():
             if field_name not in valid_fields:

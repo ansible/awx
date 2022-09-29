@@ -15,6 +15,7 @@ from django.db import connections
 from awx.main.redact import UriCleaner
 from awx.main.constants import MINIMAL_EVENTS, ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE
 from awx.main.utils.update_model import update_model
+from awx.main.utils.encryption import encrypt_dict
 from awx.main.queue import CallbackQueueDispatcher
 
 logger = logging.getLogger('awx.main.tasks.callback')
@@ -170,7 +171,12 @@ class RunnerCallback:
         Handle artifacts
         '''
         if event_data.get('event_data', {}).get('artifact_data', {}):
-            self.delay_update(artifacts=event_data['event_data']['artifact_data'])
+            artifacts = event_data['event_data']['artifact_data']
+            if '_ansible_no_log' in artifacts:
+                keys_to_encrypt = list(artifacts.keys())
+                keys_to_encrypt.remove('_ansible_no_log')
+                encrypt_dict(artifacts, keys_to_encrypt)
+            self.delay_update(artifacts=artifacts)
 
         return False
 

@@ -11,7 +11,7 @@ from awx.conf import settings_registry
 from awx.conf.models import Setting
 from awx.conf.signals import on_post_save_setting
 from awx.main.models import UnifiedJob, Credential, NotificationTemplate, Job, JobTemplate, WorkflowJob, WorkflowJobTemplate, OAuth2Application
-from awx.main.utils.encryption import encrypt_field, decrypt_field, encrypt_value, decrypt_value, get_encryption_key
+from awx.main.utils.encryption import encrypt_field, decrypt_field, encrypt_value, decrypt_value, get_encryption_key, is_encrypted
 
 
 class Command(BaseCommand):
@@ -41,7 +41,7 @@ class Command(BaseCommand):
         self._unified_jobs()
         self._oauth2_app_secrets()
         self._settings()
-        self._survey_passwords()
+        self._survey_secrets()
         return self.new_key
 
     def _notification_templates(self):
@@ -84,7 +84,7 @@ class Command(BaseCommand):
                 setting.value = encrypt_field(setting, 'value', secret_key=self.new_key)
                 setting.save()
 
-    def _survey_passwords(self):
+    def _survey_secrets(self):
         for _type in (JobTemplate, WorkflowJobTemplate):
             for jt in _type.objects.exclude(survey_spec={}):
                 changed = False
@@ -98,16 +98,16 @@ class Command(BaseCommand):
                     jt.save(update_fields=["survey_spec"])
 
         for _type in (Job, WorkflowJob):
-            for job in _type.objects.exclude(survey_passwords={}).iterator():
+            for job in _type.objects.filter(extra_vars__icontains='$encrypted$').iterator():
                 changed = False
-                for key in job.survey_passwords:
-                    if key in job.extra_vars:
-                        extra_vars = json.loads(job.extra_vars)
-                        if not extra_vars.get(key):
-                            continue
-                        raw = decrypt_value(get_encryption_key('value', None, secret_key=self.old_key), extra_vars[key])
-                        extra_vars[key] = encrypt_value(raw, pk=None, secret_key=self.new_key)
-                        job.extra_vars = json.dumps(extra_vars)
-                        changed = True
+                extra_vars = json.loads(job.extra_vars)
+                for key in extra_vars:
+                    val = extra_vars.get(key)
+                    if (not val) or (not is_encrypted(val)):
+                        continue
+                    raw = decrypt_value(get_encryption_key('value', None, secret_key=self.old_key), extra_vars[key])
+                    extra_vars[key] = encrypt_value(raw, pk=None, secret_key=self.new_key)
+                    changed = True
                 if changed:
+                    job.extra_vars = json.dumps(extra_vars)
                     job.save(update_fields=["extra_vars"])

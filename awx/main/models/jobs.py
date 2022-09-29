@@ -44,6 +44,7 @@ from awx.main.models.notifications import (
     JobNotificationMixin,
 )
 from awx.main.utils import parse_yaml_or_json, getattr_dne, NullablePromptPseudoField, polymorphic
+from awx.main.utils.encryption import is_encrypted
 from awx.main.fields import ImplicitRoleField, AskForField, JSONBlob, OrderedManyToManyField
 from awx.main.models.mixins import (
     ResourceMixin,
@@ -295,7 +296,6 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                 'name',
                 'description',
                 'organization',
-                'survey_passwords',
                 'labels',
                 'credentials',
                 'job_slice_number',
@@ -435,9 +435,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         exclude_errors = kwargs.pop('_exclude_errors', [])
         prompted_data = {}
         rejected_data = {}
-        accepted_vars, rejected_vars, errors_dict = self.accept_or_ignore_variables(
-            kwargs.get('extra_vars', {}), _exclude_errors=exclude_errors, extra_passwords=kwargs.get('survey_passwords', {})
-        )
+        accepted_vars, rejected_vars, errors_dict = self.accept_or_ignore_variables(kwargs.get('extra_vars', {}), _exclude_errors=exclude_errors)
         if accepted_vars:
             prompted_data['extra_vars'] = accepted_vars
         if rejected_vars:
@@ -993,8 +991,6 @@ class LaunchTimeConfigBase(BaseModel):
                         extra_vars = parse_yaml_or_json(extra_vars)
                     if extra_vars:
                         data['extra_vars'] = extra_vars
-                if self.survey_passwords and not display:
-                    data['survey_passwords'] = self.survey_passwords
             else:
                 prompt_val = getattr(self, prompt_name)
                 if prompt_val is not None:
@@ -1013,13 +1009,6 @@ class LaunchTimeConfig(LaunchTimeConfigBase):
 
     # Special case prompting fields, even more special than the other ones
     extra_data = JSONBlob(default=dict, blank=True)
-    survey_passwords = prevent_search(
-        JSONBlob(
-            default=dict,
-            editable=False,
-            blank=True,
-        )
-    )
     # Fields needed for non-unified job / unified JT models, because they are defined on unified models
     credentials = models.ManyToManyField('Credential', related_name='%(class)ss')
     labels = models.ManyToManyField('Label', related_name='%(class)s_labels')
@@ -1045,11 +1034,13 @@ class LaunchTimeConfig(LaunchTimeConfigBase):
         """
         Hides fields marked as passwords in survey.
         """
-        if hasattr(self, 'survey_passwords') and self.survey_passwords:
-            extra_vars = parse_yaml_or_json(self.extra_vars).copy()
-            for key, value in self.survey_passwords.items():
-                if key in extra_vars:
-                    extra_vars[key] = value
+        extra_vars = parse_yaml_or_json(self.extra_vars).copy()
+        changed = False
+        for key in extra_vars:
+            if is_encrypted(extra_vars.get(key)):
+                extra_vars[key] = '$encrypted$'
+                changed = True
+        if changed:
             return extra_vars
         else:
             return self.extra_vars

@@ -109,7 +109,6 @@ class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
             'workflow_job',
             'unified_job_template',
             'extra_data',
-            'survey_passwords',
             'inventory',
             'credentials',
             'char_prompts',
@@ -162,7 +161,6 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         'credentials',
         'inventory',
         'extra_data',
-        'survey_passwords',
         'char_prompts',
         'all_parents_must_converge',
         'identifier',
@@ -170,7 +168,7 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         'execution_environment',
         'instance_groups',
     ]
-    REENCRYPTION_BLOCKLIST_AT_COPY = ['extra_data', 'survey_passwords']
+    REENCRYPTION_BLOCKLIST_AT_COPY = ['extra_data']
 
     workflow_job_template = models.ForeignKey(
         'WorkflowJobTemplate',
@@ -301,7 +299,6 @@ class WorkflowJobNode(WorkflowNodeBase):
         # reject/accept prompted fields
         data = {}
         wj_special_vars = {}
-        wj_special_passwords = {}
         ujt_obj = self.unified_job_template
         if ujt_obj is not None:
             node_prompts_data = self.prompts_dict(for_cls=ujt_obj.__class__)
@@ -312,12 +309,9 @@ class WorkflowJobNode(WorkflowNodeBase):
             # this is inconsistent, but maintained
             if not isinstance(ujt_obj, WorkflowJobTemplate):
                 wj_special_vars = wj_prompts_data.pop('extra_vars', {})
-                wj_special_passwords = wj_prompts_data.pop('survey_passwords', {})
             elif 'extra_vars' in node_prompts_data:
                 # Follow the vars combination rules
                 node_prompts_data['extra_vars'].update(wj_prompts_data.pop('extra_vars', {}))
-            elif 'survey_passwords' in node_prompts_data:
-                node_prompts_data['survey_passwords'].update(wj_prompts_data.pop('survey_passwords', {}))
 
             # Follow the credential combination rules
             if ('credentials' in wj_prompts_data) and ('credentials' in node_prompts_data):
@@ -350,15 +344,6 @@ class WorkflowJobNode(WorkflowNodeBase):
         if aa_dict and not is_root_node:
             self.ancestor_artifacts = aa_dict
             self.save(update_fields=['ancestor_artifacts'])
-        # process password list
-        password_dict = data.get('survey_passwords', {})
-        if '_ansible_no_log' in aa_dict:
-            for key in aa_dict:
-                if key != '_ansible_no_log':
-                    password_dict[key] = REPLACE_STR
-        password_dict.update(wj_special_passwords)
-        if password_dict:
-            data['survey_passwords'] = password_dict
         # process extra_vars
         extra_vars = data.get('extra_vars', {})
         if ujt_obj and isinstance(ujt_obj, (JobTemplate, WorkflowJobTemplate)):
@@ -412,7 +397,7 @@ class WorkflowJobOptions(LaunchTimeConfigBase):
     @classmethod
     def _get_unified_job_field_names(cls):
         r = set(f.name for f in WorkflowJobOptions._meta.fields) | set(
-            ['name', 'description', 'organization', 'survey_passwords', 'labels', 'limit', 'scm_branch', 'job_tags', 'skip_tags']
+            ['name', 'description', 'organization', 'labels', 'limit', 'scm_branch', 'job_tags', 'skip_tags']
         )
         r.remove('char_prompts')  # needed due to copying launch config to launch config
         return r
@@ -570,9 +555,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         for field_name, ask_field_name in self.get_ask_mapping().items():
 
             if field_name == 'extra_vars':
-                accepted_vars, rejected_vars, vars_errors = self.accept_or_ignore_variables(
-                    kwargs.get('extra_vars', {}), _exclude_errors=exclude_errors, extra_passwords=kwargs.get('survey_passwords', {})
-                )
+                accepted_vars, rejected_vars, vars_errors = self.accept_or_ignore_variables(kwargs.get('extra_vars', {}), _exclude_errors=exclude_errors)
                 if accepted_vars:
                     prompted_data['extra_vars'] = accepted_vars
                 if rejected_vars:
