@@ -413,8 +413,8 @@ def on_populate_user(sender, **kwargs):
     # Do the same for teams
     existing_team_names = list(Team.objects.all().values_list('name', flat=True))
     for team_name, team_opts in team_map.items():
-        if 'organization' not in team_opts:
-            # You can't save the LDAP config in the UI w/o an org so if we somehow got this condition its an error
+        if not team_opts.get('organization', None):
+            # You can't save the LDAP config in the UI w/o an org (or '' or null as the org) so if we somehow got this condition its an error
             logger.error("Team named {} in LDAP team map settings is invalid due to missing organization".format(team_name))
             continue
         if team_name not in existing_team_names:
