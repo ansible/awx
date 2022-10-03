@@ -264,9 +264,15 @@ def update_scm_url(scm_type, url, username=True, password=True, check_special_ca
                 userpass, hostpath = url.split('@', 1)
             else:
                 userpass, hostpath = '', url
-            if hostpath.count(':') > 1:
+            # Handle IPv6 here. In this case, we might have hostpath of:
+            # [fd00:1234:2345:6789::11]:example/foo.git
+            if hostpath.startswith('[') and ']:' in hostpath:
+                host, path = hostpath.split(']:', 1)
+                host = host + ']'
+            elif hostpath.count(':') > 1:
                 raise ValueError(_('Invalid %s URL') % scm_type)
-            host, path = hostpath.split(':', 1)
+            else:
+                host, path = hostpath.split(':', 1)
             # if not path.startswith('/') and not path.startswith('~/'):
             #    path = '~/%s' % path
             # if path.startswith('/'):
@@ -325,7 +331,11 @@ def update_scm_url(scm_type, url, username=True, password=True, check_special_ca
         netloc = u':'.join([urllib.parse.quote(x, safe='') for x in (netloc_username, netloc_password) if x])
     else:
         netloc = u''
-    netloc = u'@'.join(filter(None, [netloc, parts.hostname]))
+    # urllib.parse strips brackets from IPv6 addresses, so we need to add them back in
+    hostname = parts.hostname
+    if hostname and ':' in hostname and '[' in url and ']' in url:
+        hostname = f'[{hostname}]'
+    netloc = u'@'.join(filter(None, [netloc, hostname]))
     if parts.port:
         netloc = u':'.join([netloc, str(parts.port)])
     new_url = urllib.parse.urlunsplit([parts.scheme, netloc, parts.path, parts.query, parts.fragment])
