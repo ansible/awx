@@ -2406,9 +2406,8 @@ class JobTemplateLaunch(RetrieveAPIView):
         """
         modern_data = data.copy()
 
-        id_fd = '{}_id'.format('inventory')
-        if 'inventory' not in modern_data and id_fd in modern_data:
-            modern_data['inventory'] = modern_data[id_fd]
+        if 'inventory' not in modern_data and 'inventory_id' in modern_data:
+            modern_data['inventory'] = modern_data['inventory_id']
 
         # credential passwords were historically provided as top-level attributes
         if 'credential_passwords' not in modern_data:
