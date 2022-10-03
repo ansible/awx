@@ -1,7 +1,7 @@
 ---
 name: Dependency Pr Update
 on:
-  pull_request:
+  pull_request_target:
     types: [labeled, opened, reopened]
 
 jobs:
@@ -9,6 +9,7 @@ jobs:
     name: Update Dependabot Prs
     if:  contains(github.event.pull_request.labels.*.name, 'dependencies') && contains(github.event.pull_request.labels.*.name, 'component:ui')
     runs-on: ubuntu-latest
+    permissions: write-all
 
     steps:
       - name: Checkout branch
