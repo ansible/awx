@@ -475,35 +475,45 @@ def on_populate_user(sender, **kwargs):
 def reconcile_users_org_team_mappings(user, desired_org_states, desired_team_states, source):
     from awx.main.models import Organization, Team
 
-    org_content_type = ContentType.objects.get_for_model(Organization)
-    team_content_type = ContentType.objects.get_for_model(Team)
+    content_types = []
+    reconcile_items = []
+    if desired_org_states:
+        content_types.append(ContentType.objects.get_for_model(Organization))
+        reconcile_items.append(('organization', desired_org_states, Organization))
+    if desired_team_states:
+        content_types.append(ContentType.objects.get_for_model(Team))
+        reconcile_items.append(('team', desired_team_states, Team))
 
-    # users_roles is a flat list of IDs
-    users_roles = list(user.roles.filter(content_type__in=[org_content_type, team_content_type]).values_list('pk', flat=True))
+    if not content_types:
+        # If both desired states were empty we can simply return because there is nothing to reconcile
+        return
 
-    for object_type, desired_states, model in [('organization', desired_org_states, Organization), ('team', desired_team_states, Team)]:
+    # users_roles is a flat set of IDs
+    users_roles = set(user.roles.filter(content_type__in=content_types).values_list('pk', flat=True))
+
+    for object_type, desired_states, model in reconcile_items:
         # Get all of the roles in the desired states for efficient DB extraction
         roles = []
         for sub_dict in desired_states.values():
             for role_name in sub_dict:
-                if sub_dict[role_name] == None:
+                if sub_dict[role_name] is None:
                     continue
                 if role_name not in roles:
                     roles.append(role_name)
 
-        # Get a set of named tuples for the org name plus all of the roles we got above
-        model_roles = getattr(model, 'objects').filter(name__in=desired_states.keys()).values_list(*(['name'] + roles), named=True)
+        # Get a set of named tuples for the org/team name plus all of the roles we got above
+        model_roles = model.objects.filter(name__in=desired_states.keys()).values_list('name', *roles, named=True)
         for row in model_roles:
             for role_name in roles:
                 desired_state = desired_states.get(row.name, {})
-                if desired_state[role_name] == None:
+                if desired_state[role_name] is None:
                     # The mapping was not defined for this [org/team]/role so we can just pass
                     pass
 
                 # If somehow the auth adapter knows about an items role but that role is not defined in the DB we are going to print a pretty error
                 # This is your classic safety net that we should never hit; but here you are reading this comment... good luck and Godspeed.
                 role_id = getattr(row, role_name, None)
-                if role_id == None:
+                if role_id is None:
                     logger.error("{} adapter wanted to manage role {} of {} {} but that role is not defined".format(source, role_name, object_type, row.name))
                     continue
 
