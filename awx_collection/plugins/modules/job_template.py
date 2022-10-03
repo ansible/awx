@@ -315,6 +315,10 @@ options:
         - list of notifications to send on error
       type: list
       elements: str
+    prevent_instance_group_fallback:
+      description:
+        - Prevent falling back to instance groups set on the associated inventory or organization
+      type: bool
 
 extends_documentation_fragment: awx.awx.auth
 
@@ -441,6 +445,7 @@ def main():
         notification_templates_started=dict(type="list", elements='str'),
         notification_templates_success=dict(type="list", elements='str'),
         notification_templates_error=dict(type="list", elements='str'),
+        prevent_instance_group_fallback=dict(type="bool"),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -539,6 +544,7 @@ def main():
         'custom_virtualenv',
         'job_slice_count',
         'webhook_service',
+        'prevent_instance_group_fallback',
     ):
         field_val = module.params.get(field_name)
         if field_val is not None:

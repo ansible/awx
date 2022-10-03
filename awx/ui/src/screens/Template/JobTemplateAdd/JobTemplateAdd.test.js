@@ -55,6 +55,7 @@ const jobTemplateData = {
   limit: '',
   name: '',
   playbook: '',
+  prevent_instance_group_fallback: false,
   project: { id: 1, summary_fields: { organization: { id: 1 } } },
   scm_branch: '',
   skip_tags: '',

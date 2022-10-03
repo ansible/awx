@@ -191,6 +191,11 @@ const getInventoryHelpTextStrings = () => ({
   sourcePath: t`The inventory file
           to be synced by this source. You can select from
           the dropdown or enter a file within the input.`,
+  preventInstanceGroupFallback: t`If enabled, the inventory will prevent adding any organization instance groups to the list of preferred instances groups to run associated job templates on.
+          Note: If this setting is enabled and you provided an empty list, the global instance groups will be applied.`,
+  enabledOptions: (
+    <p>{t`Prevent Instance Group Fallback: If enabled, the inventory will prevent adding any organization instance groups to the list of preferred instances groups to run associated job templates on.`}</p>
+  ),
 });
 
 export default getInventoryHelpTextStrings;

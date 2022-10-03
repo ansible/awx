@@ -228,15 +228,14 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
 
     @property
     def preferred_instance_groups(self):
-        if self.inventory is not None and self.inventory.organization is not None:
-            organization_groups = [x for x in self.inventory.organization.instance_groups.all()]
-        else:
-            organization_groups = []
+        selected_groups = []
         if self.inventory is not None:
-            inventory_groups = [x for x in self.inventory.instance_groups.all()]
-        else:
-            inventory_groups = []
-        selected_groups = inventory_groups + organization_groups
+            for instance_group in self.inventory.instance_groups.all():
+                selected_groups.append(instance_group)
+            if not self.inventory.prevent_instance_group_fallback and self.inventory.organization is not None:
+                for instance_group in self.inventory.organization.instance_groups.all():
+                    selected_groups.append(instance_group)
+
         if not selected_groups:
             return self.global_instance_groups
         return selected_groups

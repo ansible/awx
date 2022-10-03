@@ -203,7 +203,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     playbook) to an inventory source with a given credential.
     """
 
-    FIELDS_TO_PRESERVE_AT_COPY = ['labels', 'instance_groups', 'credentials', 'survey_spec']
+    FIELDS_TO_PRESERVE_AT_COPY = ['labels', 'instance_groups', 'credentials', 'survey_spec', 'prevent_instance_group_fallback']
     FIELDS_TO_DISCARD_AT_COPY = ['vault_credential', 'credential']
     SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name', 'organization')]
 
@@ -273,6 +273,15 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             'execute_role',
             'admin_role',
         ],
+    )
+    prevent_instance_group_fallback = models.BooleanField(
+        default=False,
+        help_text=(
+            "If enabled, the job template will prevent adding any inventory or organization "
+            "instance groups to the list of preferred instances groups to run on."
+            "If this setting is enabled and you provided an empty list, the global instance "
+            "groups will be applied."
+        ),
     )
 
     @classmethod
@@ -797,19 +806,13 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     def preferred_instance_groups(self):
         # If the user specified instance groups those will be handled by the unified_job.create_unified_job
         # This function handles only the defaults for a template w/o user specification
-        if self.organization is not None:
-            organization_groups = [x for x in self.organization.instance_groups.all()]
-        else:
-            organization_groups = []
-        if self.inventory is not None:
-            inventory_groups = [x for x in self.inventory.instance_groups.all()]
-        else:
-            inventory_groups = []
-        if self.job_template is not None:
-            template_groups = [x for x in self.job_template.instance_groups.all()]
-        else:
-            template_groups = []
-        selected_groups = template_groups + inventory_groups + organization_groups
+        selected_groups = []
+        for obj_type in ['job_template', 'inventory', 'organization']:
+            if getattr(self, obj_type) is not None:
+                for instance_group in getattr(self, obj_type).instance_groups.all():
+                    selected_groups.append(instance_group)
+                if getattr(getattr(self, obj_type), 'prevent_instance_group_fallback', False):
+                    break
         if not selected_groups:
             return self.global_instance_groups
         return selected_groups

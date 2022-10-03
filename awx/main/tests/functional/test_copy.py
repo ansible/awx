@@ -19,6 +19,7 @@ def test_job_template_copy(
     job_template_with_survey_passwords.inventory = inventory
     job_template_with_survey_passwords.labels.add(label)
     job_template_with_survey_passwords.instance_groups.add(ig)
+    job_template_with_survey_passwords.prevent_instance_group_fallback = True
     job_template_with_survey_passwords.save()
     job_template_with_survey_passwords.credentials.add(credential)
     job_template_with_survey_passwords.credentials.add(machine_credential)
@@ -65,6 +66,7 @@ def test_job_template_copy(
         assert jt_copy.labels.get(pk=label.pk) == label
         assert jt_copy.instance_groups.count() != 0
         assert jt_copy.instance_groups.get(pk=ig.pk) == ig
+        assert jt_copy.prevent_instance_group_fallback == True
 
 
 @pytest.mark.django_db
@@ -95,6 +97,8 @@ def test_inventory_copy(inventory, group_factory, post, get, alice, organization
     host = group_1_1.hosts.create(name='host', inventory=inventory)
     group_2_1.hosts.add(host)
     inventory.admin_role.members.add(alice)
+    inventory.prevent_instance_group_fallback = True
+    inventory.save()
     assert get(reverse('api:inventory_copy', kwargs={'pk': inventory.pk}), alice, expect=200).data['can_copy'] is False
     inventory.organization.admin_role.members.add(alice)
     assert get(reverse('api:inventory_copy', kwargs={'pk': inventory.pk}), alice, expect=200).data['can_copy'] is True
@@ -110,6 +114,7 @@ def test_inventory_copy(inventory, group_factory, post, get, alice, organization
     assert inventory_copy.organization == organization
     assert inventory_copy.created_by == alice
     assert inventory_copy.name == 'new inv name'
+    assert inventory_copy.prevent_instance_group_fallback == True
     assert set(group_1_1_copy.parents.all()) == set()
     assert set(group_2_1_copy.parents.all()) == set([group_1_1_copy])
     assert set(group_2_2_copy.parents.all()) == set([group_1_1_copy, group_2_1_copy])

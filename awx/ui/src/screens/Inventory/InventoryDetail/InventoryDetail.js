@@ -2,7 +2,14 @@ import React, { useCallback, useEffect } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
-import { Button, Chip } from '@patternfly/react-core';
+import {
+  Button,
+  Chip,
+  TextList,
+  TextListItem,
+  TextListItemVariants,
+  TextListVariants,
+} from '@patternfly/react-core';
 import AlertModal from 'components/AlertModal';
 import { CardBody, CardActionsRow } from 'components/Card';
 import { DetailList, Detail, UserDateDetail } from 'components/DetailList';
@@ -50,8 +57,22 @@ function InventoryDetail({ inventory }) {
   const { organization, user_capabilities: userCapabilities } =
     inventory.summary_fields;
 
+  const { prevent_instance_group_fallback } = inventory;
+
   const deleteDetailsRequests =
     relatedResourceDeleteRequests.inventory(inventory);
+
+  const renderOptionsField = prevent_instance_group_fallback;
+
+  const renderOptions = (
+    <TextList component={TextListVariants.ul}>
+      {prevent_instance_group_fallback && (
+        <TextListItem component={TextListItemVariants.li}>
+          {t`Prevent Instance Group Fallback`}
+        </TextListItem>
+      )}
+    </TextList>
+  );
 
   if (isLoading) {
     return <ContentLoading />;
@@ -102,6 +123,22 @@ function InventoryDetail({ inventory }) {
               </ChipGroup>
             }
             isEmpty={instanceGroups.length === 0}
+          />
+        )}
+        {prevent_instance_group_fallback && (
+          <Detail
+            label={t`Prevent Instance Group Fallback`}
+            dataCy="inv-detail-prevent-instnace-group-fallback"
+            helpText={helpText.preventInstanceGroupFallback}
+          />
+        )}
+        {renderOptionsField && (
+          <Detail
+            fullWidth
+            label={t`Enabled Options`}
+            value={renderOptions}
+            dataCy="jt-detail-enabled-options"
+            helpText={helpText.enabledOptions}
           />
         )}
         {inventory.summary_fields.labels && (
