@@ -615,7 +615,7 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
     def validate(self, attrs):
         attrs = super(BaseSerializer, self).validate(attrs)
         try:
-            # Create/update a model instance and run it's full_clean() method to
+            # Create/update a model instance and run its full_clean() method to
             # do any validation implemented on the model class.
             exclusions = self.get_validation_exclusions(self.instance)
             obj = self.instance or self.Meta.model()
@@ -3229,7 +3229,7 @@ class JobCreateScheduleSerializer(LabelsListMixin, BaseSerializer):
                 ret['labels'] = self._summary_field_labels(config)
             return ret
         except JobLaunchConfig.DoesNotExist:
-            return {'all': _('Unknown, job may have been ran before launch configurations were saved.')}
+            return {'all': _('Unknown, job may have been run before launch configurations were saved.')}
 
 
 class AdHocCommandSerializer(UnifiedJobSerializer):
