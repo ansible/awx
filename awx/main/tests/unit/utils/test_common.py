@@ -194,3 +194,84 @@ def test_extract_ansible_vars():
     redacted, var_list = common.extract_ansible_vars(json.dumps(my_dict))
     assert var_list == set(['ansible_connetion_setting'])
     assert redacted == {"foobar": "baz"}
+
+
+@pytest.mark.parametrize(
+    'scm_type, url, username, password, check_special_cases, scp_format, expected',
+    [
+        # General/random cases
+        ('git', '', True, True, True, False, ''),
+        ('git', 'git://example.com/foo.git', True, True, True, False, 'git://example.com/foo.git'),
+        ('git', 'http://example.com/foo.git', True, True, True, False, 'http://example.com/foo.git'),
+        ('git', 'example.com:bar.git', True, True, True, False, 'git+ssh://example.com/bar.git'),
+        ('git', 'user@example.com:bar.git', True, True, True, False, 'git+ssh://user@example.com/bar.git'),
+        ('git', '127.0.0.1:bar.git', True, True, True, False, 'git+ssh://127.0.0.1/bar.git'),
+        ('git', 'git+ssh://127.0.0.1/bar.git', True, True, True, True, '127.0.0.1:bar.git'),
+        ('git', 'ssh://127.0.0.1:22/bar.git', True, True, True, False, 'ssh://127.0.0.1:22/bar.git'),
+        ('git', 'ssh://root@127.0.0.1:22/bar.git', True, True, True, False, 'ssh://root@127.0.0.1:22/bar.git'),
+        ('git', 'some/path', True, True, True, False, 'file:///some/path'),
+        ('git', '/some/path', True, True, True, False, 'file:///some/path'),
+        # Invalid URLs - ensure we error properly
+        ('cvs', 'anything', True, True, True, False, ValueError('Unsupported SCM type "cvs"')),
+        ('svn', 'anything-without-colon-slash-slash', True, True, True, False, ValueError('Invalid svn URL')),
+        ('git', 'http://example.com:123invalidport/foo.git', True, True, True, False, ValueError('Invalid git URL')),
+        ('git', 'git+ssh://127.0.0.1/bar.git', True, True, True, False, ValueError('Unsupported git URL')),
+        ('git', 'git@example.com:3000:/git/repo.git', True, True, True, False, ValueError('Invalid git URL')),
+        ('insights', 'git://example.com/foo.git', True, True, True, False, ValueError('Unsupported insights URL')),
+        ('svn', 'file://example/path', True, True, True, False, ValueError('Unsupported host "example" for file:// URL')),
+        ('svn', 'svn:///example', True, True, True, False, ValueError('Host is required for svn URL')),
+        # Username/password cases
+        ('git', 'https://example@example.com/bar.git', False, True, True, False, 'https://example.com/bar.git'),
+        ('git', 'https://example@example.com/bar.git', 'user', True, True, False, 'https://user@example.com/bar.git'),
+        ('git', 'https://example@example.com/bar.git', 'user:pw', True, True, False, 'https://user%3Apw@example.com/bar.git'),
+        ('git', 'https://example@example.com/bar.git', False, 'pw', True, False, 'https://example.com/bar.git'),
+        ('git', 'https://some:example@example.com/bar.git', True, False, True, False, 'https://some@example.com/bar.git'),
+        ('git', 'https://some:example@example.com/bar.git', False, False, True, False, 'https://example.com/bar.git'),
+        ('git', 'https://example.com/bar.git', 'user', 'pw', True, False, 'https://user:pw@example.com/bar.git'),
+        ('git', 'https://example@example.com/bar.git', False, 'something', True, False, 'https://example.com/bar.git'),
+        # Special github/bitbucket cases
+        ('git', 'notgit@github.com:ansible/awx.git', True, True, True, False, ValueError('Username must be "git" for SSH access to github.com.')),
+        (
+            'git',
+            'notgit@bitbucket.org:does-not-exist/example.git',
+            True,
+            True,
+            True,
+            False,
+            ValueError('Username must be "git" for SSH access to bitbucket.org.'),
+        ),
+        (
+            'git',
+            'notgit@altssh.bitbucket.org:does-not-exist/example.git',
+            True,
+            True,
+            True,
+            False,
+            ValueError('Username must be "git" for SSH access to altssh.bitbucket.org.'),
+        ),
+        ('git', 'git:password@github.com:ansible/awx.git', True, True, True, False, 'git+ssh://git@github.com/ansible/awx.git'),
+        # Disabling the special handling should not raise an error
+        ('git', 'notgit@github.com:ansible/awx.git', True, True, False, False, 'git+ssh://notgit@github.com/ansible/awx.git'),
+        ('git', 'notgit@bitbucket.org:does-not-exist/example.git', True, True, False, False, 'git+ssh://notgit@bitbucket.org/does-not-exist/example.git'),
+        (
+            'git',
+            'notgit@altssh.bitbucket.org:does-not-exist/example.git',
+            True,
+            True,
+            False,
+            False,
+            'git+ssh://notgit@altssh.bitbucket.org/does-not-exist/example.git',
+        ),
+        # awx#12992 - IPv6
+        ('git', 'http://[fd00:1234:2345:6789::11]:3000/foo.git', True, True, True, False, 'http://[fd00:1234:2345:6789::11]:3000/foo.git'),
+        ('git', 'http://foo:bar@[fd00:1234:2345:6789::11]:3000/foo.git', True, True, True, False, 'http://foo:bar@[fd00:1234:2345:6789::11]:3000/foo.git'),
+        ('git', 'example@[fd00:1234:2345:6789::11]:example/foo.git', True, True, True, False, 'git+ssh://example@[fd00:1234:2345:6789::11]/example/foo.git'),
+    ],
+)
+def test_update_scm_url(scm_type, url, username, password, check_special_cases, scp_format, expected):
+    if isinstance(expected, Exception):
+        with pytest.raises(type(expected)) as excinfo:
+            common.update_scm_url(scm_type, url, username, password, check_special_cases, scp_format)
+        assert str(excinfo.value) == str(expected)
+    else:
+        assert common.update_scm_url(scm_type, url, username, password, check_special_cases, scp_format) == expected
