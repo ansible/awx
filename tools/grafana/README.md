@@ -36,9 +36,18 @@ GRAFANA=true PROMETHEUS=true EXTRA_SOURCES_ANSIBLE_OPTS="-e scrape_interval=1 ad
 
 We are configuring alerts in grafana using the provisioning files method. This feature is new in Grafana as of August, 2022. Documentation can be found: https://grafana.com/docs/grafana/latest/administration/provisioning/#alerting however it does not fully show all parameters to the config.
 
-One way to understand how to build rules is to build them in the UI and use chrometools to inspect the payload as you save the rules. It appears that the "data" portion of the payload for each rule is the same syntax as needed in the provisioning file config. To reload the alerts without restarting the container, from within the container you can send a POST with `curl -X POST http://admin:admin@localhost:3000/api/admin/provisioning/alerting/reload`. Keep in mind the grafana container does not contain `curl`. You can install it with the command `apk add curl`.
+One way to understand how to build rules is to build them in the UI and use chrometools to inspect the payload as you save the rules. It appears that the "data" portion of the payload for each rule is the same syntax as needed in the provisioning file config. To reload the alerts without restarting the container, from your terminal you can send a POST with `curl -X POST http://admin:admin@localhost:3001/api/admin/provisioning/alerting/reload`.
 
 Another way to export rules is explore the api.
 1. Get all the folders:  `GET` to `/api/folders`
 2. Get the rules `GET` to `/api/ruler/grafana/api/v1/rules/{{ Folder }}`
 
+You can do this via curl or in the web browser.
+
+### Included Alerts
+
+#### Alert if remaining capacity low and pending jobs exist
+
+We want to know if jobs are in pending but we lack capacity in the cluster to run them. Our approach is to sum all remaining capacity in the cluster and compare it to the total capacity of the cluster. If less than 10% of our capacity is remaining and we have pending jobs, and this is true for more than 180s, we will fire the alert.
+
+This alert is named "capacity_below_10_percent" and can be found in this directory in https://github.com/ansible/awx/blob/devel/tools/grafana/alerting/alerts.yml
