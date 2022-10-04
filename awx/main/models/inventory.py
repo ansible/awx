@@ -567,17 +567,6 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
     # Use .job_host_summaries.all() to get jobs affecting this host.
     # Use .job_events.all() to get events affecting this host.
 
-    '''
-    We don't use timestamp, but we may in the future.
-    '''
-
-    def update_ansible_facts(self, module, facts, timestamp=None):
-        if module == "ansible":
-            self.ansible_facts.update(facts)
-        else:
-            self.ansible_facts[module] = facts
-        self.save()
-
     def get_effective_host_name(self):
         """
         Return the name of the host that will be used in actual ansible
