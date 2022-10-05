@@ -9,7 +9,7 @@ from awx.main.dispatch import get_local_queuename
 
 from . import pg_bus_conn
 
-logger = logging.getLogger('awx.main.dispatch')
+logger = logging.getLogger('awx.main.dispatch.control')
 
 
 class Control(object):
@@ -45,7 +45,7 @@ class Control(object):
         return f"reply_to_{str(uuid.uuid4()).replace('-','_')}"
 
     def control_with_reply(self, command, timeout=5, extra_data=None):
-        logger.warning('checking {} {} for {}'.format(self.service, command, self.queuename))
+        logger.debug('checking control command {} {} for {}, waiting for reply'.format(self.service, command, self.queuename))
         reply_queue = Control.generate_reply_queue_name()
         self.result = None
 

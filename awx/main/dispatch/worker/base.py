@@ -61,7 +61,7 @@ class AWXConsumerBase(object):
         return f'listening on {self.queues}'
 
     def control(self, body):
-        logger.warning(f'Received control signal:\n{body}')
+        logger.debug(f'Received control signal:\n{body}')
         control = body.get('control')
         if control in ('status', 'running', 'cancel'):
             reply_queue = body['reply_to']
@@ -87,6 +87,7 @@ class AWXConsumerBase(object):
             with pg_bus_conn() as conn:
                 conn.notify(reply_queue, json.dumps(msg))
         elif control == 'reload':
+            logger.warning(f'Reloading {len(self.pool.workers)} workers due to control signal')
             for worker in self.pool.workers:
                 worker.quit()
         else:
