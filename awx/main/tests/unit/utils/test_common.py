@@ -199,7 +199,8 @@ def test_extract_ansible_vars():
     redacted, var_list = common.extract_ansible_vars(json.dumps(my_dict))
     assert var_list == set(['ansible_connetion_setting'])
     assert redacted == {"foobar": "baz"}
-    
+
+
 @pytest.mark.parametrize(
     'scm_type, url, username, password, check_special_cases, scp_format, expected',
     [
@@ -279,6 +280,7 @@ def test_update_scm_url(scm_type, url, username, password, check_special_cases, 
         assert str(excinfo.value) == str(expected)
     else:
         assert common.update_scm_url(scm_type, url, username, password, check_special_cases, scp_format) == expected
+
 
 class TestHostnameRegexValidator:
     @pytest.fixture
