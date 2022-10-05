@@ -13,11 +13,7 @@ import {
 } from './SharedFields';
 import getProjectHelpStrings from '../Project.helptext';
 
-const GitSubForm = ({
-  credential,
-  onCredentialSelection,
-  scmUpdateOnLaunch,
-}) => {
+const GitSubForm = ({ credentialTypeId, scmUpdateOnLaunch }) => {
   const docsURL = `${getDocsBaseUrl(
     useConfig()
   )}/html/userguide/projects.html#manage-playbooks-using-source-control`;
@@ -35,10 +31,7 @@ const GitSubForm = ({
         tooltipMaxWidth="400px"
         tooltip={projectHelpStrings.sourceControlRefspec(docsURL)}
       />
-      <ScmCredentialFormField
-        credential={credential}
-        onCredentialSelection={onCredentialSelection}
-      />
+      <ScmCredentialFormField credentialTypeId={credentialTypeId} />
       <ScmTypeOptions scmUpdateOnLaunch={scmUpdateOnLaunch} />
     </>
   );

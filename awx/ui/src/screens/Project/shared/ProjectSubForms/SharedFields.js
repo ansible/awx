@@ -35,27 +35,23 @@ export const BranchFormField = ({ label }) => {
   );
 };
 
-export const ScmCredentialFormField = ({
-  credential,
-  onCredentialSelection,
-}) => {
-  const { setFieldValue, setFieldTouched } = useFormikContext();
+export const ScmCredentialFormField = ({ credentialTypeId }) => {
+  const { setFieldValue, setFieldTouched, values } = useFormikContext();
 
-  const onCredentialChange = useCallback(
+  const handleChange = useCallback(
     (value) => {
-      onCredentialSelection('scm', value);
       setFieldValue('credential', value);
       setFieldTouched('credential', true, false);
     },
-    [onCredentialSelection, setFieldValue, setFieldTouched]
+    [setFieldValue, setFieldTouched]
   );
 
   return (
     <CredentialLookup
-      credentialTypeId={credential.typeId}
+      credentialTypeId={credentialTypeId}
       label={t`Source Control Credential`}
-      value={credential.value}
-      onChange={onCredentialChange}
+      value={values.credential}
+      onChange={handleChange}
     />
   );
 };

@@ -8,19 +8,12 @@ import {
   ScmTypeOptions,
 } from './SharedFields';
 
-const ArchiveSubForm = ({
-  credential,
-  onCredentialSelection,
-  scmUpdateOnLaunch,
-}) => {
+const ArchiveSubForm = ({ credentialTypeId, scmUpdateOnLaunch }) => {
   const projectHelpText = getProjectHelpText();
   return (
     <>
       <UrlFormField tooltip={projectHelpText.archiveUrl} />
-      <ScmCredentialFormField
-        credential={credential}
-        onCredentialSelection={onCredentialSelection}
-      />
+      <ScmCredentialFormField credentialTypeId={credentialTypeId} />
       <ScmTypeOptions scmUpdateOnLaunch={scmUpdateOnLaunch} />
     </>
   );

@@ -1,7 +1,6 @@
 /* eslint no-nested-ternary: 0 */
 import React, { useCallback, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-
 import { t } from '@lingui/macro';
 import { Formik, useField, useFormikContext } from 'formik';
 import { Form, FormGroup, Title } from '@patternfly/react-core';
@@ -17,6 +16,7 @@ import ExecutionEnvironmentLookup from 'components/Lookup/ExecutionEnvironmentLo
 import { CredentialTypesAPI, ProjectsAPI } from 'api';
 import { required } from 'util/validators';
 import { FormColumnLayout, SubFormLayout } from 'components/FormLayout';
+import useRequest from 'hooks/useRequest';
 import getProjectHelpText from './Project.helptext';
 import {
   GitSubForm,
@@ -26,67 +26,12 @@ import {
   ManualSubForm,
 } from './ProjectSubForms';
 
-const fetchCredentials = async (credential) => {
-  const [
-    {
-      data: {
-        results: [scmCredentialType],
-      },
-    },
-    {
-      data: {
-        results: [insightsCredentialType],
-      },
-    },
-    {
-      data: {
-        results: [cryptographyCredentialType],
-      },
-    },
-  ] = await Promise.all([
-    CredentialTypesAPI.read({ kind: 'scm' }),
-    CredentialTypesAPI.read({ name: 'Insights' }),
-    CredentialTypesAPI.read({ kind: 'cryptography' }),
-  ]);
-
-  if (!credential) {
-    return {
-      scm: { typeId: scmCredentialType.id },
-      insights: { typeId: insightsCredentialType.id },
-      cryptography: { typeId: cryptographyCredentialType.id },
-    };
-  }
-
-  const { credential_type_id } = credential;
-  return {
-    scm: {
-      typeId: scmCredentialType.id,
-      value: credential_type_id === scmCredentialType.id ? credential : null,
-    },
-    insights: {
-      typeId: insightsCredentialType.id,
-      value:
-        credential_type_id === insightsCredentialType.id ? credential : null,
-    },
-    cryptography: {
-      typeId: cryptographyCredentialType.id,
-      value:
-        credential_type_id === cryptographyCredentialType.id
-          ? credential
-          : null,
-    },
-  };
-};
-
 function ProjectFormFields({
   project,
   project_base_dir,
   project_local_paths,
-  formik,
-  setCredentials,
-  setSignatureValidationCredentials,
-  credentials,
-  signatureValidationCredentials,
+  credentialTypeIds,
+
   scmTypeOptions,
   setScmSubFormState,
   scmSubFormState,
@@ -96,8 +41,7 @@ function ProjectFormFields({
     scm_url: '',
     scm_branch: '',
     scm_refspec: '',
-    credential: '',
-    signature_validation_credential: '',
+    credential: null,
     scm_clean: false,
     scm_delete_on_update: false,
     scm_track_submodules: false,
@@ -105,7 +49,8 @@ function ProjectFormFields({
     allow_override: false,
     scm_update_cache_timeout: 0,
   };
-  const { setFieldValue, setFieldTouched } = useFormikContext();
+  const { setFieldValue, setFieldTouched, values, initialValues } =
+    useFormikContext();
 
   const [scmTypeField, scmTypeMeta, scmTypeHelpers] = useField({
     name: 'scm_type',
@@ -121,11 +66,11 @@ function ProjectFormFields({
   ] = useField('default_environment');
 
   /* Save current scm subform field values to state */
-  const saveSubFormState = (form) => {
+  const saveSubFormState = () => {
     const currentScmFormFields = { ...scmFormFields };
 
     Object.keys(currentScmFormFields).forEach((label) => {
-      currentScmFormFields[label] = form.values[label];
+      currentScmFormFields[label] = values[label];
     });
 
     setScmSubFormState(currentScmFormFields);
@@ -137,58 +82,27 @@ function ProjectFormFields({
    * If scm type is === the initial scm type value,
    * reset scm subform field values to scmSubFormState.
    */
-  const resetScmTypeFields = (value, form) => {
-    if (form.values.scm_type === form.initialValues.scm_type) {
-      saveSubFormState(formik);
+  const resetScmTypeFields = (value) => {
+    if (values.scm_type === initialValues.scm_type) {
+      saveSubFormState();
     }
 
     Object.keys(scmFormFields).forEach((label) => {
-      if (value === form.initialValues.scm_type) {
-        form.setFieldValue(label, scmSubFormState[label]);
+      if (value === initialValues.scm_type) {
+        setFieldValue(label, scmSubFormState[label]);
       } else {
-        form.setFieldValue(label, scmFormFields[label]);
+        setFieldValue(label, scmFormFields[label]);
       }
-      form.setFieldTouched(label, false);
+      setFieldTouched(label, false);
     });
   };
 
-  const handleCredentialSelection = useCallback(
-    (type, value) => {
-      setCredentials({
-        ...credentials,
-        [type]: {
-          ...credentials[type],
-          value,
-        },
-      });
-    },
-    [credentials, setCredentials]
-  );
-
-  const handleSignatureValidationCredentialSelection = useCallback(
-    (type, value) => {
-      setSignatureValidationCredentials({
-        ...signatureValidationCredentials,
-        [type]: {
-          ...signatureValidationCredentials[type],
-          value,
-        },
-      });
-    },
-    [signatureValidationCredentials, setSignatureValidationCredentials]
-  );
-
   const handleSignatureValidationCredentialChange = useCallback(
-    (value) => {
-      handleSignatureValidationCredentialSelection('cryptography', value);
-      setFieldValue('signature_validation_credential', value);
+    (cred) => {
+      setFieldValue('signature_validation_credential', cred);
       setFieldTouched('signature_validation_credential', true, false);
     },
-    [
-      handleSignatureValidationCredentialSelection,
-      setFieldValue,
-      setFieldTouched,
-    ]
+    [setFieldTouched, setFieldValue]
   );
 
   const handleOrganizationUpdate = useCallback(
@@ -281,18 +195,18 @@ function ProjectFormFields({
           ]}
           onChange={(event, value) => {
             scmTypeHelpers.setValue(value);
-            resetScmTypeFields(value, formik);
+            resetScmTypeFields(value);
           }}
         />
       </FormGroup>
       <CredentialLookup
-        credentialTypeId={signatureValidationCredentials.cryptography.typeId}
+        credentialTypeId={credentialTypeIds?.cryptography}
         label={t`Content Signature Validation Credential`}
         onChange={handleSignatureValidationCredentialChange}
-        value={signatureValidationCredentials.cryptography.value}
+        value={values.signature_validation_credential}
         tooltip={projectHelpText.signatureValidation}
       />
-      {formik.values.scm_type !== '' && (
+      {values.scm_type !== '' && (
         <SubFormLayout>
           <Title size="md" headingLevel="h4">
             {t`Type Details`}
@@ -302,43 +216,39 @@ function ProjectFormFields({
               {
                 manual: (
                   <ManualSubForm
-                    localPath={formik.initialValues.local_path}
+                    localPath={initialValues.local_path}
                     project_base_dir={project_base_dir}
                     project_local_paths={project_local_paths}
                   />
                 ),
                 git: (
                   <GitSubForm
-                    credential={credentials.scm}
-                    onCredentialSelection={handleCredentialSelection}
-                    scmUpdateOnLaunch={formik.values.scm_update_on_launch}
+                    credentialTypeId={credentialTypeIds.scm}
+                    scmUpdateOnLaunch={values.scm_update_on_launch}
                   />
                 ),
                 svn: (
                   <SvnSubForm
-                    credential={credentials.scm}
-                    onCredentialSelection={handleCredentialSelection}
-                    scmUpdateOnLaunch={formik.values.scm_update_on_launch}
+                    credentialTypeId={credentialTypeIds.scm}
+                    scmUpdateOnLaunch={values.scm_update_on_launch}
                   />
                 ),
                 archive: (
                   <ArchiveSubForm
-                    credential={credentials.scm}
-                    onCredentialSelection={handleCredentialSelection}
-                    scmUpdateOnLaunch={formik.values.scm_update_on_launch}
+                    credentialTypeId={credentialTypeIds.scm}
+                    scmUpdateOnLaunch={values.scm_update_on_launch}
                   />
                 ),
                 insights: (
                   <InsightsSubForm
-                    credential={credentials.insights}
-                    onCredentialSelection={handleCredentialSelection}
-                    scmUpdateOnLaunch={formik.values.scm_update_on_launch}
+                    credentialTypeId={credentialTypeIds.insights}
+                    scmUpdateOnLaunch={values.scm_update_on_launch}
                     autoPopulateCredential={
                       !project?.id || project?.scm_type !== 'insights'
                     }
                   />
                 ),
-              }[formik.values.scm_type]
+              }[values.scm_type]
             }
           </FormColumnLayout>
         </SubFormLayout>
@@ -348,16 +258,13 @@ function ProjectFormFields({
 }
 function ProjectForm({ project, submitError, ...props }) {
   const { handleCancel, handleSubmit } = props;
-  const { summary_fields = {} } = project;
+
   const { project_base_dir, project_local_paths } = useConfig();
-  const [contentError, setContentError] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [scmSubFormState, setScmSubFormState] = useState({
     scm_url: '',
     scm_branch: '',
     scm_refspec: '',
-    credential: '',
-    signature_validation_credential: '',
+    credential: null,
     scm_clean: false,
     scm_delete_on_update: false,
     scm_track_submodules: false,
@@ -365,27 +272,16 @@ function ProjectForm({ project, submitError, ...props }) {
     allow_override: false,
     scm_update_cache_timeout: 0,
   });
-  const [scmTypeOptions, setScmTypeOptions] = useState(null);
-  const [credentials, setCredentials] = useState({
-    scm: { typeId: null, value: null },
-    insights: { typeId: null, value: null },
-    cryptography: { typeId: null, value: null },
-  });
-  const [signatureValidationCredentials, setSignatureValidationCredentials] =
-    useState({
-      scm: { typeId: null, value: null },
-      insights: { typeId: null, value: null },
-      cryptography: { typeId: null, value: null },
-    });
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const credentialResponse = fetchCredentials(summary_fields.credential);
-        const signatureValidationCredentialResponse = fetchCredentials(
-          summary_fields.signature_validation_credential
-        );
-        const {
+  const {
+    result: { scmTypeOptions, credentialTypeIds },
+    error: contentError,
+    isLoading,
+    request: fetchData,
+  } = useRequest(
+    useCallback(async () => {
+      const [
+        {
           data: {
             actions: {
               GET: {
@@ -393,25 +289,47 @@ function ProjectForm({ project, submitError, ...props }) {
               },
             },
           },
-        } = await ProjectsAPI.readOptions();
-
-        setCredentials(await credentialResponse);
-        setSignatureValidationCredentials(
-          await signatureValidationCredentialResponse
-        );
-        setScmTypeOptions(choices);
-      } catch (error) {
-        setContentError(error);
-      } finally {
-        setIsLoading(false);
-      }
+        },
+        {
+          data: {
+            results: [scmCredentialType],
+          },
+        },
+        {
+          data: {
+            results: [insightsCredentialType],
+          },
+        },
+        {
+          data: {
+            results: [cryptographyCredentialType],
+          },
+        },
+      ] = await Promise.all([
+        ProjectsAPI.readOptions(),
+        CredentialTypesAPI.read({ kind: 'scm' }),
+        CredentialTypesAPI.read({ name: 'Insights' }),
+        CredentialTypesAPI.read({ kind: 'cryptography' }),
+      ]);
+      return {
+        scmTypeOptions: choices,
+        credentialTypeIds: {
+          scm: scmCredentialType.id,
+          insights: insightsCredentialType.id,
+          cryptography: cryptographyCredentialType.id,
+        },
+      };
+    }, []),
+    {
+      scmTypeOptions: [],
+      credentialTypeIds: { scm: '', insights: '', cryptography: '' },
+      isLoading: true,
     }
+  );
 
+  useEffect(() => {
     fetchData();
-  }, [
-    summary_fields.credential,
-    summary_fields.signature_validation_credential,
-  ]);
+  }, [fetchData]);
 
   if (isLoading) {
     return <ContentLoading />;
@@ -426,11 +344,11 @@ function ProjectForm({ project, submitError, ...props }) {
       initialValues={{
         allow_override: project.allow_override || false,
         base_dir: project_base_dir || '',
-        credential: project.credential || '',
+        credential: project?.summary_fields?.credential || null,
         description: project.description || '',
         local_path: project.local_path || '',
         name: project.name || '',
-        organization: project.summary_fields?.organization || null,
+        organization: project?.summary_fields?.organization || null,
         scm_branch: project.scm_branch || '',
         scm_clean: project.scm_clean || false,
         scm_delete_on_update: project.scm_delete_on_update || false,
@@ -446,7 +364,7 @@ function ProjectForm({ project, submitError, ...props }) {
         scm_update_on_launch: project.scm_update_on_launch || false,
         scm_url: project.scm_url || '',
         signature_validation_credential:
-          project.signature_validation_credential || '',
+          project?.summary_fields?.signature_validation_credential || null,
         default_environment:
           project.summary_fields?.default_environment || null,
       }}
@@ -459,13 +377,7 @@ function ProjectForm({ project, submitError, ...props }) {
               project={project}
               project_base_dir={project_base_dir}
               project_local_paths={project_local_paths}
-              formik={formik}
-              setCredentials={setCredentials}
-              setSignatureValidationCredentials={
-                setSignatureValidationCredentials
-              }
-              credentials={credentials}
-              signatureValidationCredentials={signatureValidationCredentials}
+              credentialTypeIds={credentialTypeIds}
               scmTypeOptions={scmTypeOptions}
               setScmSubFormState={setScmSubFormState}
               scmSubFormState={scmSubFormState}

@@ -10,20 +10,13 @@ import {
   ScmTypeOptions,
 } from './SharedFields';
 
-const SvnSubForm = ({
-  credential,
-  onCredentialSelection,
-  scmUpdateOnLaunch,
-}) => {
+const SvnSubForm = ({ credentialTypeId, scmUpdateOnLaunch }) => {
   const projectHelpStrings = getProjectHelpStrings();
   return (
     <>
       <UrlFormField tooltip={projectHelpStrings.svnSourceControlUrl} />
       <BranchFormField label={t`Revision #`} />
-      <ScmCredentialFormField
-        credential={credential}
-        onCredentialSelection={onCredentialSelection}
-      />
+      <ScmCredentialFormField credentialTypeId={credentialTypeId} />
       <ScmTypeOptions scmUpdateOnLaunch={scmUpdateOnLaunch} />
     </>
   );

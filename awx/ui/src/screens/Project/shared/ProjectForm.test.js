@@ -132,8 +132,7 @@ describe('<ProjectForm />', () => {
         <ProjectForm handleSubmit={jest.fn()} handleCancel={jest.fn()} />
       );
     });
-
-    expect(wrapper.find('ProjectForm').length).toBe(1);
+    waitForElement(wrapper, 'ProjectForm', (el) => el.length === 1);
   });
 
   test('new form displays primary form fields', async () => {
@@ -149,6 +148,10 @@ describe('<ProjectForm />', () => {
     expect(wrapper.find('FormGroup[label="Source Control Type"]').length).toBe(
       1
     );
+    expect(
+      wrapper.find('FormGroup[label="Content Signature Validation Credential"]')
+        .length
+    ).toBe(1);
     expect(wrapper.find('FormGroup[label="Ansible Environment"]').length).toBe(
       0
     );
@@ -163,7 +166,7 @@ describe('<ProjectForm />', () => {
     });
     await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     await act(async () => {
-      await wrapper.find('AnsibleSelect[id="scm_type"]').invoke('onChange')(
+      wrapper.find('AnsibleSelect[id="scm_type"]').invoke('onChange')(
         null,
         'git'
       );
@@ -179,15 +182,7 @@ describe('<ProjectForm />', () => {
       wrapper.find('FormGroup[label="Source Control Refspec"]').length
     ).toBe(1);
     expect(
-      wrapper.find('FormGroup[label="Content Signature Validation Credential"]')
-        .length
-    ).toBe(1);
-    expect(
       wrapper.find('FormGroup[label="Source Control Credential"]').length
-    ).toBe(1);
-    expect(
-      wrapper.find('FormGroup[label="Content Signature Validation Credential"]')
-        .length
     ).toBe(1);
     expect(wrapper.find('FormGroup[label="Options"]').length).toBe(1);
   });

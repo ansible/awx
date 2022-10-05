@@ -31,6 +31,7 @@ describe('<ProjectEdit />', () => {
     summary_fields: {
       credential: {
         id: 100,
+        name: 'insights',
         credential_type_id: 5,
         kind: 'insights',
       },

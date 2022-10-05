@@ -1,39 +1,37 @@
 import React, { useCallback } from 'react';
 
 import { t } from '@lingui/macro';
-import { useField, useFormikContext } from 'formik';
+import { useFormikContext, useField } from 'formik';
 import CredentialLookup from 'components/Lookup/CredentialLookup';
 import { required } from 'util/validators';
 import { ScmTypeOptions } from './SharedFields';
 
 const InsightsSubForm = ({
-  credential,
-  onCredentialSelection,
+  credentialTypeId,
   scmUpdateOnLaunch,
   autoPopulateCredential,
 }) => {
   const { setFieldValue, setFieldTouched } = useFormikContext();
-  const [, credMeta, credHelpers] = useField('credential');
+  const [credField, credMeta, credHelpers] = useField('credential');
 
   const onCredentialChange = useCallback(
     (value) => {
-      onCredentialSelection('insights', value);
       setFieldValue('credential', value);
       setFieldTouched('credential', true, false);
     },
-    [onCredentialSelection, setFieldValue, setFieldTouched]
+    [setFieldValue, setFieldTouched]
   );
 
   return (
     <>
       <CredentialLookup
-        credentialTypeId={credential.typeId}
+        credentialTypeId={credentialTypeId}
         label={t`Insights Credential`}
         helperTextInvalid={credMeta.error}
         isValid={!credMeta.touched || !credMeta.error}
         onBlur={() => credHelpers.setTouched()}
         onChange={onCredentialChange}
-        value={credential.value}
+        value={credField.value}
         required
         autoPopulate={autoPopulateCredential}
         validate={required(t`Select a value for this field`)}
