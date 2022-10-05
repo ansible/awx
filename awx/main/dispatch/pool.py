@@ -24,6 +24,7 @@ import psutil
 from awx.main.models import UnifiedJob
 from awx.main.dispatch import reaper
 from awx.main.utils.common import convert_mem_str_to_bytes, get_mem_effective_capacity, log_excess_runtime
+from awx.main.constants import ACTIVE_STATES
 
 if 'run_callback_receiver' in sys.argv:
     logger = logging.getLogger('awx.main.commands.run_callback_receiver')
@@ -383,8 +384,8 @@ class AutoscalePool(WorkerPool):
                 if w.current_task:
                     if w.current_task != 'QUIT':
                         try:
-                            for j in UnifiedJob.objects.filter(celery_task_id=w.current_task['uuid']):
-                                reaper.reap_job(j, 'failed')
+                            for j in UnifiedJob.objects.filter(celery_task_id=w.current_task['uuid'], status__in=ACTIVE_STATES):
+                                reaper.reap_job(j, 'failed', job_explanation=f'The controller process for this job is no longer alive, exit code {w.exitcode}')
                         except Exception:
                             logger.exception('failed to reap job UUID {}'.format(w.current_task['uuid']))
                 orphaned.extend(w.orphaned_tasks)
