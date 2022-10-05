@@ -180,8 +180,6 @@ function ManagementJob({ setBreadcrumb }) {
                 loadSchedules={loadSchedules}
                 loadScheduleOptions={loadScheduleOptions}
                 setBreadcrumb={setBreadcrumb}
-                launchConfig={{}}
-                surveyConfig={{}}
               />
             </Route>
           ) : null}
