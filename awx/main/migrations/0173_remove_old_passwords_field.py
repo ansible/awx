@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0171_add_health_check_started'),
+        ('main', '0172_prevent_instance_fallback'),
     ]
 
     operations = [
