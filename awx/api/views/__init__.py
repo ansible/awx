@@ -3627,7 +3627,6 @@ class JobCreateSchedule(RetrieveAPIView):
             enabled=False,
             rrule='{}Z RRULE:FREQ=MONTHLY;INTERVAL=1'.format(now().strftime('DTSTART:%Y%m%dT%H%M%S')),
             extra_data=config.extra_data,
-            survey_passwords=config.survey_passwords,
             inventory=config.inventory,
             execution_environment=config.execution_environment,
             char_prompts=config.char_prompts,

@@ -3689,7 +3689,7 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
         ret = super(LaunchConfigurationBaseSerializer, self).to_representation(obj)
         if obj is None:
             return ret
-        if 'extra_data' in ret and obj.survey_passwords:
+        if 'extra_data' in ret:
             ret['extra_data'] = obj.display_extra_vars()
         return ret
 
@@ -3712,31 +3712,28 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
                     ret[fd] = attrs[fd]
             return ret
 
-        # build additional field survey_passwords to track redacted variables
-        password_dict = {}
+        # find any survey passwords that might need to be encrypted
+        password_list = []
         extra_data = parse_yaml_or_json(attrs.get('extra_data', {}))
         if hasattr(ujt, 'survey_password_variables'):
-            # Prepare additional field survey_passwords for save
             for key in ujt.survey_password_variables():
                 if key in extra_data:
-                    password_dict[key] = REPLACE_STR
+                    password_list.append(key)
 
         # Replace $encrypted$ submissions with db value if exists
         if 'extra_data' in attrs:
-            if password_dict:
-                if not self.instance or password_dict != self.instance.survey_passwords:
-                    attrs['survey_passwords'] = password_dict.copy()
+            if password_list:
                 # Force dict type (cannot preserve YAML formatting if passwords are involved)
                 # Encrypt the extra_data for save, only current password vars in JT survey
                 # but first, make a copy or else this is referenced by request.data, and
                 # user could get encrypted string in form data in API browser
                 attrs['extra_data'] = extra_data.copy()
-                encrypt_dict(attrs['extra_data'], password_dict.keys())
+                encrypt_dict(attrs['extra_data'], password_list)
                 # For any raw $encrypted$ string, either
                 # - replace with existing DB value
                 # - raise a validation error
                 # - ignore, if default present
-                for key in password_dict.keys():
+                for key in password_list:
                     if attrs['extra_data'].get(key, None) == REPLACE_STR:
                         if key not in db_extra_data:
                             element = ujt.pivot_spec(ujt.survey_spec)[key]
@@ -3757,12 +3754,11 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
             errors = {}
 
         # Remove all unprocessed $encrypted$ strings, indicating default usage
-        if 'extra_data' in attrs and password_dict:
+        if 'extra_data' in attrs and password_list:
             for key, value in attrs['extra_data'].copy().items():
                 if value == REPLACE_STR:
-                    if key in password_dict:
+                    if key in password_list:
                         attrs['extra_data'].pop(key)
-                        attrs.get('survey_passwords', {}).pop(key, None)
                     else:
                         errors.setdefault('extra_vars', []).append(_('"$encrypted$ is a reserved keyword, may not be used for {}."'.format(key)))
 
