@@ -3,6 +3,7 @@
 # Copyright (c) 2017 Ansible, Inc.
 # All Rights Reserved.
 import os
+import re
 import pytest
 from uuid import uuid4
 import json
@@ -12,8 +13,12 @@ from unittest import mock
 from rest_framework.exceptions import ParseError
 
 from awx.main.utils import common
+from awx.api.validators import HostnameRegexValidator
 
 from awx.main.models import Job, AdHocCommand, InventoryUpdate, ProjectUpdate, SystemJob, WorkflowJob, Inventory, JobTemplate, UnifiedJobTemplate, UnifiedJob
+
+from django.core.exceptions import ValidationError
+from django.utils.regex_helper import _lazy_re_compile
 
 
 @pytest.mark.parametrize(
@@ -275,3 +280,55 @@ def test_update_scm_url(scm_type, url, username, password, check_special_cases, 
         assert str(excinfo.value) == str(expected)
     else:
         assert common.update_scm_url(scm_type, url, username, password, check_special_cases, scp_format) == expected
+
+
+class TestHostnameRegexValidator:
+    @pytest.fixture
+    def regex_expr(self):
+        return '^[a-z0-9][-a-z0-9]*$|^([a-z0-9][-a-z0-9]{0,62}[.])*[a-z0-9][-a-z0-9]{1,62}$'
+
+    @pytest.fixture
+    def re_flags(self):
+        return re.IGNORECASE
+
+    @pytest.fixture
+    def custom_err_message(self):
+        return "foobar"
+
+    def test_hostame_regex_validator_constructor_with_args(self, regex_expr, re_flags, custom_err_message):
+        h = HostnameRegexValidator(regex=regex_expr, flags=re_flags, message=custom_err_message)
+        assert h.regex == _lazy_re_compile(regex_expr, re_flags)
+        assert h.message == 'foobar'
+        assert h.code == 'invalid'
+        assert h.inverse_match == False
+        assert h.flags == re_flags
+
+    def test_hostame_regex_validator_default_constructor(self, regex_expr, re_flags):
+        h = HostnameRegexValidator()
+        assert h.regex == _lazy_re_compile(regex_expr, re_flags)
+        assert h.message == 'Enter a valid value.'
+        assert h.code == 'invalid'
+        assert h.inverse_match == False
+        assert h.flags == re_flags
+
+    def test_good_call(self, regex_expr, re_flags):
+        h = HostnameRegexValidator(regex=regex_expr, flags=re_flags)
+        assert (h("192.168.56.101"), None)
+
+    def test_bad_call(self, regex_expr, re_flags):
+        h = HostnameRegexValidator(regex=regex_expr, flags=re_flags)
+        try:
+            h("@#$%)$#(TUFAS_DG")
+        except ValidationError as e:
+            assert e.message is not None
+
+    def test_good_call_with_inverse(self, regex_expr, re_flags, inverse_match=True):
+        h = HostnameRegexValidator(regex=regex_expr, flags=re_flags, inverse_match=inverse_match)
+        try:
+            h("1.2.3.4")
+        except ValidationError as e:
+            assert e.message is not None
+
+    def test_bad_call_with_inverse(self, regex_expr, re_flags, inverse_match=True):
+        h = HostnameRegexValidator(regex=regex_expr, flags=re_flags, inverse_match=inverse_match)
+        assert (h("@#$%)$#(TUFAS_DG"), None)

@@ -29,6 +29,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.encoding import force_str
 from django.utils.text import capfirst
 from django.utils.timezone import now
+from django.core.validators import RegexValidator, MaxLengthValidator
 
 # Django REST Framework
 from rest_framework.exceptions import ValidationError, PermissionDenied
@@ -119,6 +120,9 @@ from awx.main.validators import vars_validate_or_raise
 
 from awx.api.versioning import reverse
 from awx.api.fields import BooleanNullField, CharNullField, ChoiceNullField, VerbatimField, DeprecatedCredentialField
+
+# AWX Utils
+from awx.api.validators import HostnameRegexValidator
 
 logger = logging.getLogger('awx.api.serializers')
 
@@ -4921,6 +4925,18 @@ class InstanceSerializer(BaseSerializer):
         extra_kwargs = {
             'node_type': {'initial': Instance.Types.EXECUTION, 'default': Instance.Types.EXECUTION},
             'node_state': {'initial': Instance.States.INSTALLED, 'default': Instance.States.INSTALLED},
+            'hostname': {
+                'validators': [
+                    MaxLengthValidator(limit_value=255),
+                    RegexValidator(
+                        regex='^localhost$|^127(?:\.[0-9]+){0,2}\.[0-9]+$|^(?:0*\:)*?:?0*1$',
+                        flags=re.IGNORECASE,
+                        inverse_match=True,
+                        message="hostname cannot be localhost or 127.0.0.1",
+                    ),
+                    HostnameRegexValidator(),
+                ],
+            },
         }
 
     def get_related(self, obj):
@@ -4991,6 +5007,10 @@ class InstanceSerializer(BaseSerializer):
         return value
 
     def validate_hostname(self, value):
+        """
+        - Hostname cannot be "localhost" - but can be something like localhost.domain
+        - Cannot change the hostname of an-already instantiated & initialized Instance object
+        """
         if self.instance and self.instance.hostname != value:
             raise serializers.ValidationError("Cannot change hostname.")
 
