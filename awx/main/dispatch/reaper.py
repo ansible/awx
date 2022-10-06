@@ -16,12 +16,7 @@ def startup_reaping():
     If this particular instance is starting, then we know that any running jobs are invalid
     so we will reap those jobs as a special action here
     """
-    try:
-        me = Instance.objects.me()
-    except RuntimeError as e:
-        logger.warning(f'Local instance is not registered, not running startup reaper: {e}')
-        return
-    jobs = UnifiedJob.objects.filter(status='running', controller_node=me.hostname)
+    jobs = UnifiedJob.objects.filter(status='running', controller_node=Instance.objects.my_hostname())
     job_ids = []
     for j in jobs:
         job_ids.append(j.id)
@@ -62,16 +57,13 @@ def reap_waiting(instance=None, status='failed', job_explanation=None, grace_per
     if grace_period is None:
         grace_period = settings.JOB_WAITING_GRACE_PERIOD + settings.TASK_MANAGER_TIMEOUT
 
-    me = instance
-    if me is None:
-        try:
-            me = Instance.objects.me()
-        except RuntimeError as e:
-            logger.warning(f'Local instance is not registered, not running reaper: {e}')
-            return
+    if instance is None:
+        hostname = Instance.objects.my_hostname()
+    else:
+        hostname = instance.hostname
     if ref_time is None:
         ref_time = tz_now()
-    jobs = UnifiedJob.objects.filter(status='waiting', modified__lte=ref_time - timedelta(seconds=grace_period), controller_node=me.hostname)
+    jobs = UnifiedJob.objects.filter(status='waiting', modified__lte=ref_time - timedelta(seconds=grace_period), controller_node=hostname)
     if excluded_uuids:
         jobs = jobs.exclude(celery_task_id__in=excluded_uuids)
     for j in jobs:
@@ -82,16 +74,13 @@ def reap(instance=None, status='failed', job_explanation=None, excluded_uuids=No
     """
     Reap all jobs in running for this instance.
     """
-    me = instance
-    if me is None:
-        try:
-            me = Instance.objects.me()
-        except RuntimeError as e:
-            logger.warning(f'Local instance is not registered, not running reaper: {e}')
-            return
+    if instance is None:
+        hostname = Instance.objects.my_hostname()
+    else:
+        hostname = instance.hostname
     workflow_ctype_id = ContentType.objects.get_for_model(WorkflowJob).id
     jobs = UnifiedJob.objects.filter(
-        Q(status='running') & (Q(execution_node=me.hostname) | Q(controller_node=me.hostname)) & ~Q(polymorphic_ctype_id=workflow_ctype_id)
+        Q(status='running') & (Q(execution_node=hostname) | Q(controller_node=hostname)) & ~Q(polymorphic_ctype_id=workflow_ctype_id)
     )
     if excluded_uuids:
         jobs = jobs.exclude(celery_task_id__in=excluded_uuids)

@@ -35,7 +35,7 @@ def unwrap_broadcast_msg(payload: dict):
 def get_broadcast_hosts():
     Instance = apps.get_model('main', 'Instance')
     instances = (
-        Instance.objects.exclude(hostname=Instance.objects.me().hostname)
+        Instance.objects.exclude(hostname=Instance.objects.my_hostname())
         .exclude(node_type='execution')
         .exclude(node_type='hop')
         .order_by('hostname')
@@ -47,7 +47,7 @@ def get_broadcast_hosts():
 
 def get_local_host():
     Instance = apps.get_model('main', 'Instance')
-    return Instance.objects.me().hostname
+    return Instance.objects.my_hostname()
 
 
 class WebsocketTask:
