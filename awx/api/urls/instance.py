@@ -9,9 +9,9 @@ from awx.api.views import (
     InstanceUnifiedJobsList,
     InstanceInstanceGroupsList,
     InstanceHealthCheck,
-    InstanceInstallBundle,
     InstancePeersList,
 )
+from awx.api.views.instance_install_bundle import InstanceInstallBundle
 
 
 urls = [
