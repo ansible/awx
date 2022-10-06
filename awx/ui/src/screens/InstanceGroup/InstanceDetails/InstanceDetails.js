@@ -23,6 +23,7 @@ import ErrorDetail from 'components/ErrorDetail';
 import DisassociateButton from 'components/DisassociateButton';
 import InstanceToggle from 'components/InstanceToggle';
 import { CardBody, CardActionsRow } from 'components/Card';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
 import { formatDateString } from 'util/dates';
 import RoutedTabs from 'components/RoutedTabs';
 import ContentError from 'components/ContentError';
@@ -62,7 +63,7 @@ function computeForks(memCapacity, cpuCapacity, selectedCapacityAdjustment) {
 }
 
 function InstanceDetails({ setBreadcrumb, instanceGroup }) {
-  const { me = {} } = useConfig();
+  const config = useConfig();
   const { id, instanceId } = useParams();
   const history = useHistory();
 
@@ -226,7 +227,21 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
           <Detail label={t`Total Jobs`} value={instance.jobs_total} />
           <Detail
             label={t`Last Health Check`}
-            helpText={t`Health checks are asynchronous tasks. See the docs for more details.`}
+            helpText={
+              <>
+                {t`Health checks are asynchronous tasks. See the`}{' '}
+                <a
+                  href={`${getDocsBaseUrl(
+                    config
+                  )}/html/administration/instances.html#health-check`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {t`documentation`}
+                </a>{' '}
+                {t`for more info.`}
+              </>
+            }
             value={formatHealthCheckTimeStamp(instance.last_health_check)}
           />
           <Detail label={t`Node Type`} value={instance.node_type} />
@@ -246,7 +261,7 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
                     step={0.1}
                     value={instance.capacity_adjustment}
                     onChange={handleChangeValue}
-                    isDisabled={!me?.is_superuser || !instance.enabled}
+                    isDisabled={!config?.me?.is_superuser || !instance.enabled}
                     data-cy="slider"
                   />
                 </SliderForks>
@@ -286,7 +301,9 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
           {isExecutionNode && (
             <Tooltip content={t`Run a health check on the instance`}>
               <Button
-                isDisabled={!me.is_superuser || instance.health_check_pending}
+                isDisabled={
+                  !config?.me?.is_superuser || instance.health_check_pending
+                }
                 variant="primary"
                 ouiaId="health-check-button"
                 onClick={fetchHealthCheck}
@@ -299,7 +316,7 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
               </Button>
             </Tooltip>
           )}
-          {me.is_superuser && instance.node_type !== 'control' && (
+          {config?.me?.is_superuser && instance.node_type !== 'control' && (
             <DisassociateButton
               verifyCannotDisassociate={instanceGroup.name === 'controlplane'}
               key="disassociate"

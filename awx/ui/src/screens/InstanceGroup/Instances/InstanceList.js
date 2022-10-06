@@ -58,11 +58,9 @@ function InstanceList({ instanceGroup }) {
         InstanceGroupsAPI.readInstances(instanceGroupId, params),
         InstanceGroupsAPI.readInstanceOptions(instanceGroupId),
       ]);
-      response.data.results.forEach((i) => {
-        if (i.health_check_pending === true) {
-          setPendingHealthCheck(true);
-        }
-      });
+      setPendingHealthCheck(
+        response?.data?.result?.some((i) => i.health_check_pending === true)
+      );
 
       return {
         instances: response.data.results,

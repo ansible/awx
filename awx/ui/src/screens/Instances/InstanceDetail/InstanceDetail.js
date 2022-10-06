@@ -23,6 +23,7 @@ import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';
 import InstanceToggle from 'components/InstanceToggle';
 import { CardBody, CardActionsRow } from 'components/Card';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
 import { formatDateString } from 'util/dates';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
@@ -62,7 +63,8 @@ function computeForks(memCapacity, cpuCapacity, selectedCapacityAdjustment) {
 }
 
 function InstanceDetail({ setBreadcrumb, isK8s }) {
-  const { me = {} } = useConfig();
+  const config = useConfig();
+
   const { id } = useParams();
   const [forks, setForks] = useState();
   const history = useHistory();
@@ -85,7 +87,6 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
         InstancesAPI.readDetail(id),
         InstancesAPI.readInstanceGroup(id),
       ]);
-      // we probably don't need this extra call
       if (details.node_type === 'execution') {
         const { data: healthCheckData } =
           await InstancesAPI.readHealthCheckDetail(id);
@@ -249,7 +250,21 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
               <Detail
                 label={t`Last Health Check`}
                 dataCy="last-health-check"
-                helpText={t`Health checks are asynchronous tasks. See the docs for more details.`}
+                helpText={
+                  <>
+                    {t`Health checks are asynchronous tasks. See the`}{' '}
+                    <a
+                      href={`${getDocsBaseUrl(
+                        config
+                      )}/html/administration/instances.html#health-check`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {t`documentation`}
+                    </a>{' '}
+                    {t`for more info.`}
+                  </>
+                }
                 value={formatHealthCheckTimeStamp(instance.last_health_check)}
               />
               {instance.related?.install_bundle && (
@@ -288,7 +303,9 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
                         step={0.1}
                         value={instance.capacity_adjustment}
                         onChange={handleChangeValue}
-                        isDisabled={!me?.is_superuser || !instance.enabled}
+                        isDisabled={
+                          !config?.me?.is_superuser || !instance.enabled
+                        }
                         data-cy="slider"
                       />
                     </SliderForks>
@@ -332,7 +349,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
         </DetailList>
         {!isHopNode && (
           <CardActionsRow>
-            {me.is_superuser && isK8s && instance.node_type === 'execution' && (
+            {config?.me?.is_superuser && isK8s && isExecutionNode && (
               <RemoveInstanceButton
                 dataCy="remove-instance-button"
                 itemsToRemove={[instance]}
@@ -343,7 +360,9 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
             {isExecutionNode && (
               <Tooltip content={t`Run a health check on the instance`}>
                 <Button
-                  isDisabled={!me.is_superuser || instance.health_check_pending}
+                  isDisabled={
+                    !config?.me?.is_superuser || instance.health_check_pending
+                  }
                   variant="primary"
                   ouiaId="health-check-button"
                   onClick={fetchHealthCheck}

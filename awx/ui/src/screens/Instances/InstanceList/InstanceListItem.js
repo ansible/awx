@@ -13,6 +13,7 @@ import {
 } from '@patternfly/react-core';
 import { OutlinedClockIcon } from '@patternfly/react-icons';
 import { Tr, Td, ExpandableRowContent } from '@patternfly/react-table';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
 import { formatDateString } from 'util/dates';
 import computeForks from 'util/computeForks';
 import { ActionsTd, ActionItem } from 'components/PaginatedTable';
@@ -53,7 +54,7 @@ function InstanceListItem({
   fetchInstances,
   rowIndex,
 }) {
-  const { me = {} } = useConfig();
+  const config = useConfig();
   const [forks, setForks] = useState(
     computeForks(
       instance.mem_capacity,
@@ -179,7 +180,7 @@ function InstanceListItem({
                     step={0.1}
                     value={instance.capacity_adjustment}
                     onChange={handleChangeValue}
-                    isDisabled={!me?.is_superuser || !instance.enabled}
+                    isDisabled={!config?.me?.is_superuser || !instance.enabled}
                     data-cy="slider"
                   />
                 </SliderForks>
@@ -236,7 +237,21 @@ function InstanceListItem({
                 <Detail
                   data-cy="last-health-check"
                   label={t`Last Health Check`}
-                  helpText={t`Health checks are asynchronous tasks. See the docs for more details.`}
+                  helpText={
+                    <>
+                      {t`Health checks are asynchronous tasks. See the`}{' '}
+                      <a
+                        href={`${getDocsBaseUrl(
+                          config
+                        )}/html/administration/instances.html#health-check`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {t`documentation`}
+                      </a>{' '}
+                      {t`for more info.`}
+                    </>
+                  }
                   value={formatHealthCheckTimeStamp(instance.last_health_check)}
                 />
               </DetailList>
