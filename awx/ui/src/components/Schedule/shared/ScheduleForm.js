@@ -67,14 +67,14 @@ function ScheduleForm({
       if (schedule.id) {
         if (
           resource.type === 'job_template' &&
-          launchConfig.ask_credential_on_launch
+          launchConfig?.ask_credential_on_launch
         ) {
           const {
             data: { results },
           } = await SchedulesAPI.readCredentials(schedule.id);
           creds = results;
         }
-        if (launchConfig.ask_labels_on_launch) {
+        if (launchConfig?.ask_labels_on_launch) {
           const {
             data: { results },
           } = await SchedulesAPI.readAllLabels(schedule.id);
@@ -82,7 +82,7 @@ function ScheduleForm({
         }
         if (
           resource.type === 'job_template' &&
-          launchConfig.ask_instance_groups_on_launch
+          launchConfig?.ask_instance_groups_on_launch
         ) {
           const {
             data: { results },
@@ -91,7 +91,7 @@ function ScheduleForm({
         }
       } else {
         if (resource.type === 'job_template') {
-          if (launchConfig.ask_labels_on_launch) {
+          if (launchConfig?.ask_labels_on_launch) {
             const {
               data: { results },
             } = await JobTemplatesAPI.readAllLabels(resource.id);
@@ -100,7 +100,7 @@ function ScheduleForm({
         }
         if (
           resource.type === 'workflow_job_template' &&
-          launchConfig.ask_labels_on_launch
+          launchConfig?.ask_labels_on_launch
         ) {
           const {
             data: { results },
@@ -123,14 +123,7 @@ function ScheduleForm({
         zoneLinks: data.links,
         credentials: creds,
       };
-    }, [
-      schedule,
-      resource.id,
-      resource.type,
-      launchConfig.ask_labels_on_launch,
-      launchConfig.ask_instance_groups_on_launch,
-      launchConfig.ask_credential_on_launch,
-    ]),
+    }, [schedule, resource.id, resource.type, launchConfig]),
     {
       zonesOptions: [],
       zoneLinks: {},
@@ -146,7 +139,7 @@ function ScheduleForm({
   const missingRequiredInventory = useCallback(() => {
     let missingInventory = false;
     if (
-      launchConfig.inventory_needed_to_start &&
+      launchConfig?.inventory_needed_to_start &&
       !schedule?.summary_fields?.inventory?.id
     ) {
       missingInventory = true;
