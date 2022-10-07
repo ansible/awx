@@ -31,7 +31,7 @@
     "react-router-dom": "^5.3.3",
     "react-virtualized": "^9.21.1",
     "rrule": "2.7.1",
-    "styled-components": "5.3.5"
+    "styled-components": "5.3.6"
   },
   "devDependencies": {
     "@babel/core": "^7.16.10",
