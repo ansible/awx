@@ -178,7 +178,7 @@ def generate_receptor_tls(instance_obj):
         .public_key(csr.public_key())
         .serial_number(x509.random_serial_number())
         .not_valid_before(datetime.datetime.utcnow())
-        .not_valid_after(datetime.datetime.utcnow() + datetime.timedelta(days=10))
+        .not_valid_after(datetime.datetime.utcnow() + datetime.timedelta(days=3650))
         .add_extension(
             csr.extensions.get_extension_for_class(x509.SubjectAlternativeName).value,
             critical=csr.extensions.get_extension_for_class(x509.SubjectAlternativeName).critical,
