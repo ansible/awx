@@ -37,7 +37,7 @@ const Wrapper = styled.div`
   padding: 0 10px;
   width: 25%;
   background-color: rgba(255, 255, 255, 0.85);
-  overflow: scroll;
+  overflow: auto;
   height: 100%;
 `;
 const Button = styled(PFButton)`
