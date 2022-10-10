@@ -101,10 +101,14 @@ register(
 def authentication_validate(serializer, attrs):
     remote_auth_settings = [
         'AUTH_LDAP_SERVER_URI',
+        'SOCIAL_AUTH_AZUREAD_OAUTH2_KEY',
         'SOCIAL_AUTH_GOOGLE_OAUTH2_KEY',
         'SOCIAL_AUTH_GITHUB_KEY',
         'SOCIAL_AUTH_GITHUB_ORG_KEY',
         'SOCIAL_AUTH_GITHUB_TEAM_KEY',
+        'SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY',
+        'SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_KEY',
+        'SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_KEY',
         'SOCIAL_AUTH_SAML_ENABLED_IDPS',
         'RADIUS_SERVER',
         'TACACSPLUS_HOST',
