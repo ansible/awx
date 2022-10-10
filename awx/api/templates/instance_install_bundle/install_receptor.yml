@@ -15,4 +15,8 @@
       pip:
         name: ansible-runner
         executable: pip3.9
+    - name: Install receptorctl
+      pip:
+        name: receptorctl
+        executable: pip3.9
 {% endverbatim %}
