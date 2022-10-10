@@ -5,6 +5,7 @@ import logging
 import threading
 import time
 import urllib.parse
+from pathlib import Path
 
 from django.conf import settings
 from django.contrib.auth import logout
@@ -202,16 +203,17 @@ class URLModificationMiddleware(MiddlewareMixin):
 
 @memoize(ttl=20)
 def is_migrating():
-    last_applied = MigrationRecorder(connection).migration_qs.order_by('-applied').only('name').first().name
-    last_number = int(last_applied.split('_', 1)[0])
-    for migration_name in dir(migrations):
+    latest_number = 0
+    latest_name = ''
+    for migration_path in Path(migrations.__path__[0]).glob('[0-9]*.py'):
         try:
-            migration_number = int(migration_name.split('_', 1)[0])
+            migration_number = int(migration_path.name.split('_', 1)[0])
         except ValueError:
             continue
-        if migration_number > last_number:
-            return True
-    return False
+        if migration_number > latest_number:
+            latest_number = migration_number
+            latest_name = migration_path.name[: -len('.py')]
+    return not MigrationRecorder(connection).migration_qs.filter(app='main', name=latest_name).exists()
 
 
 class MigrationRanCheckMiddleware(MiddlewareMixin):
