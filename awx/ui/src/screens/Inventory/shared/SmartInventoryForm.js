@@ -91,9 +91,7 @@ const SmartInventoryFormFields = ({ inventory }) => {
           id="variables"
           name="variables"
           label={t`Variables`}
-          tooltip={t`Enter inventory variables using either JSON or YAML syntax.
-            Use the radio button to toggle between the two. Refer to the
-            Ansible Controller documentation for example syntax.`}
+          tooltip={t`Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Controller documentation for example syntax.`}
         />
       </FormFullWidthLayout>
     </>
