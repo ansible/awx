@@ -1,0 +1,38 @@
+---
+name: Lock Dev Requirements
+on:
+  create:
+    branches:
+      - release_**
+jobs:
+  lock_dev_deeps:
+    if: ${{ contains(github.ref, 'refs/heads/release_') }}
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Get python version from Makefile
+        run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
+
+      - name: Install python ${{ env.py_version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.py_version }}
+
+      - name: Install required dependencies
+        run: pip install --no-deps -r ./requirements/requirements_dev.txt
+
+      - name: Create versioned requirements file
+        run: pip freeze > ./requirements/requirements_dev.txt
+
+      - name: Commit locked requirements
+        uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
+        with:
+          add: './requirements/requirements_dev.txt'
+          default_author: github_actions
+          message: 'Auto-generating locked dev requirements'
+          pathspec_error_handling: exitImmediately
+          push: true
