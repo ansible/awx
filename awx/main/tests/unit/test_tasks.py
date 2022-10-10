@@ -147,7 +147,7 @@ def test_work_success_callback_missing_job():
     task_data = {'type': 'project_update', 'id': 9999}
     with mock.patch('django.db.models.query.QuerySet.get') as get_mock:
         get_mock.side_effect = ProjectUpdate.DoesNotExist()
-        assert system.handle_work_success(task_data) is None
+        assert system.handle_work_finish(task_data) is None
 
 
 @mock.patch('awx.main.models.UnifiedJob.objects.get')

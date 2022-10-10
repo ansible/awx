@@ -55,7 +55,7 @@ from awx.main.utils.common import (
     ignore_inventory_computed_fields,
     ignore_inventory_group_removal,
     ScheduleWorkflowManager,
-    ScheduleTaskManager,
+    ScheduleDependencyManager,
 )
 
 from awx.main.utils.external_logging import reconfigure_rsyslog
@@ -702,63 +702,21 @@ def awx_periodic_scheduler():
 
 def schedule_manager_success_or_error(instance):
     if instance.unifiedjob_blocked_jobs.exists():
-        ScheduleTaskManager().schedule()
+        ScheduleDependencyManager().schedule()
     if instance.spawned_by_workflow:
         ScheduleWorkflowManager().schedule()
 
 
 @task(queue=get_local_queuename)
-def handle_work_success(task_actual):
+def handle_work_finish(task_actual):
     try:
         instance = UnifiedJob.get_instance_by_type(task_actual['type'], task_actual['id'])
     except ObjectDoesNotExist:
-        logger.warning('Missing {} `{}` in success callback.'.format(task_actual['type'], task_actual['id']))
+        logger.warning('Missing {} `{}` in finish callback.'.format(task_actual['type'], task_actual['id']))
         return
     if not instance:
         return
     schedule_manager_success_or_error(instance)
-
-
-@task(queue=get_local_queuename)
-def handle_work_error(task_id, *args, **kwargs):
-    subtasks = kwargs.get('subtasks', None)
-    logger.debug('Executing error task id %s, subtasks: %s' % (task_id, str(subtasks)))
-    first_instance = None
-    first_instance_type = ''
-    if subtasks is not None:
-        for each_task in subtasks:
-            try:
-                instance = UnifiedJob.get_instance_by_type(each_task['type'], each_task['id'])
-                if not instance:
-                    # Unknown task type
-                    logger.warning("Unknown task type: {}".format(each_task['type']))
-                    continue
-            except ObjectDoesNotExist:
-                logger.warning('Missing {} `{}` in error callback.'.format(each_task['type'], each_task['id']))
-                continue
-
-            if first_instance is None:
-                first_instance = instance
-                first_instance_type = each_task['type']
-
-            if instance.celery_task_id != task_id and not instance.cancel_flag and not instance.status in ('successful', 'failed'):
-                instance.status = 'failed'
-                instance.failed = True
-                if not instance.job_explanation:
-                    instance.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (
-                        first_instance_type,
-                        first_instance.name,
-                        first_instance.id,
-                    )
-                instance.save()
-                instance.websocket_emit_status("failed")
-
-    # We only send 1 job complete message since all the job completion message
-    # handling does is trigger the scheduler. If we extend the functionality of
-    # what the job complete message handler does then we may want to send a
-    # completion event for each job here.
-    if first_instance:
-        schedule_manager_success_or_error(first_instance)
 
 
 @task(queue=get_local_queuename)

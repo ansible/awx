@@ -40,6 +40,86 @@ def test_soft_unique_together(post, project, admin_user):
 
 
 @pytest.mark.django_db
+def test_job_fail_chain_shared_project(job_template_factory, scm_inventory_source):
+    scm_inventory_source.update_on_launch = True
+    scm_inventory_source.save()
+
+    project = scm_inventory_source.source_project
+    project.scm_update_on_launch = True
+    project.save()
+
+    objects = job_template_factory('jt', organization='org1', project=project, inventory=scm_inventory_source.inventory, credential='cred')
+    jt = objects.job_template
+    assert jt.project == scm_inventory_source.source_project
+
+    job = jt.create_unified_job()
+    job.signal_start()
+    iu = scm_inventory_source.inventory_updates.first()
+    pu = project.project_updates.first()
+    assert iu
+    assert pu
+    assert set(dep for dep in job.dependent_jobs.all()) == set([iu, pu])
+
+    assert job.get_cancel_chain() == []
+    assert iu.get_cancel_chain() == [job]
+    assert set(pu.get_cancel_chain()) == set([job, iu])
+
+
+@pytest.mark.django_db
+def test_job_fail_chain_different_projects(job_template_factory, scm_inventory_source):
+    scm_inventory_source.update_on_launch = True
+    scm_inventory_source.save()
+
+    project = scm_inventory_source.source_project
+    project.scm_update_on_launch = True
+    project.save()
+
+    objects = job_template_factory('jt', organization='org1', project='proj', inventory=scm_inventory_source.inventory, credential='cred')
+    jt = objects.job_template
+
+    jt.project.scm_update_on_launch = True
+    jt.project.save()
+
+    job = jt.create_unified_job()
+    job.signal_start()
+    iu = scm_inventory_source.inventory_updates.first()
+    assert iu
+    pu_inv = iu.dependent_jobs.first()
+    assert pu_inv
+    assert iu.dependent_jobs.count() == 1
+    pu_job = jt.project.project_updates.first()
+    assert set(dep for dep in job.dependent_jobs.all()) == set([iu, pu_inv, pu_job])
+
+    assert job.get_cancel_chain() == []
+    assert iu.get_cancel_chain() == [job]
+    assert set(pu_inv.get_cancel_chain()) == set([job, iu])
+    assert pu_job.get_cancel_chain() == [job]
+
+
+@pytest.mark.django_db
+def test_dependency_job_explanation_after_cancel(scm_inventory_source):
+    scm_inventory_source.update_on_launch = True
+    scm_inventory_source.save()
+
+    job = JobTemplate.objects.create(inventory=scm_inventory_source.inventory).create_unified_job()
+    job.signal_start()
+
+    dependent_jobs = list(job.dependent_jobs.all())
+    assert len(dependent_jobs) == 1
+    iu = dependent_jobs[0]
+    assert iu._meta.model_name == 'inventoryupdate'
+
+    iu.cancel()
+
+    job.refresh_from_db()
+    assert job.job_explanation == 'Previous Task Canceled: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (
+        'inventory_update',
+        iu.name,
+        iu.id,
+    )
+
+
+@pytest.mark.django_db
 class TestCreateUnifiedJob:
     """
     Ensure that copying a job template to a job handles many to many field copy

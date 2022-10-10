@@ -38,7 +38,6 @@ from awx.main.models.events import InventoryUpdateEvent, UnpartitionedInventoryU
 from awx.main.models.unified_jobs import UnifiedJob, UnifiedJobTemplate
 from awx.main.models.mixins import (
     ResourceMixin,
-    TaskManagerInventoryUpdateMixin,
     RelatedJobsMixin,
     CustomVirtualEnvMixin,
 )
@@ -1162,7 +1161,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
         return InventoryUpdate.objects.filter(inventory_source=self)
 
 
-class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, TaskManagerInventoryUpdateMixin, CustomVirtualEnvMixin):
+class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, CustomVirtualEnvMixin):
     """
     Internal job for tracking inventory updates from external sources.
     """
@@ -1275,6 +1274,25 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
 
     def get_notification_friendly_name(self):
         return "Inventory Update"
+
+    def get_cancel_chain(self):
+        r = super().get_cancel_chain()
+        # Special case for multiple inventory updates in same inventory
+        # If other sources in this same inventory are running as dependencies of the same job, cancel them too
+        for uj in r:
+            if uj._meta.model_name == 'job':
+                for inv_update in InventoryUpdate.objects.filter(unifiedjob_blocked_jobs=uj.id, inventory_id=self.inventory_id).exclude(id=self.id):
+                    if inv_update not in r:
+                        r.append(inv_update)
+                break
+        if self.source_project_update_id:
+            r.append(self.source_project_update)
+        return r
+
+    def dependent_templates(self):
+        if self.inventory_source and self.inventory_source.source_project and self.inventory_source.source_project.scm_update_on_launch:
+            return [self.inventory_source.source_project]
+        return super().dependent_templates()
 
     @property
     def preferred_instance_groups(self):

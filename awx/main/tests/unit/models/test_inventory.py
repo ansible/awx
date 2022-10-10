@@ -3,21 +3,8 @@ import pytest
 from django.core.exceptions import ValidationError
 
 from awx.main.models import (
-    InventoryUpdate,
     InventorySource,
 )
-
-
-def test__build_job_explanation():
-    iu = InventoryUpdate(id=3, name='I_am_an_Inventory_Update')
-
-    job_explanation = iu._build_job_explanation()
-
-    assert job_explanation == 'Previous Task Canceled: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (
-        'inventory_update',
-        'I_am_an_Inventory_Update',
-        3,
-    )
 
 
 class TestControlledBySCM:

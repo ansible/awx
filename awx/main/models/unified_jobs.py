@@ -35,7 +35,7 @@ from awx.main.models.base import CommonModelNameNotUnique, PasswordFieldsModel, 
 from awx.main.dispatch import get_local_queuename
 from awx.main.dispatch.control import Control as ControlDispatcher
 from awx.main.registrar import activity_stream_registrar
-from awx.main.models.mixins import ResourceMixin, TaskManagerUnifiedJobMixin, ExecutionEnvironmentMixin
+from awx.main.models.mixins import ResourceMixin, ExecutionEnvironmentMixin
 from awx.main.utils.common import (
     camelcase_to_underscore,
     get_model_for_type,
@@ -332,7 +332,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
 
         return NotificationTemplate.objects.none()
 
-    def create_unified_job(self, instance_groups=None, **kwargs):
+    def create_unified_job(self, available_deps=(), instance_groups=None, **kwargs):
         """
         Create a new unified job based on this unified job template.
         """
@@ -388,7 +388,8 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         else:
             unified_job.preferred_instance_groups_cache = unified_job._get_preferred_instance_group_cache()
 
-        unified_job._set_default_dependencies_processed()
+        deps = unified_job.get_or_spawn_dependent_jobs(available_deps=available_deps)
+        unified_job.dependencies_processed = bool(not deps)
         unified_job.task_impact = unified_job._get_task_impact()
 
         from awx.main.signals import disable_activity_stream, activity_stream_create
@@ -398,6 +399,9 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
             # because we haven't attached important M2M relations yet, like
             # credentials and labels
             unified_job.save()
+
+        # Link job dependencies for fail chain and things like that
+        unified_job.add_dependencies(deps)
 
         # Labels and credentials copied here
         if validated_kwargs.get('credentials'):
@@ -529,9 +533,7 @@ class StdoutMaxBytesExceeded(Exception):
         self.supported = supported
 
 
-class UnifiedJob(
-    PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique, UnifiedJobTypeStringMixin, TaskManagerUnifiedJobMixin, ExecutionEnvironmentMixin
-):
+class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique, UnifiedJobTypeStringMixin, ExecutionEnvironmentMixin):
     """
     Concrete base class for unified job run by the task engine.
     """
@@ -833,8 +835,77 @@ class UnifiedJob(
             update_fields = self._update_parent_instance_no_save(parent_instance)
             parent_instance.save(update_fields=update_fields)
 
-    def _set_default_dependencies_processed(self):
-        pass
+    def add_dependencies(self, dependencies):
+
+        from awx.main.signals import disable_activity_stream
+
+        with disable_activity_stream():
+            self.dependent_jobs.add(*dependencies)
+
+    def dependent_templates(self):
+        """
+        Returns an ordered list of associated UnifiedJobTemplates that should be updated
+        due to update_on_launch flag being set to True.
+        Ordering is so that dependencies-of-dependencies come before others that depend on them.
+        """
+        return []
+
+    def get_or_spawn_dependent_jobs(self, available_deps=()):
+        """
+        Normally, this should only be called from inside create_unified_job
+        This makes the jobs that this UnifiedJob depends on based on update_on_launch triggers
+        The available_deps iterable contains other deps already created in this same launch event
+            these are not connected to dependent_jobs unless it actually depends on it,
+            thus, it two separate lists are maintained
+        """
+        if not self.created:
+            # set created time for new (unsaved) objects - used with cache timeout logic
+            self.created = now()
+        available_deps = set(available_deps)  # create mutable copy for internal use
+        dependent_jobs = []  # list of jobs that constitute a hard dependency for this job to start
+        for ujt in self.dependent_templates():
+            # If a job matching the template is in available_deps then use that
+            found = False
+            for existing_uj in available_deps:
+                if existing_uj.unified_job_template_id == ujt.id:
+                    dependent_jobs.append(existing_uj)
+                    available_deps.add(existing_uj)
+                    logger.info(f'Satisfied {ujt.pk} dependency for {self.log_format} with shared dep {existing_uj.log_format}')
+                    found = True
+                    break
+            if found:
+                continue
+
+            # See if we can use last job in database
+            last_ujt_job = UnifiedJob.objects.filter(unified_job_template=ujt).order_by("-created").first()
+            if last_ujt_job:
+                if last_ujt_job.status in ACTIVE_STATES:
+                    dependent_jobs.append(last_ujt_job)
+                    available_deps.add(last_ujt_job)
+                    logger.info(f'Satisfied {ujt.pk} dependency for {self.log_format} with still-active {last_ujt_job.log_format}')
+                    continue  # still active so always technically satisfies cache timeout window, use it
+
+                if (last_ujt_job.status not in ['failed', 'canceled', 'error']) and last_ujt_job.finished:
+                    if hasattr(ujt, 'scm_update_cache_timeout'):
+                        cache_timeout = ujt.scm_update_cache_timeout  # for projects
+                    else:
+                        cache_timeout = ujt.update_cache_timeout  # for inventory updates
+                    timeout_seconds = datetime.timedelta(seconds=cache_timeout)
+                    if (last_ujt_job.finished + timeout_seconds) >= self.created:
+                        dependent_jobs.append(last_ujt_job)
+                        available_deps.add(last_ujt_job)
+                        logger.info(f'Satisfied {ujt.pk} dependency for {self.log_format} within cache timeout {last_ujt_job.log_format}')
+                        continue  # ran within the cache timeout window, use it
+                elif not last_ujt_job.finished:  # this should not happen
+                    logger.warning(f'Programming error: {last_ujt_job.log_format} was in a finished state but has no finished timestamp')
+
+            # If not avilable by the above sources, then create an launch new one
+            new_ujt_job = ujt.create_unified_job(available_deps=available_deps, _eager_fields=dict(launch_type='dependency', created=self.created))
+            logger.info(f'Satisfied {ujt.pk} dependency for {self.log_format} with new {new_ujt_job.log_format}, created time: {self.created}')
+            new_ujt_job.signal_start()
+            dependent_jobs.append(new_ujt_job)
+            available_deps.add(new_ujt_job)
+        return dependent_jobs
 
     def save(self, *args, **kwargs):
         """Save the job, with current status, to the database.
@@ -1423,11 +1494,6 @@ class UnifiedJob(
     def can_cancel(self):
         return bool(self.status in CAN_CANCEL)
 
-    def _build_job_explanation(self):
-        if not self.job_explanation:
-            return 'Previous Task Canceled: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (self.model_to_str(), self.name, self.id)
-        return None
-
     def fallback_cancel(self):
         if not self.celery_task_id:
             self.refresh_from_db(fields=['celery_task_id'])
@@ -1448,11 +1514,23 @@ class UnifiedJob(
             logger.exception("error encountered when checking task status")
         return bool(self.celery_task_id in canceled)  # True or False, whether confirmation was obtained
 
+    def get_cancel_chain(self):
+        """
+        Returns other jobs to cancel if this one is canceled.
+        Normally, this is just the set of jobs which are blocked by this job.
+        """
+        if not self.pk:
+            return []
+        return list(self.unifiedjob_blocked_jobs.all())  # reverse relationship for dependent_jobs
+
     def cancel(self, job_explanation=None, is_chain=False):
         if self.can_cancel:
             if not is_chain:
-                for x in self.get_jobs_fail_chain():
-                    x.cancel(job_explanation=self._build_job_explanation(), is_chain=True)
+                for x in self.get_cancel_chain():
+                    x.cancel(
+                        job_explanation=f'Previous Task Canceled: {{"job_type": "{self.model_to_str()}", "job_name": "{self.name}", "job_id": "{self.id}"}}',
+                        is_chain=True,
+                    )
 
             cancel_fields = []
             if not self.cancel_flag:

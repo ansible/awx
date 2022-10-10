@@ -2755,6 +2755,7 @@ class JobTemplateCallback(GenericAPIView):
         matching_hosts = self.find_matching_hosts()
         # If the host is not found, update the inventory before trying to
         # match again.
+        inventory_update_list = []
         inventory_sources_already_updated = []
         if len(matching_hosts) != 1:
             inventory_sources = job_template.inventory.inventory_sources.filter(update_on_launch=True)
@@ -2764,6 +2765,7 @@ class JobTemplateCallback(GenericAPIView):
                     # FIXME: Doesn't check for any existing updates.
                     inventory_update = inventory_source.create_inventory_update(**{'_eager_fields': {'launch_type': 'callback'}})
                     inventory_update.signal_start()
+                    inventory_update_list.append(inventory_update)
                     inventory_update_pks.add(inventory_update.pk)
             inventory_update_qs = models.InventoryUpdate.objects.filter(pk__in=inventory_update_pks, status__in=('pending', 'waiting', 'running'))
             # Poll for the inventory updates we've started to complete.
@@ -2802,10 +2804,13 @@ class JobTemplateCallback(GenericAPIView):
             kv['extra_vars'] = extra_vars_redacted
         kv['_prevent_slicing'] = True  # will only run against 1 host, so no point
         with transaction.atomic():
-            job = job_template.create_job(**kv)
+            if inventory_update_list:
+                job = job_template.create_job(available_deps=inventory_update_list, **kv)
+            else:
+                job = job_template.create_job(**kv)
 
         # Send a signal to signify that the job should be started.
-        result = job.signal_start(inventory_sources_already_updated=inventory_sources_already_updated)
+        result = job.signal_start()
         if not result:
             data = dict(msg=_('Error starting job!'))
             job.delete()

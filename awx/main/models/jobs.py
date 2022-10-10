@@ -49,7 +49,6 @@ from awx.main.models.mixins import (
     ResourceMixin,
     SurveyJobTemplateMixin,
     SurveyJobMixin,
-    TaskManagerJobMixin,
     CustomVirtualEnvMixin,
     RelatedJobsMixin,
     WebhookMixin,
@@ -558,7 +557,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         return UnifiedJob.objects.filter(unified_job_template=self)
 
 
-class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskManagerJobMixin, CustomVirtualEnvMixin, WebhookMixin):
+class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, CustomVirtualEnvMixin, WebhookMixin):
     """
     A job applies a project (with playbook) to an inventory source with a given
     credential.  It represents a single invocation of ansible-playbook with the
@@ -636,19 +635,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
 
     def get_ui_url(self):
         return urljoin(settings.TOWER_URL_BASE, "/#/jobs/playbook/{}".format(self.pk))
-
-    def _set_default_dependencies_processed(self):
-        """
-        This sets the initial value of dependencies_processed
-        and here we use this as a shortcut to avoid the DependencyManager for jobs that do not need it
-        """
-        if (not self.project) or self.project.scm_update_on_launch:
-            self.dependencies_processed = False
-        elif (not self.inventory) or self.inventory.inventory_sources.filter(update_on_launch=True).exists():
-            self.dependencies_processed = False
-        else:
-            # No dependencies to process
-            self.dependencies_processed = True
 
     @property
     def event_class(self):
@@ -843,6 +829,29 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
 
     def get_notification_friendly_name(self):
         return "Job"
+
+    def get_cancel_chain(self):
+        r = super().get_cancel_chain()
+        if self.project_update_id:
+            r.append(self.project_update)
+        return r
+
+    def dependent_templates(self):
+        ujts = []
+
+        if self.inventory:
+            for inv_src in self.inventory.inventory_sources.filter(update_on_launch=True):
+                # Criteria same as method InventoryUpdate.dependent_templates
+                if inv_src.source_project and inv_src.source_project.scm_update_on_launch:
+                    if inv_src.source_project not in ujts:
+                        ujts.append(inv_src.source_project)
+                ujts.append(inv_src)
+
+        if self.project and self.project.scm_update_on_launch:
+            if self.project not in ujts:
+                ujts.append(self.project)
+
+        return ujts
 
     def _get_inventory_hosts(self, only=['name', 'ansible_facts', 'ansible_facts_modified', 'modified', 'inventory_id']):
         if not self.inventory:
@@ -1295,9 +1304,6 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
     )
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
-
-    def _set_default_dependencies_processed(self):
-        self.dependencies_processed = True
 
     @classmethod
     def _get_parent_field_name(cls):

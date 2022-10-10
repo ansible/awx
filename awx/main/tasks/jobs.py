@@ -67,12 +67,7 @@ from awx.main.exceptions import AwxTaskError, PostRunError, ReceptorNodeNotFound
 from awx.main.utils.ansible import read_ansible_config
 from awx.main.utils.execution_environments import CONTAINER_ROOT, to_container_path
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
-from awx.main.utils.common import (
-    update_scm_url,
-    extract_ansible_vars,
-    get_awx_version,
-    create_partition,
-)
+from awx.main.utils.common import update_scm_url, extract_ansible_vars, get_awx_version, create_partition
 from awx.conf.license import get_license
 from awx.main.utils.handlers import SpecialInventoryHandler
 from awx.main.tasks.system import update_smart_memberships_for_inventory, update_inventory_computed_fields

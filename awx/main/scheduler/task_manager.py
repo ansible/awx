@@ -21,11 +21,6 @@ from django.contrib.contenttypes.models import ContentType
 from awx.main.dispatch.reaper import reap_job
 from awx.main.models import (
     Instance,
-    InventorySource,
-    InventoryUpdate,
-    Job,
-    Project,
-    ProjectUpdate,
     UnifiedJob,
     WorkflowApproval,
     WorkflowJob,
@@ -87,13 +82,7 @@ class TaskBase:
     @timeit
     def get_tasks(self, filter_args):
         wf_approval_ctype_id = ContentType.objects.get_for_model(WorkflowApproval).id
-        qs = (
-            UnifiedJob.objects.filter(**filter_args)
-            .exclude(launch_type='sync')
-            .exclude(polymorphic_ctype_id=wf_approval_ctype_id)
-            .order_by('created')
-            .prefetch_related('dependent_jobs')
-        )
+        qs = UnifiedJob.objects.filter(**filter_args).exclude(launch_type='sync').exclude(polymorphic_ctype_id=wf_approval_ctype_id).order_by('created')
         self.all_tasks = [t for t in qs]
 
     def record_aggregate_metrics(self, *args):
@@ -267,184 +256,46 @@ class DependencyManager(TaskBase):
     def __init__(self):
         super().__init__(prefix="dependency_manager")
 
-    def create_project_update(self, task, project_id=None):
-        if project_id is None:
-            project_id = task.project_id
-        project_task = Project.objects.get(id=project_id).create_project_update(_eager_fields=dict(launch_type='dependency'))
-
-        # Project created 1 seconds behind
-        project_task.created = task.created - timedelta(seconds=1)
-        project_task.status = 'pending'
-        project_task.save()
-        logger.debug('Spawned {} as dependency of {}'.format(project_task.log_format, task.log_format))
-        return project_task
-
-    def create_inventory_update(self, task, inventory_source_task):
-        inventory_task = InventorySource.objects.get(id=inventory_source_task.id).create_inventory_update(_eager_fields=dict(launch_type='dependency'))
-
-        inventory_task.created = task.created - timedelta(seconds=2)
-        inventory_task.status = 'pending'
-        inventory_task.save()
-        logger.debug('Spawned {} as dependency of {}'.format(inventory_task.log_format, task.log_format))
-
-        return inventory_task
-
-    def add_dependencies(self, task, dependencies):
-        with disable_activity_stream():
-            task.dependent_jobs.add(*dependencies)
-
-    def get_inventory_source_tasks(self):
-        inventory_ids = set()
-        for task in self.all_tasks:
-            if isinstance(task, Job):
-                inventory_ids.add(task.inventory_id)
-        self.all_inventory_sources = [invsrc for invsrc in InventorySource.objects.filter(inventory_id__in=inventory_ids, update_on_launch=True)]
-
-    def get_latest_inventory_update(self, inventory_source):
-        latest_inventory_update = InventoryUpdate.objects.filter(inventory_source=inventory_source).order_by("-created")
-        if not latest_inventory_update.exists():
-            return None
-        return latest_inventory_update.first()
-
-    def should_update_inventory_source(self, job, latest_inventory_update):
-        now = tz_now()
-
-        if latest_inventory_update is None:
-            return True
-        '''
-        If there's already a inventory update utilizing this job that's about to run
-        then we don't need to create one
-        '''
-        if latest_inventory_update.status in ['waiting', 'pending', 'running']:
-            return False
-
-        timeout_seconds = timedelta(seconds=latest_inventory_update.inventory_source.update_cache_timeout)
-        if (latest_inventory_update.finished + timeout_seconds) < now:
-            return True
-        if latest_inventory_update.inventory_source.update_on_launch is True and latest_inventory_update.status in ['failed', 'canceled', 'error']:
-            return True
-        return False
-
-    def get_latest_project_update(self, project_id):
-        latest_project_update = ProjectUpdate.objects.filter(project=project_id, job_type='check').order_by("-created")
-        if not latest_project_update.exists():
-            return None
-        return latest_project_update.first()
-
-    def should_update_related_project(self, job, latest_project_update):
-        now = tz_now()
-
-        if latest_project_update is None:
-            return True
-
-        if latest_project_update.status in ['failed', 'canceled']:
-            return True
-
-        '''
-        If there's already a project update utilizing this job that's about to run
-        then we don't need to create one
-        '''
-        if latest_project_update.status in ['waiting', 'pending', 'running']:
-            return False
-
-        '''
-        If the latest project update has a created time == job_created_time-1
-        then consider the project update found. This is so we don't enter an infinite loop
-        of updating the project when cache timeout is 0.
-        '''
-        if (
-            latest_project_update.project.scm_update_cache_timeout == 0
-            and latest_project_update.launch_type == 'dependency'
-            and latest_project_update.created == job.created - timedelta(seconds=1)
-        ):
-            return False
-        '''
-        Normal Cache Timeout Logic
-        '''
-        timeout_seconds = timedelta(seconds=latest_project_update.project.scm_update_cache_timeout)
-        if (latest_project_update.finished + timeout_seconds) < now:
-            return True
-        return False
-
-    def gen_dep_for_job(self, task):
-        created_dependencies = []
-        dependencies = []
-        # TODO: Can remove task.project None check after scan-job-default-playbook is removed
-        if task.project is not None and task.project.scm_update_on_launch is True:
-            latest_project_update = self.get_latest_project_update(task.project_id)
-            if self.should_update_related_project(task, latest_project_update):
-                latest_project_update = self.create_project_update(task)
-                created_dependencies.append(latest_project_update)
-            dependencies.append(latest_project_update)
-
-        # Inventory created 2 seconds behind job
-        try:
-            start_args = json.loads(decrypt_field(task, field_name="start_args"))
-        except ValueError:
-            start_args = dict()
-        # generator for inventory sources related to this task
-        task_inv_sources = (invsrc for invsrc in self.all_inventory_sources if invsrc.inventory_id == task.inventory_id)
-        for inventory_source in task_inv_sources:
-            if "inventory_sources_already_updated" in start_args and inventory_source.id in start_args['inventory_sources_already_updated']:
-                continue
-            if not inventory_source.update_on_launch:
-                continue
-            latest_inventory_update = self.get_latest_inventory_update(inventory_source)
-            if self.should_update_inventory_source(task, latest_inventory_update):
-                inventory_task = self.create_inventory_update(task, inventory_source)
-                created_dependencies.append(inventory_task)
-                dependencies.append(inventory_task)
-            else:
-                dependencies.append(latest_inventory_update)
-
-        if dependencies:
-            self.add_dependencies(task, dependencies)
-
-        return created_dependencies
-
-    def gen_dep_for_inventory_update(self, inventory_task):
-        created_dependencies = []
-        if inventory_task.source == "scm":
-            invsrc = inventory_task.inventory_source
-            if not invsrc.source_project.scm_update_on_launch:
-                return created_dependencies
-
-            latest_src_project_update = self.get_latest_project_update(invsrc.source_project_id)
-            if self.should_update_related_project(inventory_task, latest_src_project_update):
-                latest_src_project_update = self.create_project_update(inventory_task, project_id=invsrc.source_project_id)
-                created_dependencies.append(latest_src_project_update)
-            self.add_dependencies(inventory_task, [latest_src_project_update])
-            latest_src_project_update.scm_inventory_updates.add(inventory_task)
-        return created_dependencies
-
-    @timeit
-    def generate_dependencies(self, undeped_tasks):
-        created_dependencies = []
-        for task in undeped_tasks:
-            task.log_lifecycle("acknowledged")
-            if type(task) is Job:
-                created_dependencies += self.gen_dep_for_job(task)
-            elif type(task) is InventoryUpdate:
-                created_dependencies += self.gen_dep_for_inventory_update(task)
-            else:
-                continue
-        UnifiedJob.objects.filter(pk__in=[task.pk for task in undeped_tasks]).update(dependencies_processed=True)
-
-        return created_dependencies
-
-    def process_tasks(self):
-        deps = self.generate_dependencies(self.all_tasks)
-        self.generate_dependencies(deps)
-        self.subsystem_metrics.inc(f"{self.prefix}_pending_processed", len(self.all_tasks) + len(deps))
-
     @timeit
     def _schedule(self):
-        self.get_tasks(dict(status__in=["pending"], dependencies_processed=False))
+        failing_job_qs = UnifiedJob.objects.filter(
+            status='pending', dependencies_processed=False, dependent_jobs__status__in=['failed', 'error']
+        ).prefetch_related('dependent_jobs')
+        failed_job_ct = 0
+        already_failed = set()
+        for task in failing_job_qs.iterator():
+            messages = []
+            for dep in task.dependent_jobs.all():
+                if dep.status in ('failed', 'error') or dep.id in already_failed:
+                    messages.append(
+                        'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}'
+                        % (
+                            get_type_for_model(type(dep)),
+                            dep.name,
+                            dep.id,
+                        )
+                    )
+            # if we detect a failed or error dependency, go ahead and fail this
+            # task. The errback on the dependency takes some time to trigger,
+            # and we don't want the task to enter running state if its
+            # dependency has failed or errored.
+            task.status = 'failed'
+            task.job_explanation = '\n'.join(messages)
+            task.save(update_fields=['status', 'job_explanation'])
+            task.websocket_emit_status('failed')
+            failed_job_ct += 1
+            already_failed.add(task.id)
 
-        if len(self.all_tasks) > 0:
-            self.get_inventory_source_tasks()
-            self.process_tasks()
+        advancing_job_ct = (
+            UnifiedJob.objects.filter(status='pending', dependencies_processed=False)
+            .exclude(dependent_jobs__status__in=ACTIVE_STATES + ('failed', 'error', 'canceled'))
+            .update(dependencies_processed=True)
+        )
+        if advancing_job_ct:
+            logger.info(f'Dependencies fully processed for {advancing_job_ct} tasks')
             ScheduleTaskManager().schedule()
+
+        self.subsystem_metrics.inc(f"{self.prefix}_pending_processed", advancing_job_ct + failed_job_ct)
 
 
 class TaskManager(TaskBase):
@@ -475,43 +326,15 @@ class TaskManager(TaskBase):
         self.instance_groups = TaskManagerInstanceGroups(instances_by_hostname=self.instances)
         self.controlplane_ig = self.instance_groups.controlplane_ig
 
-    def job_blocked_by(self, task):
-        # TODO: I'm not happy with this, I think blocking behavior should be decided outside of the dependency graph
-        #       in the old task manager this was handled as a method on each task object outside of the graph and
-        #       probably has the side effect of cutting down *a lot* of the logic from this task manager class
-        blocked_by = self.dependency_graph.task_blocked_by(task)
-        if blocked_by:
-            return blocked_by
-
-        for dep in task.dependent_jobs.all():
-            if dep.status in ACTIVE_STATES:
-                return dep
-            # if we detect a failed or error dependency, go ahead and fail this
-            # task. The errback on the dependency takes some time to trigger,
-            # and we don't want the task to enter running state if its
-            # dependency has failed or errored.
-            elif dep.status in ("error", "failed"):
-                task.status = 'failed'
-                task.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (
-                    get_type_for_model(type(dep)),
-                    dep.name,
-                    dep.id,
-                )
-                task.save(update_fields=['status', 'job_explanation'])
-                task.websocket_emit_status('failed')
-                return dep
-
-        return None
-
     @timeit
-    def start_task(self, task, instance_group, dependent_tasks=None, instance=None):
+    def start_task(self, task, instance_group, instance=None):
         self.dependency_graph.add_job(task)
         self.subsystem_metrics.inc(f"{self.prefix}_tasks_started", 1)
         self.start_task_limit -= 1
         if self.start_task_limit == 0:
             # schedule another run immediately after this task manager
             ScheduleTaskManager().schedule()
-        from awx.main.tasks.system import handle_work_error, handle_work_success
+        from awx.main.tasks.system import handle_work_finish
 
         # update capacity for control node and execution node
         if task.controller_node:
@@ -519,13 +342,10 @@ class TaskManager(TaskBase):
         if task.execution_node:
             self.instances[task.execution_node].consume_capacity(task.task_impact)
 
-        dependent_tasks = dependent_tasks or []
-
         task_actual = {
             'type': get_type_for_model(type(task)),
             'id': task.id,
         }
-        dependencies = [{'type': get_type_for_model(type(t)), 'id': t.id} for t in dependent_tasks]
 
         task.status = 'waiting'
 
@@ -565,8 +385,8 @@ class TaskManager(TaskBase):
                 opts,
                 queue=task.get_queue_name(),
                 uuid=task.celery_task_id,
-                callbacks=[{'task': handle_work_success.name, 'kwargs': {'task_actual': task_actual}}],
-                errbacks=[{'task': handle_work_error.name, 'args': [task.celery_task_id], 'kwargs': {'subtasks': [task_actual] + dependencies}}],
+                callbacks=[{'task': handle_work_finish.name, 'kwargs': {'task_actual': task_actual}}],
+                errbacks=[{'task': handle_work_finish.name, 'kwargs': {'task_actual': task_actual}}],
             )
 
         # In exception cases, like a job failing pre-start checks, we send the websocket status message
@@ -590,7 +410,7 @@ class TaskManager(TaskBase):
             if self.timed_out():
                 logger.warning("Task manager has reached time out while processing pending jobs, exiting loop early")
                 break
-            blocked_by = self.job_blocked_by(task)
+            blocked_by = self.dependency_graph.task_blocked_by(task)
             if blocked_by:
                 self.subsystem_metrics.inc(f"{self.prefix}_tasks_blocked", 1)
                 task.log_lifecycle("blocked", blocked_by=blocked_by)
@@ -604,7 +424,7 @@ class TaskManager(TaskBase):
             if isinstance(task, WorkflowJob):
                 # Previously we were tracking allow_simultaneous blocking both here and in DependencyGraph.
                 # Double check that using just the DependencyGraph works for Workflows and Sliced Jobs.
-                self.start_task(task, None, task.get_jobs_fail_chain(), None)
+                self.start_task(task, None, None)
                 continue
 
             found_acceptable_queue = False
@@ -630,13 +450,13 @@ class TaskManager(TaskBase):
                 execution_instance = self.instances[control_instance.hostname].obj
                 task.log_lifecycle("controller_node_chosen")
                 task.log_lifecycle("execution_node_chosen")
-                self.start_task(task, self.controlplane_ig, task.get_jobs_fail_chain(), execution_instance)
+                self.start_task(task, self.controlplane_ig, execution_instance)
                 found_acceptable_queue = True
                 continue
 
             for instance_group in self.instance_groups.get_instance_groups_from_task_cache(task):
                 if instance_group.is_container_group:
-                    self.start_task(task, instance_group, task.get_jobs_fail_chain(), None)
+                    self.start_task(task, instance_group, None)
                     found_acceptable_queue = True
                     break
 
@@ -661,7 +481,7 @@ class TaskManager(TaskBase):
                         )
                     )
                     execution_instance = self.instances[execution_instance.hostname].obj
-                    self.start_task(task, instance_group, task.get_jobs_fail_chain(), execution_instance)
+                    self.start_task(task, instance_group, execution_instance)
                     found_acceptable_queue = True
                     break
                 else:
