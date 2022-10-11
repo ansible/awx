@@ -40,8 +40,13 @@ const Loader = styled(ContentLoading)`
   width: 100%;
   background: white;
 `;
-function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
-  const [storedNodes, setStoredNodes] = useState(null);
+function MeshGraph({
+  data,
+  showLegend,
+  zoom,
+  setShowZoomControls,
+  storedNodes,
+}) {
   const [isNodeSelected, setIsNodeSelected] = useState(false);
   const [selectedNode, setSelectedNode] = useState(null);
   const [simulationProgress, setSimulationProgress] = useState(null);
@@ -100,18 +105,13 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
   // update mesh when user toggles enabled/disabled slider
   useEffect(() => {
     if (instance?.id) {
-      const updatedNodes = storedNodes.map((n) =>
+      const updatedNodes = storedNodes.current.map((n) =>
         n.id === instance.id ? { ...n, enabled: instance.enabled } : n
       );
-      setStoredNodes(updatedNodes);
+      storedNodes.current = updatedNodes;
+      updateNodeSVG(storedNodes.current);
     }
   }, [instance]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    if (storedNodes) {
-      updateNodeSVG(storedNodes);
-    }
-  }, [storedNodes]);
 
   const draw = () => {
     let width;
@@ -137,6 +137,9 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
     const mesh = svg.append('g').attr('class', 'mesh');
 
     const graph = data;
+    if (storedNodes?.current) {
+      graph.nodes = storedNodes.current;
+    }
 
     /* WEB WORKER */
     const worker = webWorker();
@@ -162,7 +165,6 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
     }
 
     function ended({ nodes, links }) {
-      setStoredNodes(nodes);
       // Remove loading screen
       d3.select('.simulation-loader').style('visibility', 'hidden');
       setShowZoomControls(true);
@@ -247,7 +249,6 @@ function MeshGraph({ data, showLegend, zoom, setShowZoomControls }) {
         .attr('fill', DEFAULT_NODE_COLOR)
         .attr('stroke-dasharray', (d) => (d.enabled ? `1 0` : `5`))
         .attr('stroke', DEFAULT_NODE_STROKE_COLOR);
-
       // node type labels
       node
         .append('text')
