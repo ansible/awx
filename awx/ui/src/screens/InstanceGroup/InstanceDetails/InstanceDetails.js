@@ -12,7 +12,7 @@ import {
   Tooltip,
   Slider,
 } from '@patternfly/react-core';
-import { CaretLeftIcon } from '@patternfly/react-icons';
+import { CaretLeftIcon, OutlinedClockIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 
 import { useConfig } from 'contexts/Config';
@@ -115,15 +115,9 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
   useEffect(() => {
     fetchDetails();
   }, [fetchDetails]);
-  const {
-    error: healthCheckError,
-    isLoading: isRunningHealthCheck,
-    request: fetchHealthCheck,
-  } = useRequest(
+  const { error: healthCheckError, request: fetchHealthCheck } = useRequest(
     useCallback(async () => {
       const { status } = await InstancesAPI.healthCheck(instanceId);
-      const { data } = await InstancesAPI.readHealthCheckDetail(instanceId);
-      setHealthCheck(data);
       if (status === 200) {
         setShowHealthCheckAlert(true);
       }
@@ -161,6 +155,18 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
     debounceUpdateInstance({ capacity_adjustment: roundedValue });
   };
 
+  const formatHealthCheckTimeStamp = (last) => (
+    <>
+      {formatDateString(last)}
+      {instance.health_check_pending ? (
+        <>
+          {' '}
+          <OutlinedClockIcon />
+        </>
+      ) : null}
+    </>
+  );
+
   const { error, dismissError } = useDismissableError(
     disassociateError || updateInstanceError || healthCheckError
   );
@@ -188,6 +194,8 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
   if (isLoading) {
     return <ContentLoading />;
   }
+
+  const isExecutionNode = instance.node_type === 'execution';
 
   return (
     <>
@@ -218,7 +226,8 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
           <Detail label={t`Total Jobs`} value={instance.jobs_total} />
           <Detail
             label={t`Last Health Check`}
-            value={formatDateString(healthCheck?.last_health_check)}
+            helpText={t`Health checks are asynchronous tasks. See the docs for more details.`}
+            value={formatHealthCheckTimeStamp(instance.last_health_check)}
           />
           <Detail label={t`Node Type`} value={instance.node_type} />
           <Detail
@@ -274,18 +283,22 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
           )}
         </DetailList>
         <CardActionsRow>
-          <Tooltip content={t`Run a health check on the instance`}>
-            <Button
-              isDisabled={!me.is_superuser || isRunningHealthCheck}
-              variant="primary"
-              ouiaId="health-check-button"
-              onClick={fetchHealthCheck}
-              isLoading={isRunningHealthCheck}
-              spinnerAriaLabel={t`Running health check`}
-            >
-              {t`Run health check`}
-            </Button>
-          </Tooltip>
+          {isExecutionNode && (
+            <Tooltip content={t`Run a health check on the instance`}>
+              <Button
+                isDisabled={!me.is_superuser || instance.health_check_pending}
+                variant="primary"
+                ouiaId="health-check-button"
+                onClick={fetchHealthCheck}
+                isLoading={instance.health_check_pending}
+                spinnerAriaLabel={t`Running health check`}
+              >
+                {instance.health_check_pending
+                  ? t`Running health check`
+                  : t`Run health check`}
+              </Button>
+            </Tooltip>
+          )}
           {me.is_superuser && instance.node_type !== 'control' && (
             <DisassociateButton
               verifyCannotDisassociate={instanceGroup.name === 'controlplane'}

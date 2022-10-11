@@ -37,6 +37,8 @@ function InstanceList() {
   const location = useLocation();
   const { me } = useConfig();
   const [showHealthCheckAlert, setShowHealthCheckAlert] = useState(false);
+  const [pendingHealthCheck, setPendingHealthCheck] = useState(false);
+  const [canRunHealthCheck, setCanRunHealthCheck] = useState(true);
 
   const {
     result: { instances, count, relatedSearchableKeys, searchableKeys, isK8s },
@@ -51,6 +53,11 @@ function InstanceList() {
         InstancesAPI.readOptions(),
         SettingsAPI.readCategory('system'),
       ]);
+      response.data.results.forEach((i) => {
+        if (i.health_check_pending === true) {
+          setPendingHealthCheck(true);
+        }
+      });
       return {
         instances: response.data.results,
         isK8s: sysSettings.data.IS_K8S,
@@ -87,7 +94,7 @@ function InstanceList() {
     useCallback(async () => {
       const [...response] = await Promise.all(
         selected
-          .filter(({ node_type }) => node_type !== 'hop')
+          .filter(({ node_type }) => node_type === 'execution')
           .map(({ id }) => InstancesAPI.healthCheck(id))
       );
       if (response) {
@@ -95,6 +102,18 @@ function InstanceList() {
       }
     }, [selected])
   );
+
+  useEffect(() => {
+    if (selected) {
+      selected.forEach((i) => {
+        if (i.node_type === 'execution') {
+          setCanRunHealthCheck(true);
+        } else {
+          setCanRunHealthCheck(false);
+        }
+      });
+    }
+  }, [selected]);
 
   const handleHealthCheck = async () => {
     await fetchHealthCheck();
@@ -189,6 +208,8 @@ function InstanceList() {
                     onClick={handleHealthCheck}
                     key="healthCheck"
                     selectedItems={selected}
+                    healthCheckPending={pendingHealthCheck}
+                    isDisabled={!canRunHealthCheck}
                   />,
                 ]}
               />
@@ -196,7 +217,7 @@ function InstanceList() {
             headerRow={
               <HeaderRow qsConfig={QS_CONFIG} isExpandable>
                 <HeaderCell
-                  tooltip={t`Cannot run health check on hop nodes.`}
+                  tooltip={t`Health checks can only be run on execution nodes.`}
                   sortKey="hostname"
                 >{t`Name`}</HeaderCell>
                 <HeaderCell sortKey="errors">{t`Status`}</HeaderCell>

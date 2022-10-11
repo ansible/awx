@@ -11,6 +11,7 @@ import {
   Slider,
   Tooltip,
 } from '@patternfly/react-core';
+import { OutlinedClockIcon } from '@patternfly/react-icons';
 import { Tr, Td, ExpandableRowContent } from '@patternfly/react-table';
 import { formatDateString } from 'util/dates';
 import computeForks from 'util/computeForks';
@@ -98,7 +99,21 @@ function InstanceListItem({
     );
     debounceUpdateInstance({ capacity_adjustment: roundedValue });
   };
+
+  const formatHealthCheckTimeStamp = (last) => (
+    <>
+      {formatDateString(last)}
+      {instance.health_check_pending ? (
+        <>
+          {' '}
+          <OutlinedClockIcon />
+        </>
+      ) : null}
+    </>
+  );
+
   const isHopNode = instance.node_type === 'hop';
+  const isExecutionNode = instance.node_type === 'execution';
   return (
     <>
       <Tr
@@ -121,7 +136,7 @@ function InstanceListItem({
             rowIndex,
             isSelected,
             onSelect,
-            disable: isHopNode,
+            disable: !isExecutionNode,
           }}
           dataLabel={t`Selected`}
         />
@@ -221,7 +236,8 @@ function InstanceListItem({
                 <Detail
                   data-cy="last-health-check"
                   label={t`Last Health Check`}
-                  value={formatDateString(instance.last_health_check)}
+                  helpText={t`Health checks are asynchronous tasks. See the docs for more details.`}
+                  value={formatHealthCheckTimeStamp(instance.last_health_check)}
                 />
               </DetailList>
             </ExpandableRowContent>

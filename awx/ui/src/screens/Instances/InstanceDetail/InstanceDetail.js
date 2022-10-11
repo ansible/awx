@@ -13,7 +13,7 @@ import {
   Slider,
   Label,
 } from '@patternfly/react-core';
-import { DownloadIcon } from '@patternfly/react-icons';
+import { DownloadIcon, OutlinedClockIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 
 import { useConfig } from 'contexts/Config';
@@ -85,8 +85,8 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
         InstancesAPI.readDetail(id),
         InstancesAPI.readInstanceGroup(id),
       ]);
-
-      if (details.node_type !== 'hop') {
+      // we probably don't need this extra call
+      if (details.node_type === 'execution') {
         const { data: healthCheckData } =
           await InstancesAPI.readHealthCheckDetail(id);
         setHealthCheck(healthCheckData);
@@ -115,15 +115,9 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
       setBreadcrumb(instance);
     }
   }, [instance, setBreadcrumb]);
-  const {
-    error: healthCheckError,
-    isLoading: isRunningHealthCheck,
-    request: fetchHealthCheck,
-  } = useRequest(
+  const { error: healthCheckError, request: fetchHealthCheck } = useRequest(
     useCallback(async () => {
       const { status } = await InstancesAPI.healthCheck(id);
-      const { data } = await InstancesAPI.readHealthCheckDetail(id);
-      setHealthCheck(data);
       if (status === 200) {
         setShowHealthCheckAlert(true);
       }
@@ -148,6 +142,18 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
     );
     debounceUpdateInstance({ capacity_adjustment: roundedValue });
   };
+
+  const formatHealthCheckTimeStamp = (last) => (
+    <>
+      {formatDateString(last)}
+      {instance.health_check_pending ? (
+        <>
+          {' '}
+          <OutlinedClockIcon />
+        </>
+      ) : null}
+    </>
+  );
 
   const buildLinkURL = (inst) =>
     inst.is_container_group
@@ -179,6 +185,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
     return <ContentLoading />;
   }
   const isHopNode = instance.node_type === 'hop';
+  const isExecutionNode = instance.node_type === 'execution';
 
   return (
     <>
@@ -242,7 +249,8 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
               <Detail
                 label={t`Last Health Check`}
                 dataCy="last-health-check"
-                value={formatDateString(healthCheck?.last_health_check)}
+                helpText={t`Health checks are asynchronous tasks. See the docs for more details.`}
+                value={formatHealthCheckTimeStamp(instance.last_health_check)}
               />
               {instance.related?.install_bundle && (
                 <Detail
@@ -332,18 +340,22 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
                 onRemove={removeInstances}
               />
             )}
-            <Tooltip content={t`Run a health check on the instance`}>
-              <Button
-                isDisabled={!me.is_superuser || isRunningHealthCheck}
-                variant="primary"
-                ouiaId="health-check-button"
-                onClick={fetchHealthCheck}
-                isLoading={isRunningHealthCheck}
-                spinnerAriaLabel={t`Running health check`}
-              >
-                {t`Run health check`}
-              </Button>
-            </Tooltip>
+            {isExecutionNode && (
+              <Tooltip content={t`Run a health check on the instance`}>
+                <Button
+                  isDisabled={!me.is_superuser || instance.health_check_pending}
+                  variant="primary"
+                  ouiaId="health-check-button"
+                  onClick={fetchHealthCheck}
+                  isLoading={instance.health_check_pending}
+                  spinnerAriaLabel={t`Running health check`}
+                >
+                  {instance.health_check_pending
+                    ? t`Running health check`
+                    : t`Run health check`}
+                </Button>
+              </Tooltip>
+            )}
             <InstanceToggle
               css="display: inline-flex;"
               fetchInstances={fetchDetails}
