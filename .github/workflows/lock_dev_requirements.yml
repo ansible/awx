@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       packages: write
-      contents: read
+      contents: write
     steps:
       - uses: actions/checkout@v2
 
@@ -26,13 +26,15 @@ jobs:
         run: pip install --no-deps -r ./requirements/requirements_dev.txt
 
       - name: Create versioned requirements file
-        run: pip freeze > ./requirements/requirements_dev.txt
+        run: pip freeze > ./requirements/locked_requirements_dev.txt
+
+      - name: Make locked version of requrements_dev.txt
+        working-directory: requirements
+        run: ../.github/lock_dev_requirements.py
 
       - name: Commit locked requirements
-        uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
-        with:
-          add: './requirements/requirements_dev.txt'
-          default_author: github_actions
-          message: 'Auto-generating locked dev requirements'
-          pathspec_error_handling: exitImmediately
-          push: true
+        run: |
+          git config --global user.name 'AWX Auto-Locker'
+          git config --global user.email 'awx-project@googlegroups.com'
+          git commit -am "Auto-locking requirements_dev.txt"
+          git push
