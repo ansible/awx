@@ -392,8 +392,8 @@ class InstanceHealthCheck(GenericAPIView):
     permission_classes = (IsSystemAdminOrAuditor,)
 
     def get_queryset(self):
+        return super().get_queryset().filter(node_type='execution')
         # FIXME: For now, we don't have a good way of checking the health of a hop node.
-        return super().get_queryset().exclude(node_type='hop')
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -413,9 +413,10 @@ class InstanceHealthCheck(GenericAPIView):
 
             execution_node_health_check.apply_async([obj.hostname])
         else:
-            from awx.main.tasks.system import cluster_node_health_check
-
-            cluster_node_health_check.apply_async([obj.hostname], queue=obj.hostname)
+            return Response(
+                {"error": f"Cannot run a health check on instances of type {obj.node_type}.  Health checks can only be run on execution nodes."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         return Response({'msg': f"Health check is running for {obj.hostname}."}, status=status.HTTP_200_OK)
 
 
