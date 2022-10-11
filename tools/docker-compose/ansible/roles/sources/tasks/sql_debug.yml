@@ -1,0 +1,16 @@
+---
+- name: Enable SQL Logging in container
+  set_fact:
+    pg_log_statement: -c log_statement=all
+
+# This setting will add two headers to http responses about SQL:
+#   < X-API-Query-Count: 9
+#   < X-API-Query-Time: 0.006s
+# Technically, the way this is setup, if you disbale pg_debug after its enabled
+#  and don't rebuild your container the flag to set the headers will remain in the conf
+#  if I tried to remove it from here and someone had manually set it in the local_overrides files
+#  it would cause confustion as this code would strip it out of their local_overrides
+- name: Add SQL_DEBUG to local_settings.py
+  lineinfile:
+    path: "{{ sources_dest }}/local_settings.py"
+    line: "SQL_DEBUG = True"
