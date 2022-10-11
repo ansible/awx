@@ -46,7 +46,6 @@ options:
       description:
         - Type of SCM resource.
       choices: ["manual", "git", "svn", "insights", "archive"]
-      default: "manual"
       type: str
     scm_url:
       description:
@@ -76,28 +75,23 @@ options:
       description:
         - Remove local modifications before updating.
       type: bool
-      default: 'no'
     scm_delete_on_update:
       description:
         - Remove the repository completely before updating.
       type: bool
-      default: 'no'
     scm_track_submodules:
       description:
         - Track submodules latest commit on specified branch.
       type: bool
-      default: 'no'
     scm_update_on_launch:
       description:
         - Before an update to the local repository before launching a job with this project.
       type: bool
-      default: 'no'
     scm_update_cache_timeout:
       description:
         - Cache Timeout to cache prior project syncs for a certain number of seconds.
             Only valid if scm_update_on_launch is to True, otherwise ignored.
       type: int
-      default: 0
     allow_override:
       description:
         - Allow changing the SCM branch or revision in a job template that uses this project.
@@ -109,7 +103,6 @@ options:
         - The amount of time (in seconds) to run before the SCM Update is canceled. A value of 0 means no timeout.
         - If waiting for the project to update this will abort after this
           amount of seconds
-      default: 0
       type: int
       aliases:
         - job_timeout
@@ -262,19 +255,19 @@ def main():
         new_name=dict(),
         copy_from=dict(),
         description=dict(),
-        scm_type=dict(choices=['manual', 'git', 'svn', 'insights', 'archive'], default='manual'),
+        scm_type=dict(choices=['manual', 'git', 'svn', 'insights', 'archive']),
         scm_url=dict(),
         local_path=dict(),
         scm_branch=dict(),
         scm_refspec=dict(),
         credential=dict(aliases=['scm_credential']),
-        scm_clean=dict(type='bool', default=False),
-        scm_delete_on_update=dict(type='bool', default=False),
-        scm_track_submodules=dict(type='bool', default=False),
-        scm_update_on_launch=dict(type='bool', default=False),
-        scm_update_cache_timeout=dict(type='int', default=0),
+        scm_clean=dict(type='bool'),
+        scm_delete_on_update=dict(type='bool'),
+        scm_track_submodules=dict(type='bool'),
+        scm_update_on_launch=dict(type='bool'),
+        scm_update_cache_timeout=dict(type='int'),
         allow_override=dict(type='bool', aliases=['scm_allow_override']),
-        timeout=dict(type='int', default=0, aliases=['job_timeout']),
+        timeout=dict(type='int', aliases=['job_timeout']),
         default_environment=dict(),
         custom_virtualenv=dict(),
         organization=dict(),
