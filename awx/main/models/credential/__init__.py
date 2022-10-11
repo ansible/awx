@@ -282,7 +282,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
                         return field['default']
                 if 'default' in kwargs:
                     return kwargs['default']
-                raise AttributeError
+                raise AttributeError(field_name)
         if field_name in self.inputs:
             return self.inputs[field_name]
         if 'default' in kwargs:
