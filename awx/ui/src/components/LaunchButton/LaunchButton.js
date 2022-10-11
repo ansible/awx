@@ -107,6 +107,17 @@ function LaunchButton({ resource, children }) {
         jobPromise = JobsAPI.relaunch(resource.id, params || {});
       } else if (resource.type === 'workflow_job') {
         jobPromise = WorkflowJobsAPI.relaunch(resource.id, params || {});
+      } else if (resource.type === 'ad_hoc_command') {
+        if (params?.credential_passwords) {
+          // The api expects the passwords at the top level of the object instead of nested
+          // in credential_passwords like the other relaunch endpoints
+          Object.keys(params.credential_passwords).forEach((key) => {
+            params[key] = params.credential_passwords[key];
+          });
+
+          delete params.credential_passwords;
+        }
+        jobPromise = AdHocCommandsAPI.relaunch(resource.id, params || {});
       }
 
       const { data: job } = await jobPromise;
