@@ -2,15 +2,21 @@
 apiVersion: 1
 groups:
   - folder: awx
-    interval: 60s
+    interval: 10s
     name: awx_rules
     orgId: 1
+    exec_err_state: Alerting
+    no_data_state: NoData
     rules:
-      - condition: if_failures_too_high
-        dashboardUid: awx
+      - for: 5m
+        noDataState: OK
+        panelId: 2
+        title: failure_rate_exceeded_20_percent
+        uid: failure_rate_exceeded_20_percent
+        condition: compare
         data:
           - refId: total_errors
-            queryType: ''
+            queryType: ""
             relativeTimeRange:
               from: 600
               to: 0
@@ -19,7 +25,7 @@ groups:
               editorMode: code
               expr: >-
                 max(delta(awx_instance_status_total{instance="awx1:8013",
-                status="failed|error"}[30m]))
+                status=~"failed|error"}[30m]))
               hide: false
               intervalMs: 1000
               legendFormat: __auto
@@ -27,11 +33,11 @@ groups:
               range: true
               refId: total_errors
           - refId: max_errors
-            queryType: ''
+            queryType: ""
             relativeTimeRange:
               from: 0
               to: 0
-            datasourceUid: '-100'
+            datasourceUid: "-100"
             model:
               conditions:
                 - evaluator:
@@ -60,7 +66,7 @@ groups:
               refId: max_errors
               type: reduce
           - refId: total_success
-            queryType: ''
+            queryType: ""
             relativeTimeRange:
               from: 600
               to: 0
@@ -80,11 +86,11 @@ groups:
               range: true
               refId: total_success
           - refId: max_success
-            queryType: ''
+            queryType: ""
             relativeTimeRange:
               from: 0
               to: 0
-            datasourceUid: '-100'
+            datasourceUid: "-100"
             model:
               conditions:
                 - evaluator:
@@ -113,11 +119,11 @@ groups:
               refId: max_success
               type: reduce
           - refId: compare
-            queryType: ''
+            queryType: ""
             relativeTimeRange:
               from: 0
               to: 0
-            datasourceUid: '-100'
+            datasourceUid: "-100"
             model:
               conditions:
                 - evaluator:
@@ -158,15 +164,19 @@ groups:
               maxDataPoints: 43200
               refId: compare
               type: math
-        for: 30m
+      - for: 60s
         noDataState: OK
-        panelId: 2
-        title: failure_rate_exceeded_20_percent
-        uid: failure_rate_exceeded_20_percent
-      - condition: if_redis_queue_too_large
+        panelId: 1
+        title: redis_queue_too_large_to_clear_in_2_min
+        uid: redis_queue_too_large_to_clear_in_2_min
+        condition: redis_queue_growing_faster_than_insertion_rate
         dashboardUid: awx
         data:
-          - datasourceUid: awx_prometheus
+          - refId: events_insertion_rate_per_second
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: awx_prometheus
             model:
               editorMode: code
               expr: irate(callback_receiver_events_insert_db{node='awx_1'}[1m])
@@ -177,11 +187,11 @@ groups:
               range: true
               refId: events_insertion_rate_per_second
             queryType: ""
-            refId: events_insertion_rate_per_second
+          - refId: mean_event_insertion_rate
             relativeTimeRange:
-              from: 300
+              from: 0
               to: 0
-          - datasourceUid: -100
+            datasourceUid: -100
             model:
               conditions:
                 - evaluator:
@@ -208,11 +218,11 @@ groups:
               refId: mean_event_insertion_rate
               type: reduce
             queryType: ""
-            refId: mean_event_insertion_rate
+          - refId: redis_queue_size
             relativeTimeRange:
-              from: 0
+              from: 300
               to: 0
-          - datasourceUid: awx_prometheus
+            datasourceUid: awx_prometheus
             model:
               datasource:
                 type: prometheus
@@ -226,11 +236,11 @@ groups:
               range: true
               refId: redis_queue_size
             queryType: ""
-            refId: redis_queue_size
+          - refId: last_redis_queue_size
             relativeTimeRange:
-              from: 300
-              to: 0
-          - datasourceUid: -100
+            from: 0
+            to: 0
+            datasourceUid: -100
             model:
               conditions:
                 - evaluator:
@@ -257,11 +267,12 @@ groups:
               refId: last_redis_queue_size
               type: reduce
             queryType: ""
-            refId: last_redis_queue_size
+          - refId: redis_queue_growing_faster_than_insertion_rate
+            queryType: ""
             relativeTimeRange:
               from: 0
               to: 0
-          - datasourceUid: -100
+            datasourceUid: -100
             model:
               conditions:
                 - evaluator:
@@ -282,44 +293,35 @@ groups:
                 name: Expression
                 type: __expr__
                 uid: __expr__
-              expression: '($last_redis_queue_size > ($mean_event_insertion_rate * 120))'
+              expression: "($last_redis_queue_size > ($mean_event_insertion_rate * 120))"
               hide: false
               intervalMs: 1000
               maxDataPoints: 43200
-              refId: redis_queue_growing_faster_than_insertion_rate
               type: math
-            queryType: ""
-            refId: redis_queue_growing_faster_than_insertion_rate
-            relativeTimeRange:
-              from: 0
-              to: 0
-        for: 60s
+      - for: 60s
         noDataState: OK
-        panelId: 1
-        title: redis_queue_too_large_to_clear_in_2_min
-        uid: redis_queue_too_large_to_clear_in_2_min
-      - condition: if_capacity_is_too_low
-        dashboardUid: awx
-        no_data_state: OK
-        exec_err_state: Error
+        panelId: 3
+        uid: capacity_below_10_percent
+        title: capacity_below_10_percent
+        condition: pending_jobs_and_capacity_compare
         data:
           - refId: remaining_capacity
-            queryType: ''
+            queryType: ""
             relativeTimeRange:
-              from: 1800
+              from: 300
               to: 0
             datasourceUid: awx_prometheus
             model:
-              editorMode: builder
-              expr: awx_instance_remaining_capacity{instance="awx1:8013"}
+              editorMode: code
+              expr: sum(awx_instance_remaining_capacity)
               hide: false
               intervalMs: 1000
               legendFormat: __auto
               maxDataPoints: 43200
               range: true
               refId: remaining_capacity
-          - refId: if_capacity_is_too_low
-            queryType: ''
+          - refId: last_remaining_capacity
+            queryType: ""
             relativeTimeRange:
               from: 0
               to: 0
@@ -328,14 +330,63 @@ groups:
               conditions:
                 - evaluator:
                     params:
-                      - 20
-                      - 0
-                    type: lt
+                      - 3
+                    type: outside_range
                   operator:
-                    type: when
+                    type: and
                   query:
                     params:
-                      - remaining_capacity
+                      - total_capacity
+                  reducer:
+                    params: []
+                    type: percent_diff
+                  type: query
+              datasource:
+                type: __expr__
+                uid: "-100"
+              expression: remaining_capacity
+              hide: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+              reducer: last
+              refId: last_remaining_capacity
+              type: reduce
+          - refId: total_capacity
+            queryType: ""
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: awx_prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: awx_prometheus
+              editorMode: code
+              expr: sum(awx_instance_capacity{instance="awx1:8013"})
+              hide: false
+              intervalMs: 1000
+              legendFormat: __auto
+              maxDataPoints: 43200
+              range: true
+              refId: total_capacity
+          - refId: last_total_capacity
+            queryType: ""
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: "-100"
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 0
+                      - 0
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - capacity_below_10%
                   reducer:
                     params: []
                     type: avg
@@ -344,12 +395,142 @@ groups:
                 name: Expression
                 type: __expr__
                 uid: __expr__
-              expression: remaining_capacity
+              expression: total_capacity
               hide: false
               intervalMs: 1000
               maxDataPoints: 43200
-              refId: if_capacity_is_too_low
-              type: classic_conditions
-        for: 30m
-        title: if_capacity_is_too_low
-        uid: if_capacity_is_too_low
+              reducer: last
+              refId: last_total_capacity
+              type: reduce
+          - refId: 10_percent_total_capacity
+            queryType: ""
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: "-100"
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 0
+                      - 0
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - last_total_capacity
+                  reducer:
+                    params: []
+                    type: avg
+                  type: query
+              datasource:
+                name: Expression
+                type: __expr__
+                uid: __expr__
+              expression: "$last_total_capacity*.10"
+              hide: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: 10_percent_total_capacity
+              type: math
+          - refId: pending_jobs
+            queryType: ""
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: awx_prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: awx_prometheus
+              editorMode: builder
+              expr: awx_pending_jobs_total{instance="awx1:8013"}
+              hide: false
+              intervalMs: 1000
+              legendFormat: __auto
+              maxDataPoints: 43200
+              range: true
+              refId: pending_jobs
+          - refId: last_pending_jobs
+            queryType: ""
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: "-100"
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 0
+                      - 0
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - pending_jobs_and_capacity_compare
+                  reducer:
+                    params: []
+                    type: avg
+                  type: query
+              datasource:
+                name: Expression
+                type: __expr__
+                uid: __expr__
+              expression: pending_jobs
+              hide: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+              reducer: last
+              refId: last_pending_jobs
+              type: reduce
+          - refId: pending_jobs_and_capacity_compare
+            queryType: ""
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: "-100"
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 0
+                      - 0
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - 10_percent_total_capacity
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+                - evaluator:
+                    params:
+                      - 0
+                      - 0
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - pending_jobs
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              datasource:
+                name: Expression
+                type: __expr__
+                uid: __expr__
+              expression:
+                "($10_percent_total_capacity > $last_remaining_capacity) && $last_pending_jobs
+                > 1"
+              hide: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+              reducer: mean
+              refId: pending_jobs_and_capacity_compare
+              type: math
