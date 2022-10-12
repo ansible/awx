@@ -106,6 +106,30 @@ def test_encrypted_survey_answer(post, patch, admin_user, project, inventory, su
 
 
 @pytest.mark.django_db
+def test_survey_password_default(post, patch, admin_user, project, inventory, survey_spec_factory):
+    job_template = JobTemplate.objects.create(
+        name='test-jt',
+        project=project,
+        playbook='helloworld.yml',
+        inventory=inventory,
+        ask_variables_on_launch=False,
+        survey_enabled=True,
+        survey_spec=survey_spec_factory([{'variable': 'var1', 'question_name': 'Q1', 'type': 'password', 'required': True, 'default': 'foobar'}]),
+    )
+
+    # test removal of $encrypted$
+    url = reverse('api:job_template_schedules_list', kwargs={'pk': job_template.id})
+    r = post(url, {'name': 'test sch', 'rrule': RRULE_EXAMPLE, 'extra_data': '{"var1": "$encrypted$"}'}, admin_user, expect=201)
+    schedule = Schedule.objects.get(pk=r.data['id'])
+    assert schedule.extra_data == {}
+    assert schedule.enabled is True
+
+    # test an unrelated change
+    patch(schedule.get_absolute_url(), data={'enabled': False}, user=admin_user, expect=200)
+    patch(schedule.get_absolute_url(), data={'enabled': True}, user=admin_user, expect=200)
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize(
     'rrule, error',
     [

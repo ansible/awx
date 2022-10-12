@@ -3750,7 +3750,11 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
 
         # Build unsaved version of this config, use it to detect prompts errors
         mock_obj = self._build_mock_obj(attrs)
-        accepted, rejected, errors = ujt._accept_or_ignore_job_kwargs(_exclude_errors=self.exclude_errors, **mock_obj.prompts_dict())
+        if set(list(ujt.get_ask_mapping().keys()) + ['extra_data']) & set(attrs.keys()):
+            accepted, rejected, errors = ujt._accept_or_ignore_job_kwargs(_exclude_errors=self.exclude_errors, **mock_obj.prompts_dict())
+        else:
+            # Only perform validation of prompts if prompts fields are provided
+            errors = {}
 
         # Remove all unprocessed $encrypted$ strings, indicating default usage
         if 'extra_data' in attrs and password_dict:
