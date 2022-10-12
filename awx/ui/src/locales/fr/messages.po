@@ -5931,7 +5931,7 @@ msgstr "Désactivé"
 #: screens/Template/JobTemplateDetail/JobTemplateDetail.js:277
 #: screens/Template/shared/JobTemplateForm.js:455
 msgid "On"
-msgstr "Le"
+msgstr "Activé"
 
 #: components/Workflow/WorkflowLegend.js:126
 #: components/Workflow/WorkflowLinkHelp.js:30
