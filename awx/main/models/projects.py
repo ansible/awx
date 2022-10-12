@@ -471,6 +471,29 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
     def get_absolute_url(self, request=None):
         return reverse('api:project_detail', kwargs={'pk': self.pk}, request=request)
 
+    def get_reason_if_failed(self):
+        """
+        If the project is in a failed or errored state, return a human-readable
+        error message explaining why. Otherwise return None.
+
+        This is used during validation in the serializer and also by
+        RunProjectUpdate/RunInventoryUpdate.
+        """
+
+        if self.status not in ('error', 'failed'):
+            return None
+
+        latest_update = self.project_updates.last()
+        if latest_update is not None and latest_update.failed:
+            failed_validation_tasks = latest_update.project_update_events.filter(
+                event='runner_on_failed',
+                play="Perform project signature/checksum verification",
+            )
+            if failed_validation_tasks:
+                return _("Last project update failed due to signature validation failure.")
+
+        return _("Missing a revision to run due to failed project update.")
+
     '''
     RelatedJobsMixin
     '''

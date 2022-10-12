@@ -767,6 +767,9 @@ class SourceControlMixin(BaseTask):
 
         try:
             original_branch = None
+            failed_reason = project.get_reason_if_failed()
+            if failed_reason:
+                raise RuntimeError(failed_reason)
             project_path = project.get_project_path(check_if_exists=False)
             if project.scm_type == 'git' and (scm_branch and scm_branch != project.scm_branch):
                 if os.path.exists(project_path):
@@ -1056,10 +1059,6 @@ class RunJob(SourceControlMixin, BaseTask):
             error = _('Job could not start because no Execution Environment could be found.')
             self.update_model(job.pk, status='error', job_explanation=error)
             raise RuntimeError(error)
-        elif job.project.status in ('error', 'failed'):
-            msg = _('The project revision for this job template is unknown due to a failed update.')
-            job = self.update_model(job.pk, status='failed', job_explanation=msg)
-            raise RuntimeError(msg)
 
         if job.inventory.kind == 'smart':
             # cache smart inventory memberships so that the host_filter query is not
@@ -1067,7 +1066,11 @@ class RunJob(SourceControlMixin, BaseTask):
             update_smart_memberships_for_inventory(job.inventory)
 
     def build_project_dir(self, job, private_data_dir):
-        self.sync_and_copy(job.project, private_data_dir, scm_branch=job.scm_branch)
+        try:
+            self.sync_and_copy(job.project, private_data_dir, scm_branch=job.scm_branch)
+        except RuntimeError as e:
+            self.update_model(job.pk, status='failed', job_explanation=str(e))
+            raise
 
     def final_run_hook(self, job, status, private_data_dir, fact_modification_times):
         super(RunJob, self).final_run_hook(job, status, private_data_dir, fact_modification_times)
