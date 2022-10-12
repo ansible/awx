@@ -10,6 +10,8 @@
     - name: Enable Copr repo for Receptor
       command: dnf copr enable ansible-awx/receptor -y
     - import_role:
+        name: ansible.receptor.podman
+    - import_role:
         name: ansible.receptor.setup
     - name: Install ansible-runner
       pip:
