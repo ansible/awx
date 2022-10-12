@@ -49,8 +49,9 @@ describe('<InstanceDetail/>', () => {
         mem_capacity: 38,
         enabled: true,
         managed_by_policy: true,
-        node_type: 'hybrid',
+        node_type: 'execution',
         node_state: 'ready',
+        health_check_pending: false,
       },
     });
     InstancesAPI.readInstanceGroup.mockResolvedValue({

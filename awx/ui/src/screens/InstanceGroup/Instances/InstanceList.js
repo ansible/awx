@@ -35,6 +35,8 @@ const QS_CONFIG = getQSConfig('instance', {
 function InstanceList({ instanceGroup }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showHealthCheckAlert, setShowHealthCheckAlert] = useState(false);
+  const [pendingHealthCheck, setPendingHealthCheck] = useState(false);
+  const [canRunHealthCheck, setCanRunHealthCheck] = useState(true);
   const location = useLocation();
   const { id: instanceGroupId } = useParams();
 
@@ -56,6 +58,10 @@ function InstanceList({ instanceGroup }) {
         InstanceGroupsAPI.readInstances(instanceGroupId, params),
         InstanceGroupsAPI.readInstanceOptions(instanceGroupId),
       ]);
+      setPendingHealthCheck(
+        response?.data?.result?.some((i) => i.health_check_pending === true)
+      );
+
       return {
         instances: response.data.results,
         count: response.data.count,
@@ -90,7 +96,7 @@ function InstanceList({ instanceGroup }) {
     useCallback(async () => {
       const [...response] = await Promise.all(
         selected
-          .filter(({ node_type }) => node_type !== 'hop')
+          .filter(({ node_type }) => node_type === 'execution')
           .map(({ id }) => InstancesAPI.healthCheck(id))
       );
       if (response) {
@@ -98,6 +104,18 @@ function InstanceList({ instanceGroup }) {
       }
     }, [selected])
   );
+
+  useEffect(() => {
+    if (selected) {
+      selected.forEach((i) => {
+        if (i.node_type === 'execution') {
+          setCanRunHealthCheck(true);
+        } else {
+          setCanRunHealthCheck(false);
+        }
+      });
+    }
+  }, [selected]);
 
   const handleHealthCheck = async () => {
     await fetchHealthCheck();
@@ -246,9 +264,10 @@ function InstanceList({ instanceGroup }) {
                 isProtectedInstanceGroup={instanceGroup.name === 'controlplane'}
               />,
               <HealthCheckButton
-                isDisabled={!canAdd}
+                isDisabled={!canAdd || !canRunHealthCheck}
                 onClick={handleHealthCheck}
                 selectedItems={selected}
+                healthCheckPending={pendingHealthCheck}
               />,
             ]}
             emptyStateControls={
@@ -263,7 +282,10 @@ function InstanceList({ instanceGroup }) {
         )}
         headerRow={
           <HeaderRow qsConfig={QS_CONFIG} isExpandable>
-            <HeaderCell sortKey="hostname">{t`Name`}</HeaderCell>
+            <HeaderCell
+              tooltip={t`Health checks can only be run on execution nodes.`}
+              sortKey="hostname"
+            >{t`Name`}</HeaderCell>
             <HeaderCell sortKey="errors">{t`Status`}</HeaderCell>
             <HeaderCell sortKey="node_type">{t`Node Type`}</HeaderCell>
             <HeaderCell>{t`Capacity Adjustment`}</HeaderCell>

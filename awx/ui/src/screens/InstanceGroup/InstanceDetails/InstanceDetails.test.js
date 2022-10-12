@@ -87,8 +87,9 @@ describe('<InstanceDetails/>', () => {
         mem_capacity: 38,
         enabled: true,
         managed_by_policy: true,
-        node_type: 'hybrid',
+        node_type: 'execution',
         node_state: 'ready',
+        health_check_pending: false,
       },
     });
     InstancesAPI.readHealthCheckDetail.mockResolvedValue({
@@ -346,6 +347,67 @@ describe('<InstanceDetails/>', () => {
     expect(wrapper.find('AlertModal')).toHaveLength(1);
     expect(wrapper.find('ErrorDetail')).toHaveLength(1);
   });
+
+  test.each([
+    [1, 'hybrid', 0],
+    [2, 'hop', 0],
+    [3, 'control', 0],
+  ])(
+    'hide health check button for non-execution type nodes',
+    async (a, b, expected) => {
+      InstancesAPI.readDetail.mockResolvedValue({
+        data: {
+          id: a,
+          type: 'instance',
+          url: '/api/v2/instances/1/',
+          related: {
+            named_url: '/api/v2/instances/awx_1/',
+            jobs: '/api/v2/instances/1/jobs/',
+            instance_groups: '/api/v2/instances/1/instance_groups/',
+            health_check: '/api/v2/instances/1/health_check/',
+          },
+          uuid: '00000000-0000-0000-0000-000000000000',
+          hostname: 'awx_1',
+          created: '2021-09-08T17:10:34.484569Z',
+          modified: '2021-09-09T13:55:44.219900Z',
+          last_seen: '2021-09-09T20:20:31.623148Z',
+          last_health_check: '2021-09-09T20:20:31.623148Z',
+          errors: '',
+          capacity_adjustment: '1.00',
+          version: '19.1.0',
+          capacity: 38,
+          consumed_capacity: 0,
+          percent_capacity_remaining: 100.0,
+          jobs_running: 0,
+          jobs_total: 0,
+          cpu: 8,
+          memory: 6232231936,
+          cpu_capacity: 32,
+          mem_capacity: 38,
+          enabled: true,
+          managed_by_policy: true,
+          node_type: b,
+          node_state: 'ready',
+          health_check_pending: false,
+        },
+      });
+      jest.spyOn(ConfigContext, 'useConfig').mockImplementation(() => ({
+        me: { is_superuser: true },
+      }));
+      await act(async () => {
+        wrapper = mountWithContexts(
+          <InstanceDetails
+            instanceGroup={instanceGroup}
+            setBreadcrumb={() => {}}
+          />
+        );
+      });
+      await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
+      expect(wrapper.find("Button[ouiaId='health-check-button']")).toHaveLength(
+        expected
+      );
+    }
+  );
 
   test('Should call disassociate', async () => {
     InstanceGroupsAPI.readInstances.mockResolvedValue({
