@@ -59,13 +59,14 @@ function PlaybookSelect({
       onToggle={setIsOpen}
       placeholderText={t`Select a playbook`}
       typeAheadAriaLabel={t`Select a playbook`}
-      isCreatable={false}
+      isCreatable
+      createText=""
       onSelect={(event, value) => {
         setIsOpen(false);
         onChange(value);
       }}
       id="template-playbook"
-      isValid={isValid}
+      validated={isValid ? 'default' : 'error'}
       onBlur={onBlur}
       isDisabled={isLoading || isDisabled}
       maxHeight="1000%"
