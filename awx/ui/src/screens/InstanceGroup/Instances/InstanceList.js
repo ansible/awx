@@ -58,10 +58,10 @@ function InstanceList({ instanceGroup }) {
         InstanceGroupsAPI.readInstances(instanceGroupId, params),
         InstanceGroupsAPI.readInstanceOptions(instanceGroupId),
       ]);
-      setPendingHealthCheck(
-        response?.data?.result?.some((i) => i.health_check_pending === true)
+      const isPending = response.data.results.some(
+        (i) => i.health_check_pending === true
       );
-
+      setPendingHealthCheck(isPending);
       return {
         instances: response.data.results,
         count: response.data.count,

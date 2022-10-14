@@ -53,9 +53,10 @@ function InstanceList() {
         InstancesAPI.readOptions(),
         SettingsAPI.readCategory('system'),
       ]);
-      setPendingHealthCheck(
-        response?.data?.result?.some((i) => i.health_check_pending === true)
+      const isPending = response.data.results.some(
+        (i) => i.health_check_pending === true
       );
+      setPendingHealthCheck(isPending);
       return {
         instances: response.data.results,
         isK8s: sysSettings.data.IS_K8S,
