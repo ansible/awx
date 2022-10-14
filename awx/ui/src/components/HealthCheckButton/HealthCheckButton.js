@@ -33,8 +33,10 @@ function HealthCheckButton({
           component="button"
           onClick={onClick}
           ouiaId="health-check"
+          isLoading={healthCheckPending}
+          spinnerAriaLabel={t`Running health check`}
         >
-          {t`Run health check`}
+          {healthCheckPending ? t`Running health check` : t`Run health check`}
         </DropdownItem>
       </Tooltip>
     );
