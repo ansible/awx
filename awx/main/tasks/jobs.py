@@ -769,6 +769,7 @@ class SourceControlMixin(BaseTask):
             original_branch = None
             failed_reason = project.get_reason_if_failed()
             if failed_reason:
+                self.update_model(self.instance.pk, status='failed', job_explanation=failed_reason)
                 raise RuntimeError(failed_reason)
             project_path = project.get_project_path(check_if_exists=False)
             if project.scm_type == 'git' and (scm_branch and scm_branch != project.scm_branch):
@@ -1066,11 +1067,7 @@ class RunJob(SourceControlMixin, BaseTask):
             update_smart_memberships_for_inventory(job.inventory)
 
     def build_project_dir(self, job, private_data_dir):
-        try:
-            self.sync_and_copy(job.project, private_data_dir, scm_branch=job.scm_branch)
-        except RuntimeError as e:
-            self.update_model(job.pk, status='failed', job_explanation=str(e))
-            raise
+        self.sync_and_copy(job.project, private_data_dir, scm_branch=job.scm_branch)
 
     def final_run_hook(self, job, status, private_data_dir, fact_modification_times):
         super(RunJob, self).final_run_hook(job, status, private_data_dir, fact_modification_times)
