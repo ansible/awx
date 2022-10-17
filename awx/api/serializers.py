@@ -4931,7 +4931,8 @@ class InstanceSerializer(BaseSerializer):
             'node_state': {'initial': Instance.States.INSTALLED, 'default': Instance.States.INSTALLED},
             'hostname': {
                 'validators': [
-                    MaxLengthValidator(limit_value=255),
+                    MaxLengthValidator(limit_value=250),
+                    validators.UniqueValidator(queryset=Instance.objects.all()),
                     RegexValidator(
                         regex='^localhost$|^127(?:\.[0-9]+){0,2}\.[0-9]+$|^(?:0*\:)*?:?0*1$',
                         flags=re.IGNORECASE,
