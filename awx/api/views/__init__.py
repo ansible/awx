@@ -69,6 +69,7 @@ from awx.api.generics import (
     APIView,
     BaseUsersList,
     CopyAPIView,
+    GenericCancelView,
     GenericAPIView,
     ListAPIView,
     ListCreateAPIView,
@@ -976,19 +977,10 @@ class SystemJobEventsList(SubListAPIView):
         return job.get_event_queryset()
 
 
-class ProjectUpdateCancel(RetrieveAPIView):
+class ProjectUpdateCancel(GenericCancelView):
 
     model = models.ProjectUpdate
-    obj_permission_type = 'cancel'
     serializer_class = serializers.ProjectUpdateCancelSerializer
-
-    def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.can_cancel:
-            obj.cancel()
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return self.http_method_not_allowed(request, *args, **kwargs)
 
 
 class ProjectUpdateNotificationsList(SubListAPIView):
@@ -2262,19 +2254,10 @@ class InventoryUpdateCredentialsList(SubListAPIView):
     relationship = 'credentials'
 
 
-class InventoryUpdateCancel(RetrieveAPIView):
+class InventoryUpdateCancel(GenericCancelView):
 
     model = models.InventoryUpdate
-    obj_permission_type = 'cancel'
     serializer_class = serializers.InventoryUpdateCancelSerializer
-
-    def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.can_cancel:
-            obj.cancel()
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return self.http_method_not_allowed(request, *args, **kwargs)
 
 
 class InventoryUpdateNotificationsList(SubListAPIView):
@@ -3352,20 +3335,15 @@ class WorkflowJobWorkflowNodesList(SubListAPIView):
         return super(WorkflowJobWorkflowNodesList, self).get_queryset().order_by('id')
 
 
-class WorkflowJobCancel(RetrieveAPIView):
+class WorkflowJobCancel(GenericCancelView):
 
     model = models.WorkflowJob
-    obj_permission_type = 'cancel'
     serializer_class = serializers.WorkflowJobCancelSerializer
 
     def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.can_cancel:
-            obj.cancel()
-            ScheduleWorkflowManager().schedule()
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return self.http_method_not_allowed(request, *args, **kwargs)
+        r = super().post(request, *args, **kwargs)
+        ScheduleWorkflowManager().schedule()
+        return r
 
 
 class WorkflowJobNotificationsList(SubListAPIView):
@@ -3521,19 +3499,10 @@ class JobActivityStreamList(SubListAPIView):
     search_fields = ('changes',)
 
 
-class JobCancel(RetrieveAPIView):
+class JobCancel(GenericCancelView):
 
     model = models.Job
-    obj_permission_type = 'cancel'
     serializer_class = serializers.JobCancelSerializer
-
-    def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.can_cancel:
-            obj.cancel()
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return self.http_method_not_allowed(request, *args, **kwargs)
 
 
 class JobRelaunch(RetrieveAPIView):
@@ -4005,19 +3974,10 @@ class AdHocCommandDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
     serializer_class = serializers.AdHocCommandDetailSerializer
 
 
-class AdHocCommandCancel(RetrieveAPIView):
+class AdHocCommandCancel(GenericCancelView):
 
     model = models.AdHocCommand
-    obj_permission_type = 'cancel'
     serializer_class = serializers.AdHocCommandCancelSerializer
-
-    def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.can_cancel:
-            obj.cancel()
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return self.http_method_not_allowed(request, *args, **kwargs)
 
 
 class AdHocCommandRelaunch(GenericAPIView):
@@ -4153,19 +4113,10 @@ class SystemJobDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
     serializer_class = serializers.SystemJobSerializer
 
 
-class SystemJobCancel(RetrieveAPIView):
+class SystemJobCancel(GenericCancelView):
 
     model = models.SystemJob
-    obj_permission_type = 'cancel'
     serializer_class = serializers.SystemJobCancelSerializer
-
-    def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.can_cancel:
-            obj.cancel()
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return self.http_method_not_allowed(request, *args, **kwargs)
 
 
 class SystemJobNotificationsList(SubListAPIView):
