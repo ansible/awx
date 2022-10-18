@@ -387,6 +387,8 @@ class AutoscalePool(WorkerPool):
                                 reaper.reap_job(j, 'failed')
                         except Exception:
                             logger.exception('failed to reap job UUID {}'.format(w.current_task['uuid']))
+                    else:
+                        logger.warning(f'Worker was told to quit but has not, pid={w.pid}')
                 orphaned.extend(w.orphaned_tasks)
                 self.workers.remove(w)
             elif w.idle and len(self.workers) > self.min_workers:
@@ -450,9 +452,6 @@ class AutoscalePool(WorkerPool):
         try:
             if isinstance(body, dict) and body.get('bind_kwargs'):
                 self.add_bind_kwargs(body)
-            # when the cluster heartbeat occurs, clean up internally
-            if isinstance(body, dict) and 'cluster_node_heartbeat' in body['task']:
-                self.cleanup()
             if self.should_grow:
                 self.up()
             # we don't care about "preferred queue" round robin distribution, just
