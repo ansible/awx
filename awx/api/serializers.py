@@ -4934,7 +4934,7 @@ class InstanceSerializer(BaseSerializer):
                     MaxLengthValidator(limit_value=250),
                     validators.UniqueValidator(queryset=Instance.objects.all()),
                     RegexValidator(
-                        regex='^localhost$|^127(?:\.[0-9]+){0,2}\.[0-9]+$|^(?:0*\:)*?:?0*1$',
+                        regex=r'^localhost$|^127(?:\.[0-9]+){0,2}\.[0-9]+$|^(?:0*\:)*?:?0*1$',
                         flags=re.IGNORECASE,
                         inverse_match=True,
                         message="hostname cannot be localhost or 127.0.0.1",
