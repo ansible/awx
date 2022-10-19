@@ -208,7 +208,10 @@ def run_until_complete(node, timing_data=None, **kwargs):
     if state_name.lower() == 'failed':
         work_detail = status.get('Detail', '')
         if work_detail:
-            raise RemoteJobError(f'Receptor error from {node}, detail:\n{work_detail}')
+            if stdout:
+                raise RemoteJobError(f'Receptor error from {node}, detail:\n{work_detail}\nstdout:\n{stdout}')
+            else:
+                raise RemoteJobError(f'Receptor error from {node}, detail:\n{work_detail}')
         else:
             raise RemoteJobError(f'Unknown ansible-runner error on node {node}, stdout:\n{stdout}')
 
