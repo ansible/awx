@@ -114,7 +114,6 @@ class AWXConsumerBase(object):
             queue = 0
         self.pool.write(queue, body)
         self.total_messages += 1
-        self.record_statistics()
 
     @log_excess_runtime(logger)
     def record_statistics(self):
@@ -156,6 +155,16 @@ class AWXConsumerPG(AWXConsumerBase):
         # if no successful loops have ran since startup, then we should fail right away
         self.pg_is_down = True  # set so that we fail if we get database errors on startup
         self.pg_down_time = time.time() - self.pg_max_wait  # allow no grace period
+        self.last_cleanup = time.time()
+
+    def run_periodic_tasks(self):
+        self.record_statistics()  # maintains time buffer in method
+
+        if time.time() - self.last_cleanup > 60:  # same as cluster_node_heartbeat
+            # NOTE: if we run out of database connections, it is important to still run cleanup
+            # so that we scale down workers and free up connections
+            self.pool.cleanup()
+            self.last_cleanup = time.time()
 
     def run(self, *args, **kwargs):
         super(AWXConsumerPG, self).run(*args, **kwargs)
@@ -171,8 +180,10 @@ class AWXConsumerPG(AWXConsumerBase):
                     if init is False:
                         self.worker.on_start()
                         init = True
-                    for e in conn.events():
-                        self.process_task(json.loads(e.payload))
+                    for e in conn.events(yield_timeouts=True):
+                        if e is not None:
+                            self.process_task(json.loads(e.payload))
+                        self.run_periodic_tasks()
                         self.pg_is_down = False
                     if self.should_stop:
                         return
@@ -229,6 +240,8 @@ class BaseWorker(object):
                     # so we can establish a new connection
                     conn.close_if_unusable_or_obsolete()
                 self.perform_work(body, *args)
+            except Exception:
+                logger.exception(f'Unhandled exception in perform_work in worker pid={os.getpid()}')
             finally:
                 if 'uuid' in body:
                     uuid = body['uuid']
