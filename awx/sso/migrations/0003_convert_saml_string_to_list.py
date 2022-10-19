@@ -6,7 +6,7 @@ _values_to_change = ['is_superuser_value', 'is_superuser_role', 'is_system_audit
 
 def _get_setting():
     with connection.cursor() as cursor:
-        cursor.execute(f'SELECT value FROM conf_setting WHERE key= %s', ['SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR'])
+        cursor.execute('SELECT value FROM conf_setting WHERE key= %s', ['SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR'])
         row = cursor.fetchone()
         if row == None:
             return {}
@@ -24,7 +24,7 @@ def _get_setting():
 
 def _set_setting(value):
     with connection.cursor() as cursor:
-        cursor.execute(f'UPDATE conf_setting SET value = %s WHERE key = %s', [json.dumps(value), 'SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR'])
+        cursor.execute('UPDATE conf_setting SET value = %s WHERE key = %s', [json.dumps(value), 'SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR'])
 
 
 def forwards(app, schema_editor):

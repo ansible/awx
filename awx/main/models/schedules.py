@@ -153,7 +153,7 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
         #
 
         # Find the DTSTART rule or raise an error, its usually the first rule but that is not strictly enforced
-        start_date_rule = re.sub('^.*(DTSTART[^\s]+)\s.*$', r'\1', rrule)
+        start_date_rule = re.sub(r'^.*(DTSTART[^\s]+)\s.*$', r'\1', rrule)
         if not start_date_rule:
             raise ValueError('A DTSTART field needs to be in the rrule')
 

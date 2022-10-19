@@ -24,7 +24,6 @@ __all__ = [
     'InventoryInventorySourcesUpdatePermission',
     'UserPermission',
     'IsSystemAdminOrAuditor',
-    'InstanceGroupTowerPermission',
     'WorkflowApprovalPermission',
 ]
 

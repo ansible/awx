@@ -3050,8 +3050,7 @@ class WorkflowJobNodeChildrenBaseList(SubListAPIView):
     search_fields = ('unified_job_template__name', 'unified_job_template__description')
 
     #
-    # Limit the set of WorkflowJobeNodes to the related nodes of specified by
-    #'relationship'
+    # Limit the set of WorkflowJobNodes to the related nodes of specified by self.relationship
     #
     def get_queryset(self):
         parent = self.get_parent_object()

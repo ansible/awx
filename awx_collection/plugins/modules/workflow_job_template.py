@@ -514,7 +514,7 @@ def create_workflow_nodes(module, response, workflow_nodes, workflow_id):
         # Lookup Job Template ID
         if workflow_node['unified_job_template']['name']:
             if workflow_node['unified_job_template']['type'] is None:
-                module.fail_json(msg='Could not find unified job template type in workflow_nodes {1}'.format(workflow_node))
+                module.fail_json(msg='Could not find unified job template type in workflow_nodes {0}'.format(workflow_node))
             search_fields['type'] = workflow_node['unified_job_template']['type']
             if workflow_node['unified_job_template']['type'] == 'inventory_source':
                 if 'inventory' in workflow_node['unified_job_template']:

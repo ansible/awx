@@ -4,7 +4,7 @@ from django.utils.timezone import now
 
 logger = logging.getLogger('awx.main.migrations')
 
-__all__ = ['create_collection_jt', 'create_clearsessions_jt', 'create_cleartokens_jt']
+__all__ = ['create_clearsessions_jt', 'create_cleartokens_jt']
 
 '''
 These methods are called by migrations to create various system job templates
