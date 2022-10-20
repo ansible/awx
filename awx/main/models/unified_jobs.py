@@ -1465,23 +1465,23 @@ class UnifiedJob(
                     self.job_explanation = job_explanation
                     cancel_fields.append('job_explanation')
 
+                # Important to save here before sending cancel signal to dispatcher to cancel because
+                # the job control process will use the cancel_flag to distinguish a shutdown from a cancel
+                self.save(update_fields=cancel_fields)
+
             controller_notified = False
             if self.celery_task_id:
                 controller_notified = self.cancel_dispatcher_process()
-
-            else:
-                # Avoid race condition where we have stale model from pending state but job has already started,
-                # its checking signal but not cancel_flag, so re-send signal after this database commit
-                connection.on_commit(self.fallback_cancel)
 
             # If a SIGTERM signal was sent to the control process, and acked by the dispatcher
             # then we want to let its own cleanup change status, otherwise change status now
             if not controller_notified:
                 if self.status != 'canceled':
                     self.status = 'canceled'
-                    cancel_fields.append('status')
-
-            self.save(update_fields=cancel_fields)
+                    self.save(update_fields=['status'])
+                # Avoid race condition where we have stale model from pending state but job has already started,
+                # its checking signal but not cancel_flag, so re-send signal after updating cancel fields
+                self.fallback_cancel()
 
         return self.cancel_flag
 

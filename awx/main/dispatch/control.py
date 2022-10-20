@@ -3,6 +3,7 @@ import uuid
 import json
 
 from django.conf import settings
+from django.db import connection
 import redis
 
 from awx.main.dispatch import get_local_queuename
@@ -49,7 +50,10 @@ class Control(object):
         reply_queue = Control.generate_reply_queue_name()
         self.result = None
 
-        with pg_bus_conn(new_connection=True) as conn:
+        if not connection.get_autocommit():
+            raise RuntimeError('Control-with-reply messages can only be done in autocommit mode')
+
+        with pg_bus_conn() as conn:
             conn.listen(reply_queue)
             send_data = {'control': command, 'reply_to': reply_queue}
             if extra_data:
