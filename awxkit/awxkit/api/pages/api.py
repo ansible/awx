@@ -123,6 +123,9 @@ class ApiV2(base.Base):
             if rel_endpoint.__item_class__.__name__ == 'WorkflowApprovalTemplate':
                 continue
 
+            if rel_endpoint.__item_class__.__name__ == 'Inventory' and _page.__item_class__.__name__ == 'Schedule':
+                continue
+
             rel_natural_key = rel_endpoint.get_natural_key(self._cache)
             if rel_natural_key is None:
                 log.error("Unable to construct a natural key for foreign key %r of object %s.", key, _page.endpoint)
