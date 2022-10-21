@@ -993,9 +993,6 @@ class HostAccess(BaseAccess):
         if data and 'name' in data:
             self.check_license(add_host_name=data['name'])
 
-            # Check the per-org limit
-            self.check_org_host_limit({'inventory': obj.inventory}, add_host_name=data['name'])
-
         # Checks for admin or change permission on inventory, controls whether
         # the user can edit variable data.
         return obj and self.user in obj.inventory.admin_role
