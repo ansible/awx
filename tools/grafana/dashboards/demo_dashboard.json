@@ -188,7 +188,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.1.6",
+      "pluginVersion": "9.2.1",
       "targets": [
         {
           "datasource": {
@@ -250,7 +250,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.1.6",
+      "pluginVersion": "9.2.1",
       "targets": [
         {
           "datasource": {
@@ -642,30 +642,6 @@
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "awx_prometheus"
-              },
-              "editorMode": "builder",
-              "expr": "dependency_manager_generate_dependencies_seconds",
-              "hide": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "B"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "awx_prometheus"
-              },
-              "editorMode": "builder",
-              "expr": "dependency_manager_get_tasks_seconds",
-              "hide": false,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "C"
             },
             {
               "datasource": {
@@ -1518,6 +1494,6 @@
   "timezone": "",
   "title": "awx-demo",
   "uid": "GISWZOXnk",
-  "version": 12,
+  "version": 13,
   "weekStart": ""
 }
