@@ -1,0 +1,1502 @@
+changed: false
+controller_credential_input_sources:
+  - created: '2022-10-22T17:42:56.159989Z'
+    description: Fill the gitlab credential from CyberArk
+    id: 1
+    input_field_name: password
+    metadata:
+      object_query: Safe=MY_SAFE;Object=AWX-user
+      object_query_format: Exact
+    modified: '2022-10-22T17:42:56.160036Z'
+    related:
+      created_by: /api/v2/users/1/
+      modified_by: /api/v2/users/1/
+      source_credential: /api/v2/credentials/13/
+      target_credential: /api/v2/credentials/14/
+    source_credential:
+      credential_type: CyberArk AIM Central Credential Provider Lookup
+      name: cyberark
+      organization: Default
+    summary_fields:
+      created_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      modified_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      source_credential:
+        cloud: false
+        credential_type_id: 19
+        description: CyberArk Lookup Credential
+        id: 13
+        kind: aim
+        name: cyberark
+      target_credential:
+        cloud: false
+        credential_type_id: 2
+        description: ''
+        id: 14
+        kind: scm
+        name: gitlab
+      user_capabilities:
+        delete: true
+    target_credential:
+      credential_type: Source Control
+      name: gitlab
+      organization: Default
+    type: credential_input_source
+    url: /api/v2/credential_input_sources/1/
+controller_credentials:
+  - cloud: true
+    created: '2022-10-22T17:42:51.415643Z'
+    credential_type: Red Hat Virtualization
+    description: infra-rhvm-01 creds for inventory sources.
+    id: 9
+    inputs:
+      host: 'https://example.com/ovirt-engine/api'
+      password: $encrypted$
+      username: user
+    kind: rhv
+    kubernetes: false
+    managed: false
+    modified: '2022-10-22T17:45:30.766532Z'
+    name: admin@internal-RHVM-01
+    organization: Satellite
+    related:
+      access_list: /api/v2/credentials/9/access_list/
+      activity_stream: /api/v2/credentials/9/activity_stream/
+      copy: /api/v2/credentials/9/copy/
+      created_by: /api/v2/users/1/
+      credential_type: /api/v2/credential_types/14/
+      input_sources: /api/v2/credentials/9/input_sources/
+      modified_by: /api/v2/users/1/
+      object_roles: /api/v2/credentials/9/object_roles/
+      organization: /api/v2/organizations/2/
+      owner_teams: /api/v2/credentials/9/owner_teams/
+      owner_users: /api/v2/credentials/9/owner_users/
+    summary_fields:
+      created_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      credential_type:
+        description: ''
+        id: 14
+        name: Red Hat Virtualization
+      modified_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      object_roles:
+        admin_role:
+          description: Can manage all aspects of the credential
+          id: 89
+          name: Admin
+        read_role:
+          description: May view settings for the credential
+          id: 91
+          name: Read
+        use_role:
+          description: Can use the credential in a job template
+          id: 90
+          name: Use
+      organization:
+        description: ''
+        id: 2
+        name: Satellite
+      owners:
+        - description: ''
+          id: 2
+          name: Satellite
+          type: organization
+          url: /api/v2/organizations/2/
+      user_capabilities:
+        copy: true
+        delete: true
+        edit: true
+        use: true
+    type: credential
+    url: /api/v2/credentials/9/
+  - cloud: false
+    created: '2022-10-09T06:03:47.215778Z'
+    credential_type: Ansible Galaxy/Automation Hub API Token
+    description: ''
+    id: 2
+    inputs:
+      url: 'https://galaxy.ansible.com/'
+    kind: galaxy_api_token
+    kubernetes: false
+    managed: true
+    modified: '2022-10-09T06:03:47.215828Z'
+    name: Ansible Galaxy
+    organization: null
+    related:
+      access_list: /api/v2/credentials/2/access_list/
+      activity_stream: /api/v2/credentials/2/activity_stream/
+      copy: /api/v2/credentials/2/copy/
+      created_by: /api/v2/users/1/
+      credential_type: /api/v2/credential_types/18/
+      input_sources: /api/v2/credentials/2/input_sources/
+      modified_by: /api/v2/users/1/
+      object_roles: /api/v2/credentials/2/object_roles/
+      owner_teams: /api/v2/credentials/2/owner_teams/
+      owner_users: /api/v2/credentials/2/owner_users/
+    summary_fields:
+      created_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      credential_type:
+        description: ''
+        id: 18
+        name: Ansible Galaxy/Automation Hub API Token
+      modified_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      object_roles:
+        admin_role:
+          description: Can manage all aspects of the credential
+          id: 23
+          name: Admin
+        read_role:
+          description: May view settings for the credential
+          id: 25
+          name: Read
+        use_role:
+          description: Can use the credential in a job template
+          id: 24
+          name: Use
+      owners: []
+      user_capabilities:
+        copy: true
+        delete: false
+        edit: false
+        use: true
+    type: credential
+    url: /api/v2/credentials/2/
+  - cloud: false
+    created: '2022-10-09T06:03:58.360165Z'
+    credential_type: Ansible Galaxy/Automation Hub API Token
+    description: ''
+    id: 6
+    inputs:
+      auth_url: ''
+      token: $encrypted$
+      url: 'https://hub.nas/api/galaxy/content/community/'
+    kind: galaxy_api_token
+    kubernetes: false
+    managed: false
+    modified: '2022-10-14T00:06:28.775194Z'
+    name: Automation Hub Community Repository
+    organization: Default
+    related:
+      access_list: /api/v2/credentials/6/access_list/
+      activity_stream: /api/v2/credentials/6/activity_stream/
+      copy: /api/v2/credentials/6/copy/
+      credential_type: /api/v2/credential_types/18/
+      input_sources: /api/v2/credentials/6/input_sources/
+      modified_by: /api/v2/users/1/
+      object_roles: /api/v2/credentials/6/object_roles/
+      organization: /api/v2/organizations/1/
+      owner_teams: /api/v2/credentials/6/owner_teams/
+      owner_users: /api/v2/credentials/6/owner_users/
+    summary_fields:
+      credential_type:
+        description: ''
+        id: 18
+        name: Ansible Galaxy/Automation Hub API Token
+      modified_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      object_roles:
+        admin_role:
+          description: Can manage all aspects of the credential
+          id: 43
+          name: Admin
+        read_role:
+          description: May view settings for the credential
+          id: 45
+          name: Read
+        use_role:
+          description: Can use the credential in a job template
+          id: 44
+          name: Use
+      organization:
+        description: ''
+        id: 1
+        name: Default
+      owners:
+        - description: ''
+          id: 1
+          name: Default
+          type: organization
+          url: /api/v2/organizations/1/
+        - description: ''
+          id: 3
+          name: differential-1
+          type: team
+          url: /api/v2/teams/3/
+      user_capabilities:
+        copy: true
+        delete: true
+        edit: true
+        use: true
+    teams:
+      - differential-1
+    type: credential
+    url: /api/v2/credentials/6/
+  - cloud: false
+    created: '2022-10-09T06:03:58.749765Z'
+    credential_type: Container Registry
+    description: ''
+    id: 7
+    inputs:
+      host: hub.nas
+      password: $encrypted$
+      username: admin
+      verify_ssl: true
+    kind: registry
+    kubernetes: false
+    managed: false
+    modified: '2022-10-14T00:06:39.035801Z'
+    name: Automation Hub Container Registry
+    organization: null
+    related:
+      access_list: /api/v2/credentials/7/access_list/
+      activity_stream: /api/v2/credentials/7/activity_stream/
+      copy: /api/v2/credentials/7/copy/
+      credential_type: /api/v2/credential_types/17/
+      input_sources: /api/v2/credentials/7/input_sources/
+      modified_by: /api/v2/users/1/
+      object_roles: /api/v2/credentials/7/object_roles/
+      owner_teams: /api/v2/credentials/7/owner_teams/
+      owner_users: /api/v2/credentials/7/owner_users/
+    summary_fields:
+      credential_type:
+        description: ''
+        id: 17
+        name: Container Registry
+      modified_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      object_roles:
+        admin_role:
+          description: Can manage all aspects of the credential
+          id: 46
+          name: Admin
+        read_role:
+          description: May view settings for the credential
+          id: 48
+          name: Read
+        use_role:
+          description: Can use the credential in a job template
+          id: 47
+          name: Use
+      owners: []
+      user_capabilities:
+        copy: true
+        delete: true
+        edit: true
+        use: true
+    type: credential
+    url: /api/v2/credentials/7/
+  - cloud: false
+    created: '2022-10-09T06:03:57.676285Z'
+    credential_type: Ansible Galaxy/Automation Hub API Token
+    description: ''
+    id: 4
+    inputs:
+      auth_url: ''
+      token: $encrypted$
+      url: 'https://hub.nas/api/galaxy/content/published/'
+    kind: galaxy_api_token
+    kubernetes: false
+    managed: false
+    modified: '2022-10-14T00:06:51.239642Z'
+    name: Automation Hub Published Repository
+    organization: Default
+    related:
+      access_list: /api/v2/credentials/4/access_list/
+      activity_stream: /api/v2/credentials/4/activity_stream/
+      copy: /api/v2/credentials/4/copy/
+      credential_type: /api/v2/credential_types/18/
+      input_sources: /api/v2/credentials/4/input_sources/
+      modified_by: /api/v2/users/1/
+      object_roles: /api/v2/credentials/4/object_roles/
+      organization: /api/v2/organizations/1/
+      owner_teams: /api/v2/credentials/4/owner_teams/
+      owner_users: /api/v2/credentials/4/owner_users/
+    summary_fields:
+      credential_type:
+        description: ''
+        id: 18
+        name: Ansible Galaxy/Automation Hub API Token
+      modified_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      object_roles:
+        admin_role:
+          description: Can manage all aspects of the credential
+          id: 37
+          name: Admin
+        read_role:
+          description: May view settings for the credential
+          id: 39
+          name: Read
+        use_role:
+          description: Can use the credential in a job template
+          id: 38
+          name: Use
+      organization:
+        description: ''
+        id: 1
+        name: Default
+      owners:
+        - description: ''
+          id: 1
+          name: Default
+          type: organization
+          url: /api/v2/organizations/1/
+      user_capabilities:
+        copy: true
+        delete: true
+        edit: true
+        use: true
+    type: credential
+    url: /api/v2/credentials/4/
+  - cloud: false
+    created: '2022-10-09T06:03:58.115026Z'
+    credential_type: Ansible Galaxy/Automation Hub API Token
+    description: ''
+    id: 5
+    inputs:
+      auth_url: ''
+      token: $encrypted$
+      url: 'https://hub.nas/api/galaxy/content/rh-certified/'
+    kind: galaxy_api_token
+    kubernetes: false
+    managed: false
+    modified: '2022-10-14T00:06:17.265515Z'
+    name: Automation Hub RH Certified Repository
+    organization: Default
+    related:
+      access_list: /api/v2/credentials/5/access_list/
+      activity_stream: /api/v2/credentials/5/activity_stream/
+      copy: /api/v2/credentials/5/copy/
+      credential_type: /api/v2/credential_types/18/
+      input_sources: /api/v2/credentials/5/input_sources/
+      modified_by: /api/v2/users/1/
+      object_roles: /api/v2/credentials/5/object_roles/
+      organization: /api/v2/organizations/1/
+      owner_teams: /api/v2/credentials/5/owner_teams/
+      owner_users: /api/v2/credentials/5/owner_users/
+    summary_fields:
+      credential_type:
+        description: ''
+        id: 18
+        name: Ansible Galaxy/Automation Hub API Token
+      modified_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      object_roles:
+        admin_role:
+          description: Can manage all aspects of the credential
+          id: 40
+          name: Admin
+        read_role:
+          description: May view settings for the credential
+          id: 42
+          name: Read
+        use_role:
+          description: Can use the credential in a job template
+          id: 41
+          name: Use
+      organization:
+        description: ''
+        id: 1
+        name: Default
+      owners:
+        - description: ''
+          id: 1
+          name: Default
+          type: organization
+          url: /api/v2/organizations/1/
+      user_capabilities:
+        copy: true
+        delete: true
+        edit: true
+        use: true
+    type: credential
+    url: /api/v2/credentials/5/
+  - cloud: false
+    created: '2022-10-22T17:42:52.441957Z'
+    credential_type: CyberArk AIM Central Credential Provider Lookup
+    description: CyberArk Lookup Credential
+    id: 13
+    inputs:
+      app_id: $encrypted$
+      url: 'https://cyberark.example.com'
+    kind: aim
+    kubernetes: false
+    managed: false
+    modified: '2022-10-22T17:45:31.916044Z'
+    name: cyberark
+    organization: Default
+    related:
+      access_list: /api/v2/credentials/13/access_list/
+      activity_stream: /api/v2/credentials/13/activity_stream/
+      copy: /api/v2/credentials/13/copy/
+      created_by: /api/v2/users/1/
+      credential_type: /api/v2/credential_types/19/
+      input_sources: /api/v2/credentials/13/input_sources/
+      modified_by: /api/v2/users/1/
+      object_roles: /api/v2/credentials/13/object_roles/
+      organization: /api/v2/organizations/1/
+      owner_teams: /api/v2/credentials/13/owner_teams/
+      owner_users: /api/v2/credentials/13/owner_users/
+    summary_fields:
+      created_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      credential_type:
+        description: ''
+        id: 19
+        name: CyberArk AIM Central Credential Provider Lookup
+      modified_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      object_roles:
+        admin_role:
+          description: Can manage all aspects of the credential
+          id: 101
+          name: Admin
+        read_role:
+          description: May view settings for the credential
+          id: 103
+          name: Read
+        use_role:
+          description: Can use the credential in a job template
+          id: 102
+          name: Use
+      organization:
+        description: ''
+        id: 1
+        name: Default
+      owners:
+        - description: ''
+          id: 1
+          name: Default
+          type: organization
+          url: /api/v2/organizations/1/
+      user_capabilities:
+        copy: true
+        delete: true
+        edit: true
+        use: true
+    type: credential
+    url: /api/v2/credentials/13/
+  - cloud: false
+    created: '2022-10-09T06:03:50.740444Z'
+    credential_type: Container Registry
+    description: ''
+    id: 3
+    inputs:
+      host: registry.redhat.io
+      password: $encrypted$
+      username: rhn-gps-ssulliva
+      verify_ssl: true
+    kind: registry
+    kubernetes: false
+    managed: true
+    modified: '2022-10-09T06:03:50.937720Z'
+    name: Default Execution Environment Registry Credential
+    organization: null
+    related:
+      access_list: /api/v2/credentials/3/access_list/
+      activity_stream: /api/v2/credentials/3/activity_stream/
+      copy: /api/v2/credentials/3/copy/
+      credential_type: /api/v2/credential_types/17/
+      input_sources: /api/v2/credentials/3/input_sources/
+      object_roles: /api/v2/credentials/3/object_roles/
+      owner_teams: /api/v2/credentials/3/owner_teams/
+      owner_users: /api/v2/credentials/3/owner_users/
+    summary_fields:
+      credential_type:
+        description: ''
+        id: 17
+        name: Container Registry
+      object_roles:
+        admin_role:
+          description: Can manage all aspects of the credential
+          id: 34
+          name: Admin
+        read_role:
+          description: May view settings for the credential
+          id: 36
+          name: Read
+        use_role:
+          description: Can use the credential in a job template
+          id: 35
+          name: Use
+      owners: []
+      user_capabilities:
+        copy: true
+        delete: false
+        edit: false
+        use: true
+    type: credential
+    url: /api/v2/credentials/3/
+  - cloud: false
+    created: '2022-10-09T06:03:47.032048Z'
+    credential_type: Machine
+    description: ''
+    id: 1
+    inputs:
+      username: admin
+    kind: ssh
+    kubernetes: false
+    managed: false
+    modified: '2022-10-09T06:03:47.032078Z'
+    name: Demo Credential
+    organization: null
+    related:
+      access_list: /api/v2/credentials/1/access_list/
+      activity_stream: /api/v2/credentials/1/activity_stream/
+      copy: /api/v2/credentials/1/copy/
+      created_by: /api/v2/users/1/
+      credential_type: /api/v2/credential_types/1/
+      input_sources: /api/v2/credentials/1/input_sources/
+      modified_by: /api/v2/users/1/
+      object_roles: /api/v2/credentials/1/object_roles/
+      owner_teams: /api/v2/credentials/1/owner_teams/
+      owner_users: /api/v2/credentials/1/owner_users/
+      user: /api/v2/users/1/
+    summary_fields:
+      created_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      credential_type:
+        description: ''
+        id: 1
+        name: Machine
+      modified_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      object_roles:
+        admin_role:
+          description: Can manage all aspects of the credential
+          id: 20
+          name: Admin
+        read_role:
+          description: May view settings for the credential
+          id: 22
+          name: Read
+        use_role:
+          description: Can use the credential in a job template
+          id: 21
+          name: Use
+      owners:
+        - description: ' '
+          id: 1
+          name: admin
+          type: user
+          url: /api/v2/users/1/
+      user_capabilities:
+        copy: true
+        delete: true
+        edit: true
+        use: true
+    type: credential
+    url: /api/v2/credentials/1/
+    users:
+      - admin
+  - cloud: true
+    created: '2022-10-14T00:04:28.412079Z'
+    credential_type: Registery Credentials
+    description: ''
+    id: 8
+    inputs:
+      base_registery_password: $encrypted$
+      base_registery_username: rhn-gps-ssulliva
+      ee_ah_host: hub.nas
+      ee_ah_token: $encrypted$
+      ee_registry_password: $encrypted$
+      ee_registry_username: admin
+      ee_validate_certs: false
+    kind: null
+    kubernetes: false
+    managed: false
+    modified: '2022-10-14T00:08:48.789863Z'
+    name: Execution Build Credentials
+    organization: Default
+    related:
+      access_list: /api/v2/credentials/8/access_list/
+      activity_stream: /api/v2/credentials/8/activity_stream/
+      copy: /api/v2/credentials/8/copy/
+      created_by: /api/v2/users/1/
+      credential_type: /api/v2/credential_types/27/
+      input_sources: /api/v2/credentials/8/input_sources/
+      modified_by: /api/v2/users/1/
+      object_roles: /api/v2/credentials/8/object_roles/
+      organization: /api/v2/organizations/1/
+      owner_teams: /api/v2/credentials/8/owner_teams/
+      owner_users: /api/v2/credentials/8/owner_users/
+    summary_fields:
+      created_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      credential_type:
+        description: REST API Credential
+        id: 27
+        name: Registery Credentials
+      modified_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      object_roles:
+        admin_role:
+          description: Can manage all aspects of the credential
+          id: 49
+          name: Admin
+        read_role:
+          description: May view settings for the credential
+          id: 51
+          name: Read
+        use_role:
+          description: Can use the credential in a job template
+          id: 50
+          name: Use
+      organization:
+        description: ''
+        id: 1
+        name: Default
+      owners:
+        - description: ''
+          id: 1
+          name: Default
+          type: organization
+          url: /api/v2/organizations/1/
+      user_capabilities:
+        copy: true
+        delete: true
+        edit: true
+        use: true
+    type: credential
+    url: /api/v2/credentials/8/
+  - cloud: false
+    created: '2022-10-23T01:58:05.781361Z'
+    credential_type: GitHub Personal Access Token
+    description: ''
+    id: 17
+    inputs:
+      token: $encrypted$
+    kind: github_token
+    kubernetes: false
+    managed: false
+    modified: '2022-10-23T01:58:05.781415Z'
+    name: git
+    organization: null
+    related:
+      access_list: /api/v2/credentials/17/access_list/
+      activity_stream: /api/v2/credentials/17/activity_stream/
+      copy: /api/v2/credentials/17/copy/
+      created_by: /api/v2/users/1/
+      credential_type: /api/v2/credential_types/11/
+      input_sources: /api/v2/credentials/17/input_sources/
+      modified_by: /api/v2/users/1/
+      object_roles: /api/v2/credentials/17/object_roles/
+      owner_teams: /api/v2/credentials/17/owner_teams/
+      owner_users: /api/v2/credentials/17/owner_users/
+      user: /api/v2/users/1/
+    summary_fields:
+      created_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      credential_type:
+        description: ''
+        id: 11
+        name: GitHub Personal Access Token
+      modified_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      object_roles:
+        admin_role:
+          description: Can manage all aspects of the credential
+          id: 165
+          name: Admin
+        read_role:
+          description: May view settings for the credential
+          id: 167
+          name: Read
+        use_role:
+          description: Can use the credential in a job template
+          id: 166
+          name: Use
+      owners:
+        - description: ' '
+          id: 1
+          name: admin
+          type: user
+          url: /api/v2/users/1/
+      user_capabilities:
+        copy: true
+        delete: true
+        edit: true
+        use: true
+    type: credential
+    url: /api/v2/credentials/17/
+    users:
+      - admin
+  - cloud: false
+    created: '2022-10-22T17:42:52.807013Z'
+    credential_type: Source Control
+    description: ''
+    id: 14
+    inputs:
+      username: username
+    kind: scm
+    kubernetes: false
+    managed: false
+    modified: '2022-10-22T17:42:52.807060Z'
+    name: gitlab
+    organization: Default
+    related:
+      access_list: /api/v2/credentials/14/access_list/
+      activity_stream: /api/v2/credentials/14/activity_stream/
+      copy: /api/v2/credentials/14/copy/
+      created_by: /api/v2/users/1/
+      credential_type: /api/v2/credential_types/2/
+      input_sources: /api/v2/credentials/14/input_sources/
+      modified_by: /api/v2/users/1/
+      object_roles: /api/v2/credentials/14/object_roles/
+      organization: /api/v2/organizations/1/
+      owner_teams: /api/v2/credentials/14/owner_teams/
+      owner_users: /api/v2/credentials/14/owner_users/
+    summary_fields:
+      created_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      credential_type:
+        description: ''
+        id: 2
+        name: Source Control
+      modified_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      object_roles:
+        admin_role:
+          description: Can manage all aspects of the credential
+          id: 104
+          name: Admin
+        read_role:
+          description: May view settings for the credential
+          id: 106
+          name: Read
+        use_role:
+          description: Can use the credential in a job template
+          id: 105
+          name: Use
+      organization:
+        description: ''
+        id: 1
+        name: Default
+      owners:
+        - description: ''
+          id: 1
+          name: Default
+          type: organization
+          url: /api/v2/organizations/1/
+      user_capabilities:
+        copy: true
+        delete: true
+        edit: true
+        use: true
+    type: credential
+    url: /api/v2/credentials/14/
+  - cloud: false
+    created: '2022-10-22T17:42:51.800058Z'
+    credential_type: Source Control
+    description: >-
+      General purpose token that can be used by anyone for satlab-admin(or other
+      private) repo clone
+    id: 11
+    inputs:
+      password: $encrypted$
+      username: gitlab
+    kind: scm
+    kubernetes: false
+    managed: false
+    modified: '2022-10-22T17:45:31.324323Z'
+    name: gitlab-personal-access-token for satqe_auto_droid
+    organization: Satellite
+    related:
+      access_list: /api/v2/credentials/11/access_list/
+      activity_stream: /api/v2/credentials/11/activity_stream/
+      copy: /api/v2/credentials/11/copy/
+      created_by: /api/v2/users/1/
+      credential_type: /api/v2/credential_types/2/
+      input_sources: /api/v2/credentials/11/input_sources/
+      modified_by: /api/v2/users/1/
+      object_roles: /api/v2/credentials/11/object_roles/
+      organization: /api/v2/organizations/2/
+      owner_teams: /api/v2/credentials/11/owner_teams/
+      owner_users: /api/v2/credentials/11/owner_users/
+    summary_fields:
+      created_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      credential_type:
+        description: ''
+        id: 2
+        name: Source Control
+      modified_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      object_roles:
+        admin_role:
+          description: Can manage all aspects of the credential
+          id: 95
+          name: Admin
+        read_role:
+          description: May view settings for the credential
+          id: 97
+          name: Read
+        use_role:
+          description: Can use the credential in a job template
+          id: 96
+          name: Use
+      organization:
+        description: ''
+        id: 2
+        name: Satellite
+      owners:
+        - description: ''
+          id: 2
+          name: Satellite
+          type: organization
+          url: /api/v2/organizations/2/
+      user_capabilities:
+        copy: true
+        delete: true
+        edit: true
+        use: true
+    type: credential
+    url: /api/v2/credentials/11/
+  - cloud: false
+    created: '2022-10-22T17:42:51.541670Z'
+    credential_type: Machine
+    description: >-
+      This credential can be used with any vm that contains jenkins_public key
+      in authorized keys
+    id: 10
+    inputs:
+      ssh_key_data: $encrypted$
+      username: root
+    kind: ssh
+    kubernetes: false
+    managed: false
+    modified: '2022-10-22T17:45:31.106948Z'
+    name: machine-creds-with-jenkins-pvt-key
+    organization: Satellite
+    related:
+      access_list: /api/v2/credentials/10/access_list/
+      activity_stream: /api/v2/credentials/10/activity_stream/
+      copy: /api/v2/credentials/10/copy/
+      created_by: /api/v2/users/1/
+      credential_type: /api/v2/credential_types/1/
+      input_sources: /api/v2/credentials/10/input_sources/
+      modified_by: /api/v2/users/1/
+      object_roles: /api/v2/credentials/10/object_roles/
+      organization: /api/v2/organizations/2/
+      owner_teams: /api/v2/credentials/10/owner_teams/
+      owner_users: /api/v2/credentials/10/owner_users/
+    summary_fields:
+      created_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      credential_type:
+        description: ''
+        id: 1
+        name: Machine
+      modified_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      object_roles:
+        admin_role:
+          description: Can manage all aspects of the credential
+          id: 92
+          name: Admin
+        read_role:
+          description: May view settings for the credential
+          id: 94
+          name: Read
+        use_role:
+          description: Can use the credential in a job template
+          id: 93
+          name: Use
+      organization:
+        description: ''
+        id: 2
+        name: Satellite
+      owners:
+        - description: ''
+          id: 2
+          name: Satellite
+          type: organization
+          url: /api/v2/organizations/2/
+      user_capabilities:
+        copy: true
+        delete: true
+        edit: true
+        use: true
+    type: credential
+    url: /api/v2/credentials/10/
+  - cloud: false
+    created: '2022-10-22T17:42:52.289319Z'
+    credential_type: Vault
+    description: satlab-admin-vault password aka vault_secret
+    id: 12
+    inputs:
+      vault_password: $encrypted$
+    kind: vault
+    kubernetes: false
+    managed: false
+    modified: '2022-10-22T17:45:31.636634Z'
+    name: satlab-admin-vault
+    organization: Satellite
+    related:
+      access_list: /api/v2/credentials/12/access_list/
+      activity_stream: /api/v2/credentials/12/activity_stream/
+      copy: /api/v2/credentials/12/copy/
+      created_by: /api/v2/users/1/
+      credential_type: /api/v2/credential_types/3/
+      input_sources: /api/v2/credentials/12/input_sources/
+      modified_by: /api/v2/users/1/
+      object_roles: /api/v2/credentials/12/object_roles/
+      organization: /api/v2/organizations/2/
+      owner_teams: /api/v2/credentials/12/owner_teams/
+      owner_users: /api/v2/credentials/12/owner_users/
+    summary_fields:
+      created_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      credential_type:
+        description: ''
+        id: 3
+        name: Vault
+      modified_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      object_roles:
+        admin_role:
+          description: Can manage all aspects of the credential
+          id: 98
+          name: Admin
+        read_role:
+          description: May view settings for the credential
+          id: 100
+          name: Read
+        use_role:
+          description: Can use the credential in a job template
+          id: 99
+          name: Use
+      organization:
+        description: ''
+        id: 2
+        name: Satellite
+      owners:
+        - description: ''
+          id: 2
+          name: Satellite
+          type: organization
+          url: /api/v2/organizations/2/
+      user_capabilities:
+        copy: true
+        delete: true
+        edit: true
+        use: true
+    type: credential
+    url: /api/v2/credentials/12/
+  - cloud: true
+    created: '2022-10-22T23:24:23.151387Z'
+    credential_type: Amazon Web Services
+    description: ''
+    id: 15
+    inputs:
+      password: $encrypted$
+      username: asdf
+    kind: aws
+    kubernetes: false
+    managed: false
+    modified: '2022-10-22T23:24:23.151436Z'
+    name: sean
+    organization: null
+    related:
+      access_list: /api/v2/credentials/15/access_list/
+      activity_stream: /api/v2/credentials/15/activity_stream/
+      copy: /api/v2/credentials/15/copy/
+      created_by: /api/v2/users/1/
+      credential_type: /api/v2/credential_types/5/
+      input_sources: /api/v2/credentials/15/input_sources/
+      modified_by: /api/v2/users/1/
+      object_roles: /api/v2/credentials/15/object_roles/
+      owner_teams: /api/v2/credentials/15/owner_teams/
+      owner_users: /api/v2/credentials/15/owner_users/
+      user: /api/v2/users/1/
+    summary_fields:
+      created_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      credential_type:
+        description: ''
+        id: 5
+        name: Amazon Web Services
+      modified_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      object_roles:
+        admin_role:
+          description: Can manage all aspects of the credential
+          id: 159
+          name: Admin
+        read_role:
+          description: May view settings for the credential
+          id: 161
+          name: Read
+        use_role:
+          description: Can use the credential in a job template
+          id: 160
+          name: Use
+      owners:
+        - description: ' '
+          id: 1
+          name: admin
+          type: user
+          url: /api/v2/users/1/
+        - description: asdf asdf
+          id: 3
+          name: asdf
+          type: user
+          url: /api/v2/users/3/
+      user_capabilities:
+        copy: true
+        delete: true
+        edit: true
+        use: true
+    type: credential
+    url: /api/v2/credentials/15/
+    users:
+      - admin
+      - asdf
+  - cloud: false
+    created: '2022-10-23T01:30:01.671454Z'
+    credential_type: OpenShift or Kubernetes API Bearer Token
+    description: ''
+    id: 16
+    inputs:
+      bearer_token: $encrypted$
+      host: asdf
+      verify_ssl: true
+    kind: kubernetes_bearer_token
+    kubernetes: true
+    managed: false
+    modified: '2022-10-23T01:30:01.671505Z'
+    name: shift
+    organization: null
+    related:
+      access_list: /api/v2/credentials/16/access_list/
+      activity_stream: /api/v2/credentials/16/activity_stream/
+      copy: /api/v2/credentials/16/copy/
+      created_by: /api/v2/users/1/
+      credential_type: /api/v2/credential_types/16/
+      input_sources: /api/v2/credentials/16/input_sources/
+      modified_by: /api/v2/users/1/
+      object_roles: /api/v2/credentials/16/object_roles/
+      owner_teams: /api/v2/credentials/16/owner_teams/
+      owner_users: /api/v2/credentials/16/owner_users/
+      user: /api/v2/users/1/
+    summary_fields:
+      created_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      credential_type:
+        description: ''
+        id: 16
+        name: OpenShift or Kubernetes API Bearer Token
+      modified_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      object_roles:
+        admin_role:
+          description: Can manage all aspects of the credential
+          id: 162
+          name: Admin
+        read_role:
+          description: May view settings for the credential
+          id: 164
+          name: Read
+        use_role:
+          description: Can use the credential in a job template
+          id: 163
+          name: Use
+      owners:
+        - description: ' '
+          id: 1
+          name: admin
+          type: user
+          url: /api/v2/users/1/
+      user_capabilities:
+        copy: true
+        delete: true
+        edit: true
+        use: true
+    type: credential
+    url: /api/v2/credentials/16/
+    users:
+      - admin
+controller_execution_environments:
+  - created: '2022-10-22T22:43:01.081801Z'
+    credential: null
+    description: ''
+    id: 9
+    image: quay.io/ansible/awx-ee
+    managed: false
+    modified: '2022-10-22T22:43:01.081849Z'
+    name: org_ee
+    organization: Satellite
+    pull: ''
+    related:
+      activity_stream: /api/v2/execution_environments/9/activity_stream/
+      copy: /api/v2/execution_environments/9/copy/
+      created_by: /api/v2/users/1/
+      modified_by: /api/v2/users/1/
+      organization: /api/v2/organizations/2/
+      unified_job_templates: /api/v2/execution_environments/9/unified_job_templates/
+    summary_fields:
+      created_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      modified_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      organization:
+        description: ''
+        id: 2
+        name: Satellite
+      user_capabilities:
+        copy: true
+        delete: true
+        edit: true
+    type: execution_environment
+    url: /api/v2/execution_environments/9/
+  - created: '2022-10-22T17:46:30.581632Z'
+    credential: null
+    description: ''
+    id: 8
+    image: quay.io/ansible/awx-ee
+    managed: false
+    modified: '2022-10-22T17:46:30.581679Z'
+    name: My EE
+    organization: null
+    pull: always
+    related:
+      activity_stream: /api/v2/execution_environments/8/activity_stream/
+      copy: /api/v2/execution_environments/8/copy/
+      created_by: /api/v2/users/1/
+      modified_by: /api/v2/users/1/
+      unified_job_templates: /api/v2/execution_environments/8/unified_job_templates/
+    summary_fields:
+      created_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      modified_by:
+        first_name: ''
+        id: 1
+        last_name: ''
+        username: admin
+      user_capabilities:
+        copy: true
+        delete: true
+        edit: true
+    type: execution_environment
+    url: /api/v2/execution_environments/8/
+  - created: '2022-10-09T06:03:51.504954Z'
+    credential: Default Execution Environment Registry Credential
+    description: ''
+    id: 7
+    image: >-
+      registry.redhat.io/ansible-automation-platform-22/ee-supported-rhel8:latest
+    managed: true
+    modified: '2022-10-16T01:53:53.637157Z'
+    name: Control Plane Execution Environment
+    organization: null
+    pull: ''
+    related:
+      activity_stream: /api/v2/execution_environments/7/activity_stream/
+      copy: /api/v2/execution_environments/7/copy/
+      credential: /api/v2/credentials/3/
+      unified_job_templates: /api/v2/execution_environments/7/unified_job_templates/
+    summary_fields:
+      credential:
+        cloud: false
+        credential_type_id: 17
+        description: ''
+        id: 3
+        kind: registry
+        kubernetes: false
+        name: Default Execution Environment Registry Credential
+      user_capabilities:
+        copy: true
+        delete: false
+        edit: true
+    type: execution_environment
+    url: /api/v2/execution_environments/7/
+  - created: '2022-10-09T06:03:51.402081Z'
+    credential: Default Execution Environment Registry Credential
+    description: ''
+    id: 6
+    image: >-
+      registry.redhat.io/ansible-automation-platform-22/ee-supported-rhel8:latest
+    managed: false
+    modified: '2022-10-16T01:53:53.626610Z'
+    name: Default execution environment
+    organization: null
+    pull: ''
+    related:
+      activity_stream: /api/v2/execution_environments/6/activity_stream/
+      copy: /api/v2/execution_environments/6/copy/
+      credential: /api/v2/credentials/3/
+      unified_job_templates: /api/v2/execution_environments/6/unified_job_templates/
+    summary_fields:
+      credential:
+        cloud: false
+        credential_type_id: 17
+        description: ''
+        id: 3
+        kind: registry
+        kubernetes: false
+        name: Default Execution Environment Registry Credential
+      user_capabilities:
+        copy: true
+        delete: true
+        edit: true
+    type: execution_environment
+    url: /api/v2/execution_environments/6/
+  - created: '2022-10-09T06:03:51.297443Z'
+    credential: Default Execution Environment Registry Credential
+    description: ''
+    id: 5
+    image: 'registry.redhat.io/ansible-automation-platform-22/ee-29-rhel8:latest'
+    managed: false
+    modified: '2022-10-16T01:53:53.616164Z'
+    name: Ansible Engine 2.9 execution environment
+    organization: null
+    pull: ''
+    related:
+      activity_stream: /api/v2/execution_environments/5/activity_stream/
+      copy: /api/v2/execution_environments/5/copy/
+      credential: /api/v2/credentials/3/
+      unified_job_templates: /api/v2/execution_environments/5/unified_job_templates/
+    summary_fields:
+      credential:
+        cloud: false
+        credential_type_id: 17
+        description: ''
+        id: 3
+        kind: registry
+        kubernetes: false
+        name: Default Execution Environment Registry Credential
+      user_capabilities:
+        copy: true
+        delete: true
+        edit: true
+    type: execution_environment
+    url: /api/v2/execution_environments/5/
+  - created: '2022-10-09T06:03:51.236835Z'
+    credential: Default Execution Environment Registry Credential
+    description: ''
+    id: 4
+    image: 'registry.redhat.io/ansible-automation-platform-22/ee-minimal-rhel8:latest'
+    managed: false
+    modified: '2022-10-16T01:53:53.605748Z'
+    name: Minimal execution environment
+    organization: null
+    pull: ''
+    related:
+      activity_stream: /api/v2/execution_environments/4/activity_stream/
+      copy: /api/v2/execution_environments/4/copy/
+      credential: /api/v2/credentials/3/
+      unified_job_templates: /api/v2/execution_environments/4/unified_job_templates/
+    summary_fields:
+      credential:
+        cloud: false
+        credential_type_id: 17
+        description: ''
+        id: 3
+        kind: registry
+        kubernetes: false
+        name: Default Execution Environment Registry Credential
+      user_capabilities:
+        copy: true
+        delete: true
+        edit: true
+    type: execution_environment
+    url: /api/v2/execution_environments/4/
+  - created: '2022-10-09T06:03:51.161193Z'
+    credential: Automation Hub Container Registry
+    description: ''
+    id: 3
+    image: 'hub.nas/ee-supported-rhel8:latest'
+    managed: false
+    modified: '2022-10-16T01:53:53.510696Z'
+    name: Automation Hub Default execution environment
+    organization: null
+    pull: ''
+    related:
+      activity_stream: /api/v2/execution_environments/3/activity_stream/
+      copy: /api/v2/execution_environments/3/copy/
+      credential: /api/v2/credentials/7/
+      unified_job_templates: /api/v2/execution_environments/3/unified_job_templates/
+    summary_fields:
+      credential:
+        cloud: false
+        credential_type_id: 17
+        description: ''
+        id: 7
+        kind: registry
+        kubernetes: false
+        name: Automation Hub Container Registry
+      user_capabilities:
+        copy: true
+        delete: true
+        edit: true
+    type: execution_environment
+    url: /api/v2/execution_environments/3/
+  - created: '2022-10-09T06:03:51.057652Z'
+    credential: Automation Hub Container Registry
+    description: ''
+    id: 2
+    image: 'hub.nas/ee-29-rhel8:latest'
+    managed: false
+    modified: '2022-10-16T01:53:53.423579Z'
+    name: Automation Hub Ansible Engine 2.9 execution environment
+    organization: null
+    pull: ''
+    related:
+      activity_stream: /api/v2/execution_environments/2/activity_stream/
+      copy: /api/v2/execution_environments/2/copy/
+      credential: /api/v2/credentials/7/
+      unified_job_templates: /api/v2/execution_environments/2/unified_job_templates/
+    summary_fields:
+      credential:
+        cloud: false
+        credential_type_id: 17
+        description: ''
+        id: 7
+        kind: registry
+        kubernetes: false
+        name: Automation Hub Container Registry
+      user_capabilities:
+        copy: true
+        delete: true
+        edit: true
+    type: execution_environment
+    url: /api/v2/execution_environments/2/
+  - created: '2022-10-09T06:03:50.959400Z'
+    credential: Automation Hub Container Registry
+    description: ''
+    id: 1
+    image: 'hub.nas/ee-minimal-rhel8:latest'
+    managed: false
+    modified: '2022-10-16T01:53:53.280899Z'
+    name: Automation Hub Minimal execution environment
+    organization: null
+    pull: ''
+    related:
+      activity_stream: /api/v2/execution_environments/1/activity_stream/
+      copy: /api/v2/execution_environments/1/copy/
+      credential: /api/v2/credentials/7/
+      unified_job_templates: /api/v2/execution_environments/1/unified_job_templates/
+    summary_fields:
+      credential:
+        cloud: false
+        credential_type_id: 17
+        description: ''
+        id: 7
+        kind: registry
+        kubernetes: false
+        name: Automation Hub Container Registry
+      user_capabilities:
+        copy: true
+        delete: true
+        edit: true
+    type: execution_environment
+    url: /api/v2/execution_environments/1/
+failed: false
+lookup_data: {}
+warnings:
+  - >-
+    You are using the awx version of this collection but connecting to Red Hat
+    Ansible Automation Platform

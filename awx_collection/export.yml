@@ -1,0 +1,51 @@
+---
+- name: Export Workflow
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  collections:
+    - awx.awx
+  environment:
+     CONTROLLER_HOST: https://controller.nas
+     CONTROLLER_USERNAME: admin
+     CONTROLLER_PASSWORD: secret123
+     CONTROLLER_VERIFY_SSL: False
+
+  tasks:
+    - name: Export workflow job template
+      awx.awx.export_config:
+        endpoints:
+          #- applications
+          #- inventories
+          #- labels
+          #- notification_templates
+          #- teams
+          #- users
+          - credentials
+          - credential_input_sources
+          - execution_environments
+          #- groups
+          #- hosts
+          #- instances
+          #- instance_groups
+          #- inventory_sources
+          #- job_templates
+          #- organizations
+          #- schedules
+          #- workflow_job_templates
+          #- credential_types
+          #- settings
+        raw: False
+#        search_fields:
+#          - organization: Default
+#          - inventory: AAP Hosts
+      register: export_results
+
+    - debug:
+        var: export_results
+
+    - name: Export workflow job template to file
+      copy:
+        content: "{{ export_results | to_nice_yaml(width=50, explicit_start=True, explicit_end=True) }}"
+        dest: all.yaml
+...

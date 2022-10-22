@@ -1,0 +1,165 @@
+Done:
+  applications: "/api/v2/applications/"
+    organization:
+      name: Default
+  inventories: "/api/v2/inventories/"
+    organization:
+      name: Satellite
+  labels: "/api/v2/labels/"
+    organization:
+      name: Default
+  notification_templates: "/api/v2/notification_templates/"
+    organization:
+      name: Satellite
+  teams: "/api/v2/teams/"
+    organization:
+      name: Satellite
+  users: "/api/v2/users/"
+    organization:
+      name: Satellite
+  credential_types: "/api/v2/credential_types/"
+    none
+  settings: "/api/v2/settings/"
+    none
+
+  credentials: "/api/v2/credentials/"
+    organization:
+      name: Default
+    credential_type:
+      name: Source Control
+    users:
+      username: admin
+    teams:
+      name: name
+  credential_input_sources: "/api/v2/credential_input_sources/"
+      "source_credential": "/api/v2/credentials/13/",
+      "target_credential": "/api/v2/credentials/14/"
+  hosts: "/api/v2/hosts/"
+    inventory:
+      organization: Satellite
+      name: Testing Inventory
+
+Working on:
+  execution_environments: "/api/v2/execution_environments/"
+    organization:
+      name: Default
+      # not required
+    credential:
+      name: Default
+      org: name
+      # not required
+  groups: "/api/v2/groups/"
+    inventory:
+      organization: Satellite
+      name: Testing Inventory
+    hosts: list
+    children: lists
+  instances: "/api/v2/instances/"
+    instance_groups:
+      name: Satellite
+  instance_groups: "/api/v2/instance_groups/"
+    instances:
+      name: Satellite
+    credential:
+      name: Default
+      # not required 
+
+  inventory_sources: "/api/v2/inventory_sources/"
+    organization:
+      name: Default
+    inventory:
+      organization:
+        name: Satellite
+      name: Testing Inventory
+    source_project
+    execution_environment
+    credential
+    related:
+      schedules: []
+      notification_templates_started: []
+      notification_templates_success: []
+      notification_templates_error: []
+  job_templates: "/api/v2/job_templates/"
+    credentials: []
+    execution_environment:
+        name: My EE
+    inventory:
+      organization:
+        name: Satellite
+      name: Testing Inventory
+    project:
+      organization:
+        name: Satellite
+      name: Tower Config
+    webhook_credential:
+      organization:
+        name: Satellite
+      name: Testing Inventory
+    related:
+      labels: []
+      survey_spec
+      credentials: []
+      notification_templates_started: []
+      notification_templates_success: []
+      notification_templates_error: []
+
+
+  organizations: "/api/v2/organizations/"
+    default_environment:
+      name: My EE
+    related:
+      instance_groups: []
+      execution_environments: []
+      galaxy_credentials: []
+      notification_templates: []
+        - name: irc-satqe-chat-notification
+          organization:
+              name: Satellite
+              type: organization
+          type: notification_template
+      notification_templates_started: []
+      notification_templates_success: []
+      notification_templates_error: []
+      notification_templates_approvals: []
+  projects: "/api/v2/projects/"
+    related:
+      credentials: []
+      notification_templates_started: []
+      notification_templates_success: []
+      notification_templates_error: []
+  # roles: "/api/v2/roles/"
+  schedules: "/api/v2/schedules/"
+    unified_job_template:
+    organization: Unified job template org
+    credentials:
+    inventory:
+      organization:
+        name: Satellite
+      name: Testing Inventory
+
+  workflow_job_templates: "/api/v2/workflow_job_templates/"
+    survey_spec
+    organization:
+      name: Satellite
+    related:
+      labels: []
+      survey_spec
+      notification_templates_started: []
+        - name: irc-satqe-chat-notification
+          organization:
+              name: Satellite
+              type: organization
+          type: notification_template
+      notification_templates_success: []
+      notification_templates_error: []
+      notification_templates_approvals: []
+    inventory:
+      organization:
+        name: Satellite
+      name: Testing Inventory
+    webhook_credential:
+      organization:
+        name: Satellite
+      name: Testing Inventory
+
+

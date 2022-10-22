@@ -440,6 +440,36 @@ class ControllerAPIModule(ControllerModule):
 
         return response['json']['results'][0]
 
+    def get_all_filtered(self, endpoint, **kwargs):
+        response = self.get_endpoint(endpoint, **kwargs)
+        if response['status_code'] != 200:
+            fail_msg = "Got a {0} response when trying to get one from {1}".format(response['status_code'], endpoint)
+            if 'detail' in response.get('json', {}):
+                fail_msg += ', detail: {0}'.format(response['json']['detail'])
+            self.fail_json(msg=fail_msg)
+
+
+        if 'count' not in response['json'] or 'results' not in response['json']:
+            self.fail_json(msg="The endpoint did not provide count and results")
+
+        if response['json']['count'] == 0:
+            if allow_none:
+                return None
+            else:
+                self.fail_wanted_one(response, endpoint, kwargs.get('data'))
+        
+        next_page = response['json']['next']
+
+        if response['json']['count'] > 10000:
+            self.fail_json(msg='The number of items being queried for is higher than 10,000. Please refine your search')
+
+        while next_page is not None:
+            next_response = self.get_endpoint(next_page)
+            response['json']['results'] = response['json']['results'] + next_response['json']['results']
+            next_page = next_response['json']['next']
+            response['json']['next'] = next_page
+        return response['json']['results']
+
     def fail_wanted_one(self, response, endpoint, query_params):
         sample = response.copy()
         if len(sample['json']['results']) > 1:
