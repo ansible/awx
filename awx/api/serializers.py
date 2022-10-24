@@ -5075,7 +5075,7 @@ class InstanceGroupSerializer(BaseSerializer):
         required=False,
         initial=0,
         label=_('Max Concurrent Jobs'),
-        help_text=_("Maximum number of concurrent jobs to run on this group. When set to zero, no maximum is enforced."),
+        help_text=_("Maximum number of concurrent jobs to run on a container group. When set to zero, no maximum is enforced."),
     )
     policy_instance_list = serializers.ListField(
         child=serializers.CharField(),
@@ -5145,6 +5145,11 @@ class InstanceGroupSerializer(BaseSerializer):
     def validate_policy_instance_minimum(self, value):
         if value and self.instance and self.instance.is_container_group:
             raise serializers.ValidationError(_('Containerized instances may not be managed via the API'))
+        return value
+
+    def validate_max_concurrent_jobs(self, value):
+        if value and self.instance and not self.instance.is_container_group:
+            raise serializers.ValidationError(_('Setting max_concurrent_jobs is only available for Container Groups.'))
         return value
 
     def validate_name(self, value):

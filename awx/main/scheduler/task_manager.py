@@ -519,8 +519,10 @@ class TaskManager(TaskBase):
         if task.execution_node:
             self.instances[task.execution_node].consume_capacity(task.task_impact)
         # update number running jobs on the instance group
-        if instance_group is not None:
+        if instance_group is not None and instance_group.is_container_group:
             # Workflows and workflow approval nodes do not have an instance group
+            # We only track instance group level capacity for container groups, other groups track
+            # on a per-instance basis since they are members of multiple groups
             self.instance_groups[instance_group.name].consume_capacity()
 
         dependent_tasks = dependent_tasks or []
@@ -630,9 +632,6 @@ class TaskManager(TaskBase):
 
             # All task.capacity_type == 'control' jobs should run on control plane, no need to loop over instance groups
             if task.capacity_type == 'control':
-                if not self.instance_groups[self.controlplane_ig.name].remaining_capacity:
-                    logger.debug(f"Skipping task, {self.controlplane_ig.name} already met max concurrent jobs: {self.controlpane_ig.max_concurrent_jobs}")
-                    continue
                 task.execution_node = control_instance.hostname
                 execution_instance = self.instances[control_instance.hostname].obj
                 task.log_lifecycle("controller_node_chosen")

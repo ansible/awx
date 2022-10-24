@@ -438,6 +438,8 @@ class InstanceGroupDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAP
             data.pop('policy_instance_percentage', None)
             data.pop('policy_instance_minimum', None)
             data.pop('policy_instance_list', None)
+        else:
+            data.pop('max_concurrent_jobs', None)
         return super(InstanceGroupDetail, self).update_raw_data(data)
 
 

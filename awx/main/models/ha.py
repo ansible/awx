@@ -379,7 +379,7 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
         )
     )
     max_concurrent_jobs = models.IntegerField(
-        default=0, help_text=_("Maximum number of concurrent jobs to run on a group. Zero means no limit, jobs will be scheduled based on instance capacity.")
+        default=0, help_text=_("Maximum number of concurrent jobs to run on a container group. Zero means no limit. Not used for regular instance groups.")
     )
     policy_instance_percentage = models.IntegerField(default=0, help_text=_("Percentage of Instances to automatically assign to this group"))
     policy_instance_minimum = models.IntegerField(default=0, help_text=_("Static minimum number of Instances to automatically assign to this group"))
