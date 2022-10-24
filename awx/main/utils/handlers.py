@@ -110,7 +110,7 @@ if settings.COLOR_LOGS is True:
                 # logs rendered with cyan text
                 previous_level_map = self.level_map.copy()
                 if record.name == "awx.analytics.job_lifecycle":
-                    self.level_map[logging.DEBUG] = (None, 'cyan', True)
+                    self.level_map[logging.INFO] = (None, 'cyan', True)
                 msg = super(ColorHandler, self).colorize(line, record)
                 self.level_map = previous_level_map
                 return msg
