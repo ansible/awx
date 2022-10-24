@@ -107,7 +107,7 @@ When you attempt to perform a `git commit` there will be a pre-commit hook that 
 
 While you can use environment variables to skip the pre-commit hooks GitHub will run similar tests and prevent merging of PRs if the tests do not pass.
 
- If you would like to add additional commit hooks for your own usage you can create a directory in the root of the repository called `pre-commit-user`. Any executable file in that directory will be executed as part of the pre-commit hooks. If any of the pre-commit checks fail the commit will be halted. For your convenience in user scripts, a variable called `CHANGED_FILES` will be set with any changed files present in the commit.
+If you would like to add additional commit hooks for your own usage you can create a directory in the root of the repository called `pre-commit-user`. Any executable file in that directory will be executed as part of the pre-commit hooks. If any of the pre-commit checks fail the commit will be halted. For your convenience in user scripts, a variable called `CHANGED_FILES` will be set with any changed files present in the commit.
 
 ## What should I work on?
 
@@ -121,8 +121,7 @@ If it has someone assigned to it then that person is the person responsible for 
 
 **NOTES**
 
-> Issue assignment will only be done for maintainers of the project. If you decide to work on an issue, please feel free to add a comment in the issue to let others know that you are working on it; but know that we will accept the first pull request from whomever is able to fix an issue. Once your PR is accepted we can add you as an assignee to an issue upon request. 
-
+> Issue assignment will only be done for maintainers of the project. If you decide to work on an issue, please feel free to add a comment in the issue to let others know that you are working on it; but know that we will accept the first pull request from whomever is able to fix an issue. Once your PR is accepted we can add you as an assignee to an issue upon request.
 
 > If you work in a part of the codebase that is going through active development, your changes may be rejected, or you may be asked to `rebase`. A good idea before starting work is to have a discussion with us in the `#ansible-awx` channel on irc.libera.chat, or on the [mailing list](https://groups.google.com/forum/#!forum/awx-project).
 
@@ -132,8 +131,39 @@ If it has someone assigned to it then that person is the person responsible for 
 
 At this time we do not accept PRs for adding additional language translations as we have an automated process for generating our translations. This is because translations require constant care as new strings are added and changed in the code base. Because of this the .po files are overwritten during every translation release cycle. We also can't support a lot of translations on AWX as its an open source project and each language adds time and cost to maintain. If you would like to see AWX translated into a new language please create an issue and ask others you know to upvote the issue. Our translation team will review the needs of the community and see what they can do around supporting additional language.
 
-If you find an issue with an existing translation, please see the [Reporting Issues](#reporting-issues) section to open an issue and our translation team will work with you on a resolution. 
+If you find an issue with an existing translation, please see the [Reporting Issues](#reporting-issues) section to open an issue and our translation team will work with you on a resolution.
 
+### Common Git workflows
+
+In general there are two separate git workflows to follow when contributing code for a net new feature to AWX. One for keeping a feature branch up to date with devel, and another, used by individual contributors to keep their working branch up to date with the feature branch they are working on. When initiating work on a net new feature a new feature branch should be checked out from awx/devel and branch protection should be activated. Checking out the new branch, and activating branch protection must be done by someone with admin privileges on the AWX repo. This branch will be used by the developers working on the feature and merging work into the feature branch will allow the developers to work quickly without impacting devel. This also means that those working on the feature can decide what requirements need to pass before merging work into the feature branch. Merge meeting, QE sign off etc. can all be done at 1 time when the feature is ready to merge into awx/devel.
+
+It is important that the feature branch be kept up-to-date with awx/devel to limit merge conflicts that might arise when merging the feature into devel. To do this someone with admin privileges on the AWX repo needs to remove branch protection and then follow these steps (In this example I will use origin as the remote name for AWX):
+
+- `git fetch origin`
+- `git merge origin/devel --ff-only` merges the branch you are on with awx/devel and fast forwards.
+
+If there are merge conflicts we recommend not using `git merge origin/devel -ff-only` and instead rebasing. Those steps are:
+
+- `git fetch origin` (you might have done this step above so it is not necessary to repeate it here)
+- `git rebase -i origin/devel` (this will do an interactive rebase and make it easier to work through any merge conflicts)
+
+Then you are done and your feature branch is up-to-date with awx/devel. Just push your feature branch to `awx/feature-branch`.
+The second workflow should be used by individual contributors to keep their working branch up-to-date with the feature branch. Those steps are:
+
+- `git fetch upstream`
+- `git checkout origin/feature-branch`
+- `git checkout working-branch-name` (Many people put the issue number in the branch name. ie. 12556-Working-branch-name)
+
+Now you can start working on your issue. When ready to make a commit:
+
+- `git add .` Will stage all files that were touched. If you want to specify specific files to stage `git add file-path`
+- `git commit` You will be prompted to write a commit message.
+
+When ready to make a PR to the feature branch.
+
+- `git push origin working-branch-name` If you need to update a pull request you have already made `git push origin working-branch-name --force-with-lease`
+
+Then go to the github UI and make a pull request with the feature branch declared as the base branch.
 
 ## Submitting Pull Requests
 
@@ -161,7 +191,7 @@ Sometimes it might take us a while to fully review your PR. We try to keep the `
 When your PR is initially submitted the checks will not be run until a maintainer allows them to be. Once a maintainer has done a quick review of your work the PR will have the linter and unit tests run against them via GitHub Actions, and the status reported in the PR.
 
 ## Reporting Issues
- 
+
 We welcome your feedback, and encourage you to file an issue when you run into a problem. But before opening a new issues, we ask that you please view our [Issues guide](./ISSUES.md).
 
 ## Getting Help
