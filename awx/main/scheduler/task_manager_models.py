@@ -15,15 +15,18 @@ logger = logging.getLogger('awx.main.scheduler')
 class TaskManagerInstance:
     """A class representing minimal data the task manager needs to represent an Instance."""
 
-    def __init__(self, obj):
+    def __init__(self, obj, **kwargs):
         self.obj = obj
         self.node_type = obj.node_type
         self.consumed_capacity = 0
         self.capacity = obj.capacity
         self.hostname = obj.hostname
+        self.jobs_running = 0
 
-    def consume_capacity(self, impact):
+    def consume_capacity(self, impact, job_impact=False):
         self.consumed_capacity += impact
+        if job_impact:
+            self.jobs_running += 1
 
     @property
     def remaining_capacity(self):
@@ -33,9 +36,82 @@ class TaskManagerInstance:
         return remaining
 
 
+class TaskManagerInstanceGroup:
+    """A class representing minimal data the task manager needs to represent an InstanceGroup."""
+
+    def __init__(self, obj, task_manager_instances=None, **kwargs):
+        self.name = obj.name
+        self.is_container_group = obj.is_container_group
+        self.container_group_jobs = 0
+        self.container_group_consumed_forks = 0
+        _instances = obj.instances.all()
+        # We want the list of TaskManagerInstance objects because these are shared across the TaskManagerInstanceGroup objects.
+        # This way when we consume capacity on an instance that is in multiple groups, we tabulate across all the groups correctly.
+        self.instances = [task_manager_instances[instance.hostname] for instance in _instances if instance.hostname in task_manager_instances]
+        self.instance_hostnames = tuple([instance.hostname for instance in _instances if instance.hostname in task_manager_instances])
+        self.max_concurrent_jobs = obj.max_concurrent_jobs
+        self.max_forks = obj.max_forks
+        self.control_task_impact = kwargs.get('control_task_impact', settings.AWX_CONTROL_NODE_TASK_IMPACT)
+
+    def consume_capacity(self, task):
+        """We only consume capacity on an instance group level if it is a container group. Otherwise we consume capacity on an instance level."""
+        if self.is_container_group:
+            self.container_group_jobs += 1
+            self.container_group_consumed_forks += task.task_impact
+        else:
+            raise RuntimeError("We only track capacity for container groups at the instance group level. Otherwise, consume capacity on instances.")
+
+    def get_remaining_instance_capacity(self):
+        return sum(inst.remaining_capacity for inst in self.instances)
+
+    def get_consumed_instance_capacity(self):
+        return sum(inst.consumed_capacity for inst in self.instances)
+
+    def get_instance_jobs_running(self):
+        return sum(inst.jobs_running for inst in self.instances)
+
+    def has_remaining_capacity(self, task=None, control_impact=False):
+        """Pass either a task or control_impact=True to determine if the IG has capacity to run the control task or job task."""
+        task_impact = self.control_task_impact if control_impact else task.task_impact
+        job_impact = 0 if control_impact else 1
+
+        # We only want to loop over instances if self.max_concurrent_jobs is set
+        if self.max_concurrent_jobs == 0:
+            # Override the calculated remaining capacity, because when max_concurrent_jobs == 0 we don't enforce any max
+            remaining_jobs = 0
+        else:
+            instance_jobs_running = self.get_instance_jobs_running()
+            remaining_jobs = self.max_concurrent_jobs - instance_jobs_running - self.container_group_jobs - job_impact
+
+        # We only want to loop over instances if self.max_forks is set
+        if self.max_forks == 0:
+            # Override the calculated remaining capacity, because when max_forks == 0 we don't enforce any max
+            remaining_forks = 0
+        else:
+            instance_consumed_forks = self.get_consumed_instance_capacity()
+            remaining_forks = self.max_forks - instance_consumed_forks - self.container_group_consumed_forks - task_impact
+
+        if remaining_jobs < 0 or remaining_forks < 0:
+            # A value less than zero means the task will not fit on the group
+            task_string = f"task {task.log_format}" if task else "control task"
+            if remaining_jobs < 0:
+                logger.debug(f"{task_string} cannot fit on instance group {self.name} with {remaining_jobs} remaining jobs")
+            if remaining_forks < 0:
+                impact_string = f"with impact {task_impact}"
+                logger.debug(f"{task_string} {impact_string} cannot fit on instance group {self.name} with {remaining_forks} remaining forks")
+            return False
+
+        # Returning true means there is enough remaining capacity on the group to run the task (or no instance group level limits are being set)
+        return True
+
+
 class TaskManagerInstances:
-    def __init__(self, active_tasks, instances=None, instance_fields=('node_type', 'capacity', 'hostname', 'enabled')):
+    def __init__(self, instances=None, instance_fields=('node_type', 'capacity', 'hostname', 'enabled'), **kwargs):
         self.instances_by_hostname = dict()
+        self.instance_groups_container_group_jobs = dict()
+        self.instance_groups_container_group_consumed_forks = dict()
+        self.control_task_impact = kwargs.get('control_task_impact', settings.AWX_CONTROL_NODE_TASK_IMPACT)
+
         if instances is None:
             instances = (
                 Instance.objects.filter(hostname__isnull=False, node_state=Instance.States.READY, enabled=True)
@@ -43,18 +119,15 @@ class TaskManagerInstances:
                 .only('node_type', 'node_state', 'capacity', 'hostname', 'enabled')
             )
         for instance in instances:
-            self.instances_by_hostname[instance.hostname] = TaskManagerInstance(instance)
+            self.instances_by_hostname[instance.hostname] = TaskManagerInstance(instance, **kwargs)
 
-        # initialize remaining capacity based on currently waiting and running tasks
-        for task in active_tasks:
-            if task.status not in ['waiting', 'running']:
-                continue
-            control_instance = self.instances_by_hostname.get(task.controller_node, '')
-            execution_instance = self.instances_by_hostname.get(task.execution_node, '')
-            if execution_instance and execution_instance.node_type in ('hybrid', 'execution'):
-                self.instances_by_hostname[task.execution_node].consume_capacity(task.task_impact)
-            if control_instance and control_instance.node_type in ('hybrid', 'control'):
-                self.instances_by_hostname[task.controller_node].consume_capacity(settings.AWX_CONTROL_NODE_TASK_IMPACT)
+    def consume_capacity(self, task):
+        control_instance = self.instances_by_hostname.get(task.controller_node, '')
+        execution_instance = self.instances_by_hostname.get(task.execution_node, '')
+        if execution_instance and execution_instance.node_type in ('hybrid', 'execution'):
+            self.instances_by_hostname[task.execution_node].consume_capacity(task.task_impact, job_impact=True)
+        if control_instance and control_instance.node_type in ('hybrid', 'control'):
+            self.instances_by_hostname[task.controller_node].consume_capacity(self.control_task_impact)
 
     def __getitem__(self, hostname):
         return self.instances_by_hostname.get(hostname)
@@ -64,42 +137,48 @@ class TaskManagerInstances:
 
 
 class TaskManagerInstanceGroups:
-    """A class representing minimal data the task manager needs to represent an InstanceGroup."""
+    """A class representing minimal data the task manager needs to represent all the InstanceGroups."""
 
-    def __init__(self, instances_by_hostname=None, instance_groups=None, instance_groups_queryset=None):
+    def __init__(self, task_manager_instances=None, instance_groups=None, instance_groups_queryset=None, **kwargs):
         self.instance_groups = dict()
+        self.task_manager_instances = task_manager_instances if task_manager_instances is not None else TaskManagerInstances()
         self.controlplane_ig = None
         self.pk_ig_map = dict()
+        self.control_task_impact = kwargs.get('control_task_impact', settings.AWX_CONTROL_NODE_TASK_IMPACT)
+        self.controlplane_ig_name = kwargs.get('controlplane_ig_name', settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME)
 
         if instance_groups is not None:  # for testing
-            self.instance_groups = instance_groups
+            self.instance_groups = {ig.name: TaskManagerInstanceGroup(ig, self.task_manager_instances, **kwargs) for ig in instance_groups}
+            self.pk_ig_map = {ig.pk: ig for ig in instance_groups}
         else:
             if instance_groups_queryset is None:
-                instance_groups_queryset = InstanceGroup.objects.prefetch_related('instances').only('name', 'instances')
-            for instance_group in instance_groups_queryset:
-                if instance_group.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME:
-                    self.controlplane_ig = instance_group
-                self.instance_groups[instance_group.name] = dict(
-                    instances=[
-                        instances_by_hostname[instance.hostname] for instance in instance_group.instances.all() if instance.hostname in instances_by_hostname
-                    ],
+                instance_groups_queryset = InstanceGroup.objects.prefetch_related('instances').only(
+                    'name', 'instances', 'max_concurrent_jobs', 'max_forks', 'is_container_group'
                 )
+            for instance_group in instance_groups_queryset:
+                if instance_group.name == self.controlplane_ig_name:
+                    self.controlplane_ig = instance_group
+                self.instance_groups[instance_group.name] = TaskManagerInstanceGroup(instance_group, self.task_manager_instances, **kwargs)
                 self.pk_ig_map[instance_group.pk] = instance_group
 
+    def __getitem__(self, ig_name):
+        return self.instance_groups.get(ig_name)
+
+    def __contains__(self, ig_name):
+        return ig_name in self.instance_groups
+
     def get_remaining_capacity(self, group_name):
-        instances = self.instance_groups[group_name]['instances']
-        return sum(inst.remaining_capacity for inst in instances)
+        return self.instance_groups[group_name].get_remaining_instance_capacity()
 
     def get_consumed_capacity(self, group_name):
-        instances = self.instance_groups[group_name]['instances']
-        return sum(inst.consumed_capacity for inst in instances)
+        return self.instance_groups[group_name].get_consumed_instance_capacity()
 
     def fit_task_to_most_remaining_capacity_instance(self, task, instance_group_name, impact=None, capacity_type=None, add_hybrid_control_cost=False):
         impact = impact if impact else task.task_impact
         capacity_type = capacity_type if capacity_type else task.capacity_type
         instance_most_capacity = None
         most_remaining_capacity = -1
-        instances = self.instance_groups[instance_group_name]['instances']
+        instances = self.instance_groups[instance_group_name].instances
 
         for i in instances:
             if i.node_type not in (capacity_type, 'hybrid'):
@@ -107,7 +186,7 @@ class TaskManagerInstanceGroups:
             would_be_remaining = i.remaining_capacity - impact
             # hybrid nodes _always_ control their own tasks
             if add_hybrid_control_cost and i.node_type == 'hybrid':
-                would_be_remaining -= settings.AWX_CONTROL_NODE_TASK_IMPACT
+                would_be_remaining -= self.control_task_impact
             if would_be_remaining >= 0 and (instance_most_capacity is None or would_be_remaining > most_remaining_capacity):
                 instance_most_capacity = i
                 most_remaining_capacity = would_be_remaining
@@ -115,9 +194,12 @@ class TaskManagerInstanceGroups:
 
     def find_largest_idle_instance(self, instance_group_name, capacity_type='execution'):
         largest_instance = None
-        instances = self.instance_groups[instance_group_name]['instances']
+        instances = self.instance_groups[instance_group_name].instances
         for i in instances:
             if i.node_type not in (capacity_type, 'hybrid'):
+                continue
+            if i.capacity <= 0:
+                # We don't want to select an idle instance with 0 capacity
                 continue
             if (hasattr(i, 'jobs_running') and i.jobs_running == 0) or i.remaining_capacity == i.capacity:
                 if largest_instance is None:
@@ -139,3 +221,41 @@ class TaskManagerInstanceGroups:
             logger.warn(f"No instance groups in cache exist, defaulting to global instance groups for task {task}")
             return task.global_instance_groups
         return igs
+
+
+class TaskManagerModels:
+    def __init__(self, **kwargs):
+        # We want to avoid calls to settings over and over in loops, so cache this information here
+        kwargs['control_task_impact'] = kwargs.get('control_task_impact', settings.AWX_CONTROL_NODE_TASK_IMPACT)
+        kwargs['controlplane_ig_name'] = kwargs.get('controlplane_ig_name', settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME)
+        self.instances = TaskManagerInstances(**kwargs)
+        self.instance_groups = TaskManagerInstanceGroups(task_manager_instances=self.instances, **kwargs)
+
+    @classmethod
+    def init_with_consumed_capacity(cls, **kwargs):
+        tmm = cls(**kwargs)
+        tasks = kwargs.get('tasks', None)
+
+        if tasks is None:
+            # No tasks were provided, so we will fetch them from the database
+            task_status_filter_list = kwargs.get('task_status_filter_list', ['running', 'waiting'])
+            task_fields = kwargs.get('task_fields', ('task_impact', 'controller_node', 'execution_node', 'instance_group'))
+            from awx.main.models import UnifiedJob
+
+            tasks = UnifiedJob.objects.filter(status__in=task_status_filter_list).only(*task_fields)
+
+        for task in tasks:
+            tmm.consume_capacity(task)
+
+        return tmm
+
+    def consume_capacity(self, task):
+        # Consume capacity on instances, which bubbles up to instance groups they are a member of
+        self.instances.consume_capacity(task)
+
+        # For container group jobs, additionally we must account for capacity consumed since
+        # The container groups have no instances to look at to track how many jobs/forks are consumed
+        if task.instance_group_id:
+            ig = self.instance_groups.pk_ig_map[task.instance_group_id]
+            if ig.is_container_group:
+                self.instance_groups[ig.name].consume_capacity(task)

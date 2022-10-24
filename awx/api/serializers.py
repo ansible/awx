@@ -113,7 +113,7 @@ from awx.main.utils import (
 )
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.named_url_graph import reset_counters
-from awx.main.scheduler.task_manager_models import TaskManagerInstanceGroups, TaskManagerInstances
+from awx.main.scheduler.task_manager_models import TaskManagerModels
 from awx.main.redact import UriCleaner, REPLACE_STR
 
 from awx.main.validators import vars_validate_or_raise
@@ -5071,6 +5071,22 @@ class InstanceGroupSerializer(BaseSerializer):
         label=_('Policy Instance Minimum'),
         help_text=_("Static minimum number of Instances that will be automatically assign to " "this group when new instances come online."),
     )
+    max_concurrent_jobs = serializers.IntegerField(
+        default=0,
+        min_value=0,
+        required=False,
+        initial=0,
+        label=_('Max Concurrent Jobs'),
+        help_text=_("Maximum number of concurrent jobs to run on a group. When set to zero, no maximum is enforced."),
+    )
+    max_forks = serializers.IntegerField(
+        default=0,
+        min_value=0,
+        required=False,
+        initial=0,
+        label=_('Max Forks'),
+        help_text=_("Maximum number of forks to execute concurrently on a group. When set to zero, no maximum is enforced."),
+    )
     policy_instance_list = serializers.ListField(
         child=serializers.CharField(),
         required=False,
@@ -5092,6 +5108,8 @@ class InstanceGroupSerializer(BaseSerializer):
             "consumed_capacity",
             "percent_capacity_remaining",
             "jobs_running",
+            "max_concurrent_jobs",
+            "max_forks",
             "jobs_total",
             "instances",
             "is_container_group",
@@ -5173,14 +5191,15 @@ class InstanceGroupSerializer(BaseSerializer):
         # Store capacity values (globally computed) in the context
         if 'task_manager_igs' not in self.context:
             instance_groups_queryset = None
-            jobs_qs = UnifiedJob.objects.filter(status__in=('running', 'waiting'))
             if self.parent:  # Is ListView:
                 instance_groups_queryset = self.parent.instance
 
-            instances = TaskManagerInstances(jobs_qs)
-            instance_groups = TaskManagerInstanceGroups(instances_by_hostname=instances, instance_groups_queryset=instance_groups_queryset)
+            tm_models = TaskManagerModels.init_with_consumed_capacity(
+                instance_fields=['uuid', 'version', 'capacity', 'cpu', 'memory', 'managed_by_policy', 'enabled'],
+                instance_groups_queryset=instance_groups_queryset,
+            )
 
-            self.context['task_manager_igs'] = instance_groups
+            self.context['task_manager_igs'] = tm_models.instance_groups
         return self.context['task_manager_igs']
 
     def get_consumed_capacity(self, obj):

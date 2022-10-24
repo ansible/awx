@@ -249,6 +249,76 @@ def test_multi_jt_capacity_blocking(hybrid_instance, job_template_factory, mocke
 
 
 @pytest.mark.django_db
+def test_max_concurrent_jobs_ig_capacity_blocking(hybrid_instance, job_template_factory, mocker):
+    """When max_concurrent_jobs of an instance group is more restrictive than capacity of instances, enforce max_concurrent_jobs."""
+    instance = hybrid_instance
+    controlplane_instance_group = instance.rampart_groups.first()
+    # We will expect only 1 job to be started
+    controlplane_instance_group.max_concurrent_jobs = 1
+    controlplane_instance_group.save()
+    num_jobs = 3
+    jobs = []
+    for i in range(num_jobs):
+        jobs.append(
+            create_job(job_template_factory(f'jt{i}', organization=f'org{i}', project=f'proj{i}', inventory=f'inv{i}', credential=f'cred{i}').job_template)
+        )
+    tm = TaskManager()
+    task_impact = 1
+
+    # Sanity check that multiple jobs would run if not for the max_concurrent_jobs setting.
+    assert task_impact * num_jobs < controlplane_instance_group.capacity
+    tm = TaskManager()
+    with mock.patch('awx.main.models.Job.task_impact', new_callable=mock.PropertyMock) as mock_task_impact:
+        mock_task_impact.return_value = task_impact
+        with mock.patch.object(TaskManager, "start_task", wraps=tm.start_task) as mock_job:
+            tm.schedule()
+            mock_job.assert_called_once()
+            jobs[0].status = 'running'
+            jobs[0].controller_node = instance.hostname
+            jobs[0].execution_node = instance.hostname
+            jobs[0].instance_group = controlplane_instance_group
+            jobs[0].save()
+
+    # while that job is running, we should not start another job
+    with mock.patch('awx.main.models.Job.task_impact', new_callable=mock.PropertyMock) as mock_task_impact:
+        mock_task_impact.return_value = task_impact
+        with mock.patch.object(TaskManager, "start_task", wraps=tm.start_task) as mock_job:
+            tm.schedule()
+            mock_job.assert_not_called()
+    # now job is done, we should start one of the two other jobs
+    jobs[0].status = 'successful'
+    jobs[0].save()
+    with mock.patch('awx.main.models.Job.task_impact', new_callable=mock.PropertyMock) as mock_task_impact:
+        mock_task_impact.return_value = task_impact
+        with mock.patch.object(TaskManager, "start_task", wraps=tm.start_task) as mock_job:
+            tm.schedule()
+            mock_job.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_max_forks_ig_capacity_blocking(hybrid_instance, job_template_factory, mocker):
+    """When max_forks of an instance group is less than the capacity of instances, enforce max_forks."""
+    instance = hybrid_instance
+    controlplane_instance_group = instance.rampart_groups.first()
+    controlplane_instance_group.max_forks = 15
+    controlplane_instance_group.save()
+    task_impact = 10
+    num_jobs = 2
+    # Sanity check that 2 jobs would run if not for the max_forks setting.
+    assert controlplane_instance_group.max_forks < controlplane_instance_group.capacity
+    assert task_impact * num_jobs > controlplane_instance_group.max_forks
+    assert task_impact * num_jobs < controlplane_instance_group.capacity
+    for i in range(num_jobs):
+        create_job(job_template_factory(f'jt{i}', organization=f'org{i}', project=f'proj{i}', inventory=f'inv{i}', credential=f'cred{i}').job_template)
+    tm = TaskManager()
+    with mock.patch('awx.main.models.Job.task_impact', new_callable=mock.PropertyMock) as mock_task_impact:
+        mock_task_impact.return_value = task_impact
+        with mock.patch.object(TaskManager, "start_task", wraps=tm.start_task) as mock_job:
+            tm.schedule()
+            mock_job.assert_called_once()
+
+
+@pytest.mark.django_db
 def test_single_job_dependencies_project_launch(controlplane_instance_group, job_template_factory, mocker):
     objects = job_template_factory('jt', organization='org1', project='proj', inventory='inv', credential='cred')
     instance = controlplane_instance_group.instances.all()[0]

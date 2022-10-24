@@ -43,8 +43,7 @@ from awx.main.utils.common import task_manager_bulk_reschedule, is_testing
 from awx.main.signals import disable_activity_stream
 from awx.main.constants import ACTIVE_STATES
 from awx.main.scheduler.dependency_graph import DependencyGraph
-from awx.main.scheduler.task_manager_models import TaskManagerInstances
-from awx.main.scheduler.task_manager_models import TaskManagerInstanceGroups
+from awx.main.scheduler.task_manager_models import TaskManagerModels
 import awx.main.analytics.subsystem_metrics as s_metrics
 from awx.main.utils import decrypt_field
 
@@ -71,7 +70,12 @@ class TaskBase:
         # is called later.
         self.subsystem_metrics = s_metrics.Metrics(auto_pipe_execute=False)
         self.start_time = time.time()
+
+        # We want to avoid calling settings in loops, so cache these settings at init time
         self.start_task_limit = settings.START_TASK_LIMIT
+        self.task_manager_timeout = settings.TASK_MANAGER_TIMEOUT
+        self.control_task_impact = settings.AWX_CONTROL_NODE_TASK_IMPACT
+
         for m in self.subsystem_metrics.METRICS:
             if m.startswith(self.prefix):
                 self.subsystem_metrics.set(m, 0)
@@ -79,7 +83,7 @@ class TaskBase:
     def timed_out(self):
         """Return True/False if we have met or exceeded the timeout for the task manager."""
         elapsed = time.time() - self.start_time
-        if elapsed >= settings.TASK_MANAGER_TIMEOUT:
+        if elapsed >= self.task_manager_timeout:
             logger.warning(f"{self.prefix} manager has run for {elapsed} which is greater than TASK_MANAGER_TIMEOUT of {settings.TASK_MANAGER_TIMEOUT}.")
             return True
         return False
@@ -471,9 +475,8 @@ class TaskManager(TaskBase):
         Init AFTER we know this instance of the task manager will run because the lock is acquired.
         """
         self.dependency_graph = DependencyGraph()
-        self.instances = TaskManagerInstances(self.all_tasks)
-        self.instance_groups = TaskManagerInstanceGroups(instances_by_hostname=self.instances)
-        self.controlplane_ig = self.instance_groups.controlplane_ig
+        self.tm_models = TaskManagerModels()
+        self.controlplane_ig = self.tm_models.instance_groups.controlplane_ig
 
     def job_blocked_by(self, task):
         # TODO: I'm not happy with this, I think blocking behavior should be decided outside of the dependency graph
@@ -505,19 +508,21 @@ class TaskManager(TaskBase):
 
     @timeit
     def start_task(self, task, instance_group, dependent_tasks=None, instance=None):
+        # Just like for process_running_tasks, add the job to the dependency graph and
+        # ask the TaskManagerInstanceGroups object to update consumed capacity on all
+        # implicated instances and container groups.
         self.dependency_graph.add_job(task)
+        if instance_group is not None:
+            task.instance_group = instance_group
+        # We need the instance group assigned to correctly account for container group max_concurrent_jobs and max_forks
+        self.tm_models.consume_capacity(task)
+
         self.subsystem_metrics.inc(f"{self.prefix}_tasks_started", 1)
         self.start_task_limit -= 1
         if self.start_task_limit == 0:
             # schedule another run immediately after this task manager
             ScheduleTaskManager().schedule()
         from awx.main.tasks.system import handle_work_error, handle_work_success
-
-        # update capacity for control node and execution node
-        if task.controller_node:
-            self.instances[task.controller_node].consume_capacity(settings.AWX_CONTROL_NODE_TASK_IMPACT)
-        if task.execution_node:
-            self.instances[task.execution_node].consume_capacity(task.task_impact)
 
         dependent_tasks = dependent_tasks or []
 
@@ -546,7 +551,6 @@ class TaskManager(TaskBase):
                 ScheduleWorkflowManager().schedule()
             # at this point we already have control/execution nodes selected for the following cases
             else:
-                task.instance_group = instance_group
                 execution_node_msg = f' and execution node {task.execution_node}' if task.execution_node else ''
                 logger.debug(
                     f'Submitting job {task.log_format} controlled by {task.controller_node} to instance group {instance_group.name}{execution_node_msg}.'
@@ -580,6 +584,7 @@ class TaskManager(TaskBase):
             if type(task) is WorkflowJob:
                 ScheduleWorkflowManager().schedule()
             self.dependency_graph.add_job(task)
+            self.tm_models.consume_capacity(task)
 
     @timeit
     def process_pending_tasks(self, pending_tasks):
@@ -611,11 +616,11 @@ class TaskManager(TaskBase):
 
             # Determine if there is control capacity for the task
             if task.capacity_type == 'control':
-                control_impact = task.task_impact + settings.AWX_CONTROL_NODE_TASK_IMPACT
+                control_impact = task.task_impact + self.control_task_impact
             else:
-                control_impact = settings.AWX_CONTROL_NODE_TASK_IMPACT
-            control_instance = self.instance_groups.fit_task_to_most_remaining_capacity_instance(
-                task, instance_group_name=settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME, impact=control_impact, capacity_type='control'
+                control_impact = self.control_task_impact
+            control_instance = self.tm_models.instance_groups.fit_task_to_most_remaining_capacity_instance(
+                task, instance_group_name=self.controlplane_ig.name, impact=control_impact, capacity_type='control'
             )
             if not control_instance:
                 self.task_needs_capacity(task, tasks_to_update_job_explanation)
@@ -626,15 +631,19 @@ class TaskManager(TaskBase):
 
             # All task.capacity_type == 'control' jobs should run on control plane, no need to loop over instance groups
             if task.capacity_type == 'control':
+                if not self.tm_models.instance_groups[self.controlplane_ig.name].has_remaining_capacity(control_impact=True):
+                    continue
                 task.execution_node = control_instance.hostname
-                execution_instance = self.instances[control_instance.hostname].obj
+                execution_instance = self.tm_models.instances[control_instance.hostname].obj
                 task.log_lifecycle("controller_node_chosen")
                 task.log_lifecycle("execution_node_chosen")
                 self.start_task(task, self.controlplane_ig, task.get_jobs_fail_chain(), execution_instance)
                 found_acceptable_queue = True
                 continue
 
-            for instance_group in self.instance_groups.get_instance_groups_from_task_cache(task):
+            for instance_group in self.tm_models.instance_groups.get_instance_groups_from_task_cache(task):
+                if not self.tm_models.instance_groups[instance_group.name].has_remaining_capacity(task):
+                    continue
                 if instance_group.is_container_group:
                     self.start_task(task, instance_group, task.get_jobs_fail_chain(), None)
                     found_acceptable_queue = True
@@ -642,9 +651,9 @@ class TaskManager(TaskBase):
 
                 # at this point we know the instance group is NOT a container group
                 # because if it was, it would have started the task and broke out of the loop.
-                execution_instance = self.instance_groups.fit_task_to_most_remaining_capacity_instance(
+                execution_instance = self.tm_models.instance_groups.fit_task_to_most_remaining_capacity_instance(
                     task, instance_group_name=instance_group.name, add_hybrid_control_cost=True
-                ) or self.instance_groups.find_largest_idle_instance(instance_group_name=instance_group.name, capacity_type=task.capacity_type)
+                ) or self.tm_models.instance_groups.find_largest_idle_instance(instance_group_name=instance_group.name, capacity_type=task.capacity_type)
 
                 if execution_instance:
                     task.execution_node = execution_instance.hostname
@@ -660,7 +669,7 @@ class TaskManager(TaskBase):
                             task.log_format, instance_group.name, execution_instance.hostname, execution_instance.remaining_capacity
                         )
                     )
-                    execution_instance = self.instances[execution_instance.hostname].obj
+                    execution_instance = self.tm_models.instances[execution_instance.hostname].obj
                     self.start_task(task, instance_group, task.get_jobs_fail_chain(), execution_instance)
                     found_acceptable_queue = True
                     break
