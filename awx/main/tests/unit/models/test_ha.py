@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 import pytest
 from unittest import mock
 from unittest.mock import Mock
@@ -61,7 +63,7 @@ class TestInstanceGroup(object):
     )
     def test_fit_task_to_most_remaining_capacity_instance(self, task, instances, instance_fit_index, reason):
         InstanceGroup(id=10)
-        tm_igs = TaskManagerInstanceGroups(instance_groups={'controlplane': {'instances': instances}})
+        tm_igs = TaskManagerInstanceGroups(instance_groups={'controlplane': SimpleNamespace(instances=instances)})
 
         instance_picked = tm_igs.fit_task_to_most_remaining_capacity_instance(task, 'controlplane')
 
@@ -86,7 +88,7 @@ class TestInstanceGroup(object):
 
         InstanceGroup(id=10)
         instances_online_only = filter_offline_instances(instances)
-        tm_igs = TaskManagerInstanceGroups(instance_groups={'controlplane': {'instances': instances_online_only}})
+        tm_igs = TaskManagerInstanceGroups(instance_groups={'controlplane': SimpleNamespace(instances=instances_online_only)})
 
         if instance_fit_index is None:
             assert tm_igs.find_largest_idle_instance('controlplane') is None, reason

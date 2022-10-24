@@ -33,9 +33,39 @@ class TaskManagerInstance:
         return remaining
 
 
+class TaskManagerInstanceGroup:
+    """A class representing minimal data the task manager needs to represent an Instance."""
+
+    def __init__(self, obj, instances_by_hostname=None):
+        if not isinstance(instances_by_hostname, TaskManagerInstances):
+            raise TypeError("TaskManagerInstanceGroup must be initialized with an instance of TaskManagerInstances as an argument")
+        self.name = obj.name
+        self.is_container_group = obj.is_container_group
+        self.running_jobs = instances_by_hostname.instance_groups_running_jobs.get(self.name, 0)
+        _instances = obj.instances.all()
+        self.instances = [instances_by_hostname[instance.hostname] for instance in _instances if instance.hostname in instances_by_hostname]
+        self.instance_hostnames = tuple([instance.hostname for instance in _instances if instance.hostname in instances_by_hostname])
+        self.max_concurrent_jobs = obj.max_concurrent_jobs
+
+    def consume_capacity(self):
+        self.running_jobs += 1
+
+    @property
+    def remaining_capacity(self):
+        # If the max_concurrent_jobs is set to zero, we interperet that as no limit
+        # So there is always capacity remaining
+        if self.max_concurrent_jobs == 0:
+            return 1
+        remaining = self.max_concurrent_jobs - self.running_jobs
+        if remaining <= 0:
+            return 0
+        return remaining
+
+
 class TaskManagerInstances:
     def __init__(self, active_tasks, instances=None, instance_fields=('node_type', 'capacity', 'hostname', 'enabled')):
         self.instances_by_hostname = dict()
+        self.instance_groups_running_jobs = dict()
         if instances is None:
             instances = (
                 Instance.objects.filter(hostname__isnull=False, node_state=Instance.States.READY, enabled=True)
@@ -49,6 +79,9 @@ class TaskManagerInstances:
         for task in active_tasks:
             if task.status not in ['waiting', 'running']:
                 continue
+            if task.instance_group is not None:
+                # Workflows and workflow approval nodes do not have an instance group
+                self.instance_groups_running_jobs[task.instance_group.name] = self.instance_groups_running_jobs.get(task.instance_group.name, 0) + 1
             control_instance = self.instances_by_hostname.get(task.controller_node, '')
             execution_instance = self.instances_by_hostname.get(task.execution_node, '')
             if execution_instance and execution_instance.node_type in ('hybrid', 'execution'):
@@ -75,23 +108,25 @@ class TaskManagerInstanceGroups:
             self.instance_groups = instance_groups
         else:
             if instance_groups_queryset is None:
-                instance_groups_queryset = InstanceGroup.objects.prefetch_related('instances').only('name', 'instances')
+                instance_groups_queryset = InstanceGroup.objects.prefetch_related('instances').only('name', 'instances', 'max_concurrent_jobs')
             for instance_group in instance_groups_queryset:
                 if instance_group.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME:
                     self.controlplane_ig = instance_group
-                self.instance_groups[instance_group.name] = dict(
-                    instances=[
-                        instances_by_hostname[instance.hostname] for instance in instance_group.instances.all() if instance.hostname in instances_by_hostname
-                    ],
-                )
+                self.instance_groups[instance_group.name] = TaskManagerInstanceGroup(instance_group, instances_by_hostname)
                 self.pk_ig_map[instance_group.pk] = instance_group
 
+    def __getitem__(self, ig_name):
+        return self.instance_groups.get(ig_name)
+
+    def __contains__(self, ig_name):
+        return ig_name in self.instance_groups
+
     def get_remaining_capacity(self, group_name):
-        instances = self.instance_groups[group_name]['instances']
+        instances = self.instance_groups[group_name].instances
         return sum(inst.remaining_capacity for inst in instances)
 
     def get_consumed_capacity(self, group_name):
-        instances = self.instance_groups[group_name]['instances']
+        instances = self.instance_groups[group_name].instances
         return sum(inst.consumed_capacity for inst in instances)
 
     def fit_task_to_most_remaining_capacity_instance(self, task, instance_group_name, impact=None, capacity_type=None, add_hybrid_control_cost=False):
@@ -99,7 +134,7 @@ class TaskManagerInstanceGroups:
         capacity_type = capacity_type if capacity_type else task.capacity_type
         instance_most_capacity = None
         most_remaining_capacity = -1
-        instances = self.instance_groups[instance_group_name]['instances']
+        instances = self.instance_groups[instance_group_name].instances
 
         for i in instances:
             if i.node_type not in (capacity_type, 'hybrid'):
@@ -115,7 +150,7 @@ class TaskManagerInstanceGroups:
 
     def find_largest_idle_instance(self, instance_group_name, capacity_type='execution'):
         largest_instance = None
-        instances = self.instance_groups[instance_group_name]['instances']
+        instances = self.instance_groups[instance_group_name].instances
         for i in instances:
             if i.node_type not in (capacity_type, 'hybrid'):
                 continue

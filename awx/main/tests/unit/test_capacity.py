@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 import pytest
 
 from awx.main.scheduler.task_manager_models import TaskManagerInstanceGroups, TaskManagerInstances
@@ -20,6 +22,7 @@ class Job(FakeObject):
     is_container_group_task = False
     controller_node = ''
     execution_node = ''
+    instance_group = None
 
     def log_format(self):
         return 'job 382 (fake)'
@@ -70,7 +73,7 @@ def create_ig_manager():
 
         seed_igs = {}
         for ig in ig_list:
-            seed_igs[ig.name] = {'instances': [instances[inst.hostname] for inst in ig.instance_list]}
+            seed_igs[ig.name] = SimpleNamespace(instances=[instances[inst.hostname] for inst in ig.instance_list])
 
         instance_groups = TaskManagerInstanceGroups(instance_groups=seed_igs)
         return instance_groups

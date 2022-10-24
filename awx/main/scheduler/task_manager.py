@@ -92,7 +92,7 @@ class TaskBase:
             .exclude(launch_type='sync')
             .exclude(polymorphic_ctype_id=wf_approval_ctype_id)
             .order_by('created')
-            .prefetch_related('dependent_jobs')
+            .prefetch_related('dependent_jobs', 'instance_group')
         )
         self.all_tasks = [t for t in qs]
 
@@ -518,6 +518,10 @@ class TaskManager(TaskBase):
             self.instances[task.controller_node].consume_capacity(settings.AWX_CONTROL_NODE_TASK_IMPACT)
         if task.execution_node:
             self.instances[task.execution_node].consume_capacity(task.task_impact)
+        # update number running jobs on the instance group
+        if instance_group is not None:
+            # Workflows and workflow approval nodes do not have an instance group
+            self.instance_groups[instance_group.name].consume_capacity()
 
         dependent_tasks = dependent_tasks or []
 
@@ -615,7 +619,7 @@ class TaskManager(TaskBase):
             else:
                 control_impact = settings.AWX_CONTROL_NODE_TASK_IMPACT
             control_instance = self.instance_groups.fit_task_to_most_remaining_capacity_instance(
-                task, instance_group_name=settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME, impact=control_impact, capacity_type='control'
+                task, instance_group_name=self.controlplane_ig.name, impact=control_impact, capacity_type='control'
             )
             if not control_instance:
                 self.task_needs_capacity(task, tasks_to_update_job_explanation)
@@ -626,6 +630,9 @@ class TaskManager(TaskBase):
 
             # All task.capacity_type == 'control' jobs should run on control plane, no need to loop over instance groups
             if task.capacity_type == 'control':
+                if not self.instance_groups[self.controlplane_ig.name].remaining_capacity:
+                    logger.debug(f"Skipping task, {self.controlplane_ig.name} already met max concurrent jobs: {self.controlpane_ig.max_concurrent_jobs}")
+                    continue
                 task.execution_node = control_instance.hostname
                 execution_instance = self.instances[control_instance.hostname].obj
                 task.log_lifecycle("controller_node_chosen")
@@ -635,6 +642,9 @@ class TaskManager(TaskBase):
                 continue
 
             for instance_group in self.instance_groups.get_instance_groups_from_task_cache(task):
+                if not self.instance_groups[instance_group.name].remaining_capacity:
+                    logger.debug(f"Skipping instance group {instance_group.name}, already met max concurrent jobs: {instance_group.max_concurrent_jobs}")
+                    continue
                 if instance_group.is_container_group:
                     self.start_task(task, instance_group, task.get_jobs_fail_chain(), None)
                     found_acceptable_queue = True

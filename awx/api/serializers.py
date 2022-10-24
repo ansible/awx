@@ -5069,6 +5069,14 @@ class InstanceGroupSerializer(BaseSerializer):
         label=_('Policy Instance Minimum'),
         help_text=_("Static minimum number of Instances that will be automatically assign to " "this group when new instances come online."),
     )
+    max_concurrent_jobs = serializers.IntegerField(
+        default=0,
+        min_value=0,
+        required=False,
+        initial=0,
+        label=_('Max Concurrent Jobs'),
+        help_text=_("Maximum number of concurrent jobs to run on this group. When set to zero, no maximum is enforced."),
+    )
     policy_instance_list = serializers.ListField(
         child=serializers.CharField(),
         required=False,
@@ -5090,6 +5098,7 @@ class InstanceGroupSerializer(BaseSerializer):
             "consumed_capacity",
             "percent_capacity_remaining",
             "jobs_running",
+            "max_concurrent_jobs",
             "jobs_total",
             "instances",
             "is_container_group",
