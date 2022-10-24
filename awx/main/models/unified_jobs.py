@@ -427,7 +427,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
 
         # manually issue the create activity stream entry _after_ M2M relations
         # have been associated to the UJ
-        if unified_job.__class__ in activity_stream_registrar.models:
+        if unified_job.__class__ in activity_stream_registrar.models and unified_job.launch_type != 'dependency':
             activity_stream_create(None, unified_job, True)
         unified_job.log_lifecycle("created")
 
