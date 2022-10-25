@@ -2,7 +2,7 @@
 # Structure for the Elastic Stack docker configuration came from docker-elk:
 # https://github.com/deviantony/docker-elk
 # docker-elk is under the MIT License,
-# a copy of its license is provided in docs/licenses/docker-elk.txt
+# a copy of its license is provided in licenses/docker-elk.txt
 # contents modified
 
 version: '2'
