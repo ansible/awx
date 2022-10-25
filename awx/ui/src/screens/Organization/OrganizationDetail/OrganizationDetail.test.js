@@ -90,7 +90,7 @@ describe('<OrganizationDetail />', () => {
     await waitForElement(component, 'ContentLoading', (el) => el.length === 0);
     expect(
       component
-        .find('Chip')
+        .find('Label')
         .findWhere((el) => el.text() === 'One')
         .exists()
     ).toBe(true);

@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Chip, Divider, Title } from '@patternfly/react-core';
 import { toTitleCase } from 'util/strings';
+import InstanceGroupLabels from 'components/InstanceGroupLabels';
 import CredentialChip from '../CredentialChip';
 import ChipGroup from '../ChipGroup';
 import { DetailList, Detail, UserDateDetail } from '../DetailList';
@@ -227,21 +228,7 @@ function PromptDetail({
                   label={t`Instance Groups`}
                   rows={4}
                   value={
-                    <ChipGroup
-                      numChips={5}
-                      totalChips={overrides.instance_groups.length}
-                      ouiaId="prompt-instance-groups-chips"
-                    >
-                      {overrides.instance_groups.map((instance_group) => (
-                        <Chip
-                          key={instance_group.id}
-                          ouiaId={`instance-group-${instance_group.id}-chip`}
-                          isReadOnly
-                        >
-                          {instance_group.name}
-                        </Chip>
-                      ))}
-                    </ChipGroup>
+                    <InstanceGroupLabels labels={overrides.instance_groups} />
                   }
                 />
               )}

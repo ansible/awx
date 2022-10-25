@@ -10,6 +10,7 @@ import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { JobTemplatesAPI, SchedulesAPI, WorkflowJobTemplatesAPI } from 'api';
 import { parseVariableField, jsonToYaml } from 'util/yaml';
 import { useConfig } from 'contexts/Config';
+import InstanceGroupLabels from 'components/InstanceGroupLabels';
 import parseRuleObj from '../shared/parseRuleObj';
 import FrequencyDetails from './FrequencyDetails';
 import AlertModal from '../../AlertModal';
@@ -26,11 +27,6 @@ import ChipGroup from '../../ChipGroup';
 import { VariablesDetail } from '../../CodeEditor';
 import { VERBOSITY } from '../../VerbositySelectField';
 import getHelpText from '../../../screens/Template/shared/JobTemplate.helptext';
-
-const buildLinkURL = (instance) =>
-  instance.is_container_group
-    ? '/instance_groups/container_group/'
-    : '/instance_groups/';
 
 const PromptDivider = styled(Divider)`
   margin-top: var(--pf-global--spacer--lg);
@@ -498,26 +494,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
                 fullWidth
                 label={t`Instance Groups`}
                 value={
-                  <ChipGroup
-                    numChips={5}
-                    totalChips={instanceGroups.length}
-                    ouiaId="instance-group-chips"
-                  >
-                    {instanceGroups.map((ig) => (
-                      <Link
-                        to={`${buildLinkURL(ig)}${ig.id}/details`}
-                        key={ig.id}
-                      >
-                        <Chip
-                          key={ig.id}
-                          ouiaId={`instance-group-${ig.id}-chip`}
-                          isReadOnly
-                        >
-                          {ig.name}
-                        </Chip>
-                      </Link>
-                    ))}
-                  </ChipGroup>
+                  <InstanceGroupLabels labels={instanceGroups} isLinkable />
                 }
                 isEmpty={instanceGroups.length === 0}
               />
