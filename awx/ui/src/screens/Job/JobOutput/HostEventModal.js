@@ -40,6 +40,8 @@ const processCodeEditorValue = (value) => {
     codeEditorValue = '';
   } else if (typeof value === 'string') {
     codeEditorValue = encode(value);
+  } else if (Array.isArray(value)) {
+    codeEditorValue = encode(value.join(' '));
   } else {
     codeEditorValue = value;
   }
