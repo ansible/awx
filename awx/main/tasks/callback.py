@@ -206,7 +206,7 @@ class RunnerCallback:
                 self.instance = self.update_model(self.instance.pk, job_args=json.dumps(runner_config.command), job_cwd=runner_config.cwd, job_env=job_env)
             # We opened a connection just for that save, close it here now
             connections.close_all()
-        elif status_data['status'] == 'failed':
+        elif status_data['status'] in ('failed', 'canceled', 'timeout'):
             # For encrypted ssh_key_data, ansible-runner worker will open and write the
             # ssh_key_data to a named pipe. Then, once the podman container starts, ssh-agent will
             # read from this named pipe so that the key can be used in ansible-playbook.
