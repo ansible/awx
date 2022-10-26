@@ -1,6 +1,5 @@
 from .plugin import CredentialPlugin, CertFiles, raise_for_status
 
-import base64
 from urllib.parse import urljoin, quote
 
 from django.utils.translation import gettext_lazy as _
