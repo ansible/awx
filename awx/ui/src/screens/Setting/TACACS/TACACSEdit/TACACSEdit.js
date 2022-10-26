@@ -116,6 +116,10 @@ function TACACSEdit() {
                   name="TACACSPLUS_AUTH_PROTOCOL"
                   config={tacacs.TACACSPLUS_AUTH_PROTOCOL}
                 />
+                <ChoiceField
+                  name="TACACSPLUS_REM_ADDR"
+                  config={tacacs.TACACSPLUS_REM_ADDR}
+                />
                 {submitError && <FormSubmitError error={submitError} />}
                 {revertError && <FormSubmitError error={revertError} />}
               </FormColumnLayout>

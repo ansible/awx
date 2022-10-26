@@ -224,12 +224,18 @@ class TACACSPlusBackend(object):
             return None
         try:
             # Upstream TACACS+ client does not accept non-string, so convert if needed.
-            auth = tacacs_plus.TACACSClient(
+            tacacs_client = tacacs_plus.TACACSClient(
                 django_settings.TACACSPLUS_HOST,
                 django_settings.TACACSPLUS_PORT,
                 django_settings.TACACSPLUS_SECRET,
                 timeout=django_settings.TACACSPLUS_SESSION_TIMEOUT,
-            ).authenticate(username, password, authen_type=tacacs_plus.TAC_PLUS_AUTHEN_TYPES[django_settings.TACACSPLUS_AUTH_PROTOCOL])
+            )
+            auth_kwargs = {'authen_type': tacacs_plus.TAC_PLUS_AUTHEN_TYPES[django_settings.TACACSPLUS_AUTH_PROTOCOL]}
+            if django_settings.TACACSPLUS_AUTH_PROTOCOL:
+                client_ip = self._get_client_ip(request)
+                if client_ip:
+                    auth_kwargs['rem_addr'] = client_ip
+            auth = tacacs_client.authenticate(username, password, **auth_kwargs)
         except Exception as e:
             logger.exception("TACACS+ Authentication Error: %s" % str(e))
             return None
@@ -243,6 +249,17 @@ class TACACSPlusBackend(object):
             return User.objects.get(pk=user_id)
         except User.DoesNotExist:
             return None
+
+    def _get_client_ip(self, request):
+        if not request or not hasattr(request, 'META'):
+            return None
+
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
 
 
 class TowerSAMLIdentityProvider(BaseSAMLIdentityProvider):
