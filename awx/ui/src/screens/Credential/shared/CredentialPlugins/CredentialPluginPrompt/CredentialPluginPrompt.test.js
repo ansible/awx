@@ -36,14 +36,14 @@ const mockCredentialTypeDetail = {
     url: '/api/v2/credential_types/20/',
     related: {
       named_url:
-        '/api/v2/credential_types/CyberArk Conjur Secret Lookup+external/',
+        '/api/v2/credential_types/CyberArk Conjur Secrets Manager Lookup+external/',
       credentials: '/api/v2/credential_types/20/credentials/',
       activity_stream: '/api/v2/credential_types/20/activity_stream/',
     },
     summary_fields: { user_capabilities: { edit: false, delete: false } },
     created: '2020-05-18T21:53:35.398260Z',
     modified: '2020-05-18T21:54:05.451444Z',
-    name: 'CyberArk Conjur Secret Lookup',
+    name: 'CyberArk Conjur Secrets Manager Lookup',
     description: '',
     kind: 'external',
     namespace: 'conjur',
