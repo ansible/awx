@@ -422,8 +422,13 @@ def model_instance_diff(old, new, serializer_mapping=None):
     allowed_fields = get_allowed_fields(new, serializer_mapping)
 
     for field in allowed_fields:
-        old_value = getattr(old, field, None)
-        new_value = getattr(new, field, None)
+        model_id_field = f'{field}_id'
+        if hasattr(new, model_id_field):  # optimization for model fields
+            old_value = getattr(old, model_id_field, None)
+            new_value = getattr(new, model_id_field, None)
+        else:
+            old_value = getattr(old, field, None)
+            new_value = getattr(new, field, None)
         if old_value != new_value:
             diff[field] = (
                 _convert_model_field_for_display(old, field, password_fields=old_password_fields),
@@ -545,27 +550,26 @@ def copy_m2m_relationships(obj1, obj2, fields, kwargs=None):
     to obj2 to field of same name, if field occurs in `fields`
     """
     for field_name in fields:
-        if hasattr(obj1, field_name):
-            try:
-                field_obj = obj1._meta.get_field(field_name)
-            except FieldDoesNotExist:
-                continue
-            if isinstance(field_obj, ManyToManyField):
-                # Many to Many can be specified as field_name
-                src_field_value = getattr(obj1, field_name)
-                if kwargs and field_name in kwargs:
-                    override_field_val = kwargs[field_name]
-                    if isinstance(override_field_val, (set, list, QuerySet)):
-                        # Labels are additive so we are going to add any src labels in addition to the override labels
-                        if field_name == 'labels':
-                            for jt_label in src_field_value.all():
-                                getattr(obj2, field_name).add(jt_label.id)
-                        getattr(obj2, field_name).add(*override_field_val)
-                        continue
-                    if override_field_val.__class__.__name__ == 'ManyRelatedManager':
-                        src_field_value = override_field_val
-                dest_field = getattr(obj2, field_name)
-                dest_field.add(*list(src_field_value.all().values_list('id', flat=True)))
+        try:
+            field_obj = obj1._meta.get_field(field_name)
+        except FieldDoesNotExist:
+            continue
+        if isinstance(field_obj, ManyToManyField):
+            # Many to Many can be specified as field_name
+            src_field_value = getattr(obj1, field_name)
+            if kwargs and field_name in kwargs:
+                override_field_val = kwargs[field_name]
+                if isinstance(override_field_val, (set, list, QuerySet)):
+                    # Labels are additive so we are going to add any src labels in addition to the override labels
+                    if field_name == 'labels':
+                        for jt_label in src_field_value.all():
+                            getattr(obj2, field_name).add(jt_label.id)
+                    getattr(obj2, field_name).add(*override_field_val)
+                    continue
+                if override_field_val.__class__.__name__ == 'ManyRelatedManager':
+                    src_field_value = override_field_val
+            dest_field = getattr(obj2, field_name)
+            dest_field.add(*list(src_field_value.all().values_list('id', flat=True)))
 
 
 def get_type_for_model(model):

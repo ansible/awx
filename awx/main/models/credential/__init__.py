@@ -224,8 +224,11 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         encrypted = encrypt_field(self, field, ask=ask)
         if encrypted:
             self.inputs[field] = encrypted
+            return True
         elif field in self.inputs:
             del self.inputs[field]
+            return True
+        return False
 
     def display_inputs(self):
         field_val = self.inputs.copy()

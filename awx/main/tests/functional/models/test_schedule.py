@@ -37,6 +37,7 @@ class TestComputedFields:
         """
         original_sch_modified = schedule.modified
         original_sch_modified_by = schedule.modified_by
+        schedule.unified_job_template.refresh_from_db()
         original_ujt_modified = schedule.unified_job_template.modified
         original_ujt_modified_by = schedule.unified_job_template.modified_by
         original_AS_entries = ActivityStream.objects.count()

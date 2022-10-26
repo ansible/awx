@@ -284,6 +284,28 @@ class ImplicitRoleField(models.ForeignKey):
         ct_id = ContentType_.objects.get_for_model(instance).id
 
         Model = utils.get_current_apps().get_model('main', instance.__class__.__name__)
+
+        update_fields = kwargs.get('update_fields', ())
+        is_rbac_update = False
+        if update_fields:
+            for field_name in update_fields:
+                try:
+                    f = Model._meta.get_field(field_name)
+                    if isinstance(f, models.ForeignKey):
+                        if any(isinstance(rel_f, ImplicitRoleField) for rel_f in f.related_model._meta.get_fields()):
+                            is_rbac_update = True
+                            break
+                except django_exceptions.FieldDoesNotExist:
+                    is_rbac_update = True  # just to be conservative
+                    break
+                if isinstance(f, ImplicitRoleField):
+                    is_rbac_update = True
+                    break
+        else:
+            is_rbac_update = True
+        if not is_rbac_update:
+            return
+
         latest_instance = Model.objects.get(pk=instance.pk)
 
         # Avoid circular import

@@ -205,8 +205,9 @@ class PasswordFieldsModel(BaseModel):
                 setattr(self, field, '')
             else:
                 ask = self._password_field_allows_ask(field)
-                self.encrypt_field(field, ask)
-                self.mark_field_for_save(update_fields, field)
+                changed = self.encrypt_field(field, ask)
+                if changed:
+                    self.mark_field_for_save(update_fields, field)
         super(PasswordFieldsModel, self).save(*args, **kwargs)
         # After saving a new instance for the first time, set the password
         # fields and save again.
@@ -227,7 +228,10 @@ class PasswordFieldsModel(BaseModel):
 
     def encrypt_field(self, field, ask):
         encrypted = encrypt_field(self, field, ask)
+        if encrypted == getattr(self, field):
+            return False  # not changed
         setattr(self, field, encrypted)
+        return True
 
     def mark_field_for_save(self, update_fields, field):
         if field not in update_fields:
@@ -263,7 +267,10 @@ class HasEditsMixin(BaseModel):
             fields_set = self._get_editable_fields()
         for attr, val in self.__dict__.items():
             if attr in fields_set:
-                new_values[attr] = val
+                if isinstance(val, (dict, list)):
+                    new_values[attr] = val.copy()
+                else:
+                    new_values[attr] = val
         return new_values
 
     def _values_have_edits(self, new_values):

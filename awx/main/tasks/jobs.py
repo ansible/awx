@@ -446,16 +446,19 @@ class BaseTask(object):
         collections_info = os.path.join(artifact_dir, 'collections.json')
         ansible_version_file = os.path.join(artifact_dir, 'ansible_version.txt')
 
+        update_fields = []
         if os.path.exists(collections_info):
             with open(collections_info) as ee_json_info:
                 ee_collections_info = json.loads(ee_json_info.read())
                 instance.installed_collections = ee_collections_info
-                instance.save(update_fields=['installed_collections'])
+                update_fields.append('installed_collections')
         if os.path.exists(ansible_version_file):
             with open(ansible_version_file) as ee_ansible_info:
                 ansible_version_info = ee_ansible_info.readline()
                 instance.ansible_version = ansible_version_info
-                instance.save(update_fields=['ansible_version'])
+                update_fields.append('ansible_version')
+        if update_fields:
+            instance.save(update_fields=update_fields)
 
     def should_use_fact_cache(self):
         return False

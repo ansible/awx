@@ -55,8 +55,16 @@ from awx.main.models import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
 )
 from awx.main.constants import CENSOR_VALUE
-from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, get_current_apps
-from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
+from awx.main.utils.common import (
+    model_instance_diff,
+    get_allowed_fields,
+    model_to_dict,
+    camelcase_to_underscore,
+    get_current_apps,
+    ignore_inventory_computed_fields,
+    ignore_inventory_group_removal,
+    _inventory_updates,
+)
 from awx.main.tasks.system import update_inventory_computed_fields, handle_removed_image
 from awx.main.fields import (
     is_implicit_parent,
@@ -459,13 +467,19 @@ def activity_stream_update(sender, instance, **kwargs):
         return
     if not activity_stream_enabled:
         return
+
+    new = instance
+    serializer_mapping = model_serializer_mapping()
+    activity_stream_fields = get_allowed_fields(new, serializer_mapping)
+    if kwargs.get('update_fields'):
+        if not (set(activity_stream_fields) & set(kwargs['update_fields'])):
+            return  # if no summarizable fields are modified, exit early as optimization
     try:
         old = sender.objects.get(id=instance.id)
     except sender.DoesNotExist:
         return
 
-    new = instance
-    changes = model_instance_diff(old, new, model_serializer_mapping())
+    changes = model_instance_diff(old, new, serializer_mapping)
     if changes is None:
         return
     _type = type(instance)
