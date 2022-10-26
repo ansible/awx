@@ -9,7 +9,7 @@ aim_inputs = {
     'fields': [
         {
             'id': 'url',
-            'label': _('CyberArk AIM URL'),
+            'label': _('CyberArk CCP URL'),
             'type': 'string',
             'format': 'url',
         },
@@ -17,7 +17,7 @@ aim_inputs = {
             'id': 'webservice_id',
             'label': _('Web Service ID'),
             'type': 'string',
-            'help_text': _('The AIM Web Service ID. Default: AIMWebService'),
+            'help_text': _('The CCP Web Service ID. Leave blank to default to AIMWebService.'),
         },
         {
             'id': 'app_id',
