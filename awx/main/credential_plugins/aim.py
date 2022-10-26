@@ -70,12 +70,12 @@ def aim_backend(**kwargs):
     client_cert = kwargs.get('client_cert', None)
     client_key = kwargs.get('client_key', None)
     verify = kwargs['verify']
-    webservice_id = kwargs.get('webservice_id', None)
+    webservice_id = kwargs['webservice_id']
     app_id = kwargs['app_id']
     object_query = kwargs['object_query']
     object_query_format = kwargs['object_query_format']
     reason = kwargs.get('reason', None)
-    if webservice_id is None:
+    if webservice_id == '':
         webservice_id = 'AIMWebService'
 
     query_params = {
