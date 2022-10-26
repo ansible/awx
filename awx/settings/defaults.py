@@ -101,7 +101,7 @@ USE_L10N = True
 
 USE_TZ = True
 
-STATICFILES_DIRS = (os.path.join(BASE_DIR, 'ui', 'build', 'static'), os.path.join(BASE_DIR, 'static'))
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'ui', 'build', 'static'), os.path.join(BASE_DIR, 'static')]
 
 # Absolute filesystem path to the directory where static file are collected via
 # the collectstatic command.
