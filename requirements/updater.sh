@@ -1,15 +1,10 @@
 #!/bin/sh
 set -ue
 
-if [[ $OSTYPE == 'darwin'* ]]; then
-	requirements_in="$(python -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' ./requirements.in)"
-	requirements="$(python -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' ./requirements.txt)"
-	requirements_git="$(python -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' ./requirements_git.txt)"
-else
-	requirements_in="$(readlink -f ./requirements.in)"
-	requirements="$(readlink -f ./requirements.txt)"
-	requirements_git="$(readlink -f ./requirements_git.txt)"
-fi
+requirements_in="$(python -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' ./requirements.in)"
+requirements="$(python -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' ./requirements.txt)"
+requirements_git="$(python -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' ./requirements_git.txt)"
+
 pip_compile="pip-compile --no-header --quiet -r --allow-unsafe"
 
 _cleanup() {
