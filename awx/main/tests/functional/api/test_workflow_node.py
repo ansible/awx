@@ -264,7 +264,7 @@ class TestApprovalNodes:
         else:
             wa.save()
         assert wa.expires is None
-    def test_node_with_approve_self_approve_success(self, post, alice, job_template):
+
     def test_approve_self_node_approve_success(self, post, alice, job_template):
         wfjt = WorkflowJobTemplate.objects.create(name='foobar')
         wfjt.admin_role.members.add(alice)
