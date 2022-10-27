@@ -39,6 +39,10 @@ function ContainerGroupEdit({ instanceGroup }) {
         name: values.name,
         credential: values.credential ? values.credential.id : null,
         pod_spec_override: values.override ? values.pod_spec_override : null,
+        max_forks: values.max_forks ? values.max_forks : 0,
+        max_concurrent_jobs: values.max_concurrent_jobs
+          ? values.max_concurrent_jobs
+          : 0,
         is_container_group: true,
       });
       history.push(detailsIUrl);
