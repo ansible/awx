@@ -115,7 +115,10 @@ def main():
     result = module.post_endpoint(project['related']['update'])
 
     if result['status_code'] == 405:
-        module.fail_json(msg="Unable to trigger a project update because the project scm_type ("+project['scm_type']+") does not support it.", response=result)
+        module.fail_json(
+            msg="Unable to trigger a project update because the project scm_type ({0}) does not support it.".format(project['scm_type']),
+            response=result
+        )
     elif result['status_code'] != 202:
         module.fail_json(msg="Failed to update project, see response for details", response=result)
 
