@@ -29,6 +29,10 @@ function ContainerGroupAdd() {
     try {
       const { data: response } = await InstanceGroupsAPI.create({
         name: values.name,
+        max_forks: values.max_forks ? values.max_forks : 0,
+        max_concurrent_jobs: values.max_concurrent_jobs
+          ? values.max_concurrent_jobs
+          : 0,
         credential: values?.credential?.id,
         pod_spec_override: values.override
           ? getPodSpecValue(values.pod_spec_override)

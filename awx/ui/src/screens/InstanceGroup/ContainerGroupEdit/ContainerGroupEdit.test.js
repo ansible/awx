@@ -34,6 +34,8 @@ const instanceGroup = {
   policy_instance_percentage: 0,
   policy_instance_minimum: 0,
   policy_instance_list: [],
+  max_concurrent_jobs: 0,
+  max_forks: 0,
   pod_spec_override: '',
   summary_fields: {
     credential: {
@@ -144,6 +146,8 @@ describe('<ContainerGroupEdit/>', () => {
       ...updatedInstanceGroup,
       credential: 12,
       pod_spec_override: null,
+      max_concurrent_jobs: 0,
+      max_forks: 0,
       is_container_group: true,
     });
     expect(history.location.pathname).toEqual(

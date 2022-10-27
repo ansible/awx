@@ -42,6 +42,26 @@ function InstanceGroupFormFields() {
           assigned to this group when new instances come online.`}
         validate={minMaxValue(0, 100)}
       />
+      <FormField
+        id="instance-group-max-concurrent-jobs"
+        label={t`Max concurrent jobs`}
+        name="max_concurrent_jobs"
+        type="number"
+        min="0"
+        validate={minMaxValue(0, 2147483647)}
+        tooltip={t`Maximum number of jobs to run concurrently on this group.
+          Zero means no limit will be enforced.`}
+      />
+      <FormField
+        id="instance-group-max-forks"
+        label={t`Max forks`}
+        name="max_forks"
+        type="number"
+        min="0"
+        validate={minMaxValue(0, 2147483647)}
+        tooltip={t`Maximum number of forks to allow across all jobs running concurrently on this group.
+          Zero means no limit will be enforced.`}
+      />
     </>
   );
 }
@@ -57,6 +77,8 @@ function InstanceGroupForm({
     name: instanceGroup.name || '',
     policy_instance_minimum: instanceGroup.policy_instance_minimum || 0,
     policy_instance_percentage: instanceGroup.policy_instance_percentage || 0,
+    max_concurrent_jobs: instanceGroup.max_concurrent_jobs || 0,
+    max_forks: instanceGroup.max_forks || 0,
   };
   return (
     <Formik
