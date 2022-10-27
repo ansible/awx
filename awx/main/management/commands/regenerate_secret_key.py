@@ -32,8 +32,14 @@ class Command(BaseCommand):
     def handle(self, **options):
         self.old_key = settings.SECRET_KEY
         custom_key = os.environ.get("TOWER_SECRET_KEY")
-        if options.get("use_custom_key") and custom_key:
-            self.new_key = custom_key
+        if options.get("use_custom_key"):
+            if custom_key:
+                self.new_key = custom_key
+            else:
+                print("Use custom key was specified but the env var TOWER_SECRET_KEY was not available")
+                import sys
+
+                sys.exit(1)
         else:
             self.new_key = base64.encodebytes(os.urandom(33)).decode().rstrip()
         self._notification_templates()
