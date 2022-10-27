@@ -13,21 +13,13 @@ jobs:
       packages: write
       contents: read
     steps:
-      - name: Write PR body to a file
-        run: |
-          cat >> pr.body << __SOME_RANDOM_PR_EOF__
-          ${{ github.event.pull_request.body }}
-          __SOME_RANDOM_PR_EOF__
-
-      - name: Display the received body for troubleshooting
-        run: cat pr.body
-
-      # We want to write these out individually just incase the options were joined on a single line
       - name: Check for each of the lines
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
         run: |
-          grep "Bug, Docs Fix or other nominal change" pr.body > Z
-          grep "New or Enhanced Feature" pr.body > Y
-          grep "Breaking Change" pr.body > X
+          echo $PR_BODY | grep "Bug, Docs Fix or other nominal change" > Z
+          echo $PR_BODY | grep "New or Enhanced Feature" > Y
+          echo $PR_BODY | grep "Breaking Change" > X
           exit 0
         # We exit 0 and set the shell to prevent the returns from the greps from failing this step
         # See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#exit-codes-and-error-action-preference
