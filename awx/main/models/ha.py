@@ -394,6 +394,8 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
 
     @property
     def capacity(self):
+        if self.is_container_group:
+            return self.max_forks
         return sum(inst.capacity for inst in self.instances.all())
 
     @property

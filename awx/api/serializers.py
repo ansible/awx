@@ -5040,12 +5040,10 @@ class InstanceHealthCheckSerializer(BaseSerializer):
 class InstanceGroupSerializer(BaseSerializer):
 
     show_capabilities = ['edit', 'delete']
-
+    capacity = serializers.SerializerMethodField()
     consumed_capacity = serializers.SerializerMethodField()
     percent_capacity_remaining = serializers.SerializerMethodField()
-    jobs_running = serializers.IntegerField(
-        help_text=_('Count of jobs in the running or waiting state that ' 'are targeted for this instance group'), read_only=True
-    )
+    jobs_running = serializers.SerializerMethodField()
     jobs_total = serializers.IntegerField(help_text=_('Count of all jobs that target this instance group'), read_only=True)
     instances = serializers.SerializerMethodField()
     is_container_group = serializers.BooleanField(
@@ -5206,14 +5204,24 @@ class InstanceGroupSerializer(BaseSerializer):
         ig_mgr = self.get_ig_mgr()
         return ig_mgr.get_consumed_capacity(obj.name)
 
-    def get_percent_capacity_remaining(self, obj):
-        if not obj.capacity:
-            return 0.0
+    def get_capacity(self, obj):
         ig_mgr = self.get_ig_mgr()
-        return float("{0:.2f}".format((float(ig_mgr.get_remaining_capacity(obj.name)) / (float(obj.capacity))) * 100))
+        return ig_mgr.get_capacity(obj.name)
+
+    def get_percent_capacity_remaining(self, obj):
+        capacity = self.get_capacity(obj)
+        if not capacity:
+            return 0.0
+        consumed_capacity = self.get_consumed_capacity(obj)
+        return float("{0:.2f}".format(((float(capacity) - float(consumed_capacity)) / (float(capacity))) * 100))
 
     def get_instances(self, obj):
-        return obj.instances.count()
+        ig_mgr = self.get_ig_mgr()
+        return len(ig_mgr.get_instances(obj.name))
+
+    def get_jobs_running(self, obj):
+        ig_mgr = self.get_ig_mgr()
+        return ig_mgr.get_jobs_running(obj.name)
 
 
 class ActivityStreamSerializer(BaseSerializer):
