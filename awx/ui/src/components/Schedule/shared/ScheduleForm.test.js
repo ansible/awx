@@ -900,6 +900,36 @@ describe('<ScheduleForm />', () => {
       );
     });
 
+    test('should create schedule with the same start and end date provided that the end date is at a later time', async () => {
+      const today = DateTime.now().toFormat('yyyy-LL-dd');
+      const laterTime = DateTime.now().plus({ hours: 1 }).toFormat('h:mm a');
+      await act(async () => {
+        wrapper.find('DatePicker[aria-label="End date"]').prop('onChange')(
+          today,
+          new Date(today)
+        );
+      });
+      wrapper.update();
+      expect(
+        wrapper
+          .find('FormGroup[data-cy="schedule-End date/time"]')
+          .prop('helperTextInvalid')
+      ).toBe(
+        'Please select an end date/time that comes after the start date/time.'
+      );
+      await act(async () => {
+        wrapper.find('TimePicker[aria-label="End time"]').prop('onChange')(
+          laterTime
+        );
+      });
+      wrapper.update();
+      expect(
+        wrapper
+          .find('FormGroup[data-cy="schedule-End date/time"]')
+          .prop('helperTextInvalid')
+      ).toBe(undefined);
+    });
+
     test('error shown when on day number is not between 1 and 31', async () => {
       await act(async () => {
         wrapper.find('FrequencySelect#schedule-frequency').invoke('onChange')([
