@@ -8,6 +8,10 @@
     state: 'directory'
     mode: '0700'
 
+- name: debug minikube_setup
+  debug:
+    var: minikube_setup
+
 # Linux block
 - block:
     - name: Download Minikube
@@ -24,6 +28,7 @@
   when:
     - ansible_architecture == "x86_64"
     - ansible_system == "Linux"
+    - minikube_setup | default(False) | bool
 
 # MacOS block
 - block:
@@ -41,25 +46,29 @@
   when:
     - ansible_architecture == "x86_64"
     - ansible_system == "Darwin"
+    - minikube_setup | default(False) | bool
 
-- name: Starting Minikube
-  shell: "{{ sources_dest }}/minikube start --driver={{ driver }} --install-addons=true --addons={{ addons | join(',') }}"
-  register: minikube_stdout
+- block:
+    - name: Starting Minikube
+      shell: "{{ sources_dest }}/minikube start --driver={{ driver }} --install-addons=true --addons={{ addons | join(',') }}"
+      register: minikube_stdout
 
-- name: Enable Ingress Controller on Minikube
-  shell: "{{ sources_dest }}/minikube addons enable ingress"
+    - name: Enable Ingress Controller on Minikube
+      shell: "{{ sources_dest }}/minikube addons enable ingress"
+      when:
+        - minikube_stdout.rc == 0
+      register: _minikube_ingress
+      ignore_errors: true
+
+    - name: Show Minikube Ingress known-issue 7332 warning
+      pause:
+        seconds: 5
+        prompt: "The Minikube Ingress addon has been disabled since it looks like you are hitting https://github.com/kubernetes/minikube/issues/7332"
+      when:
+        - '"minikube/issues/7332" in _minikube_ingress.stderr'
+        - ansible_system == "Darwin"
   when:
-    - minikube_stdout.rc == 0
-  register: _minikube_ingress
-  ignore_errors: true
-
-- name: Show Minikube Ingress known-issue 7332 warning
-  pause:
-    seconds: 5
-    prompt: "The Minikube Ingress addon has been disabled since it looks like you are hitting https://github.com/kubernetes/minikube/issues/7332"
-  when:
-    - '"minikube/issues/7332" in _minikube_ingress.stderr'
-    - ansible_system == "Darwin"
+    - minikube_setup | default(False) | bool
 
 - name: Create ServiceAccount and clusterRoleBinding
   k8s:
