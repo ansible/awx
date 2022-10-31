@@ -1,28 +1,14 @@
 # Releasing AWX (and awx-operator)
 
-The release process for AWX is completely automated as of version 19.5.0.
+The release process for AWX is almost completely automated as of version 19.5.0 it just needs a human to string a couple items together. 
 
 If you need to revert a release, please refer to the [Revert a Release](#revert-a-release) section.
-## Get latest release version and list of new work
-
-1. Open the main project page for [AWX](https://github.com/ansible/awx/releases) and [AWX Operator](https://github.com/ansible/awx-operator/releases).
-
-Find the latest releases of the projects on the right hand side of the screen:
-
-![Latest Release](img/latest-release.png)
-
-2. Open the compare screen for the two projects [AWX](https://github.com/ansible/awx/compare) and [AWX Operator](https://github.com/ansible/awx-operator/compare).
-In the two dropdowns near the top of the page leave the `compare` menu at devel and select the drop down for `base` and then select `tags` and finally select the latest release from step 1:
-
-![PR Compare Screen](img/compare-screen.png)
-
-The page will now automatically update with a list of PRs that are in `AWX/devel` but not in the last release.
-
-![PR Compare List](img/pr_compare_list.png)
 
 ## Select the next release version
 
-Use this list of PRs to decide if this is a X-stream (major) release, Y-stream (minor) release, or a Z-stream (patch) release. Use [semver](https://semver.org/#summary) to help determine what kind of release is needed.
+Our release number for AWX uses [semver](https://semver.org/#summary) in the form of X.Y.Z
+
+Based on the content of the PRs included in a release we need to decide if this is a X-stream (major) release, Y-stream (minor) release, or a Z-stream (patch) release.
 
 Indicators of a Z-stream release:
 
@@ -43,6 +29,110 @@ If the latest release of `AWX` is 19.5.0:
 - Z-stream release version will be 19.5.1.
 
 With very few exceptions the new `AWX Operator` release will always be a Y-stream release.
+
+We have a script which will scan the commits and their associated PRs and key word indicators in the PR body to help indicate our next release number.
+
+This script is `tools/scripts/get_next_release_version.py`. Before running this script you need to create a GitHub Token to crawl the API with. To do this:
+ 1. Log into GitHub with your account.
+ 2. In the upper right, click on your avatar and select settings from the dropdown.
+ 3. At the bottom of the left hand menu click `Developer Settings`.
+ 4. At the bottom of this menu click `Personal access tokens` and then `Tokens (classic)` (if you have beta features enabled).
+ 5. On the token page click `Create new token` and then `Generate new token (classic)`.
+ 6. Authenticate (if required).
+ 7. On the new token screen give it a note and an expiration date and then click `Generate token` at the bottom of the screen (it only needs the default read permission).
+ 8. Create a file called `.github_creds` the script looks for this file wherever you run it from. For example, I put it in the root of my awx branch folder and then run the script like `./tools/scripts/get_next_release_version.py`.
+ 9. Run the script it will give you output like:
+ ```
+./tools/scripts/get_next_release_version.py 
+Loading credentials
+Getting current versions
+    awx: 21.7.0
+    awx-operator: 0.30.0
+PR https://github.com/ansible/awx/pull/12736 votes y
+PR https://github.com/ansible/awx/pull/12942 votes z
+PR https://github.com/ansible/awx/pull/12949 votes z
+...
+PR https://github.com/ansible/awx/pull/13062 votes z
+https://github.com/ansible/awx/compare/21.7.0...devel
+awx devel is 98 commit(s) ahead of release 21.7.0
+
+All commits voted, the release type suggestion is y
+
+PR https://github.com/ansible/awx-operator/pull/1068 votes x
+PR https://github.com/ansible/awx-operator/pull/1069 votes z
+...
+PR https://github.com/ansible/awx-operator/pull/1098 votes y
+PR https://github.com/ansible/awx-operator/pull/1103 votes z
+https://github.com/ansible/awx-operator/compare/0.30.0...devel
+awx-operator devel is 21 commit(s) ahead of release 0.30.0
+
+All commits voted, the release type suggestion is x
+
+
+
+Next recommended releases:
+  AWX: 21.8.0
+  Operator: 1.0.0
+
+
+Enter the next awx release number (21.8.0): 
+```
+ 10. You can review the PRs as needed (recommended for X or non-votes). If you agree with the selected version you can press enter at the prompts or you can override the release numbers at the prompts. The script will then prompt you for any `known issues`:
+ ```
+ Enter any known issues (one per line, empty line to end)
+ ```
+ 11. Once you enter in the versions and known issues the script will generate the body for the IRC and mailing list messages:
+ ```
+ Enter any known issues (one per line, empty line to end
+
+
+Bullhorn/irc list message:
+
+@newsbot We're happy to announce that the next release of AWX, version 21.8.0 is now available!
+Some notable features include:
+* Adding ppc64le support parameters
+* Shortcut Instance.objects.me when possible
+...
+
+In addition AWX Operator version 1.0.0 has also been released!
+Some notable features include:
+* Change no_log type to boolean
+* Enable configuration of route and ingress api versions
+
+Please see the releases pages for more details:
+AWX: [https://github.com/ansible/awx/releases/tag/21.8.0](https://github.com/ansible/awx/releases/tag/21.8.0)
+Operator: [https://github.com/ansible/awx-operator/releases/tag/1.0.0](https://github.com/ansible/awx-operator/releases/tag/1.0.0)
+
+
+
+
+Mailing list message:
+
+Subject: Announcing AWX 21.8.0 and AWX-Operator 1.0.0
+Body:
+Hi all,
+
+We're happy to announce that the next release of AWX, version 21.8.0 is now available!
+Some notable features include:
+* Adding ppc64le support parameters
+* Shortcut Instance.objects.me when possible
+...
+
+In addition AWX Operator version 1.0.0 has also been released!
+Some notable features include:
+* Change no_log type to boolean
+* Enable configuration of route and ingress api versions
+
+Please see the releases pages for more details:
+AWX: https://github.com/ansible/awx/releases/tag/21.8.0
+Operator: https://github.com/ansible/awx-operator/releases/tag/1.0.0
+
+
+
+-The AWX team.
+```
+
+**NOTE**: You should check the `notable features` sections of these messages to ensure they make sense. Massage as needed.
 
 ## Stage the release
 
