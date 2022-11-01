@@ -52,6 +52,47 @@ const hostEvent = {
   },
 };
 
+const partialHostEvent = {
+  changed: true,
+  event: 'runner_on_ok',
+  event_data: {
+    host: 'foo',
+    play: 'all',
+    playbook: 'run_command.yml',
+    res: {
+      ansible_loop_var: 'item',
+      changed: true,
+      item: '1',
+      msg: 'This is a debug message: 1',
+      stdout:
+        '              total        used        free      shared  buff/cache   available\nMem:           7973        3005         960          30        4007        4582\nSwap:          1023           0        1023',
+      stderr: 'problems',
+      cmd: ['free', '-m'],
+      stderr_lines: [],
+      stdout_lines: [
+        '              total        used        free      shared  buff/cache   available',
+        'Mem:           7973        3005         960          30        4007        4582',
+        'Swap:          1023           0        1023',
+      ],
+    },
+    task: 'command',
+    task_action: 'command',
+  },
+  event_display: 'Host OK',
+  event_level: 3,
+  failed: false,
+  host: 1,
+  id: 123,
+  job: 4,
+  play: 'all',
+  playbook: 'run_command.yml',
+  stdout: `stdout: "[0;33mchanged: [localhost] => {"changed": true, "cmd": ["free", "-m"], "delta": "0:00:01.479609", "end": "2019-09-10 14:21:45.469533", "rc": 0, "start": "2019-09-10 14:21:43.989924", "stderr": "", "stderr_lines": [], "stdout": "              total        used        free      shared  buff/cache   available\nMem:           7973        3005         960          30        4007        4582\nSwap:          1023           0        1023", "stdout_lines": ["              total        used        free      shared  buff/cache   available", "Mem:           7973        3005         960          30        4007        4582", "Swap:          1023           0        1023"]}[0m"
+  `,
+  task: 'command',
+  type: 'job_event',
+  url: '/api/v2/job_events/123/',
+};
+
 /*
 Some libraries return a list of string in stdout
 Example: https://github.com/ansible-collections/cisco.ios/blob/main/plugins/modules/ios_command.py#L124-L128
@@ -130,6 +171,13 @@ describe('HostEventModal', () => {
   test('initially renders successfully', () => {
     const wrapper = shallow(
       <HostEventModal hostEvent={hostEvent} onClose={() => {}} />
+    );
+    expect(wrapper).toHaveLength(1);
+  });
+
+  test('renders successfully with partial data', () => {
+    const wrapper = shallow(
+      <HostEventModal hostEvent={partialHostEvent} onClose={() => {}} />
     );
     expect(wrapper).toHaveLength(1);
   });
