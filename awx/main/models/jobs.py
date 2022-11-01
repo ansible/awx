@@ -15,6 +15,7 @@ from urllib.parse import urljoin
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.query import QuerySet
 
 # from django.core.cache import cache
 from django.utils.encoding import smart_str
@@ -844,22 +845,30 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     def get_notification_friendly_name(self):
         return "Job"
 
-    def _get_inventory_hosts(self, only=['name', 'ansible_facts', 'ansible_facts_modified', 'modified', 'inventory_id']):
+    def _get_inventory_hosts(self, only=('name', 'ansible_facts', 'ansible_facts_modified', 'modified', 'inventory_id'), **filters):
+        """Return value is an iterable for the relevant hosts for this job"""
         if not self.inventory:
             return []
         host_queryset = self.inventory.hosts.only(*only)
-        return self.inventory.get_sliced_hosts(host_queryset, self.job_slice_number, self.job_slice_count)
+        if filters:
+            host_queryset = host_queryset.filter(**filters)
+        host_queryset = self.inventory.get_sliced_hosts(host_queryset, self.job_slice_number, self.job_slice_count)
+        if isinstance(host_queryset, QuerySet):
+            return host_queryset.iterator()
+        return host_queryset
 
     def start_job_fact_cache(self, destination, modification_times, timeout=None):
         self.log_lifecycle("start_job_fact_cache")
         os.makedirs(destination, mode=0o700)
-        hosts = self._get_inventory_hosts()
+
         if timeout is None:
             timeout = settings.ANSIBLE_FACT_CACHE_TIMEOUT
         if timeout > 0:
             # exclude hosts with fact data older than `settings.ANSIBLE_FACT_CACHE_TIMEOUT seconds`
             timeout = now() - datetime.timedelta(seconds=timeout)
-            hosts = hosts.filter(ansible_facts_modified__gte=timeout)
+            hosts = self._get_inventory_hosts(ansible_facts_modified__gte=timeout)
+        else:
+            hosts = self._get_inventory_hosts()
         for host in hosts:
             filepath = os.sep.join(map(str, [destination, host.name]))
             if not os.path.realpath(filepath).startswith(destination):
