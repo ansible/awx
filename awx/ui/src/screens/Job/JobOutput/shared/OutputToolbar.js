@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-
+import { DateTime, Duration } from 'luxon';
 import { t } from '@lingui/macro';
 import { bool, shape, func } from 'prop-types';
 import {
@@ -41,18 +41,18 @@ const Wrapper = styled.div`
   flex-flow: row wrap;
   font-size: 14px;
 `;
+const calculateElapsed = (started) => {
+  const now = DateTime.now();
+  const duration = now
+    .diff(DateTime.fromISO(`${started}`), [
+      'milliseconds',
+      'seconds',
+      'minutes',
+      'hours',
+    ])
+    .toObject();
 
-const toHHMMSS = (elapsed) => {
-  const sec_num = parseInt(elapsed, 10);
-  const hours = Math.floor(sec_num / 3600);
-  const minutes = Math.floor(sec_num / 60) % 60;
-  const seconds = sec_num % 60;
-
-  const stampHours = hours < 10 ? `0${hours}` : hours;
-  const stampMinutes = minutes < 10 ? `0${minutes}` : minutes;
-  const stampSeconds = seconds < 10 ? `0${seconds}` : seconds;
-
-  return `${stampHours}:${stampMinutes}:${stampSeconds}`;
+  return Duration.fromObject({ ...duration }).toFormat('hh:mm:ss');
 };
 
 const OUTPUT_NO_COUNT_JOB_TYPES = [
@@ -62,17 +62,34 @@ const OUTPUT_NO_COUNT_JOB_TYPES = [
 ];
 
 const OutputToolbar = ({ job, onDelete, isDeleteDisabled, jobStatus }) => {
+  const [activeJobElapsedTime, setActiveJobElapsedTime] = useState('00:00:00');
   const hideCounts = OUTPUT_NO_COUNT_JOB_TYPES.includes(job.type);
 
   const playCount = job?.playbook_counts?.play_count;
   const taskCount = job?.playbook_counts?.task_count;
   const darkCount = job?.host_status_counts?.dark;
   const failureCount = job?.host_status_counts?.failures;
-  const totalHostCount = Object.keys(job?.host_status_counts || {}).reduce(
-    (sum, key) => sum + job?.host_status_counts[key],
-    0
-  );
+  const totalHostCount = job?.host_status_counts
+    ? Object.keys(job.host_status_counts || {}).reduce(
+        (sum, key) => sum + job.host_status_counts[key],
+        0
+      )
+    : 0;
   const { me } = useConfig();
+
+  useEffect(() => {
+    let secTimer;
+    if (job.finished) {
+      return () => clearInterval(secTimer);
+    }
+
+    secTimer = setInterval(() => {
+      const elapsedTime = calculateElapsed(job.started);
+      setActiveJobElapsedTime(elapsedTime);
+    }, 1000);
+
+    return () => clearInterval(secTimer);
+  }, [job.started, job.finished]);
 
   return (
     <Wrapper>
@@ -122,7 +139,13 @@ const OutputToolbar = ({ job, onDelete, isDeleteDisabled, jobStatus }) => {
       <BadgeGroup aria-label={t`Elapsed Time`}>
         <div>{t`Elapsed`}</div>
         <Tooltip content={t`Elapsed time that the job ran`}>
-          <Badge isRead>{toHHMMSS(job.elapsed)}</Badge>
+          <Badge isRead>
+            {job.finished
+              ? Duration.fromObject({ seconds: job.elapsed }).toFormat(
+                  'hh:mm:ss'
+                )
+              : activeJobElapsedTime}
+          </Badge>
         </Tooltip>
       </BadgeGroup>
       {['pending', 'waiting', 'running'].includes(jobStatus) &&

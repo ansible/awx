@@ -104,7 +104,7 @@
   "project": 6,
   "playbook": "chatty_tasks.yml",
   "scm_branch": "main",
-  "forks": 0,
+  "forks": 42,
   "limit": "",
   "verbosity": 0,
   "extra_vars": "{\"num_messages\": 94}",
@@ -168,7 +168,7 @@
       "ANSIBLE_SSH_CONTROL_PATH_DIR": "/tmp/awx_2_a4b1afiw/cp",
       "ANSIBLE_STDOUT_CALLBACK": "awx_display"
   },
-  "job_explanation": "",
+  "job_explanation": "Job explanation placeholder",
   "execution_node": "awx",
   "controller_node": "",
   "result_traceback": "",

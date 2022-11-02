@@ -31,7 +31,6 @@ describe('<InventorySourceEdit />', () => {
     source_vars: '---↵',
     update_cache_timeout: 0,
     update_on_launch: false,
-    update_on_project_update: false,
     verbosity: 1,
   };
   const mockInventory = {

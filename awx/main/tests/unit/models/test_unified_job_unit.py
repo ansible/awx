@@ -2,6 +2,7 @@ import pytest
 from unittest import mock
 
 from awx.main.models import UnifiedJob, UnifiedJobTemplate, WorkflowJob, WorkflowJobNode, WorkflowApprovalTemplate, Job, User, Project, JobTemplate, Inventory
+from awx.main.constants import JOB_VARIABLE_PREFIXES
 
 
 def test_incorrectly_formatted_variables():
@@ -21,6 +22,10 @@ def test_unified_job_workflow_attributes():
         assert job.workflow_job_id == 1
 
 
+def mock_on_commit(f):
+    f()
+
+
 @pytest.fixture
 def unified_job(mocker):
     mocker.patch.object(UnifiedJob, 'can_cancel', return_value=True)
@@ -29,12 +34,14 @@ def unified_job(mocker):
     j.cancel_flag = None
     j.save = mocker.MagicMock()
     j.websocket_emit_status = mocker.MagicMock()
+    j.fallback_cancel = mocker.MagicMock()
     return j
 
 
 def test_cancel(unified_job):
 
-    unified_job.cancel()
+    with mock.patch('awx.main.models.unified_jobs.connection.on_commit', wraps=mock_on_commit):
+        unified_job.cancel()
 
     assert unified_job.cancel_flag is True
     assert unified_job.status == 'canceled'
@@ -43,16 +50,23 @@ def test_cancel(unified_job):
     # Some more thought may want to go into only emitting canceled if/when the job record
     # status is changed to canceled. Unlike, currently, where it's emitted unconditionally.
     unified_job.websocket_emit_status.assert_called_with("canceled")
-    unified_job.save.assert_called_with(update_fields=['cancel_flag', 'start_args', 'status'])
+    assert [(args, kwargs) for args, kwargs in unified_job.save.call_args_list] == [
+        ((), {'update_fields': ['cancel_flag', 'start_args']}),
+        ((), {'update_fields': ['status']}),
+    ]
 
 
 def test_cancel_job_explanation(unified_job):
     job_explanation = 'giggity giggity'
 
-    unified_job.cancel(job_explanation=job_explanation)
+    with mock.patch('awx.main.models.unified_jobs.connection.on_commit'):
+        unified_job.cancel(job_explanation=job_explanation)
 
     assert unified_job.job_explanation == job_explanation
-    unified_job.save.assert_called_with(update_fields=['cancel_flag', 'start_args', 'status', 'job_explanation'])
+    assert [(args, kwargs) for args, kwargs in unified_job.save.call_args_list] == [
+        ((), {'update_fields': ['cancel_flag', 'start_args', 'job_explanation']}),
+        ((), {'update_fields': ['status']}),
+    ]
 
 
 def test_organization_copy_to_jobs():
@@ -83,26 +97,18 @@ class TestMetaVars:
     def test_job_metavars(self):
         maker = User(username='joe', pk=47, id=47)
         inv = Inventory(name='example-inv', id=45)
-        assert Job(name='fake-job', pk=42, id=42, launch_type='manual', created_by=maker, inventory=inv).awx_meta_vars() == {
-            'tower_job_id': 42,
-            'awx_job_id': 42,
-            'tower_job_launch_type': 'manual',
-            'awx_job_launch_type': 'manual',
-            'awx_user_name': 'joe',
-            'tower_user_name': 'joe',
-            'awx_user_email': '',
-            'tower_user_email': '',
-            'awx_user_first_name': '',
-            'tower_user_first_name': '',
-            'awx_user_last_name': '',
-            'tower_user_last_name': '',
-            'awx_user_id': 47,
-            'tower_user_id': 47,
-            'tower_inventory_id': 45,
-            'awx_inventory_id': 45,
-            'tower_inventory_name': 'example-inv',
-            'awx_inventory_name': 'example-inv',
-        }
+        result_hash = {}
+        for name in JOB_VARIABLE_PREFIXES:
+            result_hash['{}_job_id'.format(name)] = 42
+            result_hash['{}_job_launch_type'.format(name)] = 'manual'
+            result_hash['{}_user_name'.format(name)] = 'joe'
+            result_hash['{}_user_email'.format(name)] = ''
+            result_hash['{}_user_first_name'.format(name)] = ''
+            result_hash['{}_user_last_name'.format(name)] = ''
+            result_hash['{}_user_id'.format(name)] = 47
+            result_hash['{}_inventory_id'.format(name)] = 45
+            result_hash['{}_inventory_name'.format(name)] = 'example-inv'
+        assert Job(name='fake-job', pk=42, id=42, launch_type='manual', created_by=maker, inventory=inv).awx_meta_vars() == result_hash
 
     def test_project_update_metavars(self):
         data = Job(
@@ -113,7 +119,8 @@ class TestMetaVars:
             project=Project(name='jobs-sync', scm_revision='12345444'),
             job_template=JobTemplate(name='jobs-jt', id=92, pk=92),
         ).awx_meta_vars()
-        assert data['awx_project_revision'] == '12345444'
-        assert 'tower_job_template_id' in data
-        assert data['tower_job_template_id'] == 92
-        assert data['tower_job_template_name'] == 'jobs-jt'
+        for name in JOB_VARIABLE_PREFIXES:
+            assert data['{}_project_revision'.format(name)] == '12345444'
+            assert '{}_job_template_id'.format(name) in data
+            assert data['{}_job_template_id'.format(name)] == 92
+            assert data['{}_job_template_name'.format(name)] == 'jobs-jt'

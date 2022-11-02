@@ -98,6 +98,7 @@ function ManagementJob({ setBreadcrumb }) {
           {t`Back to management jobs`}
         </>
       ),
+      isBackButton: true,
     },
   ];
 
@@ -130,7 +131,7 @@ function ManagementJob({ setBreadcrumb }) {
             {error?.response?.status === 404 && (
               <span>
                 {t`Management job not found.`}
-                {''}
+
                 <Link to={basePath}>{t`View all management jobs`}</Link>
               </span>
             )}
@@ -179,8 +180,6 @@ function ManagementJob({ setBreadcrumb }) {
                 loadSchedules={loadSchedules}
                 loadScheduleOptions={loadScheduleOptions}
                 setBreadcrumb={setBreadcrumb}
-                launchConfig={{}}
-                surveyConfig={{}}
               />
             </Route>
           ) : null}

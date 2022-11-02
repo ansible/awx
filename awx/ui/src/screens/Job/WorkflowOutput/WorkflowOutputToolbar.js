@@ -11,6 +11,7 @@ import {
 } from '@patternfly/react-icons';
 import styled from 'styled-components';
 import StatusLabel from 'components/StatusLabel';
+import JobCancelButton from 'components/JobCancelButton';
 import {
   WorkflowDispatchContext,
   WorkflowStateContext,
@@ -61,7 +62,6 @@ const ActionButton = styled(Button)`
     color: white;
   }
 `;
-
 function WorkflowOutputToolbar({ job }) {
   const dispatch = useContext(WorkflowDispatchContext);
   const history = useHistory();
@@ -80,6 +80,18 @@ function WorkflowOutputToolbar({ job }) {
         <StatusLabel status={job.status} />
       </ToolbarJob>
       <ToolbarActions>
+        {['new', 'pending', 'waiting', 'running'].includes(job?.status) &&
+        job?.summary_fields?.user_capabilities?.start ? (
+          <JobCancelButton
+            style={{ margin: '0px 6px', padding: '6px 10px' }}
+            job={job}
+            errorTitle={t`Job Cancel Error`}
+            title={t`Cancel ${job.name}`}
+            errorMessage={t`Failed to cancel ${job.name}`}
+            showIconButton
+          />
+        ) : null}
+
         <ActionButton
           ouiaId="edit-workflow"
           aria-label={t`Edit workflow`}

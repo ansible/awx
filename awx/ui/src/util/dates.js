@@ -27,7 +27,7 @@ export function secondsToDays(seconds) {
 
 export function timeOfDay() {
   const dateTime = DateTime.local();
-  return dateTime.toFormat('hh:mm a');
+  return dateTime.toFormat('hh:mm:ss:ms a');
 }
 
 export function dateToInputDateTime(dt, tz = null) {

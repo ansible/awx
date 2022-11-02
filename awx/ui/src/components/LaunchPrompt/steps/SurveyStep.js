@@ -31,16 +31,18 @@ function SurveyStep({ surveyConfig }) {
     float: NumberField,
   };
   return (
-    <Form
-      onSubmit={(e) => {
-        e.preventDefault();
-      }}
-    >
-      {surveyConfig.spec.map((question) => {
-        const Field = fieldTypes[question.type];
-        return <Field key={question.variable} question={question} />;
-      })}
-    </Form>
+    <div data-cy="survey-prompts">
+      <Form
+        onSubmit={(e) => {
+          e.preventDefault();
+        }}
+      >
+        {surveyConfig.spec.map((question) => {
+          const Field = fieldTypes[question.type];
+          return <Field key={question.variable} question={question} />;
+        })}
+      </Form>
+    </div>
   );
 }
 SurveyStep.propTypes = {
@@ -122,7 +124,7 @@ function MultipleChoiceField({ question }) {
           setIsOpen(false);
         }}
         selections={field.value}
-        variant={SelectVariant.single}
+        variant={SelectVariant.typeahead}
         id={id}
         ouiaId={`single-survey-question-${question.variable}`}
         isOpen={isOpen}

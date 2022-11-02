@@ -5,7 +5,7 @@ import InstanceGroupsMixin from '../mixins/InstanceGroups.mixin';
 class Organizations extends InstanceGroupsMixin(NotificationsMixin(Base)) {
   constructor(http) {
     super(http);
-    this.baseUrl = '/api/v2/organizations/';
+    this.baseUrl = 'api/v2/organizations/';
   }
 
   readAccessList(id, params) {
@@ -76,6 +76,10 @@ class Organizations extends InstanceGroupsMixin(NotificationsMixin(Base)) {
       id: credentialId,
       disassociate: true,
     });
+  }
+
+  readAdmins(id, params) {
+    return this.http.get(`${this.baseUrl}${id}/admins/`, { params });
   }
 }
 

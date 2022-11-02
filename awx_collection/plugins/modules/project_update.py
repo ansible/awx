@@ -41,7 +41,7 @@ options:
       description:
         - The interval to request an update from the controller.
       required: False
-      default: 1
+      default: 2
       type: float
     timeout:
       description:
@@ -86,7 +86,7 @@ def main():
         name=dict(required=True, aliases=['project']),
         organization=dict(),
         wait=dict(default=True, type='bool'),
-        interval=dict(default=1.0, type='float'),
+        interval=dict(default=2.0, type='float'),
         timeout=dict(default=None, type='int'),
     )
 
@@ -114,7 +114,12 @@ def main():
     # Update the project
     result = module.post_endpoint(project['related']['update'])
 
-    if result['status_code'] != 202:
+    if result['status_code'] == 405:
+        module.fail_json(
+            msg="Unable to trigger a project update because the project scm_type ({0}) does not support it.".format(project['scm_type']),
+            response=result
+        )
+    elif result['status_code'] != 202:
         module.fail_json(msg="Failed to update project, see response for details", response=result)
 
     module.json_output['changed'] = True

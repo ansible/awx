@@ -1,4 +1,4 @@
-Copyright (c) 2001-2016
+Copyright (c) 2001-2022
 Allen Short
 Amber Hawkie Brown
 Andrew Bennetts
@@ -10,6 +10,7 @@ Benjamin Bruheim
 Bob Ippolito
 Canonical Limited
 Christopher Armstrong
+Ciena Corporation
 David Reid
 Divmod Inc.
 Donovan Preston
@@ -44,8 +45,10 @@ Sean Riley
 Software Freedom Conservancy
 Tavendo GmbH
 Thijs Triemstra
+Thomas Grainger
 Thomas Herve
 Timothy Allen
+Tom Most
 Tom Prince
 Travis B. Hartwell
 

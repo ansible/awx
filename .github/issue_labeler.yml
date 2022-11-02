@@ -1,12 +1,16 @@
 needs_triage:
   - '.*'
 "type:bug":
-  - "Please confirm the following"
+  - "Bug Summary"
 "type:enhancement":
-  - "Feature Idea"
+  - "Feature Summary"
 "component:ui":
   - "\\[X\\] UI"
 "component:api":
   - "\\[X\\] API"
 "component:docs":
   - "\\[X\\] Docs"
+"component:awx_collection":
+  - "\\[X\\] Collection"
+"component:cli":
+  - "\\[X\\] awxkit"

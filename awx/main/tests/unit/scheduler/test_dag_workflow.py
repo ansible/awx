@@ -2,8 +2,8 @@ import pytest
 import uuid
 import os
 
-from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import smart_text
+from django.utils.translation import gettext_lazy as _
+from django.utils.encoding import smart_str
 
 from awx.main.scheduler.dag_workflow import WorkflowDAG
 
@@ -468,7 +468,7 @@ class TestIsWorkflowDone:
         assert g.is_workflow_done() is True
         assert g.has_workflow_failed() == (
             True,
-            smart_text(
+            smart_str(
                 _(
                     "No error handling path for workflow job node(s) [({},{})]. Workflow job node(s)"
                     " missing unified job template and error handling path []."
@@ -484,7 +484,7 @@ class TestIsWorkflowDone:
         assert g.is_workflow_done() is True
         assert g.has_workflow_failed() == (
             True,
-            smart_text(
+            smart_str(
                 _(
                     "No error handling path for workflow job node(s) []. Workflow job node(s) missing" " unified job template and error handling path [{}]."
                 ).format(nodes[2].id)
@@ -500,7 +500,7 @@ class TestIsWorkflowDone:
         assert g.is_workflow_done() is True
         assert g.has_workflow_failed() == (
             True,
-            smart_text(
+            smart_str(
                 _(
                     "No error handling path for workflow job node(s) []. Workflow job node(s) missing" " unified job template and error handling path [{}]."
                 ).format(nodes[0].id)
@@ -512,7 +512,7 @@ class TestIsWorkflowDone:
 
         assert g.has_workflow_failed() == (
             True,
-            smart_text(
+            smart_str(
                 _(
                     "No error handling path for workflow job node(s) [({},{})]. Workflow job node(s)"
                     " missing unified job template and error handling path []."
@@ -525,7 +525,7 @@ class TestIsWorkflowDone:
 
         assert g.has_workflow_failed() == (
             True,
-            smart_text(
+            smart_str(
                 _(
                     "No error handling path for workflow job node(s) [({},{})]. Workflow job node(s)"
                     " missing unified job template and error handling path []."

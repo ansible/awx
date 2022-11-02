@@ -26,6 +26,7 @@ def test_empty():
         "workflow_job_template": 0,
         "unified_job": 0,
         "pending_jobs": 0,
+        "database_connections": 1,
     }
 
 

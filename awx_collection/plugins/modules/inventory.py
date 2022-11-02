@@ -66,6 +66,10 @@ options:
         - list of Instance Groups for this Organization to run on.
       type: list
       elements: str
+    prevent_instance_group_fallback:
+      description:
+        - Prevent falling back to instance groups set on the organization
+      type: bool
     state:
       description:
         - Desired state of the resource.
@@ -111,6 +115,7 @@ def main():
         kind=dict(choices=['', 'smart'], default=''),
         host_filter=dict(),
         instance_groups=dict(type="list", elements='str'),
+        prevent_instance_group_fallback=dict(type='bool'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -127,6 +132,7 @@ def main():
     state = module.params.get('state')
     kind = module.params.get('kind')
     host_filter = module.params.get('host_filter')
+    prevent_instance_group_fallback = module.params.get('prevent_instance_group_fallback')
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     org_id = module.resolve_name_to_id('organizations', organization)
@@ -157,6 +163,8 @@ def main():
         'kind': kind,
         'host_filter': host_filter,
     }
+    if prevent_instance_group_fallback is not None:
+        inventory_fields['prevent_instance_group_fallback'] = prevent_instance_group_fallback
     if description is not None:
         inventory_fields['description'] = description
     if variables is not None:

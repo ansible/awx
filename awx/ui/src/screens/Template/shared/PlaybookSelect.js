@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { number, string, oneOfType } from 'prop-types';
+import { func, number, string, oneOfType } from 'prop-types';
 
 import { t } from '@lingui/macro';
 import { SelectVariant, Select, SelectOption } from '@patternfly/react-core';
@@ -28,8 +28,11 @@ function PlaybookSelect({
       }
       const { data } = await ProjectsAPI.readPlaybooks(projectId);
 
+      if (data.length === 1) {
+        onChange(data[0]);
+      }
       return data;
-    }, [projectId]),
+    }, [projectId, onChange]),
     []
   );
 
@@ -56,13 +59,14 @@ function PlaybookSelect({
       onToggle={setIsOpen}
       placeholderText={t`Select a playbook`}
       typeAheadAriaLabel={t`Select a playbook`}
-      isCreatable={false}
+      isCreatable
+      createText=""
       onSelect={(event, value) => {
         setIsOpen(false);
         onChange(value);
       }}
       id="template-playbook"
-      isValid={isValid}
+      validated={isValid ? 'default' : 'error'}
       onBlur={onBlur}
       isDisabled={isLoading || isDisabled}
       maxHeight="1000%"
@@ -76,9 +80,11 @@ function PlaybookSelect({
 }
 PlaybookSelect.propTypes = {
   projectId: oneOfType([number, string]),
+  onChange: func,
 };
 PlaybookSelect.defaultProps = {
   projectId: null,
+  onChange: () => {},
 };
 
 export { PlaybookSelect as _PlaybookSelect };

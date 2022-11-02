@@ -1,9 +1,8 @@
 import React, { useState, useCallback } from 'react';
-
 import { t } from '@lingui/macro';
 import { Route, Switch } from 'react-router-dom';
-
 import ScreenHeader from 'components/ScreenHeader';
+import PersistentFilters from 'components/PersistentFilters';
 import ManagementJob from './ManagementJob';
 import ManagementJobList from './ManagementJobList';
 
@@ -37,7 +36,9 @@ function ManagementJobs() {
           <ManagementJob setBreadcrumb={buildBreadcrumbConfig} />
         </Route>
         <Route path={basePath}>
-          <ManagementJobList setBreadcrumb={buildBreadcrumbConfig} />
+          <PersistentFilters pageKey="managementJobs">
+            <ManagementJobList setBreadcrumb={buildBreadcrumbConfig} />
+          </PersistentFilters>
         </Route>
       </Switch>
     </>

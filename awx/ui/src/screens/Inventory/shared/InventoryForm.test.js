@@ -1,5 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { LabelsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
@@ -24,6 +25,12 @@ const inventory = {
       delete: true,
       copy: true,
       adhoc: true,
+    },
+    labels: {
+      results: [
+        { name: 'Sushi', id: 1 },
+        { name: 'Major', id: 2 },
+      ],
     },
   },
   created: '2019-10-04T16:56:48.025455Z',
@@ -57,6 +64,10 @@ describe('<InventoryForm />', () => {
   beforeAll(async () => {
     onCancel = jest.fn();
     onSubmit = jest.fn();
+    LabelsAPI.read.mockReturnValue({
+      data: inventory.summary_fields.labels,
+    });
+
     await act(async () => {
       wrapper = mountWithContexts(
         <InventoryForm
@@ -79,7 +90,9 @@ describe('<InventoryForm />', () => {
     expect(wrapper.length).toBe(1);
   });
 
-  test('should display form fields properly', () => {
+  test('should display form fields properly', async () => {
+    await waitForElement(wrapper, 'InventoryForm', (el) => el.length > 0);
+
     expect(wrapper.find('FormGroup[label="Name"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Description"]').length).toBe(1);
     expect(wrapper.find('FormGroup[label="Organization"]').length).toBe(1);
@@ -114,5 +127,13 @@ describe('<InventoryForm />', () => {
     expect(onCancel).not.toHaveBeenCalled();
     wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
     expect(onCancel).toBeCalled();
+  });
+
+  test('should render LabelsSelect', async () => {
+    const select = wrapper.find('LabelSelect');
+    expect(select).toHaveLength(1);
+    expect(select.prop('value')).toEqual(
+      inventory.summary_fields.labels.results
+    );
   });
 });

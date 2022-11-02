@@ -17,11 +17,15 @@ function JobEvent({
   isCollapsed,
   onToggleCollapsed,
   hasChildren,
+  jobStatus,
 }) {
   const numOutputLines = lineTextHtml?.length || 0;
   useEffect(() => {
-    measure();
-  }, [numOutputLines, isCollapsed, measure]);
+    const timeout = setTimeout(measure, 0);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [numOutputLines, isCollapsed, measure, jobStatus]);
 
   let toggleLineIndex = -1;
   if (hasChildren) {

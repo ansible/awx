@@ -18,6 +18,7 @@
     - pg_password
     - secret_key
     - broadcast_websocket_secret
+    - admin_password
 
 - name: Generate secrets if needed
   template:
@@ -26,6 +27,8 @@
     mode: '0600'
   when: not lookup('vars', item.item, default='') and not item.stat.exists
   loop: "{{ secrets.results }}"
+  loop_control:
+    label: '{{ item.item }}'
 
 - name: Include generated secrets unless they are explicitly passed in
   include_vars: "{{ sources_dest }}/secrets/{{ item.item }}.yml"
@@ -89,11 +92,29 @@
   args:
     creates: "{{ work_sign_public_keyfile }}"
 
+- name: Include LDAP tasks if enabled
+  include_tasks: ldap.yml
+  when: enable_ldap | bool
+
 - name: Render Docker-Compose
   template:
     src: docker-compose.yml.j2
     dest: "{{ sources_dest }}/{{ compose_name }}"
     mode: '0600'
+
+- name: Render Receptor Config(s) for Control Plane
+  template:
+    src: "receptor-awx.conf.j2"
+    dest: "{{ sources_dest }}/receptor/receptor-awx-{{ item }}.conf"
+    mode: '0600'
+  with_sequence: start=1 end={{ control_plane_node_count }}
+
+- name: Create Receptor Config Lock File
+  file:
+    path: "{{ sources_dest }}/receptor/receptor-awx-{{ item }}.conf.lock"
+    state: touch
+    mode: '0600'
+  with_sequence: start=1 end={{ control_plane_node_count }}
 
 - name: Render Receptor Config(s) for Control Plane
   template:
@@ -115,3 +136,9 @@
     mode: '0600'
   with_sequence: start=1 end={{ execution_node_count if execution_node_count | int > 0 else 1}}
   when: execution_node_count | int > 0
+
+- name: Render prometheus config
+  template:
+    src: "prometheus.yml.j2"
+    dest: "{{ sources_dest }}/prometheus.yml"
+  when: enable_prometheus|bool

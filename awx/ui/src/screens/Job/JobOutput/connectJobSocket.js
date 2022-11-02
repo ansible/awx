@@ -4,7 +4,7 @@ export default function connectJobSocket({ type, id }, onMessage) {
   ws = new WebSocket(
     `${window.location.protocol === 'http:' ? 'ws:' : 'wss:'}//${
       window.location.host
-    }/websocket/`
+    }${window.location.pathname}websocket/`
   );
 
   ws.onopen = () => {

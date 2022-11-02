@@ -1,5 +1,6 @@
 import React from 'react';
-import { node, bool, string } from 'prop-types';
+
+import { oneOfType, node, bool, string } from 'prop-types';
 import { TextListItem, TextListItemVariants } from '@patternfly/react-core';
 import styled from 'styled-components';
 import Popover from '../Popover';
@@ -20,7 +21,7 @@ const DetailValue = styled(
     <TextListItem {...props} />
   )
 )`
-  word-break: break-all;
+  overflow-wrap: break-word;
   ${(props) =>
     props.fullWidth &&
     `
@@ -40,11 +41,16 @@ const Detail = ({
   className,
   dataCy,
   alwaysVisible,
+  isEmpty,
   helpText,
   isEncrypted,
   isNotConfigured,
 }) => {
   if (!value && typeof value !== 'number' && !alwaysVisible) {
+    return null;
+  }
+
+  if (isEmpty && !alwaysVisible) {
     return null;
   }
 
@@ -81,7 +87,7 @@ Detail.propTypes = {
   value: node,
   fullWidth: bool,
   alwaysVisible: bool,
-  helpText: string,
+  helpText: oneOfType([string, node]),
 };
 Detail.defaultProps = {
   value: null,

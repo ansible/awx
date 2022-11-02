@@ -80,7 +80,7 @@ describe('PageHeaderToolbar', () => {
     });
 
     expect(
-      wrapper.find('Badge#toolbar-workflow-approval-badge').text()
+      wrapper.find('NotificationBadge#toolbar-workflow-approval-badge').text()
     ).toEqual('20');
   });
 });

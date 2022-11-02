@@ -92,7 +92,7 @@ EXAMPLES = '''
 
 - name: Export a job template named "My Template" and all Credentials
   export:
-    job_template: "My Template"
+    job_templates: "My Template"
     credential: 'all'
 '''
 

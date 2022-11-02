@@ -15,7 +15,6 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db.backends.sqlite3.base import SQLiteCursorWrapper
 
 # AWX
-from awx.main.fields import JSONBField
 from awx.main.models.projects import Project
 from awx.main.models.ha import Instance
 
@@ -348,9 +347,7 @@ def scm_inventory_source(inventory, project):
         source_project=project,
         source='scm',
         source_path='inventory_file',
-        update_on_project_update=True,
         inventory=inventory,
-        scm_last_revision=project.scm_revision,
     )
     with mock.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.update'):
         inv_src.save()
@@ -709,7 +706,7 @@ def jt_linked(organization, project, inventory, machine_credential, credential, 
 
 @pytest.fixture
 def workflow_job_template(organization):
-    wjt = WorkflowJobTemplate(name='test-workflow_job_template', organization=organization)
+    wjt = WorkflowJobTemplate.objects.create(name='test-workflow_job_template', organization=organization)
     wjt.save()
 
     return wjt
@@ -753,11 +750,6 @@ def get_db_prep_save(self, value, connection, **kwargs):
         value = dumps(value)
 
     return value
-
-
-@pytest.fixture
-def monkeypatch_jsonbfield_get_db_prep_save(mocker):
-    JSONBField.get_db_prep_save = get_db_prep_save
 
 
 @pytest.fixture

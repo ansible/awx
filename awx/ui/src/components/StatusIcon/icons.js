@@ -6,6 +6,8 @@ import {
   ExclamationTriangleIcon,
   ClockIcon,
   MinusCircleIcon,
+  InfoCircleIcon,
+  PlusCircleIcon,
 } from '@patternfly/react-icons';
 
 const Spin = keyframes`
@@ -23,6 +25,8 @@ const RunningIcon = styled(SyncAltIcon)`
 RunningIcon.displayName = 'RunningIcon';
 
 const icons = {
+  approved: CheckCircleIcon,
+  denied: InfoCircleIcon,
   success: CheckCircleIcon,
   healthy: CheckCircleIcon,
   successful: CheckCircleIcon,
@@ -37,5 +41,13 @@ const icons = {
   skipped: MinusCircleIcon,
   canceled: ExclamationTriangleIcon,
   changed: ExclamationTriangleIcon,
+  /* Instance statuses */
+  ready: CheckCircleIcon,
+  installed: ClockIcon,
+  provisioning: PlusCircleIcon,
+  deprovisioning: MinusCircleIcon,
+  unavailable: ExclamationCircleIcon,
+  'provision-fail': ExclamationCircleIcon,
+  'deprovision-fail': ExclamationCircleIcon,
 };
 export default icons;

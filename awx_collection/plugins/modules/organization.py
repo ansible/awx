@@ -192,7 +192,9 @@ def main():
             association_fields['galaxy_credentials'].append(module.resolve_name_to_id('credentials', item))
 
     # Create the data that gets sent for create and update
-    org_fields = {'name': new_name if new_name else (module.get_item_name(organization) if organization else name),}
+    org_fields = {
+        'name': new_name if new_name else (module.get_item_name(organization) if organization else name),
+    }
     if description is not None:
         org_fields['description'] = description
     if default_ee is not None:

@@ -19,18 +19,16 @@ function StepName({ hasErrors, children, id }) {
     return <div id={id}>{children}</div>;
   }
   return (
-    <>
-      <AlertText id={id}>
-        {children}
-        <Tooltip
-          position="right"
-          content={t`This step contains errors`}
-          trigger="click mouseenter focus"
-        >
-          <ExclamationCircleIcon css="color: var(--pf-global--danger-color--100)" />
-        </Tooltip>
-      </AlertText>
-    </>
+    <AlertText id={id}>
+      {children}
+      <Tooltip
+        position="right"
+        content={t`This step contains errors`}
+        trigger="click mouseenter focus"
+      >
+        <ExclamationCircleIcon css="color: var(--pf-global--danger-color--100)" />
+      </Tooltip>
+    </AlertText>
   );
 }
 

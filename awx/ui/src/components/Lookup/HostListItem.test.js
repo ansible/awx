@@ -8,6 +8,7 @@ describe('HostListItem', () => {
     id: 1,
     type: 'inventory',
     name: 'Foo',
+    description: 'Buzz',
     summary_fields: {
       inventory: {
         name: 'Bar',
@@ -24,6 +25,7 @@ describe('HostListItem', () => {
     );
     expect(wrapper.find('HostListItem').length).toBe(1);
     expect(wrapper.find('Td').at(0).text()).toBe('Foo');
-    expect(wrapper.find('Td').at(1).text()).toBe('Bar');
+    expect(wrapper.find('Td').at(1).text()).toBe('Buzz');
+    expect(wrapper.find('Td').at(2).text()).toBe('Bar');
   });
 });

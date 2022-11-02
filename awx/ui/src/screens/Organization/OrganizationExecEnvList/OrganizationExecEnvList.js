@@ -69,57 +69,55 @@ function OrganizationExecEnvList({ organization }) {
   }, [fetchExecutionEnvironments]);
 
   return (
-    <>
-      <Card>
-        <PaginatedTable
-          contentError={contentError}
-          hasContentLoading={isLoading}
-          items={executionEnvironments}
-          itemCount={executionEnvironmentsCount}
-          pluralizedItemName={t`Execution Environments`}
-          qsConfig={QS_CONFIG}
-          toolbarSearchableKeys={searchableKeys}
-          toolbarRelatedSearchableKeys={relatedSearchableKeys}
-          toolbarSearchColumns={[
-            {
-              name: t`Name`,
-              key: 'name__icontains',
-              isDefault: true,
-            },
-            {
-              name: t`Image`,
-              key: 'image__icontains',
-              isDefault: false,
-            },
-            {
-              name: t`Created By (Username)`,
-              key: 'created_by__username__icontains',
-            },
-            {
-              name: t`Modified By (Username)`,
-              key: 'modified_by__username__icontains',
-            },
-          ]}
-          renderToolbar={(props) => (
-            <DatalistToolbar {...props} qsConfig={QS_CONFIG} />
-          )}
-          headerRow={
-            <HeaderRow qsConfig={QS_CONFIG} isSelectable={false}>
-              <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
-              <HeaderCell sortKey="image">{t`Image`}</HeaderCell>
-            </HeaderRow>
-          }
-          renderRow={(executionEnvironment, index) => (
-            <OrganizationExecEnvListItem
-              key={executionEnvironment.id}
-              executionEnvironment={executionEnvironment}
-              detailUrl={`/execution_environments/${executionEnvironment.id}`}
-              rowIndex={index}
-            />
-          )}
-        />
-      </Card>
-    </>
+    <Card>
+      <PaginatedTable
+        contentError={contentError}
+        hasContentLoading={isLoading}
+        items={executionEnvironments}
+        itemCount={executionEnvironmentsCount}
+        pluralizedItemName={t`Execution Environments`}
+        qsConfig={QS_CONFIG}
+        toolbarSearchableKeys={searchableKeys}
+        toolbarRelatedSearchableKeys={relatedSearchableKeys}
+        toolbarSearchColumns={[
+          {
+            name: t`Name`,
+            key: 'name__icontains',
+            isDefault: true,
+          },
+          {
+            name: t`Image`,
+            key: 'image__icontains',
+            isDefault: false,
+          },
+          {
+            name: t`Created By (Username)`,
+            key: 'created_by__username__icontains',
+          },
+          {
+            name: t`Modified By (Username)`,
+            key: 'modified_by__username__icontains',
+          },
+        ]}
+        renderToolbar={(props) => (
+          <DatalistToolbar {...props} qsConfig={QS_CONFIG} />
+        )}
+        headerRow={
+          <HeaderRow qsConfig={QS_CONFIG} isSelectable={false}>
+            <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+            <HeaderCell sortKey="image">{t`Image`}</HeaderCell>
+          </HeaderRow>
+        }
+        renderRow={(executionEnvironment, index) => (
+          <OrganizationExecEnvListItem
+            key={executionEnvironment.id}
+            executionEnvironment={executionEnvironment}
+            detailUrl={`/execution_environments/${executionEnvironment.id}`}
+            rowIndex={index}
+          />
+        )}
+      />
+    </Card>
   );
 }
 

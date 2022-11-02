@@ -42,6 +42,10 @@ options:
       description:
         - Email address of the user.
       type: str
+    organization:
+      description:
+        - The user will be created as a member of that organization (needed for organization admins to create new organization users).
+      type: str
     is_superuser:
       description:
         - Designates that this user has all permissions without explicitly assigning them.
@@ -103,6 +107,14 @@ EXAMPLES = '''
     state: present
     controller_config_file: "~/tower_cli.cfg"
 
+- name: Add user as a member of an organization (permissions on the organization are required)
+  user:
+    username: jdoe
+    password: foobarbaz
+    email: jdoe@example.org
+    organization: devopsorg
+    state: present
+
 - name: Delete user
   user:
     username: jdoe
@@ -126,6 +138,7 @@ def main():
         is_system_auditor=dict(type='bool', default=False, aliases=['auditor']),
         password=dict(no_log=True),
         update_secrets=dict(type='bool', default=True, no_log=False),
+        organization=dict(),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -141,6 +154,7 @@ def main():
     is_superuser = module.params.get('is_superuser')
     is_system_auditor = module.params.get('is_system_auditor')
     password = module.params.get('password')
+    organization = module.params.get('organization')
     state = module.params.get('state')
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
@@ -169,8 +183,13 @@ def main():
     if password is not None:
         new_fields['password'] = password
 
-    # If the state was present and we can let the module build or update the existing item, this will return on its own
-    module.create_or_update_if_needed(existing_item, new_fields, endpoint='users', item_type='user')
+    if organization:
+        org_id = module.resolve_name_to_id('organizations', organization)
+        # If the state was present and we can let the module build or update the existing item, this will return on its own
+        module.create_or_update_if_needed(existing_item, new_fields, endpoint='organizations/{0}/users'.format(org_id), item_type='user')
+    else:
+        # If the state was present and we can let the module build or update the existing item, this will return on its own
+        module.create_or_update_if_needed(existing_item, new_fields, endpoint='users', item_type='user')
 
 
 if __name__ == '__main__':

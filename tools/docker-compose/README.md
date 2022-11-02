@@ -27,7 +27,7 @@ Here are the main `make` targets:
 
 Notable files:
 
-- `tools/docker-compose/inventory` file - used to configure the local AWX development deployment
+- `tools/docker-compose/inventory` file - used to configure the AWX development environment.
 - `migrate.yml` - playbook for migrating data from Local Docker to the Development Environment
 
 ### Prerequisites
@@ -243,7 +243,9 @@ $ make docker-compose
 - [Using Logstash](./docs/logstash.md)
 - [Start a Cluster](#start-a-cluster)
 - [Start with Minikube](#start-with-minikube)
-- [Keycloak Integration](#keycloak-integration)
+- [SAML and OIDC Integration](#saml-and-oidc-integration)
+- [OpenLDAP Integration](#openldap-integration)
+- [Splunk Integration](#splunk-integration)
 
 ### Start a Shell
 
@@ -299,11 +301,19 @@ Note that you may see multiple messages of the form `2021-03-04 20:11:47,666 WAR
 
 To bring up a 1 node AWX + minikube that is accessible from AWX run the following.
 
+Start minikube
+
+```bash
+(host)$minikube start --cpus=4  --memory=8g --addons=ingress`
+```
+
+Start AWX
+
 ```bash
 (host)$ make docker-compose-container-group
 ```
 
-Alternatively, you can set the env var `MINIKUBE_CONTAINER_GROUP=true` to use the default dev env bring up. his way you can use other env flags like the cluster node count.
+Alternatively, you can set the env var `MINIKUBE_CONTAINER_GROUP=true` to use the default dev env bring up. his way you can use other env flags like the cluster node count. Set `MINIKUBE_SETUP=true` to make the roles download, install and run minikube for you, but if you run into issues with this just start minikube yourself.
 
 ```bash
 (host)$ MINIKUBE_CONTAINER_GROUP=true make docker-compose
@@ -315,8 +325,8 @@ If you want to clean all things once your are done, you can do:
 (host)$ make docker-compose-container-group-clean
 ```
 
-### Keycloak Integration
-Keycloak is a SAML provider and can be used to test AWX social auth. This section describes how to build a reference Keycloak instance and plumb it with AWX for testing purposes.
+### SAML and OIDC Integration
+Keycloak can be used as both a SAML and OIDC provider and can be used to test AWX social auth. This section describes how to build a reference Keycloak instance and plumb it with AWX for testing purposes.
 
 First, be sure that you have the awx.awx collection installed by running `make install_collection`.
 Next, make sure you have your containers running by running `make docker-compose`.
@@ -355,13 +365,15 @@ Go ahead and stop your existing docker-compose run and restart with Keycloak bef
 Once the containers come up a new port (8443) should be exposed and the Keycloak interface should be running on that port. Connect to this through a url like `https://localhost:8443` to confirm that Keycloak has stared. If you wanted to login and look at Keycloak itself you could select the "Administration console" link and log into the UI the username/password set in the previous `docker run` command. For more information about Keycloak and links to their documentation see their project at https://github.com/keycloak/keycloak.
 
 Now we are ready to configure and plumb Keycloak with AWX. To do this we have provided a playbook which will:
-* Create a certificate for data exchange between Keycloak and AWX.
-* Create a realm in Keycloak with a client for AWX and 3 users.
-* Backup and configure the SMAL adapter in AWX. NOTE: the private key of any existing SAML adapters can not be backed up through the API, you need a DB backup to recover this.
+* Create a certificate for SAML data exchange between Keycloak and AWX.
+* Create a realm in Keycloak with a client for AWX via SAML and OIDC and 3 users.
+* Backup and configure the SMAL and OIDC adapter in AWX. NOTE: the private key of any existing SAML or OIDC adapters can not be backed up through the API, you need a DB backup to recover this.
 
 Before we can run the playbook we need to understand that SAML works by sending redirects between AWX and Keycloak through the browser. Because of this we have to tell both AWX and Keycloak how they will construct the redirect URLs. On the Keycloak side, this is done within the realm configuration and on the AWX side its done through the SAML settings. The playbook requires a variable called `container_reference` to be set. The container_reference variable needs to be how your browser will be able to talk to the running containers.  Here are some examples of how to choose a proper container_reference.
 * If you develop on a mac which runs a Fedora VM which has AWX running within that and the browser you use to access AWX runs on the mac. The the VM with the container has its own IP that is mapped to a name like `tower.home.net`. In this scenario your "container_reference" could be either the IP of the VM or the tower.home.net friendly name.
 * If you are on a Fedora work station running AWX and also using a browser on your workstation you could use localhost, your work stations IP or hostname as the container_reference.
+
+In addition, OIDC works similar but slightly differently. OIDC has browser redirection but OIDC will also communicate from the AWX docker instance to the Keycloak docker instance directly. Any hostnames you might have are likely not propagated down into the AWX container. So we need a method for both the browser and AWX container to talk to Keycloak. For this we will likely use your machines IP address. This can be passed in as a variable called `oidc_reference`. If unset this will default to container_reference which may be viable for some configurations.
 
 In addition to container_reference, there are some additional variables which you can override if you need/choose to do so. Here are their names and default values:
 ```yaml
@@ -373,20 +385,96 @@ In addition to container_reference, there are some additional variables which yo
 * keycloak_(user|pass) need to change if you modified the user when starting the initial container above.
 * cert_subject will be the subject line of the certificate shared between AWX and keycloak you can change this if you like or just use the defaults.
 
-To override any of the variables above you can add more `-e` arguments to the playbook run below. For example, if you simply need to change the `keycloak_pass` add the argument `-r keycloak_pass=my_secret_pass` to the next command.
+To override any of the variables above you can add more `-e` arguments to the playbook run below. For example, if you simply need to change the `keycloak_pass` add the argument `-e keycloak_pass=my_secret_pass` to the following ansible-playbook command.
 
-In addition, you may need to override the username or password to get into your AWX instance. We log into AWX in order to read and write the SAML settings. This can be done in several ways because we are using the awx.awx collection. The easiest way is to set environment variables such as `CONTROLLER_USERNAME`. See the awx.awx documentation for more information on setting environment variables. In the example provided below we are showing an example of specifying a username/password for authentication.
+In addition, you may need to override the username or password to get into your AWX instance. We log into AWX in order to read and write the SAML and OIDC settings. This can be done in several ways because we are using the awx.awx collection. The easiest way is to set environment variables such as `CONTROLLER_USERNAME`. See the awx.awx documentation for more information on setting environment variables. In the example provided below we are showing an example of specifying a username/password for authentication.
 
 Now that we have all of our variables covered we can run the playbook like:
 ```bash
 export CONTROLLER_USERNAME=<your username>
 export CONTROLLER_PASSWORD=<your password>
-ansible-playbook tools/docker-compose/ansible/plumb_keycloak.yml -e container_reference=<your container_reference here>
+ansible-playbook tools/docker-compose/ansible/plumb_keycloak.yml -e container_reference=<your container_reference here> -e oidc_reference=<your oidc reference>
 ```
 
-Once the playbook is done running SAML should now be setup in your development environment. This realm has three users with the following username/passwords:
+Once the playbook is done running both SAML and OIDC should now be setup in your development environment. This realm has three users with the following username/passwords:
 1. awx_unpriv:unpriv123
 2. awx_admin:admin123
 3. awx_auditor:audit123
 
-The first account is a normal user. The second account has the attribute is_superuser set in Keycloak so will be a super user in AWX. The third account has the is_system_auditor attribute in Keycloak so it will be a system auditor in AWX. To log in with one of these Keycloak users go to the AWX login screen and click the small "Sign In With SAML Keycloak" button at the bottom of the login box.
+The first account is a normal user. The second account has the SMAL attribute is_superuser set in Keycloak so will be a super user in AWX if logged in through SAML. The third account has the SAML is_system_auditor attribute in Keycloak so it will be a system auditor in AWX if logged in through SAML. To log in with one of these Keycloak users go to the AWX login screen and click the small "Sign In With SAML Keycloak" button at the bottom of the login box.
+
+Note: The OIDC adapter performs authentication only, not authorization. So any user created in AWX will not have any permissions on it at all.
+
+If you Keycloak configuration is not working and you need to rerun the playbook to try a different `container_reference` or `oidc_reference` you can log into the Keycloak admin console on port 8443 and select the AWX realm in the upper left drop down. Then make sure you are on "Ream Settings" in the Configure menu option and click the trash can next to AWX in the main page window pane. This will completely remove the AWX ream (which has both SAML and OIDC settings) enabling you to re-run the plumb playbook.
+
+### OpenLDAP Integration
+
+OpenLDAP is an LDAP provider that can be used to test AWX with LDAP integration. This section describes how to build a reference OpenLDAP instance and plumb it with your AWX for testing purposes.
+
+First, be sure that you have the awx.awx collection installed by running `make install_collection`.
+
+Anytime you want to run an OpenLDAP instance alongside AWX we can start docker-compose with the LDAP option to get an LDAP instance with the command:
+```bash
+LDAP=true make docker-compose
+```
+
+Once the containers come up two new ports (389, 636) should be exposed and the LDAP server should be running on those ports. The first port (389) is non-SSL and the second port (636) is SSL enabled.
+
+Now we are ready to configure and plumb OpenLDAP with AWX. To do this we have provided a playbook which will:
+* Backup and configure the LDAP adapter in AWX. NOTE: this will back up your existing settings but the password fields can not be backed up through the API, you need a DB backup to recover this.
+
+Note: The default configuration will utilize the non-tls connection. If you want to use the tls configuration you will need to work through TLS negotiation issues because the LDAP server is using a self signed certificate.
+
+Before we can run the playbook we need to understand that LDAP will be communicated to from within the AWX container. Because of this, we have to tell AWX how to route traffic to the LDAP container through the `LDAP Server URI` settings. The playbook requires a variable called container_reference to be set. The container_reference variable needs to be how your AWX container will be able to talk to the LDAP container. See the SAML section for some examples for how to select a `container_reference`.
+
+Once you have your container reference you can run the playbook like:
+```bash
+export CONTROLLER_USERNAME=<your username>
+export CONTROLLER_PASSWORD=<your password>
+ansible-playbook tools/docker-compose/ansible/plumb_ldap.yml -e container_reference=<your container_reference here>
+```
+
+
+Once the playbook is done running LDAP should now be setup in your development environment. This realm has four users with the following username/passwords:
+1. awx_ldap_unpriv:unpriv123
+2. awx_ldap_admin:admin123
+3. awx_ldap_auditor:audit123
+4. awx_ldap_org_admin:orgadmin123
+
+The first account is a normal user. The second account will be a super user in AWX. The third account will be a system auditor in AWX. The fourth account is an org admin. All users belong to an org called "LDAP Organization". To log in with one of these users go to the AWX login screen enter the username/password.
+
+
+### Splunk Integration
+
+Splunk is a log aggregation tool that can be used to test AWX with external logging integration. This section describes how to build a reference Splunk instance and plumb it with your AWX for testing purposes.
+
+First, be sure that you have the awx.awx collection installed by running `make install_collection`.
+
+Next, install the splunk.es collection by running `ansible-galaxy collection install splunk.es`.
+
+Anytime you want to run a Splunk instance alongside AWX we can start docker-compose with the SPLUNK option to get a Splunk instance with the command:
+```bash
+SPLUNK=true make docker-compose
+```
+
+Once the containers come up three new ports (8000, 8089 and 9199) should be exposed and the Splunk server should be running on some of those ports (the 9199 will be created later by the plumbing playbook). The first port (8000) is the non-SSL admin port and you can log into splunk with the credentials admin/splunk_admin. The url will be like http://<server>:8000/ this will be referenced below. The 8089 is the API port that the ansible modules will use to connect to and configure splunk. The 9199 port will be used to construct a TCP listener in Splunk that AWX will forward messages to.
+
+Once the containers are up we are ready to configure and plumb Splunk with AWX. To do this we have provided a playbook which will:
+* Backup and configure the External Logging adapter in AWX. NOTE: this will back up your existing settings but the password fields can not be backed up through the API, you need a DB backup to recover this.
+* Create a TCP port in Splunk for log forwarding
+
+For routing traffic between AWX and Splunk we will use the internal docker compose network. The `Logging Aggregator` will be configured using the internal network machine name of `splunk`.
+
+Once you have have the collections installed (from above) you can run the playbook like:
+```bash
+export CONTROLLER_USERNAME=<your username>
+export CONTROLLER_PASSWORD=<your password>
+ansible-playbook tools/docker-compose/ansible/plumb_splunk.yml
+```
+
+Once the playbook is done running Splunk should now be setup in your development environment. You can log into the admin console (see above for username/password) and click on "Searching and Reporting" in the left hand navigation. In the search box enter `source="http:tower_logging_collections"` and click search.
+
+
+### Prometheus and Grafana integration
+
+See docs at https://github.com/ansible/awx/blob/devel/tools/grafana/README.md

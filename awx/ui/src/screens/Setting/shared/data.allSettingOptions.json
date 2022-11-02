@@ -79,7 +79,7 @@
         "type": "string",
         "required": false,
         "label": "Red Hat customer username",
-        "help_text": "This username is used to send data to Insights for Ansible Automation Platform",
+        "help_text": "This username is used to send data to Automation Analytics",
         "category": "System",
         "category_slug": "system",
         "default": ""
@@ -88,7 +88,7 @@
         "type": "string",
         "required": false,
         "label": "Red Hat customer password",
-        "help_text": "This password is used to send data to Insights for Ansible Automation Platform",
+        "help_text": "This password is used to send data to Automation Analytics",
         "category": "System",
         "category_slug": "system",
         "default": ""
@@ -114,8 +114,8 @@
       "AUTOMATION_ANALYTICS_URL": {
         "type": "string",
         "required": false,
-        "label": "Insights for Ansible Automation Platform upload URL",
-        "help_text": "This setting is used to to configure the upload URL for data collection for Red Hat Insights.",
+        "label": "Automation Analytics upload URL",
+        "help_text": "This setting is used to to configure the upload URL for data collection for Automation Analytics.",
         "category": "System",
         "category_slug": "system",
         "default": "https://example.com"
@@ -231,11 +231,31 @@
           "read_only": false
         }
       },
+      "GALAXY_TASK_ENV": {
+        "type": "nested object",
+         "required": true,
+        "label": "Environment Variables for Galaxy Commands",
+         "help_text": "Additional environment variables set for invocations of ansible-galaxy within project updates. Useful if you must use a proxy server for ansible-galaxy but not git.",
+         "category": "Jobs",
+         "category_slug": "jobs",
+         "placeholder": {
+              "HTTP_PROXY": "myproxy.local:8080"
+          },
+         "default": {
+             "ANSIBLE_FORCE_COLOR": "false",
+              "GIT_SSH_COMMAND": "ssh -o StrictHostKeyChecking=no"
+        },
+          "child": {
+            "type": "string",
+              "required": true,
+            "read_only": false
+        }
+       },
       "INSIGHTS_TRACKING_STATE": {
         "type": "boolean",
         "required": false,
-        "label": "Gather data for Insights for Ansible Automation Platform",
-        "help_text": "Enables the service to gather data on automation and send it to Red Hat Insights.",
+        "label": "Gather data for Automation Analytics",
+        "help_text": "Enables the service to gather data on automation and send it to Automation Analytics.",
         "category": "System",
         "category_slug": "system",
         "default": false
@@ -272,6 +292,15 @@
         "required": false,
         "label": "Follow symlinks",
         "help_text": "Follow symbolic links when scanning for playbooks. Be aware that setting this to True can lead to infinite recursion if a link points to a parent directory of itself.",
+        "category": "Jobs",
+        "category_slug": "jobs",
+        "default": false
+      },
+      "AWX_MOUNT_ISOLATED_PATHS_ON_K8S": {
+        "type": "boolean",
+        "required": false,
+        "label": "Expose host paths for Container Groups",
+        "help_text": "Expose paths via hostPath for the Pods created by a Container Group. HostPath volumes present many security risks, and it is a best practice to avoid the use of HostPaths when possible. ",
         "category": "Jobs",
         "category_slug": "jobs",
         "default": false
@@ -576,7 +605,7 @@
       "AUTOMATION_ANALYTICS_LAST_GATHER": {
         "type": "datetime",
         "required": true,
-        "label": "Last gather date for Insights for Ansible Automation Platform.",
+        "label": "Last gather date for Automation Analytics.",
         "category": "System",
         "category_slug": "system",
         "default": null
@@ -584,7 +613,7 @@
       "AUTOMATION_ANALYTICS_LAST_ENTRIES": {
         "type": "string",
         "required": false,
-        "label": "Last gathered entries from the data collection service of Insights for Ansible Automation Platform",
+        "label": "Last gathered entries from the data collection service of Automation Analytics",
         "category": "System",
         "category_slug": "system",
         "default": ""
@@ -592,7 +621,7 @@
       "AUTOMATION_ANALYTICS_GATHER_INTERVAL": {
         "type": "integer",
         "required": false,
-        "label": "Insights for Ansible Automation Platform Gather Interval",
+        "label": "Automation Analytics Gather Interval",
         "help_text": "Interval (in seconds) between data gathering.",
         "min_value": 1800,
         "category": "System",
@@ -810,6 +839,39 @@
           "required": true,
           "read_only": false
         }
+      },
+      "SOCIAL_AUTH_OIDC_KEY": {
+        "type": "string",
+        "label": "OIDC Key",
+        "help_text": "The OIDC key (Client ID) from your IDP.",
+        "category": "Generic OIDC",
+        "category_slug": "oidc",
+        "default": ""
+      },
+      "SOCIAL_AUTH_OIDC_SECRET": {
+        "type": "string",
+        "label": "OIDC Secret",
+        "help_text": "The OIDC secret (Client Secret) from your IDP.",
+        "category": "Generic OIDC",
+        "category_slug": "oidc",
+        "default": ""
+      },
+      "SOCIAL_AUTH_OIDC_OIDC_ENDPOINT": {
+        "type": "string",
+        "label": "OIDC Provider URL",
+        "help_text": "The URL for your OIDC provider, e.g.: http(s)://hostname/.",
+        "category": "Generic OIDC",
+        "category_slug": "oidc",
+        "default": ""
+      },
+      "SOCIAL_AUTH_OIDC_VERIFY_SSL": {
+        "type": "boolean",
+        "required": false,
+        "label": "Verify OIDC Provider Certificate",
+        "help_text": "Verify the OIDV provider ssl certificate.",
+        "category": "Generic OIDC",
+        "category_slug": "oidc",
+        "default": true
       },
       "AUTH_LDAP_SERVER_URI": {
         "type": "string",
@@ -3816,7 +3878,7 @@
       "REDHAT_USERNAME": {
         "type": "string",
         "label": "Red Hat customer username",
-        "help_text": "This username is used to send data to Insights for Ansible Automation Platform",
+        "help_text": "This username is used to send data to Automation Analytics",
         "category": "System",
         "category_slug": "system",
         "defined_in_file": false
@@ -3824,7 +3886,7 @@
       "REDHAT_PASSWORD": {
         "type": "string",
         "label": "Red Hat customer password",
-        "help_text": "This password is used to send data to Insights for Ansible Automation Platform",
+        "help_text": "This password is used to send data to Automation Analytics",
         "category": "System",
         "category_slug": "system",
         "defined_in_file": false
@@ -3847,8 +3909,8 @@
       },
       "AUTOMATION_ANALYTICS_URL": {
         "type": "string",
-        "label": "Insights for Ansible Automation Platform upload URL",
-        "help_text": "This setting is used to to configure the upload URL for data collection for Red Hat Insights.",
+        "label": "Automation Analytics upload URL",
+        "help_text": "This setting is used to to configure the upload URL for data collection for Automation Analytics.",
         "category": "System",
         "category_slug": "system",
         "defined_in_file": false
@@ -3933,10 +3995,30 @@
           "type": "string"
         }
       },
+      "GALAXY_TASK_ENV": {
+        "type": "nested object",
+         "required": true,
+        "label": "Environment Variables for Galaxy Commands",
+         "help_text": "Additional environment variables set for invocations of ansible-galaxy within project updates. Useful if you must use a proxy server for ansible-galaxy but not git.",
+         "category": "Jobs",
+         "category_slug": "jobs",
+         "placeholder": {
+              "HTTP_PROXY": "myproxy.local:8080"
+          },
+         "default": {
+             "ANSIBLE_FORCE_COLOR": "false",
+              "GIT_SSH_COMMAND": "ssh -o StrictHostKeyChecking=no"
+        },
+          "child": {
+            "type": "string",
+              "required": true,
+            "read_only": false
+        }
+       },
       "INSIGHTS_TRACKING_STATE": {
         "type": "boolean",
-        "label": "Gather data for Insights for Ansible Automation Platform",
-        "help_text": "Enables the service to gather data on automation and send it to Red Hat Insights.",
+        "label": "Gather data for Automation Analytics",
+        "help_text": "Enables the service to gather data on automation and send it to Automation Analytics.",
         "category": "System",
         "category_slug": "system",
         "defined_in_file": false
@@ -3969,6 +4051,14 @@
         "type": "boolean",
         "label": "Follow symlinks",
         "help_text": "Follow symbolic links when scanning for playbooks. Be aware that setting this to True can lead to infinite recursion if a link points to a parent directory of itself.",
+        "category": "Jobs",
+        "category_slug": "jobs",
+        "defined_in_file": false
+      },
+      "AWX_MOUNT_ISOLATED_PATHS_ON_K8S": {
+        "type": "boolean",
+        "label": "Expose host paths for Container Groups",
+        "help_text": "Expose paths via hostPath for the Pods created by a Container Group. HostPath volumes present many security risks, and it is a best practice to avoid the use of HostPaths when possible. ",
         "category": "Jobs",
         "category_slug": "jobs",
         "defined_in_file": false
@@ -4241,21 +4331,21 @@
       },
       "AUTOMATION_ANALYTICS_LAST_GATHER": {
         "type": "datetime",
-        "label": "Last gather date for Insights for Ansible Automation Platform.",
+        "label": "Last gather date for Automation Analytics.",
         "category": "System",
         "category_slug": "system",
         "defined_in_file": false
       },
       "AUTOMATION_ANALYTICS_LAST_ENTRIES": {
         "type": "string",
-        "label": "Last gathered entries from the data collection service of Insights for Ansible Automation Platform",
+        "label": "Last gathered entries from the data collection service of Automation Analytics",
         "category": "System",
         "category_slug": "system",
         "defined_in_file": false
       },
       "AUTOMATION_ANALYTICS_GATHER_INTERVAL": {
         "type": "integer",
-        "label": "Insights for Ansible Automation Platform Gather Interval",
+        "label": "Automation Analytics Gather Interval",
         "help_text": "Interval (in seconds) between data gathering.",
         "min_value": 1800,
         "category": "System",
@@ -4427,6 +4517,38 @@
         "child": {
           "type": "string"
         }
+      },
+      "SOCIAL_AUTH_OIDC_KEY": {
+        "type": "string",
+        "label": "OIDC Key",
+        "help_text": "The OIDC key (Client ID) from your IDP.",
+        "category": "Generic OIDC",
+        "category_slug": "oidc",
+        "default": ""
+      },
+      "SOCIAL_AUTH_OIDC_SECRET": {
+        "type": "string",
+        "label": "OIDC Secret",
+        "help_text": "The OIDC secret (Client Secret) from your IDP.",
+        "category": "Generic OIDC",
+        "category_slug": "oidc",
+        "default": ""
+      },
+      "SOCIAL_AUTH_OIDC_OIDC_ENDPOINT": {
+        "type": "string",
+        "label": "OIDC Provider URL",
+        "help_text": "The URL for your OIDC provider, e.g.: http(s)://hostname/.",
+        "category": "Generic OIDC",
+        "category_slug": "oidc",
+        "default": ""
+      },
+      "SOCIAL_AUTH_OIDC_VERIFY_SSL": {
+        "type": "boolean",
+        "label": "Verify OIDC Provider Certificate",
+        "help_text": "Verify the OIDV provider ssl certificate.",
+        "category": "Generic OIDC",
+        "category_slug": "oidc",
+        "default": true
       },
       "AUTH_LDAP_SERVER_URI": {
         "type": "string",

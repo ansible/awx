@@ -31,7 +31,9 @@ function SmartInventoryHostListItem({
         }}
       />
       <Td dataLabel={t`Name`}>
-        <Link to={`${detailUrl}`}>{host.name}</Link>
+        <Link to={`${detailUrl}`}>
+          <b>{host.name}</b>
+        </Link>
       </Td>
       <Td dataLabel={t`Recent jobs`}>
         <Sparkline jobs={recentPlaybookJobs} />

@@ -1,3 +1,6 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 msgid ""
@@ -8,8 +11,7 @@ msgstr ""
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: es \n"
-"MIME-Version: 1.0\n"
+"Language: \n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
@@ -21,9 +23,7 @@ msgstr "Tiempo de inactividad fuerza desconexión"
 msgid ""
 "Number of seconds that a user is inactive before they will need to login "
 "again."
-msgstr ""
-"Número de segundos que un usuario es inactivo antes de que ellos vuelvan a "
-"conectarse de nuevo."
+msgstr "Número de segundos que un usuario es inactivo antes de que ellos vuelvan a conectarse de nuevo."
 
 #: awx/api/conf.py:21 awx/api/conf.py:31 awx/api/conf.py:42 awx/api/conf.py:50
 #: awx/api/conf.py:70 awx/api/conf.py:85 awx/api/conf.py:96 awx/sso/conf.py:105
@@ -45,9 +45,7 @@ msgstr "Número máximo de sesiones activas en simultáneo"
 msgid ""
 "Maximum number of simultaneous logged in sessions a user may have. To "
 "disable enter -1."
-msgstr ""
-"Número máximo de sesiones activas en simultáneo que un usuario puede tener. "
-"Para deshabilitar, introduzca -1."
+msgstr "Número máximo de sesiones activas en simultáneo que un usuario puede tener. Para deshabilitar, introduzca -1."
 
 #: awx/api/conf.py:37
 msgid "Disable the built-in authentication system"
@@ -58,10 +56,7 @@ msgid ""
 "Controls whether users are prevented from using the built-in authentication "
 "system. You probably want to do this if you are using an LDAP or SAML "
 "integration."
-msgstr ""
-"Controla si se impide que los usuarios utilicen el sistema de autenticación "
-"integrado. Probablemente desee hacer esto si está usando una integración de "
-"LDAP o SAML."
+msgstr "Controla si se impide que los usuarios utilicen el sistema de autenticación integrado. Probablemente desee hacer esto si está usando una integración de LDAP o SAML."
 
 #: awx/api/conf.py:48
 msgid "Enable HTTP Basic Auth"
@@ -83,13 +78,7 @@ msgid ""
 "authorization codes in the number of seconds, and "
 "`REFRESH_TOKEN_EXPIRE_SECONDS`, the duration of refresh tokens, after "
 "expired access tokens, in the number of seconds."
-msgstr ""
-"Diccionario para personalizar los tiempos de espera de OAuth2; los elementos "
-"disponibles son `ACCESS_TOKEN_EXPIRE_SECONDS`, la duración de los tokens de "
-"acceso en cantidad de segundos; `AUTHORIZATION_CODE_EXPIRE_SECONDS`, la "
-"duración de los códigos de autorización en cantidad de segundos; y "
-"`REFRESH_TOKEN_EXPIRE_SECONDS`, la duración de los tokens de actualización, "
-"después de los tokens de acceso expirados, en cantidad de segundos."
+msgstr "Diccionario para personalizar los tiempos de espera de OAuth2; los elementos disponibles son `ACCESS_TOKEN_EXPIRE_SECONDS`, la duración de los tokens de acceso en cantidad de segundos; `AUTHORIZATION_CODE_EXPIRE_SECONDS`, la duración de los códigos de autorización en cantidad de segundos; y `REFRESH_TOKEN_EXPIRE_SECONDS`, la duración de los tokens de actualización, después de los tokens de acceso expirados, en cantidad de segundos."
 
 #: awx/api/conf.py:78
 msgid "Allow External Users to Create OAuth2 Tokens"
@@ -101,11 +90,7 @@ msgid ""
 "Radius, and others) are not allowed to create OAuth2 tokens. To change this "
 "behavior, enable this setting. Existing tokens will not be deleted when this "
 "setting is toggled off."
-msgstr ""
-"Por motivos de seguridad, los usuarios de proveedores de autenticación "
-"externos (LDAP, SAML, SSO, Radius y otros) no tienen permitido crear tokens "
-"de OAuth2. Habilite este ajuste para cambiar este comportamiento. Los tokens "
-"existentes no se eliminarán cuando se desactive este ajuste."
+msgstr "Por motivos de seguridad, los usuarios de proveedores de autenticación externos (LDAP, SAML, SSO, Radius y otros) no tienen permitido crear tokens de OAuth2. Habilite este ajuste para cambiar este comportamiento. Los tokens existentes no se eliminarán cuando se desactive este ajuste."
 
 #: awx/api/conf.py:94
 msgid "Login redirect override URL"
@@ -115,10 +100,7 @@ msgstr "URL de invalidación de redireccionamiento de inicio de sesión"
 msgid ""
 "URL to which unauthorized users will be redirected to log in.  If blank, "
 "users will be sent to the login page."
-msgstr ""
-"URL a la que los usuarios no autorizados serán redirigidos para iniciar "
-"sesión. Si está en blanco, los usuarios serán enviados a la página de inicio "
-"de sesión."
+msgstr "URL a la que los usuarios no autorizados serán redirigidos para iniciar sesión. Si está en blanco, los usuarios serán enviados a la página de inicio de sesión."
 
 #: awx/api/conf.py:114
 msgid "There are no remote authentication systems configured."
@@ -167,17 +149,13 @@ msgstr "ID{field_name} no válido: {field_id}"
 msgid ""
 "Cannot apply role_level filter to this list because its model does not use "
 "roles for access control."
-msgstr ""
-"No se puede aplicar el filtro role_level a esta lista debido a que su modelo "
-"no usa roles para el control de acceso."
+msgstr "No se puede aplicar el filtro role_level a esta lista debido a que su modelo no usa roles para el control de acceso."
 
 #: awx/api/generics.py:179
 msgid ""
 "You did not use correct Content-Type in your HTTP request. If you are using "
 "our REST API, the Content-Type must be application/json"
-msgstr ""
-"No utilizó el Tipo de contenido correcto en su solicitud HTTP. Si está "
-"usando nuestra API REST, el Tipo de contenido debe ser aplicación/json."
+msgstr "No utilizó el Tipo de contenido correcto en su solicitud HTTP. Si está usando nuestra API REST, el Tipo de contenido debe ser aplicación/json."
 
 #: awx/api/generics.py:220
 msgid " To establish a login session, visit"
@@ -223,9 +201,7 @@ msgstr "Estructura de datos con URLs de recursos relacionados."
 msgid ""
 "Data structure with name/description for related resources.  The output for "
 "some objects may be limited for performance reasons."
-msgstr ""
-"Estructura de datos con nombre/descripción de los recursos relacionados. La "
-"salida de algunos objetos puede estar limitada por motivos de rendimiento."
+msgstr "Estructura de datos con nombre/descripción de los recursos relacionados. La salida de algunos objetos puede estar limitada por motivos de rendimiento."
 
 #: awx/api/metadata.py:75
 msgid "Timestamp when this {} was created."
@@ -248,17 +224,14 @@ msgstr "Error de análisis JSON; no es un objeto JSON"
 msgid ""
 "JSON parse error - %s\n"
 "Possible cause: trailing comma."
-msgstr ""
-"Error de análisis JSON - %s\n"
+msgstr "Error de análisis JSON - %s\n"
 "Posible causa: coma final."
 
 #: awx/api/serializers.py:205
 msgid ""
 "The original object is already named {}, a copy from it cannot have the same "
 "name."
-msgstr ""
-"El objeto original ya tiene el nombre {}, por lo que una copia de este no "
-"puede tener el mismo nombre."
+msgstr "El objeto original ya tiene el nombre {}, por lo que una copia de este no puede tener el mismo nombre."
 
 #: awx/api/serializers.py:334
 #, python-format
@@ -301,9 +274,7 @@ msgstr "Plantilla de trabajo"
 msgid ""
 "Indicates whether all of the events generated by this unified job have been "
 "saved to the database."
-msgstr ""
-"Indica si todos los eventos generados por esta tarea unificada se guardaron "
-"en la base de datos."
+msgstr "Indica si todos los eventos generados por esta tarea unificada se guardaron en la base de datos."
 
 #: awx/api/serializers.py:939
 msgid "Write-only field used to change the password."
@@ -324,8 +295,7 @@ msgstr "No se puede cambiar %s en el usuario gestionado por LDAP."
 
 #: awx/api/serializers.py:1153
 msgid "Must be a simple space-separated string with allowed scopes {}."
-msgstr ""
-"Debe ser una cadena simple separada por espacios con alcances permitidos {}."
+msgstr "Debe ser una cadena simple separada por espacios con alcances permitidos {}."
 
 #: awx/api/serializers.py:1238
 msgid "Authorization Grant Type"
@@ -378,9 +348,7 @@ msgstr "SCM track_submodules solo puede usarse con proyectos git."
 msgid ""
 "Only Container Registry credentials can be associated with an Execution "
 "Environment"
-msgstr ""
-"Solo las credenciales del registro de contenedores pueden asociarse a un "
-"entorno de ejecución"
+msgstr "Solo las credenciales del registro de contenedores pueden asociarse a un entorno de ejecución"
 
 #: awx/api/serializers.py:1440
 msgid "Cannot change the organization of an execution environment"
@@ -390,9 +358,7 @@ msgstr "No se puede modificar la organización de un entorno de ejecución"
 msgid ""
 "One or more job templates depend on branch override behavior for this "
 "project (ids: {})."
-msgstr ""
-"Una o más plantillas de trabajo dependen del comportamiento de invalidación "
-"de ramas para este proyecto (ids: {})."
+msgstr "Una o más plantillas de trabajo dependen del comportamiento de invalidación de ramas para este proyecto (ids: {})."
 
 #: awx/api/serializers.py:1530
 msgid "Update options must be set to false for manual projects."
@@ -406,9 +372,7 @@ msgstr "Colección de playbooks disponibles dentro de este proyecto."
 msgid ""
 "Array of inventory files and directories available within this project, not "
 "comprehensive."
-msgstr ""
-"Colección de archivos de inventario y directorios disponibles dentro de este "
-"proyecto, no global."
+msgstr "Colección de archivos de inventario y directorios disponibles dentro de este proyecto, no global."
 
 #: awx/api/serializers.py:1599 awx/api/serializers.py:3098
 #: awx/api/serializers.py:3311
@@ -560,7 +524,7 @@ msgstr "Playbook no encontrado para el proyecto."
 
 #: awx/api/serializers.py:2842
 msgid "Must select playbook for project."
-msgstr "Debe seleccionar un playbook para el proyecto"
+msgstr "Debe seleccionar un playbook para el proyecto."
 
 #: awx/api/serializers.py:2844 awx/api/serializers.py:2846
 msgid "Project does not allow overriding branch."
@@ -893,8 +857,7 @@ msgid "Containerized instances may not be managed via the API"
 msgstr "Las instancias contenedorizadas no pueden ser gestionadas a través de la API."
 
 #: awx/api/serializers.py:4919 awx/api/serializers.py:4922
-#, fuzzy, python-format
-#| msgid "tower instance group name may not be changed."
+#, python-format
 msgid "%s instance group name may not be changed."
 msgstr "El nombre del grupo de instancia %s no puede modificarse."
 
@@ -1049,8 +1012,6 @@ msgid ""
 msgstr "No puede asignar credenciales de acceso a un equipo cuando el campo de organización no está establecido o pertenezca a una organización diferente."
 
 #: awx/api/views/__init__.py:720
-#, fuzzy
-#| msgid "The instance that managed the execution environment."
 msgid "Only the 'pull' field can be edited for managed execution environments."
 msgstr "Sólo se puede editar el campo \"pull\" para los entornos de ejecución gestionados."
 
@@ -2087,8 +2048,6 @@ msgid "Unique identifier for an installation"
 msgstr "Identificador único para una instalación"
 
 #: awx/main/conf.py:183
-#, fuzzy
-#| msgid "The Instance group the job was run under"
 msgid "The instance group where control plane tasks run"
 msgstr "Grupo de instancias donde se ejecutan las tareas del plano de control"
 
@@ -2796,8 +2755,6 @@ msgid "The identifier for the secret e.g., /some/identifier"
 msgstr "El identificador para el secreto; por ejemplo, /some/identifier"
 
 #: awx/main/credential_plugins/dsv.py:12
-#, fuzzy
-#| msgid "Tenant ID"
 msgid "Tenant"
 msgstr "Inquilino"
 
@@ -2816,8 +2773,6 @@ msgid ""
 msgstr "El TLD del inquilino, por ejemplo, \"com\" cuando la URL es https://ex.secretservercloud.com"
 
 #: awx/main/credential_plugins/dsv.py:34
-#, fuzzy
-#| msgid "Secret Name"
 msgid "Secret Path"
 msgstr "Ruta secreta"
 
@@ -2826,8 +2781,6 @@ msgid "The secret path e.g. /test/secret1"
 msgstr "La ruta secreta, por ejemplo, /test/secret1"
 
 #: awx/main/credential_plugins/dsv.py:46
-#, fuzzy
-#| msgid "Job Template"
 msgid "URL template"
 msgstr "Plantilla URL"
 
@@ -2960,8 +2913,6 @@ msgid ""
 msgstr "Principales válidos (ya sea nombres de usuario o nombres de host) para los que se debería firmar el certificado:"
 
 #: awx/main/credential_plugins/tss.py:10
-#, fuzzy
-#| msgid "Auth Server URL"
 msgid "Secret Server URL"
 msgstr "URL del servidor secreto"
 
@@ -2972,8 +2923,6 @@ msgid ""
 msgstr "La URL base del servidor secreto, por ejemplo, https://myserver/SecretServer o https://mytenant.secretservercloud.com"
 
 #: awx/main/credential_plugins/tss.py:17
-#, fuzzy
-#| msgid "Red Hat customer username"
 msgid "The (Application) user username"
 msgstr "El nombre de usuario (de la aplicación)"
 
@@ -2995,20 +2944,14 @@ msgid "The corresponding password"
 msgstr "La contraseña correspondiente"
 
 #: awx/main/credential_plugins/tss.py:31
-#, fuzzy
-#| msgid "Secret Key"
 msgid "Secret ID"
 msgstr "Identificación secreta"
 
 #: awx/main/credential_plugins/tss.py:32
-#, fuzzy
-#| msgid "The name of the secret to look up."
 msgid "The integer ID of the secret"
 msgstr "El ID entero del secreto"
 
 #: awx/main/credential_plugins/tss.py:37
-#, fuzzy
-#| msgid "Secret Key"
 msgid "Secret Field"
 msgstr "Campo secreto"
 
@@ -3568,22 +3511,14 @@ msgstr "Ruta de archivo absoluta al archivo CA por usar (opcional)"
 
 #: awx/main/models/credential/__init__.py:1023
 #: awx/main/models/credential/__init__.py:1029 awx/main/models/inventory.py:813
-#, fuzzy
-#| msgid "Gather data for Insights for Ansible Automation Platform"
 msgid "Red Hat Ansible Automation Platform"
 msgstr "Plataforma Red Hat Ansible Automation"
 
 #: awx/main/models/credential/__init__.py:1031
-#, fuzzy
-#| msgid "The Ansible Tower base URL to authenticate with."
 msgid "Red Hat Ansible Automation Platform base URL to authenticate with."
 msgstr "URL base de Red Hat Ansible Automation Platform para autenticar."
 
 #: awx/main/models/credential/__init__.py:1038
-#, fuzzy
-#| msgid ""
-#| "The Ansible Tower user to authenticate as.This should not be set if an "
-#| "OAuth token is being used."
 msgid ""
 "Red Hat Ansible Automation Platform username id to authenticate as.This "
 "should not be set if an OAuth token is being used."
@@ -4488,7 +4423,7 @@ msgstr "El número de segundos desde de que la última actualización del proyec
 msgid ""
 "Allow changing the SCM branch or revision in a job template that uses this "
 "project."
-msgstr "Permitir el cambio de la rama o revisión del SCM en una plantilla de trabajo que utilice este proyecto."
+msgstr "Permitir el cambio de la rama o revisión de SCM en una plantilla de trabajo que utilice este proyecto."
 
 #: awx/main/models/projects.py:294
 msgid "The last revision fetched by a project update"
@@ -4925,7 +4860,7 @@ msgid "Exception connecting to PagerDuty: {}"
 msgstr "Excepción conectando a PagerDuty: {}"
 
 #: awx/main/notifications/pagerduty_backend.py:87
-#: awx/main/notifications/slack_backend.py:48
+#: awx/main/notifications/slack_backend.py:49
 #: awx/main/notifications/twilio_backend.py:47
 msgid "Exception sending messages: {}"
 msgstr "Excepción enviando mensajes: {}"
@@ -5181,7 +5116,7 @@ msgstr "Al menos un certificado es necesario."
 msgid ""
 "At least %(min_certs)d certificates are required, only %(cert_count)d "
 "provided."
-msgstr "Se requieren al menos %(min_certs)d certificados, sólo %(cert_count)d proporcionados."
+msgstr "Al menos %(min_certs)d certificados son necesarios, solo se proporcionó %(cert_count)d."
 
 #: awx/main/validators.py:152
 #, python-format
@@ -5195,8 +5130,7 @@ msgid ""
 msgstr "No se permiten más de %(max_certs)d certificados, %(cert_count)d proporcionado."
 
 #: awx/main/validators.py:289
-#, fuzzy, python-brace-format
-#| msgid "The container image to be used for execution."
+#, python-brace-format
 msgid "The container image name {value} is not valid"
 msgstr "El nombre de la imagen del contenedor {value} no es válido"
 
@@ -5666,17 +5600,17 @@ msgstr "La clave secreta OAuth2 (Clave secreta del cliente) from your GitHub org
 
 #: awx/sso/conf.py:751
 msgid "GitHub Organization Name"
-msgstr "Nombre de la organización de GitHub"
+msgstr "Nombre para la organización GitHub"
 
 #: awx/sso/conf.py:752
 msgid ""
 "The name of your GitHub organization, as used in your organization's URL: "
 "https://github.com/<yourorg>/."
-msgstr "El nombre de su organización de GitHub, como se utiliza en la URL de su organización: https://github.com/<votreorg>/."
+msgstr "El nombre de su organización de GitHub, como se utiliza en la URL de su organización: https://github.com/<yourorg>/."
 
 #: awx/sso/conf.py:762
 msgid "GitHub Organization OAuth2 Organization Map"
-msgstr "Mapa de organización de OAuth2 de la organización de GitHub"
+msgstr "Mapa de organización OAuth2 para organizaciones GitHub"
 
 #: awx/sso/conf.py:774
 msgid "GitHub Organization OAuth2 Team Map"
@@ -5684,7 +5618,7 @@ msgstr "Mapa de equipos OAuth2 para equipos GitHub"
 
 #: awx/sso/conf.py:790
 msgid "GitHub Team OAuth2 Callback URL"
-msgstr "URL de devolución de OAuth2 del equipo de GitHub"
+msgstr "URL callback OAuth2 para los equipos GitHub"
 
 #: awx/sso/conf.py:792 awx/sso/conf.py:1060
 msgid ""
@@ -5692,12 +5626,12 @@ msgid ""
 "<yourorg>/settings/applications and obtain an OAuth2 key (Client ID) and "
 "secret (Client Secret). Provide this URL as the callback URL for your "
 "application."
-msgstr "Cree una aplicación propiedad de la organización en https://github.com/organizations/<votreorg>/settings/applications y obtenga una clave de OAuth2 (ID del cliente) y secreta (clave secreta de cliente). Proporcione esta URL como URL de devolución para su aplicación."
+msgstr "Cree una aplicación propiedad de la organización en https://github.com/organizations/<yourorg>/settings/applications y obtenga una clave de OAuth2 (ID del cliente) y secreta (clave secreta de cliente). Proporcione esta URL como URL de devolución para su aplicación."
 
 #: awx/sso/conf.py:797 awx/sso/conf.py:809 awx/sso/conf.py:820
 #: awx/sso/conf.py:832 awx/sso/conf.py:843 awx/sso/conf.py:855
 msgid "GitHub Team OAuth2"
-msgstr "OAuth2 de equipo de GitHub"
+msgstr "OAuth2 para equipos GitHub"
 
 #: awx/sso/conf.py:807
 msgid "GitHub Team OAuth2 Key"
@@ -5828,7 +5762,7 @@ msgstr "Nombre de la organización de GitHub Enterprise"
 msgid ""
 "The name of your GitHub Enterprise organization, as used in your "
 "organization's URL: https://github.com/<yourorg>/."
-msgstr "El nombre de su organización de GitHub Enterprise, como se utiliza en la URL de su organización: https://github.com/<votreorg>/."
+msgstr "El nombre de su organización de GitHub Enterprise, como se utiliza en la URL de su organización: https://github.com/<yourorg>/."
 
 #: awx/sso/conf.py:1030
 msgid "GitHub Enterprise Organization OAuth2 Organization Map"
@@ -6304,67 +6238,3 @@ msgstr "%s se está actualizando."
 #: awx/ui/urls.py:24
 msgid "This page will refresh when complete."
 msgstr "Esta página se actualizará cuando se complete."
-
-#~ msgid "SSLError while trying to connect to {}"
-#~ msgstr "SSLError al intentar conectarse a {}"
-
-#~ msgid "Request to {} timed out."
-#~ msgstr "El tiempo de solicitud {} caducó."
-
-#~ msgid "Unknown exception {} while trying to GET {}"
-#~ msgstr "Excepción desconocida {} al intentar usar GET {}"
-
-#~ msgid ""
-#~ "Unauthorized access. Please check your Insights Credential username and "
-#~ "password."
-#~ msgstr ""
-#~ "Acceso no autorizado. Verifique su nombre de usuario y contraseña de "
-#~ "Insights."
-
-#~ msgid ""
-#~ "Failed to access the Insights API at URL {}. Server responded with {} "
-#~ "status code and message {}"
-#~ msgstr ""
-#~ "No se pudo acceder a la API de Insights en la URL {}. El servidor "
-#~ "respondió con el código de estado {} y el mensaje {}"
-
-#~ msgid "Expected JSON response from Insights at URL {} but instead got {}"
-#~ msgstr ""
-#~ "Respuesta JSON esperada de Insights en la URL {}; en cambio, se recibió {}"
-
-#~ msgid ""
-#~ "Could not translate Insights system ID {} into an Insights platform ID."
-#~ msgstr ""
-#~ "No se pudo traducir el ID del sistema Insights {} en un ID de plataforma "
-#~ "de Insights."
-
-#~ msgid "This host is not recognized as an Insights host."
-#~ msgstr "Este host no se reconoce como un host de Insights."
-
-#~ msgid "The Insights Credential for \"{}\" was not found."
-#~ msgstr "No se encontró la credencial de Insights para \"{}\"."
-
-#~ msgid ""
-#~ "The path to the secret stored in the secret backend e.g, /some/secret/"
-#~ msgstr ""
-#~ "La ruta al secreto almacenado en el backend de secretos; por ejemplo, /"
-#~ "some/secret/"
-
-#~ msgid "Ansible Tower"
-#~ msgstr "Ansible Tower"
-
-#~ msgid "Ansible Tower Hostname"
-#~ msgstr "Nombre de host de Ansible Tower"
-
-#~ msgid ""
-#~ "Credentials to be used by hosts belonging to this inventory when "
-#~ "accessing Red Hat Insights API."
-#~ msgstr ""
-#~ "Credenciales que utilizarán los hosts que pertenecen a este inventario "
-#~ "cuando accedan a la API de Red Hat Insights."
-
-#~ msgid "Assignment not allowed for Smart Inventory"
-#~ msgstr "Tarea no permitida para el inventario inteligente"
-
-#~ msgid "Red Hat Insights host unique identifier."
-#~ msgstr "Identificador único de host de Red Hat Insights."

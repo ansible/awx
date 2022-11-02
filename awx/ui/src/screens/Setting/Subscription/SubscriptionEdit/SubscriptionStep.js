@@ -119,36 +119,34 @@ function SubscriptionStep() {
             labelIcon={
               <Popover
                 content={
-                  <>
-                    <Trans>
-                      A subscription manifest is an export of a Red Hat
-                      Subscription. To generate a subscription manifest, go to{' '}
-                      <Button
-                        component="a"
-                        href="https://access.redhat.com/management/subscription_allocations"
-                        variant="link"
-                        target="_blank"
-                        isInline
-                        ouiaId="subscription-allocations-link"
-                      >
-                        access.redhat.com
-                      </Button>
-                      . For more information, see the{' '}
-                      <Button
-                        component="a"
-                        href={`${getDocsBaseUrl(
-                          config
-                        )}/html/userguide/import_license.html`}
-                        variant="link"
-                        target="_blank"
-                        ouiaId="import-license-link"
-                        isInline
-                      >
-                        User Guide
-                      </Button>
-                      .
-                    </Trans>
-                  </>
+                  <Trans>
+                    A subscription manifest is an export of a Red Hat
+                    Subscription. To generate a subscription manifest, go to{' '}
+                    <Button
+                      component="a"
+                      href="https://access.redhat.com/management/subscription_allocations"
+                      variant="link"
+                      target="_blank"
+                      isInline
+                      ouiaId="subscription-allocations-link"
+                    >
+                      access.redhat.com
+                    </Button>
+                    . For more information, see the{' '}
+                    <Button
+                      component="a"
+                      href={`${getDocsBaseUrl(
+                        config
+                      )}/html/userguide/import_license.html`}
+                      variant="link"
+                      target="_blank"
+                      ouiaId="import-license-link"
+                      isInline
+                    >
+                      User Guide
+                    </Button>
+                    .
+                  </Trans>
                 }
               />
             }
@@ -229,7 +227,7 @@ function SubscriptionStep() {
                   username: username.value,
                   password: password.value,
                 }}
-                selectedSubscripion={subscription?.value}
+                selectedSubscription={subscription?.value}
                 onClose={closeModal}
                 onConfirm={(value) => subscriptionHelpers.setValue(value)}
               />

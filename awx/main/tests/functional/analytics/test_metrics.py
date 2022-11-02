@@ -19,8 +19,7 @@ EXPECTED_VALUES = {
     'awx_hosts_total': 1.0,
     'awx_schedules_total': 1.0,
     'awx_sessions_total': 0.0,
-    'awx_sessions_total': 0.0,
-    'awx_sessions_total': 0.0,
+    'awx_status_total': 0.0,
     'awx_running_jobs_total': 0.0,
     'awx_instance_capacity': 100.0,
     'awx_instance_consumed_capacity': 0.0,
@@ -31,6 +30,7 @@ EXPECTED_VALUES = {
     'awx_license_instance_total': 0,
     'awx_license_instance_free': 0,
     'awx_pending_jobs_total': 0,
+    'awx_database_connections_total': 1,
 }
 
 

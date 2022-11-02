@@ -4,7 +4,7 @@ import RunnableMixin from '../mixins/Runnable.mixin';
 class InventoryUpdates extends RunnableMixin(Base) {
   constructor(http) {
     super(http);
-    this.baseUrl = '/api/v2/inventory_updates/';
+    this.baseUrl = 'api/v2/inventory_updates/';
     this.createSyncCancel = this.createSyncCancel.bind(this);
   }
 

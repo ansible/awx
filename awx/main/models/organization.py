@@ -8,7 +8,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.sessions.models import Session
 from django.utils.timezone import now as tz_now
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 
 # AWX
@@ -113,13 +113,6 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
 
     def _get_related_jobs(self):
         return UnifiedJob.objects.non_polymorphic().filter(organization=self)
-
-    def create_default_galaxy_credential(self):
-        from awx.main.models import Credential
-
-        public_galaxy_credential = Credential.objects.filter(managed=True, name='Ansible Galaxy').first()
-        if public_galaxy_credential is not None and public_galaxy_credential not in self.galaxy_credentials.all():
-            self.galaxy_credentials.add(public_galaxy_credential)
 
 
 class OrganizationGalaxyCredentialMembership(models.Model):

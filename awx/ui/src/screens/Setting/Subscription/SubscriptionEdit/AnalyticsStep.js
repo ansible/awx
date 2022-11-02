@@ -31,12 +31,12 @@ function AnalyticsStep() {
       spaceItems={{ default: 'spaceItemsMd' }}
       direction={{ default: 'column' }}
     >
-      <Trans>User and Insights analytics</Trans>
+      <Trans>User and Automation Analytics</Trans>
       <p>
         <Trans>
-          By default, we collect and transmit analytics data on the serice usage
-          to Red Hat. There are two categories of data collected by the service.
-          For more information, see{' '}
+          By default, we collect and transmit analytics data on the service
+          usage to Red Hat. There are two categories of data collected by the
+          service. For more information, see{' '}
           <Button
             component="a"
             href={`${getDocsBaseUrl(
@@ -68,12 +68,12 @@ function AnalyticsStep() {
         <CheckboxField
           name="insights"
           isDisabled={!config.me.is_superuser}
-          aria-label={t`Insights for Ansible Automation Platform`}
-          label={t`Insights for Ansible Automation Platform`}
+          aria-label={t`Automation Analytics`}
+          label={t`Automation Analytics`}
           id="insights-field"
           description={t`This data is used to enhance
                    future releases of the Software and to provide
-                   Insights for Ansible Automation Platform.`}
+                   Automation Analytics.`}
         />
       </FormGroup>
       {requireCredentialFields && (
@@ -82,7 +82,7 @@ function AnalyticsStep() {
           <p>
             <Trans>
               Provide your Red Hat or Red Hat Satellite credentials to enable
-              Insights for Ansible Automation Platform.
+              Automation Analytics.
             </Trans>
           </p>
           <FormField
@@ -107,8 +107,8 @@ function AnalyticsStep() {
       <Flex alignItems={{ default: 'alignItemsCenter' }}>
         <img
           width="300"
-          src="/static/media/insights-analytics-dashboard.jpeg"
-          alt={t`Insights for Ansible Automation Platform dashboard`}
+          src="static/media/insights-analytics-dashboard.jpeg"
+          alt={t`Automation Analytics dashboard`}
         />
         <Button
           component="a"
@@ -117,9 +117,7 @@ function AnalyticsStep() {
           variant="secondary"
           ouiaId="analytics-link"
         >
-          <Trans>
-            Learn more about Insights for Ansible Automation Platform
-          </Trans>
+          <Trans>Learn more about Automation Analytics</Trans>
         </Button>
       </Flex>
     </Flex>

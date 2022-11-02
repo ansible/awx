@@ -5,7 +5,8 @@ from unittest import mock
 
 from collections import namedtuple
 
-from awx.api.views import ApiVersionRootView, JobTemplateLabelList, InventoryInventorySourcesUpdate, JobTemplateSurveySpec
+from awx.api.views.root import ApiVersionRootView
+from awx.api.views import JobTemplateLabelList, InventoryInventorySourcesUpdate, JobTemplateSurveySpec
 
 from awx.main.views import handle_error
 
@@ -23,7 +24,7 @@ class TestApiRootView:
         endpoints = [
             'ping',
             'config',
-            #'settings',
+            # 'settings',
             'me',
             'dashboard',
             'organizations',
@@ -59,7 +60,7 @@ class TestApiRootView:
 
 class TestJobTemplateLabelList:
     def test_inherited_mixin_unattach(self):
-        with mock.patch('awx.api.generics.DeleteLastUnattachLabelMixin.unattach') as mixin_unattach:
+        with mock.patch('awx.api.views.labels.LabelSubListCreateAttachDetachView.unattach') as mixin_unattach:
             view = JobTemplateLabelList()
             mock_request = mock.MagicMock()
 
@@ -69,21 +70,21 @@ class TestJobTemplateLabelList:
 
 class TestInventoryInventorySourcesUpdate:
     @pytest.mark.parametrize(
-        "can_update, can_access, is_source, is_up_on_proj, expected",
+        "can_update, can_access, is_source, expected",
         [
-            (True, True, "ec2", False, [{'status': 'started', 'inventory_update': 1, 'inventory_source': 1}]),
-            (False, True, "gce", False, [{'status': 'Could not start because `can_update` returned False', 'inventory_source': 1}]),
-            (True, False, "scm", True, [{'status': 'started', 'inventory_update': 1, 'inventory_source': 1}]),
+            (True, True, "ec2", [{'status': 'started', 'inventory_update': 1, 'inventory_source': 1}]),
+            (False, True, "gce", [{'status': 'Could not start because `can_update` returned False', 'inventory_source': 1}]),
+            (True, False, "scm", [{'status': 'started', 'inventory_update': 1, 'inventory_source': 1}]),
         ],
     )
-    def test_post(self, mocker, can_update, can_access, is_source, is_up_on_proj, expected):
+    def test_post(self, mocker, can_update, can_access, is_source, expected):
         class InventoryUpdate:
             id = 1
 
         class Project:
             name = 'project'
 
-        InventorySource = namedtuple('InventorySource', ['source', 'update_on_project_update', 'pk', 'can_update', 'update', 'source_project'])
+        InventorySource = namedtuple('InventorySource', ['source', 'pk', 'can_update', 'update', 'source_project'])
 
         class InventorySources(object):
             def all(self):
@@ -92,7 +93,6 @@ class TestInventoryInventorySourcesUpdate:
                         pk=1,
                         source=is_source,
                         source_project=Project,
-                        update_on_project_update=is_up_on_proj,
                         can_update=can_update,
                         update=lambda: InventoryUpdate,
                     )

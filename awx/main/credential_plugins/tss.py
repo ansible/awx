@@ -1,5 +1,5 @@
 from .plugin import CredentialPlugin
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from thycotic.secrets.server import PasswordGrantAuthorizer, SecretServer, ServerSecret
 
@@ -49,7 +49,7 @@ def tss_backend(**kwargs):
     secret_dict = secret_server.get_secret(kwargs['secret_id'])
     secret = ServerSecret(**secret_dict)
 
-    return secret.fields[kwargs['secret_field']]
+    return secret.fields[kwargs['secret_field']].value
 
 
 tss_plugin = CredentialPlugin(

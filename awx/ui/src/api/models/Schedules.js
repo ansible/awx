@@ -1,9 +1,11 @@
 import Base from '../Base';
+import InstanceGroupsMixin from '../mixins/InstanceGroups.mixin';
+import LabelsMixin from '../mixins/Labels.mixin';
 
-class Schedules extends Base {
+class Schedules extends InstanceGroupsMixin(LabelsMixin(Base)) {
   constructor(http) {
     super(http);
-    this.baseUrl = '/api/v2/schedules/';
+    this.baseUrl = 'api/v2/schedules/';
   }
 
   createPreview(data) {

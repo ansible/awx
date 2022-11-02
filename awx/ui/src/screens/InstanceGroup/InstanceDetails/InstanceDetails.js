@@ -12,7 +12,7 @@ import {
   Tooltip,
   Slider,
 } from '@patternfly/react-core';
-import { CaretLeftIcon } from '@patternfly/react-icons';
+import { CaretLeftIcon, OutlinedClockIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 
 import { useConfig } from 'contexts/Config';
@@ -23,11 +23,13 @@ import ErrorDetail from 'components/ErrorDetail';
 import DisassociateButton from 'components/DisassociateButton';
 import InstanceToggle from 'components/InstanceToggle';
 import { CardBody, CardActionsRow } from 'components/Card';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
 import { formatDateString } from 'util/dates';
 import RoutedTabs from 'components/RoutedTabs';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import { Detail, DetailList } from 'components/DetailList';
+import HealthCheckAlert from 'components/HealthCheckAlert';
 import StatusLabel from 'components/StatusLabel';
 import useRequest, {
   useDeleteItems,
@@ -61,11 +63,12 @@ function computeForks(memCapacity, cpuCapacity, selectedCapacityAdjustment) {
 }
 
 function InstanceDetails({ setBreadcrumb, instanceGroup }) {
-  const { me = {} } = useConfig();
+  const config = useConfig();
   const { id, instanceId } = useParams();
   const history = useHistory();
 
   const [healthCheck, setHealthCheck] = useState({});
+  const [showHealthCheckAlert, setShowHealthCheckAlert] = useState(false);
   const [forks, setForks] = useState();
 
   const {
@@ -79,7 +82,6 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
         data: { results },
       } = await InstanceGroupsAPI.readInstances(instanceGroup.id);
       let instanceDetails;
-      let healthCheckDetails;
       const isAssociated = results.some(
         ({ id: instId }) => instId === parseInt(instanceId, 10)
       );
@@ -92,7 +94,7 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
           ]);
 
         instanceDetails = details;
-        healthCheckDetails = healthCheckData;
+        setHealthCheck(healthCheckData);
       } else {
         throw new Error(
           `This instance is not associated with this instance group`
@@ -100,7 +102,6 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
       }
 
       setBreadcrumb(instanceGroup, instanceDetails);
-      setHealthCheck(healthCheckDetails);
       setForks(
         computeForks(
           instanceDetails.mem_capacity,
@@ -115,11 +116,12 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
   useEffect(() => {
     fetchDetails();
   }, [fetchDetails]);
-
   const { error: healthCheckError, request: fetchHealthCheck } = useRequest(
     useCallback(async () => {
-      const { data } = await InstancesAPI.healthCheck(instanceId);
-      setHealthCheck(data);
+      const { status } = await InstancesAPI.healthCheck(instanceId);
+      if (status === 200) {
+        setShowHealthCheckAlert(true);
+      }
     }, [instanceId])
   );
 
@@ -144,7 +146,6 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
       [instance]
     )
   );
-
   const debounceUpdateInstance = useDebounce(updateInstance, 200);
 
   const handleChangeValue = (value) => {
@@ -154,6 +155,18 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
     );
     debounceUpdateInstance({ capacity_adjustment: roundedValue });
   };
+
+  const formatHealthCheckTimeStamp = (last) => (
+    <>
+      {formatDateString(last)}
+      {instance.health_check_pending ? (
+        <>
+          {' '}
+          <OutlinedClockIcon />
+        </>
+      ) : null}
+    </>
+  );
 
   const { error, dismissError } = useDismissableError(
     disassociateError || updateInstanceError || healthCheckError
@@ -183,9 +196,14 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
     return <ContentLoading />;
   }
 
+  const isExecutionNode = instance.node_type === 'execution';
+
   return (
     <>
       <RoutedTabs tabsArray={tabsArray} />
+      {showHealthCheckAlert ? (
+        <HealthCheckAlert onSetHealthCheckAlert={setShowHealthCheckAlert} />
+      ) : null}
       <CardBody>
         <DetailList gutter="sm">
           <Detail
@@ -196,7 +214,9 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
           <Detail
             label={t`Status`}
             value={
-              <StatusLabel status={healthCheck?.errors ? 'error' : 'healthy'} />
+              instance.node_state ? (
+                <StatusLabel status={instance.node_state} />
+              ) : null
             }
           />
           <Detail
@@ -207,7 +227,22 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
           <Detail label={t`Total Jobs`} value={instance.jobs_total} />
           <Detail
             label={t`Last Health Check`}
-            value={formatDateString(healthCheck?.last_health_check)}
+            helpText={
+              <>
+                {t`Health checks are asynchronous tasks. See the`}{' '}
+                <a
+                  href={`${getDocsBaseUrl(
+                    config
+                  )}/html/administration/instances.html#health-check`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {t`documentation`}
+                </a>{' '}
+                {t`for more info.`}
+              </>
+            }
+            value={formatHealthCheckTimeStamp(instance.last_health_check)}
           />
           <Detail label={t`Node Type`} value={instance.node_type} />
           <Detail
@@ -226,7 +261,7 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
                     step={0.1}
                     value={instance.capacity_adjustment}
                     onChange={handleChangeValue}
-                    isDisabled={!me?.is_superuser || !instance.enabled}
+                    isDisabled={!config?.me?.is_superuser || !instance.enabled}
                     data-cy="slider"
                   />
                 </SliderForks>
@@ -263,22 +298,31 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
           )}
         </DetailList>
         <CardActionsRow>
-          <Tooltip content={t`Run a health check on the instance`}>
-            <Button
-              isDisabled={!me.is_superuser}
-              variant="primary"
-              ouiaId="health-check-button"
-              onClick={fetchHealthCheck}
-            >
-              {t`Health Check`}
-            </Button>
-          </Tooltip>
-          {me.is_superuser && instance.node_type !== 'control' && (
+          {isExecutionNode && (
+            <Tooltip content={t`Run a health check on the instance`}>
+              <Button
+                isDisabled={
+                  !config?.me?.is_superuser || instance.health_check_pending
+                }
+                variant="primary"
+                ouiaId="health-check-button"
+                onClick={fetchHealthCheck}
+                isLoading={instance.health_check_pending}
+                spinnerAriaLabel={t`Running health check`}
+              >
+                {instance.health_check_pending
+                  ? t`Running health check`
+                  : t`Run health check`}
+              </Button>
+            </Tooltip>
+          )}
+          {config?.me?.is_superuser && instance.node_type !== 'control' && (
             <DisassociateButton
-              verifyCannotDisassociate={!me.is_superuser}
+              verifyCannotDisassociate={instanceGroup.name === 'controlplane'}
               key="disassociate"
               onDisassociate={disassociateInstance}
               itemsToDisassociate={[instance]}
+              isProtectedInstanceGroup={instanceGroup.name === 'controlplane'}
               modalTitle={t`Disassociate instance from instance group?`}
             />
           )}

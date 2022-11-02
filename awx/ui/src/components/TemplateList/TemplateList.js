@@ -12,6 +12,7 @@ import useSelected from 'hooks/useSelected';
 import useExpanded from 'hooks/useExpanded';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import useWsTemplates from 'hooks/useWsTemplates';
+import useToast, { AlertVariant } from 'hooks/useToast';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 import AlertModal from '../AlertModal';
 import DatalistToolbar from '../DataListToolbar';
@@ -41,6 +42,8 @@ function TemplateList({ defaultParams }) {
   );
 
   const location = useLocation();
+  const { addToast, Toast, toastProps } = useToast();
+
   const {
     result: {
       results,
@@ -121,6 +124,18 @@ function TemplateList({ defaultParams }) {
       allItemsSelected: isAllSelected,
       fetchItems: fetchTemplates,
     }
+  );
+
+  const handleCopy = useCallback(
+    (newTemplateId) => {
+      addToast({
+        id: newTemplateId,
+        title: t`Template copied successfully`,
+        variant: AlertVariant.success,
+        hasTimeout: true,
+      });
+    },
+    [addToast]
   );
 
   const handleTemplateDelete = async () => {
@@ -226,6 +241,7 @@ function TemplateList({ defaultParams }) {
             <HeaderRow qsConfig={qsConfig} isExpandable>
               <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
               <HeaderCell sortKey="type">{t`Type`}</HeaderCell>
+              <HeaderCell sortKey="organization">{t`Organization`}</HeaderCell>
               <HeaderCell sortKey="last_job_run">{t`Last Ran`}</HeaderCell>
               <HeaderCell>{t`Actions`}</HeaderCell>
             </HeaderRow>
@@ -266,6 +282,7 @@ function TemplateList({ defaultParams }) {
               onSelect={() => handleSelect(template)}
               isExpanded={expanded.some((row) => row.id === template.id)}
               onExpand={() => handleExpand(template)}
+              onCopy={handleCopy}
               isSelected={selected.some((row) => row.id === template.id)}
               fetchTemplates={fetchTemplates}
               rowIndex={index}
@@ -274,6 +291,7 @@ function TemplateList({ defaultParams }) {
           emptyStateControls={(canAddJT || canAddWFJT) && addButton}
         />
       </Card>
+      <Toast {...toastProps} />
       <AlertModal
         aria-label={t`Deletion Error`}
         isOpen={deletionError}

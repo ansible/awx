@@ -4,7 +4,6 @@ from unittest import mock
 
 # AWX
 from awx.main.utils.filters import SmartFilter, ExternalLoggerEnabled
-from awx.main.models import Host
 
 # Django
 from django.db.models import Q
@@ -217,39 +216,6 @@ class TestSmartFilterQueryFromString:
     def test_search_related_fields(self, mock_get_host_model, filter_string, q_expected):
         q = SmartFilter.query_from_string(filter_string)
         assert str(q) == str(q_expected)
-
-
-class TestSmartFilterQueryFromStringNoDB:
-    @pytest.mark.parametrize(
-        "filter_string,q_expected",
-        [
-            (
-                'ansible_facts__a="true" and ansible_facts__b="true" and ansible_facts__c="true"',
-                (
-                    Q(**{u"ansible_facts__contains": {u"a": u"true"}})
-                    & Q(**{u"ansible_facts__contains": {u"b": u"true"}})
-                    & Q(**{u"ansible_facts__contains": {u"c": u"true"}})
-                ),
-            ),
-            (
-                'ansible_facts__a="true" or ansible_facts__b="true" or ansible_facts__c="true"',
-                (
-                    Q(**{u"ansible_facts__contains": {u"a": u"true"}})
-                    | Q(**{u"ansible_facts__contains": {u"b": u"true"}})
-                    | Q(**{u"ansible_facts__contains": {u"c": u"true"}})
-                ),
-            ),
-            ('search=foo', Q(Q(**{u"description__icontains": u"foo"}) | Q(**{u"name__icontains": u"foo"}))),
-            (
-                'search=foo and ansible_facts__a="null"',
-                Q(Q(**{u"description__icontains": u"foo"}) | Q(**{u"name__icontains": u"foo"})) & Q(**{u"ansible_facts__contains": {u"a": u"\"null\""}}),
-            ),
-            ('name=foo or name=bar and name=foobar', Q(name="foo") | Q(name="bar") & Q(name="foobar")),
-        ],
-    )
-    def test_does_not_invoke_db(self, filter_string, q_expected):
-        q = SmartFilter.query_from_string(filter_string)
-        assert str(q.query) == str(Host.objects.filter(q_expected).query)
 
 
 '''

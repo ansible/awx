@@ -46,7 +46,12 @@ describe('<JobDetail />', () => {
 
     // StatusIcon adds visibly hidden accessibility text " successful "
     assertDetail('Job ID', '2');
-    assertDetail('Status', 'Successful');
+    expect(wrapper.find(`Detail[label="Status"] dd`).text()).toContain(
+      'Successful'
+    );
+    expect(wrapper.find(`Detail[label="Status"] dd`).text()).toContain(
+      'Job explanation placeholder'
+    );
     assertDetail('Started', '8/8/2019, 7:24:18 PM');
     assertDetail('Finished', '8/8/2019, 7:24:50 PM');
     assertDetail('Job Template', mockJobData.summary_fields.job_template.name);
@@ -63,7 +68,6 @@ describe('<JobDetail />', () => {
       'Instance Group',
       mockJobData.summary_fields.instance_group.name
     );
-    assertDetail('Job Slice', '0/1');
     assertDetail('Credentials', 'SSH: Demo Credential');
     assertDetail('Machine Credential', 'SSH: Machine cred');
     assertDetail('Source Control Branch', 'main');
@@ -74,6 +78,7 @@ describe('<JobDetail />', () => {
     );
 
     assertDetail('Job Slice', '0/1');
+    assertDetail('Forks', '42');
 
     const credentialChip = wrapper.find(
       `Detail[label="Credentials"] CredentialChip`
@@ -98,10 +103,29 @@ describe('<JobDetail />', () => {
     const statusLabel = statusDetail.find('StatusLabel');
     expect(statusLabel.prop('status')).toEqual('successful');
 
-    const projectStatusDetail = wrapper.find('Detail[label="Project Status"]');
+    const projectStatusDetail = wrapper.find(
+      'Detail[label="Project Update Status"]'
+    );
     expect(projectStatusDetail.find('StatusLabel')).toHaveLength(1);
     const projectStatusLabel = statusDetail.find('StatusLabel');
     expect(projectStatusLabel.prop('status')).toEqual('successful');
+  });
+
+  test('should display Deleted for Inventory and Project for job type run', () => {
+    const job = {
+      ...mockJobData,
+      summary_fields: {
+        ...mockJobData.summary_fields,
+        project: null,
+        inventory: null,
+      },
+      project: null,
+      inventory: null,
+    };
+
+    wrapper = mountWithContexts(<JobDetail job={job} />);
+    expect(wrapper.find(`DeletedDetail[label="Project"]`).length).toBe(1);
+    expect(wrapper.find(`DeletedDetail[label="Inventory"]`).length).toBe(1);
   });
 
   test('should not display finished date', () => {
@@ -146,6 +170,7 @@ describe('<JobDetail />', () => {
     assertDetail('Module Name', 'command');
     assertDetail('Module Arguments', 'echo hello_world');
     assertDetail('Job Type', 'Run Command');
+    expect(wrapper.find(`Detail[label="Project"]`).length).toBe(0);
   });
 
   test('should display source data', () => {
@@ -182,6 +207,7 @@ describe('<JobDetail />', () => {
       />
     );
     assertDetail('Source', 'Sourced from Project');
+    expect(wrapper.find(`Detail[label="Project"]`).length).toBe(0);
   });
 
   test('should show schedule that launched workflow job', async () => {
@@ -189,6 +215,7 @@ describe('<JobDetail />', () => {
       <JobDetail
         job={{
           ...mockJobData,
+          type: 'workflow_job',
           launch_type: 'scheduled',
           summary_fields: {
             user_capabilities: {},
@@ -214,7 +241,7 @@ describe('<JobDetail />', () => {
     ).toHaveLength(1);
   });
 
-  test('should hide "Launched By" detail for JT launched from a workflow launched by a schedule', async () => {
+  test('should hide "Launched By" detail for JT launched from a workflow launched by a schedule', () => {
     wrapper = mountWithContexts(
       <JobDetail
         job={{
@@ -275,25 +302,6 @@ describe('<JobDetail />', () => {
     expect(errorModal.length).toBe(1);
   });
 
-  test('DELETED is shown for required Job resources that have been deleted', () => {
-    const newMockData = {
-      ...mockJobData,
-      summary_fields: {
-        ...mockJobData.summary_fields,
-        inventory: null,
-        project: null,
-      },
-    };
-    wrapper = mountWithContexts(<JobDetail job={newMockData} />);
-    const detail = wrapper.find('JobDetail');
-    async function assertMissingDetail(label) {
-      expect(detail.length).toBe(1);
-      expect(detail.find(`Detail[label="${label}"] dt`).text()).toBe(label);
-      expect(detail.find(`Detail[label="${label}"] dd`).text()).toBe('DELETED');
-    }
-    assertMissingDetail('Project');
-    assertMissingDetail('Inventory');
-  });
   test('should display Playbook Check detail', () => {
     wrapper = mountWithContexts(
       <JobDetail
@@ -335,6 +343,7 @@ describe('<JobDetail />', () => {
     expect(
       wrapper.find('Button[aria-label="Cancel Demo Job Template"]')
     ).toHaveLength(0);
+    expect(wrapper.find(`Detail[label="Project"]`).length).toBe(0);
   });
 
   test('should not show cancel job button, job completed', async () => {
@@ -538,5 +547,65 @@ describe('<JobDetail />', () => {
     assertDetail('Job Type', 'Workflow Job');
     assertDetail('Inventory', 'Demo Inventory');
     assertDetail('Job Slice Parent', 'True');
+  });
+
+  test('should not load Source', () => {
+    wrapper = mountWithContexts(
+      <JobDetail
+        job={{
+          ...mockJobData,
+          summary_fields: {
+            inventory_source: {},
+            user_capabilities: {},
+            inventory: { id: 1 },
+          },
+        }}
+        inventorySourceLabels={[]}
+      />
+    );
+    const source_detail = wrapper.find(`Detail[label="Source"]`).at(0);
+    expect(source_detail.prop('isEmpty')).toEqual(true);
+  });
+
+  test('should not load Credentials', () => {
+    wrapper = mountWithContexts(
+      <JobDetail
+        job={{
+          ...mockJobData,
+          summary_fields: {
+            user_capabilities: {},
+            credentials: [],
+          },
+        }}
+      />
+    );
+    const credentials_detail = wrapper
+      .find(`Detail[label="Credentials"]`)
+      .at(0);
+    expect(credentials_detail.prop('isEmpty')).toEqual(true);
+  });
+
+  test('should not load Job Tags', () => {
+    wrapper = mountWithContexts(
+      <JobDetail
+        job={{
+          ...mockJobData,
+          job_tags: '',
+        }}
+      />
+    );
+    expect(wrapper.find('Detail[label="Job Tags"]').length).toBe(0);
+  });
+
+  test('should not load Skip Tags', () => {
+    wrapper = mountWithContexts(
+      <JobDetail
+        job={{
+          ...mockJobData,
+          skip_tags: '',
+        }}
+      />
+    );
+    expect(wrapper.find('Detail[label="Skip Tags"]').length).toBe(0);
   });
 });

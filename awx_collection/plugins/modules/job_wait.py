@@ -31,7 +31,7 @@ options:
         - The interval in sections, to request an update from the controller.
         - For backwards compatibility if unset this will be set to the average of min and max intervals
       required: False
-      default: 1
+      default: 2
       type: float
     timeout:
       description:
@@ -96,7 +96,7 @@ def main():
         job_id=dict(type='int', required=True),
         job_type=dict(choices=['project_updates', 'jobs', 'inventory_updates', 'workflow_jobs'], default='jobs'),
         timeout=dict(type='int'),
-        interval=dict(type='float', default=1),
+        interval=dict(type='float', default=2),
     )
 
     # Create a module for ourselves

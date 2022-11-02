@@ -8,7 +8,7 @@ from django.apps import apps
 from awx.main.consumers import emit_channel_notification
 
 root_key = 'awx_metrics'
-logger = logging.getLogger('awx.main.wsbroadcast')
+logger = logging.getLogger('awx.main.analytics')
 
 
 class BaseM:
@@ -16,16 +16,22 @@ class BaseM:
         self.field = field
         self.help_text = help_text
         self.current_value = 0
+        self.metric_has_changed = False
 
-    def clear_value(self, conn):
+    def reset_value(self, conn):
         conn.hset(root_key, self.field, 0)
         self.current_value = 0
 
     def inc(self, value):
         self.current_value += value
+        self.metric_has_changed = True
 
     def set(self, value):
         self.current_value = value
+        self.metric_has_changed = True
+
+    def get(self):
+        return self.current_value
 
     def decode(self, conn):
         value = conn.hget(root_key, self.field)
@@ -34,7 +40,9 @@ class BaseM:
     def to_prometheus(self, instance_data):
         output_text = f"# HELP {self.field} {self.help_text}\n# TYPE {self.field} gauge\n"
         for instance in instance_data:
-            output_text += f'{self.field}{{node="{instance}"}} {instance_data[instance][self.field]}\n'
+            if self.field in instance_data[instance]:
+                # on upgrade, if there are stale instances, we can end up with issues where new metrics are not present
+                output_text += f'{self.field}{{node="{instance}"}} {instance_data[instance][self.field]}\n'
         return output_text
 
 
@@ -46,8 +54,10 @@ class FloatM(BaseM):
             return 0.0
 
     def store_value(self, conn):
-        conn.hincrbyfloat(root_key, self.field, self.current_value)
-        self.current_value = 0
+        if self.metric_has_changed:
+            conn.hincrbyfloat(root_key, self.field, self.current_value)
+            self.current_value = 0
+            self.metric_has_changed = False
 
 
 class IntM(BaseM):
@@ -58,8 +68,10 @@ class IntM(BaseM):
             return 0
 
     def store_value(self, conn):
-        conn.hincrby(root_key, self.field, self.current_value)
-        self.current_value = 0
+        if self.metric_has_changed:
+            conn.hincrby(root_key, self.field, self.current_value)
+            self.current_value = 0
+            self.metric_has_changed = False
 
 
 class SetIntM(BaseM):
@@ -70,10 +82,9 @@ class SetIntM(BaseM):
             return 0
 
     def store_value(self, conn):
-        # do not set value if it has not changed since last time this was called
-        if self.current_value is not None:
+        if self.metric_has_changed:
             conn.hset(root_key, self.field, self.current_value)
-            self.current_value = None
+            self.metric_has_changed = False
 
 
 class SetFloatM(SetIntM):
@@ -94,13 +105,13 @@ class HistogramM(BaseM):
         self.sum = IntM(field + '_sum', '')
         super(HistogramM, self).__init__(field, help_text)
 
-    def clear_value(self, conn):
+    def reset_value(self, conn):
         conn.hset(root_key, self.field, 0)
-        self.inf.clear_value(conn)
-        self.sum.clear_value(conn)
+        self.inf.reset_value(conn)
+        self.sum.reset_value(conn)
         for b in self.buckets_to_keys.values():
-            b.clear_value(conn)
-        super(HistogramM, self).clear_value(conn)
+            b.reset_value(conn)
+        super(HistogramM, self).reset_value(conn)
 
     def observe(self, value):
         for b in self.buckets:
@@ -136,7 +147,7 @@ class HistogramM(BaseM):
 
 
 class Metrics:
-    def __init__(self, auto_pipe_execute=True):
+    def __init__(self, auto_pipe_execute=False, instance_name=None):
         self.pipe = redis.Redis.from_url(settings.BROKER_URL).pipeline()
         self.conn = redis.Redis.from_url(settings.BROKER_URL)
         self.last_pipe_execute = time.time()
@@ -150,7 +161,12 @@ class Metrics:
         # the calling function should call .pipe_execute() explicitly
         self.auto_pipe_execute = auto_pipe_execute
         Instance = apps.get_model('main', 'Instance')
-        self.instance_name = Instance.objects.me().hostname
+        if instance_name:
+            self.instance_name = instance_name
+        elif settings.IS_TESTING():
+            self.instance_name = "awx_testing"
+        else:
+            self.instance_name = Instance.objects.my_hostname()
 
         # metric name, help_text
         METRICSLIST = [
@@ -158,14 +174,39 @@ class Metrics:
             IntM('callback_receiver_events_popped_redis', 'Number of events popped from redis'),
             IntM('callback_receiver_events_in_memory', 'Current number of events in memory (in transfer from redis to db)'),
             IntM('callback_receiver_batch_events_errors', 'Number of times batch insertion failed'),
-            FloatM('callback_receiver_events_insert_db_seconds', 'Time spent saving events to database'),
+            FloatM('callback_receiver_events_insert_db_seconds', 'Total time spent saving events to database'),
             IntM('callback_receiver_events_insert_db', 'Number of events batch inserted into database'),
+            IntM('callback_receiver_events_broadcast', 'Number of events broadcast to other control plane nodes'),
             HistogramM(
                 'callback_receiver_batch_events_insert_db', 'Number of events batch inserted into database', settings.SUBSYSTEM_METRICS_BATCH_INSERT_BUCKETS
             ),
+            SetFloatM('callback_receiver_event_processing_avg_seconds', 'Average processing time per event per callback receiver batch'),
             FloatM('subsystem_metrics_pipe_execute_seconds', 'Time spent saving metrics to redis'),
             IntM('subsystem_metrics_pipe_execute_calls', 'Number of calls to pipe_execute'),
             FloatM('subsystem_metrics_send_metrics_seconds', 'Time spent sending metrics to other nodes'),
+            SetFloatM('task_manager_get_tasks_seconds', 'Time spent in loading tasks from db'),
+            SetFloatM('task_manager_start_task_seconds', 'Time spent starting task'),
+            SetFloatM('task_manager_process_running_tasks_seconds', 'Time spent processing running tasks'),
+            SetFloatM('task_manager_process_pending_tasks_seconds', 'Time spent processing pending tasks'),
+            SetFloatM('task_manager__schedule_seconds', 'Time spent in running the entire _schedule'),
+            IntM('task_manager__schedule_calls', 'Number of calls to _schedule, after lock is acquired'),
+            SetFloatM('task_manager_recorded_timestamp', 'Unix timestamp when metrics were last recorded'),
+            SetIntM('task_manager_tasks_started', 'Number of tasks started'),
+            SetIntM('task_manager_running_processed', 'Number of running tasks processed'),
+            SetIntM('task_manager_pending_processed', 'Number of pending tasks processed'),
+            SetIntM('task_manager_tasks_blocked', 'Number of tasks blocked from running'),
+            SetFloatM('task_manager_commit_seconds', 'Time spent in db transaction, including on_commit calls'),
+            SetFloatM('dependency_manager_get_tasks_seconds', 'Time spent loading pending tasks from db'),
+            SetFloatM('dependency_manager_generate_dependencies_seconds', 'Time spent generating dependencies for pending tasks'),
+            SetFloatM('dependency_manager__schedule_seconds', 'Time spent in running the entire _schedule'),
+            IntM('dependency_manager__schedule_calls', 'Number of calls to _schedule, after lock is acquired'),
+            SetFloatM('dependency_manager_recorded_timestamp', 'Unix timestamp when metrics were last recorded'),
+            SetIntM('dependency_manager_pending_processed', 'Number of pending tasks processed'),
+            SetFloatM('workflow_manager__schedule_seconds', 'Time spent in running the entire _schedule'),
+            IntM('workflow_manager__schedule_calls', 'Number of calls to _schedule, after lock is acquired'),
+            SetFloatM('workflow_manager_recorded_timestamp', 'Unix timestamp when metrics were last recorded'),
+            SetFloatM('workflow_manager_spawn_workflow_graph_jobs_seconds', 'Time spent spawning workflow tasks'),
+            SetFloatM('workflow_manager_get_tasks_seconds', 'Time spent loading workflow tasks from db'),
         ]
         # turn metric list into dictionary with the metric name as a key
         self.METRICS = {}
@@ -175,29 +216,39 @@ class Metrics:
         # track last time metrics were sent to other nodes
         self.previous_send_metrics = SetFloatM('send_metrics_time', 'Timestamp of previous send_metrics call')
 
-    def clear_values(self):
+    def reset_values(self):
+        # intended to be called once on app startup to reset all metric
+        # values to 0
         for m in self.METRICS.values():
-            m.clear_value(self.conn)
+            m.reset_value(self.conn)
         self.metrics_have_changed = True
         self.conn.delete(root_key + "_lock")
+        for m in self.conn.scan_iter(root_key + '_instance_*'):
+            self.conn.delete(m)
 
     def inc(self, field, value):
         if value != 0:
             self.METRICS[field].inc(value)
             self.metrics_have_changed = True
-            if self.auto_pipe_execute is True and self.should_pipe_execute() is True:
+            if self.auto_pipe_execute is True:
                 self.pipe_execute()
 
     def set(self, field, value):
         self.METRICS[field].set(value)
         self.metrics_have_changed = True
-        if self.auto_pipe_execute is True and self.should_pipe_execute() is True:
+        if self.auto_pipe_execute is True:
             self.pipe_execute()
+
+    def get(self, field):
+        return self.METRICS[field].get()
+
+    def decode(self, field):
+        return self.METRICS[field].decode(self.conn)
 
     def observe(self, field, value):
         self.METRICS[field].observe(value)
         self.metrics_have_changed = True
-        if self.auto_pipe_execute is True and self.should_pipe_execute() is True:
+        if self.auto_pipe_execute is True:
             self.pipe_execute()
 
     def serialize_local_metrics(self):
@@ -245,8 +296,8 @@ class Metrics:
 
     def send_metrics(self):
         # more than one thread could be calling this at the same time, so should
-        # get acquire redis lock before sending metrics
-        lock = self.conn.lock(root_key + '_lock', thread_local=False)
+        # acquire redis lock before sending metrics
+        lock = self.conn.lock(root_key + '_lock')
         if not lock.acquire(blocking=False):
             return
         try:
@@ -262,7 +313,12 @@ class Metrics:
                 self.previous_send_metrics.set(current_time)
                 self.previous_send_metrics.store_value(self.conn)
         finally:
-            lock.release()
+            try:
+                lock.release()
+            except Exception as exc:
+                # After system failures, we might throw redis.exceptions.LockNotOwnedError
+                # this is to avoid print a Traceback, and importantly, avoid raising an exception into parent context
+                logger.warning(f'Error releasing subsystem metrics redis lock, error: {str(exc)}')
 
     def load_other_metrics(self, request):
         # data received from other nodes are stored in their own keys

@@ -57,9 +57,11 @@ function PromptWFJobTemplateDetail({ resource }) {
 
   return (
     <>
-      {summary_fields?.recent_jobs?.length > 0 && (
-        <Detail value={<Sparkline jobs={recentJobs} />} label={t`Activity`} />
-      )}
+      <Detail
+        label={t`Activity`}
+        value={<Sparkline jobs={recentJobs} />}
+        isEmpty={summary_fields?.recent_jobs?.length === 0}
+      />
       {summary_fields?.organization && (
         <Detail
           label={t`Organization`}
@@ -108,7 +110,7 @@ function PromptWFJobTemplateDetail({ resource }) {
           }
         />
       )}
-      {summary_fields?.labels?.results?.length > 0 && (
+      {summary_fields?.labels?.results && (
         <Detail
           fullWidth
           label={t`Labels`}
@@ -125,6 +127,7 @@ function PromptWFJobTemplateDetail({ resource }) {
               ))}
             </ChipGroup>
           }
+          isEmpty={summary_fields?.labels?.results?.length === 0}
         />
       )}
       {extra_vars && (

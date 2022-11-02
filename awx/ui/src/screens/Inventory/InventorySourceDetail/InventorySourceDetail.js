@@ -9,6 +9,8 @@ import {
   TextListItemVariants,
   Tooltip,
 } from '@patternfly/react-core';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
+import { useConfig } from 'contexts/Config';
 import AlertModal from 'components/AlertModal';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
@@ -26,10 +28,14 @@ import { InventorySourcesAPI } from 'api';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 import useIsMounted from 'hooks/useIsMounted';
 import { formatDateString } from 'util/dates';
+import Popover from 'components/Popover';
+import { VERBOSITY } from 'components/VerbositySelectField';
 import InventorySourceSyncButton from '../shared/InventorySourceSyncButton';
 import useWsInventorySourcesDetails from '../InventorySources/useWsInventorySourcesDetails';
+import getHelpText from '../shared/Inventory.helptext';
 
 function InventorySourceDetail({ inventorySource }) {
+  const helpText = getHelpText();
   const {
     created,
     custom_virtualenv,
@@ -44,7 +50,6 @@ function InventorySourceDetail({ inventorySource }) {
     source_vars,
     update_cache_timeout,
     update_on_launch,
-    update_on_project_update,
     verbosity,
     enabled_var,
     enabled_value,
@@ -64,6 +69,7 @@ function InventorySourceDetail({ inventorySource }) {
   } = summary_fields;
 
   const [deletionError, setDeletionError] = useState(false);
+  const config = useConfig();
   const history = useHistory();
   const isMounted = useIsMounted();
 
@@ -82,6 +88,7 @@ function InventorySourceDetail({ inventorySource }) {
     {}
   );
 
+  const docsBaseUrl = getDocsBaseUrl(config);
   useEffect(() => {
     fetchSourceChoices();
   }, [fetchSourceChoices]);
@@ -105,39 +112,30 @@ function InventorySourceDetail({ inventorySource }) {
     inventorySource.id
   );
 
-  const VERBOSITY = {
-    0: t`0 (Warning)`,
-    1: t`1 (Info)`,
-    2: t`2 (Debug)`,
-  };
-
   let optionsList = '';
-  if (
-    overwrite ||
-    overwrite_vars ||
-    update_on_launch ||
-    update_on_project_update
-  ) {
+  if (overwrite || overwrite_vars || update_on_launch) {
     optionsList = (
       <TextList component={TextListVariants.ul}>
         {overwrite && (
           <TextListItem component={TextListItemVariants.li}>
             {t`Overwrite local groups and hosts from remote inventory source`}
+            <Popover content={helpText.subFormOptions.overwrite} />
           </TextListItem>
         )}
         {overwrite_vars && (
           <TextListItem component={TextListItemVariants.li}>
             {t`Overwrite local variables from remote inventory source`}
+            <Popover content={helpText.subFormOptions.overwriteVariables} />
           </TextListItem>
         )}
         {update_on_launch && (
           <TextListItem component={TextListItemVariants.li}>
             {t`Update on launch`}
-          </TextListItem>
-        )}
-        {update_on_project_update && (
-          <TextListItem component={TextListItemVariants.li}>
-            {t`Update on project update`}
+            <Popover
+              content={helpText.subFormOptions.updateOnLaunch({
+                value: source_project,
+              })}
+            />
           </TextListItem>
         )}
       </TextList>
@@ -226,26 +224,43 @@ function InventorySourceDetail({ inventorySource }) {
         {source === 'scm' ? (
           <Detail
             label={t`Inventory file`}
+            helpText={helpText.sourcePath}
             value={source_path === '' ? t`/ (project root)` : source_path}
           />
         ) : null}
-        <Detail label={t`Verbosity`} value={VERBOSITY[verbosity]} />
+        <Detail
+          label={t`Verbosity`}
+          helpText={helpText.subFormVerbosityFields}
+          value={VERBOSITY()[verbosity]}
+        />
         <Detail
           label={t`Cache timeout`}
           value={`${update_cache_timeout} ${t`seconds`}`}
+          helpText={helpText.subFormOptions.cachedTimeOut}
         />
-        <Detail label={t`Host Filter`} value={host_filter} />
-        <Detail label={t`Enabled Variable`} value={enabled_var} />
-        <Detail label={t`Enabled Value`} value={enabled_value} />
-        {credentials?.length > 0 && (
-          <Detail
-            fullWidth
-            label={t`Credential`}
-            value={credentials.map((cred) => (
-              <CredentialChip key={cred?.id} credential={cred} isReadOnly />
-            ))}
-          />
-        )}
+        <Detail
+          label={t`Host Filter`}
+          helpText={helpText.hostFilter}
+          value={host_filter}
+        />
+        <Detail
+          label={t`Enabled Variable`}
+          helpText={helpText.enabledVariableField}
+          value={enabled_var}
+        />
+        <Detail
+          label={t`Enabled Value`}
+          helpText={helpText.enabledValue}
+          value={enabled_value}
+        />
+        <Detail
+          fullWidth
+          label={t`Credential`}
+          value={credentials?.map((cred) => (
+            <CredentialChip key={cred?.id} credential={cred} isReadOnly />
+          ))}
+          isEmpty={credentials?.length === 0}
+        />
         {optionsList && (
           <Detail fullWidth label={t`Enabled Options`} value={optionsList} />
         )}
@@ -254,6 +269,7 @@ function InventorySourceDetail({ inventorySource }) {
             label={t`Source variables`}
             rows={4}
             value={source_vars}
+            helpText={helpText.sourceVars(docsBaseUrl, source)}
             name="source_vars"
             dataCy="inventory-source-detail-variables"
           />

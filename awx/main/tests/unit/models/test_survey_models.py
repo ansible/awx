@@ -59,6 +59,38 @@ class SurveyVariableValidation:
         assert accepted == {}
         assert str(errors[0]) == "Value 5 for 'a' expected to be a string."
 
+    def test_job_template_survey_default_variable_validation(self, job_template_factory):
+        objects = job_template_factory(
+            "survey_variable_validation",
+            organization="org1",
+            inventory="inventory1",
+            credential="cred1",
+            persisted=False,
+        )
+        obj = objects.job_template
+        obj.survey_spec = {
+            "description": "",
+            "spec": [
+                {
+                    "required": True,
+                    "min": 0,
+                    "default": "2",
+                    "max": 1024,
+                    "question_description": "",
+                    "choices": "",
+                    "variable": "a",
+                    "question_name": "float_number",
+                    "type": "float",
+                }
+            ],
+            "name": "",
+        }
+
+        obj.survey_enabled = True
+        accepted, _, errors = obj.accept_or_ignore_variables({"a": 2})
+        assert accepted == {{"a": 2.0}}
+        assert not errors
+
 
 @pytest.fixture
 def job(mocker):
@@ -227,13 +259,14 @@ def test_survey_encryption_defaults(survey_spec_factory, question_type, default,
 
 
 @pytest.mark.survey
+@pytest.mark.django_db
 class TestWorkflowSurveys:
     def test_update_kwargs_survey_defaults(self, survey_spec_factory):
         "Assure that the survey default over-rides a JT variable"
         spec = survey_spec_factory('var1')
         spec['spec'][0]['default'] = 3
         spec['spec'][0]['required'] = False
-        wfjt = WorkflowJobTemplate(name="test-wfjt", survey_spec=spec, survey_enabled=True, extra_vars="var1: 5")
+        wfjt = WorkflowJobTemplate.objects.create(name="test-wfjt", survey_spec=spec, survey_enabled=True, extra_vars="var1: 5")
         updated_extra_vars = wfjt._update_unified_job_kwargs({}, {})
         assert 'extra_vars' in updated_extra_vars
         assert json.loads(updated_extra_vars['extra_vars'])['var1'] == 3
@@ -245,7 +278,7 @@ class TestWorkflowSurveys:
         spec['spec'][0]['required'] = False
         spec['spec'][1]['required'] = True
         spec['spec'][2]['required'] = False
-        wfjt = WorkflowJobTemplate(name="test-wfjt", survey_spec=spec, survey_enabled=True, extra_vars="question2: hiworld")
+        wfjt = WorkflowJobTemplate.objects.create(name="test-wfjt", survey_spec=spec, survey_enabled=True, extra_vars="question2: hiworld")
         assert wfjt.variables_needed_to_start == ['question2']
         assert not wfjt.can_start_without_user_input()
 
@@ -279,6 +312,6 @@ class TestExtraVarsNoPrompt:
         self.process_vars_and_assert(jt, provided_vars, valid)
 
     def test_wfjt_extra_vars_counting(self, provided_vars, valid):
-        wfjt = WorkflowJobTemplate(name='foo', extra_vars={'tmpl_var': 'bar'})
+        wfjt = WorkflowJobTemplate.objects.create(name='foo', extra_vars={'tmpl_var': 'bar'})
         prompted_fields, ignored_fields, errors = wfjt._accept_or_ignore_job_kwargs(extra_vars=provided_vars)
         self.process_vars_and_assert(wfjt, provided_vars, valid)

@@ -100,7 +100,7 @@ function VariablesDetail({
         {error && (
           <div
             css="color: var(--pf-global--danger-color--100);
-            font-size: var(--pf-global--FontSize--sm"
+            font-size: var(--pf-global--FontSize--sm)"
           >
             {t`Error:`} {error.message}
           </div>
@@ -154,7 +154,7 @@ VariablesDetail.propTypes = {
   label: node.isRequired,
   rows: oneOfType([number, string]),
   dataCy: string,
-  helpText: string,
+  helpText: oneOfType([node, string]),
   name: string.isRequired,
 };
 VariablesDetail.defaultProps = {

@@ -12,7 +12,7 @@ from ansible.module_utils.six.moves.http_cookiejar import CookieJar
 from ansible.module_utils.six.moves.urllib.parse import urlparse, urlencode
 from ansible.module_utils.six.moves.configparser import ConfigParser, NoOptionError
 from distutils.version import LooseVersion as Version
-from socket import gethostbyname
+from socket import getaddrinfo, IPPROTO_TCP
 import time
 import re
 from json import loads, dumps
@@ -133,22 +133,30 @@ class ControllerModule(AnsibleModule):
         # Try to parse the hostname as a url
         try:
             self.url = urlparse(self.host)
+            # Store URL prefix for later use in build_url
+            self.url_prefix = self.url.path
         except Exception as e:
             self.fail_json(msg="Unable to parse controller_host as a URL ({1}): {0}".format(self.host, e))
 
+        # Remove ipv6 square brackets
+        remove_target = '[]'
+        for char in remove_target:
+            self.url.hostname.replace(char, "")
         # Try to resolve the hostname
-        hostname = self.url.netloc.split(':')[0]
         try:
-            gethostbyname(hostname)
+            addrinfolist = getaddrinfo(self.url.hostname, self.url.port, proto=IPPROTO_TCP)
+            for family, kind, proto, canonical, sockaddr in addrinfolist:
+                sockaddr[0]
         except Exception as e:
-            self.fail_json(msg="Unable to resolve controller_host ({1}): {0}".format(hostname, e))
+            self.fail_json(msg="Unable to resolve controller_host ({1}): {0}".format(self.url.hostname, e))
 
     def build_url(self, endpoint, query_params=None):
         # Make sure we start with /api/vX
         if not endpoint.startswith("/"):
             endpoint = "/{0}".format(endpoint)
-        if not endpoint.startswith("/api/"):
-            endpoint = "/api/v2{0}".format(endpoint)
+        prefix = self.url_prefix.rstrip("/")
+        if not endpoint.startswith(prefix + "/api/"):
+            endpoint = prefix + "/api/v2{0}".format(endpoint)
         if not endpoint.endswith('/') and '?' not in endpoint:
             endpoint = "{0}/".format(endpoint)
 
@@ -589,8 +597,10 @@ class ControllerAPIModule(ControllerModule):
                 "application": None,
                 "scope": "write",
             }
+            # Preserve URL prefix
+            endpoint = self.url_prefix.rstrip('/') + '/api/v2/tokens/'
             # Post to the tokens endpoint with baisc auth to try and get a token
-            api_token_url = (self.url._replace(path='/api/v2/tokens/')).geturl()
+            api_token_url = (self.url._replace(path=endpoint)).geturl()
 
             try:
                 response = self.session.open(
@@ -893,6 +903,8 @@ class ControllerAPIModule(ControllerModule):
                     item_name = existing_item['identifier']
                 elif item_type == 'credential_input_source':
                     item_name = existing_item['id']
+                elif item_type == 'instance':
+                    item_name = existing_item['hostname']
                 else:
                     item_name = existing_item['name']
                 item_id = existing_item['id']
@@ -954,9 +966,10 @@ class ControllerAPIModule(ControllerModule):
         if self.authenticated and self.oauth_token_id:
             # Attempt to delete our current token from /api/v2/tokens/
             # Post to the tokens endpoint with baisc auth to try and get a token
+            endpoint = self.url_prefix.rstrip('/') + '/api/v2/tokens/{0}/'.format(self.oauth_token_id)
             api_token_url = (
                 self.url._replace(
-                    path='/api/v2/tokens/{0}/'.format(self.oauth_token_id), query=None  # in error cases, fail_json exists before exception handling
+                    path=endpoint, query=None  # in error cases, fail_json exists before exception handling
                 )
             ).geturl()
 
@@ -988,7 +1001,7 @@ class ControllerAPIModule(ControllerModule):
         else:
             return True
 
-    def wait_on_url(self, url, object_name, object_type, timeout=30, interval=10):
+    def wait_on_url(self, url, object_name, object_type, timeout=30, interval=2):
         # Grab our start time to compare against for the timeout
         start = time.time()
         result = self.get_endpoint(url)
@@ -1028,7 +1041,7 @@ class ControllerAPIModule(ControllerModule):
         for k in ('id', 'status', 'elapsed', 'started', 'finished'):
             self.json_output[k] = response['json'].get(k)
 
-    def wait_on_workflow_node_url(self, url, object_name, object_type, timeout=30, interval=10, **kwargs):
+    def wait_on_workflow_node_url(self, url, object_name, object_type, timeout=30, interval=2, **kwargs):
         # Grab our start time to compare against for the timeout
         start = time.time()
         result = self.get_endpoint(url, **kwargs)

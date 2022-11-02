@@ -7,6 +7,7 @@ import { CardBody } from 'components/Card';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import SmartInventoryForm from '../shared/SmartInventoryForm';
+import parseHostFilter from '../shared/utils';
 
 function SmartInventoryEdit({ inventory }) {
   const history = useHistory();
@@ -60,7 +61,8 @@ function SmartInventoryEdit({ inventory }) {
   }, [submitResult, detailsUrl, history]);
 
   const handleSubmit = async (form) => {
-    const { instance_groups, organization, ...remainingForm } = form;
+    const modifiedForm = parseHostFilter(form);
+    const { instance_groups, organization, ...remainingForm } = modifiedForm;
 
     await submitRequest(
       {

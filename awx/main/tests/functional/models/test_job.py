@@ -64,3 +64,26 @@ class TestSlicingModels:
         inventory2 = Inventory.objects.create(organization=organization, name='fooinv')
         [inventory2.hosts.create(name='foo{}'.format(i)) for i in range(3)]
         assert job_template.get_effective_slice_ct({'inventory': inventory2})
+
+    def test_effective_slice_count_prompt(self, job_template, inventory, organization):
+        job_template.inventory = inventory
+        # Add our prompt fields to the JT to allow overrides
+        job_template.ask_job_slice_count_on_launch = True
+        job_template.ask_inventory_on_launch = True
+        # Set a default value of the slice count to something low
+        job_template.job_slice_count = 2
+        # Create an inventory with 4 nodes
+        inventory2 = Inventory.objects.create(organization=organization, name='fooinv')
+        [inventory2.hosts.create(name='foo{}'.format(i)) for i in range(4)]
+        # The inventory slice count will be the min of the number of nodes (4) or the job slice (2)
+        assert job_template.get_effective_slice_ct({'inventory': inventory2}) == 2
+        # Now we are going to pass in an override (like the prompt would) and as long as that is < host count we expect that back
+        assert job_template.get_effective_slice_ct({'inventory': inventory2, 'job_slice_count': 3}) == 3
+
+    def test_slice_count_prompt_limited_by_inventory(self, job_template, inventory, organization):
+        assert inventory.hosts.count() == 0
+        job_template.inventory = inventory
+        inventory.hosts.create(name='foo')
+
+        unified_job = job_template.create_unified_job(job_slice_count=2)
+        assert isinstance(unified_job, Job)

@@ -8,11 +8,11 @@ import operator
 from collections import OrderedDict
 
 from django.conf import settings
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.template.loader import render_to_string
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -205,7 +205,7 @@ class ApiV2SubscriptionView(APIView):
             elif isinstance(exc, (ValueError, OSError)) and exc.args:
                 msg = exc.args[0]
             else:
-                logger.exception(smart_text(u"Invalid subscription submitted."), extra=dict(actor=request.user.username))
+                logger.exception(smart_str(u"Invalid subscription submitted."), extra=dict(actor=request.user.username))
             return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(validated)
@@ -246,7 +246,7 @@ class ApiV2AttachView(APIView):
                 elif isinstance(exc, (ValueError, OSError)) and exc.args:
                     msg = exc.args[0]
                 else:
-                    logger.exception(smart_text(u"Invalid subscription submitted."), extra=dict(actor=request.user.username))
+                    logger.exception(smart_str(u"Invalid subscription submitted."), extra=dict(actor=request.user.username))
                 return Response({"error": msg}, status=status.HTTP_400_BAD_REQUEST)
         for sub in validated:
             if sub['pool_id'] == pool_id:
@@ -322,7 +322,7 @@ class ApiV2ConfigView(APIView):
         try:
             data_actual = json.dumps(request.data)
         except Exception:
-            logger.info(smart_text(u"Invalid JSON submitted for license."), extra=dict(actor=request.user.username))
+            logger.info(smart_str(u"Invalid JSON submitted for license."), extra=dict(actor=request.user.username))
             return Response({"error": _("Invalid JSON")}, status=status.HTTP_400_BAD_REQUEST)
 
         license_data = json.loads(data_actual)
@@ -346,7 +346,7 @@ class ApiV2ConfigView(APIView):
             try:
                 license_data_validated = get_licenser().license_from_manifest(license_data)
             except Exception:
-                logger.warning(smart_text(u"Invalid subscription submitted."), extra=dict(actor=request.user.username))
+                logger.warning(smart_str(u"Invalid subscription submitted."), extra=dict(actor=request.user.username))
                 return Response({"error": _("Invalid License")}, status=status.HTTP_400_BAD_REQUEST)
         else:
             license_data_validated = get_licenser().validate()
@@ -357,7 +357,7 @@ class ApiV2ConfigView(APIView):
                 settings.TOWER_URL_BASE = "{}://{}".format(request.scheme, request.get_host())
             return Response(license_data_validated)
 
-        logger.warning(smart_text(u"Invalid subscription submitted."), extra=dict(actor=request.user.username))
+        logger.warning(smart_str(u"Invalid subscription submitted."), extra=dict(actor=request.user.username))
         return Response({"error": _("Invalid subscription")}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request):

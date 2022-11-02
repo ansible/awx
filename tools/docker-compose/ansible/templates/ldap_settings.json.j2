@@ -1,0 +1,52 @@
+{
+    "AUTH_LDAP_1_SERVER_URI": "ldap://{{ container_reference }}:389",
+    "AUTH_LDAP_1_BIND_DN": "cn=admin,dc=example,dc=org",
+    "AUTH_LDAP_1_BIND_PASSWORD": "admin",
+    "AUTH_LDAP_1_START_TLS": false,
+    "AUTH_LDAP_1_CONNECTION_OPTIONS": {
+        "OPT_REFERRALS": 0,
+        "OPT_NETWORK_TIMEOUT": 30
+    },
+    "AUTH_LDAP_1_USER_SEARCH": [
+        "ou=users,dc=example,dc=org",
+        "SCOPE_SUBTREE",
+        "(cn=%(user)s)"
+    ],
+    "AUTH_LDAP_1_USER_DN_TEMPLATE": "cn=%(user)s,ou=users,dc=example,dc=org",
+    "AUTH_LDAP_1_USER_ATTR_MAP": {
+        "first_name": "givenName",
+        "last_name": "sn",
+        "email": "mail"
+    },
+    "AUTH_LDAP_1_GROUP_SEARCH": [
+        "ou=groups,dc=example,dc=org",
+        "SCOPE_SUBTREE",
+        "(objectClass=groupOfNames)"
+    ],
+    "AUTH_LDAP_1_GROUP_TYPE": "MemberDNGroupType",
+    "AUTH_LDAP_1_GROUP_TYPE_PARAMS": {
+        "member_attr": "member",
+        "name_attr": "cn"
+    },
+    "AUTH_LDAP_1_REQUIRE_GROUP": "cn=awx_users,ou=groups,dc=example,dc=org",
+    "AUTH_LDAP_1_DENY_GROUP": null,
+    "AUTH_LDAP_1_USER_FLAGS_BY_GROUP": {
+        "is_superuser": [
+            "cn=awx_admins,ou=groups,dc=example,dc=org"
+        ],
+        "is_system_auditor": [
+            "cn=awx_auditors,ou=groups,dc=example,dc=org"
+        ]
+    },
+    "AUTH_LDAP_1_ORGANIZATION_MAP": {
+        "LDAP Organization": {
+            "users": true,
+            "remove_admins": false,
+            "remove_users": true,
+            "admins": [
+                "cn=awx_org_admins,ou=groups,dc=example,dc=org"
+            ]
+        }
+    },
+    "AUTH_LDAP_1_TEAM_MAP": {}
+}

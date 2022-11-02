@@ -88,7 +88,7 @@ describe('<SubscriptionEdit />', () => {
         wrapper.find('WizardNavItem[content="Mock Subscription"]').length
       ).toBe(1);
       expect(
-        wrapper.find('WizardNavItem[content="User and Insights analytics"]')
+        wrapper.find('WizardNavItem[content="User and Automation Analytics"]')
           .length
       ).toBe(1);
       expect(
@@ -254,7 +254,7 @@ describe('<SubscriptionEdit />', () => {
         wrapper.find('WizardNavItem[content="Subscription Management"]').length
       ).toBe(1);
       expect(
-        wrapper.find('WizardNavItem[content="User and Insights analytics"]')
+        wrapper.find('WizardNavItem[content="User and Automation Analytics"]')
           .length
       ).toBe(0);
       expect(

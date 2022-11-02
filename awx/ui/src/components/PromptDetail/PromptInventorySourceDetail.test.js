@@ -67,7 +67,6 @@ describe('PromptInventorySourceDetail', () => {
           </li>,
           <li>Overwrite local variables from remote inventory source</li>,
           <li>Update on launch</li>,
-          <li>Update on project update</li>,
         ])
     ).toEqual(true);
   });
@@ -78,5 +77,20 @@ describe('PromptInventorySourceDetail', () => {
       <PromptInventorySourceDetail resource={mockInvSource} />
     );
     assertDetail(wrapper, 'Organization', 'Deleted');
+  });
+
+  test('should not load Credentials', () => {
+    wrapper = mountWithContexts(
+      <PromptInventorySourceDetail
+        resource={{
+          ...mockInvSource,
+          summary_fields: {
+            credentials: [],
+          },
+        }}
+      />
+    );
+    const credentials_detail = wrapper.find(`Detail[label="Credential"]`).at(0);
+    expect(credentials_detail.prop('isEmpty')).toEqual(true);
   });
 });

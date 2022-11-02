@@ -84,20 +84,16 @@ describe('<MiscSystemDetail />', () => {
     assertDetail(wrapper, 'All Users Visible to Organization Admins', 'On');
     assertDetail(
       wrapper,
-      'Insights for Ansible Automation Platform Gather Interval',
+      'Automation Analytics Gather Interval',
       '14400 seconds'
     );
     assertDetail(
       wrapper,
-      'Insights for Ansible Automation Platform upload URL',
+      'Automation Analytics upload URL',
       'https://example.com'
     );
     assertDetail(wrapper, 'Base URL of the service', 'https://towerhost');
-    assertDetail(
-      wrapper,
-      'Gather data for Insights for Ansible Automation Platform',
-      'Off'
-    );
+    assertDetail(wrapper, 'Gather data for Automation Analytics', 'Off');
     assertDetail(
       wrapper,
       'Organization Admins Can Manage Users and Teams',
@@ -111,7 +107,7 @@ describe('<MiscSystemDetail />', () => {
     assertDetail(wrapper, 'Red Hat or Satellite username', 'name2');
     assertVariableDetail(
       wrapper,
-      'Last gathered entries from the data collection service of Insights for Ansible Automation Platform',
+      'Last gathered entries from the data collection service of Automation Analytics',
       '{\n  "foo": "2021-11-24R06:35:15.179Z"\n}'
     );
     assertVariableDetail(wrapper, 'Remote Host Headers', '[]');

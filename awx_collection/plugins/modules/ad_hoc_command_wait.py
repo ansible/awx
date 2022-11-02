@@ -30,7 +30,7 @@ options:
       description:
         - The interval in sections, to request an update from the controller.
       required: False
-      default: 1
+      default: 2
       type: float
     timeout:
       description:
@@ -90,7 +90,7 @@ def main():
     argument_spec = dict(
         command_id=dict(type='int', required=True),
         timeout=dict(type='int'),
-        interval=dict(type='float', default=1),
+        interval=dict(type='float', default=2),
     )
 
     # Create a module for ourselves

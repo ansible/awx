@@ -8,7 +8,7 @@ import logging
 from django.conf import settings
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 # Django REST Framework
 from rest_framework.exceptions import PermissionDenied
@@ -16,17 +16,18 @@ from rest_framework.response import Response
 from rest_framework import status
 
 # AWX
-from awx.main.models import (
-    ActivityStream,
-    Inventory,
-    JobTemplate,
-    Role,
-    User,
-    InstanceGroup,
-    InventoryUpdateEvent,
-    InventoryUpdate,
+from awx.main.models import ActivityStream, Inventory, JobTemplate, Role, User, InstanceGroup, InventoryUpdateEvent, InventoryUpdate
+
+from awx.api.generics import (
+    ListCreateAPIView,
+    RetrieveUpdateDestroyAPIView,
+    SubListAPIView,
+    SubListAttachDetachAPIView,
+    ResourceAccessList,
+    CopyAPIView,
 )
-from awx.api.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, SubListAPIView, SubListAttachDetachAPIView, ResourceAccessList, CopyAPIView
+from awx.api.views.labels import LabelSubListCreateAttachDetachView
+
 
 from awx.api.serializers import (
     InventorySerializer,
@@ -36,7 +37,7 @@ from awx.api.serializers import (
     InventoryUpdateEventSerializer,
     JobTemplateSerializer,
 )
-from awx.api.views.mixin import RelatedJobsPreventDeleteMixin, ControlledByScmMixin
+from awx.api.views.mixin import RelatedJobsPreventDeleteMixin
 
 from awx.api.pagination import UnifiedJobEventPagination
 
@@ -70,7 +71,7 @@ class InventoryList(ListCreateAPIView):
     serializer_class = InventorySerializer
 
 
-class InventoryDetail(RelatedJobsPreventDeleteMixin, ControlledByScmMixin, RetrieveUpdateDestroyAPIView):
+class InventoryDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
 
     model = Inventory
     serializer_class = InventorySerializer
@@ -150,6 +151,11 @@ class InventoryJobTemplateList(SubListAPIView):
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(inventory=parent)
+
+
+class InventoryLabelList(LabelSubListCreateAttachDetachView):
+
+    parent_model = Inventory
 
 
 class InventoryCopy(CopyAPIView):

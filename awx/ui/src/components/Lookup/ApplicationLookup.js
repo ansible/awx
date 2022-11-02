@@ -83,6 +83,7 @@ function ApplicationLookup({ onChange, value, label, fieldName, validate }) {
         header={t`Application`}
         value={value}
         onChange={onChange}
+        onUpdate={fetchApplications}
         onDebounce={checkApplicationName}
         fieldName={fieldName}
         validate={validate}

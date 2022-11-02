@@ -10,6 +10,7 @@ FROM quay.io/centos/centos:stream9 as builder
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
+ENV AWX_LOGGING_MODE stdout
 
 
 USER root
@@ -43,8 +44,15 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     xmlsec1-devel \
     xmlsec1-openssl-devel
 
-RUN pip3 install virtualenv
+RUN pip3 install virtualenv build
 
+{% if image_architecture == 'ppc64le'  %}
+    RUN dnf -y update && dnf install -y wget && \
+    wget https://static.rust-lang.org/dist/rust-1.41.0-powerpc64le-unknown-linux-gnu.tar.gz && \
+    tar -zxvf rust-1.41.0-powerpc64le-unknown-linux-gnu.tar.gz && \
+    cd rust-1.41.0-powerpc64le-unknown-linux-gnu && \
+    sh install.sh ;
+{% endif %}
 
 # Install & build requirements
 ADD Makefile /tmp/Makefile
@@ -67,7 +75,7 @@ RUN cd /tmp && make requirements_awx_dev
 # Use the distro provided npm to bootstrap our required version of node
 
 {% if not headless|bool %}
-RUN npm install -g n && n 14.15.1
+RUN npm install -g n && n 16.13.1
 {% endif %}
 
 # Copy source into builder, build sdist, install it into awx venv
@@ -76,8 +84,7 @@ WORKDIR /tmp/src/
 RUN make sdist && /var/lib/awx/venv/awx/bin/pip install dist/awx.tar.gz
 
 {% if not headless|bool %}
-ADD tools/ansible/roles/dockerfile/files/settings.py /etc/tower/settings.py
-RUN SKIP_PG_VERSION_CHECK=yes /var/lib/awx/venv/awx/bin/awx-manage collectstatic --noinput --clear
+RUN AWX_SETTINGS_FILE=/dev/null SKIP_SECRET_KEY_CHECK=yes SKIP_PG_VERSION_CHECK=yes /var/lib/awx/venv/awx/bin/awx-manage collectstatic --noinput --clear
 {% endif %}
 
 {% endif %}
@@ -88,6 +95,7 @@ FROM quay.io/centos/centos:stream9
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
+ENV AWX_LOGGING_MODE stdout
 
 USER root
 
@@ -100,6 +108,7 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     glibc-langpack-en \
     krb5-workstation \
     nginx \
+    "openldap >= 2.6.2-3" \
     postgresql \
     python3-devel \
     python3-libselinux \
@@ -116,15 +125,7 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     xmlsec1-openssl && \
     dnf -y clean all
 
-RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 && \
-    chmod 700 get_helm.sh && \
-    ./get_helm.sh
-
-# Install tini
-RUN curl -L -o /usr/bin/tini https://github.com/krallin/tini/releases/download/v0.19.0/tini-{{ tini_architecture | default('amd64') }} && \
-    chmod +x /usr/bin/tini
-
-RUN pip3 install --no-cache-dir virtualenv supervisor
+RUN pip3 install --no-cache-dir virtualenv supervisor dumb-init
 
 RUN rm -rf /root/.cache && rm -rf /tmp/*
 
@@ -154,14 +155,16 @@ RUN dnf -y install \
     wget \
     diffutils \
     unzip && \
-    npm install -g n && n 14.18.3 && npm install -g npm@7.24.2 && dnf remove -y nodejs
+    npm install -g n && n 16.13.1 && npm install -g npm@8.5.0 && dnf remove -y nodejs
 
-RUN pip3 install --no-cache-dir black git+https://github.com/coderanger/supervisor-stdout
+RUN pip3 install --no-cache-dir black git+https://github.com/coderanger/supervisor-stdout setuptools-scm
 
 # This package randomly fails to download.
 # It is nice to have in the dev env, but not necessary.
 # Add it back to the list above if the repo ever straighten up.
 RUN dnf --enablerepo=baseos-debug -y install python3-debuginfo || :
+
+RUN dnf install -y epel-next-release && dnf install -y inotify-tools && dnf remove -y epel-next-release
 {% endif %}
 
 # Copy app from builder
@@ -194,6 +197,7 @@ RUN mkdir -p /etc/containers/registries.conf.d/ && echo "unqualified-search-regi
 # Create default awx rsyslog config
 ADD tools/ansible/roles/dockerfile/files/rsyslog.conf /var/lib/awx/rsyslog/rsyslog.conf
 ADD tools/ansible/roles/dockerfile/files/wait-for-migrations /usr/local/bin/wait-for-migrations
+ADD tools/ansible/roles/dockerfile/files/stop-supervisor /usr/local/bin/stop-supervisor
 
 ## File mappings
 {% if build_dev|bool %}
@@ -209,7 +213,7 @@ ADD https://raw.githubusercontent.com/containers/libpod/master/contrib/podmanima
 {% else %}
 ADD tools/ansible/roles/dockerfile/files/launch_awx.sh /usr/bin/launch_awx.sh
 ADD tools/ansible/roles/dockerfile/files/launch_awx_task.sh /usr/bin/launch_awx_task.sh
-ADD tools/ansible/roles/dockerfile/files/settings.py /etc/tower/settings.py
+ADD tools/ansible/roles/dockerfile/files/uwsgi.ini /etc/tower/uwsgi.ini
 ADD {{ template_dest }}/supervisor.conf /etc/supervisord.conf
 ADD {{ template_dest }}/supervisor_task.conf /etc/supervisord_task.conf
 {% endif %}
@@ -226,7 +230,6 @@ RUN for dir in \
       /var/lib/awx/rsyslog/conf.d \
       /var/lib/awx/.local/share/containers/storage \
       /var/run/awx-rsyslog \
-      /var/log/tower \
       /var/log/nginx \
       /var/lib/postgresql \
       /var/run/supervisor \
@@ -246,6 +249,7 @@ RUN for dir in \
       /etc/containers \
       /var/lib/awx/.config/containers \
       /var/lib/awx/.config/cni \
+      /var/lib/awx/.local \
       /var/lib/awx/venv \
       /var/lib/awx/venv/awx/bin \
       /var/lib/awx/venv/awx/lib/python3.9 \
@@ -263,9 +267,9 @@ RUN for dir in \
     for file in \
       /etc/containers/containers.conf \
       /var/lib/awx/.config/containers/containers.conf \
-      /var/lib/shared/overlay-images/images.lock \ 
+      /var/lib/shared/overlay-images/images.lock \
       /var/lib/shared/overlay-layers/layers.lock \
-      /var/lib/shared/vfs-images/images.lock \ 
+      /var/lib/shared/vfs-images/images.lock \
       /var/lib/shared/vfs-layers/layers.lock \
       /var/run/nginx.pid \
       /var/lib/awx/venv/awx/lib/python3.9/site-packages/awx.egg-link ; \
@@ -291,7 +295,7 @@ CMD ["/bin/bash"]
 USER 1000
 EXPOSE 8052
 
-ENTRYPOINT ["/usr/bin/tini", "--"]
+ENTRYPOINT ["dumb-init", "--"]
 CMD /usr/bin/launch_awx.sh
 VOLUME /var/lib/nginx
 VOLUME /var/lib/awx/.local/share/containers

@@ -35,9 +35,9 @@ function CredentialsStep({
     name: 'credentials',
     validate: (val) =>
       credentialsValidator(
-        defaultCredentials,
         allowCredentialsWithPasswords,
-        val
+        val,
+        defaultCredentials
       ),
   });
   const [selectedType, setSelectedType] = useState(null);
@@ -102,9 +102,9 @@ function CredentialsStep({
   useEffect(() => {
     helpers.setError(
       credentialsValidator(
-        defaultCredentials,
         allowCredentialsWithPasswords,
-        field.value
+        field.value,
+        defaultCredentials
       )
     );
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -132,7 +132,7 @@ function CredentialsStep({
   );
 
   return (
-    <>
+    <div data-cy="credentials-prompt">
       {meta.error && (
         <CredentialErrorAlert variant="danger" isInline title={meta.error} />
       )}
@@ -208,7 +208,7 @@ function CredentialsStep({
         }}
         renderItemChip={renderChip}
       />
-    </>
+    </div>
   );
 }
 

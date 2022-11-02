@@ -11,7 +11,7 @@ from social_core.exceptions import AuthException
 
 # Django
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.db.models import Q
 
 
@@ -77,6 +77,21 @@ def _update_m2m_from_expression(user, related, expr, remove=True):
         related.remove(user)
 
 
+def get_or_create_with_default_galaxy_cred(**kwargs):
+    from awx.main.models import Organization, Credential
+
+    (org, org_created) = Organization.objects.get_or_create(**kwargs)
+    if org_created:
+        logger.debug("Created org {} (id {}) from {}".format(org.name, org.id, kwargs))
+        public_galaxy_credential = Credential.objects.filter(managed=True, name='Ansible Galaxy').first()
+        if public_galaxy_credential is not None:
+            org.galaxy_credentials.add(public_galaxy_credential)
+            logger.debug("Added default Ansible Galaxy credential to org")
+        else:
+            logger.debug("Could not find default Ansible Galaxy credential to add to org")
+    return org
+
+
 def _update_org_from_attr(user, related, attr, remove, remove_admins, remove_auditors, backend):
     from awx.main.models import Organization
     from django.conf import settings
@@ -94,8 +109,7 @@ def _update_org_from_attr(user, related, attr, remove, remove_admins, remove_aud
                         organization_name = org_name
                 except Exception:
                     organization_name = org_name
-                org = Organization.objects.get_or_create(name=organization_name)[0]
-                org.create_default_galaxy_credential()
+                org = get_or_create_with_default_galaxy_cred(name=organization_name)
             else:
                 org = Organization.objects.get(name=org_name)
         except ObjectDoesNotExist:
@@ -121,7 +135,6 @@ def update_user_orgs(backend, details, user=None, *args, **kwargs):
     """
     if not user:
         return
-    from awx.main.models import Organization
 
     org_map = backend.setting('ORGANIZATION_MAP') or {}
     for org_name, org_opts in org_map.items():
@@ -130,8 +143,7 @@ def update_user_orgs(backend, details, user=None, *args, **kwargs):
             organization_name = organization_alias
         else:
             organization_name = org_name
-        org = Organization.objects.get_or_create(name=organization_name)[0]
-        org.create_default_galaxy_credential()
+        org = get_or_create_with_default_galaxy_cred(name=organization_name)
 
         # Update org admins from expression(s).
         remove = bool(org_opts.get('remove', True))
@@ -152,15 +164,14 @@ def update_user_teams(backend, details, user=None, *args, **kwargs):
     """
     if not user:
         return
-    from awx.main.models import Organization, Team
+    from awx.main.models import Team
 
     team_map = backend.setting('TEAM_MAP') or {}
     for team_name, team_opts in team_map.items():
         # Get or create the org to update.
         if 'organization' not in team_opts:
             continue
-        org = Organization.objects.get_or_create(name=team_opts['organization'])[0]
-        org.create_default_galaxy_credential()
+        org = get_or_create_with_default_galaxy_cred(name=team_opts['organization'])
 
         # Update team members from expression(s).
         team = Team.objects.get_or_create(name=team_name, organization=org)[0]
@@ -216,8 +227,7 @@ def update_user_teams_by_saml_attr(backend, details, user=None, *args, **kwargs)
 
             try:
                 if settings.SAML_AUTO_CREATE_OBJECTS:
-                    org = Organization.objects.get_or_create(name=organization_name)[0]
-                    org.create_default_galaxy_credential()
+                    org = get_or_create_with_default_galaxy_cred(name=organization_name)
                 else:
                     org = Organization.objects.get(name=organization_name)
             except ObjectDoesNotExist:
@@ -240,39 +250,61 @@ def update_user_teams_by_saml_attr(backend, details, user=None, *args, **kwargs)
         [t.member_role.members.remove(user) for t in Team.objects.filter(Q(member_role__members=user) & ~Q(id__in=team_ids))]
 
 
+def _get_matches(list1, list2):
+    # Because we are just doing an intersection here we don't really care which list is in which parameter
+
+    # A SAML provider could return either a string or a list of items so we need to coerce the SAML value into a list (if needed)
+    if not isinstance(list1, (list, tuple)):
+        list1 = [list1]
+
+    # In addition, we used to allow strings in the SAML config instead of Lists. The migration should take case of that but just in case, we will convert our list too
+    if not isinstance(list2, (list, tuple)):
+        list2 = [list2]
+
+    return set(list1).intersection(set(list2))
+
+
 def _check_flag(user, flag, attributes, user_flags_settings):
+    '''
+    Helper function to set the is_superuser is_system_auditor flags for the SAML adapter
+    Returns the new flag and whether or not it changed the flag
+    '''
     new_flag = False
     is_role_key = "is_%s_role" % (flag)
     is_attr_key = "is_%s_attr" % (flag)
     is_value_key = "is_%s_value" % (flag)
+    remove_setting = "remove_%ss" % (flag)
 
     # Check to see if we are respecting a role and, if so, does our user have that role?
-    role_setting = user_flags_settings.get(is_role_key, None)
-    if role_setting:
+    required_roles = user_flags_settings.get(is_role_key, None)
+    if required_roles:
+        matching_roles = _get_matches(required_roles, attributes.get('Role', []))
+
         # We do a 2 layer check here so that we don't spit out the else message if there is no role defined
-        if role_setting in attributes.get('Role', []):
-            logger.debug("User %s has %s role %s" % (user.username, flag, role_setting))
+        if matching_roles:
+            logger.debug("User %s has %s role(s) %s" % (user.username, flag, ', '.join(matching_roles)))
             new_flag = True
         else:
-            logger.debug("User %s is missing the %s role %s" % (user.username, flag, role_setting))
+            logger.debug("User %s is missing the %s role(s) %s" % (user.username, flag, ', '.join(required_roles)))
 
     # Next, check to see if we are respecting an attribute; this will take priority over the role if its defined
     attr_setting = user_flags_settings.get(is_attr_key, None)
     if attr_setting and attributes.get(attr_setting, None):
         # Do we have a required value for the attribute
-        if user_flags_settings.get(is_value_key, None):
+        required_value = user_flags_settings.get(is_value_key, None)
+        if required_value:
             # If so, check and see if the value of the attr matches the required value
-            attribute_value = attributes.get(attr_setting, None)
-            if isinstance(attribute_value, (list, tuple)):
-                attribute_value = attribute_value[0]
-            if attribute_value == user_flags_settings.get(is_value_key):
-                logger.debug("Giving %s %s from attribute %s with matching value" % (user.username, flag, attr_setting))
+            saml_user_attribute_value = attributes.get(attr_setting, None)
+            matching_values = _get_matches(required_value, saml_user_attribute_value)
+
+            if matching_values:
+                logger.debug("Giving %s %s from attribute %s with matching values %s" % (user.username, flag, attr_setting, ', '.join(matching_values)))
                 new_flag = True
             # if they don't match make sure that new_flag is false
             else:
                 logger.debug(
-                    "Refusing %s for %s because attr %s (%s) did not match value '%s'"
-                    % (flag, user.username, attr_setting, attribute_value, user_flags_settings.get(is_value_key))
+                    "Refusing %s for %s because attr %s (%s) did not match value(s) %s"
+                    % (flag, user.username, attr_setting, ", ".join(saml_user_attribute_value), ', '.join(required_value))
                 )
                 new_flag = False
         # If there was no required value then we can just allow them in because of the attribute
@@ -280,8 +312,16 @@ def _check_flag(user, flag, attributes, user_flags_settings):
             logger.debug("Giving %s %s from attribute %s" % (user.username, flag, attr_setting))
             new_flag = True
 
-    # If the user was flagged and we are going to make them not flagged make sure there is a message
+    # Get the users old flag
     old_value = getattr(user, "is_%s" % (flag))
+
+    # If we are not removing the flag and they were a system admin and now we don't want them to be just return
+    remove_flag = user_flags_settings.get(remove_setting, True)
+    if not remove_flag and (old_value and not new_flag):
+        logger.debug("Remove flag %s preventing removal of %s for %s" % (remove_flag, flag, user.username))
+        return old_value, False
+
+    # If the user was flagged and we are going to make them not flagged make sure there is a message
     if old_value and not new_flag:
         logger.debug("Revoking %s from %s" % (flag, user.username))
 

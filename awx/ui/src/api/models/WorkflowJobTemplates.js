@@ -1,11 +1,14 @@
 import Base from '../Base';
 import SchedulesMixin from '../mixins/Schedules.mixin';
 import NotificationsMixin from '../mixins/Notifications.mixin';
+import LabelsMixin from '../mixins/Labels.mixin';
 
-class WorkflowJobTemplates extends SchedulesMixin(NotificationsMixin(Base)) {
+class WorkflowJobTemplates extends SchedulesMixin(
+  NotificationsMixin(LabelsMixin(Base))
+) {
   constructor(http) {
     super(http);
-    this.baseUrl = '/api/v2/workflow_job_templates/';
+    this.baseUrl = 'api/v2/workflow_job_templates/';
     this.createSchedule = this.createSchedule.bind(this);
   }
 

@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { JobsAPI, JobEventsAPI } from 'api';
@@ -26,14 +25,9 @@ const applyJobEventMock = (mockJobEvents) => {
     };
   };
   JobsAPI.readEvents = jest.fn().mockImplementation(mockReadEvents);
-  JobEventsAPI.readChildren = jest.fn().mockResolvedValue({
+  JobsAPI.readChildrenSummary = jest.fn().mockResolvedValue({
     data: {
-      results: [
-        {
-          counter: 20,
-          uuid: 'abc-020',
-        },
-      ],
+      1: [0, 100],
     },
   });
 };
@@ -139,5 +133,21 @@ describe('<JobOutput />', () => {
       wrapper = mountWithContexts(<JobOutput job={mockJob} />);
     });
     await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
+  });
+  test('should show failed empty output screen', async () => {
+    JobsAPI.readEvents.mockResolvedValue({
+      data: {
+        count: 0,
+        next: null,
+        previous: null,
+        results: [],
+      },
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <JobOutput job={{ ...mockJob, status: 'failed' }} />
+      );
+    });
+    await waitForElement(wrapper, 'EmptyOutput', (el) => el.length === 1);
   });
 });

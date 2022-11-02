@@ -6,6 +6,7 @@ from datetime import timedelta
 import json
 import yaml
 import logging
+import time
 import os
 import subprocess
 import re
@@ -19,9 +20,9 @@ from functools import reduce, wraps
 # Django
 from django.core.exceptions import ObjectDoesNotExist, FieldDoesNotExist
 from django.utils.dateparse import parse_datetime
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.utils.functional import cached_property
-from django.db import connection
+from django.db import connection, transaction, ProgrammingError
 from django.db.models.fields.related import ForeignObjectRel, ManyToManyField
 from django.db.models.fields.related_descriptors import ForwardManyToOneDescriptor, ManyToManyDescriptor
 from django.db.models.query import QuerySet
@@ -78,8 +79,9 @@ __all__ = [
     'IllegalArgumentError',
     'get_custom_venv_choices',
     'get_external_account',
-    'task_manager_bulk_reschedule',
-    'schedule_task_manager',
+    'ScheduleTaskManager',
+    'ScheduleDependencyManager',
+    'ScheduleWorkflowManager',
     'classproperty',
     'create_temporary_fifo',
     'truncate_stdout',
@@ -262,9 +264,15 @@ def update_scm_url(scm_type, url, username=True, password=True, check_special_ca
                 userpass, hostpath = url.split('@', 1)
             else:
                 userpass, hostpath = '', url
-            if hostpath.count(':') > 1:
+            # Handle IPv6 here. In this case, we might have hostpath of:
+            # [fd00:1234:2345:6789::11]:example/foo.git
+            if hostpath.startswith('[') and ']:' in hostpath:
+                host, path = hostpath.split(']:', 1)
+                host = host + ']'
+            elif hostpath.count(':') > 1:
                 raise ValueError(_('Invalid %s URL') % scm_type)
-            host, path = hostpath.split(':', 1)
+            else:
+                host, path = hostpath.split(':', 1)
             # if not path.startswith('/') and not path.startswith('~/'):
             #    path = '~/%s' % path
             # if path.startswith('/'):
@@ -323,7 +331,11 @@ def update_scm_url(scm_type, url, username=True, password=True, check_special_ca
         netloc = u':'.join([urllib.parse.quote(x, safe='') for x in (netloc_username, netloc_password) if x])
     else:
         netloc = u''
-    netloc = u'@'.join(filter(None, [netloc, parts.hostname]))
+    # urllib.parse strips brackets from IPv6 addresses, so we need to add them back in
+    hostname = parts.hostname
+    if hostname and ':' in hostname and '[' in url and ']' in url:
+        hostname = f'[{hostname}]'
+    netloc = u'@'.join(filter(None, [netloc, hostname]))
     if parts.port:
         netloc = u':'.join([netloc, str(parts.port)])
     new_url = urllib.parse.urlunsplit([parts.scheme, netloc, parts.path, parts.query, parts.fragment])
@@ -530,6 +542,10 @@ def copy_m2m_relationships(obj1, obj2, fields, kwargs=None):
                 if kwargs and field_name in kwargs:
                     override_field_val = kwargs[field_name]
                     if isinstance(override_field_val, (set, list, QuerySet)):
+                        # Labels are additive so we are going to add any src labels in addition to the override labels
+                        if field_name == 'labels':
+                            for jt_label in src_field_value.all():
+                                getattr(obj2, field_name).add(jt_label.id)
                         getattr(obj2, field_name).add(*override_field_val)
                         continue
                     if override_field_val.__class__.__name__ == 'ManyRelatedManager':
@@ -692,28 +708,33 @@ def parse_yaml_or_json(vars_str, silent_failure=True):
     return vars_dict
 
 
-def get_cpu_effective_capacity(cpu_count):
-    from django.conf import settings
+def convert_cpu_str_to_decimal_cpu(cpu_str):
+    """Convert a string indicating cpu units to decimal.
 
-    settings_abscpu = getattr(settings, 'SYSTEM_TASK_ABS_CPU', None)
-    env_abscpu = os.getenv('SYSTEM_TASK_ABS_CPU', None)
+    Useful for dealing with cpu setting that may be expressed in units compatible with
+    kubernetes.
 
-    if env_abscpu is not None:
-        return int(env_abscpu)
-    elif settings_abscpu is not None:
-        return int(settings_abscpu)
+    See https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/#cpu-units
+    """
+    cpu = cpu_str
+    millicores = False
 
-    settings_forkcpu = getattr(settings, 'SYSTEM_TASK_FORKS_CPU', None)
-    env_forkcpu = os.getenv('SYSTEM_TASK_FORKS_CPU', None)
+    if cpu_str[-1] == 'm':
+        cpu = cpu_str[:-1]
+        millicores = True
 
-    if env_forkcpu:
-        forkcpu = int(env_forkcpu)
-    elif settings_forkcpu:
-        forkcpu = int(settings_forkcpu)
-    else:
-        forkcpu = 4
+    try:
+        cpu = float(cpu)
+    except ValueError:
+        cpu = 1.0
+        millicores = False
+        logger.warning(f"Could not convert SYSTEM_TASK_ABS_CPU {cpu_str} to a decimal number, falling back to default of 1 cpu")
 
-    return cpu_count * forkcpu
+    if millicores:
+        cpu = cpu / 1000
+
+    # Per kubernetes docs, fractional CPU less than .1 are not allowed
+    return max(0.1, round(cpu, 1))
 
 
 def get_corrected_cpu(cpu_count):  # formerlly get_cpu_capacity
@@ -725,34 +746,70 @@ def get_corrected_cpu(cpu_count):  # formerlly get_cpu_capacity
     settings_abscpu = getattr(settings, 'SYSTEM_TASK_ABS_CPU', None)
     env_abscpu = os.getenv('SYSTEM_TASK_ABS_CPU', None)
 
-    if env_abscpu is not None or settings_abscpu is not None:
-        return 0
+    if env_abscpu is not None:
+        return convert_cpu_str_to_decimal_cpu(env_abscpu)
+    elif settings_abscpu is not None:
+        return convert_cpu_str_to_decimal_cpu(settings_abscpu)
 
     return cpu_count  # no correction
 
 
-def get_mem_effective_capacity(mem_mb):
+def get_cpu_effective_capacity(cpu_count):
     from django.conf import settings
 
-    settings_absmem = getattr(settings, 'SYSTEM_TASK_ABS_MEM', None)
-    env_absmem = os.getenv('SYSTEM_TASK_ABS_MEM', None)
+    cpu_count = get_corrected_cpu(cpu_count)
 
-    if env_absmem is not None:
-        return int(env_absmem)
-    elif settings_absmem is not None:
-        return int(settings_absmem)
+    settings_forkcpu = getattr(settings, 'SYSTEM_TASK_FORKS_CPU', None)
+    env_forkcpu = os.getenv('SYSTEM_TASK_FORKS_CPU', None)
 
-    settings_forkmem = getattr(settings, 'SYSTEM_TASK_FORKS_MEM', None)
-    env_forkmem = os.getenv('SYSTEM_TASK_FORKS_MEM', None)
-
-    if env_forkmem:
-        forkmem = int(env_forkmem)
-    elif settings_forkmem:
-        forkmem = int(settings_forkmem)
+    if env_forkcpu:
+        forkcpu = int(env_forkcpu)
+    elif settings_forkcpu:
+        forkcpu = int(settings_forkcpu)
     else:
-        forkmem = 100
+        forkcpu = 4
 
-    return max(1, ((mem_mb // 1024 // 1024) - 2048) // forkmem)
+    return max(1, int(cpu_count * forkcpu))
+
+
+def convert_mem_str_to_bytes(mem_str):
+    """Convert string with suffix indicating units to memory in bytes (base 2)
+
+    Useful for dealing with memory setting that may be expressed in units compatible with
+    kubernetes.
+
+    See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory
+    """
+    # If there is no suffix, the memory sourced from the request is in bytes
+    if mem_str.isdigit():
+        return int(mem_str)
+
+    conversions = {
+        'Ei': lambda x: x * 2**60,
+        'E': lambda x: x * 10**18,
+        'Pi': lambda x: x * 2**50,
+        'P': lambda x: x * 10**15,
+        'Ti': lambda x: x * 2**40,
+        'T': lambda x: x * 10**12,
+        'Gi': lambda x: x * 2**30,
+        'G': lambda x: x * 10**9,
+        'Mi': lambda x: x * 2**20,
+        'M': lambda x: x * 10**6,
+        'Ki': lambda x: x * 2**10,
+        'K': lambda x: x * 10**3,
+    }
+    mem = 0
+    mem_unit = None
+    for i, char in enumerate(mem_str):
+        if not char.isdigit():
+            mem_unit = mem_str[i:]
+            mem = int(mem_str[:i])
+            break
+    if not mem_unit or mem_unit not in conversions.keys():
+        error = f"Unsupported value for SYSTEM_TASK_ABS_MEM: {mem_str}, memory must be expressed in bytes or with known suffix: {conversions.keys()}. Falling back to 1 byte"
+        logger.warning(error)
+        return 1
+    return max(1, conversions[mem_unit](mem))
 
 
 def get_corrected_memory(memory):
@@ -761,14 +818,110 @@ def get_corrected_memory(memory):
     settings_absmem = getattr(settings, 'SYSTEM_TASK_ABS_MEM', None)
     env_absmem = os.getenv('SYSTEM_TASK_ABS_MEM', None)
 
-    if env_absmem is not None or settings_absmem is not None:
-        return 0
+    # Runner returns memory in bytes
+    # so we convert memory from settings to bytes as well.
+    if env_absmem is not None:
+        return convert_mem_str_to_bytes(env_absmem)
+    elif settings_absmem is not None:
+        return convert_mem_str_to_bytes(settings_absmem)
 
     return memory
 
 
+def get_mem_effective_capacity(mem_bytes):
+    from django.conf import settings
+
+    mem_bytes = get_corrected_memory(mem_bytes)
+
+    settings_mem_mb_per_fork = getattr(settings, 'SYSTEM_TASK_FORKS_MEM', None)
+    env_mem_mb_per_fork = os.getenv('SYSTEM_TASK_FORKS_MEM', None)
+
+    if env_mem_mb_per_fork:
+        mem_mb_per_fork = int(env_mem_mb_per_fork)
+    elif settings_mem_mb_per_fork:
+        mem_mb_per_fork = int(settings_mem_mb_per_fork)
+    else:
+        mem_mb_per_fork = 100
+
+    # Per docs, deduct 2GB of memory from the available memory
+    # to cover memory consumption of background tasks when redis/web etc are colocated with
+    # the other control processes
+    memory_penalty_bytes = 2147483648
+    if settings.IS_K8S:
+        # In k8s, this is dealt with differently because
+        # redis and the web containers have their own memory allocation
+        memory_penalty_bytes = 0
+
+    # convert memory to megabytes because our setting of how much memory we
+    # should allocate per fork is in megabytes
+    mem_mb = (mem_bytes - memory_penalty_bytes) // 2**20
+    max_forks_based_on_memory = mem_mb // mem_mb_per_fork
+
+    return max(1, max_forks_based_on_memory)
+
+
 _inventory_updates = threading.local()
 _task_manager = threading.local()
+_dependency_manager = threading.local()
+_workflow_manager = threading.local()
+
+
+@contextlib.contextmanager
+def task_manager_bulk_reschedule():
+    managers = [ScheduleTaskManager(), ScheduleWorkflowManager(), ScheduleDependencyManager()]
+    """Context manager to avoid submitting task multiple times."""
+    try:
+        for m in managers:
+            m.previous_flag = getattr(m.manager_threading_local, 'bulk_reschedule', False)
+            m.previous_value = getattr(m.manager_threading_local, 'needs_scheduling', False)
+            m.manager_threading_local.bulk_reschedule = True
+            m.manager_threading_local.needs_scheduling = False
+        yield
+    finally:
+        for m in managers:
+            m.manager_threading_local.bulk_reschedule = m.previous_flag
+            if m.manager_threading_local.needs_scheduling:
+                m.schedule()
+            m.manager_threading_local.needs_scheduling = m.previous_value
+
+
+class ScheduleManager:
+    def __init__(self, manager, manager_threading_local):
+        self.manager = manager
+        self.manager_threading_local = manager_threading_local
+
+    def _schedule(self):
+        from django.db import connection
+
+        # runs right away if not in transaction
+        connection.on_commit(lambda: self.manager.delay())
+
+    def schedule(self):
+        if getattr(self.manager_threading_local, 'bulk_reschedule', False):
+            self.manager_threading_local.needs_scheduling = True
+            return
+        self._schedule()
+
+
+class ScheduleTaskManager(ScheduleManager):
+    def __init__(self):
+        from awx.main.scheduler.tasks import task_manager
+
+        super().__init__(task_manager, _task_manager)
+
+
+class ScheduleDependencyManager(ScheduleManager):
+    def __init__(self):
+        from awx.main.scheduler.tasks import dependency_manager
+
+        super().__init__(dependency_manager, _dependency_manager)
+
+
+class ScheduleWorkflowManager(ScheduleManager):
+    def __init__(self):
+        from awx.main.scheduler.tasks import workflow_manager
+
+        super().__init__(workflow_manager, _workflow_manager)
 
 
 @contextlib.contextmanager
@@ -782,37 +935,6 @@ def ignore_inventory_computed_fields():
         yield
     finally:
         _inventory_updates.is_updating = previous_value
-
-
-def _schedule_task_manager():
-    from awx.main.scheduler.tasks import run_task_manager
-    from django.db import connection
-
-    # runs right away if not in transaction
-    connection.on_commit(lambda: run_task_manager.delay())
-
-
-@contextlib.contextmanager
-def task_manager_bulk_reschedule():
-    """Context manager to avoid submitting task multiple times."""
-    try:
-        previous_flag = getattr(_task_manager, 'bulk_reschedule', False)
-        previous_value = getattr(_task_manager, 'needs_scheduling', False)
-        _task_manager.bulk_reschedule = True
-        _task_manager.needs_scheduling = False
-        yield
-    finally:
-        _task_manager.bulk_reschedule = previous_flag
-        if _task_manager.needs_scheduling:
-            _schedule_task_manager()
-        _task_manager.needs_scheduling = previous_value
-
-
-def schedule_task_manager():
-    if getattr(_task_manager, 'bulk_reschedule', False):
-        _task_manager.needs_scheduling = True
-        return
-    _schedule_task_manager()
 
 
 @contextlib.contextmanager
@@ -1036,40 +1158,29 @@ def deepmerge(a, b):
         return b
 
 
-def create_partition(tblname, start=None, end=None, partition_label=None, minutely=False):
-    """Creates new partition table for events.
-    - start defaults to beginning of current hour
-    - end defaults to end of current hour
-    - partition_label defaults to YYYYMMDD_HH
+def create_partition(tblname, start=None):
+    """Creates new partition table for events.  By default it covers the current hour."""
+    if start is None:
+        start = now()
 
-    - minutely will create partitions that span _a single minute_ for testing purposes
-    """
-    current_time = now()
-    if not start:
-        if minutely:
-            start = current_time.replace(microsecond=0, second=0)
-        else:
-            start = current_time.replace(microsecond=0, second=0, minute=0)
-    if not end:
-        if minutely:
-            end = start.replace(microsecond=0, second=0) + timedelta(minutes=1)
-        else:
-            end = start.replace(microsecond=0, second=0, minute=0) + timedelta(hours=1)
+    start = start.replace(microsecond=0, second=0, minute=0)
+    end = start + timedelta(hours=1)
+
     start_timestamp = str(start)
     end_timestamp = str(end)
 
-    if not partition_label:
-        if minutely:
-            partition_label = start.strftime('%Y%m%d_%H%M')
-        else:
-            partition_label = start.strftime('%Y%m%d_%H')
+    partition_label = start.strftime('%Y%m%d_%H')
 
-    with connection.cursor() as cursor:
-        cursor.execute(
-            f'CREATE TABLE IF NOT EXISTS {tblname}_{partition_label} '
-            f'PARTITION OF {tblname} '
-            f'FOR VALUES FROM (\'{start_timestamp}\') to (\'{end_timestamp}\');'
-        )
+    try:
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    f'CREATE TABLE IF NOT EXISTS {tblname}_{partition_label} '
+                    f'PARTITION OF {tblname} '
+                    f'FOR VALUES FROM (\'{start_timestamp}\') to (\'{end_timestamp}\');'
+                )
+    except ProgrammingError as e:
+        logger.debug(f'Caught known error due to existing partition: {e}')
 
 
 def cleanup_new_process(func):
@@ -1087,3 +1198,19 @@ def cleanup_new_process(func):
         return func(*args, **kwargs)
 
     return wrapper_cleanup_new_process
+
+
+def log_excess_runtime(func_logger, cutoff=5.0):
+    def log_excess_runtime_decorator(func):
+        @wraps(func)
+        def _new_func(*args, **kwargs):
+            start_time = time.time()
+            return_value = func(*args, **kwargs)
+            delta = time.time() - start_time
+            if delta > cutoff:
+                logger.info(f'Running {func.__name__!r} took {delta:.2f}s')
+            return return_value
+
+        return _new_func
+
+    return log_excess_runtime_decorator

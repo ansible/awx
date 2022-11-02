@@ -5,18 +5,26 @@ NPM_BIN ?= npm
 CHROMIUM_BIN=/tmp/chrome-linux/chrome
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 MANAGEMENT_COMMAND ?= awx-manage
-VERSION := $(shell $(PYTHON) setup.py --version)
-COLLECTION_VERSION := $(shell $(PYTHON) setup.py --version | cut -d . -f 1-3)
+VERSION := $(shell $(PYTHON) tools/scripts/scm_version.py)
+COLLECTION_VERSION := $(shell $(PYTHON) tools/scripts/scm_version.py | cut -d . -f 1-3)
 
 # NOTE: This defaults the container image version to the branch that's active
 COMPOSE_TAG ?= $(GIT_BRANCH)
 MAIN_NODE_TYPE ?= hybrid
 # If set to true docker-compose will also start a keycloak instance
 KEYCLOAK ?= false
+# If set to true docker-compose will also start an ldap instance
+LDAP ?= false
+# If set to true docker-compose will also start a splunk instance
+SPLUNK ?= false
+# If set to true docker-compose will also start a prometheus instance
+PROMETHEUS ?= false
+# If set to true docker-compose will also start a grafana instance
+GRAFANA ?= false
 
 VENV_BASE ?= /var/lib/awx/venv
 
-DEV_DOCKER_TAG_BASE ?= quay.io/awx
+DEV_DOCKER_TAG_BASE ?= ghcr.io/ansible
 DEVEL_IMAGE_NAME ?= $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 
 RECEPTOR_IMAGE ?= quay.io/ansible/receptor:devel
@@ -26,7 +34,7 @@ RECEPTOR_IMAGE ?= quay.io/ansible/receptor:devel
 SRC_ONLY_PKGS ?= cffi,pycparser,psycopg2,twilio
 # These should be upgraded in the AWX and Ansible venv before attempting
 # to install the actual requirements
-VENV_BOOTSTRAP ?= pip==21.2.4 setuptools==58.2.0 wheel==0.36.2
+VENV_BOOTSTRAP ?= pip==21.2.4 setuptools==58.2.0 setuptools_scm[toml]==6.4.2 wheel==0.36.2
 
 NAME ?= awx
 
@@ -41,7 +49,7 @@ I18N_FLAG_FILE = .i18n_built
 .PHONY: awx-link clean clean-tmp clean-venv requirements requirements_dev \
 	develop refresh adduser migrate dbchange \
 	receiver test test_unit test_coverage coverage_html \
-	dev_build release_build sdist \
+	sdist \
 	ui-release ui-devel \
 	VERSION PYTHON_VERSION docker-compose-sources \
 	.git/hooks/pre-commit
@@ -64,7 +72,7 @@ clean-languages:
 	rm -f $(I18N_FLAG_FILE)
 	find ./awx/locale/ -type f -regex ".*\.mo$" -delete
 
-# Remove temporary build files, compiled Python files.
+## Remove temporary build files, compiled Python files.
 clean: clean-ui clean-api clean-awxkit clean-dist
 	rm -rf awx/public
 	rm -rf awx/lib/site-packages
@@ -77,6 +85,7 @@ clean: clean-ui clean-api clean-awxkit clean-dist
 
 clean-api:
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
+	rm -rf .tox
 	find . -type f -regex ".*\.py[co]$$" -delete
 	find . -type d -name "__pycache__" -delete
 	rm -f awx/awx_test.sqlite3*
@@ -86,7 +95,7 @@ clean-api:
 clean-awxkit:
 	rm -rf awxkit/*.egg-info awxkit/.tox awxkit/build/*
 
-# convenience target to assert environment variables are defined
+## convenience target to assert environment variables are defined
 guard-%:
 	@if [ "$${$*}" = "" ]; then \
 	    echo "The required environment variable '$*' is not set"; \
@@ -109,7 +118,7 @@ virtualenv_awx:
 		fi; \
 	fi
 
-# Install third-party requirements needed for AWX's environment.
+## Install third-party requirements needed for AWX's environment. 
 # this does not use system site packages intentionally
 requirements_awx: virtualenv_awx
 	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
@@ -128,7 +137,7 @@ requirements_dev: requirements_awx requirements_awx_dev
 
 requirements_test: requirements
 
-# "Install" awx package in development mode.
+## "Install" awx package in development mode.
 develop:
 	@if [ "$(VIRTUAL_ENV)" ]; then \
 	    pip uninstall -y awx; \
@@ -145,21 +154,21 @@ version_file:
 	fi; \
 	$(PYTHON) -c "import awx; print(awx.__version__)" > /var/lib/awx/.awx_version; \
 
-# Refresh development environment after pulling new code.
+## Refresh development environment after pulling new code.
 refresh: clean requirements_dev version_file develop migrate
 
-# Create Django superuser.
+## Create Django superuser.
 adduser:
 	$(MANAGEMENT_COMMAND) createsuperuser
 
-# Create database tables and apply any new migrations.
+## Create database tables and apply any new migrations.
 migrate:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(MANAGEMENT_COMMAND) migrate --noinput
 
-# Run after making changes to the models to create a new migration.
+## Run after making changes to the models to create a new migration.
 dbchange:
 	$(MANAGEMENT_COMMAND) makemigrations
 
@@ -173,9 +182,9 @@ collectstatic:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	mkdir -p awx/public/static && $(PYTHON) manage.py collectstatic --clear --noinput > /dev/null 2>&1
+	$(PYTHON) manage.py collectstatic --clear --noinput > /dev/null 2>&1
 
-UWSGI_DEV_RELOAD_COMMAND ?= supervisorctl restart tower-processes:awx-dispatcher tower-processes:awx-receiver
+DEV_RELOAD_COMMAND ?= supervisorctl restart tower-processes:*
 
 uwsgi: collectstatic
 	@if [ "$(VENV_BASE)" ]; then \
@@ -190,12 +199,13 @@ uwsgi: collectstatic
 	    --processes=5 \
 	    --harakiri=120 --master \
 	    --no-orphans \
-	    --py-autoreload 1 \
 	    --max-requests=1000 \
 	    --stats /tmp/stats.socket \
 	    --lazy-apps \
-	    --logformat "%(addr) %(method) %(uri) - %(proto) %(status)" \
-	    --hook-accepting1="exec: $(UWSGI_DEV_RELOAD_COMMAND)"
+	    --logformat "%(addr) %(method) %(uri) - %(proto) %(status)"
+
+awx-autoreload:
+	@/awx_devel/tools/docker-compose/awx-autoreload /awx_devel/awx "$(DEV_RELOAD_COMMAND)"
 
 daphne:
 	@if [ "$(VENV_BASE)" ]; then \
@@ -209,7 +219,7 @@ wsbroadcast:
 	fi; \
 	$(PYTHON) manage.py run_wsbroadcast
 
-# Run to start the background task dispatcher for development.
+## Run to start the background task dispatcher for development.
 dispatcher:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
@@ -217,7 +227,7 @@ dispatcher:
 	$(PYTHON) manage.py run_dispatcher
 
 
-# Run to start the zeromq callback receiver
+## Run to start the zeromq callback receiver
 receiver:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
@@ -264,17 +274,17 @@ api-lint:
 	yamllint -s .
 
 awx-link:
-	[ -d "/awx_devel/awx.egg-info" ] || $(PYTHON) /awx_devel/setup.py egg_info_dev
+	[ -d "/awx_devel/awx.egg-info" ] || $(PYTHON) /awx_devel/tools/scripts/egg_info_dev
 	cp -f /tmp/awx.egg-link /var/lib/awx/venv/awx/lib/$(PYTHON)/site-packages/awx.egg-link
 
 TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/sso/tests
-
-# Run all API unit tests.
+PYTEST_ARGS ?= -n auto
+## Run all API unit tests.
 test:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider -n auto $(TEST_DIRS)
+	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider $(PYTEST_ARGS) $(TEST_DIRS)
 	cd awxkit && $(VENV_BASE)/awx/bin/tox -re py3
 	awx-manage check_migrations --dry-run --check  -n 'missing_migration_file'
 
@@ -283,6 +293,7 @@ COLLECTION_TEST_TARGET ?=
 COLLECTION_PACKAGE ?= awx
 COLLECTION_NAMESPACE ?= awx
 COLLECTION_INSTALL = ~/.ansible/collections/ansible_collections/$(COLLECTION_NAMESPACE)/$(COLLECTION_PACKAGE)
+COLLECTION_TEMPLATE_VERSION ?= false
 
 test_collection:
 	rm -f $(shell ls -d $(VENV_BASE)/awx/lib/python* | head -n 1)/no-global-site-packages.txt
@@ -305,13 +316,15 @@ symlink_collection:
 	mkdir -p ~/.ansible/collections/ansible_collections/$(COLLECTION_NAMESPACE)  # in case it does not exist
 	ln -s $(shell pwd)/awx_collection $(COLLECTION_INSTALL)
 
-build_collection:
+awx_collection_build: $(shell find awx_collection -type f)
 	ansible-playbook -i localhost, awx_collection/tools/template_galaxy.yml \
 	  -e collection_package=$(COLLECTION_PACKAGE) \
 	  -e collection_namespace=$(COLLECTION_NAMESPACE) \
 	  -e collection_version=$(COLLECTION_VERSION) \
-	  -e '{"awx_template_version":false}'
+	  -e '{"awx_template_version": $(COLLECTION_TEMPLATE_VERSION)}'
 	ansible-galaxy collection build awx_collection_build --force --output-path=awx_collection_build
+
+build_collection: awx_collection_build
 
 install_collection: build_collection
 	rm -rf $(COLLECTION_INSTALL)
@@ -329,23 +342,24 @@ test_unit:
 	fi; \
 	py.test awx/main/tests/unit awx/conf/tests/unit awx/sso/tests/unit
 
-# Run all API unit tests with coverage enabled.
+## Run all API unit tests with coverage enabled.
 test_coverage:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	py.test --create-db --cov=awx --cov-report=xml --junitxml=./reports/junit.xml $(TEST_DIRS)
 
-# Output test coverage as HTML (into htmlcov directory).
+## Output test coverage as HTML (into htmlcov directory).
 coverage_html:
 	coverage html
 
-# Run API unit tests across multiple Python/Django versions with Tox.
+## Run API unit tests across multiple Python/Django versions with Tox.
 test_tox:
 	tox -v
 
-# Make fake data
+
 DATA_GEN_PRESET = ""
+## Make fake data
 bulk_data:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
@@ -364,23 +378,24 @@ clean-ui:
 	rm -rf awx/ui/build
 	rm -rf awx/ui/src/locales/_build
 	rm -rf $(UI_BUILD_FLAG_FILE)
+        # the collectstatic command doesn't like it if this dir doesn't exist.
+	mkdir -p awx/ui/build/static
 
 awx/ui/node_modules:
-	NODE_OPTIONS=--max-old-space-size=4096 $(NPM_BIN) --prefix awx/ui --loglevel warn ci
+	NODE_OPTIONS=--max-old-space-size=6144 $(NPM_BIN) --prefix awx/ui --loglevel warn --force ci
 
-$(UI_BUILD_FLAG_FILE): awx/ui/node_modules
+$(UI_BUILD_FLAG_FILE):
+	$(MAKE) awx/ui/node_modules
 	$(PYTHON) tools/scripts/compilemessages.py
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run compile-strings
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run build
-	mkdir -p awx/public/static/css
-	mkdir -p awx/public/static/js
-	mkdir -p awx/public/static/media
-	cp -r awx/ui/build/static/css/* awx/public/static/css
-	cp -r awx/ui/build/static/js/* awx/public/static/js
-	cp -r awx/ui/build/static/media/* awx/public/static/media
+	mkdir -p /var/lib/awx/public/static/css
+	mkdir -p /var/lib/awx/public/static/js
+	mkdir -p /var/lib/awx/public/static/media
+	cp -r awx/ui/build/static/css/* /var/lib/awx/public/static/css
+	cp -r awx/ui/build/static/js/* /var/lib/awx/public/static/js
+	cp -r awx/ui/build/static/media/* /var/lib/awx/public/static/media
 	touch $@
-
-
 
 ui-release: $(UI_BUILD_FLAG_FILE)
 
@@ -400,16 +415,17 @@ ui-lint:
 
 ui-test:
 	$(NPM_BIN) --prefix awx/ui install
-	$(NPM_BIN) run --prefix awx/ui test 
+	$(NPM_BIN) run --prefix awx/ui test
 
+ui-test-screens:
+	$(NPM_BIN) --prefix awx/ui install
+	$(NPM_BIN) run --prefix awx/ui pretest
+	$(NPM_BIN) run --prefix awx/ui test-screens --runInBand
 
-# Build a pip-installable package into dist/ with a timestamped version number.
-dev_build:
-	$(PYTHON) setup.py dev_build
-
-# Build a pip-installable package into dist/ with the release version number.
-release_build:
-	$(PYTHON) setup.py release_build
+ui-test-general:
+	$(NPM_BIN) --prefix awx/ui install
+	$(NPM_BIN) run --prefix awx/ui pretest
+	$(NPM_BIN) run --prefix awx/ui/ test-general --runInBand
 
 HEADLESS ?= no
 ifeq ($(HEADLESS), yes)
@@ -417,7 +433,7 @@ dist/$(SDIST_TAR_FILE):
 else
 dist/$(SDIST_TAR_FILE): $(UI_BUILD_FLAG_FILE)
 endif
-	$(PYTHON) setup.py $(SDIST_COMMAND)
+	$(PYTHON) -m build -s
 	ln -sf $(SDIST_TAR_FILE) dist/awx.tar.gz
 
 sdist: dist/$(SDIST_TAR_FILE)
@@ -438,10 +454,16 @@ COMPOSE_OPTS ?=
 CONTROL_PLANE_NODE_COUNT ?= 1
 EXECUTION_NODE_COUNT ?= 2
 MINIKUBE_CONTAINER_GROUP ?= false
+MINIKUBE_SETUP ?= false # if false, run minikube separately
+EXTRA_SOURCES_ANSIBLE_OPTS ?=
+
+ifneq ($(ADMIN_PASSWORD),)
+	EXTRA_SOURCES_ANSIBLE_OPTS := -e admin_password=$(ADMIN_PASSWORD) $(EXTRA_SOURCES_ANSIBLE_OPTS)
+endif
 
 docker-compose-sources: .git/hooks/pre-commit
 	@if [ $(MINIKUBE_CONTAINER_GROUP) = true ]; then\
-	    ansible-playbook -i tools/docker-compose/inventory tools/docker-compose-minikube/deploy.yml; \
+	    ansible-playbook -i tools/docker-compose/inventory -e minikube_setup=$(MINIKUBE_SETUP) tools/docker-compose-minikube/deploy.yml; \
 	fi;
 
 	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/sources.yml \
@@ -451,7 +473,12 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e control_plane_node_count=$(CONTROL_PLANE_NODE_COUNT) \
 	    -e execution_node_count=$(EXECUTION_NODE_COUNT) \
 	    -e minikube_container_group=$(MINIKUBE_CONTAINER_GROUP) \
-	    -e enable_keycloak=$(KEYCLOAK)
+	    -e enable_keycloak=$(KEYCLOAK) \
+	    -e enable_ldap=$(LDAP) \
+	    -e enable_splunk=$(SPLUNK) \
+	    -e enable_prometheus=$(PROMETHEUS) \
+	    -e enable_grafana=$(GRAFANA) $(EXTRA_SOURCES_ANSIBLE_OPTS)
+
 
 
 docker-compose: awx/projects docker-compose-sources
@@ -470,8 +497,9 @@ docker-compose-runtest: awx/projects docker-compose-sources
 docker-compose-build-swagger: awx/projects docker-compose-sources
 	docker-compose -f tools/docker-compose/_sources/docker-compose.yml run --rm --service-ports --no-deps awx_1 /start_tests.sh swagger
 
+SCHEMA_DIFF_BASE_BRANCH ?= devel
 detect-schema-change: genschema
-	curl https://s3.amazonaws.com/awx-public-ci-files/schema.json -o reference-schema.json
+	curl https://s3.amazonaws.com/awx-public-ci-files/$(SCHEMA_DIFF_BASE_BRANCH)/schema.json -o reference-schema.json
 	# Ignore differences in whitespace with -b
 	diff -u -b reference-schema.json schema.json
 
@@ -484,7 +512,7 @@ docker-compose-container-group-clean:
 	fi
 	rm -rf tools/docker-compose-minikube/_sources/
 
-# Base development image build
+## Base development image build
 docker-compose-build:
 	ansible-playbook tools/ansible/dockerfile.yml -e build_dev=True -e receptor_image=$(RECEPTOR_IMAGE)
 	DOCKER_BUILDKIT=1 docker build -t $(DEVEL_IMAGE_NAME) \
@@ -498,19 +526,16 @@ docker-clean:
 	fi
 
 docker-clean-volumes: docker-compose-clean docker-compose-container-group-clean
-	docker volume rm tools_awx_db
+	docker volume rm -f tools_awx_db tools_grafana_storage tools_prometheus_storage $(docker volume ls --filter name=tools_redis_socket_ -q)
 
 docker-refresh: docker-clean docker-compose
 
-# Docker Development Environment with Elastic Stack Connected
+## Docker Development Environment with Elastic Stack Connected
 docker-compose-elk: awx/projects docker-compose-sources
 	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/elastic/docker-compose.logstash-link.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
 
 docker-compose-cluster-elk: awx/projects docker-compose-sources
 	docker-compose -f tools/docker-compose/_sources/docker-compose.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
-
-prometheus:
-	docker run -u0 --net=tools_default --link=`docker ps | egrep -o "tools_awx(_run)?_([^ ]+)?"`:awxweb --volume `pwd`/tools/prometheus:/prometheus --name prometheus -d -p 0.0.0.0:9090:9090 prom/prometheus --web.enable-lifecycle --config.file=/prometheus/prometheus.yml
 
 docker-compose-container-group:
 	MINIKUBE_CONTAINER_GROUP=true make docker-compose
@@ -542,27 +567,74 @@ Dockerfile.kube-dev: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
 	    -e template_dest=_build_kube_dev \
 	    -e receptor_image=$(RECEPTOR_IMAGE)
 
+## Build awx_kube_devel image for development on local Kubernetes environment.
 awx-kube-dev-build: Dockerfile.kube-dev
-	docker build -f Dockerfile.kube-dev \
+	DOCKER_BUILDKIT=1 docker build -f Dockerfile.kube-dev \
 	    --build-arg BUILDKIT_INLINE_CACHE=1 \
+	    --cache-from=$(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) \
 	    -t $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) .
 
+## Build awx image for deployment on Kubernetes environment.
+awx-kube-build: Dockerfile
+	DOCKER_BUILDKIT=1 docker build -f Dockerfile \
+		--build-arg VERSION=$(VERSION) \
+		--build-arg SETUPTOOLS_SCM_PRETEND_VERSION=$(VERSION) \
+		--build-arg HEADLESS=$(HEADLESS) \
+		-t $(DEV_DOCKER_TAG_BASE)/awx:$(COMPOSE_TAG) .
 
 # Translation TASKS
 # --------------------------------------
 
-# generate UI .pot file, an empty template of strings yet to be translated
+## generate UI .pot file, an empty template of strings yet to be translated
 pot: $(UI_BUILD_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run extract-template --clean
 
-# generate UI .po files for each locale (will update translated strings for `en`)
+## generate UI .po files for each locale (will update translated strings for `en`)
 po: $(UI_BUILD_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run extract-strings -- --clean
 
-# generate API django .pot .po
-LANG = "en-us"
+LANG = "en_us"
+## generate API django .pot .po
 messages:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(PYTHON) manage.py makemessages -l $(LANG) --keep-pot
+
+print-%:
+	@echo $($*)
+
+# HELP related targets
+# --------------------------------------
+
+HELP_FILTER=.PHONY
+
+## Display help targets
+help:
+	@printf "Available targets:\n"
+	@make -s help/generate | grep -vE "\w($(HELP_FILTER))"
+
+## Display help for all targets
+help/all:
+	@printf "Available targets:\n"
+	@make -s help/generate
+
+## Generate help output from MAKEFILE_LIST
+help/generate:
+	@awk '/^[-a-zA-Z_0-9%:\\\.\/]+:/ { \
+		helpMessage = match(lastLine, /^## (.*)/); \
+		if (helpMessage) { \
+			helpCommand = $$1; \
+			helpMessage = substr(lastLine, RSTART + 3, RLENGTH); \
+			gsub("\\\\", "", helpCommand); \
+			gsub(":+$$", "", helpCommand); \
+			printf "  \x1b[32;01m%-35s\x1b[0m %s\n", helpCommand, helpMessage; \
+		} else { \
+			helpCommand = $$1; \
+			gsub("\\\\", "", helpCommand); \
+			gsub(":+$$", "", helpCommand); \
+			printf "  \x1b[32;01m%-35s\x1b[0m %s\n", helpCommand, "No help available"; \
+		} \
+	} \
+	{ lastLine = $$0 }' $(MAKEFILE_LIST) | sort -u
+	@printf "\n"

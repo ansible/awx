@@ -3,7 +3,7 @@ import Base from '../Base';
 class Credentials extends Base {
   constructor(http) {
     super(http);
-    this.baseUrl = '/api/v2/credentials/';
+    this.baseUrl = 'api/v2/credentials/';
 
     this.readAccessList = this.readAccessList.bind(this);
     this.readAccessOptions = this.readAccessOptions.bind(this);

@@ -4,6 +4,7 @@ import {
   WorkflowDispatchContext,
   WorkflowStateContext,
 } from 'contexts/Workflow';
+import { useUserProfile } from 'contexts/Config';
 import {
   InventorySourcesAPI,
   JobTemplatesAPI,
@@ -93,6 +94,15 @@ const mockJobTemplate = {
 
 describe('NodeModal', () => {
   beforeEach(async () => {
+    useUserProfile.mockImplementation(() => {
+      return {
+        isSuperUser: true,
+        isSystemAuditor: false,
+        isOrgAdmin: false,
+        isNotificationAdmin: false,
+        isExecEnvAdmin: false,
+      };
+    });
     JobTemplatesAPI.read = jest.fn();
     JobTemplatesAPI.read.mockResolvedValue({
       data: {
@@ -523,6 +533,17 @@ describe('NodeModal', () => {
   });
 });
 describe('Edit existing node', () => {
+  beforeEach(() => {
+    useUserProfile.mockImplementation(() => {
+      return {
+        isSuperUser: true,
+        isSystemAuditor: false,
+        isOrgAdmin: false,
+        isNotificationAdmin: false,
+        isExecEnvAdmin: false,
+      };
+    });
+  });
   let newWrapper;
   afterEach(() => {
     jest.clearAllMocks();

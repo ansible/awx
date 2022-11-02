@@ -39,6 +39,7 @@ function TemplateListItem({
   template,
   isSelected,
   onSelect,
+  onCopy,
   detailUrl,
   fetchTemplates,
   rowIndex,
@@ -52,17 +53,21 @@ function TemplateListItem({
   )}/html/upgrade-migration-guide/upgrade_to_ees.html`;
 
   const copyTemplate = useCallback(async () => {
+    let response;
     if (template.type === 'job_template') {
-      await JobTemplatesAPI.copy(template.id, {
+      response = await JobTemplatesAPI.copy(template.id, {
         name: `${template.name} @ ${timeOfDay()}`,
       });
     } else {
-      await WorkflowJobTemplatesAPI.copy(template.id, {
+      response = await WorkflowJobTemplatesAPI.copy(template.id, {
         name: `${template.name} @ ${timeOfDay()}`,
       });
     }
+    if (response.status === 201) {
+      onCopy(response.data.id);
+    }
     await fetchTemplates();
-  }, [fetchTemplates, template.id, template.name, template.type]);
+  }, [fetchTemplates, template.id, template.name, template.type, onCopy]);
 
   const handleCopyStart = useCallback(() => {
     setIsDisabled(true);
@@ -177,6 +182,15 @@ function TemplateListItem({
           )}
         </TdBreakWord>
         <Td dataLabel={t`Type`}>{toTitleCase(template.type)}</Td>
+        <Td dataLabel={t`Organization`}>
+          {summaryFields.organization ? (
+            <Link
+              to={`/organizations/${summaryFields.organization.id}/details`}
+            >
+              {summaryFields.organization.name}
+            </Link>
+          ) : null}
+        </Td>
         <Td dataLabel={t`Last Ran`}>{lastRun}</Td>
         <ActionsTd dataLabel={t`Actions`}>
           <ActionItem
@@ -258,26 +272,14 @@ function TemplateListItem({
                 value={template.description}
                 dataCy={`template-${template.id}-description`}
               />
-              {summaryFields.recent_jobs && summaryFields.recent_jobs.length ? (
+              {summaryFields.recent_jobs ? (
                 <Detail
                   label={t`Activity`}
                   value={<Sparkline jobs={summaryFields.recent_jobs} />}
                   dataCy={`template-${template.id}-activity`}
+                  isEmpty={summaryFields.recent_jobs.length === 0}
                 />
               ) : null}
-              {summaryFields.organization && (
-                <Detail
-                  label={t`Organization`}
-                  value={
-                    <Link
-                      to={`/organizations/${summaryFields.organization.id}/details`}
-                    >
-                      {summaryFields.organization.name}
-                    </Link>
-                  }
-                  dataCy={`template-${template.id}-organization`}
-                />
-              )}
               {summaryFields.inventory ? (
                 <Detail
                   label={t`Inventory`}
@@ -315,7 +317,7 @@ function TemplateListItem({
                 value={formatDateString(template.modified)}
                 dataCy={`template-${template.id}-last-modified`}
               />
-              {summaryFields.credentials && summaryFields.credentials.length ? (
+              {summaryFields.credentials ? (
                 <Detail
                   fullWidth
                   label={t`Credentials`}
@@ -336,9 +338,10 @@ function TemplateListItem({
                     </ChipGroup>
                   }
                   dataCy={`template-${template.id}-credentials`}
+                  isEmpty={summaryFields.credentials.length === 0}
                 />
               ) : null}
-              {summaryFields.labels && summaryFields.labels.results.length > 0 && (
+              {summaryFields.labels && (
                 <Detail
                   fullWidth
                   label={t`Labels`}
@@ -360,6 +363,7 @@ function TemplateListItem({
                     </ChipGroup>
                   }
                   dataCy={`template-${template.id}-labels`}
+                  isEmpty={summaryFields.labels.results.length === 0}
                 />
               )}
             </DetailList>

@@ -19,6 +19,7 @@ import PaginatedTable, {
 } from 'components/PaginatedTable';
 import useSelected from 'hooks/useSelected';
 import useExpanded from 'hooks/useExpanded';
+import useToast, { AlertVariant } from 'hooks/useToast';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import useWsProjects from './useWsProjects';
@@ -34,6 +35,7 @@ const QS_CONFIG = getQSConfig('project', {
 function ProjectList() {
   const location = useLocation();
   const match = useRouteMatch();
+  const { addToast, Toast, toastProps } = useToast();
 
   const {
     request: fetchUpdatedProject,
@@ -121,6 +123,18 @@ function ProjectList() {
       allItemsSelected: isAllSelected,
       fetchItems: fetchProjects,
     }
+  );
+
+  const handleCopy = useCallback(
+    (newId) => {
+      addToast({
+        id: newId,
+        title: t`Project copied successfully`,
+        variant: AlertVariant.success,
+        hasTimeout: true,
+      });
+    },
+    [addToast]
   );
 
   const handleProjectDelete = async () => {
@@ -255,6 +269,7 @@ function ProjectList() {
                 detailUrl={`${match.url}/${project.id}`}
                 isSelected={selected.some((row) => row.id === project.id)}
                 onSelect={() => handleSelect(project)}
+                onCopy={handleCopy}
                 rowIndex={index}
                 onRefreshRow={(projectId) => fetchUpdatedProject(projectId)}
               />
@@ -267,6 +282,7 @@ function ProjectList() {
           />
         </Card>
       </PageSection>
+      <Toast {...toastProps} />
       {deletionError && (
         <AlertModal
           isOpen={deletionError}

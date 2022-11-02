@@ -1,5 +1,5 @@
 import { i18n } from '@lingui/core';
-import { en, fr, es, nl, ja, zh, zu } from 'make-plural/plurals';
+import { en, fr, es, ko, nl, ja, zh, zu } from 'make-plural/plurals';
 
 export const locales = {
   en: 'English',
@@ -7,6 +7,7 @@ export const locales = {
   zu: 'Zulu',
   fr: 'French',
   es: 'Spanish',
+  ko: 'Korean',
   zh: 'Chinese',
   nl: 'Dutch',
 };
@@ -15,6 +16,7 @@ i18n.loadLocaleData({
   en: { plurals: en },
   fr: { plurals: fr },
   es: { plurals: es },
+  ko: { plurals: ko },
   nl: { plurals: nl },
   ja: { plurals: ja },
   zh: { plurals: zh },

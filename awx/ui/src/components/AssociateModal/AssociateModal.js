@@ -91,76 +91,74 @@ function AssociateModal({
   };
 
   return (
-    <>
-      <Modal
-        ouiaId={ouiaId}
-        variant="large"
-        title={title}
-        aria-label={t`Association modal`}
-        isOpen={isModalOpen}
-        onClose={handleClose}
-        actions={[
-          <Button
-            ouiaId="associate-modal-save"
-            aria-label={t`Save`}
-            key="select"
-            variant="primary"
-            onClick={handleSave}
-            isDisabled={selected.length === 0}
-          >
-            {t`Save`}
-          </Button>,
-          <Button
-            ouiaId="associate-modal-cancel"
-            aria-label={t`Cancel`}
-            key="cancel"
-            variant="link"
-            onClick={handleClose}
-          >
-            {t`Cancel`}
-          </Button>,
+    <Modal
+      ouiaId={ouiaId}
+      variant="large"
+      title={title}
+      aria-label={t`Association modal`}
+      isOpen={isModalOpen}
+      onClose={handleClose}
+      actions={[
+        <Button
+          ouiaId="associate-modal-save"
+          aria-label={t`Save`}
+          key="select"
+          variant="primary"
+          onClick={handleSave}
+          isDisabled={selected.length === 0}
+        >
+          {t`Save`}
+        </Button>,
+        <Button
+          ouiaId="associate-modal-cancel"
+          aria-label={t`Cancel`}
+          key="cancel"
+          variant="link"
+          onClick={handleClose}
+        >
+          {t`Cancel`}
+        </Button>,
+      ]}
+    >
+      <OptionsList
+        displayKey={displayKey}
+        contentError={contentError}
+        columns={columns}
+        deselectItem={handleSelect}
+        header={header}
+        isLoading={isLoading}
+        multiple
+        optionCount={itemCount}
+        options={items}
+        qsConfig={QS_CONFIG(displayKey)}
+        readOnly={false}
+        selectItem={handleSelect}
+        value={selected}
+        searchColumns={[
+          {
+            name: t`Name`,
+            key: `${displayKey}__icontains`,
+            isDefault: true,
+          },
+          {
+            name: t`Created By (Username)`,
+            key: 'created_by__username__icontains',
+          },
+          {
+            name: t`Modified By (Username)`,
+            key: 'modified_by__username__icontains',
+          },
         ]}
-      >
-        <OptionsList
-          displayKey={displayKey}
-          contentError={contentError}
-          columns={columns}
-          deselectItem={handleSelect}
-          header={header}
-          isLoading={isLoading}
-          multiple
-          optionCount={itemCount}
-          options={items}
-          qsConfig={QS_CONFIG(displayKey)}
-          readOnly={false}
-          selectItem={handleSelect}
-          value={selected}
-          searchColumns={[
-            {
-              name: t`Name`,
-              key: `${displayKey}__icontains`,
-              isDefault: true,
-            },
-            {
-              name: t`Created By (Username)`,
-              key: 'created_by__username__icontains',
-            },
-            {
-              name: t`Modified By (Username)`,
-              key: 'modified_by__username__icontains',
-            },
-          ]}
-          sortColumns={[
-            {
-              name: t`Name`,
-              key: `${displayKey}`,
-            },
-          ]}
-          searchableKeys={searchableKeys}
-          relatedSearchableKeys={relatedSearchableKeys}
-        />
-      </Modal>
-    </>
+        sortColumns={[
+          {
+            name: t`Name`,
+            key: `${displayKey}`,
+          },
+        ]}
+        searchableKeys={searchableKeys}
+        relatedSearchableKeys={relatedSearchableKeys}
+      />
+    </Modal>
   );
 }
 

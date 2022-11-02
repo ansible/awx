@@ -59,12 +59,14 @@ describe('<InventoryGroup />', () => {
   });
 
   test('expect all tabs to exist, including Back to Groups', async () => {
-    expect(
-      wrapper.find('button[link="/inventories/inventory/1/groups"]').length
-    ).toBe(1);
-    expect(wrapper.find('button[aria-label="Details"]').length).toBe(1);
-    expect(wrapper.find('button[aria-label="Related Groups"]').length).toBe(1);
-    expect(wrapper.find('button[aria-label="Hosts"]').length).toBe(1);
+    const routedTabs = wrapper.find('RoutedTabs');
+    expect(routedTabs).toHaveLength(1);
+
+    const tabs = routedTabs.prop('tabsArray');
+    expect(tabs[0].link).toEqual('/inventories/inventory/1/groups');
+    expect(tabs[1].name).toEqual('Details');
+    expect(tabs[2].name).toEqual('Related Groups');
+    expect(tabs[3].name).toEqual('Hosts');
   });
 
   test('should show content error when user attempts to navigate to erroneous route', async () => {

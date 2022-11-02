@@ -85,6 +85,7 @@ describe('<InventoryDetail />', () => {
     expectDetailToMatch(wrapper, 'Name', mockInventory.name);
     expectDetailToMatch(wrapper, 'Description', mockInventory.description);
     expectDetailToMatch(wrapper, 'Type', 'Inventory');
+    expectDetailToMatch(wrapper, 'Total hosts', mockInventory.total_hosts);
     const link = wrapper.find('Detail[label="Organization"]').find('Link');
 
     const org = wrapper.find('Detail[label="Organization"]');
@@ -152,6 +153,9 @@ describe('<InventoryDetail />', () => {
     expect(InventoriesAPI.readInstanceGroups).toHaveBeenCalledWith(
       mockInventory.id
     );
-    expect(wrapper.find(`Detail[label="Instance Groups"]`)).toHaveLength(0);
+    const instance_groups_detail = wrapper
+      .find(`Detail[label="Instance Groups"]`)
+      .at(0);
+    expect(instance_groups_detail.prop('isEmpty')).toEqual(true);
   });
 });

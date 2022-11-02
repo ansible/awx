@@ -12,7 +12,9 @@ function OrganizationTeamListItem({ team, detailUrl }) {
   return (
     <Tr id={`team-row-${team.id}`} ouiaId={`team-row-${team.id}`}>
       <Td dataLabel={t`Name`}>
-        <Link to={`${detailUrl}/details`}>{team.name}</Link>
+        <Link to={`${detailUrl}/details`}>
+          <b>{team.name}</b>
+        </Link>
       </Td>
       <ActionsTd dataLabel={t`Actions`}>
         <ActionItem

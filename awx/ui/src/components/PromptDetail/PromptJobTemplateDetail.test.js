@@ -125,4 +125,92 @@ describe('PromptJobTemplateDetail', () => {
     assertDetail(wrapper, 'Organization', 'Deleted');
     assertDetail(wrapper, 'Project', 'Deleted');
   });
+
+  test('should not load Activity', () => {
+    wrapper = mountWithContexts(
+      <PromptJobTemplateDetail
+        resource={{
+          ...mockJT,
+          summary_fields: {
+            recent_jobs: [],
+          },
+        }}
+      />
+    );
+    const activity_detail = wrapper.find(`Detail[label="Activity"]`).at(0);
+    expect(activity_detail.prop('isEmpty')).toEqual(true);
+  });
+
+  test('should not load Credentials', () => {
+    wrapper = mountWithContexts(
+      <PromptJobTemplateDetail
+        resource={{
+          ...mockJT,
+          summary_fields: {
+            credentials: [],
+          },
+        }}
+      />
+    );
+    const credentials_detail = wrapper
+      .find(`Detail[label="Credentials"]`)
+      .at(0);
+    expect(credentials_detail.prop('isEmpty')).toEqual(true);
+  });
+
+  test('should not load Labels', () => {
+    wrapper = mountWithContexts(
+      <PromptJobTemplateDetail
+        resource={{
+          ...mockJT,
+          summary_fields: {
+            labels: {
+              results: [],
+            },
+          },
+        }}
+      />
+    );
+    const labels_detail = wrapper.find(`Detail[label="Labels"]`).at(0);
+    expect(labels_detail.prop('isEmpty')).toEqual(true);
+  });
+
+  test('should not load Instance Groups', () => {
+    wrapper = mountWithContexts(
+      <PromptJobTemplateDetail
+        resource={{
+          ...mockJT,
+          instance_groups: [],
+        }}
+      />
+    );
+    const instance_groups_detail = wrapper
+      .find(`Detail[label="Instance Groups"]`)
+      .at(0);
+    expect(instance_groups_detail.prop('isEmpty')).toEqual(true);
+  });
+
+  test('should not load Job Tags', () => {
+    wrapper = mountWithContexts(
+      <PromptJobTemplateDetail
+        resource={{
+          ...mockJT,
+          job_tags: '',
+        }}
+      />
+    );
+    expect(wrapper.find('Detail[label="Job Tags"]').length).toBe(0);
+  });
+
+  test('should not load Skip Tags', () => {
+    wrapper = mountWithContexts(
+      <PromptJobTemplateDetail
+        resource={{
+          ...mockJT,
+          skip_tags: '',
+        }}
+      />
+    );
+    expect(wrapper.find('Detail[label="Skip Tags"]').length).toBe(0);
+  });
 });

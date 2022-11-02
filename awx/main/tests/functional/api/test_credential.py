@@ -532,6 +532,49 @@ def test_vault_password_required(post, organization, admin):
     assert 'required fields (vault_password)' in j.job_explanation
 
 
+@pytest.mark.django_db
+def test_vault_id_immutable(post, patch, organization, admin):
+    vault = CredentialType.defaults['vault']()
+    vault.save()
+    response = post(
+        reverse('api:credential_list'),
+        {
+            'credential_type': vault.pk,
+            'organization': organization.id,
+            'name': 'Best credential ever',
+            'inputs': {'vault_id': 'password', 'vault_password': 'password'},
+        },
+        admin,
+    )
+    assert response.status_code == 201
+    assert Credential.objects.count() == 1
+    response = patch(
+        reverse('api:credential_detail', kwargs={'pk': response.data['id']}), {'inputs': {'vault_id': 'password2', 'vault_password': 'password'}}, admin
+    )
+    assert response.status_code == 400
+    assert response.data['inputs'][0] == 'Vault IDs cannot be changed once they have been created.'
+
+
+@pytest.mark.django_db
+def test_patch_without_vault_id_valid(post, patch, organization, admin):
+    vault = CredentialType.defaults['vault']()
+    vault.save()
+    response = post(
+        reverse('api:credential_list'),
+        {
+            'credential_type': vault.pk,
+            'organization': organization.id,
+            'name': 'Best credential ever',
+            'inputs': {'vault_id': 'password', 'vault_password': 'password'},
+        },
+        admin,
+    )
+    assert response.status_code == 201
+    assert Credential.objects.count() == 1
+    response = patch(reverse('api:credential_detail', kwargs={'pk': response.data['id']}), {'name': 'worst_credential_ever'}, admin)
+    assert response.status_code == 200
+
+
 #
 # Net Credentials
 #

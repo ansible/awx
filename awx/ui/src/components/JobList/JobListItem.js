@@ -8,10 +8,16 @@ import { RocketIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 import { formatDateString } from 'util/dates';
 import { isJobRunning } from 'util/jobs';
+import getScheduleUrl from 'util/getScheduleUrl';
 import { ActionsTd, ActionItem, TdBreakWord } from '../PaginatedTable';
 import { LaunchButton, ReLaunchDropDown } from '../LaunchButton';
 import StatusLabel from '../StatusLabel';
-import { DetailList, Detail, LaunchedByDetail } from '../DetailList';
+import {
+  DetailList,
+  Detail,
+  DeletedDetail,
+  LaunchedByDetail,
+} from '../DetailList';
 import ChipGroup from '../ChipGroup';
 import CredentialChip from '../CredentialChip';
 import ExecutionEnvironmentDetail from '../ExecutionEnvironmentDetail';
@@ -48,6 +54,7 @@ function JobListItem({
     job_template,
     labels,
     project,
+    schedule,
     source_workflow_job,
     workflow_job_template,
   } = job.summary_fields;
@@ -156,17 +163,29 @@ function JobListItem({
         <Td colSpan={showTypeColumn ? 6 : 5}>
           <ExpandableRowContent>
             <DetailList>
-              {job.type === 'inventory_update' &&
-                inventorySourceLabels.length > 0 && (
-                  <Detail
-                    dataCy="job-inventory-source-type"
-                    label={t`Source`}
-                    value={inventorySourceLabels.map(([string, label]) =>
-                      string === job.source ? label : null
-                    )}
-                  />
-                )}
+              {job.type === 'inventory_update' && (
+                <Detail
+                  dataCy="job-inventory-source-type"
+                  label={t`Source`}
+                  value={inventorySourceLabels?.map(([string, label]) =>
+                    string === job.source ? label : null
+                  )}
+                  isEmpty={inventorySourceLabels?.length === 0}
+                />
+              )}
               <LaunchedByDetail job={job} />
+              {job.launch_type === 'scheduled' &&
+                (schedule ? (
+                  <Detail
+                    dataCy="job-schedule"
+                    label={t`Schedule`}
+                    value={
+                      <Link to={getScheduleUrl(job)}>{schedule.name}</Link>
+                    }
+                  />
+                ) : (
+                  <DeletedDetail label={t`Schedule`} />
+                ))}
               {job_template && (
                 <Detail
                   label={t`Job Template`}
@@ -235,7 +254,7 @@ function JobListItem({
                     dataCy={`execution-environment-detail-${job.id}`}
                   />
                 )}
-              {credentials && credentials.length > 0 && (
+              {credentials && (
                 <Detail
                   fullWidth
                   label={t`Credentials`}
@@ -256,6 +275,7 @@ function JobListItem({
                       ))}
                     </ChipGroup>
                   }
+                  isEmpty={credentials.length === 0}
                 />
               )}
               {labels && labels.count > 0 && (

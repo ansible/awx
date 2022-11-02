@@ -57,6 +57,7 @@ describe('<SmartInventoryDetail />', () => {
       assertDetail('Organization', 'Default');
       assertDetail('Smart host filter', 'name__icontains=local');
       assertDetail('Instance groups', 'mock instance group');
+      assertDetail('Total hosts', '2');
       expect(wrapper.find(`Detail[label="Activity"] Sparkline`)).toHaveLength(
         1
       );
@@ -110,6 +111,41 @@ describe('<SmartInventoryDetail />', () => {
         'Modal[title="Error!"]',
         (el) => el.length === 0
       );
+    });
+
+    test('should not load Activity', async () => {
+      await act(async () => {
+        wrapper = mountWithContexts(
+          <SmartInventoryDetail
+            inventory={{
+              ...mockSmartInventory,
+              recent_jobs: [],
+            }}
+          />
+        );
+      });
+      const activity_detail = wrapper.find(`Detail[label="Activity"]`).at(0);
+      expect(activity_detail.prop('isEmpty')).toEqual(true);
+    });
+
+    test('should not load Instance Groups', async () => {
+      InventoriesAPI.readInstanceGroups.mockResolvedValue({
+        data: {
+          results: [],
+        },
+      });
+
+      let wrapper;
+      await act(async () => {
+        wrapper = mountWithContexts(
+          <SmartInventoryDetail inventory={mockSmartInventory} />
+        );
+      });
+      wrapper.update();
+      const instance_groups_detail = wrapper
+        .find(`Detail[label="Instance groups"]`)
+        .at(0);
+      expect(instance_groups_detail.prop('isEmpty')).toEqual(true);
     });
   });
 

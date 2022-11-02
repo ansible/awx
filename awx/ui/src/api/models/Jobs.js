@@ -4,7 +4,7 @@ import RunnableMixin from '../mixins/Runnable.mixin';
 class Jobs extends RunnableMixin(Base) {
   constructor(http) {
     super(http);
-    this.baseUrl = '/api/v2/jobs/';
+    this.baseUrl = 'api/v2/jobs/';
     this.jobEventSlug = '/job_events/';
   }
 
@@ -18,6 +18,10 @@ class Jobs extends RunnableMixin(Base) {
 
   readDetail(id) {
     return this.http.get(`${this.baseUrl}${id}/`);
+  }
+
+  readChildrenSummary(id) {
+    return this.http.get(`${this.baseUrl}${id}/job_events/children_summary/`);
   }
 }
 

@@ -12,11 +12,11 @@
 
 - name: Tag and Push Container Images
   docker_image:
-    name: "{{ awx_image }}:{{ awx_version }}"
+    name: "{{ awx_image }}:{{ awx_image_tag }}"
     repository: "{{ registry }}/{{ awx_image }}:{{ item }}"
     force_tag: yes
     push: true
     source: local
   with_items:
     - "latest"
-    - "{{ awx_version }}"
+    - "{{ awx_image_tag }}"

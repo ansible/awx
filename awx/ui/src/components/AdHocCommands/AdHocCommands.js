@@ -26,13 +26,6 @@ function AdHocCommands({
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const { isKebabified, onKebabModalChange } = useContext(KebabifiedContext);
 
-  const verbosityOptions = [
-    { value: '0', key: '0', label: t`0 (Normal)` },
-    { value: '1', key: '1', label: t`1 (Verbose)` },
-    { value: '2', key: '2', label: t`2 (More Verbose)` },
-    { value: '3', key: '3', label: t`3 (Debug)` },
-    { value: '4', key: '4', label: t`4 (Connection Debug)` },
-  ];
   useEffect(() => {
     if (isKebabified) {
       onKebabModalChange(isWizardOpen);
@@ -59,6 +52,7 @@ function AdHocCommands({
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
   const {
     isLoading: isLaunchLoading,
     error: launchError,
@@ -79,11 +73,19 @@ function AdHocCommands({
   );
 
   const handleSubmit = async (values) => {
-    const { credential, execution_environment, ...remainingValues } = values;
-    const newCredential = credential[0].id;
+    const {
+      credentials,
+      credential_passwords: { become_password, ssh_password, ssh_key_unlock },
+      execution_environment,
+      ...remainingValues
+    } = values;
+    const newCredential = credentials[0].id;
 
     const manipulatedValues = {
       credential: newCredential,
+      become_password,
+      ssh_password,
+      ssh_key_unlock,
       execution_environment: execution_environment[0]?.id,
       ...remainingValues,
     };
@@ -150,7 +152,6 @@ function AdHocCommands({
           adHocItems={adHocItems}
           organizationId={organizationId}
           moduleOptions={moduleOptions}
-          verbosityOptions={verbosityOptions}
           credentialTypeId={credentialTypeId}
           onCloseWizard={() => setIsWizardOpen(false)}
           onLaunch={handleSubmit}
@@ -164,6 +165,8 @@ function AdHocCommands({
 AdHocCommands.propTypes = {
   adHocItems: PropTypes.arrayOf(PropTypes.object).isRequired,
   hasListItems: PropTypes.bool.isRequired,
+  onLaunchLoading: PropTypes.func.isRequired,
+  moduleOptions: PropTypes.arrayOf(PropTypes.array).isRequired,
 };
 
 export default AdHocCommands;

@@ -1,0 +1,37 @@
+---
+name: PR Check
+env:
+  BRANCH: ${{ github.base_ref || 'devel' }}
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+jobs:
+  pr-check:
+    name: Scan PR description for semantic versioning keywords
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Check for each of the lines
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          echo $PR_BODY | grep "Bug, Docs Fix or other nominal change" > Z
+          echo $PR_BODY | grep "New or Enhanced Feature" > Y
+          echo $PR_BODY | grep "Breaking Change" > X
+          exit 0
+        # We exit 0 and set the shell to prevent the returns from the greps from failing this step
+        # See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#exit-codes-and-error-action-preference
+        shell: bash {0}
+
+      - name: Check for exactly one item
+        run: |
+          if [ $(cat X Y Z | wc -l) != 1 ] ; then
+            echo "The PR body must contain exactly one of [ 'Bug, Docs Fix or other nominal change', 'New or Enhanced Feature', 'Breaking Change' ]"
+            echo "We counted $(cat X Y Z | wc -l)"
+            echo "See the default PR body for examples"
+            exit 255;
+          else
+            exit 0;
+          fi

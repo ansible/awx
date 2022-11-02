@@ -1,4 +1,5 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import ListHeader from './ListHeader';
@@ -74,7 +75,9 @@ describe('ListHeader', () => {
 
     expect(history.location.search).toEqual(query);
     const toolbar = wrapper.find('DataListToolbar');
-    toolbar.prop('clearAllFilters')();
+    act(() => {
+      toolbar.prop('clearAllFilters')();
+    });
     expect(history.location.search).toEqual('?item.page_size=5');
   });
 

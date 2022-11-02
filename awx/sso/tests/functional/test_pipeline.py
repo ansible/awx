@@ -4,8 +4,8 @@ from unittest import mock
 
 from django.utils.timezone import now
 
+from awx.conf.registry import settings_registry
 from awx.sso.pipeline import update_user_orgs, update_user_teams, update_user_orgs_by_saml_attr, update_user_teams_by_saml_attr, _check_flag
-
 from awx.main.models import User, Team, Organization, Credential, CredentialType
 
 
@@ -92,8 +92,13 @@ class TestSAMLMap:
         assert Organization.objects.get(name="Default_Alias") is not None
 
         for o in Organization.objects.all():
-            assert o.galaxy_credentials.count() == 1
-            assert o.galaxy_credentials.first().name == 'Ansible Galaxy'
+            if o.name == 'Default':
+                # The default org was already created and should not have a galaxy credential
+                assert o.galaxy_credentials.count() == 0
+            else:
+                # The Default_Alias was created by SAML and should get the galaxy credential
+                assert o.galaxy_credentials.count() == 1
+                assert o.galaxy_credentials.first().name == 'Ansible Galaxy'
 
     def test_update_user_teams(self, backend, users, galaxy_credential):
         u1, u2, u3 = users
@@ -158,9 +163,9 @@ class TestSAMLAttr:
                     'PersonImmutableID': [],
                 },
             },
-            #'social': <UserSocialAuth: cmeyers@redhat.com>,
+            # 'social': <UserSocialAuth: cmeyers@redhat.com>,
             'social': None,
-            #'strategy': <awx.sso.strategies.django_strategy.AWXDjangoStrategy object at 0x8523a10>,
+            # 'strategy': <awx.sso.strategies.django_strategy.AWXDjangoStrategy object at 0x8523a10>,
             'strategy': None,
             'new_association': False,
         }
@@ -203,7 +208,13 @@ class TestSAMLAttr:
                 ],
             }
 
-        return MockSettings()
+        mock_settings_obj = MockSettings()
+        for key in settings_registry.get_registered_settings(category_slug='logging'):
+            value = settings_registry.get_setting_field(key).get_default()
+            setattr(mock_settings_obj, key, value)
+        setattr(mock_settings_obj, 'DEBUG', True)
+
+        return mock_settings_obj
 
     @pytest.fixture
     def backend(self):
@@ -263,8 +274,13 @@ class TestSAMLAttr:
             assert Organization.objects.get(name="o1_alias").member_role.members.count() == 1
 
         for o in Organization.objects.all():
-            assert o.galaxy_credentials.count() == 1
-            assert o.galaxy_credentials.first().name == 'Ansible Galaxy'
+            if o.id in [o1.id, o2.id, o3.id]:
+                # o[123] were created without a default galaxy cred
+                assert o.galaxy_credentials.count() == 0
+            else:
+                # anything else created should have a default galaxy cred
+                assert o.galaxy_credentials.count() == 1
+                assert o.galaxy_credentials.first().name == 'Ansible Galaxy'
 
     def test_update_user_teams_by_saml_attr(self, orgs, users, galaxy_credential, kwargs, mock_settings):
         with mock.patch('django.conf.settings', mock_settings):
@@ -322,8 +338,13 @@ class TestSAMLAttr:
             assert Team.objects.get(name='Green', organization__name='Default3').member_role.members.count() == 3
 
         for o in Organization.objects.all():
-            assert o.galaxy_credentials.count() == 1
-            assert o.galaxy_credentials.first().name == 'Ansible Galaxy'
+            if o.id in [o1.id, o2.id, o3.id]:
+                # o[123] were created without a default galaxy cred
+                assert o.galaxy_credentials.count() == 0
+            else:
+                # anything else created should have a default galaxy cred
+                assert o.galaxy_credentials.count() == 1
+                assert o.galaxy_credentials.first().name == 'Ansible Galaxy'
 
     def test_update_user_teams_alias_by_saml_attr(self, orgs, users, galaxy_credential, kwargs, mock_settings):
         with mock.patch('django.conf.settings', mock_settings):
@@ -396,71 +417,149 @@ class TestSAMLAttr:
             assert o.galaxy_credentials.count() == 1
             assert o.galaxy_credentials.first().name == 'Ansible Galaxy'
 
+    def test_galaxy_credential_no_auto_assign(self, users, kwargs, galaxy_credential, mock_settings):
+        # A Galaxy credential should not be added to an existing org
+        o = Organization.objects.create(name='Default1')
+        o = Organization.objects.create(name='Default2')
+        o = Organization.objects.create(name='Default3')
+        o = Organization.objects.create(name='Default4')
+        kwargs['response']['attributes']['memberOf'] = ['Default1']
+        kwargs['response']['attributes']['groups'] = ['Blue']
+        with mock.patch('django.conf.settings', mock_settings):
+            for u in users:
+                update_user_orgs_by_saml_attr(None, None, u, **kwargs)
+                update_user_teams_by_saml_attr(None, None, u, **kwargs)
+
+        assert Organization.objects.count() == 4
+        for o in Organization.objects.all():
+            assert o.galaxy_credentials.count() == 0
+
 
 @pytest.mark.django_db
 class TestSAMLUserFlags:
     @pytest.mark.parametrize(
-        "user_flags_settings, expected",
+        "user_flags_settings, expected, is_superuser",
         [
             # In this case we will pass no user flags so new_flag should be false and changed will def be false
             (
                 {},
                 (False, False),
+                False,
             ),
+            # NOTE: The first handful of tests test role/value as string instead of lists.
+            #       This was from the initial implementation of these fields but the code should be able to handle this
+            #       There are a couple tests at the end of this which will validate arrays in these values.
+            #
             # In this case we will give the user a group to make them an admin
             (
                 {'is_superuser_role': 'test-role-1'},
                 (True, True),
+                False,
             ),
             # In this case we will give the user a flag that will make then an admin
             (
                 {'is_superuser_attr': 'is_superuser'},
                 (True, True),
+                False,
             ),
             # In this case we will give the user a flag but the wrong value
             (
                 {'is_superuser_attr': 'is_superuser', 'is_superuser_value': 'junk'},
                 (False, False),
+                False,
             ),
             # In this case we will give the user a flag and the right value
             (
                 {'is_superuser_attr': 'is_superuser', 'is_superuser_value': 'true'},
                 (True, True),
+                False,
             ),
             # In this case we will give the user a proper role and an is_superuser_attr role that they dont have, this should make them an admin
             (
                 {'is_superuser_role': 'test-role-1', 'is_superuser_attr': 'gibberish', 'is_superuser_value': 'true'},
                 (True, True),
+                False,
             ),
             # In this case we will give the user a proper role and an is_superuser_attr role that they have, this should make them an admin
             (
                 {'is_superuser_role': 'test-role-1', 'is_superuser_attr': 'test-role-1'},
                 (True, True),
+                False,
             ),
             # In this case we will give the user a proper role and an is_superuser_attr role that they have but a bad value, this should make them an admin
             (
                 {'is_superuser_role': 'test-role-1', 'is_superuser_attr': 'is_superuser', 'is_superuser_value': 'junk'},
                 (False, False),
+                False,
             ),
             # In this case we will give the user everything
             (
                 {'is_superuser_role': 'test-role-1', 'is_superuser_attr': 'is_superuser', 'is_superuser_value': 'true'},
                 (True, True),
+                False,
+            ),
+            # In this test case we will validate that a single attribute (instead of a list) still works
+            (
+                {'is_superuser_attr': 'name_id', 'is_superuser_value': 'test_id'},
+                (True, True),
+                False,
+            ),
+            # This will be a negative test for a single atrribute
+            (
+                {'is_superuser_attr': 'name_id', 'is_superuser_value': 'junk'},
+                (False, False),
+                False,
+            ),
+            # The user is already a superuser so we should remove them
+            (
+                {'is_superuser_attr': 'name_id', 'is_superuser_value': 'junk', 'remove_superusers': True},
+                (False, True),
+                True,
+            ),
+            # The user is already a superuser but we don't have a remove field
+            (
+                {'is_superuser_attr': 'name_id', 'is_superuser_value': 'junk', 'remove_superusers': False},
+                (True, False),
+                True,
+            ),
+            # Positive test for multiple values for is_superuser_value
+            (
+                {'is_superuser_attr': 'is_superuser', 'is_superuser_value': ['junk', 'junk2', 'else', 'junk']},
+                (True, True),
+                False,
+            ),
+            # Negative test for multiple values for is_superuser_value
+            (
+                {'is_superuser_attr': 'is_superuser', 'is_superuser_value': ['junk', 'junk2', 'junk']},
+                (False, True),
+                True,
+            ),
+            # Positive test for multiple values of is_superuser_role
+            (
+                {'is_superuser_role': ['junk', 'junk2', 'something', 'junk']},
+                (True, True),
+                False,
+            ),
+            # Negative test for multiple values of is_superuser_role
+            (
+                {'is_superuser_role': ['junk', 'junk2', 'junk']},
+                (False, True),
+                True,
             ),
         ],
     )
-    def test__check_flag(self, user_flags_settings, expected):
+    def test__check_flag(self, user_flags_settings, expected, is_superuser):
         user = User()
         user.username = 'John'
-        user.is_superuser = False
+        user.is_superuser = is_superuser
 
         attributes = {
             'email': ['noone@nowhere.com'],
             'last_name': ['Westcott'],
-            'is_superuser': ['true'],
+            'is_superuser': ['something', 'else', 'true'],
             'username': ['test_id'],
             'first_name': ['John'],
-            'Role': ['test-role-1'],
+            'Role': ['test-role-1', 'something', 'different'],
             'name_id': 'test_id',
         }
 

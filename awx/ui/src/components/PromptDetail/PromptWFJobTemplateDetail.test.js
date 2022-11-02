@@ -62,4 +62,36 @@ describe('PromptWFJobTemplateDetail', () => {
       '---\nmock: data'
     );
   });
+
+  test('should not load Activity', () => {
+    wrapper = mountWithContexts(
+      <PromptWFJobTemplateDetail
+        resource={{
+          ...mockWF,
+          summary_fields: {
+            recent_jobs: [],
+          },
+        }}
+      />
+    );
+    const activity_detail = wrapper.find(`Detail[label="Activity"]`).at(0);
+    expect(activity_detail.prop('isEmpty')).toEqual(true);
+  });
+
+  test('should not load Labels', () => {
+    wrapper = mountWithContexts(
+      <PromptWFJobTemplateDetail
+        resource={{
+          ...mockWF,
+          summary_fields: {
+            labels: {
+              results: [],
+            },
+          },
+        }}
+      />
+    );
+    const labels_detail = wrapper.find(`Detail[label="Labels"]`).at(0);
+    expect(labels_detail.prop('isEmpty')).toEqual(true);
+  });
 });

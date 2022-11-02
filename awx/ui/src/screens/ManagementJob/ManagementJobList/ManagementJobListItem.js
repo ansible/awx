@@ -71,22 +71,20 @@ function ManagementJobListItem({
         </Td>
         <Td dataLabel={t`Description`}>{description}</Td>
         <ActionsTd dataLabel={t`Actions`}>
-          <ActionItem visible={isSuperUser} tooltip={t`Launch Management Job`}>
+          <ActionItem visible={isSuperUser}>
             {isSuperUser ? (
               <>
                 {isPrompted ? (
-                  <>
-                    <LaunchManagementPrompt
-                      isOpen={isManagementPromptOpen}
-                      isLoading={isManagementPromptLoading}
-                      onClick={handleManagementPromptClick}
-                      onClose={handleManagementPromptClose}
-                      onConfirm={handleManagementPromptConfirm}
-                      defaultDays={30}
-                    />
-                  </>
+                  <LaunchManagementPrompt
+                    isOpen={isManagementPromptOpen}
+                    isLoading={isManagementPromptLoading}
+                    onClick={handleManagementPromptClick}
+                    onClose={handleManagementPromptClose}
+                    onConfirm={handleManagementPromptConfirm}
+                    defaultDays={30}
+                  />
                 ) : (
-                  <Tooltip content={t`Launch management job`} position="top">
+                  <Tooltip content={t`Launch management job`} position="left">
                     <Button
                       ouiaId={`${id}-launch-button`}
                       aria-label={t`Launch management job`}

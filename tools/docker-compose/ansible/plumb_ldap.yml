@@ -1,0 +1,32 @@
+---
+- name: Plumb an ldap instance
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars:
+    awx_host: "https://localhost:8043"
+  tasks:
+    - name: Load existing and new LDAP settings
+      set_fact:
+        existing_ldap: "{{ lookup('awx.awx.controller_api', 'settings/ldap', host=awx_host, verify_ssl=false) }}"
+        new_ldap: "{{ lookup('template', 'ldap_settings.json.j2') }}"
+
+    - name: Display existing LDAP configuration
+      debug:
+        msg:
+          - "Here is your existing LDAP configuration for reference:"
+          - "{{ existing_ldap }}"
+
+    - pause:
+        prompt: "Continuing to run this will replace your existing ldap settings (displayed above). They will all be captured. Be sure that is backed up before continuing"
+
+    - name: Write out the existing content
+      copy:
+        dest: "../_sources/existing_ldap_adapter_settings.json"
+        content: "{{ existing_ldap }}"
+
+    - name: Configure AWX LDAP adapter
+      awx.awx.settings:
+        settings: "{{ new_ldap }}"
+        controller_host: "{{ awx_host }}"
+        validate_certs: False

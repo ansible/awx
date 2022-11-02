@@ -38,7 +38,7 @@ describe('<WorkflowApprovalList />', () => {
     });
     wrapper.update();
 
-    expect(wrapper.find('WorkflowApprovalListItem')).toHaveLength(3);
+    expect(wrapper.find('WorkflowApprovalListItem')).toHaveLength(4);
   });
 
   test('should select workflow approval when checked', async () => {
@@ -69,7 +69,7 @@ describe('<WorkflowApprovalList />', () => {
     wrapper.update();
 
     const items = wrapper.find('WorkflowApprovalListItem');
-    expect(items).toHaveLength(3);
+    expect(items).toHaveLength(4);
     items.forEach((item) => {
       expect(item.prop('isSelected')).toEqual(true);
     });
@@ -79,19 +79,17 @@ describe('<WorkflowApprovalList />', () => {
     ).toEqual(true);
   });
 
-  test('should disable delete button', async () => {
+  test('Delete button is active', async () => {
     await act(async () => {
       wrapper = mountWithContexts(<WorkflowApprovalList />);
     });
     wrapper.update();
-
     await act(async () => {
-      wrapper.find('WorkflowApprovalListItem').at(2).invoke('onSelect')();
+      wrapper.find('WorkflowApprovalListItem').at(1).invoke('onSelect')();
     });
     wrapper.update();
-
-    expect(wrapper.find('ToolbarDeleteButton button').prop('disabled')).toEqual(
-      true
+    expect(wrapper.find('Button[aria-label="Delete"]').prop('isDisabled')).toBe(
+      false
     );
   });
 
@@ -105,10 +103,17 @@ describe('<WorkflowApprovalList />', () => {
       wrapper.find('WorkflowApprovalListItem').at(1).invoke('onSelect')();
     });
     wrapper.update();
-    await act(async () => {
-      wrapper.find('ToolbarDeleteButton').invoke('onDelete')();
-    });
+    expect(
+      wrapper.find('Button[aria-label="Delete"]').prop('isDisabled')
+    ).toEqual(false);
+    await act(async () =>
+      wrapper.find('Button[aria-label="Delete"]').prop('onClick')()
+    );
 
+    wrapper.update();
+    await act(async () =>
+      wrapper.find('Button[aria-label="confirm delete"]').prop('onClick')()
+    );
     expect(WorkflowApprovalsAPI.destroy).toHaveBeenCalledTimes(1);
   });
 
@@ -129,14 +134,22 @@ describe('<WorkflowApprovalList />', () => {
     });
     wrapper.update();
     expect(WorkflowApprovalsAPI.read).toHaveBeenCalledTimes(1);
+
     await act(async () => {
       wrapper.find('WorkflowApprovalListItem').at(1).invoke('onSelect')();
     });
     wrapper.update();
+    expect(
+      wrapper.find('Button[aria-label="Delete"]').prop('isDisabled')
+    ).toEqual(false);
+    await act(async () =>
+      wrapper.find('Button[aria-label="Delete"]').prop('onClick')()
+    );
 
-    await act(async () => {
-      wrapper.find('ToolbarDeleteButton').invoke('onDelete')();
-    });
+    wrapper.update();
+    await act(async () =>
+      wrapper.find('Button[aria-label="confirm delete"]').prop('onClick')()
+    );
     wrapper.update();
 
     const modal = wrapper.find('Modal');

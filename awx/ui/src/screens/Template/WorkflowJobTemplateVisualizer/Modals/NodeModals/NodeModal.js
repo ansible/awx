@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-useless-fragment */
 import 'styled-components/macro';
 import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -37,6 +38,8 @@ function NodeModalForm({
   surveyConfig,
   isLaunchLoading,
   resourceDefaultCredentials,
+  labels,
+  instanceGroups,
 }) {
   const history = useHistory();
   const dispatch = useContext(WorkflowDispatchContext);
@@ -65,7 +68,9 @@ function NodeModalForm({
     surveyConfig,
     values.nodeResource,
     askLinkType,
-    resourceDefaultCredentials
+    resourceDefaultCredentials,
+    labels,
+    instanceGroups
   );
 
   const handleSaveNode = () => {
@@ -86,11 +91,9 @@ function NodeModalForm({
       const initialExtraVars =
         launchConfig.ask_variables_on_launch && (values.extra_vars || '---');
       if (surveyConfig?.spec) {
-        extraVars = yaml.safeDump(
-          mergeExtraVars(initialExtraVars, surveyValues)
-        );
+        extraVars = yaml.dump(mergeExtraVars(initialExtraVars, surveyValues));
       } else {
-        extraVars = yaml.safeDump(mergeExtraVars(initialExtraVars, {}));
+        extraVars = yaml.dump(mergeExtraVars(initialExtraVars, {}));
       }
       values.extra_data = extraVars && parseVariableField(extraVars);
       delete values.extra_vars;
@@ -118,11 +121,16 @@ function NodeModalForm({
     contentError || credentialError
   );
 
-  const nextButtonText = (activeStep) =>
-    activeStep.id === promptSteps[promptSteps?.length - 1]?.id ||
-    activeStep.name === 'Preview'
+  function nextButtonText(activeStep) {
+    let verifyPromptSteps = false;
+    if (promptSteps.length) {
+      verifyPromptSteps =
+        activeStep.id === promptSteps[promptSteps.length - 1]?.id;
+    }
+    return verifyPromptSteps || activeStep.name === 'Preview'
       ? t`Save`
       : t`Next`;
+  }
 
   const CustomFooter = (
     <WizardFooter>
@@ -237,7 +245,7 @@ const NodeModalInner = ({ title, ...rest }) => {
   const {
     request: readLaunchConfigs,
     error: launchConfigError,
-    result: { launchConfig, surveyConfig, resourceDefaultCredentials },
+    result: { launchConfig, surveyConfig, resourceDefaultCredentials, labels },
     isLoading,
   } = useRequest(
     useCallback(async () => {
@@ -256,8 +264,14 @@ const NodeModalInner = ({ title, ...rest }) => {
           launchConfig: {},
           surveyConfig: {},
           resourceDefaultCredentials: [],
+          labels: [],
         };
       }
+
+      const readLabels =
+        values.nodeType === 'workflow_job_template'
+          ? WorkflowJobTemplatesAPI.readAllLabels(values.nodeResource.id)
+          : JobTemplatesAPI.readAllLabels(values.nodeResource.id);
 
       const { data: launch } = await readLaunch(
         values.nodeType,
@@ -287,10 +301,21 @@ const NodeModalInner = ({ title, ...rest }) => {
         defaultCredentials = results;
       }
 
+      let defaultLabels = [];
+
+      if (launch.ask_labels_on_launch) {
+        const {
+          data: { results },
+        } = await readLabels;
+
+        defaultLabels = results;
+      }
+
       return {
         launchConfig: launch,
         surveyConfig: survey,
         resourceDefaultCredentials: defaultCredentials,
+        labels: defaultLabels,
       };
 
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -343,6 +368,8 @@ const NodeModalInner = ({ title, ...rest }) => {
       resourceDefaultCredentials={resourceDefaultCredentials}
       isLaunchLoading={isLoading}
       title={wizardTitle}
+      labels={labels}
+      instanceGroups={[]}
     />
   );
 };

@@ -18,20 +18,28 @@ function ExecutionEnvironmentListItem({
   detailUrl,
   isSelected,
   onSelect,
+  onCopy,
   rowIndex,
   fetchExecutionEnvironments,
 }) {
   const [isDisabled, setIsDisabled] = useState(false);
 
   const copyExecutionEnvironment = useCallback(async () => {
-    await ExecutionEnvironmentsAPI.copy(executionEnvironment.id, {
-      name: `${executionEnvironment.name} @ ${timeOfDay()}`,
-    });
+    const response = await ExecutionEnvironmentsAPI.copy(
+      executionEnvironment.id,
+      {
+        name: `${executionEnvironment.name} @ ${timeOfDay()}`,
+      }
+    );
+    if (response.status === 201) {
+      onCopy(response.data.id);
+    }
     await fetchExecutionEnvironments();
   }, [
     executionEnvironment.id,
     executionEnvironment.name,
     fetchExecutionEnvironments,
+    onCopy,
   ]);
 
   const handleCopyStart = useCallback(() => {
@@ -114,6 +122,7 @@ ExecutionEnvironmentListItem.prototype = {
   detailUrl: string.isRequired,
   isSelected: bool.isRequired,
   onSelect: func.isRequired,
+  onCopy: func.isRequired,
 };
 
 export default ExecutionEnvironmentListItem;

@@ -6,7 +6,7 @@ import re
 from django.core.validators import RegexValidator
 from django.db import models, connection
 from django.utils.timezone import now
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 
 # Django OAuth Toolkit

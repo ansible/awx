@@ -5,9 +5,16 @@ import { t } from '@lingui/macro';
 import { PageSection } from '@patternfly/react-core';
 import ScreenHeader from 'components/ScreenHeader/ScreenHeader';
 import JobList from 'components/JobList';
+import PersistentFilters from 'components/PersistentFilters';
 import Job from './Job';
 import JobTypeRedirect from './JobTypeRedirect';
 import { JOB_TYPE_URL_SEGMENTS } from '../../constants';
+
+function TypeRedirect({ view }) {
+  const { id } = useParams();
+  const { path } = useRouteMatch();
+  return <JobTypeRedirect id={id} path={path} view={view} />;
+}
 
 function Jobs() {
   const match = useRouteMatch();
@@ -29,19 +36,15 @@ function Jobs() {
     });
   }, []);
 
-  function TypeRedirect({ view }) {
-    const { id } = useParams();
-    const { path } = useRouteMatch();
-    return <JobTypeRedirect id={id} path={path} view={view} />;
-  }
-
   return (
     <>
       <ScreenHeader streamType="job" breadcrumbConfig={breadcrumbConfig} />
       <Switch>
         <Route exact path={match.path}>
           <PageSection>
-            <JobList showTypeColumn />
+            <PersistentFilters pageKey="jobs">
+              <JobList showTypeColumn />
+            </PersistentFilters>
           </PageSection>
         </Route>
         <Route path={`${match.path}/:id/details`}>

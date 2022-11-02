@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='notificationtemplate',
             name='messages',
-            field=awx.main.fields.JSONField(
+            field=awx.main.fields.JSONBlob(
                 default=awx.main.models.notifications.NotificationTemplate.default_messages,
                 help_text='Optional custom messages for notification template.',
                 null=True,

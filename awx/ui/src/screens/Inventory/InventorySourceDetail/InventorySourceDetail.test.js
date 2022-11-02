@@ -93,7 +93,7 @@ describe('InventorySourceDetail', () => {
     assertDetail(wrapper, 'Organization', 'Mock Org');
     assertDetail(wrapper, 'Project', 'Mock Project');
     assertDetail(wrapper, 'Inventory file', 'foo');
-    assertDetail(wrapper, 'Verbosity', '2 (Debug)');
+    assertDetail(wrapper, 'Verbosity', '2 (More Verbose)');
     assertDetail(wrapper, 'Cache timeout', '2 seconds');
     const executionEnvironment = wrapper.find('ExecutionEnvironmentDetail');
     expect(executionEnvironment).toHaveLength(1);
@@ -113,7 +113,6 @@ describe('InventorySourceDetail', () => {
         'Overwrite local groups and hosts from remote inventory source',
         'Overwrite local variables from remote inventory source',
         'Update on launch',
-        'Update on project update',
       ]).toContain(option.text());
     });
   });
@@ -236,5 +235,22 @@ describe('InventorySourceDetail', () => {
       'Modal[title="Error!"]',
       (el) => el.length === 0
     );
+  });
+
+  test('should not load Credentials', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <InventorySourceDetail
+          inventorySource={{
+            ...mockInvSource,
+            summary_fields: {
+              credentials: [],
+            },
+          }}
+        />
+      );
+    });
+    const credentials_detail = wrapper.find(`Detail[label="Credential"]`).at(0);
+    expect(credentials_detail.prop('isEmpty')).toEqual(true);
   });
 });

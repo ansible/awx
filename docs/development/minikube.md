@@ -35,16 +35,7 @@ For the following playbooks to work, you will need to:
 $ pip install openshift
 ```
 
-If you are not changing any code in the operator itself, git checkout the latest version from https://github.com/ansible/awx-operator/releases, and then run the following command (from the awx-operator repo):
-
-```
-$ alias kubectl="minikube kubectl --"
-$ export NAMESPACE=my-namespace
-$ kubectl create namespace $NAMESPACE
-$ kubectl config set-context --current --namespace=$NAMESPACE
-$ make deploy
-
-```
+If you are not changing any code in the operator itself, git checkout the latest version from https://github.com/ansible/awx-operator/releases, and then follow the instructions in the awx-operator [README](https://github.com/ansible/awx-operator#basic-install).
 
 If making changes to the operator itself, run the following command in the root
 of the awx-operator repo. If not, continue to the next section.
@@ -52,12 +43,11 @@ of the awx-operator repo. If not, continue to the next section.
 ### Building and Deploying a Custom AWX Operator Image
 
 ```
-$ operator-sdk build quay.io/<username>/awx-operator
-$ docker push quay.io/<username>/awx-operator
-$ ansible-playbook ansible/deploy-operator.yml \
-    -e pull_policy=Always \
-    -e operator_image=quay.io/<username>/awx-operator \
-    -e operator_version=latest
+# in awx-operator repo on the branch you want to use
+$ export IMAGE_TAG_BASE=quay.io/<username>/awx-operator
+$ export VERSION=<cusom-tag>
+$ make docker-build
+$ docker push ${IMAGE_TAG_BASE}:${VERSION}
 ```
 
 ## Deploy AWX into Minikube using the AWX Operator
@@ -71,7 +61,7 @@ In the root of awx-operator:
 ```
 $ ansible-playbook ansible/instantiate-awx-deployment.yml \
     -e development_mode=yes \
-    -e image=quay.io/awx/awx_kube_devel \
+    -e image=ghcr.io/ansible/awx_kube_devel \
     -e image_version=devel \
     -e image_pull_policy=Always \
     -e service_type=nodeport \
@@ -103,7 +93,7 @@ In the root of the AWX repo:
 
 ```
 $ make awx-kube-dev-build
-$ docker push quay.io/awx/awx_kube_devel:${COMPOSE_TAG}
+$ docker push ghcr.io/ansible/awx_kube_devel:${COMPOSE_TAG}
 ```
 
 In the root of awx-operator:
@@ -111,10 +101,11 @@ In the root of awx-operator:
 ```
 $ ansible-playbook ansible/instantiate-awx-deployment.yml \
     -e development_mode=yes \
-    -e tower_image=quay.io/awx/awx_kube_devel \
-    -e tower_image_version=${COMPOSE_TAG} \
-    -e tower_image_pull_policy=Always \
-    -e tower_ingress_type=ingress
+    -e image=ghcr.io/ansible/awx_kube_devel \
+    -e image_version=${COMPOSE_TAG} \
+    -e image_pull_policy=Always \
+    -e service_type=nodeport \
+    -e namespace=$NAMESPACE
 ```
 
 To iterate on changes to the Dockerfile, rebuild and push the image, then delete

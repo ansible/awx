@@ -44,7 +44,7 @@ function AnswerTypeField() {
       labelIcon={
         <Popover
           content={t`Choose an answer type or format you want as the prompt for the user.
-          Refer to the Ansible Tower Documentation for more additional
+          Refer to the Ansible Controller Documentation for more additional
           information about each option.`}
         />
       }
@@ -120,8 +120,14 @@ function SurveyQuestionForm({
     new_question: !question,
   };
   if (question?.type === 'multiselect' || question?.type === 'multiplechoice') {
-    const newQuestions = question.choices.split('\n').map((c, i) => {
-      if (question.default.split('\n').includes(c)) {
+    const choices = Array.isArray(question.choices)
+      ? question.choices
+      : question.choices.split('\n');
+    const defaults = Array.isArray(question.default)
+      ? question.default
+      : question.default.split('\n');
+    const formattedChoices = choices.map((c, i) => {
+      if (defaults.includes(c)) {
         return { choice: c, isDefault: true, id: i };
       }
 
@@ -136,7 +142,7 @@ function SurveyQuestionForm({
       variable: question?.variable || '',
       min: question?.min || 0,
       max: question?.max || 1024,
-      formattedChoices: newQuestions,
+      formattedChoices,
       new_question: !question,
     };
   }
@@ -260,8 +266,8 @@ function SurveyQuestionForm({
                       target="_blank"
                       rel="noreferrer"
                     >
-                      {t`documentation`}{' '}
-                    </a>
+                      {t`documentation`}
+                    </a>{' '}
                     {t`for more information.`}
                   </>
                 }

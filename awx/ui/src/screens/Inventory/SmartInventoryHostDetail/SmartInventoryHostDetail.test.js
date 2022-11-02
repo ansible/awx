@@ -27,4 +27,19 @@ describe('<SmartInventoryHostDetail />', () => {
     expect(wrapper.find('Detail[label="Activity"] Sparkline')).toHaveLength(1);
     expect(wrapper.find('VariablesDetail')).toHaveLength(1);
   });
+
+  test('should not load Activity', () => {
+    wrapper = mountWithContexts(
+      <SmartInventoryHostDetail
+        host={{
+          ...mockHost,
+          summary_fields: {
+            recent_jobs: [],
+          },
+        }}
+      />
+    );
+    const activity_detail = wrapper.find(`Detail[label="Activity"]`).at(0);
+    expect(activity_detail.prop('isEmpty')).toEqual(true);
+  });
 });

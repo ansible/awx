@@ -14,7 +14,7 @@ import yaml
 # Django
 from django.conf import settings
 from django.db import models, connection
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
@@ -29,7 +29,6 @@ from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.consumers import emit_channel_notification
 from awx.main.fields import (
     ImplicitRoleField,
-    JSONBField,
     SmartFilterField,
     OrderedManyToManyField,
 )
@@ -64,7 +63,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
     an inventory source contains lists and hosts.
     """
 
-    FIELDS_TO_PRESERVE_AT_COPY = ['hosts', 'groups', 'instance_groups']
+    FIELDS_TO_PRESERVE_AT_COPY = ['hosts', 'groups', 'instance_groups', 'prevent_instance_group_fallback']
     KIND_CHOICES = [
         ('', _('Hosts have a direct link to this inventory.')),
         ('smart', _('Hosts for inventory generated using the host_filter property.')),
@@ -170,6 +169,22 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         editable=False,
         help_text=_('Flag indicating the inventory is being deleted.'),
     )
+    labels = models.ManyToManyField(
+        "Label",
+        blank=True,
+        related_name='inventory_labels',
+        help_text=_('Labels associated with this inventory.'),
+    )
+    prevent_instance_group_fallback = models.BooleanField(
+        default=False,
+        help_text=(
+            "If enabled, the inventory will prevent adding any organization "
+            "instance groups to the list of preferred instances groups to run "
+            "associated job templates on."
+            "If this setting is enabled and you provided an empty list, the global instance "
+            "groups will be applied."
+        ),
+    )
 
     def get_absolute_url(self, request=None):
         return reverse('api:inventory_detail', kwargs={'pk': self.pk}, request=request)
@@ -231,6 +246,25 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
             raise ParseError(_('Slice number must be 1 or higher.'))
         return (number, step)
 
+    def get_sliced_hosts(self, host_queryset, slice_number, slice_count):
+        """
+        Returns a slice of Hosts given a slice number and total slice count, or
+        the original queryset if slicing is not requested.
+
+        NOTE: If slicing is performed, this will return a List[Host] with the
+        resulting slice. If slicing is not performed it will return the
+        original queryset (not evaluating it or forcing it to a list). This
+        puts the burden on the caller to check the resulting type. This is
+        non-ideal because it's easy to get wrong, but I think the only way
+        around it is to force the queryset which has memory implications for
+        large inventories.
+        """
+
+        if slice_count > 1 and slice_number > 0:
+            offset = slice_number - 1
+            host_queryset = host_queryset[offset::slice_count]
+        return host_queryset
+
     def get_script_data(self, hostvars=False, towervars=False, show_all=False, slice_number=1, slice_count=1):
         hosts_kw = dict()
         if not show_all:
@@ -238,10 +272,8 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         fetch_fields = ['name', 'id', 'variables', 'inventory_id']
         if towervars:
             fetch_fields.append('enabled')
-        hosts = self.hosts.filter(**hosts_kw).order_by('name').only(*fetch_fields)
-        if slice_count > 1 and slice_number > 0:
-            offset = slice_number - 1
-            hosts = hosts[offset::slice_count]
+        host_queryset = self.hosts.filter(**hosts_kw).order_by('name').only(*fetch_fields)
+        hosts = self.get_sliced_hosts(host_queryset, slice_number, slice_count)
 
         data = dict()
         all_group = data.setdefault('all', dict())
@@ -332,9 +364,12 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         else:
             active_inventory_sources = self.inventory_sources.filter(source__in=CLOUD_INVENTORY_SOURCES)
         failed_inventory_sources = active_inventory_sources.filter(last_job_failed=True)
+        total_hosts = active_hosts.count()
+        # if total_hosts has changed, set update_task_impact to True
+        update_task_impact = total_hosts != self.total_hosts
         computed_fields = {
             'has_active_failures': bool(failed_hosts.count()),
-            'total_hosts': active_hosts.count(),
+            'total_hosts': total_hosts,
             'hosts_with_active_failures': failed_hosts.count(),
             'total_groups': active_groups.count(),
             'has_inventory_sources': bool(active_inventory_sources.count()),
@@ -352,6 +387,14 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
                 computed_fields.pop(field)
         if computed_fields:
             iobj.save(update_fields=computed_fields.keys())
+        if update_task_impact:
+            # if total hosts count has changed, re-calculate task_impact for any
+            # job that is still in pending for this inventory, since task_impact
+            # is cached on task creation and used in task management system
+            tasks = self.jobs.filter(status="pending")
+            for t in tasks:
+                t.task_impact = t._get_task_impact()
+            UnifiedJob.objects.bulk_update(tasks, ['task_impact'])
         logger.debug("Finished updating inventory computed fields, pk={0}, in " "{1:.3f} seconds".format(self.pk, time.time() - start_time))
 
     def websocket_emit_status(self, status):
@@ -482,7 +525,7 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
         editable=False,
         help_text=_('Inventory source(s) that created or modified this host.'),
     )
-    ansible_facts = JSONBField(
+    ansible_facts = models.JSONField(
         blank=True,
         default=dict,
         help_text=_('Arbitrary JSON structure of most recent ansible_facts, per-host.'),
@@ -980,18 +1023,11 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
         default=None,
         null=True,
     )
-    scm_last_revision = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-        editable=False,
-    )
-    update_on_project_update = models.BooleanField(
-        default=False,
-    )
+
     update_on_launch = models.BooleanField(
         default=False,
     )
+
     update_cache_timeout = models.PositiveIntegerField(
         default=0,
     )
@@ -1029,14 +1065,6 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
                 self.name = 'inventory source (%s)' % replace_text
             if 'name' not in update_fields:
                 update_fields.append('name')
-        # Reset revision if SCM source has changed parameters
-        if self.source == 'scm' and not is_new_instance:
-            before_is = self.__class__.objects.get(pk=self.pk)
-            if before_is.source_path != self.source_path or before_is.source_project_id != self.source_project_id:
-                # Reset the scm_revision if file changed to force update
-                self.scm_last_revision = ''
-                if 'scm_last_revision' not in update_fields:
-                    update_fields.append('scm_last_revision')
 
         # Do the actual save.
         super(InventorySource, self).save(*args, **kwargs)
@@ -1045,10 +1073,6 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
         if replace_text in self.name:
             self.name = self.name.replace(replace_text, str(self.pk))
             super(InventorySource, self).save(update_fields=['name'])
-        if self.source == 'scm' and is_new_instance and self.update_on_project_update:
-            # Schedule a new Project update if one is not already queued
-            if self.source_project and not self.source_project.project_updates.filter(status__in=['new', 'pending', 'waiting']).exists():
-                self.update()
         if not getattr(_inventory_updates, 'is_updating', False):
             if self.inventory is not None:
                 self.inventory.update_computed_fields()
@@ -1138,25 +1162,6 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
             )
         return dict(error=list(error_notification_templates), started=list(started_notification_templates), success=list(success_notification_templates))
 
-    def clean_update_on_project_update(self):
-        if (
-            self.update_on_project_update is True
-            and self.source == 'scm'
-            and InventorySource.objects.filter(Q(inventory=self.inventory, update_on_project_update=True, source='scm') & ~Q(id=self.id)).exists()
-        ):
-            raise ValidationError(_("More than one SCM-based inventory source with update on project update per-inventory not allowed."))
-        return self.update_on_project_update
-
-    def clean_update_on_launch(self):
-        if self.update_on_project_update is True and self.source == 'scm' and self.update_on_launch is True:
-            raise ValidationError(
-                _(
-                    "Cannot update SCM-based inventory source on launch if set to update on project update. "
-                    "Instead, configure the corresponding source project to update on launch."
-                )
-            )
-        return self.update_on_launch
-
     def clean_source_path(self):
         if self.source != 'scm' and self.source_path:
             raise ValidationError(_("Cannot set source_path if not SCM type."))
@@ -1209,6 +1214,14 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
         default=None,
         null=True,
     )
+    scm_revision = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        editable=False,
+        verbose_name=_('SCM Revision'),
+        help_text=_('The SCM Revision from the Project used for this inventory update.  Only applicable to inventories source from scm'),
+    )
 
     @property
     def is_container_group_task(self):
@@ -1253,8 +1266,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
             return UnpartitionedInventoryUpdateEvent
         return InventoryUpdateEvent
 
-    @property
-    def task_impact(self):
+    def _get_task_impact(self):
         return 1
 
     # InventoryUpdate credential required
@@ -1279,25 +1291,22 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
 
     @property
     def preferred_instance_groups(self):
-        if self.inventory_source.inventory is not None and self.inventory_source.inventory.organization is not None:
-            organization_groups = [x for x in self.inventory_source.inventory.organization.instance_groups.all()]
-        else:
-            organization_groups = []
+        selected_groups = []
         if self.inventory_source.inventory is not None:
-            inventory_groups = [x for x in self.inventory_source.inventory.instance_groups.all()]
-        else:
-            inventory_groups = []
-        selected_groups = inventory_groups + organization_groups
+            # Add the inventory sources IG to the selected IGs first
+            for instance_group in self.inventory_source.inventory.instance_groups.all():
+                selected_groups.append(instance_group)
+            # If the inventory allows for fallback and we have an organization then also append the orgs IGs to the end of the list
+            if (
+                not getattr(self.inventory_source.inventory, 'prevent_instance_group_fallback', False)
+                and self.inventory_source.inventory.organization is not None
+            ):
+                for instance_group in self.inventory_source.inventory.organization.instance_groups.all():
+                    selected_groups.append(instance_group)
+
         if not selected_groups:
             return self.global_instance_groups
         return selected_groups
-
-    def cancel(self, job_explanation=None, is_chain=False):
-        res = super(InventoryUpdate, self).cancel(job_explanation=job_explanation, is_chain=is_chain)
-        if res:
-            if self.launch_type != 'scm' and self.source_project_update:
-                self.source_project_update.cancel(job_explanation=job_explanation)
-        return res
 
 
 class CustomInventoryScript(CommonModelNameNotUnique, ResourceMixin):

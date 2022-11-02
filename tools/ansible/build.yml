@@ -5,15 +5,16 @@
   tasks:
     - name: Get version from SCM if not explicitly provided
       shell: |
-        python setup.py --version | cut -d + -f -1
+        make print-VERSION | cut -d + -f -1
       args:
         chdir: '../../'
-      register: setup_py_version
+      register: scm_version
+      failed_when: not scm_version.stdout
       when: awx_version is not defined
 
     - name: Set awx_version
       set_fact:
-        awx_version: "{{ setup_py_version.stdout }}"
+        awx_version: "{{ scm_version.stdout }}"
       when: awx_version is not defined
 
     - include_role:

@@ -85,6 +85,21 @@
         that:
           - "result is changed"
 
+    - name: Add Joe as execution admin to Default Org.
+      role:
+        user: "{{ username }}"
+        role: execution_environment_admin
+        organizations: Default
+        state: "{{ item }}"
+      register: result
+      with_items:
+        - "present"
+        - "absent"
+
+    - assert:
+        that:
+          - "result is changed"
+
     - name: Create a workflow
       workflow_job_template:
         name: test-role-workflow
@@ -105,6 +120,22 @@
     - assert:
         that:
           - "result is changed"
+
+    - name: Add Joe to nonexistant job template execute role
+      role:
+        user: "{{ username }}"
+        role: execute
+        workflow: test-role-workflow
+        job_templates:
+          - non existant temp
+        state: present
+      register: result
+      ignore_errors: true
+
+    - assert:
+        that:
+          - "'There were 1 missing items, missing items' in result.msg"
+          - "'non existant temp' in result.msg"
 
     - name: Add Joe to workflow execute role, no-op
       role:

@@ -73,6 +73,10 @@ describe('<AdHocCommands />', () => {
           adHocItems={adHocItems}
           hasListItems
           onLaunchLoading={() => jest.fn()}
+          moduleOptions={[
+            ['command', 'command'],
+            ['shell', 'shell'],
+          ]}
         />
       );
     });
@@ -234,12 +238,15 @@ describe('<AdHocCommands />', () => {
       module_args: 'foo',
       diff_mode: false,
       credential: 4,
+      become_password: undefined,
       job_type: 'run',
       become_enabled: '',
       extra_vars: '---',
       forks: 0,
       limit: 'Inventory 1 Org 0, Inventory 2 Org 0',
       module_name: 'command',
+      ssh_key_unlock: undefined,
+      ssh_password: undefined,
       verbosity: 1,
       execution_environment: 2,
     });

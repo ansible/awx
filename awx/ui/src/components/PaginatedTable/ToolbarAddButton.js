@@ -56,6 +56,7 @@ function ToolbarAddButton({
   return (
     <Button
       ouiaId={ouiaId}
+      isDisabled={isDisabled}
       icon={showToggleIndicator ? <CaretDownIcon /> : null}
       iconPosition={showToggleIndicator ? 'right' : null}
       variant="primary"

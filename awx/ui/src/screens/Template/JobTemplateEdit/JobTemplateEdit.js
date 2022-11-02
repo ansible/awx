@@ -60,7 +60,7 @@ function JobTemplateEdit({ template, reloadTemplate }) {
     try {
       await JobTemplatesAPI.update(template.id, remainingValues);
       await Promise.all([
-        submitLabels(labels, template?.organization),
+        submitLabels(template?.organization, labels),
         submitCredentials(credentials),
         JobTemplatesAPI.orderInstanceGroups(
           template.id,
@@ -77,7 +77,7 @@ function JobTemplateEdit({ template, reloadTemplate }) {
     }
   };
 
-  const submitLabels = async (labels = [], orgId) => {
+  const submitLabels = async (orgId, labels = []) => {
     const { added, removed } = getAddedAndRemoved(
       template.summary_fields.labels.results,
       labels

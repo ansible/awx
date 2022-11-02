@@ -5,6 +5,7 @@ import { t } from '@lingui/macro';
 
 import { Config } from 'contexts/Config';
 import ScreenHeader from 'components/ScreenHeader';
+import PersistentFilters from 'components/PersistentFilters';
 import TeamList from './TeamList';
 import TeamAdd from './TeamAdd';
 import Team from './Team';
@@ -43,9 +44,11 @@ function Teams() {
           <Team setBreadcrumb={buildBreadcrumbConfig} />
         </Route>
         <Route path="/teams">
-          <Config>
-            {({ me }) => <TeamList path="/teams" me={me || {}} />}
-          </Config>
+          <PersistentFilters pageKey="teams">
+            <Config>
+              {({ me }) => <TeamList path="/teams" me={me || {}} />}
+            </Config>
+          </PersistentFilters>
         </Route>
       </Switch>
     </>

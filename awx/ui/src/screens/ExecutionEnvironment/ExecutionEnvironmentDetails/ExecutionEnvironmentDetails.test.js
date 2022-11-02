@@ -79,7 +79,8 @@ describe('<ExecutionEnvironmentDetails/>', () => {
       'Globally Available'
     );
     expect(
-      wrapper.find('Detail[label="Credential"]').prop('value').props.children
+      wrapper.find('Detail[label="Registry credential"]').prop('value').props
+        .children
     ).toEqual(executionEnvironment.summary_fields.credential.name);
     expect(wrapper.find('Detail[label="Managed"]').prop('value')).toEqual(
       'False'
@@ -124,7 +125,8 @@ describe('<ExecutionEnvironmentDetails/>', () => {
     );
     expect(wrapper.find(`Detail[label="Organization"] dd`).text()).toBe('Bar');
     expect(
-      wrapper.find('Detail[label="Credential"]').prop('value').props.children
+      wrapper.find('Detail[label="Registry credential"]').prop('value').props
+        .children
     ).toEqual(executionEnvironment.summary_fields.credential.name);
     const dates = wrapper.find('UserDateDetail');
     expect(dates).toHaveLength(2);
@@ -176,7 +178,8 @@ describe('<ExecutionEnvironmentDetails/>', () => {
       'Globally Available'
     );
     expect(
-      wrapper.find('Detail[label="Credential"]').prop('value').props.children
+      wrapper.find('Detail[label="Registry credential"]').prop('value').props
+        .children
     ).toEqual(executionEnvironment.summary_fields.credential.name);
     expect(wrapper.find('Detail[label="Managed"]').prop('value')).toEqual(
       'True'

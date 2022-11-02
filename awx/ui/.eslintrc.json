@@ -1,0 +1,164 @@
+{
+  "parser": "@babel/eslint-parser",
+  "ignorePatterns": ["./node_modules/"],
+  "parserOptions": {
+    "requireConfigFile": false,
+    "ecmaVersion": 6,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true,
+      "modules": true
+    },
+    "babelOptions": {
+      "presets": ["@babel/preset-react"]
+    }
+  },
+  "plugins": ["react-hooks", "jsx-a11y", "i18next", "@babel"],
+  "extends": [
+    "airbnb",
+    "prettier",
+    "plugin:jsx-a11y/strict",
+    "plugin:i18next/recommended"
+  ],
+  "settings": {
+    "react": {
+      "version": "detect"
+    },
+    "import/resolver": {
+      "node": {
+        "paths": ["src"]
+      }
+    }
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "jest": true
+  },
+  "globals": {
+    "window": true
+  },
+  "rules": {
+    "i18next/no-literal-string": [
+      2,
+      {
+        "markupOnly": true,
+        "ignoreAttribute": [
+          "dateFieldName",
+          "timeFieldName",
+          "to",
+          "streamType",
+          "path",
+          "component",
+          "variant",
+          "key",
+          "position",
+          "promptName",
+          "color",
+          "promptId",
+          "headingLevel",
+          "size",
+          "target",
+          "autoComplete",
+          "trigger",
+          "from",
+          "name",
+          "fieldId",
+          "css",
+          "gutter",
+          "dataCy",
+          "tooltipMaxWidth",
+          "mode",
+          "aria-labelledby",
+          "aria-hidden",
+          "aria-controls",
+          "aria-pressed",
+          "sortKey",
+          "ouiaId",
+          "credentialTypeNamespace",
+          "link",
+          "value",
+          "credentialTypeKind",
+          "linkTo",
+          "scrollToAlignment",
+          "displayKey",
+          "sortedColumnKey",
+          "maxHeight",
+          "role",
+          "aria-haspopup",
+          "dropDirection",
+          "resizeOrientation",
+          "src",
+          "theme",
+          "gridColumns",
+          "rows",
+          "href",
+          "modifier",
+          "data-cy",
+          "fieldName",
+          "splitButtonVariant",
+          "pageKey"
+        ],
+        "ignore": [
+          "Ansible",
+          "Tower",
+          "JSON",
+          "YAML",
+          "lg",
+          "hh:mm AM/PM",
+          "Twilio"
+        ],
+        "ignoreComponent": [
+          "AboutModal",
+          "code",
+          "Omit",
+          "PotentialLink",
+          "TypeRedirect",
+          "Radio",
+          "RunOnRadio",
+          "NodeTypeLetter",
+          "SelectableItem",
+          "Dash",
+          "Plural"
+        ],
+        "ignoreCallee": ["describe"]
+      }
+    ],
+    "camelcase": "off",
+    "arrow-parens": "off",
+    "comma-dangle": "off",
+    // https://github.com/benmosher/eslint-plugin-import/issues/479#issuecomment-252500896
+    "import/no-extraneous-dependencies": "off",
+    "max-len": [
+      "error",
+      {
+        "code": 100,
+        "ignoreStrings": true,
+        "ignoreTemplateLiterals": true
+      }
+    ],
+    "no-continue": "off",
+    "no-debugger": "off",
+    "no-mixed-operators": "off",
+    "no-param-reassign": "off",
+    "no-plusplus": "off",
+    "no-underscore-dangle": "off",
+    "no-use-before-define": "off",
+    "no-multiple-empty-lines": ["error", { "max": 1 }],
+    "object-curly-newline": "off",
+    "no-trailing-spaces": ["error"],
+    "no-unused-expressions": ["error", { "allowShortCircuit": true }],
+    "react/jsx-props-no-spreading": ["off"],
+    "react/prefer-stateless-function": "off",
+    "react/prop-types": "off",
+    "react/sort-comp": ["error", {}],
+    "jsx-a11y/label-has-for": "off",
+    "jsx-a11y/label-has-associated-control": "off",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+    "react/jsx-filename-extension": "off",
+    "no-restricted-exports": "off",
+    "react/function-component-definition": "off",
+    "prefer-regex-literals": "off"
+  }
+}

@@ -7,7 +7,6 @@ import {
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
 import mockCredential from './shared/data.scmCredential.json';
-import mockOrgCredential from './shared/data.orgCredential.json';
 import Credential from './Credential';
 
 jest.mock('../../api');
@@ -32,21 +31,24 @@ describe('<Credential />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<Credential setBreadcrumb={() => {}} />);
     });
-    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
-    await waitForElement(wrapper, '.pf-c-tabs__item', (el) => el.length === 3);
+    wrapper.update();
+    expect(wrapper.find('Credential').length).toBe(1);
+    expect(wrapper.find('RoutedTabs li').length).toBe(4);
   });
 
-  test('initially renders org-based credential successfully', async () => {
-    CredentialsAPI.readDetail.mockResolvedValueOnce({
-      data: mockOrgCredential,
-    });
-
+  test('should render expected tabs', async () => {
+    const expectedTabs = [
+      'Back to Credentials',
+      'Details',
+      'Access',
+      'Job Templates',
+    ];
     await act(async () => {
       wrapper = mountWithContexts(<Credential setBreadcrumb={() => {}} />);
     });
-    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
-    // org-based credential detail needs access tab
-    await waitForElement(wrapper, '.pf-c-tabs__item', (el) => el.length === 3);
+    wrapper.find('RoutedTabs li').forEach((tab, index) => {
+      expect(tab.text()).toEqual(expectedTabs[index]);
+    });
   });
 
   test('should show content error when user attempts to navigate to erroneous route', async () => {

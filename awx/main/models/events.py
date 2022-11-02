@@ -6,17 +6,17 @@ from collections import defaultdict
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import models, DatabaseError, connection
+from django.db import models, DatabaseError
 from django.utils.dateparse import parse_datetime
 from django.utils.text import Truncator
 from django.utils.timezone import utc, now
-from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import force_text
+from django.utils.translation import gettext_lazy as _
+from django.utils.encoding import force_str
 
 from awx.api.versioning import reverse
 from awx.main import consumers
+from awx.main.fields import JSONBlob
 from awx.main.managers import DeferJobCreatedManager
-from awx.main.fields import JSONField
 from awx.main.constants import MINIMAL_EVENTS
 from awx.main.models.base import CreatedModifiedModel
 from awx.main.utils import ignore_inventory_computed_fields, camelcase_to_underscore
@@ -24,7 +24,6 @@ from awx.main.utils import ignore_inventory_computed_fields, camelcase_to_unders
 analytics_logger = logging.getLogger('awx.analytics.job_events')
 
 logger = logging.getLogger('awx.main.models.events')
-
 
 __all__ = ['JobEvent', 'ProjectUpdateEvent', 'AdHocCommandEvent', 'InventoryUpdateEvent', 'SystemJobEvent']
 
@@ -126,6 +125,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
         'host_name',
         'verbosity',
     ]
+    WRAPUP_EVENT = 'playbook_on_stats'
 
     class Meta:
         abstract = True
@@ -209,10 +209,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
         max_length=100,
         choices=EVENT_CHOICES,
     )
-    event_data = JSONField(
-        blank=True,
-        default=dict,
-    )
+    event_data = JSONBlob(default=dict, blank=True)
     failed = models.BooleanField(
         default=False,
         editable=False,
@@ -387,16 +384,8 @@ class BasePlaybookEvent(CreatedModifiedModel):
                     job.get_event_queryset().filter(uuid__in=changed).update(changed=True)
                     job.get_event_queryset().filter(uuid__in=failed).update(failed=True)
 
-                    # send success/failure notifications when we've finished handling the playbook_on_stats event
-                    from awx.main.tasks.system import handle_success_and_failure_notifications  # circular import
-
-                    def _send_notifications():
-                        handle_success_and_failure_notifications.apply_async([job.id])
-
-                    connection.on_commit(_send_notifications)
-
         for field in ('playbook', 'play', 'task', 'role'):
-            value = force_text(event_data.get(field, '')).strip()
+            value = force_str(event_data.get(field, '')).strip()
             if value != getattr(self, field):
                 setattr(self, field, value)
         if settings.LOG_AGGREGATOR_ENABLED:
@@ -473,6 +462,7 @@ class JobEvent(BasePlaybookEvent):
     """
 
     VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['job_id', 'workflow_job_id', 'job_created']
+    JOB_REFERENCE = 'job_id'
 
     objects = DeferJobCreatedManager()
 
@@ -495,13 +485,18 @@ class JobEvent(BasePlaybookEvent):
         editable=False,
         db_index=False,
     )
+    # When we partitioned the table we accidentally "lost" the foreign key constraint.
+    # However this is good because the cascade on delete at the django layer was causing DB issues
+    # We are going to leave this as a foreign key but mark it as not having a DB relation and
+    #  prevent cascading on delete.
     host = models.ForeignKey(
         'Host',
         related_name='job_events_as_primary_host',
         null=True,
         default=None,
-        on_delete=models.SET_NULL,
+        on_delete=models.DO_NOTHING,
         editable=False,
+        db_constraint=False,
     )
     host_name = models.CharField(
         max_length=1024,
@@ -603,6 +598,7 @@ UnpartitionedJobEvent._meta.db_table = '_unpartitioned_' + JobEvent._meta.db_tab
 class ProjectUpdateEvent(BasePlaybookEvent):
 
     VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['project_update_id', 'workflow_job_id', 'job_created']
+    JOB_REFERENCE = 'project_update_id'
 
     objects = DeferJobCreatedManager()
 
@@ -644,14 +640,12 @@ class BaseCommandEvent(CreatedModifiedModel):
     """
 
     VALID_KEYS = ['event_data', 'created', 'counter', 'uuid', 'stdout', 'start_line', 'end_line', 'verbosity']
+    WRAPUP_EVENT = 'EOF'
 
     class Meta:
         abstract = True
 
-    event_data = JSONField(
-        blank=True,
-        default=dict,
-    )
+    event_data = JSONBlob(default=dict, blank=True)
     uuid = models.CharField(
         max_length=1024,
         default='',
@@ -742,6 +736,8 @@ class BaseCommandEvent(CreatedModifiedModel):
 class AdHocCommandEvent(BaseCommandEvent):
 
     VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['ad_hoc_command_id', 'event', 'host_name', 'host_id', 'workflow_job_id', 'job_created']
+    WRAPUP_EVENT = 'playbook_on_stats'  # exception to BaseCommandEvent
+    JOB_REFERENCE = 'ad_hoc_command_id'
 
     objects = DeferJobCreatedManager()
 
@@ -802,6 +798,10 @@ class AdHocCommandEvent(BaseCommandEvent):
         editable=False,
         db_index=False,
     )
+    # We need to keep this as a FK in the model because AdHocCommand uses a ManyToMany field
+    #   to hosts through adhoc_events. But in https://github.com/ansible/awx/pull/8236/ we
+    #   removed the nulling of the field in case of a host going away before an event is saved
+    #   so this needs to stay SET_NULL on the ORM level
     host = models.ForeignKey(
         'Host',
         related_name='ad_hoc_command_events',
@@ -809,6 +809,7 @@ class AdHocCommandEvent(BaseCommandEvent):
         default=None,
         on_delete=models.SET_NULL,
         editable=False,
+        db_constraint=False,
     )
     host_name = models.CharField(
         max_length=1024,
@@ -842,6 +843,7 @@ UnpartitionedAdHocCommandEvent._meta.db_table = '_unpartitioned_' + AdHocCommand
 class InventoryUpdateEvent(BaseCommandEvent):
 
     VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['inventory_update_id', 'workflow_job_id', 'job_created']
+    JOB_REFERENCE = 'inventory_update_id'
 
     objects = DeferJobCreatedManager()
 
@@ -887,6 +889,7 @@ UnpartitionedInventoryUpdateEvent._meta.db_table = '_unpartitioned_' + Inventory
 class SystemJobEvent(BaseCommandEvent):
 
     VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['system_job_id', 'job_created']
+    JOB_REFERENCE = 'system_job_id'
 
     objects = DeferJobCreatedManager()
 

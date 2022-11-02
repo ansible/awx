@@ -14,4 +14,4 @@ def delete_hg_scm(apps, schema_editor):
     update_ct = Project.objects.filter(scm_type='hg').update(scm_type='')
 
     if update_ct:
-        logger.warn('Changed {} mercurial projects to manual, deprecation period ended'.format(update_ct))
+        logger.warning('Changed {} mercurial projects to manual, deprecation period ended'.format(update_ct))

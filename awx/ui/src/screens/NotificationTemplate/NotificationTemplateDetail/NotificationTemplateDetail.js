@@ -25,16 +25,17 @@ import useRequest, { useDismissableError } from 'hooks/useRequest';
 import StatusLabel from 'components/StatusLabel';
 import hasCustomMessages from '../shared/hasCustomMessages';
 import { NOTIFICATION_TYPES } from '../constants';
+import getHelpText from '../shared/Notifications.helptext';
 
 const NUM_RETRIES = 25;
 const RETRY_TIMEOUT = 5000;
 
 function NotificationTemplateDetail({ template, defaultMessages }) {
+  const helpText = getHelpText();
   const history = useHistory();
   const [testStatus, setTestStatus] = useState(
     template.summary_fields?.recent_notifications[0]?.status ?? undefined
   );
-
   const {
     created,
     modified,
@@ -99,7 +100,7 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
   );
 
   const { error, dismissError } = useDismissableError(deleteError || testError);
-  const typeMessageDefaults = defaultMessages[template.notification_type];
+  const typeMessageDefaults = defaultMessages?.[template?.notification_type];
   return (
     <CardBody>
       <DetailList gutter="sm">
@@ -109,12 +110,12 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
           value={template.description}
           dataCy="nt-detail-description"
         />
-        {summary_fields.recent_notifications.length && (
+        {summary_fields.recent_notifications.length ? (
           <Detail
             label={t`Status`}
             value={<StatusLabel status={testStatus} />}
           />
-        )}
+        ) : null}
         {summary_fields.organization ? (
           <Detail
             label={t`Organization`}
@@ -151,6 +152,7 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
             />
             <ArrayDetail
               label={t`Recipient List`}
+              helpText={helpText.emailRecepients}
               value={configuration.recipients}
               dataCy="nt-detail-recipients"
             />
@@ -166,11 +168,16 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
             />
             <Detail
               label={t`Timeout`}
+              helpText={helpText.emailTimeout}
               value={configuration.timeout}
               dataCy="nt-detail-timeout"
             />
             {renderOptionsField && (
-              <Detail label={t`Email Options`} value={renderOptions} />
+              <Detail
+                label={t`Email Options`}
+                value={renderOptions}
+                helpText={helpText.emailOptions}
+              />
             )}
           </>
         )}
@@ -178,6 +185,7 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
           <>
             <Detail
               label={t`Grafana URL`}
+              helpText={helpText.grafanaUrl}
               value={configuration.grafana_url}
               dataCy="nt-detail-grafana-url"
             />
@@ -193,6 +201,7 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
             />
             <ArrayDetail
               label={t`Tags for the Annotation`}
+              helpText={helpText.grafanaTags}
               value={configuration.annotation_tags}
               dataCy="nt-detail-"
             />
@@ -222,6 +231,7 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
             />
             <ArrayDetail
               label={t`Destination Channels or Users`}
+              helpText={helpText.ircTargets}
               value={configuration.targets}
               dataCy="nt-detail-channels"
             />
@@ -311,11 +321,13 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
         {template.notification_type === 'slack' && (
           <>
             <ArrayDetail
+              helpText={helpText.slackChannels}
               label={t`Destination Channels`}
               value={configuration.channels}
               dataCy="nt-detail-slack-channels"
             />
             <Detail
+              helpText={helpText.slackColor}
               label={t`Notification Color`}
               value={configuration.hex_color}
               dataCy="nt-detail-slack-color"
@@ -326,11 +338,13 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
           <>
             <Detail
               label={t`Source Phone Number`}
+              helpText={helpText.twilioSourcePhoneNumber}
               value={configuration.from_number}
               dataCy="nt-detail-twilio-source-phone"
             />
             <ArrayDetail
               label={t`Destination SMS Number(s)`}
+              helpText={helpText.twilioDestinationNumbers}
               value={configuration.to_numbers}
               dataCy="nt-detail-twilio-destination-numbers"
             />
@@ -367,6 +381,7 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
             />
             <CodeDetail
               label={t`HTTP Headers`}
+              helpText={helpText.webhookHeaders}
               value={JSON.stringify(configuration.headers)}
               mode="json"
               rows={6}
@@ -384,13 +399,14 @@ function NotificationTemplateDetail({ template, defaultMessages }) {
           date={modified}
           user={summary_fields?.modified_by}
         />
-        {hasCustomMessages(messages, typeMessageDefaults) && (
+        {typeMessageDefaults &&
+        hasCustomMessages(messages, typeMessageDefaults) ? (
           <CustomMessageDetails
             messages={messages}
             defaults={typeMessageDefaults}
             type={template.notification_type}
           />
-        )}
+        ) : null}
       </DetailList>
       <CardActionsRow>
         {summary_fields.user_capabilities?.edit && (
@@ -447,54 +463,54 @@ function CustomMessageDetails({ messages, defaults, type }) {
       {showMessages && (
         <CodeDetail
           label={t`Start message`}
-          value={messages.started.message || defaults.started.message}
+          value={messages.started?.message || defaults.started?.message}
           mode="jinja2"
-          rows="2"
+          rows={2}
           fullWidth
         />
       )}
       {showBodies && (
         <CodeDetail
           label={t`Start message body`}
-          value={messages.started.body || defaults.started.body}
+          value={messages.started?.body || defaults.started?.body}
           mode="jinja2"
-          rows="6"
+          rows={6}
           fullWidth
         />
       )}
       {showMessages && (
         <CodeDetail
           label={t`Success message`}
-          value={messages.success.message || defaults.success.message}
+          value={messages.success?.message || defaults.success?.message}
           mode="jinja2"
-          rows="2"
+          rows={2}
           fullWidth
         />
       )}
       {showBodies && (
         <CodeDetail
           label={t`Success message body`}
-          value={messages.success.body || defaults.success.body}
+          value={messages.success?.body || defaults.success?.body}
           mode="jinja2"
-          rows="6"
+          rows={6}
           fullWidth
         />
       )}
       {showMessages && (
         <CodeDetail
           label={t`Error message`}
-          value={messages.error.message || defaults.error.message}
+          value={messages.error?.message || defaults.error?.message}
           mode="jinja2"
-          rows="2"
+          rows={2}
           fullWidth
         />
       )}
       {showBodies && (
         <CodeDetail
           label={t`Error message body`}
-          value={messages.error.body || defaults.error.body}
+          value={messages.error?.body || defaults.error?.body}
           mode="jinja2"
-          rows="6"
+          rows={6}
           fullWidth
         />
       )}
@@ -506,7 +522,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
             defaults.workflow_approval.approved.message
           }
           mode="jinja2"
-          rows="2"
+          rows={2}
           fullWidth
         />
       )}
@@ -518,7 +534,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
             defaults.workflow_approval.approved.body
           }
           mode="jinja2"
-          rows="6"
+          rows={6}
           fullWidth
         />
       )}
@@ -530,7 +546,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
             defaults.workflow_approval.denied.message
           }
           mode="jinja2"
-          rows="2"
+          rows={2}
           fullWidth
         />
       )}
@@ -542,7 +558,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
             defaults.workflow_approval.denied.body
           }
           mode="jinja2"
-          rows="6"
+          rows={6}
           fullWidth
         />
       )}
@@ -554,7 +570,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
             defaults.workflow_approval.running.message
           }
           mode="jinja2"
-          rows="2"
+          rows={2}
           fullWidth
         />
       )}
@@ -566,7 +582,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
             defaults.workflow_approval.running.body
           }
           mode="jinja2"
-          rows="6"
+          rows={6}
           fullWidth
         />
       )}
@@ -578,7 +594,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
             defaults.workflow_approval.timed_out.message
           }
           mode="jinja2"
-          rows="2"
+          rows={2}
           fullWidth
         />
       )}
@@ -590,7 +606,7 @@ function CustomMessageDetails({ messages, defaults, type }) {
             defaults.workflow_approval.timed_out.body
           }
           mode="jinja2"
-          rows="6"
+          rows={6}
           fullWidth
         />
       )}

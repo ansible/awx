@@ -1,6 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { JobTemplatesAPI, WorkflowJobTemplateNodesAPI } from 'api';
+import { JobTemplatesAPI, WorkflowJobTemplateNodesAPI, RootAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
@@ -26,6 +26,11 @@ describe('<JobTemplateDetail />', () => {
   beforeEach(async () => {
     JobTemplatesAPI.readInstanceGroups.mockResolvedValue(mockInstanceGroups);
     WorkflowJobTemplateNodesAPI.read.mockResolvedValue({ data: { count: 0 } });
+    RootAPI.readAssetVariables.mockResolvedValue({
+      data: {
+        BRAND_NAME: 'AWX',
+      },
+    });
     await act(async () => {
       wrapper = mountWithContexts(
         <JobTemplateDetail template={mockTemplate} />
@@ -189,5 +194,95 @@ describe('<JobTemplateDetail />', () => {
     expect(
       wrapper.find(`Detail[label="Execution Environment"] dd`).text()
     ).toBe('Default EE');
+  });
+
+  test('should not load credentials', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <JobTemplateDetail
+          template={{
+            ...mockTemplate,
+            allow_simultaneous: true,
+            ask_inventory_on_launch: true,
+            summary_fields: {
+              credentials: [],
+            },
+          }}
+        />
+      );
+    });
+    const credentials_detail = wrapper
+      .find(`Detail[label="Credentials"]`)
+      .at(0);
+    expect(credentials_detail.prop('isEmpty')).toEqual(true);
+  });
+
+  test('should not load labels', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <JobTemplateDetail
+          template={{
+            ...mockTemplate,
+            allow_simultaneous: true,
+            ask_inventory_on_launch: true,
+            summary_fields: {
+              labels: {
+                results: [],
+              },
+            },
+          }}
+        />
+      );
+    });
+    const labels_detail = wrapper.find(`Detail[label="Labels"]`).at(0);
+    expect(labels_detail.prop('isEmpty')).toEqual(true);
+  });
+
+  test('should not load instance groups', async () => {
+    JobTemplatesAPI.readInstanceGroups.mockResolvedValue({
+      data: {
+        results: [],
+      },
+    });
+
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <JobTemplateDetail template={mockTemplate} />
+      );
+    });
+    wrapper.update();
+    const instance_groups_detail = wrapper
+      .find(`Detail[label="Instance Groups"]`)
+      .at(0);
+    expect(instance_groups_detail.prop('isEmpty')).toEqual(true);
+  });
+
+  test('should not load job tags', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <JobTemplateDetail
+          template={{
+            ...mockTemplate,
+            job_tags: '',
+          }}
+        />
+      );
+    });
+    expect(wrapper.find('Detail[label="Job Tags"]').length).toBe(0);
+  });
+
+  test('should not load skip tags', async () => {
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <JobTemplateDetail
+          template={{
+            ...mockTemplate,
+            skip_tags: '',
+          }}
+        />
+      );
+    });
+    expect(wrapper.find('Detail[label="Skip Tags"]').length).toBe(0);
   });
 });

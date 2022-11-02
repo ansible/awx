@@ -65,14 +65,30 @@ describe('ScheduleListItem', () => {
     });
 
     test('Name correctly shown with correct link', () => {
+      expect(wrapper.find('Td').at(1).prop('dataLabel')).toBe('Name');
       expect(wrapper.find('Td').at(1).text()).toBe('Mock Schedule');
       expect(wrapper.find('Td').at(1).find('Link').props().to).toBe(
         '/templates/job_template/12/schedules/6/details'
       );
     });
 
-    test('Type correctly shown', () => {
-      expect(wrapper.find('Td').at(2).text()).toBe('Playbook Run');
+    test('Related resource correctly shown', () => {
+      expect(wrapper.find('Td').at(2).prop('dataLabel')).toBe(
+        'Related resource'
+      );
+      expect(wrapper.find('Td').at(2).text()).toBe('Mock JT');
+    });
+
+    test('Resource type correctly shown', () => {
+      expect(wrapper.find('Td').at(3).prop('dataLabel')).toBe('Resource type');
+      expect(wrapper.find('Td').at(3).text()).toBe('Playbook Run');
+    });
+
+    test('Next run correctly shown', () => {
+      expect(wrapper.find('Td').at(4).prop('dataLabel')).toBe('Next Run');
+      expect(wrapper.find('Td').at(4).text()).toBe(
+        'Next Run2/20/2020, 12:00:00 AM'
+      );
     });
 
     test('Edit button shown with correct link', () => {
@@ -120,16 +136,31 @@ describe('ScheduleListItem', () => {
     });
 
     test('Name correctly shown with correct link', () => {
+      expect(wrapper.find('Td').at(1).prop('dataLabel')).toBe('Name');
       expect(wrapper.find('Td').at(1).text()).toBe('Mock Schedule');
       expect(wrapper.find('Td').at(1).find('Link').props().to).toBe(
         '/templates/job_template/12/schedules/6/details'
       );
     });
 
-    test('Type correctly shown', () => {
-      expect(wrapper.find('Td').at(2).text()).toBe('Playbook Run');
+    test('Related resource correctly shown', () => {
+      expect(wrapper.find('Td').at(2).prop('dataLabel')).toBe(
+        'Related resource'
+      );
+      expect(wrapper.find('Td').at(2).text()).toBe('Mock JT');
     });
 
+    test('Resource type correctly shown', () => {
+      expect(wrapper.find('Td').at(3).prop('dataLabel')).toBe('Resource type');
+      expect(wrapper.find('Td').at(3).text()).toBe('Playbook Run');
+    });
+
+    test('Next run correctly shown', () => {
+      expect(wrapper.find('Td').at(4).prop('dataLabel')).toBe('Next Run');
+      expect(wrapper.find('Td').at(4).text()).toBe(
+        'Next Run2/20/2020, 12:00:00 AM'
+      );
+    });
     test('Edit button hidden', () => {
       expect(wrapper.find('PencilAltIcon').length).toBe(0);
     });

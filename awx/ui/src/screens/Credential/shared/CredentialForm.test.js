@@ -418,7 +418,7 @@ describe('<CredentialForm />', () => {
       ).toBe(false);
       expect(wrapper.find('FormGroup[label="Credential Type"]').length).toBe(1);
       expect(
-        wrapper.find('FormGroup[label="Ansible Tower Hostname"]').length
+        wrapper.find('FormGroup[label="Ansible Controller Hostname"]').length
       ).toBe(1);
       expect(wrapper.find('FormGroup[label="Username"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="Password"]').length).toBe(1);

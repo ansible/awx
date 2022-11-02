@@ -111,6 +111,7 @@ function WorkflowJobTemplate({ setBreadcrumb }) {
         </>
       ),
       link: `/templates`,
+      isBackButton: true,
       id: 99,
     },
     { name: t`Details`, link: `${match.url}/details` },

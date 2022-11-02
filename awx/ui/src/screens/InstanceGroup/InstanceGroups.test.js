@@ -2,6 +2,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { InstanceGroupsAPI } from 'api';
 import InstanceGroups from './InstanceGroups';
+import { useUserProfile } from 'contexts/Config';
 
 const mockUseLocationValue = {
   pathname: '',
@@ -11,6 +12,19 @@ jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useLocation: () => mockUseLocationValue,
 }));
+
+beforeEach(() => {
+  useUserProfile.mockImplementation(() => {
+    return {
+      isSuperUser: true,
+      isSystemAuditor: false,
+      isOrgAdmin: false,
+      isNotificationAdmin: false,
+      isExecEnvAdmin: false,
+    };
+  });
+});
+
 describe('<InstanceGroups/>', () => {
   test('should set breadcrumbs', () => {
     mockUseLocationValue.pathname = '/instance_groups';

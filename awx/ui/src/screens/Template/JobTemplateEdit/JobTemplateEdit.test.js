@@ -35,14 +35,25 @@ const mockJobTemplate = {
   allow_simultaneous: false,
   ask_scm_branch_on_launch: false,
   ask_diff_mode_on_launch: false,
+  ask_execution_environment_on_launch: false,
+  ask_forks_on_launch: false,
+  ask_instance_groups_on_launch: false,
   ask_variables_on_launch: false,
   ask_limit_on_launch: false,
   ask_tags_on_launch: false,
   ask_skip_tags_on_launch: false,
   ask_job_type_on_launch: false,
+  ask_labels_on_launch: false,
   ask_verbosity_on_launch: false,
   ask_inventory_on_launch: false,
+  ask_job_slice_count_on_launch: false,
   ask_credential_on_launch: false,
+  ask_execution_environment_on_launch: false,
+  ask_forks_on_launch: false,
+  ask_instance_groups_on_launch: false,
+  ask_job_slice_count_on_launch: false,
+  ask_labels_on_launch: false,
+  ask_timeout_on_launch: false,
   become_enabled: false,
   description: 'Bar',
   diff_mode: false,
@@ -57,6 +68,7 @@ const mockJobTemplate = {
   limit: '',
   name: 'Foo',
   playbook: 'Baz',
+  prevent_instance_group_fallback: false,
   project: 3,
   scm_branch: '',
   skip_tags: '',
@@ -391,61 +403,5 @@ describe('<JobTemplateEdit />', () => {
     expect(history.location.pathname).toEqual(
       '/templates/job_template/1/details'
     );
-  });
-  test('should not call ProjectsAPI.readPlaybooks if there is no project', async () => {
-    const history = createMemoryHistory({});
-    const noProjectTemplate = {
-      id: 1,
-      name: 'Foo',
-      description: 'Bar',
-      job_type: 'run',
-      inventory: 2,
-      playbook: 'Baz',
-      type: 'job_template',
-      forks: 0,
-      limit: '',
-      verbosity: '0',
-      job_slice_count: 1,
-      timeout: 0,
-      job_tags: '',
-      skip_tags: '',
-      diff_mode: false,
-      allow_callbacks: false,
-      allow_simultaneous: false,
-      use_fact_cache: false,
-      host_config_key: '',
-      summary_fields: {
-        user_capabilities: {
-          edit: true,
-        },
-        labels: {
-          results: [
-            { name: 'Sushi', id: 1 },
-            { name: 'Major', id: 2 },
-          ],
-        },
-        inventory: {
-          id: 2,
-          name: 'Demo Inventory',
-          organization_id: 1,
-        },
-        credentials: [
-          { id: 1, kind: 'cloud', name: 'Foo' },
-          { id: 2, kind: 'ssh', name: 'Bar' },
-        ],
-        webhook_credential: {
-          id: 7,
-          name: 'webhook credential',
-          kind: 'github_token',
-          credential_type_id: 12,
-        },
-      },
-    };
-    await act(async () =>
-      mountWithContexts(<JobTemplateEdit template={noProjectTemplate} />, {
-        context: { router: { history } },
-      })
-    );
-    expect(ProjectsAPI.readPlaybooks).not.toBeCalled();
   });
 });

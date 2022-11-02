@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { t } from '@lingui/macro';
-import { RolesAPI, TeamsAPI, UsersAPI } from 'api';
+import { RolesAPI, TeamsAPI, UsersAPI, OrganizationsAPI } from 'api';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import useRequest, { useDeleteItems } from 'hooks/useRequest';
+import { useUserProfile, useConfig } from 'contexts/Config';
 import AddResourceRole from '../AddRole/AddResourceRole';
 import AlertModal from '../AlertModal';
 import DataListToolbar from '../DataListToolbar';
@@ -24,12 +25,57 @@ const QS_CONFIG = getQSConfig('access', {
 });
 
 function ResourceAccessList({ apiModel, resource }) {
+  const { isSuperUser, isOrgAdmin } = useUserProfile();
+  const { me } = useConfig();
   const [submitError, setSubmitError] = useState(null);
   const [deletionRecord, setDeletionRecord] = useState(null);
   const [deletionRole, setDeletionRole] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const location = useLocation();
+
+  const {
+    isLoading: isFetchingOrgAdmins,
+    error: errorFetchingOrgAdmins,
+    request: fetchOrgAdmins,
+    result: { isCredentialOrgAdmin },
+  } = useRequest(
+    useCallback(async () => {
+      if (
+        isSuperUser ||
+        resource.type !== 'credential' ||
+        !isOrgAdmin ||
+        !resource?.organization
+      ) {
+        return false;
+      }
+      const {
+        data: { count },
+      } = await OrganizationsAPI.readAdmins(resource.organization, {
+        id: me.id,
+      });
+      return { isCredentialOrgAdmin: !!count };
+    }, [me.id, isOrgAdmin, isSuperUser, resource.type, resource.organization]),
+    {
+      isCredentialOrgAdmin: false,
+    }
+  );
+
+  useEffect(() => {
+    fetchOrgAdmins();
+  }, [fetchOrgAdmins]);
+
+  let canAddAdditionalControls = false;
+  if (isSuperUser) {
+    canAddAdditionalControls = true;
+  }
+  if (resource.type === 'credential' && isOrgAdmin && isCredentialOrgAdmin) {
+    canAddAdditionalControls = true;
+  }
+  if (resource.type !== 'credential') {
+    canAddAdditionalControls =
+      resource?.summary_fields?.user_capabilities?.edit;
+  }
 
   const {
     result: {
@@ -56,31 +102,29 @@ function ResourceAccessList({ apiModel, resource }) {
 
       let orgRoles;
       if (location.pathname.includes('/organizations')) {
-        const {
-          data: { results: roles },
-        } = await RolesAPI.read({ content_type__isnull: true });
-        const sysAdmin = roles.filter(
-          (role) => role.name === 'System Administrator'
-        );
-        const sysAud = roles.filter((role) => {
-          let auditor;
-          if (role.name === 'System Auditor') {
-            auditor = role.id;
-          }
-          return auditor;
-        });
+        const [
+          {
+            data: { results: systemAdmin },
+          },
+          {
+            data: { results: systemAuditor },
+          },
+        ] = await Promise.all([
+          RolesAPI.read({ singleton_name: 'system_administrator' }),
+          RolesAPI.read({ singleton_name: 'system_auditor' }),
+        ]);
 
-        orgRoles = Object.values(resource.summary_fields.object_roles).map(
-          (opt) => {
-            let item;
-            if (opt.name === 'Admin') {
-              item = [`${opt.id}, ${sysAdmin[0].id}`, opt.name];
-            } else if (sysAud[0].id && opt.name === 'Auditor') {
-              item = [`${sysAud[0].id}, ${opt.id}`, opt.name];
-            } else {
-              item = [`${opt.id}`, opt.name];
+        orgRoles = Object.entries(resource.summary_fields.object_roles).map(
+          ([key, value]) => {
+            if (key === 'admin_role') {
+              return [`${value.id}, ${systemAdmin[0].id}`, value.name];
             }
-            return item;
+
+            if (key === 'auditor_role') {
+              return [`${value.id}, ${systemAuditor[0].id}`, value.name];
+            }
+
+            return [`${value.id}`, value.name];
           }
         );
       }
@@ -151,8 +195,8 @@ function ResourceAccessList({ apiModel, resource }) {
   return (
     <>
       <PaginatedTable
-        error={contentError}
-        hasContentLoading={isLoading || isDeleteLoading}
+        error={contentError || errorFetchingOrgAdmins}
+        hasContentLoading={isLoading || isDeleteLoading || isFetchingOrgAdmins}
         items={accessRecords}
         itemCount={itemCount}
         pluralizedItemName={t`Roles`}
@@ -165,7 +209,7 @@ function ResourceAccessList({ apiModel, resource }) {
             {...props}
             qsConfig={QS_CONFIG}
             additionalControls={
-              resource?.summary_fields?.user_capabilities?.edit
+              canAddAdditionalControls
                 ? [
                     <ToolbarAddButton
                       ouiaId="access-add-button"

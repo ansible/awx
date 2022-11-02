@@ -22,6 +22,7 @@ from django.conf import settings
 from django.core.exceptions import FieldError, ObjectDoesNotExist
 from django.db.models import Q, Sum
 from django.db import IntegrityError, ProgrammingError, transaction, connection
+from django.db.models.fields.related import ManyToManyField, ForeignKey
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
@@ -29,7 +30,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.contrib.contenttypes.models import ContentType
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 
 # Django REST Framework
@@ -68,7 +69,7 @@ from awx.api.generics import (
     APIView,
     BaseUsersList,
     CopyAPIView,
-    DeleteLastUnattachLabelMixin,
+    GenericCancelView,
     GenericAPIView,
     ListAPIView,
     ListCreateAPIView,
@@ -85,6 +86,7 @@ from awx.api.generics import (
     SubListCreateAttachDetachAPIView,
     SubListDestroyAPIView,
 )
+from awx.api.views.labels import LabelSubListCreateAttachDetachView
 from awx.api.versioning import reverse
 from awx.main import models
 from awx.main.utils import (
@@ -93,7 +95,7 @@ from awx.main.utils import (
     get_object_or_400,
     getattrd,
     get_pk_from_dict,
-    schedule_task_manager,
+    ScheduleWorkflowManager,
     ignore_inventory_computed_fields,
 )
 from awx.main.utils.encryption import encrypt_value
@@ -105,7 +107,6 @@ from awx.api.permissions import (
     ProjectUpdatePermission,
     InventoryInventorySourcesUpdatePermission,
     UserPermission,
-    InstanceGroupTowerPermission,
     VariableDataPermission,
     WorkflowApprovalPermission,
     IsSystemAdminOrAuditor,
@@ -113,66 +114,17 @@ from awx.api.permissions import (
 from awx.api import renderers
 from awx.api import serializers
 from awx.api.metadata import RoleMetadata
-from awx.main.constants import ACTIVE_STATES
+from awx.main.constants import ACTIVE_STATES, SURVEY_TYPE_MAPPING
 from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.api.views.mixin import (
-    ControlledByScmMixin,
     InstanceGroupMembershipMixin,
     OrganizationCountsMixin,
     RelatedJobsPreventDeleteMixin,
     UnifiedJobDeletionMixin,
     NoTruncateMixin,
 )
-from awx.api.views.organization import (  # noqa
-    OrganizationList,
-    OrganizationDetail,
-    OrganizationInventoriesList,
-    OrganizationUsersList,
-    OrganizationAdminsList,
-    OrganizationExecutionEnvironmentsList,
-    OrganizationProjectsList,
-    OrganizationJobTemplatesList,
-    OrganizationWorkflowJobTemplatesList,
-    OrganizationTeamsList,
-    OrganizationActivityStreamList,
-    OrganizationNotificationTemplatesList,
-    OrganizationNotificationTemplatesAnyList,
-    OrganizationNotificationTemplatesErrorList,
-    OrganizationNotificationTemplatesStartedList,
-    OrganizationNotificationTemplatesSuccessList,
-    OrganizationNotificationTemplatesApprovalList,
-    OrganizationInstanceGroupsList,
-    OrganizationGalaxyCredentialsList,
-    OrganizationAccessList,
-    OrganizationObjectRolesList,
-)
-from awx.api.views.inventory import (  # noqa
-    InventoryList,
-    InventoryDetail,
-    InventoryUpdateEventsList,
-    InventoryList,
-    InventoryDetail,
-    InventoryActivityStreamList,
-    InventoryInstanceGroupsList,
-    InventoryAccessList,
-    InventoryObjectRolesList,
-    InventoryJobTemplateList,
-    InventoryCopy,
-)
-from awx.api.views.mesh_visualizer import MeshVisualizer  # noqa
-from awx.api.views.root import (  # noqa
-    ApiRootView,
-    ApiOAuthAuthorizationRootView,
-    ApiVersionRootView,
-    ApiV2RootView,
-    ApiV2PingView,
-    ApiV2ConfigView,
-    ApiV2SubscriptionView,
-    ApiV2AttachView,
-)
-from awx.api.views.webhooks import WebhookKeyView, GithubWebhookReceiver, GitlabWebhookReceiver  # noqa
 from awx.api.pagination import UnifiedJobEventPagination
-
+from awx.main.utils import set_environ
 
 logger = logging.getLogger('awx.api.views')
 
@@ -358,12 +310,13 @@ class DashboardJobsGraphView(APIView):
         return Response(dashboard_data)
 
 
-class InstanceList(ListAPIView):
+class InstanceList(ListCreateAPIView):
 
     name = _("Instances")
     model = models.Instance
     serializer_class = serializers.InstanceSerializer
     search_fields = ('hostname',)
+    ordering = ('id',)
 
 
 class InstanceDetail(RetrieveUpdateAPIView):
@@ -396,6 +349,17 @@ class InstanceUnifiedJobsList(SubListAPIView):
         return qs
 
 
+class InstancePeersList(SubListAPIView):
+
+    name = _("Instance Peers")
+    parent_model = models.Instance
+    model = models.Instance
+    serializer_class = serializers.InstanceSerializer
+    parent_access = 'read'
+    search_fields = {'hostname'}
+    relationship = 'peers'
+
+
 class InstanceInstanceGroupsList(InstanceGroupMembershipMixin, SubListCreateAttachDetachAPIView):
 
     name = _("Instance's Instance Groups")
@@ -408,7 +372,15 @@ class InstanceInstanceGroupsList(InstanceGroupMembershipMixin, SubListCreateAtta
         if parent.node_type == 'control':
             return {'msg': _(f"Cannot change instance group membership of control-only node: {parent.hostname}.")}
         if parent.node_type == 'hop':
-            return {'msg': _(f"Cannot change instance group membership of hop node: {parent.hostname}.")}
+            return {'msg': _(f"Cannot change instance group membership of hop node : {parent.hostname}.")}
+        return None
+
+    def is_valid_removal(self, parent, sub):
+        res = self.is_valid_relation(parent, sub)
+        if res:
+            return res
+        if sub.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME and parent.node_type == 'hybrid':
+            return {'msg': _(f"Cannot disassociate hybrid instance {parent.hostname} from {sub.name}.")}
         return None
 
 
@@ -420,8 +392,8 @@ class InstanceHealthCheck(GenericAPIView):
     permission_classes = (IsSystemAdminOrAuditor,)
 
     def get_queryset(self):
+        return super().get_queryset().filter(node_type='execution')
         # FIXME: For now, we don't have a good way of checking the health of a hop node.
-        return super().get_queryset().exclude(node_type='hop')
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -430,40 +402,22 @@ class InstanceHealthCheck(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
+        if obj.health_check_pending:
+            return Response({'msg': f"Health check was already in progress for {obj.hostname}."}, status=status.HTTP_200_OK)
 
-        if obj.node_type == 'execution':
+        # Note: hop nodes are already excluded by the get_queryset method
+        obj.health_check_started = now()
+        obj.save(update_fields=['health_check_started'])
+        if obj.node_type == models.Instance.Types.EXECUTION:
             from awx.main.tasks.system import execution_node_health_check
 
-            runner_data = execution_node_health_check(obj.hostname)
-            obj.refresh_from_db()
-            data = self.get_serializer(data=request.data).to_representation(obj)
-            # Add in some extra unsaved fields
-            for extra_field in ('transmit_timing', 'run_timing'):
-                if extra_field in runner_data:
-                    data[extra_field] = runner_data[extra_field]
+            execution_node_health_check.apply_async([obj.hostname])
         else:
-            from awx.main.tasks.system import cluster_node_health_check
-
-            if settings.CLUSTER_HOST_ID == obj.hostname:
-                cluster_node_health_check(obj.hostname)
-            else:
-                cluster_node_health_check.apply_async([obj.hostname], queue=obj.hostname)
-                start_time = time.time()
-                prior_check_time = obj.last_health_check
-                while time.time() - start_time < 50.0:
-                    obj.refresh_from_db(fields=['last_health_check'])
-                    if obj.last_health_check != prior_check_time:
-                        break
-                    if time.time() - start_time < 1.0:
-                        time.sleep(0.1)
-                    else:
-                        time.sleep(1.0)
-                else:
-                    obj.mark_offline(errors=_('Health check initiated by user determined this instance to be unresponsive'))
-            obj.refresh_from_db()
-            data = self.get_serializer(data=request.data).to_representation(obj)
-
-        return Response(data, status=status.HTTP_200_OK)
+            return Response(
+                {"error": f"Cannot run a health check on instances of type {obj.node_type}.  Health checks can only be run on execution nodes."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response({'msg': f"Health check is running for {obj.hostname}."}, status=status.HTTP_200_OK)
 
 
 class InstanceGroupList(ListCreateAPIView):
@@ -479,7 +433,6 @@ class InstanceGroupDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAP
     name = _("Instance Group Detail")
     model = models.InstanceGroup
     serializer_class = serializers.InstanceGroupSerializer
-    permission_classes = (InstanceGroupTowerPermission,)
 
     def update_raw_data(self, data):
         if self.get_object().is_container_group:
@@ -511,7 +464,15 @@ class InstanceGroupInstanceList(InstanceGroupMembershipMixin, SubListAttachDetac
         if sub.node_type == 'control':
             return {'msg': _(f"Cannot change instance group membership of control-only node: {sub.hostname}.")}
         if sub.node_type == 'hop':
-            return {'msg': _(f"Cannot change instance group membership of hop node: {sub.hostname}.")}
+            return {'msg': _(f"Cannot change instance group membership of hop node : {sub.hostname}.")}
+        return None
+
+    def is_valid_removal(self, parent, sub):
+        res = self.is_valid_relation(parent, sub)
+        if res:
+            return res
+        if sub.node_type == 'hybrid' and parent.name == settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME:
+            return {'msg': _(f"Cannot disassociate hybrid node {sub.hostname} from {parent.name}.")}
         return None
 
 
@@ -520,6 +481,7 @@ class ScheduleList(ListCreateAPIView):
     name = _("Schedules")
     model = models.Schedule
     serializer_class = serializers.ScheduleSerializer
+    ordering = ('id',)
 
 
 class ScheduleDetail(RetrieveUpdateDestroyAPIView):
@@ -560,8 +522,7 @@ class ScheduleZoneInfo(APIView):
     swagger_topic = 'System Configuration'
 
     def get(self, request):
-        zones = [{'name': zone} for zone in models.Schedule.get_zoneinfo()]
-        return Response(zones)
+        return Response({'zones': models.Schedule.get_zoneinfo(), 'links': models.Schedule.get_zoneinfo_links()})
 
 
 class LaunchConfigCredentialsBase(SubListAttachDetachAPIView):
@@ -599,6 +560,19 @@ class LaunchConfigCredentialsBase(SubListAttachDetachAPIView):
 class ScheduleCredentialsList(LaunchConfigCredentialsBase):
 
     parent_model = models.Schedule
+
+
+class ScheduleLabelsList(LabelSubListCreateAttachDetachView):
+
+    parent_model = models.Schedule
+
+
+class ScheduleInstanceGroupList(SubListAttachDetachAPIView):
+
+    model = models.InstanceGroup
+    serializer_class = serializers.InstanceGroupSerializer
+    parent_model = models.Schedule
+    relationship = 'instance_groups'
 
 
 class ScheduleUnifiedJobsList(SubListAPIView):
@@ -1004,19 +978,10 @@ class SystemJobEventsList(SubListAPIView):
         return job.get_event_queryset()
 
 
-class ProjectUpdateCancel(RetrieveAPIView):
+class ProjectUpdateCancel(GenericCancelView):
 
     model = models.ProjectUpdate
-    obj_permission_type = 'cancel'
     serializer_class = serializers.ProjectUpdateCancelSerializer
-
-    def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.can_cancel:
-            obj.cancel()
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return self.http_method_not_allowed(request, *args, **kwargs)
 
 
 class ProjectUpdateNotificationsList(SubListAPIView):
@@ -1556,8 +1521,9 @@ class CredentialExternalTest(SubDetailAPIView):
                 backend_kwargs[field_name] = value
         backend_kwargs.update(request.data.get('metadata', {}))
         try:
-            obj.credential_type.plugin.backend(**backend_kwargs)
-            return Response({}, status=status.HTTP_202_ACCEPTED)
+            with set_environ(**settings.AWX_TASK_ENV):
+                obj.credential_type.plugin.backend(**backend_kwargs)
+                return Response({}, status=status.HTTP_202_ACCEPTED)
         except requests.exceptions.HTTPError as exc:
             message = 'HTTP {}'.format(exc.response.status_code)
             return Response({'inputs': message}, status=status.HTTP_400_BAD_REQUEST)
@@ -1657,7 +1623,7 @@ class HostList(HostRelatedSearchMixin, ListCreateAPIView):
             return Response(dict(error=_(str(e))), status=status.HTTP_400_BAD_REQUEST)
 
 
-class HostDetail(RelatedJobsPreventDeleteMixin, ControlledByScmMixin, RetrieveUpdateDestroyAPIView):
+class HostDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
 
     always_allow_superuser = False
     model = models.Host
@@ -1691,7 +1657,7 @@ class InventoryHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIVie
         return qs
 
 
-class HostGroupsList(ControlledByScmMixin, SubListCreateAttachDetachAPIView):
+class HostGroupsList(SubListCreateAttachDetachAPIView):
     '''the list of groups a host is directly a member of'''
 
     model = models.Group
@@ -1807,7 +1773,7 @@ class EnforceParentRelationshipMixin(object):
         return super(EnforceParentRelationshipMixin, self).create(request, *args, **kwargs)
 
 
-class GroupChildrenList(ControlledByScmMixin, EnforceParentRelationshipMixin, SubListCreateAttachDetachAPIView):
+class GroupChildrenList(EnforceParentRelationshipMixin, SubListCreateAttachDetachAPIView):
 
     model = models.Group
     serializer_class = serializers.GroupSerializer
@@ -1853,7 +1819,7 @@ class GroupPotentialChildrenList(SubListAPIView):
         return qs.exclude(pk__in=except_pks)
 
 
-class GroupHostsList(HostRelatedSearchMixin, ControlledByScmMixin, SubListCreateAttachDetachAPIView):
+class GroupHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIView):
     '''the list of hosts directly below a group'''
 
     model = models.Host
@@ -1917,7 +1883,7 @@ class GroupActivityStreamList(SubListAPIView):
         return qs.filter(Q(group=parent) | Q(host__in=parent.hosts.all()))
 
 
-class GroupDetail(RelatedJobsPreventDeleteMixin, ControlledByScmMixin, RetrieveUpdateDestroyAPIView):
+class GroupDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
 
     model = models.Group
     serializer_class = serializers.GroupSerializer
@@ -2289,19 +2255,10 @@ class InventoryUpdateCredentialsList(SubListAPIView):
     relationship = 'credentials'
 
 
-class InventoryUpdateCancel(RetrieveAPIView):
+class InventoryUpdateCancel(GenericCancelView):
 
     model = models.InventoryUpdate
-    obj_permission_type = 'cancel'
     serializer_class = serializers.InventoryUpdateCancelSerializer
-
-    def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.can_cancel:
-            obj.cancel()
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return self.http_method_not_allowed(request, *args, **kwargs)
 
 
 class InventoryUpdateNotificationsList(SubListAPIView):
@@ -2364,10 +2321,13 @@ class JobTemplateLaunch(RetrieveAPIView):
             for field, ask_field_name in modified_ask_mapping.items():
                 if not getattr(obj, ask_field_name):
                     data.pop(field, None)
-                elif field == 'inventory':
+                elif isinstance(getattr(obj.__class__, field).field, ForeignKey):
                     data[field] = getattrd(obj, "%s.%s" % (field, 'id'), None)
-                elif field == 'credentials':
-                    data[field] = [cred.id for cred in obj.credentials.all()]
+                elif isinstance(getattr(obj.__class__, field).field, ManyToManyField):
+                    if field == 'instance_groups':
+                        data[field] = []
+                        continue
+                    data[field] = [item.id for item in getattr(obj, field).all()]
                 else:
                     data[field] = getattr(obj, field)
         return data
@@ -2380,9 +2340,8 @@ class JobTemplateLaunch(RetrieveAPIView):
         """
         modern_data = data.copy()
 
-        id_fd = '{}_id'.format('inventory')
-        if 'inventory' not in modern_data and id_fd in modern_data:
-            modern_data['inventory'] = modern_data[id_fd]
+        if 'inventory' not in modern_data and 'inventory_id' in modern_data:
+            modern_data['inventory'] = modern_data['inventory_id']
 
         # credential passwords were historically provided as top-level attributes
         if 'credential_passwords' not in modern_data:
@@ -2467,8 +2426,6 @@ class JobTemplateSurveySpec(GenericAPIView):
     obj_permission_type = 'admin'
     serializer_class = serializers.EmptySerializer
 
-    ALLOWED_TYPES = {'text': str, 'textarea': str, 'password': str, 'multiplechoice': str, 'multiselect': str, 'integer': int, 'float': float}
-
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
         return Response(obj.display_survey_spec())
@@ -2539,17 +2496,17 @@ class JobTemplateSurveySpec(GenericAPIView):
             # Type-specific validation
             # validate question type <-> default type
             qtype = survey_item["type"]
-            if qtype not in JobTemplateSurveySpec.ALLOWED_TYPES:
+            if qtype not in SURVEY_TYPE_MAPPING:
                 return Response(
                     dict(
                         error=_("'{survey_item[type]}' in survey question {idx} is not one of '{allowed_types}' allowed question types.").format(
-                            allowed_types=', '.join(JobTemplateSurveySpec.ALLOWED_TYPES.keys()), **context
+                            allowed_types=', '.join(SURVEY_TYPE_MAPPING.keys()), **context
                         )
                     ),
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             if 'default' in survey_item and survey_item['default'] != '':
-                if not isinstance(survey_item['default'], JobTemplateSurveySpec.ALLOWED_TYPES[qtype]):
+                if not isinstance(survey_item['default'], SURVEY_TYPE_MAPPING[qtype]):
                     type_label = 'string'
                     if qtype in ['integer', 'float']:
                         type_label = qtype
@@ -2704,28 +2661,9 @@ class JobTemplateCredentialsList(SubListCreateAttachDetachAPIView):
         return super(JobTemplateCredentialsList, self).is_valid_relation(parent, sub, created)
 
 
-class JobTemplateLabelList(DeleteLastUnattachLabelMixin, SubListCreateAttachDetachAPIView):
+class JobTemplateLabelList(LabelSubListCreateAttachDetachView):
 
-    model = models.Label
-    serializer_class = serializers.LabelSerializer
     parent_model = models.JobTemplate
-    relationship = 'labels'
-
-    def post(self, request, *args, **kwargs):
-        # If a label already exists in the database, attach it instead of erroring out
-        # that it already exists
-        if 'id' not in request.data and 'name' in request.data and 'organization' in request.data:
-            existing = models.Label.objects.filter(name=request.data['name'], organization_id=request.data['organization'])
-            if existing.exists():
-                existing = existing[0]
-                request.data['id'] = existing.id
-                del request.data['name']
-                del request.data['organization']
-        if models.Label.objects.filter(unifiedjobtemplate_labels=self.kwargs['pk']).count() > 100:
-            return Response(
-                dict(msg=_('Maximum number of labels for {} reached.'.format(self.parent_model._meta.verbose_name_raw))), status=status.HTTP_400_BAD_REQUEST
-            )
-        return super(JobTemplateLabelList, self).post(request, *args, **kwargs)
 
 
 class JobTemplateCallback(GenericAPIView):
@@ -2951,6 +2889,22 @@ class WorkflowJobNodeCredentialsList(SubListAPIView):
     relationship = 'credentials'
 
 
+class WorkflowJobNodeLabelsList(SubListAPIView):
+
+    model = models.Label
+    serializer_class = serializers.LabelSerializer
+    parent_model = models.WorkflowJobNode
+    relationship = 'labels'
+
+
+class WorkflowJobNodeInstanceGroupsList(SubListAttachDetachAPIView):
+
+    model = models.InstanceGroup
+    serializer_class = serializers.InstanceGroupSerializer
+    parent_model = models.WorkflowJobNode
+    relationship = 'instance_groups'
+
+
 class WorkflowJobTemplateNodeList(ListCreateAPIView):
 
     model = models.WorkflowJobTemplateNode
@@ -2967,6 +2921,19 @@ class WorkflowJobTemplateNodeDetail(RetrieveUpdateDestroyAPIView):
 class WorkflowJobTemplateNodeCredentialsList(LaunchConfigCredentialsBase):
 
     parent_model = models.WorkflowJobTemplateNode
+
+
+class WorkflowJobTemplateNodeLabelsList(LabelSubListCreateAttachDetachView):
+
+    parent_model = models.WorkflowJobTemplateNode
+
+
+class WorkflowJobTemplateNodeInstanceGroupsList(SubListAttachDetachAPIView):
+
+    model = models.InstanceGroup
+    serializer_class = serializers.InstanceGroupSerializer
+    parent_model = models.WorkflowJobTemplateNode
+    relationship = 'instance_groups'
 
 
 class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, SubListCreateAttachDetachAPIView):
@@ -3067,8 +3034,7 @@ class WorkflowJobNodeChildrenBaseList(SubListAPIView):
     search_fields = ('unified_job_template__name', 'unified_job_template__description')
 
     #
-    # Limit the set of WorkflowJobeNodes to the related nodes of specified by
-    #'relationship'
+    # Limit the set of WorkflowJobNodes to the related nodes of specified by self.relationship
     #
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -3181,13 +3147,17 @@ class WorkflowJobTemplateLaunch(RetrieveAPIView):
                 data['extra_vars'] = extra_vars
             modified_ask_mapping = models.WorkflowJobTemplate.get_ask_mapping()
             modified_ask_mapping.pop('extra_vars')
-            for field_name, ask_field_name in obj.get_ask_mapping().items():
+
+            for field, ask_field_name in modified_ask_mapping.items():
                 if not getattr(obj, ask_field_name):
-                    data.pop(field_name, None)
-                elif field_name == 'inventory':
-                    data[field_name] = getattrd(obj, "%s.%s" % (field_name, 'id'), None)
+                    data.pop(field, None)
+                elif isinstance(getattr(obj.__class__, field).field, ForeignKey):
+                    data[field] = getattrd(obj, "%s.%s" % (field, 'id'), None)
+                elif isinstance(getattr(obj.__class__, field).field, ManyToManyField):
+                    data[field] = [item.id for item in getattr(obj, field).all()]
                 else:
-                    data[field_name] = getattr(obj, field_name)
+                    data[field] = getattr(obj, field)
+
         return data
 
     def post(self, request, *args, **kwargs):
@@ -3366,20 +3336,15 @@ class WorkflowJobWorkflowNodesList(SubListAPIView):
         return super(WorkflowJobWorkflowNodesList, self).get_queryset().order_by('id')
 
 
-class WorkflowJobCancel(RetrieveAPIView):
+class WorkflowJobCancel(GenericCancelView):
 
     model = models.WorkflowJob
-    obj_permission_type = 'cancel'
     serializer_class = serializers.WorkflowJobCancelSerializer
 
     def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.can_cancel:
-            obj.cancel()
-            schedule_task_manager()
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return self.http_method_not_allowed(request, *args, **kwargs)
+        r = super().post(request, *args, **kwargs)
+        ScheduleWorkflowManager().schedule()
+        return r
 
 
 class WorkflowJobNotificationsList(SubListAPIView):
@@ -3535,19 +3500,10 @@ class JobActivityStreamList(SubListAPIView):
     search_fields = ('changes',)
 
 
-class JobCancel(RetrieveAPIView):
+class JobCancel(GenericCancelView):
 
     model = models.Job
-    obj_permission_type = 'cancel'
     serializer_class = serializers.JobCancelSerializer
-
-    def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.can_cancel:
-            obj.cancel()
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return self.http_method_not_allowed(request, *args, **kwargs)
 
 
 class JobRelaunch(RetrieveAPIView):
@@ -3674,15 +3630,21 @@ class JobCreateSchedule(RetrieveAPIView):
             extra_data=config.extra_data,
             survey_passwords=config.survey_passwords,
             inventory=config.inventory,
+            execution_environment=config.execution_environment,
             char_prompts=config.char_prompts,
             credentials=set(config.credentials.all()),
+            labels=set(config.labels.all()),
+            instance_groups=list(config.instance_groups.all()),
         )
         if not request.user.can_access(models.Schedule, 'add', schedule_data):
             raise PermissionDenied()
 
-        creds_list = schedule_data.pop('credentials')
+        related_fields = ('credentials', 'labels', 'instance_groups')
+        related = [schedule_data.pop(relationship) for relationship in related_fields]
         schedule = models.Schedule.objects.create(**schedule_data)
-        schedule.credentials.add(*creds_list)
+        for relationship, items in zip(related_fields, related):
+            for item in items:
+                getattr(schedule, relationship).add(item)
 
         data = serializers.ScheduleSerializer(schedule, context=self.get_serializer_context()).data
         data.serializer.instance = None  # hack to avoid permissions.py assuming this is Job model
@@ -3824,7 +3786,113 @@ class JobJobEventsList(BaseJobEventsList):
     def get_queryset(self):
         job = self.get_parent_object()
         self.check_parent_access(job)
-        return job.get_event_queryset().select_related('host').order_by('start_line')
+        return job.get_event_queryset().prefetch_related('job__job_template', 'host').order_by('start_line')
+
+
+class JobJobEventsChildrenSummary(APIView):
+
+    renderer_classes = [JSONRenderer]
+    meta_events = ('debug', 'verbose', 'warning', 'error', 'system_warning', 'deprecated')
+
+    def get(self, request, **kwargs):
+        resp = dict(children_summary={}, meta_event_nested_uuid={}, event_processing_finished=False, is_tree=True)
+        job = get_object_or_404(models.Job, pk=kwargs['pk'])
+        if not job.event_processing_finished:
+            return Response(resp)
+        else:
+            resp["event_processing_finished"] = True
+
+        events = list(job.get_event_queryset().values('counter', 'uuid', 'parent_uuid', 'event').order_by('counter'))
+        if len(events) == 0:
+            return Response(resp)
+
+        # key is counter, value is number of total children (including children of children, etc.)
+        map_counter_children_tally = {i['counter']: {"rowNumber": 0, "numChildren": 0} for i in events}
+        # key is uuid, value is counter
+        map_uuid_counter = {i['uuid']: i['counter'] for i in events}
+        # key is uuid, value is parent uuid. Used as a quick lookup
+        map_uuid_puuid = {i['uuid']: i['parent_uuid'] for i in events}
+        # key is counter of meta events (i.e. verbose), value is uuid of the assigned parent
+        map_meta_counter_nested_uuid = {}
+
+        # collapsable tree view in the UI only makes sense for tree-like
+        # hierarchy. If ansible is ran with a strategy like free or host_pinned, then
+        # events can be out of sequential order, and no longer follow a tree structure
+        # E1
+        #  E2
+        # E3
+        #  E4  <- parent is E3
+        #  E5  <- parent is E1
+        # in the above, there is no clear way to collapse E1, because E5 comes after
+        # E3, which occurs after E1. Thus the tree view should be disabled.
+
+        # mark the last seen uuid at a given level (0-3)
+        # if a parent uuid is not in this list, then we know the events are not tree-like
+        # and return a response with is_tree: False
+        level_current_uuid = [None, None, None, None]
+
+        prev_non_meta_event = events[0]
+        for i, e in enumerate(events):
+            if not e['event'] in JobJobEventsChildrenSummary.meta_events:
+                prev_non_meta_event = e
+            if not e['uuid']:
+                continue
+
+            if not e['event'] in JobJobEventsChildrenSummary.meta_events:
+                level = models.JobEvent.LEVEL_FOR_EVENT[e['event']]
+                level_current_uuid[level] = e['uuid']
+                # if setting level 1, for example, set levels 2 and 3 back to None
+                for u in range(level + 1, len(level_current_uuid)):
+                    level_current_uuid[u] = None
+
+            puuid = e['parent_uuid']
+            if puuid and puuid not in level_current_uuid:
+                # improper tree detected, so bail out early
+                resp['is_tree'] = False
+                return Response(resp)
+
+            # if event is verbose (or debug, etc), we need to "assign" it a
+            # parent. This code looks at the event level of the previous
+            # non-verbose event, and the level of the next (by looking ahead)
+            # non-verbose event. The verbose event is assigned the same parent
+            # uuid of the higher level event.
+            # e.g.
+            # E1
+            #  E2
+            # verbose
+            # verbose <- we are on this event currently
+            #    E4
+            # We'll compare E2 and E4, and the verbose event
+            # will be assigned the parent uuid of E4 (higher event level)
+            if e['event'] in JobJobEventsChildrenSummary.meta_events:
+                event_level_before = models.JobEvent.LEVEL_FOR_EVENT[prev_non_meta_event['event']]
+                # find next non meta event
+                z = i
+                next_non_meta_event = events[-1]
+                while z < len(events):
+                    if events[z]['event'] not in JobJobEventsChildrenSummary.meta_events:
+                        next_non_meta_event = events[z]
+                        break
+                    z += 1
+                event_level_after = models.JobEvent.LEVEL_FOR_EVENT[next_non_meta_event['event']]
+                if event_level_after and event_level_after > event_level_before:
+                    puuid = next_non_meta_event['parent_uuid']
+                else:
+                    puuid = prev_non_meta_event['parent_uuid']
+                if puuid:
+                    map_meta_counter_nested_uuid[e['counter']] = puuid
+            map_counter_children_tally[e['counter']]['rowNumber'] = i
+            if not puuid:
+                continue
+            # now traverse up the parent, grandparent, etc. events and tally those
+            while puuid:
+                map_counter_children_tally[map_uuid_counter[puuid]]['numChildren'] += 1
+                puuid = map_uuid_puuid.get(puuid, None)
+
+        # create new dictionary, dropping events with 0 children
+        resp["children_summary"] = {k: v for k, v in map_counter_children_tally.items() if v['numChildren'] != 0}
+        resp["meta_event_nested_uuid"] = map_meta_counter_nested_uuid
+        return Response(resp)
 
 
 class AdHocCommandList(ListCreateAPIView):
@@ -3907,19 +3975,10 @@ class AdHocCommandDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
     serializer_class = serializers.AdHocCommandDetailSerializer
 
 
-class AdHocCommandCancel(RetrieveAPIView):
+class AdHocCommandCancel(GenericCancelView):
 
     model = models.AdHocCommand
-    obj_permission_type = 'cancel'
     serializer_class = serializers.AdHocCommandCancelSerializer
-
-    def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.can_cancel:
-            obj.cancel()
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return self.http_method_not_allowed(request, *args, **kwargs)
 
 
 class AdHocCommandRelaunch(GenericAPIView):
@@ -4055,19 +4114,10 @@ class SystemJobDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
     serializer_class = serializers.SystemJobSerializer
 
 
-class SystemJobCancel(RetrieveAPIView):
+class SystemJobCancel(GenericCancelView):
 
     model = models.SystemJob
-    obj_permission_type = 'cancel'
     serializer_class = serializers.SystemJobCancelSerializer
-
-    def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.can_cancel:
-            obj.cancel()
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return self.http_method_not_allowed(request, *args, **kwargs)
 
 
 class SystemJobNotificationsList(SubListAPIView):
@@ -4305,18 +4355,6 @@ class NotificationDetail(RetrieveAPIView):
 
     model = models.Notification
     serializer_class = serializers.NotificationSerializer
-
-
-class LabelList(ListCreateAPIView):
-
-    model = models.Label
-    serializer_class = serializers.LabelSerializer
-
-
-class LabelDetail(RetrieveUpdateAPIView):
-
-    model = models.Label
-    serializer_class = serializers.LabelSerializer
 
 
 class ActivityStreamList(SimpleListAPIView):

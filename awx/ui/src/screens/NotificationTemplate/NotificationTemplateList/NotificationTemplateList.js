@@ -1,14 +1,8 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
-import {
-  Alert,
-  AlertActionCloseButton,
-  AlertGroup,
-  Card,
-  PageSection,
-} from '@patternfly/react-core';
+import { Card, PageSection } from '@patternfly/react-core';
 import { NotificationTemplatesAPI } from 'api';
 import PaginatedTable, {
   HeaderRow,
@@ -22,6 +16,7 @@ import ErrorDetail from 'components/ErrorDetail';
 import DataListToolbar from 'components/DataListToolbar';
 import useRequest, { useDeleteItems } from 'hooks/useRequest';
 import useSelected from 'hooks/useSelected';
+import useToast, { AlertVariant } from 'hooks/useToast';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import NotificationTemplateListItem from './NotificationTemplateListItem';
 
@@ -34,7 +29,8 @@ const QS_CONFIG = getQSConfig('notification-templates', {
 function NotificationTemplatesList() {
   const location = useLocation();
   const match = useRouteMatch();
-  const [testToasts, setTestToasts] = useState([]);
+  // const [testToasts, setTestToasts] = useState([]);
+  const { addToast, Toast, toastProps } = useToast();
 
   const addUrl = `${match.url}/add`;
 
@@ -107,18 +103,7 @@ function NotificationTemplatesList() {
     clearSelected();
   };
 
-  const addTestToast = useCallback((notification) => {
-    setTestToasts((oldToasts) => [...oldToasts, notification]);
-  }, []);
-
-  const removeTestToast = (notificationId) => {
-    setTestToasts((oldToasts) =>
-      oldToasts.filter((toast) => toast.id !== notificationId)
-    );
-  };
-
   const canAdd = actions && actions.POST;
-  const alertGroupDataCy = 'notification-template-alerts';
 
   return (
     <>
@@ -198,7 +183,35 @@ function NotificationTemplatesList() {
             }
             renderRow={(template, index) => (
               <NotificationTemplateListItem
-                onAddToast={addTestToast}
+                onAddToast={(notification) => {
+                  if (notification.status === 'pending') {
+                    return;
+                  }
+
+                  let message;
+                  if (notification.status === 'successful') {
+                    message = t`Notification sent successfully`;
+                  }
+                  if (notification.status === 'failed') {
+                    if (notification?.error === 'timed out') {
+                      message = t`Notification timed out`;
+                    } else {
+                      message = notification.error;
+                    }
+                  }
+
+                  addToast({
+                    id: notification.id,
+                    title:
+                      notification.summary_fields.notification_template.name,
+                    variant:
+                      notification.status === 'failed'
+                        ? AlertVariant.danger
+                        : AlertVariant.success,
+                    hasTimeout: notification.status !== 'failed',
+                    message,
+                  });
+                }}
                 key={template.id}
                 fetchTemplates={fetchTemplates}
                 template={template}
@@ -223,39 +236,7 @@ function NotificationTemplatesList() {
         {t`Failed to delete one or more notification template.`}
         <ErrorDetail error={deletionError} />
       </AlertModal>
-      <AlertGroup data-cy={alertGroupDataCy} isToast>
-        {testToasts
-          .filter((notification) => notification.status !== 'pending')
-          .map((notification) => (
-            <Alert
-              actionClose={
-                <AlertActionCloseButton
-                  onClose={() => removeTestToast(notification.id)}
-                />
-              }
-              onTimeout={() => removeTestToast(notification.id)}
-              timeout={notification.status !== 'failed'}
-              title={notification.summary_fields.notification_template.name}
-              variant={notification.status === 'failed' ? 'danger' : 'success'}
-              key={`notification-template-alert-${notification.id}`}
-              ouiaId={`notification-template-alert-${notification.id}`}
-            >
-              <>
-                {notification.status === 'successful' && (
-                  <p>{t`Notification sent successfully`}</p>
-                )}
-                {notification.status === 'failed' &&
-                  notification?.error === 'timed out' && (
-                    <p>{t`Notification timed out`}</p>
-                  )}
-                {notification.status === 'failed' &&
-                  notification?.error !== 'timed out' && (
-                    <p>{notification.error}</p>
-                  )}
-              </>
-            </Alert>
-          ))}
-      </AlertGroup>
+      <Toast {...toastProps} />
     </>
   );
 }

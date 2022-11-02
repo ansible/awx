@@ -37,6 +37,12 @@ describe('LaunchButton', () => {
         ask_variables_on_launch: false,
         ask_limit_on_launch: false,
         ask_scm_branch_on_launch: false,
+        ask_execution_environment_on_launch: false,
+        ask_labels_on_launch: false,
+        ask_forks_on_launch: false,
+        ask_job_slice_count_on_launch: false,
+        ask_timeout_on_launch: false,
+        ask_instance_groups_on_launch: false,
         survey_enabled: false,
         variables_needed_to_start: [],
       },
@@ -111,48 +117,6 @@ describe('LaunchButton', () => {
     expect(WorkflowJobTemplatesAPI.readLaunch).toHaveBeenCalledWith(1);
     expect(WorkflowJobTemplatesAPI.launch).toHaveBeenCalledWith(1, {});
     expect(history.location.pathname).toEqual('/jobs/9000/output');
-  });
-
-  test('should disable button to prevent duplicate clicks', async () => {
-    WorkflowJobTemplatesAPI.readLaunch.mockResolvedValue({
-      data: {
-        can_start_without_user_input: true,
-      },
-    });
-    const history = createMemoryHistory({
-      initialEntries: ['/jobs/9000'],
-    });
-    WorkflowJobTemplatesAPI.launch.mockImplementation(async () => {
-      // return asynchronously so isLaunching isn't set back to false in the
-      // same tick
-      await new Promise((resolve) => setTimeout(resolve, 10));
-      return {
-        data: {
-          id: 9000,
-        },
-      };
-    });
-    const wrapper = mountWithContexts(
-      <LaunchButton
-        resource={{
-          id: 1,
-          type: 'workflow_job_template',
-        }}
-      >
-        {({ handleLaunch, isLaunching }) => (
-          <button type="submit" onClick={handleLaunch} disabled={isLaunching} />
-        )}
-      </LaunchButton>,
-      {
-        context: {
-          router: { history },
-        },
-      }
-    );
-    const button = wrapper.find('button');
-    await act(() => button.prop('onClick')());
-    wrapper.update();
-    expect(wrapper.find('button').prop('disabled')).toEqual(false);
   });
 
   test('should relaunch job correctly', async () => {

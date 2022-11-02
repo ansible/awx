@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { ExclamationCircleIcon as PFExclamationCircleIcon } from '@patternfly/react-icons';
 import { Tooltip } from '@patternfly/react-core';
@@ -40,13 +40,11 @@ function PreviewStep({ resource, launchConfig, surveyConfig, formErrors }) {
           .filter((q) => q.type === 'password')
           .map((q) => q.variable);
         const masked = maskPasswords(surveyValues, passwordFields);
-        overrides.extra_vars = yaml.safeDump(
+        overrides.extra_vars = yaml.dump(
           mergeExtraVars(initialExtraVars, masked)
         );
       } else {
-        overrides.extra_vars = yaml.safeDump(
-          mergeExtraVars(initialExtraVars, {})
-        );
+        overrides.extra_vars = yaml.dump(mergeExtraVars(initialExtraVars, {}));
       }
     } catch (e) {
       //
@@ -54,7 +52,7 @@ function PreviewStep({ resource, launchConfig, surveyConfig, formErrors }) {
   }
 
   return (
-    <>
+    <div data-cy="prompt-preview">
       {formErrors && (
         <ErrorMessageWrapper>
           {t`Some of the previous step(s) have errors`}
@@ -72,7 +70,7 @@ function PreviewStep({ resource, launchConfig, surveyConfig, formErrors }) {
         launchConfig={launchConfig}
         overrides={overrides}
       />
-    </>
+    </div>
   );
 }
 

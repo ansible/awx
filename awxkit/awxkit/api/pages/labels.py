@@ -44,4 +44,6 @@ class Labels(page.PageList, Label):
     pass
 
 
-page.register_page([resources.labels, resources.job_labels, resources.job_template_labels, resources.workflow_job_template_labels], Labels)
+page.register_page(
+    [resources.labels, resources.inventory_labels, resources.job_labels, resources.job_template_labels, resources.workflow_job_template_labels], Labels
+)

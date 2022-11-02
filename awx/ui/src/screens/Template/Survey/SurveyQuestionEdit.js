@@ -58,17 +58,14 @@ export default function SurveyQuestionEdit({ survey, updateSurvey }) {
       if (questionIndex === -1) {
         throw new Error('Question not found in spec');
       }
-      let choices = '';
-      let defaultAnswers = '';
       if (
         submittedData.type === 'multiselect' ||
         submittedData.type === 'multiplechoice'
       ) {
+        const choices = [];
+        let defaultAnswers = '';
         submittedData.formattedChoices.forEach(({ choice, isDefault }, i) => {
-          choices =
-            i === submittedData.formattedChoices.length - 1
-              ? choices.concat(`${choice}`)
-              : choices.concat(`${choice}\n`);
+          choices.push(choice);
           if (isDefault) {
             defaultAnswers =
               i === submittedData.formattedChoices.length - 1
@@ -77,8 +74,9 @@ export default function SurveyQuestionEdit({ survey, updateSurvey }) {
           }
         });
         submittedData.default = defaultAnswers.trim();
-        submittedData.choices = choices.trim();
+        submittedData.choices = choices;
       }
+      delete submittedData.formattedChoices;
 
       await updateSurvey([
         ...survey.spec.slice(0, questionIndex),

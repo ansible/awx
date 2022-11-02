@@ -9,6 +9,7 @@ import ApplicationLookup from 'components/Lookup/ApplicationLookup';
 import Popover from 'components/Popover';
 import { required } from 'util/validators';
 import { FormColumnLayout } from 'components/FormLayout';
+import helptext from './User.helptext';
 
 function UserTokenFormFields() {
   const { setFieldValue, setFieldTouched } = useFormikContext();
@@ -45,9 +46,7 @@ function UserTokenFormFields() {
           label={
             <span>
               {t`Application`}
-              <Popover
-                content={t`Select the application that this token will belong to, or leave this field empty to create a Personal Access Token.`}
-              />
+              <Popover content={helptext.application} />
             </span>
           }
           touched={applicationMeta.touched}
@@ -67,9 +66,7 @@ function UserTokenFormFields() {
         isRequired
         validated={!scopeMeta.touched || !scopeMeta.error ? 'default' : 'error'}
         label={t`Scope`}
-        labelIcon={
-          <Popover content={t`Specify a scope for the token's access`} />
-        }
+        labelIcon={<Popover content={helptext.scope} />}
       >
         <AnsibleSelect
           {...scopeField}

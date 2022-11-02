@@ -2,14 +2,12 @@ import React from 'react';
 import { t } from '@lingui/macro';
 import { withFormik, useFormikContext } from 'formik';
 import PropTypes from 'prop-types';
-
 import Wizard from '../Wizard';
 import useAdHocLaunchSteps from './useAdHocLaunchSteps';
 
 function AdHocCommandsWizard({
   onLaunch,
   moduleOptions,
-  verbosityOptions,
   onCloseWizard,
   credentialTypeId,
   organizationId,
@@ -18,7 +16,6 @@ function AdHocCommandsWizard({
 
   const { steps, validateStep, visitStep, visitAllSteps } = useAdHocLaunchSteps(
     moduleOptions,
-    verbosityOptions,
     organizationId,
     credentialTypeId
   );
@@ -57,19 +54,20 @@ function AdHocCommandsWizard({
 }
 
 const FormikApp = withFormik({
-  mapPropsToValues({ adHocItems, verbosityOptions }) {
+  mapPropsToValues({ adHocItems }) {
     const adHocItemStrings = adHocItems.map((item) => item.name).join(', ');
     return {
       limit: adHocItemStrings || 'all',
-      credential: [],
+      credentials: [],
       module_args: '',
-      verbosity: verbosityOptions[0].value,
+      verbosity: 0,
       forks: 0,
       diff_mode: false,
       become_enabled: '',
       module_name: '',
       extra_vars: '---',
       job_type: 'run',
+      credential_passwords: {},
       execution_environment: '',
     };
   },
@@ -78,7 +76,6 @@ const FormikApp = withFormik({
 FormikApp.propTypes = {
   onLaunch: PropTypes.func.isRequired,
   moduleOptions: PropTypes.arrayOf(PropTypes.array).isRequired,
-  verbosityOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
   onCloseWizard: PropTypes.func.isRequired,
   credentialTypeId: PropTypes.number.isRequired,
 };

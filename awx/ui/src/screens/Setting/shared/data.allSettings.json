@@ -38,6 +38,10 @@
   "AWX_ISOLATION_BASE_PATH":"/tmp",
   "AWX_ISOLATION_SHOW_PATHS":[],
   "AWX_TASK_ENV":{},
+  "GALAXY_TASK_ENV": {
+    "ANSIBLE_FORCE_COLOR": "false",
+    "GIT_SSH_COMMAND": "ssh -o StrictHostKeyChecking=no"
+   },
   "INSIGHTS_TRACKING_STATE":false,
   "PROJECT_UPDATE_VVV":false,
   "AWX_ROLES_ENABLED":true,
@@ -249,6 +253,10 @@
   "SOCIAL_AUTH_SAML_ORGANIZATION_ATTR":{},
   "SOCIAL_AUTH_SAML_TEAM_ATTR":{},
   "SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR":{},
+  "SOCIAL_AUTH_OIDC_KEY":"",
+  "SOCIAL_AUTH_OIDC_SECRET":"",
+  "SOCIAL_AUTH_OIDC_OIDC_ENDPOINT":"",
+  "SOCIAL_AUTH_OIDC_VERIFY_SSL":true,
   "NAMED_URL_FORMATS":{
     "organizations":"<name>",
     "teams":"<name>++<organization.name>",
@@ -297,5 +305,6 @@
     "users":{"fields":["username"],"adj_list":[]},
     "instances":{"fields":["hostname"],"adj_list":[]}
   },
-  "DEFAULT_EXECUTION_ENVIRONMENT": 1
+  "DEFAULT_EXECUTION_ENVIRONMENT": 1,
+  "AWX_MOUNT_ISOLATED_PATHS_ON_K8S": false
 }

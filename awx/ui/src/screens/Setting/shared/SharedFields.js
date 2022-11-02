@@ -440,8 +440,9 @@ const ObjectField = ({ name, config, revertValue, isRequired = false }) => {
   const [field, meta, helpers] = useField({ name, validate });
   const isValid = !(meta.touched && meta.error);
 
-  const defaultRevertValue =
-    config?.default !== null ? JSON.stringify(config.default, null, 2) : null;
+  const defaultRevertValue = config?.default
+    ? JSON.stringify(config.default, null, 2)
+    : null;
 
   return config ? (
     <FormFullWidthLayout>

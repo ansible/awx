@@ -10,9 +10,9 @@ import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
 import useRequest from 'hooks/useRequest';
 import Popover from '../Popover';
 import OptionsList from '../OptionsList';
-
 import Lookup from './Lookup';
 import LookupErrorMessage from './shared/LookupErrorMessage';
+import FieldWithPrompt from '../FieldWithPrompt';
 
 const QS_CONFIG = getQSConfig('execution_environments', {
   page: 1,
@@ -36,6 +36,9 @@ function ExecutionEnvironmentLookup({
   value,
   fieldName,
   overrideLabel,
+  isPromptableField,
+  promptId,
+  promptName,
 }) {
   const location = useLocation();
   const {
@@ -157,6 +160,7 @@ function ExecutionEnvironmentLookup({
         value={value}
         onBlur={onBlur}
         onChange={onChange}
+        onUpdate={fetchExecutionEnvironments}
         onDebounce={checkExecutionEnvironmentName}
         fieldName={fieldName}
         validate={validate}
@@ -193,6 +197,7 @@ function ExecutionEnvironmentLookup({
           />
         )}
       />
+      <LookupErrorMessage error={error || fetchProjectError} />
     </>
   );
 
@@ -203,7 +208,21 @@ function ExecutionEnvironmentLookup({
     return t`Execution Environment`;
   };
 
-  return (
+  return isPromptableField ? (
+    <FieldWithPrompt
+      fieldId={id}
+      label={renderLabel()}
+      promptId={promptId}
+      promptName={promptName}
+      tooltip={popoverContent}
+    >
+      {tooltip && isDisabled ? (
+        <Tooltip content={tooltip}>{renderLookup()}</Tooltip>
+      ) : (
+        renderLookup()
+      )}
+    </FieldWithPrompt>
+  ) : (
     <FormGroup
       fieldId={id}
       label={renderLabel()}

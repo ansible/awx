@@ -4,6 +4,7 @@ from unittest.mock import Mock
 from decimal import Decimal
 
 from awx.main.models import InstanceGroup, Instance
+from awx.main.scheduler.task_manager_models import TaskManagerInstanceGroups
 
 
 @pytest.mark.parametrize('capacity_adjustment', [0.0, 0.25, 0.5, 0.75, 1, 1.5, 3])
@@ -59,9 +60,10 @@ class TestInstanceGroup(object):
         ],
     )
     def test_fit_task_to_most_remaining_capacity_instance(self, task, instances, instance_fit_index, reason):
-        ig = InstanceGroup(id=10)
+        InstanceGroup(id=10)
+        tm_igs = TaskManagerInstanceGroups(instance_groups={'controlplane': {'instances': instances}})
 
-        instance_picked = ig.fit_task_to_most_remaining_capacity_instance(task, instances)
+        instance_picked = tm_igs.fit_task_to_most_remaining_capacity_instance(task, 'controlplane')
 
         if instance_fit_index is None:
             assert instance_picked is None, reason
@@ -82,18 +84,19 @@ class TestInstanceGroup(object):
         def filter_offline_instances(*args):
             return filter(lambda i: i.capacity > 0, instances)
 
-        ig = InstanceGroup(id=10)
+        InstanceGroup(id=10)
         instances_online_only = filter_offline_instances(instances)
+        tm_igs = TaskManagerInstanceGroups(instance_groups={'controlplane': {'instances': instances_online_only}})
 
         if instance_fit_index is None:
-            assert ig.find_largest_idle_instance(instances_online_only) is None, reason
+            assert tm_igs.find_largest_idle_instance('controlplane') is None, reason
         else:
-            assert ig.find_largest_idle_instance(instances_online_only) == instances[instance_fit_index], reason
+            assert tm_igs.find_largest_idle_instance('controlplane') == instances[instance_fit_index], reason
 
 
 def test_cleanup_params_defaults():
     inst = Instance(hostname='foobar')
-    assert inst.get_cleanup_task_kwargs(exclude_strings=['awx_423_']) == {'exclude_strings': ['awx_423_'], 'file_pattern': '/tmp/awx_*_*'}
+    assert inst.get_cleanup_task_kwargs(exclude_strings=['awx_423_']) == {'exclude_strings': ['awx_423_'], 'file_pattern': '/tmp/awx_*_*', 'grace_period': 60}
 
 
 def test_cleanup_params_for_image_cleanup():
@@ -104,4 +107,5 @@ def test_cleanup_params_for_image_cleanup():
         'process_isolation_executable': 'podman',
         'remove_images': ['quay.invalid/foo/bar'],
         'image_prune': True,
+        'grace_period': 60,
     }

@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import { oneOf, bool, number, string, func, oneOfType } from 'prop-types';
-import { config } from 'ace-builds';
 
 import ReactAce from 'react-ace';
 import 'ace-builds/src-noconflict/mode-json';
@@ -12,8 +11,6 @@ import 'ace-builds/src-noconflict/theme-github';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
 import debounce from 'util/debounce';
-
-config.set('loadWorkerFromBlob', false);
 
 const LINE_HEIGHT = 24;
 const PADDING = 12;

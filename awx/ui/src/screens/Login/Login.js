@@ -1,10 +1,12 @@
-import React, { useCallback, useEffect } from 'react';
+/* eslint-disable react/jsx-no-useless-fragment */
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { Redirect, withRouter } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import { Formik } from 'formik';
 import styled from 'styled-components';
-import sanitizeHtml from 'sanitize-html';
+import DOMPurify from 'dompurify';
+
 import {
   Alert,
   Brand,
@@ -26,13 +28,14 @@ import {
   UserCircleIcon,
 } from '@patternfly/react-icons';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
-import { AuthAPI, RootAPI } from 'api';
+import { AuthAPI, RootAPI, MeAPI } from 'api';
 import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';
 import { useSession } from 'contexts/Session';
-import { SESSION_REDIRECT_URL } from '../../constants';
+import LoadingSpinner from 'components/LoadingSpinner';
+import { SESSION_REDIRECT_URL, SESSION_USER_ID } from '../../constants';
 
-const loginLogoSrc = '/static/media/logo-login.svg';
+const loginLogoSrc = 'static/media/logo-login.svg';
 
 const Login = styled(PFLogin)`
   & .pf-c-brand {
@@ -41,7 +44,10 @@ const Login = styled(PFLogin)`
 `;
 
 function AWXLogin({ alt, isAuthenticated }) {
-  const { authRedirectTo, isSessionExpired, setAuthRedirectTo } = useSession();
+  const [userId, setUserId] = useState(null);
+  const { authRedirectTo, isSessionExpired } = useSession();
+  const isNewUser = useRef(true);
+  const hasVerifiedUser = useRef(false);
 
   const {
     isLoading: isCustomLoginInfoLoading,
@@ -102,18 +108,45 @@ function AWXLogin({ alt, isAuthenticated }) {
   const { error: authError, dismissError: dismissAuthError } =
     useDismissableError(authenticationError);
 
+  const { isLoading: isUserIdLoading, request: fetchUserId } = useRequest(
+    useCallback(async () => {
+      if (isAuthenticated(document.cookie)) {
+        const { data } = await MeAPI.read();
+        setUserId(data.results[0].id);
+      }
+    }, [isAuthenticated])
+  );
+
   const handleSubmit = async (values) => {
     dismissAuthError();
     await authenticate(values);
-    setAuthRedirectTo('/home');
+    await fetchUserId();
   };
 
-  if (isCustomLoginInfoLoading) {
-    return null;
-  }
-  if (isAuthenticated(document.cookie)) {
-    return <Redirect to={authRedirectTo || '/'} />;
-  }
+  useEffect(() => {
+    fetchUserId();
+  }, [fetchUserId]);
+
+  const setLocalStorageAndRedirect = useCallback(() => {
+    if (userId && !hasVerifiedUser.current) {
+      const verifyIsNewUser = () => {
+        const previousUserId = JSON.parse(
+          window.localStorage.getItem(SESSION_USER_ID)
+        );
+        if (previousUserId === null) {
+          return true;
+        }
+        return userId.toString() !== previousUserId.toString();
+      };
+      isNewUser.current = verifyIsNewUser();
+      hasVerifiedUser.current = true;
+      window.localStorage.setItem(SESSION_USER_ID, JSON.stringify(userId));
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    setLocalStorageAndRedirect();
+  }, [userId, setLocalStorageAndRedirect]);
 
   let helperText;
   if (authError?.response?.status === 401) {
@@ -130,15 +163,26 @@ function AWXLogin({ alt, isAuthenticated }) {
     <LoginFooter
       data-cy="login-footer"
       dangerouslySetInnerHTML={{
-        __html: sanitizeHtml(loginInfo),
+        __html: DOMPurify.sanitize(loginInfo),
       }}
     />
   );
 
-  function setSessionRedirect() {
+  const setSessionRedirect = () => {
     window.sessionStorage.setItem(SESSION_REDIRECT_URL, authRedirectTo);
-  }
+  };
 
+  if (isCustomLoginInfoLoading) {
+    return null;
+  }
+  if (isUserIdLoading) {
+    return <LoadingSpinner />;
+  }
+  if (userId && hasVerifiedUser.current) {
+    const redirect = isNewUser.current ? '/home' : authRedirectTo;
+
+    return <Redirect to={redirect} />;
+  }
   return (
     <Login header={Header} footer={Footer}>
       <LoginMainHeader
@@ -319,6 +363,20 @@ function AWXLogin({ alt, isAuthenticated }) {
                     >
                       <Tooltip content={t`Sign in with Google`}>
                         <GoogleIcon size="lg" />
+                      </Tooltip>
+                    </LoginMainFooterLinksItem>
+                  );
+                }
+                if (authKey === 'oidc') {
+                  return (
+                    <LoginMainFooterLinksItem
+                      data-cy="social-auth-oidc"
+                      href={loginUrl}
+                      key={authKey}
+                      onClick={setSessionRedirect}
+                    >
+                      <Tooltip content={t`Sign in with OIDC`}>
+                        <UserCircleIcon size="lg" />
                       </Tooltip>
                     </LoginMainFooterLinksItem>
                   );

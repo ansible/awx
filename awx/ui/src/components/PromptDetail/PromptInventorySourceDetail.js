@@ -13,6 +13,7 @@ import { VariablesDetail } from '../CodeEditor';
 import CredentialChip from '../CredentialChip';
 import ChipGroup from '../ChipGroup';
 import ExecutionEnvironmentDetail from '../ExecutionEnvironmentDetail';
+import { VERBOSITY } from '../VerbositySelectField';
 
 function PromptInventorySourceDetail({ resource }) {
   const {
@@ -28,25 +29,11 @@ function PromptInventorySourceDetail({ resource }) {
     summary_fields,
     update_cache_timeout,
     update_on_launch,
-    update_on_project_update,
     verbosity,
   } = resource;
 
-  const VERBOSITY = {
-    0: t`0 (Normal)`,
-    1: t`1 (Verbose)`,
-    2: t`2 (More Verbose)`,
-    3: t`3 (Debug)`,
-    4: t`4 (Connection Debug)`,
-  };
-
   let optionsList = '';
-  if (
-    overwrite ||
-    overwrite_vars ||
-    update_on_launch ||
-    update_on_project_update
-  ) {
+  if (overwrite || overwrite_vars || update_on_launch) {
     optionsList = (
       <TextList component={TextListVariants.ul}>
         {overwrite && (
@@ -62,11 +49,6 @@ function PromptInventorySourceDetail({ resource }) {
         {update_on_launch && (
           <TextListItem component={TextListItemVariants.li}>
             {t`Update on launch`}
-          </TextListItem>
-        )}
-        {update_on_project_update && (
-          <TextListItem component={TextListItemVariants.li}>
-            {t`Update on project update`}
           </TextListItem>
         )}
       </TextList>
@@ -115,20 +97,19 @@ function PromptInventorySourceDetail({ resource }) {
         executionEnvironment={summary_fields?.execution_environment}
       />
       <Detail label={t`Inventory File`} value={source_path} />
-      <Detail label={t`Verbosity`} value={VERBOSITY[verbosity]} />
+      <Detail label={t`Verbosity`} value={VERBOSITY()[verbosity]} />
       <Detail
         label={t`Cache Timeout`}
         value={`${update_cache_timeout} ${t`Seconds`}`}
       />
-      {summary_fields?.credentials?.length > 0 && (
-        <Detail
-          fullWidth
-          label={t`Credential`}
-          value={summary_fields.credentials.map((cred) => (
-            <CredentialChip key={cred?.id} credential={cred} isReadOnly />
-          ))}
-        />
-      )}
+      <Detail
+        fullWidth
+        label={t`Credential`}
+        value={summary_fields?.credentials?.map((cred) => (
+          <CredentialChip key={cred?.id} credential={cred} isReadOnly />
+        ))}
+        isEmpty={summary_fields?.credentials?.length === 0}
+      />
       {source_regions && (
         <Detail
           fullWidth

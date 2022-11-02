@@ -12,7 +12,7 @@ export default function UserOrganizationListItem({ organization }) {
     >
       <Td id={labelId} dataLabel={t`Name`}>
         <Link to={`/organizations/${organization.id}/details`} id={labelId}>
-          {organization.name}
+          <b>{organization.name}</b>
         </Link>
       </Td>
       <Td dataLabel={t`Description`}>{organization.description}</Td>

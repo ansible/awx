@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-useless-fragment */
 import React, { useCallback, useEffect } from 'react';
 
 import { useField, useFormikContext } from 'formik';

@@ -41,18 +41,16 @@ describe('<SurveyQuestionEdit />', () => {
         ],
       });
       updateSurvey = jest.fn();
-      act(() => {
-        wrapper = mountWithContexts(
-          <Switch>
-            <Route path="/templates/:templateType/:id/survey/edit">
-              <SurveyQuestionEdit survey={survey} updateSurvey={updateSurvey} />
-            </Route>
-          </Switch>,
-          {
-            context: { router: { history } },
-          }
-        );
-      });
+      wrapper = mountWithContexts(
+        <Switch>
+          <Route path="/templates/:templateType/:id/survey/edit">
+            <SurveyQuestionEdit survey={survey} updateSurvey={updateSurvey} />
+          </Route>
+        </Switch>,
+        {
+          context: { router: { history } },
+        }
+      );
     });
 
     test('should render form', () => {
@@ -146,5 +144,165 @@ describe('<SurveyQuestionEdit />', () => {
         '/templates/job_templates/1/survey'
       );
     });
+  });
+
+  test('should handle multiplechoice as array', () => {
+    const survey = {
+      spec: [
+        {
+          question_name: 'What is the foo?',
+          question_description: 'more about the foo',
+          variable: 'foo',
+          required: true,
+          type: 'multiplechoice',
+          choices: ['one', 'two', 'three'],
+          default: '',
+          min: 0,
+          max: 1024,
+        },
+      ],
+    };
+    history = createMemoryHistory({
+      initialEntries: [
+        '/templates/job_templates/1/survey/edit?question_variable=foo',
+      ],
+    });
+    updateSurvey = jest.fn();
+    wrapper = mountWithContexts(
+      <Switch>
+        <Route path="/templates/:templateType/:id/survey/edit">
+          <SurveyQuestionEdit survey={survey} updateSurvey={updateSurvey} />
+        </Route>
+      </Switch>,
+      {
+        context: { router: { history } },
+      }
+    );
+
+    const inputs = wrapper.find('MultipleChoiceField TextInput');
+    expect(inputs).toHaveLength(3);
+    expect(inputs.at(0).prop('value')).toEqual('one');
+    expect(inputs.at(1).prop('value')).toEqual('two');
+    expect(inputs.at(2).prop('value')).toEqual('three');
+  });
+
+  test('should handle multiplechoice as string', () => {
+    const survey = {
+      spec: [
+        {
+          question_name: 'What is the foo?',
+          question_description: 'more about the foo',
+          variable: 'foo',
+          required: true,
+          type: 'multiplechoice',
+          choices: 'one\ntwo\nthree',
+          default: '',
+          min: 0,
+          max: 1024,
+        },
+      ],
+    };
+    history = createMemoryHistory({
+      initialEntries: [
+        '/templates/job_templates/1/survey/edit?question_variable=foo',
+      ],
+    });
+    updateSurvey = jest.fn();
+    wrapper = mountWithContexts(
+      <Switch>
+        <Route path="/templates/:templateType/:id/survey/edit">
+          <SurveyQuestionEdit survey={survey} updateSurvey={updateSurvey} />
+        </Route>
+      </Switch>,
+      {
+        context: { router: { history } },
+      }
+    );
+
+    const inputs = wrapper.find('MultipleChoiceField TextInput');
+    expect(inputs).toHaveLength(3);
+    expect(inputs.at(0).prop('value')).toEqual('one');
+    expect(inputs.at(1).prop('value')).toEqual('two');
+    expect(inputs.at(2).prop('value')).toEqual('three');
+  });
+
+  test('should handle multiselect as array', () => {
+    const survey = {
+      spec: [
+        {
+          question_name: 'What is the foo?',
+          question_description: 'more about the foo',
+          variable: 'foo',
+          required: true,
+          type: 'multiselect',
+          choices: ['one', 'two', 'three'],
+          default: '',
+          min: 0,
+          max: 1024,
+        },
+      ],
+    };
+    history = createMemoryHistory({
+      initialEntries: [
+        '/templates/job_templates/1/survey/edit?question_variable=foo',
+      ],
+    });
+    updateSurvey = jest.fn();
+    wrapper = mountWithContexts(
+      <Switch>
+        <Route path="/templates/:templateType/:id/survey/edit">
+          <SurveyQuestionEdit survey={survey} updateSurvey={updateSurvey} />
+        </Route>
+      </Switch>,
+      {
+        context: { router: { history } },
+      }
+    );
+
+    const inputs = wrapper.find('MultipleChoiceField TextInput');
+    expect(inputs).toHaveLength(3);
+    expect(inputs.at(0).prop('value')).toEqual('one');
+    expect(inputs.at(1).prop('value')).toEqual('two');
+    expect(inputs.at(2).prop('value')).toEqual('three');
+  });
+
+  test('should handle multiselect as string', () => {
+    const survey = {
+      spec: [
+        {
+          question_name: 'What is the foo?',
+          question_description: 'more about the foo',
+          variable: 'foo',
+          required: true,
+          type: 'multiselect',
+          choices: 'one\ntwo\nthree',
+          default: '',
+          min: 0,
+          max: 1024,
+        },
+      ],
+    };
+    history = createMemoryHistory({
+      initialEntries: [
+        '/templates/job_templates/1/survey/edit?question_variable=foo',
+      ],
+    });
+    updateSurvey = jest.fn();
+    wrapper = mountWithContexts(
+      <Switch>
+        <Route path="/templates/:templateType/:id/survey/edit">
+          <SurveyQuestionEdit survey={survey} updateSurvey={updateSurvey} />
+        </Route>
+      </Switch>,
+      {
+        context: { router: { history } },
+      }
+    );
+
+    const inputs = wrapper.find('MultipleChoiceField TextInput');
+    expect(inputs).toHaveLength(3);
+    expect(inputs.at(0).prop('value')).toEqual('one');
+    expect(inputs.at(1).prop('value')).toEqual('two');
+    expect(inputs.at(2).prop('value')).toEqual('three');
   });
 });

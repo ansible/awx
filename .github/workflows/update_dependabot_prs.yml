@@ -1,0 +1,29 @@
+---
+name: Dependency Pr Update
+on:
+  pull_request:
+    types: [labeled, opened, reopened]
+
+jobs:
+  pr-check:
+    name: Update Dependabot Prs
+    if:  contains(github.event.pull_request.labels.*.name, 'dependencies') && contains(github.event.pull_request.labels.*.name, 'component:ui')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v3
+
+      - name: Update PR Body
+        env:
+            GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+            OWNER: ${{ github.repository_owner }}
+            REPO: ${{ github.event.repository.name }}
+            PR: ${{github.event.pull_request.number}}
+            PR_BODY: ${{github.event.pull_request.body}}
+        run: |
+          gh pr checkout ${{ env.PR }}
+          echo "${{ env.PR_BODY }}" > my_pr_body.txt
+          echo "" >> my_pr_body.txt
+          echo "Bug, Docs Fix or other nominal change" >> my_pr_body.txt
+          gh pr edit ${{env.PR}} --body-file my_pr_body.txt

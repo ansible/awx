@@ -2,7 +2,11 @@
 
 import pytest
 
+# Django
+from django.core.exceptions import FieldDoesNotExist
+
 from rest_framework.exceptions import PermissionDenied, ParseError
+
 from awx.api.filters import FieldLookupBackend, OrderByBackend, get_field_from_path
 from awx.main.models import (
     AdHocCommand,
@@ -21,9 +25,6 @@ from awx.main.models import (
 )
 from awx.main.models.oauth import OAuth2Application
 from awx.main.models.jobs import JobOptions
-
-# Django
-from django.db.models.fields import FieldDoesNotExist
 
 
 def test_related():
@@ -76,6 +77,19 @@ def test_invalid_field():
     with pytest.raises(ValueError) as excinfo:
         field_lookup.value_to_python(WorkflowJobTemplate, invalid_field, 'foo')
     assert 'is not an allowed field name. Must be ascii encodable.' in str(excinfo.value)
+
+
+def test_valid_iexact():
+    field_lookup = FieldLookupBackend()
+    value, new_lookup, _ = field_lookup.value_to_python(JobTemplate, 'project__name__iexact', 'foo')
+    assert 'foo' in value
+
+
+def test_invalid_iexact():
+    field_lookup = FieldLookupBackend()
+    with pytest.raises(ValueError) as excinfo:
+        field_lookup.value_to_python(Job, 'id__iexact', '1')
+    assert 'is not a text field and cannot be filtered by case-insensitive search' in str(excinfo.value)
 
 
 @pytest.mark.parametrize('lookup_suffix', ['', 'contains', 'startswith', 'in'])

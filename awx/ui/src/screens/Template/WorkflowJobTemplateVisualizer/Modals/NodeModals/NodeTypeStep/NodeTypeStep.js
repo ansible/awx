@@ -19,7 +19,7 @@ import Popover from 'components/Popover';
 import AnsibleSelect from 'components/AnsibleSelect';
 import FormField from 'components/FormField';
 import getDocsBaseUrl from 'util/getDocsBaseUrl';
-import { useConfig } from 'contexts/Config';
+import { useConfig, useUserProfile } from 'contexts/Config';
 import InventorySourcesList from './InventorySourcesList';
 import JobTemplatesList from './JobTemplatesList';
 import ProjectsList from './ProjectsList';
@@ -44,6 +44,7 @@ const TimeoutLabel = styled.p`
 `;
 
 function NodeTypeStep({ isIdentifierRequired }) {
+  const { isSuperUser } = useUserProfile();
   const [nodeTypeField, , nodeTypeHelpers] = useField('nodeType');
   const [nodeResourceField, nodeResourceMeta, nodeResourceHelpers] =
     useField('nodeResource');
@@ -59,6 +60,51 @@ function NodeTypeStep({ isIdentifierRequired }) {
   const config = useConfig();
 
   const isValid = !approvalNameMeta.touched || !approvalNameMeta.error;
+  const nodeTypeChoices = [
+    {
+      key: 'workflow_approval_template',
+      value: 'workflow_approval_template',
+      label: t`Approval`,
+      isDisabled: false,
+    },
+    {
+      key: 'inventory_source',
+      value: 'inventory_source',
+      label: t`Inventory Source Sync`,
+      isDisabled: false,
+    },
+    {
+      key: 'job_template',
+      value: 'job_template',
+      label: t`Job Template`,
+      isDisabled: false,
+    },
+    {
+      key: 'project',
+      value: 'project',
+      label: t`Project Sync`,
+      isDisabled: false,
+    },
+    {
+      key: 'workflow_job_template',
+      value: 'workflow_job_template',
+      label: t`Workflow Job Template`,
+      isDisabled: false,
+    },
+  ];
+
+  const modifiedNodeTypeChoices = isSuperUser
+    ? [
+        ...nodeTypeChoices,
+        {
+          key: 'system_job_template',
+          value: 'system_job_template',
+          label: t`Management Job`,
+          isDisabled: false,
+        },
+      ]
+    : nodeTypeChoices;
+
   return (
     <>
       {nodeResourceMeta.error && (
@@ -74,44 +120,7 @@ function NodeTypeStep({ isIdentifierRequired }) {
           <AnsibleSelect
             id="nodeResource-select"
             label={t`Select a Node Type`}
-            data={[
-              {
-                key: 'workflow_approval_template',
-                value: 'workflow_approval_template',
-                label: t`Approval`,
-                isDisabled: false,
-              },
-              {
-                key: 'inventory_source',
-                value: 'inventory_source',
-                label: t`Inventory Source Sync`,
-                isDisabled: false,
-              },
-              {
-                key: 'job_template',
-                value: 'job_template',
-                label: t`Job Template`,
-                isDisabled: false,
-              },
-              {
-                key: 'project',
-                value: 'project',
-                label: t`Project Sync`,
-                isDisabled: false,
-              },
-              {
-                key: 'system_job_template',
-                value: 'system_job_template',
-                label: t`Management Job`,
-                isDisabled: false,
-              },
-              {
-                key: 'workflow_job_template',
-                value: 'workflow_job_template',
-                label: t`Workflow Job Template`,
-                isDisabled: false,
-              },
-            ]}
+            data={modifiedNodeTypeChoices}
             value={nodeTypeField.value}
             onChange={(e, val) => {
               nodeTypeHelpers.setValue(val);

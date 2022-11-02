@@ -5,7 +5,7 @@ import { t } from '@lingui/macro';
 
 import { Config } from 'contexts/Config';
 import ScreenHeader from 'components/ScreenHeader/ScreenHeader';
-
+import PersistentFilters from 'components/PersistentFilters';
 import OrganizationsList from './OrganizationList/OrganizationList';
 import OrganizationAdd from './OrganizationAdd/OrganizationAdd';
 import Organization from './Organization';
@@ -54,7 +54,9 @@ function Organizations() {
           </Config>
         </Route>
         <Route path={`${match.path}`}>
-          <OrganizationsList />
+          <PersistentFilters pageKey="organizations">
+            <OrganizationsList />
+          </PersistentFilters>
         </Route>
       </Switch>
     </>

@@ -1,18 +1,15 @@
 import React, { useState } from 'react';
 import { func, shape } from 'prop-types';
-
 import { useHistory, useLocation } from 'react-router-dom';
-import { RRule } from 'rrule';
 import { Card } from '@patternfly/react-core';
 import yaml from 'js-yaml';
 import { parseVariableField } from 'util/yaml';
-
-import { SchedulesAPI } from 'api';
+import { OrganizationsAPI, SchedulesAPI } from 'api';
 import mergeExtraVars from 'util/prompt/mergeExtraVars';
 import getSurveyValues from 'util/prompt/getSurveyValues';
 import { getAddedAndRemoved } from 'util/lists';
 import ScheduleForm from '../shared/ScheduleForm';
-import buildRuleObj from '../shared/buildRuleObj';
+import buildRuleSet from '../shared/buildRuleSet';
 import { CardBody } from '../../Card';
 
 function ScheduleAdd({
@@ -35,22 +32,16 @@ function ScheduleAdd({
     surveyConfiguration
   ) => {
     const {
+      execution_environment,
+      instance_groups,
       inventory,
-      extra_vars,
-      originalCredentials,
-      end,
       frequency,
-      interval,
+      frequencyOptions,
+      exceptionFrequency,
+      exceptionOptions,
       timezone,
-      occurrences,
-      runOn,
-      runOnTheDay,
-      runOnTheMonth,
-      runOnDayMonth,
-      runOnDayNumber,
-      runOnTheOccurrence,
       credentials,
-      daysOfWeek,
+      labels,
       ...submitValues
     } = values;
     const { added } = getAddedAndRemoved(
@@ -72,9 +63,9 @@ function ScheduleAdd({
       launchConfiguration?.ask_variables_on_launch &&
       (values.extra_vars || '---');
     if (surveyConfiguration?.spec) {
-      extraVars = yaml.safeDump(mergeExtraVars(initialExtraVars, surveyValues));
+      extraVars = yaml.dump(mergeExtraVars(initialExtraVars, surveyValues));
     } else {
-      extraVars = yaml.safeDump(mergeExtraVars(initialExtraVars, {}));
+      extraVars = yaml.dump(mergeExtraVars(initialExtraVars, {}));
     }
     submitValues.extra_data = extraVars && parseVariableField(extraVars);
     delete values.extra_vars;
@@ -82,12 +73,18 @@ function ScheduleAdd({
       submitValues.inventory = inventory.id;
     }
 
+    if (execution_environment) {
+      submitValues.execution_environment = execution_environment.id;
+    }
+
     try {
-      const rule = new RRule(buildRuleObj(values));
+      const ruleSet = buildRuleSet(values);
       const requestData = {
         ...submitValues,
-        rrule: rule.toString().replace(/\n/g, ' '),
+        rrule: ruleSet.toString().replace(/\n/g, ' '),
       };
+      delete requestData.startDate;
+      delete requestData.startTime;
 
       if (Object.keys(values).includes('daysToKeep')) {
         if (requestData.extra_data) {
@@ -98,21 +95,50 @@ function ScheduleAdd({
           });
         }
       }
-      delete requestData.startDate;
-      delete requestData.startTime;
-      delete requestData.endDate;
-      delete requestData.endTime;
 
       const {
         data: { id: scheduleId },
       } = await apiModel.createSchedule(resource.id, requestData);
-      if (credentials?.length > 0) {
-        await Promise.all(
-          added.map(({ id: credentialId }) =>
-            SchedulesAPI.associateCredential(scheduleId, credentialId)
-          )
+
+      let labelsPromises = [];
+      let credentialsPromises = [];
+
+      if (launchConfiguration?.ask_labels_on_launch && labels) {
+        let organizationId = resource.organization;
+        if (!organizationId) {
+          // eslint-disable-next-line no-useless-catch
+          try {
+            const {
+              data: { results },
+            } = await OrganizationsAPI.read();
+            organizationId = results[0].id;
+          } catch (err) {
+            throw err;
+          }
+        }
+
+        labelsPromises = labels.map((label) =>
+          SchedulesAPI.associateLabel(scheduleId, label, organizationId)
         );
       }
+
+      if (launchConfiguration?.ask_credential_on_launch && added?.length > 0) {
+        credentialsPromises = added.map(({ id: credentialId }) =>
+          SchedulesAPI.associateCredential(scheduleId, credentialId)
+        );
+      }
+      await Promise.all([labelsPromises, credentialsPromises]);
+
+      if (
+        launchConfiguration?.ask_instance_groups_on_launch &&
+        instance_groups
+      ) {
+        /* eslint-disable no-await-in-loop, no-restricted-syntax */
+        for (const group of instance_groups) {
+          await SchedulesAPI.associateInstanceGroup(scheduleId, group.id);
+        }
+      }
+
       history.push(`${pathRoot}schedules/${scheduleId}`);
     } catch (err) {
       setFormSubmitError(err);

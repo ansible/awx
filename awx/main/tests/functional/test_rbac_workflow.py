@@ -6,6 +6,7 @@ from awx.main.access import (
     WorkflowJobAccess,
     # WorkflowJobNodeAccess
 )
+from awx.main.models import JobTemplate, WorkflowJobTemplateNode
 
 from rest_framework.exceptions import PermissionDenied
 
@@ -87,6 +88,16 @@ class TestWorkflowJobTemplateNodeAccess:
         job_template.read_role.members.add(rando)
         assert not access.can_add({'workflow_job_template': wfjt, 'unified_job_template': job_template})
 
+    def test_change_JT_no_start_perm(self, wfjt, rando):
+        wfjt.admin_role.members.add(rando)
+        access = WorkflowJobTemplateNodeAccess(rando)
+        jt1 = JobTemplate.objects.create()
+        jt1.execute_role.members.add(rando)
+        assert access.can_add({'workflow_job_template': wfjt, 'unified_job_template': jt1})
+        node = WorkflowJobTemplateNode.objects.create(workflow_job_template=wfjt, unified_job_template=jt1)
+        jt2 = JobTemplate.objects.create()
+        assert not access.can_change(node, {'unified_job_template': jt2.id})
+
     def test_add_node_with_minimum_permissions(self, wfjt, job_template, inventory, rando):
         wfjt.admin_role.members.add(rando)
         access = WorkflowJobTemplateNodeAccess(rando)
@@ -100,6 +111,92 @@ class TestWorkflowJobTemplateNodeAccess:
         wfjt_node.unified_job_template = job_template
         access = WorkflowJobTemplateNodeAccess(rando)
         assert access.can_delete(wfjt_node)
+
+    @pytest.mark.parametrize(
+        "add_wfjt_admin, add_jt_admin, permission_type, expected_result, method_type",
+        [
+            (True, False, 'credentials', False, 'can_attach'),
+            (True, True, 'credentials', True, 'can_attach'),
+            (True, False, 'labels', False, 'can_attach'),
+            (True, True, 'labels', True, 'can_attach'),
+            (True, False, 'instance_groups', False, 'can_attach'),
+            (True, True, 'instance_groups', True, 'can_attach'),
+            (True, False, 'credentials', False, 'can_unattach'),
+            (True, True, 'credentials', True, 'can_unattach'),
+            (True, False, 'labels', False, 'can_unattach'),
+            (True, True, 'labels', True, 'can_unattach'),
+            (True, False, 'instance_groups', False, 'can_unattach'),
+            (True, True, 'instance_groups', True, 'can_unattach'),
+        ],
+    )
+    def test_attacher_permissions(self, wfjt_node, job_template, rando, add_wfjt_admin, permission_type, add_jt_admin, expected_result, mocker, method_type):
+        wfjt = wfjt_node.workflow_job_template
+        if add_wfjt_admin:
+            wfjt.admin_role.members.add(rando)
+            wfjt.unified_job_template = job_template
+        if add_jt_admin:
+            job_template.execute_role.members.add(rando)
+
+        from awx.main.models import Credential, Label, InstanceGroup, Organization, CredentialType
+
+        if permission_type == 'credentials':
+            sub_obj = Credential.objects.create(credential_type=CredentialType.objects.create())
+            sub_obj.use_role.members.add(rando)
+        elif permission_type == 'labels':
+            sub_obj = Label.objects.create(organization=Organization.objects.create())
+            sub_obj.organization.member_role.members.add(rando)
+        elif permission_type == 'instance_groups':
+            sub_obj = InstanceGroup.objects.create()
+            org = Organization.objects.create()
+            org.admin_role.members.add(rando)  # only admins can see IGs
+            org.instance_groups.add(sub_obj)
+
+        access = WorkflowJobTemplateNodeAccess(rando)
+        if method_type == 'can_unattach':
+            assert getattr(access, method_type)(wfjt_node, sub_obj, permission_type) == expected_result
+        else:
+            assert getattr(access, method_type)(wfjt_node, sub_obj, permission_type, {}) == expected_result
+
+    # The actual attachment of labels, credentials and instance groups are tested from JobLaunchConfigAccess
+
+    @pytest.mark.parametrize(
+        "attachment_type, expect_exception, method_type",
+        [
+            ("credentials", False, 'can_attach'),
+            ("labels", False, 'can_attach'),
+            ("instance_groups", False, 'can_attach'),
+            ("success_nodes", False, 'can_attach'),
+            ("failure_nodes", False, 'can_attach'),
+            ("always_nodes", False, 'can_attach'),
+            ("junk", True, 'can_attach'),
+            ("credentials", False, 'can_unattach'),
+            ("labels", False, 'can_unattach'),
+            ("instance_groups", False, 'can_unattach'),
+            ("success_nodes", False, 'can_unattach'),
+            ("failure_nodes", False, 'can_unattach'),
+            ("always_nodes", False, 'can_unattach'),
+            ("junk", True, 'can_unattach'),
+        ],
+    )
+    def test_attacher_raise_not_implemented(self, wfjt_node, rando, attachment_type, expect_exception, method_type):
+        wfjt = wfjt_node.workflow_job_template
+        wfjt.admin_role.members.add(rando)
+        access = WorkflowJobTemplateNodeAccess(rando)
+        if expect_exception:
+            with pytest.raises(NotImplementedError):
+                access.can_attach(wfjt_node, None, attachment_type, None)
+        else:
+            try:
+                getattr(access, method_type)(wfjt_node, None, attachment_type, None)
+            except NotImplementedError:
+                # We explicitly catch NotImplemented because the _nodes type will raise a different exception
+                assert False, "Exception was raised when it should not have been"
+            except Exception:
+                #  File "/awx_devel/awx/main/access.py", line 2074, in check_same_WFJT
+                #    raise Exception('Attaching workflow nodes only allowed for other nodes')
+                pass
+
+    # TODO: Implement additional tests for _nodes attachments here
 
 
 @pytest.mark.django_db

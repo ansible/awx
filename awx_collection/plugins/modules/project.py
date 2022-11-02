@@ -45,7 +45,7 @@ options:
     scm_type:
       description:
         - Type of SCM resource.
-      choices: ["manual", "git", "svn", "insights"]
+      choices: ["manual", "git", "svn", "insights", "archive"]
       default: "manual"
       type: str
     scm_url:
@@ -167,8 +167,14 @@ options:
         - The interval to request an update from the controller.
         - Requires wait.
       required: False
-      default: 1
+      default: 2
       type: float
+    signature_validation_credential:
+      description:
+        - Name of the credential to use for signature validation.
+        - If signature validation credential is provided, signature validation will be enabled.
+      type: str
+
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -256,7 +262,7 @@ def main():
         new_name=dict(),
         copy_from=dict(),
         description=dict(),
-        scm_type=dict(choices=['manual', 'git', 'svn', 'insights'], default='manual'),
+        scm_type=dict(choices=['manual', 'git', 'svn', 'insights', 'archive'], default='manual'),
         scm_url=dict(),
         local_path=dict(),
         scm_branch=dict(),
@@ -278,11 +284,14 @@ def main():
         state=dict(choices=['present', 'absent'], default='present'),
         wait=dict(type='bool', default=True),
         update_project=dict(default=False, type='bool'),
-        interval=dict(default=1.0, type='float'),
+        interval=dict(default=2.0, type='float'),
+        signature_validation_credential=dict(type='str'),
     )
 
     # Create a module for ourselves
-    module = ControllerAPIModule(argument_spec=argument_spec)
+    module = ControllerAPIModule(
+        argument_spec=argument_spec,
+    )
 
     # Extract our parameters
     name = module.params.get('name')
@@ -300,6 +309,8 @@ def main():
     state = module.params.get('state')
     wait = module.params.get('wait')
     update_project = module.params.get('update_project')
+
+    signature_validation_credential = module.params.get('signature_validation_credential')
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     lookup_data = {}
@@ -330,6 +341,9 @@ def main():
     if credential is not None:
         credential = module.resolve_name_to_id('credentials', credential)
 
+    if signature_validation_credential is not None:
+        signature_validation_credential = module.resolve_name_to_id('credentials', signature_validation_credential)
+
     # Attempt to look up associated field items the user specified.
     association_fields = {}
 
@@ -358,6 +372,7 @@ def main():
         'organization': org_id,
         'scm_update_on_launch': scm_update_on_launch,
         'scm_update_cache_timeout': scm_update_cache_timeout,
+        'signature_validation_credential': signature_validation_credential,
     }
 
     for field_name in (

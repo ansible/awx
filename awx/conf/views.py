@@ -13,7 +13,7 @@ from socket import SHUT_RDWR
 from django.db import connection
 from django.conf import settings
 from django.http import Http404
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 # Django REST Framework
 from rest_framework.exceptions import PermissionDenied

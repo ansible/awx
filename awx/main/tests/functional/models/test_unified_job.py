@@ -10,6 +10,7 @@ from django.contrib.contenttypes.models import ContentType
 # AWX
 from awx.main.models import UnifiedJobTemplate, Job, JobTemplate, WorkflowJobTemplate, WorkflowApprovalTemplate, Project, WorkflowJob, Schedule, Credential
 from awx.api.versioning import reverse
+from awx.main.constants import JOB_VARIABLE_PREFIXES
 
 
 @pytest.mark.django_db
@@ -125,17 +126,19 @@ class TestMetaVars:
 
         workflow_job.workflow_nodes.create(job=job)
         data = job.awx_meta_vars()
-        assert data['awx_user_id'] == admin_user.id
-        assert data['awx_user_name'] == admin_user.username
-        assert data['awx_workflow_job_id'] == workflow_job.pk
-        assert data['awx_workflow_job_launch_type'] == workflow_job.launch_type
+        for name in JOB_VARIABLE_PREFIXES:
+            assert data['{}_user_id'.format(name)] == admin_user.id
+            assert data['{}_user_name'.format(name)] == admin_user.username
+            assert data['{}_workflow_job_id'.format(name)] == workflow_job.pk
+            assert data['{}_workflow_job_launch_type'.format(name)] == workflow_job.launch_type
 
     def test_scheduled_job_metavars(self, job_template, admin_user):
         schedule = Schedule.objects.create(name='job-schedule', rrule='DTSTART:20171129T155939z\nFREQ=MONTHLY', unified_job_template=job_template)
         job = Job.objects.create(name='fake-job', launch_type='workflow', schedule=schedule, job_template=job_template)
         data = job.awx_meta_vars()
-        assert data['awx_schedule_id'] == schedule.pk
-        assert 'awx_user_name' not in data
+        for name in JOB_VARIABLE_PREFIXES:
+            assert data['{}_schedule_id'.format(name)] == schedule.pk
+            assert '{}_user_name'.format(name) not in data
 
     def test_scheduled_workflow_job_node_metavars(self, workflow_job_template):
         schedule = Schedule.objects.create(name='job-schedule', rrule='DTSTART:20171129T155939z\nFREQ=MONTHLY', unified_job_template=workflow_job_template)
@@ -144,22 +147,16 @@ class TestMetaVars:
 
         job = Job.objects.create(launch_type='workflow')
         workflow_job.workflow_nodes.create(job=job)
-        assert job.awx_meta_vars() == {
-            'awx_job_id': job.id,
-            'tower_job_id': job.id,
-            'awx_job_launch_type': 'workflow',
-            'tower_job_launch_type': 'workflow',
-            'awx_workflow_job_name': 'workflow-job',
-            'tower_workflow_job_name': 'workflow-job',
-            'awx_workflow_job_id': workflow_job.id,
-            'tower_workflow_job_id': workflow_job.id,
-            'awx_workflow_job_launch_type': workflow_job.launch_type,
-            'tower_workflow_job_launch_type': workflow_job.launch_type,
-            'awx_parent_job_schedule_id': schedule.id,
-            'tower_parent_job_schedule_id': schedule.id,
-            'awx_parent_job_schedule_name': 'job-schedule',
-            'tower_parent_job_schedule_name': 'job-schedule',
-        }
+        result_hash = {}
+        for name in JOB_VARIABLE_PREFIXES:
+            result_hash['{}_job_id'.format(name)] = job.id
+            result_hash['{}_job_launch_type'.format(name)] = 'workflow'
+            result_hash['{}_workflow_job_name'.format(name)] = 'workflow-job'
+            result_hash['{}_workflow_job_id'.format(name)] = workflow_job.id
+            result_hash['{}_workflow_job_launch_type'.format(name)] = workflow_job.launch_type
+            result_hash['{}_parent_job_schedule_id'.format(name)] = schedule.id
+            result_hash['{}_parent_job_schedule_name'.format(name)] = 'job-schedule'
+        assert job.awx_meta_vars() == result_hash
 
 
 @pytest.mark.django_db
@@ -255,12 +252,14 @@ class TestTaskImpact:
     def test_limit_task_impact(self, job_host_limit, run_computed_fields_right_away):
         job = job_host_limit(5, 2)
         job.inventory.update_computed_fields()
+        job.task_impact = job._get_task_impact()
         assert job.inventory.total_hosts == 5
         assert job.task_impact == 2 + 1  # forks becomes constraint
 
     def test_host_task_impact(self, job_host_limit, run_computed_fields_right_away):
         job = job_host_limit(3, 5)
         job.inventory.update_computed_fields()
+        job.task_impact = job._get_task_impact()
         assert job.task_impact == 3 + 1  # hosts becomes constraint
 
     def test_shard_task_impact(self, slice_job_factory, run_computed_fields_right_away):
@@ -273,9 +272,13 @@ class TestTaskImpact:
         # Even distribution - all jobs run on 1 host
         assert [len(jobs[0].inventory.get_script_data(slice_number=i + 1, slice_count=3)['all']['hosts']) for i in range(3)] == [1, 1, 1]
         jobs[0].inventory.update_computed_fields()
+        for j in jobs:
+            j.task_impact = j._get_task_impact()
         assert [job.task_impact for job in jobs] == [2, 2, 2]  # plus one base task impact
         # Uneven distribution - first job takes the extra host
         jobs[0].inventory.hosts.create(name='remainder_foo')
         assert [len(jobs[0].inventory.get_script_data(slice_number=i + 1, slice_count=3)['all']['hosts']) for i in range(3)] == [2, 1, 1]
         jobs[0].inventory.update_computed_fields()
+        # recalculate task_impact
+        jobs[0].task_impact = jobs[0]._get_task_impact()
         assert [job.task_impact for job in jobs] == [3, 2, 2]

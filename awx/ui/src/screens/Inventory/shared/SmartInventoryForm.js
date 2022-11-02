@@ -91,9 +91,7 @@ const SmartInventoryFormFields = ({ inventory }) => {
           id="variables"
           name="variables"
           label={t`Variables`}
-          tooltip={t`Enter inventory variables using either JSON or YAML syntax.
-            Use the radio button to toggle between the two. Refer to the
-            Ansible Tower documentation for example syntax.`}
+          tooltip={t`Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Controller documentation for example syntax.`}
         />
       </FormFullWidthLayout>
     </>
@@ -111,10 +109,18 @@ function SmartInventoryForm({
   const queryParams = new URLSearchParams(search);
   const hostFilterFromParams = queryParams.get('host_filter');
 
+  function addHostFilter(string) {
+    if (!string) return null;
+    if (string.includes('ansible_facts') && !string.includes('host_filter')) {
+      return string.replace('ansible_facts', 'host_filter=ansible_facts');
+    }
+    return string;
+  }
+
   const initialValues = {
     description: inventory.description || '',
     host_filter:
-      inventory.host_filter ||
+      addHostFilter(inventory.host_filter) ||
       (hostFilterFromParams
         ? toHostFilter(toSearchParams(hostFilterFromParams))
         : ''),

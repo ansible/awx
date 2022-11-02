@@ -26,6 +26,16 @@ describe('<InventoryGroupHostListItem />', () => {
     );
   });
 
+  test('should display expected details', () => {
+    expect(wrapper.find('InventoryGroupHostListItem').length).toBe(1);
+    expect(
+      wrapper.find('Td[dataLabel="host-name-2"]').find('Link').prop('to')
+    ).toBe('/host/1');
+    expect(wrapper.find('Td[dataLabel="host-description-2"]').text()).toBe(
+      'Bar'
+    );
+  });
+
   test('should display expected row item content', () => {
     expect(wrapper.find('b').text()).toContain(
       '.host-000001.group-00000.dummy'

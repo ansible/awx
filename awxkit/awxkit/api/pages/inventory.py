@@ -59,7 +59,7 @@ class Inventory(HasCopy, HasCreate, HasInstanceGroups, HasVariables, base.Base):
             organization=organization.id,
         )
 
-        optional_fields = ('host_filter', 'kind', 'variables')
+        optional_fields = ('host_filter', 'kind', 'variables', 'prevent_instance_group_fallback')
 
         update_payload(payload, optional_fields, kwargs)
 

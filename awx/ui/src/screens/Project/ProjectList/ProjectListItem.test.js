@@ -6,7 +6,12 @@ import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import ProjectsListItem from './ProjectListItem';
 
 jest.mock('../../../api/models/Projects');
-
+jest.mock('hooks/useBrandName', () => ({
+  __esModule: true,
+  default: () => ({
+    current: 'AWX',
+  }),
+}));
 describe('<ProjectsListItem />', () => {
   test('launch button shown to users with start capabilities', () => {
     const wrapper = mountWithContexts(

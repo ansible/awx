@@ -1,10 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import { Route, withRouter, Switch } from 'react-router-dom';
-
 import { t } from '@lingui/macro';
-
 import ScreenHeader from 'components/ScreenHeader/ScreenHeader';
-
+import PersistentFilters from 'components/PersistentFilters';
 import ProjectsList from './ProjectList/ProjectList';
 import ProjectAdd from './ProjectAdd/ProjectAdd';
 import Project from './Project';
@@ -49,7 +47,9 @@ function Projects() {
           <Project setBreadcrumb={buildBreadcrumbConfig} />
         </Route>
         <Route path="/projects">
-          <ProjectsList />
+          <PersistentFilters pageKey="projects">
+            <ProjectsList />
+          </PersistentFilters>
         </Route>
       </Switch>
     </>

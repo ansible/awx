@@ -1,0 +1,77 @@
+---
+#
+# This is used by a CI check in GitHub Actions and isnt really
+# meant to be run locally.
+#
+# The development environment does some unfortunate things to
+# make rootless podman work inside of a docker container.
+# The goal here is to essentially tests that the awx user is
+# able to run `podman run`.
+#
+- name: Test that the development environment is able to launch a job
+  hosts: localhost
+  tasks:
+    - name: Boot the development environment
+      command: |
+        make docker-compose
+      environment:
+        COMPOSE_UP_OPTS: -d
+      args:
+        chdir: "{{ repo_dir }}"
+
+    # Takes a while for migrations to finish
+    - name: Wait for the dev environment to be ready
+      uri:
+        url: "http://localhost:8013/api/v2/ping/"
+      register: _result
+      until: _result.status == 200
+      retries: 120
+      delay: 5
+
+    - name: Reset admin password
+      shell: |
+        docker exec -i tools_awx_1 bash <<EOSH
+          awx-manage update_password --username=admin --password=password
+          awx-manage create_preload_data
+        EOSH
+
+    - block:
+        - name: Launch Demo Job Template
+          awx.awx.job_launch:
+            name: Demo Job Template
+            wait: yes
+            validate_certs: no
+            controller_host: "http://localhost:8013"
+            controller_username: "admin"
+            controller_password: "password"
+      rescue:
+        - name: Get list of project updates and jobs
+          uri:
+            url: "http://localhost:8013/api/v2/{{ resource }}/"
+            user: admin
+            password: "password"
+            force_basic_auth: yes
+          register: job_lists
+          loop:
+            - project_updates
+            - jobs
+          loop_control:
+            loop_var: resource
+
+        - name: Get all job and project details
+          uri:
+            url: "http://localhost:8013{{ endpoint }}"
+            user: admin
+            password: "password"
+            force_basic_auth: yes
+          loop: |
+            {{ job_lists.results | map(attribute='json') | map(attribute='results') | flatten | map(attribute='url') }}
+          loop_control:
+            loop_var: endpoint
+
+        - name: Re-emit failure
+          vars:
+            failed_task:
+              result: '{{ ansible_failed_result }}'
+          fail:
+            msg: '{{ failed_task }}'

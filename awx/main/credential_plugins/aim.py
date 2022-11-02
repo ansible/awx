@@ -2,7 +2,7 @@ from .plugin import CredentialPlugin, CertFiles, raise_for_status
 
 from urllib.parse import quote, urlencode, urljoin
 
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 import requests
 
 aim_inputs = {

@@ -27,6 +27,21 @@ describe('<SmartInventoryHostList />', () => {
     InventoriesAPI.readHosts.mockResolvedValue({
       data: mockHosts,
     });
+    InventoriesAPI.readAdHocOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {
+            module_name: {
+              choices: [
+                ['command', 'command'],
+                ['shell', 'shell'],
+              ],
+            },
+          },
+          POST: {},
+        },
+      },
+    });
     await act(async () => {
       wrapper = mountWithContexts(
         <SmartInventoryHostList inventory={clonedInventory} />

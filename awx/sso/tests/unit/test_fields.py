@@ -121,11 +121,13 @@ class TestSAMLUserFlagsAttrField:
         [
             {},
             {'is_superuser_attr': 'something'},
-            {'is_superuser_value': 'value'},
-            {'is_superuser_role': 'my_peeps'},
+            {'is_superuser_value': ['value']},
+            {'is_superuser_role': ['my_peeps']},
+            {'remove_superusers': False},
             {'is_system_auditor_attr': 'something_else'},
-            {'is_system_auditor_value': 'value2'},
-            {'is_system_auditor_role': 'other_peeps'},
+            {'is_system_auditor_value': ['value2']},
+            {'is_system_auditor_role': ['other_peeps']},
+            {'remove_system_auditors': False},
         ],
     )
     def test_internal_value_valid(self, data):
@@ -145,7 +147,13 @@ class TestSAMLUserFlagsAttrField:
                     'is_system_auditor_value': 'value2',
                     'is_system_auditor_role': 'other_peeps',
                 },
-                {'junk': ['Invalid field.']},
+                {
+                    'junk': ['Invalid field.'],
+                    'is_superuser_role': ['Expected a list of items but got type "str".'],
+                    'is_superuser_value': ['Expected a list of items but got type "str".'],
+                    'is_system_auditor_role': ['Expected a list of items but got type "str".'],
+                    'is_system_auditor_value': ['Expected a list of items but got type "str".'],
+                },
             ),
             (
                 {
@@ -163,6 +171,17 @@ class TestSAMLUserFlagsAttrField:
                 {
                     'junk': ['Invalid field.'],
                     'junk2': ['Invalid field.'],
+                },
+            ),
+            # make sure we can't pass a string to the boolean fields
+            (
+                {
+                    'remove_superusers': 'test',
+                    'remove_system_auditors': 'test',
+                },
+                {
+                    "remove_superusers": ["Must be a valid boolean."],
+                    "remove_system_auditors": ["Must be a valid boolean."],
                 },
             ),
         ],

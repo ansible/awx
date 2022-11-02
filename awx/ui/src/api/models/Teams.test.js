@@ -23,7 +23,7 @@ describe('TeamsAPI', () => {
 
     expect(mockHttp.post).toHaveBeenCalledTimes(1);
     expect(mockHttp.post.mock.calls[0]).toContainEqual(
-      `/api/v2/teams/${teamId}/roles/`,
+      `api/v2/teams/${teamId}/roles/`,
       { id: roleId }
     );
   });
@@ -33,7 +33,7 @@ describe('TeamsAPI', () => {
 
     expect(mockHttp.post).toHaveBeenCalledTimes(1);
     expect(mockHttp.post.mock.calls[0]).toContainEqual(
-      `/api/v2/teams/${teamId}/roles/`,
+      `api/v2/teams/${teamId}/roles/`,
       {
         id: roleId,
         disassociate: true,

@@ -409,7 +409,7 @@ def emit_activity_stream_change(instance):
     from awx.api.serializers import ActivityStreamSerializer
 
     actor = None
-    if instance.actor:
+    if instance.actor_id:
         actor = instance.actor.username
     summary_fields = ActivityStreamSerializer(instance).get_summary_fields(instance)
     analytics_logger.info(

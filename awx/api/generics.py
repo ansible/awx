@@ -6,22 +6,21 @@ import inspect
 import logging
 import time
 import uuid
-import urllib.parse
 
 # Django
 from django.conf import settings
+from django.contrib.auth import views as auth_views
+from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
-from django.db import connection
-from django.db.models.fields import FieldDoesNotExist
+from django.core.exceptions import FieldDoesNotExist
+from django.db import connection, transaction
 from django.db.models.fields.related import OneToOneRel
 from django.http import QueryDict
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
-from django.contrib.contenttypes.models import ContentType
-from django.utils.translation import ugettext_lazy as _
-from django.contrib.auth import views as auth_views
+from django.utils.translation import gettext_lazy as _
 
 # Django REST Framework
 from rest_framework.exceptions import PermissionDenied, AuthenticationFailed, ParseError, NotAcceptable, UnsupportedMediaType
@@ -30,7 +29,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import views
 from rest_framework.permissions import AllowAny
-from rest_framework.renderers import StaticHTMLRenderer, JSONRenderer
+from rest_framework.renderers import StaticHTMLRenderer
 from rest_framework.negotiation import DefaultContentNegotiation
 
 # AWX
@@ -41,7 +40,7 @@ from awx.main.utils import camelcase_to_underscore, get_search_fields, getattrd,
 from awx.main.utils.db import get_all_field_names
 from awx.main.utils.licensing import server_product_name
 from awx.main.views import ApiErrorView
-from awx.api.serializers import ResourceAccessListElementSerializer, CopySerializer, UserSerializer
+from awx.api.serializers import ResourceAccessListElementSerializer, CopySerializer
 from awx.api.versioning import URLPathVersioning
 from awx.api.metadata import SublistAttachDetatchMetadata, Metadata
 from awx.conf import settings_registry
@@ -63,9 +62,9 @@ __all__ = [
     'SubDetailAPIView',
     'ResourceAccessList',
     'ParentMixin',
-    'DeleteLastUnattachLabelMixin',
     'SubListAttachDetachAPIView',
     'CopyAPIView',
+    'GenericCancelView',
     'BaseUsersList',
 ]
 
@@ -91,19 +90,15 @@ class LoggedLoginView(auth_views.LoginView):
 
     def post(self, request, *args, **kwargs):
         ret = super(LoggedLoginView, self).post(request, *args, **kwargs)
-        current_user = getattr(request, 'user', None)
         if request.user.is_authenticated:
-            logger.info(smart_text(u"User {} logged in from {}".format(self.request.user.username, request.META.get('REMOTE_ADDR', None))))
+            logger.info(smart_str(u"User {} logged in from {}".format(self.request.user.username, request.META.get('REMOTE_ADDR', None))))
             ret.set_cookie('userLoggedIn', 'true')
-            current_user = UserSerializer(self.request.user)
-            current_user = smart_text(JSONRenderer().render(current_user.data))
-            current_user = urllib.parse.quote('%s' % current_user, '')
-            ret.set_cookie('current_user', current_user, secure=settings.SESSION_COOKIE_SECURE or None)
+            ret.setdefault('X-API-Session-Cookie-Name', getattr(settings, 'SESSION_COOKIE_NAME', 'awx_sessionid'))
 
             return ret
         else:
             if 'username' in self.request.POST:
-                logger.warn(smart_text(u"Login failed for user {} from {}".format(self.request.POST.get('username'), request.META.get('REMOTE_ADDR', None))))
+                logger.warning(smart_str(u"Login failed for user {} from {}".format(self.request.POST.get('username'), request.META.get('REMOTE_ADDR', None))))
             ret.status_code = 401
             return ret
 
@@ -254,7 +249,7 @@ class APIView(views.APIView):
             response['X-API-Query-Time'] = '%0.3fs' % sum(q_times)
 
         if getattr(self, 'deprecated', False):
-            response['Warning'] = '299 awx "This resource has been deprecated and will be removed in a future release."'  # noqa
+            response['Warning'] = '299 awx "This resource has been deprecated and will be removed in a future release."'
 
         return response
 
@@ -391,8 +386,8 @@ class GenericAPIView(generics.GenericAPIView, APIView):
             if hasattr(self.model._meta, "verbose_name"):
                 d.update(
                     {
-                        'model_verbose_name': smart_text(self.model._meta.verbose_name),
-                        'model_verbose_name_plural': smart_text(self.model._meta.verbose_name_plural),
+                        'model_verbose_name': smart_str(self.model._meta.verbose_name),
+                        'model_verbose_name_plural': smart_str(self.model._meta.verbose_name_plural),
                     }
                 )
             serializer = self.get_serializer()
@@ -523,8 +518,8 @@ class SubListAPIView(ParentMixin, ListAPIView):
         d = super(SubListAPIView, self).get_description_context()
         d.update(
             {
-                'parent_model_verbose_name': smart_text(self.parent_model._meta.verbose_name),
-                'parent_model_verbose_name_plural': smart_text(self.parent_model._meta.verbose_name_plural),
+                'parent_model_verbose_name': smart_str(self.parent_model._meta.verbose_name),
+                'parent_model_verbose_name_plural': smart_str(self.parent_model._meta.verbose_name_plural),
             }
         )
         return d
@@ -637,6 +632,11 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
     # attaching/detaching them from the parent.
 
     def is_valid_relation(self, parent, sub, created=False):
+        "Override in subclasses to do efficient validation of attaching"
+        return None
+
+    def is_valid_removal(self, parent, sub):
+        "Same as is_valid_relation but called on disassociation"
         return None
 
     def get_description_context(self):
@@ -721,6 +721,11 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
         if not request.user.can_access(self.parent_model, 'unattach', parent, sub, self.relationship, request.data):
             raise PermissionDenied()
 
+        # Verify that removing the relationship is valid.
+        unattach_errors = self.is_valid_removal(parent, sub)
+        if unattach_errors is not None:
+            return Response(unattach_errors, status=status.HTTP_400_BAD_REQUEST)
+
         if parent_key:
             sub.delete()
         else:
@@ -762,28 +767,6 @@ class SubListAttachDetachAPIView(SubListCreateAttachDetachAPIView):
         if request_method == 'POST' and response_status in range(400, 500):
             return super(SubListAttachDetachAPIView, self).update_raw_data(data)
         return {'id': None}
-
-
-class DeleteLastUnattachLabelMixin(object):
-    """
-    Models for which you want the last instance to be deleted from the database
-    when the last disassociate is called should inherit from this class. Further,
-    the model should implement is_detached()
-    """
-
-    def unattach(self, request, *args, **kwargs):
-        (sub_id, res) = super(DeleteLastUnattachLabelMixin, self).unattach_validate(request)
-        if res:
-            return res
-
-        res = super(DeleteLastUnattachLabelMixin, self).unattach_by_id(request, sub_id)
-
-        obj = self.model.objects.get(id=sub_id)
-
-        if obj.is_detached():
-            obj.delete()
-
-        return res
 
 
 class SubDetailAPIView(ParentMixin, generics.RetrieveAPIView, GenericAPIView):
@@ -1001,6 +984,23 @@ class CopyAPIView(GenericAPIView):
         serializer = self._get_copy_return_serializer(new_obj)
         headers = {'Location': new_obj.get_absolute_url(request=request)}
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class GenericCancelView(RetrieveAPIView):
+    # In subclass set model, serializer_class
+    obj_permission_type = 'cancel'
+
+    @transaction.non_atomic_requests
+    def dispatch(self, *args, **kwargs):
+        return super(GenericCancelView, self).dispatch(*args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.can_cancel:
+            obj.cancel()
+            return Response(status=status.HTTP_202_ACCEPTED)
+        else:
+            return self.http_method_not_allowed(request, *args, **kwargs)
 
 
 class BaseUsersList(SubListCreateAttachDetachAPIView):

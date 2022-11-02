@@ -1,0 +1,4 @@
+---
+collections:
+  - name: ansible.receptor
+    version: 1.1.0

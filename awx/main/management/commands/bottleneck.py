@@ -25,7 +25,7 @@ class Command(BaseCommand):
         with connection.cursor() as cursor:
             cursor.execute(
                 f'''
-                SELECT 
+                SELECT
                     b.id, b.job_id, b.host_name, b.created - a.created delta,
                     b.task task,
                     b.event_data::json->'task_action' task_action,

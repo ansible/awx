@@ -1,4 +1,4 @@
-FROM node:14
+FROM node:16.13.1
 ARG NPMRC_FILE=.npmrc
 ENV NPMRC_FILE=${NPMRC_FILE}
 ARG TARGET='https://awx:8043'
@@ -6,7 +6,7 @@ ENV TARGET=${TARGET}
 ENV CI=true
 WORKDIR /ui
 ADD .eslintignore .eslintignore
-ADD .eslintrc .eslintrc
+ADD .eslintrc.json .eslintrc.json
 ADD .linguirc .linguirc
 ADD jsconfig.json jsconfig.json
 ADD public public

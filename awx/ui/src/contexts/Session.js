@@ -4,13 +4,14 @@ import React, {
   useState,
   useRef,
   useCallback,
+  useMemo,
 } from 'react';
 import { useHistory, Redirect } from 'react-router-dom';
 import { DateTime } from 'luxon';
 import { RootAPI, MeAPI } from 'api';
 import { isAuthenticated } from 'util/auth';
 import useRequest from 'hooks/useRequest';
-import { SESSION_TIMEOUT_KEY } from '../constants';
+import { SESSION_TIMEOUT_KEY, SESSION_USER_ID } from '../constants';
 
 // The maximum supported timeout for setTimeout(), in milliseconds,
 // is the highest number you can represent as a signed 32bit
@@ -100,7 +101,9 @@ function SessionProvider({ children }) {
     setIsUserBeingLoggedOut(true);
     if (!isSessionExpired.current) {
       setAuthRedirectTo('/logout');
+      window.localStorage.setItem(SESSION_USER_ID, null);
     }
+    sessionStorage.clear();
     await RootAPI.logout();
     setSessionTimeout(0);
     setSessionCountdown(0);
@@ -163,23 +166,35 @@ function SessionProvider({ children }) {
     clearInterval(sessionIntervalId.current);
   }, []);
 
+  const sessionValue = useMemo(
+    () => ({
+      authRedirectTo,
+      handleSessionContinue,
+      isSessionExpired,
+      isUserBeingLoggedOut,
+      loginRedirectOverride,
+      logout,
+      sessionCountdown,
+      setAuthRedirectTo,
+    }),
+    [
+      authRedirectTo,
+      handleSessionContinue,
+      isSessionExpired,
+      isUserBeingLoggedOut,
+      loginRedirectOverride,
+      logout,
+      sessionCountdown,
+      setAuthRedirectTo,
+    ]
+  );
+
   if (isLoading) {
     return null;
   }
 
   return (
-    <SessionContext.Provider
-      value={{
-        isUserBeingLoggedOut,
-        loginRedirectOverride,
-        authRedirectTo,
-        handleSessionContinue,
-        isSessionExpired,
-        logout,
-        sessionCountdown,
-        setAuthRedirectTo,
-      }}
-    >
+    <SessionContext.Provider value={sessionValue}>
       {children}
     </SessionContext.Provider>
   );

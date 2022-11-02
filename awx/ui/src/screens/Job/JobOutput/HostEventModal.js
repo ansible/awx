@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Tab, Tabs, TabTitleText } from '@patternfly/react-core';
 import PropTypes from 'prop-types';
-
 import { t } from '@lingui/macro';
 import { encode } from 'html-entities';
 import StatusLabel from '../../../components/StatusLabel';
@@ -37,20 +36,20 @@ const processEventStatus = (event) => {
 
 const processCodeEditorValue = (value) => {
   let codeEditorValue;
-  if (value === undefined) {
-    codeEditorValue = false;
-  } else if (value === '') {
-    codeEditorValue = ' ';
+  if (!value) {
+    codeEditorValue = '';
   } else if (typeof value === 'string') {
     codeEditorValue = encode(value);
+  } else if (Array.isArray(value)) {
+    codeEditorValue = encode(value.join(' '));
   } else {
     codeEditorValue = value;
   }
   return codeEditorValue;
 };
 
-const processStdOutValue = (hostEvent) => {
-  const taskAction = hostEvent?.event_data?.taskAction;
+const getStdOutValue = (hostEvent) => {
+  const taskAction = hostEvent?.event_data?.task_action;
   const res = hostEvent?.event_data?.res;
 
   let stdOut;
@@ -61,9 +60,9 @@ const processStdOutValue = (hostEvent) => {
     res.results &&
     Array.isArray(res.results)
   ) {
-    [stdOut] = res.results;
-  } else if (res) {
-    stdOut = res.stdout;
+    stdOut = res.results.join('\n');
+  } else if (res?.stdout) {
+    stdOut = Array.isArray(res.stdout) ? res.stdout.join(' ') : res.stdout;
   }
   return stdOut;
 };
@@ -81,8 +80,8 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false }) {
   };
 
   const jsonObj = processCodeEditorValue(hostEvent?.event_data?.res);
-  const stdErr = processCodeEditorValue(hostEvent?.event_data?.res?.stderr);
-  const stdOut = processCodeEditorValue(processStdOutValue(hostEvent));
+  const stdErr = hostEvent?.event_data?.res?.stderr;
+  const stdOut = getStdOutValue(hostEvent);
 
   return (
     <Modal
@@ -110,6 +109,12 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false }) {
             gutter="sm"
           >
             <Detail label={t`Host`} value={hostEvent.host_name} />
+            {hostEvent.summary_fields.host?.description ? (
+              <Detail
+                label={t`Description`}
+                value={hostEvent.summary_fields.host.description}
+              />
+            ) : null}
             {hostStatus ? (
               <Detail
                 label={t`Status`}
@@ -147,13 +152,13 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false }) {
             <ContentEmpty title={t`No JSON Available`} />
           )}
         </Tab>
-        <Tab
-          eventKey={2}
-          title={<TabTitleText>{t`Standard Out`}</TabTitleText>}
-          aria-label={t`Standard out tab`}
-          ouiaId="standard-out-tab"
-        >
-          {activeTabKey === 2 && stdOut ? (
+        {stdOut?.length ? (
+          <Tab
+            eventKey={2}
+            title={<TabTitleText>{t`Output`}</TabTitleText>}
+            aria-label={t`Output tab`}
+            ouiaId="standard-out-tab"
+          >
             <CodeEditor
               mode="javascript"
               readOnly
@@ -162,17 +167,15 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false }) {
               rows={20}
               hasErrors={false}
             />
-          ) : (
-            <ContentEmpty title={t`No Standard Out Available`} />
-          )}
-        </Tab>
-        <Tab
-          eventKey={3}
-          title={<TabTitleText>{t`Standard Error`}</TabTitleText>}
-          aria-label={t`Standard error tab`}
-          ouiaId="standard-error-tab"
-        >
-          {activeTabKey === 3 && stdErr ? (
+          </Tab>
+        ) : null}
+        {stdErr?.length ? (
+          <Tab
+            eventKey={3}
+            title={<TabTitleText>{t`Standard Error`}</TabTitleText>}
+            aria-label={t`Standard error tab`}
+            ouiaId="standard-error-tab"
+          >
             <CodeEditor
               mode="javascript"
               readOnly
@@ -181,10 +184,8 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false }) {
               hasErrors={false}
               rows={20}
             />
-          ) : (
-            <ContentEmpty title={t`No Standard Error Available`} />
-          )}
-        </Tab>
+          </Tab>
+        ) : null}
       </Tabs>
     </Modal>
   );

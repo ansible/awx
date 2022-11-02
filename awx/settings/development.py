@@ -21,7 +21,6 @@ from split_settings.tools import optional, include
 # Load default settings.
 from .defaults import *  # NOQA
 
-
 # awx-manage shell_plus --notebook
 NOTEBOOK_ARGUMENTS = ['--NotebookApp.token=', '--ip', '0.0.0.0', '--port', '8888', '--allow-root', '--no-browser']
 
@@ -45,10 +44,6 @@ SESSION_COOKIE_SECURE = False
 
 # Disallow sending csrf cookies over insecure connections
 CSRF_COOKIE_SECURE = False
-
-# Override django.template.loaders.cached.Loader in defaults.py
-template = next((tpl_backend for tpl_backend in TEMPLATES if tpl_backend['NAME'] == 'default'), None)  # noqa
-template['OPTIONS']['loaders'] = ('django.template.loaders.filesystem.Loader', 'django.template.loaders.app_directories.Loader')
 
 # Disable Pendo on the UI for development/test.
 # Note: This setting may be overridden by database settings.
@@ -83,18 +78,6 @@ include(optional('/etc/tower/conf.d/*.py'), scope=locals())
 BASE_VENV_PATH = "/var/lib/awx/venv/"
 AWX_VENV_PATH = os.path.join(BASE_VENV_PATH, "awx")
 
-# If any local_*.py files are present in awx/settings/, use them to override
-# default settings for development.  If not present, we can still run using
-# only the defaults.
-try:
-    if os.getenv('AWX_KUBE_DEVEL', False):
-        include(optional('minikube.py'), scope=locals())
-    else:
-        include(optional('local_*.py'), scope=locals())
-except ImportError:
-    traceback.print_exc()
-    sys.exit(1)
-
 # Use SQLite for unit tests instead of PostgreSQL.  If the lines below are
 # commented out, Django will create the test_awx-dev database in PostgreSQL to
 # run unit tests.
@@ -115,5 +98,25 @@ CLUSTER_HOST_ID = socket.gethostname()
 
 AWX_CALLBACK_PROFILE = True
 
+# ======================!!!!!!! FOR DEVELOPMENT ONLY !!!!!!!=================================
+# Disable normal scheduled/triggered task managers (DependencyManager, TaskManager, WorkflowManager).
+# Allows user to trigger task managers directly for debugging and profiling purposes.
+# Only works in combination with settings.SETTINGS_MODULE == 'awx.settings.development'
+AWX_DISABLE_TASK_MANAGERS = False
+# ======================!!!!!!! FOR DEVELOPMENT ONLY !!!!!!!=================================
+
 if 'sqlite3' not in DATABASES['default']['ENGINE']:  # noqa
     DATABASES['default'].setdefault('OPTIONS', dict()).setdefault('application_name', f'{CLUSTER_HOST_ID}-{os.getpid()}-{" ".join(sys.argv)}'[:63])  # noqa
+
+# If any local_*.py files are present in awx/settings/, use them to override
+# default settings for development.  If not present, we can still run using
+# only the defaults.
+# this needs to stay at the bottom of this file
+try:
+    if os.getenv('AWX_KUBE_DEVEL', False):
+        include(optional('minikube.py'), scope=locals())
+    else:
+        include(optional('local_*.py'), scope=locals())
+except ImportError:
+    traceback.print_exc()
+    sys.exit(1)

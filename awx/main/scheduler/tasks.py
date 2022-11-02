@@ -1,15 +1,35 @@
 # Python
 import logging
 
+# Django
+from django.conf import settings
+
 # AWX
-from awx.main.scheduler import TaskManager
+from awx import MODE
+from awx.main.scheduler import TaskManager, DependencyManager, WorkflowManager
 from awx.main.dispatch.publish import task
 from awx.main.dispatch import get_local_queuename
 
 logger = logging.getLogger('awx.main.scheduler')
 
 
+def run_manager(manager, prefix):
+    if MODE == 'development' and settings.AWX_DISABLE_TASK_MANAGERS:
+        logger.debug(f"Not running {prefix} manager, AWX_DISABLE_TASK_MANAGERS is True. Trigger with GET to /api/debug/{prefix}_manager/")
+        return
+    manager().schedule()
+
+
 @task(queue=get_local_queuename)
-def run_task_manager():
-    logger.debug("Running task manager.")
-    TaskManager().schedule()
+def task_manager():
+    run_manager(TaskManager, "task")
+
+
+@task(queue=get_local_queuename)
+def dependency_manager():
+    run_manager(DependencyManager, "dependency")
+
+
+@task(queue=get_local_queuename)
+def workflow_manager():
+    run_manager(WorkflowManager, "workflow")

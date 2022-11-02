@@ -6,17 +6,37 @@ practices regarding responsible disclosure, see
 https://www.ansible.com/security
 -->
 
+
+
+<!--
+
+PLEASE DO NOT USE A BLANK TEMPLATE IN THE AWX REPO.
+This is a legacy template used for internal testing ONLY.
+
+Any issues opened will this template will be automatically closed.
+
+Instead use the bug or feature request.
+
+-->
+
+
+
 ##### ISSUE TYPE
 <!--- Pick one below and delete the rest: -->
- - Bug Report
- - Feature Idea
- - Documentation
+ - Breaking Change
+ - New or Enhanced Feature
+ - Bug, Docs Fix or other nominal change
+
 
 ##### COMPONENT NAME
 <!-- Pick the area of AWX for this issue, you can have multiple, delete the rest: -->
  - API
  - UI
  - Collection
+ - Docs
+ - CLI
+ - Other
+
 
 ##### SUMMARY
 <!-- Briefly describe the problem. -->

@@ -5,16 +5,10 @@ import base64
 import os
 import re  # noqa
 import sys
+import tempfile
+import socket
 from datetime import timedelta
 
-# global settings
-from django.conf import global_settings
-
-# Update this module's local settings from the global settings module.
-this_module = sys.modules[__name__]
-for setting in dir(global_settings):
-    if setting == setting.upper():
-        setattr(this_module, setting, getattr(global_settings, setting))
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -49,6 +43,11 @@ else:
 DEBUG = True
 SQL_DEBUG = DEBUG
 
+# FIXME: it would be nice to cycle back around and allow this to be
+# BigAutoField going forward, but we'd have to be explicit about our
+# existing models.
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -72,6 +71,9 @@ AWX_CONTAINER_GROUP_K8S_API_TIMEOUT = 10
 AWX_CONTAINER_GROUP_DEFAULT_NAMESPACE = os.getenv('MY_POD_NAMESPACE', 'default')
 # Timeout when waiting for pod to enter running state. If the pod is still in pending state , it will be terminated. Valid time units are "s", "m", "h". Example : "5m" , "10s".
 AWX_CONTAINER_GROUP_POD_PENDING_TIMEOUT = "2h"
+
+# How much capacity controlling a task costs a hybrid or control node
+AWX_CONTROL_NODE_TASK_IMPACT = 1
 
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
@@ -99,11 +101,11 @@ USE_L10N = True
 
 USE_TZ = True
 
-STATICFILES_DIRS = (os.path.join(BASE_DIR, 'ui', 'build', 'static'), os.path.join(BASE_DIR, 'static'))
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'ui', 'build', 'static'), os.path.join(BASE_DIR, 'static')]
 
 # Absolute filesystem path to the directory where static file are collected via
 # the collectstatic command.
-STATIC_ROOT = os.path.join(BASE_DIR, 'public', 'static')
+STATIC_ROOT = '/var/lib/awx/public/static'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/dev/howto/static-files/
@@ -149,7 +151,8 @@ SITE_ID = 1
 
 # Make this unique, and don't share it with anybody.
 if os.path.exists('/etc/tower/SECRET_KEY'):
-    SECRET_KEY = open('/etc/tower/SECRET_KEY', 'rb').read().strip()
+    with open('/etc/tower/SECRET_KEY', 'rb') as f:
+        SECRET_KEY = f.read().strip()
 else:
     SECRET_KEY = base64.encodebytes(os.urandom(32)).decode().rstrip()
 
@@ -239,8 +242,25 @@ SUBSYSTEM_METRICS_INTERVAL_SEND_METRICS = 3
 # Interval in seconds for saving local metrics to redis
 SUBSYSTEM_METRICS_INTERVAL_SAVE_TO_REDIS = 2
 
+# Record task manager metrics at the following interval in seconds
+# If using Prometheus, it is recommended to be => the Prometheus scrape interval
+SUBSYSTEM_METRICS_TASK_MANAGER_RECORD_INTERVAL = 15
+
 # The maximum allowed jobs to start on a given task manager cycle
 START_TASK_LIMIT = 100
+
+# Time out task managers if they take longer than this many seconds, plus TASK_MANAGER_TIMEOUT_GRACE_PERIOD
+# We have the grace period so the task manager can bail out before the timeout.
+TASK_MANAGER_TIMEOUT = 300
+TASK_MANAGER_TIMEOUT_GRACE_PERIOD = 60
+
+# Number of seconds _in addition to_ the task manager timeout a job can stay
+# in waiting without being reaped
+JOB_WAITING_GRACE_PERIOD = 60
+
+# Number of seconds after a container group job finished time to wait
+# before the awx_k8s_reaper task will tear down the pods
+K8S_POD_REAPER_GRACE_PERIOD = 60
 
 # Disallow sending session cookies over insecure connections
 SESSION_COOKIE_SECURE = True
@@ -248,6 +268,10 @@ SESSION_COOKIE_SECURE = True
 # Seconds before sessions expire.
 # Note: This setting may be overridden by database settings.
 SESSION_COOKIE_AGE = 1800
+
+# Name of the cookie that contains the session information.
+# Note: Changing this value may require changes to any clients.
+SESSION_COOKIE_NAME = 'awx_sessionid'
 
 # Maximum number of per-user valid, concurrent sessions.
 # -1 is unlimited
@@ -266,8 +290,8 @@ TEMPLATES = [
     {
         'NAME': 'default',
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'APP_DIRS': True,
         'OPTIONS': {
-            'debug': DEBUG,
             'context_processors': [  # NOQA
                 'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.debug',
@@ -282,13 +306,10 @@ TEMPLATES = [
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
             ],
-            'loaders': [
-                ('django.template.loaders.cached.Loader', ('django.template.loaders.filesystem.Loader', 'django.template.loaders.app_directories.Loader'))
-            ],
             'builtins': ['awx.main.templatetags.swagger'],
         },
         'DIRS': [os.path.join(BASE_DIR, 'templates'), os.path.join(BASE_DIR, 'ui', 'build'), os.path.join(BASE_DIR, 'ui', 'public')],
-    }
+    },
 ]
 
 ROOT_URLCONF = 'awx.urls'
@@ -347,7 +368,7 @@ REST_FRAMEWORK = {
     # For swagger schema generation
     # see https://github.com/encode/django-rest-framework/pull/6532
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.AutoSchema',
-    #'URL_FORMAT_OVERRIDE': None,
+    # 'URL_FORMAT_OVERRIDE': None,
 }
 
 AUTHENTICATION_BACKENDS = (
@@ -366,6 +387,7 @@ AUTHENTICATION_BACKENDS = (
     'social_core.backends.github_enterprise.GithubEnterpriseOAuth2',
     'social_core.backends.github_enterprise.GithubEnterpriseOrganizationOAuth2',
     'social_core.backends.github_enterprise.GithubEnterpriseTeamOAuth2',
+    'social_core.backends.open_id_connect.OpenIdConnectAuth',
     'social_core.backends.azuread.AzureADOAuth2',
     'awx.sso.backends.SAMLAuth',
     'awx.main.backends.AWXModelBackend',
@@ -420,8 +442,15 @@ os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 
 # heartbeat period can factor into some forms of logic, so it is maintained as a setting here
 CLUSTER_NODE_HEARTBEAT_PERIOD = 60
+
+# Number of missed heartbeats until a node gets marked as lost
+CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE = 2
+
 RECEPTOR_SERVICE_ADVERTISEMENT_PERIOD = 60  # https://github.com/ansible/receptor/blob/aa1d589e154d8a0cb99a220aff8f98faf2273be6/pkg/netceptor/netceptor.go#L34
 EXECUTION_NODE_REMEDIATION_CHECKS = 60 * 30  # once every 30 minutes check if an execution node errors have been resolved
+
+# Amount of time dispatcher will try to reconnect to database for jobs and consuming new work
+DISPATCHER_DB_DOWNTOWN_TOLLERANCE = 40
 
 BROKER_URL = 'unix:///var/run/redis/redis.sock'
 CELERYBEAT_SCHEDULE = {
@@ -432,7 +461,8 @@ CELERYBEAT_SCHEDULE = {
         'options': {'expires': 50},
     },
     'gather_analytics': {'task': 'awx.main.tasks.system.gather_analytics', 'schedule': timedelta(minutes=5)},
-    'task_manager': {'task': 'awx.main.scheduler.tasks.run_task_manager', 'schedule': timedelta(seconds=20), 'options': {'expires': 20}},
+    'task_manager': {'task': 'awx.main.scheduler.tasks.task_manager', 'schedule': timedelta(seconds=20), 'options': {'expires': 20}},
+    'dependency_manager': {'task': 'awx.main.scheduler.tasks.dependency_manager', 'schedule': timedelta(seconds=20), 'options': {'expires': 20}},
     'k8s_reaper': {'task': 'awx.main.tasks.system.awx_k8s_reaper', 'schedule': timedelta(seconds=60), 'options': {'expires': 50}},
     'receptor_reaper': {'task': 'awx.main.tasks.system.awx_receptor_workunit_reaper', 'schedule': timedelta(seconds=60)},
     'send_subsystem_metrics': {'task': 'awx.main.analytics.analytics_tasks.send_subsystem_metrics', 'schedule': timedelta(seconds=20)},
@@ -446,7 +476,7 @@ CACHES = {'default': {'BACKEND': 'django_redis.cache.RedisCache', 'LOCATION': 'u
 # Social Auth configuration.
 SOCIAL_AUTH_STRATEGY = 'social_django.strategy.DjangoStrategy'
 SOCIAL_AUTH_STORAGE = 'social_django.models.DjangoStorage'
-SOCIAL_AUTH_USER_MODEL = AUTH_USER_MODEL  # noqa
+SOCIAL_AUTH_USER_MODEL = 'auth.User'
 
 _SOCIAL_AUTH_PIPELINE_BASE = (
     'social_core.pipeline.social_auth.social_details',
@@ -555,6 +585,10 @@ ANSIBLE_INVENTORY_UNPARSED_FAILED = True
 # Additional environment variables to be passed to the ansible subprocesses
 AWX_TASK_ENV = {}
 
+# Additional environment variables to apply when running ansible-galaxy commands
+# to fetch Ansible content - roles and collections
+GALAXY_TASK_ENV = {'ANSIBLE_FORCE_COLOR': 'false', 'GIT_SSH_COMMAND': "ssh -o StrictHostKeyChecking=no"}
+
 # Rebuild Host Smart Inventory memberships.
 AWX_REBUILD_SMART_MEMBERSHIP = False
 
@@ -588,7 +622,7 @@ AWX_ISOLATION_SHOW_PATHS = []
 # execution and isolation (such as credential files and custom
 # inventory scripts).
 # Note: This setting may be overridden by database settings.
-AWX_ISOLATION_BASE_PATH = "/tmp"
+AWX_ISOLATION_BASE_PATH = tempfile.gettempdir()
 
 # User definable ansible callback plugins
 # Note: This setting may be overridden by database settings.
@@ -793,85 +827,24 @@ LOGGING = {
         'dispatcher': {'format': '%(asctime)s %(levelname)-8s [%(guid)s] %(name)s PID:%(process)d %(message)s'},
         'job_lifecycle': {'()': 'awx.main.utils.formatters.JobLifeCycleFormatter'},
     },
+    # Extended below based on install scenario. You probably don't want to add something directly here.
+    # See 'handler_config' below.
     'handlers': {
         'console': {
             '()': 'logging.StreamHandler',
             'level': 'DEBUG',
-            'filters': ['require_debug_true_or_test', 'dynamic_level_filter', 'guid'],
+            'filters': ['dynamic_level_filter', 'guid'],
             'formatter': 'simple',
         },
         'null': {'class': 'logging.NullHandler'},
         'file': {'class': 'logging.NullHandler', 'formatter': 'simple'},
         'syslog': {'level': 'WARNING', 'filters': ['require_debug_false'], 'class': 'logging.NullHandler', 'formatter': 'simple'},
+        'inventory_import': {'level': 'DEBUG', 'class': 'logging.StreamHandler', 'formatter': 'timed_import'},
         'external_logger': {
             'class': 'awx.main.utils.handlers.RSysLogHandler',
             'formatter': 'json',
             'address': '/var/run/awx-rsyslog/rsyslog.sock',
             'filters': ['external_log_enabled', 'dynamic_level_filter', 'guid'],
-        },
-        'tower_warnings': {
-            # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
-            'class': 'logging.handlers.WatchedFileHandler',
-            'filters': ['require_debug_false', 'dynamic_level_filter', 'guid'],
-            'filename': os.path.join(LOG_ROOT, 'tower.log'),
-            'formatter': 'simple',
-        },
-        'callback_receiver': {
-            # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
-            'class': 'logging.handlers.WatchedFileHandler',
-            'filters': ['require_debug_false', 'dynamic_level_filter', 'guid'],
-            'filename': os.path.join(LOG_ROOT, 'callback_receiver.log'),
-            'formatter': 'simple',
-        },
-        'dispatcher': {
-            # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
-            'class': 'logging.handlers.WatchedFileHandler',
-            'filters': ['require_debug_false', 'dynamic_level_filter', 'guid'],
-            'filename': os.path.join(LOG_ROOT, 'dispatcher.log'),
-            'formatter': 'dispatcher',
-        },
-        'wsbroadcast': {
-            # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
-            'class': 'logging.handlers.WatchedFileHandler',
-            'filters': ['require_debug_false', 'dynamic_level_filter', 'guid'],
-            'filename': os.path.join(LOG_ROOT, 'wsbroadcast.log'),
-            'formatter': 'simple',
-        },
-        'celery.beat': {'class': 'logging.StreamHandler', 'level': 'ERROR'},  # don't log every celerybeat wakeup
-        'inventory_import': {'level': 'DEBUG', 'class': 'logging.StreamHandler', 'formatter': 'timed_import'},
-        'task_system': {
-            # don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
-            'class': 'logging.handlers.WatchedFileHandler',
-            'filters': ['require_debug_false', 'dynamic_level_filter', 'guid'],
-            'filename': os.path.join(LOG_ROOT, 'task_system.log'),
-            'formatter': 'simple',
-        },
-        'management_playbooks': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.WatchedFileHandler',
-            'filters': ['require_debug_false'],
-            'filename': os.path.join(LOG_ROOT, 'management_playbooks.log'),
-            'formatter': 'simple',
-        },
-        'system_tracking_migrations': {
-            'level': 'WARNING',
-            'class': 'logging.handlers.WatchedFileHandler',
-            'filters': ['require_debug_false'],
-            'filename': os.path.join(LOG_ROOT, 'tower_system_tracking_migrations.log'),
-            'formatter': 'simple',
-        },
-        'rbac_migrations': {
-            'level': 'WARNING',
-            'class': 'logging.handlers.WatchedFileHandler',
-            'filters': ['require_debug_false'],
-            'filename': os.path.join(LOG_ROOT, 'tower_rbac_migrations.log'),
-            'formatter': 'simple',
-        },
-        'job_lifecycle': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.WatchedFileHandler',
-            'filename': os.path.join(LOG_ROOT, 'job_lifecycle.log'),
-            'formatter': 'job_lifecycle',
         },
     },
     'loggers': {
@@ -905,6 +878,40 @@ LOGGING = {
     },
 }
 
+# Log handler configuration. Keys are the name of the handler. Be mindful when renaming things here.
+# People might have created custom settings files that augments the behavior of these.
+# Specify 'filename' (used if the environment variable AWX_LOGGING_MODE is unset or 'file')
+# and an optional 'formatter'. If no formatter is specified, 'simple' is used.
+handler_config = {
+    'tower_warnings': {'filename': 'tower.log'},
+    'callback_receiver': {'filename': 'callback_receiver.log'},
+    'dispatcher': {'filename': 'dispatcher.log', 'formatter': 'dispatcher'},
+    'wsbroadcast': {'filename': 'wsbroadcast.log'},
+    'task_system': {'filename': 'task_system.log'},
+    'rbac_migrations': {'filename': 'tower_rbac_migrations.log'},
+    'job_lifecycle': {'filename': 'job_lifecycle.log', 'formatter': 'job_lifecycle'},
+}
+
+# If running on a VM, we log to files. When running in a container, we log to stdout.
+logging_mode = os.getenv('AWX_LOGGING_MODE', 'file')
+if logging_mode not in ('file', 'stdout'):
+    raise Exception("AWX_LOGGING_MODE must be 'file' or 'stdout'")
+
+for name, config in handler_config.items():
+    # Common log handler config. Don't define a level here, it's set by settings.LOG_AGGREGATOR_LEVEL
+    LOGGING['handlers'][name] = {'filters': ['dynamic_level_filter', 'guid'], 'formatter': config.get('formatter', 'simple')}
+
+    if logging_mode == 'file':
+        LOGGING['handlers'][name]['class'] = 'logging.handlers.WatchedFileHandler'
+        LOGGING['handlers'][name]['filename'] = os.path.join(LOG_ROOT, config['filename'])
+
+    if logging_mode == 'stdout':
+        LOGGING['handlers'][name]['class'] = 'logging.NullHandler'
+
+# Prevents logging to stdout on traditional VM installs
+if logging_mode == 'file':
+    LOGGING['handlers']['console']['filters'].insert(0, 'require_debug_true_or_test')
+
 # Apply coloring to messages logged to the console
 COLOR_LOGS = False
 
@@ -934,11 +941,18 @@ AWX_CALLBACK_PROFILE = False
 # Delete temporary directories created to store playbook run-time
 AWX_CLEANUP_PATHS = True
 
+# Allow ansible-runner to store env folder (may contain sensitive information)
+AWX_RUNNER_OMIT_ENV_FILES = True
+
+# Allow ansible-runner to save ansible output (may cause performance issues)
+AWX_RUNNER_SUPPRESS_OUTPUT_FILE = True
+
 # Delete completed work units in receptor
 RECEPTOR_RELEASE_WORK = True
 
 MIDDLEWARE = [
-    'django_guid.middleware.GuidMiddleware',
+    'django_guid.middleware.guid_middleware',
+    'awx.main.middleware.SettingsCacheMiddleware',
     'awx.main.middleware.TimingMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'awx.main.middleware.MigrationRanCheckMiddleware',
@@ -993,4 +1007,10 @@ DEFAULT_CONTROL_PLANE_QUEUE_NAME = 'controlplane'
 # Extend container runtime attributes.
 # For example, to disable SELinux in containers for podman
 # DEFAULT_CONTAINER_RUN_OPTIONS = ['--security-opt', 'label=disable']
-DEFAULT_CONTAINER_RUN_OPTIONS = []
+DEFAULT_CONTAINER_RUN_OPTIONS = ['--network', 'slirp4netns:enable_ipv6=true']
+
+# Mount exposed paths as hostPath resource in k8s/ocp
+AWX_MOUNT_ISOLATED_PATHS_ON_K8S = False
+
+# This is overridden downstream via /etc/tower/conf.d/cluster_host_id.py
+CLUSTER_HOST_ID = socket.gethostname()

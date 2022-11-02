@@ -9,6 +9,7 @@ import {
   oneOf,
   oneOfType,
 } from 'prop-types';
+import { AlertVariant } from '@patternfly/react-core';
 
 export const Role = shape({
   descendent_roles: arrayOf(string),
@@ -144,6 +145,7 @@ export const Project = shape({
   summary_fields: shape({
     organization: Organization,
     credential: Credential,
+    signature_validation_credential: Credential,
     last_job: shape({}),
     last_update: shape({}),
     created_by: shape({}),
@@ -162,6 +164,7 @@ export const Project = shape({
   scm_delete_on_update: bool,
   scm_track_submodules: bool,
   credential: number,
+  signature_validation_credential: number,
   status: oneOf([
     'new',
     'pending',
@@ -428,3 +431,11 @@ export const SearchableKeys = arrayOf(
     type: string.isRequired,
   })
 );
+
+export const Toast = shape({
+  title: string.isRequired,
+  variant: oneOf(Object.values(AlertVariant)).isRequired,
+  id: oneOfType([string, number]).isRequired,
+  hasTimeout: bool,
+  message: string,
+});

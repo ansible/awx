@@ -1,7 +1,7 @@
 import yaml from 'js-yaml';
 
 export function yamlToJson(yamlString) {
-  const value = yaml.safeLoad(yamlString);
+  const value = yaml.load(yamlString);
   if (!value) {
     return '{}';
   }
@@ -19,7 +19,7 @@ export function jsonToYaml(jsonString) {
   if (Object.entries(value).length === 0) {
     return '---\n';
   }
-  return yaml.safeDump(value);
+  return yaml.dump(value);
 }
 
 export function isJsonObject(value) {

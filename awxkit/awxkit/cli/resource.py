@@ -7,7 +7,7 @@ from awxkit.exceptions import ImportExportError
 from awxkit.utils import to_str
 from awxkit.api.pages import Page
 from awxkit.api.pages.api import EXPORTABLE_RESOURCES
-from awxkit.cli.format import FORMATTERS, format_response, add_authentication_arguments
+from awxkit.cli.format import FORMATTERS, format_response, add_authentication_arguments, add_formatting_import_export
 from awxkit.cli.utils import CustomRegistryMeta, cprint
 
 
@@ -125,6 +125,10 @@ class Import(CustomCommand):
     help_text = 'import resources into Tower'
 
     def handle(self, client, parser):
+        if parser:
+            parser.usage = 'awx import < exportfile'
+            parser.description = 'import resources from stdin'
+            add_formatting_import_export(parser, {})
         if client.help:
             parser.print_help()
             raise SystemExit()
@@ -139,6 +143,8 @@ class Import(CustomCommand):
 
         client.authenticate()
         client.v2.import_assets(data)
+
+        self._has_error = getattr(client.v2, '_has_error', False)
 
         return {}
 
@@ -159,7 +165,9 @@ class Export(CustomCommand):
 
     def handle(self, client, parser):
         self.extend_parser(parser)
-
+        parser.usage = 'awx export > exportfile'
+        parser.description = 'export resources to stdout'
+        add_formatting_import_export(parser, {})
         if client.help:
             parser.print_help()
             raise SystemExit()
@@ -168,7 +176,11 @@ class Export(CustomCommand):
         kwargs = {resource: getattr(parsed, resource, None) for resource in EXPORTABLE_RESOURCES}
 
         client.authenticate()
-        return client.v2.export_assets(**kwargs)
+        data = client.v2.export_assets(**kwargs)
+
+        self._has_error = getattr(client.v2, '_has_error', False)
+
+        return data
 
 
 def parse_resource(client, skip_deprecated=False):
@@ -176,6 +188,8 @@ def parse_resource(client, skip_deprecated=False):
         dest='resource',
         metavar='resource',
     )
+
+    _system_exit = 0
 
     # check if the user is running a custom command
     for command in CustomCommand.__subclasses__():
@@ -204,6 +218,10 @@ def parse_resource(client, skip_deprecated=False):
         parser = client.subparsers[resource]
         command = CustomCommand.registry[resource]()
         response = command.handle(client, parser)
+
+        if getattr(command, '_has_error', False):
+            _system_exit = 1
+
         if response:
             _filter = client.get_config('filter')
             if resource == 'config' and client.get_config('format') == 'human':
@@ -215,7 +233,7 @@ def parse_resource(client, skip_deprecated=False):
                 connection = None
             formatted = format_response(Page.from_json(response, connection=connection), fmt=client.get_config('format'), filter=_filter)
             print(formatted)
-        raise SystemExit()
+        raise SystemExit(_system_exit)
     else:
         return resource
 

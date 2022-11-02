@@ -3,6 +3,7 @@ from prometheus_client import CollectorRegistry, Gauge, Info, generate_latest
 
 from awx.conf.license import get_license
 from awx.main.utils import get_awx_version
+from awx.main.models import UnifiedJob
 from awx.main.analytics.collectors import (
     counts,
     instance_info,
@@ -126,6 +127,8 @@ def metrics():
     LICENSE_INSTANCE_TOTAL = Gauge('awx_license_instance_total', 'Total number of managed hosts provided by your license', registry=REGISTRY)
     LICENSE_INSTANCE_FREE = Gauge('awx_license_instance_free', 'Number of remaining managed hosts provided by your license', registry=REGISTRY)
 
+    DATABASE_CONNECTIONS = Gauge('awx_database_connections_total', 'Number of connections to database', registry=REGISTRY)
+
     license_info = get_license()
     SYSTEM_INFO.info(
         {
@@ -163,10 +166,13 @@ def metrics():
     USER_SESSIONS.labels(type='user').set(current_counts['active_user_sessions'])
     USER_SESSIONS.labels(type='anonymous').set(current_counts['active_anonymous_sessions'])
 
+    DATABASE_CONNECTIONS.set(current_counts['database_connections'])
+
     all_job_data = job_counts(None)
     statuses = all_job_data.get('status', {})
-    for status, value in statuses.items():
-        STATUS.labels(status=status).set(value)
+    states = set(dict(UnifiedJob.STATUS_CHOICES).keys()) - set(['new'])
+    for state in states:
+        STATUS.labels(status=state).set(statuses.get(state, 0))
 
     RUNNING_JOBS.set(current_counts['running_jobs'])
     PENDING_JOBS.set(current_counts['pending_jobs'])

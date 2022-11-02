@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-
 import { t } from '@lingui/macro';
 import { withFormik, useField } from 'formik';
 import {
@@ -42,9 +41,11 @@ import {
 import Popover from 'components/Popover';
 import { JobTemplatesAPI } from 'api';
 import useIsMounted from 'hooks/useIsMounted';
-import LabelSelect from './LabelSelect';
+import LabelSelect from 'components/LabelSelect';
+import { VerbositySelectField } from 'components/VerbositySelectField';
 import PlaybookSelect from './PlaybookSelect';
 import WebhookSubForm from './WebhookSubForm';
+import getHelpText from './JobTemplate.helptext';
 
 const { origin } = document.location;
 
@@ -58,12 +59,13 @@ function JobTemplateForm({
   validateField,
   isOverrideDisabledLookup, // TODO: this is a confusing variable name
 }) {
+  const helpText = getHelpText();
   const [contentError, setContentError] = useState(false);
   const [allowCallbacks, setAllowCallbacks] = useState(
     Boolean(template?.host_config_key)
   );
   const [enableWebhooks, setEnableWebhooks] = useState(
-    Boolean(template.webhook_service)
+    Boolean(template?.webhook_service)
   );
   const isMounted = useIsMounted();
   const brandName = useBrandName();
@@ -84,7 +86,10 @@ function JobTemplateForm({
   const [credentialField, , credentialHelpers] = useField('credentials');
   const [labelsField, , labelsHelpers] = useField('labels');
   const [limitField, limitMeta, limitHelpers] = useField('limit');
-  const [verbosityField] = useField('verbosity');
+  const [forksField, forksMeta, forksHelpers] = useField('forks');
+  const [jobSliceCountField, jobSliceCountMeta, jobSliceCountHelpers] =
+    useField('job_slice_count');
+  const [timeoutField, timeoutMeta, timeoutHelpers] = useField('timeout');
   const [diffModeField, , diffModeHelpers] = useField('diff_mode');
   const [instanceGroupsField, , instanceGroupsHelpers] =
     useField('instanceGroups');
@@ -187,6 +192,14 @@ function JobTemplateForm({
     [setFieldValue, setFieldTouched]
   );
 
+  const handlePlaybookUpdate = useCallback(
+    (value) => {
+      setFieldValue('playbook', value);
+      setFieldTouched('playbook', true, false);
+    },
+    [setFieldValue, setFieldTouched]
+  );
+
   useEffect(() => {
     validateField('inventory');
   }, [askInventoryOnLaunchField.value, validateField]);
@@ -205,13 +218,6 @@ function JobTemplateForm({
       label: t`Check`,
       isDisabled: false,
     },
-  ];
-  const verbosityOptions = [
-    { value: '0', key: '0', label: t`0 (Normal)` },
-    { value: '1', key: '1', label: t`1 (Verbose)` },
-    { value: '2', key: '2', label: t`2 (More Verbose)` },
-    { value: '3', key: '3', label: t`3 (Debug)` },
-    { value: '4', key: '4', label: t`4 (Connection Debug)` },
   ];
   let callbackUrl;
   if (template?.related) {
@@ -250,10 +256,7 @@ function JobTemplateForm({
           label={t`Job Type`}
           promptId="template-ask-job-type-on-launch"
           promptName="ask_job_type_on_launch"
-          tooltip={t`For job templates, select run to execute
-            the playbook. Select check to only check playbook syntax,
-            test environment setup, and report problems without
-            executing the playbook.`}
+          tooltip={helpText.jobType}
         >
           <AnsibleSelect
             {...jobTypeField}
@@ -282,8 +285,7 @@ function JobTemplateForm({
             promptId="template-ask-inventory-on-launch"
             promptName="ask_inventory_on_launch"
             isPromptableField
-            tooltip={t`Select the inventory containing the hosts
-            you want this job to manage.`}
+            tooltip={helpText.inventory}
             onBlur={() => inventoryHelpers.setTouched()}
             onChange={handleInventoryUpdate}
             required={!askInventoryOnLaunchField.value}
@@ -297,8 +299,7 @@ function JobTemplateForm({
         <ProjectLookup
           value={projectField.value}
           onBlur={() => projectHelpers.setTouched()}
-          tooltip={t`Select the project containing the playbook
-                  you want this job to execute.`}
+          tooltip={helpText.project}
           isValid={Boolean(
             !projectMeta.touched || (!projectMeta.error && projectField.value)
           )}
@@ -318,11 +319,14 @@ function JobTemplateForm({
           onBlur={() => executionEnvironmentHelpers.setTouched()}
           value={executionEnvironmentField.value}
           onChange={handleExecutionEnvironmentUpdate}
-          popoverContent={t`Select the execution environment for this job template.`}
+          popoverContent={helpText.executionEnvironmentForm}
           tooltip={t`Select a project before editing the execution environment.`}
           globallyAvailable
           isDisabled={!projectField.value?.id}
           projectId={projectField.value?.id}
+          promptId="template-ask-execution-environment-on-launch"
+          promptName="ask_execution_environment_on_launch"
+          isPromptableField
         />
 
         {projectField.value?.allow_override && (
@@ -331,8 +335,7 @@ function JobTemplateForm({
             label={t`Source Control Branch`}
             promptId="template-ask-scm-branch-on-launch"
             promptName="ask_scm_branch_on_launch"
-            tooltip={t`Select a branch for the job template. This branch is applied to
-              all job template nodes that prompt for a branch.`}
+            tooltip={helpText.sourceControlBranch}
           >
             <TextInput
               id="template-scm-branch"
@@ -352,14 +355,10 @@ function JobTemplateForm({
           }
           isRequired
           label={t`Playbook`}
-          labelIcon={
-            <Popover
-              content={t`Select the playbook to be executed by this job.`}
-            />
-          }
+          labelIcon={<Popover content={helpText.playbook} />}
         >
           <PlaybookSelect
-            onChange={playbookHelpers.setValue}
+            onChange={handlePlaybookUpdate}
             projectId={projectField.value?.id}
             isValid={!playbookMeta.touched || !playbookMeta.error}
             selected={playbookField.value}
@@ -373,11 +372,7 @@ function JobTemplateForm({
             label={t`Credentials`}
             promptId="template-ask-credential-on-launch"
             promptName="ask_credential_on_launch"
-            tooltip={t`Select credentials for accessing the nodes this job will be ran
-                against. You can only select one credential of each type. For machine credentials (SSH),
-                checking "Prompt on launch" without selecting credentials will require you to select a machine
-                credential at run time. If you select credentials and check "Prompt on launch", the selected
-                credential(s) become the defaults that can be updated at run time.`}
+            tooltip={helpText.credentials}
           >
             <MultiCredentialsLookup
               value={credentialField.value}
@@ -387,16 +382,12 @@ function JobTemplateForm({
               onError={setContentError}
             />
           </FieldWithPrompt>
-          <FormGroup
-            label={t`Labels`}
-            labelIcon={
-              <Popover
-                content={t`Optional labels that describe this job template,
-                      such as 'dev' or 'test'. Labels can be used to group and filter
-                      job templates and completed jobs.`}
-              />
-            }
+          <FieldWithPrompt
             fieldId="template-labels"
+            label={t`Labels`}
+            promptId="template-ask-labels-on-launch"
+            promptName="ask_labels_on_launch"
+            tooltip={helpText.labels}
           >
             <LabelSelect
               value={labelsField.value}
@@ -404,46 +395,41 @@ function JobTemplateForm({
               onError={setContentError}
               createText={t`Create`}
             />
-          </FormGroup>
+          </FieldWithPrompt>
           <VariablesField
             id="template-variables"
             name="extra_vars"
             label={t`Variables`}
             promptId="template-ask-variables-on-launch"
-            tooltip={t`Pass extra command line variables to the playbook. This is the
-              -e or --extra-vars command line parameter for ansible-playbook.
-              Provide key/value pairs using either YAML or JSON. Refer to the
-              documentation for example syntax.`}
+            tooltip={helpText.variables}
           />
           <FormColumnLayout>
-            <FormField
-              id="template-forks"
-              name="forks"
-              type="number"
-              min="0"
+            <FieldWithPrompt
+              fieldId="template-forks"
               label={t`Forks`}
-              tooltip={
-                <span>
-                  {t`The number of parallel or simultaneous
-                    processes to use while executing the playbook. An empty value,
-                    or a value less than 1 will use the Ansible default which is
-                    usually 5. The default number of forks can be overwritten
-                    with a change to`}{' '}
-                  <code>ansible.cfg</code>.{' '}
-                  {t`Refer to the Ansible documentation for details
-                        about the configuration file.`}
-                </span>
-              }
-            />
+              promptId="template-ask-forks-on-launch"
+              promptName="ask_forks_on_launch"
+              tooltip={helpText.forks}
+            >
+              <TextInput
+                id="template-forks"
+                {...forksField}
+                validated={
+                  !forksMeta.touched || !forksMeta.error ? 'default' : 'error'
+                }
+                onChange={(value) => {
+                  forksHelpers.setValue(value);
+                }}
+                type="number"
+                min="0"
+              />
+            </FieldWithPrompt>
             <FieldWithPrompt
               fieldId="template-limit"
               label={t`Limit`}
               promptId="template-ask-limit-on-launch"
               promptName="ask_limit_on_launch"
-              tooltip={t`Provide a host pattern to further constrain
-                  the list of hosts that will be managed or affected by the
-                  playbook. Multiple patterns are allowed. Refer to Ansible
-                  documentation for more information and examples on patterns.`}
+              tooltip={helpText.limit}
             >
               <TextInput
                 id="template-limit"
@@ -456,48 +442,62 @@ function JobTemplateForm({
                 }}
               />
             </FieldWithPrompt>
-            <FieldWithPrompt
+            <VerbositySelectField
               fieldId="template-verbosity"
-              label={t`Verbosity`}
               promptId="template-ask-verbosity-on-launch"
               promptName="ask_verbosity_on_launch"
-              tooltip={t`Control the level of output ansible will
-                produce as the playbook executes.`}
+              tooltip={helpText.verbosity}
+            />
+            <FieldWithPrompt
+              fieldId="template-job-slicing"
+              label={t`Job Slicing`}
+              promptId="template-ask-job-slicing-on-launch"
+              promptName="ask_job_slice_count_on_launch"
+              tooltip={helpText.jobSlicing}
             >
-              <AnsibleSelect
-                id="template-verbosity"
-                data={verbosityOptions}
-                {...verbosityField}
+              <TextInput
+                id="template-job-slicing"
+                {...jobSliceCountField}
+                validated={
+                  !jobSliceCountMeta.touched || !jobSliceCountMeta.error
+                    ? 'default'
+                    : 'error'
+                }
+                onChange={(value) => {
+                  jobSliceCountHelpers.setValue(value);
+                }}
+                type="number"
+                min="1"
               />
             </FieldWithPrompt>
-            <FormField
-              id="template-job-slicing"
-              name="job_slice_count"
-              type="number"
-              min="1"
-              label={t`Job Slicing`}
-              tooltip={t`Divide the work done by this job template
-                  into the specified number of job slices, each running the
-                  same tasks against a portion of the inventory.`}
-            />
-            <FormField
-              id="template-timeout"
-              name="timeout"
-              type="number"
-              min="0"
+            <FieldWithPrompt
+              fieldId="template-timeout"
               label={t`Timeout`}
-              tooltip={t`The amount of time (in seconds) to run
-                  before the job is canceled. Defaults to 0 for no job
-                  timeout.`}
-            />
+              promptId="template-ask-timeout-on-launch"
+              promptName="ask_timeout_on_launch"
+              tooltip={helpText.timeout}
+            >
+              <TextInput
+                id="template-timeout"
+                {...timeoutField}
+                validated={
+                  !timeoutMeta.touched || !timeoutMeta.error
+                    ? 'default'
+                    : 'error'
+                }
+                onChange={(value) => {
+                  timeoutHelpers.setValue(value);
+                }}
+                type="number"
+                min="0"
+              />
+            </FieldWithPrompt>
             <FieldWithPrompt
               fieldId="template-diff-mode"
               label={t`Show Changes`}
               promptId="template-ask-diff-mode-on-launch"
               promptName="ask_diff_mode_on_launch"
-              tooltip={t`If enabled, show the changes made by
-                Ansible tasks, where supported. This is equivalent
-                to Ansible's --diff mode.`}
+              tooltip={helpText.showChanges}
             >
               <Switch
                 id="template-show-changes"
@@ -510,20 +510,18 @@ function JobTemplateForm({
               <InstanceGroupsLookup
                 value={instanceGroupsField.value}
                 onChange={(value) => instanceGroupsHelpers.setValue(value)}
-                tooltip={t`Select the Instance Groups for this Job Template
-                        to run on.`}
+                tooltip={helpText.instanceGroups}
                 fieldName="instanceGroups"
+                promptId="template-ask-instance-groups-on-launch"
+                promptName="ask_instance_groups_on_launch"
+                isPromptableField
               />
               <FieldWithPrompt
                 fieldId="template-tags"
                 label={t`Job Tags`}
                 promptId="template-ask-tags-on-launch"
                 promptName="ask_tags_on_launch"
-                tooltip={t`Tags are useful when you have a large
-                    playbook, and you want to run a specific part of a
-                    play or task. Use commas to separate multiple tags.
-                    Refer to the documentation for details on
-                    the usage of tags.`}
+                tooltip={helpText.jobTags}
               >
                 <TagMultiSelect
                   value={jobTagsField.value}
@@ -535,11 +533,7 @@ function JobTemplateForm({
                 label={t`Skip Tags`}
                 promptId="template-ask-skip-tags-on-launch"
                 promptName="ask_skip_tags_on_launch"
-                tooltip={t`Skip tags are useful when you have a
-                    large playbook, and you want to skip specific parts of a
-                    play or task. Use commas to separate multiple tags. Refer
-                    to the documentation for details on the usage
-                    of tags.`}
+                tooltip={helpText.skipTags}
               >
                 <TagMultiSelect
                   value={skipTagsField.value}
@@ -555,8 +549,7 @@ function JobTemplateForm({
                     id="option-privilege-escalation"
                     name="become_enabled"
                     label={t`Privilege Escalation`}
-                    tooltip={t`If enabled, run this playbook as an
-                        administrator.`}
+                    tooltip={helpText.privilegeEscalation}
                   />
                   <Checkbox
                     aria-label={t`Provisioning Callbacks`}
@@ -565,10 +558,7 @@ function JobTemplateForm({
                         {t`Provisioning Callbacks`}
                         &nbsp;
                         <Popover
-                          content={t`Enables creation of a provisioning
-                              callback URL. Using the URL a host can contact ${brandName}
-                              and request a configuration update using this job
-                              template.`}
+                          content={helpText.provisioningCallbacks(brandName)}
                         />
                       </span>
                     }
@@ -585,9 +575,7 @@ function JobTemplateForm({
                       <span>
                         {t`Enable Webhook`}
                         &nbsp;
-                        <Popover
-                          content={t`Enable webhook for this template.`}
-                        />
+                        <Popover content={helpText.enableWebhook} />
                       </span>
                     }
                     id="wfjt-enabled-webhooks"
@@ -601,67 +589,68 @@ function JobTemplateForm({
                     id="option-concurrent"
                     name="allow_simultaneous"
                     label={t`Concurrent Jobs`}
-                    tooltip={t`If enabled, simultaneous runs of this job
-                        template will be allowed.`}
+                    tooltip={helpText.concurrentJobs}
                   />
                   <CheckboxField
                     id="option-fact-cache"
                     name="use_fact_cache"
                     label={t`Enable Fact Storage`}
-                    tooltip={t`If enabled, this will store gathered facts so they can
-                      be viewed at the host level. Facts are persisted and
-                      injected into the fact cache at runtime.`}
+                    tooltip={helpText.enableFactStorage}
+                  />
+                  <CheckboxField
+                    id="option-prevent-instance-group-fallback"
+                    name="prevent_instance_group_fallback"
+                    label={t`Prevent Instance Group Fallback`}
+                    tooltip={helpText.preventInstanceGroupFallback}
                   />
                 </FormCheckboxLayout>
               </FormGroup>
             </FormFullWidthLayout>
 
             {(allowCallbacks || enableWebhooks) && (
-              <>
-                <SubFormLayout>
-                  {allowCallbacks && (
-                    <>
-                      <Title size="md" headingLevel="h4">
-                        {t`Provisioning Callback details`}
-                      </Title>
-                      <FormColumnLayout>
-                        {callbackUrl && (
-                          <FormGroup
-                            label={t`Provisioning Callback URL`}
-                            fieldId="template-callback-url"
-                          >
-                            <TextInput
-                              id="template-callback-url"
-                              isDisabled
-                              value={callbackUrl}
-                            />
-                          </FormGroup>
-                        )}
-                        <FormField
-                          id="template-host-config-key"
-                          name="host_config_key"
-                          label={t`Host Config Key`}
-                          validate={allowCallbacks ? required(null) : null}
-                          isRequired={allowCallbacks}
-                        />
-                      </FormColumnLayout>
-                    </>
-                  )}
+              <SubFormLayout>
+                {allowCallbacks && (
+                  <>
+                    <Title size="md" headingLevel="h4">
+                      {t`Provisioning Callback details`}
+                    </Title>
+                    <FormColumnLayout>
+                      {callbackUrl && (
+                        <FormGroup
+                          label={t`Provisioning Callback URL`}
+                          fieldId="template-callback-url"
+                        >
+                          <TextInput
+                            id="template-callback-url"
+                            isDisabled
+                            value={callbackUrl}
+                          />
+                        </FormGroup>
+                      )}
+                      <FormField
+                        id="template-host-config-key"
+                        name="host_config_key"
+                        label={t`Host Config Key`}
+                        validate={allowCallbacks ? required(null) : null}
+                        isRequired={allowCallbacks}
+                      />
+                    </FormColumnLayout>
+                  </>
+                )}
 
-                  {allowCallbacks && enableWebhooks && <br />}
+                {allowCallbacks && enableWebhooks && <br />}
 
-                  {enableWebhooks && (
-                    <>
-                      <Title size="md" headingLevel="h4">
-                        {t`Webhook details`}
-                      </Title>
-                      <FormColumnLayout>
-                        <WebhookSubForm templateType={template.type} />
-                      </FormColumnLayout>
-                    </>
-                  )}
-                </SubFormLayout>
-              </>
+                {enableWebhooks && (
+                  <>
+                    <Title size="md" headingLevel="h4">
+                      {t`Webhook details`}
+                    </Title>
+                    <FormColumnLayout>
+                      <WebhookSubForm templateType={template.type} />
+                    </FormColumnLayout>
+                  </>
+                )}
+              </SubFormLayout>
             )}
           </FormColumnLayout>
         </FormFullWidthLayout>
@@ -701,7 +690,7 @@ JobTemplateForm.defaultProps = {
 };
 
 const FormikApp = withFormik({
-  mapPropsToValues({ template = {} }) {
+  mapPropsToValues({ projectValues = {}, template = {} }) {
     const {
       summary_fields = {
         labels: { results: [] },
@@ -714,12 +703,21 @@ const FormikApp = withFormik({
       allow_simultaneous: template.allow_simultaneous || false,
       ask_credential_on_launch: template.ask_credential_on_launch || false,
       ask_diff_mode_on_launch: template.ask_diff_mode_on_launch || false,
+      ask_execution_environment_on_launch:
+        template.ask_execution_environment_on_launch || false,
+      ask_forks_on_launch: template.ask_forks_on_launch || false,
+      ask_instance_groups_on_launch:
+        template.ask_instance_groups_on_launch || false,
       ask_inventory_on_launch: template.ask_inventory_on_launch || false,
+      ask_job_slice_count_on_launch:
+        template.ask_job_slice_count_on_launch || false,
       ask_job_type_on_launch: template.ask_job_type_on_launch || false,
+      ask_labels_on_launch: template.ask_labels_on_launch || false,
       ask_limit_on_launch: template.ask_limit_on_launch || false,
       ask_scm_branch_on_launch: template.ask_scm_branch_on_launch || false,
       ask_skip_tags_on_launch: template.ask_skip_tags_on_launch || false,
       ask_tags_on_launch: template.ask_tags_on_launch || false,
+      ask_timeout_on_launch: template.ask_timeout_on_launch || false,
       ask_variables_on_launch: template.ask_variables_on_launch || false,
       ask_verbosity_on_launch: template.ask_verbosity_on_launch || false,
       become_enabled: template.become_enabled || false,
@@ -739,7 +737,9 @@ const FormikApp = withFormik({
       limit: template.limit || '',
       name: template.name || '',
       playbook: template.playbook || '',
-      project: summary_fields?.project || null,
+      prevent_instance_group_fallback:
+        template.prevent_instance_group_fallback || false,
+      project: summary_fields?.project || projectValues || null,
       scm_branch: template.scm_branch || '',
       skip_tags: template.skip_tags || '',
       timeout: template.timeout || 0,

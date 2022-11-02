@@ -6,7 +6,7 @@ import ldap
 
 # Django
 from django.core.exceptions import ValidationError
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 __all__ = [
     'validate_ldap_dn',

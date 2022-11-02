@@ -8,7 +8,7 @@ export default function useWebsocket(subscribeGroups) {
     ws.current = new WebSocket(
       `${window.location.protocol === 'http:' ? 'ws:' : 'wss:'}//${
         window.location.host
-      }/websocket/`
+      }${window.location.pathname}websocket/`
     );
 
     const connect = () => {

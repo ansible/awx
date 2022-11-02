@@ -9,8 +9,8 @@ import urllib.parse as urlparse
 # Django
 from django.conf import settings
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import smart_str, smart_text
+from django.utils.translation import gettext_lazy as _
+from django.utils.encoding import smart_str
 from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now, make_aware, get_default_timezone
@@ -33,12 +33,11 @@ from awx.main.models.mixins import ResourceMixin, TaskManagerProjectUpdateMixin,
 from awx.main.utils import update_scm_url, polymorphic
 from awx.main.utils.ansible import skip_directory, could_be_inventory, could_be_playbook
 from awx.main.utils.execution_environments import get_control_plane_execution_environment
-from awx.main.fields import ImplicitRoleField
+from awx.main.fields import ImplicitRoleField, JSONBlob
 from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
-from awx.main.fields import JSONField
 
 __all__ = ['Project', 'ProjectUpdate']
 
@@ -214,7 +213,7 @@ class ProjectOptions(models.Model):
                 for filename in filenames:
                     playbook = could_be_playbook(project_path, dirpath, filename)
                     if playbook is not None:
-                        results.append(smart_text(playbook))
+                        results.append(smart_str(playbook))
         return sorted(results, key=lambda x: smart_str(x).lower())
 
     @property
@@ -230,7 +229,7 @@ class ProjectOptions(models.Model):
                 for filename in filenames:
                     inv_path = could_be_inventory(project_path, dirpath, filename)
                     if inv_path is not None:
-                        results.append(smart_text(inv_path))
+                        results.append(smart_str(inv_path))
                         if len(results) > max_inventory_listing:
                             break
                 if len(results) > max_inventory_listing:
@@ -285,6 +284,17 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         help_text=_('Allow changing the SCM branch or revision in a job template ' 'that uses this project.'),
     )
 
+    # credential (keys) used to validate content signature
+    signature_validation_credential = models.ForeignKey(
+        'Credential',
+        related_name='%(class)ss_signature_validation',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+        help_text=_('An optional credential used for validating files in the project against unexpected changes.'),
+    )
+
     scm_revision = models.CharField(
         max_length=1024,
         blank=True,
@@ -294,17 +304,17 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         help_text=_('The last revision fetched by a project update'),
     )
 
-    playbook_files = JSONField(
+    playbook_files = JSONBlob(
+        default=list,
         blank=True,
-        default=[],
         editable=False,
         verbose_name=_('Playbook Files'),
         help_text=_('List of playbooks found in the project'),
     )
 
-    inventory_files = JSONField(
+    inventory_files = JSONBlob(
+        default=list,
         blank=True,
-        default=[],
         editable=False,
         verbose_name=_('Inventory Files'),
         help_text=_('Suggested list of content that could be Ansible inventory in the project'),
@@ -355,7 +365,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
-        skip_update = bool(kwargs.pop('skip_update', False))
+        self._skip_update = bool(kwargs.pop('skip_update', False))
         # Create auto-generated local path if project uses SCM.
         if self.pk and self.scm_type and not self.local_path.startswith('_'):
             slug_name = slugify(str(self.name)).replace(u'-', u'_')
@@ -373,14 +383,16 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
                 from awx.main.signals import disable_activity_stream
 
                 with disable_activity_stream():
-                    self.save(update_fields=update_fields)
+                    self.save(update_fields=update_fields, skip_update=self._skip_update)
         # If we just created a new project with SCM, start the initial update.
         # also update if certain fields have changed
         relevant_change = any(pre_save_vals.get(fd_name, None) != self._prior_values_store.get(fd_name, None) for fd_name in self.FIELDS_TRIGGER_UPDATE)
-        if (relevant_change or new_instance) and (not skip_update) and self.scm_type:
+        if (relevant_change or new_instance) and (not self._skip_update) and self.scm_type:
             self.update()
 
     def _get_current_status(self):
+        if getattr(self, '_skip_update', False):
+            return self.status
         if self.scm_type:
             if self.current_job and self.current_job.status:
                 return self.current_job.status
@@ -512,6 +524,9 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         help_text=_('The SCM Revision discovered by this update for the given project and branch.'),
     )
 
+    def _set_default_dependencies_processed(self):
+        self.dependencies_processed = True
+
     def _get_parent_field_name(self):
         return 'project'
 
@@ -559,8 +574,7 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
             return UnpartitionedProjectUpdateEvent
         return ProjectUpdateEvent
 
-    @property
-    def task_impact(self):
+    def _get_task_impact(self):
         return 0 if self.job_type == 'run' else 1
 
     @property
@@ -613,30 +627,14 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
     def get_notification_friendly_name(self):
         return "Project Update"
 
-    @property
-    def preferred_instance_groups(self):
-        '''
-        Project updates should pretty much always run on the control plane
-        however, we are not yet saying no to custom groupings within the control plane
-        Thus, we return custom groups and then unconditionally add the control plane
-        '''
-        if self.organization is not None:
-            organization_groups = [x for x in self.organization.instance_groups.all()]
-        else:
-            organization_groups = []
-        template_groups = [x for x in super(ProjectUpdate, self).preferred_instance_groups]
-        selected_groups = template_groups + organization_groups
-
-        controlplane_ig = self.control_plane_instance_group
-        if controlplane_ig and controlplane_ig[0] and controlplane_ig[0] not in selected_groups:
-            selected_groups += controlplane_ig
-
-        return selected_groups
-
     def save(self, *args, **kwargs):
         added_update_fields = []
         if not self.job_tags:
             job_tags = ['update_{}'.format(self.scm_type), 'install_roles', 'install_collections']
+            if self.project.signature_validation_credential is not None:
+                credential_type = self.project.signature_validation_credential.credential_type.namespace
+                job_tags.append(f'validation_{credential_type}')
+                job_tags.append('validation_checksum_manifest')
             self.job_tags = ','.join(job_tags)
             added_update_fields.append('job_tags')
         if self.scm_delete_on_update and 'delete' not in self.job_tags and self.job_type == 'check':

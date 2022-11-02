@@ -11,8 +11,10 @@ import useRequest, { useDismissableError } from 'hooks/useRequest';
 import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';
 import { ProjectsAPI } from 'api';
+import getProjectHelpStrings from './Project.helptext';
 
 function ProjectSyncButton({ projectId, lastJobStatus = null }) {
+  const projectHelpStrings = getProjectHelpStrings();
   const match = useRouteMatch();
 
   const { request: handleSync, error: syncError } = useRequest(
@@ -21,7 +23,6 @@ function ProjectSyncButton({ projectId, lastJobStatus = null }) {
     }, [projectId]),
     null
   );
-
   const { error, dismissError } = useDismissableError(syncError);
   const isDetailsView = match.url.endsWith('/details');
   const isDisabled = ['pending', 'waiting', 'running'].includes(lastJobStatus);
@@ -29,10 +30,7 @@ function ProjectSyncButton({ projectId, lastJobStatus = null }) {
   return (
     <>
       {isDisabled ? (
-        <Tooltip
-          content={t`This project is currently on sync and cannot be clicked until sync process completed`}
-          position="top"
-        >
+        <Tooltip content={projectHelpStrings.syncButtonDisabled} position="top">
           <div>
             <Button
               ouiaId={`${projectId}-sync-button`}

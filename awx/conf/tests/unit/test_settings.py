@@ -8,10 +8,12 @@ import codecs
 from uuid import uuid4
 import time
 
+from unittest import mock
+
 from django.conf import LazySettings
 from django.core.cache.backends.locmem import LocMemCache
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 import pytest
 
 from awx.conf import models, fields
@@ -299,3 +301,33 @@ def test_readonly_sensitive_cache_data_is_encrypted(settings):
     cache.set('AWX_ENCRYPTED', 'SECRET!')
     assert cache.get('AWX_ENCRYPTED') == 'SECRET!'
     assert native_cache.get('AWX_ENCRYPTED') == 'FRPERG!'
+
+
+@pytest.mark.defined_in_file(AWX_VAR='DEFAULT')
+def test_in_memory_cache_only_for_registered_settings(settings):
+    "Test that we only make use of the in-memory TTL cache for registered settings"
+    settings._awx_conf_memoizedcache.clear()
+    settings.MIDDLEWARE
+    assert len(settings._awx_conf_memoizedcache) == 0  # does not cache MIDDLEWARE
+    settings.registry.register('AWX_VAR', field_class=fields.CharField, category=_('System'), category_slug='system')
+    settings._wrapped.__dict__['all_supported_settings'] = ['AWX_VAR']  # because it is cached_property
+    settings._awx_conf_memoizedcache.clear()
+    assert settings.AWX_VAR == 'DEFAULT'
+    assert len(settings._awx_conf_memoizedcache) == 1  # caches registered settings
+
+
+@pytest.mark.defined_in_file(AWX_VAR='DEFAULT')
+def test_in_memory_cache_works(settings):
+    settings._awx_conf_memoizedcache.clear()
+    settings.registry.register('AWX_VAR', field_class=fields.CharField, category=_('System'), category_slug='system')
+    settings._wrapped.__dict__['all_supported_settings'] = ['AWX_VAR']
+
+    settings._awx_conf_memoizedcache.clear()
+
+    with mock.patch('awx.conf.settings.SettingsWrapper._get_local', return_value='DEFAULT') as mock_get:
+        assert settings.AWX_VAR == 'DEFAULT'
+        mock_get.assert_called_once_with('AWX_VAR')
+
+    with mock.patch.object(settings, '_get_local') as mock_get:
+        assert settings.AWX_VAR == 'DEFAULT'
+        mock_get.assert_not_called()

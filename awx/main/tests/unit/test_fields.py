@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from unittest import mock
 import pytest
 
 from django.core.exceptions import ValidationError
@@ -8,7 +9,7 @@ from django.db.models.fields.related_descriptors import ReverseManyToOneDescript
 
 from rest_framework.serializers import ValidationError as DRFValidationError
 
-from awx.main.models import Credential, CredentialType, BaseModel
+from awx.main.models import Credential, CredentialType
 from awx.main.fields import JSONSchemaField, ImplicitRoleField, ImplicitRoleDescriptor
 
 
@@ -16,7 +17,7 @@ from awx.main.fields import JSONSchemaField, ImplicitRoleField, ImplicitRoleDesc
     'schema, given, message',
     [
         (
-            {  # immitates what the CredentialType injectors field is
+            {  # imitates what the CredentialType injectors field is
                 "additionalProperties": False,
                 "type": "object",
                 "properties": {"extra_vars": {"additionalProperties": False, "type": "object"}},
@@ -25,7 +26,7 @@ from awx.main.fields import JSONSchemaField, ImplicitRoleField, ImplicitRoleDesc
             "list provided in relative path ['extra_vars'], expected dict",
         ),
         (
-            {  # immitates what the CredentialType injectors field is
+            {  # imitates what the CredentialType injectors field is
                 "additionalProperties": False,
                 "type": "object",
             },
@@ -35,7 +36,7 @@ from awx.main.fields import JSONSchemaField, ImplicitRoleField, ImplicitRoleDesc
     ],
 )
 def test_custom_error_messages(schema, given, message):
-    instance = BaseModel()
+    instance = mock.Mock()
 
     class MockFieldSubclass(JSONSchemaField):
         def schema(self, model_instance):

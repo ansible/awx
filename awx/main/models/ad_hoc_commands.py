@@ -9,7 +9,7 @@ from urllib.parse import urljoin
 from django.conf import settings
 from django.db import models
 from django.utils.text import Truncator
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 
 # AWX
@@ -89,6 +89,9 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
     )
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
+
+    def _set_default_dependencies_processed(self):
+        self.dependencies_processed = True
 
     def clean_inventory(self):
         inv = self.inventory
@@ -178,12 +181,12 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
     def get_passwords_needed_to_start(self):
         return self.passwords_needed_to_start
 
-    @property
-    def task_impact(self):
+    def _get_task_impact(self):
         # NOTE: We sorta have to assume the host count matches and that forks default to 5
-        from awx.main.models.inventory import Host
-
-        count_hosts = Host.objects.filter(enabled=True, inventory__ad_hoc_commands__pk=self.pk).count()
+        if self.inventory:
+            count_hosts = self.inventory.total_hosts
+        else:
+            count_hosts = 5
         return min(count_hosts, 5 if self.forks == 0 else self.forks) + 1
 
     def copy(self):
@@ -207,23 +210,32 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
 
     def save(self, *args, **kwargs):
         update_fields = kwargs.get('update_fields', [])
+
+        def add_to_update_fields(name):
+            if name not in update_fields:
+                update_fields.append(name)
+
+        if not self.preferred_instance_groups_cache:
+            self.preferred_instance_groups_cache = self._get_preferred_instance_group_cache()
+            add_to_update_fields("preferred_instance_groups_cache")
         if not self.name:
             self.name = Truncator(u': '.join(filter(None, (self.module_name, self.module_args)))).chars(512)
-            if 'name' not in update_fields:
-                update_fields.append('name')
+            add_to_update_fields("name")
+        if self.task_impact == 0:
+            self.task_impact = self._get_task_impact()
+            add_to_update_fields("task_impact")
         super(AdHocCommand, self).save(*args, **kwargs)
 
     @property
     def preferred_instance_groups(self):
-        if self.inventory is not None and self.inventory.organization is not None:
-            organization_groups = [x for x in self.inventory.organization.instance_groups.all()]
-        else:
-            organization_groups = []
+        selected_groups = []
         if self.inventory is not None:
-            inventory_groups = [x for x in self.inventory.instance_groups.all()]
-        else:
-            inventory_groups = []
-        selected_groups = inventory_groups + organization_groups
+            for instance_group in self.inventory.instance_groups.all():
+                selected_groups.append(instance_group)
+            if not self.inventory.prevent_instance_group_fallback and self.inventory.organization is not None:
+                for instance_group in self.inventory.organization.instance_groups.all():
+                    selected_groups.append(instance_group)
+
         if not selected_groups:
             return self.global_instance_groups
         return selected_groups

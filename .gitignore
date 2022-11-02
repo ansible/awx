@@ -7,6 +7,9 @@ reference-schema.json
 .tags
 .tags1
 
+# User level pre-commit hooks
+pre-commit-user
+
 # Tower
 awx-dev
 awx/settings/local_*.py*
@@ -35,7 +38,6 @@ awx/ui/build
 awx/ui/.env.local
 awx/ui/instrumented
 rsyslog.pid
-tools/prometheus/data
 tools/docker-compose/ansible/awx_dump.sql
 tools/docker-compose/Dockerfile
 tools/docker-compose/_build

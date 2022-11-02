@@ -59,6 +59,30 @@ def add_authentication_arguments(parser, env):
     )
 
 
+def add_verbose(formatting, env):
+    formatting.add_argument(
+        '-v',
+        '--verbose',
+        dest='conf.verbose',
+        help='print debug-level logs, including requests made',
+        default=strtobool(env.get('CONTROLLER_VERBOSE', env.get('TOWER_VERBOSE', 'f'))),
+        action="store_true",
+    )
+
+
+def add_formatting_import_export(parser, env):
+    formatting = parser.add_argument_group('input/output formatting')
+    formatting.add_argument(
+        '-f',
+        '--conf.format',
+        dest='conf.format',
+        choices=['json', 'yaml'],
+        default=env.get('CONTROLLER_FORMAT', env.get('TOWER_FORMAT', 'json')),
+        help=('specify a format for the input and output'),
+    )
+    add_verbose(formatting, env)
+
+
 def add_output_formatting_arguments(parser, env):
     formatting = parser.add_argument_group('input/output formatting')
 
@@ -84,14 +108,7 @@ def add_output_formatting_arguments(parser, env):
         default=env.get('CONTROLLER_COLOR', env.get('TOWER_COLOR', 't')),
         type=strtobool,
     )
-    formatting.add_argument(
-        '-v',
-        '--verbose',
-        dest='conf.verbose',
-        help='print debug-level logs, including requests made',
-        default=strtobool(env.get('CONTROLLER_VERBOSE', env.get('TOWER_VERBOSE', 'f'))),
-        action="store_true",
-    )
+    add_verbose(formatting, env)
 
 
 def format_response(response, fmt='json', filter='.', changed=False):

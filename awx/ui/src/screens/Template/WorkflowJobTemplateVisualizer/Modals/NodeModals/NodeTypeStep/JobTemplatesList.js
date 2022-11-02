@@ -44,30 +44,28 @@ function TemplatePopoverContent({ template }) {
         value={template?.playbook}
         dataCy={`template-${template.id}-playbook`}
       />
-      {template.summary_fields?.credentials &&
-      template.summary_fields.credentials.length ? (
-        <Detail
-          fullWidth
-          label={t`Credentials`}
-          dataCy={`template-${template.id}-credentials`}
-          value={
-            <ChipGroup
-              numChips={5}
-              totalChips={template.summary_fields.credentials.length}
-              ouiaId={`template-${template.id}-credential-chips`}
-            >
-              {template.summary_fields.credentials.map((c) => (
-                <CredentialChip
-                  key={c.id}
-                  credential={c}
-                  isReadOnly
-                  ouiaId={`credential-${c.id}-chip`}
-                />
-              ))}
-            </ChipGroup>
-          }
-        />
-      ) : null}
+      <Detail
+        fullWidth
+        label={t`Credentials`}
+        dataCy={`template-${template.id}-credentials`}
+        value={
+          <ChipGroup
+            numChips={5}
+            totalChips={template.summary_fields?.credentials?.length}
+            ouiaId={`template-${template.id}-credential-chips`}
+          >
+            {template.summary_fields?.credentials?.map((c) => (
+              <CredentialChip
+                key={c.id}
+                credential={c}
+                isReadOnly
+                ouiaId={`credential-${c.id}-chip`}
+              />
+            ))}
+          </ChipGroup>
+        }
+        isEmpty={template.summary_fields?.credentials?.length === 0}
+      />
     </DetailList>
   );
 }

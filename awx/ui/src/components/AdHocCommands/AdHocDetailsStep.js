@@ -7,6 +7,7 @@ import { Form, FormGroup, Switch, Checkbox } from '@patternfly/react-core';
 import styled from 'styled-components';
 import { required } from 'util/validators';
 import useBrandName from 'hooks/useBrandName';
+import { VerbositySelectField } from 'components/VerbositySelectField';
 import AnsibleSelect from '../AnsibleSelect';
 import FormField from '../FormField';
 import { VariablesField } from '../CodeEditor';
@@ -21,7 +22,7 @@ const TooltipWrapper = styled.div`
   text-align: left;
 `;
 
-function AdHocDetailsStep({ verbosityOptions, moduleOptions }) {
+function AdHocDetailsStep({ moduleOptions }) {
   const brandName = useBrandName();
   const [moduleNameField, moduleNameMeta, moduleNameHelpers] = useField({
     name: 'module_name',
@@ -32,7 +33,7 @@ function AdHocDetailsStep({ verbosityOptions, moduleOptions }) {
   const [diffModeField, , diffModeHelpers] = useField('diff_mode');
   const [becomeEnabledField, , becomeEnabledHelpers] =
     useField('become_enabled');
-  const [verbosityField, verbosityMeta, verbosityHelpers] = useField({
+  const [, verbosityMeta] = useField({
     name: 'verbosity',
     validate: required(null),
   });
@@ -122,33 +123,16 @@ function AdHocDetailsStep({ verbosityOptions, moduleOptions }) {
               )
             }
           />
-          <FormGroup
+
+          <VerbositySelectField
             fieldId="verbosity"
-            aria-label={t`select verbosity`}
-            label={t`Verbosity`}
-            isRequired
-            validated={
+            tooltip={t`These are the verbosity levels for standard out of the command run that are supported.`}
+            isValid={
               !verbosityMeta.touched || !verbosityMeta.error
                 ? 'default'
                 : 'error'
             }
-            helperTextInvalid={verbosityMeta.error}
-            labelIcon={
-              <Popover
-                content={t`These are the verbosity levels for standard out of the command run that are supported.`}
-              />
-            }
-          >
-            <AnsibleSelect
-              {...verbosityField}
-              isValid={!verbosityMeta.touched || !verbosityMeta.error}
-              id="verbosity"
-              data={verbosityOptions || []}
-              onChange={(event, value) => {
-                verbosityHelpers.setValue(parseInt(value, 10));
-              }}
-            />
-          </FormGroup>
+          />
           <FormField
             id="limit"
             name="limit"
@@ -296,7 +280,6 @@ function AdHocDetailsStep({ verbosityOptions, moduleOptions }) {
 
 AdHocDetailsStep.propTypes = {
   moduleOptions: PropTypes.arrayOf(PropTypes.array).isRequired,
-  verbosityOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
 export default AdHocDetailsStep;

@@ -11,8 +11,9 @@ from urllib.parse import urljoin
 # Django
 from django.db import connection, models
 from django.conf import settings
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils.timezone import now, timedelta
 
 # from django import settings as tower_settings
 
@@ -28,7 +29,7 @@ from awx.main.models import prevent_search, accepts_json, UnifiedJobTemplate, Un
 from awx.main.models.notifications import NotificationTemplate, JobNotificationMixin
 from awx.main.models.base import CreatedModifiedModel, VarsDictProperty
 from awx.main.models.rbac import ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
-from awx.main.fields import ImplicitRoleField, AskForField
+from awx.main.fields import ImplicitRoleField, JSONBlob, OrderedManyToManyField
 from awx.main.models.mixins import (
     ResourceMixin,
     SurveyJobTemplateMixin,
@@ -40,8 +41,7 @@ from awx.main.models.mixins import (
 from awx.main.models.jobs import LaunchTimeConfigBase, LaunchTimeConfig, JobTemplate
 from awx.main.models.credential import Credential
 from awx.main.redact import REPLACE_STR
-from awx.main.fields import JSONField
-from awx.main.utils import schedule_task_manager
+from awx.main.utils import ScheduleWorkflowManager
 
 
 __all__ = [
@@ -114,6 +114,9 @@ class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
             'credentials',
             'char_prompts',
             'all_parents_must_converge',
+            'labels',
+            'instance_groups',
+            'execution_environment',
         ]
 
     def create_workflow_job_node(self, **kwargs):
@@ -122,7 +125,7 @@ class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
         """
         create_kwargs = {}
         for field_name in self._get_workflow_job_field_names():
-            if field_name == 'credentials':
+            if field_name in ['credentials', 'labels', 'instance_groups']:
                 continue
             if field_name in kwargs:
                 create_kwargs[field_name] = kwargs[field_name]
@@ -132,10 +135,20 @@ class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
         new_node = WorkflowJobNode.objects.create(**create_kwargs)
         if self.pk:
             allowed_creds = self.credentials.all()
+            allowed_labels = self.labels.all()
+            allowed_instance_groups = self.instance_groups.all()
         else:
             allowed_creds = []
+            allowed_labels = []
+            allowed_instance_groups = []
         for cred in allowed_creds:
             new_node.credentials.add(cred)
+
+        for label in allowed_labels:
+            new_node.labels.add(label)
+        for instance_group in allowed_instance_groups:
+            new_node.instance_groups.add(instance_group)
+
         return new_node
 
 
@@ -153,6 +166,9 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         'char_prompts',
         'all_parents_must_converge',
         'identifier',
+        'labels',
+        'execution_environment',
+        'instance_groups',
     ]
     REENCRYPTION_BLOCKLIST_AT_COPY = ['extra_data', 'survey_passwords']
 
@@ -166,6 +182,13 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         default=uuid4,
         blank=False,
         help_text=_('An identifier for this node that is unique within its workflow. ' 'It is copied to workflow job nodes corresponding to this node.'),
+    )
+    instance_groups = OrderedManyToManyField(
+        'InstanceGroup',
+        related_name='workflow_job_template_node_instance_groups',
+        blank=True,
+        editable=False,
+        through='WorkflowJobTemplateNodeBaseInstanceGroupMembership',
     )
 
     class Meta:
@@ -211,7 +234,7 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         approval_template = WorkflowApprovalTemplate(**kwargs)
         approval_template.save()
         self.unified_job_template = approval_template
-        self.save()
+        self.save(update_fields=['unified_job_template'])
         return approval_template
 
 
@@ -232,9 +255,9 @@ class WorkflowJobNode(WorkflowNodeBase):
         default=None,
         on_delete=models.CASCADE,
     )
-    ancestor_artifacts = JSONField(
-        blank=True,
+    ancestor_artifacts = JSONBlob(
         default=dict,
+        blank=True,
         editable=False,
     )
     do_not_run = models.BooleanField(
@@ -249,6 +272,9 @@ class WorkflowJobNode(WorkflowNodeBase):
         max_length=512,
         blank=True,  # blank denotes pre-migration job nodes
         help_text=_('An identifier coresponding to the workflow job template node that this node was created from.'),
+    )
+    instance_groups = OrderedManyToManyField(
+        'InstanceGroup', related_name='workflow_job_node_instance_groups', blank=True, editable=False, through='WorkflowJobNodeBaseInstanceGroupMembership'
     )
 
     class Meta:
@@ -265,19 +291,6 @@ class WorkflowJobNode(WorkflowNodeBase):
     def get_absolute_url(self, request=None):
         return reverse('api:workflow_job_node_detail', kwargs={'pk': self.pk}, request=request)
 
-    def prompts_dict(self, *args, **kwargs):
-        r = super(WorkflowJobNode, self).prompts_dict(*args, **kwargs)
-        # Explanation - WFJT extra_vars still break pattern, so they are not
-        # put through prompts processing, but inventory and others are only accepted
-        # if JT prompts for it, so it goes through this mechanism
-        if self.workflow_job:
-            if self.workflow_job.inventory_id:
-                # workflow job inventory takes precedence
-                r['inventory'] = self.workflow_job.inventory
-            if self.workflow_job.char_prompts:
-                r.update(self.workflow_job.char_prompts)
-        return r
-
     def get_job_kwargs(self):
         """
         In advance of creating a new unified job as part of a workflow,
@@ -287,16 +300,38 @@ class WorkflowJobNode(WorkflowNodeBase):
         """
         # reject/accept prompted fields
         data = {}
+        wj_special_vars = {}
+        wj_special_passwords = {}
         ujt_obj = self.unified_job_template
         if ujt_obj is not None:
-            # MERGE note: move this to prompts_dict method on node when merging
-            # with the workflow inventory branch
-            prompts_data = self.prompts_dict()
-            if isinstance(ujt_obj, WorkflowJobTemplate):
-                if self.workflow_job.extra_vars:
-                    prompts_data.setdefault('extra_vars', {})
-                    prompts_data['extra_vars'].update(self.workflow_job.extra_vars_dict)
-            accepted_fields, ignored_fields, errors = ujt_obj._accept_or_ignore_job_kwargs(**prompts_data)
+            node_prompts_data = self.prompts_dict(for_cls=ujt_obj.__class__)
+            wj_prompts_data = self.workflow_job.prompts_dict(for_cls=ujt_obj.__class__)
+            # Explanation - special historical case
+            # WFJT extra_vars ignored JobTemplate.ask_variables_on_launch, bypassing _accept_or_ignore_job_kwargs
+            # inventory and others are only accepted if JT prompts for it with related ask_ field
+            # this is inconsistent, but maintained
+            if not isinstance(ujt_obj, WorkflowJobTemplate):
+                wj_special_vars = wj_prompts_data.pop('extra_vars', {})
+                wj_special_passwords = wj_prompts_data.pop('survey_passwords', {})
+            elif 'extra_vars' in node_prompts_data:
+                # Follow the vars combination rules
+                node_prompts_data['extra_vars'].update(wj_prompts_data.pop('extra_vars', {}))
+            elif 'survey_passwords' in node_prompts_data:
+                node_prompts_data['survey_passwords'].update(wj_prompts_data.pop('survey_passwords', {}))
+
+            # Follow the credential combination rules
+            if ('credentials' in wj_prompts_data) and ('credentials' in node_prompts_data):
+                wj_pivoted_creds = Credential.unique_dict(wj_prompts_data['credentials'])
+                node_pivoted_creds = Credential.unique_dict(node_prompts_data['credentials'])
+                node_pivoted_creds.update(wj_pivoted_creds)
+                wj_prompts_data['credentials'] = [cred for cred in node_pivoted_creds.values()]
+
+            # NOTE: no special rules for instance_groups, because they do not merge
+            # or labels, because they do not propogate WFJT-->node at all
+
+            # Combine WFJT prompts with node here, WFJT at higher level
+            node_prompts_data.update(wj_prompts_data)
+            accepted_fields, ignored_fields, errors = ujt_obj._accept_or_ignore_job_kwargs(**node_prompts_data)
             if errors:
                 logger.info(
                     _('Bad launch configuration starting template {template_pk} as part of ' 'workflow {workflow_pk}. Errors:\n{error_text}').format(
@@ -304,36 +339,24 @@ class WorkflowJobNode(WorkflowNodeBase):
                     )
                 )
             data.update(accepted_fields)  # missing fields are handled in the scheduler
-            try:
-                # config saved on the workflow job itself
-                wj_config = self.workflow_job.launch_config
-            except ObjectDoesNotExist:
-                wj_config = None
-            if wj_config:
-                accepted_fields, ignored_fields, errors = ujt_obj._accept_or_ignore_job_kwargs(**wj_config.prompts_dict())
-                accepted_fields.pop('extra_vars', None)  # merge handled with other extra_vars later
-                data.update(accepted_fields)
         # build ancestor artifacts, save them to node model for later
         aa_dict = {}
         is_root_node = True
         for parent_node in self.get_parent_nodes():
             is_root_node = False
             aa_dict.update(parent_node.ancestor_artifacts)
-            if parent_node.job and hasattr(parent_node.job, 'artifacts'):
-                aa_dict.update(parent_node.job.artifacts)
+            if parent_node.job:
+                aa_dict.update(parent_node.job.get_effective_artifacts(parents_set=set([self.workflow_job_id])))
         if aa_dict and not is_root_node:
             self.ancestor_artifacts = aa_dict
             self.save(update_fields=['ancestor_artifacts'])
         # process password list
-        password_dict = {}
+        password_dict = data.get('survey_passwords', {})
         if '_ansible_no_log' in aa_dict:
             for key in aa_dict:
                 if key != '_ansible_no_log':
                     password_dict[key] = REPLACE_STR
-        if self.workflow_job.survey_passwords:
-            password_dict.update(self.workflow_job.survey_passwords)
-        if self.survey_passwords:
-            password_dict.update(self.survey_passwords)
+        password_dict.update(wj_special_passwords)
         if password_dict:
             data['survey_passwords'] = password_dict
         # process extra_vars
@@ -343,12 +366,12 @@ class WorkflowJobNode(WorkflowNodeBase):
                 functional_aa_dict = copy(aa_dict)
                 functional_aa_dict.pop('_ansible_no_log', None)
                 extra_vars.update(functional_aa_dict)
-        if ujt_obj and isinstance(ujt_obj, JobTemplate):
-            # Workflow Job extra_vars higher precedence than ancestor artifacts
-            if self.workflow_job and self.workflow_job.extra_vars:
-                extra_vars.update(self.workflow_job.extra_vars_dict)
+
+        # Workflow Job extra_vars higher precedence than ancestor artifacts
+        extra_vars.update(wj_special_vars)
         if extra_vars:
             data['extra_vars'] = extra_vars
+
         # ensure that unified jobs created by WorkflowJobs are marked
         data['_eager_fields'] = {'launch_type': 'workflow'}
         if self.workflow_job and self.workflow_job.created_by:
@@ -374,6 +397,10 @@ class WorkflowJobOptions(LaunchTimeConfigBase):
             )
         )
     )
+    # Workflow jobs are used for sliced jobs, and thus, must be a conduit for any JT prompts
+    instance_groups = OrderedManyToManyField(
+        'InstanceGroup', related_name='workflow_job_instance_groups', blank=True, editable=False, through='WorkflowJobInstanceGroupMembership'
+    )
     allow_simultaneous = models.BooleanField(default=False)
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
@@ -385,7 +412,7 @@ class WorkflowJobOptions(LaunchTimeConfigBase):
     @classmethod
     def _get_unified_job_field_names(cls):
         r = set(f.name for f in WorkflowJobOptions._meta.fields) | set(
-            ['name', 'description', 'organization', 'survey_passwords', 'labels', 'limit', 'scm_branch']
+            ['name', 'description', 'organization', 'survey_passwords', 'labels', 'limit', 'scm_branch', 'job_tags', 'skip_tags']
         )
         r.remove('char_prompts')  # needed due to copying launch config to launch config
         return r
@@ -425,26 +452,29 @@ class WorkflowJobOptions(LaunchTimeConfigBase):
 class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTemplateMixin, ResourceMixin, RelatedJobsMixin, WebhookTemplateMixin):
 
     SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name', 'organization')]
-    FIELDS_TO_PRESERVE_AT_COPY = ['labels', 'organization', 'instance_groups', 'workflow_job_template_nodes', 'credentials', 'survey_spec']
+    FIELDS_TO_PRESERVE_AT_COPY = [
+        'labels',
+        'organization',
+        'instance_groups',
+        'workflow_job_template_nodes',
+        'credentials',
+        'survey_spec',
+        'skip_tags',
+        'job_tags',
+        'execution_environment',
+    ]
 
     class Meta:
         app_label = 'main'
 
-    ask_inventory_on_launch = AskForField(
+    notification_templates_approvals = models.ManyToManyField(
+        "NotificationTemplate",
         blank=True,
-        default=False,
+        related_name='%(class)s_notification_templates_for_approvals',
     )
-    ask_limit_on_launch = AskForField(
-        blank=True,
-        default=False,
+    admin_role = ImplicitRoleField(
+        parent_role=['singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, 'organization.workflow_admin_role'],
     )
-    ask_scm_branch_on_launch = AskForField(
-        blank=True,
-        default=False,
-    )
-    notification_templates_approvals = models.ManyToManyField("NotificationTemplate", blank=True, related_name='%(class)s_notification_templates_for_approvals')
-
-    admin_role = ImplicitRoleField(parent_role=['singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, 'organization.workflow_admin_role'])
     execute_role = ImplicitRoleField(
         parent_role=[
             'admin_role',
@@ -623,6 +653,9 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
     )
     is_sliced_job = models.BooleanField(default=False)
 
+    def _set_default_dependencies_processed(self):
+        self.dependencies_processed = True
+
     @property
     def workflow_nodes(self):
         return self.workflow_job_nodes
@@ -660,10 +693,16 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
                 node_job_description = 'job #{0}, "{1}", which finished with status {2}.'.format(node.job.id, node.job.name, node.job.status)
             str_arr.append("- node #{0} spawns {1}".format(node.id, node_job_description))
         result['body'] = '\n'.join(str_arr)
+        result.update(
+            dict(
+                inventory=self.inventory.name if self.inventory else None,
+                limit=self.limit,
+                extra_vars=self.display_extra_vars(),
+            )
+        )
         return result
 
-    @property
-    def task_impact(self):
+    def _get_task_impact(self):
         return 0
 
     def get_ancestor_workflows(self):
@@ -683,6 +722,46 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
             wj = wj.get_workflow_job()
         return ancestors
 
+    def get_effective_artifacts(self, **kwargs):
+        """
+        For downstream jobs of a workflow nested inside of a workflow,
+        we send aggregated artifacts from the nodes inside of the nested workflow
+        """
+        artifacts = {}
+        job_queryset = (
+            UnifiedJob.objects.filter(unified_job_node__workflow_job=self)
+            .defer('job_args', 'job_cwd', 'start_args', 'result_traceback')
+            .order_by('finished', 'id')
+            .filter(status__in=['successful', 'failed'])
+            .iterator()
+        )
+        parents_set = kwargs.get('parents_set', set())
+        new_parents_set = parents_set | {self.id}
+        for job in job_queryset:
+            if job.id in parents_set:
+                continue
+            artifacts.update(job.get_effective_artifacts(parents_set=new_parents_set))
+        return artifacts
+
+    def prompts_dict(self, *args, **kwargs):
+        if self.job_template_id:
+            # HACK: Exception for sliced jobs here, this is bad
+            # when sliced jobs were introduced, workflows did not have all the prompted JT fields
+            # so to support prompting with slicing, we abused the workflow job launch config
+            # these would be more properly saved on the workflow job, but it gets the wrong fields now
+            try:
+                wj_config = self.launch_config
+                r = wj_config.prompts_dict(*args, **kwargs)
+            except ObjectDoesNotExist:
+                r = {}
+        else:
+            r = super().prompts_dict(*args, **kwargs)
+            # Workflow labels and job labels are treated separately
+            # that means that they do not propogate from WFJT / workflow job to jobs in workflow
+            r.pop('labels', None)
+
+        return r
+
     def get_notification_templates(self):
         return self.workflow_job_template.notification_templates
 
@@ -693,11 +772,10 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
     def preferred_instance_groups(self):
         return []
 
-    @property
-    def actually_running(self):
+    def cancel_dispatcher_process(self):
         # WorkflowJobs don't _actually_ run anything in the dispatcher, so
         # there's no point in asking the dispatcher if it knows about this task
-        return self.status == 'running'
+        return True
 
 
 class WorkflowApprovalTemplate(UnifiedJobTemplate, RelatedJobsMixin):
@@ -756,6 +834,12 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         default=0,
         help_text=_("The amount of time (in seconds) before the approval node expires and fails."),
     )
+    expires = models.DateTimeField(
+        default=None,
+        null=True,
+        editable=False,
+        help_text=_("The time this approval will expire. This is the created time plus timeout, used for filtering."),
+    )
     timed_out = models.BooleanField(default=False, help_text=_("Shows when an approval node (with a timeout assigned to it) has timed out."))
     approved_or_denied_by = models.ForeignKey(
         'auth.User',
@@ -765,6 +849,9 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         editable=False,
         on_delete=models.SET_NULL,
     )
+
+    def _set_default_dependencies_processed(self):
+        self.dependencies_processed = True
 
     @classmethod
     def _get_unified_job_template_class(cls):
@@ -783,13 +870,32 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
     def _get_parent_field_name(self):
         return 'workflow_approval_template'
 
+    def save(self, *args, **kwargs):
+        update_fields = list(kwargs.get('update_fields', []))
+        if self.timeout != 0 and ((not self.pk) or (not update_fields) or ('timeout' in update_fields)):
+            if not self.created:  # on creation, created will be set by parent class, so we fudge it here
+                created = now()
+            else:
+                created = self.created
+            new_expires = created + timedelta(seconds=self.timeout)
+            if new_expires != self.expires:
+                self.expires = new_expires
+                if update_fields and 'expires' not in update_fields:
+                    update_fields.append('expires')
+        elif self.timeout == 0 and ((not update_fields) or ('timeout' in update_fields)):
+            if self.expires:
+                self.expires = None
+                if update_fields and 'expires' not in update_fields:
+                    update_fields.append('expires')
+        super(WorkflowApproval, self).save(*args, **kwargs)
+
     def approve(self, request=None):
         self.status = 'successful'
         self.approved_or_denied_by = get_current_user()
         self.save()
         self.send_approval_notification('approved')
         self.websocket_emit_status(self.status)
-        schedule_task_manager()
+        ScheduleWorkflowManager().schedule()
         return reverse('api:workflow_approval_approve', kwargs={'pk': self.pk}, request=request)
 
     def deny(self, request=None):
@@ -798,7 +904,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         self.save()
         self.send_approval_notification('denied')
         self.websocket_emit_status(self.status)
-        schedule_task_manager()
+        ScheduleWorkflowManager().schedule()
         return reverse('api:workflow_approval_deny', kwargs={'pk': self.pk}, request=request)
 
     def signal_start(self, **kwargs):
@@ -886,3 +992,12 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
     @property
     def workflow_job(self):
         return self.unified_job_node.workflow_job
+
+    def notification_data(self):
+        result = super(WorkflowApproval, self).notification_data()
+        result.update(
+            dict(
+                extra_vars=self.workflow_job.display_extra_vars(),
+            )
+        )
+        return result

@@ -74,59 +74,57 @@ function ExecutionEnvironmentTemplateList({ executionEnvironment }) {
   }, [fetchTemplates]);
 
   return (
-    <>
-      <Card>
-        <PaginatedTable
-          contentError={contentError}
-          hasContentLoading={isLoading}
-          items={templates}
-          itemCount={templatesCount}
-          pluralizedItemName={t`Templates`}
-          qsConfig={QS_CONFIG}
-          toolbarSearchableKeys={searchableKeys}
-          toolbarRelatedSearchableKeys={relatedSearchableKeys}
-          toolbarSearchColumns={[
-            {
-              name: t`Name`,
-              key: 'name__icontains',
-              isDefault: true,
-            },
-            {
-              name: t`Type`,
-              key: 'or__type',
-              options: [
-                [`job_template`, t`Job Template`],
-                [`workflow_job_template`, t`Workflow Template`],
-              ],
-            },
-            {
-              name: t`Created By (Username)`,
-              key: 'created_by__username__icontains',
-            },
-            {
-              name: t`Modified By (Username)`,
-              key: 'modified_by__username__icontains',
-            },
-          ]}
-          renderToolbar={(props) => (
-            <DatalistToolbar {...props} qsConfig={QS_CONFIG} />
-          )}
-          headerRow={
-            <HeaderRow qsConfig={QS_CONFIG} isSelectable={false}>
-              <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
-              <HeaderCell>{t`Type`}</HeaderCell>
-            </HeaderRow>
-          }
-          renderRow={(template) => (
-            <ExecutionEnvironmentTemplateListItem
-              key={template.id}
-              template={template}
-              detailUrl={`/templates/${template.type}/${template.id}/details`}
-            />
-          )}
-        />
-      </Card>
-    </>
+    <Card>
+      <PaginatedTable
+        contentError={contentError}
+        hasContentLoading={isLoading}
+        items={templates}
+        itemCount={templatesCount}
+        pluralizedItemName={t`Templates`}
+        qsConfig={QS_CONFIG}
+        toolbarSearchableKeys={searchableKeys}
+        toolbarRelatedSearchableKeys={relatedSearchableKeys}
+        toolbarSearchColumns={[
+          {
+            name: t`Name`,
+            key: 'name__icontains',
+            isDefault: true,
+          },
+          {
+            name: t`Type`,
+            key: 'or__type',
+            options: [
+              [`job_template`, t`Job Template`],
+              [`workflow_job_template`, t`Workflow Template`],
+            ],
+          },
+          {
+            name: t`Created By (Username)`,
+            key: 'created_by__username__icontains',
+          },
+          {
+            name: t`Modified By (Username)`,
+            key: 'modified_by__username__icontains',
+          },
+        ]}
+        renderToolbar={(props) => (
+          <DatalistToolbar {...props} qsConfig={QS_CONFIG} />
+        )}
+        headerRow={
+          <HeaderRow qsConfig={QS_CONFIG} isSelectable={false}>
+            <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
+            <HeaderCell>{t`Type`}</HeaderCell>
+          </HeaderRow>
+        }
+        renderRow={(template) => (
+          <ExecutionEnvironmentTemplateListItem
+            key={template.id}
+            template={template}
+            detailUrl={`/templates/${template.type}/${template.id}/details`}
+          />
+        )}
+      />
+    </Card>
   );
 }
 

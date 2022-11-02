@@ -11,7 +11,9 @@ import {
   Slider,
   Tooltip,
 } from '@patternfly/react-core';
+import { OutlinedClockIcon } from '@patternfly/react-icons';
 import { Tr, Td, ExpandableRowContent } from '@patternfly/react-table';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
 import { formatDateString } from 'util/dates';
 import { ActionsTd, ActionItem } from 'components/PaginatedTable';
 import InstanceToggle from 'components/InstanceToggle';
@@ -19,6 +21,7 @@ import StatusLabel from 'components/StatusLabel';
 import { Instance } from 'types';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import useDebounce from 'hooks/useDebounce';
+import computeForks from 'util/computeForks';
 import { InstancesAPI } from 'api';
 import { useConfig } from 'contexts/Config';
 import AlertModal from 'components/AlertModal';
@@ -42,15 +45,6 @@ const SliderForks = styled.div`
   text-align: center;
 `;
 
-function computeForks(memCapacity, cpuCapacity, selectedCapacityAdjustment) {
-  const minCapacity = Math.min(memCapacity, cpuCapacity);
-  const maxCapacity = Math.max(memCapacity, cpuCapacity);
-
-  return Math.floor(
-    minCapacity + (maxCapacity - minCapacity) * selectedCapacityAdjustment
-  );
-}
-
 function InstanceListItem({
   instance,
   isExpanded,
@@ -60,7 +54,8 @@ function InstanceListItem({
   fetchInstances,
   rowIndex,
 }) {
-  const { me = {} } = useConfig();
+  const config = useConfig();
+  const { id } = useParams();
   const [forks, setForks] = useState(
     computeForks(
       instance.mem_capacity,
@@ -68,7 +63,6 @@ function InstanceListItem({
       instance.capacity_adjustment
     )
   );
-  const { id } = useParams();
 
   const labelId = `check-action-${instance.id}`;
 
@@ -108,6 +102,18 @@ function InstanceListItem({
     debounceUpdateInstance({ capacity_adjustment: roundedValue });
   };
 
+  const formatHealthCheckTimeStamp = (last) => (
+    <>
+      {formatDateString(last)}
+      {instance.health_check_pending ? (
+        <>
+          {' '}
+          <OutlinedClockIcon />
+        </>
+      ) : null}
+    </>
+  );
+
   return (
     <>
       <Tr
@@ -144,11 +150,10 @@ function InstanceListItem({
               </div>
             }
           >
-            <StatusLabel status={instance.errors ? 'error' : 'healthy'} />
+            <StatusLabel status={instance.node_state} />
           </Tooltip>
         </Td>
-        <Td dataLabel={t`Running Jobs`}>{instance.jobs_running}</Td>
-        <Td dataLabel={t`Total Jobs`}>{instance.jobs_total}</Td>
+        <Td dataLabel={t`Node Type`}>{instance.node_type}</Td>
         <Td dataLabel={t`Capacity Adjustment`}>
           <SliderHolder data-cy="slider-holder">
             <div data-cy="cpu-capacity">{t`CPU ${instance.cpu_capacity}`}</div>
@@ -163,7 +168,7 @@ function InstanceListItem({
                 step={0.1}
                 value={instance.capacity_adjustment}
                 onChange={handleChangeValue}
-                isDisabled={!me?.is_superuser || !instance.enabled}
+                isDisabled={!config?.me?.is_superuser || !instance.enabled}
                 data-cy="slider"
               />
             </SliderForks>
@@ -197,14 +202,40 @@ function InstanceListItem({
         <Td colSpan={7}>
           <ExpandableRowContent>
             <DetailList>
-              <Detail label={t`Node Type`} value={instance.node_type} />
               <Detail
+                data-cy="running-jobs"
+                value={instance.jobs_running}
+                label={t`Running Jobs`}
+              />
+              <Detail
+                data-cy="total-jobs"
+                value={instance.jobs_total}
+                label={t`Total Jobs`}
+              />
+              <Detail
+                data-cy="policy-type"
                 label={t`Policy Type`}
                 value={instance.managed_by_policy ? t`Auto` : t`Manual`}
               />
               <Detail
+                data-cy="last-health-check"
                 label={t`Last Health Check`}
-                value={formatDateString(instance.last_health_check)}
+                helpText={
+                  <>
+                    {t`Health checks are asynchronous tasks. See the`}{' '}
+                    <a
+                      href={`${getDocsBaseUrl(
+                        config
+                      )}/html/administration/instances.html#health-check`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {t`documentation`}
+                    </a>{' '}
+                    {t`for more info.`}
+                  </>
+                }
+                value={formatHealthCheckTimeStamp(instance.last_health_check)}
               />
             </DetailList>
           </ExpandableRowContent>

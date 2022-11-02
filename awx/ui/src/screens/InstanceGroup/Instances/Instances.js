@@ -21,7 +21,7 @@ function Instances({ setBreadcrumb, instanceGroup }) {
         />
       </Route>
       <Route key="instanceList" path="/instance_groups/:id/instances">
-        <InstanceList />
+        <InstanceList instanceGroup={instanceGroup} />
       </Route>
     </Switch>
   );

@@ -10,7 +10,7 @@ const STEP_ID = 'credentials';
 export default function useCredentialsStep(
   launchConfig,
   resource,
-  resourceDefaultCredentials,
+  resourceDefaultCredentials = [],
   allowCredentialsWithPasswords = false
 ) {
   const [field, meta, helpers] = useField('credentials');
@@ -35,9 +35,9 @@ export default function useCredentialsStep(
     validate: () => {
       helpers.setError(
         credentialsValidator(
-          resourceDefaultCredentials,
           allowCredentialsWithPasswords,
-          field.value
+          field.value,
+          resourceDefaultCredentials
         )
       );
     },
@@ -78,6 +78,6 @@ function getInitialValues(launchConfig, resourceDefaultCredentials) {
   }
 
   return {
-    credentials: resourceDefaultCredentials || [],
+    credentials: resourceDefaultCredentials,
   };
 }

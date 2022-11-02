@@ -29,7 +29,7 @@ function LaunchManagementPrompt({
   const [dataRetention, setDataRetention] = useState(defaultDays);
   return (
     <>
-      <Tooltip content={t`Launch management job`} position="top">
+      <Tooltip content={t`Launch management job`} position="left">
         <Button
           aria-label={t`Launch management job`}
           variant="plain"

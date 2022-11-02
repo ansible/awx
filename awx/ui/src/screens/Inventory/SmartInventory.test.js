@@ -32,8 +32,26 @@ describe('<SmartInventory />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<SmartInventory setBreadcrumb={() => {}} />);
     });
-    await waitForElement(wrapper, 'SmartInventory');
-    await waitForElement(wrapper, '.pf-c-tabs__item', (el) => el.length === 5);
+    wrapper.update();
+    expect(wrapper.find('SmartInventory').length).toBe(1);
+    expect(wrapper.find('RoutedTabs li').length).toBe(6);
+  });
+
+  test('should render expected tabs', async () => {
+    const expectedTabs = [
+      'Back to Inventories',
+      'Details',
+      'Access',
+      'Hosts',
+      'Jobs',
+      'Job Templates',
+    ];
+    await act(async () => {
+      wrapper = mountWithContexts(<SmartInventory setBreadcrumb={() => {}} />);
+    });
+    wrapper.find('RoutedTabs li').forEach((tab, index) => {
+      expect(tab.text()).toEqual(expectedTabs[index]);
+    });
   });
 
   test('should show content error when api throws an error', async () => {

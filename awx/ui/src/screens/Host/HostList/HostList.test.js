@@ -287,6 +287,25 @@ describe('<HostList />', () => {
     ).toBe(true);
   });
 
+  test('Smart Inventory button should be disable to ansible facts search', async () => {
+    let wrapper;
+    const history = createMemoryHistory({
+      initialEntries: [
+        '/hosts?host.host_filter=ansible_facts__ansible_date_time__weekday_number%3D"3"',
+      ],
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(<HostList />, {
+        context: { router: { history } },
+      });
+    });
+
+    await waitForLoaded(wrapper);
+    expect(
+      wrapper.find('Button[aria-label="Smart Inventory"]').props().isDisabled
+    ).toBe(true);
+  });
+
   test('Clicking Smart Inventory button should navigate to smart inventory form with correct query param', async () => {
     let wrapper;
     const history = createMemoryHistory({

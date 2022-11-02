@@ -17,6 +17,7 @@ const hostEvent = {
       msg: 'This is a debug message: 1',
       stdout:
         '              total        used        free      shared  buff/cache   available\nMem:           7973        3005         960          30        4007        4582\nSwap:          1023           0        1023',
+      stderr: 'problems',
       cmd: ['free', '-m'],
       stderr_lines: [],
       stdout_lines: [
@@ -42,6 +43,67 @@ const hostEvent = {
   task: 'command',
   type: 'job_event',
   url: '/api/v2/job_events/123/',
+  summary_fields: {
+    host: {
+      id: 1,
+      name: 'foo',
+      description: 'Bar',
+    },
+  },
+};
+
+/*
+Some libraries return a list of string in stdout
+Example: https://github.com/ansible-collections/cisco.ios/blob/main/plugins/modules/ios_command.py#L124-L128
+*/
+const hostEventWithArray = {
+  changed: true,
+  event: 'runner_on_ok',
+  event_data: {
+    host: 'foo',
+    play: 'all',
+    playbook: 'run_command.yml',
+    res: {
+      ansible_loop_var: 'item',
+      changed: true,
+      item: '1',
+      msg: 'This is a debug message: 1',
+      stdout: [
+        '              total        used        free      shared  buff/cache   available\nMem:           7973        3005         960          30        4007        4582\nSwap:          1023           0        1023',
+      ],
+      stderr: 'problems',
+      cmd: ['free', '-m'],
+      stderr_lines: [],
+      stdout_lines: [
+        '              total        used        free      shared  buff/cache   available',
+        'Mem:           7973        3005         960          30        4007        4582',
+        'Swap:          1023           0        1023',
+      ],
+    },
+    task: 'command',
+    task_action: 'command',
+  },
+  event_display: 'Host OK',
+  event_level: 3,
+  failed: false,
+  host: 1,
+  host_name: 'foo',
+  id: 123,
+  job: 4,
+  play: 'all',
+  playbook: 'run_command.yml',
+  stdout: `stdout: "[0;33mchanged: [localhost] => {"changed": true, "cmd": ["free", "-m"], "delta": "0:00:01.479609", "end": "2019-09-10 14:21:45.469533", "rc": 0, "start": "2019-09-10 14:21:43.989924", "stderr": "", "stderr_lines": [], "stdout": "              total        used        free      shared  buff/cache   available\nMem:           7973        3005         960          30        4007        4582\nSwap:          1023           0        1023", "stdout_lines": ["              total        used        free      shared  buff/cache   available", "Mem:           7973        3005         960          30        4007        4582", "Swap:          1023           0        1023"]}[0m"
+  `,
+  task: 'command',
+  type: 'job_event',
+  url: '/api/v2/job_events/123/',
+  summary_fields: {
+    host: {
+      id: 1,
+      name: 'foo',
+      description: 'Bar',
+    },
+  },
 };
 
 /* eslint-disable no-useless-escape */
@@ -51,6 +113,7 @@ const jsonValue = `{
   \"item\": \"1\",
   \"msg\": \"This is a debug message: 1\",
   \"stdout\": \"              total        used        free      shared  buff/cache   available\\nMem:           7973        3005         960          30        4007        4582\\nSwap:          1023           0        1023\",
+  \"stderr\": \"problems\",
   \"cmd\": [
     \"free\",
     \"-m\"
@@ -84,7 +147,7 @@ describe('HostEventModal', () => {
       <HostEventModal hostEvent={hostEvent} onClose={() => {}} isOpen />
     );
     expect(wrapper.find('Tabs').prop('activeKey')).toEqual(0);
-    expect(wrapper.find('Detail')).toHaveLength(5);
+    expect(wrapper.find('Detail')).toHaveLength(6);
 
     function assertDetail(index, label, value) {
       const detail = wrapper.find('Detail').at(index);
@@ -94,10 +157,11 @@ describe('HostEventModal', () => {
 
     const detail = wrapper.find('Detail').first();
     expect(detail.prop('value')).toEqual('foo');
-    assertDetail(1, 'Play', 'all');
-    assertDetail(2, 'Task', 'command');
-    assertDetail(3, 'Module', 'command');
-    assertDetail(4, 'Command', hostEvent.event_data.res.cmd);
+    assertDetail(1, 'Description', 'Bar');
+    assertDetail(2, 'Play', 'all');
+    assertDetail(3, 'Task', 'command');
+    assertDetail(4, 'Module', 'command');
+    assertDetail(5, 'Command', hostEvent.event_data.res.cmd);
   });
 
   test('should display successful host status label', () => {
@@ -169,7 +233,7 @@ describe('HostEventModal', () => {
     handleTabClick(null, 1);
     wrapper.update();
 
-    const codeEditor = wrapper.find('CodeEditor');
+    const codeEditor = wrapper.find('Tab[eventKey=1] CodeEditor');
     expect(codeEditor.prop('mode')).toBe('javascript');
     expect(codeEditor.prop('readOnly')).toBe(true);
     expect(codeEditor.prop('value')).toEqual(jsonValue);
@@ -184,7 +248,7 @@ describe('HostEventModal', () => {
     handleTabClick(null, 2);
     wrapper.update();
 
-    const codeEditor = wrapper.find('CodeEditor');
+    const codeEditor = wrapper.find('Tab[eventKey=2] CodeEditor');
     expect(codeEditor.prop('mode')).toBe('javascript');
     expect(codeEditor.prop('readOnly')).toBe(true);
     expect(codeEditor.prop('value')).toEqual(hostEvent.event_data.res.stdout);
@@ -195,7 +259,7 @@ describe('HostEventModal', () => {
       ...hostEvent,
       event_data: {
         res: {
-          stderr: '',
+          stderr: 'error content',
         },
       },
     };
@@ -207,10 +271,10 @@ describe('HostEventModal', () => {
     handleTabClick(null, 3);
     wrapper.update();
 
-    const codeEditor = wrapper.find('CodeEditor');
+    const codeEditor = wrapper.find('Tab[eventKey=3] CodeEditor');
     expect(codeEditor.prop('mode')).toBe('javascript');
     expect(codeEditor.prop('readOnly')).toBe(true);
-    expect(codeEditor.prop('value')).toEqual(' ');
+    expect(codeEditor.prop('value')).toEqual('error content');
   });
 
   test('should pass onClose to Modal', () => {
@@ -226,7 +290,7 @@ describe('HostEventModal', () => {
     const debugTaskAction = {
       ...hostEvent,
       event_data: {
-        taskAction: 'debug',
+        task_action: 'debug',
         res: {
           result: {
             stdout: 'foo bar',
@@ -242,7 +306,7 @@ describe('HostEventModal', () => {
     handleTabClick(null, 2);
     wrapper.update();
 
-    const codeEditor = wrapper.find('CodeEditor');
+    const codeEditor = wrapper.find('Tab[eventKey=2] CodeEditor');
     expect(codeEditor.prop('mode')).toBe('javascript');
     expect(codeEditor.prop('readOnly')).toBe(true);
     expect(codeEditor.prop('value')).toEqual('foo bar');
@@ -252,7 +316,7 @@ describe('HostEventModal', () => {
     const yumTaskAction = {
       ...hostEvent,
       event_data: {
-        taskAction: 'yum',
+        task_action: 'yum',
         res: {
           results: ['baz', 'bar'],
         },
@@ -266,9 +330,30 @@ describe('HostEventModal', () => {
     handleTabClick(null, 2);
     wrapper.update();
 
-    const codeEditor = wrapper.find('CodeEditor');
+    const codeEditor = wrapper.find('Tab[eventKey=2] CodeEditor');
     expect(codeEditor.prop('mode')).toBe('javascript');
     expect(codeEditor.prop('readOnly')).toBe(true);
-    expect(codeEditor.prop('value')).toEqual('baz');
+    expect(codeEditor.prop('value')).toEqual('baz\nbar');
+  });
+
+  test('should display Standard Out array stdout content', () => {
+    const wrapper = shallow(
+      <HostEventModal
+        hostEvent={hostEventWithArray}
+        onClose={() => {}}
+        isOpen
+      />
+    );
+
+    const handleTabClick = wrapper.find('Tabs').prop('onSelect');
+    handleTabClick(null, 2);
+    wrapper.update();
+
+    const codeEditor = wrapper.find('Tab[eventKey=2] CodeEditor');
+    expect(codeEditor.prop('mode')).toBe('javascript');
+    expect(codeEditor.prop('readOnly')).toBe(true);
+    expect(codeEditor.prop('value')).toEqual(
+      hostEventWithArray.event_data.res.stdout.join(' ')
+    );
   });
 });

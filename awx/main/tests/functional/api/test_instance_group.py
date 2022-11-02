@@ -216,7 +216,7 @@ def test_instance_attach_to_instance_group(post, instance_group, node_type_insta
 
     count = ActivityStream.objects.count()
 
-    url = reverse(f'api:instance_group_instance_list', kwargs={'pk': instance_group.pk})
+    url = reverse('api:instance_group_instance_list', kwargs={'pk': instance_group.pk})
     post(url, {'associate': True, 'id': instance.id}, admin, expect=204 if node_type != 'control' else 400)
 
     new_activity = ActivityStream.objects.all()[count:]
@@ -240,7 +240,7 @@ def test_instance_unattach_from_instance_group(post, instance_group, node_type_i
 
     count = ActivityStream.objects.count()
 
-    url = reverse(f'api:instance_group_instance_list', kwargs={'pk': instance_group.pk})
+    url = reverse('api:instance_group_instance_list', kwargs={'pk': instance_group.pk})
     post(url, {'disassociate': True, 'id': instance.id}, admin, expect=204 if node_type != 'control' else 400)
 
     new_activity = ActivityStream.objects.all()[count:]
@@ -263,7 +263,7 @@ def test_instance_group_attach_to_instance(post, instance_group, node_type_insta
 
     count = ActivityStream.objects.count()
 
-    url = reverse(f'api:instance_instance_groups_list', kwargs={'pk': instance.pk})
+    url = reverse('api:instance_instance_groups_list', kwargs={'pk': instance.pk})
     post(url, {'associate': True, 'id': instance_group.id}, admin, expect=204 if node_type != 'control' else 400)
 
     new_activity = ActivityStream.objects.all()[count:]
@@ -287,7 +287,7 @@ def test_instance_group_unattach_from_instance(post, instance_group, node_type_i
 
     count = ActivityStream.objects.count()
 
-    url = reverse(f'api:instance_instance_groups_list', kwargs={'pk': instance.pk})
+    url = reverse('api:instance_instance_groups_list', kwargs={'pk': instance.pk})
     post(url, {'disassociate': True, 'id': instance_group.id}, admin, expect=204 if node_type != 'control' else 400)
 
     new_activity = ActivityStream.objects.all()[count:]
@@ -301,3 +301,17 @@ def test_instance_group_unattach_from_instance(post, instance_group, node_type_i
         assert new_activity.instance_group.first() == instance_group
     else:
         assert not new_activity
+
+
+@pytest.mark.django_db
+def test_cannot_remove_controlplane_hybrid_instances(post, controlplane_instance_group, node_type_instance, admin_user):
+    instance = node_type_instance(hostname='hybrid_node', node_type='hybrid')
+    controlplane_instance_group.instances.add(instance)
+
+    url = reverse('api:instance_group_instance_list', kwargs={'pk': controlplane_instance_group.pk})
+    r = post(url, {'disassociate': True, 'id': instance.id}, admin_user, expect=400)
+    assert 'Cannot disassociate hybrid node' in str(r.data)
+
+    url = reverse('api:instance_instance_groups_list', kwargs={'pk': instance.pk})
+    r = post(url, {'disassociate': True, 'id': controlplane_instance_group.id}, admin_user, expect=400)
+    assert 'Cannot disassociate hybrid instance' in str(r.data)

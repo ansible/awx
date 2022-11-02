@@ -16,13 +16,26 @@ from awx.main.utils.encryption import encrypt_field, decrypt_field, encrypt_valu
 
 class Command(BaseCommand):
     """
-    Regenerate a new SECRET_KEY value and re-encrypt every secret in the database.
+    Re-encrypt every secret in the database, using regenerated new SECRET_KEY or user provided key.
     """
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--use-custom-key',
+            dest='use_custom_key',
+            action='store_true',
+            default=False,
+            help='Use existing key provided as TOWER_SECRET_KEY environment variable',
+        )
 
     @transaction.atomic
     def handle(self, **options):
         self.old_key = settings.SECRET_KEY
-        self.new_key = base64.encodebytes(os.urandom(33)).decode().rstrip()
+        custom_key = os.environ.get("TOWER_SECRET_KEY")
+        if options.get("use_custom_key") and custom_key:
+            self.new_key = custom_key
+        else:
+            self.new_key = base64.encodebytes(os.urandom(33)).decode().rstrip()
         self._notification_templates()
         self._credentials()
         self._unified_jobs()

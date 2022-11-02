@@ -37,7 +37,12 @@ describe('<RoutedTabs />', () => {
   });
 
   test('should update history when new tab selected', async () => {
-    wrapper.find('Tabs').invoke('onSelect')({}, 2);
+    wrapper.find('Tabs').invoke('onSelect')(
+      {
+        preventDefault: () => {},
+      },
+      2
+    );
     wrapper.update();
 
     expect(history.location.pathname).toEqual('/organizations/19/access');

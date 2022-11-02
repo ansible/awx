@@ -3,7 +3,7 @@ export default function getRowRangePageSize(startIndex, stopIndex) {
   let pageSize;
 
   if (startIndex === stopIndex) {
-    page = startIndex + 1;
+    page = startIndex;
     pageSize = 1;
   } else if (stopIndex >= startIndex + 50) {
     page = Math.floor(startIndex / 50) + 1;

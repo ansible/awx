@@ -44,4 +44,14 @@ describe('getEventRequestParams', () => {
     });
     expect(loadRange).toEqual(range(121, 126));
   });
+
+  it('should return last event only', () => {
+    const [params, loadRange] = getEventRequestParams(job, 72, [72, 72]);
+
+    expect(params).toEqual({
+      page: 72,
+      page_size: 1,
+    });
+    expect(loadRange).toEqual(range(72, 72));
+  });
 });

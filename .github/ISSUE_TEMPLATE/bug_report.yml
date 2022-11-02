@@ -1,13 +1,12 @@
 ---
 name: Bug Report
-description: Create a report to help us improve
+description: "🐞 Create a report to help us improve"
 body:
   - type: markdown
     attributes:
       value: |
-        Issues are for **concrete, actionable bugs and feature requests** only. For debugging help or technical support, please use:
-        - The #ansible-awx channel on irc.libera.chat
-        - The awx project mailing list, https://groups.google.com/forum/#!forum/awx-project
+        Bug Report issues are for **concrete, actionable bugs** only.
+        For debugging help or technical support, please see the [Get Involved section of our README](https://github.com/ansible/awx#get-involved)
 
   - type: checkboxes
     id: terms
@@ -24,7 +23,7 @@ body:
   - type: textarea
     id: summary
     attributes:
-      label: Summary
+      label: Bug Summary
       description: Briefly describe the problem.
     validations:
       required: false
@@ -45,6 +44,9 @@ body:
         - label: UI
         - label: API
         - label: Docs
+        - label: Collection
+        - label: CLI
+        - label: Other
 
   - type: dropdown
     id: awx-install-method
@@ -57,9 +59,8 @@ body:
         - minikube
         - openshift
         - minishift
-        - docker on linux
-        - docker for mac
-        - boot2docker
+        - docker development environment
+        - N/A
     validations:
       required: true
 

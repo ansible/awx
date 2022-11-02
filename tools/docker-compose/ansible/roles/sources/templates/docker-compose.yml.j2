@@ -1,3 +1,4 @@
+#jinja2: lstrip_blocks: True
 ---
 version: '2.1'
 services:
@@ -21,6 +22,8 @@ services:
       RECEPTORCTL_SOCKET: {{ receptor_socket_file }}
       CONTROL_PLANE_NODE_COUNT: {{ control_plane_node_count|int }}
       EXECUTION_NODE_COUNT: {{ execution_node_count|int }}
+      AWX_LOGGING_MODE: stdout
+      DJANGO_SUPERUSER_PASSWORD: {{ admin_password }}
 {% if loop.index == 1 %}
       RUN_MIGRATIONS: 1
 {% endif %}
@@ -39,6 +42,7 @@ services:
       - "../../docker-compose/_sources/local_settings.py:/etc/tower/conf.d/local_settings.py"
       - "../../docker-compose/_sources/SECRET_KEY:/etc/tower/SECRET_KEY"
       - "../../docker-compose/_sources/receptor/receptor-awx-{{ loop.index }}.conf:/etc/receptor/receptor.conf"
+      - "../../docker-compose/_sources/receptor/receptor-awx-{{ loop.index }}.conf.lock:/etc/receptor/receptor.conf.lock"
       - "../../docker-compose/_sources/receptor/work_public_key.pem:/etc/receptor/work_public_key.pem"
       - "../../docker-compose/_sources/receptor/work_private_key.pem:/etc/receptor/work_private_key.pem"
       # - "../../docker-compose/_sources/certs:/etc/receptor/certs"  # TODO: optionally generate certs
@@ -56,6 +60,7 @@ services:
       - "8013:8013"  # http
       - "8043:8043"  # https
       - "2222:2222"  # receptor foo node
+      - "3000:3001"  # used by the UI dev env
 {% endif %}
   redis_{{ container_postfix }}:
     image: redis:latest
@@ -68,7 +73,7 @@ services:
 {% endfor %}
 {% if control_plane_node_count|int > 1 %}
   haproxy:
-    image: haproxy
+    image: haproxy:2.3
     user: "{{ ansible_user_uid }}"
     volumes:
       - "./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:Z"
@@ -99,6 +104,72 @@ services:
     depends_on:
       - postgres
 {% endif %}
+{% if enable_ldap|bool %}
+  ldap:
+    image: bitnami/openldap:2
+    container_name: tools_ldap_1
+    hostname: ldap
+    user: "{{ ansible_user_uid }}"
+    ports:
+      - "389:1389"
+      - "636:1636"
+    environment:
+      LDAP_ADMIN_USERNAME: admin
+      LDAP_ADMIN_PASSWORD: admin
+      LDAP_CUSTOM_LDIF_DIR: /opt/bitnami/openldap/ldiffs
+      LDAP_ENABLE_TLS: "yes"
+      LDAP_LDAPS_PORT_NUMBER: 1636
+      LDAP_TLS_CERT_FILE: /opt/bitnami/openldap/certs/{{ ldap_public_key_file_name }}
+      LDAP_TLS_CA_FILE: /opt/bitnami/openldap/certs/{{ ldap_public_key_file_name }}
+      LDAP_TLS_KEY_FILE: /opt/bitnami/openldap/certs/{{ ldap_private_key_file_name }}
+    volumes:
+      - 'openldap_data:/bitnami/openldap'
+      - '../../docker-compose/_sources/ldap_certs:/opt/bitnami/openldap/certs'
+      - '../../docker-compose/_sources/ldap_diffs:/opt/bitnami/openldap/ldiffs'
+{% endif %}
+{% if enable_splunk|bool %}
+  splunk:
+    image: splunk/splunk:latest
+    container_name: tools_splunk_1
+    hostname: splunk
+    ports:
+      - "8000:8000"
+      - "8089:8089"
+      - "9199:9199"
+    environment:
+      SPLUNK_START_ARGS: --accept-license
+      SPLUNK_PASSWORD: splunk_admin
+{% endif %}
+{% if enable_prometheus|bool %}
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: tools_prometheus_1
+    hostname: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - "../../docker-compose/_sources/prometheus.yml:/etc/prometheus/prometheus.yml"
+      - "prometheus_storage:/prometheus:rw"
+    links:
+{% for i in range(control_plane_node_count|int) %}
+      - awx_{{ loop.index }}:awx{{ loop.index }} # because underscores are not valid in hostnames
+{% endfor %}
+{% endif %}
+{% if enable_grafana|bool %}
+  grafana:
+    image: grafana/grafana-enterprise:latest
+    container_name: tools_grafana_1
+    hostname: grafana
+    ports:
+      - "3001:3000"
+    volumes:
+      - "../../grafana:/etc/grafana/provisioning"
+      - "grafana_storage:/var/lib/grafana:rw"
+    links:
+      - prometheus
+    depends_on:
+      - prometheus
+{% endif %}
   # A useful container that simply passes through log messages to the console
   # helpful for testing awx/tower logging
   # logstash:
@@ -108,6 +179,8 @@ services:
   postgres:
     image: postgres:12
     container_name: tools_postgres_1
+    # additional logging settings for postgres can be found https://www.postgresql.org/docs/current/runtime-config-logging.html
+    command: postgres -c log_destination=stderr -c log_min_messages=info -c log_min_duration_statement={{ pg_log_min_duration_statement|default(1000) }} -c max_connections={{ pg_max_connections|default(1024) }}
     environment:
       POSTGRES_HOST_AUTH_METHOD: trust
       POSTGRES_USER: {{ pg_username }}
@@ -128,7 +201,7 @@ services:
       - "5555:5555"
     volumes:
       - "../../docker-compose/_sources/receptor/receptor-hop.conf:/etc/receptor/receptor.conf"
-  {% for i in range(execution_node_count|int) -%}
+  {% for i in range(execution_node_count|int) %}
   receptor-{{ loop.index }}:
     image: "{{ awx_image }}:{{ awx_image_tag }}"
     user: "{{ ansible_user_uid }}"
@@ -156,6 +229,19 @@ volumes:
   redis_socket_{{ container_postfix }}:
     name: tools_redis_socket_{{ container_postfix }}
 {% endfor -%}
+{% if enable_ldap|bool %}
+  openldap_data:
+    name: tools_ldap_1
+    driver: local
+{% endif %}
+{% if enable_prometheus|bool %}
+  prometheus_storage:
+    name: tools_prometheus_storage
+{% endif %}
+{% if enable_grafana|bool %}
+  grafana_storage:
+    name: tools_grafana_storage
+{% endif %}
 {% if minikube_container_group|bool %}
 networks:
   default:

@@ -42,6 +42,7 @@ describe('<_AddResourceRole />', () => {
         results: [
           { id: 1, username: 'foo', url: '' },
           { id: 2, username: 'bar', url: '' },
+          { id: 3, username: 'baz', url: '' },
         ],
       },
     });
@@ -95,14 +96,20 @@ describe('<_AddResourceRole />', () => {
     // Step 2
     await waitForElement(wrapper, 'EmptyStateBody', (el) => el.length === 0);
     expect(wrapper.find('Chip').length).toBe(0);
-    act(() =>
-      wrapper.find('CheckboxListItem[name="foo"]').invoke('onSelect')(true)
-    );
-    wrapper.update();
+    wrapper.find('CheckboxListItem[name="foo"]').invoke('onSelect')(true);
+    wrapper.find('CheckboxListItem[name="bar"]').invoke('onSelect')(true);
+    wrapper.find('CheckboxListItem[name="baz"]').invoke('onSelect')(true);
+    wrapper.find('CheckboxListItem[name="baz"]').invoke('onSelect')(false);
     expect(
       wrapper.find('CheckboxListItem[name="foo"]').prop('isSelected')
     ).toBe(true);
-    expect(wrapper.find('Chip').length).toBe(1);
+    expect(
+      wrapper.find('CheckboxListItem[name="bar"]').prop('isSelected')
+    ).toBe(true);
+    expect(
+      wrapper.find('CheckboxListItem[name="baz"]').prop('isSelected')
+    ).toBe(false);
+    expect(wrapper.find('Chip').length).toBe(2);
     act(() => wrapper.find('Button[type="submit"]').prop('onClick')());
     wrapper.update();
 
@@ -120,6 +127,8 @@ describe('<_AddResourceRole />', () => {
       wrapper.find('Button[type="submit"]').prop('onClick')()
     );
     expect(UsersAPI.associateRole).toBeCalledWith(1, 1);
+    expect(UsersAPI.associateRole).toBeCalledWith(2, 1);
+    expect(UsersAPI.associateRole).toBeCalledTimes(2);
   });
 
   test('should call on error properly', async () => {
@@ -189,7 +198,7 @@ describe('<_AddResourceRole />', () => {
     expect(onError).toBeCalled();
   });
 
-  test('should should update history properly', async () => {
+  test('should update history properly', async () => {
     let wrapper;
     const history = createMemoryHistory({
       initialEntries: ['organizations/2/access?resource.order_by=-username'],

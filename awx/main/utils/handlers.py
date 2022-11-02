@@ -10,6 +10,7 @@ from datetime import datetime
 # Django
 from django.conf import settings
 from django.utils.timezone import now
+from django.utils.encoding import force_str
 
 # AWX
 from awx.main.exceptions import PostRunError
@@ -42,7 +43,7 @@ class RSysLogHandler(logging.handlers.SysLogHandler):
             msg += exc.splitlines()[-1]
         except Exception:
             msg += exc
-        msg = '\n'.join([msg, record.msg, ''])
+        msg = '\n'.join([msg, force_str(record.msg), ''])  # force_str used in case of translated strings
         sys.stderr.write(msg)
 
     def emit(self, msg):
@@ -75,7 +76,7 @@ class SpecialInventoryHandler(logging.Handler):
     def emit(self, record):
         # check cancel and timeout status regardless of log level
         this_time = now()
-        if (this_time - self.last_check).total_seconds() > 0.5:  # cancel callback is expensive
+        if (this_time - self.last_check).total_seconds() > 0.1:
             self.last_check = this_time
             if self.cancel_callback():
                 raise PostRunError('Inventory update has been canceled', status='canceled')
@@ -109,7 +110,7 @@ if settings.COLOR_LOGS is True:
                 # logs rendered with cyan text
                 previous_level_map = self.level_map.copy()
                 if record.name == "awx.analytics.job_lifecycle":
-                    self.level_map[logging.DEBUG] = (None, 'cyan', True)
+                    self.level_map[logging.INFO] = (None, 'cyan', True)
                 msg = super(ColorHandler, self).colorize(line, record)
                 self.level_map = previous_level_map
                 return msg

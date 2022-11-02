@@ -1,8 +1,10 @@
+import sys
+
 # Django
 from django.apps import AppConfig
 
 # from django.core import checks
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 
 class ConfConfig(AppConfig):
@@ -12,6 +14,9 @@ class ConfConfig(AppConfig):
 
     def ready(self):
         self.module.autodiscover()
-        from .settings import SettingsWrapper
 
-        SettingsWrapper.initialize()
+        if not set(sys.argv) & {'migrate', 'check_migrations'}:
+
+            from .settings import SettingsWrapper
+
+            SettingsWrapper.initialize()

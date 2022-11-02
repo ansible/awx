@@ -52,6 +52,7 @@ function Host({ setBreadcrumb }) {
       ),
       link: `/hosts`,
       id: 99,
+      isBackButton: true,
     },
     {
       name: t`Details`,

@@ -73,21 +73,19 @@ function ApplicationAdd({ onSuccessfulAdd }) {
     return <ContentError error={error} />;
   }
   return (
-    <>
-      <PageSection>
-        <Card>
-          <CardBody>
-            <ApplicationForm
-              onSubmit={handleSubmit}
-              onCancel={handleCancel}
-              authorizationOptions={authorizationOptions}
-              clientTypeOptions={clientTypeOptions}
-              submitError={submitError}
-            />
-          </CardBody>
-        </Card>
-      </PageSection>
-    </>
+    <PageSection>
+      <Card>
+        <CardBody>
+          <ApplicationForm
+            onSubmit={handleSubmit}
+            onCancel={handleCancel}
+            authorizationOptions={authorizationOptions}
+            clientTypeOptions={clientTypeOptions}
+            submitError={submitError}
+          />
+        </CardBody>
+      </Card>
+    </PageSection>
   );
 }
 export default ApplicationAdd;

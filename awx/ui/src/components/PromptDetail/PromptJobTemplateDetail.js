@@ -15,6 +15,7 @@ import Sparkline from '../Sparkline';
 import { Detail, DeletedDetail } from '../DetailList';
 import { VariablesDetail } from '../CodeEditor';
 import ExecutionEnvironmentDetail from '../ExecutionEnvironmentDetail';
+import { VERBOSITY } from '../VerbositySelectField';
 
 function PromptJobTemplateDetail({ resource }) {
   const {
@@ -25,7 +26,7 @@ function PromptJobTemplateDetail({ resource }) {
     extra_vars,
     forks,
     host_config_key,
-    instance_groups,
+    instance_groups = [],
     job_slice_count,
     job_tags,
     job_type,
@@ -41,14 +42,6 @@ function PromptJobTemplateDetail({ resource }) {
     webhook_service,
     custom_virtualenv,
   } = resource;
-
-  const VERBOSITY = {
-    0: t`0 (Normal)`,
-    1: t`1 (Verbose)`,
-    2: t`2 (More Verbose)`,
-    3: t`3 (Debug)`,
-    4: t`4 (Connection Debug)`,
-  };
 
   let optionsList = '';
   if (
@@ -101,9 +94,11 @@ function PromptJobTemplateDetail({ resource }) {
 
   return (
     <>
-      {summary_fields.recent_jobs?.length > 0 && (
-        <Detail value={<Sparkline jobs={recentJobs} />} label={t`Activity`} />
-      )}
+      <Detail
+        label={t`Activity`}
+        value={<Sparkline jobs={recentJobs} />}
+        isEmpty={summary_fields.recent_jobs?.length === 0}
+      />
       <Detail label={t`Job Type`} value={toTitleCase(job_type)} />
       {summary_fields?.organization ? (
         <Detail
@@ -151,9 +146,12 @@ function PromptJobTemplateDetail({ resource }) {
       />
       <Detail label={t`Source Control Branch`} value={scm_branch} />
       <Detail label={t`Playbook`} value={playbook} />
-      <Detail label={t`Forks`} value={forks || '0'} />
+      <Detail
+        label={t`Forks`}
+        value={typeof forks === 'number' ? forks.toString() : forks}
+      />
       <Detail label={t`Limit`} value={limit} />
-      <Detail label={t`Verbosity`} value={VERBOSITY[verbosity]} />
+      <Detail label={t`Verbosity`} value={VERBOSITY()[verbosity]} />
       {typeof diff_mode === 'boolean' && (
         <Detail label={t`Show Changes`} value={diff_mode ? t`On` : t`Off`} />
       )}
@@ -187,7 +185,7 @@ function PromptJobTemplateDetail({ resource }) {
         />
       )}
       {optionsList && <Detail label={t`Enabled Options`} value={optionsList} />}
-      {summary_fields?.credentials?.length > 0 && (
+      {summary_fields?.credentials && (
         <Detail
           fullWidth
           label={t`Credentials`}
@@ -202,9 +200,10 @@ function PromptJobTemplateDetail({ resource }) {
               ))}
             </ChipGroup>
           }
+          isEmpty={summary_fields?.credentials?.length === 0}
         />
       )}
-      {summary_fields?.labels?.results?.length > 0 && (
+      {summary_fields?.labels?.results && (
         <Detail
           fullWidth
           label={t`Labels`}
@@ -221,28 +220,28 @@ function PromptJobTemplateDetail({ resource }) {
               ))}
             </ChipGroup>
           }
+          isEmpty={summary_fields?.labels?.results?.length === 0}
         />
       )}
-      {instance_groups?.length > 0 && (
-        <Detail
-          fullWidth
-          label={t`Instance Groups`}
-          value={
-            <ChipGroup
-              numChips={5}
-              totalChips={instance_groups.length}
-              ouiaId="prompt-jt-instance-group-chips"
-            >
-              {instance_groups.map((ig) => (
-                <Chip key={ig.id} isReadOnly>
-                  {ig.name}
-                </Chip>
-              ))}
-            </ChipGroup>
-          }
-        />
-      )}
-      {job_tags?.length > 0 && (
+      <Detail
+        fullWidth
+        label={t`Instance Groups`}
+        value={
+          <ChipGroup
+            numChips={5}
+            totalChips={instance_groups?.length}
+            ouiaId="prompt-jt-instance-group-chips"
+          >
+            {instance_groups?.map((ig) => (
+              <Chip key={ig.id} isReadOnly>
+                {ig.name}
+              </Chip>
+            ))}
+          </ChipGroup>
+        }
+        isEmpty={instance_groups?.length === 0}
+      />
+      {job_tags && (
         <Detail
           fullWidth
           label={t`Job Tags`}
@@ -259,9 +258,10 @@ function PromptJobTemplateDetail({ resource }) {
               ))}
             </ChipGroup>
           }
+          isEmpty={job_tags?.length === 0}
         />
       )}
-      {skip_tags?.length > 0 && (
+      {skip_tags && (
         <Detail
           fullWidth
           label={t`Skip Tags`}
@@ -278,6 +278,7 @@ function PromptJobTemplateDetail({ resource }) {
               ))}
             </ChipGroup>
           }
+          isEmpty={skip_tags?.length === 0}
         />
       )}
       {extra_vars && (

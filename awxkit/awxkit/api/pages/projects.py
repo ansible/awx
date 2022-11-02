@@ -40,6 +40,7 @@ class Project(HasCopy, HasCreate, HasNotifications, UnifiedJobTemplate):
             'scm_update_on_launch',
             'scm_refspec',
             'allow_override',
+            'signature_validation_credential',
         )
         update_payload(payload, fields, kwargs)
 

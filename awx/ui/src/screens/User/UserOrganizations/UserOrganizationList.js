@@ -5,6 +5,7 @@ import { t } from '@lingui/macro';
 import PaginatedTable, {
   HeaderRow,
   HeaderCell,
+  getSearchableKeys,
 } from 'components/PaginatedTable';
 import useRequest from 'hooks/useRequest';
 import { UsersAPI } from 'api';
@@ -20,7 +21,7 @@ const QS_CONFIG = getQSConfig('organizations', {
 
 function UserOrganizationList() {
   const location = useLocation();
-  const { id: userId } = useParams();
+  const { id } = useParams();
 
   const {
     result: { organizations, count, searchableKeys, relatedSearchableKeys },
@@ -36,20 +37,18 @@ function UserOrganizationList() {
         },
         actions,
       ] = await Promise.all([
-        UsersAPI.readOrganizations(userId, params),
-        UsersAPI.readOrganizationOptions(),
+        UsersAPI.readOrganizations(id, params),
+        UsersAPI.readOrganizationOptions(id),
       ]);
       return {
-        searchableKeys: Object.keys(actions.data.actions?.GET || {}).filter(
-          (key) => actions.data.actions?.GET[key].filterable
-        ),
+        searchableKeys: getSearchableKeys(actions.data.actions?.GET),
         relatedSearchableKeys: (actions?.data?.related_search_fields || []).map(
           (val) => val.slice(0, -8)
         ),
         organizations: results,
         count: orgCount,
       };
-    }, [userId, location.search]),
+    }, [id, location.search]),
     {
       organizations: [],
       count: 0,

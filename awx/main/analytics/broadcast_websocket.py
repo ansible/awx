@@ -89,7 +89,7 @@ class BroadcastWebsocketStatsManager:
 
                 await asyncio.sleep(settings.BROADCAST_WEBSOCKET_STATS_POLL_RATE_SECONDS)
         except Exception as e:
-            logger.warn(e)
+            logger.warning(e)
             await asyncio.sleep(settings.BROADCAST_WEBSOCKET_STATS_POLL_RATE_SECONDS)
             self.start()
 

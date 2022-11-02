@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+from decimal import Decimal
 
 from django.db import migrations, models
-from decimal import Decimal
+
 import awx.main.fields
 
 
@@ -16,8 +17,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='instancegroup',
             name='policy_instance_list',
-            field=awx.main.fields.JSONField(
-                default=[], help_text='List of exact-match Instances that will always be automatically assigned to this group', blank=True
+            field=awx.main.fields.JSONBlob(
+                default=list, help_text='List of exact-match Instances that will always be automatically assigned to this group', blank=True
             ),
         ),
         migrations.AddField(

@@ -63,7 +63,7 @@ describe('<Project />', () => {
       '.pf-c-tabs__item-text',
       (el) => el.length === 6
     );
-    expect(tabs.at(3).text()).toEqual('Notifications');
+    expect(tabs.at(4).text()).toEqual('Notifications');
   });
 
   test('notifications tab hidden with reduced permissions', async () => {

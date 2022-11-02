@@ -222,6 +222,77 @@
       "can_approve_or_deny": false,
       "approval_expiration": null,
       "timed_out": false
+    },
+    {
+      "id": 220,
+      "type": "workflow_approval",
+      "url": "/api/v2/workflow_approvals/218/",
+      "related": {
+        "created_by": "/api/v2/users/1/",
+        "unified_job_template": "/api/v2/workflow_approval_templates/10/",
+        "source_workflow_job": "/api/v2/workflow_jobs/216/",
+        "workflow_approval_template": "/api/v2/workflow_approval_templates/10/",
+        "approve": "/api/v2/workflow_approvals/218/approve/",
+        "deny": "/api/v2/workflow_approvals/218/deny/"
+      },
+      "summary_fields": {
+        "workflow_job_template": {
+          "id": 9,
+          "name": "Approval @ 9:15:26 AM",
+          "description": ""
+        },
+        "workflow_job": {
+          "id": 216,
+          "name": "Approval @ 9:15:26 AM",
+          "description": ""
+        },
+        "workflow_approval_template": {
+          "id": 10,
+          "name": "approval copy",
+          "description": "",
+          "timeout": 0
+        },
+        "unified_job_template": {
+          "id": 10,
+          "name": "approval copy",
+          "description": "",
+          "unified_job_type": "workflow_approval"
+        },
+        "created_by": {
+          "id": 1,
+          "username": "admin",
+          "first_name": "",
+          "last_name": ""
+        },
+        "user_capabilities": {
+          "delete": true,
+          "start": true
+        },
+        "source_workflow_job": {
+          "id": 216,
+          "name": "Approval @ 9:15:26 AM",
+          "description": "",
+          "status": "running",
+          "failed": false,
+          "elapsed": 0.0
+        }
+      },
+      "created": "2020-10-09T17:13:12.067947Z",
+      "modified": "2020-10-09T17:13:12.068147Z",
+      "name": "approval",
+      "description": "description of approval",
+      "unified_job_template": 10,
+      "launch_type": "workflow",
+      "status": "successful",
+      "failed": false,
+      "started": "2020-10-09T17:13:12.067947Z",
+      "finished": null,
+      "canceled_on": null,
+      "elapsed": 22.879029,
+      "job_explanation": "",
+      "can_approve_or_deny": true,
+      "approval_expiration": null,
+      "timed_out": false
     }
   ]
 }

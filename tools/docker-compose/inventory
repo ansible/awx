@@ -15,5 +15,5 @@ localhost ansible_connection=local ansible_python_interpreter="/usr/bin/env pyth
 # pg_username=""
 # pg_hostname=""
 
-# awx_image="quay.io/awx/awx_devel"
+# awx_image="ghcr.io/ansible/awx_devel"
 # migrate_local_docker=false

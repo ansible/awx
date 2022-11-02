@@ -1,5 +1,5 @@
 from .plugin import CredentialPlugin, raise_for_status
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from urllib.parse import urljoin
 import requests
 

@@ -100,12 +100,19 @@ function CredentialDetail({ credential }) {
 
   const { error, dismissError } = useDismissableError(deleteError);
 
-  const renderDetail = ({ id, label, type, ask_at_runtime }) => {
+  const renderDetail = ({
+    id,
+    label,
+    type,
+    ask_at_runtime,
+    help_text = '',
+  }) => {
     if (inputSources[id]) {
       return (
         <React.Fragment key={id}>
           <Detail
             dataCy={`credential-${id}-detail`}
+            helpText={help_text}
             id={`credential-${id}-detail`}
             fullWidth
             label={<span>{label} *</span>}
@@ -151,6 +158,7 @@ function CredentialDetail({ credential }) {
           key={id}
           label={label}
           value={t`Encrypted`}
+          helpText={help_text}
           isEncrypted
         />
       );
@@ -160,6 +168,7 @@ function CredentialDetail({ credential }) {
       return (
         <Detail
           dataCy={`credential-${id}-detail`}
+          helpText={help_text}
           id={`credential-${id}-detail`}
           key={id}
           label={label}
@@ -175,6 +184,7 @@ function CredentialDetail({ credential }) {
         key={id}
         label={label}
         value={inputs[id]}
+        helpText={help_text}
       />
     );
   };
@@ -254,20 +264,19 @@ function CredentialDetail({ credential }) {
           date={modified}
           user={modified_by}
         />
-        {enabledBooleanFields.length > 0 && (
-          <Detail
-            label={t`Enabled Options`}
-            value={
-              <TextList component={TextListVariants.ul}>
-                {enabledBooleanFields.map(({ id, label }) => (
-                  <TextListItem key={id} component={TextListItemVariants.li}>
-                    {label}
-                  </TextListItem>
-                ))}
-              </TextList>
-            }
-          />
-        )}
+        <Detail
+          label={t`Enabled Options`}
+          value={
+            <TextList component={TextListVariants.ul}>
+              {enabledBooleanFields.map(({ id, label }) => (
+                <TextListItem key={id} component={TextListItemVariants.li}>
+                  {label}
+                </TextListItem>
+              ))}
+            </TextList>
+          }
+          isEmpty={enabledBooleanFields.length === 0}
+        />
       </DetailList>
       {Object.keys(inputSources).length > 0 && (
         <PluginFieldText>

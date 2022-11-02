@@ -3,7 +3,7 @@ import Base from '../Base';
 class Teams extends Base {
   constructor(http) {
     super(http);
-    this.baseUrl = '/api/v2/teams/';
+    this.baseUrl = 'api/v2/teams/';
   }
 
   associateRole(teamId, roleId) {

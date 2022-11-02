@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
                 ('client_id', models.CharField(db_index=True, default=oauth2_provider.generators.generate_client_id, max_length=100, unique=True)),
                 (
                     'redirect_uris',
-                    models.TextField(blank=True, help_text='Allowed URIs list, space separated', validators=[oauth2_provider.validators.validate_uris]),
+                    models.TextField(blank=True, help_text='Allowed URIs list, space separated'),
                 ),
                 ('client_type', models.CharField(choices=[('confidential', 'Confidential'), ('public', 'Public')], max_length=32)),
                 (

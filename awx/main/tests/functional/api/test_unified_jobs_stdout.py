@@ -3,11 +3,12 @@
 import base64
 import json
 import re
-from datetime import datetime
+from unittest import mock
 
 from django.conf import settings
 from django.utils.encoding import smart_str
-from unittest import mock
+from django.utils.timezone import now as tz_now
+
 import pytest
 
 from awx.api.versioning import reverse
@@ -146,7 +147,7 @@ def test_stdout_line_range(sqlite_copy_expert, Parent, Child, relation, view, ge
 
 @pytest.mark.django_db
 def test_text_stdout_from_system_job_events(sqlite_copy_expert, get, admin):
-    created = datetime.utcnow()
+    created = tz_now()
     job = SystemJob(created=created)
     job.save()
     for i in range(3):
@@ -158,7 +159,7 @@ def test_text_stdout_from_system_job_events(sqlite_copy_expert, get, admin):
 
 @pytest.mark.django_db
 def test_text_stdout_with_max_stdout(sqlite_copy_expert, get, admin):
-    created = datetime.utcnow()
+    created = tz_now()
     job = SystemJob(created=created)
     job.save()
     total_bytes = settings.STDOUT_MAX_BYTES_DISPLAY + 1
@@ -185,7 +186,7 @@ def test_text_stdout_with_max_stdout(sqlite_copy_expert, get, admin):
 @pytest.mark.parametrize('fmt', ['txt', 'ansi'])
 @mock.patch('awx.main.redact.UriCleaner.SENSITIVE_URI_PATTERN', mock.Mock(**{'search.return_value': None}))  # really slow for large strings
 def test_max_bytes_display(sqlite_copy_expert, Parent, Child, relation, view, fmt, get, admin):
-    created = datetime.utcnow()
+    created = tz_now()
     job = Parent(created=created)
     job.save()
     total_bytes = settings.STDOUT_MAX_BYTES_DISPLAY + 1
@@ -267,7 +268,7 @@ def test_text_with_unicode_stdout(sqlite_copy_expert, Parent, Child, relation, v
 
 @pytest.mark.django_db
 def test_unicode_with_base64_ansi(sqlite_copy_expert, get, admin):
-    created = datetime.utcnow()
+    created = tz_now()
     job = Job(created=created)
     job.save()
     for i in range(3):

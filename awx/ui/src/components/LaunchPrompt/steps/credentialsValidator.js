@@ -7,9 +7,9 @@ const credentialPromptsForPassword = (credential) =>
   credential?.inputs?.vault_password === 'ASK';
 
 export default function credentialsValidator(
-  defaultCredentials = [],
   allowCredentialsWithPasswords,
-  selectedCredentials
+  selectedCredentials,
+  defaultCredentials = []
 ) {
   if (defaultCredentials.length > 0 && selectedCredentials) {
     const missingCredentialTypes = [];

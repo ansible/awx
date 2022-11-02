@@ -1,18 +1,16 @@
 import React, { useState } from 'react';
-
 import { useHistory, useLocation } from 'react-router-dom';
-import { RRule } from 'rrule';
 import { shape } from 'prop-types';
 import { Card } from '@patternfly/react-core';
 import yaml from 'js-yaml';
-import { SchedulesAPI } from 'api';
+import { OrganizationsAPI, SchedulesAPI } from 'api';
 import { getAddedAndRemoved } from 'util/lists';
-
 import { parseVariableField } from 'util/yaml';
 import mergeExtraVars from 'util/prompt/mergeExtraVars';
 import getSurveyValues from 'util/prompt/getSurveyValues';
+import createNewLabels from 'util/labels';
 import ScheduleForm from '../shared/ScheduleForm';
-import buildRuleObj from '../shared/buildRuleObj';
+import buildRuleSet from '../shared/buildRuleSet';
 import { CardBody } from '../../Card';
 
 function ScheduleEdit({
@@ -27,36 +25,29 @@ function ScheduleEdit({
   const history = useHistory();
   const location = useLocation();
   const { pathname } = location;
-  const pathRoot = pathname.substr(0, pathname.indexOf('schedules'));
+  const pathRoot = pathname.substring(0, pathname.indexOf('schedules'));
 
   const handleSubmit = async (
     values,
     launchConfiguration,
     surveyConfiguration,
+    originalInstanceGroups,
+    originalLabels,
     scheduleCredentials = []
   ) => {
     const {
+      execution_environment,
+      instance_groups,
       inventory,
       credentials = [],
-      end,
       frequency,
-      interval,
+      frequencyOptions,
+      exceptionFrequency,
+      exceptionOptions,
       timezone,
-      occurences,
-      runOn,
-      runOnTheDay,
-      runOnTheMonth,
-      runOnDayMonth,
-      runOnDayNumber,
-      runOnTheOccurence,
-      daysOfWeek,
+      labels,
       ...submitValues
     } = values;
-    const { added, removed } = getAddedAndRemoved(
-      [...(resource?.summary_fields.credentials || []), ...scheduleCredentials],
-      credentials
-    );
-
     let extraVars;
     const surveyValues = getSurveyValues(values);
 
@@ -73,9 +64,9 @@ function ScheduleEdit({
       launchConfiguration?.ask_variables_on_launch &&
       (values.extra_vars || '---');
     if (surveyConfiguration?.spec) {
-      extraVars = yaml.safeDump(mergeExtraVars(initialExtraVars, surveyValues));
+      extraVars = yaml.dump(mergeExtraVars(initialExtraVars, surveyValues));
     } else {
-      extraVars = yaml.safeDump(mergeExtraVars(initialExtraVars, {}));
+      extraVars = yaml.dump(mergeExtraVars(initialExtraVars, {}));
     }
     submitValues.extra_data = extraVars && parseVariableField(extraVars);
 
@@ -90,16 +81,31 @@ function ScheduleEdit({
       submitValues.inventory = inventory.id;
     }
 
+    if (execution_environment) {
+      submitValues.execution_environment = execution_environment.id;
+    }
+
     try {
-      const rule = new RRule(buildRuleObj(values));
+      if (launchConfiguration?.ask_labels_on_launch) {
+        const { labelIds, error } = createNewLabels(
+          values.labels,
+          resource.organization
+        );
+
+        if (error) {
+          setFormSubmitError(error);
+        } else {
+          submitValues.labels = labelIds;
+        }
+      }
+
+      const ruleSet = buildRuleSet(values);
       const requestData = {
         ...submitValues,
-        rrule: rule.toString().replace(/\n/g, ' '),
+        rrule: ruleSet.toString().replace(/\n/g, ' '),
       };
       delete requestData.startDate;
       delete requestData.startTime;
-      delete requestData.endDate;
-      delete requestData.endTime;
 
       if (Object.keys(values).includes('daysToKeep')) {
         if (!requestData.extra_data) {
@@ -114,16 +120,51 @@ function ScheduleEdit({
       const {
         data: { id: scheduleId },
       } = await SchedulesAPI.update(schedule.id, requestData);
-      if (values.credentials?.length > 0) {
-        await Promise.all([
-          ...removed.map(({ id }) =>
-            SchedulesAPI.disassociateCredential(scheduleId, id)
-          ),
-          ...added.map(({ id }) =>
-            SchedulesAPI.associateCredential(scheduleId, id)
-          ),
-        ]);
+
+      const { added: addedCredentials, removed: removedCredentials } =
+        getAddedAndRemoved(
+          [
+            ...(resource?.summary_fields.credentials || []),
+            ...scheduleCredentials,
+          ],
+          credentials
+        );
+
+      const { added: addedLabels, removed: removedLabels } = getAddedAndRemoved(
+        originalLabels,
+        labels
+      );
+
+      let organizationId = resource.organization;
+
+      if (addedLabels.length > 0) {
+        if (!organizationId) {
+          const {
+            data: { results },
+          } = await OrganizationsAPI.read();
+          organizationId = results[0].id;
+        }
       }
+
+      await Promise.all([
+        ...removedCredentials.map(({ id }) =>
+          SchedulesAPI.disassociateCredential(scheduleId, id)
+        ),
+        ...addedCredentials.map(({ id }) =>
+          SchedulesAPI.associateCredential(scheduleId, id)
+        ),
+        ...removedLabels.map((label) =>
+          SchedulesAPI.disassociateLabel(scheduleId, label)
+        ),
+        ...addedLabels.map((label) =>
+          SchedulesAPI.associateLabel(scheduleId, label, organizationId)
+        ),
+        SchedulesAPI.orderInstanceGroups(
+          scheduleId,
+          instance_groups || [],
+          originalInstanceGroups
+        ),
+      ]);
 
       history.push(`${pathRoot}schedules/${scheduleId}/details`);
     } catch (err) {

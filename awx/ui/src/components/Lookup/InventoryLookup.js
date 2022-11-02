@@ -26,7 +26,6 @@ function InventoryLookup({
   hideSmartInventories,
   history,
   isDisabled,
-  isOverrideDisabled,
   isPromptableField,
   onBlur,
   onChange,
@@ -39,13 +38,7 @@ function InventoryLookup({
   const autoPopulateLookup = useAutoPopulateLookup(onChange);
 
   const {
-    result: {
-      inventories,
-      count,
-      relatedSearchableKeys,
-      searchableKeys,
-      canEdit,
-    },
+    result: { inventories, count, relatedSearchableKeys, searchableKeys },
     request: fetchInventories,
     error,
     isLoading,
@@ -85,8 +78,6 @@ function InventoryLookup({
             key,
             type: actionsResponse.data.actions?.GET[key].type,
           })),
-        canEdit:
-          Boolean(actionsResponse.data.actions.POST) || isOverrideDisabled,
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [autoPopulate, autoPopulateLookup, history.location]),
@@ -95,7 +86,6 @@ function InventoryLookup({
       count: 0,
       relatedSearchableKeys: [],
       searchableKeys: [],
-      canEdit: false,
     }
   );
 
@@ -123,71 +113,70 @@ function InventoryLookup({
   }, [fetchInventories]);
 
   return isPromptableField ? (
-    <>
-      <FieldWithPrompt
-        fieldId={fieldId}
-        isRequired={required}
-        label={t`Inventory`}
-        promptId={promptId}
-        promptName={promptName}
-        isDisabled={!canEdit || isDisabled}
-        tooltip={t`Select the inventory containing the hosts
+    <FieldWithPrompt
+      fieldId={fieldId}
+      isRequired={required}
+      label={t`Inventory`}
+      promptId={promptId}
+      promptName={promptName}
+      isDisabled={isDisabled}
+      tooltip={t`Select the inventory containing the hosts
             you want this job to manage.`}
-      >
-        <Lookup
-          id="inventory-lookup"
-          header={t`Inventory`}
-          value={value}
-          onChange={onChange}
-          onBlur={onBlur}
-          required={required}
-          onDebounce={checkInventoryName}
-          fieldName={fieldName}
-          validate={validate}
-          isLoading={isLoading}
-          isDisabled={!canEdit || isDisabled}
-          qsConfig={QS_CONFIG}
-          renderOptionsList={({ state, dispatch, canDelete }) => (
-            <OptionsList
-              value={state.selectedItems}
-              options={inventories}
-              optionCount={count}
-              searchColumns={[
-                {
-                  name: t`Name`,
-                  key: 'name__icontains',
-                  isDefault: true,
-                },
-                {
-                  name: t`Created By (Username)`,
-                  key: 'created_by__username__icontains',
-                },
-                {
-                  name: t`Modified By (Username)`,
-                  key: 'modified_by__username__icontains',
-                },
-              ]}
-              sortColumns={[
-                {
-                  name: t`Name`,
-                  key: 'name',
-                },
-              ]}
-              searchableKeys={searchableKeys}
-              relatedSearchableKeys={relatedSearchableKeys}
-              multiple={state.multiple}
-              header={t`Inventory`}
-              name="inventory"
-              qsConfig={QS_CONFIG}
-              readOnly={!canDelete}
-              selectItem={(item) => dispatch({ type: 'SELECT_ITEM', item })}
-              deselectItem={(item) => dispatch({ type: 'DESELECT_ITEM', item })}
-            />
-          )}
-        />
-        <LookupErrorMessage error={error} />
-      </FieldWithPrompt>
-    </>
+    >
+      <Lookup
+        id="inventory-lookup"
+        header={t`Inventory`}
+        value={value}
+        onChange={onChange}
+        onUpdate={fetchInventories}
+        onBlur={onBlur}
+        required={required}
+        onDebounce={checkInventoryName}
+        fieldName={fieldName}
+        validate={validate}
+        isLoading={isLoading}
+        isDisabled={isDisabled}
+        qsConfig={QS_CONFIG}
+        renderOptionsList={({ state, dispatch, canDelete }) => (
+          <OptionsList
+            value={state.selectedItems}
+            options={inventories}
+            optionCount={count}
+            searchColumns={[
+              {
+                name: t`Name`,
+                key: 'name__icontains',
+                isDefault: true,
+              },
+              {
+                name: t`Created By (Username)`,
+                key: 'created_by__username__icontains',
+              },
+              {
+                name: t`Modified By (Username)`,
+                key: 'modified_by__username__icontains',
+              },
+            ]}
+            sortColumns={[
+              {
+                name: t`Name`,
+                key: 'name',
+              },
+            ]}
+            searchableKeys={searchableKeys}
+            relatedSearchableKeys={relatedSearchableKeys}
+            multiple={state.multiple}
+            header={t`Inventory`}
+            name="inventory"
+            qsConfig={QS_CONFIG}
+            readOnly={!canDelete}
+            selectItem={(item) => dispatch({ type: 'SELECT_ITEM', item })}
+            deselectItem={(item) => dispatch({ type: 'DESELECT_ITEM', item })}
+          />
+        )}
+      />
+      <LookupErrorMessage error={error} />
+    </FieldWithPrompt>
   ) : (
     <>
       <Lookup
@@ -201,7 +190,7 @@ function InventoryLookup({
         onBlur={onBlur}
         required={required}
         isLoading={isLoading}
-        isDisabled={!canEdit || isDisabled}
+        isDisabled={isDisabled}
         qsConfig={QS_CONFIG}
         renderOptionsList={({ state, dispatch, canDelete }) => (
           <OptionsList
@@ -252,7 +241,6 @@ InventoryLookup.propTypes = {
   fieldName: string,
   hideSmartInventories: bool,
   isDisabled: bool,
-  isOverrideDisabled: bool,
   onChange: func.isRequired,
   required: bool,
   validate: func,
@@ -265,7 +253,6 @@ InventoryLookup.defaultProps = {
   fieldName: 'inventory',
   hideSmartInventories: false,
   isDisabled: false,
-  isOverrideDisabled: false,
   required: false,
   validate: () => {},
   value: null,

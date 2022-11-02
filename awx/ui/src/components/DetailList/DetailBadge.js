@@ -9,11 +9,12 @@ const Detail = styled(_Detail)`
   word-break: break-word;
 `;
 
-function DetailBadge({ label, content, dataCy = null }) {
+function DetailBadge({ label, helpText, content, dataCy = null }) {
   return (
     <Detail
       label={label}
       dataCy={dataCy}
+      helpText={helpText}
       value={<Badge isRead>{content}</Badge>}
     />
   );

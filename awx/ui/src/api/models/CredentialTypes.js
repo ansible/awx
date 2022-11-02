@@ -3,11 +3,19 @@ import Base from '../Base';
 class CredentialTypes extends Base {
   constructor(http) {
     super(http);
-    this.baseUrl = '/api/v2/credential_types/';
+    this.baseUrl = 'api/v2/credential_types/';
   }
 
   async loadAllTypes(
-    acceptableKinds = ['machine', 'cloud', 'net', 'ssh', 'vault', 'kubernetes']
+    acceptableKinds = [
+      'machine',
+      'cloud',
+      'net',
+      'ssh',
+      'vault',
+      'kubernetes',
+      'cryptography',
+    ]
   ) {
     const pageSize = 200;
     // The number of credential types a user can have is unlimited. In practice, it is unlikely for

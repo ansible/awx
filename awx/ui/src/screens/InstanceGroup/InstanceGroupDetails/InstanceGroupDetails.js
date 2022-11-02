@@ -23,11 +23,7 @@ const Unavailable = styled.span`
   color: var(--pf-global--danger-color--200);
 `;
 
-function InstanceGroupDetails({
-  instanceGroup,
-  defaultControlPlane,
-  defaultExecution,
-}) {
+function InstanceGroupDetails({ instanceGroup }) {
   const { id, name } = instanceGroup;
 
   const history = useHistory();
@@ -46,8 +42,6 @@ function InstanceGroupDetails({
   const { error, dismissError } = useDismissableError(deleteError);
   const deleteDetailsRequests =
     relatedResourceDeleteRequests.instanceGroup(instanceGroup);
-  const isDefaultInstanceGroup =
-    name === defaultControlPlane || name === defaultExecution;
   return (
     <CardBody>
       <DetailList>
@@ -68,10 +62,14 @@ function InstanceGroupDetails({
         <DetailBadge
           label={t`Policy instance minimum`}
           dataCy="instance-group-policy-instance-minimum"
+          helpText={t`Minimum number of instances that will be automatically
+          assigned to this group when new instances come online.`}
           content={instanceGroup.policy_instance_minimum}
         />
         <DetailBadge
           label={t`Policy instance percentage`}
+          helpText={t`Minimum percentage of all instances that will be automatically
+          assigned to this group when new instances come online.`}
           dataCy="instance-group-policy-instance-percentage"
           content={`${instanceGroup.policy_instance_percentage} %`}
         />
@@ -115,8 +113,7 @@ function InstanceGroupDetails({
               {t`Edit`}
             </Button>
           )}
-        {!isDefaultInstanceGroup &&
-          instanceGroup.summary_fields.user_capabilities &&
+        {instanceGroup.summary_fields.user_capabilities &&
           instanceGroup.summary_fields.user_capabilities.delete && (
             <DeleteButton
               ouiaId="instance-group-detail-delete-button"

@@ -4,8 +4,8 @@ import { Route, useRouteMatch, Switch } from 'react-router-dom';
 import { t } from '@lingui/macro';
 
 import ScreenHeader from 'components/ScreenHeader/ScreenHeader';
+import PersistentFilters from 'components/PersistentFilters';
 import { Config } from 'contexts/Config';
-
 import UsersList from './UserList/UserList';
 import UserAdd from './UserAdd/UserAdd';
 import User from './User';
@@ -51,7 +51,9 @@ function Users() {
           </Config>
         </Route>
         <Route path={`${match.path}`}>
-          <UsersList />
+          <PersistentFilters pageKey="users">
+            <UsersList />
+          </PersistentFilters>
         </Route>
       </Switch>
     </>

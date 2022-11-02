@@ -17,7 +17,6 @@ const initialValues = {
   source_vars: '---\n',
   update_cache_timeout: 0,
   update_on_launch: true,
-  update_on_project_update: false,
   verbosity: 1,
 };
 

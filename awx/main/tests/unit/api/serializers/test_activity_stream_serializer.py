@@ -20,7 +20,7 @@ def test_activity_stream_related():
     """
     serializer_related = set(
         ActivityStream._meta.get_field(field_name).related_model
-        for field_name, stuff in ActivityStreamSerializer()._local_summarizable_fk_fields
+        for field_name, stuff in ActivityStreamSerializer()._local_summarizable_fk_fields(None)
         if hasattr(ActivityStream, field_name)
     )
 

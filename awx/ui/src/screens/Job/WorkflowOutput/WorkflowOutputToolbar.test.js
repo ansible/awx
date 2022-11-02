@@ -10,7 +10,12 @@ let wrapper;
 const dispatch = jest.fn();
 const job = {
   id: 1,
-  status: 'successful',
+  status: 'running',
+  summary_fields: {
+    user_capabilities: {
+      start: true,
+    },
+  },
 };
 const workflowContext = {
   nodes: [],
@@ -49,6 +54,7 @@ describe('WorkflowOutputToolbar', () => {
     shouldFind('Button#workflow-output-toggle-legend');
     shouldFind('Badge');
     shouldFind('Button#workflow-output-toggle-tools');
+    shouldFind('JobCancelButton');
   });
 
   test('Shows correct number of nodes', () => {

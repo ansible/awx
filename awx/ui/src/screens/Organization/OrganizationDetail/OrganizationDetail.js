@@ -30,7 +30,7 @@ function OrganizationDetail({ organization }) {
     created,
     modified,
     summary_fields,
-    galaxy_credentials,
+    galaxy_credentials = [],
   } = organization;
   const [contentError, setContentError] = useState(null);
   const [hasContentLoading, setHasContentLoading] = useState(true);
@@ -94,12 +94,22 @@ function OrganizationDetail({ organization }) {
         />
         <Detail label={t`Description`} value={description} />
         {license_info?.license_type !== 'open' && (
-          <Detail label={t`Max Hosts`} value={`${max_hosts}`} />
+          <Detail
+            label={t`Max Hosts`}
+            value={`${max_hosts}`}
+            helpText={t`The maximum number of hosts allowed to be managed by
+            this organization. Value defaults to 0 which means no limit.
+            Refer to the Ansible documentation for more details.`}
+          />
         )}
         <ExecutionEnvironmentDetail
           virtualEnvironment={custom_virtualenv}
           executionEnvironment={summary_fields?.default_environment}
           isDefaultEnvironment
+          helpText={t`The execution environment that will be used for jobs
+          inside of this organization. This will be used a fallback when
+          an execution environment has not been explicitly assigned at the
+          project, job template or workflow level.`}
         />
         <UserDateDetail
           label={t`Created`}
@@ -111,10 +121,11 @@ function OrganizationDetail({ organization }) {
           date={modified}
           user={summary_fields.modified_by}
         />
-        {instanceGroups && instanceGroups.length > 0 && (
+        {instanceGroups && (
           <Detail
             fullWidth
             label={t`Instance Groups`}
+            helpText={t`The Instance Groups for this Organization to run on.`}
             value={
               <ChipGroup
                 numChips={5}
@@ -134,35 +145,35 @@ function OrganizationDetail({ organization }) {
                 ))}
               </ChipGroup>
             }
+            isEmpty={instanceGroups.length === 0}
           />
         )}
-        {galaxy_credentials && galaxy_credentials.length > 0 && (
-          <Detail
-            fullWidth
-            label={t`Galaxy Credentials`}
-            value={
-              <ChipGroup
-                numChips={5}
-                totalChips={galaxy_credentials.length}
-                ouiaId="galaxy-credential-chips"
-              >
-                {galaxy_credentials.map((credential) => (
-                  <Link
+        <Detail
+          fullWidth
+          label={t`Galaxy Credentials`}
+          value={
+            <ChipGroup
+              numChips={5}
+              totalChips={galaxy_credentials?.length}
+              ouiaId="galaxy-credential-chips"
+            >
+              {galaxy_credentials?.map((credential) => (
+                <Link
+                  key={credential.id}
+                  to={`/credentials/${credential.id}/details`}
+                >
+                  <CredentialChip
+                    credential={credential}
                     key={credential.id}
-                    to={`/credentials/${credential.id}/details`}
-                  >
-                    <CredentialChip
-                      credential={credential}
-                      key={credential.id}
-                      isReadOnly
-                      ouiaId={`galaxy-credential-${credential.id}-chip`}
-                    />
-                  </Link>
-                ))}
-              </ChipGroup>
-            }
-          />
-        )}
+                    isReadOnly
+                    ouiaId={`galaxy-credential-${credential.id}-chip`}
+                  />
+                </Link>
+              ))}
+            </ChipGroup>
+          }
+          isEmpty={galaxy_credentials?.length === 0}
+        />
       </DetailList>
       <CardActionsRow>
         {summary_fields.user_capabilities.edit && (

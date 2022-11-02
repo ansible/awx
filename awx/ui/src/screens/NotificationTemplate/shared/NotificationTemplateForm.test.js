@@ -101,6 +101,9 @@ describe('<NotificationTemplateForm />', () => {
 
     expect(wrapper.find('input#option-use-ssl').length).toBe(1);
     expect(wrapper.find('input#option-use-tls').length).toBe(1);
+    expect(
+      wrapper.find('FormGroup[label="Email Options"]').find('HelpIcon').length
+    ).toBe(1);
   });
 
   test('should render custom messages fields', async () => {

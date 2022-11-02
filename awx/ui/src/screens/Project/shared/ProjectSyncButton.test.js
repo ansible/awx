@@ -6,7 +6,12 @@ import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import ProjectSyncButton from './ProjectSyncButton';
 
 jest.mock('../../../api');
-
+jest.mock('hooks/useBrandName', () => ({
+  __esModule: true,
+  default: () => ({
+    current: 'AWX',
+  }),
+}));
 describe('ProjectSyncButton', () => {
   let wrapper;
 

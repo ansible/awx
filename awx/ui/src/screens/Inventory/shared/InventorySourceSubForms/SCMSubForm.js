@@ -21,12 +21,15 @@ import {
   EnabledValueField,
   HostFilterField,
 } from './SharedFields';
+import getHelpText from '../Inventory.helptext';
 
 const SCMSubForm = ({ autoPopulateProject }) => {
+  const helpText = getHelpText();
   const [isOpen, setIsOpen] = useState(false);
   const [sourcePath, setSourcePath] = useState([]);
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [credentialField] = useField('credential');
+
   const [projectField, projectMeta, projectHelpers] =
     useField('source_project');
   const [sourcePathField, sourcePathMeta, sourcePathHelpers] = useField({
@@ -54,14 +57,16 @@ const SCMSubForm = ({ autoPopulateProject }) => {
   const handleProjectUpdate = useCallback(
     (value) => {
       setFieldValue('source_project', value);
-      setFieldValue('source_path', '');
-      setFieldTouched('source_path', false);
       setFieldTouched('source_project', true, false);
+      if (sourcePathField.value) {
+        setFieldValue('source_path', '');
+        setFieldTouched('source_path', false);
+      }
       if (value) {
         fetchSourcePath(value.id);
       }
     },
-    [fetchSourcePath, setFieldValue, setFieldTouched]
+    [fetchSourcePath, setFieldValue, setFieldTouched, sourcePathField.value]
   );
 
   const handleCredentialUpdate = useCallback(
@@ -102,13 +107,7 @@ const SCMSubForm = ({ autoPopulateProject }) => {
         }
         isRequired
         label={t`Inventory file`}
-        labelIcon={
-          <Popover
-            content={t`Select the inventory file
-          to be synced by this source. You can select from
-          the dropdown or enter a file within the input.`}
-          />
-        }
+        labelIcon={<Popover content={helpText.sourcePath} />}
       >
         <Select
           ouiaId="InventorySourceForm-source_path"

@@ -51,7 +51,9 @@ class WSClient(object):
 
     # Subscription group types
 
-    def __init__(self, token=None, hostname='', port=443, secure=True, session_id=None, csrftoken=None, add_received_time=False):
+    def __init__(
+        self, token=None, hostname='', port=443, secure=True, session_id=None, csrftoken=None, add_received_time=False, session_cookie_name='awx_sessionid'
+    ):
         # delay this import, because this is an optional dependency
         import websocket
 
@@ -78,7 +80,7 @@ class WSClient(object):
         if self.token is not None:
             auth_cookie = 'token="{0.token}";'.format(self)
         elif self.session_id is not None:
-            auth_cookie = 'sessionid="{0.session_id}"'.format(self)
+            auth_cookie = '{1}="{0.session_id}"'.format(self, session_cookie_name)
             if self.csrftoken:
                 auth_cookie += ';csrftoken={0.csrftoken}'.format(self)
         else:

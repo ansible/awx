@@ -1,6 +1,7 @@
 from unittest import mock
 import datetime as dt
 from django.core.mail.message import EmailMessage
+import pytest
 
 import awx.main.notifications.grafana_backend as grafana_backend
 
@@ -29,7 +30,7 @@ def test_send_messages():
         requests_mock.post.assert_called_once_with(
             'https://example.com/api/annotations',
             headers={'Content-Type': 'application/json', 'Authorization': 'Bearer testapikey'},
-            json={'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'panelId': None, 'time': 60000, 'dashboardId': None},
+            json={'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'time': 60000},
             verify=True,
         )
         assert sent_messages == 1
@@ -59,20 +60,21 @@ def test_send_messages_with_no_verify_ssl():
         requests_mock.post.assert_called_once_with(
             'https://example.com/api/annotations',
             headers={'Content-Type': 'application/json', 'Authorization': 'Bearer testapikey'},
-            json={'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'panelId': None, 'time': 60000, 'dashboardId': None},
+            json={'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'time': 60000},
             verify=False,
         )
         assert sent_messages == 1
 
 
-def test_send_messages_with_dashboardid():
+@pytest.mark.parametrize("dashboardId", [42, 0])
+def test_send_messages_with_dashboardid(dashboardId):
     with mock.patch('awx.main.notifications.grafana_backend.requests') as requests_mock:
         requests_mock.post.return_value.status_code = 200
         m = {}
         m['started'] = dt.datetime.utcfromtimestamp(60).isoformat()
         m['finished'] = dt.datetime.utcfromtimestamp(120).isoformat()
         m['subject'] = "test subject"
-        backend = grafana_backend.GrafanaBackend("testapikey", dashboardId=42)
+        backend = grafana_backend.GrafanaBackend("testapikey", dashboardId=dashboardId)
         message = EmailMessage(
             m['subject'],
             {"started": m['started'], "finished": m['finished']},
@@ -89,20 +91,21 @@ def test_send_messages_with_dashboardid():
         requests_mock.post.assert_called_once_with(
             'https://example.com/api/annotations',
             headers={'Content-Type': 'application/json', 'Authorization': 'Bearer testapikey'},
-            json={'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'panelId': None, 'time': 60000, 'dashboardId': 42},
+            json={'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'time': 60000, 'dashboardId': dashboardId},
             verify=True,
         )
         assert sent_messages == 1
 
 
-def test_send_messages_with_panelid():
+@pytest.mark.parametrize("panelId", [42, 0])
+def test_send_messages_with_panelid(panelId):
     with mock.patch('awx.main.notifications.grafana_backend.requests') as requests_mock:
         requests_mock.post.return_value.status_code = 200
         m = {}
         m['started'] = dt.datetime.utcfromtimestamp(60).isoformat()
         m['finished'] = dt.datetime.utcfromtimestamp(120).isoformat()
         m['subject'] = "test subject"
-        backend = grafana_backend.GrafanaBackend("testapikey", dashboardId=None, panelId=42)
+        backend = grafana_backend.GrafanaBackend("testapikey", dashboardId=None, panelId=panelId)
         message = EmailMessage(
             m['subject'],
             {"started": m['started'], "finished": m['finished']},
@@ -119,7 +122,7 @@ def test_send_messages_with_panelid():
         requests_mock.post.assert_called_once_with(
             'https://example.com/api/annotations',
             headers={'Content-Type': 'application/json', 'Authorization': 'Bearer testapikey'},
-            json={'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'panelId': 42, 'time': 60000, 'dashboardId': None},
+            json={'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'panelId': panelId, 'time': 60000},
             verify=True,
         )
         assert sent_messages == 1
@@ -179,7 +182,7 @@ def test_send_messages_with_tags():
         requests_mock.post.assert_called_once_with(
             'https://example.com/api/annotations',
             headers={'Content-Type': 'application/json', 'Authorization': 'Bearer testapikey'},
-            json={'tags': ['ansible'], 'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'panelId': None, 'time': 60000, 'dashboardId': None},
+            json={'tags': ['ansible'], 'text': 'test subject', 'isRegion': True, 'timeEnd': 120000, 'time': 60000},
             verify=True,
         )
         assert sent_messages == 1

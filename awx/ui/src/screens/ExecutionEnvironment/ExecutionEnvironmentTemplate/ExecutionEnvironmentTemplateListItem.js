@@ -10,7 +10,9 @@ function ExecutionEnvironmentTemplateListItem({ template, detailUrl }) {
       ouiaId={`template-row-${template.id}`}
     >
       <Td dataLabel={t`Name`}>
-        <Link to={`${detailUrl}`}>{template.name}</Link>
+        <Link to={`${detailUrl}`}>
+          <b>{template.name}</b>
+        </Link>
       </Td>
       <Td dataLabel={t`Type`}>
         {template.type === 'job_template'

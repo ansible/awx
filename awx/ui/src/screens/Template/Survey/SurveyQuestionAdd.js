@@ -19,17 +19,14 @@ export default function SurveyQuestionAdd({ survey, updateSurvey }) {
         );
         return;
       }
-      let choices = '';
-      let defaultAnswers = '';
       if (
         formData.type === 'multiselect' ||
         formData.type === 'multiplechoice'
       ) {
+        const choices = [];
+        let defaultAnswers = '';
         formData.formattedChoices.forEach(({ choice, isDefault }, i) => {
-          choices =
-            i === formData.formattedChoices.length - 1
-              ? choices.concat(`${choice}`)
-              : choices.concat(`${choice}\n`);
+          choices.push(choice);
           if (isDefault) {
             defaultAnswers =
               i === formData.formattedChoices.length - 1
@@ -38,7 +35,7 @@ export default function SurveyQuestionAdd({ survey, updateSurvey }) {
           }
         });
         formData.default = defaultAnswers.trim();
-        formData.choices = choices.trim();
+        formData.choices = choices;
       }
       delete formData.formattedChoices;
       const newSpec = survey?.spec ? survey.spec.concat(formData) : [formData];

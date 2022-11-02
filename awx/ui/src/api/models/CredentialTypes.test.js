@@ -20,7 +20,7 @@ describe('CredentialTypesAPI', () => {
 
     expect(mockHttp.get).toHaveBeenCalledTimes(1);
     expect(mockHttp.get.mock.calls[0]).toEqual([
-      `/api/v2/credential_types/`,
+      `api/v2/credential_types/`,
       { params: { page_size: 200 } },
     ]);
     expect(types).toEqual(typesData);
@@ -41,11 +41,11 @@ describe('CredentialTypesAPI', () => {
 
     expect(mockHttp.get).toHaveBeenCalledTimes(2);
     expect(mockHttp.get.mock.calls[0]).toEqual([
-      `/api/v2/credential_types/`,
+      `api/v2/credential_types/`,
       { params: { page_size: 200 } },
     ]);
     expect(mockHttp.get.mock.calls[1]).toEqual([
-      `/api/v2/credential_types/`,
+      `api/v2/credential_types/`,
       { params: { page_size: 200, page: 2 } },
     ]);
     expect(types).toHaveLength(4);

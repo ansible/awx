@@ -14,6 +14,14 @@ function InventoryAdd() {
     history.push('/inventories');
   };
 
+  async function submitLabels(inventoryId, orgId, labels = []) {
+    const associationPromises = labels.map((label) =>
+      InventoriesAPI.associateLabel(inventoryId, label, orgId)
+    );
+
+    return Promise.all([...associationPromises]);
+  }
+
   const handleSubmit = async (values) => {
     const { instanceGroups, organization, ...remainingValues } = values;
     try {
@@ -25,6 +33,8 @@ function InventoryAdd() {
       });
       /* eslint-disable no-await-in-loop, no-restricted-syntax */
       // Resolve Promises sequentially to maintain order and avoid race condition
+
+      await submitLabels(inventoryId, values.organization?.id, values.labels);
       for (const group of instanceGroups) {
         await InventoriesAPI.associateInstanceGroup(inventoryId, group.id);
       }

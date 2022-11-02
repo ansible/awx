@@ -16,18 +16,18 @@ const DateTimeGroup = styled.span`
 `;
 function DateTimePicker({ dateFieldName, timeFieldName, label }) {
   const [dateField, dateMeta, dateHelpers] = useField({
-    name: `${dateFieldName}`,
+    name: dateFieldName,
     validate: combine([required(null), isValidDate]),
   });
   const [timeField, timeMeta, timeHelpers] = useField({
-    name: `${timeFieldName}`,
+    name: timeFieldName,
     validate: combine([required(null), validateTime()]),
   });
 
   const onDateChange = (inputDate, newDate) => {
     dateHelpers.setTouched();
     if (isValidDate(newDate) && inputDate === yyyyMMddFormat(newDate)) {
-      dateHelpers.setValue(new Date(newDate).toISOString().split('T')[0]);
+      dateHelpers.setValue(inputDate);
     }
   };
 

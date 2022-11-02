@@ -4,14 +4,14 @@ import { t } from '@lingui/macro';
 import StepName from '../LaunchPrompt/steps/StepName';
 import AdHocCredentialStep from './AdHocCredentialStep';
 
-const STEP_ID = 'credential';
+const STEP_ID = 'credentials';
 export default function useAdHocExecutionEnvironmentStep(
   visited,
   credentialTypeId
 ) {
-  const [field, meta, helpers] = useField('credential');
+  const [field, meta, helpers] = useField('credentials');
   const hasError =
-    Object.keys(visited).includes('credential') &&
+    Object.keys(visited).includes('credentials') &&
     !field.value.length &&
     meta.touched;
 
@@ -35,7 +35,7 @@ export default function useAdHocExecutionEnvironmentStep(
       }
     },
     setTouched: (setFieldTouched) => {
-      setFieldTouched('credential', true, false);
+      setFieldTouched('credentials', true, false);
     },
   };
 }

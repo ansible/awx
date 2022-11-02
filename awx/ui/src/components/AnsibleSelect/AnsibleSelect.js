@@ -46,7 +46,9 @@ function AnsibleSelect({
           value={option.value}
           label={option.label}
           isDisabled={option.isDisabled}
-        />
+        >
+          {option.label}
+        </FormSelectOption>
       ))}
     </FormSelect>
   );

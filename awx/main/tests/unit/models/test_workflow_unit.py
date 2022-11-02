@@ -94,7 +94,7 @@ def workflow_job_unit():
 
 @pytest.fixture
 def workflow_job_template_unit():
-    return WorkflowJobTemplate(name='workflow')
+    return WorkflowJobTemplate.objects.create(name='workflow')
 
 
 @pytest.fixture
@@ -151,6 +151,7 @@ def test_node_getter_and_setters():
     assert node.job_type == 'check'
 
 
+@pytest.mark.django_db
 class TestWorkflowJobCreate:
     def test_create_no_prompts(self, wfjt_node_no_prompts, workflow_job_unit, mocker):
         mock_create = mocker.MagicMock()
@@ -165,6 +166,7 @@ class TestWorkflowJobCreate:
                 unified_job_template=wfjt_node_no_prompts.unified_job_template,
                 workflow_job=workflow_job_unit,
                 identifier=mocker.ANY,
+                execution_environment=None,
             )
 
     def test_create_with_prompts(self, wfjt_node_with_prompts, workflow_job_unit, credential, mocker):
@@ -180,9 +182,11 @@ class TestWorkflowJobCreate:
                 unified_job_template=wfjt_node_with_prompts.unified_job_template,
                 workflow_job=workflow_job_unit,
                 identifier=mocker.ANY,
+                execution_environment=None,
             )
 
 
+@pytest.mark.django_db
 @mock.patch('awx.main.models.workflow.WorkflowNodeBase.get_parent_nodes', lambda self: [])
 class TestWorkflowJobNodeJobKWARGS:
     """
@@ -231,4 +235,12 @@ class TestWorkflowJobNodeJobKWARGS:
 
 
 def test_get_ask_mapping_integrity():
-    assert list(WorkflowJobTemplate.get_ask_mapping().keys()) == ['extra_vars', 'inventory', 'limit', 'scm_branch']
+    assert list(WorkflowJobTemplate.get_ask_mapping().keys()) == [
+        'inventory',
+        'limit',
+        'scm_branch',
+        'labels',
+        'job_tags',
+        'skip_tags',
+        'extra_vars',
+    ]

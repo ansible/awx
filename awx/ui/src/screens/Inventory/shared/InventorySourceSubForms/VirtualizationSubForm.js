@@ -1,10 +1,10 @@
 import React, { useCallback } from 'react';
 import { useField, useFormikContext } from 'formik';
-import { t, Trans } from '@lingui/macro';
+import { t } from '@lingui/macro';
+import { useConfig } from 'contexts/Config';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
 import CredentialLookup from 'components/Lookup/CredentialLookup';
 import { required } from 'util/validators';
-import getDocsBaseUrl from 'util/getDocsBaseUrl';
-import { useConfig } from 'contexts/Config';
 import {
   OptionsField,
   VerbosityField,
@@ -13,8 +13,10 @@ import {
   HostFilterField,
   SourceVarsField,
 } from './SharedFields';
+import getHelpText from '../Inventory.helptext';
 
 const VirtualizationSubForm = ({ autoPopulateCredential }) => {
+  const helpText = getHelpText();
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [credentialField, credentialMeta, credentialHelpers] =
     useField('credential');
@@ -28,12 +30,7 @@ const VirtualizationSubForm = ({ autoPopulateCredential }) => {
     [setFieldValue, setFieldTouched]
   );
 
-  const pluginLink = `${getDocsBaseUrl(
-    config
-  )}/html/userguide/inventories.html#inventory-plugins`;
-  const configLink =
-    'https://docs.ansible.com/ansible/latest/collections/ovirt/ovirt/ovirt_inventory.html';
-
+  const docsBaseUrl = getDocsBaseUrl(config);
   return (
     <>
       <CredentialLookup
@@ -54,24 +51,7 @@ const VirtualizationSubForm = ({ autoPopulateCredential }) => {
       <EnabledValueField />
       <OptionsField />
       <SourceVarsField
-        popoverContent={
-          <>
-            <Trans>
-              Enter variables to configure the inventory source. For a detailed
-              description of how to configure this plugin, see{' '}
-              <a href={pluginLink} target="_blank" rel="noopener noreferrer">
-                Inventory Plugins
-              </a>{' '}
-              in the documentation and the{' '}
-              <a href={configLink} target="_blank" rel="noopener noreferrer">
-                ovirt
-              </a>{' '}
-              plugin configuration guide.
-            </Trans>
-            <br />
-            <br />
-          </>
-        }
+        popoverContent={helpText.sourceVars(docsBaseUrl, 'rhv')}
       />
     </>
   );

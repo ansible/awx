@@ -124,5 +124,21 @@ describe('<DisassociateButton />', () => {
       );
       expect(wrapper.find('button[disabled]')).toHaveLength(1);
     });
+    test('should disable button when selected items contain instances thaat are hybrid and are inside a protected instances', () => {
+      const wrapper = mountWithContexts(
+        <DisassociateButton
+          onDisassociate={() => {}}
+          isProectedInstanceGroup
+          itemsToDelete={[
+            {
+              id: 1,
+              hostname: 'awx',
+              node_type: 'control',
+            },
+          ]}
+        />
+      );
+      expect(wrapper.find('button[disabled]')).toHaveLength(1);
+    });
   });
 });

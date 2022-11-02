@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useReducer } from 'react';
 import { useHistory } from 'react-router-dom';
-
 import styled from 'styled-components';
 import { shape } from 'prop-types';
 import { t } from '@lingui/macro';
@@ -18,6 +17,7 @@ import ContentLoading from 'components/ContentLoading';
 import workflowReducer from 'components/Workflow/workflowReducer';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import {
+  OrganizationsAPI,
   WorkflowApprovalTemplatesAPI,
   WorkflowJobTemplateNodesAPI,
   WorkflowJobTemplatesAPI,
@@ -53,13 +53,17 @@ const Wrapper = styled.div`
 `;
 
 const replaceIdentifier = (node) => {
-  if (stringIsUUID(node.originalNodeObject.identifier) && node.identifier) {
+  if (
+    stringIsUUID(node.originalNodeObject.identifier) &&
+    typeof node.identifier === 'string' &&
+    node.identifier !== ''
+  ) {
     return true;
   }
 
   if (
     !stringIsUUID(node.originalNodeObject.identifier) &&
-    node.identifier !== node.originalNodeObject.identifier
+    node.originalNodeObject.identifier !== node.identifier
   ) {
     return true;
   }
@@ -133,6 +137,7 @@ function Visualizer({ template }) {
     addNodeTarget: null,
     addingLink: false,
     contentError: null,
+    defaultOrganization: null,
     isLoading: true,
     linkToDelete: null,
     linkToEdit: null,
@@ -155,6 +160,7 @@ function Visualizer({ template }) {
     addLinkTargetNode,
     addNodeSource,
     contentError,
+    defaultOrganization,
     isLoading,
     linkToDelete,
     linkToEdit,
@@ -268,6 +274,14 @@ function Visualizer({ template }) {
   useEffect(() => {
     async function fetchData() {
       try {
+        const {
+          data: { results },
+        } = await OrganizationsAPI.read({ page_size: 1, page: 1 });
+        dispatch({
+          type: 'SET_DEFAULT_ORGANIZATION',
+          value: results[0]?.id,
+        });
+
         const workflowNodes = await fetchWorkflowNodes(template.id);
         dispatch({
           type: 'GENERATE_NODES_AND_LINKS',
@@ -297,7 +311,11 @@ function Visualizer({ template }) {
     }
   }, [links, nodes]);
 
-  const { error: saveVisualizerError, request: saveVisualizer } = useRequest(
+  const {
+    error: saveVisualizerError,
+    isLoading: isSavingVisualizer,
+    request: saveVisualizer,
+  } = useRequest(
     useCallback(async () => {
       const nodeRequests = [];
       const approvalTemplateRequests = [];
@@ -305,6 +323,9 @@ function Visualizer({ template }) {
       const deletedNodeIds = [];
       const associateCredentialRequests = [];
       const disassociateCredentialRequests = [];
+      const associateLabelRequests = [];
+      const disassociateLabelRequests = [];
+      const instanceGroupRequests = [];
 
       const generateLinkMapAndNewLinks = () => {
         const linkMap = {};
@@ -403,6 +424,8 @@ function Visualizer({ template }) {
             nodeRequests.push(
               WorkflowJobTemplatesAPI.createNode(template.id, {
                 ...node.promptValues,
+                execution_environment:
+                  node.promptValues?.execution_environment?.id || null,
                 inventory: node.promptValues?.inventory?.id || null,
                 unified_job_template: node.fullUnifiedJobTemplate.id,
                 all_parents_must_converge: node.all_parents_must_converge,
@@ -426,6 +449,29 @@ function Visualizer({ template }) {
                     );
                   });
                 }
+
+                if (node.promptValues?.labels?.length > 0) {
+                  node.promptValues.labels.forEach((label) => {
+                    associateLabelRequests.push(
+                      WorkflowJobTemplateNodesAPI.associateLabel(
+                        data.id,
+                        label,
+                        node.fullUnifiedJobTemplate.organization ||
+                          defaultOrganization
+                      )
+                    );
+                  });
+                }
+                if (node.promptValues?.instance_groups?.length > 0)
+                  /* eslint-disable no-await-in-loop, no-restricted-syntax */
+                  for (const group of node.promptValues.instance_groups) {
+                    instanceGroupRequests.push(
+                      WorkflowJobTemplateNodesAPI.associateInstanceGroup(
+                        data.id,
+                        group.id
+                      )
+                    );
+                  }
               })
             );
           }
@@ -435,7 +481,7 @@ function Visualizer({ template }) {
           ) {
             if (
               node.originalNodeObject.summary_fields.unified_job_template
-                .unified_job_type === 'workflow_approval'
+                ?.unified_job_type === 'workflow_approval'
             ) {
               nodeRequests.push(
                 WorkflowJobTemplateNodesAPI.replace(
@@ -490,6 +536,8 @@ function Visualizer({ template }) {
             nodeRequests.push(
               WorkflowJobTemplateNodesAPI.replace(node.originalNodeObject.id, {
                 ...node.promptValues,
+                execution_environment:
+                  node.promptValues?.execution_environment?.id || null,
                 inventory: node.promptValues?.inventory?.id || null,
                 unified_job_template: node.fullUnifiedJobTemplate.id,
                 all_parents_must_converge: node.all_parents_must_converge,
@@ -504,6 +552,12 @@ function Visualizer({ template }) {
                       node.launchConfig?.defaults?.credentials
                     ),
                     node.promptValues?.credentials
+                  );
+
+                const { added: addedLabels, removed: removedLabels } =
+                  getAddedAndRemoved(
+                    node?.originalNodeLabels,
+                    node.promptValues?.labels
                   );
 
                 if (addedCredentials.length > 0) {
@@ -526,6 +580,41 @@ function Visualizer({ template }) {
                     )
                   );
                 }
+
+                if (addedLabels.length > 0) {
+                  addedLabels.forEach((label) => {
+                    associateLabelRequests.push(
+                      WorkflowJobTemplateNodesAPI.associateLabel(
+                        node.originalNodeObject.id,
+                        label,
+                        node.fullUnifiedJobTemplate.organization ||
+                          defaultOrganization
+                      )
+                    );
+                  });
+                }
+                if (removedLabels?.length > 0) {
+                  removedLabels.forEach((label) =>
+                    disassociateLabelRequests.push(
+                      WorkflowJobTemplateNodesAPI.disassociateLabel(
+                        node.originalNodeObject.id,
+                        label,
+                        node.fullUnifiedJobTemplate.organization ||
+                          defaultOrganization
+                      )
+                    )
+                  );
+                }
+
+                if (node.promptValues?.instance_groups) {
+                  instanceGroupRequests.push(
+                    WorkflowJobTemplateNodesAPI.orderInstanceGroups(
+                      node.originalNodeObject.id,
+                      node.promptValues?.instance_groups,
+                      node?.originalNodeInstanceGroups || []
+                    )
+                  );
+                }
               })
             );
           }
@@ -542,18 +631,25 @@ function Visualizer({ template }) {
       );
       await Promise.all(associateNodes(newLinks, originalLinkMap));
 
-      await Promise.all(disassociateCredentialRequests);
-      await Promise.all(associateCredentialRequests);
+      await Promise.all([
+        ...disassociateCredentialRequests,
+        ...disassociateLabelRequests,
+      ]);
+      await Promise.all([
+        ...associateCredentialRequests,
+        ...associateLabelRequests,
+        ...instanceGroupRequests,
+      ]);
 
       history.push(`/templates/workflow_job_template/${template.id}/details`);
-    }, [links, nodes, history, template.id]),
+    }, [links, nodes, history, defaultOrganization, template.id]),
     {}
   );
 
   const { error: nodeRequestError, dismissError: dismissNodeRequestError } =
     useDismissableError(saveVisualizerError);
 
-  if (isLoading) {
+  if (isLoading || isSavingVisualizer) {
     return (
       <CenteredContent>
         <ContentLoading />

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { TeamsAPI, UsersAPI } from 'api';
+import useSelected from 'hooks/useSelected';
 import SelectableCard from '../SelectableCard';
 import Wizard from '../Wizard';
 import SelectResourceStep from './SelectResourceStep';
@@ -71,26 +72,20 @@ const teamSortColumns = [
 function AddResourceRole({ onSave, onClose, roles, resource, onError }) {
   const history = useHistory();
 
-  const [selectedResource, setSelectedResource] = useState(null);
-  const [selectedResourceRows, setSelectedResourceRows] = useState([]);
-  const [selectedRoleRows, setSelectedRoleRows] = useState([]);
+  const {
+    selected: resourcesSelected,
+    handleSelect: handleResourceSelect,
+    clearSelected: clearResources,
+  } = useSelected([]);
+  const {
+    selected: rolesSelected,
+    handleSelect: handleRoleSelect,
+    clearSelected: clearRoles,
+  } = useSelected([]);
+
+  const [resourceType, setResourceType] = useState(null);
   const [currentStepId, setCurrentStepId] = useState(1);
   const [maxEnabledStep, setMaxEnabledStep] = useState(1);
-
-  const handleResourceCheckboxClick = (user) => {
-    const selectedIndex = selectedResourceRows.findIndex(
-      (selectedRow) => selectedRow.id === user.id
-    );
-    if (selectedIndex > -1) {
-      selectedResourceRows.splice(selectedIndex, 1);
-      if (selectedResourceRows.length === 0) {
-        setMaxEnabledStep(currentStepId);
-      }
-      setSelectedRoleRows(selectedResourceRows);
-    } else {
-      setSelectedResourceRows([...selectedResourceRows, user]);
-    }
-  };
 
   useEffect(() => {
     if (currentStepId === 1 && maxEnabledStep > 1) {
@@ -98,24 +93,10 @@ function AddResourceRole({ onSave, onClose, roles, resource, onError }) {
     }
   }, [currentStepId, history, maxEnabledStep]);
 
-  const handleRoleCheckboxClick = (role) => {
-    const selectedIndex = selectedRoleRows.findIndex(
-      (selectedRow) => selectedRow.id === role.id
-    );
-
-    if (selectedIndex > -1) {
-      setSelectedRoleRows(
-        selectedRoleRows.filter((r, index) => index !== selectedIndex)
-      );
-    } else {
-      setSelectedRoleRows([...selectedRoleRows, role]);
-    }
-  };
-
-  const handleResourceSelect = (resourceType) => {
-    setSelectedResource(resourceType);
-    setSelectedResourceRows([]);
-    setSelectedRoleRows([]);
+  const handleResourceTypeSelect = (type) => {
+    setResourceType(type);
+    clearResources();
+    clearRoles();
   };
 
   const handleWizardNext = (step) => {
@@ -131,20 +112,20 @@ function AddResourceRole({ onSave, onClose, roles, resource, onError }) {
     try {
       const roleRequests = [];
 
-      for (let i = 0; i < selectedResourceRows.length; i++) {
-        for (let j = 0; j < selectedRoleRows.length; j++) {
-          if (selectedResource === 'users') {
+      for (let i = 0; i < resourcesSelected.length; i++) {
+        for (let j = 0; j < rolesSelected.length; j++) {
+          if (resourceType === 'users') {
             roleRequests.push(
               UsersAPI.associateRole(
-                selectedResourceRows[i].id,
-                selectedRoleRows[j].id
+                resourcesSelected[i].id,
+                rolesSelected[j].id
               )
             );
-          } else if (selectedResource === 'teams') {
+          } else if (resourceType === 'teams') {
             roleRequests.push(
               TeamsAPI.associateRole(
-                selectedResourceRows[i].id,
-                selectedRoleRows[j].id
+                resourcesSelected[i].id,
+                rolesSelected[j].id
               )
             );
           }
@@ -162,7 +143,7 @@ function AddResourceRole({ onSave, onClose, roles, resource, onError }) {
   // Object roles can be user only, so we remove them when
   // showing role choices for team access
   const selectableRoles = { ...roles };
-  if (selectedResource === 'teams') {
+  if (resourceType === 'teams') {
     Object.keys(roles).forEach((key) => {
       if (selectableRoles[key].user_only) {
         delete selectableRoles[key];
@@ -172,7 +153,7 @@ function AddResourceRole({ onSave, onClose, roles, resource, onError }) {
 
   let wizardTitle = '';
 
-  switch (selectedResource) {
+  switch (resourceType) {
     case 'users':
       wizardTitle = t`Add User Roles`;
       break;
@@ -193,60 +174,60 @@ function AddResourceRole({ onSave, onClose, roles, resource, onError }) {
             {t`Choose the type of resource that will be receiving new roles.  For example, if you'd like to add new roles to a set of users please choose Users and click Next.  You'll be able to select the specific resources in the next step.`}
           </div>
           <SelectableCard
-            isSelected={selectedResource === 'users'}
+            isSelected={resourceType === 'users'}
             label={t`Users`}
             ariaLabel={t`Users`}
             dataCy="add-role-users"
-            onClick={() => handleResourceSelect('users')}
+            onClick={() => handleResourceTypeSelect('users')}
           />
           {resource?.type === 'team' ||
           (resource?.type === 'credential' &&
             !resource?.organization) ? null : (
             <SelectableCard
-              isSelected={selectedResource === 'teams'}
+              isSelected={resourceType === 'teams'}
               label={t`Teams`}
               ariaLabel={t`Teams`}
               dataCy="add-role-teams"
-              onClick={() => handleResourceSelect('teams')}
+              onClick={() => handleResourceTypeSelect('teams')}
             />
           )}
         </div>
       ),
       nextButtonText: t`Next`,
-      enableNext: selectedResource !== null,
+      enableNext: resourceType !== null,
     },
     {
       id: 2,
       name: t`Select Items from List`,
       component: (
         <>
-          {selectedResource === 'users' && (
+          {resourceType === 'users' && (
             <SelectResourceStep
               searchColumns={userSearchColumns}
               sortColumns={userSortColumns}
               displayKey="username"
-              onRowClick={handleResourceCheckboxClick}
+              onRowClick={handleResourceSelect}
               fetchItems={readUsers}
               fetchOptions={readUsersOptions}
               selectedLabel={t`Selected`}
-              selectedResourceRows={selectedResourceRows}
+              selectedResourceRows={resourcesSelected}
               sortedColumnKey="username"
             />
           )}
-          {selectedResource === 'teams' && (
+          {resourceType === 'teams' && (
             <SelectResourceStep
               searchColumns={teamSearchColumns}
               sortColumns={teamSortColumns}
-              onRowClick={handleResourceCheckboxClick}
+              onRowClick={handleResourceSelect}
               fetchItems={readTeams}
               fetchOptions={readTeamsOptions}
               selectedLabel={t`Selected`}
-              selectedResourceRows={selectedResourceRows}
+              selectedResourceRows={resourcesSelected}
             />
           )}
         </>
       ),
-      enableNext: selectedResourceRows.length > 0,
+      enableNext: resourcesSelected.length > 0,
       nextButtonText: t`Next`,
       canJumpTo: maxEnabledStep >= 2,
     },
@@ -255,16 +236,16 @@ function AddResourceRole({ onSave, onClose, roles, resource, onError }) {
       name: t`Select Roles to Apply`,
       component: (
         <SelectRoleStep
-          onRolesClick={handleRoleCheckboxClick}
+          onRolesClick={handleRoleSelect}
           roles={selectableRoles}
-          selectedListKey={selectedResource === 'users' ? 'username' : 'name'}
+          selectedListKey={resourceType === 'users' ? 'username' : 'name'}
           selectedListLabel={t`Selected`}
-          selectedResourceRows={selectedResourceRows}
-          selectedRoleRows={selectedRoleRows}
+          selectedResourceRows={resourcesSelected}
+          selectedRoleRows={rolesSelected}
         />
       ),
       nextButtonText: t`Save`,
-      enableNext: selectedRoleRows.length > 0,
+      enableNext: rolesSelected.length > 0,
       canJumpTo: maxEnabledStep >= 3,
     },
   ];

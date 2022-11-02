@@ -53,5 +53,41 @@ describe('<ResourceAccessListItem />', () => {
 
     expect(wrapper.find('Td[dataLabel="First name"]').text()).toBe('jane');
     expect(wrapper.find('Td[dataLabel="Last name"]').text()).toBe('brown');
+
+    const user_roles_detail = wrapper.find(`Detail[label="User Roles"]`).at(0);
+    expect(user_roles_detail.prop('isEmpty')).toEqual(true);
+  });
+
+  test('should not load team roles', async () => {
+    let wrapper;
+
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <table>
+          <tbody>
+            <ResourceAccessListItem
+              accessRecord={{
+                ...accessRecord,
+                summary_fields: {
+                  direct_access: [
+                    {
+                      role: {
+                        id: 3,
+                        name: 'Member',
+                        user_capabilities: { unattach: true },
+                      },
+                    },
+                  ],
+                  indirect_access: [],
+                },
+              }}
+              onRoleDelete={() => {}}
+            />
+          </tbody>
+        </table>
+      );
+    });
+    const team_roles_detail = wrapper.find(`Detail[label="Team Roles"]`).at(0);
+    expect(team_roles_detail.prop('isEmpty')).toEqual(true);
   });
 });

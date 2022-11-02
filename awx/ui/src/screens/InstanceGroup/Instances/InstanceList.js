@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-
-import { Plural, t } from '@lingui/macro';
+import { t } from '@lingui/macro';
 import { useLocation, useParams } from 'react-router-dom';
 import 'styled-components/macro';
 
@@ -16,7 +15,6 @@ import DisassociateButton from 'components/DisassociateButton';
 import AssociateModal from 'components/AssociateModal';
 import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';
-
 import useRequest, {
   useDeleteItems,
   useDismissableError,
@@ -24,8 +22,8 @@ import useRequest, {
 import useSelected from 'hooks/useSelected';
 import { InstanceGroupsAPI, InstancesAPI } from 'api';
 import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
-
-import { Button, Tooltip } from '@patternfly/react-core';
+import HealthCheckButton from 'components/HealthCheckButton/HealthCheckButton';
+import HealthCheckAlert from 'components/HealthCheckAlert';
 import InstanceListItem from './InstanceListItem';
 
 const QS_CONFIG = getQSConfig('instance', {
@@ -34,8 +32,11 @@ const QS_CONFIG = getQSConfig('instance', {
   order_by: 'hostname',
 });
 
-function InstanceList() {
+function InstanceList({ instanceGroup }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showHealthCheckAlert, setShowHealthCheckAlert] = useState(false);
+  const [pendingHealthCheck, setPendingHealthCheck] = useState(false);
+  const [canRunHealthCheck, setCanRunHealthCheck] = useState(true);
   const location = useLocation();
   const { id: instanceGroupId } = useParams();
 
@@ -57,6 +58,10 @@ function InstanceList() {
         InstanceGroupsAPI.readInstances(instanceGroupId, params),
         InstanceGroupsAPI.readInstanceOptions(instanceGroupId),
       ]);
+      const isPending = response.data.results.some(
+        (i) => i.health_check_pending === true
+      );
+      setPendingHealthCheck(isPending);
       return {
         instances: response.data.results,
         count: response.data.count,
@@ -83,12 +88,39 @@ function InstanceList() {
     fetchInstances();
   }, [fetchInstances]);
 
-  const { error: healthCheckError, request: fetchHealthCheck } = useRequest(
+  const {
+    error: healthCheckError,
+    request: fetchHealthCheck,
+    isLoading: isHealthCheckLoading,
+  } = useRequest(
     useCallback(async () => {
-      await Promise.all(selected.map(({ id }) => InstancesAPI.healthCheck(id)));
-      fetchInstances();
-    }, [selected, fetchInstances])
+      const [...response] = await Promise.all(
+        selected
+          .filter(({ node_type }) => node_type === 'execution')
+          .map(({ id }) => InstancesAPI.healthCheck(id))
+      );
+      if (response) {
+        setShowHealthCheckAlert(true);
+      }
+    }, [selected])
   );
+
+  useEffect(() => {
+    if (selected) {
+      selected.forEach((i) => {
+        if (i.node_type === 'execution') {
+          setCanRunHealthCheck(true);
+        } else {
+          setCanRunHealthCheck(false);
+        }
+      });
+    }
+  }, [selected]);
+
+  const handleHealthCheck = async () => {
+    await fetchHealthCheck();
+    clearSelected();
+  };
 
   const {
     isLoading: isDisassociateLoading,
@@ -121,7 +153,7 @@ function InstanceList() {
       async (instancesToAssociate) => {
         await Promise.all(
           instancesToAssociate
-            .filter((i) => i.node_type !== 'control')
+            .filter((i) => i.node_type !== 'control' || i.node_type !== 'hop')
             .map((instance) =>
               InstanceGroupsAPI.associateInstance(instanceGroupId, instance.id)
             )
@@ -149,7 +181,7 @@ function InstanceList() {
       InstancesAPI.read(
         mergeParams(params, {
           ...{ not__rampart_groups__id: instanceGroupId },
-          ...{ not__node_type: 'control' },
+          ...{ not__node_type: ['hop', 'control'] },
         })
       ),
     [instanceGroupId]
@@ -165,9 +197,14 @@ function InstanceList() {
 
   return (
     <>
+      {showHealthCheckAlert ? (
+        <HealthCheckAlert onSetHealthCheckAlert={setShowHealthCheckAlert} />
+      ) : null}
       <PaginatedTable
         contentError={contentError}
-        hasContentLoading={isLoading || isDisassociateLoading}
+        hasContentLoading={
+          isLoading || isDisassociateLoading || isHealthCheckLoading
+        }
         items={instances}
         itemCount={count}
         pluralizedItemName={t`Instances`}
@@ -180,6 +217,15 @@ function InstanceList() {
             name: t`Name`,
             key: 'hostname__icontains',
             isDefault: true,
+          },
+          {
+            name: t`Node Type`,
+            key: `or__node_type`,
+            options: [
+              [`control`, t`Control`],
+              [`execution`, t`Execution`],
+              [`hybrid`, t`Hybrid`],
+            ],
           },
         ]}
         toolbarSortColumns={[
@@ -207,36 +253,22 @@ function InstanceList() {
                   ]
                 : []),
               <DisassociateButton
-                verifyCannotDisassociate={selected.some(
-                  (s) => s.node_type === 'control'
-                )}
+                verifyCannotDisassociate={
+                  selected.some((s) => s.node_type === 'control') ||
+                  instanceGroup.name === 'controlplane'
+                }
                 key="disassociate"
                 onDisassociate={handleDisassociate}
                 itemsToDisassociate={selected}
                 modalTitle={t`Disassociate instance from instance group?`}
+                isProtectedInstanceGroup={instanceGroup.name === 'controlplane'}
               />,
-              <Tooltip
-                content={
-                  selected.length ? (
-                    <Plural
-                      value={selected.length}
-                      one="Click to run a health check on the selected instance."
-                      other="Click to run a health check on the selected instances."
-                    />
-                  ) : (
-                    t`Select an instance to run a health check.`
-                  )
-                }
-              >
-                <div>
-                  <Button
-                    isDisabled={!canAdd || !selected.length}
-                    variant="secondary"
-                    ouiaId="health-check"
-                    onClick={fetchHealthCheck}
-                  >{t`Health Check`}</Button>
-                </div>
-              </Tooltip>,
+              <HealthCheckButton
+                isDisabled={!canAdd || !canRunHealthCheck}
+                onClick={handleHealthCheck}
+                selectedItems={selected}
+                healthCheckPending={pendingHealthCheck}
+              />,
             ]}
             emptyStateControls={
               canAdd ? (
@@ -250,10 +282,12 @@ function InstanceList() {
         )}
         headerRow={
           <HeaderRow qsConfig={QS_CONFIG} isExpandable>
-            <HeaderCell sortKey="hostname">{t`Name`}</HeaderCell>
+            <HeaderCell
+              tooltip={t`Health checks can only be run on execution nodes.`}
+              sortKey="hostname"
+            >{t`Name`}</HeaderCell>
             <HeaderCell sortKey="errors">{t`Status`}</HeaderCell>
-            <HeaderCell>{t`Running Jobs`}</HeaderCell>
-            <HeaderCell>{t`Total Jobs`}</HeaderCell>
+            <HeaderCell sortKey="node_type">{t`Node Type`}</HeaderCell>
             <HeaderCell>{t`Capacity Adjustment`}</HeaderCell>
             <HeaderCell>{t`Used Capacity`}</HeaderCell>
             <HeaderCell>{t`Actions`}</HeaderCell>

@@ -1,7 +1,22 @@
 import React from 'react';
 import { shape, string, number, arrayOf, node, oneOfType } from 'prop-types';
-import { Tab, Tabs, TabTitleText } from '@patternfly/react-core';
+import {
+  Tab as PFTab,
+  Tabs as PFTabs,
+  TabTitleText,
+} from '@patternfly/react-core';
 import { useHistory, useLocation } from 'react-router-dom';
+import styled from 'styled-components';
+
+const Tabs = styled(PFTabs)`
+  & > ul {
+    flex-grow: 1;
+  }
+`;
+
+const Tab = styled(PFTab)`
+  ${(props) => props.hasstyle && `${props.hasstyle}`}
+`;
 
 function RoutedTabs({ tabsArray }) {
   const history = useHistory();
@@ -21,13 +36,16 @@ function RoutedTabs({ tabsArray }) {
     return 0;
   };
 
-  function handleTabSelect(event, eventKey) {
+  const handleTabSelect = (event, eventKey) => {
     const match = tabsArray.find((tab) => tab.id === eventKey);
     if (match) {
-      history.push(match.link);
+      event.preventDefault();
+      const link = match.isBackButton
+        ? `${match.link}?restoreFilters=true`
+        : match.link;
+      history.push(link);
     }
-  }
-
+  };
   return (
     <Tabs
       activeKey={getActiveTabId()}
@@ -39,10 +57,11 @@ function RoutedTabs({ tabsArray }) {
           aria-label={typeof tab.name === 'string' ? tab.name : null}
           eventKey={tab.id}
           key={tab.id}
-          link={tab.link}
+          href={!tab.hasstyle && `#${tab.link}`}
           title={<TabTitleText>{tab.name}</TabTitleText>}
           aria-controls=""
           ouiaId={`${tab.name}-tab`}
+          hasstyle={tab.hasstyle}
         />
       ))}
     </Tabs>
@@ -53,7 +72,6 @@ RoutedTabs.propTypes = {
   tabsArray: arrayOf(
     shape({
       id: number.isRequired,
-      link: string.isRequired,
       name: oneOfType([string.isRequired, node.isRequired]),
     })
   ).isRequired,

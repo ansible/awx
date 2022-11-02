@@ -1,9 +1,11 @@
 import Base from '../Base';
+import InstanceGroupsMixin from '../mixins/InstanceGroups.mixin';
+import LabelsMixin from '../mixins/Labels.mixin';
 
-class WorkflowJobTemplateNodes extends Base {
+class WorkflowJobTemplateNodes extends LabelsMixin(InstanceGroupsMixin(Base)) {
   constructor(http) {
     super(http);
-    this.baseUrl = '/api/v2/workflow_job_template_nodes/';
+    this.baseUrl = 'api/v2/workflow_job_template_nodes/';
   }
 
   createApprovalTemplate(id, data) {

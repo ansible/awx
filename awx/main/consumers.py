@@ -65,7 +65,7 @@ class WebsocketSecretAuthHelper:
         nonce_parsed = int(nonce_parsed)
         nonce_diff = now - nonce_parsed
         if abs(nonce_diff) > nonce_tolerance:
-            logger.warn(f"Potential replay attack or machine(s) time out of sync by {nonce_diff} seconds.")
+            logger.warning(f"Potential replay attack or machine(s) time out of sync by {nonce_diff} seconds.")
             raise ValueError(f"Potential replay attack or machine(s) time out of sync by {nonce_diff} seconds.")
 
         return True
@@ -85,7 +85,7 @@ class BroadcastConsumer(AsyncJsonWebsocketConsumer):
         try:
             WebsocketSecretAuthHelper.is_authorized(self.scope)
         except Exception:
-            logger.warn(f"client '{self.channel_name}' failed to authorize against the broadcast endpoint.")
+            logger.warning(f"client '{self.channel_name}' failed to authorize against the broadcast endpoint.")
             await self.close()
             return
 

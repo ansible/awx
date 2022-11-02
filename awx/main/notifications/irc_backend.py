@@ -7,8 +7,8 @@ import logging
 
 import irc.client
 
-from django.utils.encoding import smart_text
-from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import smart_str
+from django.utils.translation import gettext_lazy as _
 
 from awx.main.notifications.base import AWXBaseEmailBackend
 from awx.main.notifications.custom_notification_base import CustomNotificationBase
@@ -55,7 +55,7 @@ class IrcBackend(AWXBaseEmailBackend, CustomNotificationBase):
                 connect_factory=connection_factory,
             )
         except irc.client.ServerConnectionError as e:
-            logger.error(smart_text(_("Exception connecting to irc server: {}").format(e)))
+            logger.error(smart_str(_("Exception connecting to irc server: {}").format(e)))
             if not self.fail_silently:
                 raise
         return True

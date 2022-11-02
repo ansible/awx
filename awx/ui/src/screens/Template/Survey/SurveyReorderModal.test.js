@@ -90,7 +90,7 @@ describe('<SurveyReorderModal />', () => {
     const question3Value = wrapper.find('textarea');
 
     const question4 = wrapper.find('td[aria-label="Password Question"]');
-    const question4Value = wrapper.find('TextInputBase#survey-preview-text-c');
+    const question4Value = wrapper.find('#survey-preview-encrypted');
 
     const question5 = wrapper.find('td[aria-label="Multiple select Question"]');
     const question5Value = wrapper
@@ -110,8 +110,7 @@ describe('<SurveyReorderModal />', () => {
     expect(question3Value.prop('value')).toBe('Text Area Question Value');
     expect(question3Value.prop('disabled')).toBe(true);
     expect(question4).toHaveLength(1);
-    expect(question4Value.prop('value')).toBe('$encrypted$');
-    expect(question4Value.prop('isDisabled')).toBe(true);
+    expect(question4Value.prop('children')).toBe('ENCRYPTED');
 
     expect(question5).toHaveLength(1);
     expect(question5Value.length).toBe(4);

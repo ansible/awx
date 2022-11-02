@@ -1,5 +1,5 @@
 import 'styled-components/macro';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 import { t } from '@lingui/macro';
@@ -44,6 +44,8 @@ function Search({
   maxSelectHeight,
   enableNegativeFiltering,
   enableRelatedFuzzyFiltering,
+  handleIsAnsibleFactsSelected,
+  isFilterCleared,
 }) {
   const location = useLocation();
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
@@ -62,6 +64,26 @@ function Search({
   );
   const [searchValue, setSearchValue] = useState('');
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
+
+  const params = parseQueryString(qsConfig, location.search);
+  if (params?.host_filter) {
+    params.ansible_facts = params.host_filter.substring(
+      'ansible_facts__'.length
+    );
+    delete params.host_filter;
+  }
+
+  const searchChips = getChipsByKey(params, columns, qsConfig);
+  const [chipsByKey, setChipsByKey] = useState(
+    JSON.parse(JSON.stringify(searchChips))
+  );
+
+  useEffect(() => {
+    Object.keys(chipsByKey).forEach((el) => {
+      chipsByKey[el].chips = [];
+    });
+    setChipsByKey({ ...chipsByKey, ...searchChips });
+  }, [location.search]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDropdownSelect = ({ target }) => {
     const { key: actualSearchKey } = columns.find(
@@ -95,12 +117,6 @@ function Search({
       onRemove(key, actualValue);
     }
   };
-
-  const chipsByKey = getChipsByKey(
-    parseQueryString(qsConfig, location.search),
-    columns,
-    qsConfig
-  );
 
   const { name: searchColumnName } = columns.find(
     ({ key }) => key === searchKey
@@ -161,40 +177,40 @@ function Search({
               maxSelectHeight={maxSelectHeight}
               enableNegativeFiltering={enableNegativeFiltering}
               enableRelatedFuzzyFiltering={enableRelatedFuzzyFiltering}
+              handleIsAnsibleFactsSelected={handleIsAnsibleFactsSelected}
+              isFilterCleared={isFilterCleared}
             />
           )) ||
             (options && (
-              <>
-                <Select
-                  variant={SelectVariant.checkbox}
-                  aria-label={name}
-                  typeAheadAriaLabel={name}
-                  onToggle={setIsFilterDropdownOpen}
-                  onSelect={(event, selection) =>
-                    handleFilterDropdownSelect(key, event, selection)
-                  }
-                  selections={chipsByKey[key].chips.map((chip) => {
-                    const [, ...value] = chip.key.split(':');
-                    return value.join(':');
-                  })}
-                  isOpen={isFilterDropdownOpen}
-                  placeholderText={t`Filter By ${name}`}
-                  ouiaId={`filter-by-${key}`}
-                  isDisabled={isDisabled}
-                  maxHeight={maxSelectHeight}
-                  noResultsFoundText={t`No results found`}
-                >
-                  {options.map(([optionKey, optionLabel]) => (
-                    <SelectOption
-                      key={optionKey}
-                      value={optionKey}
-                      inputId={`select-option-${optionKey}`}
-                    >
-                      {optionLabel}
-                    </SelectOption>
-                  ))}
-                </Select>
-              </>
+              <Select
+                variant={SelectVariant.checkbox}
+                aria-label={name}
+                typeAheadAriaLabel={name}
+                onToggle={setIsFilterDropdownOpen}
+                onSelect={(event, selection) =>
+                  handleFilterDropdownSelect(key, event, selection)
+                }
+                selections={chipsByKey[key]?.chips.map((chip) => {
+                  const [, ...value] = chip.key.split(':');
+                  return value.join(':');
+                })}
+                isOpen={isFilterDropdownOpen}
+                placeholderText={t`Filter By ${name}`}
+                ouiaId={`filter-by-${key}`}
+                isDisabled={isDisabled}
+                maxHeight={maxSelectHeight}
+                noResultsFoundText={t`No results found`}
+              >
+                {options.map(([optionKey, optionLabel]) => (
+                  <SelectOption
+                    key={optionKey}
+                    value={optionKey}
+                    inputId={`select-option-${optionKey}`}
+                  >
+                    {optionLabel}
+                  </SelectOption>
+                ))}
+              </Select>
             )) ||
             (isBoolean && (
               <Select
@@ -253,14 +269,17 @@ function Search({
       {/* Add a ToolbarFilter for any key that doesn't have it's own
       search column so the chips show up */}
       {Object.keys(chipsByKey)
-        .filter((val) => chipsByKey[val].chips.length > 0)
         .filter((val) => columns.map((val2) => val2.key).indexOf(val) === -1)
         .map((leftoverKey) => (
           <ToolbarFilter
             chips={chipsByKey[leftoverKey] ? chipsByKey[leftoverKey].chips : []}
             deleteChip={(unusedKey, chip) => {
               const [columnKey, ...value] = chip.key.split(':');
-              onRemove(columnKey, value.join(':'));
+              if (columnKey === 'ansible_facts') {
+                onRemove('host_filter', `${columnKey}__${value}`);
+              } else {
+                onRemove(columnKey, value.join(':'));
+              }
             }}
             categoryName={
               chipsByKey[leftoverKey]

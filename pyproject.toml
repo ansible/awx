@@ -1,5 +1,13 @@
+[build-system]
+requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+# Do not uncomment the line below. We need to be able to override the version via a file, and this
+# causes the "version" key in setup.cfg to be ignored.
+# [tool.setuptools_scm]
+
 [tool.black]
 line-length = 160
 fast = true
 skip-string-normalization = true
-exclude = "awx_collection"
+extend-exclude = "awx_collection"
