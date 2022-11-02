@@ -9,7 +9,7 @@
     "@lingui/react": "3.14.0",
     "@patternfly/patternfly": "4.210.2",
     "@patternfly/react-core": "^4.239.0",
-    "@patternfly/react-icons": "4.90.0",
+    "@patternfly/react-icons": "4.92.10",
     "@patternfly/react-table": "4.108.0",
     "ace-builds": "^1.10.1",
     "ansi-to-html": "0.7.2",
