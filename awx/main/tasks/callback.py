@@ -2,8 +2,6 @@ import json
 import time
 import logging
 from collections import deque
-import os
-import stat
 
 # Django
 from django.conf import settings
@@ -206,21 +204,6 @@ class RunnerCallback:
                 self.instance = self.update_model(self.instance.pk, job_args=json.dumps(runner_config.command), job_cwd=runner_config.cwd, job_env=job_env)
             # We opened a connection just for that save, close it here now
             connections.close_all()
-        elif status_data['status'] == 'failed':
-            # For encrypted ssh_key_data, ansible-runner worker will open and write the
-            # ssh_key_data to a named pipe. Then, once the podman container starts, ssh-agent will
-            # read from this named pipe so that the key can be used in ansible-playbook.
-            # Once the podman container exits, the named pipe is deleted.
-            # However, if the podman container fails to start in the first place, e.g. the image
-            # name is incorrect, then this pipe is not cleaned up. Eventually ansible-runner
-            # processor will attempt to write artifacts to the private data dir via unstream_dir, requiring
-            # that it open this named pipe. This leads to a hang. Thus, before any artifacts
-            # are written by the processor, it's important to remove this ssh_key_data pipe.
-            private_data_dir = self.instance.job_env.get('AWX_PRIVATE_DATA_DIR', None)
-            if private_data_dir:
-                key_data_file = os.path.join(private_data_dir, 'artifacts', str(self.instance.id), 'ssh_key_data')
-                if os.path.exists(key_data_file) and stat.S_ISFIFO(os.stat(key_data_file).st_mode):
-                    os.remove(key_data_file)
         elif status_data['status'] == 'error':
             result_traceback = status_data.get('result_traceback', None)
             if result_traceback:
