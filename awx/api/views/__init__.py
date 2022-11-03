@@ -2221,6 +2221,8 @@ class InventorySourceUpdateView(RetrieveAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
+        serializer = self.get_serializer(instance=obj, data=request.data)
+        serializer.is_valid(raise_exception=True)
         if obj.can_update:
             update = obj.update()
             if not update:
