@@ -7,8 +7,6 @@ aioredis==1.3.1
     # via -r /awx_devel/requirements/requirements_git.txt
 ansiconv==1.0.0
     # via -r /awx_devel/requirements/requirements.in
-asciichartpy==1.5.25
-    # via -r /awx_devel/requirements/requirements.in
 asgiref==3.5.0
     # via
     #   channels
@@ -440,7 +438,6 @@ pip==21.2.4
 setuptools==58.2.0
     # via
     #   -r /awx_devel/requirements/requirements.in
-    #   asciichartpy
     #   google-auth
     #   jsonschema
     #   kubernetes

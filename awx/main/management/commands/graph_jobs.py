@@ -1,8 +1,13 @@
 # Python
-import asciichartpy as chart
 import collections
 import time
 import sys
+
+try:
+    import asciichartpy as chart
+except:
+    print("Error: this command requires asciichartpy library to be installed")
+    sys.exit(1)
 
 # Django
 from django.db.models import Count
