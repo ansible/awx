@@ -33,7 +33,9 @@ generate_requirements() {
 
 main() {
   base_dir=$(pwd)
-  _tmp="$(mktemp -d --suffix .awx-requirements XXXX -p /tmp)"
+
+  _tmp=$(python -c "import tempfile; print(tempfile.mkdtemp(suffix='.awx-requirements', dir='/tmp'))")
+
   trap _cleanup INT TERM EXIT
 
   if [ "$1" = "upgrade" ]; then
