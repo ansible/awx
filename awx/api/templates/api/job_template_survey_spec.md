@@ -28,6 +28,7 @@ Within each survey item `type` must be one of:
 * float: For survey questions expecting a decimal number
 * multiplechoice: For survey questions where one option from a list is required
 * multiselect: For survey questions where multiple items from a presented list can be selected
+* bool: For survey questions where the value must be a `true` or `false` literal
 
 Each item must contain a `question_name` and `question_description` field that describes the survey question itself.
 The `variable` elements of each survey items represents the key that will be given to the playbook when the {{model_verbose_name}}
@@ -71,6 +72,17 @@ Here is a more comprehensive example showing the various question types and thei
         	"max": "",
         	"required": true,
         	"default": "NOT OPTIONAL"
+            },
+            {
+        	"type": "bool",
+        	"question_name": "This is true or false",
+        	"question_description": "I am a boolean",
+        	"variable": "bool_answer",
+        	"choices": "",
+        	"min": "",
+        	"max": "",
+        	"required": false,
+        	"default": false
             },
             {
         	"type": "multiplechoice",

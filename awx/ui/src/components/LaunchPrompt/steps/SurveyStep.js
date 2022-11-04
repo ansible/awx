@@ -17,7 +17,7 @@ import {
   combine,
 } from 'util/validators';
 import { Survey } from 'types';
-import FormField from '../../FormField';
+import FormField, { CheckboxField } from '../../FormField';
 import Popover from '../../Popover';
 
 function SurveyStep({ surveyConfig }) {
@@ -29,6 +29,7 @@ function SurveyStep({ surveyConfig }) {
     multiselect: MultiSelectField,
     integer: NumberField,
     float: NumberField,
+    bool: SurveyCheckboxField,
   };
   return (
     <div data-cy="survey-prompts">
@@ -66,6 +67,20 @@ function TextField({ question }) {
       type={question.type}
       minLength={question.min}
       maxLength={question.max}
+    />
+  );
+}
+
+function SurveyCheckboxField({ question }) {
+  const validators = [question.required ? required(null) : null];
+  return (
+    <CheckboxField
+      id={`survey-question-${question.variable}`}
+      name={`survey_${question.variable}`}
+      label={question.question_name}
+      tooltip={question.question_description}
+      isRequired={question.required}
+      validate={combine(validators)}
     />
   );
 }

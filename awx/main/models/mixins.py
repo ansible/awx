@@ -293,6 +293,11 @@ class SurveyJobTemplateMixin(models.Model):
             if survey_element['variable'] in data:
                 if data[survey_element['variable']] not in choice_list:
                     errors.append("Value %s for '%s' expected to be one of %s." % (data[survey_element['variable']], survey_element['variable'], choice_list))
+        elif survey_element['type'] == 'bool':
+            if survey_element['variable'] in data:
+                if type(data[survey_element['variable']]) != bool:
+                    errors.append("Value %s for '%s' expected to be a boolean." % (data[survey_element['variable']], survey_element['variable']))
+                    return errors
         return errors
 
     def _accept_or_ignore_variables(self, data, errors=None, _exclude_errors=(), extra_passwords=None):
