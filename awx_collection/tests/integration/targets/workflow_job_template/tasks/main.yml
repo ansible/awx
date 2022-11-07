@@ -729,6 +729,24 @@
               organization:
                 name: Default
               type: workflow_job_template
+              forks: 12
+              job_slice_count: 2
+              timeout: 23
+              execution_environment:
+                name: "{{ ee1 }}"
+              related:
+                credentials:
+                  - name: "{{ scm_cred_name }}"
+                    organization:
+                      name: Default
+                instance_groups:
+                  - name: "{{ ig1 }}"
+                  - name: "{{ ig2 }}"
+                labels:
+                  - name: "{{ label1 }}"
+                  - name: "{{ label2 }}"
+                    organization:
+                      name: "{{ org_name }}"
       register: result
 
     - name: Delete copied workflow job template
