@@ -187,7 +187,9 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   useEffect(() => {
     const pendingRequests = Object.values(eventByUuidRequests.current || {});
     setHasContentLoading(true); // prevents "no content found" screen from flashing
-    setIsFollowModeEnabled(false);
+    if (location.search) {
+      setIsFollowModeEnabled(false);
+    }
     Promise.allSettled(pendingRequests).then(() => {
       setRemoteRowCount(0);
       clearLoadedEvents();
@@ -635,10 +637,14 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     setIsFollowModeEnabled(false);
   };
 
-  const scrollToEnd = () => {
+  const scrollToEnd = useCallback(() => {
     scrollToRow(-1);
-    setTimeout(() => scrollToRow(-1), 100);
-  };
+    let timeout;
+    if (isFollowModeEnabled) {
+      setTimeout(() => scrollToRow(-1), 100);
+    }
+    return () => clearTimeout(timeout);
+  }, [isFollowModeEnabled]);
 
   const handleScrollLast = () => {
     scrollToEnd();
