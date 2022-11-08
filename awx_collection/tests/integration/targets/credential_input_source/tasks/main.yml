@@ -14,7 +14,7 @@
       credential:
         description: Credential for Testing Source
         name: "{{ src_cred_name }}"
-        credential_type: CyberArk AIM Central Credential Provider Lookup
+        credential_type: CyberArk Central Credential Provider Lookup
         inputs:
           url: "https://cyberark.example.com"
           app_id: "My-App-ID"
@@ -58,7 +58,7 @@
       credential:
         description: Credential for Testing Source Change
         name: "{{ src_cred_name }}-2"
-        credential_type: CyberArk AIM Central Credential Provider Lookup
+        credential_type: CyberArk Central Credential Provider Lookup
         inputs:
           url: "https://cyberark-prod.example.com"
           app_id: "My-App-ID"
@@ -92,7 +92,7 @@
       credential:
         name: "{{ src_cred_name }}"
         organization: Default
-        credential_type: CyberArk AIM Central Credential Provider Lookup
+        credential_type: CyberArk Central Credential Provider Lookup
         state: absent
       register: result
 
@@ -100,7 +100,7 @@
       credential:
         name: "{{ src_cred_name }}-2"
         organization: Default
-        credential_type: CyberArk AIM Central Credential Provider Lookup
+        credential_type: CyberArk Central Credential Provider Lookup
         state: absent
       register: result
 
