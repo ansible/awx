@@ -80,7 +80,8 @@ def conjur_backend(**kwargs):
     # https://www.conjur.org/api.html#secrets-retrieve-a-secret-get
     path = urljoin(url, '/'.join(['api', 'secrets', account, 'variable', secret_path]))
     if version:
-        path = '?'.join([path, version])
+        ver = "version={}".format(version)
+        path = '?'.join([path, ver])
 
     with CertFiles(cacert) as cert:
         lookup_kwargs['verify'] = cert
