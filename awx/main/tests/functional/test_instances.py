@@ -1,7 +1,7 @@
 import pytest
 from unittest import mock
 
-from awx.main.models import AdHocCommand, InventoryUpdate, JobTemplate
+from awx.main.models import AdHocCommand, InventoryUpdate, JobTemplate, Job
 from awx.main.models.activity_stream import ActivityStream
 from awx.main.models.ha import Instance, InstanceGroup
 from awx.main.tasks.system import apply_cluster_membership_policies
@@ -13,6 +13,24 @@ from django.utils.timezone import now
 @pytest.mark.django_db
 def test_default_tower_instance_group(default_instance_group, job_factory):
     assert default_instance_group in job_factory().preferred_instance_groups
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('node_type', ('execution', 'control'))
+@pytest.mark.parametrize('active', (True, False))
+def test_get_cleanup_task_kwargs_active_jobs(node_type, active):
+    instance = Instance.objects.create(hostname='foobar', node_type=node_type)
+    job_kwargs = dict()
+    job_kwargs['controller_node' if node_type == 'control' else 'execution_node'] = instance.hostname
+    job_kwargs['status'] = 'running' if active else 'successful'
+
+    job = Job.objects.create(**job_kwargs)
+    kwargs = instance.get_cleanup_task_kwargs()
+
+    if active:
+        assert kwargs['exclude_strings'] == [f'awx_{job.pk}_']
+    else:
+        assert 'exclude_strings' not in kwargs
 
 
 @pytest.mark.django_db
