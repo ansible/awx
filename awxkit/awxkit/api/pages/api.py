@@ -218,6 +218,8 @@ class ApiV2(base.Base):
             return endpoint.get(id=int(value))
         options = self._cache.get_options(endpoint)
         identifier = next(field for field in options['search_fields'] if field in ('name', 'username', 'hostname'))
+        if len(value.split(',')) > 0:
+            identifier += '__in'
         return endpoint.get(**{identifier: value}, all_pages=True)
 
     def export_assets(self, **kwargs):

@@ -28,51 +28,51 @@ options:
       default: 'False'
     organizations:
       description:
-        - organization name to export
+        - organization names to export
       type: str
     users:
       description:
-        - user name to export
+        - user names to export
       type: str
     teams:
       description:
-        - team name to export
+        - team names to export
       type: str
     credential_types:
       description:
-        - credential type name to export
+        - credential type names to export
       type: str
     credentials:
       description:
-        - credential name to export
+        - credential names to export
       type: str
     execution_environments:
       description:
-        - execution environment name to export
+        - execution environment names to export
       type: str
     notification_templates:
       description:
-        - notification template name to export
+        - notification template names to export
       type: str
     inventory_sources:
       description:
-        - inventory soruce to export
+        - inventory soruces to export
       type: str
     inventory:
       description:
-        - inventory name to export
+        - inventory names to export
       type: str
     projects:
       description:
-        - project name to export
+        - project names to export
       type: str
     job_templates:
       description:
-        - job template name to export
+        - job template names to export
       type: str
     workflow_job_templates:
       description:
-        - workflow name to export
+        - workflow names to export
       type: str
 requirements:
   - "awxkit >= 9.3.0"
@@ -94,6 +94,10 @@ EXAMPLES = '''
   export:
     job_templates: "My Template"
     credential: 'all'
+
+- name: Export two or more inventories with a comma separated list of names
+  export:
+    inventory: "My Inventory1,My Inventory2"
 '''
 
 import logging
