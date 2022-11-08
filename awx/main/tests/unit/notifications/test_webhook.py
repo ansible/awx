@@ -27,11 +27,12 @@ def test_send_messages_as_POST():
             ]
         )
         requests_mock.post.assert_called_once_with(
-            'http://example.com',
+            url='http://example.com',
             auth=None,
             data=json.dumps({'text': 'test body'}, ensure_ascii=False).encode('utf-8'),
             headers={'Content-Type': 'application/json', 'User-Agent': 'AWX 0.0.1.dev (open)'},
             verify=True,
+            allow_redirects=False,
         )
         assert sent_messages == 1
 
@@ -57,11 +58,12 @@ def test_send_messages_as_PUT():
             ]
         )
         requests_mock.put.assert_called_once_with(
-            'http://example.com',
+            url='http://example.com',
             auth=None,
             data=json.dumps({'text': 'test body 2'}, ensure_ascii=False).encode('utf-8'),
             headers={'Content-Type': 'application/json', 'User-Agent': 'AWX 0.0.1.dev (open)'},
             verify=True,
+            allow_redirects=False,
         )
         assert sent_messages == 1
 
@@ -87,11 +89,12 @@ def test_send_messages_with_username():
             ]
         )
         requests_mock.post.assert_called_once_with(
-            'http://example.com',
+            url='http://example.com',
             auth=('userstring', None),
             data=json.dumps({'text': 'test body'}, ensure_ascii=False).encode('utf-8'),
             headers={'Content-Type': 'application/json', 'User-Agent': 'AWX 0.0.1.dev (open)'},
             verify=True,
+            allow_redirects=False,
         )
         assert sent_messages == 1
 
@@ -117,11 +120,12 @@ def test_send_messages_with_password():
             ]
         )
         requests_mock.post.assert_called_once_with(
-            'http://example.com',
+            url='http://example.com',
             auth=(None, 'passwordstring'),
             data=json.dumps({'text': 'test body'}, ensure_ascii=False).encode('utf-8'),
             headers={'Content-Type': 'application/json', 'User-Agent': 'AWX 0.0.1.dev (open)'},
             verify=True,
+            allow_redirects=False,
         )
         assert sent_messages == 1
 
@@ -147,11 +151,12 @@ def test_send_messages_with_username_and_password():
             ]
         )
         requests_mock.post.assert_called_once_with(
-            'http://example.com',
+            url='http://example.com',
             auth=('userstring', 'passwordstring'),
             data=json.dumps({'text': 'test body'}, ensure_ascii=False).encode('utf-8'),
             headers={'Content-Type': 'application/json', 'User-Agent': 'AWX 0.0.1.dev (open)'},
             verify=True,
+            allow_redirects=False,
         )
         assert sent_messages == 1
 
@@ -177,11 +182,12 @@ def test_send_messages_with_no_verify_ssl():
             ]
         )
         requests_mock.post.assert_called_once_with(
-            'http://example.com',
+            url='http://example.com',
             auth=None,
             data=json.dumps({'text': 'test body'}, ensure_ascii=False).encode('utf-8'),
             headers={'Content-Type': 'application/json', 'User-Agent': 'AWX 0.0.1.dev (open)'},
             verify=False,
+            allow_redirects=False,
         )
         assert sent_messages == 1
 
@@ -207,7 +213,7 @@ def test_send_messages_with_additional_headers():
             ]
         )
         requests_mock.post.assert_called_once_with(
-            'http://example.com',
+            url='http://example.com',
             auth=None,
             data=json.dumps({'text': 'test body'}, ensure_ascii=False).encode('utf-8'),
             headers={
@@ -217,5 +223,6 @@ def test_send_messages_with_additional_headers():
                 'X-Test-Header2': 'test-content-2',
             },
             verify=True,
+            allow_redirects=False,
         )
         assert sent_messages == 1

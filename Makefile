@@ -85,6 +85,7 @@ clean: clean-ui clean-api clean-awxkit clean-dist
 
 clean-api:
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
+	rm -rf .tox
 	find . -type f -regex ".*\.py[co]$$" -delete
 	find . -type d -name "__pycache__" -delete
 	rm -f awx/awx_test.sqlite3*
@@ -181,7 +182,7 @@ collectstatic:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	mkdir -p awx/public/static && $(PYTHON) manage.py collectstatic --clear --noinput > /dev/null 2>&1
+	$(PYTHON) manage.py collectstatic --clear --noinput > /dev/null 2>&1
 
 DEV_RELOAD_COMMAND ?= supervisorctl restart tower-processes:*
 
@@ -377,6 +378,8 @@ clean-ui:
 	rm -rf awx/ui/build
 	rm -rf awx/ui/src/locales/_build
 	rm -rf $(UI_BUILD_FLAG_FILE)
+        # the collectstatic command doesn't like it if this dir doesn't exist.
+	mkdir -p awx/ui/build/static
 
 awx/ui/node_modules:
 	NODE_OPTIONS=--max-old-space-size=6144 $(NPM_BIN) --prefix awx/ui --loglevel warn --force ci
@@ -386,15 +389,13 @@ $(UI_BUILD_FLAG_FILE):
 	$(PYTHON) tools/scripts/compilemessages.py
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run compile-strings
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run build
-	mkdir -p awx/public/static/css
-	mkdir -p awx/public/static/js
-	mkdir -p awx/public/static/media
-	cp -r awx/ui/build/static/css/* awx/public/static/css
-	cp -r awx/ui/build/static/js/* awx/public/static/js
-	cp -r awx/ui/build/static/media/* awx/public/static/media
+	mkdir -p /var/lib/awx/public/static/css
+	mkdir -p /var/lib/awx/public/static/js
+	mkdir -p /var/lib/awx/public/static/media
+	cp -r awx/ui/build/static/css/* /var/lib/awx/public/static/css
+	cp -r awx/ui/build/static/js/* /var/lib/awx/public/static/js
+	cp -r awx/ui/build/static/media/* /var/lib/awx/public/static/media
 	touch $@
-
-
 
 ui-release: $(UI_BUILD_FLAG_FILE)
 
@@ -453,6 +454,7 @@ COMPOSE_OPTS ?=
 CONTROL_PLANE_NODE_COUNT ?= 1
 EXECUTION_NODE_COUNT ?= 2
 MINIKUBE_CONTAINER_GROUP ?= false
+MINIKUBE_SETUP ?= false # if false, run minikube separately
 EXTRA_SOURCES_ANSIBLE_OPTS ?=
 
 ifneq ($(ADMIN_PASSWORD),)
@@ -461,7 +463,7 @@ endif
 
 docker-compose-sources: .git/hooks/pre-commit
 	@if [ $(MINIKUBE_CONTAINER_GROUP) = true ]; then\
-	    ansible-playbook -i tools/docker-compose/inventory tools/docker-compose-minikube/deploy.yml; \
+	    ansible-playbook -i tools/docker-compose/inventory -e minikube_setup=$(MINIKUBE_SETUP) tools/docker-compose-minikube/deploy.yml; \
 	fi;
 
 	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/sources.yml \

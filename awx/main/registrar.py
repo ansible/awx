@@ -3,6 +3,8 @@
 
 from django.db.models.signals import pre_save, post_save, pre_delete, m2m_changed
 
+from taggit.managers import TaggableManager
+
 
 class ActivityStreamRegistrar(object):
     def __init__(self):
@@ -19,6 +21,8 @@ class ActivityStreamRegistrar(object):
             pre_delete.connect(activity_stream_delete, sender=model, dispatch_uid=str(self.__class__) + str(model) + "_delete")
 
             for m2mfield in model._meta.many_to_many:
+                if isinstance(m2mfield, TaggableManager):
+                    continue  # Special case for taggit app
                 try:
                     m2m_attr = getattr(model, m2mfield.name)
                     m2m_changed.connect(

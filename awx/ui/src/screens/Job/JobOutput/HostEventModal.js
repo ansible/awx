@@ -62,7 +62,7 @@ const getStdOutValue = (hostEvent) => {
   ) {
     stdOut = res.results.join('\n');
   } else if (res?.stdout) {
-    stdOut = res.stdout;
+    stdOut = Array.isArray(res.stdout) ? res.stdout.join(' ') : res.stdout;
   }
   return stdOut;
 };

@@ -7,7 +7,7 @@ from awx.main.models.ha import Instance
 from django.test.utils import override_settings
 
 
-INSTANCE_KWARGS = dict(hostname='example-host', cpu=6, memory=36000000000, cpu_capacity=6, mem_capacity=42)
+INSTANCE_KWARGS = dict(hostname='example-host', cpu=6, node_type='execution', memory=36000000000, cpu_capacity=6, mem_capacity=42)
 
 
 @pytest.mark.django_db

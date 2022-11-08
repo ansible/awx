@@ -75,6 +75,7 @@ def test_encrypted_subfields(get, post, user, organization):
     url = reverse('api:notification_template_detail', kwargs={'pk': response.data['id']})
     response = get(url, u)
     assert response.data['notification_configuration']['account_token'] == "$encrypted$"
+
     with mock.patch.object(notification_template_actual.notification_class, "send_messages", assert_send):
         notification_template_actual.send("Test", {'body': "Test"})
 
@@ -175,3 +176,46 @@ def test_custom_environment_injection(post, user, organization):
 
         fake_send.side_effect = _send_side_effect
         template.send('subject', 'message')
+
+
+def mock_post(*args, **kwargs):
+    class MockGoodResponse:
+        def __init__(self):
+            self.status_code = 200
+
+    class MockRedirectResponse:
+        def __init__(self):
+            self.status_code = 301
+            self.headers = {"Location": "http://goodendpoint"}
+
+    if kwargs['url'] == "http://goodendpoint":
+        return MockGoodResponse()
+    else:
+        return MockRedirectResponse()
+
+
+@pytest.mark.django_db
+@mock.patch('requests.post', side_effect=mock_post)
+def test_webhook_notification_pointed_to_a_redirect_launch_endpoint(post, admin, organization):
+
+    n1 = NotificationTemplate.objects.create(
+        name="test-webhook",
+        description="test webhook",
+        organization=organization,
+        notification_type="webhook",
+        notification_configuration=dict(
+            url="http://some.fake.url",
+            disable_ssl_verification=True,
+            http_method="POST",
+            headers={
+                "Content-Type": "application/json",
+            },
+            username=admin.username,
+            password=admin.password,
+        ),
+        messages={
+            "success": {"message": "", "body": "{}"},
+        },
+    )
+
+    assert n1.send("", n1.messages.get("success").get("body")) == 1

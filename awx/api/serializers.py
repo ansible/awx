@@ -2221,6 +2221,15 @@ class InventorySourceUpdateSerializer(InventorySourceSerializer):
     class Meta:
         fields = ('can_update',)
 
+    def validate(self, attrs):
+        project = self.instance.source_project
+        if project:
+            failed_reason = project.get_reason_if_failed()
+            if failed_reason:
+                raise serializers.ValidationError(failed_reason)
+
+        return super(InventorySourceUpdateSerializer, self).validate(attrs)
+
 
 class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSerializer):
 
@@ -4272,17 +4281,10 @@ class JobLaunchSerializer(BaseSerializer):
         # Basic validation - cannot run a playbook without a playbook
         if not template.project:
             errors['project'] = _("A project is required to run a job.")
-        elif template.project.status in ('error', 'failed'):
-            errors['playbook'] = _("Missing a revision to run due to failed project update.")
-
-            latest_update = template.project.project_updates.last()
-            if latest_update is not None and latest_update.failed:
-                failed_validation_tasks = latest_update.project_update_events.filter(
-                    event='runner_on_failed',
-                    play="Perform project signature/checksum verification",
-                )
-                if failed_validation_tasks:
-                    errors['playbook'] = _("Last project update failed due to signature validation failure.")
+        else:
+            failure_reason = template.project.get_reason_if_failed()
+            if failure_reason:
+                errors['playbook'] = failure_reason
 
         # cannot run a playbook without an inventory
         if template.inventory and template.inventory.pending_deletion is True:
@@ -4952,7 +4954,7 @@ class InstanceSerializer(BaseSerializer):
             res['install_bundle'] = self.reverse('api:instance_install_bundle', kwargs={'pk': obj.pk})
         res['peers'] = self.reverse('api:instance_peers_list', kwargs={"pk": obj.pk})
         if self.context['request'].user.is_superuser or self.context['request'].user.is_system_auditor:
-            if obj.node_type != 'hop':
+            if obj.node_type == 'execution':
                 res['health_check'] = self.reverse('api:instance_health_check', kwargs={'pk': obj.pk})
         return res
 
