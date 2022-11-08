@@ -860,6 +860,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     @log_excess_runtime(logger, debug_cutoff=0.01, msg='Job {job_id} host facts prepared for {written_ct} hosts, took {delta:.3f} s', add_log_data=True)
     def start_job_fact_cache(self, destination, log_data, timeout=None):
         self.log_lifecycle("start_job_fact_cache")
+        log_data['written_ct'] = 0
         os.makedirs(destination, mode=0o700)
 
         if timeout is None:
