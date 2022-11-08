@@ -38,7 +38,14 @@ class Command(BaseCommand):
             (changed, instance) = Instance.objects.register(ip_address=os.environ.get('MY_POD_IP'), node_type='control', uuid=settings.SYSTEM_UUID)
             RegisterQueue(settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME, 100, 0, [], is_container_group=False).register()
             RegisterQueue(
-                settings.DEFAULT_EXECUTION_QUEUE_NAME, 100, 0, [], is_container_group=True, pod_spec_override=settings.DEFAULT_EXECUTION_QUEUE_POD_SPEC_OVERRIDE
+                settings.DEFAULT_EXECUTION_QUEUE_NAME,
+                100,
+                0,
+                [],
+                is_container_group=True,
+                pod_spec_override=settings.DEFAULT_EXECUTION_QUEUE_POD_SPEC_OVERRIDE,
+                max_forks=settings.DEFAULT_EXECUTION_QUEUE_MAX_FORKS,
+                max_concurrent_jobs=settings.DEFAULT_EXECUTION_QUEUE_MAX_CONCURRENT_JOBS,
             ).register()
         else:
             (changed, instance) = Instance.objects.register(hostname=hostname, node_type=node_type, uuid=uuid)

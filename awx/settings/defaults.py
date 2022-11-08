@@ -983,6 +983,13 @@ DJANGO_GUID = {'GUID_HEADER_NAME': 'X-API-Request-Id'}
 DEFAULT_EXECUTION_QUEUE_NAME = 'default'
 # pod spec used when the default execution queue is a container group, e.g. when deploying on k8s/ocp with the operator
 DEFAULT_EXECUTION_QUEUE_POD_SPEC_OVERRIDE = ''
+# Max number of concurrently consumed forks for the default execution queue
+# Zero means no limit
+DEFAULT_EXECUTION_QUEUE_MAX_FORKS = 0
+# Max number of concurrently running jobs for the default execution queue
+# Zero means no limit
+DEFAULT_EXECUTION_QUEUE_MAX_CONCURRENT_JOBS = 0
+
 # Name of the default controlplane queue
 DEFAULT_CONTROL_PLANE_QUEUE_NAME = 'controlplane'
 
