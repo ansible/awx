@@ -871,6 +871,8 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             hosts = self._get_inventory_hosts(ansible_facts_modified__gte=timeout)
         else:
             hosts = self._get_inventory_hosts()
+
+        last_filepath_written = None
         for host in hosts:
             filepath = os.sep.join(map(str, [destination, host.name]))
             if not os.path.realpath(filepath).startswith(destination):
