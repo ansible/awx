@@ -120,7 +120,7 @@ def main():
     # We are not going to raise an error here because the __init__ method of ControllerAWXKitModule will do that for us
     if HAS_EXPORTABLE_RESOURCES:
         for resource in EXPORTABLE_RESOURCES:
-            argument_spec[resource] = dict(type='list')
+            argument_spec[resource] = dict(type='list', elements='str')
 
     module = ControllerAWXKitModule(argument_spec=argument_spec)
 
