@@ -13,8 +13,8 @@ from django.conf import settings
 from django.apps import apps
 
 from awx.main.analytics.broadcast_websocket import (
-    BroadcastWebsocketStats,
-    BroadcastWebsocketStatsManager,
+    RelayWebsocketStats,
+    RelayWebsocketStatsManager,
 )
 import awx.main.analytics.subsystem_metrics as s_metrics
 
@@ -50,19 +50,17 @@ class WebsocketRelayConnection:
     def __init__(
         self,
         name,
-        stats: BroadcastWebsocketStats,
+        stats: RelayWebsocketStats,
         remote_host: str,
         remote_port: int = settings.BROADCAST_WEBSOCKET_PORT,
         protocol: str = settings.BROADCAST_WEBSOCKET_PROTOCOL,
         verify_ssl: bool = settings.BROADCAST_WEBSOCKET_VERIFY_CERT,
-        endpoint: str = 'relay',
     ):
         self.name = name
         self.event_loop = asyncio.get_event_loop()
         self.stats = stats
         self.remote_host = remote_host
         self.remote_port = remote_port
-        self.endpoint = endpoint
         self.protocol = protocol
         self.verify_ssl = verify_ssl
         self.channel_layer = None
@@ -91,7 +89,7 @@ class WebsocketRelayConnection:
             logger.warning(f"Connection from {self.name} to {self.remote_host} cancelled")
             raise
 
-        uri = f"{self.protocol}://{self.remote_host}:{self.remote_port}/websocket/{self.endpoint}/"
+        uri = f"{self.protocol}://{self.remote_host}:{self.remote_port}/websocket/relay/"
         timeout = aiohttp.ClientTimeout(total=10)
 
         secret_val = WebsocketSecretAuthHelper.construct_secret()
@@ -145,6 +143,10 @@ class WebsocketRelayConnection:
                     logger.warning(logmsg)
                     continue
 
+            from remote_pdb import RemotePdb
+
+            RemotePdb('127.0.0.1', 4444).set_trace()
+
             if payload.get("type") == "consumer.subscribe":
                 for group in payload['groups']:
                     name = f"{self.remote_host}-{group}"
@@ -197,7 +199,7 @@ class WebSocketRelayManager(object):
         self.relay_connections = dict()
         self.local_hostname = get_local_host()
         self.event_loop = asyncio.get_event_loop()
-        self.stats_mgr = BroadcastWebsocketStatsManager(self.event_loop, self.local_hostname)
+        self.stats_mgr = RelayWebsocketStatsManager(self.event_loop, self.local_hostname)
 
     async def run(self):
         self.stats_mgr.start()

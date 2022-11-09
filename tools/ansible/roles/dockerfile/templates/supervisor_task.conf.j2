@@ -22,6 +22,23 @@ stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
 
+[program:wsrelay]
+{% if kube_dev | bool %}
+command = make wsrelay
+directory = /awx_devel
+{% else %}
+command = awx-manage run_wsrelay
+directory = /var/lib/awx
+{% endif %}
+autorestart = true
+startsecs = 30
+stopasgroup=true
+killasgroup=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+
 [program:callback-receiver]
 {% if kube_dev | bool %}
 command = make receiver
