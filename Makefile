@@ -21,6 +21,8 @@ SPLUNK ?= false
 PROMETHEUS ?= false
 # If set to true docker-compose will also start a grafana instance
 GRAFANA ?= false
+# If set to true docker-compose will also start a hashicorp vault instance
+VAULT ?= false
 
 VENV_BASE ?= /var/lib/awx/venv
 
@@ -477,7 +479,8 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e enable_ldap=$(LDAP) \
 	    -e enable_splunk=$(SPLUNK) \
 	    -e enable_prometheus=$(PROMETHEUS) \
-	    -e enable_grafana=$(GRAFANA) $(EXTRA_SOURCES_ANSIBLE_OPTS)
+	    -e enable_grafana=$(GRAFANA) $(EXTRA_SOURCES_ANSIBLE_OPTS) \
+	    -e enable_vault=$(VAULT)
 
 
 
