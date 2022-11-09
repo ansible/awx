@@ -5,6 +5,7 @@
 import dateutil
 import functools
 import html
+import itertools
 import logging
 import re
 import requests
@@ -20,9 +21,10 @@ from urllib3.exceptions import ConnectTimeoutError
 # Django
 from django.conf import settings
 from django.core.exceptions import FieldError, ObjectDoesNotExist
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Count
 from django.db import IntegrityError, ProgrammingError, transaction, connection
 from django.db.models.fields.related import ManyToManyField, ForeignKey
+from django.db.models.functions import Trunc
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
@@ -46,9 +48,6 @@ from rest_framework import status
 # Django REST Framework YAML
 from rest_framework_yaml.parsers import YAMLParser
 from rest_framework_yaml.renderers import YAMLRenderer
-
-# QSStats
-import qsstats
 
 # ANSIConv
 import ansiconv
@@ -283,30 +282,50 @@ class DashboardJobsGraphView(APIView):
             success_query = success_query.filter(instance_of=models.ProjectUpdate)
             failed_query = failed_query.filter(instance_of=models.ProjectUpdate)
 
-        success_qss = qsstats.QuerySetStats(success_query, 'finished')
-        failed_qss = qsstats.QuerySetStats(failed_query, 'finished')
-
-        start_date = now()
+        end = now()
+        interval = 'day'
         if period == 'month':
-            end_date = start_date - dateutil.relativedelta.relativedelta(months=1)
-            interval = 'days'
+            start = end - dateutil.relativedelta.relativedelta(months=1)
         elif period == 'two_weeks':
-            end_date = start_date - dateutil.relativedelta.relativedelta(weeks=2)
-            interval = 'days'
+            start = end - dateutil.relativedelta.relativedelta(weeks=2)
         elif period == 'week':
-            end_date = start_date - dateutil.relativedelta.relativedelta(weeks=1)
-            interval = 'days'
+            start = end - dateutil.relativedelta.relativedelta(weeks=1)
         elif period == 'day':
-            end_date = start_date - dateutil.relativedelta.relativedelta(days=1)
-            interval = 'hours'
+            start = end - dateutil.relativedelta.relativedelta(days=1)
+            interval = 'hour'
         else:
             return Response({'error': _('Unknown period "%s"') % str(period)}, status=status.HTTP_400_BAD_REQUEST)
 
         dashboard_data = {"jobs": {"successful": [], "failed": []}}
-        for element in success_qss.time_series(end_date, start_date, interval=interval):
-            dashboard_data['jobs']['successful'].append([time.mktime(element[0].timetuple()), element[1]])
-        for element in failed_qss.time_series(end_date, start_date, interval=interval):
-            dashboard_data['jobs']['failed'].append([time.mktime(element[0].timetuple()), element[1]])
+
+        succ_list = dashboard_data['jobs']['successful']
+        fail_list = dashboard_data['jobs']['failed']
+
+        qs_s = (
+            success_query.filter(finished__range=(start, end))
+            .annotate(d=Trunc('finished', interval, tzinfo=end.tzinfo))
+            .order_by()
+            .values('d')
+            .annotate(agg=Count('id', distinct=True))
+        )
+        data_s = {item['d']: item['agg'] for item in qs_s}
+        qs_f = (
+            failed_query.filter(finished__range=(start, end))
+            .annotate(d=Trunc('finished', interval, tzinfo=end.tzinfo))
+            .order_by()
+            .values('d')
+            .annotate(agg=Count('id', distinct=True))
+        )
+        data_f = {item['d']: item['agg'] for item in qs_f}
+
+        start_date = start.replace(hour=0, minute=0, second=0, microsecond=0)
+        for d in itertools.count():
+            date = start_date + dateutil.relativedelta.relativedelta(days=d)
+            if date > end:
+                break
+            succ_list.append([time.mktime(date.timetuple()), data_s.get(date, 0)])
+            fail_list.append([time.mktime(date.timetuple()), data_f.get(date, 0)])
+
         return Response(dashboard_data)
 
 
