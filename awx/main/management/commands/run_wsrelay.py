@@ -13,7 +13,7 @@ from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
 
 from awx.main.analytics.broadcast_websocket import (
-    BroadcastWebsocketStatsManager,
+    RelayWebsocketStatsManager,
     safe_name,
 )
 from awx.main.wsrelay import WebSocketRelayManager
@@ -130,9 +130,9 @@ class Command(BaseCommand):
 
         if options.get('status'):
             try:
-                stats_all = BroadcastWebsocketStatsManager.get_stats_sync()
+                stats_all = RelayWebsocketStatsManager.get_stats_sync()
             except redis.exceptions.ConnectionError as e:
-                print(f"Unable to get Broadcast Websocket Status. Failed to connect to redis {e}")
+                print(f"Unable to get Relay Websocket Status. Failed to connect to redis {e}")
                 return
 
             data = {}
@@ -151,13 +151,13 @@ class Command(BaseCommand):
             host_stats = Command.get_connection_status(hostnames, data)
             lines = Command._format_lines(host_stats)
 
-            print(f'Broadcast websocket connection status from "{my_hostname}" to:')
+            print(f'Relay websocket connection status from "{my_hostname}" to:')
             print('\n'.join(lines))
 
             host_stats = Command.get_connection_stats(hostnames, data)
             lines = Command._format_lines(host_stats)
 
-            print(f'\nBroadcast websocket connection stats from "{my_hostname}" to:')
+            print(f'\nRelay websocket connection stats from "{my_hostname}" to:')
             print('\n'.join(lines))
 
             return
@@ -166,4 +166,4 @@ class Command(BaseCommand):
             websocket_relay_manager = WebSocketRelayManager()
             asyncio.run(websocket_relay_manager.run())
         except KeyboardInterrupt:
-            logger.debug('Terminating Websocket Broadcaster')
+            logger.debug('Terminating Websocket Relayer')
