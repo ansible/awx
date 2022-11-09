@@ -29,51 +29,51 @@ options:
     organizations:
       description:
         - organization names to export
-      type: str
+      type: list
     users:
       description:
         - user names to export
-      type: str
+      type: list
     teams:
       description:
         - team names to export
-      type: str
+      type: list
     credential_types:
       description:
         - credential type names to export
-      type: str
+      type: list
     credentials:
       description:
         - credential names to export
-      type: str
+      type: list
     execution_environments:
       description:
         - execution environment names to export
-      type: str
+      type: list
     notification_templates:
       description:
         - notification template names to export
-      type: str
+      type: list
     inventory_sources:
       description:
         - inventory soruces to export
-      type: str
+      type: list
     inventory:
       description:
         - inventory names to export
-      type: str
+      type: list
     projects:
       description:
         - project names to export
-      type: str
+      type: list
     job_templates:
       description:
         - job template names to export
-      type: str
+      type: list
     workflow_job_templates:
       description:
         - workflow names to export
-      type: str
+      type: list
 requirements:
   - "awxkit >= 9.3.0"
 notes:
@@ -95,9 +95,9 @@ EXAMPLES = '''
     job_templates: "My Template"
     credential: 'all'
 
-- name: Export two or more inventories with a comma separated list of names
+- name: Export a list of inventories
   export:
-    inventory: "My Inventory1,My Inventory2"
+    inventory: ['My Inventory 1', 'My Inventory 2']
 '''
 
 import logging
@@ -115,24 +115,12 @@ except ImportError:
 def main():
     argument_spec = dict(
         all=dict(type='bool', default=False),
-        credential_types=dict(type='str'),
-        credentials=dict(type='str'),
-        execution_environments=dict(type='str'),
-        inventory=dict(type='str'),
-        inventory_sources=dict(type='str'),
-        job_templates=dict(type='str'),
-        notification_templates=dict(type='str'),
-        organizations=dict(type='str'),
-        projects=dict(type='str'),
-        teams=dict(type='str'),
-        users=dict(type='str'),
-        workflow_job_templates=dict(type='str'),
     )
 
     # We are not going to raise an error here because the __init__ method of ControllerAWXKitModule will do that for us
     if HAS_EXPORTABLE_RESOURCES:
         for resource in EXPORTABLE_RESOURCES:
-            argument_spec[resource] = dict(type='str')
+            argument_spec[resource] = dict(type='list')
 
     module = ControllerAWXKitModule(argument_spec=argument_spec)
 
