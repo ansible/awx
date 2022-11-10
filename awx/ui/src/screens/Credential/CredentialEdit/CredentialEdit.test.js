@@ -282,7 +282,7 @@ const mockInputSources = {
         summary_fields: {
           source_credential: {
             id: 20,
-            name: 'CyberArk Conjur Secret Lookup',
+            name: 'CyberArk Conjur Secrets Manager Lookup',
             description: '',
             kind: 'conjur',
             cloud: false,
@@ -301,7 +301,7 @@ const mockInputSources = {
         summary_fields: {
           source_credential: {
             id: 20,
-            name: 'CyberArk Conjur Secret Lookup',
+            name: 'CyberArk Conjur Secrets Manager Lookup',
             description: '',
             kind: 'conjur',
             cloud: false,

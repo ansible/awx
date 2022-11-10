@@ -1,6 +1,5 @@
 from .plugin import CredentialPlugin, CertFiles, raise_for_status
 
-import base64
 from urllib.parse import urljoin, quote
 
 from django.utils.translation import gettext_lazy as _
@@ -61,7 +60,7 @@ def conjur_backend(**kwargs):
     cacert = kwargs.get('cacert', None)
 
     auth_kwargs = {
-        'headers': {'Content-Type': 'text/plain'},
+        'headers': {'Content-Type': 'text/plain', 'Accept-Encoding': 'base64'},
         'data': api_key,
         'allow_redirects': False,
     }
@@ -69,9 +68,9 @@ def conjur_backend(**kwargs):
     with CertFiles(cacert) as cert:
         # https://www.conjur.org/api.html#authentication-authenticate-post
         auth_kwargs['verify'] = cert
-        resp = requests.post(urljoin(url, '/'.join(['authn', account, username, 'authenticate'])), **auth_kwargs)
+        resp = requests.post(urljoin(url, '/'.join(['api', 'authn', account, username, 'authenticate'])), **auth_kwargs)
     raise_for_status(resp)
-    token = base64.b64encode(resp.content).decode('utf-8')
+    token = resp.content.decode('utf-8')
 
     lookup_kwargs = {
         'headers': {'Authorization': 'Token token="{}"'.format(token)},
@@ -79,7 +78,7 @@ def conjur_backend(**kwargs):
     }
 
     # https://www.conjur.org/api.html#secrets-retrieve-a-secret-get
-    path = urljoin(url, '/'.join(['secrets', account, 'variable', secret_path]))
+    path = urljoin(url, '/'.join(['api', 'secrets', account, 'variable', secret_path]))
     if version:
         path = '?'.join([path, version])
 
@@ -90,4 +89,4 @@ def conjur_backend(**kwargs):
     return resp.text
 
 
-conjur_plugin = CredentialPlugin('CyberArk Conjur Secret Lookup', inputs=conjur_inputs, backend=conjur_backend)
+conjur_plugin = CredentialPlugin('CyberArk Conjur Secrets Manager Lookup', inputs=conjur_inputs, backend=conjur_backend)
