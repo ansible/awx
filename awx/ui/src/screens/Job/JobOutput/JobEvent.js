@@ -41,7 +41,7 @@ function JobEvent({
         if (lineNumber < 0) {
           return null;
         }
-        const canToggle = index === toggleLineIndex;
+        const canToggle = index === toggleLineIndex && !event.isTracebackOnly;
         return (
           <JobEventLine
             onClick={isClickable ? onJobEventClick : undefined}
@@ -55,7 +55,7 @@ function JobEvent({
               onToggle={onToggleCollapsed}
             />
             <JobEventLineNumber>
-              {lineNumber}
+              {!event.isTracebackOnly ? lineNumber : ''}
               <JobEventEllipsis isCollapsed={isCollapsed && canToggle} />
             </JobEventLineNumber>
             <JobEventLineText
