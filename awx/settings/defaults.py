@@ -304,11 +304,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.sessions',
     'django.contrib.sites',
+    # daphne has to be installed before django.contrib.staticfiles for the app to startup
+    # According to channels 4.0 docs you install daphne instead of channels now
+    'daphne',
     'django.contrib.staticfiles',
     'oauth2_provider',
     'rest_framework',
     'django_extensions',
-    'channels',
     'polymorphic',
     'taggit',
     'social_django',
