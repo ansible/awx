@@ -10,7 +10,7 @@ cryptography>=36.0.2,<37.0.0 # Until paramiko fixes https://github.com/paramiko/
 Cython<3 # Since the bump to PyYAML 5.4.1 this is now a mandatory dep
 daphne
 distro
-django>=3.2.16,<4.0.0  # see UPGRADE BLOCKERs https://github.com/ansible/awx/security/dependabot/67
+django==3.2.16  # see UPGRADE BLOCKERs https://github.com/ansible/awx/security/dependabot/67
 django-auth-ldap
 django-cors-headers>=3.5.0
 django-crum
