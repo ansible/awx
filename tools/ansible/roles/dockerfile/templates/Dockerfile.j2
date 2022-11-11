@@ -232,10 +232,11 @@ RUN for dir in \
       /var/run/awx-rsyslog \
       /var/log/nginx \
       /var/lib/postgresql \
+      /var/lib/nginx \
       /var/run/supervisor \
       /var/run/awx-receptor \
       /var/lib/nginx ; \
-    do mkdir -m 0775 -p $dir ; chmod g+rwx $dir ; chgrp root $dir ; done && \
+    do mkdir -m 0775 -p $dir ; chmod g+rwx $dir ; chgrp root $dir ; chown root: /var/lib/nginx ; done && \
     for file in \
       /etc/subuid \
       /etc/subgid \
@@ -274,6 +275,7 @@ RUN for dir in \
       /var/run/nginx.pid \
       /var/lib/awx/venv/awx/lib/python3.9/site-packages/awx.egg-link ; \
     do touch $file ; chmod g+rw $file ; done
+    
 {% endif %}
 
 {% if not build_dev|bool %}
