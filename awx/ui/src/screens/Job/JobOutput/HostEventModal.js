@@ -62,7 +62,7 @@ const getStdOutValue = (hostEvent) => {
   ) {
     stdOut = res.results.join('\n');
   } else if (res?.stdout) {
-    stdOut = res.stdout;
+    stdOut = Array.isArray(res.stdout) ? res.stdout.join(' ') : res.stdout;
   }
   return stdOut;
 };
@@ -70,7 +70,6 @@ const getStdOutValue = (hostEvent) => {
 function HostEventModal({ onClose, hostEvent = {}, isOpen = false }) {
   const [hostStatus, setHostStatus] = useState(null);
   const [activeTabKey, setActiveTabKey] = useState(0);
-
   useEffect(() => {
     setHostStatus(processEventStatus(hostEvent));
   }, [setHostStatus, hostEvent]);
@@ -108,11 +107,11 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false }) {
             style={{ alignItems: 'center', marginTop: '20px' }}
             gutter="sm"
           >
-            <Detail label={t`Host`} value={hostEvent.host_name} />
-            {hostEvent.summary_fields.host?.description ? (
+            <Detail label={t`Host`} value={hostEvent.event_data?.host} />
+            {hostEvent.summary_fields?.host?.description ? (
               <Detail
                 label={t`Description`}
-                value={hostEvent.summary_fields.host.description}
+                value={hostEvent.summary_fields?.host?.description}
               />
             ) : null}
             {hostStatus ? (
@@ -125,12 +124,9 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false }) {
             <Detail label={t`Task`} value={hostEvent.task} />
             <Detail
               label={t`Module`}
-              value={hostEvent.event_data.task_action || t`No result found`}
+              value={hostEvent.event_data?.task_action || t`No result found`}
             />
-            <Detail
-              label={t`Command`}
-              value={hostEvent?.event_data?.res?.cmd}
-            />
+            <Detail label={t`Command`} value={hostEvent.event_data?.res?.cmd} />
           </DetailList>
         </Tab>
         <Tab

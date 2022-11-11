@@ -197,8 +197,10 @@ def parse_resource(client, skip_deprecated=False):
 
     if hasattr(client, 'v2'):
         for k in client.v2.json.keys():
-            if k in ('dashboard',):
-                # the Dashboard API is deprecated and not supported
+            if k in ('dashboard', 'config'):
+                # - the Dashboard API is deprecated and not supported
+                # - the Config command is already dealt with by the
+                #    CustomCommand section above
                 continue
 
             # argparse aliases are *only* supported in Python3 (not 2.7)

@@ -10,28 +10,6 @@ import socket
 from datetime import timedelta
 
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
-
-def is_testing(argv=None):
-    import sys
-
-    '''Return True if running django or py.test unit tests.'''
-    if 'PYTEST_CURRENT_TEST' in os.environ.keys():
-        return True
-    argv = sys.argv if argv is None else argv
-    if len(argv) >= 1 and ('py.test' in argv[0] or 'py/test.py' in argv[0]):
-        return True
-    elif len(argv) >= 2 and argv[1] == 'test':
-        return True
-    return False
-
-
-def IS_TESTING(argv=None):
-    return is_testing(argv)
-
-
 if "pytest" in sys.modules:
     from unittest import mock
 
@@ -40,8 +18,12 @@ if "pytest" in sys.modules:
 else:
     import ldap
 
+
 DEBUG = True
 SQL_DEBUG = DEBUG
+
+# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 # FIXME: it would be nice to cycle back around and allow this to be
 # BigAutoField going forward, but we'd have to be explicit about our
@@ -101,7 +83,7 @@ USE_L10N = True
 
 USE_TZ = True
 
-STATICFILES_DIRS = (os.path.join(BASE_DIR, 'ui', 'build', 'static'), os.path.join(BASE_DIR, 'static'))
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'ui', 'build', 'static'), os.path.join(BASE_DIR, 'static')]
 
 # Absolute filesystem path to the directory where static file are collected via
 # the collectstatic command.
@@ -253,6 +235,14 @@ START_TASK_LIMIT = 100
 # We have the grace period so the task manager can bail out before the timeout.
 TASK_MANAGER_TIMEOUT = 300
 TASK_MANAGER_TIMEOUT_GRACE_PERIOD = 60
+
+# Number of seconds _in addition to_ the task manager timeout a job can stay
+# in waiting without being reaped
+JOB_WAITING_GRACE_PERIOD = 60
+
+# Number of seconds after a container group job finished time to wait
+# before the awx_k8s_reaper task will tear down the pods
+K8S_POD_REAPER_GRACE_PERIOD = 60
 
 # Disallow sending session cookies over insecure connections
 SESSION_COOKIE_SECURE = True
@@ -1003,17 +993,6 @@ DEFAULT_CONTAINER_RUN_OPTIONS = ['--network', 'slirp4netns:enable_ipv6=true']
 
 # Mount exposed paths as hostPath resource in k8s/ocp
 AWX_MOUNT_ISOLATED_PATHS_ON_K8S = False
-
-# Time out task managers if they take longer than this many seconds
-TASK_MANAGER_TIMEOUT = 300
-
-# Number of seconds _in addition to_ the task manager timeout a job can stay
-# in waiting without being reaped
-JOB_WAITING_GRACE_PERIOD = 60
-
-# Number of seconds after a container group job finished time to wait
-# before the awx_k8s_reaper task will tear down the pods
-K8S_POD_REAPER_GRACE_PERIOD = 60
 
 # This is overridden downstream via /etc/tower/conf.d/cluster_host_id.py
 CLUSTER_HOST_ID = socket.gethostname()

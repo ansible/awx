@@ -416,8 +416,14 @@ function ScheduleForm({
 
       if (options.end === 'onDate') {
         if (
-          DateTime.fromISO(values.startDate) >=
-          DateTime.fromISO(options.endDate)
+          DateTime.fromFormat(
+            `${values.startDate} ${values.startTime}`,
+            'yyyy-LL-dd h:mm a'
+          ).toMillis() >=
+          DateTime.fromFormat(
+            `${options.endDate} ${options.endTime}`,
+            'yyyy-LL-dd h:mm a'
+          ).toMillis()
         ) {
           freqErrors.endDate = t`Please select an end date/time that comes after the start date/time.`;
         }

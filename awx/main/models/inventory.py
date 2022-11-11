@@ -247,6 +247,19 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         return (number, step)
 
     def get_sliced_hosts(self, host_queryset, slice_number, slice_count):
+        """
+        Returns a slice of Hosts given a slice number and total slice count, or
+        the original queryset if slicing is not requested.
+
+        NOTE: If slicing is performed, this will return a List[Host] with the
+        resulting slice. If slicing is not performed it will return the
+        original queryset (not evaluating it or forcing it to a list). This
+        puts the burden on the caller to check the resulting type. This is
+        non-ideal because it's easy to get wrong, but I think the only way
+        around it is to force the queryset which has memory implications for
+        large inventories.
+        """
+
         if slice_count > 1 and slice_number > 0:
             offset = slice_number - 1
             host_queryset = host_queryset[offset::slice_count]

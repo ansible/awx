@@ -1,6 +1,7 @@
 from contextlib import suppress
 
-from awxkit.api.pages import SystemJobTemplate
+from awxkit.api.pages import JobTemplate, SystemJobTemplate, Project, InventorySource
+from awxkit.api.pages.workflow_job_templates import WorkflowJobTemplate
 from awxkit.api.mixins import HasCreate
 from awxkit.api.resources import resources
 from awxkit.config import config
@@ -11,7 +12,7 @@ from . import base
 
 
 class Schedule(HasCreate, base.Base):
-    dependencies = [SystemJobTemplate]
+    dependencies = [JobTemplate, SystemJobTemplate, Project, InventorySource, WorkflowJobTemplate]
     NATURAL_KEY = ('unified_job_template', 'name')
 
     def silent_delete(self):

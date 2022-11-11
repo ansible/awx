@@ -275,7 +275,13 @@ class ApiV2(base.Base):
                         # When creating a project, we need to wait for its
                         # first project update to finish so that associated
                         # JTs have valid options for playbook names
-                        _page.wait_until_completed()
+                        try:
+                            _page.wait_until_completed(timeout=300)
+                        except AssertionError:
+                            # If the project update times out, try to
+                            # carry on in the hopes that it will
+                            # finish before it is needed.
+                            pass
                 else:
                     # If we are an existing project and our scm_tpye is not changing don't try and import the local_path setting
                     if asset['natural_key']['type'] == 'project' and 'local_path' in post_data and _page['scm_type'] == post_data['scm_type']:
