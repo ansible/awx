@@ -1,7 +1,6 @@
 import datetime
 import asyncio
 import logging
-import aioredis
 import redis
 import re
 
@@ -82,7 +81,7 @@ class BroadcastWebsocketStatsManager:
 
     async def run_loop(self):
         try:
-            redis_conn = await aioredis.create_redis_pool(settings.BROKER_URL)
+            redis_conn = await redis.asyncio.create_redis_pool(settings.BROKER_URL)
             while True:
                 stats_data_str = ''.join(stat.serialize() for stat in self._stats.values())
                 await redis_conn.set(self._redis_key, stats_data_str)
