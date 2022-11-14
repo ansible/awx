@@ -10,28 +10,6 @@ import socket
 from datetime import timedelta
 
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
-
-def is_testing(argv=None):
-    import sys
-
-    '''Return True if running django or py.test unit tests.'''
-    if 'PYTEST_CURRENT_TEST' in os.environ.keys():
-        return True
-    argv = sys.argv if argv is None else argv
-    if len(argv) >= 1 and ('py.test' in argv[0] or 'py/test.py' in argv[0]):
-        return True
-    elif len(argv) >= 2 and argv[1] == 'test':
-        return True
-    return False
-
-
-def IS_TESTING(argv=None):
-    return is_testing(argv)
-
-
 if "pytest" in sys.modules:
     from unittest import mock
 
@@ -40,8 +18,12 @@ if "pytest" in sys.modules:
 else:
     import ldap
 
+
 DEBUG = True
 SQL_DEBUG = DEBUG
+
+# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 # FIXME: it would be nice to cycle back around and allow this to be
 # BigAutoField going forward, but we'd have to be explicit about our

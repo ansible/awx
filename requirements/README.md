@@ -1,25 +1,22 @@
 # Dependency Management
 
-The `requirements.txt` file is generated from `requirements.in`, using `pip-tools` `pip-compile`.
+The `requirements.txt` file is generated from `requirements.in` and `requirements_git.txt`, using `pip-tools` and `pip-compile`.
 
 ## How To Use
 
-Commands should be run from inside the `./requirements` directory of the awx repository.
+Commands should be run in the awx container from inside the `./requirements` directory of the awx repository.
 
 ### Upgrading or Adding Select Libraries
 
 If you need to add or upgrade one targeted library, then modify `requirements.in`,
 then run the script:
 
-`./updater.sh`
-
-NOTE: `./updater.sh` uses /usr/bin/python3.6, to match the current python version
-(3.6) used to build releases.
+`./updater.sh run`
 
 #### Upgrading Unpinned Dependency
 
 If you require a new version of a dependency that does not have a pinned version
-for a fix or feature, pin a minimum version and run `./updater.sh`. For example,
+for a fix or feature, pin a minimum version in `requirements.in` and run `./updater.sh run`. For example,
 replace the line `asgi-amqp` with `asgi-amqp>=1.1.4`, and consider leaving a
 note.
 
