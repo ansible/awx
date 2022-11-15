@@ -1751,7 +1751,7 @@ msgstr "Día"
 
 #: components/Schedule/ScheduleDetail/FrequencyDetails.js:130
 msgid "Day {0}"
-msgstr "Día"
+msgstr "Día {0}"
 
 #: components/Schedule/ScheduleDetail/ScheduleDetail.js:399
 #: components/Schedule/shared/ScheduleFormFields.js:136
@@ -2792,7 +2792,7 @@ msgstr "Fecha/hora de finalización"
 
 #: components/Schedule/shared/buildRuleObj.js:110
 msgid "End did not match an expected value ({0})"
-msgstr "La finalización no coincide con un valor esperado"
+msgstr "La finalización no coincide con un valor esperado ({0})"
 
 #: components/Schedule/shared/DateTimePicker.js:61
 msgid "End time"
@@ -9733,7 +9733,7 @@ msgstr "Ingrese variables con sintaxis JSON o YAML. Use el botón de selección 
 
 #: screens/Inventory/shared/Inventory.helptext.js:166
 msgid "Variables used to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>{sourceType}</1> plugin configuration guide."
-msgstr "Introduzca las variables para configurar el origen del inventario. Para una descripción detallada de cómo configurar este plugin, consulte los <0>plugins de inventario</0> en la documentación y la guía de configuración del plugin <1> de ovirt{sourceType}."
+msgstr "Introduzca las variables para configurar el origen del inventario. Para una descripción detallada de cómo configurar este plugin, consulte los <0>plugins de inventario</0> en la documentación y la guía de configuración del plugin <1> de ovirt{sourceType}</1>."
 
 #: components/LaunchPrompt/steps/CredentialPasswordsStep.js:121
 msgid "Vault password"
@@ -10218,7 +10218,7 @@ msgstr "Tarea en flujo de trabajo"
 
 #: components/WorkflowOutputNavigation/WorkflowOutputNavigation.js:76
 msgid "Workflow Job 1/{0}"
-msgstr "Tarea en flujo de trabajo"
+msgstr "Tarea en flujo de trabajo 1/{0}"
 
 #: components/JobList/JobListItem.js:201
 #: components/Workflow/WorkflowNodeHelp.js:63
@@ -10355,7 +10355,7 @@ msgstr "No tiene permiso para desvincular lo siguiente: {itemsUnableToDisassocia
 
 #: screens/Instances/Shared/RemoveInstanceButton.js:72
 msgid "You do not have permission to remove instances: {itemsUnableToremove}"
-msgstr "No tiene permisos para los recursos relacionados."
+msgstr "No tiene permisos para los recursos relacionados: {itemsUnableToremove}"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:82
 msgid "You have automated against more hosts than your subscription allows."
@@ -10713,11 +10713,11 @@ msgstr "{0, plural, one {You do not have permission to cancel the following job:
 
 #: components/Schedule/ScheduleDetail/FrequencyDetails.js:143
 msgid "{0, selectordinal, one {The first {dayOfWeek}} two {The second {dayOfWeek}} =3 {The third {dayOfWeek}} =4 {The fourth {dayOfWeek}} =5 {The fifth {dayOfWeek}}}"
-msgstr "{0, selectordinal, one {The first {dayOfWeek}} dos {The second {dayOfWeek}} =3 {The third {dayOfWeek}} =4 {The fourth {dayOfWeek}} =5 {The fifth {dayOfWeek}}}"
+msgstr "{0, selectordinal, one {The first {dayOfWeek}} two {The second {dayOfWeek}} =3 {The third {dayOfWeek}} =4 {The fourth {dayOfWeek}} =5 {The fifth {dayOfWeek}}}"
 
 #: components/Schedule/ScheduleDetail/FrequencyDetails.js:202
 msgid "{0, selectordinal, one {The first {weekday} of {month}} two {The second {weekday} of {month}} =3 {The third {weekday} of {month}} =4 {The fourth {weekday} of {month}} =5 {The fifth {weekday} of {month}}}"
-msgstr "{0, selectordinal, one {The first {weekday} de {month}} dos {The second {weekday} de {month}} =3 {The third {weekday} de {month}} =4 {The fourth {weekday} de {month}} =5 {The fifth {weekday} de {month}}}"
+msgstr "{0, selectordinal, one {The first {weekday} de {month}} two {The second {weekday} de {month}} =3 {The third {weekday} de {month}} =4 {The fourth {weekday} de {month}} =5 {The fifth {weekday} de {month}}}"
 
 #: screens/ActivityStream/ActivityStreamListItem.js:28
 msgid "{0} (deleted)"
@@ -10729,11 +10729,11 @@ msgstr "{0} más"
 
 #: screens/Job/JobDetail/JobDetail.js:399
 msgid "{0} seconds"
-msgstr "segundos"
+msgstr "{0} segundos"
 
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:95
 msgid "{automatedInstancesCount} since {automatedInstancesSinceDateTime}"
-msgstr "desde"
+msgstr "{automatedInstancesCount} desde {automatedInstancesSinceDateTime}"
 
 #: components/AppContainer/AppContainer.js:55
 msgid "{brandName} logo"
@@ -10753,27 +10753,27 @@ msgstr "{forks, plural, one {# fork} other {# forks}}"
 
 #: components/Schedule/ScheduleDetail/FrequencyDetails.js:41
 msgid "{interval, plural, one {{interval} day} other {{interval} days}}"
-msgstr "{interval, plural, one {{interval} día} otros {{interval} días}}"
+msgstr "{interval, plural, one {{interval} día} other {{interval} días}}"
 
 #: components/Schedule/ScheduleDetail/FrequencyDetails.js:33
 msgid "{interval, plural, one {{interval} hour} other {{interval} hours}}"
-msgstr "{interval, plural, one {{interval} hora} otros {{interval} horas}}"
+msgstr "{interval, plural, one {{interval} hora} other {{interval} horas}}"
 
 #: components/Schedule/ScheduleDetail/FrequencyDetails.js:25
 msgid "{interval, plural, one {{interval} minute} other {{interval} minutes}}"
-msgstr "{interval, plural, one {{interval} minuto} otros {{interval} minutos}}"
+msgstr "{interval, plural, one {{interval} minuto} other {{interval} minutos}}"
 
 #: components/Schedule/ScheduleDetail/FrequencyDetails.js:57
 msgid "{interval, plural, one {{interval} month} other {{interval} months}}"
-msgstr "{interval, plural, one {{interval} mes} otros {{interval} meses}}"
+msgstr "{interval, plural, one {{interval} mes} other {{interval} meses}}"
 
 #: components/Schedule/ScheduleDetail/FrequencyDetails.js:49
 msgid "{interval, plural, one {{interval} week} other {{interval} weeks}}"
-msgstr "{interval, plural, one {{interval} semana} otras {{interval} semanas}}"
+msgstr "{interval, plural, one {{interval} semana} other {{interval} semanas}}"
 
 #: components/Schedule/ScheduleDetail/FrequencyDetails.js:65
 msgid "{interval, plural, one {{interval} year} other {{interval} years}}"
-msgstr "{interval, plural, one {{interval} año} otros {{interval} años}}"
+msgstr "{interval, plural, one {{interval} año} other {{interval} años}}"
 
 #: components/Schedule/shared/FrequencyDetailSubform.js:198
 msgid "{intervalValue, plural, one {day} other {days}}"
@@ -10817,7 +10817,7 @@ msgstr "{numJobsToCancel, plural, one {{0}} other {{1}}}"
 
 #: components/Schedule/ScheduleDetail/FrequencyDetails.js:226
 msgid "{numOccurrences, plural, one {After {numOccurrences} occurrence} other {After {numOccurrences} occurrences}}"
-msgstr "{numOccurrences, plural, one {After {numOccurrences} ocurrencia} otras {After {numOccurrences} ocurrencias}}"
+msgstr "{numOccurrences, plural, one {After {numOccurrences} ocurrencia} other {After {numOccurrences} ocurrencias}}"
 
 #: components/PaginatedTable/PaginatedTable.js:79
 msgid "{pluralizedItemName} List"
@@ -10830,4 +10830,3 @@ msgstr "{selectedItemsCount, plural, one {Click to run a health check on the sel
 #: components/AppContainer/AppContainer.js:154
 msgid "{sessionCountdown, plural, one {You will be logged out in # second due to inactivity} other {You will be logged out in # seconds due to inactivity}}"
 msgstr "{sessionCountdown, plural, one {You will be logged out in # second due to inactivity} other {You will be logged out in # seconds due to inactivity}}"
-
