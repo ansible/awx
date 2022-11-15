@@ -16,7 +16,7 @@
     command: ansible-runner
     params: worker
     allowruntimeparams: true
-    verifysignature: true
+    verifysignature: {{ sign_work }}
 
 - control-service:
     service: control
