@@ -118,7 +118,7 @@ virtualenv_awx:
 		fi; \
 	fi
 
-## Install third-party requirements needed for AWX's environment. 
+## Install third-party requirements needed for AWX's environment.
 # this does not use system site packages intentionally
 requirements_awx: virtualenv_awx
 	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
@@ -452,7 +452,7 @@ awx/projects:
 COMPOSE_UP_OPTS ?=
 COMPOSE_OPTS ?=
 CONTROL_PLANE_NODE_COUNT ?= 1
-EXECUTION_NODE_COUNT ?= 2
+EXECUTION_NODE_COUNT ?= 0
 MINIKUBE_CONTAINER_GROUP ?= false
 MINIKUBE_SETUP ?= false # if false, run minikube separately
 EXTRA_SOURCES_ANSIBLE_OPTS ?=
