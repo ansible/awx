@@ -14,7 +14,7 @@ from awx.main.models import (
     Job,
     JobEvent,
 )
-from awx.main.management.commands.replay_job_events import (
+from awx.main.management.commands.replay_job_events_websockets import (
     ReplayJobEvents,
 )
 
