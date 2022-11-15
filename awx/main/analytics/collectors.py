@@ -238,7 +238,9 @@ def instance_info(since, include_hostnames=False, **kwargs):
     info = {}
     # Use same method that the TaskManager does to compute consumed capacity without querying all running jobs for each Instance
     active_tasks = models.UnifiedJob.objects.filter(status__in=['running', 'waiting']).only('task_impact', 'controller_node', 'execution_node')
-    tm_instances = TaskManagerInstances(active_tasks, instance_fields=['uuid', 'version', 'capacity', 'cpu', 'memory', 'managed_by_policy', 'enabled'])
+    tm_instances = TaskManagerInstances(
+        active_tasks, instance_fields=['uuid', 'version', 'capacity', 'cpu', 'memory', 'managed_by_policy', 'enabled', 'node_type']
+    )
     for tm_instance in tm_instances.instances_by_hostname.values():
         instance = tm_instance.obj
         instance_info = {
@@ -251,6 +253,7 @@ def instance_info(since, include_hostnames=False, **kwargs):
             'enabled': instance.enabled,
             'consumed_capacity': tm_instance.consumed_capacity,
             'remaining_capacity': instance.capacity - tm_instance.consumed_capacity,
+            'node_type': instance.node_type,
         }
         if include_hostnames is True:
             instance_info['hostname'] = instance.hostname
