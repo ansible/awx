@@ -1,6 +1,6 @@
 build
 django-debug-toolbar==3.2.4
-django-rest-swagger
+drf-yasg
 # pprofile - re-add once https://github.com/vpelletier/pprofile/issues/41 is addressed
 ipython>=7.31.1 # https://github.com/ansible/awx/security/dependabot/30
 unittest2
