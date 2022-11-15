@@ -90,6 +90,7 @@ __all__ = [
     'deepmerge',
     'get_event_partition_epoch',
     'cleanup_new_process',
+    'log_excess_runtime',
 ]
 
 
@@ -1215,15 +1216,30 @@ def cleanup_new_process(func):
     return wrapper_cleanup_new_process
 
 
-def log_excess_runtime(func_logger, cutoff=5.0):
+def log_excess_runtime(func_logger, cutoff=5.0, debug_cutoff=5.0, msg=None, add_log_data=False):
     def log_excess_runtime_decorator(func):
         @functools.wraps(func)
         def _new_func(*args, **kwargs):
             start_time = time.time()
-            return_value = func(*args, **kwargs)
-            delta = time.time() - start_time
-            if delta > cutoff:
-                logger.info(f'Running {func.__name__!r} took {delta:.2f}s')
+            log_data = {'name': repr(func.__name__)}
+
+            if add_log_data:
+                return_value = func(*args, log_data=log_data, **kwargs)
+            else:
+                return_value = func(*args, **kwargs)
+
+            log_data['delta'] = time.time() - start_time
+            if isinstance(return_value, dict):
+                log_data.update(return_value)
+
+            if msg is None:
+                record_msg = 'Running {name} took {delta:.2f}s'
+            else:
+                record_msg = msg
+            if log_data['delta'] > cutoff:
+                func_logger.info(record_msg.format(**log_data))
+            elif log_data['delta'] > debug_cutoff:
+                func_logger.debug(record_msg.format(**log_data))
             return return_value
 
         return _new_func
