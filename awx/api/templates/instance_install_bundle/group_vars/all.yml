@@ -7,7 +7,7 @@ receptor_work_commands:
     command: ansible-runner
     params: worker
     allowruntimeparams: true
-    verifysignature: true
+    verifysignature: {{ sign_work }}
 custom_worksign_public_keyfile: receptor/work-public-key.pem
 custom_tls_certfile: receptor/tls/receptor.crt
 custom_tls_keyfile: receptor/tls/receptor.key

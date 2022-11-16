@@ -11,12 +11,16 @@
 - tcp-listener:
     port: 2222
 
+{% if sign_work|bool %}
 - work-signing:
     privatekey: /etc/receptor/work_private_key.pem
     tokenexpiration: 1m
+{% endif %}
 
+{% if sign_work|bool %}
 - work-verification:
     publickey: /etc/receptor/work_public_key.pem
+{% endif %}
 
 {% for i in range(item | int + 1, control_plane_node_count | int + 1) %}
 - tcp-peer:
@@ -40,7 +44,7 @@
     command: ansible-runner
     params: worker
     allowruntimeparams: true
-    verifysignature: true
+    verifysignature: {{ sign_work }}
 
 - work-kubernetes:
     worktype: kubernetes-runtime-auth
@@ -48,7 +52,7 @@
     allowruntimeauth: true
     allowruntimepod: true
     allowruntimeparams: true
-    verifysignature: true
+    verifysignature: {{ sign_work }}
 
 - work-kubernetes:
     worktype: kubernetes-incluster-auth
@@ -56,4 +60,4 @@
     allowruntimeauth: true
     allowruntimepod: true
     allowruntimeparams: true
-    verifysignature: true
+    verifysignature: {{ sign_work }}
