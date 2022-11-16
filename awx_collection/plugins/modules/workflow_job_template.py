@@ -19,7 +19,6 @@ author: "John Westcott IV (@john-westcott-iv)"
 short_description: create, update, or destroy Automation Platform Controller workflow job templates.
 description:
     - Create, update, or destroy Automation Platform Controller workflow job templates.
-    - Replaces the deprecated tower_workflow_template module.
     - Use workflow_job_template_node after this, or use the workflow_nodes parameter to build the workflow's graph
 options:
     name:

@@ -20,6 +20,10 @@ short_description: Cancel an Ad Hoc Command.
 description:
     - Cancel ad hoc command. See
       U(https://www.ansible.com/tower) for an overview.
+deprecated:
+    alternative: Use M(awx.awx.ad_hoc_command_cancel) instead.
+    why: Module was renamed.
+    remove_by_date: 2022-01-23
 options:
     command_id:
       description:
