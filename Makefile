@@ -54,47 +54,6 @@ I18N_FLAG_FILE = .i18n_built
 	VERSION PYTHON_VERSION docker-compose-sources \
 	.git/hooks/pre-commit
 
-clean-tmp:
-	rm -rf tmp/
-
-clean-venv:
-	rm -rf venv/
-
-clean-dist:
-	rm -rf dist
-
-clean-schema:
-	rm -rf swagger.json
-	rm -rf schema.json
-	rm -rf reference-schema.json
-
-clean-languages:
-	rm -f $(I18N_FLAG_FILE)
-	find ./awx/locale/ -type f -regex ".*\.mo$" -delete
-
-## Remove temporary build files, compiled Python files.
-clean: clean-ui clean-api clean-awxkit clean-dist
-	rm -rf awx/public
-	rm -rf awx/lib/site-packages
-	rm -rf awx/job_status
-	rm -rf awx/job_output
-	rm -rf reports
-	rm -rf tmp
-	rm -rf $(I18N_FLAG_FILE)
-	mkdir tmp
-
-clean-api:
-	rm -rf build $(NAME)-$(VERSION) *.egg-info
-	rm -rf .tox
-	find . -type f -regex ".*\.py[co]$$" -delete
-	find . -type d -name "__pycache__" -delete
-	rm -f awx/awx_test.sqlite3*
-	rm -rf requirements/vendor
-	rm -rf awx/projects
-
-clean-awxkit:
-	rm -rf awxkit/*.egg-info awxkit/.tox awxkit/build/*
-
 ## convenience target to assert environment variables are defined
 guard-%:
 	@if [ "$${$*}" = "" ]; then \
@@ -372,15 +331,6 @@ bulk_data:
 
 UI_BUILD_FLAG_FILE = awx/ui/.ui-built
 
-clean-ui:
-	rm -rf node_modules
-	rm -rf awx/ui/node_modules
-	rm -rf awx/ui/build
-	rm -rf awx/ui/src/locales/_build
-	rm -rf $(UI_BUILD_FLAG_FILE)
-        # the collectstatic command doesn't like it if this dir doesn't exist.
-	mkdir -p awx/ui/build/static
-
 awx/ui/node_modules:
 	NODE_OPTIONS=--max-old-space-size=6144 $(NPM_BIN) --prefix awx/ui --loglevel warn --force ci
 
@@ -503,30 +453,12 @@ detect-schema-change: genschema
 	# Ignore differences in whitespace with -b
 	diff -u -b reference-schema.json schema.json
 
-docker-compose-clean: awx/projects
-	docker-compose -f tools/docker-compose/_sources/docker-compose.yml rm -sf
-
-docker-compose-container-group-clean:
-	@if [ -f "tools/docker-compose-minikube/_sources/minikube" ]; then \
-	    tools/docker-compose-minikube/_sources/minikube delete; \
-	fi
-	rm -rf tools/docker-compose-minikube/_sources/
-
 ## Base development image build
 docker-compose-build:
 	ansible-playbook tools/ansible/dockerfile.yml -e build_dev=True -e receptor_image=$(RECEPTOR_IMAGE)
 	DOCKER_BUILDKIT=1 docker build -t $(DEVEL_IMAGE_NAME) \
 	    --build-arg BUILDKIT_INLINE_CACHE=1 \
 	    --cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .
-
-docker-clean:
-	$(foreach container_id,$(shell docker ps -f name=tools_awx -aq && docker ps -f name=tools_receptor -aq),docker stop $(container_id); docker rm -f $(container_id);)
-	if [ "$(shell docker images | grep awx_devel)" ]; then \
-	  docker images | grep awx_devel | awk '{print $$3}' | xargs docker rmi --force; \
-	fi
-
-docker-clean-volumes: docker-compose-clean docker-compose-container-group-clean
-	docker volume rm -f tools_awx_db tools_grafana_storage tools_prometheus_storage $(docker volume ls --filter name=tools_redis_socket_ -q)
 
 docker-refresh: docker-clean docker-compose
 
@@ -539,14 +471,6 @@ docker-compose-cluster-elk: awx/projects docker-compose-sources
 
 docker-compose-container-group:
 	MINIKUBE_CONTAINER_GROUP=true make docker-compose
-
-clean-elk:
-	docker stop tools_kibana_1
-	docker stop tools_logstash_1
-	docker stop tools_elasticsearch_1
-	docker rm tools_logstash_1
-	docker rm tools_elasticsearch_1
-	docker rm tools_kibana_1
 
 psql-container:
 	docker run -it --net tools_default --rm postgres:12 sh -c 'exec psql -h "postgres" -p "5432" -U postgres'
@@ -603,6 +527,84 @@ messages:
 
 print-%:
 	@echo $($*)
+
+# Cleaning
+# --------------------------------------
+## Remove temporary build files, compiled Python files.
+clean: clean-ui clean-api clean-awxkit clean-dist
+	rm -rf awx/public
+	rm -rf awx/lib/site-packages
+	rm -rf awx/job_status
+	rm -rf awx/job_output
+	rm -rf reports
+	rm -rf tmp
+	rm -rf $(I18N_FLAG_FILE)
+	mkdir tmp
+
+clean-elk:
+	docker stop tools_kibana_1
+	docker stop tools_logstash_1
+	docker stop tools_elasticsearch_1
+	docker rm tools_logstash_1
+	docker rm tools_elasticsearch_1
+	docker rm tools_kibana_1
+
+clean-ui:
+	rm -rf node_modules
+	rm -rf awx/ui/node_modules
+	rm -rf awx/ui/build
+	rm -rf awx/ui/src/locales/_build
+	rm -rf $(UI_BUILD_FLAG_FILE)
+    # the collectstatic command doesn't like it if this dir doesn't exist.
+	mkdir -p awx/ui/build/static
+
+clean-tmp:
+	rm -rf tmp/
+
+clean-venv:
+	rm -rf venv/
+
+clean-dist:
+	rm -rf dist
+
+clean-schema:
+	rm -rf swagger.json
+	rm -rf schema.json
+	rm -rf reference-schema.json
+
+clean-languages:
+	rm -f $(I18N_FLAG_FILE)
+	find ./awx/locale/ -type f -regex ".*\.mo$" -delete
+
+clean-api:
+	rm -rf build $(NAME)-$(VERSION) *.egg-info
+	rm -rf .tox
+	find . -type f -regex ".*\.py[co]$$" -delete
+	find . -type d -name "__pycache__" -delete
+	rm -f awx/awx_test.sqlite3*
+	rm -rf requirements/vendor
+	rm -rf awx/projects
+
+clean-awxkit:
+	rm -rf awxkit/*.egg-info awxkit/.tox awxkit/build/*
+
+docker-compose-clean: awx/projects
+	docker-compose -f tools/docker-compose/_sources/docker-compose.yml rm -sf
+
+docker-compose-container-group-clean:
+	@if [ -f "tools/docker-compose-minikube/_sources/minikube" ]; then \
+	    tools/docker-compose-minikube/_sources/minikube delete; \
+	fi
+	rm -rf tools/docker-compose-minikube/_sources/
+
+docker-clean:
+	$(foreach container_id,$(shell docker ps -f name=tools_awx -aq && docker ps -f name=tools_receptor -aq),docker stop $(container_id); docker rm -f $(container_id);)
+	if [ "$(shell docker images | grep awx_devel)" ]; then \
+	  docker images | grep awx_devel | awk '{print $$3}' | xargs docker rmi --force; \
+	fi
+
+docker-clean-volumes: docker-compose-clean docker-compose-container-group-clean
+	docker volume rm -f tools_awx_db tools_grafana_storage tools_prometheus_storage $(docker volume ls --filter name=tools_redis_socket_ -q)
 
 # HELP related targets
 # --------------------------------------
