@@ -84,7 +84,7 @@ options:
       type: str
     execution_environment:
       description:
-        - Execution Environment to use for the JT.
+        - Execution Environment to use for the job template.
       type: str
     custom_virtualenv:
       description:
