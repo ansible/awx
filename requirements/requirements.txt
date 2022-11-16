@@ -123,6 +123,7 @@ django-pglocks==1.0.4
     # via -r /awx_devel/requirements/requirements.in
 django-polymorphic==3.1.0
     # via -r /awx_devel/requirements/requirements.in
+    # via -r /awx_devel/requirements/requirements_git.txt
 django-redis==5.2.0
     # via -r /awx_devel/requirements/requirements.in
 django-solo==2.0.0
@@ -292,7 +293,7 @@ pyjwt==2.6.0
     #   twilio
 pyopenssl==22.1.0
     # via twisted
-pyparsing==3.0.9
+pyparsing==2.4.6
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   packaging
@@ -416,7 +417,7 @@ tempora==5.0.2
     #   jaraco-logging
 tomli==2.0.1
     # via setuptools-scm
-twilio==7.15.1
+twilio==7.15.2
     # via -r /awx_devel/requirements/requirements.in
 twisted[tls]==22.10.0
     # via
