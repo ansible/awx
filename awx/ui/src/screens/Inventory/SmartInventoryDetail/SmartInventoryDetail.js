@@ -2,7 +2,7 @@ import React, { useCallback, useEffect } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
-import { Button, Chip, Label } from '@patternfly/react-core';
+import { Button, Label } from '@patternfly/react-core';
 
 import { Inventory } from 'types';
 import { InventoriesAPI, UnifiedJobsAPI } from 'api';
@@ -10,7 +10,6 @@ import useRequest, { useDismissableError } from 'hooks/useRequest';
 
 import AlertModal from 'components/AlertModal';
 import { CardBody, CardActionsRow } from 'components/Card';
-import ChipGroup from 'components/ChipGroup';
 import { VariablesDetail } from 'components/CodeEditor';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
@@ -18,6 +17,7 @@ import DeleteButton from 'components/DeleteButton';
 import { DetailList, Detail, UserDateDetail } from 'components/DetailList';
 import ErrorDetail from 'components/ErrorDetail';
 import Sparkline from 'components/Sparkline';
+import InstanceGroupLabels from 'components/InstanceGroupLabels';
 
 function SmartInventoryDetail({ inventory }) {
   const history = useHistory();
@@ -120,23 +120,7 @@ function SmartInventoryDetail({ inventory }) {
           <Detail
             fullWidth
             label={t`Instance groups`}
-            value={
-              <ChipGroup
-                numChips={5}
-                totalChips={instanceGroups.length}
-                ouiaId="instance-group-chips"
-              >
-                {instanceGroups.map((ig) => (
-                  <Chip
-                    key={ig.id}
-                    isReadOnly
-                    ouiaId={`instance-group-${ig.id}-chip`}
-                  >
-                    {ig.name}
-                  </Chip>
-                ))}
-              </ChipGroup>
-            }
+            value={<InstanceGroupLabels labels={instanceGroups} />}
             isEmpty={instanceGroups.length === 0}
           />
           <VariablesDetail
