@@ -20,11 +20,6 @@ short_description: Wait for Automation Platform Controller Ad Hoc Command to fin
 description:
     - Wait for Automation Platform Controller ad hoc command to finish and report success or failure. See
       U(https://www.ansible.com/tower) for an overview.
-deprecated:
-    alternative: Use M(awx.awx.ad_hoc_command_command_wait) instead.
-    why: Module was renamed.
-    removed_in: 21.12.0
-    removed_from_collection: awx.awx
 options:
     command_id:
       description:
