@@ -315,7 +315,7 @@ class BaseTask(object):
 
         return env
 
-    def _inventory_file(self, inventory, private_data_dir, file_name, script_params):
+    def _write_inventory_file(self, inventory, private_data_dir, file_name, script_params):
         script_data = inventory.get_script_data(**script_params)
         for hostname, hv in script_data.get('_meta', {}).get('hostvars', {}).items():
             # maintain a list of host_name --> host_id
@@ -333,9 +333,9 @@ class BaseTask(object):
         if instance.inventory.kind == 'multiple':
             ret = []
             for source_inventory in instance.inventory.source_inventories.all():
-                ret.append(self._inventory_file(source_inventory, private_data_dir, f'hosts_{source_inventory.id}', script_params))
+                ret.append(self._write_inventory_file(source_inventory, private_data_dir, f'hosts_{source_inventory.id}', script_params))
             return ret
-        return self._inventory_file(self.inventory, private_data_dir, 'hosts', script_params)
+        return self._write_inventory_file(instance.inventory, private_data_dir, 'hosts', script_params)
 
     def build_args(self, instance, private_data_dir, passwords):
         raise NotImplementedError
