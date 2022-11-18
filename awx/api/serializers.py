@@ -1672,13 +1672,8 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
         res.update(
             dict(
                 hosts=self.reverse('api:inventory_hosts_list', kwargs={'pk': obj.pk}),
-                groups=self.reverse('api:inventory_groups_list', kwargs={'pk': obj.pk}),
-                root_groups=self.reverse('api:inventory_root_groups_list', kwargs={'pk': obj.pk}),
                 variable_data=self.reverse('api:inventory_variable_data', kwargs={'pk': obj.pk}),
                 script=self.reverse('api:inventory_script_view', kwargs={'pk': obj.pk}),
-                tree=self.reverse('api:inventory_tree_view', kwargs={'pk': obj.pk}),
-                inventory_sources=self.reverse('api:inventory_inventory_sources_list', kwargs={'pk': obj.pk}),
-                update_inventory_sources=self.reverse('api:inventory_inventory_sources_update', kwargs={'pk': obj.pk}),
                 activity_stream=self.reverse('api:inventory_activity_stream_list', kwargs={'pk': obj.pk}),
                 job_templates=self.reverse('api:inventory_job_template_list', kwargs={'pk': obj.pk}),
                 ad_hoc_commands=self.reverse('api:inventory_ad_hoc_commands_list', kwargs={'pk': obj.pk}),
@@ -1689,8 +1684,17 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
                 labels=self.reverse('api:inventory_label_list', kwargs={'pk': obj.pk}),
             )
         )
+        if obj.kind in ('', 'constructed'):
+            # links not relevant for the "old" smart inventory
+            res['groups'] = self.reverse('api:inventory_groups_list', kwargs={'pk': obj.pk})
+            res['root_groups'] = self.reverse('api:inventory_root_groups_list', kwargs={'pk': obj.pk})
+            res['update_inventory_sources'] = self.reverse('api:inventory_inventory_sources_update', kwargs={'pk': obj.pk})
+            res['inventory_sources'] = self.reverse('api:inventory_inventory_sources_list', kwargs={'pk': obj.pk})
+            res['tree'] = self.reverse('api:inventory_tree_view', kwargs={'pk': obj.pk})
         if obj.organization:
             res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk})
+        if obj.kind == 'constructed':
+            res['source_inventories'] = self.reverse('api:inventory_source_inventories', kwargs={'pk': obj.pk})
         return res
 
     def to_representation(self, obj):
