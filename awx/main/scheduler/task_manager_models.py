@@ -270,12 +270,22 @@ class TaskManagerModels:
         tasks = kwargs.get('tasks', None)
 
         if tasks is None:
+            instance_group_queryset = kwargs.get('instance_groups_queryset', None)
             # No tasks were provided, so we will fetch them from the database
             task_status_filter_list = kwargs.get('task_status_filter_list', ['running', 'waiting'])
             task_fields = kwargs.get('task_fields', ('task_impact', 'controller_node', 'execution_node', 'instance_group'))
             from awx.main.models import UnifiedJob
 
-            tasks = UnifiedJob.objects.filter(status__in=task_status_filter_list).only(*task_fields)
+            if instance_group_queryset is not None:
+                logger.debug("******************INSTANCE GROUP QUERYSET PASSED -- FILTERING TASKS ****************************")
+                # Sometimes things like the serializer pass a queryset that looks at not all instance groups. in this case,
+                # we also need to filter the tasks we look at
+                tasks = UnifiedJob.objects.filter(status__in=task_status_filter_list, instance_group__in=[ig.id for ig in instance_group_queryset]).only(
+                    *task_fields
+                )
+            else:
+                # No instance group query set, look at all tasks in whole system
+                tasks = UnifiedJob.objects.filter(status__in=task_status_filter_list).only(*task_fields)
 
         for task in tasks:
             tmm.consume_capacity(task)
@@ -289,6 +299,11 @@ class TaskManagerModels:
         # For container group jobs, additionally we must account for capacity consumed since
         # The container groups have no instances to look at to track how many jobs/forks are consumed
         if task.instance_group_id:
-            ig = self.instance_groups.pk_ig_map[task.instance_group_id]
-            if ig.is_container_group:
-                self.instance_groups[ig.name].consume_capacity(task)
+            if not task.instance_group_id in self.instance_groups.pk_ig_map.keys():
+                logger.warn(
+                    f"Task {task.log_format} assigned {task.instance_group_id} but this instance group not present in map of instance groups{self.instance_groups.pk_ig_map.keys()}"
+                )
+            else:
+                ig = self.instance_groups.pk_ig_map[task.instance_group_id]
+                if ig.is_container_group:
+                    self.instance_groups[ig.name].consume_capacity(task)
