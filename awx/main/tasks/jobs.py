@@ -317,9 +317,10 @@ class BaseTask(object):
 
     def _inventory_file(self, inventory, private_data_dir, file_name, script_params):
         script_data = inventory.get_script_data(**script_params)
-        # maintain a list of host_name --> host_id
-        # so we can associate emitted events to Host objects
-        self.runner_callback.host_map = {hostname: hv.pop('remote_tower_id', '') for hostname, hv in script_data.get('_meta', {}).get('hostvars', {}).items()}
+        for hostname, hv in script_data.get('_meta', {}).get('hostvars', {}).items():
+            # maintain a list of host_name --> host_id
+            # so we can associate emitted events to Host objects
+            self.runner_callback.host_map[hostname] = hv.pop('remote_tower_id', '')
         file_content = '#! /usr/bin/env python3\n# -*- coding: utf-8 -*-\nprint(%r)\n' % json.dumps(script_data)
         return self.write_private_data_file(private_data_dir, file_name, file_content, sub_dir='inventory', file_permissions=0o700)
 
@@ -328,6 +329,7 @@ class BaseTask(object):
         if hasattr(instance, 'job_slice_number'):
             script_params['slice_number'] = instance.job_slice_number
             script_params['slice_count'] = instance.job_slice_count
+        self.runner_callback.host_map = {}
         if instance.inventory.kind == 'multiple':
             ret = []
             for source_inventory in instance.inventory.source_inventories.all():
