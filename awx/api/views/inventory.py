@@ -94,6 +94,13 @@ class InventoryDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIVie
             return Response(dict(error=_("{0}".format(e))), status=status.HTTP_400_BAD_REQUEST)
 
 
+class InventorySourceInventoriesList(SubListAttachDetachAPIView):
+    model = Inventory
+    serializer_class = InventorySerializer
+    parent_model = Inventory
+    relationship = 'source_inventories'
+
+
 class InventoryActivityStreamList(SubListAPIView):
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
