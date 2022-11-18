@@ -67,6 +67,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
     KIND_CHOICES = [
         ('', _('Hosts have a direct link to this inventory.')),
         ('smart', _('Hosts for inventory generated using the host_filter property.')),
+        ('multiple', _('Contains links to several other inventories to run automation against them all at the same time.')),
     ]
 
     class Meta:
@@ -138,6 +139,12 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         null=True,
         default=None,
         help_text=_('Filter that will be applied to the hosts of this inventory.'),
+    )
+    source_inventories = models.ManyToManyField(
+        'Inventory',
+        blank=True,
+        related_name='destination_inventories',
+        help_text=_('Only valid for multiple inventories, this links to the inventories that will be used.'),
     )
     instance_groups = OrderedManyToManyField(
         'InstanceGroup',
