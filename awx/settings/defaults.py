@@ -745,6 +745,11 @@ CUSTOM_EXCLUDE_EMPTY_GROUPS = False
 SCM_EXCLUDE_EMPTY_GROUPS = False
 # SCM_INSTANCE_ID_VAR =
 
+# ----------------
+# -- Constructed --
+# ----------------
+CONSTRUCTED_EXCLUDE_EMPTY_GROUPS = False
+
 # ---------------------
 # -- Activity Stream --
 # ---------------------
