@@ -315,13 +315,13 @@ class BaseTask(object):
 
         return env
 
-    def _inventory_file(self, inventory, private_data_dir, script_params):
+    def _inventory_file(self, inventory, private_data_dir, file_name, script_params):
         script_data = inventory.get_script_data(**script_params)
         # maintain a list of host_name --> host_id
         # so we can associate emitted events to Host objects
         self.runner_callback.host_map = {hostname: hv.pop('remote_tower_id', '') for hostname, hv in script_data.get('_meta', {}).get('hostvars', {}).items()}
         file_content = '#! /usr/bin/env python3\n# -*- coding: utf-8 -*-\nprint(%r)\n' % json.dumps(script_data)
-        return self.write_private_data_file(private_data_dir, 'hosts', file_content, sub_dir='inventory', file_permissions=0o700)
+        return self.write_private_data_file(private_data_dir, file_name, file_content, sub_dir='inventory', file_permissions=0o700)
 
     def build_inventory(self, instance, private_data_dir):
         script_params = dict(hostvars=True, towervars=True)
@@ -331,9 +331,9 @@ class BaseTask(object):
         if instance.inventory.kind == 'multiple':
             ret = []
             for source_inventory in instance.inventory.source_inventories.all():
-                ret.append(self._inventory_file(source_inventory, private_data_dir, script_params))
+                ret.append(self._inventory_file(source_inventory, private_data_dir, f'hosts_{source_inventory.id}', script_params))
             return ret
-        return self._inventory_file(self.inventory, private_data_dir, script_params)
+        return self._inventory_file(self.inventory, private_data_dir, 'hosts', script_params)
 
     def build_args(self, instance, private_data_dir, passwords):
         raise NotImplementedError
