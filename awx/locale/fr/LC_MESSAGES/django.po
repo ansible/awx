@@ -3742,15 +3742,15 @@ msgstr "Erreur"
 
 #: awx/main/models/execution_environments.py:17
 msgid "Always pull container before running."
-msgstr "Extraire le conteneur avant tout exécution."
+msgstr "Télécharger l'image avant tout exécution."
 
 #: awx/main/models/execution_environments.py:18
 msgid "Only pull the image if not present before running."
-msgstr "Ne pas extraire l'image si elle n'est pas présente avant l'exécution."
+msgstr "Télécharger l'image uniquement si elle n'est pas présente avant l'exécution."
 
 #: awx/main/models/execution_environments.py:19
 msgid "Never pull container before running."
-msgstr "Ne pas extraire le conteneur avant d’exécuter."
+msgstr "Ne pas télécharger l'image avant d’exécuter."
 
 #: awx/main/models/execution_environments.py:29
 msgid ""
@@ -3769,7 +3769,7 @@ msgstr "L'emplacement complet de l'image, y compris le registre du conteneur, le
 
 #: awx/main/models/execution_environments.py:51
 msgid "Pull image before running?"
-msgstr "Extraire l'image avant de l'exécuter ?"
+msgstr "Télécharger l'image avant de l'exécuter ?"
 
 #: awx/main/models/ha.py:167
 msgid "Instances that are members of this InstanceGroup"
