@@ -764,7 +764,7 @@ msgid ""
 "you can input tags, commit hashes, and arbitrary refs. Some\n"
 "commit hashes and refs may not be available unless you also\n"
 "provide a custom refspec."
-msgstr "Branche à extraire.  En plus des branches, vous pouvez saisir des balises, des hachages de validation et des références arbitraires.  Certains hachages et références de validation peuvent ne pas être disponibles à moins que vous ne fournissiez également une refspec personnalisée."
+msgstr "Branche à télécharger.  En plus des branches, vous pouvez saisir des balises, des hachages de validation et des références arbitraires.  Certains hachages et références de validation peuvent ne pas être disponibles à moins que vous ne fournissiez également une refspec personnalisée."
 
 #: screens/Template/shared/JobTemplate.helptext.js:27
 msgid "Branch to use in job run. Project default used if blank. Only allowed if project allow_override field is set to true."
@@ -6681,7 +6681,7 @@ msgstr "Échec du provisionnement"
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:86
 #: screens/ExecutionEnvironment/shared/ExecutionEnvironmentForm.js:114
 msgid "Pull"
-msgstr "Extraire"
+msgstr "Télécharger"
 
 #: screens/Template/Survey/SurveyQuestionForm.js:163
 msgid "Question"
