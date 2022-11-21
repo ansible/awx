@@ -50,7 +50,7 @@ from awx.main.models import (
 )
 from awx.main.constants import ACTIVE_STATES
 from awx.main.dispatch.publish import task
-from awx.main.dispatch import get_local_queuename, reaper
+from awx.main.dispatch import get_local_queuename, pg_bus_conn, reaper
 from awx.main.utils.common import (
     ignore_inventory_computed_fields,
     ignore_inventory_group_removal,
@@ -58,7 +58,6 @@ from awx.main.utils.common import (
     ScheduleTaskManager,
 )
 
-from awx.main.utils.external_logging import reconfigure_rsyslog
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
 from awx.main.tasks.receptor import get_receptor_ctl, worker_info, worker_cleanup, administrative_workunit_reaper, write_receptor_config
@@ -115,7 +114,9 @@ def dispatch_startup():
     m.reset_values()
 
     # Update Tower's rsyslog.conf file based on loggins settings in the db
-    reconfigure_rsyslog()
+    # Paylod is empty string because the configurer already has the data
+    with pg_bus_conn() as conn:
+        conn.notify('rsyslog_configurer', "")
 
 
 def inform_cluster_of_shutdown():
@@ -254,7 +255,9 @@ def handle_setting_changes(setting_keys):
     cache.delete_many(cache_keys)
 
     if any([setting.startswith('LOG_AGGREGATOR') for setting in setting_keys]):
-        reconfigure_rsyslog()
+        # Paylod is empty string because the configurer already has the data
+        with pg_bus_conn() as conn:
+            conn.notify('rsyslog_configurer', "")
 
 
 @task(queue='tower_broadcast_all')
