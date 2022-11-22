@@ -1353,12 +1353,12 @@ class UnifiedJob(
                     missing_credential_inputs.append(required)
                     credential_name = credential.name
 
-        if missing_credential_inputs:
-            self.job_explanation = '{} cannot start because Credential {} does not provide one or more required fields ({}).'.format(
-                self._meta.verbose_name.title(), credential_name, ', '.join(sorted(missing_credential_inputs))
-            )
-            self.save(update_fields=['job_explanation'])
-            return (False, None)
+                if missing_credential_inputs:
+                    self.job_explanation = '{} cannot start because Credential {} does not provide one or more required fields ({}).'.format(
+                        self._meta.verbose_name.title(), credential_name, ', '.join(sorted(missing_credential_inputs))
+                    )
+                self.save(update_fields=['job_explanation'])
+                return (False, None)
 
         needed = self.get_passwords_needed_to_start()
         try:
