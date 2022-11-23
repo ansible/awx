@@ -136,7 +136,9 @@ try:
     import pytz
     from dateutil import rrule
 except ImportError as imp_exc:
-    raise_from(AnsibleError('{0}'.format(imp_exc)), imp_exc)
+    LIBRARY_IMPORT_ERROR = imp_exc
+else:
+    LIBRARY_IMPORT_ERROR = None
 
 
 class LookupModule(LookupBase):
@@ -169,6 +171,8 @@ class LookupModule(LookupBase):
 
     # plugin constructor
     def __init__(self, *args, **kwargs):
+        if LIBRARY_IMPORT_ERROR:
+            raise_from(AnsibleError('{0}'.format(LIBRARY_IMPORT_ERROR)), LIBRARY_IMPORT_ERROR)
         super().__init__(*args, **kwargs)
 
     @staticmethod
