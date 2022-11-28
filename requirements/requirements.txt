@@ -29,9 +29,7 @@ attrs==22.1.0
     #   service-identity
     #   twisted
 autobahn==22.7.1
-    # via
-    #   -r /awx_devel/requirements/requirements.in
-    #   daphne
+    # via daphne
 autocommand==2.2.2
     # via jaraco-text
 automat==22.10.0
@@ -203,9 +201,7 @@ json-log-formatter==0.5.1
 jsonschema==4.17.1
     # via -r /awx_devel/requirements/requirements.in
 kubernetes==25.3.0
-    # via
-    #   -r /awx_devel/requirements/requirements.in
-    #   openshift
+    # via openshift
 lockfile==0.12.2
     # via python-daemon
 lxml==4.7.0
@@ -285,7 +281,6 @@ pygerduty==0.38.3
     # via -r /awx_devel/requirements/requirements.in
 pyjwt==2.6.0
     # via
-    #   -r /awx_devel/requirements/requirements.in
     #   adal
     #   social-auth-core
     #   twilio
@@ -404,9 +399,7 @@ social-auth-core[openidconnect]==4.3.0
     #   -r /awx_devel/requirements/requirements.in
     #   social-auth-app-django
 sqlparse==0.4.3
-    # via
-    #   -r /awx_devel/requirements/requirements.in
-    #   django
+    # via django
 tacacs-plus==1.0
     # via -r /awx_devel/requirements/requirements.in
 tempora==5.1.0
