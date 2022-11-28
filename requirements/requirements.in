@@ -63,6 +63,7 @@ wheel
 pip==21.2.4  # see UPGRADE BLOCKERs
 setuptools>=62.4.0  # see UPGRADE BLOCKERs
 setuptools_scm[toml]>=3.4  # see UPGRADE BLOCKERs, xmlsec build dep
+xmlsec==1.3.12 # xmlsec 1.3.13 removed the ability to use lxml 4.7.0 but python3-saml requires lxml 4.7.0 so we need to pin xmlsec
 lxml>=3.8 # xmlsec build dep
 pkgconfig>=1.5.1 # xmlsec build dep
 setuptools-rust >= 0.11.4 # cryptography build dep
