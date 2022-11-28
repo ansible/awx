@@ -53,11 +53,15 @@ AWX_ISOLATION_SHOW_PATHS = [
 #  Any settings defined after this point will be marked as as a read_only database setting
 #
 ################################################################################################
-DEFAULTS_SNAPSHOT = {}
 this_module = sys.modules[__name__]
-for setting in dir(this_module):
+local_vars = dir(this_module)
+DEFAULTS_SNAPSHOT = {}  # define after we save local_vars so we do not snapshot the snapshot
+for setting in local_vars:
     if setting == setting.upper():
         DEFAULTS_SNAPSHOT[setting] = copy.deepcopy(getattr(this_module, setting))
+
+del local_vars  # avoid temporary variables from showing up in dir(settings)
+del this_module
 
 # Load settings from any .py files in the global conf.d directory specified in
 # the environment, defaulting to /etc/tower/conf.d/.
