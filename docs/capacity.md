@@ -124,3 +124,15 @@ be selected. If set to a value of `0.0` then the smallest value will be used. A 
 be `18`:
 
     16 + (20 - 16) * 0.5 == 18
+
+### Max forks and Max Concurrent jobs on Instance Groups and Container Groups
+
+By default, only Instances have capacity and we only track capacity consumed per instance. With the max_forks and max_concurrent_jobs fields now available on Instance Groups, we additionally can limit how many jobs or forks are allowed to be concurrently consumed across an entire Instance Group or Container Group.
+
+This is especially useful for Container Groups where previously, there was no limit to how many jobs we would submit to a Container Group, which made it impossible to "overflow" job loads from one Container Group to another container group, which may be on a different Kubenetes cluster or namespace.
+
+One way to calculate what max_concurrent_jobs is desirable to set on a Container Group is to consider the pod_spec for that container group. In the pod_spec we indicate the resource requests and limits for the automation job pod. If you pod_spec indicates that a pod with 100MB of memory will be provisioned, and you know your Kubernetes cluster has 1 worker node with 8GB of RAM, you know that the maximum number of jobs that you would ideally start would be around 81 jobs, calculated by taking  (8GB memory on node * 1024 MB) // 100 MB memory/job pod which with floor division comes out to 81.
+
+Alternatively, instead of considering the number of job pods and the resources requested, we can consider the memory consumption of the forks in the jobs. We normally consider that 100MB of memory will be used by each fork of ansible. Therefore we also know that our 8 GB worker node should also only run 81 forks of ansible at a time -- which depending on the forks and inventory settings of the job templates, could be consumed by anywhere from 1 job to 81 jobs. So we can also set max_forks = 81. This way, either 39 jobs with 1 fork can run (task impact is always forks + 1), or 2 jobs with forks set to 39 can run.
+
+While this feature is most useful for Container Groups where there is no other way to limit job execution, this feature is avialable for use on any instance group. This can be useful if for other business reasons you want to set a InstanceGroup wide limit on concurrent jobs. For example, if you have a job template that you only want 10 copies of running at a time -- you could create a dedicated instance group for that job template and set max_concurrent_jobs to 10.
