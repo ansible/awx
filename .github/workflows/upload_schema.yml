@@ -1,5 +1,9 @@
 ---
 name: Upload API Schema
+
+env:
+  LC_ALL: "C.UTF-8" # prevent ERROR: Ansible could not initialize the preferred locale: unsupported locale setting
+
 on:
   push:
     branches:
