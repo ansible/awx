@@ -306,7 +306,7 @@ class LookupModule(LookupBase):
                 rrule_kwargs['byweekno'] = self.process_integer('byweekno', rule, 1, 52, rule_number)
 
             if 'byweekday' in rule:
-                rrule_kwargs['byweekday'] = self.process_list('byweekday', rule, LookupModule().weekdayss, rule_number)
+                rrule_kwargs['byweekday'] = self.process_list('byweekday', rule, LookupModule().weekdays, rule_number)
 
             if 'byhour' in rule:
                 rrule_kwargs['byhour'] = self.process_integer('byhour', rule, 0, 23, rule_number)
