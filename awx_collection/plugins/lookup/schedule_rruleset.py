@@ -264,11 +264,11 @@ class LookupModule(LookupBase):
             frequency = rule.get('frequency', None)
             if not frequency:
                 raise AnsibleError("Rule {0} is missing a frequency".format(rule_number))
-            if frequency not in LookupModule.frequencies:
+            if frequency not in LookupModule().frequencies:
                 raise AnsibleError('Frequency of rule {0} is invalid {1}'.format(rule_number, frequency))
 
             rrule_kwargs = {
-                'freq': LookupModule.frequencies[frequency],
+                'freq': LookupModule().frequencies[frequency],
                 'interval': rule.get('interval', 1),
                 'dtstart': start_date,
             }
@@ -291,7 +291,7 @@ class LookupModule(LookupBase):
                             )
 
             if 'bysetpos' in rule:
-                rrule_kwargs['bysetpos'] = self.process_list('bysetpos', rule, LookupModule.set_positions, rule_number)
+                rrule_kwargs['bysetpos'] = self.process_list('bysetpos', rule, LookupModule().set_positions, rule_number)
 
             if 'bymonth' in rule:
                 rrule_kwargs['bymonth'] = self.process_integer('bymonth', rule, 1, 12, rule_number)
@@ -306,7 +306,7 @@ class LookupModule(LookupBase):
                 rrule_kwargs['byweekno'] = self.process_integer('byweekno', rule, 1, 52, rule_number)
 
             if 'byweekday' in rule:
-                rrule_kwargs['byweekday'] = self.process_list('byweekday', rule, LookupModule.weekdays, rule_number)
+                rrule_kwargs['byweekday'] = self.process_list('byweekday', rule, LookupModule().weekdayss, rule_number)
 
             if 'byhour' in rule:
                 rrule_kwargs['byhour'] = self.process_integer('byhour', rule, 0, 23, rule_number)
