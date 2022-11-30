@@ -161,7 +161,7 @@ class Export(CustomCommand):
             # 1) the resource flag is not used at all, which will result in the attr being None
             # 2) the resource flag is used with no argument, which will result in the attr being ''
             # 3) the resource flag is used with an argument, and the attr will be that argument's value
-            resources.add_argument('--{}'.format(resource), nargs='?', const='')
+            resources.add_argument('--{}'.format(resource), nargs='*')
 
     def handle(self, client, parser):
         self.extend_parser(parser)
