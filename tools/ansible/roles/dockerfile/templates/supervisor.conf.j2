@@ -22,12 +22,11 @@ stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
 
 [program:uwsgi]
-
 {% if kube_dev | bool %}
 command = make uwsgi
 directory = /awx_devel
 environment =
-    DEV_RELOAD_COMMAND='supervisorctl -c /etc/supervisord_task.conf restart all; supervisorctl restart tower-processes:daphne tower-processes:wsrelay'
+    DEV_RELOAD_COMMAND='supervisorctl -c /etc/supervisord_task.conf restart all; supervisorctl restart tower-processes:daphne'
 {% else %}
 command = /var/lib/awx/venv/awx/bin/uwsgi /etc/tower/uwsgi.ini
 directory = /var/lib/awx
@@ -70,7 +69,7 @@ stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
 
 [group:tower-processes]
-programs=nginx,uwsgi,daphne,wsrelay,awx-rsyslogd
+programs=nginx,uwsgi,daphne,awx-rsyslogd
 priority=5
 
 [eventlistener:superwatcher]
