@@ -201,10 +201,10 @@ class EventConsumer(AsyncJsonWebsocketConsumer):
             for group_name in new_groups_exclusive:
                 await self.channel_layer.group_add(group_name, self.channel_name)
 
-                await self.channel_layer.group_send(
-                    settings.BROADCAST_WEBSOCKET_GROUP_NAME,
-                    {"type": "consumer.subscribe", "groups": list(new_groups), "origin_channel": self.channel_name},
-                )
+            await self.channel_layer.group_send(
+                settings.BROADCAST_WEBSOCKET_GROUP_NAME,
+                {"type": "consumer.subscribe", "groups": list(new_groups), "origin_channel": self.channel_name},
+            )
             self.scope['session']['groups'] = new_groups
             await self.send_json({"groups_current": list(new_groups), "groups_left": list(old_groups), "groups_joined": list(new_groups_exclusive)})
 
