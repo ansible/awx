@@ -30,50 +30,62 @@ options:
       description:
         - organization names to export
       type: list
+      elements: str
     users:
       description:
         - user names to export
       type: list
+      elements: str
     teams:
       description:
         - team names to export
       type: list
+      elements: str
     credential_types:
       description:
         - credential type names to export
       type: list
+      elements: str
     credentials:
       description:
         - credential names to export
       type: list
+      elements: str
     execution_environments:
       description:
         - execution environment names to export
       type: list
+      elements: str
     notification_templates:
       description:
         - notification template names to export
       type: list
+      elements: str
     inventory_sources:
       description:
         - inventory soruces to export
       type: list
+      elements: str
     inventory:
       description:
         - inventory names to export
       type: list
+      elements: str
     projects:
       description:
         - project names to export
       type: list
+      elements: str
     job_templates:
       description:
         - job template names to export
       type: list
+      elements: str
     workflow_job_templates:
       description:
         - workflow names to export
       type: list
+      elements: str
 requirements:
   - "awxkit >= 9.3.0"
 notes:
