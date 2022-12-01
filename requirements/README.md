@@ -98,13 +98,13 @@ ImportError: cannot import name 'KeyVaultClient'
 
 ### pip, setuptools and setuptools_scm
 
-The offline installer needs to have functionality confirmed before upgrading these.
+If modifying these libraries make sure testing with the offline build is performed to confirm they are functionally working.
 Versions need to match the versions used in the pip bootstrapping step
 in the top-level Makefile.
 
 ### cryptography
 
-The offline installer needs to have functionality confirmed before upgrading these.
+If modifying this library make sure testing with the offline build is performed to confirm it is functionally working.
 
 ## Library Notes
 
