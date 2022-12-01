@@ -593,7 +593,6 @@ pot: $(UI_BUILD_FLAG_FILE)
 po: $(UI_BUILD_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run extract-strings -- --clean
 
-LANG = "en_us"
 ## generate API django .pot .po
 messages:
 	@if [ "$(VENV_BASE)" ]; then \
