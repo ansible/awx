@@ -121,6 +121,7 @@ def main():
     timeout = module.params.get('timeout')
 
     for field_name in (
+        'limit',
         'extra_vars',
         'scm_branch',
     ):
