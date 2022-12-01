@@ -530,7 +530,7 @@ class CredentialType(CommonModelNameNotUnique):
             # awx-manage inventory_update does not support extra_vars via -e
             def build_extra_vars(node):
                 if isinstance(node, dict):
-                    return {k: build_extra_vars(v) for k, v in node.items()}
+                    return {build_extra_vars(k): build_extra_vars(v) for k, v in node.items()}
                 elif isinstance(node, list):
                     return [build_extra_vars(x) for x in node]
                 else:
