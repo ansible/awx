@@ -22,6 +22,16 @@ import { CredentialsAPI } from 'api';
 import CredentialDetail from './CredentialDetail';
 import CredentialEdit from './CredentialEdit';
 
+const jobTemplateCredentialTypes = [
+  'machine',
+  'cloud',
+  'net',
+  'ssh',
+  'vault',
+  'kubernetes',
+  'cryptography',
+];
+
 function Credential({ setBreadcrumb }) {
   const { pathname } = useLocation();
 
@@ -75,13 +85,14 @@ function Credential({ setBreadcrumb }) {
       link: `/credentials/${id}/access`,
       id: 1,
     },
-    {
+  ];
+  if (jobTemplateCredentialTypes.includes(credential?.kind)) {
+    tabsArray.push({
       name: t`Job Templates`,
       link: `/credentials/${id}/job_templates`,
       id: 2,
-    },
-  ];
-
+    });
+  }
   let showCardHeader = true;
 
   if (pathname.endsWith('edit') || pathname.endsWith('add')) {
@@ -133,6 +144,7 @@ function Credential({ setBreadcrumb }) {
               <Route key="job_templates" path="/credentials/:id/job_templates">
                 <RelatedTemplateList
                   searchParams={{ credentials__id: credential.id }}
+                  resourceName={[credential.name, credential.kind]}
                 />
               </Route>,
               <Route key="not-found" path="*">

@@ -690,7 +690,7 @@ JobTemplateForm.defaultProps = {
 };
 
 const FormikApp = withFormik({
-  mapPropsToValues({ projectValues = {}, template = {} }) {
+  mapPropsToValues({ resourceValues = null, template = {} }) {
     const {
       summary_fields = {
         labels: { results: [] },
@@ -698,7 +698,7 @@ const FormikApp = withFormik({
       },
     } = template;
 
-    return {
+    const initialValues = {
       allow_callbacks: template.allow_callbacks || false,
       allow_simultaneous: template.allow_simultaneous || false,
       ask_credential_on_launch: template.ask_credential_on_launch || false,
@@ -739,7 +739,7 @@ const FormikApp = withFormik({
       playbook: template.playbook || '',
       prevent_instance_group_fallback:
         template.prevent_instance_group_fallback || false,
-      project: summary_fields?.project || projectValues || null,
+      project: summary_fields?.project || null,
       scm_branch: template.scm_branch || '',
       skip_tags: template.skip_tags || '',
       timeout: template.timeout || 0,
@@ -756,6 +756,24 @@ const FormikApp = withFormik({
       execution_environment:
         template.summary_fields?.execution_environment || null,
     };
+    if (resourceValues !== null) {
+      if (resourceValues.type === 'credentials') {
+        initialValues[resourceValues.type] = [
+          {
+            id: parseInt(resourceValues.id, 10),
+            name: resourceValues.name,
+            kind: resourceValues.kind,
+          },
+        ];
+      } else {
+        initialValues[resourceValues.type] = {
+          id: parseInt(resourceValues.id, 10),
+          name: resourceValues.name,
+        };
+      }
+    }
+
+    return initialValues;
   },
   handleSubmit: async (values, { props, setErrors }) => {
     try {
