@@ -20,6 +20,8 @@ class Command(BaseCommand):
         try:
             with pg_bus_conn(new_connection=True) as conn:
                 conn.listen("rsyslog_configurer")
+                # reconfigure rsyslog on start up
+                reconfigure_rsyslog()
                 for e in conn.events(yield_timeouts=True):
                     if e is not None:
                         reconfigure_rsyslog()

@@ -113,11 +113,6 @@ def dispatch_startup():
     m = Metrics()
     m.reset_values()
 
-    # Update Tower's rsyslog.conf file based on loggins settings in the db
-    # Paylod is empty string because the configurer already has the data
-    with pg_bus_conn() as conn:
-        conn.notify('rsyslog_configurer', "")
-
 
 def inform_cluster_of_shutdown():
     try:
