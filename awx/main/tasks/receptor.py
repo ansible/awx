@@ -61,11 +61,17 @@ def read_receptor_config():
             return yaml.safe_load(f)
 
 
-def work_signing_enabled(config_data):
-    for section in config_data:
-        if 'work-verification' in section:
-            return True
-    return False
+def work_signing_enabled(receptor_ctl, remote_node, work_type):
+    receptor_status = receptor_ctl.simple_command("status")
+
+    for node in receptor_status["Advertisements"]:
+        if node["NodeID"] == remote_node:
+            for work in node["WorkCommands"]:
+                if work["WorkType"] == work_type:
+                    return work["Secure"]
+
+    logger.warning(f"{remote_node} not found in receptor advertisments, defaulting to signed work.")
+    return True
 
 
 def get_receptor_sockfile(config_data):
@@ -301,6 +307,7 @@ class AWXReceptorJob:
         self.task = task
         self.runner_params = runner_params
         self.unit_id = None
+        self.execution_node = task.instance.execution_node
 
         if self.task and not self.task.instance.is_container_group_task:
             execution_environment_params = self.task.build_execution_environment_params(self.task.instance, runner_params['private_data_dir'])
@@ -312,21 +319,21 @@ class AWXReceptorJob:
     def run(self):
         # We establish a connection to the Receptor socket
         self.config_data = read_receptor_config()
-        receptor_ctl = get_receptor_ctl(self.config_data)
+        self.receptor_ctl = get_receptor_ctl(self.config_data)
 
         res = None
         try:
-            res = self._run_internal(receptor_ctl)
+            res = self._run_internal()
             return res
         finally:
             # Make sure to always release the work unit if we established it
             if self.unit_id is not None and settings.RECEPTOR_RELEASE_WORK:
                 try:
-                    receptor_ctl.simple_command(f"work release {self.unit_id}")
+                    self.receptor_ctl.simple_command(f"work release {self.unit_id}")
                 except Exception:
                     logger.exception(f"Error releasing work unit {self.unit_id}.")
 
-    def _run_internal(self, receptor_ctl):
+    def _run_internal(self):
         # Create a socketpair. Where the left side will be used for writing our payload
         # (private data dir, kwargs). The right side will be passed to Receptor for
         # reading.
@@ -335,15 +342,15 @@ class AWXReceptorJob:
         # Prepare the submit_work kwargs before creating threads, because references to settings are not thread-safe
         work_submit_kw = dict(worktype=self.work_type, params=self.receptor_params, signwork=self.sign_work)
         if self.work_type == 'ansible-runner':
-            work_submit_kw['node'] = self.task.instance.execution_node
-            use_stream_tls = get_conn_type(work_submit_kw['node'], receptor_ctl).name == "STREAMTLS"
+            work_submit_kw['node'] = self.execution_node
+            use_stream_tls = get_conn_type(work_submit_kw['node'], self.receptor_ctl).name == "STREAMTLS"
             work_submit_kw['tlsclient'] = get_tls_client(self.config_data, use_stream_tls)
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
             transmitter_future = executor.submit(self.transmit, sockin)
 
             # submit our work, passing in the right side of our socketpair for reading.
-            result = receptor_ctl.submit_work(payload=sockout.makefile('rb'), **work_submit_kw)
+            result = self.receptor_ctl.submit_work(payload=sockout.makefile('rb'), **work_submit_kw)
 
             sockin.close()
             sockout.close()
@@ -375,7 +382,7 @@ class AWXReceptorJob:
         if self.work_type != 'local' and os.path.exists(artifact_dir):
             shutil.rmtree(artifact_dir)
 
-        resultsock, resultfile = receptor_ctl.get_work_results(self.unit_id, return_socket=True, return_sockfile=True)
+        resultsock, resultfile = self.receptor_ctl.get_work_results(self.unit_id, return_socket=True, return_sockfile=True)
 
         connections.close_all()
 
@@ -393,7 +400,7 @@ class AWXReceptorJob:
                     raise SignalExit()
                 res = processor_future.result()
             except SignalExit:
-                receptor_ctl.simple_command(f"work cancel {self.unit_id}")
+                self.receptor_ctl.simple_command(f"work cancel {self.unit_id}")
                 resultsock.shutdown(socket.SHUT_RDWR)
                 resultfile.close()
                 result = namedtuple('result', ['status', 'rc'])
@@ -408,7 +415,7 @@ class AWXReceptorJob:
                     return res
 
                 try:
-                    unit_status = receptor_ctl.simple_command(f'work status {self.unit_id}')
+                    unit_status = self.receptor_ctl.simple_command(f'work status {self.unit_id}')
                     detail = unit_status.get('Detail', None)
                     state_name = unit_status.get('StateName', None)
                 except Exception:
@@ -424,7 +431,7 @@ class AWXReceptorJob:
                     return
 
                 try:
-                    resultsock = receptor_ctl.get_work_results(self.unit_id, return_sockfile=True)
+                    resultsock = self.receptor_ctl.get_work_results(self.unit_id, return_sockfile=True)
                     lines = resultsock.readlines()
                     receptor_output = b"".join(lines).decode()
                     if receptor_output:
@@ -487,9 +494,7 @@ class AWXReceptorJob:
 
     @property
     def sign_work(self):
-        if self.work_type in ('ansible-runner', 'local'):
-            return work_signing_enabled(self.config_data)
-        return False
+        return work_signing_enabled(self.receptor_ctl, self.execution_node, self.work_type)
 
     @property
     def work_type(self):
