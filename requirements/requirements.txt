@@ -124,7 +124,7 @@ django-redis==5.2.0
     # via -r /awx_devel/requirements/requirements.in
 django-solo==2.0.0
     # via -r /awx_devel/requirements/requirements.in
-django-split-settings==1.2.0
+django-split-settings==1.0.0
     # via -r /awx_devel/requirements/requirements.in
 django-taggit==3.1.0
     # via -r /awx_devel/requirements/requirements.in
