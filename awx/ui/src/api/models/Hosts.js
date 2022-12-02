@@ -20,6 +20,10 @@ class Hosts extends Base {
     return this.http.get(`${this.baseUrl}${id}/all_groups/`, { params });
   }
 
+  readGroups(id, params) {
+    return this.http.get(`${this.baseUrl}${id}/groups/`, { params });
+  }
+
   readGroupsOptions(id) {
     return this.http.options(`${this.baseUrl}${id}/groups/`);
   }
