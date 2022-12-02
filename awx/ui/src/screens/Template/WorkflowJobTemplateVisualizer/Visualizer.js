@@ -489,7 +489,8 @@ function Visualizer({ template }) {
                   {
                     all_parents_must_converge: node.all_parents_must_converge,
                     ...(replaceIdentifier(node) && {
-                      identifier: node.identifier,
+                      identifier:
+                        node.identifier || node.originalNodeObject.identifier,
                     }),
                   }
                 ).then(({ data }) => {
