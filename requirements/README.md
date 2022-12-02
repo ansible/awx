@@ -67,6 +67,48 @@ Check that the import remains the same in the desired version.
 
 https://github.com/django/django/blob/af5ec222ccd24e81f9fec6c34836a4e503e7ccf7/django/db/backends/base/schema.py#L7
 
+### django-split-settings
+
+When we attemed to upgrade past 1.0.0 the build process in GitHub failed on the docker build step with the following error:
+
+```
+#19 [builder 12/12] RUN AWX_SETTINGS_FILE=/dev/null SKIP_SECRET_KEY_CHECK=yes SKIP_PG_VERSION_CHECK=yes /var/lib/awx/venv/awx/bin/awx-manage collectstatic --noinput --clear
+#19 sha256:cd5adb08d3aa92504348338475db9f8bb820b4f67ba5b75edf9ae7554175f1d0
+#19 0.725 Traceback (most recent call last):
+#19 0.725   File \"/var/lib/awx/venv/awx/bin/awx-manage\", line 8, in <module>
+#19 0.726     sys.exit(manage())
+#19 0.726   File \"/var/lib/awx/venv/awx/lib64/python3.9/site-packages/awx/__init__.py\", line 178, in manage
+#19 0.726     prepare_env()
+#19 0.726   File \"/var/lib/awx/venv/awx/lib64/python3.9/site-packages/awx/__init__.py\", line 133, in prepare_env
+#19 0.726     if not settings.DEBUG:  # pragma: no cover
+#19 0.726   File \"/var/lib/awx/venv/awx/lib64/python3.9/site-packages/django/conf/__init__.py\", line 82, in __getattr__
+#19 0.726     self._setup(name)
+#19 0.726   File \"/var/lib/awx/venv/awx/lib64/python3.9/site-packages/django/conf/__init__.py\", line 69, in _setup
+#19 0.726     self._wrapped = Settings(settings_module)
+#19 0.726   File \"/var/lib/awx/venv/awx/lib64/python3.9/site-packages/django/conf/__init__.py\", line 170, in __init__
+#19 0.726     mod = importlib.import_module(self.SETTINGS_MODULE)
+#19 0.726   File \"/usr/lib64/python3.9/importlib/__init__.py\", line 127, in import_module
+#19 0.726     return _bootstrap._gcd_import(name[level:], package, level)
+#19 0.726   File \"<frozen importlib._bootstrap>\", line 1030, in _gcd_import
+#19 0.726   File \"<frozen importlib._bootstrap>\", line 1007, in _find_and_load
+#19 0.726   File \"<frozen importlib._bootstrap>\", line 986, in _find_and_load_unlocked
+#19 0.726   File \"<frozen importlib._bootstrap>\", line 680, in _load_unlocked
+#19 0.726   File \"<frozen importlib._bootstrap_external>\", line 850, in exec_module
+#19 0.726   File \"<frozen importlib._bootstrap>\", line 228, in _call_with_frames_removed
+#19 0.726   File \"/var/lib/awx/venv/awx/lib64/python3.9/site-packages/awx/settings/production.py\", line 74, in <module>
+#19 0.726     include(settings_file, optional(settings_files), scope=locals())
+#19 0.726   File \"/var/lib/awx/venv/awx/lib64/python3.9/site-packages/split_settings/tools.py\", line 116, in include
+#19 0.726     module = module_from_spec(spec)  # type: ignore
+#19 0.726   File \"<frozen importlib._bootstrap>\", line 562, in module_from_spec
+#19 0.726 AttributeError: 'NoneType' object has no attribute 'loader'
+#19 ERROR: executor failed running [/bin/sh -c AWX_SETTINGS_FILE=/dev/null SKIP_SECRET_KEY_CHECK=yes SKIP_PG_VERSION_CHECK=yes /var/lib/awx/venv/awx/bin/awx-manage collectstatic --noinput --clear]: exit code: 1
+```
+
+The various versions past 1.0.0 talk about adding and removing support for different python versions so there may be a mismatch in what the versions of the library support vs what is being built inside the container. Ironically, we did not experience the problem on our local containers when running `collectstatic` so we think it has something to do specifically with the build process.
+
+This issue was not picked up by any existing QE testing, only when building in GitHub.
+
+
 ### social-auth-app-django
 
 django-social keeps a list of backends in memory that it gathers
