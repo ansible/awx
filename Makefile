@@ -598,7 +598,7 @@ messages:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py makemessages -l $(LANG) --keep-pot
+	$(PYTHON) manage.py makemessages -l en_us --keep-pot
 
 print-%:
 	@echo $($*)
