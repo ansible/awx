@@ -2697,46 +2697,66 @@ class ActivityStreamAccess(BaseAccess):
         # 'job_template', 'job', 'project', 'project_update', 'workflow_job',
         # 'inventory_source', 'workflow_job_template'
 
-        inventory_set = Inventory.accessible_objects(self.user, 'read_role')
-        credential_set = Credential.accessible_objects(self.user, 'read_role')
+        q = Q(user=self.user)
+        inventory_set = Inventory.accessible_pk_qs(self.user, 'read_role')
+        if inventory_set:
+            q |= (
+                Q(ad_hoc_command__inventory__in=inventory_set)
+                | Q(inventory__in=inventory_set)
+                | Q(host__inventory__in=inventory_set)
+                | Q(group__inventory__in=inventory_set)
+                | Q(inventory_source__inventory__in=inventory_set)
+                | Q(inventory_update__inventory_source__inventory__in=inventory_set)
+            )
+
+        credential_set = Credential.accessible_pk_qs(self.user, 'read_role')
+        if credential_set:
+            q |= Q(credential__in=credential_set)
+
         auditing_orgs = (
             (Organization.accessible_objects(self.user, 'admin_role') | Organization.accessible_objects(self.user, 'auditor_role'))
             .distinct()
             .values_list('id', flat=True)
         )
-        project_set = Project.accessible_objects(self.user, 'read_role')
-        jt_set = JobTemplate.accessible_objects(self.user, 'read_role')
-        team_set = Team.accessible_objects(self.user, 'read_role')
-        wfjt_set = WorkflowJobTemplate.accessible_objects(self.user, 'read_role')
-        app_set = OAuth2ApplicationAccess(self.user).filtered_queryset()
-        token_set = OAuth2TokenAccess(self.user).filtered_queryset()
+        if auditing_orgs:
+            q |= (
+                Q(user__in=auditing_orgs.values('member_role__members'))
+                | Q(organization__in=auditing_orgs)
+                | Q(notification_template__organization__in=auditing_orgs)
+                | Q(notification__notification_template__organization__in=auditing_orgs)
+                | Q(label__organization__in=auditing_orgs)
+                | Q(role__in=Role.objects.filter(ancestors__in=self.user.roles.all()) if auditing_orgs else [])
+            )
 
-        return qs.filter(
-            Q(ad_hoc_command__inventory__in=inventory_set)
-            | Q(o_auth2_application__in=app_set)
-            | Q(o_auth2_access_token__in=token_set)
-            | Q(user__in=auditing_orgs.values('member_role__members'))
-            | Q(user=self.user)
-            | Q(organization__in=auditing_orgs)
-            | Q(inventory__in=inventory_set)
-            | Q(host__inventory__in=inventory_set)
-            | Q(group__inventory__in=inventory_set)
-            | Q(inventory_source__inventory__in=inventory_set)
-            | Q(inventory_update__inventory_source__inventory__in=inventory_set)
-            | Q(credential__in=credential_set)
-            | Q(team__in=team_set)
-            | Q(project__in=project_set)
-            | Q(project_update__project__in=project_set)
-            | Q(job_template__in=jt_set)
-            | Q(job__job_template__in=jt_set)
-            | Q(workflow_job_template__in=wfjt_set)
-            | Q(workflow_job_template_node__workflow_job_template__in=wfjt_set)
-            | Q(workflow_job__workflow_job_template__in=wfjt_set)
-            | Q(notification_template__organization__in=auditing_orgs)
-            | Q(notification__notification_template__organization__in=auditing_orgs)
-            | Q(label__organization__in=auditing_orgs)
-            | Q(role__in=Role.objects.filter(ancestors__in=self.user.roles.all()) if auditing_orgs else [])
-        ).distinct()
+        project_set = Project.accessible_pk_qs(self.user, 'read_role')
+        if project_set:
+            q |= Q(project__in=project_set) | Q(project_update__project__in=project_set)
+
+        jt_set = JobTemplate.accessible_pk_qs(self.user, 'read_role')
+        if jt_set:
+            q |= Q(job_template__in=jt_set) | Q(job__job_template__in=jt_set)
+
+        wfjt_set = WorkflowJobTemplate.accessible_pk_qs(self.user, 'read_role')
+        if wfjt_set:
+            q |= (
+                Q(workflow_job_template__in=wfjt_set)
+                | Q(workflow_job_template_node__workflow_job_template__in=wfjt_set)
+                | Q(workflow_job__workflow_job_template__in=wfjt_set)
+            )
+
+        team_set = Team.accessible_pk_qs(self.user, 'read_role')
+        if team_set:
+            q |= Q(team__in=team_set)
+
+        app_set = OAuth2ApplicationAccess(self.user).filtered_queryset()
+        if app_set:
+            q |= Q(o_auth2_application__in=app_set)
+
+        token_set = OAuth2TokenAccess(self.user).filtered_queryset()
+        if token_set:
+            q |= Q(o_auth2_access_token__in=token_set)
+
+        return qs.filter(q).distinct()
 
     def can_add(self, data):
         return False
