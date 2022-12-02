@@ -1,6 +1,8 @@
 import logging
 
 from django.core.management.base import BaseCommand
+from django.conf import settings
+from django.core.cache import cache
 from awx.main.dispatch import pg_bus_conn
 from awx.main.utils.external_logging import reconfigure_rsyslog
 
@@ -24,6 +26,11 @@ class Command(BaseCommand):
                 reconfigure_rsyslog()
                 for e in conn.events(yield_timeouts=True):
                     if e is not None:
+                        logger.info("Change in logging settings found. Restarting rsyslogd")
+                        # clear the cache of relevant settings then restart
+                        setting_keys = [k for k in dir(settings) if k.startswith('LOG_AGGREAGTOR')]
+                        cache.delete_many(setting_keys)
+                        settings._awx_conf_memoizedcache.clear()
                         reconfigure_rsyslog()
         except Exception:
             # Log unanticipated exception in addition to writing to stderr to get timestamps and other metadata
