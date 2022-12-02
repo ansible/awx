@@ -83,7 +83,7 @@
   when: awx_image_tag is not defined
 
 - name: Generate Private RSA key for signing work
-  command: openssl genrsa -out {{ work_sign_private_keyfile }} {{ receptor_rsa_bits }}
+  command: openssl genrsa -traditional -out {{ work_sign_private_keyfile }} {{ receptor_rsa_bits }}
   args:
     creates: "{{ work_sign_private_keyfile }}"
   when: sign_work | bool
