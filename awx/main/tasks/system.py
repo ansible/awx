@@ -50,7 +50,7 @@ from awx.main.models import (
 )
 from awx.main.constants import ACTIVE_STATES
 from awx.main.dispatch.publish import task
-from awx.main.dispatch import get_local_queuename, pg_bus_conn, reaper
+from awx.main.dispatch import get_local_queuename, reaper
 from awx.main.utils.common import (
     ignore_inventory_computed_fields,
     ignore_inventory_group_removal,
@@ -245,7 +245,7 @@ def apply_cluster_membership_policies():
 
 
 @task(queue='tower_broadcast_all')
-def handle_setting_changes(setting_keys):
+def clear_setting_cache(setting_keys):
     orig_len = len(setting_keys)
     for i in range(orig_len):
         for dependent_key in settings_registry.get_dependent_settings(setting_keys[i]):
@@ -253,11 +253,6 @@ def handle_setting_changes(setting_keys):
     cache_keys = set(setting_keys)
     logger.debug('cache delete_many(%r)', cache_keys)
     cache.delete_many(cache_keys)
-
-    if any([setting.startswith('LOG_AGGREGATOR') for setting in setting_keys]):
-        # Paylod is empty string because the configurer already has the data
-        with pg_bus_conn() as conn:
-            conn.notify('rsyslog_configurer', "")
 
 
 @task(queue='tower_broadcast_all')
