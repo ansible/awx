@@ -28,52 +28,64 @@ options:
       default: 'False'
     organizations:
       description:
-        - organization name to export
-      type: str
+        - organization names to export
+      type: list
+      elements: str
     users:
       description:
-        - user name to export
-      type: str
+        - user names to export
+      type: list
+      elements: str
     teams:
       description:
-        - team name to export
-      type: str
+        - team names to export
+      type: list
+      elements: str
     credential_types:
       description:
-        - credential type name to export
-      type: str
+        - credential type names to export
+      type: list
+      elements: str
     credentials:
       description:
-        - credential name to export
-      type: str
+        - credential names to export
+      type: list
+      elements: str
     execution_environments:
       description:
-        - execution environment name to export
-      type: str
+        - execution environment names to export
+      type: list
+      elements: str
     notification_templates:
       description:
-        - notification template name to export
-      type: str
+        - notification template names to export
+      type: list
+      elements: str
     inventory_sources:
       description:
-        - inventory soruce to export
-      type: str
+        - inventory soruces to export
+      type: list
+      elements: str
     inventory:
       description:
-        - inventory name to export
-      type: str
+        - inventory names to export
+      type: list
+      elements: str
     projects:
       description:
-        - project name to export
-      type: str
+        - project names to export
+      type: list
+      elements: str
     job_templates:
       description:
-        - job template name to export
-      type: str
+        - job template names to export
+      type: list
+      elements: str
     workflow_job_templates:
       description:
-        - workflow name to export
-      type: str
+        - workflow names to export
+      type: list
+      elements: str
 requirements:
   - "awxkit >= 9.3.0"
 notes:
@@ -94,6 +106,10 @@ EXAMPLES = '''
   export:
     job_templates: "My Template"
     credential: 'all'
+
+- name: Export a list of inventories
+  export:
+    inventory: ['My Inventory 1', 'My Inventory 2']
 '''
 
 import logging
@@ -111,24 +127,12 @@ except ImportError:
 def main():
     argument_spec = dict(
         all=dict(type='bool', default=False),
-        credential_types=dict(type='str'),
-        credentials=dict(type='str'),
-        execution_environments=dict(type='str'),
-        inventory=dict(type='str'),
-        inventory_sources=dict(type='str'),
-        job_templates=dict(type='str'),
-        notification_templates=dict(type='str'),
-        organizations=dict(type='str'),
-        projects=dict(type='str'),
-        teams=dict(type='str'),
-        users=dict(type='str'),
-        workflow_job_templates=dict(type='str'),
     )
 
     # We are not going to raise an error here because the __init__ method of ControllerAWXKitModule will do that for us
     if HAS_EXPORTABLE_RESOURCES:
         for resource in EXPORTABLE_RESOURCES:
-            argument_spec[resource] = dict(type='str')
+            argument_spec[resource] = dict(type='list', elements='str')
 
     module = ControllerAWXKitModule(argument_spec=argument_spec)
 

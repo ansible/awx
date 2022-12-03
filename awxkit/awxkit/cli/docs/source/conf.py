@@ -52,6 +52,7 @@ html_static_path = ['_static']
 
 rst_epilog = '''
 .. |prog| replace:: awx
-.. |at| replace:: Ansible Tower
-.. |RHAT| replace:: Red Hat Ansible Tower
+.. |at| replace:: automation controller
+.. |At| replace:: Automation controller
+.. |RHAT| replace:: Red Hat Ansible Automation Platform controller
 '''

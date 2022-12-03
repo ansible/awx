@@ -426,7 +426,7 @@ class BaseTask(object):
         """
         instance.log_lifecycle("post_run")
 
-    def final_run_hook(self, instance, status, private_data_dir, fact_modification_times):
+    def final_run_hook(self, instance, status, private_data_dir):
         """
         Hook for any steps to run after job/task is marked as complete.
         """
@@ -469,7 +469,6 @@ class BaseTask(object):
         self.instance = self.update_model(pk, status='running', start_args='')  # blank field to remove encrypted passwords
         self.instance.websocket_emit_status("running")
         status, rc = 'error', None
-        fact_modification_times = {}
         self.runner_callback.event_ct = 0
 
         '''
@@ -497,14 +496,6 @@ class BaseTask(object):
 
             if not os.path.exists(settings.AWX_ISOLATION_BASE_PATH):
                 raise RuntimeError('AWX_ISOLATION_BASE_PATH=%s does not exist' % settings.AWX_ISOLATION_BASE_PATH)
-
-            # Fetch "cached" fact data from prior runs and put on the disk
-            # where ansible expects to find it
-            if getattr(self.instance, 'use_fact_cache', False):
-                self.instance.start_job_fact_cache(
-                    os.path.join(private_data_dir, 'artifacts', str(self.instance.id), 'fact_cache'),
-                    fact_modification_times,
-                )
 
             # May have to serialize the value
             private_data_files, ssh_key_data = self.build_private_data_files(self.instance, private_data_dir)
@@ -646,7 +637,7 @@ class BaseTask(object):
             self.instance.send_notification_templates('succeeded' if status == 'successful' else 'failed')
 
         try:
-            self.final_run_hook(self.instance, status, private_data_dir, fact_modification_times)
+            self.final_run_hook(self.instance, status, private_data_dir)
         except Exception:
             logger.exception('{} Final run hook errored.'.format(self.instance.log_format))
 
@@ -1066,12 +1057,19 @@ class RunJob(SourceControlMixin, BaseTask):
             # ran inside of the event saving code
             update_smart_memberships_for_inventory(job.inventory)
 
+        # Fetch "cached" fact data from prior runs and put on the disk
+        # where ansible expects to find it
+        if job.use_fact_cache:
+            self.facts_write_time = self.instance.start_job_fact_cache(os.path.join(private_data_dir, 'artifacts', str(job.id), 'fact_cache'))
+
     def build_project_dir(self, job, private_data_dir):
         self.sync_and_copy(job.project, private_data_dir, scm_branch=job.scm_branch)
 
-    def final_run_hook(self, job, status, private_data_dir, fact_modification_times):
-        super(RunJob, self).final_run_hook(job, status, private_data_dir, fact_modification_times)
-        if not private_data_dir:
+    def post_run_hook(self, job, status):
+        super(RunJob, self).post_run_hook(job, status)
+        job.refresh_from_db(fields=['job_env'])
+        private_data_dir = job.job_env.get('AWX_PRIVATE_DATA_DIR')
+        if (not private_data_dir) or (not hasattr(self, 'facts_write_time')):
             # If there's no private data dir, that means we didn't get into the
             # actual `run()` call; this _usually_ means something failed in
             # the pre_run_hook method
@@ -1079,9 +1077,11 @@ class RunJob(SourceControlMixin, BaseTask):
         if job.use_fact_cache:
             job.finish_job_fact_cache(
                 os.path.join(private_data_dir, 'artifacts', str(job.id), 'fact_cache'),
-                fact_modification_times,
+                self.facts_write_time,
             )
 
+    def final_run_hook(self, job, status, private_data_dir):
+        super(RunJob, self).final_run_hook(job, status, private_data_dir)
         try:
             inventory = job.inventory
         except Inventory.DoesNotExist:

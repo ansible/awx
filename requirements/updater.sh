@@ -33,11 +33,47 @@ generate_requirements() {
 
 main() {
   base_dir=$(pwd)
-  _tmp="$(mktemp -d --suffix .awx-requirements XXXX -p /tmp)"
+
+  _tmp=$(python -c "import tempfile; print(tempfile.mkdtemp(suffix='.awx-requirements', dir='/tmp'))")
+
   trap _cleanup INT TERM EXIT
 
-  if [ "$1" = "upgrade" ]; then
+  case $1 in
+    "run")
+      NEEDS_HELP=0
+    ;;
+    "upgrade")
+      NEEDS_HELP=0
       pip_compile="${pip_compile} --upgrade"
+    ;;
+    "help")
+      NEEDS_HELP=1
+    ;;
+    *)
+      echo ""
+      echo "ERROR: Parameter $1 not valid"
+      echo ""
+      NEEDS_HELP=1
+    ;;
+  esac 
+
+  if [[ "$NEEDS_HELP" == "1" ]] ; then
+    echo "This script generates requirements.txt from requirements.in and requirements_git.in"
+    echo "It should be run from within the awx container"
+    echo ""
+    echo "Usage: $0 [run|upgrade]"
+    echo ""
+    echo "Commands:"
+    echo "help      Print this message"
+    echo "run       Run the process only upgrading pinned libraries from requirements.in"
+    echo "upgrade   Upgrade all libraries to latest while respecting pinnings"
+    echo ""
+    exit
+  fi
+
+  if [[ ! -d /awx_devel ]] ; then
+      echo "This script should be run inside the awx container"
+      exit
   fi
 
   cp -vf requirements.txt "${_tmp}"

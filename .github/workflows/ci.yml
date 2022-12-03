@@ -2,6 +2,7 @@
 name: CI
 env:
   BRANCH: ${{ github.base_ref || 'devel' }}
+  LC_ALL: "C.UTF-8" # prevent ERROR: Ansible could not initialize the preferred locale: unsupported locale setting
 on:
   pull_request:
 jobs:

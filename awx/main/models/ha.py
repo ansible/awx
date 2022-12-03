@@ -233,11 +233,12 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         if not isinstance(vargs.get('grace_period'), int):
             vargs['grace_period'] = 60  # grace period of 60 minutes, need to set because CLI default will not take effect
         if 'exclude_strings' not in vargs and vargs.get('file_pattern'):
-            active_pks = list(
-                UnifiedJob.objects.filter(
-                    (models.Q(execution_node=self.hostname) | models.Q(controller_node=self.hostname)) & models.Q(status__in=('running', 'waiting'))
-                ).values_list('pk', flat=True)
-            )
+            active_job_qs = UnifiedJob.objects.filter(status__in=('running', 'waiting'))
+            if self.node_type == 'execution':
+                active_job_qs = active_job_qs.filter(execution_node=self.hostname)
+            else:
+                active_job_qs = active_job_qs.filter(controller_node=self.hostname)
+            active_pks = list(active_job_qs.values_list('pk', flat=True))
             if active_pks:
                 vargs['exclude_strings'] = [JOB_FOLDER_PREFIX % job_id for job_id in active_pks]
         if 'remove_images' in vargs or 'image_prune' in vargs:
@@ -378,6 +379,8 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
             default='',
         )
     )
+    max_concurrent_jobs = models.IntegerField(default=0, help_text=_("Maximum number of concurrent jobs to run on this group. Zero means no limit."))
+    max_forks = models.IntegerField(default=0, help_text=_("Max forks to execute on this group. Zero means no limit."))
     policy_instance_percentage = models.IntegerField(default=0, help_text=_("Percentage of Instances to automatically assign to this group"))
     policy_instance_minimum = models.IntegerField(default=0, help_text=_("Static minimum number of Instances to automatically assign to this group"))
     policy_instance_list = JSONBlob(
@@ -391,6 +394,8 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
 
     @property
     def capacity(self):
+        if self.is_container_group:
+            return self.max_forks
         return sum(inst.capacity for inst in self.instances.all())
 
     @property

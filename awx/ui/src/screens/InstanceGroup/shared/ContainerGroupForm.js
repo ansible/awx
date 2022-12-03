@@ -11,7 +11,7 @@ import FormField, {
   CheckboxField,
 } from 'components/FormField';
 import FormActionGroup from 'components/FormActionGroup';
-import { required } from 'util/validators';
+import { required, minMaxValue } from 'util/validators';
 import {
   FormColumnLayout,
   FormFullWidthLayout,
@@ -57,6 +57,26 @@ function ContainerGroupFormFields({ instanceGroup }) {
         tooltip={t`Credential to authenticate with Kubernetes or OpenShift. Must be of type "Kubernetes/OpenShift API Bearer Token". If left blank, the underlying Pod's service account will be used.`}
         autoPopulate={!instanceGroup?.id}
       />
+      <FormField
+        id="instance-group-max-concurrent-jobs"
+        label={t`Max concurrent jobs`}
+        name="max_concurrent_jobs"
+        type="number"
+        min="0"
+        validate={minMaxValue(0, 2147483647)}
+        tooltip={t`Maximum number of jobs to run concurrently on this group.
+          Zero means no limit will be enforced.`}
+      />
+      <FormField
+        id="instance-group-max-forks"
+        label={t`Max forks`}
+        name="max_forks"
+        type="number"
+        min="0"
+        validate={minMaxValue(0, 2147483647)}
+        tooltip={t`Maximum number of forks to allow across all jobs running concurrently on this group.
+          Zero means no limit will be enforced.`}
+      />
 
       <FormGroup fieldId="container-groups-option-checkbox" label={t`Options`}>
         <FormCheckboxLayout>
@@ -97,6 +117,8 @@ function ContainerGroupForm({
 
   const initialValues = {
     name: instanceGroup?.name || '',
+    max_concurrent_jobs: instanceGroup.max_concurrent_jobs || 0,
+    max_forks: instanceGroup.max_forks || 0,
     credential: instanceGroup?.summary_fields?.credential,
     pod_spec_override: isCheckboxChecked
       ? instanceGroup?.pod_spec_override

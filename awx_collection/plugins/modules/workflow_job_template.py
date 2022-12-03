@@ -208,6 +208,29 @@ options:
           description:
             - Limit to act on, applied as a prompt, if job template prompts for limit
           type: str
+        forks:
+          description:
+            - The number of parallel or simultaneous processes to use while executing the playbook, if job template prompts for forks
+          type: int
+        job_slice_count:
+          description:
+            - The number of jobs to slice into at runtime, if job template prompts for job slices. Will cause the Job Template to launch a workflow if value is greater than 1.
+          type: int
+          default: '1'
+        timeout:
+          description:
+            - Maximum time in seconds to wait for a job to finish (server-side), if job template prompts for timeout.
+          type: int
+        execution_environment:
+          description:
+            - Name of Execution Environment to be applied to job as launch-time prompts.
+          type: dict
+          suboptions:
+            name:
+              description:
+                - Name of Execution Environment to be applied to job as launch-time prompts.
+                - Uniqueness is not handled rigorously.
+              type: str
         diff_mode:
           description:
             - Run diff mode, applied as a prompt, if job template prompts for diff mode
@@ -298,7 +321,6 @@ options:
         related:
           description:
             - Related items to this workflow node.
-            - Must include credentials, failure_nodes, always_nodes, success_nodes, even if empty.
           type: dict
           suboptions:
             always_nodes:
@@ -341,6 +363,46 @@ options:
                 name:
                   description:
                     - Name Credentials to be applied to job as launch-time prompts.
+                  elements: str
+                organization:
+                  description:
+                    - Name of key for use in model for organizational reference
+                  type: dict
+                  suboptions:
+                    name:
+                      description:
+                        - The organization of the credentials exists in.
+                      type: str
+            labels:
+              description:
+                - Labels to be applied to job as launch-time prompts.
+                - List of Label names.
+                - Uniqueness is not handled rigorously.
+              type: list
+              suboptions:
+                name:
+                  description:
+                    - Name Labels to be applied to job as launch-time prompts.
+                  elements: str
+                organization:
+                  description:
+                    - Name of key for use in model for organizational reference
+                  type: dict
+                  suboptions:
+                    name:
+                      description:
+                        - The organization of the label node exists in.
+                      type: str
+            instance_groups:
+              description:
+                - Instance groups to be applied to job as launch-time prompts.
+                - List of Instance group names.
+                - Uniqueness is not handled rigorously.
+              type: list
+              suboptions:
+                name:
+                  description:
+                    - Name of Instance groups to be applied to job as launch-time prompts.
                   elements: str
     destroy_current_nodes:
       description:
@@ -474,11 +536,21 @@ EXAMPLES = '''
             name: Default
           name: job template 2
           type: job_template
+        execution_environment:
+            name: My EE
         related:
-          success_nodes: []
-          failure_nodes: []
-          always_nodes: []
-          credentials: []
+          credentials:
+              - name: cyberark
+                organization:
+                    name: Default
+          instance_groups:
+              - name: SunCavanaugh Cloud
+              - name: default
+          labels:
+              - name: Custom Label
+              - name: Another Custom Label
+                organization:
+                    name: Default
   register: result
 
 '''
@@ -547,6 +619,9 @@ def create_workflow_nodes(module, response, workflow_nodes, workflow_id):
             'limit',
             'diff_mode',
             'verbosity',
+            'forks',
+            'job_slice_count',
+            'timeout',
             'all_parents_must_converge',
             'state',
         ):
@@ -555,6 +630,10 @@ def create_workflow_nodes(module, response, workflow_nodes, workflow_id):
                 workflow_node_fields[field_name] = field_val
             if workflow_node['identifier']:
                 search_fields = {'identifier': workflow_node['identifier']}
+            if 'execution_environment' in workflow_node:
+                workflow_node_fields['execution_environment'] = module.get_one(
+                    'execution_environments', name_or_id=workflow_node['execution_environment']['name']
+                )['id']
 
         # Set Search fields
         search_fields['workflow_job_template'] = workflow_node_fields['workflow_job_template'] = workflow_id
@@ -641,15 +720,26 @@ def create_workflow_nodes_association(module, response, workflow_nodes, workflow
             # Get id's for association fields
             association_fields = {}
 
-            for association in ('always_nodes', 'success_nodes', 'failure_nodes', 'credentials'):
+            for association in (
+                'always_nodes',
+                'success_nodes',
+                'failure_nodes',
+                'credentials',
+                'labels',
+                'instance_groups',
+            ):
                 # Extract out information if it exists
                 # Test if it is defined, else move to next association.
+                prompt_lookup = ['credentials', 'labels', 'instance_groups']
                 if association in workflow_node['related']:
                     id_list = []
+                    lookup_data = {}
                     for sub_name in workflow_node['related'][association]:
-                        if association == 'credentials':
-                            endpoint = 'credentials'
-                            lookup_data = {'name': sub_name['name']}
+                        if association in prompt_lookup:
+                            endpoint = association
+                            if 'organization' in sub_name:
+                                lookup_data['organization'] = module.resolve_name_to_id('organizations', sub_name['organization']['name'])
+                            lookup_data['name'] = sub_name['name']
                         else:
                             endpoint = 'workflow_job_template_nodes'
                             lookup_data = {'identifier': sub_name['identifier']}

@@ -35,7 +35,7 @@ RECEPTOR_IMAGE ?= quay.io/ansible/receptor:devel
 SRC_ONLY_PKGS ?= cffi,pycparser,psycopg2,twilio
 # These should be upgraded in the AWX and Ansible venv before attempting
 # to install the actual requirements
-VENV_BOOTSTRAP ?= pip==21.2.4 setuptools==58.2.0 setuptools_scm[toml]==6.4.2 wheel==0.36.2
+VENV_BOOTSTRAP ?= pip==21.2.4 setuptools==65.6.3 setuptools_scm[toml]==7.0.5 wheel==0.38.4
 
 NAME ?= awx
 
@@ -390,18 +390,18 @@ $(UI_BUILD_FLAG_FILE):
 	$(PYTHON) tools/scripts/compilemessages.py
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run compile-strings
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run build
-	mkdir -p /var/lib/awx/public/static/css
-	mkdir -p /var/lib/awx/public/static/js
-	mkdir -p /var/lib/awx/public/static/media
-	cp -r awx/ui/build/static/css/* /var/lib/awx/public/static/css
-	cp -r awx/ui/build/static/js/* /var/lib/awx/public/static/js
-	cp -r awx/ui/build/static/media/* /var/lib/awx/public/static/media
 	touch $@
 
 ui-release: $(UI_BUILD_FLAG_FILE)
 
 ui-devel: awx/ui/node_modules
 	@$(MAKE) -B $(UI_BUILD_FLAG_FILE)
+	mkdir -p /var/lib/awx/public/static/css
+	mkdir -p /var/lib/awx/public/static/js
+	mkdir -p /var/lib/awx/public/static/media
+	cp -r awx/ui/build/static/css/* /var/lib/awx/public/static/css
+	cp -r awx/ui/build/static/js/* /var/lib/awx/public/static/js
+	cp -r awx/ui/build/static/media/* /var/lib/awx/public/static/media
 
 ui-devel-instrumented: awx/ui/node_modules
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run start-instrumented
@@ -453,7 +453,7 @@ awx/projects:
 COMPOSE_UP_OPTS ?=
 COMPOSE_OPTS ?=
 CONTROL_PLANE_NODE_COUNT ?= 1
-EXECUTION_NODE_COUNT ?= 2
+EXECUTION_NODE_COUNT ?= 0
 MINIKUBE_CONTAINER_GROUP ?= false
 MINIKUBE_SETUP ?= false # if false, run minikube separately
 EXTRA_SOURCES_ANSIBLE_OPTS ?=
@@ -597,13 +597,12 @@ pot: $(UI_BUILD_FLAG_FILE)
 po: $(UI_BUILD_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run extract-strings -- --clean
 
-LANG = "en_us"
 ## generate API django .pot .po
 messages:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py makemessages -l $(LANG) --keep-pot
+	$(PYTHON) manage.py makemessages -l en_us --keep-pot
 
 print-%:
 	@echo $($*)

@@ -34,6 +34,7 @@ import useRequest, { useDismissableError } from 'hooks/useRequest';
 import useBrandName from 'hooks/useBrandName';
 import ExecutionEnvironmentDetail from 'components/ExecutionEnvironmentDetail';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
+import InstanceGroupLabels from 'components/InstanceGroupLabels';
 import getHelpText from '../shared/JobTemplate.helptext';
 
 function JobTemplateDetail({ template }) {
@@ -166,11 +167,6 @@ function JobTemplateDetail({ template }) {
       </Link>
     );
   };
-
-  const buildLinkURL = (instance) =>
-    instance.is_container_group
-      ? '/instance_groups/container_group/'
-      : '/instance_groups/';
 
   if (instanceGroupsError) {
     return <ContentError error={instanceGroupsError} />;
@@ -422,25 +418,7 @@ function JobTemplateDetail({ template }) {
           label={t`Instance Groups`}
           dataCy="jt-detail-instance-groups"
           helpText={helpText.instanceGroups}
-          value={
-            <ChipGroup
-              numChips={5}
-              totalChips={instanceGroups.length}
-              ouiaId="instance-group-chips"
-            >
-              {instanceGroups.map((ig) => (
-                <Link to={`${buildLinkURL(ig)}${ig.id}/details`} key={ig.id}>
-                  <Chip
-                    key={ig.id}
-                    ouiaId={`instance-group-${ig.id}-chip`}
-                    isReadOnly
-                  >
-                    {ig.name}
-                  </Chip>
-                </Link>
-              ))}
-            </ChipGroup>
-          }
+          value={<InstanceGroupLabels labels={instanceGroups} isLinkable />}
           isEmpty={instanceGroups.length === 0}
         />
         {job_tags && (

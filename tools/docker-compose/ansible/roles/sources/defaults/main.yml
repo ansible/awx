@@ -13,6 +13,7 @@ receptor_image: quay.io/ansible/receptor:devel
 # Keys for signing work
 receptor_rsa_bits: 4096
 receptor_work_sign_reconfigure: false
+sign_work: no  # currently defaults to no because openssl version mismatch causes "unknown block type PRIVATE KEY"
 work_sign_key_dir: '../_sources/receptor'
 work_sign_private_keyfile: "{{ work_sign_key_dir }}/work_private_key.pem"
 work_sign_public_keyfile: "{{ work_sign_key_dir }}/work_public_key.pem"

@@ -721,7 +721,7 @@ msgstr "DTSTART valide obligatoire dans rrule. La valeur doit commencer par : DT
 #: awx/api/serializers.py:4657
 msgid ""
 "DTSTART cannot be a naive datetime.  Specify ;TZINFO= or YYYYMMDDTHHMMSSZZ."
-msgstr "DTSTART ne peut correspondre à une DateHeure naïve. Spécifier ;TZINFO= ou YYYYMMDDTHHMMSSZZ."
+msgstr "DTSTART ne peut correspondre à une date-heure naïve. Spécifier ;TZINFO= ou YYYYMMDDTHHMMSSZZ."
 
 #: awx/api/serializers.py:4659
 msgid "Multiple DTSTART is not supported."
@@ -6240,3 +6240,4 @@ msgstr "%s est en cours de mise à niveau."
 #: awx/ui/urls.py:24
 msgid "This page will refresh when complete."
 msgstr "Cette page sera rafraîchie une fois terminée."
+

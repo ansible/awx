@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { Link, useHistory, useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { t, Plural } from '@lingui/macro';
 import {
   Button,
@@ -11,7 +11,6 @@ import {
   CodeBlockCode,
   Tooltip,
   Slider,
-  Label,
 } from '@patternfly/react-core';
 import { DownloadIcon, OutlinedClockIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
@@ -34,6 +33,7 @@ import useRequest, {
   useDismissableError,
 } from 'hooks/useRequest';
 import HealthCheckAlert from 'components/HealthCheckAlert';
+import InstanceGroupLabels from 'components/InstanceGroupLabels';
 import RemoveInstanceButton from '../Shared/RemoveInstanceButton';
 
 const Unavailable = styled.span`
@@ -156,11 +156,6 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
     </>
   );
 
-  const buildLinkURL = (inst) =>
-    inst.is_container_group
-      ? '/instance_groups/container_group/'
-      : '/instance_groups/';
-
   const { error, dismissError } = useDismissableError(
     updateInstanceError || healthCheckError
   );
@@ -225,25 +220,9 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
                   label={t`Instance Groups`}
                   dataCy="instance-groups"
                   helpText={t`The Instance Groups to which this instance belongs.`}
-                  value={instanceGroups.map((ig) => (
-                    <React.Fragment key={ig.id}>
-                      <Label
-                        color="blue"
-                        isTruncated
-                        render={({ className, content, componentRef }) => (
-                          <Link
-                            to={`${buildLinkURL(ig)}${ig.id}/details`}
-                            className={className}
-                            innerRef={componentRef}
-                          >
-                            {content}
-                          </Link>
-                        )}
-                      >
-                        {ig.name}
-                      </Label>{' '}
-                    </React.Fragment>
-                  ))}
+                  value={
+                    <InstanceGroupLabels labels={instanceGroups} isLinkable />
+                  }
                   isEmpty={instanceGroups.length === 0}
                 />
               )}
