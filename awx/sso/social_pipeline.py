@@ -15,7 +15,7 @@ from django.utils.translation import gettext_lazy as _
 from django.db.models import Q
 
 
-logger = logging.getLogger('awx.sso.pipeline')
+logger = logging.getLogger('awx.sso.social_pipeline')
 
 
 class AuthNotFound(AuthException):
