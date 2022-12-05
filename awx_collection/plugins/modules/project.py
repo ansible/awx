@@ -331,12 +331,6 @@ def main():
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(project)
 
-    if credential is not None:
-        credential = module.resolve_name_to_id('credentials', credential)
-
-    if signature_validation_credential is not None:
-        signature_validation_credential = module.resolve_name_to_id('credentials', signature_validation_credential)
-
     # Attempt to look up associated field items the user specified.
     association_fields = {}
 
@@ -361,20 +355,18 @@ def main():
     # Create the data that gets sent for create and update
     project_fields = {
         'name': new_name if new_name else (module.get_item_name(project) if project else name),
-        'scm_type': scm_type,
-        'organization': org_id,
-        'scm_update_on_launch': scm_update_on_launch,
-        'scm_update_cache_timeout': scm_update_cache_timeout,
-        'signature_validation_credential': signature_validation_credential,
     }
 
     for field_name in (
+        'scm_type',
         'scm_url',
         'scm_branch',
         'scm_refspec',
         'scm_clean',
         'scm_delete_on_update',
-        "scm_track_submodules",
+        'scm_track_submodules',
+        'scm_update_on_launch',
+        'scm_update_cache_timeout',
         'timeout',
         'scm_update_cache_timeout',
         'custom_virtualenv',
@@ -385,12 +377,19 @@ def main():
         if field_val is not None:
             project_fields[field_name] = field_val
 
-    if credential is not None:
-        project_fields['credential'] = credential
-    if default_ee is not None:
-        project_fields['default_environment'] = module.resolve_name_to_id('execution_environments', default_ee)
-    if scm_type == '':
-        if local_path is not None:
+    for variable, field, endpoint in (
+        (default_ee, 'default_environment', 'execution_environments'),
+        (credential, 'credential', 'credentials'),
+        (signature_validation_credential, 'signature_validation_credential', 'credentials'),
+    ):
+        if variable is not None:
+            project_fields[field] = module.resolve_name_to_id(endpoint, variable)
+
+    if org_id is not None:
+        # this is resolved earlier, so save an API call and don't do it again in the loop above
+        project_fields['organization'] = org_id
+
+    if scm_type == '' and local_path is not None:
             project_fields['local_path'] = local_path
 
     if scm_update_cache_timeout != 0 and scm_update_on_launch is not True:
