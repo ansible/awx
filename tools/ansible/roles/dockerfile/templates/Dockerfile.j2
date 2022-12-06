@@ -274,7 +274,7 @@ RUN for dir in \
       /var/run/nginx.pid \
       /var/lib/awx/venv/awx/lib/python3.9/site-packages/awx.egg-link ; \
     do touch $file ; chmod g+rw $file ; done && \
-    echo "\setenv PAGER 'less -S'" > /var/lib/awx/.psqlrc
+    echo "\setenv PAGER 'less -SXF'" > /var/lib/awx/.psqlrc
 {% endif %}
 
 {% if not build_dev|bool %}
