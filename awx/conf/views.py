@@ -141,6 +141,10 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
             settings_change_list.append(setting.key)
         if settings_change_list:
             connection.on_commit(lambda: clear_setting_cache.delay(settings_change_list))
+            if any([setting.startswith('LOG_AGGREGATOR') for setting in settings_change_list]):
+                # call notify to rsyslog. no data is need so payload is empty
+                with pg_bus_conn() as conn:
+                    conn.notify('rsyslog_configurer', "")
 
         # When TOWER_URL_BASE is deleted from the API, reset it to the hostname
         # used to make the request as a default.
