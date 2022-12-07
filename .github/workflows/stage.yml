@@ -21,6 +21,7 @@ on:
 
 jobs:
   stage:
+    if: github.repository == 'ansible/awx'
     runs-on: ubuntu-latest
     permissions:
       packages: write

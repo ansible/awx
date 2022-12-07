@@ -10,6 +10,7 @@ on:
 
 jobs:
   promote:
+    if: github.repository == 'ansible/awx'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout awx
