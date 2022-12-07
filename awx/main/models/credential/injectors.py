@@ -15,6 +15,7 @@ def aws(cred, env, private_data_dir):
 
     if cred.has_input('security_token'):
         env['AWS_SECURITY_TOKEN'] = cred.get_input('security_token', default='')
+        env['AWS_SESSION_TOKEN'] = env['AWS_SECURITY_TOKEN']
 
 
 def gce(cred, env, private_data_dir):
