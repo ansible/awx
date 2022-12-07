@@ -107,12 +107,12 @@ class WebsocketRelayConnection:
             self.stats.record_connection_lost()
             raise
         except client_exceptions.ClientConnectorError as e:
-            logger.warning(f"Connection from {self.name} to {self.remote_host} failed: '{e}'.")
+            logger.warning(f"Connection from {self.name} to {self.remote_host} failed: '{e}'.", exc_info=True)
         except asyncio.TimeoutError:
             logger.warning(f"Connection from {self.name} to {self.remote_host} timed out.")
         except Exception as e:
             # Early on, this is our canary. I'm not sure what exceptions we can really encounter.
-            logger.exception(f"Connection from {self.name} to {self.remote_host} failed for unknown reason: '{e}'.")
+            logger.warning(f"Connection from {self.name} to {self.remote_host} failed for unknown reason: '{e}'.", exc_info=True)
         else:
             logger.warning(f"Connection from {self.name} to {self.remote_host} list.")
 
@@ -143,10 +143,6 @@ class WebsocketRelayConnection:
                     logger.warning(logmsg)
                     continue
 
-            from remote_pdb import RemotePdb
-
-            RemotePdb('127.0.0.1', 4444).set_trace()
-
             if payload.get("type") == "consumer.subscribe":
                 for group in payload['groups']:
                     name = f"{self.remote_host}-{group}"
@@ -155,14 +151,20 @@ class WebsocketRelayConnection:
                         producer = self.event_loop.create_task(self.run_producer(name, websocket, group))
 
                         self.producers[name] = {"task": producer, "subscriptions": {origin_channel}}
+                        logger.debug(f"Producer {name} started.")
                     else:
                         self.producers[name]["subscriptions"].add(origin_channel)
+                        logger.debug(f"Connection from {self.name} to {self.remote_host} added subscription to {group}.")
 
             if payload.get("type") == "consumer.unsubscribe":
                 for group in payload['groups']:
                     name = f"{self.remote_host}-{group}"
                     origin_channel = payload['origin_channel']
-                    self.producers[name]["subscriptions"].remove(origin_channel)
+                    try:
+                        self.producers[name]["subscriptions"].remove(origin_channel)
+                        logger.debug(f"Unsubscribed {origin_channel} from {name}")
+                    except KeyError:
+                        logger.warning(f"Producer {name} not found.")
 
     async def run_producer(self, name, websocket, group):
         try:
