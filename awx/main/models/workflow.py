@@ -653,6 +653,8 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
     )
     is_sliced_job = models.BooleanField(default=False)
 
+    is_bulk_job = models.BooleanField(default=False)
+
     def _set_default_dependencies_processed(self):
         self.dependencies_processed = True
 

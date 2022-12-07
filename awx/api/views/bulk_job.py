@@ -9,10 +9,17 @@ from awx.api.generics import APIView
 from rest_framework.permissions import IsAuthenticated
 from awx.api import serializers
 
+from awx.api.views import WorkflowJobList
 from awx.main.models import WorkflowJob, WorkflowJobNode, UnifiedJobTemplate, Inventory, InventorySource, Credential
 
 
-class AdHocWorkflowView(APIView):
+class BulkJobView(WorkflowJobList):
+    def get_queryset(self):
+        qs = self.request.user.get_queryset(self.model)
+        return qs.filter(workflow_job_template=None, is_bulk_job=True).distinct()
+
+
+class BulkJobLaunchView(APIView):
     _ignore_model_permissions = True
     permission_classes = [IsAuthenticated]  # FIXME: Could finde/make a permissions class more tailored to this view
 
@@ -156,7 +163,7 @@ class AdHocWorkflowView(APIView):
         # Now that we have validated the workflow job node input and acess to underlying resources,
         # we can create the workflow job and the workflow nodes
         name = request.data['name'] if 'name' in request.data else 'AdHocWorkflow'
-        wfj = WorkflowJob.objects.create(name=name)
+        wfj = WorkflowJob.objects.create(name=name, is_bulk_job=True)
         for kwargs in workflow_node_data:
             kwargs['unified_job_template'] = ujt_map[kwargs['unified_job_template']]
             if 'inventory' in kwargs:

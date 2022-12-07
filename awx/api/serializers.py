@@ -3519,6 +3519,7 @@ class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
             'allow_simultaneous',
             'job_template',
             'is_sliced_job',
+            'is_bulk_job',
             '-execution_environment',
             '-execution_node',
             '-event_processing_finished',

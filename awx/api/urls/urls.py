@@ -34,7 +34,7 @@ from awx.api.views import (
 from awx.api.views.mesh_visualizer import MeshVisualizer
 
 from awx.api.views.metrics import MetricsView
-from awx.api.views.adhoc_workflow import AdHocWorkflowView
+from awx.api.views.bulk_job import BulkJobLaunchView, BulkJobView
 
 from .organization import urls as organization_urls
 from .user import urls as user_urls
@@ -137,7 +137,8 @@ v2_urls = [
     re_path(r'^activity_stream/', include(activity_stream_urls)),
     re_path(r'^workflow_approval_templates/', include(workflow_approval_template_urls)),
     re_path(r'^workflow_approvals/', include(workflow_approval_urls)),
-    re_path(r'^ad_hoc_workflow/$', AdHocWorkflowView.as_view(), name='ad_hoc_workflow'),
+    re_path(r'^bulk_jobs/launch/$', BulkJobLaunchView.as_view(), name='bulk_job_launch'),
+    re_path(r'^bulk_jobs/$', BulkJobView.as_view(), name='bulk_job'),
 ]
 
 
