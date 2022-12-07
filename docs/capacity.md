@@ -98,6 +98,7 @@ Examples:
 Given settings.AWX_CONTROL_NODE_TASK_IMPACT is 1:
   - Project updates (where the execution_node is always the same as the controller_node), have a total impact of 2.
   - Container group jobs (where the execution node is not a member of the cluster) only control impact applies, and the controller node has a total task impact of 1.
+  - A job executing on a "hybrid" node where both control and execution will occur on the same node has the task impact of (1 overhead for ansible main process) + (min(forks,hosts)) + (1 control node task impact). Meaning a Job running on a hybrid node with forks set to 1 would have a total task impact of 3.
 
 ### Selecting the Right settings.AWX_CONTROL_NODE_TASK_IMPACT
 
