@@ -4,6 +4,7 @@ import { Formik } from 'formik';
 import { CredentialsAPI, CredentialTypesAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import CredentialsStep from './CredentialsStep';
+import { createMemoryHistory } from 'history';
 
 jest.mock('../../../api/models/CredentialTypes');
 jest.mock('../../../api/models/Credentials');
@@ -150,6 +151,41 @@ describe('CredentialsStep', () => {
       credential_type: 1,
       order_by: 'name',
       page: 1,
+      page_size: 5,
+    });
+
+    await act(async () => {
+      wrapper.find('AnsibleSelect').invoke('onChange')({}, 3);
+    });
+    expect(CredentialsAPI.read).toHaveBeenCalledWith({
+      credential_type: 3,
+      order_by: 'name',
+      page: 1,
+      page_size: 5,
+    });
+  });
+
+  test('should reset query params (credential.page) when selected credential type is changed', async () => {
+    let wrapper;
+    const history = createMemoryHistory({
+      initialEntries: ['?credential.page=2'],
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Formik>
+          <CredentialsStep allowCredentialsWithPasswords />
+        </Formik>,
+        {
+          context: { router: { history } },
+        }
+      );
+    });
+    wrapper.update();
+
+    expect(CredentialsAPI.read).toHaveBeenCalledWith({
+      credential_type: 1,
+      order_by: 'name',
+      page: 2,
       page_size: 5,
     });
 
