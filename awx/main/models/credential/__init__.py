@@ -1191,6 +1191,23 @@ ManagedCredentialType(
     },
 )
 
+ManagedCredentialType(
+    namespace='vault_auth_aws',
+    kind='cloud',
+    cloud=True,
+    name=gettext_noop('Vault/AWS'),
+    managed=True,
+    inputs={
+        'fields': [
+            {
+                'id': 'auth_full_path',
+                'label': gettext_noop('Full path to the secret/engine role'),
+                'type': 'string'
+            },
+        ],
+        'required': ['auth_full_path'],
+    },
+)
 
 class CredentialInputSource(PrimordialModel):
     class Meta:
