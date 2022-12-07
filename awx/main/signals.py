@@ -17,6 +17,7 @@ from django.db.models.signals import (
     pre_delete,
     post_delete,
     m2m_changed,
+    post_migrate,
 )
 from django.dispatch import receiver
 from django.contrib.auth import SESSION_KEY
@@ -107,6 +108,19 @@ def emit_update_inventory_on_created_or_deleted(sender, **kwargs):
     else:
         if inventory is not None:
             connection.on_commit(lambda: update_inventory_computed_fields.delay(inventory.id))
+
+
+def fixup_missing_org_ee_admin_roles(app_config, **kwargs):
+    if app_config.label != 'main':
+        return
+
+    print("Fixing up missing EE admin roles.")
+    with disable_activity_stream():
+        for org in Organization.objects.all():
+            org.save()
+
+
+post_migrate.connect(fixup_missing_org_ee_admin_roles)
 
 
 def rebuild_role_ancestor_list(reverse, model, instance, pk_set, action, **kwargs):
