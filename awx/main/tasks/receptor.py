@@ -63,7 +63,7 @@ def read_receptor_config():
 
 def work_signing_enabled(config_data):
     for section in config_data:
-        if 'work-verification' in section:
+        if 'work-signing' in section:
             return True
     return False
 
