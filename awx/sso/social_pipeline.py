@@ -12,6 +12,7 @@ from social_core.exceptions import AuthException
 # Django
 from django.utils.translation import gettext_lazy as _
 
+from awx.sso.common import get_or_create_with_default_galaxy_cred
 
 logger = logging.getLogger('awx.sso.social_pipeline')
 
@@ -73,21 +74,6 @@ def _update_m2m_from_expression(user, related, expr, remove=True):
         related.add(user)
     elif remove:
         related.remove(user)
-
-
-def get_or_create_with_default_galaxy_cred(**kwargs):
-    from awx.main.models import Organization, Credential
-
-    (org, org_created) = Organization.objects.get_or_create(**kwargs)
-    if org_created:
-        logger.debug("Created org {} (id {}) from {}".format(org.name, org.id, kwargs))
-        public_galaxy_credential = Credential.objects.filter(managed=True, name='Ansible Galaxy').first()
-        if public_galaxy_credential is not None:
-            org.galaxy_credentials.add(public_galaxy_credential)
-            logger.debug("Added default Ansible Galaxy credential to org")
-        else:
-            logger.debug("Could not find default Ansible Galaxy credential to add to org")
-    return org
 
 
 def update_user_orgs(backend, details, user=None, *args, **kwargs):

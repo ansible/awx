@@ -4,9 +4,17 @@
 import logging
 
 from django.contrib.contenttypes.models import ContentType
+from django.db.utils import IntegrityError
 from awx.main.models import Organization, Team
 
 logger = logging.getLogger('awx.sso.common')
+
+
+def get_orgs_by_ids():
+    existing_orgs = {}
+    for (org_id, org_name) in Organization.objects.all().values_list('id', 'name'):
+        existing_orgs[org_name] = org_id
+    return existing_orgs
 
 
 def reconcile_users_org_team_mappings(user, desired_org_states, desired_team_states, source):
@@ -49,9 +57,9 @@ def reconcile_users_org_team_mappings(user, desired_org_states, desired_team_sta
         for row in model_roles:
             for role_name in roles:
                 desired_state = desired_states.get(row.name, {})
-                if desired_state[role_name] is None:
-                    # The mapping was not defined for this [org/team]/role so we can just pass
-                    pass
+                if role_name not in desired_state or desired_state[role_name] is None:
+                    # The mapping was not defined for this [org/team]/role so we can just move on
+                    continue
 
                 # If somehow the auth adapter knows about an items role but that role is not defined in the DB we are going to print a pretty error
                 # This is your classic safety net that we should never hit; but here you are reading this comment... good luck and Godspeed.
@@ -70,3 +78,56 @@ def reconcile_users_org_team_mappings(user, desired_org_states, desired_team_sta
                     if role_id in users_roles:
                         logger.debug("{} adapter removing user {} permission of {} from {} {}".format(source, user.username, role_name, object_type, row.name))
                         user.roles.remove(role_id)
+
+
+def create_org_and_teams(org_list, team_map, adapter):
+    #
+    # org_list is a set of organization names
+    # team_map is a dict of {<team_name>: <org name>}
+    #
+    # Move this junk into save of the settings for performance later, there is no need to do that here
+    #    with maybe the exception of someone defining this in settings before the server is started?
+    # ==============================================================================================================
+
+    # Get all of the IDs and names of orgs in the DB and create any new org defined in LDAP that does not exist in the DB
+    existing_orgs = get_orgs_by_ids()
+
+    # Create any orgs (if needed) for all entries in the org and team maps
+    for org_name in org_list:
+        if org_name and org_name not in existing_orgs:
+            logger.info("{} adapter is creating org {}".format(adapter, org_name))
+            try:
+                new_org = get_or_create_with_default_galaxy_cred(name=org_name)
+            except IntegrityError:
+                # Another thread must have created this org before we did so now we need to get it
+                new_org = get_or_create_with_default_galaxy_cred(name=org_name)
+            # Add the org name to the existing orgs since we created it and we may need it to build the teams below
+            existing_orgs[org_name] = new_org.id
+
+    # Do the same for teams
+    existing_team_names = list(Team.objects.all().values_list('name', flat=True))
+    for team_name in team_map.keys():
+        if team_name not in existing_team_names:
+            logger.info("{} adapter is creating team {} in org {}".format(adapter, team_name, team_map[team_name]))
+            try:
+                Team.objects.create(name=team_name, organization_id=existing_orgs[team_map[team_name]])
+            except IntegrityError:
+                # If another process got here before us that is ok because we don't need the ID from this team or anything
+                pass
+    # End move some day
+    # ==============================================================================================================
+
+
+def get_or_create_with_default_galaxy_cred(**kwargs):
+    from awx.main.models import Organization, Credential
+
+    (org, org_created) = Organization.objects.get_or_create(**kwargs)
+    if org_created:
+        logger.debug("Created org {} (id {}) from {}".format(org.name, org.id, kwargs))
+        public_galaxy_credential = Credential.objects.filter(managed=True, name='Ansible Galaxy').first()
+        if public_galaxy_credential is not None:
+            org.galaxy_credentials.add(public_galaxy_credential)
+            logger.debug("Added default Ansible Galaxy credential to org")
+        else:
+            logger.debug("Could not find default Ansible Galaxy credential to add to org")
+    return org

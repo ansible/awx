@@ -14,7 +14,6 @@ from django.contrib.auth.models import User
 from django.conf import settings as django_settings
 from django.core.signals import setting_changed
 from django.utils.encoding import force_str
-from django.db.utils import IntegrityError
 
 # django-auth-ldap
 from django_auth_ldap.backend import LDAPSettings as BaseLDAPSettings
@@ -35,8 +34,7 @@ from social_core.backends.saml import SAMLIdentityProvider as BaseSAMLIdentityPr
 
 # Ansible Tower
 from awx.sso.models import UserEnterpriseAuth
-
-from .common import reconcile_users_org_team_mappings
+from awx.sso.common import create_org_and_teams, reconcile_users_org_team_mappings
 
 logger = logging.getLogger('awx.sso.backends')
 
@@ -366,8 +364,6 @@ def on_populate_user(sender, **kwargs):
     Handle signal from LDAP backend to populate the user object.  Update user
     organization/team memberships according to their LDAP groups.
     """
-    from awx.main.models import Organization, Team
-
     user = kwargs['user']
     ldap_user = kwargs['ldap_user']
     backend = ldap_user.backend
@@ -391,43 +387,16 @@ def on_populate_user(sender, **kwargs):
 
     org_map = getattr(backend.settings, 'ORGANIZATION_MAP', {})
     team_map = getattr(backend.settings, 'TEAM_MAP', {})
-
-    # Move this junk into save of the settings for performance later, there is no need to do that here
-    #    with maybe the exception of someone defining this in settings before the server is started?
-    # ==============================================================================================================
-
-    # Get all of the IDs and names of orgs in the DB and create any new org defined in LDAP that does not exist in the DB
-    existing_orgs = {}
-    for (org_id, org_name) in Organization.objects.all().values_list('id', 'name'):
-        existing_orgs[org_name] = org_id
-
-    # Create any orgs (if needed) for all entries in the org and team maps
-    for org_name in set(list(org_map.keys()) + [item.get('organization', None) for item in team_map.values()]):
-        if org_name and org_name not in existing_orgs:
-            logger.info("LDAP adapter is creating org {}".format(org_name))
-            try:
-                new_org = Organization.objects.create(name=org_name)
-            except IntegrityError:
-                # Another thread must have created this org before we did so now we need to get it
-                new_org = Organization.objects.get(name=org_name)
-            # Add the org name to the existing orgs since we created it and we may need it to build the teams below
-            existing_orgs[org_name] = new_org.id
-
-    # Do the same for teams
-    existing_team_names = list(Team.objects.all().values_list('name', flat=True))
+    orgs_list = set(list(org_map.keys()) + [item.get('organization', None) for item in team_map.values()])
+    team_map = {}
     for team_name, team_opts in team_map.items():
         if not team_opts.get('organization', None):
             # You can't save the LDAP config in the UI w/o an org (or '' or null as the org) so if we somehow got this condition its an error
             logger.error("Team named {} in LDAP team map settings is invalid due to missing organization".format(team_name))
             continue
-        if team_name not in existing_team_names:
-            try:
-                Team.objects.create(name=team_name, organization_id=existing_orgs[team_opts['organization']])
-            except IntegrityError:
-                # If another process got here before us that is ok because we don't need the ID from this team or anything
-                pass
-    # End move some day
-    # ==============================================================================================================
+        team_map[team_name] = team_opts['organization']
+
+    create_org_and_teams(orgs_list, team_map, 'LDAP')
 
     # Compute in memory what the state is of the different LDAP orgs
     org_roles_and_ldap_attributes = {'admin_role': 'admins', 'auditor_role': 'auditors', 'member_role': 'users'}
