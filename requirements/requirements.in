@@ -36,6 +36,7 @@ openshift
 pexpect==4.7.0 # see library notes
 prometheus_client
 psycopg2
+psycopg
 psutil
 pygerduty
 pyparsing==2.4.6  # Upgrading to v3 of pyparsing introduce errors on smart host filtering: Expected 'or' term, found 'or'  (at char 15), (line:1, col:16)
