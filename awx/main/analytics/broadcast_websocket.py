@@ -2,6 +2,7 @@ import datetime
 import asyncio
 import logging
 import redis
+import redis.asyncio
 import re
 
 from prometheus_client import (
@@ -81,7 +82,7 @@ class BroadcastWebsocketStatsManager:
 
     async def run_loop(self):
         try:
-            redis_conn = await redis.asyncio.create_redis_pool(settings.BROKER_URL)
+            redis_conn = await redis.asyncio.Redis.from_url(settings.BROKER_URL)
             while True:
                 stats_data_str = ''.join(stat.serialize() for stat in self._stats.values())
                 await redis_conn.set(self._redis_key, stats_data_str)
@@ -121,8 +122,8 @@ class BroadcastWebsocketStats:
             'Number of messages received, to be forwarded, by the broadcast websocket system',
             registry=self._registry,
         )
-        self._messages_received = Gauge(
-            f'awx_{self.remote_name}_messages_received',
+        self._messages_received_current_conn = Gauge(
+            f'awx_{self.remote_name}_messages_received_currrent_conn',
             'Number forwarded messages received by the broadcast websocket system, for the duration of the current connection',
             registry=self._registry,
         )
@@ -143,13 +144,13 @@ class BroadcastWebsocketStats:
 
     def record_message_received(self):
         self._internal_messages_received_per_minute.record()
-        self._messages_received.inc()
+        self._messages_received_current_conn.inc()
         self._messages_received_total.inc()
 
     def record_connection_established(self):
         self._connection.state('connected')
         self._connection_start.set_to_current_time()
-        self._messages_received.set(0)
+        self._messages_received_current_conn.set(0)
 
     def record_connection_lost(self):
         self._connection.state('disconnected')
