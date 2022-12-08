@@ -6,8 +6,8 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
-import MultiCredentialsLookup from './MultiCredentialsLookup';
 import { createMemoryHistory } from 'history';
+import MultiCredentialsLookup from './MultiCredentialsLookup';
 
 jest.mock('../../api');
 

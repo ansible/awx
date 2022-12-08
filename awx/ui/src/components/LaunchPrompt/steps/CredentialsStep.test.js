@@ -3,8 +3,8 @@ import { act } from 'react-dom/test-utils';
 import { Formik } from 'formik';
 import { CredentialsAPI, CredentialTypesAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import CredentialsStep from './CredentialsStep';
 import { createMemoryHistory } from 'history';
+import CredentialsStep from './CredentialsStep';
 
 jest.mock('../../../api/models/CredentialTypes');
 jest.mock('../../../api/models/Credentials');
