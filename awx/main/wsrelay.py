@@ -22,6 +22,7 @@ import awx.main.analytics.subsystem_metrics as s_metrics
 
 logger = logging.getLogger('awx.main.wsrelay')
 
+
 def wrap_broadcast_msg(group, message: str):
     # TODO: Maybe wrap as "group","message" so that we don't need to
     # encode/decode as json.
@@ -192,27 +193,35 @@ class WebSocketRelayManager(object):
 
     async def pg_consumer(self, conn):
         try:
-            await conn.execute("LISTEN wsrelay_rx_from_web")
+            await conn.execute("LISTEN web_heartbeet")
             async for notif in conn.notifies():
-                if notif is not None and notif.channel == "wsrelay_rx_from_web":
+                if notif is not None and notif.channel == "web_heartbeet":
                     try:
                         payload = json.loads(notif.payload)
                     except json.JSONDecodeError:
-                        logmsg = "Failed to decode message from pg_notify channel `wsrelay_rx_from_web`"
+                        logmsg = "Failed to decode message from pg_notify channel `web_heartbeet`"
                         if logger.isEnabledFor(logging.DEBUG):
                             logmsg = "{} {}".format(logmsg, payload)
                         logger.warning(logmsg)
                         continue
 
+                    # Skip if the message comes from the same host we are running on
+                    # In this case, we'll be sharing a redis, no need to relay.
+                    if payload.get("hostname") == self.local_hostname:
+                        continue
+
                     if payload.get("action") == "online":
                         hostname = payload["hostname"]
                         ip = payload["ip"]
+                        if ip is None:
+                            # If we don't get an IP, just try the hostname, maybe it resolves
+                            ip = hostname
                         self.known_hosts[hostname] = ip
-                        logger.info(f"Web host {hostname} ({ip}) is online.")
+                        logger.debug(f"Web host {hostname} ({ip}) online heartbeat received.")
                     elif payload.get("action") == "offline":
                         hostname = payload["hostname"]
                         del self.known_hosts[hostname]
-                        logger.info(f"Web host {host} ({ip}) is offline.")
+                        logger.debug(f"Web host {hostname} ({ip}) offline heartbeat received.")
         except Exception as e:
             # This catch-all is the same as the one above. asyncio will NOT log exceptions anywhere, so we need to do so ourselves.
             logger.exception(f"pg_consumer exception")
@@ -261,12 +270,9 @@ class WebSocketRelayManager(object):
                 del self.relay_connections[h]
                 stats_mgr.delete_remote_host_stats(h)
 
-            logger.error(f"New remote hosts: {new_remote_hosts}")
             for h in new_remote_hosts:
-                logger.error("we are here once")
                 stats = stats_mgr.new_remote_host_stats(h)
-                logger.error("but now we are not?")
-                logger.info(f"Starting relay connection to {h}")
+                logger.debug(f"Starting relay connection to {h}")
                 relay_connection = WebsocketRelayConnection(name=self.local_hostname, stats=stats, remote_host=self.known_hosts[h])
                 relay_connection.start()
                 self.relay_connections[h] = relay_connection
