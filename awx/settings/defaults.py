@@ -1011,6 +1011,9 @@ BROADCAST_WEBSOCKET_NEW_INSTANCE_POLL_RATE_SECONDS = 10
 # How often websocket process will generate stats
 BROADCAST_WEBSOCKET_STATS_POLL_RATE_SECONDS = 5
 
+# How often should web instances advertise themselves?
+BROADCAST_WEBSOCKET_BEACON_FROM_WEB_RATE_SECONDS = 15
+
 DJANGO_GUID = {'GUID_HEADER_NAME': 'X-API-Request-Id'}
 
 # Name of the default task queue

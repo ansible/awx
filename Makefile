@@ -229,6 +229,12 @@ wsrelay:
 	fi; \
 	$(PYTHON) manage.py run_wsrelay
 
+heartbeet:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py run_heartbeet
+
 ## Run to start the background task dispatcher for development.
 dispatcher:
 	@if [ "$(VENV_BASE)" ]; then \
