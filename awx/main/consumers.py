@@ -240,6 +240,6 @@ def emit_channel_notification(group, payload):
     run_sync(
         channel_layer.group_send(
             group,
-            {"type": "internal.message", "text": payload_dumped},
+            {"type": "internal.message", "text": payload_dumped, "needs_relay": True},
         )
     )
