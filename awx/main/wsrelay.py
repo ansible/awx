@@ -164,6 +164,14 @@ class WebsocketRelayConnection:
             while True:
                 try:
                     msg = await asyncio.wait_for(self.channel_layer.receive(consumer_channel), timeout=10)
+                    if not msg.get("needs_relay"):
+                        # This is added in by emit_channel_notification(). It prevents us from looping
+                        # in the event that we are sharing a redis with a web instance. We'll see the
+                        # message once (it'll have needs_relay=True), we'll delete that, and then forward
+                        # the message along. The web instance will add it back to the same channels group,
+                        # but it won't have needs_relay=True, so we'll ignore it.
+                        continue
+                    del msg["needs_relay"]
                 except asyncio.TimeoutError:
                     current_subscriptions = self.producers[name]["subscriptions"]
                     if len(current_subscriptions) == 0:
