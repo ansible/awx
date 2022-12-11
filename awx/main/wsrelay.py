@@ -62,7 +62,7 @@ class WebsocketRelayConnection:
     async def connect(self):
         from awx.main.consumers import WebsocketSecretAuthHelper  # noqa
 
-        logger.debug(f"Connection from {self.name} to {self.remote_host} attempt number {attempt}.")
+        logger.debug(f"Connection attempt from {self.name} to {self.remote_host}")
 
         '''
         Can not put get_channel_layer() in the init code because it is in the init
@@ -116,7 +116,7 @@ class WebsocketRelayConnection:
                 try:
                     payload = json.loads(msg.data)
                 except json.JSONDecodeError:
-                    logmsg = "Failed to decode broadcast message"
+                    logmsg = "Failed to decode message from web node"
                     if logger.isEnabledFor(logging.DEBUG):
                         logmsg = "{} {}".format(logmsg, payload)
                     logger.warning(logmsg)
@@ -150,6 +150,7 @@ class WebsocketRelayConnection:
 
             consumer_channel = await self.channel_layer.new_channel()
             await self.channel_layer.group_add(group, consumer_channel)
+            logger.debug(f"Producer {name} added to group {group} and is now awaiting messages.")
 
             while True:
                 try:
@@ -257,7 +258,7 @@ class WebSocketRelayManager(object):
 
         # Establishes a websocket connection to /websocket/relay on all API servers
         while True:
-            logger.info("Current known hosts: {}".format(self.known_hosts))
+            # logger.info("Current known hosts: {}".format(self.known_hosts))
             future_remote_hosts = self.known_hosts.keys()
             current_remote_hosts = self.relay_connections.keys()
             deleted_remote_hosts = set(current_remote_hosts) - set(future_remote_hosts)
@@ -293,7 +294,6 @@ class WebSocketRelayManager(object):
 
             for h in new_remote_hosts:
                 stats = stats_mgr.new_remote_host_stats(h)
-                logger.debug(f"Starting relay connection to {h}")
                 relay_connection = WebsocketRelayConnection(name=self.local_hostname, stats=stats, remote_host=self.known_hosts[h])
                 relay_connection.start()
                 self.relay_connections[h] = relay_connection
