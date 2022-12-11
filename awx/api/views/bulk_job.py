@@ -178,9 +178,13 @@ class BulkJobLaunchView(APIView):
 
         try:
             workflow_nodes = WorkflowJobNode.objects.bulk_create(workflow_nodes)
+            CredThroughModel = WorkflowJobNode.credentials.through
+            cred_through_models = []
             for node in workflow_nodes:
                 if 'credentials' in node_m2m_objects[node.identifier]:
-                    node.credentials.set(node_m2m_objects[node.identifier]['credentials'])
+                    for cred in node_m2m_objects[node.identifier]['credentials']:
+                        cred_through_models.append(CredThroughModel(credential=cred, workflowjobnode=node))
+            CredThroughModel.objects.bulk_create(cred_through_models)
             # Now that nodes are created, we can move the workflowjob from 'new' to 'pending' so the task manager
             # will pick it up and spawn the jobs
             wfj.status = 'pending'
