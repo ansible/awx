@@ -161,6 +161,11 @@ class WebsocketRelayConnection:
                         # the message along. The web instance will add it back to the same channels group,
                         # but it won't have needs_relay=True, so we'll ignore it.
                         continue
+
+                    # We need to copy the message because we're going to delete the needs_relay key
+                    # and we don't want to modify the original message because other producers may
+                    # still need to act on it. It seems weird, but it's necessary.
+                    msg = dict(msg)
                     del msg["needs_relay"]
                 except asyncio.TimeoutError:
                     current_subscriptions = self.producers[name]["subscriptions"]
