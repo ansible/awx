@@ -74,7 +74,7 @@ EXAMPLES = """
 
 - name: Load the UI settings specifying the connection info
   set_fact:
-    controller_settings: "{{ lookup('awx.awx.controller_api', 'settings/ui' host='controller.example.com',
+    controller_settings: "{{ lookup('awx.awx.controller_api', 'settings/ui', host='controller.example.com',
                              username='admin', password=my_pass_var, verify_ssl=False) }}"
 
 - name: Report the usernames of all users with admin privs
