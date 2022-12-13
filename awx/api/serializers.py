@@ -8,6 +8,7 @@ import logging
 import re
 from collections import OrderedDict
 from datetime import timedelta
+from uuid import uuid4
 
 # OAuth2
 from oauthlib import oauth2
@@ -4451,6 +4452,126 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
         template.scm_branch = WFJT_scm_branch
 
         return accepted
+
+
+class BulkJobNodeSerializer(serializers.Serializer):
+    # if we can find out the user, we can filter down the UnifiedJobTemplate objects
+    unified_job_template = serializers.PrimaryKeyRelatedField(queryset=UnifiedJobTemplate.objects.all(), many=False)
+    inventory = serializers.PrimaryKeyRelatedField(queryset=Inventory.objects.all(), required=False, many=False)
+    credentials = serializers.PrimaryKeyRelatedField(queryset=Credential.objects.all(), required=False, many=True)
+    identifier = serializers.CharField(required=False, write_only=True, allow_blank=False)
+
+    class Meta:
+        fields = (
+            'unified_job_template',
+            'identifier',
+            'inventory',
+            'credentials',
+            #   'labels',
+            #   'extra_data',
+            #   'survey_passwords',
+            #   'char_prompts',
+            #   'labels',
+            #   'instance_groups',
+            #   'execution_environment',
+        )
+
+    def validate(self, attrs):
+        # Since we don't validate using the model here, I don't want to pass any extra things that we are not
+        # explicitly checking RBAC on up to the BulkJobsLaunchSerializer because we could allow people to launch with
+        # related items they don't have permission to
+        for key in attrs.keys():
+            if key not in self.fields:
+                attrs.pop(key)
+        attrs = super().validate(attrs)
+        return attrs
+
+
+class BulkJobLaunchSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=512, required=False)  # limited by max name of jobs
+    jobs = serializers.ListField(child=BulkJobNodeSerializer(), allow_empty=False, max_length=100)
+
+    class Meta:
+        fields = ('name', 'jobs')
+        read_only_fields = ()
+
+    def validate(self, attrs):
+
+        request = self.context.get('request', None)
+        identifiers = set()
+        for node in attrs['jobs']:
+            if 'identifier' in node:
+                if node['identifier'] in identifiers:
+                    raise serializers.ValidationError(_(f"Identifier {node['identifier']} not unique"))
+                identifiers.add(node['identifier'])
+            else:
+                node['identifier'] = str(uuid4())
+        if request and not request.user.is_superuser:
+            allowed_ujts = set()
+            requested_ujts = {j['unified_job_template'].id for j in attrs['jobs']}
+            [allowed_ujts.add(tup[0]) for tup in UnifiedJobTemplate.accessible_pk_qs(request.user, 'execute_role').all()]
+            [allowed_ujts.add(tup[0]) for tup in UnifiedJobTemplate.accessible_pk_qs(request.user, 'admin_role').all()]
+            [allowed_ujts.add(tup[0]) for tup in UnifiedJobTemplate.accessible_pk_qs(request.user, 'update_role').all()]
+            accessible_inventories_qs = Inventory.accessible_pk_qs(request.user, 'update_role')
+            [allowed_ujts.add(tup[0]) for tup in InventorySource.objects.filter(inventory__in=accessible_inventories_qs).values_list('id')]
+            if requested_ujts - allowed_ujts:
+                not_allowed = requested_ujts - allowed_ujts
+                raise serializers.ValidationError(_(f"Unified Job Templates {not_allowed} not found."))
+
+            requested_use_inventories = {job['inventory'].id for job in attrs['jobs'] if 'inventory' in job}
+            if requested_use_inventories:
+                accessible_use_inventories = {tup[0] for tup in Inventory.accessible_pk_qs(request.user, 'use_role') }
+                if requested_use_inventories - accessible_use_inventories:
+                    not_allowed = requested_use_inventories - accessible_use_inventories
+                    raise serializers.ValidationError(_(f"Inventories {not_allowed} not found."))
+            requested_use_credentials = set()
+            for job in attrs['jobs']:
+                if 'credentials' in job:
+                    [requested_use_credentials.add(cred.id) for cred in job['credentials']]
+            if requested_use_credentials:
+                accessible_use_credentials = {tup[0] for tup in Credential.accessible_pk_qs(request.user, 'use_role').all()}
+                if requested_use_credentials - accessible_use_credentials:
+                    not_allowed = requested_use_credentials - accessible_use_credentials
+                    raise serializers.ValidationError(_(f"Credentials {not_allowed} not found."))
+
+        return attrs
+
+    def create(self, validated_data):
+        job_node_data = validated_data.pop('jobs')
+
+        # FIXME: Need to set organization on the WorkflowJob in order for users to be able to see it --
+        # normally their permission is sourced from the underlying WorkflowJobTemplate
+        # maybe we need to add Organization to WorkflowJob
+        if 'name' not in validated_data:
+            validated_data['name'] = 'Bulk Job Launch'
+
+        wfj = WorkflowJob.objects.create(**validated_data)
+        nodes = []
+        node_m2m_objects = {}
+        for node_attrs in job_node_data:
+            # we need to add any m2m objects after creation via the through model
+            node_m2m_objects[node_attrs['identifier']] = {}
+            for item in ['credentials']:
+                if item in node_attrs:
+                    node_m2m_objects[node_attrs['identifier']][item] = node_attrs.pop(item)
+            node_obj = WorkflowJobNode(workflow_job=wfj, created=wfj.created, modified=wfj.modified, **node_attrs)
+            nodes.append(node_obj)
+            node_m2m_objects[node_attrs['identifier']]['node'] = node_obj
+        WorkflowJobNode.objects.bulk_create(nodes)
+
+        # Deal with the m2m objects we have to create once the node exists
+        CredThroughModel = WorkflowJobNode.credentials.through
+        cred_through_models = []
+        for node_identifier in node_m2m_objects.keys():
+            if 'credentials' in node_m2m_objects[node_identifier]:
+                for cred in node_m2m_objects[node_identifier]['credentials']:
+                    cred_through_models.append(CredThroughModel(credential=cred, workflowjobnode=node_m2m_objects[node_identifier]['node']))
+        if cred_through_models:
+            CredThroughModel.objects.bulk_create(cred_through_models)
+
+        wfj.status = 'pending'
+        wfj.save()
+        return WorkflowJobSerializer().to_representation(wfj)
 
 
 class NotificationTemplateSerializer(BaseSerializer):
