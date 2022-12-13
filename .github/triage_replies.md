@@ -53,6 +53,16 @@ https://github.com/ansible/awx/#get-involved \
 Thank you once again for this and your interest in AWX!
 
 
+### Red Hat Support Team
+- Hi! \
+\
+It appears that you are using an RPM build for RHEL. Please reach out to the Red Hat support team and submit a ticket. \
+\
+Here is the link to do so: \
+\
+https://access.redhat.com/support \
+\
+Thank you for your submission and for supporting AWX!
 
 
 ## Common
