@@ -387,7 +387,7 @@ def on_populate_user(sender, **kwargs):
 
     org_map = getattr(backend.settings, 'ORGANIZATION_MAP', {})
     team_map = getattr(backend.settings, 'TEAM_MAP', {})
-    orgs_list = set(list(org_map.keys()) + [item.get('organization', None) for item in team_map.values()])
+    orgs_list = list(org_map.keys())
     team_map = {}
     for team_name, team_opts in team_map.items():
         if not team_opts.get('organization', None):

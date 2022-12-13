@@ -92,8 +92,22 @@ def create_org_and_teams(org_list, team_map, adapter):
     # Get all of the IDs and names of orgs in the DB and create any new org defined in LDAP that does not exist in the DB
     existing_orgs = get_orgs_by_ids()
 
-    # Create any orgs (if needed) for all entries in the org and team maps
-    for org_name in org_list:
+    # Parse through orgs and teams provided and create a list of unique items we care about creating
+    all_orgs = list(set(org_list))
+    all_teams = []
+    for team_name in team_map:
+        org_name = team_map[team_name]
+        if org_name:
+            if org_name not in all_orgs:
+                all_orgs.append(org_name)
+            # We don't have to test if this is in all_teams because team_map is already a hash
+            all_teams.append(team_name)
+        else:
+            # The UI should prevent this condition so this is just a double check to prevent a stack trace....
+            #  although the rest of the login process might stack later on
+            logger.error("{} adapter is attempting to create a team {} but it does not have an org".format(adapter, team_name))
+
+    for org_name in all_orgs:
         if org_name and org_name not in existing_orgs:
             logger.info("{} adapter is creating org {}".format(adapter, org_name))
             try:
@@ -106,7 +120,7 @@ def create_org_and_teams(org_list, team_map, adapter):
 
     # Do the same for teams
     existing_team_names = list(Team.objects.all().values_list('name', flat=True))
-    for team_name in team_map.keys():
+    for team_name in all_teams:
         if team_name not in existing_team_names:
             logger.info("{} adapter is creating team {} in org {}".format(adapter, team_name, team_map[team_name]))
             try:
