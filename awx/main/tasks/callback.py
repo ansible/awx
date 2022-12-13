@@ -204,7 +204,7 @@ class RunnerCallback:
                 self.instance = self.update_model(self.instance.pk, job_args=json.dumps(runner_config.command), job_cwd=runner_config.cwd, job_env=job_env)
             # We opened a connection just for that save, close it here now
             connections.close_all()
-        elif status_data['status'] == 'error':
+        elif status_data['status'] in ('error', 'canceled', 'timeout'):
             result_traceback = status_data.get('result_traceback', None)
             if result_traceback:
                 self.delay_update(result_traceback=result_traceback)
