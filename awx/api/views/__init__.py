@@ -4561,13 +4561,23 @@ class WorkflowApprovalDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 from rest_framework.decorators import api_view
 
 
-@api_view(['GET', 'POST'])
-def BulkJobLaunchView(request, *args, **kwargs):
-    bulkjob_serializer = serializers.BulkJobLaunchSerializer(data=request.data)
-    if bulkjob_serializer.is_valid():
-        result = bulkjob_serializer.create(bulkjob_serializer.validated_data)
-        return Response(serializers.WorkflowJobSerializer().to_representation(result), status=status.HTTP_201_CREATED)
-    return Response(bulkjob_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class BulkJobLaunchView(APIView):
+    _ignore_model_permissions = True
+    permission_classes = [IsAuthenticated]
+    serializer_class = serializers.BulkJobLaunchSerializer
+    allowed_methods = ['GET', 'POST']
+
+    def get(self, request):
+        bulkjob_serializer = serializers.BulkJobLaunchSerializer(data={})
+        bulkjob_serializer.is_valid()
+        return Response(bulkjob_serializer.errors, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        bulkjob_serializer = serializers.BulkJobLaunchSerializer(data=request.data)
+        if bulkjob_serializer.is_valid():
+            result = bulkjob_serializer.create(bulkjob_serializer.validated_data)
+            return Response(result, status=status.HTTP_201_CREATED)
+        return Response(bulkjob_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class WorkflowApprovalApprove(RetrieveAPIView):

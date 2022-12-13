@@ -4499,7 +4499,7 @@ class BulkJobLaunchSerializer(serializers.Serializer):
         WorkflowJobNode.objects.bulk_create(nodes)
         wfj.status = 'pending'
         wfj.save()
-        return wfj
+        return WorkflowJobSerializer().to_representation(wfj)
 
 
 class NotificationTemplateSerializer(BaseSerializer):
