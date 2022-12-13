@@ -4558,6 +4558,18 @@ class WorkflowApprovalDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
     serializer_class = serializers.WorkflowApprovalSerializer
 
 
+from rest_framework.decorators import api_view
+
+
+@api_view(['GET', 'POST'])
+def BulkJobLaunchView(request, *args, **kwargs):
+    bulkjob_serializer = serializers.BulkJobLaunchSerializer(data=request.data)
+    if bulkjob_serializer.is_valid():
+        result = bulkjob_serializer.create(bulkjob_serializer.validated_data)
+        return Response(serializers.WorkflowJobSerializer().to_representation(result), status=status.HTTP_201_CREATED)
+    return Response(bulkjob_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class WorkflowApprovalApprove(RetrieveAPIView):
     model = models.WorkflowApproval
     serializer_class = serializers.WorkflowApprovalViewSerializer

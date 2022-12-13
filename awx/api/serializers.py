@@ -4453,6 +4453,55 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
         return accepted
 
 
+class BulkJobNodeSerializer(serializers.Serializer):
+    # if we can find out the user, we can filter down the UnifiedJobTemplate objects
+    unified_job_template = serializers.PrimaryKeyRelatedField(queryset=UnifiedJobTemplate.objects.all(), many=False)
+
+    class Meta:
+        fields = ('unified_job_template', 'unified_job_type')
+
+    def validate(self, attrs):
+        for key in attrs.keys():
+            if key not in self.fields:
+                attrs.pop(key)
+        attrs = super().validate(attrs)
+        return attrs
+
+
+class BulkJobLaunchSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=512)  # limited by max name of jobs
+    jobs = serializers.ListField(child=BulkJobNodeSerializer(), allow_empty=False, max_length=100)
+
+    class Meta:
+        fields = ('name', 'workflow_job_nodes')
+        read_only_fields = ()
+
+    def validate_jobs(self, jobs):
+        view = self.context.get('view', None)
+        if view and not view.request.user.is_superuser:
+            allowed_ujts = set()
+            allowed_ujts.union(set(JobTemplate.allowed_objects(request.user, 'execute_role').all()))
+            allowed_ujts.union(set(WorkflowJobTemplate.allowed_objects(request.user, 'execute_role').all()))
+            allowed_ujts.union(set(ProjectUpdate.allowed_objects(request.user, 'update_role').all()))
+            allowed_ujts.union(set(InventorySource.objects.filter(inventory__in=Inventory.accessible_objects(request.user, 'update_role').all())))
+            requested_ujts = set(UnifiedJobTemplate.objects.filter(id__in=[j['unified_job_template'] for j in jobs]))
+            if allowed_ujts.intersection(requested_ujts) != requested_ujts:
+                raise serializers.ValidationError(_(f"Unified Job Templates {requested_ujts - allowed_ujts.intersection(requested_ujts)} not found."))
+        return jobs
+
+    def create(self, validated_data):
+        job_node_data = validated_data.pop('jobs')
+        # validated_data['is_bulk_job'] = True
+        wfj = WorkflowJob.objects.create(**validated_data)
+        nodes = []
+        for node in job_node_data:
+            nodes.append(WorkflowJobNode(workflow_job=wfj, created=wfj.created, modified=wfj.modified, **node))
+        WorkflowJobNode.objects.bulk_create(nodes)
+        wfj.status = 'pending'
+        wfj.save()
+        return wfj
+
+
 class NotificationTemplateSerializer(BaseSerializer):
     show_capabilities = ['edit', 'delete', 'copy']
     capabilities_prefetch = [{'copy': 'organization.admin'}]
