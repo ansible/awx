@@ -8,6 +8,7 @@ import logging
 import re
 from collections import OrderedDict
 from datetime import timedelta
+from uuid import uuid4
 
 # OAuth2
 from oauthlib import oauth2
@@ -4456,11 +4457,29 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
 class BulkJobNodeSerializer(serializers.Serializer):
     # if we can find out the user, we can filter down the UnifiedJobTemplate objects
     unified_job_template = serializers.PrimaryKeyRelatedField(queryset=UnifiedJobTemplate.objects.all(), many=False)
+    inventory = serializers.PrimaryKeyRelatedField(queryset=Inventory.objects.all(), required=False, many=False)
+    credentials = serializers.PrimaryKeyRelatedField(queryset=Credential.objects.all(), required=False, many=True)
+    identifier = serializers.CharField(required=False, write_only=True, allow_blank=False)
 
     class Meta:
-        fields = ('unified_job_template', 'unified_job_type')
+        fields = (
+            'unified_job_template',
+            'identifier',
+            'inventory',
+            'credentials',
+            #   'labels',
+            #   'extra_data',
+            #   'survey_passwords',
+            #   'char_prompts',
+            #   'labels',
+            #   'instance_groups',
+            #   'execution_environment',
+        )
 
     def validate(self, attrs):
+        # Since we don't validate using the model here, I don't want to pass any extra things that we are not
+        # explicitly checking RBAC on up to the BulkJobsLaunchSerializer because we could allow people to launch with
+        # related items they don't have permission to
         for key in attrs.keys():
             if key not in self.fields:
                 attrs.pop(key)
@@ -4478,25 +4497,67 @@ class BulkJobLaunchSerializer(serializers.Serializer):
 
     def validate_jobs(self, jobs):
         view = self.context.get('view', None)
+        identifiers = set()
+        for node in jobs:
+            if 'identifier' in node:
+                if node['identifier'] in identifiers:
+                    raise serializers.ValidationError(_(f"Identifier {identifier} not unique"))
+                identifiers.add(node['identifier'])
+            else:
+                node['identifier'] = str(uuid4())
         if view and not view.request.user.is_superuser:
             allowed_ujts = set()
             allowed_ujts.union(set(JobTemplate.allowed_objects(request.user, 'execute_role').all()))
             allowed_ujts.union(set(WorkflowJobTemplate.allowed_objects(request.user, 'execute_role').all()))
             allowed_ujts.union(set(ProjectUpdate.allowed_objects(request.user, 'update_role').all()))
-            allowed_ujts.union(set(InventorySource.objects.filter(inventory__in=Inventory.accessible_objects(request.user, 'update_role').all())))
+            accessible_inventories_qs = Inventory.accessible_objects(request.user, 'update_role')
+            allowed_ujts.union(set(InventorySource.objects.filter(inventory__in=accessible_inventories_qs.all())))
             requested_ujts = set(UnifiedJobTemplate.objects.filter(id__in=[j['unified_job_template'] for j in jobs]))
             if allowed_ujts.intersection(requested_ujts) != requested_ujts:
                 raise serializers.ValidationError(_(f"Unified Job Templates {requested_ujts - allowed_ujts.intersection(requested_ujts)} not found."))
+
+            inventories = {job.get('inventory') for job in jobs if 'inventory' in job}
+            if inventories:
+                allowed_inventories = set(accessible_inventories_qs.all()).intersection(inventories)
+                if allowed_inventories != set(inventories):
+                    raise serializers.ValidationError(_(f"Inventories {( inventories - allowed_inventories.intersection(inventories))} not found."))
+            credentials = {job.get('credentials') for job in jobs if 'credential' in job}
+            if credentials:
+                allowed_credentials = set(Credentials.allowed_objects(request.user, 'use_role').all()).intersection(credentials)
+                if allowed_credentials != set(credentials):
+                    raise serializers.ValidationError(_(f"Credentials {( credentials - allowed_credentials.intersection(credentials))} not found."))
+
         return jobs
 
     def create(self, validated_data):
         job_node_data = validated_data.pop('jobs')
         # validated_data['is_bulk_job'] = True
+        # FIXME: Need to set organization on the WorkflowJob in order for users to be able to see it --
+        # normally their permission is sourced from the underlying WorkflowJobTemplate
         wfj = WorkflowJob.objects.create(**validated_data)
         nodes = []
-        for node in job_node_data:
-            nodes.append(WorkflowJobNode(workflow_job=wfj, created=wfj.created, modified=wfj.modified, **node))
+        node_m2m_objects = {}
+        for node_attrs in job_node_data:
+            # we need to add any m2m objects after creation via the through model
+            node_m2m_objects[node_attrs['identifier']] = {}
+            for item in ['credentials']:
+                if item in node_attrs:
+                    node_m2m_objects[node_attrs['identifier']][item] = node_attrs.pop(item)
+            node_obj = WorkflowJobNode(workflow_job=wfj, created=wfj.created, modified=wfj.modified, **node_attrs)
+            nodes.append(node_obj)
+            node_m2m_objects[node_attrs['identifier']]['node'] = node_obj
         WorkflowJobNode.objects.bulk_create(nodes)
+
+        # Deal with the m2m objects we have to create once the node exists
+        CredThroughModel = WorkflowJobNode.credentials.through
+        cred_through_models = []
+        for node_identifier in node_m2m_objects.keys():
+            if 'credentials' in node_m2m_objects[node_identifier]:
+                for cred in node_m2m_objects[node_identifier]['credentials']:
+                    cred_through_models.append(CredThroughModel(credential=cred, workflowjobnode=node_m2m_objects[node_identifier]['node']))
+        if cred_through_models:
+            CredThroughModel.objects.bulk_create(cred_through_models)
+
         wfj.status = 'pending'
         wfj.save()
         return WorkflowJobSerializer().to_representation(wfj)
