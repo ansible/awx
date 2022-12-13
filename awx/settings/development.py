@@ -114,7 +114,7 @@ if 'sqlite3' not in DATABASES['default']['ENGINE']:  # noqa
 # this needs to stay at the bottom of this file
 try:
     if os.getenv('AWX_KUBE_DEVEL', False):
-        include(optional('minikube.py'), scope=locals())
+        include(optional('development_kube.py'), scope=locals())
     else:
         include(optional('local_*.py'), scope=locals())
 except ImportError:
