@@ -4488,11 +4488,11 @@ class BulkJobNodeSerializer(serializers.Serializer):
 
 
 class BulkJobLaunchSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=512)  # limited by max name of jobs
+    name = serializers.CharField(max_length=512, required=False)  # limited by max name of jobs
     jobs = serializers.ListField(child=BulkJobNodeSerializer(), allow_empty=False, max_length=100)
 
     class Meta:
-        fields = ('name', 'workflow_job_nodes')
+        fields = ('name', 'jobs')
         read_only_fields = ()
 
     def validate_jobs(self, jobs):
@@ -4531,9 +4531,16 @@ class BulkJobLaunchSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         job_node_data = validated_data.pop('jobs')
+
+        # TODO: add 'is_bulk_job' to workflow_job
         # validated_data['is_bulk_job'] = True
+
         # FIXME: Need to set organization on the WorkflowJob in order for users to be able to see it --
         # normally their permission is sourced from the underlying WorkflowJobTemplate
+        # maybe we need to add Organization to WorkflowJob
+        if 'name' not in validated_data:
+            validated_data['name'] = 'Bulk Job Launch'
+
         wfj = WorkflowJob.objects.create(**validated_data)
         nodes = []
         node_m2m_objects = {}

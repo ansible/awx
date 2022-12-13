@@ -4565,9 +4565,10 @@ class BulkJobLaunchView(APIView):
     _ignore_model_permissions = True
     permission_classes = [IsAuthenticated]
     serializer_class = serializers.BulkJobLaunchSerializer
-    allowed_methods = ['GET', 'POST']
+    allowed_methods = ['GET', 'POST', 'OPTIONS']
 
     def get(self, request):
+        # TODO Return something sensible here, like the defaults
         bulkjob_serializer = serializers.BulkJobLaunchSerializer(data={})
         bulkjob_serializer.is_valid()
         return Response(bulkjob_serializer.errors, status=status.HTTP_200_OK)
