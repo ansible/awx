@@ -56,7 +56,7 @@ options:
     pull:
       description:
         - determine image pull behavior
-      choices: ["always", "missing", "never"]
+      choices: ["always", "missing", "never", "newer"]
       default: 'missing'
       type: str
 extends_documentation_fragment: awx.awx.auth
@@ -84,7 +84,7 @@ def main():
         organization=dict(),
         credential=dict(default=''),
         state=dict(choices=['present', 'absent'], default='present'),
-        pull=dict(choices=['always', 'missing', 'never'], default='missing'),
+        pull=dict(choices=['always', 'missing', 'never', 'newer'], default='missing'),
     )
 
     # Create a module for ourselves

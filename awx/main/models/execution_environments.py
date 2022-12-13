@@ -17,6 +17,7 @@ class ExecutionEnvironment(CommonModel):
         ('always', _("Always pull container before running.")),
         ('missing', _("Only pull the image if not present before running.")),
         ('never', _("Never pull container before running.")),
+        ('newer', _("Only pull if a newer image is available in the registry.")),
     ]
 
     organization = models.ForeignKey(
