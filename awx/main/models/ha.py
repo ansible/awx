@@ -354,7 +354,9 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         except redis.ConnectionError:
             errors = _('Failed to connect to Redis')
 
-        self.save_health_data(awx_application_version, get_cpu_count(), get_mem_in_bytes(), update_last_seen=True, errors=errors)
+        data = dict(version=awx_application_version, cpu=get_cpu_count(), memory=get_mem_in_bytes(), update_last_seen=True, errors=errors)
+        self.save_health_data(**data)
+        return data
 
 
 class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin, ResourceMixin):

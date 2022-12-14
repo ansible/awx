@@ -413,7 +413,7 @@ def cluster_node_health_check(node):
     except Instance.DoesNotExist:
         logger.warning(f'Instance record for {node} missing, could not check capacity.')
         return
-    this_inst.local_health_check()
+    return this_inst.local_health_check()
 
 
 @task(queue=get_task_queuename)

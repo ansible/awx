@@ -4,8 +4,6 @@ from django.utils.timezone import now
 
 logger = logging.getLogger('awx.main.migrations')
 
-__all__ = ['create_clearsessions_jt', 'create_cleartokens_jt']
-
 '''
 These methods are called by migrations to create various system job templates
 
@@ -14,65 +12,91 @@ only if new system job templates were created (i.e. new database).
 '''
 
 
-def create_clearsessions_jt(apps, schema_editor):
+SYSTEM_JOB_TEMPLATES = {
+    'cleanup_jobs': dict(
+        name='Cleanup Job Details',
+        description='Remove job history',
+        schedule_name='Cleanup Job Schedule',
+        rrule_template='DTSTART:%s RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=SU',
+        extra_data={'days': '120'},
+    ),
+    'cleanup_activitystream': dict(
+        name='Cleanup Activity Stream',
+        description='Remove activity stream history',
+        schedule_name='Cleanup Activity Schedule',
+        rrule_template='DTSTART:%s RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=TU',
+        extra_data={'days': '355'},
+    ),
+    'cleanup_facts': dict(
+        name='Cleanup Fact Details',
+        description='Remove system tracking history',
+        schedule_name='Cleanup Fact Schedule',
+        rrule_template='DTSTART:%s RRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1',
+        extra_data={'older_than': '120d', 'granularity': '1w'},
+    ),
+    'cleanup_sessions': dict(
+        name='Cleanup Expired Sessions',
+        description='Cleans out expired browser sessions',
+        schedule_name='Cleanup Expired Sessions',
+        schedule_description='Cleans out expired browser sessions',
+        rrule_template='DTSTART:%s RRULE:FREQ=WEEKLY;INTERVAL=1',
+        extra_data={},
+    ),
+    'cleanup_tokens': dict(
+        name='Cleanup Expired OAuth 2 Tokens',
+        description='Cleanup expired OAuth 2 access and refresh tokens',
+        schedule_name='Cleanup Expired OAuth 2 Tokens',
+        schedule_description='Removes expired OAuth 2 access and refresh tokens',
+        rrule_template='DTSTART:%s RRULE:FREQ=WEEKLY;INTERVAL=1',
+        extra_data={},
+    ),
+    'run_health_checks': dict(
+        name='Run Cluster Health Checks',
+        description='Run health check on all eligible instances',
+        schedule_name='Run Cluster Health Checks',
+        rrule_template='DTSTART:%s RRULE:FREQ=DAILY;INTERVAL=1',
+        extra_data={},
+    ),
+}
+
+
+def create_system_job_templates(apps, schema_editor):
+    """
+    Create default system job templates if not present. Create default schedules
+    only if new system job templates were created (i.e. new database).
+    """
+
     SystemJobTemplate = apps.get_model('main', 'SystemJobTemplate')
     Schedule = apps.get_model('main', 'Schedule')
     ContentType = apps.get_model('contenttypes', 'ContentType')
     sjt_ct = ContentType.objects.get_for_model(SystemJobTemplate)
     now_dt = now()
-    schedule_time = now_dt.strftime('%Y%m%dT%H%M%SZ')
+    now_str = now_dt.strftime('%Y%m%dT%H%M%SZ')
+    job_type_choices = set(job_type for job_type, description in SystemJobTemplate._meta.get_field('job_type').choices)
 
-    sjt, created = SystemJobTemplate.objects.get_or_create(
-        job_type='cleanup_sessions',
-        defaults=dict(
-            name='Cleanup Expired Sessions',
-            description='Cleans out expired browser sessions',
-            polymorphic_ctype=sjt_ct,
-            created=now_dt,
-            modified=now_dt,
-        ),
-    )
-    if created:
-        sched = Schedule(
-            name='Cleanup Expired Sessions',
-            rrule='DTSTART:%s RRULE:FREQ=WEEKLY;INTERVAL=1' % schedule_time,
-            description='Cleans out expired browser sessions',
-            enabled=True,
-            created=now_dt,
-            modified=now_dt,
-            extra_data={},
+    for job_type, details in SYSTEM_JOB_TEMPLATES.items():
+        if job_type not in job_type_choices:
+            continue  # when logic runs before field has updated
+        sjt, created = SystemJobTemplate.objects.get_or_create(
+            job_type=job_type,
+            defaults=dict(
+                name=details['name'],
+                description=details['description'],
+                created=now_dt,
+                modified=now_dt,
+                polymorphic_ctype=sjt_ct,
+            ),
         )
-        sched.unified_job_template = sjt
-        sched.save()
-
-
-def create_cleartokens_jt(apps, schema_editor):
-    SystemJobTemplate = apps.get_model('main', 'SystemJobTemplate')
-    Schedule = apps.get_model('main', 'Schedule')
-    ContentType = apps.get_model('contenttypes', 'ContentType')
-    sjt_ct = ContentType.objects.get_for_model(SystemJobTemplate)
-    now_dt = now()
-    schedule_time = now_dt.strftime('%Y%m%dT%H%M%SZ')
-
-    sjt, created = SystemJobTemplate.objects.get_or_create(
-        job_type='cleanup_tokens',
-        defaults=dict(
-            name='Cleanup Expired OAuth 2 Tokens',
-            description='Cleanup expired OAuth 2 access and refresh tokens',
-            polymorphic_ctype=sjt_ct,
-            created=now_dt,
-            modified=now_dt,
-        ),
-    )
-    if created:
-        sched = Schedule(
-            name='Cleanup Expired OAuth 2 Tokens',
-            rrule='DTSTART:%s RRULE:FREQ=WEEKLY;INTERVAL=1' % schedule_time,
-            description='Removes expired OAuth 2 access and refresh tokens',
-            enabled=True,
-            created=now_dt,
-            modified=now_dt,
-            extra_data={},
-        )
-        sched.unified_job_template = sjt
-        sched.save()
+        if created:
+            logger.info(f'Created system job {job_type}')
+            sched = Schedule(
+                name=details['schedule_name'],
+                rrule=details['rrule_template'] % now_str,
+                description=details.get('schedule_description', 'Automatically Generated Schedule'),
+                enabled=True,
+                extra_data=details['extra_data'],
+                created=now_dt,
+                modified=now_dt,
+            )
+            sched.unified_job_template = sjt
+            sched.save()

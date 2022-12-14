@@ -1142,6 +1142,7 @@ class SystemJobOptions(BaseModel):
         ('cleanup_activitystream', _('Remove activity stream entries older than a certain number of days')),
         ('cleanup_sessions', _('Removes expired browser sessions from the database')),
         ('cleanup_tokens', _('Removes expired OAuth 2 access tokens and refresh tokens')),
+        ('run_health_checks', _('Runs health checks for instances with node types that can run jobs')),
     ]
 
     class Meta:
