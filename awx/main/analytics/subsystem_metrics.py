@@ -9,7 +9,7 @@ from django.apps import apps
 from awx.main.consumers import emit_channel_notification
 from awx.main.utils import is_testing
 
-root_key = 'awx_metrics'
+root_key = settings.SUBSYSTEM_METRICS_REDIS_KEY_PREFIX
 logger = logging.getLogger('awx.main.analytics')
 
 
@@ -264,13 +264,6 @@ class Metrics:
             data[field] = self.METRICS[field].decode(self.conn)
         return data
 
-    def store_metrics(self, data_json):
-        # called when receiving metrics from other instances
-        data = json.loads(data_json)
-        if self.instance_name != data['instance']:
-            logger.debug(f"{self.instance_name} received subsystem metrics from {data['instance']}")
-        self.conn.set(root_key + "_instance_" + data['instance'], data['metrics'])
-
     def should_pipe_execute(self):
         if self.metrics_have_changed is False:
             return False
@@ -309,15 +302,8 @@ class Metrics:
                     'instance': self.instance_name,
                     'metrics': self.serialize_local_metrics(),
                 }
-                # store a local copy as well
-                self.store_metrics(json.dumps(payload))
 
-                # 🚨🚨🚨🚨🚨🚨🚨🚨
-                # TODO: rework how metrics are emitted and recorded. we used to exploit wsbroadcast's behavior of
-                # sending the same data out to  every other node.
-                # Should we increment this data in redis but ultimately just store it in the database?
-                # emit_channel_notification("metrics", payload)
-                # 🚨🚨🚨🚨🚨🚨🚨🚨
+                emit_channel_notification("metrics", payload)
 
                 self.previous_send_metrics.set(current_time)
                 self.previous_send_metrics.store_value(self.conn)
