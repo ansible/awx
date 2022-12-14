@@ -493,6 +493,24 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e enable_grafana=$(GRAFANA) $(EXTRA_SOURCES_ANSIBLE_OPTS)
 
 
+podman-kube-play: awx/projects docker-compose-sources
+	podman play kube tools/docker-compose/_sources/podman_kube.yml
+
+podman-kube-clean: awx/projects
+	if [ "$(shell podman pod list --filter name=awx -q)" ]; then \
+	  podman pod rm --force awx; \
+        fi
+	podman volume prune --force --filter label=pod=awx
+
+podman-build:
+	ansible-playbook tools/ansible/dockerfile.yml -e build_dev=True -e receptor_image=$(RECEPTOR_IMAGE)
+	podman build -t $(DEVEL_IMAGE_NAME) \
+	    --cache-from=$(DEV_IMAGE_TAG_BASE)/awx_devel .
+
+podman-clean: podman-kube-clean
+	if [ "$(shell podman images --filter reference=awx_devel -q)" ]; then \
+	    podman rmi $(shell podman images --filter reference=awx_devel -q); \
+	fi
 
 docker-compose: awx/projects docker-compose-sources
 	docker-compose -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_OPTS) up $(COMPOSE_UP_OPTS) --remove-orphans
