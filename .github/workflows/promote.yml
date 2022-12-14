@@ -74,4 +74,6 @@ jobs:
           docker tag ghcr.io/${{ github.repository }}:${{ github.event.release.tag_name }} quay.io/${{ github.repository }}:latest
           docker push quay.io/${{ github.repository }}:${{ github.event.release.tag_name }}
           docker push quay.io/${{ github.repository }}:latest
-
+          docker pull ghcr.io/${{ github.repository_owner }}/awx-ee:${{ github.event.release.tag_name }}
+          docker tag ghcr.io/${{ github.repository_owner }}/awx-ee:${{ github.event.release.tag_name }} quay.io/${{ github.repository_owner }}/awx-ee:${{ github.event.release.tag_name }}
+          docker push quay.io/${{ github.repository_owner }}/awx-ee:${{ github.event.release.tag_name }}
