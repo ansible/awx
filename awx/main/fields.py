@@ -790,13 +790,11 @@ class CredentialTypeInjectorField(JSONSchemaField):
                 'extra_vars': {
                     'type': 'object',
                     'patternProperties': {
-                        # http://docs.ansible.com/ansible/playbooks_variables.html#what-makes-a-valid-variable-name
-                        '^[a-zA-Z_]+[a-zA-Z0-9_]*$': {'type': 'string'},
+                        r'^(?:(?:{{[^{}]*?}})|(?:[a-zA-Z_]+[a-zA-Z0-9_]*)+)+$': {"anyOf": [{'type': 'string'}, {'$ref': '#/properties/extra_vars'}]}
                     },
                     'additionalProperties': False,
                 },
             },
-            'additionalProperties': False,
         }
 
     def validate_env_var_allowed(self, env_var):
