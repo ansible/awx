@@ -107,6 +107,12 @@ class WebsocketRelayConnection:
         self.async_task.cancel()
 
     async def run_connection(self, websocket: aiohttp.ClientWebSocketResponse):
+        # create a dedicated subsystem metric producer to handle local subsystem
+        # metrics messages
+        # the "metrics" group is not subscribed to in the typical fashion, so we
+        # just explicitly create it
+        producer = self.event_loop.create_task(self.run_producer("metrics", websocket, "metrics"))
+        self.producers["metrics"] = {"task": producer, "subscriptions": {"metrics"}}
         async for msg in websocket:
             self.stats.record_message_received()
 
