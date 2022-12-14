@@ -118,6 +118,12 @@
     dest: "{{ sources_dest }}/{{ compose_name }}"
     mode: "0600"
 
+- name: Render Podman Kube Play
+  template:
+    src: podman_kube.yml.j2
+    dest: "{{ sources_dest }}/podman_kube.yml"
+    mode: "0600"
+
 - name: Render Receptor Config(s) for Control Plane
   template:
     src: "receptor-awx.conf.j2"
