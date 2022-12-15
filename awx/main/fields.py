@@ -790,7 +790,7 @@ class CredentialTypeInjectorField(JSONSchemaField):
                 'extra_vars': {
                     'type': 'object',
                     'patternProperties': {
-                        r'^(?:(?:{{[^{}]*?}})|(?:[a-zA-Z_]+[a-zA-Z0-9_]*)+)+$': {"anyOf": [{'type': 'string'}, {'$ref': '#/properties/extra_vars'}]}
+                        r'^(?:(?:{(?:{|%)[^{}]*?(?:%|})})|(?:[a-zA-Z_]+[a-zA-Z0-9_]*)+)+$': {"anyOf": [{'type': 'string'}, {'$ref': '#/properties/extra_vars'}]}
                     },
                     'additionalProperties': False,
                 },
