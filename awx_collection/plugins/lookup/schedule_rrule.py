@@ -101,38 +101,38 @@ else:
 
 
 class LookupModule(LookupBase):
-    frequencies = {
-        'none': rrule.DAILY,
-        'minute': rrule.MINUTELY,
-        'hour': rrule.HOURLY,
-        'day': rrule.DAILY,
-        'week': rrule.WEEKLY,
-        'month': rrule.MONTHLY,
-    }
-
-    weekdays = {
-        'monday': rrule.MO,
-        'tuesday': rrule.TU,
-        'wednesday': rrule.WE,
-        'thursday': rrule.TH,
-        'friday': rrule.FR,
-        'saturday': rrule.SA,
-        'sunday': rrule.SU,
-    }
-
-    set_positions = {
-        'first': 1,
-        'second': 2,
-        'third': 3,
-        'fourth': 4,
-        'last': -1,
-    }
-
     # plugin constructor
     def __init__(self, *args, **kwargs):
         if LIBRARY_IMPORT_ERROR:
             raise_from(AnsibleError('{0}'.format(LIBRARY_IMPORT_ERROR)), LIBRARY_IMPORT_ERROR)
         super().__init__(*args, **kwargs)
+
+        self.frequencies = {
+            'none': rrule.DAILY,
+            'minute': rrule.MINUTELY,
+            'hour': rrule.HOURLY,
+            'day': rrule.DAILY,
+            'week': rrule.WEEKLY,
+            'month': rrule.MONTHLY,
+        }
+
+        self.weekdays = {
+            'monday': rrule.MO,
+            'tuesday': rrule.TU,
+            'wednesday': rrule.WE,
+            'thursday': rrule.TH,
+            'friday': rrule.FR,
+            'saturday': rrule.SA,
+            'sunday': rrule.SU,
+        }
+
+        self.set_positions = {
+            'first': 1,
+            'second': 2,
+            'third': 3,
+            'fourth': 4,
+            'last': -1,
+        }
 
     @staticmethod
     def parse_date_time(date_string):
@@ -149,14 +149,13 @@ class LookupModule(LookupBase):
 
         return self.get_rrule(frequency, kwargs)
 
-    @staticmethod
-    def get_rrule(frequency, kwargs):
+    def get_rrule(self, frequency, kwargs):
 
-        if frequency not in LookupModule.frequencies:
+        if frequency not in self.frequencies:
             raise AnsibleError('Frequency of {0} is invalid'.format(frequency))
 
         rrule_kwargs = {
-            'freq': LookupModule.frequencies[frequency],
+            'freq': self.frequencies[frequency],
             'interval': kwargs.get('every', 1),
         }
 
@@ -187,9 +186,9 @@ class LookupModule(LookupBase):
                 days = []
                 for day in kwargs['on_days'].split(','):
                     day = day.strip()
-                    if day not in LookupModule.weekdays:
-                        raise AnsibleError('Parameter on_days must only contain values {0}'.format(', '.join(LookupModule.weekdays.keys())))
-                    days.append(LookupModule.weekdays[day])
+                    if day not in self.weekdays:
+                        raise AnsibleError('Parameter on_days must only contain values {0}'.format(', '.join(self.weekdays.keys())))
+                    days.append(self.weekdays[day])
 
                 rrule_kwargs['byweekday'] = days
 
@@ -214,13 +213,13 @@ class LookupModule(LookupBase):
                     except Exception as e:
                         raise_from(AnsibleError('on_the parameter must be two words separated by a space'), e)
 
-                    if weekday not in LookupModule.weekdays:
+                    if weekday not in self.weekdays:
                         raise AnsibleError('Weekday portion of on_the parameter is not valid')
-                    if occurance not in LookupModule.set_positions:
+                    if occurance not in self.set_positions:
                         raise AnsibleError('The first string of the on_the parameter is not valid')
 
-                    rrule_kwargs['byweekday'] = LookupModule.weekdays[weekday]
-                    rrule_kwargs['bysetpos'] = LookupModule.set_positions[occurance]
+                    rrule_kwargs['byweekday'] = self.weekdays[weekday]
+                    rrule_kwargs['bysetpos'] = self.set_positions[occurance]
 
         my_rule = rrule.rrule(**rrule_kwargs)
 
