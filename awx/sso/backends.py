@@ -477,84 +477,65 @@ def on_populate_user(sender, **kwargs):
 
 def reconcile_users_org_team_mappings(user, desired_org_states, desired_team_states, source):
     #
-    # desired_org_states: { '<org_name>': { '<role>': <boolean> } }
+    # Arguments:
+    #   user - a user object
+    #   desired_org_states: { '<org_name>': { '<role>': <boolean> or None } }
+    #   desired_team_states: { '<org_name>': { '<team name>': { '<role>': <boolean> or None } } }
+    #   source - a text label indicating the "authentication adapter" for debug messages
     #
-    # desired_team_states: { '<org_name>': { '<team name>': { '<role>': <boolean> } } }
+    # This function will load the users existing roles and then based on the deisred states modify the users roles
+    #    True indicates the user needs to be a member of the role
+    #    False indicates the user should not be a member of the role
+    #    None means this function should not change the users membership of a role
     #
     from awx.main.models import Organization, Team
 
     content_types = []
+    reconcile_items = []
     if desired_org_states:
         content_types.append(ContentType.objects.get_for_model(Organization))
+        reconcile_items.append(('organization', desired_org_states))
     if desired_team_states:
         content_types.append(ContentType.objects.get_for_model(Team))
+        reconcile_items.append(('team', desired_team_states))
 
     if not content_types:
         # If both desired states were empty we can simply return because there is nothing to reconcile
         return
 
-    # users_existing_roles is a flat set of IDs
-    users_existing_roles = set(user.roles.filter(content_type__in=content_types).values_list('pk', flat=True))
+    # users_roles is a flat set of IDs
+    users_roles = set(user.roles.filter(content_type__in=content_types).values_list('pk', flat=True))
 
-    if desired_org_states:
-        object_type = 'organization'
-        desired_states = desired_org_states
-
+    for object_type, desired_states in reconcile_items:
         roles = []
-        for sub_dict in desired_states.values():
-            for role_name in sub_dict:
-                if sub_dict[role_name] is None:
-                    continue
-                if role_name not in roles:
-                    roles.append(role_name)
-
         # Get a set of named tuples for the org/team name plus all of the roles we got above
-        model_roles = Organization.objects.filter(name__in=desired_states.keys()).values_list('name', *roles, named=True)
-        for row in model_roles:
-            for role_name in roles:
-                desired_state = desired_states.get(row.name, {})
-                if desired_state.get(role_name, None) is None:
-                    # The mapping was not defined for this [org/team]/role so we can just pass
-                    continue
-
-                # If somehow the auth adapter knows about an items role but that role is not defined in the DB we are going to print a pretty error
-                # This is your classic safety net that we should never hit; but here you are reading this comment... good luck and Godspeed.
-                role_id = getattr(row, role_name, None)
-                if role_id is None:
-                    logger.error("{} adapter wanted to manage role {} of {} {} but that role is not defined".format(source, role_name, object_type, row.name))
-                    continue
-
-                if desired_state[role_name]:
-                    # The desired state was the user mapped into the object_type, if the user was not mapped in map them in
-                    if role_id not in users_existing_roles:
-                        logger.debug("{} adapter adding user {} to {} {} as {}".format(source, user.username, object_type, row.name, role_name))
-                        user.roles.add(role_id)
-                else:
-                    # The desired state was the user was not mapped into the org, if the user has the permission remove it
-                    if role_id in users_existing_roles:
-                        logger.debug("{} adapter removing user {} permission of {} from {} {}".format(source, user.username, role_name, object_type, row.name))
-                        user.roles.remove(role_id)
-
-    if desired_team_states:
-        object_type = 'team'
-        desired_states = desired_team_states
-        # Get all of the roles in the desired states for efficient DB extraction
-        roles = []
-        team_names = []
-        for team_dicts in desired_states.values():
-            team_names.extend(team_dicts.keys())
-            for sub_dict in team_dicts.values():
+        if object_type == 'organization':
+            for sub_dict in desired_states.values():
                 for role_name in sub_dict:
                     if sub_dict[role_name] is None:
                         continue
                     if role_name not in roles:
                         roles.append(role_name)
+            model_roles = Organization.objects.filter(name__in=desired_states.keys()).values_list('name', *roles, named=True)
+        else:
+            team_names = []
+            for teams_dict in desired_states.values():
+                team_names.extend(teams_dict.keys())
+                for sub_dict in teams_dict.values():
+                    for role_name in sub_dict:
+                        if sub_dict[role_name] is None:
+                            continue
+                        if role_name not in roles:
+                            roles.append(role_name)
+            model_roles = Team.objects.filter(name__in=team_names).values_list('name', 'organization__name', *roles, named=True)
 
-        # Get a set of named tuples for the org/team name plus all of the roles we got above
-        model_roles = Team.objects.filter(name__in=team_names).values_list('name', 'organization__name', *roles, named=True)
         for row in model_roles:
             for role_name in roles:
-                desired_state = desired_states.get(row.organization__name, {}).get(row.name, {})
+                if object_type == 'organization':
+                    desired_state = desired_states.get(row.name, {})
+                else:
+                    desired_state = desired_states.get(row.organization__name, {}).get(row.name, {})
+
                 if desired_state.get(role_name, None) is None:
                     # The mapping was not defined for this [org/team]/role so we can just pass
                     continue
@@ -568,11 +549,11 @@ def reconcile_users_org_team_mappings(user, desired_org_states, desired_team_sta
 
                 if desired_state[role_name]:
                     # The desired state was the user mapped into the object_type, if the user was not mapped in map them in
-                    if role_id not in users_existing_roles:
+                    if role_id not in users_roles:
                         logger.debug("{} adapter adding user {} to {} {} as {}".format(source, user.username, object_type, row.name, role_name))
                         user.roles.add(role_id)
                 else:
                     # The desired state was the user was not mapped into the org, if the user has the permission remove it
-                    if role_id in users_existing_roles:
+                    if role_id in users_roles:
                         logger.debug("{} adapter removing user {} permission of {} from {} {}".format(source, user.username, role_name, object_type, row.name))
                         user.roles.remove(role_id)
