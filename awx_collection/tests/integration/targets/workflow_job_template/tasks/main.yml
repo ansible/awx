@@ -245,6 +245,7 @@
         ask_inventory_on_launch: true
         ask_scm_branch_on_launch: true
         ask_limit_on_launch: true
+        ask_tags_on_launch: true
         ask_variables_on_launch: true
       register: result
 
@@ -263,6 +264,7 @@
         ask_inventory_on_launch: true
         ask_scm_branch_on_launch: true
         ask_limit_on_launch: true
+        ask_tags_on_launch: true
         ask_variables_on_launch: true
       register: bad_label_results
       ignore_errors: true
@@ -278,6 +280,7 @@
         ask_inventory_on_launch: false
         ask_scm_branch_on_launch: false
         ask_limit_on_launch: false
+        ask_tags_on_launch: false
         ask_variables_on_launch: false
         state: present
 
