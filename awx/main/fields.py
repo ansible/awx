@@ -856,27 +856,41 @@ class CredentialTypeInjectorField(JSONSchemaField):
                 template_name = template_name.split('.')[1]
                 setattr(valid_namespace['tower'].filename, template_name, 'EXAMPLE_FILENAME')
 
+        def validate_template_string(tmpl):
+            try:
+                sandbox.ImmutableSandboxedEnvironment(undefined=StrictUndefined).from_string(tmpl).render(valid_namespace)
+            except UndefinedError as e:
+                raise django_exceptions.ValidationError(
+                    _('{sub_key} uses an undefined field ({error_msg})').format(sub_key=key, error_msg=e),
+                    code='invalid',
+                    params={'value': value},
+                )
+            except SecurityError as e:
+                raise django_exceptions.ValidationError(_('Encountered unsafe code execution: {}').format(e))
+            except TemplateSyntaxError as e:
+                raise django_exceptions.ValidationError(
+                    _('Syntax error rendering template for {sub_key} inside of {type} ({error_msg})').format(sub_key=key, type=type_, error_msg=e),
+                    code='invalid',
+                    params={'value': value},
+                )
+
+        def validate_extra_vars(node):
+            if isinstance(node, dict):
+                return {validate_extra_vars(k): validate_extra_vars(v) for k, v in node.items()}
+            elif isinstance(node, list):
+                return [validate_extra_vars(x) for x in node]
+            else:
+                validate_template_string(node)
+
         for type_, injector in value.items():
             if type_ == 'env':
                 for key in injector.keys():
                     self.validate_env_var_allowed(key)
-            for key, tmpl in injector.items():
-                try:
-                    sandbox.ImmutableSandboxedEnvironment(undefined=StrictUndefined).from_string(tmpl).render(valid_namespace)
-                except UndefinedError as e:
-                    raise django_exceptions.ValidationError(
-                        _('{sub_key} uses an undefined field ({error_msg})').format(sub_key=key, error_msg=e),
-                        code='invalid',
-                        params={'value': value},
-                    )
-                except SecurityError as e:
-                    raise django_exceptions.ValidationError(_('Encountered unsafe code execution: {}').format(e))
-                except TemplateSyntaxError as e:
-                    raise django_exceptions.ValidationError(
-                        _('Syntax error rendering template for {sub_key} inside of {type} ({error_msg})').format(sub_key=key, type=type_, error_msg=e),
-                        code='invalid',
-                        params={'value': value},
-                    )
+            if type_ == 'extra_vars':
+                validate_extra_vars(injector)
+            else:
+                for key, tmpl in injector.items():
+                    validate_template_string(tmpl)
 
 
 class AskForField(models.BooleanField):
