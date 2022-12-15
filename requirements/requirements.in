@@ -38,7 +38,6 @@ psycopg2
 psutil
 pygerduty
 pyparsing==2.4.6  # Upgrading to v3 of pyparsing introduce errors on smart host filtering: Expected 'or' term, found 'or'  (at char 15), (line:1, col:16)
-python3-saml==1.13.0
 python-dsv-sdk
 python-tss-sdk==1.0.0
 python-ldap
@@ -59,9 +58,6 @@ wheel
 pip==21.2.4  # see UPGRADE BLOCKERs
 setuptools  # see UPGRADE BLOCKERs
 setuptools_scm[toml]  # see UPGRADE BLOCKERs, xmlsec build dep
-xmlsec==1.3.12 # xmlsec 1.3.13 removed the ability to use lxml 4.7.0 but python3-saml requires lxml 4.7.0 so we need to pin xmlsec
-lxml>=3.8 # xmlsec build dep
-pkgconfig>=1.5.1 # xmlsec build dep
 setuptools-rust >= 0.11.4 # cryptography build dep
 
 # Temporarily added to use ansible-runner from git branch, to be removed
