@@ -59,6 +59,7 @@ pip==21.2.4  # see UPGRADE BLOCKERs
 setuptools  # see UPGRADE BLOCKERs
 setuptools_scm[toml]  # see UPGRADE BLOCKERs, xmlsec build dep
 setuptools-rust >= 0.11.4 # cryptography build dep
+pkgconfig>=1.5.1  # xmlsec build dep - needed for offline build
 
 # Temporarily added to use ansible-runner from git branch, to be removed
 # when ansible-runner moves from requirements_git.txt to here
