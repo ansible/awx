@@ -856,7 +856,7 @@ class CredentialTypeInjectorField(JSONSchemaField):
                 template_name = template_name.split('.')[1]
                 setattr(valid_namespace['tower'].filename, template_name, 'EXAMPLE_FILENAME')
 
-        def validate_template_string(tmpl):
+        def validate_template_string(type_, key, tmpl):
             try:
                 sandbox.ImmutableSandboxedEnvironment(undefined=StrictUndefined).from_string(tmpl).render(valid_namespace)
             except UndefinedError as e:
@@ -874,23 +874,23 @@ class CredentialTypeInjectorField(JSONSchemaField):
                     params={'value': value},
                 )
 
-        def validate_extra_vars(node):
+        def validate_extra_vars(key, node):
             if isinstance(node, dict):
-                return {validate_extra_vars(k): validate_extra_vars(v) for k, v in node.items()}
+                return {validate_extra_vars(key, k): validate_extra_vars(k, v) for k, v in node.items()}
             elif isinstance(node, list):
-                return [validate_extra_vars(x) for x in node]
+                return [validate_extra_vars(key, x) for x in node]
             else:
-                validate_template_string(node)
+                validate_template_string("extra_vars", key, node)
 
         for type_, injector in value.items():
             if type_ == 'env':
                 for key in injector.keys():
                     self.validate_env_var_allowed(key)
             if type_ == 'extra_vars':
-                validate_extra_vars(injector)
+                validate_extra_vars(None, injector)
             else:
                 for key, tmpl in injector.items():
-                    validate_template_string(tmpl)
+                    validate_template_string(type_, key, tmpl)
 
 
 class AskForField(models.BooleanField):
