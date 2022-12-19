@@ -158,7 +158,11 @@ class InstanceManager(models.Manager):
                     return (False, instance)
 
             # Create new instance, and fill in default values
-            create_defaults = {'node_state': Instance.States.INSTALLED, 'capacity': 0}
+            create_defaults = {
+                'node_state': Instance.States.INSTALLED,
+                'capacity': 0,
+                'listener_port': 27199,
+            }
             if defaults is not None:
                 create_defaults.update(defaults)
             uuid_option = {}
