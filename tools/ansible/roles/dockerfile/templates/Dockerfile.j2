@@ -2,7 +2,7 @@
 ### tools/ansible/roles/dockerfile/templates/Dockerfile.j2
 ###
 ### DO NOT EDIT
-###
+###t
 
 # Build container
 FROM quay.io/centos/centos:stream9 as builder
@@ -199,6 +199,10 @@ ADD tools/ansible/roles/dockerfile/files/rsyslog.conf /var/lib/awx/rsyslog/rsysl
 ADD tools/ansible/roles/dockerfile/files/wait-for-migrations /usr/local/bin/wait-for-migrations
 ADD tools/ansible/roles/dockerfile/files/stop-supervisor /usr/local/bin/stop-supervisor
 
+# Create default awx rsyslog sidecar
+# Unsure about second arg here
+ADD tools/ansible/roles/dockerfile/templates/supervisor_rsyslog.conf.j2 /var/run/supervisor/supervisor.rsyslog.sock
+
 ## File mappings
 {% if build_dev|bool %}
 ADD tools/docker-compose/launch_awx.sh /usr/bin/launch_awx.sh
@@ -216,6 +220,7 @@ ADD tools/ansible/roles/dockerfile/files/launch_awx_task.sh /usr/bin/launch_awx_
 ADD tools/ansible/roles/dockerfile/files/uwsgi.ini /etc/tower/uwsgi.ini
 ADD {{ template_dest }}/supervisor.conf /etc/supervisord.conf
 ADD {{ template_dest }}/supervisor_task.conf /etc/supervisord_task.conf
+ADD {{ template_dest }}/supervisor_rsyslog.conf.j2 /etc/supervisor_rsyslog.conf.j2 
 {% endif %}
 {% if (build_dev|bool) or (kube_dev|bool) %}
 ADD tools/docker-compose/awx.egg-link /tmp/awx.egg-link
@@ -233,6 +238,7 @@ RUN for dir in \
       /var/log/nginx \
       /var/lib/postgresql \
       /var/run/supervisor \
+      /var/run/supervisor_rsyslog \
       /var/run/awx-receptor \
       /var/lib/nginx ; \
     do mkdir -m 0775 -p $dir ; chmod g+rwx $dir ; chgrp root $dir ; done && \
