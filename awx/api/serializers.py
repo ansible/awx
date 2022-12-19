@@ -4456,9 +4456,12 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
 
 class BulkJobNodeSerializer(serializers.Serializer):
     # if we can find out the user, we can filter down the UnifiedJobTemplate objects
-    unified_job_template = serializers.PrimaryKeyRelatedField(queryset=UnifiedJobTemplate.objects.all(), many=False)
-    inventory = serializers.PrimaryKeyRelatedField(queryset=Inventory.objects.all(), required=False, many=False)
-    credentials = serializers.PrimaryKeyRelatedField(queryset=Credential.objects.all(), required=False, many=True)
+    unified_job_template = serializers.IntegerField(
+        required=True,
+        min_value=1,
+    )
+    inventory = serializers.IntegerField(required=False, min_value=1)
+    credentials = serializers.ListField(child=serializers.IntegerField(min_value=1), required=False)
     identifier = serializers.CharField(required=False, write_only=True, allow_blank=False)
 
     class Meta:
@@ -4475,16 +4478,6 @@ class BulkJobNodeSerializer(serializers.Serializer):
             #   'instance_groups',
             #   'execution_environment',
         )
-
-    def validate(self, attrs):
-        # Since we don't validate using the model here, I don't want to pass any extra things that we are not
-        # explicitly checking RBAC on up to the BulkJobsLaunchSerializer because we could allow people to launch with
-        # related items they don't have permission to
-        for key in attrs.keys():
-            if key not in self.fields:
-                attrs.pop(key)
-        attrs = super().validate(attrs)
-        return attrs
 
 
 class BulkJobLaunchSerializer(serializers.Serializer):
@@ -4506,34 +4499,67 @@ class BulkJobLaunchSerializer(serializers.Serializer):
                 identifiers.add(node['identifier'])
             else:
                 node['identifier'] = str(uuid4())
+
+        # Build sets of all the requested resources
+        # TODO: As we add other related items, we need to add them here
+        requested_ujts = {j['unified_job_template'] for j in attrs['jobs']}
+        requested_use_inventories = {job['inventory'] for job in attrs['jobs'] if 'inventory' in job}
+        requested_use_credentials = set()
+        for job in attrs['jobs']:
+            if 'credentials' in job:
+                [requested_use_credentials.add(cred) for cred in job['credentials']]
+
+        # If we are not a superuser, check we have permissions
+        # TODO: As we add other related items, we need to add them here
         if request and not request.user.is_superuser:
             allowed_ujts = set()
-            requested_ujts = {j['unified_job_template'].id for j in attrs['jobs']}
             [allowed_ujts.add(tup[0]) for tup in UnifiedJobTemplate.accessible_pk_qs(request.user, 'execute_role').all()]
             [allowed_ujts.add(tup[0]) for tup in UnifiedJobTemplate.accessible_pk_qs(request.user, 'admin_role').all()]
             [allowed_ujts.add(tup[0]) for tup in UnifiedJobTemplate.accessible_pk_qs(request.user, 'update_role').all()]
             accessible_inventories_qs = Inventory.accessible_pk_qs(request.user, 'update_role')
             [allowed_ujts.add(tup[0]) for tup in InventorySource.objects.filter(inventory__in=accessible_inventories_qs).values_list('id')]
+
             if requested_ujts - allowed_ujts:
                 not_allowed = requested_ujts - allowed_ujts
                 raise serializers.ValidationError(_(f"Unified Job Templates {not_allowed} not found."))
 
-            requested_use_inventories = {job['inventory'].id for job in attrs['jobs'] if 'inventory' in job}
             if requested_use_inventories:
                 accessible_use_inventories = {tup[0] for tup in Inventory.accessible_pk_qs(request.user, 'use_role')}
                 if requested_use_inventories - accessible_use_inventories:
                     not_allowed = requested_use_inventories - accessible_use_inventories
                     raise serializers.ValidationError(_(f"Inventories {not_allowed} not found."))
-            requested_use_credentials = set()
-            for job in attrs['jobs']:
-                if 'credentials' in job:
-                    [requested_use_credentials.add(cred.id) for cred in job['credentials']]
+
             if requested_use_credentials:
                 accessible_use_credentials = {tup[0] for tup in Credential.accessible_pk_qs(request.user, 'use_role').all()}
                 if requested_use_credentials - accessible_use_credentials:
                     not_allowed = requested_use_credentials - accessible_use_credentials
                     raise serializers.ValidationError(_(f"Credentials {not_allowed} not found."))
 
+        # all of the unified job templates and related items have now been checked, we can now grab the objects from the DB
+        # TODO: As we add more related objects like Label, InstanceGroup, etc we need to add them here
+        objectified_jobs = []
+        key_to_obj_map = {
+            "unified_job_template": {obj.id: obj for obj in UnifiedJobTemplate.objects.filter(id__in=requested_ujts)},
+            "inventory": {obj.id: obj for obj in Inventory.objects.filter(id__in=requested_use_inventories)},
+            "credentials": {obj.id: obj for obj in Credential.objects.filter(id__in=requested_use_credentials)},
+        }
+
+        # This loop is generalized so we should only have to add related items to the key_to_obj_map
+        for job in attrs['jobs']:
+            objectified_job = {}
+            for key, value in job.items():
+                if key in key_to_obj_map:
+                    if isinstance(value, int):
+                        objectified_job[key] = key_to_obj_map[key][value]
+                    elif isinstance(value, list):
+                        objectified_job[key] = []
+                        for item in value:
+                            objectified_job[key].append(key_to_obj_map[key][item])
+                else:
+                    objectified_job[key] = value
+            objectified_jobs.append(objectified_job)
+
+        attrs['jobs'] = objectified_jobs
         return attrs
 
     def create(self, validated_data):
