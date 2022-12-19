@@ -5,8 +5,8 @@ import tempfile
 import shutil
 
 from awx.main.tasks.jobs import RunJob
-from awx.main.tasks.system import execution_node_health_check, _cleanup_images_and_files
-from awx.main.models import Instance, Job
+from awx.main.tasks.system import execution_node_health_check, _cleanup_images_and_files, handle_work_error
+from awx.main.models import Instance, Job, InventoryUpdate, ProjectUpdate
 
 
 @pytest.fixture
@@ -74,3 +74,17 @@ def test_does_not_run_reaped_job(mocker, mock_me):
     job.refresh_from_db()
     assert job.status == 'failed'
     mock_run.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_handle_work_error_nested(project, inventory_source):
+    pu = ProjectUpdate.objects.create(status='failed', project=project, celery_task_id='1234')
+    iu = InventoryUpdate.objects.create(status='pending', inventory_source=inventory_source, source='scm')
+    job = Job.objects.create(status='pending')
+    iu.dependent_jobs.add(pu)
+    job.dependent_jobs.add(pu, iu)
+    handle_work_error({'type': 'project_update', 'id': pu.id})
+    iu.refresh_from_db()
+    job.refresh_from_db()
+    assert iu.job_explanation == f'Previous Task Failed: {{"job_type": "project_update", "job_name": "", "job_id": "{pu.id}"}}'
+    assert job.job_explanation == f'Previous Task Failed: {{"job_type": "inventory_update", "job_name": "", "job_id": "{iu.id}"}}'

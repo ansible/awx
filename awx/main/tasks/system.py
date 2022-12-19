@@ -52,6 +52,7 @@ from awx.main.constants import ACTIVE_STATES
 from awx.main.dispatch.publish import task
 from awx.main.dispatch import get_local_queuename, reaper
 from awx.main.utils.common import (
+    get_type_for_model,
     ignore_inventory_computed_fields,
     ignore_inventory_group_removal,
     ScheduleWorkflowManager,
@@ -720,45 +721,43 @@ def handle_work_success(task_actual):
 
 
 @task(queue=get_local_queuename)
-def handle_work_error(task_id, *args, **kwargs):
-    subtasks = kwargs.get('subtasks', None)
-    logger.debug('Executing error task id %s, subtasks: %s' % (task_id, str(subtasks)))
-    first_instance = None
-    first_instance_type = ''
-    if subtasks is not None:
-        for each_task in subtasks:
-            try:
-                instance = UnifiedJob.get_instance_by_type(each_task['type'], each_task['id'])
-                if not instance:
-                    # Unknown task type
-                    logger.warning("Unknown task type: {}".format(each_task['type']))
-                    continue
-            except ObjectDoesNotExist:
-                logger.warning('Missing {} `{}` in error callback.'.format(each_task['type'], each_task['id']))
-                continue
+def handle_work_error(task_actual):
+    try:
+        instance = UnifiedJob.get_instance_by_type(task_actual['type'], task_actual['id'])
+    except ObjectDoesNotExist:
+        logger.warning('Missing {} `{}` in error callback.'.format(task_actual['type'], task_actual['id']))
+        return
+    if not instance:
+        return
 
-            if first_instance is None:
-                first_instance = instance
-                first_instance_type = each_task['type']
+    subtasks = instance.get_jobs_fail_chain()  # reverse of dependent_jobs mostly
+    logger.debug(f'Executing error task id {task_actual["id"]}, subtasks: {[subtask.id for subtask in subtasks]}')
 
-            if instance.celery_task_id != task_id and not instance.cancel_flag and not instance.status in ('successful', 'failed'):
-                instance.status = 'failed'
-                instance.failed = True
-                if not instance.job_explanation:
-                    instance.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (
-                        first_instance_type,
-                        first_instance.name,
-                        first_instance.id,
-                    )
-                instance.save()
-                instance.websocket_emit_status("failed")
+    deps_of_deps = {}
+
+    for subtask in subtasks:
+        if subtask.celery_task_id != instance.celery_task_id and not subtask.cancel_flag and not subtask.status in ('successful', 'failed'):
+            # If there are multiple in the dependency chain, A->B->C, and this was called for A, blame B for clarity
+            blame_job = deps_of_deps.get(subtask.id, instance)
+            subtask.status = 'failed'
+            subtask.failed = True
+            if not subtask.job_explanation:
+                subtask.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (
+                    get_type_for_model(type(blame_job)),
+                    blame_job.name,
+                    blame_job.id,
+                )
+            subtask.save()
+            subtask.websocket_emit_status("failed")
+
+            for sub_subtask in subtask.get_jobs_fail_chain():
+                deps_of_deps[sub_subtask.id] = subtask
 
     # We only send 1 job complete message since all the job completion message
     # handling does is trigger the scheduler. If we extend the functionality of
     # what the job complete message handler does then we may want to send a
     # completion event for each job here.
-    if first_instance:
-        schedule_manager_success_or_error(first_instance)
+    schedule_manager_success_or_error(instance)
 
 
 @task(queue=get_local_queuename)

@@ -23,7 +23,7 @@ def test_multi_group_basic_job_launch(instance_factory, controlplane_instance_gr
         mock_task_impact.return_value = 500
         with mocker.patch("awx.main.scheduler.TaskManager.start_task"):
             TaskManager().schedule()
-            TaskManager.start_task.assert_has_calls([mock.call(j1, ig1, [], i1), mock.call(j2, ig2, [], i2)])
+            TaskManager.start_task.assert_has_calls([mock.call(j1, ig1, i1), mock.call(j2, ig2, i2)])
 
 
 @pytest.mark.django_db
@@ -54,7 +54,7 @@ def test_multi_group_with_shared_dependency(instance_factory, controlplane_insta
         DependencyManager().schedule()
         TaskManager().schedule()
         pu = p.project_updates.first()
-        TaskManager.start_task.assert_called_once_with(pu, controlplane_instance_group, [j1, j2], controlplane_instance_group.instances.all()[0])
+        TaskManager.start_task.assert_called_once_with(pu, controlplane_instance_group, controlplane_instance_group.instances.all()[0])
         pu.finished = pu.created + timedelta(seconds=1)
         pu.status = "successful"
         pu.save()
@@ -62,8 +62,8 @@ def test_multi_group_with_shared_dependency(instance_factory, controlplane_insta
         DependencyManager().schedule()
         TaskManager().schedule()
 
-        TaskManager.start_task.assert_any_call(j1, ig1, [], i1)
-        TaskManager.start_task.assert_any_call(j2, ig2, [], i2)
+        TaskManager.start_task.assert_any_call(j1, ig1, i1)
+        TaskManager.start_task.assert_any_call(j2, ig2, i2)
         assert TaskManager.start_task.call_count == 2
 
 
@@ -75,7 +75,7 @@ def test_workflow_job_no_instancegroup(workflow_job_template_factory, controlpla
     wfj.save()
     with mocker.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
-        TaskManager.start_task.assert_called_once_with(wfj, None, [], None)
+        TaskManager.start_task.assert_called_once_with(wfj, None, None)
         assert wfj.instance_group is None
 
 
@@ -150,7 +150,7 @@ def test_failover_group_run(instance_factory, controlplane_instance_group, mocke
         mock_task_impact.return_value = 500
         with mock.patch.object(TaskManager, "start_task", wraps=tm.start_task) as mock_job:
             tm.schedule()
-            mock_job.assert_has_calls([mock.call(j1, ig1, [], i1), mock.call(j1_1, ig2, [], i2)])
+            mock_job.assert_has_calls([mock.call(j1, ig1, i1), mock.call(j1_1, ig2, i2)])
             assert mock_job.call_count == 2
 
 
