@@ -4495,7 +4495,7 @@ class BulkJobLaunchSerializer(serializers.Serializer):
         for node in attrs['jobs']:
             if 'identifier' in node:
                 if node['identifier'] in identifiers:
-                    raise serializers.ValidationError(_(f"Identifier {identifier} not unique"))
+                    raise serializers.ValidationError(_(f"Identifier {node['identifier']} not unique"))
                 identifiers.add(node['identifier'])
             else:
                 node['identifier'] = str(uuid4())
