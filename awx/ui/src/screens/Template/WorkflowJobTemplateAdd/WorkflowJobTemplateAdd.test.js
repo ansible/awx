@@ -119,7 +119,7 @@ describe('<WorkflowJobTemplateAdd/>', () => {
       job_tags: null,
       limit: null,
       organization: undefined,
-      scm_branch: '',
+      scm_branch: null,
       skip_tags: null,
       webhook_credential: undefined,
       webhook_service: '',
