@@ -4569,12 +4569,12 @@ class BulkJobLaunchView(APIView):
 
     def get(self, request):
         # TODO Return something sensible here, like the defaults
-        bulkjob_serializer = serializers.BulkJobLaunchSerializer(data={})
+        bulkjob_serializer = serializers.BulkJobLaunchSerializer(data={}, context={'request': request})
         bulkjob_serializer.is_valid()
         return Response(bulkjob_serializer.errors, status=status.HTTP_200_OK)
 
     def post(self, request):
-        bulkjob_serializer = serializers.BulkJobLaunchSerializer(data=request.data)
+        bulkjob_serializer = serializers.BulkJobLaunchSerializer(data=request.data, context={'request': request})
         if bulkjob_serializer.is_valid():
             result = bulkjob_serializer.create(bulkjob_serializer.validated_data)
             return Response(result, status=status.HTTP_201_CREATED)

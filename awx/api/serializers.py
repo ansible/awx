@@ -4495,45 +4495,49 @@ class BulkJobLaunchSerializer(serializers.Serializer):
         fields = ('name', 'jobs')
         read_only_fields = ()
 
-    def validate_jobs(self, jobs):
-        view = self.context.get('view', None)
+    def validate(self, attrs):
+
+        request = self.context.get('request', None)
         identifiers = set()
-        for node in jobs:
+        for node in attrs['jobs']:
             if 'identifier' in node:
                 if node['identifier'] in identifiers:
                     raise serializers.ValidationError(_(f"Identifier {identifier} not unique"))
                 identifiers.add(node['identifier'])
             else:
                 node['identifier'] = str(uuid4())
-        if view and not view.request.user.is_superuser:
+        if request and not request.user.is_superuser:
             allowed_ujts = set()
-            allowed_ujts.union(set(JobTemplate.allowed_objects(request.user, 'execute_role').all()))
-            allowed_ujts.union(set(WorkflowJobTemplate.allowed_objects(request.user, 'execute_role').all()))
-            allowed_ujts.union(set(ProjectUpdate.allowed_objects(request.user, 'update_role').all()))
-            accessible_inventories_qs = Inventory.accessible_objects(request.user, 'update_role')
-            allowed_ujts.union(set(InventorySource.objects.filter(inventory__in=accessible_inventories_qs.all())))
-            requested_ujts = set(UnifiedJobTemplate.objects.filter(id__in=[j['unified_job_template'] for j in jobs]))
-            if allowed_ujts.intersection(requested_ujts) != requested_ujts:
-                raise serializers.ValidationError(_(f"Unified Job Templates {requested_ujts - allowed_ujts.intersection(requested_ujts)} not found."))
+            requested_ujts = {j['unified_job_template'].id for j in attrs['jobs']}
+            [allowed_ujts.add(tup[0]) for tup in UnifiedJobTemplate.accessible_pk_qs(request.user, 'execute_role').all()]
+            [allowed_ujts.add(tup[0]) for tup in UnifiedJobTemplate.accessible_pk_qs(request.user, 'admin_role').all()]
+            [allowed_ujts.add(tup[0]) for tup in UnifiedJobTemplate.accessible_pk_qs(request.user, 'update_role').all()]
+            accessible_inventories_qs = Inventory.accessible_pk_qs(request.user, 'update_role')
+            [allowed_ujts.add(tup[0]) for tup in InventorySource.objects.filter(inventory__in=accessible_inventories_qs).values_list('id')]
+            if requested_ujts - allowed_ujts:
+                not_allowed = requested_ujts - allowed_ujts
+                raise serializers.ValidationError(_(f"Unified Job Templates {not_allowed} not found."))
 
-            inventories = {job.get('inventory') for job in jobs if 'inventory' in job}
-            if inventories:
-                allowed_inventories = set(accessible_inventories_qs.all()).intersection(inventories)
-                if allowed_inventories != set(inventories):
-                    raise serializers.ValidationError(_(f"Inventories {( inventories - allowed_inventories.intersection(inventories))} not found."))
-            credentials = {job.get('credentials') for job in jobs if 'credential' in job}
-            if credentials:
-                allowed_credentials = set(Credentials.allowed_objects(request.user, 'use_role').all()).intersection(credentials)
-                if allowed_credentials != set(credentials):
-                    raise serializers.ValidationError(_(f"Credentials {( credentials - allowed_credentials.intersection(credentials))} not found."))
+            requested_use_inventories = {job['inventory'].id for job in attrs['jobs'] if 'inventory' in job}
+            if requested_use_inventories:
+                accessible_use_inventories = {tup[0] for tup in Inventory.accessible_pk_qs(request.user, 'use_role') }
+                if requested_use_inventories - accessible_use_inventories:
+                    not_allowed = requested_use_inventories - accessible_use_inventories
+                    raise serializers.ValidationError(_(f"Inventories {not_allowed} not found."))
+            requested_use_credentials = set()
+            for job in attrs['jobs']:
+                if 'credentials' in job:
+                    [requested_use_credentials.add(cred.id) for cred in job['credentials']]
+            if requested_use_credentials:
+                accessible_use_credentials = {tup[0] for tup in Credential.accessible_pk_qs(request.user, 'use_role').all()}
+                if requested_use_credentials - accessible_use_credentials:
+                    not_allowed = requested_use_credentials - accessible_use_credentials
+                    raise serializers.ValidationError(_(f"Credentials {not_allowed} not found."))
 
-        return jobs
+        return attrs
 
     def create(self, validated_data):
         job_node_data = validated_data.pop('jobs')
-
-        # TODO: add 'is_bulk_job' to workflow_job
-        # validated_data['is_bulk_job'] = True
 
         # FIXME: Need to set organization on the WorkflowJob in order for users to be able to see it --
         # normally their permission is sourced from the underlying WorkflowJobTemplate
