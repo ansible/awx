@@ -4489,7 +4489,7 @@ class BulkJobNodeSerializer(serializers.Serializer):
 
 class BulkJobLaunchSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=512, required=False)  # limited by max name of jobs
-    jobs = serializers.ListField(child=BulkJobNodeSerializer(), allow_empty=False, max_length=100)
+    jobs = BulkJobNodeSerializer(many=True, allow_empty=False, max_length=100)
 
     class Meta:
         fields = ('name', 'jobs')
@@ -4520,7 +4520,7 @@ class BulkJobLaunchSerializer(serializers.Serializer):
 
             requested_use_inventories = {job['inventory'].id for job in attrs['jobs'] if 'inventory' in job}
             if requested_use_inventories:
-                accessible_use_inventories = {tup[0] for tup in Inventory.accessible_pk_qs(request.user, 'use_role') }
+                accessible_use_inventories = {tup[0] for tup in Inventory.accessible_pk_qs(request.user, 'use_role')}
                 if requested_use_inventories - accessible_use_inventories:
                     not_allowed = requested_use_inventories - accessible_use_inventories
                     raise serializers.ValidationError(_(f"Inventories {not_allowed} not found."))
