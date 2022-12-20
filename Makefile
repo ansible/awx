@@ -336,7 +336,7 @@ install_collection: build_collection
 test_collection_sanity:
 	rm -rf awx_collection_build/
 	rm -rf $(COLLECTION_INSTALL)
-	if ! [ -x "$(shell command -v ansible-test)" ]; then pip install ansible-core; pip install -e awxkit/; fi
+	if ! [ -x "$(shell command -v ansible-test)" ]; then pip install ansible-core; fi
 	ansible --version
 	COLLECTION_VERSION=1.0.0 make install_collection
 	cd $(COLLECTION_INSTALL) && ansible-test sanity

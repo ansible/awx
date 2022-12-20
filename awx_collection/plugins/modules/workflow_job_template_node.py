@@ -30,7 +30,6 @@ options:
         - Variables to apply at launch time.
         - Will only be accepted if job template prompts for vars or has a survey asking for those vars.
       type: dict
-      default: {}
     inventory:
       description:
         - Inventory applied as a prompt, if job template prompts for inventory

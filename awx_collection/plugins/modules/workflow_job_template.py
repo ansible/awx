@@ -214,7 +214,8 @@ options:
           type: int
         job_slice_count:
           description:
-            - The number of jobs to slice into at runtime, if job template prompts for job slices. Will cause the Job Template to launch a workflow if value is greater than 1.
+            - The number of jobs to slice into at runtime, if job template prompts for job slices.
+            - Will cause the Job Template to launch a workflow if value is greater than 1.
           type: int
           default: '1'
         timeout:

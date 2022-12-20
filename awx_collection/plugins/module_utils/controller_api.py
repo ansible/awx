@@ -4,6 +4,7 @@ __metaclass__ = type
 
 from ansible.module_utils.basic import AnsibleModule, env_fallback
 from ansible.module_utils.urls import Request, SSLValidationError, ConnectionError
+from ansible.module_utils.parsing.convert_bool import boolean as strtobool
 from ansible.module_utils.six import PY2
 from ansible.module_utils.six import raise_from, string_types
 from ansible.module_utils.six.moves import StringIO
@@ -17,7 +18,6 @@ import re
 from json import loads, dumps
 from os.path import isfile, expanduser, split, join, exists, isdir
 from os import access, R_OK, getcwd
-from distutils.util import strtobool
 
 
 try:
