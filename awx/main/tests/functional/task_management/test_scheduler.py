@@ -18,7 +18,7 @@ def test_single_job_scheduler_launch(hybrid_instance, controlplane_instance_grou
     j = create_job(objects.job_template)
     with mocker.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
-        TaskManager.start_task.assert_called_once_with(j, controlplane_instance_group, [], instance)
+        TaskManager.start_task.assert_called_once_with(j, controlplane_instance_group, instance)
 
 
 @pytest.mark.django_db
@@ -240,12 +240,12 @@ def test_multi_jt_capacity_blocking(hybrid_instance, job_template_factory, mocke
         mock_task_impact.return_value = 505
         with mock.patch.object(TaskManager, "start_task", wraps=tm.start_task) as mock_job:
             tm.schedule()
-            mock_job.assert_called_once_with(j1, controlplane_instance_group, [], instance)
+            mock_job.assert_called_once_with(j1, controlplane_instance_group, instance)
             j1.status = "successful"
             j1.save()
     with mock.patch.object(TaskManager, "start_task", wraps=tm.start_task) as mock_job:
         tm.schedule()
-        mock_job.assert_called_once_with(j2, controlplane_instance_group, [], instance)
+        mock_job.assert_called_once_with(j2, controlplane_instance_group, instance)
 
 
 @pytest.mark.django_db
@@ -337,12 +337,12 @@ def test_single_job_dependencies_project_launch(controlplane_instance_group, job
             pu = [x for x in p.project_updates.all()]
             assert len(pu) == 1
             TaskManager().schedule()
-            TaskManager.start_task.assert_called_once_with(pu[0], controlplane_instance_group, [j], instance)
+            TaskManager.start_task.assert_called_once_with(pu[0], controlplane_instance_group, instance)
             pu[0].status = "successful"
             pu[0].save()
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
-        TaskManager.start_task.assert_called_once_with(j, controlplane_instance_group, [], instance)
+        TaskManager.start_task.assert_called_once_with(j, controlplane_instance_group, instance)
 
 
 @pytest.mark.django_db
@@ -365,12 +365,12 @@ def test_single_job_dependencies_inventory_update_launch(controlplane_instance_g
             iu = [x for x in ii.inventory_updates.all()]
             assert len(iu) == 1
             TaskManager().schedule()
-            TaskManager.start_task.assert_called_once_with(iu[0], controlplane_instance_group, [j], instance)
+            TaskManager.start_task.assert_called_once_with(iu[0], controlplane_instance_group, instance)
             iu[0].status = "successful"
             iu[0].save()
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
-        TaskManager.start_task.assert_called_once_with(j, controlplane_instance_group, [], instance)
+        TaskManager.start_task.assert_called_once_with(j, controlplane_instance_group, instance)
 
 
 @pytest.mark.django_db
@@ -412,7 +412,7 @@ def test_job_dependency_with_already_updated(controlplane_instance_group, job_te
             mock_iu.assert_not_called()
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
-        TaskManager.start_task.assert_called_once_with(j, controlplane_instance_group, [], instance)
+        TaskManager.start_task.assert_called_once_with(j, controlplane_instance_group, instance)
 
 
 @pytest.mark.django_db
@@ -442,9 +442,7 @@ def test_shared_dependencies_launch(controlplane_instance_group, job_template_fa
         TaskManager().schedule()
         pu = p.project_updates.first()
         iu = ii.inventory_updates.first()
-        TaskManager.start_task.assert_has_calls(
-            [mock.call(iu, controlplane_instance_group, [j1, j2], instance), mock.call(pu, controlplane_instance_group, [j1, j2], instance)]
-        )
+        TaskManager.start_task.assert_has_calls([mock.call(iu, controlplane_instance_group, instance), mock.call(pu, controlplane_instance_group, instance)])
         pu.status = "successful"
         pu.finished = pu.created + timedelta(seconds=1)
         pu.save()
@@ -453,9 +451,7 @@ def test_shared_dependencies_launch(controlplane_instance_group, job_template_fa
         iu.save()
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
-        TaskManager.start_task.assert_has_calls(
-            [mock.call(j1, controlplane_instance_group, [], instance), mock.call(j2, controlplane_instance_group, [], instance)]
-        )
+        TaskManager.start_task.assert_has_calls([mock.call(j1, controlplane_instance_group, instance), mock.call(j2, controlplane_instance_group, instance)])
     pu = [x for x in p.project_updates.all()]
     iu = [x for x in ii.inventory_updates.all()]
     assert len(pu) == 1
@@ -479,7 +475,7 @@ def test_job_not_blocking_project_update(controlplane_instance_group, job_templa
         project_update.status = "pending"
         project_update.save()
         TaskManager().schedule()
-        TaskManager.start_task.assert_called_once_with(project_update, controlplane_instance_group, [], instance)
+        TaskManager.start_task.assert_called_once_with(project_update, controlplane_instance_group, instance)
 
 
 @pytest.mark.django_db
@@ -503,7 +499,7 @@ def test_job_not_blocking_inventory_update(controlplane_instance_group, job_temp
 
         DependencyManager().schedule()
         TaskManager().schedule()
-        TaskManager.start_task.assert_called_once_with(inventory_update, controlplane_instance_group, [], instance)
+        TaskManager.start_task.assert_called_once_with(inventory_update, controlplane_instance_group, instance)
 
 
 @pytest.mark.django_db
