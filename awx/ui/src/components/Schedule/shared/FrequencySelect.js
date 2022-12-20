@@ -1,30 +1,12 @@
 import React, { useState } from 'react';
-import { arrayOf, string } from 'prop-types';
+import { t } from '@lingui/macro';
+import { useField } from 'formik';
+import { RRule } from 'rrule';
 import { Select, SelectOption, SelectVariant } from '@patternfly/react-core';
 
-export default function FrequencySelect({
-  id,
-  value,
-  onChange,
-  onBlur,
-  placeholderText,
-  children,
-}) {
+export default function FrequencySelect({ id, onBlur, placeholderText }) {
   const [isOpen, setIsOpen] = useState(false);
-
-  const onSelect = (event, selectedValue) => {
-    if (selectedValue === 'none') {
-      onChange([]);
-      setIsOpen(false);
-      return;
-    }
-    const index = value.indexOf(selectedValue);
-    if (index === -1) {
-      onChange(value.concat(selectedValue));
-    } else {
-      onChange(value.slice(0, index).concat(value.slice(index + 1)));
-    }
-  };
+  const [frequency, , frequencyHelpers] = useField('freq');
 
   const onToggle = (val) => {
     if (!val) {
@@ -35,21 +17,26 @@ export default function FrequencySelect({
 
   return (
     <Select
-      variant={SelectVariant.checkbox}
-      onSelect={onSelect}
-      selections={value}
+      onSelect={(e, v) => {
+        frequencyHelpers.setValue(v);
+        setIsOpen(false);
+      }}
+      selections={frequency.value}
       placeholderText={placeholderText}
       onToggle={onToggle}
+      value={frequency.value}
       isOpen={isOpen}
       ouiaId={`frequency-select-${id}`}
+      onBlur={() => frequencyHelpers.setTouched(true)}
     >
-      {children}
+      <SelectOption value={RRule.MINUTELY}>{t`Minute`}</SelectOption>
+      <SelectOption value={RRule.HOURLY}>{t`Hour`}</SelectOption>
+      <SelectOption value={RRule.DAILY}>{t`Day`}</SelectOption>
+      <SelectOption value={RRule.WEEKLY}>{t`Week`}</SelectOption>
+      <SelectOption value={RRule.MONTHLY}>{t`Month`}</SelectOption>
+      <SelectOption value={RRule.YEARLY}>{t`Year`}</SelectOption>
     </Select>
   );
 }
-
-FrequencySelect.propTypes = {
-  value: arrayOf(string).isRequired,
-};
 
 export { SelectOption, SelectVariant };

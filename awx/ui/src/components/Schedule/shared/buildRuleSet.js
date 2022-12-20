@@ -1,5 +1,6 @@
 import { RRule, RRuleSet } from 'rrule';
 import buildRuleObj, { buildDtStartObj } from './buildRuleObj';
+import { FREQUENCIESCONSTANTS } from './scheduleFormHelpers';
 
 window.RRuleSet = RRuleSet;
 
@@ -12,42 +13,31 @@ export default function buildRuleSet(values, useUTCStart) {
       startDate: values.startDate,
       startTime: values.startTime,
       timezone: values.timezone,
+      frequency: values.freq,
     });
     set.rrule(startRule);
   }
 
-  if (values.frequency.length === 0) {
-    const rule = buildRuleObj(
-      {
-        startDate: values.startDate,
-        startTime: values.startTime,
-        timezone: values.timezone,
-        frequency: 'none',
-        interval: 1,
-      },
-      useUTCStart
-    );
-    set.rrule(new RRule(rule));
-  }
-
-  frequencies.forEach((frequency) => {
-    if (!values.frequency.includes(frequency)) {
+  values.frequencies.forEach(({ frequency, rrule }) => {
+    if (!frequencies.includes(frequency)) {
       return;
     }
+
     const rule = buildRuleObj(
       {
         startDate: values.startDate,
         startTime: values.startTime,
         timezone: values.timezone,
-        frequency,
-        ...values.frequencyOptions[frequency],
+        freq: FREQUENCIESCONSTANTS[frequency],
+        rrule,
       },
-      useUTCStart
+      true
     );
+
     set.rrule(new RRule(rule));
   });
 
-  frequencies.forEach((frequency) => {
+  values.exceptions?.forEach(({ frequency, rrule }) => {
     if (!values.exceptionFrequency?.includes(frequency)) {
       return;
     }
@@ -56,8 +46,8 @@ export default function buildRuleSet(values, useUTCStart) {
         startDate: values.startDate,
         startTime: values.startTime,
         timezone: values.timezone,
-        frequency,
-        ...values.exceptionOptions[frequency],
+        freq: FREQUENCIESCONSTANTS[frequency],
+        rrule,
       },
       useUTCStart
     );

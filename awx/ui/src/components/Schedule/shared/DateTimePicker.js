@@ -55,7 +55,6 @@ function DateTimePicker({ dateFieldName, timeFieldName, label }) {
           onChange={onDateChange}
         />
         <TimePicker
-          placeholder="hh:mm AM/PM"
           stepMinutes={15}
           aria-label={
             timeFieldName.startsWith('start') ? t`Start time` : t`End time`

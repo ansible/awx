@@ -1,7 +1,5 @@
-import { t } from '@lingui/macro';
 import { RRule } from 'rrule';
 import { DateTime } from 'luxon';
-import { getRRuleDayConstants } from 'util/dates';
 
 window.RRule = RRule;
 window.DateTime = DateTime;
@@ -22,7 +20,7 @@ export function buildDtStartObj(values) {
     startHour
   )}${pad(startMinute)}00`;
   const rruleString = values.timezone
-    ? `DTSTART;TZID=${values.timezone}:${dateString}`
+    ? `DTSTART;TZID=${values.timezone}${dateString}`
     : `DTSTART:${dateString}Z`;
   const rule = RRule.fromString(rruleString);
 
@@ -38,7 +36,8 @@ function pad(num) {
 
 export default function buildRuleObj(values, includeStart) {
   const ruleObj = {
-    interval: values.interval,
+    interval: values.interval || 1,
+    freq: values.freq,
   };
 
   if (includeStart) {
@@ -47,68 +46,6 @@ export default function buildRuleObj(values, includeStart) {
       values.startTime,
       values.timezone
     );
-  }
-
-  switch (values.frequency) {
-    case 'none':
-      ruleObj.count = 1;
-      ruleObj.freq = RRule.MINUTELY;
-      break;
-    case 'minute':
-      ruleObj.freq = RRule.MINUTELY;
-      break;
-    case 'hour':
-      ruleObj.freq = RRule.HOURLY;
-      break;
-    case 'day':
-      ruleObj.freq = RRule.DAILY;
-      break;
-    case 'week':
-      ruleObj.freq = RRule.WEEKLY;
-      ruleObj.byweekday = values.daysOfWeek;
-      break;
-    case 'month':
-      ruleObj.freq = RRule.MONTHLY;
-      if (values.runOn === 'day') {
-        ruleObj.bymonthday = values.runOnDayNumber;
-      } else if (values.runOn === 'the') {
-        ruleObj.bysetpos = parseInt(values.runOnTheOccurrence, 10);
-        ruleObj.byweekday = getRRuleDayConstants(values.runOnTheDay);
-      }
-      break;
-    case 'year':
-      ruleObj.freq = RRule.YEARLY;
-      if (values.runOn === 'day') {
-        ruleObj.bymonth = parseInt(values.runOnDayMonth, 10);
-        ruleObj.bymonthday = values.runOnDayNumber;
-      } else if (values.runOn === 'the') {
-        ruleObj.bysetpos = parseInt(values.runOnTheOccurrence, 10);
-        ruleObj.byweekday = getRRuleDayConstants(values.runOnTheDay);
-        ruleObj.bymonth = parseInt(values.runOnTheMonth, 10);
-      }
-      break;
-    default:
-      throw new Error(t`Frequency did not match an expected value`);
-  }
-
-  if (values.frequency !== 'none') {
-    switch (values.end) {
-      case 'never':
-        break;
-      case 'after':
-        ruleObj.count = values.occurrences;
-        break;
-      case 'onDate': {
-        ruleObj.until = buildDateTime(
-          values.endDate,
-          values.endTime,
-          values.timezone
-        );
-        break;
-      }
-      default:
-        throw new Error(t`End did not match an expected value (${values.end})`);
-    }
   }
 
   return ruleObj;

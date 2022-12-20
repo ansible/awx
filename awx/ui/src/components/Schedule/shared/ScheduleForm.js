@@ -18,14 +18,9 @@ import SchedulePromptableFields from './SchedulePromptableFields';
 import ScheduleFormFields from './ScheduleFormFields';
 import UnsupportedScheduleForm from './UnsupportedScheduleForm';
 import parseRuleObj, { UnsupportedRRuleError } from './parseRuleObj';
-import buildRuleObj from './buildRuleObj';
-import buildRuleSet from './buildRuleSet';
-
-const NUM_DAYS_PER_FREQUENCY = {
-  week: 7,
-  month: 31,
-  year: 365,
-};
+import ScheduleFormWizard from './ScheduleFormWizard';
+import FrequenciesList from './FrequenciesList';
+// import { validateSchedule } from './scheduleFormHelpers';
 
 function ScheduleForm({
   hasDaysToKeepField,
@@ -40,15 +35,16 @@ function ScheduleForm({
 }) {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isSaveDisabled, setIsSaveDisabled] = useState(false);
+  const [isScheduleWizardOpen, setIsScheduleWizardOpen] = useState(false);
   const originalLabels = useRef([]);
   const originalInstanceGroups = useRef([]);
 
   let rruleError;
   const now = DateTime.now();
+
   const closestQuarterHour = DateTime.fromMillis(
     Math.ceil(now.ts / 900000) * 900000
   );
-  const tomorrow = closestQuarterHour.plus({ days: 1 });
   const isTemplate =
     resource.type === 'workflow_job_template' ||
     resource.type === 'job_template';
@@ -283,69 +279,10 @@ function ScheduleForm({
   }
   const [currentDate, time] = dateToInputDateTime(closestQuarterHour.toISO());
 
-  const [tomorrowDate] = dateToInputDateTime(tomorrow.toISO());
-  const initialFrequencyOptions = {
-    minute: {
-      interval: 1,
-      end: 'never',
-      occurrences: 1,
-      endDate: tomorrowDate,
-      endTime: time,
-    },
-    hour: {
-      interval: 1,
-      end: 'never',
-      occurrences: 1,
-      endDate: tomorrowDate,
-      endTime: time,
-    },
-    day: {
-      interval: 1,
-      end: 'never',
-      occurrences: 1,
-      endDate: tomorrowDate,
-      endTime: time,
-    },
-    week: {
-      interval: 1,
-      end: 'never',
-      occurrences: 1,
-      endDate: tomorrowDate,
-      endTime: time,
-      daysOfWeek: [],
-    },
-    month: {
-      interval: 1,
-      end: 'never',
-      occurrences: 1,
-      endDate: tomorrowDate,
-      endTime: time,
-      runOn: 'day',
-      runOnTheOccurrence: 1,
-      runOnTheDay: 'sunday',
-      runOnDayNumber: 1,
-    },
-    year: {
-      interval: 1,
-      end: 'never',
-      occurrences: 1,
-      endDate: tomorrowDate,
-      endTime: time,
-      runOn: 'day',
-      runOnTheOccurrence: 1,
-      runOnTheDay: 'sunday',
-      runOnTheMonth: 1,
-      runOnDayMonth: 1,
-      runOnDayNumber: 1,
-    },
-  };
-
   const initialValues = {
     description: schedule.description || '',
-    frequency: [],
+    frequencies: [],
     exceptionFrequency: [],
-    frequencyOptions: initialFrequencyOptions,
-    exceptionOptions: initialFrequencyOptions,
     name: schedule.name || '',
     startDate: currentDate,
     startTime: time,
@@ -367,11 +304,9 @@ function ScheduleForm({
     }
     initialValues.daysToKeep = initialDaysToKeep;
   }
-
-  let overriddenValues = {};
   if (schedule.rrule) {
     try {
-      overriddenValues = parseRuleObj(schedule);
+      parseRuleObj(schedule);
     } catch (error) {
       if (error instanceof UnsupportedRRuleError) {
         return (
@@ -394,89 +329,33 @@ function ScheduleForm({
   if (contentLoading) {
     return <ContentLoading />;
   }
-
-  const validate = (values) => {
-    const errors = {};
-
-    values.frequency.forEach((freq) => {
-      const options = values.frequencyOptions[freq];
-      const freqErrors = {};
-
-      if (
-        (freq === 'month' || freq === 'year') &&
-        options.runOn === 'day' &&
-        (options.runOnDayNumber < 1 || options.runOnDayNumber > 31)
-      ) {
-        freqErrors.runOn = t`Please select a day number between 1 and 31.`;
-      }
-
-      if (options.end === 'after' && !options.occurrences) {
-        freqErrors.occurrences = t`Please enter a number of occurrences.`;
-      }
-
-      if (options.end === 'onDate') {
-        if (
-          DateTime.fromFormat(
-            `${values.startDate} ${values.startTime}`,
-            'yyyy-LL-dd h:mm a'
-          ).toMillis() >=
-          DateTime.fromFormat(
-            `${options.endDate} ${options.endTime}`,
-            'yyyy-LL-dd h:mm a'
-          ).toMillis()
-        ) {
-          freqErrors.endDate = t`Please select an end date/time that comes after the start date/time.`;
-        }
-
-        if (
-          DateTime.fromISO(options.endDate)
-            .diff(DateTime.fromISO(values.startDate), 'days')
-            .toObject().days < NUM_DAYS_PER_FREQUENCY[freq]
-        ) {
-          const rule = new RRule(
-            buildRuleObj({
-              startDate: values.startDate,
-              startTime: values.startTime,
-              frequency: freq,
-              ...options,
-            })
-          );
-          if (rule.all().length === 0) {
-            errors.startDate = t`Selected date range must have at least 1 schedule occurrence.`;
-            freqErrors.endDate = t`Selected date range must have at least 1 schedule occurrence.`;
-          }
-        }
-      }
-      if (Object.keys(freqErrors).length > 0) {
-        if (!errors.frequencyOptions) {
-          errors.frequencyOptions = {};
-        }
-        errors.frequencyOptions[freq] = freqErrors;
-      }
-    });
-
-    if (values.exceptionFrequency.length > 0 && !scheduleHasInstances(values)) {
-      errors.exceptionFrequency = t`This schedule has no occurrences due to the selected exceptions.`;
-    }
-
-    return errors;
-  };
-
+  const frequencies = [];
+  frequencies.push(parseRuleObj(schedule));
   return (
     <Config>
       {() => (
         <Formik
           initialValues={{
-            ...initialValues,
-            ...overriddenValues,
-            frequencyOptions: {
-              ...initialValues.frequencyOptions,
-              ...overriddenValues.frequencyOptions,
-            },
-            exceptionOptions: {
-              ...initialValues.exceptionOptions,
-              ...overriddenValues.exceptionOptions,
-            },
+            name: schedule.name || '',
+            description: schedule.description || '',
+            frequencies: frequencies || [],
+            freq: RRule.DAILY,
+            interval: 1,
+            wkst: RRule.SU,
+            byweekday: [],
+            byweekno: [],
+            bymonth: [],
+            bymonthday: '',
+            byyearday: '',
+            bysetpos: '',
+            until: schedule.until || null,
+            endDate: currentDate,
+            endTime: time,
+            count: 1,
+            endingType: 'never',
+            timezone: schedule.timezone || now.zoneName,
+            startDate: currentDate,
+            startTime: time,
           }}
           onSubmit={(values) => {
             submitSchedule(
@@ -488,73 +367,90 @@ function ScheduleForm({
               credentials
             );
           }}
-          validate={validate}
+          validate={() => {}}
         >
           {(formik) => (
-            <Form autoComplete="off" onSubmit={formik.handleSubmit}>
-              <FormColumnLayout>
-                <ScheduleFormFields
-                  hasDaysToKeepField={hasDaysToKeepField}
-                  zoneOptions={zoneOptions}
-                  zoneLinks={zoneLinks}
-                />
-                {isWizardOpen && (
-                  <SchedulePromptableFields
-                    schedule={schedule}
-                    credentials={credentials}
-                    surveyConfig={surveyConfig}
-                    launchConfig={launchConfig}
-                    resource={resource}
-                    onCloseWizard={() => {
-                      setIsWizardOpen(false);
-                    }}
-                    onSave={() => {
-                      setIsWizardOpen(false);
-                      setIsSaveDisabled(false);
-                    }}
-                    resourceDefaultCredentials={resourceDefaultCredentials}
-                    labels={originalLabels.current}
-                    instanceGroups={originalInstanceGroups.current}
+            <>
+              <Form autoComplete="off" onSubmit={formik.handleSubmit}>
+                <FormColumnLayout>
+                  <ScheduleFormFields
+                    hasDaysToKeepField={hasDaysToKeepField}
+                    zoneOptions={zoneOptions}
+                    zoneLinks={zoneLinks}
                   />
-                )}
-                <FormSubmitError error={submitError} />
-                <FormFullWidthLayout>
-                  <ActionGroup>
-                    <Button
-                      ouiaId="schedule-form-save-button"
-                      aria-label={t`Save`}
-                      variant="primary"
-                      type="button"
-                      onClick={formik.handleSubmit}
-                      isDisabled={isSaveDisabled}
-                    >
-                      {t`Save`}
-                    </Button>
-
-                    {isTemplate && showPromptButton && (
+                  {isWizardOpen && (
+                    <SchedulePromptableFields
+                      schedule={schedule}
+                      credentials={credentials}
+                      surveyConfig={surveyConfig}
+                      launchConfig={launchConfig}
+                      resource={resource}
+                      onCloseWizard={() => {
+                        setIsWizardOpen(false);
+                      }}
+                      onSave={() => {
+                        setIsWizardOpen(false);
+                        setIsSaveDisabled(false);
+                      }}
+                      resourceDefaultCredentials={resourceDefaultCredentials}
+                      labels={originalLabels.current}
+                      instanceGroups={originalInstanceGroups.current}
+                    />
+                  )}
+                  <FormFullWidthLayout>
+                    <FrequenciesList openWizard={setIsScheduleWizardOpen} />
+                  </FormFullWidthLayout>
+                  <FormSubmitError error={submitError} />
+                  <FormFullWidthLayout>
+                    <ActionGroup>
                       <Button
-                        ouiaId="schedule-form-prompt-button"
+                        ouiaId="schedule-form-save-button"
+                        aria-label={t`Save`}
+                        variant="primary"
+                        type="button"
+                        onClick={formik.handleSubmit}
+                        isDisabled={isSaveDisabled}
+                      >
+                        {t`Save`}
+                      </Button>
+
+                      <Button
+                        onClick={() => {}}
+                      >{t`Preview occurances`}</Button>
+
+                      {isTemplate && showPromptButton && (
+                        <Button
+                          ouiaId="schedule-form-prompt-button"
+                          variant="secondary"
+                          type="button"
+                          aria-label={t`Prompt`}
+                          onClick={() => setIsWizardOpen(true)}
+                        >
+                          {t`Prompt`}
+                        </Button>
+                      )}
+                      <Button
+                        ouiaId="schedule-form-cancel-button"
+                        aria-label={t`Cancel`}
                         variant="secondary"
                         type="button"
-                        aria-label={t`Prompt`}
-                        onClick={() => setIsWizardOpen(true)}
+                        onClick={handleCancel}
                       >
-                        {t`Prompt`}
+                        {t`Cancel`}
                       </Button>
-                    )}
-                    <Button
-                      ouiaId="schedule-form-cancel-button"
-                      aria-label={t`Cancel`}
-                      variant="secondary"
-                      type="button"
-                      onClick={handleCancel}
-                    >
-                      {t`Cancel`}
-                    </Button>
-                  </ActionGroup>
-                </FormFullWidthLayout>
-              </FormColumnLayout>
-            </Form>
+                    </ActionGroup>
+                  </FormFullWidthLayout>
+                </FormColumnLayout>
+              </Form>
+              {isScheduleWizardOpen && (
+                <ScheduleFormWizard
+                  staticFormFormkik={formik}
+                  isOpen={isScheduleWizardOpen}
+                  handleSave={() => {}}
+                  setIsOpen={setIsScheduleWizardOpen}
+                />
+              )}
+            </>
           )}
         </Formik>
       )}
@@ -575,24 +471,3 @@ ScheduleForm.defaultProps = {
 };
 
 export default ScheduleForm;
-
-function scheduleHasInstances(values) {
-  let rangeToCheck = 1;
-  values.frequency.forEach((freq) => {
-    if (NUM_DAYS_PER_FREQUENCY[freq] > rangeToCheck) {
-      rangeToCheck = NUM_DAYS_PER_FREQUENCY[freq];
-    }
-  });
-
-  const ruleSet = buildRuleSet(values, true);
-  const startDate = DateTime.fromISO(values.startDate);
-  const endDate = startDate.plus({ days: rangeToCheck });
-  const instances = ruleSet.between(
-    startDate.toJSDate(),
-    endDate.toJSDate(),
-    true,
-    (date, i) => i === 0
-  );
-
-  return instances.length > 0;
-}
