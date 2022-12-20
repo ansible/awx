@@ -51,6 +51,7 @@ I18N_FLAG_FILE = .i18n_built
 .PHONY: awx-link clean clean-tmp clean-venv requirements requirements_dev \
 	develop refresh adduser migrate dbchange \
 	receiver test test_unit test_coverage coverage_html \
+	awx_collection_build \
 	sdist \
 	ui-release ui-devel \
 	VERSION PYTHON_VERSION docker-compose-sources \
@@ -319,7 +320,8 @@ symlink_collection:
 	mkdir -p ~/.ansible/collections/ansible_collections/$(COLLECTION_NAMESPACE)  # in case it does not exist
 	ln -s $(shell pwd)/awx_collection $(COLLECTION_INSTALL)
 
-awx_collection_build: $(shell find awx_collection -type f)
+awx_collection_build:
+	rm -rf awx_collection_build/
 	ansible-playbook -i localhost, awx_collection/tools/template_galaxy.yml \
 	  -e collection_package=$(COLLECTION_PACKAGE) \
 	  -e collection_namespace=$(COLLECTION_NAMESPACE) \
@@ -333,13 +335,11 @@ install_collection: build_collection
 	rm -rf $(COLLECTION_INSTALL)
 	ansible-galaxy collection install awx_collection_build/$(COLLECTION_NAMESPACE)-$(COLLECTION_PACKAGE)-$(COLLECTION_VERSION).tar.gz
 
-test_collection_sanity:
-	rm -rf awx_collection_build/
-	rm -rf $(COLLECTION_INSTALL)
+test_collection_sanity: install_collection
 	if ! [ -x "$(shell command -v ansible-test)" ]; then pip install ansible-core; fi
 	ansible --version
-	COLLECTION_VERSION=1.0.0 make install_collection
-	cd $(COLLECTION_INSTALL) && ansible-test sanity --exclude=plugins/modules/export.py
+	echo $(COLLECTION_VERSION)  # for debugging of sanity test CI
+	cd $(COLLECTION_INSTALL) && ansible-test sanity --exclude=plugins/modules/export.py  # HELP WANTED: export module needs awxkit, but do not know how to install
 
 test_collection_integration: install_collection
 	cd $(COLLECTION_INSTALL) && ansible-test integration $(COLLECTION_TEST_TARGET)
