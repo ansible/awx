@@ -4464,25 +4464,53 @@ class BulkJobNodeSerializer(serializers.Serializer):
     credentials = serializers.ListField(child=serializers.IntegerField(min_value=1), required=False)
     identifier = serializers.CharField(required=False, write_only=True, allow_blank=False)
 
+    #  labels = serializers.ListField(child=serializers.IntegerField(min_value=1), required=False)
+    #  instance_groups = serializers.ListField(child=serializers.IntegerField(min_value=1), required=False)
+    #  execution_environment = serializers.IntegerField(required=False, min_value=1)
+    #
+    limit = serializers.CharField(required=False, write_only=True, allow_blank=False)
+    #  char_prompts = serializers.CharField(required=False, write_only=True, allow_blank=False)
+    #  diff_mode = serializers.CharField(required=False, write_only=True, allow_blank=False)
+    #  job_tags  = serializers.CharField(required=False, write_only=True, allow_blank=False)
+    #  job_type = serializers.CharField(required=False, write_only=True, allow_blank=False)
+    #  scm_branch = serializers.CharField(required=False, write_only=True, allow_blank=False)
+    #  skip_tags = serializers.CharField(required=False, write_only=True, allow_blank=False)
+    #  survey_passwords = serializers.CharField(required=False, write_only=True, allow_blank=False)
+    #  forks = serializers.IntegerField(required=False, min_value=1)
+    #  job_slice_count = serializers.IntegerField(required=False, min_value=1)
+    #  verbosity = serializers.IntegerField(required=False, min_value=1)
+    #  timeout = serializers.IntegerField(required=False, min_value=1)
+
     class Meta:
         fields = (
             'unified_job_template',
             'identifier',
             'inventory',
             'credentials',
-            #   'labels',
-            #   'extra_data',
-            #   'survey_passwords',
+            'limit',
             #   'char_prompts',
+            #   'diff_mode',
+            #   'extra_data',
+            #   'forks',
+            #   'job_slice_count',
+            #   'job_tags',
+            #   'job_type'
+            #   'limit',
+            #   'scm_branch',
+            #   'skip_tags',
+            #   'survey_passwords',
+            #   'timeout',
+            #   'verbosity',
+            # these are related objects and we need to add extra validation for them in the parent BulkJobLaunchSerializer
             #   'labels',
-            #   'instance_groups',
             #   'execution_environment',
+            #   'instance_groups',
         )
 
 
 class BulkJobLaunchSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=512, required=False)  # limited by max name of jobs
-    jobs = BulkJobNodeSerializer(many=True, allow_empty=False, max_length=100)
+    jobs = BulkJobNodeSerializer(many=True, allow_empty=False, max_length=1000)
 
     class Meta:
         fields = ('name', 'jobs')
@@ -4574,26 +4602,47 @@ class BulkJobLaunchSerializer(serializers.Serializer):
         wfj = WorkflowJob.objects.create(**validated_data)
         nodes = []
         node_m2m_objects = {}
+        node_m2m_object_types_to_through_model = {'credentials': WorkflowJobNode.credentials.through}
+        node_deferred_attr_names = ('limit',)
+        node_deferred_attrs = {}
         for node_attrs in job_node_data:
+
             # we need to add any m2m objects after creation via the through model
             node_m2m_objects[node_attrs['identifier']] = {}
-            for item in ['credentials']:
+            node_deferred_attrs[node_attrs['identifier']] = {}
+            for item in node_m2m_object_types_to_through_model.keys():
                 if item in node_attrs:
                     node_m2m_objects[node_attrs['identifier']][item] = node_attrs.pop(item)
+
+            # Some attributes are not accepted by WorkflowJobNode __init__, we have to set them after
+            for item in node_deferred_attr_names:
+                if item in node_attrs:
+                    node_deferred_attrs[node_attrs['identifier']][item] = node_attrs.pop(item)
+
+            # Create the node objects
             node_obj = WorkflowJobNode(workflow_job=wfj, created=wfj.created, modified=wfj.modified, **node_attrs)
+
+            # we can set the deferred attrs now
+            for item, value in node_deferred_attrs[node_attrs['identifier']].items():
+                setattr(node_obj, item, value)
+
+            # the node is now ready to be bulk created
             nodes.append(node_obj)
+
+            # we'll need this later when we do the m2m through model bulk create
             node_m2m_objects[node_attrs['identifier']]['node'] = node_obj
+
         WorkflowJobNode.objects.bulk_create(nodes)
 
         # Deal with the m2m objects we have to create once the node exists
-        CredThroughModel = WorkflowJobNode.credentials.through
-        cred_through_models = []
-        for node_identifier in node_m2m_objects.keys():
-            if 'credentials' in node_m2m_objects[node_identifier]:
-                for cred in node_m2m_objects[node_identifier]['credentials']:
-                    cred_through_models.append(CredThroughModel(credential=cred, workflowjobnode=node_m2m_objects[node_identifier]['node']))
-        if cred_through_models:
-            CredThroughModel.objects.bulk_create(cred_through_models)
+        for obj_type, obj_through_model in node_m2m_object_types_to_through_model.items():
+            through_models = []
+            for node_identifier in node_m2m_objects.keys():
+                if obj_type in node_m2m_objects[node_identifier]:
+                    for cred in node_m2m_objects[node_identifier][obj_type]:
+                        through_models.append(obj_through_model(credential=cred, workflowjobnode=node_m2m_objects[node_identifier]['node']))
+            if through_models:
+                obj_through_model.objects.bulk_create(through_models)
 
         wfj.status = 'pending'
         wfj.save()
