@@ -339,7 +339,7 @@ test_collection_sanity:
 	if ! [ -x "$(shell command -v ansible-test)" ]; then pip install ansible-core; fi
 	ansible --version
 	COLLECTION_VERSION=1.0.0 make install_collection
-	cd $(COLLECTION_INSTALL) && ansible-test sanity --exclude=plugins/modules/export.py
+	cd $(COLLECTION_INSTALL) && ansible-test sanity --docker
 
 test_collection_integration: install_collection
 	cd $(COLLECTION_INSTALL) && ansible-test integration $(COLLECTION_TEST_TARGET)
