@@ -214,7 +214,8 @@ options:
           type: int
         job_slice_count:
           description:
-            - The number of jobs to slice into at runtime, if job template prompts for job slices. Will cause the Job Template to launch a workflow if value is greater than 1.
+            - The number of jobs to slice into at runtime, if job template prompts for job slices.
+            - Will cause the Job Template to launch a workflow if value is greater than 1.
           type: int
           default: '1'
         timeout:
@@ -328,42 +329,46 @@ options:
                 - Nodes that will run after this node completes.
                 - List of node identifiers.
               type: list
+              elements: dict
               suboptions:
                 identifier:
                   description:
                     - Identifier of Node that will run after this node completes given this option.
-                  elements: str
+                  type: str
             success_nodes:
               description:
                 - Nodes that will run after this node on success.
                 - List of node identifiers.
               type: list
+              elements: dict
               suboptions:
                 identifier:
                   description:
                     - Identifier of Node that will run after this node completes given this option.
-                  elements: str
+                  type: str
             failure_nodes:
               description:
                 - Nodes that will run after this node on failure.
                 - List of node identifiers.
               type: list
+              elements: dict
               suboptions:
                 identifier:
                   description:
                     - Identifier of Node that will run after this node completes given this option.
-                  elements: str
+                  type: str
             credentials:
               description:
                 - Credentials to be applied to job as launch-time prompts.
                 - List of credential names.
                 - Uniqueness is not handled rigorously.
               type: list
+              elements: dict
               suboptions:
                 name:
                   description:
                     - Name Credentials to be applied to job as launch-time prompts.
-                  elements: str
+                  type: str
                 organization:
                   description:
                     - Name of key for use in model for organizational reference
@@ -379,11 +384,12 @@ options:
                 - List of Label names.
                 - Uniqueness is not handled rigorously.
               type: list
+              elements: dict
               suboptions:
                 name:
                   description:
                     - Name Labels to be applied to job as launch-time prompts.
-                  elements: str
+                  type: str
                 organization:
                   description:
                     - Name of key for use in model for organizational reference
@@ -399,11 +405,12 @@ options:
                 - List of Instance group names.
                 - Uniqueness is not handled rigorously.
               type: list
+              elements: dict
               suboptions:
                 name:
                   description:
                     - Name of Instance groups to be applied to job as launch-time prompts.
-                  elements: str
+                  type: str
     destroy_current_nodes:
       description:
         - Set in order to destroy current workflow_nodes on the workflow.
@@ -789,7 +796,7 @@ def main():
         allow_simultaneous=dict(type='bool'),
         ask_variables_on_launch=dict(type='bool'),
         ask_labels_on_launch=dict(type='bool', aliases=['ask_labels']),
-        ask_tags_on_launch=dict(type='bool'),
+        ask_tags_on_launch=dict(type='bool', aliases=['ask_tags']),
         ask_skip_tags_on_launch=dict(type='bool', aliases=['ask_skip_tags']),
         inventory=dict(),
         limit=dict(),

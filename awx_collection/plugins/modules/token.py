@@ -35,7 +35,6 @@ options:
         - Optional description of this access token.
       required: False
       type: str
-      default: ''
     application:
       description:
         - The application tied to this token.

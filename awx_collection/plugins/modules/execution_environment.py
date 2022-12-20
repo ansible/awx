@@ -80,9 +80,9 @@ def main():
         name=dict(required=True),
         new_name=dict(),
         image=dict(required=True),
-        description=dict(default=''),
+        description=dict(),
         organization=dict(),
-        credential=dict(default=''),
+        credential=dict(),
         state=dict(choices=['present', 'absent'], default='present'),
         pull=dict(choices=['always', 'missing', 'never'], default='missing'),
     )

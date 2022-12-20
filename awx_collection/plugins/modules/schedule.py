@@ -51,7 +51,6 @@ options:
         - Specify C(extra_vars) for the template.
       required: False
       type: dict
-      default: {}
     forks:
       description:
         - Forks applied as a prompt, assuming job template prompts for forks

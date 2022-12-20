@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 DOCUMENTATION = """
-    lookup: schedule_rrule
+    name: schedule_rrule
     author: John Westcott IV (@john-westcott-iv)
     short_description: Generate an rrule string which can be used for Schedules
     requirements:

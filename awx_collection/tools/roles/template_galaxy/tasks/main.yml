@@ -1,4 +1,11 @@
 ---
+- name: Sanity assertions, that some variables have a non-blank value
+  assert:
+    that:
+      - collection_version
+      - collection_package
+      - collection_path
+
 - name: Set the collection version in the controller_api.py file
   replace:
     path: "{{ collection_path }}/plugins/module_utils/controller_api.py"

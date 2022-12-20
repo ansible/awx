@@ -6,7 +6,9 @@ CHROMIUM_BIN=/tmp/chrome-linux/chrome
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 MANAGEMENT_COMMAND ?= awx-manage
 VERSION := $(shell $(PYTHON) tools/scripts/scm_version.py)
-COLLECTION_VERSION := $(shell $(PYTHON) tools/scripts/scm_version.py | cut -d . -f 1-3)
+
+# ansible-test requires semver compatable version, so we allow overrides to hack it
+COLLECTION_VERSION ?= $(shell $(PYTHON) tools/scripts/scm_version.py | cut -d . -f 1-3)
 
 # NOTE: This defaults the container image version to the branch that's active
 COMPOSE_TAG ?= $(GIT_BRANCH)
@@ -300,7 +302,8 @@ test_collection:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi && \
-	pip install ansible-core && \
+	if ! [ -x "$(shell command -v ansible-playbook)" ]; then pip install ansible-core; fi
+	ansible --version
 	py.test $(COLLECTION_TEST_DIRS) -v
 	# The python path needs to be modified so that the tests can find Ansible within the container
 	# First we will use anything expility set as PYTHONPATH
@@ -330,8 +333,13 @@ install_collection: build_collection
 	rm -rf $(COLLECTION_INSTALL)
 	ansible-galaxy collection install awx_collection_build/$(COLLECTION_NAMESPACE)-$(COLLECTION_PACKAGE)-$(COLLECTION_VERSION).tar.gz
 
-test_collection_sanity: install_collection
-	cd $(COLLECTION_INSTALL) && ansible-test sanity
+test_collection_sanity:
+	rm -rf awx_collection_build/
+	rm -rf $(COLLECTION_INSTALL)
+	if ! [ -x "$(shell command -v ansible-test)" ]; then pip install ansible-core; fi
+	ansible --version
+	COLLECTION_VERSION=1.0.0 make install_collection
+	cd $(COLLECTION_INSTALL) && ansible-test sanity --exclude=plugins/modules/export.py
 
 test_collection_integration: install_collection
 	cd $(COLLECTION_INSTALL) && ansible-test integration $(COLLECTION_TEST_TARGET)

@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 DOCUMENTATION = """
-    lookup: schedule_rruleset
+    name: schedule_rruleset
     author: John Westcott IV (@john-westcott-iv)
     short_description: Generate an rruleset string
     requirements:
@@ -31,7 +31,8 @@ DOCUMENTATION = """
       rules:
         description:
           - Array of rules in the rruleset
-        type: array
+        type: list
+        elements: dict
         required: True
         suboptions:
           frequency:
@@ -192,14 +193,14 @@ class LookupModule(LookupBase):
         # something: [1,2,3] - A list of ints
         return_values = []
         # If they give us a single int, lets make it a list of ints
-        if type(rule[field_name]) == int:
+        if isinstance(rule[field_name], int):
             rule[field_name] = [rule[field_name]]
         # If its not a list, we need to split it into a list
-        if type(rule[field_name]) != list:
+        if isinstance(rule[field_name], list):
             rule[field_name] = rule[field_name].split(',')
         for value in rule[field_name]:
             # If they have a list of strs we want to strip the str incase its space delineated
-            if type(value) == str:
+            if isinstance(value, str):
                 value = value.strip()
             # If value happens to be an int (from a list of ints) we need to coerce it into a str for the re.match
             if not re.match(r"^\d+$", str(value)) or int(value) < min_value or int(value) > max_value:
@@ -209,7 +210,7 @@ class LookupModule(LookupBase):
 
     def process_list(self, field_name, rule, valid_list, rule_number):
         return_values = []
-        if type(rule[field_name]) != list:
+        if isinstance(rule[field_name], list):
             rule[field_name] = rule[field_name].split(',')
         for value in rule[field_name]:
             value = value.strip()

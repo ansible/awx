@@ -28,6 +28,9 @@ jobs:
           - name: awx-collection
             command: /start_tests.sh test_collection_all
             label: Run Collection Tests
+          - name: awx-collection-sanity
+            command: /start_tests.sh test_collection_sanity
+            label: Run Ansible core Collection Sanity tests
           - name: api-schema
             label: Check API Schema
             command: /start_tests.sh detect-schema-change SCHEMA_DIFF_BASE_BRANCH=${{ github.event.pull_request.base.ref }}

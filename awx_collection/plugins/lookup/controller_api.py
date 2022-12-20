@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 DOCUMENTATION = """
-lookup: controller_api
+name: controller_api
 author: John Westcott IV (@john-westcott-iv)
 short_description: Search the API for objects
 requirements:

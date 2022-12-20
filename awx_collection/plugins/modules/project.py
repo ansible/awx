@@ -60,12 +60,10 @@ options:
       description:
         - The branch to use for the SCM resource.
       type: str
-      default: ''
     scm_refspec:
       description:
         - The refspec to use for the SCM resource.
       type: str
-      default: ''
     credential:
       description:
         - Name of the credential to use with this SCM resource.

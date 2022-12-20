@@ -42,6 +42,7 @@ options:
         - Maximum time in seconds to wait for a job to finish.
         - Not specifying means the task will wait until the controller cancels the command.
       type: int
+      default: 0
 extends_documentation_fragment: awx.awx.auth
 '''
 
