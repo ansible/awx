@@ -5,7 +5,6 @@ plugins/modules/ad_hoc_command_cancel.py import-3.9
 plugins/modules/ad_hoc_command_wait.py import-3.9
 plugins/modules/application.py import-3.9
 plugins/modules/controller_meta.py import-3.9
-plugins/modules/credential.py import-3.92
 plugins/modules/credential_input_source.py import-3.9
 plugins/modules/credential_type.py import-3.9
 plugins/modules/execution_environment.py import-3.9
@@ -21,13 +20,11 @@ plugins/modules/inventory_source_update.py import-3.9
 plugins/modules/job_cancel.py import-3.9
 plugins/modules/job_launch.py import-3.9
 plugins/modules/job_list.py import-3.9
-plugins/modules/job_template.py import-3.93
 plugins/modules/job_wait.py import-3.9
 plugins/modules/label.py import-3.9
 plugins/modules/license.py import-3.9
 plugins/modules/notification_template.py import-3.9
 plugins/modules/organization.py import-3.9
-plugins/modules/project.py import-3.92
 plugins/modules/project_update.py import-3.9
 plugins/modules/role.py import-3.9
 plugins/modules/schedule.py import-3.9
@@ -65,7 +62,7 @@ plugins/modules/inventory_source.py import-3.10
 plugins/modules/inventory_source_update.py import-3.10
 plugins/modules/job_cancel.py import-3.10
 plugins/modules/job_launch.py import-3.10
-plugins/modules/job_list.py import-3.10  
+plugins/modules/job_list.py import-3.10
 plugins/modules/job_template.py import-3.10
 plugins/modules/job_wait.py import-3.10
 plugins/modules/label.py import-3.10
@@ -76,7 +73,7 @@ plugins/modules/project.py import-3.10
 plugins/modules/project_update.py import-3.10
 plugins/modules/role.py import-3.10
 plugins/modules/schedule.py import-3.10
-plugins/modules/settings.py import-3.10 
+plugins/modules/settings.py import-3.10
 plugins/modules/subscriptions.py import-3.10
 plugins/modules/team.py import-3.10
 plugins/modules/token.py import-3.10
