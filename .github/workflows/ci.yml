@@ -28,9 +28,6 @@ jobs:
           - name: awx-collection
             command: /start_tests.sh test_collection_all
             label: Run Collection Tests
-          - name: awx-collection-sanity
-            command: /start_tests.sh test_collection_sanity
-            label: Run Ansible core Collection Sanity tests
           - name: api-schema
             label: Check API Schema
             command: /start_tests.sh detect-schema-change SCHEMA_DIFF_BASE_BRANCH=${{ github.event.pull_request.base.ref }}
@@ -148,3 +145,22 @@ jobs:
         env:
           AWX_TEST_IMAGE: awx
           AWX_TEST_VERSION: ci
+
+  collection-sanity:
+    name: awx_collection sanity
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+
+      # The containers that GitHub Actions use have Ansible installed, so upgrade to make sure we have the latest version.
+      - name: Upgrade ansible-core
+        run: python3 -m pip install --upgrade ansible-core
+
+      - name: Run sanity tests
+        run: make test_collection_sanity
+        env:
+          # needed due to cgroupsv2. This is fixed, but a stable release
+          # with the fix has not been made yet.
+          ANSIBLE_TEST_PREFER_PODMAN: 1
