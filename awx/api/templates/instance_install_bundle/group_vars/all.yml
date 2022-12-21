@@ -1,3 +1,4 @@
+---
 receptor_user: awx
 receptor_group: awx
 receptor_verify: true
@@ -15,9 +16,11 @@ custom_ca_certfile: receptor/tls/ca/receptor-ca.crt
 receptor_protocol: 'tcp'
 receptor_listener: true
 receptor_port: {{ instance.listener_port }}
-receptor_dependencies:
-  - python39-pip
 {% verbatim %}
+receptor_dependencies:
+  - >
+    {{ ansible_distribution_major_version is version(9, '<')
+      | ternary('python39-pip', 'python3-pip') }}
 podman_user: "{{ receptor_user }}"
 podman_group: "{{ receptor_group }}"
 {% endverbatim %}
