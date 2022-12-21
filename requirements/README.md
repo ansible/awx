@@ -157,6 +157,15 @@ For now, we pin to the old version, 3.4.1
 * https://github.com/django/channels_redis/issues/332
 * https://github.com/ansible/awx/issues/13313
 
+### hiredis
+
+The hiredis 2.1.0 release doesn't provide source distribution on PyPI which prevents users to build that python package from the
+sources.
+Downgrading to 2.0.0 (which provides source distribution) until the channels-redis issue is fixed or a newer hiredis version is
+available on PyPi with source distribution.
+
+* https://github.com/redis/hiredis-py/issues/138
+
 ## Library Notes
 
 ### pexpect
