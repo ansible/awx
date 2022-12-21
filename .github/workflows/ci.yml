@@ -154,6 +154,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Get tags so version is correctly built
+        run: git fetch --tags origin
+
       # The containers that GitHub Actions use have Ansible installed, so upgrade to make sure we have the latest version.
       - name: Upgrade ansible-core
         run: python3 -m pip install --upgrade ansible-core
