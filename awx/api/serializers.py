@@ -4504,8 +4504,8 @@ class BulkJobNodeSerializer(serializers.Serializer):
 
 
 class BulkJobLaunchSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=512, required=False)  # limited by max name of jobs
-    jobs = BulkJobNodeSerializer(many=True, allow_empty=False, max_length=1000)
+    name = serializers.CharField(max_length=512, write_only=True, required=False)  # limited by max name of jobs
+    jobs = BulkJobNodeSerializer(many=True, allow_empty=False, write_only=True, max_length=1000)
 
     class Meta:
         fields = ('name', 'jobs')
