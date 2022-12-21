@@ -24,9 +24,5 @@ cat << EOF > /var/lib/awx/rsyslog/rsyslog.conf
 action(type="omfile" file="/dev/null")
 EOF
 
-#using this to start child process rsyslog and rsyslog configurer 
-#How do I tell supervisord to launch rsyslog 
-#supervisord -c  tells supervisor d what config file to use 
-#need an rsyslog config file 
 exec supervisord -c /etc/supervisor_rsyslog.conf
 
