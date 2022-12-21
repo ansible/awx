@@ -2123,7 +2123,11 @@ class WorkflowJobAccess(BaseAccess):
     )
 
     def filtered_queryset(self):
-        return WorkflowJob.objects.filter(unified_job_template__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
+        return WorkflowJob.objects.filter(
+            Q(unified_job_template__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
+            | Q(created_by__in=str(self.user.id), is_bulk_job=True)
+            | Q(organization__in=Organization.objects.filter(Q(admin_role__members=self.user)), is_bulk_job=True)
+        )
 
     def can_add(self, data):
         # Old add-start system for launching jobs is being depreciated, and

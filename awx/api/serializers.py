@@ -31,6 +31,7 @@ from django.utils.encoding import force_str
 from django.utils.text import capfirst
 from django.utils.timezone import now
 from django.core.validators import RegexValidator, MaxLengthValidator
+from django.db.models import Q
 
 # Django REST Framework
 from rest_framework.exceptions import ValidationError, PermissionDenied
@@ -4576,16 +4577,47 @@ class BulkJobNodeSerializer(serializers.Serializer):
 
 
 class BulkJobLaunchSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=512, required=False)  # limited by max name of jobs
-    jobs = BulkJobNodeSerializer(many=True, allow_empty=False, max_length=1000)
+    name = serializers.CharField(max_length=512, write_only=True, required=False)  # limited by max name of jobs
+    jobs = BulkJobNodeSerializer(many=True, allow_empty=False, write_only=True, max_length=1000)
+    description: serializers.CharField(write_only=True, required=False, allow_blank=False)
+    extra_vars: serializers.CharField(write_only=True, required=False, allow_blank=False)
+    organization = serializers.PrimaryKeyRelatedField(
+        queryset=Organization.objects.all(),
+        required=False,
+        default=None,
+        allow_null=True,
+        help_text=_('Inherit permissions from organization roles.'),
+    )
+    # inventory: "",  # Here we can use PrimaryKeyRelatedField so it will automagically do rbac/turn into object
+    limit: serializers.CharField(write_only=True, required=False, allow_blank=False)
+    scm_branch: serializers.CharField(write_only=True, required=False, allow_blank=False)
+    # webhook_service: null,  # Here we can use PrimaryKeyRelatedField so it will automagically do rbac/turn into object, I think, I'm actually not sure how to use this
+    # webhook_credential: null,  # Here we can use PrimaryKeyRelatedField so it will automagically do rbac/turn into object  I think, I'm actually not sure how to use this
+    skip_tags: serializers.CharField(write_only=True, required=False, allow_blank=False)
+    job_tags: serializers.CharField(write_only=True, required=False, allow_blank=False)
+    is_bulk_job: serializers.BooleanField(default=True)
 
     class Meta:
-        fields = ('name', 'jobs')
+        fields = ('name', 'jobs', 'description', 'limit')
         read_only_fields = ()
 
     def validate(self, attrs):
 
         request = self.context.get('request', None)
+        # validate Organization
+        # - If the orgs is not set, set it to the org of the launching user
+        # - If the user is part of multiple orgs, throw a validation error saying user is part of multiple orgs, please provide one
+
+        if 'organization' not in attrs or attrs['organization'] == None or attrs['oganization'] == '':
+            if Organization.accessible_pk_qs(request.user, 'read_role').count() == 1:
+                for tup in Organization.accessible_pk_qs(request.user, 'read_role').all():
+                    attrs['organization'] = tup[0]
+            elif Organization.accessible_pk_qs(request.user, 'read_role').count() > 1:
+                raise serializers.ValidationError(_(f"User has permission to multiple Organizations, please set one of them in the request"))
+            else:
+                raise serializers.ValidationError(_(f"User not part of any organization, please assign an organization to assign to the bulk job"))
+        requested_org = {attrs['organization']}
+
         identifiers = set()
         for node in attrs['jobs']:
             if 'identifier' in node:
@@ -4610,12 +4642,15 @@ class BulkJobLaunchSerializer(serializers.Serializer):
                 [requested_use_labels.add(label) for label in job['labels']]
             if 'instance_groups' in job:
                 [requested_use_instance_groups.add(instance_group) for instance_group in job['instance_groups']]
-            if 'execution_environment' in job:
-                [requested_use_execution_environments.add(execution_env) for execution_env in job['execution_environment']]
 
         # If we are not a superuser, check we have permissions
         # TODO: As we add other related items, we need to add them here
         if request and not request.user.is_superuser:
+            allowed_orgs = set()
+            if requested_org:
+                [allowed_orgs.add(tup[0]) for tup in Organization.accessible_pk_qs(request.user, 'read_role').all()]
+                if requested_org not in allowed_orgs:
+                    ValidationError(_(f"Organization {requested_org} not found"))
             allowed_ujts = set()
             [allowed_ujts.add(tup[0]) for tup in UnifiedJobTemplate.accessible_pk_qs(request.user, 'execute_role').all()]
             [allowed_ujts.add(tup[0]) for tup in UnifiedJobTemplate.accessible_pk_qs(request.user, 'admin_role').all()]
@@ -4640,7 +4675,7 @@ class BulkJobLaunchSerializer(serializers.Serializer):
                     raise serializers.ValidationError(_(f"Credentials {not_allowed} not found."))
 
             if requested_use_labels:
-                accessible_use_labels = {tup[0] for tup in Label.objects.all()}
+                accessible_use_labels = {tup.id for tup in Label.objects.all()}
                 if requested_use_labels - accessible_use_labels:
                     not_allowed = requested_use_labels - accessible_use_labels
                     raise serializers.ValidationError(_(f"Labels {not_allowed} not found"))
@@ -4649,14 +4684,21 @@ class BulkJobLaunchSerializer(serializers.Serializer):
                 # only org admins are allowed to see instance groups
                 organization_admin_qs = Organization.accessible_pk_qs(request.user, 'admin_role').all()
                 if organization_admin_qs:
-                    accessible_use_instance_groups = {tup[0] for tup in InstanceGroup.objects.all()}
+                    accessible_use_instance_groups = {tup.id for tup in InstanceGroup.objects.all()}
                     if requested_use_instance_groups - accessible_use_instance_groups:
                         not_allowed = requested_use_instance_groups - accessible_use_instance_groups
                         raise serializers.ValidationError(_(f"Instance Groups {not_allowed} not found"))
 
-            # TODO: Figure out the Execution environment RBAC
-            # For execution environment, need to figure out the RBAC part. Seems like any user part of an organization can see/use all the execution
-            # of that orgnization. So we need to filter out the ee's based on request.user organization.
+            if requested_use_execution_environments:
+                accessible_execution_env = {
+                    tup.id
+                    for tup in ExecutionEnvironment.objects.filter(
+                        Q(organization__in=Organization.accessible_pk_qs(request.user, 'read_role')) | Q(organization__isnull=True)
+                    ).distinct()
+                }
+                if requested_use_execution_environments - accessible_execution_env:
+                    not_allowed = requested_use_execution_environments - accessible_execution_env
+                    raise serializers.ValidationError(_(f"Execution Environments {not_allowed} not found"))
 
         # all of the unified job templates and related items have now been checked, we can now grab the objects from the DB
         # TODO: As we add more related objects like Label, InstanceGroup, etc we need to add them here
@@ -4667,6 +4709,7 @@ class BulkJobLaunchSerializer(serializers.Serializer):
             "credentials": {obj.id: obj for obj in Credential.objects.filter(id__in=requested_use_credentials)},
             "labels": {obj.id: obj for obj in Label.objects.filter(id__in=requested_use_labels)},
             "instance_groups": {obj.id: obj for obj in InstanceGroup.objects.filter(id__in=requested_use_instance_groups)},
+            "execution_environment": {obj.id: obj for obj in ExecutionEnvironment.objects.filter(id__in=requested_use_execution_environments)},
         }
 
         # This loop is generalized so we should only have to add related items to the key_to_obj_map
@@ -4685,6 +4728,9 @@ class BulkJobLaunchSerializer(serializers.Serializer):
             objectified_jobs.append(objectified_job)
 
         attrs['jobs'] = objectified_jobs
+        # map the organization object
+        for obj in Organization.objects.filter(id__in=requested_org):
+            attrs['organization'] = obj
         return attrs
 
     def create(self, validated_data):
