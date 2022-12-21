@@ -30,6 +30,8 @@ from awx.api.views import (
     OAuth2TokenList,
     ApplicationOAuth2TokenList,
     OAuth2ApplicationDetail,
+)
+from awx.api.views.bulk import (
     BulkJobLaunchView,
     BulkView,
 )
