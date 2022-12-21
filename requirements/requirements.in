@@ -26,6 +26,7 @@ djangorestframework==3.13.1
 djangorestframework-yaml
 filelock
 GitPython
+hiredis==2.0.0  # see UPGRADE BLOCKERs
 irc
 jinja2
 JSON-log-formatter

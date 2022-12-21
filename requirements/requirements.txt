@@ -158,8 +158,10 @@ gitpython==3.1.29
     # via -r /awx_devel/requirements/requirements.in
 google-auth==2.14.1
     # via kubernetes
-hiredis==2.1.0
-    # via aioredis
+hiredis==2.0.0
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   aioredis
 hyperlink==21.0.0
     # via
     #   autobahn
