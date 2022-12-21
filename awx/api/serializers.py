@@ -109,11 +109,14 @@ from awx.main.utils import (
     encrypt_dict,
     prefetch_page_capabilities,
     truncate_stdout,
+    get_licenser,
 )
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.named_url_graph import reset_counters
 from awx.main.scheduler.task_manager_models import TaskManagerModels
 from awx.main.redact import UriCleaner, REPLACE_STR
+from awx.main.signals import update_inventory_computed_fields
+
 
 from awx.main.validators import vars_validate_or_raise
 
@@ -1853,7 +1856,7 @@ class HostSerializer(BaseSerializerWithVariables):
             vars_dict = parse_yaml_or_json(variables)
             vars_dict['ansible_ssh_port'] = port
             attrs['variables'] = json.dumps(vars_dict)
-        if Group.objects.filter(name=name, inventory=inventory).exists():
+        if inventory and Group.objects.filter(name=name, inventory=inventory).exists():
             raise serializers.ValidationError(_('A Group with that name already exists.'))
 
         return super(HostSerializer, self).validate(attrs)
@@ -1943,6 +1946,123 @@ class GroupSerializer(BaseSerializerWithVariables):
         if obj is not None and 'inventory' in ret and not obj.inventory:
             ret['inventory'] = None
         return ret
+
+
+class BulkHostSerializer(HostSerializer):
+    name = serializers.CharField(required=True, allow_blank=False, max_length=512)
+    instance_id = serializers.CharField(required=False, max_length=1024)
+    description = serializers.CharField(required=False)
+    enabled = serializers.BooleanField(default=True, required=False)
+    variables = serializers.CharField(allow_blank=True, required=False)
+
+    class Meta:
+        fields = (
+            'name',
+            'enabled',
+            'instance_id',
+            'description',
+            'variables',
+        )
+
+
+class BulkHostCreateSerializer(serializers.Serializer):
+    inventory = serializers.PrimaryKeyRelatedField(
+        queryset=Inventory.objects.all(), required=True, write_only=True, help_text=_('Primary Key ID of inventory to add hosts to.')
+    )
+    hosts = serializers.ListField(child=BulkHostSerializer(), allow_empty=False, max_length=1000, write_only=True, help_text=_('Hosts to be created.'))
+
+    class Meta:
+        fields = ('inventory', 'hosts')
+        read_only_fields = ()
+
+    def raise_if_cannot_add_hosts(self, attrs):
+        validation_info = get_licenser().validate()
+
+        org = attrs['inventory'].organization
+
+        if org:
+            org_active_count = Host.objects.org_active_count(org.id)
+            new_hosts = [h['name'] for h in attrs['hosts']]
+            org_net_new_host_count = Host.objects.filter(inventory__organization=org.id).exclude(name__in=new_hosts).count()
+            if org.max_hosts > 0 and org_active_count + org_net_new_host_count > org.max_hosts:
+                raise PermissionDenied(
+                    _(
+                        "You have already reached the maximum number of %s hosts"
+                        " allowed for your organization. Contact your System Administrator"
+                        " for assistance." % org.max_hosts
+                    )
+                )
+
+            # Don't check license if it is open license
+        if validation_info.get('license_type', 'UNLICENSED') == 'open':
+            return True
+
+        sys_free_instances = validation_info.get('free_instances', 0)
+        system_net_new_host_count = Host.objects.exclude(name__in=new_hosts).count()
+
+        if system_net_new_host_count > sys_free_instances:
+            hard_error = validation_info.get('trial', False) is True or validation_info['instance_count'] == 10
+            if hard_error:
+                # Only raise permission error for trial, otherwise just log a warning as we do in other inventory import situations
+                raise PermissionDenied(_("Host count exceeds available instances."))
+            logger.warning(_("Number of hosts allowed by license has been exceeded."))
+
+        return True
+
+    def validate(self, attrs):
+        request = self.context.get('request', None)
+        inv = attrs['inventory']
+        if request and not request.user.is_superuser:
+            if inv.organization:
+                org_admin_orgs = {tup[0] for tup in Organization.accessible_pk_qs(request.user, 'admin_role')}
+                inv_admin_orgs = {tup[0] for tup in Organization.accessible_pk_qs(request.user, 'inventory_admin_role')}
+                is_org_admin = inv.organization.id in org_admin_orgs
+                is_org_inv_admin = inv.organization.id in inv_admin_orgs
+            else:
+                is_org_admin = False
+                is_org_inv_admin = False
+            # This may not work, need to figure out what the role is called
+            is_inventory_admin = inv.admin_role.members.filter(id=request.user.id).exists()
+            if not any([is_inventory_admin, is_org_admin, is_org_inv_admin]):
+                raise serializers.ValidationError(_(f'Inventory with id {inv.id} not found or lack permissions to add hosts.'))
+        current_hostnames = {h[0] for h in Host.objects.filter(inventory=inv).values_list('name').all()}
+        new_names = [host['name'] for host in attrs['hosts']]
+        duplicate_new_names = [n for n in new_names if n in current_hostnames or new_names.count(n) > 1]
+        if duplicate_new_names:
+            raise serializers.ValidationError(_(f'Hostnames must be unique in an inventory. Duplicates found: {duplicate_new_names}'))
+
+        self.raise_if_cannot_add_hosts(attrs)
+
+        _now = now()
+        for host in attrs['hosts']:
+            host['created'] = _now
+            host['modified'] = _now
+            host['inventory'] = inv
+        return attrs
+
+    def create(self, validated_data):
+        # This assumes total_hosts is up to date, and it can get out of date if the inventory computed fields have not been updated lately.
+        # If we wanted to side step this we could query Hosts.objects.filter(inventory...)
+        old_total_hosts = validated_data['inventory'].total_hosts
+        result = [Host(**attrs) for attrs in validated_data['hosts']]
+        try:
+            Host.objects.bulk_create(result)
+        except Exception as e:
+            raise serializers.ValidationError({"detail": _(f"{e}")})
+        new_total_hosts = old_total_hosts + len(result)
+        request = self.context.get('request', None)
+        changes = {'total_hosts': [old_total_hosts, new_total_hosts]}
+        activity_entry = ActivityStream.objects.create(
+            operation='update',
+            object1='inventory',
+            changes=json.dumps(changes),
+            actor=request.user,
+        )
+        activity_entry.inventory.add(validated_data['inventory'])
+
+        # This actually updates the cached "total_hosts" field on the inventory
+        update_inventory_computed_fields.delay(validated_data['inventory'].id)
+        return {"created": len(result), "url": InventorySerializer().get_related(validated_data['inventory'])['hosts']}
 
 
 class GroupTreeSerializer(GroupSerializer):
