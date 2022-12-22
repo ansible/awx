@@ -279,7 +279,7 @@ def test_logging_aggregator_missing_settings(put, post, admin, key, value, error
     ],
 )
 @pytest.mark.django_db
-def test_logging_aggregator_valid_settings(put, post, admin, type, host, port, username, password):
+def test_logging_aggregator_valid_settings(put, post, admin, type, host, port, username, password, mocker):
     _, mock_settings = _mock_logging_defaults()
     # type = 'splunk'
     # host = 'https://yoursplunk:8088/services/collector/event'
@@ -292,6 +292,8 @@ def test_logging_aggregator_valid_settings(put, post, admin, type, host, port, u
         mock_settings['LOG_AGGREGATOR_USERNAME'] = username
     if password:
         mock_settings['LOG_AGGREGATOR_PASSWORD'] = password
+    # mock testing pg_notify
+    mocker.patch("awx.conf.views.send_pg_notify", return_value=None)
     url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'logging'})
     response = put(url, data=mock_settings, user=admin, expect=200)
     assert type in response.data.get('LOG_AGGREGATOR_TYPE')
@@ -305,13 +307,15 @@ def test_logging_aggregator_valid_settings(put, post, admin, type, host, port, u
 
 
 @pytest.mark.django_db
-def test_logging_aggregator_connection_test_valid(put, post, admin):
+def test_logging_aggregator_connection_test_valid(put, post, admin, mocker):
     _, mock_settings = _mock_logging_defaults()
     type = 'other'
     host = 'https://localhost'
     mock_settings['LOG_AGGREGATOR_ENABLED'] = True
     mock_settings['LOG_AGGREGATOR_TYPE'] = type
     mock_settings['LOG_AGGREGATOR_HOST'] = host
+    # mock testing pg_notify
+    mocker.patch("awx.conf.views.send_pg_notify", return_value=None)
     # POST to save these mock settings
     url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'logging'})
     put(url, data=mock_settings, user=admin, expect=200)
