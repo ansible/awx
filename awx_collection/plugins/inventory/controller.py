@@ -7,7 +7,6 @@ __metaclass__ = type
 
 DOCUMENTATION = '''
 name: controller
-plugin_type: inventory
 author:
   - Matthew Jones (@matburt)
   - Yunfan Zhang (@YunfanZhang42)

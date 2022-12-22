@@ -507,7 +507,7 @@ class TaskManager(TaskBase):
         return None
 
     @timeit
-    def start_task(self, task, instance_group, dependent_tasks=None, instance=None):
+    def start_task(self, task, instance_group, instance=None):
         # Just like for process_running_tasks, add the job to the dependency graph and
         # ask the TaskManagerInstanceGroups object to update consumed capacity on all
         # implicated instances and container groups.
@@ -523,14 +523,6 @@ class TaskManager(TaskBase):
             # schedule another run immediately after this task manager
             ScheduleTaskManager().schedule()
         from awx.main.tasks.system import handle_work_error, handle_work_success
-
-        dependent_tasks = dependent_tasks or []
-
-        task_actual = {
-            'type': get_type_for_model(type(task)),
-            'id': task.id,
-        }
-        dependencies = [{'type': get_type_for_model(type(t)), 'id': t.id} for t in dependent_tasks]
 
         task.status = 'waiting'
 
@@ -563,6 +555,7 @@ class TaskManager(TaskBase):
         # apply_async does a NOTIFY to the channel dispatcher is listening to
         # postgres will treat this as part of the transaction, which is what we want
         if task.status != 'failed' and type(task) is not WorkflowJob:
+            task_actual = {'type': get_type_for_model(type(task)), 'id': task.id}
             task_cls = task._get_task_class()
             task_cls.apply_async(
                 [task.pk],
@@ -570,7 +563,7 @@ class TaskManager(TaskBase):
                 queue=task.get_queue_name(),
                 uuid=task.celery_task_id,
                 callbacks=[{'task': handle_work_success.name, 'kwargs': {'task_actual': task_actual}}],
-                errbacks=[{'task': handle_work_error.name, 'args': [task.celery_task_id], 'kwargs': {'subtasks': [task_actual] + dependencies}}],
+                errbacks=[{'task': handle_work_error.name, 'kwargs': {'task_actual': task_actual}}],
             )
 
         # In exception cases, like a job failing pre-start checks, we send the websocket status message
@@ -609,7 +602,7 @@ class TaskManager(TaskBase):
             if isinstance(task, WorkflowJob):
                 # Previously we were tracking allow_simultaneous blocking both here and in DependencyGraph.
                 # Double check that using just the DependencyGraph works for Workflows and Sliced Jobs.
-                self.start_task(task, None, task.get_jobs_fail_chain(), None)
+                self.start_task(task, None, None)
                 continue
 
             found_acceptable_queue = False
@@ -637,7 +630,7 @@ class TaskManager(TaskBase):
                 execution_instance = self.tm_models.instances[control_instance.hostname].obj
                 task.log_lifecycle("controller_node_chosen")
                 task.log_lifecycle("execution_node_chosen")
-                self.start_task(task, self.controlplane_ig, task.get_jobs_fail_chain(), execution_instance)
+                self.start_task(task, self.controlplane_ig, execution_instance)
                 found_acceptable_queue = True
                 continue
 
@@ -645,7 +638,7 @@ class TaskManager(TaskBase):
                 if not self.tm_models.instance_groups[instance_group.name].has_remaining_capacity(task):
                     continue
                 if instance_group.is_container_group:
-                    self.start_task(task, instance_group, task.get_jobs_fail_chain(), None)
+                    self.start_task(task, instance_group, None)
                     found_acceptable_queue = True
                     break
 
@@ -670,7 +663,7 @@ class TaskManager(TaskBase):
                         )
                     )
                     execution_instance = self.tm_models.instances[execution_instance.hostname].obj
-                    self.start_task(task, instance_group, task.get_jobs_fail_chain(), execution_instance)
+                    self.start_task(task, instance_group, execution_instance)
                     found_acceptable_queue = True
                     break
                 else:

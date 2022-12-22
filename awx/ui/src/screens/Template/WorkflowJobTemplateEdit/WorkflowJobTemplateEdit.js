@@ -30,6 +30,7 @@ function WorkflowJobTemplateEdit({ template }) {
       limit,
       job_tags,
       skip_tags,
+      scm_branch,
       ...templatePayload
     } = values;
     templatePayload.inventory = inventory?.id || null;
@@ -38,6 +39,7 @@ function WorkflowJobTemplateEdit({ template }) {
     templatePayload.limit = limit === '' ? null : limit;
     templatePayload.job_tags = job_tags === '' ? null : job_tags;
     templatePayload.skip_tags = skip_tags === '' ? null : skip_tags;
+    templatePayload.scm_branch = scm_branch === '' ? null : scm_branch;
 
     const formOrgId =
       organization?.id || inventory?.summary_fields?.organization.id || null;

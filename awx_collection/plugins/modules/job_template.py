@@ -266,6 +266,7 @@ options:
       description:
         - Maximum time in seconds to wait for a job to finish (server-side).
       type: int
+      default: 0
     job_slice_count:
       description:
         - The number of jobs to slice into at runtime. Will cause the Job Template to launch a workflow if value is greater than 1.
@@ -287,7 +288,6 @@ options:
       description:
         - Branch to use in job run. Project default used if blank. Only allowed if project allow_override field is set to true.
       type: str
-      default: ''
     labels:
       description:
         - The labels applied to this job template

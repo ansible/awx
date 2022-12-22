@@ -86,6 +86,16 @@ options:
         - workflow names to export
       type: list
       elements: str
+    applications:
+      description:
+        - OAuth2 application names to export
+      type: list
+      elements: str
+    schedules:
+      description:
+        - schedule names to export
+      type: list
+      elements: str
 requirements:
   - "awxkit >= 9.3.0"
 notes:

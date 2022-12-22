@@ -153,6 +153,10 @@ function CredentialsStep({
             }))}
             value={selectedType && selectedType.id}
             onChange={(e, id) => {
+              // Reset query params when the category of credentials is changed
+              history.replace({
+                search: '',
+              });
               setSelectedType(types.find((o) => o.id === parseInt(id, 10)));
             }}
           />
