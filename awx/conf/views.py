@@ -30,7 +30,7 @@ from awx.main.tasks.system import clear_setting_cache
 from awx.conf.models import Setting
 from awx.conf.serializers import SettingCategorySerializer, SettingSingletonSerializer
 from awx.conf import settings_registry
-from awx.main.dispatch import pg_bus_conn
+from awx.main.utils.external_logging import send_pg_notify
 
 
 SettingCategory = collections.namedtuple('SettingCategory', ('url', 'slug', 'name'))
@@ -124,8 +124,7 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
             connection.on_commit(lambda: clear_setting_cache.delay(settings_change_list))
             if any([setting.startswith('LOG_AGGREGATOR') for setting in settings_change_list]):
                 # call notify to rsyslog. no data is need so payload is empty
-                with pg_bus_conn() as conn:
-                    conn.notify('rsyslog_configurer', "")
+                send_pg_notify('rsyslog_configurer', "")
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
