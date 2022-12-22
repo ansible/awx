@@ -28,7 +28,7 @@ class Command(BaseCommand):
                     if e is not None:
                         logger.info("Change in logging settings found. Restarting rsyslogd")
                         # clear the cache of relevant settings then restart
-                        setting_keys = [k for k in dir(settings) if k.startswith('LOG_AGGREAGTOR')]
+                        setting_keys = [k for k in dir(settings) if k.startswith('LOG_AGGREGATOR')]
                         cache.delete_many(setting_keys)
                         settings._awx_conf_memoizedcache.clear()
                         reconfigure_rsyslog()
