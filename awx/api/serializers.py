@@ -4463,8 +4463,7 @@ class BulkJobNodeSerializer(serializers.Serializer):
     inventory = serializers.IntegerField(required=False, min_value=1)
     credentials = serializers.ListField(child=serializers.IntegerField(min_value=1), required=False)
     identifier = serializers.CharField(required=False, write_only=True, allow_blank=False)
-
-    #  labels = serializers.ListField(child=serializers.IntegerField(min_value=1), required=False)
+    labels = serializers.ListField(child=serializers.IntegerField(min_value=1), required=False)
     #  instance_groups = serializers.ListField(child=serializers.IntegerField(min_value=1), required=False)
     #  execution_environment = serializers.IntegerField(required=False, min_value=1)
     #
@@ -4488,6 +4487,7 @@ class BulkJobNodeSerializer(serializers.Serializer):
             'inventory',
             'credentials',
             'limit',
+            'labels',
             #   'char_prompts',
             #   'diff_mode',
             #   'extra_data',
@@ -4502,7 +4502,6 @@ class BulkJobNodeSerializer(serializers.Serializer):
             #   'timeout',
             #   'verbosity',
             # these are related objects and we need to add extra validation for them in the parent BulkJobLaunchSerializer
-            #   'labels',
             #   'execution_environment',
             #   'instance_groups',
         )
@@ -4533,9 +4532,12 @@ class BulkJobLaunchSerializer(serializers.Serializer):
         requested_ujts = {j['unified_job_template'] for j in attrs['jobs']}
         requested_use_inventories = {job['inventory'] for job in attrs['jobs'] if 'inventory' in job}
         requested_use_credentials = set()
+        requested_use_labels = set()
         for job in attrs['jobs']:
             if 'credentials' in job:
                 [requested_use_credentials.add(cred) for cred in job['credentials']]
+            if 'labels' in job:
+                [requested_use_labels.add(label) for label in job['labels']]
 
         # If we are not a superuser, check we have permissions
         # TODO: As we add other related items, we need to add them here
@@ -4570,6 +4572,7 @@ class BulkJobLaunchSerializer(serializers.Serializer):
             "unified_job_template": {obj.id: obj for obj in UnifiedJobTemplate.objects.filter(id__in=requested_ujts)},
             "inventory": {obj.id: obj for obj in Inventory.objects.filter(id__in=requested_use_inventories)},
             "credentials": {obj.id: obj for obj in Credential.objects.filter(id__in=requested_use_credentials)},
+            "labels": {obj.id: obj for obj in Label.objects.filter(id__in=requested_use_labels)},
         }
 
         # This loop is generalized so we should only have to add related items to the key_to_obj_map
@@ -4599,10 +4602,10 @@ class BulkJobLaunchSerializer(serializers.Serializer):
         if 'name' not in validated_data:
             validated_data['name'] = 'Bulk Job Launch'
 
-        wfj = WorkflowJob.objects.create(**validated_data)
+        wfj = WorkflowJob.objects.create(**validated_data, is_bulk_job=True)
         nodes = []
         node_m2m_objects = {}
-        node_m2m_object_types_to_through_model = {'credentials': WorkflowJobNode.credentials.through}
+        node_m2m_object_types_to_through_model = {'credentials': WorkflowJobNode.credentials.through, 'labels': WorkflowJobNode.labels.through}
         node_deferred_attr_names = ('limit',)
         node_deferred_attrs = {}
         for node_attrs in job_node_data:
@@ -4638,9 +4641,12 @@ class BulkJobLaunchSerializer(serializers.Serializer):
         for obj_type, obj_through_model in node_m2m_object_types_to_through_model.items():
             through_models = []
             for node_identifier in node_m2m_objects.keys():
-                if obj_type in node_m2m_objects[node_identifier]:
+                if obj_type in node_m2m_objects[node_identifier] and obj_type == 'credentials':
                     for cred in node_m2m_objects[node_identifier][obj_type]:
                         through_models.append(obj_through_model(credential=cred, workflowjobnode=node_m2m_objects[node_identifier]['node']))
+                if obj_type in node_m2m_objects[node_identifier] and obj_type == 'labels':
+                    for label in node_m2m_objects[node_identifier][obj_type]:
+                        through_models.append(obj_through_model(label=label, workflowjobnode=node_m2m_objects[node_identifier]['node']))
             if through_models:
                 obj_through_model.objects.bulk_create(through_models)
 
