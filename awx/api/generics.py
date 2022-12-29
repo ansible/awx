@@ -145,19 +145,6 @@ class APIView(views.APIView):
         if getattr(settings, 'SQL_DEBUG', False):
             self.queries_before = len(connection.queries)
 
-        # If there are any custom headers in REMOTE_HOST_HEADERS, make sure
-        # they respect the allowed proxy list
-        if all(
-            [
-                settings.PROXY_IP_ALLOWED_LIST,
-                request.environ.get('REMOTE_ADDR') not in settings.PROXY_IP_ALLOWED_LIST,
-                request.environ.get('REMOTE_HOST') not in settings.PROXY_IP_ALLOWED_LIST,
-            ]
-        ):
-            for custom_header in settings.REMOTE_HOST_HEADERS:
-                if custom_header.startswith('HTTP_'):
-                    request.environ.pop(custom_header, None)
-
         drf_request = super(APIView, self).initialize_request(request, *args, **kwargs)
         request.drf_request = drf_request
         try:
