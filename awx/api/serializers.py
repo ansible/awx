@@ -4464,21 +4464,23 @@ class BulkJobNodeSerializer(serializers.Serializer):
     credentials = serializers.ListField(child=serializers.IntegerField(min_value=1), required=False)
     identifier = serializers.CharField(required=False, write_only=True, allow_blank=False)
     labels = serializers.ListField(child=serializers.IntegerField(min_value=1), required=False)
-    #  instance_groups = serializers.ListField(child=serializers.IntegerField(min_value=1), required=False)
-    #  execution_environment = serializers.IntegerField(required=False, min_value=1)
+    instance_groups = serializers.ListField(child=serializers.IntegerField(min_value=1), required=False)
+    execution_environment = serializers.IntegerField(required=False, min_value=1)
     #
     limit = serializers.CharField(required=False, write_only=True, allow_blank=False)
-    #  char_prompts = serializers.CharField(required=False, write_only=True, allow_blank=False)
-    #  diff_mode = serializers.CharField(required=False, write_only=True, allow_blank=False)
-    #  job_tags  = serializers.CharField(required=False, write_only=True, allow_blank=False)
-    #  job_type = serializers.CharField(required=False, write_only=True, allow_blank=False)
-    #  scm_branch = serializers.CharField(required=False, write_only=True, allow_blank=False)
-    #  skip_tags = serializers.CharField(required=False, write_only=True, allow_blank=False)
-    #  survey_passwords = serializers.CharField(required=False, write_only=True, allow_blank=False)
-    #  forks = serializers.IntegerField(required=False, min_value=1)
-    #  job_slice_count = serializers.IntegerField(required=False, min_value=1)
-    #  verbosity = serializers.IntegerField(required=False, min_value=1)
-    #  timeout = serializers.IntegerField(required=False, min_value=1)
+    scm_branch = serializers.CharField(required=False, write_only=True, allow_blank=False)
+    verbosity = serializers.IntegerField(required=False, min_value=1)
+    forks = serializers.IntegerField(required=False, min_value=1)
+    char_prompts = serializers.CharField(required=False, write_only=True, allow_blank=False)
+    diff_mode = serializers.CharField(required=False, write_only=True, allow_blank=False)
+    job_tags  = serializers.CharField(required=False, write_only=True, allow_blank=False)
+    job_type = serializers.CharField(required=False, write_only=True, allow_blank=False)
+    skip_tags = serializers.CharField(required=False, write_only=True, allow_blank=False)
+    survey_passwords = serializers.CharField(required=False, write_only=True, allow_blank=False)
+    job_slice_count = serializers.IntegerField(required=False, min_value=1)
+    timeout = serializers.IntegerField(required=False, min_value=1)
+
+
 
     class Meta:
         fields = (
@@ -4488,22 +4490,22 @@ class BulkJobNodeSerializer(serializers.Serializer):
             'credentials',
             'limit',
             'labels',
-            #   'char_prompts',
-            #   'diff_mode',
-            #   'extra_data',
-            #   'forks',
-            #   'job_slice_count',
-            #   'job_tags',
-            #   'job_type'
-            #   'limit',
-            #   'scm_branch',
-            #   'skip_tags',
-            #   'survey_passwords',
-            #   'timeout',
-            #   'verbosity',
+            'instance_groups',
+            'execution_environment'
+            'scm_branch',
+            'verbosity'
+            'forks'
+            'char_prompts',
+            'diff_mode',
+            'extra_data',
+            'job_slice_count',
+            'job_tags',
+            'job_type'
+            'skip_tags',
+            'survey_passwords',
+            'timeout',
             # these are related objects and we need to add extra validation for them in the parent BulkJobLaunchSerializer
-            #   'execution_environment',
-            #   'instance_groups',
+            #
         )
 
 
@@ -4531,13 +4533,19 @@ class BulkJobLaunchSerializer(serializers.Serializer):
         # TODO: As we add other related items, we need to add them here
         requested_ujts = {j['unified_job_template'] for j in attrs['jobs']}
         requested_use_inventories = {job['inventory'] for job in attrs['jobs'] if 'inventory' in job}
+        requested_use_execution_environments = {job['execution_environment'] for job in attrs['jobs'] if 'execution_environment' in job}
         requested_use_credentials = set()
         requested_use_labels = set()
+        requested_use_instance_groups = set()
         for job in attrs['jobs']:
             if 'credentials' in job:
                 [requested_use_credentials.add(cred) for cred in job['credentials']]
             if 'labels' in job:
                 [requested_use_labels.add(label) for label in job['labels']]
+            if 'instance_groups' in job:
+                [requested_use_instance_groups.add(instance_group) for instance_group in job['instance_groups']]
+            if 'execution_environment' in job:
+                [requested_use_execution_environments.add(execution_env) for execution_env in job['execution_environment']]
 
         # If we are not a superuser, check we have permissions
         # TODO: As we add other related items, we need to add them here
@@ -4565,6 +4573,25 @@ class BulkJobLaunchSerializer(serializers.Serializer):
                     not_allowed = requested_use_credentials - accessible_use_credentials
                     raise serializers.ValidationError(_(f"Credentials {not_allowed} not found."))
 
+            if requested_use_labels:
+                accessible_use_labels = {tup[0] for tup in Label.objects.all()}
+                if requested_use_labels - accessible_use_labels:
+                    not_allowed = requested_use_labels - accessible_use_labels
+                    raise serializers.ValidationError(_(f"Labels {not_allowed} not found"))
+
+            if requested_use_instance_groups:
+                # only org admins are allowed to see instance groups
+                organization_admin_qs = Organization.accessible_pk_qs(request.user, 'admin_role').all()
+                if organization_admin_qs:
+                    accessible_use_instance_groups = {tup[0] for tup in InstanceGroup.objects.all()}
+                    if requested_use_instance_groups - accessible_use_instance_groups:
+                        not_allowed = requested_use_instance_groups - accessible_use_instance_groups
+                        raise serializers.ValidationError(_(f"Instance Groups {not_allowed} not found"))
+
+            # TODO: Figure out the Execution environment RBAC
+            # For execution environment, need to figure out the RBAC part. Seems like any user part of an organization can see/use all the execution
+            # of that orgnization. So we need to filter out the ee's based on request.user organization.
+
         # all of the unified job templates and related items have now been checked, we can now grab the objects from the DB
         # TODO: As we add more related objects like Label, InstanceGroup, etc we need to add them here
         objectified_jobs = []
@@ -4573,6 +4600,7 @@ class BulkJobLaunchSerializer(serializers.Serializer):
             "inventory": {obj.id: obj for obj in Inventory.objects.filter(id__in=requested_use_inventories)},
             "credentials": {obj.id: obj for obj in Credential.objects.filter(id__in=requested_use_credentials)},
             "labels": {obj.id: obj for obj in Label.objects.filter(id__in=requested_use_labels)},
+            "instance_groups": {obj.id: obj for obj in InstanceGroup.objects.filter(id__in=requested_use_instance_groups)}
         }
 
         # This loop is generalized so we should only have to add related items to the key_to_obj_map
@@ -4605,8 +4633,8 @@ class BulkJobLaunchSerializer(serializers.Serializer):
         wfj = WorkflowJob.objects.create(**validated_data, is_bulk_job=True)
         nodes = []
         node_m2m_objects = {}
-        node_m2m_object_types_to_through_model = {'credentials': WorkflowJobNode.credentials.through, 'labels': WorkflowJobNode.labels.through}
-        node_deferred_attr_names = ('limit',)
+        node_m2m_object_types_to_through_model = {'credentials': WorkflowJobNode.credentials.through, 'labels': WorkflowJobNode.labels.through, 'instance_groups': WorkflowJobNode.instance_groups.through}
+        node_deferred_attr_names = ('limit', 'scm_branch', 'verbosity', 'forks', 'char_prompts', 'diff_mode', 'job_tags', 'job_type', 'skip_tags', 'survey_passwords', 'job_slice_count', 'timeout')
         node_deferred_attrs = {}
         for node_attrs in job_node_data:
 
@@ -4647,13 +4675,15 @@ class BulkJobLaunchSerializer(serializers.Serializer):
                 if obj_type in node_m2m_objects[node_identifier] and obj_type == 'labels':
                     for label in node_m2m_objects[node_identifier][obj_type]:
                         through_models.append(obj_through_model(label=label, workflowjobnode=node_m2m_objects[node_identifier]['node']))
+                if obj_type in node_m2m_objects[node_identifier] and obj_type == 'instance_groups':
+                    for instance_group in node_m2m_objects[node_identifier][obj_type]:
+                        through_models.append(obj_through_model(instancegroup=instance_group, workflowjobnode=node_m2m_objects[node_identifier]['node']))
             if through_models:
                 obj_through_model.objects.bulk_create(through_models)
 
         wfj.status = 'pending'
         wfj.save()
         return WorkflowJobSerializer().to_representation(wfj)
-
 
 class NotificationTemplateSerializer(BaseSerializer):
     show_capabilities = ['edit', 'delete', 'copy']
