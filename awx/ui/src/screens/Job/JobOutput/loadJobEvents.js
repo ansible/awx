@@ -29,8 +29,11 @@ export function prependTraceback(job, events) {
     start_line: 0,
   };
   const firstIndex = events.findIndex((jobEvent) => jobEvent.counter === 1);
-  if (firstIndex && events[firstIndex]?.stdout) {
-    const stdoutLines = events[firstIndex].stdout.split('\r\n');
+  if (firstIndex > -1) {
+    if (!events[firstIndex].stdout) {
+      events[firstIndex].isTracebackOnly = true;
+    }
+    const stdoutLines = events[firstIndex].stdout?.split('\r\n') || [];
     stdoutLines[0] = tracebackEvent.stdout;
     events[firstIndex].stdout = stdoutLines.join('\r\n');
   } else {
