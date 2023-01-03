@@ -420,7 +420,7 @@ describe('<AdvancedSearch />', () => {
     const selectOptions = wrapper.find(
       'Select[aria-label="Related search type"] SelectOption'
     );
-    expect(selectOptions).toHaveLength(2);
+    expect(selectOptions).toHaveLength(3);
     expect(
       selectOptions.find('SelectOption[id="name-option-select"]').prop('value')
     ).toBe('name__icontains');
