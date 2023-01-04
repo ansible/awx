@@ -11,6 +11,7 @@
   with_items:
     - "supervisor.conf"
     - "supervisor_task.conf"
+    - "supervisor_rsyslog.conf"
 
 - name: Render Dockerfile
   template:
