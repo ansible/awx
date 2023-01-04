@@ -31,6 +31,7 @@ from awx.api.views import (
     ApplicationOAuth2TokenList,
     OAuth2ApplicationDetail,
     BulkJobLaunchView,
+    BulkView,
 )
 from awx.api.views.mesh_visualizer import MeshVisualizer
 
@@ -137,7 +138,8 @@ v2_urls = [
     re_path(r'^activity_stream/', include(activity_stream_urls)),
     re_path(r'^workflow_approval_templates/', include(workflow_approval_template_urls)),
     re_path(r'^workflow_approvals/', include(workflow_approval_urls)),
-    re_path(r'^bulk_jobs/launch/$', BulkJobLaunchView.as_view(), name='bulk_job_launch'),
+    re_path(r'^bulk/job_launch/$', BulkJobLaunchView.as_view(), name='bulk_job_launch'),
+    re_path(r'^bulk/$', BulkView.as_view(), name='bulk'),
 ]
 
 
