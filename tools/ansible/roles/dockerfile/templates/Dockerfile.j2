@@ -194,8 +194,6 @@ ENV _CONTAINERS_USERNS_CONFIGURED=""
 RUN mkdir -p /etc/containers/registries.conf.d/ && echo "unqualified-search-registries = []" >> /etc/containers/registries.conf.d/force-fully-qualified-images.conf && chmod 644 /etc/containers/registries.conf.d/force-fully-qualified-images.conf
 {% endif %}
 
-# Create default awx rsyslog config
-ADD tools/ansible/roles/dockerfile/files/rsyslog.conf /var/lib/awx/rsyslog/rsyslog.conf
 ADD tools/ansible/roles/dockerfile/files/wait-for-migrations /usr/local/bin/wait-for-migrations
 ADD tools/ansible/roles/dockerfile/files/stop-supervisor /usr/local/bin/stop-supervisor
 
@@ -213,8 +211,10 @@ ADD tools/docker-compose/podman-containers.conf /var/lib/awx/.config/containers/
 {% else %}
 ADD tools/ansible/roles/dockerfile/files/launch_awx.sh /usr/bin/launch_awx.sh
 ADD tools/ansible/roles/dockerfile/files/launch_awx_task.sh /usr/bin/launch_awx_task.sh
+ADD tools/ansible/roles/dockerfile/files/launch_awx_rsyslog.sh /usr/bin/launch_awx_rsyslog.sh
 ADD {{ template_dest }}/supervisor.conf /etc/supervisord.conf
 ADD {{ template_dest }}/supervisor_task.conf /etc/supervisord_task.conf
+ADD {{ template_dest }}/supervisor_rsyslog.conf /etc/supervisor_rsyslog.conf
 {% endif %}
 {% if (build_dev|bool) or (kube_dev|bool) %}
 ADD tools/docker-compose/awx.egg-link /tmp/awx.egg-link
