@@ -26,10 +26,11 @@ from awx.api.generics import APIView, GenericAPIView, ListAPIView, RetrieveUpdat
 from awx.api.permissions import IsSystemAdminOrAuditor
 from awx.api.versioning import reverse
 from awx.main.utils import camelcase_to_underscore
-from awx.main.tasks.system import handle_setting_changes
+from awx.main.tasks.system import clear_setting_cache
 from awx.conf.models import Setting
 from awx.conf.serializers import SettingCategorySerializer, SettingSingletonSerializer
 from awx.conf import settings_registry
+from awx.main.utils.external_logging import send_pg_notify
 
 
 SettingCategory = collections.namedtuple('SettingCategory', ('url', 'slug', 'name'))
@@ -118,7 +119,10 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
                 setting.save(update_fields=['value'])
                 settings_change_list.append(key)
         if settings_change_list:
-            connection.on_commit(lambda: handle_setting_changes.delay(settings_change_list))
+            connection.on_commit(lambda: clear_setting_cache.delay(settings_change_list))
+            if any([setting.startswith('LOG_AGGREGATOR') for setting in settings_change_list]):
+                # call notify to rsyslog. no data is need so payload is empty
+                send_pg_notify('rsyslog_configurer', "")
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -133,7 +137,10 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
             setting.delete()
             settings_change_list.append(setting.key)
         if settings_change_list:
-            connection.on_commit(lambda: handle_setting_changes.delay(settings_change_list))
+            connection.on_commit(lambda: clear_setting_cache.delay(settings_change_list))
+            if any([setting.startswith('LOG_AGGREGATOR') for setting in settings_change_list]):
+                # call notify to rsyslog. no data is need so payload is empty
+                send_pg_notify('rsyslog_configurer', "")
 
         # When TOWER_URL_BASE is deleted from the API, reset it to the hostname
         # used to make the request as a default.

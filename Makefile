@@ -238,6 +238,12 @@ receiver:
 	fi; \
 	$(PYTHON) manage.py run_callback_receiver
 
+rsyslog-configurer:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py run_rsyslog_configurer
+
 nginx:
 	nginx -g "daemon off;"
 
