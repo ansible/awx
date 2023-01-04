@@ -4473,14 +4473,12 @@ class BulkJobNodeSerializer(serializers.Serializer):
     forks = serializers.IntegerField(required=False, min_value=1)
     char_prompts = serializers.CharField(required=False, write_only=True, allow_blank=False)
     diff_mode = serializers.CharField(required=False, write_only=True, allow_blank=False)
-    job_tags  = serializers.CharField(required=False, write_only=True, allow_blank=False)
+    job_tags = serializers.CharField(required=False, write_only=True, allow_blank=False)
     job_type = serializers.CharField(required=False, write_only=True, allow_blank=False)
     skip_tags = serializers.CharField(required=False, write_only=True, allow_blank=False)
     survey_passwords = serializers.CharField(required=False, write_only=True, allow_blank=False)
     job_slice_count = serializers.IntegerField(required=False, min_value=1)
     timeout = serializers.IntegerField(required=False, min_value=1)
-
-
 
     class Meta:
         fields = (
@@ -4491,17 +4489,13 @@ class BulkJobNodeSerializer(serializers.Serializer):
             'limit',
             'labels',
             'instance_groups',
-            'execution_environment'
-            'scm_branch',
-            'verbosity'
-            'forks'
-            'char_prompts',
+            'execution_environment' 'scm_branch',
+            'verbosity' 'forks' 'char_prompts',
             'diff_mode',
             'extra_data',
             'job_slice_count',
             'job_tags',
-            'job_type'
-            'skip_tags',
+            'job_type' 'skip_tags',
             'survey_passwords',
             'timeout',
             # these are related objects and we need to add extra validation for them in the parent BulkJobLaunchSerializer
@@ -4600,7 +4594,7 @@ class BulkJobLaunchSerializer(serializers.Serializer):
             "inventory": {obj.id: obj for obj in Inventory.objects.filter(id__in=requested_use_inventories)},
             "credentials": {obj.id: obj for obj in Credential.objects.filter(id__in=requested_use_credentials)},
             "labels": {obj.id: obj for obj in Label.objects.filter(id__in=requested_use_labels)},
-            "instance_groups": {obj.id: obj for obj in InstanceGroup.objects.filter(id__in=requested_use_instance_groups)}
+            "instance_groups": {obj.id: obj for obj in InstanceGroup.objects.filter(id__in=requested_use_instance_groups)},
         }
 
         # This loop is generalized so we should only have to add related items to the key_to_obj_map
@@ -4633,8 +4627,25 @@ class BulkJobLaunchSerializer(serializers.Serializer):
         wfj = WorkflowJob.objects.create(**validated_data, is_bulk_job=True)
         nodes = []
         node_m2m_objects = {}
-        node_m2m_object_types_to_through_model = {'credentials': WorkflowJobNode.credentials.through, 'labels': WorkflowJobNode.labels.through, 'instance_groups': WorkflowJobNode.instance_groups.through}
-        node_deferred_attr_names = ('limit', 'scm_branch', 'verbosity', 'forks', 'char_prompts', 'diff_mode', 'job_tags', 'job_type', 'skip_tags', 'survey_passwords', 'job_slice_count', 'timeout')
+        node_m2m_object_types_to_through_model = {
+            'credentials': WorkflowJobNode.credentials.through,
+            'labels': WorkflowJobNode.labels.through,
+            'instance_groups': WorkflowJobNode.instance_groups.through,
+        }
+        node_deferred_attr_names = (
+            'limit',
+            'scm_branch',
+            'verbosity',
+            'forks',
+            'char_prompts',
+            'diff_mode',
+            'job_tags',
+            'job_type',
+            'skip_tags',
+            'survey_passwords',
+            'job_slice_count',
+            'timeout',
+        )
         node_deferred_attrs = {}
         for node_attrs in job_node_data:
 
@@ -4684,6 +4695,7 @@ class BulkJobLaunchSerializer(serializers.Serializer):
         wfj.status = 'pending'
         wfj.save()
         return WorkflowJobSerializer().to_representation(wfj)
+
 
 class NotificationTemplateSerializer(BaseSerializer):
     show_capabilities = ['edit', 'delete', 'copy']
