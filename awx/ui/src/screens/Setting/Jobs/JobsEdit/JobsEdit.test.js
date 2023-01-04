@@ -122,4 +122,22 @@ describe('<JobsEdit />', () => {
     await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('ContentError').length).toBe(1);
   });
+
+  test('Form input fields that are invisible (due to being set manually via a settings file) should not prevent submitting the form', async () => {
+    const mockOptions = Object.assign({}, mockAllOptions);
+    // If AWX_ISOLATION_BASE_PATH has been set in a settings file it will be absent in the PUT options
+    delete mockOptions['actions']['PUT']['AWX_ISOLATION_BASE_PATH'];
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <SettingsProvider value={mockOptions.actions}>
+          <JobsEdit />
+        </SettingsProvider>
+      );
+    });
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
+    await act(async () => {
+      wrapper.find('Form').invoke('onSubmit')();
+    });
+    expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
+  });
 });
