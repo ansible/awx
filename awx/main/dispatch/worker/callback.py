@@ -182,7 +182,8 @@ class CallbackBrokerWorker(BaseWorker):
                         try:
                             e.save()
                             metrics_singular_events_saved += 1
-                            saved_events.append(events.pop(e))  # Importantly, remove successfully saved events from the buffer
+                            events.remove(e)
+                            saved_events.append(e)  # Importantly, remove successfully saved events from the buffer
                         except Exception as exc_indv:
                             retry_count = getattr(e, '_retry_count', 0) + 1
                             e._retry_count = retry_count
