@@ -32,6 +32,12 @@ function RelatedLookupTypeInput({
         description={t`Fuzzy search on name field.`}
       />
       <SelectOption
+        id="name-exact-option-select"
+        key="name"
+        value="name"
+        description={t`Exact search on name field.`}
+      />
+      <SelectOption
         id="id-option-select"
         key="id"
         value="id"
