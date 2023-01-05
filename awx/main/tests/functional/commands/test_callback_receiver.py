@@ -122,13 +122,18 @@ class TestCallbackBrokerWorker(TransactionTestCase):
         # but we can still test that it is sanitized before saving
         worker = self.get_worker()
         kwargs = self.event_create_kwargs()
-        events = [
-            InventoryUpdateEvent(uuid=str(uuid4()), stdout="\x00", **kwargs),
-            # HACK: force bulk_create error because sqlite3 would otherwise accept NUL character
-            InventoryUpdateEvent(uuid=str(uuid4()), counter=-2, **self.event_create_kwargs()),
-        ]
+        events = [InventoryUpdateEvent(uuid=str(uuid4()), stdout="\x00", **kwargs)]
+        assert "\x00" in events[0].stdout  # sanity
         worker.buff = {InventoryUpdateEvent: events.copy()}
-        worker.flush()
 
-        event = InventoryUpdateEvent.objects.get(uuid=events[0].uuid)
-        assert "\x00" not in event.stdout
+        with mock.patch.object(InventoryUpdateEvent.objects, 'bulk_create', side_effect=ValueError):
+            with mock.patch.object(events[0], 'save', side_effect=ValueError):
+                worker.flush()
+
+            assert "\x00" not in events[0].stdout
+
+            worker.last_flush = time.time() - 2.0
+            worker.flush()
+
+            event = InventoryUpdateEvent.objects.get(uuid=events[0].uuid)
+            assert "\x00" not in event.stdout

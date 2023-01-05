@@ -170,31 +170,32 @@ class CallbackBrokerWorker(BaseWorker):
                     saved_events = events
                     self.buff[cls] = []
                 except Exception as exc:
-                    # if the database is flaking, let ensure_connection throw a general exception
+                    # If the database is flaking, let ensure_connection throw a general exception
                     # will be caught by the outer loop, which goes into a proper sleep and retry loop
-                    django_connection.ensure_connection()  # INCLUDE in final patch
+                    django_connection.ensure_connection()
                     logger.warning(f'Error in events bulk_create, will try indiviually, error: {str(exc)}')
                     # if an exception occurs, we should re-attempt to save the
                     # events one-by-one, because something in the list is
                     # broken/stale
                     metrics_events_batch_save_errors += 1
                     for e in events.copy():
-                        # special sanitization logic for postgres treatment of NUL 0x00 char
-                        if "\x00" in e.stdout:
-                            e.stdout = e.stdout.replace("\x00", "")
-
                         try:
                             e.save()
                             metrics_singular_events_saved += 1
-                            events.remove(e)  # Importantly, remove successfully saved events from the buffer
-                            saved_events.append(e)
+                            saved_events.append(events.pop(e))  # Importantly, remove successfully saved events from the buffer
                         except Exception as exc_indv:
                             retry_count = getattr(e, '_retry_count', 0) + 1
                             e._retry_count = retry_count
-                            logger.info(f'Database Error Saving individual Event uuid={e.uuid} try={retry_count}, error: {str(exc_indv)}')
+
+                            # special sanitization logic for postgres treatment of NUL 0x00 char
+                            if (retry_count == 1) and isinstance(exc_indv, ValueError) and ("\x00" in e.stdout):
+                                e.stdout = e.stdout.replace("\x00", "")
+
                             if retry_count >= self.INDIVIDUAL_EVENT_RETRIES:
-                                logger.error(f'Hit max retries saving individual Event error: {str(exc_indv)}\ndata:\n{e.__dict__}')
+                                logger.error(f'Hit max retries ({retry_count}) saving individual Event error: {str(exc_indv)}\ndata:\n{e.__dict__}')
                                 events.remove(e)
+                            else:
+                                logger.info(f'Database Error Saving individual Event uuid={e.uuid} try={retry_count}, error: {str(exc_indv)}')
 
                 metrics_duration_to_save = time.perf_counter() - metrics_duration_to_save
                 for e in saved_events:
