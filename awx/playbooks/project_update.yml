@@ -214,6 +214,8 @@
       with_fileglob:
         - "{{project_path|quote}}/roles/requirements.yaml"
         - "{{project_path|quote}}/roles/requirements.yml"
+        - "{{project_path|quote}}/requirements.yaml"
+        - "{{project_path|quote}}/requirements.yml"
       changed_when: "'was installed successfully' in galaxy_result.stdout"
       environment: "{{ galaxy_task_env }}"
       when: roles_enabled|bool
