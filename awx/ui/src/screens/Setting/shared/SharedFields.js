@@ -397,7 +397,10 @@ const InputField = ({ name, config, type = 'text', isRequired = false }) => {
 };
 InputField.propTypes = {
   name: string.isRequired,
-  config: shape({}).isRequired,
+  config: shape({}),
+};
+InputField.defaultProps = {
+  config: null,
 };
 
 const TextAreaField = ({ name, config, isRequired = false }) => {
