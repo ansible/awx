@@ -110,9 +110,10 @@ def _update_user_teams(backend, desired_team_state, orgs_to_create, teams_to_cre
         remove = bool(team_opts.get('remove', True))
         add_or_remove = _update_m2m_from_expression(user, users_expr, remove)
         if add_or_remove is not None:
-            if team_name not in desired_team_state:
-                desired_team_state[team_name] = {}
-            desired_team_state[team_name] = {'member_role': add_or_remove}
+            org_name = team_opts['organization']
+            if org_name not in desired_team_state:
+                desired_team_state[org_name] = {}
+            desired_team_state[org_name][team_name] = {'member_role': add_or_remove}
 
 
 def _update_user_orgs_by_saml_attr(backend, desired_org_state, orgs_to_create, **kwargs):
@@ -188,9 +189,9 @@ def _update_user_teams_by_saml_attr(desired_team_state, orgs_to_create, teams_to
         else:
             user_is_member_of_team = False
 
-        if team_name not in desired_team_state:
-            desired_team_state[team_name] = {}
-        desired_team_state[team_name] = {'member_role': user_is_member_of_team}
+        if organization_name not in desired_team_state:
+            desired_team_state[organization_name] = {}
+        desired_team_state[organization_name][team_name] = {'member_role': user_is_member_of_team}
 
 
 def _get_matches(list1, list2):
