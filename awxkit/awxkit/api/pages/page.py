@@ -519,7 +519,7 @@ class PageCache(object):
 
     def get_post_fields(self, page):
         url = page.endpoint if isinstance(page, Page) else str(page)
-        key = url.strip('/').split('/')[-1]
+        key = get_registered_page(url)
         if key in self.post_fields:
             return self.post_fields[key]
 
@@ -532,7 +532,7 @@ class PageCache(object):
             post_fields = options_page.json['actions']['POST']
         else:
             log.warning("Insufficient privileges on %s, inferring POST fields from description.", options_page.endpoint)
-            post_fields = parse_description(options_page.json['description'])
+            post_fields = utils.parse_description(options_page.json['description'])
         self.post_fields[key] = post_fields
 
         return post_fields
