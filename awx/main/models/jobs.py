@@ -832,7 +832,8 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
                 r['{}_job_template_id'.format(name)] = self.job_template.pk
                 r['{}_job_template_name'.format(name)] = self.job_template.name
         if self.execution_node:
-            r['{}_execution_node'.format(name)] = self.execution_node
+            for name in JOB_VARIABLE_PREFIXES:
+                r['{}_execution_node'.format(name)] = self.execution_node
         return r
 
     '''
