@@ -452,7 +452,10 @@ def on_populate_user(sender, **kwargs):
         remove = bool(team_opts.get('remove', True))
         state = _update_m2m_from_groups(ldap_user, users_opts, remove)
         if state is not None:
-            desired_team_states[team_name] = {'member_role': state}
+            organization = team_opts['organization']
+            if organization not in desired_team_states:
+                desired_team_states[organization] = {}
+            desired_team_states[organization][team_name] = {'member_role': state}
 
     # Check if user.profile is available, otherwise force user.save()
     try:
@@ -473,16 +476,28 @@ def on_populate_user(sender, **kwargs):
 
 
 def reconcile_users_org_team_mappings(user, desired_org_states, desired_team_states, source):
+    #
+    # Arguments:
+    #   user - a user object
+    #   desired_org_states: { '<org_name>': { '<role>': <boolean> or None } }
+    #   desired_team_states: { '<org_name>': { '<team name>': { '<role>': <boolean> or None } } }
+    #   source - a text label indicating the "authentication adapter" for debug messages
+    #
+    # This function will load the users existing roles and then based on the deisred states modify the users roles
+    #    True indicates the user needs to be a member of the role
+    #    False indicates the user should not be a member of the role
+    #    None means this function should not change the users membership of a role
+    #
     from awx.main.models import Organization, Team
 
     content_types = []
     reconcile_items = []
     if desired_org_states:
         content_types.append(ContentType.objects.get_for_model(Organization))
-        reconcile_items.append(('organization', desired_org_states, Organization))
+        reconcile_items.append(('organization', desired_org_states))
     if desired_team_states:
         content_types.append(ContentType.objects.get_for_model(Team))
-        reconcile_items.append(('team', desired_team_states, Team))
+        reconcile_items.append(('team', desired_team_states))
 
     if not content_types:
         # If both desired states were empty we can simply return because there is nothing to reconcile
@@ -491,24 +506,39 @@ def reconcile_users_org_team_mappings(user, desired_org_states, desired_team_sta
     # users_roles is a flat set of IDs
     users_roles = set(user.roles.filter(content_type__in=content_types).values_list('pk', flat=True))
 
-    for object_type, desired_states, model in reconcile_items:
-        # Get all of the roles in the desired states for efficient DB extraction
+    for object_type, desired_states in reconcile_items:
         roles = []
-        for sub_dict in desired_states.values():
-            for role_name in sub_dict:
-                if sub_dict[role_name] is None:
-                    continue
-                if role_name not in roles:
-                    roles.append(role_name)
-
         # Get a set of named tuples for the org/team name plus all of the roles we got above
-        model_roles = model.objects.filter(name__in=desired_states.keys()).values_list('name', *roles, named=True)
+        if object_type == 'organization':
+            for sub_dict in desired_states.values():
+                for role_name in sub_dict:
+                    if sub_dict[role_name] is None:
+                        continue
+                    if role_name not in roles:
+                        roles.append(role_name)
+            model_roles = Organization.objects.filter(name__in=desired_states.keys()).values_list('name', *roles, named=True)
+        else:
+            team_names = []
+            for teams_dict in desired_states.values():
+                team_names.extend(teams_dict.keys())
+                for sub_dict in teams_dict.values():
+                    for role_name in sub_dict:
+                        if sub_dict[role_name] is None:
+                            continue
+                        if role_name not in roles:
+                            roles.append(role_name)
+            model_roles = Team.objects.filter(name__in=team_names).values_list('name', 'organization__name', *roles, named=True)
+
         for row in model_roles:
             for role_name in roles:
-                desired_state = desired_states.get(row.name, {})
-                if desired_state[role_name] is None:
+                if object_type == 'organization':
+                    desired_state = desired_states.get(row.name, {})
+                else:
+                    desired_state = desired_states.get(row.organization__name, {}).get(row.name, {})
+
+                if desired_state.get(role_name, None) is None:
                     # The mapping was not defined for this [org/team]/role so we can just pass
-                    pass
+                    continue
 
                 # If somehow the auth adapter knows about an items role but that role is not defined in the DB we are going to print a pretty error
                 # This is your classic safety net that we should never hit; but here you are reading this comment... good luck and Godspeed.
