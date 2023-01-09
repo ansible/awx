@@ -790,7 +790,9 @@ class CredentialTypeInjectorField(JSONSchemaField):
                 'extra_vars': {
                     'type': 'object',
                     'patternProperties': {
-                        r'^(?:(?:{(?:{|%)[^{}]*?(?:%|})})|(?:[a-zA-Z_]+[a-zA-Z0-9_]*)+)+$': {"anyOf": [{'type': 'string'}, {'$ref': '#/properties/extra_vars'}]}
+                        r'^(?:(?:{(?:{|%)[^{}]*?(?:%|})})|(?:[a-zA-Z_]+[a-zA-Z0-9_]*)+)+$': {
+                            "anyOf": [{'type': 'string'}, {'type': 'array'}, {'$ref': '#/properties/extra_vars'}]
+                        }
                     },
                     'additionalProperties': False,
                 },
@@ -876,9 +878,9 @@ class CredentialTypeInjectorField(JSONSchemaField):
 
         def validate_extra_vars(key, node):
             if isinstance(node, dict):
-                return {validate_extra_vars(key, k): validate_extra_vars(k, v) for k, v in node.items()}
+                return {validate_extra_vars(key, k): validate_extra_vars("{key}.{k}".format(key=key, k=k), v) for k, v in node.items()}
             elif isinstance(node, list):
-                return [validate_extra_vars(key, x) for x in node]
+                return [validate_extra_vars("{key}[{i}]".format(key=key, i=i), x) for i, x in enumerate(node)]
             else:
                 validate_template_string("extra_vars", key, node)
 
