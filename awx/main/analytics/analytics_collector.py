@@ -11,7 +11,6 @@ import insights_analytics_collector as base
 from awx.conf.license import get_license
 from awx.main.models import Job
 from awx.main.access import access_registry
-from awx.main.analytics import collectors
 from awx.main.analytics.package import Package
 from awx.main.analytics.collection_json import CollectionJSON
 from awx.main.utils import datetime_hook
@@ -21,7 +20,11 @@ logger = logging.getLogger('awx.main.analytics')
 
 
 class AnalyticsCollector(base.Collector):
-    def __init__(self, collection_type=base.Collector.SCHEDULED_COLLECTION, collector_module=collectors):
+    def __init__(self, collection_type=base.Collector.SCHEDULED_COLLECTION, collector_module=None):
+        from awx.main.analytics import collectors
+
+        if collector_module is None:
+            collector_module = collectors
         super(AnalyticsCollector, self).__init__(collection_type=collection_type, collector_module=collector_module, logger=logger)
 
     def _is_valid_license(self):
