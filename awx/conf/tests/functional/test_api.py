@@ -94,9 +94,7 @@ def test_setting_singleton_retrieve_readonly(api_request, dummy_setting):
 
 @pytest.mark.django_db
 def test_setting_singleton_update(api_request, dummy_setting):
-    with dummy_setting('FOO_BAR', field_class=fields.IntegerField, category='FooBar', category_slug='foobar'), mock.patch(
-        'awx.conf.views.handle_setting_changes'
-    ):
+    with dummy_setting('FOO_BAR', field_class=fields.IntegerField, category='FooBar', category_slug='foobar'), mock.patch('awx.conf.views.clear_setting_cache'):
         api_request('patch', reverse('api:setting_singleton_detail', kwargs={'category_slug': 'foobar'}), data={'FOO_BAR': 3})
         response = api_request('get', reverse('api:setting_singleton_detail', kwargs={'category_slug': 'foobar'}))
         assert response.data['FOO_BAR'] == 3
@@ -112,7 +110,7 @@ def test_setting_singleton_update_hybriddictfield_with_forbidden(api_request, du
     # sure that the _Forbidden validator doesn't get used for the
     # fields.  See also https://github.com/ansible/awx/issues/4099.
     with dummy_setting('FOO_BAR', field_class=sso_fields.SAMLOrgAttrField, category='FooBar', category_slug='foobar'), mock.patch(
-        'awx.conf.views.handle_setting_changes'
+        'awx.conf.views.clear_setting_cache'
     ):
         api_request(
             'patch',
@@ -126,7 +124,7 @@ def test_setting_singleton_update_hybriddictfield_with_forbidden(api_request, du
 @pytest.mark.django_db
 def test_setting_singleton_update_dont_change_readonly_fields(api_request, dummy_setting):
     with dummy_setting('FOO_BAR', field_class=fields.IntegerField, read_only=True, default=4, category='FooBar', category_slug='foobar'), mock.patch(
-        'awx.conf.views.handle_setting_changes'
+        'awx.conf.views.clear_setting_cache'
     ):
         api_request('patch', reverse('api:setting_singleton_detail', kwargs={'category_slug': 'foobar'}), data={'FOO_BAR': 5})
         response = api_request('get', reverse('api:setting_singleton_detail', kwargs={'category_slug': 'foobar'}))
@@ -136,7 +134,7 @@ def test_setting_singleton_update_dont_change_readonly_fields(api_request, dummy
 @pytest.mark.django_db
 def test_setting_singleton_update_dont_change_encrypted_mark(api_request, dummy_setting):
     with dummy_setting('FOO_BAR', field_class=fields.CharField, encrypted=True, category='FooBar', category_slug='foobar'), mock.patch(
-        'awx.conf.views.handle_setting_changes'
+        'awx.conf.views.clear_setting_cache'
     ):
         api_request('patch', reverse('api:setting_singleton_detail', kwargs={'category_slug': 'foobar'}), data={'FOO_BAR': 'password'})
         assert Setting.objects.get(key='FOO_BAR').value.startswith('$encrypted$')
@@ -155,16 +153,14 @@ def test_setting_singleton_update_runs_custom_validate(api_request, dummy_settin
 
     with dummy_setting('FOO_BAR', field_class=fields.IntegerField, category='FooBar', category_slug='foobar'), dummy_validate(
         'foobar', func_raising_exception
-    ), mock.patch('awx.conf.views.handle_setting_changes'):
+    ), mock.patch('awx.conf.views.clear_setting_cache'):
         response = api_request('patch', reverse('api:setting_singleton_detail', kwargs={'category_slug': 'foobar'}), data={'FOO_BAR': 23})
         assert response.status_code == 400
 
 
 @pytest.mark.django_db
 def test_setting_singleton_delete(api_request, dummy_setting):
-    with dummy_setting('FOO_BAR', field_class=fields.IntegerField, category='FooBar', category_slug='foobar'), mock.patch(
-        'awx.conf.views.handle_setting_changes'
-    ):
+    with dummy_setting('FOO_BAR', field_class=fields.IntegerField, category='FooBar', category_slug='foobar'), mock.patch('awx.conf.views.clear_setting_cache'):
         api_request('delete', reverse('api:setting_singleton_detail', kwargs={'category_slug': 'foobar'}))
         response = api_request('get', reverse('api:setting_singleton_detail', kwargs={'category_slug': 'foobar'}))
         assert not response.data['FOO_BAR']
@@ -173,7 +169,7 @@ def test_setting_singleton_delete(api_request, dummy_setting):
 @pytest.mark.django_db
 def test_setting_singleton_delete_no_read_only_fields(api_request, dummy_setting):
     with dummy_setting('FOO_BAR', field_class=fields.IntegerField, read_only=True, default=23, category='FooBar', category_slug='foobar'), mock.patch(
-        'awx.conf.views.handle_setting_changes'
+        'awx.conf.views.clear_setting_cache'
     ):
         api_request('delete', reverse('api:setting_singleton_detail', kwargs={'category_slug': 'foobar'}))
         response = api_request('get', reverse('api:setting_singleton_detail', kwargs={'category_slug': 'foobar'}))
