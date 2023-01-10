@@ -129,7 +129,6 @@ def main():
     state = module.params.pop('state')
     preserve_existing_hosts = module.params.get('preserve_existing_hosts')
     preserve_existing_children = module.params.get('preserve_existing_children')
-    preserve_existing_children = preserve_existing_children or module.params.get('preserve_existing_children')
     variables = module.params.get('variables')
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
