@@ -215,6 +215,9 @@ JOB_EVENT_MAX_QUEUE_SIZE = 10000
 # The number of job events to migrate per-transaction when moving from int -> bigint
 JOB_EVENT_MIGRATION_CHUNK_SIZE = 1000000
 
+# The prefix of the redis key that stores metrics
+SUBSYSTEM_METRICS_REDIS_KEY_PREFIX = "awx_metrics"
+
 # Histogram buckets for the callback_receiver_batch_events_insert_db metric
 SUBSYSTEM_METRICS_BATCH_INSERT_BUCKETS = [10, 50, 150, 350, 650, 2000]
 
@@ -844,7 +847,7 @@ LOGGING = {
         'awx.main.commands.run_callback_receiver': {'handlers': ['callback_receiver']},  # level handled by dynamic_level_filter
         'awx.main.dispatch': {'handlers': ['dispatcher']},
         'awx.main.consumers': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'INFO'},
-        'awx.main.wsbroadcast': {'handlers': ['wsbroadcast']},
+        'awx.main.wsrelay': {'handlers': ['wsrelay']},
         'awx.main.rsyslog_configurer': {'handlers': ['rsyslog_configurer']},
         'awx.main.commands.inventory_import': {'handlers': ['inventory_import'], 'propagate': False},
         'awx.main.tasks': {'handlers': ['task_system', 'external_logger'], 'propagate': False},
@@ -854,7 +857,7 @@ LOGGING = {
         'awx.main.signals': {'level': 'INFO'},  # very verbose debug-level logs
         'awx.api.permissions': {'level': 'INFO'},  # very verbose debug-level logs
         'awx.analytics': {'handlers': ['external_logger'], 'level': 'INFO', 'propagate': False},
-        'awx.analytics.broadcast_websocket': {'handlers': ['console', 'file', 'wsbroadcast', 'external_logger'], 'level': 'INFO', 'propagate': False},
+        'awx.analytics.broadcast_websocket': {'handlers': ['console', 'file', 'wsrelay', 'external_logger'], 'level': 'INFO', 'propagate': False},
         'awx.analytics.performance': {'handlers': ['console', 'file', 'tower_warnings', 'external_logger'], 'level': 'DEBUG', 'propagate': False},
         'awx.analytics.job_lifecycle': {'handlers': ['console', 'job_lifecycle'], 'level': 'DEBUG', 'propagate': False},
         'django_auth_ldap': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
@@ -872,7 +875,7 @@ handler_config = {
     'tower_warnings': {'filename': 'tower.log'},
     'callback_receiver': {'filename': 'callback_receiver.log'},
     'dispatcher': {'filename': 'dispatcher.log', 'formatter': 'dispatcher'},
-    'wsbroadcast': {'filename': 'wsbroadcast.log'},
+    'wsrelay': {'filename': 'wsrelay.log'},
     'task_system': {'filename': 'task_system.log'},
     'rbac_migrations': {'filename': 'tower_rbac_migrations.log'},
     'job_lifecycle': {'filename': 'job_lifecycle.log', 'formatter': 'job_lifecycle'},
@@ -981,6 +984,9 @@ BROADCAST_WEBSOCKET_NEW_INSTANCE_POLL_RATE_SECONDS = 10
 
 # How often websocket process will generate stats
 BROADCAST_WEBSOCKET_STATS_POLL_RATE_SECONDS = 5
+
+# How often should web instances advertise themselves?
+BROADCAST_WEBSOCKET_BEACON_FROM_WEB_RATE_SECONDS = 15
 
 DJANGO_GUID = {'GUID_HEADER_NAME': 'X-API-Request-Id'}
 

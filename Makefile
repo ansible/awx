@@ -2,6 +2,7 @@ PYTHON ?= python3.9
 OFFICIAL ?= no
 NODE ?= node
 NPM_BIN ?= npm
+KIND_BIN ?= $(shell which kind)
 CHROMIUM_BIN=/tmp/chrome-linux/chrome
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 MANAGEMENT_COMMAND ?= awx-manage
@@ -226,11 +227,17 @@ daphne:
 	fi; \
 	daphne -b 127.0.0.1 -p 8051 awx.asgi:channel_layer
 
-wsbroadcast:
+wsrelay:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py run_wsbroadcast
+	$(PYTHON) manage.py run_wsrelay
+
+heartbeet:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py run_heartbeet
 
 ## Run to start the background task dispatcher for development.
 dispatcher:
@@ -599,6 +606,9 @@ awx-kube-build: Dockerfile
 		--build-arg SETUPTOOLS_SCM_PRETEND_VERSION=$(VERSION) \
 		--build-arg HEADLESS=$(HEADLESS) \
 		-t $(DEV_DOCKER_TAG_BASE)/awx:$(COMPOSE_TAG) .
+
+kind-dev-load: awx-kube-dev-build
+	$(KIND_BIN) load docker-image $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG)
 
 # Translation TASKS
 # --------------------------------------
