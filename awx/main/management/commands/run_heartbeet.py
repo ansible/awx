@@ -14,9 +14,6 @@ logger = logging.getLogger('awx.main.commands.run_heartbeet')
 class Command(BaseCommand):
     help = 'Launch the web server beacon (heartbeet)'
 
-    # def add_arguments(self, parser):
-    #    parser.add_argument('--status', dest='status', action='store_true', help='print the internal state of any running broadcast websocket')
-
     def print_banner(self):
         heartbeet = """
    **********   **********
