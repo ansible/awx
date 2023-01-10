@@ -4509,12 +4509,12 @@ class BulkJobLaunchSerializer(serializers.Serializer):
     jobs = BulkJobNodeSerializer(many=True, allow_empty=False, write_only=True, max_length=1000)
     description: serializers.CharField(write_only=True, required=False, allow_blank=False)
     extra_vars: serializers.CharField(write_only=True, required=False, allow_blank=False)
-    #organization: (Maybe if they don't set it, set their first organization) # Here we can use PrimaryKeyRelatedField so it will automagically do rbac/turn into object )
-    #inventory: "",  # Here we can use PrimaryKeyRelatedField so it will automagically do rbac/turn into object
+    # organization: (Maybe if they don't set it, set their first organization) # Here we can use PrimaryKeyRelatedField so it will automagically do rbac/turn into object )
+    # inventory: "",  # Here we can use PrimaryKeyRelatedField so it will automagically do rbac/turn into object
     limit: serializers.CharField(write_only=True, required=False, allow_blank=False)
     scm_branch: serializers.CharField(write_only=True, required=False, allow_blank=False)
-    #webhook_service: null,  # Here we can use PrimaryKeyRelatedField so it will automagically do rbac/turn into object, I think, I'm actually not sure how to use this
-    #webhook_credential: null,  # Here we can use PrimaryKeyRelatedField so it will automagically do rbac/turn into object  I think, I'm actually not sure how to use this
+    # webhook_service: null,  # Here we can use PrimaryKeyRelatedField so it will automagically do rbac/turn into object, I think, I'm actually not sure how to use this
+    # webhook_credential: null,  # Here we can use PrimaryKeyRelatedField so it will automagically do rbac/turn into object  I think, I'm actually not sure how to use this
     skip_tags: serializers.CharField(write_only=True, required=False, allow_blank=False)
     job_tags: serializers.CharField(write_only=True, required=False, allow_blank=False)
 
@@ -4592,9 +4592,12 @@ class BulkJobLaunchSerializer(serializers.Serializer):
                         raise serializers.ValidationError(_(f"Instance Groups {not_allowed} not found"))
 
             if requested_use_execution_environments:
-                accessible_execution_env = {tup.id for tup in ExecutionEnvironment.objects.filter(
-                    Q(organization__in=Organization.accessible_pk_qs(request.user, 'read_role')) | Q(organization__isnull=True)
-                ).distinct()}
+                accessible_execution_env = {
+                    tup.id
+                    for tup in ExecutionEnvironment.objects.filter(
+                        Q(organization__in=Organization.accessible_pk_qs(request.user, 'read_role')) | Q(organization__isnull=True)
+                    ).distinct()
+                }
                 if requested_use_execution_environments - accessible_execution_env:
                     not_allowed = requested_use_execution_environments - accessible_execution_env
                     raise serializers.ValidationError(_(f"Execution Environments {not_allowed} not found"))
@@ -4608,7 +4611,7 @@ class BulkJobLaunchSerializer(serializers.Serializer):
             "credentials": {obj.id: obj for obj in Credential.objects.filter(id__in=requested_use_credentials)},
             "labels": {obj.id: obj for obj in Label.objects.filter(id__in=requested_use_labels)},
             "instance_groups": {obj.id: obj for obj in InstanceGroup.objects.filter(id__in=requested_use_instance_groups)},
-            "execution_environment": {obj.id: obj for obj in ExecutionEnvironment.objects.filter(id__in=requested_use_execution_environments)}
+            "execution_environment": {obj.id: obj for obj in ExecutionEnvironment.objects.filter(id__in=requested_use_execution_environments)},
         }
 
         # This loop is generalized so we should only have to add related items to the key_to_obj_map
