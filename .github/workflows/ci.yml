@@ -107,25 +107,6 @@ jobs:
           AWX_TEST_IMAGE: awx
           AWX_TEST_VERSION: ci
 
-  collection-sanity:
-    name: awx_collection sanity
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-    steps:
-      - uses: actions/checkout@v3
-
-      # The containers that GitHub Actions use have Ansible installed, so upgrade to make sure we have the latest version.
-      - name: Upgrade ansible-core
-        run: python3 -m pip install --upgrade ansible-core
-
-      - name: Run sanity tests
-        run: make test_collection_sanity
-        env:
-          # needed due to cgroupsv2. This is fixed, but a stable release
-          # with the fix has not been made yet.
-          ANSIBLE_TEST_PREFER_PODMAN: 1
-
   collection-integration:
     name: awx_collection integration
     runs-on: ubuntu-latest

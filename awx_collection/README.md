@@ -25,7 +25,7 @@ doc fragment.
 This collection templates the `galaxy.yml` file it uses.
 Run `make build_collection` from the root folder of the AWX source tree.
 This will create the `tar.gz` file inside the `awx_collection` folder
-with the current AWX version, for example: `awx_collection/awx-awx-9.2.0.tar.gz`.
+with the current AWX version, for example: `awx_collection/awx-awx-21.10.2.tar.gz`.
 
 Installing the `tar.gz` involves no special instructions.
 

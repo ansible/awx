@@ -1,0 +1,35 @@
+---
+name: CI
+env:
+  BRANCH: ${{ github.base_ref || 'devel' }}
+  LC_ALL: "C.UTF-8" # prevent ERROR: Ansible could not initialize the preferred locale: unsupported locale setting
+on:
+  pull_request:
+    paths:
+      - 'awx_collection/**'
+jobs:
+  collection-sanity:
+    name: "awx_collection sanity ${{ matrix.tests.label }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        tests:
+          - label: Ansible-core from PyPI
+            ansible_source: ansible-core
+          - label: Ansible-core devel
+            ansible_source: "git+https://github.com/ansible/ansible.git"
+
+    steps:
+      - uses: actions/checkout@v2
+
+      # The containers that GitHub Actions use have Ansible installed, so upgrade to make sure we have the latest version.
+      - name: Upgrade ansible-core
+        run: "python3 -m pip install --upgrade ${{ matrix.tests.ansible_source }}"
+
+      - name: "Run sanity tests ${{ matrix.tests.label }}"
+        run: make test_collection_sanity
+        env:
+          # needed due to cgroupsv2. This is fixed, but a stable release
+          # with the fix has not been made yet.
+          ANSIBLE_TEST_PREFER_PODMAN: 1
