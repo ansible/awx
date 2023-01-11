@@ -5,13 +5,6 @@
 import re
 import logging
 
-
-# Python Social Auth
-from social_core.exceptions import AuthException
-
-# Django
-from django.utils.translation import gettext_lazy as _
-
 from awx.sso.common import get_or_create_with_default_galaxy_cred
 
 logger = logging.getLogger('awx.sso.social_pipeline')
