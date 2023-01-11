@@ -5,10 +5,10 @@
 import re
 import logging
 
-
 # Django
 from django.conf import settings
 
+from awx.main.models import Team
 from awx.sso.common import create_org_and_teams, reconcile_users_org_team_mappings, get_orgs_by_ids
 
 logger = logging.getLogger('awx.sso.saml_pipeline')
@@ -24,14 +24,12 @@ def populate_user(backend, details, user=None, *args, **kwargs):
     orgs_to_create = []
     teams_to_create = {}
     _update_user_orgs_by_saml_attr(backend, desired_org_state, orgs_to_create, **kwargs)
-    _update_user_teams_by_saml_attr(desired_team_state, orgs_to_create, teams_to_create, **kwargs)
+    _update_user_teams_by_saml_attr(desired_team_state, teams_to_create, **kwargs)
     _update_user_orgs(backend, desired_org_state, orgs_to_create, user)
-    _update_user_teams(backend, desired_team_state, orgs_to_create, teams_to_create, user)
+    _update_user_teams(backend, desired_team_state, teams_to_create, user)
 
     # If the SAML adapter is allowed to create objects, lets do that first
-    if settings.SAML_AUTO_CREATE_OBJECTS:
-        # Orgs are derived from 4 settings: ORG_MAP, TEAM_MAP,
-        create_org_and_teams(orgs_to_create, teams_to_create, 'SAML')
+    create_org_and_teams(orgs_to_create, teams_to_create, 'SAML', settings.SAML_AUTO_CREATE_OBJECTS)
 
     # Finally reconcile the user
     reconcile_users_org_team_mappings(user, desired_org_state, desired_team_state, 'SAML')
@@ -92,7 +90,7 @@ def _update_user_orgs(backend, desired_org_state, orgs_to_create, user=None):
             desired_org_state[organization_name][role_name] = has_role
 
 
-def _update_user_teams(backend, desired_team_state, orgs_to_create, teams_to_create, user=None):
+def _update_user_teams(backend, desired_team_state, teams_to_create, user=None):
     """
     Update team memberships for the given user based on mapping rules defined
     in settings.
@@ -103,8 +101,6 @@ def _update_user_teams(backend, desired_team_state, orgs_to_create, teams_to_cre
         # Get or create the org to update.
         if 'organization' not in team_opts:
             continue
-        if team_opts['organization'] not in orgs_to_create:
-            orgs_to_create.append(team_opts['organization'])
         teams_to_create[team_name] = team_opts['organization']
         users_expr = team_opts.get('users', None)
         remove = bool(team_opts.get('remove', True))
@@ -132,7 +128,7 @@ def _update_user_orgs_by_saml_attr(backend, desired_org_state, orgs_to_create, *
             # Only get the all orgs once, and only if needed
             if all_orgs is None:
                 all_orgs = get_orgs_by_ids()
-            for org_name in all_orgs.values():
+            for org_name in all_orgs.keys():
                 if org_name not in desired_org_state:
                     desired_org_state[org_name] = {}
                 desired_org_state[org_name][role] = False
@@ -158,13 +154,26 @@ def _update_user_orgs_by_saml_attr(backend, desired_org_state, orgs_to_create, *
             desired_org_state[organization_name][role] = True
 
 
-def _update_user_teams_by_saml_attr(desired_team_state, orgs_to_create, teams_to_create, **kwargs):
+def _update_user_teams_by_saml_attr(desired_team_state, teams_to_create, **kwargs):
     #
     # Map users into organizations based on SOCIAL_AUTH_SAML_TEAM_ATTR setting
     #
     team_map = settings.SOCIAL_AUTH_SAML_TEAM_ATTR
     if team_map.get('saml_attr') is None:
         return
+
+    all_teams = None
+    # The role and flag is hard coded here but intended to be flexible in case we ever wanted to add another team type
+    for role, remove_flag in [('member_role', 'remove')]:
+        remove = bool(team_map.get(remove_flag, True))
+        if remove:
+            # Only get the all orgs once, and only if needed
+            if all_teams is None:
+                all_teams = Team.objects.all().values_list('name', 'organization__name')
+            for (team_name, organization_name) in all_teams:
+                if organization_name not in desired_team_state:
+                    desired_team_state[organization_name] = {}
+                desired_team_state[organization_name][team_name] = {role: False}
 
     saml_team_names = set(kwargs.get('response', {}).get('attributes', {}).get(team_map['saml_attr'], []))
 
@@ -181,10 +190,7 @@ def _update_user_teams_by_saml_attr(desired_team_state, orgs_to_create, teams_to
             if team_alias:
                 team_name = team_alias
 
-            if organization_name not in orgs_to_create:
-                orgs_to_create.append(organization_name)
             teams_to_create[team_name] = organization_name
-
             user_is_member_of_team = True
         else:
             user_is_member_of_team = False
