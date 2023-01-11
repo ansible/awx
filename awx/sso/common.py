@@ -100,7 +100,7 @@ def reconcile_users_org_team_mappings(user, desired_org_states, desired_team_sta
                         user.roles.remove(role_id)
 
 
-def create_org_and_teams(org_list, team_map, adapter):
+def create_org_and_teams(org_list, team_map, adapter, can_create=True):
     #
     # org_list is a set of organization names
     # team_map is a dict of {<team_name>: <org name>}
@@ -108,6 +108,10 @@ def create_org_and_teams(org_list, team_map, adapter):
     # Move this junk into save of the settings for performance later, there is no need to do that here
     #    with maybe the exception of someone defining this in settings before the server is started?
     # ==============================================================================================================
+
+    if not can_create:
+        logger.debug(f"Adapter {adapter} is not allowed to create orgs/teams")
+        return
 
     # Get all of the IDs and names of orgs in the DB and create any new org defined in LDAP that does not exist in the DB
     existing_orgs = get_orgs_by_ids()
