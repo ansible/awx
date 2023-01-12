@@ -48,9 +48,6 @@ def tss_backend(**kwargs):
     secret_server = SecretServer(kwargs['server_url'], authorizer)
     secret_dict = secret_server.get_secret(kwargs['secret_id'])
     secret = ServerSecret(**secret_dict)
-    #Fix Issue https://github.com/ansible/awx/issues/13384
-    # For SSH Key types thycotic is returning a Object of Type <class 'requests.models.Response'>
-    # So we need to check whether response is a string or object and based on that we need return value
     
     if type(secret.fields[kwargs['secret_field']].value) != str :
         return secret.fields[kwargs['secret_field']].value.text
