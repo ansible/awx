@@ -12,6 +12,8 @@ from awx.main.access import (
     ScheduleAccess,
 )
 
+from awx.api.versioning import reverse
+
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("role", ["admin_role", "inventory_admin_role"])
@@ -99,6 +101,44 @@ def test_host_access(organization, inventory, group, user, group_factory):
     host.save()
 
     assert inventory_admin_access.can_read(host) is False
+
+
+@pytest.mark.django_db
+def test_bulk_host_create_rbac(organization, inventory, post, get, user):
+    '''
+    If I am a...
+      org admin
+      inventory admin at org level
+      admin of a particular invenotry
+          ... I can bulk add hosts
+
+    Everyone else cannot
+    '''
+    inventory.organization = organization
+    inventory_admin = user('inventory_admin', False)
+    org_admin = user('org_admin', False)
+    org_inv_admin = user('org_admin', False)
+    auditor = user('auditor', False)
+    member = user('member', False)
+    use_inv_member = user('member', False)
+    for u in [org_admin, org_inv_admin, auditor, member, inventory_admin, use_inv_member]:
+        organization.member_role.members.add(u)
+    organization.admin_role.members.add(org_admin)
+    organization.inventory_admin_role.members.add(org_inv_admin)
+    inventory.admin_role.members.add(inventory_admin)
+    inventory.use_role.members.add(use_inv_member)
+    organization.auditor_role.members.add(auditor)
+
+    for indx, u in enumerate([org_admin, inventory_admin, org_inv_admin]):
+        bulk_host_create_response = post(
+            reverse('api:bulk_host_create'), {'inventory': inventory.id, 'hosts': [{'name': f'foobar-{indx}'}]}, u, expect=201
+        ).data
+        assert bulk_host_create_response['created'] == 1, f"unexpected number of hosts created for user {u}"
+
+    for indx, u in enumerate([member, auditor, use_inv_member]):
+        bulk_host_create_response = post(
+            reverse('api:bulk_host_create'), {'inventory': inventory.id, 'hosts': [{'name': f'foobar2-{indx}'}]}, u, expect=400
+        ).data
 
 
 @pytest.mark.django_db
