@@ -4509,7 +4509,13 @@ class BulkJobLaunchSerializer(serializers.Serializer):
     jobs = BulkJobNodeSerializer(many=True, allow_empty=False, write_only=True, max_length=1000)
     description: serializers.CharField(write_only=True, required=False, allow_blank=False)
     extra_vars: serializers.CharField(write_only=True, required=False, allow_blank=False)
-    # organization: (Maybe if they don't set it, set their first organization) # Here we can use PrimaryKeyRelatedField so it will automagically do rbac/turn into object )
+    organization = serializers.PrimaryKeyRelatedField(
+        queryset=Organization.objects.all(),
+        required=False,
+        default=None,
+        allow_null=True,
+        help_text=_('Inherit permissions from organization roles.'),
+    )
     # inventory: "",  # Here we can use PrimaryKeyRelatedField so it will automagically do rbac/turn into object
     limit: serializers.CharField(write_only=True, required=False, allow_blank=False)
     scm_branch: serializers.CharField(write_only=True, required=False, allow_blank=False)
@@ -4517,6 +4523,7 @@ class BulkJobLaunchSerializer(serializers.Serializer):
     # webhook_credential: null,  # Here we can use PrimaryKeyRelatedField so it will automagically do rbac/turn into object  I think, I'm actually not sure how to use this
     skip_tags: serializers.CharField(write_only=True, required=False, allow_blank=False)
     job_tags: serializers.CharField(write_only=True, required=False, allow_blank=False)
+    is_bulk_job: serializers.BooleanField(default=True)
 
     class Meta:
         fields = ('name', 'jobs', 'description', 'limit')
@@ -4525,6 +4532,20 @@ class BulkJobLaunchSerializer(serializers.Serializer):
     def validate(self, attrs):
 
         request = self.context.get('request', None)
+        # validate Organization
+        # - If the orgs is not set, set it to the org of the launching user
+        # - If the user is part of multiple orgs, throw a validation error saying user is part of multiple orgs, please provide one
+
+        if 'organization' not in attrs or attrs['organization'] == None or attrs['oganization'] == '':
+            if Organization.accessible_pk_qs(request.user, 'read_role').count() == 1:
+                for tup in Organization.accessible_pk_qs(request.user, 'read_role').all():
+                    attrs['organization'] = tup[0]
+            elif Organization.accessible_pk_qs(request.user, 'read_role').count() > 1:
+                raise serializers.ValidationError(_(f"User is part of multiple Organization, please set one of them in the request"))
+            else:
+                raise serializers.ValidationError(_(f"User not part of any organization, please assign an organization for the user"))
+        requested_org = {attrs['organization']}
+
         identifiers = set()
         for node in attrs['jobs']:
             if 'identifier' in node:
@@ -4553,6 +4574,11 @@ class BulkJobLaunchSerializer(serializers.Serializer):
         # If we are not a superuser, check we have permissions
         # TODO: As we add other related items, we need to add them here
         if request and not request.user.is_superuser:
+            allowed_orgs = set()
+            if requested_org:
+                [allowed_orgs.add(tup[0]) for tup in Organization.accessible_pk_qs(request.user, 'read_role').all()]
+                if requested_org not in allowed_orgs:
+                    ValidationError(_(f"Organization {requested_org} not found"))
             allowed_ujts = set()
             [allowed_ujts.add(tup[0]) for tup in UnifiedJobTemplate.accessible_pk_qs(request.user, 'execute_role').all()]
             [allowed_ujts.add(tup[0]) for tup in UnifiedJobTemplate.accessible_pk_qs(request.user, 'admin_role').all()]
@@ -4630,6 +4656,9 @@ class BulkJobLaunchSerializer(serializers.Serializer):
             objectified_jobs.append(objectified_job)
 
         attrs['jobs'] = objectified_jobs
+        # map the organization object
+        for obj in Organization.objects.filter(id__in=requested_org):
+            attrs['organization'] = obj
         return attrs
 
     def create(self, validated_data):
