@@ -4543,7 +4543,7 @@ class BulkJobLaunchSerializer(serializers.Serializer):
             elif Organization.accessible_pk_qs(request.user, 'read_role').count() > 1:
                 raise serializers.ValidationError(_(f"User has permission to multiple Organizations, please set one of them in the request"))
             else:
-                raise serializers.ValidationError(_(f"User not part of any organization, please assign an organization for the user"))
+                raise serializers.ValidationError(_(f"User not part of any organization, please assign an organization to assign to the bulk job"))
         requested_org = {attrs['organization']}
 
         identifiers = set()
