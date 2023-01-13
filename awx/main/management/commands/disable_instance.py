@@ -44,6 +44,8 @@ class AWXInstance:
     def jobs_pretty(self):
         jobs = []
         for j in self.jobs():
+            if not j.started:
+                continue
             # similar calculation of `elapsed` as the corresponding serializer
             # does
             td = now() - j.started
@@ -72,7 +74,10 @@ class Command(BaseCommand):
     help = "Disable instance, optionally waiting for all its managed jobs to finish."
 
     @staticmethod
-    def int_positive(arg):
+    def ge_1(arg):
+        if arg == "inf":
+            return float(arg)
+
         int_arg = int(arg)
         if int_arg < 1:
             raise ArgumentTypeError(f"The value must be a positive number >= 1. Provided: \"{arg}\"")
@@ -87,24 +92,24 @@ class Command(BaseCommand):
             default=socket.gethostname(),
             help=f"{Instance.hostname.field.help_text} Defaults to the hostname of the machine where the Python interpreter is currently executing".strip(),
         )
-        filter_group.add_argument("--id", type=self.int_positive, help=Instance.id.field.help_text)
+        filter_group.add_argument("--id", type=self.ge_1, help=Instance.id.field.help_text)
 
         parser.add_argument(
             "--wait",
             action="store_true",
-            help="Wait for jobs managed by the instance to finish. With default retry arguments waits for about 3h",
+            help="Wait for jobs managed by the instance to finish. With default retry arguments waits ~1h",
         )
 
         parser.add_argument(
             "--retry",
-            type=self.int_positive,
-            default=360,
-            help="Number of retries when waiting for jobs to finish. Default: 360",
+            type=self.ge_1,
+            default=120,
+            help="Number of retries when waiting for jobs to finish. Default: 120. Also accepts \"inf\" to wait indefinitely",
         )
 
         parser.add_argument(
             "--retry_sleep",
-            type=self.int_positive,
+            type=self.ge_1,
             default=30,
             help="Number of seconds to sleep before consequtive retries when waiting. Default: 30",
         )
