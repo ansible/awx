@@ -1,6 +1,7 @@
 import copy
 import os
 import pathlib
+import time
 from urllib.parse import urljoin
 
 from .plugin import CredentialPlugin, CertFiles, raise_for_status
@@ -247,7 +248,15 @@ def kv_backend(**kwargs):
     request_url = urljoin(url, '/'.join(['v1'] + path_segments)).rstrip('/')
     with CertFiles(cacert) as cert:
         request_kwargs['verify'] = cert
-        response = sess.get(request_url, **request_kwargs)
+        request_retries = 0
+        while request_retries < 5:
+            response = sess.get(request_url, **request_kwargs)
+            # https://developer.hashicorp.com/vault/docs/enterprise/consistency
+            if response.status_code == 412:
+                request_retries += 1
+                time.sleep(1)
+            else:
+                break
     raise_for_status(response)
 
     json = response.json()
@@ -289,8 +298,15 @@ def ssh_backend(**kwargs):
 
     with CertFiles(cacert) as cert:
         request_kwargs['verify'] = cert
-        resp = sess.post(request_url, **request_kwargs)
-
+        request_retries = 0
+        while request_retries < 5:
+            resp = sess.post(request_url, **request_kwargs)
+            # https://developer.hashicorp.com/vault/docs/enterprise/consistency
+            if resp.status_code == 412:
+                request_retries += 1
+                time.sleep(1)
+            else:
+                break
     raise_for_status(resp)
     return resp.json()['data']['signed_key']
 
