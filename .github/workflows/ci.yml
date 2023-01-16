@@ -19,6 +19,9 @@ jobs:
           - name: api-test
             command: /start_tests.sh
             label: Run API Tests
+          - name: api-coverage-test
+            command: /start_tests.sh check_coverage
+            label: Check API Coverage
           - name: api-lint
             command: /var/lib/awx/venv/awx/bin/tox -e linters
             label: Run API Linters

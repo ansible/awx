@@ -61,7 +61,7 @@ I18N_FLAG_FILE = .i18n_built
 
 .PHONY: awx-link clean clean-tmp clean-venv requirements requirements_dev \
 	develop refresh adduser migrate dbchange \
-	receiver test test_unit test_coverage coverage_html \
+	receiver test test_unit test_coverage check_coverage coverage_html \
 	sdist \
 	ui-release ui-devel \
 	VERSION PYTHON_VERSION docker-compose-sources \
@@ -360,6 +360,37 @@ test_coverage:
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	py.test --create-db --cov=awx --cov-report=xml --junitxml=./reports/junit.xml $(TEST_DIRS)
+
+## Run coverage check (compares current branch from where forked from devel)  ** WARNING: will perform git checkout actions on your repo, be sure you are ok with that **
+check_coverage:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	if [ "${GIT_BRANCH}" == "devel" ] ; then \
+		echo "Doesn't make much sense to compare devel to devel"; \
+		exit 0; \
+	fi;
+	# Remove the existing report (if there)
+	rm -f reports/coverage.xml
+	# Find the fork point between the current branch and devel
+	FORK_POINT=`git merge-base origin/devel HEAD`
+	if [ "x${FORK_POINT}" == "x" ] ; then \
+		echo "Unable to determine devel fork point"; \
+		exit 0; \
+	fi;
+	echo "Running coverage changes since ${FORK_POINT}"
+	# Run the test for the current branch and copy off report
+	#-py.test --create-db --cov=awx --cov-report=xml --junitxml=./reports/junit.xml $(TEST_DIRS)
+	#mv reports/coverage.xml reports/current.xml
+	# Checkout fork point
+	git checkout ${FORK_POINT}
+	# Run test for the devel branch and copy off report
+	#-py.test --create-db --cov=awx --cov-report=xml --junitxml=./reports/junit.xml $(TEST_DIRS)
+	#mv reports/coverage.xml reports/devel.xml
+	# Checkout the original branch
+	git checkout ${GIT_BRANCH}
+	# Run the comparison
+	tools/scripts/compare_coverage.py ${FORK_POINT}
 
 ## Output test coverage as HTML (into htmlcov directory).
 coverage_html:
