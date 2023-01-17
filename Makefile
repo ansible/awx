@@ -380,13 +380,13 @@ check_coverage:
 	fi;
 	echo "Running coverage changes since ${FORK_POINT}"
 	# Run the test for the current branch and copy off report
-	#-py.test --create-db --cov=awx --cov-report=xml --junitxml=./reports/junit.xml $(TEST_DIRS)
-	#mv reports/coverage.xml reports/current.xml
+	-py.test --create-db --cov=awx --cov-report=xml --junitxml=./reports/junit.xml $(TEST_DIRS)
+	mv reports/coverage.xml reports/current.xml
 	# Checkout fork point
 	git checkout ${FORK_POINT}
 	# Run test for the devel branch and copy off report
-	#-py.test --create-db --cov=awx --cov-report=xml --junitxml=./reports/junit.xml $(TEST_DIRS)
-	#mv reports/coverage.xml reports/devel.xml
+	-py.test --create-db --cov=awx --cov-report=xml --junitxml=./reports/junit.xml $(TEST_DIRS)
+	mv reports/coverage.xml reports/devel.xml
 	# Checkout the original branch
 	git checkout ${GIT_BRANCH}
 	# Run the comparison
