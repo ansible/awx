@@ -846,6 +846,7 @@ LOGGING = {
         'awx.main.consumers': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'INFO'},
         'awx.main.wsbroadcast': {'handlers': ['wsbroadcast']},
         'awx.main.rsyslog_configurer': {'handlers': ['rsyslog_configurer']},
+        'awx.main.cache_clear': {'handlers': ['cache_clear']},
         'awx.main.commands.inventory_import': {'handlers': ['inventory_import'], 'propagate': False},
         'awx.main.tasks': {'handlers': ['task_system', 'external_logger'], 'propagate': False},
         'awx.main.analytics': {'handlers': ['task_system', 'external_logger'], 'level': 'INFO', 'propagate': False},
@@ -877,6 +878,7 @@ handler_config = {
     'rbac_migrations': {'filename': 'tower_rbac_migrations.log'},
     'job_lifecycle': {'filename': 'job_lifecycle.log', 'formatter': 'job_lifecycle'},
     'rsyslog_configurer': {'filename': 'rsyslog_configurer.log'},
+    'cache_clear': {'filename': 'cache_clear.log'},
 }
 
 # If running on a VM, we log to files. When running in a container, we log to stdout.
