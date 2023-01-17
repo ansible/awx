@@ -61,10 +61,10 @@ from awx.main.utils.common import (
 
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
+from awx.main.utils.external_logging import send_pg_notify
 from awx.main.tasks.receptor import get_receptor_ctl, worker_info, worker_cleanup, administrative_workunit_reaper, write_receptor_config
 from awx.main.consumers import emit_channel_notification
 from awx.main import analytics
-from awx.conf import settings_registry
 from awx.main.analytics.subsystem_metrics import Metrics
 
 from rest_framework.exceptions import PermissionDenied
@@ -240,15 +240,10 @@ def apply_cluster_membership_policies():
         logger.debug('Cluster policy computation finished in {} seconds'.format(time.time() - started_compute))
 
 
-@task(queue='tower_broadcast_all')
+@task(queue='tower_settings_change')
 def clear_setting_cache(setting_keys):
-    orig_len = len(setting_keys)
-    for i in range(orig_len):
-        for dependent_key in settings_registry.get_dependent_settings(setting_keys[i]):
-            setting_keys.append(dependent_key)
-    cache_keys = set(setting_keys)
-    logger.debug('cache delete_many(%r)', cache_keys)
-    cache.delete_many(cache_keys)
+    # notify the service to clear the cache
+    send_pg_notify('tower_settings_change', setting_keys)
 
 
 @task(queue='tower_broadcast_all')
