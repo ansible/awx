@@ -273,12 +273,12 @@ class TestApprovalNodes:
         post(url, {'name': 'Approve Test', 'description': '', 'timeout': 0, 'approve_self': True}, user=alice, expect=201)
         post(reverse('api:workflow_job_template_launch', kwargs={'pk': wfjt.pk}), user=alice, expect=201)
         wf_job = WorkflowJob.objects.first()
+        DependencyManager().schedule()  # TODO: exclude workflows from this and delete line
         TaskManager().schedule()
-        TaskManager().schedule()
+        WorkflowManager().schedule()
         wfj_node = wf_job.workflow_nodes.first()
         approval = wfj_node.job
         assert approval.name == 'Approve Test'
-        # Django-crum is not working for tests
         approval.created_by = alice
         approval.save()
         post(reverse('api:workflow_approval_approve', kwargs={'pk': approval.pk}), user=alice, expect=204)
@@ -292,8 +292,9 @@ class TestApprovalNodes:
         post(url, {'name': 'Approve Test', 'description': '', 'timeout': 0, 'approve_self': False}, user=alice, expect=201)
         post(reverse('api:workflow_job_template_launch', kwargs={'pk': wfjt.pk}), user=alice, expect=201)
         wf_job = WorkflowJob.objects.first()
+        DependencyManager().schedule()  # TODO: exclude workflows from this and delete line
         TaskManager().schedule()
-        TaskManager().schedule()
+        WorkflowManager().schedule()
         wfj_node = wf_job.workflow_nodes.first()
         approval = wfj_node.job
         assert approval.name == 'Approve Test'
@@ -310,8 +311,9 @@ class TestApprovalNodes:
         post(url, {'name': 'Approve Test', 'description': '', 'timeout': 0, 'approve_self': False}, user=alice, expect=201)
         post(reverse('api:workflow_job_template_launch', kwargs={'pk': wfjt.pk}), user=alice, expect=201)
         wf_job = WorkflowJob.objects.first()
+        DependencyManager().schedule()  # TODO: exclude workflows from this and delete line
         TaskManager().schedule()
-        TaskManager().schedule()
+        WorkflowManager().schedule()
         wfj_node = wf_job.workflow_nodes.first()
         approval = wfj_node.job
         assert approval.name == 'Approve Test'
