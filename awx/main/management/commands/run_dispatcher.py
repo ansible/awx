@@ -76,7 +76,7 @@ class Command(BaseCommand):
         consumer = None
 
         try:
-            queues = ['tower_broadcast_all', get_local_queuename()]
+            queues = ['tower_broadcast_all', 'tower_settings_change', 'rsyslog_configurer', get_local_queuename()]
             consumer = AWXConsumerPG('dispatcher', TaskWorker(), queues, AutoscalePool(min_workers=4))
             consumer.run()
         except KeyboardInterrupt:

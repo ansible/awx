@@ -70,6 +70,12 @@ I18N_FLAG_FILE = .i18n_built
 	VERSION PYTHON_VERSION docker-compose-sources \
 	.git/hooks/pre-commit github_ci_setup github_ci_runner
 
+cache-clear:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py run_cache_clear
+
 clean-tmp:
 	rm -rf tmp/
 
