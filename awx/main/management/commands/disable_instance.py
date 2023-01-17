@@ -44,11 +44,10 @@ class AWXInstance:
     def jobs_pretty(self):
         jobs = []
         for j in self.jobs():
-            if not j.started:
-                continue
+            job_started = j.started if j.started else now()
             # similar calculation of `elapsed` as the corresponding serializer
             # does
-            td = now() - j.started
+            td = now() - job_started
             elapsed = (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / (10**6 * 1.0)
             elapsed = float(elapsed)
             details = dict(
@@ -76,7 +75,7 @@ class Command(BaseCommand):
     @staticmethod
     def ge_1(arg):
         if arg == "inf":
-            return float(arg)
+            return float("inf")
 
         int_arg = int(arg)
         if int_arg < 1:
