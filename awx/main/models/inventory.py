@@ -927,6 +927,11 @@ class InventorySourceOptions(BaseModel):
         blank=True,
         default=1,
     )
+    limit = models.TextField(
+        blank=True,
+        default='',
+        help_text=_("Enter host, group or pattern match"),
+    )
 
     @staticmethod
     def cloud_credential_validation(source, cred):
