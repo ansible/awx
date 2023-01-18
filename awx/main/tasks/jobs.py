@@ -1528,7 +1528,7 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
         if inventory_update.inventory.kind == 'constructed':
             for source_inventory in inventory_update.inventory.source_inventories.all():
                 args.append('-i')
-                script_params = script_params = dict(hostvars=True, towervars=True)
+                script_params = dict(hostvars=True, towervars=True)
                 source_inv_path = self.write_inventory_file(source_inventory, private_data_dir, f'hosts_{source_inventory.id}', script_params)
                 args.append(to_container_path(source_inv_path, private_data_dir))
 
