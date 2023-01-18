@@ -790,13 +790,14 @@ class CredentialTypeInjectorField(JSONSchemaField):
                 'extra_vars': {
                     'type': 'object',
                     'patternProperties': {
-                        r'^(?:(?:{(?:{|%)[^{}]*?(?:%|})})|(?:[a-zA-Z_]+[a-zA-Z0-9_]*)+)+$': {
-                            "anyOf": [{'type': 'string'}, {'type': 'array'}, {'$ref': '#/properties/extra_vars'}]
-                        }
+                        # http://docs.ansible.com/ansible/playbooks_variables.html#what-makes-a-valid-variable-name
+                        # plus, add ability to template
+                        r'^[a-zA-Z_\{\}]+[a-zA-Z0-9_\{\}]*$': {"anyOf": [{'type': 'string'}, {'type': 'array'}, {'$ref': '#/properties/extra_vars'}]}
                     },
                     'additionalProperties': False,
                 },
             },
+            'additionalProperties': False,
         }
 
     def validate_env_var_allowed(self, env_var):
@@ -878,9 +879,12 @@ class CredentialTypeInjectorField(JSONSchemaField):
 
         def validate_extra_vars(key, node):
             if isinstance(node, dict):
-                return {validate_extra_vars(key, k): validate_extra_vars("{key}.{k}".format(key=key, k=k), v) for k, v in node.items()}
+                for k, v in node.items():
+                    validate_template_string("extra_vars", 'a key' if key is None else key, k)
+                    validate_extra_vars(k if key is None else "{key}.{k}".format(key=key, k=k), v)
             elif isinstance(node, list):
-                return [validate_extra_vars("{key}[{i}]".format(key=key, i=i), x) for i, x in enumerate(node)]
+                for i, x in enumerate(node):
+                    validate_extra_vars("{key}[{i}]".format(key=key, i=i), x)
             else:
                 validate_template_string("extra_vars", key, node)
 
