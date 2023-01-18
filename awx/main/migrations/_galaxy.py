@@ -44,7 +44,7 @@ def migrate_galaxy_settings(apps, schema_editor):
             credential_type=galaxy_type,
             inputs={'url': 'https://galaxy.ansible.com/'},
         )
-    except:
+    except Exception:
         # Needed for new migrations, tests
         public_galaxy_credential = Credential(
             created=now(), modified=now(), name='Ansible Galaxy', managed=True, credential_type=galaxy_type, inputs={'url': 'https://galaxy.ansible.com/'}

@@ -54,6 +54,18 @@ options:
       required: False
       type: int
       default: '0'
+    max_concurrent_jobs:
+      description:
+        - Maximum number of concurrent jobs to run on this group. Zero means no limit.
+      required: False
+      type: int
+      default: '0'
+    max_forks:
+      description:
+        - Max forks to execute on this group. Zero means no limit.
+      required: False
+      type: int
+      default: '0'
     policy_instance_list:
       description:
         - List of exact-match Instances that will be assigned to this group
@@ -95,6 +107,8 @@ def main():
         is_container_group=dict(type='bool', default=False),
         policy_instance_percentage=dict(type='int', default='0'),
         policy_instance_minimum=dict(type='int', default='0'),
+        max_concurrent_jobs=dict(type='int', default='0'),
+        max_forks=dict(type='int', default='0'),
         policy_instance_list=dict(type='list', elements='str'),
         pod_spec_override=dict(),
         instances=dict(required=False, type="list", elements='str', default=None),
@@ -111,6 +125,8 @@ def main():
     is_container_group = module.params.get('is_container_group')
     policy_instance_percentage = module.params.get('policy_instance_percentage')
     policy_instance_minimum = module.params.get('policy_instance_minimum')
+    max_concurrent_jobs = module.params.get('max_concurrent_jobs')
+    max_forks = module.params.get('max_forks')
     policy_instance_list = module.params.get('policy_instance_list')
     pod_spec_override = module.params.get('pod_spec_override')
     instances = module.params.get('instances')
@@ -144,6 +160,10 @@ def main():
         new_fields['policy_instance_percentage'] = policy_instance_percentage
     if policy_instance_minimum is not None:
         new_fields['policy_instance_minimum'] = policy_instance_minimum
+    if max_concurrent_jobs is not None:
+        new_fields['max_concurrent_jobs'] = max_concurrent_jobs
+    if max_forks is not None:
+        new_fields['max_forks'] = max_forks
     if policy_instance_list is not None:
         new_fields['policy_instance_list'] = policy_instance_list
     if pod_spec_override is not None:

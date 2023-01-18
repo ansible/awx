@@ -31,7 +31,7 @@ class PubSub(object):
             cur.execute('SELECT pg_notify(%s, %s);', (channel, payload))
 
     def events(self, select_timeout=5, yield_timeouts=False):
-        if not pg_connection.get_autocommit():
+        if not self.conn.autocommit:
             raise RuntimeError('Listening for events can only be done in autocommit mode')
 
         while True:

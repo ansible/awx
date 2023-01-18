@@ -1,11 +1,21 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { RRule } from 'rrule';
-import { SchedulesAPI, JobTemplatesAPI, InventoriesAPI } from 'api';
+import {
+  CredentialsAPI,
+  CredentialTypesAPI,
+  SchedulesAPI,
+  JobTemplatesAPI,
+  InventoriesAPI,
+} from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import ScheduleAdd from './ScheduleAdd';
 
-jest.mock('../../../api');
+jest.mock('../../../api/models/Credentials');
+jest.mock('../../../api/models/CredentialTypes');
+jest.mock('../../../api/models/Schedules');
+jest.mock('../../../api/models/JobTemplates');
+jest.mock('../../../api/models/Inventories');
 
 const launchConfig = {
   can_start_without_user_input: false,
@@ -19,7 +29,7 @@ const launchConfig = {
   ask_limit_on_launch: false,
   ask_verbosity_on_launch: false,
   ask_inventory_on_launch: true,
-  ask_credential_on_launch: false,
+  ask_credential_on_launch: true,
   survey_enabled: false,
   variables_needed_to_start: [],
   credential_needed_to_start: false,
@@ -57,6 +67,33 @@ describe('<ScheduleAdd />', () => {
       ],
     });
     JobTemplatesAPI.createSchedule.mockResolvedValue({ data: { id: 3 } });
+
+    CredentialTypesAPI.loadAllTypes.mockResolvedValue([
+      { id: 1, name: 'ssh', kind: 'ssh' },
+    ]);
+
+    CredentialsAPI.read.mockResolvedValue({
+      data: {
+        count: 1,
+        results: [
+          {
+            id: 10,
+            name: 'cred 1',
+            kind: 'ssh',
+            url: '',
+            credential_type: 1,
+          },
+        ],
+      },
+    });
+
+    CredentialsAPI.readOptions.mockResolvedValue({
+      data: {
+        related_search_fields: [],
+        actions: { GET: { filterabled: true } },
+      },
+    });
+
     await act(async () => {
       wrapper = mountWithContexts(
         <ScheduleAdd
@@ -70,6 +107,7 @@ describe('<ScheduleAdd />', () => {
             description: '',
           }}
           launchConfig={launchConfig}
+          surveyConfig={{}}
         />
       );
     });
@@ -390,6 +428,7 @@ describe('<ScheduleAdd />', () => {
       wrapper.find('Button[aria-label="Prompt"]').prop('onClick')()
     );
     wrapper.update();
+    // Inventory step
     expect(wrapper.find('WizardNavItem').at(0).prop('isCurrent')).toBe(true);
     await act(async () => {
       wrapper.find('td#check-action-item-1').find('input').simulate('click');
@@ -402,7 +441,21 @@ describe('<ScheduleAdd />', () => {
       wrapper.find('WizardFooterInternal').prop('onNext')()
     );
     wrapper.update();
+    // Credential step
     expect(wrapper.find('WizardNavItem').at(1).prop('isCurrent')).toBe(true);
+    await act(async () => {
+      wrapper.find('td#check-action-item-10').find('input').simulate('click');
+    });
+    wrapper.update();
+    expect(
+      wrapper.find('td#check-action-item-10').find('input').prop('checked')
+    ).toBe(true);
+    await act(async () =>
+      wrapper.find('WizardFooterInternal').prop('onNext')()
+    );
+    wrapper.update();
+    // Preview step
+    expect(wrapper.find('WizardNavItem').at(2).prop('isCurrent')).toBe(true);
     await act(async () =>
       wrapper.find('WizardFooterInternal').prop('onNext')()
     );
@@ -414,10 +467,7 @@ describe('<ScheduleAdd />', () => {
         frequency: [],
         skip_tags: '',
         inventory: { name: 'inventory', id: 45 },
-        credentials: [
-          { name: 'cred 1', id: 10 },
-          { name: 'cred 2', id: 20 },
-        ],
+        credentials: [{ name: 'cred 1', id: 10 }],
         startDate: '2021-01-28',
         startTime: '2:15 PM',
         timezone: 'America/New_York',
@@ -434,7 +484,6 @@ describe('<ScheduleAdd />', () => {
       skip_tags: '',
     });
     expect(SchedulesAPI.associateCredential).toBeCalledWith(3, 10);
-    expect(SchedulesAPI.associateCredential).toBeCalledWith(3, 20);
   });
 
   test('should submit survey with default values properly, without opening prompt wizard', async () => {

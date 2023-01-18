@@ -5,17 +5,25 @@ import { func, shape } from 'prop-types';
 import { Form, FormGroup } from '@patternfly/react-core';
 import { VariablesField } from 'components/CodeEditor';
 import Popover from 'components/Popover';
-import FormField, { FormSubmitError } from 'components/FormField';
+import FormField, {
+  CheckboxField,
+  FormSubmitError,
+} from 'components/FormField';
 import FormActionGroup from 'components/FormActionGroup';
 import { required } from 'util/validators';
 import LabelSelect from 'components/LabelSelect';
 import InstanceGroupsLookup from 'components/Lookup/InstanceGroupsLookup';
 import OrganizationLookup from 'components/Lookup/OrganizationLookup';
 import ContentError from 'components/ContentError';
-import { FormColumnLayout, FormFullWidthLayout } from 'components/FormLayout';
-import helpText from './Inventory.helptext';
+import {
+  FormColumnLayout,
+  FormFullWidthLayout,
+  FormCheckboxLayout,
+} from 'components/FormLayout';
+import getHelpText from './Inventory.helptext';
 
 function InventoryFormFields({ inventory }) {
+  const helpText = getHelpText();
   const [contentError, setContentError] = useState(false);
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [organizationField, organizationMeta, organizationHelpers] =
@@ -83,6 +91,16 @@ function InventoryFormFields({ inventory }) {
             createText={t`Create`}
           />
         </FormGroup>
+        <FormGroup fieldId="inventory-option-checkboxes" label={t`Options`}>
+          <FormCheckboxLayout>
+            <CheckboxField
+              id="option-prevent-instance-group-fallback"
+              name="prevent_instance_group_fallback"
+              label={t`Prevent Instance Group Fallback`}
+              tooltip={helpText.preventInstanceGroupFallback}
+            />
+          </FormCheckboxLayout>
+        </FormGroup>
         <VariablesField
           tooltip={helpText.variables()}
           id="inventory-variables"
@@ -111,6 +129,8 @@ function InventoryForm({
       null,
     instanceGroups: instanceGroups || [],
     labels: inventory?.summary_fields?.labels?.results || [],
+    prevent_instance_group_fallback:
+      inventory.prevent_instance_group_fallback || false,
   };
   return (
     <Formik

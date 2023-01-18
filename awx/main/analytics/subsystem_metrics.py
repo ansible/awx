@@ -5,7 +5,9 @@ import logging
 
 from django.conf import settings
 from django.apps import apps
+
 from awx.main.consumers import emit_channel_notification
+from awx.main.utils import is_testing
 
 root_key = 'awx_metrics'
 logger = logging.getLogger('awx.main.analytics')
@@ -163,14 +165,10 @@ class Metrics:
         Instance = apps.get_model('main', 'Instance')
         if instance_name:
             self.instance_name = instance_name
-        elif settings.IS_TESTING():
+        elif is_testing():
             self.instance_name = "awx_testing"
         else:
-            try:
-                self.instance_name = Instance.objects.me().hostname
-            except Exception as e:
-                self.instance_name = settings.CLUSTER_HOST_ID
-                logger.info(f'Instance {self.instance_name} seems to be unregistered, error: {e}')
+            self.instance_name = Instance.objects.my_hostname()
 
         # metric name, help_text
         METRICSLIST = [

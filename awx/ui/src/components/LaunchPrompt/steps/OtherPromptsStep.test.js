@@ -13,6 +13,11 @@ describe('OtherPromptsStep', () => {
           <OtherPromptsStep
             launchConfig={{
               ask_job_type_on_launch: true,
+              job_template_data: {
+                name: 'Demo Job Template',
+                id: 1,
+                description: '',
+              },
             }}
           />
         </Formik>
@@ -36,6 +41,11 @@ describe('OtherPromptsStep', () => {
           <OtherPromptsStep
             launchConfig={{
               ask_limit_on_launch: true,
+              job_template_data: {
+                name: 'Demo Job Template',
+                id: 1,
+                description: '',
+              },
             }}
           />
         </Formik>
@@ -48,6 +58,81 @@ describe('OtherPromptsStep', () => {
     );
   });
 
+  test('should render timeout field', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Formik>
+          <OtherPromptsStep
+            launchConfig={{
+              ask_timeout_on_launch: true,
+              job_template_data: {
+                name: 'Demo Job Template',
+                id: 1,
+                description: '',
+              },
+            }}
+          />
+        </Formik>
+      );
+    });
+
+    expect(wrapper.find('FormField#prompt-timeout')).toHaveLength(1);
+    expect(wrapper.find('FormField#prompt-timeout input').prop('name')).toEqual(
+      'timeout'
+    );
+  });
+
+  test('should render forks field', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Formik>
+          <OtherPromptsStep
+            launchConfig={{
+              ask_forks_on_launch: true,
+              job_template_data: {
+                name: 'Demo Job Template',
+                id: 1,
+                description: '',
+              },
+            }}
+          />
+        </Formik>
+      );
+    });
+
+    expect(wrapper.find('FormField#prompt-forks')).toHaveLength(1);
+    expect(wrapper.find('FormField#prompt-forks input').prop('name')).toEqual(
+      'forks'
+    );
+  });
+
+  test('should render job slicing field', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Formik>
+          <OtherPromptsStep
+            launchConfig={{
+              ask_job_slice_count_on_launch: true,
+              job_template_data: {
+                name: 'Demo Job Template',
+                id: 1,
+                description: '',
+              },
+            }}
+          />
+        </Formik>
+      );
+    });
+
+    expect(wrapper.find('FormField#prompt-job-slicing')).toHaveLength(1);
+    expect(
+      wrapper.find('FormField#prompt-job-slicing input').prop('name')
+    ).toEqual('job_slice_count');
+  });
+
   test('should render source control branch field', async () => {
     let wrapper;
     await act(async () => {
@@ -56,6 +141,11 @@ describe('OtherPromptsStep', () => {
           <OtherPromptsStep
             launchConfig={{
               ask_scm_branch_on_launch: true,
+              job_template_data: {
+                name: 'Demo Job Template',
+                id: 1,
+                description: '',
+              },
             }}
           />
         </Formik>
@@ -76,6 +166,11 @@ describe('OtherPromptsStep', () => {
           <OtherPromptsStep
             launchConfig={{
               ask_verbosity_on_launch: true,
+              job_template_data: {
+                name: 'Demo Job Template',
+                id: 1,
+                description: '',
+              },
             }}
           />
         </Formik>
@@ -96,6 +191,11 @@ describe('OtherPromptsStep', () => {
           <OtherPromptsStep
             launchConfig={{
               ask_diff_mode_on_launch: true,
+              job_template_data: {
+                name: 'Demo Job Template',
+                id: 1,
+                description: '',
+              },
             }}
           />
         </Formik>
@@ -119,6 +219,11 @@ describe('OtherPromptsStep', () => {
             onVarModeChange={onModeChange}
             launchConfig={{
               ask_variables_on_launch: true,
+              job_template_data: {
+                name: 'Demo Job Template',
+                id: 1,
+                description: '',
+              },
             }}
           />
         </Formik>

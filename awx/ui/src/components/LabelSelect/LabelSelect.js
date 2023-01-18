@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { func, arrayOf, number, shape, string, oneOfType } from 'prop-types';
-import { Select, SelectOption, SelectVariant } from '@patternfly/react-core';
+import {
+  Chip,
+  ChipGroup,
+  Select,
+  SelectOption,
+  SelectVariant,
+} from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 import { LabelsAPI } from 'api';
 import useIsMounted from 'hooks/useIsMounted';
@@ -60,7 +66,12 @@ function LabelSelect({ value, placeholder, onChange, onError, createText }) {
 
   const renderOptions = (opts) =>
     opts.map((option) => (
-      <SelectOption key={option.id} aria-label={option.name} value={option}>
+      <SelectOption
+        key={option.id}
+        aria-label={option.name}
+        value={option}
+        isDisabled={option.isReadOnly}
+      >
         {option.name}
       </SelectOption>
     ));
@@ -73,6 +84,23 @@ function LabelSelect({ value, placeholder, onChange, onError, createText }) {
     }
     return null;
   };
+
+  const chipGroupComponent = () => (
+    <ChipGroup>
+      {(selections || []).map((currentChip) => (
+        <Chip
+          isReadOnly={currentChip.isReadOnly}
+          key={currentChip.name}
+          onClick={(e) => {
+            onSelect(e, currentChip);
+          }}
+        >
+          {currentChip.name}
+        </Chip>
+      ))}
+    </ChipGroup>
+  );
+
   return (
     <Select
       variant={SelectVariant.typeaheadMulti}
@@ -83,7 +111,7 @@ function LabelSelect({ value, placeholder, onChange, onError, createText }) {
         }
         onSelect(e, item);
       }}
-      onClear={() => onChange([])}
+      onClear={() => onChange(selections.filter((label) => label.isReadOnly))}
       onFilter={onFilter}
       isCreatable
       onCreateOption={(label) => {
@@ -101,6 +129,7 @@ function LabelSelect({ value, placeholder, onChange, onError, createText }) {
       createText={createText}
       noResultsFoundText={t`No results found`}
       ouiaId="template-label-select"
+      chipGroupComponent={chipGroupComponent()}
     >
       {renderOptions(options)}
     </Select>

@@ -27,7 +27,9 @@ class Command(BaseCommand):
         )
 
     def handle(self, **options):
+        # provides a mapping of hostname to Instance objects
         nodes = Instance.objects.in_bulk(field_name='hostname')
+
         if options['source'] not in nodes:
             raise CommandError(f"Host {options['source']} is not a registered instance.")
         if not (options['peers'] or options['disconnect'] or options['exact'] is not None):
@@ -57,7 +59,9 @@ class Command(BaseCommand):
 
             results = 0
             for target in options['peers']:
-                _, created = InstanceLink.objects.get_or_create(source=nodes[options['source']], target=nodes[target])
+                _, created = InstanceLink.objects.update_or_create(
+                    source=nodes[options['source']], target=nodes[target], defaults={'link_state': InstanceLink.States.ESTABLISHED}
+                )
                 if created:
                     results += 1
 
@@ -80,7 +84,9 @@ class Command(BaseCommand):
                 links = set(InstanceLink.objects.filter(source=nodes[options['source']]).values_list('target__hostname', flat=True))
                 removals, _ = InstanceLink.objects.filter(source=nodes[options['source']], target__hostname__in=links - peers).delete()
                 for target in peers - links:
-                    _, created = InstanceLink.objects.get_or_create(source=nodes[options['source']], target=nodes[target])
+                    _, created = InstanceLink.objects.update_or_create(
+                        source=nodes[options['source']], target=nodes[target], defaults={'link_state': InstanceLink.States.ESTABLISHED}
+                    )
                     if created:
                         additions += 1
 

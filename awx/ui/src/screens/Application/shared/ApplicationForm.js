@@ -13,13 +13,14 @@ import FormActionGroup from 'components/FormActionGroup/FormActionGroup';
 import OrganizationLookup from 'components/Lookup/OrganizationLookup';
 import AnsibleSelect from 'components/AnsibleSelect';
 import Popover from 'components/Popover';
-import applicationHelpTextStrings from './Application.helptext';
+import getApplicationHelpTextStrings from './Application.helptext';
 
 function ApplicationFormFields({
   application,
   authorizationOptions,
   clientTypeOptions,
 }) {
+  const applicationHelpTextStrings = getApplicationHelpTextStrings();
   const match = useRouteMatch();
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [organizationField, organizationMeta, organizationHelpers] =

@@ -24,6 +24,8 @@
         public_key_trimmed: "{{ public_key_content | regex_replace('-----BEGIN CERTIFICATE-----\\\\n', '') | regex_replace('\\\\n-----END CERTIFICATE-----', '') }}"
         existing_saml: "{{ lookup('awx.awx.controller_api', 'settings/saml', host=awx_host, verify_ssl=false) }}"
         new_saml: "{{ lookup('template', 'saml_settings.json.j2') }}"
+        existing_oidc: "{{ lookup('awx.awx.controller_api', 'settings/oidc', host=awx_host, verify_ssl=false) }}"
+        new_oidc: "{{ lookup('template', 'oidc_settings.json.j2') }}"
       vars:
         # We add the extra \\ in here so that when jinja is templating out the files we end up with \n in the strings.
         public_key_content: "{{ lookup('file', public_key_file) | regex_replace('\n', '\\\\n') }}"
@@ -34,18 +36,31 @@
         msg:
           - "Here is your existing SAML configuration for reference:"
           - "{{ existing_saml }}"
+          - "Here is your existing OIDC configuration for reference:"
+          - "{{ existing_oidc }}"
 
     - pause:
-        prompt: "Continuing to run this will replace your existing saml settings (displayed above). They will all be captured except for your private key. Be sure that is backed up before continuing"
+        prompt: "Continuing to run this will replace your existing saml and OIDC settings (displayed above). They will all be captured except for your private key. Be sure that is backed up before continuing"
 
     - name: Write out the existing content
       copy:
-        dest: "../_sources/existing_saml_adapter_settings.json"
-        content: "{{ existing_saml }}"
+        dest: "../_sources/{{ item.filename }}"
+        content: "{{ item.content }}"
+      loop:
+        - filename: "existing_saml_adapter_settings.json"
+          content: "{{ existing_saml }}"
+        - filename: "existing_oidc_adapter_settings.json"
+          content: "{{ existing_oidc }}"
 
     - name: Configure AWX SAML adapter
       awx.awx.settings:
         settings: "{{ new_saml }}"
+        controller_host: "{{ awx_host }}"
+        validate_certs: False
+
+    - name: Configure AWX OIDC adapter
+      awx.awx.settings:
+        settings: "{{ new_oidc }}"
         controller_host: "{{ awx_host }}"
         validate_certs: False
 

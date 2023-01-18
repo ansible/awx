@@ -141,14 +141,14 @@ function JobsEdit() {
               <FormColumnLayout>
                 <InputField
                   name="AWX_ISOLATION_BASE_PATH"
-                  config={jobs.AWX_ISOLATION_BASE_PATH}
-                  isRequired
+                  config={jobs.AWX_ISOLATION_BASE_PATH ?? null}
+                  isRequired={Boolean(options?.AWX_ISOLATION_BASE_PATH)}
                 />
                 <InputField
                   name="SCHEDULE_MAX_JOBS"
-                  config={jobs.SCHEDULE_MAX_JOBS}
-                  type="number"
-                  isRequired
+                  config={jobs.SCHEDULE_MAX_JOBS ?? null}
+                  type={options?.SCHEDULE_MAX_JOBS ? 'number' : undefined}
+                  isRequired={Boolean(options?.SCHEDULE_MAX_JOBS)}
                 />
                 <InputField
                   name="DEFAULT_JOB_TIMEOUT"

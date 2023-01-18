@@ -840,6 +840,39 @@
           "read_only": false
         }
       },
+      "SOCIAL_AUTH_OIDC_KEY": {
+        "type": "string",
+        "label": "OIDC Key",
+        "help_text": "The OIDC key (Client ID) from your IDP.",
+        "category": "Generic OIDC",
+        "category_slug": "oidc",
+        "default": ""
+      },
+      "SOCIAL_AUTH_OIDC_SECRET": {
+        "type": "string",
+        "label": "OIDC Secret",
+        "help_text": "The OIDC secret (Client Secret) from your IDP.",
+        "category": "Generic OIDC",
+        "category_slug": "oidc",
+        "default": ""
+      },
+      "SOCIAL_AUTH_OIDC_OIDC_ENDPOINT": {
+        "type": "string",
+        "label": "OIDC Provider URL",
+        "help_text": "The URL for your OIDC provider, e.g.: http(s)://hostname/.",
+        "category": "Generic OIDC",
+        "category_slug": "oidc",
+        "default": ""
+      },
+      "SOCIAL_AUTH_OIDC_VERIFY_SSL": {
+        "type": "boolean",
+        "required": false,
+        "label": "Verify OIDC Provider Certificate",
+        "help_text": "Verify the OIDV provider ssl certificate.",
+        "category": "Generic OIDC",
+        "category_slug": "oidc",
+        "default": true
+      },
       "AUTH_LDAP_SERVER_URI": {
         "type": "string",
         "required": false,
@@ -4484,6 +4517,38 @@
         "child": {
           "type": "string"
         }
+      },
+      "SOCIAL_AUTH_OIDC_KEY": {
+        "type": "string",
+        "label": "OIDC Key",
+        "help_text": "The OIDC key (Client ID) from your IDP.",
+        "category": "Generic OIDC",
+        "category_slug": "oidc",
+        "default": ""
+      },
+      "SOCIAL_AUTH_OIDC_SECRET": {
+        "type": "string",
+        "label": "OIDC Secret",
+        "help_text": "The OIDC secret (Client Secret) from your IDP.",
+        "category": "Generic OIDC",
+        "category_slug": "oidc",
+        "default": ""
+      },
+      "SOCIAL_AUTH_OIDC_OIDC_ENDPOINT": {
+        "type": "string",
+        "label": "OIDC Provider URL",
+        "help_text": "The URL for your OIDC provider, e.g.: http(s)://hostname/.",
+        "category": "Generic OIDC",
+        "category_slug": "oidc",
+        "default": ""
+      },
+      "SOCIAL_AUTH_OIDC_VERIFY_SSL": {
+        "type": "boolean",
+        "label": "Verify OIDC Provider Certificate",
+        "help_text": "Verify the OIDV provider ssl certificate.",
+        "category": "Generic OIDC",
+        "category_slug": "oidc",
+        "default": true
       },
       "AUTH_LDAP_SERVER_URI": {
         "type": "string",

@@ -145,7 +145,7 @@ class BaseTask(object):
         """
         Return params structure to be executed by the container runtime
         """
-        if settings.IS_K8S:
+        if settings.IS_K8S and instance.instance_group.is_container_group:
             return {}
 
         image = instance.execution_environment.image
@@ -390,6 +390,7 @@ class BaseTask(object):
             logger.error("I/O error({0}) while trying to open lock file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
             raise
 
+        emitted_lockfile_log = False
         start_time = time.time()
         while True:
             try:
@@ -401,7 +402,14 @@ class BaseTask(object):
                     logger.error("I/O error({0}) while trying to aquire lock on file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
                     raise
                 else:
+                    if not emitted_lockfile_log:
+                        logger.info(f"exception acquiring lock {lock_path}: {e}")
+                        emitted_lockfile_log = True
                     time.sleep(1.0)
+            self.instance.refresh_from_db(fields=['cancel_flag'])
+            if self.instance.cancel_flag or signal_callback():
+                logger.debug(f"Unified job {self.instance.id} was canceled while waiting for project file lock")
+                return
         waiting_time = time.time() - start_time
 
         if waiting_time > 1.0:
@@ -422,7 +430,7 @@ class BaseTask(object):
         """
         instance.log_lifecycle("post_run")
 
-    def final_run_hook(self, instance, status, private_data_dir, fact_modification_times):
+    def final_run_hook(self, instance, status, private_data_dir):
         """
         Hook for any steps to run after job/task is marked as complete.
         """
@@ -465,7 +473,6 @@ class BaseTask(object):
         self.instance = self.update_model(pk, status='running', start_args='')  # blank field to remove encrypted passwords
         self.instance.websocket_emit_status("running")
         status, rc = 'error', None
-        fact_modification_times = {}
         self.runner_callback.event_ct = 0
 
         '''
@@ -483,6 +490,7 @@ class BaseTask(object):
             self.instance.log_lifecycle("preparing_playbook")
             if self.instance.cancel_flag or signal_callback():
                 self.instance = self.update_model(self.instance.pk, status='canceled')
+
             if self.instance.status != 'running':
                 # Stop the task chain and prevent starting the job if it has
                 # already been canceled.
@@ -492,14 +500,6 @@ class BaseTask(object):
 
             if not os.path.exists(settings.AWX_ISOLATION_BASE_PATH):
                 raise RuntimeError('AWX_ISOLATION_BASE_PATH=%s does not exist' % settings.AWX_ISOLATION_BASE_PATH)
-
-            # Fetch "cached" fact data from prior runs and put on the disk
-            # where ansible expects to find it
-            if getattr(self.instance, 'use_fact_cache', False):
-                self.instance.start_job_fact_cache(
-                    os.path.join(private_data_dir, 'artifacts', str(self.instance.id), 'fact_cache'),
-                    fact_modification_times,
-                )
 
             # May have to serialize the value
             private_data_files, ssh_key_data = self.build_private_data_files(self.instance, private_data_dir)
@@ -585,7 +585,7 @@ class BaseTask(object):
                     event_handler=self.runner_callback.event_handler,
                     finished_callback=self.runner_callback.finished_callback,
                     status_handler=self.runner_callback.status_handler,
-                    cancel_callback=self.runner_callback.cancel_callback,
+                    cancel_callback=signal_callback,
                     **params,
                 )
             else:
@@ -641,7 +641,7 @@ class BaseTask(object):
             self.instance.send_notification_templates('succeeded' if status == 'successful' else 'failed')
 
         try:
-            self.final_run_hook(self.instance, status, private_data_dir, fact_modification_times)
+            self.final_run_hook(self.instance, status, private_data_dir)
         except Exception:
             logger.exception('{} Final run hook errored.'.format(self.instance.log_format))
 
@@ -695,7 +695,7 @@ class SourceControlMixin(BaseTask):
 
     def spawn_project_sync(self, project, sync_needs, scm_branch=None):
         pu_ig = self.instance.instance_group
-        pu_en = Instance.objects.me().hostname
+        pu_en = Instance.objects.my_hostname()
 
         sync_metafields = dict(
             launch_type="sync",
@@ -734,8 +734,7 @@ class SourceControlMixin(BaseTask):
                 sync_task = RunProjectUpdate(job_private_data_dir=private_data_dir)
                 sync_task.run(local_project_sync.id)
                 local_project_sync.refresh_from_db()
-                if isinstance(self.instance, Job):
-                    self.instance = self.update_model(self.instance.pk, scm_revision=local_project_sync.scm_revision)
+                self.instance = self.update_model(self.instance.pk, scm_revision=local_project_sync.scm_revision)
             except Exception:
                 local_project_sync.refresh_from_db()
                 if local_project_sync.status != 'canceled':
@@ -754,8 +753,7 @@ class SourceControlMixin(BaseTask):
         else:
             # Case where a local sync is not needed, meaning that local tree is
             # up-to-date with project, job is running project current version
-            if isinstance(self.instance, Job):
-                self.instance = self.update_model(self.instance.pk, scm_revision=project.scm_revision)
+            self.instance = self.update_model(self.instance.pk, scm_revision=project.scm_revision)
             # Project update does not copy the folder, so copy here
             RunProjectUpdate.make_local_copy(project, private_data_dir)
 
@@ -764,6 +762,10 @@ class SourceControlMixin(BaseTask):
 
         try:
             original_branch = None
+            failed_reason = project.get_reason_if_failed()
+            if failed_reason:
+                self.update_model(self.instance.pk, status='failed', job_explanation=failed_reason)
+                raise RuntimeError(failed_reason)
             project_path = project.get_project_path(check_if_exists=False)
             if project.scm_type == 'git' and (scm_branch and scm_branch != project.scm_branch):
                 if os.path.exists(project_path):
@@ -1053,22 +1055,25 @@ class RunJob(SourceControlMixin, BaseTask):
             error = _('Job could not start because no Execution Environment could be found.')
             self.update_model(job.pk, status='error', job_explanation=error)
             raise RuntimeError(error)
-        elif job.project.status in ('error', 'failed'):
-            msg = _('The project revision for this job template is unknown due to a failed update.')
-            job = self.update_model(job.pk, status='failed', job_explanation=msg)
-            raise RuntimeError(msg)
 
         if job.inventory.kind == 'smart':
             # cache smart inventory memberships so that the host_filter query is not
             # ran inside of the event saving code
             update_smart_memberships_for_inventory(job.inventory)
 
+        # Fetch "cached" fact data from prior runs and put on the disk
+        # where ansible expects to find it
+        if job.use_fact_cache:
+            self.facts_write_time = self.instance.start_job_fact_cache(os.path.join(private_data_dir, 'artifacts', str(job.id), 'fact_cache'))
+
     def build_project_dir(self, job, private_data_dir):
         self.sync_and_copy(job.project, private_data_dir, scm_branch=job.scm_branch)
 
-    def final_run_hook(self, job, status, private_data_dir, fact_modification_times):
-        super(RunJob, self).final_run_hook(job, status, private_data_dir, fact_modification_times)
-        if not private_data_dir:
+    def post_run_hook(self, job, status):
+        super(RunJob, self).post_run_hook(job, status)
+        job.refresh_from_db(fields=['job_env'])
+        private_data_dir = job.job_env.get('AWX_PRIVATE_DATA_DIR')
+        if (not private_data_dir) or (not hasattr(self, 'facts_write_time')):
             # If there's no private data dir, that means we didn't get into the
             # actual `run()` call; this _usually_ means something failed in
             # the pre_run_hook method
@@ -1076,9 +1081,11 @@ class RunJob(SourceControlMixin, BaseTask):
         if job.use_fact_cache:
             job.finish_job_fact_cache(
                 os.path.join(private_data_dir, 'artifacts', str(job.id), 'fact_cache'),
-                fact_modification_times,
+                self.facts_write_time,
             )
 
+    def final_run_hook(self, job, status, private_data_dir):
+        super(RunJob, self).final_run_hook(job, status, private_data_dir)
         try:
             inventory = job.inventory
         except Inventory.DoesNotExist:
@@ -1266,6 +1273,10 @@ class RunProjectUpdate(BaseTask):
             # for raw archive, prevent error moving files between volumes
             extra_vars['ansible_remote_tmp'] = os.path.join(project_update.get_project_path(check_if_exists=False), '.ansible_awx', 'tmp')
 
+        if project_update.project.signature_validation_credential is not None:
+            pubkey = project_update.project.signature_validation_credential.get_input('gpg_public_key')
+            extra_vars['gpg_pubkey'] = pubkey
+
         self._write_extra_vars_file(private_data_dir, extra_vars)
 
     def build_playbook_path_relative_to_cwd(self, project_update, private_data_dir):
@@ -1288,10 +1299,6 @@ class RunProjectUpdate(BaseTask):
         # re-create root project folder if a natural disaster has destroyed it
         project_path = instance.project.get_project_path(check_if_exists=False)
 
-        instance.refresh_from_db(fields=['cancel_flag'])
-        if instance.cancel_flag:
-            logger.debug("ProjectUpdate({0}) was canceled".format(instance.pk))
-            return
         if instance.launch_type != 'sync':
             self.acquire_lock(instance.project, instance.id)
 
@@ -1622,7 +1629,7 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
 
         handler = SpecialInventoryHandler(
             self.runner_callback.event_handler,
-            self.runner_callback.cancel_callback,
+            signal_callback,
             verbosity=inventory_update.verbosity,
             job_timeout=self.get_instance_timeout(self.instance),
             start_time=inventory_update.started,

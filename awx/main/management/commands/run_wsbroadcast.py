@@ -53,7 +53,7 @@ class Command(BaseCommand):
         return lines
 
     @classmethod
-    def get_connection_status(cls, me, hostnames, data):
+    def get_connection_status(cls, hostnames, data):
         host_stats = [('hostname', 'state', 'start time', 'duration (sec)')]
         for h in hostnames:
             connection_color = '91'  # red
@@ -78,7 +78,7 @@ class Command(BaseCommand):
         return host_stats
 
     @classmethod
-    def get_connection_stats(cls, me, hostnames, data):
+    def get_connection_stats(cls, hostnames, data):
         host_stats = [('hostname', 'total', 'per minute')]
         for h in hostnames:
             h_safe = safe_name(h)
@@ -119,8 +119,8 @@ class Command(BaseCommand):
             return
 
         try:
-            me = Instance.objects.me()
-            logger.info('Active instance with hostname {} is registered.'.format(me.hostname))
+            my_hostname = Instance.objects.my_hostname()
+            logger.info('Active instance with hostname {} is registered.'.format(my_hostname))
         except RuntimeError as e:
             # the CLUSTER_HOST_ID in the task, and web instance must match and
             # ensure network connectivity between the task and web instance
@@ -145,19 +145,19 @@ class Command(BaseCommand):
                 else:
                     data[family.name] = family.samples[0].value
 
-            me = Instance.objects.me()
-            hostnames = [i.hostname for i in Instance.objects.exclude(hostname=me.hostname)]
+            my_hostname = Instance.objects.my_hostname()
+            hostnames = [i.hostname for i in Instance.objects.exclude(hostname=my_hostname)]
 
-            host_stats = Command.get_connection_status(me, hostnames, data)
+            host_stats = Command.get_connection_status(hostnames, data)
             lines = Command._format_lines(host_stats)
 
-            print(f'Broadcast websocket connection status from "{me.hostname}" to:')
+            print(f'Broadcast websocket connection status from "{my_hostname}" to:')
             print('\n'.join(lines))
 
-            host_stats = Command.get_connection_stats(me, hostnames, data)
+            host_stats = Command.get_connection_stats(hostnames, data)
             lines = Command._format_lines(host_stats)
 
-            print(f'\nBroadcast websocket connection stats from "{me.hostname}" to:')
+            print(f'\nBroadcast websocket connection stats from "{my_hostname}" to:')
             print('\n'.join(lines))
 
             return

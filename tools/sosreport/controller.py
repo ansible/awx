@@ -70,6 +70,7 @@ class Controller(Plugin, RedHatPlugin):
         for path in SOSREPORT_CONTROLLER_DIRS:
             self.add_copy_spec(path)
 
-        self.add_forbidden_path(SOSREPORT_FORBIDDEN_PATHS)
+        for path in SOSREPORT_FORBIDDEN_PATHS:
+            self.add_forbidden_path(path)
 
         self.add_cmd_output(SOSREPORT_CONTROLLER_COMMANDS)

@@ -11,7 +11,9 @@ import {
   Slider,
   Tooltip,
 } from '@patternfly/react-core';
+import { OutlinedClockIcon } from '@patternfly/react-icons';
 import { Tr, Td, ExpandableRowContent } from '@patternfly/react-table';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
 import { formatDateString } from 'util/dates';
 import computeForks from 'util/computeForks';
 import { ActionsTd, ActionItem } from 'components/PaginatedTable';
@@ -52,7 +54,7 @@ function InstanceListItem({
   fetchInstances,
   rowIndex,
 }) {
-  const { me = {} } = useConfig();
+  const config = useConfig();
   const [forks, setForks] = useState(
     computeForks(
       instance.mem_capacity,
@@ -98,7 +100,21 @@ function InstanceListItem({
     );
     debounceUpdateInstance({ capacity_adjustment: roundedValue });
   };
+
+  const formatHealthCheckTimeStamp = (last) => (
+    <>
+      {formatDateString(last)}
+      {instance.health_check_pending ? (
+        <>
+          {' '}
+          <OutlinedClockIcon />
+        </>
+      ) : null}
+    </>
+  );
+
   const isHopNode = instance.node_type === 'hop';
+  const isExecutionNode = instance.node_type === 'execution';
   return (
     <>
       <Tr
@@ -121,7 +137,7 @@ function InstanceListItem({
             rowIndex,
             isSelected,
             onSelect,
-            disable: isHopNode,
+            disable: !isExecutionNode,
           }}
           dataLabel={t`Selected`}
         />
@@ -143,7 +159,7 @@ function InstanceListItem({
               </div>
             }
           >
-            <StatusLabel status={instance.errors ? 'error' : 'healthy'} />
+            <StatusLabel status={instance.node_state} />
           </Tooltip>
         </Td>
 
@@ -164,7 +180,7 @@ function InstanceListItem({
                     step={0.1}
                     value={instance.capacity_adjustment}
                     onChange={handleChangeValue}
-                    isDisabled={!me?.is_superuser || !instance.enabled}
+                    isDisabled={!config?.me?.is_superuser || !instance.enabled}
                     data-cy="slider"
                   />
                 </SliderForks>
@@ -221,7 +237,22 @@ function InstanceListItem({
                 <Detail
                   data-cy="last-health-check"
                   label={t`Last Health Check`}
-                  value={formatDateString(instance.last_health_check)}
+                  helpText={
+                    <>
+                      {t`Health checks are asynchronous tasks. See the`}{' '}
+                      <a
+                        href={`${getDocsBaseUrl(
+                          config
+                        )}/html/administration/instances.html#health-check`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {t`documentation`}
+                      </a>{' '}
+                      {t`for more info.`}
+                    </>
+                  }
+                  value={formatHealthCheckTimeStamp(instance.last_health_check)}
                 />
               </DetailList>
             </ExpandableRowContent>

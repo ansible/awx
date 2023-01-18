@@ -33,6 +33,8 @@ const initialPodSpec = {
 const instanceGroupCreateData = {
   name: 'Fuz',
   credential: { id: 71, name: 'CG' },
+  max_concurrent_jobs: 0,
+  max_forks: 0,
   pod_spec_override:
     'apiVersion: v1\nkind: Pod\nmetadata:\n  namespace: default\nspec:\n  containers:\n    - image: ansible/ansible-runner\n      tty: true\n      stdin: true\n      imagePullPolicy: Always\n      args:\n        - sleep\n        - infinity\n        - test',
 };

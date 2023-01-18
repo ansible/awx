@@ -34,7 +34,8 @@ import useRequest, { useDismissableError } from 'hooks/useRequest';
 import useBrandName from 'hooks/useBrandName';
 import ExecutionEnvironmentDetail from 'components/ExecutionEnvironmentDetail';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
-import helpText from '../shared/JobTemplate.helptext';
+import InstanceGroupLabels from 'components/InstanceGroupLabels';
+import getHelpText from '../shared/JobTemplate.helptext';
 
 function JobTemplateDetail({ template }) {
   const {
@@ -63,12 +64,13 @@ function JobTemplateDetail({ template }) {
     webhook_service,
     related: { webhook_receiver },
     webhook_key,
+    prevent_instance_group_fallback,
     custom_virtualenv,
   } = template;
   const { id: templateId } = useParams();
   const history = useHistory();
   const brandName = useBrandName();
-
+  const helpText = getHelpText();
   const {
     isLoading: isLoadingInstanceGroups,
     request: fetchInstanceGroups,
@@ -111,7 +113,8 @@ function JobTemplateDetail({ template }) {
     host_config_key ||
     allow_simultaneous ||
     use_fact_cache ||
-    webhook_service;
+    webhook_service ||
+    prevent_instance_group_fallback;
 
   const renderOptions = (
     <TextList component={TextListVariants.ul}>
@@ -140,6 +143,11 @@ function JobTemplateDetail({ template }) {
           {t`Webhooks`}
         </TextListItem>
       )}
+      {prevent_instance_group_fallback && (
+        <TextListItem component={TextListItemVariants.li}>
+          {t`Prevent Instance Group Fallback`}
+        </TextListItem>
+      )}
     </TextList>
   );
 
@@ -159,11 +167,6 @@ function JobTemplateDetail({ template }) {
       </Link>
     );
   };
-
-  const buildLinkURL = (instance) =>
-    instance.is_container_group
-      ? '/instance_groups/container_group/'
-      : '/instance_groups/';
 
   if (instanceGroupsError) {
     return <ContentError error={instanceGroupsError} />;
@@ -335,6 +338,13 @@ function JobTemplateDetail({ template }) {
             }
           />
         )}
+        {prevent_instance_group_fallback && (
+          <Detail
+            label={t`Prevent Instance Group Fallback`}
+            dataCy="jt-detail-prevent-instnace-group-fallback"
+            helpText={helpText.preventInstanceGroupFallback}
+          />
+        )}
         <UserDateDetail
           label={t`Created`}
           date={created}
@@ -408,25 +418,7 @@ function JobTemplateDetail({ template }) {
           label={t`Instance Groups`}
           dataCy="jt-detail-instance-groups"
           helpText={helpText.instanceGroups}
-          value={
-            <ChipGroup
-              numChips={5}
-              totalChips={instanceGroups.length}
-              ouiaId="instance-group-chips"
-            >
-              {instanceGroups.map((ig) => (
-                <Link to={`${buildLinkURL(ig)}${ig.id}/details`} key={ig.id}>
-                  <Chip
-                    key={ig.id}
-                    ouiaId={`instance-group-${ig.id}-chip`}
-                    isReadOnly
-                  >
-                    {ig.name}
-                  </Chip>
-                </Link>
-              ))}
-            </ChipGroup>
-          }
+          value={<InstanceGroupLabels labels={instanceGroups} isLinkable />}
           isEmpty={instanceGroups.length === 0}
         />
         {job_tags && (

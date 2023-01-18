@@ -25,6 +25,7 @@ describe('<InstanceDetail/>', () => {
 
     InstancesAPI.readDetail.mockResolvedValue({
       data: {
+        related: {},
         id: 1,
         type: 'instance',
         url: '/api/v2/instances/1/',
@@ -48,7 +49,19 @@ describe('<InstanceDetail/>', () => {
         mem_capacity: 38,
         enabled: true,
         managed_by_policy: true,
-        node_type: 'hybrid',
+        node_type: 'execution',
+        node_state: 'ready',
+        health_check_pending: false,
+      },
+    });
+    InstancesAPI.readInstanceGroup.mockResolvedValue({
+      data: {
+        results: [
+          {
+            id: 1,
+            name: 'Foo',
+          },
+        ],
       },
     });
     InstancesAPI.readHealthCheckDetail.mockResolvedValue({
@@ -151,41 +164,6 @@ describe('<InstanceDetail/>', () => {
     });
     await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('InstanceToggle').length).toBe(1);
-  });
-
-  test('Should make request for Health Check', async () => {
-    InstancesAPI.healthCheck.mockResolvedValue({
-      data: {
-        uuid: '00000000-0000-0000-0000-000000000000',
-        hostname: 'awx_1',
-        version: '19.1.0',
-        last_health_check: '2021-09-15T18:02:07.270664Z',
-        errors: '',
-        cpu: 8,
-        memory: 6232231936,
-        cpu_capacity: 32,
-        mem_capacity: 38,
-        capacity: 38,
-      },
-    });
-    jest.spyOn(ConfigContext, 'useConfig').mockImplementation(() => ({
-      me: { is_superuser: true },
-    }));
-    await act(async () => {
-      wrapper = mountWithContexts(<InstanceDetail setBreadcrumb={() => {}} />);
-    });
-    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
-    expect(
-      wrapper.find("Button[ouiaId='health-check-button']").prop('isDisabled')
-    ).toBe(false);
-    await act(async () => {
-      wrapper.find("Button[ouiaId='health-check-button']").prop('onClick')();
-    });
-    expect(InstancesAPI.healthCheck).toBeCalledWith(1);
-    wrapper.update();
-    expect(
-      wrapper.find("Detail[label='Last Health Check']").prop('value')
-    ).toBe('9/15/2021, 6:02:07 PM');
   });
 
   test('Should handle api error for health check', async () => {

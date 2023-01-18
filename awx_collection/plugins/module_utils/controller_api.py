@@ -4,6 +4,7 @@ __metaclass__ = type
 
 from ansible.module_utils.basic import AnsibleModule, env_fallback
 from ansible.module_utils.urls import Request, SSLValidationError, ConnectionError
+from ansible.module_utils.parsing.convert_bool import boolean as strtobool
 from ansible.module_utils.six import PY2
 from ansible.module_utils.six import raise_from, string_types
 from ansible.module_utils.six.moves import StringIO
@@ -11,14 +12,21 @@ from ansible.module_utils.six.moves.urllib.error import HTTPError
 from ansible.module_utils.six.moves.http_cookiejar import CookieJar
 from ansible.module_utils.six.moves.urllib.parse import urlparse, urlencode
 from ansible.module_utils.six.moves.configparser import ConfigParser, NoOptionError
-from distutils.version import LooseVersion as Version
 from socket import getaddrinfo, IPPROTO_TCP
 import time
 import re
 from json import loads, dumps
 from os.path import isfile, expanduser, split, join, exists, isdir
 from os import access, R_OK, getcwd
-from distutils.util import strtobool
+
+
+try:
+    from ansible.module_utils.compat.version import LooseVersion as Version
+except ImportError:
+    try:
+        from distutils.version import LooseVersion as Version
+    except ImportError:
+        raise AssertionError('To use this plugin or module with ansible-core 2.11, you need to use Python < 3.12 with distutils.version present')
 
 try:
     import yaml
@@ -903,6 +911,8 @@ class ControllerAPIModule(ControllerModule):
                     item_name = existing_item['identifier']
                 elif item_type == 'credential_input_source':
                     item_name = existing_item['id']
+                elif item_type == 'instance':
+                    item_name = existing_item['hostname']
                 else:
                     item_name = existing_item['name']
                 item_id = existing_item['id']

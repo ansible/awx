@@ -1,7 +1,7 @@
 import React from 'react';
 import { t } from '@lingui/macro';
 
-const projectHelpTextStrings = {
+const projectHelpTextStrings = () => ({
   executionEnvironment: t`The execution environment that will be used for jobs that use this project. This will be used as fallback when an execution environment has not been explicitly assigned at the job template or workflow level.`,
   projectBasePath: (brandName = '') => (
     <span>
@@ -105,6 +105,10 @@ const projectHelpTextStrings = {
         you can input tags, commit hashes, and arbitrary refs. Some
         commit hashes and refs may not be available unless you also
         provide a custom refspec.`,
+  signatureValidation: t`Enable content signing to verify that the content 
+                    has remained secure when a project is synced. 
+                    If the content has been tampered with, the 
+                    job will not run.`,
   options: {
     clean: t`Remove any local modifications prior to performing an update.`,
     delete: t`Delete the local repository in its entirety prior to
@@ -128,6 +132,6 @@ const projectHelpTextStrings = {
                     considered current, and a new project update will be
                     performed.`,
   },
-};
+});
 
 export default projectHelpTextStrings;

@@ -59,7 +59,7 @@ class Inventory(HasCopy, HasCreate, HasInstanceGroups, HasVariables, base.Base):
             organization=organization.id,
         )
 
-        optional_fields = ('host_filter', 'kind', 'variables')
+        optional_fields = ('host_filter', 'kind', 'variables', 'prevent_instance_group_fallback')
 
         update_payload(payload, optional_fields, kwargs)
 
@@ -333,7 +333,6 @@ class InventorySource(HasCreate, HasNotifications, UnifiedJobTemplate):
             'overwrite_vars',
             'update_cache_timeout',
             'update_on_launch',
-            'update_on_project_update',
             'verbosity',
         )
 

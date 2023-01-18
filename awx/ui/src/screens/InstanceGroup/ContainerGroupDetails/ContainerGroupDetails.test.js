@@ -23,6 +23,8 @@ const instanceGroup = {
   created: '2020-09-03T18:26:47.113934Z',
   modified: '2020-09-03T19:34:23.244694Z',
   capacity: 0,
+  max_concurrent_jobs: 0,
+  max_forks: 0,
   committed_capacity: 0,
   consumed_capacity: 0,
   percent_capacity_remaining: 0.0,

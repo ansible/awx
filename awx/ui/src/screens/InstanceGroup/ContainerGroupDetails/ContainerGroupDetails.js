@@ -9,7 +9,12 @@ import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';
 import { CardBody, CardActionsRow } from 'components/Card';
 import DeleteButton from 'components/DeleteButton';
-import { Detail, DetailList, UserDateDetail } from 'components/DetailList';
+import {
+  Detail,
+  DetailList,
+  UserDateDetail,
+  DetailBadge,
+} from 'components/DetailList';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { jsonToYaml, isJsonString } from 'util/yaml';
 import { InstanceGroupsAPI } from 'api';
@@ -46,6 +51,20 @@ function ContainerGroupDetails({ instanceGroup }) {
           label={t`Type`}
           value={t`Container group`}
           dataCy="container-group-type"
+        />
+        <DetailBadge
+          label={t`Max concurrent jobs`}
+          dataCy="instance-group-max-concurrent-jobs"
+          helpText={t`Maximum number of jobs to run concurrently on this group.
+          Zero means no limit will be enforced.`}
+          content={instanceGroup.max_concurrent_jobs}
+        />
+        <DetailBadge
+          label={t`Max forks`}
+          dataCy="instance-group-max-forks"
+          helpText={t`Maximum number of forks to allow across all jobs running concurrently on this group.
+          Zero means no limit will be enforced.`}
+          content={instanceGroup.max_forks}
         />
         {instanceGroup.summary_fields.credential && (
           <Detail

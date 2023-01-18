@@ -44,6 +44,7 @@ const instance = [
     enabled: true,
     managed_by_policy: true,
     node_type: 'hybrid',
+    node_state: 'ready',
   },
   {
     id: 2,
@@ -72,6 +73,7 @@ const instance = [
     enabled: true,
     managed_by_policy: true,
     node_type: 'control',
+    node_state: 'ready',
   },
 ];
 
@@ -279,8 +281,8 @@ describe('<InstanceListItem/>', () => {
     expect(wrapper.find('Detail[label="Policy Type"]').prop('value')).toBe(
       'Auto'
     );
-    expect(
-      wrapper.find('Detail[label="Last Health Check"]').prop('value')
-    ).toBe('9/15/2021, 6:02:07 PM');
+    expect(wrapper.find('Detail[label="Last Health Check"]').text()).toBe(
+      'Last Health Check9/15/2021, 6:02:07 PM'
+    );
   });
 });

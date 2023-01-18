@@ -332,10 +332,11 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
 
         return NotificationTemplate.objects.none()
 
-    def create_unified_job(self, **kwargs):
+    def create_unified_job(self, instance_groups=None, **kwargs):
         """
         Create a new unified job based on this unified job template.
         """
+        # TODO: rename kwargs to prompts, to set expectation that these are runtime values
         new_job_passwords = kwargs.pop('survey_passwords', {})
         eager_fields = kwargs.pop('_eager_fields', None)
 
@@ -382,7 +383,10 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
             unified_job.survey_passwords = new_job_passwords
             kwargs['survey_passwords'] = new_job_passwords  # saved in config object for relaunch
 
-        unified_job.preferred_instance_groups_cache = unified_job._get_preferred_instance_group_cache()
+        if instance_groups:
+            unified_job.preferred_instance_groups_cache = [ig.id for ig in instance_groups]
+        else:
+            unified_job.preferred_instance_groups_cache = unified_job._get_preferred_instance_group_cache()
 
         unified_job._set_default_dependencies_processed()
         unified_job.task_impact = unified_job._get_task_impact()
@@ -412,13 +416,17 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
             unified_job.handle_extra_data(validated_kwargs['extra_vars'])
 
         # Create record of provided prompts for relaunch and rescheduling
-        unified_job.create_config_from_prompts(kwargs, parent=self)
+        config = unified_job.create_config_from_prompts(kwargs, parent=self)
+        if instance_groups:
+            for ig in instance_groups:
+                config.instance_groups.add(ig)
 
         # manually issue the create activity stream entry _after_ M2M relations
         # have been associated to the UJ
         if unified_job.__class__ in activity_stream_registrar.models:
             activity_stream_create(None, unified_job, True)
         unified_job.log_lifecycle("created")
+
         return unified_job
 
     @classmethod
@@ -973,22 +981,38 @@ class UnifiedJob(
             valid_fields.extend(['survey_passwords', 'extra_vars'])
         else:
             kwargs.pop('survey_passwords', None)
+        many_to_many_fields = []
         for field_name, value in kwargs.items():
             if field_name not in valid_fields:
                 raise Exception('Unrecognized launch config field {}.'.format(field_name))
-            if field_name == 'credentials':
+            field = None
+            # may use extra_data as a proxy for extra_vars
+            if field_name in config.SUBCLASS_FIELDS and field_name != 'extra_vars':
+                field = config._meta.get_field(field_name)
+            if isinstance(field, models.ManyToManyField):
+                many_to_many_fields.append(field_name)
                 continue
-            key = field_name
-            if key == 'extra_vars':
-                key = 'extra_data'
-            setattr(config, key, value)
+            if isinstance(field, (models.ForeignKey)) and (value is None):
+                continue  # the null value indicates not-provided for ForeignKey case
+            setattr(config, field_name, value)
         config.save()
 
-        job_creds = set(kwargs.get('credentials', []))
-        if 'credentials' in [field.name for field in parent._meta.get_fields()]:
-            job_creds = job_creds - set(parent.credentials.all())
-        if job_creds:
-            config.credentials.add(*job_creds)
+        for field_name in many_to_many_fields:
+            prompted_items = kwargs.get(field_name, [])
+            if not prompted_items:
+                continue
+            if field_name == 'instance_groups':
+                # Here we are doing a loop to make sure we preserve order for this Ordered field
+                # also do not merge IGs with parent, so this saves the literal list
+                for item in prompted_items:
+                    getattr(config, field_name).add(item)
+            else:
+                # Assuming this field merges prompts with parent, save just the diff
+                if field_name in [field.name for field in parent._meta.get_fields()]:
+                    prompted_items = set(prompted_items) - set(getattr(parent, field_name).all())
+                if prompted_items:
+                    getattr(config, field_name).add(*prompted_items)
+
         return config
 
     @property
@@ -1281,6 +1305,8 @@ class UnifiedJob(
                     status_data['instance_group_name'] = None
             elif status in ['successful', 'failed', 'canceled'] and self.finished:
                 status_data['finished'] = datetime.datetime.strftime(self.finished, "%Y-%m-%dT%H:%M:%S.%fZ")
+            elif status == 'running':
+                status_data['started'] = datetime.datetime.strftime(self.finished, "%Y-%m-%dT%H:%M:%S.%fZ")
             status_data.update(self.websocket_emit_data())
             status_data['group_name'] = 'jobs'
             if getattr(self, 'unified_job_template_id', None):
@@ -1325,12 +1351,12 @@ class UnifiedJob(
                 if required in defined_fields and not credential.has_input(required):
                     missing_credential_inputs.append(required)
 
-        if missing_credential_inputs:
-            self.job_explanation = '{} cannot start because Credential {} does not provide one or more required fields ({}).'.format(
-                self._meta.verbose_name.title(), credential.name, ', '.join(sorted(missing_credential_inputs))
-            )
-            self.save(update_fields=['job_explanation'])
-            return (False, None)
+            if missing_credential_inputs:
+                self.job_explanation = '{} cannot start because Credential {} does not provide one or more required fields ({}).'.format(
+                    self._meta.verbose_name.title(), credential.name, ', '.join(sorted(missing_credential_inputs))
+                )
+                self.save(update_fields=['job_explanation'])
+                return (False, None)
 
         needed = self.get_passwords_needed_to_start()
         try:
@@ -1396,22 +1422,6 @@ class UnifiedJob(
         return True
 
     @property
-    def actually_running(self):
-        # returns True if the job is running in the appropriate dispatcher process
-        running = False
-        if all([self.status == 'running', self.celery_task_id, self.execution_node]):
-            # If the job is marked as running, but the dispatcher
-            # doesn't know about it (or the dispatcher doesn't reply),
-            # then cancel the job
-            timeout = 5
-            try:
-                running = self.celery_task_id in ControlDispatcher('dispatcher', self.controller_node or self.execution_node).running(timeout=timeout)
-            except (socket.timeout, RuntimeError):
-                logger.error('could not reach dispatcher on {} within {}s'.format(self.execution_node, timeout))
-                running = False
-        return running
-
-    @property
     def can_cancel(self):
         return bool(self.status in CAN_CANCEL)
 
@@ -1420,27 +1430,61 @@ class UnifiedJob(
             return 'Previous Task Canceled: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (self.model_to_str(), self.name, self.id)
         return None
 
+    def fallback_cancel(self):
+        if not self.celery_task_id:
+            self.refresh_from_db(fields=['celery_task_id'])
+        self.cancel_dispatcher_process()
+
+    def cancel_dispatcher_process(self):
+        """Returns True if dispatcher running this job acknowledged request and sent SIGTERM"""
+        if not self.celery_task_id:
+            return
+        canceled = []
+        try:
+            # Use control and reply mechanism to cancel and obtain confirmation
+            timeout = 5
+            canceled = ControlDispatcher('dispatcher', self.controller_node).cancel([self.celery_task_id])
+        except socket.timeout:
+            logger.error(f'could not reach dispatcher on {self.controller_node} within {timeout}s')
+        except Exception:
+            logger.exception("error encountered when checking task status")
+        return bool(self.celery_task_id in canceled)  # True or False, whether confirmation was obtained
+
     def cancel(self, job_explanation=None, is_chain=False):
         if self.can_cancel:
             if not is_chain:
                 for x in self.get_jobs_fail_chain():
                     x.cancel(job_explanation=self._build_job_explanation(), is_chain=True)
 
+            cancel_fields = []
             if not self.cancel_flag:
                 self.cancel_flag = True
                 self.start_args = ''  # blank field to remove encrypted passwords
-                cancel_fields = ['cancel_flag', 'start_args']
-                if self.status in ('pending', 'waiting', 'new'):
-                    self.status = 'canceled'
-                    cancel_fields.append('status')
-                if self.status == 'running' and not self.actually_running:
-                    self.status = 'canceled'
-                    cancel_fields.append('status')
+                cancel_fields.extend(['cancel_flag', 'start_args'])
+                connection.on_commit(lambda: self.websocket_emit_status("canceled"))
+
                 if job_explanation is not None:
                     self.job_explanation = job_explanation
                     cancel_fields.append('job_explanation')
+
+                # Important to save here before sending cancel signal to dispatcher to cancel because
+                # the job control process will use the cancel_flag to distinguish a shutdown from a cancel
                 self.save(update_fields=cancel_fields)
-                self.websocket_emit_status("canceled")
+
+            controller_notified = False
+            if self.celery_task_id:
+                controller_notified = self.cancel_dispatcher_process()
+
+            # If a SIGTERM signal was sent to the control process, and acked by the dispatcher
+            # then we want to let its own cleanup change status, otherwise change status now
+            if not controller_notified:
+                if self.status != 'canceled':
+                    self.status = 'canceled'
+                    self.save(update_fields=['status'])
+                # Avoid race condition where we have stale model from pending state but job has already started,
+                # its checking signal but not cancel_flag, so re-send signal after updating cancel fields
+                self.fallback_cancel()
+
         return self.cancel_flag
 
     @property

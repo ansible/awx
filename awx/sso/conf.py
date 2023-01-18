@@ -53,7 +53,7 @@ SOCIAL_AUTH_ORGANIZATION_MAP_HELP_TEXT = _(
     '''\
 Mapping to organization admins/users from social auth accounts. This setting
 controls which users are placed into which organizations based on their
-username and email address. Configuration details are available in the 
+username and email address. Configuration details are available in the
 documentation.\
 '''
 )
@@ -1213,6 +1213,54 @@ register(
     category=_('Azure AD OAuth2'),
     category_slug='azuread-oauth2',
     placeholder=SOCIAL_AUTH_TEAM_MAP_PLACEHOLDER,
+)
+
+###############################################################################
+# Generic OIDC AUTHENTICATION SETTINGS
+###############################################################################
+
+register(
+    'SOCIAL_AUTH_OIDC_KEY',
+    field_class=fields.CharField,
+    allow_null=False,
+    default=None,
+    label=_('OIDC Key'),
+    help_text='The OIDC key (Client ID) from your IDP.',
+    category=_('Generic OIDC'),
+    category_slug='oidc',
+)
+
+register(
+    'SOCIAL_AUTH_OIDC_SECRET',
+    field_class=fields.CharField,
+    allow_blank=True,
+    default='',
+    label=_('OIDC Secret'),
+    help_text=_('The OIDC secret (Client Secret) from your IDP.'),
+    category=_('Generic OIDC'),
+    category_slug='oidc',
+    encrypted=True,
+)
+
+register(
+    'SOCIAL_AUTH_OIDC_OIDC_ENDPOINT',
+    field_class=fields.CharField,
+    allow_blank=True,
+    default='',
+    label=_('OIDC Provider URL'),
+    help_text=_('The URL for your OIDC provider including the path up to /.well-known/openid-configuration'),
+    category=_('Generic OIDC'),
+    category_slug='oidc',
+)
+
+register(
+    'SOCIAL_AUTH_OIDC_VERIFY_SSL',
+    field_class=fields.BooleanField,
+    default=True,
+    label=_('Verify OIDC Provider Certificate'),
+    help_text=_('Verify the OIDV provider ssl certificate.'),
+    category=_('Generic OIDC'),
+    category_slug='oidc',
 )
 
 ###############################################################################

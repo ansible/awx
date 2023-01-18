@@ -5,7 +5,7 @@ from decimal import Decimal
 import logging
 import os
 
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models, connection
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
@@ -59,6 +59,15 @@ class InstanceLink(BaseModel):
     source = models.ForeignKey('Instance', on_delete=models.CASCADE, related_name='+')
     target = models.ForeignKey('Instance', on_delete=models.CASCADE, related_name='reverse_peers')
 
+    class States(models.TextChoices):
+        ADDING = 'adding', _('Adding')
+        ESTABLISHED = 'established', _('Established')
+        REMOVING = 'removing', _('Removing')
+
+    link_state = models.CharField(
+        choices=States.choices, default=States.ESTABLISHED, max_length=16, help_text=_("Indicates the current life cycle stage of this peer link.")
+    )
+
     class Meta:
         unique_together = ('source', 'target')
 
@@ -105,6 +114,11 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         editable=False,
         help_text=_('Last time instance ran its heartbeat task for main cluster nodes. Last known connection to receptor mesh for execution nodes.'),
     )
+    health_check_started = models.DateTimeField(
+        null=True,
+        editable=False,
+        help_text=_("The last time a health check was initiated on this instance."),
+    )
     last_health_check = models.DateTimeField(
         null=True,
         editable=False,
@@ -127,13 +141,33 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         default=0,
         editable=False,
     )
-    NODE_TYPE_CHOICES = [
-        ("control", "Control plane node"),
-        ("execution", "Execution plane node"),
-        ("hybrid", "Controller and execution"),
-        ("hop", "Message-passing node, no execution capability"),
-    ]
-    node_type = models.CharField(default='hybrid', choices=NODE_TYPE_CHOICES, max_length=16)
+
+    class Types(models.TextChoices):
+        CONTROL = 'control', _("Control plane node")
+        EXECUTION = 'execution', _("Execution plane node")
+        HYBRID = 'hybrid', _("Controller and execution")
+        HOP = 'hop', _("Message-passing node, no execution capability")
+
+    node_type = models.CharField(default=Types.HYBRID, choices=Types.choices, max_length=16, help_text=_("Role that this node plays in the mesh."))
+
+    class States(models.TextChoices):
+        PROVISIONING = 'provisioning', _('Provisioning')
+        PROVISION_FAIL = 'provision-fail', _('Provisioning Failure')
+        INSTALLED = 'installed', _('Installed')
+        READY = 'ready', _('Ready')
+        UNAVAILABLE = 'unavailable', _('Unavailable')
+        DEPROVISIONING = 'deprovisioning', _('De-provisioning')
+        DEPROVISION_FAIL = 'deprovision-fail', _('De-provisioning Failure')
+
+    node_state = models.CharField(
+        choices=States.choices, default=States.READY, max_length=16, help_text=_("Indicates the current life cycle stage of this instance.")
+    )
+    listener_port = models.PositiveIntegerField(
+        blank=True,
+        default=27199,
+        validators=[MinValueValidator(1), MaxValueValidator(65535)],
+        help_text=_("Port that Receptor will listen for incoming connections on."),
+    )
 
     peers = models.ManyToManyField('self', symmetrical=False, through=InstanceLink, through_fields=('source', 'target'))
 
@@ -178,6 +212,14 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     def jobs_total(self):
         return UnifiedJob.objects.filter(execution_node=self.hostname).count()
 
+    @property
+    def health_check_pending(self):
+        if self.health_check_started is None:
+            return False
+        if self.last_health_check is None:
+            return True
+        return self.health_check_started > self.last_health_check
+
     def get_cleanup_task_kwargs(self, **kwargs):
         """
         Produce options to use for the command: ansible-runner worker cleanup
@@ -191,11 +233,12 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         if not isinstance(vargs.get('grace_period'), int):
             vargs['grace_period'] = 60  # grace period of 60 minutes, need to set because CLI default will not take effect
         if 'exclude_strings' not in vargs and vargs.get('file_pattern'):
-            active_pks = list(
-                UnifiedJob.objects.filter(
-                    (models.Q(execution_node=self.hostname) | models.Q(controller_node=self.hostname)) & models.Q(status__in=('running', 'waiting'))
-                ).values_list('pk', flat=True)
-            )
+            active_job_qs = UnifiedJob.objects.filter(status__in=('running', 'waiting'))
+            if self.node_type == 'execution':
+                active_job_qs = active_job_qs.filter(execution_node=self.hostname)
+            else:
+                active_job_qs = active_job_qs.filter(controller_node=self.hostname)
+            active_pks = list(active_job_qs.values_list('pk', flat=True))
             if active_pks:
                 vargs['exclude_strings'] = [JOB_FOLDER_PREFIX % job_id for job_id in active_pks]
         if 'remove_images' in vargs or 'image_prune' in vargs:
@@ -213,18 +256,22 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         return self.last_seen < ref_time - timedelta(seconds=grace_period)
 
     def mark_offline(self, update_last_seen=False, perform_save=True, errors=''):
-        if self.cpu_capacity == 0 and self.mem_capacity == 0 and self.capacity == 0 and self.errors == errors and (not update_last_seen):
-            return
+        if self.node_state not in (Instance.States.READY, Instance.States.UNAVAILABLE, Instance.States.INSTALLED):
+            return []
+        if self.node_state == Instance.States.UNAVAILABLE and self.errors == errors and (not update_last_seen):
+            return []
+        self.node_state = Instance.States.UNAVAILABLE
         self.cpu_capacity = self.mem_capacity = self.capacity = 0
         self.errors = errors
         if update_last_seen:
             self.last_seen = now()
 
+        update_fields = ['node_state', 'capacity', 'cpu_capacity', 'mem_capacity', 'errors']
+        if update_last_seen:
+            update_fields += ['last_seen']
         if perform_save:
-            update_fields = ['capacity', 'cpu_capacity', 'mem_capacity', 'errors']
-            if update_last_seen:
-                update_fields += ['last_seen']
             self.save(update_fields=update_fields)
+        return update_fields
 
     def set_capacity_value(self):
         """Sets capacity according to capacity adjustment rule (no save)"""
@@ -278,8 +325,12 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         if not errors:
             self.refresh_capacity_fields()
             self.errors = ''
+            if self.node_state in (Instance.States.UNAVAILABLE, Instance.States.INSTALLED):
+                self.node_state = Instance.States.READY
+                update_fields.append('node_state')
         else:
-            self.mark_offline(perform_save=False, errors=errors)
+            fields_to_update = self.mark_offline(perform_save=False, errors=errors)
+            update_fields.extend(fields_to_update)
         update_fields.extend(['cpu_capacity', 'mem_capacity', 'capacity'])
 
         # disabling activity stream will avoid extra queries, which is important for heatbeat actions
@@ -296,7 +347,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
             # playbook event data; we should consider this a zero capacity event
             redis.Redis.from_url(settings.BROKER_URL).ping()
         except redis.ConnectionError:
-            errors = _('Failed to connect ot Redis')
+            errors = _('Failed to connect to Redis')
 
         self.save_health_data(awx_application_version, get_cpu_count(), get_mem_in_bytes(), update_last_seen=True, errors=errors)
 
@@ -328,6 +379,8 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
             default='',
         )
     )
+    max_concurrent_jobs = models.IntegerField(default=0, help_text=_("Maximum number of concurrent jobs to run on this group. Zero means no limit."))
+    max_forks = models.IntegerField(default=0, help_text=_("Max forks to execute on this group. Zero means no limit."))
     policy_instance_percentage = models.IntegerField(default=0, help_text=_("Percentage of Instances to automatically assign to this group"))
     policy_instance_minimum = models.IntegerField(default=0, help_text=_("Static minimum number of Instances to automatically assign to this group"))
     policy_instance_list = JSONBlob(
@@ -341,6 +394,8 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
 
     @property
     def capacity(self):
+        if self.is_container_group:
+            return self.max_forks
         return sum(inst.capacity for inst in self.instances.all())
 
     @property
@@ -388,6 +443,20 @@ def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs
 
 @receiver(post_save, sender=Instance)
 def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
+    if settings.IS_K8S and instance.node_type in (Instance.Types.EXECUTION,):
+        if instance.node_state == Instance.States.DEPROVISIONING:
+            from awx.main.tasks.receptor import remove_deprovisioned_node  # prevents circular import
+
+            # wait for jobs on the node to complete, then delete the
+            # node and kick off write_receptor_config
+            connection.on_commit(lambda: remove_deprovisioned_node.apply_async([instance.hostname]))
+
+        if instance.node_state == Instance.States.INSTALLED:
+            from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
+
+            # broadcast to all control instances to update their receptor configs
+            connection.on_commit(lambda: write_receptor_config.apply_async(queue='tower_broadcast_all'))
+
     if created or instance.has_policy_changes():
         schedule_policy_task()
 
@@ -428,6 +497,61 @@ class OrganizationInstanceGroupMembership(models.Model):
 class InventoryInstanceGroupMembership(models.Model):
 
     inventory = models.ForeignKey('Inventory', on_delete=models.CASCADE)
+    instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
+    position = models.PositiveIntegerField(
+        null=True,
+        default=None,
+        db_index=True,
+    )
+
+
+class JobLaunchConfigInstanceGroupMembership(models.Model):
+
+    joblaunchconfig = models.ForeignKey('JobLaunchConfig', on_delete=models.CASCADE)
+    instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
+    position = models.PositiveIntegerField(
+        null=True,
+        default=None,
+        db_index=True,
+    )
+
+
+class ScheduleInstanceGroupMembership(models.Model):
+
+    schedule = models.ForeignKey('Schedule', on_delete=models.CASCADE)
+    instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
+    position = models.PositiveIntegerField(
+        null=True,
+        default=None,
+        db_index=True,
+    )
+
+
+class WorkflowJobTemplateNodeBaseInstanceGroupMembership(models.Model):
+
+    workflowjobtemplatenode = models.ForeignKey('WorkflowJobTemplateNode', on_delete=models.CASCADE)
+    instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
+    position = models.PositiveIntegerField(
+        null=True,
+        default=None,
+        db_index=True,
+    )
+
+
+class WorkflowJobNodeBaseInstanceGroupMembership(models.Model):
+
+    workflowjobnode = models.ForeignKey('WorkflowJobNode', on_delete=models.CASCADE)
+    instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
+    position = models.PositiveIntegerField(
+        null=True,
+        default=None,
+        db_index=True,
+    )
+
+
+class WorkflowJobInstanceGroupMembership(models.Model):
+
+    workflowjobnode = models.ForeignKey('WorkflowJob', on_delete=models.CASCADE)
     instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
     position = models.PositiveIntegerField(
         null=True,

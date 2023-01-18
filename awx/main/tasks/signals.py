@@ -9,12 +9,17 @@ logger = logging.getLogger('awx.main.tasks.signals')
 __all__ = ['with_signal_handling', 'signal_callback']
 
 
+class SignalExit(Exception):
+    pass
+
+
 class SignalState:
     def reset(self):
         self.sigterm_flag = False
         self.is_active = False
         self.original_sigterm = None
         self.original_sigint = None
+        self.raise_exception = False
 
     def __init__(self):
         self.reset()
@@ -22,6 +27,9 @@ class SignalState:
     def set_flag(self, *args):
         """Method to pass into the python signal.signal method to receive signals"""
         self.sigterm_flag = True
+        if self.raise_exception:
+            self.raise_exception = False  # so it is not raised a second time in error handling
+            raise SignalExit()
 
     def connect_signals(self):
         self.original_sigterm = signal.getsignal(signal.SIGTERM)

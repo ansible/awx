@@ -25,12 +25,13 @@ import useRequest, { useDismissableError } from 'hooks/useRequest';
 import StatusLabel from 'components/StatusLabel';
 import hasCustomMessages from '../shared/hasCustomMessages';
 import { NOTIFICATION_TYPES } from '../constants';
-import helpText from '../shared/Notifications.helptext';
+import getHelpText from '../shared/Notifications.helptext';
 
 const NUM_RETRIES = 25;
 const RETRY_TIMEOUT = 5000;
 
 function NotificationTemplateDetail({ template, defaultMessages }) {
+  const helpText = getHelpText();
   const history = useHistory();
   const [testStatus, setTestStatus] = useState(
     template.summary_fields?.recent_notifications[0]?.status ?? undefined

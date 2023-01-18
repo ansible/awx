@@ -284,6 +284,17 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         help_text=_('Allow changing the SCM branch or revision in a job template ' 'that uses this project.'),
     )
 
+    # credential (keys) used to validate content signature
+    signature_validation_credential = models.ForeignKey(
+        'Credential',
+        related_name='%(class)ss_signature_validation',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+        help_text=_('An optional credential used for validating files in the project against unexpected changes.'),
+    )
+
     scm_revision = models.CharField(
         max_length=1024,
         blank=True,
@@ -460,6 +471,29 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
     def get_absolute_url(self, request=None):
         return reverse('api:project_detail', kwargs={'pk': self.pk}, request=request)
 
+    def get_reason_if_failed(self):
+        """
+        If the project is in a failed or errored state, return a human-readable
+        error message explaining why. Otherwise return None.
+
+        This is used during validation in the serializer and also by
+        RunProjectUpdate/RunInventoryUpdate.
+        """
+
+        if self.status not in ('error', 'failed'):
+            return None
+
+        latest_update = self.project_updates.last()
+        if latest_update is not None and latest_update.failed:
+            failed_validation_tasks = latest_update.project_update_events.filter(
+                event='runner_on_failed',
+                play="Perform project signature/checksum verification",
+            )
+            if failed_validation_tasks:
+                return _("Last project update failed due to signature validation failure.")
+
+        return _("Missing a revision to run due to failed project update.")
+
     '''
     RelatedJobsMixin
     '''
@@ -620,6 +654,10 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         added_update_fields = []
         if not self.job_tags:
             job_tags = ['update_{}'.format(self.scm_type), 'install_roles', 'install_collections']
+            if self.project.signature_validation_credential is not None:
+                credential_type = self.project.signature_validation_credential.credential_type.namespace
+                job_tags.append(f'validation_{credential_type}')
+                job_tags.append('validation_checksum_manifest')
             self.job_tags = ','.join(job_tags)
             added_update_fields.append('job_tags')
         if self.scm_delete_on_update and 'delete' not in self.job_tags and self.job_type == 'check':

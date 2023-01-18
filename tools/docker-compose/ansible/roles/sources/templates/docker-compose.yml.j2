@@ -1,3 +1,4 @@
+#jinja2: lstrip_blocks: True
 ---
 version: '2.1'
 services:
@@ -22,6 +23,7 @@ services:
       CONTROL_PLANE_NODE_COUNT: {{ control_plane_node_count|int }}
       EXECUTION_NODE_COUNT: {{ execution_node_count|int }}
       AWX_LOGGING_MODE: stdout
+      DJANGO_SUPERUSER_PASSWORD: {{ admin_password }}
 {% if loop.index == 1 %}
       RUN_MIGRATIONS: 1
 {% endif %}
@@ -40,8 +42,11 @@ services:
       - "../../docker-compose/_sources/local_settings.py:/etc/tower/conf.d/local_settings.py"
       - "../../docker-compose/_sources/SECRET_KEY:/etc/tower/SECRET_KEY"
       - "../../docker-compose/_sources/receptor/receptor-awx-{{ loop.index }}.conf:/etc/receptor/receptor.conf"
+      - "../../docker-compose/_sources/receptor/receptor-awx-{{ loop.index }}.conf.lock:/etc/receptor/receptor.conf.lock"
+{% if sign_work|bool %}
       - "../../docker-compose/_sources/receptor/work_public_key.pem:/etc/receptor/work_public_key.pem"
       - "../../docker-compose/_sources/receptor/work_private_key.pem:/etc/receptor/work_private_key.pem"
+{% endif %}
       # - "../../docker-compose/_sources/certs:/etc/receptor/certs"  # TODO: optionally generate certs
       - "/sys/fs/cgroup:/sys/fs/cgroup"
       - "~/.kube/config:/var/lib/awx/.kube/config"
@@ -141,28 +146,27 @@ services:
   prometheus:
     image: prom/prometheus:latest
     container_name: tools_prometheus_1
-    hostname: splunk
+    hostname: prometheus
     ports:
       - "9090:9090"
     volumes:
-      - "../../prometheus:/etc/prometheus"
+      - "../../docker-compose/_sources/prometheus.yml:/etc/prometheus/prometheus.yml"
       - "prometheus_storage:/prometheus:rw"
     links:
-      - awx_1:awx1
+{% for i in range(control_plane_node_count|int) %}
+      - awx_{{ loop.index }}:awx{{ loop.index }} # because underscores are not valid in hostnames
+{% endfor %}
 {% endif %}
 {% if enable_grafana|bool %}
   grafana:
     image: grafana/grafana-enterprise:latest
     container_name: tools_grafana_1
-    hostname: splunk
+    hostname: grafana
     ports:
       - "3001:3000"
     volumes:
       - "../../grafana:/etc/grafana/provisioning"
       - "grafana_storage:/var/lib/grafana:rw"
-    environment:
-      SPLUNK_START_ARGS: --accept-license
-      SPLUNK_PASSWORD: splunk_admin
     links:
       - prometheus
     depends_on:
@@ -178,7 +182,7 @@ services:
     image: postgres:12
     container_name: tools_postgres_1
     # additional logging settings for postgres can be found https://www.postgresql.org/docs/current/runtime-config-logging.html
-    command: postgres -c log_destination=stderr -c log_min_messages=info -c log_min_duration_statement={{ pg_log_min_duration_statement|default(1000) }}
+    command: postgres -c log_destination=stderr -c log_min_messages=info -c log_min_duration_statement={{ pg_log_min_duration_statement|default(1000) }} -c max_connections={{ pg_max_connections|default(1024) }}
     environment:
       POSTGRES_HOST_AUTH_METHOD: trust
       POSTGRES_USER: {{ pg_username }}
@@ -199,7 +203,7 @@ services:
       - "5555:5555"
     volumes:
       - "../../docker-compose/_sources/receptor/receptor-hop.conf:/etc/receptor/receptor.conf"
-  {% for i in range(execution_node_count|int) -%}
+  {% for i in range(execution_node_count|int) %}
   receptor-{{ loop.index }}:
     image: "{{ awx_image }}:{{ awx_image_tag }}"
     user: "{{ ansible_user_uid }}"
@@ -227,7 +231,7 @@ volumes:
   redis_socket_{{ container_postfix }}:
     name: tools_redis_socket_{{ container_postfix }}
 {% endfor -%}
-{% if enable_ldap %}
+{% if enable_ldap|bool %}
   openldap_data:
     name: tools_ldap_1
     driver: local

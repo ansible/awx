@@ -76,7 +76,7 @@ class SpecialInventoryHandler(logging.Handler):
     def emit(self, record):
         # check cancel and timeout status regardless of log level
         this_time = now()
-        if (this_time - self.last_check).total_seconds() > 0.5:  # cancel callback is expensive
+        if (this_time - self.last_check).total_seconds() > 0.1:
             self.last_check = this_time
             if self.cancel_callback():
                 raise PostRunError('Inventory update has been canceled', status='canceled')
@@ -103,6 +103,10 @@ ColorHandler = logging.StreamHandler
 if settings.COLOR_LOGS is True:
     try:
         from logutils.colorize import ColorizingStreamHandler
+        import colorama
+
+        colorama.deinit()
+        colorama.init(wrap=False, convert=False, strip=False)
 
         class ColorHandler(ColorizingStreamHandler):
             def colorize(self, line, record):
@@ -110,7 +114,7 @@ if settings.COLOR_LOGS is True:
                 # logs rendered with cyan text
                 previous_level_map = self.level_map.copy()
                 if record.name == "awx.analytics.job_lifecycle":
-                    self.level_map[logging.DEBUG] = (None, 'cyan', True)
+                    self.level_map[logging.INFO] = (None, 'cyan', True)
                 msg = super(ColorHandler, self).colorize(line, record)
                 self.level_map = previous_level_map
                 return msg

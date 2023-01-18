@@ -16,7 +16,7 @@ from rest_framework import status
 
 from awx.main.constants import ACTIVE_STATES
 from awx.main.utils import get_object_or_400
-from awx.main.models.ha import Instance, InstanceGroup
+from awx.main.models.ha import Instance, InstanceGroup, schedule_policy_task
 from awx.main.models.organization import Team
 from awx.main.models.projects import Project
 from awx.main.models.inventory import Inventory
@@ -107,6 +107,11 @@ class InstanceGroupMembershipMixin(object):
                 if inst_name in ig_obj.policy_instance_list:
                     ig_obj.policy_instance_list.pop(ig_obj.policy_instance_list.index(inst_name))
                     ig_obj.save(update_fields=['policy_instance_list'])
+
+            # sometimes removing an instance has a non-obvious consequence
+            # this is almost always true if policy_instance_percentage or _minimum is non-zero
+            # after removing a single instance, the other memberships need to be re-balanced
+            schedule_policy_task()
         return response
 
 

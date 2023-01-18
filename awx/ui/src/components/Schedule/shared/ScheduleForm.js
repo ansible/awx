@@ -1,13 +1,12 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState, useRef } from 'react';
 import { shape, func } from 'prop-types';
-
 import { DateTime } from 'luxon';
 import { t } from '@lingui/macro';
 import { Formik } from 'formik';
 import { RRule } from 'rrule';
 import { Button, Form, ActionGroup } from '@patternfly/react-core';
 import { Config } from 'contexts/Config';
-import { SchedulesAPI } from 'api';
+import { JobTemplatesAPI, SchedulesAPI, WorkflowJobTemplatesAPI } from 'api';
 import { dateToInputDateTime } from 'util/dates';
 import useRequest from 'hooks/useRequest';
 import { parseVariableField } from 'util/yaml';
@@ -20,6 +19,7 @@ import ScheduleFormFields from './ScheduleFormFields';
 import UnsupportedScheduleForm from './UnsupportedScheduleForm';
 import parseRuleObj, { UnsupportedRRuleError } from './parseRuleObj';
 import buildRuleObj from './buildRuleObj';
+import buildRuleSet from './buildRuleSet';
 
 const NUM_DAYS_PER_FREQUENCY = {
   week: 7,
@@ -30,7 +30,7 @@ const NUM_DAYS_PER_FREQUENCY = {
 function ScheduleForm({
   hasDaysToKeepField,
   handleCancel,
-  handleSubmit,
+  handleSubmit: submitSchedule,
   schedule,
   submitError,
   resource,
@@ -40,6 +40,8 @@ function ScheduleForm({
 }) {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isSaveDisabled, setIsSaveDisabled] = useState(false);
+  const originalLabels = useRef([]);
+  const originalInstanceGroups = useRef([]);
 
   let rruleError;
   const now = DateTime.now();
@@ -59,12 +61,52 @@ function ScheduleForm({
     useCallback(async () => {
       const { data } = await SchedulesAPI.readZoneInfo();
 
-      let creds;
+      let creds = [];
+      let allLabels = [];
+      let allInstanceGroups = [];
       if (schedule.id) {
-        const {
-          data: { results },
-        } = await SchedulesAPI.readCredentials(schedule.id);
-        creds = results;
+        if (
+          resource.type === 'job_template' &&
+          launchConfig?.ask_credential_on_launch
+        ) {
+          const {
+            data: { results },
+          } = await SchedulesAPI.readCredentials(schedule.id);
+          creds = results;
+        }
+        if (launchConfig?.ask_labels_on_launch) {
+          const {
+            data: { results },
+          } = await SchedulesAPI.readAllLabels(schedule.id);
+          allLabels = results;
+        }
+        if (
+          resource.type === 'job_template' &&
+          launchConfig?.ask_instance_groups_on_launch
+        ) {
+          const {
+            data: { results },
+          } = await SchedulesAPI.readInstanceGroups(schedule.id);
+          allInstanceGroups = results;
+        }
+      } else {
+        if (resource.type === 'job_template') {
+          if (launchConfig?.ask_labels_on_launch) {
+            const {
+              data: { results },
+            } = await JobTemplatesAPI.readAllLabels(resource.id);
+            allLabels = results;
+          }
+        }
+        if (
+          resource.type === 'workflow_job_template' &&
+          launchConfig?.ask_labels_on_launch
+        ) {
+          const {
+            data: { results },
+          } = await WorkflowJobTemplatesAPI.readAllLabels(resource.id);
+          allLabels = results;
+        }
       }
 
       const zones = (data.zones || []).map((zone) => ({
@@ -73,12 +115,15 @@ function ScheduleForm({
         label: zone,
       }));
 
+      originalLabels.current = allLabels;
+      originalInstanceGroups.current = allInstanceGroups;
+
       return {
         zoneOptions: zones,
         zoneLinks: data.links,
-        credentials: creds || [],
+        credentials: creds,
       };
-    }, [schedule]),
+    }, [schedule, resource.id, resource.type, launchConfig]),
     {
       zonesOptions: [],
       zoneLinks: {},
@@ -94,7 +139,7 @@ function ScheduleForm({
   const missingRequiredInventory = useCallback(() => {
     let missingInventory = false;
     if (
-      launchConfig.inventory_needed_to_start &&
+      launchConfig?.inventory_needed_to_start &&
       !schedule?.summary_fields?.inventory?.id
     ) {
       missingInventory = true;
@@ -224,6 +269,12 @@ function ScheduleForm({
       launchConfig.ask_scm_branch_on_launch ||
       launchConfig.ask_tags_on_launch ||
       launchConfig.ask_skip_tags_on_launch ||
+      launchConfig.ask_execution_environment_on_launch ||
+      launchConfig.ask_labels_on_launch ||
+      launchConfig.ask_forks_on_launch ||
+      launchConfig.ask_job_slice_count_on_launch ||
+      launchConfig.ask_timeout_on_launch ||
+      launchConfig.ask_instance_groups_on_launch ||
       launchConfig.survey_enabled ||
       launchConfig.inventory_needed_to_start ||
       launchConfig.variables_needed_to_start?.length > 0)
@@ -300,19 +351,6 @@ function ScheduleForm({
     startTime: time,
     timezone: schedule.timezone || now.zoneName,
   };
-  const submitSchedule = (
-    values,
-    launchConfiguration,
-    surveyConfiguration,
-    scheduleCredentials
-  ) => {
-    handleSubmit(
-      values,
-      launchConfiguration,
-      surveyConfiguration,
-      scheduleCredentials
-    );
-  };
 
   if (hasDaysToKeepField) {
     let initialDaysToKeep = 30;
@@ -378,8 +416,14 @@ function ScheduleForm({
 
       if (options.end === 'onDate') {
         if (
-          DateTime.fromISO(values.startDate) >=
-          DateTime.fromISO(options.endDate)
+          DateTime.fromFormat(
+            `${values.startDate} ${values.startTime}`,
+            'yyyy-LL-dd h:mm a'
+          ).toMillis() >=
+          DateTime.fromFormat(
+            `${options.endDate} ${options.endTime}`,
+            'yyyy-LL-dd h:mm a'
+          ).toMillis()
         ) {
           freqErrors.endDate = t`Please select an end date/time that comes after the start date/time.`;
         }
@@ -411,6 +455,10 @@ function ScheduleForm({
       }
     });
 
+    if (values.exceptionFrequency.length > 0 && !scheduleHasInstances(values)) {
+      errors.exceptionFrequency = t`This schedule has no occurrences due to the selected exceptions.`;
+    }
+
     return errors;
   };
 
@@ -431,7 +479,14 @@ function ScheduleForm({
             },
           }}
           onSubmit={(values) => {
-            submitSchedule(values, launchConfig, surveyConfig, credentials);
+            submitSchedule(
+              values,
+              launchConfig,
+              surveyConfig,
+              originalInstanceGroups.current,
+              originalLabels.current,
+              credentials
+            );
           }}
           validate={validate}
         >
@@ -458,6 +513,8 @@ function ScheduleForm({
                       setIsSaveDisabled(false);
                     }}
                     resourceDefaultCredentials={resourceDefaultCredentials}
+                    labels={originalLabels.current}
+                    instanceGroups={originalInstanceGroups.current}
                   />
                 )}
                 <FormSubmitError error={submitError} />
@@ -518,3 +575,24 @@ ScheduleForm.defaultProps = {
 };
 
 export default ScheduleForm;
+
+function scheduleHasInstances(values) {
+  let rangeToCheck = 1;
+  values.frequency.forEach((freq) => {
+    if (NUM_DAYS_PER_FREQUENCY[freq] > rangeToCheck) {
+      rangeToCheck = NUM_DAYS_PER_FREQUENCY[freq];
+    }
+  });
+
+  const ruleSet = buildRuleSet(values, true);
+  const startDate = DateTime.fromISO(values.startDate);
+  const endDate = startDate.plus({ days: rangeToCheck });
+  const instances = ruleSet.between(
+    startDate.toJSDate(),
+    endDate.toJSDate(),
+    true,
+    (date, i) => i === 0
+  );
+
+  return instances.length > 0;
+}

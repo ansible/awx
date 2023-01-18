@@ -23,6 +23,12 @@ const allPrompts = {
     ask_tags_on_launch: true,
     ask_variables_on_launch: true,
     ask_verbosity_on_launch: true,
+    ask_execution_environment_on_launch: true,
+    ask_labels_on_launch: true,
+    ask_forks_on_launch: true,
+    ask_job_slice_count_on_launch: true,
+    ask_timeout_on_launch: true,
+    ask_instance_groups_on_launch: true,
     survey_enabled: true,
     inventory_needed_to_start: true,
   },
@@ -40,6 +46,12 @@ const noPrompts = {
     ask_tags_on_launch: false,
     ask_variables_on_launch: false,
     ask_verbosity_on_launch: false,
+    ask_execution_environment_on_launch: false,
+    ask_labels_on_launch: false,
+    ask_forks_on_launch: false,
+    ask_job_slice_count_on_launch: false,
+    ask_timeout_on_launch: false,
+    ask_instance_groups_on_launch: false,
     survey_enabled: false,
   },
 };
@@ -91,6 +103,10 @@ const schedule = {
   limit: null,
   diff_mode: null,
   verbosity: null,
+  execution_environment: null,
+  forks: null,
+  job_slice_count: null,
+  timeout: null,
 };
 
 const scheduleWithPrompts = {
@@ -104,6 +120,10 @@ const scheduleWithPrompts = {
   diff_mode: true,
   verbosity: 1,
   extra_data: { foo: 'fii' },
+  execution_environment: 1,
+  forks: 1,
+  job_slice_count: 1,
+  timeout: 100,
 };
 
 describe('<ScheduleDetail />', () => {
@@ -182,6 +202,14 @@ describe('<ScheduleDetail />', () => {
     expect(wrapper.find('Detail[label="Credentials"]').length).toBe(0);
     expect(wrapper.find('Detail[label="Job Tags"]').length).toBe(0);
     expect(wrapper.find('Detail[label="Skip Tags"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Timeout"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Job Slicing"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Forks"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Labels"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Instance Groups"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Execution Environment"]').length).toBe(
+      0
+    );
     expect(wrapper.find('VariablesDetail').length).toBe(0);
   });
   test('details should render with the proper values with prompts', async () => {
@@ -196,6 +224,28 @@ describe('<ScheduleDetail />', () => {
           {
             id: 2,
             name: 'Cred 2',
+          },
+        ],
+      },
+    });
+    SchedulesAPI.readInstanceGroups.mockResolvedValue({
+      data: {
+        count: 1,
+        results: [
+          {
+            id: 1,
+            name: 'IG 1',
+          },
+        ],
+      },
+    });
+    SchedulesAPI.readAllLabels.mockResolvedValue({
+      data: {
+        count: 1,
+        results: [
+          {
+            id: 1,
+            name: 'Label 1',
           },
         ],
       },
@@ -254,10 +304,30 @@ describe('<ScheduleDetail />', () => {
     expect(wrapper.find('Detail[label="Credentials"]').length).toBe(1);
     expect(wrapper.find('Detail[label="Job Tags"]').length).toBe(1);
     expect(wrapper.find('Detail[label="Skip Tags"]').length).toBe(1);
+    expect(wrapper.find('Detail[label="Timeout"]').length).toBe(1);
+    expect(wrapper.find('Detail[label="Job Slicing"]').length).toBe(1);
+    expect(wrapper.find('Detail[label="Forks"]').length).toBe(1);
+    expect(wrapper.find('Detail[label="Labels"]').length).toBe(1);
+    expect(wrapper.find('Detail[label="Instance Groups"]').length).toBe(1);
+    expect(wrapper.find('Detail[label="Execution Environment"]').length).toBe(
+      1
+    );
     expect(wrapper.find('VariablesDetail').length).toBe(1);
   });
   test('prompt values section should be hidden if no overrides are present on the schedule but ask_ options are all true', async () => {
     SchedulesAPI.readCredentials.mockResolvedValueOnce({
+      data: {
+        count: 0,
+        results: [],
+      },
+    });
+    SchedulesAPI.readInstanceGroups.mockResolvedValue({
+      data: {
+        count: 0,
+        results: [],
+      },
+    });
+    SchedulesAPI.readAllLabels.mockResolvedValue({
       data: {
         count: 0,
         results: [],
@@ -296,6 +366,14 @@ describe('<ScheduleDetail />', () => {
     expect(wrapper.find('Detail[label="Credentials"]').length).toBe(0);
     expect(wrapper.find('Detail[label="Job Tags"]').length).toBe(0);
     expect(wrapper.find('Detail[label="Skip Tags"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Timeout"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Job Slicing"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Forks"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Labels"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Instance Groups"]').length).toBe(0);
+    expect(wrapper.find('Detail[label="Execution Environment"]').length).toBe(
+      0
+    );
     expect(wrapper.find('VariablesDetail').length).toBe(0);
   });
   test('prompt values section should be hidden if overrides are present on the schedule but ask_ options are all false', async () => {
@@ -464,6 +542,18 @@ describe('<ScheduleDetail />', () => {
   });
   test('should have disabled toggle', async () => {
     SchedulesAPI.readCredentials.mockResolvedValueOnce({
+      data: {
+        count: 0,
+        results: [],
+      },
+    });
+    SchedulesAPI.readInstanceGroups.mockResolvedValue({
+      data: {
+        count: 0,
+        results: [],
+      },
+    });
+    SchedulesAPI.readAllLabels.mockResolvedValue({
       data: {
         count: 0,
         results: [],

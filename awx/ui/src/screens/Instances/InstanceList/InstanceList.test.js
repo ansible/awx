@@ -3,7 +3,7 @@ import { act } from 'react-dom/test-utils';
 import { Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 
-import { InstancesAPI } from 'api';
+import { InstancesAPI, SettingsAPI } from 'api';
 import {
   mountWithContexts,
   waitForElement,
@@ -32,7 +32,8 @@ const instances = [
     jobs_running: 0,
     jobs_total: 68,
     cpu: 6,
-    node_type: 'control',
+    node_type: 'execution',
+    node_state: 'ready',
     memory: 2087469056,
     cpu_capacity: 24,
     mem_capacity: 1,
@@ -51,7 +52,8 @@ const instances = [
     jobs_running: 0,
     jobs_total: 68,
     cpu: 6,
-    node_type: 'hybrid',
+    node_type: 'execution',
+    node_state: 'ready',
     memory: 2087469056,
     cpu_capacity: 24,
     mem_capacity: 1,
@@ -71,6 +73,7 @@ const instances = [
     jobs_total: 68,
     cpu: 6,
     node_type: 'execution',
+    node_state: 'ready',
     memory: 2087469056,
     cpu_capacity: 24,
     mem_capacity: 1,
@@ -90,6 +93,7 @@ const instances = [
     jobs_total: 68,
     cpu: 6,
     node_type: 'hop',
+    node_state: 'ready',
     memory: 2087469056,
     cpu_capacity: 24,
     mem_capacity: 1,
@@ -111,6 +115,7 @@ describe('<InstanceList/>', () => {
       },
     });
     InstancesAPI.readOptions.mockResolvedValue(options);
+    SettingsAPI.readCategory.mockResolvedValue({ data: { IS_K8S: false } });
     const history = createMemoryHistory({
       initialEntries: ['/instances/1'],
     });
@@ -189,5 +194,53 @@ describe('<InstanceList/>', () => {
     );
     wrapper.update();
     expect(wrapper.find('AlertModal')).toHaveLength(1);
+  });
+  test('Should not show Add button', () => {
+    expect(wrapper.find('Button[ouiaId="instances-add-button"]')).toHaveLength(
+      0
+    );
+  });
+});
+
+describe('InstanceList should show Add button', () => {
+  let wrapper;
+
+  const options = { data: { actions: { POST: true } } };
+
+  beforeEach(async () => {
+    InstancesAPI.read.mockResolvedValue({
+      data: {
+        count: instances.length,
+        results: instances,
+      },
+    });
+    InstancesAPI.readOptions.mockResolvedValue(options);
+    SettingsAPI.readCategory.mockResolvedValue({ data: { IS_K8S: true } });
+    const history = createMemoryHistory({
+      initialEntries: ['/instances/1'],
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Route path="/instances/:id">
+          <InstanceList />
+        </Route>,
+        {
+          context: {
+            router: { history, route: { location: history.location } },
+          },
+        }
+      );
+    });
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('Should show Add button', () => {
+    expect(wrapper.find('Button[ouiaId="instances-add-button"]')).toHaveLength(
+      1
+    );
   });
 });

@@ -54,7 +54,7 @@ class Command(BaseCommand):
 
                 capacity = f' capacity={x.capacity}' if x.node_type != 'hop' else ''
                 version = f" version={x.version or '?'}" if x.node_type != 'hop' else ''
-                heartbeat = f' heartbeat="{x.modified:%Y-%m-%d %H:%M:%S}"' if x.capacity or x.node_type == 'hop' else ''
+                heartbeat = f' heartbeat="{x.last_seen:%Y-%m-%d %H:%M:%S}"' if x.capacity or x.node_type == 'hop' else ''
                 print(f'\t{color}{x.hostname}{capacity} node_type={x.node_type}{version}{heartbeat}\033[0m')
 
             print()

@@ -5,7 +5,8 @@ from unittest import mock
 
 from collections import namedtuple
 
-from awx.api.views import ApiVersionRootView, JobTemplateLabelList, InventoryInventorySourcesUpdate, JobTemplateSurveySpec
+from awx.api.views.root import ApiVersionRootView
+from awx.api.views import JobTemplateLabelList, InventoryInventorySourcesUpdate, JobTemplateSurveySpec
 
 from awx.main.views import handle_error
 
@@ -23,7 +24,7 @@ class TestApiRootView:
         endpoints = [
             'ping',
             'config',
-            #'settings',
+            # 'settings',
             'me',
             'dashboard',
             'organizations',
@@ -59,7 +60,7 @@ class TestApiRootView:
 
 class TestJobTemplateLabelList:
     def test_inherited_mixin_unattach(self):
-        with mock.patch('awx.api.generics.DeleteLastUnattachLabelMixin.unattach') as mixin_unattach:
+        with mock.patch('awx.api.views.labels.LabelSubListCreateAttachDetachView.unattach') as mixin_unattach:
             view = JobTemplateLabelList()
             mock_request = mock.MagicMock()
 

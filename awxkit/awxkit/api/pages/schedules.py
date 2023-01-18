@@ -1,6 +1,7 @@
 from contextlib import suppress
 
-from awxkit.api.pages import SystemJobTemplate
+from awxkit.api.pages import JobTemplate, SystemJobTemplate, Project, InventorySource
+from awxkit.api.pages.workflow_job_templates import WorkflowJobTemplate
 from awxkit.api.mixins import HasCreate
 from awxkit.api.resources import resources
 from awxkit.config import config
@@ -11,7 +12,7 @@ from . import base
 
 
 class Schedule(HasCreate, base.Base):
-    dependencies = [SystemJobTemplate]
+    dependencies = [JobTemplate, SystemJobTemplate, Project, InventorySource, WorkflowJobTemplate]
     NATURAL_KEY = ('unified_job_template', 'name')
 
     def silent_delete(self):
@@ -46,6 +47,14 @@ class Schedules(page.PageList, Schedule):
     def remove_credential(self, cred):
         with suppress(exc.NoContent):
             self.related.credentials.post(dict(id=cred.id, disassociate=True))
+
+    def add_label(self, label):
+        with suppress(exc.NoContent):
+            self.related.labels.post(dict(id=label.id))
+
+    def add_instance_group(self, instance_group):
+        with suppress(exc.NoContent):
+            self.related.instance_groups.post(dict(id=instance_group.id))
 
 
 page.register_page([resources.schedules, resources.related_schedules], Schedules)

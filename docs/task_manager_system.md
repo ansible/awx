@@ -1,18 +1,108 @@
-# Task Manager Overview
+# Task Manager System Overview
 
-The task manager is responsible for deciding when jobs should be scheduled to run. When choosing a task to run, the considerations are:
+The task management system is made up of three separate components:
+1. Dependency Manager
+2. Task Manager
+3. Workflow Manager
+
+Each of these run in a separate dispatched task and can run at the same time as one another.
+
+This system is responsible for deciding when tasks should be scheduled to run. When choosing a task to run, the considerations are:
 1. Creation time
 2. Job dependencies
 3. Capacity
 
-Independent jobs are run in order of creation time, earliest first. Jobs with dependencies are also run in creation time order within the group of job dependencies. Capacity is the final consideration when deciding to release a job to be run by the task dispatcher.
+Independent tasks are run in order of creation time, earliest first. Tasks with dependencies are also run in creation time order within the group of task dependencies. Capacity is the final consideration when deciding to release a task to be run by the dispatcher.
 
-## Task Manager Architecture
 
-The task manager has a single entry point, `Scheduler().schedule()`. The method may be called in parallel, at any time, as many times as the user wants. The `schedule()` function tries to acquire a single, global lock using the Instance table first recorded in the database. If the lock cannot be acquired, the method returns. The failure to acquire the lock indicates that there is another instance currently running `schedule()`.
+## Dependency Manager
+
+Responsible for looking at each pending task and determining whether it should create a dependency for that task.
+For example, if `update_on_launch` is enabled of a task, a project update will be created as a dependency of that task. The Dependency Manager is responsible for creating that project update.
+
+Dependencies can also have their own dependencies, for example,
+
+```
++-----------+
+|           |                          created by web API call
+|   Job A   |
+|           |
++-----------+---+
+                |
+                |
+        +-------v----+
+        |  Inventory |                 dependency of Job A
+        |  Source    |                 created by Dependency Manager
+        |  Update B  |
+        +------------+-------+
+                             |
+                             |
+                      +------v------+
+                      |   Project   |  dependency of Inventory Source Update B
+                      |   Update C  |  created by Dependency Manager
+                      +-------------+
+```
+
+
+### Dependency Manager Steps
+
+1. Get pending tasks (parent tasks) that have `dependencies_processed = False`
+2. Create project update if
+    a. not already created
+    b. last project update outside of cache timeout window
+3. Create inventory source update if
+    a. not already created
+    b. last inventory source update outside of cache timeout window
+4. Check and create dependencies for these newly created dependencies
+    a. inventory source updates can have a project update dependency
+5. All dependencies are linked to the parent task via the `dependent_jobs` field
+    a. This allows us to cancel the parent task if the dependency fails or is canceled
+6. Update the parent tasks with `dependencies_processed = True`
+
+
+## Task Manager
+
+Responsible for looking at each pending task and determining whether Task Manager can start that task.
+
+### Task Manager Steps
+
+1. Get pending, waiting, and running tasks that have `dependencies_processed = True`
+2. Before processing pending tasks, the task manager first processes running tasks. This allows it to build a dependency graph and account for the currently consumed capacity in the system.
+    a. dependency graph is just an internal data structure that tracks which jobs are currently running. It also handles "soft" blocking logic
+    b. the capacity is tracked in memory on the `TaskManagerInstances` and `TaskManagerInstanceGroups` objects which are  in-memory representations of the instances and instance groups. These data structures are used to help track what consumed capacity will be as we decide that we will start new tasks, and until such time that we actually commit the state changes to the database.
+3. For each pending task:
+    a. Check if total number of tasks started on this task manager cycle is > `start_task_limit`
+    b. Check if [timed out](#Timing Out)
+    b. Check if task is blocked
+    c. Check if preferred instances have enough capacity to run the task
+4. Start the task by changing status to `waiting` and submitting task to dispatcher
+
+
+## Workflow Manager
+
+Responsible for looking at each workflow job and determining if next node can run
+
+### Worflow Manager Steps
+
+1. Get all running workflow jobs
+2. Build up a workflow DAG for each workflow job
+3. For each workflow job:
+    a. Check if [timed out](#Timing Out)
+    b. Check if next node can start based on previous node status and the associated success / failure / always logic
+4. Create new task and signal start
+
+
+## Task Manager System Architecture
+
+Each of the three managers has a single entry point, `schedule()`. The `schedule()` function tries to acquire a single, global lock recorded in the database. If the lock cannot be acquired, the method returns. The failure to acquire the lock indicates that there is another instance currently running `schedule()`.
+
+Each manager runs inside of an atomic DB transaction. If the dispatcher task that is running the manager is killed, none of the created tasks or updates will take effect.
 
 ### Hybrid Scheduler: Periodic + Event
-The `schedule()` function is run (a) periodically by a background task and (b) on job creation or completion. The task manager system would behave correctly if it ran, exclusively, via (a) or (b).
+
+Each manager's `schedule()` function is run (a) periodically by a background task and (b) on job creation or completion. The task manager system would behave correctly if it ran, exclusively, via (a) or (b).
+
+Special note -- the workflow manager is not scheduled to run periodically *directly*, but piggy-backs off the task manager. That is, if task manager sees at least one running workflow job, it will schedule the workflow manager to run.
 
 `schedule()` is triggered via both mechanisms because of the following properties:
 1. It reduces the time from launch to running, resulting a better user experience.
@@ -20,21 +110,34 @@ The `schedule()` function is run (a) periodically by a background task and (b) o
 
 Empirically, the periodic task manager has been effective in the past and will continue to be relied upon with the added event-triggered `schedule()`.
 
-### Scheduler Algorithm
+### Bulk Reschedule 
 
- * Get all non-completed jobs, `all_tasks`
- * Detect finished workflow jobs
- * Spawn next workflow jobs if needed
- * For each pending job, start with the oldest created job
-   * If the job is not blocked, and there is capacity in the instance group queue, then mark it as `waiting` and submit the job.
+Typically each manager is ran asynchronously via the dispatcher system. Dispatcher tasks take resources, so it is important to not schedule tasks unnecessarily. We also need a mechanism to run the manager *after* an atomic transaction block.
+
+Scheduling the managers are facilitated through the `ScheduleTaskManager`, `ScheduleDependencyManager`, and `ScheduleWorkflowManager` classes. These are utilities that help prevent too many managers from being started via the dispatcher system. Think of it as a "do once" mechanism.
+
+```python3
+with transaction.atomic()
+  for t in tasks:
+    if condition:
+      ScheduleTaskManager.schedule()
+```
+
+In the above code, we only want to schedule the TaskManager once after all `tasks` have been processed. `ScheduleTaskManager.schedule()` will handle that logic correctly.
+
+### Timing out
+
+Because of the global lock of the each manager, only one manager can run at a time. If that manager gets stuck for whatever reason, it is important to kill it and let a new one take its place. As such, there is special code in the parent dispatcher process to SIGKILL any of the task system managers after a few minutes.
+
+There is an important side effect to this. Because the manager `schedule()` runs in a transaction, the next run will have re-process the same tasks again. This could lead a manager never being able to progress from one run to the next, as each time it times out. In this situation the task system is effectively stuck as new tasks cannot start. To mitigate this, each manager will check if is is about to hit the time out period and bail out early if so. This gives the manager enough time to commit the DB transaction, and the next manager cycle will be able to start with the next set of unprocessed tasks. This ensures that the system can still make incremental progress under high workloads (i.e. many pending tasks).
 
 
 ### Job Lifecycle
 
 | Job Status |                                                       State                                                      |
-|:----------:|:------------------------------------------------------------------------------------------------------------------:|
+|:-----------|:-------------------------------------------------------------------------------------------------------------------|
 | pending    | Job has been launched.  <br>1. Hasn't yet been seen by the scheduler <br>2. Is blocked by another task <br>3. Not enough capacity |
-| waiting    | Job published to an AMQP queue.
+| waiting    | Job submitted to dispatcher via pg_notify
 | running    | Job is running on a AWX node.
 | successful | Job finished with `ansible-playbook` return code 0.                                                                  |
 | failed     | Job finished with `ansible-playbook` return code other than 0.                                                       |
@@ -46,19 +149,20 @@ Empirically, the periodic task manager has been effective in the past and will c
 The Task Manager decides which exact node a job will run on. It does so by considering user-configured group execution policy and user-configured capacity. First, the set of groups on which a job _can_ run on is constructed (see the AWX document on [Clustering](https://github.com/ansible/awx/blob/devel/docs/clustering.md)). The groups are traversed until a node within that group is found. The node with the largest remaining capacity that is idle is chosen first. If there are no idle nodes, then the node with the largest remaining capacity greater than or equal to the job capacity requirements is chosen.
 
 
-## Code Composition
+## Managers are short-lived
 
-The main goal of the new task manager is to run in our HA environment. This translates to making the task manager logic run on any AWX node. To support this, we need to remove any reliance on the state between task manager schedule logic runs. A future goal of AWX is to design the task manager to have limited/no access to the database for this feature. This secondary requirement, combined with performance needs, led to the creation of partial models that wrap dict database model data.
+Manager instances are short lived. Each time it runs, a new instance of the manager class is created, relevant data is pulled in from database, and the manager processes the data. After running, the instance is cleaned up.
 
 
 ### Blocking Logic
 
 The blocking logic is handled by a mixture of ORM instance references and task manager local tracking data in the scheduler instance.
 
+There is a distinction between so-called "hard" vs "soft" blocking.
 
-## Acceptance Tests
+**Hard blocking** refers to dependencies that are represented in the database via the task `dependent_jobs` field. That is, Job A will not run if any of its `dependent_jobs` are still running.
 
-The new task manager should, in essence, work like the old one. Old task manager features were identified while new ones were discovered in the process of creating the new task manager. Rules for the new task manager behavior are iterated below; testing should ensure that those rules are followed.
+**Soft blocking** refers to blocking logic that doesn't have a database representation. Imagine Job A and B are both based on the same job template, and concurrent jobs is `disabled`. Job B will be blocked from running if Job A is already running. This is determined purely by the task manager tracking running jobs via the Dependency Graph.
 
 
 ### Task Manager Rules

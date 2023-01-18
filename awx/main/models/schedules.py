@@ -18,6 +18,7 @@ from django.utils.translation import gettext_lazy as _
 
 # AWX
 from awx.api.versioning import reverse
+from awx.main.fields import OrderedManyToManyField
 from awx.main.models.base import PrimordialModel
 from awx.main.models.jobs import LaunchTimeConfig
 from awx.main.utils import ignore_inventory_computed_fields
@@ -83,6 +84,13 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
     )
     rrule = models.TextField(help_text=_("A value representing the schedules iCal recurrence rule."))
     next_run = models.DateTimeField(null=True, default=None, editable=False, help_text=_("The next time that the scheduled action will run."))
+    instance_groups = OrderedManyToManyField(
+        'InstanceGroup',
+        related_name='schedule_instance_groups',
+        blank=True,
+        editable=False,
+        through='ScheduleInstanceGroupMembership',
+    )
 
     @classmethod
     def get_zoneinfo(cls):
@@ -145,7 +153,7 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
         #
 
         # Find the DTSTART rule or raise an error, its usually the first rule but that is not strictly enforced
-        start_date_rule = re.sub('^.*(DTSTART[^\s]+)\s.*$', r'\1', rrule)
+        start_date_rule = re.sub(r'^.*(DTSTART[^\s]+)\s.*$', r'\1', rrule)
         if not start_date_rule:
             raise ValueError('A DTSTART field needs to be in the rrule')
 

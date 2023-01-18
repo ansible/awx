@@ -8,6 +8,7 @@ class Instances extends Base {
     this.readHealthCheckDetail = this.readHealthCheckDetail.bind(this);
     this.healthCheck = this.healthCheck.bind(this);
     this.readInstanceGroup = this.readInstanceGroup.bind(this);
+    this.deprovisionInstance = this.deprovisionInstance.bind(this);
   }
 
   healthCheck(instanceId) {
@@ -18,8 +19,18 @@ class Instances extends Base {
     return this.http.get(`${this.baseUrl}${instanceId}/health_check/`);
   }
 
+  readPeers(instanceId, params) {
+    return this.http.get(`${this.baseUrl}${instanceId}/peers/`, { params });
+  }
+
   readInstanceGroup(instanceId) {
     return this.http.get(`${this.baseUrl}${instanceId}/instance_groups/`);
+  }
+
+  deprovisionInstance(instanceId) {
+    return this.http.patch(`${this.baseUrl}${instanceId}/`, {
+      node_state: 'deprovisioning',
+    });
   }
 }
 

@@ -11,11 +11,12 @@ import os
 import subprocess
 import re
 import stat
+import sys
 import urllib.parse
 import threading
 import contextlib
 import tempfile
-from functools import reduce, wraps
+import functools
 
 # Django
 from django.core.exceptions import ObjectDoesNotExist, FieldDoesNotExist
@@ -73,6 +74,7 @@ __all__ = [
     'NullablePromptPseudoField',
     'model_instance_diff',
     'parse_yaml_or_json',
+    'is_testing',
     'RequireDebugTrueOrTest',
     'has_model_field_prefetched',
     'set_environ',
@@ -88,6 +90,7 @@ __all__ = [
     'deepmerge',
     'get_event_partition_epoch',
     'cleanup_new_process',
+    'log_excess_runtime',
 ]
 
 
@@ -144,6 +147,19 @@ def underscore_to_camelcase(s):
     return ''.join(x.capitalize() or '_' for x in s.split('_'))
 
 
+@functools.cache
+def is_testing(argv=None):
+    '''Return True if running django or py.test unit tests.'''
+    if 'PYTEST_CURRENT_TEST' in os.environ.keys():
+        return True
+    argv = sys.argv if argv is None else argv
+    if len(argv) >= 1 and ('py.test' in argv[0] or 'py/test.py' in argv[0]):
+        return True
+    elif len(argv) >= 2 and argv[1] == 'test':
+        return True
+    return False
+
+
 class RequireDebugTrueOrTest(logging.Filter):
     """
     Logging filter to output when in DEBUG mode or running tests.
@@ -152,7 +168,7 @@ class RequireDebugTrueOrTest(logging.Filter):
     def filter(self, record):
         from django.conf import settings
 
-        return settings.DEBUG or settings.IS_TESTING()
+        return settings.DEBUG or is_testing()
 
 
 class IllegalArgumentError(ValueError):
@@ -174,7 +190,7 @@ def memoize(ttl=60, cache_key=None, track_function=False, cache=None):
     cache = cache or get_memoize_cache()
 
     def memoize_decorator(f):
-        @wraps(f)
+        @functools.wraps(f)
         def _memoizer(*args, **kwargs):
             if track_function:
                 cache_dict_key = slugify('%r %r' % (args, kwargs))
@@ -264,9 +280,15 @@ def update_scm_url(scm_type, url, username=True, password=True, check_special_ca
                 userpass, hostpath = url.split('@', 1)
             else:
                 userpass, hostpath = '', url
-            if hostpath.count(':') > 1:
+            # Handle IPv6 here. In this case, we might have hostpath of:
+            # [fd00:1234:2345:6789::11]:example/foo.git
+            if hostpath.startswith('[') and ']:' in hostpath:
+                host, path = hostpath.split(']:', 1)
+                host = host + ']'
+            elif hostpath.count(':') > 1:
                 raise ValueError(_('Invalid %s URL') % scm_type)
-            host, path = hostpath.split(':', 1)
+            else:
+                host, path = hostpath.split(':', 1)
             # if not path.startswith('/') and not path.startswith('~/'):
             #    path = '~/%s' % path
             # if path.startswith('/'):
@@ -325,7 +347,11 @@ def update_scm_url(scm_type, url, username=True, password=True, check_special_ca
         netloc = u':'.join([urllib.parse.quote(x, safe='') for x in (netloc_username, netloc_password) if x])
     else:
         netloc = u''
-    netloc = u'@'.join(filter(None, [netloc, parts.hostname]))
+    # urllib.parse strips brackets from IPv6 addresses, so we need to add them back in
+    hostname = parts.hostname
+    if hostname and ':' in hostname and '[' in url and ']' in url:
+        hostname = f'[{hostname}]'
+    netloc = u'@'.join(filter(None, [netloc, hostname]))
     if parts.port:
         netloc = u':'.join([netloc, str(parts.port)])
     new_url = urllib.parse.urlunsplit([parts.scheme, netloc, parts.path, parts.query, parts.fragment])
@@ -532,6 +558,10 @@ def copy_m2m_relationships(obj1, obj2, fields, kwargs=None):
                 if kwargs and field_name in kwargs:
                     override_field_val = kwargs[field_name]
                     if isinstance(override_field_val, (set, list, QuerySet)):
+                        # Labels are additive so we are going to add any src labels in addition to the override labels
+                        if field_name == 'labels':
+                            for jt_label in src_field_value.all():
+                                getattr(obj2, field_name).add(jt_label.id)
                         getattr(obj2, field_name).add(*override_field_val)
                         continue
                     if override_field_val.__class__.__name__ == 'ManyRelatedManager':
@@ -978,7 +1008,7 @@ def getattrd(obj, name, default=NoDefaultProvided):
     """
 
     try:
-        return reduce(getattr, name.split("."), obj)
+        return functools.reduce(getattr, name.split("."), obj)
     except AttributeError:
         if default != NoDefaultProvided:
             return default
@@ -1174,7 +1204,7 @@ def cleanup_new_process(func):
     Cleanup django connection, cache connection, before executing new thread or processes entry point, func.
     """
 
-    @wraps(func)
+    @functools.wraps(func)
     def wrapper_cleanup_new_process(*args, **kwargs):
         from awx.conf.settings import SettingsWrapper  # noqa
 
@@ -1186,15 +1216,30 @@ def cleanup_new_process(func):
     return wrapper_cleanup_new_process
 
 
-def log_excess_runtime(func_logger, cutoff=5.0):
+def log_excess_runtime(func_logger, cutoff=5.0, debug_cutoff=5.0, msg=None, add_log_data=False):
     def log_excess_runtime_decorator(func):
-        @wraps(func)
+        @functools.wraps(func)
         def _new_func(*args, **kwargs):
             start_time = time.time()
-            return_value = func(*args, **kwargs)
-            delta = time.time() - start_time
-            if delta > cutoff:
-                logger.info(f'Running {func.__name__!r} took {delta:.2f}s')
+            log_data = {'name': repr(func.__name__)}
+
+            if add_log_data:
+                return_value = func(*args, log_data=log_data, **kwargs)
+            else:
+                return_value = func(*args, **kwargs)
+
+            log_data['delta'] = time.time() - start_time
+            if isinstance(return_value, dict):
+                log_data.update(return_value)
+
+            if msg is None:
+                record_msg = 'Running {name} took {delta:.2f}s'
+            else:
+                record_msg = msg
+            if log_data['delta'] > cutoff:
+                func_logger.info(record_msg.format(**log_data))
+            elif log_data['delta'] > debug_cutoff:
+                func_logger.debug(record_msg.format(**log_data))
             return return_value
 
         return _new_func

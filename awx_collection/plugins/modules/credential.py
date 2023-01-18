@@ -52,8 +52,8 @@ options:
         - The credential type being created.
         - Can be a built-in credential type such as "Machine", or a custom credential type such as "My Credential Type"
         - Choices include Amazon Web Services, Ansible Galaxy/Automation Hub API Token, Centrify Vault Credential Provider Lookup,
-          Container Registry, CyberArk AIM Central Credential Provider Lookup, CyberArk Conjur Secret Lookup, Google Compute Engine,
-          GitHub Personal Access Token, GitLab Personal Access Token, HashiCorp Vault Secret Lookup, HashiCorp Vault Signed SSH,
+          Container Registry, CyberArk Central Credential Provider Lookup, CyberArk Conjur Secret Lookup, Google Compute Engine,
+          GitHub Personal Access Token, GitLab Personal Access Token, GPG Public Key, HashiCorp Vault Secret Lookup, HashiCorp Vault Signed SSH,
           Insights, Machine, Microsoft Azure Key Vault, Microsoft Azure Resource Manager, Network, OpenShift or Kubernetes API
           Bearer Token, OpenStack, Red Hat Ansible Automation Platform, Red Hat Satellite 6, Red Hat Virtualization, Source Control,
           Thycotic DevOps Secrets Vault, Thycotic Secret Server, Vault, VMware vCenter, or a custom credential type
@@ -82,6 +82,7 @@ options:
         - ssh_key_data (SSH private key content; to extract the content from a file path, use the lookup function (see examples))
         - vault_id (the vault identifier; this parameter is only valid if C(kind) is specified as C(vault).)
         - ssh_key_unlock (unlock password for ssh_key; use "ASK" and launch job to be prompted)
+        - gpg_public_key (GPG Public Key used for signature validation)
       type: dict
     update_secrets:
       description:

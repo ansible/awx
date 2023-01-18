@@ -19,8 +19,11 @@ jobs:
             GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
             OWNER: ${{ github.repository_owner }}
             REPO: ${{ github.event.repository.name }}
-            BRANCH: ${{github.event.pull_request.head.ref}}
-            PR: ${{github.event.pull_request}}
+            PR: ${{github.event.pull_request.number}}
+            PR_BODY: ${{github.event.pull_request.body}}
         run: |
-          gh pr checkout ${{ env.BRANCH }}
-          gh pr edit --body "${{ env.PR }}\nBug, Docs Fix or other nominal change"
+          gh pr checkout ${{ env.PR }}
+          echo "${{ env.PR_BODY }}" > my_pr_body.txt
+          echo "" >> my_pr_body.txt
+          echo "Bug, Docs Fix or other nominal change" >> my_pr_body.txt
+          gh pr edit ${{env.PR}} --body-file my_pr_body.txt

@@ -42,6 +42,7 @@ const instances = [
     jobs_total: 68,
     cpu: 6,
     node_type: 'control',
+    node_state: 'ready',
     memory: 2087469056,
     cpu_capacity: 24,
     mem_capacity: 1,
@@ -69,6 +70,7 @@ const instances = [
     jobs_total: 68,
     cpu: 6,
     node_type: 'hybrid',
+    node_state: 'ready',
     memory: 2087469056,
     cpu_capacity: 24,
     mem_capacity: 1,
@@ -96,6 +98,7 @@ const instances = [
     jobs_total: 68,
     cpu: 6,
     node_type: 'execution',
+    node_state: 'ready',
     memory: 2087469056,
     cpu_capacity: 24,
     mem_capacity: 1,
@@ -169,7 +172,7 @@ describe('<InstanceList/>', () => {
     await act(async () =>
       wrapper.find('Button[ouiaId="health-check"]').prop('onClick')()
     );
-    expect(InstancesAPI.healthCheck).toBeCalledTimes(3);
+    expect(InstancesAPI.healthCheck).toBeCalledTimes(1);
   });
   test('should render health check error', async () => {
     InstancesAPI.healthCheck.mockRejectedValue(

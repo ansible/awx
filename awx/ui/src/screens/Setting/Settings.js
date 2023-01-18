@@ -12,6 +12,7 @@ import useRequest from 'hooks/useRequest';
 import AzureAD from './AzureAD';
 import GitHub from './GitHub';
 import GoogleOAuth2 from './GoogleOAuth2';
+import OIDC from './OIDC';
 import Jobs from './Jobs';
 import LDAP from './LDAP';
 import Subscription from './Subscription';
@@ -68,6 +69,9 @@ function Settings() {
     '/settings/google_oauth2': t`Google OAuth2`,
     '/settings/google_oauth2/details': t`Details`,
     '/settings/google_oauth2/edit': t`Edit Details`,
+    '/settings/oidc': t`Generic OIDC`,
+    '/settings/oidc/details': t`Details`,
+    '/settings/oidc/edit': t`Edit Details`,
     '/settings/jobs': t`Jobs`,
     '/settings/jobs/details': t`Details`,
     '/settings/jobs/edit': t`Edit Details`,
@@ -152,6 +156,9 @@ function Settings() {
         </Route>
         <Route path="/settings/google_oauth2">
           <GoogleOAuth2 />
+        </Route>
+        <Route path="/settings/oidc">
+          <OIDC />
         </Route>
         <Route path="/settings/jobs">
           <Jobs />

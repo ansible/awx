@@ -128,7 +128,7 @@ def main():
     description = module.params.get('description')
     state = module.params.pop('state')
     preserve_existing_hosts = module.params.get('preserve_existing_hosts')
-    preserve_existing_children = module.params.get('preserve_existing_groups')
+    preserve_existing_children = module.params.get('preserve_existing_children')
     variables = module.params.get('variables')
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
@@ -170,7 +170,7 @@ def main():
             id_list.append(sub_obj['id'])
         # Preserve existing objects
         if (preserve_existing_hosts and relationship == 'hosts') or (preserve_existing_children and relationship == 'children'):
-            preserve_existing_check = module.get_endpoint(group['related'][relationship])
+            preserve_existing_check = module.get_all_endpoint(group['related'][relationship])
             for sub_obj in preserve_existing_check['json']['results']:
                 id_list.append(sub_obj['id'])
         if id_list:

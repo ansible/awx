@@ -45,6 +45,7 @@ credential_input_fields = (
     'username',
     'vault_password',
     'vault_id',
+    'gpg_public_key',
 )
 
 
@@ -94,6 +95,7 @@ credential_type_name_to_config_kind_map = {
     'machine': 'ssh',
     'vault': 'vault',
     'vmware vcenter': 'vmware',
+    'gpg public key': 'gpg_public_key',
 }
 
 config_kind_to_credential_type_name_map = {kind: name for name, kind in credential_type_name_to_config_kind_map.items()}

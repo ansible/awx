@@ -19,6 +19,10 @@ class UnifiedJobTemplate(HasStatus, base.Base):
         'job_type',
         'verbosity',
         'inventory',
+        'forks',
+        'timeout',
+        'job_slice_count',
+        'execution_environment',
     )
 
     def __str__(self):

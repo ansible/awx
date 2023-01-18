@@ -55,7 +55,6 @@ options:
       description:
         - The arguments to pass to the module.
       type: str
-      default: ""
     forks:
       description:
         - The number of forks to use for this ad hoc execution.

@@ -18,6 +18,7 @@
     - pg_password
     - secret_key
     - broadcast_websocket_secret
+    - admin_password
 
 - name: Generate secrets if needed
   template:
@@ -85,11 +86,13 @@
   command: openssl genrsa -out {{ work_sign_private_keyfile }} {{ receptor_rsa_bits }}
   args:
     creates: "{{ work_sign_private_keyfile }}"
+  when: sign_work | bool
 
 - name: Generate public RSA key for signing work
   command: openssl rsa -in {{ work_sign_private_keyfile }} -out {{ work_sign_public_keyfile }} -outform PEM -pubout
   args:
     creates: "{{ work_sign_public_keyfile }}"
+  when: sign_work | bool
 
 - name: Include LDAP tasks if enabled
   include_tasks: ldap.yml
@@ -108,11 +111,27 @@
     mode: '0600'
   with_sequence: start=1 end={{ control_plane_node_count }}
 
+- name: Create Receptor Config Lock File
+  file:
+    path: "{{ sources_dest }}/receptor/receptor-awx-{{ item }}.conf.lock"
+    state: touch
+    mode: '0600'
+  with_sequence: start=1 end={{ control_plane_node_count }}
+
+- name: Render Receptor Config(s) for Control Plane
+  template:
+    src: "receptor-awx.conf.j2"
+    dest: "{{ sources_dest }}/receptor/receptor-awx-{{ item }}.conf"
+    mode: '0600'
+  with_sequence: start=1 end={{ control_plane_node_count }}
+
 - name: Render Receptor Hop Config
   template:
     src: "receptor-hop.conf.j2"
     dest: "{{ sources_dest }}/receptor/receptor-hop.conf"
     mode: '0600'
+  when:
+    - execution_node_count | int > 0
 
 - name: Render Receptor Worker Config(s)
   template:
@@ -121,3 +140,9 @@
     mode: '0600'
   with_sequence: start=1 end={{ execution_node_count if execution_node_count | int > 0 else 1}}
   when: execution_node_count | int > 0
+
+- name: Render prometheus config
+  template:
+    src: "prometheus.yml.j2"
+    dest: "{{ sources_dest }}/prometheus.yml"
+  when: enable_prometheus|bool

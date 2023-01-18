@@ -17,11 +17,35 @@ jest.mock('../../../api/models/Inventories');
 const credentials = {
   data: {
     results: [
-      { id: 1, kind: 'cloud', name: 'Cred 1', url: 'www.google.com' },
-      { id: 2, kind: 'ssh', name: 'Cred 2', url: 'www.google.com' },
-      { id: 3, kind: 'Ansible', name: 'Cred 3', url: 'www.google.com' },
-      { id: 4, kind: 'Machine', name: 'Cred 4', url: 'www.google.com' },
-      { id: 5, kind: 'Machine', name: 'Cred 5', url: 'www.google.com' },
+      {
+        id: 1,
+        kind: 'cloud',
+        name: 'Cred 1',
+        url: 'www.google.com',
+        inputs: {},
+      },
+      { id: 2, kind: 'ssh', name: 'Cred 2', url: 'www.google.com', inputs: {} },
+      {
+        id: 3,
+        kind: 'Ansible',
+        name: 'Cred 3',
+        url: 'www.google.com',
+        inputs: {},
+      },
+      {
+        id: 4,
+        kind: 'Machine',
+        name: 'Cred 4',
+        url: 'www.google.com',
+        inputs: {},
+      },
+      {
+        id: 5,
+        kind: 'Machine',
+        name: 'Cred 5',
+        url: 'www.google.com',
+        inputs: {},
+      },
     ],
   },
 };
@@ -39,6 +63,12 @@ const launchData = {
     ask_verbosity_on_launch: false,
     ask_inventory_on_launch: true,
     ask_credential_on_launch: false,
+    ask_execution_environment_on_launch: false,
+    ask_labels_on_launch: false,
+    ask_forks_on_launch: false,
+    ask_job_slice_count_on_launch: false,
+    ask_timeout_on_launch: false,
+    ask_instance_groups_on_launch: false,
     survey_enabled: false,
     variables_needed_to_start: [],
     credential_needed_to_start: false,
@@ -86,7 +116,7 @@ const mockSchedule = {
 
 let wrapper;
 
-const defaultFieldsVisible = () => {
+const defaultFieldsVisible = (isExceptionsVisible) => {
   expect(wrapper.find('FormGroup[label="Name"]').length).toBe(1);
   expect(wrapper.find('FormGroup[label="Description"]').length).toBe(1);
   expect(wrapper.find('FormGroup[label="Start date/time"]').length).toBe(1);
@@ -94,7 +124,11 @@ const defaultFieldsVisible = () => {
   expect(
     wrapper.find('FormGroup[label="Local time zone"]').find('HelpIcon').length
   ).toBe(1);
-  expect(wrapper.find('FrequencySelect').length).toBe(1);
+  if (isExceptionsVisible) {
+    expect(wrapper.find('FrequencySelect').length).toBe(2);
+  } else {
+    expect(wrapper.find('FrequencySelect').length).toBe(1);
+  }
 };
 
 const nonRRuleValuesMatch = () => {
@@ -149,6 +183,12 @@ describe('<ScheduleForm />', () => {
               ask_verbosity_on_launch: false,
               ask_inventory_on_launch: true,
               ask_credential_on_launch: false,
+              ask_execution_environment_on_launch: false,
+              ask_labels_on_launch: false,
+              ask_forks_on_launch: false,
+              ask_job_slice_count_on_launch: false,
+              ask_timeout_on_launch: false,
+              ask_instance_groups_on_launch: false,
               survey_enabled: false,
               variables_needed_to_start: [],
               credential_needed_to_start: false,
@@ -204,6 +244,12 @@ describe('<ScheduleForm />', () => {
               ask_verbosity_on_launch: false,
               ask_inventory_on_launch: true,
               ask_credential_on_launch: false,
+              ask_execution_environment_on_launch: false,
+              ask_labels_on_launch: false,
+              ask_forks_on_launch: false,
+              ask_job_slice_count_on_launch: false,
+              ask_timeout_on_launch: false,
+              ask_instance_groups_on_launch: false,
               survey_enabled: false,
               variables_needed_to_start: [],
               credential_needed_to_start: false,
@@ -271,6 +317,12 @@ describe('<ScheduleForm />', () => {
               ask_verbosity_on_launch: false,
               ask_inventory_on_launch: true,
               ask_credential_on_launch: false,
+              ask_execution_environment_on_launch: false,
+              ask_labels_on_launch: false,
+              ask_forks_on_launch: false,
+              ask_job_slice_count_on_launch: false,
+              ask_timeout_on_launch: false,
+              ask_instance_groups_on_launch: false,
               survey_enabled: false,
               variables_needed_to_start: [],
               credential_needed_to_start: false,
@@ -402,6 +454,12 @@ describe('<ScheduleForm />', () => {
               ask_verbosity_on_launch: false,
               ask_inventory_on_launch: true,
               ask_credential_on_launch: false,
+              ask_execution_environment_on_launch: false,
+              ask_labels_on_launch: false,
+              ask_forks_on_launch: false,
+              ask_job_slice_count_on_launch: false,
+              ask_timeout_on_launch: false,
+              ask_instance_groups_on_launch: false,
               survey_enabled: false,
               variables_needed_to_start: [],
               credential_needed_to_start: false,
@@ -461,6 +519,12 @@ describe('<ScheduleForm />', () => {
               ask_verbosity_on_launch: false,
               ask_inventory_on_launch: false,
               ask_credential_on_launch: false,
+              ask_execution_environment_on_launch: false,
+              ask_labels_on_launch: false,
+              ask_forks_on_launch: false,
+              ask_job_slice_count_on_launch: false,
+              ask_timeout_on_launch: false,
+              ask_instance_groups_on_launch: false,
               survey_enabled: false,
               variables_needed_to_start: [],
               credential_needed_to_start: false,
@@ -513,7 +577,7 @@ describe('<ScheduleForm />', () => {
         runFrequencySelect.invoke('onChange')(['minute']);
       });
       wrapper.update();
-      defaultFieldsVisible();
+      defaultFieldsVisible(true);
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="On days"]').length).toBe(0);
@@ -547,7 +611,7 @@ describe('<ScheduleForm />', () => {
         runFrequencySelect.invoke('onChange')(['hour']);
       });
       wrapper.update();
-      defaultFieldsVisible();
+      defaultFieldsVisible(true);
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="On days"]').length).toBe(0);
@@ -579,7 +643,7 @@ describe('<ScheduleForm />', () => {
         runFrequencySelect.invoke('onChange')(['day']);
       });
       wrapper.update();
-      defaultFieldsVisible();
+      defaultFieldsVisible(true);
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="On days"]').length).toBe(0);
@@ -611,7 +675,7 @@ describe('<ScheduleForm />', () => {
         runFrequencySelect.invoke('onChange')(['week']);
       });
       wrapper.update();
-      defaultFieldsVisible();
+      defaultFieldsVisible(true);
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="On days"]').length).toBe(1);
@@ -643,7 +707,7 @@ describe('<ScheduleForm />', () => {
         runFrequencySelect.invoke('onChange')(['month']);
       });
       wrapper.update();
-      defaultFieldsVisible();
+      defaultFieldsVisible(true);
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="On days"]').length).toBe(0);
@@ -692,7 +756,7 @@ describe('<ScheduleForm />', () => {
         runFrequencySelect.invoke('onChange')(['year']);
       });
       wrapper.update();
-      defaultFieldsVisible();
+      defaultFieldsVisible(true);
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="On days"]').length).toBe(0);
@@ -836,6 +900,36 @@ describe('<ScheduleForm />', () => {
       );
     });
 
+    test('should create schedule with the same start and end date provided that the end date is at a later time', async () => {
+      const today = DateTime.now().toFormat('yyyy-LL-dd');
+      const laterTime = DateTime.now().plus({ hours: 1 }).toFormat('h:mm a');
+      await act(async () => {
+        wrapper.find('DatePicker[aria-label="End date"]').prop('onChange')(
+          today,
+          new Date(today)
+        );
+      });
+      wrapper.update();
+      expect(
+        wrapper
+          .find('FormGroup[data-cy="schedule-End date/time"]')
+          .prop('helperTextInvalid')
+      ).toBe(
+        'Please select an end date/time that comes after the start date/time.'
+      );
+      await act(async () => {
+        wrapper.find('TimePicker[aria-label="End time"]').prop('onChange')(
+          laterTime
+        );
+      });
+      wrapper.update();
+      expect(
+        wrapper
+          .find('FormGroup[data-cy="schedule-End date/time"]')
+          .prop('helperTextInvalid')
+      ).toBe(undefined);
+    });
+
     test('error shown when on day number is not between 1 and 31', async () => {
       await act(async () => {
         wrapper.find('FrequencySelect#schedule-frequency').invoke('onChange')([
@@ -890,7 +984,7 @@ describe('<ScheduleForm />', () => {
       jest.clearAllMocks();
     });
 
-    test('should make API calls to fetch credentials, launch configuration, and survey configuration', async () => {
+    test('should make API calls to fetch credentials, labels, and zone info', async () => {
       await act(async () => {
         wrapper = mountWithContexts(
           <ScheduleForm
@@ -902,6 +996,9 @@ describe('<ScheduleForm />', () => {
               type: 'job_template',
               name: 'Foo Job Template',
               description: '',
+              summary_fields: {
+                credentials: [],
+              },
             }}
             launchConfig={{
               can_start_without_user_input: true,
@@ -915,7 +1012,13 @@ describe('<ScheduleForm />', () => {
               ask_limit_on_launch: false,
               ask_verbosity_on_launch: false,
               ask_inventory_on_launch: false,
-              ask_credential_on_launch: false,
+              ask_credential_on_launch: true,
+              ask_execution_environment_on_launch: false,
+              ask_labels_on_launch: true,
+              ask_forks_on_launch: false,
+              ask_job_slice_count_on_launch: false,
+              ask_timeout_on_launch: false,
+              ask_instance_groups_on_launch: false,
               survey_enabled: false,
               variables_needed_to_start: [],
               credential_needed_to_start: false,
@@ -929,7 +1032,9 @@ describe('<ScheduleForm />', () => {
           />
         );
       });
+      expect(SchedulesAPI.readZoneInfo).toBeCalled();
       expect(SchedulesAPI.readCredentials).toBeCalledWith(27);
+      expect(SchedulesAPI.readAllLabels).toBeCalledWith(27);
     });
 
     test('should not call API to get credentials ', async () => {
@@ -957,6 +1062,12 @@ describe('<ScheduleForm />', () => {
               ask_verbosity_on_launch: false,
               ask_inventory_on_launch: false,
               ask_credential_on_launch: false,
+              ask_execution_environment_on_launch: false,
+              ask_labels_on_launch: false,
+              ask_forks_on_launch: false,
+              ask_job_slice_count_on_launch: false,
+              ask_timeout_on_launch: false,
+              ask_instance_groups_on_launch: false,
               survey_enabled: false,
               variables_needed_to_start: [],
               credential_needed_to_start: false,
@@ -986,6 +1097,30 @@ describe('<ScheduleForm />', () => {
               inventory: 2,
               name: 'Foo Project',
               description: '',
+            }}
+            launchConfig={{
+              can_start_without_user_input: true,
+              passwords_needed_to_start: [],
+              ask_scm_branch_on_launch: false,
+              ask_variables_on_launch: false,
+              ask_tags_on_launch: false,
+              ask_diff_mode_on_launch: false,
+              ask_skip_tags_on_launch: false,
+              ask_job_type_on_launch: false,
+              ask_limit_on_launch: false,
+              ask_verbosity_on_launch: false,
+              ask_inventory_on_launch: false,
+              ask_credential_on_launch: false,
+              ask_execution_environment_on_launch: false,
+              ask_labels_on_launch: false,
+              ask_forks_on_launch: false,
+              ask_job_slice_count_on_launch: false,
+              ask_timeout_on_launch: false,
+              ask_instance_groups_on_launch: false,
+              survey_enabled: false,
+              variables_needed_to_start: [],
+              credential_needed_to_start: false,
+              inventory_needed_to_start: false,
             }}
           />
         );
@@ -1058,7 +1193,7 @@ describe('<ScheduleForm />', () => {
       wrapper.update();
 
       expect(wrapper.find('ScheduleForm').length).toBe(1);
-      defaultFieldsVisible();
+      defaultFieldsVisible(true);
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="Occurrences"]').length).toBe(0);
@@ -1113,7 +1248,7 @@ describe('<ScheduleForm />', () => {
       wrapper.update();
 
       expect(wrapper.find('ScheduleForm').length).toBe(1);
-      defaultFieldsVisible();
+      defaultFieldsVisible(true);
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="Occurrences"]').length).toBe(1);
@@ -1171,7 +1306,7 @@ describe('<ScheduleForm />', () => {
       wrapper.update();
 
       expect(wrapper.find('ScheduleForm').length).toBe(1);
-      defaultFieldsVisible();
+      defaultFieldsVisible(true);
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="On days"]').length).toBe(0);
@@ -1224,7 +1359,7 @@ describe('<ScheduleForm />', () => {
       wrapper.update();
 
       expect(wrapper.find('ScheduleForm').length).toBe(1);
-      defaultFieldsVisible();
+      defaultFieldsVisible(true);
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="End date/time"]').length).toBe(1);
@@ -1318,10 +1453,7 @@ describe('<ScheduleForm />', () => {
       wrapper.update();
 
       expect(wrapper.find('ScheduleForm').length).toBe(1);
-      defaultFieldsVisible();
-
-      expect(wrapper.find('ScheduleForm').length).toBe(1);
-      defaultFieldsVisible();
+      defaultFieldsVisible(true);
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="Run on"]').length).toBe(1);
@@ -1394,7 +1526,7 @@ describe('<ScheduleForm />', () => {
       wrapper.update();
 
       expect(wrapper.find('ScheduleForm').length).toBe(1);
-      defaultFieldsVisible();
+      defaultFieldsVisible(true);
       expect(wrapper.find('FormGroup[label="End"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="Run every"]').length).toBe(1);
       expect(wrapper.find('FormGroup[label="Run on"]').length).toBe(1);

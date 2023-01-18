@@ -154,6 +154,26 @@ class Page(object):
         resp.status_code = 200
         return cls(r=resp, connection=connection)
 
+    @property
+    def bytes(self):
+        if self.r is None:
+            return b''
+        return self.r.content
+
+    def extract_data(self, response):
+        """Takes a `requests.Response` and returns a data dict."""
+        try:
+            data = response.json()
+        except ValueError as e:  # If there was no json to parse
+            data = {}
+            if response.text or response.status_code not in (200, 202, 204):
+                text = response.text
+                if len(text) > 1024:
+                    text = text[:1024] + '... <<< Truncated >>> ...'
+                log.debug("Unable to parse JSON response ({0.status_code}): {1} - '{2}'".format(response, e, text))
+
+        return data
+
     def page_identity(self, response, request_json=None):
         """Takes a `requests.Response` and
         returns a new __item_class__ instance if the request method is not a get, or returns
@@ -171,16 +191,7 @@ class Page(object):
         else:
             ds = None
 
-        try:
-            data = response.json()
-        except ValueError as e:  # If there was no json to parse
-            data = dict()
-            if response.text or response.status_code not in (200, 202, 204):
-                text = response.text
-                if len(text) > 1024:
-                    text = text[:1024] + '... <<< Truncated >>> ...'
-                log.debug("Unable to parse JSON response ({0.status_code}): {1} - '{2}'".format(response, e, text))
-
+        data = self.extract_data(response)
         exc_str = "%s (%s) received" % (http.responses[response.status_code], response.status_code)
 
         exception = exception_from_status_code(response.status_code)

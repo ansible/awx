@@ -3,13 +3,14 @@ import { useField } from 'formik';
 import { FormGroup, Title } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 import styled from 'styled-components';
+import 'styled-components/macro';
 import FormField from 'components/FormField';
 import { required } from 'util/validators';
 import { useConfig } from 'contexts/Config';
 import Popover from '../../Popover';
 import AnsibleSelect from '../../AnsibleSelect';
 import FrequencySelect, { SelectOption } from './FrequencySelect';
-import helpText from '../../../screens/Template/shared/JobTemplate.helptext';
+import getHelpText from '../../../screens/Template/shared/JobTemplate.helptext';
 import { SubFormLayout, FormColumnLayout } from '../../FormLayout';
 import FrequencyDetailSubform from './FrequencyDetailSubform';
 import DateTimePicker from './DateTimePicker';
@@ -26,6 +27,7 @@ export default function ScheduleFormFields({
   zoneOptions,
   zoneLinks,
 }) {
+  const helpText = getHelpText();
   const [timezone, timezoneMeta] = useField({
     name: 'timezone',
     validate: required(t`Select a value for this field`),
@@ -53,11 +55,11 @@ export default function ScheduleFormFields({
   }
   const config = useConfig();
 
-  // const [exceptionFrequency, exceptionFrequencyMeta, exceptionFrequencyHelper] =
-  //   useField({
-  //     name: 'exceptionFrequency',
-  //     validate: required(t`Select a value for this field`),
-  //   });
+  const [exceptionFrequency, exceptionFrequencyMeta, exceptionFrequencyHelper] =
+    useField({
+      name: 'exceptionFrequency',
+      validate: required(t`Select a value for this field`),
+    });
 
   const updateFrequency = (setFrequency) => (values) => {
     setFrequency(values.sort(sortFrequencies));
@@ -151,42 +153,53 @@ export default function ScheduleFormFields({
               />
             </FormColumnLayout>
           ))}
-          {/* <Title size="md" headingLevel="h4">{t`Exceptions`}</Title>
-          <FormGroup
-            name="exceptions"
-            fieldId="exception-frequency"
-            helperTextInvalid={exceptionFrequencyMeta.error}
-            validated={
-              !exceptionFrequencyMeta.touched || !exceptionFrequencyMeta.error
-                ? 'default'
-                : 'error'
-            }
-            label={t`Add exceptions`}
-          >
-            <FrequencySelect
-              variant={SelectVariant.checkbox}
-              onChange={exceptionFrequencyHelper.setValue}
-              value={exceptionFrequency.value}
-              placeholderText={t`None`}
-              onBlur={exceptionFrequencyHelper.setTouched}
+          <Title
+            size="md"
+            headingLevel="h4"
+            css="margin-top: var(--pf-c-card--child--PaddingRight)"
+          >{t`Exceptions`}</Title>
+          <FormColumnLayout stacked>
+            <FormGroup
+              name="exceptions"
+              fieldId="exception-frequency"
+              helperTextInvalid={exceptionFrequencyMeta.error}
+              validated={
+                !exceptionFrequencyMeta.touched || !exceptionFrequencyMeta.error
+                  ? 'default'
+                  : 'error'
+              }
+              label={t`Add exceptions`}
             >
-              <SelectClearOption value="none">{t`None`}</SelectClearOption>
-              <SelectOption value="minute">{t`Minute`}</SelectOption>
-              <SelectOption value="hour">{t`Hour`}</SelectOption>
-              <SelectOption value="day">{t`Day`}</SelectOption>
-              <SelectOption value="week">{t`Week`}</SelectOption>
-              <SelectOption value="month">{t`Month`}</SelectOption>
-              <SelectOption value="year">{t`Year`}</SelectOption>
-            </FrequencySelect>
-          </FormGroup>
+              <FrequencySelect
+                id="exception-frequency"
+                onChange={updateFrequency(exceptionFrequencyHelper.setValue)}
+                value={exceptionFrequency.value}
+                placeholderText={
+                  exceptionFrequency.value.length
+                    ? t`Select frequency`
+                    : t`None`
+                }
+                onBlur={exceptionFrequencyHelper.setTouched}
+              >
+                <SelectClearOption value="none">{t`None`}</SelectClearOption>
+                <SelectOption value="minute">{t`Minute`}</SelectOption>
+                <SelectOption value="hour">{t`Hour`}</SelectOption>
+                <SelectOption value="day">{t`Day`}</SelectOption>
+                <SelectOption value="week">{t`Week`}</SelectOption>
+                <SelectOption value="month">{t`Month`}</SelectOption>
+                <SelectOption value="year">{t`Year`}</SelectOption>
+              </FrequencySelect>
+            </FormGroup>
+          </FormColumnLayout>
           {exceptionFrequency.value.map((val) => (
             <FormColumnLayout key={val} stacked>
               <FrequencyDetailSubform
                 frequency={val}
                 prefix={`exceptionOptions.${val}`}
+                isException
               />
             </FormColumnLayout>
-          ))} */}
+          ))}
         </SubFormLayout>
       ) : null}
     </>

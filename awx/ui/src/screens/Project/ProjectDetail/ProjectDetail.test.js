@@ -46,6 +46,11 @@ describe('<ProjectDetail />', () => {
         name: 'qux',
         kind: 'scm',
       },
+      signature_validation_credential: {
+        id: 2000,
+        name: 'svc',
+        kind: 'cryptography',
+      },
       last_job: {
         id: 9000,
         status: 'successful',
@@ -78,6 +83,7 @@ describe('<ProjectDetail />', () => {
     scm_delete_on_update: true,
     scm_track_submodules: true,
     credential: 100,
+    signature_validation_credential: 200,
     status: 'successful',
     organization: 10,
     scm_update_on_launch: true,
@@ -107,6 +113,10 @@ describe('<ProjectDetail />', () => {
     assertDetail(
       'Source Control Credential',
       `Scm: ${mockProject.summary_fields.credential.name}`
+    );
+    assertDetail(
+      'Content Signature Validation Credential',
+      `Cryptography: ${mockProject.summary_fields.signature_validation_credential.name}`
     );
     assertDetail(
       'Cache Timeout',

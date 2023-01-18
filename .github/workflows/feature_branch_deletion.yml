@@ -1,0 +1,26 @@
+---
+name: Feature branch deletion cleanup
+env:
+  LC_ALL: "C.UTF-8" # prevent ERROR: Ansible could not initialize the preferred locale: unsupported locale setting
+on:
+  delete:
+    branches:
+      - feature_**
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Delete API Schema
+        env:
+          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+          AWS_REGION: 'us-east-1'
+        run: |
+          ansible localhost -c local, -m command -a "{{ ansible_python_interpreter + ' -m pip install boto3'}}"
+          ansible localhost -c local -m aws_s3 \
+            -a "bucket=awx-public-ci-files object=${GITHUB_REF##*/}/schema.json mode=delete permission=public-read"
+
+

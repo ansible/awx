@@ -73,6 +73,20 @@ function InstanceGroupDetails({ instanceGroup }) {
           dataCy="instance-group-policy-instance-percentage"
           content={`${instanceGroup.policy_instance_percentage} %`}
         />
+        <DetailBadge
+          label={t`Max concurrent jobs`}
+          dataCy="instance-group-max-concurrent-jobs"
+          helpText={t`Maximum number of jobs to run concurrently on this group.
+          Zero means no limit will be enforced.`}
+          content={instanceGroup.max_concurrent_jobs}
+        />
+        <DetailBadge
+          label={t`Max forks`}
+          dataCy="instance-group-max-forks"
+          helpText={t`Maximum number of forks to allow across all jobs running concurrently on this group.
+          Zero means no limit will be enforced.`}
+          content={instanceGroup.max_forks}
+        />
         {instanceGroup.capacity ? (
           <DetailBadge
             label={t`Used capacity`}

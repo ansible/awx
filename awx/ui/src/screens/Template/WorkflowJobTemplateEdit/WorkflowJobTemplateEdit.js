@@ -3,7 +3,12 @@ import { useHistory } from 'react-router-dom';
 
 import { CardBody } from 'components/Card';
 import { getAddedAndRemoved } from 'util/lists';
-import { WorkflowJobTemplatesAPI, OrganizationsAPI, UsersAPI } from 'api';
+import {
+  InventoriesAPI,
+  WorkflowJobTemplatesAPI,
+  OrganizationsAPI,
+  UsersAPI,
+} from 'api';
 import { useConfig } from 'contexts/Config';
 import useRequest from 'hooks/useRequest';
 import ContentError from 'components/ContentError';
@@ -23,12 +28,18 @@ function WorkflowJobTemplateEdit({ template }) {
       webhook_credential,
       webhook_key,
       limit,
+      job_tags,
+      skip_tags,
+      scm_branch,
       ...templatePayload
     } = values;
     templatePayload.inventory = inventory?.id || null;
     templatePayload.organization = organization?.id || null;
     templatePayload.webhook_credential = webhook_credential?.id || null;
     templatePayload.limit = limit === '' ? null : limit;
+    templatePayload.job_tags = job_tags === '' ? null : job_tags;
+    templatePayload.skip_tags = skip_tags === '' ? null : skip_tags;
+    templatePayload.scm_branch = scm_branch === '' ? null : scm_branch;
 
     const formOrgId =
       organization?.id || inventory?.summary_fields?.organization.id || null;
@@ -76,15 +87,16 @@ function WorkflowJobTemplateEdit({ template }) {
   };
 
   const {
-    isLoading,
+    isLoading: isFetchUserRoleLoading,
     request: fetchUserRole,
     result: { orgAdminResults, isOrgAdmin },
-    error: contentError,
+    error: fetchUserRoleError,
   } = useRequest(
     useCallback(async () => {
       const {
         data: { results, count },
       } = await UsersAPI.readAdminOfOrganizations(me?.id);
+
       return { isOrgAdmin: count > 0, orgAdminResults: results };
     }, [me.id]),
     { isOrgAdmin: false, orgAdminResults: null }
@@ -94,11 +106,37 @@ function WorkflowJobTemplateEdit({ template }) {
     fetchUserRole();
   }, [fetchUserRole]);
 
-  if (contentError) {
-    return <ContentError error={contentError} />;
+  const {
+    isLoading: isFetchInventoryLoading,
+    request: fetchInventory,
+    result: { canChangeInventory },
+    error: fetchInventoryError,
+  } = useRequest(
+    useCallback(async () => {
+      if (template.inventory) {
+        const {
+          data: { count },
+        } = await InventoriesAPI.read({
+          role_level: 'use_role',
+          id: template.inventory,
+        });
+        return { canChangeInventory: count && count > 0 };
+      }
+
+      return { canChangeInventory: true };
+    }, [template.inventory]),
+    { canChangeInventory: false }
+  );
+
+  useEffect(() => {
+    fetchInventory();
+  }, [fetchInventory]);
+
+  if (fetchUserRoleError || fetchInventoryError) {
+    return <ContentError error={fetchUserRoleError || fetchInventoryError} />;
   }
 
-  if (isLoading || !orgAdminResults) {
+  if (isFetchUserRoleLoading || isFetchInventoryLoading || !orgAdminResults) {
     return <ContentLoading />;
   }
 
@@ -110,6 +148,7 @@ function WorkflowJobTemplateEdit({ template }) {
         template={template}
         submitError={formSubmitError}
         isOrgAdmin={isOrgAdmin}
+        isInventoryDisabled={!canChangeInventory}
       />
     </CardBody>
   );

@@ -104,6 +104,33 @@ class SurveyJobTemplateMixin(models.Model):
         default=False,
     )
     survey_spec = prevent_search(JSONBlob(default=dict, blank=True))
+
+    ask_inventory_on_launch = AskForField(
+        blank=True,
+        default=False,
+    )
+    ask_limit_on_launch = AskForField(
+        blank=True,
+        default=False,
+    )
+    ask_scm_branch_on_launch = AskForField(
+        blank=True,
+        default=False,
+        allows_field='scm_branch',
+    )
+    ask_labels_on_launch = AskForField(
+        blank=True,
+        default=False,
+    )
+    ask_tags_on_launch = AskForField(
+        blank=True,
+        default=False,
+        allows_field='job_tags',
+    )
+    ask_skip_tags_on_launch = AskForField(
+        blank=True,
+        default=False,
+    )
     ask_variables_on_launch = AskForField(blank=True, default=False, allows_field='extra_vars')
 
     def survey_password_variables(self):
@@ -411,6 +438,11 @@ class TaskManagerUnifiedJobMixin(models.Model):
 class TaskManagerJobMixin(TaskManagerUnifiedJobMixin):
     class Meta:
         abstract = True
+
+    def get_jobs_fail_chain(self):
+        if self.project_update_id:
+            return [self.project_update]
+        return []
 
 
 class TaskManagerUpdateOnLaunchMixin(TaskManagerUnifiedJobMixin):

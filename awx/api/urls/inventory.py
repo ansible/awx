@@ -3,25 +3,27 @@
 
 from django.urls import re_path
 
-from awx.api.views import (
+from awx.api.views.inventory import (
     InventoryList,
     InventoryDetail,
-    InventoryHostsList,
-    InventoryGroupsList,
-    InventoryRootGroupsList,
-    InventoryVariableData,
-    InventoryScriptView,
-    InventoryTreeView,
-    InventoryInventorySourcesList,
-    InventoryInventorySourcesUpdate,
     InventoryActivityStreamList,
     InventoryJobTemplateList,
-    InventoryAdHocCommandsList,
     InventoryAccessList,
     InventoryObjectRolesList,
     InventoryInstanceGroupsList,
     InventoryLabelList,
     InventoryCopy,
+)
+from awx.api.views import (
+    InventoryHostsList,
+    InventoryGroupsList,
+    InventoryInventorySourcesList,
+    InventoryInventorySourcesUpdate,
+    InventoryAdHocCommandsList,
+    InventoryRootGroupsList,
+    InventoryScriptView,
+    InventoryTreeView,
+    InventoryVariableData,
 )
 
 

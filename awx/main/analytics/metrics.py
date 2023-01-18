@@ -3,6 +3,7 @@ from prometheus_client import CollectorRegistry, Gauge, Info, generate_latest
 
 from awx.conf.license import get_license
 from awx.main.utils import get_awx_version
+from awx.main.models import UnifiedJob
 from awx.main.analytics.collectors import (
     counts,
     instance_info,
@@ -56,6 +57,7 @@ def metrics():
         [
             'hostname',
             'instance_uuid',
+            'node_type',
         ],
         registry=REGISTRY,
     )
@@ -83,6 +85,7 @@ def metrics():
         [
             'hostname',
             'instance_uuid',
+            'node_type',
         ],
         registry=REGISTRY,
     )
@@ -110,6 +113,7 @@ def metrics():
         [
             'hostname',
             'instance_uuid',
+            'node_type',
         ],
         registry=REGISTRY,
     )
@@ -119,6 +123,7 @@ def metrics():
         [
             'hostname',
             'instance_uuid',
+            'node_type',
         ],
         registry=REGISTRY,
     )
@@ -169,8 +174,9 @@ def metrics():
 
     all_job_data = job_counts(None)
     statuses = all_job_data.get('status', {})
-    for status, value in statuses.items():
-        STATUS.labels(status=status).set(value)
+    states = set(dict(UnifiedJob.STATUS_CHOICES).keys()) - set(['new'])
+    for state in states:
+        STATUS.labels(status=state).set(statuses.get(state, 0))
 
     RUNNING_JOBS.set(current_counts['running_jobs'])
     PENDING_JOBS.set(current_counts['pending_jobs'])
@@ -178,12 +184,13 @@ def metrics():
     instance_data = instance_info(None, include_hostnames=True)
     for uuid, info in instance_data.items():
         hostname = info['hostname']
-        INSTANCE_CAPACITY.labels(hostname=hostname, instance_uuid=uuid).set(instance_data[uuid]['capacity'])
+        node_type = info['node_type']
+        INSTANCE_CAPACITY.labels(hostname=hostname, instance_uuid=uuid, node_type=node_type).set(instance_data[uuid]['capacity'])
         INSTANCE_CPU.labels(hostname=hostname, instance_uuid=uuid).set(instance_data[uuid]['cpu'])
         INSTANCE_MEMORY.labels(hostname=hostname, instance_uuid=uuid).set(instance_data[uuid]['memory'])
-        INSTANCE_CONSUMED_CAPACITY.labels(hostname=hostname, instance_uuid=uuid).set(instance_data[uuid]['consumed_capacity'])
-        INSTANCE_REMAINING_CAPACITY.labels(hostname=hostname, instance_uuid=uuid).set(instance_data[uuid]['remaining_capacity'])
-        INSTANCE_INFO.labels(hostname=hostname, instance_uuid=uuid).info(
+        INSTANCE_CONSUMED_CAPACITY.labels(hostname=hostname, instance_uuid=uuid, node_type=node_type).set(instance_data[uuid]['consumed_capacity'])
+        INSTANCE_REMAINING_CAPACITY.labels(hostname=hostname, instance_uuid=uuid, node_type=node_type).set(instance_data[uuid]['remaining_capacity'])
+        INSTANCE_INFO.labels(hostname=hostname, instance_uuid=uuid, node_type=node_type).info(
             {
                 'enabled': str(instance_data[uuid]['enabled']),
                 'managed_by_policy': str(instance_data[uuid]['managed_by_policy']),

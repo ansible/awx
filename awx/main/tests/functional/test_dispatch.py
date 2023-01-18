@@ -244,7 +244,7 @@ class TestAutoScaling:
         assert not self.pool.should_grow
         alive_pid = self.pool.workers[1].pid
         self.pool.workers[0].process.terminate()
-        time.sleep(1)  # wait a moment for sigterm
+        time.sleep(2)  # wait a moment for sigterm
 
         # clean up and the dead worker
         self.pool.cleanup()

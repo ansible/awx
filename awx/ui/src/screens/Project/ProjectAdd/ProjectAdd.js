@@ -18,9 +18,15 @@ function ProjectAdd() {
       // the API might throw an unexpected error if our creation request
       // has a zero-length string as its credential field. As a work-around,
       // normalize falsey credential fields by deleting them.
-      delete values.credential;
-    } else {
+      values.credential = null;
+    } else if (typeof values.credential.id === 'number') {
       values.credential = values.credential.id;
+    }
+    if (!values.signature_validation_credential) {
+      values.signature_validation_credential = null;
+    } else if (typeof values.signature_validation_credential.id === 'number') {
+      values.signature_validation_credential =
+        values.signature_validation_credential.id;
     }
     setFormSubmitError(null);
     try {

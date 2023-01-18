@@ -5,6 +5,7 @@
 import dateutil
 import functools
 import html
+import itertools
 import logging
 import re
 import requests
@@ -20,8 +21,10 @@ from urllib3.exceptions import ConnectTimeoutError
 # Django
 from django.conf import settings
 from django.core.exceptions import FieldError, ObjectDoesNotExist
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Count
 from django.db import IntegrityError, ProgrammingError, transaction, connection
+from django.db.models.fields.related import ManyToManyField, ForeignKey
+from django.db.models.functions import Trunc
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
@@ -46,9 +49,6 @@ from rest_framework import status
 from rest_framework_yaml.parsers import YAMLParser
 from rest_framework_yaml.renderers import YAMLRenderer
 
-# QSStats
-import qsstats
-
 # ANSIConv
 import ansiconv
 
@@ -68,7 +68,7 @@ from awx.api.generics import (
     APIView,
     BaseUsersList,
     CopyAPIView,
-    DeleteLastUnattachLabelMixin,
+    GenericCancelView,
     GenericAPIView,
     ListAPIView,
     ListCreateAPIView,
@@ -85,6 +85,7 @@ from awx.api.generics import (
     SubListCreateAttachDetachAPIView,
     SubListDestroyAPIView,
 )
+from awx.api.views.labels import LabelSubListCreateAttachDetachView
 from awx.api.versioning import reverse
 from awx.main import models
 from awx.main.utils import (
@@ -121,58 +122,8 @@ from awx.api.views.mixin import (
     UnifiedJobDeletionMixin,
     NoTruncateMixin,
 )
-from awx.api.views.organization import (  # noqa
-    OrganizationList,
-    OrganizationDetail,
-    OrganizationInventoriesList,
-    OrganizationUsersList,
-    OrganizationAdminsList,
-    OrganizationExecutionEnvironmentsList,
-    OrganizationProjectsList,
-    OrganizationJobTemplatesList,
-    OrganizationWorkflowJobTemplatesList,
-    OrganizationTeamsList,
-    OrganizationActivityStreamList,
-    OrganizationNotificationTemplatesList,
-    OrganizationNotificationTemplatesAnyList,
-    OrganizationNotificationTemplatesErrorList,
-    OrganizationNotificationTemplatesStartedList,
-    OrganizationNotificationTemplatesSuccessList,
-    OrganizationNotificationTemplatesApprovalList,
-    OrganizationInstanceGroupsList,
-    OrganizationGalaxyCredentialsList,
-    OrganizationAccessList,
-    OrganizationObjectRolesList,
-)
-from awx.api.views.inventory import (  # noqa
-    InventoryList,
-    InventoryDetail,
-    InventoryUpdateEventsList,
-    InventoryList,
-    InventoryDetail,
-    InventoryActivityStreamList,
-    InventoryInstanceGroupsList,
-    InventoryAccessList,
-    InventoryObjectRolesList,
-    InventoryJobTemplateList,
-    InventoryLabelList,
-    InventoryCopy,
-)
-from awx.api.views.mesh_visualizer import MeshVisualizer  # noqa
-from awx.api.views.root import (  # noqa
-    ApiRootView,
-    ApiOAuthAuthorizationRootView,
-    ApiVersionRootView,
-    ApiV2RootView,
-    ApiV2PingView,
-    ApiV2ConfigView,
-    ApiV2SubscriptionView,
-    ApiV2AttachView,
-)
-from awx.api.views.webhooks import WebhookKeyView, GithubWebhookReceiver, GitlabWebhookReceiver  # noqa
 from awx.api.pagination import UnifiedJobEventPagination
 from awx.main.utils import set_environ
-
 
 logger = logging.getLogger('awx.api.views')
 
@@ -331,34 +282,54 @@ class DashboardJobsGraphView(APIView):
             success_query = success_query.filter(instance_of=models.ProjectUpdate)
             failed_query = failed_query.filter(instance_of=models.ProjectUpdate)
 
-        success_qss = qsstats.QuerySetStats(success_query, 'finished')
-        failed_qss = qsstats.QuerySetStats(failed_query, 'finished')
-
-        start_date = now()
+        end = now()
+        interval = 'day'
         if period == 'month':
-            end_date = start_date - dateutil.relativedelta.relativedelta(months=1)
-            interval = 'days'
+            start = end - dateutil.relativedelta.relativedelta(months=1)
         elif period == 'two_weeks':
-            end_date = start_date - dateutil.relativedelta.relativedelta(weeks=2)
-            interval = 'days'
+            start = end - dateutil.relativedelta.relativedelta(weeks=2)
         elif period == 'week':
-            end_date = start_date - dateutil.relativedelta.relativedelta(weeks=1)
-            interval = 'days'
+            start = end - dateutil.relativedelta.relativedelta(weeks=1)
         elif period == 'day':
-            end_date = start_date - dateutil.relativedelta.relativedelta(days=1)
-            interval = 'hours'
+            start = end - dateutil.relativedelta.relativedelta(days=1)
+            interval = 'hour'
         else:
             return Response({'error': _('Unknown period "%s"') % str(period)}, status=status.HTTP_400_BAD_REQUEST)
 
         dashboard_data = {"jobs": {"successful": [], "failed": []}}
-        for element in success_qss.time_series(end_date, start_date, interval=interval):
-            dashboard_data['jobs']['successful'].append([time.mktime(element[0].timetuple()), element[1]])
-        for element in failed_qss.time_series(end_date, start_date, interval=interval):
-            dashboard_data['jobs']['failed'].append([time.mktime(element[0].timetuple()), element[1]])
+
+        succ_list = dashboard_data['jobs']['successful']
+        fail_list = dashboard_data['jobs']['failed']
+
+        qs_s = (
+            success_query.filter(finished__range=(start, end))
+            .annotate(d=Trunc('finished', interval, tzinfo=end.tzinfo))
+            .order_by()
+            .values('d')
+            .annotate(agg=Count('id', distinct=True))
+        )
+        data_s = {item['d']: item['agg'] for item in qs_s}
+        qs_f = (
+            failed_query.filter(finished__range=(start, end))
+            .annotate(d=Trunc('finished', interval, tzinfo=end.tzinfo))
+            .order_by()
+            .values('d')
+            .annotate(agg=Count('id', distinct=True))
+        )
+        data_f = {item['d']: item['agg'] for item in qs_f}
+
+        start_date = start.replace(hour=0, minute=0, second=0, microsecond=0)
+        for d in itertools.count():
+            date = start_date + dateutil.relativedelta.relativedelta(days=d)
+            if date > end:
+                break
+            succ_list.append([time.mktime(date.timetuple()), data_s.get(date, 0)])
+            fail_list.append([time.mktime(date.timetuple()), data_f.get(date, 0)])
+
         return Response(dashboard_data)
 
 
-class InstanceList(ListAPIView):
+class InstanceList(ListCreateAPIView):
 
     name = _("Instances")
     model = models.Instance
@@ -372,6 +343,13 @@ class InstanceDetail(RetrieveUpdateAPIView):
     name = _("Instance Detail")
     model = models.Instance
     serializer_class = serializers.InstanceSerializer
+
+    def update_raw_data(self, data):
+        # these fields are only valid on creation of an instance, so they unwanted on detail view
+        data.pop('listener_port', None)
+        data.pop('node_type', None)
+        data.pop('hostname', None)
+        return super(InstanceDetail, self).update_raw_data(data)
 
     def update(self, request, *args, **kwargs):
         r = super(InstanceDetail, self).update(request, *args, **kwargs)
@@ -395,6 +373,17 @@ class InstanceUnifiedJobsList(SubListAPIView):
         qs = get_user_queryset(self.request.user, models.UnifiedJob)
         qs = qs.filter(execution_node=po.hostname)
         return qs
+
+
+class InstancePeersList(SubListAPIView):
+
+    name = _("Instance Peers")
+    parent_model = models.Instance
+    model = models.Instance
+    serializer_class = serializers.InstanceSerializer
+    parent_access = 'read'
+    search_fields = {'hostname'}
+    relationship = 'peers'
 
 
 class InstanceInstanceGroupsList(InstanceGroupMembershipMixin, SubListCreateAttachDetachAPIView):
@@ -429,8 +418,8 @@ class InstanceHealthCheck(GenericAPIView):
     permission_classes = (IsSystemAdminOrAuditor,)
 
     def get_queryset(self):
+        return super().get_queryset().filter(node_type='execution')
         # FIXME: For now, we don't have a good way of checking the health of a hop node.
-        return super().get_queryset().exclude(node_type='hop')
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -439,40 +428,22 @@ class InstanceHealthCheck(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
+        if obj.health_check_pending:
+            return Response({'msg': f"Health check was already in progress for {obj.hostname}."}, status=status.HTTP_200_OK)
 
-        if obj.node_type == 'execution':
+        # Note: hop nodes are already excluded by the get_queryset method
+        obj.health_check_started = now()
+        obj.save(update_fields=['health_check_started'])
+        if obj.node_type == models.Instance.Types.EXECUTION:
             from awx.main.tasks.system import execution_node_health_check
 
-            runner_data = execution_node_health_check(obj.hostname)
-            obj.refresh_from_db()
-            data = self.get_serializer(data=request.data).to_representation(obj)
-            # Add in some extra unsaved fields
-            for extra_field in ('transmit_timing', 'run_timing'):
-                if extra_field in runner_data:
-                    data[extra_field] = runner_data[extra_field]
+            execution_node_health_check.apply_async([obj.hostname])
         else:
-            from awx.main.tasks.system import cluster_node_health_check
-
-            if settings.CLUSTER_HOST_ID == obj.hostname:
-                cluster_node_health_check(obj.hostname)
-            else:
-                cluster_node_health_check.apply_async([obj.hostname], queue=obj.hostname)
-                start_time = time.time()
-                prior_check_time = obj.last_health_check
-                while time.time() - start_time < 50.0:
-                    obj.refresh_from_db(fields=['last_health_check'])
-                    if obj.last_health_check != prior_check_time:
-                        break
-                    if time.time() - start_time < 1.0:
-                        time.sleep(0.1)
-                    else:
-                        time.sleep(1.0)
-                else:
-                    obj.mark_offline(errors=_('Health check initiated by user determined this instance to be unresponsive'))
-            obj.refresh_from_db()
-            data = self.get_serializer(data=request.data).to_representation(obj)
-
-        return Response(data, status=status.HTTP_200_OK)
+            return Response(
+                {"error": f"Cannot run a health check on instances of type {obj.node_type}.  Health checks can only be run on execution nodes."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response({'msg': f"Health check is running for {obj.hostname}."}, status=status.HTTP_200_OK)
 
 
 class InstanceGroupList(ListCreateAPIView):
@@ -615,6 +586,19 @@ class LaunchConfigCredentialsBase(SubListAttachDetachAPIView):
 class ScheduleCredentialsList(LaunchConfigCredentialsBase):
 
     parent_model = models.Schedule
+
+
+class ScheduleLabelsList(LabelSubListCreateAttachDetachView):
+
+    parent_model = models.Schedule
+
+
+class ScheduleInstanceGroupList(SubListAttachDetachAPIView):
+
+    model = models.InstanceGroup
+    serializer_class = serializers.InstanceGroupSerializer
+    parent_model = models.Schedule
+    relationship = 'instance_groups'
 
 
 class ScheduleUnifiedJobsList(SubListAPIView):
@@ -1020,19 +1004,10 @@ class SystemJobEventsList(SubListAPIView):
         return job.get_event_queryset()
 
 
-class ProjectUpdateCancel(RetrieveAPIView):
+class ProjectUpdateCancel(GenericCancelView):
 
     model = models.ProjectUpdate
-    obj_permission_type = 'cancel'
     serializer_class = serializers.ProjectUpdateCancelSerializer
-
-    def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.can_cancel:
-            obj.cancel()
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return self.http_method_not_allowed(request, *args, **kwargs)
 
 
 class ProjectUpdateNotificationsList(SubListAPIView):
@@ -2272,6 +2247,8 @@ class InventorySourceUpdateView(RetrieveAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
+        serializer = self.get_serializer(instance=obj, data=request.data)
+        serializer.is_valid(raise_exception=True)
         if obj.can_update:
             update = obj.update()
             if not update:
@@ -2306,19 +2283,10 @@ class InventoryUpdateCredentialsList(SubListAPIView):
     relationship = 'credentials'
 
 
-class InventoryUpdateCancel(RetrieveAPIView):
+class InventoryUpdateCancel(GenericCancelView):
 
     model = models.InventoryUpdate
-    obj_permission_type = 'cancel'
     serializer_class = serializers.InventoryUpdateCancelSerializer
-
-    def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.can_cancel:
-            obj.cancel()
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return self.http_method_not_allowed(request, *args, **kwargs)
 
 
 class InventoryUpdateNotificationsList(SubListAPIView):
@@ -2381,10 +2349,13 @@ class JobTemplateLaunch(RetrieveAPIView):
             for field, ask_field_name in modified_ask_mapping.items():
                 if not getattr(obj, ask_field_name):
                     data.pop(field, None)
-                elif field == 'inventory':
+                elif isinstance(getattr(obj.__class__, field).field, ForeignKey):
                     data[field] = getattrd(obj, "%s.%s" % (field, 'id'), None)
-                elif field == 'credentials':
-                    data[field] = [cred.id for cred in obj.credentials.all()]
+                elif isinstance(getattr(obj.__class__, field).field, ManyToManyField):
+                    if field == 'instance_groups':
+                        data[field] = []
+                        continue
+                    data[field] = [item.id for item in getattr(obj, field).all()]
                 else:
                     data[field] = getattr(obj, field)
         return data
@@ -2397,9 +2368,8 @@ class JobTemplateLaunch(RetrieveAPIView):
         """
         modern_data = data.copy()
 
-        id_fd = '{}_id'.format('inventory')
-        if 'inventory' not in modern_data and id_fd in modern_data:
-            modern_data['inventory'] = modern_data[id_fd]
+        if 'inventory' not in modern_data and 'inventory_id' in modern_data:
+            modern_data['inventory'] = modern_data['inventory_id']
 
         # credential passwords were historically provided as top-level attributes
         if 'credential_passwords' not in modern_data:
@@ -2719,28 +2689,9 @@ class JobTemplateCredentialsList(SubListCreateAttachDetachAPIView):
         return super(JobTemplateCredentialsList, self).is_valid_relation(parent, sub, created)
 
 
-class JobTemplateLabelList(DeleteLastUnattachLabelMixin, SubListCreateAttachDetachAPIView):
+class JobTemplateLabelList(LabelSubListCreateAttachDetachView):
 
-    model = models.Label
-    serializer_class = serializers.LabelSerializer
     parent_model = models.JobTemplate
-    relationship = 'labels'
-
-    def post(self, request, *args, **kwargs):
-        # If a label already exists in the database, attach it instead of erroring out
-        # that it already exists
-        if 'id' not in request.data and 'name' in request.data and 'organization' in request.data:
-            existing = models.Label.objects.filter(name=request.data['name'], organization_id=request.data['organization'])
-            if existing.exists():
-                existing = existing[0]
-                request.data['id'] = existing.id
-                del request.data['name']
-                del request.data['organization']
-        if models.Label.objects.filter(unifiedjobtemplate_labels=self.kwargs['pk']).count() > 100:
-            return Response(
-                dict(msg=_('Maximum number of labels for {} reached.'.format(self.parent_model._meta.verbose_name_raw))), status=status.HTTP_400_BAD_REQUEST
-            )
-        return super(JobTemplateLabelList, self).post(request, *args, **kwargs)
 
 
 class JobTemplateCallback(GenericAPIView):
@@ -2966,6 +2917,22 @@ class WorkflowJobNodeCredentialsList(SubListAPIView):
     relationship = 'credentials'
 
 
+class WorkflowJobNodeLabelsList(SubListAPIView):
+
+    model = models.Label
+    serializer_class = serializers.LabelSerializer
+    parent_model = models.WorkflowJobNode
+    relationship = 'labels'
+
+
+class WorkflowJobNodeInstanceGroupsList(SubListAttachDetachAPIView):
+
+    model = models.InstanceGroup
+    serializer_class = serializers.InstanceGroupSerializer
+    parent_model = models.WorkflowJobNode
+    relationship = 'instance_groups'
+
+
 class WorkflowJobTemplateNodeList(ListCreateAPIView):
 
     model = models.WorkflowJobTemplateNode
@@ -2982,6 +2949,19 @@ class WorkflowJobTemplateNodeDetail(RetrieveUpdateDestroyAPIView):
 class WorkflowJobTemplateNodeCredentialsList(LaunchConfigCredentialsBase):
 
     parent_model = models.WorkflowJobTemplateNode
+
+
+class WorkflowJobTemplateNodeLabelsList(LabelSubListCreateAttachDetachView):
+
+    parent_model = models.WorkflowJobTemplateNode
+
+
+class WorkflowJobTemplateNodeInstanceGroupsList(SubListAttachDetachAPIView):
+
+    model = models.InstanceGroup
+    serializer_class = serializers.InstanceGroupSerializer
+    parent_model = models.WorkflowJobTemplateNode
+    relationship = 'instance_groups'
 
 
 class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, SubListCreateAttachDetachAPIView):
@@ -3082,8 +3062,7 @@ class WorkflowJobNodeChildrenBaseList(SubListAPIView):
     search_fields = ('unified_job_template__name', 'unified_job_template__description')
 
     #
-    # Limit the set of WorkflowJobeNodes to the related nodes of specified by
-    #'relationship'
+    # Limit the set of WorkflowJobNodes to the related nodes of specified by self.relationship
     #
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -3196,13 +3175,17 @@ class WorkflowJobTemplateLaunch(RetrieveAPIView):
                 data['extra_vars'] = extra_vars
             modified_ask_mapping = models.WorkflowJobTemplate.get_ask_mapping()
             modified_ask_mapping.pop('extra_vars')
-            for field_name, ask_field_name in obj.get_ask_mapping().items():
+
+            for field, ask_field_name in modified_ask_mapping.items():
                 if not getattr(obj, ask_field_name):
-                    data.pop(field_name, None)
-                elif field_name == 'inventory':
-                    data[field_name] = getattrd(obj, "%s.%s" % (field_name, 'id'), None)
+                    data.pop(field, None)
+                elif isinstance(getattr(obj.__class__, field).field, ForeignKey):
+                    data[field] = getattrd(obj, "%s.%s" % (field, 'id'), None)
+                elif isinstance(getattr(obj.__class__, field).field, ManyToManyField):
+                    data[field] = [item.id for item in getattr(obj, field).all()]
                 else:
-                    data[field_name] = getattr(obj, field_name)
+                    data[field] = getattr(obj, field)
+
         return data
 
     def post(self, request, *args, **kwargs):
@@ -3381,20 +3364,15 @@ class WorkflowJobWorkflowNodesList(SubListAPIView):
         return super(WorkflowJobWorkflowNodesList, self).get_queryset().order_by('id')
 
 
-class WorkflowJobCancel(RetrieveAPIView):
+class WorkflowJobCancel(GenericCancelView):
 
     model = models.WorkflowJob
-    obj_permission_type = 'cancel'
     serializer_class = serializers.WorkflowJobCancelSerializer
 
     def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.can_cancel:
-            obj.cancel()
-            ScheduleWorkflowManager().schedule()
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return self.http_method_not_allowed(request, *args, **kwargs)
+        r = super().post(request, *args, **kwargs)
+        ScheduleWorkflowManager().schedule()
+        return r
 
 
 class WorkflowJobNotificationsList(SubListAPIView):
@@ -3550,19 +3528,10 @@ class JobActivityStreamList(SubListAPIView):
     search_fields = ('changes',)
 
 
-class JobCancel(RetrieveAPIView):
+class JobCancel(GenericCancelView):
 
     model = models.Job
-    obj_permission_type = 'cancel'
     serializer_class = serializers.JobCancelSerializer
-
-    def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.can_cancel:
-            obj.cancel()
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return self.http_method_not_allowed(request, *args, **kwargs)
 
 
 class JobRelaunch(RetrieveAPIView):
@@ -3689,15 +3658,21 @@ class JobCreateSchedule(RetrieveAPIView):
             extra_data=config.extra_data,
             survey_passwords=config.survey_passwords,
             inventory=config.inventory,
+            execution_environment=config.execution_environment,
             char_prompts=config.char_prompts,
             credentials=set(config.credentials.all()),
+            labels=set(config.labels.all()),
+            instance_groups=list(config.instance_groups.all()),
         )
         if not request.user.can_access(models.Schedule, 'add', schedule_data):
             raise PermissionDenied()
 
-        creds_list = schedule_data.pop('credentials')
+        related_fields = ('credentials', 'labels', 'instance_groups')
+        related = [schedule_data.pop(relationship) for relationship in related_fields]
         schedule = models.Schedule.objects.create(**schedule_data)
-        schedule.credentials.add(*creds_list)
+        for relationship, items in zip(related_fields, related):
+            for item in items:
+                getattr(schedule, relationship).add(item)
 
         data = serializers.ScheduleSerializer(schedule, context=self.get_serializer_context()).data
         data.serializer.instance = None  # hack to avoid permissions.py assuming this is Job model
@@ -4028,19 +4003,10 @@ class AdHocCommandDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
     serializer_class = serializers.AdHocCommandDetailSerializer
 
 
-class AdHocCommandCancel(RetrieveAPIView):
+class AdHocCommandCancel(GenericCancelView):
 
     model = models.AdHocCommand
-    obj_permission_type = 'cancel'
     serializer_class = serializers.AdHocCommandCancelSerializer
-
-    def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.can_cancel:
-            obj.cancel()
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return self.http_method_not_allowed(request, *args, **kwargs)
 
 
 class AdHocCommandRelaunch(GenericAPIView):
@@ -4176,19 +4142,10 @@ class SystemJobDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
     serializer_class = serializers.SystemJobSerializer
 
 
-class SystemJobCancel(RetrieveAPIView):
+class SystemJobCancel(GenericCancelView):
 
     model = models.SystemJob
-    obj_permission_type = 'cancel'
     serializer_class = serializers.SystemJobCancelSerializer
-
-    def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.can_cancel:
-            obj.cancel()
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return self.http_method_not_allowed(request, *args, **kwargs)
 
 
 class SystemJobNotificationsList(SubListAPIView):
@@ -4426,18 +4383,6 @@ class NotificationDetail(RetrieveAPIView):
 
     model = models.Notification
     serializer_class = serializers.NotificationSerializer
-
-
-class LabelList(ListCreateAPIView):
-
-    model = models.Label
-    serializer_class = serializers.LabelSerializer
-
-
-class LabelDetail(RetrieveUpdateAPIView):
-
-    model = models.Label
-    serializer_class = serializers.LabelSerializer
 
 
 class ActivityStreamList(SimpleListAPIView):

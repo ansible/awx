@@ -9,29 +9,31 @@ function JobTemplateAdd() {
   const [formSubmitError, setFormSubmitError] = useState(null);
   const history = useHistory();
 
-  const projectParams = {
-    project_id: null,
-    project_name: null,
+  const resourceParams = {
+    resource_id: null,
+    resource_name: null,
+    resource_type: null,
+    resource_kind: null,
   };
   history.location.search
     .replace(/^\?/, '')
     .split('&')
     .map((s) => s.split('='))
     .forEach(([key, val]) => {
-      if (!(key in projectParams)) {
+      if (!(key in resourceParams)) {
         return;
       }
-      projectParams[key] = decodeURIComponent(val);
+      resourceParams[key] = decodeURIComponent(val);
     });
 
-  let projectValues = null;
+  let resourceValues = null;
 
-  if (
-    Object.values(projectParams).filter((item) => item !== null).length === 2
-  ) {
-    projectValues = {
-      id: projectParams.project_id,
-      name: projectParams.project_name,
+  if (history.location.search.includes('resource_id' && 'resource_name')) {
+    resourceValues = {
+      id: resourceParams.resource_id,
+      name: resourceParams.resource_name,
+      type: resourceParams.resource_type,
+      kind: resourceParams.resource_kind, // refers to credential kind
     };
   }
 
@@ -122,7 +124,7 @@ function JobTemplateAdd() {
             handleCancel={handleCancel}
             handleSubmit={handleSubmit}
             submitError={formSubmitError}
-            projectValues={projectValues}
+            resourceValues={resourceValues}
             isOverrideDisabledLookup
           />
         </CardBody>

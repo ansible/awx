@@ -153,9 +153,6 @@ use_dev_supervisor.txt
 /sanity/
 /awx_collection_build/
 
-# Setup for metrics gathering
-tools/prometheus/prometheus.yml
-
 .idea/*
 *.unison.tmp
 *.#

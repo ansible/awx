@@ -1,0 +1,6 @@
+{
+    "SOCIAL_AUTH_OIDC_KEY": "awx_oidc_client",
+    "SOCIAL_AUTH_OIDC_SECRET": "7b1c3527-8702-4742-af69-2b74ee5742e8",
+    "SOCIAL_AUTH_OIDC_OIDC_ENDPOINT": "https://{{ oidc_reference | default(container_reference) }}:8443/auth/realms/awx",
+    "SOCIAL_AUTH_OIDC_VERIFY_SSL": "False"
+}

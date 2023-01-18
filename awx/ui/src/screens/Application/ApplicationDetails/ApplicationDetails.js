@@ -11,13 +11,14 @@ import { Detail, DetailList, UserDateDetail } from 'components/DetailList';
 import { ApplicationsAPI } from 'api';
 import DeleteButton from 'components/DeleteButton';
 import ErrorDetail from 'components/ErrorDetail';
-import applicationHelpTextStrings from '../shared/Application.helptext';
+import getApplicationHelpTextStrings from '../shared/Application.helptext';
 
 function ApplicationDetails({
   application,
   authorizationOptions,
   clientTypeOptions,
 }) {
+  const applicationHelpTextStrings = getApplicationHelpTextStrings();
   const history = useHistory();
   const {
     isLoading: deleteLoading,

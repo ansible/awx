@@ -63,7 +63,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
     an inventory source contains lists and hosts.
     """
 
-    FIELDS_TO_PRESERVE_AT_COPY = ['hosts', 'groups', 'instance_groups']
+    FIELDS_TO_PRESERVE_AT_COPY = ['hosts', 'groups', 'instance_groups', 'prevent_instance_group_fallback']
     KIND_CHOICES = [
         ('', _('Hosts have a direct link to this inventory.')),
         ('smart', _('Hosts for inventory generated using the host_filter property.')),
@@ -175,6 +175,16 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         related_name='inventory_labels',
         help_text=_('Labels associated with this inventory.'),
     )
+    prevent_instance_group_fallback = models.BooleanField(
+        default=False,
+        help_text=(
+            "If enabled, the inventory will prevent adding any organization "
+            "instance groups to the list of preferred instances groups to run "
+            "associated job templates on."
+            "If this setting is enabled and you provided an empty list, the global instance "
+            "groups will be applied."
+        ),
+    )
 
     def get_absolute_url(self, request=None):
         return reverse('api:inventory_detail', kwargs={'pk': self.pk}, request=request)
@@ -236,6 +246,25 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
             raise ParseError(_('Slice number must be 1 or higher.'))
         return (number, step)
 
+    def get_sliced_hosts(self, host_queryset, slice_number, slice_count):
+        """
+        Returns a slice of Hosts given a slice number and total slice count, or
+        the original queryset if slicing is not requested.
+
+        NOTE: If slicing is performed, this will return a List[Host] with the
+        resulting slice. If slicing is not performed it will return the
+        original queryset (not evaluating it or forcing it to a list). This
+        puts the burden on the caller to check the resulting type. This is
+        non-ideal because it's easy to get wrong, but I think the only way
+        around it is to force the queryset which has memory implications for
+        large inventories.
+        """
+
+        if slice_count > 1 and slice_number > 0:
+            offset = slice_number - 1
+            host_queryset = host_queryset[offset::slice_count]
+        return host_queryset
+
     def get_script_data(self, hostvars=False, towervars=False, show_all=False, slice_number=1, slice_count=1):
         hosts_kw = dict()
         if not show_all:
@@ -243,10 +272,8 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         fetch_fields = ['name', 'id', 'variables', 'inventory_id']
         if towervars:
             fetch_fields.append('enabled')
-        hosts = self.hosts.filter(**hosts_kw).order_by('name').only(*fetch_fields)
-        if slice_count > 1 and slice_number > 0:
-            offset = slice_number - 1
-            hosts = hosts[offset::slice_count]
+        host_queryset = self.hosts.filter(**hosts_kw).order_by('name').only(*fetch_fields)
+        hosts = self.get_sliced_hosts(host_queryset, slice_number, slice_count)
 
         data = dict()
         all_group = data.setdefault('all', dict())
@@ -539,17 +566,6 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
 
     # Use .job_host_summaries.all() to get jobs affecting this host.
     # Use .job_events.all() to get events affecting this host.
-
-    '''
-    We don't use timestamp, but we may in the future.
-    '''
-
-    def update_ansible_facts(self, module, facts, timestamp=None):
-        if module == "ansible":
-            self.ansible_facts.update(facts)
-        else:
-            self.ansible_facts[module] = facts
-        self.save()
 
     def get_effective_host_name(self):
         """
@@ -1187,6 +1203,14 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
         default=None,
         null=True,
     )
+    scm_revision = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        editable=False,
+        verbose_name=_('SCM Revision'),
+        help_text=_('The SCM Revision from the Project used for this inventory update.  Only applicable to inventories source from scm'),
+    )
 
     @property
     def is_container_group_task(self):
@@ -1256,15 +1280,19 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
 
     @property
     def preferred_instance_groups(self):
-        if self.inventory_source.inventory is not None and self.inventory_source.inventory.organization is not None:
-            organization_groups = [x for x in self.inventory_source.inventory.organization.instance_groups.all()]
-        else:
-            organization_groups = []
+        selected_groups = []
         if self.inventory_source.inventory is not None:
-            inventory_groups = [x for x in self.inventory_source.inventory.instance_groups.all()]
-        else:
-            inventory_groups = []
-        selected_groups = inventory_groups + organization_groups
+            # Add the inventory sources IG to the selected IGs first
+            for instance_group in self.inventory_source.inventory.instance_groups.all():
+                selected_groups.append(instance_group)
+            # If the inventory allows for fallback and we have an organization then also append the orgs IGs to the end of the list
+            if (
+                not getattr(self.inventory_source.inventory, 'prevent_instance_group_fallback', False)
+                and self.inventory_source.inventory.organization is not None
+            ):
+                for instance_group in self.inventory_source.inventory.organization.instance_groups.all():
+                    selected_groups.append(instance_group)
+
         if not selected_groups:
             return self.global_instance_groups
         return selected_groups

@@ -24,12 +24,10 @@ function WorkflowOutputNavigation({ relatedJobs, parentRef }) {
   const { id } = useParams();
 
   const relevantResults = relatedJobs.filter(
-    ({
-      job: jobId,
-      summary_fields: {
-        unified_job_template: { unified_job_type },
-      },
-    }) => jobId && `${jobId}` !== id && unified_job_type !== 'workflow_approval'
+    ({ job: jobId, summary_fields }) =>
+      jobId &&
+      `${jobId}` !== id &&
+      summary_fields.job.type !== 'workflow_approval'
   );
 
   const [isOpen, setIsOpen] = useState(false);
@@ -101,16 +99,14 @@ function WorkflowOutputNavigation({ relatedJobs, parentRef }) {
           {sortedJobs?.map((node) => (
             <SelectOption
               key={node.id}
-              to={`/jobs/${
-                JOB_URL_SEGMENT_MAP[
-                  node.summary_fields.unified_job_template.unified_job_type
-                ]
-              }/${node.summary_fields.job?.id}/output`}
+              to={`/jobs/${JOB_URL_SEGMENT_MAP[node.summary_fields.job.type]}/${
+                node.summary_fields.job?.id
+              }/output`}
               component={Link}
-              value={node.summary_fields.unified_job_template.name}
+              value={node.summary_fields.job.name}
             >
               {stringIsUUID(node.identifier)
-                ? node.summary_fields.unified_job_template.name
+                ? node.summary_fields.job.name
                 : node.identifier}
             </SelectOption>
           ))}

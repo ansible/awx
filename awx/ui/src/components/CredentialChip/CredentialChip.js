@@ -9,6 +9,8 @@ function CredentialChip({ credential, ...props }) {
   let type;
   if (credential.cloud) {
     type = t`Cloud`;
+  } else if (credential.kind === 'gpg_public_key') {
+    type = t`GPG Public Key`;
   } else if (credential.kind === 'aws' || credential.kind === 'ssh') {
     type = credential.kind.toUpperCase();
   } else {

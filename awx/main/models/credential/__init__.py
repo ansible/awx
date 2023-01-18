@@ -282,7 +282,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
                         return field['default']
                 if 'default' in kwargs:
                     return kwargs['default']
-                raise AttributeError
+                raise AttributeError(field_name)
         if field_name in self.inputs:
             return self.inputs[field_name]
         if 'default' in kwargs:
@@ -336,6 +336,7 @@ class CredentialType(CommonModelNameNotUnique):
         ('external', _('External')),
         ('kubernetes', _('Kubernetes')),
         ('galaxy', _('Galaxy/Automation Hub')),
+        ('cryptography', _('Cryptography')),
     )
 
     kind = models.CharField(max_length=32, choices=KIND_CHOICES)
@@ -1168,6 +1169,25 @@ ManagedCredentialType(
             },
         ],
         'required': ['url'],
+    },
+)
+
+ManagedCredentialType(
+    namespace='gpg_public_key',
+    kind='cryptography',
+    name=gettext_noop('GPG Public Key'),
+    inputs={
+        'fields': [
+            {
+                'id': 'gpg_public_key',
+                'label': gettext_noop('GPG Public Key'),
+                'type': 'string',
+                'secret': True,
+                'multiline': True,
+                'help_text': gettext_noop('GPG Public Key used to validate content signatures.'),
+            },
+        ],
+        'required': ['gpg_public_key'],
     },
 )
 

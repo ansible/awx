@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-
 import { t } from '@lingui/macro';
 import { withFormik, useField } from 'formik';
 import {
@@ -46,7 +45,7 @@ import LabelSelect from 'components/LabelSelect';
 import { VerbositySelectField } from 'components/VerbositySelectField';
 import PlaybookSelect from './PlaybookSelect';
 import WebhookSubForm from './WebhookSubForm';
-import helpText from './JobTemplate.helptext';
+import getHelpText from './JobTemplate.helptext';
 
 const { origin } = document.location;
 
@@ -60,6 +59,7 @@ function JobTemplateForm({
   validateField,
   isOverrideDisabledLookup, // TODO: this is a confusing variable name
 }) {
+  const helpText = getHelpText();
   const [contentError, setContentError] = useState(false);
   const [allowCallbacks, setAllowCallbacks] = useState(
     Boolean(template?.host_config_key)
@@ -86,6 +86,10 @@ function JobTemplateForm({
   const [credentialField, , credentialHelpers] = useField('credentials');
   const [labelsField, , labelsHelpers] = useField('labels');
   const [limitField, limitMeta, limitHelpers] = useField('limit');
+  const [forksField, forksMeta, forksHelpers] = useField('forks');
+  const [jobSliceCountField, jobSliceCountMeta, jobSliceCountHelpers] =
+    useField('job_slice_count');
+  const [timeoutField, timeoutMeta, timeoutHelpers] = useField('timeout');
   const [diffModeField, , diffModeHelpers] = useField('diff_mode');
   const [instanceGroupsField, , instanceGroupsHelpers] =
     useField('instanceGroups');
@@ -320,6 +324,9 @@ function JobTemplateForm({
           globallyAvailable
           isDisabled={!projectField.value?.id}
           projectId={projectField.value?.id}
+          promptId="template-ask-execution-environment-on-launch"
+          promptName="ask_execution_environment_on_launch"
+          isPromptableField
         />
 
         {projectField.value?.allow_override && (
@@ -375,10 +382,12 @@ function JobTemplateForm({
               onError={setContentError}
             />
           </FieldWithPrompt>
-          <FormGroup
-            label={t`Labels`}
-            labelIcon={<Popover content={helpText.labels} />}
+          <FieldWithPrompt
             fieldId="template-labels"
+            label={t`Labels`}
+            promptId="template-ask-labels-on-launch"
+            promptName="ask_labels_on_launch"
+            tooltip={helpText.labels}
           >
             <LabelSelect
               value={labelsField.value}
@@ -386,7 +395,7 @@ function JobTemplateForm({
               onError={setContentError}
               createText={t`Create`}
             />
-          </FormGroup>
+          </FieldWithPrompt>
           <VariablesField
             id="template-variables"
             name="extra_vars"
@@ -395,14 +404,26 @@ function JobTemplateForm({
             tooltip={helpText.variables}
           />
           <FormColumnLayout>
-            <FormField
-              id="template-forks"
-              name="forks"
-              type="number"
-              min="0"
+            <FieldWithPrompt
+              fieldId="template-forks"
               label={t`Forks`}
+              promptId="template-ask-forks-on-launch"
+              promptName="ask_forks_on_launch"
               tooltip={helpText.forks}
-            />
+            >
+              <TextInput
+                id="template-forks"
+                {...forksField}
+                validated={
+                  !forksMeta.touched || !forksMeta.error ? 'default' : 'error'
+                }
+                onChange={(value) => {
+                  forksHelpers.setValue(value);
+                }}
+                type="number"
+                min="0"
+              />
+            </FieldWithPrompt>
             <FieldWithPrompt
               fieldId="template-limit"
               label={t`Limit`}
@@ -427,22 +448,50 @@ function JobTemplateForm({
               promptName="ask_verbosity_on_launch"
               tooltip={helpText.verbosity}
             />
-            <FormField
-              id="template-job-slicing"
-              name="job_slice_count"
-              type="number"
-              min="1"
+            <FieldWithPrompt
+              fieldId="template-job-slicing"
               label={t`Job Slicing`}
+              promptId="template-ask-job-slicing-on-launch"
+              promptName="ask_job_slice_count_on_launch"
               tooltip={helpText.jobSlicing}
-            />
-            <FormField
-              id="template-timeout"
-              name="timeout"
-              type="number"
-              min="0"
+            >
+              <TextInput
+                id="template-job-slicing"
+                {...jobSliceCountField}
+                validated={
+                  !jobSliceCountMeta.touched || !jobSliceCountMeta.error
+                    ? 'default'
+                    : 'error'
+                }
+                onChange={(value) => {
+                  jobSliceCountHelpers.setValue(value);
+                }}
+                type="number"
+                min="1"
+              />
+            </FieldWithPrompt>
+            <FieldWithPrompt
+              fieldId="template-timeout"
               label={t`Timeout`}
+              promptId="template-ask-timeout-on-launch"
+              promptName="ask_timeout_on_launch"
               tooltip={helpText.timeout}
-            />
+            >
+              <TextInput
+                id="template-timeout"
+                {...timeoutField}
+                validated={
+                  !timeoutMeta.touched || !timeoutMeta.error
+                    ? 'default'
+                    : 'error'
+                }
+                onChange={(value) => {
+                  timeoutHelpers.setValue(value);
+                }}
+                type="number"
+                min="0"
+              />
+            </FieldWithPrompt>
             <FieldWithPrompt
               fieldId="template-diff-mode"
               label={t`Show Changes`}
@@ -463,6 +512,9 @@ function JobTemplateForm({
                 onChange={(value) => instanceGroupsHelpers.setValue(value)}
                 tooltip={helpText.instanceGroups}
                 fieldName="instanceGroups"
+                promptId="template-ask-instance-groups-on-launch"
+                promptName="ask_instance_groups_on_launch"
+                isPromptableField
               />
               <FieldWithPrompt
                 fieldId="template-tags"
@@ -544,6 +596,12 @@ function JobTemplateForm({
                     name="use_fact_cache"
                     label={t`Enable Fact Storage`}
                     tooltip={helpText.enableFactStorage}
+                  />
+                  <CheckboxField
+                    id="option-prevent-instance-group-fallback"
+                    name="prevent_instance_group_fallback"
+                    label={t`Prevent Instance Group Fallback`}
+                    tooltip={helpText.preventInstanceGroupFallback}
                   />
                 </FormCheckboxLayout>
               </FormGroup>
@@ -632,7 +690,7 @@ JobTemplateForm.defaultProps = {
 };
 
 const FormikApp = withFormik({
-  mapPropsToValues({ projectValues = {}, template = {} }) {
+  mapPropsToValues({ resourceValues = null, template = {} }) {
     const {
       summary_fields = {
         labels: { results: [] },
@@ -640,17 +698,26 @@ const FormikApp = withFormik({
       },
     } = template;
 
-    return {
+    const initialValues = {
       allow_callbacks: template.allow_callbacks || false,
       allow_simultaneous: template.allow_simultaneous || false,
       ask_credential_on_launch: template.ask_credential_on_launch || false,
       ask_diff_mode_on_launch: template.ask_diff_mode_on_launch || false,
+      ask_execution_environment_on_launch:
+        template.ask_execution_environment_on_launch || false,
+      ask_forks_on_launch: template.ask_forks_on_launch || false,
+      ask_instance_groups_on_launch:
+        template.ask_instance_groups_on_launch || false,
       ask_inventory_on_launch: template.ask_inventory_on_launch || false,
+      ask_job_slice_count_on_launch:
+        template.ask_job_slice_count_on_launch || false,
       ask_job_type_on_launch: template.ask_job_type_on_launch || false,
+      ask_labels_on_launch: template.ask_labels_on_launch || false,
       ask_limit_on_launch: template.ask_limit_on_launch || false,
       ask_scm_branch_on_launch: template.ask_scm_branch_on_launch || false,
       ask_skip_tags_on_launch: template.ask_skip_tags_on_launch || false,
       ask_tags_on_launch: template.ask_tags_on_launch || false,
+      ask_timeout_on_launch: template.ask_timeout_on_launch || false,
       ask_variables_on_launch: template.ask_variables_on_launch || false,
       ask_verbosity_on_launch: template.ask_verbosity_on_launch || false,
       become_enabled: template.become_enabled || false,
@@ -670,7 +737,9 @@ const FormikApp = withFormik({
       limit: template.limit || '',
       name: template.name || '',
       playbook: template.playbook || '',
-      project: summary_fields?.project || projectValues || null,
+      prevent_instance_group_fallback:
+        template.prevent_instance_group_fallback || false,
+      project: summary_fields?.project || null,
       scm_branch: template.scm_branch || '',
       skip_tags: template.skip_tags || '',
       timeout: template.timeout || 0,
@@ -687,6 +756,24 @@ const FormikApp = withFormik({
       execution_environment:
         template.summary_fields?.execution_environment || null,
     };
+    if (resourceValues !== null) {
+      if (resourceValues.type === 'credentials') {
+        initialValues[resourceValues.type] = [
+          {
+            id: parseInt(resourceValues.id, 10),
+            name: resourceValues.name,
+            kind: resourceValues.kind,
+          },
+        ];
+      } else {
+        initialValues[resourceValues.type] = {
+          id: parseInt(resourceValues.id, 10),
+          name: resourceValues.name,
+        };
+      }
+    }
+
+    return initialValues;
   },
   handleSubmit: async (values, { props, setErrors }) => {
     try {

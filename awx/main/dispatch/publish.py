@@ -1,14 +1,13 @@
 import inspect
 import logging
-import sys
 import json
 import time
 from uuid import uuid4
 
-from django.conf import settings
 from django_guid import get_guid
 
 from . import pg_bus_conn
+from awx.main.utils import is_testing
 
 logger = logging.getLogger('awx.main.dispatch')
 
@@ -93,7 +92,7 @@ class task:
                 obj.update(**kw)
                 if callable(queue):
                     queue = queue()
-                if not settings.IS_TESTING(sys.argv):
+                if not is_testing():
                     with pg_bus_conn() as conn:
                         conn.notify(queue, json.dumps(obj))
                 return (obj, queue)

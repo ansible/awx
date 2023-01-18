@@ -1,0 +1,20 @@
+#jinja2: lstrip_blocks: True
+---
+global:
+  scrape_interval: {{ scrape_interval }}  # Set the scrape interval to something faster. Default is every 1 minute.
+
+scrape_configs:
+  - job_name: 'awx'
+    static_configs:
+    - targets:
+      # metrics are broadcast to all nodes in the cluster,
+      # so no need to track nodes individually.
+      - awx1:8013
+    metrics_path: /api/v2/metrics
+    scrape_interval: {{ scrape_interval }}
+    scheme: http
+    params:
+      format: ['txt']
+    basic_auth:
+      username: admin
+      password: {{ admin_password }}

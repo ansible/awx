@@ -18,6 +18,7 @@
 # galaxy_task_env: environment variables to use specifically for ansible-galaxy commands
 # awx_version: Current running version of the awx or tower as a string
 # awx_license_type: "open" for AWX; else presume Tower
+# gpg_pubkey: the GPG public key to use for validation, when enabled
 
 - hosts: localhost
   gather_facts: false
@@ -152,6 +153,26 @@
         - update_svn
         - update_insights
         - update_archive
+
+- hosts: localhost
+  gather_facts: false
+  connection: local
+  name: Perform project signature/checksum verification
+  tasks:
+    - name: Verify project content using GPG signature
+      verify_project:
+        project_path: "{{ project_path | quote }}"
+        validation_type: gpg
+        gpg_pubkey: "{{ gpg_pubkey }}"
+      tags:
+        - validation_gpg_public_key
+
+    - name: Verify project content against checksum manifest
+      verify_project:
+        project_path: "{{ project_path | quote }}"
+        validation_type: checksum_manifest
+      tags:
+        - validation_checksum_manifest
 
 - hosts: localhost
   gather_facts: false

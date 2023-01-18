@@ -6,6 +6,7 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
+import { createMemoryHistory } from 'history';
 import MultiCredentialsLookup from './MultiCredentialsLookup';
 
 jest.mock('../../api');
@@ -226,6 +227,53 @@ describe('<Formik><MultiCredentialsLookup /></Formik>', () => {
         label: 'New Cred',
       },
     ]);
+  });
+
+  test('should reset query params (credentials.page) when selected credential type is changed', async () => {
+    const history = createMemoryHistory({
+      initialEntries: ['?credentials.page=2'],
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Formik>
+          <MultiCredentialsLookup
+            value={credentials}
+            tooltip="This is credentials look up"
+            onChange={() => {}}
+            onError={() => {}}
+          />
+        </Formik>,
+        {
+          context: { router: { history } },
+        }
+      );
+    });
+    const searchButton = await waitForElement(
+      wrapper,
+      'Button[aria-label="Search"]'
+    );
+    await act(async () => {
+      searchButton.invoke('onClick')();
+    });
+    expect(CredentialsAPI.read).toHaveBeenCalledWith({
+      credential_type: 400,
+      order_by: 'name',
+      page: 2,
+      page_size: 5,
+    });
+
+    const select = await waitForElement(wrapper, 'AnsibleSelect');
+    await act(async () => {
+      select.invoke('onChange')({}, 500);
+    });
+    wrapper.update();
+
+    expect(CredentialsAPI.read).toHaveBeenCalledWith({
+      credential_type: 500,
+      order_by: 'name',
+      page: 1,
+      page_size: 5,
+    });
   });
 
   test('should only add 1 credential per credential type except vault(see below)', async () => {

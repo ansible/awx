@@ -3,7 +3,12 @@ import { Plural, t } from '@lingui/macro';
 import { Button, DropdownItem, Tooltip } from '@patternfly/react-core';
 import { useKebabifiedMenu } from 'contexts/Kebabified';
 
-function HealthCheckButton({ isDisabled, onClick, selectedItems }) {
+function HealthCheckButton({
+  isDisabled,
+  onClick,
+  selectedItems,
+  healthCheckPending,
+}) {
   const { isKebabified } = useKebabifiedMenu();
 
   const selectedItemsCount = selectedItems.length;
@@ -28,8 +33,10 @@ function HealthCheckButton({ isDisabled, onClick, selectedItems }) {
           component="button"
           onClick={onClick}
           ouiaId="health-check"
+          isLoading={healthCheckPending}
+          spinnerAriaLabel={t`Running health check`}
         >
-          {t`Run health check`}
+          {healthCheckPending ? t`Running health check` : t`Run health check`}
         </DropdownItem>
       </Tooltip>
     );
@@ -42,7 +49,11 @@ function HealthCheckButton({ isDisabled, onClick, selectedItems }) {
           variant="secondary"
           ouiaId="health-check"
           onClick={onClick}
-        >{t`Run health check`}</Button>
+          isLoading={healthCheckPending}
+          spinnerAriaLabel={t`Running health check`}
+        >
+          {healthCheckPending ? t`Running health check` : t`Run health check`}
+        </Button>
       </div>
     </Tooltip>
   );

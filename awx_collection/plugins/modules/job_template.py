@@ -84,7 +84,7 @@ options:
       type: str
     execution_environment:
       description:
-        - Execution Environment to use for the JT.
+        - Execution Environment to use for the job template.
       type: str
     custom_virtualenv:
       description:
@@ -208,6 +208,42 @@ options:
       type: bool
       aliases:
         - ask_credential
+    ask_execution_environment_on_launch:
+      description:
+        - Prompt user for execution environment on launch.
+      type: bool
+      aliases:
+        - ask_execution_environment
+    ask_forks_on_launch:
+      description:
+        - Prompt user for forks on launch.
+      type: bool
+      aliases:
+        - ask_forks
+    ask_instance_groups_on_launch:
+      description:
+        - Prompt user for instance groups on launch.
+      type: bool
+      aliases:
+        - ask_instance_groups
+    ask_job_slice_count_on_launch:
+      description:
+        - Prompt user for job slice count on launch.
+      type: bool
+      aliases:
+        - ask_job_slice_count
+    ask_labels_on_launch:
+      description:
+        - Prompt user for labels on launch.
+      type: bool
+      aliases:
+        - ask_labels
+    ask_timeout_on_launch:
+      description:
+        - Prompt user for timeout on launch.
+      type: bool
+      aliases:
+        - ask_timeout
     survey_enabled:
       description:
         - Enable a survey on the job template.
@@ -230,6 +266,7 @@ options:
       description:
         - Maximum time in seconds to wait for a job to finish (server-side).
       type: int
+      default: 0
     job_slice_count:
       description:
         - The number of jobs to slice into at runtime. Will cause the Job Template to launch a workflow if value is greater than 1.
@@ -251,7 +288,6 @@ options:
       description:
         - Branch to use in job run. Project default used if blank. Only allowed if project allow_override field is set to true.
       type: str
-      default: ''
     labels:
       description:
         - The labels applied to this job template
@@ -279,6 +315,10 @@ options:
         - list of notifications to send on error
       type: list
       elements: str
+    prevent_instance_group_fallback:
+      description:
+        - Prevent falling back to instance groups set on the associated inventory or organization
+      type: bool
 
 extends_documentation_fragment: awx.awx.auth
 
@@ -385,6 +425,12 @@ def main():
         ask_verbosity_on_launch=dict(type='bool', aliases=['ask_verbosity']),
         ask_inventory_on_launch=dict(type='bool', aliases=['ask_inventory']),
         ask_credential_on_launch=dict(type='bool', aliases=['ask_credential']),
+        ask_execution_environment_on_launch=dict(type='bool', aliases=['ask_execution_environment']),
+        ask_forks_on_launch=dict(type='bool', aliases=['ask_forks']),
+        ask_instance_groups_on_launch=dict(type='bool', aliases=['ask_instance_groups']),
+        ask_job_slice_count_on_launch=dict(type='bool', aliases=['ask_job_slice_count']),
+        ask_labels_on_launch=dict(type='bool', aliases=['ask_labels']),
+        ask_timeout_on_launch=dict(type='bool', aliases=['ask_timeout']),
         survey_enabled=dict(type='bool'),
         survey_spec=dict(type="dict"),
         become_enabled=dict(type='bool'),
@@ -399,6 +445,7 @@ def main():
         notification_templates_started=dict(type="list", elements='str'),
         notification_templates_success=dict(type="list", elements='str'),
         notification_templates_error=dict(type="list", elements='str'),
+        prevent_instance_group_fallback=dict(type="bool"),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
@@ -484,6 +531,12 @@ def main():
         'ask_verbosity_on_launch',
         'ask_inventory_on_launch',
         'ask_credential_on_launch',
+        'ask_execution_environment_on_launch',
+        'ask_forks_on_launch',
+        'ask_instance_groups_on_launch',
+        'ask_job_slice_count_on_launch',
+        'ask_labels_on_launch',
+        'ask_timeout_on_launch',
         'survey_enabled',
         'become_enabled',
         'diff_mode',
@@ -491,6 +544,7 @@ def main():
         'custom_virtualenv',
         'job_slice_count',
         'webhook_service',
+        'prevent_instance_group_fallback',
     ):
         field_val = module.params.get(field_name)
         if field_val is not None:

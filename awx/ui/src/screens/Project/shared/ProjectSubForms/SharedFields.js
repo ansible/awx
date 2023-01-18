@@ -7,7 +7,7 @@ import CredentialLookup from 'components/Lookup/CredentialLookup';
 import FormField, { CheckboxField } from 'components/FormField';
 import { required } from 'util/validators';
 import { FormCheckboxLayout, FormFullWidthLayout } from 'components/FormLayout';
-import projectHelpStrings from '../Project.helptext';
+import getProjectHelpStrings from '../Project.helptext';
 
 export const UrlFormField = ({ tooltip }) => (
   <FormField
@@ -22,15 +22,18 @@ export const UrlFormField = ({ tooltip }) => (
   />
 );
 
-export const BranchFormField = ({ label }) => (
-  <FormField
-    id="project-scm-branch"
-    name="scm_branch"
-    type="text"
-    label={label}
-    tooltip={projectHelpStrings.branchFormField}
-  />
-);
+export const BranchFormField = ({ label }) => {
+  const projectHelpStrings = getProjectHelpStrings();
+  return (
+    <FormField
+      id="project-scm-branch"
+      name="scm_branch"
+      type="text"
+      label={label}
+      tooltip={projectHelpStrings.branchFormField}
+    />
+  );
+};
 
 export const ScmCredentialFormField = ({
   credential,
@@ -59,6 +62,7 @@ export const ScmCredentialFormField = ({
 
 export const ScmTypeOptions = ({ scmUpdateOnLaunch, hideAllowOverride }) => {
   const { values } = useFormikContext();
+  const projectHelpStrings = getProjectHelpStrings();
 
   return (
     <FormFullWidthLayout>

@@ -29,7 +29,7 @@ import { VERBOSITY } from 'components/VerbositySelectField';
 import { getJobModel, isJobRunning } from 'util/jobs';
 import { formatDateString } from 'util/dates';
 import { Job } from 'types';
-import jobHelpText from '../Job.helptext';
+import getJobHelpText from '../Job.helptext';
 
 const StatusDetailValue = styled.div`
   align-items: center;
@@ -39,6 +39,7 @@ const StatusDetailValue = styled.div`
 `;
 
 function JobDetail({ job, inventorySourceLabels }) {
+  const jobHelpText = getJobHelpText();
   const { me } = useConfig();
   const {
     created_by,
@@ -146,27 +147,48 @@ function JobDetail({ job, inventorySourceLabels }) {
 
   const renderProjectDetail = () => {
     if (
-      job.type !== 'ad_hoc_command' &&
-      job.type !== 'inventory_update' &&
-      job.type !== 'system_job' &&
-      job.type !== 'workflow_job'
+      (job.type !== 'ad_hoc_command' &&
+        job.type !== 'inventory_update' &&
+        job.type !== 'system_job' &&
+        job.type !== 'workflow_job') ||
+      source_project
     ) {
-      return project ? (
+      const projectDetailsLink = `/projects/${
+        project ? project?.id : source_project?.id
+      }/details`;
+
+      const jobLink = `/jobs/project/${
+        project ? projectUpdate?.id : job.source_project_update
+      }`;
+
+      let projectName = '';
+      if (project?.name || source_project?.name) {
+        projectName = project ? project.name : source_project.name;
+      }
+      return project || inventory_source ? (
         <>
           <Detail
             dataCy="job-project"
-            label={t`Project`}
-            helpText={jobHelpText.project}
-            value={<Link to={`/projects/${project.id}`}>{project.name}</Link>}
+            label={project ? t`Project` : t`Source`}
+            helpText={
+              project ? jobHelpText.project : jobHelpText.project_source
+            }
+            value={<Link to={`${projectDetailsLink}`}>{projectName}</Link>}
           />
           <Detail
             dataCy="job-project-status"
             label={t`Project Update Status`}
             helpText={jobHelpText.projectUpdate}
             value={
-              projectUpdate ? (
-                <Link to={`/jobs/project/${projectUpdate.id}`}>
-                  <StatusLabel status={projectUpdate.status} />
+              projectUpdate || job.source_project_update ? (
+                <Link to={`${jobLink}`}>
+                  <StatusLabel
+                    status={
+                      projectUpdate
+                        ? projectUpdate.status
+                        : source_project.status
+                    }
+                  />
                 </Link>
               ) : null
             }
@@ -189,9 +211,7 @@ function JobDetail({ job, inventorySourceLabels }) {
           value={
             <StatusDetailValue>
               {job.status && <StatusLabel status={job.status} />}
-              {job.job_explanation && job.job_explanation !== job.status
-                ? job.job_explanation
-                : null}
+              {job?.job_explanation !== job.status ? job.job_explanation : null}
             </StatusDetailValue>
           }
         />
@@ -268,31 +288,17 @@ function JobDetail({ job, inventorySourceLabels }) {
                 </Link>
               }
             />
-            <Detail
-              dataCy="job-inventory-source-type"
-              label={t`Source`}
-              value={inventorySourceLabels.map(([string, label]) =>
-                string === job.source ? label : null
-              )}
-              isEmpty={inventorySourceLabels.length === 0}
-            />
-          </>
-        )}
-        {inventory_source && inventory_source.source === 'scm' && (
-          <Detail
-            dataCy="job-inventory-source-project"
-            label={t`Inventory Source Project`}
-            value={
-              <StatusDetailValue>
-                {source_project.status && (
-                  <StatusLabel status={source_project.status} />
+            {!source_project && (
+              <Detail
+                dataCy="job-inventory-source-type"
+                label={t`Source`}
+                value={inventorySourceLabels.map(([string, label]) =>
+                  string === job.source ? label : null
                 )}
-                <Link to={`/projects/${source_project.id}`}>
-                  {source_project.name}
-                </Link>
-              </StatusDetailValue>
-            }
-          />
+                isEmpty={inventorySourceLabels.length === 0}
+              />
+            )}
+          </>
         )}
         {renderProjectDetail()}
         {scmBranch && (
@@ -383,6 +389,16 @@ function JobDetail({ job, inventorySourceLabels }) {
             label={t`Forks`}
             value={`${job.forks}`}
             helpText={jobHelpText.forks}
+          />
+        )}
+        {typeof job.timeout === 'number' && (
+          <Detail
+            dataCy="timeout"
+            label={t`Timeout`}
+            value={
+              job.timeout ? t`${job.timeout} seconds` : t`No timeout specified`
+            }
+            helpText={jobHelpText.timeout}
           />
         )}
         {credential && (

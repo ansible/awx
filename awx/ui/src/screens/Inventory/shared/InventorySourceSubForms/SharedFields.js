@@ -9,25 +9,29 @@ import { VariablesField } from 'components/CodeEditor';
 import FormField, { CheckboxField } from 'components/FormField';
 import { FormFullWidthLayout, FormCheckboxLayout } from 'components/FormLayout';
 import Popover from 'components/Popover';
-import helpText from '../Inventory.helptext';
+import getHelpText from '../Inventory.helptext';
 
-export const SourceVarsField = ({ popoverContent }) => (
-  <FormFullWidthLayout>
-    <VariablesField
-      id="source_vars"
-      name="source_vars"
-      label={t`Source variables`}
-      tooltip={
-        <>
-          {popoverContent}
-          {helpText.variables()}
-        </>
-      }
-    />
-  </FormFullWidthLayout>
-);
+export const SourceVarsField = ({ popoverContent }) => {
+  const helpText = getHelpText();
+  return (
+    <FormFullWidthLayout>
+      <VariablesField
+        id="source_vars"
+        name="source_vars"
+        label={t`Source variables`}
+        tooltip={
+          <>
+            {popoverContent}
+            {helpText.variables()}
+          </>
+        }
+      />
+    </FormFullWidthLayout>
+  );
+};
 
 export const VerbosityField = () => {
+  const helpText = getHelpText();
   const [field, meta, helpers] = useField('verbosity');
   const isValid = !(meta.touched && meta.error);
   const options = [
@@ -54,6 +58,7 @@ export const VerbosityField = () => {
 };
 
 export const OptionsField = () => {
+  const helpText = getHelpText();
   const [updateOnLaunchField] = useField('update_on_launch');
   const [, , updateCacheTimeoutHelper] = useField('update_cache_timeout');
   const [projectField] = useField('source_project');
@@ -106,33 +111,42 @@ export const OptionsField = () => {
   );
 };
 
-export const EnabledVarField = () => (
-  <FormField
-    id="inventory-enabled-var"
-    label={t`Enabled Variable`}
-    tooltip={helpText.enabledVariableField}
-    name="enabled_var"
-    type="text"
-  />
-);
+export const EnabledVarField = () => {
+  const helpText = getHelpText();
+  return (
+    <FormField
+      id="inventory-enabled-var"
+      label={t`Enabled Variable`}
+      tooltip={helpText.enabledVariableField}
+      name="enabled_var"
+      type="text"
+    />
+  );
+};
 
-export const EnabledValueField = () => (
-  <FormField
-    id="inventory-enabled-value"
-    label={t`Enabled Value`}
-    tooltip={helpText.enabledValue}
-    name="enabled_value"
-    type="text"
-  />
-);
+export const EnabledValueField = () => {
+  const helpText = getHelpText();
+  return (
+    <FormField
+      id="inventory-enabled-value"
+      label={t`Enabled Value`}
+      tooltip={helpText.enabledValue}
+      name="enabled_value"
+      type="text"
+    />
+  );
+};
 
-export const HostFilterField = () => (
-  <FormField
-    id="host-filter"
-    label={t`Host Filter`}
-    tooltip={helpText.hostFilter}
-    name="host_filter"
-    type="text"
-    validate={regExp()}
-  />
-);
+export const HostFilterField = () => {
+  const helpText = getHelpText();
+  return (
+    <FormField
+      id="host-filter"
+      label={t`Host Filter`}
+      tooltip={helpText.hostFilter}
+      name="host_filter"
+      type="text"
+      validate={regExp()}
+    />
+  );
+};

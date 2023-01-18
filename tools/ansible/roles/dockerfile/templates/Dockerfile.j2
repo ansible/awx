@@ -46,6 +46,13 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
 
 RUN pip3 install virtualenv build
 
+{% if image_architecture == 'ppc64le'  %}
+    RUN dnf -y update && dnf install -y wget && \
+    wget https://static.rust-lang.org/dist/rust-1.41.0-powerpc64le-unknown-linux-gnu.tar.gz && \
+    tar -zxvf rust-1.41.0-powerpc64le-unknown-linux-gnu.tar.gz && \
+    cd rust-1.41.0-powerpc64le-unknown-linux-gnu && \
+    sh install.sh ;
+{% endif %}
 
 # Install & build requirements
 ADD Makefile /tmp/Makefile
@@ -101,6 +108,7 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     glibc-langpack-en \
     krb5-workstation \
     nginx \
+    "openldap >= 2.6.2-3" \
     postgresql \
     python3-devel \
     python3-libselinux \
@@ -108,7 +116,7 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     python3-psycopg2 \
     python3-setuptools \
     rsync \
-    "rsyslog >= 8.1911.0" \
+    rsyslog-8.2102.0-106.el9 \
     subversion \
     sudo \
     vim-minimal \
@@ -116,10 +124,6 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     unzip \
     xmlsec1-openssl && \
     dnf -y clean all
-
-RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 && \
-    chmod 700 get_helm.sh && \
-    ./get_helm.sh
 
 RUN pip3 install virtualenv supervisor dumb-init
 
@@ -269,7 +273,8 @@ RUN for dir in \
       /var/lib/shared/vfs-layers/layers.lock \
       /var/run/nginx.pid \
       /var/lib/awx/venv/awx/lib/python3.9/site-packages/awx.egg-link ; \
-    do touch $file ; chmod g+rw $file ; done
+    do touch $file ; chmod g+rw $file ; done && \
+    echo "\setenv PAGER 'less -SXF'" > /var/lib/awx/.psqlrc
 {% endif %}
 
 {% if not build_dev|bool %}

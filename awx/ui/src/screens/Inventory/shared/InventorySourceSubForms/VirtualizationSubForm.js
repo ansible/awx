@@ -13,9 +13,10 @@ import {
   HostFilterField,
   SourceVarsField,
 } from './SharedFields';
-import helpText from '../Inventory.helptext';
+import getHelpText from '../Inventory.helptext';
 
 const VirtualizationSubForm = ({ autoPopulateCredential }) => {
+  const helpText = getHelpText();
   const { setFieldValue, setFieldTouched } = useFormikContext();
   const [credentialField, credentialMeta, credentialHelpers] =
     useField('credential');
