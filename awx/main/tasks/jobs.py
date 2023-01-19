@@ -315,17 +315,22 @@ class BaseTask(object):
 
         return env
 
+    def write_inventory_file(self, inventory, private_data_dir, file_name, script_params):
+        script_data = inventory.get_script_data(**script_params)
+        for hostname, hv in script_data.get('_meta', {}).get('hostvars', {}).items():
+            # maintain a list of host_name --> host_id
+            # so we can associate emitted events to Host objects
+            self.runner_callback.host_map[hostname] = hv.pop('remote_tower_id', '')
+        file_content = '#! /usr/bin/env python3\n# -*- coding: utf-8 -*-\nprint(%r)\n' % json.dumps(script_data)
+        return self.write_private_data_file(private_data_dir, file_name, file_content, sub_dir='inventory', file_permissions=0o700)
+
     def build_inventory(self, instance, private_data_dir):
         script_params = dict(hostvars=True, towervars=True)
         if hasattr(instance, 'job_slice_number'):
             script_params['slice_number'] = instance.job_slice_number
             script_params['slice_count'] = instance.job_slice_count
-        script_data = instance.inventory.get_script_data(**script_params)
-        # maintain a list of host_name --> host_id
-        # so we can associate emitted events to Host objects
-        self.runner_callback.host_map = {hostname: hv.pop('remote_tower_id', '') for hostname, hv in script_data.get('_meta', {}).get('hostvars', {}).items()}
-        file_content = '#! /usr/bin/env python3\n# -*- coding: utf-8 -*-\nprint(%r)\n' % json.dumps(script_data)
-        return self.write_private_data_file(private_data_dir, 'hosts', file_content, sub_dir='inventory', file_permissions=0o700)
+
+        return self.write_inventory_file(instance.inventory, private_data_dir, 'hosts', script_params)
 
     def build_args(self, instance, private_data_dir, passwords):
         raise NotImplementedError
@@ -1466,8 +1471,6 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
 
         if injector is not None:
             env = injector.build_env(inventory_update, env, private_data_dir, private_data_files)
-            # All CLOUD_PROVIDERS sources implement as inventory plugin from collection
-            env['ANSIBLE_INVENTORY_ENABLED'] = 'auto'
 
         if inventory_update.source == 'scm':
             for env_k in inventory_update.source_vars_dict:
@@ -1519,6 +1522,15 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
             raise RuntimeError('Inventory Source is not associated with an Inventory.')
 
         args = ['ansible-inventory', '--list', '--export']
+
+        # special case for constructed inventories, we pass source inventories from database
+        # these must come in order, and in order _before_ the constructed inventory itself
+        if inventory_update.inventory.kind == 'constructed':
+            for source_inventory in inventory_update.inventory.source_inventories.all():
+                args.append('-i')
+                script_params = dict(hostvars=True, towervars=True)
+                source_inv_path = self.write_inventory_file(source_inventory, private_data_dir, f'hosts_{source_inventory.id}', script_params)
+                args.append(to_container_path(source_inv_path, private_data_dir))
 
         # Add arguments for the source inventory file/script/thing
         rel_path = self.pseudo_build_inventory(inventory_update, private_data_dir)
