@@ -79,4 +79,14 @@ class Migration(migrations.Migration):
                 max_length=32,
             ),
         ),
+        migrations.AddField(
+            model_name='inventorysource',
+            name='limit',
+            field=models.TextField(blank=True, default='', help_text='Enter host, group or pattern match'),
+        ),
+        migrations.AddField(
+            model_name='inventoryupdate',
+            name='limit',
+            field=models.TextField(blank=True, default='', help_text='Enter host, group or pattern match'),
+        ),
     ]
