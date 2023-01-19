@@ -1,7 +1,6 @@
 import logging
 
 from django.core.management.base import BaseCommand
-from django.conf import settings
 from django.core.cache import cache
 from awx.main.dispatch import pg_bus_conn
 from awx.conf import settings_registry
