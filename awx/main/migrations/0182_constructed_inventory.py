@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0174_ensure_org_ee_admin_roles'),
+        ('main', '0181_hostmetricsummarymonthly'),
     ]
 
     operations = [
@@ -88,5 +88,23 @@ class Migration(migrations.Migration):
             model_name='inventoryupdate',
             name='limit',
             field=models.TextField(blank=True, default='', help_text='Enter host, group or pattern match'),
+        ),
+        migrations.AlterField(
+            model_name='inventorysource',
+            name='host_filter',
+            field=models.TextField(
+                blank=True,
+                default='',
+                help_text='This field is deprecated and will be removed in a future release. Regex where only matching hosts will be imported.',
+            ),
+        ),
+        migrations.AlterField(
+            model_name='inventoryupdate',
+            name='host_filter',
+            field=models.TextField(
+                blank=True,
+                default='',
+                help_text='This field is deprecated and will be removed in a future release. Regex where only matching hosts will be imported.',
+            ),
         ),
     ]
