@@ -21,7 +21,7 @@ logger = logging.getLogger('awx.conf.fields')
 # Use DRF fields to convert/validate settings:
 # - to_representation(obj) should convert a native Python object to a primitive
 #   serializable type. This primitive type will be what is presented in the API
-#   and stored in the JSON field in the datbase.
+#   and stored in the JSON field in the database.
 # - to_internal_value(data) should convert the primitive type back into the
 #   appropriate Python type to be used in settings.
 
