@@ -1539,6 +1539,11 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
 
         args.append('-i')
         args.append(container_location)
+        # Added this in order to allow older versions of ansible-inventory https://github.com/ansible/ansible/pull/79596
+        # limit should be usable in ansible-inventory 2.15+
+        if inventory_update.limit:
+            args.append('--limit')
+            args.append(inventory_update.limit)
 
         args.append('--output')
         args.append(os.path.join(CONTAINER_ROOT, 'artifacts', str(inventory_update.id), 'output.json'))
