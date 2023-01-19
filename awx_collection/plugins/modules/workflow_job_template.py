@@ -614,6 +614,10 @@ def create_workflow_nodes(module, response, workflow_nodes, workflow_id):
                 if workflow_node['unified_job_template']['type'] != 'workflow_approval':
                     module.fail_json(msg="Unable to Find unified_job_template: {0}".format(search_fields))
 
+        inventory = workflow_node.get('inventory')
+        if inventory:
+            workflow_node_fields['inventory'] = module.resolve_name_to_id('inventories', inventory)
+
         # Lookup Values for other fields
 
         for field_name in (
