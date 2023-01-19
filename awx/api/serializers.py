@@ -2144,6 +2144,7 @@ class InventorySourceOptionsSerializer(BaseSerializer):
             'custom_virtualenv',
             'timeout',
             'verbosity',
+            'limit',
         )
         read_only_fields = ('*', 'custom_virtualenv')
 

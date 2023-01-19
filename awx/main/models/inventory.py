@@ -969,7 +969,7 @@ class InventorySourceOptions(BaseModel):
     host_filter = models.TextField(
         blank=True,
         default='',
-        help_text=_('Regex where only matching hosts will be imported.'),
+        help_text=_('This field is deprecated and will be removed in a future release. Regex where only matching hosts will be imported.'),
     )
     overwrite = models.BooleanField(
         default=False,
@@ -988,6 +988,11 @@ class InventorySourceOptions(BaseModel):
         choices=INVENTORY_UPDATE_VERBOSITY_CHOICES,
         blank=True,
         default=1,
+    )
+    limit = models.TextField(
+        blank=True,
+        default='',
+        help_text=_("Enter host, group or pattern match"),
     )
 
     @staticmethod
