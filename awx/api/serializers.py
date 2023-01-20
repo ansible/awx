@@ -116,6 +116,8 @@ from awx.main.utils.filters import SmartFilter
 from awx.main.utils.named_url_graph import reset_counters
 from awx.main.scheduler.task_manager_models import TaskManagerModels
 from awx.main.redact import UriCleaner, REPLACE_STR
+from awx.main.signals import update_inventory_computed_fields
+
 
 from awx.main.validators import vars_validate_or_raise
 
@@ -2065,11 +2067,27 @@ class BulkHostCreateSerializer(serializers.Serializer):
         return attrs
 
     def create(self, validated_data):
+        # This assumes total_hosts is up to date, and it can get out of date if the inventory computed fields have not been updated lately.
+        # If we wanted to side step this we could query Hosts.objects.filter(inventory...)
+        old_total_hosts = validated_data['inventory'].total_hosts
         result = [Host(**attrs) for attrs in validated_data['hosts']]
         try:
             Host.objects.bulk_create(result)
         except Exception as e:
             raise serializers.ValidationError({"detail": _(f"{e}")})
+        new_total_hosts = old_total_hosts + len(result)
+        request = self.context.get('request', None)
+        changes = {'total_hosts': [old_total_hosts, new_total_hosts]}
+        activity_entry = ActivityStream.objects.create(
+            operation='update',
+            object1='inventory',
+            changes=json.dumps(changes),
+            actor=request.user,
+        )
+        activity_entry.inventory.add(validated_data['inventory'])
+
+        # This actually updates the cached "total_hosts" field on the inventory
+        update_inventory_computed_fields.delay(validated_data['inventory'].id)
         return {"created": len(result), "url": InventorySerializer().get_related(validated_data['inventory'])['hosts']}
 
 
