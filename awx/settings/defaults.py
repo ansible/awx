@@ -763,6 +763,8 @@ SCM_EXCLUDE_EMPTY_GROUPS = False
 # ----------------
 # -- Constructed --
 # ----------------
+CONSTRUCTED_INSTANCE_ID_VAR = 'remote_tower_id'
+
 CONSTRUCTED_EXCLUDE_EMPTY_GROUPS = False
 
 # ---------------------
