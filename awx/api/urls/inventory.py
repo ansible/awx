@@ -6,6 +6,8 @@ from django.urls import re_path
 from awx.api.views.inventory import (
     InventoryList,
     InventoryDetail,
+    ConstructedInventoryDetail,
+    ConstructedInventoryList,
     InventoryActivityStreamList,
     InventorySourceInventoriesList,
     InventoryJobTemplateList,
@@ -50,4 +52,10 @@ urls = [
     re_path(r'^(?P<pk>[0-9]+)/copy/$', InventoryCopy.as_view(), name='inventory_copy'),
 ]
 
-__all__ = ['urls']
+# Constructed inventory special views
+constructed_inventory_urls = [
+    re_path(r'^$', ConstructedInventoryList.as_view(), name='constructed_inventory_list'),
+    re_path(r'^(?P<pk>[0-9]+)/$', ConstructedInventoryDetail.as_view(), name='constructed_inventory_detail'),
+]
+
+__all__ = ['urls', 'constructed_inventory_urls']
