@@ -39,7 +39,7 @@ from .organization import urls as organization_urls
 from .user import urls as user_urls
 from .project import urls as project_urls
 from .project_update import urls as project_update_urls
-from .inventory import urls as inventory_urls
+from .inventory import urls as inventory_urls, constructed_inventory_urls
 from .execution_environments import urls as execution_environment_urls
 from .team import urls as team_urls
 from .host import urls as host_urls
@@ -110,6 +110,7 @@ v2_urls = [
     re_path(r'^project_updates/', include(project_update_urls)),
     re_path(r'^teams/', include(team_urls)),
     re_path(r'^inventories/', include(inventory_urls)),
+    re_path(r'^constructed_inventories/', include(constructed_inventory_urls)),
     re_path(r'^hosts/', include(host_urls)),
     re_path(r'^groups/', include(group_urls)),
     re_path(r'^inventory_sources/', include(inventory_source_urls)),
