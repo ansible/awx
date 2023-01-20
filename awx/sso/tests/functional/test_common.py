@@ -4,7 +4,7 @@ from django.core.exceptions import FieldError
 from django.utils.timezone import now
 
 from awx.main.models import Credential, CredentialType, Organization, Team, User
-from awx.sso.common import get_orgs_by_ids, reconcile_users_org_team_mappings, create_org_and_teams, get_or_create_with_default_galaxy_cred
+from awx.sso.common import get_orgs_by_ids, reconcile_users_org_team_mappings, create_org_and_teams, get_or_create_org_with_default_galaxy_cred
 
 
 @pytest.mark.django_db
@@ -255,11 +255,11 @@ class TestCommonFunctions:
         assert Organization.objects.count() == org_count
         assert Team.objects.count() == team_count
 
-    def test_get_or_create_with_default_galaxy_cred_add_galaxy_cred(self, galaxy_credential):
+    def test_get_or_create_org_with_default_galaxy_cred_add_galaxy_cred(self, galaxy_credential):
         # If this method creates the org it should get the default galaxy credential
         num_orgs = 4
         for number in range(1, (num_orgs + 1)):
-            get_or_create_with_default_galaxy_cred(name=f"Default {number}")
+            get_or_create_org_with_default_galaxy_cred(name=f"Default {number}")
 
         assert Organization.objects.count() == 4
 
@@ -267,12 +267,12 @@ class TestCommonFunctions:
             assert o.galaxy_credentials.count() == 1
             assert o.galaxy_credentials.first().name == 'Ansible Galaxy'
 
-    def test_get_or_create_with_default_galaxy_cred_no_galaxy_cred(self, galaxy_credential):
+    def test_get_or_create_org_with_default_galaxy_cred_no_galaxy_cred(self, galaxy_credential):
         # If the org is pre-created, we should not add the galaxy_credential
         num_orgs = 4
         for number in range(1, (num_orgs + 1)):
             Organization.objects.create(name=f"Default {number}")
-            get_or_create_with_default_galaxy_cred(name=f"Default {number}")
+            get_or_create_org_with_default_galaxy_cred(name=f"Default {number}")
 
         assert Organization.objects.count() == 4
 

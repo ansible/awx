@@ -5,7 +5,7 @@
 import re
 import logging
 
-from awx.sso.common import get_or_create_with_default_galaxy_cred
+from awx.sso.common import get_or_create_org_with_default_galaxy_cred
 
 logger = logging.getLogger('awx.sso.social_pipeline')
 
@@ -53,7 +53,7 @@ def update_user_orgs(backend, details, user=None, *args, **kwargs):
             organization_name = organization_alias
         else:
             organization_name = org_name
-        org = get_or_create_with_default_galaxy_cred(name=organization_name)
+        org = get_or_create_org_with_default_galaxy_cred(name=organization_name)
 
         # Update org admins from expression(s).
         remove = bool(org_opts.get('remove', True))
@@ -81,7 +81,7 @@ def update_user_teams(backend, details, user=None, *args, **kwargs):
         # Get or create the org to update.
         if 'organization' not in team_opts:
             continue
-        org = get_or_create_with_default_galaxy_cred(name=team_opts['organization'])
+        org = get_or_create_org_with_default_galaxy_cred(name=team_opts['organization'])
 
         # Update team members from expression(s).
         team = Team.objects.get_or_create(name=team_name, organization=org)[0]

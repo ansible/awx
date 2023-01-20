@@ -135,10 +135,10 @@ def create_org_and_teams(org_list, team_map, adapter, can_create=True):
         if org_name and org_name not in existing_orgs:
             logger.info("{} adapter is creating org {}".format(adapter, org_name))
             try:
-                new_org = get_or_create_with_default_galaxy_cred(name=org_name)
+                new_org = get_or_create_org_with_default_galaxy_cred(name=org_name)
             except IntegrityError:
                 # Another thread must have created this org before we did so now we need to get it
-                new_org = get_or_create_with_default_galaxy_cred(name=org_name)
+                new_org = get_or_create_org_with_default_galaxy_cred(name=org_name)
             # Add the org name to the existing orgs since we created it and we may need it to build the teams below
             existing_orgs[org_name] = new_org.id
 
@@ -156,7 +156,7 @@ def create_org_and_teams(org_list, team_map, adapter, can_create=True):
     # ==============================================================================================================
 
 
-def get_or_create_with_default_galaxy_cred(**kwargs):
+def get_or_create_org_with_default_galaxy_cred(**kwargs):
     from awx.main.models import Organization, Credential
 
     (org, org_created) = Organization.objects.get_or_create(**kwargs)
