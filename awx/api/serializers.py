@@ -2083,7 +2083,7 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
 
     class Meta:
         model = InventorySource
-        fields = ('*', 'name', 'inventory', 'update_on_launch', 'update_cache_timeout', 'source_project') + (
+        fields = ('*', 'name', 'inventory', 'update_on_launch', 'update_cache_timeout', 'source_project', 'limit') + (
             'last_update_failed',
             'last_updated',
         )  # Backwards compatibility.
