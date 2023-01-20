@@ -594,3 +594,45 @@ class TestControlledBySCM:
             rando,
             expect=403,
         )
+
+
+@pytest.mark.django_db
+class TestConstructedInventory:
+    @pytest.fixture
+    def constructed_inventory(self, organization):
+        return Inventory.objects.create(name='constructed-test-inventory', kind='constructed', organization=organization)
+
+    def test_get_constructed_inventory(self, constructed_inventory, admin_user, get):
+        inv_src = constructed_inventory.inventory_sources.first()
+        inv_src.update_cache_timeout = 53
+        inv_src.save(update_fields=['update_cache_timeout'])
+        r = get(url=reverse('api:constructed_inventory_detail', kwargs={'pk': constructed_inventory.pk}), user=admin_user, expect=200)
+        assert r.data['update_cache_timeout'] == 53
+
+    def test_patch_constructed_inventory(self, constructed_inventory, admin_user, patch):
+        inv_src = constructed_inventory.inventory_sources.first()
+        assert inv_src.update_cache_timeout == 0
+        assert inv_src.limit == ''
+        r = patch(
+            url=reverse('api:constructed_inventory_detail', kwargs={'pk': constructed_inventory.pk}),
+            data=dict(update_cache_timeout=54, limit='foobar'),
+            user=admin_user,
+            expect=200,
+        )
+        assert r.data['update_cache_timeout'] == 54
+        inv_src = constructed_inventory.inventory_sources.first()
+        assert inv_src.update_cache_timeout == 54
+        assert inv_src.limit == 'foobar'
+
+    def test_create_constructed_inventory(self, constructed_inventory, admin_user, post, organization):
+        r = post(
+            url=reverse('api:constructed_inventory_list'),
+            data=dict(name='constructed-inventory-just-created', kind='constructed', organization=organization.id, update_cache_timeout=55, limit='foobar'),
+            user=admin_user,
+            expect=201,
+        )
+        pk = r.data['id']
+        constructed_inventory = Inventory.objects.get(pk=pk)
+        inv_src = constructed_inventory.inventory_sources.first()
+        assert inv_src.update_cache_timeout == 55
+        assert inv_src.limit == 'foobar'
