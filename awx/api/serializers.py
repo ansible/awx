@@ -2064,7 +2064,8 @@ class BulkHostCreateSerializer(serializers.Serializer):
 
         # This actually updates the cached "total_hosts" field on the inventory
         update_inventory_computed_fields.delay(validated_data['inventory'].id)
-        return {"created": len(result), "url": InventorySerializer().get_related(validated_data['inventory'])['hosts']}
+        ids = [item.id for item in result]
+        return {"created": ids, "url": InventorySerializer().get_related(validated_data['inventory'])['hosts']}
 
 
 class GroupTreeSerializer(GroupSerializer):
@@ -4562,13 +4563,17 @@ class BulkJobNodeSerializer(serializers.Serializer):
             'limit',
             'labels',
             'instance_groups',
-            'execution_environment' 'scm_branch',
-            'verbosity' 'forks' 'char_prompts',
+            'execution_environment',
+            'scm_branch',
+            'verbosity',
+            'forks',
+            'char_prompts',
             'diff_mode',
             'extra_data',
             'job_slice_count',
             'job_tags',
-            'job_type' 'skip_tags',
+            'job_type',
+            'skip_tags',
             'survey_passwords',
             'timeout',
             # these are related objects and we need to add extra validation for them in the parent BulkJobLaunchSerializer
@@ -4576,11 +4581,11 @@ class BulkJobNodeSerializer(serializers.Serializer):
         )
 
 
-class BulkJobLaunchSerializer(serializers.Serializer):
+class BulkJobLaunchSerializer(BaseSerializer):
     name = serializers.CharField(max_length=512, write_only=True, required=False)  # limited by max name of jobs
     jobs = BulkJobNodeSerializer(many=True, allow_empty=False, write_only=True, max_length=1000)
-    description: serializers.CharField(write_only=True, required=False, allow_blank=False)
-    extra_vars: serializers.CharField(write_only=True, required=False, allow_blank=False)
+    description = serializers.CharField(write_only=True, required=False, allow_blank=False)
+    extra_vars = serializers.CharField(write_only=True, required=False, allow_blank=False)
     organization = serializers.PrimaryKeyRelatedField(
         queryset=Organization.objects.all(),
         required=False,
@@ -4588,36 +4593,23 @@ class BulkJobLaunchSerializer(serializers.Serializer):
         allow_null=True,
         help_text=_('Inherit permissions from organization roles.'),
     )
-    # inventory: "",  # Here we can use PrimaryKeyRelatedField so it will automagically do rbac/turn into object
-    limit: serializers.CharField(write_only=True, required=False, allow_blank=False)
-    scm_branch: serializers.CharField(write_only=True, required=False, allow_blank=False)
+    inventory = serializers.PrimaryKeyRelatedField(queryset=Inventory.objects.all(), required=False, write_only=True)
+    limit = serializers.CharField(write_only=True, required=False, allow_blank=False)
+    scm_branch = serializers.CharField(write_only=True, required=False, allow_blank=False)
+    # not implemented yet
     # webhook_service: null,  # Here we can use PrimaryKeyRelatedField so it will automagically do rbac/turn into object, I think, I'm actually not sure how to use this
     # webhook_credential: null,  # Here we can use PrimaryKeyRelatedField so it will automagically do rbac/turn into object  I think, I'm actually not sure how to use this
-    skip_tags: serializers.CharField(write_only=True, required=False, allow_blank=False)
-    job_tags: serializers.CharField(write_only=True, required=False, allow_blank=False)
-    is_bulk_job: serializers.BooleanField(default=True)
+    skip_tags = serializers.CharField(write_only=True, required=False, allow_blank=False)
+    job_tags = serializers.CharField(write_only=True, required=False, allow_blank=False)
 
     class Meta:
-        fields = ('name', 'jobs', 'description', 'limit')
+        model = WorkflowJob
+        fields = ('name', 'jobs', 'description', 'extra_vars', 'organization', 'inventory', 'limit', 'scm_branch', 'skip_tags', 'job_tags')
         read_only_fields = ()
 
     def validate(self, attrs):
-
         request = self.context.get('request', None)
-        # validate Organization
-        # - If the orgs is not set, set it to the org of the launching user
-        # - If the user is part of multiple orgs, throw a validation error saying user is part of multiple orgs, please provide one
-
-        if 'organization' not in attrs or attrs['organization'] == None or attrs['oganization'] == '':
-            if Organization.accessible_pk_qs(request.user, 'read_role').count() == 1:
-                for tup in Organization.accessible_pk_qs(request.user, 'read_role').all():
-                    attrs['organization'] = tup[0]
-            elif Organization.accessible_pk_qs(request.user, 'read_role').count() > 1:
-                raise serializers.ValidationError(_(f"User has permission to multiple Organizations, please set one of them in the request"))
-            else:
-                raise serializers.ValidationError(_(f"User not part of any organization, please assign an organization to assign to the bulk job"))
-        requested_org = {attrs['organization']}
-
+        self.check_organization_permission(attrs, request)
         identifiers = set()
         for node in attrs['jobs']:
             if 'identifier' in node:
@@ -4646,96 +4638,39 @@ class BulkJobLaunchSerializer(serializers.Serializer):
         # If we are not a superuser, check we have permissions
         # TODO: As we add other related items, we need to add them here
         if request and not request.user.is_superuser:
-            allowed_orgs = set()
-            if requested_org:
-                [allowed_orgs.add(tup[0]) for tup in Organization.accessible_pk_qs(request.user, 'read_role').all()]
-                if requested_org not in allowed_orgs:
-                    ValidationError(_(f"Organization {requested_org} not found"))
-            allowed_ujts = set()
-            [allowed_ujts.add(tup[0]) for tup in UnifiedJobTemplate.accessible_pk_qs(request.user, 'execute_role').all()]
-            [allowed_ujts.add(tup[0]) for tup in UnifiedJobTemplate.accessible_pk_qs(request.user, 'admin_role').all()]
-            [allowed_ujts.add(tup[0]) for tup in UnifiedJobTemplate.accessible_pk_qs(request.user, 'update_role').all()]
-            accessible_inventories_qs = Inventory.accessible_pk_qs(request.user, 'update_role')
-            [allowed_ujts.add(tup[0]) for tup in InventorySource.objects.filter(inventory__in=accessible_inventories_qs).values_list('id')]
-
-            if requested_ujts - allowed_ujts:
-                not_allowed = requested_ujts - allowed_ujts
-                raise serializers.ValidationError(_(f"Unified Job Templates {not_allowed} not found."))
-
+            self.check_unified_job_permission(request, requested_ujts)
             if requested_use_inventories:
-                accessible_use_inventories = {tup[0] for tup in Inventory.accessible_pk_qs(request.user, 'use_role')}
-                if requested_use_inventories - accessible_use_inventories:
-                    not_allowed = requested_use_inventories - accessible_use_inventories
-                    raise serializers.ValidationError(_(f"Inventories {not_allowed} not found."))
+                self.check_inventory_permission(request, requested_use_inventories)
 
             if requested_use_credentials:
-                accessible_use_credentials = {tup[0] for tup in Credential.accessible_pk_qs(request.user, 'use_role').all()}
-                if requested_use_credentials - accessible_use_credentials:
-                    not_allowed = requested_use_credentials - accessible_use_credentials
-                    raise serializers.ValidationError(_(f"Credentials {not_allowed} not found."))
+                self.check_credential_permission(request, requested_use_credentials)
 
             if requested_use_labels:
-                accessible_use_labels = {tup.id for tup in Label.objects.all()}
-                if requested_use_labels - accessible_use_labels:
-                    not_allowed = requested_use_labels - accessible_use_labels
-                    raise serializers.ValidationError(_(f"Labels {not_allowed} not found"))
+                self.check_label_permission(requested_use_labels)
 
             if requested_use_instance_groups:
-                # only org admins are allowed to see instance groups
-                organization_admin_qs = Organization.accessible_pk_qs(request.user, 'admin_role').all()
-                if organization_admin_qs:
-                    accessible_use_instance_groups = {tup.id for tup in InstanceGroup.objects.all()}
-                    if requested_use_instance_groups - accessible_use_instance_groups:
-                        not_allowed = requested_use_instance_groups - accessible_use_instance_groups
-                        raise serializers.ValidationError(_(f"Instance Groups {not_allowed} not found"))
+                self.check_instance_group_permission(request, requested_use_instance_groups)
 
             if requested_use_execution_environments:
-                accessible_execution_env = {
-                    tup.id
-                    for tup in ExecutionEnvironment.objects.filter(
-                        Q(organization__in=Organization.accessible_pk_qs(request.user, 'read_role')) | Q(organization__isnull=True)
-                    ).distinct()
-                }
-                if requested_use_execution_environments - accessible_execution_env:
-                    not_allowed = requested_use_execution_environments - accessible_execution_env
-                    raise serializers.ValidationError(_(f"Execution Environments {not_allowed} not found"))
+                self.check_instance_group_permission(request, requested_use_instance_groups)
 
         # all of the unified job templates and related items have now been checked, we can now grab the objects from the DB
-        # TODO: As we add more related objects like Label, InstanceGroup, etc we need to add them here
-        objectified_jobs = []
-        key_to_obj_map = {
-            "unified_job_template": {obj.id: obj for obj in UnifiedJobTemplate.objects.filter(id__in=requested_ujts)},
-            "inventory": {obj.id: obj for obj in Inventory.objects.filter(id__in=requested_use_inventories)},
-            "credentials": {obj.id: obj for obj in Credential.objects.filter(id__in=requested_use_credentials)},
-            "labels": {obj.id: obj for obj in Label.objects.filter(id__in=requested_use_labels)},
-            "instance_groups": {obj.id: obj for obj in InstanceGroup.objects.filter(id__in=requested_use_instance_groups)},
-            "execution_environment": {obj.id: obj for obj in ExecutionEnvironment.objects.filter(id__in=requested_use_execution_environments)},
-        }
+        jobs_object = self.get_objectified_jobs(
+            attrs,
+            requested_ujts,
+            requested_use_inventories,
+            requested_use_credentials,
+            requested_use_labels,
+            requested_use_instance_groups,
+            requested_use_execution_environments,
+        )
 
-        # This loop is generalized so we should only have to add related items to the key_to_obj_map
-        for job in attrs['jobs']:
-            objectified_job = {}
-            for key, value in job.items():
-                if key in key_to_obj_map:
-                    if isinstance(value, int):
-                        objectified_job[key] = key_to_obj_map[key][value]
-                    elif isinstance(value, list):
-                        objectified_job[key] = []
-                        for item in value:
-                            objectified_job[key].append(key_to_obj_map[key][item])
-                else:
-                    objectified_job[key] = value
-            objectified_jobs.append(objectified_job)
-
-        attrs['jobs'] = objectified_jobs
-        # map the organization object
-        for obj in Organization.objects.filter(id__in=requested_org):
-            attrs['organization'] = obj
+        attrs['jobs'] = jobs_object
+        attrs = super().validate(attrs)
         return attrs
 
     def create(self, validated_data):
         job_node_data = validated_data.pop('jobs')
-
         # FIXME: Need to set organization on the WorkflowJob in order for users to be able to see it --
         # normally their permission is sourced from the underlying WorkflowJobTemplate
         # maybe we need to add Organization to WorkflowJob
@@ -4812,7 +4747,113 @@ class BulkJobLaunchSerializer(serializers.Serializer):
 
         wfj.status = 'pending'
         wfj.save()
+
         return WorkflowJobSerializer().to_representation(wfj)
+
+    def check_organization_permission(self, attrs, request):
+        # validate Organization
+        # - If the orgs is not set, set it to the org of the launching user
+        # - If the user is part of multiple orgs, throw a validation error saying user is part of multiple orgs, please provide one
+        if 'organization' not in attrs or attrs['organization'] == None or attrs['organization'] == '':
+            if Organization.accessible_pk_qs(request.user, 'read_role').count() == 1:
+                for tup in Organization.accessible_pk_qs(request.user, 'read_role').all():
+                    attrs['organization'] = Organization.objects.filter(id__in=str(tup[0])).first()
+            elif Organization.accessible_pk_qs(request.user, 'read_role').count() > 1:
+                raise serializers.ValidationError("User has permission to multiple Organizations, please set one of them in the request")
+            else:
+                raise serializers.ValidationError("User not part of any organization, please assign an organization to assign to the bulk job")
+        else:
+            allowed_orgs = set()
+            requested_org = attrs['organization']
+            if request and not request.user.is_superuser:
+                [allowed_orgs.add(tup[0]) for tup in Organization.accessible_pk_qs(request.user, 'read_role').all()]
+                if requested_org.id not in allowed_orgs:
+                    raise ValidationError(_(f"Organization {requested_org.id} not found"))
+
+    def check_unified_job_permission(self, request, requested_ujts):
+        allowed_ujts = set()
+        [allowed_ujts.add(tup[0]) for tup in UnifiedJobTemplate.accessible_pk_qs(request.user, 'execute_role').all()]
+        [allowed_ujts.add(tup[0]) for tup in UnifiedJobTemplate.accessible_pk_qs(request.user, 'admin_role').all()]
+        [allowed_ujts.add(tup[0]) for tup in UnifiedJobTemplate.accessible_pk_qs(request.user, 'update_role').all()]
+        accessible_inventories_qs = Inventory.accessible_pk_qs(request.user, 'update_role')
+        [allowed_ujts.add(tup[0]) for tup in InventorySource.objects.filter(inventory__in=accessible_inventories_qs).values_list('id')]
+
+        if requested_ujts - allowed_ujts:
+            not_allowed = requested_ujts - allowed_ujts
+            raise serializers.ValidationError(_(f"Unified Job Templates {not_allowed} not found."))
+
+    def check_inventory_permission(self, request, requested_use_inventories):
+        accessible_use_inventories = {tup[0] for tup in Inventory.accessible_pk_qs(request.user, 'use_role')}
+        if requested_use_inventories - accessible_use_inventories:
+            not_allowed = requested_use_inventories - accessible_use_inventories
+            raise serializers.ValidationError(_(f"Inventories {not_allowed} not found."))
+
+    def check_credential_permission(self, request, requested_use_credentials):
+        accessible_use_credentials = {tup[0] for tup in Credential.accessible_pk_qs(request.user, 'use_role').all()}
+        if requested_use_credentials - accessible_use_credentials:
+            not_allowed = requested_use_credentials - accessible_use_credentials
+            raise serializers.ValidationError(_(f"Credentials {not_allowed} not found."))
+
+    def check_label_permission(self, requested_use_labels):
+        accessible_use_labels = {tup.id for tup in Label.objects.all()}
+        if requested_use_labels - accessible_use_labels:
+            not_allowed = requested_use_labels - accessible_use_labels
+            raise serializers.ValidationError(_(f"Labels {not_allowed} not found"))
+
+    def check_instance_group_permission(self, request, requested_use_instance_groups):
+        # only org admins are allowed to see instance groups
+        organization_admin_qs = Organization.accessible_pk_qs(request.user, 'admin_role').all()
+        if organization_admin_qs:
+            accessible_use_instance_groups = {tup.id for tup in InstanceGroup.objects.all()}
+            if requested_use_instance_groups - accessible_use_instance_groups:
+                not_allowed = requested_use_instance_groups - accessible_use_instance_groups
+                raise serializers.ValidationError(_(f"Instance Groups {not_allowed} not found"))
+
+    def check_execution_environment_permission(self, request, requested_use_execution_environments):
+        accessible_execution_env = {
+            tup.id
+            for tup in ExecutionEnvironment.objects.filter(
+                Q(organization__in=Organization.accessible_pk_qs(request.user, 'read_role')) | Q(organization__isnull=True)
+            ).distinct()
+        }
+        if requested_use_execution_environments - accessible_execution_env:
+            not_allowed = requested_use_execution_environments - accessible_execution_env
+            raise serializers.ValidationError(_(f"Execution Environments {not_allowed} not found"))
+
+    def get_objectified_jobs(
+        self,
+        attrs,
+        requested_ujts,
+        requested_use_inventories,
+        requested_use_credentials,
+        requested_use_labels,
+        requested_use_instance_groups,
+        requested_use_execution_environments,
+    ):
+        objectified_jobs = []
+        key_to_obj_map = {
+            "unified_job_template": {obj.id: obj for obj in UnifiedJobTemplate.objects.filter(id__in=requested_ujts)},
+            "inventory": {obj.id: obj for obj in Inventory.objects.filter(id__in=requested_use_inventories)},
+            "credentials": {obj.id: obj for obj in Credential.objects.filter(id__in=requested_use_credentials)},
+            "labels": {obj.id: obj for obj in Label.objects.filter(id__in=requested_use_labels)},
+            "instance_groups": {obj.id: obj for obj in InstanceGroup.objects.filter(id__in=requested_use_instance_groups)},
+            "execution_environment": {obj.id: obj for obj in ExecutionEnvironment.objects.filter(id__in=requested_use_execution_environments)},
+        }
+        # This loop is generalized so we should only have to add related items to the key_to_obj_map
+        for job in attrs['jobs']:
+            objectified_job = {}
+            for key, value in job.items():
+                if key in key_to_obj_map:
+                    if isinstance(value, int):
+                        objectified_job[key] = key_to_obj_map[key][value]
+                    elif isinstance(value, list):
+                        objectified_job[key] = []
+                        for item in value:
+                            objectified_job[key].append(key_to_obj_map[key][item])
+                else:
+                    objectified_job[key] = value
+            objectified_jobs.append(objectified_job)
+        return objectified_jobs
 
 
 class NotificationTemplateSerializer(BaseSerializer):
