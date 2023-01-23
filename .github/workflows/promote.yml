@@ -38,9 +38,13 @@ jobs:
       - name: Build collection and publish to galaxy
         run: |
           COLLECTION_TEMPLATE_VERSION=true COLLECTION_NAMESPACE=${{ env.collection_namespace }} make build_collection
-          ansible-galaxy collection publish \
-            --token=${{ secrets.GALAXY_TOKEN }} \
-            awx_collection_build/${{ env.collection_namespace }}-awx-${{ github.event.release.tag_name }}.tar.gz
+          if [ "$(curl --head -sw '%{http_code}' https://galaxy.ansible.com/download/${{ env.collection_namespace }}-awx-${{ github.event.release.tag_name }}.tar.gz | tail -1)" == "302" ] ; then \
+              echo "Galaxy release already done"; \
+          else \
+              ansible-galaxy collection publish \
+                --token=${{ secrets.GALAXY_TOKEN }} \
+                awx_collection_build/${{ env.collection_namespace }}-awx-${{ github.event.release.tag_name }}.tar.gz; \
+          fi
 
       - name: Set official pypi info
         run: echo pypi_repo=pypi >> $GITHUB_ENV
@@ -52,6 +56,7 @@ jobs:
 
       - name: Build awxkit and upload to pypi
         run: |
+          git reset --hard
           cd awxkit && python3 setup.py bdist_wheel
           twine upload \
             -r ${{ env.pypi_repo }} \
