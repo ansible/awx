@@ -64,6 +64,10 @@ options:
       description:
         - If specified, AWX will only import hosts that match this regular expression.
       type: str
+    limit:
+      description:
+        - Enter host, group or pattern match
+      type: str
     credential:
       description:
         - Credential to use for the source.
@@ -172,6 +176,7 @@ def main():
         enabled_var=dict(),
         enabled_value=dict(),
         host_filter=dict(),
+        limit=dict(),
         credential=dict(),
         execution_environment=dict(),
         custom_virtualenv=dict(),
@@ -279,6 +284,7 @@ def main():
         'enabled_value',
         'host_filter',
         'scm_branch',
+        'limit',
     )
 
     # Layer in all remaining optional information
