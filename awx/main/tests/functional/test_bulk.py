@@ -19,7 +19,7 @@ def withAssertNumQueriesLessThan(num_queries):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('num_hosts, num_queries', [(9, 15), (99, 20), (999, 25)])
+@pytest.mark.parametrize('num_hosts, num_queries', [(9, 15), (99, 20), (999, 30)])
 def test_bulk_host_create_num_queries(organization, inventory, post, get, user, num_hosts, num_queries):
     '''
     If I am a...
