@@ -1998,9 +1998,12 @@ class WorkflowJobNodeAccess(BaseAccess):
     )
 
     def filtered_queryset(self):
-        return self.model.objects.filter(Q(workflow_job__unified_job_template__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
-                                        | Q(workflow_job__created_by_id=self.user.id, workflow_job__is_bulk_job=True)
-                                        | Q(workflow_job__organization__in=Organization.objects.filter(Q(admin_role__members=self.user)), workflow_job__is_bulk_job=True))
+        return self.model.objects.filter(
+            Q(workflow_job__unified_job_template__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
+            | Q(workflow_job__created_by_id=self.user.id, workflow_job__is_bulk_job=True)
+            | Q(workflow_job__organization__in=Organization.objects.filter(Q(admin_role__members=self.user)), workflow_job__is_bulk_job=True)
+        )
+
     @check_superuser
     def can_add(self, data):
         if data is None:  # Hide direct creation in API browser

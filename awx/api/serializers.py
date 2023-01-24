@@ -4631,8 +4631,8 @@ class BulkJobNodeSerializer(serializers.Serializer):
 class BulkJobLaunchSerializer(BaseSerializer):
     name = serializers.CharField(max_length=512, write_only=True, required=False)  # limited by max name of jobs
     jobs = BulkJobNodeSerializer(many=True, allow_empty=False, write_only=True, max_length=1000)
-    description= serializers.CharField(write_only=True, required=False, allow_blank=False)
-    extra_vars= serializers.CharField(write_only=True, required=False, allow_blank=False)
+    description = serializers.CharField(write_only=True, required=False, allow_blank=False)
+    extra_vars = serializers.CharField(write_only=True, required=False, allow_blank=False)
     organization = serializers.PrimaryKeyRelatedField(
         queryset=Organization.objects.all(),
         required=False,
@@ -4640,14 +4640,14 @@ class BulkJobLaunchSerializer(BaseSerializer):
         allow_null=True,
         help_text=_('Inherit permissions from organization roles.'),
     )
-    inventory= serializers.PrimaryKeyRelatedField(queryset=Inventory.objects.all(), required=False, write_only=True)
-    limit= serializers.CharField(write_only=True, required=False, allow_blank=False)
-    scm_branch= serializers.CharField(write_only=True, required=False, allow_blank=False)
+    inventory = serializers.PrimaryKeyRelatedField(queryset=Inventory.objects.all(), required=False, write_only=True)
+    limit = serializers.CharField(write_only=True, required=False, allow_blank=False)
+    scm_branch = serializers.CharField(write_only=True, required=False, allow_blank=False)
     # not implemented yet
     # webhook_service: null,  # Here we can use PrimaryKeyRelatedField so it will automagically do rbac/turn into object, I think, I'm actually not sure how to use this
     # webhook_credential: null,  # Here we can use PrimaryKeyRelatedField so it will automagically do rbac/turn into object  I think, I'm actually not sure how to use this
-    skip_tags= serializers.CharField(write_only=True, required=False, allow_blank=False)
-    job_tags= serializers.CharField(write_only=True, required=False, allow_blank=False)
+    skip_tags = serializers.CharField(write_only=True, required=False, allow_blank=False)
+    job_tags = serializers.CharField(write_only=True, required=False, allow_blank=False)
 
     class Meta:
         model = WorkflowJob
@@ -4702,9 +4702,15 @@ class BulkJobLaunchSerializer(BaseSerializer):
                 self.check_instance_group_permission(request, requested_use_instance_groups)
 
         # all of the unified job templates and related items have now been checked, we can now grab the objects from the DB
-        jobs_object = self.get_objectified_jobs(attrs, requested_ujts, requested_use_inventories, requested_use_credentials,
-                                                requested_use_labels, requested_use_instance_groups,
-                                                requested_use_execution_environments)
+        jobs_object = self.get_objectified_jobs(
+            attrs,
+            requested_ujts,
+            requested_use_inventories,
+            requested_use_credentials,
+            requested_use_labels,
+            requested_use_instance_groups,
+            requested_use_execution_environments,
+        )
 
         attrs['jobs'] = jobs_object
         attrs = super().validate(attrs)
@@ -4819,8 +4825,7 @@ class BulkJobLaunchSerializer(BaseSerializer):
         [allowed_ujts.add(tup[0]) for tup in UnifiedJobTemplate.accessible_pk_qs(request.user, 'admin_role').all()]
         [allowed_ujts.add(tup[0]) for tup in UnifiedJobTemplate.accessible_pk_qs(request.user, 'update_role').all()]
         accessible_inventories_qs = Inventory.accessible_pk_qs(request.user, 'update_role')
-        [allowed_ujts.add(tup[0]) for tup in
-         InventorySource.objects.filter(inventory__in=accessible_inventories_qs).values_list('id')]
+        [allowed_ujts.add(tup[0]) for tup in InventorySource.objects.filter(inventory__in=accessible_inventories_qs).values_list('id')]
 
         if requested_ujts - allowed_ujts:
             not_allowed = requested_ujts - allowed_ujts
@@ -4857,17 +4862,23 @@ class BulkJobLaunchSerializer(BaseSerializer):
         accessible_execution_env = {
             tup.id
             for tup in ExecutionEnvironment.objects.filter(
-                Q(organization__in=Organization.accessible_pk_qs(request.user, 'read_role')) | Q(
-                    organization__isnull=True)
+                Q(organization__in=Organization.accessible_pk_qs(request.user, 'read_role')) | Q(organization__isnull=True)
             ).distinct()
         }
         if requested_use_execution_environments - accessible_execution_env:
             not_allowed = requested_use_execution_environments - accessible_execution_env
             raise serializers.ValidationError(_(f"Execution Environments {not_allowed} not found"))
 
-    def get_objectified_jobs(self, attrs, requested_ujts, requested_use_inventories, requested_use_credentials,
-                                                requested_use_labels, requested_use_instance_groups,
-                                                requested_use_execution_environments):
+    def get_objectified_jobs(
+        self,
+        attrs,
+        requested_ujts,
+        requested_use_inventories,
+        requested_use_credentials,
+        requested_use_labels,
+        requested_use_instance_groups,
+        requested_use_execution_environments,
+    ):
         objectified_jobs = []
         key_to_obj_map = {
             "unified_job_template": {obj.id: obj for obj in UnifiedJobTemplate.objects.filter(id__in=requested_ujts)},
@@ -4892,6 +4903,7 @@ class BulkJobLaunchSerializer(BaseSerializer):
                     objectified_job[key] = value
             objectified_jobs.append(objectified_job)
         return objectified_jobs
+
 
 class NotificationTemplateSerializer(BaseSerializer):
     show_capabilities = ['edit', 'delete', 'copy']
