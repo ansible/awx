@@ -2090,7 +2090,8 @@ class BulkHostCreateSerializer(serializers.Serializer):
 
         # This actually updates the cached "total_hosts" field on the inventory
         update_inventory_computed_fields.delay(validated_data['inventory'].id)
-        return {"created": len(result), "url": InventorySerializer().get_related(validated_data['inventory'])['hosts']}
+        ids = [item.id for item in result]
+        return {"created": ids, "url": InventorySerializer().get_related(validated_data['inventory'])['hosts']}
 
 
 class GroupTreeSerializer(GroupSerializer):
