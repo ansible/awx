@@ -94,7 +94,7 @@ class WebsocketRelayConnection:
             # Early on, this is our canary. I'm not sure what exceptions we can really encounter.
             logger.warning(f"Connection from {self.name} to {self.remote_host} failed for unknown reason: '{e}'.", exc_info=True)
         else:
-            logger.info(f"Connection from {self.name} to {self.remote_host} lost, but no exception was raised.")
+            logger.debug(f"Connection from {self.name} to {self.remote_host} lost, but no exception was raised.")
         finally:
             self.connected = False
             self.stats.record_connection_lost()
