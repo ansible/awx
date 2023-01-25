@@ -957,9 +957,9 @@ class InventorySourceOptions(BaseModel):
         Jobs using the project can use the default_environment, but the project updates
         are not flexible enough to allow customizing the image they use.
         """
-        if self.kind == 'constructed':
+        if self.inventory.kind == 'constructed':
             return get_control_plane_execution_environment()
-        return super().resolve_execution_environment
+        return super().resolve_execution_environment()
 
     @staticmethod
     def cloud_credential_validation(source, cred):
