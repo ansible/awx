@@ -99,7 +99,7 @@ class Command(BaseCommand):
             executor = MigrationExecutor(connection)
             migrating = bool(executor.migration_plan(executor.loader.graph.leaf_nodes()))
         except Exception as exc:
-            logger.info(f'Error on startup of run_wsrelay (error: {exc}), retry in 10s...')
+            logger.warning(f'Error on startup of run_wsrelay (error: {exc}), retry in 10s...')
             time.sleep(10)
             return
 
@@ -166,4 +166,4 @@ class Command(BaseCommand):
             websocket_relay_manager = WebSocketRelayManager()
             asyncio.run(websocket_relay_manager.run())
         except KeyboardInterrupt:
-            logger.debug('Terminating Websocket Relayer')
+            logger.info('Terminating Websocket Relayer')
