@@ -179,7 +179,7 @@ function Project({ setBreadcrumb }) {
                 searchParams={{
                   project__id: project.id,
                 }}
-                projectName={project.name}
+                resourceName={project.name}
               />
             </Route>
             {project?.scm_type && project.scm_type !== '' && (
