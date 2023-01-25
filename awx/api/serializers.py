@@ -4801,7 +4801,7 @@ class BulkJobLaunchSerializer(BaseSerializer):
         # validate Organization
         # - If the orgs is not set, set it to the org of the launching user
         # - If the user is part of multiple orgs, throw a validation error saying user is part of multiple orgs, please provide one
-        if 'organization' not in attrs or attrs['organization'] == None or attrs['oganization'] == '':
+        if 'organization' not in attrs or attrs['organization'] == None or attrs['organization'] == '':
             if Organization.accessible_pk_qs(request.user, 'read_role').count() == 1:
                 for tup in Organization.accessible_pk_qs(request.user, 'read_role').all():
                     attrs['organization'] = Organization.objects.filter(id__in=str(tup[0])).first()
@@ -4814,10 +4814,8 @@ class BulkJobLaunchSerializer(BaseSerializer):
             requested_org = attrs['organization']
             if request and not request.user.is_superuser:
                 [allowed_orgs.add(tup[0]) for tup in Organization.accessible_pk_qs(request.user, 'read_role').all()]
-                if requested_org not in allowed_orgs:
-                    raise ValidationError(_(f"Organization {requested_org} not found"))
-                else:
-                    attrs['organization'] = Organization.objects.filter(id__in=requested_org)
+                if requested_org.id not in allowed_orgs:
+                    raise ValidationError(_(f"Organization {requested_org.id} not found"))
 
     def check_unified_job_permission(self, request, requested_ujts):
         allowed_ujts = set()
