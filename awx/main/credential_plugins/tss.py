@@ -48,12 +48,10 @@ def tss_backend(**kwargs):
     secret_server = SecretServer(kwargs['server_url'], authorizer)
     secret_dict = secret_server.get_secret(kwargs['secret_id'])
     secret = ServerSecret(**secret_dict)
-    
     if type(secret.fields[kwargs['secret_field']].value) != str :
         return secret.fields[kwargs['secret_field']].value.text
     else:
         return secret.fields[kwargs['secret_field']].value
-
     
 
 
