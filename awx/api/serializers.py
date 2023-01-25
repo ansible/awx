@@ -1715,6 +1715,7 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
             res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk})
         if obj.kind == 'constructed':
             res['source_inventories'] = self.reverse('api:inventory_source_inventories', kwargs={'pk': obj.pk})
+            res['url'] = self.reverse('api:constructed_inventory_detail', kwargs={'pk': obj.pk})
         return res
 
     def to_representation(self, obj):
@@ -1754,6 +1755,81 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
         if kind == 'smart' and not host_filter:
             raise serializers.ValidationError({'host_filter': _('Smart inventories must specify host_filter')})
         return super(InventorySerializer, self).validate(attrs)
+
+
+class ConstructedFieldMixin(serializers.Field):
+    def get_attribute(self, instance):
+        if not hasattr(instance, '_constructed_inv_src'):
+            instance._constructed_inv_src = instance.inventory_sources.first()
+        inv_src = instance._constructed_inv_src
+        return super().get_attribute(inv_src)  # yoink
+
+
+class ConstructedCharField(ConstructedFieldMixin, serializers.CharField):
+    pass
+
+
+class ConstructedIntegerField(ConstructedFieldMixin, serializers.IntegerField):
+    pass
+
+
+class ConstructedInventorySerializer(InventorySerializer):
+    source_vars = ConstructedCharField(
+        required=False,
+        default=None,
+        allow_blank=True,
+        help_text=_('The source_vars for the related auto-created inventory source, special to constructed inventory.'),
+    )
+    update_cache_timeout = ConstructedIntegerField(
+        required=False,
+        allow_null=True,
+        min_value=0,
+        default=None,
+        help_text=_('The cache timeout for the related auto-created inventory source, special to constructed inventory'),
+    )
+    limit = ConstructedCharField(
+        required=False,
+        default=None,
+        allow_blank=True,
+        help_text=_('The limit to restrict the returned hosts for the related auto-created inventory source, special to constructed inventory.'),
+    )
+
+    class Meta:
+        model = Inventory
+        fields = ('*', '-host_filter', 'source_vars', 'update_cache_timeout', 'limit')
+
+    def pop_inv_src_data(self, data):
+        inv_src_data = {}
+        for field in ('source_vars', 'update_cache_timeout', 'limit'):
+            if field in data:
+                # values always need to be removed, as they are not valid for Inventory model
+                value = data.pop(field)
+                # null is not valid for any of those fields, taken as not-provided
+                if value is not None:
+                    inv_src_data[field] = value
+        return inv_src_data
+
+    def apply_inv_src_data(self, inventory, inv_src_data):
+        if inv_src_data:
+            update_fields = []
+            inv_src = inventory.inventory_sources.first()
+            for field, value in inv_src_data.items():
+                setattr(inv_src, field, value)
+                update_fields.append(field)
+            if update_fields:
+                inv_src.save(update_fields=update_fields)
+
+    def create(self, validated_data):
+        inv_src_data = self.pop_inv_src_data(validated_data)
+        inventory = super().create(validated_data)
+        self.apply_inv_src_data(inventory, inv_src_data)
+        return inventory
+
+    def update(self, obj, validated_data):
+        inv_src_data = self.pop_inv_src_data(validated_data)
+        obj = super().update(obj, validated_data)
+        self.apply_inv_src_data(obj, inv_src_data)
+        return obj
 
 
 class InventoryScriptSerializer(InventorySerializer):
