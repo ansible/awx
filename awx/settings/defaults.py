@@ -172,7 +172,9 @@ GLOBAL_JOB_EXECUTION_ENVIRONMENTS = [{'name': 'AWX EE (latest)', 'image': 'quay.
 # This image is distinguished from others by having "managed" set to True and users have limited
 # ability to modify it through the API.
 # If a registry credential is needed to pull the image, that can be provided to the awx-manage command
-CONTROL_PLANE_EXECUTION_ENVIRONMENT = 'quay.io/ansible/awx-ee:latest'
+
+# HACK: this is done temporarily for feature development, remove before merge
+CONTROL_PLANE_EXECUTION_ENVIRONMENT = 'quay.io/relrod/awx-ee-invlimit:latest'
 
 # Note: This setting may be overridden by database settings.
 STDOUT_MAX_BYTES_DISPLAY = 1048576
