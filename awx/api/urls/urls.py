@@ -32,6 +32,7 @@ from awx.api.views import (
     OAuth2ApplicationDetail,
 )
 from awx.api.views.mesh_visualizer import MeshVisualizer
+from awx.api.views.analytics import AnalyticsReportsList
 
 from awx.api.views.metrics import MetricsView
 
@@ -73,7 +74,7 @@ from .oauth2 import urls as oauth2_urls
 from .oauth2_root import urls as oauth2_root_urls
 from .workflow_approval_template import urls as workflow_approval_template_urls
 from .workflow_approval import urls as workflow_approval_urls
-
+from .analytics import urls as analytics_urls
 
 v2_urls = [
     re_path(r'^$', ApiV2RootView.as_view(), name='api_v2_root_view'),
@@ -136,6 +137,7 @@ v2_urls = [
     re_path(r'^activity_stream/', include(activity_stream_urls)),
     re_path(r'^workflow_approval_templates/', include(workflow_approval_template_urls)),
     re_path(r'^workflow_approvals/', include(workflow_approval_urls)),
+    re_path(r'^analytics/', include(analytics_urls), name='analytics_reports_list'),
 ]
 
 
