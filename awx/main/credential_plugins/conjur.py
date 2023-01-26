@@ -72,8 +72,6 @@ def conjur_backend(**kwargs):
             resp = requests.post(urljoin(url, '/'.join(['authn', account, username, 'authenticate'])), **auth_kwargs)
         except requests.exceptions.ConnectionError:
             resp = requests.post(urljoin(url, '/'.join(['api', 'authn', account, username, 'authenticate'])), **auth_kwargs)
-        except:
-            resp = requests.post(urljoin(url, '/'.join(['api', 'authn', account, username, 'authenticate'])), **auth_kwargs)
     raise_for_status(resp)
     token = resp.content.decode('utf-8')
 
@@ -95,8 +93,6 @@ def conjur_backend(**kwargs):
         try:
             resp = requests.get(path, timeout=30, **lookup_kwargs)
         except requests.exceptions.ConnectionError:
-            resp = requests.get(path_conjurcloud, timeout=30, **lookup_kwargs)
-        except:
             resp = requests.get(path_conjurcloud, timeout=30, **lookup_kwargs)
     raise_for_status(resp)
     return resp.text
