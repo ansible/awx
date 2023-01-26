@@ -44,6 +44,10 @@ class CustomAction(metaclass=CustomActionRegistryMeta):
 
 
 class Launchable(object):
+    @property
+    def options_endpoint(self):
+        return self.page.endpoint + '1/{}/'.format(self.action)
+
     def add_arguments(self, parser, resource_options_parser, with_pk=True):
         from .options import pk_or_name
 
@@ -53,7 +57,7 @@ class Launchable(object):
         parser.choices[self.action].add_argument('--action-timeout', type=int, help='If set with --monitor or --wait, time out waiting on job completion.')
         parser.choices[self.action].add_argument('--wait', action='store_true', help='If set, waits until the launched job finishes.')
 
-        launch_time_options = self.page.connection.options(self.page.endpoint + '1/{}/'.format(self.action))
+        launch_time_options = self.page.connection.options(self.options_endpoint)
         if launch_time_options.ok:
             launch_time_options = launch_time_options.json()['actions']['POST']
             resource_options_parser.options['LAUNCH'] = launch_time_options

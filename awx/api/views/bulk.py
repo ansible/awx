@@ -28,8 +28,8 @@ class BulkView(APIView):
     def get(self, request, format=None):
         '''List top level resources'''
         data = OrderedDict()
-        data['bulk_host_create'] = reverse('api:bulk_host_create', request=request)
-        data['bulk_job_launch'] = reverse('api:bulk_job_launch', request=request)
+        data['host_create'] = reverse('api:bulk_host_create', request=request)
+        data['job_launch'] = reverse('api:bulk_job_launch', request=request)
         return Response(data)
 
 

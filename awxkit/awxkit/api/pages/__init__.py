@@ -1,6 +1,7 @@
 # Order matters
 from .page import *  # NOQA
 from .base import *  # NOQA
+from .bulk import *  # NOQA
 from .access_list import *  # NOQA
 from .api import *  # NOQA
 from .authtoken import *  # NOQA
