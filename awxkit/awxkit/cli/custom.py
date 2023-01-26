@@ -90,6 +90,48 @@ class JobTemplateLaunch(Launchable, CustomAction):
     resource = 'job_templates'
 
 
+class BulkJobLaunch(Launchable, CustomAction):
+    action = 'job_launch'
+    resource = 'bulk'
+
+    @property
+    def options_endpoint(self):
+        return self.page.endpoint + '{}/'.format(self.action)
+
+    def add_arguments(self, parser, resource_options_parser):
+        Launchable.add_arguments(self, parser, resource_options_parser, with_pk=False)
+
+    def perform(self, **kwargs):
+        monitor_kwargs = {
+            'monitor': kwargs.pop('monitor', False),
+            'wait': kwargs.pop('wait', False),
+            'action_timeout': kwargs.pop('action_timeout', False),
+        }
+        response = self.page.get().job_launch.post(kwargs)
+        self.monitor(response, **monitor_kwargs)
+        return response
+
+
+class BulkHostCreate(CustomAction):
+    action = 'host_create'
+    resource = 'bulk'
+
+    @property
+    def options_endpoint(self):
+        return self.page.endpoint + '{}/'.format(self.action)
+
+    def add_arguments(self, parser, resource_options_parser):
+        options = self.page.connection.options(self.options_endpoint)
+        if options.ok:
+            options = options.json()['actions']['POST']
+            resource_options_parser.options['HOSTCREATEPOST'] = options
+            resource_options_parser.build_query_arguments(self.action, 'HOSTCREATEPOST')
+
+    def perform(self, **kwargs):
+        response = self.page.get().host_create.post(kwargs)
+        return response
+
+
 class ProjectUpdate(Launchable, CustomAction):
     action = 'update'
     resource = 'projects'
