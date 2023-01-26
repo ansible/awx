@@ -13,6 +13,7 @@ class Resources(object):
     _applications = 'applications/'
     _auth = 'auth/'
     _authtoken = 'authtoken/'
+    _bulk = 'bulk/'
     _config = 'config/'
     _config_attach = 'config/attach/'
     _credential = r'credentials/\d+/'

@@ -16,9 +16,25 @@ from awx.api import (
 )
 
 
-class BulkJobLaunchView(GenericAPIView):
-    _ignore_model_permissions = True
+class BulkView(APIView):
     permission_classes = [IsAuthenticated]
+    renderer_classes = [
+        renderers.BrowsableAPIRenderer,
+        JSONRenderer,
+    ]
+    allowed_methods = ['GET', 'OPTIONS']
+
+    def get(self, request, format=None):
+        '''List top level resources'''
+        data = OrderedDict()
+        data['host_create'] = reverse('api:bulk_host_create', request=request)
+        data['job_launch'] = reverse('api:bulk_job_launch', request=request)
+        return Response(data)
+
+
+class BulkJobLaunchView(GenericAPIView):
+    permission_classes = [IsAuthenticated]
+    model = UnifiedJob
     serializer_class = serializers.BulkJobLaunchSerializer
     allowed_methods = ['GET', 'POST', 'OPTIONS']
 
@@ -35,26 +51,9 @@ class BulkJobLaunchView(GenericAPIView):
         return Response(bulkjob_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class BulkView(APIView):
-    _ignore_model_permissions = True
-    permission_classes = [IsAuthenticated]
-    renderer_classes = [
-        renderers.BrowsableAPIRenderer,
-        JSONRenderer,
-    ]
-    allowed_methods = ['GET', 'OPTIONS']
-
-    def get(self, request, format=None):
-        '''List top level resources'''
-        data = OrderedDict()
-        data['bulk_host_create'] = reverse('api:bulk_host_create', request=request)
-        data['bulk_job_launch'] = reverse('api:bulk_job_launch', request=request)
-        return Response(data)
-
-
 class BulkHostCreateView(GenericAPIView):
-    _ignore_model_permissions = True
     permission_classes = [IsAuthenticated]
+    model = Host
     serializer_class = serializers.BulkHostCreateSerializer
     allowed_methods = ['GET', 'POST', 'OPTIONS']
 
