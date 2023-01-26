@@ -1971,7 +1971,8 @@ class BulkHostCreateSerializer(serializers.Serializer):
     inventory = serializers.PrimaryKeyRelatedField(
         queryset=Inventory.objects.all(), required=True, write_only=True, help_text=_('Primary Key ID of inventory to add hosts to.')
     )
-    hosts = serializers.ListField(child=BulkHostSerializer(), allow_empty=False, max_length=1000, write_only=True, help_text=_('Hosts to be created.'))
+    hosts_help_text = _('List of hosts to be created, JSON. e.g. [{"name": "example.com"}, {"name": "127.0.0.1"}]')
+    hosts = serializers.ListField(child=BulkHostSerializer(), allow_empty=False, max_length=1000, write_only=True, help_text=hosts_help_text)
 
     class Meta:
         fields = ('inventory', 'hosts')
@@ -4582,8 +4583,9 @@ class BulkJobNodeSerializer(serializers.Serializer):
 
 
 class BulkJobLaunchSerializer(BaseSerializer):
-    name = serializers.CharField(max_length=512, write_only=True, required=False)  # limited by max name of jobs
-    jobs = BulkJobNodeSerializer(many=True, allow_empty=False, write_only=True, max_length=1000)
+    name = serializers.CharField(default='Bulk Job Launch', max_length=512, write_only=True, required=False, allow_blank=True)  # limited by max name of jobs
+    job_node_help_text = _('List of jobs to be launched, JSON. e.g. [{"unified_job_template": 7}, {"unified_job_template": 10}]')
+    jobs = BulkJobNodeSerializer(many=True, allow_empty=False, write_only=True, max_length=1000, help_text=job_node_help_text)
     description = serializers.CharField(write_only=True, required=False, allow_blank=False)
     extra_vars = serializers.CharField(write_only=True, required=False, allow_blank=False)
     organization = serializers.PrimaryKeyRelatedField(
@@ -4673,11 +4675,11 @@ class BulkJobLaunchSerializer(BaseSerializer):
         job_node_data = validated_data.pop('jobs')
         # FIXME: Need to set organization on the WorkflowJob in order for users to be able to see it --
         # normally their permission is sourced from the underlying WorkflowJobTemplate
-        # maybe we need to add Organization to WorkflowJob
-        if 'name' not in validated_data:
-            validated_data['name'] = 'Bulk Job Launch'
-
+        # maybe we need to add Organization to WorkflowJobd
+        wfj_limit = validated_data.pop('limit', None)
         wfj = WorkflowJob.objects.create(**validated_data, is_bulk_job=True)
+        if wfj_limit:
+            wfj.limit = wfj_limit
         nodes = []
         node_m2m_objects = {}
         node_m2m_object_types_to_through_model = {
