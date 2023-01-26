@@ -354,7 +354,9 @@ def _update_m2m_from_groups(ldap_user, opts, remove=True):
                 continue
             if ldap_user._get_groups().is_member_of(group_dn):
                 return True
-    return False
+    if remove:
+        return False
+    return None
 
 
 @receiver(populate_user, dispatch_uid='populate-ldap-user')
