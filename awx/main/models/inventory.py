@@ -49,7 +49,7 @@ from awx.main.models.notifications import (
 from awx.main.models.credential.injectors import _openstack_data
 from awx.main.utils import _inventory_updates
 from awx.main.utils.safe_yaml import sanitize_jinja
-from awx.main.utils.execution_environments import to_container_path
+from awx.main.utils.execution_environments import to_container_path, get_control_plane_execution_environment
 from awx.main.utils.licensing import server_product_name
 
 
@@ -994,6 +994,16 @@ class InventorySourceOptions(BaseModel):
         default='',
         help_text=_("Enter host, group or pattern match"),
     )
+
+    def resolve_execution_environment(self):
+        """
+        Project updates, themselves, will use the control plane execution environment.
+        Jobs using the project can use the default_environment, but the project updates
+        are not flexible enough to allow customizing the image they use.
+        """
+        if self.inventory.kind == 'constructed':
+            return get_control_plane_execution_environment()
+        return super().resolve_execution_environment()
 
     @staticmethod
     def cloud_credential_validation(source, cred):
