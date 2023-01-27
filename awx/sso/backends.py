@@ -11,11 +11,9 @@ import ldap
 # Django
 from django.dispatch import receiver
 from django.contrib.auth.models import User
-from django.contrib.contenttypes.models import ContentType
 from django.conf import settings as django_settings
 from django.core.signals import setting_changed
 from django.utils.encoding import force_str
-from django.db.utils import IntegrityError
 
 # django-auth-ldap
 from django_auth_ldap.backend import LDAPSettings as BaseLDAPSettings
@@ -36,6 +34,7 @@ from social_core.backends.saml import SAMLIdentityProvider as BaseSAMLIdentityPr
 
 # Ansible Tower
 from awx.sso.models import UserEnterpriseAuth
+from awx.sso.common import create_org_and_teams, reconcile_users_org_team_mappings
 
 logger = logging.getLogger('awx.sso.backends')
 
@@ -365,8 +364,6 @@ def on_populate_user(sender, **kwargs):
     Handle signal from LDAP backend to populate the user object.  Update user
     organization/team memberships according to their LDAP groups.
     """
-    from awx.main.models import Organization, Team
-
     user = kwargs['user']
     ldap_user = kwargs['ldap_user']
     backend = ldap_user.backend
@@ -390,43 +387,16 @@ def on_populate_user(sender, **kwargs):
 
     org_map = getattr(backend.settings, 'ORGANIZATION_MAP', {})
     team_map = getattr(backend.settings, 'TEAM_MAP', {})
-
-    # Move this junk into save of the settings for performance later, there is no need to do that here
-    #    with maybe the exception of someone defining this in settings before the server is started?
-    # ==============================================================================================================
-
-    # Get all of the IDs and names of orgs in the DB and create any new org defined in LDAP that does not exist in the DB
-    existing_orgs = {}
-    for (org_id, org_name) in Organization.objects.all().values_list('id', 'name'):
-        existing_orgs[org_name] = org_id
-
-    # Create any orgs (if needed) for all entries in the org and team maps
-    for org_name in set(list(org_map.keys()) + [item.get('organization', None) for item in team_map.values()]):
-        if org_name and org_name not in existing_orgs:
-            logger.info("LDAP adapter is creating org {}".format(org_name))
-            try:
-                new_org = Organization.objects.create(name=org_name)
-            except IntegrityError:
-                # Another thread must have created this org before we did so now we need to get it
-                new_org = Organization.objects.get(name=org_name)
-            # Add the org name to the existing orgs since we created it and we may need it to build the teams below
-            existing_orgs[org_name] = new_org.id
-
-    # Do the same for teams
-    existing_team_names = list(Team.objects.all().values_list('name', flat=True))
+    orgs_list = list(org_map.keys())
+    team_map = {}
     for team_name, team_opts in team_map.items():
         if not team_opts.get('organization', None):
             # You can't save the LDAP config in the UI w/o an org (or '' or null as the org) so if we somehow got this condition its an error
             logger.error("Team named {} in LDAP team map settings is invalid due to missing organization".format(team_name))
             continue
-        if team_name not in existing_team_names:
-            try:
-                Team.objects.create(name=team_name, organization_id=existing_orgs[team_opts['organization']])
-            except IntegrityError:
-                # If another process got here before us that is ok because we don't need the ID from this team or anything
-                pass
-    # End move some day
-    # ==============================================================================================================
+        team_map[team_name] = team_opts['organization']
+
+    create_org_and_teams(orgs_list, team_map, 'LDAP')
 
     # Compute in memory what the state is of the different LDAP orgs
     org_roles_and_ldap_attributes = {'admin_role': 'admins', 'auditor_role': 'auditors', 'member_role': 'users'}
@@ -475,87 +445,3 @@ def on_populate_user(sender, **kwargs):
         profile.save()
 
     reconcile_users_org_team_mappings(user, desired_org_states, desired_team_states, 'LDAP')
-
-
-def reconcile_users_org_team_mappings(user, desired_org_states, desired_team_states, source):
-    #
-    # Arguments:
-    #   user - a user object
-    #   desired_org_states: { '<org_name>': { '<role>': <boolean> or None } }
-    #   desired_team_states: { '<org_name>': { '<team name>': { '<role>': <boolean> or None } } }
-    #   source - a text label indicating the "authentication adapter" for debug messages
-    #
-    # This function will load the users existing roles and then based on the deisred states modify the users roles
-    #    True indicates the user needs to be a member of the role
-    #    False indicates the user should not be a member of the role
-    #    None means this function should not change the users membership of a role
-    #
-    from awx.main.models import Organization, Team
-
-    content_types = []
-    reconcile_items = []
-    if desired_org_states:
-        content_types.append(ContentType.objects.get_for_model(Organization))
-        reconcile_items.append(('organization', desired_org_states))
-    if desired_team_states:
-        content_types.append(ContentType.objects.get_for_model(Team))
-        reconcile_items.append(('team', desired_team_states))
-
-    if not content_types:
-        # If both desired states were empty we can simply return because there is nothing to reconcile
-        return
-
-    # users_roles is a flat set of IDs
-    users_roles = set(user.roles.filter(content_type__in=content_types).values_list('pk', flat=True))
-
-    for object_type, desired_states in reconcile_items:
-        roles = []
-        # Get a set of named tuples for the org/team name plus all of the roles we got above
-        if object_type == 'organization':
-            for sub_dict in desired_states.values():
-                for role_name in sub_dict:
-                    if sub_dict[role_name] is None:
-                        continue
-                    if role_name not in roles:
-                        roles.append(role_name)
-            model_roles = Organization.objects.filter(name__in=desired_states.keys()).values_list('name', *roles, named=True)
-        else:
-            team_names = []
-            for teams_dict in desired_states.values():
-                team_names.extend(teams_dict.keys())
-                for sub_dict in teams_dict.values():
-                    for role_name in sub_dict:
-                        if sub_dict[role_name] is None:
-                            continue
-                        if role_name not in roles:
-                            roles.append(role_name)
-            model_roles = Team.objects.filter(name__in=team_names).values_list('name', 'organization__name', *roles, named=True)
-
-        for row in model_roles:
-            for role_name in roles:
-                if object_type == 'organization':
-                    desired_state = desired_states.get(row.name, {})
-                else:
-                    desired_state = desired_states.get(row.organization__name, {}).get(row.name, {})
-
-                if desired_state.get(role_name, None) is None:
-                    # The mapping was not defined for this [org/team]/role so we can just pass
-                    continue
-
-                # If somehow the auth adapter knows about an items role but that role is not defined in the DB we are going to print a pretty error
-                # This is your classic safety net that we should never hit; but here you are reading this comment... good luck and Godspeed.
-                role_id = getattr(row, role_name, None)
-                if role_id is None:
-                    logger.error("{} adapter wanted to manage role {} of {} {} but that role is not defined".format(source, role_name, object_type, row.name))
-                    continue
-
-                if desired_state[role_name]:
-                    # The desired state was the user mapped into the object_type, if the user was not mapped in map them in
-                    if role_id not in users_roles:
-                        logger.debug("{} adapter adding user {} to {} {} as {}".format(source, user.username, object_type, row.name, role_name))
-                        user.roles.add(role_id)
-                else:
-                    # The desired state was the user was not mapped into the org, if the user has the permission remove it
-                    if role_id in users_roles:
-                        logger.debug("{} adapter removing user {} permission of {} from {} {}".format(source, user.username, role_name, object_type, row.name))
-                        user.roles.remove(role_id)
