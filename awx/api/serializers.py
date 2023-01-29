@@ -2065,8 +2065,17 @@ class BulkHostCreateSerializer(serializers.Serializer):
 
         # This actually updates the cached "total_hosts" field on the inventory
         update_inventory_computed_fields.delay(validated_data['inventory'].id)
-        ids = [item.id for item in result]
-        return {"created": ids, "url": InventorySerializer().get_related(validated_data['inventory'])['hosts']}
+        return_keys = [k for k in BulkHostSerializer().fields.keys()] + ['id']
+        return_data = []
+        for r in result:
+            item = {k: getattr(r, k) for k in return_keys}
+            if not settings.IS_TESTING_MODE:
+                # sqlite acts different with bulk_create -- it doesn't return the id of the objects
+                # to get it, you have to do an additional query, which is not useful for our tests
+                item['url'] = reverse('api:host_detail', kwargs={'pk': r.id})
+            item['inventory'] = reverse('api:inventory_detail', kwargs={'pk': validated_data['inventory'].id})
+            return_data.append(item)
+        return return_data
 
 
 class GroupTreeSerializer(GroupSerializer):
