@@ -1799,7 +1799,7 @@ class ConstructedInventorySerializer(InventorySerializer):
         min_value=0,
         max_value=2,
         default=None,
-        help_text=_('The cache timeout for the related auto-created inventory source, special to constructed inventory'),
+        help_text=_('The verbosity level for the related auto-created inventory source, special to constructed inventory'),
     )
 
     class Meta:
