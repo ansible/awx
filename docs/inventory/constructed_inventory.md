@@ -3,7 +3,7 @@
 Constructed inventory is a separate "kind" of inventory, along-side of
 normal (manual) inventories and "smart" inventories.
 The functionality overlaps with smart inventory, and it is intended that
-smart inventory is sunseted and will be eventually removed.
+smart inventory is sunsetted and will be eventually removed.
 
 #### Demo Problem
 
