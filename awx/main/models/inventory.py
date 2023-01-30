@@ -445,7 +445,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         """
         if self.kind == 'constructed':
             if not self.inventory_sources.exists():
-                self.inventory_sources.create(source='constructed', name=f'Auto-created source for: {self.name}'[:512], overwrite=True)
+                self.inventory_sources.create(source='constructed', name=f'Auto-created source for: {self.name}'[:512], overwrite=True, update_on_launch=True)
 
     def save(self, *args, **kwargs):
         self._update_host_smart_inventory_memeberships()

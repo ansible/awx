@@ -1773,14 +1773,22 @@ class ConstructedInventorySerializer(InventorySerializer):
         allow_blank=True,
         help_text=_('The limit to restrict the returned hosts for the related auto-created inventory source, special to constructed inventory.'),
     )
+    verbosity = ConstructedIntegerField(
+        required=False,
+        allow_null=True,
+        min_value=0,
+        max_value=2,
+        default=None,
+        help_text=_('The verbosity level for the related auto-created inventory source, special to constructed inventory'),
+    )
 
     class Meta:
         model = Inventory
-        fields = ('*', '-host_filter', 'source_vars', 'update_cache_timeout', 'limit')
+        fields = ('*', '-host_filter', 'source_vars', 'update_cache_timeout', 'limit', 'verbosity')
 
     def pop_inv_src_data(self, data):
         inv_src_data = {}
-        for field in ('source_vars', 'update_cache_timeout', 'limit'):
+        for field in ('source_vars', 'update_cache_timeout', 'limit', 'verbosity'):
             if field in data:
                 # values always need to be removed, as they are not valid for Inventory model
                 value = data.pop(field)
