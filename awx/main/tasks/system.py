@@ -242,8 +242,8 @@ def apply_cluster_membership_policies():
 
 @task(queue='tower_settings_change')
 def clear_setting_cache(setting_keys):
-    # notify the service to clear the cache
-    send_pg_notify('tower_settings_change', setting_keys)
+    # log that cache is being cleared
+    logger.info(f"clear_setting_cache of keys {setting_keys}")
 
 
 @task(queue='tower_broadcast_all')
