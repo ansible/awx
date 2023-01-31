@@ -420,6 +420,9 @@ AUTH_BASIC_ENABLED = True
 # when trying to access a UI page that requries authentication.
 LOGIN_REDIRECT_OVERRIDE = ''
 
+# Note: This setting may be overridden by database settings.
+ALLOW_METRICS_FOR_ANONYMOUS_USERS = False
+
 DEVSERVER_DEFAULT_ADDR = '0.0.0.0'
 DEVSERVER_DEFAULT_PORT = '8013'
 
@@ -472,21 +475,15 @@ _SOCIAL_AUTH_PIPELINE_BASE = (
     'social_core.pipeline.user.get_username',
     'social_core.pipeline.social_auth.associate_by_email',
     'social_core.pipeline.user.create_user',
-    'awx.sso.pipeline.check_user_found_or_created',
+    'awx.sso.social_base_pipeline.check_user_found_or_created',
     'social_core.pipeline.social_auth.associate_user',
     'social_core.pipeline.social_auth.load_extra_data',
-    'awx.sso.pipeline.set_is_active_for_new_user',
+    'awx.sso.social_base_pipeline.set_is_active_for_new_user',
     'social_core.pipeline.user.user_details',
-    'awx.sso.pipeline.prevent_inactive_login',
+    'awx.sso.social_base_pipeline.prevent_inactive_login',
 )
-SOCIAL_AUTH_PIPELINE = _SOCIAL_AUTH_PIPELINE_BASE + ('awx.sso.pipeline.update_user_orgs', 'awx.sso.pipeline.update_user_teams')
-SOCIAL_AUTH_SAML_PIPELINE = _SOCIAL_AUTH_PIPELINE_BASE + (
-    'awx.sso.pipeline.update_user_orgs_by_saml_attr',
-    'awx.sso.pipeline.update_user_teams_by_saml_attr',
-    'awx.sso.pipeline.update_user_orgs',
-    'awx.sso.pipeline.update_user_teams',
-    'awx.sso.pipeline.update_user_flags',
-)
+SOCIAL_AUTH_PIPELINE = _SOCIAL_AUTH_PIPELINE_BASE + ('awx.sso.social_pipeline.update_user_orgs', 'awx.sso.social_pipeline.update_user_teams')
+SOCIAL_AUTH_SAML_PIPELINE = _SOCIAL_AUTH_PIPELINE_BASE + ('awx.sso.saml_pipeline.populate_user', 'awx.sso.saml_pipeline.update_user_flags')
 SAML_AUTO_CREATE_OBJECTS = True
 
 SOCIAL_AUTH_LOGIN_URL = '/'

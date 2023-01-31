@@ -17,9 +17,9 @@ jobs:
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
         run: |
-          echo $PR_BODY | grep "Bug, Docs Fix or other nominal change" > Z
-          echo $PR_BODY | grep "New or Enhanced Feature" > Y
-          echo $PR_BODY | grep "Breaking Change" > X
+          echo "$PR_BODY" | grep "Bug, Docs Fix or other nominal change" > Z
+          echo "$PR_BODY" | grep "New or Enhanced Feature" > Y
+          echo "$PR_BODY" | grep "Breaking Change" > X
           exit 0
         # We exit 0 and set the shell to prevent the returns from the greps from failing this step
         # See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#exit-codes-and-error-action-preference

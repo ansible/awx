@@ -6,7 +6,8 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
-import mockCredential from './shared/data.scmCredential.json';
+import mockMachineCredential from './shared/data.machineCredential.json';
+import mockSCMCredential from './shared/data.scmCredential.json';
 import Credential from './Credential';
 
 jest.mock('../../api');
@@ -21,19 +22,28 @@ jest.mock('react-router-dom', () => ({
 describe('<Credential />', () => {
   let wrapper;
 
-  beforeEach(() => {
+  test('initially renders user-based machine credential successfully', async () => {
     CredentialsAPI.readDetail.mockResolvedValueOnce({
-      data: mockCredential,
+      data: mockMachineCredential,
     });
-  });
-
-  test('initially renders user-based credential successfully', async () => {
     await act(async () => {
       wrapper = mountWithContexts(<Credential setBreadcrumb={() => {}} />);
     });
     wrapper.update();
     expect(wrapper.find('Credential').length).toBe(1);
     expect(wrapper.find('RoutedTabs li').length).toBe(4);
+  });
+
+  test('initially renders user-based SCM credential successfully', async () => {
+    CredentialsAPI.readDetail.mockResolvedValueOnce({
+      data: mockSCMCredential,
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(<Credential setBreadcrumb={() => {}} />);
+    });
+    wrapper.update();
+    expect(wrapper.find('Credential').length).toBe(1);
+    expect(wrapper.find('RoutedTabs li').length).toBe(3);
   });
 
   test('should render expected tabs', async () => {
