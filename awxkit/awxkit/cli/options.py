@@ -122,6 +122,15 @@ class ResourceOptionsParser(object):
                     action='store_true',
                     help=('fetch all pages of content from the API when ' 'returning results (instead of just the first page)'),
                 )
+                parser.add_argument(
+                    '--order_by',
+                    dest='order_by',
+                    help=(
+                        'order results by given field name, '
+                        'prefix the field name with a dash (-) to sort in reverse eg --order_by=\'-name\','
+                        'multiple sorting fields may be specified by separating the field names with a comma (,)'
+                    ),
+                )
                 add_output_formatting_arguments(parser, {})
 
     def build_detail_actions(self):
