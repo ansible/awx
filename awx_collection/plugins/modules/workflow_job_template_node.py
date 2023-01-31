@@ -20,7 +20,6 @@ short_description: create, update, or destroy Automation Platform Controller wor
 description:
     - Create, update, or destroy Automation Platform Controller workflow job template nodes.
     - Use this to build a graph for a workflow, which dictates what the workflow runs.
-    - Replaces the deprecated tower_workflow_template module schema command.
     - You can create nodes first, and link them afterwards, and not worry about ordering.
       For failsafe referencing of a node, specify identifier, WFJT, and organization.
       With those specified, you can choose to modify or not modify any other parameter.
@@ -30,7 +29,6 @@ options:
         - Variables to apply at launch time.
         - Will only be accepted if job template prompts for vars or has a survey asking for those vars.
       type: dict
-      default: {}
     inventory:
       description:
         - Inventory applied as a prompt, if job template prompts for inventory

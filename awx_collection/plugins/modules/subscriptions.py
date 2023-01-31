@@ -39,6 +39,7 @@ options:
         - Note This is a client side search, not an API side search
       required: False
       type: dict
+      default: {}
 extends_documentation_fragment: awx.awx.auth
 '''
 

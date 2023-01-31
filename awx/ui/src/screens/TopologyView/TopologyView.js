@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState, useRef } from 'react';
 import { t } from '@lingui/macro';
 import { PageSection, Card, CardBody } from '@patternfly/react-core';
 import ContentError from 'components/ContentError';
@@ -10,6 +10,7 @@ import useZoom from './utils/useZoom';
 import { CHILDSELECTOR, PARENTSELECTOR } from './constants';
 
 function TopologyView() {
+  const storedNodes = useRef(null);
   const [showLegend, setShowLegend] = useState(true);
   const [showZoomControls, setShowZoomControls] = useState(false);
   const {
@@ -20,6 +21,7 @@ function TopologyView() {
   } = useRequest(
     useCallback(async () => {
       const { data } = await MeshAPI.read();
+      storedNodes.current = data.nodes;
       return {
         meshData: data,
       };
@@ -64,6 +66,7 @@ function TopologyView() {
                   showLegend={showLegend}
                   zoom={zoom}
                   setShowZoomControls={setShowZoomControls}
+                  storedNodes={storedNodes}
                 />
               )}
             </CardBody>

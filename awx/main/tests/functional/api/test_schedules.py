@@ -106,6 +106,30 @@ def test_encrypted_survey_answer(post, patch, admin_user, project, inventory, su
 
 
 @pytest.mark.django_db
+def test_survey_password_default(post, patch, admin_user, project, inventory, survey_spec_factory):
+    job_template = JobTemplate.objects.create(
+        name='test-jt',
+        project=project,
+        playbook='helloworld.yml',
+        inventory=inventory,
+        ask_variables_on_launch=False,
+        survey_enabled=True,
+        survey_spec=survey_spec_factory([{'variable': 'var1', 'question_name': 'Q1', 'type': 'password', 'required': True, 'default': 'foobar'}]),
+    )
+
+    # test removal of $encrypted$
+    url = reverse('api:job_template_schedules_list', kwargs={'pk': job_template.id})
+    r = post(url, {'name': 'test sch', 'rrule': RRULE_EXAMPLE, 'extra_data': '{"var1": "$encrypted$"}'}, admin_user, expect=201)
+    schedule = Schedule.objects.get(pk=r.data['id'])
+    assert schedule.extra_data == {}
+    assert schedule.enabled is True
+
+    # test an unrelated change
+    patch(schedule.get_absolute_url(), data={'enabled': False}, user=admin_user, expect=200)
+    patch(schedule.get_absolute_url(), data={'enabled': True}, user=admin_user, expect=200)
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize(
     'rrule, error',
     [
@@ -123,19 +147,19 @@ def test_encrypted_survey_answer(post, patch, admin_user, project, inventory, su
         ("DTSTART:20030925T104941Z RRULE:FREQ=DAILY;INTERVAL=10;COUNT=500;UNTIL=20040925T104941Z", "RRULE may not contain both COUNT and UNTIL"),  # noqa
         ("DTSTART:20300308T050000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=2000", "COUNT > 999 is unsupported"),  # noqa
         # Individual rule test with multiple rules
-        ## Bad Rule:  RRULE:NONSENSE
+        # Bad Rule:  RRULE:NONSENSE
         ("DTSTART:20300308T050000Z RRULE:NONSENSE RRULE:INTERVAL=1;FREQ=DAILY EXRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=SU", "INTERVAL required in rrule"),
-        ## Bad Rule:  RRULE:FREQ=YEARLY;INTERVAL=1;BYDAY=5MO
+        # Bad Rule:  RRULE:FREQ=YEARLY;INTERVAL=1;BYDAY=5MO
         (
             "DTSTART:20300308T050000Z RRULE:INTERVAL=1;FREQ=DAILY EXRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=SU RRULE:FREQ=YEARLY;INTERVAL=1;BYDAY=5MO",
             "BYDAY with numeric prefix not supported",
         ),  # noqa
-        ## Bad Rule:  RRULE:FREQ=DAILY;INTERVAL=10;COUNT=500;UNTIL=20040925T104941Z
+        # Bad Rule:  RRULE:FREQ=DAILY;INTERVAL=10;COUNT=500;UNTIL=20040925T104941Z
         (
             "DTSTART:20030925T104941Z RRULE:INTERVAL=1;FREQ=DAILY EXRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=SU RRULE:FREQ=DAILY;INTERVAL=10;COUNT=500;UNTIL=20040925T104941Z",
             "RRULE may not contain both COUNT and UNTIL",
         ),  # noqa
-        ## Bad Rule:  RRULE:FREQ=DAILY;INTERVAL=1;COUNT=2000
+        # Bad Rule:  RRULE:FREQ=DAILY;INTERVAL=1;COUNT=2000
         (
             "DTSTART:20300308T050000Z RRULE:INTERVAL=1;FREQ=DAILY EXRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=SU RRULE:FREQ=DAILY;INTERVAL=1;COUNT=2000",
             "COUNT > 999 is unsupported",

@@ -60,12 +60,10 @@ options:
       description:
         - The branch to use for the SCM resource.
       type: str
-      default: ''
     scm_refspec:
       description:
         - The refspec to use for the SCM resource.
       type: str
-      default: ''
     credential:
       description:
         - Name of the credential to use with this SCM resource.
@@ -172,7 +170,7 @@ options:
     signature_validation_credential:
       description:
         - Name of the credential to use for signature validation.
-        - If signature validation credential is provided, signature validation will be enabled. 
+        - If signature validation credential is provided, signature validation will be enabled.
       type: str
 
 extends_documentation_fragment: awx.awx.auth

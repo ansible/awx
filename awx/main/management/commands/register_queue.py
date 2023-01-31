@@ -17,7 +17,9 @@ class InstanceNotFound(Exception):
 
 
 class RegisterQueue:
-    def __init__(self, queuename, instance_percent, inst_min, hostname_list, is_container_group=None, pod_spec_override=None):
+    def __init__(
+        self, queuename, instance_percent, inst_min, hostname_list, is_container_group=None, pod_spec_override=None, max_forks=None, max_concurrent_jobs=None
+    ):
         self.instance_not_found_err = None
         self.queuename = queuename
         self.instance_percent = instance_percent
@@ -25,6 +27,8 @@ class RegisterQueue:
         self.hostname_list = hostname_list
         self.is_container_group = is_container_group
         self.pod_spec_override = pod_spec_override
+        self.max_forks = max_forks
+        self.max_concurrent_jobs = max_concurrent_jobs
 
     def get_create_update_instance_group(self):
         created = False
@@ -43,6 +47,14 @@ class RegisterQueue:
 
         if self.pod_spec_override and (ig.pod_spec_override != self.pod_spec_override):
             ig.pod_spec_override = self.pod_spec_override
+            changed = True
+
+        if self.max_forks and (ig.max_forks != self.max_forks):
+            ig.max_forks = self.max_forks
+            changed = True
+
+        if self.max_concurrent_jobs and (ig.max_concurrent_jobs != self.max_concurrent_jobs):
+            ig.max_concurrent_jobs = self.max_concurrent_jobs
             changed = True
 
         if changed:

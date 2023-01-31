@@ -13,7 +13,7 @@ from django.contrib.auth import views as auth_views
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.exceptions import FieldDoesNotExist
-from django.db import connection
+from django.db import connection, transaction
 from django.db.models.fields.related import OneToOneRel
 from django.http import QueryDict
 from django.shortcuts import get_object_or_404
@@ -64,6 +64,7 @@ __all__ = [
     'ParentMixin',
     'SubListAttachDetachAPIView',
     'CopyAPIView',
+    'GenericCancelView',
     'BaseUsersList',
 ]
 
@@ -983,6 +984,23 @@ class CopyAPIView(GenericAPIView):
         serializer = self._get_copy_return_serializer(new_obj)
         headers = {'Location': new_obj.get_absolute_url(request=request)}
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class GenericCancelView(RetrieveAPIView):
+    # In subclass set model, serializer_class
+    obj_permission_type = 'cancel'
+
+    @transaction.non_atomic_requests
+    def dispatch(self, *args, **kwargs):
+        return super(GenericCancelView, self).dispatch(*args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.can_cancel:
+            obj.cancel()
+            return Response(status=status.HTTP_202_ACCEPTED)
+        else:
+            return self.http_method_not_allowed(request, *args, **kwargs)
 
 
 class BaseUsersList(SubListCreateAttachDetachAPIView):

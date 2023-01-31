@@ -28,7 +28,7 @@ Here are the main `make` targets:
 Notable files:
 
 - `tools/docker-compose/inventory` file - used to configure the AWX development environment.
-- `migrate.yml` - playbook for migrating data from Local Docker to the Development Environment
+- `tools/docker-compose/ansible/migrate.yml` - playbook for migrating data from Local Docker to the Development Environment
 
 ### Prerequisites
 
@@ -301,11 +301,19 @@ Note that you may see multiple messages of the form `2021-03-04 20:11:47,666 WAR
 
 To bring up a 1 node AWX + minikube that is accessible from AWX run the following.
 
+Start minikube
+
+```bash
+(host)$minikube start --cpus=4  --memory=8g --addons=ingress`
+```
+
+Start AWX
+
 ```bash
 (host)$ make docker-compose-container-group
 ```
 
-Alternatively, you can set the env var `MINIKUBE_CONTAINER_GROUP=true` to use the default dev env bring up. his way you can use other env flags like the cluster node count.
+Alternatively, you can set the env var `MINIKUBE_CONTAINER_GROUP=true` to use the default dev env bring up. his way you can use other env flags like the cluster node count. Set `MINIKUBE_SETUP=true` to make the roles download, install and run minikube for you, but if you run into issues with this just start minikube yourself.
 
 ```bash
 (host)$ MINIKUBE_CONTAINER_GROUP=true make docker-compose

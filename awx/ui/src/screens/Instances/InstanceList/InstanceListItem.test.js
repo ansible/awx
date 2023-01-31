@@ -272,9 +272,9 @@ describe('<InstanceListItem/>', () => {
     expect(wrapper.find('Detail[label="Policy Type"]').prop('value')).toBe(
       'Auto'
     );
-    expect(
-      wrapper.find('Detail[label="Last Health Check"]').prop('value')
-    ).toBe('9/15/2021, 6:02:07 PM');
+    expect(wrapper.find('Detail[label="Last Health Check"]').text()).toBe(
+      'Last Health Check9/15/2021, 6:02:07 PM'
+    );
   });
   test('Hop should not render some things', async () => {
     const onSelect = jest.fn();

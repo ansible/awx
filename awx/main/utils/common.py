@@ -11,11 +11,12 @@ import os
 import subprocess
 import re
 import stat
+import sys
 import urllib.parse
 import threading
 import contextlib
 import tempfile
-from functools import reduce, wraps
+import functools
 
 # Django
 from django.core.exceptions import ObjectDoesNotExist, FieldDoesNotExist
@@ -73,6 +74,7 @@ __all__ = [
     'NullablePromptPseudoField',
     'model_instance_diff',
     'parse_yaml_or_json',
+    'is_testing',
     'RequireDebugTrueOrTest',
     'has_model_field_prefetched',
     'set_environ',
@@ -88,6 +90,7 @@ __all__ = [
     'deepmerge',
     'get_event_partition_epoch',
     'cleanup_new_process',
+    'log_excess_runtime',
 ]
 
 
@@ -144,6 +147,19 @@ def underscore_to_camelcase(s):
     return ''.join(x.capitalize() or '_' for x in s.split('_'))
 
 
+@functools.cache
+def is_testing(argv=None):
+    '''Return True if running django or py.test unit tests.'''
+    if 'PYTEST_CURRENT_TEST' in os.environ.keys():
+        return True
+    argv = sys.argv if argv is None else argv
+    if len(argv) >= 1 and ('py.test' in argv[0] or 'py/test.py' in argv[0]):
+        return True
+    elif len(argv) >= 2 and argv[1] == 'test':
+        return True
+    return False
+
+
 class RequireDebugTrueOrTest(logging.Filter):
     """
     Logging filter to output when in DEBUG mode or running tests.
@@ -152,7 +168,7 @@ class RequireDebugTrueOrTest(logging.Filter):
     def filter(self, record):
         from django.conf import settings
 
-        return settings.DEBUG or settings.IS_TESTING()
+        return settings.DEBUG or is_testing()
 
 
 class IllegalArgumentError(ValueError):
@@ -174,7 +190,7 @@ def memoize(ttl=60, cache_key=None, track_function=False, cache=None):
     cache = cache or get_memoize_cache()
 
     def memoize_decorator(f):
-        @wraps(f)
+        @functools.wraps(f)
         def _memoizer(*args, **kwargs):
             if track_function:
                 cache_dict_key = slugify('%r %r' % (args, kwargs))
@@ -992,7 +1008,7 @@ def getattrd(obj, name, default=NoDefaultProvided):
     """
 
     try:
-        return reduce(getattr, name.split("."), obj)
+        return functools.reduce(getattr, name.split("."), obj)
     except AttributeError:
         if default != NoDefaultProvided:
             return default
@@ -1188,7 +1204,7 @@ def cleanup_new_process(func):
     Cleanup django connection, cache connection, before executing new thread or processes entry point, func.
     """
 
-    @wraps(func)
+    @functools.wraps(func)
     def wrapper_cleanup_new_process(*args, **kwargs):
         from awx.conf.settings import SettingsWrapper  # noqa
 
@@ -1200,15 +1216,30 @@ def cleanup_new_process(func):
     return wrapper_cleanup_new_process
 
 
-def log_excess_runtime(func_logger, cutoff=5.0):
+def log_excess_runtime(func_logger, cutoff=5.0, debug_cutoff=5.0, msg=None, add_log_data=False):
     def log_excess_runtime_decorator(func):
-        @wraps(func)
+        @functools.wraps(func)
         def _new_func(*args, **kwargs):
             start_time = time.time()
-            return_value = func(*args, **kwargs)
-            delta = time.time() - start_time
-            if delta > cutoff:
-                logger.info(f'Running {func.__name__!r} took {delta:.2f}s')
+            log_data = {'name': repr(func.__name__)}
+
+            if add_log_data:
+                return_value = func(*args, log_data=log_data, **kwargs)
+            else:
+                return_value = func(*args, **kwargs)
+
+            log_data['delta'] = time.time() - start_time
+            if isinstance(return_value, dict):
+                log_data.update(return_value)
+
+            if msg is None:
+                record_msg = 'Running {name} took {delta:.2f}s'
+            else:
+                record_msg = msg
+            if log_data['delta'] > cutoff:
+                func_logger.info(record_msg.format(**log_data))
+            elif log_data['delta'] > debug_cutoff:
+                func_logger.debug(record_msg.format(**log_data))
             return return_value
 
         return _new_func

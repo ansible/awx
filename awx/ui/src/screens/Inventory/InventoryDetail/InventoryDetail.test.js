@@ -131,9 +131,8 @@ describe('<InventoryDetail />', () => {
     expect(InventoriesAPI.readInstanceGroups).toHaveBeenCalledWith(
       mockInventory.id
     );
-    const chip = wrapper.find('Chip').at(0);
-    expect(chip.prop('isReadOnly')).toEqual(true);
-    expect(chip.prop('children')).toEqual('Foo');
+    const label = wrapper.find('Label').at(0);
+    expect(label.prop('children')).toEqual('Foo');
   });
 
   test('should not load instance groups', async () => {

@@ -159,7 +159,7 @@ def run_module(request, collection_import):
         elif getattr(resource_module, 'TowerLegacyModule', None):
             resource_class = resource_module.TowerLegacyModule
         else:
-            raise ("The module has neither a TowerLegacyModule, ControllerAWXKitModule or a ControllerAPIModule")
+            raise RuntimeError("The module has neither a TowerLegacyModule, ControllerAWXKitModule or a ControllerAPIModule")
 
         with mock.patch.object(resource_class, '_load_params', new=mock_load_params):
             # Call the test utility (like a mock server) instead of issuing HTTP requests

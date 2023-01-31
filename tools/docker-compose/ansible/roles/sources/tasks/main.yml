@@ -86,11 +86,13 @@
   command: openssl genrsa -out {{ work_sign_private_keyfile }} {{ receptor_rsa_bits }}
   args:
     creates: "{{ work_sign_private_keyfile }}"
+  when: sign_work | bool
 
 - name: Generate public RSA key for signing work
   command: openssl rsa -in {{ work_sign_private_keyfile }} -out {{ work_sign_public_keyfile }} -outform PEM -pubout
   args:
     creates: "{{ work_sign_public_keyfile }}"
+  when: sign_work | bool
 
 - name: Include LDAP tasks if enabled
   include_tasks: ldap.yml
@@ -128,6 +130,8 @@
     src: "receptor-hop.conf.j2"
     dest: "{{ sources_dest }}/receptor/receptor-hop.conf"
     mode: '0600'
+  when:
+    - execution_node_count | int > 0
 
 - name: Render Receptor Worker Config(s)
   template:

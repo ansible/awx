@@ -569,7 +569,7 @@ register(
 register(
     'LOG_AGGREGATOR_LOGGERS',
     field_class=fields.StringListField,
-    default=['awx', 'activity_stream', 'job_events', 'system_tracking'],
+    default=['awx', 'activity_stream', 'job_events', 'system_tracking', 'broadcast_websocket'],
     label=_('Loggers Sending Data to Log Aggregator Form'),
     help_text=_(
         'List of loggers that will send HTTP logs to the collector, these can '
@@ -577,7 +577,8 @@ register(
         'awx - service logs\n'
         'activity_stream - activity stream records\n'
         'job_events - callback data from Ansible job events\n'
-        'system_tracking - facts gathered from scan jobs.'
+        'system_tracking - facts gathered from scan jobs\n'
+        'broadcast_websocket - errors pertaining to websockets broadcast metrics\n'
     ),
     category=_('Logging'),
     category_slug='logging',

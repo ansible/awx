@@ -5,7 +5,6 @@ __metaclass__ = type
 import gnupg
 import os
 import tempfile
-from ansible.module_utils.basic import *
 from ansible.plugins.action import ActionBase
 from ansible.utils.display import Display
 
@@ -15,7 +14,7 @@ from ansible_sign.checksum import (
     InvalidChecksumLine,
 )
 from ansible_sign.checksum.differ import DistlibManifestChecksumFileExistenceDiffer
-from ansible_sign.signing import *
+from ansible_sign.signing import GPGVerifier
 
 display = Display()
 

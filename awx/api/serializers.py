@@ -113,7 +113,7 @@ from awx.main.utils import (
 )
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.named_url_graph import reset_counters
-from awx.main.scheduler.task_manager_models import TaskManagerInstanceGroups, TaskManagerInstances
+from awx.main.scheduler.task_manager_models import TaskManagerModels
 from awx.main.redact import UriCleaner, REPLACE_STR
 
 from awx.main.validators import vars_validate_or_raise
@@ -2221,6 +2221,15 @@ class InventorySourceUpdateSerializer(InventorySourceSerializer):
     class Meta:
         fields = ('can_update',)
 
+    def validate(self, attrs):
+        project = self.instance.source_project
+        if project:
+            failed_reason = project.get_reason_if_failed()
+            if failed_reason:
+                raise serializers.ValidationError(failed_reason)
+
+        return super(InventorySourceUpdateSerializer, self).validate(attrs)
+
 
 class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSerializer):
 
@@ -3750,7 +3759,11 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
 
         # Build unsaved version of this config, use it to detect prompts errors
         mock_obj = self._build_mock_obj(attrs)
-        accepted, rejected, errors = ujt._accept_or_ignore_job_kwargs(_exclude_errors=self.exclude_errors, **mock_obj.prompts_dict())
+        if set(list(ujt.get_ask_mapping().keys()) + ['extra_data']) & set(attrs.keys()):
+            accepted, rejected, errors = ujt._accept_or_ignore_job_kwargs(_exclude_errors=self.exclude_errors, **mock_obj.prompts_dict())
+        else:
+            # Only perform validation of prompts if prompts fields are provided
+            errors = {}
 
         # Remove all unprocessed $encrypted$ strings, indicating default usage
         if 'extra_data' in attrs and password_dict:
@@ -4268,17 +4281,10 @@ class JobLaunchSerializer(BaseSerializer):
         # Basic validation - cannot run a playbook without a playbook
         if not template.project:
             errors['project'] = _("A project is required to run a job.")
-        elif template.project.status in ('error', 'failed'):
-            errors['playbook'] = _("Missing a revision to run due to failed project update.")
-
-            latest_update = template.project.project_updates.last()
-            if latest_update is not None and latest_update.failed:
-                failed_validation_tasks = latest_update.project_update_events.filter(
-                    event='runner_on_failed',
-                    play="Perform project signature/checksum verification",
-                )
-                if failed_validation_tasks:
-                    errors['playbook'] = _("Last project update failed due to signature validation failure.")
+        else:
+            failure_reason = template.project.get_reason_if_failed()
+            if failure_reason:
+                errors['playbook'] = failure_reason
 
         # cannot run a playbook without an inventory
         if template.inventory and template.inventory.pending_deletion is True:
@@ -4927,9 +4933,10 @@ class InstanceSerializer(BaseSerializer):
             'node_state': {'initial': Instance.States.INSTALLED, 'default': Instance.States.INSTALLED},
             'hostname': {
                 'validators': [
-                    MaxLengthValidator(limit_value=255),
+                    MaxLengthValidator(limit_value=250),
+                    validators.UniqueValidator(queryset=Instance.objects.all()),
                     RegexValidator(
-                        regex='^localhost$|^127(?:\.[0-9]+){0,2}\.[0-9]+$|^(?:0*\:)*?:?0*1$',
+                        regex=r'^localhost$|^127(?:\.[0-9]+){0,2}\.[0-9]+$|^(?:0*\:)*?:?0*1$',
                         flags=re.IGNORECASE,
                         inverse_match=True,
                         message="hostname cannot be localhost or 127.0.0.1",
@@ -4947,7 +4954,7 @@ class InstanceSerializer(BaseSerializer):
             res['install_bundle'] = self.reverse('api:instance_install_bundle', kwargs={'pk': obj.pk})
         res['peers'] = self.reverse('api:instance_peers_list', kwargs={"pk": obj.pk})
         if self.context['request'].user.is_superuser or self.context['request'].user.is_system_auditor:
-            if obj.node_type != 'hop':
+            if obj.node_type == 'execution':
                 res['health_check'] = self.reverse('api:instance_health_check', kwargs={'pk': obj.pk})
         return res
 
@@ -5033,12 +5040,10 @@ class InstanceHealthCheckSerializer(BaseSerializer):
 class InstanceGroupSerializer(BaseSerializer):
 
     show_capabilities = ['edit', 'delete']
-
+    capacity = serializers.SerializerMethodField()
     consumed_capacity = serializers.SerializerMethodField()
     percent_capacity_remaining = serializers.SerializerMethodField()
-    jobs_running = serializers.IntegerField(
-        help_text=_('Count of jobs in the running or waiting state that ' 'are targeted for this instance group'), read_only=True
-    )
+    jobs_running = serializers.SerializerMethodField()
     jobs_total = serializers.IntegerField(help_text=_('Count of all jobs that target this instance group'), read_only=True)
     instances = serializers.SerializerMethodField()
     is_container_group = serializers.BooleanField(
@@ -5064,6 +5069,22 @@ class InstanceGroupSerializer(BaseSerializer):
         label=_('Policy Instance Minimum'),
         help_text=_("Static minimum number of Instances that will be automatically assign to " "this group when new instances come online."),
     )
+    max_concurrent_jobs = serializers.IntegerField(
+        default=0,
+        min_value=0,
+        required=False,
+        initial=0,
+        label=_('Max Concurrent Jobs'),
+        help_text=_("Maximum number of concurrent jobs to run on a group. When set to zero, no maximum is enforced."),
+    )
+    max_forks = serializers.IntegerField(
+        default=0,
+        min_value=0,
+        required=False,
+        initial=0,
+        label=_('Max Forks'),
+        help_text=_("Maximum number of forks to execute concurrently on a group. When set to zero, no maximum is enforced."),
+    )
     policy_instance_list = serializers.ListField(
         child=serializers.CharField(),
         required=False,
@@ -5085,6 +5106,8 @@ class InstanceGroupSerializer(BaseSerializer):
             "consumed_capacity",
             "percent_capacity_remaining",
             "jobs_running",
+            "max_concurrent_jobs",
+            "max_forks",
             "jobs_total",
             "instances",
             "is_container_group",
@@ -5166,28 +5189,39 @@ class InstanceGroupSerializer(BaseSerializer):
         # Store capacity values (globally computed) in the context
         if 'task_manager_igs' not in self.context:
             instance_groups_queryset = None
-            jobs_qs = UnifiedJob.objects.filter(status__in=('running', 'waiting'))
             if self.parent:  # Is ListView:
                 instance_groups_queryset = self.parent.instance
 
-            instances = TaskManagerInstances(jobs_qs)
-            instance_groups = TaskManagerInstanceGroups(instances_by_hostname=instances, instance_groups_queryset=instance_groups_queryset)
+            tm_models = TaskManagerModels.init_with_consumed_capacity(
+                instance_fields=['uuid', 'version', 'capacity', 'cpu', 'memory', 'managed_by_policy', 'enabled'],
+                instance_groups_queryset=instance_groups_queryset,
+            )
 
-            self.context['task_manager_igs'] = instance_groups
+            self.context['task_manager_igs'] = tm_models.instance_groups
         return self.context['task_manager_igs']
 
     def get_consumed_capacity(self, obj):
         ig_mgr = self.get_ig_mgr()
         return ig_mgr.get_consumed_capacity(obj.name)
 
-    def get_percent_capacity_remaining(self, obj):
-        if not obj.capacity:
-            return 0.0
+    def get_capacity(self, obj):
         ig_mgr = self.get_ig_mgr()
-        return float("{0:.2f}".format((float(ig_mgr.get_remaining_capacity(obj.name)) / (float(obj.capacity))) * 100))
+        return ig_mgr.get_capacity(obj.name)
+
+    def get_percent_capacity_remaining(self, obj):
+        capacity = self.get_capacity(obj)
+        if not capacity:
+            return 0.0
+        consumed_capacity = self.get_consumed_capacity(obj)
+        return float("{0:.2f}".format(((float(capacity) - float(consumed_capacity)) / (float(capacity))) * 100))
 
     def get_instances(self, obj):
-        return obj.instances.count()
+        ig_mgr = self.get_ig_mgr()
+        return len(ig_mgr.get_instances(obj.name))
+
+    def get_jobs_running(self, obj):
+        ig_mgr = self.get_ig_mgr()
+        return ig_mgr.get_jobs_running(obj.name)
 
 
 class ActivityStreamSerializer(BaseSerializer):

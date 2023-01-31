@@ -16,7 +16,7 @@ from awx.conf.license import get_license
 from awx.main.utils import get_awx_version, camelcase_to_underscore, datetime_hook
 from awx.main import models
 from awx.main.analytics import register
-from awx.main.scheduler.task_manager_models import TaskManagerInstances
+from awx.main.scheduler.task_manager_models import TaskManagerModels
 
 """
 This module is used to define metrics collected by awx.main.analytics.gather()
@@ -237,9 +237,8 @@ def projects_by_scm_type(since, **kwargs):
 def instance_info(since, include_hostnames=False, **kwargs):
     info = {}
     # Use same method that the TaskManager does to compute consumed capacity without querying all running jobs for each Instance
-    active_tasks = models.UnifiedJob.objects.filter(status__in=['running', 'waiting']).only('task_impact', 'controller_node', 'execution_node')
-    tm_instances = TaskManagerInstances(active_tasks, instance_fields=['uuid', 'version', 'capacity', 'cpu', 'memory', 'managed_by_policy', 'enabled'])
-    for tm_instance in tm_instances.instances_by_hostname.values():
+    tm_models = TaskManagerModels.init_with_consumed_capacity(instance_fields=['uuid', 'version', 'capacity', 'cpu', 'memory', 'managed_by_policy', 'enabled'])
+    for tm_instance in tm_models.instances.instances_by_hostname.values():
         instance = tm_instance.obj
         instance_info = {
             'uuid': instance.uuid,
@@ -251,6 +250,7 @@ def instance_info(since, include_hostnames=False, **kwargs):
             'enabled': instance.enabled,
             'consumed_capacity': tm_instance.consumed_capacity,
             'remaining_capacity': instance.capacity - tm_instance.consumed_capacity,
+            'node_type': instance.node_type,
         }
         if include_hostnames is True:
             instance_info['hostname'] = instance.hostname

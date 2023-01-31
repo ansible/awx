@@ -50,7 +50,10 @@ def test_cancel(unified_job):
     # Some more thought may want to go into only emitting canceled if/when the job record
     # status is changed to canceled. Unlike, currently, where it's emitted unconditionally.
     unified_job.websocket_emit_status.assert_called_with("canceled")
-    unified_job.save.assert_called_with(update_fields=['cancel_flag', 'start_args', 'status'])
+    assert [(args, kwargs) for args, kwargs in unified_job.save.call_args_list] == [
+        ((), {'update_fields': ['cancel_flag', 'start_args']}),
+        ((), {'update_fields': ['status']}),
+    ]
 
 
 def test_cancel_job_explanation(unified_job):
@@ -60,7 +63,10 @@ def test_cancel_job_explanation(unified_job):
         unified_job.cancel(job_explanation=job_explanation)
 
     assert unified_job.job_explanation == job_explanation
-    unified_job.save.assert_called_with(update_fields=['cancel_flag', 'start_args', 'job_explanation', 'status'])
+    assert [(args, kwargs) for args, kwargs in unified_job.save.call_args_list] == [
+        ((), {'update_fields': ['cancel_flag', 'start_args', 'job_explanation']}),
+        ((), {'update_fields': ['status']}),
+    ]
 
 
 def test_organization_copy_to_jobs():

@@ -172,7 +172,7 @@ describe('<InstanceList/>', () => {
     await act(async () =>
       wrapper.find('Button[ouiaId="health-check"]').prop('onClick')()
     );
-    expect(InstancesAPI.healthCheck).toBeCalledTimes(3);
+    expect(InstancesAPI.healthCheck).toBeCalledTimes(1);
   });
   test('should render health check error', async () => {
     InstancesAPI.healthCheck.mockRejectedValue(

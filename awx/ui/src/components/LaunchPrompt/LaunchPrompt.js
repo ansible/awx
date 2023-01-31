@@ -129,7 +129,7 @@ function PromptModalForm({
       }}
       title={t`Launch | ${resource.name}`}
       description={
-        resource.description.length > 512 ? (
+        resource.description?.length > 512 ? (
           <ExpandableSection
             toggleText={
               showDescription ? t`Hide description` : t`Show description`

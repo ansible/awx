@@ -116,7 +116,7 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     python3-psycopg2 \
     python3-setuptools \
     rsync \
-    "rsyslog >= 8.1911.0" \
+    rsyslog-8.2102.0-106.el9 \
     subversion \
     sudo \
     vim-minimal \
@@ -273,7 +273,8 @@ RUN for dir in \
       /var/lib/shared/vfs-layers/layers.lock \
       /var/run/nginx.pid \
       /var/lib/awx/venv/awx/lib/python3.9/site-packages/awx.egg-link ; \
-    do touch $file ; chmod g+rw $file ; done
+    do touch $file ; chmod g+rw $file ; done && \
+    echo "\setenv PAGER 'less -SXF'" > /var/lib/awx/.psqlrc
 {% endif %}
 
 {% if not build_dev|bool %}

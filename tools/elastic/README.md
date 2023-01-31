@@ -3,7 +3,7 @@
 These are tools to run a containerized version of ELK stack, comprising
 of Logstash, Elastic Search, and Kibana.
 
-A copy of the license is in `docs/licenses/docker-elk.txt`
+A copy of the license is in `licenses/docker-elk.txt`
 
 ## Instructions
 

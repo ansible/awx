@@ -55,7 +55,6 @@ options:
       description:
         - The arguments to pass to the module.
       type: str
-      default: ""
     forks:
       description:
         - The number of forks to use for this ad hoc execution.
@@ -124,7 +123,7 @@ def main():
         module_name=dict(required=True),
         module_args=dict(),
         forks=dict(type='int'),
-        verbosity=dict(type='int', choices=['0', '1', '2', '3', '4', '5']),
+        verbosity=dict(type='int', choices=[0, 1, 2, 3, 4, 5]),
         extra_vars=dict(type='dict'),
         become_enabled=dict(type='bool'),
         diff_mode=dict(type='bool'),

@@ -118,7 +118,7 @@ class WebsocketTask:
             logger.warning(f"Connection from {self.name} to {self.remote_host} timed out.")
         except Exception as e:
             # Early on, this is our canary. I'm not sure what exceptions we can really encounter.
-            logger.warning(f"Connection from {self.name} to {self.remote_host} failed for unknown reason: '{e}'.")
+            logger.exception(f"Connection from {self.name} to {self.remote_host} failed for unknown reason: '{e}'.")
         else:
             logger.warning(f"Connection from {self.name} to {self.remote_host} list.")
 

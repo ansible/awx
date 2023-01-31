@@ -333,7 +333,6 @@ class InventorySource(HasCreate, HasNotifications, UnifiedJobTemplate):
             'overwrite_vars',
             'update_cache_timeout',
             'update_on_launch',
-            'update_on_project_update',
             'verbosity',
         )
 

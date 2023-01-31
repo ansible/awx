@@ -5,6 +5,7 @@
 import dateutil
 import functools
 import html
+import itertools
 import logging
 import re
 import requests
@@ -20,9 +21,10 @@ from urllib3.exceptions import ConnectTimeoutError
 # Django
 from django.conf import settings
 from django.core.exceptions import FieldError, ObjectDoesNotExist
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Count
 from django.db import IntegrityError, ProgrammingError, transaction, connection
 from django.db.models.fields.related import ManyToManyField, ForeignKey
+from django.db.models.functions import Trunc
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
@@ -47,9 +49,6 @@ from rest_framework import status
 from rest_framework_yaml.parsers import YAMLParser
 from rest_framework_yaml.renderers import YAMLRenderer
 
-# QSStats
-import qsstats
-
 # ANSIConv
 import ansiconv
 
@@ -69,6 +68,7 @@ from awx.api.generics import (
     APIView,
     BaseUsersList,
     CopyAPIView,
+    GenericCancelView,
     GenericAPIView,
     ListAPIView,
     ListCreateAPIView,
@@ -282,30 +282,50 @@ class DashboardJobsGraphView(APIView):
             success_query = success_query.filter(instance_of=models.ProjectUpdate)
             failed_query = failed_query.filter(instance_of=models.ProjectUpdate)
 
-        success_qss = qsstats.QuerySetStats(success_query, 'finished')
-        failed_qss = qsstats.QuerySetStats(failed_query, 'finished')
-
-        start_date = now()
+        end = now()
+        interval = 'day'
         if period == 'month':
-            end_date = start_date - dateutil.relativedelta.relativedelta(months=1)
-            interval = 'days'
+            start = end - dateutil.relativedelta.relativedelta(months=1)
         elif period == 'two_weeks':
-            end_date = start_date - dateutil.relativedelta.relativedelta(weeks=2)
-            interval = 'days'
+            start = end - dateutil.relativedelta.relativedelta(weeks=2)
         elif period == 'week':
-            end_date = start_date - dateutil.relativedelta.relativedelta(weeks=1)
-            interval = 'days'
+            start = end - dateutil.relativedelta.relativedelta(weeks=1)
         elif period == 'day':
-            end_date = start_date - dateutil.relativedelta.relativedelta(days=1)
-            interval = 'hours'
+            start = end - dateutil.relativedelta.relativedelta(days=1)
+            interval = 'hour'
         else:
             return Response({'error': _('Unknown period "%s"') % str(period)}, status=status.HTTP_400_BAD_REQUEST)
 
         dashboard_data = {"jobs": {"successful": [], "failed": []}}
-        for element in success_qss.time_series(end_date, start_date, interval=interval):
-            dashboard_data['jobs']['successful'].append([time.mktime(element[0].timetuple()), element[1]])
-        for element in failed_qss.time_series(end_date, start_date, interval=interval):
-            dashboard_data['jobs']['failed'].append([time.mktime(element[0].timetuple()), element[1]])
+
+        succ_list = dashboard_data['jobs']['successful']
+        fail_list = dashboard_data['jobs']['failed']
+
+        qs_s = (
+            success_query.filter(finished__range=(start, end))
+            .annotate(d=Trunc('finished', interval, tzinfo=end.tzinfo))
+            .order_by()
+            .values('d')
+            .annotate(agg=Count('id', distinct=True))
+        )
+        data_s = {item['d']: item['agg'] for item in qs_s}
+        qs_f = (
+            failed_query.filter(finished__range=(start, end))
+            .annotate(d=Trunc('finished', interval, tzinfo=end.tzinfo))
+            .order_by()
+            .values('d')
+            .annotate(agg=Count('id', distinct=True))
+        )
+        data_f = {item['d']: item['agg'] for item in qs_f}
+
+        start_date = start.replace(hour=0, minute=0, second=0, microsecond=0)
+        for d in itertools.count():
+            date = start_date + dateutil.relativedelta.relativedelta(days=d)
+            if date > end:
+                break
+            succ_list.append([time.mktime(date.timetuple()), data_s.get(date, 0)])
+            fail_list.append([time.mktime(date.timetuple()), data_f.get(date, 0)])
+
         return Response(dashboard_data)
 
 
@@ -323,6 +343,13 @@ class InstanceDetail(RetrieveUpdateAPIView):
     name = _("Instance Detail")
     model = models.Instance
     serializer_class = serializers.InstanceSerializer
+
+    def update_raw_data(self, data):
+        # these fields are only valid on creation of an instance, so they unwanted on detail view
+        data.pop('listener_port', None)
+        data.pop('node_type', None)
+        data.pop('hostname', None)
+        return super(InstanceDetail, self).update_raw_data(data)
 
     def update(self, request, *args, **kwargs):
         r = super(InstanceDetail, self).update(request, *args, **kwargs)
@@ -391,8 +418,8 @@ class InstanceHealthCheck(GenericAPIView):
     permission_classes = (IsSystemAdminOrAuditor,)
 
     def get_queryset(self):
+        return super().get_queryset().filter(node_type='execution')
         # FIXME: For now, we don't have a good way of checking the health of a hop node.
-        return super().get_queryset().exclude(node_type='hop')
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -412,9 +439,10 @@ class InstanceHealthCheck(GenericAPIView):
 
             execution_node_health_check.apply_async([obj.hostname])
         else:
-            from awx.main.tasks.system import cluster_node_health_check
-
-            cluster_node_health_check.apply_async([obj.hostname], queue=obj.hostname)
+            return Response(
+                {"error": f"Cannot run a health check on instances of type {obj.node_type}.  Health checks can only be run on execution nodes."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         return Response({'msg': f"Health check is running for {obj.hostname}."}, status=status.HTTP_200_OK)
 
 
@@ -976,19 +1004,10 @@ class SystemJobEventsList(SubListAPIView):
         return job.get_event_queryset()
 
 
-class ProjectUpdateCancel(RetrieveAPIView):
+class ProjectUpdateCancel(GenericCancelView):
 
     model = models.ProjectUpdate
-    obj_permission_type = 'cancel'
     serializer_class = serializers.ProjectUpdateCancelSerializer
-
-    def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.can_cancel:
-            obj.cancel()
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return self.http_method_not_allowed(request, *args, **kwargs)
 
 
 class ProjectUpdateNotificationsList(SubListAPIView):
@@ -2228,6 +2247,8 @@ class InventorySourceUpdateView(RetrieveAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
+        serializer = self.get_serializer(instance=obj, data=request.data)
+        serializer.is_valid(raise_exception=True)
         if obj.can_update:
             update = obj.update()
             if not update:
@@ -2262,19 +2283,10 @@ class InventoryUpdateCredentialsList(SubListAPIView):
     relationship = 'credentials'
 
 
-class InventoryUpdateCancel(RetrieveAPIView):
+class InventoryUpdateCancel(GenericCancelView):
 
     model = models.InventoryUpdate
-    obj_permission_type = 'cancel'
     serializer_class = serializers.InventoryUpdateCancelSerializer
-
-    def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.can_cancel:
-            obj.cancel()
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return self.http_method_not_allowed(request, *args, **kwargs)
 
 
 class InventoryUpdateNotificationsList(SubListAPIView):
@@ -3050,8 +3062,7 @@ class WorkflowJobNodeChildrenBaseList(SubListAPIView):
     search_fields = ('unified_job_template__name', 'unified_job_template__description')
 
     #
-    # Limit the set of WorkflowJobeNodes to the related nodes of specified by
-    #'relationship'
+    # Limit the set of WorkflowJobNodes to the related nodes of specified by self.relationship
     #
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -3353,20 +3364,15 @@ class WorkflowJobWorkflowNodesList(SubListAPIView):
         return super(WorkflowJobWorkflowNodesList, self).get_queryset().order_by('id')
 
 
-class WorkflowJobCancel(RetrieveAPIView):
+class WorkflowJobCancel(GenericCancelView):
 
     model = models.WorkflowJob
-    obj_permission_type = 'cancel'
     serializer_class = serializers.WorkflowJobCancelSerializer
 
     def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.can_cancel:
-            obj.cancel()
-            ScheduleWorkflowManager().schedule()
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return self.http_method_not_allowed(request, *args, **kwargs)
+        r = super().post(request, *args, **kwargs)
+        ScheduleWorkflowManager().schedule()
+        return r
 
 
 class WorkflowJobNotificationsList(SubListAPIView):
@@ -3522,19 +3528,10 @@ class JobActivityStreamList(SubListAPIView):
     search_fields = ('changes',)
 
 
-class JobCancel(RetrieveAPIView):
+class JobCancel(GenericCancelView):
 
     model = models.Job
-    obj_permission_type = 'cancel'
     serializer_class = serializers.JobCancelSerializer
-
-    def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.can_cancel:
-            obj.cancel()
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return self.http_method_not_allowed(request, *args, **kwargs)
 
 
 class JobRelaunch(RetrieveAPIView):
@@ -4006,19 +4003,10 @@ class AdHocCommandDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
     serializer_class = serializers.AdHocCommandDetailSerializer
 
 
-class AdHocCommandCancel(RetrieveAPIView):
+class AdHocCommandCancel(GenericCancelView):
 
     model = models.AdHocCommand
-    obj_permission_type = 'cancel'
     serializer_class = serializers.AdHocCommandCancelSerializer
-
-    def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.can_cancel:
-            obj.cancel()
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return self.http_method_not_allowed(request, *args, **kwargs)
 
 
 class AdHocCommandRelaunch(GenericAPIView):
@@ -4154,19 +4142,10 @@ class SystemJobDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
     serializer_class = serializers.SystemJobSerializer
 
 
-class SystemJobCancel(RetrieveAPIView):
+class SystemJobCancel(GenericCancelView):
 
     model = models.SystemJob
-    obj_permission_type = 'cancel'
     serializer_class = serializers.SystemJobCancelSerializer
-
-    def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.can_cancel:
-            obj.cancel()
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return self.http_method_not_allowed(request, *args, **kwargs)
 
 
 class SystemJobNotificationsList(SubListAPIView):

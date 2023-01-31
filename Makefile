@@ -6,7 +6,20 @@ CHROMIUM_BIN=/tmp/chrome-linux/chrome
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 MANAGEMENT_COMMAND ?= awx-manage
 VERSION := $(shell $(PYTHON) tools/scripts/scm_version.py)
-COLLECTION_VERSION := $(shell $(PYTHON) tools/scripts/scm_version.py | cut -d . -f 1-3)
+
+# ansible-test requires semver compatable version, so we allow overrides to hack it
+COLLECTION_VERSION ?= $(shell $(PYTHON) tools/scripts/scm_version.py | cut -d . -f 1-3)
+# args for the ansible-test sanity command
+COLLECTION_SANITY_ARGS ?= --docker
+# collection unit testing directories
+COLLECTION_TEST_DIRS ?= awx_collection/test/awx
+# collection integration test directories (defaults to all)
+COLLECTION_TEST_TARGET ?=
+# args for collection install
+COLLECTION_PACKAGE ?= awx
+COLLECTION_NAMESPACE ?= awx
+COLLECTION_INSTALL = ~/.ansible/collections/ansible_collections/$(COLLECTION_NAMESPACE)/$(COLLECTION_PACKAGE)
+COLLECTION_TEMPLATE_VERSION ?= false
 
 # NOTE: This defaults the container image version to the branch that's active
 COMPOSE_TAG ?= $(GIT_BRANCH)
@@ -34,7 +47,7 @@ RECEPTOR_IMAGE ?= quay.io/ansible/receptor:devel
 SRC_ONLY_PKGS ?= cffi,pycparser,psycopg2,twilio
 # These should be upgraded in the AWX and Ansible venv before attempting
 # to install the actual requirements
-VENV_BOOTSTRAP ?= pip==21.2.4 setuptools==58.2.0 setuptools_scm[toml]==6.4.2 wheel==0.36.2
+VENV_BOOTSTRAP ?= pip==21.2.4 setuptools==65.6.3 setuptools_scm[toml]==7.0.5 wheel==0.38.4
 
 NAME ?= awx
 
@@ -85,6 +98,7 @@ clean: clean-ui clean-api clean-awxkit clean-dist
 
 clean-api:
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
+	rm -rf .tox
 	find . -type f -regex ".*\.py[co]$$" -delete
 	find . -type d -name "__pycache__" -delete
 	rm -f awx/awx_test.sqlite3*
@@ -117,7 +131,7 @@ virtualenv_awx:
 		fi; \
 	fi
 
-## Install third-party requirements needed for AWX's environment. 
+## Install third-party requirements needed for AWX's environment.
 # this does not use system site packages intentionally
 requirements_awx: virtualenv_awx
 	if [[ "$(PIP_OPTIONS)" == *"--no-index"* ]]; then \
@@ -181,7 +195,7 @@ collectstatic:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	mkdir -p awx/public/static && $(PYTHON) manage.py collectstatic --clear --noinput > /dev/null 2>&1
+	$(PYTHON) manage.py collectstatic --clear --noinput > /dev/null 2>&1
 
 DEV_RELOAD_COMMAND ?= supervisorctl restart tower-processes:*
 
@@ -287,19 +301,13 @@ test:
 	cd awxkit && $(VENV_BASE)/awx/bin/tox -re py3
 	awx-manage check_migrations --dry-run --check  -n 'missing_migration_file'
 
-COLLECTION_TEST_DIRS ?= awx_collection/test/awx
-COLLECTION_TEST_TARGET ?=
-COLLECTION_PACKAGE ?= awx
-COLLECTION_NAMESPACE ?= awx
-COLLECTION_INSTALL = ~/.ansible/collections/ansible_collections/$(COLLECTION_NAMESPACE)/$(COLLECTION_PACKAGE)
-COLLECTION_TEMPLATE_VERSION ?= false
-
 test_collection:
 	rm -f $(shell ls -d $(VENV_BASE)/awx/lib/python* | head -n 1)/no-global-site-packages.txt
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi && \
-	pip install ansible-core && \
+	if ! [ -x "$(shell command -v ansible-playbook)" ]; then pip install ansible-core; fi
+	ansible --version
 	py.test $(COLLECTION_TEST_DIRS) -v
 	# The python path needs to be modified so that the tests can find Ansible within the container
 	# First we will use anything expility set as PYTHONPATH
@@ -329,8 +337,13 @@ install_collection: build_collection
 	rm -rf $(COLLECTION_INSTALL)
 	ansible-galaxy collection install awx_collection_build/$(COLLECTION_NAMESPACE)-$(COLLECTION_PACKAGE)-$(COLLECTION_VERSION).tar.gz
 
-test_collection_sanity: install_collection
-	cd $(COLLECTION_INSTALL) && ansible-test sanity
+test_collection_sanity:
+	rm -rf awx_collection_build/
+	rm -rf $(COLLECTION_INSTALL)
+	if ! [ -x "$(shell command -v ansible-test)" ]; then pip install ansible-core; fi
+	ansible --version
+	COLLECTION_VERSION=1.0.0 make install_collection
+	cd $(COLLECTION_INSTALL) && ansible-test sanity $(COLLECTION_SANITY_ARGS)
 
 test_collection_integration: install_collection
 	cd $(COLLECTION_INSTALL) && ansible-test integration $(COLLECTION_TEST_TARGET)
@@ -377,6 +390,8 @@ clean-ui:
 	rm -rf awx/ui/build
 	rm -rf awx/ui/src/locales/_build
 	rm -rf $(UI_BUILD_FLAG_FILE)
+        # the collectstatic command doesn't like it if this dir doesn't exist.
+	mkdir -p awx/ui/build/static
 
 awx/ui/node_modules:
 	NODE_OPTIONS=--max-old-space-size=6144 $(NPM_BIN) --prefix awx/ui --loglevel warn --force ci
@@ -386,20 +401,18 @@ $(UI_BUILD_FLAG_FILE):
 	$(PYTHON) tools/scripts/compilemessages.py
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run compile-strings
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run build
-	mkdir -p awx/public/static/css
-	mkdir -p awx/public/static/js
-	mkdir -p awx/public/static/media
-	cp -r awx/ui/build/static/css/* awx/public/static/css
-	cp -r awx/ui/build/static/js/* awx/public/static/js
-	cp -r awx/ui/build/static/media/* awx/public/static/media
 	touch $@
-
-
 
 ui-release: $(UI_BUILD_FLAG_FILE)
 
 ui-devel: awx/ui/node_modules
 	@$(MAKE) -B $(UI_BUILD_FLAG_FILE)
+	mkdir -p /var/lib/awx/public/static/css
+	mkdir -p /var/lib/awx/public/static/js
+	mkdir -p /var/lib/awx/public/static/media
+	cp -r awx/ui/build/static/css/* /var/lib/awx/public/static/css
+	cp -r awx/ui/build/static/js/* /var/lib/awx/public/static/js
+	cp -r awx/ui/build/static/media/* /var/lib/awx/public/static/media
 
 ui-devel-instrumented: awx/ui/node_modules
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run start-instrumented
@@ -451,8 +464,9 @@ awx/projects:
 COMPOSE_UP_OPTS ?=
 COMPOSE_OPTS ?=
 CONTROL_PLANE_NODE_COUNT ?= 1
-EXECUTION_NODE_COUNT ?= 2
+EXECUTION_NODE_COUNT ?= 0
 MINIKUBE_CONTAINER_GROUP ?= false
+MINIKUBE_SETUP ?= false # if false, run minikube separately
 EXTRA_SOURCES_ANSIBLE_OPTS ?=
 
 ifneq ($(ADMIN_PASSWORD),)
@@ -461,7 +475,7 @@ endif
 
 docker-compose-sources: .git/hooks/pre-commit
 	@if [ $(MINIKUBE_CONTAINER_GROUP) = true ]; then\
-	    ansible-playbook -i tools/docker-compose/inventory tools/docker-compose-minikube/deploy.yml; \
+	    ansible-playbook -i tools/docker-compose/inventory -e minikube_setup=$(MINIKUBE_SETUP) tools/docker-compose-minikube/deploy.yml; \
 	fi;
 
 	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/sources.yml \
@@ -591,13 +605,12 @@ pot: $(UI_BUILD_FLAG_FILE)
 po: $(UI_BUILD_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run extract-strings -- --clean
 
-LANG = "en_us"
 ## generate API django .pot .po
 messages:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py makemessages -l $(LANG) --keep-pot
+	$(PYTHON) manage.py makemessages -l en_us --keep-pot
 
 print-%:
 	@echo $($*)

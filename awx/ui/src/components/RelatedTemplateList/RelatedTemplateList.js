@@ -34,8 +34,14 @@ const QS_CONFIG = getQSConfig('template', {
   order_by: 'name',
 });
 
-function RelatedTemplateList({ searchParams, projectName = null }) {
-  const { id: projectId } = useParams();
+const resources = {
+  projects: 'project',
+  inventories: 'inventory',
+  credentials: 'credentials',
+};
+
+function RelatedTemplateList({ searchParams, resourceName = null }) {
+  const { id } = useParams();
   const location = useLocation();
   const { addToast, Toast, toastProps } = useToast();
 
@@ -129,12 +135,19 @@ function RelatedTemplateList({ searchParams, projectName = null }) {
     actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
 
   let linkTo = '';
-
-  if (projectName) {
-    const qs = encodeQueryString({
-      project_id: projectId,
-      project_name: projectName,
-    });
+  if (resourceName) {
+    const queryString = {
+      resource_id: id,
+      resource_name: resourceName,
+      resource_type: resources[location.pathname.split('/')[1]],
+      resource_kind: null,
+    };
+    if (Array.isArray(resourceName)) {
+      const [name, kind] = resourceName;
+      queryString.resource_name = name;
+      queryString.resource_kind = kind;
+    }
+    const qs = encodeQueryString(queryString);
     linkTo = `/templates/job_template/add/?${qs}`;
   } else {
     linkTo = '/templates/job_template/add';

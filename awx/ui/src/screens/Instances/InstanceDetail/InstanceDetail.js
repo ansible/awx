@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { Link, useHistory, useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { t, Plural } from '@lingui/macro';
 import {
   Button,
@@ -11,9 +11,8 @@ import {
   CodeBlockCode,
   Tooltip,
   Slider,
-  Label,
 } from '@patternfly/react-core';
-import { DownloadIcon } from '@patternfly/react-icons';
+import { DownloadIcon, OutlinedClockIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 
 import { useConfig } from 'contexts/Config';
@@ -23,6 +22,7 @@ import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';
 import InstanceToggle from 'components/InstanceToggle';
 import { CardBody, CardActionsRow } from 'components/Card';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
 import { formatDateString } from 'util/dates';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
@@ -33,6 +33,7 @@ import useRequest, {
   useDismissableError,
 } from 'hooks/useRequest';
 import HealthCheckAlert from 'components/HealthCheckAlert';
+import InstanceGroupLabels from 'components/InstanceGroupLabels';
 import RemoveInstanceButton from '../Shared/RemoveInstanceButton';
 
 const Unavailable = styled.span`
@@ -62,7 +63,8 @@ function computeForks(memCapacity, cpuCapacity, selectedCapacityAdjustment) {
 }
 
 function InstanceDetail({ setBreadcrumb, isK8s }) {
-  const { me = {} } = useConfig();
+  const config = useConfig();
+
   const { id } = useParams();
   const [forks, setForks] = useState();
   const history = useHistory();
@@ -85,8 +87,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
         InstancesAPI.readDetail(id),
         InstancesAPI.readInstanceGroup(id),
       ]);
-
-      if (details.node_type !== 'hop') {
+      if (details.node_type === 'execution') {
         const { data: healthCheckData } =
           await InstancesAPI.readHealthCheckDetail(id);
         setHealthCheck(healthCheckData);
@@ -115,15 +116,9 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
       setBreadcrumb(instance);
     }
   }, [instance, setBreadcrumb]);
-  const {
-    error: healthCheckError,
-    isLoading: isRunningHealthCheck,
-    request: fetchHealthCheck,
-  } = useRequest(
+  const { error: healthCheckError, request: fetchHealthCheck } = useRequest(
     useCallback(async () => {
       const { status } = await InstancesAPI.healthCheck(id);
-      const { data } = await InstancesAPI.readHealthCheckDetail(id);
-      setHealthCheck(data);
       if (status === 200) {
         setShowHealthCheckAlert(true);
       }
@@ -149,10 +144,17 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
     debounceUpdateInstance({ capacity_adjustment: roundedValue });
   };
 
-  const buildLinkURL = (inst) =>
-    inst.is_container_group
-      ? '/instance_groups/container_group/'
-      : '/instance_groups/';
+  const formatHealthCheckTimeStamp = (last) => (
+    <>
+      {formatDateString(last)}
+      {instance.health_check_pending ? (
+        <>
+          {' '}
+          <OutlinedClockIcon />
+        </>
+      ) : null}
+    </>
+  );
 
   const { error, dismissError } = useDismissableError(
     updateInstanceError || healthCheckError
@@ -179,6 +181,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
     return <ContentLoading />;
   }
   const isHopNode = instance.node_type === 'hop';
+  const isExecutionNode = instance.node_type === 'execution';
 
   return (
     <>
@@ -217,32 +220,31 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
                   label={t`Instance Groups`}
                   dataCy="instance-groups"
                   helpText={t`The Instance Groups to which this instance belongs.`}
-                  value={instanceGroups.map((ig) => (
-                    <React.Fragment key={ig.id}>
-                      <Label
-                        color="blue"
-                        isTruncated
-                        render={({ className, content, componentRef }) => (
-                          <Link
-                            to={`${buildLinkURL(ig)}${ig.id}/details`}
-                            className={className}
-                            innerRef={componentRef}
-                          >
-                            {content}
-                          </Link>
-                        )}
-                      >
-                        {ig.name}
-                      </Label>{' '}
-                    </React.Fragment>
-                  ))}
+                  value={
+                    <InstanceGroupLabels labels={instanceGroups} isLinkable />
+                  }
                   isEmpty={instanceGroups.length === 0}
                 />
               )}
               <Detail
                 label={t`Last Health Check`}
                 dataCy="last-health-check"
-                value={formatDateString(healthCheck?.last_health_check)}
+                helpText={
+                  <>
+                    {t`Health checks are asynchronous tasks. See the`}{' '}
+                    <a
+                      href={`${getDocsBaseUrl(
+                        config
+                      )}/html/administration/instances.html#health-check`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {t`documentation`}
+                    </a>{' '}
+                    {t`for more info.`}
+                  </>
+                }
+                value={formatHealthCheckTimeStamp(instance.last_health_check)}
               />
               {instance.related?.install_bundle && (
                 <Detail
@@ -280,7 +282,9 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
                         step={0.1}
                         value={instance.capacity_adjustment}
                         onChange={handleChangeValue}
-                        isDisabled={!me?.is_superuser || !instance.enabled}
+                        isDisabled={
+                          !config?.me?.is_superuser || !instance.enabled
+                        }
                         data-cy="slider"
                       />
                     </SliderForks>
@@ -324,7 +328,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
         </DetailList>
         {!isHopNode && (
           <CardActionsRow>
-            {me.is_superuser && isK8s && instance.node_type === 'execution' && (
+            {config?.me?.is_superuser && isK8s && isExecutionNode && (
               <RemoveInstanceButton
                 dataCy="remove-instance-button"
                 itemsToRemove={[instance]}
@@ -332,18 +336,24 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
                 onRemove={removeInstances}
               />
             )}
-            <Tooltip content={t`Run a health check on the instance`}>
-              <Button
-                isDisabled={!me.is_superuser || isRunningHealthCheck}
-                variant="primary"
-                ouiaId="health-check-button"
-                onClick={fetchHealthCheck}
-                isLoading={isRunningHealthCheck}
-                spinnerAriaLabel={t`Running health check`}
-              >
-                {t`Run health check`}
-              </Button>
-            </Tooltip>
+            {isExecutionNode && (
+              <Tooltip content={t`Run a health check on the instance`}>
+                <Button
+                  isDisabled={
+                    !config?.me?.is_superuser || instance.health_check_pending
+                  }
+                  variant="primary"
+                  ouiaId="health-check-button"
+                  onClick={fetchHealthCheck}
+                  isLoading={instance.health_check_pending}
+                  spinnerAriaLabel={t`Running health check`}
+                >
+                  {instance.health_check_pending
+                    ? t`Running health check`
+                    : t`Run health check`}
+                </Button>
+              </Tooltip>
+            )}
             <InstanceToggle
               css="display: inline-flex;"
               fetchInstances={fetchDetails}

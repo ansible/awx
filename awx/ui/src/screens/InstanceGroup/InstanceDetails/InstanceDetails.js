@@ -12,7 +12,7 @@ import {
   Tooltip,
   Slider,
 } from '@patternfly/react-core';
-import { CaretLeftIcon } from '@patternfly/react-icons';
+import { CaretLeftIcon, OutlinedClockIcon } from '@patternfly/react-icons';
 import styled from 'styled-components';
 
 import { useConfig } from 'contexts/Config';
@@ -23,6 +23,7 @@ import ErrorDetail from 'components/ErrorDetail';
 import DisassociateButton from 'components/DisassociateButton';
 import InstanceToggle from 'components/InstanceToggle';
 import { CardBody, CardActionsRow } from 'components/Card';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
 import { formatDateString } from 'util/dates';
 import RoutedTabs from 'components/RoutedTabs';
 import ContentError from 'components/ContentError';
@@ -62,7 +63,7 @@ function computeForks(memCapacity, cpuCapacity, selectedCapacityAdjustment) {
 }
 
 function InstanceDetails({ setBreadcrumb, instanceGroup }) {
-  const { me = {} } = useConfig();
+  const config = useConfig();
   const { id, instanceId } = useParams();
   const history = useHistory();
 
@@ -80,50 +81,39 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
       const {
         data: { results },
       } = await InstanceGroupsAPI.readInstances(instanceGroup.id);
-      let instanceDetails;
       const isAssociated = results.some(
         ({ id: instId }) => instId === parseInt(instanceId, 10)
       );
 
       if (isAssociated) {
-        const [{ data: details }, { data: healthCheckData }] =
-          await Promise.all([
-            InstancesAPI.readDetail(instanceId),
-            InstancesAPI.readHealthCheckDetail(instanceId),
-          ]);
-
-        instanceDetails = details;
-        setHealthCheck(healthCheckData);
-      } else {
-        throw new Error(
-          `This instance is not associated with this instance group`
+        const { data: details } = await InstancesAPI.readDetail(instanceId);
+        if (details.node_type === 'execution') {
+          const { data: healthCheckData } =
+            await InstancesAPI.readHealthCheckDetail(instanceId);
+          setHealthCheck(healthCheckData);
+        }
+        setBreadcrumb(instanceGroup, details);
+        setForks(
+          computeForks(
+            details.mem_capacity,
+            details.cpu_capacity,
+            details.capacity_adjustment
+          )
         );
+        return { instance: details };
       }
-
-      setBreadcrumb(instanceGroup, instanceDetails);
-      setForks(
-        computeForks(
-          instanceDetails.mem_capacity,
-          instanceDetails.cpu_capacity,
-          instanceDetails.capacity_adjustment
-        )
+      throw new Error(
+        `This instance is not associated with this instance group`
       );
-      return { instance: instanceDetails };
     }, [instanceId, setBreadcrumb, instanceGroup]),
     { instance: {}, isLoading: true }
   );
   useEffect(() => {
     fetchDetails();
   }, [fetchDetails]);
-  const {
-    error: healthCheckError,
-    isLoading: isRunningHealthCheck,
-    request: fetchHealthCheck,
-  } = useRequest(
+  const { error: healthCheckError, request: fetchHealthCheck } = useRequest(
     useCallback(async () => {
       const { status } = await InstancesAPI.healthCheck(instanceId);
-      const { data } = await InstancesAPI.readHealthCheckDetail(instanceId);
-      setHealthCheck(data);
       if (status === 200) {
         setShowHealthCheckAlert(true);
       }
@@ -161,6 +151,18 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
     debounceUpdateInstance({ capacity_adjustment: roundedValue });
   };
 
+  const formatHealthCheckTimeStamp = (last) => (
+    <>
+      {formatDateString(last)}
+      {instance.health_check_pending ? (
+        <>
+          {' '}
+          <OutlinedClockIcon />
+        </>
+      ) : null}
+    </>
+  );
+
   const { error, dismissError } = useDismissableError(
     disassociateError || updateInstanceError || healthCheckError
   );
@@ -188,6 +190,8 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
   if (isLoading) {
     return <ContentLoading />;
   }
+
+  const isExecutionNode = instance.node_type === 'execution';
 
   return (
     <>
@@ -218,7 +222,22 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
           <Detail label={t`Total Jobs`} value={instance.jobs_total} />
           <Detail
             label={t`Last Health Check`}
-            value={formatDateString(healthCheck?.last_health_check)}
+            helpText={
+              <>
+                {t`Health checks are asynchronous tasks. See the`}{' '}
+                <a
+                  href={`${getDocsBaseUrl(
+                    config
+                  )}/html/administration/instances.html#health-check`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {t`documentation`}
+                </a>{' '}
+                {t`for more info.`}
+              </>
+            }
+            value={formatHealthCheckTimeStamp(instance.last_health_check)}
           />
           <Detail label={t`Node Type`} value={instance.node_type} />
           <Detail
@@ -237,7 +256,7 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
                     step={0.1}
                     value={instance.capacity_adjustment}
                     onChange={handleChangeValue}
-                    isDisabled={!me?.is_superuser || !instance.enabled}
+                    isDisabled={!config?.me?.is_superuser || !instance.enabled}
                     data-cy="slider"
                   />
                 </SliderForks>
@@ -274,19 +293,25 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
           )}
         </DetailList>
         <CardActionsRow>
-          <Tooltip content={t`Run a health check on the instance`}>
-            <Button
-              isDisabled={!me.is_superuser || isRunningHealthCheck}
-              variant="primary"
-              ouiaId="health-check-button"
-              onClick={fetchHealthCheck}
-              isLoading={isRunningHealthCheck}
-              spinnerAriaLabel={t`Running health check`}
-            >
-              {t`Run health check`}
-            </Button>
-          </Tooltip>
-          {me.is_superuser && instance.node_type !== 'control' && (
+          {isExecutionNode && (
+            <Tooltip content={t`Run a health check on the instance`}>
+              <Button
+                isDisabled={
+                  !config?.me?.is_superuser || instance.health_check_pending
+                }
+                variant="primary"
+                ouiaId="health-check-button"
+                onClick={fetchHealthCheck}
+                isLoading={instance.health_check_pending}
+                spinnerAriaLabel={t`Running health check`}
+              >
+                {instance.health_check_pending
+                  ? t`Running health check`
+                  : t`Run health check`}
+              </Button>
+            </Tooltip>
+          )}
+          {config?.me?.is_superuser && instance.node_type !== 'control' && (
             <DisassociateButton
               verifyCannotDisassociate={instanceGroup.name === 'controlplane'}
               key="disassociate"

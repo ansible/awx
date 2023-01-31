@@ -61,10 +61,15 @@ def read_receptor_config():
             return yaml.safe_load(f)
 
 
-def get_receptor_sockfile():
-    data = read_receptor_config()
+def work_signing_enabled(config_data):
+    for section in config_data:
+        if 'work-signing' in section:
+            return True
+    return False
 
-    for section in data:
+
+def get_receptor_sockfile(config_data):
+    for section in config_data:
         for entry_name, entry_data in section.items():
             if entry_name == 'control-service':
                 if 'filename' in entry_data:
@@ -75,12 +80,11 @@ def get_receptor_sockfile():
         raise RuntimeError(f'Receptor conf {__RECEPTOR_CONF} does not have control-service entry needed to get sockfile')
 
 
-def get_tls_client(use_stream_tls=None):
+def get_tls_client(config_data, use_stream_tls=None):
     if not use_stream_tls:
         return None
 
-    data = read_receptor_config()
-    for section in data:
+    for section in config_data:
         for entry_name, entry_data in section.items():
             if entry_name == 'tls-client':
                 if 'name' in entry_data:
@@ -88,10 +92,12 @@ def get_tls_client(use_stream_tls=None):
     return None
 
 
-def get_receptor_ctl():
-    receptor_sockfile = get_receptor_sockfile()
+def get_receptor_ctl(config_data=None):
+    if config_data is None:
+        config_data = read_receptor_config()
+    receptor_sockfile = get_receptor_sockfile(config_data)
     try:
-        return ReceptorControl(receptor_sockfile, config=__RECEPTOR_CONF, tlsclient=get_tls_client(True))
+        return ReceptorControl(receptor_sockfile, config=__RECEPTOR_CONF, tlsclient=get_tls_client(config_data, True))
     except RuntimeError:
         return ReceptorControl(receptor_sockfile)
 
@@ -159,15 +165,18 @@ def run_until_complete(node, timing_data=None, **kwargs):
     """
     Runs an ansible-runner work_type on remote node, waits until it completes, then returns stdout.
     """
-    receptor_ctl = get_receptor_ctl()
+    config_data = read_receptor_config()
+    receptor_ctl = get_receptor_ctl(config_data)
 
     use_stream_tls = getattr(get_conn_type(node, receptor_ctl), 'name', None) == "STREAMTLS"
-    kwargs.setdefault('tlsclient', get_tls_client(use_stream_tls))
+    kwargs.setdefault('tlsclient', get_tls_client(config_data, use_stream_tls))
     kwargs.setdefault('ttl', '20s')
     kwargs.setdefault('payload', '')
+    if work_signing_enabled(config_data):
+        kwargs['signwork'] = True
 
     transmit_start = time.time()
-    result = receptor_ctl.submit_work(worktype='ansible-runner', node=node, signwork=True, **kwargs)
+    result = receptor_ctl.submit_work(worktype='ansible-runner', node=node, **kwargs)
 
     unit_id = result['unitid']
     run_start = time.time()
@@ -208,7 +217,10 @@ def run_until_complete(node, timing_data=None, **kwargs):
     if state_name.lower() == 'failed':
         work_detail = status.get('Detail', '')
         if work_detail:
-            raise RemoteJobError(f'Receptor error from {node}, detail:\n{work_detail}')
+            if stdout:
+                raise RemoteJobError(f'Receptor error from {node}, detail:\n{work_detail}\nstdout:\n{stdout}')
+            else:
+                raise RemoteJobError(f'Receptor error from {node}, detail:\n{work_detail}')
         else:
             raise RemoteJobError(f'Unknown ansible-runner error on node {node}, stdout:\n{stdout}')
 
@@ -299,7 +311,8 @@ class AWXReceptorJob:
 
     def run(self):
         # We establish a connection to the Receptor socket
-        receptor_ctl = get_receptor_ctl()
+        self.config_data = read_receptor_config()
+        receptor_ctl = get_receptor_ctl(self.config_data)
 
         res = None
         try:
@@ -324,7 +337,7 @@ class AWXReceptorJob:
         if self.work_type == 'ansible-runner':
             work_submit_kw['node'] = self.task.instance.execution_node
             use_stream_tls = get_conn_type(work_submit_kw['node'], receptor_ctl).name == "STREAMTLS"
-            work_submit_kw['tlsclient'] = get_tls_client(use_stream_tls)
+            work_submit_kw['tlsclient'] = get_tls_client(self.config_data, use_stream_tls)
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
             transmitter_future = executor.submit(self.transmit, sockin)
@@ -398,9 +411,11 @@ class AWXReceptorJob:
                     unit_status = receptor_ctl.simple_command(f'work status {self.unit_id}')
                     detail = unit_status.get('Detail', None)
                     state_name = unit_status.get('StateName', None)
+                    stdout_size = unit_status.get('StdoutSize', 0)
                 except Exception:
                     detail = ''
                     state_name = ''
+                    stdout_size = 0
                     logger.exception(f'An error was encountered while getting status for work unit {self.unit_id}')
 
                 if 'exceeded quota' in detail:
@@ -411,9 +426,16 @@ class AWXReceptorJob:
                     return
 
                 try:
-                    resultsock = receptor_ctl.get_work_results(self.unit_id, return_sockfile=True)
-                    lines = resultsock.readlines()
-                    receptor_output = b"".join(lines).decode()
+                    receptor_output = ''
+                    if state_name == 'Failed' and self.task.runner_callback.event_ct == 0:
+                        # if receptor work unit failed and no events were emitted, work results may
+                        # contain useful information about why the job failed. In case stdout is
+                        # massive, only ask for last 1000 bytes
+                        startpos = max(stdout_size - 1000, 0)
+                        resultsock, resultfile = receptor_ctl.get_work_results(self.unit_id, startpos=startpos, return_socket=True, return_sockfile=True)
+                        resultsock.setblocking(False)  # this makes resultfile reads non blocking
+                        lines = resultfile.readlines()
+                        receptor_output = b"".join(lines).decode()
                     if receptor_output:
                         self.task.runner_callback.delay_update(result_traceback=receptor_output)
                     elif detail:
@@ -474,7 +496,9 @@ class AWXReceptorJob:
 
     @property
     def sign_work(self):
-        return True if self.work_type in ('ansible-runner', 'local') else False
+        if self.work_type in ('ansible-runner', 'local'):
+            return work_signing_enabled(self.config_data)
+        return False
 
     @property
     def work_type(self):

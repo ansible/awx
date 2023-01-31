@@ -43,8 +43,10 @@ services:
       - "../../docker-compose/_sources/SECRET_KEY:/etc/tower/SECRET_KEY"
       - "../../docker-compose/_sources/receptor/receptor-awx-{{ loop.index }}.conf:/etc/receptor/receptor.conf"
       - "../../docker-compose/_sources/receptor/receptor-awx-{{ loop.index }}.conf.lock:/etc/receptor/receptor.conf.lock"
+{% if sign_work|bool %}
       - "../../docker-compose/_sources/receptor/work_public_key.pem:/etc/receptor/work_public_key.pem"
       - "../../docker-compose/_sources/receptor/work_private_key.pem:/etc/receptor/work_private_key.pem"
+{% endif %}
       # - "../../docker-compose/_sources/certs:/etc/receptor/certs"  # TODO: optionally generate certs
       - "/sys/fs/cgroup:/sys/fs/cgroup"
       - "~/.kube/config:/var/lib/awx/.kube/config"
@@ -180,7 +182,7 @@ services:
     image: postgres:12
     container_name: tools_postgres_1
     # additional logging settings for postgres can be found https://www.postgresql.org/docs/current/runtime-config-logging.html
-    command: postgres -c log_destination=stderr -c log_min_messages=info -c log_min_duration_statement={{ pg_log_min_duration_statement|default(1000) }}
+    command: postgres -c log_destination=stderr -c log_min_messages=info -c log_min_duration_statement={{ pg_log_min_duration_statement|default(1000) }} -c max_connections={{ pg_max_connections|default(1024) }}
     environment:
       POSTGRES_HOST_AUTH_METHOD: trust
       POSTGRES_USER: {{ pg_username }}
