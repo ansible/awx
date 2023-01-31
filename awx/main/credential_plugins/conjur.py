@@ -68,7 +68,10 @@ def conjur_backend(**kwargs):
     with CertFiles(cacert) as cert:
         # https://www.conjur.org/api.html#authentication-authenticate-post
         auth_kwargs['verify'] = cert
-        resp = requests.post(urljoin(url, '/'.join(['api', 'authn', account, username, 'authenticate'])), **auth_kwargs)
+        try:
+            resp = requests.post(urljoin(url, '/'.join(['authn', account, username, 'authenticate'])), **auth_kwargs)
+        except requests.exceptions.ConnectionError:
+            resp = requests.post(urljoin(url, '/'.join(['api', 'authn', account, username, 'authenticate'])), **auth_kwargs)
     raise_for_status(resp)
     token = resp.content.decode('utf-8')
 
@@ -78,14 +81,19 @@ def conjur_backend(**kwargs):
     }
 
     # https://www.conjur.org/api.html#secrets-retrieve-a-secret-get
-    path = urljoin(url, '/'.join(['api', 'secrets', account, 'variable', secret_path]))
+    path = urljoin(url, '/'.join(['secrets', account, 'variable', secret_path]))
+    path_conjurcloud = urljoin(url, '/'.join(['api', 'secrets', account, 'variable', secret_path]))
     if version:
         ver = "version={}".format(version)
         path = '?'.join([path, ver])
+        path_conjurcloud = '?'.join([path_conjurcloud, ver])
 
     with CertFiles(cacert) as cert:
         lookup_kwargs['verify'] = cert
-        resp = requests.get(path, timeout=30, **lookup_kwargs)
+        try:
+            resp = requests.get(path, timeout=30, **lookup_kwargs)
+        except requests.exceptions.ConnectionError:
+            resp = requests.get(path_conjurcloud, timeout=30, **lookup_kwargs)
     raise_for_status(resp)
     return resp.text
 
