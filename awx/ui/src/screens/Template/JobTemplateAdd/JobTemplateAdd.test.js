@@ -274,9 +274,14 @@ describe('<JobTemplateAdd />', () => {
   test('should parse and pre-fill project field from query params', async () => {
     const history = createMemoryHistory({
       initialEntries: [
-        '/templates/job_template/add/add?project_id=6&project_name=Demo%20Project',
+        '/templates/job_template/add?resource_id=6&resource_name=Demo%20Project&resource_type=project',
       ],
     });
+    ProjectsAPI.read.mockResolvedValueOnce({
+      count: 1,
+      results: [{ name: 'foo', id: 1, allow_override: true, organization: 1 }],
+    });
+    ProjectsAPI.readOptions.mockResolvedValueOnce({});
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(<JobTemplateAdd />, {
@@ -284,8 +289,9 @@ describe('<JobTemplateAdd />', () => {
       });
     });
     await waitForElement(wrapper, 'EmptyStateBody', (el) => el.length === 0);
+
     expect(wrapper.find('input#project').prop('value')).toEqual('Demo Project');
-    expect(ProjectsAPI.readPlaybooks).toBeCalledWith('6');
+    expect(ProjectsAPI.readPlaybooks).toBeCalledWith(6);
   });
 
   test('should not call ProjectsAPI.readPlaybooks if there is no project', async () => {

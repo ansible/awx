@@ -390,6 +390,7 @@ class BaseTask(object):
             logger.error("I/O error({0}) while trying to open lock file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
             raise
 
+        emitted_lockfile_log = False
         start_time = time.time()
         while True:
             try:
@@ -401,6 +402,9 @@ class BaseTask(object):
                     logger.error("I/O error({0}) while trying to aquire lock on file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
                     raise
                 else:
+                    if not emitted_lockfile_log:
+                        logger.info(f"exception acquiring lock {lock_path}: {e}")
+                        emitted_lockfile_log = True
                     time.sleep(1.0)
             self.instance.refresh_from_db(fields=['cancel_flag'])
             if self.instance.cancel_flag or signal_callback():

@@ -3,14 +3,12 @@ import logging
 import os
 import signal
 import time
-import traceback
 import datetime
 
 from django.conf import settings
 from django.utils.functional import cached_property
 from django.utils.timezone import now as tz_now
-from django.db import DatabaseError, OperationalError, transaction, connection as django_connection
-from django.db.utils import InterfaceError, InternalError
+from django.db import transaction, connection as django_connection
 from django_guid import set_guid
 
 import psutil
@@ -64,6 +62,7 @@ class CallbackBrokerWorker(BaseWorker):
     """
 
     MAX_RETRIES = 2
+    INDIVIDUAL_EVENT_RETRIES = 3
     last_stats = time.time()
     last_flush = time.time()
     total = 0
@@ -164,38 +163,48 @@ class CallbackBrokerWorker(BaseWorker):
                     else:  # only calculate the seconds if the created time already has been set
                         metrics_total_job_event_processing_seconds += e.modified - e.created
                 metrics_duration_to_save = time.perf_counter()
+                saved_events = []
                 try:
                     cls.objects.bulk_create(events)
                     metrics_bulk_events_saved += len(events)
+                    saved_events = events
+                    self.buff[cls] = []
                 except Exception as exc:
-                    logger.warning(f'Error in events bulk_create, will try indiviually up to 5 errors, error {str(exc)}')
+                    # If the database is flaking, let ensure_connection throw a general exception
+                    # will be caught by the outer loop, which goes into a proper sleep and retry loop
+                    django_connection.ensure_connection()
+                    logger.warning(f'Error in events bulk_create, will try indiviually, error: {str(exc)}')
                     # if an exception occurs, we should re-attempt to save the
                     # events one-by-one, because something in the list is
                     # broken/stale
-                    consecutive_errors = 0
-                    events_saved = 0
                     metrics_events_batch_save_errors += 1
-                    for e in events:
+                    for e in events.copy():
                         try:
                             e.save()
-                            events_saved += 1
-                            consecutive_errors = 0
+                            metrics_singular_events_saved += 1
+                            events.remove(e)
+                            saved_events.append(e)  # Importantly, remove successfully saved events from the buffer
                         except Exception as exc_indv:
-                            consecutive_errors += 1
-                            logger.info(f'Database Error Saving individual Job Event, error {str(exc_indv)}')
-                        if consecutive_errors >= 5:
-                            raise
-                    metrics_singular_events_saved += events_saved
-                    if events_saved == 0:
-                        raise
+                            retry_count = getattr(e, '_retry_count', 0) + 1
+                            e._retry_count = retry_count
+
+                            # special sanitization logic for postgres treatment of NUL 0x00 char
+                            if (retry_count == 1) and isinstance(exc_indv, ValueError) and ("\x00" in e.stdout):
+                                e.stdout = e.stdout.replace("\x00", "")
+
+                            if retry_count >= self.INDIVIDUAL_EVENT_RETRIES:
+                                logger.error(f'Hit max retries ({retry_count}) saving individual Event error: {str(exc_indv)}\ndata:\n{e.__dict__}')
+                                events.remove(e)
+                            else:
+                                logger.info(f'Database Error Saving individual Event uuid={e.uuid} try={retry_count}, error: {str(exc_indv)}')
+
                 metrics_duration_to_save = time.perf_counter() - metrics_duration_to_save
-                for e in events:
+                for e in saved_events:
                     if not getattr(e, '_skip_websocket_message', False):
                         metrics_events_broadcast += 1
                         emit_event_detail(e)
                     if getattr(e, '_notification_trigger_event', False):
                         job_stats_wrapup(getattr(e, e.JOB_REFERENCE), event=e)
-            self.buff = {}
             self.last_flush = time.time()
             # only update metrics if we saved events
             if (metrics_bulk_events_saved + metrics_singular_events_saved) > 0:
@@ -267,20 +276,16 @@ class CallbackBrokerWorker(BaseWorker):
                 try:
                     self.flush(force=flush)
                     break
-                except (OperationalError, InterfaceError, InternalError) as exc:
+                except Exception as exc:
+                    # Aside form bugs, exceptions here are assumed to be due to database flake
                     if retries >= self.MAX_RETRIES:
                         logger.exception('Worker could not re-establish database connectivity, giving up on one or more events.')
+                        self.buff = {}
                         return
                     delay = 60 * retries
                     logger.warning(f'Database Error Flushing Job Events, retry #{retries + 1} in {delay} seconds: {str(exc)}')
                     django_connection.close()
                     time.sleep(delay)
                     retries += 1
-                except DatabaseError:
-                    logger.exception('Database Error Flushing Job Events')
-                    django_connection.close()
-                    break
-        except Exception as exc:
-            tb = traceback.format_exc()
-            logger.error('Callback Task Processor Raised Exception: %r', exc)
-            logger.error('Detail: {}'.format(tb))
+        except Exception:
+            logger.exception(f'Callback Task Processor Raised Unexpected Exception processing event data:\n{body}')

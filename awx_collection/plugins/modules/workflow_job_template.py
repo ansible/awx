@@ -19,7 +19,6 @@ author: "John Westcott IV (@john-westcott-iv)"
 short_description: create, update, or destroy Automation Platform Controller workflow job templates.
 description:
     - Create, update, or destroy Automation Platform Controller workflow job templates.
-    - Replaces the deprecated tower_workflow_template module.
     - Use workflow_job_template_node after this, or use the workflow_nodes parameter to build the workflow's graph
 options:
     name:
@@ -613,6 +612,10 @@ def create_workflow_nodes(module, response, workflow_nodes, workflow_id):
             else:
                 if workflow_node['unified_job_template']['type'] != 'workflow_approval':
                     module.fail_json(msg="Unable to Find unified_job_template: {0}".format(search_fields))
+
+        inventory = workflow_node.get('inventory')
+        if inventory:
+            workflow_node_fields['inventory'] = module.resolve_name_to_id('inventories', inventory)
 
         # Lookup Values for other fields
 
