@@ -65,6 +65,7 @@ from awx.main.utils.external_logging import send_pg_notify
 from awx.main.tasks.receptor import get_receptor_ctl, worker_info, worker_cleanup, administrative_workunit_reaper, write_receptor_config
 from awx.main.consumers import emit_channel_notification
 from awx.main import analytics
+from awx.conf import settings_registry
 from awx.main.analytics.subsystem_metrics import Metrics
 
 from rest_framework.exceptions import PermissionDenied
@@ -244,6 +245,13 @@ def apply_cluster_membership_policies():
 def clear_setting_cache(setting_keys):
     # log that cache is being cleared
     logger.info(f"clear_setting_cache of keys {setting_keys}")
+    orig_len = len(setting_keys)
+    for i in range(orig_len):
+        for dependent_key in settings_registry.get_dependent_settings(setting_keys[i]):
+            setting_keys.append(dependent_key)
+    cache_keys = set(setting_keys)
+    logger.debug('cache delete_many(%r)', cache_keys)
+    cache.delete_many(cache_keys)
 
 
 @task(queue='tower_broadcast_all')
