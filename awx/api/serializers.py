@@ -1972,7 +1972,9 @@ class BulkHostCreateSerializer(serializers.Serializer):
         queryset=Inventory.objects.all(), required=True, write_only=True, help_text=_('Primary Key ID of inventory to add hosts to.')
     )
     hosts_help_text = _('List of hosts to be created, JSON. e.g. [{"name": "example.com"}, {"name": "127.0.0.1"}]')
-    hosts = serializers.ListField(child=BulkHostSerializer(), allow_empty=False, max_length=1000, write_only=True, help_text=hosts_help_text)
+    hosts = serializers.ListField(
+        child=BulkHostSerializer(), allow_empty=False, max_length=settings.BULK_HOST_MAX_CREATE, write_only=True, help_text=hosts_help_text
+    )
 
     class Meta:
         fields = ('inventory', 'hosts')
@@ -4594,9 +4596,9 @@ class BulkJobNodeSerializer(serializers.Serializer):
 class BulkJobLaunchSerializer(BaseSerializer):
     name = serializers.CharField(default='Bulk Job Launch', max_length=512, write_only=True, required=False, allow_blank=True)  # limited by max name of jobs
     job_node_help_text = _('List of jobs to be launched, JSON. e.g. [{"unified_job_template": 7}, {"unified_job_template": 10}]')
-    jobs = BulkJobNodeSerializer(many=True, allow_empty=False, write_only=True, max_length=1000, help_text=job_node_help_text)
+    jobs = BulkJobNodeSerializer(many=True, allow_empty=False, write_only=True, max_length=settings.BULK_JOB_MAX_LAUNCH, help_text=job_node_help_text)
     description = serializers.CharField(write_only=True, required=False, allow_blank=False)
-    extra_vars = serializers.CharField(write_only=True, required=False, allow_blank=False)
+    extra_vars = serializers.JSONField(write_only=True, required=False)
     organization = serializers.PrimaryKeyRelatedField(
         queryset=Organization.objects.all(),
         required=False,
@@ -4620,7 +4622,6 @@ class BulkJobLaunchSerializer(BaseSerializer):
 
     def validate(self, attrs):
         request = self.context.get('request', None)
-        self.check_organization_permission(attrs, request)
         identifiers = set()
         for node in attrs['jobs']:
             if 'identifier' in node:
@@ -4649,6 +4650,7 @@ class BulkJobLaunchSerializer(BaseSerializer):
         # If we are not a superuser, check we have permissions
         # TODO: As we add other related items, we need to add them here
         if request and not request.user.is_superuser:
+            self.check_organization_permission(attrs, request)
             self.check_unified_job_permission(request, requested_ujts)
             if requested_use_inventories:
                 self.check_inventory_permission(request, requested_use_inventories)
@@ -4677,6 +4679,9 @@ class BulkJobLaunchSerializer(BaseSerializer):
         )
 
         attrs['jobs'] = jobs_object
+        if 'extra_vars' in attrs:
+            extra_vars_dict = parse_yaml_or_json(attrs['extra_vars'])
+            attrs['extra_vars'] = json.dumps(extra_vars_dict)
         attrs = super().validate(attrs)
         return attrs
 

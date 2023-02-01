@@ -131,6 +131,13 @@ NAMED_URL_GRAPH = {}
 # Note: This setting may be overridden by database settings.
 SCHEDULE_MAX_JOBS = 10
 
+# Bulk API related settings
+# Maximum number of jobs that can be launched in 1 bulk job
+BULK_JOB_MAX_LAUNCH = 100
+
+# Maximum number of host that can be created in 1 bulk host create
+BULK_HOST_MAX_CREATE = 1000
+
 SITE_ID = 1
 
 # Make this unique, and don't share it with anybody.
