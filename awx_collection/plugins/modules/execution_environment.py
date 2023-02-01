@@ -84,6 +84,7 @@ def main():
         organization=dict(),
         credential=dict(),
         state=dict(choices=['present', 'absent'], default='present'),
+        # NOTE: Default for pull differs from API (which is blank by default)
         pull=dict(choices=['always', 'missing', 'never'], default='missing'),
     )
 
