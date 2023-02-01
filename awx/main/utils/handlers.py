@@ -103,6 +103,10 @@ ColorHandler = logging.StreamHandler
 if settings.COLOR_LOGS is True:
     try:
         from logutils.colorize import ColorizingStreamHandler
+        import colorama
+
+        colorama.deinit()
+        colorama.init(wrap=False, convert=False, strip=False)
 
         class ColorHandler(ColorizingStreamHandler):
             def colorize(self, line, record):

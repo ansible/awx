@@ -46,90 +46,216 @@ action_groups:
 plugin_routing:
   inventory:
     tower:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* plugins have been deprecated, use awx.awx.controller instead.
       redirect: awx.awx.controller
   lookup:
     tower_api:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* plugins have been deprecated, use awx.awx.controller_api instead.
       redirect: awx.awx.controller_api
     tower_schedule_rrule:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* plugins have been deprecated, use awx.awx.schedule_rrule instead.
       redirect: awx.awx.schedule_rrule
   modules:
     tower_ad_hoc_command_cancel:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.ad_hoc_command_cancel instead.
       redirect: awx.awx.ad_hoc_command_cancel
     tower_ad_hoc_command_wait:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.ad_hoc_command_wait instead.
       redirect: awx.awx.ad_hoc_command_wait
     tower_ad_hoc_command:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.ad_hoc_command instead.
       redirect: awx.awx.ad_hoc_command
     tower_application:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.application instead.
       redirect: awx.awx.application
     tower_meta:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.controller_meta instead.
       redirect: awx.awx.controller_meta
     tower_credential_input_source:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.credential_input_source instead.
       redirect: awx.awx.credential_input_source
     tower_credential_type:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.credential_type instead.
       redirect: awx.awx.credential_type
     tower_credential:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.credential instead.
       redirect: awx.awx.credential
     tower_execution_environment:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.execution_environment instead.
       redirect: awx.awx.execution_environment
     tower_export:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.export instead.
       redirect: awx.awx.export
     tower_group:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.group instead.
       redirect: awx.awx.group
     tower_host:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.host instead.
       redirect: awx.awx.host
     tower_import:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.import instead.
       redirect: awx.awx.import
     tower_instance_group:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.instance_group instead.
       redirect: awx.awx.instance_group
     tower_inventory_source_update:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.inventory_source_update instead.
       redirect: awx.awx.inventory_source_update
     tower_inventory_source:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.inventory_source instead.
       redirect: awx.awx.inventory_source
     tower_inventory:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.inventory instead.
       redirect: awx.awx.inventory
     tower_job_cancel:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.job_cancel instead.
       redirect: awx.awx.job_cancel
     tower_job_launch:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.job_launch instead.
       redirect: awx.awx.job_launch
     tower_job_list:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.job_list instead.
       redirect: awx.awx.job_list
     tower_job_template:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.job_template instead.
       redirect: awx.awx.job_template
     tower_job_wait:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.job_wait instead.
       redirect: awx.awx.job_wait
     tower_label:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.label instead.
       redirect: awx.awx.label
     tower_license:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.license instead.
       redirect: awx.awx.license
     tower_notification_template:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.notification_template instead.
       redirect: awx.awx.notification_template
     tower_notification:
       redirect: awx.awx.notification_template
     tower_organization:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.organization instead.
       redirect: awx.awx.organization
     tower_project_update:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.project_update instead.
       redirect: awx.awx.project_update
     tower_project:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.project instead.
       redirect: awx.awx.project
     tower_role:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.role instead.
       redirect: awx.awx.role
     tower_schedule:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.schedule instead.
       redirect: awx.awx.schedule
     tower_settings:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.settings instead.
       redirect: awx.awx.settings
     tower_team:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.team instead.
       redirect: awx.awx.team
     tower_token:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.token instead.
       redirect: awx.awx.token
     tower_user:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.user instead.
       redirect: awx.awx.user
     tower_workflow_approval:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.workflow_approval instead.
       redirect: awx.awx.workflow_approval
     tower_workflow_job_template_node:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.workflow_job_template_node instead.
       redirect: awx.awx.workflow_job_template_node
     tower_workflow_job_template:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.workflow_job_template instead.
       redirect: awx.awx.workflow_job_template
     tower_workflow_launch:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.workflow_launch instead.
       redirect: awx.awx.workflow_launch
     tower_workflow_node_wait:
+      deprecation:
+        removal_date: '2022-01-23'
+        warning_text: The tower_* modules have been deprecated, use awx.awx.workflow_node_wait instead.
       redirect: awx.awx.workflow_node_wait

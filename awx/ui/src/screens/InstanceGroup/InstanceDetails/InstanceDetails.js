@@ -81,35 +81,30 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
       const {
         data: { results },
       } = await InstanceGroupsAPI.readInstances(instanceGroup.id);
-      let instanceDetails;
       const isAssociated = results.some(
         ({ id: instId }) => instId === parseInt(instanceId, 10)
       );
 
       if (isAssociated) {
-        const [{ data: details }, { data: healthCheckData }] =
-          await Promise.all([
-            InstancesAPI.readDetail(instanceId),
-            InstancesAPI.readHealthCheckDetail(instanceId),
-          ]);
-
-        instanceDetails = details;
-        setHealthCheck(healthCheckData);
-      } else {
-        throw new Error(
-          `This instance is not associated with this instance group`
+        const { data: details } = await InstancesAPI.readDetail(instanceId);
+        if (details.node_type === 'execution') {
+          const { data: healthCheckData } =
+            await InstancesAPI.readHealthCheckDetail(instanceId);
+          setHealthCheck(healthCheckData);
+        }
+        setBreadcrumb(instanceGroup, details);
+        setForks(
+          computeForks(
+            details.mem_capacity,
+            details.cpu_capacity,
+            details.capacity_adjustment
+          )
         );
+        return { instance: details };
       }
-
-      setBreadcrumb(instanceGroup, instanceDetails);
-      setForks(
-        computeForks(
-          instanceDetails.mem_capacity,
-          instanceDetails.cpu_capacity,
-          instanceDetails.capacity_adjustment
-        )
+      throw new Error(
+        `This instance is not associated with this instance group`
       );
-      return { instance: instanceDetails };
     }, [instanceId, setBreadcrumb, instanceGroup]),
     { instance: {}, isLoading: true }
   );

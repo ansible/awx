@@ -187,7 +187,9 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
   useEffect(() => {
     const pendingRequests = Object.values(eventByUuidRequests.current || {});
     setHasContentLoading(true); // prevents "no content found" screen from flashing
-    setIsFollowModeEnabled(false);
+    if (location.search) {
+      setIsFollowModeEnabled(false);
+    }
     Promise.allSettled(pendingRequests).then(() => {
       setRemoteRowCount(0);
       clearLoadedEvents();
@@ -251,6 +253,9 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
         });
         const updated = oldWsEvents.concat(newEvents);
         jobSocketCounter.current = updated.length;
+        if (!oldWsEvents.length && min > remoteRowCount + 1) {
+          loadJobEvents(min);
+        }
         return updated.sort((a, b) => a.counter - b.counter);
       });
       setCssMap((prevCssMap) => ({
@@ -358,7 +363,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     }
   };
 
-  const loadJobEvents = async () => {
+  const loadJobEvents = async (firstWsCounter = null) => {
     const [params, loadRange] = getEventRequestParams(job, 50, [1, 50]);
 
     if (isMounted.current) {
@@ -370,6 +375,9 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
 
     if (isFlatMode) {
       params.not__stdout = '';
+    }
+    if (firstWsCounter) {
+      params.counter__lt = firstWsCounter;
     }
     const qsParams = parseQueryString(QS_CONFIG, location.search);
     const eventPromise = getJobModel(job.type).readEvents(job.id, {
@@ -435,7 +443,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     if (getEvent(counter)) {
       return true;
     }
-    if (index > remoteRowCount && index < remoteRowCount + wsEvents.length) {
+    if (index >= remoteRowCount && index < remoteRowCount + wsEvents.length) {
       return true;
     }
     return currentlyLoading.includes(counter);
@@ -462,7 +470,7 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     }
     if (
       !event &&
-      index > remoteRowCount &&
+      index >= remoteRowCount &&
       index < remoteRowCount + wsEvents.length
     ) {
       event = wsEvents[index - remoteRowCount];
@@ -629,10 +637,14 @@ function JobOutput({ job, eventRelatedSearchableKeys, eventSearchableKeys }) {
     setIsFollowModeEnabled(false);
   };
 
-  const scrollToEnd = () => {
+  const scrollToEnd = useCallback(() => {
     scrollToRow(-1);
-    setTimeout(() => scrollToRow(-1), 100);
-  };
+    let timeout;
+    if (isFollowModeEnabled) {
+      setTimeout(() => scrollToRow(-1), 100);
+    }
+    return () => clearTimeout(timeout);
+  }, [isFollowModeEnabled]);
 
   const handleScrollLast = () => {
     scrollToEnd();

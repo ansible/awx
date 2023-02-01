@@ -181,6 +181,7 @@ function Inventory({ setBreadcrumb }) {
             >
               <RelatedTemplateList
                 searchParams={{ inventory__id: inventory.id }}
+                resourceName={inventory.name}
               />
             </Route>,
             <Route path="*" key="not-found">
