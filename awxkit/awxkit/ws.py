@@ -15,7 +15,6 @@ log = logging.getLogger(__name__)
 
 
 class WSClientException(Exception):
-
     pass
 
 

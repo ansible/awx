@@ -450,7 +450,6 @@ class WorkflowJobOptions(LaunchTimeConfigBase):
 
 
 class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTemplateMixin, ResourceMixin, RelatedJobsMixin, WebhookTemplateMixin):
-
     SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name', 'organization')]
     FIELDS_TO_PRESERVE_AT_COPY = [
         'labels',
@@ -568,7 +567,6 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         # Handle all the fields that have prompting rules
         # NOTE: If WFJTs prompt for other things, this logic can be combined with jobs
         for field_name, ask_field_name in self.get_ask_mapping().items():
-
             if field_name == 'extra_vars':
                 accepted_vars, rejected_vars, vars_errors = self.accept_or_ignore_variables(
                     kwargs.get('extra_vars', {}), _exclude_errors=exclude_errors, extra_passwords=kwargs.get('survey_passwords', {})
@@ -779,7 +777,6 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
 
 
 class WorkflowApprovalTemplate(UnifiedJobTemplate, RelatedJobsMixin):
-
     FIELDS_TO_PRESERVE_AT_COPY = [
         'description',
         'timeout',

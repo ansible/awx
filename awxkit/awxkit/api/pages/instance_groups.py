@@ -39,7 +39,6 @@ page.register_page([resources.instance_group, (resources.instance_groups, 'post'
 
 
 class InstanceGroups(page.PageList, InstanceGroup):
-
     pass
 
 

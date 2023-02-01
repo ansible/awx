@@ -74,7 +74,6 @@ class JsonDumpsAction(argparse.Action):
 
 
 class ResourceOptionsParser(object):
-
     deprecated = False
 
     def __init__(self, v2, page, resource, parser):

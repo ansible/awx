@@ -25,6 +25,7 @@ from rest_framework import status
 # Red Hat has an OID namespace (RHANANA). Receptor has its own designation under that.
 RECEPTOR_OID = "1.3.6.1.4.1.2312.19.1"
 
+
 # generate install bundle for the instance
 # install bundle directory structure
 # ├── install_receptor.yml (playbook)
@@ -40,7 +41,6 @@ RECEPTOR_OID = "1.3.6.1.4.1.2312.19.1"
 # │   └── work-public-key.pem
 # └── requirements.yml
 class InstanceInstallBundle(GenericAPIView):
-
     name = _('Install Bundle')
     model = models.Instance
     serializer_class = serializers.InstanceSerializer

@@ -8,7 +8,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [('conf', '0005_v330_rename_two_session_settings')]
 
     operations = [migrations.RunPython(fill_ldap_group_type_params)]

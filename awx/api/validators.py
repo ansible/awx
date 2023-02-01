@@ -33,7 +33,6 @@ class HostnameRegexValidator(RegexValidator):
         return f"regex={self.regex}, message={self.message}, code={self.code}, inverse_match={self.inverse_match}, flags={self.flags}"
 
     def __validate(self, value):
-
         if ' ' in value:
             return False, ValidationError("whitespaces in hostnames are illegal")
 

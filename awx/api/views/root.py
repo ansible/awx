@@ -36,7 +36,6 @@ logger = logging.getLogger('awx.api.views.root')
 
 
 class ApiRootView(APIView):
-
     permission_classes = (AllowAny,)
     name = _('REST API')
     versioning_class = None
@@ -59,7 +58,6 @@ class ApiRootView(APIView):
 
 
 class ApiOAuthAuthorizationRootView(APIView):
-
     permission_classes = (AllowAny,)
     name = _("API OAuth 2 Authorization Root")
     versioning_class = None
@@ -74,7 +72,6 @@ class ApiOAuthAuthorizationRootView(APIView):
 
 
 class ApiVersionRootView(APIView):
-
     permission_classes = (AllowAny,)
     swagger_topic = 'Versioning'
 
@@ -172,7 +169,6 @@ class ApiV2PingView(APIView):
 
 
 class ApiV2SubscriptionView(APIView):
-
     permission_classes = (IsAuthenticated,)
     name = _('Subscriptions')
     swagger_topic = 'System Configuration'
@@ -212,7 +208,6 @@ class ApiV2SubscriptionView(APIView):
 
 
 class ApiV2AttachView(APIView):
-
     permission_classes = (IsAuthenticated,)
     name = _('Attach Subscription')
     swagger_topic = 'System Configuration'
@@ -230,7 +225,6 @@ class ApiV2AttachView(APIView):
         user = getattr(settings, 'SUBSCRIPTIONS_USERNAME', None)
         pw = getattr(settings, 'SUBSCRIPTIONS_PASSWORD', None)
         if pool_id and user and pw:
-
             data = request.data.copy()
             try:
                 with set_environ(**settings.AWX_TASK_ENV):
@@ -258,7 +252,6 @@ class ApiV2AttachView(APIView):
 
 
 class ApiV2ConfigView(APIView):
-
     permission_classes = (IsAuthenticated,)
     name = _('Configuration')
     swagger_topic = 'System Configuration'

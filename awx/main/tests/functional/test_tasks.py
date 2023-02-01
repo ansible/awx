@@ -52,7 +52,6 @@ def test_folder_cleanup_stale_file(mock_job_folder, mock_me):
 def test_folder_cleanup_running_job(mock_job_folder, mock_me):
     me_inst = Instance.objects.create(hostname='local_node', uuid='00000000-0000-0000-0000-000000000000')
     with mock.patch.object(Instance.objects, 'me', return_value=me_inst):
-
         job = Job.objects.create(id=123, controller_node=me_inst.hostname, status='running')
         _cleanup_images_and_files(grace_period=0)
         assert os.path.exists(mock_job_folder)  # running job should prevent folder from getting deleted

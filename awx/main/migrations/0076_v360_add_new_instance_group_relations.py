@@ -7,7 +7,6 @@ from awx.main.fields import OrderedManyToManyField
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0075_v360_remove_old_instance_group_relations'),
     ]

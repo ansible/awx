@@ -14,7 +14,6 @@ def _noop(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [('conf', '0007_v380_rename_more_settings')]
 
     operations = [migrations.RunPython(clear_old_license, _noop), migrations.RunPython(prefill_rh_credentials, _noop)]

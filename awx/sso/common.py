@@ -12,7 +12,7 @@ logger = logging.getLogger('awx.sso.common')
 
 def get_orgs_by_ids():
     existing_orgs = {}
-    for (org_id, org_name) in Organization.objects.all().values_list('id', 'name'):
+    for org_id, org_name in Organization.objects.all().values_list('id', 'name'):
         existing_orgs[org_name] = org_id
     return existing_orgs
 

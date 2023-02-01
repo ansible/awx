@@ -63,7 +63,6 @@ DEPENDENT_NONEXPORT = [
 
 
 class Api(base.Base):
-
     pass
 
 
@@ -71,7 +70,6 @@ page.register_page(resources.api, Api)
 
 
 class ApiV2(base.Base):
-
     # Export methods
 
     def _export(self, _page, post_fields):
