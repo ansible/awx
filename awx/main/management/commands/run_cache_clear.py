@@ -23,7 +23,7 @@ class Command(BaseCommand):
                 for e in conn.events(yield_timeouts=True):
                     if e is not None:
                         body = json.loads(e.payload)
-                        logger.warning(f"Cache clear request received. Clearing now, payload: {e.payload}")
+                        logger.info(f"Cache clear request received. Clearing now, payload: {e.payload}")
                         TaskWorker.run_callable(body)
                     else:
                         logger.info('run_clear_cache got timeout')
