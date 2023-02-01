@@ -51,9 +51,9 @@ SYSTEM_JOB_TEMPLATES = {
         extra_data={},
     ),
     'run_health_checks': dict(
-        name='Run Cluster Health Checks',
-        description='Run health check on all eligible instances',
-        schedule_name='Run Cluster Health Checks',
+        name='Run Execution Node Health Checks',
+        description='Run health check on all execution nodes',
+        schedule_name='Run Execution Node Health Checks',
         rrule_template='DTSTART:%s RRULE:FREQ=DAILY;INTERVAL=1',
         extra_data={},
     ),
