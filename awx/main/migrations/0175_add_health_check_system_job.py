@@ -8,7 +8,7 @@ from awx.main.migrations._create_system_jobs import create_system_job_templates
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0173_instancegroup_max_limits'),
+        ('main', '0174_ensure_org_ee_admin_roles'),
     ]
 
     operations = [
