@@ -13,7 +13,6 @@ def create_new_credential_types(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0095_v360_increase_instance_version_length'),
     ]

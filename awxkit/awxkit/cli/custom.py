@@ -148,7 +148,6 @@ class WorkflowLaunch(Launchable, CustomAction):
 
 
 class HasStdout(object):
-
     action = 'stdout'
 
     def add_arguments(self, parser, resource_options_parser):
@@ -180,7 +179,6 @@ class AdhocCommandStdout(HasStdout, CustomAction):
 
 
 class AssociationMixin(object):
-
     action = 'associate'
 
     def add_arguments(self, parser, resource_options_parser):
@@ -344,7 +342,6 @@ class SettingsList(CustomAction):
 
 
 class RoleMixin(object):
-
     has_roles = [
         ['organizations', 'organization'],
         ['projects', 'project'],
@@ -427,25 +424,21 @@ class RoleMixin(object):
 
 
 class UserGrant(RoleMixin, CustomAction):
-
     resource = 'users'
     action = 'grant'
 
 
 class UserRevoke(RoleMixin, CustomAction):
-
     resource = 'users'
     action = 'revoke'
 
 
 class TeamGrant(RoleMixin, CustomAction):
-
     resource = 'teams'
     action = 'grant'
 
 
 class TeamRevoke(RoleMixin, CustomAction):
-
     resource = 'teams'
     action = 'revoke'
 
@@ -476,7 +469,6 @@ class SettingsModify(CustomAction):
 
 
 class HasMonitor(object):
-
     action = 'monitor'
 
     def add_arguments(self, parser, resource_options_parser):

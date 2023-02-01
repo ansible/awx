@@ -7,7 +7,6 @@ from awx.main.migrations._create_system_jobs import create_clearsessions_jt, cre
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0077_v360_add_default_orderings'),
     ]

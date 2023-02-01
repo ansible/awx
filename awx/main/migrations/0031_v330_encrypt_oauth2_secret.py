@@ -8,7 +8,6 @@ import oauth2_provider.generators
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0030_v330_modify_application'),
     ]

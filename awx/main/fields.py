@@ -232,7 +232,6 @@ class ImplicitRoleField(models.ForeignKey):
             field_names = [field_names]
 
         for field_name in field_names:
-
             if field_name.startswith('singleton:'):
                 continue
 
@@ -244,7 +243,6 @@ class ImplicitRoleField(models.ForeignKey):
             field = getattr(cls, field_name, None)
 
             if field and type(field) is ReverseManyToOneDescriptor or type(field) is ManyToManyDescriptor:
-
                 if '.' in field_attr:
                     raise Exception('Referencing deep roles through ManyToMany fields is unsupported.')
 
@@ -629,7 +627,6 @@ class CredentialInputField(JSONSchemaField):
         # `ssh_key_unlock` requirements are very specific and can't be
         # represented without complicated JSON schema
         if model_instance.credential_type.managed is True and 'ssh_key_unlock' in defined_fields:
-
             # in order to properly test the necessity of `ssh_key_unlock`, we
             # need to know the real value of `ssh_key_data`; for a payload like:
             # {

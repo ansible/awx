@@ -8,7 +8,6 @@ import awx.main.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0019_v330_custom_virtualenv'),
     ]

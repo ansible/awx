@@ -22,7 +22,6 @@ page.register_page(resources.workflow_approval, WorkflowApproval)
 
 
 class WorkflowApprovals(page.PageList, WorkflowApproval):
-
     pass
 
 

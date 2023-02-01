@@ -4,7 +4,6 @@ from . import page
 
 
 class Setting(base.Base):
-
     pass
 
 

@@ -17,7 +17,6 @@ logger = logging.getLogger('awx.sso.views')
 
 
 class BaseRedirectView(RedirectView):
-
     permanent = True
 
     def get_redirect_url(self, *args, **kwargs):

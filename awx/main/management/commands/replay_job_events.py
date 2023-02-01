@@ -28,7 +28,6 @@ class JobStatusLifeCycle:
 
 
 class ReplayJobEvents(JobStatusLifeCycle):
-
     recording_start = None
     replay_start = None
 
@@ -190,7 +189,6 @@ class ReplayJobEvents(JobStatusLifeCycle):
 
 
 class Command(BaseCommand):
-
     help = 'Replay job events over websockets ordered by created on date.'
 
     def _parse_slice_range(self, slice_arg):

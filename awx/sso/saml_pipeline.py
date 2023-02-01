@@ -170,7 +170,7 @@ def _update_user_teams_by_saml_attr(desired_team_state, teams_to_create, **kwarg
             # Only get the all orgs once, and only if needed
             if all_teams is None:
                 all_teams = Team.objects.all().values_list('name', 'organization__name')
-            for (team_name, organization_name) in all_teams:
+            for team_name, organization_name in all_teams:
                 if organization_name not in desired_team_state:
                     desired_team_state[organization_name] = {}
                 desired_team_state[organization_name][team_name] = {role: False}

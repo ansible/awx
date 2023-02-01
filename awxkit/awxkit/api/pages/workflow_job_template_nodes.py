@@ -9,7 +9,6 @@ from . import page
 
 
 class WorkflowJobTemplateNode(HasCreate, base.Base):
-
     dependencies = [WorkflowJobTemplate, UnifiedJobTemplate]
     NATURAL_KEY = ('workflow_job_template', 'identifier')
 
@@ -113,7 +112,6 @@ page.register_page(
 
 
 class WorkflowJobTemplateNodes(page.PageList, WorkflowJobTemplateNode):
-
     pass
 
 

@@ -934,7 +934,6 @@ class Command(BaseCommand):
         # (even though inventory_import.Command.handle -- which calls
         # perform_update -- has its own lock, inventory_ID_import)
         with advisory_lock('inventory_{}_perform_update'.format(self.inventory.id)):
-
             try:
                 self.check_license()
             except PermissionDenied as e:

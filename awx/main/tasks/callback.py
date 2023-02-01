@@ -244,5 +244,4 @@ class RunnerCallbackForAdHocCommand(RunnerCallback):
 
 
 class RunnerCallbackForSystemJob(RunnerCallback):
-
     pass
