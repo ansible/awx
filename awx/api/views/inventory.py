@@ -98,12 +98,10 @@ class InventoryDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIVie
 
 
 class ConstructedInventoryDetail(InventoryDetail):
-
     serializer_class = ConstructedInventorySerializer
 
 
 class ConstructedInventoryList(InventoryList):
-
     serializer_class = ConstructedInventorySerializer
 
     def get_queryset(self):
