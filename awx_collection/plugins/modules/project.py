@@ -388,7 +388,7 @@ def main():
         project_fields['organization'] = org_id
 
     if scm_type == '' and local_path is not None:
-            project_fields['local_path'] = local_path
+        project_fields['local_path'] = local_path
 
     if scm_update_cache_timeout not in (0, None) and scm_update_on_launch is not True:
         module.warn('scm_update_cache_timeout will be ignored since scm_update_on_launch was not set to true')
