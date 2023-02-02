@@ -290,7 +290,7 @@ TEMPLATES = [
             ],
             'builtins': ['awx.main.templatetags.swagger'],
         },
-        'DIRS': [os.path.join(BASE_DIR, 'templates'), os.path.join(BASE_DIR, 'ui', 'build'), os.path.join(BASE_DIR, 'ui', 'public')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'), '/var/lib/awx/public/static/controller/', os.path.join(BASE_DIR, 'ui', 'build'), os.path.join(BASE_DIR, 'ui', 'public')],
     },
 ]
 

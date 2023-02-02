@@ -9,6 +9,10 @@ class IndexView(TemplateView):
 
     template_name = 'index.html'
 
+class ControllerView(TemplateView):
+
+    template_name = 'index_controller.html'
+
 
 class MigrationsNotran(TemplateView):
 
@@ -27,4 +31,4 @@ class MigrationsNotran(TemplateView):
 
 app_name = 'ui'
 
-urlpatterns = [re_path(r'^$', IndexView.as_view(), name='index'), re_path(r'^migrations_notran/$', MigrationsNotran.as_view(), name='migrations_notran')]
+urlpatterns = [re_path(r'^$', IndexView.as_view(), name='index'), re_path(r'^controller/.*$', ControllerView.as_view(), name='index'), re_path(r'^migrations_notran/$', MigrationsNotran.as_view(), name='migrations_notran')]
