@@ -21,7 +21,6 @@ page.register_page(resources.system_job_template, SystemJobTemplate)
 
 
 class SystemJobTemplates(page.PageList, SystemJobTemplate):
-
     pass
 
 

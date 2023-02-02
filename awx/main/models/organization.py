@@ -116,7 +116,6 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
 
 
 class OrganizationGalaxyCredentialMembership(models.Model):
-
     organization = models.ForeignKey('Organization', on_delete=models.CASCADE)
     credential = models.ForeignKey('Credential', on_delete=models.CASCADE)
     position = models.PositiveIntegerField(

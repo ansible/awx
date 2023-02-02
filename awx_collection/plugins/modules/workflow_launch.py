@@ -105,7 +105,7 @@ def main():
         extra_vars=dict(type='dict'),
         wait=dict(required=False, default=True, type='bool'),
         interval=dict(required=False, default=2.0, type='float'),
-        timeout=dict(required=False, default=None, type='int'),
+        timeout=dict(required=False, type='int'),
     )
 
     # Create a module for ourselves

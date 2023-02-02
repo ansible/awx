@@ -20,7 +20,6 @@ def create_uuid(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0111_v370_delete_channelgroup'),
     ]

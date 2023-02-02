@@ -9,7 +9,6 @@ import awx.main.models.notifications
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0084_v360_token_description'),
     ]

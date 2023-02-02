@@ -50,13 +50,11 @@ options:
       description:
         - Designates that this user has all permissions without explicitly assigning them.
       type: bool
-      default: False
       aliases: ['superuser']
     is_system_auditor:
       description:
         - User is a system wide auditor.
       type: bool
-      default: False
       aliases: ['auditor']
     password:
       description:
@@ -134,8 +132,8 @@ def main():
         first_name=dict(),
         last_name=dict(),
         email=dict(),
-        is_superuser=dict(type='bool', default=False, aliases=['superuser']),
-        is_system_auditor=dict(type='bool', default=False, aliases=['auditor']),
+        is_superuser=dict(type='bool', aliases=['superuser']),
+        is_system_auditor=dict(type='bool', aliases=['auditor']),
         password=dict(no_log=True),
         update_secrets=dict(type='bool', default=True, no_log=False),
         organization=dict(),

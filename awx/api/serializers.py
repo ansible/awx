@@ -205,7 +205,6 @@ def reverse_gfk(content_object, request):
 
 
 class CopySerializer(serializers.Serializer):
-
     name = serializers.CharField()
 
     def validate(self, attrs):
@@ -437,7 +436,6 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
                     continue
                 summary_fields[fk] = OrderedDict()
                 for field in related_fields:
-
                     fval = getattr(fkval, field, None)
 
                     if fval is None and field == 'type':
@@ -935,7 +933,6 @@ class UnifiedJobListSerializer(UnifiedJobSerializer):
 
 
 class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
-
     result_stdout = serializers.SerializerMethodField()
 
     class Meta:
@@ -949,7 +946,6 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
 
 
 class UserSerializer(BaseSerializer):
-
     password = serializers.CharField(required=False, default='', write_only=True, help_text=_('Write-only field used to change the password.'))
     ldap_dn = serializers.CharField(source='profile.ldap_dn', read_only=True)
     external_account = serializers.SerializerMethodField(help_text=_('Set if the account is managed by an external service'))
@@ -1109,7 +1105,6 @@ class UserActivityStreamSerializer(UserSerializer):
 
 
 class BaseOAuth2TokenSerializer(BaseSerializer):
-
     refresh_token = serializers.SerializerMethodField()
     token = serializers.SerializerMethodField()
     ALLOWED_SCOPES = ['read', 'write']
@@ -1227,7 +1222,6 @@ class UserPersonalTokenSerializer(BaseOAuth2TokenSerializer):
 
 
 class OAuth2ApplicationSerializer(BaseSerializer):
-
     show_capabilities = ['edit', 'delete']
 
     class Meta:
@@ -1462,7 +1456,6 @@ class ExecutionEnvironmentSerializer(BaseSerializer):
 
 
 class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
-
     status = serializers.ChoiceField(choices=Project.PROJECT_STATUS_CHOICES, read_only=True)
     last_update_failed = serializers.BooleanField(read_only=True)
     last_updated = serializers.DateTimeField(read_only=True)
@@ -1553,7 +1546,6 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
 
 
 class ProjectPlaybooksSerializer(ProjectSerializer):
-
     playbooks = serializers.SerializerMethodField(help_text=_('Array of playbooks available within this project.'))
 
     class Meta:
@@ -1571,7 +1563,6 @@ class ProjectPlaybooksSerializer(ProjectSerializer):
 
 
 class ProjectInventoriesSerializer(ProjectSerializer):
-
     inventory_files = serializers.ReadOnlyField(help_text=_('Array of inventory files and directories available within this project, ' 'not comprehensive.'))
 
     class Meta:
@@ -1586,7 +1577,6 @@ class ProjectInventoriesSerializer(ProjectSerializer):
 
 
 class ProjectUpdateViewSerializer(ProjectSerializer):
-
     can_update = serializers.BooleanField(read_only=True)
 
     class Meta:
@@ -1616,7 +1606,6 @@ class ProjectUpdateSerializer(UnifiedJobSerializer, ProjectOptionsSerializer):
 
 
 class ProjectUpdateDetailSerializer(ProjectUpdateSerializer):
-
     playbook_counts = serializers.SerializerMethodField(help_text=_('A count of all plays and tasks for the job run.'))
 
     class Meta:
@@ -1639,7 +1628,6 @@ class ProjectUpdateListSerializer(ProjectUpdateSerializer, UnifiedJobListSeriali
 
 
 class ProjectUpdateCancelSerializer(ProjectUpdateSerializer):
-
     can_cancel = serializers.BooleanField(read_only=True)
 
     class Meta:
@@ -2105,7 +2093,6 @@ class BulkHostCreateSerializer(serializers.Serializer):
 
 
 class GroupTreeSerializer(GroupSerializer):
-
     children = serializers.SerializerMethodField()
 
     class Meta:
@@ -2203,7 +2190,6 @@ class InventorySourceOptionsSerializer(BaseSerializer):
 
 
 class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOptionsSerializer):
-
     status = serializers.ChoiceField(choices=InventorySource.INVENTORY_SOURCE_STATUS_CHOICES, read_only=True)
     last_update_failed = serializers.BooleanField(read_only=True)
     last_updated = serializers.DateTimeField(read_only=True)
@@ -2348,7 +2334,6 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
 
 
 class InventorySourceUpdateSerializer(InventorySourceSerializer):
-
     can_update = serializers.BooleanField(read_only=True)
 
     class Meta:
@@ -2365,7 +2350,6 @@ class InventorySourceUpdateSerializer(InventorySourceSerializer):
 
 
 class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSerializer):
-
     custom_virtualenv = serializers.ReadOnlyField()
 
     class Meta:
@@ -2406,7 +2390,6 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
 
 
 class InventoryUpdateDetailSerializer(InventoryUpdateSerializer):
-
     source_project = serializers.SerializerMethodField(help_text=_('The project used for this job.'), method_name='get_source_project_id')
 
     class Meta:
@@ -2457,7 +2440,6 @@ class InventoryUpdateListSerializer(InventoryUpdateSerializer, UnifiedJobListSer
 
 
 class InventoryUpdateCancelSerializer(InventoryUpdateSerializer):
-
     can_cancel = serializers.BooleanField(read_only=True)
 
     class Meta:
@@ -2815,7 +2797,6 @@ class CredentialSerializer(BaseSerializer):
 
 
 class CredentialSerializerCreate(CredentialSerializer):
-
     user = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(),
         required=False,
@@ -3170,7 +3151,6 @@ class JobTemplateWithSpecSerializer(JobTemplateSerializer):
 
 
 class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
-
     passwords_needed_to_start = serializers.ReadOnlyField()
     artifacts = serializers.SerializerMethodField()
 
@@ -3253,7 +3233,6 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
 
 
 class JobDetailSerializer(JobSerializer):
-
     playbook_counts = serializers.SerializerMethodField(help_text=_('A count of all plays and tasks for the job run.'))
     custom_virtualenv = serializers.ReadOnlyField()
 
@@ -3271,7 +3250,6 @@ class JobDetailSerializer(JobSerializer):
 
 
 class JobCancelSerializer(BaseSerializer):
-
     can_cancel = serializers.BooleanField(read_only=True)
 
     class Meta:
@@ -3280,7 +3258,6 @@ class JobCancelSerializer(BaseSerializer):
 
 
 class JobRelaunchSerializer(BaseSerializer):
-
     passwords_needed_to_start = serializers.SerializerMethodField()
     retry_counts = serializers.SerializerMethodField()
     hosts = serializers.ChoiceField(
@@ -3340,7 +3317,6 @@ class JobRelaunchSerializer(BaseSerializer):
 
 
 class JobCreateScheduleSerializer(LabelsListMixin, BaseSerializer):
-
     can_schedule = serializers.SerializerMethodField()
     prompts = serializers.SerializerMethodField()
 
@@ -3466,7 +3442,6 @@ class AdHocCommandDetailSerializer(AdHocCommandSerializer):
 
 
 class AdHocCommandCancelSerializer(AdHocCommandSerializer):
-
     can_cancel = serializers.BooleanField(read_only=True)
 
     class Meta:
@@ -3505,7 +3480,6 @@ class SystemJobTemplateSerializer(UnifiedJobTemplateSerializer):
 
 
 class SystemJobSerializer(UnifiedJobSerializer):
-
     result_stdout = serializers.SerializerMethodField()
 
     class Meta:
@@ -3532,7 +3506,6 @@ class SystemJobSerializer(UnifiedJobSerializer):
 
 
 class SystemJobCancelSerializer(SystemJobSerializer):
-
     can_cancel = serializers.BooleanField(read_only=True)
 
     class Meta:
@@ -3697,7 +3670,6 @@ class WorkflowJobListSerializer(WorkflowJobSerializer, UnifiedJobListSerializer)
 
 
 class WorkflowJobCancelSerializer(WorkflowJobSerializer):
-
     can_cancel = serializers.BooleanField(read_only=True)
 
     class Meta:
@@ -3711,7 +3683,6 @@ class WorkflowApprovalViewSerializer(UnifiedJobSerializer):
 
 
 class WorkflowApprovalSerializer(UnifiedJobSerializer):
-
     can_approve_or_deny = serializers.SerializerMethodField()
     approval_expiration = serializers.SerializerMethodField()
     timed_out = serializers.ReadOnlyField()
@@ -4106,7 +4077,6 @@ class JobHostSummarySerializer(BaseSerializer):
 
 
 class JobEventSerializer(BaseSerializer):
-
     event_display = serializers.CharField(source='get_event_display2', read_only=True)
     event_level = serializers.IntegerField(read_only=True)
 
@@ -4202,7 +4172,6 @@ class ProjectUpdateEventSerializer(JobEventSerializer):
 
 
 class AdHocCommandEventSerializer(BaseSerializer):
-
     event_display = serializers.CharField(source='get_event_display', read_only=True)
 
     class Meta:
@@ -4484,7 +4453,6 @@ class JobLaunchSerializer(BaseSerializer):
 
 
 class WorkflowJobLaunchSerializer(BaseSerializer):
-
     can_start_without_user_input = serializers.BooleanField(read_only=True)
     defaults = serializers.SerializerMethodField()
     variables_needed_to_start = serializers.ReadOnlyField()
@@ -4541,7 +4509,6 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
         return False
 
     def get_defaults(self, obj):
-
         defaults_dict = {}
         for field_name in WorkflowJobTemplate.get_ask_mapping().keys():
             if field_name == 'inventory':
@@ -4558,7 +4525,6 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
         return dict(name=obj.name, id=obj.id, description=obj.description)
 
     def validate(self, attrs):
-
         template = self.instance
 
         accepted, rejected, errors = template._accept_or_ignore_job_kwargs(**attrs)
@@ -5131,7 +5097,6 @@ class NotificationTemplateSerializer(BaseSerializer):
 
 
 class NotificationSerializer(BaseSerializer):
-
     body = serializers.SerializerMethodField(help_text=_('Notification body'))
 
     class Meta:
@@ -5503,7 +5468,6 @@ class InstanceHealthCheckSerializer(BaseSerializer):
 
 
 class InstanceGroupSerializer(BaseSerializer):
-
     show_capabilities = ['edit', 'delete']
     capacity = serializers.SerializerMethodField()
     consumed_capacity = serializers.SerializerMethodField()
@@ -5690,7 +5654,6 @@ class InstanceGroupSerializer(BaseSerializer):
 
 
 class ActivityStreamSerializer(BaseSerializer):
-
     changes = serializers.SerializerMethodField()
     object_association = serializers.SerializerMethodField(help_text=_("When present, shows the field name of the role or relationship that changed."))
     object_type = serializers.SerializerMethodField(help_text=_("When present, shows the model on which the role or relationship was defined."))

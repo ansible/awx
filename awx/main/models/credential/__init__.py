@@ -547,7 +547,6 @@ class CredentialType(CommonModelNameNotUnique):
 
 
 class ManagedCredentialType(SimpleNamespace):
-
     registry = {}
 
     def __init__(self, namespace, **kwargs):

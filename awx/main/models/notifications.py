@@ -37,7 +37,6 @@ __all__ = ['NotificationTemplate', 'Notification']
 
 
 class NotificationTemplate(CommonModelNameNotUnique):
-
     NOTIFICATION_TYPES = [
         ('email', _('Email'), CustomEmailBackend),
         ('slack', _('Slack'), SlackBackend),

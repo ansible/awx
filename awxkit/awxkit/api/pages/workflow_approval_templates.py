@@ -4,7 +4,6 @@ from . import page
 
 
 class WorkflowApprovalTemplate(UnifiedJobTemplate):
-
     pass
 
 
@@ -18,7 +17,6 @@ page.register_page(
 
 
 class WorkflowApprovalTemplates(page.PageList, WorkflowApprovalTemplate):
-
     pass
 
 

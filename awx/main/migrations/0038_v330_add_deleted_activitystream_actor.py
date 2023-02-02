@@ -8,7 +8,6 @@ import awx.main.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0037_v330_remove_legacy_fact_cleanup'),
     ]

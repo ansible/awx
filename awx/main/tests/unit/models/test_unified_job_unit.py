@@ -39,7 +39,6 @@ def unified_job(mocker):
 
 
 def test_cancel(unified_job):
-
     with mock.patch('awx.main.models.unified_jobs.connection.on_commit', wraps=mock_on_commit):
         unified_job.cancel()
 

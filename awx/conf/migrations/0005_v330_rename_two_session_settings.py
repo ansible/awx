@@ -15,7 +15,6 @@ def reverse_copy_session_settings(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [('conf', '0004_v320_reencrypt')]
 
     operations = [migrations.RunPython(copy_session_settings, reverse_copy_session_settings)]

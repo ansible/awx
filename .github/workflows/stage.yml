@@ -84,6 +84,20 @@ jobs:
             -e push=yes \
             -e awx_official=yes
 
+      - name: Log in to GHCR
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Log in to Quay
+        run: |
+          echo ${{ secrets.QUAY_TOKEN }} | docker login quay.io -u ${{ secrets.QUAY_USER }} --password-stdin
+
+      - name: tag awx-ee:latest with version input
+        run: |
+          docker pull quay.io/ansible/awx-ee:latest
+          docker tag quay.io/ansible/awx-ee:latest ghcr.io/${{ github.repository_owner }}/awx-ee:${{ github.event.inputs.version }}
+          docker push ghcr.io/${{ github.repository_owner }}/awx-ee:${{ github.event.inputs.version }}
+
       - name: Build and stage awx-operator
         working-directory: awx-operator
         run: |
@@ -103,6 +117,7 @@ jobs:
         env:
           AWX_TEST_IMAGE: ${{ github.repository }}
           AWX_TEST_VERSION: ${{ github.event.inputs.version }}
+          AWX_EE_TEST_IMAGE: ghcr.io/${{ github.repository_owner }}/awx-ee:${{ github.event.inputs.version }}
 
       - name: Create draft release for AWX
         working-directory: awx

@@ -104,7 +104,6 @@ def filter_sensitive(registry, key, value):
 
 
 class TransientSetting(object):
-
     __slots__ = ('pk', 'value')
 
     def __init__(self, pk, value):

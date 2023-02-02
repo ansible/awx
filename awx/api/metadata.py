@@ -128,7 +128,7 @@ class Metadata(metadata.SimpleMetadata):
         # Special handling of notification configuration where the required properties
         # are conditional on the type selected.
         if field.field_name == 'notification_configuration':
-            for (notification_type_name, notification_tr_name, notification_type_class) in NotificationTemplate.NOTIFICATION_TYPES:
+            for notification_type_name, notification_tr_name, notification_type_class in NotificationTemplate.NOTIFICATION_TYPES:
                 field_info[notification_type_name] = notification_type_class.init_parameters
 
         # Special handling of notification messages where the required properties
@@ -138,7 +138,7 @@ class Metadata(metadata.SimpleMetadata):
         except (AttributeError, KeyError):
             view_model = None
         if view_model == NotificationTemplate and field.field_name == 'messages':
-            for (notification_type_name, notification_tr_name, notification_type_class) in NotificationTemplate.NOTIFICATION_TYPES:
+            for notification_type_name, notification_tr_name, notification_type_class in NotificationTemplate.NOTIFICATION_TYPES:
                 field_info[notification_type_name] = notification_type_class.default_messages
 
         # Update type of fields returned...

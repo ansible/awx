@@ -43,7 +43,6 @@ __all__ = ['Project', 'ProjectUpdate']
 
 
 class ProjectOptions(models.Model):
-
     SCM_TYPE_CHOICES = [
         ('', _('Manual')),
         ('git', _('Git')),

@@ -6,7 +6,6 @@ from awx.main.migrations._rbac import delete_all_custom_script_roles
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0137_custom_inventory_scripts_removal_data'),
     ]

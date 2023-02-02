@@ -12,7 +12,6 @@ def setup_tower_managed_defaults(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0092_v360_webhook_mixin'),
     ]
