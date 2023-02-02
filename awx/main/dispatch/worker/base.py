@@ -190,7 +190,7 @@ class AWXConsumerPG(AWXConsumerBase):
             except psycopg2.InterfaceError:
                 logger.warning("Stale Postgres message bus connection, reconnecting")
                 continue
-            except (db.DatabaseError, psycopg2.OperationalError):
+            except (db.DatabaseError, psycopg2.OperationalError, db.Error):
                 # If we have attained stady state operation, tolerate short-term database hickups
                 if not self.pg_is_down:
                     logger.exception(f"Error consuming new events from postgres, will retry for {self.pg_max_wait} s")

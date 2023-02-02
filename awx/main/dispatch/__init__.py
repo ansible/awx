@@ -1,16 +1,10 @@
 import psycopg2
 import select
-import logging
-import time
-import os
-import signal
 
 from contextlib import contextmanager
 
 from django.conf import settings
-from django.db import connection as pg_connection, OperationalError, Error
-
-logger = logging.getLogger('awx.dispatch.init')
+from django.db import connection as pg_connection
 
 NOT_READY = ([], [], [])
 
@@ -42,6 +36,10 @@ class PubSub(object):
         while True:
             if select.select([self.conn], [], [], select_timeout) == NOT_READY:
                 if yield_timeouts:
+                    # this is a 'ping' to db connection to make sure it's still alive
+                    # and prevent the main thread from hanging
+                    # this error will be cathced by the main thread and we enter on reconnection loop
+                    self.conn.cursor().execute('SELECT 1')
                     yield None
             else:
                 self.conn.poll()
@@ -63,11 +61,7 @@ def pg_bus_conn(new_connection=False):
     so that messages follow postgres transaction rules
     https://www.postgresql.org/docs/current/sql-notify.html
     '''
-    conn = None
-    retry_conn = False
-    MAX_RETRIES = settings.DISPATCHER_DB_DOWNTOWN_TOLLERANCE
-    POLL_SECONDS = int(settings.DISPATCHER_DB_DOWNTOWN_TOLLERANCE / 10)
-    
+
     if new_connection:
         conf = settings.DATABASES['default']
         conn = psycopg2.connect(
@@ -77,23 +71,10 @@ def pg_bus_conn(new_connection=False):
         conn.set_session(autocommit=True)
     else:
         if pg_connection.connection is None:
-            for retry_count in range(MAX_RETRIES):
-                try:
-                    pg_connection.connect()
-                    conn = pg_connection.connection
-                except (psycopg2.OperationalError, OperationalError, Error) as reconn_error:
-                    logger.warning(f'Database unavailable. Retry with new connection in next {POLL_SECONDS} seconds. Attempt {retry_count}/{MAX_RETRIES}.')
-                    time.sleep(POLL_SECONDS)
-                    retry_conn = True
-                else: 
-                    if retry_conn:
-                        logger.warning('Run dispatcher restart due to database connection loss and restore.')
-                        os.kill(os.getppid(), signal.SIGTERM)
-                    break
-            else:
-                raise RuntimeError(f'Could not connect to postgres afer {MAX_RETRIES} retries.')
-        else:
-            conn = pg_connection.connection
+            pg_connection.connect()
+        if pg_connection.connection is None:
+            raise RuntimeError('Unexpectedly could not connect to postgres for pg_notify actions')
+        conn = pg_connection.connection
 
     pubsub = PubSub(conn)
     yield pubsub
