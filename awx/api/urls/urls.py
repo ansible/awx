@@ -50,6 +50,7 @@ from .inventory import urls as inventory_urls
 from .execution_environments import urls as execution_environment_urls
 from .team import urls as team_urls
 from .host import urls as host_urls
+from .host_metric import urls as host_metric_urls
 from .group import urls as group_urls
 from .inventory_source import urls as inventory_source_urls
 from .inventory_update import urls as inventory_update_urls
@@ -118,6 +119,7 @@ v2_urls = [
     re_path(r'^teams/', include(team_urls)),
     re_path(r'^inventories/', include(inventory_urls)),
     re_path(r'^hosts/', include(host_urls)),
+    re_path(r'^host_metrics/', include(host_metric_urls)),
     re_path(r'^groups/', include(group_urls)),
     re_path(r'^inventory_sources/', include(inventory_source_urls)),
     re_path(r'^inventory_updates/', include(inventory_update_urls)),
