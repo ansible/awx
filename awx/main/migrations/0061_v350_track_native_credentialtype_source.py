@@ -14,7 +14,6 @@ def migrate_to_static_inputs(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0060_v350_update_schedule_uniqueness_constraint'),
     ]

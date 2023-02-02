@@ -8,7 +8,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0025_v330_add_oauth_activity_stream_registrar'),
     ]

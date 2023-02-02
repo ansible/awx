@@ -40,7 +40,6 @@ logger = logging.getLogger('awx.sso.backends')
 
 
 class LDAPSettings(BaseLDAPSettings):
-
     defaults = dict(list(BaseLDAPSettings.defaults.items()) + list({'ORGANIZATION_MAP': {}, 'TEAM_MAP': {}, 'GROUP_TYPE_PARAMS': {}}.items()))
 
     def __init__(self, prefix='AUTH_LDAP_', defaults={}):

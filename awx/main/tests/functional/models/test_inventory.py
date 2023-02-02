@@ -231,7 +231,6 @@ def setup_ec2_gce(organization):
 
 @pytest.fixture
 def setup_inventory_groups(inventory, group_factory):
-
     groupA = group_factory('test_groupA')
     groupB = group_factory('test_groupB')
 

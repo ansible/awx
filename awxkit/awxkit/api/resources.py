@@ -1,5 +1,4 @@
 class Resources(object):
-
     _activity = r'activity_stream/\d+/'
     _activity_stream = 'activity_stream/'
     _ad_hoc_command = r'ad_hoc_commands/\d+/'

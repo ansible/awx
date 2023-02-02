@@ -135,7 +135,6 @@ class HybridDictField(fields.DictField):
 
 
 class AuthenticationBackendsField(fields.StringListField):
-
     # Mapping of settings that must be set in order to enable each
     # authentication backend.
     REQUIRED_BACKEND_SETTINGS = collections.OrderedDict(
@@ -244,7 +243,6 @@ class LDAPServerURIField(fields.URLField):
 
 
 class LDAPConnectionOptionsField(fields.DictField):
-
     default_error_messages = {'invalid_options': _('Invalid connection option(s): {invalid_options}.')}
 
     def to_representation(self, value):
@@ -336,7 +334,6 @@ class LDAPScopeField(fields.ChoiceField):
 
 
 class LDAPSearchField(fields.ListField):
-
     default_error_messages = {
         'invalid_length': _('Expected a list of three items but got {length} instead.'),
         'type_error': _('Expected an instance of LDAPSearch but got {input_type} instead.'),
@@ -366,12 +363,10 @@ class LDAPSearchField(fields.ListField):
 
 
 class LDAPSearchWithUserField(LDAPSearchField):
-
     ldap_filter_field_class = LDAPFilterWithUserField
 
 
 class LDAPSearchUnionField(fields.ListField):
-
     default_error_messages = {'type_error': _('Expected an instance of LDAPSearch or LDAPSearchUnion but got {input_type} instead.')}
     ldap_search_field_class = LDAPSearchWithUserField
 
@@ -406,7 +401,6 @@ class LDAPSearchUnionField(fields.ListField):
 
 
 class LDAPUserAttrMapField(fields.DictField):
-
     default_error_messages = {'invalid_attrs': _('Invalid user attribute(s): {invalid_attrs}.')}
     valid_user_attrs = {'first_name', 'last_name', 'email'}
     child = fields.CharField()
@@ -422,7 +416,6 @@ class LDAPUserAttrMapField(fields.DictField):
 
 
 class LDAPGroupTypeField(fields.ChoiceField, DependsOnMixin):
-
     default_error_messages = {
         'type_error': _('Expected an instance of LDAPGroupType but got {input_type} instead.'),
         'missing_parameters': _('Missing required parameters in {dependency}.'),
@@ -498,7 +491,6 @@ class LDAPGroupTypeParamsField(fields.DictField, DependsOnMixin):
 
 
 class LDAPUserFlagsField(fields.DictField):
-
     default_error_messages = {'invalid_flag': _('Invalid user flag: "{invalid_flag}".')}
     valid_user_flags = {'is_superuser', 'is_system_auditor'}
     child = LDAPDNListField()
@@ -512,12 +504,10 @@ class LDAPUserFlagsField(fields.DictField):
 
 
 class LDAPDNMapField(fields.StringListBooleanField):
-
     child = LDAPDNField()
 
 
 class LDAPSingleOrganizationMapField(HybridDictField):
-
     admins = LDAPDNMapField(allow_null=True, required=False)
     users = LDAPDNMapField(allow_null=True, required=False)
     auditors = LDAPDNMapField(allow_null=True, required=False)
@@ -529,12 +519,10 @@ class LDAPSingleOrganizationMapField(HybridDictField):
 
 
 class LDAPOrganizationMapField(fields.DictField):
-
     child = LDAPSingleOrganizationMapField()
 
 
 class LDAPSingleTeamMapField(HybridDictField):
-
     organization = fields.CharField()
     users = LDAPDNMapField(allow_null=True, required=False)
     remove = fields.BooleanField(required=False)
@@ -543,7 +531,6 @@ class LDAPSingleTeamMapField(HybridDictField):
 
 
 class LDAPTeamMapField(fields.DictField):
-
     child = LDAPSingleTeamMapField()
 
 
@@ -577,7 +564,6 @@ class SocialMapStringRegexField(fields.CharField):
 
 
 class SocialMapField(fields.ListField):
-
     default_error_messages = {'type_error': _('Expected None, True, False, a string or list of strings but got {input_type} instead.')}
     child = SocialMapStringRegexField()
 
@@ -611,7 +597,6 @@ class SocialMapField(fields.ListField):
 
 
 class SocialSingleOrganizationMapField(HybridDictField):
-
     admins = SocialMapField(allow_null=True, required=False)
     users = SocialMapField(allow_null=True, required=False)
     remove_admins = fields.BooleanField(required=False)
@@ -622,12 +607,10 @@ class SocialSingleOrganizationMapField(HybridDictField):
 
 
 class SocialOrganizationMapField(fields.DictField):
-
     child = SocialSingleOrganizationMapField()
 
 
 class SocialSingleTeamMapField(HybridDictField):
-
     organization = fields.CharField()
     users = SocialMapField(allow_null=True, required=False)
     remove = fields.BooleanField(required=False)
@@ -636,19 +619,16 @@ class SocialSingleTeamMapField(HybridDictField):
 
 
 class SocialTeamMapField(fields.DictField):
-
     child = SocialSingleTeamMapField()
 
 
 class SAMLOrgInfoValueField(HybridDictField):
-
     name = fields.CharField()
     displayname = fields.CharField()
     url = fields.URLField()
 
 
 class SAMLOrgInfoField(fields.DictField):
-
     default_error_messages = {'invalid_lang_code': _('Invalid language code(s) for org info: {invalid_lang_codes}.')}
     child = SAMLOrgInfoValueField()
 
@@ -666,13 +646,11 @@ class SAMLOrgInfoField(fields.DictField):
 
 
 class SAMLContactField(HybridDictField):
-
     givenName = fields.CharField()
     emailAddress = fields.EmailField()
 
 
 class SAMLIdPField(HybridDictField):
-
     entity_id = fields.CharField()
     url = fields.URLField()
     x509cert = fields.CharField(validators=[validate_certificate])
@@ -684,12 +662,10 @@ class SAMLIdPField(HybridDictField):
 
 
 class SAMLEnabledIdPsField(fields.DictField):
-
     child = SAMLIdPField()
 
 
 class SAMLSecurityField(HybridDictField):
-
     nameIdEncrypted = fields.BooleanField(required=False)
     authnRequestsSigned = fields.BooleanField(required=False)
     logoutRequestSigned = fields.BooleanField(required=False)
@@ -710,7 +686,6 @@ class SAMLSecurityField(HybridDictField):
 
 
 class SAMLOrgAttrField(HybridDictField):
-
     remove = fields.BooleanField(required=False)
     saml_attr = fields.CharField(required=False, allow_null=True)
     remove_admins = fields.BooleanField(required=False)
@@ -722,7 +697,6 @@ class SAMLOrgAttrField(HybridDictField):
 
 
 class SAMLTeamAttrTeamOrgMapField(HybridDictField):
-
     team = fields.CharField(required=True, allow_null=False)
     team_alias = fields.CharField(required=False, allow_null=True)
     organization = fields.CharField(required=True, allow_null=False)
@@ -731,7 +705,6 @@ class SAMLTeamAttrTeamOrgMapField(HybridDictField):
 
 
 class SAMLTeamAttrField(HybridDictField):
-
     team_org_map = fields.ListField(required=False, child=SAMLTeamAttrTeamOrgMapField(), allow_null=True)
     remove = fields.BooleanField(required=False)
     saml_attr = fields.CharField(required=False, allow_null=True)
@@ -740,7 +713,6 @@ class SAMLTeamAttrField(HybridDictField):
 
 
 class SAMLUserFlagsAttrField(HybridDictField):
-
     is_superuser_attr = fields.CharField(required=False, allow_null=True)
     is_superuser_value = fields.StringListField(required=False, allow_null=True)
     is_superuser_role = fields.StringListField(required=False, allow_null=True)

@@ -94,7 +94,7 @@ def main():
         organization=dict(),
         wait=dict(default=False, type='bool'),
         interval=dict(default=2.0, type='float'),
-        timeout=dict(default=None, type='int'),
+        timeout=dict(type='int'),
     )
 
     # Create a module for ourselves

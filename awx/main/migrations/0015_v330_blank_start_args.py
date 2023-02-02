@@ -7,7 +7,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0014_v330_saved_launchtime_configs'),
     ]

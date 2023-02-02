@@ -6,7 +6,6 @@ from django.core.management.base import BaseCommand
 
 
 class Ungrouped(object):
-
     name = 'ungrouped'
     policy_instance_percentage = None
     policy_instance_minimum = None

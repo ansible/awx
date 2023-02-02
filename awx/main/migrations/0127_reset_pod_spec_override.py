@@ -9,7 +9,6 @@ def reset_pod_specs(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0126_executionenvironment_container_options'),
     ]

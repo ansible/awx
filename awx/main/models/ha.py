@@ -473,7 +473,6 @@ def on_instance_deleted(sender, instance, using, **kwargs):
 
 
 class UnifiedJobTemplateInstanceGroupMembership(models.Model):
-
     unifiedjobtemplate = models.ForeignKey('UnifiedJobTemplate', on_delete=models.CASCADE)
     instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
     position = models.PositiveIntegerField(
@@ -484,7 +483,6 @@ class UnifiedJobTemplateInstanceGroupMembership(models.Model):
 
 
 class OrganizationInstanceGroupMembership(models.Model):
-
     organization = models.ForeignKey('Organization', on_delete=models.CASCADE)
     instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
     position = models.PositiveIntegerField(
@@ -495,7 +493,6 @@ class OrganizationInstanceGroupMembership(models.Model):
 
 
 class InventoryInstanceGroupMembership(models.Model):
-
     inventory = models.ForeignKey('Inventory', on_delete=models.CASCADE)
     instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
     position = models.PositiveIntegerField(
@@ -506,7 +503,6 @@ class InventoryInstanceGroupMembership(models.Model):
 
 
 class JobLaunchConfigInstanceGroupMembership(models.Model):
-
     joblaunchconfig = models.ForeignKey('JobLaunchConfig', on_delete=models.CASCADE)
     instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
     position = models.PositiveIntegerField(
@@ -517,7 +513,6 @@ class JobLaunchConfigInstanceGroupMembership(models.Model):
 
 
 class ScheduleInstanceGroupMembership(models.Model):
-
     schedule = models.ForeignKey('Schedule', on_delete=models.CASCADE)
     instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
     position = models.PositiveIntegerField(
@@ -528,7 +523,6 @@ class ScheduleInstanceGroupMembership(models.Model):
 
 
 class WorkflowJobTemplateNodeBaseInstanceGroupMembership(models.Model):
-
     workflowjobtemplatenode = models.ForeignKey('WorkflowJobTemplateNode', on_delete=models.CASCADE)
     instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
     position = models.PositiveIntegerField(
@@ -539,7 +533,6 @@ class WorkflowJobTemplateNodeBaseInstanceGroupMembership(models.Model):
 
 
 class WorkflowJobNodeBaseInstanceGroupMembership(models.Model):
-
     workflowjobnode = models.ForeignKey('WorkflowJobNode', on_delete=models.CASCADE)
     instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
     position = models.PositiveIntegerField(
@@ -550,7 +543,6 @@ class WorkflowJobNodeBaseInstanceGroupMembership(models.Model):
 
 
 class WorkflowJobInstanceGroupMembership(models.Model):
-
     workflowjobnode = models.ForeignKey('WorkflowJob', on_delete=models.CASCADE)
     instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
     position = models.PositiveIntegerField(

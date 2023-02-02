@@ -6,7 +6,6 @@ import json
 
 
 class Command(BaseCommand):
-
     help = 'This is for offline licensing usage'
 
     def add_arguments(self, parser):

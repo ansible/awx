@@ -17,90 +17,72 @@ class Common(Exception):
 
 
 class BadRequest(Common):
-
     pass
 
 
 class Conflict(Common):
-
     pass
 
 
 class Duplicate(Common):
-
     pass
 
 
 class Forbidden(Common):
-
     pass
 
 
 class InternalServerError(Common):
-
     pass
 
 
 class BadGateway(Common):
-
     pass
 
 
 class LicenseExceeded(Common):
-
     pass
 
 
 class LicenseInvalid(Common):
-
     pass
 
 
 class MethodNotAllowed(Common):
-
     pass
 
 
 class NoContent(Common):
-
     message = ''
 
 
 class NotFound(Common):
-
     pass
 
 
 class PaymentRequired(Common):
-
     pass
 
 
 class Unauthorized(Common):
-
     pass
 
 
 class Unknown(Common):
-
     pass
 
 
 class WaitUntilTimeout(Common):
-
     pass
 
 
 class UnexpectedAWXState(Common):
-
     pass
 
 
 class IsMigrating(Common):
-
     pass
 
 
 class ImportExportError(Exception):
-
     pass

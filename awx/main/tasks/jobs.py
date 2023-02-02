@@ -1102,7 +1102,6 @@ class RunJob(SourceControlMixin, BaseTask):
 
 @task(queue=get_local_queuename)
 class RunProjectUpdate(BaseTask):
-
     model = ProjectUpdate
     event_model = ProjectUpdateEvent
     callback_class = RunnerCallbackForProjectUpdate
@@ -1425,7 +1424,6 @@ class RunProjectUpdate(BaseTask):
 
 @task(queue=get_local_queuename)
 class RunInventoryUpdate(SourceControlMixin, BaseTask):
-
     model = InventoryUpdate
     event_model = InventoryUpdateEvent
     callback_class = RunnerCallbackForInventoryUpdate
@@ -1832,7 +1830,6 @@ class RunAdHocCommand(BaseTask):
 
 @task(queue=get_local_queuename)
 class RunSystemJob(BaseTask):
-
     model = SystemJob
     event_model = SystemJobEvent
     callback_class = RunnerCallbackForSystemJob

@@ -18,7 +18,6 @@ def _gen_install_uuid(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0068_v350_index_event_created'),
     ]

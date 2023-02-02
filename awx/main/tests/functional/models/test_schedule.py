@@ -20,7 +20,6 @@ def job_template(inventory, project):
 
 @pytest.mark.django_db
 class TestComputedFields:
-
     # expired in 2015, so next_run should not be populated
     dead_rrule = "DTSTART;TZID=UTC:20140520T190000 RRULE:FREQ=YEARLY;INTERVAL=1;BYMONTH=1;BYMONTHDAY=1;UNTIL=20150530T000000Z"
     continuing_rrule = "DTSTART;TZID=UTC:20140520T190000 RRULE:FREQ=YEARLY;INTERVAL=1;BYMONTH=1;BYMONTHDAY=1"

@@ -29,7 +29,6 @@ def inventory_source_vars_forward(apps, schema_editor):
     source_vars_backup = dict()
 
     for inv_source_obj in _get_inventory_sources(InventorySource):
-
         if inv_source_obj.source in FrozenInjectors:
             source_vars_backup[inv_source_obj.id] = dict(inv_source_obj.source_vars_dict)
 
@@ -40,7 +39,6 @@ def inventory_source_vars_forward(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0118_add_remote_archive_scm_type'),
     ]

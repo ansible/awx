@@ -67,7 +67,6 @@ else:
     from django.db import connection
 
 if HAS_DJANGO is True:
-
     # See upgrade blocker note in requirements/README.md
     try:
         names_digest('foo', 'bar', 'baz', length=8)

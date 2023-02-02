@@ -170,7 +170,6 @@ class BroadcastWebsocketManager(object):
         self.stats_mgr = BroadcastWebsocketStatsManager(self.event_loop, self.local_hostname)
 
     async def run_per_host_websocket(self):
-
         while True:
             known_hosts = await get_broadcast_hosts()
             future_remote_hosts = known_hosts.keys()

@@ -5,7 +5,6 @@ import django.db.models.expressions
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0134_unifiedjob_ansible_version'),
     ]
