@@ -1027,7 +1027,9 @@ class GroupAccess(BaseAccess):
         return Group.objects.filter(inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
 
     def can_add(self, data):
-        if not data or 'inventory' not in data:
+        if not data:  # So the browseable API will work
+            return Inventory.accessible_objects(self.user, 'admin_role').exists()
+        if 'inventory' not in data:
             return False
         # Checks for admin or change permission on inventory.
         return self.check_related('inventory', Inventory, data)
