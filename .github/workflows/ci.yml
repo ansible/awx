@@ -1,8 +1,11 @@
 ---
 name: CI
 env:
-  BRANCH: ${{ github.base_ref || 'devel' }}
   LC_ALL: "C.UTF-8" # prevent ERROR: Ansible could not initialize the preferred locale: unsupported locale setting
+  py_version: "3.9"
+  CI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  DEV_DOCKER_TAG_BASE: ghcr.io/${{ github.repository_owner }}
+  COMPOSE_TAG: ${{ github.base_ref || 'devel' }}
 on:
   pull_request:
 jobs:
@@ -43,60 +46,23 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Get python version from Makefile
-        run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
+      - name: Run check ${{ matrix.tests.label }}
+        run: make github_ci_runner
+        env:
+          CI_GITHUB_COMMAND: ${{ matrix.tests.command }}
 
-      - name: Install python ${{ env.py_version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ env.py_version }}
-
-      - name: Log in to registry
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-      - name: Pre-pull image to warm build cache
-        run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} || :
-
-      - name: Build image
-        run: |
-          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ env.BRANCH }} make docker-compose-build
-
-      - name: ${{ matrix.texts.label }}
-        run: |
-          docker run -u $(id -u) --rm -v ${{ github.workspace}}:/awx_devel/:Z \
-            --workdir=/awx_devel ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} ${{ matrix.tests.command }}
   dev-env:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 
-      - name: Get python version from Makefile
-        run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
-
       - name: Install python ${{ env.py_version }}
         uses: actions/setup-python@v2
         with:
           python-version: ${{ env.py_version }}
 
-      - name: Log in to registry
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-      - name: Pre-pull image to warm build cache
-        run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ env.BRANCH }} || :
-
-      - name: Build image
-        run: |
-          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ env.BRANCH }} make docker-compose-build
-
       - name: Run smoke test
-        run: |
-          export DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }}
-          export COMPOSE_TAG=${{ env.BRANCH }}
-          ansible-playbook tools/docker-compose/ansible/smoke-test.yml -e repo_dir=$(pwd) -v
+        run: make github_ci_setup && ansible-playbook tools/docker-compose/ansible/smoke-test.yml -v
 
   awx-operator:
     runs-on: ubuntu-latest
@@ -111,10 +77,6 @@ jobs:
         with:
           repository: ansible/awx-operator
           path: awx-operator
-
-      - name: Get python version from Makefile
-        working-directory: awx
-        run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
 
       - name: Install python ${{ env.py_version }}
         uses: actions/setup-python@v2

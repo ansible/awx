@@ -65,7 +65,7 @@ I18N_FLAG_FILE = .i18n_built
 	sdist \
 	ui-release ui-devel \
 	VERSION PYTHON_VERSION docker-compose-sources \
-	.git/hooks/pre-commit
+	.git/hooks/pre-commit github_ci_setup github_ci_runner
 
 clean-tmp:
 	rm -rf tmp/
@@ -300,6 +300,14 @@ test:
 	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider $(PYTEST_ARGS) $(TEST_DIRS)
 	cd awxkit && $(VENV_BASE)/awx/bin/tox -re py3
 	awx-manage check_migrations --dry-run --check  -n 'missing_migration_file'
+
+github_ci_setup:
+	echo $(CI_GITHUB_TOKEN) | docker login ghcr.io -u $(GITHUB_ACTOR) --password-stdin  # Log in to registry
+	docker pull $(DEVEL_IMAGE_NAME) || :  # Pre-pull image to warm build cache
+	make docker-compose-build	 # Build image
+
+github_ci_runner: github_ci_setup
+	docker run -u $(shell id -u) --rm -v $(GITHUB_WORKSPACE):/awx_devel/:Z --workdir=/awx_devel $(DEVEL_IMAGE_NAME) $(CI_GITHUB_COMMAND)
 
 test_collection:
 	rm -f $(shell ls -d $(VENV_BASE)/awx/lib/python* | head -n 1)/no-global-site-packages.txt
