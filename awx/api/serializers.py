@@ -55,6 +55,7 @@ from awx.main.models import (
     ExecutionEnvironment,
     Group,
     Host,
+    HostMetric,
     Instance,
     InstanceGroup,
     InstanceLink,
@@ -5000,6 +5001,14 @@ class InstanceHealthCheckSerializer(BaseSerializer):
         model = Instance
         read_only_fields = ('uuid', 'hostname', 'version', 'last_health_check', 'errors', 'cpu', 'memory', 'cpu_capacity', 'mem_capacity', 'capacity')
         fields = read_only_fields
+
+
+class HostMetricSerializer(BaseSerializer):
+    show_capabilities = ['delete']
+
+    class Meta:
+        model = HostMetric
+        fields = ("hostname", "first_automation", "last_automation")
 
 
 class InstanceGroupSerializer(BaseSerializer):

@@ -1531,6 +1531,13 @@ class HostRelatedSearchMixin(object):
         return ret
 
 
+class HostMetricList(ListAPIView):
+    always_allow_superuser = False
+    name = _("Host Metrics List")
+    model = models.HostMetric
+    serializer_class = serializers.HostMetricSerializer
+
+
 class HostList(HostRelatedSearchMixin, ListCreateAPIView):
     always_allow_superuser = False
     model = models.Host
