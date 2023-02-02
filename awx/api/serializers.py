@@ -1805,6 +1805,7 @@ class ConstructedInventorySerializer(InventorySerializer):
     class Meta:
         model = Inventory
         fields = ('*', '-host_filter', 'source_vars', 'update_cache_timeout', 'limit', 'verbosity')
+        read_only_fields = ('*', 'kind')
 
     def pop_inv_src_data(self, data):
         inv_src_data = {}
@@ -1828,6 +1829,7 @@ class ConstructedInventorySerializer(InventorySerializer):
                 inv_src.save(update_fields=update_fields)
 
     def create(self, validated_data):
+        validated_data['kind'] = 'constructed'
         inv_src_data = self.pop_inv_src_data(validated_data)
         inventory = super().create(validated_data)
         self.apply_inv_src_data(inventory, inv_src_data)
