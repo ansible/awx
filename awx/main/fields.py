@@ -788,7 +788,8 @@ class CredentialTypeInjectorField(JSONSchemaField):
                     'type': 'object',
                     'patternProperties': {
                         # http://docs.ansible.com/ansible/playbooks_variables.html#what-makes-a-valid-variable-name
-                        '^[a-zA-Z_]+[a-zA-Z0-9_]*$': {'type': 'string'},
+                        # plus, add ability to template
+                        r'^[a-zA-Z_\{\}]+[a-zA-Z0-9_\{\}]*$': {"anyOf": [{'type': 'string'}, {'type': 'array'}, {'$ref': '#/properties/extra_vars'}]}
                     },
                     'additionalProperties': False,
                 },
@@ -855,27 +856,44 @@ class CredentialTypeInjectorField(JSONSchemaField):
                 template_name = template_name.split('.')[1]
                 setattr(valid_namespace['tower'].filename, template_name, 'EXAMPLE_FILENAME')
 
+        def validate_template_string(type_, key, tmpl):
+            try:
+                sandbox.ImmutableSandboxedEnvironment(undefined=StrictUndefined).from_string(tmpl).render(valid_namespace)
+            except UndefinedError as e:
+                raise django_exceptions.ValidationError(
+                    _('{sub_key} uses an undefined field ({error_msg})').format(sub_key=key, error_msg=e),
+                    code='invalid',
+                    params={'value': value},
+                )
+            except SecurityError as e:
+                raise django_exceptions.ValidationError(_('Encountered unsafe code execution: {}').format(e))
+            except TemplateSyntaxError as e:
+                raise django_exceptions.ValidationError(
+                    _('Syntax error rendering template for {sub_key} inside of {type} ({error_msg})').format(sub_key=key, type=type_, error_msg=e),
+                    code='invalid',
+                    params={'value': value},
+                )
+
+        def validate_extra_vars(key, node):
+            if isinstance(node, dict):
+                for k, v in node.items():
+                    validate_template_string("extra_vars", 'a key' if key is None else key, k)
+                    validate_extra_vars(k if key is None else "{key}.{k}".format(key=key, k=k), v)
+            elif isinstance(node, list):
+                for i, x in enumerate(node):
+                    validate_extra_vars("{key}[{i}]".format(key=key, i=i), x)
+            else:
+                validate_template_string("extra_vars", key, node)
+
         for type_, injector in value.items():
             if type_ == 'env':
                 for key in injector.keys():
                     self.validate_env_var_allowed(key)
-            for key, tmpl in injector.items():
-                try:
-                    sandbox.ImmutableSandboxedEnvironment(undefined=StrictUndefined).from_string(tmpl).render(valid_namespace)
-                except UndefinedError as e:
-                    raise django_exceptions.ValidationError(
-                        _('{sub_key} uses an undefined field ({error_msg})').format(sub_key=key, error_msg=e),
-                        code='invalid',
-                        params={'value': value},
-                    )
-                except SecurityError as e:
-                    raise django_exceptions.ValidationError(_('Encountered unsafe code execution: {}').format(e))
-                except TemplateSyntaxError as e:
-                    raise django_exceptions.ValidationError(
-                        _('Syntax error rendering template for {sub_key} inside of {type} ({error_msg})').format(sub_key=key, type=type_, error_msg=e),
-                        code='invalid',
-                        params={'value': value},
-                    )
+            if type_ == 'extra_vars':
+                validate_extra_vars(None, injector)
+            else:
+                for key, tmpl in injector.items():
+                    validate_template_string(type_, key, tmpl)
 
 
 class AskForField(models.BooleanField):
