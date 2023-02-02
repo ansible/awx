@@ -6,6 +6,7 @@ import Config from './models/Config';
 import CredentialInputSources from './models/CredentialInputSources';
 import CredentialTypes from './models/CredentialTypes';
 import Credentials from './models/Credentials';
+import ConstructedInventories from './models/ConstructedInventories';
 import Dashboard from './models/Dashboard';
 import ExecutionEnvironments from './models/ExecutionEnvironments';
 import Groups from './models/Groups';
@@ -53,6 +54,7 @@ const ConfigAPI = new Config();
 const CredentialInputSourcesAPI = new CredentialInputSources();
 const CredentialTypesAPI = new CredentialTypes();
 const CredentialsAPI = new Credentials();
+const ConstructedInventoriesAPI = new ConstructedInventories();
 const DashboardAPI = new Dashboard();
 const ExecutionEnvironmentsAPI = new ExecutionEnvironments();
 const GroupsAPI = new Groups();
@@ -101,6 +103,7 @@ export {
   CredentialInputSourcesAPI,
   CredentialTypesAPI,
   CredentialsAPI,
+  ConstructedInventoriesAPI,
   DashboardAPI,
   ExecutionEnvironmentsAPI,
   GroupsAPI,
