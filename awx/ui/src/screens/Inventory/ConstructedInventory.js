@@ -12,22 +12,23 @@ import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
 
 import useRequest from 'hooks/useRequest';
-import { InventoriesAPI } from 'api';
+import { ConstructedInventoriesAPI, InventoriesAPI } from 'api';
 
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
 import JobList from 'components/JobList';
+import RelatedTemplateList from 'components/RelatedTemplateList';
 import { ResourceAccessList } from 'components/ResourceAccessList';
 import RoutedTabs from 'components/RoutedTabs';
-import RelatedTemplateList from 'components/RelatedTemplateList';
-import SmartInventoryDetail from './SmartInventoryDetail';
-import SmartInventoryEdit from './SmartInventoryEdit';
-import SmartInventoryHosts from './SmartInventoryHosts';
+import ConstructedInventoryDetail from './ConstructedInventoryDetail';
+import ConstructedInventoryEdit from './ConstructedInventoryEdit';
+import ConstructedInventoryGroups from './ConstructedInventoryGroups';
+import ConstructedInventoryHosts from './ConstructedInventoryHosts';
 import { getInventoryPath } from './shared/utils';
 
-function SmartInventory({ setBreadcrumb }) {
+function ConstructedInventory({ setBreadcrumb }) {
   const location = useLocation();
-  const match = useRouteMatch('/inventories/smart_inventory/:id');
+  const match = useRouteMatch('/inventories/constructed_inventory/:id');
 
   const {
     result: inventory,
@@ -36,7 +37,9 @@ function SmartInventory({ setBreadcrumb }) {
     request: fetchInventory,
   } = useRequest(
     useCallback(async () => {
-      const { data } = await InventoriesAPI.readDetail(match.params.id);
+      const { data } = await ConstructedInventoriesAPI.readDetail(
+        match.params.id
+      );
       return data;
     }, [match.params.id]),
 
@@ -67,12 +70,13 @@ function SmartInventory({ setBreadcrumb }) {
     { name: t`Details`, link: `${match.url}/details`, id: 0 },
     { name: t`Access`, link: `${match.url}/access`, id: 1 },
     { name: t`Hosts`, link: `${match.url}/hosts`, id: 2 },
+    { name: t`Groups`, link: `${match.url}/groups`, id: 3 },
     {
       name: t`Jobs`,
       link: `${match.url}/jobs`,
-      id: 3,
+      id: 4,
     },
-    { name: t`Job Templates`, link: `${match.url}/job_templates`, id: 4 },
+    { name: t`Job Templates`, link: `${match.url}/job_templates`, id: 5 },
   ];
 
   if (hasContentLoading) {
@@ -92,7 +96,7 @@ function SmartInventory({ setBreadcrumb }) {
           <ContentError error={contentError}>
             {contentError?.response?.status === 404 && (
               <span>
-                {t`Smart Inventory not found.`}{' '}
+                {t`Constructed Inventory not found.`}{' '}
                 <Link to="/inventories">{t`View all Inventories.`}</Link>
               </span>
             )}
@@ -102,13 +106,12 @@ function SmartInventory({ setBreadcrumb }) {
     );
   }
 
-  if (inventory && inventory?.kind !== 'smart') {
+  if (inventory && inventory?.kind !== 'constructed') {
     return <Redirect to={`${getInventoryPath(inventory)}/details`} />;
   }
 
   let showCardHeader = true;
-
-  if (['edit', 'hosts/'].some((name) => location.pathname.includes(name))) {
+  if (['edit'].some((name) => location.pathname.includes(name))) {
     showCardHeader = false;
   }
 
@@ -118,36 +121,51 @@ function SmartInventory({ setBreadcrumb }) {
         {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
         <Switch>
           <Redirect
-            from="/inventories/smart_inventory/:id"
-            to="/inventories/smart_inventory/:id/details"
+            from="/inventories/constructed_inventory/:id"
+            to="/inventories/constructed_inventory/:id/details"
             exact
           />
           {inventory && [
             <Route
+              path="/inventories/constructed_inventory/:id/details"
               key="details"
-              path="/inventories/smart_inventory/:id/details"
             >
-              <SmartInventoryDetail
-                isLoading={hasContentLoading}
+              <ConstructedInventoryDetail
                 inventory={inventory}
+                hasInventoryLoading={hasContentLoading}
               />
             </Route>,
-            <Route key="edit" path="/inventories/smart_inventory/:id/edit">
-              <SmartInventoryEdit inventory={inventory} />
+            <Route
+              key="edit"
+              path="/inventories/constructed_inventory/:id/edit"
+            >
+              <ConstructedInventoryEdit />
             </Route>,
-            <Route key="access" path="/inventories/smart_inventory/:id/access">
+            <Route
+              path="/inventories/constructed_inventory/:id/access"
+              key="access"
+            >
               <ResourceAccessList
                 resource={inventory}
                 apiModel={InventoriesAPI}
               />
             </Route>,
-            <Route key="hosts" path="/inventories/smart_inventory/:id/hosts">
-              <SmartInventoryHosts
-                inventory={inventory}
-                setBreadcrumb={setBreadcrumb}
-              />
+            <Route
+              path="/inventories/constructed_inventory/:id/hosts"
+              key="hosts"
+            >
+              <ConstructedInventoryHosts />
             </Route>,
-            <Route key="jobs" path="/inventories/smart_inventory/:id/jobs">
+            <Route
+              path="/inventories/constructed_inventory/:id/groups"
+              key="groups"
+            >
+              <ConstructedInventoryGroups />
+            </Route>,
+            <Route
+              key="jobs"
+              path="/inventories/constructed_inventory/:id/jobs"
+            >
               <JobList
                 defaultParams={{
                   or__job__inventory: inventory.id,
@@ -160,31 +178,29 @@ function SmartInventory({ setBreadcrumb }) {
             </Route>,
             <Route
               key="job_templates"
-              path="/inventories/smart_inventory/:id/job_templates"
+              path="/inventories/constructed_inventory/:id/job_templates"
             >
               <RelatedTemplateList
                 searchParams={{ inventory__id: inventory.id }}
               />
             </Route>,
-            <Route key="not-found" path="*">
-              {!hasContentLoading && (
-                <ContentError isNotFound>
-                  {match.params.id && (
-                    <Link
-                      to={`/inventories/smart_inventory/${match.params.id}/details`}
-                    >
-                      {t`View Inventory Details`}
-                    </Link>
-                  )}
-                </ContentError>
-              )}
-            </Route>,
           ]}
+          <Route path="*" key="not-found">
+            <ContentError isNotFound>
+              {match.params.id && (
+                <Link
+                  to={`/inventories/constructed_inventory/${match.params.id}/details`}
+                >
+                  {t`View Constructed Inventory Details`}
+                </Link>
+              )}
+            </ContentError>
+          </Route>
         </Switch>
       </Card>
     </PageSection>
   );
 }
 
-export { SmartInventory as _SmartInventory };
-export default SmartInventory;
+export { ConstructedInventory as _ConstructedInventory };
+export default ConstructedInventory;
