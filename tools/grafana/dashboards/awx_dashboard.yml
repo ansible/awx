@@ -6,3 +6,7 @@ providers:
     allowUiUpdates: true
     options:
       path: /etc/grafana/provisioning/dashboards/demo_dashboard.json
+  - name: PostgreSQL Statement Statistics
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/postgresql_stats.json

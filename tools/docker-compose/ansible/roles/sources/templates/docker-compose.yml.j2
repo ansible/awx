@@ -182,13 +182,21 @@ services:
     image: postgres:12
     container_name: tools_postgres_1
     # additional logging settings for postgres can be found https://www.postgresql.org/docs/current/runtime-config-logging.html
-    command: postgres -c log_destination=stderr -c log_min_messages=info -c log_min_duration_statement={{ pg_log_min_duration_statement|default(1000) }} -c max_connections={{ pg_max_connections|default(1024) }}
+    command: >
+      postgres
+      -c config_file=/etc/postgresql/awx_postgresql.conf
+      -c log_destination=stderr
+      -c log_min_messages=info
+      -c log_min_duration_statement={{ pg_log_min_duration_statement|default(1000) }}
+      -c max_connections={{ pg_max_connections|default(1024) }}
     environment:
       POSTGRES_HOST_AUTH_METHOD: trust
       POSTGRES_USER: {{ pg_username }}
       POSTGRES_DB: {{ pg_database }}
       POSTGRES_PASSWORD: {{ pg_password }}
     volumes:
+      - "../../postgresql:/etc/postgresql:z"
+      - "../../postgresql/initdb.d:/docker-entrypoint-initdb.d:z"
       - "awx_db:/var/lib/postgresql/data"
 {% if execution_node_count|int > 0 %}
   receptor-hop:

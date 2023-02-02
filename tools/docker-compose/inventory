@@ -1,11 +1,12 @@
-localhost ansible_connection=local ansible_python_interpreter="/usr/bin/env python3"
+# localhost ansible_connection=local ansible_python_interpreter="/usr/bin/env python3"
+localhost ansible_connection=local ansible_python_interpreter="/home/hproctor/Development/awx/.venv/awx/bin/python3"
 
 [all:vars]
 
 # AWX-Managed Database Settings
 # If left blank, these will be generated upon install.
 # Values are written out to tools/docker-compose/_sources/secrets/
-# pg_password=""
+pg_password="awxpasswd"
 # broadcast_websocket_secret=""
 # secret_key=""
 

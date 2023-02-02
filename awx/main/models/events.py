@@ -596,7 +596,6 @@ UnpartitionedJobEvent._meta.db_table = '_unpartitioned_' + JobEvent._meta.db_tab
 
 
 class ProjectUpdateEvent(BasePlaybookEvent):
-
     VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['project_update_id', 'workflow_job_id', 'job_created']
     JOB_REFERENCE = 'project_update_id'
 
@@ -734,7 +733,6 @@ class BaseCommandEvent(CreatedModifiedModel):
 
 
 class AdHocCommandEvent(BaseCommandEvent):
-
     VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['ad_hoc_command_id', 'event', 'host_name', 'host_id', 'workflow_job_id', 'job_created']
     WRAPUP_EVENT = 'playbook_on_stats'  # exception to BaseCommandEvent
     JOB_REFERENCE = 'ad_hoc_command_id'
@@ -841,7 +839,6 @@ UnpartitionedAdHocCommandEvent._meta.db_table = '_unpartitioned_' + AdHocCommand
 
 
 class InventoryUpdateEvent(BaseCommandEvent):
-
     VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['inventory_update_id', 'workflow_job_id', 'job_created']
     JOB_REFERENCE = 'inventory_update_id'
 
@@ -887,7 +884,6 @@ UnpartitionedInventoryUpdateEvent._meta.db_table = '_unpartitioned_' + Inventory
 
 
 class SystemJobEvent(BaseCommandEvent):
-
     VALID_KEYS = BaseCommandEvent.VALID_KEYS + ['system_job_id', 'job_created']
     JOB_REFERENCE = 'system_job_id'
 

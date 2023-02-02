@@ -63,17 +63,17 @@ MODULE_OPTIONS = ('yup', 'stonchronize', 'templotz', 'deboog')
 
 
 class YieldedRows(StringIO):
-    def __init__(self, job_id, rows, created_stamp, modified_stamp, *args, **kwargs):
+    def __init__(self, job_id, rows, created_stamp, modified_stamp, job_created, *args, **kwargs):
         self.rows = rows
         self.rowlist = []
-        for (event, module) in itertools.product(EVENT_OPTIONS, MODULE_OPTIONS):
+        for event, module in itertools.product(EVENT_OPTIONS, MODULE_OPTIONS):
             event_data_json = {"task_action": module, "name": "Do a {} thing".format(module), "task": "Do a {} thing".format(module)}
             row = (
                 "\t".join(
                     [
                         f"{created_stamp}",
                         f"{modified_stamp}",
-                        f"{created_stamp}",
+                        str(job_created),
                         event,
                         json.dumps(event_data_json),
                         str(event in ('runner_on_failed', 'runner_on_unreachable')),
@@ -110,9 +110,9 @@ class YieldedRows(StringIO):
         return self.rowlist[random.randrange(len(self.rowlist))] * 1000
 
 
-def firehose(job, count, created_stamp, modified_stamp):
+def firehose(job, count, created_stamp, modified_stamp, job_created):
     conn = psycopg2.connect(dsn)
-    f = YieldedRows(job, count, created_stamp, modified_stamp)
+    f = YieldedRows(job, count, created_stamp, modified_stamp, job_created)
     with conn.cursor() as cursor:
         cursor.copy_expert(
             (
@@ -194,11 +194,11 @@ def generate_jobs(jobs, batch_size, time_delta):
         with connection.cursor() as cursor:
             query, params = query.sql_with_params()[0]
             cursor.execute(query, params)
-        return ujs[-1], jt_pos, [uj.pk for uj in ujs]
+        return ujs[-1], jt_pos, [(uj.pk, uj.created) for uj in ujs]
 
     i = 1
     jt_pos = 0
-    created_job_ids = []
+    job_ids_created = []
     s = time()
 
     from awx.main.models import JobEvent
@@ -210,17 +210,17 @@ def generate_jobs(jobs, batch_size, time_delta):
     while jobs > 0:
         s_loop = time()
         print('running batch {}, runtime {}'.format(i, time() - s))
-        created, jt_pos, ujs_pk = make_batch(min(jobs, batch_size), jt_pos)
+        created, jt_pos, ujs_pk_created = make_batch(min(jobs, batch_size), jt_pos)
         print('took {}'.format(time() - s_loop))
         i += 1
         jobs -= batch_size
-        created_job_ids += ujs_pk
-    print('Created Job IDS: {}'.format(created_job_ids))
+        job_ids_created += ujs_pk_created
+    print('Created Job IDS: {}'.format(j[0] for j in job_ids_created))
     # return created
-    return created_job_ids
+    return ujs_pk_created
 
 
-def generate_events(events, job, time_delta):
+def generate_events(events, job, job_created, time_delta):
     conn = psycopg2.connect(dsn)
     cursor = conn.cursor()
 
@@ -228,6 +228,7 @@ def generate_events(events, job, time_delta):
     modified_time = datetime.datetime.today() - time_delta
     created_stamp = created_time.strftime("%Y-%m-%d %H:%M:%S")
     modified_stamp = modified_time.strftime("%Y-%m-%d %H:%M:%S")
+    job_created = job_created.replace(minute=0, second=0, microsecond=0)
 
     print(f'attaching {events} events to job {job}')
     cores = multiprocessing.cpu_count()
@@ -239,7 +240,7 @@ def generate_events(events, job, time_delta):
         num_events = events
 
     for i in range(num_procs):
-        p = multiprocessing.Process(target=firehose, args=(job, num_events, created_stamp, modified_stamp))
+        p = multiprocessing.Process(target=firehose, args=(job, num_events, created_stamp, modified_stamp, job_created))
         p.daemon = True
         workers.append(p)
 
@@ -261,13 +262,101 @@ def generate_events(events, job, time_delta):
 
     cursor.execute(
         "UPDATE main_jobevent SET "
-        "counter=nextval('firehose_seq')::integer,"
-        "start_line=nextval('firehose_line_seq')::integer,"
-        "end_line=currval('firehose_line_seq')::integer + 2 "
-        f"WHERE job_id={job}"
+        "counter = nextval('firehose_seq')::integer, "
+        "start_line = nextval('firehose_line_seq')::integer, "
+        "end_line = currval('firehose_line_seq')::integer + 2 "
+        "WHERE job_id = %s "
+        "and job_created = %s",
+        (job, job_created),
     )
     conn.commit()
     conn.close()
+
+
+# --------- DROP/DISABLE DB OBJECTS -----------
+def disable_wal(conn):
+    # disable WAL to drastically increase write speed
+    # we're not doing replication, and the goal of this script is to just
+    # insert data as quickly as possible without concern for the risk of
+    # data loss on crash
+    # see: https://www.compose.com/articles/faster-performance-with-unlogged-tables-in-postgresql/
+
+    print("Disable logging (WAL).")
+    with conn.cursor() as cursor:
+        cursor.execute('ALTER TABLE main_jobevent SET UNLOGGED')
+
+
+def drop_indexes(conn):
+    # get all the indexes for main_jobevent
+    print("Drop indexes on main_jobevent.")
+    with conn.cursor() as cursor:
+        cursor.execute("SELECT indexname, indexdef FROM pg_indexes WHERE tablename='main_jobevent' AND indexname != 'main_jobevent_pkey1';")
+        indexes = cursor.fetchall()
+        # drop all indexes for speed
+        for indexname, indexdef in indexes:
+            if indexname == 'main_jobevent_pkey_new':  # Dropped by the constraint
+                continue
+            cursor.execute(f'DROP INDEX IF EXISTS {indexname}')
+            print(f'DROP INDEX IF EXISTS {indexname}')
+
+    return indexes
+
+
+def drop_constraints(conn):
+    print("Drop constraints on main_jobevent.")
+    with conn.cursor() as cursor:
+        cursor.execute(
+            "SELECT conname, contype, pg_catalog.pg_get_constraintdef(r.oid, true) as condef FROM pg_catalog.pg_constraint r WHERE r.conrelid = 'main_jobevent'::regclass AND conname != 'main_jobevent_pkey1';"
+        )  # noqa
+        constraints = cursor.fetchall()
+
+        for conname, contype, condef in constraints:
+            cursor.execute(f'ALTER TABLE main_jobevent DROP CONSTRAINT IF EXISTS {conname}')
+            print(f'ALTER TABLE main_jobevent DROP CONSTRAINT IF EXISTS {conname}')
+
+    return constraints
+
+
+# --------- RECREATE/ENABLE DB OBJECTS -----------
+def enable_wal(conn):
+    print("Enable logging (WAL)")
+    sql = 'ALTER TABLE main_jobevent SET LOGGED'
+    cleanup(sql)
+
+
+def create_indexes(conn, indexes):
+    # restore all indexes
+    print(datetime.datetime.utcnow().isoformat())
+    print('restoring indexes and constraints (this may take awhile)')
+
+    workers = []
+    for indexname, indexdef in indexes:
+        if indexname == 'main_jobevent_pkey_new':  # Created by the constraint
+            continue
+        p = multiprocessing.Process(target=cleanup, args=(indexdef,))
+        p.daemon = True
+        workers.append(p)
+
+    for w in workers:
+        w.start()
+
+    for w in workers:
+        w.join()
+
+    print(datetime.datetime.utcnow().isoformat())
+
+
+def create_constraints(conn, constraints):
+    for conname, contype, condef in constraints:
+        if contype == 'c':
+            # if there are any check constraints, don't add them back
+            # (historically, these are > 0 checks, which are basically
+            # worthless, because Ansible doesn't emit counters, line
+            # numbers, verbosity, etc... < 0)
+            continue
+
+        sql = f'ALTER TABLE main_jobevent ADD CONSTRAINT {conname} {condef}'
+        cleanup(sql)
 
 
 if __name__ == '__main__':
@@ -276,82 +365,34 @@ if __name__ == '__main__':
     parser.add_argument('--events-per-job', type=int, help='Number of events to create.', default=1345)  # 1B by default
     parser.add_argument('--batch-size', type=int, help='Number of jobs to create in a single batch.', default=100)
     parser.add_argument('--days-delta', type=int, help='Number of days old to create the events. Defaults to 31.', default=31)
+    parser.add_argument('--preserve-db', action="store_true", default=False, help='Keep table structure unchanged')
     params = parser.parse_args()
     jobs = params.jobs_per_hour
     events = params.events_per_job
     days_delta = params.days_delta
     batch_size = params.batch_size
+    indexes = constraints = None
     try:
         conn = psycopg2.connect(dsn)
-        cursor = conn.cursor()
 
-        # Drop all the indexes before generating jobs
-        print('removing indexes and constraints')
-        # get all the indexes for main_jobevent
-        # disable WAL to drastically increase write speed
-        # we're not doing replication, and the goal of this script is to just
-        # insert data as quickly as possible without concern for the risk of
-        # data loss on crash
-        # see: https://www.compose.com/articles/faster-performance-with-unlogged-tables-in-postgresql/
-
-        cursor.execute('ALTER TABLE main_jobevent SET UNLOGGED')
-        cursor.execute("SELECT indexname, indexdef FROM pg_indexes WHERE tablename='main_jobevent' AND indexname != 'main_jobevent_pkey1';")
-        indexes = cursor.fetchall()
-
-        cursor.execute(
-            "SELECT conname, contype, pg_catalog.pg_get_constraintdef(r.oid, true) as condef FROM pg_catalog.pg_constraint r WHERE r.conrelid = 'main_jobevent'::regclass AND conname != 'main_jobevent_pkey1';"
-        )  # noqa
-        constraints = cursor.fetchall()
-
-        # drop all indexes for speed
-        for indexname, indexdef in indexes:
-            if indexname == 'main_jobevent_pkey_new':  # Dropped by the constraint
-                continue
-            cursor.execute(f'DROP INDEX IF EXISTS {indexname}')
-            print(f'DROP INDEX IF EXISTS {indexname}')
-        for conname, contype, condef in constraints:
-            cursor.execute(f'ALTER TABLE main_jobevent DROP CONSTRAINT IF EXISTS {conname}')
-            print(f'ALTER TABLE main_jobevent DROP CONSTRAINT IF EXISTS {conname}')
-        conn.commit()
+        if not params.preserve_db:
+            disable_wal(conn)
+            constraints = drop_constraints(conn)
+            indexes = drop_indexes(conn)
+            conn.commit()
 
         for i_day in range(days_delta, 0, -1):
             for j_hour in range(24):
                 time_delta = datetime.timedelta(days=i_day, hours=j_hour, seconds=0)
-                created_job_ids = generate_jobs(jobs, batch_size=batch_size, time_delta=time_delta)
+                job_ids_created = generate_jobs(jobs, batch_size=batch_size, time_delta=time_delta)
                 if events > 0:
-                    for k_id in created_job_ids:
-                        generate_events(events, str(k_id), time_delta)
+                    for k_id, k_created in job_ids_created:
+                        generate_events(events, str(k_id), k_created, time_delta)
                 print(datetime.datetime.utcnow().isoformat())
+
         conn.close()
-
     finally:
-        # restore all indexes
-        print(datetime.datetime.utcnow().isoformat())
-        print('restoring indexes and constraints (this may take awhile)')
-
-        workers = []
-        for indexname, indexdef in indexes:
-            if indexname == 'main_jobevent_pkey_new':  # Created by the constraint
-                continue
-            p = multiprocessing.Process(target=cleanup, args=(indexdef,))
-            p.daemon = True
-            workers.append(p)
-
-        for w in workers:
-            w.start()
-
-        for w in workers:
-            w.join()
-
-        for conname, contype, condef in constraints:
-            if contype == 'c':
-                # if there are any check constraints, don't add them back
-                # (historically, these are > 0 checks, which are basically
-                # worthless, because Ansible doesn't emit counters, line
-                # numbers, verbosity, etc... < 0)
-                continue
-
-            sql = f'ALTER TABLE main_jobevent ADD CONSTRAINT {conname} {condef}'
-            cleanup(sql)
-
-        print(datetime.datetime.utcnow().isoformat())
+        if not params.preserve_db:
+            create_indexes(conn, indexes)
+            create_constraints(conn, constraints)
+            enable_wal(conn)
