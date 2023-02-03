@@ -1955,7 +1955,7 @@ class BulkHostSerializer(HostSerializer):
     instance_id = serializers.CharField(required=False, max_length=1024)
     description = serializers.CharField(required=False)
     enabled = serializers.BooleanField(default=True, required=False)
-    variables = serializers.CharField(allow_blank=True, required=False)
+    variables = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         fields = (
@@ -4565,6 +4565,7 @@ class BulkJobNodeSerializer(serializers.Serializer):
     survey_passwords = serializers.CharField(required=False, write_only=True, allow_blank=False)
     job_slice_count = serializers.IntegerField(required=False, min_value=1)
     timeout = serializers.IntegerField(required=False, min_value=1)
+    extra_data = serializers.JSONField(write_only=True, required=False)
 
     class Meta:
         fields = (
@@ -4689,11 +4690,16 @@ class BulkJobLaunchSerializer(BaseSerializer):
         job_node_data = validated_data.pop('jobs')
         # FIXME: Need to set organization on the WorkflowJob in order for users to be able to see it --
         # normally their permission is sourced from the underlying WorkflowJobTemplate
-        # maybe we need to add Organization to WorkflowJobd
-        wfj_limit = validated_data.pop('limit', None)
+        # maybe we need to add Organization to WorkflowJob
+        wfj_deferred_attr_names = ('skip_tags', 'limit', 'job_tags')
+        wfj_deferred_vals = {}
+        for item in wfj_deferred_attr_names:
+            wfj_deferred_vals[item] = validated_data.pop(item, None)
+
         wfj = WorkflowJob.objects.create(**validated_data, is_bulk_job=True)
-        if wfj_limit:
-            wfj.limit = wfj_limit
+        for key, val in wfj_deferred_vals.items():
+            if val:
+                setattr(wfj, key, val)
         nodes = []
         node_m2m_objects = {}
         node_m2m_object_types_to_through_model = {
@@ -4717,7 +4723,6 @@ class BulkJobLaunchSerializer(BaseSerializer):
         )
         node_deferred_attrs = {}
         for node_attrs in job_node_data:
-
             # we need to add any m2m objects after creation via the through model
             node_m2m_objects[node_attrs['identifier']] = {}
             node_deferred_attrs[node_attrs['identifier']] = {}

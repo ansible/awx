@@ -14,6 +14,7 @@ class Resources(object):
     _auth = 'auth/'
     _authtoken = 'authtoken/'
     _bulk = 'bulk/'
+    _bulk_job_launch = 'bulk/job_launch/'
     _config = 'config/'
     _config_attach = 'config/attach/'
     _credential = r'credentials/\d+/'
