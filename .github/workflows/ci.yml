@@ -46,9 +46,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Run check ${{ matrix.tests.label }}
-        run: make github_ci_runner
-        env:
-          CI_GITHUB_COMMAND: ${{ matrix.tests.command }}
+        run: AWX_DOCKER_CMD='${{ matrix.tests.command }}' make github_ci_runner
 
   dev-env:
     runs-on: ubuntu-latest
