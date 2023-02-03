@@ -10,3 +10,21 @@ class Bulk(base.Base):
 
 
 page.register_page([resources.bulk, (resources.bulk, 'get')], Bulk)
+
+
+class BulkJobLaunch(base.Base):
+    def post(self, payload={}):
+        result = self.connection.post(self.endpoint, payload)
+        return self.walk(result.json()['url'])
+
+
+page.register_page(resources.bulk_job_launch, BulkJobLaunch)
+
+
+class BulkHostCreate(base.Base):
+    def post(self, payload={}):
+        result = self.connection.post(self.endpoint, payload)
+        return result.json()
+
+
+page.register_page(resources.bulk_host_create, BulkHostCreate)
