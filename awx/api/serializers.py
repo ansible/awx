@@ -1884,7 +1884,7 @@ class HostSerializer(BaseSerializerWithVariables):
             )
         )
         if obj.inventory.kind == 'constructed':
-            res['original_host'] = self.reverse('api:host_detail', kwargs={'pk': obj.instance_id })
+            res['original_host'] = self.reverse('api:host_detail', kwargs={'pk': obj.instance_id})
         if obj.inventory:
             res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
         if obj.last_job:
