@@ -886,17 +886,13 @@ class OrganizationAccess(NotificationAttachMixin, BaseAccess):
 
 class HostMetricAccess(BaseAccess):
     """
-    - I can see host metrics when a super user or system auditor.
-    - I can delete host metrics when a super user.
+    - I can see host metrics when I'm a super user or system auditor.
+    - I can delete host metrics when I'm a super user.
     """
 
     model = HostMetric
 
     def get_queryset(self):
-        # if self.user.is_superuser or self.user.is_system_auditor:
-        #     return self.model.objects.filter(Q(user__isnull=True) | Q(user=self.user))
-        # else:
-        #     return self.model.objects.filter(user=self.user)
         if self.user.is_superuser or self.user.is_system_auditor:
             qs = self.model.objects.all()
         else:
