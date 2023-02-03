@@ -1529,10 +1529,10 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
         # special case for constructed inventories, we pass source inventories from database
         # these must come in order, and in order _before_ the constructed inventory itself
         if inventory_update.inventory.kind == 'constructed':
-            for source_inventory in inventory_update.inventory.source_inventories.all():
+            for input_inventory in inventory_update.inventory.input_inventories.all():
                 args.append('-i')
                 script_params = dict(hostvars=True, towervars=True)
-                source_inv_path = self.write_inventory_file(source_inventory, private_data_dir, f'hosts_{source_inventory.id}', script_params)
+                source_inv_path = self.write_inventory_file(input_inventory, private_data_dir, f'hosts_{input_inventory.id}', script_params)
                 args.append(to_container_path(source_inv_path, private_data_dir))
 
         # Add arguments for the source inventory file/script/thing

@@ -109,11 +109,11 @@ class ConstructedInventoryList(InventoryList):
         return r.filter(kind='constructed')
 
 
-class InventorySourceInventoriesList(SubListAttachDetachAPIView):
+class InventoryInputInventoriesList(SubListAttachDetachAPIView):
     model = Inventory
     serializer_class = InventorySerializer
     parent_model = Inventory
-    relationship = 'source_inventories'
+    relationship = 'input_inventories'
 
 
 class InventoryActivityStreamList(SubListAPIView):
