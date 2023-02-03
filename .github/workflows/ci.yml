@@ -20,32 +20,24 @@ jobs:
         tests:
           - name: api-test
             command: /start_tests.sh
-            label: Run API Tests
           - name: api-lint
             command: /var/lib/awx/venv/awx/bin/tox -e linters
-            label: Run API Linters
           - name: api-swagger
             command: /start_tests.sh swagger
-            label: Generate API Reference
           - name: awx-collection
             command: /start_tests.sh test_collection_all
-            label: Run Collection Tests
           - name: api-schema
-            label: Check API Schema
             command: /start_tests.sh detect-schema-change SCHEMA_DIFF_BASE_BRANCH=${{ github.event.pull_request.base.ref }}
           - name: ui-lint
-            label: Run UI Linters
             command: make ui-lint
           - name: ui-test-screens
-            label: Run UI Screens Tests
             command: make ui-test-screens
           - name: ui-test-general
-            label: Run UI General Tests
             command: make ui-test-general
     steps:
       - uses: actions/checkout@v2
 
-      - name: Run check ${{ matrix.tests.label }}
+      - name: Run check ${{ matrix.tests.name }}
         run: AWX_DOCKER_CMD='${{ matrix.tests.command }}' make github_ci_runner
 
   dev-env:
