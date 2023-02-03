@@ -5392,7 +5392,18 @@ class HostMetricSerializer(BaseSerializer):
 
     class Meta:
         model = HostMetric
-        fields = ("hostname", "first_automation", "last_automation")
+        fields = (
+            "id",
+            "hostname",
+            "url",
+            "first_automation",
+            "last_automation",
+            "last_deleted",
+            "automated_counter",
+            "deleted_counter",
+            "deleted",
+            "used_in_inventories",
+        )
 
 
 class InstanceGroupSerializer(BaseSerializer):

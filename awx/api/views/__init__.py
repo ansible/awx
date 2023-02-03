@@ -1549,10 +1549,18 @@ class HostRelatedSearchMixin(object):
 
 
 class HostMetricList(ListAPIView):
-    always_allow_superuser = False
     name = _("Host Metrics List")
     model = models.HostMetric
     serializer_class = serializers.HostMetricSerializer
+    permission_classes = (IsSystemAdminOrAuditor,)
+    search_fields = ('hostname', 'deleted')
+
+
+class HostMetricDetail(RetrieveDestroyAPIView):
+    name = _("Host Metric Detail")
+    model = models.HostMetric
+    serializer_class = serializers.HostMetricSerializer
+    permission_classes = (IsSystemAdminOrAuditor,)
 
 
 class HostList(HostRelatedSearchMixin, ListCreateAPIView):
