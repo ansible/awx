@@ -2,7 +2,6 @@
 name: CI
 env:
   LC_ALL: "C.UTF-8" # prevent ERROR: Ansible could not initialize the preferred locale: unsupported locale setting
-  py_version: "3.9"
   CI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   DEV_DOCKER_TAG_BASE: ghcr.io/${{ github.repository_owner }}
   COMPOSE_TAG: ${{ github.base_ref || 'devel' }}
@@ -56,11 +55,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Install python ${{ env.py_version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ env.py_version }}
-
       - name: Run smoke test
         run: make github_ci_setup && ansible-playbook tools/docker-compose/ansible/smoke-test.yml -v
 
@@ -77,6 +71,10 @@ jobs:
         with:
           repository: ansible/awx-operator
           path: awx-operator
+
+      - name: Get python version from Makefile
+        working-directory: awx
+        run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
 
       - name: Install python ${{ env.py_version }}
         uses: actions/setup-python@v2
