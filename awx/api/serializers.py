@@ -1986,7 +1986,9 @@ class BulkHostCreateSerializer(serializers.Serializer):
         queryset=Inventory.objects.all(), required=True, write_only=True, help_text=_('Primary Key ID of inventory to add hosts to.')
     )
     hosts_help_text = _('List of hosts to be created, JSON. e.g. [{"name": "example.com"}, {"name": "127.0.0.1"}]')
-    hosts = serializers.ListField(child=BulkHostSerializer(), allow_empty=False, max_length=settings.BULK_HOST_MAX_CREATE, write_only=True, help_text=hosts_help_text)
+    hosts = serializers.ListField(
+        child=BulkHostSerializer(), allow_empty=False, max_length=settings.BULK_HOST_MAX_CREATE, write_only=True, help_text=hosts_help_text
+    )
 
     class Meta:
         fields = ('inventory', 'hosts')
