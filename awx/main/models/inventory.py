@@ -820,9 +820,19 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
 
 
 class HostMetric(models.Model):
-    hostname = models.CharField(primary_key=True, max_length=512)
+    hostname = models.CharField(unique=True, max_length=512)
     first_automation = models.DateTimeField(auto_now_add=True, null=False, db_index=True, help_text=_('When the host was first automated against'))
     last_automation = models.DateTimeField(db_index=True, help_text=_('When the host was last automated against'))
+    last_deleted = models.DateTimeField(null=True, db_index=True, help_text=_('When the host was last deleted'))
+    automated_counter = models.BigIntegerField(default=0, help_text=_('How many times was the host automated'))
+    deleted_counter = models.BigIntegerField(default=0, help_text=_('How many times was the host deleted'))
+    deleted = models.BooleanField(
+        default=False, help_text=_('Boolean flag saying whether the host is deleted and therefore not counted into the subscription consumption')
+    )
+    used_in_inventories = models.BigIntegerField(null=True, help_text=_('How many inventories contain this host'))
+
+    def get_absolute_url(self, request=None):
+        return reverse('api:host_metric_detail', kwargs={'pk': self.pk}, request=request)
 
 
 class InventorySourceOptions(BaseModel):
