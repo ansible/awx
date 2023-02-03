@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='inventory',
-            name='source_inventories',
+            name='input_inventories',
             field=models.ManyToManyField(
                 blank=True,
                 help_text='Only valid for constructed inventories, this links to the inventories that will be used.',
