@@ -1883,6 +1883,8 @@ class HostSerializer(BaseSerializerWithVariables):
                 ansible_facts=self.reverse('api:host_ansible_facts_detail', kwargs={'pk': obj.pk}),
             )
         )
+        if obj.instance_id and obj.pk != obj.instance_id:
+            res['original_host'] = self.reverse('api:host_detail', kwargs={'pk': obj.instance_id }),
         if obj.inventory:
             res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
         if obj.last_job:
