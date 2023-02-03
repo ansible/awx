@@ -98,12 +98,10 @@ class InventoryDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIVie
 
 
 class ConstructedInventoryDetail(InventoryDetail):
-
     serializer_class = ConstructedInventorySerializer
 
 
 class ConstructedInventoryList(InventoryList):
-
     serializer_class = ConstructedInventorySerializer
 
     def get_queryset(self):
@@ -111,11 +109,11 @@ class ConstructedInventoryList(InventoryList):
         return r.filter(kind='constructed')
 
 
-class InventorySourceInventoriesList(SubListAttachDetachAPIView):
+class InventoryInputInventoriesList(SubListAttachDetachAPIView):
     model = Inventory
     serializer_class = InventorySerializer
     parent_model = Inventory
-    relationship = 'source_inventories'
+    relationship = 'input_inventories'
 
 
 class InventoryActivityStreamList(SubListAPIView):

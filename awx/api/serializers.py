@@ -1702,8 +1702,8 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
         if obj.organization:
             res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk})
         if obj.kind == 'constructed':
-            res['source_inventories'] = self.reverse('api:inventory_source_inventories', kwargs={'pk': obj.pk})
-            res['url'] = self.reverse('api:constructed_inventory_detail', kwargs={'pk': obj.pk})
+            res['input_inventories'] = self.reverse('api:inventory_input_inventories', kwargs={'pk': obj.pk})
+            res['constructed_url'] = self.reverse('api:constructed_inventory_detail', kwargs={'pk': obj.pk})
         return res
 
     def to_representation(self, obj):
@@ -1883,6 +1883,8 @@ class HostSerializer(BaseSerializerWithVariables):
                 ansible_facts=self.reverse('api:host_ansible_facts_detail', kwargs={'pk': obj.pk}),
             )
         )
+        if obj.inventory.kind == 'constructed':
+            res['original_host'] = self.reverse('api:host_detail', kwargs={'pk': obj.instance_id})
         if obj.inventory:
             res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
         if obj.last_job:

@@ -140,7 +140,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         default=None,
         help_text=_('Filter that will be applied to the hosts of this inventory.'),
     )
-    source_inventories = models.ManyToManyField(
+    input_inventories = models.ManyToManyField(
         'Inventory',
         blank=True,
         related_name='destination_inventories',

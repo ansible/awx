@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0174_ensure_org_ee_admin_roles'),
     ]
@@ -12,7 +11,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='inventory',
-            name='source_inventories',
+            name='input_inventories',
             field=models.ManyToManyField(
                 blank=True,
                 help_text='Only valid for constructed inventories, this links to the inventories that will be used.',
