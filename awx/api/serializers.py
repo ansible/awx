@@ -4634,7 +4634,6 @@ class BulkJobLaunchSerializer(BaseSerializer):
 
     def validate(self, attrs):
         request = self.context.get('request', None)
-        self.check_organization_permission(attrs, request)
         identifiers = set()
         for node in attrs['jobs']:
             if 'identifier' in node:
@@ -4663,6 +4662,7 @@ class BulkJobLaunchSerializer(BaseSerializer):
         # If we are not a superuser, check we have permissions
         # TODO: As we add other related items, we need to add them here
         if request and not request.user.is_superuser:
+            self.check_organization_permission(attrs, request)
             self.check_unified_job_permission(request, requested_ujts)
             if requested_use_inventories:
                 self.check_inventory_permission(request, requested_use_inventories)
