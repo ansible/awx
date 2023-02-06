@@ -116,6 +116,13 @@ class TestCallbackBrokerWorker(TransactionTestCase):
         assert worker.buff.get(InventoryUpdateEvent, []) == []
         assert InventoryUpdateEvent.objects.filter(uuid=events[0].uuid).count() == 0  # sanity
 
+    def test_flush_with_empty_buffer(self):
+        worker = self.get_worker()
+        worker.buff = {InventoryUpdateEvent: []}
+        with mock.patch.object(InventoryUpdateEvent.objects, 'bulk_create') as flush_mock:
+            worker.flush()
+        flush_mock.assert_not_called()
+
     def test_postgres_invalid_NUL_char(self):
         # In postgres, text fields reject NUL character, 0x00
         # tests use sqlite3 which will not raise an error
