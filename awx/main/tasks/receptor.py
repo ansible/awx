@@ -186,7 +186,6 @@ def run_until_complete(node, timing_data=None, **kwargs):
     stdout = ''
 
     try:
-
         resultfile = receptor_ctl.get_work_results(unit_id)
 
         while run_timing < 20.0:
@@ -206,7 +205,6 @@ def run_until_complete(node, timing_data=None, **kwargs):
         stdout = str(stdout, encoding='utf-8')
 
     finally:
-
         if settings.RECEPTOR_RELEASE_WORK:
             res = receptor_ctl.simple_command(f"work release {unit_id}")
             if res != {'released': unit_id}:

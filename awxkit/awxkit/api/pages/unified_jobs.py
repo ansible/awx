@@ -152,7 +152,6 @@ class UnifiedJob(HasStatus, base.Base):
 
 
 class UnifiedJobs(page.PageList, UnifiedJob):
-
     pass
 
 

@@ -172,7 +172,11 @@ of the [Jinja templating language](https://jinja.palletsprojects.com/en/2.10.x/)
             "THIRD_PARTY_CLOUD_API_TOKEN": "{{api_token}}"
         },
         "extra_vars": {
-            "some_extra_var": "{{username}}:{{password}"
+            "some_extra_var": "{{username}}:{{password}}",
+            "auth": {
+                "username": "{{username}}",
+                "password": "{{password}}"
+            }
         }
     }
 

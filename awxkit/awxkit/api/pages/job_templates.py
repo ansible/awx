@@ -11,7 +11,6 @@ from . import page
 
 
 class JobTemplate(HasCopy, HasCreate, HasInstanceGroups, HasNotifications, HasSurvey, UnifiedJobTemplate):
-
     optional_dependencies = [Inventory, Credential, Project]
     NATURAL_KEY = ('organization', 'name')
 
@@ -153,7 +152,6 @@ page.register_page([resources.job_template, (resources.job_templates, 'post'), (
 
 
 class JobTemplates(page.PageList, JobTemplate):
-
     pass
 
 
@@ -161,7 +159,6 @@ page.register_page([resources.job_templates, resources.related_job_templates], J
 
 
 class JobTemplateCallback(base.Base):
-
     pass
 
 
@@ -169,7 +166,6 @@ page.register_page(resources.job_template_callback, JobTemplateCallback)
 
 
 class JobTemplateLaunch(base.Base):
-
     pass
 
 
@@ -177,7 +173,6 @@ page.register_page(resources.job_template_launch, JobTemplateLaunch)
 
 
 class JobTemplateCopy(base.Base):
-
     pass
 
 

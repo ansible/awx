@@ -4,7 +4,6 @@ from . import page
 
 
 class Instance(base.Base):
-
     pass
 
 
@@ -12,7 +11,6 @@ page.register_page(resources.instance, Instance)
 
 
 class Instances(page.PageList, Instance):
-
     pass
 
 

@@ -15,7 +15,6 @@ logger = logging.getLogger('awx.main.notifications.twilio_backend')
 
 
 class TwilioBackend(AWXBaseEmailBackend, CustomNotificationBase):
-
     init_parameters = {
         "account_sid": {"label": "Account SID", "type": "string"},
         "account_token": {"label": "Account Token", "type": "password"},

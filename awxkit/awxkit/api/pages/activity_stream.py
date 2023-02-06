@@ -4,7 +4,6 @@ from . import page
 
 
 class ActivityStream(base.Base):
-
     pass
 
 
@@ -12,7 +11,6 @@ page.register_page(resources.activity, ActivityStream)
 
 
 class ActivityStreams(page.PageList, ActivityStream):
-
     pass
 
 

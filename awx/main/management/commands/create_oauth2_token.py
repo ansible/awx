@@ -17,7 +17,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if not options['user']:
-
             raise CommandError('Username not supplied. Usage: awx-manage create_oauth2_token --user=username.')
         try:
             user = User.objects.get(username=options['user'])

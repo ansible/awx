@@ -82,7 +82,6 @@ class DeleteMeta:
         part_drop = {}
 
         for pk, status, created in self.jobs_qs:
-
             part_key = partition_table_name(self.job_class, created)
             if status in ['pending', 'waiting', 'running']:
                 part_drop[part_key] = False

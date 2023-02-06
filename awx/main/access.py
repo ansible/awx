@@ -561,7 +561,6 @@ class NotificationAttachMixin(BaseAccess):
 
 
 class InstanceAccess(BaseAccess):
-
     model = Instance
     prefetch_related = ('rampart_groups',)
 
@@ -579,7 +578,6 @@ class InstanceAccess(BaseAccess):
         return super(InstanceAccess, self).can_unattach(obj, sub_obj, relationship, relationship, data=data)
 
     def can_add(self, data):
-
         return self.user.is_superuser
 
     def can_change(self, obj, data):
@@ -590,7 +588,6 @@ class InstanceAccess(BaseAccess):
 
 
 class InstanceGroupAccess(BaseAccess):
-
     model = InstanceGroup
     prefetch_related = ('instances',)
 
@@ -1030,7 +1027,9 @@ class GroupAccess(BaseAccess):
         return Group.objects.filter(inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
 
     def can_add(self, data):
-        if not data or 'inventory' not in data:
+        if not data:  # So the browseable API will work
+            return Inventory.accessible_objects(self.user, 'admin_role').exists()
+        if 'inventory' not in data:
             return False
         # Checks for admin or change permission on inventory.
         return self.check_related('inventory', Inventory, data)
@@ -2352,7 +2351,6 @@ class JobEventAccess(BaseAccess):
 
 
 class UnpartitionedJobEventAccess(JobEventAccess):
-
     model = UnpartitionedJobEvent
 
 

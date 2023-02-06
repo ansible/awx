@@ -135,7 +135,6 @@ def get_default_schema():
 
 
 class APIView(views.APIView):
-
     schema = get_default_schema()
     versioning_class = URLPathVersioning
 
@@ -800,7 +799,6 @@ class RetrieveUpdateDestroyAPIView(RetrieveUpdateAPIView, DestroyAPIView):
 
 
 class ResourceAccessList(ParentMixin, ListAPIView):
-
     serializer_class = ResourceAccessListElementSerializer
     ordering = ('username',)
 
@@ -823,7 +821,6 @@ def trigger_delayed_deep_copy(*args, **kwargs):
 
 
 class CopyAPIView(GenericAPIView):
-
     serializer_class = CopySerializer
     permission_classes = (AllowAny,)
     copy_return_serializer_class = None

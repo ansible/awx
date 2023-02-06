@@ -74,7 +74,6 @@ class Instance(FakeObject):
 @pytest.fixture
 def sample_cluster():
     def stand_up_cluster():
-
         ig_small = InstanceGroup(name='ig_small')
         ig_large = InstanceGroup(name='ig_large')
         default = InstanceGroup(name='default')

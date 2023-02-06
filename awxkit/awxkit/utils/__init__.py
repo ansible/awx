@@ -117,7 +117,7 @@ class PseudoNamespace(dict):
                 for key in iterable:
                     self[key] = iterable[key]
             else:
-                for (k, v) in iterable:
+                for k, v in iterable:
                     self[k] = v
         for k in kw:
             self[k] = kw[k]
