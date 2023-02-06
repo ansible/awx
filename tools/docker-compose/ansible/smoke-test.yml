@@ -17,7 +17,7 @@
       environment:
         COMPOSE_UP_OPTS: -d
       args:
-        chdir: "{{ repo_dir }}"
+        chdir: "{{ playbook_dir }}/../../../"
 
     # Takes a while for migrations to finish
     - name: Wait for the dev environment to be ready

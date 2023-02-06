@@ -25,7 +25,7 @@ django-taggit
 djangorestframework==3.13.1
 djangorestframework-yaml
 filelock
-GitPython
+GitPython>=3.1.30  # CVE-2022-24439
 hiredis==2.0.0  # see UPGRADE BLOCKERs
 irc
 jinja2
@@ -55,7 +55,7 @@ twilio
 twisted[tls]
 uWSGI
 uwsgitop
-wheel
+wheel>=0.38.1 # CVE-2022-40898
 pip==21.2.4  # see UPGRADE BLOCKERs
 setuptools  # see UPGRADE BLOCKERs
 setuptools_scm[toml]  # see UPGRADE BLOCKERs, xmlsec build dep
