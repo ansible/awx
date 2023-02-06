@@ -20,7 +20,9 @@ read_only_endpoints_with_modules = ['settings', 'role', 'project_update']
 
 # If a module should not be created for an endpoint and the endpoint is not read-only add it here
 # THINK HARD ABOUT DOING THIS
-no_module_for_endpoint = []
+no_module_for_endpoint = [
+    'constructed_inventories',  # This is a view for inventory with kind=constructed
+]
 
 # Some modules work on the related fields of an endpoint. These modules will not have an auto-associated endpoint
 no_endpoint_for_module = [
