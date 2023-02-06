@@ -54,7 +54,7 @@ options:
     kind:
       description:
         - The kind field. Cannot be modified after created.
-      choices: ["", "smart"]
+      choices: ["", "smart", "constructed"]
       type: str
     host_filter:
       description:
@@ -63,6 +63,11 @@ options:
     instance_groups:
       description:
         - list of Instance Groups for this Organization to run on.
+      type: list
+      elements: str
+    input_inventories:
+      description:
+        - List of Inventories to use as input for Constructed Inventory.
       type: list
       elements: str
     prevent_instance_group_fallback:
@@ -111,11 +116,12 @@ def main():
         description=dict(),
         organization=dict(required=True),
         variables=dict(type='dict'),
-        kind=dict(choices=['', 'smart']),
+        kind=dict(choices=['', 'smart', 'constructed']),
         host_filter=dict(),
         instance_groups=dict(type="list", elements='str'),
         prevent_instance_group_fallback=dict(type='bool'),
         state=dict(choices=['present', 'absent'], default='present'),
+        input_inventories=dict(type='list', elements='str'),
     )
 
     # Create a module for ourselves
@@ -180,6 +186,13 @@ def main():
     # We need to perform a check to make sure you are not trying to convert a regular inventory into a smart one.
     if inventory and inventory['kind'] == '' and inventory_fields['kind'] == 'smart':
         module.fail_json(msg='You cannot turn a regular inventory into a "smart" inventory.')
+
+    if kind == 'constructed':
+        input_inventory_names = module.params.get('input_inventories')
+        if input_inventory_names is not None:
+            association_fields['input_inventories'] = []
+            for item in input_inventory_names:
+                association_fields['input_inventories'].append(module.resolve_name_to_id('inventories', item))
 
     # If the state was present and we can let the module build or update the existing inventory, this will return on its own
     module.create_or_update_if_needed(
