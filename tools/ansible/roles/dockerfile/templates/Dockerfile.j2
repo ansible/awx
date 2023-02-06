@@ -212,7 +212,6 @@ ADD tools/docker-compose/podman-containers.conf /var/lib/awx/.config/containers/
 ADD tools/ansible/roles/dockerfile/files/launch_awx.sh /usr/bin/launch_awx.sh
 ADD tools/ansible/roles/dockerfile/files/launch_awx_task.sh /usr/bin/launch_awx_task.sh
 ADD tools/ansible/roles/dockerfile/files/launch_awx_rsyslog.sh /usr/bin/launch_awx_rsyslog.sh
-ADD tools/ansible/roles/dockerfile/files/launch_awx_rsyslog.sh /usr/bin/launch_awx_cache_clear.sh
 ADD {{ template_dest }}/supervisor.conf /etc/supervisord.conf
 ADD {{ template_dest }}/supervisor_task.conf /etc/supervisord_task.conf
 ADD {{ template_dest }}/supervisor_rsyslog.conf /etc/supervisor_rsyslog.conf
