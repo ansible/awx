@@ -4,7 +4,6 @@ from . import page
 
 
 class MeshVisualizer(base.Base):
-
     pass
 
 

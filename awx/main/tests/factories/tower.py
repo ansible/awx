@@ -403,7 +403,6 @@ def create_notification_template(name, roles=None, persisted=True, **kwargs):
 
 
 def generate_workflow_job_template_nodes(workflow_job_template, persisted, **kwargs):
-
     workflow_job_template_nodes = kwargs.get('workflow_job_template_nodes', [])
     if len(workflow_job_template_nodes) > 0 and not persisted:
         raise RuntimeError('workflow job template nodes cannot be used when persisted=False')

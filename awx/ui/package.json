@@ -42,7 +42,7 @@
     "@babel/preset-react": "7.16.7",
     "@cypress/instrument-cra": "^1.4.0",
     "@lingui/cli": "^3.7.1",
-    "@lingui/loader": "^3.8.3",
+    "@lingui/loader": "3.15.0",
     "@lingui/macro": "^3.7.1",
     "@nteract/mockument": "^1.0.4",
     "@testing-library/jest-dom": "^5.16.2",
@@ -66,7 +66,7 @@
     "jest-websocket-mock": "^2.0.2",
     "mock-socket": "^9.1.3",
     "prettier": "2.3.2",
-    "react-scripts": "5.0.0"
+    "react-scripts": "5.0.1"
   },
   "scripts": {
     "prelint": "lingui compile",

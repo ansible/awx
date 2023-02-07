@@ -11,7 +11,6 @@ from . import page
 
 
 class Project(HasCopy, HasCreate, HasNotifications, UnifiedJobTemplate):
-
     optional_dependencies = [Credential, Organization]
     optional_schedule_fields = tuple()
     NATURAL_KEY = ('organization', 'name')
@@ -131,7 +130,6 @@ page.register_page([resources.project, (resources.projects, 'post'), (resources.
 
 
 class Projects(page.PageList, Project):
-
     pass
 
 
@@ -139,7 +137,6 @@ page.register_page([resources.projects, resources.related_projects], Projects)
 
 
 class ProjectUpdate(UnifiedJob):
-
     pass
 
 
@@ -147,7 +144,6 @@ page.register_page(resources.project_update, ProjectUpdate)
 
 
 class ProjectUpdates(page.PageList, ProjectUpdate):
-
     pass
 
 
@@ -155,7 +151,6 @@ page.register_page([resources.project_updates, resources.project_project_updates
 
 
 class ProjectUpdateLaunch(base.Base):
-
     pass
 
 
@@ -163,7 +158,6 @@ page.register_page(resources.project_related_update, ProjectUpdateLaunch)
 
 
 class ProjectUpdateCancel(base.Base):
-
     pass
 
 
@@ -171,7 +165,6 @@ page.register_page(resources.project_update_cancel, ProjectUpdateCancel)
 
 
 class ProjectCopy(base.Base):
-
     pass
 
 
@@ -179,7 +172,6 @@ page.register_page(resources.project_copy, ProjectCopy)
 
 
 class Playbooks(base.Base):
-
     pass
 
 

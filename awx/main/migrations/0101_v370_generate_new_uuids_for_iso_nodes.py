@@ -16,7 +16,6 @@ def _generate_new_uuid_for_iso_nodes(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0100_v370_projectupdate_job_tags'),
     ]

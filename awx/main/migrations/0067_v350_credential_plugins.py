@@ -18,7 +18,6 @@ def setup_tower_managed_defaults(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('taggit', '0002_auto_20150616_2121'),

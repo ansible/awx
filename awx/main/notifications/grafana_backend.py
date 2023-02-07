@@ -31,7 +31,6 @@ logger = logging.getLogger('awx.main.notifications.grafana_backend')
 
 
 class GrafanaBackend(AWXBaseEmailBackend, CustomNotificationBase):
-
     init_parameters = {"grafana_url": {"label": "Grafana URL", "type": "string"}, "grafana_key": {"label": "Grafana API Key", "type": "password"}}
     recipient_parameter = "grafana_url"
     sender_parameter = None

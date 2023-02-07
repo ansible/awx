@@ -54,7 +54,6 @@ options:
     kind:
       description:
         - The kind field. Cannot be modified after created.
-      default: ""
       choices: ["", "smart"]
       type: str
     host_filter:
@@ -112,7 +111,7 @@ def main():
         description=dict(),
         organization=dict(required=True),
         variables=dict(type='dict'),
-        kind=dict(choices=['', 'smart'], default=''),
+        kind=dict(choices=['', 'smart']),
         host_filter=dict(),
         instance_groups=dict(type="list", elements='str'),
         prevent_instance_group_fallback=dict(type='bool'),

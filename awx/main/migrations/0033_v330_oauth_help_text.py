@@ -12,7 +12,6 @@ import oauth2_provider.generators
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0032_v330_polymorphic_delete'),
     ]

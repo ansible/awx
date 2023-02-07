@@ -46,7 +46,6 @@ logger = logging.getLogger('awx.api.views.organization')
 
 
 class InventoryUpdateEventsList(SubListAPIView):
-
     model = InventoryUpdateEvent
     serializer_class = InventoryUpdateEventSerializer
     parent_model = InventoryUpdate
@@ -66,13 +65,11 @@ class InventoryUpdateEventsList(SubListAPIView):
 
 
 class InventoryList(ListCreateAPIView):
-
     model = Inventory
     serializer_class = InventorySerializer
 
 
 class InventoryDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
-
     model = Inventory
     serializer_class = InventorySerializer
 
@@ -98,7 +95,6 @@ class InventoryDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIVie
 
 
 class InventoryActivityStreamList(SubListAPIView):
-
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
     parent_model = Inventory
@@ -113,7 +109,6 @@ class InventoryActivityStreamList(SubListAPIView):
 
 
 class InventoryInstanceGroupsList(SubListAttachDetachAPIView):
-
     model = InstanceGroup
     serializer_class = InstanceGroupSerializer
     parent_model = Inventory
@@ -121,13 +116,11 @@ class InventoryInstanceGroupsList(SubListAttachDetachAPIView):
 
 
 class InventoryAccessList(ResourceAccessList):
-
     model = User  # needs to be User for AccessLists's
     parent_model = Inventory
 
 
 class InventoryObjectRolesList(SubListAPIView):
-
     model = Role
     serializer_class = RoleSerializer
     parent_model = Inventory
@@ -140,7 +133,6 @@ class InventoryObjectRolesList(SubListAPIView):
 
 
 class InventoryJobTemplateList(SubListAPIView):
-
     model = JobTemplate
     serializer_class = JobTemplateSerializer
     parent_model = Inventory
@@ -154,11 +146,9 @@ class InventoryJobTemplateList(SubListAPIView):
 
 
 class InventoryLabelList(LabelSubListCreateAttachDetachView):
-
     parent_model = Inventory
 
 
 class InventoryCopy(CopyAPIView):
-
     model = Inventory
     copy_return_serializer_class = InventorySerializer

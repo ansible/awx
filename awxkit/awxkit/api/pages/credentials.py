@@ -142,7 +142,6 @@ def get_payload_field_and_value_from_kwargs_or_config_cred(field, kind, kwargs, 
 
 
 class CredentialType(HasCreate, base.Base):
-
     NATURAL_KEY = ('name', 'kind')
 
     def silent_delete(self):
@@ -182,7 +181,6 @@ page.register_page([resources.credential_type, (resources.credential_types, 'pos
 
 
 class CredentialTypes(page.PageList, CredentialType):
-
     pass
 
 
@@ -190,7 +188,6 @@ page.register_page(resources.credential_types, CredentialTypes)
 
 
 class Credential(HasCopy, HasCreate, base.Base):
-
     dependencies = [CredentialType]
     optional_dependencies = [Organization, User, Team]
     NATURAL_KEY = ('organization', 'name', 'credential_type')
@@ -296,7 +293,6 @@ page.register_page(
 
 
 class Credentials(page.PageList, Credential):
-
     pass
 
 
@@ -304,7 +300,6 @@ page.register_page([resources.credentials, resources.related_credentials, resour
 
 
 class CredentialCopy(base.Base):
-
     pass
 
 

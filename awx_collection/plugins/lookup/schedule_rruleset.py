@@ -147,34 +147,34 @@ class LookupModule(LookupBase):
     def __init__(self, *args, **kwargs):
         if LIBRARY_IMPORT_ERROR:
             raise_from(AnsibleError('{0}'.format(LIBRARY_IMPORT_ERROR)), LIBRARY_IMPORT_ERROR)
-            super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
-            self.frequencies = {
-                'none': rrule.DAILY,
-                'minute': rrule.MINUTELY,
-                'hour': rrule.HOURLY,
-                'day': rrule.DAILY,
-                'week': rrule.WEEKLY,
-                'month': rrule.MONTHLY,
-            }
+        self.frequencies = {
+            'none': rrule.DAILY,
+            'minute': rrule.MINUTELY,
+            'hour': rrule.HOURLY,
+            'day': rrule.DAILY,
+            'week': rrule.WEEKLY,
+            'month': rrule.MONTHLY,
+        }
 
-            self.weekdays = {
-                'monday': rrule.MO,
-                'tuesday': rrule.TU,
-                'wednesday': rrule.WE,
-                'thursday': rrule.TH,
-                'friday': rrule.FR,
-                'saturday': rrule.SA,
-                'sunday': rrule.SU,
-            }
+        self.weekdays = {
+            'monday': rrule.MO,
+            'tuesday': rrule.TU,
+            'wednesday': rrule.WE,
+            'thursday': rrule.TH,
+            'friday': rrule.FR,
+            'saturday': rrule.SA,
+            'sunday': rrule.SU,
+        }
 
-            self.set_positions = {
-                'first': 1,
-                'second': 2,
-                'third': 3,
-                'fourth': 4,
-                'last': -1,
-            }
+        self.set_positions = {
+            'first': 1,
+            'second': 2,
+            'third': 3,
+            'fourth': 4,
+            'last': -1,
+        }
 
     @staticmethod
     def parse_date_time(date_string):

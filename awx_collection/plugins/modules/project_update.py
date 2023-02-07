@@ -87,7 +87,7 @@ def main():
         organization=dict(),
         wait=dict(default=True, type='bool'),
         interval=dict(default=2.0, type='float'),
-        timeout=dict(default=None, type='int'),
+        timeout=dict(type='int'),
     )
 
     # Create a module for ourselves
@@ -116,8 +116,7 @@ def main():
 
     if result['status_code'] == 405:
         module.fail_json(
-            msg="Unable to trigger a project update because the project scm_type ({0}) does not support it.".format(project['scm_type']),
-            response=result
+            msg="Unable to trigger a project update because the project scm_type ({0}) does not support it.".format(project['scm_type']), response=result
         )
     elif result['status_code'] != 202:
         module.fail_json(msg="Failed to update project, see response for details", response=result)

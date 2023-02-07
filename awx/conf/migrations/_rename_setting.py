@@ -10,7 +10,6 @@ __all__ = ['rename_setting']
 
 
 def rename_setting(apps, schema_editor, old_key, new_key):
-
     old_setting = None
     Setting = apps.get_model('conf', 'Setting')
     if Setting.objects.filter(key=new_key).exists() or hasattr(settings, new_key):

@@ -180,7 +180,6 @@ data_loggly = {
     ],
 )
 def test_rsyslog_conf_template(enabled, log_type, host, port, protocol, errorfile, expected_config):
-
     mock_settings, _ = _mock_logging_defaults()
 
     # Set test settings

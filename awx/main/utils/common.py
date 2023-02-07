@@ -361,7 +361,6 @@ def update_scm_url(scm_type, url, username=True, password=True, check_special_ca
 
 
 def get_allowed_fields(obj, serializer_mapping):
-
     if serializer_mapping is not None and obj.__class__ in serializer_mapping:
         serializer_actual = serializer_mapping[obj.__class__]()
         allowed_fields = [x for x in serializer_actual.fields if not serializer_actual.fields[x].read_only] + ['id']
@@ -631,7 +630,6 @@ def prefetch_page_capabilities(model, page, prefetch_list, user):
         mapping[obj.id] = {}
 
     for prefetch_entry in prefetch_list:
-
         display_method = None
         if type(prefetch_entry) is dict:
             display_method = list(prefetch_entry.keys())[0]

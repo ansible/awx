@@ -5,7 +5,6 @@ from awx.main.migrations._inventory_source import delete_cloudforms_inv_source
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0116_v400_remove_hipchat_notifications'),
     ]
