@@ -40,6 +40,16 @@ def test_instance_group_ordering(source_model):
 
 @pytest.mark.django_db
 @pytest.mark.parametrize('source_model', ['job_template', 'inventory', 'organization'], indirect=True)
+def test_instance_group_bulk_add(source_model):
+    groups = [InstanceGroup.objects.create(name='host-%d' % i) for i in range(5)]
+    groups.reverse()
+    with pytest.raises(RuntimeError) as err:
+        source_model.instance_groups.add(*groups)
+    assert 'Ordered many-to-many fields do not support multiple objects' in str(err)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('source_model', ['job_template', 'inventory', 'organization'], indirect=True)
 def test_instance_group_middle_deletion(source_model):
     groups = [InstanceGroup.objects.create(name='host-%d' % i) for i in range(5)]
     groups.reverse()
