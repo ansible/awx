@@ -16,9 +16,9 @@ author: "Seth Foster (@fosterseth)"
 short_description: Bulk job launch in Automation Platform Controller
 description:
     - Single-request bulk job launch in Automation Platform Controller.
-    - The result is flat workflow, each job specified in the parameter jobs results in a workflow job node.
+    - Results in a workflow where each node corresponds to each item specified in the jobs field.
     - Any options specified at the top level will inherited by the launched jobs (if prompt on launch is enabled for those fields).
-    - Designed to efficiently start many jobs at once.
+    - Provides a way to submit many jobs at once to Controller.
 options:
     jobs:
       description:
@@ -43,7 +43,7 @@ options:
       type: str
     limit:
       description:
-        - Limit to use for the I(job_template).
+        - Limit to use for the bulk job.
       type: str
     scm_branch:
       description:
@@ -53,6 +53,7 @@ options:
     extra_vars:
       description:
         - Any extra vars required to launch the job.
+        - Extends the extra_data field at the individual job level.
       type: dict
     job_tags:
       description:
@@ -83,8 +84,8 @@ extends_documentation_fragment: awx.awx.auth
 
 RETURN = '''
 job_info:
-    description: dictionary containing information about the workflow executed
-    returned: If workflow launched
+    description: dictionary containing information about the bulk job executed
+    returned: If bulk job launched
     type: dict
 '''
 
@@ -97,8 +98,14 @@ EXAMPLES = '''
       - unified_job_template: 7
       - unified_job_template: 10
         limit: foo
+        extra_data:
+          food: carrot
+          color: orange
     limit: bar
-    inventory: 1 # only affects job templates with prompt on launch enabled for inventory
+    extra_vars: # these override / extend extra_data at the job level
+      food: grape
+      animal: owl
+    inventory: 1
 
 - name: Launch bulk jobs with lookup plugin
   bulk_job_launch:
@@ -131,15 +138,31 @@ def main():
     # Create a module for ourselves
     module = ControllerAPIModule(argument_spec=argument_spec)
 
+    post_data_names = (
+      'jobs',
+      'name',
+      'organization',
+      'inventory',
+      'limit',
+      'scm_branch',
+      'extra_vars',
+      'job_tags',
+      'skip_tags',
+    )
+    post_data = {}
+    for p in post_data_names:
+      val = module.params.get(p)
+      if val:
+        post_data[p] = val
+
     # Extract our parameters
-    name = module.params.get('name')
     wait = module.params.get('wait')
     timeout = module.params.get('timeout')
     interval = module.params.get('interval')
-    jobs = module.params.get('jobs')
+    name = module.params.get('name')
 
     # Launch the jobs
-    result = module.post_endpoint("bulk/job_launch", data={"jobs": jobs})
+    result = module.post_endpoint("bulk/job_launch", data=post_data)
 
     if result['status_code'] != 201:
         module.fail_json(msg="Failed to launch bulk jobs, see response for details", response=result)
