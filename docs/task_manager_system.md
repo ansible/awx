@@ -18,7 +18,7 @@ Independent tasks are run in order of creation time, earliest first. Tasks with 
 ## Dependency Manager
 
 Responsible for looking at each pending task and determining whether it should create a dependency for that task.
-For example, if `update_on_launch` is enabled of a task, a project update will be created as a dependency of that task. The Dependency Manager is responsible for creating that project update.
+For example, if `scm_update_on_launch` is enabled for the project a task uses, a project update will be created as a dependency of that task. The Dependency Manager is responsible for creating that project update.
 
 Dependencies can also have their own dependencies, for example,
 
@@ -47,17 +47,17 @@ Dependencies can also have their own dependencies, for example,
 ### Dependency Manager Steps
 
 1. Get pending tasks (parent tasks) that have `dependencies_processed = False`
-2. Create project update if
+2. As optimization, cache related projects and inventory sources
+3. Create project or inventory update for related project or inventory source if
     a. not already created
-    b. last project update outside of cache timeout window
-3. Create inventory source update if
-    a. not already created
-    b. last inventory source update outside of cache timeout window
-4. Check and create dependencies for these newly created dependencies
-    a. inventory source updates can have a project update dependency
-5. All dependencies are linked to the parent task via the `dependent_jobs` field
+    b. last update failed
+    c. last project update outside of cache timeout window
+    d. some extra logic applies to inventory update creation
+4. All dependencies (new or old) are linked to the parent task via the `dependent_jobs` field
     a. This allows us to cancel the parent task if the dependency fails or is canceled
-6. Update the parent tasks with `dependencies_processed = True`
+5. Update the parent tasks with `dependencies_processed = True`
+6. Check and create dependencies for these newly created dependencies
+    a. inventory source updates can have a project update dependency
 
 
 ## Task Manager
@@ -110,7 +110,7 @@ Special note -- the workflow manager is not scheduled to run periodically *direc
 
 Empirically, the periodic task manager has been effective in the past and will continue to be relied upon with the added event-triggered `schedule()`.
 
-### Bulk Reschedule 
+### Bulk Reschedule
 
 Typically, each manager runs asynchronously via the dispatcher system. Dispatcher tasks take resources, so it is important to not schedule tasks unnecessarily. We also need a mechanism to run the manager *after* an atomic transaction block.
 
