@@ -16,7 +16,7 @@ author: "Seth Foster (@fosterseth)"
 short_description: Bulk host create in Automation Platform Controller
 description:
     - Single-request bulk host creation in Automation Platform Controller.
-    - Designed to efficiently add many hosts to an inventory.
+    - Provides a way to add many hosts at once to an inventory in Controller.
 options:
     hosts:
       description:

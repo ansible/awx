@@ -4579,6 +4579,7 @@ class BulkJobNodeSerializer(serializers.Serializer):
     survey_passwords = serializers.CharField(required=False, write_only=True, allow_blank=False)
     job_slice_count = serializers.IntegerField(required=False, min_value=1)
     timeout = serializers.IntegerField(required=False, min_value=1)
+    extra_data = serializers.JSONField(write_only=True, required=False)
 
     class Meta:
         fields = (
