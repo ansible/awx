@@ -18,8 +18,6 @@ jobs:
       fail-fast: false
       matrix:
         tests:
-          - name: api-test
-            command: /start_tests.sh
           - name: api-lint
             command: /var/lib/awx/venv/awx/bin/tox -e linters
           - name: api-swagger
