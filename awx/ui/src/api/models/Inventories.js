@@ -74,7 +74,7 @@ class Inventories extends InstanceGroupsMixin(Base) {
   }
 
   readSourceInventories(inventoryId, params) {
-    return this.http.get(`${this.baseUrl}${inventoryId}/source_inventories/`, {
+    return this.http.get(`${this.baseUrl}${inventoryId}/input_inventories/`, {
       params,
     });
   }
