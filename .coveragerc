@@ -4,6 +4,7 @@ branch = True
 omit =
     awx/main/migrations/*
     awx/lib/site-packages/*
+relative_files = True
 
 [report]
 # Regexes for lines to exclude from consideration
