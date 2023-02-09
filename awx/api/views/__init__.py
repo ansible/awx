@@ -1610,6 +1610,8 @@ class HostDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
     def delete(self, request, *args, **kwargs):
         if self.get_object().inventory.pending_deletion:
             return Response({"error": _("The inventory for this host is already being deleted.")}, status=status.HTTP_400_BAD_REQUEST)
+        if self.get_object().inventory.kind == 'constructed':
+            return Response({"error": _("Delete constructed inventory hosts from input inventory.")}, status=status.HTTP_400_BAD_REQUEST)
         return super(HostDetail, self).delete(request, *args, **kwargs)
 
 

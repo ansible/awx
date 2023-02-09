@@ -1933,8 +1933,8 @@ class HostSerializer(BaseSerializerWithVariables):
         return value
 
     def validate_inventory(self, value):
-        if value.kind == 'smart':
-            raise serializers.ValidationError({"detail": _("Cannot create Host for Smart Inventory")})
+        if value.kind in ('constructed', 'smart'):
+            raise serializers.ValidationError({"detail": _("Cannot create Host for Smart or Constructed Inventories")})
         return value
 
     def validate_variables(self, value):
@@ -2032,8 +2032,8 @@ class GroupSerializer(BaseSerializerWithVariables):
         return value
 
     def validate_inventory(self, value):
-        if value.kind == 'smart':
-            raise serializers.ValidationError({"detail": _("Cannot create Group for Smart Inventory")})
+        if value.kind in ('constructed', 'smart'):
+            raise serializers.ValidationError({"detail": _("Cannot create Group for Smart or Constructed Inventories")})
         return value
 
     def to_representation(self, obj):
@@ -2339,8 +2339,8 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         return value
 
     def validate_inventory(self, value):
-        if value and value.kind == 'smart':
-            raise serializers.ValidationError({"detail": _("Cannot create Inventory Source for Smart Inventory")})
+        if value and value.kind in ('constructed', 'smart'):
+            raise serializers.ValidationError({"detail": _("Cannot create Inventory Source for Smart or Constructed Inventories")})
         return value
 
     # TODO: remove when old 'credential' fields are removed
@@ -2361,6 +2361,8 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         obj = super(InventorySourceSerializer, self).update(obj, validated_data)
         if deprecated_fields:
             self._update_deprecated_fields(deprecated_fields, obj)
+        if obj.source == 'constructed':
+            raise serializers.ValidationError({'error': _("Cannot edit source of type constructed.")})
         return obj
 
     # TODO: remove when old 'credential' fields are removed
@@ -2387,6 +2389,8 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         if get_field_from_model_or_attrs('source') == 'scm':
             if ('source' in attrs or 'source_project' in attrs) and get_field_from_model_or_attrs('source_project') is None:
                 raise serializers.ValidationError({"source_project": _("Project required for scm type sources.")})
+        elif (get_field_from_model_or_attrs('source') == 'constructed') and (self.instance and self.instance.source != 'constructed'):
+            raise serializers.ValidationError({"Error": _('constructed not a valid source for inventory')})
         else:
             redundant_scm_fields = list(filter(lambda x: attrs.get(x, None), ['source_project', 'source_path', 'scm_branch']))
             if redundant_scm_fields:
