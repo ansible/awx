@@ -1941,8 +1941,8 @@ class HostSerializer(BaseSerializerWithVariables):
         return value
 
     def validate_inventory(self, value):
-        if value.kind == 'smart':
-            raise serializers.ValidationError({"detail": _("Cannot create Host for Smart Inventory")})
+        if value.kind in ('constructed', 'smart'):
+            raise serializers.ValidationError({"detail": _("Cannot create Host for Smart or Constructed Inventories")})
         return value
 
     def validate_variables(self, value):
@@ -2040,8 +2040,8 @@ class GroupSerializer(BaseSerializerWithVariables):
         return value
 
     def validate_inventory(self, value):
-        if value.kind == 'smart':
-            raise serializers.ValidationError({"detail": _("Cannot create Group for Smart Inventory")})
+        if value.kind in ('constructed', 'smart'):
+            raise serializers.ValidationError({"detail": _("Cannot create Group for Smart or Constructed Inventories")})
         return value
 
     def to_representation(self, obj):
@@ -2222,8 +2222,8 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         return value
 
     def validate_inventory(self, value):
-        if value and value.kind == 'smart':
-            raise serializers.ValidationError({"detail": _("Cannot create Inventory Source for Smart Inventory")})
+        if value and value.kind in ('constructed', 'smart'):
+            raise serializers.ValidationError({"detail": _("Cannot create Inventory Source for Smart or Constructed Inventories")})
         return value
 
     # TODO: remove when old 'credential' fields are removed
