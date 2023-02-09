@@ -6,7 +6,7 @@ from collections import defaultdict
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import models, DatabaseError
+from django.db import connection, models, DatabaseError
 from django.utils.dateparse import parse_datetime
 from django.utils.text import Truncator
 from django.utils.timezone import utc, now
@@ -536,7 +536,7 @@ class JobEvent(BasePlaybookEvent):
                 return
             job = self.job
 
-            from awx.main.models import Host, JobHostSummary, HostMetric  # circular import
+            from awx.main.models import Host, JobHostSummary  # circular import
 
             all_hosts = Host.objects.filter(pk__in=self.host_map.values()).only('id', 'name')
             existing_host_ids = set(h.id for h in all_hosts)
@@ -575,12 +575,26 @@ class JobEvent(BasePlaybookEvent):
 
             Host.objects.bulk_update(list(updated_hosts), ['last_job_id', 'last_job_host_summary_id'], batch_size=100)
 
-            # bulk-create
-            current_time = now()
-            HostMetric.objects.bulk_create(
-                [HostMetric(hostname=hostname, last_automation=current_time) for hostname in updated_hosts_list], ignore_conflicts=True, batch_size=100
+            # Create/update Host Metrics
+            self._update_host_metrics(updated_hosts_list)
+
+    @staticmethod
+    def _update_host_metrics(updated_hosts_list):
+        from awx.main.models import HostMetric  # circular import
+
+        # bulk-create
+        current_time = now()
+        HostMetric.objects.bulk_create(
+            [HostMetric(hostname=hostname, last_automation=current_time) for hostname in updated_hosts_list], ignore_conflicts=True, batch_size=1000
+        )
+        # bulk-update
+        batch_start, batch_size = 0, 1000
+        while batch_start <= len(updated_hosts_list):
+            batched_host_list = updated_hosts_list[batch_start : (batch_start + batch_size)]
+            HostMetric.objects.filter(hostname__in=batched_host_list).update(
+                last_automation=current_time, automated_counter=models.F('automated_counter') + 1, deleted=False
             )
-            HostMetric.objects.filter(hostname__in=updated_hosts_list).update(last_automation=current_time)
+            batch_start += batch_size
 
     @property
     def job_verbosity(self):
