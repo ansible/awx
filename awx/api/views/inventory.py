@@ -115,6 +115,15 @@ class InventoryInputInventoriesList(SubListAttachDetachAPIView):
     parent_model = Inventory
     relationship = 'input_inventories'
 
+    # Specifically overriding the post method on this view to disallow constructed inventories as input inventories
+    def post(self, request, *args, **kwargs):
+        obj = Inventory.objects.get(id=request.data.get('id'))
+        if obj.kind == 'constructed':
+            return Response(
+                dict(error=_('You cannot add a constructed inventory to another constructed inventory.')), status=status.HTTP_405_METHOD_NOT_ALLOWED
+            )
+        return super(InventoryInputInventoriesList, self).post(request, *args, **kwargs)
+
 
 class InventoryActivityStreamList(SubListAPIView):
     model = ActivityStream
