@@ -1582,6 +1582,21 @@ class InventoryHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIVie
         return qs
 
 
+class ConstructedInventoryHostList(HostRelatedSearchMixin, SubListAPIView):
+    model = models.Host
+    serializer_class = serializers.HostSerializer
+    parent_model = models.Inventory
+    relationship = 'hosts'
+    parent_key = 'inventory'
+
+    def get_queryset(self):
+        inventory = self.get_parent_object()
+        qs = getattrd(inventory, self.relationship).all()
+        # Apply queryset optimizations
+        qs = qs.select_related(*HostAccess.select_related).prefetch_related(*HostAccess.prefetch_related)
+        return qs
+
+
 class HostGroupsList(SubListCreateAttachDetachAPIView):
     '''the list of groups a host is directly a member of'''
 

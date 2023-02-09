@@ -27,6 +27,7 @@ from awx.api.views import (
     InventoryScriptView,
     InventoryTreeView,
     InventoryVariableData,
+    ConstructedInventoryHostList,
 )
 
 
@@ -56,6 +57,7 @@ urls = [
 constructed_inventory_urls = [
     re_path(r'^$', ConstructedInventoryList.as_view(), name='constructed_inventory_list'),
     re_path(r'^(?P<pk>[0-9]+)/$', ConstructedInventoryDetail.as_view(), name='constructed_inventory_detail'),
+    re_path(r'^(?P<pk>[0-9]+)/hosts/', ConstructedInventoryHostList.as_view(), name='constructed_inventory_host_list'),
 ]
 
 __all__ = ['urls', 'constructed_inventory_urls']

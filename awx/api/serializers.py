@@ -1702,6 +1702,7 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
         if obj.organization:
             res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk})
         if obj.kind == 'constructed':
+            res['hosts'] = self.reverse('api:constructed_inventory_host_list', kwargs={'pk': obj.pk})
             res['input_inventories'] = self.reverse('api:inventory_input_inventories', kwargs={'pk': obj.pk})
             res['constructed_url'] = self.reverse('api:constructed_inventory_detail', kwargs={'pk': obj.pk})
         return res
