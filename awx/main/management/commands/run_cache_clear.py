@@ -25,8 +25,6 @@ class Command(BaseCommand):
                         body = json.loads(e.payload)
                         logger.info(f"Cache clear request received. Clearing now, payload: {e.payload}")
                         TaskWorker.run_callable(body)
-                    else:
-                        logger.info('run_clear_cache got timeout')
 
         except Exception:
             # Log unanticipated exception in addition to writing to stderr to get timestamps and other metadata
