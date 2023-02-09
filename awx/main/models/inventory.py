@@ -834,6 +834,18 @@ class HostMetric(models.Model):
     def get_absolute_url(self, request=None):
         return reverse('api:host_metric_detail', kwargs={'pk': self.pk}, request=request)
 
+    def soft_delete(self):
+        if not self.deleted:
+            self.deleted_counter = (self.deleted_counter or 0) + 1
+            self.last_deleted = now()
+            self.deleted = True
+            self.save()
+
+    def soft_restore(self):
+        if self.deleted:
+            self.deleted = False
+            self.save()
+
 
 class InventorySourceOptions(BaseModel):
     """

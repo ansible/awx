@@ -1562,6 +1562,11 @@ class HostMetricDetail(RetrieveDestroyAPIView):
     serializer_class = serializers.HostMetricSerializer
     permission_classes = (IsSystemAdminOrAuditor,)
 
+    def delete(self, request, *args, **kwargs):
+        self.get_object().soft_delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class HostList(HostRelatedSearchMixin, ListCreateAPIView):
     always_allow_superuser = False
