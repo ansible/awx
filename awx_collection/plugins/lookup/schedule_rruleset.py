@@ -210,8 +210,7 @@ class LookupModule(LookupBase):
 
     def process_list(self, field_name, rule, valid_list, rule_number):
         return_values = []
-        if isinstance(rule[field_name], list):
-            rule[field_name] = rule[field_name].split(',')
+        rule[field_name] = rule[field_name].split(',')
         for value in rule[field_name]:
             value = value.strip()
             if value not in valid_list:
