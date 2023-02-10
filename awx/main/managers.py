@@ -79,6 +79,11 @@ class HostManager(models.Manager):
         return qs
 
 
+class HostMetricActiveManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(deleted=False)
+
+
 def get_ig_ig_mapping(ig_instance_mapping, instance_ig_mapping):
     # Create IG mapping by union of all groups their instances are members of
     ig_ig_mapping = {}

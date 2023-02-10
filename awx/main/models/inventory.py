@@ -32,7 +32,7 @@ from awx.main.fields import (
     SmartFilterField,
     OrderedManyToManyField,
 )
-from awx.main.managers import HostManager
+from awx.main.managers import HostManager, HostMetricActiveManager
 from awx.main.models.base import BaseModel, CommonModelNameNotUnique, VarsDictProperty, CLOUD_INVENTORY_SOURCES, prevent_search, accepts_json
 from awx.main.models.events import InventoryUpdateEvent, UnpartitionedInventoryUpdateEvent
 from awx.main.models.unified_jobs import UnifiedJob, UnifiedJobTemplate
@@ -830,6 +830,9 @@ class HostMetric(models.Model):
         default=False, help_text=_('Boolean flag saying whether the host is deleted and therefore not counted into the subscription consumption')
     )
     used_in_inventories = models.BigIntegerField(null=True, help_text=_('How many inventories contain this host'))
+
+    objects = models.Manager()
+    active_objects = HostMetricActiveManager()
 
     def get_absolute_url(self, request=None):
         return reverse('api:host_metric_detail', kwargs={'pk': self.pk}, request=request)
