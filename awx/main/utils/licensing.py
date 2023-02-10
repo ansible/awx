@@ -382,8 +382,8 @@ class Licenser(object):
 
         current_instances = Host.objects.active_count()
         license_date = int(attrs.get('license_date', 0) or 0)
-        automated_instances = HostMetric.objects.count()
-        first_host = HostMetric.objects.only('first_automation').order_by('first_automation').first()
+        automated_instances = HostMetric.active_objects.count()
+        first_host = HostMetric.active_objects.only('first_automation').order_by('first_automation').first()
         if first_host:
             automated_since = int(first_host.first_automation.timestamp())
         else:
