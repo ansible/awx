@@ -160,7 +160,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
     status = models.CharField(
         max_length=32,
         choices=ALL_STATUS_CHOICES,
-        default='ok',
+        default='never updated',
         editable=False,
     )
     organization = models.ForeignKey(
