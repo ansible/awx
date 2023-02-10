@@ -1,3 +1,5 @@
+import urllib.parse
+
 import pytest
 
 # AWX
@@ -8,9 +10,11 @@ from awx.main.migrations import _save_password_keys as save_password_keys
 
 # Django
 from django.apps import apps
+from django.urls import resolve
 
 # DRF
 from rest_framework.exceptions import ValidationError
+from rest_framework.test import APIRequestFactory, force_authenticate
 
 
 @pytest.mark.django_db
@@ -154,8 +158,12 @@ def test_edit_playbook(patch, job_template_factory, alice):
 def test_invalid_json_body(patch, job_template_factory, alice, json_body):
     objs = job_template_factory('jt', organization='org1')
     objs.job_template.admin_role.members.add(alice)
-    resp = patch(reverse('api:job_template_detail', kwargs={'pk': objs.job_template.id}), json_body, alice, expect=400)
-    assert resp.data['detail'] == (u'JSON parse error - not a JSON object')
+    url = reverse('api:job_template_detail', kwargs={'pk': objs.job_template.id})
+    request = APIRequestFactory().patch(url, data=json_body, format='json')
+    force_authenticate(request, user=alice)
+    view, view_args, view_kwargs = resolve(urllib.parse.urlparse(url)[2])
+    response = view(request, *view_args, **view_kwargs)
+    assert response.data['detail'] == (u'JSON parse error - not a JSON object')
 
 
 @pytest.mark.django_db
@@ -217,7 +225,7 @@ def test_jt_admin_copy_edit_functional(jt_copy_edit, rando, get, post):
 
     post_data = get_response.data
     post_data['name'] = '%s @ 12:19:47 pm' % post_data['name']
-    post_response = post(reverse('api:job_template_list'), user=rando, data=post_data)
+    post_response = post(reverse('api:job_template_list'), user=rando, data=dict(post_data))
     assert post_response.status_code == 403
 
 
@@ -228,7 +236,7 @@ def test_launch_with_pending_deletion_inventory(get, post, organization_factory,
     jt.inventory.pending_deletion = True
     jt.inventory.save()
 
-    resp = post(reverse('api:job_template_launch', kwargs={'pk': jt.pk}), objs.superusers.admin, expect=400)
+    resp = post(reverse('api:job_template_launch', kwargs={'pk': jt.pk}), user=objs.superusers.admin, expect=400)
     assert resp.data['inventory'] == ['The inventory associated with this Job Template is being deleted.']
 
 
@@ -299,7 +307,7 @@ def test_jt_organization_follows_project(post, patch, admin_user):
     assert data['organization'] == project1.organization_id
     data['project'] = project2.id
     jt = JobTemplate.objects.get(pk=data['id'])
-    r = patch(url=jt.get_absolute_url(), data=data, user=admin_user, expect=200)
+    r = patch(url=jt.get_absolute_url(), data=dict(data), user=admin_user, expect=200)
     assert r.data['organization'] == project2.organization_id
 
 

@@ -44,6 +44,9 @@ from awx.main.models.ad_hoc_commands import AdHocCommand
 from awx.main.models.oauth import OAuth2Application as Application
 from awx.main.models.execution_environments import ExecutionEnvironment
 
+# enforce types
+import type_enforced
+
 __SWAGGER_REQUESTS__ = {}
 
 
@@ -579,11 +582,9 @@ def permissions():
 
 
 def _request(verb):
-    def rf(url, data_or_user=None, user=None, middleware=None, expect=None, **kwargs):
-        if type(data_or_user) is User and user is None:
-            user = data_or_user
-        elif 'data' not in kwargs:
-            kwargs['data'] = data_or_user
+    @type_enforced.Enforcer
+    def rf(url: str, data: [dict, str] = None, user: User = None, expect: int = 0, middleware=None, **kwargs):
+        kwargs['data'] = data
         if 'format' not in kwargs and 'content_type' not in kwargs:
             kwargs['format'] = 'json'
 
@@ -631,6 +632,15 @@ def _request(verb):
             kwargs.get('data'),
         )
         return response
+
+    if verb in ('get', 'options', 'delete'):
+        # demote data to a kwarg because these methods do not usually take data
+        def read_rf(url: str, *args, data: dict = None, **kwargs):
+            if data is None:
+                data = {}
+            return rf(url, data, *args, **kwargs)
+
+        return read_rf
 
     return rf
 

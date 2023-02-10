@@ -94,7 +94,7 @@ def source_model(request):
 @pytest.mark.django_db
 def test_delete_instance_group_jobs(delete, instance_group_jobs_successful, instance_group, admin):
     url = reverse("api:instance_group_detail", kwargs={'pk': instance_group.pk})
-    delete(url, None, admin, expect=204)
+    delete(url, user=admin, expect=204)
 
 
 @pytest.mark.django_db
@@ -103,7 +103,7 @@ def test_delete_instance_group_jobs_running(delete, instance_group_jobs_running,
         return (x['type'], str(x['id']))
 
     url = reverse("api:instance_group_detail", kwargs={'pk': instance_group.pk})
-    response = delete(url, None, admin, expect=409)
+    response = delete(url, user=admin, expect=409)
 
     expect_transformed = [dict(id=j.id, type=j.model_to_str()) for j in instance_group_jobs_running]
     response_sorted = sorted(response.data['active_jobs'], key=sort_keys)
@@ -120,9 +120,9 @@ def test_delete_rename_tower_instance_group_prevented(
     url = reverse("api:instance_group_detail", kwargs={'pk': tower_instance_group.pk})
     super_user = user('bob', True)
 
-    delete(url, None, super_user, expect=403)
+    delete(url, user=super_user, expect=403)
 
-    resp = options(url, None, super_user, expect=200)
+    resp = options(url, user=super_user, expect=200)
     assert len(resp.data['actions'].keys()) == 2
     assert 'DELETE' not in resp.data['actions']
     assert 'GET' in resp.data['actions']

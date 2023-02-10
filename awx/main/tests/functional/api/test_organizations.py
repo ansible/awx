@@ -50,9 +50,9 @@ def test_organization_list_access_tests(options, head, get, admin, alice):
     options(reverse('api:organization_list'), user=alice, expect=200)
     head(reverse('api:organization_list'), user=alice, expect=200)
     get(reverse('api:organization_list'), user=alice, expect=200)
-    options(reverse('api:organization_list'), user=None, expect=401)
-    head(reverse('api:organization_list'), user=None, expect=401)
-    get(reverse('api:organization_list'), user=None, expect=401)
+    options(reverse('api:organization_list'), expect=401)
+    head(reverse('api:organization_list'), expect=401)
+    get(reverse('api:organization_list'), expect=401)
 
 
 @pytest.mark.django_db
@@ -61,7 +61,7 @@ def test_organization_access_tests(organization, get, admin, alice, bob):
     get(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=admin, expect=200)
     get(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=alice, expect=200)
     get(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=bob, expect=403)
-    get(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=None, expect=401)
+    get(reverse('api:organization_detail', kwargs={'pk': organization.id}), expect=401)
 
 
 @pytest.mark.django_db
@@ -201,11 +201,11 @@ def test_update_organization(get, put, organization, alice, bob):
     organization.admin_role.members.add(alice)
     data = get(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=alice, expect=200).data
     data['description'] = 'hi'
-    put(reverse('api:organization_detail', kwargs={'pk': organization.id}), data, user=alice, expect=200)
+    put(reverse('api:organization_detail', kwargs={'pk': organization.id}), data=dict(data), user=alice, expect=200)
     organization.refresh_from_db()
     assert organization.description == 'hi'
     data['description'] = 'bye'
-    put(reverse('api:organization_detail', kwargs={'pk': organization.id}), data, user=bob, expect=403)
+    put(reverse('api:organization_detail', kwargs={'pk': organization.id}), dict(data), user=bob, expect=403)
 
 
 @pytest.mark.django_db
@@ -214,13 +214,14 @@ def test_update_organization_max_hosts(get, put, organization, admin, alice, bob
     data = get(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=admin, expect=200).data
     assert organization.max_hosts == 0
     data['max_hosts'] = 3
-    put(reverse('api:organization_detail', kwargs={'pk': organization.id}), data, user=admin, expect=200)
+    put(reverse('api:organization_detail', kwargs={'pk': organization.id}), data=dict(data), user=admin, expect=200)
     organization.refresh_from_db()
     assert organization.max_hosts == 3
 
     # Organization admins can get the data and can update other fields, but not max_hosts
     organization.admin_role.members.add(alice)
     data = get(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=alice, expect=200).data
+    data = dict(data)
     data['max_hosts'] = 5
     put(reverse('api:organization_detail', kwargs={'pk': organization.id}), data, user=alice, expect=400)
     organization.refresh_from_db()
@@ -251,13 +252,13 @@ def test_delete_organization_xfail1(delete, organization, alice):
 
 @pytest.mark.django_db
 def test_delete_organization_xfail2(delete, organization):
-    delete(reverse('api:organization_detail', kwargs={'pk': organization.id}), user=None, expect=401)
+    delete(reverse('api:organization_detail', kwargs={'pk': organization.id}), expect=401)
 
 
 @pytest.mark.django_db
 def test_organization_delete(delete, admin, organization, organization_jobs_successful):
     url = reverse('api:organization_detail', kwargs={'pk': organization.id})
-    delete(url, None, user=admin, expect=204)
+    delete(url, user=admin, expect=204)
 
 
 @pytest.mark.django_db
@@ -266,7 +267,7 @@ def test_organization_delete_with_active_jobs(delete, admin, organization, organ
         return (x['type'], str(x['id']))
 
     url = reverse('api:organization_detail', kwargs={'pk': organization.id})
-    resp = delete(url, None, user=admin, expect=409)
+    resp = delete(url, user=admin, expect=409)
 
     expect_transformed = [dict(id=j.id, type=j.model_to_str()) for j in organization_jobs_running]
     resp_sorted = sorted(resp.data['active_jobs'], key=sort_keys)

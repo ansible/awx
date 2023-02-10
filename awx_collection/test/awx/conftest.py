@@ -114,7 +114,7 @@ def run_module(request, collection_import):
             # make request
             with transaction.atomic():
                 rf = _request(method.lower())
-                django_response = rf(url, user=request_user, expect=None, **kwargs_copy)
+                django_response = rf(url, user=request_user, **kwargs_copy)
 
             # requests library response object is different from the Django response, but they are the same concept
             # this converts the Django response object into a requests response object for consumption
@@ -253,9 +253,7 @@ def vault_credential(organization):
 def kube_credential():
     ct = CredentialType.defaults['kubernetes_bearer_token']()
     ct.save()
-    return Credential.objects.create(
-        credential_type=ct, name='kube-cred', inputs={'host': 'my.cluster', 'bearer_token': 'my-token', 'verify_ssl': False}
-    )
+    return Credential.objects.create(credential_type=ct, name='kube-cred', inputs={'host': 'my.cluster', 'bearer_token': 'my-token', 'verify_ssl': False})
 
 
 @pytest.fixture

@@ -140,7 +140,7 @@ def test_deprecated_credential_activity_stream(patch, admin_user, machine_creden
     job_template.credentials.add(machine_credential)
     starting_entries = job_template.activitystream_set.count()
     # no-op patch
-    patch(job_template.get_absolute_url(), admin_user, data={'credential': machine_credential.pk}, expect=200)
+    patch(job_template.get_absolute_url(), user=admin_user, data={'credential': machine_credential.pk}, expect=200)
     # no-op should not produce activity stream entries
     assert starting_entries == job_template.activitystream_set.count()
 
@@ -157,7 +157,7 @@ def test_multi_vault_preserved_on_put(get, put, admin_user, job_template, vault_
     )
     job_template.credentials.add(vault_credential, vault2)
     assert job_template.credentials.count() == 2  # sanity check
-    r = get(job_template.get_absolute_url(), admin_user, expect=200)
+    r = get(job_template.get_absolute_url(), user=admin_user, expect=200)
     # should be a no-op PUT request
-    put(job_template.get_absolute_url(), admin_user, data=r.data, expect=200)
+    put(job_template.get_absolute_url(), user=admin_user, data=dict(r.data), expect=200)
     assert job_template.credentials.count() == 2

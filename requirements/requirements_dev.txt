@@ -5,6 +5,7 @@ django-rest-swagger
 ipython>=7.31.1 # https://github.com/ansible/awx/security/dependabot/30
 unittest2
 black
+type-enforced
 pytest!=7.0.0
 pytest-cov
 pytest-django

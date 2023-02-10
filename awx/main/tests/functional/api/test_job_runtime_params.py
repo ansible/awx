@@ -443,7 +443,7 @@ def test_job_launch_fails_with_missing_vault_password(machine_credential, vault_
     deploy_jobtemplate.execute_role.members.add(rando)
     deploy_jobtemplate.save()
 
-    response = post(reverse('api:job_template_launch', kwargs={'pk': deploy_jobtemplate.pk}), rando, expect=400)
+    response = post(reverse('api:job_template_launch', kwargs={'pk': deploy_jobtemplate.pk}), user=rando, expect=400)
     assert response.data['passwords_needed_to_start'] == ['vault_password']
 
 
@@ -547,7 +547,7 @@ def test_job_launch_fails_with_missing_multivault_password(machine_credential, v
         [cred['passwords_needed'] for cred in resp.data['defaults']['credentials'] if cred['credential_type'] == vault_credential.credential_type_id], []
     ) == ['vault_password.abc', 'vault_password.xyz']
 
-    resp = post(url, rando, expect=400)
+    resp = post(url, user=rando, expect=400)
     assert resp.data['passwords_needed_to_start'] == ['vault_password.abc', 'vault_password.xyz']
 
     with mock.patch.object(Job, 'signal_start') as signal_start:
@@ -563,7 +563,7 @@ def test_job_launch_fails_with_missing_ssh_password(machine_credential, deploy_j
     deploy_jobtemplate.execute_role.members.add(rando)
     deploy_jobtemplate.save()
 
-    response = post(reverse('api:job_template_launch', kwargs={'pk': deploy_jobtemplate.pk}), rando, expect=400)
+    response = post(reverse('api:job_template_launch', kwargs={'pk': deploy_jobtemplate.pk}), user=rando, expect=400)
     assert response.data['passwords_needed_to_start'] == ['ssh_password']
 
 
@@ -578,7 +578,7 @@ def test_job_launch_fails_with_missing_vault_and_ssh_password(machine_credential
     deploy_jobtemplate.execute_role.members.add(rando)
     deploy_jobtemplate.save()
 
-    response = post(reverse('api:job_template_launch', kwargs={'pk': deploy_jobtemplate.pk}), rando, expect=400)
+    response = post(reverse('api:job_template_launch', kwargs={'pk': deploy_jobtemplate.pk}), user=rando, expect=400)
     assert sorted(response.data['passwords_needed_to_start']) == ['ssh_password', 'vault_password']
 
 

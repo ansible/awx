@@ -90,7 +90,7 @@ def test_job_redaction_disabled(get, format, content_type, negative_test_cases, 
 @pytest.mark.django_db
 def test_options_fields_choices(instance, options, user):
     url = reverse('api:unified_job_list')
-    response = options(url, None, user('admin', True))
+    response = options(url, user('admin', True))
 
     assert 'launch_type' in response.data['actions']['GET']
     assert 'choice' == response.data['actions']['GET']['launch_type']['type']
@@ -104,7 +104,7 @@ def test_options_fields_choices(instance, options, user):
 def test_delete_job_in_active_state(job_factory, delete, admin, status):
     j = job_factory(initial_state=status)
     url = reverse('api:job_detail', kwargs={'pk': j.pk})
-    delete(url, None, admin, expect=403)
+    delete(url, admin, expect=403)
 
 
 @pytest.mark.parametrize("status", list(TEST_STATES))
@@ -113,7 +113,7 @@ def test_delete_project_update_in_active_state(project, delete, admin, status):
     p = ProjectUpdate(project=project, status=status)
     p.save()
     url = reverse('api:project_update_detail', kwargs={'pk': p.pk})
-    delete(url, None, admin, expect=403)
+    delete(url, user=admin, expect=403)
 
 
 @pytest.mark.parametrize("status", list(TEST_STATES))
@@ -121,7 +121,7 @@ def test_delete_project_update_in_active_state(project, delete, admin, status):
 def test_delete_inventory_update_in_active_state(inventory_source, delete, admin, status):
     i = InventoryUpdate.objects.create(inventory_source=inventory_source, status=status, source=inventory_source.source)
     url = reverse('api:inventory_update_detail', kwargs={'pk': i.pk})
-    delete(url, None, admin, expect=403)
+    delete(url, user=admin, expect=403)
 
 
 @pytest.mark.parametrize("status", list(TEST_STATES))
@@ -129,7 +129,7 @@ def test_delete_inventory_update_in_active_state(inventory_source, delete, admin
 def test_delete_workflow_job_in_active_state(workflow_job_factory, delete, admin, status):
     wj = workflow_job_factory(initial_state=status)
     url = reverse('api:workflow_job_detail', kwargs={'pk': wj.pk})
-    delete(url, None, admin, expect=403)
+    delete(url, user=admin, expect=403)
 
 
 @pytest.mark.parametrize("status", list(TEST_STATES))
@@ -137,7 +137,7 @@ def test_delete_workflow_job_in_active_state(workflow_job_factory, delete, admin
 def test_delete_system_job_in_active_state(system_job_factory, delete, admin, status):
     sys_j = system_job_factory(initial_state=status)
     url = reverse('api:system_job_detail', kwargs={'pk': sys_j.pk})
-    delete(url, None, admin, expect=403)
+    delete(url, user=admin, expect=403)
 
 
 @pytest.mark.parametrize("status", list(TEST_STATES))
@@ -145,4 +145,4 @@ def test_delete_system_job_in_active_state(system_job_factory, delete, admin, st
 def test_delete_ad_hoc_command_in_active_state(ad_hoc_command_factory, delete, admin, status):
     adhoc = ad_hoc_command_factory(initial_state=status)
     url = reverse('api:ad_hoc_command_detail', kwargs={'pk': adhoc.pk})
-    delete(url, None, admin, expect=403)
+    delete(url, user=admin, expect=403)

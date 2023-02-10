@@ -226,7 +226,6 @@ def test_completeness(collection_import, request, admin_user, job_template, exec
     endpoint_response = _request('get')(
         url='/api/v2/',
         user=admin_user,
-        expect=None,
     )
     for endpoint in endpoint_response.data.keys():
         # Module names are singular and endpoints are plural so we need to convert to singular
@@ -253,7 +252,6 @@ def test_completeness(collection_import, request, admin_user, job_template, exec
         options_response = _request('options')(
             url=endpoint_url,
             user=admin_user,
-            expect=None,
         )
         if 'POST' in options_response.data.get('actions', {}):
             option_comparison[module_name]['api_options'] = options_response.data.get('actions').get('POST')

@@ -147,7 +147,7 @@ def test_empty_ldap_dn(get, put, patch, delete, admin, setting):
 def test_radius_settings(get, put, patch, delete, admin, settings):
     url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'radius'})
     response = get(url, user=admin, expect=200)
-    put(url, user=admin, data=response.data, expect=200)
+    put(url, user=admin, data=dict(response.data), expect=200)
     # Set secret via the API.
     patch(url, user=admin, data={'RADIUS_SECRET': 'mysecret'}, expect=200)
     response = get(url, user=admin, expect=200)
@@ -179,7 +179,7 @@ def test_radius_settings(get, put, patch, delete, admin, settings):
 def test_tacacsplus_settings(get, put, patch, admin):
     url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'tacacsplus'})
     response = get(url, user=admin, expect=200)
-    put(url, user=admin, data=response.data, expect=200)
+    put(url, user=admin, data=dict(response.data), expect=200)
     patch(url, user=admin, data={'TACACSPLUS_SECRET': 'mysecret'}, expect=200)
     patch(url, user=admin, data={'TACACSPLUS_SECRET': ''}, expect=200)
     patch(url, user=admin, data={'TACACSPLUS_HOST': 'localhost'}, expect=400)
@@ -196,7 +196,7 @@ def test_ui_settings(get, put, patch, delete, admin):
     response = get(url, user=admin, expect=200)
     assert not response.data['CUSTOM_LOGO']
     assert not response.data['CUSTOM_LOGIN_INFO']
-    put(url, user=admin, data=response.data, expect=200)
+    put(url, user=admin, data=dict(response.data), expect=200)
     patch(url, user=admin, data={'CUSTOM_LOGO': 'data:text/plain;base64,'}, expect=400)
     patch(url, user=admin, data={'CUSTOM_LOGO': 'data:image/png;base64,00'}, expect=400)
     patch(url, user=admin, data={'CUSTOM_LOGO': TEST_GIF_LOGO}, expect=200)
