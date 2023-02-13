@@ -38,6 +38,7 @@ from awx.main.models import (
     Group,
     Host,
     HostMetric,
+    HostMetricSummaryMonthly,
     Instance,
     InstanceGroup,
     Inventory,
@@ -910,6 +911,33 @@ class HostMetricAccess(BaseAccess):
 
     def can_delete(self, obj):
         return bool(self.user.is_superuser or (obj and obj.user == self.user))
+
+
+class HostMetricSummaryMonthlyAccess(BaseAccess):
+    """
+    - I can see host metrics when I'm a super user or system auditor.
+    """
+
+    model = HostMetricSummaryMonthly
+
+    def get_queryset(self):
+        if self.user.is_superuser or self.user.is_system_auditor:
+            qs = self.model.objects.all()
+        else:
+            qs = self.filtered_queryset()
+        return qs
+
+    def can_read(self, obj):
+        return bool(self.user.is_superuser or self.user.is_system_auditor or (obj and obj.user == self.user))
+
+    def can_add(self, data):
+        return False  # There is no API endpoint to POST new settings.
+
+    def can_change(self, obj, data):
+        return False
+
+    def can_delete(self, obj):
+        return False
 
 
 class InventoryAccess(BaseAccess):

@@ -30,6 +30,7 @@ from awx.api.views import (
     OAuth2TokenList,
     ApplicationOAuth2TokenList,
     OAuth2ApplicationDetail,
+    HostMetricSummaryMonthlyList,
 )
 
 from awx.api.views.bulk import (
@@ -120,6 +121,7 @@ v2_urls = [
     re_path(r'^inventories/', include(inventory_urls)),
     re_path(r'^hosts/', include(host_urls)),
     re_path(r'^host_metrics/', include(host_metric_urls)),
+    re_path(r'^host_metric_summary_monthly/$', HostMetricSummaryMonthlyList.as_view(), name='host_metric_summary_monthly_list'),
     re_path(r'^groups/', include(group_urls)),
     re_path(r'^inventory_sources/', include(inventory_source_urls)),
     re_path(r'^inventory_updates/', include(inventory_update_urls)),
