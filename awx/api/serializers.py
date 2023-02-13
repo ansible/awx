@@ -4732,7 +4732,6 @@ class BulkJobLaunchSerializer(BaseSerializer):
         )
         node_deferred_attrs = {}
         for node_attrs in job_node_data:
-
             # we need to add any m2m objects after creation via the through model
             node_m2m_objects[node_attrs['identifier']] = {}
             node_deferred_attrs[node_attrs['identifier']] = {}
