@@ -56,6 +56,7 @@ from awx.main.models import (
     Group,
     Host,
     HostMetric,
+    HostMetricSummaryMonthly,
     Instance,
     InstanceGroup,
     InstanceLink,
@@ -5020,6 +5021,13 @@ class HostMetricSerializer(BaseSerializer):
             "deleted",
             "used_in_inventories",
         )
+
+
+class HostMetricSummaryMonthlySerializer(BaseSerializer):
+    class Meta:
+        model = HostMetricSummaryMonthly
+        read_only_fields = ("id", "date", "license_consumed", "license_capacity", "hosts_added", "hosts_deleted", "indirectly_managed_hosts")
+        fields = read_only_fields
 
 
 class InstanceGroupSerializer(BaseSerializer):

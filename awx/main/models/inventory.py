@@ -53,7 +53,7 @@ from awx.main.utils.execution_environments import to_container_path
 from awx.main.utils.licensing import server_product_name
 
 
-__all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate', 'SmartInventoryMembership']
+__all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate', 'SmartInventoryMembership', 'HostMetric', 'HostMetricSummaryMonthly']
 
 logger = logging.getLogger('awx.main.models.inventory')
 
@@ -848,6 +848,19 @@ class HostMetric(models.Model):
         if self.deleted:
             self.deleted = False
             self.save()
+
+
+class HostMetricSummaryMonthly(models.Model):
+    """
+    HostMetric summaries computed by scheduled task <TODO> monthly
+    """
+
+    date = models.DateField(unique=True)
+    license_consumed = models.BigIntegerField(default=0, help_text=_("How much unique hosts are consumed from the license"))
+    license_capacity = models.BigIntegerField(default=0, help_text=_("'License capacity as max. number of unique hosts"))
+    hosts_added = models.BigIntegerField(default=0, help_text=_("How many hosts were added in the associated month, consuming more license capacity"))
+    hosts_deleted = models.BigIntegerField(default=0, help_text=_("How many hosts were deleted in the associated month, freeing the license capacity"))
+    indirectly_managed_hosts = models.BigIntegerField(default=0, help_text=("Manually entered number indirectly managed hosts for a certain month"))
 
 
 class InventorySourceOptions(BaseModel):
