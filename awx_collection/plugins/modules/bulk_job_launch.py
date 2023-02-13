@@ -36,11 +36,11 @@ options:
         - If not provided, will use the organization the user is in.
         - Required if the user belongs to more than one organization.
         - Affects who can see the resulting bulk job.
-      type: str
+      type: int
     inventory:
       description:
         - Inventory to use for the jobs ran within the bulk job, only used if prompt for inventory is set.
-      type: str
+      type: int
     limit:
       description:
         - Limit to use for the bulk job.
@@ -89,7 +89,6 @@ job_info:
     type: dict
 '''
 
-
 EXAMPLES = '''
 - name: Launch bulk jobs
   bulk_job_launch:
@@ -118,13 +117,14 @@ EXAMPLES = '''
 from ..module_utils.controller_api import ControllerAPIModule
 import json
 
+
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         jobs=dict(required=True, type='list'),
         name=dict(),
-        organization=dict(),
-        inventory=dict(),
+        organization=dict(type='int'),
+        inventory=dict(type='int'),
         limit=dict(),
         scm_branch=dict(),
         extra_vars=dict(type='dict'),
@@ -139,21 +139,21 @@ def main():
     module = ControllerAPIModule(argument_spec=argument_spec)
 
     post_data_names = (
-      'jobs',
-      'name',
-      'organization',
-      'inventory',
-      'limit',
-      'scm_branch',
-      'extra_vars',
-      'job_tags',
-      'skip_tags',
+        'jobs',
+        'name',
+        'organization',
+        'inventory',
+        'limit',
+        'scm_branch',
+        'extra_vars',
+        'job_tags',
+        'skip_tags',
     )
     post_data = {}
     for p in post_data_names:
-      val = module.params.get(p)
-      if val:
-        post_data[p] = val
+        val = module.params.get(p)
+        if val:
+            post_data[p] = val
 
     # Extract our parameters
     wait = module.params.get('wait')
@@ -177,7 +177,8 @@ def main():
         module.exit_json(**module.json_output)
 
     # Invoke wait function
-    module.wait_on_url(url=result['json']['url'], object_name=name, object_type='Bulk Job Launch', timeout=timeout, interval=interval)
+    module.wait_on_url(url=result['json']['url'], object_name=name, object_type='Bulk Job Launch', timeout=timeout,
+                       interval=interval)
 
     module.exit_json(**module.json_output)
 

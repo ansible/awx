@@ -22,15 +22,14 @@ options:
       description:
         - List of hosts to add to inventory.
       required: True
-      type: str
+      type: list
     inventory:
       description:
         - Inventory the hosts should be made a member of.
       required: True
-      type: str
+      type: int
 extends_documentation_fragment: awx.awx.auth
 '''
-
 
 EXAMPLES = '''
 - name: Bulk host create
@@ -44,11 +43,12 @@ EXAMPLES = '''
 from ..module_utils.controller_api import ControllerAPIModule
 import json
 
+
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         hosts=dict(required=True, type='list'),
-        inventory=dict(),
+        inventory=dict(required=True, type='int'),
     )
 
     # Create a module for ourselves
