@@ -1258,7 +1258,7 @@ register(
     field_class=fields.BooleanField,
     default=True,
     label=_('Verify OIDC Provider Certificate'),
-    help_text=_('Verify the OIDV provider ssl certificate.'),
+    help_text=_('Verify the OIDC provider ssl certificate.'),
     category=_('Generic OIDC'),
     category_slug='oidc',
 )
