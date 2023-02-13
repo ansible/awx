@@ -385,6 +385,10 @@ class FieldLookupBackend(BaseFilterBackend):
             raise ParseError(json.dumps(e.messages, ensure_ascii=False))
 
 
+class HostMetricSummaryMonthlyFieldLookupBackend(FieldLookupBackend):
+    RESERVED_NAMES = ('page', 'page_size', 'format', 'order', 'order_by', 'search', 'type', 'past_months', 'count_disabled', 'no_truncate', 'limit')
+
+
 class OrderByBackend(BaseFilterBackend):
     """
     Filter to apply ordering based on query string parameters.

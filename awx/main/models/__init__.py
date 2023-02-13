@@ -16,6 +16,7 @@ from awx.main.models.inventory import (  # noqa
     Group,
     Host,
     HostMetric,
+    HostMetricSummaryMonthly,
     Inventory,
     InventorySource,
     InventoryUpdate,

@@ -3,6 +3,7 @@
 
 # Python
 import dateutil
+import datetime
 import functools
 import html
 import itertools
@@ -16,7 +17,6 @@ from base64 import b64encode
 from collections import OrderedDict
 
 from urllib3.exceptions import ConnectTimeoutError
-
 
 # Django
 from django.conf import settings
@@ -122,6 +122,7 @@ from awx.api.views.mixin import (
     UnifiedJobDeletionMixin,
     NoTruncateMixin,
 )
+from awx.api.filters import HostMetricSummaryMonthlyFieldLookupBackend
 from awx.api.pagination import UnifiedJobEventPagination
 from awx.main.utils import set_environ
 
@@ -1566,6 +1567,37 @@ class HostMetricDetail(RetrieveDestroyAPIView):
         self.get_object().soft_delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class HostMetricSummaryMonthlyList(ListAPIView):
+    name = _("Host Metrics Summary Monthly")
+    model = models.HostMetricSummaryMonthly
+    permission_classes = (IsSystemAdminOrAuditor,)
+    serializer_class = serializers.HostMetricSummaryMonthlySerializer
+    search_fields = ('date',)
+    filter_backends = [HostMetricSummaryMonthlyFieldLookupBackend]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        past_months = self.request.query_params.get('past_months', None)
+        date_from = self._get_date_from(past_months)
+
+        queryset = queryset.filter(date__gte=date_from)
+        return queryset
+
+    @staticmethod
+    def _get_date_from(past_months, default=12, maximum=36):
+        try:
+            months_ago = int(past_months or default)
+        except ValueError:
+            months_ago = default
+        months_ago = min(months_ago, maximum)
+        months_ago = max(months_ago, 1)
+
+        date_from = datetime.date.today() - dateutil.relativedelta.relativedelta(months=months_ago)
+        # Set to beginning of the month
+        date_from = date_from.replace(day=1).isoformat()
+        return date_from
 
 
 class HostList(HostRelatedSearchMixin, ListCreateAPIView):
