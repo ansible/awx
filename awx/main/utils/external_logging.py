@@ -6,6 +6,7 @@ import urllib.parse as urlparse
 from django.conf import settings
 
 from awx.main.utils.reload import supervisor_service_command
+from awx.main.dispatch.publish import task
 from awx.main.dispatch import pg_bus_conn
 
 
@@ -115,6 +116,7 @@ def construct_rsyslog_conf_template(settings=settings):
     return tmpl
 
 
+@task(queue='rsyslog_configurer')
 def reconfigure_rsyslog():
     tmpl = construct_rsyslog_conf_template()
     # Write config to a temp file then move it to preserve atomicity
