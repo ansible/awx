@@ -25,8 +25,11 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
+      - name: Echo the varaible
+        run: echo Token should be Z${{ secrets.SONAR_TOKEN }}Z
+
       - name: Run tests and generate coverage report
-        run: AWX_DOCKER_CMD='/start_tests.sh test_coverage' make github_ci_runner
+        run: AWX_DOCKER_CMD='/start_tests.sh' make github_ci_runner
 
       - name: SonarCloud Scan
         # We want this to run even if the tests fail
