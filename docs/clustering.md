@@ -1,92 +1,169 @@
-## AWX Clustering/HA Overview
+# AWX Clustering Overview
 
-Prior to 3.1, the Ansible Tower HA solution was not a true high-availability system. This system has been entirely rewritten in 3.1 with a focus towards a proper highly-available clustered system. This has been extended further in 3.2 to allow grouping of clustered instances into different pools/queues.
-
-* Each instance should be able to act as an entry point for UI and API Access.
-  This should enable AWX administrators to use load balancers in front of as many instances as they wish and maintain good data visibility.
-* Each instance should be able to join the AWX cluster and expand its ability to execute jobs.
-* Provisioning new instance should be as simple as updating the `inventory` file and re-running the setup playbook.
-* Instances can be de-provisioned with a simple management command.
-* Instances can be grouped into one or more Instance Groups to share resources for topical purposes.
-* These instance groups should be assignable to certain resources:
-  * Organizations
-  * Inventories
-  * Job Templates
-
-  ...such that execution of jobs under those resources will favor particular queues.
-
-It's important to point out a few existing things:
-
-* PostgreSQL is still a standalone instance and is not clustered. Replica configuration will not be managed. If the user configures standby replicas, database failover will also not be managed.
-* All instances should be reachable from all other instances and they should be able to reach the database. It's also important for the hosts to have a stable address and/or hostname (depending on how you configure the AWX host).
-* Existing old-style HA deployments will be transitioned automatically to the new HA system during the upgrade process to 3.1.
-* Manual projects will need to be synced to all instances by the customer.
-
-Ansible Tower 3.3 adds support for container-based clusters using Openshift or Kubernetes.
-
-
-## Important Changes
-
-* There is no concept of primary/secondary in the new AWX system. *All* systems are primary.
-* The `inventory` file for AWX deployments should be saved/persisted. If new instances are to be provisioned, the passwords and configuration options as well as host names will need to be available to the installer.
-
-
-## Concepts and Configuration
-
-### Installation and the Inventory File
-The current standalone instance configuration doesn't change for a 3.1+ deployment. The inventory file does change in some important ways:
-
-* Since there is no primary/secondary configuration, those inventory groups go away and are replaced with a single inventory group `tower`. The customer may *optionally* define other groups and group instances in those groups. These groups should be prefixed with `instance_group_`. One instance *must* be present in the `tower` group. Technically `tower` is a group like any other `instance_group_` group, but it must always be present and if a specific group is not associated with a specific resource, then job execution will always fall back to the `tower` group:
+AWX supports multi-node configurations. Here is an example configuration with two control plane nodes.
 
 ```
-[tower]
-hostA
-hostB
-hostC
+       ┌───────────────────────────┐
+       │      Load-balancer        │
+       │   (configured separately) │
+       └───┬───────────────────┬───┘
+           │   round robin API │
+           ▼       requests    ▼
 
-[instance_group_east]
-hostB
-hostC
-
-[instance_group_west]
-hostC
-hostD
+  AWX Control               AWX Control
+    Node 1                    Node 2
+┌──────────────┐           ┌──────────────┐
+│              │           │              │
+│ ┌──────────┐ │           │ ┌──────────┐ │
+│ │ awx-task │ │           │ │ awx-task │ │
+│ ├──────────┤ │           │ ├──────────┤ │
+│ │ awx-ee   │ │           │ │ awx-ee   │ │
+│ ├──────────┤ │           │ ├──────────┤ │
+│ │ awx-web  │ │           │ │ awx-web  │ │
+│ ├──────────┤ │           │ ├──────────┤ │
+│ │ redis    │ │           │ │ redis    │ │
+│ └──────────┘ │           │ └──────────┘ │
+│              │           │              │
+└──────────────┴─────┬─────┴──────────────┘
+                     │
+                     │
+               ┌─────▼─────┐
+               │ Postgres  │
+               │ database  │
+               └───────────┘
 ```
 
-The `database` group remains in order to specify an external Postgres. If the database host is provisioned separately, this group should be empty.
+There are two main deployment types, virtual machines (VM) or K8S. Ansible Automation Platform (AAP) can be installed via VM or K8S deployments. The upstream AWX project can only be installed via a K8S deployment. Either deployment type supports cluster scaling.
+- Control plane nodes run a number of background services that are managed by supervisord
+  - dispatcher
+  - wsbroadcast
+  - callback receiver
+  - receptor (*managed under systemd)
+  - redis (*managed under systemd)
+  - uwsgi
+  - daphne
+  - rsyslog
+- For K8S deployments, these background processes are containerized
+  - `awx-ee`: receptor
+  - `awx-web`: uwsgi, daphne, wsbroadcast, rsyslog
+  - `awx-task`: dispatcher, callback receiver
+  - `redis`: redis
+- Each control node is monolithic and contains all the necessary components for handling API requests and running jobs.
+- A load balancer in front of the cluster can handle incoming web requests and send them control nodes based on load balancing rules (e.g. round robin)
+- All control nodes on the cluster interact single, shared Postgres database
+- AWX is configured in such a way that if any of these services or their components fail, then all services are restarted. If these fail sufficiently (often in a short span of time), then the entire instance will be placed offline in an automated fashion in order to allow remediation without causing unexpected behavior.
+
+## Scaling the cluster
+
+For AAP deployments, scaling up involves modifying `inventory`and re-running setup.sh
+For K8s deployments, scaling up is handled by changing the number of replicas in the AWX replica set.
+
+After scaling up, the new control plane node is registered in the database as a new `Instance`.
+
+Instance types:
+`hybrid` (AAP only) - control plane node that can also run jobs
+`control` - control plane node that cannot run jobs
+`execution` - not a control node, this instance can only run jobs
+`hop` (AAP only) - not a control node, this instance serves to route traffic from control nodes to execution nodes
+
+Note, hybrid (AAP only) and control nodes are identical other than the `type` indicated in the database. `control`-type nodes still have all the machinery to run jobs, but are disabled through the API. The reason is that users may wish to provision control nodes with less hardware resources, and have a separate fleet of nodes to run jobs (i.e. execution nodes).
+
+## Communication between nodes
+
+Each control node is connected to the other nodes via the following
+
+| Node           | Connection Type      | Purpose                            |
+|----------------|----------------------|------------------------------------|
+| control node   | websockets, receptor | sending websockets, heartbeat      |
+| execution      | receptor             | submitting jobs, heartbeat         |
+| hop (AAP only) | receptor             | routing traffic to execution nodes |
+| postgres       | postgres TCP/IP      | read and write queries, pg notify  |
+
+
+I.e. control nodes are connected to other control nodes via websockets and receptor.
+
+### Receptor
+
+Receptor provides an overlay network that connects control, execution, and hop nodes together.
+
+Receptor is used for establishing periodic heartbeats and submitting jobs to execution nodes.
+
+The connected nodes form a mesh. It works by connecting nodes via persistent TCP/IP connections. Importantly, once a node is on the mesh, it can be accessed from all other nodes on the mesh, even if not directly connected via TCP.
+
+node A <---TCP---> node B <---TCP---> node C
+
+node A is reachable from node C (and vice versa). Receptor does this by routing traffic through the receptor process running on node B.
+
+
+### Websockets
+
+Each control node establishes a websocket connection to each other control node. We call this the websocket backplane.
 
 ```
-[tower]
-hostA
-hostB
-hostC
-
-[database]
-hostDB
+┌────────┐
+│        │
+│browser │
+│        │
+└───┬────┘
+    │ websocket connection
+    │
+┌───▼─────┐            ┌─────────┐
+│ control │            │ control │
+│ node A  │◄───────────┤ node B  │
+└─────────┘  websocket └─────────┘
+             connection
+             (job event)
 ```
 
+The AWX UI will open websocket connections to the server to stream certain data in real time. For example, the job events on the Job Detail Page is streaming over a websocket connection and rendered in real time. The browser has no way of choosing which control node it connects to, instead the connection is handled by the load balancer, the same way http API requests are handled.
 
-Recommendations and constraints:
- - Do not create a group named `instance_group_tower`.
- - Do not name any instance the same as a group name.
+Therefore, we could have a situation where the browser is connected control node A, but is requesting job events that are emitted from control node B. As such, control node B will send job events over a separate, persistent websocket connection to control node A. Once control node A has received that message, it can then propagate it to the browser.
 
-### Provisioning and Deprovisioning Instances and Groups
+One consequence of this is that control node B must *broadcast* this message to all other control nodes, because it doesn't know which node the browser is connected to.
 
-* **Provisioning** - Provisioning instances after installation is supported by updating the `inventory` file and re-running the setup playbook. It's important that this file contains all passwords and related information used when installing the cluster; if this is not the case, other instances may be reconfigured (this can be done intentionally).
+The websocket backplane is handled by the wsbroadcast service that is part of the application startup.
 
-* **Deprovisioning** - AWX does not automatically deprovision instances since it cannot distinguish between an instance that was taken offline intentionally or due to failure.
 
-  Starting with AWX version 19.3.0, deprovisioning an instance results in one or more Receptor configurations needing to be updated across one or more nodes, which therefore cannot be done via a manual process; the Automation Mesh Installer needs to deprovision the nodes.
+### Postgres
 
-  Adding to and removing from the mesh does not require that every node is listed in the inventory file; in other words, the absence of a node from the inventory file _does not_ indicate that a node should be removed. Instead, a `hostvar` of `node_state: deprovision` conveys to the mesh installer that the node should be deprovisioned.
+AWX is a Django application and uses the psycopg2 library to establish connections to the Postgres database.
+Only control nodes need direct access to the database.
 
-* **Removing/Deprovisioning Instance Groups** - AWX does not automatically de-provision or remove instance groups, even though re-provisioning will often cause these to be unused. They may still show up in API endpoints and stats monitoring. These groups can be removed with the following command:
+Importantly AWX relies on the Postgres notify system for inter-process communication. The dispatcher system spawns separate processes/threads that run in parallel. For example, it runs the task manager periodically, and the task manager needs to be able to communicate with the main dispatcher thread. It does this via `pg_notify`.
 
-```
-$ awx-manage unregister_queue --queuename=<name>
-```
+## Node health
 
-### Configuring Instances and Instance Groups from the API
+Node health is determined by the `cluster_node_heartbeat`. This is a periodic task that runs on each control node.
+
+1. Get a list of instances registered to the database.
+2. `inspect_execution_nodes` looks at each execution node
+  a. get a DB advisory lock so that only a single control plane node runs this inspection at given time.
+  b. set `last_seen` based on Receptor's own heartbeat system
+    - Each node on the Receptor mesh sends advertisements out to other nodes. The `Time` field in this payload can be used to set `last_seen`
+  c. use `receptorctl status` to gather node information advertised on the Receptor mesh
+  d. run `execution_node_health_check`
+    - This is an async task submitted to the dispatcher and attempts to run `ansible-runner --worker-info` against that node
+    - This command will return important information about the node's hardware resources like CPU cores, total memory, and ansible-runner version
+    - This information will be used to calculate capacity for that instance
+3. Determine if other nodes are lost based the `last_seen` value determined in step 2
+  a. `grace_period = settings.CLUSTER_NODE_HEARTBEAT_PERIOD * settings.CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE`
+  b. if `last_seen` is before this grace period, mark instance as lost
+4. Determine if *this* node is lost and run `local_health_check`
+  a. call `get_cpu_count` and `get_mem_in_bytes` directly from ansible-runner, which is what `ansible-runner --worker-info` calls under the hood
+5. If *this* instance was not found in the database, register it
+6. Compare *this* node's ansible-runner version with that of other instances
+  a. if this version is older, call `stop_local_services` which shuts down itself
+7. For other instances marked as lost (step 3)
+  a. reap running, pending, and waiting jobs on that instance (mark them as failed)
+  b. delete instance from DB instance list
+8. `cluster_node_heartbeat` is called from the dispatcher, and the dispatcher parent process passes `worker_tasks` data to this method
+  a. reap local jobs that are not active (that is, no dispatcher worker is actively processing it)
+
+## Instance groups
+
+As mentioned, control and execution nodes are registered in the database as instances. These instances can be groups into instance groups via the API.
+
+## Configuring Instances and Instance Groups from the API
 
 Instance Groups can be created by posting to `/api/v2/instance_groups` as a System Administrator.
 
@@ -106,17 +183,15 @@ every new Instance that comes online.
 
 Instance Group Policies are controlled by three optional fields on an `Instance Group`:
 
-* `policy_instance_percentage`: This is a number between 0 - 100. It guarantees that this percentage of active AWX instances will be added to this `Instance Group`. As new instances come online, if the number of Instances in this group relative to the total number of instances is fewer than the given percentage, then new ones will be added until the percentage condition is satisfied.
-* `policy_instance_minimum`: This policy attempts to keep at least this many `Instances` in the `Instance Group`. If the number of available instances is lower than this minimum, then all `Instances` will be placed in this `Instance Group`.
-* `policy_instance_list`: This is a fixed list of `Instance` names to always include in this `Instance Group`.
+- `policy_instance_percentage`: This is a number between 0 - 100. It guarantees that this percentage of active AWX instances will be added to this `Instance Group`. As new instances come online, if the number of Instances in this group relative to the total number of instances is fewer than the given percentage, then new ones will be added until the percentage condition is satisfied.
+- `policy_instance_minimum`: This policy attempts to keep at least this many `Instances` in the `Instance Group`. If the number of available instances is lower than this minimum, then all `Instances` will be placed in this `Instance Group`.
+- `policy_instance_list`: This is a fixed list of `Instance` names to always include in this `Instance Group`.
 
-> NOTES
+- `Instances` that are assigned directly to `Instance Groups` by posting to `/api/v2/instance_groups/x/instances` or `/api/v2/instances/x/instance_groups` are automatically added to the `policy_instance_list`. This means they are subject to the normal caveats for `policy_instance_list` and must be manually managed.
 
-* `Instances` that are assigned directly to `Instance Groups` by posting to `/api/v2/instance_groups/x/instances` or `/api/v2/instances/x/instance_groups` are automatically added to the `policy_instance_list`. This means they are subject to the normal caveats for `policy_instance_list` and must be manually managed.
+- `policy_instance_percentage` and `policy_instance_minimum` work together. For example, if you have a `policy_instance_percentage` of 50% and a `policy_instance_minimum` of 2 and you start 6 `Instances`, 3 of them would be assigned to the `Instance Group`. If you reduce the number of `Instances` to 2, then both of them would be assigned to the `Instance Group` to satisfy `policy_instance_minimum`. In this way, you can set a lower bound on the amount of available resources.
 
-* `policy_instance_percentage` and `policy_instance_minimum` work together. For example, if you have a `policy_instance_percentage` of 50% and a `policy_instance_minimum` of 2 and you start 6 `Instances`, 3 of them would be assigned to the `Instance Group`. If you reduce the number of `Instances` to 2, then both of them would be assigned to the `Instance Group` to satisfy `policy_instance_minimum`. In this way, you can set a lower bound on the amount of available resources.
-
-* Policies don't actively prevent `Instances` from being associated with multiple `Instance Groups` but this can effectively be achieved by making the percentages sum to 100. If you have 4 `Instance Groups`, assign each a percentage value of 25 and the `Instances` will be distributed among them with no overlap.
+- Policies don't actively prevent `Instances` from being associated with multiple `Instance Groups` but this can effectively be achieved by making the percentages sum to 100. If you have 4 `Instance Groups`, assign each a percentage value of 25 and the `Instances` will be distributed among them with no overlap.
 
 
 ### Manually Pinning Instances to Specific Groups
@@ -143,27 +218,14 @@ HTTP PATCH /api/v2/instances/X/
 
 ### Status and Monitoring
 
-AWX itself reports as much status as it can via the API at `/api/v2/ping` in order to provide validation of the health of the Cluster. This includes:
+AWX itself reports as much status as it can via the API at `/api/v2/ping` in order to provide validation of the health of the cluster. This includes:
 
-* The instance servicing the HTTP request.
-* The last heartbeat time of all other instances in the cluster.
-* Instance Groups and Instance membership in those groups.
+- The instance servicing the HTTP request.
+- The last heartbeat time of all other instances in the cluster.
+- Instance Groups and Instance membership in those groups.
 
 A more detailed view of Instances and Instance Groups, including running jobs and membership
 information can be seen at `/api/v2/instances/` and `/api/v2/instance_groups`.
-
-
-### Instance Services and Failure Behavior
-
-Each AWX instance is made up of several different services working collaboratively:
-
-* **HTTP Services** - This includes the AWX application itself as well as external web services.
-* **Callback Receiver** - Receives job events that result from running Ansible jobs.
-* **Celery** - The worker queue that processes and runs all jobs.
-* **Redis** - this is used as a queue for AWX to process ansible playbook callback events.
-
-AWX is configured in such a way that if any of these services or their components fail, then all services are restarted. If these fail sufficiently (often in a short span of time), then the entire instance will be placed offline in an automated fashion in order to allow remediation without causing unexpected behavior.
-
 
 ### Job Runtime Behavior
 
@@ -221,53 +283,3 @@ The global `tower` group can still be associated with a resource, just like any 
 In order to support temporarily taking an `Instance` offline, there is a boolean property `enabled` defined on each instance.
 
 When this property is disabled, no jobs will be assigned to that `Instance`. Existing jobs will finish but no new work will be assigned.
-
-## Acceptance Criteria
-
-When verifying acceptance, we should ensure that the following statements are true:
-
-* AWX should install as a standalone Instance
-* AWX should install in a Clustered fashion
-* Instances should, optionally, be able to be grouped arbitrarily into different Instance Groups
-* Capacity should be tracked at the group level and capacity impact should make sense relative to what instance a job is running on and what groups that instance is a member of
-* Provisioning should be supported via the setup playbook
-* De-provisioning should be supported via a management command
-* All jobs, inventory updates, and project updates should run successfully
-* Jobs should be able to run on hosts for which they are targeted; if assigned implicitly or directly to groups, then they should only run on instances in those Instance Groups
-* Project updates should manifest their data on the host that will run the job immediately prior to the job running
-* AWX should be able to reasonably survive the removal of all instances in the cluster
-* AWX should behave in a predictable fashion during network partitioning
-
-## Testing Considerations
-
-* Basic testing should be able to demonstrate parity with a standalone instance for all integration testing.
-* Basic playbook testing to verify routing differences, including:
-  - Basic FQDN
-  - Short-name name resolution
-  - IP addresses
-  - `/etc/hosts` static routing information
-* We should test behavior of large and small clusters; small clusters usually consist of 2 - 3 instances and large clusters have 10 - 15 instances.
-* Failure testing should involve killing single instances and killing multiple instances while the cluster is performing work. Job failures during the time period should be predictable and not catastrophic.
-* Instance downtime testing should also include recoverability testing (killing single services and ensuring the system can return itself to a working state).
-* Persistent failure should be tested by killing single services in such a way that the cluster instance cannot be recovered and ensuring that the instance is properly taken offline.
-* Network partitioning failures will also be important. In order to test this:
-  - Disallow a single instance from communicating with the other instances but allow it to communicate with the database
-  - Break the link between instances such that it forms two or more groups where Group A and Group B can't communicate but all instances can communicate with the database.
-* Crucially, when network partitioning is resolved, all instances should recover into a consistent state.
-* Upgrade Testing - verify behavior before and after are the same for the end user.
-* Project Updates should be thoroughly tested for all SCM types (`git`, `svn`, `archive`) and for manual projects.
-* Setting up instance groups in two scenarios:
-  a) instances are shared between groups
-  b) instances are isolated to particular groups
-  Organizations, Inventories, and Job Templates should be variously assigned to one or many groups and jobs should execute in those groups in preferential order as resources are available.
-
-## Performance Testing
-
-Performance testing should be twofold:
-
-* A large volume of simultaneous jobs
-* Jobs that generate a large amount of output
-
-These should also be benchmarked against the same playbooks using the 3.0.X Tower release and a stable Ansible version. For a large volume playbook (*e.g.*, against 100+ hosts), something like the following is recommended:
-
-https://gist.github.com/michelleperz/fe3a0eb4eda888221229730e34b28b89
