@@ -8,26 +8,35 @@ def constructed_inventory(organization):
     """
     creates a new constructed inventory source
     """
-    return Inventory.objects.create(name='dummy2', kind='constructed', organization=organization)
+
+    def factory(name, org=organization):
+        try:
+            inv = Inventory.objects.get(name=name, organization=org, kind='constructed')
+        except Inventory.DoesNotExist:
+            inv = Inventory.objects.create(name=name, organization=org, kind='constructed')
+        return inv
+
+    return factory
 
 
 @pytest.mark.django_db
-def test_constructed_inventory_post(post, organization, admin_user):
-    inventory1 = Inventory.objects.create(name='dummy1', kind='constructed', organization=organization)
-    inventory2 = Inventory.objects.create(name='dummy2', kind='constructed', organization=organization)
+def test_constructed_inventory_post(post, admin_user, constructed_inventory):
+    inv1 = constructed_inventory(name='dummy1')
+    inv2 = constructed_inventory(name='dummy2')
     resp = post(
-        url=reverse('api:inventory_input_inventories', kwargs={'pk': inventory1.pk}),
-        data={'id': inventory2.pk},
+        url=reverse('api:inventory_input_inventories', kwargs={'pk': inv1.pk}),
+        data={'id': inv2.pk},
         user=admin_user,
-        expect=405,
+        expect=400,
     )
-    assert resp.status_code == 405
+    assert resp.status_code == 400
 
 
 @pytest.mark.django_db
 def test_add_constructed_inventory_source(post, admin_user, constructed_inventory):
+    inv1 = constructed_inventory(name='dummy1')
     resp = post(
-        url=reverse('api:inventory_inventory_sources_list', kwargs={'pk': constructed_inventory.pk}),
+        url=reverse('api:inventory_inventory_sources_list', kwargs={'pk': inv1.pk}),
         data={'name': 'dummy1', 'source': 'constructed'},
         user=admin_user,
         expect=400,
@@ -37,8 +46,9 @@ def test_add_constructed_inventory_source(post, admin_user, constructed_inventor
 
 @pytest.mark.django_db
 def test_add_constructed_inventory_host(post, admin_user, constructed_inventory):
+    inv1 = constructed_inventory(name='dummy1')
     resp = post(
-        url=reverse('api:inventory_hosts_list', kwargs={'pk': constructed_inventory.pk}),
+        url=reverse('api:inventory_hosts_list', kwargs={'pk': inv1.pk}),
         data={'name': 'dummy1'},
         user=admin_user,
         expect=400,
@@ -48,8 +58,9 @@ def test_add_constructed_inventory_host(post, admin_user, constructed_inventory)
 
 @pytest.mark.django_db
 def test_add_constructed_inventory_group(post, admin_user, constructed_inventory):
+    inv1 = constructed_inventory(name='dummy1')
     resp = post(
-        reverse('api:inventory_groups_list', kwargs={'pk': constructed_inventory.pk}),
+        reverse('api:inventory_groups_list', kwargs={'pk': inv1.pk}),
         data={'name': 'group-test'},
         user=admin_user,
         expect=400,
@@ -58,12 +69,11 @@ def test_add_constructed_inventory_group(post, admin_user, constructed_inventory
 
 
 @pytest.mark.django_db
-def test_edit_constructed_inventory_source(patch, admin_user, inventory):
-    inventory.inventory_sources.create(name="dummysrc", source="constructed")
-    inv_id = inventory.inventory_sources.get(name='dummysrc').id
+def test_edit_constructed_inventory_source(patch, admin_user, inventory_source_factory):
+    inv_src = inventory_source_factory(name='dummy1', source='constructed')
     resp = patch(
-        reverse('api:inventory_source_detail', kwargs={'pk': inv_id}),
-        data={'description': inventory.name},
+        reverse('api:inventory_source_detail', kwargs={'pk': inv_src.id}),
+        data={'description': inv_src.name},
         user=admin_user,
         expect=400,
     )

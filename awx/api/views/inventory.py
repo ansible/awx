@@ -14,6 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework import serializers
 
 # AWX
 from awx.main.models import ActivityStream, Inventory, JobTemplate, Role, User, InstanceGroup, InventoryUpdateEvent, InventoryUpdate
@@ -115,14 +116,9 @@ class InventoryInputInventoriesList(SubListAttachDetachAPIView):
     parent_model = Inventory
     relationship = 'input_inventories'
 
-    # Specifically overriding the post method on this view to disallow constructed inventories as input inventories
-    def post(self, request, *args, **kwargs):
-        obj = Inventory.objects.get(id=request.data.get('id'))
-        if obj.kind == 'constructed':
-            return Response(
-                dict(error=_('You cannot add a constructed inventory to another constructed inventory.')), status=status.HTTP_405_METHOD_NOT_ALLOWED
-            )
-        return super(InventoryInputInventoriesList, self).post(request, *args, **kwargs)
+    def is_valid_relation(self, parent, sub, created=False):
+        if sub.kind == 'constructed':
+            raise serializers.ValidationError({'error': 'You cannot add a constructed inventory to another constructed inventory.'})
 
 
 class InventoryActivityStreamList(SubListAPIView):
