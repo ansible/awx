@@ -1,5 +1,6 @@
 ---
 sources_dest: '../_sources'
+awx_root: "{{ lookup('pipe', 'git rev-parse --show-toplevel') | realpath | default('../../../../')}}"
 compose_name: 'docker-compose.yml'
 awx_image: 'ghcr.io/ansible/awx_devel'
 pg_port: 5432
@@ -15,7 +16,7 @@ ingress_path: /
 receptor_rsa_bits: 4096
 receptor_work_sign_reconfigure: false
 sign_work: no  # currently defaults to no because openssl version mismatch causes "unknown block type PRIVATE KEY"
-work_sign_key_dir: '../_sources/receptor'
+work_sign_key_dir: '{{ sources_dest }}/receptor'
 work_sign_private_keyfile: "{{ work_sign_key_dir }}/work_private_key.pem"
 work_sign_public_keyfile: "{{ work_sign_key_dir }}/work_public_key.pem"
 

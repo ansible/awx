@@ -4,6 +4,7 @@
   connection: local
   gather_facts: False
   vars:
+    sources_dest: "{{ sources_dest | default('../_sources', true) }}"
     awx_host: "https://localhost:8043"
   collections:
     - splunk.es
@@ -41,7 +42,7 @@
 
     - name: Write out the existing content
       copy:
-        dest: "../_sources/existing_logging.json"
+        dest: "{{ sources_dest }}/existing_logging.json"
         content: "{{ existing_logging }}"
 
     - name: Configure AWX logging adapter
