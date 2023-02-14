@@ -10,6 +10,46 @@ from awx.main.models import Organization
 
 
 @pytest.mark.django_db
+def test_ig_read_user_visibility(default_instance_group, user):
+    u = user('test', False)
+    role = getattr(default_instance_group, 'read_role')
+    role.members.add(u)
+    access = InstanceGroupAccess(u)
+    assert access.can_read(default_instance_group)
+    assert not access.can_use(default_instance_group)
+    assert not access.can_add(default_instance_group)
+    assert not access.can_admin(default_instance_group)
+    assert not access.can_change(default_instance_group, {'name': 'New description.'})
+
+
+@pytest.mark.django_db
+def test_ig_use_role_user_visibility(default_instance_group, user):
+    u = user('test', False)
+    role = getattr(default_instance_group, 'use_role')
+    role.members.add(u)
+    access = InstanceGroupAccess(u)
+    assert access.can_read(default_instance_group)
+    assert access.can_use(default_instance_group)
+    assert not access.can_add(default_instance_group)
+    assert not access.can_admin(default_instance_group)
+    assert not access.can_change(default_instance_group, {'name': 'New description.'})
+
+
+@pytest.mark.django_db
+def test_ig_admin_role_user_visibility(default_instance_group, user):
+    u = user('test', False)
+    role = getattr(default_instance_group, 'admin_role')
+    role.members.add(u)
+    access = InstanceGroupAccess(u)
+    assert access.can_read(default_instance_group)
+    assert access.can_use(default_instance_group)
+    assert not access.can_add(default_instance_group)
+    assert access.can_admin(default_instance_group)
+    assert access.can_change(default_instance_group, {'name': 'New description.'})
+    assert not access.can_delete(default_instance_group)
+
+
+@pytest.mark.django_db
 def test_ig_normal_user_visibility(organization, default_instance_group, user):
     u = user('user', False)
     assert len(InstanceGroupAccess(u).get_queryset()) == 0

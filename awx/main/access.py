@@ -592,13 +592,24 @@ class InstanceGroupAccess(BaseAccess):
     prefetch_related = ('instances',)
 
     def filtered_queryset(self):
-        return InstanceGroup.objects.filter(organization__in=Organization.accessible_pk_qs(self.user, 'admin_role')).distinct()
+        if self.user.admin_of_organizations.exists():
+            return InstanceGroup.objects.filter(organization__in=Organization.accessible_pk_qs(self.user, 'admin_role')).distinct()
+        return self.model.accessible_objects(self.user, 'read_role')
+
+    @check_superuser
+    def can_use(self, obj):
+        return self.user in obj.use_role
 
     def can_add(self, data):
         return self.user.is_superuser
 
+    @check_superuser
     def can_change(self, obj, data):
-        return self.user.is_superuser
+        return self.can_admin(obj)
+
+    @check_superuser
+    def can_admin(self, obj):
+        return self.user in obj.admin_role
 
     def can_delete(self, obj):
         if obj.name in [settings.DEFAULT_EXECUTION_QUEUE_NAME, settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]:
@@ -1675,7 +1686,7 @@ class JobTemplateAccess(NotificationAttachMixin, UnifiedCredentialsMixin, BaseAc
         if relationship == "instance_groups":
             if not obj.organization:
                 return False
-            return self.user.can_access(type(sub_obj), "read", sub_obj) and self.user in obj.organization.admin_role
+            return self.user.can_access(type(sub_obj), "read", sub_obj) and (self.user in sub_obj.use_role or self.user in obj.organization.admin_role)
         return super(JobTemplateAccess, self).can_attach(obj, sub_obj, relationship, data, skip_sub_obj_read_check=skip_sub_obj_read_check)
 
     @check_superuser
