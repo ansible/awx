@@ -4,6 +4,7 @@
   connection: local
   gather_facts: False
   vars:
+    sources_dest: "{{ sources_dest | default('../_sources', true) }}"
     awx_host: "https://localhost:8043"
   tasks:
     - name: Load existing and new LDAP settings
@@ -22,7 +23,7 @@
 
     - name: Write out the existing content
       copy:
-        dest: "../_sources/existing_ldap_adapter_settings.json"
+        dest: "{{ sources_dest }}/existing_ldap_adapter_settings.json"
         content: "{{ existing_ldap }}"
 
     - name: Configure AWX LDAP adapter

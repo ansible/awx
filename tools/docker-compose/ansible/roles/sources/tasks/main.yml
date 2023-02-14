@@ -1,6 +1,6 @@
 ---
 
-- name: Create _sources directories
+- name: Create sources directories
   file:
     path: "{{ sources_dest }}/{{ item }}"
     state: 'directory'
@@ -41,6 +41,19 @@
     content: "{{ secret_key }}"
     dest: "{{ sources_dest }}/SECRET_KEY"
   no_log: true
+
+- name: Copy grafana dir
+  copy:
+    src: "../../../../../grafana"
+    dest: "{{ sources_dest }}/grafana"
+
+- name: Copy config files
+  copy:
+    src: "{{ item }}"
+    dest: "{{ sources_dest }}/{{ item }}"
+  with_items:
+    - "supervisor.conf"
+    - "redis.conf"
 
 - name: Render configuration templates
   template:
