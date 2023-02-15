@@ -18,12 +18,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='hostmetric',
             name='automated_counter',
-            field=models.BigIntegerField(default=0, help_text='How many times was the host automated'),
+            field=models.IntegerField(default=0, help_text='How many times was the host automated'),
         ),
         migrations.AddField(
             model_name='hostmetric',
             name='deleted_counter',
-            field=models.BigIntegerField(default=0, help_text='How many times was the host deleted'),
+            field=models.IntegerField(default=0, help_text='How many times was the host deleted'),
         ),
         migrations.AddField(
             model_name='hostmetric',
@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='hostmetric',
             name='used_in_inventories',
-            field=models.BigIntegerField(null=True, help_text='How many inventories contain this host'),
+            field=models.IntegerField(null=True, help_text='How many inventories contain this host'),
         ),
         migrations.AddField(
             model_name='hostmetric', name='id', field=models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
