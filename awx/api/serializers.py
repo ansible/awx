@@ -2244,6 +2244,8 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         obj = super(InventorySourceSerializer, self).update(obj, validated_data)
         if deprecated_fields:
             self._update_deprecated_fields(deprecated_fields, obj)
+        if obj.source == 'constructed':
+            raise serializers.ValidationError({'error': _("Cannot edit source of type constructed.")})
         return obj
 
     # TODO: remove when old 'credential' fields are removed

@@ -14,6 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework import serializers
 
 # AWX
 from awx.main.models import ActivityStream, Inventory, JobTemplate, Role, User, InstanceGroup, InventoryUpdateEvent, InventoryUpdate
@@ -114,6 +115,10 @@ class InventoryInputInventoriesList(SubListAttachDetachAPIView):
     serializer_class = InventorySerializer
     parent_model = Inventory
     relationship = 'input_inventories'
+
+    def is_valid_relation(self, parent, sub, created=False):
+        if sub.kind == 'constructed':
+            raise serializers.ValidationError({'error': 'You cannot add a constructed inventory to another constructed inventory.'})
 
 
 class InventoryActivityStreamList(SubListAPIView):
