@@ -9,7 +9,7 @@ from awx.main.models import WorkflowJob
 @pytest.mark.django_db
 def test_bulk_job_launch(run_module, admin_user, job_template):
     jobs = [dict(unified_job_template=job_template.id)]
-    result = run_module(
+    run_module(
         'bulk_job_launch',
         {
             'name': "foo-bulk-job",
@@ -29,7 +29,7 @@ def test_bulk_job_launch(run_module, admin_user, job_template):
 @pytest.mark.django_db
 def test_bulk_host_create(run_module, admin_user, inventory):
     hosts = [dict(name="127.0.0.1"), dict(name="foo.dns.org")]
-    result = run_module(
+    run_module(
         'bulk_host_create',
         {
             'inventory': inventory.id,

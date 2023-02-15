@@ -200,7 +200,6 @@ EXAMPLES = '''
 '''
 
 from ..module_utils.controller_api import ControllerAPIModule
-import json
 
 
 def main():
@@ -208,6 +207,7 @@ def main():
     argument_spec = dict(
         jobs=dict(required=True, type='list'),
         name=dict(),
+        description=dict(),
         organization=dict(type='int'),
         inventory=dict(type='int'),
         limit=dict(),
@@ -226,6 +226,7 @@ def main():
     post_data_names = (
         'jobs',
         'name',
+        'description',
         'organization',
         'inventory',
         'limit',

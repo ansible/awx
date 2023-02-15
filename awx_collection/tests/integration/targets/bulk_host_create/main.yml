@@ -7,7 +7,7 @@
 - name: Generate a unique name
   set_fact:
     bulk_host_name: "AWX-Collection-tests-bulk_host_create-{{ test_id }}"
-  
+
 - name: Get our collection package
   controller_meta:
   register: controller_meta
@@ -23,7 +23,7 @@
     organization: Default
     state: present
   register: inventory_result
-  
+
 
 - name: Bulk Host Create
   bulk_host_create:
