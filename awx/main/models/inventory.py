@@ -153,7 +153,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
     input_inventories = OrderedManyToManyField(
         'Inventory',
         blank=True,
-        through_fields=('input_inventory', 'constructed_inventory'),
+        through_fields=('constructed_inventory', 'input_inventory'),
         related_name='destination_inventories',
         help_text=_('Only valid for constructed inventories, this links to the inventories that will be used.'),
         through='InventoryConstructedInventoryMembership',
