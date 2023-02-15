@@ -868,7 +868,7 @@
         "type": "boolean",
         "required": false,
         "label": "Verify OIDC Provider Certificate",
-        "help_text": "Verify the OIDV provider ssl certificate.",
+        "help_text": "Verify the OIDC provider ssl certificate.",
         "category": "Generic OIDC",
         "category_slug": "oidc",
         "default": true
@@ -4545,7 +4545,7 @@
       "SOCIAL_AUTH_OIDC_VERIFY_SSL": {
         "type": "boolean",
         "label": "Verify OIDC Provider Certificate",
-        "help_text": "Verify the OIDV provider ssl certificate.",
+        "help_text": "Verify the OIDC provider ssl certificate.",
         "category": "Generic OIDC",
         "category_slug": "oidc",
         "default": true

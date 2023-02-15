@@ -38,9 +38,12 @@ EXPORTABLE_RELATIONS = ['Roles', 'NotificationTemplates', 'WorkflowJobTemplateNo
 DEPENDENT_EXPORT = [
     ('JobTemplate', 'Label'),
     ('JobTemplate', 'SurveySpec'),
+    ('JobTemplate', 'Schedule'),
     ('WorkflowJobTemplate', 'Label'),
     ('WorkflowJobTemplate', 'SurveySpec'),
+    ('WorkflowJobTemplate', 'Schedule'),
     ('WorkflowJobTemplate', 'WorkflowJobTemplateNode'),
+    ('InventorySource', 'Schedule'),
     ('Inventory', 'Group'),
     ('Inventory', 'Host'),
     ('Inventory', 'Label'),

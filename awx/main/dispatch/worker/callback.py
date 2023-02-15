@@ -154,6 +154,8 @@ class CallbackBrokerWorker(BaseWorker):
             metrics_events_missing_created = 0
             metrics_total_job_event_processing_seconds = datetime.timedelta(seconds=0)
             for cls, events in self.buff.items():
+                if not events:
+                    continue
                 logger.debug(f'{cls.__name__}.objects.bulk_create({len(events)})')
                 for e in events:
                     e.modified = now  # this can be set before created because now is set above on line 149
