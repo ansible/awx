@@ -2231,6 +2231,7 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
             'custom_virtualenv',
             'instance_group',
             'scm_revision',
+            'scm_branch',
         )
 
     def get_related(self, obj):

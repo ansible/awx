@@ -288,6 +288,7 @@ class DependencyManager(TaskBase):
 
         inventory_task.created = task.created - timedelta(seconds=2)
         inventory_task.status = 'pending'
+        inventory_task.scm_branch = task.scm_branch
         inventory_task.save()
         logger.debug('Spawned {} as dependency of {}'.format(inventory_task.log_format, task.log_format))
 
@@ -326,6 +327,8 @@ class DependencyManager(TaskBase):
         if (latest_inventory_update.finished + timeout_seconds) < now:
             return True
         if latest_inventory_update.inventory_source.update_on_launch is True and latest_inventory_update.status in ['failed', 'canceled', 'error']:
+            return True
+        if latest_inventory_update.scm_branch != job.scm_branch:
             return True
         return False
 

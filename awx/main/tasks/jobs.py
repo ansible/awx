@@ -1581,7 +1581,7 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
         if inventory_update.source == 'scm':
             if not source_project:
                 raise RuntimeError('Could not find project to run SCM inventory update from.')
-            self.sync_and_copy(source_project, private_data_dir)
+            self.sync_and_copy(source_project, private_data_dir, scm_branch=inventory_update.scm_branch)
         else:
             # If source is not SCM make an empty project directory, content is built inside inventory folder
             super(RunInventoryUpdate, self).build_project_dir(inventory_update, private_data_dir)
