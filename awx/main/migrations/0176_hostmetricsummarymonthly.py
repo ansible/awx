@@ -18,15 +18,15 @@ class Migration(migrations.Migration):
                 ('license_capacity', models.BigIntegerField(default=0, help_text="'License capacity as max. number of unique hosts")),
                 (
                     'hosts_added',
-                    models.BigIntegerField(default=0, help_text='How many hosts were added in the associated month, consuming more license capacity'),
+                    models.IntegerField(default=0, help_text='How many hosts were added in the associated month, consuming more license capacity'),
                 ),
                 (
                     'hosts_deleted',
-                    models.BigIntegerField(default=0, help_text='How many hosts were deleted in the associated month, freeing the license capacity'),
+                    models.IntegerField(default=0, help_text='How many hosts were deleted in the associated month, freeing the license capacity'),
                 ),
                 (
                     'indirectly_managed_hosts',
-                    models.BigIntegerField(default=0, help_text='Manually entered number indirectly managed hosts for a certain month'),
+                    models.IntegerField(default=0, help_text='Manually entered number indirectly managed hosts for a certain month'),
                 ),
             ],
         ),

@@ -6,7 +6,7 @@ from collections import defaultdict
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import connection, models, DatabaseError
+from django.db import models, DatabaseError
 from django.utils.dateparse import parse_datetime
 from django.utils.text import Truncator
 from django.utils.timezone import utc, now
@@ -585,7 +585,7 @@ class JobEvent(BasePlaybookEvent):
         # bulk-create
         current_time = now()
         HostMetric.objects.bulk_create(
-            [HostMetric(hostname=hostname, last_automation=current_time) for hostname in updated_hosts_list], ignore_conflicts=True, batch_size=1000
+            [HostMetric(hostname=hostname, last_automation=current_time) for hostname in updated_hosts_list], ignore_conflicts=True, batch_size=100
         )
         # bulk-update
         batch_start, batch_size = 0, 1000
