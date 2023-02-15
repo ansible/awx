@@ -31,8 +31,9 @@ options:
           type: str
           require: True
         description:
-          - The description to use for the host.
-        type: str
+          description:
+            - The description to use for the host.
+          type: str
         enabled:
           description:
             - If the host should be enabled.
