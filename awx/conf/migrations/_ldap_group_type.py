@@ -1,7 +1,11 @@
 import inspect
 
 from django.conf import settings
-from django.utils.timezone import now
+
+import logging
+
+
+logger = logging.getLogger('awx.conf.migrations')
 
 
 def fill_ldap_group_type_params(apps, schema_editor):
@@ -15,7 +19,7 @@ def fill_ldap_group_type_params(apps, schema_editor):
         entry = qs[0]
         group_type_params = entry.value
     else:
-        entry = Setting(key='AUTH_LDAP_GROUP_TYPE_PARAMS', value=group_type_params, created=now(), modified=now())
+        return  # for new installs we prefer to use the default value
 
     init_attrs = set(inspect.getfullargspec(group_type.__init__).args[1:])
     for k in list(group_type_params.keys()):
@@ -23,4 +27,5 @@ def fill_ldap_group_type_params(apps, schema_editor):
             del group_type_params[k]
 
     entry.value = group_type_params
+    logger.warning(f'Migration updating AUTH_LDAP_GROUP_TYPE_PARAMS with value {entry.value}')
     entry.save()
