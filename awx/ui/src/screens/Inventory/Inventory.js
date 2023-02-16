@@ -8,6 +8,7 @@ import {
   Link,
   useLocation,
   useRouteMatch,
+  useParams,
 } from 'react-router-dom';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
@@ -30,14 +31,15 @@ function Inventory({ setBreadcrumb }) {
   const [hasContentLoading, setHasContentLoading] = useState(true);
   const [inventory, setInventory] = useState(null);
   const location = useLocation();
+  const { id: inventoryId } = useParams();
   const match = useRouteMatch({
-    path: '/inventories/inventory/:id',
+    path: `/inventories/:inventoryType/:id`,
   });
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const { data } = await InventoriesAPI.readDetail(match.params.id);
+        const { data } = await InventoriesAPI.readDetail(inventoryId);
         setBreadcrumb(data);
         setInventory(data);
       } catch (error) {
@@ -48,7 +50,7 @@ function Inventory({ setBreadcrumb }) {
     }
 
     fetchData();
-  }, [match.params.id, location.pathname, setBreadcrumb]);
+  }, [inventoryId, location.pathname, setBreadcrumb]);
 
   const tabsArray = [
     {
@@ -185,10 +187,8 @@ function Inventory({ setBreadcrumb }) {
             </Route>,
             <Route path="*" key="not-found">
               <ContentError isNotFound>
-                {match.params.id && (
-                  <Link
-                    to={`/inventories/inventory/${match.params.id}/details`}
-                  >
+                {inventoryId && (
+                  <Link to={`/inventories/inventory/${inventoryId}/details`}>
                     {t`View Inventory Details`}
                   </Link>
                 )}

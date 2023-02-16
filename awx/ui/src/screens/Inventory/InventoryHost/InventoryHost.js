@@ -8,6 +8,7 @@ import {
   Link,
   useRouteMatch,
   useLocation,
+  useParams,
 } from 'react-router-dom';
 import { Card } from '@patternfly/react-core';
 import { CaretLeftIcon } from '@patternfly/react-icons';
@@ -25,9 +26,9 @@ import InventoryHostGroups from '../InventoryHostGroups';
 
 function InventoryHost({ setBreadcrumb, inventory }) {
   const location = useLocation();
-  const match = useRouteMatch('/inventories/inventory/:id/hosts/:hostId');
-  const hostListUrl = `/inventories/inventory/${inventory.id}/hosts`;
-
+  const { hostId, id: inventoryId, inventoryType } = useParams();
+  const match = useRouteMatch('/inventories/:inventoryType/:id/hosts/:hostId');
+  const hostListUrl = `/inventories/${inventoryType}/${inventory.id}/hosts`;
   const {
     result: { host },
     error: contentError,
@@ -35,14 +36,11 @@ function InventoryHost({ setBreadcrumb, inventory }) {
     request: fetchHost,
   } = useRequest(
     useCallback(async () => {
-      const response = await InventoriesAPI.readHostDetail(
-        inventory.id,
-        match.params.hostId
-      );
+      const response = await InventoriesAPI.readHostDetail(inventoryId, hostId);
       return {
         host: response,
       };
-    }, [inventory.id, match.params.hostId]),
+    }, [inventoryId, hostId]),
     {
       host: null,
     }
@@ -120,37 +118,37 @@ function InventoryHost({ setBreadcrumb, inventory }) {
       {!isLoading && host && (
         <Switch>
           <Redirect
-            from="/inventories/inventory/:id/hosts/:hostId"
-            to="/inventories/inventory/:id/hosts/:hostId/details"
+            from="/inventories/:inventoryType/:id/hosts/:hostId"
+            to="/inventories/:inventoryType/:id/hosts/:hostId/details"
             exact
           />
           <Route
             key="details"
-            path="/inventories/inventory/:id/hosts/:hostId/details"
+            path="/inventories/:inventoryType/:id/hosts/:hostId/details"
           >
             <InventoryHostDetail host={host} />
           </Route>
           <Route
             key="edit"
-            path="/inventories/inventory/:id/hosts/:hostId/edit"
+            path="/inventories/:inventoryType/:id/hosts/:hostId/edit"
           >
             <InventoryHostEdit host={host} inventory={inventory} />
           </Route>
           <Route
             key="facts"
-            path="/inventories/inventory/:id/hosts/:hostId/facts"
+            path="/inventories/:inventoryType/:id/hosts/:hostId/facts"
           >
             <InventoryHostFacts host={host} />
           </Route>
           <Route
             key="groups"
-            path="/inventories/inventory/:id/hosts/:hostId/groups"
+            path="/inventories/:inventoryType/:id/hosts/:hostId/groups"
           >
             <InventoryHostGroups />
           </Route>
           <Route
             key="jobs"
-            path="/inventories/inventory/:id/hosts/:hostId/jobs"
+            path="/inventories/:inventoryType/:id/hosts/:hostId/jobs"
           >
             <JobList defaultParams={{ job__hosts: host.id }} />
           </Route>

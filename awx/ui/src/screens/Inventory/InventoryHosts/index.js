@@ -1,1 +1,1 @@
-export { default } from './InventoryHostList';
+export { default } from './InventoryHosts';

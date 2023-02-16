@@ -1,4 +1,6 @@
 import React from 'react';
+import { Route } from 'react-router-dom';
+import { createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
 import { InventoriesAPI, HostsAPI } from 'api';
 import {
@@ -357,5 +359,82 @@ describe('<InventoryHostList />', () => {
       );
     });
     expect(wrapper.find('AdHocCommands')).toHaveLength(0);
+  });
+});
+
+describe('Should not show add button for constructed inventory host list', () => {
+  let wrapper;
+  let history;
+  jest.mock('react-router-dom', () => ({
+    ...jest.requireActual('react-router-dom'),
+    useParams: () => ({
+      id: 1,
+      groupId: 2,
+      inventoryType: 'constructed_inventory',
+    }),
+  }));
+
+  beforeEach(async () => {
+    InventoriesAPI.readHosts.mockResolvedValue({
+      data: {
+        count: mockHosts.length,
+        results: mockHosts,
+      },
+    });
+    InventoriesAPI.readHostsOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+        related_search_fields: ['first_key__search', 'ansible_facts'],
+      },
+    });
+
+    InventoriesAPI.readAdHocOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {
+            module_name: {
+              choices: [
+                ['command', 'command'],
+                ['shell', 'shell'],
+              ],
+            },
+          },
+          POST: {},
+        },
+      },
+    });
+    history = createMemoryHistory({
+      initialEntries: ['/inventories/constructed_inventory/3/hosts'],
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Route path="/inventories/:inventoryType/:id/hosts">
+          <InventoryHostList />
+        </Route>,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: history.location,
+              },
+            },
+          },
+        }
+      );
+    });
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+  test('should not show add button', () => {
+    expect(wrapper.find('ToolbarAddButton').length).toBe(0);
+    expect(wrapper.find('ToolbarDeleteButton').length).toBe(0);
+    expect(wrapper.find('AdHocCommands').length).toBe(1);
   });
 });

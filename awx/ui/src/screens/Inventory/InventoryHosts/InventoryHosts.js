@@ -8,14 +8,14 @@ import InventoryHostList from './InventoryHostList';
 function InventoryHosts({ setBreadcrumb, inventory }) {
   return (
     <Switch>
-      <Route key="host-add" path="/inventories/inventory/:id/hosts/add">
+      <Route key="host-add" path="/inventories/:inventoryType/:id/hosts/add">
         <InventoryHostAdd inventory={inventory} />
       </Route>
-      <Route key="host" path="/inventories/inventory/:id/hosts/:hostId">
+      <Route key="host" path="/inventories/:inventoryType/:id/hosts/:hostId">
         <InventoryHost setBreadcrumb={setBreadcrumb} inventory={inventory} />
       </Route>
-      <Route key="host-list" path="/inventories/inventory/:id/hosts">
-        <InventoryHostList />
+      <Route key="host-list" path="/inventories/:inventoryType/:id/hosts">
+        <InventoryHostList inventory={inventory} />
       </Route>
     </Switch>
   );

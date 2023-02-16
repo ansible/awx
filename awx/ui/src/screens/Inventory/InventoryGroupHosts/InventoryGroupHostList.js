@@ -34,7 +34,7 @@ const QS_CONFIG = getQSConfig('host', {
 function InventoryGroupHostList() {
   const [isAdHocLaunchLoading, setIsAdHocLaunchLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { id: inventoryId, groupId } = useParams();
+  const { id: inventoryId, groupId, inventoryType } = useParams();
   const location = useLocation();
 
   const {
@@ -259,8 +259,8 @@ function InventoryGroupHostList() {
             key={host.id}
             rowIndex={index}
             host={host}
-            detailUrl={`/inventories/inventory/${inventoryId}/hosts/${host.id}/details`}
-            editUrl={`/inventories/inventory/${inventoryId}/hosts/${host.id}/edit`}
+            detailUrl={`/inventories/${inventoryType}/${inventoryId}/hosts/${host.id}/details`}
+            editUrl={`/inventories/${inventoryType}/${inventoryId}/hosts/${host.id}/edit`}
             isSelected={selected.some((row) => row.id === host.id)}
             onSelect={() => handleSelect(host)}
           />

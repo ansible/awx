@@ -5,7 +5,7 @@ import { Tooltip } from '@patternfly/react-core';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import useSelected from 'hooks/useSelected';
 import useRequest from 'hooks/useRequest';
-import { InventoriesAPI } from 'api';
+import { ConstructedInventoriesAPI, InventoriesAPI } from 'api';
 import DataListToolbar from 'components/DataListToolbar';
 import PaginatedTable, {
   HeaderRow,
@@ -29,7 +29,7 @@ function cannotDelete(item) {
 
 function InventoryGroupsList() {
   const location = useLocation();
-  const { id: inventoryId } = useParams();
+  const { id: inventoryId, inventoryType } = useParams();
   const [isAdHocLaunchLoading, setIsAdHocLaunchLoading] = useState(false);
 
   const {
@@ -104,8 +104,10 @@ function InventoryGroupsList() {
   };
 
   const canAdd =
-    actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
-
+    actions &&
+    Object.prototype.hasOwnProperty.call(actions, 'POST') &&
+    inventoryType !== 'constructed_inventory';
+  const canDelete = inventoryType !== 'constructed_inventory';
   return (
     <PaginatedTable
       contentError={contentError}
@@ -139,14 +141,15 @@ function InventoryGroupsList() {
       headerRow={
         <HeaderRow qsConfig={QS_CONFIG}>
           <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
-          <HeaderCell>{t`Actions`}</HeaderCell>
+          {inventoryType !== 'constructed_inventory' && (
+            <HeaderCell>{t`Actions`}</HeaderCell>
+          )}
         </HeaderRow>
       }
       renderRow={(item, index) => (
         <InventoryGroupItem
           key={item.id}
           group={item}
-          inventoryId={inventoryId}
           isSelected={selected.some((row) => row.id === item.id)}
           onSelect={() => handleSelect(item)}
           rowIndex={index}
@@ -177,20 +180,28 @@ function InventoryGroupsList() {
                   />,
                 ]
               : []),
-            <Tooltip content={renderTooltip()} position="top" key="delete">
-              <div>
-                <InventoryGroupsDeleteModal
-                  groups={selected}
-                  isDisabled={
-                    selected.length === 0 || selected.some(cannotDelete)
-                  }
-                  onAfterDelete={() => {
-                    fetchData();
-                    clearSelected();
-                  }}
-                />
-              </div>
-            </Tooltip>,
+            ...(canDelete
+              ? [
+                  <Tooltip
+                    content={renderTooltip()}
+                    position="top"
+                    key="delete"
+                  >
+                    <div>
+                      <InventoryGroupsDeleteModal
+                        groups={selected}
+                        isDisabled={
+                          selected.length === 0 || selected.some(cannotDelete)
+                        }
+                        onAfterDelete={() => {
+                          fetchData();
+                          clearSelected();
+                        }}
+                      />
+                    </div>
+                  </Tooltip>,
+                ]
+              : []),
           ]}
         />
       )}

@@ -26,7 +26,7 @@ const QS_CONFIG = getQSConfig('host', {
 
 function InventoryHostList() {
   const [isAdHocLaunchLoading, setIsAdHocLaunchLoading] = useState(false);
-  const { id } = useParams();
+  const { id, inventoryType } = useParams();
   const { search } = useLocation();
 
   const {
@@ -100,8 +100,10 @@ function InventoryHostList() {
   };
 
   const canAdd =
-    actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
-
+    actions &&
+    Object.prototype.hasOwnProperty.call(actions, 'POST') &&
+    inventoryType !== 'constructed_inventory';
+  const canDelete = inventoryType !== 'constructed_inventory';
   return (
     <>
       <PaginatedTable
@@ -166,12 +168,16 @@ function InventoryHostList() {
                     />,
                   ]
                 : []),
-              <ToolbarDeleteButton
-                key="delete"
-                onDelete={handleDeleteHosts}
-                itemsToDelete={selected}
-                pluralizedItemName={t`Hosts`}
-              />,
+              ...(canDelete
+                ? [
+                    <ToolbarDeleteButton
+                      key="delete"
+                      onDelete={handleDeleteHosts}
+                      itemsToDelete={selected}
+                      pluralizedItemName={t`Hosts`}
+                    />,
+                  ]
+                : []),
             ]}
           />
         )}
@@ -179,8 +185,8 @@ function InventoryHostList() {
           <InventoryHostItem
             key={host.id}
             host={host}
-            detailUrl={`/inventories/inventory/${id}/hosts/${host.id}/details`}
-            editUrl={`/inventories/inventory/${id}/hosts/${host.id}/edit`}
+            detailUrl={`/inventories/${inventoryType}/${id}/hosts/${host.id}/details`}
+            editUrl={`/inventories/${inventoryType}/${id}/hosts/${host.id}/edit`}
             isSelected={selected.some((row) => row.id === host.id)}
             onSelect={() => handleSelect(host)}
             rowIndex={index}

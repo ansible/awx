@@ -10,12 +10,6 @@ import {
 import InventoryGroupsList from './InventoryGroupsList';
 
 jest.mock('../../../api');
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => ({
-    id: 1,
-  }),
-}));
 const mockGroups = [
   {
     id: 1,
@@ -60,7 +54,14 @@ const mockGroups = [
 
 describe('<InventoryGroupsList />', () => {
   let wrapper;
-
+  jest.mock('react-router-dom', () => ({
+    ...jest.requireActual('react-router-dom'),
+    useParams: () => ({
+      id: 1,
+      groupId: 2,
+      inventoryType: 'inventory',
+    }),
+  }));
   beforeEach(async () => {
     InventoriesAPI.readGroups.mockResolvedValue({
       data: {
@@ -96,7 +97,7 @@ describe('<InventoryGroupsList />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <Route path="/inventories/inventory/:id/groups">
+        <Route path="/inventories/:inventoryType/:id/groups">
           <InventoryGroupsList />
         </Route>,
         {
@@ -314,5 +315,80 @@ describe('<InventoryGroupsList/> error handling', () => {
         .find('AlertModal[aria-label="deletion error"]')
         .invoke('onClose')();
     });
+  });
+});
+
+describe('Constructed Inventory group', () => {
+  let wrapper;
+  let history;
+  jest.mock('react-router-dom', () => ({
+    ...jest.requireActual('react-router-dom'),
+    useParams: () => ({
+      id: 1,
+      groupId: 2,
+      inventoryType: 'constructed_inventory',
+    }),
+  }));
+
+  beforeEach(async () => {
+    InventoriesAPI.readGroups.mockResolvedValue({
+      data: {
+        count: mockGroups.length,
+        results: mockGroups,
+      },
+    });
+    InventoriesAPI.readGroupsOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+      },
+    });
+    InventoriesAPI.readAdHocOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {
+            module_name: {
+              choices: [
+                ['command', 'command'],
+                ['shell', 'shell'],
+              ],
+            },
+          },
+          POST: {},
+        },
+      },
+    });
+    history = createMemoryHistory({
+      initialEntries: ['/inventories/constructed_inventory/3/groups'],
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Route path="/inventories/:inventoryType/:id/groups">
+          <InventoryGroupsList />
+        </Route>,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: history.location,
+              },
+            },
+          },
+        }
+      );
+    });
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+  test('should not show add button', () => {
+    expect(wrapper.find('ToolbarAddButton').length).toBe(0);
+    expect(wrapper.find('ToolbarDeleteButton').length).toBe(0);
+    expect(wrapper.find('AdHocCommands').length).toBe(1);
   });
 });

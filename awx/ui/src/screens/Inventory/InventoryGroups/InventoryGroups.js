@@ -16,11 +16,14 @@ function InventoryGroups({ setBreadcrumb, inventory }) {
           inventory={inventory}
         />
       </Route>
-      <Route key="details" path="/inventories/inventory/:id/groups/:groupId/">
+      <Route
+        key="details"
+        path="/inventories/:inventoryType/:id/groups/:groupId/"
+      >
         <InventoryGroup inventory={inventory} setBreadcrumb={setBreadcrumb} />
       </Route>
-      <Route key="list" path="/inventories/inventory/:id/groups">
-        <InventoryGroupsList />
+      <Route key="list" path="/inventories/:inventoryType/:id/groups">
+        <InventoryGroupsList inventory={inventory} />
       </Route>
     </Switch>
   );

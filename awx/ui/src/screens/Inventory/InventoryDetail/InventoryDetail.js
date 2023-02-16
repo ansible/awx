@@ -24,6 +24,7 @@ import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { Inventory } from 'types';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
 import InstanceGroupLabels from 'components/InstanceGroupLabels';
+import { VERBOSITY } from 'components/VerbositySelectField';
 import getHelpText from '../shared/Inventory.helptext';
 
 function InventoryDetail({ inventory }) {
@@ -102,6 +103,7 @@ function InventoryDetail({ inventory }) {
           }
         />
         <Detail label={t`Total hosts`} value={inventory.total_hosts} />
+        <Detail label={t`Total groups`} value={inventory.total_groups} />
         {instanceGroups && (
           <Detail
             fullWidth
@@ -117,6 +119,21 @@ function InventoryDetail({ inventory }) {
             helpText={helpText.preventInstanceGroupFallback}
           />
         )}
+        <Detail
+          label={t`Limit`}
+          dataCy="inv-detail-limit"
+          value={inventory.limit}
+        />
+        <Detail
+          label={t`Cache timeout`}
+          value={inventory.update_cache_timeout}
+          dataCy="inv-detail-cache-timeout"
+        />
+        <Detail
+          label={t`Verbosity`}
+          dataCy="inv-detail-verbosity"
+          value={VERBOSITY()[inventory.verbosity]}
+        />
         {renderOptionsField && (
           <Detail
             fullWidth
@@ -149,7 +166,7 @@ function InventoryDetail({ inventory }) {
         <VariablesDetail
           label={t`Variables`}
           helpText={helpText.variables()}
-          value={inventory.variables}
+          value={inventory.variables || inventory.source_vars}
           rows={4}
           name="variables"
           dataCy="inventory-detail-variables"
@@ -187,7 +204,6 @@ function InventoryDetail({ inventory }) {
           </DeleteButton>
         )}
       </CardActionsRow>
-      {/* Update delete modal to show dependencies https://github.com/ansible/awx/issues/5546 */}
       {error && (
         <AlertModal
           isOpen={error}

@@ -1,6 +1,6 @@
 import 'styled-components/macro';
 import React, { useState } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, useParams } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import { Button } from '@patternfly/react-core';
@@ -16,6 +16,7 @@ import { HostsAPI } from 'api';
 import HostToggle from 'components/HostToggle';
 
 function InventoryHostDetail({ host }) {
+  const { inventoryType } = useParams();
   const {
     created,
     description,
@@ -92,25 +93,27 @@ function InventoryHostDetail({ host }) {
           dataCy="inventory-host-detail-variables"
         />
       </DetailList>
-      <CardActionsRow>
-        {user_capabilities?.edit && (
-          <Button
-            ouiaId="inventory-host-detail-edit-button"
-            aria-label={t`edit`}
-            component={Link}
-            to={`/inventories/inventory/${inventory.id}/hosts/${id}/edit`}
-          >
-            {t`Edit`}
-          </Button>
-        )}
-        {user_capabilities?.delete && (
-          <DeleteButton
-            name={name}
-            modalTitle={t`Delete Host`}
-            onConfirm={() => handleHostDelete()}
-          />
-        )}
-      </CardActionsRow>
+      {inventoryType !== 'constructed_inventory' && (
+        <CardActionsRow>
+          {user_capabilities?.edit && (
+            <Button
+              ouiaId="inventory-host-detail-edit-button"
+              aria-label={t`edit`}
+              component={Link}
+              to={`/inventories/inventory/${inventory.id}/hosts/${id}/edit`}
+            >
+              {t`Edit`}
+            </Button>
+          )}
+          {user_capabilities?.delete && (
+            <DeleteButton
+              name={name}
+              modalTitle={t`Delete Host`}
+              onConfirm={() => handleHostDelete()}
+            />
+          )}
+        </CardActionsRow>
+      )}
       {deletionError && (
         <AlertModal
           isOpen={deletionError}

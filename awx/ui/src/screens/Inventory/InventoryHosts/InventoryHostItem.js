@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { string, bool, func } from 'prop-types';
 import { t } from '@lingui/macro';
 import { Tr, Td } from '@patternfly/react-table';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { PencilAltIcon } from '@patternfly/react-icons';
 import { Button, Chip } from '@patternfly/react-core';
 import { HostsAPI } from 'api';
@@ -22,6 +22,8 @@ function InventoryHostItem({
   onSelect,
   rowIndex,
 }) {
+  const { inventoryType } = useParams();
+
   const labelId = `check-action-${host.id}`;
   const initialGroups = host?.summary_fields?.groups ?? {
     results: [],
@@ -95,20 +97,22 @@ function InventoryHostItem({
           gridColumns="auto 40px"
         >
           <HostToggle host={host} />
-          <ActionItem
-            visible={host.summary_fields.user_capabilities?.edit}
-            tooltip={t`Edit host`}
-          >
-            <Button
-              aria-label={t`Edit host`}
-              ouiaId={`${host.id}-edit-button`}
-              variant="plain"
-              component={Link}
-              to={`${editUrl}`}
+          {inventoryType !== 'constructed_inventory' && (
+            <ActionItem
+              visible={host.summary_fields.user_capabilities?.edit}
+              tooltip={t`Edit host`}
             >
-              <PencilAltIcon />
-            </Button>
-          </ActionItem>
+              <Button
+                aria-label={t`Edit host`}
+                ouiaId={`${host.id}-edit-button`}
+                variant="plain"
+                component={Link}
+                to={`${editUrl}`}
+              >
+                <PencilAltIcon />
+              </Button>
+            </ActionItem>
+          )}
         </ActionsTd>
       </Tr>
       {dismissableError && (
