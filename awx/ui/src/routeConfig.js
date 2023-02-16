@@ -23,6 +23,7 @@ import TopologyView from 'screens/TopologyView';
 import Users from 'screens/User';
 import WorkflowApprovals from 'screens/WorkflowApproval';
 import { Jobs } from 'screens/Job';
+import HostMetrics from 'screens/HostMetrics';
 
 function getRouteConfig(userProfile = {}) {
   let routeConfig = [
@@ -55,6 +56,11 @@ function getRouteConfig(userProfile = {}) {
           path: '/workflow_approvals',
           screen: WorkflowApprovals,
         },
+  {
+    title: <Trans>Host Metrics</Trans>,
+    path: '/host_metrics',
+        screen: HostMetrics,
+  },
       ],
     },
     {
