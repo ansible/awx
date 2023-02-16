@@ -33,6 +33,7 @@ JSON-log-formatter
 jsonschema
 Markdown  # used for formatting API help
 openshift
+pandas
 pexpect==4.7.0 # see library notes
 prometheus_client
 psycopg2

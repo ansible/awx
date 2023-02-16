@@ -241,6 +241,8 @@ multidict==6.0.2
     #   yarl
 netaddr==0.8.0
     # via pyrad
+numpy==1.24.2
+    # via pandas
 oauthlib==3.2.2
     # via
     #   django-oauth-toolkit
@@ -253,6 +255,8 @@ packaging==21.3
     #   ansible-runner
     #   redis
     #   setuptools-scm
+pandas==1.5.3
+    # via -r /awx_devel/requirements/requirements.in
 pbr==5.11.0
     # via -r /awx_devel/requirements/requirements.in
 pexpect==4.7.0
@@ -308,6 +312,7 @@ python-dateutil==2.8.2
     # via
     #   adal
     #   kubernetes
+    #   pandas
     #   receptorctl
 python-dsv-sdk==1.0.1
     # via -r /awx_devel/requirements/requirements.in
@@ -329,6 +334,7 @@ pytz==2022.6
     #   django
     #   djangorestframework
     #   irc
+    #   pandas
     #   tempora
     #   twilio
 pyyaml==6.0
