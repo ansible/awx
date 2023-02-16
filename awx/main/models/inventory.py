@@ -1214,8 +1214,9 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
         max_length=1024,
         default='',
         blank=True,
-        help_text=_('Branch to use in job run. Project default used if blank. ' 'Only allowed if project allow_override field is set to true.'),
+        help_text=_('Branch to use in inventory update. Project default used if blank. Only allowed if project allow_override field is set to true.'),
     )
+
     @property
     def is_container_group_task(self):
         return bool(self.instance_group and self.instance_group.is_container_group)

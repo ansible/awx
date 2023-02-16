@@ -361,7 +361,7 @@ def test_single_job_dependencies_inventory_update_launch(controlplane_instance_g
         dm = DependencyManager()
         with mock.patch.object(DependencyManager, "create_inventory_update", wraps=dm.create_inventory_update) as mock_iu:
             dm.schedule()
-            mock_iu.assert_called_once_with(j, ii)
+            mock_iu.assert_called_once_with(j, ii, should_set_scm_branch=False)
             iu = [x for x in ii.inventory_updates.all()]
             assert len(iu) == 1
             TaskManager().schedule()

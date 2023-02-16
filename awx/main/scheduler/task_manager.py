@@ -283,12 +283,13 @@ class DependencyManager(TaskBase):
         logger.debug('Spawned {} as dependency of {}'.format(project_task.log_format, task.log_format))
         return project_task
 
-    def create_inventory_update(self, task, inventory_source_task):
+    def create_inventory_update(self, task, inventory_source_task, should_set_scm_branch=False):
         inventory_task = InventorySource.objects.get(id=inventory_source_task.id).create_inventory_update(_eager_fields=dict(launch_type='dependency'))
 
         inventory_task.created = task.created - timedelta(seconds=2)
         inventory_task.status = 'pending'
-        inventory_task.scm_branch = task.scm_branch
+        if should_set_scm_branch:
+            inventory_task.scm_branch = task.scm_branch
         inventory_task.save()
         logger.debug('Spawned {} as dependency of {}'.format(inventory_task.log_format, task.log_format))
 
@@ -327,8 +328,6 @@ class DependencyManager(TaskBase):
         if (latest_inventory_update.finished + timeout_seconds) < now:
             return True
         if latest_inventory_update.inventory_source.update_on_launch is True and latest_inventory_update.status in ['failed', 'canceled', 'error']:
-            return True
-        if latest_inventory_update.scm_branch != job.scm_branch:
             return True
         return False
 
@@ -397,8 +396,18 @@ class DependencyManager(TaskBase):
             if not inventory_source.update_on_launch:
                 continue
             latest_inventory_update = self.get_latest_inventory_update(inventory_source)
-            if self.should_update_inventory_source(task, latest_inventory_update):
-                inventory_task = self.create_inventory_update(task, inventory_source)
+            # necessary for branch override to work properly
+            # if inventory source uses the same project as task, and the last inventory update has a different scm_branch, we should set branch override
+            if (
+                inventory_source.source == "scm"
+                and inventory_source.source_project_id == task.project_id
+                and latest_inventory_update.scm_branch != task.scm_branch
+            ):
+                should_set_scm_branch = True
+            else:
+                should_set_scm_branch = False
+            if should_set_scm_branch or self.should_update_inventory_source(task, latest_inventory_update):
+                inventory_task = self.create_inventory_update(task, inventory_source, should_set_scm_branch=should_set_scm_branch)
                 created_dependencies.append(inventory_task)
                 dependencies.append(inventory_task)
             else:
