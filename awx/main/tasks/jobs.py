@@ -311,7 +311,7 @@ class BaseTask(object):
         env['AWX_PRIVATE_DATA_DIR'] = private_data_dir
 
         if self.instance.execution_environment is None:
-            raise RuntimeError('The project could not sync because there is no Execution Environment.')
+            raise RuntimeError(f'The {self.model.__name__} could not run because there is no Execution Environment.')
 
         return env
 
