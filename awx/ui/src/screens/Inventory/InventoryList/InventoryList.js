@@ -195,6 +195,7 @@ function InventoryList() {
                 options: [
                   ['', t`Inventory`],
                   ['smart', t`Smart Inventory`],
+                  ['constructed', t`Constructed Inventory`],
                 ],
               },
               {
