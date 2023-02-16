@@ -10,6 +10,7 @@ on:
 
 jobs:
   promote:
+    if: endsWith(github.repository, '/awx') 
     runs-on: ubuntu-latest
     steps:
       - name: Checkout awx
