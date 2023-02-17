@@ -2077,7 +2077,7 @@ class BulkHostCreateSerializer(serializers.Serializer):
                 item['url'] = reverse('api:host_detail', kwargs={'pk': r.id})
             item['inventory'] = reverse('api:inventory_detail', kwargs={'pk': validated_data['inventory'].id})
             host_data.append(item)
-        return_data['url'] = reverse('api:inventory_hosts_list', kwargs={'pk': validated_data['inventory'].id})
+        return_data['url'] = reverse('api:inventory_detail', kwargs={'pk': validated_data['inventory'].id})
         return_data['hosts'] = host_data
         return return_data
 
@@ -4640,21 +4640,19 @@ class BulkJobLaunchSerializer(BaseSerializer):
             if 'instance_groups' in job:
                 [requested_use_instance_groups.add(instance_group) for instance_group in job['instance_groups']]
 
-        # If we are not a superuser, check we have permissions
-        if request and not request.user.is_superuser:
-            self.check_organization_permission(attrs, request)
-            self.check_unified_job_permission(request, requested_ujts)
-            if requested_use_inventories or 'inventory' in attrs:
-                self.check_inventory_permission(attrs, request, requested_use_inventories)
+        self.check_organization_permission(attrs, request)
+        self.check_unified_job_permission(request, requested_ujts)
+        if requested_use_inventories or 'inventory' in attrs:
+            self.check_inventory_permission(attrs, request, requested_use_inventories)
 
-            if requested_use_labels:
-                self.check_label_permission(requested_use_labels)
+        if requested_use_labels:
+            self.check_label_permission(requested_use_labels)
 
-            if requested_use_instance_groups:
-                self.check_instance_group_permission(request, requested_use_instance_groups)
+        if requested_use_instance_groups:
+            self.check_instance_group_permission(request, requested_use_instance_groups)
 
-            if requested_use_execution_environments:
-                self.check_instance_group_permission(request, requested_use_instance_groups)
+        if requested_use_execution_environments:
+            self.check_instance_group_permission(request, requested_use_instance_groups)
 
         # all of the unified job templates and related items have now been checked, we can now grab the objects from the DB
         jobs_object = self.get_objectified_jobs(
@@ -4688,7 +4686,6 @@ class BulkJobLaunchSerializer(BaseSerializer):
         nodes = []
         node_m2m_objects = {}
         node_m2m_object_types_to_through_model = {
-
             'credentials': WorkflowJobNode.credentials.through,
             'labels': WorkflowJobNode.labels.through,
             'instance_groups': WorkflowJobNode.instance_groups.through,
@@ -4759,21 +4756,22 @@ class BulkJobLaunchSerializer(BaseSerializer):
         # validate Organization
         # - If the orgs is not set, set it to the org of the launching user
         # - If the user is part of multiple orgs, throw a validation error saying user is part of multiple orgs, please provide one
-        if 'organization' not in attrs or attrs['organization'] == None or attrs['organization'] == '':
-            if Organization.accessible_pk_qs(request.user, 'read_role').count() == 1:
-                for tup in Organization.accessible_pk_qs(request.user, 'read_role').all():
-                    attrs['organization'] = Organization.objects.filter(id__in=str(tup[0])).first()
-            elif Organization.accessible_pk_qs(request.user, 'read_role').count() > 1:
-                raise serializers.ValidationError("User has permission to multiple Organizations, please set one of them in the request")
+        if not request.user.is_superuser:
+            if 'organization' not in attrs or attrs['organization'] == None or attrs['organization'] == '':
+                if Organization.accessible_pk_qs(request.user, 'read_role').count() == 1:
+                    for tup in Organization.accessible_pk_qs(request.user, 'read_role').all():
+                        attrs['organization'] = Organization.objects.filter(id__in=str(tup[0])).first()
+                elif Organization.accessible_pk_qs(request.user, 'read_role').count() > 1:
+                    raise serializers.ValidationError("User has permission to multiple Organizations, please set one of them in the request")
+                else:
+                    raise serializers.ValidationError("User not part of any organization, please assign an organization to assign to the bulk job")
             else:
-                raise serializers.ValidationError("User not part of any organization, please assign an organization to assign to the bulk job")
-        else:
-            allowed_orgs = set()
-            requested_org = attrs['organization']
-            if request and not request.user.is_superuser:
-                [allowed_orgs.add(tup[0]) for tup in Organization.accessible_pk_qs(request.user, 'read_role').all()]
-                if requested_org.id not in allowed_orgs:
-                    raise ValidationError(_(f"Organization {requested_org.id} not found or you don't have permissions to access it"))
+                allowed_orgs = set()
+                requested_org = attrs['organization']
+                if request and not request.user.is_superuser:
+                    [allowed_orgs.add(tup[0]) for tup in Organization.accessible_pk_qs(request.user, 'read_role').all()]
+                    if requested_org.id not in allowed_orgs:
+                        raise ValidationError(_(f"Organization {requested_org.id} not found or you don't have permissions to access it"))
 
     def check_unified_job_permission(self, request, requested_ujts):
         allowed_ujts = set()
@@ -4786,6 +4784,7 @@ class BulkJobLaunchSerializer(BaseSerializer):
         if requested_ujts - allowed_ujts:
             not_allowed = requested_ujts - allowed_ujts
             raise serializers.ValidationError(_(f"Unified Job Templates {not_allowed} not found or you don't have permissions to access it"))
+
     def check_inventory_permission(self, attrs, request, requested_use_inventories):
         accessible_use_inventories = {tup[0] for tup in Inventory.accessible_pk_qs(request.user, 'use_role')}
         if requested_use_inventories - accessible_use_inventories:

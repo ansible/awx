@@ -15,7 +15,10 @@ page.register_page([resources.bulk, (resources.bulk, 'get')], Bulk)
 class BulkJobLaunch(base.Base):
     def post(self, payload={}):
         result = self.connection.post(self.endpoint, payload)
-        return self.walk(result.json()['url'])
+        if 'url' in result.json():
+            return self.walk(result.json()['url'])
+        else:
+            return self.page_identity(result, request_json={})
 
 
 page.register_page(resources.bulk_job_launch, BulkJobLaunch)

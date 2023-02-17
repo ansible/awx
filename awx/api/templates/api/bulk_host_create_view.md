@@ -4,43 +4,38 @@ This endpoint allows the client to create multiple hosts and associate them with
 
 Example:
 
-```
-{
-"inventory": 1,
-"hosts": [
-    {"name": "example1.com", "variables": "ansible_connection: local"},
-    {"name": "example2.com"}
-]
-
-}
-```
+    {
+        "inventory": 1,
+        "hosts": [
+            {"name": "example1.com", "variables": "ansible_connection: local"},
+            {"name": "example2.com"}
+        ]
+    }
 
 Return data:
 
-```commandline
-{
-    "url": "/api/v2/inventories/3/hosts/",
-    "hosts": [
-        {
-            "name": "example1.com",
-            "enabled": true,
-            "instance_id": "",
-            "description": "",
-            "variables": "ansible_connection: local",
-            "id": 1255,
-            "url": "/api/v2/hosts/1255/",
-            "inventory": "/api/v2/inventories/3/"
-        },
-        {
-            "name": "example2.com",
-            "enabled": true,
-            "instance_id": "",
-            "description": "",
-            "variables": "",
-            "id": 1256,
-            "url": "/api/v2/hosts/1256/",
-            "inventory": "/api/v2/inventories/3/"
-        }
-    ]
-}
-```
+    {
+        "url": "/api/v2/inventories/3/hosts/",
+        "hosts": [
+            {
+                "name": "example1.com",
+                "enabled": true,
+                "instance_id": "",
+                "description": "",
+                "variables": "ansible_connection: local",
+                "id": 1255,
+                "url": "/api/v2/hosts/1255/",
+                "inventory": "/api/v2/inventories/3/"
+            },
+            {
+                "name": "example2.com",
+                "enabled": true,
+                "instance_id": "",
+                "description": "",
+                "variables": "",
+                "id": 1256,
+                "url": "/api/v2/hosts/1256/",
+                "inventory": "/api/v2/inventories/3/"
+            }
+        ]
+    }

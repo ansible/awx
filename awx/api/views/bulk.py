@@ -6,6 +6,7 @@ from rest_framework.reverse import reverse
 from rest_framework import status
 from rest_framework.response import Response
 
+from awx.main.models import UnifiedJob, Host
 from awx.api.generics import (
     GenericAPIView,
     APIView,
