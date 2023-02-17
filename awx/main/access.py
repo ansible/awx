@@ -588,6 +588,19 @@ class InstanceAccess(BaseAccess):
 
 
 class InstanceGroupAccess(BaseAccess):
+    """
+    I can see Instance Groups when I am:
+       - a superuser(system administrator)
+       - an organization admin
+       - at least read_role on the instance group
+    I can edit Instance Groups when I am:
+       - a superuser
+       - an organization admin
+       - admin role on the Instance group
+    I can add/delete Instance Groups:
+       - a superuser(system administrator)
+    """
+
     model = InstanceGroup
     prefetch_related = ('instances',)
 
