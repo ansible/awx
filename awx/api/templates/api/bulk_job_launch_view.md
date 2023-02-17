@@ -4,13 +4,10 @@ This endpoint allows the client to launch multiple UnifiedJobTemplates at a time
 
 Example:
 
-```
-{
-"name": "my bulk job",
-"jobs": [
-    {"unified_job_template": 7, "inventory": 2},
-    {"unified_job_template": 7, "credentials": [3]}
-]
-
-}
-```
+    {
+        "name": "my bulk job",
+        "jobs": [
+            {"unified_job_template": 7, "inventory": 2},
+            {"unified_job_template": 7, "credentials": [3]}
+        ]
+    }
