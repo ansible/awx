@@ -377,6 +377,24 @@ options:
                       description:
                         - The organization of the credentials exists in.
                       type: str
+            inventory:
+              description:
+                - Inventory to be applied to job as launch-time prompts.
+              type: dict
+              suboptions:
+                name:
+                  description:
+                    - Name Inventory to be applied to job as launch-time prompts.
+                  type: str
+                organization:
+                  description:
+                    - Name of key for use in model for organizational reference
+                  type: dict
+                  suboptions:
+                    name:
+                      description:
+                        - The organization of the credentials exists in.
+                      type: str
             labels:
               description:
                 - Labels to be applied to job as launch-time prompts.
@@ -613,10 +631,6 @@ def create_workflow_nodes(module, response, workflow_nodes, workflow_id):
                 if workflow_node['unified_job_template']['type'] != 'workflow_approval':
                     module.fail_json(msg="Unable to Find unified_job_template: {0}".format(search_fields))
 
-        inventory = workflow_node.get('inventory')
-        if inventory:
-            workflow_node_fields['inventory'] = module.resolve_name_to_id('inventories', inventory)
-
         # Lookup Values for other fields
 
         for field_name in (
@@ -736,11 +750,12 @@ def create_workflow_nodes_association(module, response, workflow_nodes, workflow
                 'failure_nodes',
                 'credentials',
                 'labels',
+                'inventory',
                 'instance_groups',
             ):
                 # Extract out information if it exists
                 # Test if it is defined, else move to next association.
-                prompt_lookup = ['credentials', 'labels', 'instance_groups']
+                prompt_lookup = ['credentials', 'labels', 'inventory', 'instance_groups']
                 if association in workflow_node['related']:
                     id_list = []
                     lookup_data = {}
