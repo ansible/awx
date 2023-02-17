@@ -1,4 +1,3 @@
-import socket
 import time
 from urllib.parse import urljoin
 
@@ -18,7 +17,7 @@ class AWXInstance:
         self.get_instance()
 
     def get_instance(self):
-        filter = self.filter if self.filter is not None else dict(hostname=socket.gethostname())
+        filter = self.filter if self.filter is not None else dict(hostname=settings.CLUSTER_HOST_ID)
         qs = Instance.objects.filter(**filter)
         if not qs.exists():
             raise ValueError(f"No AWX instance found with {filter} parameters")
@@ -88,7 +87,7 @@ class Command(BaseCommand):
         filter_group.add_argument(
             "--hostname",
             type=str,
-            default=socket.gethostname(),
+            default=settings.CLUSTER_HOST_ID,
             help=f"{Instance.hostname.field.help_text} Defaults to the hostname of the machine where the Python interpreter is currently executing".strip(),
         )
         filter_group.add_argument("--id", type=self.ge_1, help=Instance.id.field.help_text)
