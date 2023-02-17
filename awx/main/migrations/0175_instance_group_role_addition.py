@@ -9,7 +9,6 @@ from awx.main.migrations import _migration_utils as migration_utils
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0174_ensure_org_ee_admin_roles'),
     ]
@@ -18,22 +17,37 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='instancegroup',
             name='admin_role',
-            field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=['singleton:system_administrator'], related_name='+', to='main.role'),
+            field=awx.main.fields.ImplicitRoleField(
+                editable=False,
+                null='True',
+                on_delete=django.db.models.deletion.CASCADE,
+                parent_role=['singleton:system_administrator'],
+                related_name='+',
+                to='main.role',
+            ),
             preserve_default='True',
         ),
         migrations.AddField(
             model_name='instancegroup',
             name='read_role',
-            field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=['singleton:system_auditor', 'use_role', 'admin_role'], related_name='+', to='main.role'),
+            field=awx.main.fields.ImplicitRoleField(
+                editable=False,
+                null='True',
+                on_delete=django.db.models.deletion.CASCADE,
+                parent_role=['singleton:system_auditor', 'use_role', 'admin_role'],
+                related_name='+',
+                to='main.role',
+            ),
             preserve_default='True',
         ),
         migrations.AddField(
             model_name='instancegroup',
             name='use_role',
-            field=awx.main.fields.ImplicitRoleField(editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=['admin_role'], related_name='+', to='main.role'),
+            field=awx.main.fields.ImplicitRoleField(
+                editable=False, null='True', on_delete=django.db.models.deletion.CASCADE, parent_role=['admin_role'], related_name='+', to='main.role'
+            ),
             preserve_default='True',
         ),
         migrations.RunPython(migration_utils.set_current_apps_for_migrations),
         migrations.RunPython(rbac.create_roles),
-
     ]

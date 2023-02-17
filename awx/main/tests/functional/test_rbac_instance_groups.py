@@ -10,11 +10,14 @@ from awx.main.models import Organization
 
 
 @pytest.mark.django_db
-def test_ig_read_user_visibility(default_instance_group, user):
+def test_ig_read_user_visibility(default_instance_group, user, organization, job_template_factory):
     u = user('test', False)
-    role = getattr(default_instance_group, 'read_role')
+    objects = job_template_factory('jt', organization=organization, project='p', inventory='i', credential='c')
+    role = default_instance_group.read_role
     role.members.add(u)
     access = InstanceGroupAccess(u)
+    jtaccess = JobTemplateAccess(u)
+    assert not jtaccess.can_attach(objects.job_template, default_instance_group, 'instance_groups', None)
     assert access.can_read(default_instance_group)
     assert not access.can_use(default_instance_group)
     assert not access.can_add(default_instance_group)
@@ -23,9 +26,9 @@ def test_ig_read_user_visibility(default_instance_group, user):
 
 
 @pytest.mark.django_db
-def test_ig_use_role_user_visibility(default_instance_group, user):
+def test_ig_use_role_user_visibility(default_instance_group, user, organization, job_template_factory):
     u = user('test', False)
-    role = getattr(default_instance_group, 'use_role')
+    role = default_instance_group.use_role
     role.members.add(u)
     access = InstanceGroupAccess(u)
     assert access.can_read(default_instance_group)
@@ -36,9 +39,9 @@ def test_ig_use_role_user_visibility(default_instance_group, user):
 
 
 @pytest.mark.django_db
-def test_ig_admin_role_user_visibility(default_instance_group, user):
+def test_ig_admin_role_user_visibility(default_instance_group, user, organization, job_template_factory):
     u = user('test', False)
-    role = getattr(default_instance_group, 'admin_role')
+    role = default_instance_group.admin_role
     role.members.add(u)
     access = InstanceGroupAccess(u)
     assert access.can_read(default_instance_group)
@@ -47,6 +50,57 @@ def test_ig_admin_role_user_visibility(default_instance_group, user):
     assert access.can_admin(default_instance_group)
     assert access.can_change(default_instance_group, {'name': 'New description.'})
     assert not access.can_delete(default_instance_group)
+
+
+@pytest.mark.django_db
+def test_ig_role_based_associability(default_instance_group, user, organization, job_template_factory):
+    objects = job_template_factory('jt', organization=organization, project='p', inventory='i', credential='c')
+
+    ig_read = user('reader', False)
+    ig_use = user('use', False)
+    ig_admin = user('admin', False)
+
+    read_role = default_instance_group.read_role
+    admin_role = default_instance_group.admin_role
+    use_role = default_instance_group.use_role
+
+    read_role.members.add(ig_read)
+    use_role.members.add(ig_use)
+    admin_role.members.add(ig_admin)
+
+    read_access = JobTemplateAccess(ig_read)
+    use_access = JobTemplateAccess(ig_use)
+    admin_access = JobTemplateAccess(ig_admin)
+
+    assert not read_access.can_attach(objects.job_template, default_instance_group, 'instance_groups', None)
+    assert use_access.can_attach(objects.job_template, default_instance_group, 'instance_groups', None)
+    assert admin_access.can_attach(objects.job_template, default_instance_group, 'instance_groups', None)
+
+    read_access = InventoryAccess(ig_read)
+    use_access = InventoryAccess(ig_use)
+    admin_access = InventoryAccess(ig_admin)
+
+    assert not read_access.can_attach(objects.inventory, default_instance_group, 'instance_groups', None)
+    assert use_access.can_attach(objects.inventory, default_instance_group, 'instance_groups', None)
+    assert admin_access.can_attach(objects.inventory, default_instance_group, 'instance_groups', None)
+
+
+@pytest.mark.django_db
+def test_ig_use_with_org_admin(default_instance_group, rando, admin):
+    org = Organization.objects.create(name='org1')
+
+    use_role = default_instance_group.use_role
+    use_role.members.add(rando)
+    admin_role = org.admin_role
+    org_admin_role = org.admin_role
+    org_admin_role.members.add(admin)
+    admin_role.members.add(rando)
+
+    admin_access = InstanceGroupAccess(admin)
+    access = InstanceGroupAccess(rando)
+
+    assert list(admin_access.get_queryset()) == [default_instance_group]
+    assert list(access.get_queryset()) == [default_instance_group]
 
 
 @pytest.mark.django_db
