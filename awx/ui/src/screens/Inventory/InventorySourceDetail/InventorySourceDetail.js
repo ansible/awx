@@ -31,7 +31,7 @@ import { formatDateString } from 'util/dates';
 import Popover from 'components/Popover';
 import { VERBOSITY } from 'components/VerbositySelectField';
 import InventorySourceSyncButton from '../shared/InventorySourceSyncButton';
-import useWsInventorySourcesDetails from '../InventorySources/useWsInventorySourcesDetails';
+import useWsInventorySourcesDetails from '../shared/useWsInventorySourcesDetails';
 import getHelpText from '../shared/Inventory.helptext';
 
 function InventorySourceDetail({ inventorySource }) {
