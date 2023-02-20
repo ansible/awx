@@ -196,10 +196,22 @@ class ProjectOptions(models.Model):
             if not check_if_exists or os.path.exists(smart_str(proj_path)):
                 return proj_path
 
+    def get_host_project_path(self, check_if_exists=True):
+        local_path = os.path.basename(self.local_path)
+        if local_path and not local_path.startswith('.'):
+            proj_path = os.path.join(settings.HOST_PROJECTS_ROOT or settings.PROJECTS_ROOT, local_path)
+            if not check_if_exists or os.path.exists(smart_str(proj_path)):
+                return proj_path
+
     def get_cache_path(self):
         local_path = os.path.basename(self.local_path)
         if local_path:
             return os.path.join(settings.PROJECTS_ROOT, '.__awx_cache', local_path)
+
+    def get_host_cache_path(self):
+        local_path = os.path.basename(self.local_path)
+        if local_path:
+            return os.path.join(settings.HOST_PROJECTS_ROOT or settings.PROJECTS_ROOT, '.__awx_cache', local_path)
 
     @property
     def playbooks(self):

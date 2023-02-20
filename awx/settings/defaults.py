@@ -108,6 +108,10 @@ LOGIN_URL = '/api/login/'
 # This directory should not be web-accessible.
 PROJECTS_ROOT = '/var/lib/awx/projects/'
 
+# Absolute filesystem path to the directory to host projects (with playbooks) in the host.
+# This setting is used when running containerized AWX receptor
+HOST_PROJECTS_ROOT = None
+
 # Absolute filesystem path to the directory for job status stdout (default for
 # development and tests, default for production defined in production.py). This
 # directory should not be web-accessible

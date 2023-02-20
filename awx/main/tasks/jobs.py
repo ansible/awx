@@ -1406,12 +1406,14 @@ class RunProjectUpdate(BaseTask):
 
         params = super(RunProjectUpdate, self).build_execution_environment_params(instance, private_data_dir)
         project_path = instance.get_project_path(check_if_exists=False)
+        host_project_path = instance.get_host_project_path(check_if_exists=False)
         cache_path = instance.get_cache_path()
+        host_cache_path = instance.get_host_cache_path()
         params.setdefault('container_volume_mounts', [])
         params['container_volume_mounts'].extend(
             [
-                f"{project_path}:{project_path}:z",
-                f"{cache_path}:{cache_path}:z",
+                f"{host_project_path}:{project_path}:z",
+                f"{host_cache_path}:{cache_path}:z",
             ]
         )
         return params

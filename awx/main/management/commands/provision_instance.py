@@ -29,7 +29,7 @@ class Command(BaseCommand):
         parser.add_argument('--uuid', type=str, help="Instance UUID")
 
     def _register_hostname(self, hostname, node_type, uuid):
-        if not hostname:
+        if settings.IS_K8S:
             if not settings.AWX_AUTO_DEPROVISION_INSTANCES:
                 raise CommandError('Registering with values from settings only intended for use in K8s installs')
 
@@ -47,8 +47,10 @@ class Command(BaseCommand):
                 max_forks=settings.DEFAULT_EXECUTION_QUEUE_MAX_FORKS,
                 max_concurrent_jobs=settings.DEFAULT_EXECUTION_QUEUE_MAX_CONCURRENT_JOBS,
             ).register()
-        else:
+        elif hostname:
             (changed, instance) = Instance.objects.register(hostname=hostname, node_type=node_type, uuid=uuid)
+        else:
+            return
         if changed:
             print("Successfully registered instance {}".format(hostname))
         else:
