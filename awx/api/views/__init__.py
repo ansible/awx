@@ -466,6 +466,11 @@ class InstanceGroupUnifiedJobsList(SubListAPIView):
     relationship = "unifiedjob_set"
 
 
+class InstanceGroupAccessList(ResourceAccessList):
+    model = models.User  # needs to be User for AccessLists
+    parent_model = models.InstanceGroup
+
+
 class InstanceGroupInstanceList(InstanceGroupMembershipMixin, SubListAttachDetachAPIView):
     name = _("Instance Group's Instances")
     model = models.Instance
