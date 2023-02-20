@@ -16,7 +16,10 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('position', models.PositiveIntegerField(db_index=True, default=None, null=True)),
-                ('constructed_inventory', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='main.inventory', related_name='constructed_inventories')),
+                (
+                    'constructed_inventory',
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='main.inventory', related_name='constructed_inventories'),
+                ),
                 ('input_inventory', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='main.inventory')),
             ],
         ),
@@ -25,6 +28,7 @@ class Migration(migrations.Migration):
             name='input_inventories',
             field=awx.main.fields.OrderedManyToManyField(
                 blank=True,
+                through_fields=('constructed_inventory', 'input_inventory'),
                 help_text='Only valid for constructed inventories, this links to the inventories that will be used.',
                 related_name='destination_inventories',
                 through='main.InventoryConstructedInventoryMembership',
