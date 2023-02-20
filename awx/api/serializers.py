@@ -3528,6 +3528,26 @@ class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
             return ret
         if 'extra_vars' in ret:
             ret['extra_vars'] = obj.display_extra_vars()
+        all_jobs = []
+        # Because there is a possiblity that this could return none if there is a workflow approval in pending
+        # catch this and pass
+        try:
+            for wf_job in obj.workflow_job_nodes.all():
+                job_template = {
+                    'job_template': {
+                        'id': wf_job.job_id,
+                        'name': wf_job.job.name,
+                        'status': wf_job.job.status,
+                        'created': wf_job.job.created,
+                        'finished': wf_job.job.finished,
+                        'elapsed': wf_job.job.elapsed,
+                        'type': wf_job.job.job_type_name,
+                    }
+                }
+                all_jobs.append(job_template)
+            ret['visualizer'] = all_jobs
+        except Exception:
+            return ret
         return ret
 
 
