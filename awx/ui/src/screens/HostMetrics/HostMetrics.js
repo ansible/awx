@@ -62,10 +62,10 @@ function HostMetrics() {
   pluralizedItemName={t`Host Metrics`}
   renderRow={(item)=> (<HostMetricsListItem item={item} />)}
   qsConfig={QS_CONFIG}
-  toolbarSearchColumns={[{name: t`Hostname`, key: 'hostname', isDefault: true}]}
+  toolbarSearchColumns={[{name: t`Hostname`, key: 'hostname__icontains', isDefault: true}]}
   toolbarSearchableKeys={[]}
   toolbarRelatedSearchableKeys={[]}
-  renderToolbar={(props) => <DataListToolbar {...props} fillWidth />}
+  renderToolbar={(props) => <DataListToolbar {...props} advancedSearchDisabled={true} fillWidth}
   headerRow={
       <HeaderRow qsConfig={QS_CONFIG}>
       <HeaderCell sortKey="hostname">{t`Hostname`}</HeaderCell>
@@ -83,4 +83,5 @@ function HostMetrics() {
   );
 }
 
+export { HostMetrics as _HostMetrics };
 export default HostMetrics;
