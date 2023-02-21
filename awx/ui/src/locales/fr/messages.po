@@ -5048,7 +5048,7 @@ msgstr "Lancer"
 
 #: components/TemplateList/TemplateListItem.js:214
 msgid "Launch Template"
-msgstr "Lacer le modèle."
+msgstr "Lancer le modèle."
 
 #: screens/ManagementJob/ManagementJobList/LaunchManagementPrompt.js:32
 #: screens/ManagementJob/ManagementJobList/LaunchManagementPrompt.js:34
