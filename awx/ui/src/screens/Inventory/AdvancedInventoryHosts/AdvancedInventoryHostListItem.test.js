@@ -1,6 +1,6 @@
 import React from 'react';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import SmartInventoryHostListItem from './SmartInventoryHostListItem';
+import AdvancedInventoryHostListItem from './AdvancedInventoryHostListItem';
 
 const mockHost = {
   id: 2,
@@ -19,14 +19,14 @@ const mockHost = {
   },
 };
 
-describe('<SmartInventoryHostListItem />', () => {
+describe('<AdvancedInventoryHostListItem />', () => {
   let wrapper;
 
   beforeEach(() => {
     wrapper = mountWithContexts(
       <table>
         <tbody>
-          <SmartInventoryHostListItem
+          <AdvancedInventoryHostListItem
             detailUrl="/inventories/smart_inventory/1/hosts/2"
             host={mockHost}
             isSelected={false}

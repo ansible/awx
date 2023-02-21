@@ -13,7 +13,7 @@ import { getQSConfig, parseQueryString } from 'util/qs';
 import { InventoriesAPI } from 'api';
 import { Inventory } from 'types';
 import AdHocCommands from 'components/AdHocCommands/AdHocCommands';
-import SmartInventoryHostListItem from './SmartInventoryHostListItem';
+import AdvancedInventoryHostListItem from './AdvancedInventoryHostListItem';
 
 const QS_CONFIG = getQSConfig('host', {
   page: 1,
@@ -21,7 +21,7 @@ const QS_CONFIG = getQSConfig('host', {
   order_by: 'name',
 });
 
-function SmartInventoryHostList({ inventory }) {
+function AdvancedInventoryHostList({ inventory }) {
   const location = useLocation();
   const [isAdHocLaunchLoading, setIsAdHocLaunchLoading] = useState(false);
   const {
@@ -61,7 +61,10 @@ function SmartInventoryHostList({ inventory }) {
   useEffect(() => {
     fetchHosts();
   }, [fetchHosts]);
-
+  const inventoryType =
+    inventory.kind === 'constructed'
+      ? 'constructed_inventory'
+      : 'smart_inventory';
   return (
     <PaginatedTable
       contentError={contentError}
@@ -114,10 +117,11 @@ function SmartInventoryHostList({ inventory }) {
         </HeaderRow>
       }
       renderRow={(host, index) => (
-        <SmartInventoryHostListItem
+        <AdvancedInventoryHostListItem
           key={host.id}
           host={host}
-          detailUrl={`/inventories/smart_inventory/${inventory.id}/hosts/${host.id}/details`}
+          inventoryType={inventoryType}
+          detailUrl={`/inventories/${inventoryType}/${inventory.id}/hosts/${host.id}/details`}
           isSelected={selected.some((row) => row.id === host.id)}
           onSelect={() => handleSelect(host)}
           rowIndex={index}
@@ -127,8 +131,8 @@ function SmartInventoryHostList({ inventory }) {
   );
 }
 
-SmartInventoryHostList.propTypes = {
+AdvancedInventoryHostList.propTypes = {
   inventory: Inventory.isRequired,
 };
 
-export default SmartInventoryHostList;
+export default AdvancedInventoryHostList;
