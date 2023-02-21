@@ -80,7 +80,7 @@ def aim_backend(**kwargs):
     app_id = kwargs['app_id']
     object_query = kwargs['object_query']
     object_query_format = kwargs['object_query_format']
-    object_property = kwargs['object_property']
+    object_property = kwargs.get('object_property', '')
     reason = kwargs.get('reason', None)
     if webservice_id == '':
         webservice_id = 'AIMWebService'
