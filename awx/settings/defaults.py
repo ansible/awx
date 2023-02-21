@@ -83,7 +83,11 @@ USE_L10N = True
 
 USE_TZ = True
 
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'ui', 'build', 'static'), os.path.join(BASE_DIR, 'static')]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'ui', 'build', 'static'),
+    os.path.join(BASE_DIR, 'ui-next', 'ansible-ui', 'build'),
+    os.path.join(BASE_DIR, 'static'),
+]
 
 # Absolute filesystem path to the directory where static file are collected via
 # the collectstatic command.
@@ -290,7 +294,12 @@ TEMPLATES = [
             ],
             'builtins': ['awx.main.templatetags.swagger'],
         },
-        'DIRS': [os.path.join(BASE_DIR, 'templates'), os.path.join(BASE_DIR, 'ui', 'build'), os.path.join(BASE_DIR, 'ui', 'public')],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
+            os.path.join(BASE_DIR, 'ui', 'build'),
+            os.path.join(BASE_DIR, 'ui', 'public'),
+            os.path.join(BASE_DIR, 'ui-next', 'ansible-ui', 'build', 'controller'),
+        ],
     },
 ]
 

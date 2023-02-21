@@ -9,6 +9,8 @@ from awx.main.views import handle_400, handle_403, handle_404, handle_500, handl
 
 urlpatterns = [
     re_path(r'', include('awx.ui.urls', namespace='ui')),
+    re_path(r'^controller/', include('awx.ui-next.urls', namespace='controller')),
+    # re_path(r'^ui-next/', include('awx.ui-next.urls', namespace='ui-next')),
     re_path(r'^api/', include('awx.api.urls', namespace='api')),
     re_path(r'^sso/', include('awx.sso.urls', namespace='sso')),
     re_path(r'^sso/', include('social_django.urls', namespace='social')),

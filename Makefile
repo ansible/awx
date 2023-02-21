@@ -1,3 +1,5 @@
+include awx/ui-next/Makefile
+
 PYTHON ?= python3.9
 OFFICIAL ?= no
 NODE ?= node
@@ -540,7 +542,7 @@ docker-compose-container-group-clean:
 	rm -rf tools/docker-compose-minikube/_sources/
 
 ## Base development image build
-docker-compose-build:
+docker-compose-build: 
 	ansible-playbook tools/ansible/dockerfile.yml -e build_dev=True -e receptor_image=$(RECEPTOR_IMAGE)
 	DOCKER_BUILDKIT=1 docker build -t $(DEVEL_IMAGE_NAME) \
 	    --build-arg BUILDKIT_INLINE_CACHE=1 \
