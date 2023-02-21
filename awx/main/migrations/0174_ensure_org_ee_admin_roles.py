@@ -7,7 +7,6 @@ from awx.main.migrations import _migration_utils as migration_utils
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0173_instancegroup_max_limits'),
     ]

@@ -12,11 +12,16 @@ import PaginatedTable, {
 import AlertModal from 'components/AlertModal';
 import ErrorDetail from 'components/ErrorDetail';
 import DataListToolbar from 'components/DataListToolbar';
-import useRequest, { useDeleteItems } from 'hooks/useRequest';
+import useRequest, {
+  useDeleteItems,
+  useDismissableError,
+} from 'hooks/useRequest';
 import useSelected from 'hooks/useSelected';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import WorkflowApprovalListItem from './WorkflowApprovalListItem';
 import useWsWorkflowApprovals from './useWsWorkflowApprovals';
+import WorkflowApprovalListApproveButton from './WorkflowApprovalListApproveButton';
+import WorkflowApprovalListDenyButton from './WorkflowApprovalListDenyButton';
 
 const QS_CONFIG = getQSConfig('workflow_approvals', {
   page: 1,
@@ -104,7 +109,50 @@ function WorkflowApprovalsList() {
     clearSelected();
   };
 
-  const isLoading = isWorkflowApprovalsLoading || isDeleteLoading;
+  const {
+    error: approveApprovalError,
+    isLoading: isApproveLoading,
+    request: approveWorkflowApprovals,
+  } = useRequest(
+    useCallback(
+      async () =>
+        Promise.all(selected.map(({ id }) => WorkflowApprovalsAPI.approve(id))),
+      [selected]
+    ),
+    {}
+  );
+
+  const handleApprove = async () => {
+    await approveWorkflowApprovals();
+    clearSelected();
+  };
+
+  const {
+    error: denyApprovalError,
+    isLoading: isDenyLoading,
+    request: denyWorkflowApprovals,
+  } = useRequest(
+    useCallback(
+      async () =>
+        Promise.all(selected.map(({ id }) => WorkflowApprovalsAPI.deny(id))),
+      [selected]
+    ),
+    {}
+  );
+
+  const handleDeny = async () => {
+    await denyWorkflowApprovals();
+    clearSelected();
+  };
+
+  const { error: actionError, dismissError: dismissActionError } =
+    useDismissableError(approveApprovalError || denyApprovalError);
+
+  const isLoading =
+    isWorkflowApprovalsLoading ||
+    isDeleteLoading ||
+    isApproveLoading ||
+    isDenyLoading;
 
   return (
     <>
@@ -138,6 +186,16 @@ function WorkflowApprovalsList() {
                 onSelectAll={selectAll}
                 qsConfig={QS_CONFIG}
                 additionalControls={[
+                  <WorkflowApprovalListApproveButton
+                    key="approve"
+                    onApprove={handleApprove}
+                    selectedItems={selected}
+                  />,
+                  <WorkflowApprovalListDenyButton
+                    key="deny"
+                    onDeny={handleDeny}
+                    selectedItems={selected}
+                  />,
                   <ToolbarDeleteButton
                     key="delete"
                     onDelete={handleDelete}
@@ -191,6 +249,19 @@ function WorkflowApprovalsList() {
         >
           {t`Failed to delete one or more workflow approval.`}
           <ErrorDetail error={deletionError} />
+        </AlertModal>
+      )}
+      {actionError && (
+        <AlertModal
+          isOpen={actionError}
+          variant="error"
+          title={t`Error!`}
+          onClose={dismissActionError}
+        >
+          {approveApprovalError
+            ? t`Failed to approve one or more workflow approval.`
+            : t`Failed to deny one or more workflow approval.`}
+          <ErrorDetail error={actionError} />
         </AlertModal>
       )}
     </>

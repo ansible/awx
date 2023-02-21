@@ -109,7 +109,6 @@ options:
       description:
         - Control the output level Ansible produces as the playbook runs. 0 - Normal, 1 - Verbose, 2 - More Verbose, 3 - Debug, 4 - Connection Debug.
       choices: [0, 1, 2, 3, 4]
-      default: 0
       type: int
     extra_vars:
       description:
@@ -123,7 +122,6 @@ options:
       description:
         - Enable forcing playbook handlers to run even if a task fails.
       type: bool
-      default: 'no'
       aliases:
         - force_handlers_enabled
     skip_tags:
@@ -271,7 +269,6 @@ options:
       description:
         - The number of jobs to slice into at runtime. Will cause the Job Template to launch a workflow if value is greater than 1.
       type: int
-      default: '1'
     webhook_service:
       description:
         - Service that webhook requests will be accepted from
@@ -407,13 +404,13 @@ def main():
         instance_groups=dict(type="list", elements='str'),
         forks=dict(type='int'),
         limit=dict(),
-        verbosity=dict(type='int', choices=[0, 1, 2, 3, 4], default=0),
+        verbosity=dict(type='int', choices=[0, 1, 2, 3, 4]),
         extra_vars=dict(type='dict'),
         job_tags=dict(),
-        force_handlers=dict(type='bool', default=False, aliases=['force_handlers_enabled']),
+        force_handlers=dict(type='bool', aliases=['force_handlers_enabled']),
         skip_tags=dict(),
         start_at_task=dict(),
-        timeout=dict(type='int', default=0),
+        timeout=dict(type='int'),
         use_fact_cache=dict(type='bool', aliases=['fact_caching_enabled']),
         host_config_key=dict(no_log=False),
         ask_diff_mode_on_launch=dict(type='bool', aliases=['ask_diff_mode']),
@@ -438,7 +435,7 @@ def main():
         allow_simultaneous=dict(type='bool', aliases=['concurrent_jobs_enabled']),
         scm_branch=dict(),
         ask_scm_branch_on_launch=dict(type='bool'),
-        job_slice_count=dict(type='int', default='1'),
+        job_slice_count=dict(type='int'),
         webhook_service=dict(choices=['github', 'gitlab', '']),
         webhook_credential=dict(),
         labels=dict(type="list", elements='str'),

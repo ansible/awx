@@ -61,7 +61,6 @@ page.register_page([resources.schedules, resources.related_schedules], Schedules
 
 
 class SchedulesPreview(base.Base):
-
     pass
 
 

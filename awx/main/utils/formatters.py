@@ -176,7 +176,6 @@ class LogstashFormatter(LogstashFormatterBase):
             if guid:
                 data_for_log['guid'] = guid
             for field_object in job_event._meta.fields:
-
                 if not field_object.__class__ or not field_object.__class__.__name__:
                     field_class_name = ''
                 else:

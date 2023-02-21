@@ -7,7 +7,6 @@ from awx.main.models import CredentialType
 
 
 class Command(BaseCommand):
-
     help = 'Load default managed credential types.'
 
     def handle(self, *args, **options):

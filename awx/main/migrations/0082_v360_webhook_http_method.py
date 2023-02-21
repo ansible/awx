@@ -15,7 +15,6 @@ def add_webhook_notification_template_fields(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0081_v360_notify_on_start'),
     ]

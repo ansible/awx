@@ -5,7 +5,6 @@ from awx.main.migrations import ActivityStreamDisabledMigration
 
 
 class Migration(ActivityStreamDisabledMigration):
-
     dependencies = [
         ('main', '0010_v322_add_ovirt4_tower_inventory'),
     ]

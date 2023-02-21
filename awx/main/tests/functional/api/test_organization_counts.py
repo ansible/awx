@@ -8,7 +8,6 @@ from awx.main.models import Project, Host
 @pytest.fixture
 def organization_resource_creator(organization, user):
     def rf(users, admins, job_templates, projects, inventories, teams):
-
         # Associate one resource of every type with the organization
         for i in range(users):
             member_user = user('org-member %s' % i)

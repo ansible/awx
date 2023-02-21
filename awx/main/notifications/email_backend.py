@@ -22,7 +22,6 @@ DEFAULT_APPROVAL_DENIED_BODY = CustomNotificationBase.DEFAULT_APPROVAL_DENIED_BO
 
 
 class CustomEmailBackend(EmailBackend, CustomNotificationBase):
-
     init_parameters = {
         "host": {"label": "Host", "type": "string"},
         "port": {"label": "Port", "type": "int"},

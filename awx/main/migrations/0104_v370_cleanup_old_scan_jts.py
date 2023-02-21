@@ -9,7 +9,6 @@ def cleanup_scan_jts(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0103_v370_remove_computed_fields'),
     ]

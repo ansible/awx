@@ -6,12 +6,10 @@ from awx.main.utils.licensing import server_product_name
 
 
 class IndexView(TemplateView):
-
     template_name = 'index.html'
 
 
 class MigrationsNotran(TemplateView):
-
     template_name = 'installing.html'
 
     def get_context_data(self, **kwargs):

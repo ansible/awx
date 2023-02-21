@@ -160,7 +160,6 @@ class FieldLookupBackend(BaseFilterBackend):
     NO_DUPLICATES_ALLOW_LIST = (CharField, IntegerField, BooleanField, TextField)
 
     def get_fields_from_lookup(self, model, lookup):
-
         if '__' in lookup and lookup.rsplit('__', 1)[-1] in self.SUPPORTED_LOOKUPS:
             path, suffix = lookup.rsplit('__', 1)
         else:

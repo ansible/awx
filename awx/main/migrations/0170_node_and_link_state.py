@@ -16,7 +16,6 @@ def forwards(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0169_jt_prompt_everything_on_launch'),
     ]

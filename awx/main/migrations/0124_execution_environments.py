@@ -8,7 +8,6 @@ import taggit.managers
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('taggit', '0003_taggeditem_add_unique_index'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

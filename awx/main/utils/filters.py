@@ -63,7 +63,6 @@ def record_is_blocked(record):
 
 
 class ExternalLoggerEnabled(Filter):
-
     enabled_loggers = FieldFromSettings('LOG_AGGREGATOR_LOGGERS')
     enabled_flag = FieldFromSettings('LOG_AGGREGATOR_ENABLED')
 
@@ -325,7 +324,6 @@ class SmartFilter(object):
 
     @classmethod
     def query_from_string(cls, filter_string):
-
         """
         TODO:
         * handle values with " via: a.b.c.d="hello\"world"

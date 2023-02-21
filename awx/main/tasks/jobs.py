@@ -311,7 +311,7 @@ class BaseTask(object):
         env['AWX_PRIVATE_DATA_DIR'] = private_data_dir
 
         if self.instance.execution_environment is None:
-            raise RuntimeError('The project could not sync because there is no Execution Environment.')
+            raise RuntimeError(f'The {self.model.__name__} could not run because there is no Execution Environment.')
 
         return env
 
@@ -390,6 +390,7 @@ class BaseTask(object):
             logger.error("I/O error({0}) while trying to open lock file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
             raise
 
+        emitted_lockfile_log = False
         start_time = time.time()
         while True:
             try:
@@ -401,6 +402,9 @@ class BaseTask(object):
                     logger.error("I/O error({0}) while trying to aquire lock on file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
                     raise
                 else:
+                    if not emitted_lockfile_log:
+                        logger.info(f"exception acquiring lock {lock_path}: {e}")
+                        emitted_lockfile_log = True
                     time.sleep(1.0)
             self.instance.refresh_from_db(fields=['cancel_flag'])
             if self.instance.cancel_flag or signal_callback():
@@ -1093,7 +1097,6 @@ class RunJob(SourceControlMixin, BaseTask):
 
 @task(queue=get_local_queuename)
 class RunProjectUpdate(BaseTask):
-
     model = ProjectUpdate
     event_model = ProjectUpdateEvent
     callback_class = RunnerCallbackForProjectUpdate
@@ -1416,7 +1419,6 @@ class RunProjectUpdate(BaseTask):
 
 @task(queue=get_local_queuename)
 class RunInventoryUpdate(SourceControlMixin, BaseTask):
-
     model = InventoryUpdate
     event_model = InventoryUpdateEvent
     callback_class = RunnerCallbackForInventoryUpdate
@@ -1811,7 +1813,6 @@ class RunAdHocCommand(BaseTask):
 
 @task(queue=get_local_queuename)
 class RunSystemJob(BaseTask):
-
     model = SystemJob
     event_model = SystemJobEvent
     callback_class = RunnerCallbackForSystemJob
