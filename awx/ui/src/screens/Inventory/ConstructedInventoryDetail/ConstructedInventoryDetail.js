@@ -5,6 +5,8 @@ import { t } from '@lingui/macro';
 import {
   Button,
   Chip,
+  Label,
+  LabelGroup,
   TextList,
   TextListItem,
   TextListItemVariants,
@@ -114,6 +116,10 @@ function ConstructedInventoryDetail({ inventory }) {
     wsInventorySource.summary_fields?.current_job ||
     wsInventorySource.summary_fields?.last_job ||
     null;
+  const wsInventory = {
+    ...inventory,
+    ...wsInventorySource?.summary_fields?.inventory,
+  };
 
   const { request: deleteInventory, error: deleteError } = useRequest(
     useCallback(async () => {
@@ -180,19 +186,19 @@ function ConstructedInventoryDetail({ inventory }) {
         />
         <Detail
           label={actions.total_groups.label}
-          value={inventory.total_groups}
+          value={wsInventory.total_groups}
           helpText={actions.total_groups.help_text}
           dataCy="constructed-inventory-total-groups"
         />
         <Detail
           label={actions.total_hosts.label}
-          value={inventory.total_hosts}
+          value={wsInventory.total_hosts}
           helpText={actions.total_hosts.help_text}
           dataCy="constructed-inventory-total-hosts"
         />
         <Detail
           label={actions.total_inventory_sources.label}
-          value={inventory.total_inventory_sources}
+          value={wsInventory.total_inventory_sources}
           helpText={actions.total_inventory_sources.help_text}
           dataCy="constructed-inventory-sources"
         />
@@ -204,7 +210,7 @@ function ConstructedInventoryDetail({ inventory }) {
         />
         <Detail
           label={actions.inventory_sources_with_failures.label}
-          value={inventory.inventory_sources_with_failures}
+          value={wsInventory.inventory_sources_with_failures}
           helpText={actions.inventory_sources_with_failures.help_text}
           dataCy="constructed-inventory-sources-with-failures"
         />
@@ -266,22 +272,25 @@ function ConstructedInventoryDetail({ inventory }) {
           fullWidth
           label={t`Input Inventories`}
           value={
-            <ChipGroup
-              numChips={5}
-              totalChips={inputInventories?.length}
-              ouiaId="input-inventory-chips"
-            >
+            <LabelGroup numLabels={5}>
               {inputInventories?.map((inputInventory) => (
-                <Link
+                <Label
+                  color="blue"
                   key={inputInventory.id}
-                  to={`/inventories/inventory/${inputInventory.id}/details`}
+                  render={({ className, content, componentRef }) => (
+                    <Link
+                      className={className}
+                      innerRef={componentRef}
+                      to={`/inventories/inventory/${inputInventory.id}/details`}
+                    >
+                      {content}
+                    </Link>
+                  )}
                 >
-                  <Chip key={inputInventory.id} isReadOnly>
-                    {inputInventory.name}
-                  </Chip>
-                </Link>
+                  {inputInventory.name}
+                </Label>
               ))}
-            </ChipGroup>
+            </LabelGroup>
           }
           isEmpty={inputInventories?.length === 0}
         />
