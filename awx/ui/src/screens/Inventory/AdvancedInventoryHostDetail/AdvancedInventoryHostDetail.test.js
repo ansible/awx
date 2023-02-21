@@ -1,15 +1,17 @@
 import React from 'react';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
-import SmartInventoryHostDetail from './SmartInventoryHostDetail';
+import AdvancedInventoryHostDetail from './AdvancedInventoryHostDetail';
 import mockHost from '../shared/data.host.json';
 
 jest.mock('../../../api');
 
-describe('<SmartInventoryHostDetail />', () => {
+describe('<AdvancedInventoryHostDetail />', () => {
   let wrapper;
 
   beforeAll(() => {
-    wrapper = mountWithContexts(<SmartInventoryHostDetail host={mockHost} />);
+    wrapper = mountWithContexts(
+      <AdvancedInventoryHostDetail host={mockHost} />
+    );
   });
 
   test('should render Details', () => {
@@ -30,11 +32,12 @@ describe('<SmartInventoryHostDetail />', () => {
 
   test('should not load Activity', () => {
     wrapper = mountWithContexts(
-      <SmartInventoryHostDetail
+      <AdvancedInventoryHostDetail
         host={{
           ...mockHost,
           summary_fields: {
             recent_jobs: [],
+            inventory: { kind: 'constructed', id: 2 },
           },
         }}
       />
