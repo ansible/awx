@@ -9,20 +9,26 @@ import { Tr, Td } from '@patternfly/react-table';
 import Sparkline from 'components/Sparkline';
 import { Host } from 'types';
 
-function SmartInventoryHostListItem({
+function AdvancedInventoryHostListItem({
   detailUrl,
-  host,
+  host: {
+    name,
+    id,
+    summary_fields: { recent_jobs, inventory },
+  },
   isSelected,
   onSelect,
   rowIndex,
+  inventoryType,
 }) {
-  const recentPlaybookJobs = host.summary_fields.recent_jobs.map((job) => ({
+  const recentPlaybookJobs = recent_jobs.map((job) => ({
     ...job,
     type: 'job',
   }));
-
+  const inventoryKind = inventory.kind === '' ? 'inventory' : inventoryType;
+  const inventoryLink = `/inventories/${inventoryKind}/${inventory.id}/details`;
   return (
-    <Tr id={`host-row-${host.id}`} ouiaId={`host-row-${host.id}`}>
+    <Tr id={`host-row-${id}`} ouiaId={`host-row-${id}`}>
       <Td
         select={{
           rowIndex,
@@ -32,28 +38,24 @@ function SmartInventoryHostListItem({
       />
       <Td dataLabel={t`Name`}>
         <Link to={`${detailUrl}`}>
-          <b>{host.name}</b>
+          <b>{name}</b>
         </Link>
       </Td>
       <Td dataLabel={t`Recent jobs`}>
         <Sparkline jobs={recentPlaybookJobs} />
       </Td>
       <Td dataLabel={t`Inventory`}>
-        <Link
-          to={`/inventories/inventory/${host.summary_fields.inventory.id}/details`}
-        >
-          {host.summary_fields.inventory.name}
-        </Link>
+        <Link to={inventoryLink}>{inventory.name}</Link>
       </Td>
     </Tr>
   );
 }
 
-SmartInventoryHostListItem.propTypes = {
+AdvancedInventoryHostListItem.propTypes = {
   detailUrl: string.isRequired,
   host: Host.isRequired,
   isSelected: bool.isRequired,
   onSelect: func.isRequired,
 };
 
-export default SmartInventoryHostListItem;
+export default AdvancedInventoryHostListItem;

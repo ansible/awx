@@ -22,7 +22,7 @@ import RoutedTabs from 'components/RoutedTabs';
 import RelatedTemplateList from 'components/RelatedTemplateList';
 import SmartInventoryDetail from './SmartInventoryDetail';
 import SmartInventoryEdit from './SmartInventoryEdit';
-import SmartInventoryHosts from './SmartInventoryHosts';
+import AdvancedInventoryHosts from './AdvancedInventoryHosts';
 import { getInventoryPath } from './shared/utils';
 
 function SmartInventory({ setBreadcrumb }) {
@@ -142,7 +142,7 @@ function SmartInventory({ setBreadcrumb }) {
               />
             </Route>,
             <Route key="hosts" path="/inventories/smart_inventory/:id/hosts">
-              <SmartInventoryHosts
+              <AdvancedInventoryHosts
                 inventory={inventory}
                 setBreadcrumb={setBreadcrumb}
               />

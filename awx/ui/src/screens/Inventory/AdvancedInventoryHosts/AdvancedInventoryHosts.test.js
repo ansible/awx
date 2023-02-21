@@ -5,37 +5,39 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import SmartInventoryHosts from './SmartInventoryHosts';
+import AdvancedInventoryHosts from './AdvancedInventoryHosts';
 
 jest.mock('../../../api');
-jest.mock('./SmartInventoryHostList', () => {
-  const SmartInventoryHostList = () => <div />;
+jest.mock('./AdvancedInventoryHostList', () => {
+  const AdvancedInventoryHostList = () => <div />;
   return {
     __esModule: true,
-    default: SmartInventoryHostList,
+    default: AdvancedInventoryHostList,
   };
 });
 
-describe('<SmartInventoryHosts />', () => {
+describe('<AdvancedInventoryHosts />', () => {
   test('should render smart inventory host list', () => {
     const history = createMemoryHistory({
       initialEntries: ['/inventories/smart_inventory/1/hosts'],
     });
     const match = {
-      path: '/inventories/smart_inventory/:id/hosts',
+      path: '/inventories/:inventoryType/:id/hosts',
       url: '/inventories/smart_inventory/1/hosts',
       isExact: true,
     };
     const wrapper = mountWithContexts(
-      <SmartInventoryHosts inventory={{ id: 1 }} />,
+      <AdvancedInventoryHosts inventory={{ id: 1 }} />,
       {
         context: { router: { history, route: { match } } },
       }
     );
-    expect(wrapper.find('SmartInventoryHostList').length).toBe(1);
-    expect(wrapper.find('SmartInventoryHostList').prop('inventory')).toEqual({
-      id: 1,
-    });
+    expect(wrapper.find('AdvancedInventoryHostList').length).toBe(1);
+    expect(wrapper.find('AdvancedInventoryHostList').prop('inventory')).toEqual(
+      {
+        id: 1,
+      }
+    );
     jest.clearAllMocks();
   });
 
@@ -45,20 +47,23 @@ describe('<SmartInventoryHosts />', () => {
       initialEntries: ['/inventories/smart_inventory/1/hosts/2'],
     });
     const match = {
-      path: '/inventories/smart_inventory/:id/hosts/:hostId',
+      path: '/inventories/:inventoryType/:id/hosts/:hostId',
       url: '/inventories/smart_inventory/1/hosts/2',
       isExact: true,
     };
     await act(async () => {
       wrapper = mountWithContexts(
-        <SmartInventoryHosts inventory={{ id: 1 }} setBreadcrumb={() => {}} />,
+        <AdvancedInventoryHosts
+          inventory={{ id: 1 }}
+          setBreadcrumb={() => {}}
+        />,
         {
           context: { router: { history, route: { match } } },
         }
       );
     });
     await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
-    expect(wrapper.find('SmartInventoryHost').length).toBe(1);
+    expect(wrapper.find('AdvancedInventoryHost').length).toBe(1);
     jest.clearAllMocks();
   });
 });
