@@ -5,13 +5,13 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
-import SmartInventoryHostList from './SmartInventoryHostList';
+import AdvancedInventoryHostList from './AdvancedInventoryHostList';
 import mockInventory from '../shared/data.inventory.json';
 import mockHosts from '../shared/data.hosts.json';
 
 jest.mock('../../../api');
 
-describe('<SmartInventoryHostList />', () => {
+describe('<AdvancedInventoryHostList />', () => {
   let wrapper;
   const clonedInventory = {
     ...mockInventory,
@@ -44,7 +44,7 @@ describe('<SmartInventoryHostList />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <SmartInventoryHostList inventory={clonedInventory} />
+        <AdvancedInventoryHostList inventory={clonedInventory} />
       );
     });
     await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
@@ -55,12 +55,12 @@ describe('<SmartInventoryHostList />', () => {
   });
 
   test('initially renders successfully', () => {
-    expect(wrapper.find('SmartInventoryHostList').length).toBe(1);
+    expect(wrapper.find('AdvancedInventoryHostList').length).toBe(1);
   });
 
   test('should fetch hosts from api and render them in the list', () => {
     expect(InventoriesAPI.readHosts).toHaveBeenCalled();
-    expect(wrapper.find('SmartInventoryHostListItem').length).toBe(3);
+    expect(wrapper.find('AdvancedInventoryHostListItem').length).toBe(3);
   });
 
   test('should select and deselect all items', async () => {
@@ -87,7 +87,7 @@ describe('<SmartInventoryHostList />', () => {
     );
     await act(async () => {
       wrapper = mountWithContexts(
-        <SmartInventoryHostList inventory={mockInventory} />
+        <AdvancedInventoryHostList inventory={mockInventory} />
       );
     });
     await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);

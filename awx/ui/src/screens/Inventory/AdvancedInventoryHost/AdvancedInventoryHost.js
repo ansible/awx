@@ -8,11 +8,11 @@ import ContentLoading from 'components/ContentLoading';
 import RoutedTabs from 'components/RoutedTabs';
 import useRequest from 'hooks/useRequest';
 import { InventoriesAPI } from 'api';
-import SmartInventoryHostDetail from '../SmartInventoryHostDetail';
+import AdvancedInventoryHostDetail from '../AdvancedInventoryHostDetail';
 
-function SmartInventoryHost({ inventory, setBreadcrumb }) {
+function AdvancedInventoryHost({ inventory, setBreadcrumb }) {
   const { params, path, url } = useRouteMatch(
-    '/inventories/smart_inventory/:id/hosts/:hostId'
+    '/inventories/:inventoryType/:id/hosts/:hostId'
   );
 
   const {
@@ -28,7 +28,7 @@ function SmartInventoryHost({ inventory, setBreadcrumb }) {
       );
       return response;
     }, [inventory.id, params.hostId]),
-    null
+    { isLoading: true }
   );
 
   useEffect(() => {
@@ -44,7 +44,6 @@ function SmartInventoryHost({ inventory, setBreadcrumb }) {
   if (error) {
     return <ContentError error={error} />;
   }
-
   const tabsArray = [
     {
       name: (
@@ -53,7 +52,7 @@ function SmartInventoryHost({ inventory, setBreadcrumb }) {
           {t`Back to Hosts`}
         </>
       ),
-      link: `/inventories/smart_inventory/${inventory.id}/hosts`,
+      link: `/inventories/${params.inventoryType}/${inventory.id}/hosts`,
       id: 0,
     },
     {
@@ -72,17 +71,19 @@ function SmartInventoryHost({ inventory, setBreadcrumb }) {
       {!isLoading && host && (
         <Switch>
           <Redirect
-            from="/inventories/smart_inventory/:id/hosts/:hostId"
+            from="/inventories/:inventoryType/:id/hosts/:hostId"
             to={`${path}/details`}
             exact
           />
           <Route key="details" path={`${path}/details`}>
-            <SmartInventoryHostDetail host={host} />
+            <AdvancedInventoryHostDetail host={host} />
           </Route>
           <Route key="not-found" path="*">
             <ContentError isNotFound>
               <Link to={`${url}/details`}>
-                {t`View smart inventory host details`}
+                {params.inventoryType === 'smart_inventory'
+                  ? t`View smart inventory host details`
+                  : t`View constructed inventory host details`}
               </Link>
             </ContentError>
           </Route>
@@ -92,4 +93,4 @@ function SmartInventoryHost({ inventory, setBreadcrumb }) {
   );
 }
 
-export default SmartInventoryHost;
+export default AdvancedInventoryHost;

@@ -7,14 +7,14 @@ import {
   waitForElement,
 } from '../../../../testUtils/enzymeHelpers';
 import mockHost from '../shared/data.host.json';
-import SmartInventoryHost from './SmartInventoryHost';
+import AdvancedInventoryHost from './AdvancedInventoryHost';
 
 jest.mock('../../../api');
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useRouteMatch: () => ({
     params: { id: 1234, hostId: 2 },
-    path: '/inventories/smart_inventory/:id/hosts/:hostId',
+    path: '/inventories/:inventoryType/:id/hosts/:hostId',
     url: '/inventories/smart_inventory/1234/hosts/2',
   }),
 }));
@@ -24,7 +24,7 @@ const mockSmartInventory = {
   name: 'Mock Smart Inventory',
 };
 
-describe('<SmartInventoryHost />', () => {
+describe('<AdvancedInventoryHost />', () => {
   let wrapper;
   let history;
 
@@ -36,7 +36,7 @@ describe('<SmartInventoryHost />', () => {
     InventoriesAPI.readHostDetail.mockResolvedValue(mockHost);
     await act(async () => {
       wrapper = mountWithContexts(
-        <SmartInventoryHost
+        <AdvancedInventoryHost
           inventory={mockSmartInventory}
           setBreadcrumb={() => {}}
         />
@@ -55,7 +55,7 @@ describe('<SmartInventoryHost />', () => {
     InventoriesAPI.readHostDetail.mockRejectedValueOnce(new Error());
     await act(async () => {
       wrapper = mountWithContexts(
-        <SmartInventoryHost
+        <AdvancedInventoryHost
           inventory={mockSmartInventory}
           setBreadcrumb={() => {}}
         />
@@ -76,7 +76,7 @@ describe('<SmartInventoryHost />', () => {
     });
     await act(async () => {
       wrapper = mountWithContexts(
-        <SmartInventoryHost
+        <AdvancedInventoryHost
           inventory={mockSmartInventory}
           setBreadcrumb={() => {}}
         />,
