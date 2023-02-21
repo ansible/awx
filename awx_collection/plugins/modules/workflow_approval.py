@@ -57,7 +57,15 @@ extends_documentation_fragment: awx.awx.auth
 
 
 EXAMPLES = """
-- name: Launch a workflow with a timeout of 10 seconds
+- name: Create a workflow approval node
+  workflow_job_template_node:
+    identifier: approval_test
+    approval_node:
+      name: approval_jt_name
+      timeout: 900
+    workflow: "Test Workflow"
+
+- name: Launch the workflow with a timeout of 10 seconds
   workflow_launch:
     workflow_template: "Test Workflow"
     wait: False
@@ -66,7 +74,7 @@ EXAMPLES = """
 - name: Wait for approval node to activate and approve
   workflow_approval:
     workflow_job_id: "{{ workflow.id }}"
-    name: Approve Me
+    name: approval_jt_name
     interval: 10
     timeout: 20
     action: deny
