@@ -1,3 +1,5 @@
+-include awx/ui_next/Makefile
+
 PYTHON ?= python3.9
 DOCKER_COMPOSE ?= docker-compose
 OFFICIAL ?= no
@@ -449,7 +451,7 @@ HEADLESS ?= no
 ifeq ($(HEADLESS), yes)
 dist/$(SDIST_TAR_FILE):
 else
-dist/$(SDIST_TAR_FILE): $(UI_BUILD_FLAG_FILE)
+dist/$(SDIST_TAR_FILE): $(UI_BUILD_FLAG_FILE) awx/ui_next/build
 endif
 	$(PYTHON) -m build -s
 	ln -sf $(SDIST_TAR_FILE) dist/awx.tar.gz
@@ -496,8 +498,6 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e enable_splunk=$(SPLUNK) \
 	    -e enable_prometheus=$(PROMETHEUS) \
 	    -e enable_grafana=$(GRAFANA) $(EXTRA_SOURCES_ANSIBLE_OPTS)
-
-
 
 docker-compose: awx/projects docker-compose-sources
 	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_OPTS) up $(COMPOSE_UP_OPTS) --remove-orphans
@@ -592,7 +592,7 @@ awx-kube-dev-build: Dockerfile.kube-dev
 	    -t $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) .
 
 ## Build awx image for deployment on Kubernetes environment.
-awx-kube-build: Dockerfile
+awx-kube-build: Dockerfile awx/ui_next/src
 	DOCKER_BUILDKIT=1 docker build -f Dockerfile \
 		--build-arg VERSION=$(VERSION) \
 		--build-arg SETUPTOOLS_SCM_PRETEND_VERSION=$(VERSION) \
@@ -654,3 +654,11 @@ help/generate:
 	} \
 	{ lastLine = $$0 }' $(MAKEFILE_LIST) | sort -u
 	@printf "\n"
+
+## Display help for a specific target folder
+help/%:
+	@make -s help MAKEFILE_LIST="$*/Makefile"
+
+## Display help for a specific target folder
+help/%/aliases:
+	@make -s help/all MAKEFILE_LIST="$*/Makefile.aliases"
