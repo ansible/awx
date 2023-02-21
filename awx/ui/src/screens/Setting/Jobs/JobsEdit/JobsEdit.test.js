@@ -79,7 +79,6 @@ describe('<JobsEdit />', () => {
     const {
       EVENT_STDOUT_MAX_BYTES_DISPLAY,
       STDOUT_MAX_BYTES_DISPLAY,
-      AWX_RUNNER_KEEPALIVE_SECONDS,
       ...jobRequest
     } = mockJobSettings;
     expect(SettingsAPI.updateAll).toHaveBeenCalledWith(jobRequest);
