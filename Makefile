@@ -1,4 +1,4 @@
-include awx/ui-next/Makefile
+# include awx/ui-next/Makefile
 
 PYTHON ?= python3.9
 OFFICIAL ?= no

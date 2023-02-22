@@ -25,4 +25,7 @@ class MigrationsNotran(TemplateView):
 
 app_name = 'ui-next'
 
-urlpatterns = [re_path(r'^$', IndexView.as_view(), name='index'), re_path(r'^migrations_notran/$', MigrationsNotran.as_view(), name='migrations_notran')]
+urlpatterns = [
+    re_path(r'^$', IndexView.as_view(), name='index'),
+    re_path(r'^migrations_notran/$', MigrationsNotran.as_view(), name='migrations_notran'),
+]
