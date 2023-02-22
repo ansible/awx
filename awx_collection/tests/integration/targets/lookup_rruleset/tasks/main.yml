@@ -356,3 +356,19 @@
     that:
       - results is success
       - "'DTSTART;TZID=UTC:20220430T103045 RRULE:FREQ=MONTHLY;BYMONTHDAY=12,13,14,15,16,17,18;BYDAY=SA;INTERVAL=1' == complex_rule"
+
+- name: mondays, Tuesdays, and WEDNESDAY with case-insensitivity
+  set_fact:
+    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules, timezone='UTC' ) }}"
+  ignore_errors: True
+  register: results
+  vars:
+    rrules:
+      - frequency: 'day'
+        interval: 1
+        byweekday: monday, Tuesday, WEDNESDAY
+
+- assert:
+    that:
+      - results is success
+      - "'DTSTART;TZID=UTC:20220430T103045 RRULE:FREQ=DAILY;BYDAY=MO,TU,WE;INTERVAL=1' == complex_rule"
