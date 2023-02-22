@@ -24,9 +24,8 @@ def test_default_settings():
     from django.conf import settings
 
     for k in dir(settings):
-        default_val = getattr(settings.default_settings, k, None)
         if k not in settings.DEFAULTS_SNAPSHOT or k in LOCAL_SETTINGS:
             continue
+        default_val = getattr(settings.default_settings, k, None)
         snapshot_val = settings.DEFAULTS_SNAPSHOT[k]
-        if default_val != snapshot_val:
-            raise Exception(f'Setting for {k} does not match shapshot:\nsnapshot: {snapshot_val}\ndefault: {default_val}')
+        assert default_val == snapshot_val, f'Setting for {k} does not match shapshot:\nsnapshot: {snapshot_val}\ndefault: {default_val}'
