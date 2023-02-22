@@ -38,7 +38,7 @@ const InventoryLookupField = ({ isDisabled }) => {
       error={inventoryMeta.error}
       validate={required(t`Select a value for this field`)}
       isDisabled={isDisabled}
-      hideSmartInventories
+      hideAdvancedInventories
       autoPopulate={!inventoryField.value?.id}
     />
   );
