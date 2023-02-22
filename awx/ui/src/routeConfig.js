@@ -187,6 +187,7 @@ function getRouteConfig(userProfile = {}) {
 
   if (userProfile?.isSuperUser || userProfile?.isSystemAuditor)
     return routeConfig;
+  deleteRoute('host_metrics');
   deleteRouteGroup('settings');
   deleteRoute('management_jobs');
   if (userProfile?.isOrgAdmin) return routeConfig;
