@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import { Host } from 'types';
@@ -8,7 +8,8 @@ import { Detail, DetailList, UserDateDetail } from 'components/DetailList';
 import Sparkline from 'components/Sparkline';
 import { VariablesDetail } from 'components/CodeEditor';
 
-function SmartInventoryHostDetail({ host }) {
+function AdvancedInventoryHostDetail({ host }) {
+  const { inventoryType } = useParams();
   const {
     created,
     description,
@@ -24,6 +25,7 @@ function SmartInventoryHostDetail({ host }) {
     type: 'job',
   }));
 
+  const inventoryKind = inventory.kind === '' ? 'inventory' : inventoryType;
   return (
     <CardBody>
       <DetailList gutter="sm">
@@ -37,7 +39,7 @@ function SmartInventoryHostDetail({ host }) {
         <Detail
           label={t`Inventory`}
           value={
-            <Link to={`/inventories/inventory/${inventory?.id}/details`}>
+            <Link to={`/inventories/${inventoryKind}/${inventory?.id}/details`}>
               {inventory?.name}
             </Link>
           }
@@ -61,8 +63,8 @@ function SmartInventoryHostDetail({ host }) {
   );
 }
 
-SmartInventoryHostDetail.propTypes = {
+AdvancedInventoryHostDetail.propTypes = {
   host: Host.isRequired,
 };
 
-export default SmartInventoryHostDetail;
+export default AdvancedInventoryHostDetail;

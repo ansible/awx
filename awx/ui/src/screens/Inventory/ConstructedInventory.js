@@ -23,7 +23,7 @@ import RoutedTabs from 'components/RoutedTabs';
 import ConstructedInventoryDetail from './ConstructedInventoryDetail';
 import ConstructedInventoryEdit from './ConstructedInventoryEdit';
 import ConstructedInventoryGroups from './ConstructedInventoryGroups';
-import ConstructedInventoryHosts from './ConstructedInventoryHosts';
+import AdvancedInventoryHosts from './AdvancedInventoryHosts';
 import { getInventoryPath } from './shared/utils';
 
 function ConstructedInventory({ setBreadcrumb }) {
@@ -42,8 +42,7 @@ function ConstructedInventory({ setBreadcrumb }) {
       );
       return data;
     }, [match.params.id]),
-
-    null
+    { isLoading: true }
   );
 
   useEffect(() => {
@@ -111,7 +110,11 @@ function ConstructedInventory({ setBreadcrumb }) {
   }
 
   let showCardHeader = true;
-  if (['edit'].some((name) => location.pathname.includes(name))) {
+  if (
+    ['edit', 'add', 'groups/', 'hosts/'].some((name) =>
+      location.pathname.includes(name)
+    )
+  ) {
     showCardHeader = false;
   }
 
@@ -154,7 +157,10 @@ function ConstructedInventory({ setBreadcrumb }) {
               path="/inventories/constructed_inventory/:id/hosts"
               key="hosts"
             >
-              <ConstructedInventoryHosts />
+              <AdvancedInventoryHosts
+                inventory={inventory}
+                setBreadcrumb={setBreadcrumb}
+              />
             </Route>,
             <Route
               path="/inventories/constructed_inventory/:id/groups"
