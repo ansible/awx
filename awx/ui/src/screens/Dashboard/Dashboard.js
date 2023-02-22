@@ -1,14 +1,16 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { t } from '@lingui/macro';
+import { t, Trans } from '@lingui/macro';
 import {
+  Banner,
   Card,
   PageSection,
   Tabs,
   Tab,
   TabTitleText,
 } from '@patternfly/react-core';
+import { InfoCircleIcon } from '@patternfly/react-icons';
 
 import useRequest from 'hooks/useRequest';
 import { DashboardAPI } from 'api';
@@ -69,6 +71,15 @@ function Dashboard() {
   }
   return (
     <>
+      <Banner variant="info">
+        <Trans>
+          <p>
+            <InfoCircleIcon /> A tech preview of the new Ansible Automation
+            Platform user interface can be found{' '}
+            <a href="/controller/dashboard">here</a>.
+          </p>
+        </Trans>
+      </Banner>
       <ScreenHeader
         streamType="all"
         breadcrumbConfig={{ '/home': t`Dashboard` }}
