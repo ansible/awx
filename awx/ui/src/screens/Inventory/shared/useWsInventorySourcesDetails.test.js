@@ -1,8 +1,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import WS from 'jest-websocket-mock';
+import { InventorySourcesAPI } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import useWsInventorySourceDetails from './useWsInventorySourcesDetails';
+
+jest.mock('../../../api/models/InventorySources');
 
 function TestInner() {
   return <div />;
@@ -111,6 +114,27 @@ describe('useWsProject', () => {
       status: 'running',
       finished: null,
     });
+
+    expect(InventorySourcesAPI.readDetail).toHaveBeenCalledTimes(0);
+    InventorySourcesAPI.readDetail.mockResolvedValue({
+      data: {},
+    });
+    await act(async () => {
+      mockServer.send(
+        JSON.stringify({
+          group_name: 'jobs',
+          inventory_id: 1,
+          status: 'successful',
+          type: 'inventory_update',
+          unified_job_id: 2,
+          unified_job_template_id: 1,
+          inventory_source_id: 1,
+        })
+      );
+    });
+    expect(InventorySourcesAPI.readDetail).toHaveBeenCalledTimes(1);
+
+    jest.clearAllMocks();
     WS.clean();
   });
 });

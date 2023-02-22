@@ -5,54 +5,103 @@ import { t } from '@lingui/macro';
 import {
   Button,
   Chip,
+  Label,
+  LabelGroup,
   TextList,
   TextListItem,
   TextListItemVariants,
   TextListVariants,
+  Tooltip,
 } from '@patternfly/react-core';
+import { InventoriesAPI, ConstructedInventoriesAPI } from 'api';
+import { Inventory } from 'types';
+import { formatDateString } from 'util/dates';
+import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
+import useRequest, { useDismissableError } from 'hooks/useRequest';
 import AlertModal from 'components/AlertModal';
 import { CardBody, CardActionsRow } from 'components/Card';
-import { DetailList, Detail, UserDateDetail } from 'components/DetailList';
+import ChipGroup from 'components/ChipGroup';
 import { VariablesDetail } from 'components/CodeEditor';
-import DeleteButton from 'components/DeleteButton';
-import ErrorDetail from 'components/ErrorDetail';
 import ContentError from 'components/ContentError';
 import ContentLoading from 'components/ContentLoading';
-import ChipGroup from 'components/ChipGroup';
-import Popover from 'components/Popover';
-import { InventoriesAPI, ConstructedInventoriesAPI } from 'api';
-import useRequest, { useDismissableError } from 'hooks/useRequest';
-import { Inventory } from 'types';
-import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
+import { DetailList, Detail, UserDateDetail } from 'components/DetailList';
+import DeleteButton from 'components/DeleteButton';
+import ErrorDetail from 'components/ErrorDetail';
 import InstanceGroupLabels from 'components/InstanceGroupLabels';
+import JobCancelButton from 'components/JobCancelButton';
+import Popover from 'components/Popover';
+import StatusLabel from 'components/StatusLabel';
+import ConstructedInventorySyncButton from './ConstructedInventorySyncButton';
+import useWsInventorySourcesDetails from '../shared/useWsInventorySourcesDetails';
 import getHelpText from '../shared/Inventory.helptext';
+
+function JobStatusLabel({ job }) {
+  if (!job) {
+    return null;
+  }
+
+  return (
+    <Tooltip
+      position="top"
+      content={
+        <>
+          <div>{t`MOST RECENT SYNC`}</div>
+          <div>
+            {t`JOB ID:`} {job.id}
+          </div>
+          <div>
+            {t`STATUS:`} {job.status.toUpperCase()}
+          </div>
+          {job.finished && (
+            <div>
+              {t`FINISHED:`} {formatDateString(job.finished)}
+            </div>
+          )}
+        </>
+      }
+      key={job.id}
+    >
+      <Link to={`/jobs/inventory/${job.id}`}>
+        <StatusLabel status={job.status} />
+      </Link>
+    </Tooltip>
+  );
+}
 
 function ConstructedInventoryDetail({ inventory }) {
   const history = useHistory();
   const helpText = getHelpText();
 
   const {
-    result: { instanceGroups, sourceInventories, actions },
+    result: { instanceGroups, inputInventories, inventorySource, actions },
     request: fetchRelatedDetails,
     error: contentError,
     isLoading,
   } = useRequest(
     useCallback(async () => {
-      const [response, sourceInvResponse, options] = await Promise.all([
+      const [
+        instanceGroupsResponse,
+        inputInventoriesResponse,
+        inventorySourceResponse,
+        optionsResponse,
+      ] = await Promise.all([
         InventoriesAPI.readInstanceGroups(inventory.id),
-        InventoriesAPI.readSourceInventories(inventory.id),
-        ConstructedInventoriesAPI.readOptions(inventory.id),
+        InventoriesAPI.readInputInventories(inventory.id),
+        InventoriesAPI.readSources(inventory.id),
+        ConstructedInventoriesAPI.readOptions(),
       ]);
 
       return {
-        instanceGroups: response.data.results,
-        sourceInventories: sourceInvResponse.data.results,
-        actions: options.data.actions.GET,
+        instanceGroups: instanceGroupsResponse.data.results,
+        inputInventories: inputInventoriesResponse.data.results,
+        inventorySource: inventorySourceResponse.data.results[0],
+        actions: optionsResponse.data.actions.GET,
       };
     }, [inventory.id]),
     {
       instanceGroups: [],
-      sourceInventories: [],
+      inputInventories: [],
+      inventorySource: {},
       actions: {},
       isLoading: true,
     }
@@ -62,6 +111,16 @@ function ConstructedInventoryDetail({ inventory }) {
     fetchRelatedDetails();
   }, [fetchRelatedDetails]);
 
+  const wsInventorySource = useWsInventorySourcesDetails(inventorySource);
+  const inventorySourceSyncJob =
+    wsInventorySource.summary_fields?.current_job ||
+    wsInventorySource.summary_fields?.last_job ||
+    null;
+  const wsInventory = {
+    ...inventory,
+    ...wsInventorySource?.summary_fields?.inventory,
+  };
+
   const { request: deleteInventory, error: deleteError } = useRequest(
     useCallback(async () => {
       await InventoriesAPI.destroy(inventory.id);
@@ -70,9 +129,6 @@ function ConstructedInventoryDetail({ inventory }) {
   );
 
   const { error, dismissError } = useDismissableError(deleteError);
-
-  const { organization, user_capabilities: userCapabilities } =
-    inventory.summary_fields;
 
   const deleteDetailsRequests =
     relatedResourceDeleteRequests.inventory(inventory);
@@ -94,6 +150,14 @@ function ConstructedInventoryDetail({ inventory }) {
           dataCy="constructed-inventory-name"
         />
         <Detail
+          label={t`Last Job Status`}
+          value={
+            inventorySourceSyncJob && (
+              <JobStatusLabel job={inventorySourceSyncJob} />
+            )
+          }
+        />
+        <Detail
           label={t`Description`}
           value={inventory.description}
           dataCy="constructed-inventory-description"
@@ -113,26 +177,28 @@ function ConstructedInventoryDetail({ inventory }) {
           label={t`Organization`}
           dataCy="constructed-inventory-organization"
           value={
-            <Link to={`/organizations/${organization.id}/details`}>
-              {organization.name}
+            <Link
+              to={`/organizations/${inventory.summary_fields?.organization.id}/details`}
+            >
+              {inventory.summary_fields?.organization.name}
             </Link>
           }
         />
         <Detail
           label={actions.total_groups.label}
-          value={inventory.total_groups}
+          value={wsInventory.total_groups}
           helpText={actions.total_groups.help_text}
           dataCy="constructed-inventory-total-groups"
         />
         <Detail
           label={actions.total_hosts.label}
-          value={inventory.total_hosts}
+          value={wsInventory.total_hosts}
           helpText={actions.total_hosts.help_text}
           dataCy="constructed-inventory-total-hosts"
         />
         <Detail
           label={actions.total_inventory_sources.label}
-          value={inventory.total_inventory_sources}
+          value={wsInventory.total_inventory_sources}
           helpText={actions.total_inventory_sources.help_text}
           dataCy="constructed-inventory-sources"
         />
@@ -144,7 +210,7 @@ function ConstructedInventoryDetail({ inventory }) {
         />
         <Detail
           label={actions.inventory_sources_with_failures.label}
-          value={inventory.inventory_sources_with_failures}
+          value={wsInventory.inventory_sources_with_failures}
           helpText={actions.inventory_sources_with_failures.help_text}
           dataCy="constructed-inventory-sources-with-failures"
         />
@@ -204,26 +270,29 @@ function ConstructedInventoryDetail({ inventory }) {
         />
         <Detail
           fullWidth
-          label={t`Source Inventories`}
+          label={t`Input Inventories`}
           value={
-            <ChipGroup
-              numChips={5}
-              totalChips={sourceInventories?.length}
-              ouiaId="source-inventory-chips"
-            >
-              {sourceInventories?.map((sourceInventory) => (
-                <Link
-                  key={sourceInventory.id}
-                  to={`/inventories/inventory/${sourceInventory.id}/details`}
+            <LabelGroup numLabels={5}>
+              {inputInventories?.map((inputInventory) => (
+                <Label
+                  color="blue"
+                  key={inputInventory.id}
+                  render={({ className, content, componentRef }) => (
+                    <Link
+                      className={className}
+                      innerRef={componentRef}
+                      to={`/inventories/inventory/${inputInventory.id}/details`}
+                    >
+                      {content}
+                    </Link>
+                  )}
                 >
-                  <Chip key={sourceInventory.id} isReadOnly>
-                    {sourceInventory.name}
-                  </Chip>
-                </Link>
+                  {inputInventory.name}
+                </Label>
               ))}
-            </ChipGroup>
+            </LabelGroup>
           }
-          isEmpty={sourceInventories?.length === 0}
+          isEmpty={inputInventories?.length === 0}
         />
         <VariablesDetail
           label={actions.source_vars.label}
@@ -245,7 +314,7 @@ function ConstructedInventoryDetail({ inventory }) {
         />
       </DetailList>
       <CardActionsRow>
-        {userCapabilities.edit && (
+        {inventory?.summary_fields?.user_capabilities?.edit && (
           <Button
             ouiaId="inventory-detail-edit-button"
             component={Link}
@@ -254,7 +323,21 @@ function ConstructedInventoryDetail({ inventory }) {
             {t`Edit`}
           </Button>
         )}
-        {userCapabilities.delete && (
+        {inventorySource?.summary_fields?.user_capabilities?.start &&
+          (['new', 'running', 'pending', 'waiting'].includes(
+            inventorySourceSyncJob?.status
+          ) ? (
+            <JobCancelButton
+              job={{ id: inventorySourceSyncJob.id, type: 'inventory_update' }}
+              errorTitle={t`Constructed Inventory Source Sync Error`}
+              title={t`Cancel Constructed Inventory Source Sync`}
+              errorMessage={t`Failed to cancel Constructed Inventory Source Sync`}
+              buttonText={t`Cancel Sync`}
+            />
+          ) : (
+            <ConstructedInventorySyncButton inventoryId={inventory.id} />
+          ))}
+        {inventory?.summary_fields?.user_capabilities?.delete && (
           <DeleteButton
             name={inventory.name}
             modalTitle={t`Delete Inventory`}
