@@ -70,14 +70,14 @@ describe('InventoryLookup', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <Formik>
-          <InventoryLookup onChange={() => {}} hideSmartInventories />
+          <InventoryLookup onChange={() => {}} hideAdvancedInventories />
         </Formik>
       );
     });
     wrapper.update();
     expect(InventoriesAPI.read).toHaveBeenCalledTimes(1);
     expect(InventoriesAPI.read).toHaveBeenCalledWith({
-      not__kind: 'smart',
+      not__kind: ['smart', 'constructed'],
       order_by: 'name',
       page: 1,
       page_size: 5,
