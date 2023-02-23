@@ -31,14 +31,13 @@ from awx.api.views import (
     ApplicationOAuth2TokenList,
     OAuth2ApplicationDetail,
 )
-from awx.api.views.bulk import (
-    BulkJobLaunchView,
-    BulkView,
-)
+
 from awx.api.views.bulk import (
     BulkView,
     BulkHostCreateView,
+    BulkJobLaunchView,
 )
+
 from awx.api.views.mesh_visualizer import MeshVisualizer
 
 from awx.api.views.metrics import MetricsView
