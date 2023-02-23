@@ -26,7 +26,7 @@ def test_ig_read_user_visibility(default_instance_group, user, organization, job
 
 
 @pytest.mark.django_db
-def test_ig_use_role_user_visibility(default_instance_group, user, organization, job_template_factory):
+def test_ig_use_role_user_visibility(default_instance_group, user):
     u = user('test', False)
     role = default_instance_group.use_role
     role.members.add(u)
@@ -36,20 +36,6 @@ def test_ig_use_role_user_visibility(default_instance_group, user, organization,
     assert not access.can_add(default_instance_group)
     assert not access.can_admin(default_instance_group)
     assert not access.can_change(default_instance_group, {'name': 'New description.'})
-
-
-@pytest.mark.django_db
-def test_ig_admin_role_user_visibility(default_instance_group, user, organization, job_template_factory):
-    u = user('test', False)
-    role = default_instance_group.admin_role
-    role.members.add(u)
-    access = InstanceGroupAccess(u)
-    assert access.can_read(default_instance_group)
-    assert access.can_use(default_instance_group)
-    assert not access.can_add(default_instance_group)
-    assert access.can_admin(default_instance_group)
-    assert access.can_change(default_instance_group, {'name': 'New description.'})
-    assert not access.can_delete(default_instance_group)
 
 
 @pytest.mark.django_db
@@ -118,7 +104,7 @@ def test_ig_admin_user_visibility(organization, default_instance_group, admin, s
     assert len(InstanceGroupAccess(system_auditor).get_queryset()) == 1
     assert len(InstanceGroupAccess(org_admin).get_queryset()) == 0
     organization.instance_groups.add(default_instance_group)
-    assert len(InstanceGroupAccess(org_admin).get_queryset()) == 1
+    assert len(InstanceGroupAccess(org_admin).get_queryset()) == 0
 
 
 @pytest.mark.django_db
@@ -129,16 +115,6 @@ def test_ig_normal_user_associability(organization, default_instance_group, user
     organization.instance_groups.add(default_instance_group)
     organization.member_role.members.add(u)
     assert not access.can_attach(organization, default_instance_group, 'instance_groups', None)
-
-
-@pytest.mark.django_db
-def test_access_via_two_organizations(rando, default_instance_group):
-    for org_name in ['org1', 'org2']:
-        org = Organization.objects.create(name=org_name)
-        org.instance_groups.add(default_instance_group)
-        org.admin_role.members.add(rando)
-    access = InstanceGroupAccess(rando)
-    assert list(access.get_queryset()) == [default_instance_group]
 
 
 @pytest.mark.django_db
@@ -166,7 +142,7 @@ def test_ig_associability(organization, default_instance_group, admin, system_au
     omember_access = InventoryAccess(org_member)
 
     assert admin_access.can_attach(objects.inventory, default_instance_group, 'instance_groups', None)
-    assert oadmin_access.can_attach(objects.inventory, default_instance_group, 'instance_groups', None)
+    assert not oadmin_access.can_attach(objects.inventory, default_instance_group, 'instance_groups', None)
     assert not auditor_access.can_attach(objects.inventory, default_instance_group, 'instance_groups', None)
     assert not omember_access.can_attach(objects.inventory, default_instance_group, 'instance_groups', None)
 
@@ -176,6 +152,6 @@ def test_ig_associability(organization, default_instance_group, admin, system_au
     omember_access = JobTemplateAccess(org_member)
 
     assert admin_access.can_attach(objects.job_template, default_instance_group, 'instance_groups', None)
-    assert oadmin_access.can_attach(objects.job_template, default_instance_group, 'instance_groups', None)
+    assert not oadmin_access.can_attach(objects.job_template, default_instance_group, 'instance_groups', None)
     assert not auditor_access.can_attach(objects.job_template, default_instance_group, 'instance_groups', None)
     assert not omember_access.can_attach(objects.job_template, default_instance_group, 'instance_groups', None)

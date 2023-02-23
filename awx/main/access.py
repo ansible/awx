@@ -591,7 +591,6 @@ class InstanceGroupAccess(BaseAccess):
     """
     I can see Instance Groups when I am:
        - a superuser(system administrator)
-       - an organization admin to which an instance group is associated
        - at least read_role on the instance group
     I can edit Instance Groups when I am:
        - a superuser
@@ -601,15 +600,12 @@ class InstanceGroupAccess(BaseAccess):
     I can use Instance Groups when I have:
        - use_role on the instance group
        - admin_role on the instance group
-       - organization admin to which an instance group is associated(by special logic handled elsewhere)
     """
 
     model = InstanceGroup
     prefetch_related = ('instances',)
 
     def filtered_queryset(self):
-        if self.user.admin_of_organizations.exists() and not self.model.accessible_objects(self.user, 'read_role'):
-            return InstanceGroup.objects.filter(organization__in=Organization.accessible_pk_qs(self.user, 'admin_role')).distinct()
         return self.model.accessible_objects(self.user, 'read_role')
 
     @check_superuser
@@ -961,7 +957,7 @@ class InventoryAccess(BaseAccess):
 
     def can_attach(self, obj, sub_obj, relationship, *args, **kwargs):
         if relationship == "instance_groups":
-            if self.user.can_access(type(sub_obj), "read", sub_obj) and (self.user in sub_obj.use_role or self.user in obj.organization.admin_role):
+            if self.user in sub_obj.use_role:
                 return True
             return False
         return super(InventoryAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
@@ -1702,7 +1698,7 @@ class JobTemplateAccess(NotificationAttachMixin, UnifiedCredentialsMixin, BaseAc
         if relationship == "instance_groups":
             if not obj.organization:
                 return False
-            return self.user.can_access(type(sub_obj), "read", sub_obj) and (self.user in sub_obj.use_role or self.user in obj.organization.admin_role)
+            return self.user in sub_obj.use_role
         return super(JobTemplateAccess, self).can_attach(obj, sub_obj, relationship, data, skip_sub_obj_read_check=skip_sub_obj_read_check)
 
     @check_superuser
