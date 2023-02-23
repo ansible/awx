@@ -1,4 +1,7 @@
-# include awx/ui-next/Makefile
+mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+current_dir := $(dir $(mkfile_path))
+
+include awx/ui-next/Makefile
 
 PYTHON ?= python3.9
 OFFICIAL ?= no
@@ -399,7 +402,7 @@ bulk_data:
 # UI TASKS
 # --------------------------------------
 
-UI_BUILD_FLAG_FILE = awx/ui/.ui-built
+UI_BUILD_FLAG_FILE = $(current_dir)ui/.ui-built
 
 clean-ui:
 	rm -rf node_modules
@@ -460,7 +463,7 @@ HEADLESS ?= no
 ifeq ($(HEADLESS), yes)
 dist/$(SDIST_TAR_FILE):
 else
-dist/$(SDIST_TAR_FILE): $(UI_BUILD_FLAG_FILE)
+dist/$(SDIST_TAR_FILE): $(UI_BUILD_FLAG_FILE) awx/ui-next/ansible-ui/build
 endif
 	$(PYTHON) -m build -s
 	ln -sf $(SDIST_TAR_FILE) dist/awx.tar.gz
@@ -508,8 +511,6 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e enable_prometheus=$(PROMETHEUS) \
 	    -e enable_grafana=$(GRAFANA) $(EXTRA_SOURCES_ANSIBLE_OPTS)
 
-
-
 docker-compose: awx/projects docker-compose-sources
 	docker-compose -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_OPTS) up $(COMPOSE_UP_OPTS) --remove-orphans
 
@@ -542,7 +543,7 @@ docker-compose-container-group-clean:
 	rm -rf tools/docker-compose-minikube/_sources/
 
 ## Base development image build
-docker-compose-build: 
+docker-compose-build:
 	ansible-playbook tools/ansible/dockerfile.yml -e build_dev=True -e receptor_image=$(RECEPTOR_IMAGE)
 	DOCKER_BUILDKIT=1 docker build -t $(DEVEL_IMAGE_NAME) \
 	    --build-arg BUILDKIT_INLINE_CACHE=1 \
@@ -666,3 +667,11 @@ help/generate:
 	} \
 	{ lastLine = $$0 }' $(MAKEFILE_LIST) | sort -u
 	@printf "\n"
+
+## Display help for a specific target folder
+help/%:
+	@make -s help MAKEFILE_LIST="$*/Makefile"
+
+## Display help for a specific target folder
+help/%/aliases:
+	@make -s help/all MAKEFILE_LIST="$*/Makefile.aliases"
