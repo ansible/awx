@@ -4288,7 +4288,7 @@ class WorkflowApprovalTemplateJobsList(SubListAPIView):
     parent_key = 'workflow_approval_template'
 
 
-class WorkflowApprovalList(ListCreateAPIView):
+class WorkflowApprovalList(ListAPIView):
     model = models.WorkflowApproval
     serializer_class = serializers.WorkflowApprovalListSerializer
 

@@ -28,7 +28,7 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import views
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import StaticHTMLRenderer
 from rest_framework.negotiation import DefaultContentNegotiation
 
@@ -822,7 +822,7 @@ def trigger_delayed_deep_copy(*args, **kwargs):
 
 class CopyAPIView(GenericAPIView):
     serializer_class = CopySerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
     copy_return_serializer_class = None
     new_in_330 = True
     new_in_api_v2 = True
