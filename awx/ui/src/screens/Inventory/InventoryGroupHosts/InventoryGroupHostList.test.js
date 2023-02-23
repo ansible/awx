@@ -8,19 +8,20 @@ import {
 } from '../../../../testUtils/enzymeHelpers';
 import InventoryGroupHostList from './InventoryGroupHostList';
 import mockHosts from '../shared/data.hosts.json';
+import { Route } from 'react-router-dom';
 
 jest.mock('../../../api/models/Groups');
 jest.mock('../../../api/models/Inventories');
 jest.mock('../../../api/models/CredentialTypes');
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => ({
-    id: 1,
-    groupId: 2,
-  }),
-}));
 
 describe('<InventoryGroupHostList />', () => {
+  jest.mock('react-router-dom', () => ({
+    ...jest.requireActual('react-router-dom'),
+    useParams: () => ({
+      id: 1,
+      groupId: 2,
+    }),
+  }));
   let wrapper;
 
   beforeEach(async () => {
@@ -301,5 +302,66 @@ describe('<InventoryGroupHostList />', () => {
       wrapper = mountWithContexts(<InventoryGroupHostList />);
     });
     expect(wrapper.find('AdHocCommands')).toHaveLength(0);
+  });
+});
+
+describe('<InventoryGroupHostList> for constructed inventories', () => {
+  jest.mock('react-router-dom', () => ({
+    ...jest.requireActual('react-router-dom'),
+    useParams: () => ({
+      id: 1,
+      groupId: 2,
+      inventoryType: 'constructed_inventory',
+    }),
+  }));
+  let wrapper;
+
+  beforeEach(async () => {
+    GroupsAPI.readAllHosts.mockResolvedValue({
+      data: { ...mockHosts },
+    });
+    InventoriesAPI.readHostsOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {},
+          POST: {},
+        },
+      },
+    });
+    InventoriesAPI.readAdHocOptions.mockResolvedValue({
+      data: {
+        actions: {
+          GET: {
+            module_name: {
+              choices: [
+                ['command', 'command'],
+                ['shell', 'shell'],
+              ],
+            },
+          },
+          POST: {},
+        },
+      },
+    });
+    const history = createMemoryHistory({
+      initialEntries: ['/inventories/constructed_inventory/1/groups/2/hosts'],
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Route path="/inventories/:inventoryType/:id/groups/:groupId/hosts">
+          <InventoryGroupHostList />
+        </Route>,
+        { context: { router: { history } } }
+      );
+    });
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+  test('Should not show associate, or disassociate button', async () => {
+    expect(wrapper.find('AddDropDownButton').length).toBe(0);
+    expect(wrapper.find('DisassociateButton').length).toBe(0);
   });
 });

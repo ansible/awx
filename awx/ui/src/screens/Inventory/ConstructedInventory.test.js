@@ -21,12 +21,6 @@ jest.mock('react-router-dom', () => ({
 describe('<ConstructedInventory />', () => {
   let wrapper;
 
-  // beforeEach(async () => {
-  //   ConstructedInventoriesAPI.readDetail.mockResolvedValue({
-  //     data: mockInventory,
-  //   });
-  // });
-
   test('should render expected tabs', async () => {
     ConstructedInventoriesAPI.readDetail.mockResolvedValue({
       data: mockInventory,

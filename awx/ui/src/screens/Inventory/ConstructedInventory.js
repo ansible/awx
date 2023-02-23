@@ -22,7 +22,7 @@ import { ResourceAccessList } from 'components/ResourceAccessList';
 import RoutedTabs from 'components/RoutedTabs';
 import ConstructedInventoryDetail from './ConstructedInventoryDetail';
 import ConstructedInventoryEdit from './ConstructedInventoryEdit';
-import ConstructedInventoryGroups from './ConstructedInventoryGroups';
+import InventoryGroups from './InventoryGroups';
 import AdvancedInventoryHosts from './AdvancedInventoryHosts';
 import { getInventoryPath } from './shared/utils';
 
@@ -164,9 +164,12 @@ function ConstructedInventory({ setBreadcrumb }) {
             </Route>,
             <Route
               path="/inventories/constructed_inventory/:id/groups"
-              key="groups"
+              key="constructed_inventory_groups"
             >
-              <ConstructedInventoryGroups />
+              <InventoryGroups
+                inventory={inventory}
+                setBreadcrumb={setBreadcrumb}
+              />
             </Route>,
             <Route
               key="jobs"
