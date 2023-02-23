@@ -29,7 +29,7 @@ function cannotDelete(item) {
 
 function InventoryGroupsList() {
   const location = useLocation();
-  const { id: inventoryId } = useParams();
+  const { id: inventoryId, inventoryType } = useParams();
   const [isAdHocLaunchLoading, setIsAdHocLaunchLoading] = useState(false);
 
   const {
@@ -102,9 +102,11 @@ function InventoryGroupsList() {
     }
     return t`Select a row to delete`;
   };
-
+  const isNotConstructedInventory = inventoryType !== 'constructed_inventory';
   const canAdd =
-    actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
+    actions &&
+    Object.prototype.hasOwnProperty.call(actions, 'POST') &&
+    isNotConstructedInventory;
 
   return (
     <PaginatedTable
@@ -139,14 +141,13 @@ function InventoryGroupsList() {
       headerRow={
         <HeaderRow qsConfig={QS_CONFIG}>
           <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
-          <HeaderCell>{t`Actions`}</HeaderCell>
+          {isNotConstructedInventory && <HeaderCell>{t`Actions`}</HeaderCell>}
         </HeaderRow>
       }
       renderRow={(item, index) => (
         <InventoryGroupItem
           key={item.id}
           group={item}
-          inventoryId={inventoryId}
           isSelected={selected.some((row) => row.id === item.id)}
           onSelect={() => handleSelect(item)}
           rowIndex={index}
@@ -177,20 +178,28 @@ function InventoryGroupsList() {
                   />,
                 ]
               : []),
-            <Tooltip content={renderTooltip()} position="top" key="delete">
-              <div>
-                <InventoryGroupsDeleteModal
-                  groups={selected}
-                  isDisabled={
-                    selected.length === 0 || selected.some(cannotDelete)
-                  }
-                  onAfterDelete={() => {
-                    fetchData();
-                    clearSelected();
-                  }}
-                />
-              </div>
-            </Tooltip>,
+            ...(isNotConstructedInventory
+              ? [
+                  <Tooltip
+                    content={renderTooltip()}
+                    position="top"
+                    key="delete"
+                  >
+                    <div>
+                      <InventoryGroupsDeleteModal
+                        groups={selected}
+                        isDisabled={
+                          selected.length === 0 || selected.some(cannotDelete)
+                        }
+                        onAfterDelete={() => {
+                          fetchData();
+                          clearSelected();
+                        }}
+                      />
+                    </div>
+                  </Tooltip>,
+                ]
+              : []),
           ]}
         />
       )}

@@ -34,7 +34,7 @@ const QS_CONFIG = getQSConfig('host', {
 function InventoryGroupHostList() {
   const [isAdHocLaunchLoading, setIsAdHocLaunchLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { id: inventoryId, groupId } = useParams();
+  const { id: inventoryId, groupId, inventoryType } = useParams();
   const location = useLocation();
 
   const {
@@ -145,9 +145,11 @@ function InventoryGroupHostList() {
     useDismissableError(associateErr);
   const { error: disassociateError, dismissError: dismissDisassociateError } =
     useDismissableError(disassociateErr);
-
+  const isNotConstructedInventory = inventoryType !== 'constructed_inventory';
   const canAdd =
-    actions && Object.prototype.hasOwnProperty.call(actions, 'POST');
+    actions &&
+    Object.prototype.hasOwnProperty.call(actions, 'POST') &&
+    isNotConstructedInventory;
   const addFormUrl = `/inventories/inventory/${inventoryId}/groups/${groupId}/nested_hosts/add`;
   const addExistingHost = t`Add existing host`;
   const addNewHost = t`Add new host`;
@@ -240,17 +242,21 @@ function InventoryGroupHostList() {
                     />,
                   ]
                 : []),
-              <DisassociateButton
-                key="disassociate"
-                onDisassociate={handleDisassociate}
-                itemsToDisassociate={selected}
-                modalTitle={t`Disassociate host from group?`}
-                modalNote={t`
+              ...(isNotConstructedInventory
+                ? [
+                    <DisassociateButton
+                      key="disassociate"
+                      onDisassociate={handleDisassociate}
+                      itemsToDisassociate={selected}
+                      modalTitle={t`Disassociate host from group?`}
+                      modalNote={t`
                         Note that only hosts directly in this group can
                         be disassociated. Hosts in sub-groups must be disassociated
                         directly from the sub-group level that they belong.
                       `}
-              />,
+                    />,
+                  ]
+                : []),
             ]}
           />
         )}
@@ -259,8 +265,8 @@ function InventoryGroupHostList() {
             key={host.id}
             rowIndex={index}
             host={host}
-            detailUrl={`/inventories/inventory/${inventoryId}/hosts/${host.id}/details`}
-            editUrl={`/inventories/inventory/${inventoryId}/hosts/${host.id}/edit`}
+            detailUrl={`/inventories/${inventoryType}/${inventoryId}/hosts/${host.id}/details`}
+            editUrl={`/inventories/${inventoryType}/${inventoryId}/hosts/${host.id}/edit`}
             isSelected={selected.some((row) => row.id === host.id)}
             onSelect={() => handleSelect(host)}
           />
