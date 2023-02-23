@@ -68,6 +68,7 @@ Notable releases of the `awx.awx` collection:
  - 7.0.0 is intended to be identical to the content prior to the migration, aside from changes necessary to function as a collection.
  - 11.0.0 has no non-deprecated modules that depend on the deprecated `tower-cli` [PyPI](https://pypi.org/project/ansible-tower-cli/).
  - 19.2.1 large renaming purged "tower" names (like options and module names), adding redirects for old names
+ - 21.11.0 "tower" modules deprecated and symlinks removed.
  - 0.0.1-devel is the version you should see if installing from source, which is intended for development and expected to be unstable.
 
 The following notes are changes that may require changes to playbooks:

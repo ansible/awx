@@ -29,7 +29,7 @@ options:
           description:
             - The name to use for the host.
           type: str
-          require: True
+          required: True
         description:
           description:
             - The description to use for the host.
@@ -70,7 +70,7 @@ import json
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
-        hosts=dict(required=True, type='list'),
+        hosts=dict(required=True, type='list', elements='dict'),
         inventory=dict(required=True, type='int'),
     )
 
@@ -82,8 +82,8 @@ def main():
     hosts = module.params.get('hosts')
 
     for h in hosts:
-      if 'variables' in h:
-        h['variables'] = json.dumps(h['variables'])
+        if 'variables' in h:
+            h['variables'] = json.dumps(h['variables'])
     # Launch the jobs
     result = module.post_endpoint("bulk/host_create", data={"inventory": inventory, "hosts": hosts})
 

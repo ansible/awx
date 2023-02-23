@@ -6,6 +6,7 @@ import pytest
 
 from awx.main.models import WorkflowJob
 
+
 @pytest.mark.django_db
 def test_bulk_job_launch(run_module, admin_user, job_template):
     jobs = [dict(unified_job_template=job_template.id)]

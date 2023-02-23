@@ -205,7 +205,7 @@ from ..module_utils.controller_api import ControllerAPIModule
 def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
-        jobs=dict(required=True, type='list'),
+        jobs=dict(required=True, type='list', elements='dict'),
         name=dict(),
         description=dict(),
         organization=dict(type='int'),
@@ -217,7 +217,6 @@ def main():
         skip_tags=dict(),
         wait=dict(required=False, default=True, type='bool'),
         interval=dict(required=False, default=2.0, type='float'),
-        timeout=dict(required=False, default=None, type='int'),
     )
 
     # Create a module for ourselves
