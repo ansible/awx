@@ -7,5 +7,4 @@ class ConstructedInventories extends InstanceGroupsMixin(Base) {
     this.baseUrl = 'api/v2/constructed_inventories/';
   }
 }
-
 export default ConstructedInventories;

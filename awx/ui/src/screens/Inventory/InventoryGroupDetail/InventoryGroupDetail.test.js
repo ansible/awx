@@ -39,6 +39,14 @@ describe('<InventoryGroupDetail />', () => {
   let history;
 
   describe('User has full permissions', () => {
+    jest.mock('react-router-dom', () => ({
+      ...jest.requireActual('react-router-dom'),
+      useParams: () => ({
+        id: 1,
+        groupId: 3,
+        inventoryType: 'inventory',
+      }),
+    }));
     beforeEach(async () => {
       await act(async () => {
         history = createMemoryHistory({
@@ -116,6 +124,14 @@ describe('<InventoryGroupDetail />', () => {
   });
 
   describe('User has read-only permissions', () => {
+    jest.mock('react-router-dom', () => ({
+      ...jest.requireActual('react-router-dom'),
+      useParams: () => ({
+        id: 1,
+        groupId: 3,
+        inventoryType: 'inventory',
+      }),
+    }));
     test('should hide edit/delete buttons', async () => {
       const readOnlyGroup = {
         ...inventoryGroup,
@@ -157,6 +173,50 @@ describe('<InventoryGroupDetail />', () => {
 
       expect(wrapper.find('button[aria-label="Edit"]').length).toBe(0);
       expect(wrapper.find('button[aria-label="Delete"]').length).toBe(0);
+    });
+  });
+  describe('Cannot edit or delete constructed inventory group', () => {
+    beforeEach(async () => {
+      await act(async () => {
+        history = createMemoryHistory({
+          initialEntries: ['/inventories/inventory/1/groups/1/details'],
+        });
+        wrapper = mountWithContexts(
+          <Route path="/inventories/inventory/:id/groups/:groupId">
+            <InventoryGroupDetail inventoryGroup={inventoryGroup} />
+          </Route>,
+          {
+            context: {
+              router: {
+                history,
+                route: {
+                  location: history.location,
+                  match: {
+                    params: {
+                      id: 1,
+                      group: 2,
+                      inventoryType: 'constructed_inventory',
+                    },
+                  },
+                },
+              },
+            },
+          }
+        );
+        await waitForElement(
+          wrapper,
+          'ContentLoading',
+          (el) => el.length === 0
+        );
+      });
+    });
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+    test('should not show edit button', () => {
+      const editButton = wrapper.find('Button[aria-label="edit"]');
+      expect(editButton.length).toBe(0);
+      expect(wrapper.find('Button[aria-label="delete"]').length).toBe(0);
     });
   });
 });
