@@ -1,5 +1,4 @@
 from awx.main.models import Organization
-from django.apps import apps
 
 
 def migrate_org_admin_to_use(apps):

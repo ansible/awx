@@ -39,36 +39,21 @@ def test_ig_use_role_user_visibility(default_instance_group, user):
 
 
 @pytest.mark.django_db
-def test_ig_role_based_associability(default_instance_group, user, organization, job_template_factory):
+@pytest.mark.parametrize(
+    "obj_perm,subobj_perm,allowed", [('admin_role', 'use_role', True), ('admin_role', 'read_role', False), ('admin_role', 'admin_role', True)]
+)
+def test_ig_role_based_associability(default_instance_group, rando, organization, job_template_factory, obj_perm, subobj_perm, allowed):
     objects = job_template_factory('jt', organization=organization, project='p', inventory='i', credential='c')
+    if obj_perm:
+        getattr(objects.job_template, obj_perm).members.add(rando)
+        getattr(objects.inventory, obj_perm).members.add(rando)
+        getattr(objects.organization, obj_perm).members.add(rando)
+    if subobj_perm:
+        getattr(default_instance_group, subobj_perm).members.add(rando)
 
-    ig_read = user('reader', False)
-    ig_use = user('use', False)
-    ig_admin = user('admin', False)
-
-    read_role = default_instance_group.read_role
-    admin_role = default_instance_group.admin_role
-    use_role = default_instance_group.use_role
-
-    read_role.members.add(ig_read)
-    use_role.members.add(ig_use)
-    admin_role.members.add(ig_admin)
-
-    read_access = JobTemplateAccess(ig_read)
-    use_access = JobTemplateAccess(ig_use)
-    admin_access = JobTemplateAccess(ig_admin)
-
-    assert not read_access.can_attach(objects.job_template, default_instance_group, 'instance_groups', None)
-    assert use_access.can_attach(objects.job_template, default_instance_group, 'instance_groups', None)
-    assert admin_access.can_attach(objects.job_template, default_instance_group, 'instance_groups', None)
-
-    read_access = InventoryAccess(ig_read)
-    use_access = InventoryAccess(ig_use)
-    admin_access = InventoryAccess(ig_admin)
-
-    assert not read_access.can_attach(objects.inventory, default_instance_group, 'instance_groups', None)
-    assert use_access.can_attach(objects.inventory, default_instance_group, 'instance_groups', None)
-    assert admin_access.can_attach(objects.inventory, default_instance_group, 'instance_groups', None)
+    assert allowed == JobTemplateAccess(rando).can_attach(objects.job_template, default_instance_group, 'instance_groups', None)
+    assert allowed == InventoryAccess(rando).can_attach(objects.inventory, default_instance_group, 'instance_groups', None)
+    assert allowed == OrganizationAccess(rando).can_attach(objects.organization, default_instance_group, 'instance_groups', None)
 
 
 @pytest.mark.django_db
