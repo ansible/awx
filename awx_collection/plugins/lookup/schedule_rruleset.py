@@ -210,6 +210,7 @@ class LookupModule(LookupBase):
 
     def process_list(self, field_name, rule, valid_list, rule_number):
         return_values = []
+        # If its not a list, we need to split it into a list
         if not isinstance(rule[field_name], list):
             rule[field_name] = rule[field_name].split(',')
         for value in rule[field_name]:
