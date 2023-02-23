@@ -2052,7 +2052,7 @@ class BulkHostCreateSerializer(serializers.Serializer):
         try:
             Host.objects.bulk_create(result)
         except Exception as e:
-            raise serializers.ValidationError({"detail": _(f"{e}")})
+            raise serializers.ValidationError({"detail": _(f"cannot create host, host creation error {e}")})
         new_total_hosts = old_total_hosts + len(result)
         request = self.context.get('request', None)
         changes = {'total_hosts': [old_total_hosts, new_total_hosts]}
