@@ -26,7 +26,7 @@
   name: Update source tree if necessary
   tasks:
     - name: Delete project directory before update
-      ansible.builtin.shell: set -o pipefail && find . -delete -print | head -2  # volume mounted, cannot delete folder itself
+      ansible.builtin.shell: set -o pipefail && find . -delete -print | tail -2  # volume mounted, cannot delete folder itself
       register: reg
       changed_when: reg.stdout_lines | length > 1
       args:
