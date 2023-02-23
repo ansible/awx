@@ -1,6 +1,6 @@
 import 'styled-components/macro';
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { string, bool, func, number } from 'prop-types';
 import { t } from '@lingui/macro';
 import { Button, Tooltip } from '@patternfly/react-core';
@@ -24,7 +24,7 @@ function InventoryGroupHostListItem({
     ...job,
     type: 'job',
   }));
-
+  const { inventoryType } = useParams();
   const labelId = `check-action-${host.id}`;
 
   return (
@@ -57,22 +57,24 @@ function InventoryGroupHostListItem({
         >
           <HostToggle host={host} />
         </ActionItem>
-        <ActionItem
-          tooltip={t`Edit Host`}
-          visible={host.summary_fields.user_capabilities?.edit}
-        >
-          <Tooltip content={t`Edit Host`} position="top">
-            <Button
-              ouiaId={`${host.id}-edit-button`}
-              aria-label={t`Edit Host`}
-              variant="plain"
-              component={Link}
-              to={`${editUrl}`}
-            >
-              <PencilAltIcon />
-            </Button>
-          </Tooltip>
-        </ActionItem>
+        {inventoryType !== 'constructed_inventory' && (
+          <ActionItem
+            tooltip={t`Edit Host`}
+            visible={host.summary_fields.user_capabilities?.edit}
+          >
+            <Tooltip content={t`Edit Host`} position="top">
+              <Button
+                ouiaId={`${host.id}-edit-button`}
+                aria-label={t`Edit Host`}
+                variant="plain"
+                component={Link}
+                to={`${editUrl}`}
+              >
+                <PencilAltIcon />
+              </Button>
+            </Tooltip>
+          </ActionItem>
+        )}
       </ActionsTd>
     </Tr>
   );
