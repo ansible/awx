@@ -1,20 +1,13 @@
 ui_next_mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
-ui_next_dir := $(dir $(ui_next_mkfile_path))
+ui_next_dir := $(shell realpath --relative-to $(CURDIR) $(dir $(ui_next_mkfile_path)))
 
-ifeq ($(current_dir), undefined)
-	ui_next_dir := $(dir $(ui_next_mkfile_path))
-else
-	ui_next_dir := $(shell realpath --relative-to $(current_dir) $(ui_next_dir))/
-endif
+ANSIBLE_UI_DIR ?= $(ui_next_dir)/src
 
 ANSIBLE_UI_GIT_REPO_HTTPS ?=
 ANSIBLE_UI_GIT_REPO_SSH ?=
-
 ANSIBLE_UI_GIT_BRANCH ?= main
 
 ANSIBLE_UI_LOCAL ?=
-
-ANSIBLE_UI_DIR ?= $(ui_next_dir)ansible-ui
 
 .PHONY: ui-next/clone-https
 ## Shallow clone the ui-next repo via https skip if ANSIBLE_UI_GIT_REPO_HTTPS is undefined

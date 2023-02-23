@@ -1,6 +1,3 @@
-mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
-current_dir := $(dir $(mkfile_path))
-
 include awx/ui-next/Makefile
 
 PYTHON ?= python3.9
@@ -402,7 +399,7 @@ bulk_data:
 # UI TASKS
 # --------------------------------------
 
-UI_BUILD_FLAG_FILE = $(current_dir)ui/.ui-built
+UI_BUILD_FLAG_FILE = $(CURDIR)/ui/.ui-built
 
 clean-ui:
 	rm -rf node_modules
