@@ -323,7 +323,7 @@ describe('<InventoryRelatedGroupList> for constructed inventories', () => {
     });
     const history = createMemoryHistory({
       initialEntries: [
-        '/inventories/constructed_inventory/1/groups/2/nested_groupss',
+        '/inventories/constructed_inventory/1/groups/2/nested_groups',
       ],
     });
     await act(async () => {
