@@ -3,14 +3,11 @@ import datetime
 from django.core.serializers.json import DjangoJSONEncoder
 from awx.main.models.inventory import HostMetric, HostMetricSummaryMonthly
 from awx.main.analytics.collectors import config
-from awx.main.utils.encryption import get_encryption_key, Fernet256
-from django.utils.encoding import smart_str, smart_bytes
-import base64
 import json
 import sys
 import tempfile
 import tarfile
-import pandas as pd
+import csv
 
 PREFERRED_ROW_COUNT = 500000
 
@@ -52,7 +49,7 @@ class Command(BaseCommand):
 
         return list_of_queryset
 
-    def paginated_df(self, options, type, filter_kwargs, offset=0, limit=PREFERRED_ROW_COUNT):
+    def paginated_db_retrieval(self, type, filter_kwargs, offset=0, limit=PREFERRED_ROW_COUNT):
         list_of_queryset = []
         if type == 'host_metric':
             result = HostMetric.objects.filter(**filter_kwargs)
@@ -61,16 +58,7 @@ class Command(BaseCommand):
             result = HostMetricSummaryMonthly.objects.filter(**filter_kwargs)
             list_of_queryset = self.host_metric_summary_monthly_queryset(result, offset, limit)
 
-        df = pd.DataFrame(list_of_queryset)
-
-        if options['anonymized'] and 'hostname' in df.columns:
-            key = get_encryption_key('hostname', options.get('anonymized'))
-            df['hostname'] = df.apply(lambda x: self.obfuscated_hostname(key, x['hostname']), axis=1)
-
-        return df
-
-    def obfuscated_hostname(self, secret_sauce, hostname):
-        return self.encrypt_name(secret_sauce, hostname)
+        return list_of_queryset
 
     def whole_page_count(self, row_count, rows_per_file):
         whole_pages = int(row_count / rows_per_file)
@@ -80,10 +68,16 @@ class Command(BaseCommand):
         return whole_pages
 
     def csv_for_tar(self, options, temp_dir, type, filter_kwargs, index=1, offset=0, rows_per_file=PREFERRED_ROW_COUNT):
-        df = self.paginated_df(options, type, filter_kwargs, offset, rows_per_file)
+        list_of_queryset = self.paginated_db_retrieval(type, filter_kwargs, offset, rows_per_file)
         csv_file = f'{temp_dir}/{type}{index}.csv'
         arcname_file = f'{type}{index}.csv'
-        df.to_csv(csv_file, index=False)
+
+        with open(csv_file, 'w', newline='') as output_file:
+            keys = list_of_queryset[0].keys() if list_of_queryset else []
+            dict_writer = csv.DictWriter(output_file, keys)
+            dict_writer.writeheader()
+            dict_writer.writerows(list_of_queryset)
+
         return csv_file, arcname_file
 
     def config_for_tar(self, options, temp_dir):
@@ -93,28 +87,6 @@ class Command(BaseCommand):
         with open(config_file, 'w') as f:
             f.write(config_json)
         return config_file, arcname_file
-
-    def encrypt_name(self, key, value):
-        value = smart_str(value)
-        f = Fernet256(key)
-        encrypted = f.encrypt(smart_bytes(value))
-        b64data = smart_str(base64.b64encode(encrypted))
-        tokens = ['$encrypted', 'UTF8', 'AESCBC', b64data]
-        return '$'.join(tokens)
-
-    def decrypt_name(self, encryption_key, value):
-        raw_data = value[len('$encrypted$') :]
-        # If the encrypted string contains a UTF8 marker, discard it
-        utf8 = raw_data.startswith('UTF8$')
-        if utf8:
-            raw_data = raw_data[len('UTF8$') :]
-        algo, b64data = raw_data.split('$', 1)
-        if algo != 'AESCBC':
-            raise ValueError('unsupported algorithm: %s' % algo)
-        encrypted = base64.b64decode(b64data)
-        f = Fernet256(encryption_key)
-        value = f.decrypt(encrypted)
-        return smart_str(value)
 
     def output_json(self, options, filter_kwargs):
         if not options.get('json') or options.get('json') == 'host_metric':
@@ -184,7 +156,6 @@ class Command(BaseCommand):
         parser.add_argument('--json', type=str, const='host_metric', nargs='?', help='Select output as JSON for host_metric or host_metric_summary_monthly')
         parser.add_argument('--csv', type=str, const='host_metric', nargs='?', help='Select output as CSV for host_metric or host_metric_summary_monthly')
         parser.add_argument('--tarball', action='store_true', help=f'Package CSV files into a tar with upto {PREFERRED_ROW_COUNT} rows')
-        parser.add_argument('--anonymized', type=str, help='Anonymize hostnames with provided salt')
         parser.add_argument('--rows_per_file', type=int, help=f'Split rows in chunks of {PREFERRED_ROW_COUNT}')
 
     def handle(self, *args, **options):
