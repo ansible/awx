@@ -14,6 +14,7 @@ class Inventories extends InstanceGroupsMixin(Base) {
     this.readGroupsOptions = this.readGroupsOptions.bind(this);
     this.promoteGroup = this.promoteGroup.bind(this);
     this.readInputInventories = this.readInputInventories.bind(this);
+    this.associateInventory = this.associateInventory.bind(this);
   }
 
   readAccessList(id, params) {
@@ -135,6 +136,12 @@ class Inventories extends InstanceGroupsMixin(Base) {
     return this.http.post(`${this.baseUrl}${id}/labels/`, {
       id: label.id,
       disassociate: true,
+    });
+  }
+
+  associateInventory(id, inputInventoryId) {
+    return this.http.post(`${this.baseUrl}${id}/input_inventories/`, {
+      id: inputInventoryId,
     });
   }
 }

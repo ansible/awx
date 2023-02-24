@@ -1,12 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { string, bool, func, oneOf } from 'prop-types';
+import { string, bool, func, oneOf, shape } from 'prop-types';
 
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
 import styled from 'styled-components';
 import { Split, SplitItem, Button, Modal } from '@patternfly/react-core';
 import { ExpandArrowsAltIcon } from '@patternfly/react-icons';
-import { yamlToJson, jsonToYaml, isJsonString } from 'util/yaml';
+import {
+  yamlToJson,
+  jsonToYaml,
+  isJsonString,
+  parseVariableField,
+} from 'util/yaml';
 import { CheckboxField } from '../FormField';
 import MultiButtonToggle from '../MultiButtonToggle';
 import CodeEditor from './CodeEditor';
@@ -33,6 +38,8 @@ function VariablesField({
   tooltip,
   initialMode,
   onModeChange,
+  isRequired,
+  validators,
 }) {
   // track focus manually, because the Code Editor library doesn't wire
   // into Formik completely
@@ -44,17 +51,22 @@ function VariablesField({
         return undefined;
       }
       try {
-        if (mode === YAML_MODE) {
-          yamlToJson(value);
-        } else {
-          JSON.parse(value);
+        const parsedVariables = parseVariableField(value);
+        if (validators) {
+          const errorMessages = Object.keys(validators)
+            .map((field) => validators[field](parsedVariables[field]))
+            .filter((e) => e);
+
+          if (errorMessages.length > 0) {
+            return errorMessages;
+          }
         }
       } catch (error) {
         return error.message;
       }
       return undefined;
     },
-    [shouldValidate, mode]
+    [shouldValidate, validators]
   );
   const [field, meta, helpers] = useField({ name, validate });
 
@@ -127,6 +139,7 @@ function VariablesField({
         setMode={handleModeChange}
         setShouldValidate={setShouldValidate}
         handleChange={handleChange}
+        isRequired={isRequired}
       />
       <Modal
         variant="xlarge"
@@ -164,7 +177,11 @@ function VariablesField({
       </Modal>
       {meta.error ? (
         <div className="pf-c-form__helper-text pf-m-error" aria-live="polite">
-          {meta.error}
+          {(Array.isArray(meta.error) ? meta.error : [meta.error]).map(
+            (errorMessage) => (
+              <p key={errorMessage}>{errorMessage}</p>
+            )
+          )}
         </div>
       ) : null}
     </div>
@@ -178,12 +195,16 @@ VariablesField.propTypes = {
   promptId: string,
   initialMode: oneOf([YAML_MODE, JSON_MODE]),
   onModeChange: func,
+  isRequired: bool,
+  validators: shape({}),
 };
 VariablesField.defaultProps = {
   readOnly: false,
   promptId: null,
   initialMode: YAML_MODE,
   onModeChange: () => {},
+  isRequired: false,
+  validators: {},
 };
 
 function VariablesFieldInternals({
@@ -199,6 +220,7 @@ function VariablesFieldInternals({
   onExpand,
   setShouldValidate,
   handleChange,
+  isRequired,
 }) {
   const [field, meta, helpers] = useField(name);
 
@@ -220,6 +242,12 @@ function VariablesFieldInternals({
           <SplitItem>
             <label htmlFor={id} className="pf-c-form__label">
               <span className="pf-c-form__label-text">{label}</span>
+              {isRequired && (
+                <span className="pf-c-form__label-required" aria-hidden="true">
+                  {' '}
+                  *{' '}
+                </span>
+              )}
             </label>
             {tooltip && <Popover content={tooltip} id={`${id}-tooltip`} />}
           </SplitItem>
