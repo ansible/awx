@@ -6,29 +6,21 @@ from awx.main.access import (
     InventoryAccess,
     JobTemplateAccess,
 )
-from awx.main.models import Organization
 
 
 @pytest.mark.django_db
-def test_ig_read_user_visibility(default_instance_group, rando):
-    default_instance_group.read_role.members.add(rando)
+@pytest.mark.parametrize(
+    "obj_perm,allowed,readonly,partial", [("admin_role", True, True, True), ("use_role", False, True, True), ("read_role", False, True, False)]
+)
+def test_ig_role_base_visibility(default_instance_group, rando, obj_perm, allowed, partial, readonly):
+    if obj_perm:
+        getattr(default_instance_group, obj_perm).members.add(rando)
 
-    assert InstanceGroupAccess(rando).can_read(default_instance_group)
-    assert not InstanceGroupAccess(rando).can_use(default_instance_group)
+    assert readonly == InstanceGroupAccess(rando).can_read(default_instance_group)
+    assert partial == InstanceGroupAccess(rando).can_use(default_instance_group)
     assert not InstanceGroupAccess(rando).can_add(default_instance_group)
-    assert not InstanceGroupAccess(rando).can_admin(default_instance_group)
-    assert not InstanceGroupAccess(rando).can_change(default_instance_group, {'name': 'New description.'})
-
-
-@pytest.mark.django_db
-def test_ig_use_role_user_visibility(default_instance_group, rando):
-    default_instance_group.use_role.members.add(rando)
-
-    assert InstanceGroupAccess(rando).can_read(default_instance_group)
-    assert InstanceGroupAccess(rando).can_use(default_instance_group)
-    assert not InstanceGroupAccess(rando).can_add(default_instance_group)
-    assert not InstanceGroupAccess(rando).can_admin(default_instance_group)
-    assert not InstanceGroupAccess(rando).can_change(default_instance_group, {'name': 'New description.'})
+    assert allowed == InstanceGroupAccess(rando).can_admin(default_instance_group)
+    assert allowed == InstanceGroupAccess(rando).can_change(default_instance_group, {'name': 'New Name'})
 
 
 @pytest.mark.django_db

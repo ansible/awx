@@ -599,7 +599,6 @@ class InstanceGroupAccess(BaseAccess):
        - a superuser(system administrator)
     I can use Instance Groups when I have:
        - use_role on the instance group
-       - admin_role on the instance group
     """
 
     model = InstanceGroup
