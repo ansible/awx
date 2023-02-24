@@ -196,7 +196,7 @@ class LookupModule(LookupBase):
         if isinstance(rule[field_name], int):
             rule[field_name] = [rule[field_name]]
         # If its not a list, we need to split it into a list
-        if isinstance(rule[field_name], list):
+        if not isinstance(rule[field_name], list):
             rule[field_name] = rule[field_name].split(',')
         for value in rule[field_name]:
             # If they have a list of strs we want to strip the str incase its space delineated
@@ -210,7 +210,9 @@ class LookupModule(LookupBase):
 
     def process_list(self, field_name, rule, valid_list, rule_number):
         return_values = []
-        rule[field_name] = rule[field_name].split(',')
+        # If its not a list, we need to split it into a list
+        if not isinstance(rule[field_name], list):
+            rule[field_name] = rule[field_name].split(',')
         for value in rule[field_name]:
             value = value.strip()
             if value not in valid_list:
