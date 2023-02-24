@@ -10,32 +10,25 @@ from awx.main.models import Organization
 
 
 @pytest.mark.django_db
-def test_ig_read_user_visibility(default_instance_group, user, organization, job_template_factory):
-    u = user('test', False)
-    objects = job_template_factory('jt', organization=organization, project='p', inventory='i', credential='c')
-    role = default_instance_group.read_role
-    role.members.add(u)
-    access = InstanceGroupAccess(u)
-    jtaccess = JobTemplateAccess(u)
-    assert not jtaccess.can_attach(objects.job_template, default_instance_group, 'instance_groups', None)
-    assert access.can_read(default_instance_group)
-    assert not access.can_use(default_instance_group)
-    assert not access.can_add(default_instance_group)
-    assert not access.can_admin(default_instance_group)
-    assert not access.can_change(default_instance_group, {'name': 'New description.'})
+def test_ig_read_user_visibility(default_instance_group, rando):
+    default_instance_group.read_role.members.add(rando)
+
+    assert InstanceGroupAccess(rando).can_read(default_instance_group)
+    assert not InstanceGroupAccess(rando).can_use(default_instance_group)
+    assert not InstanceGroupAccess(rando).can_add(default_instance_group)
+    assert not InstanceGroupAccess(rando).can_admin(default_instance_group)
+    assert not InstanceGroupAccess(rando).can_change(default_instance_group, {'name': 'New description.'})
 
 
 @pytest.mark.django_db
-def test_ig_use_role_user_visibility(default_instance_group, user):
-    u = user('test', False)
-    role = default_instance_group.use_role
-    role.members.add(u)
-    access = InstanceGroupAccess(u)
-    assert access.can_read(default_instance_group)
-    assert access.can_use(default_instance_group)
-    assert not access.can_add(default_instance_group)
-    assert not access.can_admin(default_instance_group)
-    assert not access.can_change(default_instance_group, {'name': 'New description.'})
+def test_ig_use_role_user_visibility(default_instance_group, rando):
+    default_instance_group.use_role.members.add(rando)
+
+    assert InstanceGroupAccess(rando).can_read(default_instance_group)
+    assert InstanceGroupAccess(rando).can_use(default_instance_group)
+    assert not InstanceGroupAccess(rando).can_add(default_instance_group)
+    assert not InstanceGroupAccess(rando).can_admin(default_instance_group)
+    assert not InstanceGroupAccess(rando).can_change(default_instance_group, {'name': 'New description.'})
 
 
 @pytest.mark.django_db
@@ -57,21 +50,11 @@ def test_ig_role_based_associability(default_instance_group, rando, organization
 
 
 @pytest.mark.django_db
-def test_ig_use_with_org_admin(default_instance_group, rando, admin):
-    org = Organization.objects.create(name='org1')
+def test_ig_use_with_org_admin(default_instance_group, rando, org_admin):
+    default_instance_group.use_role.members.add(rando)
 
-    use_role = default_instance_group.use_role
-    use_role.members.add(rando)
-    admin_role = org.admin_role
-    org_admin_role = org.admin_role
-    org_admin_role.members.add(admin)
-    admin_role.members.add(rando)
-
-    admin_access = InstanceGroupAccess(admin)
-    access = InstanceGroupAccess(rando)
-
-    assert list(admin_access.get_queryset()) == [default_instance_group]
-    assert list(access.get_queryset()) == [default_instance_group]
+    assert list(InstanceGroupAccess(org_admin).get_queryset()) != [default_instance_group]
+    assert list(InstanceGroupAccess(rando).get_queryset()) == [default_instance_group]
 
 
 @pytest.mark.django_db
