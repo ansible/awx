@@ -158,18 +158,25 @@ function ConstructedInventoryFormFields({ inventory = {}, options }) {
   );
 }
 
-function ConstructedInventoryForm({ onCancel, onSubmit, submitError }) {
+function ConstructedInventoryForm({
+  constructedInventory,
+  instanceGroups,
+  inputInventories,
+  onCancel,
+  onSubmit,
+  submitError,
+}) {
   const initialValues = {
-    description: '',
-    instanceGroups: [],
     kind: 'constructed',
-    inputInventories: [],
-    limit: '',
-    name: '',
-    organization: null,
-    source_vars: '---',
-    update_cache_timeout: 0,
-    verbosity: 0,
+    description: constructedInventory?.description || '',
+    instanceGroups: instanceGroups || [],
+    inputInventories: inputInventories || [],
+    limit: constructedInventory?.limit || '',
+    name: constructedInventory?.name || '',
+    organization: constructedInventory?.summary_fields?.organization || null,
+    update_cache_timeout: constructedInventory?.update_cache_timeout || 0,
+    verbosity: constructedInventory?.verbosity || 0,
+    source_vars: constructedInventory?.source_vars || '---',
   };
 
   const {
@@ -204,7 +211,7 @@ function ConstructedInventoryForm({ onCancel, onSubmit, submitError }) {
         <Form role="form" autoComplete="off" onSubmit={formik.handleSubmit}>
           <FormColumnLayout>
             <ConstructedInventoryFormFields options={options} />
-            <FormSubmitError error={submitError} />
+            {submitError && <FormSubmitError error={submitError} />}
             <FormActionGroup
               onCancel={onCancel}
               onSubmit={formik.handleSubmit}

@@ -33,8 +33,8 @@ function ConstructedInventory({ setBreadcrumb }) {
   const {
     result: inventory,
     error: contentError,
-    isLoading: hasContentLoading,
     request: fetchInventory,
+    isLoading,
   } = useRequest(
     useCallback(async () => {
       const { data } = await ConstructedInventoriesAPI.readDetail(
@@ -42,7 +42,7 @@ function ConstructedInventory({ setBreadcrumb }) {
       );
       return data;
     }, [match.params.id]),
-    { isLoading: true }
+    { inventory: null, isLoading: true }
   );
 
   useEffect(() => {
@@ -78,7 +78,7 @@ function ConstructedInventory({ setBreadcrumb }) {
     { name: t`Job Templates`, link: `${match.url}/job_templates`, id: 5 },
   ];
 
-  if (hasContentLoading) {
+  if (isLoading) {
     return (
       <PageSection>
         <Card>
@@ -133,16 +133,13 @@ function ConstructedInventory({ setBreadcrumb }) {
               path="/inventories/constructed_inventory/:id/details"
               key="details"
             >
-              <ConstructedInventoryDetail
-                inventory={inventory}
-                hasInventoryLoading={hasContentLoading}
-              />
+              <ConstructedInventoryDetail inventory={inventory} />
             </Route>,
             <Route
               key="edit"
               path="/inventories/constructed_inventory/:id/edit"
             >
-              <ConstructedInventoryEdit />
+              <ConstructedInventoryEdit inventory={inventory} />
             </Route>,
             <Route
               path="/inventories/constructed_inventory/:id/access"

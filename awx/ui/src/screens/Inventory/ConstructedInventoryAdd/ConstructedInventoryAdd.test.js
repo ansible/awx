@@ -110,6 +110,7 @@ describe('<ConstructedInventoryAdd />', () => {
     await act(async () => {
       wrapper = mountWithContexts(<ConstructedInventoryAdd />);
     });
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('FormSubmitError').length).toBe(0);
     await act(async () => {
       wrapper.find('ConstructedInventoryForm').invoke('onSubmit')(formData);
