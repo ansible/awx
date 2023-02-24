@@ -99,12 +99,12 @@ def test_instance_dup(org_admin, organization, project, instance_factory, instan
     list_response = get(reverse('api:instance_list'), user=system_auditor)
     api_num_instances_auditor = list(list_response.data.items())[0][1]
 
+    ig_all.read_role.members.add(org_admin)
     list_response2 = get(reverse('api:instance_list'), user=org_admin)
     api_num_instances_oa = list(list_response2.data.items())[0][1]
 
     assert api_num_instances_auditor == actual_num_instances
-    # Note: The org_admin will not see the default 'tower' node
-    # (instance fixture) because it is not in its group, as expected
+    # Note: The org_admin will not see instances unless at least read_role to the IG has been assigned
     assert api_num_instances_oa == (actual_num_instances - 1)
 
 
