@@ -1,7 +1,7 @@
 from awx.main.models import Organization
 
 
-def migrate_org_admin_to_use(apps):
+def migrate_org_admin_to_use(apps, schema_editor):
     for org in Organization.objects.prefetch_related('admin_role__members').iterator():
         igs = list(org.instance_groups.all())
         if not igs:

@@ -127,6 +127,7 @@ describe('getRouteConfig', () => {
       '/teams',
       '/credential_types',
       '/notification_templates',
+      '/instance_groups',
       '/applications',
       '/execution_environments',
     ]);
@@ -150,6 +151,7 @@ describe('getRouteConfig', () => {
       '/users',
       '/teams',
       '/credential_types',
+      '/instance_groups',
       '/applications',
       '/execution_environments',
     ]);
@@ -173,6 +175,7 @@ describe('getRouteConfig', () => {
       '/users',
       '/teams',
       '/credential_types',
+      '/instance_groups',
       '/applications',
       '/execution_environments',
     ]);
@@ -201,6 +204,7 @@ describe('getRouteConfig', () => {
       '/teams',
       '/credential_types',
       '/notification_templates',
+      '/instance_groups',
       '/applications',
       '/execution_environments',
     ]);
