@@ -32,7 +32,7 @@ from awx.main.fields import (
     SmartFilterField,
     OrderedManyToManyField,
 )
-from awx.main.managers import HostManager
+from awx.main.managers import HostManager, HostMetricActiveManager
 from awx.main.models.base import BaseModel, CommonModelNameNotUnique, VarsDictProperty, CLOUD_INVENTORY_SOURCES, prevent_search, accepts_json
 from awx.main.models.events import InventoryUpdateEvent, UnpartitionedInventoryUpdateEvent
 from awx.main.models.unified_jobs import UnifiedJob, UnifiedJobTemplate
@@ -53,7 +53,7 @@ from awx.main.utils.execution_environments import to_container_path
 from awx.main.utils.licensing import server_product_name
 
 
-__all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate', 'SmartInventoryMembership']
+__all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate', 'SmartInventoryMembership', 'HostMetric', 'HostMetricSummaryMonthly']
 
 logger = logging.getLogger('awx.main.models.inventory')
 
@@ -820,9 +820,47 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
 
 
 class HostMetric(models.Model):
-    hostname = models.CharField(primary_key=True, max_length=512)
+    hostname = models.CharField(unique=True, max_length=512)
     first_automation = models.DateTimeField(auto_now_add=True, null=False, db_index=True, help_text=_('When the host was first automated against'))
     last_automation = models.DateTimeField(db_index=True, help_text=_('When the host was last automated against'))
+    last_deleted = models.DateTimeField(null=True, db_index=True, help_text=_('When the host was last deleted'))
+    automated_counter = models.BigIntegerField(default=0, help_text=_('How many times was the host automated'))
+    deleted_counter = models.IntegerField(default=0, help_text=_('How many times was the host deleted'))
+    deleted = models.BooleanField(
+        default=False, help_text=_('Boolean flag saying whether the host is deleted and therefore not counted into the subscription consumption')
+    )
+    used_in_inventories = models.IntegerField(null=True, help_text=_('How many inventories contain this host'))
+
+    objects = models.Manager()
+    active_objects = HostMetricActiveManager()
+
+    def get_absolute_url(self, request=None):
+        return reverse('api:host_metric_detail', kwargs={'pk': self.pk}, request=request)
+
+    def soft_delete(self):
+        if not self.deleted:
+            self.deleted_counter = (self.deleted_counter or 0) + 1
+            self.last_deleted = now()
+            self.deleted = True
+            self.save(update_fields=['deleted', 'deleted_counter', 'last_deleted'])
+
+    def soft_restore(self):
+        if self.deleted:
+            self.deleted = False
+            self.save(update_fields=['deleted'])
+
+
+class HostMetricSummaryMonthly(models.Model):
+    """
+    HostMetric summaries computed by scheduled task <TODO> monthly
+    """
+
+    date = models.DateField(unique=True)
+    license_consumed = models.BigIntegerField(default=0, help_text=_("How many unique hosts are consumed from the license"))
+    license_capacity = models.BigIntegerField(default=0, help_text=_("'License capacity as max. number of unique hosts"))
+    hosts_added = models.IntegerField(default=0, help_text=_("How many hosts were added in the associated month, consuming more license capacity"))
+    hosts_deleted = models.IntegerField(default=0, help_text=_("How many hosts were deleted in the associated month, freeing the license capacity"))
+    indirectly_managed_hosts = models.IntegerField(default=0, help_text=("Manually entered number indirectly managed hosts for a certain month"))
 
 
 class InventorySourceOptions(BaseModel):
