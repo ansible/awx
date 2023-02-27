@@ -680,17 +680,20 @@ class ControllerAPIModule(ControllerModule):
         response = self.get_all_endpoint(association_endpoint)
         existing_associated_ids = [association['id'] for association in response['json']['results']]
 
-        # Disassociate anything that is in existing_associated_ids but not in new_association_list
-        ids_to_remove = list(set(existing_associated_ids) - set(new_association_list))
-        for an_id in ids_to_remove:
+        # If the current associations match the desired associations then we can just return
+        if existing_associated_ids == new_association_list:
+            return
+
+        # Some associations can be ordered (like galaxy credentials), because of this we have to remove everything to re-add in order
+        for an_id in existing_associated_ids:
             response = self.post_endpoint(association_endpoint, **{'data': {'id': int(an_id), 'disassociate': True}})
             if response['status_code'] == 204:
                 self.json_output['changed'] = True
             else:
                 self.fail_json(msg="Failed to disassociate item {0}".format(response['json'].get('detail', response['json'])))
 
-        # Associate anything that is in new_association_list but not in `association`
-        for an_id in list(set(new_association_list) - set(existing_associated_ids)):
+        # Now we will add everything back in the received order
+        for an_id in new_association_list:
             response = self.post_endpoint(association_endpoint, **{'data': {'id': int(an_id)}})
             if response['status_code'] == 204:
                 self.json_output['changed'] = True
