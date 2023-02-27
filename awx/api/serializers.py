@@ -4028,7 +4028,7 @@ class ProjectUpdateEventSerializer(JobEventSerializer):
         # raw SCM URLs in their stdout (which *could* contain passwords)
         # attempt to detect and filter HTTP basic auth passwords in the stdout
         # of these types of events
-        if obj.event_data.get('task_action') in ('git', 'svn'):
+        if obj.event_data.get('task_action') in ('git', 'svn', 'ansible.builtin.git', 'ansible.builtin.svn'):
             try:
                 return json.loads(UriCleaner.remove_sensitive(json.dumps(obj.event_data)))
             except Exception:
