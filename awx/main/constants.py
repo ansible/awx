@@ -106,3 +106,7 @@ JOB_VARIABLE_PREFIXES = [
 ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE = (
     '\u001b[31m \u001b[1m This can be caused if the version of ansible-runner in your execution environment is out of date.\u001b[0m'
 )
+
+# Values for setting SUBSCRIPTION_USAGE_MODEL
+SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS = 'unique_managed_hosts'
+SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS_MONTHLY = 'unique_managed_hosts_monthly'
