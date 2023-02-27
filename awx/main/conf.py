@@ -10,7 +10,7 @@ from rest_framework import serializers
 # AWX
 from awx.conf import fields, register, register_validate
 from awx.main.models import ExecutionEnvironment
-
+from awx.main.constants import SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS, SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS_MONTHLY
 
 logger = logging.getLogger('awx.main.conf')
 
@@ -773,6 +773,17 @@ register(
     category=_('System'),
     category_slug='system',
     help_text=_('Indicates whether the instance is part of a kubernetes-based deployment.'),
+)
+
+register(
+    'SUBSCRIPTION_USAGE_MODEL',
+    field_class=fields.ChoiceField,
+    choices=[SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS, SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS_MONTHLY],
+    default='',
+    allow_blank=True,
+    label=_('Defines subscription usage model and shows Host Metrics'),
+    category=_('System'),
+    category_slug='system',
 )
 
 
