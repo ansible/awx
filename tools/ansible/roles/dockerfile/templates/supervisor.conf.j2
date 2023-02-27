@@ -30,8 +30,8 @@ environment =
     DEV_RELOAD_COMMAND='supervisorctl -c /etc/supervisord_task.conf restart all; supervisorctl restart tower-processes:daphne tower-processes:wsbroadcast'
 {% else %}
 command = /var/lib/awx/venv/awx/bin/uwsgi /etc/tower/uwsgi.ini
-{% endif %}
 directory = /var/lib/awx
+{% endif %}
 autorestart = true
 startsecs = 30
 stopasgroup=true

@@ -49,11 +49,18 @@
     mode: '0600'
   with_items:
     - "database.py"
-    - "local_settings.py"
     - "websocket_secret.py"
     - "haproxy.cfg"
-    - "nginx.conf"
-    - "nginx.locations.conf"
+
+- name: Delete old local_settings.py
+  file:
+    path: "{{ playbook_dir }}/../../../awx/settings/local_settings.py"
+    state: absent
+
+- name: Copy local_settings.py
+  copy:
+    src: "local_settings.py"
+    dest: "{{ sources_dest }}/local_settings.py"
 
 - name: Get OS info for sdb
   shell: |

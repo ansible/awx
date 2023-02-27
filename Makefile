@@ -203,7 +203,19 @@ uwsgi: collectstatic
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	uwsgi /etc/tower/uwsgi.ini
+	uwsgi -b 32768 \
+	    --socket 127.0.0.1:8050 \
+	    --module=awx.wsgi:application \
+	    --home=/var/lib/awx/venv/awx \
+	    --chdir=/awx_devel/ \
+	    --vacuum \
+	    --processes=5 \
+	    --harakiri=120 --master \
+	    --no-orphans \
+	    --max-requests=1000 \
+	    --stats /tmp/stats.socket \
+	    --lazy-apps \
+	    --logformat "%(addr) %(method) %(uri) - %(proto) %(status)"
 
 awx-autoreload:
 	@/awx_devel/tools/docker-compose/awx-autoreload /awx_devel/awx "$(DEV_RELOAD_COMMAND)"

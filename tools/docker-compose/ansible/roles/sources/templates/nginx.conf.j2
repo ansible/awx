@@ -1,7 +1,8 @@
+#user awx;
+
 worker_processes  1;
 
-error_log  /var/log/nginx/error.log warn;
-pid        /var/run/nginx.pid;
+pid        /tmp/nginx.pid;
 
 events {
     worker_connections  1024;
@@ -16,7 +17,7 @@ http {
                       '$status $body_bytes_sent "$http_referer" '
                       '"$http_user_agent" "$http_x_forwarded_for"';
 
-    access_log  /var/log/nginx/access.log  main;
+    access_log /dev/stdout main;
 
     map $http_upgrade $connection_upgrade {
         default upgrade;
@@ -24,17 +25,41 @@ http {
     }
 
     sendfile        on;
+    #tcp_nopush     on;
+    #gzip  on;
 
     upstream uwsgi {
-        server localhost:8050;
-    }
+        server 127.0.0.1:8050;
+        }
 
     upstream daphne {
-        server localhost:8051;
+        server 127.0.0.1:8051;
     }
 
+    {% if ssl_certificate is defined %}
     server {
-        listen 8013 default_server;
+        listen 8052 default_server;
+        server_name _;
+
+        # Redirect all HTTP links to the matching HTTPS page
+        return 301 https://$host$request_uri;
+    }
+    {%endif %}
+
+    server {
+        {% if (ssl_certificate is defined) and (ssl_certificate_key is defined) %}
+        listen 8053 ssl;
+
+        ssl_certificate /etc/nginx/awxweb.pem;
+        ssl_certificate_key /etc/nginx/awxweb_key.pem;
+        {% elif (ssl_certificate is defined) and (ssl_certificate_key is not defined) %}
+        listen 8053 ssl;
+
+        ssl_certificate /etc/nginx/awxweb.pem;
+        ssl_certificate_key /etc/nginx/awxweb.pem;
+        {% else %}
+        listen 8052 default_server;
+        {% endif %}
 
         # If you have a domain name, this is where to add it
         server_name _;
@@ -42,35 +67,56 @@ http {
 
         # HSTS (ngx_http_headers_module is required) (15768000 seconds = 6 months)
         add_header Strict-Transport-Security max-age=15768000;
-        add_header X-Content-Type-Options nosniff;
 
-        include /etc/nginx/conf.d/*.conf;
-    }
+        # Protect against click-jacking https://www.owasp.org/index.php/Testing_for_Clickjacking_(OTG-CLIENT-009)
+        add_header X-Frame-Options "DENY";
 
-    server {
-        listen 8043 default_server ssl;
+        location /nginx_status {
+          stub_status on;
+          access_log off;
+          allow 127.0.0.1;
+          deny all;
+        }
 
-        # If you have a domain name, this is where to add it
-        server_name _;
-        keepalive_timeout 65;
+        location /static/ {
+            alias /var/lib/awx/public/static/;
+        }
 
-        ssl_certificate /etc/nginx/nginx.crt;
-        ssl_certificate_key /etc/nginx/nginx.key;
+        location /favicon.ico { alias /var/lib/awx/public/static/favicon.ico; }
 
-        ssl_session_timeout 1d;
-        ssl_session_cache shared:SSL:50m;
-        ssl_session_tickets off;
+        location /websocket {
+            # Pass request to the upstream alias
+            proxy_pass http://daphne;
+            # Require http version 1.1 to allow for upgrade requests
+            proxy_http_version 1.1;
+            # We want proxy_buffering off for proxying to websockets.
+            proxy_buffering off;
+            # http://en.wikipedia.org/wiki/X-Forwarded-For
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            # enable this if you use HTTPS:
+            proxy_set_header X-Forwarded-Proto https;
+            # pass the Host: header from the client for the sake of redirects
+            proxy_set_header Host $http_host;
+            # We've set the Host header, so we don't need Nginx to muddle
+            # about with redirects
+            proxy_redirect off;
+            # Depending on the request value, set the Upgrade and
+            # connection headers
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection $connection_upgrade;
+        }
 
-        # intermediate configuration. tweak to your needs.
-        ssl_protocols TLSv1.2;
-        ssl_ciphers 'ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256';
-        ssl_prefer_server_ciphers on;
-
-        # HSTS (ngx_http_headers_module is required) (15768000 seconds = 6 months)
-        add_header Strict-Transport-Security max-age=15768000;
-        add_header X-Content-Type-Options nosniff;
-
-
-        include /etc/nginx/conf.d/*.conf;
+        location / {
+            # Add trailing / if missing
+            rewrite ^(.*)$http_host(.*[^/])$ $1$http_host$2/ permanent;
+            uwsgi_read_timeout 120s;
+            uwsgi_pass uwsgi;
+            include /etc/nginx/uwsgi_params;
+            {%- if extra_nginx_include is defined %}
+            include {{ extra_nginx_include }};
+            {%- endif %}
+            proxy_set_header X-Forwarded-Port 443;
+            uwsgi_param HTTP_X_FORWARDED_PORT 443;
+        }
     }
 }

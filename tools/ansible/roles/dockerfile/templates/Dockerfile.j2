@@ -199,11 +199,11 @@ ADD tools/ansible/roles/dockerfile/files/rsyslog.conf /var/lib/awx/rsyslog/rsysl
 ADD tools/ansible/roles/dockerfile/files/wait-for-migrations /usr/local/bin/wait-for-migrations
 ADD tools/ansible/roles/dockerfile/files/stop-supervisor /usr/local/bin/stop-supervisor
 
-ADD tools/ansible/roles/dockerfile/files/uwsgi.ini /etc/tower/uwsgi.ini
-
 ## File mappings
 {% if build_dev|bool %}
 ADD tools/docker-compose/launch_awx.sh /usr/bin/launch_awx.sh
+ADD tools/docker-compose/nginx.conf /etc/nginx/nginx.conf
+ADD tools/docker-compose/nginx.vh.default.conf /etc/nginx/conf.d/nginx.vh.default.conf
 ADD tools/docker-compose/start_tests.sh /start_tests.sh
 ADD tools/docker-compose/bootstrap_development.sh /usr/bin/bootstrap_development.sh
 ADD tools/docker-compose/entrypoint.sh /entrypoint.sh
@@ -213,6 +213,7 @@ ADD https://raw.githubusercontent.com/containers/libpod/master/contrib/podmanima
 {% else %}
 ADD tools/ansible/roles/dockerfile/files/launch_awx.sh /usr/bin/launch_awx.sh
 ADD tools/ansible/roles/dockerfile/files/launch_awx_task.sh /usr/bin/launch_awx_task.sh
+ADD tools/ansible/roles/dockerfile/files/uwsgi.ini /etc/tower/uwsgi.ini
 ADD {{ template_dest }}/supervisor.conf /etc/supervisord.conf
 ADD {{ template_dest }}/supervisor_task.conf /etc/supervisord_task.conf
 {% endif %}
