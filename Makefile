@@ -1,4 +1,4 @@
-include awx/ui-next/Makefile
+include awx/ui_next/Makefile
 
 PYTHON ?= python3.9
 OFFICIAL ?= no
@@ -460,7 +460,7 @@ HEADLESS ?= no
 ifeq ($(HEADLESS), yes)
 dist/$(SDIST_TAR_FILE):
 else
-dist/$(SDIST_TAR_FILE): $(UI_BUILD_FLAG_FILE) awx/ui-next/ansible-ui/build
+dist/$(SDIST_TAR_FILE): $(UI_BUILD_FLAG_FILE) awx/ui_next/src/build
 endif
 	$(PYTHON) -m build -s
 	ln -sf $(SDIST_TAR_FILE) dist/awx.tar.gz

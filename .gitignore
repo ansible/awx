@@ -162,4 +162,4 @@ use_dev_supervisor.txt
 /_build_kube_dev/
 /Dockerfile.kube-dev
 
-awx/ui-next/ansible-ui
+awx/ui_next/src

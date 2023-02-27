@@ -1,9 +1,0 @@
-{
-    "name": "ui-next",
-    "homepage": ".",
-    "private": true,
-    "engines": {
-      "node": ">=16.13.1"
-    },
-    
-}

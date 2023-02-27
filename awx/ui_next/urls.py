@@ -6,9 +6,10 @@ from awx.main.utils.licensing import server_product_name
 
 
 class IndexView(TemplateView):
-    template_name = 'index_controller.html'
+    template_name = 'index_awx.html'
 
 
+# TODO: Hao fix this
 class MigrationsNotran(TemplateView):
     template_name = 'installing.html'
 
@@ -23,7 +24,7 @@ class MigrationsNotran(TemplateView):
         return context
 
 
-app_name = 'ui-next'
+app_name = 'ui_next'
 
 urlpatterns = [
     re_path(r'^$', IndexView.as_view(), name='index'),
