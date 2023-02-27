@@ -611,9 +611,9 @@ class BaseTask(object):
             status = res.status
             rc = res.rc
 
-            if status in ('timeout', 'error'):
+            if status in ('timeout', 'idle_timeout', 'error'):
                 self.runner_callback.delay_update(skip_if_already_set=True, job_explanation=f"Job terminated due to {status}")
-                if status == 'timeout':
+                if status in ('timeout', 'idle_timeout'):
                     status = 'failed'
             elif status == 'canceled':
                 self.instance = self.update_model(pk)
