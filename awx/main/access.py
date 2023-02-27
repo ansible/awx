@@ -1874,8 +1874,6 @@ class JobLaunchConfigAccess(UnifiedCredentialsMixin, BaseAccess):
     def _related_filtered_queryset(self, cls):
         if cls is Label:
             return LabelAccess(self.user).filtered_queryset()
-        elif cls is InstanceGroup:
-            return InstanceGroupAccess(self.user).filtered_queryset()
         else:
             return cls._accessible_pk_qs(cls, self.user, 'use_role')
 
