@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='hostmetric',
             name='automated_counter',
-            field=models.IntegerField(default=0, help_text='How many times was the host automated'),
+            field=models.BigIntegerField(default=0, help_text='How many times was the host automated'),
         ),
         migrations.AddField(
             model_name='hostmetric',

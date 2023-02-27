@@ -3,7 +3,6 @@
 
 # Python
 import dateutil
-import datetime
 import functools
 import html
 import itertools
