@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('date', models.DateField(unique=True)),
-                ('license_consumed', models.BigIntegerField(default=0, help_text='How much unique hosts are consumed from the license')),
+                ('license_consumed', models.BigIntegerField(default=0, help_text='How many unique hosts are consumed from the license')),
                 ('license_capacity', models.BigIntegerField(default=0, help_text="'License capacity as max. number of unique hosts")),
                 (
                     'hosts_added',
