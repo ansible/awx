@@ -10,7 +10,7 @@ from rest_framework import serializers
 # AWX
 from awx.conf import fields, register, register_validate
 from awx.main.models import ExecutionEnvironment
-
+from awx.main.constants import SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS, SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS_MONTHLY
 
 logger = logging.getLogger('awx.main.conf')
 
@@ -801,6 +801,17 @@ register(
     default=False,
     label=_('Enable Preview of New User Interface'),
     help_text=_('Enable preview of new user interface.'),
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
+    'SUBSCRIPTION_USAGE_MODEL',
+    field_class=fields.ChoiceField,
+    choices=[SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS, SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS_MONTHLY],
+    default='',
+    allow_blank=True,
+    label=_('Defines subscription usage model and shows Host Metrics'),
     category=_('System'),
     category_slug='system',
 )
