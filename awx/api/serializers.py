@@ -4673,13 +4673,15 @@ class BulkJobLaunchSerializer(BaseSerializer):
         return attrs
 
     def create(self, validated_data):
+        request = self.context.get('request', None)
+        launch_user = request.user if request else None
         job_node_data = validated_data.pop('jobs')
         wfj_deferred_attr_names = ('skip_tags', 'limit', 'job_tags')
         wfj_deferred_vals = {}
         for item in wfj_deferred_attr_names:
             wfj_deferred_vals[item] = validated_data.pop(item, None)
 
-        wfj = WorkflowJob.objects.create(**validated_data, is_bulk_job=True)
+        wfj = WorkflowJob.objects.create(**validated_data, is_bulk_job=True, launch_type='manual', created_by=launch_user)
         for key, val in wfj_deferred_vals.items():
             if val:
                 setattr(wfj, key, val)
@@ -4802,7 +4804,7 @@ class BulkJobLaunchSerializer(BaseSerializer):
             raise serializers.ValidationError(_(f"Credentials {not_allowed} not found or you don't have permissions to access it"))
 
     def check_label_permission(self, requested_use_labels):
-        accessible_use_labels = {tup.id for tup in Label.objects.all()}
+        accessible_use_labels = {tup.id for tup in Label.objects.all(organization__in=Organizations.accessible_pk_qs(request.user, 'read_role'))}
         if requested_use_labels - accessible_use_labels:
             not_allowed = requested_use_labels - accessible_use_labels
             raise serializers.ValidationError(_(f"Labels {not_allowed} not found or you don't have permissions to access it"))
