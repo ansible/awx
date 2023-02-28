@@ -493,6 +493,7 @@
       workflow_job_template:
         name: "copy_{{ wfjt_name }}"
         organization: Default
+        ask_inventory_on_launch: true
         survey_spec:
           name: Basic Survey
           description: Basic Survey
@@ -737,6 +738,10 @@
               timeout: 23
               execution_environment:
                 name: "{{ ee1 }}"
+              inventory:
+                name: Test inventory
+                organization:
+                  name: Default
               related:
                 credentials:
                   - name: "{{ scm_cred_name }}"
