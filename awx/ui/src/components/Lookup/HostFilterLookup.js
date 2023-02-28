@@ -84,6 +84,7 @@ const QS_CONFIG = getQSConfig(
     page: 1,
     page_size: 5,
     order_by: 'name',
+    not__inventory__kind: 'constructed',
   },
   ['id', 'page', 'page_size', 'inventory']
 );
