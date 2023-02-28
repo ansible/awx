@@ -1,4 +1,4 @@
-include awx/ui_next/Makefile
+-include awx/ui_next/Makefile
 
 PYTHON ?= python3.9
 OFFICIAL ?= no
@@ -387,7 +387,7 @@ bulk_data:
 # UI TASKS
 # --------------------------------------
 
-UI_BUILD_FLAG_FILE = $(CURDIR)/ui/.ui-built
+UI_BUILD_FLAG_FILE = awx/ui/.ui-built
 
 clean-ui:
 	rm -rf node_modules
@@ -448,7 +448,7 @@ HEADLESS ?= no
 ifeq ($(HEADLESS), yes)
 dist/$(SDIST_TAR_FILE):
 else
-dist/$(SDIST_TAR_FILE): $(UI_BUILD_FLAG_FILE) awx/ui_next/src/build
+dist/$(SDIST_TAR_FILE): $(UI_BUILD_FLAG_FILE) awx/ui_next/build
 endif
 	$(PYTHON) -m build -s
 	ln -sf $(SDIST_TAR_FILE) dist/awx.tar.gz
@@ -590,7 +590,7 @@ awx-kube-dev-build: Dockerfile.kube-dev
 	    -t $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) .
 
 ## Build awx image for deployment on Kubernetes environment.
-awx-kube-build: Dockerfile
+awx-kube-build: Dockerfile awx/ui_next/src
 	DOCKER_BUILDKIT=1 docker build -f Dockerfile \
 		--build-arg VERSION=$(VERSION) \
 		--build-arg SETUPTOOLS_SCM_PRETEND_VERSION=$(VERSION) \

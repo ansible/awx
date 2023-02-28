@@ -79,6 +79,6 @@ ui_next/clean: ui_next/clean/build
 .PHONY: ui_next/clean/build
 ## Clean ui_next build
 ui_next/clean/build:
-	rm -rf $$(UI_NEXT_DIR)/build
+	rm -rf $(UI_NEXT_DIR)/build
 
 
