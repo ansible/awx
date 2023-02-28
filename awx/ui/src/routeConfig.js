@@ -56,11 +56,11 @@ function getRouteConfig(userProfile = {}) {
           path: '/workflow_approvals',
           screen: WorkflowApprovals,
         },
-  {
-    title: <Trans>Host Metrics</Trans>,
-    path: '/host_metrics',
-        screen: HostMetrics,
-  },
+        {
+          title: <Trans>Host Metrics</Trans>,
+          path: '/host_metrics',
+          screen: HostMetrics,
+        },
       ],
     },
     {

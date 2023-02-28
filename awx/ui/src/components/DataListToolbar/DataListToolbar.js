@@ -88,8 +88,8 @@ function DataListToolbar({
     [setIsKebabModalOpen]
   );
   const columns = [...searchColumns];
-  if ( !advancedSearchDisabled ) {
-      columns.push({ name: t`Advanced`, key: 'advanced' });
+  if (!advancedSearchDisabled) {
+    columns.push({ name: t`Advanced`, key: 'advanced' });
   }
   return (
     <Toolbar
@@ -226,7 +226,7 @@ DataListToolbar.propTypes = {
   additionalControls: PropTypes.arrayOf(PropTypes.node),
   enableNegativeFiltering: PropTypes.bool,
   enableRelatedFuzzyFiltering: PropTypes.bool,
-  advancedSearchDisabled : PropTypes.bool,
+  advancedSearchDisabled: PropTypes.bool,
 };
 
 DataListToolbar.defaultProps = {

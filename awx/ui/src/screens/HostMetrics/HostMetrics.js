@@ -1,5 +1,5 @@
-import React, {useCallback, useEffect, useState} from 'react';
-import {t} from "@lingui/macro";
+import React, { useCallback, useEffect, useState } from 'react';
+import { t } from '@lingui/macro';
 import ScreenHeader from 'components/ScreenHeader/ScreenHeader';
 import { HostMetricsAPI } from 'api';
 import useRequest from 'hooks/useRequest';
@@ -9,17 +9,17 @@ import PaginatedTable, {
 } from 'components/PaginatedTable';
 import DataListToolbar from 'components/DataListToolbar';
 import { getQSConfig, parseQueryString } from 'util/qs';
-import {Card, PageSection} from "@patternfly/react-core";
+import { Card, PageSection } from '@patternfly/react-core';
 import { useLocation } from 'react-router-dom';
 import useSelected from 'hooks/useSelected';
-import HostMetricsListItem from "./HostMetricsListItem";
-import HostMetricsDeleteButton from "./HostMetricsDeleteButton";
+import HostMetricsListItem from './HostMetricsListItem';
+import HostMetricsDeleteButton from './HostMetricsDeleteButton';
 
 const QS_CONFIG = getQSConfig('host_metrics', {
-    page: 1,
-    page_size: 20,
-    order_by: 'hostname',
-    deleted: false,
+  page: 1,
+  page_size: 20,
+  order_by: 'hostname',
+  deleted: false,
 });
 
 function HostMetrics() {
@@ -34,15 +34,15 @@ function HostMetrics() {
     error,
     request: readHostMetrics,
   } = useRequest(
-      useCallback(async () => {
-        const params = parseQueryString(QS_CONFIG, location.search);
-        const list = await HostMetricsAPI.read(params);
-        return {
-          count: list.data.count,
-          results: list.data.results
-        };
-      }, [location]),
-      { results: [], count: 0 }
+    useCallback(async () => {
+      const params = parseQueryString(QS_CONFIG, location.search);
+      const list = await HostMetricsAPI.read(params);
+      return {
+        count: list.data.count,
+        results: list.data.results,
+      };
+    }, [location]),
+    { results: [], count: 0 }
   );
 
   useEffect(() => {
@@ -50,14 +50,11 @@ function HostMetrics() {
   }, [readHostMetrics]);
 
   const { selected, isAllSelected, handleSelect, selectAll, clearSelected } =
-      useSelected(results);
+    useSelected(results);
 
-  return(
+  return (
     <>
-      <ScreenHeader
-        streamType="none"
-        breadcrumbConfig={breadcrumbConfig}
-      />
+      <ScreenHeader streamType="none" breadcrumbConfig={breadcrumbConfig} />
       <PageSection>
         <Card>
           <PaginatedTable
@@ -66,19 +63,27 @@ function HostMetrics() {
             items={results}
             itemCount={count}
             pluralizedItemName={t`Host Metrics`}
-            renderRow={(item, index)=> (
+            renderRow={(item, index) => (
               <HostMetricsListItem
                 item={item}
-                isSelected={selected.some((row) => row.hostname === item.hostname)}
+                isSelected={selected.some(
+                  (row) => row.hostname === item.hostname
+                )}
                 onSelect={() => handleSelect(item)}
                 rowIndex={index}
               />
             )}
             qsConfig={QS_CONFIG}
-            toolbarSearchColumns={[{name: t`Hostname`, key: 'hostname__icontains', isDefault: true}]}
+            toolbarSearchColumns={[
+              {
+                name: t`Hostname`,
+                key: 'hostname__icontains',
+                isDefault: true,
+              },
+            ]}
             toolbarSearchableKeys={[]}
             toolbarRelatedSearchableKeys={[]}
-            renderToolbar={(props) =>
+            renderToolbar={(props) => (
               <DataListToolbar
                 {...props}
                 advancedSearchDisabled
@@ -89,46 +94,55 @@ function HostMetrics() {
                   <HostMetricsDeleteButton
                     key="delete"
                     onDelete={() =>
-                      Promise.all(selected.map((hostMetric) =>
-                        HostMetricsAPI.destroy(hostMetric.id)))
-                          .then(() => { readHostMetrics(); clearSelected(); })
+                      Promise.all(
+                        selected.map((hostMetric) =>
+                          HostMetricsAPI.destroy(hostMetric.id)
+                        )
+                      ).then(() => {
+                        readHostMetrics();
+                        clearSelected();
+                      })
                     }
-                itemsToDelete={selected}
-                pluralizedItemName={t`Host Metrics`}
-                />]}
-              />}
-              headerRow={
-                <HeaderRow qsConfig={QS_CONFIG}>
-                  <HeaderCell
-                    sortKey="hostname">
-                      {t`Hostname`}
-                  </HeaderCell>
-                  <HeaderCell
-                    sortKey="first_automation"
-                    tooltip={t`When was the host first automated`}>
-                      {t`First automated`}
-                   </HeaderCell>
-                  <HeaderCell
-                    sortKey="last_automation"
-                    tooltip={t`When was the host last automated`}>
-                      {t`Last automated`}
-                  </HeaderCell>
-                  <HeaderCell
-                    sortKey="automated_counter"
-                    tooltip={t`How many times was the host automated`}>
-                      {t`Automation`}
-                  </HeaderCell>
-                  <HeaderCell
-                    sortKey="used_in_inventories"
-                    tooltip={t`How many inventories is the host in, recomputed on a weekly schedule`}>
-                      {t`Inventories`}
-                  </HeaderCell>
-                  <HeaderCell
-                    sortKey="deleted_counter"
-                    tooltip={t`How many times was the host deleted`}>
-                      {t`Deleted`}
-                  </HeaderCell>
-                </HeaderRow>
+                    itemsToDelete={selected}
+                    pluralizedItemName={t`Host Metrics`}
+                  />,
+                ]}
+              />
+            )}
+            headerRow={
+              <HeaderRow qsConfig={QS_CONFIG}>
+                <HeaderCell sortKey="hostname">{t`Hostname`}</HeaderCell>
+                <HeaderCell
+                  sortKey="first_automation"
+                  tooltip={t`When was the host first automated`}
+                >
+                  {t`First automated`}
+                </HeaderCell>
+                <HeaderCell
+                  sortKey="last_automation"
+                  tooltip={t`When was the host last automated`}
+                >
+                  {t`Last automated`}
+                </HeaderCell>
+                <HeaderCell
+                  sortKey="automated_counter"
+                  tooltip={t`How many times was the host automated`}
+                >
+                  {t`Automation`}
+                </HeaderCell>
+                <HeaderCell
+                  sortKey="used_in_inventories"
+                  tooltip={t`How many inventories is the host in, recomputed on a weekly schedule`}
+                >
+                  {t`Inventories`}
+                </HeaderCell>
+                <HeaderCell
+                  sortKey="deleted_counter"
+                  tooltip={t`How many times was the host deleted`}
+                >
+                  {t`Deleted`}
+                </HeaderCell>
+              </HeaderRow>
             }
           />
         </Card>
