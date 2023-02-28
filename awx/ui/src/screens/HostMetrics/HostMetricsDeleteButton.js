@@ -36,7 +36,6 @@ const ItemToDelete = shape({
 function HostMetricsDeleteButton({
   itemsToDelete,
   pluralizedItemName,
-  errorMessage,
   onDelete,
   deleteDetailsRequests,
   warningMessage,
@@ -48,7 +47,6 @@ function HostMetricsDeleteButton({
 
   const [deleteMessageError, setDeleteMessageError] = useState();
   const handleDelete = () => {
-    console.log("Delete");
     onDelete();
     toggleModal();
   };
@@ -78,9 +76,8 @@ function HostMetricsDeleteButton({
   const renderTooltip = () => {
     if (itemsToDelete.length) {
       return t`Soft delete`;
-    } else {
-      return t`Select a row to delete`;
     }
+    return t`Select a row to delete`;
   };
 
   const modalTitle = t`Soft delete ${pluralizedItemName}?`;
@@ -94,11 +91,8 @@ function HostMetricsDeleteButton({
       deleteMessages.push(warningMessage);
     }
     if (deleteMessage) {
-      if (itemsToDelete.length > 1 || deleteDetails)
-      {
-        deleteMessages.push(deleteMessage);
-      } else if (deleteDetails || itemsToDelete.length > 1) {
-        deleteMessages.push(deleteMessage);
+      if (itemsToDelete.length > 1 || deleteDetails) {
+          deleteMessages.push(deleteMessage);
       }
     }
     return (

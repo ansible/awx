@@ -11,22 +11,21 @@ import DataListToolbar from 'components/DataListToolbar';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import {Card, PageSection} from "@patternfly/react-core";
 import { useLocation } from 'react-router-dom';
+import useSelected from 'hooks/useSelected';
 import HostMetricsListItem from "./HostMetricsListItem";
 import HostMetricsDeleteButton from "./HostMetricsDeleteButton";
-import useSelected from 'hooks/useSelected';
 
+const QS_CONFIG = getQSConfig('host_metrics', {
+    page: 1,
+    page_size: 20,
+    order_by: 'hostname',
+});
 
 function HostMetrics() {
-
   const location = useLocation();
 
   const [breadcrumbConfig] = useState({
     '/host_metrics': t`Host Metrics`,
-  });
-  const QS_CONFIG = getQSConfig('host_metrics', {
-    page: 1,
-    page_size: 20,
-    order_by: 'hostname',
   });
   const {
     result: { count, results },
@@ -41,7 +40,7 @@ function HostMetrics() {
           count: list.data.count,
           results: list.data.results
         };
-      }, [location.search]),
+      }, [location]),
       { results: [], count: 0 }
   );
 
@@ -81,7 +80,7 @@ function HostMetrics() {
             renderToolbar={(props) =>
               <DataListToolbar
                 {...props}
-                advancedSearchDisabled={true}
+                advancedSearchDisabled
                 fillWidth
                 isAllSelected={isAllSelected}
                 onSelectAll={selectAll}
