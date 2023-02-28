@@ -3,32 +3,32 @@ UI_NEXT_DIR := $(shell realpath --relative-to $(CURDIR) $(dir $(UI_NEXT_MKFILE_P
 
 UI_NEXT_SRC_DIR := $(UI_NEXT_DIR)/src
 
-UI_NEXT_SRC_GIT_REPO_HTTPS ?=
-UI_NEXT_SRC_GIT_REPO_SSH ?=
-UI_NEXT_SRC_GIT_BRANCH ?= main
+UI_NEXT_GIT_REPO_HTTPS ?=
+UI_NEXT_GIT_REPO_SSH ?=
+UI_NEXT_GIT_BRANCH ?= main
 
 UI_NEXT_LOCAL ?=
 
 .PHONY: ui_next/clone-https
-## Shallow clone the ui_next repo via https skip if UI_NEXT_SRC_GIT_REPO_HTTPS is undefined
+## Shallow clone the ui_next repo via https skip if UI_NEXT_GIT_REPO_HTTPS is undefined
 ui_next/clone-https:
-	@if [ -z "$(UI_NEXT_SRC_GIT_REPO_HTTPS)" ]; then \
-		echo "SKIP: ui_next/clone-https. UI_NEXT_SRC_GIT_REPO_HTTPS is not set."; \
+	@if [ -z "$(UI_NEXT_GIT_REPO_HTTPS)" ]; then \
+		echo "SKIP: ui_next/clone-https. UI_NEXT_GIT_REPO_HTTPS is not set."; \
 	elif [ -d "$(UI_NEXT_SRC_DIR)" ]; then \
 		echo "SKIP: ui_next/clone-https. $(UI_NEXT_SRC_DIR) already exists."; \
 	else \
-		git clone --depth 1 --branch $(UI_NEXT_SRC_GIT_BRANCH) $(UI_NEXT_SRC_GIT_REPO_HTTPS) $(UI_NEXT_SRC_DIR) || true; \
+		git clone --depth 1 --branch $(UI_NEXT_GIT_BRANCH) $(UI_NEXT_GIT_REPO_HTTPS) $(UI_NEXT_SRC_DIR) || true; \
 	fi
 
 .PHONY: ui_next/clone-ssh
 ## Shallow clone the ui_next repo via ssh.
 ui_next/clone-ssh:
-	@if [ -z "$(UI_NEXT_SRC_GIT_REPO_SSH)" ]; then \
-		echo "SKIP: ui_next/clone-ssh. UI_NEXT_SRC_GIT_REPO_SSH is not set."; \
+	@if [ -z "$(UI_NEXT_GIT_REPO_SSH)" ]; then \
+		echo "SKIP: ui_next/clone-ssh. UI_NEXT_GIT_REPO_SSH is not set."; \
 	elif [ -d "$(UI_NEXT_SRC_DIR)" ]; then \
 		echo "SKIP: ui_next/clone-ssh. $(UI_NEXT_SRC_DIR) already exists."; \
 	else \
-		git clone --depth 1 --branch $(UI_NEXT_SRC_GIT_BRANCH) $(UI_NEXT_SRC_GIT_REPO_SSH) $(UI_NEXT_SRC_DIR) || true; \
+		git clone --depth 1 --branch $(UI_NEXT_GIT_BRANCH) $(UI_NEXT_GIT_REPO_SSH) $(UI_NEXT_SRC_DIR) || true; \
 	fi
 
 .PHONY: ui_next/link-local
@@ -42,9 +42,9 @@ ui_next/link-local:
 		ln -s $(UI_NEXT_LOCAL) $(UI_NEXT_SRC_DIR); \
 	fi
 
-.PHONY: ui_next
+.PHONY: ui_next/src
 ## Try to link to a local clone of ui_next repo if it exist otherwise clone via ssh than https.
-ui_next:
+ui_next/src:
 	@if [ -d "$(UI_NEXT_SRC_DIR)" ]; then \
 		echo "SKIP: ui_next. $(UI_NEXT_SRC_DIR) already exists."; \
 	else \
@@ -53,11 +53,11 @@ ui_next:
 
 ## Alias for ui_next, will not run if ui_next already exist
 $(UI_NEXT_SRC_DIR):
-	$(MAKE) ui_next
+	$(MAKE) ui_next/src
 
 .PHONY: ui_next/build
 ## Build ui_next from source
-ui_next/src/build: ui_next
+ui_next/src/build: ui_next/src
 	cd $(UI_NEXT_SRC_DIR) && \
 	npm install webpack && \
 	npm run build:awx
