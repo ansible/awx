@@ -4559,7 +4559,7 @@ class BulkJobNodeSerializer(serializers.Serializer):
     scm_branch = serializers.CharField(required=False, write_only=True, allow_blank=False)
     verbosity = serializers.IntegerField(required=False, min_value=1)
     forks = serializers.IntegerField(required=False, min_value=1)
-    diff_mode = serializers.CharField(required=False, write_only=True, allow_blank=False)
+    diff_mode = serializers.BooleanField(required=False, allow_null=True, default=None)
     job_tags = serializers.CharField(required=False, write_only=True, allow_blank=False)
     job_type = serializers.CharField(required=False, write_only=True, allow_blank=False)
     skip_tags = serializers.CharField(required=False, write_only=True, allow_blank=False)
@@ -4646,7 +4646,7 @@ class BulkJobLaunchSerializer(BaseSerializer):
             self.check_inventory_permission(attrs, request, requested_use_inventories)
 
         if requested_use_labels:
-            self.check_label_permission(requested_use_labels)
+            self.check_label_permission(request, requested_use_labels)
 
         if requested_use_instance_groups:
             self.check_instance_group_permission(request, requested_use_instance_groups)
@@ -4803,8 +4803,8 @@ class BulkJobLaunchSerializer(BaseSerializer):
             not_allowed = requested_use_credentials - accessible_use_credentials
             raise serializers.ValidationError(_(f"Credentials {not_allowed} not found or you don't have permissions to access it"))
 
-    def check_label_permission(self, requested_use_labels):
-        accessible_use_labels = {tup.id for tup in Label.objects.all(organization__in=Organizations.accessible_pk_qs(request.user, 'read_role'))}
+    def check_label_permission(self, request, requested_use_labels):
+        accessible_use_labels = {tup.id for tup in Label.objects.filter(organization__in=Organization.accessible_pk_qs(request.user, 'read_role'))}
         if requested_use_labels - accessible_use_labels:
             not_allowed = requested_use_labels - accessible_use_labels
             raise serializers.ValidationError(_(f"Labels {not_allowed} not found or you don't have permissions to access it"))
