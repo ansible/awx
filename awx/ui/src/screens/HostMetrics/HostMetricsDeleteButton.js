@@ -1,18 +1,7 @@
 import React, { useState } from 'react';
-import {
-  func,
-  node,
-  string,
-  arrayOf,
-  shape,
-} from 'prop-types';
+import { func, node, string, arrayOf, shape } from 'prop-types';
 import styled from 'styled-components';
-import {
-  Alert,
-  Badge,
-  Button,
-  Tooltip,
-} from '@patternfly/react-core';
+import { Alert, Badge, Button, Tooltip } from '@patternfly/react-core';
 import { t } from '@lingui/macro';
 import { getRelatedResourceDeleteCounts } from 'util/getRelatedResourceDeleteDetails';
 import AlertModal from '../../components/AlertModal';
@@ -82,8 +71,7 @@ function HostMetricsDeleteButton({
 
   const modalTitle = t`Soft delete ${pluralizedItemName}?`;
 
-  const isDisabled =
-    itemsToDelete.length === 0;
+  const isDisabled = itemsToDelete.length === 0;
 
   const buildDeleteWarning = () => {
     const deleteMessages = [];
@@ -92,7 +80,7 @@ function HostMetricsDeleteButton({
     }
     if (deleteMessage) {
       if (itemsToDelete.length > 1 || deleteDetails) {
-          deleteMessages.push(deleteMessage);
+        deleteMessages.push(deleteMessage);
       }
     }
     return (
@@ -134,21 +122,21 @@ function HostMetricsDeleteButton({
 
   return (
     <>
-        <Tooltip content={renderTooltip()} position="top">
-          <div>
-            <Button
-              variant="secondary"
-              isLoading={isLoading}
-              ouiaId="delete-button"
-              spinnerAriaValueText={isLoading ? 'Loading' : undefined}
-              aria-label={t`Delete`}
-              onClick={() => toggleModal(true)}
-              isDisabled={isDisabled}
-            >
-              {t`Delete`}
-            </Button>
-          </div>
-        </Tooltip>
+      <Tooltip content={renderTooltip()} position="top">
+        <div>
+          <Button
+            variant="secondary"
+            isLoading={isLoading}
+            ouiaId="delete-button"
+            spinnerAriaValueText={isLoading ? 'Loading' : undefined}
+            aria-label={t`Delete`}
+            onClick={() => toggleModal(true)}
+            isDisabled={isDisabled}
+          >
+            {t`Delete`}
+          </Button>
+        </div>
+      </Tooltip>
       {isModalOpen && (
         <AlertModal
           variant="danger"
@@ -181,7 +169,10 @@ function HostMetricsDeleteButton({
         >
           <div>{t`This action will soft delete the following:`}</div>
           {itemsToDelete.map((item) => (
-            <span key={item.hostname} id={`item-to-be-deleted-${item.hostname}`}>
+            <span
+              key={item.hostname}
+              id={`item-to-be-deleted-${item.hostname}`}
+            >
               <strong>{item.hostname}</strong>
               <br />
             </span>

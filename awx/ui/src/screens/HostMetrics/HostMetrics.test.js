@@ -19,7 +19,7 @@ const mockHostMetrics = [
     used_in_inventories: 1,
     deleted_counter: 1,
     id: 1,
-  }
+  },
 ];
 
 function waitForLoaded(wrapper) {
