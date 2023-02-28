@@ -19,6 +19,7 @@ const QS_CONFIG = getQSConfig('host_metrics', {
     page: 1,
     page_size: 20,
     order_by: 'hostname',
+    deleted: false,
 });
 
 function HostMetrics() {
