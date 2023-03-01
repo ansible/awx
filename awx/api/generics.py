@@ -674,7 +674,7 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
                 location = None
             created = True
 
-        # Retrive the sub object (whether created or by ID).
+        # Retrieve the sub object (whether created or by ID).
         sub = get_object_or_400(self.model, pk=sub_id)
 
         # Verify we have permission to attach.

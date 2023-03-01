@@ -537,7 +537,7 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
         #
         # This logic is to force rendering choice's on an uneditable field.
         # Note: Consider expanding this rendering for more than just choices fields
-        # Note: This logic works in conjuction with
+        # Note: This logic works in conjunction with
         if hasattr(model_field, 'choices') and model_field.choices:
             was_editable = model_field.editable
             model_field.editable = True
@@ -3983,7 +3983,7 @@ class JobEventSerializer(BaseSerializer):
         # Show full stdout for playbook_on_* events.
         if obj and obj.event.startswith('playbook_on'):
             return data
-        # If the view logic says to not trunctate (request was to the detail view or a param was used)
+        # If the view logic says to not truncate (request was to the detail view or a param was used)
         if self.context.get('no_truncate', False):
             return data
         max_bytes = settings.EVENT_STDOUT_MAX_BYTES_DISPLAY
@@ -4058,7 +4058,7 @@ class AdHocCommandEventSerializer(BaseSerializer):
 
     def to_representation(self, obj):
         data = super(AdHocCommandEventSerializer, self).to_representation(obj)
-        # If the view logic says to not trunctate (request was to the detail view or a param was used)
+        # If the view logic says to not truncate (request was to the detail view or a param was used)
         if self.context.get('no_truncate', False):
             return data
         max_bytes = settings.EVENT_STDOUT_MAX_BYTES_DISPLAY
@@ -4751,7 +4751,7 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
         ),
     )
     until = serializers.SerializerMethodField(
-        help_text=_('The date this schedule will end. This field is computed from the RRULE. If the schedule does not end an emptry string will be returned'),
+        help_text=_('The date this schedule will end. This field is computed from the RRULE. If the schedule does not end an empty string will be returned'),
     )
 
     class Meta:
