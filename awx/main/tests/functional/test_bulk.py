@@ -5,7 +5,7 @@ from uuid import uuid4
 from awx.api.versioning import reverse
 
 from awx.main.models.jobs import JobTemplate
-from awx.main.models import Organization, Inventory, WorkflowJob, ExecutionEnvironment
+from awx.main.models import Organization, Inventory, WorkflowJob, ExecutionEnvironment, Host
 from awx.main.scheduler import TaskManager
 
 
@@ -70,6 +70,7 @@ def test_bulk_host_create_rbac(organization, inventory, post, get, user):
             reverse('api:bulk_host_create'), {'inventory': inventory.id, 'hosts': [{'name': f'foobar-{indx}'}]}, u, expect=201
         ).data
         assert len(bulk_host_create_response['hosts']) == 1, f"unexpected number of hosts created for user {u}"
+        assert Host.objects.filter(inventory__id=inventory.id)[0].name == 'foobar-0'
 
     for indx, u in enumerate([member, auditor, use_inv_member]):
         bulk_host_create_response = post(
