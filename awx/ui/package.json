@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "@lingui/react": "3.14.0",
-    "@patternfly/patternfly": "4.217.1",
+    "@patternfly/patternfly": "4.224.2",
     "@patternfly/react-core": "^4.264.0",
     "@patternfly/react-icons": "4.92.10",
     "@patternfly/react-table": "4.108.0",
