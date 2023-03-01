@@ -33,7 +33,7 @@ def test_bulk_host_create(run_module, admin_user, inventory):
     run_module(
         'bulk_host_create',
         {
-            'inventory': inventory.id,
+            'inventory': inventory.name,
             'hosts': hosts,
         },
         admin_user,

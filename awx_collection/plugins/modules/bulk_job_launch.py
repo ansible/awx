@@ -125,11 +125,11 @@ options:
         - If not provided, will use the organization the user is in.
         - Required if the user belongs to more than one organization.
         - Affects who can see the resulting bulk job.
-      type: int
+      type: str
     inventory:
       description:
-        - Inventory ID to use for the jobs ran within the bulk job, only used if prompt for inventory is set.
-      type: int
+        - Inventory name or ID to use for the jobs ran within the bulk job, only used if prompt for inventory is set.
+      type: str
     scm_branch:
       description:
         - A specific branch of the SCM project to run the template on.
@@ -189,14 +189,15 @@ EXAMPLES = '''
     extra_vars: # these override / extend extra_data at the job level
       food: grape
       animal: owl
-    inventory: 1
+    organization: Default
+    inventory: Demo Inventory
 
 - name: Launch bulk jobs with lookup plugin
   bulk_job_launch:
     name: My Bulk Job Launch
     jobs:
       - unified_job_template: 7
-      - unified_job_template: "{{ lookup('awx.awx.controller_api', 'job_templates', query_params={'name': 'Demo Job Template'}, return_ids=True) }}"
+      - unified_job_template: "{{ lookup('awx.awx.controller_api', 'job_templates', query_params={'name': 'Demo Job Template'}, return_ids=True, expect_one=True) }}"
 '''
 
 from ..module_utils.controller_api import ControllerAPIModule
@@ -208,8 +209,8 @@ def main():
         jobs=dict(required=True, type='list', elements='dict'),
         name=dict(),
         description=dict(),
-        organization=dict(type='int'),
-        inventory=dict(type='int'),
+        organization=dict(type='str'),
+        inventory=dict(type='str'),
         limit=dict(),
         scm_branch=dict(),
         extra_vars=dict(type='dict'),
@@ -226,8 +227,6 @@ def main():
         'jobs',
         'name',
         'description',
-        'organization',
-        'inventory',
         'limit',
         'scm_branch',
         'extra_vars',
@@ -239,6 +238,16 @@ def main():
         val = module.params.get(p)
         if val:
             post_data[p] = val
+
+    # Resolve name to ID for related resources
+    # Do not resolve name for "jobs" suboptions, for optimization
+    org_name = module.params.get('organization')
+    if org_name:
+        post_data['organization'] = module.resolve_name_to_id('organizations', org_name)
+
+    inv_name = module.params.get('inventory')
+    if inv_name:
+        post_data['inventory'] = module.resolve_name_to_id('inventories', inv_name)
 
     # Extract our parameters
     wait = module.params.get('wait')

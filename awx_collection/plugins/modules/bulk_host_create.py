@@ -48,9 +48,9 @@ options:
           type: str
     inventory:
       description:
-        - Inventory ID the hosts should be made a member of.
+        - Inventory name or ID the hosts should be made a member of.
       required: True
-      type: int
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -71,21 +71,24 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         hosts=dict(required=True, type='list', elements='dict'),
-        inventory=dict(required=True, type='int'),
+        inventory=dict(required=True, type='str'),
     )
 
     # Create a module for ourselves
     module = ControllerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
-    inventory = module.params.get('inventory')
+    inv_name = module.params.get('inventory')
     hosts = module.params.get('hosts')
 
     for h in hosts:
         if 'variables' in h:
             h['variables'] = json.dumps(h['variables'])
+
+    inv_id = module.resolve_name_to_id('inventories', inv_name)
+
     # Launch the jobs
-    result = module.post_endpoint("bulk/host_create", data={"inventory": inventory, "hosts": hosts})
+    result = module.post_endpoint("bulk/host_create", data={"inventory": inv_id, "hosts": hosts})
 
     if result['status_code'] != 201:
         module.fail_json(msg="Failed to create hosts, see response for details", response=result)

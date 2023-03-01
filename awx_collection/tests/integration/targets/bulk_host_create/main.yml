@@ -6,7 +6,7 @@
 
 - name: Generate a unique name
   set_fact:
-    bulk_host_name: "AWX-Collection-tests-bulk_host_create-{{ test_id }}"
+    bulk_inv_name: "AWX-Collection-tests-bulk_host_create-{{ test_id }}"
 
 - name: Get our collection package
   controller_meta:
@@ -19,7 +19,7 @@
 
 - name: Create an inventory
   inventory:
-    name: "{{ bulk_host_name }}"
+    name: "{{ bulk_inv_name }}"
     organization: Default
     state: present
   register: inventory_result
@@ -36,7 +36,7 @@
       - name: example.dns.gg
         description: "myhost2"
         enabled: false
-    inventory: "{{ inventory_result.id }}"
+    inventory: "{{ bulk_inv_name }}"
   register: result
 
 - assert:
@@ -46,6 +46,6 @@
 # cleanup
 - name: Delete inventory
   inventory:
-    name: "{{ bulk_host_name }}"
+    name: "{{ bulk_inv_name }}"
     organization: Default
     state: absent
