@@ -197,7 +197,8 @@ EXAMPLES = '''
     name: My Bulk Job Launch
     jobs:
       - unified_job_template: 7
-      - unified_job_template: "{{ lookup('awx.awx.controller_api', 'job_templates', query_params={'name': 'Demo Job Template'}, return_ids=True, expect_one=True) }}"
+      - unified_job_template: "{{ lookup('awx.awx.controller_api', 'job_templates', query_params={'name': 'Demo Job Template'},
+        return_ids=True, expect_one=True) }}"
 '''
 
 from ..module_utils.controller_api import ControllerAPIModule

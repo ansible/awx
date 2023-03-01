@@ -3078,7 +3078,9 @@ class WorkflowJobTemplateWorkflowNodesList(SubListCreateAPIView):
     search_fields = ('unified_job_template__name', 'unified_job_template__description')
 
     def get_queryset(self):
-        return super(WorkflowJobTemplateWorkflowNodesList, self).get_queryset().order_by('id')
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        return getattr(parent, self.relationship).order_by('id')
 
 
 class WorkflowJobTemplateJobsList(SubListAPIView):
@@ -3172,7 +3174,9 @@ class WorkflowJobWorkflowNodesList(SubListAPIView):
     search_fields = ('unified_job_template__name', 'unified_job_template__description')
 
     def get_queryset(self):
-        return super(WorkflowJobWorkflowNodesList, self).get_queryset().order_by('id')
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        return getattr(parent, self.relationship).order_by('id')
 
 
 class WorkflowJobCancel(GenericCancelView):
