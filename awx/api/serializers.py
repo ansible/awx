@@ -1951,12 +1951,6 @@ class GroupSerializer(BaseSerializerWithVariables):
 
 
 class BulkHostSerializer(HostSerializer):
-    name = serializers.CharField(required=True, allow_blank=False, max_length=512)
-    instance_id = serializers.CharField(required=False, max_length=1024)
-    description = serializers.CharField(required=False)
-    enabled = serializers.BooleanField(default=True, required=False)
-    variables = serializers.CharField(write_only=True, required=False)
-
     class Meta:
         model = Host
         fields = (
@@ -1973,9 +1967,7 @@ class BulkHostCreateSerializer(serializers.Serializer):
         queryset=Inventory.objects.all(), required=True, write_only=True, help_text=_('Primary Key ID of inventory to add hosts to.')
     )
     hosts_help_text = _('List of hosts to be created, JSON. e.g. [{"name": "example.com"}, {"name": "127.0.0.1"}]')
-    hosts = serializers.ListField(
-        child=BulkHostSerializer(), allow_empty=False, max_length=settings.BULK_HOST_MAX_CREATE, write_only=True, help_text=hosts_help_text
-    )
+    hosts = serializers.ListField(child=BulkHostSerializer(), allow_empty=False, max_length=100000, write_only=True, help_text=hosts_help_text)
 
     class Meta:
         model = Inventory
@@ -2019,6 +2011,8 @@ class BulkHostCreateSerializer(serializers.Serializer):
     def validate(self, attrs):
         request = self.context.get('request', None)
         inv = attrs['inventory']
+        if len(attrs['hosts']) > settings.BULK_HOST_MAX_CREATE:
+            raise serializers.ValidationError(_('Number of hosts exceeds system setting BULK_HOST_MAX_CREATE'))
         if request and not request.user.is_superuser:
             if inv.organization:
                 is_org_admin = request.user in inv.organization.admin_role
@@ -4594,7 +4588,7 @@ class BulkJobNodeSerializer(serializers.Serializer):
 class BulkJobLaunchSerializer(BaseSerializer):
     name = serializers.CharField(default='Bulk Job Launch', max_length=512, write_only=True, required=False, allow_blank=True)  # limited by max name of jobs
     job_node_help_text = _('List of jobs to be launched, JSON. e.g. [{"unified_job_template": 7}, {"unified_job_template": 10}]')
-    jobs = BulkJobNodeSerializer(many=True, allow_empty=False, write_only=True, max_length=settings.BULK_JOB_MAX_LAUNCH, help_text=job_node_help_text)
+    jobs = BulkJobNodeSerializer(many=True, allow_empty=False, write_only=True, max_length=100000, help_text=job_node_help_text)
     description = serializers.CharField(write_only=True, required=False, allow_blank=False)
     extra_vars = serializers.JSONField(write_only=True, required=False)
     organization = serializers.PrimaryKeyRelatedField(
@@ -4618,6 +4612,9 @@ class BulkJobLaunchSerializer(BaseSerializer):
     def validate(self, attrs):
         request = self.context.get('request', None)
         identifiers = set()
+        if len(attrs['jobs']) > settings.BULK_JOB_MAX_LAUNCH:
+            raise serializers.ValidationError(_('Number of requested jobs exceeds system setting BULK_JOB_MAX_LAUNCH'))
+
         for node in attrs['jobs']:
             if 'identifier' in node:
                 if node['identifier'] in identifiers:
