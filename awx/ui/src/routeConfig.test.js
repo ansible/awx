@@ -7,6 +7,7 @@ const userProfile = {
   isOrgAdmin: false,
   isNotificationAdmin: false,
   isExecEnvAdmin: false,
+  systemConfig: { SUBSCRIPTION_USAGE_MODEL: 'unique_managed_hosts' },
 };
 
 const filterPaths = (sidebar) => {
