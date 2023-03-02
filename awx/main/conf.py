@@ -788,7 +788,7 @@ register(
 register(
     'BULK_HOST_MAX_CREATE',
     field_class=fields.IntegerField,
-    default=1000,
+    default=100,
     label=_('Max number of hosts to allow to be created in a single bulk action'),
     help_text=_('Max number of hosts to allow to be created in a single bulk action'),
     category=_('Bulk Actions'),
