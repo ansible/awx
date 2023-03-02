@@ -75,4 +75,4 @@ Following is an example of a post request at the /api/v2/bulk/host_create:
 
 The above will add 6 hosts in the inventory.
 
-The maximum number of hosts allowed to be added is controlled by the setting `BULK_HOST_MAX_CREATE`. The default is 1,000 hosts. Additionally, nginx limits the maximum payload size, which is very likely when posting a large number of hosts in one request with variable data associated with them. The maximum payload size is 1MB unless overridden in your nginx config.
+The maximum number of hosts allowed to be added is controlled by the setting `BULK_HOST_MAX_CREATE`. The default is 100 hosts. Additionally, nginx limits the maximum payload size, which is very likely when posting a large number of hosts in one request with variable data associated with them. The maximum payload size is 1MB unless overridden in your nginx config.

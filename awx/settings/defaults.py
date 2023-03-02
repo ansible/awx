@@ -136,7 +136,7 @@ SCHEDULE_MAX_JOBS = 10
 BULK_JOB_MAX_LAUNCH = 100
 
 # Maximum number of host that can be created in 1 bulk host create
-BULK_HOST_MAX_CREATE = 1000
+BULK_HOST_MAX_CREATE = 100
 
 SITE_ID = 1
 

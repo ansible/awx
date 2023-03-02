@@ -10,7 +10,7 @@ from awx.main.scheduler import TaskManager
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('num_hosts, num_queries', [(9, 15), (99, 20), (999, 30)])
+@pytest.mark.parametrize('num_hosts, num_queries', [(9, 15), (99, 20)])
 def test_bulk_host_create_num_queries(organization, inventory, post, get, user, num_hosts, num_queries, django_assert_max_num_queries):
     '''
     If I am a...
