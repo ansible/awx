@@ -116,7 +116,7 @@ class RunnerCallback:
             # so it *should* have a negligible performance impact
             task = event_data.get('event_data', {}).get('task_action')
             try:
-                if task in ('git', 'svn'):
+                if task in ('git', 'svn', 'ansible.builtin.git', 'ansible.builtin.svn'):
                     event_data_json = json.dumps(event_data)
                     event_data_json = UriCleaner.remove_sensitive(event_data_json)
                     event_data = json.loads(event_data_json)
@@ -219,7 +219,7 @@ class RunnerCallbackForProjectUpdate(RunnerCallback):
     def event_handler(self, event_data):
         super_return_value = super(RunnerCallbackForProjectUpdate, self).event_handler(event_data)
         returned_data = event_data.get('event_data', {})
-        if returned_data.get('task_action', '') == 'set_fact':
+        if returned_data.get('task_action', '') in ('set_fact', 'ansible.builtin.set_fact'):
             returned_facts = returned_data.get('res', {}).get('ansible_facts', {})
             if 'scm_version' in returned_facts:
                 self.playbook_new_revision = returned_facts['scm_version']
