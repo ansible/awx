@@ -2000,6 +2000,7 @@ class InventorySourceOptionsSerializer(BaseSerializer):
             'source',
             'source_path',
             'source_vars',
+            'scm_branch',
             'credential',
             'enabled_var',
             'enabled_value',
@@ -2164,9 +2165,13 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             if ('source' in attrs or 'source_project' in attrs) and get_field_from_model_or_attrs('source_project') is None:
                 raise serializers.ValidationError({"source_project": _("Project required for scm type sources.")})
         else:
-            redundant_scm_fields = list(filter(lambda x: attrs.get(x, None), ['source_project', 'source_path']))
+            redundant_scm_fields = list(filter(lambda x: attrs.get(x, None), ['source_project', 'source_path', 'scm_branch']))
             if redundant_scm_fields:
                 raise serializers.ValidationError({"detail": _("Cannot set %s if not SCM type." % ' '.join(redundant_scm_fields))})
+
+        project = get_field_from_model_or_attrs('source_project')
+        if get_field_from_model_or_attrs('scm_branch') and not project.allow_override:
+            raise serializers.ValidationError({'scm_branch': _('Project does not allow overriding branch.')})
 
         attrs = super(InventorySourceSerializer, self).validate(attrs)
 
