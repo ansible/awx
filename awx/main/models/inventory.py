@@ -59,7 +59,7 @@ logger = logging.getLogger('awx.main.models.inventory')
 
 
 class InventoryConstructedInventoryMembership(models.Model):
-    constructed_inventory = models.ForeignKey('Inventory', on_delete=models.CASCADE, related_name='constructed_inventories')
+    constructed_inventory = models.ForeignKey('Inventory', on_delete=models.CASCADE, related_name='constructed_inventory_memberships')
     input_inventory = models.ForeignKey('Inventory', on_delete=models.CASCADE)
     position = models.PositiveIntegerField(
         null=True,

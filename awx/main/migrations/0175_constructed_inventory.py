@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
                 ('position', models.PositiveIntegerField(db_index=True, default=None, null=True)),
                 (
                     'constructed_inventory',
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='main.inventory', related_name='constructed_inventories'),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='main.inventory', related_name='constructed_inventory_memberships'),
                 ),
                 ('input_inventory', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='main.inventory')),
             ],
