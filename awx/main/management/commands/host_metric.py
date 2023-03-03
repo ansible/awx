@@ -49,36 +49,41 @@ class Command(BaseCommand):
 
         return list_of_queryset
 
-    def paginated_db_retrieval(self, type, filter_kwargs, offset=0, limit=PREFERRED_ROW_COUNT):
+    def paginated_db_retrieval(self, type, filter_kwargs, rows_per_file):
+        offset = 0
         list_of_queryset = []
-        if type == 'host_metric':
-            result = HostMetric.objects.filter(**filter_kwargs)
-            list_of_queryset = self.host_metric_queryset(result, offset, limit)
-        elif type == 'host_metric_summary_monthly':
-            result = HostMetricSummaryMonthly.objects.filter(**filter_kwargs)
-            list_of_queryset = self.host_metric_summary_monthly_queryset(result, offset, limit)
+        while True:
+            if type == 'host_metric':
+                result = HostMetric.objects.filter(**filter_kwargs)
+                list_of_queryset = self.host_metric_queryset(result, offset, rows_per_file)
+            elif type == 'host_metric_summary_monthly':
+                result = HostMetricSummaryMonthly.objects.filter(**filter_kwargs)
+                list_of_queryset = self.host_metric_summary_monthly_queryset(result, offset, rows_per_file)
 
-        return list_of_queryset
+            if not list_of_queryset:
+                break
+            else:
+                yield list_of_queryset
 
-    def whole_page_count(self, row_count, rows_per_file):
-        whole_pages = int(row_count / rows_per_file)
-        partial_page = row_count % rows_per_file
-        if partial_page:
-            whole_pages += 1
-        return whole_pages
+            offset += len(list_of_queryset)
 
-    def csv_for_tar(self, options, temp_dir, type, filter_kwargs, index=1, offset=0, rows_per_file=PREFERRED_ROW_COUNT):
-        list_of_queryset = self.paginated_db_retrieval(type, filter_kwargs, offset, rows_per_file)
-        csv_file = f'{temp_dir}/{type}{index}.csv'
-        arcname_file = f'{type}{index}.csv'
+    def csv_for_tar(self, temp_dir, type, filter_kwargs, single_header=False, rows_per_file=PREFERRED_ROW_COUNT):
+        for index, list_of_queryset in enumerate(self.paginated_db_retrieval(type, filter_kwargs, rows_per_file)):
+            csv_file = f'{temp_dir}/{type}{index+1}.csv'
+            arcname_file = f'{type}{index+1}.csv'
 
-        with open(csv_file, 'w', newline='') as output_file:
-            keys = list_of_queryset[0].keys() if list_of_queryset else []
-            dict_writer = csv.DictWriter(output_file, keys)
-            dict_writer.writeheader()
-            dict_writer.writerows(list_of_queryset)
+            with open(csv_file, 'w', newline='') as output_file:
+                try:
+                    keys = list_of_queryset[0].keys() if list_of_queryset else []
+                    dict_writer = csv.DictWriter(output_file, keys)
+                    if not single_header or index == 0:
+                        dict_writer.writeheader()
+                    dict_writer.writerows(list_of_queryset)
 
-        return csv_file, arcname_file
+                except Exception as e:
+                    print(e)
+
+            yield csv_file, arcname_file
 
     def config_for_tar(self, options, temp_dir):
         config_json = json.dumps(config(options.get('since')))
@@ -89,61 +94,37 @@ class Command(BaseCommand):
         return config_file, arcname_file
 
     def output_json(self, options, filter_kwargs):
-        if not options.get('json') or options.get('json') == 'host_metric':
-            result = HostMetric.objects.filter(**filter_kwargs)
-            list_of_queryset = self.host_metric_queryset(result)
-        elif options.get('json') == 'host_metric_summary_monthly':
-            result = HostMetricSummaryMonthly.objects.filter(**filter_kwargs)
-            list_of_queryset = self.host_metric_summary_monthly_queryset(result)
+        rows_per_file = options['rows_per_file'] or PREFERRED_ROW_COUNT
+        with tempfile.TemporaryDirectory() as temp_dir:
+            for csv_detail in self.csv_for_tar(temp_dir, options.get('json', 'host_metric'), filter_kwargs, False, rows_per_file):
+                csv_file = csv_detail[0]
 
-        json_result = json.dumps(list_of_queryset, cls=DjangoJSONEncoder)
-        print(json_result)
+                with open(csv_file) as f:
+                    reader = csv.DictReader(f)
+                    rows = list(reader)
+                    json_result = json.dumps(rows, cls=DjangoJSONEncoder)
+                    print(json_result)
 
     def output_csv(self, options, filter_kwargs):
+        rows_per_file = options['rows_per_file'] or PREFERRED_ROW_COUNT
         with tempfile.TemporaryDirectory() as temp_dir:
-            if not options.get('csv') or options.get('csv') == 'host_metric':
-                csv_file, _arcname_file = self.csv_for_tar(options, temp_dir, 'host_metric', filter_kwargs)
-            elif options.get('csv') == 'host_metric_summary_monthly':
-                csv_file, _arcname_file = self.csv_for_tar(options, temp_dir, 'host_metric_summary_monthly', filter_kwargs)
-            with open(csv_file) as f:
-                sys.stdout.write(f.read())
+            for csv_detail in self.csv_for_tar(temp_dir, options.get('csv', 'host_metric'), filter_kwargs, True, rows_per_file):
+                csv_file = csv_detail[0]
+                with open(csv_file) as f:
+                    sys.stdout.write(f.read())
 
-    def output_tarball(self, options, filter_kwargs, host_metric_row_count, host_metric_summary_monthly_row_count):
+    def output_tarball(self, options, filter_kwargs):
+        single_header = False if options['rows_per_file'] else True
+        rows_per_file = options['rows_per_file'] or PREFERRED_ROW_COUNT
+
         tar = tarfile.open("./host_metrics.tar.gz", "w:gz")
 
         with tempfile.TemporaryDirectory() as temp_dir:
-            if host_metric_row_count:
-                csv_file, arcname_file = self.csv_for_tar(options, temp_dir, 'host_metric', filter_kwargs)
-                tar.add(csv_file, arcname=arcname_file)
+            for csv_detail in self.csv_for_tar(temp_dir, 'host_metric', filter_kwargs, single_header, rows_per_file):
+                tar.add(csv_detail[0], arcname=csv_detail[1])
 
-            if host_metric_summary_monthly_row_count:
-                csv_file, arcname_file = self.csv_for_tar(options, temp_dir, 'host_metric_summary_monthly', filter_kwargs)
-                tar.add(csv_file, arcname=arcname_file)
-
-            config_file, arcname_file = self.config_for_tar(options, temp_dir)
-            tar.add(config_file, arcname=arcname_file)
-
-        tar.close()
-
-    def output_rows_per_file(self, options, filter_kwargs, host_metric_row_count, host_metric_summary_monthly_row_count):
-        rows_per_file = options.get('rows_per_file', PREFERRED_ROW_COUNT)
-        tar = tarfile.open("./host_metrics.tar.gz", "w:gz")
-
-        host_metric_whole_pages = self.whole_page_count(host_metric_row_count, rows_per_file)
-        host_metric_summary_monthly_whole_pages = self.whole_page_count(host_metric_summary_monthly_row_count, rows_per_file)
-
-        with tempfile.TemporaryDirectory() as temp_dir:
-            for index in range(host_metric_whole_pages):
-                offset = index * rows_per_file
-
-                csv_file, arcname_file = self.csv_for_tar(options, temp_dir, 'host_metric', filter_kwargs, index + 1, offset, rows_per_file)
-                tar.add(csv_file, arcname=arcname_file)
-
-            for index in range(host_metric_summary_monthly_whole_pages):
-                offset = index * rows_per_file
-
-                csv_file, arcname_file = self.csv_for_tar(options, temp_dir, 'host_metric_summary_monthly', filter_kwargs, index + 1, offset, rows_per_file)
-                tar.add(csv_file, arcname=arcname_file)
+            for csv_detail in self.csv_for_tar(temp_dir, 'host_metric_summary_monthly', filter_kwargs, single_header, rows_per_file):
+                tar.add(csv_detail[0], arcname=csv_detail[1])
 
             config_file, arcname_file = self.config_for_tar(options, temp_dir)
             tar.add(config_file, arcname=arcname_file)
@@ -180,17 +161,8 @@ class Command(BaseCommand):
         if until is not None:
             filter_kwargs_host_metrics_summary['date__lte'] = until
 
-        host_metric_row_count = HostMetric.objects.filter(**filter_kwargs).count()
-        host_metric_summary_monthly_row_count = HostMetricSummaryMonthly.objects.filter(**filter_kwargs_host_metrics_summary).count()
-
-        if (host_metric_row_count > PREFERRED_ROW_COUNT or host_metric_summary_monthly_row_count > PREFERRED_ROW_COUNT) and (
-            not options.get('rows_per_file') or options.get('rows_per_file') > PREFERRED_ROW_COUNT
-        ):
-            print(
-                f"HostMetric / HostMetricSummaryMonthly rows exceed the allowable limit of {PREFERRED_ROW_COUNT}. "
-                f"Set --rows_per_file {PREFERRED_ROW_COUNT} "
-                f"to split the rows in chunks of {PREFERRED_ROW_COUNT}"
-            )
+        if options['rows_per_file'] and options.get('rows_per_file') > PREFERRED_ROW_COUNT:
+            print(f"rows_per_file exceeds the allowable limit of {PREFERRED_ROW_COUNT}.")
             return
 
         # if --json flag is set, output the result in json format
@@ -199,18 +171,17 @@ class Command(BaseCommand):
         elif options['csv']:
             self.output_csv(options, filter_kwargs)
         elif options['tarball']:
-            self.output_tarball(options, filter_kwargs, host_metric_row_count, host_metric_summary_monthly_row_count)
-        elif options['rows_per_file']:
-            self.output_rows_per_file(options, filter_kwargs, host_metric_row_count, host_metric_summary_monthly_row_count)
+            self.output_tarball(options, filter_kwargs)
 
         # --json flag is not set, output in plain text
         else:
-            print(f"Total Number of hosts automated: {host_metric_row_count}")
+            print(f"Printing up to {PREFERRED_ROW_COUNT } automated hosts:")
             result = HostMetric.objects.filter(**filter_kwargs)
-            for item in result:
+            list_of_queryset = self.host_metric_queryset(result, 0, PREFERRED_ROW_COUNT)
+            for item in list_of_queryset:
                 print(
                     "Hostname : {hostname} | first_automation : {first_automation} | last_automation : {last_automation}".format(
-                        hostname=item.hostname, first_automation=item.first_automation, last_automation=item.last_automation
+                        hostname=item['hostname'], first_automation=item['first_automation'], last_automation=item['last_automation']
                     )
                 )
         return
