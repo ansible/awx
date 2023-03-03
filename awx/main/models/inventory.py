@@ -58,6 +58,16 @@ __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate', '
 logger = logging.getLogger('awx.main.models.inventory')
 
 
+class InventoryConstructedInventoryMembership(models.Model):
+    constructed_inventory = models.ForeignKey('Inventory', on_delete=models.CASCADE, related_name='constructed_inventory_memberships')
+    input_inventory = models.ForeignKey('Inventory', on_delete=models.CASCADE)
+    position = models.PositiveIntegerField(
+        null=True,
+        default=None,
+        db_index=True,
+    )
+
+
 class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
     """
     an inventory source contains lists and hosts.
@@ -140,11 +150,13 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         default=None,
         help_text=_('Filter that will be applied to the hosts of this inventory.'),
     )
-    input_inventories = models.ManyToManyField(
+    input_inventories = OrderedManyToManyField(
         'Inventory',
         blank=True,
+        through_fields=('constructed_inventory', 'input_inventory'),
         related_name='destination_inventories',
         help_text=_('Only valid for constructed inventories, this links to the inventories that will be used.'),
+        through='InventoryConstructedInventoryMembership',
     )
     instance_groups = OrderedManyToManyField(
         'InstanceGroup',
