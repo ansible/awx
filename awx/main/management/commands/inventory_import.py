@@ -27,9 +27,9 @@ from awx.main.utils.mem_inventory import MemInventory, dict_to_mem_data
 from awx.main.utils.safe_yaml import sanitize_jinja
 
 # other AWX imports
+from awx.main.models.execution_environments import ExecutionEnvironment
 from awx.main.models.rbac import batch_role_ancestor_rebuilding
 from awx.main.utils import ignore_inventory_computed_fields, get_licenser
-from awx.main.utils.execution_environments import get_default_execution_environment
 from awx.main.signals import disable_activity_stream
 from awx.main.constants import STANDARD_INVENTORY_UPDATE_ENV
 from awx.main.utils.pglock import advisory_lock
@@ -67,16 +67,17 @@ class AnsibleInventoryLoader(object):
         /usr/bin/ansible/ansible-inventory -i hosts --list
     """
 
-    def __init__(self, source, verbosity=0):
+    def __init__(self, source, execution_environment, verbosity=0):
         self.source = source
         self.verbosity = verbosity
+        self.execution_environment = execution_environment
 
     def get_base_args(self):
         bargs = ['podman', 'run', '--user=root', '--quiet']
         bargs.extend(['-v', '{0}:{0}:Z'.format(self.source)])
         for key, value in STANDARD_INVENTORY_UPDATE_ENV.items():
             bargs.extend(['-e', '{0}={1}'.format(key, value)])
-        ee = get_default_execution_environment()
+        ee = self.execution_environment
 
         if settings.IS_K8S:
             logger.warning('This command is not able to run on kubernetes-based deployment. This action should be done using the API.')
@@ -162,6 +163,13 @@ class Command(BaseCommand):
             default=None,
             metavar='v',
             help='value of host variable specified by --enabled-var that indicates host is enabled/online.',
+        )
+        parser.add_argument(
+            '--execution-environment',
+            dest='execution_environment',
+            type=str,
+            default='Default execution environment',
+            help='name of the execution environment to use'
         )
         parser.add_argument(
             '--group-filter',
@@ -851,6 +859,7 @@ class Command(BaseCommand):
             logger.info('Updating inventory %d: %s' % (inventory.pk, inventory.name))
 
             # Create ad-hoc inventory source and inventory update objects
+            ee = ExecutionEnvironment.objects.get(name=options.get('execution_environment'))
             with ignore_inventory_computed_fields():
                 source = Command.get_source_absolute_path(raw_source)
 
@@ -860,14 +869,20 @@ class Command(BaseCommand):
                     source_path=os.path.abspath(source),
                     overwrite=bool(options.get('overwrite', False)),
                     overwrite_vars=bool(options.get('overwrite_vars', False)),
+                    execution_environment=ee,
                 )
                 inventory_update = inventory_source.create_inventory_update(
-                    _eager_fields=dict(status='running', job_args=json.dumps(sys.argv), job_env=dict(os.environ.items()), job_cwd=os.getcwd())
+                    _eager_fields=dict(status='running', job_args=json.dumps(sys.argv), job_env=dict(os.environ.items()), job_cwd=os.getcwd(), execution_environment=ee)
                 )
+            
+            try:
+                data = AnsibleInventoryLoader(source=source,execution_environment=ee, verbosity=verbosity).load()
+                logger.debug('Finished loading from source: %s', source)
 
-            data = AnsibleInventoryLoader(source=source, verbosity=verbosity).load()
-
-            logger.debug('Finished loading from source: %s', source)
+            except SystemExit:
+                logger.debug("Error occurred while running ansible-inventory")
+                inventory_update.cancel()
+                sys.exit(1)
 
             status, tb, exc = 'error', '', None
             try:
