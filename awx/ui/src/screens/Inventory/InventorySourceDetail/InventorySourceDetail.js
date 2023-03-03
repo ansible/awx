@@ -48,6 +48,7 @@ function InventorySourceDetail({ inventorySource }) {
     source,
     source_path,
     source_vars,
+    scm_branch,
     update_cache_timeout,
     update_on_launch,
     verbosity,
@@ -232,6 +233,11 @@ function InventorySourceDetail({ inventorySource }) {
           label={t`Verbosity`}
           helpText={helpText.subFormVerbosityFields}
           value={VERBOSITY()[verbosity]}
+        />
+        <Detail
+          label={t`Scm Branch`}
+          helpText={helpText.sourceControlBranch}
+          value={scm_branch}
         />
         <Detail
           label={t`Cache timeout`}

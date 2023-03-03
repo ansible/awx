@@ -20,6 +20,7 @@ import {
   EnabledVarField,
   EnabledValueField,
   HostFilterField,
+  BranchFormField,
 } from './SharedFields';
 import getHelpText from '../Inventory.helptext';
 
@@ -36,7 +37,6 @@ const SCMSubForm = ({ autoPopulateProject }) => {
     name: 'source_path',
     validate: required(t`Select a value for this field`),
   });
-
   const { error: sourcePathError, request: fetchSourcePath } = useRequest(
     useCallback(async (projectId) => {
       const { data } = await ProjectsAPI.readInventories(projectId);
@@ -44,7 +44,6 @@ const SCMSubForm = ({ autoPopulateProject }) => {
     }, []),
     []
   );
-
   useEffect(() => {
     if (projectMeta.initialValue) {
       fetchSourcePath(projectMeta.initialValue.id);
@@ -68,7 +67,6 @@ const SCMSubForm = ({ autoPopulateProject }) => {
     },
     [fetchSourcePath, setFieldValue, setFieldTouched, sourcePathField.value]
   );
-
   const handleCredentialUpdate = useCallback(
     (value) => {
       setFieldValue('credential', value);
@@ -76,9 +74,9 @@ const SCMSubForm = ({ autoPopulateProject }) => {
     },
     [setFieldValue, setFieldTouched]
   );
-
   return (
     <>
+      <BranchFormField label={t`Source Control Branch/Tag/Commit`} />
       <CredentialLookup
         credentialTypeKind="cloud"
         label={t`Credential`}
