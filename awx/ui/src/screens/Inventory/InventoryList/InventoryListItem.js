@@ -146,7 +146,7 @@ function InventoryListItem({
               aria-label={t`Edit Inventory`}
               variant="plain"
               component={Link}
-              to={`${getInventoryPath(inventory)}edit`}
+              to={`${getInventoryPath(inventory)}/edit`}
             >
               <PencilAltIcon />
             </Button>

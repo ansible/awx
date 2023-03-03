@@ -10,6 +10,7 @@ const parseHostFilter = (value) => {
 export default parseHostFilter;
 
 export function getInventoryPath(inventory) {
+  if (!inventory) return '/inventories';
   const url = {
     '': `/inventories/inventory/${inventory.id}`,
     smart: `/inventories/smart_inventory/${inventory.id}`,
