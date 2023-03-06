@@ -65,6 +65,7 @@ function HostMetrics() {
             pluralizedItemName={t`Host Metrics`}
             renderRow={(item, index) => (
               <HostMetricsListItem
+                key={item.id}
                 item={item}
                 isSelected={selected.some(
                   (row) => row.hostname === item.hostname
