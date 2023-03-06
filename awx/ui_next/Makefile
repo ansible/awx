@@ -63,14 +63,14 @@ $(UI_NEXT_SRC_DIR):
 
 .PHONY: ui_next/build
 ## Build ui_next from source
-ui_next/build: ui_next/src
+ui_next/src/build: ui_next/src
 	cd $(UI_NEXT_SRC_DIR) && \
 	npm install webpack && \
 	npm run build:awx
 
 .PHONY: ui_next/build
-## Copy ui_next/build to ui_next/build
-ui_next/build: ui_next/build
+## Copy ui_next/src/build to ui_next/build
+ui_next/build: ui_next/src/build
 	cp -r $(UI_NEXT_SRC_DIR)/build $(UI_NEXT_BUILD_DIR)
 
 ## Alias for ui_next/build, will not run if build already exist
