@@ -1,8 +1,9 @@
 UI_NEXT_MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
-UI_NEXT_DIR := $(subst $(CURDIR)/,, $(UI_NEXT_MKFILE_PATH))
+UI_NEXT_MKFILE_DIR := $(dir $(UI_NEXT_MKFILE_PATH))
+UI_NEXT_DIR := $(subst $(CURDIR)/,, $(UI_NEXT_MKFILE_DIR))
 
-UI_NEXT_SRC_DIR := $(UI_NEXT_DIR)/src
-UI_NEXT_BUILD_DIR := $(UI_NEXT_DIR)/build
+UI_NEXT_SRC_DIR := $(UI_NEXT_DIR)src
+UI_NEXT_BUILD_DIR := $(UI_NEXT_DIR)build
 
 # Path to your local clone of the UI_NEXT repo
 UI_NEXT_LOCAL ?=
@@ -75,14 +76,25 @@ ui_next/build: ui_next/src/build
 $(UI_NEXT_BUILD_DIR):
 	$(MAKE) ui_next/build
 
+## Alias for ui_next/clean
+$(UI_NEXT_DIR)clean:
+	rm -rf $(UI_NEXT_DIR)/src
+	rm -rf $(UI_NEXT_DIR)/build
+
 .PHONY: ui_next/clean
 ## Clean ui_next
 ui_next/clean: ui_next/clean/build
-	rm -rf $(UI_NEXT_SRC_DIR)
+	rm -rf $(UI_NEXT_DIR)/src
+
+.PHONY: ui_next/clean/src
+## Clean ui_next src
+ui_next/clean/src:
+	rm -rf $(UI_NEXT_DIR)/src
 
 .PHONY: ui_next/clean/build
 ## Clean ui_next build
 ui_next/clean/build:
-	rm -rf $(UI_NEXT_BUILD_DIR)
+	rm -rf $(UI_NEXT_DIR)/build
 
-
+print-%:
+	@echo $($*)
