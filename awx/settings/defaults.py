@@ -792,6 +792,7 @@ INSIGHTS_URL_BASE = "https://example.org"
 INSIGHTS_AGENT_MIME = 'application/example'
 # See https://github.com/ansible/awx-facts-playbooks
 INSIGHTS_SYSTEM_ID_FILE = '/etc/redhat-access-insights/machine-id'
+INSIGHTS_CERT_PATH = "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
 
 TOWER_SETTINGS_MANIFEST = {}
 
