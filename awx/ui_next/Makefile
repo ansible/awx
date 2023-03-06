@@ -2,6 +2,7 @@ UI_NEXT_MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 UI_NEXT_MKFILE_DIR := $(dir $(UI_NEXT_MKFILE_PATH))
 UI_NEXT_DIR := $(subst $(CURDIR)/,, $(UI_NEXT_MKFILE_DIR))
 
+# NOTE: UI_NEXT_DIR swallowed the / because we want to be able to run `make src` from the ui_next dir
 UI_NEXT_SRC_DIR := $(UI_NEXT_DIR)src
 UI_NEXT_BUILD_DIR := $(UI_NEXT_DIR)build
 
