@@ -1,5 +1,6 @@
-from django.core.management.base import BaseCommand, CommandError
+from awx.main.tasks.system import clear_setting_cache
 from django.conf import settings
+from django.core.management.base import BaseCommand, CommandError
 
 
 class Command(BaseCommand):
@@ -30,6 +31,8 @@ class Command(BaseCommand):
 
         else:
             raise CommandError('Please pass --enable flag to allow local auth or --disable flag to disable local auth')
+
+        clear_setting_cache.delay(['DISABLE_LOCAL_AUTH'])
 
     def handle(self, **options):
         self._enable_disable_auth(options.get('enable'), options.get('disable'))
