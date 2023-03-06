@@ -85,6 +85,8 @@ class RunnerCallback:
         # which generate job events from two 'streams':
         # ansible-inventory and the awx.main.commands.inventory_import
         # logger
+        if event_data.get('event') == 'keepalive':
+            return
 
         if event_data.get(self.event_data_key, None):
             if self.event_data_key != 'job_id':

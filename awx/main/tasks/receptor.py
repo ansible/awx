@@ -526,6 +526,10 @@ class AWXReceptorJob:
         pod_spec['spec']['containers'][0]['image'] = ee.image
         pod_spec['spec']['containers'][0]['args'] = ['ansible-runner', 'worker', '--private-data-dir=/runner']
 
+        if settings.AWX_RUNNER_KEEPALIVE_SECONDS:
+            pod_spec['spec']['containers'][0].setdefault('env', [])
+            pod_spec['spec']['containers'][0]['env'].append({'name': 'ANSIBLE_RUNNER_KEEPALIVE_SECONDS', 'value': str(settings.AWX_RUNNER_KEEPALIVE_SECONDS)})
+
         # Enforce EE Pull Policy
         pull_options = {"always": "Always", "missing": "IfNotPresent", "never": "Never"}
         if self.task and self.task.instance.execution_environment:

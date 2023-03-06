@@ -929,6 +929,11 @@ AWX_RUNNER_OMIT_ENV_FILES = True
 # Allow ansible-runner to save ansible output (may cause performance issues)
 AWX_RUNNER_SUPPRESS_OUTPUT_FILE = True
 
+# https://github.com/ansible/ansible-runner/pull/1191/files
+# Interval in seconds between the last message and keep-alive messages that
+# ansible-runner will send
+AWX_RUNNER_KEEPALIVE_SECONDS = 0
+
 # Delete completed work units in receptor
 RECEPTOR_RELEASE_WORK = True
 

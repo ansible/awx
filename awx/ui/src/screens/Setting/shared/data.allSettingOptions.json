@@ -344,6 +344,16 @@
         "category_slug": "jobs",
         "default": 10
       },
+      "AWX_RUNNER_KEEPALIVE_SECONDS": {
+        "type": "integer",
+        "required": true,
+        "label": "K8S Ansible Runner Keep-Alive Message Interval",
+        "help_text": "Only applies to K8S deployments and container_group jobs. If not 0, send a message every so-many seconds to keep connection open.",
+        "category": "Jobs",
+        "category_slug": "jobs",
+        "placeholder": 240,
+        "default": 0
+      },
       "AWX_ANSIBLE_CALLBACK_PLUGINS": {
         "type": "list",
         "required": false,
@@ -4097,6 +4107,15 @@
         "category": "Jobs",
         "category_slug": "jobs",
         "defined_in_file": false
+      },
+      "AWX_RUNNER_KEEPALIVE_SECONDS": {
+        "type": "integer",
+        "label": "K8S Ansible Runner Keep-Alive Message Interval",
+        "help_text": "Only applies to K8S deployments and container_group jobs. If not 0, send a message every so-many seconds to keep connection open.",
+        "category": "Jobs",
+        "category_slug": "jobs",
+        "placeholder": 240,
+        "default": 0
       },
       "AWX_ANSIBLE_CALLBACK_PLUGINS": {
         "type": "list",
