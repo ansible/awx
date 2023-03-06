@@ -33,8 +33,6 @@ Notable files:
 ### Prerequisites
 
 - [Docker](https://docs.docker.com/engine/installation/) on the host where AWX will be deployed. After installing Docker, the Docker service must be started (depending on your OS, you may have to add the local user that uses Docker to the `docker` group, refer to the documentation for details)
-- [docker-compose](https://pypi.org/project/docker-compose/) Python module.
-  - This also installs the `docker` Python module, which is incompatible with [`docker-py`](https://pypi.org/project/docker-py/). If you have previously installed `docker-py`, please uninstall it.
 - [Docker Compose](https://docs.docker.com/compose/install/).
 - [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) will need to be installed as we use it to template files needed for the docker-compose.
 - OpenSSL.

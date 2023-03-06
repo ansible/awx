@@ -60,7 +60,7 @@ class BrowsableAPIRenderer(renderers.BrowsableAPIRenderer):
             delattr(renderer_context['view'], '_request')
 
     def get_raw_data_form(self, data, view, method, request):
-        # Set a flag on the view to indiciate to the view/serializer that we're
+        # Set a flag on the view to indicate to the view/serializer that we're
         # creating a raw data form for the browsable API.  Store the original
         # request method to determine how to populate the raw data form.
         if request.method in {'OPTIONS', 'DELETE'}:

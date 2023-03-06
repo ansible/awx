@@ -152,7 +152,7 @@ def api_exception_handler(exc, context):
         if 'awx.named_url_rewritten' in req.environ and not str(getattr(exc, 'status_code', 0)).startswith('2'):
             # if the URL was rewritten, and it's not a 2xx level status code,
             # revert the request.path to its original value to avoid leaking
-            # any context about the existance of resources
+            # any context about the existence of resources
             req.path = req.environ['awx.named_url_rewritten']
             if exc.status_code == 403:
                 exc = NotFound(detail=_('Not found.'))
@@ -172,7 +172,7 @@ class DashboardView(APIView):
         user_inventory = get_user_queryset(request.user, models.Inventory)
         inventory_with_failed_hosts = user_inventory.filter(hosts_with_active_failures__gt=0)
         user_inventory_external = user_inventory.filter(has_inventory_sources=True)
-        # if there are *zero* inventories, this aggregrate query will be None, fall back to 0
+        # if there are *zero* inventories, this aggregate query will be None, fall back to 0
         failed_inventory = user_inventory.aggregate(Sum('inventory_sources_with_failures'))['inventory_sources_with_failures__sum'] or 0
         data['inventories'] = {
             'url': reverse('api:inventory_list', request=request),
@@ -1667,7 +1667,7 @@ class GroupList(ListCreateAPIView):
 
 class EnforceParentRelationshipMixin(object):
     """
-    Useful when you have a self-refering ManyToManyRelationship.
+    Useful when you have a self-referring ManyToManyRelationship.
     * Tower uses a shallow (2-deep only) url pattern. For example:
 
     When an object hangs off of a parent object you would have the url of the
@@ -2415,7 +2415,7 @@ class JobTemplateSurveySpec(GenericAPIView):
                             status=status.HTTP_400_BAD_REQUEST,
                         )
             # if it's a multiselect or multiple choice, it must have coices listed
-            # choices and defualts must come in as strings seperated by /n characters.
+            # choices and defaults must come in as strings separated by /n characters.
             if qtype == 'multiselect' or qtype == 'multiplechoice':
                 if 'choices' in survey_item:
                     if isinstance(survey_item['choices'], str):
@@ -3430,7 +3430,7 @@ class JobCreateSchedule(RetrieveAPIView):
 
         config = obj.launch_config
 
-        # Make up a name for the schedule, guarentee that it is unique
+        # Make up a name for the schedule, guarantee that it is unique
         name = 'Auto-generated schedule from job {}'.format(obj.id)
         existing_names = models.Schedule.objects.filter(name__startswith=name).values_list('name', flat=True)
         if name in existing_names:
@@ -3621,7 +3621,7 @@ class JobJobEventsChildrenSummary(APIView):
         # key is counter of meta events (i.e. verbose), value is uuid of the assigned parent
         map_meta_counter_nested_uuid = {}
 
-        # collapsable tree view in the UI only makes sense for tree-like
+        # collapsible tree view in the UI only makes sense for tree-like
         # hierarchy. If ansible is ran with a strategy like free or host_pinned, then
         # events can be out of sequential order, and no longer follow a tree structure
         # E1

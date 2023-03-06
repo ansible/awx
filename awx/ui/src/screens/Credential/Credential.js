@@ -22,14 +22,19 @@ import { CredentialsAPI } from 'api';
 import CredentialDetail from './CredentialDetail';
 import CredentialEdit from './CredentialEdit';
 
-const jobTemplateCredentialTypes = [
-  'machine',
-  'cloud',
-  'net',
-  'ssh',
-  'vault',
-  'kubernetes',
-  'cryptography',
+const unacceptableCredentialTypes = [
+  'centrify_vault_kv',
+  'aim',
+  'conjur',
+  'hashivault_kv',
+  'hashivault_ssh',
+  'azure_kv',
+  'thycotic_dsv',
+  'thycotic_tss',
+  'galaxy_api_token',
+  'insights',
+  'registry',
+  'scm',
 ];
 
 function Credential({ setBreadcrumb }) {
@@ -86,7 +91,10 @@ function Credential({ setBreadcrumb }) {
       id: 1,
     },
   ];
-  if (jobTemplateCredentialTypes.includes(credential?.kind)) {
+  if (
+    !unacceptableCredentialTypes.includes(credential?.kind) &&
+    credential !== null
+  ) {
     tabsArray.push({
       name: t`Job Templates`,
       link: `/credentials/${id}/job_templates`,
@@ -115,12 +123,14 @@ function Credential({ setBreadcrumb }) {
       </PageSection>
     );
   }
+  if (hasContentLoading) {
+    return <ContentLoading />;
+  }
 
   return (
     <PageSection>
       <Card>
         {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
-        {hasContentLoading && <ContentLoading />}
         {!hasContentLoading && credential && (
           <Switch>
             <Redirect
