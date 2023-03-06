@@ -1,13 +1,17 @@
 UI_NEXT_MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
-UI_NEXT_DIR := $(shell realpath --relative-to $(CURDIR) $(dir $(UI_NEXT_MKFILE_PATH)))
+UI_NEXT_DIR := $(subst $(CURDIR)/,, $(UI_NEXT_MKFILE_PATH))
 
 UI_NEXT_SRC_DIR := $(UI_NEXT_DIR)/src
+UI_NEXT_BUILD_DIR := $(UI_NEXT_DIR)/build
 
-UI_NEXT_GIT_REPO_HTTPS ?=
-UI_NEXT_GIT_REPO_SSH ?=
+# Path to your local clone of the UI_NEXT repo
+UI_NEXT_LOCAL ?=
+
+# Git repo and branch to the UI_NEXT repo
+UI_NEXT_GIT_REPO_SSH ?= git@github.com:ansible/ansible-ui.git
+UI_NEXT_GIT_REPO_HTTPS ?= https://github.com/ansible/ansible-ui.git
 UI_NEXT_GIT_BRANCH ?= main
 
-UI_NEXT_LOCAL ?=
 
 .PHONY: ui_next/clone-https
 ## Shallow clone the ui_next repo via https skip if UI_NEXT_GIT_REPO_HTTPS is undefined
@@ -65,10 +69,10 @@ ui_next/src/build: ui_next/src
 .PHONY: ui_next/build
 ## Copy ui_next/src/build to ui_next/build
 ui_next/build: ui_next/src/build
-	cp -r $(UI_NEXT_SRC_DIR)/build $(UI_NEXT_DIR)/build
+	cp -r $(UI_NEXT_SRC_DIR)/build $(UI_NEXT_BUILD_DIR)
 
 ## Alias for ui_next/build, will not run if build already exist
-$(UI_NEXT_DIR)/build:
+$(UI_NEXT_BUILD_DIR):
 	$(MAKE) ui_next/build
 
 .PHONY: ui_next/clean
@@ -79,6 +83,6 @@ ui_next/clean: ui_next/clean/build
 .PHONY: ui_next/clean/build
 ## Clean ui_next build
 ui_next/clean/build:
-	rm -rf $(UI_NEXT_DIR)/build
+	rm -rf $(UI_NEXT_BUILD_DIR)
 
 
