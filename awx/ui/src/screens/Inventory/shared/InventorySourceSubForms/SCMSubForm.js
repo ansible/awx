@@ -13,6 +13,7 @@ import { required } from 'util/validators';
 import CredentialLookup from 'components/Lookup/CredentialLookup';
 import ProjectLookup from 'components/Lookup/ProjectLookup';
 import Popover from 'components/Popover';
+import FormField from 'components/FormField';
 import {
   OptionsField,
   SourceVarsField,
@@ -22,7 +23,6 @@ import {
   HostFilterField,
 } from './SharedFields';
 import getHelpText from '../Inventory.helptext';
-import FormField from 'components/FormField';
 
 const SCMSubForm = ({ autoPopulateProject }) => {
   const helpText = getHelpText();
