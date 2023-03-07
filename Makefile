@@ -571,6 +571,7 @@ VERSION:
 PYTHON_VERSION:
 	@echo "$(PYTHON)" | sed 's:python::'
 
+.PHONY: Dockerfile
 Dockerfile: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
 	ansible-playbook tools/ansible/dockerfile.yml -e receptor_image=$(RECEPTOR_IMAGE)
 
