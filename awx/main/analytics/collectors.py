@@ -233,7 +233,7 @@ def projects_by_scm_type(since, **kwargs):
     return counts
 
 
-@register('instance_info', '1.2', description=_('Cluster topology and capacity'))
+@register('instance_info', '1.3', description=_('Cluster topology and capacity'))
 def instance_info(since, include_hostnames=False, **kwargs):
     info = {}
     # Use same method that the TaskManager does to compute consumed capacity without querying all running jobs for each Instance

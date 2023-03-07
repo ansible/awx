@@ -283,6 +283,16 @@ register(
 )
 
 register(
+    'AWX_RUNNER_KEEPALIVE_SECONDS',
+    field_class=fields.IntegerField,
+    label=_('K8S Ansible Runner Keep-Alive Message Interval'),
+    help_text=_('Only applies to jobs running in a Container Group. If not 0, send a message every so-many seconds to keep connection open.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+    placeholder=240,  # intended to be under common 5 minute idle timeout
+)
+
+register(
     'GALAXY_TASK_ENV',
     field_class=fields.KeyValueField,
     label=_('Environment Variables for Galaxy Commands'),

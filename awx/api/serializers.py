@@ -108,7 +108,6 @@ from awx.main.utils import (
     extract_ansible_vars,
     encrypt_dict,
     prefetch_page_capabilities,
-    get_external_account,
     truncate_stdout,
 )
 from awx.main.utils.filters import SmartFilter
@@ -123,6 +122,8 @@ from awx.api.fields import BooleanNullField, CharNullField, ChoiceNullField, Ver
 
 # AWX Utils
 from awx.api.validators import HostnameRegexValidator
+
+from awx.sso.common import get_external_account
 
 logger = logging.getLogger('awx.api.serializers')
 
@@ -536,7 +537,7 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
         #
         # This logic is to force rendering choice's on an uneditable field.
         # Note: Consider expanding this rendering for more than just choices fields
-        # Note: This logic works in conjuction with
+        # Note: This logic works in conjunction with
         if hasattr(model_field, 'choices') and model_field.choices:
             was_editable = model_field.editable
             model_field.editable = True
@@ -987,23 +988,8 @@ class UserSerializer(BaseSerializer):
     def _update_password(self, obj, new_password):
         # For now we're not raising an error, just not saving password for
         # users managed by LDAP who already have an unusable password set.
-        if getattr(settings, 'AUTH_LDAP_SERVER_URI', None):
-            try:
-                if obj.pk and obj.profile.ldap_dn and not obj.has_usable_password():
-                    new_password = None
-            except AttributeError:
-                pass
-        if (
-            getattr(settings, 'SOCIAL_AUTH_GOOGLE_OAUTH2_KEY', None)
-            or getattr(settings, 'SOCIAL_AUTH_GITHUB_KEY', None)
-            or getattr(settings, 'SOCIAL_AUTH_GITHUB_ORG_KEY', None)
-            or getattr(settings, 'SOCIAL_AUTH_GITHUB_TEAM_KEY', None)
-            or getattr(settings, 'SOCIAL_AUTH_SAML_ENABLED_IDPS', None)
-        ) and obj.social_auth.all():
-            new_password = None
-        if (getattr(settings, 'RADIUS_SERVER', None) or getattr(settings, 'TACACSPLUS_HOST', None)) and obj.enterprise_auth.all():
-            new_password = None
-        if new_password:
+        # Get external password will return something like ldap or enterprise or None if the user isn't external. We only want to allow a password update for a None option
+        if new_password and not self.get_external_account(obj):
             obj.set_password(new_password)
             obj.save(update_fields=['password'])
 
@@ -4094,7 +4080,7 @@ class JobEventSerializer(BaseSerializer):
         # Show full stdout for playbook_on_* events.
         if obj and obj.event.startswith('playbook_on'):
             return data
-        # If the view logic says to not trunctate (request was to the detail view or a param was used)
+        # If the view logic says to not truncate (request was to the detail view or a param was used)
         if self.context.get('no_truncate', False):
             return data
         max_bytes = settings.EVENT_STDOUT_MAX_BYTES_DISPLAY
@@ -4125,7 +4111,7 @@ class ProjectUpdateEventSerializer(JobEventSerializer):
         # raw SCM URLs in their stdout (which *could* contain passwords)
         # attempt to detect and filter HTTP basic auth passwords in the stdout
         # of these types of events
-        if obj.event_data.get('task_action') in ('git', 'svn'):
+        if obj.event_data.get('task_action') in ('git', 'svn', 'ansible.builtin.git', 'ansible.builtin.svn'):
             try:
                 return json.loads(UriCleaner.remove_sensitive(json.dumps(obj.event_data)))
             except Exception:
@@ -4169,7 +4155,7 @@ class AdHocCommandEventSerializer(BaseSerializer):
 
     def to_representation(self, obj):
         data = super(AdHocCommandEventSerializer, self).to_representation(obj)
-        # If the view logic says to not trunctate (request was to the detail view or a param was used)
+        # If the view logic says to not truncate (request was to the detail view or a param was used)
         if self.context.get('no_truncate', False):
             return data
         max_bytes = settings.EVENT_STDOUT_MAX_BYTES_DISPLAY
@@ -4862,7 +4848,7 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
         ),
     )
     until = serializers.SerializerMethodField(
-        help_text=_('The date this schedule will end. This field is computed from the RRULE. If the schedule does not end an emptry string will be returned'),
+        help_text=_('The date this schedule will end. This field is computed from the RRULE. If the schedule does not end an empty string will be returned'),
     )
 
     class Meta:
