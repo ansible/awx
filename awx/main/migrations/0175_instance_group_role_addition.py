@@ -4,10 +4,6 @@ import awx.main.fields
 from django.db import migrations
 import django.db.models.deletion
 
-from awx.main.migrations import _rbac as rbac
-from awx.main.migrations import _migration_utils as migration_utils
-from awx.main.migrations import _OrgAdmin_to_use_ig as oamigrate
-
 
 class Migration(migrations.Migration):
     dependencies = [
@@ -49,7 +45,4 @@ class Migration(migrations.Migration):
             ),
             preserve_default='True',
         ),
-        migrations.RunPython(migration_utils.set_current_apps_for_migrations),
-        migrations.RunPython(rbac.create_roles),
-        migrations.RunPython(oamigrate.migrate_org_admin_to_use),
     ]
