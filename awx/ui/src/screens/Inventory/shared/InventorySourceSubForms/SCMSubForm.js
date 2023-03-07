@@ -20,9 +20,9 @@ import {
   EnabledVarField,
   EnabledValueField,
   HostFilterField,
-  BranchFormField,
 } from './SharedFields';
 import getHelpText from '../Inventory.helptext';
+import FormField from 'components/FormField';
 
 const SCMSubForm = ({ autoPopulateProject }) => {
   const helpText = getHelpText();
@@ -57,6 +57,7 @@ const SCMSubForm = ({ autoPopulateProject }) => {
     (value) => {
       setFieldValue('source_project', value);
       setFieldTouched('source_project', true, false);
+      setFieldValue('scm_branch', '', false);
       if (sourcePathField.value) {
         setFieldValue('source_path', '');
         setFieldTouched('source_path', false);
@@ -76,7 +77,15 @@ const SCMSubForm = ({ autoPopulateProject }) => {
   );
   return (
     <>
-      <BranchFormField label={t`Source Control Branch/Tag/Commit`} />
+      {projectField.value?.allow_override && (
+        <FormField
+          id="project-scm-branch"
+          name="scm_branch"
+          type="text"
+          label={t`Source Control Branch/Tag/Commit`}
+          tooltip={helpText.sourceControlBranch}
+        />
+      )}
       <CredentialLookup
         credentialTypeKind="cloud"
         label={t`Credential`}

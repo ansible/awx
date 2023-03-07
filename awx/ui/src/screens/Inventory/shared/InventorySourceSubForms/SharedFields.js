@@ -150,16 +150,3 @@ export const HostFilterField = () => {
     />
   );
 };
-
-export const BranchFormField = ({ label }) => {
-  const helpText = getHelpText();
-  return (
-    <FormField
-      id="project-scm-branch"
-      name="scm_branch"
-      type="text"
-      label={label}
-      tooltip={helpText.sourceControlBranch}
-    />
-  );
-};
