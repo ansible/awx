@@ -48,7 +48,7 @@
     skip_tags: "skipbaz"
     job_tags: "Hello World"
     limit: "localhost"
-    wait: False
+    wait: True
     inventory: Demo Inventory
     organization: Default
   register: result

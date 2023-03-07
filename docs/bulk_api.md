@@ -4,6 +4,10 @@ Bulk API endpoints allows to perform bulk operations in single web request. Ther
 - /api/v2/bulk/job_launch
 - /api/v2/bulk/host_create
 
+Making individual API calls in rapid succession or at high concurrency can overwhelm AWX's ability to serve web requests. When the application's ability to serve is exausted, clients often receive 504 timeout errors.
+
+ Allowing the client combine actions into fewer requests allows for launching more jobs or adding more hosts with fewer requests and less time without exauhsting Controller's ability to serve requests, making excessive and repetitive database queries, or using excessive database connections (each web request opens a seperate database connection).
+
 ## Bulk Job Launch
 
 Provides feature in the API that allows a single web request to achieve multiple job launches. It creates a workflow job with individual jobs as nodes within the workflow job. It also supports providing promptable fields like inventory, credential etc.
@@ -50,10 +54,29 @@ Prompted field value can also be provided at the top level. For example:
 
 In the above example, `inventory: 2` will get used for the job templates (11, 12 and 13) in which inventory is marked as prompt of launch.
 
+*Note:* The `instance_groups` relationship is not supported for node-level prompts, unlike `"credentials"` in the above example, and will be ignored if provided. See OPTIONS for `/api/v2/bulk/job_launch/` for what fields are accepted at the workflow and node level, as that is the ultimate source of truth to determine what fields the API will accept.
+
 ### RBAC For Bulk Job Launch
 
 #### Who can bulk launch?
 Anyone who is logged in can view the launch point. In order to launch a unified_job_template, you need to have either `update` or `execute` depending on the type of unified job (job template, project update, etc).
+
+Launching using the bulk endpoint results in a workflow job being launched. For auditing purposes, in general we require to assign an organization to the resulting workflow. The logic for assigning this organization is as follows:
+
+- Superusers may assign any organization or none. If they do not assign one, they will be the only user able to see the parent workflow.
+- Users that are members of exactly 1 organization do not need to specify an organization, as their single organization will be used to assign to the resulting Workflow
+- Users that are members of multiple organizations must specify the organization to assign to the resulting workflow. If they do not specify, an error will be returned indicating this requirement.
+
+Example of specifying the organization:
+
+    {
+        "name": "Bulk Job Launch with org specified",
+        "jobs": [
+            {"unified_job_template": 12},
+            {"unified_job_template": 13}
+        ],
+        "organization": 2
+    }
 
 #### Who can see bulk jobs that have been run?
 System admins and Organization admins will see Bulk Jobs in the workflow jobs list and the unified jobs list. They can additionally see these individual workflow jobs.
