@@ -235,7 +235,7 @@ function InventorySourceDetail({ inventorySource }) {
           value={VERBOSITY()[verbosity]}
         />
         <Detail
-          label={t`Scm Branch`}
+          label={t`Source Control Branch`}
           helpText={helpText.sourceControlBranch}
           value={scm_branch}
         />
