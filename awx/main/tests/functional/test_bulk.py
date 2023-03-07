@@ -129,7 +129,7 @@ def test_bulk_job_launch_no_access_to_job_template(job_template, organization, i
     bulk_job_launch_response = post(
         reverse('api:bulk_job_launch'), {'name': 'Bulk Job Launch', 'jobs': [{'unified_job_template': jt.id}]}, normal_user, expect=400
     ).data
-    assert bulk_job_launch_response['__all__'][0] == f'Unified Job Templates {{{jt.id}}} not found or you don\'t have permissions to access it'
+    assert bulk_job_launch_response['__all__'][0] == f'Job Templates {{{jt.id}}} not found or you don\'t have permissions to access it'
 
 
 @pytest.mark.django_db
