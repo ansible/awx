@@ -1865,6 +1865,7 @@ class JobLaunchConfigAccess(UnifiedCredentialsMixin, BaseAccess):
 
     @check_superuser
     def can_add(self, data, template=None):
+        # WARNING: duplicated with BulkJobLaunchSerializer, check when changing permission levels
         # This is a special case, we don't check related many-to-many elsewhere
         # launch RBAC checks use this
         if 'reference_obj' in data:
@@ -1999,7 +2000,7 @@ class WorkflowJobNodeAccess(BaseAccess):
     def filtered_queryset(self):
         return self.model.objects.filter(
             Q(workflow_job__unified_job_template__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
-            | Q(workflow_job__organization__in=Organization.objects.filter(Q(admin_role__members=self.user)), workflow_job__is_bulk_job=True)
+            | Q(workflow_job__organization__in=Organization.objects.filter(Q(admin_role__members=self.user)))
         )
 
     def can_read(self, obj):
