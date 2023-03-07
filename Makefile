@@ -536,10 +536,8 @@ docker-compose-build:
 	    --cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .
 
 docker-clean:
-	$(foreach container_id,$(shell docker ps -f name=tools_awx -aq && docker ps -f name=tools_receptor -aq),docker stop $(container_id); docker rm -f $(container_id);)
-	if [ "$(shell docker images | grep awx_devel)" ]; then \
-	  docker images | grep awx_devel | awk '{print $$3}' | xargs docker rmi --force; \
-	fi
+	-$(foreach container_id,$(shell docker ps -f name=tools_awx -aq && docker ps -f name=tools_receptor -aq),docker stop $(container_id); docker rm -f $(container_id);)
+	-$(foreach image_id,$(shell docker images --filter=reference='*awx_devel*' -aq),docker rmi --force $(image_id);)
 
 docker-clean-volumes: docker-compose-clean docker-compose-container-group-clean
 	docker volume rm -f tools_awx_db tools_grafana_storage tools_prometheus_storage $(docker volume ls --filter name=tools_redis_socket_ -q)
