@@ -2004,6 +2004,7 @@ class WorkflowJobNodeAccess(BaseAccess):
         )
 
     def can_read(self, obj):
+        """Overriding this opens up detail view access for bulk jobs, where the workflow job has no associated workflow job template."""
         if obj.workflow_job.is_bulk_job and obj.workflow_job.created_by_id == self.user.id:
             return True
         return super().can_read(obj)
@@ -2138,6 +2139,7 @@ class WorkflowJobAccess(BaseAccess):
         )
 
     def can_read(self, obj):
+        """Overriding this opens up detail view access for bulk jobs, where the workflow job has no associated workflow job template."""
         if obj.is_bulk_job and obj.created_by_id == self.user.id:
             return True
         return super().can_read(obj)
