@@ -139,7 +139,11 @@ export function ProtectedRoute({ children, ...rest }) {
 function App() {
   const history = useHistory();
   const { hash, search, pathname } = useLocation();
+  const searchParams = Object.fromEntries(new URLSearchParams(search));
+  const pseudolocalization =
+    searchParams.pseudolocalization === 'true' || false;
   let language = getLanguageWithoutRegionCode(navigator);
+
   if (!Object.keys(locales).includes(language)) {
     // If there isn't a string catalog available for the browser's
     // preferred language, default to one that has strings.
@@ -147,8 +151,8 @@ function App() {
   }
 
   useEffect(() => {
-    dynamicActivate(language);
-  }, [language]);
+    dynamicActivate(language, pseudolocalization);
+  }, [language, pseudolocalization]);
 
   useTitle();
 
