@@ -10,7 +10,7 @@ from rest_framework import serializers
 # AWX
 from awx.conf import fields, register, register_validate
 from awx.main.models import ExecutionEnvironment
-from awx.main.constants import SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS, SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS_MONTHLY
+from awx.main.constants import SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS
 
 logger = logging.getLogger('awx.main.conf')
 
@@ -808,7 +808,13 @@ register(
 register(
     'SUBSCRIPTION_USAGE_MODEL',
     field_class=fields.ChoiceField,
-    choices=[SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS, SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS_MONTHLY],
+    choices=[
+        ('', _('Default model for AWX - no subscription')),
+        (
+            SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS,
+            _('Usage based on unique managed nodes in a large historical time frame and delete functionality for no longer used managed nodes'),
+        ),
+    ],
     default='',
     allow_blank=True,
     label=_('Defines subscription usage model and shows Host Metrics'),
