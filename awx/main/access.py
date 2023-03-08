@@ -1693,6 +1693,7 @@ class JobTemplateAccess(NotificationAttachMixin, UnifiedCredentialsMixin, BaseAc
         return self.user.is_superuser or self.user in obj.admin_role
 
     @check_superuser
+    # object here is the job template. sub_object here is what is being attached
     def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
         if relationship == "instance_groups":
             if not obj.organization:
