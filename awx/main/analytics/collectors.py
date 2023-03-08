@@ -237,7 +237,9 @@ def projects_by_scm_type(since, **kwargs):
 def instance_info(since, include_hostnames=False, **kwargs):
     info = {}
     # Use same method that the TaskManager does to compute consumed capacity without querying all running jobs for each Instance
-    tm_models = TaskManagerModels.init_with_consumed_capacity(instance_fields=['uuid', 'version', 'capacity', 'cpu', 'memory', 'managed_by_policy', 'enabled'])
+    tm_models = TaskManagerModels.init_with_consumed_capacity(
+        instance_fields=['uuid', 'version', 'capacity', 'cpu', 'memory', 'managed_by_policy', 'enabled', 'node_type']
+    )
     for tm_instance in tm_models.instances.instances_by_hostname.values():
         instance = tm_instance.obj
         instance_info = {
