@@ -7,6 +7,7 @@ on:
     branches:
       - devel
       - release_*
+      - feature_*
 jobs:
   push:
     if: endsWith(github.repository, '/awx') || startsWith(github.ref, 'refs/heads/release_')
@@ -20,6 +21,12 @@ jobs:
       - name: Get python version from Makefile
         run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
 
+      - name: Set lower case owner name
+        run: |
+          echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
+        env:
+          OWNER: '${{ github.repository_owner }}'
+
       - name: Install python ${{ env.py_version }}
         uses: actions/setup-python@v2
         with:
@@ -31,15 +38,18 @@ jobs:
 
       - name: Pre-pull image to warm build cache
         run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${GITHUB_REF##*/} || :
-          docker pull ghcr.io/${{ github.repository_owner }}/awx_kube_devel:${GITHUB_REF##*/} || :
+          docker pull ghcr.io/${OWNER_LC}/awx_devel:${GITHUB_REF##*/} || :
+          docker pull ghcr.io/${OWNER_LC}/awx_kube_devel:${GITHUB_REF##*/} || :
+          docker pull ghcr.io/${OWNER_LC}/awx:${GITHUB_REF##*/} || :
 
       - name: Build images
         run: |
-          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${GITHUB_REF##*/} make docker-compose-build
-          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${GITHUB_REF##*/} make awx-kube-dev-build
+          DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER_LC} COMPOSE_TAG=${GITHUB_REF##*/} make docker-compose-build
+          DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER_LC} COMPOSE_TAG=${GITHUB_REF##*/} make awx-kube-dev-build
+          DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER_LC} COMPOSE_TAG=${GITHUB_REF##*/} make awx-kube-build
 
       - name: Push image
         run: |
-          docker push ghcr.io/${{ github.repository_owner }}/awx_devel:${GITHUB_REF##*/}
-          docker push ghcr.io/${{ github.repository_owner }}/awx_kube_devel:${GITHUB_REF##*/}
+          docker push ghcr.io/${OWNER_LC}/awx_devel:${GITHUB_REF##*/}
+          docker push ghcr.io/${OWNER_LC}/awx_kube_devel:${GITHUB_REF##*/}
+          docker push ghcr.io/${OWNER_LC}/awx:${GITHUB_REF##*/}
