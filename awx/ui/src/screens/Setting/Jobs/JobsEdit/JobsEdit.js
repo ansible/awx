@@ -151,6 +151,11 @@ function JobsEdit() {
                   isRequired={Boolean(options?.SCHEDULE_MAX_JOBS)}
                 />
                 <InputField
+                  name="AWX_RUNNER_KEEPALIVE_SECONDS"
+                  config={jobs.AWX_RUNNER_KEEPALIVE_SECONDS}
+                  type="number"
+                />
+                <InputField
                   name="DEFAULT_JOB_TIMEOUT"
                   config={jobs.DEFAULT_JOB_TIMEOUT}
                   type="number"

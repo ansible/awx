@@ -14,7 +14,7 @@ from oauth2_provider.models import AbstractApplication, AbstractAccessToken
 from oauth2_provider.generators import generate_client_secret
 from oauthlib import oauth2
 
-from awx.main.utils import get_external_account
+from awx.sso.common import get_external_account
 from awx.main.fields import OAuth2ClientSecretField
 
 

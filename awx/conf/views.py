@@ -180,7 +180,7 @@ class SettingLoggingTest(GenericAPIView):
             if not port:
                 return Response({'error': 'Port required for ' + protocol}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            # if http/https by this point, domain is reacheable
+            # if http/https by this point, domain is reachable
             return Response(status=status.HTTP_202_ACCEPTED)
 
         if protocol == 'udp':

@@ -1972,7 +1972,7 @@ msgid ""
 "HTTP headers and meta keys to search to determine remote host name or IP. "
 "Add additional items to this list, such as \"HTTP_X_FORWARDED_FOR\", if "
 "behind a reverse proxy. See the \"Proxy Support\" section of the "
-"Adminstrator guide for more details."
+"Administrator guide for more details."
 msgstr ""
 
 #: awx/main/conf.py:85
@@ -2457,7 +2457,7 @@ msgid ""
 msgstr ""
 
 #: awx/main/conf.py:631
-msgid "Maximum disk persistance for external log aggregation (in GB)"
+msgid "Maximum disk persistence for external log aggregation (in GB)"
 msgstr ""
 
 #: awx/main/conf.py:633
@@ -2548,7 +2548,7 @@ msgid "Enable"
 msgstr ""
 
 #: awx/main/constants.py:27
-msgid "Doas"
+msgid "Does"
 msgstr ""
 
 #: awx/main/constants.py:28
@@ -4801,7 +4801,7 @@ msgstr ""
 
 #: awx/main/models/workflow.py:251
 msgid ""
-"An identifier coresponding to the workflow job template node that this node "
+"An identifier corresponding to the workflow job template node that this node "
 "was created from."
 msgstr ""
 
@@ -5521,7 +5521,7 @@ msgstr ""
 #: awx/sso/conf.py:606
 msgid ""
 "Extra arguments for Google OAuth2 login. You can restrict it to only allow a "
-"single domain to authenticate, even if the user is logged in with multple "
+"single domain to authenticate, even if the user is logged in with multiple "
 "Google accounts. Refer to the documentation for more detail."
 msgstr ""
 
@@ -5905,7 +5905,7 @@ msgstr ""
 
 #: awx/sso/conf.py:1290
 msgid ""
-"Create a keypair to use as a service provider (SP) and include the "
+"Create a key pair to use as a service provider (SP) and include the "
 "certificate content here."
 msgstr ""
 
@@ -5915,7 +5915,7 @@ msgstr ""
 
 #: awx/sso/conf.py:1302
 msgid ""
-"Create a keypair to use as a service provider (SP) and include the private "
+"Create a key pair to use as a service provider (SP) and include the private "
 "key content here."
 msgstr ""
 
