@@ -83,7 +83,7 @@ def _identify_lower(key, since, until, last_gather):
     return lower, last_entries
 
 
-@register('config', '1.4', description=_('General platform configuration.'))
+@register('config', '1.5', description=_('General platform configuration.'))
 def config(since, **kwargs):
     license_info = get_license()
     install_type = 'traditional'
@@ -119,6 +119,7 @@ def config(since, **kwargs):
         'compliant': license_info.get('compliant'),
         'date_warning': license_info.get('date_warning'),
         'date_expired': license_info.get('date_expired'),
+        'subscription_usage_model': getattr(settings, 'SUBSCRIPTION_USAGE_MODEL', ''),  # 1.5+
         'free_instances': license_info.get('free_instances', 0),
         'total_licensed_instances': license_info.get('instance_count', 0),
         'license_expiry': license_info.get('time_remaining', 0),
