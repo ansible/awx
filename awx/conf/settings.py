@@ -187,7 +187,7 @@ def get_settings_to_cache(registry):
 def _get_setting_from_db(registry, key):
     def wrapped(registry, key):
         field = registry.get_setting_field(key)
-        if not field.read_only:
+        if not field.read_only or key == 'INSTALL_UUID':
             return Setting.objects.filter(key=key, user__isnull=True).order_by('pk').first()
 
     with ThreadPoolExecutor(max_workers=1) as executor:
