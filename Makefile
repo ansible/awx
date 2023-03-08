@@ -280,7 +280,7 @@ awx-link:
 	cp -f /tmp/awx.egg-link /var/lib/awx/venv/awx/lib/$(PYTHON)/site-packages/awx.egg-link
 
 TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/sso/tests
-PYTEST_ARGS ?= -n auto
+PYTEST_ARGS ?= -n auto --dist=loadfile
 ## Run all API unit tests.
 test:
 	if [ "$(VENV_BASE)" ]; then \
