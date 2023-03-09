@@ -639,6 +639,15 @@
         "unit": "seconds",
         "default": 14400
       },
+      "UI_NEXT": {
+        "type": "boolean",
+        "required": false,
+        "label": "Enable Next Generation User Interface",
+        "help_text": "Enable the next generation user interface.",
+        "category": "System",
+        "category_slug": "system",
+        "default": true
+      },
       "SESSION_COOKIE_AGE": {
         "type": "integer",
         "required": true,
@@ -4371,6 +4380,14 @@
         "category_slug": "system",
         "defined_in_file": false,
         "unit": "seconds"
+      },
+      "UI_NEXT": {
+        "type": "boolean",
+        "label": "Enable Next Generation User Interface",
+        "help_text": "Enable the next generation user interface.",
+        "category": "System",
+        "category_slug": "system",
+        "defined_in_file": false
       },
       "SESSION_COOKIE_AGE": {
         "type": "integer",
