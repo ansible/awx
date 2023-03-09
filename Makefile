@@ -412,9 +412,6 @@ ui-release: $(UI_BUILD_FLAG_FILE)
 ui-devel: awx/ui/node_modules
 	@$(MAKE) -B $(UI_BUILD_FLAG_FILE)
 	@if [ -d "/var/lib/awx" ] ; then \
-		command1 ; \
-		command2 ; \
-		... ;\
 		mkdir -p /var/lib/awx/public/static/css; \
 		mkdir -p /var/lib/awx/public/static/js; \
 		mkdir -p /var/lib/awx/public/static/media; \
