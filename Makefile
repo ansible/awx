@@ -411,12 +411,14 @@ ui-release: $(UI_BUILD_FLAG_FILE)
 
 ui-devel: awx/ui/node_modules
 	@$(MAKE) -B $(UI_BUILD_FLAG_FILE)
-	mkdir -p /var/lib/awx/public/static/css
-	mkdir -p /var/lib/awx/public/static/js
-	mkdir -p /var/lib/awx/public/static/media
-	cp -r awx/ui/build/static/css/* /var/lib/awx/public/static/css
-	cp -r awx/ui/build/static/js/* /var/lib/awx/public/static/js
-	cp -r awx/ui/build/static/media/* /var/lib/awx/public/static/media
+	@if [ -d "/var/lib/awx" ] ; then \
+		mkdir -p /var/lib/awx/public/static/css; \
+		mkdir -p /var/lib/awx/public/static/js; \
+		mkdir -p /var/lib/awx/public/static/media; \
+		cp -r awx/ui/build/static/css/* /var/lib/awx/public/static/css; \
+		cp -r awx/ui/build/static/js/* /var/lib/awx/public/static/js; \
+		cp -r awx/ui/build/static/media/* /var/lib/awx/public/static/media; \
+    	fi
 
 ui-devel-instrumented: awx/ui/node_modules
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run start-instrumented
