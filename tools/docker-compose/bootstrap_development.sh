@@ -14,6 +14,10 @@ make awx-link
 make version_file
 
 if [[ -n "$RUN_MIGRATIONS" ]]; then
+    # wait for postgres to be ready
+    while ! nc -z postgres 5432; do
+        echo "Waiting for postgres to be ready to accept connections"; sleep 1;
+    done;
     make migrate
 else
     wait-for-migrations
