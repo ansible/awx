@@ -235,6 +235,7 @@ class TestAutoScaling:
         assert len(self.pool) == 10
         assert self.pool.workers[0].messages_sent == 2
 
+    @pytest.mark.timeout(20)
     def test_lost_worker_autoscale(self):
         # if a worker exits, it should be replaced automatically up to min_workers
         self.pool.init_workers(ResultWriter().work_loop, multiprocessing.Queue())
@@ -243,8 +244,8 @@ class TestAutoScaling:
         assert len(self.pool) == 2
         assert not self.pool.should_grow
         alive_pid = self.pool.workers[1].pid
-        self.pool.workers[0].process.terminate()
-        time.sleep(2)  # wait a moment for sigterm
+        self.pool.workers[0].process.kill()
+        self.pool.workers[0].process.join()  # waits for process to full terminate
 
         # clean up and the dead worker
         self.pool.cleanup()
