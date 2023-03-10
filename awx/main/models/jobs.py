@@ -862,7 +862,10 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         self.log_lifecycle("start_job_fact_cache")
         log_data['job_id'] = self.id
         log_data['written_ct'] = 0
-        os.makedirs(destination, mode=0o700)
+        try:
+            os.makedirs(destination, mode=0o700)
+        except FileExistsError:
+            pass
 
         if timeout is None:
             timeout = settings.ANSIBLE_FACT_CACHE_TIMEOUT

@@ -553,7 +553,8 @@ class BaseTask(object):
                 params['module'] = self.build_module_name(self.instance)
                 params['module_args'] = self.build_module_args(self.instance)
 
-            if getattr(self.instance, 'use_fact_cache', False):
+            # TODO: refactor into a better BasTask method
+            if getattr(self.instance, 'use_fact_cache', False) or getattr(self.instance, 'source', '') == 'constructed':
                 # Enable Ansible fact cache.
                 params['fact_cache_type'] = 'jsonfile'
             else:
@@ -1529,6 +1530,8 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
                 script_params = dict(hostvars=True, towervars=True)
                 source_inv_path = self.write_inventory_file(input_inventory, private_data_dir, f'hosts_{input_inventory.id}', script_params)
                 args.append(to_container_path(source_inv_path, private_data_dir))
+                # Include any facts from input inventories so they can be used in filters
+                Job(pk=42, inventory=input_inventory).start_job_fact_cache(os.path.join(private_data_dir, 'artifacts', str(inventory_update.id), 'fact_cache'))
 
         # Add arguments for the source inventory file/script/thing
         rel_path = self.pseudo_build_inventory(inventory_update, private_data_dir)
