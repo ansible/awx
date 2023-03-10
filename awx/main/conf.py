@@ -795,6 +795,106 @@ register(
     category_slug='bulk',
 )
 
+register(
+    'SYSTEM_TASK_ABS_CPU',
+    field_class=fields.CharField,
+    default='',
+    allow_blank=True,
+    label=_('Override CPU for capacity calculations for all instances.'),
+    help_text=_(
+        'Override CPU for capacity calculations for all instances.'
+        ' When not set, the heartbeat task will dynamically detect CPU available.'
+        ' Accepts formats equivalent to kubernetes resource requests like 4 or 4000m.'
+        ' For operator based deployments, this is managed by the operator based on resource limits.'
+    ),
+    category=_('Task'),
+    category_slug='task',
+)
+
+register(
+    'SYSTEM_TASK_ABS_MEM',
+    field_class=fields.CharField,
+    default='',
+    allow_blank=True,
+    label=_('Override Memory for capacity calculations for all instances.'),
+    help_text=_(
+        'Override Memory for capacity calculations for all instances.'
+        ' When not set, the heartbeat task will dynamically detect memory available.'
+        ' Accepts formats equivalent to kubernetes resource requests like 4Gi or 4000Mi.'
+        ' For operator based deployments, this is managed by the operator based on resource limits.'
+    ),
+    category=_('Task'),
+    category_slug='task',
+)
+
+register(
+    'SYSTEM_TASK_FORKS_MEM',
+    field_class=fields.IntegerField,
+    default=100,
+    label=_('Amount of memory needed per-fork.'),
+    help_text=_('Amount of memory needed per-fork, used when calculating memory based capacity of an instance.'),
+    category=_('Task'),
+    category_slug='task',
+)
+
+register(
+    'SYSTEM_TASK_FORKS_CPU',
+    field_class=fields.IntegerField,
+    default=4,
+    label=_('Number of forks able to run per CPU.'),
+    help_text=_('Number of forks able to run per CPU, used when calculating CPU based capacity of an instance.'),
+    category=_('Task'),
+    category_slug='task',
+)
+
+register(
+    'TASK_MANAGER_TIMEOUT',
+    field_class=fields.IntegerField,
+    default=300,
+    label=_('Timeout limit in seconds for the task managers.'),
+    help_text=_('Timeout limit in seconds for the task managers.' ' After this timeout, task managers will attempt to exit and commit progress.'),
+    category=_('Task'),
+    category_slug='task',
+)
+
+register(
+    'TASK_MANAGER_TIMEOUT_GRACE_PERIOD',
+    field_class=fields.IntegerField,
+    default=60,
+    label=_('After TASK_MANAGER_TIMEOUT seconds, allow an additoinal TASK_MANAGER_TIMEOUT_GRACE_PERIOD.'),
+    help_text=_(
+        'After TASK_MANAGER_TIMEOUT seconds, allow an additoinal TASK_MANAGER_TIMEOUT_GRACE_PERIOD'
+        ' during which the task manager will attempt to exit gracefully before receiving SIGKILL.'
+    ),
+    category=_('Task'),
+    category_slug='task',
+)
+
+register(
+    'START_TASK_LIMIT',
+    field_class=fields.IntegerField,
+    default=100,
+    label=_('Max number of tasks to start in an individual task manager run.'),
+    help_text=_('Max number of tasks to start in an individual task manager run.'),
+    category=_('Task'),
+    category_slug='task',
+)
+
+register(
+    'AWX_CONTROL_NODE_TASK_IMPACT',
+    field_class=fields.IntegerField,
+    default=1,
+    label=_('Impact on the capacity of a control node when it controls a job.'),
+    help_text=_(
+        'Number of capacity units to consume on a control node when it is selected'
+        ' to run control processes for a task. For example, a control node with 100 capacity'
+        ' and AWX_CONTROL_NODE_TASK_IMPACT set to 5 will be able to control at most 20 jobs.'
+        ' Note some capacity may be reserved for other background tasks.'
+    ),
+    category=_('Task'),
+    category_slug='task',
+)
+
 
 def logging_validate(serializer, attrs):
     if not serializer.instance or not hasattr(serializer.instance, 'LOG_AGGREGATOR_HOST') or not hasattr(serializer.instance, 'LOG_AGGREGATOR_TYPE'):

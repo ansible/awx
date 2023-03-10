@@ -22,7 +22,7 @@ class TestInstanceGroupInstanceMapping(TransactionTestCase):
 
     def test_mapping(self):
         self.sample_cluster()
-        with self.assertNumQueries(3):
+        with self.assertNumQueries(4):
             instance_groups = TaskManagerInstanceGroups()
 
         ig_instance_map = instance_groups.instance_groups

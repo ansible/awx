@@ -761,7 +761,7 @@ def get_corrected_cpu(cpu_count):  # formerlly get_cpu_capacity
 
     if env_abscpu is not None:
         return convert_cpu_str_to_decimal_cpu(env_abscpu)
-    elif settings_abscpu is not None:
+    elif settings_abscpu is not None and settings_abscpu != '':  # user for some reason may one to set to a falsy 0
         return convert_cpu_str_to_decimal_cpu(settings_abscpu)
 
     return cpu_count  # no correction
@@ -835,7 +835,7 @@ def get_corrected_memory(memory):
     # so we convert memory from settings to bytes as well.
     if env_absmem is not None:
         return convert_mem_str_to_bytes(env_absmem)
-    elif settings_absmem is not None:
+    elif settings_absmem is not None and settings_absmem != '':  # user for some reason may want to set to falsy 0
         return convert_mem_str_to_bytes(settings_absmem)
 
     return memory
