@@ -872,6 +872,12 @@ class InventorySourceOptions(BaseModel):
         default='',
         help_text=_('Inventory source variables in YAML or JSON format.'),
     )
+    scm_branch = models.CharField(
+        max_length=1024,
+        default='',
+        blank=True,
+        help_text=_('Inventory source SCM branch. Project default used if blank. Only allowed if project allow_override field is set to true.'),
+    )
     enabled_var = models.TextField(
         blank=True,
         default='',

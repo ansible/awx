@@ -105,6 +105,11 @@ options:
       description:
         - Project to use as source with scm option
       type: str
+    scm_branch:
+      description:
+        - Inventory source SCM branch.
+        - Project must have branch override enabled.
+      type: str
     state:
       description:
         - Desired state of the resource.
@@ -178,6 +183,7 @@ def main():
         update_on_launch=dict(type='bool'),
         update_cache_timeout=dict(type='int'),
         source_project=dict(),
+        scm_branch=dict(type='str'),
         notification_templates_started=dict(type="list", elements='str'),
         notification_templates_success=dict(type="list", elements='str'),
         notification_templates_error=dict(type="list", elements='str'),
@@ -272,6 +278,7 @@ def main():
         'enabled_var',
         'enabled_value',
         'host_filter',
+        'scm_branch',
     )
 
     # Layer in all remaining optional information
