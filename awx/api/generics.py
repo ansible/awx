@@ -512,6 +512,7 @@ class SubListAPIView(ParentMixin, ListAPIView):
     # And optionally (user must have given access permission on parent object
     # to view sublist):
     #   parent_access = 'read'
+    filter_read_permission = True
 
     def get_description_context(self):
         d = super(SubListAPIView, self).get_description_context()
@@ -528,6 +529,8 @@ class SubListAPIView(ParentMixin, ListAPIView):
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model).distinct()
         sublist_qs = self.get_sublist_queryset(parent)
+        if not self.filter_read_permission:
+            return sublist_qs
         return qs & sublist_qs
 
     def get_sublist_queryset(self, parent):

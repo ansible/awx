@@ -52,7 +52,6 @@ from awx.api.serializers import (
     WorkflowJobTemplateSerializer,
     CredentialSerializer,
 )
-from awx.main.utils import getattrd
 from awx.api.views.mixin import RelatedJobsPreventDeleteMixin, OrganizationCountsMixin
 
 logger = logging.getLogger('awx.api.views.organization')
@@ -208,6 +207,7 @@ class OrganizationInstanceGroupsList(SubListAttachDetachAPIView):
     serializer_class = InstanceGroupSerializer
     parent_model = Organization
     relationship = 'instance_groups'
+    filter_read_permission = False
 
 
 class OrganizationGalaxyCredentialsList(SubListAttachDetachAPIView):
@@ -215,16 +215,7 @@ class OrganizationGalaxyCredentialsList(SubListAttachDetachAPIView):
     serializer_class = CredentialSerializer
     parent_model = Organization
     relationship = 'galaxy_credentials'
-
-    def get_queryset(self):
-        # Return the full list of credentials
-        parent = self.get_parent_object()
-        self.check_parent_access(parent)
-        sublist_qs = getattrd(parent, self.relationship)
-        sublist_qs = sublist_qs.prefetch_related(
-            'created_by', 'modified_by', 'admin_role', 'use_role', 'read_role', 'admin_role__parents', 'admin_role__members'
-        )
-        return sublist_qs
+    filter_read_permission = False
 
     def is_valid_relation(self, parent, sub, created=False):
         if sub.kind != 'galaxy_api_token':
