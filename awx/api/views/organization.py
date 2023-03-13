@@ -216,7 +216,6 @@ class OrganizationGalaxyCredentialsList(SubListAttachDetachAPIView):
     parent_model = Organization
     relationship = 'galaxy_credentials'
     filter_read_permission = False
-    prefetched_items = ['created_by', 'modified_by', 'admin_role', 'use_role', 'read_role', 'admin_role__parents', 'admin_role__members']
 
     def is_valid_relation(self, parent, sub, created=False):
         if sub.kind != 'galaxy_api_token':
