@@ -201,7 +201,6 @@ class WebsocketRelayConnection:
 
 class WebSocketRelayManager(object):
     def __init__(self):
-
         self.local_hostname = get_local_host()
         self.relay_connections = dict()
         # hostname -> ip
