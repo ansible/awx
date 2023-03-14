@@ -1643,8 +1643,9 @@ class constructed(PluginFileInjector):
 
     def build_env(self, *args, **kwargs):
         env = super().build_env(*args, **kwargs)
-        # Enable all types of inventory plugins so we pick up the script files from source inventories
-        del env['ANSIBLE_INVENTORY_ENABLED']
+        # Enable script inventory plugin so we pick up the script files from source inventories
+        env['ANSIBLE_INVENTORY_ENABLED'] += ',script'
+        env['ANSIBLE_INVENTORY_ANY_UNPARSED_IS_FAILED'] = 'True'
         return env
 
 
