@@ -11,11 +11,13 @@ from datetime import timedelta
 
 
 if "pytest" in sys.modules:
+    IS_TESTING_MODE = True
     from unittest import mock
 
     with mock.patch('__main__.__builtins__.dir', return_value=[]):
         import ldap
 else:
+    IS_TESTING_MODE = False
     import ldap
 
 
@@ -128,6 +130,13 @@ NAMED_URL_GRAPH = {}
 # Maximum number of the same job that can be waiting to run when launching from scheduler
 # Note: This setting may be overridden by database settings.
 SCHEDULE_MAX_JOBS = 10
+
+# Bulk API related settings
+# Maximum number of jobs that can be launched in 1 bulk job
+BULK_JOB_MAX_LAUNCH = 100
+
+# Maximum number of host that can be created in 1 bulk host create
+BULK_HOST_MAX_CREATE = 100
 
 SITE_ID = 1
 

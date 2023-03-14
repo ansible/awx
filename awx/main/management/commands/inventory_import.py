@@ -851,6 +851,7 @@ class Command(BaseCommand):
             logger.info('Updating inventory %d: %s' % (inventory.pk, inventory.name))
 
             # Create ad-hoc inventory source and inventory update objects
+            ee = get_default_execution_environment()
             with ignore_inventory_computed_fields():
                 source = Command.get_source_absolute_path(raw_source)
 
@@ -860,14 +861,22 @@ class Command(BaseCommand):
                     source_path=os.path.abspath(source),
                     overwrite=bool(options.get('overwrite', False)),
                     overwrite_vars=bool(options.get('overwrite_vars', False)),
+                    execution_environment=ee,
                 )
                 inventory_update = inventory_source.create_inventory_update(
-                    _eager_fields=dict(status='running', job_args=json.dumps(sys.argv), job_env=dict(os.environ.items()), job_cwd=os.getcwd())
+                    _eager_fields=dict(
+                        status='running', job_args=json.dumps(sys.argv), job_env=dict(os.environ.items()), job_cwd=os.getcwd(), execution_environment=ee
+                    )
                 )
 
-            data = AnsibleInventoryLoader(source=source, verbosity=verbosity).load()
+            try:
+                data = AnsibleInventoryLoader(source=source, verbosity=verbosity).load()
+                logger.debug('Finished loading from source: %s', source)
 
-            logger.debug('Finished loading from source: %s', source)
+            except SystemExit:
+                logger.debug("Error occurred while running ansible-inventory")
+                inventory_update.cancel()
+                sys.exit(1)
 
             status, tb, exc = 'error', '', None
             try:

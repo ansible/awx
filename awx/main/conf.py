@@ -776,6 +776,26 @@ register(
 )
 
 register(
+    'BULK_JOB_MAX_LAUNCH',
+    field_class=fields.IntegerField,
+    default=100,
+    label=_('Max jobs to allow bulk jobs to launch'),
+    help_text=_('Max jobs to allow bulk jobs to launch'),
+    category=_('Bulk Actions'),
+    category_slug='bulk',
+)
+
+register(
+    'BULK_HOST_MAX_CREATE',
+    field_class=fields.IntegerField,
+    default=100,
+    label=_('Max number of hosts to allow to be created in a single bulk action'),
+    help_text=_('Max number of hosts to allow to be created in a single bulk action'),
+    category=_('Bulk Actions'),
+    category_slug='bulk',
+)
+
+register(
     'SUBSCRIPTION_USAGE_MODEL',
     field_class=fields.ChoiceField,
     choices=[

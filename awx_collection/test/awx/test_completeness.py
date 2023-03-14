@@ -44,6 +44,12 @@ no_endpoint_for_module = [
     'subscriptions',  # Subscription deals with config/subscriptions
 ]
 
+# Add modules with endpoints that are not at /api/v2
+extra_endpoints = {
+    'bulk_job_launch': '/api/v2/bulk/job_launch/',
+    'bulk_host_create': '/api/v2/bulk/host_create/',
+}
+
 # Global module parameters we can ignore
 ignore_parameters = ['state', 'new_name', 'update_secrets', 'copy_from']
 
@@ -73,6 +79,8 @@ no_api_parameter_ok = {
     'user': ['new_username', 'organization'],
     # workflow_approval parameters that do not apply when approving an approval node.
     'workflow_approval': ['action', 'interval', 'timeout', 'workflow_job_id'],
+    # bulk
+    'bulk_job_launch': ['interval', 'wait'],
 }
 
 # When this tool was created we were not feature complete. Adding something in here indicates a module
@@ -228,6 +236,10 @@ def test_completeness(collection_import, request, admin_user, job_template, exec
         user=admin_user,
         expect=None,
     )
+
+    for key, val in extra_endpoints.items():
+        endpoint_response.data[key] = val
+
     for endpoint in endpoint_response.data.keys():
         # Module names are singular and endpoints are plural so we need to convert to singular
         singular_endpoint = '{0}'.format(endpoint)

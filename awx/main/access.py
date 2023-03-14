@@ -1865,6 +1865,7 @@ class JobLaunchConfigAccess(UnifiedCredentialsMixin, BaseAccess):
 
     @check_superuser
     def can_add(self, data, template=None):
+        # WARNING: duplicated with BulkJobLaunchSerializer, check when changing permission levels
         # This is a special case, we don't check related many-to-many elsewhere
         # launch RBAC checks use this
         if 'reference_obj' in data:
@@ -1997,7 +1998,16 @@ class WorkflowJobNodeAccess(BaseAccess):
     )
 
     def filtered_queryset(self):
-        return self.model.objects.filter(workflow_job__unified_job_template__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
+        return self.model.objects.filter(
+            Q(workflow_job__unified_job_template__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
+            | Q(workflow_job__organization__in=Organization.objects.filter(Q(admin_role__members=self.user)))
+        )
+
+    def can_read(self, obj):
+        """Overriding this opens up detail view access for bulk jobs, where the workflow job has no associated workflow job template."""
+        if obj.workflow_job.is_bulk_job and obj.workflow_job.created_by_id == self.user.id:
+            return True
+        return super().can_read(obj)
 
     @check_superuser
     def can_add(self, data):
@@ -2123,7 +2133,16 @@ class WorkflowJobAccess(BaseAccess):
     )
 
     def filtered_queryset(self):
-        return WorkflowJob.objects.filter(unified_job_template__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
+        return WorkflowJob.objects.filter(
+            Q(unified_job_template__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
+            | Q(organization__in=Organization.objects.filter(Q(admin_role__members=self.user)), is_bulk_job=True)
+        )
+
+    def can_read(self, obj):
+        """Overriding this opens up detail view access for bulk jobs, where the workflow job has no associated workflow job template."""
+        if obj.is_bulk_job and obj.created_by_id == self.user.id:
+            return True
+        return super().can_read(obj)
 
     def can_add(self, data):
         # Old add-start system for launching jobs is being depreciated, and
