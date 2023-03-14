@@ -44,6 +44,7 @@ import WorkflowApprovalTemplates from './models/WorkflowApprovalTemplates';
 import WorkflowJobTemplateNodes from './models/WorkflowJobTemplateNodes';
 import WorkflowJobTemplates from './models/WorkflowJobTemplates';
 import WorkflowJobs from './models/WorkflowJobs';
+import HostMetrics from './models/HostMetrics';
 
 const ActivityStreamAPI = new ActivityStream();
 const AdHocCommandsAPI = new AdHocCommands();
@@ -91,6 +92,7 @@ const WorkflowApprovalTemplatesAPI = new WorkflowApprovalTemplates();
 const WorkflowJobTemplateNodesAPI = new WorkflowJobTemplateNodes();
 const WorkflowJobTemplatesAPI = new WorkflowJobTemplates();
 const WorkflowJobsAPI = new WorkflowJobs();
+const HostMetricsAPI = new HostMetrics();
 
 export {
   ActivityStreamAPI,
@@ -139,4 +141,5 @@ export {
   WorkflowJobTemplateNodesAPI,
   WorkflowJobTemplatesAPI,
   WorkflowJobsAPI,
+  HostMetricsAPI,
 };
