@@ -35,6 +35,7 @@ from cryptography import x509
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
+from awx.main.constants import SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS
 
 MAX_INSTANCES = 9999999
 
@@ -382,8 +383,15 @@ class Licenser(object):
 
         current_instances = Host.objects.active_count()
         license_date = int(attrs.get('license_date', 0) or 0)
-        automated_instances = HostMetric.active_objects.count()
-        first_host = HostMetric.active_objects.only('first_automation').order_by('first_automation').first()
+
+        model = getattr(settings, 'SUBSCRIPTION_USAGE_MODEL', '')
+        if model == SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS:
+            automated_instances = HostMetric.active_objects.count()
+            first_host = HostMetric.active_objects.only('first_automation').order_by('first_automation').first()
+        else:
+            automated_instances = HostMetric.objects.count()
+            first_host = HostMetric.objects.only('first_automation').order_by('first_automation').first()
+
         if first_host:
             automated_since = int(first_host.first_automation.timestamp())
         else:
