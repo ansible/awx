@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0174_ensure_org_ee_admin_roles'),
+        ('main', '0179_change_cyberark_plugin_names'),
     ]
 
     operations = [

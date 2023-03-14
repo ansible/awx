@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0175_add_hostmetric_fields'),
+        ('main', '0180_add_hostmetric_fields'),
     ]
 
     operations = [
