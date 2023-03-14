@@ -2,7 +2,7 @@ import pytest
 
 from django.apps import apps
 
-from awx.main.models import Organization, InstanceGroup
+from awx.main.models import InstanceGroup
 from awx.main.migrations import _OrgAdmin_to_use_ig as orgadmin
 
 

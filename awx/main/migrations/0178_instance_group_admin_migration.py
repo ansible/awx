@@ -9,7 +9,7 @@ from awx.main.migrations import ActivityStreamDisabledMigration
 
 class Migration(ActivityStreamDisabledMigration):
     dependencies = [
-        ('main', '0175_instance_group_role_addition'),
+        ('main', '0177_instance_group_role_addition'),
     ]
     operations = [
         migrations.RunPython(migration_utils.set_current_apps_for_migrations),
