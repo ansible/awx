@@ -272,6 +272,9 @@ class ApiV2ConfigView(APIView):
 
         pendo_state = settings.PENDO_TRACKING_STATE if settings.PENDO_TRACKING_STATE in ('off', 'anonymous', 'detailed') else 'off'
 
+        # Guarding against settings.UI_NEXT being set to a non-boolean value
+        ui_next_state = settings.UI_NEXT if settings.UI_NEXT in (True, False) else False
+
         data = dict(
             time_zone=settings.TIME_ZONE,
             license_info=license_data,
@@ -280,6 +283,7 @@ class ApiV2ConfigView(APIView):
             analytics_status=pendo_state,
             analytics_collectors=all_collectors(),
             become_methods=PRIVILEGE_ESCALATION_METHODS,
+            ui_next=ui_next_state,
         )
 
         # If LDAP is enabled, user_ldap_fields will return a list of field
