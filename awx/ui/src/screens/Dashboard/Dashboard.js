@@ -12,6 +12,8 @@ import {
 } from '@patternfly/react-core';
 import { InfoCircleIcon } from '@patternfly/react-icons';
 
+import { useConfig } from 'contexts/Config';
+import useBrandName from 'hooks/useBrandName';
 import useRequest from 'hooks/useRequest';
 import { DashboardAPI } from 'api';
 import ScreenHeader from 'components/ScreenHeader';
@@ -42,6 +44,8 @@ const MainPageSection = styled(PageSection)`
 `;
 
 function Dashboard() {
+  const config = useConfig();
+  const brandName = useBrandName();
   const [activeTabId, setActiveTabId] = useState(0);
 
   const {
@@ -71,15 +75,16 @@ function Dashboard() {
   }
   return (
     <>
-      <Banner variant="info">
-        <Trans>
-          <p>
-            <InfoCircleIcon /> A tech preview of the new Ansible Automation
-            Platform user interface can be found{' '}
-            <a href="/ui_next/dashboard">here</a>.
-          </p>
-        </Trans>
-      </Banner>
+      {config?.ui_next && (
+        <Banner variant="info">
+          <Trans>
+            <p>
+              <InfoCircleIcon /> A tech preview of the new {brandName} user
+              interface can be found <a href="/ui_next/dashboard">here</a>.
+            </p>
+          </Trans>
+        </Banner>
+      )}
       <ScreenHeader
         streamType="all"
         breadcrumbConfig={{ '/home': t`Dashboard` }}
