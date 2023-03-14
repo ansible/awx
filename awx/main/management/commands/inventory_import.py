@@ -654,13 +654,19 @@ class Command(BaseCommand):
             mem_host = self.all_group.all_hosts[mem_host_name]
             import_vars = mem_host.variables
             host_desc = import_vars.pop('_awx_description', 'imported')
-            host_attrs = dict(variables=json.dumps(import_vars), description=host_desc)
+            host_attrs = dict(description=host_desc)
             enabled = self._get_enabled(mem_host.variables)
             if enabled is not None:
                 host_attrs['enabled'] = enabled
             if self.instance_id_var:
                 instance_id = self._get_instance_id(mem_host.variables)
                 host_attrs['instance_id'] = instance_id
+            if self.inventory.kind == 'constructed':
+                # remote towervars so the constructed hosts do not have extra variables
+                for prefix in ('host', 'tower'):
+                    for var in ('remote_{}_enabled', 'remote_{}_id'):
+                        import_vars.pop(var.format(prefix), None)
+            host_attrs['variables'] = json.dumps(import_vars)
             try:
                 sanitize_jinja(mem_host_name)
             except ValueError as e:
