@@ -8,9 +8,7 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-
 ANSIBLE_METADATA = {'metadata_version': '1.1', 'status': ['preview'], 'supported_by': 'community'}
-
 
 DOCUMENTATION = '''
 ---
@@ -60,6 +58,14 @@ options:
       description:
         - The host_filter field. Only useful when C(kind=smart).
       type: str
+    limit:
+      description:
+        - Enter host, group or pattern match. Only useful when C(kind=constructed).
+      type: str
+    source_vars:
+      description:
+        - Filter about inventory parameters to filter the hosts. Only useful when C(kind=constructed).
+      type: dict
     instance_groups:
       description:
         - list of Instance Groups for this Organization to run on.
@@ -83,7 +89,6 @@ options:
 extends_documentation_fragment: awx.awx.auth
 '''
 
-
 EXAMPLES = '''
 - name: Add inventory
   inventory:
@@ -101,7 +106,6 @@ EXAMPLES = '''
     organization: Foo
     state: present
 '''
-
 
 from ..module_utils.controller_api import ControllerAPIModule
 import json
@@ -122,6 +126,8 @@ def main():
         prevent_instance_group_fallback=dict(type='bool'),
         state=dict(choices=['present', 'absent'], default='present'),
         input_inventories=dict(type='list', elements='str'),
+        limit=dict(type='str'),
+        source_vars=dict(type='dict')
     )
 
     # Create a module for ourselves
@@ -138,6 +144,8 @@ def main():
     kind = module.params.get('kind')
     host_filter = module.params.get('host_filter')
     prevent_instance_group_fallback = module.params.get('prevent_instance_group_fallback')
+    limit = module.params.get('limit')
+    source_vars = module.params.get('source_vars')
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     org_id = module.resolve_name_to_id('organizations', organization)
@@ -175,6 +183,12 @@ def main():
     if variables is not None:
         inventory_fields['variables'] = json.dumps(variables)
 
+    # For constructed inventory, we need to pass limit and source_vars
+    if limit is not None and kind == 'constructed':
+        inventory_fields['limit'] = prevent_instance_group_fallback
+    if source_vars is not None and kind == 'constructed':
+        inventory_fields['source_vars'] = json.dumps(source_vars)
+
     association_fields = {}
 
     instance_group_names = module.params.get('instance_groups')
@@ -194,7 +208,8 @@ def main():
             for item in input_inventory_names:
                 association_fields['input_inventories'].append(module.resolve_name_to_id('inventories', item))
 
-    # If the state was present and we can let the module build or update the existing inventory, this will return on its own
+    # If the state was present and we can let the module build or update the existing inventory, this will return on
+    # its own
     module.create_or_update_if_needed(
         inventory,
         inventory_fields,
