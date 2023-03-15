@@ -5,13 +5,13 @@
 ### via GIT
 
 ```bash
-export UI_NEXT_GIT_BRANCH_REPO_HTTPS=https://<git repo>
+export UI_NEXT_GIT_BRANCH_REPO=https://<git repo>
 ```
 
 or
 
 ```bash
-export UI_NEXT_GIT_BRANCH_REPO_SSH=git@<git repo>
+export UI_NEXT_GIT_BRANCH_REPO=git@<git repo>
 ```
 
 optionally set branch (default is main)
@@ -29,5 +29,11 @@ export UI_NEXT_LOCAL = /path/to/your/ui_next
 ## Build
 
 ```bash
-make ui_next/build
+make ui-next
+```
+
+## Clean
+
+```bash
+make clean/ui-next
 ```

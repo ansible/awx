@@ -451,7 +451,7 @@ HEADLESS ?= no
 ifeq ($(HEADLESS), yes)
 dist/$(SDIST_TAR_FILE):
 else
-dist/$(SDIST_TAR_FILE): $(UI_BUILD_FLAG_FILE) awx/ui_next/build
+dist/$(SDIST_TAR_FILE): $(UI_BUILD_FLAG_FILE) ui-next
 endif
 	$(PYTHON) -m build -s
 	ln -sf $(SDIST_TAR_FILE) dist/awx.tar.gz
@@ -592,7 +592,7 @@ awx-kube-dev-build: Dockerfile.kube-dev
 	    -t $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) .
 
 ## Build awx image for deployment on Kubernetes environment.
-awx-kube-build: Dockerfile awx/ui_next/src
+awx-kube-build: Dockerfile
 	DOCKER_BUILDKIT=1 docker build -f Dockerfile \
 		--build-arg VERSION=$(VERSION) \
 		--build-arg SETUPTOOLS_SCM_PRETEND_VERSION=$(VERSION) \
@@ -658,6 +658,9 @@ help/generate:
 ## Display help for a specific target folder
 help/%:
 	@make -s help MAKEFILE_LIST="$*/Makefile"
+
+help/ui-next:
+	@make -s help MAKEFILE_LIST="awx/ui_next/Makefile"
 
 ## Display help for a specific target folder
 help/%/aliases:
