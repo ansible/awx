@@ -152,6 +152,7 @@ const getInventoryHelpTextStrings = () => ({
   },
   enabledVariableField: t`Retrieve the enabled state from the given dict of host variables.
         The enabled variable may be specified using dot notation, e.g: 'foo.bar'`,
+  sourceControlBranch: t`Branch to use on inventory sync. Project default used if blank. Only allowed if project allow_override field is set to true.`,
   enabledValue: t`This field is ignored unless an Enabled Variable is set. If the enabled variable matches this value, the host will be enabled on import.`,
   hostFilter: t`Regular expression where only matching host names will be imported. The filter is applied as a post-processing step after any inventory plugin filters are applied.`,
   sourceVars: (docsBaseUrl, source) => {

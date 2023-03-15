@@ -8,6 +8,7 @@ class InstanceGroups extends Base {
     this.associateInstance = this.associateInstance.bind(this);
     this.disassociateInstance = this.disassociateInstance.bind(this);
     this.readInstanceOptions = this.readInstanceOptions.bind(this);
+    this.readInstanceGroupOptions = this.readInstanceGroupOptions.bind(this);
     this.readInstances = this.readInstances.bind(this);
     this.readJobs = this.readJobs.bind(this);
   }
@@ -31,6 +32,10 @@ class InstanceGroups extends Base {
 
   readInstanceOptions(id) {
     return this.http.options(`${this.baseUrl}${id}/instances/`);
+  }
+
+  readInstanceGroupOptions(id) {
+    return this.http.options(`${this.baseUrl}${id}/`);
   }
 
   readJobs(id) {

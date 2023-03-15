@@ -759,7 +759,7 @@ class SourceControlMixin(BaseTask):
 
     def sync_and_copy(self, project, private_data_dir, scm_branch=None):
         self.acquire_lock(project, self.instance.id)
-
+        is_commit = False
         try:
             original_branch = None
             failed_reason = project.get_reason_if_failed()
@@ -771,6 +771,7 @@ class SourceControlMixin(BaseTask):
                 if os.path.exists(project_path):
                     git_repo = git.Repo(project_path)
                     if git_repo.head.is_detached:
+                        is_commit = True
                         original_branch = git_repo.head.commit
                     else:
                         original_branch = git_repo.active_branch
@@ -782,7 +783,11 @@ class SourceControlMixin(BaseTask):
                 # for git project syncs, non-default branches can be problems
                 # restore to branch the repo was on before this run
                 try:
-                    original_branch.checkout()
+                    if is_commit:
+                        git_repo.head.set_commit(original_branch)
+                        git_repo.head.reset(index=True, working_tree=True)
+                    else:
+                        original_branch.checkout()
                 except Exception:
                     # this could have failed due to dirty tree, but difficult to predict all cases
                     logger.exception(f'Failed to restore project repo to prior state after {self.instance.id}')
@@ -1581,7 +1586,7 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
         if inventory_update.source == 'scm':
             if not source_project:
                 raise RuntimeError('Could not find project to run SCM inventory update from.')
-            self.sync_and_copy(source_project, private_data_dir)
+            self.sync_and_copy(source_project, private_data_dir, scm_branch=inventory_update.inventory_source.scm_branch)
         else:
             # If source is not SCM make an empty project directory, content is built inside inventory folder
             super(RunInventoryUpdate, self).build_project_dir(inventory_update, private_data_dir)

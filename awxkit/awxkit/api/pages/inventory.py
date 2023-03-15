@@ -319,6 +319,7 @@ class InventorySource(HasCreate, HasNotifications, UnifiedJobTemplate):
         optional_fields = (
             'source_path',
             'source_vars',
+            'scm_branch',
             'timeout',
             'overwrite',
             'overwrite_vars',

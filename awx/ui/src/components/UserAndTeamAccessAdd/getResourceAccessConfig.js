@@ -6,6 +6,7 @@ import {
   InventoriesAPI,
   ProjectsAPI,
   OrganizationsAPI,
+  InstanceGroupsAPI,
 } from 'api';
 
 export default function getResourceAccessConfig() {
@@ -209,6 +210,33 @@ export default function getResourceAccessConfig() {
       ],
       fetchItems: (queryParams) => OrganizationsAPI.read(queryParams),
       fetchOptions: () => OrganizationsAPI.readOptions(),
+    },
+    {
+      selectedResource: 'Instance Groups',
+      label: t`Instance Groups`,
+      searchColumns: [
+        {
+          name: t`Name`,
+          key: 'name__icontains',
+          isDefault: true,
+        },
+        {
+          name: t`Created By (Username)`,
+          key: 'created_by__username__icontains',
+        },
+        {
+          name: t`Modified By (Username)`,
+          key: 'modified_by__username__icontains',
+        },
+      ],
+      sortColumns: [
+        {
+          name: t`Name`,
+          key: 'name',
+        },
+      ],
+      fetchItems: (queryParams) => InstanceGroupsAPI.read(queryParams),
+      fetchOptions: () => InstanceGroupsAPI.readOptions(),
     },
   ];
 }

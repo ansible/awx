@@ -21,9 +21,11 @@ function ContainerGroupEdit({ instanceGroup }) {
     result: initialPodSpec,
   } = useRequest(
     useCallback(async () => {
-      const { data } = await InstanceGroupsAPI.readOptions();
-      return data.actions.POST.pod_spec_override.default;
-    }, []),
+      const { data } = await InstanceGroupsAPI.readInstanceGroupOptions(
+        instanceGroup.id
+      );
+      return data.actions.PUT.pod_spec_override.default;
+    }, [instanceGroup.id]),
     {
       initialPodSpec: {},
     }

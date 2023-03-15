@@ -466,6 +466,23 @@ class InstanceGroupUnifiedJobsList(SubListAPIView):
     relationship = "unifiedjob_set"
 
 
+class InstanceGroupAccessList(ResourceAccessList):
+    model = models.User  # needs to be User for AccessLists
+    parent_model = models.InstanceGroup
+
+
+class InstanceGroupObjectRolesList(SubListAPIView):
+    model = models.Role
+    serializer_class = serializers.RoleSerializer
+    parent_model = models.InstanceGroup
+    search_fields = ('role_field', 'content_type__model')
+
+    def get_queryset(self):
+        po = self.get_parent_object()
+        content_type = ContentType.objects.get_for_model(self.parent_model)
+        return models.Role.objects.filter(content_type=content_type, object_id=po.pk)
+
+
 class InstanceGroupInstanceList(InstanceGroupMembershipMixin, SubListAttachDetachAPIView):
     name = _("Instance Group's Instances")
     model = models.Instance
@@ -3078,7 +3095,9 @@ class WorkflowJobTemplateWorkflowNodesList(SubListCreateAPIView):
     search_fields = ('unified_job_template__name', 'unified_job_template__description')
 
     def get_queryset(self):
-        return super(WorkflowJobTemplateWorkflowNodesList, self).get_queryset().order_by('id')
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        return getattr(parent, self.relationship).order_by('id')
 
 
 class WorkflowJobTemplateJobsList(SubListAPIView):
@@ -3172,7 +3191,9 @@ class WorkflowJobWorkflowNodesList(SubListAPIView):
     search_fields = ('unified_job_template__name', 'unified_job_template__description')
 
     def get_queryset(self):
-        return super(WorkflowJobWorkflowNodesList, self).get_queryset().order_by('id')
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        return getattr(parent, self.relationship).order_by('id')
 
 
 class WorkflowJobCancel(GenericCancelView):

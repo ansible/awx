@@ -184,7 +184,6 @@ function getRouteConfig(userProfile = {}) {
   deleteRouteGroup('settings');
   deleteRoute('management_jobs');
   if (userProfile?.isOrgAdmin) return routeConfig;
-  deleteRoute('instance_groups');
   deleteRoute('topology_view');
   deleteRoute('instances');
   if (!userProfile?.isNotificationAdmin) deleteRoute('notification_templates');
