@@ -5471,6 +5471,8 @@ class InstanceGroupSerializer(BaseSerializer):
         res = super(InstanceGroupSerializer, self).get_related(obj)
         res['jobs'] = self.reverse('api:instance_group_unified_jobs_list', kwargs={'pk': obj.pk})
         res['instances'] = self.reverse('api:instance_group_instance_list', kwargs={'pk': obj.pk})
+        res['access_list'] = self.reverse('api:instance_group_access_list', kwargs={'pk': obj.pk})
+        res['object_roles'] = self.reverse('api:instance_group_object_role_list', kwargs={'pk': obj.pk})
         if obj.credential:
             res['credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.credential_id})
 
