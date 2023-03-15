@@ -63,6 +63,7 @@ from awx.main.tasks.callback import (
 )
 from awx.main.tasks.signals import with_signal_handling, signal_callback
 from awx.main.tasks.receptor import AWXReceptorJob
+from awx.main.tasks.facts import start_fact_cache, finish_fact_cache
 from awx.main.exceptions import AwxTaskError, PostRunError, ReceptorNodeNotFound
 from awx.main.utils.ansible import read_ansible_config
 from awx.main.utils.execution_environments import CONTAINER_ROOT, to_container_path
@@ -455,6 +456,9 @@ class BaseTask(object):
                 instance.ansible_version = ansible_version_info
                 instance.save(update_fields=['ansible_version'])
 
+    def should_use_fact_cache(self):
+        return False
+
     @with_path_cleanup
     @with_signal_handling
     def run(self, pk, **kwargs):
@@ -553,7 +557,8 @@ class BaseTask(object):
                 params['module'] = self.build_module_name(self.instance)
                 params['module_args'] = self.build_module_args(self.instance)
 
-            if getattr(self.instance, 'use_fact_cache', False):
+            # TODO: refactor into a better BasTask method
+            if self.should_use_fact_cache():
                 # Enable Ansible fact cache.
                 params['fact_cache_type'] = 'jsonfile'
             else:
@@ -1008,6 +1013,9 @@ class RunJob(SourceControlMixin, BaseTask):
 
         return args
 
+    def should_use_fact_cache(self):
+        return self.instance.use_fact_cache
+
     def build_playbook_path_relative_to_cwd(self, job, private_data_dir):
         return job.playbook
 
@@ -1073,8 +1081,14 @@ class RunJob(SourceControlMixin, BaseTask):
 
         # Fetch "cached" fact data from prior runs and put on the disk
         # where ansible expects to find it
-        if job.use_fact_cache:
-            self.facts_write_time = self.instance.start_job_fact_cache(os.path.join(private_data_dir, 'artifacts', str(job.id), 'fact_cache'))
+        if self.should_use_fact_cache():
+            job.log_lifecycle("start_job_fact_cache")
+            self.facts_write_time = start_fact_cache(
+                job.inventory,
+                os.path.join(private_data_dir, 'artifacts', str(job.id), 'fact_cache'),
+                slice_number=job.job_slice_number,
+                slice_count=job.job_slice_count,
+            )
 
     def build_project_dir(self, job, private_data_dir):
         self.sync_and_copy(job.project, private_data_dir, scm_branch=job.scm_branch)
@@ -1088,10 +1102,15 @@ class RunJob(SourceControlMixin, BaseTask):
             # actual `run()` call; this _usually_ means something failed in
             # the pre_run_hook method
             return
-        if job.use_fact_cache:
-            job.finish_job_fact_cache(
+        if self.should_use_fact_cache():
+            job.log_lifecycle("finish_job_fact_cache")
+            finish_fact_cache(
+                job.inventory,
                 os.path.join(private_data_dir, 'artifacts', str(job.id), 'fact_cache'),
-                self.facts_write_time,
+                facts_write_time=self.facts_write_time,
+                slice_number=job.job_slice_number,
+                slice_count=job.job_slice_count,
+                job_id=job.id,
             )
 
     def final_run_hook(self, job, status, private_data_dir):
@@ -1529,11 +1548,14 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
         # special case for constructed inventories, we pass source inventories from database
         # these must come in order, and in order _before_ the constructed inventory itself
         if inventory_update.inventory.kind == 'constructed':
+            inventory_update.log_lifecycle("start_job_fact_cache")
             for input_inventory in inventory_update.inventory.input_inventories.all():
                 args.append('-i')
                 script_params = dict(hostvars=True, towervars=True)
                 source_inv_path = self.write_inventory_file(input_inventory, private_data_dir, f'hosts_{input_inventory.id}', script_params)
                 args.append(to_container_path(source_inv_path, private_data_dir))
+                # Include any facts from input inventories so they can be used in filters
+                start_fact_cache(input_inventory, os.path.join(private_data_dir, 'artifacts', str(inventory_update.id), 'fact_cache'))
 
         # Add arguments for the source inventory file/script/thing
         rel_path = self.pseudo_build_inventory(inventory_update, private_data_dir)
@@ -1561,6 +1583,9 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
             args.append('-' + 'v' * min(5, inventory_update.verbosity * 2 + 1))
 
         return args
+
+    def should_use_fact_cache(self):
+        return bool(self.instance.source == 'constructed')
 
     def build_inventory(self, inventory_update, private_data_dir):
         return None  # what runner expects in order to not deal with inventory
