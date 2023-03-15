@@ -27,21 +27,8 @@ i18n.loadLocaleData({
  * We do a dynamic import of just the catalog that we need
  * @param locale any locale string
  */
-export async function dynamicActivate(locale, pseudolocalization = false) {
+export async function dynamicActivate(locale) {
   const { messages } = await import(`./locales/${locale}/messages`);
-
-  if (pseudolocalization) {
-    Object.keys(messages).forEach((key) => {
-      if (Array.isArray(messages[key])) {
-        // t`Foo ${param}` -> ["Foo ", ['param']] => [">>", "Foo ", ['param'], "<<"]
-        messages[key] = ['»', ...messages[key], '«'];
-      } else {
-        // simple string
-        messages[key] = `»${messages[key]}«`;
-      }
-    });
-  }
-
   i18n.load(locale, messages);
   i18n.activate(locale);
 }
