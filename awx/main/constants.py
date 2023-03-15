@@ -108,3 +108,6 @@ JOB_VARIABLE_PREFIXES = [
 ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE = (
     '\u001b[31m \u001b[1m This can be caused if the version of ansible-runner in your execution environment is out of date.\u001b[0m'
 )
+
+# Shared prefetch to use for creating a queryset for the purpose of writing or saving facts
+HOST_FACTS_FIELDS = ('name', 'ansible_facts', 'ansible_facts_modified', 'modified', 'inventory_id')
