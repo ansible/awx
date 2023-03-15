@@ -28,7 +28,7 @@ import { getLanguageWithoutRegionCode } from 'util/language';
 import Metrics from 'screens/Metrics';
 import SubscriptionEdit from 'screens/Setting/Subscription/SubscriptionEdit';
 import useTitle from 'hooks/useTitle';
-import { dynamicActivate, locales } from './i18nLoader';
+import { dynamicActivate } from './i18nLoader';
 import getRouteConfig from './routeConfig';
 import { SESSION_REDIRECT_URL } from './constants';
 
@@ -139,16 +139,15 @@ export function ProtectedRoute({ children, ...rest }) {
 function App() {
   const history = useHistory();
   const { hash, search, pathname } = useLocation();
-  let language = getLanguageWithoutRegionCode(navigator);
-  if (!Object.keys(locales).includes(language)) {
-    // If there isn't a string catalog available for the browser's
-    // preferred language, default to one that has strings.
-    language = 'en';
-  }
+  const searchParams = Object.fromEntries(new URLSearchParams(search));
+  const pseudolocalization =
+    searchParams.pseudolocalization === 'true' || false;
+  const language =
+    searchParams.lang || getLanguageWithoutRegionCode(navigator) || 'en';
 
   useEffect(() => {
-    dynamicActivate(language);
-  }, [language]);
+    dynamicActivate(language, pseudolocalization);
+  }, [language, pseudolocalization]);
 
   useTitle();
 
