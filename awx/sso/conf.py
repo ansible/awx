@@ -148,6 +148,16 @@ register(
     placeholder=['username', 'email'],
 )
 
+register(
+    'SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL',
+    field_class=fields.BooleanField,
+    default=False,
+    label=_('Use Email address for usernames'),
+    help_text=_('Enabling this setting will tell social auth to use the full Email as username instead of the full name'),
+    category=_('Authentication'),
+    category_slug='authentication',
+)
+
 ###############################################################################
 # LDAP AUTHENTICATION SETTINGS
 ###############################################################################
