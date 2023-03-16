@@ -25,6 +25,7 @@ fi
 
 # Make sure that the UI static file directory exists, Django complains otherwise.
 mkdir -p /awx_devel/awx/ui/build/static
+mkdir -p /awx_devel/awx/ui_next/build/awx
 
 if output=$(awx-manage createsuperuser --noinput --username=admin --email=admin@localhost 2> /dev/null); then
     echo $output

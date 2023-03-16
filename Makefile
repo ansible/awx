@@ -420,7 +420,7 @@ ui-devel: awx/ui/node_modules
 		cp -r awx/ui/build/static/css/* /var/lib/awx/public/static/css; \
 		cp -r awx/ui/build/static/js/* /var/lib/awx/public/static/js; \
 		cp -r awx/ui/build/static/media/* /var/lib/awx/public/static/media; \
-    	fi
+	fi
 
 ui-devel-instrumented: awx/ui/node_modules
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run start-instrumented
@@ -655,13 +655,7 @@ help/generate:
 	{ lastLine = $$0 }' $(MAKEFILE_LIST) | sort -u
 	@printf "\n"
 
-## Display help for a specific target folder
-help/%:
-	@make -s help MAKEFILE_LIST="$*/Makefile"
-
+## Display help for ui-next targets
 help/ui-next:
 	@make -s help MAKEFILE_LIST="awx/ui_next/Makefile"
 
-## Display help for a specific target folder
-help/%/aliases:
-	@make -s help/all MAKEFILE_LIST="$*/Makefile.aliases"
