@@ -6,7 +6,12 @@ import { useField } from 'formik';
 import styled from 'styled-components';
 import { Split, SplitItem, Button, Modal } from '@patternfly/react-core';
 import { ExpandArrowsAltIcon } from '@patternfly/react-icons';
-import { yamlToJson, jsonToYaml, isJsonString } from 'util/yaml';
+import {
+  yamlToJson,
+  jsonToYaml,
+  isJsonString,
+  parseVariableField,
+} from 'util/yaml';
 import { CheckboxField } from '../FormField';
 import MultiButtonToggle from '../MultiButtonToggle';
 import CodeEditor from './CodeEditor';
@@ -37,36 +42,24 @@ function VariablesField({
   // track focus manually, because the Code Editor library doesn't wire
   // into Formik completely
   const [shouldValidate, setShouldValidate] = useState(false);
-  const [mode, setMode] = useState(initialMode || YAML_MODE);
   const validate = useCallback(
     (value) => {
       if (!shouldValidate) {
         return undefined;
       }
       try {
-        if (mode === YAML_MODE) {
-          yamlToJson(value);
-        } else {
-          JSON.parse(value);
-        }
+        parseVariableField(value);
       } catch (error) {
         return error.message;
       }
       return undefined;
     },
-    [shouldValidate, mode]
+    [shouldValidate]
   );
   const [field, meta, helpers] = useField({ name, validate });
-
-  useEffect(() => {
-    if (isJsonString(field.value)) {
-      // mode's useState above couldn't be initialized to JSON_MODE because
-      // the field value had to be defined below it
-      setMode(JSON_MODE);
-      onModeChange(JSON_MODE);
-      helpers.setValue(JSON.stringify(JSON.parse(field.value), null, 2));
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const [mode, setMode] = useState(() =>
+    isJsonString(field.value) ? JSON_MODE : initialMode || YAML_MODE
+  );
 
   useEffect(
     () => {
