@@ -337,6 +337,8 @@ class TestTaskPublisher:
 
 
 yesterday = tz_now() - datetime.timedelta(days=1)
+minute = tz_now() - datetime.timedelta(seconds=120)
+now = tz_now()
 
 
 @pytest.mark.django_db
@@ -368,7 +370,7 @@ class TestJobReaper(object):
             # we have to edit the modification time _without_ calling save()
             # (because .save() overwrites it to _now_)
             Job.objects.filter(id=j.id).update(modified=modified)
-        reaper.reap(i)
+        reaper.reap(i, ref_time=now)
         reaper.reap_waiting(i)
         job = Job.objects.first()
         if fail:
@@ -379,13 +381,15 @@ class TestJobReaper(object):
             assert job.status == status
 
     @pytest.mark.parametrize(
-        'excluded_uuids, fail',
+        'excluded_uuids, fail, modified',
         [
-            (['abc123'], False),
-            ([], True),
+            (['abc123'], False, None),
+            ([], False, None),
+            ([], True, minute),
         ],
     )
-    def test_do_not_reap_excluded_uuids(self, excluded_uuids, fail):
+    def test_do_not_reap_excluded_uuids(self, excluded_uuids, fail, modified):
+        """Modified Test to account for ref_time in reap()"""
         i = Instance(hostname='awx')
         i.save()
         j = Job(
@@ -396,10 +400,13 @@ class TestJobReaper(object):
             celery_task_id='abc123',
         )
         j.save()
+        if modified:
+            Job.objects.filter(id=j.id).update(modified=modified)
 
         # if the UUID is excluded, don't reap it
-        reaper.reap(i, excluded_uuids=excluded_uuids)
+        reaper.reap(i, excluded_uuids=excluded_uuids, ref_time=now)
         job = Job.objects.first()
+
         if fail:
             assert job.status == 'failed'
             assert 'marked as failed' in job.job_explanation
@@ -412,6 +419,6 @@ class TestJobReaper(object):
         i.save()
         j = WorkflowJob(status='running', execution_node='awx')
         j.save()
-        reaper.reap(i)
+        reaper.reap(i, ref_time=now)
 
         assert WorkflowJob.objects.first().status == 'running'
