@@ -49,15 +49,23 @@ class TestSurveyVariableValidation:
                     "variable": "a",
                     "question_name": "Whosyourdaddy",
                     "type": "text",
-                }
+                },
+                {
+                    "required": True,
+                    "question_description": "",
+                    "variable": "mybool",
+                    "question_name": "Whoa, a boolean?",
+                    "type": "bool",
+                },
             ],
             "name": "",
         }
         obj.survey_enabled = True
-        accepted, rejected, errors = obj.accept_or_ignore_variables({"a": 5})
-        assert rejected == {"a": 5}
+        accepted, rejected, errors = obj.accept_or_ignore_variables({"a": 5, "mybool": 5})
+        assert rejected == {"a": 5, "mybool": 5}
         assert accepted == {}
         assert str(errors['variables_needed_to_start'][0]) == "Value 5 for 'a' expected to be a string."
+        assert str(errors['variables_needed_to_start'][1]) == "Value 5 for 'mybool' expected to be a boolean."
 
     def test_job_template_survey_default_variable_validation(self, job_template_factory):
         objects = job_template_factory(
