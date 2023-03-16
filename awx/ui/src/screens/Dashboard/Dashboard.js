@@ -79,7 +79,7 @@ function Dashboard() {
         <Banner variant="info">
           <Trans>
             <p>
-              <InfoCircleIcon /> A tech preview of the new ${brandName} user
+              <InfoCircleIcon /> A tech preview of the new {brandName} user
               interface can be found <a href="/ui_next/dashboard">here</a>.
             </p>
           </Trans>
