@@ -347,8 +347,8 @@ class TestJobReaper(object):
         'status, execution_node, controller_node, modified, fail',
         [
             ('running', '', '', None, False),  # running, not assigned to the instance
-            ('running', 'awx', '', None, True),  # running, has the instance as its execution_node
-            ('running', '', 'awx', None, True),  # running, has the instance as its controller_node
+            ('running', 'awx', '', minute, True),  # running, has the instance as its execution_node
+            ('running', '', 'awx', minute, True),  # running, has the instance as its controller_node
             ('waiting', '', '', None, False),  # waiting, not assigned to the instance
             ('waiting', 'awx', '', None, False),  # waiting, was edited less than a minute ago
             ('waiting', '', 'awx', None, False),  # waiting, was edited less than a minute ago
