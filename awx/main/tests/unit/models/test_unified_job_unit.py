@@ -107,7 +107,11 @@ class TestMetaVars:
             result_hash['{}_user_id'.format(name)] = 47
             result_hash['{}_inventory_id'.format(name)] = 45
             result_hash['{}_inventory_name'.format(name)] = 'example-inv'
-        assert Job(name='fake-job', pk=42, id=42, launch_type='manual', created_by=maker, inventory=inv).awx_meta_vars() == result_hash
+            result_hash['{}_execution_node'.format(name)] = 'example-exec-node'
+        assert (
+            Job(name='fake-job', pk=42, id=42, launch_type='manual', created_by=maker, inventory=inv, execution_node='example-exec-node').awx_meta_vars()
+            == result_hash
+        )
 
     def test_project_update_metavars(self):
         data = Job(
