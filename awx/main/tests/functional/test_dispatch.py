@@ -419,15 +419,22 @@ class TestJobReaper(object):
         i.save()
         j = WorkflowJob(status='running', execution_node='awx')
         j.save()
-        reaper.reap(i, ref_time=now)
+        reaper.reap(i)
 
         assert WorkflowJob.objects.first().status == 'running'
 
     def test_should_not_reap_new(self):
+        """
+        This test is designed specifically to ensure that jobs that are launched after the dispatcher has provided a list of UUIDs aren't reaped.
+        It is very racy and this test is designed with that in mind
+        """
         i = Instance(hostname='awx')
+        # ref_time is set to 10 seconds in the past to mimic someone launching a job in the heartbeat window.
         ref_time = tz_now() - datetime.timedelta(seconds=10)
+        # creating job at current time
         job = Job.objects.create(status='running', controller_node=i.hostname)
         reaper.reap(i, ref_time=ref_time)
+        # explictly refreshing from db to ensure up to date cache
         job.refresh_from_db()
         assert job.started > ref_time
         assert job.status == 'running'
