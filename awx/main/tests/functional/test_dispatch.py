@@ -13,7 +13,6 @@ from awx.main.dispatch import reaper
 from awx.main.dispatch.pool import StatefulPoolWorker, WorkerPool, AutoscalePool
 from awx.main.dispatch.publish import task
 from awx.main.dispatch.worker import BaseWorker, TaskWorker
-from awx.main.utils.update_model import update_model
 
 
 '''
@@ -348,8 +347,8 @@ class TestJobReaper(object):
         'status, execution_node, controller_node, modified, fail',
         [
             ('running', '', '', None, False),  # running, not assigned to the instance
-            ('running', 'awx', '', minute, True),  # running, has the instance as its execution_node
-            ('running', '', 'awx', minute, True),  # running, has the instance as its controller_node
+            ('running', 'awx', '', None, True),  # running, has the instance as its execution_node
+            ('running', '', 'awx', None, True),  # running, has the instance as its controller_node
             ('waiting', '', '', None, False),  # waiting, not assigned to the instance
             ('waiting', 'awx', '', None, False),  # waiting, was edited less than a minute ago
             ('waiting', '', 'awx', None, False),  # waiting, was edited less than a minute ago
@@ -371,7 +370,7 @@ class TestJobReaper(object):
             # we have to edit the modification time _without_ calling save()
             # (because .save() overwrites it to _now_)
             Job.objects.filter(id=j.id).update(modified=modified)
-        reaper.reap(i, ref_time=now)
+        reaper.reap(i)
         reaper.reap_waiting(i)
         job = Job.objects.first()
         if fail:
@@ -382,14 +381,14 @@ class TestJobReaper(object):
             assert job.status == status
 
     @pytest.mark.parametrize(
-        'excluded_uuids, fail, modified',
+        'excluded_uuids, fail, started',
         [
             (['abc123'], False, None),
             ([], False, None),
             ([], True, minute),
         ],
     )
-    def test_do_not_reap_excluded_uuids(self, excluded_uuids, fail, modified):
+    def test_do_not_reap_excluded_uuids(self, excluded_uuids, fail, started):
         """Modified Test to account for ref_time in reap()"""
         i = Instance(hostname='awx')
         i.save()
@@ -401,8 +400,8 @@ class TestJobReaper(object):
             celery_task_id='abc123',
         )
         j.save()
-        if modified:
-            Job.objects.filter(id=j.id).update(modified=modified)
+        if started:
+            Job.objects.filter(id=j.id).update(started=started)
 
         # if the UUID is excluded, don't reap it
         reaper.reap(i, excluded_uuids=excluded_uuids, ref_time=now)
@@ -426,11 +425,8 @@ class TestJobReaper(object):
 
     def test_should_not_reap_new(self):
         i = Instance(hostname='awx')
-        job = Job.objects.create(status='waiting', controller_node=i.hostname)
-        ref_time = tz_now()  # - datetime.timedelta(seconds=15)
-        update_model(Job, job.id, status='running')
-        # job.status = 'running'
-        # job.save(update_fields=['status'])
+        ref_time = tz_now() - datetime.timedelta(seconds=10)
+        job = Job.objects.create(status='running', controller_node=i.hostname)
         reaper.reap(i, ref_time=ref_time)
         job.refresh_from_db()
         assert job.started > ref_time
