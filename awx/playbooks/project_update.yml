@@ -47,6 +47,7 @@
             force: "{{ scm_clean }}"
             track_submodules: "{{ scm_track_submodules | default(omit) }}"
             accept_hostkey: "{{ scm_accept_hostkey | default(omit) }}"
+            depth: 1
           register: git_result
 
         - name: Set the git repository version
