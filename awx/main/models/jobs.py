@@ -1045,7 +1045,7 @@ class JobHostSummary(CreatedModifiedModel):
 
     class Meta:
         app_label = 'main'
-        unique_together = [('job', 'host_name')]
+        unique_together = [('job', 'host')]
         verbose_name_plural = _('job host summaries')
         ordering = ('-pk',)
 

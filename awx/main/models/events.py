@@ -542,6 +542,7 @@ class JobEvent(BasePlaybookEvent):
             existing_host_ids = set(h.id for h in all_hosts)
 
             summaries = dict()
+            constructed_summaries = dict()
             updated_hosts_list = list()
             for host in hostnames:
                 updated_hosts_list.append(host.lower())
@@ -557,6 +558,19 @@ class JobEvent(BasePlaybookEvent):
                 summary = JobHostSummary(created=now(), modified=now(), job_id=job.id, host_id=host_id, host_name=host, **host_stats)
                 summary.failed = bool(summary.dark or summary.failures)
                 summaries[(host_id, host)] = summary
+                if self.job.inventory.kind == 'constructed':
+                    # make an extra copy of summary for constructed host
+                    # will fill in host_id as later step host_id=host_id
+                    constructed_summaries[host_id] = JobHostSummary(
+                        created=summary.created, modified=summary.modified, job_id=job.id, host_name=host, **host_stats
+                    )
+            if self.job.inventory.kind == 'constructed':
+                for host_id, instance_id in self.job.inventory.hosts.values_list('id', 'instance_id'):
+                    summary = constructed_summaries.pop(host_id, None)
+                    if not summary or (not instance_id):
+                        continue
+                    summary.host_id = int(instance_id)
+                    summaries[(instance_id, summary.host_name)] = summary
 
             JobHostSummary.objects.bulk_create(summaries.values())
 

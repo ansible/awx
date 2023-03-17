@@ -122,4 +122,8 @@ class Migration(migrations.Migration):
                 help_text='This field is deprecated and will be removed in a future release. Regex where only matching hosts will be imported.',
             ),
         ),
+        migrations.AlterUniqueTogether(
+            name='jobhostsummary',
+            unique_together={('job', 'host')},
+        ),
     ]

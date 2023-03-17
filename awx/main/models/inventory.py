@@ -359,10 +359,14 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
             for host in hosts:
                 data['_meta']['hostvars'][host.name] = host.variables_dict
                 if towervars:
+                    host_id = host.id
+                    if self.kind == 'constructed':
+                        host_id = int(host.instance_id)
+                        data['_meta']['hostvars'][host.name]['remote_constructed_id'] = host.id
                     for prefix in ('host', 'tower'):
                         tower_dict = {
                             f'remote_{prefix}_enabled': str(host.enabled).lower(),
-                            f'remote_{prefix}_id': host.id,
+                            f'remote_{prefix}_id': host_id,
                         }
                         data['_meta']['hostvars'][host.name].update(tower_dict)
 

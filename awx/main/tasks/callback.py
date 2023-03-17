@@ -22,6 +22,7 @@ class RunnerCallback:
     def __init__(self, model=None):
         self.parent_workflow_job_id = None
         self.host_map = {}
+        self.constructed_backlinks = {}
         self.guid = get_guid()
         self.job_created = None
         self.recent_event_timings = deque(maxlen=settings.MAX_WEBSOCKET_EVENT_RATE)
@@ -98,8 +99,12 @@ class RunnerCallback:
             host = event_data.get('event_data', {}).get('host', '').strip()
             if host:
                 event_data['host_name'] = host
-                if host in self.host_map:
-                    event_data['host_id'] = self.host_map[host]
+                if hasattr(self, 'constructed_backlinks'):
+                    if host in self.constructed_backlinks:
+                        event_data['host_id'] = self.constructed_backlinks[host]
+                else:
+                    if host in self.host_map:
+                        event_data['host_id'] = self.host_map[host]
             else:
                 event_data['host_name'] = ''
                 event_data['host_id'] = ''
