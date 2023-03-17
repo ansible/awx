@@ -13,6 +13,7 @@ from awx.main.dispatch import reaper
 from awx.main.dispatch.pool import StatefulPoolWorker, WorkerPool, AutoscalePool
 from awx.main.dispatch.publish import task
 from awx.main.dispatch.worker import BaseWorker, TaskWorker
+from awx.main.utils.update_model import update_model
 
 
 '''
@@ -422,3 +423,16 @@ class TestJobReaper(object):
         reaper.reap(i, ref_time=now)
 
         assert WorkflowJob.objects.first().status == 'running'
+
+    def test_should_not_reap_new(self):
+        i = Instance(hostname='awx')
+        job = Job.objects.create(status='waiting', controller_node=i.hostname)
+        ref_time = tz_now()  # - datetime.timedelta(seconds=15)
+        update_model(Job, job.id, status='running')
+        # job.status = 'running'
+        # job.save(update_fields=['status'])
+        reaper.reap(i, ref_time=ref_time)
+        job.refresh_from_db()
+        assert job.started > ref_time
+        assert job.status == 'running'
+        assert job.job_explanation == ''
