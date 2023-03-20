@@ -148,7 +148,7 @@ class TestWorkflowJobTemplateNodeAccess:
         elif permission_type == 'instance_groups':
             sub_obj = InstanceGroup.objects.create()
             org = Organization.objects.create()
-            org.admin_role.members.add(rando)  # only admins can see IGs
+            sub_obj.use_role.members.add(rando)  # only admins can see IGs
             org.instance_groups.add(sub_obj)
 
         access = WorkflowJobTemplateNodeAccess(rando)

@@ -337,6 +337,8 @@ class TestTaskPublisher:
 
 
 yesterday = tz_now() - datetime.timedelta(days=1)
+minute = tz_now() - datetime.timedelta(seconds=120)
+now = tz_now()
 
 
 @pytest.mark.django_db
@@ -379,13 +381,15 @@ class TestJobReaper(object):
             assert job.status == status
 
     @pytest.mark.parametrize(
-        'excluded_uuids, fail',
+        'excluded_uuids, fail, started',
         [
-            (['abc123'], False),
-            ([], True),
+            (['abc123'], False, None),
+            ([], False, None),
+            ([], True, minute),
         ],
     )
-    def test_do_not_reap_excluded_uuids(self, excluded_uuids, fail):
+    def test_do_not_reap_excluded_uuids(self, excluded_uuids, fail, started):
+        """Modified Test to account for ref_time in reap()"""
         i = Instance(hostname='awx')
         i.save()
         j = Job(
@@ -396,10 +400,13 @@ class TestJobReaper(object):
             celery_task_id='abc123',
         )
         j.save()
+        if started:
+            Job.objects.filter(id=j.id).update(started=started)
 
         # if the UUID is excluded, don't reap it
-        reaper.reap(i, excluded_uuids=excluded_uuids)
+        reaper.reap(i, excluded_uuids=excluded_uuids, ref_time=now)
         job = Job.objects.first()
+
         if fail:
             assert job.status == 'failed'
             assert 'marked as failed' in job.job_explanation
@@ -415,3 +422,20 @@ class TestJobReaper(object):
         reaper.reap(i)
 
         assert WorkflowJob.objects.first().status == 'running'
+
+    def test_should_not_reap_new(self):
+        """
+        This test is designed specifically to ensure that jobs that are launched after the dispatcher has provided a list of UUIDs aren't reaped.
+        It is very racy and this test is designed with that in mind
+        """
+        i = Instance(hostname='awx')
+        # ref_time is set to 10 seconds in the past to mimic someone launching a job in the heartbeat window.
+        ref_time = tz_now() - datetime.timedelta(seconds=10)
+        # creating job at current time
+        job = Job.objects.create(status='running', controller_node=i.hostname)
+        reaper.reap(i, ref_time=ref_time)
+        # explictly refreshing from db to ensure up to date cache
+        job.refresh_from_db()
+        assert job.started > ref_time
+        assert job.status == 'running'
+        assert job.job_explanation == ''

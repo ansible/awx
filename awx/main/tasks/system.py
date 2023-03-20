@@ -581,7 +581,7 @@ def cluster_node_heartbeat(dispatch_time=None, worker_tasks=None):
         active_task_ids = []
         for task_list in worker_tasks.values():
             active_task_ids.extend(task_list)
-        reaper.reap(instance=this_inst, excluded_uuids=active_task_ids)
+        reaper.reap(instance=this_inst, excluded_uuids=active_task_ids, ref_time=datetime.fromisoformat(dispatch_time))
         if max(len(task_list) for task_list in worker_tasks.values()) <= 1:
             reaper.reap_waiting(instance=this_inst, excluded_uuids=active_task_ids, ref_time=datetime.fromisoformat(dispatch_time))
 

@@ -115,6 +115,14 @@ describe('<Login />', () => {
     );
   });
 
+  test.only('form has autocomplete off', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(<AWXLogin isAuthenticated={() => false} />);
+    });
+    expect(wrapper.find('form[autoComplete="off"]').length).toBe(1);
+  });
+
   test('custom logo renders Brand component with correct src and alt', async () => {
     let wrapper;
     await act(async () => {
