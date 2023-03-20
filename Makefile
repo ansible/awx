@@ -447,6 +447,7 @@ ui-test-general:
 	$(NPM_BIN) run --prefix awx/ui pretest
 	$(NPM_BIN) run --prefix awx/ui/ test-general --runInBand
 
+# NOTE: The make target ui-next is imported from awx/ui_next/Makefile
 HEADLESS ?= no
 ifeq ($(HEADLESS), yes)
 dist/$(SDIST_TAR_FILE):
