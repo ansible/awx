@@ -267,7 +267,7 @@ def main():
 
     if state == 'exists' and credential is not None:
         # If credential exists and state is exists, we're done here.
-        module.create_if_needed(credential, credential, endpoint='credentials', item_type='credential')
+        module.exit_json(**module.json_output)
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     if user:
