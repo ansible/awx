@@ -567,7 +567,7 @@ class JobEvent(BasePlaybookEvent):
             if self.job.inventory.kind == 'constructed':
                 for host_id, instance_id in self.job.inventory.hosts.values_list('id', 'instance_id'):
                     summary = constructed_summaries.pop(host_id, None)
-                    if not summary or (not instance_id):
+                    if not summary or not instance_id:
                         continue
                     summary.host_id = int(instance_id)
                     summaries[(instance_id, summary.host_name)] = summary
