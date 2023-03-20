@@ -38,6 +38,8 @@ STANDARD_INVENTORY_UPDATE_ENV = {
     'ANSIBLE_INVENTORY_EXPORT': 'True',
     # Redirecting output to stderr allows JSON parsing to still work with -vvv
     'ANSIBLE_VERBOSE_TO_STDERR': 'True',
+    # if ansible-inventory --limit is used for an inventory import, unmatched should be a failure
+    'ANSIBLE_HOST_PATTERN_MISMATCH': 'error',
 }
 CAN_CANCEL = ('new', 'pending', 'waiting', 'running')
 ACTIVE_STATES = CAN_CANCEL
