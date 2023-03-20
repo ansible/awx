@@ -73,7 +73,8 @@ $(UI_NEXT_DIR)/src:
 			git clone --depth 1 --branch $(UI_NEXT_GIT_BRANCH) $(UI_NEXT_GIT_REPO) $(UI_NEXT_DIR)/src || true; \
 		fi; \
 	else \
-		echo "SKIP: ui-next/src. UI_NEXT_LOCAL and UI_NEXT_GIT_REPO are not set."; \
+		echo "FAILED: ui-next/src. UI_NEXT_LOCAL and UI_NEXT_GIT_REPO are not set."; \
+		exit 1; \
 	fi
 
 .PHONY: ui-next/src/webpack
