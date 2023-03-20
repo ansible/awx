@@ -16,8 +16,8 @@ ui-next: ui-next/build
 .PHONY: ui-next/build
 ## Build ui-next/build
 ui-next/build: $(UI_NEXT_DIR)/build
-
-## Real target for ui-next.
+.PHONY: $(UI_NEXT_DIR)/build
+## True build target for ui-next.
 $(UI_NEXT_DIR)/build: ui-next/src/build
 	@echo "=== Copying $(UI_NEXT_DIR)/src/build to $(UI_NEXT_DIR)/build ==="
 	@rm -rf $(UI_NEXT_DIR)/build
@@ -28,17 +28,19 @@ $(UI_NEXT_DIR)/build: ui-next/src/build
 ## Build ui-next/src/build
 ui-next/src/build: $(UI_NEXT_DIR)/src/build
 
-## Real target for ui-next/src/build.
+.PHONY: $(UI_NEXT_DIR)/src/build
+## True target for ui-next/src/build.
 $(UI_NEXT_DIR)/src/build: ui-next/src ui-next/src/webpack
 	@echo "=== Building ui_next ==="
 	@cd $(UI_NEXT_DIR)/src && npm run build:awx
 
 .PHONY: ui-next/src
+## Clone or link src of UI_NEXT to ui-next/src, will re-clone/link/update if necessary.
 ui-next/src: $(UI_NEXT_DIR)/src
 
 # TODO: Rewrite this big bash script in a more readable way.
 .PHONY: $(UI_NEXT_DIR)/src
-## Real target for ui-next/src.
+## True target for ui-next/src.
 $(UI_NEXT_DIR)/src:
 	@echo "=== Setting up $(UI_NEXT_DIR)/src ==="
 	@if [ ! -z "$(UI_NEXT_LOCAL)" ]; then \
@@ -78,7 +80,8 @@ $(UI_NEXT_DIR)/src:
 ## Install webpack.
 ui-next/src/webpack: $(UI_NEXT_DIR)/src/node_modules/webpack
 
-## Real target for ui-next/src/webpack.
+.PHONY: $(UI_NEXT_DIR)/src/node_modules/webpack
+## True target for ui-next/src/webpack.
 $(UI_NEXT_DIR)/src/node_modules/webpack:
 	@echo "=== Installing webpack ==="
 	@cd $(UI_NEXT_DIR)/src && npm install webpack
