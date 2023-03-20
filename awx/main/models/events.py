@@ -7,6 +7,7 @@ from collections import defaultdict
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models, DatabaseError
+from django.db.models.functions import Cast
 from django.utils.dateparse import parse_datetime
 from django.utils.text import Truncator
 from django.utils.timezone import utc, now
@@ -559,18 +560,25 @@ class JobEvent(BasePlaybookEvent):
                 summary.failed = bool(summary.dark or summary.failures)
                 summaries[(host_id, host)] = summary
                 if self.job.inventory.kind == 'constructed':
-                    # make an extra copy of summary for constructed host
+                    # make an extra copy of summary for original host
                     # will fill in host_id as later step host_id=host_id
                     constructed_summaries[host_id] = JobHostSummary(
                         created=summary.created, modified=summary.modified, job_id=job.id, host_name=host, **host_stats
                     )
             if self.job.inventory.kind == 'constructed':
+                valid_original_ids = set(
+                    Host.objects.filter(
+                        id__in=self.job.inventory.hosts.exclude(instance_id='').values_list(Cast('instance_id', output_field=models.IntegerField()))
+                    ).values_list('id', flat=True)
+                )
                 for host_id, instance_id in self.job.inventory.hosts.values_list('id', 'instance_id'):
                     summary = constructed_summaries.pop(host_id, None)
-                    if not summary or not instance_id:
+                    if not summary or (not instance_id) or (int(instance_id) not in valid_original_ids):
                         continue
                     summary.host_id = int(instance_id)
                     summaries[(instance_id, summary.host_name)] = summary
+                    # TODO: still have potential in both smart and constructed inventory for original host
+                    # to be deleted while the job is in progress
 
             JobHostSummary.objects.bulk_create(summaries.values())
 
