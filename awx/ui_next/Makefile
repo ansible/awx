@@ -1,8 +1,8 @@
 ## UI_NEXT_DIR: Relative path to the directory containing this Makefile
 UI_NEXT_DIR := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
 
-# ## Path to your local clone of the UI_NEXT repo
-# #  NOTE: you will not be able to build within the docker-compose development environment if you use this option
+## Path to your local clone of the UI_NEXT repo
+#  NOTE: you will not be able to build within the docker-compose development environment if you use this option
 UI_NEXT_LOCAL ?=
 
 # Git repo and branch to the UI_NEXT repo
