@@ -36,6 +36,7 @@ $(UI_NEXT_DIR)/src/build: ui-next/src ui-next/src/webpack
 .PHONY: ui-next/src
 ui-next/src: $(UI_NEXT_DIR)/src
 
+# TODO: Rewrite this big bash script in a more readable way.
 .PHONY: $(UI_NEXT_DIR)/src
 ## Real target for ui-next/src.
 $(UI_NEXT_DIR)/src:
