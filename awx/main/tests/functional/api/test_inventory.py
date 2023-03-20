@@ -624,6 +624,35 @@ class TestConstructedInventory:
         assert inv_src.update_cache_timeout == 54
         assert inv_src.limit == 'foobar'
 
+    def test_patch_constructed_inventory_generated_source_limits_editable_fields(self, constructed_inventory, admin_user, project, patch):
+        inv_src = constructed_inventory.inventory_sources.first()
+        r = patch(
+            url=inv_src.get_absolute_url(),
+            data={
+                'source': 'scm',
+                'source_project': project.pk,
+                'source_path': '',
+                'source_vars': 'plugin: a.b.c',
+            },
+            expect=400,
+            user=admin_user,
+        )
+        assert r.data['error'] == "Cannot change field 'source' on a constructed inventory source."
+
+        # Make sure it didn't get updated before we got the error
+        assert inv_src == constructed_inventory.inventory_sources.first()
+
+    def test_patch_constructed_inventory_generated_source_allows_source_vars_edit(self, constructed_inventory, admin_user, patch):
+        inv_src = constructed_inventory.inventory_sources.first()
+        r = patch(
+            url=inv_src.get_absolute_url(),
+            data={
+                'source_vars': 'plugin: a.b.c',
+            },
+            expect=200,
+            user=admin_user,
+        )
+
     def test_create_constructed_inventory(self, constructed_inventory, admin_user, post, organization):
         r = post(
             url=reverse('api:constructed_inventory_list'),
