@@ -35,8 +35,14 @@ dsv_inputs = {
             'type': 'string',
             'help_text': _('The secret path e.g. /test/secret1'),
         },
+        {
+            'id': 'secret_field',
+            'label': _('Secret Field'),
+            'help_text': _('The field to extract from the secret'),
+            'type': 'string',
+        },
     ],
-    'required': ['tenant', 'client_id', 'client_secret', 'path'],
+    'required': ['tenant', 'client_id', 'client_secret', 'path', 'secret_field'],
 }
 
 if settings.DEBUG:
@@ -52,5 +58,5 @@ if settings.DEBUG:
 dsv_plugin = CredentialPlugin(
     'Thycotic DevOps Secrets Vault',
     dsv_inputs,
-    lambda **kwargs: SecretsVault(**{k: v for (k, v) in kwargs.items() if k in [field['id'] for field in dsv_inputs['fields']]}).get_secret(kwargs['path']),
+    lambda **kwargs: SecretsVault(**{k: v for (k, v) in kwargs.items() if k in [field['id'] for field in dsv_inputs['fields']]}).get_secret(kwargs['path'])['data'][kwargs['secret_field']],
 )
