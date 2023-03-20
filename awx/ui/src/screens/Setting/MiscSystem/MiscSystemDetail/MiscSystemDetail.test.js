@@ -114,7 +114,7 @@ describe('<MiscSystemDetail />', () => {
     assertVariableDetail(wrapper, 'Remote Host Headers', '[]');
     assertVariableDetail(wrapper, 'Proxy IP Allowed List', '[]');
     assertDetail(wrapper, 'Global default execution environment', 'Foo');
-    assertDetail(wrapper, 'Enable Next Generation User Interface', 'On');
+    assertDetail(wrapper, 'Enable Preview of New User Interface', 'On');
   });
 
   test('should render execution environment as not configured', async () => {

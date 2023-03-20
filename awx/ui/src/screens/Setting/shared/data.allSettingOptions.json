@@ -642,8 +642,8 @@
       "UI_NEXT": {
         "type": "boolean",
         "required": false,
-        "label": "Enable Next Generation User Interface",
-        "help_text": "Enable the next generation user interface.",
+        "label": "Enable Preview of New User Interface",
+        "help_text": "'Enable preview of new user interface.",
         "category": "System",
         "category_slug": "system",
         "default": true
@@ -4383,8 +4383,8 @@
       },
       "UI_NEXT": {
         "type": "boolean",
-        "label": "Enable Next Generation User Interface",
-        "help_text": "Enable the next generation user interface.",
+        "label": "Enable Preview of New User Interface",
+        "help_text": "Enable preview of new user interface.",
         "category": "System",
         "category_slug": "system",
         "defined_in_file": false
