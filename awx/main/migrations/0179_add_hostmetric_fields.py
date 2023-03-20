@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0176_inventorysource_scm_branch'),
+        ('main', '0178_inventorysource_scm_branch'),
     ]
 
     operations = [
