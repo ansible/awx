@@ -87,7 +87,7 @@ options:
     update_secrets:
       description:
         - C(true) will always update encrypted values.
-        - C(false) will only updated encrypted values if a change is absolutely known to be needed.
+        - C(false) will only update encrypted values if a change is absolutely known to be needed.
       type: bool
       default: true
     user:
@@ -100,8 +100,8 @@ options:
       type: str
     state:
       description:
-        - Desired state of the resource.
-      choices: ["present", "absent"]
+        - Desired state of the resource. C(exists) will not modify the resource if it is present.
+      choices: ["present", "absent", "exists"]
       default: "present"
       type: str
 
@@ -216,7 +216,7 @@ def main():
         update_secrets=dict(type='bool', default=True, no_log=False),
         user=dict(),
         team=dict(),
-        state=dict(choices=['present', 'absent'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )
 
     # Create a module for ourselves
@@ -264,6 +264,10 @@ def main():
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(credential)
+
+    if state == 'exists' and credential is not None:
+        # If credential exists and state is exists, we're done here.
+        module.create_if_needed(credential, credential, endpoint='credentials', item_type='credential')
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     if user:
