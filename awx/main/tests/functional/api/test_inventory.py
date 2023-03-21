@@ -624,6 +624,50 @@ class TestConstructedInventory:
         assert inv_src.update_cache_timeout == 54
         assert inv_src.limit == 'foobar'
 
+    def test_patch_constructed_inventory_generated_source_limits_editable_fields(self, constructed_inventory, admin_user, project, patch):
+        inv_src = constructed_inventory.inventory_sources.first()
+        r = patch(
+            url=inv_src.get_absolute_url(),
+            data={
+                'source': 'scm',
+                'source_project': project.pk,
+                'source_path': '',
+                'source_vars': 'plugin: a.b.c',
+            },
+            expect=400,
+            user=admin_user,
+        )
+        assert str(r.data['error'][0]) == "Cannot change field 'source' on a constructed inventory source."
+
+        # Make sure it didn't get updated before we got the error
+        inv_src_after_err = constructed_inventory.inventory_sources.first()
+        assert inv_src.id == inv_src_after_err.id
+        assert inv_src.source == inv_src_after_err.source
+        assert inv_src.source_project == inv_src_after_err.source_project
+        assert inv_src.source_path == inv_src_after_err.source_path
+        assert inv_src.source_vars == inv_src_after_err.source_vars
+
+    def test_patch_constructed_inventory_generated_source_allows_source_vars_edit(self, constructed_inventory, admin_user, patch):
+        inv_src = constructed_inventory.inventory_sources.first()
+        patch(
+            url=inv_src.get_absolute_url(),
+            data={
+                'source_vars': 'plugin: a.b.c',
+            },
+            expect=200,
+            user=admin_user,
+        )
+
+        inv_src_after_patch = constructed_inventory.inventory_sources.first()
+
+        # sanity checks
+        assert inv_src.id == inv_src_after_patch.id
+        assert inv_src.source == 'constructed'
+        assert inv_src_after_patch.source == 'constructed'
+        assert inv_src.source_vars == ''
+
+        assert inv_src_after_patch.source_vars == 'plugin: a.b.c'
+
     def test_create_constructed_inventory(self, constructed_inventory, admin_user, post, organization):
         r = post(
             url=reverse('api:constructed_inventory_list'),
