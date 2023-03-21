@@ -2004,11 +2004,6 @@ class InventorySourceDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroy
     model = models.InventorySource
     serializer_class = serializers.InventorySourceSerializer
 
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context.update(original=self.get_object())
-        return context
-
 
 class InventorySourceSchedulesList(SubListCreateAPIView):
     name = _("Inventory Source Schedules")
