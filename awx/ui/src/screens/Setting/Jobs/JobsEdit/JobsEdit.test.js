@@ -77,8 +77,6 @@ describe('<JobsEdit />', () => {
     });
     expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
     const {
-      EVENT_STDOUT_MAX_BYTES_DISPLAY,
-      STDOUT_MAX_BYTES_DISPLAY,
       ...jobRequest
     } = mockJobSettings;
     expect(SettingsAPI.updateAll).toHaveBeenCalledWith(jobRequest);

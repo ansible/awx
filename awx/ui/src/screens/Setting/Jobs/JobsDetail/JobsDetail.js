@@ -30,8 +30,6 @@ function JobsDetail() {
       const { data } = await SettingsAPI.readCategory('jobs');
 
       const {
-        STDOUT_MAX_BYTES_DISPLAY,
-        EVENT_STDOUT_MAX_BYTES_DISPLAY,
         ...jobsData
       } = data;
 

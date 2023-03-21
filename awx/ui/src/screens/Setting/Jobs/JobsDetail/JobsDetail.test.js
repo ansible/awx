@@ -68,6 +68,8 @@ describe('<JobsDetail />', () => {
     assertDetail(wrapper, 'Default Inventory Update Timeout', '0 seconds');
     assertDetail(wrapper, 'Default Project Update Timeout', '0 seconds');
     assertDetail(wrapper, 'Per-Host Ansible Fact Cache Timeout', '0 seconds');
+    assertDetail(wrapper, 'Standard Output Maximum Display Size', '1048576');
+    assertDetail(wrapper, 'Job Event Standard Output Maximum Display Size', '1024');
     assertDetail(wrapper, 'Maximum number of forks per job', '200');
     assertDetail(wrapper, 'Expose host paths for Container Groups', 'Off');
     assertVariableDetail(

@@ -36,8 +36,6 @@ function JobsEdit() {
     useCallback(async () => {
       const { data } = await SettingsAPI.readCategory('jobs');
       const {
-        EVENT_STDOUT_MAX_BYTES_DISPLAY,
-        STDOUT_MAX_BYTES_DISPLAY,
         ...jobsData
       } = data;
       const mergedData = {};
@@ -178,6 +176,16 @@ function JobsEdit() {
                 <InputField
                   name="ANSIBLE_FACT_CACHE_TIMEOUT"
                   config={jobs.ANSIBLE_FACT_CACHE_TIMEOUT}
+                  type="number"
+                />
+                <InputField
+                  name="STDOUT_MAX_BYTES_DISPLAY"
+                  config={jobs.STDOUT_MAX_BYTES_DISPLAY}
+                  type="number"
+                />
+                <InputField
+                  name="EVENT_STDOUT_MAX_BYTES_DISPLAY"
+                  config={jobs.EVENT_STDOUT_MAX_BYTES_DISPLAY}
                   type="number"
                 />
                 <InputField
