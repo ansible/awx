@@ -838,7 +838,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
 
     def get_hosts_for_fact_cache(self):
         """
-        Builds the querset to use for writing or finalizing the fact cache
+        Builds the queryset to use for writing or finalizing the fact cache
         these need to be the 'real' hosts associated with the job.
         For constructed inventories, that means the original (input inventory) hosts
         when slicing, that means only returning hosts in that slice
