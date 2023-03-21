@@ -6,6 +6,7 @@ recursive-include awx/templates *.html
 recursive-include awx/api/templates *.md *.html *.yml
 recursive-include awx/ui/build *.html
 recursive-include awx/ui/build *
+recursive-include awx/ui_next/build *
 recursive-include awx/playbooks *.yml
 recursive-include awx/lib/site-packages *
 recursive-include awx/plugins *.ps1

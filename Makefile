@@ -1,3 +1,5 @@
+-include awx/ui_next/Makefile
+
 PYTHON ?= python3.9
 DOCKER_COMPOSE ?= docker-compose
 OFFICIAL ?= no
@@ -418,7 +420,7 @@ ui-devel: awx/ui/node_modules
 		cp -r awx/ui/build/static/css/* /var/lib/awx/public/static/css; \
 		cp -r awx/ui/build/static/js/* /var/lib/awx/public/static/js; \
 		cp -r awx/ui/build/static/media/* /var/lib/awx/public/static/media; \
-    	fi
+	fi
 
 ui-devel-instrumented: awx/ui/node_modules
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run start-instrumented
@@ -445,11 +447,12 @@ ui-test-general:
 	$(NPM_BIN) run --prefix awx/ui pretest
 	$(NPM_BIN) run --prefix awx/ui/ test-general --runInBand
 
+# NOTE: The make target ui-next is imported from awx/ui_next/Makefile
 HEADLESS ?= no
 ifeq ($(HEADLESS), yes)
 dist/$(SDIST_TAR_FILE):
 else
-dist/$(SDIST_TAR_FILE): $(UI_BUILD_FLAG_FILE)
+dist/$(SDIST_TAR_FILE): $(UI_BUILD_FLAG_FILE) ui-next
 endif
 	$(PYTHON) -m build -s
 	ln -sf $(SDIST_TAR_FILE) dist/awx.tar.gz
@@ -496,8 +499,6 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e enable_splunk=$(SPLUNK) \
 	    -e enable_prometheus=$(PROMETHEUS) \
 	    -e enable_grafana=$(GRAFANA) $(EXTRA_SOURCES_ANSIBLE_OPTS)
-
-
 
 docker-compose: awx/projects docker-compose-sources
 	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_OPTS) up $(COMPOSE_UP_OPTS) --remove-orphans
@@ -654,3 +655,8 @@ help/generate:
 	} \
 	{ lastLine = $$0 }' $(MAKEFILE_LIST) | sort -u
 	@printf "\n"
+
+## Display help for ui-next targets
+help/ui-next:
+	@make -s help MAKEFILE_LIST="awx/ui_next/Makefile"
+

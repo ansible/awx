@@ -10,13 +10,14 @@ msgstr ""
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
+"Plural-Forms: \n"
 
 #: components/Schedule/ScheduleOccurrences/ScheduleOccurrences.js:43
 msgid "(Limited to first 10)"
 msgstr "(상위 10개로 제한)"
 
 #: components/TemplateList/TemplateListItem.js:103
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:161
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:162
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:90
 msgid "(Prompt on launch)"
 msgstr "(실행 시 프롬프트)"
@@ -25,7 +26,7 @@ msgstr "(실행 시 프롬프트)"
 msgid "* This field will be retrieved from an external secret management system using the specified credential."
 msgstr "*이 필드는 지정된 인증 정보를 사용하여 외부 보안 관리 시스템에서 검색됩니다."
 
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:228
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:229
 msgid "/ (project root)"
 msgstr "/ (프로젝트 root)"
 
@@ -65,6 +66,10 @@ msgstr "4 (연결 디버그)"
 msgid "5 (WinRM Debug)"
 msgstr "5 (WinRM 디버그)"
 
+#: screens/Dashboard/Dashboard.js:81
+msgid "<0><1/> A tech preview of the new {brandName} user interface can be found <2>here</2>.</0>"
+msgstr ""
+
 #: screens/Project/shared/Project.helptext.js:76
 msgid ""
 "A refspec to fetch (passed to the Ansible git\n"
@@ -99,7 +104,7 @@ msgstr "정보"
 
 #: routeConfig.js:92
 #: screens/ActivityStream/ActivityStream.js:179
-#: screens/Credential/Credential.js:74
+#: screens/Credential/Credential.js:89
 #: screens/Credential/Credentials.js:29
 #: screens/Inventory/Inventories.js:59
 #: screens/Inventory/Inventory.js:65
@@ -135,7 +140,7 @@ msgstr "동작"
 
 #: components/JobList/JobList.js:249
 #: components/JobList/JobListItem.js:103
-#: components/RelatedTemplateList/RelatedTemplateList.js:189
+#: components/RelatedTemplateList/RelatedTemplateList.js:202
 #: components/Schedule/ScheduleList/ScheduleList.js:172
 #: components/Schedule/ScheduleList/ScheduleListItem.js:128
 #: components/SelectedList/DraggableSelectedList.js:101
@@ -157,18 +162,19 @@ msgstr "동작"
 #: screens/Host/HostList/HostListItem.js:70
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:200
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:75
-#: screens/InstanceGroup/Instances/InstanceList.js:271
-#: screens/InstanceGroup/Instances/InstanceListItem.js:171
-#: screens/Instances/InstanceList/InstanceList.js:206
-#: screens/Instances/InstanceList/InstanceListItem.js:183
+#: screens/InstanceGroup/Instances/InstanceList.js:293
+#: screens/InstanceGroup/Instances/InstanceListItem.js:185
+#: screens/Instances/InstanceList/InstanceList.js:226
+#: screens/Instances/InstanceList/InstanceListItem.js:199
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.js:218
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostListItem.js:53
 #: screens/Inventory/InventoryGroups/InventoryGroupItem.js:39
 #: screens/Inventory/InventoryGroups/InventoryGroupsList.js:142
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupItem.js:41
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.js:187
-#: screens/Inventory/InventoryHosts/InventoryHostItem.js:44
-#: screens/Inventory/InventoryHosts/InventoryHostList.js:140
+#: screens/Inventory/InventoryHosts/InventoryHostItem.js:93
+#: screens/Inventory/InventoryHosts/InventoryHostItem.js:94
+#: screens/Inventory/InventoryHosts/InventoryHostList.js:141
 #: screens/Inventory/InventoryList/InventoryList.js:222
 #: screens/Inventory/InventoryList/InventoryListItem.js:131
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.js:233
@@ -192,7 +198,7 @@ msgstr "동작"
 #: screens/Template/Survey/SurveyListItem.js:90
 #: screens/User/UserList/UserList.js:164
 #: screens/User/UserList/UserListItem.js:56
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:167
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:225
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.js:78
 msgid "Actions"
 msgstr "동작"
@@ -360,7 +366,7 @@ msgid "Alert modal"
 msgstr "경고 모달"
 
 #: components/LaunchButton/ReLaunchDropDown.js:48
-#: components/PromptDetail/PromptDetail.js:132
+#: components/PromptDetail/PromptDetail.js:133
 #: screens/Metrics/Metrics.js:82
 #: screens/Metrics/Metrics.js:82
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:266
@@ -425,7 +431,7 @@ msgstr "응답 유형"
 msgid "Answer variable name"
 msgstr "응답 변수 이름"
 
-#: components/PromptDetail/PromptDetail.js:132
+#: components/PromptDetail/PromptDetail.js:133
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:263
 msgid "Any"
 msgstr "모든"
@@ -475,6 +481,10 @@ msgstr "애플리케이션 및 토큰"
 msgid "Approval"
 msgstr "승인"
 
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListApproveButton.js:30
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListApproveButton.js:46
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListApproveButton.js:54
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListApproveButton.js:58
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.js:82
 #: screens/WorkflowApproval/shared/WorkflowApprovalButton.js:44
 #: screens/WorkflowApproval/shared/WorkflowApprovalButton.js:47
@@ -542,7 +552,7 @@ msgstr "{1}에서 {0} 액세스 권한을 삭제하시겠습니까? 이렇게 �
 msgid "Are you sure you want to remove {0} access from {username}?"
 msgstr "{username} 에서 {0} 액세스 권한을 삭제하시겠습니까?"
 
-#: screens/Job/JobOutput/JobOutput.js:826
+#: screens/Job/JobOutput/JobOutput.js:838
 msgid "Are you sure you want to submit the request to cancel this job?"
 msgstr "이 작업을 취소하기 위한 요청을 제출하시겠습니까?"
 
@@ -555,7 +565,7 @@ msgstr "인수"
 msgid "Artifacts"
 msgstr "아티팩트"
 
-#: screens/InstanceGroup/Instances/InstanceList.js:233
+#: screens/InstanceGroup/Instances/InstanceList.js:251
 #: screens/User/UserTeams/UserTeamList.js:208
 msgid "Associate"
 msgstr "연결"
@@ -591,10 +601,11 @@ msgstr "인증 코드 만료"
 msgid "Authorization grant type"
 msgstr "인증 권한 부여 유형"
 
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:215
-#: screens/InstanceGroup/Instances/InstanceListItem.js:204
-#: screens/Instances/InstanceDetail/InstanceDetail.js:209
-#: screens/Instances/InstanceList/InstanceListItem.js:219
+#: components/InstanceDetails.js/InstanceDetails.js:255
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:219
+#: screens/InstanceGroup/Instances/InstanceListItem.js:218
+#: screens/Instances/InstanceDetail/InstanceDetail.js:212
+#: screens/Instances/InstanceList/InstanceListItem.js:235
 #: screens/Instances/InstancePeers/InstancePeerListItem.js:83
 msgid "Auto"
 msgstr "Auto"
@@ -631,7 +642,7 @@ msgstr "Azure AD 설정"
 msgid "Back"
 msgstr "뒤로"
 
-#: screens/Credential/Credential.js:65
+#: screens/Credential/Credential.js:80
 msgid "Back to Credentials"
 msgstr "인증 정보로 돌아가기"
 
@@ -654,7 +665,8 @@ msgstr "호스트로 돌아가기"
 msgid "Back to Instance Groups"
 msgstr "인스턴스 그룹으로 돌아가기"
 
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:173
+#: components/InstanceDetails.js/InstanceDetails.js:214
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:175
 #: screens/Instances/Instance.js:22
 msgid "Back to Instances"
 msgstr "인스턴스로 돌아가기"
@@ -691,7 +703,7 @@ msgstr "일정으로 돌아가기"
 #: screens/Setting/LDAP/LDAPDetail/LDAPDetail.js:95
 #: screens/Setting/Logging/LoggingDetail/LoggingDetail.js:69
 #: screens/Setting/MiscAuthentication/MiscAuthenticationDetail/MiscAuthenticationDetail.js:43
-#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.js:90
+#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.js:91
 #: screens/Setting/OIDC/OIDCDetail/OIDCDetail.js:44
 #: screens/Setting/RADIUS/RADIUSDetail/RADIUSDetail.js:49
 #: screens/Setting/SAML/SAMLDetail/SAMLDetail.js:45
@@ -770,6 +782,10 @@ msgstr "체크아웃할 분기입니다. 분기 외에도 태그, 커밋 해시 
 msgid "Branch to use in job run. Project default used if blank. Only allowed if project allow_override field is set to true."
 msgstr "작업 실행에 사용할 분기입니다. 비어 있는 경우 프로젝트 기본값이 사용됩니다. 프로젝트 allow_override 필드가 true로 설정된 경우에만 허용됩니다."
 
+#: screens/Inventory/shared/Inventory.helptext.js:155
+msgid "Branch to use on inventory sync. Project default used if blank. Only allowed if project allow_override field is set to true."
+msgstr ""
+
 #: components/About/About.js:45
 msgid "Brand Image"
 msgstr "브랜드 이미지"
@@ -787,10 +803,11 @@ msgstr "검색 중..."
 msgid "By default, we collect and transmit analytics data on the service usage to Red Hat. There are two categories of data collected by the service. For more information, see <0>this Tower documentation page</0>. Uncheck the following boxes to disable this feature."
 msgstr "기본적으로 Red Hat은 서비스 사용에 대한 분석 데이터를 수집하여 전송합니다. 서비스에서 수집하는 데이터에는 두 가지 카테고리가 있습니다. 자세한 내용은 <0>Tower 설명서 페이지</0>를 참조하십시오. 이 기능을 비활성화하려면 다음 확인란을 선택 해제하십시오."
 
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:228
-#: screens/InstanceGroup/Instances/InstanceListItem.js:145
-#: screens/Instances/InstanceDetail/InstanceDetail.js:271
-#: screens/Instances/InstanceList/InstanceListItem.js:155
+#: components/InstanceDetails.js/InstanceDetails.js:332
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:247
+#: screens/InstanceGroup/Instances/InstanceListItem.js:159
+#: screens/Instances/InstanceDetail/InstanceDetail.js:273
+#: screens/Instances/InstanceList/InstanceListItem.js:171
 #: screens/TopologyView/Tooltip.js:285
 msgid "CPU {0}"
 msgstr "CPU {0}"
@@ -802,7 +819,7 @@ msgstr "CPU {0}"
 msgid "Cache Timeout"
 msgstr "캐시 제한 시간"
 
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:237
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:243
 msgid "Cache timeout"
 msgstr "캐시 제한 시간"
 
@@ -825,8 +842,8 @@ msgstr "캐시 제한 시간 (초)"
 #: components/Lookup/Lookup.js:209
 #: components/PaginatedTable/ToolbarDeleteButton.js:282
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.js:37
-#: components/Schedule/shared/ScheduleForm.js:548
-#: components/Schedule/shared/ScheduleForm.js:553
+#: components/Schedule/shared/ScheduleForm.js:547
+#: components/Schedule/shared/ScheduleForm.js:552
 #: components/Schedule/shared/SchedulePromptableFields.js:126
 #: components/Schedule/shared/UnsupportedScheduleForm.js:22
 #: components/Schedule/shared/UnsupportedScheduleForm.js:27
@@ -863,14 +880,14 @@ msgstr "캐시 제한 시간 (초)"
 msgid "Cancel"
 msgstr "취소"
 
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:300
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:306
 #: screens/Inventory/InventorySources/InventorySourceListItem.js:112
 msgid "Cancel Inventory Source Sync"
 msgstr "인벤토리 소스 동기화 취소"
 
 #: components/JobCancelButton/JobCancelButton.js:69
-#: screens/Job/JobOutput/JobOutput.js:802
-#: screens/Job/JobOutput/JobOutput.js:803
+#: screens/Job/JobOutput/JobOutput.js:814
+#: screens/Job/JobOutput/JobOutput.js:815
 msgid "Cancel Job"
 msgstr "작업 취소"
 
@@ -879,7 +896,7 @@ msgstr "작업 취소"
 msgid "Cancel Project Sync"
 msgstr "프로젝트 동기화 취소"
 
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:302
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:308
 #: screens/Project/ProjectDetail/ProjectDetail.js:323
 msgid "Cancel Sync"
 msgstr "동기화 취소"
@@ -891,8 +908,8 @@ msgstr "동기화 취소"
 msgid "Cancel Workflow"
 msgstr "워크플로우 취소"
 
-#: screens/Job/JobOutput/JobOutput.js:810
-#: screens/Job/JobOutput/JobOutput.js:813
+#: screens/Job/JobOutput/JobOutput.js:822
+#: screens/Job/JobOutput/JobOutput.js:825
 msgid "Cancel job"
 msgstr "작업 취소"
 
@@ -931,7 +948,7 @@ msgstr "서브스크립션 편집 취소"
 
 #: components/JobList/JobListItem.js:113
 #: screens/Job/JobDetail/JobDetail.js:600
-#: screens/Job/JobOutput/shared/OutputToolbar.js:137
+#: screens/Job/JobOutput/shared/OutputToolbar.js:158
 #: screens/Job/WorkflowOutput/WorkflowOutputToolbar.js:89
 msgid "Cancel {0}"
 msgstr "취소 {0}"
@@ -949,7 +966,6 @@ msgid ""
 "logging aggregator host and logging aggregator type."
 msgstr "로깅 수집기 호스트 및 로깅 수집기 유형을 제공하지 않고 로그 수집기를 활성화할 수 없습니다."
 
-#: screens/Instances/InstanceList/InstanceList.js:199
 #: screens/Instances/InstancePeers/InstancePeerList.js:94
 msgid "Cannot run health check on hop nodes."
 msgstr "홉 노드에서 상태 점검을 실행할 수 없습니다."
@@ -960,12 +976,13 @@ msgstr "홉 노드에서 상태 점검을 실행할 수 없습니다."
 msgid "Capacity"
 msgstr "용량"
 
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:225
-#: screens/InstanceGroup/Instances/InstanceList.js:269
-#: screens/InstanceGroup/Instances/InstanceListItem.js:143
-#: screens/Instances/InstanceDetail/InstanceDetail.js:267
-#: screens/Instances/InstanceList/InstanceList.js:204
-#: screens/Instances/InstanceList/InstanceListItem.js:153
+#: components/InstanceDetails.js/InstanceDetails.js:328
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:244
+#: screens/InstanceGroup/Instances/InstanceList.js:291
+#: screens/InstanceGroup/Instances/InstanceListItem.js:157
+#: screens/Instances/InstanceDetail/InstanceDetail.js:269
+#: screens/Instances/InstanceList/InstanceList.js:224
+#: screens/Instances/InstanceList/InstanceListItem.js:169
 msgid "Capacity Adjustment"
 msgstr "용량 조정"
 
@@ -1051,7 +1068,7 @@ msgstr "작업 유형 선택"
 msgid "Choose a module"
 msgstr "모듈 선택"
 
-#: screens/Inventory/shared/InventorySourceForm.js:139
+#: screens/Inventory/shared/InventorySourceForm.js:140
 msgid "Choose a source"
 msgstr "소스 선택"
 
@@ -1120,7 +1137,8 @@ msgstr "이 버튼을 클릭하여 선택한 인증 정보 및 지정된 입력�
 msgid "Click to create a new link to this node."
 msgstr "이 노드에 대한 새 링크를 생성하려면 클릭합니다."
 
-#: screens/Instances/InstanceDetail/InstanceDetail.js:251
+#: components/InstanceDetails.js/InstanceDetails.js:312
+#: screens/Instances/InstanceDetail/InstanceDetail.js:253
 msgid "Click to download bundle"
 msgstr "클릭하여 번들을 다운로드합니다"
 
@@ -1195,7 +1213,7 @@ msgstr "준수"
 
 #: components/PromptDetail/PromptJobTemplateDetail.js:68
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:36
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:132
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:133
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:58
 #: screens/Template/shared/JobTemplateForm.js:591
 msgid "Concurrent Jobs"
@@ -1272,7 +1290,7 @@ msgstr "선택 확인"
 msgid "Container Group"
 msgstr "컨테이너 그룹"
 
-#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:47
+#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:52
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:57
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:68
 msgid "Container group"
@@ -1297,8 +1315,8 @@ msgstr "콘텐츠 서명 확인 인증 정보"
 msgid "Continue"
 msgstr "계속"
 
-#: screens/InstanceGroup/Instances/InstanceList.js:207
-#: screens/Instances/InstanceList/InstanceList.js:151
+#: screens/InstanceGroup/Instances/InstanceList.js:225
+#: screens/Instances/InstanceList/InstanceList.js:169
 msgid "Control"
 msgstr "컨트롤"
 
@@ -1321,7 +1339,7 @@ msgstr "플레이북이 실행되면 ansible이 생성되는 출력 수준을 �
 msgid "Controller Node"
 msgstr "컨트롤러 노드"
 
-#: components/PromptDetail/PromptDetail.js:130
+#: components/PromptDetail/PromptDetail.js:131
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:225
 msgid "Convergence"
 msgstr "통합"
@@ -1494,28 +1512,28 @@ msgid "Create user token"
 msgstr "사용자 토큰 만들기"
 
 #: components/Lookup/ApplicationLookup.js:115
-#: components/PromptDetail/PromptDetail.js:154
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:406
+#: components/PromptDetail/PromptDetail.js:155
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:402
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:105
 #: screens/Credential/CredentialDetail/CredentialDetail.js:257
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:90
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:103
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:151
 #: screens/Host/HostDetail/HostDetail.js:86
-#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:67
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:93
-#: screens/Inventory/InventoryDetail/InventoryDetail.js:173
+#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:86
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:107
+#: screens/Inventory/InventoryDetail/InventoryDetail.js:158
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.js:43
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.js:81
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:277
-#: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:149
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:283
+#: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:133
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.js:46
 #: screens/Job/JobDetail/JobDetail.js:534
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:393
-#: screens/Organization/OrganizationDetail/OrganizationDetail.js:115
+#: screens/Organization/OrganizationDetail/OrganizationDetail.js:111
 #: screens/Project/ProjectDetail/ProjectDetail.js:292
 #: screens/Team/TeamDetail/TeamDetail.js:47
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:353
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:349
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:187
 #: screens/User/UserDetail/UserDetail.js:82
 #: screens/User/UserTokenDetail/UserTokenDetail.js:61
@@ -1528,16 +1546,16 @@ msgstr "생성됨"
 #: components/AdHocCommands/AdHocExecutionEnvironmentStep.js:112
 #: components/AddRole/AddResourceRole.js:57
 #: components/AssociateModal/AssociateModal.js:144
-#: components/LaunchPrompt/steps/CredentialsStep.js:173
+#: components/LaunchPrompt/steps/CredentialsStep.js:177
 #: components/LaunchPrompt/steps/InventoryStep.js:89
 #: components/Lookup/CredentialLookup.js:194
 #: components/Lookup/InventoryLookup.js:152
 #: components/Lookup/InventoryLookup.js:207
-#: components/Lookup/MultiCredentialsLookup.js:194
+#: components/Lookup/MultiCredentialsLookup.js:198
 #: components/Lookup/OrganizationLookup.js:134
 #: components/Lookup/ProjectLookup.js:151
 #: components/NotificationList/NotificationList.js:206
-#: components/RelatedTemplateList/RelatedTemplateList.js:166
+#: components/RelatedTemplateList/RelatedTemplateList.js:179
 #: components/Schedule/ScheduleList/ScheduleList.js:198
 #: components/TemplateList/TemplateList.js:226
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:27
@@ -1578,16 +1596,16 @@ msgstr "(사용자 이름)에 의해 생성됨"
 #: components/AdHocCommands/useAdHocCredentialStep.js:24
 #: components/PromptDetail/PromptInventorySourceDetail.js:107
 #: screens/Credential/shared/CredentialPlugins/CredentialPluginPrompt/CredentialPluginPrompt.js:40
-#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:52
+#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:71
 #: screens/InstanceGroup/shared/ContainerGroupForm.js:50
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:258
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:264
 #: screens/Inventory/shared/InventorySourceSubForms/AzureSubForm.js:38
 #: screens/Inventory/shared/InventorySourceSubForms/ControllerSubForm.js:37
 #: screens/Inventory/shared/InventorySourceSubForms/EC2SubForm.js:37
 #: screens/Inventory/shared/InventorySourceSubForms/GCESubForm.js:37
 #: screens/Inventory/shared/InventorySourceSubForms/InsightsSubForm.js:38
 #: screens/Inventory/shared/InventorySourceSubForms/OpenStackSubForm.js:37
-#: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:84
+#: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:91
 #: screens/Inventory/shared/InventorySourceSubForms/SatelliteSubForm.js:36
 #: screens/Inventory/shared/InventorySourceSubForms/VMwareSubForm.js:38
 #: screens/Inventory/shared/InventorySourceSubForms/VirtualizationSubForm.js:38
@@ -1624,7 +1642,7 @@ msgstr "인증 정보 유형"
 msgid "Credential copied successfully"
 msgstr "인증 정보가 성공적으로 복사됨"
 
-#: screens/Credential/Credential.js:98
+#: screens/Credential/Credential.js:117
 msgid "Credential not found."
 msgstr "인증 정보를 찾을 수 없습니다."
 
@@ -1633,7 +1651,7 @@ msgstr "인증 정보를 찾을 수 없습니다."
 msgid "Credential passwords"
 msgstr "인증 정보 암호"
 
-#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:53
+#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:72
 msgid "Credential to authenticate with Kubernetes or OpenShift"
 msgstr "Kubernetes 또는 OpenShift로 인증하는 인증 정보"
 
@@ -1650,13 +1668,13 @@ msgid "Credential type not found."
 msgstr "인증 정보 유형을 찾을 수 없습니다."
 
 #: components/JobList/JobListItem.js:260
-#: components/LaunchPrompt/steps/CredentialsStep.js:190
+#: components/LaunchPrompt/steps/CredentialsStep.js:194
 #: components/LaunchPrompt/steps/useCredentialsStep.js:62
 #: components/Lookup/MultiCredentialsLookup.js:138
-#: components/Lookup/MultiCredentialsLookup.js:211
-#: components/PromptDetail/PromptDetail.js:192
+#: components/Lookup/MultiCredentialsLookup.js:215
+#: components/PromptDetail/PromptDetail.js:193
 #: components/PromptDetail/PromptJobTemplateDetail.js:191
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:528
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:505
 #: components/TemplateList/TemplateListItem.js:323
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:77
 #: routeConfig.js:70
@@ -1665,7 +1683,7 @@ msgstr "인증 정보 유형을 찾을 수 없습니다."
 #: screens/Credential/Credentials.js:14
 #: screens/Credential/Credentials.js:24
 #: screens/Job/JobDetail/JobDetail.js:429
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:374
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:370
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/JobTemplatesList.js:49
 #: screens/Template/shared/JobTemplateForm.js:372
 #: util/getRelatedResourceDeleteDetails.js:91
@@ -1680,11 +1698,11 @@ msgstr "시작 시 암호가 필요한 인증 정보는 허용되지 않습니�
 msgid "Current page"
 msgstr "현재 페이지"
 
-#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:85
+#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:104
 msgid "Custom Kubernetes or OpenShift Pod specification."
 msgstr "사용자 정의 Kubernetes 또는 OpenShift Pod 사양"
 
-#: screens/InstanceGroup/shared/ContainerGroupForm.js:79
+#: screens/InstanceGroup/shared/ContainerGroupForm.js:99
 msgid "Custom pod spec"
 msgstr "사용자 정의 Pod 사양"
 
@@ -1706,8 +1724,8 @@ msgstr "사용자 지정 가상 환경 {virtualEnvironment} 은 실행 환경으
 msgid "Customize messages…"
 msgstr "메시지 사용자 정의..."
 
-#: screens/InstanceGroup/shared/ContainerGroupForm.js:65
-#: screens/InstanceGroup/shared/ContainerGroupForm.js:66
+#: screens/InstanceGroup/shared/ContainerGroupForm.js:85
+#: screens/InstanceGroup/shared/ContainerGroupForm.js:86
 msgid "Customize pod specification"
 msgstr "Pod 사양 사용자 정의"
 
@@ -1717,7 +1735,7 @@ msgid "DELETED"
 msgstr "삭제됨"
 
 #: routeConfig.js:34
-#: screens/Dashboard/Dashboard.js:74
+#: screens/Dashboard/Dashboard.js:91
 msgid "Dashboard"
 msgstr "대시보드"
 
@@ -1733,7 +1751,7 @@ msgstr "데이터 보존 기간"
 msgid "Date"
 msgstr "날짜"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:184
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:180
 #: components/Schedule/shared/FrequencyDetailSubform.js:177
 #: components/Schedule/shared/FrequencyDetailSubform.js:356
 #: components/Schedule/shared/FrequencyDetailSubform.js:460
@@ -1746,7 +1764,7 @@ msgstr "일"
 msgid "Day {0}"
 msgstr "{0} 일"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:399
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:395
 #: components/Schedule/shared/ScheduleFormFields.js:136
 msgid "Days of Data to Keep"
 msgstr "데이터 보관 일수"
@@ -1810,17 +1828,17 @@ msgstr "시스템 수준 기능 및 함수 정의"
 #: components/PaginatedTable/ToolbarDeleteButton.js:250
 #: components/PaginatedTable/ToolbarDeleteButton.js:273
 #: components/ResourceAccessList/DeleteRoleConfirmationModal.js:29
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:646
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:623
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:128
 #: screens/Credential/CredentialDetail/CredentialDetail.js:306
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:124
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:134
-#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:115
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:127
-#: screens/Inventory/InventoryDetail/InventoryDetail.js:201
+#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:134
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:141
+#: screens/Inventory/InventoryDetail/InventoryDetail.js:186
 #: screens/Inventory/InventoryGroups/InventoryGroupsList.js:101
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:316
-#: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:174
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:322
+#: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:158
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:64
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:68
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:73
@@ -1828,11 +1846,11 @@ msgstr "시스템 수준 기능 및 함수 정의"
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:102
 #: screens/Job/JobDetail/JobDetail.js:612
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:436
-#: screens/Organization/OrganizationDetail/OrganizationDetail.js:199
+#: screens/Organization/OrganizationDetail/OrganizationDetail.js:177
 #: screens/Project/ProjectDetail/ProjectDetail.js:340
 #: screens/Project/shared/ProjectSubForms/SharedFields.js:80
 #: screens/Team/TeamDetail/TeamDetail.js:70
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:545
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:523
 #: screens/Template/Survey/SurveyList.js:66
 #: screens/Template/Survey/SurveyToolbar.js:93
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:269
@@ -1859,17 +1877,17 @@ msgstr "실행 환경 삭제"
 msgid "Delete Host"
 msgstr "호스트 삭제"
 
-#: screens/Inventory/InventoryDetail/InventoryDetail.js:196
+#: screens/Inventory/InventoryDetail/InventoryDetail.js:181
 msgid "Delete Inventory"
 msgstr "인벤토리 삭제"
 
 #: screens/Job/JobDetail/JobDetail.js:608
-#: screens/Job/JobOutput/shared/OutputToolbar.js:195
-#: screens/Job/JobOutput/shared/OutputToolbar.js:199
+#: screens/Job/JobOutput/shared/OutputToolbar.js:216
+#: screens/Job/JobOutput/shared/OutputToolbar.js:220
 msgid "Delete Job"
 msgstr "작업 삭제"
 
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:539
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:517
 msgid "Delete Job Template"
 msgstr "작업 템플릿 삭제"
 
@@ -1877,7 +1895,7 @@ msgstr "작업 템플릿 삭제"
 msgid "Delete Notification"
 msgstr "알림 삭제"
 
-#: screens/Organization/OrganizationDetail/OrganizationDetail.js:193
+#: screens/Organization/OrganizationDetail/OrganizationDetail.js:171
 msgid "Delete Organization"
 msgstr "조직 삭제"
 
@@ -1889,7 +1907,7 @@ msgstr "프로젝트 삭제"
 msgid "Delete Questions"
 msgstr "질문 삭제"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:642
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:619
 msgid "Delete Schedule"
 msgstr "일정 삭제"
 
@@ -1934,16 +1952,16 @@ msgstr "인증 정보 유형 삭제"
 msgid "Delete error"
 msgstr "오류 삭제"
 
-#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:109
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:121
+#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:128
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:135
 msgid "Delete instance group"
 msgstr "인스턴스 그룹 삭제"
 
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:310
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:316
 msgid "Delete inventory source"
 msgstr "인벤토리 소스 삭제"
 
-#: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:170
+#: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:154
 msgid "Delete smart inventory"
 msgstr "스마트 인벤토리 삭제"
 
@@ -2010,6 +2028,10 @@ msgstr "거부됨 - {0} 자세한 내용은 활동 스트림을 참조하십시�
 msgid "Denied by {0} - {1}"
 msgstr "{0} - {1} 거부됨"
 
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListDenyButton.js:30
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListDenyButton.js:46
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListDenyButton.js:54
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListDenyButton.js:58
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.js:89
 #: screens/WorkflowApproval/shared/WorkflowDenyButton.js:35
 #: screens/WorkflowApproval/shared/WorkflowDenyButton.js:42
@@ -2035,8 +2057,8 @@ msgstr "프로비저닝 해제 실패"
 #: components/Lookup/HostFilterLookup.js:423
 #: components/Lookup/HostListItem.js:9
 #: components/NotificationList/NotificationList.js:186
-#: components/PromptDetail/PromptDetail.js:119
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:327
+#: components/PromptDetail/PromptDetail.js:120
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:323
 #: components/Schedule/ScheduleList/ScheduleList.js:194
 #: components/Schedule/shared/ScheduleFormFields.js:80
 #: components/TemplateList/TemplateList.js:210
@@ -2058,28 +2080,28 @@ msgstr "프로비저닝 해제 실패"
 #: screens/Host/HostList/HostList.js:170
 #: screens/Host/HostList/HostListItem.js:57
 #: screens/Instances/Shared/InstanceForm.js:26
-#: screens/Inventory/InventoryDetail/InventoryDetail.js:93
+#: screens/Inventory/InventoryDetail/InventoryDetail.js:94
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.js:35
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.js:216
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.js:80
-#: screens/Inventory/InventoryHosts/InventoryHostItem.js:40
+#: screens/Inventory/InventoryHosts/InventoryHostItem.js:70
 #: screens/Inventory/InventoryHosts/InventoryHostList.js:124
 #: screens/Inventory/InventoryHosts/InventoryHostList.js:139
 #: screens/Inventory/InventoryList/InventoryList.js:195
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:198
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:199
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:104
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.js:36
 #: screens/Inventory/shared/InventoryForm.js:58
 #: screens/Inventory/shared/InventoryGroupForm.js:40
-#: screens/Inventory/shared/InventorySourceForm.js:108
+#: screens/Inventory/shared/InventorySourceForm.js:109
 #: screens/Inventory/shared/SmartInventoryForm.js:55
-#: screens/Job/JobOutput/HostEventModal.js:112
+#: screens/Job/JobOutput/HostEventModal.js:113
 #: screens/ManagementJob/ManagementJobList/ManagementJobList.js:101
 #: screens/ManagementJob/ManagementJobList/ManagementJobListItem.js:72
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:109
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.js:127
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.js:49
-#: screens/Organization/OrganizationDetail/OrganizationDetail.js:95
+#: screens/Organization/OrganizationDetail/OrganizationDetail.js:91
 #: screens/Organization/OrganizationList/OrganizationList.js:127
 #: screens/Organization/shared/OrganizationForm.js:64
 #: screens/Project/ProjectDetail/ProjectDetail.js:177
@@ -2089,7 +2111,7 @@ msgstr "프로비저닝 해제 실패"
 #: screens/Team/TeamDetail/TeamDetail.js:38
 #: screens/Team/TeamList/TeamList.js:122
 #: screens/Team/shared/TeamForm.js:37
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:187
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:183
 #: screens/Template/Survey/SurveyQuestionForm.js:171
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:112
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:183
@@ -2106,7 +2128,7 @@ msgstr "프로비저닝 해제 실패"
 #: screens/User/UserTokenList/UserTokenListItem.js:29
 #: screens/User/shared/UserTokenForm.js:59
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:145
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:128
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:176
 msgid "Description"
 msgstr "설명"
 
@@ -2136,10 +2158,11 @@ msgstr "대상 채널 또는 사용자"
 
 #: components/AdHocCommands/useAdHocDetailsStep.js:35
 #: components/ErrorDetail/ErrorDetail.js:88
+#: components/InstanceDetails.js/InstanceDetails.js:221
 #: components/Schedule/Schedule.js:71
 #: screens/Application/Application/Application.js:79
 #: screens/Application/Applications.js:39
-#: screens/Credential/Credential.js:72
+#: screens/Credential/Credential.js:87
 #: screens/Credential/Credentials.js:28
 #: screens/CredentialType/CredentialType.js:63
 #: screens/CredentialType/CredentialTypes.js:26
@@ -2148,7 +2171,7 @@ msgstr "대상 채널 또는 사용자"
 #: screens/Host/Host.js:58
 #: screens/Host/Hosts.js:27
 #: screens/InstanceGroup/ContainerGroup.js:66
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:180
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:182
 #: screens/InstanceGroup/InstanceGroup.js:69
 #: screens/InstanceGroup/InstanceGroups.js:30
 #: screens/InstanceGroup/InstanceGroups.js:38
@@ -2163,7 +2186,7 @@ msgstr "대상 채널 또는 사용자"
 #: screens/Inventory/SmartInventory.js:66
 #: screens/Inventory/SmartInventoryHost/SmartInventoryHost.js:60
 #: screens/Job/Job.js:130
-#: screens/Job/JobOutput/HostEventModal.js:103
+#: screens/Job/JobOutput/HostEventModal.js:104
 #: screens/Job/Jobs.js:35
 #: screens/ManagementJob/ManagementJobs.js:26
 #: screens/NotificationTemplate/NotificationTemplate.js:84
@@ -2177,7 +2200,7 @@ msgstr "대상 채널 또는 사용자"
 #: screens/Setting/Jobs/JobsDetail/JobsDetail.js:65
 #: screens/Setting/Logging/LoggingDetail/LoggingDetail.js:76
 #: screens/Setting/MiscAuthentication/MiscAuthenticationDetail/MiscAuthenticationDetail.js:50
-#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.js:97
+#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.js:98
 #: screens/Setting/OIDC/OIDCDetail/OIDCDetail.js:51
 #: screens/Setting/RADIUS/RADIUSDetail/RADIUSDetail.js:56
 #: screens/Setting/SAML/SAMLDetail/SAMLDetail.js:52
@@ -2225,7 +2248,7 @@ msgstr "대상 채널 또는 사용자"
 msgid "Details"
 msgstr "세부 정보"
 
-#: screens/Job/JobOutput/HostEventModal.js:100
+#: screens/Job/JobOutput/HostEventModal.js:101
 msgid "Details tab"
 msgstr "세부 정보 탭"
 
@@ -2273,8 +2296,8 @@ msgstr "호스트에서 그룹을 분리하시겠습니까?"
 msgid "Disassociate host from group?"
 msgstr "그룹에서 호스트를 분리하시겠습니까?"
 
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:296
-#: screens/InstanceGroup/Instances/InstanceList.js:245
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:321
+#: screens/InstanceGroup/Instances/InstanceList.js:263
 msgid "Disassociate instance from instance group?"
 msgstr "인스턴스를 인스턴스 그룹에서 분리하시겠습니까?"
 
@@ -2325,8 +2348,8 @@ msgstr "완료"
 msgid "Download Bundle"
 msgstr "번들 다운로드"
 
-#: screens/Job/JobOutput/shared/OutputToolbar.js:179
-#: screens/Job/JobOutput/shared/OutputToolbar.js:184
+#: screens/Job/JobOutput/shared/OutputToolbar.js:200
+#: screens/Job/JobOutput/shared/OutputToolbar.js:205
 msgid "Download Output"
 msgstr "출력 다운로드"
 
@@ -2372,28 +2395,28 @@ msgid ""
 "revision of the project prior to starting the job."
 msgstr "이 프로젝트를 사용하여 작업을 실행할 때마다 작업을 시작하기 전에 프로젝트의 버전을 업데이트합니다."
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:632
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:636
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:609
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:613
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:115
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:117
 #: screens/Credential/CredentialDetail/CredentialDetail.js:293
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:109
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:121
 #: screens/Host/HostDetail/HostDetail.js:108
-#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:101
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:113
-#: screens/Inventory/InventoryDetail/InventoryDetail.js:190
+#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:120
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:127
+#: screens/Inventory/InventoryDetail/InventoryDetail.js:175
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.js:55
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.js:62
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.js:103
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:292
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:298
 #: screens/Inventory/InventorySources/InventorySourceListItem.js:127
-#: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:164
+#: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:148
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:418
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:420
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:138
-#: screens/Organization/OrganizationDetail/OrganizationDetail.js:182
-#: screens/Organization/OrganizationDetail/OrganizationDetail.js:186
+#: screens/Organization/OrganizationDetail/OrganizationDetail.js:160
+#: screens/Organization/OrganizationDetail/OrganizationDetail.js:164
 #: screens/Project/ProjectDetail/ProjectDetail.js:313
 #: screens/Setting/AzureAD/AzureADDetail/AzureADDetail.js:85
 #: screens/Setting/AzureAD/AzureADDetail/AzureADDetail.js:89
@@ -2409,8 +2432,8 @@ msgstr "이 프로젝트를 사용하여 작업을 실행할 때마다 작업을
 #: screens/Setting/Logging/LoggingDetail/LoggingDetail.js:111
 #: screens/Setting/MiscAuthentication/MiscAuthenticationDetail/MiscAuthenticationDetail.js:84
 #: screens/Setting/MiscAuthentication/MiscAuthenticationDetail/MiscAuthenticationDetail.js:88
-#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.js:152
-#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.js:156
+#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.js:153
+#: screens/Setting/MiscSystem/MiscSystemDetail/MiscSystemDetail.js:157
 #: screens/Setting/OIDC/OIDCDetail/OIDCDetail.js:85
 #: screens/Setting/OIDC/OIDCDetail/OIDCDetail.js:89
 #: screens/Setting/RADIUS/RADIUSDetail/RADIUSDetail.js:99
@@ -2424,8 +2447,8 @@ msgstr "이 프로젝트를 사용하여 작업을 실행할 때마다 작업을
 #: screens/Setting/UI/UIDetail/UIDetail.js:110
 #: screens/Team/TeamDetail/TeamDetail.js:55
 #: screens/Team/TeamDetail/TeamDetail.js:59
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:514
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:516
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:492
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:494
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:239
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:241
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeViewModal.js:260
@@ -2599,7 +2622,8 @@ msgstr "세부 정보 편집"
 msgid "Edit group"
 msgstr "그룹 편집"
 
-#: screens/Inventory/InventoryHosts/InventoryHostItem.js:48
+#: screens/Inventory/InventoryHosts/InventoryHostItem.js:100
+#: screens/Inventory/InventoryHosts/InventoryHostItem.js:103
 msgid "Edit host"
 msgstr "호스트 편집"
 
@@ -2626,16 +2650,16 @@ msgid "Edit workflow"
 msgstr "워크플로우 편집"
 
 #: components/Workflow/WorkflowNodeHelp.js:170
-#: screens/Job/JobOutput/shared/OutputToolbar.js:125
+#: screens/Job/JobOutput/shared/OutputToolbar.js:140
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:216
 msgid "Elapsed"
 msgstr "경과됨"
 
-#: screens/Job/JobOutput/shared/OutputToolbar.js:124
+#: screens/Job/JobOutput/shared/OutputToolbar.js:139
 msgid "Elapsed Time"
 msgstr "경과된 시간"
 
-#: screens/Job/JobOutput/shared/OutputToolbar.js:126
+#: screens/Job/JobOutput/shared/OutputToolbar.js:141
 msgid "Elapsed time that the job ran"
 msgstr "작업이 실행되는 데 경과된 시간"
 
@@ -2685,7 +2709,8 @@ msgid ""
 "has remained secure when a project is synced. \n"
 "If the content has been tampered with, the \n"
 "job will not run."
-msgstr "콘텐츠 서명을 활성화하여 프로젝트가 동기화될 때 \n"
+msgstr ""
+"콘텐츠 서명을 활성화하여 프로젝트가 동기화될 때 \n"
 " 콘텐츠가 안전하게 유지되는지 확인합니다. \n"
 " 컨텐츠가 변조된 경우, \n"
 " 작업이 실행되지 않습니다."
@@ -2723,20 +2748,20 @@ msgstr "활성화됨"
 #: components/PromptDetail/PromptProjectDetail.js:145
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:99
 #: screens/Credential/CredentialDetail/CredentialDetail.js:268
-#: screens/Inventory/InventoryDetail/InventoryDetail.js:138
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:265
+#: screens/Inventory/InventoryDetail/InventoryDetail.js:123
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:271
 #: screens/Project/ProjectDetail/ProjectDetail.js:302
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:365
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:361
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:199
 msgid "Enabled Options"
 msgstr "활성화된 옵션"
 
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:252
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:258
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:132
 msgid "Enabled Value"
 msgstr "활성화된 값"
 
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:247
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:253
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:119
 msgid "Enabled Variable"
 msgstr "활성화된 변수"
@@ -2800,11 +2825,15 @@ msgid "Enter inputs using either JSON or YAML syntax. Refer to the Ansible Contr
 msgstr "JSON 또는 YAML 구문을 사용하여 입력합니다. 구문 예제는 Ansible Controller 설명서를 참조하십시오."
 
 #: screens/Inventory/shared/SmartInventoryForm.js:94
-msgid ""
-"Enter inventory variables using either JSON or YAML syntax.\n"
-"Use the radio button to toggle between the two. Refer to the\n"
-"Ansible Controller documentation for example syntax."
-msgstr "JSON 또는 YAML 구문을 사용하여 인벤토리 변수를 입력합니다. 라디오 버튼을 사용하여 두 항목 사이를 전환합니다. 구문 예제는 Ansible Controller 설명서를 참조하십시오."
+#~ msgid ""
+#~ "Enter inventory variables using either JSON or YAML syntax.\n"
+#~ "Use the radio button to toggle between the two. Refer to the\n"
+#~ "Ansible Controller documentation for example syntax."
+#~ msgstr "JSON 또는 YAML 구문을 사용하여 인벤토리 변수를 입력합니다. 라디오 버튼을 사용하여 두 항목 사이를 전환합니다. 구문 예제는 Ansible Controller 설명서를 참조하십시오."
+
+#: screens/Inventory/shared/SmartInventoryForm.js:94
+msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Controller documentation for example syntax."
+msgstr ""
 
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:87
 msgid "Environment variables or extra variables that specify the values a credential type can inject."
@@ -2817,8 +2846,8 @@ msgstr "인증 정보 유형에서 삽입할 수 있는 값을 지정하는 환�
 #: screens/CredentialType/CredentialTypeList/CredentialTypeList.js:205
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:143
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:230
-#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:123
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:135
+#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:142
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:149
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:222
 #: screens/Job/JobOutput/JobOutputSearch.js:104
 #: screens/TopologyView/Legend.js:178
@@ -2851,14 +2880,14 @@ msgstr "워크플로우를 저장하는 동안 오류가 발생했습니다!"
 #: components/InstanceToggle/InstanceToggle.js:67
 #: components/JobList/JobList.js:315
 #: components/JobList/JobList.js:326
-#: components/LaunchButton/LaunchButton.js:185
+#: components/LaunchButton/LaunchButton.js:196
 #: components/LaunchPrompt/LaunchPrompt.js:96
 #: components/NotificationList/NotificationList.js:246
 #: components/PaginatedTable/ToolbarDeleteButton.js:205
-#: components/RelatedTemplateList/RelatedTemplateList.js:241
+#: components/RelatedTemplateList/RelatedTemplateList.js:254
 #: components/ResourceAccessList/ResourceAccessList.js:277
 #: components/ResourceAccessList/ResourceAccessList.js:289
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:654
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:631
 #: components/Schedule/ScheduleList/ScheduleList.js:239
 #: components/Schedule/ScheduleToggle/ScheduleToggle.js:73
 #: components/Schedule/shared/SchedulePromptableFields.js:63
@@ -2873,29 +2902,30 @@ msgstr "워크플로우를 저장하는 동안 오류가 발생했습니다!"
 #: screens/Host/HostDetail/HostDetail.js:123
 #: screens/Host/HostGroups/HostGroupsList.js:244
 #: screens/Host/HostList/HostList.js:233
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:310
-#: screens/InstanceGroup/Instances/InstanceList.js:308
-#: screens/InstanceGroup/Instances/InstanceListItem.js:218
-#: screens/Instances/InstanceDetail/InstanceDetail.js:360
-#: screens/Instances/InstanceDetail/InstanceDetail.js:375
-#: screens/Instances/InstanceList/InstanceList.js:231
-#: screens/Instances/InstanceList/InstanceList.js:243
-#: screens/Instances/InstanceList/InstanceListItem.js:234
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:335
+#: screens/InstanceGroup/Instances/InstanceList.js:330
+#: screens/InstanceGroup/Instances/InstanceListItem.js:247
+#: screens/Instances/InstanceDetail/InstanceDetail.js:370
+#: screens/Instances/InstanceDetail/InstanceDetail.js:385
+#: screens/Instances/InstanceList/InstanceList.js:251
+#: screens/Instances/InstanceList/InstanceList.js:263
+#: screens/Instances/InstanceList/InstanceListItem.js:265
 #: screens/Instances/Shared/RemoveInstanceButton.js:104
-#: screens/Inventory/InventoryDetail/InventoryDetail.js:210
+#: screens/Inventory/InventoryDetail/InventoryDetail.js:195
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.js:78
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.js:285
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.js:296
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.js:56
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.js:118
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.js:261
-#: screens/Inventory/InventoryHosts/InventoryHostList.js:201
+#: screens/Inventory/InventoryHosts/InventoryHostItem.js:118
+#: screens/Inventory/InventoryHosts/InventoryHostList.js:202
 #: screens/Inventory/InventoryList/InventoryList.js:285
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.js:264
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:323
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:329
 #: screens/Inventory/InventorySources/InventorySourceList.js:239
 #: screens/Inventory/InventorySources/InventorySourceList.js:252
-#: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:183
+#: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:167
 #: screens/Inventory/shared/InventoryGroupsDeleteModal.js:152
 #: screens/Inventory/shared/InventorySourceSyncButton.js:49
 #: screens/Login/Login.js:239
@@ -2903,7 +2933,7 @@ msgstr "워크플로우를 저장하는 동안 오류가 발생했습니다!"
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:444
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.js:233
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:169
-#: screens/Organization/OrganizationDetail/OrganizationDetail.js:208
+#: screens/Organization/OrganizationDetail/OrganizationDetail.js:186
 #: screens/Organization/OrganizationList/OrganizationList.js:195
 #: screens/Project/ProjectDetail/ProjectDetail.js:348
 #: screens/Project/ProjectList/ProjectList.js:291
@@ -2913,14 +2943,14 @@ msgstr "워크플로우를 저장하는 동안 오류가 발생했습니다!"
 #: screens/Team/TeamList/TeamList.js:192
 #: screens/Team/TeamRoles/TeamRolesList.js:247
 #: screens/Team/TeamRoles/TeamRolesList.js:258
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:554
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:532
 #: screens/Template/TemplateSurvey.js:130
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:277
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeModal.js:180
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeModal.js:195
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeModal.js:337
 #: screens/Template/WorkflowJobTemplateVisualizer/VisualizerNode.js:373
-#: screens/TopologyView/MeshGraph.js:405
+#: screens/TopologyView/MeshGraph.js:406
 #: screens/TopologyView/Tooltip.js:199
 #: screens/User/UserDetail/UserDetail.js:115
 #: screens/User/UserList/UserList.js:189
@@ -2930,7 +2960,8 @@ msgstr "워크플로우를 저장하는 동안 오류가 발생했습니다!"
 #: screens/User/UserTokenDetail/UserTokenDetail.js:85
 #: screens/User/UserTokenList/UserTokenList.js:214
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:348
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:189
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:247
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:258
 #: screens/WorkflowApproval/shared/WorkflowApprovalButton.js:53
 #: screens/WorkflowApproval/shared/WorkflowDenyButton.js:48
 msgid "Error!"
@@ -2940,8 +2971,8 @@ msgstr "오류!"
 msgid "Error:"
 msgstr "오류:"
 
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:267
-#: screens/Instances/InstanceDetail/InstanceDetail.js:315
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:286
+#: screens/Instances/InstanceDetail/InstanceDetail.js:319
 msgid "Errors"
 msgstr "오류"
 
@@ -2971,7 +3002,7 @@ msgstr "이벤트 요약을 사용할 수 없음"
 msgid "Events"
 msgstr "이벤트"
 
-#: screens/Job/JobOutput/JobOutput.js:713
+#: screens/Job/JobOutput/JobOutput.js:725
 msgid "Events processing complete."
 msgstr "이벤트 처리가 완료되었습니다."
 
@@ -2979,9 +3010,13 @@ msgstr "이벤트 처리가 완료되었습니다."
 msgid "Exact match (default lookup if not specified)."
 msgstr "정확한 일치(지정되지 않은 경우 기본 조회)."
 
-#: components/Search/RelatedLookupTypeInput.js:38
+#: components/Search/RelatedLookupTypeInput.js:44
 msgid "Exact search on id field."
 msgstr "id 필드에서 정확한 검색"
+
+#: components/Search/RelatedLookupTypeInput.js:38
+msgid "Exact search on name field."
+msgstr ""
 
 #: screens/Project/shared/Project.helptext.js:23
 msgid "Example URLs for GIT Source Control include:"
@@ -3003,7 +3038,7 @@ msgstr "예를 들면 다음과 같습니다."
 msgid "Examples:"
 msgstr "예:"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:354
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:350
 msgid "Exception Frequency"
 msgstr "예외 빈도"
 
@@ -3023,8 +3058,8 @@ msgstr "부모 노드가 실패 상태가 되면 실행합니다."
 msgid "Execute when the parent node results in a successful state."
 msgstr "부모 노드가 성공하면 실행됩니다."
 
-#: screens/InstanceGroup/Instances/InstanceList.js:208
-#: screens/Instances/InstanceList/InstanceList.js:152
+#: screens/InstanceGroup/Instances/InstanceList.js:226
+#: screens/Instances/InstanceList/InstanceList.js:170
 msgid "Execution"
 msgstr "실행"
 
@@ -3038,8 +3073,8 @@ msgstr "실행"
 #: components/Lookup/ExecutionEnvironmentLookup.js:159
 #: components/Lookup/ExecutionEnvironmentLookup.js:191
 #: components/Lookup/ExecutionEnvironmentLookup.js:208
-#: components/PromptDetail/PromptDetail.js:220
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:451
+#: components/PromptDetail/PromptDetail.js:221
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:447
 msgid "Execution Environment"
 msgstr "실행 환경"
 
@@ -3154,7 +3189,7 @@ msgid "Extra variables"
 msgstr "추가 변수"
 
 #: components/Sparkline/Sparkline.js:35
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:164
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:165
 #: screens/Inventory/InventorySources/InventorySourceListItem.js:43
 #: screens/Project/ProjectDetail/ProjectDetail.js:139
 #: screens/Project/ProjectList/ProjectListItem.js:77
@@ -3162,7 +3197,7 @@ msgid "FINISHED:"
 msgstr "완료:"
 
 #: components/PromptDetail/PromptJobTemplateDetail.js:73
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:137
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:138
 msgid "Fact Storage"
 msgstr "실제 스토리지"
 
@@ -3182,29 +3217,33 @@ msgstr "팩트"
 #: components/JobList/JobList.js:232
 #: components/StatusLabel/StatusLabel.js:45
 #: components/Workflow/WorkflowNodeHelp.js:105
-#: components/WorkflowOutputNavigation/WorkflowOutputNavigation.js:90
+#: components/WorkflowOutputNavigation/WorkflowOutputNavigation.js:88
 #: screens/Dashboard/shared/ChartTooltip.js:66
 #: screens/Job/JobOutput/shared/HostStatusBar.js:47
-#: screens/Job/JobOutput/shared/OutputToolbar.js:113
+#: screens/Job/JobOutput/shared/OutputToolbar.js:128
 msgid "Failed"
 msgstr "실패"
 
-#: screens/Job/JobOutput/shared/OutputToolbar.js:112
+#: screens/Job/JobOutput/shared/OutputToolbar.js:127
 msgid "Failed Host Count"
 msgstr "실패한 호스트 수"
 
-#: screens/Job/JobOutput/shared/OutputToolbar.js:114
+#: screens/Job/JobOutput/shared/OutputToolbar.js:129
 msgid "Failed Hosts"
 msgstr "실패한 호스트"
 
 #: components/LaunchButton/ReLaunchDropDown.js:61
-#: screens/Dashboard/Dashboard.js:87
+#: screens/Dashboard/Dashboard.js:104
 msgid "Failed hosts"
 msgstr "실패한 호스트"
 
 #: screens/Dashboard/DashboardGraph.js:170
 msgid "Failed jobs"
 msgstr "실패한 작업"
+
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:262
+msgid "Failed to approve one or more workflow approval."
+msgstr ""
 
 #: screens/WorkflowApproval/shared/WorkflowApprovalButton.js:56
 msgid "Failed to approve {0}."
@@ -3220,7 +3259,7 @@ msgid "Failed to associate role"
 msgstr "역할을 연결하지 못했습니다."
 
 #: screens/Host/HostGroups/HostGroupsList.js:248
-#: screens/InstanceGroup/Instances/InstanceList.js:311
+#: screens/InstanceGroup/Instances/InstanceList.js:333
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.js:288
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.js:265
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.js:268
@@ -3228,7 +3267,7 @@ msgstr "역할을 연결하지 못했습니다."
 msgid "Failed to associate."
 msgstr "연결에 실패했습니다."
 
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:301
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:307
 #: screens/Inventory/InventorySources/InventorySourceListItem.js:111
 msgid "Failed to cancel Inventory Source Sync"
 msgstr "인벤토리 소스 동기화를 취소하지 못했습니다."
@@ -3244,7 +3283,7 @@ msgstr "하나 이상의 작업을 취소하지 못했습니다."
 
 #: components/JobList/JobListItem.js:114
 #: screens/Job/JobDetail/JobDetail.js:601
-#: screens/Job/JobOutput/shared/OutputToolbar.js:138
+#: screens/Job/JobOutput/shared/OutputToolbar.js:159
 #: screens/Job/WorkflowOutput/WorkflowOutputToolbar.js:90
 msgid "Failed to cancel {0}"
 msgstr "{0} 취소 실패"
@@ -3287,15 +3326,15 @@ msgstr "그룹 {0} 을/를 삭제하지 못했습니다."
 msgid "Failed to delete host."
 msgstr "호스트를 삭제하지 못했습니다."
 
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:327
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:333
 msgid "Failed to delete inventory source {name}."
 msgstr "인벤토리 소스 {name} 삭제에 실패했습니다."
 
-#: screens/Inventory/InventoryDetail/InventoryDetail.js:213
+#: screens/Inventory/InventoryDetail/InventoryDetail.js:198
 msgid "Failed to delete inventory."
 msgstr "인벤토리를 삭제하지 못했습니다."
 
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:557
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:535
 msgid "Failed to delete job template."
 msgstr "작업 템플릿을 삭제하지 못했습니다."
 
@@ -3324,7 +3363,7 @@ msgid "Failed to delete one or more groups."
 msgstr "하나 이상의 그룹을 삭제하지 못했습니다."
 
 #: screens/Host/HostList/HostList.js:236
-#: screens/Inventory/InventoryHosts/InventoryHostList.js:204
+#: screens/Inventory/InventoryHosts/InventoryHostList.js:205
 msgid "Failed to delete one or more hosts."
 msgstr "하나 이상의 호스트를 삭제하지 못했습니다."
 
@@ -3340,7 +3379,7 @@ msgstr "하나 이상의 인벤토리를 삭제하지 못했습니다."
 msgid "Failed to delete one or more inventory sources."
 msgstr "하나 이상의 인벤토리 소스를 삭제하지 못했습니다."
 
-#: components/RelatedTemplateList/RelatedTemplateList.js:244
+#: components/RelatedTemplateList/RelatedTemplateList.js:257
 msgid "Failed to delete one or more job templates."
 msgstr "하나 이상의 작업 템플릿을 삭제하지 못했습니다."
 
@@ -3384,11 +3423,11 @@ msgstr "하나 이상의 사용자 토큰을 삭제하지 못했습니다."
 msgid "Failed to delete one or more users."
 msgstr "하나 이상의 사용자를 삭제하지 못했습니다."
 
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:192
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:250
 msgid "Failed to delete one or more workflow approval."
 msgstr "하나 이상의 워크플로우 승인을 삭제하지 못했습니다."
 
-#: screens/Organization/OrganizationDetail/OrganizationDetail.js:211
+#: screens/Organization/OrganizationDetail/OrganizationDetail.js:189
 msgid "Failed to delete organization."
 msgstr "조직을 삭제하지 못했습니다."
 
@@ -3405,11 +3444,11 @@ msgstr "역할을 삭제하지 못했습니다"
 msgid "Failed to delete role."
 msgstr "역할을 삭제하지 못했습니다."
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:657
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:634
 msgid "Failed to delete schedule."
 msgstr "일정을 삭제하지 못했습니다."
 
-#: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:186
+#: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:170
 msgid "Failed to delete smart inventory."
 msgstr "스마트 인벤토리를 삭제하지 못했습니다."
 
@@ -3434,6 +3473,10 @@ msgstr "워크플로 작업 템플릿을 삭제하지 못했습니다."
 msgid "Failed to delete {name}."
 msgstr "{name} 을/를 삭제하지 못했습니다."
 
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:263
+msgid "Failed to deny one or more workflow approval."
+msgstr ""
+
 #: screens/WorkflowApproval/shared/WorkflowDenyButton.js:51
 msgid "Failed to deny {0}."
 msgstr "{0} 을/를 거부하지 못했습니다."
@@ -3448,9 +3491,9 @@ msgstr "하나 이상의 그룹을 연결 해제하지 못했습니다."
 msgid "Failed to disassociate one or more hosts."
 msgstr "하나 이상의 호스트를 연결 해제하지 못했습니다."
 
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:315
-#: screens/InstanceGroup/Instances/InstanceList.js:313
-#: screens/Instances/InstanceDetail/InstanceDetail.js:365
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:340
+#: screens/InstanceGroup/Instances/InstanceList.js:335
+#: screens/Instances/InstanceDetail/InstanceDetail.js:375
 msgid "Failed to disassociate one or more instances."
 msgstr "하나 이상의 인스턴스를 연결 해제하지 못했습니다."
 
@@ -3466,18 +3509,22 @@ msgstr "사용자 정의 로그인 구성 설정을 가져오지 못했습니다
 msgid "Failed to fetch the updated project data."
 msgstr "업데이트된 프로젝트 데이터를 가져오지 못했습니다."
 
-#: screens/TopologyView/MeshGraph.js:409
+#: screens/TopologyView/MeshGraph.js:410
 msgid "Failed to get instance."
 msgstr "인스턴스를 가져오지 못했습니다."
 
 #: components/AdHocCommands/AdHocCommands.js:112
-#: components/LaunchButton/LaunchButton.js:188
+#: components/LaunchButton/LaunchButton.js:199
 #: screens/ManagementJob/ManagementJobList/ManagementJobList.js:128
 msgid "Failed to launch job."
 msgstr "작업을 시작하지 못했습니다."
 
-#: screens/Instances/InstanceDetail/InstanceDetail.js:378
-#: screens/Instances/InstanceList/InstanceList.js:246
+#: screens/Inventory/InventoryHosts/InventoryHostItem.js:121
+msgid "Failed to load related groups."
+msgstr ""
+
+#: screens/Instances/InstanceDetail/InstanceDetail.js:388
+#: screens/Instances/InstanceList/InstanceList.js:266
 msgid "Failed to remove one or more instances."
 msgstr "하나 이상의 인스턴스를 제거하지 못했습니다."
 
@@ -3489,8 +3536,8 @@ msgstr "구성을 검색하지 못했습니다."
 msgid "Failed to retrieve full node resource object."
 msgstr "전체 노드 리소스 오브젝트를 검색하지 못했습니다."
 
-#: screens/InstanceGroup/Instances/InstanceList.js:315
-#: screens/Instances/InstanceList/InstanceList.js:234
+#: screens/InstanceGroup/Instances/InstanceList.js:337
+#: screens/Instances/InstanceList/InstanceList.js:254
 msgid "Failed to run a health check on one or more instances."
 msgstr "하나 이상의 인스턴스에서 상태 확인을 실행하지 못했습니다."
 
@@ -3526,10 +3573,10 @@ msgstr "알림을 전환하지 못했습니다."
 msgid "Failed to toggle schedule."
 msgstr "일정을 전환하지 못했습니다."
 
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:314
-#: screens/InstanceGroup/Instances/InstanceListItem.js:222
-#: screens/Instances/InstanceDetail/InstanceDetail.js:364
-#: screens/Instances/InstanceList/InstanceListItem.js:238
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:339
+#: screens/InstanceGroup/Instances/InstanceListItem.js:251
+#: screens/Instances/InstanceDetail/InstanceDetail.js:374
+#: screens/Instances/InstanceList/InstanceListItem.js:269
 msgid "Failed to update capacity adjustment."
 msgstr "크기 조정을 업데이트하지 못했습니다."
 
@@ -3577,7 +3624,7 @@ msgstr "필드에 값이 있습니다."
 msgid "Field ends with value."
 msgstr "필드는 값으로 끝납니다."
 
-#: screens/InstanceGroup/shared/ContainerGroupForm.js:76
+#: screens/InstanceGroup/shared/ContainerGroupForm.js:96
 msgid "Field for passing a custom Kubernetes or OpenShift Pod specification."
 msgstr "사용자 정의 Kubernetes 또는 OpenShift Pod 사양을 전달하는 필드입니다."
 
@@ -3610,11 +3657,11 @@ msgstr "파일, 디렉터리 또는 스크립트"
 msgid "Filter By {name}"
 msgstr "{name}으로 필터링"
 
-#: components/WorkflowOutputNavigation/WorkflowOutputNavigation.js:88
+#: components/WorkflowOutputNavigation/WorkflowOutputNavigation.js:86
 msgid "Filter by failed jobs"
 msgstr "실패한 작업으로 필터링"
 
-#: components/WorkflowOutputNavigation/WorkflowOutputNavigation.js:94
+#: components/WorkflowOutputNavigation/WorkflowOutputNavigation.js:92
 msgid "Filter by successful jobs"
 msgstr "성공한 작업으로 필터링"
 
@@ -3643,7 +3690,7 @@ msgstr "첫 번째"
 msgid "First Name"
 msgstr "이름"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:332
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:328
 msgid "First Run"
 msgstr "첫 번째 실행"
 
@@ -3686,11 +3733,11 @@ msgstr "자세한 내용은 다음을 참조하십시오."
 #: components/AdHocCommands/AdHocDetailsStep.js:160
 #: components/AdHocCommands/AdHocDetailsStep.js:161
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:55
-#: components/PromptDetail/PromptDetail.js:345
+#: components/PromptDetail/PromptDetail.js:332
 #: components/PromptDetail/PromptJobTemplateDetail.js:150
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:475
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:471
 #: screens/Job/JobDetail/JobDetail.js:389
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:259
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:255
 #: screens/Template/shared/JobTemplateForm.js:409
 #: screens/TopologyView/Tooltip.js:282
 msgid "Forks"
@@ -3700,12 +3747,12 @@ msgstr "포크"
 msgid "Fourth"
 msgstr "네 번째"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:363
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:359
 #: components/Schedule/shared/ScheduleFormFields.js:146
 msgid "Frequency Details"
 msgstr "빈도 세부 정보"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:381
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:377
 msgid "Frequency Exception Details"
 msgstr "빈도 예외 세부 정보"
 
@@ -3727,7 +3774,7 @@ msgstr "금요일"
 msgid "Friday"
 msgstr "금요일"
 
-#: components/Search/RelatedLookupTypeInput.js:45
+#: components/Search/RelatedLookupTypeInput.js:51
 msgid "Fuzzy search on id, name or description fields."
 msgstr "id, 이름 또는 설명 필드에서 퍼지 검색"
 
@@ -3739,7 +3786,7 @@ msgstr "이름 필드에서 퍼지 검색"
 msgid "GPG Public Key"
 msgstr "GPG 공개 키"
 
-#: screens/Organization/OrganizationDetail/OrganizationDetail.js:153
+#: screens/Organization/OrganizationDetail/OrganizationDetail.js:131
 #: screens/Organization/shared/OrganizationForm.js:101
 msgid "Galaxy Credentials"
 msgstr "Galaxy 인증 정보"
@@ -3777,7 +3824,7 @@ msgstr "서브스크립션 가져오기"
 msgid "Git"
 msgstr "Git"
 
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:312
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:308
 #: screens/Template/shared/WebhookSubForm.js:106
 msgid "GitHub"
 msgstr "GitHub"
@@ -3816,7 +3863,7 @@ msgstr "GitHub 팀"
 msgid "GitHub settings"
 msgstr "GitHub 설정"
 
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:312
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:308
 #: screens/Template/shared/WebhookSubForm.js:112
 msgid "GitLab"
 msgstr "GitLab"
@@ -3920,6 +3967,19 @@ msgstr "HTTP 방법"
 msgid "Health check request(s) submitted. Please wait and reload the page."
 msgstr "상태 점검 요청이 제출되었습니다. 잠시 기다렸다가 페이지를 다시 로드하십시오."
 
+#: components/InstanceDetails.js/InstanceDetails.js:293
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:227
+#: screens/InstanceGroup/Instances/InstanceListItem.js:225
+#: screens/Instances/InstanceDetail/InstanceDetail.js:234
+#: screens/Instances/InstanceList/InstanceListItem.js:242
+msgid "Health checks are asynchronous tasks. See the"
+msgstr ""
+
+#: screens/InstanceGroup/Instances/InstanceList.js:286
+#: screens/Instances/InstanceList/InstanceList.js:219
+msgid "Health checks can only be run on execution nodes."
+msgstr ""
+
 #: components/StatusLabel/StatusLabel.js:42
 msgid "Healthy"
 msgstr "상태 양호"
@@ -3942,7 +4002,7 @@ msgstr "설명 숨기기"
 msgid "Hipchat"
 msgstr "Hipchat"
 
-#: screens/Instances/InstanceList/InstanceList.js:154
+#: screens/Instances/InstanceList/InstanceList.js:172
 msgid "Hop"
 msgstr "홉"
 
@@ -3950,8 +4010,9 @@ msgstr "홉"
 msgid "Hop node"
 msgstr "홉 노드"
 
-#: screens/Instances/InstanceDetail/InstanceDetail.js:211
-#: screens/Job/JobOutput/HostEventModal.js:109
+#: components/InstanceDetails.js/InstanceDetails.js:257
+#: screens/Instances/InstanceDetail/InstanceDetail.js:214
+#: screens/Job/JobOutput/HostEventModal.js:110
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:149
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:78
 msgid "Host"
@@ -3966,16 +4027,16 @@ msgid "Host Async OK"
 msgstr "호스트 동기화 확인"
 
 #: components/PromptDetail/PromptJobTemplateDetail.js:159
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:297
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:293
 #: screens/Template/shared/JobTemplateForm.js:633
 msgid "Host Config Key"
 msgstr "호스트 구성 키"
 
-#: screens/Job/JobOutput/shared/OutputToolbar.js:96
+#: screens/Job/JobOutput/shared/OutputToolbar.js:111
 msgid "Host Count"
 msgstr "호스트 수"
 
-#: screens/Job/JobOutput/HostEventModal.js:88
+#: screens/Job/JobOutput/HostEventModal.js:89
 msgid "Host Details"
 msgstr "호스트 세부 정보"
 
@@ -3987,13 +4048,14 @@ msgstr "호스트 실패"
 msgid "Host Failure"
 msgstr "호스트 실패"
 
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:242
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:248
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:145
 msgid "Host Filter"
 msgstr "호스트 필터"
 
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:201
-#: screens/Instances/InstanceDetail/InstanceDetail.js:191
+#: components/InstanceDetails.js/InstanceDetails.js:237
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:205
+#: screens/Instances/InstanceDetail/InstanceDetail.js:194
 #: screens/Instances/Shared/InstanceForm.js:18
 msgid "Host Name"
 msgstr "호스트 이름"
@@ -4026,7 +4088,7 @@ msgstr "호스트에 연결할 수 없음"
 msgid "Host details"
 msgstr "호스트 세부 정보"
 
-#: screens/Job/JobOutput/HostEventModal.js:89
+#: screens/Job/JobOutput/HostEventModal.js:90
 msgid "Host details modal"
 msgstr "호스트 세부 정보 모달"
 
@@ -4041,7 +4103,7 @@ msgstr "이 작업의 호스트 상태 정보를 사용할 수 없습니다."
 
 #: routeConfig.js:85
 #: screens/ActivityStream/ActivityStream.js:176
-#: screens/Dashboard/Dashboard.js:81
+#: screens/Dashboard/Dashboard.js:98
 #: screens/Host/HostList/HostList.js:143
 #: screens/Host/HostList/HostList.js:191
 #: screens/Host/Hosts.js:14
@@ -4053,10 +4115,10 @@ msgstr "이 작업의 호스트 상태 정보를 사용할 수 없습니다."
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.js:189
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.js:272
 #: screens/Inventory/InventoryHosts/InventoryHostList.js:112
-#: screens/Inventory/InventoryHosts/InventoryHostList.js:172
+#: screens/Inventory/InventoryHosts/InventoryHostList.js:173
 #: screens/Inventory/SmartInventory.js:68
 #: screens/Inventory/SmartInventoryHosts/SmartInventoryHostList.js:71
-#: screens/Job/JobOutput/shared/OutputToolbar.js:97
+#: screens/Job/JobOutput/shared/OutputToolbar.js:112
 #: util/getRelatedResourceDeleteDetails.js:123
 msgid "Hosts"
 msgstr "호스트"
@@ -4078,15 +4140,15 @@ msgstr "가져온 호스트"
 msgid "Hosts remaining"
 msgstr "남아 있는 호스트"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:183
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:179
 #: components/Schedule/shared/FrequencyDetailSubform.js:175
 #: components/Schedule/shared/ScheduleFormFields.js:126
 #: components/Schedule/shared/ScheduleFormFields.js:186
 msgid "Hour"
 msgstr "시간"
 
-#: screens/InstanceGroup/Instances/InstanceList.js:209
-#: screens/Instances/InstanceList/InstanceList.js:153
+#: screens/InstanceGroup/Instances/InstanceList.js:227
+#: screens/Instances/InstanceList/InstanceList.js:171
 msgid "Hybrid"
 msgstr "하이브리드"
 
@@ -4205,18 +4267,20 @@ msgstr "활성화하면 이 작업 템플릿을 동시에 실행할 수 있습�
 msgid "If enabled, simultaneous runs of this workflow job template will be allowed."
 msgstr "활성화하면 이 워크플로 작업 템플릿을 동시에 실행할 수 있습니다."
 
-#: screens/Inventory/shared/Inventory.helptext.js:194
+#: screens/Inventory/shared/Inventory.helptext.js:195
 msgid ""
 "If enabled, the inventory will prevent adding any organization instance groups to the list of preferred instances groups to run associated job templates on.\n"
 "Note: If this setting is enabled and you provided an empty list, the global instance groups will be applied."
-msgstr "활성화된 경우 인벤토리에서 연결된 작업 템플릿을 실행할 기본 인스턴스 그룹 목록에 조직 인스턴스 그룹을 추가할 수 없습니다. \n"
+msgstr ""
+"활성화된 경우 인벤토리에서 연결된 작업 템플릿을 실행할 기본 인스턴스 그룹 목록에 조직 인스턴스 그룹을 추가할 수 없습니다. \n"
 " 참고: 이 설정이 활성화되어 있고 빈 목록을 제공한 경우 글로벌 인스턴스 그룹이 적용됩니다."
 
 #: screens/Template/shared/JobTemplate.helptext.js:33
 msgid ""
 "If enabled, the job template will prevent adding any inventory or organization instance groups to the list of preferred instances groups to run on.\n"
 "Note: If this setting is enabled and you provided an empty list, the global instance groups will be applied."
-msgstr "활성화된 경우 작업 템플릿에서 실행할 기본 인스턴스 그룹 목록에 인벤토리 또는 조직 인스턴스 그룹을 추가하지 않습니다. \n"
+msgstr ""
+"활성화된 경우 작업 템플릿에서 실행할 기본 인스턴스 그룹 목록에 인벤토리 또는 조직 인스턴스 그룹을 추가하지 않습니다. \n"
 " 참고: 이 설정이 활성화되어 있고 빈 목록을 제공한 경우 글로벌 인스턴스 그룹이 적용됩니다."
 
 #: screens/Template/shared/JobTemplate.helptext.js:35
@@ -4314,7 +4378,8 @@ msgstr "Insights 인증 정보"
 msgid "Insights system ID"
 msgstr "Insights 시스템 ID"
 
-#: screens/Instances/InstanceDetail/InstanceDetail.js:249
+#: components/InstanceDetails.js/InstanceDetails.js:310
+#: screens/Instances/InstanceDetail/InstanceDetail.js:251
 msgid "Install Bundle"
 msgstr "번들 설치"
 
@@ -4335,25 +4400,26 @@ msgstr "인스턴스 필터"
 msgid "Instance Group"
 msgstr "인스턴스 그룹"
 
+#: components/InstanceDetails.js/InstanceDetails.js:263
 #: components/LaunchPrompt/steps/InstanceGroupsStep.js:96
 #: components/LaunchPrompt/steps/useInstanceGroupsStep.js:31
 #: components/Lookup/InstanceGroupsLookup.js:74
 #: components/Lookup/InstanceGroupsLookup.js:121
 #: components/Lookup/InstanceGroupsLookup.js:141
 #: components/Lookup/InstanceGroupsLookup.js:151
-#: components/PromptDetail/PromptDetail.js:227
+#: components/PromptDetail/PromptDetail.js:228
 #: components/PromptDetail/PromptJobTemplateDetail.js:228
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:499
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:495
 #: routeConfig.js:132
 #: screens/ActivityStream/ActivityStream.js:205
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:106
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:179
 #: screens/InstanceGroup/InstanceGroups.js:16
 #: screens/InstanceGroup/InstanceGroups.js:26
-#: screens/Instances/InstanceDetail/InstanceDetail.js:217
-#: screens/Inventory/InventoryDetail/InventoryDetail.js:107
-#: screens/Organization/OrganizationDetail/OrganizationDetail.js:127
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:422
+#: screens/Instances/InstanceDetail/InstanceDetail.js:220
+#: screens/Inventory/InventoryDetail/InventoryDetail.js:108
+#: screens/Organization/OrganizationDetail/OrganizationDetail.js:123
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:418
 #: util/getRelatedResourceDeleteDetails.js:282
 msgid "Instance Groups"
 msgstr "인스턴스 그룹"
@@ -4383,8 +4449,8 @@ msgstr "인스턴스 그룹"
 msgid "Instance group not found."
 msgstr "인스턴스 그룹을 찾을 수 없습니다."
 
-#: screens/InstanceGroup/Instances/InstanceListItem.js:165
-#: screens/Instances/InstanceList/InstanceListItem.js:176
+#: screens/InstanceGroup/Instances/InstanceListItem.js:179
+#: screens/Instances/InstanceList/InstanceListItem.js:192
 msgid "Instance group used capacity"
 msgstr "인스턴스 그룹이 사용하는 용량"
 
@@ -4407,9 +4473,9 @@ msgstr "인스턴스 유형"
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:198
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:73
 #: screens/InstanceGroup/InstanceGroups.js:31
-#: screens/InstanceGroup/Instances/InstanceList.js:192
-#: screens/InstanceGroup/Instances/InstanceList.js:290
-#: screens/Instances/InstanceList/InstanceList.js:136
+#: screens/InstanceGroup/Instances/InstanceList.js:210
+#: screens/InstanceGroup/Instances/InstanceList.js:312
+#: screens/Instances/InstanceList/InstanceList.js:154
 #: screens/Instances/Instances.js:13
 #: screens/Instances/Instances.js:22
 msgid "Instances"
@@ -4442,7 +4508,7 @@ msgstr "사용자 이름 또는 암호가 잘못되었습니다. 다시 시도�
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:119
 #: routeConfig.js:80
 #: screens/ActivityStream/ActivityStream.js:173
-#: screens/Dashboard/Dashboard.js:92
+#: screens/Dashboard/Dashboard.js:109
 #: screens/Inventory/Inventories.js:17
 #: screens/Inventory/InventoryList/InventoryList.js:174
 #: screens/Inventory/InventoryList/InventoryList.js:237
@@ -4466,18 +4532,18 @@ msgstr "소스와 함께 인벤토리를 복사할 수 없습니다."
 #: components/Lookup/InventoryLookup.js:169
 #: components/Lookup/InventoryLookup.js:184
 #: components/Lookup/InventoryLookup.js:224
-#: components/PromptDetail/PromptDetail.js:214
+#: components/PromptDetail/PromptDetail.js:215
 #: components/PromptDetail/PromptInventorySourceDetail.js:76
 #: components/PromptDetail/PromptJobTemplateDetail.js:119
 #: components/PromptDetail/PromptJobTemplateDetail.js:129
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:79
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:430
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:426
 #: components/TemplateList/TemplateListItem.js:285
 #: components/TemplateList/TemplateListItem.js:295
 #: screens/Host/HostDetail/HostDetail.js:77
 #: screens/Host/HostList/HostList.js:171
 #: screens/Host/HostList/HostListItem.js:61
-#: screens/Inventory/InventoryDetail/InventoryDetail.js:94
+#: screens/Inventory/InventoryDetail/InventoryDetail.js:95
 #: screens/Inventory/InventoryList/InventoryList.js:186
 #: screens/Inventory/InventoryList/InventoryListItem.js:117
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.js:38
@@ -4486,8 +4552,8 @@ msgstr "소스와 함께 인벤토리를 복사할 수 없습니다."
 #: screens/Job/JobDetail/JobDetail.js:107
 #: screens/Job/JobDetail/JobDetail.js:122
 #: screens/Job/JobDetail/JobDetail.js:129
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:214
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:224
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:210
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:220
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:141
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/JobTemplatesList.js:33
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:252
@@ -4514,7 +4580,7 @@ msgstr "인벤토리 소스"
 msgid "Inventory Source Sync"
 msgstr "인벤토리 소스 동기화"
 
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:299
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:305
 #: screens/Inventory/InventorySources/InventorySourceListItem.js:110
 msgid "Inventory Source Sync Error"
 msgstr "인벤토리 소스 동기화 오류"
@@ -4546,8 +4612,8 @@ msgstr "인벤토리 업데이트"
 msgid "Inventory copied successfully"
 msgstr "인벤토리가 성공적으로 복사됨"
 
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:226
-#: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:109
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:227
+#: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:116
 msgid "Inventory file"
 msgstr "인벤토리 파일"
 
@@ -4559,7 +4625,7 @@ msgstr "인벤토리를 찾을 수 없음"
 msgid "Inventory sync"
 msgstr "인벤토리 동기화"
 
-#: screens/Dashboard/Dashboard.js:98
+#: screens/Dashboard/Dashboard.js:115
 msgid "Inventory sync failures"
 msgstr "인벤토리 동기화 실패"
 
@@ -4593,18 +4659,18 @@ msgid "Items per page"
 msgstr "페이지당 항목"
 
 #: components/Sparkline/Sparkline.js:28
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:157
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:158
 #: screens/Inventory/InventorySources/InventorySourceListItem.js:36
 #: screens/Project/ProjectDetail/ProjectDetail.js:132
 #: screens/Project/ProjectList/ProjectListItem.js:70
 msgid "JOB ID:"
 msgstr "작업 ID:"
 
-#: screens/Job/JobOutput/HostEventModal.js:136
+#: screens/Job/JobOutput/HostEventModal.js:134
 msgid "JSON"
 msgstr "JSON"
 
-#: screens/Job/JobOutput/HostEventModal.js:137
+#: screens/Job/JobOutput/HostEventModal.js:135
 msgid "JSON tab"
 msgstr "JSON 탭"
 
@@ -4619,16 +4685,16 @@ msgstr "1월"
 
 #: components/JobList/JobListItem.js:112
 #: screens/Job/JobDetail/JobDetail.js:599
-#: screens/Job/JobOutput/JobOutput.js:845
-#: screens/Job/JobOutput/JobOutput.js:846
-#: screens/Job/JobOutput/shared/OutputToolbar.js:136
+#: screens/Job/JobOutput/JobOutput.js:857
+#: screens/Job/JobOutput/JobOutput.js:858
+#: screens/Job/JobOutput/shared/OutputToolbar.js:157
 #: screens/Job/WorkflowOutput/WorkflowOutputToolbar.js:88
 msgid "Job Cancel Error"
 msgstr "작업 취소 오류"
 
 #: screens/Job/JobDetail/JobDetail.js:621
-#: screens/Job/JobOutput/JobOutput.js:834
-#: screens/Job/JobOutput/JobOutput.js:835
+#: screens/Job/JobOutput/JobOutput.js:846
+#: screens/Job/JobOutput/JobOutput.js:847
 msgid "Job Delete Error"
 msgstr "작업 삭제 오류"
 
@@ -4651,10 +4717,10 @@ msgid "Job Slice Parent"
 msgstr "작업 분할 부모"
 
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:76
-#: components/PromptDetail/PromptDetail.js:349
+#: components/PromptDetail/PromptDetail.js:336
 #: components/PromptDetail/PromptJobTemplateDetail.js:158
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:494
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:289
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:490
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:285
 #: screens/Template/shared/JobTemplateForm.js:453
 msgid "Job Slicing"
 msgstr "작업 분할"
@@ -4665,11 +4731,11 @@ msgstr "작업 상태"
 
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:97
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:98
-#: components/PromptDetail/PromptDetail.js:267
+#: components/PromptDetail/PromptDetail.js:254
 #: components/PromptDetail/PromptJobTemplateDetail.js:247
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:571
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:548
 #: screens/Job/JobDetail/JobDetail.js:474
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:449
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:427
 #: screens/Template/shared/JobTemplateForm.js:521
 #: screens/Template/shared/WorkflowJobTemplateForm.js:218
 msgid "Job Tags"
@@ -4690,7 +4756,7 @@ msgstr "작업 템플릿"
 msgid "Job Template default credentials must be replaced with one of the same type.  Please select a credential for the following types in order to proceed: {0}"
 msgstr "작업 템플릿 기본 인증 정보는 동일한 유형 중 하나로 교체해야 합니다. 계속하려면 다음 유형의 인증 정보를 선택하십시오. {0}"
 
-#: screens/Credential/Credential.js:79
+#: screens/Credential/Credential.js:99
 #: screens/Credential/Credentials.js:30
 #: screens/Inventory/Inventories.js:62
 #: screens/Inventory/Inventory.js:74
@@ -4713,26 +4779,26 @@ msgstr "노드를 생성하거나 편집할 때 암호를 입력하라는 인증
 
 #: components/JobList/JobList.js:208
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:146
-#: components/PromptDetail/PromptDetail.js:185
+#: components/PromptDetail/PromptDetail.js:186
 #: components/PromptDetail/PromptJobTemplateDetail.js:102
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:423
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:419
 #: screens/Job/JobDetail/JobDetail.js:267
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:192
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:188
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:138
 #: screens/Template/shared/JobTemplateForm.js:256
 msgid "Job Type"
 msgstr "작업 유형"
 
-#: screens/Dashboard/Dashboard.js:125
+#: screens/Dashboard/Dashboard.js:142
 msgid "Job status"
 msgstr "작업 상태"
 
-#: screens/Dashboard/Dashboard.js:123
+#: screens/Dashboard/Dashboard.js:140
 msgid "Job status graph tab"
 msgstr "작업 상태 그래프 탭"
 
-#: components/RelatedTemplateList/RelatedTemplateList.js:156
-#: components/RelatedTemplateList/RelatedTemplateList.js:206
+#: components/RelatedTemplateList/RelatedTemplateList.js:169
+#: components/RelatedTemplateList/RelatedTemplateList.js:219
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:15
 msgid "Job templates"
 msgstr "작업 템플릿"
@@ -4846,7 +4912,7 @@ msgstr "LDAP4"
 msgid "LDAP5"
 msgstr "LDAP5"
 
-#: components/RelatedTemplateList/RelatedTemplateList.js:178
+#: components/RelatedTemplateList/RelatedTemplateList.js:191
 #: components/TemplateList/TemplateList.js:234
 msgid "Label"
 msgstr "레이블"
@@ -4857,15 +4923,15 @@ msgstr "레이블 이름"
 
 #: components/JobList/JobListItem.js:284
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:223
-#: components/PromptDetail/PromptDetail.js:323
+#: components/PromptDetail/PromptDetail.js:310
 #: components/PromptDetail/PromptJobTemplateDetail.js:209
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:116
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:551
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:528
 #: components/TemplateList/TemplateListItem.js:347
-#: screens/Inventory/InventoryDetail/InventoryDetail.js:148
+#: screens/Inventory/InventoryDetail/InventoryDetail.js:133
 #: screens/Inventory/shared/InventoryForm.js:83
 #: screens/Job/JobDetail/JobDetail.js:453
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:401
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:397
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:206
 #: screens/Template/shared/JobTemplateForm.js:387
 #: screens/Template/shared/WorkflowJobTemplateForm.js:195
@@ -4877,18 +4943,19 @@ msgstr "레이블"
 msgid "Last"
 msgstr "마지막"
 
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:220
-#: screens/InstanceGroup/Instances/InstanceListItem.js:133
-#: screens/InstanceGroup/Instances/InstanceListItem.js:208
-#: screens/Instances/InstanceDetail/InstanceDetail.js:243
-#: screens/Instances/InstanceList/InstanceListItem.js:138
-#: screens/Instances/InstanceList/InstanceListItem.js:223
+#: components/InstanceDetails.js/InstanceDetails.js:289
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:224
+#: screens/InstanceGroup/Instances/InstanceListItem.js:147
+#: screens/InstanceGroup/Instances/InstanceListItem.js:222
+#: screens/Instances/InstanceDetail/InstanceDetail.js:230
+#: screens/Instances/InstanceList/InstanceListItem.js:154
+#: screens/Instances/InstanceList/InstanceListItem.js:239
 #: screens/Instances/InstancePeers/InstancePeerListItem.js:47
 #: screens/Instances/InstancePeers/InstancePeerListItem.js:87
 msgid "Last Health Check"
 msgstr "마지막 상태 점검"
 
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:183
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:184
 #: screens/Project/ProjectDetail/ProjectDetail.js:161
 msgid "Last Job Status"
 msgstr "마지막 작업 상태"
@@ -4897,8 +4964,8 @@ msgstr "마지막 작업 상태"
 msgid "Last Login"
 msgstr "마지막 로그인"
 
-#: components/PromptDetail/PromptDetail.js:161
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:411
+#: components/PromptDetail/PromptDetail.js:162
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:407
 #: components/TemplateList/TemplateListItem.js:316
 #: screens/Application/ApplicationDetails/ApplicationDetails.js:106
 #: screens/Application/ApplicationsList/ApplicationListItem.js:45
@@ -4907,17 +4974,17 @@ msgstr "마지막 로그인"
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:95
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:108
 #: screens/Host/HostDetail/HostDetail.js:89
-#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:72
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:98
-#: screens/Inventory/InventoryDetail/InventoryDetail.js:178
+#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:91
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:112
+#: screens/Inventory/InventoryDetail/InventoryDetail.js:163
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.js:45
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.js:84
 #: screens/Job/JobDetail/JobDetail.js:538
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:398
-#: screens/Organization/OrganizationDetail/OrganizationDetail.js:120
+#: screens/Organization/OrganizationDetail/OrganizationDetail.js:116
 #: screens/Project/ProjectDetail/ProjectDetail.js:297
 #: screens/Team/TeamDetail/TeamDetail.js:48
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:358
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:354
 #: screens/User/UserDetail/UserDetail.js:84
 #: screens/User/UserTokenDetail/UserTokenDetail.js:66
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:204
@@ -4940,7 +5007,7 @@ msgstr "성"
 msgid "Last Ran"
 msgstr "마지막 실행"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:341
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:337
 msgid "Last Run"
 msgstr "마지막 실행"
 
@@ -4948,8 +5015,8 @@ msgstr "마지막 실행"
 msgid "Last job"
 msgstr "마지막 작업"
 
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:280
-#: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:151
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:286
+#: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:135
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.js:49
 #: screens/Project/ProjectList/ProjectListItem.js:308
 #: screens/TopologyView/Tooltip.js:331
@@ -4973,8 +5040,8 @@ msgstr "마지막으로 사용됨"
 #: components/LaunchPrompt/steps/usePreviewStep.js:35
 #: screens/ManagementJob/ManagementJobList/LaunchManagementPrompt.js:54
 #: screens/ManagementJob/ManagementJobList/LaunchManagementPrompt.js:57
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:520
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:529
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:498
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:507
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:245
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:254
 msgid "Launch"
@@ -5041,12 +5108,12 @@ msgstr "비교 값보다 적거나 같습니다."
 #: components/AdHocCommands/AdHocDetailsStep.js:141
 #: components/JobList/JobList.js:238
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:65
-#: components/PromptDetail/PromptDetail.js:255
+#: components/PromptDetail/PromptDetail.js:242
 #: components/PromptDetail/PromptJobTemplateDetail.js:153
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:90
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:473
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:469
 #: screens/Job/JobDetail/JobDetail.js:325
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:265
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:261
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:151
 #: screens/Template/shared/JobTemplateForm.js:429
 #: screens/Template/shared/WorkflowJobTemplateForm.js:159
@@ -5074,7 +5141,7 @@ msgstr "로딩 중"
 msgid "Local"
 msgstr "지역"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:343
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:339
 msgid "Local Time Zone"
 msgstr "현지 시간대"
 
@@ -5117,7 +5184,7 @@ msgstr "검색 유형"
 msgid "Lookup typeahead"
 msgstr "자동 완성 검색"
 
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:155
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:156
 #: screens/Inventory/InventorySources/InventorySourceListItem.js:34
 #: screens/Project/ProjectDetail/ProjectDetail.js:130
 #: screens/Project/ProjectList/ProjectListItem.js:68
@@ -5172,14 +5239,15 @@ msgstr "관리 작업을 찾을 수 없습니다."
 msgid "Management jobs"
 msgstr "관리 작업"
 
+#: components/InstanceDetails.js/InstanceDetails.js:255
 #: components/Lookup/ProjectLookup.js:135
 #: components/PromptDetail/PromptProjectDetail.js:98
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:88
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:157
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:215
-#: screens/InstanceGroup/Instances/InstanceListItem.js:204
-#: screens/Instances/InstanceDetail/InstanceDetail.js:209
-#: screens/Instances/InstanceList/InstanceListItem.js:219
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:219
+#: screens/InstanceGroup/Instances/InstanceListItem.js:218
+#: screens/Instances/InstanceDetail/InstanceDetail.js:212
+#: screens/Instances/InstanceList/InstanceListItem.js:235
 #: screens/Instances/InstancePeers/InstancePeerListItem.js:83
 #: screens/Job/JobDetail/JobDetail.js:74
 #: screens/Project/ProjectDetail/ProjectDetail.js:192
@@ -5199,10 +5267,24 @@ msgstr "3월"
 msgid "Mattermost"
 msgstr "가장 중요"
 
-#: screens/Organization/OrganizationDetail/OrganizationDetail.js:98
+#: screens/Organization/OrganizationDetail/OrganizationDetail.js:94
 #: screens/Organization/shared/OrganizationForm.js:71
 msgid "Max Hosts"
 msgstr "최대 호스트"
+
+#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:56
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:77
+#: screens/InstanceGroup/shared/ContainerGroupForm.js:62
+#: screens/InstanceGroup/shared/InstanceGroupForm.js:47
+msgid "Max concurrent jobs"
+msgstr ""
+
+#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:63
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:84
+#: screens/InstanceGroup/shared/ContainerGroupForm.js:72
+#: screens/InstanceGroup/shared/InstanceGroupForm.js:57
+msgid "Max forks"
+msgstr ""
 
 #: screens/Template/Survey/SurveyQuestionForm.js:220
 msgid "Maximum"
@@ -5211,6 +5293,24 @@ msgstr "최대"
 #: screens/Template/Survey/SurveyQuestionForm.js:204
 msgid "Maximum length"
 msgstr "최대 길이"
+
+#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:65
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:86
+#: screens/InstanceGroup/shared/ContainerGroupForm.js:77
+#: screens/InstanceGroup/shared/InstanceGroupForm.js:62
+msgid ""
+"Maximum number of forks to allow across all jobs running concurrently on this group.\n"
+"Zero means no limit will be enforced."
+msgstr ""
+
+#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:58
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:79
+#: screens/InstanceGroup/shared/ContainerGroupForm.js:67
+#: screens/InstanceGroup/shared/InstanceGroupForm.js:52
+msgid ""
+"Maximum number of jobs to run concurrently on this group.\n"
+"Zero means no limit will be enforced."
+msgstr ""
 
 #: components/Schedule/ScheduleDetail/FrequencyDetails.js:163
 #: components/Schedule/shared/FrequencyDetailSubform.js:118
@@ -5260,7 +5360,7 @@ msgid ""
 "assigned to this group when new instances come online."
 msgstr "새 인스턴스가 온라인 상태가 되면 이 그룹에 자동으로 할당되는 모든 인스턴스의 최소 백분율입니다."
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:182
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:178
 #: components/Schedule/shared/FrequencyDetailSubform.js:173
 #: components/Schedule/shared/ScheduleFormFields.js:125
 #: components/Schedule/shared/ScheduleFormFields.js:185
@@ -5302,16 +5402,16 @@ msgstr "수정됨"
 #: components/AdHocCommands/AdHocExecutionEnvironmentStep.js:116
 #: components/AddRole/AddResourceRole.js:61
 #: components/AssociateModal/AssociateModal.js:148
-#: components/LaunchPrompt/steps/CredentialsStep.js:177
+#: components/LaunchPrompt/steps/CredentialsStep.js:181
 #: components/LaunchPrompt/steps/InventoryStep.js:93
 #: components/Lookup/CredentialLookup.js:198
 #: components/Lookup/InventoryLookup.js:156
 #: components/Lookup/InventoryLookup.js:211
-#: components/Lookup/MultiCredentialsLookup.js:198
+#: components/Lookup/MultiCredentialsLookup.js:202
 #: components/Lookup/OrganizationLookup.js:138
 #: components/Lookup/ProjectLookup.js:147
 #: components/NotificationList/NotificationList.js:210
-#: components/RelatedTemplateList/RelatedTemplateList.js:170
+#: components/RelatedTemplateList/RelatedTemplateList.js:183
 #: components/Schedule/ScheduleList/ScheduleList.js:202
 #: components/TemplateList/TemplateList.js:230
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:31
@@ -5349,7 +5449,7 @@ msgid "Modified by (username)"
 msgstr "(사용자 이름)에 의해 수정됨"
 
 #: components/AdHocCommands/AdHocDetailsStep.js:59
-#: screens/Job/JobOutput/HostEventModal.js:125
+#: screens/Job/JobOutput/HostEventModal.js:126
 msgid "Module"
 msgstr "모듈"
 
@@ -5372,7 +5472,7 @@ msgstr "월요일"
 msgid "Monday"
 msgstr "월요일"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:186
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:182
 #: components/Schedule/shared/FrequencyDetailSubform.js:181
 #: components/Schedule/shared/ScheduleFormFields.js:129
 #: components/Schedule/shared/ScheduleFormFields.js:189
@@ -5421,8 +5521,8 @@ msgstr "다중 선택 옵션"
 #: components/JobList/JobList.js:195
 #: components/JobList/JobList.js:244
 #: components/JobList/JobListItem.js:86
-#: components/LaunchPrompt/steps/CredentialsStep.js:168
-#: components/LaunchPrompt/steps/CredentialsStep.js:183
+#: components/LaunchPrompt/steps/CredentialsStep.js:172
+#: components/LaunchPrompt/steps/CredentialsStep.js:187
 #: components/LaunchPrompt/steps/ExecutionEnvironmentStep.js:76
 #: components/LaunchPrompt/steps/ExecutionEnvironmentStep.js:86
 #: components/LaunchPrompt/steps/ExecutionEnvironmentStep.js:97
@@ -5445,8 +5545,8 @@ msgstr "다중 선택 옵션"
 #: components/Lookup/InventoryLookup.js:162
 #: components/Lookup/InventoryLookup.js:202
 #: components/Lookup/InventoryLookup.js:217
-#: components/Lookup/MultiCredentialsLookup.js:189
-#: components/Lookup/MultiCredentialsLookup.js:204
+#: components/Lookup/MultiCredentialsLookup.js:193
+#: components/Lookup/MultiCredentialsLookup.js:208
 #: components/Lookup/OrganizationLookup.js:129
 #: components/Lookup/OrganizationLookup.js:144
 #: components/Lookup/ProjectLookup.js:127
@@ -5456,11 +5556,11 @@ msgstr "다중 선택 옵션"
 #: components/NotificationList/NotificationListItem.js:28
 #: components/OptionsList/OptionsList.js:57
 #: components/PaginatedTable/PaginatedTable.js:72
-#: components/PromptDetail/PromptDetail.js:114
-#: components/RelatedTemplateList/RelatedTemplateList.js:161
-#: components/RelatedTemplateList/RelatedTemplateList.js:186
+#: components/PromptDetail/PromptDetail.js:115
+#: components/RelatedTemplateList/RelatedTemplateList.js:174
+#: components/RelatedTemplateList/RelatedTemplateList.js:199
 #: components/ResourceAccessList/ResourceAccessListItem.js:58
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:325
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:321
 #: components/Schedule/ScheduleList/ScheduleList.js:168
 #: components/Schedule/ScheduleList/ScheduleList.js:189
 #: components/Schedule/ScheduleList/ScheduleListItem.js:86
@@ -5516,27 +5616,27 @@ msgstr "다중 선택 옵션"
 #: screens/Host/HostList/HostList.js:148
 #: screens/Host/HostList/HostList.js:169
 #: screens/Host/HostList/HostListItem.js:50
-#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:41
+#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:46
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:49
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:161
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:194
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:61
-#: screens/InstanceGroup/Instances/InstanceList.js:199
-#: screens/InstanceGroup/Instances/InstanceList.js:215
-#: screens/InstanceGroup/Instances/InstanceList.js:266
-#: screens/InstanceGroup/Instances/InstanceList.js:299
-#: screens/InstanceGroup/Instances/InstanceListItem.js:124
+#: screens/InstanceGroup/Instances/InstanceList.js:217
+#: screens/InstanceGroup/Instances/InstanceList.js:233
+#: screens/InstanceGroup/Instances/InstanceList.js:288
+#: screens/InstanceGroup/Instances/InstanceList.js:321
+#: screens/InstanceGroup/Instances/InstanceListItem.js:138
 #: screens/InstanceGroup/shared/ContainerGroupForm.js:44
 #: screens/InstanceGroup/shared/InstanceGroupForm.js:19
-#: screens/Instances/InstanceList/InstanceList.js:143
-#: screens/Instances/InstanceList/InstanceList.js:160
-#: screens/Instances/InstanceList/InstanceList.js:201
-#: screens/Instances/InstanceList/InstanceListItem.js:128
+#: screens/Instances/InstanceList/InstanceList.js:161
+#: screens/Instances/InstanceList/InstanceList.js:178
+#: screens/Instances/InstanceList/InstanceList.js:221
+#: screens/Instances/InstanceList/InstanceListItem.js:144
 #: screens/Instances/InstancePeers/InstancePeerList.js:80
 #: screens/Instances/InstancePeers/InstancePeerList.js:87
 #: screens/Instances/InstancePeers/InstancePeerList.js:96
 #: screens/Instances/InstancePeers/InstancePeerListItem.js:37
-#: screens/Inventory/InventoryDetail/InventoryDetail.js:89
+#: screens/Inventory/InventoryDetail/InventoryDetail.js:90
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.js:31
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.js:194
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostList.js:209
@@ -5548,7 +5648,7 @@ msgstr "다중 선택 옵션"
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupItem.js:36
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.js:169
 #: screens/Inventory/InventoryHostGroups/InventoryHostGroupsList.js:186
-#: screens/Inventory/InventoryHosts/InventoryHostItem.js:33
+#: screens/Inventory/InventoryHosts/InventoryHostItem.js:63
 #: screens/Inventory/InventoryHosts/InventoryHostList.js:119
 #: screens/Inventory/InventoryHosts/InventoryHostList.js:138
 #: screens/Inventory/InventoryList/InventoryList.js:178
@@ -5558,7 +5658,7 @@ msgstr "다중 선택 옵션"
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.js:180
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.js:195
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.js:232
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:181
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:182
 #: screens/Inventory/InventorySources/InventorySourceList.js:211
 #: screens/Inventory/InventorySources/InventorySourceListItem.js:71
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:98
@@ -5568,7 +5668,7 @@ msgstr "다중 선택 옵션"
 #: screens/Inventory/SmartInventoryHosts/SmartInventoryHostListItem.js:33
 #: screens/Inventory/shared/InventoryForm.js:50
 #: screens/Inventory/shared/InventoryGroupForm.js:32
-#: screens/Inventory/shared/InventorySourceForm.js:100
+#: screens/Inventory/shared/InventorySourceForm.js:101
 #: screens/Inventory/shared/SmartInventoryForm.js:47
 #: screens/ManagementJob/ManagementJobList/ManagementJobList.js:90
 #: screens/ManagementJob/ManagementJobList/ManagementJobList.js:100
@@ -5578,7 +5678,7 @@ msgstr "다중 선택 옵션"
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.js:178
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:112
 #: screens/NotificationTemplate/shared/NotificationTemplateForm.js:41
-#: screens/Organization/OrganizationDetail/OrganizationDetail.js:91
+#: screens/Organization/OrganizationDetail/OrganizationDetail.js:87
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.js:84
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvList.js:107
 #: screens/Organization/OrganizationExecEnvList/OrganizationExecEnvListItem.js:16
@@ -5600,7 +5700,7 @@ msgstr "다중 선택 옵션"
 #: screens/Team/TeamList/TeamList.js:142
 #: screens/Team/TeamList/TeamListItem.js:33
 #: screens/Team/shared/TeamForm.js:29
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:185
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:181
 #: screens/Template/Survey/SurveyList.js:102
 #: screens/Template/Survey/SurveyList.js:102
 #: screens/Template/Survey/SurveyListItem.js:39
@@ -5631,8 +5731,8 @@ msgstr "다중 선택 옵션"
 #: screens/User/UserTeams/UserTeamListItem.js:18
 #: screens/User/UserTokenList/UserTokenListItem.js:22
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:140
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:123
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:163
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:171
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:221
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.js:43
 msgid "Name"
 msgstr "이름"
@@ -5675,7 +5775,7 @@ msgstr "새로운"
 msgid "Next"
 msgstr "다음"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:337
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:333
 #: components/Schedule/ScheduleList/ScheduleList.js:171
 #: components/Schedule/ScheduleList/ScheduleListItem.js:118
 #: components/Schedule/ScheduleList/ScheduleListItem.js:122
@@ -5695,7 +5795,7 @@ msgstr "일치하는 호스트가 없음"
 msgid "No Hosts Remaining"
 msgstr "남아 있는 호스트가 없음"
 
-#: screens/Job/JobOutput/HostEventModal.js:150
+#: screens/Job/JobOutput/HostEventModal.js:148
 msgid "No JSON Available"
 msgstr "사용할 수 있는 JSON 없음"
 
@@ -5719,7 +5819,7 @@ msgstr "사용 가능한 작업 데이터가 없습니다."
 msgid "No output found for this job."
 msgstr "이 작업에 대한 출력을 찾을 수 없습니다."
 
-#: screens/Job/JobOutput/HostEventModal.js:126
+#: screens/Job/JobOutput/HostEventModal.js:127
 msgid "No result found"
 msgstr "결과를 찾을 수 없음"
 
@@ -5738,10 +5838,10 @@ msgstr "결과를 찾을 수 없음"
 #: screens/Credential/shared/CredentialForm.js:143
 #: screens/Credential/shared/CredentialFormFields/BecomeMethodField.js:65
 #: screens/Dashboard/DashboardGraph.js:106
-#: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:137
+#: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:144
 #: screens/Template/Survey/SurveyReorderModal.js:166
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:260
-#: screens/Template/shared/PlaybookSelect.js:72
+#: screens/Template/shared/PlaybookSelect.js:73
 msgid "No results found"
 msgstr "결과를 찾을 수 없음"
 
@@ -5769,15 +5869,16 @@ msgstr "{pluralizedItemName} 을/를 찾을 수 없음"
 msgid "Node Alias"
 msgstr "노드 별칭"
 
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:223
-#: screens/InstanceGroup/Instances/InstanceList.js:204
-#: screens/InstanceGroup/Instances/InstanceList.js:268
-#: screens/InstanceGroup/Instances/InstanceList.js:300
-#: screens/InstanceGroup/Instances/InstanceListItem.js:142
-#: screens/Instances/InstanceDetail/InstanceDetail.js:204
-#: screens/Instances/InstanceList/InstanceList.js:148
-#: screens/Instances/InstanceList/InstanceList.js:203
-#: screens/Instances/InstanceList/InstanceListItem.js:150
+#: components/InstanceDetails.js/InstanceDetails.js:250
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:242
+#: screens/InstanceGroup/Instances/InstanceList.js:222
+#: screens/InstanceGroup/Instances/InstanceList.js:290
+#: screens/InstanceGroup/Instances/InstanceList.js:322
+#: screens/InstanceGroup/Instances/InstanceListItem.js:156
+#: screens/Instances/InstanceDetail/InstanceDetail.js:207
+#: screens/Instances/InstanceList/InstanceList.js:166
+#: screens/Instances/InstanceList/InstanceList.js:223
+#: screens/Instances/InstanceList/InstanceListItem.js:166
 #: screens/Instances/InstancePeers/InstancePeerList.js:98
 #: screens/Instances/InstancePeers/InstancePeerListItem.js:59
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:118
@@ -5802,8 +5903,8 @@ msgstr "노드 유형"
 msgid "None"
 msgstr "없음"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:193
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:196
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:189
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:192
 msgid "None (Run Once)"
 msgstr "없음 (한 번 실행)"
 
@@ -5954,14 +6055,14 @@ msgstr "10월"
 #: components/HostToggle/HostToggle.js:61
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:192
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:195
-#: components/PromptDetail/PromptDetail.js:362
+#: components/PromptDetail/PromptDetail.js:349
 #: components/PromptDetail/PromptJobTemplateDetail.js:156
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:489
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:485
 #: components/Schedule/ScheduleToggle/ScheduleToggle.js:58
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.js:45
 #: screens/Setting/shared/SettingDetail.js:98
 #: screens/Setting/shared/SharedFields.js:150
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:284
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:280
 #: screens/Template/shared/JobTemplateForm.js:504
 msgid "Off"
 msgstr "Off"
@@ -5970,14 +6071,14 @@ msgstr "Off"
 #: components/HostToggle/HostToggle.js:60
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:192
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:194
-#: components/PromptDetail/PromptDetail.js:362
+#: components/PromptDetail/PromptDetail.js:349
 #: components/PromptDetail/PromptJobTemplateDetail.js:156
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:489
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:485
 #: components/Schedule/ScheduleToggle/ScheduleToggle.js:57
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.js:45
 #: screens/Setting/shared/SettingDetail.js:98
 #: screens/Setting/shared/SharedFields.js:149
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:284
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:280
 #: screens/Template/shared/JobTemplateForm.js:504
 msgid "On"
 msgstr "On"
@@ -6050,7 +6151,7 @@ msgstr "선택적으로 상태 업데이트를 웹 후크 서비스로 다시 �
 #: components/NotificationList/NotificationList.js:220
 #: components/NotificationList/NotificationListItem.js:34
 #: screens/Credential/shared/TypeInputsSubForm.js:47
-#: screens/InstanceGroup/shared/ContainerGroupForm.js:61
+#: screens/InstanceGroup/shared/ContainerGroupForm.js:81
 #: screens/Instances/Shared/InstanceForm.js:54
 #: screens/Inventory/shared/InventoryForm.js:94
 #: screens/Project/shared/ProjectSubForms/SharedFields.js:69
@@ -6086,11 +6187,11 @@ msgstr "순서"
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:155
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentList.js:167
 #: screens/ExecutionEnvironment/ExecutionEnvironmentList/ExecutionEnvironmentListItem.js:76
-#: screens/Inventory/InventoryDetail/InventoryDetail.js:96
+#: screens/Inventory/InventoryDetail/InventoryDetail.js:97
 #: screens/Inventory/InventoryList/InventoryList.js:191
 #: screens/Inventory/InventoryList/InventoryList.js:221
 #: screens/Inventory/InventoryList/InventoryListItem.js:119
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:202
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:203
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:107
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:121
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:131
@@ -6100,8 +6201,8 @@ msgstr "순서"
 #: screens/Team/TeamDetail/TeamDetail.js:40
 #: screens/Team/TeamList/TeamList.js:143
 #: screens/Team/TeamList/TeamListItem.js:38
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:199
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:210
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:195
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:206
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:120
 #: screens/User/UserTeams/UserTeamList.js:181
 #: screens/User/UserTeams/UserTeamList.js:237
@@ -6145,12 +6246,12 @@ msgid "Out of compliance"
 msgstr "규정 준수 외"
 
 #: screens/Job/Job.js:131
-#: screens/Job/JobOutput/HostEventModal.js:156
+#: screens/Job/JobOutput/HostEventModal.js:154
 #: screens/Job/Jobs.js:34
 msgid "Output"
 msgstr "출력"
 
-#: screens/Job/JobOutput/HostEventModal.js:157
+#: screens/Job/JobOutput/HostEventModal.js:155
 msgid "Output tab"
 msgstr "출력 탭"
 
@@ -6159,12 +6260,12 @@ msgid "Overwrite"
 msgstr "덮어쓰기"
 
 #: components/PromptDetail/PromptInventorySourceDetail.js:41
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:121
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:122
 msgid "Overwrite local groups and hosts from remote inventory source"
 msgstr "원격 인벤토리 소스에서 로컬 그룹 및 호스트 덮어쓰기"
 
 #: components/PromptDetail/PromptInventorySourceDetail.js:46
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:127
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:128
 msgid "Overwrite local variables from remote inventory source"
 msgstr "원격 인벤토리 소스에서 로컬 변수 덮어쓰기"
 
@@ -6283,11 +6384,11 @@ msgstr "개인 액세스 토큰"
 msgid "Personal access token"
 msgstr "개인 액세스 토큰"
 
-#: screens/Job/JobOutput/HostEventModal.js:122
+#: screens/Job/JobOutput/HostEventModal.js:123
 msgid "Play"
 msgstr "플레이"
 
-#: screens/Job/JobOutput/shared/OutputToolbar.js:84
+#: screens/Job/JobOutput/shared/OutputToolbar.js:99
 msgid "Play Count"
 msgstr "플레이 수"
 
@@ -6297,7 +6398,7 @@ msgstr "플레이 시작됨"
 
 #: components/PromptDetail/PromptJobTemplateDetail.js:148
 #: screens/Job/JobDetail/JobDetail.js:319
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:253
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:249
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/JobTemplatesList.js:43
 #: screens/Template/shared/JobTemplateForm.js:357
 msgid "Playbook"
@@ -6329,7 +6430,7 @@ msgstr "플레이북 실행"
 msgid "Playbook Started"
 msgstr "플레이북 시작됨"
 
-#: components/RelatedTemplateList/RelatedTemplateList.js:174
+#: components/RelatedTemplateList/RelatedTemplateList.js:187
 #: components/TemplateList/TemplateList.js:222
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:23
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:54
@@ -6341,7 +6442,7 @@ msgstr "플레이북 이름"
 msgid "Playbook run"
 msgstr "플레이북 실행"
 
-#: screens/Job/JobOutput/shared/OutputToolbar.js:85
+#: screens/Job/JobOutput/shared/OutputToolbar.js:100
 msgid "Plays"
 msgstr "플레이"
 
@@ -6365,7 +6466,7 @@ msgstr "이 목록을 채우려면 {pluralizedItemName} 을 추가하십시오."
 msgid "Please click the Start button to begin."
 msgstr "시작하려면 시작 버튼을 클릭하십시오."
 
-#: components/Schedule/shared/ScheduleForm.js:421
+#: components/Schedule/shared/ScheduleForm.js:414
 msgid "Please enter a number of occurrences."
 msgstr "이벤트 발생 횟수를 입력해 주십시오."
 
@@ -6385,7 +6486,7 @@ msgstr "로그인하십시오"
 msgid "Please run a job to populate this list."
 msgstr "이 목록을 채우려면 작업을 실행하십시오."
 
-#: components/Schedule/shared/ScheduleForm.js:417
+#: components/Schedule/shared/ScheduleForm.js:410
 msgid "Please select a day number between 1 and 31."
 msgstr "1에서 31 사이의 날짜 번호를 선택하십시오."
 
@@ -6393,7 +6494,7 @@ msgstr "1에서 31 사이의 날짜 번호를 선택하십시오."
 msgid "Please select an Inventory or check the Prompt on Launch option"
 msgstr "인벤토리를 선택하거나 시작 시 프롬프트 옵션을 선택하십시오."
 
-#: components/Schedule/shared/ScheduleForm.js:429
+#: components/Schedule/shared/ScheduleForm.js:428
 msgid "Please select an end date/time that comes after the start date/time."
 msgstr "시작 날짜/시간 이후의 종료 날짜/시간을 선택하십시오."
 
@@ -6409,14 +6510,15 @@ msgstr "위의 필터를 사용하여 다른 검색을 시도하십시오."
 msgid "Please wait until the topology view is populated..."
 msgstr "토폴로지 보기가 채워질 때까지 기다리십시오..."
 
-#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:78
+#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:97
 msgid "Pod spec override"
 msgstr "Pod 사양 덮어쓰기"
 
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:214
-#: screens/InstanceGroup/Instances/InstanceListItem.js:203
-#: screens/Instances/InstanceDetail/InstanceDetail.js:208
-#: screens/Instances/InstanceList/InstanceListItem.js:218
+#: components/InstanceDetails.js/InstanceDetails.js:254
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:218
+#: screens/InstanceGroup/Instances/InstanceListItem.js:217
+#: screens/Instances/InstanceDetail/InstanceDetail.js:211
+#: screens/Instances/InstanceList/InstanceListItem.js:234
 #: screens/Instances/InstancePeers/InstancePeerListItem.js:82
 msgid "Policy Type"
 msgstr "정책 유형"
@@ -6472,16 +6574,16 @@ msgid ""
 "cancel the drag operation."
 msgstr "스페이스바 또는 Enter 키를 눌러 드래그를 시작하고 화살표 키를 사용하여 위로 또는 아래로 이동합니다. Enter 키를 눌러 끌어오기하거나 다른 키를 눌러 끌어오기 작업을 취소합니다."
 
-#: screens/Inventory/InventoryDetail/InventoryDetail.js:71
-#: screens/Inventory/InventoryDetail/InventoryDetail.js:130
+#: screens/Inventory/InventoryDetail/InventoryDetail.js:72
+#: screens/Inventory/InventoryDetail/InventoryDetail.js:115
 #: screens/Inventory/shared/InventoryForm.js:99
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:147
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:347
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:148
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:343
 #: screens/Template/shared/JobTemplateForm.js:603
 msgid "Prevent Instance Group Fallback"
 msgstr "인스턴스 그룹 폴백 방지"
 
-#: screens/Inventory/shared/Inventory.helptext.js:197
+#: screens/Inventory/shared/Inventory.helptext.js:198
 msgid "Prevent Instance Group Fallback: If enabled, the inventory will prevent adding any organization instance groups to the list of preferred instances groups to run associated job templates on."
 msgstr "인스턴스 그룹 폴백 방지: 활성화된 경우, 인벤토리에서 연결된 작업 템플릿을 실행하도록 기본 인스턴스 그룹 목록에 조직 인스턴스 그룹을 추가할 수 없습니다."
 
@@ -6499,7 +6601,7 @@ msgid "Private key passphrase"
 msgstr "개인 키 암호"
 
 #: components/PromptDetail/PromptJobTemplateDetail.js:58
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:122
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:123
 #: screens/Template/shared/JobTemplateForm.js:551
 msgid "Privilege Escalation"
 msgstr "권한 에스컬레이션"
@@ -6520,11 +6622,11 @@ msgstr "권한 에스컬레이션: 활성화하면 이 플레이북을 관리자
 #: components/PromptDetail/PromptJobTemplateDetail.js:133
 #: components/PromptDetail/PromptJobTemplateDetail.js:141
 #: components/TemplateList/TemplateListItem.js:300
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:216
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:217
 #: screens/Job/JobDetail/JobDetail.js:172
 #: screens/Job/JobDetail/JobDetail.js:198
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:229
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:239
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:225
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:235
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/JobTemplatesList.js:38
 msgid "Project"
 msgstr "프로젝트"
@@ -6565,14 +6667,14 @@ msgstr "프로젝트가 성공적으로 복사됨"
 msgid "Project not found."
 msgstr "프로젝트를 찾을 수 없음"
 
-#: screens/Dashboard/Dashboard.js:109
+#: screens/Dashboard/Dashboard.js:126
 msgid "Project sync failures"
 msgstr "프로젝트 동기화 실패"
 
 #: components/UserAndTeamAccessAdd/getResourceAccessConfig.js:146
 #: routeConfig.js:75
 #: screens/ActivityStream/ActivityStream.js:170
-#: screens/Dashboard/Dashboard.js:103
+#: screens/Dashboard/Dashboard.js:120
 #: screens/Project/ProjectList/ProjectList.js:180
 #: screens/Project/ProjectList/ProjectList.js:249
 #: screens/Project/Projects.js:12
@@ -6587,12 +6689,12 @@ msgstr "프로젝트"
 msgid "Promote Child Groups and Hosts"
 msgstr "하위 그룹 및 호스트 승격"
 
-#: components/Schedule/shared/ScheduleForm.js:540
-#: components/Schedule/shared/ScheduleForm.js:543
+#: components/Schedule/shared/ScheduleForm.js:539
+#: components/Schedule/shared/ScheduleForm.js:542
 msgid "Prompt"
 msgstr "프롬프트"
 
-#: components/PromptDetail/PromptDetail.js:182
+#: components/PromptDetail/PromptDetail.js:183
 msgid "Prompt Overrides"
 msgstr "프롬프트 덮어쓰기"
 
@@ -6606,8 +6708,8 @@ msgstr "시작 시 프롬프트"
 msgid "Prompt | {0}"
 msgstr "프롬프트 | {0}"
 
-#: components/PromptDetail/PromptDetail.js:180
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:418
+#: components/PromptDetail/PromptDetail.js:181
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:414
 msgid "Prompted Values"
 msgstr "프롬프트 값"
 
@@ -6652,7 +6754,7 @@ msgid "Provisioning"
 msgstr "프로비저닝"
 
 #: components/PromptDetail/PromptJobTemplateDetail.js:162
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:302
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:298
 #: screens/Template/shared/JobTemplateForm.js:620
 msgid "Provisioning Callback URL"
 msgstr "콜백 URL 프로비저닝"
@@ -6662,7 +6764,7 @@ msgid "Provisioning Callback details"
 msgstr "프로비저닝 호출 세부 정보"
 
 #: components/PromptDetail/PromptJobTemplateDetail.js:63
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:127
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:128
 #: screens/Template/shared/JobTemplateForm.js:555
 #: screens/Template/shared/JobTemplateForm.js:558
 msgid "Provisioning Callbacks"
@@ -6693,10 +6795,11 @@ msgstr "RADIUS"
 msgid "RADIUS settings"
 msgstr "RADIUS 설정"
 
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:244
-#: screens/InstanceGroup/Instances/InstanceListItem.js:161
-#: screens/Instances/InstanceDetail/InstanceDetail.js:287
-#: screens/Instances/InstanceList/InstanceListItem.js:171
+#: components/InstanceDetails.js/InstanceDetails.js:348
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:263
+#: screens/InstanceGroup/Instances/InstanceListItem.js:175
+#: screens/Instances/InstanceDetail/InstanceDetail.js:291
+#: screens/Instances/InstanceList/InstanceListItem.js:187
 #: screens/TopologyView/Tooltip.js:307
 msgid "RAM {0}"
 msgstr "RAM {0}"
@@ -6710,23 +6813,23 @@ msgstr "읽기"
 msgid "Ready"
 msgstr "준비됨"
 
-#: screens/Dashboard/Dashboard.js:133
+#: screens/Dashboard/Dashboard.js:150
 msgid "Recent Jobs"
 msgstr "최근 작업"
 
-#: screens/Dashboard/Dashboard.js:131
+#: screens/Dashboard/Dashboard.js:148
 msgid "Recent Jobs list tab"
 msgstr "최근 작업 목록 탭"
 
-#: screens/Dashboard/Dashboard.js:145
+#: screens/Dashboard/Dashboard.js:162
 msgid "Recent Templates"
 msgstr "최근 템플릿"
 
-#: screens/Dashboard/Dashboard.js:143
+#: screens/Dashboard/Dashboard.js:160
 msgid "Recent Templates list tab"
 msgstr "최근 템플릿 목록 탭"
 
-#: components/RelatedTemplateList/RelatedTemplateList.js:188
+#: components/RelatedTemplateList/RelatedTemplateList.js:201
 #: screens/Inventory/SmartInventoryHosts/SmartInventoryHostList.js:112
 #: screens/Inventory/SmartInventoryHosts/SmartInventoryHostListItem.js:38
 msgid "Recent jobs"
@@ -6817,12 +6920,15 @@ msgstr "리전"
 msgid "Registry credential"
 msgstr "레지스트리 인증 정보"
 
-#: screens/Inventory/shared/Inventory.helptext.js:156
+#: screens/Inventory/shared/Inventory.helptext.js:157
 msgid "Regular expression where only matching host names will be imported. The filter is applied as a post-processing step after any inventory plugin filters are applied."
 msgstr "호스트 이름과 일치하는 정규 표현식을 가져옵니다. 필터는 인벤토리 플러그인 필터를 적용한 후 사후 처리 단계로 적용됩니다."
 
 #: screens/Inventory/Inventories.js:81
 #: screens/Inventory/InventoryGroup/InventoryGroup.js:62
+#: screens/Inventory/InventoryHosts/InventoryHostItem.js:76
+#: screens/Inventory/InventoryHosts/InventoryHostItem.js:79
+#: screens/Inventory/InventoryHosts/InventoryHostList.js:140
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupList.js:175
 msgid "Related Groups"
 msgstr "관련 그룹"
@@ -6849,12 +6955,12 @@ msgstr "관련 검색 자동 완성"
 #: components/LaunchButton/ReLaunchDropDown.js:82
 #: screens/Job/JobDetail/JobDetail.js:580
 #: screens/Job/JobDetail/JobDetail.js:588
-#: screens/Job/JobOutput/shared/OutputToolbar.js:167
+#: screens/Job/JobOutput/shared/OutputToolbar.js:188
 msgid "Relaunch"
 msgstr "다시 시작"
 
 #: components/JobList/JobListItem.js:126
-#: screens/Job/JobOutput/shared/OutputToolbar.js:147
+#: screens/Job/JobOutput/shared/OutputToolbar.js:168
 msgid "Relaunch Job"
 msgstr "작업 다시 시작"
 
@@ -6872,7 +6978,7 @@ msgid "Relaunch on"
 msgstr "다시 시작"
 
 #: components/JobList/JobListItem.js:125
-#: screens/Job/JobOutput/shared/OutputToolbar.js:146
+#: screens/Job/JobOutput/shared/OutputToolbar.js:167
 msgid "Relaunch using host parameters"
 msgstr "호스트 매개변수를 사용하여 다시 시작"
 
@@ -6880,7 +6986,7 @@ msgstr "호스트 매개변수를 사용하여 다시 시작"
 msgid "Reload"
 msgstr "다시 로드"
 
-#: screens/Job/JobOutput/JobOutput.js:723
+#: screens/Job/JobOutput/JobOutput.js:735
 msgid "Reload output"
 msgstr "출력 다시 로드"
 
@@ -6893,8 +6999,8 @@ msgstr "출력 다시 로드"
 msgid "Remote Archive"
 msgstr "원격 아카이브"
 
-#: screens/Instances/InstanceDetail/InstanceDetail.js:374
-#: screens/Instances/InstanceList/InstanceList.js:242
+#: screens/Instances/InstanceDetail/InstanceDetail.js:384
+#: screens/Instances/InstanceList/InstanceList.js:262
 msgid "Removal Error"
 msgstr "제거 오류"
 
@@ -6953,7 +7059,7 @@ msgstr "이 링크를 제거하면 나머지 분기가 분리되고 시작 시 �
 msgid "Reorder"
 msgstr "재정렬"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:349
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:345
 msgid "Repeat Frequency"
 msgstr "반복 빈도"
 
@@ -7023,8 +7129,8 @@ msgstr "호스트 변수의 지정된 dict에서 활성화된 상태를 검색�
 #: components/JobCancelButton/JobCancelButton.js:100
 #: components/JobList/JobListCancelButton.js:160
 #: components/JobList/JobListCancelButton.js:163
-#: screens/Job/JobOutput/JobOutput.js:819
-#: screens/Job/JobOutput/JobOutput.js:822
+#: screens/Job/JobOutput/JobOutput.js:831
+#: screens/Job/JobOutput/JobOutput.js:834
 msgid "Return"
 msgstr "돌아가기"
 
@@ -7129,8 +7235,9 @@ msgstr "실행"
 msgid "Run Command"
 msgstr "명령 실행"
 
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:277
-#: screens/Instances/InstanceDetail/InstanceDetail.js:335
+#: components/InstanceDetails.js/InstanceDetails.js:385
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:297
+#: screens/Instances/InstanceDetail/InstanceDetail.js:340
 msgid "Run a health check on the instance"
 msgstr "인스턴스에서 상태 점검을 실행합니다."
 
@@ -7147,10 +7254,11 @@ msgstr "명령 실행"
 msgid "Run every"
 msgstr "모두 실행"
 
-#: components/HealthCheckButton/HealthCheckButton.js:32
-#: components/HealthCheckButton/HealthCheckButton.js:45
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:286
-#: screens/Instances/InstanceDetail/InstanceDetail.js:344
+#: components/HealthCheckButton/HealthCheckButton.js:39
+#: components/HealthCheckButton/HealthCheckButton.js:55
+#: components/InstanceDetails.js/InstanceDetails.js:396
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:310
+#: screens/Instances/InstanceDetail/InstanceDetail.js:353
 msgid "Run health check"
 msgstr "실행 상태 점검"
 
@@ -7177,17 +7285,26 @@ msgstr "실행 중"
 msgid "Running Handlers"
 msgstr "실행 중인 Handlers"
 
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:217
+#: components/InstanceDetails.js/InstanceDetails.js:258
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:221
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:196
-#: screens/InstanceGroup/Instances/InstanceListItem.js:194
-#: screens/Instances/InstanceDetail/InstanceDetail.js:212
-#: screens/Instances/InstanceList/InstanceListItem.js:209
+#: screens/InstanceGroup/Instances/InstanceListItem.js:208
+#: screens/Instances/InstanceDetail/InstanceDetail.js:215
+#: screens/Instances/InstanceList/InstanceListItem.js:225
 #: screens/Instances/InstancePeers/InstancePeerListItem.js:73
 msgid "Running Jobs"
 msgstr "실행 중인 작업"
 
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:284
-#: screens/Instances/InstanceDetail/InstanceDetail.js:342
+#: components/HealthCheckButton/HealthCheckButton.js:37
+#: components/HealthCheckButton/HealthCheckButton.js:39
+#: components/HealthCheckButton/HealthCheckButton.js:53
+#: components/HealthCheckButton/HealthCheckButton.js:55
+#: components/InstanceDetails.js/InstanceDetails.js:392
+#: components/InstanceDetails.js/InstanceDetails.js:395
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:306
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:309
+#: screens/Instances/InstanceDetail/InstanceDetail.js:349
+#: screens/Instances/InstanceDetail/InstanceDetail.js:352
 msgid "Running health check"
 msgstr "실행 중인 상태 점검"
 
@@ -7226,7 +7343,7 @@ msgid "START"
 msgstr "시작"
 
 #: components/Sparkline/Sparkline.js:31
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:160
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:161
 #: screens/Inventory/InventorySources/InventorySourceListItem.js:39
 #: screens/Project/ProjectDetail/ProjectDetail.js:135
 #: screens/Project/ProjectList/ProjectListItem.js:73
@@ -7249,8 +7366,8 @@ msgstr "토요일"
 #: components/AssociateModal/AssociateModal.js:110
 #: components/FormActionGroup/FormActionGroup.js:13
 #: components/FormActionGroup/FormActionGroup.js:19
-#: components/Schedule/shared/ScheduleForm.js:526
-#: components/Schedule/shared/ScheduleForm.js:532
+#: components/Schedule/shared/ScheduleForm.js:525
+#: components/Schedule/shared/ScheduleForm.js:531
 #: components/Schedule/shared/useSchedulePromptSteps.js:49
 #: components/UserAndTeamAccessAdd/UserAndTeamAccessAdd.js:130
 #: screens/Credential/shared/CredentialForm.js:318
@@ -7304,7 +7421,7 @@ msgstr "일정이 활성화됨"
 msgid "Schedule is inactive"
 msgstr "일정이 비활성 상태입니다"
 
-#: components/Schedule/shared/ScheduleForm.js:394
+#: components/Schedule/shared/ScheduleForm.js:387
 msgid "Schedule is missing rrule"
 msgstr "일정에 규칙이 누락되어 있습니다"
 
@@ -7426,7 +7543,7 @@ msgstr "호스트 선택"
 msgid "Select Input"
 msgstr "입력 선택"
 
-#: screens/InstanceGroup/Instances/InstanceList.js:295
+#: screens/InstanceGroup/Instances/InstanceList.js:317
 msgid "Select Instances"
 msgstr "인스턴스 선택"
 
@@ -7496,10 +7613,18 @@ msgstr "실행 환경을 편집하기 전에 프로젝트를 선택합니다."
 msgid "Select a question to delete"
 msgstr "삭제할 질문을 선택"
 
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListApproveButton.js:18
+msgid "Select a row to approve"
+msgstr ""
+
 #: components/PaginatedTable/ToolbarDeleteButton.js:160
 #: screens/Inventory/InventoryGroups/InventoryGroupsList.js:103
 msgid "Select a row to delete"
 msgstr "삭제할 행 선택"
+
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListDenyButton.js:18
+msgid "Select a row to deny"
+msgstr ""
 
 #: components/DisassociateButton/DisassociateButton.js:75
 msgid "Select a row to disassociate"
@@ -7528,8 +7653,8 @@ msgstr "서브스크립션 선택"
 #: screens/Inventory/shared/InventorySourceSubForms/GCESubForm.js:45
 #: screens/Inventory/shared/InventorySourceSubForms/InsightsSubForm.js:46
 #: screens/Inventory/shared/InventorySourceSubForms/OpenStackSubForm.js:45
-#: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:37
-#: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:97
+#: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:38
+#: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:104
 #: screens/Inventory/shared/InventorySourceSubForms/SatelliteSubForm.js:44
 #: screens/Inventory/shared/InventorySourceSubForms/VMwareSubForm.js:46
 #: screens/Inventory/shared/InventorySourceSubForms/VirtualizationSubForm.js:46
@@ -7571,7 +7696,7 @@ msgstr "인스턴스 선택"
 msgid "Select an instance and a metric to show chart"
 msgstr "차트를 표시할 인스턴스 및 메트릭을 선택합니다."
 
-#: components/HealthCheckButton/HealthCheckButton.js:19
+#: components/HealthCheckButton/HealthCheckButton.js:24
 msgid "Select an instance to run a health check."
 msgstr "상태 점검을 실행할 인스턴스를 선택합니다."
 
@@ -7627,9 +7752,9 @@ msgstr "기간 선택"
 msgid "Select roles to apply"
 msgstr "적용할 역할 선택"
 
-#: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:128
-#: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:129
-#: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:130
+#: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:135
+#: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:136
+#: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:137
 msgid "Select source path"
 msgstr "소스 경로 선택"
 
@@ -7719,8 +7844,8 @@ msgstr "{0} 선택"
 #: screens/Host/HostGroups/HostGroupItem.js:26
 #: screens/Host/HostList/HostListItem.js:48
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:59
-#: screens/InstanceGroup/Instances/InstanceListItem.js:122
-#: screens/Instances/InstanceList/InstanceListItem.js:126
+#: screens/InstanceGroup/Instances/InstanceListItem.js:136
+#: screens/Instances/InstanceList/InstanceListItem.js:142
 #: screens/Inventory/InventoryGroupHosts/InventoryGroupHostListItem.js:42
 #: screens/Inventory/InventoryList/InventoryListItem.js:90
 #: screens/Inventory/InventoryRelatedGroups/InventoryRelatedGroupListItem.js:37
@@ -7743,8 +7868,8 @@ msgstr "선택됨"
 msgid "Selected Category"
 msgstr "선택한 카테고리"
 
+#: components/Schedule/shared/ScheduleForm.js:445
 #: components/Schedule/shared/ScheduleForm.js:446
-#: components/Schedule/shared/ScheduleForm.js:447
 msgid "Selected date range must have at least 1 schedule occurrence."
 msgstr "선택한 날짜 범위는 하나 이상의 일정이 포함되어 있어야 합니다."
 
@@ -7778,7 +7903,7 @@ msgstr "유지해야 하는 데이터 일 수를 설정합니다."
 msgid "Set preferences for data collection, logos, and logins"
 msgstr "데이터 수집, 로고 및 로그인에 대한 기본 설정"
 
-#: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:131
+#: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:138
 msgid "Set source path to"
 msgstr "소스 경로 설정"
 
@@ -7844,10 +7969,10 @@ msgid "Show"
 msgstr "표시"
 
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:182
-#: components/PromptDetail/PromptDetail.js:361
+#: components/PromptDetail/PromptDetail.js:348
 #: components/PromptDetail/PromptJobTemplateDetail.js:156
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:488
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:283
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:484
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:279
 #: screens/Template/shared/JobTemplateForm.js:497
 msgid "Show Changes"
 msgstr "변경 사항 표시"
@@ -7921,11 +8046,11 @@ msgstr "간단한 키 선택"
 
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:106
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:107
-#: components/PromptDetail/PromptDetail.js:295
+#: components/PromptDetail/PromptDetail.js:282
 #: components/PromptDetail/PromptJobTemplateDetail.js:267
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:595
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:572
 #: screens/Job/JobDetail/JobDetail.js:500
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:475
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:453
 #: screens/Template/shared/JobTemplateForm.js:533
 #: screens/Template/shared/WorkflowJobTemplateForm.js:230
 msgid "Skip Tags"
@@ -7999,8 +8124,8 @@ msgstr "분류"
 
 #: components/JobList/JobListItem.js:169
 #: components/PromptDetail/PromptInventorySourceDetail.js:84
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:199
-#: screens/Inventory/shared/InventorySourceForm.js:130
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:200
+#: screens/Inventory/shared/InventorySourceForm.js:131
 #: screens/Job/JobDetail/JobDetail.js:172
 #: screens/Job/JobDetail/JobDetail.js:294
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/InventorySourcesList.js:93
@@ -8008,20 +8133,22 @@ msgid "Source"
 msgstr "소스"
 
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:44
-#: components/PromptDetail/PromptDetail.js:250
+#: components/PromptDetail/PromptDetail.js:237
 #: components/PromptDetail/PromptJobTemplateDetail.js:147
 #: components/PromptDetail/PromptProjectDetail.js:106
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:89
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:467
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:463
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:238
 #: screens/Job/JobDetail/JobDetail.js:307
 #: screens/Project/ProjectDetail/ProjectDetail.js:230
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:248
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:244
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:133
 #: screens/Template/shared/JobTemplateForm.js:335
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:245
 msgid "Source Control Branch"
 msgstr "소스 제어 분기"
 
+#: screens/Inventory/shared/InventorySourceSubForms/SCMSubForm.js:85
 #: screens/Project/shared/ProjectSubForms/GitSubForm.js:29
 msgid "Source Control Branch/Tag/Commit"
 msgstr "소스 제어 분기/태그/커밋"
@@ -8084,7 +8211,7 @@ msgstr "소스 워크플로 작업"
 msgid "Source control branch"
 msgstr "소스 제어 분기"
 
-#: screens/Inventory/shared/InventorySourceForm.js:152
+#: screens/Inventory/shared/InventorySourceForm.js:153
 msgid "Source details"
 msgstr "소스 세부 정보"
 
@@ -8092,7 +8219,7 @@ msgstr "소스 세부 정보"
 msgid "Source phone number"
 msgstr "소스 전화 번호"
 
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:269
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:275
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:21
 msgid "Source variables"
 msgstr "소스 변수"
@@ -8122,11 +8249,11 @@ msgstr "알림 색상을 지정합니다. 허용되는 색상은 16진수 색상
 msgid "Specify the conditions under which this node should be executed"
 msgstr "이 노드를 실행해야 하는 조건을 지정합니다."
 
-#: screens/Job/JobOutput/HostEventModal.js:173
+#: screens/Job/JobOutput/HostEventModal.js:171
 msgid "Standard Error"
 msgstr "표준 오류"
 
-#: screens/Job/JobOutput/HostEventModal.js:174
+#: screens/Job/JobOutput/HostEventModal.js:172
 msgid "Standard error tab"
 msgstr "표준 오류 탭"
 
@@ -8173,27 +8300,28 @@ msgid "Start time"
 msgstr "시작 시간"
 
 #: screens/Job/JobDetail/JobDetail.js:220
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:165
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:223
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.js:63
 msgid "Started"
 msgstr "시작됨"
 
+#: components/InstanceDetails.js/InstanceDetails.js:242
 #: components/JobList/JobList.js:224
 #: components/JobList/JobList.js:245
 #: components/JobList/JobListItem.js:95
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:206
-#: screens/InstanceGroup/Instances/InstanceList.js:267
-#: screens/InstanceGroup/Instances/InstanceListItem.js:129
-#: screens/Instances/InstanceDetail/InstanceDetail.js:196
-#: screens/Instances/InstanceList/InstanceList.js:202
-#: screens/Instances/InstanceList/InstanceListItem.js:134
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:210
+#: screens/InstanceGroup/Instances/InstanceList.js:289
+#: screens/InstanceGroup/Instances/InstanceListItem.js:143
+#: screens/Instances/InstanceDetail/InstanceDetail.js:199
+#: screens/Instances/InstanceList/InstanceList.js:222
+#: screens/Instances/InstanceList/InstanceListItem.js:150
 #: screens/Instances/InstancePeers/InstancePeerList.js:97
 #: screens/Instances/InstancePeers/InstancePeerListItem.js:43
 #: screens/Inventory/InventoryList/InventoryListItem.js:101
 #: screens/Inventory/InventorySources/InventorySourceList.js:212
 #: screens/Inventory/InventorySources/InventorySourceListItem.js:87
 #: screens/Job/JobDetail/JobDetail.js:210
-#: screens/Job/JobOutput/HostEventModal.js:118
+#: screens/Job/JobOutput/HostEventModal.js:119
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:115
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.js:179
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateListItem.js:117
@@ -8201,7 +8329,7 @@ msgstr "시작됨"
 #: screens/Project/ProjectList/ProjectListItem.js:197
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:61
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:162
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:166
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:224
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListItem.js:66
 msgid "Status"
 msgstr "상태"
@@ -8289,7 +8417,7 @@ msgstr "성공 메시지 본문"
 #: components/JobList/JobList.js:231
 #: components/StatusLabel/StatusLabel.js:43
 #: components/Workflow/WorkflowNodeHelp.js:102
-#: components/WorkflowOutputNavigation/WorkflowOutputNavigation.js:96
+#: components/WorkflowOutputNavigation/WorkflowOutputNavigation.js:94
 #: screens/Dashboard/shared/ChartTooltip.js:59
 msgid "Successful"
 msgstr "성공"
@@ -8425,8 +8553,8 @@ msgstr "TACACS+"
 msgid "TACACS+ settings"
 msgstr "TACACS + 설정"
 
-#: screens/Dashboard/Dashboard.js:117
-#: screens/Job/JobOutput/HostEventModal.js:94
+#: screens/Dashboard/Dashboard.js:134
+#: screens/Job/JobOutput/HostEventModal.js:95
 msgid "Tabs"
 msgstr "탭"
 
@@ -8453,11 +8581,11 @@ msgstr "주석 태그(선택 사항)"
 msgid "Target URL"
 msgstr "대상 URL"
 
-#: screens/Job/JobOutput/HostEventModal.js:123
+#: screens/Job/JobOutput/HostEventModal.js:124
 msgid "Task"
 msgstr "작업"
 
-#: screens/Job/JobOutput/shared/OutputToolbar.js:90
+#: screens/Job/JobOutput/shared/OutputToolbar.js:105
 msgid "Task Count"
 msgstr "작업 수"
 
@@ -8465,7 +8593,7 @@ msgstr "작업 수"
 msgid "Task Started"
 msgstr "호스트 시작됨"
 
-#: screens/Job/JobOutput/shared/OutputToolbar.js:91
+#: screens/Job/JobOutput/shared/OutputToolbar.js:106
 msgid "Tasks"
 msgstr "작업"
 
@@ -8507,7 +8635,7 @@ msgstr "팀"
 msgid "Template"
 msgstr "템플릿"
 
-#: components/RelatedTemplateList/RelatedTemplateList.js:115
+#: components/RelatedTemplateList/RelatedTemplateList.js:121
 #: components/TemplateList/TemplateList.js:133
 msgid "Template copied successfully"
 msgstr "템플릿이 성공적으로 복사됨"
@@ -8577,11 +8705,12 @@ msgstr "The"
 msgid "The Grant type the user must use to acquire tokens for this application"
 msgstr "사용자가 이 애플리케이션의 토큰을 얻는 데 사용해야 하는 Grant 유형"
 
-#: screens/Organization/OrganizationDetail/OrganizationDetail.js:128
+#: screens/Organization/OrganizationDetail/OrganizationDetail.js:124
 msgid "The Instance Groups for this Organization to run on."
 msgstr "이 조직에서 실행할 인스턴스 그룹입니다."
 
-#: screens/Instances/InstanceDetail/InstanceDetail.js:219
+#: components/InstanceDetails.js/InstanceDetails.js:265
+#: screens/Instances/InstanceDetail/InstanceDetail.js:222
 msgid "The Instance Groups to which this instance belongs."
 msgstr "이 인스턴스가 속하는 인스턴스 그룹입니다."
 
@@ -8612,7 +8741,7 @@ msgstr "Grafana 서버의 기본 URL - /api/annotations 엔드포인트가 기�
 msgid "The container image to be used for execution."
 msgstr "실행에 사용할 컨테이너 이미지입니다."
 
-#: screens/Organization/OrganizationDetail/OrganizationDetail.js:109
+#: screens/Organization/OrganizationDetail/OrganizationDetail.js:105
 msgid ""
 "The execution environment that will be used for jobs\n"
 "inside of this organization. This will be used a fallback when\n"
@@ -8644,7 +8773,7 @@ msgstr "모든 참조에 대한 첫 번째 참조를 가져옵니다. Github pul
 msgid "The full image location, including the container registry, image name, and version tag."
 msgstr "컨테이너 레지스트리, 이미지 이름, 버전 태그를 포함한 전체 이미지 위치입니다."
 
-#: screens/Inventory/shared/Inventory.helptext.js:191
+#: screens/Inventory/shared/Inventory.helptext.js:192
 msgid ""
 "The inventory file\n"
 "to be synced by this source. You can select from\n"
@@ -8663,7 +8792,7 @@ msgstr "마지막 {dayOfWeek}"
 msgid "The last {weekday} of {month}"
 msgstr "마지막 {weekday} / {month}"
 
-#: screens/Organization/OrganizationDetail/OrganizationDetail.js:100
+#: screens/Organization/OrganizationDetail/OrganizationDetail.js:96
 msgid ""
 "The maximum number of hosts allowed to be managed by\n"
 "this organization. Value defaults to 0 which means no limit.\n"
@@ -8823,7 +8952,7 @@ msgstr "이 작업은 다음과 같이 연결을 해제합니다."
 msgid "This action will remove the following instances:"
 msgstr "이 작업은 다음 인스턴스를 제거합니다."
 
-#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:113
+#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:132
 msgid "This container group is currently being by other resources. Are you sure you want to delete it?"
 msgstr "현재 이 컨테이너 그룹에 다른 리소스가 있습니다. 삭제하시겠습니까?"
 
@@ -8840,7 +8969,8 @@ msgid ""
 "This data is used to enhance\n"
 "future releases of the Software and to provide\n"
 "Automation Analytics."
-msgstr "이 데이터는\n"
+msgstr ""
+"이 데이터는\n"
 "향후 소프트웨어 릴리스를 개선하고\n"
 "Automation Analytics를 제공하는 데 사용됩니다."
 
@@ -8860,7 +8990,7 @@ msgstr "현재 다른 리소스에서 이 실행 환경이 사용되고 있습�
 msgid "This feature is deprecated and will be removed in a future release."
 msgstr "이 기능은 더 이상 사용되지 않으며 향후 릴리스에서 제거될 예정입니다."
 
-#: screens/Inventory/shared/Inventory.helptext.js:155
+#: screens/Inventory/shared/Inventory.helptext.js:156
 msgid "This field is ignored unless an Enabled Variable is set. If the enabled variable matches this value, the host will be enabled on import."
 msgstr "활성화된 변수가 설정되지 않은 경우 이 필드는 무시됩니다. 사용 가능한 변수가 이 값과 일치하면 호스트는 가져오기에서 활성화됩니다."
 
@@ -8946,7 +9076,7 @@ msgstr "이 필드는 지정된 인증 정보를 사용하여 외부 시크릿 �
 msgid "This has already been acted on"
 msgstr "이 작업은 이미 수행되었습니다."
 
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:125
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:139
 msgid "This instance group is currently being by other resources. Are you sure you want to delete it?"
 msgstr "이 인스턴스 그룹은 현재 다른 리소스에 의해 있습니다. 삭제하시겠습니까?"
 
@@ -8954,11 +9084,11 @@ msgstr "이 인스턴스 그룹은 현재 다른 리소스에 의해 있습니�
 msgid "This inventory is applied to all workflow nodes within this workflow ({0}) that prompt for an inventory."
 msgstr "이 인벤토리는 이 워크플로우({0}) 내의 모든 워크플로 노드에 적용되며, 인벤토리를 요청하는 메시지를 표시합니다."
 
-#: screens/Inventory/InventoryDetail/InventoryDetail.js:199
+#: screens/Inventory/InventoryDetail/InventoryDetail.js:184
 msgid "This inventory is currently being used by other resources. Are you sure you want to delete it?"
 msgstr "이 인벤토리는 현재 다른 리소스에서 사용하고 있습니다. 삭제하시겠습니까?"
 
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:313
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:319
 msgid "This inventory source is currently being used by other resources that rely on it. Are you sure you want to delete it?"
 msgstr "이 인벤토리 소스는 현재 이를 사용하는 다른 리소스에서 사용되고 있습니다. 삭제하시겠습니까?"
 
@@ -8974,11 +9104,11 @@ msgstr "토큰 값과 연결된 새로 고침 토큰 값이 표시되는 유일�
 msgid "This job failed and has no output."
 msgstr "이 작업은 실패하여 출력이 없습니다."
 
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:543
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:521
 msgid "This job template is currently being used by other resources. Are you sure you want to delete it?"
 msgstr "이 작업 템플릿은 현재 다른 리소스에서 사용하고 있습니다. 삭제하시겠습니까?"
 
-#: screens/Organization/OrganizationDetail/OrganizationDetail.js:197
+#: screens/Organization/OrganizationDetail/OrganizationDetail.js:175
 msgid "This organization is currently being by other resources. Are you sure you want to delete it?"
 msgstr "이 조직은 현재 다른 리소스에서 사용 중입니다. 삭제하시겠습니까?"
 
@@ -8990,7 +9120,7 @@ msgstr "이 프로젝트는 현재 다른 리소스에서 사용하고 있습니
 msgid "This project is currently on sync and cannot be clicked until sync process completed"
 msgstr "이 프로젝트는 현재 동기화 상태에 있으며 동기화 프로세스가 완료될 때까지 클릭할 수 없습니다."
 
-#: components/Schedule/shared/ScheduleForm.js:460
+#: components/Schedule/shared/ScheduleForm.js:459
 msgid "This schedule has no occurrences due to the selected exceptions."
 msgstr "이 일정에는 선택한 예외로 인해 발생하지 않습니다."
 
@@ -9006,7 +9136,8 @@ msgstr "이 일정에는 필수 설문 조사 값이 없습니다."
 msgid ""
 "This schedule uses complex rules that are not supported in the\n"
 "UI.  Please use the API to manage this schedule."
-msgstr "이 일정은 UI에서 지원되지 않는 복잡한 규칙을 사용합니다. \n"
+msgstr ""
+"이 일정은 UI에서 지원되지 않는 복잡한 규칙을 사용합니다. \n"
 "  API를 사용하여 이 일정을 관리하십시오."
 
 #: components/LaunchPrompt/steps/StepName.js:26
@@ -9086,13 +9217,13 @@ msgid "Timed out"
 msgstr "시간 초과"
 
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:86
-#: components/PromptDetail/PromptDetail.js:136
-#: components/PromptDetail/PromptDetail.js:355
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:484
+#: components/PromptDetail/PromptDetail.js:137
+#: components/PromptDetail/PromptDetail.js:342
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:480
 #: screens/Job/JobDetail/JobDetail.js:397
 #: screens/NotificationTemplate/NotificationTemplateDetail/NotificationTemplateDetail.js:170
 #: screens/NotificationTemplate/shared/TypeInputsSubForm.js:114
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:277
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:273
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:186
 #: screens/Template/shared/JobTemplateForm.js:475
 msgid "Timeout"
@@ -9195,15 +9326,16 @@ msgid "Tools"
 msgstr "툴"
 
 #: routeConfig.js:152
-#: screens/TopologyView/TopologyView.js:40
+#: screens/TopologyView/TopologyView.js:42
 msgid "Topology View"
 msgstr "토폴로지 보기"
 
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:218
+#: components/InstanceDetails.js/InstanceDetails.js:259
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:222
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:197
-#: screens/InstanceGroup/Instances/InstanceListItem.js:199
-#: screens/Instances/InstanceDetail/InstanceDetail.js:213
-#: screens/Instances/InstanceList/InstanceListItem.js:214
+#: screens/InstanceGroup/Instances/InstanceListItem.js:213
+#: screens/Instances/InstanceDetail/InstanceDetail.js:216
+#: screens/Instances/InstanceList/InstanceListItem.js:230
 #: screens/Instances/InstancePeers/InstancePeerListItem.js:78
 msgid "Total Jobs"
 msgstr "총 작업"
@@ -9213,7 +9345,7 @@ msgstr "총 작업"
 msgid "Total Nodes"
 msgstr "총 노드"
 
-#: screens/Inventory/InventoryDetail/InventoryDetail.js:103
+#: screens/Inventory/InventoryDetail/InventoryDetail.js:104
 #: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:119
 msgid "Total hosts"
 msgstr "총 호스트"
@@ -9269,8 +9401,8 @@ msgstr "Twilio"
 #: components/Lookup/ProjectLookup.js:132
 #: components/NotificationList/NotificationList.js:219
 #: components/NotificationList/NotificationListItem.js:33
-#: components/PromptDetail/PromptDetail.js:124
-#: components/RelatedTemplateList/RelatedTemplateList.js:187
+#: components/PromptDetail/PromptDetail.js:125
+#: components/RelatedTemplateList/RelatedTemplateList.js:200
 #: components/TemplateList/TemplateList.js:214
 #: components/TemplateList/TemplateList.js:243
 #: components/TemplateList/TemplateListItem.js:184
@@ -9283,11 +9415,11 @@ msgstr "Twilio"
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.js:94
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateList.js:116
 #: screens/ExecutionEnvironment/ExecutionEnvironmentTemplate/ExecutionEnvironmentTemplateListItem.js:17
-#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:46
+#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:51
 #: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:54
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupList.js:195
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:66
-#: screens/Inventory/InventoryDetail/InventoryDetail.js:94
+#: screens/Inventory/InventoryDetail/InventoryDetail.js:95
 #: screens/Inventory/InventoryList/InventoryList.js:220
 #: screens/Inventory/InventoryList/InventoryListItem.js:116
 #: screens/Inventory/InventorySources/InventorySourceList.js:213
@@ -9335,13 +9467,14 @@ msgstr "호스트에서 인벤토리를 변경할 수 없음"
 msgid "Unable to load last job update"
 msgstr "마지막 작업 업데이트를 로드할 수 없음"
 
+#: components/InstanceDetails.js/InstanceDetails.js:367
 #: components/StatusLabel/StatusLabel.js:61
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:260
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:87
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:279
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:101
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:46
-#: screens/InstanceGroup/Instances/InstanceListItem.js:78
-#: screens/Instances/InstanceDetail/InstanceDetail.js:306
-#: screens/Instances/InstanceList/InstanceListItem.js:77
+#: screens/InstanceGroup/Instances/InstanceListItem.js:80
+#: screens/Instances/InstanceDetail/InstanceDetail.js:310
+#: screens/Instances/InstanceList/InstanceListItem.js:79
 #: screens/TopologyView/Tooltip.js:121
 msgid "Unavailable"
 msgstr "사용할 수 없음"
@@ -9361,15 +9494,15 @@ msgstr "무제한"
 
 #: components/StatusLabel/StatusLabel.js:47
 #: screens/Job/JobOutput/shared/HostStatusBar.js:51
-#: screens/Job/JobOutput/shared/OutputToolbar.js:103
+#: screens/Job/JobOutput/shared/OutputToolbar.js:118
 msgid "Unreachable"
 msgstr "연결할 수 없음"
 
-#: screens/Job/JobOutput/shared/OutputToolbar.js:102
+#: screens/Job/JobOutput/shared/OutputToolbar.js:117
 msgid "Unreachable Host Count"
 msgstr "연결할 수 없는 호스트 수"
 
-#: screens/Job/JobOutput/shared/OutputToolbar.js:104
+#: screens/Job/JobOutput/shared/OutputToolbar.js:119
 msgid "Unreachable Hosts"
 msgstr "연결할 수 없는 호스트"
 
@@ -9386,7 +9519,7 @@ msgid "Update Revision on Launch"
 msgstr "시작 시 버전 업데이트"
 
 #: components/PromptDetail/PromptInventorySourceDetail.js:51
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:133
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:134
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:92
 msgid "Update on launch"
 msgstr "시작 시 업데이트"
@@ -9458,22 +9591,25 @@ msgid ""
 "route SMS messages. Phone numbers should be formatted +11231231234. For more information see Twilio documentation"
 msgstr "SMS 메시지를 라우팅할 위치를 지정하려면 한 줄에 하나의 전화 번호를 사용합니다. 전화 번호는 +11231231234 형식이어야 합니다. 자세한 내용은 Twilio 문서를 참조하십시오."
 
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:249
-#: screens/InstanceGroup/Instances/InstanceList.js:270
-#: screens/Instances/InstanceDetail/InstanceDetail.js:292
-#: screens/Instances/InstanceList/InstanceList.js:205
+#: components/InstanceDetails.js/InstanceDetails.js:353
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:268
+#: screens/InstanceGroup/Instances/InstanceList.js:292
+#: screens/Instances/InstanceDetail/InstanceDetail.js:296
+#: screens/Instances/InstanceList/InstanceList.js:225
 msgid "Used Capacity"
 msgstr "사용된 용량"
 
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:253
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:257
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:78
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:86
+#: components/InstanceDetails.js/InstanceDetails.js:358
+#: components/InstanceDetails.js/InstanceDetails.js:364
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:272
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:276
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:92
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:100
 #: screens/InstanceGroup/InstanceGroupList/InstanceGroupListItem.js:42
-#: screens/InstanceGroup/Instances/InstanceListItem.js:74
-#: screens/Instances/InstanceDetail/InstanceDetail.js:297
-#: screens/Instances/InstanceDetail/InstanceDetail.js:303
-#: screens/Instances/InstanceList/InstanceListItem.js:73
+#: screens/InstanceGroup/Instances/InstanceListItem.js:76
+#: screens/Instances/InstanceDetail/InstanceDetail.js:301
+#: screens/Instances/InstanceDetail/InstanceDetail.js:307
+#: screens/Instances/InstanceList/InstanceListItem.js:75
 #: screens/TopologyView/Tooltip.js:117
 msgid "Used capacity"
 msgstr "사용된 용량"
@@ -9573,22 +9709,22 @@ msgstr "VMware vCenter"
 #: components/AdHocCommands/AdHocPreviewStep.js:69
 #: components/HostForm/HostForm.js:113
 #: components/LaunchPrompt/steps/OtherPromptsStep.js:115
-#: components/PromptDetail/PromptDetail.js:168
-#: components/PromptDetail/PromptDetail.js:369
+#: components/PromptDetail/PromptDetail.js:169
+#: components/PromptDetail/PromptDetail.js:356
 #: components/PromptDetail/PromptJobTemplateDetail.js:286
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:135
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:620
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:597
 #: screens/Host/HostDetail/HostDetail.js:93
-#: screens/Inventory/InventoryDetail/InventoryDetail.js:165
+#: screens/Inventory/InventoryDetail/InventoryDetail.js:150
 #: screens/Inventory/InventoryGroupDetail/InventoryGroupDetail.js:37
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.js:88
-#: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:143
+#: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:127
 #: screens/Inventory/SmartInventoryHostDetail/SmartInventoryHostDetail.js:53
 #: screens/Inventory/shared/InventoryForm.js:108
 #: screens/Inventory/shared/InventoryGroupForm.js:46
 #: screens/Inventory/shared/SmartInventoryForm.js:93
 #: screens/Job/JobDetail/JobDetail.js:546
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:501
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:479
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:226
 #: screens/Template/shared/JobTemplateForm.js:402
 #: screens/Template/shared/WorkflowJobTemplateForm.js:212
@@ -9604,7 +9740,7 @@ msgstr "프롬프트 변수"
 msgid "Variables must be in JSON or YAML syntax. Use the radio button to toggle between the two."
 msgstr "변수는 JSON 또는 YAML 구문이어야 합니다. 라디오 버튼을 사용하여 둘 사이를 전환합니다."
 
-#: screens/Inventory/shared/Inventory.helptext.js:166
+#: screens/Inventory/shared/Inventory.helptext.js:167
 msgid "Variables used to configure the inventory source. For a detailed description of how to configure this plugin, see <0>Inventory Plugins</0> in the documentation and the <1>{sourceType}</1> plugin configuration guide."
 msgstr "인벤토리 소스를 구성하는데 사용되는 변수입니다. 이 플러그인을 구성하는 방법에 대한 자세한 내용은 설명서의 <0>인벤토리 플러그인</0> 섹션과 <1>{sourceType}</1> 플러그인 구성 가이드를 참조하십시오."
 
@@ -9621,16 +9757,16 @@ msgid "Verbose"
 msgstr "상세 정보"
 
 #: components/AdHocCommands/AdHocPreviewStep.js:63
-#: components/PromptDetail/PromptDetail.js:260
+#: components/PromptDetail/PromptDetail.js:247
 #: components/PromptDetail/PromptInventorySourceDetail.js:100
 #: components/PromptDetail/PromptJobTemplateDetail.js:154
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:478
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:474
 #: components/VerbositySelectField/VerbositySelectField.js:34
 #: components/VerbositySelectField/VerbositySelectField.js:45
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:232
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:233
 #: screens/Inventory/shared/InventorySourceSubForms/SharedFields.js:47
 #: screens/Job/JobDetail/JobDetail.js:331
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:271
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:267
 msgid "Verbosity"
 msgstr "상세 정보"
 
@@ -9638,8 +9774,8 @@ msgstr "상세 정보"
 msgid "View Azure AD settings"
 msgstr "Azure AD 설정 보기"
 
-#: screens/Credential/Credential.js:143
-#: screens/Credential/Credential.js:155
+#: screens/Credential/Credential.js:165
+#: screens/Credential/Credential.js:177
 msgid "View Credential Details"
 msgstr "인증 정보 세부 정보보기"
 
@@ -9663,7 +9799,7 @@ msgstr "호스트 세부 정보 보기"
 msgid "View Instance Details"
 msgstr "인스턴스 세부 정보 보기"
 
-#: screens/Inventory/Inventory.js:192
+#: screens/Inventory/Inventory.js:193
 #: screens/Inventory/InventoryGroup/InventoryGroup.js:142
 #: screens/Inventory/SmartInventory.js:175
 msgid "View Inventory Details"
@@ -9777,7 +9913,7 @@ msgstr "<0>docs.ansible.com</0>에서 YAML 예제 보기"
 msgid "View activity stream"
 msgstr "활동 스트림 보기"
 
-#: screens/Credential/Credential.js:99
+#: screens/Credential/Credential.js:118
 msgid "View all Credentials."
 msgstr "모든 인증 정보 보기"
 
@@ -9940,7 +10076,7 @@ msgstr "Webhook"
 
 #: components/PromptDetail/PromptJobTemplateDetail.js:177
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:103
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:333
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:329
 #: screens/Template/shared/WebhookSubForm.js:199
 msgid "Webhook Credential"
 msgstr "Webhook 인증 정보"
@@ -9951,7 +10087,7 @@ msgstr "Webhook 인증 정보"
 
 #: components/PromptDetail/PromptJobTemplateDetail.js:173
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:92
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:326
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:322
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:168
 #: screens/Template/shared/WebhookSubForm.js:173
 msgid "Webhook Key"
@@ -9959,7 +10095,7 @@ msgstr "Webhook 키"
 
 #: components/PromptDetail/PromptJobTemplateDetail.js:166
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:91
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:311
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:307
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:156
 #: screens/Template/shared/WebhookSubForm.js:129
 msgid "Webhook Service"
@@ -9967,7 +10103,7 @@ msgstr "Webhook 서비스"
 
 #: components/PromptDetail/PromptJobTemplateDetail.js:169
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:95
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:319
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:315
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:162
 #: screens/Template/shared/WebhookSubForm.js:161
 #: screens/Template/shared/WebhookSubForm.js:167
@@ -9991,7 +10127,7 @@ msgstr "Webhook 서비스는 이를 공유 시크릿으로 사용할 수 있습�
 
 #: components/PromptDetail/PromptJobTemplateDetail.js:78
 #: components/PromptDetail/PromptWFJobTemplateDetail.js:41
-#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:142
+#: screens/Template/JobTemplateDetail/JobTemplateDetail.js:143
 #: screens/Template/WorkflowJobTemplateDetail/WorkflowJobTemplateDetail.js:63
 msgid "Webhooks"
 msgstr "Webhook"
@@ -10015,7 +10151,7 @@ msgstr "수요일"
 msgid "Wednesday"
 msgstr "수요일"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:185
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:181
 #: components/Schedule/shared/FrequencyDetailSubform.js:179
 #: components/Schedule/shared/ScheduleFormFields.js:128
 #: components/Schedule/shared/ScheduleFormFields.js:188
@@ -10068,8 +10204,8 @@ msgstr "워크플로우 승인을 찾을 수 없습니다."
 
 #: routeConfig.js:54
 #: screens/ActivityStream/ActivityStream.js:156
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:118
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:145
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:166
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:203
 #: screens/WorkflowApproval/WorkflowApprovals.js:13
 #: screens/WorkflowApproval/WorkflowApprovals.js:22
 msgid "Workflow Approvals"
@@ -10080,11 +10216,11 @@ msgstr "워크플로우 승인"
 #: components/Schedule/ScheduleList/ScheduleListItem.js:40
 #: screens/Job/JobDetail/JobDetail.js:70
 #: screens/WorkflowApproval/WorkflowApprovalDetail/WorkflowApprovalDetail.js:224
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:164
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:222
 msgid "Workflow Job"
 msgstr "워크플로우 작업"
 
-#: components/WorkflowOutputNavigation/WorkflowOutputNavigation.js:76
+#: components/WorkflowOutputNavigation/WorkflowOutputNavigation.js:74
 msgid "Workflow Job 1/{0}"
 msgstr "워크플로 작업 1/{0}"
 
@@ -10112,11 +10248,11 @@ msgstr "워크플로우 작업 템플릿"
 msgid "Workflow Link"
 msgstr "워크플로우 링크"
 
-#: components/WorkflowOutputNavigation/WorkflowOutputNavigation.js:100
+#: components/WorkflowOutputNavigation/WorkflowOutputNavigation.js:98
 msgid "Workflow Nodes"
 msgstr "워크플로 노드"
 
-#: components/WorkflowOutputNavigation/WorkflowOutputNavigation.js:86
+#: components/WorkflowOutputNavigation/WorkflowOutputNavigation.js:84
 msgid "Workflow Statuses"
 msgstr "워크플로우 상태"
 
@@ -10194,7 +10330,7 @@ msgstr "쓰기"
 msgid "YAML:"
 msgstr "YAML:"
 
-#: components/Schedule/ScheduleDetail/ScheduleDetail.js:187
+#: components/Schedule/ScheduleDetail/ScheduleDetail.js:183
 #: components/Schedule/shared/FrequencyDetailSubform.js:183
 #: components/Schedule/shared/ScheduleFormFields.js:130
 #: components/Schedule/shared/ScheduleFormFields.js:190
@@ -10204,6 +10340,14 @@ msgstr "년"
 #: components/Search/Search.js:229
 msgid "Yes"
 msgstr "제공됨"
+
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListApproveButton.js:27
+msgid "You are unable to act on the following workflow approvals: {itemsUnableToApprove}"
+msgstr ""
+
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalListDenyButton.js:27
+msgid "You are unable to act on the following workflow approvals: {itemsUnableToDeny}"
+msgstr ""
 
 #: components/Lookup/MultiCredentialsLookup.js:155
 msgid "You cannot select multiple vault credentials with the same vault ID. Doing so will automatically deselect the other with the same vault ID."
@@ -10344,7 +10488,12 @@ msgstr "세부 정보"
 msgid "disassociate"
 msgstr "연결 해제"
 
+#: components/InstanceDetails.js/InstanceDetails.js:301
 #: components/Lookup/HostFilterLookup.js:406
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:235
+#: screens/InstanceGroup/Instances/InstanceListItem.js:233
+#: screens/Instances/InstanceDetail/InstanceDetail.js:242
+#: screens/Instances/InstanceList/InstanceListItem.js:250
 #: screens/NotificationTemplate/shared/Notifications.helptext.js:20
 #: screens/NotificationTemplate/shared/Notifications.helptext.js:39
 #: screens/Template/Survey/SurveyQuestionForm.js:269
@@ -10356,11 +10505,11 @@ msgstr "문서"
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:105
 #: screens/ExecutionEnvironment/ExecutionEnvironmentDetails/ExecutionEnvironmentDetails.js:117
 #: screens/Host/HostDetail/HostDetail.js:104
-#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:97
-#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:109
+#: screens/InstanceGroup/ContainerGroupDetails/ContainerGroupDetails.js:116
+#: screens/InstanceGroup/InstanceGroupDetails/InstanceGroupDetails.js:123
 #: screens/Inventory/InventoryHostDetail/InventoryHostDetail.js:99
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:289
-#: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:161
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:295
+#: screens/Inventory/SmartInventoryDetail/SmartInventoryDetail.js:145
 #: screens/Project/ProjectDetail/ProjectDetail.js:309
 #: screens/Setting/Subscription/SubscriptionDetail/SubscriptionDetail.js:195
 #: screens/User/UserDetail/UserDetail.js:92
@@ -10372,7 +10521,12 @@ msgstr "편집"
 msgid "encrypted"
 msgstr "암호화"
 
+#: components/InstanceDetails.js/InstanceDetails.js:303
 #: components/Lookup/HostFilterLookup.js:408
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:237
+#: screens/InstanceGroup/Instances/InstanceListItem.js:235
+#: screens/Instances/InstanceDetail/InstanceDetail.js:244
+#: screens/Instances/InstanceList/InstanceListItem.js:252
 #: screens/Template/WorkflowJobTemplateVisualizer/Modals/NodeModals/NodeTypeStep/NodeTypeStep.js:241
 msgid "for more info."
 msgstr "자세한 내용"
@@ -10456,7 +10610,7 @@ msgstr "작업 다시 시작"
 msgid "sec"
 msgstr "초"
 
-#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:238
+#: screens/Inventory/InventorySourceDetail/InventorySourceDetail.js:244
 msgid "seconds"
 msgstr "초"
 
@@ -10525,7 +10679,7 @@ msgstr "{0, plural, one {The inventory will be in a pending status until the fin
 msgid "{0, plural, one {The selected job cannot be deleted due to insufficient permission or a running job status} other {The selected jobs cannot be deleted due to insufficient permissions or a running job status}}"
 msgstr "{0, plural, one {The selected job cannot be deleted due to insufficient permission or a running job status} other {The selected jobs cannot be deleted due to insufficient permissions or a running job status}}"
 
-#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:151
+#: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:209
 msgid "{0, plural, one {This approval cannot be deleted due to insufficient permissions or a pending job status} other {These approvals cannot be deleted due to insufficient permissions or a pending job status}}"
 msgstr "{0, plural, one {This approval cannot be deleted due to insufficient permissions or a pending job status} other {These approvals cannot be deleted due to insufficient permissions or a pending job status}}"
 
@@ -10565,7 +10719,7 @@ msgstr "{0, plural, one {This organization is currently being used by other reso
 msgid "{0, plural, one {This project is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these projects could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
 msgstr "{0, plural, one {This project is currently being used by other resources. Are you sure you want to delete it?} other {Deleting these projects could impact other resources that rely on them. Are you sure you want to delete anyway?}}"
 
-#: components/RelatedTemplateList/RelatedTemplateList.js:209
+#: components/RelatedTemplateList/RelatedTemplateList.js:222
 #: components/TemplateList/TemplateList.js:266
 msgid "{0, plural, one {This template is currently being used by some workflow nodes. Are you sure you want to delete it?} other {Deleting these templates could impact some workflow nodes that rely on them. Are you sure you want to delete anyway?}}"
 msgstr "{0, plural, one {This template is currently being used by some workflow nodes. Are you sure you want to delete it?} other {Deleting these templates could impact some workflow nodes that rely on them. Are you sure you want to delete anyway?}}"
@@ -10610,10 +10764,11 @@ msgstr "{brandName} 로고"
 msgid "{dateStr} by <0>{username}</0>"
 msgstr "{dateStr} (<0>{username}</0> 기준)"
 
-#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:231
-#: screens/InstanceGroup/Instances/InstanceListItem.js:148
-#: screens/Instances/InstanceDetail/InstanceDetail.js:274
-#: screens/Instances/InstanceList/InstanceListItem.js:158
+#: components/InstanceDetails.js/InstanceDetails.js:335
+#: screens/InstanceGroup/InstanceDetails/InstanceDetails.js:250
+#: screens/InstanceGroup/Instances/InstanceListItem.js:162
+#: screens/Instances/InstanceDetail/InstanceDetail.js:276
+#: screens/Instances/InstanceList/InstanceListItem.js:174
 #: screens/TopologyView/Tooltip.js:288
 msgid "{forks, plural, one {# fork} other {# forks}}"
 msgstr "{forks, plural, one {# fork} other {# forks}}"
@@ -10666,7 +10821,7 @@ msgstr "{intervalValue, plural, one {week} other {weeks}}"
 msgid "{intervalValue, plural, one {year} other {years}}"
 msgstr "{intervalValue, plural, one {year} other {years}}"
 
-#: components/PromptDetail/PromptDetail.js:44
+#: components/PromptDetail/PromptDetail.js:45
 msgid "{minutes} min {seconds} sec"
 msgstr "{minutes} 분 {seconds} 초"
 
@@ -10690,7 +10845,7 @@ msgstr "{numOccurrences, plural, one {After {numOccurrences} occurrence} other {
 msgid "{pluralizedItemName} List"
 msgstr "{pluralizedItemName} 목록"
 
-#: components/HealthCheckButton/HealthCheckButton.js:13
+#: components/HealthCheckButton/HealthCheckButton.js:18
 msgid "{selectedItemsCount, plural, one {Click to run a health check on the selected instance.} other {Click to run a health check on the selected instances.}}"
 msgstr "{selectedItemsCount, plural, one {Click to run a health check on the selected instance.} other {Click to run a health check on the selected instances.}}"
 

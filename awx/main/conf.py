@@ -795,6 +795,16 @@ register(
     category_slug='bulk',
 )
 
+register(
+    'UI_NEXT',
+    field_class=fields.BooleanField,
+    default=False,
+    label=_('Enable Preview of New User Interface'),
+    help_text=_('Enable preview of new user interface.'),
+    category=_('System'),
+    category_slug='system',
+)
+
 
 def logging_validate(serializer, attrs):
     if not serializer.instance or not hasattr(serializer.instance, 'LOG_AGGREGATOR_HOST') or not hasattr(serializer.instance, 'LOG_AGGREGATOR_TYPE'):
