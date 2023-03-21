@@ -1,0 +1,283 @@
+#jinja2: lstrip_blocks: True
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    volume.podman.io/driver: local
+  labels:
+    name: tools_awx_db
+    pod: awx
+  name: awx_db
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+{% for i in range(control_plane_node_count|int) -%}
+  {% set container_postfix = loop.index %}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    volume.podman.io/driver: local
+  labels:
+    name: tools_redis_socket_{{ container_postfix }}
+    pod: awx
+  name: redis_socket_{{ container_postfix }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+{% endfor -%}
+{% if enable_ldap|bool %}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    volume.podman.io/driver: local
+  labels:
+    name: tools_ldap_1
+    pod: awx
+  name: openldap_data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+{% endif %}
+{% if enable_prometheus|bool %}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    volume.podman.io/driver: local
+  labels:
+    name: tools_prometheus_storage
+    pod: awx
+  name: prometheus_storage
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+{% endif %}
+{% if enable_grafana|bool %}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    volume.podman.io/driver: local
+  labels:
+    name: tools_grafana_storage
+    pod: awx
+  name: grafana_storage
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+{% endif %}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: awx
+  name: awx
+spec:
+  ports:
+    - name: "https"
+      port: 8043
+      targetPort: 8043
+    - name: "unused/debugging"
+      port: 8080
+      targetPort: 8080
+    - name: "http"
+      port: 8013
+      targetPort: 8013
+    - name: "jupyter"
+      targetPort: 8888
+  selector:
+    app: awx
+  type: NodePort
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: awx
+  name: awx
+spec:
+  securityContext:
+    capabilities:
+      drop:
+        - CAP_MKNOD
+        - CAP_NET_RAW
+        - CAP_AUDIT_WRITE
+  containers:
+    - name: tools_postgres_1
+      image: docker.io/library/postgres:12
+      env:
+        - name: POSTGRES_HOST_AUTH_METHOD
+          value: trust
+        - name: POSTGRES_DB
+          value: {{ pg_database|quote }}
+        - name: POSTGRES_USER
+          value: {{ pg_username|quote }}
+        - name: POSTGRES_PASSWORD
+          value: {{ pg_password|quote }}
+      args: [postgres, -c, log_destination=stderr, -c, log_min_messages=info, -c, log_min_duration_statement=1000, -c, max_connections=1024]
+      ports:
+        - containerPort: 8043
+          hostPort: 8043
+        - containerPort: 8080
+          hostPort: 8080
+        - containerPort: 8888
+          hostPort: 42689
+      volumeMounts:
+        - mountPath: /var/lib/postgresql_data
+          name: awx_db-pvc
+    - name: tools_redis_1
+      image: docker.io/library/redis:latest
+      command:
+        - redis-server
+      args:
+        - /usr/local/etc/redis/redis.conf
+      volumeMounts:
+        - mountPath: /usr/local/etc/redis/redis.conf
+          name: tools-redis-redis.conf-host-0
+        - mountPath: /var/run/redis/
+          name: redis_socket_1-pvc
+          readOnly: false
+    - name: tools_awx_1
+      image: "{{ awx_image }}:{{ awx_image_tag }}"
+      args: [launch_awx.sh]
+      env:
+        - name: OS
+          value: "{{ os_info.stdout }}"
+        - name: SDB_HOST
+          value: "0.0.0.0"
+        - name: SDB_PORT
+          value: 7899
+        - name: AWX_GROUP_QUEUES
+          value: tower
+        - name: MAIN_NODE_TYPE
+          value: {{ lookup('ansible.builtin.env', 'MAIN_NODE_TYPE') | default('hybrid', true) }}
+        - name: RECEPTORCTL_SOCKET
+          value: {{ receptor_socket_file }}
+        - name: CONTROL_PLANE_NODE_COUNT
+          value: {{ control_plane_node_count|int }}
+        - name: EXECUTION_NODE_COUNT
+          value: {{ execution_node_count|int }}
+        - name: AWX_LOGGING_MODE
+          value: stdout
+        - name: DJANGO_SUPERUSER_PASSWORD
+          value: {{ admin_password }}
+        - name: RUN_MIGRATIONS
+          value: 1
+      securityContext:
+        privileged: true
+      workingDir: /awx_devel
+      volumeMounts:
+        - mountPath: /awx_devel
+          name: awx_devel-host-0
+        - mountPath: /etc/supervisord.conf
+          name: tools-docker-compose-supervisor.conf-host-0
+        - mountPath: /etc/tower/conf.d/database.py
+          name: tools-docker-compose-sources-database.py-host-0
+        - mountPath: /etc/tower/conf.d/websocket_secret.py
+          name: tools-docker-compose-sources-websocket-secret.py-host-0
+        - mountPath: /etc/tower/SECRET_KEY
+          name: tools-docker-compose-sources-SECRET-KEY-host-0
+        - mountPath: /etc/tower/conf.d/local_settings.py
+          name: tools-docker-compose-sources-local-settings.py-host-0
+        - mountPath: /etc/receptor/receptor.conf
+          name: tools-docker-compose-sources-receptor-receptor-awx-1.conf-host-0
+        - mountPath: /etc/receptor/receptor.conf.lock
+          name: tools-docker-compose-sources-receptor-receptor-awx-1.conf.lock-host-0
+        - mountPath: /sys/fs/cgroup
+          name: sys-fs-cgroup-host-0
+        - mountPath: /var/lib/awx/.kube/config
+          name: kube-config-host-0
+        - mountPath: /var/run/redis
+          name: redis_socket_1-pvc
+          readOnly: false
+  hostAliases:
+    - ip: 127.0.0.1
+      hostnames:
+        - postgres
+        - redis_1
+        - awx_1
+  restartPolicy: Never
+  volumes:
+    - name: awx_db-pvc
+      persistentVolumeClaim:
+        claimName: awx_db
+    - name: tools-redis-redis.conf-host-0
+      hostPath:
+        path: ./tools/redis/redis.conf
+        type: File
+    - name: redis_socket_1-pvc
+      persistentVolumeClaim:
+        claimName: redis_socket_1
+    - name: awx_devel-host-0
+      hostPath:
+        path: ./
+        type: Directory
+    - name: tools-docker-compose-supervisor.conf-host-0
+      hostPath:
+        path: ./tools/docker-compose/supervisor.conf
+        type: File
+    - name: tools-docker-compose-sources-database.py-host-0
+      hostPath:
+        path: ./tools/docker-compose/_sources/database.py
+        type: File
+    - name: tools-docker-compose-sources-websocket-secret.py-host-0
+      hostPath:
+        path: ./tools/docker-compose/_sources/websocket_secret.py
+        type: File
+    - name: tools-docker-compose-sources-local-settings.py-host-0
+      hostPath:
+        path: ./tools/docker-compose/_sources/local_settings.py
+        type: File
+    - name: tools-docker-compose-sources-SECRET-KEY-host-0
+      hostPath:
+        path: ./tools/docker-compose/_sources/SECRET_KEY
+        type: File
+    - name: tools-docker-compose-sources-receptor-receptor-awx-1.conf-host-0
+      hostPath:
+        path: ./tools/docker-compose/_sources/receptor/receptor-awx-1.conf
+        type: File
+    - name: tools-docker-compose-sources-receptor-receptor-awx-1.conf.lock-host-0
+      hostPath:
+        path: ./tools/docker-compose/_sources/receptor/receptor-awx-1.conf.lock
+        type: File
+{% if sign_work|bool %}
+    - name: tools-docker-compose-sources-receptor-work-public-key.pem-host-0
+      hostPath:
+        path: ./tools/docker-compose/_sources/receptor/work_public_key.pem
+        type: File
+    - name: tools-docker-compose-sources-receptor-work-private-key.pem-host-0
+      hostPath:
+        path: ./tools/docker-compose/_sources/receptor/work_private_key.pem
+        type: File
+{% endif %}
+    - name: sys-fs-cgroup-host-0
+      hostPath:
+        path: /sys/fs/cgroup
+        type: Directory
+    - name: kube-config-host-0
+      hostPath:
+        path: {{ lookup('ansible.builtin.env', 'HOME') }}/.kube/config
+        type: File

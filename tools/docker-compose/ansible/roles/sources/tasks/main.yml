@@ -1,10 +1,9 @@
 ---
-
 - name: Create _sources directories
   file:
     path: "{{ sources_dest }}/{{ item }}"
-    state: 'directory'
-    mode: '0700'
+    state: "directory"
+    mode: "0700"
   loop:
     - secrets
     - receptor
@@ -22,13 +21,13 @@
 
 - name: Generate secrets if needed
   template:
-    src: 'secrets.yml.j2'
-    dest: '{{ sources_dest }}/secrets/{{ item.item }}.yml'
-    mode: '0600'
+    src: "secrets.yml.j2"
+    dest: "{{ sources_dest }}/secrets/{{ item.item }}.yml"
+    mode: "0600"
   when: not lookup('vars', item.item, default='') and not item.stat.exists
   loop: "{{ secrets.results }}"
   loop_control:
-    label: '{{ item.item }}'
+    label: "{{ item.item }}"
 
 - name: Include generated secrets unless they are explicitly passed in
   include_vars: "{{ sources_dest }}/secrets/{{ item.item }}.yml"
@@ -46,7 +45,7 @@
   template:
     src: "{{ item }}.j2"
     dest: "{{ sources_dest }}/{{ item }}"
-    mode: '0600'
+    mode: "0600"
   with_items:
     - "database.py"
     - "local_settings.py"
@@ -56,10 +55,25 @@
     - "nginx.locations.conf"
 
 - name: Get OS info for sdb
-  shell: |
-    docker info | grep 'Operating System'
-  register: os_info
-  changed_when: false
+  block:
+    - name: Get OS info for sdb from docker
+      shell: |
+        docker info | grep 'Operating System'
+      register: os_info
+      changed_when: false
+  rescue:
+    - block:
+        - name: Get OS info for sdb from lsb_release
+          shell: |
+            lsb_release -ds
+          register: os_info
+          changed_when: false
+      rescue:
+        - name: Get OS info for sdb from podman
+          shell: |
+            podman info --format "{% raw %}{{ .Host.Distribution.Distribution|title }} {{ .Host.Distribution.Version }}{% endraw %}"
+          register: os_info
+          changed_when: false
 
 - name: Get user UID
   shell: id -u
@@ -95,34 +109,40 @@
   template:
     src: docker-compose.yml.j2
     dest: "{{ sources_dest }}/{{ compose_name }}"
-    mode: '0600'
+    mode: "0600"
+
+- name: Render Podman Kube Play
+  template:
+    src: podman_kube.yml.j2
+    dest: "{{ sources_dest }}/podman_kube.yml"
+    mode: "0600"
 
 - name: Render Receptor Config(s) for Control Plane
   template:
     src: "receptor-awx.conf.j2"
     dest: "{{ sources_dest }}/receptor/receptor-awx-{{ item }}.conf"
-    mode: '0600'
+    mode: "0600"
   with_sequence: start=1 end={{ control_plane_node_count }}
 
 - name: Create Receptor Config Lock File
   file:
     path: "{{ sources_dest }}/receptor/receptor-awx-{{ item }}.conf.lock"
     state: touch
-    mode: '0600'
+    mode: "0600"
   with_sequence: start=1 end={{ control_plane_node_count }}
 
 - name: Render Receptor Config(s) for Control Plane
   template:
     src: "receptor-awx.conf.j2"
     dest: "{{ sources_dest }}/receptor/receptor-awx-{{ item }}.conf"
-    mode: '0600'
+    mode: "0600"
   with_sequence: start=1 end={{ control_plane_node_count }}
 
 - name: Render Receptor Hop Config
   template:
     src: "receptor-hop.conf.j2"
     dest: "{{ sources_dest }}/receptor/receptor-hop.conf"
-    mode: '0600'
+    mode: "0600"
   when:
     - execution_node_count | int > 0
 
@@ -130,7 +150,7 @@
   template:
     src: "receptor-worker.conf.j2"
     dest: "{{ sources_dest }}/receptor/receptor-worker-{{ item }}.conf"
-    mode: '0600'
+    mode: "0600"
   with_sequence: start=1 end={{ execution_node_count if execution_node_count | int > 0 else 1}}
   when: execution_node_count | int > 0
 
