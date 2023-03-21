@@ -458,12 +458,19 @@ class Command(BaseCommand):
         # TODO: We disable variable overwrite here in case user-defined inventory variables get
         # mangled. But we still need to figure out a better way of processing multiple inventory
         # update variables mixing with each other.
-        all_obj = self.inventory
-        db_variables = all_obj.variables_dict
-        db_variables.update(self.all_group.variables)
-        if db_variables != all_obj.variables_dict:
-            all_obj.variables = json.dumps(db_variables)
-            all_obj.save(update_fields=['variables'])
+        # issue for this: https://github.com/ansible/awx/issues/11623
+
+        if not (self.inventory.kind == 'constructed' and self.inventory_source.overwrite_vars):
+            # NOTE: we had to add a exception case to not merge variables
+            # to make constructed inventory coherent
+            db_variables = self.all_group.variables
+        else:
+            db_variables = self.inventory.variables_dict
+            db_variables.update(self.all_group.variables)
+
+        if db_variables != self.inventory.variables_dict:
+            self.inventory.variables = json.dumps(db_variables)
+            self.inventory.save(update_fields=['variables'])
             logger.debug('Inventory variables updated from "all" group')
         else:
             logger.debug('Inventory variables unmodified')
