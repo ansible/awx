@@ -2353,18 +2353,12 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
 
     # TODO: remove when old 'credential' fields are removed
     def update(self, obj, validated_data):
-        original = self.context['original']
         deprecated_fields = {}
         if 'credential' in validated_data:
             deprecated_fields['credential'] = validated_data.pop('credential')
         obj = super(InventorySourceSerializer, self).update(obj, validated_data)
         if deprecated_fields:
             self._update_deprecated_fields(deprecated_fields, obj)
-        if original.source == 'constructed':
-            allowed_fields = CONSTRUCTED_INVENTORY_SOURCE_EDITABLE_FIELDS
-            for field in validated_data:
-                if validated_data[field] != getattr(original, field) and field not in allowed_fields:
-                    raise serializers.ValidationError({"error": _("Cannot change field '{}' on a constructed inventory source.").format(field)})
         return obj
 
     # TODO: remove when old 'credential' fields are removed
@@ -2388,10 +2382,15 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         def get_field_from_model_or_attrs(fd):
             return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)
 
-        if get_field_from_model_or_attrs('source') == 'scm':
+        if self.instance and self.instance.source == 'constructed':
+            allowed_fields = CONSTRUCTED_INVENTORY_SOURCE_EDITABLE_FIELDS
+            for field in attrs:
+                if attrs[field] != getattr(self.instance, field) and field not in allowed_fields:
+                    raise serializers.ValidationError({"error": _("Cannot change field '{}' on a constructed inventory source.").format(field)})
+        elif get_field_from_model_or_attrs('source') == 'scm':
             if ('source' in attrs or 'source_project' in attrs) and get_field_from_model_or_attrs('source_project') is None:
                 raise serializers.ValidationError({"source_project": _("Project required for scm type sources.")})
-        elif (get_field_from_model_or_attrs('source') == 'constructed') and (self.instance and self.instance.source != 'constructed'):
+        elif get_field_from_model_or_attrs('source') == 'constructed':
             raise serializers.ValidationError({"error": _('constructed not a valid source for inventory')})
         else:
             redundant_scm_fields = list(filter(lambda x: attrs.get(x, None), ['source_project', 'source_path', 'scm_branch']))

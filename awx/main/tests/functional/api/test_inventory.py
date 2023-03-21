@@ -637,7 +637,7 @@ class TestConstructedInventory:
             expect=400,
             user=admin_user,
         )
-        assert r.data['error'] == "Cannot change field 'source' on a constructed inventory source."
+        assert str(r.data['error'][0]) == "Cannot change field 'source' on a constructed inventory source."
 
         # Make sure it didn't get updated before we got the error
         inv_src_after_err = constructed_inventory.inventory_sources.first()
