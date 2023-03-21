@@ -45,7 +45,7 @@ from polymorphic.models import PolymorphicModel
 
 # AWX
 from awx.main.access import get_user_capabilities
-from awx.main.constants import ACTIVE_STATES, CENSOR_VALUE, CONSTRUCTED_INVENTORY_SOURCE_EDITABLE_FIELDS
+from awx.main.constants import ACTIVE_STATES, CENSOR_VALUE
 from awx.main.models import (
     ActivityStream,
     AdHocCommand,
@@ -187,6 +187,11 @@ SUMMARIZABLE_FK_FIELDS = {
     'approved_or_denied_by': ('id', 'username', 'first_name', 'last_name'),
     'credential_type': DEFAULT_SUMMARY_FIELDS,
 }
+
+
+# These fields can be edited on a constructed inventory's generated source (possibly by using the constructed
+# inventory's special API endpoint, but also by using the inventory sources endpoint).
+CONSTRUCTED_INVENTORY_SOURCE_EDITABLE_FIELDS = ('source_vars', 'update_cache_timeout', 'limit', 'verbosity')
 
 
 def reverse_gfk(content_object, request):
@@ -1782,7 +1787,7 @@ class ConstructedInventorySerializer(InventorySerializer):
 
     class Meta:
         model = Inventory
-        fields = ('*', '-host_filter', 'source_vars', 'update_cache_timeout', 'limit', 'verbosity')
+        fields = ('*', '-host_filter') + CONSTRUCTED_INVENTORY_SOURCE_EDITABLE_FIELDS
         read_only_fields = ('*', 'kind')
 
     def pop_inv_src_data(self, data):

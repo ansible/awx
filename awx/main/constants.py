@@ -106,7 +106,3 @@ JOB_VARIABLE_PREFIXES = [
 ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE = (
     '\u001b[31m \u001b[1m This can be caused if the version of ansible-runner in your execution environment is out of date.\u001b[0m'
 )
-
-# These fields can be edited on a constructed inventory's generated source (possibly by using the constructed
-# inventory's special API endpoint, but also by using the inventory sources endpoint).
-CONSTRUCTED_INVENTORY_SOURCE_EDITABLE_FIELDS = ('source_vars', 'update_cache_timeout', 'limit', 'verbosity')
