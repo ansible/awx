@@ -640,7 +640,12 @@ class TestConstructedInventory:
         assert r.data['error'] == "Cannot change field 'source' on a constructed inventory source."
 
         # Make sure it didn't get updated before we got the error
-        assert inv_src == constructed_inventory.inventory_sources.first()
+        inv_src_after_err = constructed_inventory.inventory_sources.first()
+        assert inv_src.id == inv_src_after_err.id
+        assert inv_src.source == inv_src_after_err.source
+        assert inv_src.source_project == inv_src_after_err.source_project
+        assert inv_src.source_path == inv_src_after_err.source_path
+        assert inv_src.source_vars == inv_src_after_err.source_vars
 
     def test_patch_constructed_inventory_generated_source_allows_source_vars_edit(self, constructed_inventory, admin_user, patch):
         inv_src = constructed_inventory.inventory_sources.first()
