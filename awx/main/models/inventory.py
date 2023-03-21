@@ -206,6 +206,8 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
     )
 
     def get_absolute_url(self, request=None):
+        if self.kind == 'constructed':
+            return reverse('api:constructed_inventory_detail', kwargs={'pk': self.pk}, request=request)
         return reverse('api:inventory_detail', kwargs={'pk': self.pk}, request=request)
 
     variables_dict = VarsDictProperty('variables')
