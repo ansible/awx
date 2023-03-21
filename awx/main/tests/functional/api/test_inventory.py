@@ -649,7 +649,7 @@ class TestConstructedInventory:
 
     def test_patch_constructed_inventory_generated_source_allows_source_vars_edit(self, constructed_inventory, admin_user, patch):
         inv_src = constructed_inventory.inventory_sources.first()
-        r = patch(
+        patch(
             url=inv_src.get_absolute_url(),
             data={
                 'source_vars': 'plugin: a.b.c',
@@ -657,6 +657,16 @@ class TestConstructedInventory:
             expect=200,
             user=admin_user,
         )
+
+        inv_src_after_patch = constructed_inventory.inventory_sources.first()
+
+        # sanity checks
+        assert inv_src.id == inv_src_after_patch.id
+        assert inv_src.source == 'constructed'
+        assert inv_src_after_patch.source == 'constructed'
+        assert inv_src.source_vars == ''
+
+        assert inv_src_after_patch.source_vars == 'plugin: a.b.c'
 
     def test_create_constructed_inventory(self, constructed_inventory, admin_user, post, organization):
         r = post(
