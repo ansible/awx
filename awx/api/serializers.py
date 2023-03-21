@@ -45,7 +45,7 @@ from polymorphic.models import PolymorphicModel
 
 # AWX
 from awx.main.access import get_user_capabilities
-from awx.main.constants import ACTIVE_STATES, CENSOR_VALUE
+from awx.main.constants import ACTIVE_STATES, CENSOR_VALUE, CONSTRUCTED_INVENTORY_SOURCE_EDITABLE_FIELDS
 from awx.main.models import (
     ActivityStream,
     AdHocCommand,
@@ -1787,7 +1787,7 @@ class ConstructedInventorySerializer(InventorySerializer):
 
     def pop_inv_src_data(self, data):
         inv_src_data = {}
-        for field in ('source_vars', 'update_cache_timeout', 'limit', 'verbosity'):
+        for field in CONSTRUCTED_INVENTORY_SOURCE_EDITABLE_FIELDS:
             if field in data:
                 # values always need to be removed, as they are not valid for Inventory model
                 value = data.pop(field)
@@ -2361,7 +2361,7 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         if deprecated_fields:
             self._update_deprecated_fields(deprecated_fields, obj)
         if original.source == 'constructed':
-            allowed_fields = ('source_vars', 'limit')
+            allowed_fields = CONSTRUCTED_INVENTORY_SOURCE_EDITABLE_FIELDS
             for field in validated_data:
                 if validated_data[field] != getattr(original, field) and field not in allowed_fields:
                     raise serializers.ValidationError({"error": _("Cannot change field '{}' on a constructed inventory source.").format(field)})
