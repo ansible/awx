@@ -569,12 +569,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         default=None,
         on_delete=models.SET_NULL,
     )
-    hosts = models.ManyToManyField(
-        'Host',
-        related_name='jobs',
-        editable=False,
-        through='JobHostSummary',
-    )
+    hosts = models.ManyToManyField('Host', related_name='jobs', editable=False, through='JobHostSummary', through_fields=('job', 'host'))
     artifacts = JSONBlob(
         default=dict,
         blank=True,
@@ -1059,6 +1054,15 @@ class JobHostSummary(CreatedModifiedModel):
         editable=False,
     )
     host = models.ForeignKey('Host', related_name='job_host_summaries', null=True, default=None, on_delete=models.SET_NULL, editable=False)
+    constructed_host = models.ForeignKey(
+        'Host',
+        related_name='constructed_host_summaries',
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+        editable=False,
+        help_text='Only for jobs run against constructed inventories, this links to the host inside the constructed inventory.',
+    )
 
     host_name = models.CharField(
         max_length=1024,

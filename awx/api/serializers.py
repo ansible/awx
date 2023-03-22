@@ -158,6 +158,7 @@ SUMMARIZABLE_FK_FIELDS = {
         'kind',
     ),
     'host': DEFAULT_SUMMARY_FIELDS,
+    'constructed_host': DEFAULT_SUMMARY_FIELDS,
     'group': DEFAULT_SUMMARY_FIELDS,
     'default_environment': DEFAULT_SUMMARY_FIELDS + ('image',),
     'execution_environment': DEFAULT_SUMMARY_FIELDS + ('image',),
@@ -1903,6 +1904,10 @@ class HostSerializer(BaseSerializerWithVariables):
             group_list = [{'id': g.id, 'name': g.name} for g in obj.groups.all().order_by('id')[:5]]
         group_cnt = obj.groups.count()
         d.setdefault('groups', {'count': group_cnt, 'results': group_list})
+        if obj.inventory.kind == 'constructed':
+            summaries_qs = obj.constructed_host_summaries
+        else:
+            summaries_qs = obj.job_host_summaries
         d.setdefault(
             'recent_jobs',
             [
@@ -1913,7 +1918,7 @@ class HostSerializer(BaseSerializerWithVariables):
                     'status': j.job.status,
                     'finished': j.job.finished,
                 }
-                for j in obj.job_host_summaries.select_related('job__job_template').order_by('-created').defer('job__extra_vars', 'job__artifacts')[:5]
+                for j in summaries_qs.select_related('job__job_template').order_by('-created').defer('job__extra_vars', 'job__artifacts')[:5]
             ],
         )
         return d
@@ -4140,6 +4145,7 @@ class JobHostSummarySerializer(BaseSerializer):
             '-description',
             'job',
             'host',
+            'constructed_host',
             'host_name',
             'changed',
             'dark',
