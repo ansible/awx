@@ -227,7 +227,7 @@ class Command(BaseCommand):
 
         # --json flag is not set, output in plain text
         else:
-            print(f"Printing up to {BATCHED_FETCH_COUNT } automated hosts:")
+            print(f"Printing up to {BATCHED_FETCH_COUNT} automated hosts:")
             result = HostMetric.objects.filter(**filter_kwargs)
             list_of_queryset = self.host_metric_queryset(result, 0, BATCHED_FETCH_COUNT)
             for item in list_of_queryset:
