@@ -34,6 +34,12 @@ export UI_NEXT_LOCAL = /path/to/your/ui_next
 make ui-next
 ```
 
+## Rebuild
+
+```bash
+make -B ui-next
+```
+
 ## Clean
 
 ```bash

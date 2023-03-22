@@ -16,9 +16,10 @@ ui-next: ui-next/build
 .PHONY: ui-next/build
 ## Build ui-next/build
 ui-next/build: $(UI_NEXT_DIR)/build
-.PHONY: $(UI_NEXT_DIR)/build
+
 ## True build target for ui-next.
-$(UI_NEXT_DIR)/build: ui-next/src/build
+$(UI_NEXT_DIR)/build:
+	@$(MAKE) $(UI_NEXT_DIR)/src/build/awx
 	@echo "=== Copying $(UI_NEXT_DIR)/src/build to $(UI_NEXT_DIR)/build ==="
 	@rm -rf $(UI_NEXT_DIR)/build
 	@cp -r $(UI_NEXT_DIR)/src/build $(UI_NEXT_DIR)
@@ -26,11 +27,10 @@ $(UI_NEXT_DIR)/build: ui-next/src/build
 
 .PHONY: ui-next/src/build
 ## Build ui-next/src/build
-ui-next/src/build: $(UI_NEXT_DIR)/src/build
+ui-next/src/build: $(UI_NEXT_DIR)/src/build/awx
 
-.PHONY: $(UI_NEXT_DIR)/src/build
-## True target for ui-next/src/build.
-$(UI_NEXT_DIR)/src/build: ui-next/src ui-next/src/webpack
+## True target for ui-next/src/build. Build ui_next from source.
+$(UI_NEXT_DIR)/src/build/awx: $(UI_NEXT_DIR)/src $(UI_NEXT_DIR)/src/node_modules/webpack
 	@echo "=== Building ui_next ==="
 	@cd $(UI_NEXT_DIR)/src && npm run build:awx
 
@@ -39,7 +39,6 @@ $(UI_NEXT_DIR)/src/build: ui-next/src ui-next/src/webpack
 ui-next/src: $(UI_NEXT_DIR)/src
 
 # TODO: Rewrite this big bash script in a more readable way.
-.PHONY: $(UI_NEXT_DIR)/src
 ## True target for ui-next/src.
 $(UI_NEXT_DIR)/src:
 	@echo "=== Setting up $(UI_NEXT_DIR)/src ==="
@@ -81,7 +80,6 @@ $(UI_NEXT_DIR)/src:
 ## Install webpack.
 ui-next/src/webpack: $(UI_NEXT_DIR)/src/node_modules/webpack
 
-.PHONY: $(UI_NEXT_DIR)/src/node_modules/webpack
 ## True target for ui-next/src/webpack.
 $(UI_NEXT_DIR)/src/node_modules/webpack:
 	@echo "=== Installing webpack ==="
@@ -100,3 +98,15 @@ clean/ui-next/src:
 ## Clean ui_next build
 clean/ui-next/build:
 	rm -rf $(UI_NEXT_DIR)/build
+
+.PHONY: $(UI_NEXT_DIR)/clean
+## Alias for clean/ui-next, so we can run `make clean` directly in ui_next
+$(UI_NEXT_DIR)/clean: clean/ui-next
+
+.PHONY: $(UI_NEXT_DIR)/clean/src
+## Alias for clean/ui-next/src, so we can run `make clean/src` directly in ui_next
+$(UI_NEXT_DIR)/clean/src: clean/ui-next/src
+
+.PHONY: $(UI_NEXT_DIR)/clean/build
+## Alias for clean/ui-next/build, so we can run `make clean/build` directly in ui_next
+$(UI_NEXT_DIR)/clean/build: clean/ui-next/build
