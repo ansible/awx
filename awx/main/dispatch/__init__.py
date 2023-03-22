@@ -5,6 +5,7 @@ from contextlib import contextmanager
 
 from django.conf import settings
 from django.db import connection as pg_connection
+import os
 
 
 NOT_READY = ([], [], [])
@@ -12,6 +13,15 @@ NOT_READY = ([], [], [])
 
 def get_local_queuename():
     return settings.CLUSTER_HOST_ID
+
+
+def get_task_queuename():
+    if os.getenv('AWX_COMPONENT') == 'web':
+        from awx.main.models.ha import Instance
+
+        return Instance.objects.filter(node_type__in=['control', 'hybrid']).order_by('?').first().hostname
+    else:
+        return settings.CLUSTER_HOST_ID
 
 
 class PubSub(object):
