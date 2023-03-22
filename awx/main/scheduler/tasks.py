@@ -8,7 +8,7 @@ from django.conf import settings
 from awx import MODE
 from awx.main.scheduler import TaskManager, DependencyManager, WorkflowManager
 from awx.main.dispatch.publish import task
-from awx.main.dispatch import get_local_queuename
+from awx.main.dispatch import get_task_queuename
 
 logger = logging.getLogger('awx.main.scheduler')
 
@@ -20,16 +20,16 @@ def run_manager(manager, prefix):
     manager().schedule()
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 def task_manager():
     run_manager(TaskManager, "task")
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 def dependency_manager():
     run_manager(DependencyManager, "dependency")
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 def workflow_manager():
     run_manager(WorkflowManager, "workflow")
