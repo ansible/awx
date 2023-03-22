@@ -549,6 +549,7 @@ class JobEvent(BasePlaybookEvent):
                     host_map[host.name] = host.id
             else:
                 all_hosts = Host.objects.filter(pk__in=self.host_map.values()).only('id', 'name')
+                constructed_host_map = {}
                 host_map = self.host_map
 
             existing_host_ids = set(h.id for h in all_hosts)
