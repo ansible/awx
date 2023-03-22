@@ -307,5 +307,6 @@
     "instances":{"fields":["hostname"],"adj_list":[]}
   },
   "DEFAULT_EXECUTION_ENVIRONMENT": 1,
-  "AWX_MOUNT_ISOLATED_PATHS_ON_K8S": false
+  "AWX_MOUNT_ISOLATED_PATHS_ON_K8S": false,
+  "UI_NEXT": false
 }
