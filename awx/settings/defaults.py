@@ -1021,5 +1021,4 @@ CLUSTER_HOST_ID = socket.gethostname()
 # License compliance for total host count. Possible values:
 # - '': No model - Subscription not counted from Host Metrics
 # - 'unique_managed_hosts': Compliant = automated - deleted hosts (using /api/v2/host_metrics/)
-# - 'unique_managed_hosts_monthly': TBD: AoC on Azure (now equal to '')
 SUBSCRIPTION_USAGE_MODEL = ''

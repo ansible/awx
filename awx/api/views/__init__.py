@@ -1570,15 +1570,16 @@ class HostMetricDetail(RetrieveDestroyAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class HostMetricSummaryMonthlyList(ListAPIView):
-    name = _("Host Metrics Summary Monthly")
-    model = models.HostMetricSummaryMonthly
-    serializer_class = serializers.HostMetricSummaryMonthlySerializer
-    permission_classes = (IsSystemAdminOrAuditor,)
-    search_fields = ('date',)
-
-    def get_queryset(self):
-        return self.model.objects.all()
+# It will be enabled in future version of the AWX
+# class HostMetricSummaryMonthlyList(ListAPIView):
+#     name = _("Host Metrics Summary Monthly")
+#     model = models.HostMetricSummaryMonthly
+#     serializer_class = serializers.HostMetricSummaryMonthlySerializer
+#     permission_classes = (IsSystemAdminOrAuditor,)
+#     search_fields = ('date',)
+#
+#     def get_queryset(self):
+#         return self.model.objects.all()
 
 
 class HostList(HostRelatedSearchMixin, ListCreateAPIView):
