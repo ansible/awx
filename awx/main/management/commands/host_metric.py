@@ -185,7 +185,6 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--since', type=datetime.datetime.fromisoformat, help='Start Date in ISO format YYYY-MM-DD')
-        parser.add_argument('--until', type=datetime.datetime.fromisoformat, help='End Date in ISO format YYYY-MM-DD')
         parser.add_argument('--json', type=str, const='host_metric', nargs='?', help='Select output as JSON for host_metric or host_metric_summary_monthly')
         parser.add_argument('--csv', type=str, const='host_metric', nargs='?', help='Select output as CSV for host_metric or host_metric_summary_monthly')
         parser.add_argument('--tarball', action='store_true', help=f'Package CSV files into a tar with upto {CSV_PREFERRED_ROW_COUNT} rows')
@@ -193,25 +192,17 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         since = options.get('since')
-        until = options.get('until')
 
         if since is not None and since.tzinfo is None:
             since = since.replace(tzinfo=datetime.timezone.utc)
 
-        if until is not None and until.tzinfo is None:
-            until = until.replace(tzinfo=datetime.timezone.utc)
-
         filter_kwargs = {}
         if since is not None:
             filter_kwargs['last_automation__gte'] = since
-        if until is not None:
-            filter_kwargs['last_automation__lte'] = until
 
         filter_kwargs_host_metrics_summary = {}
         if since is not None:
             filter_kwargs_host_metrics_summary['date__gte'] = since
-        if until is not None:
-            filter_kwargs_host_metrics_summary['date__lte'] = until
 
         if options['rows_per_file'] and options.get('rows_per_file') > CSV_PREFERRED_ROW_COUNT:
             print(f"rows_per_file exceeds the allowable limit of {CSV_PREFERRED_ROW_COUNT}.")
