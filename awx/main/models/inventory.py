@@ -359,8 +359,6 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
             for host in hosts:
                 data['_meta']['hostvars'][host.name] = host.variables_dict
                 if towervars:
-                    if self.kind == 'constructed':
-                        data['_meta']['hostvars'][host.name]['remote_constructed_original_id'] = int(host.instance_id)
                     for prefix in ('host', 'tower'):
                         tower_dict = {
                             f'remote_{prefix}_enabled': str(host.enabled).lower(),
