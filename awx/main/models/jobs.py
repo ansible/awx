@@ -1058,7 +1058,7 @@ class JobHostSummary(CreatedModifiedModel):
         default=None,
         on_delete=models.SET_NULL,
         editable=False,
-        help_text='Only for jobs ran against constructed inventories, this links to the host inside the constructed inventory.',
+        help_text='Only for jobs run against constructed inventories, this links to the host inside the constructed inventory.',
     )
 
     host_name = models.CharField(

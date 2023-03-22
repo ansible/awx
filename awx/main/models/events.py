@@ -544,9 +544,7 @@ class JobEvent(BasePlaybookEvent):
                     'id', 'name'
                 )
                 constructed_host_map = self.host_map
-                host_map = {}
-                for host in all_hosts:
-                    host_map[host.name] = host.id
+                host_map = {host.name: host.id for host in all_hosts}
             else:
                 all_hosts = Host.objects.filter(pk__in=self.host_map.values()).only('id', 'name')
                 constructed_host_map = {}
@@ -558,10 +556,10 @@ class JobEvent(BasePlaybookEvent):
             updated_hosts_list = list()
             for host in hostnames:
                 updated_hosts_list.append(host.lower())
-                host_id = host_map.get(host, None)
+                host_id = host_map.get(host)
                 if host_id not in existing_host_ids:
                     host_id = None
-                constructed_host_id = constructed_host_map.get(host, None)
+                constructed_host_id = constructed_host_map.get(host)
                 host_stats = {}
                 for stat in ('changed', 'dark', 'failures', 'ignored', 'ok', 'processed', 'rescued', 'skipped'):
                     try:

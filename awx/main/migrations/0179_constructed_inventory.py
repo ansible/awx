@@ -128,7 +128,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 default=None,
                 editable=False,
-                help_text='Only for jobs ran against constructed inventories, this links to the host inside the constructed inventory.',
+                help_text='Only for jobs run against constructed inventories, this links to the host inside the constructed inventory.',
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name='constructed_host_summaries',
