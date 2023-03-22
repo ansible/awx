@@ -122,8 +122,17 @@ class Migration(migrations.Migration):
                 help_text='This field is deprecated and will be removed in a future release. Regex where only matching hosts will be imported.',
             ),
         ),
-        migrations.AlterUniqueTogether(
-            name='jobhostsummary',
-            unique_together={('job', 'host')},
+        migrations.AddField(
+            model_name='jobhostsummary',
+            name='constructed_host',
+            field=models.ForeignKey(
+                default=None,
+                editable=False,
+                help_text='Only for jobs ran against constructed inventories, this links to the host inside the constructed inventory.',
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name='constructed_host_summaries',
+                to='main.host',
+            ),
         ),
     ]

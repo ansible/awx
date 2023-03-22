@@ -539,46 +539,39 @@ class JobEvent(BasePlaybookEvent):
 
             from awx.main.models import Host, JobHostSummary, HostMetric  # circular import
 
-            all_hosts = Host.objects.filter(pk__in=self.host_map.values()).only('id', 'name')
+            if self.job.inventory.kind == 'constructed':
+                all_hosts = Host.objects.filter(id__in=self.job.inventory.hosts.values_list(Cast('instance_id', output_field=models.IntegerField()))).only(
+                    'id', 'name'
+                )
+                constructed_host_map = self.host_map
+                host_map = {}
+                for host in all_hosts:
+                    host_map[host.name] = host.id
+            else:
+                all_hosts = Host.objects.filter(pk__in=self.host_map.values()).only('id', 'name')
+                host_map = self.host_map
+
             existing_host_ids = set(h.id for h in all_hosts)
 
             summaries = dict()
-            constructed_summaries = dict()
             updated_hosts_list = list()
             for host in hostnames:
                 updated_hosts_list.append(host.lower())
-                host_id = self.host_map.get(host, None)
+                host_id = host_map.get(host, None)
                 if host_id not in existing_host_ids:
                     host_id = None
+                constructed_host_id = constructed_host_map.get(host, None)
                 host_stats = {}
                 for stat in ('changed', 'dark', 'failures', 'ignored', 'ok', 'processed', 'rescued', 'skipped'):
                     try:
                         host_stats[stat] = self.event_data.get(stat, {}).get(host, 0)
                     except AttributeError:  # in case event_data[stat] isn't a dict.
                         pass
-                summary = JobHostSummary(created=now(), modified=now(), job_id=job.id, host_id=host_id, host_name=host, **host_stats)
+                summary = JobHostSummary(
+                    created=now(), modified=now(), job_id=job.id, host_id=host_id, constructed_host_id=constructed_host_id, host_name=host, **host_stats
+                )
                 summary.failed = bool(summary.dark or summary.failures)
                 summaries[(host_id, host)] = summary
-                if self.job.inventory.kind == 'constructed':
-                    # make an extra copy of summary for original host
-                    # will fill in host_id as later step host_id=host_id
-                    constructed_summaries[host_id] = JobHostSummary(
-                        created=summary.created, modified=summary.modified, job_id=job.id, host_name=host, **host_stats
-                    )
-            if self.job.inventory.kind == 'constructed':
-                valid_original_ids = set(
-                    Host.objects.filter(
-                        id__in=self.job.inventory.hosts.exclude(instance_id='').values_list(Cast('instance_id', output_field=models.IntegerField()))
-                    ).values_list('id', flat=True)
-                )
-                for host_id, instance_id in self.job.inventory.hosts.values_list('id', 'instance_id'):
-                    summary = constructed_summaries.pop(host_id, None)
-                    if not summary or (not instance_id) or (int(instance_id) not in valid_original_ids):
-                        continue
-                    summary.host_id = int(instance_id)
-                    summaries[(instance_id, summary.host_name)] = summary
-                    # TODO: still have potential in both smart and constructed inventory for original host
-                    # to be deleted while the job is in progress
 
             JobHostSummary.objects.bulk_create(summaries.values())
 
