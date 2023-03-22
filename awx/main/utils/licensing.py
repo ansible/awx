@@ -384,8 +384,8 @@ class Licenser(object):
         current_instances = Host.objects.active_count()
         license_date = int(attrs.get('license_date', 0) or 0)
 
-        model = getattr(settings, 'SUBSCRIPTION_USAGE_MODEL', '')
-        if model == SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS:
+        subscription_model = getattr(settings, 'SUBSCRIPTION_USAGE_MODEL', '')
+        if subscription_model == SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS:
             automated_instances = HostMetric.active_objects.count()
             first_host = HostMetric.active_objects.only('first_automation').order_by('first_automation').first()
         else:
