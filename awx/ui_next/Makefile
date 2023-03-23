@@ -13,6 +13,15 @@ UI_NEXT_GIT_BRANCH ?= main
 ## Default build target of ui-next Makefile, builds ui-next/build
 ui-next: ui-next/build
 
+.PHONY: ui-next/headless
+## Create fake ui-next/build/awx for headless builds
+ui-next/headless:
+	@echo "=== Creating fake $(UI_NEXT_DIR)/build/awx ==="
+	@rm -rf $(UI_NEXT_DIR)/build/awx
+	@mkdir -p $(UI_NEXT_DIR)/build/awx
+	@touch $(UI_NEXT_DIR)/build/awx/HEADLESS
+	@echo "=== Done creating fake $(UI_NEXT_DIR)/build/awx ==="
+
 .PHONY: ui-next/build
 ## Build ui-next/build
 ui-next/build: $(UI_NEXT_DIR)/build

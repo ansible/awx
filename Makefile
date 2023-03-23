@@ -447,10 +447,18 @@ ui-test-general:
 	$(NPM_BIN) run --prefix awx/ui pretest
 	$(NPM_BIN) run --prefix awx/ui/ test-general --runInBand
 
+## Create empty ui/build for headless builds
+ui-headless:
+	@echo "=== Creating empty awx/ui/build ==="
+	@rm -rf awx/ui/build/static
+	@mkdir -p awx/ui/build/static
+	@touch awx/ui/build/static/HEADLESS
+	@echo "=== Done creating empty awx/ui/build ==="
+
 # NOTE: The make target ui-next is imported from awx/ui_next/Makefile
 HEADLESS ?= no
 ifeq ($(HEADLESS), yes)
-dist/$(SDIST_TAR_FILE):
+dist/$(SDIST_TAR_FILE): ui-headless ui-next/headless
 else
 dist/$(SDIST_TAR_FILE): $(UI_BUILD_FLAG_FILE) ui-next
 endif
