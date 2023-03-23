@@ -112,6 +112,16 @@ function SubscriptionDetail() {
             label={t`Hosts remaining`}
             value={license_info.free_instances}
           />
+          <Detail
+            dataCy="subscription-hosts-deleted"
+            label={t`Hosts deleted`}
+            value={license_info.deleted_instances}
+          />
+          <Detail
+              dataCy="subscription-hosts-reactivated"
+              label={t`Active hosts previously deleted`}
+              value={license_info.reactivated_instances}
+          />
           {license_info.instance_count < 9999999 && (
             <Detail
               dataCy="subscription-hosts-available"
