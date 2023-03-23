@@ -132,3 +132,20 @@ def test_secret_field_write_twice(run_module, organization, admin_user, cred_typ
     else:
         assert result.get('changed') is False, result
         assert Credential.objects.get(id=result['id']).get_input('token') == val1
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('state', ('present', 'absent', 'exists'))
+def test_credential_state(run_module, organization, admin_user, cred_type, state):
+    for state in ('present', 'absent', 'exists'):
+        result = run_module(
+            'credential',
+            dict(
+                name='Galaxy Token for Steve',
+                organization=organization.name,
+                credential_type=cred_type.name,
+                inputs={'token': '7rEZK38DJl58A7RxA6EC7lLvUHbBQ1'},
+                state=state,
+            ),
+            admin_user,
+        )
+        assert not result.get('failed', False), result.get('msg', result)
