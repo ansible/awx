@@ -15,15 +15,16 @@ ui-next: ui-next/build
 
 .PHONY: ui-next/build
 ## Build ui-next/build
-ui-next/build: $(UI_NEXT_DIR)/build
+ui-next: $(UI_NEXT_DIR)/build
 
-## True build target for ui-next.
-$(UI_NEXT_DIR)/build:
-	@$(MAKE) $(UI_NEXT_DIR)/src/build/awx
-	@echo "=== Copying $(UI_NEXT_DIR)/src/build to $(UI_NEXT_DIR)/build ==="
-	@rm -rf $(UI_NEXT_DIR)/build
-	@cp -r $(UI_NEXT_DIR)/src/build $(UI_NEXT_DIR)
-	@echo "=== Done building $(UI_NEXT_DIR)/build ==="
+.PHONY: ui-next/headless
+## Create empty ui-next/build for headless builds
+ui-next/headless:
+	@echo "=== Creating empty $(UI_NEXT_DIR)/build ==="
+	@rm -rf $(UI_NEXT_DIR)/build/awx
+	@mkdir -p $(UI_NEXT_DIR)/build/awx
+	@touch $(UI_NEXT_DIR)/build/awx/HEADLESS
+	@echo "=== Done creating empty $(UI_NEXT_DIR)/build ==="
 
 .PHONY: ui-next/src/build
 ## Build ui-next/src/build

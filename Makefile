@@ -450,7 +450,7 @@ ui-test-general:
 # NOTE: The make target ui-next is imported from awx/ui_next/Makefile
 HEADLESS ?= no
 ifeq ($(HEADLESS), yes)
-dist/$(SDIST_TAR_FILE):
+dist/$(SDIST_TAR_FILE): ui-next/headless
 else
 dist/$(SDIST_TAR_FILE): $(UI_BUILD_FLAG_FILE) ui-next
 endif
