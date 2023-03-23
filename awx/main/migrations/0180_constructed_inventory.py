@@ -7,7 +7,7 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0178_instance_group_admin_migration'),
+        ('main', '0179_change_cyberark_plugin_names'),
     ]
 
     operations = [
