@@ -36,7 +36,7 @@ def start_fact_cache(hosts, destination, log_data, timeout=None, inventory_id=No
 
     last_filepath_written = None
     for host in hosts:
-        if host.ansible_facts_modified and (host.ansible_facts_modified >= now() - datetime.timedelta(seconds=timeout)):
+        if (not host.ansible_facts_modified) or (timeout and host.ansible_facts_modified < now() - datetime.timedelta(seconds=timeout)):
             continue  # facts are expired - do not write them
         filepath = os.sep.join(map(str, [destination, host.name]))
         if not os.path.realpath(filepath).startswith(destination):

@@ -11,15 +11,24 @@ from awx.main.models import (
 )
 from awx.main.tasks.facts import start_fact_cache, finish_fact_cache
 
+from django.utils.timezone import now
+
+from datetime import timedelta
+
 
 @pytest.fixture
-def hosts():
+def ref_time():
+    return now() - timedelta(seconds=5)
+
+
+@pytest.fixture
+def hosts(ref_time):
     inventory = Inventory(id=5)
     return [
-        Host(name='host1', ansible_facts={"a": 1, "b": 2}, inventory=inventory),
-        Host(name='host2', ansible_facts={"a": 1, "b": 2}, inventory=inventory),
-        Host(name='host3', ansible_facts={"a": 1, "b": 2}, inventory=inventory),
-        Host(name=u'Iñtërnâtiônàlizætiøn', ansible_facts={"a": 1, "b": 2}, inventory=inventory),
+        Host(name='host1', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=ref_time, inventory=inventory),
+        Host(name='host2', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=ref_time, inventory=inventory),
+        Host(name='host3', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=ref_time, inventory=inventory),
+        Host(name=u'Iñtërnâtiônàlizætiøn', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=ref_time, inventory=inventory),
     ]
 
 
@@ -49,7 +58,27 @@ def test_fact_cache_with_invalid_path_traversal(tmpdir):
     assert os.listdir(os.path.join(fact_cache, '..')) == ['facts']
 
 
-def test_finish_job_fact_cache_with_existing_data(hosts, mocker, tmpdir):
+def test_start_job_fact_cache_past_timeout(hosts, tmpdir):
+    fact_cache = os.path.join(tmpdir, 'facts')
+    # the hosts fixture was modified 5s ago, which is more than 2s
+    last_modified = start_fact_cache(hosts, fact_cache, timeout=2)
+    assert last_modified is None
+
+    for host in hosts:
+        assert not os.path.exists(os.path.join(fact_cache, host.name))
+
+
+def test_start_job_fact_cache_within_timeout(hosts, tmpdir):
+    fact_cache = os.path.join(tmpdir, 'facts')
+    # the hosts fixture was modified 5s ago, which is less than 7s
+    last_modified = start_fact_cache(hosts, fact_cache, timeout=7)
+    assert last_modified
+
+    for host in hosts:
+        assert os.path.exists(os.path.join(fact_cache, host.name))
+
+
+def test_finish_job_fact_cache_with_existing_data(hosts, mocker, tmpdir, ref_time):
     fact_cache = os.path.join(tmpdir, 'facts')
     last_modified = start_fact_cache(hosts, fact_cache, timeout=0)
 
@@ -71,8 +100,9 @@ def test_finish_job_fact_cache_with_existing_data(hosts, mocker, tmpdir):
 
     for host in (hosts[0], hosts[2], hosts[3]):
         assert host.ansible_facts == {"a": 1, "b": 2}
-        assert host.ansible_facts_modified is None
+        assert host.ansible_facts_modified == ref_time
     assert hosts[1].ansible_facts == ansible_facts_new
+    assert hosts[1].ansible_facts_modified > ref_time
     bulk_update.assert_called_once_with([hosts[1]], ['ansible_facts', 'ansible_facts_modified'])
 
 
@@ -95,7 +125,7 @@ def test_finish_job_fact_cache_with_bad_data(hosts, mocker, tmpdir):
     bulk_update.assert_not_called()
 
 
-def test_finish_job_fact_cache_clear(hosts, mocker, tmpdir):
+def test_finish_job_fact_cache_clear(hosts, mocker, ref_time, tmpdir):
     fact_cache = os.path.join(tmpdir, 'facts')
     last_modified = start_fact_cache(hosts, fact_cache, timeout=0)
 
@@ -106,6 +136,7 @@ def test_finish_job_fact_cache_clear(hosts, mocker, tmpdir):
 
     for host in (hosts[0], hosts[2], hosts[3]):
         assert host.ansible_facts == {"a": 1, "b": 2}
-        assert host.ansible_facts_modified is None
+        assert host.ansible_facts_modified == ref_time
     assert hosts[1].ansible_facts == {}
+    assert hosts[1].ansible_facts_modified > ref_time
     bulk_update.assert_called_once_with([hosts[1]], ['ansible_facts', 'ansible_facts_modified'])
