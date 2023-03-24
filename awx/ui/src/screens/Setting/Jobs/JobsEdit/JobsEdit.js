@@ -35,9 +35,7 @@ function JobsEdit() {
   } = useRequest(
     useCallback(async () => {
       const { data } = await SettingsAPI.readCategory('jobs');
-      const {
-        ...jobsData
-      } = data;
+      const { ...jobsData } = data;
       const mergedData = {};
       Object.keys(jobsData).forEach((key) => {
         if (!options[key]) {

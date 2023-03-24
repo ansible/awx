@@ -76,9 +76,7 @@ describe('<JobsEdit />', () => {
       wrapper.find('Form').invoke('onSubmit')();
     });
     expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
-    const {
-      ...jobRequest
-    } = mockJobSettings;
+    const { ...jobRequest } = mockJobSettings;
     expect(SettingsAPI.updateAll).toHaveBeenCalledWith(jobRequest);
   });
 
