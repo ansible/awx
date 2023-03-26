@@ -11,6 +11,7 @@ from urllib.parse import urljoin
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.functions import Cast
 
 # from django.core.cache import cache
 from django.utils.translation import gettext_lazy as _
@@ -21,6 +22,7 @@ from rest_framework.exceptions import ParseError
 
 # AWX
 from awx.api.versioning import reverse
+from awx.main.constants import HOST_FACTS_FIELDS
 from awx.main.models.base import (
     BaseModel,
     CreatedModifiedModel,
@@ -833,6 +835,27 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
 
     def get_notification_friendly_name(self):
         return "Job"
+
+    def get_hosts_for_fact_cache(self):
+        """
+        Builds the queryset to use for writing or finalizing the fact cache
+        these need to be the 'real' hosts associated with the job.
+        For constructed inventories, that means the original (input inventory) hosts
+        when slicing, that means only returning hosts in that slice
+        """
+        Host = JobHostSummary._meta.get_field('host').related_model
+        if not self.inventory_id:
+            return Host.objects.none()
+
+        if self.inventory.kind == 'constructed':
+            id_field = Host._meta.get_field('id')
+            host_qs = Host.objects.filter(id__in=self.inventory.hosts.exclude(instance_id='').values_list(Cast('instance_id', output_field=id_field)))
+        else:
+            host_qs = self.inventory.hosts
+
+        host_qs = host_qs.only(*HOST_FACTS_FIELDS)
+        host_qs = self.inventory.get_sliced_hosts(host_qs, self.job_slice_number, self.job_slice_count)
+        return host_qs
 
 
 class LaunchTimeConfigBase(BaseModel):
