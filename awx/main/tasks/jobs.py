@@ -37,6 +37,7 @@ from awx.main.constants import (
     MAX_ISOLATED_PATH_COLON_DELIMITER,
     CONTAINER_VOLUMES_MOUNT_TYPES,
     ACTIVE_STATES,
+    HOST_FACTS_FIELDS,
 )
 from awx.main.models import (
     Instance,
@@ -1084,10 +1085,7 @@ class RunJob(SourceControlMixin, BaseTask):
         if self.should_use_fact_cache():
             job.log_lifecycle("start_job_fact_cache")
             self.facts_write_time = start_fact_cache(
-                job.inventory,
-                os.path.join(private_data_dir, 'artifacts', str(job.id), 'fact_cache'),
-                slice_number=job.job_slice_number,
-                slice_count=job.job_slice_count,
+                job.get_hosts_for_fact_cache(), os.path.join(private_data_dir, 'artifacts', str(job.id), 'fact_cache'), inventory_id=job.inventory_id
             )
 
     def build_project_dir(self, job, private_data_dir):
@@ -1105,12 +1103,11 @@ class RunJob(SourceControlMixin, BaseTask):
         if self.should_use_fact_cache():
             job.log_lifecycle("finish_job_fact_cache")
             finish_fact_cache(
-                job.inventory,
+                job.get_hosts_for_fact_cache(),
                 os.path.join(private_data_dir, 'artifacts', str(job.id), 'fact_cache'),
                 facts_write_time=self.facts_write_time,
-                slice_number=job.job_slice_number,
-                slice_count=job.job_slice_count,
                 job_id=job.id,
+                inventory_id=job.inventory_id,
             )
 
     def final_run_hook(self, job, status, private_data_dir):
@@ -1555,7 +1552,11 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
                 source_inv_path = self.write_inventory_file(input_inventory, private_data_dir, f'hosts_{input_inventory.id}', script_params)
                 args.append(to_container_path(source_inv_path, private_data_dir))
                 # Include any facts from input inventories so they can be used in filters
-                start_fact_cache(input_inventory, os.path.join(private_data_dir, 'artifacts', str(inventory_update.id), 'fact_cache'))
+                start_fact_cache(
+                    input_inventory.hosts.only(*HOST_FACTS_FIELDS),
+                    os.path.join(private_data_dir, 'artifacts', str(inventory_update.id), 'fact_cache'),
+                    inventory_id=input_inventory.id,
+                )
 
         # Add arguments for the source inventory file/script/thing
         rel_path = self.pseudo_build_inventory(inventory_update, private_data_dir)

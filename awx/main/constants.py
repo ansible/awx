@@ -111,3 +111,6 @@ ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE = (
 
 # Values for setting SUBSCRIPTION_USAGE_MODEL
 SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS = 'unique_managed_hosts'
+
+# Shared prefetch to use for creating a queryset for the purpose of writing or saving facts
+HOST_FACTS_FIELDS = ('name', 'ansible_facts', 'ansible_facts_modified', 'modified', 'inventory_id')

@@ -6,40 +6,35 @@ import time
 import pytest
 
 from awx.main.models import (
-    Job,
     Inventory,
     Host,
 )
 from awx.main.tasks.facts import start_fact_cache, finish_fact_cache
 
+from django.utils.timezone import now
+
+from datetime import timedelta
+
 
 @pytest.fixture
-def hosts():
+def ref_time():
+    return now() - timedelta(seconds=5)
+
+
+@pytest.fixture
+def hosts(ref_time):
     inventory = Inventory(id=5)
     return [
-        Host(name='host1', ansible_facts={"a": 1, "b": 2}, inventory=inventory),
-        Host(name='host2', ansible_facts={"a": 1, "b": 2}, inventory=inventory),
-        Host(name='host3', ansible_facts={"a": 1, "b": 2}, inventory=inventory),
-        Host(name=u'Iñtërnâtiônàlizætiøn', ansible_facts={"a": 1, "b": 2}, inventory=inventory),
+        Host(name='host1', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=ref_time, inventory=inventory),
+        Host(name='host2', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=ref_time, inventory=inventory),
+        Host(name='host3', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=ref_time, inventory=inventory),
+        Host(name=u'Iñtërnâtiônàlizætiøn', ansible_facts={"a": 1, "b": 2}, ansible_facts_modified=ref_time, inventory=inventory),
     ]
 
 
-@pytest.fixture
-def inventory(mocker, hosts):
-    mocker.patch('awx.main.tasks.facts._get_inventory_hosts', return_value=hosts)
-    return Inventory(id=5)
-
-
-@pytest.fixture
-def job(mocker, inventory):
-    j = Job(inventory=inventory, id=2)
-    # j._get_inventory_hosts = mocker.Mock(return_value=hosts)
-    return j
-
-
-def test_start_job_fact_cache(hosts, job, inventory, tmpdir):
+def test_start_job_fact_cache(hosts, tmpdir):
     fact_cache = os.path.join(tmpdir, 'facts')
-    last_modified = start_fact_cache(inventory, fact_cache, timeout=0)
+    last_modified = start_fact_cache(hosts, fact_cache, timeout=0)
 
     for host in hosts:
         filepath = os.path.join(fact_cache, host.name)
@@ -49,26 +44,43 @@ def test_start_job_fact_cache(hosts, job, inventory, tmpdir):
         assert os.path.getmtime(filepath) <= last_modified
 
 
-def test_fact_cache_with_invalid_path_traversal(job, inventory, tmpdir, mocker):
-    mocker.patch(
-        'awx.main.tasks.facts._get_inventory_hosts',
-        return_value=[
-            Host(
-                name='../foo',
-                ansible_facts={"a": 1, "b": 2},
-            ),
-        ],
-    )
+def test_fact_cache_with_invalid_path_traversal(tmpdir):
+    hosts = [
+        Host(
+            name='../foo',
+            ansible_facts={"a": 1, "b": 2},
+        ),
+    ]
 
     fact_cache = os.path.join(tmpdir, 'facts')
-    start_fact_cache(inventory, fact_cache, timeout=0)
+    start_fact_cache(hosts, fact_cache, timeout=0)
     # a file called "foo" should _not_ be written outside the facts dir
     assert os.listdir(os.path.join(fact_cache, '..')) == ['facts']
 
 
-def test_finish_job_fact_cache_with_existing_data(job, hosts, inventory, mocker, tmpdir):
+def test_start_job_fact_cache_past_timeout(hosts, tmpdir):
     fact_cache = os.path.join(tmpdir, 'facts')
-    last_modified = start_fact_cache(inventory, fact_cache, timeout=0)
+    # the hosts fixture was modified 5s ago, which is more than 2s
+    last_modified = start_fact_cache(hosts, fact_cache, timeout=2)
+    assert last_modified is None
+
+    for host in hosts:
+        assert not os.path.exists(os.path.join(fact_cache, host.name))
+
+
+def test_start_job_fact_cache_within_timeout(hosts, tmpdir):
+    fact_cache = os.path.join(tmpdir, 'facts')
+    # the hosts fixture was modified 5s ago, which is less than 7s
+    last_modified = start_fact_cache(hosts, fact_cache, timeout=7)
+    assert last_modified
+
+    for host in hosts:
+        assert os.path.exists(os.path.join(fact_cache, host.name))
+
+
+def test_finish_job_fact_cache_with_existing_data(hosts, mocker, tmpdir, ref_time):
+    fact_cache = os.path.join(tmpdir, 'facts')
+    last_modified = start_fact_cache(hosts, fact_cache, timeout=0)
 
     bulk_update = mocker.patch('django.db.models.query.QuerySet.bulk_update')
 
@@ -84,18 +96,19 @@ def test_finish_job_fact_cache_with_existing_data(job, hosts, inventory, mocker,
         new_modification_time = time.time() + 3600
         os.utime(filepath, (new_modification_time, new_modification_time))
 
-    finish_fact_cache(inventory, fact_cache, last_modified)
+    finish_fact_cache(hosts, fact_cache, last_modified)
 
     for host in (hosts[0], hosts[2], hosts[3]):
         assert host.ansible_facts == {"a": 1, "b": 2}
-        assert host.ansible_facts_modified is None
+        assert host.ansible_facts_modified == ref_time
     assert hosts[1].ansible_facts == ansible_facts_new
+    assert hosts[1].ansible_facts_modified > ref_time
     bulk_update.assert_called_once_with([hosts[1]], ['ansible_facts', 'ansible_facts_modified'])
 
 
-def test_finish_job_fact_cache_with_bad_data(job, hosts, inventory, mocker, tmpdir):
+def test_finish_job_fact_cache_with_bad_data(hosts, mocker, tmpdir):
     fact_cache = os.path.join(tmpdir, 'facts')
-    last_modified = start_fact_cache(inventory, fact_cache, timeout=0)
+    last_modified = start_fact_cache(hosts, fact_cache, timeout=0)
 
     bulk_update = mocker.patch('django.db.models.query.QuerySet.bulk_update')
 
@@ -107,22 +120,23 @@ def test_finish_job_fact_cache_with_bad_data(job, hosts, inventory, mocker, tmpd
             new_modification_time = time.time() + 3600
             os.utime(filepath, (new_modification_time, new_modification_time))
 
-    finish_fact_cache(inventory, fact_cache, last_modified)
+    finish_fact_cache(hosts, fact_cache, last_modified)
 
     bulk_update.assert_not_called()
 
 
-def test_finish_job_fact_cache_clear(job, hosts, inventory, mocker, tmpdir):
+def test_finish_job_fact_cache_clear(hosts, mocker, ref_time, tmpdir):
     fact_cache = os.path.join(tmpdir, 'facts')
-    last_modified = start_fact_cache(inventory, fact_cache, timeout=0)
+    last_modified = start_fact_cache(hosts, fact_cache, timeout=0)
 
     bulk_update = mocker.patch('django.db.models.query.QuerySet.bulk_update')
 
     os.remove(os.path.join(fact_cache, hosts[1].name))
-    finish_fact_cache(inventory, fact_cache, last_modified)
+    finish_fact_cache(hosts, fact_cache, last_modified)
 
     for host in (hosts[0], hosts[2], hosts[3]):
         assert host.ansible_facts == {"a": 1, "b": 2}
-        assert host.ansible_facts_modified is None
+        assert host.ansible_facts_modified == ref_time
     assert hosts[1].ansible_facts == {}
+    assert hosts[1].ansible_facts_modified > ref_time
     bulk_update.assert_called_once_with([hosts[1]], ['ansible_facts', 'ansible_facts_modified'])
