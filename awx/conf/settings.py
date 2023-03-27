@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from django.conf import LazySettings
 from django.conf import settings, UserSettingsHolder
 from django.core.cache import cache as django_cache
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, SynchronousOnlyOperation
 from django.db import transaction, connection
 from django.db.utils import Error as DBError, ProgrammingError
 from django.utils.functional import cached_property
@@ -183,16 +183,20 @@ def get_settings_to_cache(registry):
     return dict([(key, SETTING_CACHE_NOTSET) for key in get_writeable_settings(registry)])
 
 
-# HACK: runs in thread in order to work in an asyncio context
+# Will first attempt to get the setting from the database in synchronous mode.
+# If call from async context, it will attempt to get the setting from the database in a thread.
 def _get_setting_from_db(registry, key):
-    def wrapped(registry, key):
+    def get_settings_from_db_sync(registry, key):
         field = registry.get_setting_field(key)
         if not field.read_only or key == 'INSTALL_UUID':
             return Setting.objects.filter(key=key, user__isnull=True).order_by('pk').first()
 
-    with ThreadPoolExecutor(max_workers=1) as executor:
-        future = executor.submit(wrapped, registry, key)
-        return future.result()
+    try:
+        return get_settings_from_db_sync(registry, key)
+    except SynchronousOnlyOperation:
+        with ThreadPoolExecutor(max_workers=1) as executor:
+            future = executor.submit(get_settings_from_db_sync, registry, key)
+            return future.result()
 
 
 def get_cache_value(value):
