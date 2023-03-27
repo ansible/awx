@@ -19,7 +19,18 @@ def get_task_queuename():
     if os.getenv('AWX_COMPONENT') == 'web':
         from awx.main.models.ha import Instance
 
-        return Instance.objects.filter(node_type__in=['control', 'hybrid']).order_by('?').first().hostname
+        return (
+            Instance.objects.filter(
+                node_type__in=[Instance.Types.CONTROL, Instance.Types.HYBRID],
+                node_state=Instance.States.READY,
+                enabled=True,
+            )
+            .only('hostname')
+            .order_by('?')
+            .first()
+            .hostname
+        )
+
     else:
         return settings.CLUSTER_HOST_ID
 
