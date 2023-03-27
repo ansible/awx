@@ -1,6 +1,7 @@
 import json
 import logging
 import asyncio
+from typing import Dict
 
 import aiohttp
 from aiohttp import client_exceptions
