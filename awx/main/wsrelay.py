@@ -1,13 +1,12 @@
 import json
 import logging
 import asyncio
+from typing import Dict
 
 import aiohttp
 from aiohttp import client_exceptions
-from asgiref.sync import sync_to_async
 
 from channels.layers import get_channel_layer
-from channels.db import database_sync_to_async
 
 from django.conf import settings
 from django.apps import apps
@@ -240,7 +239,7 @@ class WebSocketRelayManager(object):
         except Exception as e:
             # This catch-all is the same as the one above. asyncio will eat the exception
             # but we want to know about it.
-            logger.exception(f"pg_consumer exception")
+            logger.exception(f"pg_consumer exception: {e}")
 
     async def run(self):
         event_loop = asyncio.get_running_loop()
