@@ -859,6 +859,15 @@
           "read_only": false
         }
       },
+      "SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL": {
+        "type": "boolean",
+        "required": false,
+        "label": "Use Email address for usernames",
+        "help_text": "Enabling this setting will tell social auth to use the full Email as username instead of the full name",
+        "category": "Authentication",
+        "category_slug": "authentication",
+        "default": false
+      },
       "SOCIAL_AUTH_OIDC_KEY": {
         "type": "string",
         "label": "OIDC Key",
@@ -4553,6 +4562,14 @@
         "child": {
           "type": "string"
         }
+      },
+      "SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL": {
+        "type": "boolean",
+        "label": "Use Email address for usernames",
+        "help_text": "Enabling this setting will tell social auth to use the full Email as username instead of the full name",
+        "category": "Authentication",
+        "category_slug": "authentication",
+        "default": false
       },
       "SOCIAL_AUTH_OIDC_KEY": {
         "type": "string",
