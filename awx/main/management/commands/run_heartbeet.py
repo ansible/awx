@@ -15,7 +15,7 @@ class Command(BaseCommand):
     help = 'Launch the web server beacon (heartbeet)'
 
     def print_banner(self):
-        heartbeet = """
+        heartbeet = r"""
    **********   **********
  ************* *************
 *****************************
