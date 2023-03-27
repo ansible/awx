@@ -3,10 +3,17 @@ import { t } from '@lingui/macro';
 import {
   Alert,
   AlertActionLink,
+  ClipboardCopyButton,
   CodeBlock,
   CodeBlockAction,
   CodeBlockCode,
-  ClipboardCopyButton,
+  ClipboardCopy,
+  Form,
+  FormFieldGroupExpandable,
+  FormFieldGroupHeader,
+  FormGroup,
+  Panel,
+  CardBody,
 } from '@patternfly/react-core';
 import {
   TableComposable,
@@ -22,25 +29,6 @@ import { useConfig } from 'contexts/Config';
 
 function ConstructedInventoryHint() {
   const config = useConfig();
-  const [copied, setCopied] = React.useState(false);
-
-  const clipboardCopyFunc = (event, text) => {
-    navigator.clipboard.writeText(text.toString());
-  };
-
-  const onClick = (event, text) => {
-    clipboardCopyFunc(event, text);
-    setCopied(true);
-  };
-
-  const pluginSample = `plugin: constructed
-strict: true
-use_vars_plugins: true
-groups:
-  shutdown: resolved_state == "shutdown"
-  shutdown_in_product_dev: resolved_state == "shutdown" and account_alias == "product_dev"
-compose:
-  resolved_state: state | default("running")`;
 
   return (
     <Alert
@@ -56,12 +44,18 @@ compose:
           component="a"
           target="_blank"
         >
-          {t`View constructed plugin documentation here`}{' '}
+          {t`View constructed inventory documentation here`}{' '}
           <ExternalLinkAltIcon />
         </AlertActionLink>
       }
     >
-      <span>{t`WIP - More to come...`}</span>
+      <span>
+        {t`This table gives a few useful parameters of the constructed
+               inventory plugin. For the full list of parameters `}{' '}
+        <a
+          href={t`https://docs.ansible.com/ansible/latest/collections/ansible/builtin/constructed_inventory.html`}
+        >{t`view the constructed inventory plugin docs here.`}</a>
+      </span>
       <br />
       <br />
       <TableComposable
@@ -82,7 +76,7 @@ compose:
               <p style={{ color: 'red' }}>{t`required`}</p>
             </Td>
             <Td dataLabel={t`description`}>
-              {t`Token that ensures this is a source file 
+              {t`Token that ensures this is a source file
               for the ‘constructed’ plugin.`}
             </Td>
           </Tr>
@@ -95,21 +89,9 @@ compose:
               {t`If yes make invalid entries a fatal error, otherwise skip and
               continue.`}{' '}
               <br />
-              {t`If users need feedback about the correctness 
-              of their constructed groups, it is highly recommended 
+              {t`If users need feedback about the correctness
+              of their constructed groups, it is highly recommended
               to use strict: true in the plugin configuration.`}
-            </Td>
-          </Tr>
-          <Tr key="use_vars_plugins">
-            <Td dataLabel={t`name`}>
-              <code>use_vars_plugins</code>
-              <p style={{ color: 'blue' }}>{t`string`}</p>
-            </Td>
-            <Td dataLabel={t`description`}>
-              {t`Normally, for performance reasons, vars plugins get 
-              executed after the inventory sources complete the 
-              base inventory, this option allows for getting vars 
-              related to hosts/groups from those plugins.`}
             </Td>
           </Tr>
           <Tr key="groups">
@@ -127,37 +109,250 @@ compose:
               <p style={{ color: 'blue' }}>{t`dictionary`}</p>
             </Td>
             <Td dataLabel={t`description`}>
-              {t`Create vars from jinja2 expressions.`}
+              {t`Create vars from jinja2 expressions. This can be useful
+              if the constructed groups you define do not contain the expected
+              hosts. This can be used to add hostvars from expressions so
+              that you know what the resultant values of those expressions are.`}
             </Td>
           </Tr>
         </Tbody>
       </TableComposable>
       <br />
       <br />
-      <b>{t`Sample constructed inventory plugin:`}</b>
-      <CodeBlock
-        actions={
-          <CodeBlockAction>
-            <ClipboardCopyButton
-              id="basic-copy-button"
-              textId="code-content"
-              aria-label={t`Copy to clipboard`}
-              onClick={(e) => onClick(e, pluginSample)}
-              exitDelay={copied ? 1500 : 600}
-              maxWidth="110px"
-              variant="plain"
-              onTooltipHidden={() => setCopied(false)}
-            >
-              {copied
-                ? t`Successfully copied to clipboard!`
-                : t`Copy to clipboard`}
-            </ClipboardCopyButton>
-          </CodeBlockAction>
-        }
-      >
-        <CodeBlockCode id="code-content">{pluginSample}</CodeBlockCode>
-      </CodeBlock>
+      <Panel>
+        <CardBody>
+          <Form>
+            <b>{t`Constructed inventory examples`}</b>
+            <LimitToIntersectionExample />
+            <FilterOnNestedGroupExample />
+            <HostsByProcessorTypeExample />
+          </Form>
+        </CardBody>
+      </Panel>
     </Alert>
+  );
+}
+
+function LimitToIntersectionExample() {
+  const [copied, setCopied] = React.useState(false);
+  const clipboardCopyFunc = (event, text) => {
+    navigator.clipboard.writeText(text.toString());
+  };
+
+  const onClick = (event, text) => {
+    clipboardCopyFunc(event, text);
+    setCopied(true);
+  };
+
+  const limitToIntersectionLimit = `is_shutdown:&product_dev`;
+  const limitToIntersectionCode = `plugin: constructed
+strict: true
+groups:
+  shutdown_in_product_dev: state | default("running") == "shutdown" and account_alias == "product_dev"`;
+
+  return (
+    <FormFieldGroupExpandable
+      header={
+        <FormFieldGroupHeader
+          titleText={{
+            text: t`Construct 2 groups, limit to intersection`,
+            id: 'intersection-example',
+          }}
+          titleDescription={t`This constructed inventory input 
+            creates a group for both of the categories and uses 
+            the limit (host pattern) to only return hosts that 
+            are in the intersection of those two groups.`}
+        />
+      }
+    >
+      <FormGroup label={t`Limit`} fieldId="intersection-example-limit">
+        <ClipboardCopy isReadOnly hoverTip={t`Copy`} clickTip={t`Copied`}>
+          {limitToIntersectionLimit}
+        </ClipboardCopy>
+      </FormGroup>
+      <FormGroup
+        label={t`Source vars`}
+        fieldId="intersection-example-source-vars"
+      >
+        <CodeBlock
+          actions={
+            <CodeBlockAction>
+              <ClipboardCopyButton
+                id="intersection-example-source-vars"
+                textId="intersection-example-source-vars"
+                aria-label={t`Copy to clipboard`}
+                onClick={(e) => onClick(e, limitToIntersectionCode)}
+                exitDelay={copied ? 1500 : 600}
+                maxWidth="110px"
+                variant="plain"
+                onTooltipHidden={() => setCopied(false)}
+              >
+                {copied
+                  ? t`Successfully copied to clipboard!`
+                  : t`Copy to clipboard`}
+              </ClipboardCopyButton>
+            </CodeBlockAction>
+          }
+        >
+          <CodeBlockCode id="intersection-example-source-vars">
+            {limitToIntersectionCode}
+          </CodeBlockCode>
+        </CodeBlock>
+      </FormGroup>
+    </FormFieldGroupExpandable>
+  );
+}
+function FilterOnNestedGroupExample() {
+  const [copied, setCopied] = React.useState(false);
+  const clipboardCopyFunc = (event, text) => {
+    navigator.clipboard.writeText(text.toString());
+  };
+
+  const onClick = (event, text) => {
+    clipboardCopyFunc(event, text);
+    setCopied(true);
+  };
+
+  const nestedGroupsInventoryLimit = `groupA`;
+  const nestedGroupsInventorySourceVars = `plugin: constructed`;
+  const nestedGroupsInventory = `all:
+  children:
+    groupA:
+      children:
+        groupB:
+          hosts:
+            host1: {}
+      vars:
+        filter_var: filter_val
+    ungrouped:
+      hosts:
+        host2: {}`;
+
+  return (
+    <FormFieldGroupExpandable
+      header={
+        <FormFieldGroupHeader
+          titleText={{
+            text: t`Filter on nested group name`,
+            id: 'nested-groups-example',
+          }}
+          titleDescription={t`This constructed inventory input
+            creates a group for both of the categories and uses
+            the limit (host pattern) to only return hosts that
+            are in the intersection of those two groups.`}
+        />
+      }
+    >
+      <FormGroup>
+        <p>{t`Nested groups inventory definition:`}</p>
+        <CodeBlock>
+          <CodeBlockCode id="nested-groups-example-inventory">
+            {nestedGroupsInventory}
+          </CodeBlockCode>
+        </CodeBlock>
+      </FormGroup>
+      <FormGroup label={t`Limit`} fieldId="nested-groups-example-limit">
+        <ClipboardCopy isReadOnly hoverTip={t`Copy`} clickTip={t`Copied`}>
+          {nestedGroupsInventoryLimit}
+        </ClipboardCopy>
+      </FormGroup>
+      <FormGroup
+        label={t`Source vars`}
+        fieldId="nested-groups-example-source-vars"
+      >
+        <CodeBlock
+          actions={
+            <CodeBlockAction>
+              <ClipboardCopyButton
+                id="nested-groups-example-source-vars"
+                textId="nested-groups-example-source-vars"
+                aria-label={t`Copy to clipboard`}
+                onClick={(e) => onClick(e, nestedGroupsInventorySourceVars)}
+                exitDelay={copied ? 1500 : 600}
+                maxWidth="110px"
+                variant="plain"
+                onTooltipHidden={() => setCopied(false)}
+              >
+                {copied
+                  ? t`Successfully copied to clipboard!`
+                  : t`Copy to clipboard`}
+              </ClipboardCopyButton>
+            </CodeBlockAction>
+          }
+        >
+          <CodeBlockCode id="nested-groups-example-source-vars">
+            {nestedGroupsInventorySourceVars}
+          </CodeBlockCode>
+        </CodeBlock>
+      </FormGroup>
+    </FormFieldGroupExpandable>
+  );
+}
+function HostsByProcessorTypeExample() {
+  const [copied, setCopied] = React.useState(false);
+  const clipboardCopyFunc = (event, text) => {
+    navigator.clipboard.writeText(text.toString());
+  };
+
+  const onClick = (event, text) => {
+    clipboardCopyFunc(event, text);
+    setCopied(true);
+  };
+
+  const hostsByProcessorLimit = `intel_hosts`;
+  const hostsByProcessorSourceVars = `plugin: constructed
+  strict: true
+  groups:
+    intel_hosts: "GenuineIntel" in ansible_processor`;
+
+  return (
+    <FormFieldGroupExpandable
+      header={
+        <FormFieldGroupHeader
+          titleText={{
+            text: t`Hosts by processor type`,
+            id: 'processor-example',
+          }}
+          titleDescription="It is hard to give a specification for
+            the inventory for Ansible facts, because to populate
+            the system facts you need to run a playbook against
+            the inventory that has `gather_facts: true`. The
+            actual facts will differ system-to-system."
+        />
+      }
+    >
+      <FormGroup label={t`Limit`} fieldId="processor-example-limit">
+        <ClipboardCopy isReadOnly hoverTip={t`Copy`} clickTip={t`Copied`}>
+          {hostsByProcessorLimit}
+        </ClipboardCopy>
+      </FormGroup>
+      <FormGroup label={t`Source vars`} fieldId="processor-example-source-vars">
+        <CodeBlock
+          actions={
+            <CodeBlockAction>
+              <ClipboardCopyButton
+                id="processor-example-source-vars"
+                textId="processor-example-source-vars"
+                aria-label={t`Copy to clipboard`}
+                onClick={(e) => onClick(e, hostsByProcessorSourceVars)}
+                exitDelay={copied ? 1500 : 600}
+                maxWidth="110px"
+                variant="plain"
+                onTooltipHidden={() => setCopied(false)}
+              >
+                {copied
+                  ? t`Successfully copied to clipboard!`
+                  : t`Copy to clipboard`}
+              </ClipboardCopyButton>
+            </CodeBlockAction>
+          }
+        >
+          <CodeBlockCode id="processor-example-source-vars">
+            {hostsByProcessorSourceVars}
+          </CodeBlockCode>
+        </CodeBlock>
+      </FormGroup>
+    </FormFieldGroupExpandable>
   );
 }
 
