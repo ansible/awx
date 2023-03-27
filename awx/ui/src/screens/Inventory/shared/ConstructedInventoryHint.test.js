@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ConstructedInventoryHint from './ConstructedInventoryHint';
 
@@ -10,7 +10,7 @@ describe('<ConstructedInventoryHint />', () => {
     render(<ConstructedInventoryHint />);
     expect(
       screen.getByRole('link', {
-        name: 'View constructed plugin documentation here',
+        name: 'View constructed inventory documentation here',
       })
     ).toBeInTheDocument();
   });
@@ -33,14 +33,20 @@ describe('<ConstructedInventoryHint />', () => {
     });
     jest.spyOn(navigator.clipboard, 'writeText');
 
-    const { container } = render(<ConstructedInventoryHint />);
+    render(<ConstructedInventoryHint />);
     fireEvent.click(screen.getByRole('button', { name: 'Info alert details' }));
     fireEvent.click(
-      container.querySelector('button[aria-label="Copy to clipboard"]')
+      screen.getByRole('button', { name: 'Hosts by processor type' })
     );
-
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Copy to clipboard',
+      })
+    );
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-      expect.stringContaining('plugin: constructed')
+      expect.stringContaining(
+        'intel_hosts: "GenuineIntel" in ansible_processor'
+      )
     );
   });
 });
