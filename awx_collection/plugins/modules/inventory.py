@@ -100,6 +100,35 @@ EXAMPLES = '''
     description: "Our Foo Cloud Servers"
     organization: Foo
     state: present
+
+# You can create and modify constructed inventories by creating an inventory
+# of kind "constructed" and then editing the automatically generated inventory
+# source for that inventory.
+- name: Add constructed inventory with two existing input inventories
+  inventory:
+    name: My Constructed Inventory
+    organization: Default
+    kind: constructed
+    input_inventories:
+      - "West Datacenter"
+      - "East Datacenter"
+
+- name: Edit the constructed inventory source
+  inventory_source:
+    # The constructed inventory source will always be in the format:
+    # "Auto-created source for: <constructed inventory name>"
+    name: "Auto-created source for: My Constructed Inventory"
+    inventory: My Constructed Inventory
+    limit: host3,host4,host6
+    source_vars:
+      plugin: constructed
+      strict: true
+      use_vars_plugins: true
+      groups:
+        shutdown: resolved_state == "shutdown"
+        shutdown_in_product_dev: resolved_state == "shutdown" and account_alias == "product_dev"
+      compose:
+        resolved_state: state | default("running")
 '''
 
 
