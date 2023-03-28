@@ -18,6 +18,10 @@ class Settings extends Base {
     return this.http.get(`${this.baseUrl}all/`);
   }
 
+  readSystem() {
+    return this.http.get(`${this.baseUrl}system/`);
+  }
+
   updateCategory(category, data) {
     return this.http.patch(`${this.baseUrl}${category}/`, data);
   }

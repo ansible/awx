@@ -1028,3 +1028,8 @@ AWX_MOUNT_ISOLATED_PATHS_ON_K8S = False
 CLUSTER_HOST_ID = socket.gethostname()
 
 UI_NEXT = True
+
+# License compliance for total host count. Possible values:
+# - '': No model - Subscription not counted from Host Metrics
+# - 'unique_managed_hosts': Compliant = automated - deleted hosts (using /api/v2/host_metrics/)
+SUBSCRIPTION_USAGE_MODEL = ''

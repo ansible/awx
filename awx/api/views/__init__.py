@@ -17,7 +17,6 @@ from collections import OrderedDict
 
 from urllib3.exceptions import ConnectTimeoutError
 
-
 # Django
 from django.conf import settings
 from django.core.exceptions import FieldError, ObjectDoesNotExist
@@ -1546,6 +1545,41 @@ class HostRelatedSearchMixin(object):
         ret = super(HostRelatedSearchMixin, self).related_search_fields
         ret.append('ansible_facts')
         return ret
+
+
+class HostMetricList(ListAPIView):
+    name = _("Host Metrics List")
+    model = models.HostMetric
+    serializer_class = serializers.HostMetricSerializer
+    permission_classes = (IsSystemAdminOrAuditor,)
+    search_fields = ('hostname', 'deleted')
+
+    def get_queryset(self):
+        return self.model.objects.all()
+
+
+class HostMetricDetail(RetrieveDestroyAPIView):
+    name = _("Host Metric Detail")
+    model = models.HostMetric
+    serializer_class = serializers.HostMetricSerializer
+    permission_classes = (IsSystemAdminOrAuditor,)
+
+    def delete(self, request, *args, **kwargs):
+        self.get_object().soft_delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# It will be enabled in future version of the AWX
+# class HostMetricSummaryMonthlyList(ListAPIView):
+#     name = _("Host Metrics Summary Monthly")
+#     model = models.HostMetricSummaryMonthly
+#     serializer_class = serializers.HostMetricSummaryMonthlySerializer
+#     permission_classes = (IsSystemAdminOrAuditor,)
+#     search_fields = ('date',)
+#
+#     def get_queryset(self):
+#         return self.model.objects.all()
 
 
 class HostList(HostRelatedSearchMixin, ListCreateAPIView):
