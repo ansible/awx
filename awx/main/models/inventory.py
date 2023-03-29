@@ -49,13 +49,23 @@ from awx.main.models.notifications import (
 from awx.main.models.credential.injectors import _openstack_data
 from awx.main.utils import _inventory_updates
 from awx.main.utils.safe_yaml import sanitize_jinja
-from awx.main.utils.execution_environments import to_container_path
+from awx.main.utils.execution_environments import to_container_path, get_control_plane_execution_environment
 from awx.main.utils.licensing import server_product_name
 
 
 __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate', 'SmartInventoryMembership', 'HostMetric', 'HostMetricSummaryMonthly']
 
 logger = logging.getLogger('awx.main.models.inventory')
+
+
+class InventoryConstructedInventoryMembership(models.Model):
+    constructed_inventory = models.ForeignKey('Inventory', on_delete=models.CASCADE, related_name='constructed_inventory_memberships')
+    input_inventory = models.ForeignKey('Inventory', on_delete=models.CASCADE)
+    position = models.PositiveIntegerField(
+        null=True,
+        default=None,
+        db_index=True,
+    )
 
 
 class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
@@ -67,6 +77,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
     KIND_CHOICES = [
         ('', _('Hosts have a direct link to this inventory.')),
         ('smart', _('Hosts for inventory generated using the host_filter property.')),
+        ('constructed', _('Parse list of source inventories with the constructed inventory plugin.')),
     ]
 
     class Meta:
@@ -139,6 +150,14 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         default=None,
         help_text=_('Filter that will be applied to the hosts of this inventory.'),
     )
+    input_inventories = OrderedManyToManyField(
+        'Inventory',
+        blank=True,
+        through_fields=('constructed_inventory', 'input_inventory'),
+        related_name='destination_inventories',
+        help_text=_('Only valid for constructed inventories, this links to the inventories that will be used.'),
+        through='InventoryConstructedInventoryMembership',
+    )
     instance_groups = OrderedManyToManyField(
         'InstanceGroup',
         blank=True,
@@ -187,6 +206,8 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
     )
 
     def get_absolute_url(self, request=None):
+        if self.kind == 'constructed':
+            return reverse('api:constructed_inventory_detail', kwargs={'pk': self.pk}, request=request)
         return reverse('api:inventory_detail', kwargs={'pk': self.pk}, request=request)
 
     variables_dict = VarsDictProperty('variables')
@@ -338,13 +359,12 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
             for host in hosts:
                 data['_meta']['hostvars'][host.name] = host.variables_dict
                 if towervars:
-                    tower_dict = dict(
-                        remote_tower_enabled=str(host.enabled).lower(),
-                        remote_tower_id=host.id,
-                        remote_host_enabled=str(host.enabled).lower(),
-                        remote_host_id=host.id,
-                    )
-                    data['_meta']['hostvars'][host.name].update(tower_dict)
+                    for prefix in ('host', 'tower'):
+                        tower_dict = {
+                            f'remote_{prefix}_enabled': str(host.enabled).lower(),
+                            f'remote_{prefix}_id': host.id,
+                        }
+                        data['_meta']['hostvars'][host.name].update(tower_dict)
 
         return data
 
@@ -431,12 +451,24 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
 
             connection.on_commit(on_commit)
 
+    def _enforce_constructed_source(self):
+        """
+        Constructed inventory should always have exactly 1 inventory source, constructed type
+        this enforces that requirement
+        """
+        if self.kind == 'constructed':
+            if not self.inventory_sources.exists():
+                self.inventory_sources.create(
+                    source='constructed', name=f'Auto-created source for: {self.name}'[:512], overwrite=True, overwrite_vars=True, update_on_launch=True
+                )
+
     def save(self, *args, **kwargs):
         self._update_host_smart_inventory_memeberships()
         super(Inventory, self).save(*args, **kwargs)
         if self.kind == 'smart' and 'host_filter' in kwargs.get('update_fields', ['host_filter']) and connection.vendor != 'sqlite':
             # Minimal update of host_count for smart inventory host filter changes
             self.update_computed_fields()
+        self._enforce_constructed_source()
 
     def delete(self, *args, **kwargs):
         self._update_host_smart_inventory_memeberships()
@@ -872,6 +904,7 @@ class InventorySourceOptions(BaseModel):
 
     SOURCE_CHOICES = [
         ('file', _('File, Directory or Script')),
+        ('constructed', _('Template additional groups and hostvars at runtime')),
         ('scm', _('Sourced from a Project')),
         ('ec2', _('Amazon EC2')),
         ('gce', _('Google Compute Engine')),
@@ -951,7 +984,7 @@ class InventorySourceOptions(BaseModel):
     host_filter = models.TextField(
         blank=True,
         default='',
-        help_text=_('Regex where only matching hosts will be imported.'),
+        help_text=_('This field is deprecated and will be removed in a future release. Regex where only matching hosts will be imported.'),
     )
     overwrite = models.BooleanField(
         default=False,
@@ -971,6 +1004,21 @@ class InventorySourceOptions(BaseModel):
         blank=True,
         default=1,
     )
+    limit = models.TextField(
+        blank=True,
+        default='',
+        help_text=_("Enter host, group or pattern match"),
+    )
+
+    def resolve_execution_environment(self):
+        """
+        Project updates, themselves, will use the control plane execution environment.
+        Jobs using the project can use the default_environment, but the project updates
+        are not flexible enough to allow customizing the image they use.
+        """
+        if self.inventory.kind == 'constructed':
+            return get_control_plane_execution_environment()
+        return super().resolve_execution_environment()
 
     @staticmethod
     def cloud_credential_validation(source, cred):
@@ -1407,6 +1455,8 @@ class PluginFileInjector(object):
         env.update(injector_env)
         # Preserves current behavior for Ansible change in default planned for 2.10
         env['ANSIBLE_TRANSFORM_INVALID_GROUP_CHARS'] = 'never'
+        # All CLOUD_PROVIDERS sources implement as inventory plugin from collection
+        env['ANSIBLE_INVENTORY_ENABLED'] = 'auto'
         return env
 
     def _get_shared_env(self, inventory_update, private_data_dir, private_data_files):
@@ -1588,6 +1638,19 @@ class insights(PluginFileInjector):
     downstream_namespace = 'redhat'
     downstream_collection = 'insights'
     use_fqcn = True
+
+
+class constructed(PluginFileInjector):
+    plugin_name = 'constructed'
+    namespace = 'ansible'
+    collection = 'builtin'
+
+    def build_env(self, *args, **kwargs):
+        env = super().build_env(*args, **kwargs)
+        # Enable script inventory plugin so we pick up the script files from source inventories
+        env['ANSIBLE_INVENTORY_ENABLED'] += ',script'
+        env['ANSIBLE_INVENTORY_ANY_UNPARSED_IS_FAILED'] = 'True'
+        return env
 
 
 for cls in PluginFileInjector.__subclasses__():

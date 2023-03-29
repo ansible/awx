@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { func, bool, string } from 'prop-types';
+import { func, bool, string, oneOfType, arrayOf } from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { InventoriesAPI } from 'api';
@@ -23,7 +23,7 @@ function InventoryLookup({
   autoPopulate,
   fieldId,
   fieldName,
-  hideSmartInventories,
+  hideAdvancedInventories,
   history,
   isDisabled,
   isPromptableField,
@@ -34,6 +34,7 @@ function InventoryLookup({
   required,
   validate,
   value,
+  multiple,
 }) {
   const autoPopulateLookup = useAutoPopulateLookup(onChange);
 
@@ -45,8 +46,8 @@ function InventoryLookup({
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, history.location.search);
-      const inventoryKindParams = hideSmartInventories
-        ? { not__kind: 'smart' }
+      const inventoryKindParams = hideAdvancedInventories
+        ? { not__kind: ['smart', 'constructed'] }
         : {};
       const [{ data }, actionsResponse] = await Promise.all([
         InventoriesAPI.read(
@@ -69,7 +70,10 @@ function InventoryLookup({
         ).map((val) => val.slice(0, -8)),
         searchableKeys: Object.keys(actionsResponse.data.actions?.GET || {})
           .filter((key) => {
-            if (['kind', 'host_filter'].includes(key) && hideSmartInventories) {
+            if (
+              ['kind', 'host_filter'].includes(key) &&
+              hideAdvancedInventories
+            ) {
               return false;
             }
             return actionsResponse.data.actions?.GET[key].filterable;
@@ -187,6 +191,7 @@ function InventoryLookup({
         onDebounce={checkInventoryName}
         fieldName={fieldName}
         validate={validate}
+        multiple={multiple}
         onBlur={onBlur}
         required={required}
         isLoading={isLoading}
@@ -227,6 +232,10 @@ function InventoryLookup({
             readOnly={!canDelete}
             selectItem={(item) => dispatch({ type: 'SELECT_ITEM', item })}
             deselectItem={(item) => dispatch({ type: 'DESELECT_ITEM', item })}
+            sortSelectedItems={(selectedItems) =>
+              dispatch({ type: 'SET_SELECTED_ITEMS', selectedItems })
+            }
+            isSelectedDraggable
           />
         )}
       />
@@ -239,19 +248,19 @@ InventoryLookup.propTypes = {
   autoPopulate: bool,
   fieldId: string,
   fieldName: string,
-  hideSmartInventories: bool,
+  hideAdvancedInventories: bool,
   isDisabled: bool,
   onChange: func.isRequired,
   required: bool,
   validate: func,
-  value: Inventory,
+  value: oneOfType([Inventory, arrayOf(Inventory)]),
 };
 
 InventoryLookup.defaultProps = {
   autoPopulate: false,
   fieldId: 'inventory',
   fieldName: 'inventory',
-  hideSmartInventories: false,
+  hideAdvancedInventories: false,
   isDisabled: false,
   required: false,
   validate: () => {},

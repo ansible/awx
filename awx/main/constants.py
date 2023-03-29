@@ -38,6 +38,8 @@ STANDARD_INVENTORY_UPDATE_ENV = {
     'ANSIBLE_INVENTORY_EXPORT': 'True',
     # Redirecting output to stderr allows JSON parsing to still work with -vvv
     'ANSIBLE_VERBOSE_TO_STDERR': 'True',
+    # if ansible-inventory --limit is used for an inventory import, unmatched should be a failure
+    'ANSIBLE_HOST_PATTERN_MISMATCH': 'error',
 }
 CAN_CANCEL = ('new', 'pending', 'waiting', 'running')
 ACTIVE_STATES = CAN_CANCEL
@@ -109,3 +111,6 @@ ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE = (
 
 # Values for setting SUBSCRIPTION_USAGE_MODEL
 SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS = 'unique_managed_hosts'
+
+# Shared prefetch to use for creating a queryset for the purpose of writing or saving facts
+HOST_FACTS_FIELDS = ('name', 'ansible_facts', 'ansible_facts_modified', 'modified', 'inventory_id')

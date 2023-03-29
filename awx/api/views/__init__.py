@@ -29,7 +29,7 @@ from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 
@@ -1610,12 +1610,22 @@ class HostDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
     def delete(self, request, *args, **kwargs):
         if self.get_object().inventory.pending_deletion:
             return Response({"error": _("The inventory for this host is already being deleted.")}, status=status.HTTP_400_BAD_REQUEST)
+        if self.get_object().inventory.kind == 'constructed':
+            return Response({"error": _("Delete constructed inventory hosts from input inventory.")}, status=status.HTTP_400_BAD_REQUEST)
         return super(HostDetail, self).delete(request, *args, **kwargs)
 
 
 class HostAnsibleFactsDetail(RetrieveAPIView):
     model = models.Host
     serializer_class = serializers.AnsibleFactsSerializer
+
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.inventory.kind == 'constructed':
+            # If this is a constructed inventory host, it is not the source of truth about facts
+            # redirect to the original input inventory host instead
+            return HttpResponseRedirect(reverse('api:host_ansible_facts_detail', kwargs={'pk': obj.instance_id}, request=self.request))
+        return super().get(request, *args, **kwargs)
 
 
 class InventoryHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIView):

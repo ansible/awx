@@ -14,6 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework import serializers
 
 # AWX
 from awx.main.models import ActivityStream, Inventory, JobTemplate, Role, User, InstanceGroup, InventoryUpdateEvent, InventoryUpdate
@@ -31,6 +32,7 @@ from awx.api.views.labels import LabelSubListCreateAttachDetachView
 
 from awx.api.serializers import (
     InventorySerializer,
+    ConstructedInventorySerializer,
     ActivityStreamSerializer,
     RoleSerializer,
     InstanceGroupSerializer,
@@ -79,7 +81,9 @@ class InventoryDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIVie
 
         # Do not allow changes to an Inventory kind.
         if kind is not None and obj.kind != kind:
-            return Response(dict(error=_('You cannot turn a regular inventory into a "smart" inventory.')), status=status.HTTP_405_METHOD_NOT_ALLOWED)
+            return Response(
+                dict(error=_('You cannot turn a regular inventory into a "smart" or "constructed" inventory.')), status=status.HTTP_405_METHOD_NOT_ALLOWED
+            )
         return super(InventoryDetail, self).update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
@@ -92,6 +96,29 @@ class InventoryDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIVie
             return Response(status=status.HTTP_202_ACCEPTED)
         except RuntimeError as e:
             return Response(dict(error=_("{0}".format(e))), status=status.HTTP_400_BAD_REQUEST)
+
+
+class ConstructedInventoryDetail(InventoryDetail):
+    serializer_class = ConstructedInventorySerializer
+
+
+class ConstructedInventoryList(InventoryList):
+    serializer_class = ConstructedInventorySerializer
+
+    def get_queryset(self):
+        r = super().get_queryset()
+        return r.filter(kind='constructed')
+
+
+class InventoryInputInventoriesList(SubListAttachDetachAPIView):
+    model = Inventory
+    serializer_class = InventorySerializer
+    parent_model = Inventory
+    relationship = 'input_inventories'
+
+    def is_valid_relation(self, parent, sub, created=False):
+        if sub.kind == 'constructed':
+            raise serializers.ValidationError({'error': 'You cannot add a constructed inventory to another constructed inventory.'})
 
 
 class InventoryActivityStreamList(SubListAPIView):

@@ -760,6 +760,13 @@ CUSTOM_EXCLUDE_EMPTY_GROUPS = False
 SCM_EXCLUDE_EMPTY_GROUPS = False
 # SCM_INSTANCE_ID_VAR =
 
+# ----------------
+# -- Constructed --
+# ----------------
+CONSTRUCTED_INSTANCE_ID_VAR = 'remote_tower_id'
+
+CONSTRUCTED_EXCLUDE_EMPTY_GROUPS = False
+
 # ---------------------
 # -- Activity Stream --
 # ---------------------
