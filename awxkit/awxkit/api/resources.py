@@ -44,6 +44,8 @@ class Resources(object):
     _groups = 'groups/'
     _host = r'hosts/\d+/'
     _host_groups = r'hosts/\d+/groups/'
+    _host_metrics = 'host_metrics/'
+    _host_metric = r'host_metrics/\d+/'
     _host_insights = r'hosts/\d+/insights/'
     _host_related_ad_hoc_commands = r'hosts/\d+/ad_hoc_commands/'
     _host_related_fact_version = r'hosts/\d+/fact_versions/\d+/'
