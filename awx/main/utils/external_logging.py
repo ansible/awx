@@ -7,7 +7,6 @@ from django.conf import settings
 
 from awx.main.utils.reload import supervisor_service_command
 from awx.main.dispatch.publish import task
-from awx.main.dispatch import pg_bus_conn
 
 
 def construct_rsyslog_conf_template(settings=settings):
@@ -127,8 +126,3 @@ def reconfigure_rsyslog():
             f.write(tmpl + '\n')
         shutil.move(path, '/var/lib/awx/rsyslog/rsyslog.conf')
     supervisor_service_command(command='restart', service='awx-rsyslogd')
-
-
-def send_pg_notify(channel: str, payload: str) -> None:
-    with pg_bus_conn() as conn:
-        conn.notify(channel, payload)
