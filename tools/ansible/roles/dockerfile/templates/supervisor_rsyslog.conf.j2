@@ -18,7 +18,7 @@ stderr_logfile_maxbytes=0
 
 [program:awx-rsyslog-configurer]
 {% if kube_dev | bool %}
-command = make rsyslog-configurer
+command = make run-rsyslog-configurer
 directory = /awx_devel
 {% else %}
 command = awx-manage run_rsyslog_configurer

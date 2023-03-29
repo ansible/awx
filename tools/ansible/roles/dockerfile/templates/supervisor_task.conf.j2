@@ -24,7 +24,7 @@ stderr_logfile_maxbytes=0
 
 [program:wsrelay]
 {% if kube_dev | bool %}
-command = make wsrelay
+command = make run-wsrelay
 directory = /awx_devel
 {% else %}
 command = awx-manage run_wsrelay
