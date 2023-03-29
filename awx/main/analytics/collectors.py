@@ -131,7 +131,7 @@ def _identify_lower(key, since, until, last_gather):
     return lower, last_entries
 
 
-@register('config', '1.5', description=_('General platform configuration.'))
+@register('config', '1.6', description=_('General platform configuration.'))
 def config(since, **kwargs):
     license_info = get_license()
     install_type = 'traditional'
@@ -155,10 +155,13 @@ def config(since, **kwargs):
         'subscription_name': license_info.get('subscription_name'),
         'sku': license_info.get('sku'),
         'support_level': license_info.get('support_level'),
+        'usage': license_info.get('usage'),
         'product_name': license_info.get('product_name'),
         'valid_key': license_info.get('valid_key'),
         'satellite': license_info.get('satellite'),
         'pool_id': license_info.get('pool_id'),
+        'subscription_id': license_info.get('subscription_id'),
+        'account_number': license_info.get('account_number'),
         'current_instances': license_info.get('current_instances'),
         'automated_instances': license_info.get('automated_instances'),
         'automated_since': license_info.get('automated_since'),
