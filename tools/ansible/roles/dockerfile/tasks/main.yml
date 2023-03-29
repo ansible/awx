@@ -9,7 +9,7 @@
     src: "{{ item }}.j2"
     dest: "{{ dockerfile_dest }}/{{ template_dest }}/{{ item }}"
   with_items:
-    - "supervisor.conf"
+    - "supervisor_web.conf"
     - "supervisor_task.conf"
     - "supervisor_rsyslog.conf"
 
