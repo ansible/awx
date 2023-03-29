@@ -1,3 +1,4 @@
+import os
 import psycopg2
 import select
 
@@ -5,8 +6,6 @@ from contextlib import contextmanager
 
 from django.conf import settings
 from django.db import connection as pg_connection
-import os
-
 
 NOT_READY = ([], [], [])
 
@@ -16,23 +15,26 @@ def get_local_queuename():
 
 
 def get_task_queuename():
-    if os.getenv('AWX_COMPONENT') == 'web':
-        from awx.main.models.ha import Instance
-
-        return (
-            Instance.objects.filter(
-                node_type__in=[Instance.Types.CONTROL, Instance.Types.HYBRID],
-                node_state=Instance.States.READY,
-                enabled=True,
-            )
-            .only('hostname')
-            .order_by('?')
-            .first()
-            .hostname
-        )
-
-    else:
+    if os.getenv('AWX_COMPONENT') != 'web':
         return settings.CLUSTER_HOST_ID
+
+    from awx.main.models.ha import Instance
+
+    random_task_instance = (
+        Instance.objects.filter(
+            node_type__in=(Instance.Types.CONTROL, Instance.Types.HYBRID),
+            node_state=Instance.States.READY,
+            enabled=True,
+        )
+        .only('hostname')
+        .order_by('?')
+        .first()
+    )
+
+    if random_task_instance is None:
+        raise ValueError('No task instances are READY and Enabled.')
+
+    return random_task_instance.hostname
 
 
 class PubSub(object):
