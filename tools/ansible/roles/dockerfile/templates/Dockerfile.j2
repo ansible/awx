@@ -210,7 +210,7 @@ ADD tools/scripts/config-watcher /usr/bin/config-watcher
 ADD tools/docker-compose/containers.conf /etc/containers/containers.conf
 ADD tools/docker-compose/podman-containers.conf /var/lib/awx/.config/containers/containers.conf
 {% else %}
-ADD tools/ansible/roles/dockerfile/files/launch_awx.sh /usr/bin/launch_awx.sh
+ADD tools/ansible/roles/dockerfile/files/launch_awx_web.sh /usr/bin/launch_awx_web.sh
 ADD tools/ansible/roles/dockerfile/files/launch_awx_task.sh /usr/bin/launch_awx_task.sh
 ADD tools/ansible/roles/dockerfile/files/launch_awx_rsyslog.sh /usr/bin/launch_awx_rsyslog.sh
 ADD {{ template_dest }}/supervisor_web.conf /etc/supervisord_web.conf
@@ -297,7 +297,6 @@ USER 1000
 EXPOSE 8052
 
 ENTRYPOINT ["dumb-init", "--"]
-CMD /usr/bin/launch_awx.sh
 VOLUME /var/lib/nginx
 VOLUME /var/lib/awx/.local/share/containers
 {% endif %}
