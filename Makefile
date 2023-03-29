@@ -70,12 +70,6 @@ I18N_FLAG_FILE = .i18n_built
 	VERSION PYTHON_VERSION docker-compose-sources \
 	.git/hooks/pre-commit github_ci_setup github_ci_runner
 
-cache-clear:
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	$(PYTHON) manage.py run_cache_clear
-
 clean-tmp:
 	rm -rf tmp/
 
@@ -223,18 +217,6 @@ daphne:
 	fi; \
 	daphne -b 127.0.0.1 -p 8051 awx.asgi:channel_layer
 
-wsrelay:
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	$(PYTHON) manage.py run_wsrelay
-
-heartbeet:
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	$(PYTHON) manage.py run_heartbeet
-
 ## Run to start the background task dispatcher for development.
 dispatcher:
 	@if [ "$(VENV_BASE)" ]; then \
@@ -242,19 +224,12 @@ dispatcher:
 	fi; \
 	$(PYTHON) manage.py run_dispatcher
 
-
 ## Run to start the zeromq callback receiver
 receiver:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(PYTHON) manage.py run_callback_receiver
-
-rsyslog-configurer:
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	$(PYTHON) manage.py run_rsyslog_configurer
 
 nginx:
 	nginx -g "daemon off;"
@@ -264,6 +239,34 @@ jupyter:
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(MANAGEMENT_COMMAND) shell_plus --notebook
+
+## Start the rsyslog configurer process in background in development environment.
+run-rsyslog-configurer:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py run_rsyslog_configurer
+
+## Start cache_clear process in background in development environment.
+run-cache-clear:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py run_cache_clear
+
+## Start the wsrelay process in background in development environment.
+run-wsrelay:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py run_wsrelay
+
+## Start the heartbeat process in background in development environment.
+run-heartbeet:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py run_heartbeet
 
 reports:
 	mkdir -p $@
