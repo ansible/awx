@@ -51,7 +51,7 @@ class Command(BaseCommand):
         return json.dumps(payload)
 
     def do_hearbeat_loop(self):
-        with pg_bus_conn(new_connection=True) as conn:
+        with pg_bus_conn() as conn:
             while True:
                 logger.debug('Sending heartbeat')
                 conn.notify('web_heartbeet', self.construct_payload())

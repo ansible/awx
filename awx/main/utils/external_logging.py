@@ -127,8 +127,3 @@ def reconfigure_rsyslog():
             f.write(tmpl + '\n')
         shutil.move(path, '/var/lib/awx/rsyslog/rsyslog.conf')
     supervisor_service_command(command='restart', service='awx-rsyslogd')
-
-
-def send_pg_notify(channel: str, payload: str) -> None:
-    with pg_bus_conn() as conn:
-        conn.notify(channel, payload)
