@@ -618,9 +618,6 @@ awx-kube-build: Dockerfile
 		--build-arg HEADLESS=$(HEADLESS) \
 		-t $(DEV_DOCKER_TAG_BASE)/awx:$(COMPOSE_TAG) .
 
-kind-dev-load: awx-kube-dev-build
-	$(KIND_BIN) load docker-image $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG)
-
 # Translation TASKS
 # --------------------------------------
 
