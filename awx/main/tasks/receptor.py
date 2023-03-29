@@ -668,6 +668,7 @@ RECEPTOR_CONFIG_STARTER = (
             'rootcas': '/etc/receptor/tls/ca/receptor-ca.crt',
             'cert': '/etc/receptor/tls/receptor.crt',
             'key': '/etc/receptor/tls/receptor.key',
+            'mintls13': False,
         }
     },
 )
