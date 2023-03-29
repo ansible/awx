@@ -5,7 +5,6 @@ DOCKER_COMPOSE ?= docker-compose
 OFFICIAL ?= no
 NODE ?= node
 NPM_BIN ?= npm
-KIND_BIN ?= $(shell which kind)
 CHROMIUM_BIN=/tmp/chrome-linux/chrome
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 MANAGEMENT_COMMAND ?= awx-manage
