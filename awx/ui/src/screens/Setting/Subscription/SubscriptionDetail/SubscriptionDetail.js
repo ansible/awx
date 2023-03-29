@@ -24,7 +24,7 @@ const HelperText = styled(PFHelperText)`
 `;
 
 function SubscriptionDetail() {
-  const { me = {}, license_info, version } = useConfig();
+  const { me = {}, license_info, version, systemConfig } = useConfig();
   const baseURL = '/settings/subscription';
   const tabsArray = [
     {
@@ -56,35 +56,37 @@ function SubscriptionDetail() {
       <RoutedTabs tabsArray={tabsArray} />
       <CardBody>
         <DetailList>
-          <Detail
-            dataCy="subscription-status"
-            label={t`Status`}
-            value={
-              license_info.compliant ? (
-                <>
-                  <Label variant="outline" color="green" icon={<CheckIcon />}>
-                    {t`Compliant`}
-                  </Label>
-                  <HelperText>
-                    <HelperTextItem>{t`The number of hosts you have automated against is below your subscription count.`}</HelperTextItem>
-                  </HelperText>
-                </>
-              ) : (
-                <>
-                  <Label
-                    variant="outline"
-                    color="red"
-                    icon={<ExclamationCircleIcon />}
-                  >
-                    {t`Out of compliance`}
-                  </Label>
-                  <HelperText>
-                    <HelperTextItem>{t`You have automated against more hosts than your subscription allows.`}</HelperTextItem>
-                  </HelperText>
-                </>
-              )
-            }
-          />
+          {systemConfig?.SUBSCRIPTION_USAGE_MODEL === 'unique_managed_hosts' && (
+            <Detail
+              dataCy="subscription-status"
+              label={t`Status`}
+              value={
+                license_info.compliant ? (
+                  <>
+                    <Label variant="outline" color="green" icon={<CheckIcon />}>
+                      {t`Compliant`}
+                    </Label>
+                    <HelperText>
+                      <HelperTextItem>{t`The number of hosts you have automated against is below your subscription count.`}</HelperTextItem>
+                    </HelperText>
+                  </>
+                ) : (
+                  <>
+                    <Label
+                      variant="outline"
+                      color="red"
+                      icon={<ExclamationCircleIcon />}
+                    >
+                      {t`Out of compliance`}
+                    </Label>
+                    <HelperText>
+                      <HelperTextItem>{t`You have automated against more hosts than your subscription allows.`}</HelperTextItem>
+                    </HelperText>
+                  </>
+                )
+              }
+            />
+          )}
           {typeof automatedInstancesCount !== 'undefined' &&
             automatedInstancesCount !== null && (
               <Detail
@@ -107,21 +109,27 @@ function SubscriptionDetail() {
             label={t`Hosts imported`}
             value={license_info.current_instances}
           />
-          <Detail
-            dataCy="subscription-hosts-remaining"
-            label={t`Hosts remaining`}
-            value={license_info.free_instances}
-          />
-          <Detail
-            dataCy="subscription-hosts-deleted"
-            label={t`Hosts deleted`}
-            value={license_info.deleted_instances}
-          />
-          <Detail
+          {systemConfig?.SUBSCRIPTION_USAGE_MODEL === 'unique_managed_hosts' && (
+            <Detail
+              dataCy="subscription-hosts-remaining"
+              label={t`Hosts remaining`}
+              value={license_info.free_instances}
+            />
+          )}
+          {systemConfig?.SUBSCRIPTION_USAGE_MODEL === 'unique_managed_hosts' && (
+            <Detail
+              dataCy="subscription-hosts-deleted"
+              label={t`Hosts deleted`}
+              value={license_info.deleted_instances}
+            />
+          )}
+          {systemConfig?.SUBSCRIPTION_USAGE_MODEL === 'unique_managed_hosts' && (
+            <Detail
               dataCy="subscription-hosts-reactivated"
               label={t`Active hosts previously deleted`}
               value={license_info.reactivated_instances}
-          />
+            />
+          )}
           {license_info.instance_count < 9999999 && (
             <Detail
               dataCy="subscription-hosts-available"
