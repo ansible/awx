@@ -75,7 +75,13 @@ stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
 
 [program:awx-cache-clear]
+{% if kube_dev | bool %}
+command = make cache_clear
+directory = /awx_devel
+{% else %}
 command = awx-manage run_cache_clear
+directory = /var/lib/awx
+{% endif %}
 autorestart = true
 startsecs = 30
 stopasgroup=true
