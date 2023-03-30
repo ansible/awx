@@ -58,5 +58,5 @@ if settings.DEBUG:
 dsv_plugin = CredentialPlugin(
     'Thycotic DevOps Secrets Vault',
     dsv_inputs,
-    lambda **kwargs: SecretsVault(**{k: v for (k, v) in kwargs.items() if k in [field['id'] for field in dsv_inputs['fields']]}).get_secret(kwargs['path'])['data'][kwargs['secret_field']],
+    lambda **kwargs: SecretsVault(**{k: v for (k, v) in kwargs.items() if k in [field['id'] for field in dsv_inputs['fields']]}).get_secret(kwargs['path'])['data'][kwargs['secret_field']],  # fmt: skip
 )
