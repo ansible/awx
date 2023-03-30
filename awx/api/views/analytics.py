@@ -131,25 +131,11 @@ class AnalyticsGenericView(APIView):
         return analytics_url
 
     @staticmethod
-    def _check_upload_enabled():
-        state = getattr(settings, 'INSIGHTS_TRACKING_STATE', False)
-        if not state:
-            raise MissingSettings(ERROR_UPLOAD_NOT_ENABLED)
-        return True
-
-    @staticmethod
-    def _get_rh_user():
-        user = getattr(settings, 'REDHAT_USERNAME', None)
-        if not user:
-            raise MissingSettings(ERROR_MISSING_USER)
-        return user
-
-    @staticmethod
-    def _get_rh_password():
-        password = getattr(settings, 'REDHAT_PASSWORD', None)
-        if not password:
-            raise MissingSettings(ERROR_MISSING_PASSWORD)
-        return password
+    def _get_setting(setting_name, default, error_message):
+        setting = getattr(settings, setting_name, default)
+        if not setting:
+            raise MissingSettings(error_message)
+        return setting
 
     @staticmethod
     def _error_response(keyword, message=None, remote=True, remote_status_code=None, status_code=status.HTTP_403_FORBIDDEN):
@@ -200,10 +186,10 @@ class AnalyticsGenericView(APIView):
         try:
             headers = self._request_headers(request)
 
-            self._check_upload_enabled()
+            self._get_setting('INSIGHTS_TRACKING_STATE', False, ERROR_UPLOAD_NOT_ENABLED)
             url = self._get_analytics_url(request.path)
-            rh_user = self._get_rh_user()
-            rh_password = self._get_rh_password()
+            rh_user = self._get_setting('REDHAT_USERNAME', None, ERROR_MISSING_USER)
+            rh_password = self._get_setting('REDHAT_PASSWORD', None, ERROR_MISSING_PASSWORD)
 
             if method not in ["GET", "POST", "OPTIONS"]:
                 return self._error_response(ERROR_UNSUPPORTED_METHOD, method, remote=False, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
