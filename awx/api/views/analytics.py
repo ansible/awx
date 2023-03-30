@@ -51,7 +51,23 @@ class AnalyticsRootView(APIView):
 
     def get(self, request, format=None):
         data = OrderedDict()
-        data['reports'] = reverse('analytics_reports_list')
+        data['authorized'] = reverse('api:analytics_authorized')
+        data['reports'] = reverse('api:analytics_reports_list')
+        data['report_options'] = reverse('api:analytics_report_options_list')
+        data['adoption_rate'] = reverse('api:analytics_adoption_rate')
+        data['adoption_rate_options'] = reverse('api:analytics_adoption_rate_options')
+        data['event_explorer'] = reverse('api:analytics_event_explorer')
+        data['event_explorer_options'] = reverse('api:analytics_event_explorer_options')
+        data['host_explorer'] = reverse('api:analytics_host_explorer')
+        data['host_explorer_options'] = reverse('api:analytics_host_explorer_options')
+        data['job_explorer'] = reverse('api:analytics_job_explorer')
+        data['job_explorer_options'] = reverse('api:analytics_job_explorer_options')
+        data['probe_templates'] = reverse('api:analytics_probe_templates_explorer')
+        data['probe_templates_options'] = reverse('api:analytics_probe_templates_options')
+        data['probe_template_for_hosts'] = reverse('api:analytics_probe_template_for_hosts_explorer')
+        data['probe_template_for_hosts_options'] = reverse('api:analytics_probe_template_for_hosts_options')
+        data['roi_templates'] = reverse('api:analytics_roi_templates_explorer')
+        data['roi_templates_options'] = reverse('api:analytics_roi_templates_options')
         return Response(data)
 
 
