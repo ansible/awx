@@ -86,7 +86,7 @@ clean-schema:
 
 clean-languages:
 	rm -f $(I18N_FLAG_FILE)
-	find ./awx/locale/ -type f -regex ".*\.mo$" -delete
+	find ./awx/locale/ -type f -regex '.*\.mo$$' -delete
 
 ## Remove temporary build files, compiled Python files.
 clean: clean-ui clean-api clean-awxkit clean-dist
