@@ -230,6 +230,7 @@ def main():
         endpoint='inventories',
         item_type='inventory',
         associations=association_fields,
+        modify_item_url=lambda url: url.replace('/constructed_inventories/', '/inventories/') if kind == 'constructed' else None,
     )
 
 

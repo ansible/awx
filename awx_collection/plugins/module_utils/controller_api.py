@@ -766,7 +766,7 @@ class ControllerAPIModule(ControllerModule):
                 self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, new_item_name, response['status_code']))
         return new_existing_item
 
-    def create_if_needed(self, existing_item, new_item, endpoint, on_create=None, auto_exit=True, item_type='unknown', associations=None):
+    def create_if_needed(self, existing_item, new_item, endpoint, on_create=None, auto_exit=True, item_type='unknown', associations=None, modify_item_url=None):
 
         # This will exit from the module on its own
         # If the method successfully creates an item and on_create param is defined,
@@ -810,6 +810,9 @@ class ControllerAPIModule(ControllerModule):
                     self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, response['json']))
                 else:
                     self.fail_json(msg="Unable to create {0} {1}: {2}".format(item_type, item_name, response['status_code']))
+
+        if item_url is not None and modify_item_url is not None:
+            item_url = modify_item_url(item_url)
 
         # Process any associations with this item
         if associations is not None:
@@ -890,7 +893,7 @@ class ControllerAPIModule(ControllerModule):
                     return True
         return False
 
-    def update_if_needed(self, existing_item, new_item, on_update=None, auto_exit=True, associations=None):
+    def update_if_needed(self, existing_item, new_item, on_update=None, auto_exit=True, associations=None, modify_item_url=None):
         # This will exit from the module on its own
         # If the method successfully updates an item and on_update param is defined,
         #   the on_update parameter will be called as a method pasing in this object and the json from the response
@@ -900,10 +903,11 @@ class ControllerAPIModule(ControllerModule):
         # Note: common error codes from the AWX API can cause the module to fail
         response = None
         if existing_item:
-
             # If we have an item, we can see if it needs an update
             try:
                 item_url = existing_item['url']
+                if modify_item_url is not None:
+                    item_url = modify_item_url(item_url)
                 item_type = existing_item['type']
                 if item_type == 'user':
                     item_name = existing_item['username']
@@ -961,14 +965,13 @@ class ControllerAPIModule(ControllerModule):
             return last_data
 
     def create_or_update_if_needed(
-        self, existing_item, new_item, endpoint=None, item_type='unknown', on_create=None, on_update=None, auto_exit=True, associations=None
+            self, existing_item, new_item, endpoint=None, item_type='unknown', on_create=None, on_update=None, auto_exit=True, associations=None, modify_item_url=None
     ):
         if existing_item:
-            return self.update_if_needed(existing_item, new_item, on_update=on_update, auto_exit=auto_exit, associations=associations)
+            return self.update_if_needed(existing_item, new_item, on_update=on_update, auto_exit=auto_exit, associations=associations, modify_item_url=modify_item_url)
         else:
             return self.create_if_needed(
-                existing_item, new_item, endpoint, on_create=on_create, item_type=item_type, auto_exit=auto_exit, associations=associations
-            )
+                existing_item, new_item, endpoint, on_create=on_create, item_type=item_type, auto_exit=auto_exit, associations=associations, modify_item_url=modify_item_url)
 
     def logout(self):
         if self.authenticated and self.oauth_token_id:
