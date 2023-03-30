@@ -26,8 +26,8 @@ class TaskWorker(BaseWorker):
     `awx.main.dispatch.publish`.
     """
 
-    @classmethod
-    def resolve_callable(cls, task):
+    @staticmethod
+    def resolve_callable(task):
         """
         Transform a dotted notation task into an imported, callable function, e.g.,
 
@@ -46,7 +46,8 @@ class TaskWorker(BaseWorker):
 
         return _call
 
-    def run_callable(self, body):
+    @staticmethod
+    def run_callable(body):
         """
         Given some AMQP message, import the correct Python code and run it.
         """

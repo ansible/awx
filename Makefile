@@ -217,19 +217,12 @@ daphne:
 	fi; \
 	daphne -b 127.0.0.1 -p 8051 awx.asgi:channel_layer
 
-wsbroadcast:
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	$(PYTHON) manage.py run_wsbroadcast
-
 ## Run to start the background task dispatcher for development.
 dispatcher:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(PYTHON) manage.py run_dispatcher
-
 
 ## Run to start the zeromq callback receiver
 receiver:
@@ -246,6 +239,34 @@ jupyter:
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(MANAGEMENT_COMMAND) shell_plus --notebook
+
+## Start the rsyslog configurer process in background in development environment.
+run-rsyslog-configurer:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py run_rsyslog_configurer
+
+## Start cache_clear process in background in development environment.
+run-cache-clear:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py run_cache_clear
+
+## Start the wsrelay process in background in development environment.
+run-wsrelay:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py run_wsrelay
+
+## Start the heartbeat process in background in development environment.
+run-heartbeet:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py run_heartbeet
 
 reports:
 	mkdir -p $@

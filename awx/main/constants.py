@@ -65,7 +65,7 @@ ENV_BLOCKLIST = frozenset(
         'INVENTORY_HOSTVARS',
         'AWX_HOST',
         'PROJECT_REVISION',
-        'SUPERVISOR_WEB_CONFIG_PATH',
+        'SUPERVISOR_CONFIG_PATH',
     )
 )
 

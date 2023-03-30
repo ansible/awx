@@ -13,13 +13,13 @@ from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
 
 from awx.main.analytics.broadcast_websocket import (
-    BroadcastWebsocketStatsManager,
+    RelayWebsocketStatsManager,
     safe_name,
 )
-from awx.main.wsbroadcast import BroadcastWebsocketManager
+from awx.main.wsrelay import WebSocketRelayManager
 
 
-logger = logging.getLogger('awx.main.wsbroadcast')
+logger = logging.getLogger('awx.main.wsrelay')
 
 
 class Command(BaseCommand):
@@ -99,7 +99,7 @@ class Command(BaseCommand):
             executor = MigrationExecutor(connection)
             migrating = bool(executor.migration_plan(executor.loader.graph.leaf_nodes()))
         except Exception as exc:
-            logger.info(f'Error on startup of run_wsbroadcast (error: {exc}), retry in 10s...')
+            logger.warning(f'Error on startup of run_wsrelay (error: {exc}), retry in 10s...')
             time.sleep(10)
             return
 
@@ -130,9 +130,9 @@ class Command(BaseCommand):
 
         if options.get('status'):
             try:
-                stats_all = BroadcastWebsocketStatsManager.get_stats_sync()
+                stats_all = RelayWebsocketStatsManager.get_stats_sync()
             except redis.exceptions.ConnectionError as e:
-                print(f"Unable to get Broadcast Websocket Status. Failed to connect to redis {e}")
+                print(f"Unable to get Relay Websocket Status. Failed to connect to redis {e}")
                 return
 
             data = {}
@@ -151,22 +151,19 @@ class Command(BaseCommand):
             host_stats = Command.get_connection_status(hostnames, data)
             lines = Command._format_lines(host_stats)
 
-            print(f'Broadcast websocket connection status from "{my_hostname}" to:')
+            print(f'Relay websocket connection status from "{my_hostname}" to:')
             print('\n'.join(lines))
 
             host_stats = Command.get_connection_stats(hostnames, data)
             lines = Command._format_lines(host_stats)
 
-            print(f'\nBroadcast websocket connection stats from "{my_hostname}" to:')
+            print(f'\nRelay websocket connection stats from "{my_hostname}" to:')
             print('\n'.join(lines))
 
             return
 
         try:
-            broadcast_websocket_mgr = BroadcastWebsocketManager()
-            task = broadcast_websocket_mgr.start()
-
-            loop = asyncio.get_event_loop()
-            loop.run_until_complete(task)
+            websocket_relay_manager = WebSocketRelayManager()
+            asyncio.run(websocket_relay_manager.run())
         except KeyboardInterrupt:
-            logger.debug('Terminating Websocket Broadcaster')
+            logger.info('Terminating Websocket Relayer')
