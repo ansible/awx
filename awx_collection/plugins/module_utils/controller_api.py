@@ -965,13 +965,35 @@ class ControllerAPIModule(ControllerModule):
             return last_data
 
     def create_or_update_if_needed(
-            self, existing_item, new_item, endpoint=None, item_type='unknown', on_create=None, on_update=None, auto_exit=True, associations=None, modify_item_url=None
+            self,
+            existing_item,
+            new_item,
+            endpoint=None,
+            item_type='unknown',
+            on_create=None,
+            on_update=None,
+            auto_exit=True,
+            associations=None,
+            modify_item_url=None
     ):
         if existing_item:
-            return self.update_if_needed(existing_item, new_item, on_update=on_update, auto_exit=auto_exit, associations=associations, modify_item_url=modify_item_url)
+            return self.update_if_needed(
+                existing_item,
+                new_item,
+                on_update=on_update,
+                auto_exit=auto_exit,
+                associations=associations,
+                modify_item_url=modify_item_url)
         else:
             return self.create_if_needed(
-                existing_item, new_item, endpoint, on_create=on_create, item_type=item_type, auto_exit=auto_exit, associations=associations, modify_item_url=modify_item_url)
+                existing_item,
+                new_item,
+                endpoint,
+                on_create=on_create,
+                item_type=item_type,
+                auto_exit=auto_exit,
+                associations=associations,
+                modify_item_url=modify_item_url)
 
     def logout(self):
         if self.authenticated and self.oauth_token_id:
