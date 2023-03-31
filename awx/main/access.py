@@ -1629,18 +1629,18 @@ class JobTemplateAccess(NotificationAttachMixin, UnifiedCredentialsMixin, BaseAc
             return True
 
         data = dict(data)
-
         if self.changes_are_non_sensitive(obj, data):
             return True
-
         if not self.check_related('execution_environment', ExecutionEnvironment, data, obj=obj, role_field='read_role'):
             return False
-
         for required_field, cls in (('inventory', Inventory), ('project', Project)):
             is_mandatory = True
             if not getattr(obj, '{}_id'.format(required_field)):
                 is_mandatory = False
             if not self.check_related(required_field, cls, data, obj=obj, role_field='use_role', mandatory=is_mandatory):
+                if required_field in data:
+                    new_obj = get_object_from_data(required_field, cls, data)
+                    return self.user in new_obj.use_role and (self.user in obj.inventory.use_role or self.user in obj.project.use_role)
                 return False
         return True
 
