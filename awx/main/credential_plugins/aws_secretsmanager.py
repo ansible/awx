@@ -1,7 +1,7 @@
 import boto3
 from botocore.exceptions import ClientError
 
-from .plugin import CredentialPlugin, raise_for_status
+from .plugin import CredentialPlugin
 from django.utils.translation import gettext_lazy as _
 
 
@@ -31,7 +31,6 @@ secrets_manager_inputs = {
             'label': _('AWS Secret Name'),
             'type': 'string',
         },
-        {'id': 'version_id', 'label': _('AWS Secret Version Id'), 'type': 'string', 'help_text': _('Version of the secret. This defaults to AWSCURRENT')},
     ],
     'required': ['aws_access_key', 'aws_secret_key', 'region_name', 'secret_name'],
 }
@@ -42,7 +41,6 @@ def aws_secretsmanager_backend(**kwargs):
     region_name = kwargs['region_name']
     aws_secret_access_key = kwargs['aws_secret_key']
     aws_access_key_id = kwargs['aws_access_key']
-    version_id = kwargs['version_id'] or 'AWSCURRENT'
 
     session = boto3.session.Session()
     client = session.client(
@@ -50,9 +48,9 @@ def aws_secretsmanager_backend(**kwargs):
     )
 
     try:
-        get_secret_value_response = client.get_secret_value(SecretId=secret_name, VersionId=version_id)
+        get_secret_value_response = client.get_secret_value(SecretId=secret_name)
     except ClientError as e:
-        raise raise_for_status(e)
+        raise e
     # Secrets Manager decrypts the secret value using the associated KMS CMK
     # Depending on whether the secret was a string or binary, only one of these fields will be populated
     if 'SecretString' in get_secret_value_response:

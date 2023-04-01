@@ -78,7 +78,7 @@ def test_default_cred_types():
         [
             'aim',
             'aws',
-            'aws_secretsmanager_credential'
+            'aws_secretsmanager_credential',
             'azure_kv',
             'azure_rm',
             'centrify_vault_kv',
