@@ -56,7 +56,8 @@ function SubscriptionDetail() {
       <RoutedTabs tabsArray={tabsArray} />
       <CardBody>
         <DetailList>
-          {systemConfig?.SUBSCRIPTION_USAGE_MODEL === 'unique_managed_hosts' && (
+          {systemConfig?.SUBSCRIPTION_USAGE_MODEL ===
+            'unique_managed_hosts' && (
             <Detail
               dataCy="subscription-status"
               label={t`Status`}
@@ -109,21 +110,24 @@ function SubscriptionDetail() {
             label={t`Hosts imported`}
             value={license_info.current_instances}
           />
-          {systemConfig?.SUBSCRIPTION_USAGE_MODEL === 'unique_managed_hosts' && (
+          {systemConfig?.SUBSCRIPTION_USAGE_MODEL ===
+            'unique_managed_hosts' && (
             <Detail
               dataCy="subscription-hosts-remaining"
               label={t`Hosts remaining`}
               value={license_info.free_instances}
             />
           )}
-          {systemConfig?.SUBSCRIPTION_USAGE_MODEL === 'unique_managed_hosts' && (
+          {systemConfig?.SUBSCRIPTION_USAGE_MODEL ===
+            'unique_managed_hosts' && (
             <Detail
               dataCy="subscription-hosts-deleted"
               label={t`Hosts deleted`}
               value={license_info.deleted_instances}
             />
           )}
-          {systemConfig?.SUBSCRIPTION_USAGE_MODEL === 'unique_managed_hosts' && (
+          {systemConfig?.SUBSCRIPTION_USAGE_MODEL ===
+            'unique_managed_hosts' && (
             <Detail
               dataCy="subscription-hosts-reactivated"
               label={t`Active hosts previously deleted`}

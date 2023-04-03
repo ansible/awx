@@ -31,6 +31,9 @@ const config = {
     trial: false,
     valid_key: true,
   },
+  systemConfig: {
+    SUBSCRIPTION_USAGE_MODEL: 'unique_managed_hosts',
+  },
 };
 
 describe('<SubscriptionDetail />', () => {
