@@ -697,3 +697,5 @@ class TestConstructedInventory:
         assert const_r.data['url'] == url_const
         assert inv_r.data['url'] == url_inv
         assert inv_r.data['url'] != const_r.data['url']
+        assert inv_r.data['related']['constructed_url'] == url_const
+        assert const_r.data['related']['constructed_url'] == url_const
