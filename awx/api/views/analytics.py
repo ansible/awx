@@ -18,8 +18,6 @@ from collections import OrderedDict
 AUTOMATION_ANALYTICS_API_URL_PATH = "/api/tower-analytics/v1"
 AWX_ANALYTICS_API_PREFIX = 'analytics'
 
-CERT_PATH = "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
-
 ERROR_UPLOAD_NOT_ENABLED = "analytics-upload-not-enabled"
 ERROR_MISSING_URL = "missing-url"
 ERROR_MISSING_USER = "missing-user"
