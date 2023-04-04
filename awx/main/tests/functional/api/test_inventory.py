@@ -680,3 +680,22 @@ class TestConstructedInventory:
         inv_src = constructed_inventory.inventory_sources.first()
         assert inv_src.update_cache_timeout == 55
         assert inv_src.limit == 'foobar'
+
+    def test_get_absolute_url_for_constructed_inventory(self, constructed_inventory, admin_user, get):
+        """
+        If we are using the normal inventory API endpoint to look at a
+        constructed inventory, then we should get a normal inventory API route
+        back. If we are accessing it via the special constructed inventory
+        endpoint, then we should get that back.
+        """
+
+        url_const = reverse('api:constructed_inventory_detail', kwargs={'pk': constructed_inventory.pk})
+        url_inv = reverse('api:inventory_detail', kwargs={'pk': constructed_inventory.pk})
+
+        const_r = get(url=url_const, user=admin_user, expect=200)
+        inv_r = get(url=url_inv, user=admin_user, expect=200)
+        assert const_r.data['url'] == url_const
+        assert inv_r.data['url'] == url_inv
+        assert inv_r.data['url'] != const_r.data['url']
+        assert inv_r.data['related']['constructed_url'] == url_const
+        assert const_r.data['related']['constructed_url'] == url_const
