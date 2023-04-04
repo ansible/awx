@@ -159,11 +159,22 @@ class AnalyticsGenericView(APIView):
         return self._error_response(ERROR_NOT_FOUND, message, remote=True, remote_status_code=status.HTTP_404_NOT_FOUND, status_code=status.HTTP_404_NOT_FOUND)
 
     @staticmethod
-    def _forward_response(response):
+    def _update_response_links(json_response):
+        if not json_response.get('links', None):
+            return
+
+        for key, value in json_response['links'].items():
+            if value:
+                json_response['links'][key] = value.replace(AUTOMATION_ANALYTICS_API_URL_PATH, f"/api/v2/{AWX_ANALYTICS_API_PREFIX}")
+
+    def _forward_response(self, response):
         try:
             content_type = response.headers.get('content-type', '')
             if content_type.find('application/json') != -1:
-                return Response(response.json(), status=response.status_code)
+                json_response = response.json()
+                self._update_response_links(json_response)
+
+                return Response(json_response, status=response.status_code)
         except Exception as e:
             logger.error(f"Analytics API: Response error: {e}")
 
@@ -178,7 +189,7 @@ class AnalyticsGenericView(APIView):
             rh_user = self._get_rh_user()
             rh_password = self._get_rh_password()
 
-            if method not in ["GET", "POST"]:
+            if method not in ["GET", "POST", "OPTIONS"]:
                 return self._error_response(ERROR_UNSUPPORTED_METHOD, method, remote=False, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
             else:
                 response = requests.request(
@@ -226,6 +237,9 @@ class AnalyticsGenericListView(AnalyticsGenericView):
     def post(self, request, format=None):
         return self._send_to_analytics(request, method="POST")
 
+    def options(self, request, format=None):
+        return self._send_to_analytics(request, method="OPTIONS")
+
 
 class AnalyticsGenericDetailView(AnalyticsGenericView):
     def get(self, request, slug, format=None):
@@ -233,6 +247,9 @@ class AnalyticsGenericDetailView(AnalyticsGenericView):
 
     def post(self, request, slug, format=None):
         return self._send_to_analytics(request, method="POST")
+
+    def options(self, request, slug, format=None):
+        return self._send_to_analytics(request, method="OPTIONS")
 
 
 class AnalyticsAuthorizedView(AnalyticsGenericListView):
