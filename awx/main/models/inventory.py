@@ -892,13 +892,20 @@ class HostMetric(models.Model):
 
     @classmethod
     def cleanup_task(cls, months_ago):
-        last_automation_before = now() - dateutil.relativedelta.relativedelta(months=months_ago)
+        try:
+            months_ago = int(months_ago)
+            if months_ago <= 0:
+                raise ValueError()
 
-        logger.info(f'Cleanup [HostMetric]: soft-deleting records last automated before {last_automation_before}')
-        HostMetric.objects.filter(last_automation__lt=last_automation_before).update(
-            deleted=True, deleted_counter=models.F('deleted_counter') + 1, last_deleted=now()
-        )
-        settings.CLEANUP_HOST_METRICS_LAST_TS = now()
+            last_automation_before = now() - dateutil.relativedelta.relativedelta(months=months_ago)
+
+            logger.info(f'Cleanup [HostMetric]: soft-deleting records last automated before {last_automation_before}')
+            HostMetric.active_objects.filter(last_automation__lt=last_automation_before).update(
+                deleted=True, deleted_counter=models.F('deleted_counter') + 1, last_deleted=now()
+            )
+            settings.CLEANUP_HOST_METRICS_LAST_TS = now()
+        except (TypeError, ValueError):
+            logger.error(f"Cleanup [HostMetric]: months_ago({months_ago}) has to be a positive integer value")
 
 
 class HostMetricSummaryMonthly(models.Model):
