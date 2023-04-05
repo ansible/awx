@@ -221,7 +221,7 @@ ADD tools/ansible/roles/dockerfile/files/launch_awx_task.sh /usr/bin/launch_awx_
 ADD tools/ansible/roles/dockerfile/files/launch_awx_rsyslog.sh /usr/bin/launch_awx_rsyslog.sh
 ADD {{ template_dest }}/supervisor_web.conf /etc/supervisord_web.conf
 ADD {{ template_dest }}/supervisor_task.conf /etc/supervisord_task.conf
-ADD {{ template_dest }}/supervisor_rsyslog.conf /etc/supervisor_rsyslog.conf
+ADD {{ template_dest }}/supervisor_rsyslog.conf /etc/supervisord_rsyslog.conf
 {% endif %}
 {% if (build_dev|bool) or (kube_dev|bool) %}
 ADD tools/docker-compose/awx.egg-link /tmp/awx.egg-link

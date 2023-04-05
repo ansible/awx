@@ -3,7 +3,7 @@ nodaemon = True
 umask = 022
 logfile = /dev/stdout
 logfile_maxbytes = 0
-pidfile = /var/run/supervisor/supervisor.pid
+pidfile = /var/run/supervisor/supervisor.task.pid
 
 [program:dispatcher]
 {% if kube_dev | bool %}
@@ -70,10 +70,10 @@ stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
 
 [unix_http_server]
-file=/var/run/supervisor/supervisor.sock
+file=/var/run/supervisor/supervisor.task.sock
 
 [supervisorctl]
-serverurl=unix:///var/run/supervisor/supervisor.sock ; use a unix:// URL  for a unix socket
+serverurl=unix:///var/run/supervisor/supervisor.task.sock ; use a unix:// URL  for a unix socket
 
 [rpcinterface:supervisor]
 supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface

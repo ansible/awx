@@ -17,6 +17,7 @@ from django.db import models, connection
 from django.utils.translation import gettext_lazy as _
 from django.db import transaction
 from django.core.exceptions import ValidationError
+from django.urls import resolve
 from django.utils.timezone import now
 from django.db.models import Q
 
@@ -206,8 +207,14 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
     )
 
     def get_absolute_url(self, request=None):
-        if self.kind == 'constructed':
-            return reverse('api:constructed_inventory_detail', kwargs={'pk': self.pk}, request=request)
+        if request is not None:
+            # circular import
+            from awx.api.urls.inventory import constructed_inventory_urls
+
+            route = resolve(request.path_info)
+            if any(route.url_name == url.name for url in constructed_inventory_urls):
+                return reverse('api:constructed_inventory_detail', kwargs={'pk': self.pk}, request=request)
+
         return reverse('api:inventory_detail', kwargs={'pk': self.pk}, request=request)
 
     variables_dict = VarsDictProperty('variables')
