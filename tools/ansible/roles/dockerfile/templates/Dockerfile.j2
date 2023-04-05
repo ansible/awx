@@ -15,6 +15,9 @@ ENV AWX_LOGGING_MODE stdout
 
 USER root
 
+# Import the gpg key for DNF to work
+RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+
 # Install build dependencies
 RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     dnf config-manager --set-enabled crb && \
@@ -98,6 +101,9 @@ ENV LC_ALL en_US.UTF-8
 ENV AWX_LOGGING_MODE stdout
 
 USER root
+
+# Import the gpg key for DNF to work
+RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
 
 # Install runtime requirements
 RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
@@ -215,7 +221,7 @@ ADD tools/ansible/roles/dockerfile/files/launch_awx_task.sh /usr/bin/launch_awx_
 ADD tools/ansible/roles/dockerfile/files/launch_awx_rsyslog.sh /usr/bin/launch_awx_rsyslog.sh
 ADD {{ template_dest }}/supervisor_web.conf /etc/supervisord_web.conf
 ADD {{ template_dest }}/supervisor_task.conf /etc/supervisord_task.conf
-ADD {{ template_dest }}/supervisor_rsyslog.conf /etc/supervisor_rsyslog.conf
+ADD {{ template_dest }}/supervisor_rsyslog.conf /etc/supervisord_rsyslog.conf
 {% endif %}
 {% if (build_dev|bool) or (kube_dev|bool) %}
 ADD tools/docker-compose/awx.egg-link /tmp/awx.egg-link
