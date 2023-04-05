@@ -15,6 +15,9 @@ ENV AWX_LOGGING_MODE stdout
 
 USER root
 
+# Import the gpg key for DNF to work
+RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+
 # Install build dependencies
 RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     dnf config-manager --set-enabled crb && \
@@ -98,6 +101,9 @@ ENV LC_ALL en_US.UTF-8
 ENV AWX_LOGGING_MODE stdout
 
 USER root
+
+# Import the gpg key for DNF to work
+RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
 
 # Install runtime requirements
 RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
