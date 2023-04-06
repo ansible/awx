@@ -228,7 +228,7 @@ services:
 
 volumes:
   awx_db:
-    name: tools_awx_db
+    name: {{ dbname }}
 {% for i in range(control_plane_node_count|int) -%}
   {% set container_postfix = loop.index %}
   redis_socket_{{ container_postfix }}:

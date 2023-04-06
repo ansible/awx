@@ -498,6 +498,7 @@ EXECUTION_NODE_COUNT ?= 0
 MINIKUBE_CONTAINER_GROUP ?= false
 MINIKUBE_SETUP ?= false # if false, run minikube separately
 EXTRA_SOURCES_ANSIBLE_OPTS ?=
+DBNAME ?= tools_awx_db
 
 ifneq ($(ADMIN_PASSWORD),)
 	EXTRA_SOURCES_ANSIBLE_OPTS := -e admin_password=$(ADMIN_PASSWORD) $(EXTRA_SOURCES_ANSIBLE_OPTS)
@@ -519,9 +520,11 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e enable_ldap=$(LDAP) \
 	    -e enable_splunk=$(SPLUNK) \
 	    -e enable_prometheus=$(PROMETHEUS) \
-	    -e enable_grafana=$(GRAFANA) $(EXTRA_SOURCES_ANSIBLE_OPTS)
+	    -e enable_grafana=$(GRAFANA) $(EXTRA_SOURCES_ANSIBLE_OPTS) \
+	    -e dbname=$(DBNAME) \
 
 docker-compose: awx/projects docker-compose-sources
+	-docker rm tools_postgres_1
 	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_OPTS) up $(COMPOSE_UP_OPTS) --remove-orphans
 
 docker-compose-credential-plugins: awx/projects docker-compose-sources
