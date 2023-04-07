@@ -116,6 +116,11 @@ options:
         - Project the role acts on.
       type: list
       elements: str
+    instance_groups:
+      description:
+        - Instance Group the role acts on.
+      type: list
+      elements: str
     state:
       description:
         - Desired state.
@@ -193,6 +198,7 @@ def main():
         lookup_organization=dict(),
         project=dict(),
         projects=dict(type='list', elements='str'),
+        instance_groups=dict(type='list', elements='str'),
         state=dict(choices=['present', 'absent'], default='present'),
     )
 

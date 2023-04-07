@@ -44,16 +44,18 @@ class Command(BaseCommand):
 
             for x in ig.instances.all():
                 color = '\033[92m'
+                end_color = '\033[0m'
                 if x.capacity == 0 and x.node_type != 'hop':
                     color = '\033[91m'
                 if not x.enabled:
                     color = '\033[90m[DISABLED] '
                 if no_color:
                     color = ''
+                    end_color = ''
 
                 capacity = f' capacity={x.capacity}' if x.node_type != 'hop' else ''
                 version = f" version={x.version or '?'}" if x.node_type != 'hop' else ''
                 heartbeat = f' heartbeat="{x.last_seen:%Y-%m-%d %H:%M:%S}"' if x.capacity or x.node_type == 'hop' else ''
-                print(f'\t{color}{x.hostname}{capacity} node_type={x.node_type}{version}{heartbeat}\033[0m')
+                print(f'\t{color}{x.hostname}{capacity} node_type={x.node_type}{version}{heartbeat}{end_color}')
 
             print()
