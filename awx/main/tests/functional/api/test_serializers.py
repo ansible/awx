@@ -59,6 +59,7 @@ def test_validate_password_rules(password, min_length, min_digits, min_upper, mi
                 assert False, "validate_password raised an unexpected exception"
 
 
+@pytest.mark.django_db
 def test_validate_password_too_long():
     password_max_length = User._meta.get_field('password').max_length
     password = "x" * password_max_length
