@@ -172,8 +172,10 @@ idna==3.4
     #   requests
     #   twisted
     #   yarl
-importlib-metadata==5.1.0
-    # via markdown
+importlib-metadata==4.6.4
+    # via
+    #   ansible-runner
+    #   markdown
 incremental==22.10.0
     # via twisted
 inflect==6.0.2
