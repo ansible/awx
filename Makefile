@@ -10,9 +10,6 @@ GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 MANAGEMENT_COMMAND ?= awx-manage
 VERSION := $(shell $(PYTHON) tools/scripts/scm_version.py)
 
-# temparary workaround for pip resolver issues
-PIP_OPTIONS="--use-deprecated=legacy-resolver"
-
 # ansible-test requires semver compatable version, so we allow overrides to hack it
 COLLECTION_VERSION ?= $(shell $(PYTHON) tools/scripts/scm_version.py | cut -d . -f 1-3)
 # args for the ansible-test sanity command
