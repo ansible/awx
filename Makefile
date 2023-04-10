@@ -1,3 +1,5 @@
+-include awx/ui_next/Makefile
+
 PYTHON ?= python3.9
 DOCKER_COMPOSE ?= docker-compose
 OFFICIAL ?= no
@@ -84,7 +86,7 @@ clean-schema:
 
 clean-languages:
 	rm -f $(I18N_FLAG_FILE)
-	find ./awx/locale/ -type f -regex ".*\.mo$" -delete
+	find ./awx/locale/ -type f -regex '.*\.mo$$' -delete
 
 ## Remove temporary build files, compiled Python files.
 clean: clean-ui clean-api clean-awxkit clean-dist
@@ -215,19 +217,12 @@ daphne:
 	fi; \
 	daphne -b 127.0.0.1 -p 8051 awx.asgi:channel_layer
 
-wsbroadcast:
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	$(PYTHON) manage.py run_wsbroadcast
-
 ## Run to start the background task dispatcher for development.
 dispatcher:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(PYTHON) manage.py run_dispatcher
-
 
 ## Run to start the zeromq callback receiver
 receiver:
@@ -244,6 +239,34 @@ jupyter:
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(MANAGEMENT_COMMAND) shell_plus --notebook
+
+## Start the rsyslog configurer process in background in development environment.
+run-rsyslog-configurer:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py run_rsyslog_configurer
+
+## Start cache_clear process in background in development environment.
+run-cache-clear:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py run_cache_clear
+
+## Start the wsrelay process in background in development environment.
+run-wsrelay:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py run_wsrelay
+
+## Start the heartbeat process in background in development environment.
+run-heartbeet:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py run_heartbeet
 
 reports:
 	mkdir -p $@
@@ -418,7 +441,7 @@ ui-devel: awx/ui/node_modules
 		cp -r awx/ui/build/static/css/* /var/lib/awx/public/static/css; \
 		cp -r awx/ui/build/static/js/* /var/lib/awx/public/static/js; \
 		cp -r awx/ui/build/static/media/* /var/lib/awx/public/static/media; \
-    	fi
+	fi
 
 ui-devel-instrumented: awx/ui/node_modules
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run start-instrumented
@@ -445,11 +468,12 @@ ui-test-general:
 	$(NPM_BIN) run --prefix awx/ui pretest
 	$(NPM_BIN) run --prefix awx/ui/ test-general --runInBand
 
+# NOTE: The make target ui-next is imported from awx/ui_next/Makefile
 HEADLESS ?= no
 ifeq ($(HEADLESS), yes)
 dist/$(SDIST_TAR_FILE):
 else
-dist/$(SDIST_TAR_FILE): $(UI_BUILD_FLAG_FILE)
+dist/$(SDIST_TAR_FILE): $(UI_BUILD_FLAG_FILE) ui-next
 endif
 	$(PYTHON) -m build -s
 	ln -sf $(SDIST_TAR_FILE) dist/awx.tar.gz
@@ -497,8 +521,6 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e enable_prometheus=$(PROMETHEUS) \
 	    -e enable_grafana=$(GRAFANA) $(EXTRA_SOURCES_ANSIBLE_OPTS)
 
-
-
 docker-compose: awx/projects docker-compose-sources
 	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_OPTS) up $(COMPOSE_UP_OPTS) --remove-orphans
 
@@ -539,7 +561,7 @@ docker-compose-build:
 
 docker-clean:
 	-$(foreach container_id,$(shell docker ps -f name=tools_awx -aq && docker ps -f name=tools_receptor -aq),docker stop $(container_id); docker rm -f $(container_id);)
-	-$(foreach image_id,$(shell docker images --filter=reference='*awx_devel*' -aq),docker rmi --force $(image_id);)
+	-$(foreach image_id,$(shell docker images --filter=reference='*/*/*awx_devel*' --filter=reference='*/*awx_devel*' --filter=reference='*awx_devel*' -aq),docker rmi --force $(image_id);)
 
 docker-clean-volumes: docker-compose-clean docker-compose-container-group-clean
 	docker volume rm -f tools_awx_db tools_grafana_storage tools_prometheus_storage $(docker volume ls --filter name=tools_redis_socket_ -q)
@@ -654,3 +676,7 @@ help/generate:
 	} \
 	{ lastLine = $$0 }' $(MAKEFILE_LIST) | sort -u
 	@printf "\n"
+
+## Display help for ui-next targets
+help/ui-next:
+	@make -s help MAKEFILE_LIST="awx/ui_next/Makefile"

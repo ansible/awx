@@ -2,12 +2,8 @@
 # All Rights Reserved.
 
 # Python
-import codecs
-import datetime
 import logging
-import os
 import time
-import json
 from urllib.parse import urljoin
 
 
@@ -15,11 +11,9 @@ from urllib.parse import urljoin
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models.query import QuerySet
+from django.db.models.functions import Cast
 
 # from django.core.cache import cache
-from django.utils.encoding import smart_str
-from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import FieldDoesNotExist
 
@@ -28,6 +22,7 @@ from rest_framework.exceptions import ParseError
 
 # AWX
 from awx.api.versioning import reverse
+from awx.main.constants import HOST_FACTS_FIELDS
 from awx.main.models.base import (
     BaseModel,
     CreatedModifiedModel,
@@ -44,7 +39,7 @@ from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
 )
-from awx.main.utils import parse_yaml_or_json, getattr_dne, NullablePromptPseudoField, polymorphic, log_excess_runtime
+from awx.main.utils import parse_yaml_or_json, getattr_dne, NullablePromptPseudoField, polymorphic
 from awx.main.fields import ImplicitRoleField, AskForField, JSONBlob, OrderedManyToManyField
 from awx.main.models.mixins import (
     ResourceMixin,
@@ -60,8 +55,6 @@ from awx.main.constants import JOB_VARIABLE_PREFIXES
 
 
 logger = logging.getLogger('awx.main.models.jobs')
-analytics_logger = logging.getLogger('awx.analytics.job_events')
-system_tracking_logger = logging.getLogger('awx.analytics.system_tracking')
 
 __all__ = ['JobTemplate', 'JobLaunchConfig', 'Job', 'JobHostSummary', 'SystemJobTemplate', 'SystemJob']
 
@@ -578,12 +571,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         default=None,
         on_delete=models.SET_NULL,
     )
-    hosts = models.ManyToManyField(
-        'Host',
-        related_name='jobs',
-        editable=False,
-        through='JobHostSummary',
-    )
+    hosts = models.ManyToManyField('Host', related_name='jobs', editable=False, through='JobHostSummary', through_fields=('job', 'host'))
     artifacts = JSONBlob(
         default=dict,
         blank=True,
@@ -848,109 +836,26 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     def get_notification_friendly_name(self):
         return "Job"
 
-    def _get_inventory_hosts(self, only=('name', 'ansible_facts', 'ansible_facts_modified', 'modified', 'inventory_id'), **filters):
-        """Return value is an iterable for the relevant hosts for this job"""
-        if not self.inventory:
-            return []
-        host_queryset = self.inventory.hosts.only(*only)
-        if filters:
-            host_queryset = host_queryset.filter(**filters)
-        host_queryset = self.inventory.get_sliced_hosts(host_queryset, self.job_slice_number, self.job_slice_count)
-        if isinstance(host_queryset, QuerySet):
-            return host_queryset.iterator()
-        return host_queryset
+    def get_hosts_for_fact_cache(self):
+        """
+        Builds the queryset to use for writing or finalizing the fact cache
+        these need to be the 'real' hosts associated with the job.
+        For constructed inventories, that means the original (input inventory) hosts
+        when slicing, that means only returning hosts in that slice
+        """
+        Host = JobHostSummary._meta.get_field('host').related_model
+        if not self.inventory_id:
+            return Host.objects.none()
 
-    @log_excess_runtime(logger, debug_cutoff=0.01, msg='Job {job_id} host facts prepared for {written_ct} hosts, took {delta:.3f} s', add_log_data=True)
-    def start_job_fact_cache(self, destination, log_data, timeout=None):
-        self.log_lifecycle("start_job_fact_cache")
-        log_data['job_id'] = self.id
-        log_data['written_ct'] = 0
-        os.makedirs(destination, mode=0o700)
-
-        if timeout is None:
-            timeout = settings.ANSIBLE_FACT_CACHE_TIMEOUT
-        if timeout > 0:
-            # exclude hosts with fact data older than `settings.ANSIBLE_FACT_CACHE_TIMEOUT seconds`
-            timeout = now() - datetime.timedelta(seconds=timeout)
-            hosts = self._get_inventory_hosts(ansible_facts_modified__gte=timeout)
+        if self.inventory.kind == 'constructed':
+            id_field = Host._meta.get_field('id')
+            host_qs = Host.objects.filter(id__in=self.inventory.hosts.exclude(instance_id='').values_list(Cast('instance_id', output_field=id_field)))
         else:
-            hosts = self._get_inventory_hosts()
+            host_qs = self.inventory.hosts
 
-        last_filepath_written = None
-        for host in hosts:
-            filepath = os.sep.join(map(str, [destination, host.name]))
-            if not os.path.realpath(filepath).startswith(destination):
-                system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
-                continue
-            try:
-                with codecs.open(filepath, 'w', encoding='utf-8') as f:
-                    os.chmod(f.name, 0o600)
-                    json.dump(host.ansible_facts, f)
-                    log_data['written_ct'] += 1
-                    last_filepath_written = filepath
-            except IOError:
-                system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
-                continue
-        # make note of the time we wrote the last file so we can check if any file changed later
-        if last_filepath_written:
-            return os.path.getmtime(last_filepath_written)
-        return None
-
-    @log_excess_runtime(
-        logger,
-        debug_cutoff=0.01,
-        msg='Job {job_id} host facts: updated {updated_ct}, cleared {cleared_ct}, unchanged {unmodified_ct}, took {delta:.3f} s',
-        add_log_data=True,
-    )
-    def finish_job_fact_cache(self, destination, facts_write_time, log_data):
-        self.log_lifecycle("finish_job_fact_cache")
-        log_data['job_id'] = self.id
-        log_data['updated_ct'] = 0
-        log_data['unmodified_ct'] = 0
-        log_data['cleared_ct'] = 0
-        hosts_to_update = []
-        for host in self._get_inventory_hosts():
-            filepath = os.sep.join(map(str, [destination, host.name]))
-            if not os.path.realpath(filepath).startswith(destination):
-                system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
-                continue
-            if os.path.exists(filepath):
-                # If the file changed since we wrote the last facts file, pre-playbook run...
-                modified = os.path.getmtime(filepath)
-                if (not facts_write_time) or modified > facts_write_time:
-                    with codecs.open(filepath, 'r', encoding='utf-8') as f:
-                        try:
-                            ansible_facts = json.load(f)
-                        except ValueError:
-                            continue
-                        host.ansible_facts = ansible_facts
-                        host.ansible_facts_modified = now()
-                        hosts_to_update.append(host)
-                        system_tracking_logger.info(
-                            'New fact for inventory {} host {}'.format(smart_str(host.inventory.name), smart_str(host.name)),
-                            extra=dict(
-                                inventory_id=host.inventory.id,
-                                host_name=host.name,
-                                ansible_facts=host.ansible_facts,
-                                ansible_facts_modified=host.ansible_facts_modified.isoformat(),
-                                job_id=self.id,
-                            ),
-                        )
-                        log_data['updated_ct'] += 1
-                else:
-                    log_data['unmodified_ct'] += 1
-            else:
-                # if the file goes missing, ansible removed it (likely via clear_facts)
-                host.ansible_facts = {}
-                host.ansible_facts_modified = now()
-                hosts_to_update.append(host)
-                system_tracking_logger.info('Facts cleared for inventory {} host {}'.format(smart_str(host.inventory.name), smart_str(host.name)))
-                log_data['cleared_ct'] += 1
-            if len(hosts_to_update) > 100:
-                self.inventory.hosts.bulk_update(hosts_to_update, ['ansible_facts', 'ansible_facts_modified'])
-                hosts_to_update = []
-        if hosts_to_update:
-            self.inventory.hosts.bulk_update(hosts_to_update, ['ansible_facts', 'ansible_facts_modified'])
+        host_qs = host_qs.only(*HOST_FACTS_FIELDS)
+        host_qs = self.inventory.get_sliced_hosts(host_qs, self.job_slice_number, self.job_slice_count)
+        return host_qs
 
 
 class LaunchTimeConfigBase(BaseModel):
@@ -1172,6 +1077,15 @@ class JobHostSummary(CreatedModifiedModel):
         editable=False,
     )
     host = models.ForeignKey('Host', related_name='job_host_summaries', null=True, default=None, on_delete=models.SET_NULL, editable=False)
+    constructed_host = models.ForeignKey(
+        'Host',
+        related_name='constructed_host_summaries',
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+        editable=False,
+        help_text='Only for jobs run against constructed inventories, this links to the host inside the constructed inventory.',
+    )
 
     host_name = models.CharField(
         max_length=1024,

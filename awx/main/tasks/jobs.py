@@ -29,7 +29,7 @@ from gitdb.exc import BadName as BadGitName
 
 # AWX
 from awx.main.dispatch.publish import task
-from awx.main.dispatch import get_local_queuename
+from awx.main.dispatch import get_task_queuename
 from awx.main.constants import (
     PRIVILEGE_ESCALATION_METHODS,
     STANDARD_INVENTORY_UPDATE_ENV,
@@ -37,6 +37,7 @@ from awx.main.constants import (
     MAX_ISOLATED_PATH_COLON_DELIMITER,
     CONTAINER_VOLUMES_MOUNT_TYPES,
     ACTIVE_STATES,
+    HOST_FACTS_FIELDS,
 )
 from awx.main.models import (
     Instance,
@@ -63,6 +64,7 @@ from awx.main.tasks.callback import (
 )
 from awx.main.tasks.signals import with_signal_handling, signal_callback
 from awx.main.tasks.receptor import AWXReceptorJob
+from awx.main.tasks.facts import start_fact_cache, finish_fact_cache
 from awx.main.exceptions import AwxTaskError, PostRunError, ReceptorNodeNotFound
 from awx.main.utils.ansible import read_ansible_config
 from awx.main.utils.execution_environments import CONTAINER_ROOT, to_container_path
@@ -315,17 +317,22 @@ class BaseTask(object):
 
         return env
 
+    def write_inventory_file(self, inventory, private_data_dir, file_name, script_params):
+        script_data = inventory.get_script_data(**script_params)
+        for hostname, hv in script_data.get('_meta', {}).get('hostvars', {}).items():
+            # maintain a list of host_name --> host_id
+            # so we can associate emitted events to Host objects
+            self.runner_callback.host_map[hostname] = hv.get('remote_tower_id', '')
+        file_content = '#! /usr/bin/env python3\n# -*- coding: utf-8 -*-\nprint(%r)\n' % json.dumps(script_data)
+        return self.write_private_data_file(private_data_dir, file_name, file_content, sub_dir='inventory', file_permissions=0o700)
+
     def build_inventory(self, instance, private_data_dir):
         script_params = dict(hostvars=True, towervars=True)
         if hasattr(instance, 'job_slice_number'):
             script_params['slice_number'] = instance.job_slice_number
             script_params['slice_count'] = instance.job_slice_count
-        script_data = instance.inventory.get_script_data(**script_params)
-        # maintain a list of host_name --> host_id
-        # so we can associate emitted events to Host objects
-        self.runner_callback.host_map = {hostname: hv.pop('remote_tower_id', '') for hostname, hv in script_data.get('_meta', {}).get('hostvars', {}).items()}
-        file_content = '#! /usr/bin/env python3\n# -*- coding: utf-8 -*-\nprint(%r)\n' % json.dumps(script_data)
-        return self.write_private_data_file(private_data_dir, 'hosts', file_content, sub_dir='inventory', file_permissions=0o700)
+
+        return self.write_inventory_file(instance.inventory, private_data_dir, 'hosts', script_params)
 
     def build_args(self, instance, private_data_dir, passwords):
         raise NotImplementedError
@@ -450,6 +457,9 @@ class BaseTask(object):
                 instance.ansible_version = ansible_version_info
                 instance.save(update_fields=['ansible_version'])
 
+    def should_use_fact_cache(self):
+        return False
+
     @with_path_cleanup
     @with_signal_handling
     def run(self, pk, **kwargs):
@@ -548,7 +558,8 @@ class BaseTask(object):
                 params['module'] = self.build_module_name(self.instance)
                 params['module_args'] = self.build_module_args(self.instance)
 
-            if getattr(self.instance, 'use_fact_cache', False):
+            # TODO: refactor into a better BasTask method
+            if self.should_use_fact_cache():
                 # Enable Ansible fact cache.
                 params['fact_cache_type'] = 'jsonfile'
             else:
@@ -795,7 +806,7 @@ class SourceControlMixin(BaseTask):
             self.release_lock(project)
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 class RunJob(SourceControlMixin, BaseTask):
     """
     Run a job using ansible-playbook.
@@ -1003,6 +1014,9 @@ class RunJob(SourceControlMixin, BaseTask):
 
         return args
 
+    def should_use_fact_cache(self):
+        return self.instance.use_fact_cache
+
     def build_playbook_path_relative_to_cwd(self, job, private_data_dir):
         return job.playbook
 
@@ -1068,8 +1082,11 @@ class RunJob(SourceControlMixin, BaseTask):
 
         # Fetch "cached" fact data from prior runs and put on the disk
         # where ansible expects to find it
-        if job.use_fact_cache:
-            self.facts_write_time = self.instance.start_job_fact_cache(os.path.join(private_data_dir, 'artifacts', str(job.id), 'fact_cache'))
+        if self.should_use_fact_cache():
+            job.log_lifecycle("start_job_fact_cache")
+            self.facts_write_time = start_fact_cache(
+                job.get_hosts_for_fact_cache(), os.path.join(private_data_dir, 'artifacts', str(job.id), 'fact_cache'), inventory_id=job.inventory_id
+            )
 
     def build_project_dir(self, job, private_data_dir):
         self.sync_and_copy(job.project, private_data_dir, scm_branch=job.scm_branch)
@@ -1083,10 +1100,14 @@ class RunJob(SourceControlMixin, BaseTask):
             # actual `run()` call; this _usually_ means something failed in
             # the pre_run_hook method
             return
-        if job.use_fact_cache:
-            job.finish_job_fact_cache(
+        if self.should_use_fact_cache():
+            job.log_lifecycle("finish_job_fact_cache")
+            finish_fact_cache(
+                job.get_hosts_for_fact_cache(),
                 os.path.join(private_data_dir, 'artifacts', str(job.id), 'fact_cache'),
-                self.facts_write_time,
+                facts_write_time=self.facts_write_time,
+                job_id=job.id,
+                inventory_id=job.inventory_id,
             )
 
     def final_run_hook(self, job, status, private_data_dir):
@@ -1100,7 +1121,7 @@ class RunJob(SourceControlMixin, BaseTask):
                 update_inventory_computed_fields.delay(inventory.id)
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 class RunProjectUpdate(BaseTask):
     model = ProjectUpdate
     event_model = ProjectUpdateEvent
@@ -1422,7 +1443,7 @@ class RunProjectUpdate(BaseTask):
         return params
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 class RunInventoryUpdate(SourceControlMixin, BaseTask):
     model = InventoryUpdate
     event_model = InventoryUpdateEvent
@@ -1469,8 +1490,6 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
 
         if injector is not None:
             env = injector.build_env(inventory_update, env, private_data_dir, private_data_files)
-            # All CLOUD_PROVIDERS sources implement as inventory plugin from collection
-            env['ANSIBLE_INVENTORY_ENABLED'] = 'auto'
 
         if inventory_update.source == 'scm':
             for env_k in inventory_update.source_vars_dict:
@@ -1523,6 +1542,22 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
 
         args = ['ansible-inventory', '--list', '--export']
 
+        # special case for constructed inventories, we pass source inventories from database
+        # these must come in order, and in order _before_ the constructed inventory itself
+        if inventory_update.inventory.kind == 'constructed':
+            inventory_update.log_lifecycle("start_job_fact_cache")
+            for input_inventory in inventory_update.inventory.input_inventories.all():
+                args.append('-i')
+                script_params = dict(hostvars=True, towervars=True)
+                source_inv_path = self.write_inventory_file(input_inventory, private_data_dir, f'hosts_{input_inventory.id}', script_params)
+                args.append(to_container_path(source_inv_path, private_data_dir))
+                # Include any facts from input inventories so they can be used in filters
+                start_fact_cache(
+                    input_inventory.hosts.only(*HOST_FACTS_FIELDS),
+                    os.path.join(private_data_dir, 'artifacts', str(inventory_update.id), 'fact_cache'),
+                    inventory_id=input_inventory.id,
+                )
+
         # Add arguments for the source inventory file/script/thing
         rel_path = self.pseudo_build_inventory(inventory_update, private_data_dir)
         container_location = os.path.join(CONTAINER_ROOT, rel_path)
@@ -1530,6 +1565,11 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
 
         args.append('-i')
         args.append(container_location)
+        # Added this in order to allow older versions of ansible-inventory https://github.com/ansible/ansible/pull/79596
+        # limit should be usable in ansible-inventory 2.15+
+        if inventory_update.limit:
+            args.append('--limit')
+            args.append(inventory_update.limit)
 
         args.append('--output')
         args.append(os.path.join(CONTAINER_ROOT, 'artifacts', str(inventory_update.id), 'output.json'))
@@ -1544,6 +1584,9 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
             args.append('-' + 'v' * min(5, inventory_update.verbosity * 2 + 1))
 
         return args
+
+    def should_use_fact_cache(self):
+        return bool(self.instance.source == 'constructed')
 
     def build_inventory(self, inventory_update, private_data_dir):
         return None  # what runner expects in order to not deal with inventory
@@ -1663,7 +1706,7 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
             raise PostRunError('Error occured while saving inventory data, see traceback or server logs', status='error', tb=traceback.format_exc())
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 class RunAdHocCommand(BaseTask):
     """
     Run an ad hoc command using ansible.
@@ -1816,7 +1859,7 @@ class RunAdHocCommand(BaseTask):
         return d
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 class RunSystemJob(BaseTask):
     model = SystemJob
     event_model = SystemJobEvent

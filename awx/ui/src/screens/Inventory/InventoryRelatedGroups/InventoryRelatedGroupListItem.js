@@ -1,6 +1,6 @@
 import 'styled-components/macro';
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { string, bool, func, number } from 'prop-types';
 
 import { t } from '@lingui/macro';
@@ -21,7 +21,7 @@ function InventoryRelatedGroupListItem({
   onSelect,
 }) {
   const labelId = `check-action-${group.id}`;
-
+  const { inventoryType } = useParams();
   return (
     <Tr
       id={group.id}
@@ -41,22 +41,24 @@ function InventoryRelatedGroupListItem({
           <b>{group.name}</b>
         </Link>
       </Td>
-      <ActionsTd dataLabel={t`Actions`}>
-        <ActionItem
-          tooltip={t`Edit Group`}
-          visible={group.summary_fields.user_capabilities?.edit}
-        >
-          <Button
-            ouiaId={`${group.id}-edit-button`}
-            aria-label={t`Edit Group`}
-            variant="plain"
-            component={Link}
-            to={`${editUrl}`}
+      {inventoryType !== 'constructed_inventory' && (
+        <ActionsTd dataLabel={t`Actions`}>
+          <ActionItem
+            tooltip={t`Edit Group`}
+            visible={group.summary_fields.user_capabilities?.edit}
           >
-            <PencilAltIcon />
-          </Button>
-        </ActionItem>
-      </ActionsTd>
+            <Button
+              ouiaId={`${group.id}-edit-button`}
+              aria-label={t`Edit Group`}
+              variant="plain"
+              component={Link}
+              to={`${editUrl}`}
+            >
+              <PencilAltIcon />
+            </Button>
+          </ActionItem>
+        </ActionsTd>
+      )}
     </Tr>
   );
 }

@@ -28,7 +28,7 @@ from awx.main.utils.common import (
 from awx.main.constants import MAX_ISOLATED_PATH_COLON_DELIMITER
 from awx.main.tasks.signals import signal_state, signal_callback, SignalExit
 from awx.main.models import Instance, InstanceLink, UnifiedJob
-from awx.main.dispatch import get_local_queuename
+from awx.main.dispatch import get_task_queuename
 from awx.main.dispatch.publish import task
 
 # Receptorctl
@@ -668,6 +668,7 @@ RECEPTOR_CONFIG_STARTER = (
             'rootcas': '/etc/receptor/tls/ca/receptor-ca.crt',
             'cert': '/etc/receptor/tls/receptor.crt',
             'key': '/etc/receptor/tls/receptor.key',
+            'mintls13': False,
         }
     },
 )
@@ -712,7 +713,7 @@ def write_receptor_config():
     links.update(link_state=InstanceLink.States.ESTABLISHED)
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 def remove_deprovisioned_node(hostname):
     InstanceLink.objects.filter(source__hostname=hostname).update(link_state=InstanceLink.States.REMOVING)
     InstanceLink.objects.filter(target__hostname=hostname).update(link_state=InstanceLink.States.REMOVING)

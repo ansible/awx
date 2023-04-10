@@ -13,6 +13,9 @@ class Inventories extends InstanceGroupsMixin(Base) {
     this.readGroups = this.readGroups.bind(this);
     this.readGroupsOptions = this.readGroupsOptions.bind(this);
     this.promoteGroup = this.promoteGroup.bind(this);
+    this.readInputInventories = this.readInputInventories.bind(this);
+    this.associateInventory = this.associateInventory.bind(this);
+    this.disassociateInventory = this.disassociateInventory.bind(this);
   }
 
   readAccessList(id, params) {
@@ -72,6 +75,12 @@ class Inventories extends InstanceGroupsMixin(Base) {
     });
   }
 
+  readInputInventories(inventoryId, params) {
+    return this.http.get(`${this.baseUrl}${inventoryId}/input_inventories/`, {
+      params,
+    });
+  }
+
   readSources(inventoryId, params) {
     return this.http.get(`${this.baseUrl}${inventoryId}/inventory_sources/`, {
       params,
@@ -127,6 +136,19 @@ class Inventories extends InstanceGroupsMixin(Base) {
   disassociateLabel(id, label) {
     return this.http.post(`${this.baseUrl}${id}/labels/`, {
       id: label.id,
+      disassociate: true,
+    });
+  }
+
+  associateInventory(id, inputInventoryId) {
+    return this.http.post(`${this.baseUrl}${id}/input_inventories/`, {
+      id: inputInventoryId,
+    });
+  }
+
+  disassociateInventory(id, inputInventoryId) {
+    return this.http.post(`${this.baseUrl}${id}/input_inventories/`, {
+      id: inputInventoryId,
       disassociate: true,
     });
   }

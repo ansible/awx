@@ -47,10 +47,11 @@ from awx.main.models import (
     Inventory,
     SmartInventoryMembership,
     Job,
+    HostMetric,
 )
 from awx.main.constants import ACTIVE_STATES
 from awx.main.dispatch.publish import task
-from awx.main.dispatch import get_local_queuename, reaper
+from awx.main.dispatch import get_task_queuename, reaper
 from awx.main.utils.common import (
     get_type_for_model,
     ignore_inventory_computed_fields,
@@ -59,7 +60,6 @@ from awx.main.utils.common import (
     ScheduleTaskManager,
 )
 
-from awx.main.utils.external_logging import reconfigure_rsyslog
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
 from awx.main.tasks.receptor import get_receptor_ctl, worker_info, worker_cleanup, administrative_workunit_reaper, write_receptor_config
@@ -115,9 +115,6 @@ def dispatch_startup():
     m = Metrics()
     m.reset_values()
 
-    # Update Tower's rsyslog.conf file based on loggins settings in the db
-    reconfigure_rsyslog()
-
 
 def inform_cluster_of_shutdown():
     try:
@@ -132,7 +129,7 @@ def inform_cluster_of_shutdown():
         logger.exception('Encountered problem with normal shutdown signal.')
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 def apply_cluster_membership_policies():
     from awx.main.signals import disable_activity_stream
 
@@ -244,8 +241,10 @@ def apply_cluster_membership_policies():
         logger.debug('Cluster policy computation finished in {} seconds'.format(time.time() - started_compute))
 
 
-@task(queue='tower_broadcast_all')
-def handle_setting_changes(setting_keys):
+@task(queue='tower_settings_change')
+def clear_setting_cache(setting_keys):
+    # log that cache is being cleared
+    logger.info(f"clear_setting_cache of keys {setting_keys}")
     orig_len = len(setting_keys)
     for i in range(orig_len):
         for dependent_key in settings_registry.get_dependent_settings(setting_keys[i]):
@@ -253,9 +252,6 @@ def handle_setting_changes(setting_keys):
     cache_keys = set(setting_keys)
     logger.debug('cache delete_many(%r)', cache_keys)
     cache.delete_many(cache_keys)
-
-    if any([setting.startswith('LOG_AGGREGATOR') for setting in setting_keys]):
-        reconfigure_rsyslog()
 
 
 @task(queue='tower_broadcast_all')
@@ -286,7 +282,7 @@ def profile_sql(threshold=1, minutes=1):
         logger.error('SQL QUERIES >={}s ENABLED FOR {} MINUTE(S)'.format(threshold, minutes))
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 def send_notifications(notification_list, job_id=None):
     if not isinstance(notification_list, list):
         raise TypeError("notification_list should be of type list")
@@ -317,7 +313,7 @@ def send_notifications(notification_list, job_id=None):
                 logger.exception('Error saving notification {} result.'.format(notification.id))
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 def gather_analytics():
     from awx.conf.models import Setting
     from rest_framework.fields import DateTimeField
@@ -330,7 +326,7 @@ def gather_analytics():
         analytics.gather()
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 def purge_old_stdout_files():
     nowtime = time.time()
     for f in os.listdir(settings.JOBOUTPUT_ROOT):
@@ -378,12 +374,26 @@ def handle_removed_image(remove_images=None):
     _cleanup_images_and_files(remove_images=remove_images, file_pattern='')
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 def cleanup_images_and_files():
     _cleanup_images_and_files()
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
+def cleanup_host_metrics():
+    from awx.conf.models import Setting
+    from rest_framework.fields import DateTimeField
+
+    last_cleanup = Setting.objects.filter(key='CLEANUP_HOST_METRICS_LAST_TS').first()
+    last_time = DateTimeField().to_internal_value(last_cleanup.value) if last_cleanup and last_cleanup.value else None
+
+    cleanup_interval_secs = getattr(settings, 'CLEANUP_HOST_METRICS_INTERVAL', 30) * 86400
+    if not last_time or ((now() - last_time).total_seconds() > cleanup_interval_secs):
+        months_ago = getattr(settings, 'CLEANUP_HOST_METRICS_THRESHOLD', 12)
+        HostMetric.cleanup_task(months_ago)
+
+
+@task(queue=get_task_queuename)
 def cluster_node_health_check(node):
     """
     Used for the health check endpoint, refreshes the status of the instance, but must be ran on target node
@@ -402,7 +412,7 @@ def cluster_node_health_check(node):
     this_inst.local_health_check()
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 def execution_node_health_check(node):
     if node == '':
         logger.warning('Remote health check incorrectly called with blank string')
@@ -496,7 +506,7 @@ def inspect_execution_nodes(instance_list):
                     execution_node_health_check.apply_async([hostname])
 
 
-@task(queue=get_local_queuename, bind_kwargs=['dispatch_time', 'worker_tasks'])
+@task(queue=get_task_queuename, bind_kwargs=['dispatch_time', 'worker_tasks'])
 def cluster_node_heartbeat(dispatch_time=None, worker_tasks=None):
     logger.debug("Cluster node heartbeat task.")
     nowtime = now()
@@ -586,7 +596,7 @@ def cluster_node_heartbeat(dispatch_time=None, worker_tasks=None):
             reaper.reap_waiting(instance=this_inst, excluded_uuids=active_task_ids, ref_time=datetime.fromisoformat(dispatch_time))
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 def awx_receptor_workunit_reaper():
     """
     When an AWX job is launched via receptor, files such as status, stdin, and stdout are created
@@ -622,7 +632,7 @@ def awx_receptor_workunit_reaper():
     administrative_workunit_reaper(receptor_work_list)
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 def awx_k8s_reaper():
     if not settings.RECEPTOR_RELEASE_WORK:
         return
@@ -642,7 +652,7 @@ def awx_k8s_reaper():
                 logger.exception("Failed to delete orphaned pod {} from {}".format(job.log_format, group))
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 def awx_periodic_scheduler():
     with advisory_lock('awx_periodic_scheduler_lock', wait=False) as acquired:
         if acquired is False:
@@ -708,7 +718,7 @@ def schedule_manager_success_or_error(instance):
         ScheduleWorkflowManager().schedule()
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 def handle_work_success(task_actual):
     try:
         instance = UnifiedJob.get_instance_by_type(task_actual['type'], task_actual['id'])
@@ -720,7 +730,7 @@ def handle_work_success(task_actual):
     schedule_manager_success_or_error(instance)
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 def handle_work_error(task_actual):
     try:
         instance = UnifiedJob.get_instance_by_type(task_actual['type'], task_actual['id'])
@@ -760,7 +770,7 @@ def handle_work_error(task_actual):
     schedule_manager_success_or_error(instance)
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 def update_inventory_computed_fields(inventory_id):
     """
     Signal handler and wrapper around inventory.update_computed_fields to
@@ -801,7 +811,7 @@ def update_smart_memberships_for_inventory(smart_inventory):
     return False
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 def update_host_smart_inventory_memberships():
     smart_inventories = Inventory.objects.filter(kind='smart', host_filter__isnull=False, pending_deletion=False)
     changed_inventories = set([])
@@ -817,7 +827,7 @@ def update_host_smart_inventory_memberships():
         smart_inventory.update_computed_fields()
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 def delete_inventory(inventory_id, user_id, retries=5):
     # Delete inventory as user
     if user_id is None:
@@ -882,7 +892,7 @@ def _reconstruct_relationships(copy_mapping):
         new_obj.save()
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 def deep_copy_model_obj(model_module, model_name, obj_pk, new_obj_pk, user_pk, uuid, permission_check_func=None):
     sub_obj_list = cache.get(uuid)
     if sub_obj_list is None:

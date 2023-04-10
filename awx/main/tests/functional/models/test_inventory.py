@@ -169,7 +169,8 @@ class TestInventorySourceInjectors:
         CLOUD_PROVIDERS constant contains the same names as what are
         defined within the injectors
         """
-        assert set(CLOUD_PROVIDERS) == set(InventorySource.injectors.keys())
+        # slight exception case for constructed, because it has a FQCN but is not a cloud source
+        assert set(CLOUD_PROVIDERS) | set(['constructed']) == set(InventorySource.injectors.keys())
 
     @pytest.mark.parametrize('source,filename', [('ec2', 'aws_ec2.yml'), ('openstack', 'openstack.yml'), ('gce', 'gcp_compute.yml')])
     def test_plugin_filenames(self, source, filename):

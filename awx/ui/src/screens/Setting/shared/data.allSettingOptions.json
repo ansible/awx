@@ -639,6 +639,15 @@
         "unit": "seconds",
         "default": 14400
       },
+      "UI_NEXT": {
+        "type": "boolean",
+        "required": false,
+        "label": "Enable Preview of New User Interface",
+        "help_text": "'Enable preview of new user interface.",
+        "category": "System",
+        "category_slug": "system",
+        "default": true
+      },
       "SESSION_COOKIE_AGE": {
         "type": "integer",
         "required": true,
@@ -849,6 +858,15 @@
           "required": true,
           "read_only": false
         }
+      },
+      "SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL": {
+        "type": "boolean",
+        "required": false,
+        "label": "Use Email address for usernames",
+        "help_text": "Enabling this setting will tell social auth to use the full Email as username instead of the full name",
+        "category": "Authentication",
+        "category_slug": "authentication",
+        "default": false
       },
       "SOCIAL_AUTH_OIDC_KEY": {
         "type": "string",
@@ -4372,6 +4390,14 @@
         "defined_in_file": false,
         "unit": "seconds"
       },
+      "UI_NEXT": {
+        "type": "boolean",
+        "label": "Enable Preview of New User Interface",
+        "help_text": "Enable preview of new user interface.",
+        "category": "System",
+        "category_slug": "system",
+        "defined_in_file": false
+      },
       "SESSION_COOKIE_AGE": {
         "type": "integer",
         "label": "Idle Time Force Log Out",
@@ -4536,6 +4562,14 @@
         "child": {
           "type": "string"
         }
+      },
+      "SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL": {
+        "type": "boolean",
+        "label": "Use Email address for usernames",
+        "help_text": "Enabling this setting will tell social auth to use the full Email as username instead of the full name",
+        "category": "Authentication",
+        "category_slug": "authentication",
+        "default": false
       },
       "SOCIAL_AUTH_OIDC_KEY": {
         "type": "string",

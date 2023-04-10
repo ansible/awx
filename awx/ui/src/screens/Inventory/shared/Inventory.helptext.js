@@ -19,6 +19,8 @@ const ansibleDocUrls = {
   rhv: 'https://docs.ansible.com/ansible/latest/collections/ovirt/ovirt/ovirt_inventory.html',
   vmware:
     'https://docs.ansible.com/ansible/latest/collections/community/vmware/vmware_vm_inventory_inventory.html',
+  constructed:
+    'https://docs.ansible.com/ansible/latest/collections/ansible/builtin/constructed_inventory.html',
 };
 
 const getInventoryHelpTextStrings = () => ({
@@ -186,6 +188,42 @@ const getInventoryHelpTextStrings = () => ({
         </Trans>
         <br />
         <br />
+      </>
+    );
+  },
+  constructedInventorySourceVars: () => {
+    const yamlExample = `
+      ---
+      plugin: constructed
+      strict: true
+      use_vars_plugins: true
+    `;
+    return (
+      <>
+        <Trans>
+          Variables used to configure the constructed inventory plugin. For a
+          detailed description of how to configure this plugin, see{' '}
+          <a
+            href={ansibleDocUrls.constructed}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            constructed inventory
+          </a>{' '}
+          plugin configuration guide.
+        </Trans>
+        <br />
+        <br />
+        <hr />
+        <br />
+        <Trans>
+          Variables must be in JSON or YAML syntax. Use the radio button to
+          toggle between the two.
+        </Trans>
+        <br />
+        <br />
+        <Trans>YAML:</Trans>
+        <pre>{yamlExample}</pre>
       </>
     );
   },

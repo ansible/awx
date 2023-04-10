@@ -56,6 +56,8 @@ from awx.main.models import (
     ExecutionEnvironment,
     Group,
     Host,
+    HostMetric,
+    HostMetricSummaryMonthly,
     Instance,
     InstanceGroup,
     InstanceLink,
@@ -156,6 +158,7 @@ SUMMARIZABLE_FK_FIELDS = {
         'kind',
     ),
     'host': DEFAULT_SUMMARY_FIELDS,
+    'constructed_host': DEFAULT_SUMMARY_FIELDS,
     'group': DEFAULT_SUMMARY_FIELDS,
     'default_environment': DEFAULT_SUMMARY_FIELDS + ('image',),
     'execution_environment': DEFAULT_SUMMARY_FIELDS + ('image',),
@@ -187,6 +190,11 @@ SUMMARIZABLE_FK_FIELDS = {
     'approved_or_denied_by': ('id', 'username', 'first_name', 'last_name'),
     'credential_type': DEFAULT_SUMMARY_FIELDS,
 }
+
+
+# These fields can be edited on a constructed inventory's generated source (possibly by using the constructed
+# inventory's special API endpoint, but also by using the inventory sources endpoint).
+CONSTRUCTED_INVENTORY_SOURCE_EDITABLE_FIELDS = ('source_vars', 'update_cache_timeout', 'limit', 'verbosity')
 
 
 def reverse_gfk(content_object, request):
@@ -1670,13 +1678,8 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
         res.update(
             dict(
                 hosts=self.reverse('api:inventory_hosts_list', kwargs={'pk': obj.pk}),
-                groups=self.reverse('api:inventory_groups_list', kwargs={'pk': obj.pk}),
-                root_groups=self.reverse('api:inventory_root_groups_list', kwargs={'pk': obj.pk}),
                 variable_data=self.reverse('api:inventory_variable_data', kwargs={'pk': obj.pk}),
                 script=self.reverse('api:inventory_script_view', kwargs={'pk': obj.pk}),
-                tree=self.reverse('api:inventory_tree_view', kwargs={'pk': obj.pk}),
-                inventory_sources=self.reverse('api:inventory_inventory_sources_list', kwargs={'pk': obj.pk}),
-                update_inventory_sources=self.reverse('api:inventory_inventory_sources_update', kwargs={'pk': obj.pk}),
                 activity_stream=self.reverse('api:inventory_activity_stream_list', kwargs={'pk': obj.pk}),
                 job_templates=self.reverse('api:inventory_job_template_list', kwargs={'pk': obj.pk}),
                 ad_hoc_commands=self.reverse('api:inventory_ad_hoc_commands_list', kwargs={'pk': obj.pk}),
@@ -1687,8 +1690,18 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
                 labels=self.reverse('api:inventory_label_list', kwargs={'pk': obj.pk}),
             )
         )
+        if obj.kind in ('', 'constructed'):
+            # links not relevant for the "old" smart inventory
+            res['groups'] = self.reverse('api:inventory_groups_list', kwargs={'pk': obj.pk})
+            res['root_groups'] = self.reverse('api:inventory_root_groups_list', kwargs={'pk': obj.pk})
+            res['update_inventory_sources'] = self.reverse('api:inventory_inventory_sources_update', kwargs={'pk': obj.pk})
+            res['inventory_sources'] = self.reverse('api:inventory_inventory_sources_list', kwargs={'pk': obj.pk})
+            res['tree'] = self.reverse('api:inventory_tree_view', kwargs={'pk': obj.pk})
         if obj.organization:
             res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk})
+        if obj.kind == 'constructed':
+            res['input_inventories'] = self.reverse('api:inventory_input_inventories', kwargs={'pk': obj.pk})
+            res['constructed_url'] = self.reverse('api:constructed_inventory_detail', kwargs={'pk': obj.pk})
         return res
 
     def to_representation(self, obj):
@@ -1728,6 +1741,91 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
         if kind == 'smart' and not host_filter:
             raise serializers.ValidationError({'host_filter': _('Smart inventories must specify host_filter')})
         return super(InventorySerializer, self).validate(attrs)
+
+
+class ConstructedFieldMixin(serializers.Field):
+    def get_attribute(self, instance):
+        if not hasattr(instance, '_constructed_inv_src'):
+            instance._constructed_inv_src = instance.inventory_sources.first()
+        inv_src = instance._constructed_inv_src
+        return super().get_attribute(inv_src)  # yoink
+
+
+class ConstructedCharField(ConstructedFieldMixin, serializers.CharField):
+    pass
+
+
+class ConstructedIntegerField(ConstructedFieldMixin, serializers.IntegerField):
+    pass
+
+
+class ConstructedInventorySerializer(InventorySerializer):
+    source_vars = ConstructedCharField(
+        required=False,
+        default=None,
+        allow_blank=True,
+        help_text=_('The source_vars for the related auto-created inventory source, special to constructed inventory.'),
+    )
+    update_cache_timeout = ConstructedIntegerField(
+        required=False,
+        allow_null=True,
+        min_value=0,
+        default=None,
+        help_text=_('The cache timeout for the related auto-created inventory source, special to constructed inventory'),
+    )
+    limit = ConstructedCharField(
+        required=False,
+        default=None,
+        allow_blank=True,
+        help_text=_('The limit to restrict the returned hosts for the related auto-created inventory source, special to constructed inventory.'),
+    )
+    verbosity = ConstructedIntegerField(
+        required=False,
+        allow_null=True,
+        min_value=0,
+        max_value=2,
+        default=None,
+        help_text=_('The verbosity level for the related auto-created inventory source, special to constructed inventory'),
+    )
+
+    class Meta:
+        model = Inventory
+        fields = ('*', '-host_filter') + CONSTRUCTED_INVENTORY_SOURCE_EDITABLE_FIELDS
+        read_only_fields = ('*', 'kind')
+
+    def pop_inv_src_data(self, data):
+        inv_src_data = {}
+        for field in CONSTRUCTED_INVENTORY_SOURCE_EDITABLE_FIELDS:
+            if field in data:
+                # values always need to be removed, as they are not valid for Inventory model
+                value = data.pop(field)
+                # null is not valid for any of those fields, taken as not-provided
+                if value is not None:
+                    inv_src_data[field] = value
+        return inv_src_data
+
+    def apply_inv_src_data(self, inventory, inv_src_data):
+        if inv_src_data:
+            update_fields = []
+            inv_src = inventory.inventory_sources.first()
+            for field, value in inv_src_data.items():
+                setattr(inv_src, field, value)
+                update_fields.append(field)
+            if update_fields:
+                inv_src.save(update_fields=update_fields)
+
+    def create(self, validated_data):
+        validated_data['kind'] = 'constructed'
+        inv_src_data = self.pop_inv_src_data(validated_data)
+        inventory = super().create(validated_data)
+        self.apply_inv_src_data(inventory, inv_src_data)
+        return inventory
+
+    def update(self, obj, validated_data):
+        inv_src_data = self.pop_inv_src_data(validated_data)
+        obj = super().update(obj, validated_data)
+        self.apply_inv_src_data(obj, inv_src_data)
+        return obj
 
 
 class InventoryScriptSerializer(InventorySerializer):
@@ -1783,6 +1881,9 @@ class HostSerializer(BaseSerializerWithVariables):
                 ansible_facts=self.reverse('api:host_ansible_facts_detail', kwargs={'pk': obj.pk}),
             )
         )
+        if obj.inventory.kind == 'constructed':
+            res['original_host'] = self.reverse('api:host_detail', kwargs={'pk': obj.instance_id})
+            res['ansible_facts'] = self.reverse('api:host_ansible_facts_detail', kwargs={'pk': obj.instance_id})
         if obj.inventory:
             res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
         if obj.last_job:
@@ -1804,6 +1905,10 @@ class HostSerializer(BaseSerializerWithVariables):
             group_list = [{'id': g.id, 'name': g.name} for g in obj.groups.all().order_by('id')[:5]]
         group_cnt = obj.groups.count()
         d.setdefault('groups', {'count': group_cnt, 'results': group_list})
+        if obj.inventory.kind == 'constructed':
+            summaries_qs = obj.constructed_host_summaries
+        else:
+            summaries_qs = obj.job_host_summaries
         d.setdefault(
             'recent_jobs',
             [
@@ -1814,7 +1919,7 @@ class HostSerializer(BaseSerializerWithVariables):
                     'status': j.job.status,
                     'finished': j.job.finished,
                 }
-                for j in obj.job_host_summaries.select_related('job__job_template').order_by('-created').defer('job__extra_vars', 'job__artifacts')[:5]
+                for j in summaries_qs.select_related('job__job_template').order_by('-created').defer('job__extra_vars', 'job__artifacts')[:5]
             ],
         )
         return d
@@ -1839,8 +1944,8 @@ class HostSerializer(BaseSerializerWithVariables):
         return value
 
     def validate_inventory(self, value):
-        if value.kind == 'smart':
-            raise serializers.ValidationError({"detail": _("Cannot create Host for Smart Inventory")})
+        if value.kind in ('constructed', 'smart'):
+            raise serializers.ValidationError({"detail": _("Cannot create Host for Smart or Constructed Inventories")})
         return value
 
     def validate_variables(self, value):
@@ -1938,8 +2043,8 @@ class GroupSerializer(BaseSerializerWithVariables):
         return value
 
     def validate_inventory(self, value):
-        if value.kind == 'smart':
-            raise serializers.ValidationError({"detail": _("Cannot create Group for Smart Inventory")})
+        if value.kind in ('constructed', 'smart'):
+            raise serializers.ValidationError({"detail": _("Cannot create Group for Smart or Constructed Inventories")})
         return value
 
     def to_representation(self, obj):
@@ -2138,6 +2243,7 @@ class InventorySourceOptionsSerializer(BaseSerializer):
             'custom_virtualenv',
             'timeout',
             'verbosity',
+            'limit',
         )
         read_only_fields = ('*', 'custom_virtualenv')
 
@@ -2244,8 +2350,8 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         return value
 
     def validate_inventory(self, value):
-        if value and value.kind == 'smart':
-            raise serializers.ValidationError({"detail": _("Cannot create Inventory Source for Smart Inventory")})
+        if value and value.kind in ('constructed', 'smart'):
+            raise serializers.ValidationError({"detail": _("Cannot create Inventory Source for Smart or Constructed Inventories")})
         return value
 
     # TODO: remove when old 'credential' fields are removed
@@ -2289,9 +2395,16 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         def get_field_from_model_or_attrs(fd):
             return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)
 
-        if get_field_from_model_or_attrs('source') == 'scm':
+        if self.instance and self.instance.source == 'constructed':
+            allowed_fields = CONSTRUCTED_INVENTORY_SOURCE_EDITABLE_FIELDS
+            for field in attrs:
+                if attrs[field] != getattr(self.instance, field) and field not in allowed_fields:
+                    raise serializers.ValidationError({"error": _("Cannot change field '{}' on a constructed inventory source.").format(field)})
+        elif get_field_from_model_or_attrs('source') == 'scm':
             if ('source' in attrs or 'source_project' in attrs) and get_field_from_model_or_attrs('source_project') is None:
                 raise serializers.ValidationError({"source_project": _("Project required for scm type sources.")})
+        elif get_field_from_model_or_attrs('source') == 'constructed':
+            raise serializers.ValidationError({"error": _('constructed not a valid source for inventory')})
         else:
             redundant_scm_fields = list(filter(lambda x: attrs.get(x, None), ['source_project', 'source_path', 'scm_branch']))
             if redundant_scm_fields:
@@ -4033,6 +4146,7 @@ class JobHostSummarySerializer(BaseSerializer):
             '-description',
             'job',
             'host',
+            'constructed_host',
             'host_name',
             'changed',
             'dark',
@@ -5383,6 +5497,32 @@ class InstanceHealthCheckSerializer(BaseSerializer):
     class Meta:
         model = Instance
         read_only_fields = ('uuid', 'hostname', 'version', 'last_health_check', 'errors', 'cpu', 'memory', 'cpu_capacity', 'mem_capacity', 'capacity')
+        fields = read_only_fields
+
+
+class HostMetricSerializer(BaseSerializer):
+    show_capabilities = ['delete']
+
+    class Meta:
+        model = HostMetric
+        fields = (
+            "id",
+            "hostname",
+            "url",
+            "first_automation",
+            "last_automation",
+            "last_deleted",
+            "automated_counter",
+            "deleted_counter",
+            "deleted",
+            "used_in_inventories",
+        )
+
+
+class HostMetricSummaryMonthlySerializer(BaseSerializer):
+    class Meta:
+        model = HostMetricSummaryMonthly
+        read_only_fields = ("id", "date", "license_consumed", "license_capacity", "hosts_added", "hosts_deleted", "indirectly_managed_hosts")
         fields = read_only_fields
 
 

@@ -284,13 +284,15 @@ def main():
         argument_spec=argument_spec,
     )
 
+    # Alias for manual projects
+    if module.params.get('scm_type') == "manual":
+        module.params['scm_type'] = ''
+
     # Extract our parameters
     name = module.params.get('name')
     new_name = module.params.get("new_name")
     copy_from = module.params.get('copy_from')
     scm_type = module.params.get('scm_type')
-    if scm_type == "manual":
-        scm_type = ""
     local_path = module.params.get('local_path')
     credential = module.params.get('credential')
     scm_update_on_launch = module.params.get('scm_update_on_launch')
@@ -387,7 +389,8 @@ def main():
         # this is resolved earlier, so save an API call and don't do it again in the loop above
         project_fields['organization'] = org_id
 
-    if scm_type == '' and local_path is not None:
+    # Respect local_path if scm_type is manual type or not specified
+    if scm_type in ('', None) and local_path is not None:
         project_fields['local_path'] = local_path
 
     if scm_update_cache_timeout not in (0, None) and scm_update_on_launch is not True:

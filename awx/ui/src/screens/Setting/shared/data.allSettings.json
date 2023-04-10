@@ -103,6 +103,7 @@
   "SOCIAL_AUTH_ORGANIZATION_MAP":null,
   "SOCIAL_AUTH_TEAM_MAP":null,
   "SOCIAL_AUTH_USER_FIELDS":null,
+  "SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL":false,
   "AUTH_LDAP_SERVER_URI":"ldap://ldap.example.com",
   "AUTH_LDAP_BIND_DN":"cn=eng_user1",
   "AUTH_LDAP_BIND_PASSWORD":"$encrypted$",
@@ -307,5 +308,6 @@
     "instances":{"fields":["hostname"],"adj_list":[]}
   },
   "DEFAULT_EXECUTION_ENVIRONMENT": 1,
-  "AWX_MOUNT_ISOLATED_PATHS_ON_K8S": false
+  "AWX_MOUNT_ISOLATED_PATHS_ON_K8S": false,
+  "UI_NEXT": false
 }

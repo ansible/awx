@@ -85,7 +85,11 @@ USE_L10N = True
 
 USE_TZ = True
 
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'ui', 'build', 'static'), os.path.join(BASE_DIR, 'static')]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'ui', 'build', 'static'),
+    os.path.join(BASE_DIR, 'ui_next', 'build'),
+    os.path.join(BASE_DIR, 'static'),
+]
 
 # Absolute filesystem path to the directory where static file are collected via
 # the collectstatic command.
@@ -224,6 +228,9 @@ JOB_EVENT_MAX_QUEUE_SIZE = 10000
 # The number of job events to migrate per-transaction when moving from int -> bigint
 JOB_EVENT_MIGRATION_CHUNK_SIZE = 1000000
 
+# The prefix of the redis key that stores metrics
+SUBSYSTEM_METRICS_REDIS_KEY_PREFIX = "awx_metrics"
+
 # Histogram buckets for the callback_receiver_batch_events_insert_db metric
 SUBSYSTEM_METRICS_BATCH_INSERT_BUCKETS = [10, 50, 150, 350, 650, 2000]
 
@@ -299,7 +306,12 @@ TEMPLATES = [
             ],
             'builtins': ['awx.main.templatetags.swagger'],
         },
-        'DIRS': [os.path.join(BASE_DIR, 'templates'), os.path.join(BASE_DIR, 'ui', 'build'), os.path.join(BASE_DIR, 'ui', 'public')],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
+            os.path.join(BASE_DIR, 'ui', 'build'),
+            os.path.join(BASE_DIR, 'ui', 'public'),
+            os.path.join(BASE_DIR, 'ui_next', 'build', 'awx'),
+        ],
     },
 ]
 
@@ -463,6 +475,7 @@ CELERYBEAT_SCHEDULE = {
     'receptor_reaper': {'task': 'awx.main.tasks.system.awx_receptor_workunit_reaper', 'schedule': timedelta(seconds=60)},
     'send_subsystem_metrics': {'task': 'awx.main.analytics.analytics_tasks.send_subsystem_metrics', 'schedule': timedelta(seconds=20)},
     'cleanup_images': {'task': 'awx.main.tasks.system.cleanup_images_and_files', 'schedule': timedelta(hours=3)},
+    'cleanup_host_metrics': {'task': 'awx.main.tasks.system.cleanup_host_metrics', 'schedule': timedelta(days=1)},
 }
 
 # Django Caching Configuration
@@ -751,6 +764,13 @@ CUSTOM_EXCLUDE_EMPTY_GROUPS = False
 SCM_EXCLUDE_EMPTY_GROUPS = False
 # SCM_INSTANCE_ID_VAR =
 
+# ----------------
+# -- Constructed --
+# ----------------
+CONSTRUCTED_INSTANCE_ID_VAR = 'remote_tower_id'
+
+CONSTRUCTED_EXCLUDE_EMPTY_GROUPS = False
+
 # ---------------------
 # -- Activity Stream --
 # ---------------------
@@ -773,6 +793,7 @@ INSIGHTS_URL_BASE = "https://example.org"
 INSIGHTS_AGENT_MIME = 'application/example'
 # See https://github.com/ansible/awx-facts-playbooks
 INSIGHTS_SYSTEM_ID_FILE = '/etc/redhat-access-insights/machine-id'
+INSIGHTS_CERT_PATH = "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
 
 TOWER_SETTINGS_MANIFEST = {}
 
@@ -850,7 +871,10 @@ LOGGING = {
         'awx.main.commands.run_callback_receiver': {'handlers': ['callback_receiver']},  # level handled by dynamic_level_filter
         'awx.main.dispatch': {'handlers': ['dispatcher']},
         'awx.main.consumers': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'INFO'},
-        'awx.main.wsbroadcast': {'handlers': ['wsbroadcast']},
+        'awx.main.rsyslog_configurer': {'handlers': ['rsyslog_configurer']},
+        'awx.main.cache_clear': {'handlers': ['cache_clear']},
+        'awx.main.heartbeet': {'handlers': ['heartbeet']},
+        'awx.main.wsrelay': {'handlers': ['wsrelay']},
         'awx.main.commands.inventory_import': {'handlers': ['inventory_import'], 'propagate': False},
         'awx.main.tasks': {'handlers': ['task_system', 'external_logger'], 'propagate': False},
         'awx.main.analytics': {'handlers': ['task_system', 'external_logger'], 'level': 'INFO', 'propagate': False},
@@ -859,7 +883,7 @@ LOGGING = {
         'awx.main.signals': {'level': 'INFO'},  # very verbose debug-level logs
         'awx.api.permissions': {'level': 'INFO'},  # very verbose debug-level logs
         'awx.analytics': {'handlers': ['external_logger'], 'level': 'INFO', 'propagate': False},
-        'awx.analytics.broadcast_websocket': {'handlers': ['console', 'file', 'wsbroadcast', 'external_logger'], 'level': 'INFO', 'propagate': False},
+        'awx.analytics.broadcast_websocket': {'handlers': ['console', 'file', 'wsrelay', 'external_logger'], 'level': 'INFO', 'propagate': False},
         'awx.analytics.performance': {'handlers': ['console', 'file', 'tower_warnings', 'external_logger'], 'level': 'DEBUG', 'propagate': False},
         'awx.analytics.job_lifecycle': {'handlers': ['console', 'job_lifecycle'], 'level': 'DEBUG', 'propagate': False},
         'django_auth_ldap': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
@@ -877,10 +901,13 @@ handler_config = {
     'tower_warnings': {'filename': 'tower.log'},
     'callback_receiver': {'filename': 'callback_receiver.log'},
     'dispatcher': {'filename': 'dispatcher.log', 'formatter': 'dispatcher'},
-    'wsbroadcast': {'filename': 'wsbroadcast.log'},
+    'wsrelay': {'filename': 'wsrelay.log'},
     'task_system': {'filename': 'task_system.log'},
     'rbac_migrations': {'filename': 'tower_rbac_migrations.log'},
     'job_lifecycle': {'filename': 'job_lifecycle.log', 'formatter': 'job_lifecycle'},
+    'rsyslog_configurer': {'filename': 'rsyslog_configurer.log'},
+    'cache_clear': {'filename': 'cache_clear.log'},
+    'heartbeet': {'filename': 'heartbeet.log'},
 }
 
 # If running on a VM, we log to files. When running in a container, we log to stdout.
@@ -991,6 +1018,9 @@ BROADCAST_WEBSOCKET_NEW_INSTANCE_POLL_RATE_SECONDS = 10
 # How often websocket process will generate stats
 BROADCAST_WEBSOCKET_STATS_POLL_RATE_SECONDS = 5
 
+# How often should web instances advertise themselves?
+BROADCAST_WEBSOCKET_BEACON_FROM_WEB_RATE_SECONDS = 15
+
 DJANGO_GUID = {'GUID_HEADER_NAME': 'X-API-Request-Id'}
 
 # Name of the default task queue
@@ -1017,3 +1047,17 @@ AWX_MOUNT_ISOLATED_PATHS_ON_K8S = False
 
 # This is overridden downstream via /etc/tower/conf.d/cluster_host_id.py
 CLUSTER_HOST_ID = socket.gethostname()
+
+UI_NEXT = True
+
+# License compliance for total host count. Possible values:
+# - '': No model - Subscription not counted from Host Metrics
+# - 'unique_managed_hosts': Compliant = automated - deleted hosts (using /api/v2/host_metrics/)
+SUBSCRIPTION_USAGE_MODEL = ''
+
+# Host metrics cleanup - last time of the cleanup run (soft-deleting records)
+CLEANUP_HOST_METRICS_LAST_TS = None
+# Host metrics cleanup - minimal interval between two cleanups in days
+CLEANUP_HOST_METRICS_INTERVAL = 30  # days
+# Host metrics cleanup - soft-delete HostMetric records with last_automation < [threshold] (in months)
+CLEANUP_HOST_METRICS_THRESHOLD = 12  # months
