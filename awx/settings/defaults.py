@@ -475,6 +475,7 @@ CELERYBEAT_SCHEDULE = {
     'receptor_reaper': {'task': 'awx.main.tasks.system.awx_receptor_workunit_reaper', 'schedule': timedelta(seconds=60)},
     'send_subsystem_metrics': {'task': 'awx.main.analytics.analytics_tasks.send_subsystem_metrics', 'schedule': timedelta(seconds=20)},
     'cleanup_images': {'task': 'awx.main.tasks.system.cleanup_images_and_files', 'schedule': timedelta(hours=3)},
+    'cleanup_host_metrics': {'task': 'awx.main.tasks.system.cleanup_host_metrics', 'schedule': timedelta(days=1)},
 }
 
 # Django Caching Configuration
@@ -792,6 +793,7 @@ INSIGHTS_URL_BASE = "https://example.org"
 INSIGHTS_AGENT_MIME = 'application/example'
 # See https://github.com/ansible/awx-facts-playbooks
 INSIGHTS_SYSTEM_ID_FILE = '/etc/redhat-access-insights/machine-id'
+INSIGHTS_CERT_PATH = "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
 
 TOWER_SETTINGS_MANIFEST = {}
 
@@ -1052,3 +1054,10 @@ UI_NEXT = False
 # - '': No model - Subscription not counted from Host Metrics
 # - 'unique_managed_hosts': Compliant = automated - deleted hosts (using /api/v2/host_metrics/)
 SUBSCRIPTION_USAGE_MODEL = ''
+
+# Host metrics cleanup - last time of the cleanup run (soft-deleting records)
+CLEANUP_HOST_METRICS_LAST_TS = None
+# Host metrics cleanup - minimal interval between two cleanups in days
+CLEANUP_HOST_METRICS_INTERVAL = 30  # days
+# Host metrics cleanup - soft-delete HostMetric records with last_automation < [threshold] (in months)
+CLEANUP_HOST_METRICS_THRESHOLD = 12  # months

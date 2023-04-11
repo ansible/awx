@@ -47,6 +47,7 @@ from awx.main.models import (
     Inventory,
     SmartInventoryMembership,
     Job,
+    HostMetric,
 )
 from awx.main.constants import ACTIVE_STATES
 from awx.main.dispatch.publish import task
@@ -376,6 +377,20 @@ def handle_removed_image(remove_images=None):
 @task(queue=get_task_queuename)
 def cleanup_images_and_files():
     _cleanup_images_and_files()
+
+
+@task(queue=get_task_queuename)
+def cleanup_host_metrics():
+    from awx.conf.models import Setting
+    from rest_framework.fields import DateTimeField
+
+    last_cleanup = Setting.objects.filter(key='CLEANUP_HOST_METRICS_LAST_TS').first()
+    last_time = DateTimeField().to_internal_value(last_cleanup.value) if last_cleanup and last_cleanup.value else None
+
+    cleanup_interval_secs = getattr(settings, 'CLEANUP_HOST_METRICS_INTERVAL', 30) * 86400
+    if not last_time or ((now() - last_time).total_seconds() > cleanup_interval_secs):
+        months_ago = getattr(settings, 'CLEANUP_HOST_METRICS_THRESHOLD', 12)
+        HostMetric.cleanup_task(months_ago)
 
 
 @task(queue=get_task_queuename)

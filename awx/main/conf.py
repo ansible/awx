@@ -822,6 +822,15 @@ register(
     category_slug='system',
 )
 
+register(
+    'CLEANUP_HOST_METRICS_LAST_TS',
+    field_class=fields.DateTimeField,
+    label=_('Last cleanup date for HostMetrics'),
+    allow_null=True,
+    category=_('System'),
+    category_slug='system',
+)
+
 
 def logging_validate(serializer, attrs):
     if not serializer.instance or not hasattr(serializer.instance, 'LOG_AGGREGATOR_HOST') or not hasattr(serializer.instance, 'LOG_AGGREGATOR_TYPE'):
