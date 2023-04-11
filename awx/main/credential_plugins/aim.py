@@ -111,6 +111,8 @@ def aim_backend(**kwargs):
         object_property = 'Content'
     elif object_property.lower() == 'username':
         object_property = 'UserName'
+    elif object_property not in res:
+        raise ValueError('Property {} not found in object'.format(object_property))
     else:
         object_property = object_property.capitalize()
 
