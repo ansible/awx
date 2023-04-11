@@ -298,11 +298,13 @@ class Metrics:
         try:
             current_time = time.time()
             if current_time - self.previous_send_metrics.decode(self.conn) > self.send_metrics_interval:
+                serialized_metrics = self.serialize_local_metrics()
                 payload = {
                     'instance': self.instance_name,
-                    'metrics': self.serialize_local_metrics(),
+                    'metrics': serialized_metrics,
                 }
-
+                # store the serialized data locally as well, so that load_other_metrics will read it
+                self.conn.set(root_key + '_instance_' + self.instance_name, serialized_metrics)
                 emit_channel_notification("metrics", payload)
 
                 self.previous_send_metrics.set(current_time)
