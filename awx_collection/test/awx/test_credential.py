@@ -133,6 +133,7 @@ def test_secret_field_write_twice(run_module, organization, admin_user, cred_typ
         assert result.get('changed') is False, result
         assert Credential.objects.get(id=result['id']).get_input('token') == val1
 
+
 @pytest.mark.django_db
 @pytest.mark.parametrize('state', ('present', 'absent', 'exists'))
 def test_credential_state(run_module, organization, admin_user, cred_type, state):
