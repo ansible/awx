@@ -68,9 +68,11 @@ def construct_rsyslog_conf_template(settings=settings):
         if (not original_parsed.scheme and not host.startswith('//')) or original_parsed.hostname is None:
             host = 'https://%s' % (host)
         parsed = urlparse.urlsplit(host)
-
-        if 's' in str(parsed.port):  # Check if the port contains an 's'
+        if not parsed.scheme or not parsed.hostname:
             raise ValueError(f"Invalid URL for logging: {host}. Please check the LOG_AGGREGATOR_HOST setting.")
+        if parsed.port and not str(parsed.port).isdigit():
+            raise ValueError(f"Invalid port in URL for logging: {host}. Please check the LOG_AGGREGATOR_HOST setting.")
+
 
         host = escape_quotes(parsed.hostname)
         try:
