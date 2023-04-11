@@ -388,9 +388,13 @@ class Licenser(object):
         if subscription_model == SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS:
             automated_instances = HostMetric.active_objects.count()
             first_host = HostMetric.active_objects.only('first_automation').order_by('first_automation').first()
+            attrs['deleted_instances'] = HostMetric.objects.filter(deleted=True).count()
+            attrs['reactivated_instances'] = HostMetric.active_objects.filter(deleted_counter__gte=1).count()
         else:
-            automated_instances = HostMetric.objects.count()
+            automated_instances = 0
             first_host = HostMetric.objects.only('first_automation').order_by('first_automation').first()
+            attrs['deleted_instances'] = 0
+            attrs['reactivated_instances'] = 0
 
         if first_host:
             automated_since = int(first_host.first_automation.timestamp())

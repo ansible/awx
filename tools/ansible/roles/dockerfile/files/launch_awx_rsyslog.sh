@@ -24,4 +24,5 @@ cat << EOF > /var/lib/awx/rsyslog/rsyslog.conf
 action(type="omfile" file="/dev/null")
 EOF
 
-exec supervisord -c /etc/supervisord.conf
+exec supervisord -c /etc/supervisord_rsyslog.conf
+

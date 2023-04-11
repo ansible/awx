@@ -9,6 +9,8 @@ import re
 import copy
 import os.path
 from urllib.parse import urljoin
+
+import dateutil.relativedelta
 import yaml
 
 # Django
@@ -17,6 +19,7 @@ from django.db import models, connection
 from django.utils.translation import gettext_lazy as _
 from django.db import transaction
 from django.core.exceptions import ValidationError
+from django.urls import resolve
 from django.utils.timezone import now
 from django.db.models import Q
 
@@ -206,8 +209,14 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
     )
 
     def get_absolute_url(self, request=None):
-        if self.kind == 'constructed':
-            return reverse('api:constructed_inventory_detail', kwargs={'pk': self.pk}, request=request)
+        if request is not None:
+            # circular import
+            from awx.api.urls.inventory import constructed_inventory_urls
+
+            route = resolve(request.path_info)
+            if any(route.url_name == url.name for url in constructed_inventory_urls):
+                return reverse('api:constructed_inventory_detail', kwargs={'pk': self.pk}, request=request)
+
         return reverse('api:inventory_detail', kwargs={'pk': self.pk}, request=request)
 
     variables_dict = VarsDictProperty('variables')
@@ -880,6 +889,23 @@ class HostMetric(models.Model):
         if self.deleted:
             self.deleted = False
             self.save(update_fields=['deleted'])
+
+    @classmethod
+    def cleanup_task(cls, months_ago):
+        try:
+            months_ago = int(months_ago)
+            if months_ago <= 0:
+                raise ValueError()
+
+            last_automation_before = now() - dateutil.relativedelta.relativedelta(months=months_ago)
+
+            logger.info(f'Cleanup [HostMetric]: soft-deleting records last automated before {last_automation_before}')
+            HostMetric.active_objects.filter(last_automation__lt=last_automation_before).update(
+                deleted=True, deleted_counter=models.F('deleted_counter') + 1, last_deleted=now()
+            )
+            settings.CLEANUP_HOST_METRICS_LAST_TS = now()
+        except (TypeError, ValueError):
+            logger.error(f"Cleanup [HostMetric]: months_ago({months_ago}) has to be a positive integer value")
 
 
 class HostMetricSummaryMonthly(models.Model):

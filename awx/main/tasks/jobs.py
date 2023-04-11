@@ -29,7 +29,7 @@ from gitdb.exc import BadName as BadGitName
 
 # AWX
 from awx.main.dispatch.publish import task
-from awx.main.dispatch import get_local_queuename
+from awx.main.dispatch import get_task_queuename
 from awx.main.constants import (
     PRIVILEGE_ESCALATION_METHODS,
     STANDARD_INVENTORY_UPDATE_ENV,
@@ -806,7 +806,7 @@ class SourceControlMixin(BaseTask):
             self.release_lock(project)
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 class RunJob(SourceControlMixin, BaseTask):
     """
     Run a job using ansible-playbook.
@@ -1121,7 +1121,7 @@ class RunJob(SourceControlMixin, BaseTask):
                 update_inventory_computed_fields.delay(inventory.id)
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 class RunProjectUpdate(BaseTask):
     model = ProjectUpdate
     event_model = ProjectUpdateEvent
@@ -1443,7 +1443,7 @@ class RunProjectUpdate(BaseTask):
         return params
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 class RunInventoryUpdate(SourceControlMixin, BaseTask):
     model = InventoryUpdate
     event_model = InventoryUpdateEvent
@@ -1706,7 +1706,7 @@ class RunInventoryUpdate(SourceControlMixin, BaseTask):
             raise PostRunError('Error occured while saving inventory data, see traceback or server logs', status='error', tb=traceback.format_exc())
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 class RunAdHocCommand(BaseTask):
     """
     Run an ad hoc command using ansible.
@@ -1859,7 +1859,7 @@ class RunAdHocCommand(BaseTask):
         return d
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 class RunSystemJob(BaseTask):
     model = SystemJob
     event_model = SystemJobEvent

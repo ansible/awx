@@ -42,3 +42,4 @@ from .credential_input_sources import *  # NOQA
 from .metrics import *  # NOQA
 from .subscriptions import *  # NOQA
 from .workflow_approval_templates import *  # NOQA
+from .host_metrics import *  # NOQA
