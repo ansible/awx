@@ -102,6 +102,6 @@ except IOError:
 
 from .application_name import set_application_name
 
-set_application_name(DATABASES, CLUSTER_HOST_ID)
+set_application_name(DATABASES, CLUSTER_HOST_ID)  # NOQA
 
 del set_application_name
