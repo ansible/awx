@@ -85,7 +85,7 @@ def pg_bus_conn(new_connection=False):
     '''
 
     if new_connection:
-        conf = settings.DATABASES['default']
+        conf = settings.DATABASES['default'].copy()
         conf['OPTIONS'] = conf.get('OPTIONS', {}).copy()
         # Modify the application name to distinguish from other connections the process might use
         conf['OPTIONS']['application_name'] = get_application_name(settings.CLUSTER_HOST_ID, function='listener')
