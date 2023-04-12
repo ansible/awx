@@ -1,7 +1,7 @@
 from .plugin import CredentialPlugin
 from django.utils.translation import gettext_lazy as _
 
-from thycotic.secrets.server import PasswordGrantAuthorizer, SecretServer, ServerSecret
+from thycotic.secrets.server import DomainPasswordGrantAuthorizer, PasswordGrantAuthorizer, SecretServer, ServerSecret
 
 tss_inputs = {
     'fields': [
@@ -15,6 +15,12 @@ tss_inputs = {
             'id': 'username',
             'label': _('Username'),
             'help_text': _('The (Application) user username'),
+            'type': 'string',
+        },
+        {
+            'id': 'domain',
+            'label': _('Domain'),
+            'help_text': _('The (Application) user domain'),
             'type': 'string',
         },
         {
@@ -44,7 +50,10 @@ tss_inputs = {
 
 
 def tss_backend(**kwargs):
-    authorizer = PasswordGrantAuthorizer(kwargs['server_url'], kwargs['username'], kwargs['password'])
+    if 'domain' in kwargs:
+        authorizer = DomainPasswordGrantAuthorizer(kwargs['server_url'], kwargs['username'], kwargs['password'], kwargs['domain'])
+    else:
+        authorizer = PasswordGrantAuthorizer(kwargs['server_url'], kwargs['username'], kwargs['password'])
     secret_server = SecretServer(kwargs['server_url'], authorizer)
     secret_dict = secret_server.get_secret(kwargs['secret_id'])
     secret = ServerSecret(**secret_dict)
