@@ -24,6 +24,7 @@ services:
       EXECUTION_NODE_COUNT: {{ execution_node_count|int }}
       AWX_LOGGING_MODE: stdout
       DJANGO_SUPERUSER_PASSWORD: {{ admin_password }}
+      UWSGI_MOUNT_PATH: {{ ingress_path }}
 {% if loop.index == 1 %}
       RUN_MIGRATIONS: 1
 {% endif %}
@@ -40,6 +41,8 @@ services:
       - "../../docker-compose/_sources/database.py:/etc/tower/conf.d/database.py"
       - "../../docker-compose/_sources/websocket_secret.py:/etc/tower/conf.d/websocket_secret.py"
       - "../../docker-compose/_sources/local_settings.py:/etc/tower/conf.d/local_settings.py"
+      - "../../docker-compose/_sources/nginx.conf:/etc/nginx/nginx.conf"
+      - "../../docker-compose/_sources/nginx.locations.conf:/etc/nginx/conf.d/nginx.locations.conf"
       - "../../docker-compose/_sources/SECRET_KEY:/etc/tower/SECRET_KEY"
       - "../../docker-compose/_sources/receptor/receptor-awx-{{ loop.index }}.conf:/etc/receptor/receptor.conf"
       - "../../docker-compose/_sources/receptor/receptor-awx-{{ loop.index }}.conf.lock:/etc/receptor/receptor.conf.lock"

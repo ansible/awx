@@ -6,6 +6,8 @@ action_groups:
     - ad_hoc_command_cancel
     - ad_hoc_command_wait
     - application
+    - bulk_job_launch
+    - bulk_host_create
     - controller_meta
     - credential_input_source
     - credential

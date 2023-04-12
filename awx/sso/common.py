@@ -169,3 +169,45 @@ def get_or_create_org_with_default_galaxy_cred(**kwargs):
         else:
             logger.debug("Could not find default Ansible Galaxy credential to add to org")
     return org
+
+
+def get_external_account(user):
+    account_type = None
+
+    # Previously this method also checked for active configuration which meant that if a user logged in from LDAP
+    #    and then LDAP was no longer configured it would "convert" the user from an LDAP account_type to none.
+    #    This did have one benefit that if a login type was removed intentionally the user could be given a username password.
+    #    But it had a limitation that the user would have to have an active session (or an admin would have to go set a temp password).
+    #    It also lead to the side affect that if LDAP was ever reconfigured the user would convert back to LDAP but still have a local password.
+    #    That local password could then be used to bypass LDAP authentication.
+    try:
+        if user.pk and user.profile.ldap_dn and not user.has_usable_password():
+            account_type = "ldap"
+    except AttributeError:
+        pass
+
+    if user.social_auth.all():
+        account_type = "social"
+
+    if user.enterprise_auth.all():
+        account_type = "enterprise"
+
+    return account_type
+
+
+def is_remote_auth_enabled():
+    from django.conf import settings
+
+    # Append LDAP, Radius, TACACS+ and SAML options
+    settings_that_turn_on_remote_auth = [
+        'AUTH_LDAP_SERVER_URI',
+        'SOCIAL_AUTH_SAML_ENABLED_IDPS',
+        'RADIUS_SERVER',
+        'TACACSPLUS_HOST',
+    ]
+    # Also include any SOCAIL_AUTH_*KEY (except SAML)
+    for social_auth_key in dir(settings):
+        if social_auth_key.startswith('SOCIAL_AUTH_') and social_auth_key.endswith('_KEY') and 'SAML' not in social_auth_key:
+            settings_that_turn_on_remote_auth.append(social_auth_key)
+
+    return any(getattr(settings, s, None) for s in settings_that_turn_on_remote_auth)

@@ -18,7 +18,7 @@ class DistinctParametrize(object):
 
 
 @pytest.mark.survey
-class SurveyVariableValidation:
+class TestSurveyVariableValidation:
     def test_survey_answers_as_string(self, job_template_factory):
         objects = job_template_factory('job-template-with-survey', survey=[{'variable': 'var1', 'type': 'text'}], persisted=False)
         jt = objects.job_template
@@ -57,7 +57,7 @@ class SurveyVariableValidation:
         accepted, rejected, errors = obj.accept_or_ignore_variables({"a": 5})
         assert rejected == {"a": 5}
         assert accepted == {}
-        assert str(errors[0]) == "Value 5 for 'a' expected to be a string."
+        assert str(errors['variables_needed_to_start'][0]) == "Value 5 for 'a' expected to be a string."
 
     def test_job_template_survey_default_variable_validation(self, job_template_factory):
         objects = job_template_factory(
@@ -88,7 +88,7 @@ class SurveyVariableValidation:
 
         obj.survey_enabled = True
         accepted, _, errors = obj.accept_or_ignore_variables({"a": 2})
-        assert accepted == {{"a": 2.0}}
+        assert accepted == {"a": 2.0}
         assert not errors
 
 

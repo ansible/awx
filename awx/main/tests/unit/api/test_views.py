@@ -50,6 +50,7 @@ class TestApiRootView:
             'activity_stream',
             'workflow_job_templates',
             'workflow_jobs',
+            'analytics',
         ]
         view = ApiVersionRootView()
         ret = view.get(mocker.MagicMock())

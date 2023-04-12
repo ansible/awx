@@ -146,7 +146,7 @@ There is an important side effect to this. Because the manager `schedule()` runs
 
 ### Node Affinity Decider
 
-The Task Manager decides which exact node a job will run on. It does so by considering user-configured group execution policy and user-configured capacity. First, the set of groups on which a job _can_ run on is constructed (see the AWX document on [Clustering](https://github.com/ansible/awx/blob/devel/docs/clustering.md)). The groups are traversed until a node within that group is found. The node with the largest remaining capacity that is idle is chosen first. If there are no idle nodes, then the node with the largest remaining capacity greater than or equal to the job capacity requirements is chosen.
+The Task Manager decides which exact node a job will run on. It does so by considering user-configured group execution policy and user-configured capacity. First, the set of groups on which a job _can_ run on is constructed (see the AWX document on [Clustering](https://github.com/ansible/awx/blob/devel/docs/clustering.md)). The groups are traversed until a node within that group is found. The node with the largest remaining capacity (after accounting for the job's task impact) is chosen first. If there are no instances that can fit the job, then the largest *idle* node is chosen, regardless whether the job fits within its capacity limits. In this second case, it is possible for the instance to exceed its capacity in order to run the job.
 
 
 ## Managers are short-lived

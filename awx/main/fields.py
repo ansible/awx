@@ -954,6 +954,16 @@ class OrderedManyToManyDescriptor(ManyToManyDescriptor):
                 def get_queryset(self):
                     return super(OrderedManyRelatedManager, self).get_queryset().order_by('%s__position' % self.through._meta.model_name)
 
+                def add(self, *objects):
+                    if len(objects) > 1:
+                        raise RuntimeError('Ordered many-to-many fields do not support multiple objects')
+                    return super().add(*objects)
+
+                def remove(self, *objects):
+                    if len(objects) > 1:
+                        raise RuntimeError('Ordered many-to-many fields do not support multiple objects')
+                    return super().remove(*objects)
+
             return OrderedManyRelatedManager
 
         return add_custom_queryset_to_many_related_manager(
@@ -971,13 +981,12 @@ class OrderedManyToManyField(models.ManyToManyField):
     by a special `position` column on the M2M table
     """
 
-    def _update_m2m_position(self, sender, **kwargs):
-        if kwargs.get('action') in ('post_add', 'post_remove'):
-            order_with_respect_to = None
-            for field in sender._meta.local_fields:
-                if isinstance(field, models.ForeignKey) and isinstance(kwargs['instance'], field.related_model):
-                    order_with_respect_to = field.name
-            for i, ig in enumerate(sender.objects.filter(**{order_with_respect_to: kwargs['instance'].pk})):
+    def _update_m2m_position(self, sender, instance, action, **kwargs):
+        if action in ('post_add', 'post_remove'):
+            descriptor = getattr(instance, self.name)
+            order_with_respect_to = descriptor.source_field_name
+
+            for i, ig in enumerate(sender.objects.filter(**{order_with_respect_to: instance.pk})):
                 if ig.position != i:
                     ig.position = i
                     ig.save()

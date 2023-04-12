@@ -14,7 +14,7 @@ from awx.main.constants import JOB_VARIABLE_PREFIXES
 
 
 @pytest.mark.django_db
-def test_subclass_types(rando):
+def test_subclass_types():
     assert set(UnifiedJobTemplate._submodels_with_roles()) == set(
         [
             ContentType.objects.get_for_model(JobTemplate).id,

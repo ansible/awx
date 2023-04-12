@@ -1,9 +1,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-
-import { DashboardAPI } from 'api';
+import { DashboardAPI, RootAPI } from 'api';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
-
 import Dashboard from './Dashboard';
 
 jest.mock('../../api');
@@ -15,6 +13,11 @@ describe('<Dashboard />', () => {
   beforeEach(async () => {
     await act(async () => {
       DashboardAPI.read.mockResolvedValue({});
+      RootAPI.readAssetVariables.mockResolvedValue({
+        data: {
+          BRAND_NAME: 'AWX',
+        },
+      });
       graphRequest = DashboardAPI.readJobGraph;
       graphRequest.mockResolvedValue({});
       pageWrapper = mountWithContexts(<Dashboard />);
