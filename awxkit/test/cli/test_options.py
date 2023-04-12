@@ -177,7 +177,10 @@ class TestOptions(unittest.TestCase):
     def test_actions_with_primary_key(self):
         for method in ('get', 'modify', 'delete'):
             page = OptionsPage.from_json({'actions': {'GET': {}, 'POST': {}}})
-            ResourceOptionsParser(None, page, 'jobs', self.parser)
+        _parser = argparse.ArgumentParser()
+self.parser = _parser.add_subparsers(help='action')
+   
+        ResourceOptionsParser(None, page, 'jobs', self.parser)
             assert method in self.parser.choices
 
             out = StringIO()
