@@ -7,10 +7,9 @@ from django.utils.translation import gettext_lazy as _
 from django.utils import translation
 
 from awx.api.generics import APIView, Response
-from awx.api.permissions import IsSystemAdminOrAuditor
+from awx.api.permissions import AnalyticsPermission
 from awx.api.versioning import reverse
 from awx.main.utils import get_awx_version
-from rest_framework.permissions import AllowAny
 from rest_framework import status
 
 from collections import OrderedDict
@@ -43,7 +42,7 @@ class GetNotAllowedMixin(object):
 
 
 class AnalyticsRootView(APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (AnalyticsPermission,)
     name = _('Automation Analytics')
     swagger_topic = 'Automation Analytics'
 
@@ -99,7 +98,7 @@ class AnalyticsGenericView(APIView):
         return Response(response.json(), status=response.status_code)
     """
 
-    permission_classes = (IsSystemAdminOrAuditor,)
+    permission_classes = (AnalyticsPermission,)
 
     @staticmethod
     def _request_headers(request):
