@@ -4,6 +4,7 @@ import { t } from '@lingui/macro';
 import { Switch, Route, Redirect, Link, useRouteMatch } from 'react-router-dom';
 import { CaretLeftIcon } from '@patternfly/react-icons';
 import { Card, PageSection } from '@patternfly/react-core';
+import { useConfig } from 'contexts/Config';
 import ContentError from 'components/ContentError';
 import RoutedTabs from 'components/RoutedTabs';
 import useRequest from 'hooks/useRequest';
@@ -13,6 +14,9 @@ import InstanceDetail from './InstanceDetail';
 import InstancePeerList from './InstancePeers';
 
 function Instance({ setBreadcrumb }) {
+  const { me } = useConfig();
+  const canReadSettings = me.is_superuser || me.is_system_auditor;
+
   const match = useRouteMatch();
   const tabsArray = [
     {
@@ -30,19 +34,21 @@ function Instance({ setBreadcrumb }) {
   ];
 
   const {
-    result: { isK8s },
+    result: isK8s,
     error,
     isLoading,
     request,
   } = useRequest(
     useCallback(async () => {
+      if (!canReadSettings) {
+        return false;
+      }
       const { data } = await SettingsAPI.readCategory('system');
-      return {
-        isK8s: data.IS_K8S,
-      };
-    }, []),
+      return data?.IS_K8S ?? false;
+    }, [canReadSettings]),
     { isK8s: false, isLoading: true }
   );
+
   useEffect(() => {
     request();
   }, [request]);
