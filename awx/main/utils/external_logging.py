@@ -73,7 +73,6 @@ def construct_rsyslog_conf_template(settings=settings):
         if parsed.port and not str(parsed.port).isdigit():
             raise ValueError(f"Invalid port in URL for logging: {host}. Please check the LOG_AGGREGATOR_HOST setting.")
 
-
         host = escape_quotes(parsed.hostname)
         try:
             if parsed.port:
