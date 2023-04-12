@@ -7,6 +7,7 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 
 from awx.main.dispatch import pg_bus_conn
+from django.db import connection
 
 logger = logging.getLogger('awx.main.commands.run_heartbeet')
 
@@ -51,6 +52,7 @@ class Command(BaseCommand):
         return json.dumps(payload)
 
     def do_hearbeat_loop(self):
+        connection.close()
         with pg_bus_conn(new_connection=True) as conn:
             while True:
                 logger.debug('Sending heartbeat')

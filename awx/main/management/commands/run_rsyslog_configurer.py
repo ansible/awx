@@ -7,6 +7,7 @@ from django.core.cache import cache
 from awx.main.dispatch import pg_bus_conn
 from awx.main.dispatch.worker.task import TaskWorker
 from awx.main.utils.external_logging import reconfigure_rsyslog
+from django.db import connection
 
 logger = logging.getLogger('awx.main.rsyslog_configurer')
 
@@ -26,6 +27,7 @@ class Command(BaseCommand):
                 conn.listen("rsyslog_configurer")
                 # reconfigure rsyslog on start up
                 reconfigure_rsyslog()
+                connection.close()
                 for e in conn.events(yield_timeouts=True):
                     if e is not None:
                         logger.info("Change in logging settings found. Restarting rsyslogd")
