@@ -23,5 +23,5 @@ def get_all_field_names(model):
     )
 
 
-def set_connection_name(proc_function=None):
-    set_application_name(settings.DATABASES, settings.CLUSTER_HOST_ID, proc_function=proc_function)
+def set_connection_name(function):
+    set_application_name(settings.DATABASES, settings.CLUSTER_HOST_ID, function=function)

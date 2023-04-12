@@ -23,7 +23,7 @@ class Scheduler(Scheduler):
             ppid = os.getppid()
             logger.warning('periodic beat started')
 
-            set_connection_name(proc_function='periodic')  # set application_name to distinguish from other dispatcher processes
+            set_connection_name('periodic')  # set application_name to distinguish from other dispatcher processes
 
             while True:
                 if os.getppid() != ppid:

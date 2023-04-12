@@ -18,11 +18,14 @@ def get_service_name(argv):
         return arg
 
 
-def set_application_name(DATABASES, CLUSTER_HOST_ID, proc_function=''):
+def get_application_name(CLUSTER_HOST_ID, function=''):
+    if function:
+        function = f'_{function}'
+    return f'awx-{os.getpid()}-{get_service_name(sys.argv)}{function}-{CLUSTER_HOST_ID}'[:63]
+
+
+def set_application_name(DATABASES, CLUSTER_HOST_ID, function=''):
     if 'sqlite3' in DATABASES['default']['ENGINE']:
         return
     options_dict = DATABASES['default'].setdefault('OPTIONS', dict())
-    if proc_function:
-        proc_function = f'_{proc_function}'
-    connection_name = f'awx-{os.getpid()}-{get_service_name(sys.argv)}{proc_function}-{CLUSTER_HOST_ID}'[:63]
-    options_dict['application_name'] = connection_name
+    options_dict['application_name'] = get_application_name(CLUSTER_HOST_ID, function)
