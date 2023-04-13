@@ -461,7 +461,9 @@ EXAMPLES = '''
           failure_nodes:
             - identifier: node201
           always_nodes: []
-          credentials: []
+          credentials:
+            - local_cred
+            - suplementary cred
       - identifier: node201
         unified_job_template:
           organization:

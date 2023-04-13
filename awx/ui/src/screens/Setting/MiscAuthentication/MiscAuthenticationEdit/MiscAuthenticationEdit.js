@@ -54,7 +54,11 @@ function MiscAuthenticationEdit() {
         'SOCIAL_AUTH_ORGANIZATION_MAP',
         'SOCIAL_AUTH_TEAM_MAP',
         'SOCIAL_AUTH_USER_FIELDS',
-        'SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL'
+        'SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL',
+        'LOCAL_PASSWORD_MIN_LENGTH',
+        'LOCAL_PASSWORD_MIN_DIGITS',
+        'LOCAL_PASSWORD_MIN_UPPER',
+        'LOCAL_PASSWORD_MIN_SPECIAL'
       );
 
       const authenticationData = {
@@ -246,6 +250,30 @@ function MiscAuthenticationEdit() {
                 <BooleanField
                   name="SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL"
                   config={authentication.SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL}
+                />
+                <InputField
+                  name="LOCAL_PASSWORD_MIN_LENGTH"
+                  config={authentication.LOCAL_PASSWORD_MIN_LENGTH}
+                  type="number"
+                  isRequired
+                />
+                <InputField
+                  name="LOCAL_PASSWORD_MIN_DIGITS"
+                  config={authentication.LOCAL_PASSWORD_MIN_DIGITS}
+                  type="number"
+                  isRequired
+                />
+                <InputField
+                  name="LOCAL_PASSWORD_MIN_UPPER"
+                  config={authentication.LOCAL_PASSWORD_MIN_UPPER}
+                  type="number"
+                  isRequired
+                />
+                <InputField
+                  name="LOCAL_PASSWORD_MIN_SPECIAL"
+                  config={authentication.LOCAL_PASSWORD_MIN_SPECIAL}
+                  type="number"
+                  isRequired
                 />
                 {submitError && <FormSubmitError error={submitError} />}
                 {revertError && <FormSubmitError error={revertError} />}
