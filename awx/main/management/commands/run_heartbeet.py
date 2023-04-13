@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import time
+import signal
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
@@ -56,6 +57,8 @@ class Command(BaseCommand):
                 logger.debug('Sending heartbeat')
                 conn.notify('web_heartbeet', self.construct_payload())
                 time.sleep(settings.BROADCAST_WEBSOCKET_BEACON_FROM_WEB_RATE_SECONDS)
+                signal.signal(signal.SIGTERM, conn.notify('web_heartbeet', self.construct_payload(action='offline')))
+                signal.signal(signal.SIGINT, conn.notify('web_heartbeet', self.construct_payload(action='offline')))
 
     # TODO: Send a message with action=offline if we notice a SIGTERM or SIGINT
     # (wsrelay can use this to remove the node quicker)
