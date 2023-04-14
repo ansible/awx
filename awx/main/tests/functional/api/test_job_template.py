@@ -368,4 +368,4 @@ def test_job_template_missing_inventory(project, inventory, admin_user, post):
         expect=400,
     )
     assert r.status_code == 400
-    assert "Cannot start automatically, user input required!" in str(r.data)
+    assert "Cannot start automatically, an inventory is required." in str(r.data)
