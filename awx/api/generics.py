@@ -88,15 +88,30 @@ class LoggedLoginView(auth_views.LoginView):
 
     def post(self, request, *args, **kwargs):
         ret = super(LoggedLoginView, self).post(request, *args, **kwargs)
+
+        client_addr = request.META.get('REMOTE_ADDR', None)
+
+        # If an authorized header contains an IP, override the client_addr
+        for custom_header in settings.REMOTE_HOST_HEADERS:
+            for value in request.META.get(custom_header, '').split(','):
+                value = value.strip()
+                if value:
+                    client_addr = value
+                    break
+
+            else:
+                continue
+            break
+
         if request.user.is_authenticated:
-            logger.info(smart_str(u"User {} logged in from {}".format(self.request.user.username, request.META.get('REMOTE_ADDR', None))))
+            logger.info(smart_str(u"User {} logged in from {}".format(self.request.user.username, client_addr)))
             ret.set_cookie('userLoggedIn', 'true')
             ret.setdefault('X-API-Session-Cookie-Name', getattr(settings, 'SESSION_COOKIE_NAME', 'awx_sessionid'))
 
             return ret
         else:
             if 'username' in self.request.POST:
-                logger.warning(smart_str(u"Login failed for user {} from {}".format(self.request.POST.get('username'), request.META.get('REMOTE_ADDR', None))))
+                logger.warning(smart_str(u"Login failed for user {} from {}".format(self.request.POST.get('username'), client_addr)))
             ret.status_code = 401
             return ret
 

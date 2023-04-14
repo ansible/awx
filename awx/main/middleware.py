@@ -207,8 +207,9 @@ class MigrationRanCheckMiddleware(MiddlewareMixin):
 
 
 class SetRemoteAddrFromRemoteHostHeader(MiddlewareMixin):
-    def process_request(self, request):
+    environ = {}
 
+    def process_request(self, request):
         # If there are any custom headers in REMOTE_HOST_HEADERS, make sure
         # they respect the allowed proxy list
         if all(
@@ -222,13 +223,6 @@ class SetRemoteAddrFromRemoteHostHeader(MiddlewareMixin):
                 if custom_header.startswith('HTTP_'):
                     request.environ.pop(custom_header, None)
 
-        for custom_header in settings.REMOTE_HOST_HEADERS:
-            for value in request.META.get(custom_header, '').split(','):
-                value = value.strip()
-                if value:
-                    request.META['REMOTE_ADDR'] = value
-                    break
-
-            else:
-                continue
-            break
+    def process_response(self, request, response):
+        self.environ = request.environ
+        return response
