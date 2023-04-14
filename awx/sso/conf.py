@@ -148,6 +148,16 @@ register(
     placeholder=['username', 'email'],
 )
 
+register(
+    'SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL',
+    field_class=fields.BooleanField,
+    default=False,
+    label=_('Use Email address for usernames'),
+    help_text=_('Enabling this setting will tell social auth to use the full Email as username instead of the full name'),
+    category=_('Authentication'),
+    category_slug='authentication',
+)
+
 ###############################################################################
 # LDAP AUTHENTICATION SETTINGS
 ###############################################################################
@@ -1591,6 +1601,50 @@ register(
         ('is_system_auditor_role', ['saml_role']),
         ('remove_system_auditors', True),
     ],
+)
+
+register(
+    'LOCAL_PASSWORD_MIN_LENGTH',
+    field_class=fields.IntegerField,
+    min_value=0,
+    default=0,
+    label=_('Minimum number of characters in local password'),
+    help_text=_('Minimum number of characters required in a local password. 0 means no minimum'),
+    category=_('Authentication'),
+    category_slug='authentication',
+)
+
+register(
+    'LOCAL_PASSWORD_MIN_DIGITS',
+    field_class=fields.IntegerField,
+    min_value=0,
+    default=0,
+    label=_('Minimum number of digit characters in local password'),
+    help_text=_('Minimum number of digit characters required in a local password. 0 means no minimum'),
+    category=_('Authentication'),
+    category_slug='authentication',
+)
+
+register(
+    'LOCAL_PASSWORD_MIN_UPPER',
+    field_class=fields.IntegerField,
+    min_value=0,
+    default=0,
+    label=_('Minimum number of uppercase characters in local password'),
+    help_text=_('Minimum number of uppercase characters required in a local password. 0 means no minimum'),
+    category=_('Authentication'),
+    category_slug='authentication',
+)
+
+register(
+    'LOCAL_PASSWORD_MIN_SPECIAL',
+    field_class=fields.IntegerField,
+    min_value=0,
+    default=0,
+    label=_('Minimum number of special characters in local password'),
+    help_text=_('Minimum number of special characters required in a local password. 0 means no minimum'),
+    category=_('Authentication'),
+    category_slug='authentication',
 )
 
 

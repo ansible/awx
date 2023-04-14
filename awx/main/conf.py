@@ -10,7 +10,7 @@ from rest_framework import serializers
 # AWX
 from awx.conf import fields, register, register_validate
 from awx.main.models import ExecutionEnvironment
-
+from awx.main.constants import SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS
 
 logger = logging.getLogger('awx.main.conf')
 
@@ -793,6 +793,42 @@ register(
     help_text=_('Max number of hosts to allow to be created in a single bulk action'),
     category=_('Bulk Actions'),
     category_slug='bulk',
+)
+
+register(
+    'UI_NEXT',
+    field_class=fields.BooleanField,
+    default=False,
+    label=_('Enable Preview of New User Interface'),
+    help_text=_('Enable preview of new user interface.'),
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
+    'SUBSCRIPTION_USAGE_MODEL',
+    field_class=fields.ChoiceField,
+    choices=[
+        ('', _('Default model for AWX - no subscription. Deletion of host_metrics will not be considered for purposes of managed host counting')),
+        (
+            SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS,
+            _('Usage based on unique managed nodes in a large historical time frame and delete functionality for no longer used managed nodes'),
+        ),
+    ],
+    default='',
+    allow_blank=True,
+    label=_('Defines subscription usage model and shows Host Metrics'),
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
+    'CLEANUP_HOST_METRICS_LAST_TS',
+    field_class=fields.DateTimeField,
+    label=_('Last cleanup date for HostMetrics'),
+    allow_null=True,
+    category=_('System'),
+    category_slug='system',
 )
 
 

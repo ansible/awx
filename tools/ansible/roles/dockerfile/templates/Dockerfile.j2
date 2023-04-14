@@ -15,6 +15,9 @@ ENV AWX_LOGGING_MODE stdout
 
 USER root
 
+# Import the gpg key for DNF to work
+RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+
 # Install build dependencies
 RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     dnf config-manager --set-enabled crb && \
@@ -98,6 +101,9 @@ ENV LC_ALL en_US.UTF-8
 ENV AWX_LOGGING_MODE stdout
 
 USER root
+
+# Import the gpg key for DNF to work
+RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
 
 # Install runtime requirements
 RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
@@ -194,7 +200,6 @@ ENV _CONTAINERS_USERNS_CONFIGURED=""
 RUN mkdir -p /etc/containers/registries.conf.d/ && echo "unqualified-search-registries = []" >> /etc/containers/registries.conf.d/force-fully-qualified-images.conf && chmod 644 /etc/containers/registries.conf.d/force-fully-qualified-images.conf
 {% endif %}
 
-# Create default awx rsyslog config
 ADD tools/ansible/roles/dockerfile/files/rsyslog.conf /var/lib/awx/rsyslog/rsyslog.conf
 ADD tools/ansible/roles/dockerfile/files/wait-for-migrations /usr/local/bin/wait-for-migrations
 ADD tools/ansible/roles/dockerfile/files/stop-supervisor /usr/local/bin/stop-supervisor
@@ -208,13 +213,15 @@ ADD tools/docker-compose/start_tests.sh /start_tests.sh
 ADD tools/docker-compose/bootstrap_development.sh /usr/bin/bootstrap_development.sh
 ADD tools/docker-compose/entrypoint.sh /entrypoint.sh
 ADD tools/scripts/config-watcher /usr/bin/config-watcher
-ADD https://raw.githubusercontent.com/containers/libpod/master/contrib/podmanimage/stable/containers.conf /etc/containers/containers.conf
-ADD https://raw.githubusercontent.com/containers/libpod/master/contrib/podmanimage/stable/podman-containers.conf /var/lib/awx/.config/containers/containers.conf
+ADD tools/docker-compose/containers.conf /etc/containers/containers.conf
+ADD tools/docker-compose/podman-containers.conf /var/lib/awx/.config/containers/containers.conf
 {% else %}
-ADD tools/ansible/roles/dockerfile/files/launch_awx.sh /usr/bin/launch_awx.sh
+ADD tools/ansible/roles/dockerfile/files/launch_awx_web.sh /usr/bin/launch_awx_web.sh
 ADD tools/ansible/roles/dockerfile/files/launch_awx_task.sh /usr/bin/launch_awx_task.sh
-ADD {{ template_dest }}/supervisor.conf /etc/supervisord.conf
+ADD tools/ansible/roles/dockerfile/files/launch_awx_rsyslog.sh /usr/bin/launch_awx_rsyslog.sh
+ADD {{ template_dest }}/supervisor_web.conf /etc/supervisord_web.conf
 ADD {{ template_dest }}/supervisor_task.conf /etc/supervisord_task.conf
+ADD {{ template_dest }}/supervisor_rsyslog.conf /etc/supervisord_rsyslog.conf
 {% endif %}
 {% if (build_dev|bool) or (kube_dev|bool) %}
 ADD tools/docker-compose/awx.egg-link /tmp/awx.egg-link
@@ -296,7 +303,6 @@ USER 1000
 EXPOSE 8052
 
 ENTRYPOINT ["dumb-init", "--"]
-CMD /usr/bin/launch_awx.sh
 VOLUME /var/lib/nginx
 VOLUME /var/lib/awx/.local/share/containers
 {% endif %}

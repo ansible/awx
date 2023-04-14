@@ -244,6 +244,7 @@ $ make docker-compose
 - [SAML and OIDC Integration](#saml-and-oidc-integration)
 - [OpenLDAP Integration](#openldap-integration)
 - [Splunk Integration](#splunk-integration)
+- [tacacs+ Integration](#tacacs+-integration)
 
 ### Start a Shell
 
@@ -293,7 +294,7 @@ Certain features or bugs are only applicable when running a cluster of AWX nodes
 
 `CONTROL_PLANE_NODE_COUNT` is configurable and defaults to 1, effectively a non-clustered AWX.
 
-Note that you may see multiple messages of the form `2021-03-04 20:11:47,666 WARNING [-] awx.main.wsbroadcast Connection from awx_2 to awx_5 failed: 'Cannot connect to host awx_5:8013 ssl:False [Name or service not known]'.`. This can happen when you bring up a cluster of many nodes, say 10, then you bring up a cluster of less nodes, say 3. In this example, there will be 7 `Instance` records in the database that represent AWX instances. The AWX development environment mimics the VM deployment (vs. kubernetes) and expects the missing nodes to be brought back to healthy by the admin. The warning message you are seeing is all of the AWX nodes trying to connect the websocket backplane. You can manually delete the `Instance` records from the database i.e. `Instance.objects.get(hostname='awx_9').delete()` to stop the warnings.
+Note that you may see multiple messages of the form `2021-03-04 20:11:47,666 WARNING [-] awx.main.wsrelay Connection from awx_2 to awx_5 failed: 'Cannot connect to host awx_5:8013 ssl:False [Name or service not known]'.`. This can happen when you bring up a cluster of many nodes, say 10, then you bring up a cluster of less nodes, say 3. In this example, there will be 7 `Instance` records in the database that represent AWX instances. The AWX development environment mimics the VM deployment (vs. kubernetes) and expects the missing nodes to be brought back to healthy by the admin. The warning message you are seeing is all of the AWX nodes trying to connect the websocket backplane. You can manually delete the `Instance` records from the database i.e. `Instance.objects.get(hostname='awx_9').delete()` to stop the warnings.
 
 ### Start with Minikube
 
@@ -472,6 +473,29 @@ ansible-playbook tools/docker-compose/ansible/plumb_splunk.yml
 
 Once the playbook is done running Splunk should now be setup in your development environment. You can log into the admin console (see above for username/password) and click on "Searching and Reporting" in the left hand navigation. In the search box enter `source="http:tower_logging_collections"` and click search.
 
+### - tacacs+ Integration
+
+tacacs+ is an networking protocol that provides external authentication which can be used with AWX. This section describes how to build a reference tacacs+ instance and plumb it with your AWX for testing purposes.
+
+First, be sure that you have the awx.awx collection installed by running `make install_collection`.
+
+Anytime you want to run a tacacs+ instance alongside AWX we can start docker-compose with the TACACS option to get a containerized instance with the command:
+```bash
+TACACS=true make docker-compose
+```
+
+Once the containers come up a new port (49) should be exposed and the tacacs+ server should be running on those ports.
+
+Now we are ready to configure and plumb tacacs+ with AWX. To do this we have provided a playbook which will:
+* Backup and configure the tacacsplus adapter in AWX. NOTE: this will back up your existing settings but the password fields can not be backed up through the API, you need a DB backup to recover this.
+
+```bash
+export CONTROLLER_USERNAME=<your username>
+export CONTROLLER_PASSWORD=<your password>
+ansible-playbook tools/docker-compose/ansible/plumb_tacacs.yml
+```
+
+Once the playbook is done running tacacs+ should now be setup in your development environment. This server has the accounts listed on https://hub.docker.com/r/dchidell/docker-tacacs
 
 ### Prometheus and Grafana integration
 

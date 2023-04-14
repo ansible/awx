@@ -64,6 +64,10 @@ options:
       description:
         - If specified, AWX will only import hosts that match this regular expression.
       type: str
+    limit:
+      description:
+        - Enter host, group or pattern match
+      type: str
     credential:
       description:
         - Credential to use for the source.
@@ -104,6 +108,11 @@ options:
     source_project:
       description:
         - Project to use as source with scm option
+      type: str
+    scm_branch:
+      description:
+        - Inventory source SCM branch.
+        - Project must have branch override enabled.
       type: str
     state:
       description:
@@ -167,6 +176,7 @@ def main():
         enabled_var=dict(),
         enabled_value=dict(),
         host_filter=dict(),
+        limit=dict(),
         credential=dict(),
         execution_environment=dict(),
         custom_virtualenv=dict(),
@@ -178,6 +188,7 @@ def main():
         update_on_launch=dict(type='bool'),
         update_cache_timeout=dict(type='int'),
         source_project=dict(),
+        scm_branch=dict(type='str'),
         notification_templates_started=dict(type="list", elements='str'),
         notification_templates_success=dict(type="list", elements='str'),
         notification_templates_error=dict(type="list", elements='str'),
@@ -272,6 +283,8 @@ def main():
         'enabled_var',
         'enabled_value',
         'host_filter',
+        'scm_branch',
+        'limit',
     )
 
     # Layer in all remaining optional information

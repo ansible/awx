@@ -6,7 +6,7 @@ from django.conf import settings
 from django.db import connection
 import redis
 
-from awx.main.dispatch import get_local_queuename
+from awx.main.dispatch import get_task_queuename
 
 from . import pg_bus_conn
 
@@ -21,7 +21,7 @@ class Control(object):
         if service not in self.services:
             raise RuntimeError('{} must be in {}'.format(service, self.services))
         self.service = service
-        self.queuename = host or get_local_queuename()
+        self.queuename = host or get_task_queuename()
 
     def status(self, *args, **kwargs):
         r = redis.Redis.from_url(settings.BROKER_URL)

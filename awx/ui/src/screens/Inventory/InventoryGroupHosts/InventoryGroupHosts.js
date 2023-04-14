@@ -9,7 +9,7 @@ function InventoryGroupHosts({ inventoryGroup }) {
       <Route path="/inventories/inventory/:id/groups/:groupId/nested_hosts/add">
         <InventoryGroupHostAdd inventoryGroup={inventoryGroup} />
       </Route>
-      <Route path="/inventories/inventory/:id/groups/:groupId/nested_hosts">
+      <Route path="/inventories/:inventoryType/:id/groups/:groupId/nested_hosts">
         <InventoryGroupHostList />
       </Route>
     </Switch>

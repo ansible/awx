@@ -512,6 +512,14 @@ def group(inventory):
 
 
 @pytest.fixture
+def constructed_inventory(organization):
+    """
+    creates a new constructed inventory source
+    """
+    return Inventory.objects.create(name='dummy1', kind='constructed', organization=organization)
+
+
+@pytest.fixture
 def inventory_source(inventory):
     # by making it ec2, the credential is not required
     return InventorySource.objects.create(name='single-inv-src', inventory=inventory, source='ec2')
@@ -733,6 +741,30 @@ def system_job_factory(system_job_template, admin):
         return system_job_template.create_unified_job(_eager_fields={'status': initial_state, 'created_by': created_by})
 
     return factory
+
+
+@pytest.fixture
+def wfjt(workflow_job_template_factory, organization):
+    objects = workflow_job_template_factory('test_workflow', organization=organization, persisted=True)
+    return objects.workflow_job_template
+
+
+@pytest.fixture
+def wfjt_with_nodes(workflow_job_template_factory, organization, job_template):
+    objects = workflow_job_template_factory(
+        'test_workflow', organization=organization, workflow_job_template_nodes=[{'unified_job_template': job_template}], persisted=True
+    )
+    return objects.workflow_job_template
+
+
+@pytest.fixture
+def wfjt_node(wfjt_with_nodes):
+    return wfjt_with_nodes.workflow_job_template_nodes.all()[0]
+
+
+@pytest.fixture
+def workflow_job(wfjt):
+    return wfjt.workflow_jobs.create(name='test_workflow')
 
 
 def dumps(value):

@@ -84,6 +84,7 @@
           "displayKey",
           "sortedColumnKey",
           "maxHeight",
+          "maxWidth",
           "role",
           "aria-haspopup",
           "dropDirection",
@@ -97,7 +98,8 @@
           "data-cy",
           "fieldName",
           "splitButtonVariant",
-          "pageKey"
+          "pageKey",
+          "textId"
         ],
         "ignore": [
           "Ansible",

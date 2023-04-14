@@ -151,7 +151,9 @@ EXAMPLES = '''
   job_launch:
     job_template: "My Job Template"
     inventory: "My Inventory"
-    credential: "My Credential"
+    credentials:
+      - "My Credential"
+      - "suplementary cred"
   register: job
 - name: Wait for job max 120s
   job_wait:

@@ -17,7 +17,7 @@ def supervisor_service_command(command, service='*', communicate=True):
     """
     args = ['supervisorctl']
 
-    supervisor_config_path = os.getenv('SUPERVISOR_WEB_CONFIG_PATH', None)
+    supervisor_config_path = os.getenv('SUPERVISOR_CONFIG_PATH', None)
     if supervisor_config_path:
         args.extend(['-c', supervisor_config_path])
 

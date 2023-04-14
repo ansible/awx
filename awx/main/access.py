@@ -588,17 +588,39 @@ class InstanceAccess(BaseAccess):
 
 
 class InstanceGroupAccess(BaseAccess):
+    """
+    I can see Instance Groups when I am:
+       - a superuser(system administrator)
+       - at least read_role on the instance group
+    I can edit Instance Groups when I am:
+       - a superuser
+       - admin role on the Instance group
+    I can add/delete Instance Groups:
+       - a superuser(system administrator)
+    I can use Instance Groups when I have:
+       - use_role on the instance group
+    """
+
     model = InstanceGroup
     prefetch_related = ('instances',)
 
     def filtered_queryset(self):
-        return InstanceGroup.objects.filter(organization__in=Organization.accessible_pk_qs(self.user, 'admin_role')).distinct()
+        return self.model.accessible_objects(self.user, 'read_role')
+
+    @check_superuser
+    def can_use(self, obj):
+        return self.user in obj.use_role
 
     def can_add(self, data):
         return self.user.is_superuser
 
+    @check_superuser
     def can_change(self, obj, data):
-        return self.user.is_superuser
+        return self.can_admin(obj)
+
+    @check_superuser
+    def can_admin(self, obj):
+        return self.user in obj.admin_role
 
     def can_delete(self, obj):
         if obj.name in [settings.DEFAULT_EXECUTION_QUEUE_NAME, settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]:
@@ -845,7 +867,7 @@ class OrganizationAccess(NotificationAttachMixin, BaseAccess):
             return RoleAccess(self.user).can_attach(rel_role, sub_obj, 'members', *args, **kwargs)
 
         if relationship == "instance_groups":
-            if self.user.is_superuser:
+            if self.user in obj.admin_role and self.user in sub_obj.use_role:
                 return True
             return False
         return super(OrganizationAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
@@ -934,7 +956,7 @@ class InventoryAccess(BaseAccess):
 
     def can_attach(self, obj, sub_obj, relationship, *args, **kwargs):
         if relationship == "instance_groups":
-            if self.user.can_access(type(sub_obj), "read", sub_obj) and self.user in obj.organization.admin_role:
+            if self.user in sub_obj.use_role and self.user in obj.admin_role:
                 return True
             return False
         return super(InventoryAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
@@ -1671,11 +1693,12 @@ class JobTemplateAccess(NotificationAttachMixin, UnifiedCredentialsMixin, BaseAc
         return self.user.is_superuser or self.user in obj.admin_role
 
     @check_superuser
+    # object here is the job template. sub_object here is what is being attached
     def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
         if relationship == "instance_groups":
             if not obj.organization:
                 return False
-            return self.user.can_access(type(sub_obj), "read", sub_obj) and self.user in obj.organization.admin_role
+            return self.user in sub_obj.use_role and self.user in obj.admin_role
         return super(JobTemplateAccess, self).can_attach(obj, sub_obj, relationship, data, skip_sub_obj_read_check=skip_sub_obj_read_check)
 
     @check_superuser
@@ -1852,8 +1875,6 @@ class JobLaunchConfigAccess(UnifiedCredentialsMixin, BaseAccess):
     def _related_filtered_queryset(self, cls):
         if cls is Label:
             return LabelAccess(self.user).filtered_queryset()
-        elif cls is InstanceGroup:
-            return InstanceGroupAccess(self.user).filtered_queryset()
         else:
             return cls._accessible_pk_qs(cls, self.user, 'use_role')
 

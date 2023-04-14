@@ -1,0 +1,113 @@
+[supervisord]
+nodaemon = True
+umask = 022
+logfile = /dev/stdout
+logfile_maxbytes = 0
+pidfile = /var/run/supervisor/supervisor.web.pid
+
+[program:nginx]
+{% if kube_dev | bool %}
+command = make nginx
+directory = /awx_devel
+{% else %}
+command = nginx -g "daemon off;"
+{% endif %}
+autorestart = true
+startsecs = 30
+stopasgroup=true
+killasgroup=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+
+[program:uwsgi]
+{% if kube_dev | bool %}
+command = make uwsgi
+directory = /awx_devel
+environment =
+    DEV_RELOAD_COMMAND='supervisorctl -c /etc/supervisord_task.conf restart all; supervisorctl restart tower-processes:daphne'
+{% else %}
+command = /var/lib/awx/venv/awx/bin/uwsgi /etc/tower/uwsgi.ini
+directory = /var/lib/awx
+{% endif %}
+autorestart = true
+startsecs = 30
+stopasgroup=true
+killasgroup=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+
+[program:daphne]
+{% if kube_dev | bool %}
+command = make daphne
+directory = /awx_devel
+{% else %}
+command = /var/lib/awx/venv/awx/bin/daphne -b 127.0.0.1 -p 8051 --websocket_timeout -1 awx.asgi:channel_layer
+directory = /var/lib/awx
+{% endif %}
+autorestart = true
+startsecs = 30
+stopasgroup=true
+killasgroup=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+
+[program:heartbeet]
+{% if kube_dev | bool %}
+command = make run-heartbeet
+directory = /awx_devel
+{% else %}
+command = awx-manage run_heartbeet
+directory = /var/lib/awx
+{% endif %}
+autorestart = true
+startsecs = 30
+stopasgroup=true
+killasgroup=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+
+[program:awx-cache-clear]
+{% if kube_dev | bool %}
+command = make run-cache-clear
+directory = /awx_devel
+{% else %}
+command = awx-manage run_cache_clear
+directory = /var/lib/awx
+{% endif %}
+autorestart = true
+startsecs = 30
+stopasgroup=true
+killasgroup=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+
+[group:tower-processes]
+programs=nginx,uwsgi,daphne,awx-cache-clear,heartbeet
+priority=5
+
+[eventlistener:superwatcher]
+command=stop-supervisor
+events=PROCESS_STATE_FATAL
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+
+[unix_http_server]
+file=/var/run/supervisor/supervisor.web.sock
+
+[supervisorctl]
+serverurl=unix:///var/run/supervisor/supervisor.web.sock ; use a unix:// URL  for a unix socket
+
+[rpcinterface:supervisor]
+supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface

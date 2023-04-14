@@ -6,6 +6,7 @@ import Config from './models/Config';
 import CredentialInputSources from './models/CredentialInputSources';
 import CredentialTypes from './models/CredentialTypes';
 import Credentials from './models/Credentials';
+import ConstructedInventories from './models/ConstructedInventories';
 import Dashboard from './models/Dashboard';
 import ExecutionEnvironments from './models/ExecutionEnvironments';
 import Groups from './models/Groups';
@@ -44,6 +45,7 @@ import WorkflowApprovalTemplates from './models/WorkflowApprovalTemplates';
 import WorkflowJobTemplateNodes from './models/WorkflowJobTemplateNodes';
 import WorkflowJobTemplates from './models/WorkflowJobTemplates';
 import WorkflowJobs from './models/WorkflowJobs';
+import HostMetrics from './models/HostMetrics';
 
 const ActivityStreamAPI = new ActivityStream();
 const AdHocCommandsAPI = new AdHocCommands();
@@ -53,6 +55,7 @@ const ConfigAPI = new Config();
 const CredentialInputSourcesAPI = new CredentialInputSources();
 const CredentialTypesAPI = new CredentialTypes();
 const CredentialsAPI = new Credentials();
+const ConstructedInventoriesAPI = new ConstructedInventories();
 const DashboardAPI = new Dashboard();
 const ExecutionEnvironmentsAPI = new ExecutionEnvironments();
 const GroupsAPI = new Groups();
@@ -91,6 +94,7 @@ const WorkflowApprovalTemplatesAPI = new WorkflowApprovalTemplates();
 const WorkflowJobTemplateNodesAPI = new WorkflowJobTemplateNodes();
 const WorkflowJobTemplatesAPI = new WorkflowJobTemplates();
 const WorkflowJobsAPI = new WorkflowJobs();
+const HostMetricsAPI = new HostMetrics();
 
 export {
   ActivityStreamAPI,
@@ -101,6 +105,7 @@ export {
   CredentialInputSourcesAPI,
   CredentialTypesAPI,
   CredentialsAPI,
+  ConstructedInventoriesAPI,
   DashboardAPI,
   ExecutionEnvironmentsAPI,
   GroupsAPI,
@@ -139,4 +144,5 @@ export {
   WorkflowJobTemplateNodesAPI,
   WorkflowJobTemplatesAPI,
   WorkflowJobsAPI,
+  HostMetricsAPI,
 };

@@ -1,0 +1,56 @@
+[supervisord]
+nodaemon = True
+umask = 022
+logfile = /dev/stdout
+logfile_maxbytes = 0
+pidfile = /var/run/supervisor/supervisor.rsyslog.pid
+
+[program:awx-rsyslogd]
+command = rsyslogd -n -i /var/run/awx-rsyslog/rsyslog.pid -f /var/lib/awx/rsyslog/rsyslog.conf
+autorestart = true
+startsecs = 30
+stopasgroup=true
+killasgroup=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+
+[program:awx-rsyslog-configurer]
+{% if kube_dev | bool %}
+command = make run-rsyslog-configurer
+directory = /awx_devel
+{% else %}
+command = awx-manage run_rsyslog_configurer
+directory = /var/lib/awx
+{% endif %}
+autorestart = true
+startsecs = 30
+stopasgroup=true
+killasgroup=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+
+[group:tower-processes]
+programs=awx-rsyslog-configurer,awx-rsyslogd
+priority=5
+
+[eventlistener:superwatcher]
+command=stop-supervisor
+events=PROCESS_STATE_FATAL
+autorestart = true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+
+[unix_http_server]
+file=/var/run/supervisor/supervisor.rsyslog.sock
+
+[supervisorctl]
+serverurl=unix:///var/run/supervisor/supervisor.rsyslog.sock ; use a unix:// URL  for a unix socket
+
+[rpcinterface:supervisor]
+supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface

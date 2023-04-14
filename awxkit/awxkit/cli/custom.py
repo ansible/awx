@@ -396,6 +396,7 @@ class RoleMixin(object):
         ['credentials', 'credential'],
         ['job_templates', 'job_template'],
         ['workflow_job_templates', 'workflow_job_template'],
+        ['instance_groups', 'instance_group'],
     ]
     roles = {}  # this is calculated once
 

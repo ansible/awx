@@ -98,10 +98,14 @@ class ApiVersionRootView(APIView):
         data['tokens'] = reverse('api:o_auth2_token_list', request=request)
         data['metrics'] = reverse('api:metrics_view', request=request)
         data['inventory'] = reverse('api:inventory_list', request=request)
+        data['constructed_inventory'] = reverse('api:constructed_inventory_list', request=request)
         data['inventory_sources'] = reverse('api:inventory_source_list', request=request)
         data['inventory_updates'] = reverse('api:inventory_update_list', request=request)
         data['groups'] = reverse('api:group_list', request=request)
         data['hosts'] = reverse('api:host_list', request=request)
+        data['host_metrics'] = reverse('api:host_metric_list', request=request)
+        # It will be enabled in future version of the AWX
+        # data['host_metric_summary_monthly'] = reverse('api:host_metric_summary_monthly_list', request=request)
         data['job_templates'] = reverse('api:job_template_list', request=request)
         data['jobs'] = reverse('api:job_list', request=request)
         data['ad_hoc_commands'] = reverse('api:ad_hoc_command_list', request=request)
@@ -122,6 +126,7 @@ class ApiVersionRootView(APIView):
         data['workflow_job_nodes'] = reverse('api:workflow_job_node_list', request=request)
         data['mesh_visualizer'] = reverse('api:mesh_visualizer_view', request=request)
         data['bulk'] = reverse('api:bulk', request=request)
+        data['analytics'] = reverse('api:analytics_root_view', request=request)
         return Response(data)
 
 
@@ -272,6 +277,9 @@ class ApiV2ConfigView(APIView):
 
         pendo_state = settings.PENDO_TRACKING_STATE if settings.PENDO_TRACKING_STATE in ('off', 'anonymous', 'detailed') else 'off'
 
+        # Guarding against settings.UI_NEXT being set to a non-boolean value
+        ui_next_state = settings.UI_NEXT if settings.UI_NEXT in (True, False) else False
+
         data = dict(
             time_zone=settings.TIME_ZONE,
             license_info=license_data,
@@ -280,6 +288,7 @@ class ApiV2ConfigView(APIView):
             analytics_status=pendo_state,
             analytics_collectors=all_collectors(),
             become_methods=PRIVILEGE_ESCALATION_METHODS,
+            ui_next=ui_next_state,
         )
 
         # If LDAP is enabled, user_ldap_fields will return a list of field

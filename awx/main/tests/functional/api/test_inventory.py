@@ -594,3 +594,108 @@ class TestControlledBySCM:
             rando,
             expect=403,
         )
+
+
+@pytest.mark.django_db
+class TestConstructedInventory:
+    @pytest.fixture
+    def constructed_inventory(self, organization):
+        return Inventory.objects.create(name='constructed-test-inventory', kind='constructed', organization=organization)
+
+    def test_get_constructed_inventory(self, constructed_inventory, admin_user, get):
+        inv_src = constructed_inventory.inventory_sources.first()
+        inv_src.update_cache_timeout = 53
+        inv_src.save(update_fields=['update_cache_timeout'])
+        r = get(url=reverse('api:constructed_inventory_detail', kwargs={'pk': constructed_inventory.pk}), user=admin_user, expect=200)
+        assert r.data['update_cache_timeout'] == 53
+
+    def test_patch_constructed_inventory(self, constructed_inventory, admin_user, patch):
+        inv_src = constructed_inventory.inventory_sources.first()
+        assert inv_src.update_cache_timeout == 0
+        assert inv_src.limit == ''
+        r = patch(
+            url=reverse('api:constructed_inventory_detail', kwargs={'pk': constructed_inventory.pk}),
+            data=dict(update_cache_timeout=54, limit='foobar'),
+            user=admin_user,
+            expect=200,
+        )
+        assert r.data['update_cache_timeout'] == 54
+        inv_src = constructed_inventory.inventory_sources.first()
+        assert inv_src.update_cache_timeout == 54
+        assert inv_src.limit == 'foobar'
+
+    def test_patch_constructed_inventory_generated_source_limits_editable_fields(self, constructed_inventory, admin_user, project, patch):
+        inv_src = constructed_inventory.inventory_sources.first()
+        r = patch(
+            url=inv_src.get_absolute_url(),
+            data={
+                'source': 'scm',
+                'source_project': project.pk,
+                'source_path': '',
+                'source_vars': 'plugin: a.b.c',
+            },
+            expect=400,
+            user=admin_user,
+        )
+        assert str(r.data['error'][0]) == "Cannot change field 'source' on a constructed inventory source."
+
+        # Make sure it didn't get updated before we got the error
+        inv_src_after_err = constructed_inventory.inventory_sources.first()
+        assert inv_src.id == inv_src_after_err.id
+        assert inv_src.source == inv_src_after_err.source
+        assert inv_src.source_project == inv_src_after_err.source_project
+        assert inv_src.source_path == inv_src_after_err.source_path
+        assert inv_src.source_vars == inv_src_after_err.source_vars
+
+    def test_patch_constructed_inventory_generated_source_allows_source_vars_edit(self, constructed_inventory, admin_user, patch):
+        inv_src = constructed_inventory.inventory_sources.first()
+        patch(
+            url=inv_src.get_absolute_url(),
+            data={
+                'source_vars': 'plugin: a.b.c',
+            },
+            expect=200,
+            user=admin_user,
+        )
+
+        inv_src_after_patch = constructed_inventory.inventory_sources.first()
+
+        # sanity checks
+        assert inv_src.id == inv_src_after_patch.id
+        assert inv_src.source == 'constructed'
+        assert inv_src_after_patch.source == 'constructed'
+        assert inv_src.source_vars == ''
+
+        assert inv_src_after_patch.source_vars == 'plugin: a.b.c'
+
+    def test_create_constructed_inventory(self, constructed_inventory, admin_user, post, organization):
+        r = post(
+            url=reverse('api:constructed_inventory_list'),
+            data=dict(name='constructed-inventory-just-created', kind='constructed', organization=organization.id, update_cache_timeout=55, limit='foobar'),
+            user=admin_user,
+            expect=201,
+        )
+        pk = r.data['id']
+        constructed_inventory = Inventory.objects.get(pk=pk)
+        inv_src = constructed_inventory.inventory_sources.first()
+        assert inv_src.update_cache_timeout == 55
+        assert inv_src.limit == 'foobar'
+
+    def test_get_absolute_url_for_constructed_inventory(self, constructed_inventory, admin_user, get):
+        """
+        If we are using the normal inventory API endpoint to look at a
+        constructed inventory, then we should get a normal inventory API route
+        back. If we are accessing it via the special constructed inventory
+        endpoint, then we should get that back.
+        """
+
+        url_const = reverse('api:constructed_inventory_detail', kwargs={'pk': constructed_inventory.pk})
+        url_inv = reverse('api:inventory_detail', kwargs={'pk': constructed_inventory.pk})
+
+        const_r = get(url=url_const, user=admin_user, expect=200)
+        inv_r = get(url=url_inv, user=admin_user, expect=200)
+        assert const_r.data['url'] == url_const
+        assert inv_r.data['url'] == url_inv
+        assert inv_r.data['url'] != const_r.data['url']
+        assert inv_r.data['related']['constructed_url'] == url_const
+        assert const_r.data['related']['constructed_url'] == url_const
