@@ -1,17 +1,21 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Please Wait</title>
+    <title>On Break...</title>
     <meta http-equiv="refresh" content="2">
+    <link rel="stylesheet" href="/static/custom_error.css">
   </head>
-  <body style="background-color: black; color: white;">
-    <div style="display: flex; justify-content: center; align-items: center; text-align: center; min-height: 100vh;">
-       <span>
-         <h1 style="margin-bottom: 0px">The potato is taking a much needed break.</h1><br/>
-         <h2 style="margin-top: 4px">Please check back later.</h2></br>
-         <h2 style="margin-top: 4px">HTTP Response: 502</h2><br/>
-       </span>
-       <img height="150px" width="150px" src="/static/tater_read.png">
+  <body>
+    <div class="container">
+        <div class="upper_div">
+            <img class="main_image" src="/static/awx-spud-reading.svg"/>
+            <span class="error_number">502</span>
+        </div>
+        <div class="message_div">
+            <div class="m1">HTTP Response: 502</div>
+            <div class="m2">The spud is taking a much needed break...</div>
+            <div class="m3">Please check back later.</div>
+        </div>
     </div>
   </body>
 </html>
