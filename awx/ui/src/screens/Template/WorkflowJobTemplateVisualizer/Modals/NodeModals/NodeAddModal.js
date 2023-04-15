@@ -16,6 +16,7 @@ function NodeAddModal() {
     const {
       approvalName,
       approvalDescription,
+      approveSelf,
       timeoutMinutes,
       timeoutSeconds,
       linkType,
@@ -48,6 +49,7 @@ function NodeAddModal() {
         description: approvalDescription,
         name: approvalName,
         timeout: Number(timeoutMinutes) * 60 + Number(timeoutSeconds),
+        approve_self: approveSelf,
         type: 'workflow_approval_template',
       };
     } else {

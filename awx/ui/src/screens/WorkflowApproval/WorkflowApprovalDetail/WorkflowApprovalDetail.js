@@ -216,6 +216,10 @@ function WorkflowApprovalDetail({ workflowApproval, fetchWorkflowApproval }) {
           label={t`Elapsed`}
           value={secondsToHHMMSS(workflowApproval.elapsed)}
         />
+        <Detail
+          label={t`Can approve their own workflow`}
+          value={workflowApproval.approve_self ? t`True` : t`False`}
+        />
       </DetailList>
       <Title headingLevel="h2">{t`Workflow job details`}</Title>
       <Divider />

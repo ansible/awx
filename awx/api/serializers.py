@@ -3803,10 +3803,11 @@ class WorkflowApprovalSerializer(UnifiedJobSerializer):
     can_approve_or_deny = serializers.SerializerMethodField()
     approval_expiration = serializers.SerializerMethodField()
     timed_out = serializers.ReadOnlyField()
+    approve_self = serializers.ReadOnlyField()
 
     class Meta:
         model = WorkflowApproval
-        fields = ('*', '-controller_node', '-execution_node', 'can_approve_or_deny', 'approval_expiration', 'timed_out')
+        fields = ('*', '-controller_node', '-execution_node', 'can_approve_or_deny', 'approval_expiration', 'timed_out', 'approve_self')
 
     def get_approval_expiration(self, obj):
         if obj.status != 'pending' or obj.timeout == 0:
@@ -3843,13 +3844,13 @@ class WorkflowApprovalActivityStreamSerializer(WorkflowApprovalSerializer):
 
 class WorkflowApprovalListSerializer(WorkflowApprovalSerializer, UnifiedJobListSerializer):
     class Meta:
-        fields = ('*', '-controller_node', '-execution_node', 'can_approve_or_deny', 'approval_expiration', 'timed_out')
+        fields = ('*', '-controller_node', '-execution_node', 'can_approve_or_deny', 'approval_expiration', 'timed_out', 'approve_self')
 
 
 class WorkflowApprovalTemplateSerializer(UnifiedJobTemplateSerializer):
     class Meta:
         model = WorkflowApprovalTemplate
-        fields = ('*', 'timeout', 'name')
+        fields = ('*', 'timeout', 'name', 'approve_self')
 
     def get_related(self, obj):
         res = super(WorkflowApprovalTemplateSerializer, self).get_related(obj)
@@ -4059,6 +4060,7 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
         summary_fields = super(WorkflowJobTemplateNodeSerializer, self).get_summary_fields(obj)
         if isinstance(obj.unified_job_template, WorkflowApprovalTemplate):
             summary_fields['unified_job_template']['timeout'] = obj.unified_job_template.timeout
+            summary_fields['unified_job_template']['approve_self'] = obj.unified_job_template.approve_self
         return summary_fields
 
 
@@ -4135,7 +4137,7 @@ class WorkflowJobTemplateNodeDetailSerializer(WorkflowJobTemplateNodeSerializer)
 class WorkflowJobTemplateNodeCreateApprovalSerializer(BaseSerializer):
     class Meta:
         model = WorkflowApprovalTemplate
-        fields = ('timeout', 'name', 'description')
+        fields = ('timeout', 'name', 'description', 'approve_self')
 
     def to_representation(self, obj):
         return {}

@@ -621,4 +621,23 @@ describe('<WorkflowApprovalDetail />', () => {
       (el) => el.length === 0
     );
   });
+
+  test('approve button should be disabled', () => {
+    const wrapper = mountWithContexts(
+      <WorkflowApprovalDetail
+        workflowApproval={{
+          ...workflowApproval,
+          summary_fields: {
+            ...workflowApproval.summary_fields,
+            user_capabilities: {
+              approve: false,
+            },
+          },
+        }}
+      />
+    );
+    expect(
+      wrapper.find('Button[aria-label="Approve"]').prop('isDisabled')
+    ).toBe(true);
+  });
 });

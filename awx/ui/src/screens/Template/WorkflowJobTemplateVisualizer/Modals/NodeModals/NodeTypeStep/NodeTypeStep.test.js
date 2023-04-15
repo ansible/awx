@@ -187,6 +187,7 @@ describe('NodeTypeStep', () => {
             nodeType: 'workflow_approval_template',
             approvalName: '',
             approvalDescription: '',
+            approveSelf: true,
             timeoutMinutes: 0,
             timeoutSeconds: 0,
             convergence: 'any',
@@ -204,6 +205,7 @@ describe('NodeTypeStep', () => {
     expect(wrapper.find('FormField[label="Description"]').length).toBe(1);
     expect(wrapper.find('input[name="timeoutMinutes"]').length).toBe(1);
     expect(wrapper.find('input[name="timeoutSeconds"]').length).toBe(1);
+    expect(wrapper.find('input[name="approveSelf"]').length).toBe(1);
 
     await act(async () => {
       wrapper.find('input#approval-name').simulate('change', {
@@ -220,6 +222,9 @@ describe('NodeTypeStep', () => {
       });
       wrapper.find('input[name="timeoutSeconds"]').simulate('change', {
         target: { value: 30, name: 'timeoutSeconds' },
+      });
+      wrapper.find('input[name="approveSelf"]').simulate('change', {
+        target: { value: false, name: 'approveSelf' },
       });
     });
 
