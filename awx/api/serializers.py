@@ -995,6 +995,24 @@ class UserSerializer(BaseSerializer):
         django_validate_password(value)
         if not self.instance and value in (None, ''):
             raise serializers.ValidationError(_('Password required for new User.'))
+
+        # Check if a password is too long
+        password_max_length = User._meta.get_field('password').max_length
+        if len(value) > password_max_length:
+            raise serializers.ValidationError(_('Password max length is {}'.format(password_max_length)))
+        if getattr(settings, 'LOCAL_PASSWORD_MIN_LENGTH', 0) and len(value) < getattr(settings, 'LOCAL_PASSWORD_MIN_LENGTH'):
+            raise serializers.ValidationError(_('Password must be at least {} characters long.'.format(getattr(settings, 'LOCAL_PASSWORD_MIN_LENGTH'))))
+        if getattr(settings, 'LOCAL_PASSWORD_MIN_DIGITS', 0) and sum(c.isdigit() for c in value) < getattr(settings, 'LOCAL_PASSWORD_MIN_DIGITS'):
+            raise serializers.ValidationError(_('Password must contain at least {} digits.'.format(getattr(settings, 'LOCAL_PASSWORD_MIN_DIGITS'))))
+        if getattr(settings, 'LOCAL_PASSWORD_MIN_UPPER', 0) and sum(c.isupper() for c in value) < getattr(settings, 'LOCAL_PASSWORD_MIN_UPPER'):
+            raise serializers.ValidationError(
+                _('Password must contain at least {} uppercase characters.'.format(getattr(settings, 'LOCAL_PASSWORD_MIN_UPPER')))
+            )
+        if getattr(settings, 'LOCAL_PASSWORD_MIN_SPECIAL', 0) and sum(not c.isalnum() for c in value) < getattr(settings, 'LOCAL_PASSWORD_MIN_SPECIAL'):
+            raise serializers.ValidationError(
+                _('Password must contain at least {} special characters.'.format(getattr(settings, 'LOCAL_PASSWORD_MIN_SPECIAL')))
+            )
+
         return value
 
     def _update_password(self, obj, new_password):

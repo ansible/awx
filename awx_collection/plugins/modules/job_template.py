@@ -337,6 +337,7 @@ EXAMPLES = '''
     playbook: "ping.yml"
     credentials:
       - "Local"
+      - "2nd credential"
     state: "present"
     controller_config_file: "~/tower_cli.cfg"
     survey_enabled: yes
