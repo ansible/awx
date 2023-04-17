@@ -12,6 +12,7 @@ from django.db.models.fields.related import ForeignKey
 from django.http import Http404
 from django.utils.encoding import force_str, smart_str
 from django.utils.translation import gettext_lazy as _
+from django.urls import URLResolver, URLPattern
 
 # Django REST Framework
 from rest_framework import exceptions
@@ -29,6 +30,24 @@ from awx.main.utils.execution_environments import get_default_pod_spec
 
 # Polymorphic
 from polymorphic.models import PolymorphicModel
+
+
+def all_view_iterator(pattern=None):
+    """
+    Utility method for when the OPTIONS want to get combined URL and view information
+    """
+    if isinstance(pattern, URLPattern) and hasattr(pattern.callback, 'view_class'):
+        yield (str(pattern.pattern), pattern.callback.view_class)
+    sub_patterns = []
+    if pattern is None:
+        from awx.api.urls import urlpatterns
+
+        sub_patterns = urlpatterns
+    if isinstance(pattern, URLResolver):
+        sub_patterns = pattern.url_patterns
+    for sub_pattern in sub_patterns:
+        for sub_view in all_view_iterator(pattern=sub_pattern):
+            yield sub_view
 
 
 class Metadata(metadata.SimpleMetadata):
@@ -252,11 +271,23 @@ class Metadata(metadata.SimpleMetadata):
         finally:
             delattr(view, '_request')
 
+        from rest_framework import generics
+
         # Add type(s) handled by this view/serializer.
         if hasattr(view, 'get_serializer'):
             serializer = view.get_serializer()
             if hasattr(serializer, 'get_types'):
                 metadata['types'] = serializer.get_types()
+
+            if hasattr(serializer, 'Meta') and isinstance(view, generics.RetrieveAPIView):
+                # Provide tail path navigation to related associate disassociate endpoints
+                from awx.api.generics import SubListCreateAttachDetachAPIView
+
+                metadata['related_associations'] = [
+                    [p.strip('$/').rsplit('/')[-1], v.model._meta.verbose_name_plural.replace(' ', '_')]
+                    for p, v in all_view_iterator()
+                    if issubclass(v, SubListCreateAttachDetachAPIView) and v.parent_model is serializer.Meta.model
+                ]
 
         # Add search fields if available from the view.
         if getattr(view, 'search_fields', None):
@@ -275,8 +306,6 @@ class Metadata(metadata.SimpleMetadata):
                     roles.append(field.name)
         if len(roles) > 0:
             metadata['object_roles'] = roles
-
-        from rest_framework import generics
 
         if isinstance(view, generics.ListAPIView) and hasattr(view, 'paginator'):
             metadata['max_page_size'] = view.paginator.max_page_size
