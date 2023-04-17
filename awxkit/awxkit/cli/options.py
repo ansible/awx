@@ -7,6 +7,7 @@ import sys
 import yaml
 
 from .custom import CustomAction
+from .associate import AssociationParser
 from .format import add_output_formatting_arguments, strtobool
 from .resource import DEPRECATED_RESOURCES_REVERSE
 
@@ -86,13 +87,19 @@ class ResourceOptionsParser(object):
         self.page = page
         self.resource = resource
         self.parser = parser
-        self.options = getattr(self.page.options().json, 'actions', {'GET': {}})
+        options_json = self.page.options().json
+        self.options = getattr(options_json, 'actions', {'GET': {}})
         self.get_allowed_options()
         if self.resource != 'settings':
             # /api/v2/settings is a special resource that doesn't have
             # traditional list/detail endpoints
             self.build_list_actions()
             self.build_detail_actions()
+
+            # all normal resources are also considered to have association abilities
+            self.parser.add_parser('associate', help='Associate via a related endpoint')
+            self.associate = AssociationParser(page, options_json, resource)
+            self.associate.add_arguments(self.parser, self)
 
         self.handle_custom_actions()
 
