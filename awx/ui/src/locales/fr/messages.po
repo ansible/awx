@@ -9637,7 +9637,7 @@ msgstr "Utilisateur"
 
 #: components/AppContainer/PageHeaderToolbar.js:160
 msgid "User Details"
-msgstr "Détails de l'erreur"
+msgstr "Informations sur l'utilisateur"
 
 #: screens/Setting/SettingList.js:121
 #: screens/Setting/Settings.js:118
