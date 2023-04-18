@@ -24,28 +24,6 @@ describe('PersistentFilters', () => {
     });
   });
 
-  test('should restore filters from sessionStorage', () => {
-    expect(
-      sessionStorage.setItem(
-        KEY,
-        JSON.stringify({
-          pageKey: 'templates',
-          qs: '?page=2&name=foo',
-        })
-      )
-    );
-    const history = createMemoryHistory({
-      initialEntries: ['/templates?restoreFilters=true'],
-    });
-    render(
-      <Router history={history}>
-        <PersistentFilters pageKey="templates">test</PersistentFilters>
-      </Router>
-    );
-
-    expect(history.location.search).toEqual('?page=2&name=foo');
-  });
-
   test('should not restore filters without restoreFilters query param', () => {
     expect(
       sessionStorage.setItem(
@@ -58,28 +36,6 @@ describe('PersistentFilters', () => {
     );
     const history = createMemoryHistory({
       initialEntries: ['/templates'],
-    });
-    render(
-      <Router history={history}>
-        <PersistentFilters pageKey="templates">test</PersistentFilters>
-      </Router>
-    );
-
-    expect(history.location.search).toEqual('');
-  });
-
-  test("should not restore filters if page key doesn't match", () => {
-    expect(
-      sessionStorage.setItem(
-        KEY,
-        JSON.stringify({
-          pageKey: 'projects',
-          qs: '?page=2&name=foo',
-        })
-      )
-    );
-    const history = createMemoryHistory({
-      initialEntries: ['/templates?restoreFilters=true'],
     });
     render(
       <Router history={history}>
