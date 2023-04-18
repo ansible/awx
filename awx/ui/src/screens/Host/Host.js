@@ -52,7 +52,7 @@ function Host({ setBreadcrumb }) {
       ),
       link: `/hosts`,
       id: 99,
-      isBackButton: true,
+      persistentFilterKey: 'hosts',
     },
     {
       name: t`Details`,

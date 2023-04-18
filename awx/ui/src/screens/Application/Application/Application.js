@@ -74,7 +74,7 @@ function Application({ setBreadcrumb }) {
       ),
       link: '/applications',
       id: 0,
-      isBackButton: true,
+      persistentFilterKey: 'applications',
     },
     { name: t`Details`, link: `/applications/${id}/details`, id: 1 },
     { name: t`Tokens`, link: `/applications/${id}/tokens`, id: 2 },
