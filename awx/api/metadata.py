@@ -277,14 +277,15 @@ class Metadata(metadata.SimpleMetadata):
             if hasattr(serializer, 'get_types'):
                 metadata['types'] = serializer.get_types()
 
-            # Provide tail path navigation to related associate disassociate endpoints
-            from awx.api.generics import SubListCreateAttachDetachAPIView
+            if hasattr(serializer, 'Meta'):
+                # Provide tail path navigation to related associate disassociate endpoints
+                from awx.api.generics import SubListCreateAttachDetachAPIView
 
-            metadata['related_associations'] = [
-                [p.strip('$/').rsplit('/')[-1], v.model._meta.verbose_name_plural.replace(' ', '_')]
-                for p, v in all_view_iterator()
-                if issubclass(v, SubListCreateAttachDetachAPIView) and v.parent_model is serializer.Meta.model
-            ]
+                metadata['related_associations'] = [
+                    [p.strip('$/').rsplit('/')[-1], v.model._meta.verbose_name_plural.replace(' ', '_')]
+                    for p, v in all_view_iterator()
+                    if issubclass(v, SubListCreateAttachDetachAPIView) and v.parent_model is serializer.Meta.model
+                ]
 
         # Add search fields if available from the view.
         if getattr(view, 'search_fields', None):
