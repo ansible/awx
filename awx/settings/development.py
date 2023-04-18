@@ -105,8 +105,11 @@ AWX_CALLBACK_PROFILE = True
 AWX_DISABLE_TASK_MANAGERS = False
 # ======================!!!!!!! FOR DEVELOPMENT ONLY !!!!!!!=================================
 
-if 'sqlite3' not in DATABASES['default']['ENGINE']:  # noqa
-    DATABASES['default'].setdefault('OPTIONS', dict()).setdefault('application_name', f'{CLUSTER_HOST_ID}-{os.getpid()}-{" ".join(sys.argv)}'[:63])  # noqa
+from .application_name import set_application_name
+
+set_application_name(DATABASES, CLUSTER_HOST_ID)
+
+del set_application_name
 
 # If any local_*.py files are present in awx/settings/, use them to override
 # default settings for development.  If not present, we can still run using

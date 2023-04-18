@@ -734,10 +734,10 @@ CONTROLLER_INSTANCE_ID_VAR = 'remote_tower_id'
 # ---------------------
 # ----- Foreman -----
 # ---------------------
-SATELLITE6_ENABLED_VAR = 'foreman_enabled'
+SATELLITE6_ENABLED_VAR = 'foreman_enabled,foreman.enabled'
 SATELLITE6_ENABLED_VALUE = 'True'
 SATELLITE6_EXCLUDE_EMPTY_GROUPS = True
-SATELLITE6_INSTANCE_ID_VAR = 'foreman_id'
+SATELLITE6_INSTANCE_ID_VAR = 'foreman_id,foreman.id'
 # SATELLITE6_GROUP_PREFIX and SATELLITE6_GROUP_PATTERNS defined in source vars
 
 # ----------------

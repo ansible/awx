@@ -100,6 +100,8 @@ except IOError:
 
 # The below runs AFTER all of the custom settings are imported.
 
-DATABASES.setdefault('default', dict()).setdefault('OPTIONS', dict()).setdefault(
-    'application_name', f'{CLUSTER_HOST_ID}-{os.getpid()}-{" ".join(sys.argv)}'[:63]  # NOQA
-)  # noqa
+from .application_name import set_application_name
+
+set_application_name(DATABASES, CLUSTER_HOST_ID)  # NOQA
+
+del set_application_name

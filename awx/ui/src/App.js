@@ -28,7 +28,7 @@ import { getLanguageWithoutRegionCode } from 'util/language';
 import Metrics from 'screens/Metrics';
 import SubscriptionEdit from 'screens/Setting/Subscription/SubscriptionEdit';
 import useTitle from 'hooks/useTitle';
-import { dynamicActivate } from './i18nLoader';
+import { dynamicActivate, locales } from './i18nLoader';
 import getRouteConfig from './routeConfig';
 import { SESSION_REDIRECT_URL } from './constants';
 
@@ -142,8 +142,14 @@ function App() {
   const searchParams = Object.fromEntries(new URLSearchParams(search));
   const pseudolocalization =
     searchParams.pseudolocalization === 'true' || false;
-  const language =
+  let language =
     searchParams.lang || getLanguageWithoutRegionCode(navigator) || 'en';
+
+  if (!Object.keys(locales).includes(language)) {
+    // If there isn't a string catalog available for the browser's
+    // preferred language, default to one that has strings.
+    language = 'en';
+  }
 
   useEffect(() => {
     dynamicActivate(language, pseudolocalization);
