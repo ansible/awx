@@ -55,6 +55,12 @@ aim_inputs = {
         },
         {'id': 'object_query_format', 'label': _('Object Query Format'), 'type': 'string', 'default': 'Exact', 'choices': ['Exact', 'Regexp']},
         {
+            'id': 'object_property',
+            'label': _('Object Property'),
+            'type': 'string',
+            'help_text': _('The property of the object to return. Default: Content Ex: Username, Address, etc.'),
+        },
+        {
             'id': 'reason',
             'label': _('Reason'),
             'type': 'string',
@@ -74,6 +80,7 @@ def aim_backend(**kwargs):
     app_id = kwargs['app_id']
     object_query = kwargs['object_query']
     object_query_format = kwargs['object_query_format']
+    object_property = kwargs.get('object_property', '')
     reason = kwargs.get('reason', None)
     if webservice_id == '':
         webservice_id = 'AIMWebService'
@@ -98,7 +105,18 @@ def aim_backend(**kwargs):
             allow_redirects=False,
         )
     raise_for_status(res)
-    return res.json()['Content']
+    # CCP returns the property name capitalized, username is camel case
+    # so we need to handle that case
+    if object_property == '':
+        object_property = 'Content'
+    elif object_property.lower() == 'username':
+        object_property = 'UserName'
+    elif object_property not in res:
+        raise KeyError('Property {} not found in object'.format(object_property))
+    else:
+        object_property = object_property.capitalize()
+
+    return res.json()[object_property]
 
 
 aim_plugin = CredentialPlugin('CyberArk Central Credential Provider Lookup', inputs=aim_inputs, backend=aim_backend)

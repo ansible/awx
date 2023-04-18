@@ -98,6 +98,7 @@ class Command(BaseCommand):
         try:
             executor = MigrationExecutor(connection)
             migrating = bool(executor.migration_plan(executor.loader.graph.leaf_nodes()))
+            connection.close()  # Because of async nature, main loop will use new connection, so close this
         except Exception as exc:
             logger.warning(f'Error on startup of run_wsrelay (error: {exc}), retry in 10s...')
             time.sleep(10)

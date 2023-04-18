@@ -52,7 +52,7 @@ def all_collectors():
     }
 
 
-def register(key, version, description=None, format='json', expensive=None):
+def register(key, version, description=None, format='json', expensive=None, full_sync_interval=None):
     """
     A decorator used to register a function as a metric collector.
 
@@ -71,6 +71,7 @@ def register(key, version, description=None, format='json', expensive=None):
         f.__awx_analytics_description__ = description
         f.__awx_analytics_type__ = format
         f.__awx_expensive__ = expensive
+        f.__awx_full_sync_interval__ = full_sync_interval
         return f
 
     return decorate
@@ -259,10 +260,19 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
                 # These slicer functions may return a generator. The `since` parameter is
                 # allowed to be None, and will fall back to LAST_ENTRIES[key] or to
                 # LAST_GATHER (truncated appropriately to match the 4-week limit).
+                #
+                # Or it can force full table sync if interval is given
+                kwargs = dict()
+                full_sync_enabled = False
+                if func.__awx_full_sync_interval__:
+                    last_full_sync = last_entries.get(f"{key}_full")
+                    full_sync_enabled = not last_full_sync or last_full_sync < now() - timedelta(days=func.__awx_full_sync_interval__)
+
+                kwargs['full_sync_enabled'] = full_sync_enabled
                 if func.__awx_expensive__:
-                    slices = func.__awx_expensive__(key, since, until, last_gather)
+                    slices = func.__awx_expensive__(key, since, until, last_gather, **kwargs)
                 else:
-                    slices = collectors.trivial_slicing(key, since, until, last_gather)
+                    slices = collectors.trivial_slicing(key, since, until, last_gather, **kwargs)
 
                 for start, end in slices:
                     files = func(start, full_path=gather_dir, until=end)
@@ -300,6 +310,12 @@ def gather(dest=None, module=None, subset=None, since=None, until=None, collecti
             except Exception:
                 succeeded = False
                 logger.exception("Could not generate metric {}".format(filename))
+
+            # update full sync timestamp if successfully shipped
+            if full_sync_enabled and collection_type != 'dry-run' and succeeded:
+                with disable_activity_stream():
+                    last_entries[f"{key}_full"] = now()
+                    settings.AUTOMATION_ANALYTICS_LAST_ENTRIES = json.dumps(last_entries, cls=DjangoJSONEncoder)
 
         if collection_type != 'dry-run':
             if succeeded:
@@ -359,9 +375,7 @@ def ship(path):
         s.headers = get_awx_http_client_headers()
         s.headers.pop('Content-Type')
         with set_environ(**settings.AWX_TASK_ENV):
-            response = s.post(
-                url, files=files, verify="/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem", auth=(rh_user, rh_password), headers=s.headers, timeout=(31, 31)
-            )
+            response = s.post(url, files=files, verify=settings.INSIGHTS_CERT_PATH, auth=(rh_user, rh_password), headers=s.headers, timeout=(31, 31))
         # Accept 2XX status_codes
         if response.status_code >= 300:
             logger.error('Upload failed with status {}, {}'.format(response.status_code, response.text))
