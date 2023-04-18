@@ -9,7 +9,7 @@ cryptography
 Cython<3 # Since the bump to PyYAML 5.4.1 this is now a mandatory dep
 daphne
 distro
-django==3.2.16  # see UPGRADE BLOCKERs https://github.com/ansible/awx/security/dependabot/67
+django==4.2  # see UPGRADE BLOCKERs
 django-auth-ldap
 django-cors-headers
 django-crum
@@ -22,7 +22,7 @@ django-redis
 django-solo
 django-split-settings==1.0.0    # We hit a strange issue where the release process errored when upgrading past 1.0.0 see UPGRADE BLOCKERS
 django-taggit
-djangorestframework==3.13.1
+djangorestframework
 djangorestframework-yaml
 filelock
 GitPython>=3.1.30  # CVE-2022-24439

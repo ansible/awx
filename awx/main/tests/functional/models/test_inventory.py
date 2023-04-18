@@ -271,6 +271,7 @@ def test_inventory_update_excessively_long_name(inventory, inventory_source):
 class TestHostManager:
     def test_host_filter_not_smart(self, setup_ec2_gce, organization):
         smart_inventory = Inventory(name='smart', organization=organization, host_filter='inventory_sources__source=ec2')
+        smart_inventory.save()
         assert len(smart_inventory.hosts.all()) == 0
 
     def test_host_distinctness(self, setup_inventory_groups, organization):
