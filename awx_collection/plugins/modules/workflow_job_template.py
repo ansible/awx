@@ -144,6 +144,7 @@ options:
       choices:
         - present
         - absent
+        - exists
       default: "present"
       type: str
     notification_templates_started:
@@ -667,8 +668,7 @@ def create_workflow_nodes(module, response, workflow_nodes, workflow_id):
                 inv_lookup_data = {}
                 if 'organization' in workflow_node['inventory']:
                     inv_lookup_data['organization'] = module.resolve_name_to_id('organizations', workflow_node['inventory']['organization']['name'])
-                workflow_node_fields['inventory'] = module.get_one(
-                    'inventories', name_or_id=workflow_node['inventory']['name'], data=inv_lookup_data)['id']
+                workflow_node_fields['inventory'] = module.get_one('inventories', name_or_id=workflow_node['inventory']['name'], data=inv_lookup_data)['id']
             else:
                 workflow_node_fields['inventory'] = module.get_one('inventories', name_or_id=workflow_node['inventory'])['id']
 
@@ -843,7 +843,7 @@ def main():
         notification_templates_approvals=dict(type="list", elements='str'),
         workflow_nodes=dict(type='list', elements='dict', aliases=['schema']),
         destroy_current_nodes=dict(type='bool', default=False, aliases=['destroy_current_schema']),
-        state=dict(choices=['present', 'absent'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )
 
     # Create a module for ourselves
@@ -871,7 +871,7 @@ def main():
         search_fields['organization'] = new_fields['organization'] = organization_id
 
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('workflow_job_templates', name_or_id=name, **{'data': search_fields})
+    existing_item = module.get_one('workflow_job_templates', name_or_id=name, check_exists=(state == 'exists'), **{'data': search_fields})
 
     # Attempt to look up credential to copy based on the provided name
     if copy_from:
