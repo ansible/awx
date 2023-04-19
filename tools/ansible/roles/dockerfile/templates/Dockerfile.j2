@@ -232,7 +232,7 @@ ADD {{ template_dest }}/supervisor_rsyslog.conf /etc/supervisord_rsyslog.conf
 {% endif %}
 
 {% if (build_dev|bool) or (kube_dev|bool) %}
-ADD tools/docker-compose/awx.egg-link /tmp/awx.egg-link
+RUN echo /awx_devel > /var/lib/awx/venv/awx/lib/python3.9/site-packages/awx.egg-link
 ADD tools/docker-compose/awx-manage /usr/local/bin/awx-manage
 ADD tools/scripts/awx-python /usr/bin/awx-python
 {% endif %}
@@ -285,8 +285,7 @@ RUN for dir in \
       /var/lib/shared/overlay-layers/layers.lock \
       /var/lib/shared/vfs-images/images.lock \
       /var/lib/shared/vfs-layers/layers.lock \
-      /var/run/nginx.pid \
-      /var/lib/awx/venv/awx/lib/python3.9/site-packages/awx.egg-link ; \
+      /var/run/nginx.pid; \
     do touch $file ; chmod g+rw $file ; done && \
     echo "\setenv PAGER 'less -SXF'" > /var/lib/awx/.psqlrc
 {% endif %}
