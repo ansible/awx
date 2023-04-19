@@ -556,12 +556,21 @@ docker-compose-container-group-clean:
 	fi
 	rm -rf tools/docker-compose-minikube/_sources/
 
-## Base development image build
-docker-compose-build:
-	ansible-playbook tools/ansible/dockerfile.yml -e build_dev=True -e receptor_image=$(RECEPTOR_IMAGE)
-	DOCKER_BUILDKIT=1 docker build -t $(DEVEL_IMAGE_NAME) \
-	    --build-arg BUILDKIT_INLINE_CACHE=1 \
-	    --cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .
+.PHONY: Dockerfile.dev
+## Generate Dockerfile.dev for awx_devel image
+Dockerfile.dev: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
+	ansible-playbook tools/ansible/dockerfile.yml \
+		-e dockerfile_name=Dockerfile.dev \
+		-e build_dev=True \
+		-e receptor_image=$(RECEPTOR_IMAGE)
+
+## Build awx_devel image for docker compose development environment
+docker-compose-build: Dockerfile.dev
+	DOCKER_BUILDKIT=1 docker build \
+		-f Dockerfile.dev \
+		-t $(DEVEL_IMAGE_NAME) \
+		--build-arg BUILDKIT_INLINE_CACHE=1 \
+		--cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .
 
 docker-clean:
 	-$(foreach container_id,$(shell docker ps -f name=tools_awx -aq && docker ps -f name=tools_receptor -aq),docker stop $(container_id); docker rm -f $(container_id);)
@@ -600,9 +609,22 @@ PYTHON_VERSION:
 	@echo "$(PYTHON)" | sed 's:python::'
 
 .PHONY: Dockerfile
+## Generate Dockerfile for awx image
 Dockerfile: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
-	ansible-playbook tools/ansible/dockerfile.yml -e receptor_image=$(RECEPTOR_IMAGE)
+	ansible-playbook tools/ansible/dockerfile.yml \
+		-e receptor_image=$(RECEPTOR_IMAGE) \
+		-e headless=$(HEADLESS)
 
+## Build awx image for deployment on Kubernetes environment.
+awx-kube-build: Dockerfile
+	DOCKER_BUILDKIT=1 docker build -f Dockerfile \
+		--build-arg VERSION=$(VERSION) \
+		--build-arg SETUPTOOLS_SCM_PRETEND_VERSION=$(VERSION) \
+		--build-arg HEADLESS=$(HEADLESS) \
+		-t $(DEV_DOCKER_TAG_BASE)/awx:$(COMPOSE_TAG) .
+
+.PHONY: Dockerfile.kube-dev
+## Generate Docker.kube-dev for awx_kube_devel image
 Dockerfile.kube-dev: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
 	ansible-playbook tools/ansible/dockerfile.yml \
 	    -e dockerfile_name=Dockerfile.kube-dev \
@@ -617,13 +639,6 @@ awx-kube-dev-build: Dockerfile.kube-dev
 	    --cache-from=$(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) \
 	    -t $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) .
 
-## Build awx image for deployment on Kubernetes environment.
-awx-kube-build: Dockerfile
-	DOCKER_BUILDKIT=1 docker build -f Dockerfile \
-		--build-arg VERSION=$(VERSION) \
-		--build-arg SETUPTOOLS_SCM_PRETEND_VERSION=$(VERSION) \
-		--build-arg HEADLESS=$(HEADLESS) \
-		-t $(DEV_DOCKER_TAG_BASE)/awx:$(COMPOSE_TAG) .
 
 # Translation TASKS
 # --------------------------------------
