@@ -128,6 +128,8 @@ except ImportError:
     traceback.print_exc()
     sys.exit(1)
 
+# The below runs AFTER all of the custom settings are imported
+# because conf.d files will define DATABASES and this should modify that
 from .application_name import set_application_name
 
 set_application_name(DATABASES, CLUSTER_HOST_ID)
