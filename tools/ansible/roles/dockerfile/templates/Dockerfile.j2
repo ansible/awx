@@ -215,6 +215,13 @@ ADD tools/docker-compose/entrypoint.sh /entrypoint.sh
 ADD tools/scripts/config-watcher /usr/bin/config-watcher
 ADD tools/docker-compose/containers.conf /etc/containers/containers.conf
 ADD tools/docker-compose/podman-containers.conf /var/lib/awx/.config/containers/containers.conf
+{% elif kube_dev|bool %}
+RUN ln -sf /awx_devel/tools/ansible/roles/dockerfile/files/launch_awx_web.sh /usr/bin/launch_awx_web.sh
+RUN ln -sf /awx_devel/tools/ansible/roles/dockerfile/files/launch_awx_task.sh /usr/bin/launch_awx_task.sh
+RUN ln -sf /awx_devel/tools/ansible/roles/dockerfile/files/launch_awx_rsyslog.sh /usr/bin/launch_awx_rsyslog.sh
+RUN ln -sf /awx_devel/{{ template_dest }}/supervisor_web.conf /etc/supervisord_web.conf
+RUN ln -sf /awx_devel/{{ template_dest }}/supervisor_task.conf /etc/supervisord_task.conf
+RUN ln -sf /awx_devel/{{ template_dest }}/supervisor_rsyslog.conf /etc/supervisord_rsyslog.conf
 {% else %}
 ADD tools/ansible/roles/dockerfile/files/launch_awx_web.sh /usr/bin/launch_awx_web.sh
 ADD tools/ansible/roles/dockerfile/files/launch_awx_task.sh /usr/bin/launch_awx_task.sh
@@ -223,6 +230,7 @@ ADD {{ template_dest }}/supervisor_web.conf /etc/supervisord_web.conf
 ADD {{ template_dest }}/supervisor_task.conf /etc/supervisord_task.conf
 ADD {{ template_dest }}/supervisor_rsyslog.conf /etc/supervisord_rsyslog.conf
 {% endif %}
+
 {% if (build_dev|bool) or (kube_dev|bool) %}
 ADD tools/docker-compose/awx.egg-link /tmp/awx.egg-link
 ADD tools/docker-compose/awx-manage /usr/local/bin/awx-manage
