@@ -3643,6 +3643,14 @@ class GroupJobEventsList(BaseJobEventsList):
     parent_model = models.Group
 
 
+class DependentJobsList(SubListAPIView):
+    parent_model = models.UnifiedJob
+    model = models.UnifiedJob
+    relationship = 'dependent_jobs'
+    serializer_class = serializers.UnifiedJobSerializer
+    name = _('Unified Job Dependent Jobs List')
+
+
 class JobJobEventsList(BaseJobEventsList):
     parent_model = models.Job
     pagination_class = UnifiedJobEventPagination
