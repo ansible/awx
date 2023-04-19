@@ -129,7 +129,7 @@ function Template({ setBreadcrumb }) {
         </>
       ),
       link: `/templates`,
-      isBackButton: true,
+      persistentFilterKey: 'templates',
       id: 99,
     },
     { name: t`Details`, link: `${match.url}/details` },
