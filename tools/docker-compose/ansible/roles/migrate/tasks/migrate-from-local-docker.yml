@@ -30,7 +30,7 @@
 
 - name: Start dev env database container
   docker_compose:
-    project_src: "{{ playbook_dir }}/../_sources"
+    project_src: "{{ sources_dest }}"
     files: "docker-compose.yml"
     services:
       - postgres
@@ -45,7 +45,7 @@
 
 - name: Restore to new postgres container
   shell: |
-    COMPOSE_PROJECT_NAME=tools docker-compose -f {{ playbook_dir }}/../_sources/docker-compose.yml exec -T postgres psql -U {{ pg_username }} -d {{ pg_database }} -p {{ pg_port }} < awx_dump.sql
+    COMPOSE_PROJECT_NAME=tools docker-compose -f {{ sources_dest }}/docker-compose.yml exec -T postgres psql -U {{ pg_username }} -d {{ pg_database }} -p {{ pg_port }} < awx_dump.sql
 
 - name: Clean up temporary awx db dump
   file:

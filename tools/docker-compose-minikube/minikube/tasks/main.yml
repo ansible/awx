@@ -107,3 +107,9 @@
     src: bootstrap_minikube.py.j2
     dest: "{{ sources_dest }}/bootstrap_minikube.py"
     mode: '0600'
+
+- name: Copy bootstrap_minikube.py to project root
+  copy:
+    src: "{{ sources_dest }}/boostrap_minikube.py"
+    dest: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}/tools/docker-compose-minikube/_sources/bootstrap_minikube.py"
+    mode: '0755'
