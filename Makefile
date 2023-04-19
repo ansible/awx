@@ -296,7 +296,7 @@ swagger: reports
 check: black
 
 api-lint:
-	BLACK_ARGS="--check" make black
+	BLACK_ARGS="--check" $(MAKE) black
 	flake8 awx
 	yamllint -s .
 
@@ -321,7 +321,7 @@ github_ci_setup:
 	# CI_GITHUB_TOKEN is defined in .github files
 	echo $(CI_GITHUB_TOKEN) | docker login ghcr.io -u $(GITHUB_ACTOR) --password-stdin
 	docker pull $(DEVEL_IMAGE_NAME) || :  # Pre-pull image to warm build cache
-	make docker-compose-build
+	$(MAKE) docker-compose-build
 
 ## Runs AWX_DOCKER_CMD inside a new docker container.
 docker-runner:
@@ -371,7 +371,7 @@ test_collection_sanity:
 	rm -rf $(COLLECTION_INSTALL)
 	if ! [ -x "$(shell command -v ansible-test)" ]; then pip install ansible-core; fi
 	ansible --version
-	COLLECTION_VERSION=1.0.0 make install_collection
+	COLLECTION_VERSION=1.0.0 $(MAKE) install_collection
 	cd $(COLLECTION_INSTALL) && ansible-test sanity $(COLLECTION_SANITY_ARGS)
 
 test_collection_integration: install_collection
@@ -589,7 +589,7 @@ docker-compose-cluster-elk: awx/projects docker-compose-sources
 	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
 
 docker-compose-container-group:
-	MINIKUBE_CONTAINER_GROUP=true make docker-compose
+	MINIKUBE_CONTAINER_GROUP=true $(MAKE) docker-compose
 
 clean-elk:
 	docker stop tools_kibana_1
@@ -669,12 +669,12 @@ HELP_FILTER=.PHONY
 ## Display help targets
 help:
 	@printf "Available targets:\n"
-	@make -s help/generate | grep -vE "\w($(HELP_FILTER))"
+	@$(MAKE) -s help/generate | grep -vE "\w($(HELP_FILTER))"
 
 ## Display help for all targets
 help/all:
 	@printf "Available targets:\n"
-	@make -s help/generate
+	@$(MAKE) -s help/generate
 
 ## Generate help output from MAKEFILE_LIST
 help/generate:
@@ -698,4 +698,4 @@ help/generate:
 
 ## Display help for ui-next targets
 help/ui-next:
-	@make -s help MAKEFILE_LIST="awx/ui_next/Makefile"
+	@$(MAKE) -s help MAKEFILE_LIST="awx/ui_next/Makefile"
