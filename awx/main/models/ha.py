@@ -464,9 +464,15 @@ def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs
         instance.set_default_policy_fields()
 
 
+# @receiver(post_save, sender=InstanceLink)
+# def on_instance_link_saved(sender, instance, **kwargs):
+#     from awx.main.tasks.receptor import write_receptor_config  # prevents circular impor
+#     connection.on_commit(lambda: write_receptor_config.apply_async(queue='tower_broadcast_all'))
+
+
 @receiver(post_save, sender=Instance)
 def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
-    if settings.IS_K8S and instance.node_type in (Instance.Types.EXECUTION,):
+    if settings.IS_K8S and instance.node_type in (Instance.Types.EXECUTION, Instance.Types.HOP):
         if instance.node_state == Instance.States.DEPROVISIONING:
             from awx.main.tasks.receptor import remove_deprovisioned_node  # prevents circular import
 

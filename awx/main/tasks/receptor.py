@@ -681,14 +681,16 @@ def write_receptor_config():
         receptor_config = list(RECEPTOR_CONFIG_STARTER)
 
         this_inst = Instance.objects.me()
-        instances = Instance.objects.filter(node_type=Instance.Types.EXECUTION)
+        # import sdb;sdb.set_trace()
+        # instances = Instance.objects.filter(node_type__in=(Instance.Types.EXECUTION, Instance.Types.HOP))
         existing_peers = {link.target_id for link in InstanceLink.objects.filter(source=this_inst)}
+        instances = Instance.objects.filter(id__in=existing_peers)
         new_links = []
         for instance in instances:
             peer = {'tcp-peer': {'address': f'{instance.hostname}:{instance.listener_port}', 'tls': 'tlsclient'}}
             receptor_config.append(peer)
-            if instance.id not in existing_peers:
-                new_links.append(InstanceLink(source=this_inst, target=instance, link_state=InstanceLink.States.ADDING))
+            # if instance.id not in existing_peers:
+            #     new_links.append(InstanceLink(source=this_inst, target=instance, link_state=InstanceLink.States.ADDING))
 
         InstanceLink.objects.bulk_create(new_links)
 
@@ -709,8 +711,8 @@ def write_receptor_config():
     else:
         raise RuntimeError("Receptor reload failed")
 
-    links = InstanceLink.objects.filter(source=this_inst, target__in=instances, link_state=InstanceLink.States.ADDING)
-    links.update(link_state=InstanceLink.States.ESTABLISHED)
+    # links = InstanceLink.objects.filter(source=this_inst, target__in=instances, link_state=InstanceLink.States.ADDING)
+    # links.update(link_state=InstanceLink.States.ESTABLISHED)
 
 
 @task(queue=get_task_queuename)
