@@ -49,9 +49,9 @@ class InstanceInstallBundle(GenericAPIView):
     def get(self, request, *args, **kwargs):
         instance_obj = self.get_object()
 
-        if instance_obj.node_type not in ('execution',):
+        if instance_obj.node_type not in ('execution', 'hop'):
             return Response(
-                data=dict(msg=_('Install bundle can only be generated for execution nodes.')),
+                data=dict(msg=_('Install bundle can only be generated for execution or hop nodes.')),
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -118,7 +118,10 @@ def generate_inventory_yml(instance_obj):
 
 
 def generate_group_vars_all_yml(instance_obj):
-    return render_to_string("instance_install_bundle/group_vars/all.yml", context=dict(instance=instance_obj))
+    peers = []
+    for instance in instance_obj.peers.all():
+        peers.append(dict(host=instance.hostname, port=instance.listener_port))
+    return render_to_string("instance_install_bundle/group_vars/all.yml", context=dict(instance=instance_obj, peers=peers))
 
 
 def generate_receptor_tls(instance_obj):
