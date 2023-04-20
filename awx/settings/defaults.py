@@ -4,22 +4,13 @@
 import base64
 import os
 import re  # noqa
-import sys
 import tempfile
+import ldap
 import socket
 from datetime import timedelta
 
 
-if "pytest" in sys.modules:
-    IS_TESTING_MODE = True
-    from unittest import mock
-
-    with mock.patch('__main__.__builtins__.dir', return_value=[]):
-        import ldap
-else:
-    IS_TESTING_MODE = False
-    import ldap
-
+IS_TESTING_MODE = False
 
 DEBUG = True
 SQL_DEBUG = DEBUG
