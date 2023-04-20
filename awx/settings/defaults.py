@@ -1,13 +1,16 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+# Python
 import base64
 import os
 import re  # noqa
 import tempfile
-import ldap
 import socket
 from datetime import timedelta
+
+# python-ldap
+import ldap
 
 
 DEBUG = True
