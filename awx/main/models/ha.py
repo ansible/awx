@@ -70,7 +70,7 @@ class InstanceLink(BaseModel):
         REMOVING = 'removing', _('Removing')
 
     link_state = models.CharField(
-        choices=States.choices, default=States.ESTABLISHED, max_length=16, help_text=_("Indicates the current life cycle stage of this peer link.")
+        choices=States.choices, default=States.ADDING, max_length=16, help_text=_("Indicates the current life cycle stage of this peer link.")
     )
 
     class Meta:
@@ -79,6 +79,9 @@ class InstanceLink(BaseModel):
 
 class Instance(HasPolicyEditsMixin, BaseModel):
     """A model representing an AWX instance running against this database."""
+
+    def __str__(self):
+        return self.hostname
 
     objects = InstanceManager()
 
@@ -464,10 +467,11 @@ def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs
         instance.set_default_policy_fields()
 
 
-# @receiver(post_save, sender=InstanceLink)
-# def on_instance_link_saved(sender, instance, **kwargs):
-#     from awx.main.tasks.receptor import write_receptor_config  # prevents circular impor
-#     connection.on_commit(lambda: write_receptor_config.apply_async(queue='tower_broadcast_all'))
+@receiver(post_save, sender=InstanceLink)
+def on_instance_link_saved(sender, instance, **kwargs):
+    from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
+
+    connection.on_commit(lambda: write_receptor_config.apply_async(queue='tower_broadcast_all'))
 
 
 @receiver(post_save, sender=Instance)
