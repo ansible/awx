@@ -3647,7 +3647,7 @@ class DependentJobsList(SubListAPIView):
     parent_model = models.UnifiedJob
     model = models.UnifiedJob
     relationship = 'dependent_jobs'
-    serializer_class = serializers.UnifiedJobSerializer
+    serializer_class = serializers.UnifiedJobListSerializer
     name = _('Unified Job Dependent Jobs List')
 
 
