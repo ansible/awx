@@ -80,6 +80,9 @@ class InstanceLink(BaseModel):
 class Instance(HasPolicyEditsMixin, BaseModel):
     """A model representing an AWX instance running against this database."""
 
+    def __str__(self):
+        return self.hostname
+
     objects = InstanceManager()
 
     # Fields set in instance registration
@@ -175,6 +178,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     )
 
     peers = models.ManyToManyField('self', symmetrical=False, through=InstanceLink, through_fields=('source', 'target'))
+    peers_from_control_nodes = models.BooleanField(default=False, help_text=_("If True, control plane cluster nodes should automatically peer to it."))
 
     class Meta:
         app_label = 'main'
@@ -279,6 +283,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         return update_fields
 
     def set_capacity_value(self):
+        old_val = self.capacity
         """Sets capacity according to capacity adjustment rule (no save)"""
         if self.enabled and self.node_type != 'hop':
             lower_cap = min(self.mem_capacity, self.cpu_capacity)
@@ -286,6 +291,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
             self.capacity = lower_cap + (higher_cap - lower_cap) * self.capacity_adjustment
         else:
             self.capacity = 0
+        return int(self.capacity) != int(old_val)  # return True if value changed
 
     def refresh_capacity_fields(self):
         """Update derived capacity fields from cpu and memory (no save)"""
@@ -466,7 +472,7 @@ def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs
 
 @receiver(post_save, sender=Instance)
 def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
-    if settings.IS_K8S and instance.node_type in (Instance.Types.EXECUTION,):
+    if settings.IS_K8S and instance.node_type in (Instance.Types.EXECUTION, Instance.Types.HOP):
         if instance.node_state == Instance.States.DEPROVISIONING:
             from awx.main.tasks.receptor import remove_deprovisioned_node  # prevents circular import
 
@@ -474,11 +480,10 @@ def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
             # node and kick off write_receptor_config
             connection.on_commit(lambda: remove_deprovisioned_node.apply_async([instance.hostname]))
 
-        if instance.node_state == Instance.States.INSTALLED:
-            from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
+        from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
 
-            # broadcast to all control instances to update their receptor configs
-            connection.on_commit(lambda: write_receptor_config.apply_async(queue='tower_broadcast_all'))
+        # broadcast to all control instances to update their receptor configs
+        connection.on_commit(lambda: write_receptor_config.apply_async(queue='tower_broadcast_all'))
 
     if created or instance.has_policy_changes():
         schedule_policy_task()
@@ -493,6 +498,11 @@ def on_instance_group_deleted(sender, instance, using, **kwargs):
 @receiver(post_delete, sender=Instance)
 def on_instance_deleted(sender, instance, using, **kwargs):
     schedule_policy_task()
+    if settings.IS_K8S and instance.node_type in (Instance.Types.EXECUTION, Instance.Types.HOP) and instance.peers_from_control_nodes:
+        from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
+
+        # broadcast to all control instances to update their receptor configs
+        connection.on_commit(lambda: write_receptor_config.apply_async(kwargs=dict(force=True), queue='tower_broadcast_all'))
 
 
 class UnifiedJobTemplateInstanceGroupMembership(models.Model):
