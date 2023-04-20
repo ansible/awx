@@ -676,39 +676,50 @@ RECEPTOR_CONFIG_STARTER = (
 
 
 @task()
-def write_receptor_config():
+def write_receptor_config(force=False):
+    """
+    only control nodes will run this
+    """
     lock = FileLock(__RECEPTOR_CONF_LOCKFILE)
     with lock:
         receptor_config = list(RECEPTOR_CONFIG_STARTER)
 
         this_inst = Instance.objects.me()
-        instances = Instance.objects.filter(node_type=Instance.Types.EXECUTION)
-        existing_peers = {link.target_id for link in InstanceLink.objects.filter(source=this_inst)}
-        new_links = []
-        for instance in instances:
-            peer = {'tcp-peer': {'address': f'{instance.hostname}:{instance.listener_port}', 'tls': 'tlsclient'}}
-            receptor_config.append(peer)
-            if instance.id not in existing_peers:
-                new_links.append(InstanceLink(source=this_inst, target=instance, link_state=InstanceLink.States.ADDING))
+        instances = Instance.objects.filter(node_type__in=(Instance.Types.EXECUTION, Instance.Types.HOP))
+        existing_peers = this_inst.peers.all()
 
-        InstanceLink.objects.bulk_create(new_links)
+        links_added = []
+        links_removed = False
+        for instance in instances:
+            if not instance.peers_from_control_nodes and instance in existing_peers:
+                this_inst.peers.remove(instance)
+                links_removed = True
+            if instance.peers_from_control_nodes:
+                peer = {'tcp-peer': {'address': f'{instance.hostname}:{instance.listener_port}', 'tls': 'tlsclient'}}
+                receptor_config.append(peer)
+                if instance not in existing_peers:
+                    links_added.append(InstanceLink(source=this_inst, target=instance, link_state=InstanceLink.States.ADDING))
+
+        InstanceLink.objects.bulk_create(links_added)
 
         with open(__RECEPTOR_CONF, 'w') as file:
             yaml.dump(receptor_config, file, default_flow_style=False)
 
-    # This needs to be outside of the lock because this function itself will acquire the lock.
-    receptor_ctl = get_receptor_ctl()
+    if force or links_removed or links_added:
+        logger.debug("Receptor config changed, reloading receptor")
+        # This needs to be outside of the lock because this function itself will acquire the lock.
+        receptor_ctl = get_receptor_ctl()
 
-    attempts = 10
-    for backoff in range(1, attempts + 1):
-        try:
-            receptor_ctl.simple_command("reload")
-            break
-        except ValueError:
-            logger.warning(f"Unable to reload Receptor configuration. {attempts-backoff} attempts left.")
-            time.sleep(backoff)
-    else:
-        raise RuntimeError("Receptor reload failed")
+        attempts = 10
+        for backoff in range(1, attempts + 1):
+            try:
+                receptor_ctl.simple_command("reload")
+                break
+            except ValueError:
+                logger.warning(f"Unable to reload Receptor configuration. {attempts-backoff} attempts left.")
+                time.sleep(backoff)
+        else:
+            raise RuntimeError("Receptor reload failed")
 
     links = InstanceLink.objects.filter(source=this_inst, target__in=instances, link_state=InstanceLink.States.ADDING)
     links.update(link_state=InstanceLink.States.ESTABLISHED)

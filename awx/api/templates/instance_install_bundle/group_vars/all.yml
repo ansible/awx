@@ -16,6 +16,14 @@ custom_ca_certfile: receptor/tls/ca/mesh-CA.crt
 receptor_protocol: 'tcp'
 receptor_listener: true
 receptor_port: {{ instance.listener_port }}
+{% if peers %}
+receptor_peers:
+{% for peer in peers %}
+  - host: {{ peer.host }}
+    port: {{ peer.port }}
+    protocol: tcp
+{% endfor %}
+{% endif %}
 receptor_dependencies:
   - python39-pip
 {% verbatim %}
