@@ -2185,7 +2185,7 @@ class BulkHostCreateSerializer(serializers.Serializer):
         host_data = []
         for r in result:
             item = {k: getattr(r, k) for k in return_keys}
-            if not settings.IS_TESTING_MODE:
+            if settings.DATABASES and ('sqlite3' in settings.DATABASES.get('default', {}).get('ENGINE')):
                 # sqlite acts different with bulk_create -- it doesn't return the id of the objects
                 # to get it, you have to do an additional query, which is not useful for our tests
                 item['url'] = reverse('api:host_detail', kwargs={'pk': r.id})

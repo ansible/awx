@@ -9,7 +9,6 @@ import socket
 import copy
 import sys
 import traceback
-import uuid
 
 # Centos-7 doesn't include the svg mime type
 # /usr/lib64/python/mimetypes.py
@@ -64,22 +63,6 @@ INSTALL_UUID = '00000000-0000-0000-0000-000000000000'
 
 BASE_VENV_PATH = "/var/lib/awx/venv/"
 AWX_VENV_PATH = os.path.join(BASE_VENV_PATH, "awx")
-
-# Use SQLite for unit tests instead of PostgreSQL.  If the lines below are
-# commented out, Django will create the test_awx-dev database in PostgreSQL to
-# run unit tests.
-if "pytest" in sys.modules:
-    CACHES = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache', 'LOCATION': 'unique-{}'.format(str(uuid.uuid4()))}}
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'awx.sqlite3'),  # noqa
-            'TEST': {
-                # Test database cannot be :memory: for inventory tests.
-                'NAME': os.path.join(BASE_DIR, 'awx_test.sqlite3')  # noqa
-            },
-        }
-    }
 
 CLUSTER_HOST_ID = socket.gethostname()
 

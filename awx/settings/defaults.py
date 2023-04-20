@@ -10,8 +10,6 @@ import socket
 from datetime import timedelta
 
 
-IS_TESTING_MODE = False
-
 DEBUG = True
 SQL_DEBUG = DEBUG
 
