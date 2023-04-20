@@ -5377,6 +5377,7 @@ class InstanceSerializer(BaseSerializer):
     jobs_running = serializers.IntegerField(help_text=_('Count of jobs in the running or waiting state that are targeted for this instance'), read_only=True)
     jobs_total = serializers.IntegerField(help_text=_('Count of all jobs that target this instance'), read_only=True)
     health_check_pending = serializers.SerializerMethodField()
+    peers = serializers.PrimaryKeyRelatedField(many=True, queryset=Instance.objects.all())
 
     class Meta:
         model = Instance
@@ -5413,6 +5414,7 @@ class InstanceSerializer(BaseSerializer):
             'node_state',
             'ip_address',
             'listener_port',
+            'peers',
         )
         extra_kwargs = {
             'node_type': {'initial': Instance.Types.EXECUTION, 'default': Instance.Types.EXECUTION},
@@ -5436,7 +5438,7 @@ class InstanceSerializer(BaseSerializer):
         res = super(InstanceSerializer, self).get_related(obj)
         res['jobs'] = self.reverse('api:instance_unified_jobs_list', kwargs={'pk': obj.pk})
         res['instance_groups'] = self.reverse('api:instance_instance_groups_list', kwargs={'pk': obj.pk})
-        if settings.IS_K8S and obj.node_type in (Instance.Types.EXECUTION,):
+        if settings.IS_K8S and obj.node_type in (Instance.Types.EXECUTION, Instance.Types.HOP):
             res['install_bundle'] = self.reverse('api:instance_install_bundle', kwargs={'pk': obj.pk})
         res['peers'] = self.reverse('api:instance_peers_list', kwargs={"pk": obj.pk})
         if self.context['request'].user.is_superuser or self.context['request'].user.is_system_auditor:
@@ -5466,21 +5468,13 @@ class InstanceSerializer(BaseSerializer):
         return obj.health_check_pending
 
     def validate(self, data):
-        if self.instance:
-            if self.instance.node_type == Instance.Types.HOP:
-                raise serializers.ValidationError("Hop node instances may not be changed.")
-        else:
-            if not settings.IS_K8S:
-                raise serializers.ValidationError("Can only create instances on Kubernetes or OpenShift.")
+        if not self.instance and not settings.IS_K8S:
+            raise serializers.ValidationError("Can only create instances on Kubernetes or OpenShift.")
         return data
 
     def validate_node_type(self, value):
-        if not self.instance:
-            if value not in (Instance.Types.EXECUTION,):
-                raise serializers.ValidationError("Can only create execution nodes.")
-        else:
-            if self.instance.node_type != value:
-                raise serializers.ValidationError("Cannot change node type.")
+        if self.instance and self.instance.node_type != value:
+            raise serializers.ValidationError("Cannot change node type.")
 
         return value
 
@@ -5491,8 +5485,8 @@ class InstanceSerializer(BaseSerializer):
                     raise serializers.ValidationError("Can only change the state on Kubernetes or OpenShift.")
                 if value != Instance.States.DEPROVISIONING:
                     raise serializers.ValidationError("Can only change instances to the 'deprovisioning' state.")
-                if self.instance.node_type not in (Instance.Types.EXECUTION,):
-                    raise serializers.ValidationError("Can only deprovision execution nodes.")
+                if self.instance.node_type not in (Instance.Types.EXECUTION, Instance.Types.HOP):
+                    raise serializers.ValidationError("Can only deprovision execution or hop nodes.")
         else:
             if value and value != Instance.States.INSTALLED:
                 raise serializers.ValidationError("Can only create instances in the 'installed' state.")
