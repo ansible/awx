@@ -10,7 +10,7 @@ from awx.main.models import WorkflowJob
 @pytest.mark.django_db
 def test_bulk_job_launch(run_module, admin_user, job_template):
     jobs = [dict(unified_job_template=job_template.id)]
-    run_module(
+    result = run_module(
         'bulk_job_launch',
         {
             'name': "foo-bulk-job",
@@ -21,6 +21,8 @@ def test_bulk_job_launch(run_module, admin_user, job_template):
         },
         admin_user,
     )
+    assert not result.get('failed', False), result.get('msg', result)
+    assert result.get('changed'), result
 
     bulk_job = WorkflowJob.objects.get(name="foo-bulk-job")
     assert bulk_job.extra_vars == '{"animal": "owl"}'
@@ -30,7 +32,7 @@ def test_bulk_job_launch(run_module, admin_user, job_template):
 @pytest.mark.django_db
 def test_bulk_host_create(run_module, admin_user, inventory):
     hosts = [dict(name="127.0.0.1"), dict(name="foo.dns.org")]
-    run_module(
+    result = run_module(
         'bulk_host_create',
         {
             'inventory': inventory.name,
@@ -38,6 +40,8 @@ def test_bulk_host_create(run_module, admin_user, inventory):
         },
         admin_user,
     )
+    assert not result.get('failed', False), result.get('msg', result)
+    assert result.get('changed'), result
     resp_hosts = inventory.hosts.all().values_list('name', flat=True)
     for h in hosts:
         assert h['name'] in resp_hosts
