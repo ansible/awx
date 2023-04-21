@@ -114,9 +114,6 @@ JOBOUTPUT_ROOT = '/var/lib/awx/job_status/'
 # Absolute filesystem path to the directory to store logs
 LOG_ROOT = '/var/log/tower/'
 
-# The heartbeat file for the scheduler
-SCHEDULE_METADATA_LOCATION = os.path.join(BASE_DIR, '.tower_cycle')
-
 # Django gettext files path: locale/<lang-code>/LC_MESSAGES/django.po, django.mo
 LOCALE_PATHS = (os.path.join(BASE_DIR, 'locale'),)
 
@@ -788,8 +785,6 @@ INSIGHTS_AGENT_MIME = 'application/example'
 INSIGHTS_SYSTEM_ID_FILE = '/etc/redhat-access-insights/machine-id'
 INSIGHTS_CERT_PATH = "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
 
-TOWER_SETTINGS_MANIFEST = {}
-
 # Settings related to external logger configuration
 LOG_AGGREGATOR_ENABLED = False
 LOG_AGGREGATOR_TCP_TIMEOUT = 5
@@ -800,11 +795,6 @@ LOG_AGGREGATOR_MAX_DISK_USAGE_PATH = '/var/lib/awx'
 LOG_AGGREGATOR_RSYSLOGD_DEBUG = False
 LOG_AGGREGATOR_RSYSLOGD_ERROR_LOG_FILE = '/var/log/tower/rsyslog.err'
 API_400_ERROR_LOG_FORMAT = 'status {status_code} received by user {user_name} attempting to access {url_path} from {remote_addr}'
-
-# The number of retry attempts for websocket session establishment
-# If you're encountering issues establishing websockets in a cluster,
-# raising this value can help
-CHANNEL_LAYER_RECEIVE_MAX_RETRY = 10
 
 ASGI_APPLICATION = "awx.main.routing.application"
 
@@ -955,7 +945,8 @@ AWX_CLEANUP_PATHS = True
 # Allow ansible-runner to store env folder (may contain sensitive information)
 AWX_RUNNER_OMIT_ENV_FILES = True
 
-# Allow ansible-runner to save ansible output (may cause performance issues)
+# Allow ansible-runner to save ansible output
+# (changing to False may cause performance issues)
 AWX_RUNNER_SUPPRESS_OUTPUT_FILE = True
 
 # https://github.com/ansible/ansible-runner/pull/1191/files
