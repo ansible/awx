@@ -22,10 +22,8 @@ def migrate_event_data(apps, schema_editor):
             # recreate counter for the new table's primary key to
             # start where the *old* table left off (we have to do this because the
             # counter changed from an int to a bigint)
-            cursor.execute(f'DROP SEQUENCE IF EXISTS "{tblname}_id_seq" CASCADE;')
-            cursor.execute(f'CREATE SEQUENCE "{tblname}_id_seq";')
-            cursor.execute(f'ALTER TABLE "{tblname}" ALTER COLUMN "id" ' f"SET DEFAULT nextval('{tblname}_id_seq');")
-            cursor.execute(f"SELECT setval('{tblname}_id_seq', (SELECT MAX(id) FROM _old_{tblname}), true);")
+            cursor.execute(f'CREATE SEQUENCE IF NOT EXISTS "{tblname}_id_seq";')
+            cursor.execute(f"SELECT setval('{tblname}_id_seq', COALESCE((SELECT MAX(id)+1 FROM _old_{tblname}), 1), false);")
             cursor.execute(f'DROP TABLE _old_{tblname};')
 
 
