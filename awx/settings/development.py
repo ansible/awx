@@ -115,6 +115,6 @@ except ImportError:
 # because conf.d files will define DATABASES and this should modify that
 from .application_name import set_application_name
 
-set_application_name(DATABASES, CLUSTER_HOST_ID)
+set_application_name(DATABASES, CLUSTER_HOST_ID)  # NOQA
 
 del set_application_name
