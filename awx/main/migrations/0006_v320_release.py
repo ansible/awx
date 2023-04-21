@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 # Psycopg2
-from psycopg2.extensions import AsIs
+from psycopg import sql
 
 # Django
 from django.db import connection, migrations, models, OperationalError, ProgrammingError
@@ -136,7 +136,11 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.RunSQL(
-            [("CREATE INDEX host_ansible_facts_default_gin ON %s USING gin" "(ansible_facts jsonb_path_ops);", [AsIs(Host._meta.db_table)])],
+            [
+                "CREATE INDEX host_ansible_facts_default_gin ON {} USING gin(ansible_facts jsonb_path_ops);".format(
+                    sql.Identifier(Host._meta.db_table).as_string(connection.cursor())
+                )
+            ],
             [('DROP INDEX host_ansible_facts_default_gin;', None)],
         ),
         # SCM file-based inventories
