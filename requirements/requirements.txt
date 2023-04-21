@@ -74,6 +74,7 @@ cryptography==38.0.4
     #   adal
     #   autobahn
     #   azure-keyvault
+    #   jwcrypto
     #   pyopenssl
     #   service-identity
     #   social-auth-core
@@ -91,6 +92,8 @@ defusedxml==0.7.1
     # via
     #   python3-openid
     #   social-auth-core
+deprecated==1.2.13
+    # via jwcrypto
 distro==1.8.0
     # via -r /awx_devel/requirements/requirements.in
 django==3.2.16
@@ -118,7 +121,7 @@ django-extensions==3.2.1
     # via -r /awx_devel/requirements/requirements.in
 django-guid==3.2.1
     # via -r /awx_devel/requirements/requirements.in
-django-oauth-toolkit==1.4.1
+django-oauth-toolkit==1.7.1
     # via -r /awx_devel/requirements/requirements.in
 django-pglocks==1.0.4
     # via -r /awx_devel/requirements/requirements.in
@@ -210,6 +213,8 @@ json-log-formatter==0.5.1
     # via -r /awx_devel/requirements/requirements.in
 jsonschema==4.17.3
     # via -r /awx_devel/requirements/requirements.in
+jwcrypto==1.4.2
+    # via django-oauth-toolkit
 kubernetes==25.3.0
     # via openshift
 lockfile==0.12.2
@@ -444,6 +449,8 @@ websocket-client==1.4.2
     # via kubernetes
 wheel==0.38.4
     # via -r /awx_devel/requirements/requirements.in
+wrapt==1.15.0
+    # via deprecated
 xmlsec==1.3.13
     # via python3-saml
 yarl==1.8.1
