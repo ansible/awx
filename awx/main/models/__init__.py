@@ -52,6 +52,7 @@ from awx.main.models.ha import (  # noqa
     InstanceLink,
     InstanceGroup,
     TowerScheduleState,
+    InstanceLink,
 )
 from awx.main.models.rbac import (  # noqa
     Role,
@@ -205,6 +206,7 @@ activity_stream_registrar.connect(Inventory)
 activity_stream_registrar.connect(Host)
 activity_stream_registrar.connect(Group)
 activity_stream_registrar.connect(Instance)
+# activity_stream_registrar.connect(InstanceLink)
 activity_stream_registrar.connect(InstanceGroup)
 activity_stream_registrar.connect(InventorySource)
 # activity_stream_registrar.connect(InventoryUpdate)

@@ -56,6 +56,7 @@ from awx.main.models import (
     Project,
     ProjectUpdate,
     ProjectUpdateEvent,
+    InstanceLink,
     Role,
     Schedule,
     SystemJob,
@@ -2947,6 +2948,23 @@ class WorkflowApprovalTemplateAccess(BaseAccess):
 
     def filtered_queryset(self):
         return self.model.objects.filter(workflowjobtemplatenodes__workflow_job_template__in=WorkflowJobTemplate.accessible_pk_qs(self.user, 'read_role'))
+
+
+class PeersAccess(BaseAccess):
+    model = InstanceLink
+    # prefetch_related = ('source','target',)
+
+    # def filtered_queryset(self):
+    #     return InstanceLink.objects.filter(rampart_groups__in=self.user.get_queryset(InstanceGroup)).distinct()
+
+    def can_add(self, data):
+        return self.user.is_superuser
+
+    def can_change(self, obj, data):
+        return False
+
+    def can_delete(self, obj):
+        return self.user.is_superuser
 
 
 for cls in BaseAccess.__subclasses__():

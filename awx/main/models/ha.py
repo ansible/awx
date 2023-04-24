@@ -76,6 +76,9 @@ class InstanceLink(BaseModel):
     class Meta:
         unique_together = ('source', 'target')
 
+    def get_absolute_url(self, request=None):
+        return reverse('api:peers_detail', kwargs={'pk': self.pk}, request=request)
+
 
 class Instance(HasPolicyEditsMixin, BaseModel):
     """A model representing an AWX instance running against this database."""

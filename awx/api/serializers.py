@@ -5352,7 +5352,7 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
 class InstanceLinkSerializer(BaseSerializer):
     class Meta:
         model = InstanceLink
-        fields = ('source', 'target', 'link_state')
+        fields = ('id', 'url', 'source', 'target', 'link_state')
 
     source = serializers.SlugRelatedField(slug_field="hostname", read_only=True)
     target = serializers.SlugRelatedField(slug_field="hostname", read_only=True)
