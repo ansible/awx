@@ -59,17 +59,15 @@ class Command(BaseCommand):
 
     def do_hearbeat_loop(self):
         with pg_bus_conn(new_connection=True) as conn:
-            signal.signal(signal.SIGTERM, self.notify_listener_and_exit)
-            signal.signal(signal.SIGINT, self.notify_listener_and_exit)
             while True:
                 logger.debug('Sending heartbeat')
                 conn.notify('web_heartbeet', self.construct_payload())
                 time.sleep(settings.BROADCAST_WEBSOCKET_BEACON_FROM_WEB_RATE_SECONDS)
 
-    # TODO: Send a message with action=offline if we notice a SIGTERM or SIGINT
-    # (wsrelay can use this to remove the node quicker)
     def handle(self, *arg, **options):
         self.print_banner()
+        signal.signal(signal.SIGTERM, self.notify_listener_and_exit)
+        signal.signal(signal.SIGINT, self.notify_listener_and_exit)
 
         # Note: We don't really try any reconnect logic to pg_notify here,
         # just let supervisor restart if we fail.
