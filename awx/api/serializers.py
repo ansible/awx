@@ -5364,6 +5364,11 @@ class InstanceNodeSerializer(BaseSerializer):
         fields = ('id', 'hostname', 'node_type', 'node_state', 'enabled')
 
 
+class PeersSerializer(serializers.StringRelatedField):
+    def to_internal_value(self, value):
+        return Instance.objects.get(hostname=value)
+
+
 class InstanceSerializer(BaseSerializer):
     show_capabilities = ['edit']
 
@@ -5373,7 +5378,7 @@ class InstanceSerializer(BaseSerializer):
     jobs_total = serializers.IntegerField(help_text=_('Count of all jobs that target this instance'), read_only=True)
     health_check_pending = serializers.SerializerMethodField()
     # peers = serializers.PrimaryKeyRelatedField(many=True, queryset=Instance.objects.all())
-    peers = serializers.StringRelatedField(many=True)
+    peers = PeersSerializer(many=True)
 
     class Meta:
         model = Instance
