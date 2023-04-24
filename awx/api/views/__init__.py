@@ -4397,3 +4397,16 @@ class WorkflowApprovalDeny(RetrieveAPIView):
             return Response({"error": _("This workflow step has already been approved or denied.")}, status=status.HTTP_400_BAD_REQUEST)
         obj.deny(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class PeersList(ListCreateAPIView):
+    model = models.InstanceLink
+    serializer_class = serialazers.InstanceLinkSerializer
+
+class PeersDetail(RetrieveUpdateDestroyAPIView):
+    always_allow_superuser = True
+    model = models.InstanceLink
+    serializer_class = serializers.InstanceLinkSerializer
+
+    def delete(self, request, *args, **kwargs):
+        return super(PeersDetail, self).delete(request, *args, **kwargs)

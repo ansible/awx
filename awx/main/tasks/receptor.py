@@ -685,10 +685,17 @@ def write_receptor_config():
         existing_peers = {link.target_id for link in InstanceLink.objects.filter(source=this_inst)}
         new_links = []
         for instance in instances:
-            peer = {'tcp-peer': {'address': f'{instance.hostname}:{instance.listener_port}', 'tls': 'tlsclient'}}
-            receptor_config.append(peer)
-            if instance.id not in existing_peers:
-                new_links.append(InstanceLink(source=this_inst, target=instance, link_state=InstanceLink.States.ADDING))
+            is_peer = False
+            instance_target_peers = InstanceLink.objects.filter(target=instance)
+            for instance_target_peer in instance_target_peers:
+                if instance_target_peer.source_id != this_inst.id:
+                    is_peer = True
+
+            if not is_peer:
+                peer = {'tcp-peer': {'address': f'{instance.hostname}:{instance.listener_port}', 'tls': 'tlsclient'}}
+                receptor_config.append(peer)
+                if instance.id not in existing_peers:
+                    new_links.append(InstanceLink(source=this_inst, target=instance, link_state=InstanceLink.States.ADDING))
 
         InstanceLink.objects.bulk_create(new_links)
 
