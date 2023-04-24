@@ -10,7 +10,7 @@ class AssociationParser(object):
     def __init__(self, page, options_json, resource):
         self.page = page
         self.targets = {}
-        for related_key, plural_name in options_json['related_associations']:
+        for related_key, plural_name in options_json.get('related_associations', {}):
             self.targets[related_key] = plural_name
         self.resource = resource
 
