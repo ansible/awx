@@ -1,14 +1,19 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { t } from '@lingui/macro';
 import { CardBody } from 'components/Card';
 import PaginatedTable, {
   getSearchableKeys,
   HeaderCell,
   HeaderRow,
+  ToolbarAddButton,
 } from 'components/PaginatedTable';
+import DisassociateButton from 'components/DisassociateButton';
+import AssociateModal from 'components/AssociateModal';
+import ErrorDetail from 'components/ErrorDetail';
+import AlertModal from 'components/AlertModal';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import { useLocation, useParams } from 'react-router-dom';
-import useRequest, { useDeleteItems } from 'hooks/useRequest';
+import useRequest, { useDeleteItems, useDismissableError } from 'hooks/useRequest';
 import DataListToolbar from 'components/DataListToolbar';
 import { InstancesAPI, PeersAPI } from 'api';
 import useExpanded from 'hooks/useExpanded';
@@ -25,15 +30,15 @@ function InstancePeerList() {
   const location = useLocation();
   const { id } = useParams();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
-  const isSysAdmin = roles.some((role) => role.name === 'System Administrator');
-  
+
+  // const isSysAdmin = roles.some((role) => role.name === 'System Administrator');
+
   const fetchInstancesToAssociate = useCallback(
     (params) =>
       InstancesAPI.read(params),
-    [instanceId]
+    []
   );
-  
+
   const {
     isLoading,
     error: contentError,
@@ -74,7 +79,6 @@ function InstancePeerList() {
 
   const { expanded, isAllExpanded, handleExpand, expandAll } =
     useExpanded(peers);
-  
   const { selected, isAllSelected, handleSelect, clearSelected, selectAll } =
     useSelected(peers);
 
@@ -82,9 +86,9 @@ function InstancePeerList() {
     associateError || disassociateError
   );
 
-  const { 
-    request: handlePeerAssociate, 
-    error: associateError 
+  const {
+    request: handlePeerAssociate,
+    error: associateError
   } = useRequest(
     useCallback(
       async (instancesPeerToAssociate) => {
@@ -92,7 +96,7 @@ function InstancePeerList() {
           instancesPeerToAssociate
             .filter((i) => i.node_type !== 'control')
             .map((target) =>
-              PeersAPI.addPeer(id, target.id)
+              PeersAPI.createPeer(id, target.id)
             )
         );
         fetchPeers();
@@ -105,13 +109,12 @@ function InstancePeerList() {
     isLoading: isDisassociateLoading,
     deleteItems: deletePeers,
     deletionError: disassociateError,
-    clearDeletionError,
   } = useDeleteItems(
     useCallback(
-      () => 
+      () =>
         Promise.all(
           selected.map((target) =>
-              PeersAPI.deletePeer(id, target.id)
+              PeersAPI.destroyPeer(id, target.id)
           )
         ),
       [id, selected]
@@ -122,9 +125,8 @@ function InstancePeerList() {
       fetchItems: fetchPeers,
     }
   );
-  
-  const canAdd = isSysAdmin;
-  
+
+  const canAdd = true;
 
   const handlePeersDiassociate = async () => {
     await deletePeers();
@@ -181,7 +183,7 @@ function InstancePeerList() {
                     <ToolbarAddButton
                       ouiaId="add-instance-peers-button"
                       key="add"
-                      onClick={() => setShowAddModal(true)}
+                      onClick={() => setIsModalOpen(true)}
                     />,
                   ]
                 : []),
@@ -191,7 +193,6 @@ function InstancePeerList() {
                 onDisassociate={handlePeersDiassociate}
                 itemsToDisassociate={selected}
                 modalTitle={t`Disassociate instance from peers?`}
-                isProtectedInstanceGroup={instanceGroup.name === 'controlplane'}
               />,
             ]}
           />

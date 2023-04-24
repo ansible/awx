@@ -114,6 +114,7 @@ export {
   HostsAPI,
   InstanceGroupsAPI,
   InstancesAPI,
+  PeersAPI,
   InventoriesAPI,
   InventoryScriptsAPI,
   InventorySourcesAPI,

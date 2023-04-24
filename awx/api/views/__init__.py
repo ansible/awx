@@ -4400,10 +4400,13 @@ class WorkflowApprovalDeny(RetrieveAPIView):
 
 
 class PeersList(ListCreateAPIView):
+    name = _("Peers")
     model = models.InstanceLink
-    serializer_class = serialazers.InstanceLinkSerializer
+    serializer_class = serializers.InstanceLinkSerializer
+
 
 class PeersDetail(RetrieveUpdateDestroyAPIView):
+    name = _("Peers Detail")
     always_allow_superuser = True
     model = models.InstanceLink
     serializer_class = serializers.InstanceLinkSerializer

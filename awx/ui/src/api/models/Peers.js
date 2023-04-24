@@ -4,26 +4,29 @@ class Peers extends Base {
   constructor(http) {
     super(http);
     this.baseUrl = 'api/v2/peers/';
+
+    this.createPeer = this.createPeer.bind(this);
+    this.destroyPeer = this.destroyPeer.bind(this);
   }
 
-  addPeer(sourceId, targetId) {
+  createPeer(sourceId, targetId) {
     return this.http.post(`${this.baseUrl}`, {
-      source: sourceId, 
+      source: sourceId,
       target: targetId,
       link_state: 'established'
     });
   }
 
-  deletePeer(sourceId, targetId) {
+  destroyPeer(sourceId, targetId) {
 
-    const { data } = await this.read({
+    const { data } = this.read({
       page: 1,
       page_size: 200,
       source: sourceId,
       target: targetId,
     });
 
-    const [peer_delete] = await Promise.all(
+    const [peer_delete] = Promise.all(
       data.results
         .map((peer) =>
           this.destroy(peer.id)
