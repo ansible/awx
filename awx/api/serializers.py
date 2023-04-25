@@ -5420,6 +5420,7 @@ class InstanceSerializer(BaseSerializer):
             'ip_address',
             'listener_port',
             'peers',
+            'peer_to_control_nodes',
         )
         extra_kwargs = {
             'node_type': {'initial': Instance.Types.EXECUTION, 'default': Instance.Types.EXECUTION},
