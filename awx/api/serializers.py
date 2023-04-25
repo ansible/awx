@@ -954,7 +954,7 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
 
 
 class UserSerializer(BaseSerializer):
-    password = serializers.CharField(required=False, default='', write_only=True, help_text=_('Write-only field used to change the password.'))
+    password = serializers.CharField(required=False, default='', help_text=_('Field used to change the password.'))
     ldap_dn = serializers.CharField(source='profile.ldap_dn', read_only=True)
     external_account = serializers.SerializerMethodField(help_text=_('Set if the account is managed by an external service'))
     is_system_auditor = serializers.BooleanField(default=False)
@@ -981,7 +981,12 @@ class UserSerializer(BaseSerializer):
 
     def to_representation(self, obj):
         ret = super(UserSerializer, self).to_representation(obj)
-        ret.pop('password', None)
+        if self.get_external_account(obj):
+            # If this is an external account it shouldn't have a password field
+            ret.pop('password', None)
+        else:
+            # If its an internal account lets assume there is a password and return $encrypted$ to the user
+            ret['password'] = '$encrypted$'
         if obj and type(self) is UserSerializer:
             ret['auth'] = obj.social_auth.values('provider', 'uid')
         return ret
@@ -1019,7 +1024,7 @@ class UserSerializer(BaseSerializer):
         # For now we're not raising an error, just not saving password for
         # users managed by LDAP who already have an unusable password set.
         # Get external password will return something like ldap or enterprise or None if the user isn't external. We only want to allow a password update for a None option
-        if new_password and not self.get_external_account(obj):
+        if new_password and new_password != '$encrypted$' and not self.get_external_account(obj):
             obj.set_password(new_password)
             obj.save(update_fields=['password'])
 
