@@ -149,7 +149,7 @@ class ResourceOptionsParser(object):
             if method == 'get':
                 add_output_formatting_arguments(parser, {})
 
-        if self.resource != 'settings':
+        if self.resource != 'settings' and hasattr(self, 'related_associations'):
             # all normal resources are also considered to have association abilities
             self.parser.add_parser('associate', help='Associate via a related endpoint')
             self.associate = AssociationParser(self.page, self.resource)
