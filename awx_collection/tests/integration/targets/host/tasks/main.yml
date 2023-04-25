@@ -1,8 +1,13 @@
 ---
+- name: Generate a test ID
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
 - name: Generate names
   set_fact:
-    host_name: "AWX-Collection-tests-host-host-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    inv_name: "AWX-Collection-tests-host-inv-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    host_name: "AWX-Collection-tests-host-host-{{ test_id }}"
+    inv_name: "AWX-Collection-tests-host-inv-{{ test_id }}"
 
 - name: Create an Inventory
   inventory:

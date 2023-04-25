@@ -2,22 +2,25 @@
 - name: Load the UI settings
   set_fact:
     project_base_dir: "{{ controller_settings.project_base_dir }}"
+    inv_name: "AWX-Collection-tests-manual_project-inv-{{ test_id }}"
+    host_name: "AWX-Collection-tests-manual_project-host-{{ test_id }}"
+    cred_name: "AWX-Collection-tests-manual_project-cred-{{ test_id }}"
   vars:
     controller_settings: "{{ lookup('awx.awx.controller_api', 'config/') }}"
 
 - inventory:
-    name: localhost
+    name: "{{ inv_name }}"
     organization: Default
 
 - host:
-    name: localhost
-    inventory: localhost
+    name: "{{ host_name }}"
+    inventory: "{{ inv_name }}"
     variables:
       ansible_connection: local
 
 - name: Create an unused SSH / Machine credential
   credential:
-    name: dummy
+    name: "{{ cred_name }}"
     credential_type: Machine
     inputs:
       ssh_key_data: |
@@ -36,8 +39,8 @@
 
     - name: Create a directory for manual project
       ad_hoc_command:
-        credential: dummy
-        inventory: localhost
+        credential: "{{ cred_name }}"
+        inventory: "{{ inv_name }}"
         job_type: run
         module_args: "mkdir -p {{ project_base_dir }}/{{ project_dir_name }}"
         module_name: command
@@ -51,6 +54,18 @@
 
     - name: Delete dummy credential
       credential:
-        name: dummy
+        name: "{{ cred_name }}"
         credential_type: Machine
+        state: absent
+
+    - name: Delete host
+      host:
+        name: "{{ host_name }}"
+        inventory: "{{ inv_name }}"
+        state: absent
+
+    - name: Delete Inventory
+      inventory:
+        name: "{{ inv_name }}"
+        organization: Default
         state: absent

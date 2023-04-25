@@ -2,6 +2,7 @@
 - name: Generate a random string for test
   set_fact:
     test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
 
 - name: generate random string for schedule
   set_fact:

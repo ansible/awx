@@ -1,15 +1,13 @@
 ---
-- name: Generate random string for project
+- name: Generate a test ID
   set_fact:
-    rand_string: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
 
-- name: Generate manual project name
+- name: Generate object names
   set_fact:
-    project_name: "Manual_Project_{{ rand_string }}"
-
-- name: Generate manual project dir name
-  set_fact:
-    project_dir_name: "proj_{{ rand_string }}"
+    project_name: "AWX-Collection-tests-manual_project-proj-{{ test_id }}"
+    project_dir_name: "proj_{{ test_id }}"
 
 - name: Create a project directory for manual project
   import_tasks: create_project_dir.yml

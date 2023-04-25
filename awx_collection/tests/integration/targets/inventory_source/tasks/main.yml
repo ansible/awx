@@ -1,9 +1,14 @@
 ---
+- name: Generate a test ID
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
 - name: Generate names
   set_fact:
-    openstack_cred: "AWX-Collection-tests-inventory_source-cred-openstack-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    openstack_inv: "AWX-Collection-tests-inventory_source-inv-openstack-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    openstack_inv_source: "AWX-Collection-tests-inventory_source-inv-source-openstack-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    openstack_cred: "AWX-Collection-tests-inventory_source-cred-openstack-{{ test_id }}"
+    openstack_inv: "AWX-Collection-tests-inventory_source-inv-openstack-{{ test_id }}"
+    openstack_inv_source: "AWX-Collection-tests-inventory_source-inv-source-openstack-{{ test_id }}"
 
 - name: Add a credential
   credential:

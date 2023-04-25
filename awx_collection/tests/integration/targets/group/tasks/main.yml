@@ -1,13 +1,18 @@
 ---
+- name: Generate a test ID
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
 - name: Generate names
   set_fact:
-    group_name1: "AWX-Collection-tests-group-group-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    group_name2: "AWX-Collection-tests-group-group-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    group_name3: "AWX-Collection-tests-group-group-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    inv_name: "AWX-Collection-tests-group-inv-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    host_name1: "AWX-Collection-tests-group-host-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    host_name2: "AWX-Collection-tests-group-host-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    host_name3: "AWX-Collection-tests-group-host-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    group_name1: "AWX-Collection-tests-group-group1-{{ test_id }}"
+    group_name2: "AWX-Collection-tests-group-group2-{{ test_id }}"
+    group_name3: "AWX-Collection-tests-group-group3-{{ test_id }}"
+    inv_name: "AWX-Collection-tests-group-inv-{{ test_id }}"
+    host_name1: "AWX-Collection-tests-group-host1-{{ test_id }}"
+    host_name2: "AWX-Collection-tests-group-host2-{{ test_id }}"
+    host_name3: "AWX-Collection-tests-group-host3-{{ test_id }}"
 
 - name: Create an Inventory
   inventory:
@@ -117,9 +122,10 @@
     state: absent
   register: result
 
+# In this case, group 2 was last a child of group1 so deleting group1 deleted group2
 - assert:
     that:
-      - "result is changed"
+      - "result is not changed"
 
 - name: Delete a Group
   group:

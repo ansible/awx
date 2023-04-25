@@ -1,7 +1,12 @@
 ---
+- name: Generate a test ID
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
 - name: Generate names
   set_fact:
-    label_name: "AWX-Collection-tests-label-label-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    label_name: "AWX-Collection-tests-label-label-{{ test_id }}"
 
 - name: Create a Label
   label:
