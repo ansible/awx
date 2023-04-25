@@ -2581,16 +2581,7 @@ class JobTemplateCredentialsList(SubListCreateAttachDetachAPIView):
     serializer_class = serializers.CredentialSerializer
     parent_model = models.JobTemplate
     relationship = 'credentials'
-
-    def get_queryset(self):
-        # Return the full list of credentials
-        parent = self.get_parent_object()
-        self.check_parent_access(parent)
-        sublist_qs = getattrd(parent, self.relationship)
-        sublist_qs = sublist_qs.prefetch_related(
-            'created_by', 'modified_by', 'admin_role', 'use_role', 'read_role', 'admin_role__parents', 'admin_role__members'
-        )
-        return sublist_qs
+    filter_read_permission = False
 
     def is_valid_relation(self, parent, sub, created=False):
         if sub.unique_hash() in [cred.unique_hash() for cred in parent.credentials.all()]:
@@ -2780,6 +2771,7 @@ class JobTemplateInstanceGroupsList(SubListAttachDetachAPIView):
     serializer_class = serializers.InstanceGroupSerializer
     parent_model = models.JobTemplate
     relationship = 'instance_groups'
+    filter_read_permission = False
 
 
 class JobTemplateAccessList(ResourceAccessList):

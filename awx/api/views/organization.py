@@ -207,6 +207,7 @@ class OrganizationInstanceGroupsList(SubListAttachDetachAPIView):
     serializer_class = InstanceGroupSerializer
     parent_model = Organization
     relationship = 'instance_groups'
+    filter_read_permission = False
 
 
 class OrganizationGalaxyCredentialsList(SubListAttachDetachAPIView):
@@ -214,6 +215,7 @@ class OrganizationGalaxyCredentialsList(SubListAttachDetachAPIView):
     serializer_class = CredentialSerializer
     parent_model = Organization
     relationship = 'galaxy_credentials'
+    filter_read_permission = False
 
     def is_valid_relation(self, parent, sub, created=False):
         if sub.kind != 'galaxy_api_token':

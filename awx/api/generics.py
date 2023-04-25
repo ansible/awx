@@ -510,6 +510,9 @@ class SubListAPIView(ParentMixin, ListAPIView):
     # And optionally (user must have given access permission on parent object
     # to view sublist):
     #   parent_access = 'read'
+    # filter_read_permission sets whether or not to override the default intersection behavior
+    # implemented here
+    filter_read_permission = True
 
     def get_description_context(self):
         d = super(SubListAPIView, self).get_description_context()
@@ -524,8 +527,14 @@ class SubListAPIView(ParentMixin, ListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model).distinct()
         sublist_qs = self.get_sublist_queryset(parent)
+        if not self.filter_read_permission:
+            access_class = access_registry[self.model]
+            if access_class.prefetch_related:
+                return sublist_qs.prefetch_related(*access_class.prefetch_related)
+            if access_class.select_related:
+                return sublist_qs.select_related(*access_class.select_related)
+        qs = self.request.user.get_queryset(self.model).distinct()
         return qs & sublist_qs
 
     def get_sublist_queryset(self, parent):
