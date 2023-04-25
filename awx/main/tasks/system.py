@@ -893,15 +893,8 @@ def _reconstruct_relationships(copy_mapping):
 
 
 @task(queue=get_task_queuename)
-def deep_copy_model_obj(model_module, model_name, obj_pk, new_obj_pk, user_pk, uuid, permission_check_func=None):
-    sub_obj_list = cache.get(uuid)
-    if sub_obj_list is None:
-        logger.error('Deep copy {} from {} to {} failed unexpectedly.'.format(model_name, obj_pk, new_obj_pk))
-        return
-
+def deep_copy_model_obj(model_module, model_name, obj_pk, new_obj_pk, user_pk, permission_check_func=None):
     logger.debug('Deep copy {} from {} to {}.'.format(model_name, obj_pk, new_obj_pk))
-    from awx.api.generics import CopyAPIView
-    from awx.main.signals import disable_activity_stream
 
     model = getattr(importlib.import_module(model_module), model_name, None)
     if model is None:
@@ -913,6 +906,28 @@ def deep_copy_model_obj(model_module, model_name, obj_pk, new_obj_pk, user_pk, u
     except ObjectDoesNotExist:
         logger.warning("Object or user no longer exists.")
         return
+
+    o2m_to_preserve = {}
+    fields_to_preserve = set(getattr(model, 'FIELDS_TO_PRESERVE_AT_COPY', []))
+
+    for field in model._meta.get_fields():
+        if field.name in fields_to_preserve:
+            if field.one_to_many:
+                try:
+                    field_val = getattr(obj, field.name)
+                except AttributeError:
+                    continue
+                o2m_to_preserve[field.name] = field_val
+
+    sub_obj_list = []
+    for o2m in o2m_to_preserve:
+        for sub_obj in o2m_to_preserve[o2m].all():
+            sub_model = type(sub_obj)
+            sub_obj_list.append((sub_model.__module__, sub_model.__name__, sub_obj.pk))
+
+    from awx.api.generics import CopyAPIView
+    from awx.main.signals import disable_activity_stream
+
     with transaction.atomic(), ignore_inventory_computed_fields(), disable_activity_stream():
         copy_mapping = {}
         for sub_obj_setup in sub_obj_list:

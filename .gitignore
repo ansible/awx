@@ -157,9 +157,10 @@ use_dev_supervisor.txt
 *.unison.tmp
 *.#
 /awx/ui/.ui-built
-/Dockerfile
 /_build/
 /_build_kube_dev/
+/Dockerfile
+/Dockerfile.dev
 /Dockerfile.kube-dev
 
 awx/ui_next/src

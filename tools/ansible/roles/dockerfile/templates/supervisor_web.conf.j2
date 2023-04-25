@@ -25,8 +25,6 @@ stderr_logfile_maxbytes=0
 {% if kube_dev | bool %}
 command = make uwsgi
 directory = /awx_devel
-environment =
-    DEV_RELOAD_COMMAND='supervisorctl -c /etc/supervisord_task.conf restart all; supervisorctl restart tower-processes:daphne'
 {% else %}
 command = /var/lib/awx/venv/awx/bin/uwsgi /etc/tower/uwsgi.ini
 directory = /var/lib/awx
@@ -90,6 +88,19 @@ stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
+
+{% if kube_dev | bool %}
+[program:awx-autoreload]
+command = /awx_devel/tools/docker-compose/awx-autoreload /awx_devel/awx 'supervisorctl -c /etc/supervisord_web.conf restart tower-processes:*'
+autostart = true
+autorestart = true
+stopasgroup=true
+killasgroup=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+{% endif %}
 
 [group:tower-processes]
 programs=nginx,uwsgi,daphne,awx-cache-clear,heartbeet

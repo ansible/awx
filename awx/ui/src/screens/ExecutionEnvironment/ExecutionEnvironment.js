@@ -59,7 +59,7 @@ function ExecutionEnvironment({ setBreadcrumb }) {
       ),
       link: '/execution_environments',
       id: 99,
-      isBackButton: true,
+      persistentFilterKey: 'executionEnvironments',
     },
     {
       name: t`Details`,

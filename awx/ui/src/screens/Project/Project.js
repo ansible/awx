@@ -99,7 +99,7 @@ function Project({ setBreadcrumb }) {
       ),
       link: `/projects`,
       id: 99,
-      isBackButton: true,
+      persistentFilterKey: 'projects',
     },
     { name: t`Details`, link: `/projects/${id}/details` },
     { name: t`Access`, link: `/projects/${id}/access` },
