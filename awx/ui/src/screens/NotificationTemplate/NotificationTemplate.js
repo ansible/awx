@@ -78,7 +78,7 @@ function NotificationTemplate({ setBreadcrumb }) {
       ),
       link: `/notification_templates`,
       id: 99,
-      isBackButton: true,
+      persistentFilterKey: 'notificationTemplates',
     },
     {
       name: t`Details`,

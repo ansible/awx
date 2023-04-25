@@ -4,8 +4,7 @@
   gather_facts: true
   tasks:
     - name: Get version from SCM if not explicitly provided
-      shell: |
-        make print-VERSION | cut -d + -f -1
+      command: make version-for-buildyml
       args:
         chdir: '../../'
       register: scm_version

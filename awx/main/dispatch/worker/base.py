@@ -18,6 +18,7 @@ from django.conf import settings
 from awx.main.dispatch.pool import WorkerPool
 from awx.main.dispatch import pg_bus_conn
 from awx.main.utils.common import log_excess_runtime
+from awx.main.utils.db import set_connection_name
 
 if 'run_callback_receiver' in sys.argv:
     logger = logging.getLogger('awx.main.commands.run_callback_receiver')
@@ -219,6 +220,7 @@ class BaseWorker(object):
     def work_loop(self, queue, finished, idx, *args):
         ppid = os.getppid()
         signal_handler = WorkerSignalHandler()
+        set_connection_name('worker')  # set application_name to distinguish from other dispatcher processes
         while not signal_handler.kill_now:
             # if the parent PID changes, this process has been orphaned
             # via e.g., segfault or sigkill, we should exit too

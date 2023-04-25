@@ -5,13 +5,11 @@
 import inspect
 import logging
 import time
-import uuid
 
 # Django
 from django.conf import settings
 from django.contrib.auth import views as auth_views
 from django.contrib.contenttypes.models import ContentType
-from django.core.cache import cache
 from django.core.exceptions import FieldDoesNotExist
 from django.db import connection, transaction
 from django.db.models.fields.related import OneToOneRel
@@ -967,16 +965,11 @@ class CopyAPIView(GenericAPIView):
         if hasattr(new_obj, 'admin_role') and request.user not in new_obj.admin_role.members.all():
             new_obj.admin_role.members.add(request.user)
         if sub_objs:
-            # store the copied object dict into cache, because it's
-            # often too large for postgres' notification bus
-            # (which has a default maximum message size of 8k)
-            key = 'deep-copy-{}'.format(str(uuid.uuid4()))
-            cache.set(key, sub_objs, timeout=3600)
             permission_check_func = None
             if hasattr(type(self), 'deep_copy_permission_check_func'):
                 permission_check_func = (type(self).__module__, type(self).__name__, 'deep_copy_permission_check_func')
             trigger_delayed_deep_copy(
-                self.model.__module__, self.model.__name__, obj.pk, new_obj.pk, request.user.pk, key, permission_check_func=permission_check_func
+                self.model.__module__, self.model.__name__, obj.pk, new_obj.pk, request.user.pk, permission_check_func=permission_check_func
             )
         serializer = self._get_copy_return_serializer(new_obj)
         headers = {'Location': new_obj.get_absolute_url(request=request)}

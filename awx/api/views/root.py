@@ -126,6 +126,7 @@ class ApiVersionRootView(APIView):
         data['workflow_job_nodes'] = reverse('api:workflow_job_node_list', request=request)
         data['mesh_visualizer'] = reverse('api:mesh_visualizer_view', request=request)
         data['bulk'] = reverse('api:bulk', request=request)
+        data['analytics'] = reverse('api:analytics_root_view', request=request)
         return Response(data)
 
 

@@ -33,6 +33,10 @@ const authenticationData = {
   SOCIAL_AUTH_TEAM_MAP: null,
   SOCIAL_AUTH_USER_FIELDS: null,
   SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL: false,
+  LOCAL_PASSWORD_MIN_LENGTH: 0,
+  LOCAL_PASSWORD_MIN_DIGITS: 0,
+  LOCAL_PASSWORD_MIN_UPPER: 0,
+  LOCAL_PASSWORD_MIN_SPECIAL: 0,
 };
 
 describe('<MiscAuthenticationEdit />', () => {

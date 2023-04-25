@@ -175,6 +175,14 @@ services:
     depends_on:
       - prometheus
 {% endif %}
+{% if enable_tacacs|bool %}
+  tacacs:
+    image: dchidell/docker-tacacs
+    container_name: tools_tacacs_1
+    hostname: tacacs
+    ports:
+      - "49:49"
+{% endif %}
   # A useful container that simply passes through log messages to the console
   # helpful for testing awx/tower logging
   # logstash:
