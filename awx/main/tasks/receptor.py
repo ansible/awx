@@ -676,13 +676,17 @@ RECEPTOR_CONFIG_STARTER = (
 
 @task()
 def write_receptor_config():
+    """
+    only control nodes will run this since it has @task decorator
+    """
     lock = FileLock(__RECEPTOR_CONF_LOCKFILE)
     with lock:
         receptor_config = list(RECEPTOR_CONFIG_STARTER)
 
         this_inst = Instance.objects.me()
-        instances = Instance.objects.filter(node_type=Instance.Types.EXECUTION)
+        instances = Instance.objects.filter(peer_to_control_nodes=True)
         existing_peers = {link.target_id for link in InstanceLink.objects.filter(source=this_inst)}
+
         new_links = []
         for instance in instances:
             is_peer = False

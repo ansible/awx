@@ -70,7 +70,7 @@ class InstanceLink(BaseModel):
         REMOVING = 'removing', _('Removing')
 
     link_state = models.CharField(
-        choices=States.choices, default=States.ESTABLISHED, max_length=16, help_text=_("Indicates the current life cycle stage of this peer link.")
+        choices=States.choices, default=States.ADDING, max_length=16, help_text=_("Indicates the current life cycle stage of this peer link.")
     )
 
     class Meta:
@@ -84,6 +84,9 @@ class InstanceLink(BaseModel):
 
 class Instance(HasPolicyEditsMixin, BaseModel):
     """A model representing an AWX instance running against this database."""
+
+    def __str__(self):
+        return self.hostname
 
     objects = InstanceManager()
 
@@ -180,6 +183,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     )
 
     peers = models.ManyToManyField('self', symmetrical=False, through=InstanceLink, through_fields=('source', 'target'))
+    peer_to_control_nodes = models.BooleanField(default=False, help_text=_("If True, control plane cluster nodes should automatically peer to it."))
 
     class Meta:
         app_label = 'main'
@@ -284,6 +288,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         return update_fields
 
     def set_capacity_value(self):
+        old_val = self.capacity
         """Sets capacity according to capacity adjustment rule (no save)"""
         if self.enabled and self.node_type != 'hop':
             lower_cap = min(self.mem_capacity, self.cpu_capacity)
@@ -291,6 +296,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
             self.capacity = lower_cap + (higher_cap - lower_cap) * self.capacity_adjustment
         else:
             self.capacity = 0
+        return int(self.capacity) != int(old_val)  # return True if value changed
 
     def refresh_capacity_fields(self):
         """Update derived capacity fields from cpu and memory (no save)"""
@@ -471,7 +477,7 @@ def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs
 
 @receiver(post_save, sender=Instance)
 def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
-    if settings.IS_K8S and instance.node_type in (Instance.Types.EXECUTION,):
+    if settings.IS_K8S and instance.node_type in (Instance.Types.EXECUTION, Instance.Types.HOP):
         if instance.node_state == Instance.States.DEPROVISIONING:
             from awx.main.tasks.receptor import remove_deprovisioned_node  # prevents circular import
 
@@ -479,7 +485,7 @@ def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
             # node and kick off write_receptor_config
             connection.on_commit(lambda: remove_deprovisioned_node.apply_async([instance.hostname]))
 
-        if instance.node_state == Instance.States.INSTALLED:
+        if instance.node_state == Instance.States.INSTALLED and instance.peer_to_control_nodes:
             from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
 
             # broadcast to all control instances to update their receptor configs
