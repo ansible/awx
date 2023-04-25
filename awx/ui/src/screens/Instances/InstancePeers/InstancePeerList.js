@@ -26,7 +26,7 @@ const QS_CONFIG = getQSConfig('peer', {
   order_by: 'hostname',
 });
 
-function InstancePeerList() {
+function InstancePeerList({ setBreadcrumb }) {
   const location = useLocation();
   const { id } = useParams();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -52,20 +52,23 @@ function InstancePeerList() {
     isLoading,
     error: contentError,
     request: fetchPeers,
-    result: { peers, count, relatedSearchableKeys, searchableKeys },
+    result: { instance, peers, count, relatedSearchableKeys, searchableKeys },
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
       const [
+        { data: instance_detail },
         {
           data: { results, count: itemNumber },
         },
         actions,
       ] = await Promise.all([
+        InstancesAPI.readDetail(id),
         InstancesAPI.readPeers(id, params),
         InstancesAPI.readOptions(),
       ]);
       return {
+        instance: instance_detail,
         peers: results,
         count: itemNumber,
         relatedSearchableKeys: (actions?.data?.related_search_fields || []).map(
@@ -75,6 +78,7 @@ function InstancePeerList() {
       };
     }, [id, location]),
     {
+      instance: {},
       peers: [],
       count: 0,
       relatedSearchableKeys: [],
@@ -84,6 +88,7 @@ function InstancePeerList() {
 
   useEffect(() => {
     fetchPeers();
+    setBreadcrumb(instance.hostname);
   }, [fetchPeers]);
 
   const { expanded, isAllExpanded, handleExpand, expandAll } =
@@ -101,11 +106,10 @@ function InstancePeerList() {
   } = useRequest(
     useCallback(
       async (instancesPeerToAssociate) => {
-        const { data: details } = await InstancesAPI.readDetail(id);
         await Promise.all(
           instancesPeerToAssociate
             .map((target) =>
-              PeersAPI.createPeer(details.hostname, target.hostname)
+              PeersAPI.createPeer(instance.hostname, target.hostname)
             )
         );
         fetchPeers();
@@ -121,11 +125,9 @@ function InstancePeerList() {
   } = useDeleteItems(
     useCallback(
       async () => {
-        const { data: details } = await InstancesAPI.readDetail(id);
-
         await Promise.all(
           selected.map((target) =>
-            PeersAPI.destroyPeer(details.hostname, target.hostname)
+            PeersAPI.destroyPeer(instance.hostname, target.hostname)
           )
         );
       },
