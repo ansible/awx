@@ -33,7 +33,7 @@ from rest_framework.negotiation import DefaultContentNegotiation
 # AWX
 from awx.api.filters import FieldLookupBackend
 from awx.main.models import UnifiedJob, UnifiedJobTemplate, User, Role, Credential, WorkflowJobTemplateNode, WorkflowApprovalTemplate
-from awx.main.access import access_registry
+from awx.main.access import optimize_queryset
 from awx.main.utils import camelcase_to_underscore, get_search_fields, getattrd, get_object_or_400, decrypt_field, get_awx_version
 from awx.main.utils.db import get_all_field_names
 from awx.main.utils.licensing import server_product_name
@@ -362,12 +362,7 @@ class GenericAPIView(generics.GenericAPIView, APIView):
             return self.queryset._clone()
         elif self.model is not None:
             qs = self.model._default_manager
-            if self.model in access_registry:
-                access_class = access_registry[self.model]
-                if access_class.select_related:
-                    qs = qs.select_related(*access_class.select_related)
-                if access_class.prefetch_related:
-                    qs = qs.prefetch_related(*access_class.prefetch_related)
+            qs = optimize_queryset(qs)
             return qs
         else:
             return super(GenericAPIView, self).get_queryset()
@@ -529,11 +524,7 @@ class SubListAPIView(ParentMixin, ListAPIView):
         self.check_parent_access(parent)
         sublist_qs = self.get_sublist_queryset(parent)
         if not self.filter_read_permission:
-            access_class = access_registry[self.model]
-            if access_class.prefetch_related:
-                return sublist_qs.prefetch_related(*access_class.prefetch_related)
-            if access_class.select_related:
-                return sublist_qs.select_related(*access_class.select_related)
+            return optimize_queryset(sublist_qs)
         qs = self.request.user.get_queryset(self.model).distinct()
         return qs & sublist_qs
 
