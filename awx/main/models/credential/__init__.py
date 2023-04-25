@@ -195,6 +195,9 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
 
     @cached_property
     def dynamic_input_fields(self):
+        # if the credential is not yet saved we can't access the input_sources
+        if not self.id:
+            return []
         return [obj.input_field_name for obj in self.input_sources.all()]
 
     def _password_field_allows_ask(self, field):
