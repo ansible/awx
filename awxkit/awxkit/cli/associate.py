@@ -1,20 +1,21 @@
 import functools
+import logging
 
 from awxkit import api
 from awxkit.exceptions import NoContent
 
 
+log = logging.getLogger(__name__)
+
+
 class AssociationParser(object):
     action = 'associate'
 
-    def __init__(self, page, options_json, resource):
+    def __init__(self, page, resource):
         self.page = page
-        self.targets = {}
-        for related_key, plural_name in options_json.get('related_associations', {}):
-            self.targets[related_key] = plural_name
         self.resource = resource
 
-    def add_arguments(self, parser, resource_options_parser):
+    def add_arguments(self, parser, related_associations):
         from .options import pk_or_name
 
         parser.choices[self.action].add_argument(
@@ -23,7 +24,7 @@ class AssociationParser(object):
             help=f'Primary object for the association, obtained from {self.resource} endpoint',
         )
         group = parser.choices[self.action].add_mutually_exclusive_group(required=True)
-        for param, endpoint in self.targets.items():
+        for related_name, endpoint in related_associations:
 
             class related_page(object):
                 def __init__(self, connection, resource):
@@ -35,22 +36,25 @@ class AssociationParser(object):
                     return getattr(v2, self.resource).get(**kwargs)
 
             group.add_argument(
-                f'--{param}',
+                f'--{related_name}',
                 metavar='',
-                type=functools.partial(pk_or_name, None, param, page=related_page(self.page.connection, endpoint)),
-                help=f'The ID (or name) of the {param} to {self.action}',
+                type=functools.partial(pk_or_name, None, related_name, page=related_page(self.page.connection, endpoint)),
+                help=f'The ID (or name) of the {related_name} to {self.action}',
             )
 
     def perform(self, **kwargs):
-        for k, v in kwargs.items():
-            related_endpoint = self.page.endpoint + k + '/'  # there is probably a more awxkit-y way of doing this
+        for related_name, related_id in kwargs.items():
+            self.page = self.page.get()
+            related_page = getattr(self.page.related, related_name)
             try:
-                self.page.connection.post(related_endpoint, {'id': v, self.action: True})
+                payload = {'id': related_id, self.action: True}
+                related_page.post(payload)
             except NoContent:
                 # we expect to enter this block because these endpoints return
                 # HTTP 204 on success
-                pass
-            r = self.page.connection.get(related_endpoint)
-            # import pdb; pdb.set_trace()
-            return self.page.get().page_identity(r)
-            # return self.page.get().related[endpoint].get()
+                log.debug(f'Related {related_name} id={related_id} is successfully {self.action}d with resource at url {self.page.endpoint}')
+            return getattr(self.page.related, related_name).get()
+
+
+class DisAssociationParser(AssociationParser):
+    action = 'disassociate'

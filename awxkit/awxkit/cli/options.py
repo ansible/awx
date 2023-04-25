@@ -7,7 +7,7 @@ import sys
 import yaml
 
 from .custom import CustomAction
-from .associate import AssociationParser
+from .associate import AssociationParser, DisAssociationParser
 from .format import add_output_formatting_arguments, strtobool
 from .resource import DEPRECATED_RESOURCES_REVERSE
 
@@ -97,9 +97,13 @@ class ResourceOptionsParser(object):
             self.build_detail_actions()
 
             # all normal resources are also considered to have association abilities
+            related_associations = options_json.get('related_associations', {})
             self.parser.add_parser('associate', help='Associate via a related endpoint')
-            self.associate = AssociationParser(page, options_json, resource)
-            self.associate.add_arguments(self.parser, self)
+            self.associate = AssociationParser(page, resource)
+            self.associate.add_arguments(self.parser, related_associations)
+            self.parser.add_parser('disassociate', help='Disassociate via a related endpoint')
+            self.disassociate = DisAssociationParser(page, resource)
+            self.disassociate.add_arguments(self.parser, related_associations)
 
         self.handle_custom_actions()
 
