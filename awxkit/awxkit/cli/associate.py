@@ -8,6 +8,16 @@ from awxkit.exceptions import NoContent
 log = logging.getLogger(__name__)
 
 
+# These were custom commands before the refactor to work via OPTIONS
+# and custom commands have custom names, which we add for backward compat
+OLD_ALIASES = {
+    'notification_templates_started': 'start_notification',
+    'notification_templates_error': 'error_notification',
+    'notification_templates_success': 'success_notificaton',
+    'notification_templates_approvals': 'approval_notification',
+}
+
+
 class AssociationParser(object):
     action = 'associate'
 
@@ -35,8 +45,14 @@ class AssociationParser(object):
                     v2 = api.Api(connection=self.conn).get().current_version.get()
                     return getattr(v2, self.resource).get(**kwargs)
 
+            arg_names = [f'--{related_name}']
+            if related_name.endswith('s'):
+                arg_names.append(f'--{related_name[:-1]}')
+            if related_name in OLD_ALIASES:
+                arg_names.append(f'--{OLD_ALIASES[related_name]}')
+
             group.add_argument(
-                f'--{related_name}',
+                *arg_names,
                 metavar='',
                 type=functools.partial(pk_or_name, None, related_name, page=related_page(self.page.connection, endpoint)),
                 help=f'The ID (or name) of the {related_name} to {self.action}',
