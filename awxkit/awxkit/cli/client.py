@@ -263,6 +263,8 @@ class CLI(object):
         # TODO: do this better somehow
         if action == 'associate':
             return parser.associate.perform(**parsed)
+        elif action == 'disassociate':
+            return parser.disassociate.perform(**parsed)
 
         if self.method == 'patch' and not parsed:
             # If we're doing an HTTP PATCH with an empty payload,
