@@ -1479,8 +1479,6 @@ class PluginFileInjector(object):
     def build_env(self, inventory_update, env, private_data_dir, private_data_files):
         injector_env = self.get_plugin_env(inventory_update, private_data_dir, private_data_files)
         env.update(injector_env)
-        # Preserves current behavior for Ansible change in default planned for 2.10
-        env['ANSIBLE_TRANSFORM_INVALID_GROUP_CHARS'] = 'never'
         # All CLOUD_PROVIDERS sources implement as inventory plugin from collection
         env['ANSIBLE_INVENTORY_ENABLED'] = 'auto'
         return env
