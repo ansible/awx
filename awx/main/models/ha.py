@@ -61,8 +61,8 @@ class HasPolicyEditsMixin(HasEditsMixin):
 
 
 class InstanceLink(BaseModel):
-    source = models.ForeignKey('Instance', on_delete=models.CASCADE, related_name='+')
-    target = models.ForeignKey('Instance', on_delete=models.CASCADE, related_name='reverse_peers')
+    source = models.ForeignKey('Instance', on_delete=models.CASCADE, related_name='source_peers')
+    target = models.ForeignKey('Instance', on_delete=models.CASCADE, related_name='target_peers')
 
     class States(models.TextChoices):
         ADDING = 'adding', _('Adding')
