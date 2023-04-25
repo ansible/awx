@@ -2692,7 +2692,10 @@ class JobTemplateCallback(GenericAPIView):
         # Permission class should have already validated host_config_key.
         job_template = self.get_object()
         # Attempt to find matching hosts based on remote address.
-        matching_hosts = self.find_matching_hosts()
+        if job_template.inventory:
+            matching_hosts = self.find_matching_hosts()
+        else:
+            return Response({"msg": _("Cannot start automatically, an inventory is required.")}, status=status.HTTP_400_BAD_REQUEST)
         # If the host is not found, update the inventory before trying to
         # match again.
         inventory_sources_already_updated = []

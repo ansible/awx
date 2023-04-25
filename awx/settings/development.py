@@ -62,19 +62,6 @@ DEBUG_TOOLBAR_CONFIG = {'ENABLE_STACKTRACES': True}
 SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
 INSTALL_UUID = '00000000-0000-0000-0000-000000000000'
 
-# Store a snapshot of default settings at this point before loading any
-# customizable config files.
-DEFAULTS_SNAPSHOT = {}
-this_module = sys.modules[__name__]
-for setting in dir(this_module):
-    if setting == setting.upper():
-        DEFAULTS_SNAPSHOT[setting] = copy.deepcopy(getattr(this_module, setting))
-
-# If there is an `/etc/tower/settings.py`, include it.
-# If there is a `/etc/tower/conf.d/*.py`, include them.
-include(optional('/etc/tower/settings.py'), scope=locals())
-include(optional('/etc/tower/conf.d/*.py'), scope=locals())
-
 BASE_VENV_PATH = "/var/lib/awx/venv/"
 AWX_VENV_PATH = os.path.join(BASE_VENV_PATH, "awx")
 
@@ -105,11 +92,28 @@ AWX_CALLBACK_PROFILE = True
 AWX_DISABLE_TASK_MANAGERS = False
 # ======================!!!!!!! FOR DEVELOPMENT ONLY !!!!!!!=================================
 
-from .application_name import set_application_name
+# Store a snapshot of default settings at this point before loading any
+# customizable config files.
+this_module = sys.modules[__name__]
+local_vars = dir(this_module)
+DEFAULTS_SNAPSHOT = {}  # define after we save local_vars so we do not snapshot the snapshot
+for setting in local_vars:
+    if setting.isupper():
+        DEFAULTS_SNAPSHOT[setting] = copy.deepcopy(getattr(this_module, setting))
 
-set_application_name(DATABASES, CLUSTER_HOST_ID)
+del local_vars  # avoid temporary variables from showing up in dir(settings)
+del this_module
+#
+###############################################################################################
+#
+#  Any settings defined after this point will be marked as as a read_only database setting
+#
+################################################################################################
 
-del set_application_name
+# If there is an `/etc/tower/settings.py`, include it.
+# If there is a `/etc/tower/conf.d/*.py`, include them.
+include(optional('/etc/tower/settings.py'), scope=locals())
+include(optional('/etc/tower/conf.d/*.py'), scope=locals())
 
 # If any local_*.py files are present in awx/settings/, use them to override
 # default settings for development.  If not present, we can still run using
@@ -123,3 +127,11 @@ try:
 except ImportError:
     traceback.print_exc()
     sys.exit(1)
+
+# The below runs AFTER all of the custom settings are imported
+# because conf.d files will define DATABASES and this should modify that
+from .application_name import set_application_name
+
+set_application_name(DATABASES, CLUSTER_HOST_ID)
+
+del set_application_name
