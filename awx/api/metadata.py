@@ -271,13 +271,15 @@ class Metadata(metadata.SimpleMetadata):
         finally:
             delattr(view, '_request')
 
+        from rest_framework import generics
+
         # Add type(s) handled by this view/serializer.
         if hasattr(view, 'get_serializer'):
             serializer = view.get_serializer()
             if hasattr(serializer, 'get_types'):
                 metadata['types'] = serializer.get_types()
 
-            if hasattr(serializer, 'Meta'):
+            if hasattr(serializer, 'Meta') and isinstance(view, generics.RetrieveAPIView):
                 # Provide tail path navigation to related associate disassociate endpoints
                 from awx.api.generics import SubListCreateAttachDetachAPIView
 
@@ -304,8 +306,6 @@ class Metadata(metadata.SimpleMetadata):
                     roles.append(field.name)
         if len(roles) > 0:
             metadata['object_roles'] = roles
-
-        from rest_framework import generics
 
         if isinstance(view, generics.ListAPIView) and hasattr(view, 'paginator'):
             metadata['max_page_size'] = view.paginator.max_page_size

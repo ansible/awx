@@ -99,15 +99,6 @@ class ResourceOptionsParser(object):
             self.build_list_actions()
             self.build_detail_actions()
 
-            # all normal resources are also considered to have association abilities
-            related_associations = options_json.get('related_associations', {})
-            self.parser.add_parser('associate', help='Associate via a related endpoint')
-            self.associate = AssociationParser(page, resource)
-            self.associate.add_arguments(self.parser, related_associations)
-            self.parser.add_parser('disassociate', help='Disassociate via a related endpoint')
-            self.disassociate = DisAssociationParser(page, resource)
-            self.disassociate.add_arguments(self.parser, related_associations)
-
         self.handle_custom_actions()
 
     def get_allowed_options(self):
@@ -116,6 +107,7 @@ class ResourceOptionsParser(object):
         if '299' in warning and 'deprecated' in warning:
             self.deprecated = True
         self.allowed_options = options.headers.get('Allow', '').split(', ')
+        self.related_associations = options.json().get('related_associations', {})
 
     def build_list_actions(self):
         action_map = {
@@ -156,6 +148,15 @@ class ResourceOptionsParser(object):
             )
             if method == 'get':
                 add_output_formatting_arguments(parser, {})
+
+        if self.resource != 'settings':
+            # all normal resources are also considered to have association abilities
+            self.parser.add_parser('associate', help='Associate via a related endpoint')
+            self.associate = AssociationParser(self.page, self.resource)
+            self.associate.add_arguments(self.parser, self.related_associations)
+            self.parser.add_parser('disassociate', help='Disassociate via a related endpoint')
+            self.disassociate = DisAssociationParser(self.page, self.resource)
+            self.disassociate.add_arguments(self.parser, self.related_associations)
 
     def build_query_arguments(self, method, http_method):
         required_group = None
