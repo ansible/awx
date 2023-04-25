@@ -11,7 +11,7 @@ import DisassociateButton from 'components/DisassociateButton';
 import AssociateModal from 'components/AssociateModal';
 import ErrorDetail from 'components/ErrorDetail';
 import AlertModal from 'components/AlertModal';
-import { getQSConfig, parseQueryString } from 'util/qs';
+import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
 import { useLocation, useParams } from 'react-router-dom';
 import useRequest, { useDeleteItems, useDismissableError } from 'hooks/useRequest';
 import DataListToolbar from 'components/DataListToolbar';
@@ -35,8 +35,17 @@ function InstancePeerList() {
 
   const fetchInstancesToAssociate = useCallback(
     (params) =>
-      InstancesAPI.read(params),
-    []
+      InstancesAPI.read(
+        mergeParams(params, {
+          ...{ not__id: id },
+        })
+      ),
+    [id]
+  );
+
+  const readInstancesOptions = useCallback(
+    () => InstancesAPI.readOptions(id),
+    [id]
   );
 
   const {
@@ -92,11 +101,11 @@ function InstancePeerList() {
   } = useRequest(
     useCallback(
       async (instancesPeerToAssociate) => {
+        const { data: details } = await InstancesAPI.readDetail(id);
         await Promise.all(
           instancesPeerToAssociate
-            .filter((i) => i.node_type !== 'control')
             .map((target) =>
-              PeersAPI.createPeer(id, target.id)
+              PeersAPI.createPeer(details.hostname, target.hostname)
             )
         );
         fetchPeers();
@@ -111,12 +120,15 @@ function InstancePeerList() {
     deletionError: disassociateError,
   } = useDeleteItems(
     useCallback(
-      () =>
-        Promise.all(
+      async () => {
+        const { data: details } = await InstancesAPI.readDetail(id);
+
+        await Promise.all(
           selected.map((target) =>
-              PeersAPI.destroyPeer(id, target.id)
+            PeersAPI.destroyPeer(details.hostname, target.hostname)
           )
-        ),
+        );
+      },
       [id, selected]
     ),
     {
@@ -217,7 +229,7 @@ function InstancePeerList() {
           onAssociate={handlePeerAssociate}
           onClose={() => setIsModalOpen(false)}
           title={t`Select Instances`}
-         // optionsRequest={readInstancesOptions}
+          optionsRequest={readInstancesOptions}
           displayKey="hostname"
           columns={[
             { key: 'hostname', name: t`Name` },

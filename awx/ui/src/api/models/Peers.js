@@ -9,31 +9,30 @@ class Peers extends Base {
     this.destroyPeer = this.destroyPeer.bind(this);
   }
 
-  createPeer(sourceId, targetId) {
+  createPeer(source_hostname, target_hostname) {
     return this.http.post(`${this.baseUrl}`, {
-      source: sourceId,
-      target: targetId,
+      source: source_hostname,
+      target: target_hostname,
       link_state: 'established'
     });
   }
 
-  destroyPeer(sourceId, targetId) {
+  async destroyPeer(source_hostname, target_hostname) {
 
-    const { data } = this.read({
+    const { data } = await this.read({
       page: 1,
       page_size: 200,
-      source: sourceId,
-      target: targetId,
+      source__hostname__exact: source_hostname,
+      target__hostname__exact: target_hostname,
     });
 
-    const [peer_delete] = Promise.all(
+    const [peer_delete] = await Promise.all(
       data.results
         .map((peer) =>
           this.destroy(peer.id)
         )
     );
-
-    return peer_delete
+    return peer_delete;
   }
 
 }

@@ -75,6 +75,8 @@ class InstanceLink(BaseModel):
 
     class Meta:
         unique_together = ('source', 'target')
+        app_label = 'main'
+        ordering = ("id",)
 
     def get_absolute_url(self, request=None):
         return reverse('api:peers_detail', kwargs={'pk': self.pk}, request=request)
