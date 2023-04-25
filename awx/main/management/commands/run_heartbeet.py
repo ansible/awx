@@ -58,11 +58,11 @@ class Command(BaseCommand):
         sys.exit(1)
 
     def do_hearbeat_loop(self):
-        while True:
-            with pg_bus_conn(new_connection=True) as conn:
+        with pg_bus_conn(new_connection=True) as conn:
+            while True:
                 logger.debug('Sending heartbeat')
                 conn.notify('web_heartbeet', self.construct_payload())
-            time.sleep(settings.BROADCAST_WEBSOCKET_BEACON_FROM_WEB_RATE_SECONDS)
+                time.sleep(settings.BROADCAST_WEBSOCKET_BEACON_FROM_WEB_RATE_SECONDS)
 
     def handle(self, *arg, **options):
         self.print_banner()
