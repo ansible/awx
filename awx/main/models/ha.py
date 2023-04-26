@@ -480,11 +480,10 @@ def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
             # node and kick off write_receptor_config
             connection.on_commit(lambda: remove_deprovisioned_node.apply_async([instance.hostname]))
 
-        if instance.node_state == Instance.States.INSTALLED and instance.peers_from_control_nodes:
-            from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
+        from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
 
-            # broadcast to all control instances to update their receptor configs
-            connection.on_commit(lambda: write_receptor_config.apply_async(queue='tower_broadcast_all'))
+        # broadcast to all control instances to update their receptor configs
+        connection.on_commit(lambda: write_receptor_config.apply_async(queue='tower_broadcast_all'))
 
     if created or instance.has_policy_changes():
         schedule_policy_task()
@@ -499,6 +498,11 @@ def on_instance_group_deleted(sender, instance, using, **kwargs):
 @receiver(post_delete, sender=Instance)
 def on_instance_deleted(sender, instance, using, **kwargs):
     schedule_policy_task()
+    if settings.IS_K8S and instance.node_type in (Instance.Types.EXECUTION, Instance.Types.HOP) and instance.peers_from_control_nodes:
+        from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
+
+        # broadcast to all control instances to update their receptor configs
+        connection.on_commit(lambda: write_receptor_config.apply_async(kwargs=dict(force=True), queue='tower_broadcast_all'))
 
 
 class UnifiedJobTemplateInstanceGroupMembership(models.Model):
