@@ -463,6 +463,7 @@ CELERYBEAT_SCHEDULE = {
         'schedule': timedelta(seconds=CLUSTER_NODE_HEARTBEAT_PERIOD),
         'options': {'expires': 50},
     },
+    'inspect_receptor_connections': {'task': 'awx.main.tasks.system.inspect_receptor_connections', 'schedule': timedelta(seconds=20)},
     'gather_analytics': {'task': 'awx.main.tasks.system.gather_analytics', 'schedule': timedelta(minutes=5)},
     'task_manager': {'task': 'awx.main.scheduler.tasks.task_manager', 'schedule': timedelta(seconds=20), 'options': {'expires': 20}},
     'dependency_manager': {'task': 'awx.main.scheduler.tasks.dependency_manager', 'schedule': timedelta(seconds=20), 'options': {'expires': 20}},
