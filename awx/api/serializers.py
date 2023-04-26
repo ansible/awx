@@ -5469,9 +5469,15 @@ class InstanceSerializer(BaseSerializer):
         return obj.health_check_pending
 
     def validate(self, attrs):
+        def get_field_from_model_or_attrs(fd):
+            return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)
+
         if not self.instance and not settings.IS_K8S:
             raise serializers.ValidationError("Can only create instances on Kubernetes or OpenShift.")
-        if attrs.get('peers_from_control_nodes', False) and attrs.get('node_type', None) not in (Instance.Types.EXECUTION, Instance.Types.HOP):
+        node_type = get_field_from_model_or_attrs("node_type")
+        peers_from_control_nodes = get_field_from_model_or_attrs("peers_from_control_nodes")
+
+        if peers_from_control_nodes and node_type not in (Instance.Types.EXECUTION, Instance.Types.HOP):
             raise serializers.ValidationError("peers_from_control_nodes can only be enabled for execution or hop nodes.")
         return super().validate(attrs)
 
