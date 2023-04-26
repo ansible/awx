@@ -39,6 +39,7 @@ from awx.main.models import (
     Host,
     Instance,
     InstanceGroup,
+    InstanceLink,
     Inventory,
     InventorySource,
     InventoryUpdate,
@@ -2947,6 +2948,22 @@ class WorkflowApprovalTemplateAccess(BaseAccess):
 
     def filtered_queryset(self):
         return self.model.objects.filter(workflowjobtemplatenodes__workflow_job_template__in=WorkflowJobTemplate.accessible_pk_qs(self.user, 'read_role'))
+
+
+class PeersAccess(BaseAccess):
+    model = InstanceLink
+
+    def can_add(self, data):
+        return False
+
+    def can_change(self, obj, data):
+        return False
+
+    def can_delete(self, obj):
+        return True
+
+    def can_copy(self, obj):
+        return False
 
 
 for cls in BaseAccess.__subclasses__():
