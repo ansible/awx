@@ -67,14 +67,20 @@ class InstanceLink(BaseModel):
     class States(models.TextChoices):
         ADDING = 'adding', _('Adding')
         ESTABLISHED = 'established', _('Established')
+        DISCONNECTED = 'disconnected', _('Disconnected')
         REMOVING = 'removing', _('Removing')
 
     link_state = models.CharField(
-        choices=States.choices, default=States.ESTABLISHED, max_length=16, help_text=_("Indicates the current life cycle stage of this peer link.")
+        choices=States.choices, default=States.DISCONNECTED, max_length=16, help_text=_("Indicates the current life cycle stage of this peer link.")
     )
 
     class Meta:
         unique_together = ('source', 'target')
+        ordering = ("id",)
+        constraints = [models.CheckConstraint(check=~models.Q(source=models.F('target')), name='source_and_target_can_not_be_equal')]
+
+    def get_absolute_url(self, request=None):
+        return reverse('api:peers_detail', kwargs={'pk': self.pk}, request=request)
 
 
 class Instance(HasPolicyEditsMixin, BaseModel):
