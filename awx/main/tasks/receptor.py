@@ -684,7 +684,7 @@ def write_receptor_config():
         receptor_config = list(RECEPTOR_CONFIG_STARTER)
 
         this_inst = Instance.objects.me()
-        instances = Instance.objects.filter(peer_to_control_nodes=True)
+        instances = Instance.objects.filter(peers_from_control_nodes=True)
         existing_peers = {link.target_id for link in InstanceLink.objects.filter(source=this_inst)}
 
         new_links = []
