@@ -62,7 +62,7 @@ from wsgiref.util import FileWrapper
 
 # AWX
 from awx.main.tasks.system import send_notifications, update_inventory_computed_fields
-from awx.main.access import get_user_queryset, HostAccess
+from awx.main.access import get_user_queryset
 from awx.api.generics import (
     APIView,
     BaseUsersList,
