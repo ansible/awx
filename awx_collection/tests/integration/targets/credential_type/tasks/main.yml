@@ -1,7 +1,12 @@
 ---
+- name: Generate a test ID
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
 - name: Generate names
   set_fact:
-    cred_type_name: "AWX-Collection-tests-credential_type-cred-type-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    cred_type_name: "AWX-Collection-tests-credential_type-cred-type-{{ test_id }}"
 
 - block:
     - name: Add Tower credential type

@@ -108,9 +108,8 @@
 
 - assert:
     that:
-      - wait_results is failed
-      - 'wait_results.status == "canceled"'
-      - "wait_results.msg == 'The ad hoc command - {{ command.id }}, failed'"
+      - wait_results is successful
+      - 'wait_results.status == "successful"'
 
 - name: Delete the Credential
   credential:
