@@ -10,7 +10,7 @@ import AlertModal from '../AlertModal';
 
 function InstancePeerControl({ className, fetchInstances, instance, onToggle }) {
   const { me = {} } = useConfig();
-  const [isEnabled, setIsEnabled] = useState(instance.peer_to_control_nodes);
+  const [isEnabled, setIsEnabled] = useState(instance.peers_from_control_nodes);
   const [showError, setShowError] = useState(false);
 
   const {
@@ -20,11 +20,11 @@ function InstancePeerControl({ className, fetchInstances, instance, onToggle }) 
     request: toggleInstance,
   } = useRequest(
     useCallback(async () => {
-      await InstancesAPI.update(instance.id, { peer_to_control_nodes: !isEnabled });
+      await InstancesAPI.update(instance.id, { peers_from_control_nodes: !isEnabled });
       await fetchInstances();
       return !isEnabled;
     }, [instance, isEnabled, fetchInstances]),
-    instance.peer_to_control_nodes
+    instance.peers_from_control_nodes
   );
 
   useEffect(() => {

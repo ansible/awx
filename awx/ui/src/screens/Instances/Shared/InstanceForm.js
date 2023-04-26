@@ -87,8 +87,8 @@ function InstanceFormFields() {
       </FormGroup>
       <FormGroup fieldId="peer-to-control-nodes-option-checkboxes" label={t`Options`}>
         <CheckboxField
-          id="peer_to_control_nodes"
-          name="peer_to_control_nodes"
+          id="peers_from_control_nodes"
+          name="peers_from_control_nodes"
           label={t`Connect to control nodes`}
           tooltip={t`Connect this instance to control nodes. If disabled, instance will be connected only to peers selected.`}
         />

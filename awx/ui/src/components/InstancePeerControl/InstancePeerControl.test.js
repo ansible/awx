@@ -31,7 +31,7 @@ const mockInstance = {
   mem_capacity: 1,
   enabled: true,
   managed_by_policy: true,
-  peer_to_control_nodes: false,
+  peers_from_control_nodes: false,
 };
 
 describe('<InstanceToggle>', () => {
@@ -56,7 +56,7 @@ describe('<InstanceToggle>', () => {
       wrapper.find('Switch').invoke('onChange')();
     });
     expect(InstancesAPI.update).toHaveBeenCalledWith(1, {
-      peer_to_control_nodes: false,
+      peers_from_control_nodes: false,
     });
     wrapper.update();
     expect(wrapper.find('Switch').prop('isChecked')).toEqual(false);
@@ -69,7 +69,7 @@ describe('<InstanceToggle>', () => {
       <InstanceToggle
         instance={{
           ...mockInstance,
-          peer_to_control_nodes: false,
+          peers_from_control_nodes: false,
         }}
         onToggle={onToggle}
         fetchInstances={fetchInstances}
@@ -81,7 +81,7 @@ describe('<InstanceToggle>', () => {
       wrapper.find('Switch').invoke('onChange')();
     });
     expect(InstancesAPI.update).toHaveBeenCalledWith(1, {
-      peer_to_control_nodes: true,
+      peers_from_control_nodes: true,
     });
     wrapper.update();
     expect(wrapper.find('Switch').prop('isChecked')).toEqual(true);

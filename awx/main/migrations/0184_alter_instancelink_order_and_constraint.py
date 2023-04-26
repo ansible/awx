@@ -6,7 +6,7 @@ import django.db.models.expressions
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0184_instance_peer_to_control_nodes'),
+        ('main', '0183_instance_peers_from_control_nodes'),
     ]
 
     operations = [
