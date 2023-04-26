@@ -61,8 +61,8 @@ class HasPolicyEditsMixin(HasEditsMixin):
 
 
 class InstanceLink(BaseModel):
-    source = models.ForeignKey('Instance', on_delete=models.CASCADE, related_name='source_peers')
-    target = models.ForeignKey('Instance', on_delete=models.CASCADE, related_name='target_peers')
+    source = models.ForeignKey('Instance', on_delete=models.CASCADE, related_name='+')
+    target = models.ForeignKey('Instance', on_delete=models.CASCADE, related_name='reverse_peers')
 
     class States(models.TextChoices):
         ADDING = 'adding', _('Adding')
@@ -75,8 +75,8 @@ class InstanceLink(BaseModel):
 
     class Meta:
         unique_together = ('source', 'target')
-        app_label = 'main'
         ordering = ("id",)
+        constraints = [models.CheckConstraint(check=~models.Q(source=models.F('target')), name='source_and_target_can_not_be_equal')]
 
     def get_absolute_url(self, request=None):
         return reverse('api:peers_detail', kwargs={'pk': self.pk}, request=request)
