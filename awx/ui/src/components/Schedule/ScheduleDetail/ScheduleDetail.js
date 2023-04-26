@@ -11,7 +11,8 @@ import { JobTemplatesAPI, SchedulesAPI, WorkflowJobTemplatesAPI } from 'api';
 import { parseVariableField, jsonToYaml } from 'util/yaml';
 import { useConfig } from 'contexts/Config';
 import InstanceGroupLabels from 'components/InstanceGroupLabels';
-import parseRuleObj from '../shared/parseRuleObj';
+import parseRuleObj, { UnsupportedRRuleError } from '../shared/parseRuleObj';
+import UnsupportedRRuleAlert from '../shared/UnsupportedRRuleAlert';
 import FrequencyDetails from './FrequencyDetails';
 import AlertModal from '../../AlertModal';
 import { CardBody, CardActionsRow } from '../../Card';
@@ -182,8 +183,20 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
     month: t`Month`,
     year: t`Year`,
   };
-  const { frequency, frequencyOptions, exceptionFrequency, exceptionOptions } =
-    parseRuleObj(schedule);
+  let rruleError;
+  let frequency = [];
+  let frequencyOptions = {};
+  let exceptionFrequency = [];
+  let exceptionOptions = {};
+  try {
+    ({ frequency, frequencyOptions, exceptionFrequency, exceptionOptions } =
+      parseRuleObj(schedule));
+  } catch (parseRuleError) {
+    if (parseRuleError instanceof UnsupportedRRuleError) {
+      rruleError = parseRuleError;
+    }
+  }
+
   const repeatFrequency = frequency.length
     ? frequency.map((f) => frequencies[f]).join(', ')
     : t`None (Run Once)`;
@@ -602,6 +615,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
           </PromptDetailList>
         </>
       )}
+      {rruleError && <UnsupportedRRuleAlert schedule={schedule} />}
       <CardActionsRow>
         {summary_fields?.user_capabilities?.edit && (
           <Button
