@@ -172,7 +172,8 @@ def main():
         if (preserve_existing_hosts and relationship == 'hosts') or (preserve_existing_children and relationship == 'children'):
             preserve_existing_check = module.get_all_endpoint(group['related'][relationship])
             for sub_obj in preserve_existing_check['json']['results']:
-                id_list.append(sub_obj['id'])
+                if 'id' in sub_obj:
+                    id_list.append(sub_obj['id'])
         if id_list:
             association_fields[relationship] = id_list
 
