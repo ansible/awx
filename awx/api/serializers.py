@@ -5356,10 +5356,16 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
 class InstanceLinkSerializer(BaseSerializer):
     class Meta:
         model = InstanceLink
-        fields = ('source', 'target', 'link_state')
+        fields = ('id', 'url', 'related', 'source', 'target', 'link_state')
 
-    source = serializers.SlugRelatedField(slug_field="hostname", read_only=True)
-    target = serializers.SlugRelatedField(slug_field="hostname", read_only=True)
+    source = serializers.SlugRelatedField(slug_field="hostname", queryset=Instance.objects.all())
+    target = serializers.SlugRelatedField(slug_field="hostname", queryset=Instance.objects.all())
+
+    def get_related(self, obj):
+        res = super(InstanceLinkSerializer, self).get_related(obj)
+        res['source_instance'] = self.reverse('api:instance_detail', kwargs={'pk': obj.source.id})
+        res['target_instance'] = self.reverse('api:instance_detail', kwargs={'pk': obj.target.id})
+        return res
 
 
 class InstanceNodeSerializer(BaseSerializer):
