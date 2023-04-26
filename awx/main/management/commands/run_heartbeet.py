@@ -55,7 +55,7 @@ class Command(BaseCommand):
     def notify_listener_and_exit(self, *args):
         with pg_bus_conn(new_connection=False) as conn:
             conn.notify('web_heartbeet', self.construct_payload(action='offline'))
-        sys.exit(1)
+        sys.exit(0)
 
     def do_hearbeat_loop(self):
         with pg_bus_conn(new_connection=True) as conn:
