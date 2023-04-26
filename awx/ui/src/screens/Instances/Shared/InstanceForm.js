@@ -118,7 +118,7 @@ function InstanceForm({
           node_state: 'installed',
           listener_port: 27199,
           enabled: true,
-          peer_to_control_nodes: true,
+          peers_from_control_nodes: true,
         }}
         onSubmit={(values) => {
           handleSubmit(values);
