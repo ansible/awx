@@ -5384,7 +5384,6 @@ class InstanceSerializer(BaseSerializer):
     jobs_running = serializers.IntegerField(help_text=_('Count of jobs in the running or waiting state that are targeted for this instance'), read_only=True)
     jobs_total = serializers.IntegerField(help_text=_('Count of all jobs that target this instance'), read_only=True)
     health_check_pending = serializers.SerializerMethodField()
-    # peers = serializers.PrimaryKeyRelatedField(many=True, queryset=Instance.objects.all())
     peers = PeersSerializer(many=True)
 
     class Meta:
@@ -5423,7 +5422,7 @@ class InstanceSerializer(BaseSerializer):
             'ip_address',
             'listener_port',
             'peers',
-            'peer_to_control_nodes',
+            'peers_from_control_nodes',
         )
         extra_kwargs = {
             'node_type': {'initial': Instance.Types.EXECUTION, 'default': Instance.Types.EXECUTION},
@@ -5476,10 +5475,18 @@ class InstanceSerializer(BaseSerializer):
     def get_health_check_pending(self, obj):
         return obj.health_check_pending
 
-    def validate(self, data):
+    def validate(self, attrs):
+        def get_field_from_model_or_attrs(fd):
+            return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)
+
         if not self.instance and not settings.IS_K8S:
             raise serializers.ValidationError("Can only create instances on Kubernetes or OpenShift.")
-        return data
+        node_type = get_field_from_model_or_attrs("node_type")
+        peers_from_control_nodes = get_field_from_model_or_attrs("peers_from_control_nodes")
+
+        if peers_from_control_nodes and node_type not in (Instance.Types.EXECUTION, Instance.Types.HOP):
+            raise serializers.ValidationError("peers_from_control_nodes can only be enabled for execution or hop nodes.")
+        return super().validate(attrs)
 
     def validate_node_type(self, value):
         if self.instance and self.instance.node_type != value:

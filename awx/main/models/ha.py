@@ -70,7 +70,7 @@ class InstanceLink(BaseModel):
         REMOVING = 'removing', _('Removing')
 
     link_state = models.CharField(
-        choices=States.choices, default=States.ADDING, max_length=16, help_text=_("Indicates the current life cycle stage of this peer link.")
+        choices=States.choices, default=States.ESTABLISHED, max_length=16, help_text=_("Indicates the current life cycle stage of this peer link.")
     )
 
     class Meta:
@@ -183,7 +183,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     )
 
     peers = models.ManyToManyField('self', symmetrical=False, through=InstanceLink, through_fields=('source', 'target'))
-    peer_to_control_nodes = models.BooleanField(default=False, help_text=_("If True, control plane cluster nodes should automatically peer to it."))
+    peers_from_control_nodes = models.BooleanField(default=False, help_text=_("If True, control plane cluster nodes should automatically peer to it."))
 
     class Meta:
         app_label = 'main'
@@ -485,11 +485,10 @@ def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
             # node and kick off write_receptor_config
             connection.on_commit(lambda: remove_deprovisioned_node.apply_async([instance.hostname]))
 
-        if instance.node_state == Instance.States.INSTALLED and instance.peer_to_control_nodes:
-            from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
+        from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
 
-            # broadcast to all control instances to update their receptor configs
-            connection.on_commit(lambda: write_receptor_config.apply_async(queue='tower_broadcast_all'))
+        # broadcast to all control instances to update their receptor configs
+        connection.on_commit(lambda: write_receptor_config.apply_async(queue='tower_broadcast_all'))
 
     if created or instance.has_policy_changes():
         schedule_policy_task()
@@ -504,6 +503,11 @@ def on_instance_group_deleted(sender, instance, using, **kwargs):
 @receiver(post_delete, sender=Instance)
 def on_instance_deleted(sender, instance, using, **kwargs):
     schedule_policy_task()
+    if settings.IS_K8S and instance.node_type in (Instance.Types.EXECUTION, Instance.Types.HOP) and instance.peers_from_control_nodes:
+        from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
+
+        # broadcast to all control instances to update their receptor configs
+        connection.on_commit(lambda: write_receptor_config.apply_async(kwargs=dict(force=True), queue='tower_broadcast_all'))
 
 
 class UnifiedJobTemplateInstanceGroupMembership(models.Model):
