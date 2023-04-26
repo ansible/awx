@@ -75,6 +75,11 @@ class InstanceLink(BaseModel):
 
     class Meta:
         unique_together = ('source', 'target')
+        ordering = ("id",)
+        constraints = [models.CheckConstraint(check=~models.Q(source=models.F('target')), name='source_and_target_can_not_be_equal')]
+
+    def get_absolute_url(self, request=None):
+        return reverse('api:peers_detail', kwargs={'pk': self.pk}, request=request)
 
 
 class Instance(HasPolicyEditsMixin, BaseModel):
