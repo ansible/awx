@@ -13,7 +13,10 @@ import ErrorDetail from 'components/ErrorDetail';
 import AlertModal from 'components/AlertModal';
 import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
 import { useLocation, useParams } from 'react-router-dom';
-import useRequest, { useDeleteItems, useDismissableError } from 'hooks/useRequest';
+import useRequest, {
+  useDeleteItems,
+  useDismissableError,
+} from 'hooks/useRequest';
 import DataListToolbar from 'components/DataListToolbar';
 import { InstancesAPI, PeersAPI } from 'api';
 import useExpanded from 'hooks/useExpanded';
@@ -101,27 +104,23 @@ function InstancePeerList({ setBreadcrumb }) {
         mergeParams(params, {
           ...{ not__id: id },
           ...{ not__node_type: ['control', 'hybrid'] },
-          ...{ not__hostname: instance.peers }
+          ...{ not__hostname: instance.peers },
         })
       ),
     [id, instance]
   );
 
-  const {
-    request: handlePeerAssociate,
-    error: associateError
-  } = useRequest(
+  const { request: handlePeerAssociate, error: associateError } = useRequest(
     useCallback(
       async (instancesPeerToAssociate) => {
         await Promise.all(
-          instancesPeerToAssociate
-            .map((target) =>
-              PeersAPI.createPeer(instance.hostname, target.hostname)
-            )
+          instancesPeerToAssociate.map((target) =>
+            PeersAPI.createPeer(instance.hostname, target.hostname)
+          )
         );
         fetchPeers();
       },
-      [id, instance, fetchPeers]
+      [instance, fetchPeers]
     )
   );
 
@@ -130,16 +129,13 @@ function InstancePeerList({ setBreadcrumb }) {
     deleteItems: deletePeers,
     deletionError: disassociateError,
   } = useDeleteItems(
-    useCallback(
-      async () => {
-        await Promise.all(
-          selected.map((target) =>
-            PeersAPI.destroyPeer(instance.hostname, target.hostname)
-          )
-        );
-      },
-      [id, selected]
-    ),
+    useCallback(async () => {
+      await Promise.all(
+        selected.map((target) =>
+          PeersAPI.destroyPeer(instance.hostname, target.hostname)
+        )
+      );
+    }, [instance, selected]),
     {
       qsConfig: QS_CONFIG,
       allItemsSelected: isAllSelected,
@@ -254,8 +250,7 @@ function InstancePeerList({ setBreadcrumb }) {
           variant="error"
         >
           {associateError && t`Failed to associate peer.`}
-          {disassociateError &&
-            t`Failed to remove one or more peers.`}
+          {disassociateError && t`Failed to remove one or more peers.`}
           <ErrorDetail error={error} />
         </AlertModal>
       )}

@@ -183,7 +183,8 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
   }
   const isHopNode = instance.node_type === 'hop';
   const isExecutionNode = instance.node_type === 'execution';
-  const isControlNode = instance.node_type === 'control' || instance.node_type === 'hybrid';
+  const isControlNode =
+    instance.node_type === 'control' || instance.node_type === 'hybrid';
 
   return (
     <>
@@ -328,49 +329,49 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
             />
           )}
         </DetailList>
-          <CardActionsRow>
-            {config?.me?.is_superuser && (isExecutionNode || isHopNode) && (
-              <RemoveInstanceButton
-                dataCy="remove-instance-button"
-                itemsToRemove={[instance]}
-                isK8s={isK8s}
-                onRemove={removeInstances}
-              />
-            )}
-            {isExecutionNode && (
-              <Tooltip content={t`Run a health check on the instance`}>
-                <Button
-                  isDisabled={
-                    !config?.me?.is_superuser || instance.health_check_pending
-                  }
-                  variant="primary"
-                  ouiaId="health-check-button"
-                  onClick={fetchHealthCheck}
-                  isLoading={instance.health_check_pending}
-                  spinnerAriaLabel={t`Running health check`}
-                >
-                  {instance.health_check_pending
-                    ? t`Running health check`
-                    : t`Run health check`}
-                </Button>
-              </Tooltip>
-            )}
-            {(isExecutionNode || isControlNode) && (
-              <InstanceToggle
-                css="display: inline-flex;"
-                fetchInstances={fetchDetails}
-                instance={instance}
-                dataCy="enable-instance"
-              />
-            )}
-            {!isControlNode && (
-              <InstancePeerControl
-                css="display: inline-flex;"
-                fetchInstances={fetchDetails}
-                instance={instance}
-              />
-            )}
-          </CardActionsRow>
+        <CardActionsRow>
+          {config?.me?.is_superuser && (isExecutionNode || isHopNode) && (
+            <RemoveInstanceButton
+              dataCy="remove-instance-button"
+              itemsToRemove={[instance]}
+              isK8s={isK8s}
+              onRemove={removeInstances}
+            />
+          )}
+          {isExecutionNode && (
+            <Tooltip content={t`Run a health check on the instance`}>
+              <Button
+                isDisabled={
+                  !config?.me?.is_superuser || instance.health_check_pending
+                }
+                variant="primary"
+                ouiaId="health-check-button"
+                onClick={fetchHealthCheck}
+                isLoading={instance.health_check_pending}
+                spinnerAriaLabel={t`Running health check`}
+              >
+                {instance.health_check_pending
+                  ? t`Running health check`
+                  : t`Run health check`}
+              </Button>
+            </Tooltip>
+          )}
+          {(isExecutionNode || isControlNode) && (
+            <InstanceToggle
+              css="display: inline-flex;"
+              fetchInstances={fetchDetails}
+              instance={instance}
+              dataCy="enable-instance"
+            />
+          )}
+          {!isControlNode && (
+            <InstancePeerControl
+              css="display: inline-flex;"
+              fetchInstances={fetchDetails}
+              instance={instance}
+            />
+          )}
+        </CardActionsRow>
 
         {error && (
           <AlertModal

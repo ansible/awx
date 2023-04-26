@@ -59,7 +59,9 @@ function InstanceFormFields() {
         label={t`Instance Type`}
         tooltip={t`Sets the role that this instance will play within mesh topology. Default is "execution."`}
         validated={
-          !instanceTypeMeta.touched || !instanceTypeMeta.error ? 'default' : 'error'
+          !instanceTypeMeta.touched || !instanceTypeMeta.error
+            ? 'default'
+            : 'error'
         }
         helperTextInvalid={instanceTypeMeta.error}
         isRequired
@@ -85,7 +87,10 @@ function InstanceFormFields() {
           tooltip={t`Set the instance enabled or disabled. If disabled, jobs will not be assigned to this instance.`}
         />
       </FormGroup>
-      <FormGroup fieldId="peer-to-control-nodes-option-checkboxes" label={t`Options`}>
+      <FormGroup
+        fieldId="peer-to-control-nodes-option-checkboxes"
+        label={t`Options`}
+      >
         <CheckboxField
           id="peers_from_control_nodes"
           name="peers_from_control_nodes"

@@ -13,12 +13,11 @@ class Peers extends Base {
     return this.http.post(`${this.baseUrl}`, {
       source: source_hostname,
       target: target_hostname,
-      link_state: 'established'
+      link_state: 'established',
     });
   }
 
   async destroyPeer(source_hostname, target_hostname) {
-
     const { data } = await this.read({
       page: 1,
       page_size: 200,
@@ -27,14 +26,10 @@ class Peers extends Base {
     });
 
     const [peer_delete] = await Promise.all(
-      data.results
-        .map((peer) =>
-          this.destroy(peer.id)
-        )
+      data.results.map((peer) => this.destroy(peer.id))
     );
     return peer_delete;
   }
-
 }
 
 export default Peers;

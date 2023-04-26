@@ -3,10 +3,7 @@
 
 from django.urls import re_path
 
-from awx.api.views import (
-    PeersList,
-    PeersDetail
-)
+from awx.api.views import PeersList, PeersDetail
 
 
 urls = [
