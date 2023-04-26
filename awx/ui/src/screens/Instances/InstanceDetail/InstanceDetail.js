@@ -34,6 +34,7 @@ import useRequest, {
 } from 'hooks/useRequest';
 import HealthCheckAlert from 'components/HealthCheckAlert';
 import InstanceGroupLabels from 'components/InstanceGroupLabels';
+import InstancePeerControl from 'components/InstancePeerControl';
 import RemoveInstanceButton from '../Shared/RemoveInstanceButton';
 
 const Unavailable = styled.span`
@@ -182,6 +183,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
   }
   const isHopNode = instance.node_type === 'hop';
   const isExecutionNode = instance.node_type === 'execution';
+  const isControlNode = instance.node_type === 'control' || instance.node_type === 'hybrid';
 
   return (
     <>
@@ -326,9 +328,8 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
             />
           )}
         </DetailList>
-        {!isHopNode && (
           <CardActionsRow>
-            {config?.me?.is_superuser && isK8s && isExecutionNode && (
+            {config?.me?.is_superuser && (isExecutionNode || isHopNode) && (
               <RemoveInstanceButton
                 dataCy="remove-instance-button"
                 itemsToRemove={[instance]}
@@ -354,14 +355,22 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
                 </Button>
               </Tooltip>
             )}
-            <InstanceToggle
-              css="display: inline-flex;"
-              fetchInstances={fetchDetails}
-              instance={instance}
-              dataCy="enable-instance"
-            />
+            {(isExecutionNode || isControlNode) && (
+              <InstanceToggle
+                css="display: inline-flex;"
+                fetchInstances={fetchDetails}
+                instance={instance}
+                dataCy="enable-instance"
+              />
+            )}
+            {!isControlNode && (
+              <InstancePeerControl
+                css="display: inline-flex;"
+                fetchInstances={fetchDetails}
+                instance={instance}
+              />
+            )}
           </CardActionsRow>
-        )}
 
         {error && (
           <AlertModal

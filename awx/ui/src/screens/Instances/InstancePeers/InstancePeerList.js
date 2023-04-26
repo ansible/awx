@@ -33,16 +33,6 @@ function InstancePeerList({ setBreadcrumb }) {
 
   // const isSysAdmin = roles.some((role) => role.name === 'System Administrator');
 
-  const fetchInstancesToAssociate = useCallback(
-    (params) =>
-      InstancesAPI.read(
-        mergeParams(params, {
-          ...{ not__id: id },
-        })
-      ),
-    [id]
-  );
-
   const readInstancesOptions = useCallback(
     () => InstancesAPI.readOptions(id),
     [id]
@@ -88,8 +78,13 @@ function InstancePeerList({ setBreadcrumb }) {
 
   useEffect(() => {
     fetchPeers();
-    setBreadcrumb(instance.hostname);
   }, [fetchPeers]);
+
+  useEffect(() => {
+    if (instance) {
+      setBreadcrumb(instance);
+    }
+  }, [instance, setBreadcrumb]);
 
   const { expanded, isAllExpanded, handleExpand, expandAll } =
     useExpanded(peers);
@@ -98,6 +93,18 @@ function InstancePeerList({ setBreadcrumb }) {
 
   const { error, dismissError } = useDismissableError(
     associateError || disassociateError
+  );
+
+  const fetchInstancesToAssociate = useCallback(
+    (params) =>
+      InstancesAPI.read(
+        mergeParams(params, {
+          ...{ not__id: id },
+          ...{ not__node_type: ['control', 'hybrid'] },
+          ...{ not__hostname: instance.peers }
+        })
+      ),
+    [id, instance]
   );
 
   const {
@@ -114,7 +121,7 @@ function InstancePeerList({ setBreadcrumb }) {
         );
         fetchPeers();
       },
-      [id, fetchPeers]
+      [id, instance, fetchPeers]
     )
   );
 

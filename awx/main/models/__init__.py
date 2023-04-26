@@ -52,7 +52,6 @@ from awx.main.models.ha import (  # noqa
     InstanceLink,
     InstanceGroup,
     TowerScheduleState,
-    InstanceLink,
 )
 from awx.main.models.rbac import (  # noqa
     Role,
