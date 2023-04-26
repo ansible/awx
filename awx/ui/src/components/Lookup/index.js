@@ -8,3 +8,4 @@ export { default as ApplicationLookup } from './ApplicationLookup';
 export { default as HostFilterLookup } from './HostFilterLookup';
 export { default as OrganizationLookup } from './OrganizationLookup';
 export { default as ExecutionEnvironmentLookup } from './ExecutionEnvironmentLookup';
+export { default as PeersLookup } from './PeersLookup';
