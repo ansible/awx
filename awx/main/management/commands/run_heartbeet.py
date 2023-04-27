@@ -2,6 +2,8 @@ import json
 import logging
 import os
 import time
+import signal
+import sys
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
@@ -50,6 +52,11 @@ class Command(BaseCommand):
         }
         return json.dumps(payload)
 
+    def notify_listener_and_exit(self, *args):
+        with pg_bus_conn(new_connection=False) as conn:
+            conn.notify('web_heartbeet', self.construct_payload(action='offline'))
+        sys.exit(0)
+
     def do_hearbeat_loop(self):
         with pg_bus_conn(new_connection=True) as conn:
             while True:
@@ -57,10 +64,10 @@ class Command(BaseCommand):
                 conn.notify('web_heartbeet', self.construct_payload())
                 time.sleep(settings.BROADCAST_WEBSOCKET_BEACON_FROM_WEB_RATE_SECONDS)
 
-    # TODO: Send a message with action=offline if we notice a SIGTERM or SIGINT
-    # (wsrelay can use this to remove the node quicker)
     def handle(self, *arg, **options):
         self.print_banner()
+        signal.signal(signal.SIGTERM, self.notify_listener_and_exit)
+        signal.signal(signal.SIGINT, self.notify_listener_and_exit)
 
         # Note: We don't really try any reconnect logic to pg_notify here,
         # just let supervisor restart if we fail.
