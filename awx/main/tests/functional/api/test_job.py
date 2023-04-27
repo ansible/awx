@@ -224,7 +224,7 @@ class TestControllerNode:
         return AdHocCommand.objects.create(inventory=inventory)
 
     @pytest.mark.django_db
-    def test_field_controller_node_exists(self, sqlite_copy_expert, admin_user, job, project_update, inventory_update, adhoc, get, system_job_factory):
+    def test_field_controller_node_exists(self, sqlite_copy, admin_user, job, project_update, inventory_update, adhoc, get, system_job_factory):
         system_job = system_job_factory()
 
         r = get(reverse('api:unified_job_list') + '?id={}'.format(job.id), admin_user, expect=200)

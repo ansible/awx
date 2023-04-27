@@ -1137,11 +1137,6 @@ class UnifiedJob(
                     if total > max_supported:
                         raise StdoutMaxBytesExceeded(total, max_supported)
 
-                # psycopg2's copy_expert writes bytes, but callers of this
-                # function assume a str-based fd will be returned; decode
-                # .write() calls on the fly to maintain this interface
-                _write = fd.write
-                fd.write = lambda s: _write(smart_str(s))
                 tbl = self._meta.db_table + 'event'
                 created_by_cond = ''
                 if self.has_unpartitioned_events:
@@ -1150,7 +1145,12 @@ class UnifiedJob(
                     created_by_cond = f"job_created='{self.created.isoformat()}' AND "
 
                 sql = f"copy (select stdout from {tbl} where {created_by_cond}{self.event_parent_key}={self.id} and stdout != '' order by start_line) to stdout"  # nosql
-                cursor.copy_expert(sql, fd)
+                # psycopg3's copy writes bytes, but callers of this
+                # function assume a str-based fd will be returned; decode
+                # .write() calls on the fly to maintain this interface
+                with cursor.copy(sql) as copy:
+                    while data := copy.read():
+                        fd.write(smart_str(bytes(data)))
 
                 if hasattr(fd, 'name'):
                     # If we're dealing with a physical file, use `sed` to clean

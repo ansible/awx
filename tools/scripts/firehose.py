@@ -98,37 +98,27 @@ class YieldedRows(StringIO):
             )
             self.rowlist.append(row)
 
-    def read(self, x):
-        if self.rows <= 0:
-            self.close()
-            return ''
-        elif self.rows >= 1 and self.rows < 1000:
-            event_rows = self.rowlist[random.randrange(len(self.rowlist))] * self.rows
-            self.rows -= self.rows
-            return event_rows
-        self.rows -= 1000
-        return self.rowlist[random.randrange(len(self.rowlist))] * 1000
-
 
 def firehose(job, count, created_stamp, modified_stamp):
     conn = psycopg.connect(dsn)
     f = YieldedRows(job, count, created_stamp, modified_stamp)
-    with conn.cursor() as cursor:
-        cursor.copy_expert(
-            (
-                'COPY '
-                'main_jobevent('
-                'created, modified, job_created, event, event_data, failed, changed, '
-                'host_name, play, role, task, counter, host_id, job_id, uuid, '
-                'parent_uuid, end_line, playbook, start_line, stdout, verbosity'
-                ') '
-                'FROM STDIN'
-            ),
-            f,
-            size=1024 * 1000,
-        )
-    conn.commit()
-    conn.close()
+    sql = '''
+          COPY main_jobevent(
+            created, modified, job_created, event, event_data, failed, changed,
+            host_name, play, role, task, counter, host_id, job_id, uuid,
+            parent_uuid, end_line, playbook, start_line, stdout, verbosity
+          ) FROM STDIN
+    '''
+    try:
+        with conn.cursor() as cursor:
+            with cursor.copy(sql) as copy:
+                copy.write("".join(f.rowlist))
+    except Exception as e:
+        print("Failed to import events")
+        print(e)
+    finally:
+        conn.commit()
+        conn.close()
 
 
 def cleanup(sql):
