@@ -147,7 +147,7 @@ function InstanceForm({
           node_state: instance.node_state || 'installed',
           listener_port: instance.listener_port || 27199,
           enabled: instance.enabled || true,
-          peers_from_control_nodes: instance.peers_from_control_nodes || true,
+          peers_from_control_nodes: instance.peers_from_control_nodes? true : !isEdit,
           peers: instance.peers || [],
         }}
         onSubmit={(values) => {

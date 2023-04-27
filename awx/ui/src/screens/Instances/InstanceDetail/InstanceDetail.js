@@ -208,6 +208,18 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
           <Detail label={t`Node Type`} value={instance.node_type} />
           <Detail label={t`Host`} value={instance.ip_address} />
           <Detail label={t`Instance Port`} value={instance.listener_port} />
+          { (isExecutionNode || isHopNode) && (
+            // <Detail label={t`Connection to control nodes`} value={instance.peers_from_control_nodes? t`Enabled` : t`Disabled`} />
+            <Detail
+              label={t`Connection to control nodes`}
+              dataCy="peer-to-control-nodes"
+              value={
+                instance.peers_from_control_nodes ? (
+                  <StatusLabel status="enabled" />
+                ) : <StatusLabel status="disabled" />
+              }
+            />
+          )}
           {instance.related?.install_bundle && (
             <Detail
               label={t`Install Bundle`}
