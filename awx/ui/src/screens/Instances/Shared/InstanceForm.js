@@ -36,7 +36,7 @@ function InstanceFormFields({ isEdit }) {
   return (
     <>
       <FormField
-        id="instance-hostname"
+        id="hostname"
         label={t`Host Name`}
         name="hostname"
         type="text"

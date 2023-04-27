@@ -140,10 +140,10 @@ function InstancePeerList({ setBreadcrumb }) {
   const { error, dismissError } = useDismissableError(
     associateError || disassociateError
   );
-  
+
   const isHopNode = instance.node_type === 'hop';
   const isExecutionNode = instance.node_type === 'execution';
-  
+
   return (
     <CardBody>
       <PaginatedTable
@@ -191,18 +191,22 @@ function InstancePeerList({ setBreadcrumb }) {
             onExpandAll={expandAll}
             qsConfig={QS_CONFIG}
             additionalControls={[
-              ((isExecutionNode || isHopNode) && <ToolbarAddButton
-                ouiaId="add-instance-peers-button"
-                key="associate"
-                onClick={() => setIsModalOpen(true)}
-              />),
-              ((isExecutionNode || isHopNode) && <DisassociateButton
-                verifyCannotDisassociate={false}
-                key="disassociate"
-                onDisassociate={handlePeersDiassociate}
-                itemsToDisassociate={selected}
-                modalTitle={t`Remove instance from peers?`}
-              />),
+              (isExecutionNode || isHopNode) && (
+                <ToolbarAddButton
+                  ouiaId="add-instance-peers-button"
+                  key="associate"
+                  onClick={() => setIsModalOpen(true)}
+                />
+              ),
+              (isExecutionNode || isHopNode) && (
+                <DisassociateButton
+                  verifyCannotDisassociate={false}
+                  key="disassociate"
+                  onDisassociate={handlePeersDiassociate}
+                  itemsToDisassociate={selected}
+                  modalTitle={t`Remove instance from peers?`}
+                />
+              ),
             ]}
           />
         )}
