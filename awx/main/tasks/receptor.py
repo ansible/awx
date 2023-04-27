@@ -28,7 +28,7 @@ from awx.main.utils.common import (
 from awx.main.constants import MAX_ISOLATED_PATH_COLON_DELIMITER
 from awx.main.tasks.signals import signal_state, signal_callback, SignalExit
 from awx.main.models import Instance, InstanceLink, UnifiedJob
-from awx.main.dispatch import get_task_queuename
+from awx.main.dispatch.queues import get_task_queuename
 from awx.main.dispatch.publish import task
 
 # Receptorctl

@@ -29,7 +29,7 @@ from gitdb.exc import BadName as BadGitName
 
 # AWX
 from awx.main.dispatch.publish import task
-from awx.main.dispatch import get_task_queuename
+from awx.main.dispatch.queues import get_task_queuename
 from awx.main.constants import (
     PRIVILEGE_ESCALATION_METHODS,
     STANDARD_INVENTORY_UPDATE_ENV,

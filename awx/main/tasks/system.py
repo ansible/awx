@@ -51,7 +51,8 @@ from awx.main.models import (
 )
 from awx.main.constants import ACTIVE_STATES
 from awx.main.dispatch.publish import task
-from awx.main.dispatch import get_task_queuename, reaper
+from awx.main.dispatch.queues import get_task_queuename
+from awx.main.dispatch import reaper
 from awx.main.utils.common import (
     get_type_for_model,
     ignore_inventory_computed_fields,

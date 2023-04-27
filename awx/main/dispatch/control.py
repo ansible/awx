@@ -6,7 +6,7 @@ from django.conf import settings
 from django.db import connection
 import redis
 
-from awx.main.dispatch import get_task_queuename
+from awx.main.dispatch.queues import get_task_queuename
 
 from . import pg_bus_conn
 
