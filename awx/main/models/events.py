@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+from datetime import timezone
 import logging
 from collections import defaultdict
 
@@ -10,7 +11,7 @@ from django.db import models, DatabaseError
 from django.db.models.functions import Cast
 from django.utils.dateparse import parse_datetime
 from django.utils.text import Truncator
-from django.utils.timezone import utc, now
+from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django.utils.encoding import force_str
 
@@ -422,7 +423,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
             if not isinstance(kwargs['created'], datetime.datetime):
                 kwargs['created'] = parse_datetime(kwargs['created'])
             if not kwargs['created'].tzinfo:
-                kwargs['created'] = kwargs['created'].replace(tzinfo=utc)
+                kwargs['created'] = kwargs['created'].replace(tzinfo=timezone.utc)
         except (KeyError, ValueError):
             kwargs.pop('created', None)
 
@@ -432,7 +433,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
             if not isinstance(kwargs['job_created'], datetime.datetime):
                 kwargs['job_created'] = parse_datetime(kwargs['job_created'])
             if not kwargs['job_created'].tzinfo:
-                kwargs['job_created'] = kwargs['job_created'].replace(tzinfo=utc)
+                kwargs['job_created'] = kwargs['job_created'].replace(tzinfo=timezone.utc)
         except (KeyError, ValueError):
             kwargs.pop('job_created', None)
 
@@ -734,7 +735,7 @@ class BaseCommandEvent(CreatedModifiedModel):
             if not isinstance(kwargs['created'], datetime.datetime):
                 kwargs['created'] = parse_datetime(kwargs['created'])
             if not kwargs['created'].tzinfo:
-                kwargs['created'] = kwargs['created'].replace(tzinfo=utc)
+                kwargs['created'] = kwargs['created'].replace(tzinfo=timezone.utc)
         except (KeyError, ValueError):
             kwargs.pop('created', None)
 
