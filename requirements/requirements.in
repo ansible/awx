@@ -1,4 +1,5 @@
 aiohttp
+ansible-runner==2.3.2
 ansiconv==1.0.0  # UPGRADE BLOCKER: from 2013, consider replacing instead of upgrading
 asciichartpy
 asn1
@@ -62,7 +63,3 @@ setuptools  # see UPGRADE BLOCKERs
 setuptools_scm[toml]  # see UPGRADE BLOCKERs, xmlsec build dep
 setuptools-rust >= 0.11.4 # cryptography build dep
 pkgconfig>=1.5.1  # xmlsec build dep - needed for offline build
-
-# Temporarily added to use ansible-runner from git branch, to be removed
-# when ansible-runner moves from requirements_git.txt to here
-pbr
