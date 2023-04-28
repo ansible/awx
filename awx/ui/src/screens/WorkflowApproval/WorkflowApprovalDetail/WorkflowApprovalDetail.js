@@ -17,11 +17,7 @@ import { CardBody, CardActionsRow } from 'components/Card';
 import { Detail, DetailList, UserDateDetail } from 'components/DetailList';
 import { VariablesDetail } from 'components/CodeEditor';
 import { formatDateString, secondsToHHMMSS } from 'util/dates';
-import {
-  WorkflowApprovalsAPI,
-  WorkflowJobTemplatesAPI,
-  WorkflowJobsAPI,
-} from 'api';
+import { WorkflowApprovalsAPI, WorkflowJobsAPI } from 'api';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { WorkflowApproval } from 'types';
 import StatusLabel from 'components/StatusLabel';
@@ -67,8 +63,10 @@ function WorkflowApprovalDetail({ workflowApproval, fetchWorkflowApproval }) {
   const { error: deleteError, dismissError: dismissDeleteError } =
     useDismissableError(deleteApprovalError);
 
-  const workflowJobTemplateId =
-    workflowApproval.summary_fields.workflow_job_template.id;
+  const sourceWorkflowJob =
+    workflowApproval?.summary_fields?.source_workflow_job;
+  const sourceWorkflowJobTemplate =
+    workflowApproval?.summary_fields?.workflow_job_template;
 
   const {
     error: fetchWorkflowJobError,
@@ -77,23 +75,10 @@ function WorkflowApprovalDetail({ workflowApproval, fetchWorkflowApproval }) {
     result: workflowJob,
   } = useRequest(
     useCallback(async () => {
-      if (!workflowJobTemplateId) {
-        return {};
-      }
-      const { data: workflowJobTemplate } =
-        await WorkflowJobTemplatesAPI.readDetail(workflowJobTemplateId);
-
-      let jobId = null;
-
-      if (workflowJobTemplate.summary_fields?.current_job) {
-        jobId = workflowJobTemplate.summary_fields.current_job.id;
-      } else if (workflowJobTemplate.summary_fields?.last_job) {
-        jobId = workflowJobTemplate.summary_fields.last_job.id;
-      }
-      const { data } = await WorkflowJobsAPI.readDetail(jobId);
-
+      if (!sourceWorkflowJob?.id) return {};
+      const { data } = await WorkflowJobsAPI.readDetail(sourceWorkflowJob?.id);
       return data;
-    }, [workflowJobTemplateId]),
+    }, [sourceWorkflowJob?.id]),
     {
       workflowJob: null,
       isLoading: true,
@@ -116,11 +101,6 @@ function WorkflowApprovalDetail({ workflowApproval, fetchWorkflowApproval }) {
     },
     [addToast, fetchWorkflowApproval]
   );
-  const sourceWorkflowJob =
-    workflowApproval?.summary_fields?.source_workflow_job;
-
-  const sourceWorkflowJobTemplate =
-    workflowApproval?.summary_fields?.workflow_job_template;
 
   const isLoading = isDeleteLoading || isLoadingWorkflowJob;
 

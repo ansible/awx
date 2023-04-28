@@ -2,6 +2,7 @@
 - name: Generate a random string for names
   set_fact:
     test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
 
 - name: Generate random names for test objects
   set_fact:
@@ -17,8 +18,8 @@
     webhook_wfjt_name: "AWX-Collection-tests-workflow_job_template-webhook-wfjt-{{ test_id }}"
     email_not: "AWX-Collection-tests-job_template-email-not-{{ test_id }}"
     webhook_notification: "AWX-Collection-tests-notification_template-wehbook-not-{{ test_id }}"
-    project_inv: "AWX-Collection-tests-inventory_source-inv-project-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    project_inv_source: "AWX-Collection-tests-inventory_source-inv-source-project-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    project_inv: "AWX-Collection-tests-inventory_source-inv-project-{{ test_id }}"
+    project_inv_source: "AWX-Collection-tests-inventory_source-inv-source-project-{{ test_id }}"
     github_webhook_credential_name: "AWX-Collection-tests-credential-webhook-{{ test_id }}_github"
     ee1: "AWX-Collection-tests-workflow_job_template-ee1-{{ test_id }}"
     label1: "AWX-Collection-tests-workflow_job_template-l1-{{ test_id }}"

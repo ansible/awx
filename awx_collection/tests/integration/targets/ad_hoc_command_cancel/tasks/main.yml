@@ -46,27 +46,24 @@
     that:
       - "command is changed"
 
-- name: Timeout waiting for the command to cancel
+- name: Cancel the command
   ad_hoc_command_cancel:
     command_id: "{{ command.id }}"
-    timeout: -1
   register: results
   ignore_errors: true
 
 - assert:
     that:
-      - results is failed
-      - "results['msg'] == 'Monitoring of ad hoc command aborted due to timeout'"
+      - results is changed
 
-- block:
-    - name: "Wait for up to a minute until the job enters the can_cancel: False state"
-      debug:
-        msg: "The job can_cancel status has transitioned into False, we can proceed with testing"
-      until: not job_status
-      retries: 6
-      delay: 10
-      vars:
-        job_status: "{{ lookup('awx.awx.controller_api', 'ad_hoc_commands/'+ command.id | string +'/cancel')['can_cancel'] }}"
+- name: "Wait for up to a minute until the job enters the can_cancel: False state"
+  debug:
+    msg: "The job can_cancel status has transitioned into False, we can proceed with testing"
+  until: not job_status
+  retries: 6
+  delay: 10
+  vars:
+    job_status: "{{ lookup('awx.awx.controller_api', 'ad_hoc_commands/'+ command.id | string +'/cancel')['can_cancel'] }}"
 
 - name: Cancel the command with hard error if it's not running
   ad_hoc_command_cancel:

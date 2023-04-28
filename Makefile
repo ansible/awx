@@ -1,6 +1,6 @@
 -include awx/ui_next/Makefile
 
-PYTHON ?= python3.9
+PYTHON := $(notdir $(shell for i in python3.9 python3; do command -v $$i; done|sed 1q))
 DOCKER_COMPOSE ?= docker-compose
 OFFICIAL ?= no
 NODE ?= node
@@ -296,13 +296,13 @@ swagger: reports
 check: black
 
 api-lint:
-	BLACK_ARGS="--check" make black
+	BLACK_ARGS="--check" $(MAKE) black
 	flake8 awx
 	yamllint -s .
 
+## Run egg_info_dev to generate awx.egg-info for development.
 awx-link:
 	[ -d "/awx_devel/awx.egg-info" ] || $(PYTHON) /awx_devel/tools/scripts/egg_info_dev
-	cp -f /tmp/awx.egg-link /var/lib/awx/venv/awx/lib/$(PYTHON)/site-packages/awx.egg-link
 
 TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/sso/tests
 PYTEST_ARGS ?= -n auto
@@ -321,7 +321,7 @@ github_ci_setup:
 	# CI_GITHUB_TOKEN is defined in .github files
 	echo $(CI_GITHUB_TOKEN) | docker login ghcr.io -u $(GITHUB_ACTOR) --password-stdin
 	docker pull $(DEVEL_IMAGE_NAME) || :  # Pre-pull image to warm build cache
-	make docker-compose-build
+	$(MAKE) docker-compose-build
 
 ## Runs AWX_DOCKER_CMD inside a new docker container.
 docker-runner:
@@ -371,7 +371,7 @@ test_collection_sanity:
 	rm -rf $(COLLECTION_INSTALL)
 	if ! [ -x "$(shell command -v ansible-test)" ]; then pip install ansible-core; fi
 	ansible --version
-	COLLECTION_VERSION=1.0.0 make install_collection
+	COLLECTION_VERSION=1.0.0 $(MAKE) install_collection
 	cd $(COLLECTION_INSTALL) && ansible-test sanity $(COLLECTION_SANITY_ARGS)
 
 test_collection_integration: install_collection
@@ -589,7 +589,7 @@ docker-compose-cluster-elk: awx/projects docker-compose-sources
 	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
 
 docker-compose-container-group:
-	MINIKUBE_CONTAINER_GROUP=true make docker-compose
+	MINIKUBE_CONTAINER_GROUP=true $(MAKE) docker-compose
 
 clean-elk:
 	docker stop tools_kibana_1
@@ -606,7 +606,18 @@ VERSION:
 	@echo "awx: $(VERSION)"
 
 PYTHON_VERSION:
-	@echo "$(PYTHON)" | sed 's:python::'
+	@echo "$(subst python,,$(PYTHON))"
+
+.PHONY: version-for-buildyml
+version-for-buildyml:
+	@echo $(firstword $(subst +, ,$(VERSION)))
+# version-for-buildyml prints a special version string for build.yml,
+# chopping off the sha after the '+' sign.
+# tools/ansible/build.yml was doing this: make print-VERSION | cut -d + -f -1
+# This does the same thing in native make without
+# the pipe or the extra processes, and now the pb does `make version-for-buildyml`
+# Example:
+# 	22.1.1.dev38+g523c0d9781 becomes 22.1.1.dev38
 
 .PHONY: Dockerfile
 ## Generate Dockerfile for awx image
@@ -658,6 +669,7 @@ messages:
 	fi; \
 	$(PYTHON) manage.py makemessages -l en_us --keep-pot
 
+.PHONY: print-%
 print-%:
 	@echo $($*)
 
@@ -669,12 +681,12 @@ HELP_FILTER=.PHONY
 ## Display help targets
 help:
 	@printf "Available targets:\n"
-	@make -s help/generate | grep -vE "\w($(HELP_FILTER))"
+	@$(MAKE) -s help/generate | grep -vE "\w($(HELP_FILTER))"
 
 ## Display help for all targets
 help/all:
 	@printf "Available targets:\n"
-	@make -s help/generate
+	@$(MAKE) -s help/generate
 
 ## Generate help output from MAKEFILE_LIST
 help/generate:
@@ -698,4 +710,4 @@ help/generate:
 
 ## Display help for ui-next targets
 help/ui-next:
-	@make -s help MAKEFILE_LIST="awx/ui_next/Makefile"
+	@$(MAKE) -s help MAKEFILE_LIST="awx/ui_next/Makefile"

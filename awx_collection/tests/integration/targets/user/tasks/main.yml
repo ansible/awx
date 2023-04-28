@@ -1,7 +1,12 @@
 ---
+- name: Generate a test ID
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
 - name: Generate names
   set_fact:
-    username: "AWX-Collection-tests-user-user-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    username: "AWX-Collection-tests-user-user-{{ test_id }}"
 
 - name: Create a User
   user:
@@ -131,10 +136,6 @@
         'Can not verify ssl with non-https protocol' in result.exception"
 
 - block:
-    - name: Generate a test ID
-      set_fact:
-        test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-
     - name: Generate an org name
       set_fact:
         org_name: "AWX-Collection-tests-organization-org-{{ test_id }}"

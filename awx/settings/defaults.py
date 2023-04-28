@@ -1,24 +1,16 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+# Python
 import base64
 import os
 import re  # noqa
-import sys
 import tempfile
 import socket
 from datetime import timedelta
 
-
-if "pytest" in sys.modules:
-    IS_TESTING_MODE = True
-    from unittest import mock
-
-    with mock.patch('__main__.__builtins__.dir', return_value=[]):
-        import ldap
-else:
-    IS_TESTING_MODE = False
-    import ldap
+# python-ldap
+import ldap
 
 
 DEBUG = True
