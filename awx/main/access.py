@@ -2952,3 +2952,19 @@ class WorkflowApprovalTemplateAccess(BaseAccess):
 for cls in BaseAccess.__subclasses__():
     access_registry[cls.model] = cls
 access_registry[UnpartitionedJobEvent] = UnpartitionedJobEventAccess
+
+
+def optimize_queryset(queryset):
+    """
+    A utility method in case you already have a queryset and just want to
+    apply the standard optimizations for that model.
+    In other words, use if you do not want to start from filtered_queryset for some reason.
+    """
+    if not queryset.model or queryset.model not in access_registry:
+        return queryset
+    access_class = access_registry[queryset.model]
+    if access_class.select_related:
+        queryset = queryset.select_related(*access_class.select_related)
+    if access_class.prefetch_related:
+        queryset = queryset.prefetch_related(*access_class.prefetch_related)
+    return queryset
