@@ -678,6 +678,7 @@ RECEPTOR_CONFIG_STARTER = (
 def write_receptor_config(force=False):
     """
     only control nodes will run this
+    force=True means to call receptorctl reload
     """
     lock = FileLock(__RECEPTOR_CONF_LOCKFILE)
     with lock:
