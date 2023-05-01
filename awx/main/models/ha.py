@@ -67,10 +67,11 @@ class InstanceLink(BaseModel):
     class States(models.TextChoices):
         ADDING = 'adding', _('Adding')
         ESTABLISHED = 'established', _('Established')
+        DISCONNECTED = 'disconnected', _('Disconnected')
         REMOVING = 'removing', _('Removing')
 
     link_state = models.CharField(
-        choices=States.choices, default=States.ESTABLISHED, max_length=16, help_text=_("Indicates the current life cycle stage of this peer link.")
+        choices=States.choices, default=States.DISCONNECTED, max_length=16, help_text=_("Indicates the current life cycle stage of this peer link.")
     )
 
     class Meta:
