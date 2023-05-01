@@ -14,15 +14,7 @@ except ModuleNotFoundError:
         result = subprocess.run(cmd, capture_output=True)
         if result.returncode:
             # failed, we have no version, so print output so that users can debug
-            print(f'\nCommand `{" ".join(cmd)}` failed (rc={result.returncode}).\n\nstdout:')
-            sys.stdout.buffer.write(result.stdout)
-            sys.stdout.flush()
-            sys.stderr.flush()
-            print('\nstderr:\n')
-            sys.stderr.buffer.write(result.stderr)
-            sys.stderr.flush()
-            print('\n')
-            result.check_returncode()  # raise exception from subprocess
+            raise Exception(f'\nCommand `{" ".join(cmd)}` failed (rc={result.returncode}).\n\nstdout:\n{result.stdout}\n\nstderr:\n{result.stderr}')
 
     from setuptools_scm import get_version
 
