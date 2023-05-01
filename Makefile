@@ -42,7 +42,10 @@ TACACS ?= false
 
 VENV_BASE ?= /var/lib/awx/venv
 
-DEV_DOCKER_TAG_BASE ?= ghcr.io/ansible
+DEV_DOCKER_OWNER ?= ansible
+# Docker will only accept lowercase, so github names like Paul need to be paul
+DEV_DOCKER_OWNER_LOWER = $(shell echo $(DEV_DOCKER_OWNER) | tr A-Z a-z)
+DEV_DOCKER_TAG_BASE ?= ghcr.io/$(DEV_DOCKER_OWNER_LOWER)
 DEVEL_IMAGE_NAME ?= $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 
 RECEPTOR_IMAGE ?= quay.io/ansible/receptor:devel
