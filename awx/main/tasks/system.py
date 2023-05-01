@@ -455,6 +455,30 @@ def execution_node_health_check(node):
     return data
 
 
+@task(queue=get_task_queuename)
+def inspect_receptor_connections():
+    ctl = get_receptor_ctl()
+    mesh_status = ctl.simple_command('status')
+
+    # detect active/inactive receptor links
+    from awx.main.models import InstanceLink
+
+    all_links = InstanceLink.objects.all()
+    active_receptor_conns = mesh_status['KnownConnectionCosts']
+    update_links = []
+    for link in all_links:
+        if link.target.hostname in active_receptor_conns.get(link.source.hostname, {}):
+            if link.link_state is not InstanceLink.States.ESTABLISHED:
+                link.link_state = InstanceLink.States.ESTABLISHED
+                update_links.append(link)
+        else:
+            if link.link_state is not InstanceLink.States.DISCONNECTED:
+                link.link_state = InstanceLink.States.DISCONNECTED
+                update_links.append(link)
+
+    InstanceLink.objects.bulk_update(update_links, ['link_state'])
+
+
 def inspect_execution_nodes(instance_list):
     with advisory_lock('inspect_execution_nodes_lock', wait=False):
         node_lookup = {inst.hostname: inst for inst in instance_list}
