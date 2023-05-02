@@ -24,7 +24,6 @@ const colors = {
   disabled: 'grey',
   canceled: 'orange',
   changed: 'orange',
-  enabled: 'green',
   /* Instance statuses */
   ready: 'green',
   installed: 'blue',
@@ -54,7 +53,6 @@ export default function StatusLabel({ status, tooltipContent = '', children }) {
     disabled: t`Disabled`,
     canceled: t`Canceled`,
     changed: t`Changed`,
-    enabled: t`Enabled`,
     /* Instance statuses */
     ready: t`Ready`,
     installed: t`Installed`,
@@ -106,7 +104,6 @@ StatusLabel.propTypes = {
     'disabled',
     'canceled',
     'changed',
-    'enabled',
     'ready',
     'installed',
     'provisioning',

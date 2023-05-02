@@ -212,7 +212,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
             <Detail
               label={t`Connection to control nodes`}
               value={
-                instance.peers_from_control_nodes ? t`Enabled` : t`Disabled`
+                instance.peers_from_control_nodes ? t`On` : t`Off`
               }
             />
           )}

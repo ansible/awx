@@ -41,7 +41,6 @@ const icons = {
   skipped: MinusCircleIcon,
   canceled: ExclamationTriangleIcon,
   changed: ExclamationTriangleIcon,
-  enabled: CheckCircleIcon,
   /* Instance statuses */
   ready: CheckCircleIcon,
   installed: ClockIcon,
