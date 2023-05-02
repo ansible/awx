@@ -34,16 +34,22 @@ function InstanceEdit({ setBreadcrumb }) {
     isLoading,
     error,
     request: fetchDetail,
-    result: { instance },
+    result: { instance, peers },
   } = useRequest(
     useCallback(async () => {
-      const { data: instance_detail } = await InstancesAPI.readDetail(id);
+      const [{ data: instance_detail }, { data: peers_detail }] =
+        await Promise.all([
+          InstancesAPI.readDetail(id),
+          InstancesAPI.readPeers(id),
+        ]);
       return {
         instance: instance_detail,
+        peers: peers_detail.results,
       };
     }, [id]),
     {
       instance: {},
+      peers: [],
     }
   );
 
@@ -85,6 +91,7 @@ function InstanceEdit({ setBreadcrumb }) {
       <Card>
         <InstanceForm
           instance={instance}
+          instance_peers={peers}
           isEdit
           submitError={formError}
           handleSubmit={handleSubmit}

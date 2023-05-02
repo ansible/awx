@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { arrayOf, string, func, bool, objectOf, shape } from 'prop-types';
+import { arrayOf, string, func, bool, shape } from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import { FormGroup, Chip } from '@patternfly/react-core';
@@ -50,9 +50,11 @@ function InstancesLookup({
       const peersFilter = {};
       if (typePeers) {
         peersFilter.not__node_type = ['control', 'hybrid'];
-        if (instance_details.id) {
-          peersFilter.not__id = instance_details.id;
-          peersFilter.not__hostname = instance_details.peers;
+        if (instance_details) {
+          if (instance_details.id) {
+            peersFilter.not__id = instance_details.id;
+            peersFilter.not__hostname = instance_details.peers;
+          }
         }
       }
 
@@ -72,12 +74,7 @@ function InstancesLookup({
         ).map((val) => val.slice(0, -8)),
         searchableKeys: getSearchableKeys(actionsResponse.data.actions?.GET),
       };
-    }, [
-      history.location,
-      typePeers,
-      instance_details.id,
-      instance_details.peers,
-    ]),
+    }, [history.location, typePeers, instance_details]),
     {
       instances: [],
       count: 0,
@@ -185,7 +182,7 @@ InstancesLookup.propTypes = {
   fieldName: string,
   columns: arrayOf(Object),
   formLabel: string,
-  instance_details: objectOf(shape({})),
+  instance_details: (Instance, shape({})),
   typePeers: bool,
 };
 

@@ -195,6 +195,7 @@ function InstancePeerList({ setBreadcrumb }) {
                 <ToolbarAddButton
                   ouiaId="add-instance-peers-button"
                   key="associate"
+                  defaultLabel={t`Associate`}
                   onClick={() => setIsModalOpen(true)}
                 />
               ),

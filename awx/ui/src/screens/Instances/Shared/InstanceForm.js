@@ -66,47 +66,47 @@ function InstanceFormFields({ isEdit }) {
         tooltip={t`Select the port that Receptor will listen on for incoming connections. Default is 27199.`}
         isRequired
       />
-      <FormGroup
-        fieldId="instance-type"
-        label={t`Instance Type`}
-        tooltip={t`Sets the role that this instance will play within mesh topology. Default is "execution."`}
-        validated={
-          !instanceTypeMeta.touched || !instanceTypeMeta.error
-            ? 'default'
-            : 'error'
-        }
-        helperTextInvalid={instanceTypeMeta.error}
-        isRequired
-      >
-        <AnsibleSelect
-          {...instanceTypeField}
-          id="node_type"
-          data={INSTANCE_TYPES.map((type) => ({
-            key: type.id,
-            value: type.id,
-            label: type.name,
-          }))}
-          onChange={(event, value) => {
-            instanceTypeHelpers.setValue(value);
-          }}
-        />
-      </FormGroup>
       {!isEdit && (
-        <InstancesLookup
-          helperTextInvalid={peersMeta.error}
-          isValid={!peersMeta.touched || !peersMeta.error}
-          onBlur={() => peersHelpers.setTouched()}
-          onChange={handlePeersUpdate}
-          value={peersField.value}
-          tooltip={t`Select the Peers Instances.`}
-          fieldName="peers"
-          formLabel={t`Peers`}
-          multiple
-          typePeers
-          id="peers"
+        <FormGroup
+          fieldId="instance-type"
+          label={t`Instance Type`}
+          tooltip={t`Sets the role that this instance will play within mesh topology. Default is "execution."`}
+          validated={
+            !instanceTypeMeta.touched || !instanceTypeMeta.error
+              ? 'default'
+              : 'error'
+          }
+          helperTextInvalid={instanceTypeMeta.error}
           isRequired
-        />
+        >
+          <AnsibleSelect
+            {...instanceTypeField}
+            id="node_type"
+            data={INSTANCE_TYPES.map((type) => ({
+              key: type.id,
+              value: type.id,
+              label: type.name,
+            }))}
+            onChange={(event, value) => {
+              instanceTypeHelpers.setValue(value);
+            }}
+          />
+        </FormGroup>
       )}
+      <InstancesLookup
+        helperTextInvalid={peersMeta.error}
+        isValid={!peersMeta.touched || !peersMeta.error}
+        onBlur={() => peersHelpers.setTouched()}
+        onChange={handlePeersUpdate}
+        value={peersField.value}
+        tooltip={t`Select the Peers Instances.`}
+        fieldName="peers"
+        formLabel={t`Peers`}
+        multiple
+        typePeers
+        id="peers"
+        isRequired
+      />
       <FormGroup fieldId="instance-option-checkboxes" label={t`Options`}>
         <CheckboxField
           id="enabled"
@@ -114,11 +114,6 @@ function InstanceFormFields({ isEdit }) {
           label={t`Enable Instance`}
           tooltip={t`Set the instance enabled or disabled. If disabled, jobs will not be assigned to this instance.`}
         />
-      </FormGroup>
-      <FormGroup
-        fieldId="peer-to-control-nodes-option-checkboxes"
-        label={t`Options`}
-      >
         <CheckboxField
           id="peers_from_control_nodes"
           name="peers_from_control_nodes"
@@ -126,12 +121,18 @@ function InstanceFormFields({ isEdit }) {
           tooltip={t`Connect this instance to control nodes. If disabled, instance will be connected only to peers selected.`}
         />
       </FormGroup>
+      {/* <FormGroup
+        fieldId="peer-to-control-nodes-option-checkboxes"
+        label={t`Options`}
+      >
+      </FormGroup> */}
     </>
   );
 }
 
 function InstanceForm({
   instance = {},
+  instance_peers = [],
   isEdit = false,
   submitError,
   handleCancel,
@@ -150,7 +151,7 @@ function InstanceForm({
           peers_from_control_nodes: instance.peers_from_control_nodes
             ? true
             : !isEdit,
-          peers: instance.peers || [],
+          peers: instance_peers,
         }}
         onSubmit={(values) => {
           handleSubmit({

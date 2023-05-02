@@ -209,17 +209,10 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
           <Detail label={t`Host`} value={instance.ip_address} />
           <Detail label={t`Instance Port`} value={instance.listener_port} />
           {(isExecutionNode || isHopNode) && (
-            // <Detail label={t`Connection to control nodes`}
-            // value={instance.peers_from_control_nodes? t`Enabled` : t`Disabled`} />
             <Detail
               label={t`Connection to control nodes`}
-              dataCy="peer-to-control-nodes"
               value={
-                instance.peers_from_control_nodes ? (
-                  <StatusLabel status="enabled" />
-                ) : (
-                  <StatusLabel status="disabled" />
-                )
+                instance.peers_from_control_nodes ? t`Enabled` : t`Disabled`
               }
             />
           )}
@@ -344,16 +337,6 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
           )}
         </DetailList>
         <CardActionsRow>
-          {config?.me?.is_superuser &&
-            isK8s &&
-            (isExecutionNode || isHopNode) && (
-              <RemoveInstanceButton
-                dataCy="remove-instance-button"
-                itemsToRemove={[instance]}
-                isK8s={isK8s}
-                onRemove={removeInstances}
-              />
-            )}
           {config?.me?.is_superuser && isK8s && (isExecutionNode || isHopNode) && (
             <Button
               ouiaId="instance-detail-edit-button"
@@ -364,6 +347,16 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
               {t`Edit`}
             </Button>
           )}
+          {config?.me?.is_superuser &&
+            isK8s &&
+            (isExecutionNode || isHopNode) && (
+              <RemoveInstanceButton
+                dataCy="remove-instance-button"
+                itemsToRemove={[instance]}
+                isK8s={isK8s}
+                onRemove={removeInstances}
+              />
+            )}
           {isExecutionNode && (
             <Tooltip content={t`Run a health check on the instance`}>
               <Button
