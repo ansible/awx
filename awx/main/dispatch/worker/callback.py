@@ -192,10 +192,16 @@ class CallbackBrokerWorker(BaseWorker):
                             e._retry_count = retry_count
 
                             # special sanitization logic for postgres treatment of NUL 0x00 char
-                            if (retry_count == 1) and isinstance(exc_indv, DataError) and ("\x00" in e.stdout):
-                                e.stdout = e.stdout.replace("\x00", "")
-
-                            if retry_count >= self.INDIVIDUAL_EVENT_RETRIES:
+                            if (retry_count == 1) and isinstance(exc_indv, DataError):
+                                # The easiest place is in stdout. This raises as an error stating that it can't save a NUL character
+                                if "\x00" in e.stdout:
+                                    e.stdout = e.stdout.replace("\x00", "")
+                                # There is also a chance that NUL char is embedded in event data which is part of a JSON blob. In that case we, thankfully, get a different exception
+                                if 'unsupported Unicode escape sequence' in str(exc_indv):
+                                    e.event_data = json.loads(
+                                        json.dumps(e.event_data).replace("\x00", "").replace("\\x00", "").replace("\u0000", "").replace("\\u0000", "")
+                                    )
+                            elif retry_count >= self.INDIVIDUAL_EVENT_RETRIES:
                                 logger.error(f'Hit max retries ({retry_count}) saving individual Event error: {str(exc_indv)}\ndata:\n{e.__dict__}')
                                 events.remove(e)
                             else:
