@@ -9,6 +9,7 @@ from django.conf import settings
 from django.utils.functional import cached_property
 from django.utils.timezone import now as tz_now
 from django.db import transaction, connection as django_connection
+from django.db.utils import DataError
 from django_guid import set_guid
 
 import psutil
@@ -191,7 +192,7 @@ class CallbackBrokerWorker(BaseWorker):
                             e._retry_count = retry_count
 
                             # special sanitization logic for postgres treatment of NUL 0x00 char
-                            if (retry_count == 1) and isinstance(exc_indv, ValueError) and ("\x00" in e.stdout):
+                            if (retry_count == 1) and isinstance(exc_indv, DataError) and ("\x00" in e.stdout):
                                 e.stdout = e.stdout.replace("\x00", "")
 
                             if retry_count >= self.INDIVIDUAL_EVENT_RETRIES:
