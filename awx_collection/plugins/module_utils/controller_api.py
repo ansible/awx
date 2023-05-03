@@ -680,20 +680,26 @@ class ControllerAPIModule(ControllerModule):
         response = self.get_all_endpoint(association_endpoint)
         existing_associated_ids = [association['id'] for association in response['json']['results']]
 
-        # If the current associations match the desired associations then we can just return
-        if existing_associated_ids == new_association_list:
-            return
+        # Some associations can be ordered (like galaxy credentials)
+        if association_endpoint.strip('/').split('/')[-1] in ('instance_groups', 'galaxy_credentials'):
+            if existing_associated_ids == new_association_list:
+                return  # If the current associations EXACTLY match the desired associations then we can return
+            removal_list = existing_associated_ids  # because of ordering, we have to remove everything
+            addition_list = new_association_list  # re-add everything back in-order
+        else:
+            if set(existing_associated_ids) == set(new_association_list):
+                return
+            removal_list = set(existing_associated_ids) - set(new_association_list)
+            addition_list = set(new_association_list) - set(existing_associated_ids)
 
-        # Some associations can be ordered (like galaxy credentials), because of this we have to remove everything to re-add in order
-        for an_id in existing_associated_ids:
+        for an_id in removal_list:
             response = self.post_endpoint(association_endpoint, **{'data': {'id': int(an_id), 'disassociate': True}})
             if response['status_code'] == 204:
                 self.json_output['changed'] = True
             else:
                 self.fail_json(msg="Failed to disassociate item {0}".format(response['json'].get('detail', response['json'])))
 
-        # Now we will add everything back in the received order
-        for an_id in new_association_list:
+        for an_id in addition_list:
             response = self.post_endpoint(association_endpoint, **{'data': {'id': int(an_id)}})
             if response['status_code'] == 204:
                 self.json_output['changed'] = True
