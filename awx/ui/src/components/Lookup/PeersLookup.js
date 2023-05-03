@@ -20,7 +20,7 @@ const QS_CONFIG = getQSConfig('instances', {
   order_by: 'hostname',
 });
 
-function InstancesLookup({
+function PeersLookup({
   id,
   value,
   onChange,
@@ -170,7 +170,7 @@ function InstancesLookup({
   );
 }
 
-InstancesLookup.propTypes = {
+PeersLookup.propTypes = {
   id: string,
   value: arrayOf(Instance).isRequired,
   tooltip: string,
@@ -186,7 +186,7 @@ InstancesLookup.propTypes = {
   typePeers: bool,
 };
 
-InstancesLookup.defaultProps = {
+PeersLookup.defaultProps = {
   id: 'instances',
   tooltip: '',
   className: '',
@@ -209,4 +209,4 @@ InstancesLookup.defaultProps = {
   typePeers: false,
 };
 
-export default withRouter(InstancesLookup);
+export default withRouter(PeersLookup);

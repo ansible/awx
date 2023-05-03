@@ -9,7 +9,7 @@ import FormField, {
 } from 'components/FormField';
 import FormActionGroup from 'components/FormActionGroup';
 import AnsibleSelect from 'components/AnsibleSelect';
-import { InstancesLookup } from 'components/Lookup';
+import { PeersLookup } from 'components/Lookup';
 import { required } from 'util/validators';
 
 const INSTANCE_TYPES = [
@@ -66,34 +66,33 @@ function InstanceFormFields({ isEdit }) {
         tooltip={t`Select the port that Receptor will listen on for incoming connections. Default is 27199.`}
         isRequired
       />
-      {!isEdit && (
-        <FormGroup
-          fieldId="instance-type"
-          label={t`Instance Type`}
-          tooltip={t`Sets the role that this instance will play within mesh topology. Default is "execution."`}
-          validated={
-            !instanceTypeMeta.touched || !instanceTypeMeta.error
-              ? 'default'
-              : 'error'
-          }
-          helperTextInvalid={instanceTypeMeta.error}
-          isRequired
-        >
-          <AnsibleSelect
-            {...instanceTypeField}
-            id="node_type"
-            data={INSTANCE_TYPES.map((type) => ({
-              key: type.id,
-              value: type.id,
-              label: type.name,
-            }))}
-            onChange={(event, value) => {
-              instanceTypeHelpers.setValue(value);
-            }}
-          />
-        </FormGroup>
-      )}
-      <InstancesLookup
+      <FormGroup
+        fieldId="instance-type"
+        label={t`Instance Type`}
+        tooltip={t`Sets the role that this instance will play within mesh topology. Default is "execution."`}
+        validated={
+          !instanceTypeMeta.touched || !instanceTypeMeta.error
+            ? 'default'
+            : 'error'
+        }
+        helperTextInvalid={instanceTypeMeta.error}
+        isRequired
+      >
+        <AnsibleSelect
+          {...instanceTypeField}
+          id="node_type"
+          data={INSTANCE_TYPES.map((type) => ({
+            key: type.id,
+            value: type.id,
+            label: type.name,
+          }))}
+          onChange={(event, value) => {
+            instanceTypeHelpers.setValue(value);
+          }}
+          isDisabled={isEdit}
+        />
+      </FormGroup>
+      <PeersLookup
         helperTextInvalid={peersMeta.error}
         isValid={!peersMeta.touched || !peersMeta.error}
         onBlur={() => peersHelpers.setTouched()}
@@ -121,11 +120,6 @@ function InstanceFormFields({ isEdit }) {
           tooltip={t`Connect this instance to control nodes. If disabled, instance will be connected only to peers selected.`}
         />
       </FormGroup>
-      {/* <FormGroup
-        fieldId="peer-to-control-nodes-option-checkboxes"
-        label={t`Options`}
-      >
-      </FormGroup> */}
     </>
   );
 }

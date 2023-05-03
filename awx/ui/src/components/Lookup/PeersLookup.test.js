@@ -3,7 +3,7 @@ import { act } from 'react-dom/test-utils';
 import { Formik } from 'formik';
 import { InstancesAPI } from 'api';
 import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
-import InstancesLookup from './InstancesLookup';
+import PeersLookup from './PeersLookup';
 
 jest.mock('../../api');
 
@@ -67,7 +67,7 @@ const instances = [
   },
 ];
 
-describe('InstancesLookup', () => {
+describe('PeersLookup', () => {
   let wrapper;
 
   beforeEach(() => {
@@ -93,13 +93,13 @@ describe('InstancesLookup', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <Formik>
-          <InstancesLookup value={instances} onChange={() => {}} />
+          <PeersLookup value={instances} onChange={() => {}} />
         </Formik>
       );
     });
     wrapper.update();
     expect(InstancesAPI.read).toHaveBeenCalledTimes(1);
-    expect(wrapper.find('InstancesLookup')).toHaveLength(1);
+    expect(wrapper.find('PeersLookup')).toHaveLength(1);
     expect(wrapper.find('FormGroup[label="Instances"]').length).toBe(1);
     expect(wrapper.find('Checkbox[aria-label="Prompt on launch"]').length).toBe(
       0
@@ -118,7 +118,7 @@ describe('InstancesLookup', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <Formik>
-          <InstancesLookup
+          <PeersLookup
             value={instances}
             instance_details={instances[0]}
             onChange={() => {}}
@@ -128,7 +128,7 @@ describe('InstancesLookup', () => {
     });
     wrapper.update();
     expect(InstancesAPI.read).toHaveBeenCalledTimes(1);
-    expect(wrapper.find('InstancesLookup')).toHaveLength(1);
+    expect(wrapper.find('PeersLookup')).toHaveLength(1);
     expect(wrapper.find('FormGroup[label="Instances"]').length).toBe(1);
     expect(wrapper.find('Checkbox[aria-label="Prompt on launch"]').length).toBe(
       0
