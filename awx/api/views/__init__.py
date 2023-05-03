@@ -4356,6 +4356,7 @@ class PeersList(ListAPIView):
     name = _("Peers")
     model = models.InstanceLink
     serializer_class = serializers.InstanceLinkSerializer
+    search_fields = ('source', 'target', 'link_state')
 
 
 class PeersDetail(RetrieveAPIView):
