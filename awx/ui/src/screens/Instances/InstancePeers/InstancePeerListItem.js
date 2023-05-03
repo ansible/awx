@@ -10,6 +10,8 @@ import { Detail, DetailList } from 'components/DetailList';
 
 function InstancePeerListItem({
   peerInstance,
+  isSelected,
+  onSelect,
   isExpanded,
   onExpand,
   rowIndex,
@@ -33,7 +35,14 @@ function InstancePeerListItem({
             }}
           />
         )}
-        <Td />
+        <Td
+          select={{
+            rowIndex,
+            isSelected,
+            onSelect,
+          }}
+          dataLabel={t`Selected`}
+        />
         <Td id={labelId} dataLabel={t`Name`}>
           <Link to={`/instances/${peerInstance.id}/details`}>
             <b>{peerInstance.hostname}</b>
