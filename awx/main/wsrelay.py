@@ -11,7 +11,7 @@ from channels.layers import get_channel_layer
 from django.conf import settings
 from django.apps import apps
 
-import psycopg
+import aiopg
 
 from awx.main.analytics.broadcast_websocket import (
     RelayWebsocketStats,
@@ -207,35 +207,37 @@ class WebSocketRelayManager(object):
 
     async def pg_consumer(self, conn):
         try:
-            await conn.execute("LISTEN web_heartbeet")
-            async for notif in conn.notifies():
-                if notif is not None and notif.channel == "web_heartbeet":
-                    try:
-                        payload = json.loads(notif.payload)
-                    except json.JSONDecodeError:
-                        logmsg = "Failed to decode message from pg_notify channel `web_heartbeet`"
-                        if logger.isEnabledFor(logging.DEBUG):
-                            logmsg = "{} {}".format(logmsg, payload)
-                        logger.warning(logmsg)
-                        continue
+            async with conn.cursor() as cur:
+                await cur.execute("LISTEN web_heartbeet")
+                while True:
+                    notif = await conn.notifies.get()
+                    if notif is not None and notif.channel == "web_heartbeet":
+                        try:
+                            payload = json.loads(notif.payload)
+                        except json.JSONDecodeError:
+                            logmsg = "Failed to decode message from pg_notify channel `web_heartbeet`"
+                            if logger.isEnabledFor(logging.DEBUG):
+                                logmsg = "{} {}".format(logmsg, payload)
+                            logger.warning(logmsg)
+                            continue
 
-                    # Skip if the message comes from the same host we are running on
-                    # In this case, we'll be sharing a redis, no need to relay.
-                    if payload.get("hostname") == self.local_hostname:
-                        continue
+                        # Skip if the message comes from the same host we are running on
+                        # In this case, we'll be sharing a redis, no need to relay.
+                        if payload.get("hostname") == self.local_hostname:
+                            continue
 
-                    if payload.get("action") == "online":
-                        hostname = payload["hostname"]
-                        ip = payload["ip"]
-                        if ip is None:
-                            # If we don't get an IP, just try the hostname, maybe it resolves
-                            ip = hostname
-                        self.known_hosts[hostname] = ip
-                        logger.debug(f"Web host {hostname} ({ip}) online heartbeat received.")
-                    elif payload.get("action") == "offline":
-                        hostname = payload["hostname"]
-                        del self.known_hosts[hostname]
-                        logger.debug(f"Web host {hostname} ({ip}) offline heartbeat received.")
+                        if payload.get("action") == "online":
+                            hostname = payload["hostname"]
+                            ip = payload["ip"]
+                            if ip is None:
+                                # If we don't get an IP, just try the hostname, maybe it resolves
+                                ip = hostname
+                            self.known_hosts[hostname] = ip
+                            logger.debug(f"Web host {hostname} ({ip}) online heartbeat received.")
+                        elif payload.get("action") == "offline":
+                            hostname = payload["hostname"]
+                            del self.known_hosts[hostname]
+                            logger.debug(f"Web host {hostname} ({ip}) offline heartbeat received.")
         except Exception as e:
             # This catch-all is the same as the one above. asyncio will eat the exception
             # but we want to know about it.
@@ -249,7 +251,7 @@ class WebSocketRelayManager(object):
 
         # Set up a pg_notify consumer for allowing web nodes to "provision" and "deprovision" themselves gracefully.
         database_conf = settings.DATABASES['default']
-        async_conn = await psycopg.AsyncConnection.connect(
+        async_conn = await aiopg.connect(
             dbname=database_conf['NAME'],
             host=database_conf['HOST'],
             user=database_conf['USER'],
@@ -257,7 +259,6 @@ class WebSocketRelayManager(object):
             port=database_conf['PORT'],
             **database_conf.get("OPTIONS", {}),
         )
-        await async_conn.set_autocommit(True)
         event_loop.create_task(self.pg_consumer(async_conn))
 
         # Establishes a websocket connection to /websocket/relay on all API servers
