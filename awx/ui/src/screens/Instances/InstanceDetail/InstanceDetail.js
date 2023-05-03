@@ -211,9 +211,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
           {(isExecutionNode || isHopNode) && (
             <Detail
               label={t`Connection to control nodes`}
-              value={
-                instance.peers_from_control_nodes ? t`On` : t`Off`
-              }
+              value={instance.peers_from_control_nodes ? t`On` : t`Off`}
             />
           )}
           {instance.related?.install_bundle && (

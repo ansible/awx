@@ -65,6 +65,10 @@ const instanceData = {
   peers_from_control_nodes: false,
 };
 
+const instanceDataWithPeers = {
+  results: [instanceData],
+};
+
 const updatedInstance = {
   node_type: 'hop',
   peers: ['test-peer'],
@@ -78,11 +82,13 @@ describe('<InstanceEdit/>', () => {
     useDebounce.mockImplementation((fn) => fn);
     history = createMemoryHistory();
     InstancesAPI.readDetail.mockResolvedValue({ data: instanceData });
+    InstancesAPI.readPeers.mockResolvedValue({ data: instanceDataWithPeers });
 
     await act(async () => {
       wrapper = mountWithContexts(
         <InstanceEdit
           instance={instanceData}
+          peers={instanceDataWithPeers}
           isEdit
           setBreadcrumb={() => {}}
         />,
