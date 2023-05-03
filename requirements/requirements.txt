@@ -24,6 +24,8 @@ async-timeout==4.0.2
     #   aiohttp
     #   aioredis
     #   redis
+asyncpg==0.27.0
+    # via -r /awx_devel/requirements/requirements.in
 attrs==22.1.0
     # via
     #   aiohttp
@@ -266,8 +268,6 @@ prometheus-client==0.15.0
     # via -r /awx_devel/requirements/requirements.in
 psutil==5.9.4
     # via -r /awx_devel/requirements/requirements.in
-psycopg==3.1.4
-    # via -r /awx_devel/requirements/requirements.in
 psycopg2==2.9.5
     # via -r /awx_devel/requirements/requirements.in
 ptyprocess==0.7.0
@@ -428,7 +428,7 @@ txaio==22.2.1
 typing-extensions==4.4.0
     # via
     #   azure-core
-    #   psycopg
+    #   pydantic
     #   setuptools-rust
     #   setuptools-scm
     #   twisted
