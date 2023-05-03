@@ -1,7 +1,6 @@
 import json
 import logging
 import asyncio
-import select
 from typing import Dict
 
 import aiohttp
@@ -12,7 +11,6 @@ from channels.layers import get_channel_layer
 from django.conf import settings
 from django.apps import apps
 
-import psycopg2
 import asyncpg
 
 from awx.main.analytics.broadcast_websocket import (
