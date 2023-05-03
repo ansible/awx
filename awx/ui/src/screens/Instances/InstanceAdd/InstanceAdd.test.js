@@ -32,12 +32,10 @@ describe('<InstanceAdd />', () => {
     await waitForElement(wrapper, 'isLoading', (el) => el.length === 0);
     await act(async () => {
       wrapper.find('InstanceForm').prop('handleSubmit')({
-        name: 'new Foo',
         node_type: 'hop',
       });
     });
     expect(InstancesAPI.create).toHaveBeenCalledWith({
-      name: 'new Foo',
       node_type: 'hop',
     });
     expect(history.location.pathname).toBe('/instances/13/details');

@@ -94,6 +94,8 @@ describe('<InstanceForm />', () => {
       listener_port: 'This is a repeat song',
       node_state: 'installed',
       node_type: 'execution',
+      peers_from_control_nodes: true,
+      peers: [],
     });
   });
 });
