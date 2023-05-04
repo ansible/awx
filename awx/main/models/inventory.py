@@ -36,7 +36,6 @@ from awx.main.consumers import emit_channel_notification
 from awx.main.fields import (
     ImplicitRoleField,
     SmartFilterField,
-    OrderedManyToManyField,
 )
 from awx.main.managers import HostManager, HostMetricActiveManager
 from awx.main.models.base import BaseModel, CommonModelNameNotUnique, VarsDictProperty, CLOUD_INVENTORY_SOURCES, prevent_search, accepts_json
@@ -153,11 +152,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         sort_value_field_name='position',
         help_text=_('Only valid for constructed inventories, this links to the inventories that will be used.'),
     )
-    instance_groups = OrderedManyToManyField(
-        'InstanceGroup',
-        blank=True,
-        through='InventoryInstanceGroupMembership',
-    )
+    instance_groups = SortedManyToManyField('InstanceGroup', blank=True, related_name='inventory_instance_groups')
     admin_role = ImplicitRoleField(
         parent_role='organization.inventory_admin_role',
     )

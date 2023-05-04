@@ -17,6 +17,9 @@ from django.utils.timezone import now, timedelta
 
 # from django import settings as tower_settings
 
+# Django sorted many-to-many
+from sortedm2m.fields import SortedManyToManyField
+
 # Django-CRUM
 from crum import get_current_user
 
@@ -29,7 +32,7 @@ from awx.main.models import prevent_search, accepts_json, UnifiedJobTemplate, Un
 from awx.main.models.notifications import NotificationTemplate, JobNotificationMixin
 from awx.main.models.base import CreatedModifiedModel, VarsDictProperty
 from awx.main.models.rbac import ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
-from awx.main.fields import ImplicitRoleField, JSONBlob, OrderedManyToManyField
+from awx.main.fields import ImplicitRoleField, JSONBlob
 from awx.main.models.mixins import (
     ResourceMixin,
     SurveyJobTemplateMixin,
@@ -183,13 +186,7 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         blank=False,
         help_text=_('An identifier for this node that is unique within its workflow. It is copied to workflow job nodes corresponding to this node.'),
     )
-    instance_groups = OrderedManyToManyField(
-        'InstanceGroup',
-        related_name='workflow_job_template_node_instance_groups',
-        blank=True,
-        editable=False,
-        through='WorkflowJobTemplateNodeBaseInstanceGroupMembership',
-    )
+    instance_groups = SortedManyToManyField('InstanceGroup', blank=True, editable=False, related_name='workflow_job_template_node_instance_groups2')
 
     class Meta:
         app_label = 'main'
@@ -273,9 +270,7 @@ class WorkflowJobNode(WorkflowNodeBase):
         blank=True,  # blank denotes pre-migration job nodes
         help_text=_('An identifier coresponding to the workflow job template node that this node was created from.'),
     )
-    instance_groups = OrderedManyToManyField(
-        'InstanceGroup', related_name='workflow_job_node_instance_groups', blank=True, editable=False, through='WorkflowJobNodeBaseInstanceGroupMembership'
-    )
+    instance_groups = SortedManyToManyField('InstanceGroup', blank=True, editable=False, related_name='workflow_job_node_instance_groups2')
 
     class Meta:
         app_label = 'main'
@@ -398,9 +393,7 @@ class WorkflowJobOptions(LaunchTimeConfigBase):
         )
     )
     # Workflow jobs are used for sliced jobs, and thus, must be a conduit for any JT prompts
-    instance_groups = OrderedManyToManyField(
-        'InstanceGroup', related_name='workflow_job_instance_groups', blank=True, editable=False, through='WorkflowJobInstanceGroupMembership'
-    )
+    instance_groups = SortedManyToManyField('InstanceGroup', blank=True, editable=False, related_name='workflow_job_instance_groups2')
     allow_simultaneous = models.BooleanField(default=False)
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)

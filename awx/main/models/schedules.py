@@ -16,9 +16,11 @@ from django.db.models.query import QuerySet
 from django.utils.timezone import now, make_aware
 from django.utils.translation import gettext_lazy as _
 
+# Django sorted many-to-many
+from sortedm2m.fields import SortedManyToManyField
+
 # AWX
 from awx.api.versioning import reverse
-from awx.main.fields import OrderedManyToManyField
 from awx.main.models.base import PrimordialModel
 from awx.main.models.jobs import LaunchTimeConfig
 from awx.main.utils import ignore_inventory_computed_fields
@@ -83,13 +85,7 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
     )
     rrule = models.TextField(help_text=_("A value representing the schedules iCal recurrence rule."))
     next_run = models.DateTimeField(null=True, default=None, editable=False, help_text=_("The next time that the scheduled action will run."))
-    instance_groups = OrderedManyToManyField(
-        'InstanceGroup',
-        related_name='schedule_instance_groups',
-        blank=True,
-        editable=False,
-        through='ScheduleInstanceGroupMembership',
-    )
+    instance_groups = SortedManyToManyField('InstanceGroup', blank=True, editable=False, related_name='schedule_instance_groups2')
 
     @classmethod
     def get_zoneinfo(cls):

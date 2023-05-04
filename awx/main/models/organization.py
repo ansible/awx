@@ -15,7 +15,7 @@ from sortedm2m.fields import SortedManyToManyField
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.fields import AutoOneToOneField, ImplicitRoleField, OrderedManyToManyField
+from awx.main.fields import AutoOneToOneField, ImplicitRoleField
 from awx.main.models.base import BaseModel, CommonModel, CommonModelNameNotUnique, CreatedModifiedModel, NotificationFieldsModel
 from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
@@ -36,7 +36,7 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
         app_label = 'main'
         ordering = ('name',)
 
-    instance_groups = OrderedManyToManyField('InstanceGroup', blank=True, through='OrganizationInstanceGroupMembership')
+    instance_groups = SortedManyToManyField('InstanceGroup', blank=True, related_name='organization_instance_groups')
     galaxy_credentials = SortedManyToManyField('Credential', blank=True, related_name='orgs_using_as_galaxy', sort_value_field_name='position')
     max_hosts = models.PositiveIntegerField(
         blank=True,

@@ -70,4 +70,119 @@ class Migration(migrations.Migration):
                 ),
             ]
         ),
+        # handle instance_groups relationships, the through table names already align for this
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.RemoveField(
+                    model_name='inventory',
+                    name='instance_groups',
+                ),
+                migrations.RemoveField(
+                    model_name='joblaunchconfig',
+                    name='instance_groups',
+                ),
+                migrations.RemoveField(
+                    model_name='organization',
+                    name='instance_groups',
+                ),
+                migrations.RemoveField(
+                    model_name='schedule',
+                    name='instance_groups',
+                ),
+                migrations.RemoveField(
+                    model_name='unifiedjobtemplate',
+                    name='instance_groups',
+                ),
+                migrations.RemoveField(
+                    model_name='workflowjob',
+                    name='instance_groups',
+                ),
+                migrations.RemoveField(
+                    model_name='workflowjobnode',
+                    name='instance_groups',
+                ),
+                migrations.RemoveField(
+                    model_name='workflowjobtemplatenode',
+                    name='instance_groups',
+                ),
+                migrations.DeleteModel(
+                    name='InventoryInstanceGroupMembership',
+                ),
+                migrations.DeleteModel(
+                    name='JobLaunchConfigInstanceGroupMembership',
+                ),
+                migrations.DeleteModel(
+                    name='OrganizationInstanceGroupMembership',
+                ),
+                migrations.DeleteModel(
+                    name='ScheduleInstanceGroupMembership',
+                ),
+                migrations.DeleteModel(
+                    name='UnifiedJobTemplateInstanceGroupMembership',
+                ),
+                migrations.DeleteModel(
+                    name='WorkflowJobInstanceGroupMembership',
+                ),
+                migrations.DeleteModel(
+                    name='WorkflowJobNodeBaseInstanceGroupMembership',
+                ),
+                migrations.DeleteModel(
+                    name='WorkflowJobTemplateNodeBaseInstanceGroupMembership',
+                ),
+                migrations.AddField(
+                    model_name='inventory',
+                    name='instance_groups',
+                    field=sortedm2m.fields.SortedManyToManyField(blank=True, help_text=None, related_name='inventory_instance_groups', to='main.InstanceGroup'),
+                ),
+                migrations.AddField(
+                    model_name='joblaunchconfig',
+                    name='instance_groups',
+                    field=sortedm2m.fields.SortedManyToManyField(
+                        editable=False, help_text=None, related_name='launch_config_instance_groups', to='main.InstanceGroup'
+                    ),
+                ),
+                migrations.AddField(
+                    model_name='organization',
+                    name='instance_groups',
+                    field=sortedm2m.fields.SortedManyToManyField(
+                        blank=True, help_text=None, related_name='organization_instance_groups', to='main.InstanceGroup'
+                    ),
+                ),
+                migrations.AddField(
+                    model_name='schedule',
+                    name='instance_groups',
+                    field=sortedm2m.fields.SortedManyToManyField(
+                        blank=True, editable=False, help_text=None, related_name='schedule_instance_groups', to='main.InstanceGroup'
+                    ),
+                ),
+                migrations.AddField(
+                    model_name='unifiedjobtemplate',
+                    name='instance_groups',
+                    field=sortedm2m.fields.SortedManyToManyField(
+                        blank=True, help_text=None, related_name='unifiedjobtemplate_instance_groups', to='main.InstanceGroup'
+                    ),
+                ),
+                migrations.AddField(
+                    model_name='workflowjob',
+                    name='instance_groups',
+                    field=sortedm2m.fields.SortedManyToManyField(
+                        blank=True, editable=False, help_text=None, related_name='workflow_job_instance_groups', to='main.InstanceGroup'
+                    ),
+                ),
+                migrations.AddField(
+                    model_name='workflowjobnode',
+                    name='instance_groups',
+                    field=sortedm2m.fields.SortedManyToManyField(
+                        blank=True, editable=False, help_text=None, related_name='workflow_job_node_instance_groups', to='main.InstanceGroup'
+                    ),
+                ),
+                migrations.AddField(
+                    model_name='workflowjobtemplatenode',
+                    name='instance_groups',
+                    field=sortedm2m.fields.SortedManyToManyField(
+                        blank=True, editable=False, help_text=None, related_name='workflow_job_template_node_instance_groups', to='main.InstanceGroup'
+                    ),
+                ),
+            ]
+        ),
     ]
