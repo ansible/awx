@@ -13,7 +13,6 @@ from django.utils.translation import gettext_lazy as _
 # Django sorted many-to-many
 from sortedm2m.fields import SortedManyToManyField
 
-
 # AWX
 from awx.api.versioning import reverse
 from awx.main.fields import AutoOneToOneField, ImplicitRoleField, OrderedManyToManyField

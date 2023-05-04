@@ -10,6 +10,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        # handle galaxy_credentials field
         migrations.AlterModelTable(
             name='organizationgalaxycredentialmembership',
             table='main_organization_galaxy_credentials',
@@ -20,13 +21,52 @@ class Migration(migrations.Migration):
                     model_name='organization',
                     name='galaxy_credentials',
                 ),
+                migrations.DeleteModel(
+                    name='OrganizationGalaxyCredentialMembership',
+                ),
                 migrations.AddField(
                     model_name='organization',
                     name='galaxy_credentials',
-                    field=sortedm2m.fields.SortedManyToManyField(blank=True, help_text=None, related_name='orgs_using_as_galaxy', to='main.Credential'),
+                    field=sortedm2m.fields.SortedManyToManyField(
+                        blank=True, help_text=None, related_name='orgs_using_as_galaxy', sort_value_field_name='position', to='main.Credential'
+                    ),
+                ),
+            ]
+        ),
+        # handle input_inventories field, more complex due to symmetrical thing
+        migrations.RenameField(
+            model_name='inventoryconstructedinventorymembership',
+            old_name='constructed_inventory',
+            new_name='from_inventory',
+        ),
+        migrations.RenameField(
+            model_name='inventoryconstructedinventorymembership',
+            old_name='input_inventory',
+            new_name='to_inventory',
+        ),
+        migrations.AlterModelTable(
+            name='inventoryconstructedinventorymembership',
+            table='main_inventory_input_inventories',
+        ),
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.RemoveField(
+                    model_name='inventory',
+                    name='input_inventories',
                 ),
                 migrations.DeleteModel(
-                    name='OrganizationGalaxyCredentialMembership',
+                    name='InventoryConstructedInventoryMembership',
+                ),
+                migrations.AddField(
+                    model_name='inventory',
+                    name='input_inventories',
+                    field=sortedm2m.fields.SortedManyToManyField(
+                        blank=True,
+                        help_text='Only valid for constructed inventories, this links to the inventories that will be used.',
+                        related_name='destination_inventories',
+                        sort_value_field_name='position',
+                        to='main.Inventory',
+                    ),
                 ),
             ]
         ),
