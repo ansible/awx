@@ -70,7 +70,39 @@ class Migration(migrations.Migration):
                 ),
             ]
         ),
-        # handle instance_groups relationships, the through table names already align for this
+        # handle instance_groups relationships - 8 relationships in total
+        migrations.AlterModelTable(
+            name='inventoryinstancegroupmembership',
+            table='main_inventory_instance_groups',
+        ),
+        migrations.AlterModelTable(
+            name='joblaunchconfiginstancegroupmembership',
+            table='main_joblaunchconfig_instance_groups',
+        ),
+        migrations.AlterModelTable(
+            name='organizationinstancegroupmembership',
+            table='main_organization_instance_groups',
+        ),
+        migrations.AlterModelTable(
+            name='scheduleinstancegroupmembership',
+            table='main_schedule_instance_groups',
+        ),
+        migrations.AlterModelTable(
+            name='unifiedjobtemplateinstancegroupmembership',
+            table='main_unifiedjobtemplate_instance_groups',
+        ),
+        migrations.AlterModelTable(
+            name='workflowjobinstancegroupmembership',
+            table='main_workflowjob_instance_groups',
+        ),
+        migrations.AlterModelTable(
+            name='workflowjobnodebaseinstancegroupmembership',
+            table='main_workflowjobnode_instance_groups',
+        ),
+        migrations.AlterModelTable(
+            name='workflowjobtemplatenodebaseinstancegroupmembership',
+            table='main_workflowjobtemplatenode_instance_groups',
+        ),
         migrations.SeparateDatabaseAndState(
             state_operations=[
                 migrations.RemoveField(
@@ -132,55 +164,77 @@ class Migration(migrations.Migration):
                 migrations.AddField(
                     model_name='inventory',
                     name='instance_groups',
-                    field=sortedm2m.fields.SortedManyToManyField(blank=True, help_text=None, related_name='inventory_instance_groups', to='main.InstanceGroup'),
+                    field=sortedm2m.fields.SortedManyToManyField(
+                        blank=True, help_text=None, sort_value_field_name='position', related_name='inventory_instance_groups', to='main.InstanceGroup'
+                    ),
                 ),
                 migrations.AddField(
                     model_name='joblaunchconfig',
                     name='instance_groups',
                     field=sortedm2m.fields.SortedManyToManyField(
-                        editable=False, help_text=None, related_name='launch_config_instance_groups', to='main.InstanceGroup'
+                        editable=False, help_text=None, sort_value_field_name='position', related_name='launch_config_instance_groups', to='main.InstanceGroup'
                     ),
                 ),
                 migrations.AddField(
                     model_name='organization',
                     name='instance_groups',
                     field=sortedm2m.fields.SortedManyToManyField(
-                        blank=True, help_text=None, related_name='organization_instance_groups', to='main.InstanceGroup'
+                        blank=True, help_text=None, sort_value_field_name='position', related_name='organization_instance_groups', to='main.InstanceGroup'
                     ),
                 ),
                 migrations.AddField(
                     model_name='schedule',
                     name='instance_groups',
                     field=sortedm2m.fields.SortedManyToManyField(
-                        blank=True, editable=False, help_text=None, related_name='schedule_instance_groups', to='main.InstanceGroup'
+                        blank=True,
+                        editable=False,
+                        help_text=None,
+                        sort_value_field_name='position',
+                        related_name='schedule_instance_groups',
+                        to='main.InstanceGroup',
                     ),
                 ),
                 migrations.AddField(
                     model_name='unifiedjobtemplate',
                     name='instance_groups',
                     field=sortedm2m.fields.SortedManyToManyField(
-                        blank=True, help_text=None, related_name='unifiedjobtemplate_instance_groups', to='main.InstanceGroup'
+                        blank=True, help_text=None, sort_value_field_name='position', related_name='unifiedjobtemplate_instance_groups', to='main.InstanceGroup'
                     ),
                 ),
                 migrations.AddField(
                     model_name='workflowjob',
                     name='instance_groups',
                     field=sortedm2m.fields.SortedManyToManyField(
-                        blank=True, editable=False, help_text=None, related_name='workflow_job_instance_groups', to='main.InstanceGroup'
+                        blank=True,
+                        editable=False,
+                        help_text=None,
+                        sort_value_field_name='position',
+                        related_name='workflow_job_instance_groups',
+                        to='main.InstanceGroup',
                     ),
                 ),
                 migrations.AddField(
                     model_name='workflowjobnode',
                     name='instance_groups',
                     field=sortedm2m.fields.SortedManyToManyField(
-                        blank=True, editable=False, help_text=None, related_name='workflow_job_node_instance_groups', to='main.InstanceGroup'
+                        blank=True,
+                        editable=False,
+                        help_text=None,
+                        sort_value_field_name='position',
+                        related_name='workflow_job_node_instance_groups',
+                        to='main.InstanceGroup',
                     ),
                 ),
                 migrations.AddField(
                     model_name='workflowjobtemplatenode',
                     name='instance_groups',
                     field=sortedm2m.fields.SortedManyToManyField(
-                        blank=True, editable=False, help_text=None, related_name='workflow_job_template_node_instance_groups', to='main.InstanceGroup'
+                        blank=True,
+                        editable=False,
+                        help_text=None,
+                        sort_value_field_name='position',
+                        related_name='workflow_job_template_node_instance_groups',
+                        to='main.InstanceGroup',
                     ),
                 ),
             ]

@@ -152,7 +152,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         sort_value_field_name='position',
         help_text=_('Only valid for constructed inventories, this links to the inventories that will be used.'),
     )
-    instance_groups = SortedManyToManyField('InstanceGroup', blank=True, related_name='inventory_instance_groups')
+    instance_groups = SortedManyToManyField('InstanceGroup', blank=True, sort_value_field_name='position', related_name='inventory_instance_groups')
     admin_role = ImplicitRoleField(
         parent_role='organization.inventory_admin_role',
     )

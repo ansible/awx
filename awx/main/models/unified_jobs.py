@@ -179,7 +179,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         related_name='%(class)ss',
     )
     labels = models.ManyToManyField("Label", blank=True, related_name='%(class)s_labels')
-    instance_groups = SortedManyToManyField('InstanceGroup', blank=True, related_name='unifiedjobtemplate_instance_groups')
+    instance_groups = SortedManyToManyField('InstanceGroup', blank=True, sort_value_field_name='position', related_name='unifiedjobtemplate_instance_groups')
 
     def get_absolute_url(self, request=None):
         real_instance = self.get_real_instance()

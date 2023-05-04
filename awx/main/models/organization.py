@@ -36,7 +36,7 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
         app_label = 'main'
         ordering = ('name',)
 
-    instance_groups = SortedManyToManyField('InstanceGroup', blank=True, related_name='organization_instance_groups')
+    instance_groups = SortedManyToManyField('InstanceGroup', blank=True, sort_value_field_name='position', related_name='organization_instance_groups')
     galaxy_credentials = SortedManyToManyField('Credential', blank=True, related_name='orgs_using_as_galaxy', sort_value_field_name='position')
     max_hosts = models.PositiveIntegerField(
         blank=True,

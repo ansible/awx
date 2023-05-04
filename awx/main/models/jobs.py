@@ -1025,7 +1025,9 @@ class JobLaunchConfig(LaunchTimeConfig):
     )
 
     # Instance Groups needed for non-unified job / unified JT models
-    instance_groups = SortedManyToManyField('InstanceGroup', editable=False, related_name='launch_config_instance_groups')
+    instance_groups = SortedManyToManyField(
+        'InstanceGroup', blank=True, sort_value_field_name='position', editable=False, related_name='launch_config_instance_groups'
+    )
 
     def has_user_prompts(self, template):
         """
