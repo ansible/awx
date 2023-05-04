@@ -186,7 +186,7 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         blank=False,
         help_text=_('An identifier for this node that is unique within its workflow. It is copied to workflow job nodes corresponding to this node.'),
     )
-    instance_groups = SortedManyToManyField('InstanceGroup', blank=True, editable=False, related_name='workflow_job_template_node_instance_groups2')
+    instance_groups = SortedManyToManyField('InstanceGroup', blank=True, editable=False, related_name='workflow_job_template_node_instance_groups')
 
     class Meta:
         app_label = 'main'
@@ -270,7 +270,7 @@ class WorkflowJobNode(WorkflowNodeBase):
         blank=True,  # blank denotes pre-migration job nodes
         help_text=_('An identifier coresponding to the workflow job template node that this node was created from.'),
     )
-    instance_groups = SortedManyToManyField('InstanceGroup', blank=True, editable=False, related_name='workflow_job_node_instance_groups2')
+    instance_groups = SortedManyToManyField('InstanceGroup', blank=True, editable=False, related_name='workflow_job_node_instance_groups')
 
     class Meta:
         app_label = 'main'
@@ -393,7 +393,7 @@ class WorkflowJobOptions(LaunchTimeConfigBase):
         )
     )
     # Workflow jobs are used for sliced jobs, and thus, must be a conduit for any JT prompts
-    instance_groups = SortedManyToManyField('InstanceGroup', blank=True, editable=False, related_name='workflow_job_instance_groups2')
+    instance_groups = SortedManyToManyField('InstanceGroup', blank=True, editable=False, related_name='workflow_job_instance_groups')
     allow_simultaneous = models.BooleanField(default=False)
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)

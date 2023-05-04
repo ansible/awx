@@ -2,6 +2,9 @@
 
 import awx.main.fields
 import awx.main.utils.polymorphic
+
+from awx.main.migrations._removed_fields import OrderedManyToManyField
+
 from django.db import migrations, models
 import django.db.models.deletion
 
@@ -177,21 +180,21 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='joblaunchconfig',
             name='instance_groups',
-            field=awx.main.fields.OrderedManyToManyField(
+            field=OrderedManyToManyField(
                 blank=True, editable=False, related_name='joblaunchconfigs', through='main.JobLaunchConfigInstanceGroupMembership', to='main.InstanceGroup'
             ),
         ),
         migrations.AddField(
             model_name='schedule',
             name='instance_groups',
-            field=awx.main.fields.OrderedManyToManyField(
+            field=OrderedManyToManyField(
                 blank=True, editable=False, related_name='schedule_instance_groups', through='main.ScheduleInstanceGroupMembership', to='main.InstanceGroup'
             ),
         ),
         migrations.AddField(
             model_name='workflowjob',
             name='instance_groups',
-            field=awx.main.fields.OrderedManyToManyField(
+            field=OrderedManyToManyField(
                 blank=True,
                 editable=False,
                 related_name='workflow_job_instance_groups',
@@ -202,7 +205,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workflowjobnode',
             name='instance_groups',
-            field=awx.main.fields.OrderedManyToManyField(
+            field=OrderedManyToManyField(
                 blank=True,
                 editable=False,
                 related_name='workflow_job_node_instance_groups',
@@ -213,7 +216,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workflowjobtemplatenode',
             name='instance_groups',
-            field=awx.main.fields.OrderedManyToManyField(
+            field=OrderedManyToManyField(
                 blank=True,
                 editable=False,
                 related_name='workflow_job_template_node_instance_groups',

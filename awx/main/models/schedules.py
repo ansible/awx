@@ -85,7 +85,7 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
     )
     rrule = models.TextField(help_text=_("A value representing the schedules iCal recurrence rule."))
     next_run = models.DateTimeField(null=True, default=None, editable=False, help_text=_("The next time that the scheduled action will run."))
-    instance_groups = SortedManyToManyField('InstanceGroup', blank=True, editable=False, related_name='schedule_instance_groups2')
+    instance_groups = SortedManyToManyField('InstanceGroup', blank=True, editable=False, related_name='schedule_instance_groups')
 
     @classmethod
     def get_zoneinfo(cls):

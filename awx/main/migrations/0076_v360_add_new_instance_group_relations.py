@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 from django.db import migrations
-from awx.main.fields import OrderedManyToManyField
+from awx.main.migrations._removed_fields import OrderedManyToManyField
 
 
 class Migration(migrations.Migration):
