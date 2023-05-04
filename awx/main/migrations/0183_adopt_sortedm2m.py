@@ -71,6 +71,11 @@ class Migration(migrations.Migration):
             ]
         ),
         # handle instance_groups relationships - 8 relationships in total
+        migrations.RenameField(  # one exception where field name was inconsistent
+            model_name='workflowjobinstancegroupmembership',
+            old_name='workflowjobnode',
+            new_name='workflowjob',
+        ),
         migrations.AlterModelTable(
             name='inventoryinstancegroupmembership',
             table='main_inventory_instance_groups',
