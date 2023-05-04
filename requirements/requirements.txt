@@ -11,7 +11,7 @@ ansiconv==1.0.0
     # via -r /awx_devel/requirements/requirements.in
 asciichartpy==1.5.25
     # via -r /awx_devel/requirements/requirements.in
-asgiref==3.5.2
+asgiref==3.6.0
     # via
     #   channels
     #   channels-redis
@@ -98,7 +98,7 @@ deprecated==1.2.13
     # via jwcrypto
 distro==1.8.0
     # via -r /awx_devel/requirements/requirements.in
-django==3.2.16
+django==4.2
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   channels
@@ -138,7 +138,7 @@ django-split-settings==1.0.0
     # via -r /awx_devel/requirements/requirements.in
 django-taggit==3.1.0
     # via -r /awx_devel/requirements/requirements.in
-djangorestframework==3.13.1
+djangorestframework==3.14.0
     # via -r /awx_devel/requirements/requirements.in
 djangorestframework-yaml==2.0.0
     # via -r /awx_devel/requirements/requirements.in
@@ -334,7 +334,6 @@ python3-openid==3.2.0
     # via -r /awx_devel/requirements/requirements_git.txt
 pytz==2022.6
     # via
-    #   django
     #   djangorestframework
     #   irc
     #   tempora
