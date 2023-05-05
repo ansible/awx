@@ -177,7 +177,12 @@ class Migration(migrations.Migration):
                     model_name='joblaunchconfig',
                     name='instance_groups',
                     field=sortedm2m.fields.SortedManyToManyField(
-                        editable=False, help_text=None, sort_value_field_name='position', related_name='launch_config_instance_groups', to='main.InstanceGroup'
+                        blank=True,
+                        editable=False,
+                        help_text=None,
+                        sort_value_field_name='position',
+                        related_name='launch_config_instance_groups',
+                        to='main.InstanceGroup',
                     ),
                 ),
                 migrations.AddField(
