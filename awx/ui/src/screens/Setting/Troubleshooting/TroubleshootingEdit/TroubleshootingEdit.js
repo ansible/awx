@@ -70,10 +70,6 @@ function TroubleshootingEdit() {
   const handleSubmit = async (form) => {
     await submitForm({
       ...form,
-      // AWX_CALLBACK_PROFILE: formatJson(form.AWX_CALLBACK_PROFILE),
-      // AWX_CLEANUP_PATHS: formatJson(form.AWX_CLEANUP_PATHS),
-      // AWX_REQUEST_PROFILE: formatJson(form.AWX_REQUEST_PROFILE),
-      // RECEPTOR_RELEASE_WORK: formatJson(form.RECEPTOR_RELEASE_WORK),
     });
   };
 
