@@ -18,20 +18,20 @@ def test_instance_group_ordering(source_model):
 
     assert [g.name for g in source_model.instance_groups.all()] == ['host-4', 'host-3', 'host-2', 'host-1', 'host-0']
     assert [(row.position, row.instancegroup.name) for row in source_model.instance_groups.through.objects.all()] == [
-        (0, 'host-4'),
-        (1, 'host-3'),
-        (2, 'host-2'),
-        (3, 'host-1'),
-        (4, 'host-0'),
+        (1, 'host-4'),
+        (2, 'host-3'),
+        (3, 'host-2'),
+        (4, 'host-1'),
+        (5, 'host-0'),
     ]
 
     source_model.instance_groups.remove(groups[0])
     assert [g.name for g in source_model.instance_groups.all()] == ['host-3', 'host-2', 'host-1', 'host-0']
     assert [(row.position, row.instancegroup.name) for row in source_model.instance_groups.through.objects.all()] == [
-        (0, 'host-3'),
-        (1, 'host-2'),
-        (2, 'host-1'),
-        (3, 'host-0'),
+        (2, 'host-3'),
+        (3, 'host-2'),
+        (4, 'host-1'),
+        (5, 'host-0'),
     ]
 
     source_model.instance_groups.clear()
@@ -43,9 +43,8 @@ def test_instance_group_ordering(source_model):
 def test_instance_group_bulk_add(source_model):
     groups = [InstanceGroup.objects.create(name='host-%d' % i) for i in range(5)]
     groups.reverse()
-    with pytest.raises(RuntimeError) as err:
-        source_model.instance_groups.add(*groups)
-    assert 'Ordered many-to-many fields do not support multiple objects' in str(err)
+    source_model.instance_groups.add(*groups)
+    assert list(source_model.instance_groups.all()) == groups
 
 
 @pytest.mark.django_db
@@ -59,10 +58,10 @@ def test_instance_group_middle_deletion(source_model):
     source_model.instance_groups.remove(groups[2])
     assert [g.name for g in source_model.instance_groups.all()] == ['host-4', 'host-3', 'host-1', 'host-0']
     assert [(row.position, row.instancegroup.name) for row in source_model.instance_groups.through.objects.all()] == [
-        (0, 'host-4'),
-        (1, 'host-3'),
-        (2, 'host-1'),
-        (3, 'host-0'),
+        (1, 'host-4'),
+        (2, 'host-3'),
+        (4, 'host-1'),
+        (5, 'host-0'),
     ]
 
 
@@ -87,21 +86,21 @@ def test_input_inventories_ordering():
         constructed_inventory.input_inventories.add(inv)
 
     assert [g.name for g in constructed_inventory.input_inventories.all()] == ['inv-4', 'inv-3', 'inv-2', 'inv-1', 'inv-0']
-    assert [(row.position, row.input_inventory.name) for row in constructed_inventory.input_inventories.through.objects.all()] == [
-        (0, 'inv-4'),
-        (1, 'inv-3'),
-        (2, 'inv-2'),
-        (3, 'inv-1'),
-        (4, 'inv-0'),
+    assert [(row.position, row.to_inventory.name) for row in constructed_inventory.input_inventories.through.objects.all()] == [
+        (1, 'inv-4'),
+        (2, 'inv-3'),
+        (3, 'inv-2'),
+        (4, 'inv-1'),
+        (5, 'inv-0'),
     ]
 
     constructed_inventory.input_inventories.remove(input_inventories[0])
     assert [g.name for g in constructed_inventory.input_inventories.all()] == ['inv-3', 'inv-2', 'inv-1', 'inv-0']
-    assert [(row.position, row.input_inventory.name) for row in constructed_inventory.input_inventories.through.objects.all()] == [
-        (0, 'inv-3'),
-        (1, 'inv-2'),
-        (2, 'inv-1'),
-        (3, 'inv-0'),
+    assert [(row.position, row.to_inventory.name) for row in constructed_inventory.input_inventories.through.objects.all()] == [
+        (2, 'inv-3'),
+        (3, 'inv-2'),
+        (4, 'inv-1'),
+        (5, 'inv-0'),
     ]
 
     constructed_inventory.input_inventories.clear()
