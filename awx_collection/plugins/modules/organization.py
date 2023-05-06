@@ -51,8 +51,9 @@ options:
     state:
       description:
         - Desired state of the resource.
+        - Enforced state enforces default values of any option not provided.
       default: "present"
-      choices: ["present", "absent"]
+      choices: ["present", "absent", "exists", enforced]
       type: str
     instance_groups:
       description:
@@ -130,7 +131,7 @@ def main():
         notification_templates_error=dict(type="list", elements='str'),
         notification_templates_approvals=dict(type="list", elements='str'),
         galaxy_credentials=dict(type="list", elements='str'),
-        state=dict(choices=['present', 'absent'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists', 'enforced'], default='present'),
     )
 
     # Create a module for ourselves
@@ -146,11 +147,15 @@ def main():
     state = module.params.get('state')
 
     # Attempt to look up organization based on the provided name
-    organization = module.get_one('organizations', name_or_id=name)
+    organization = module.get_one('organizations', name_or_id=name, check_exists=(state == 'exists'))
 
+    # set the default for enforced defaults
+    enforced_defaults = False
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(organization)
+    elif state == 'enforced':
+        enforced_defaults = True
     # Attempt to look up associated field items the user specified.
     association_fields = {}
 
@@ -159,49 +164,65 @@ def main():
         association_fields['instance_groups'] = []
         for item in instance_group_names:
             association_fields['instance_groups'].append(module.resolve_name_to_id('instance_groups', item))
+    elif instance_group_names is None and enforced_defaults:
+        association_fields['instance_groups'] = []
 
     notifications_start = module.params.get('notification_templates_started')
     if notifications_start is not None:
         association_fields['notification_templates_started'] = []
         for item in notifications_start:
             association_fields['notification_templates_started'].append(module.resolve_name_to_id('notification_templates', item))
+    elif notifications_start is None and enforced_defaults:
+        association_fields['notification_templates_started'] = []
 
     notifications_success = module.params.get('notification_templates_success')
     if notifications_success is not None:
         association_fields['notification_templates_success'] = []
         for item in notifications_success:
             association_fields['notification_templates_success'].append(module.resolve_name_to_id('notification_templates', item))
+    elif notifications_success is None and enforced_defaults:
+        association_fields['notification_templates_success'] = []
 
     notifications_error = module.params.get('notification_templates_error')
     if notifications_error is not None:
         association_fields['notification_templates_error'] = []
         for item in notifications_error:
             association_fields['notification_templates_error'].append(module.resolve_name_to_id('notification_templates', item))
+    elif notifications_error is None and enforced_defaults:
+        association_fields['notification_templates_error'] = []
 
     notifications_approval = module.params.get('notification_templates_approvals')
     if notifications_approval is not None:
         association_fields['notification_templates_approvals'] = []
         for item in notifications_approval:
             association_fields['notification_templates_approvals'].append(module.resolve_name_to_id('notification_templates', item))
+    elif notifications_approval is None and enforced_defaults:
+        association_fields['notification_templates_approvals'] = []
 
     galaxy_credentials = module.params.get('galaxy_credentials')
     if galaxy_credentials is not None:
         association_fields['galaxy_credentials'] = []
         for item in galaxy_credentials:
             association_fields['galaxy_credentials'].append(module.resolve_name_to_id('credentials', item))
+    elif galaxy_credentials is None and enforced_defaults:
+        association_fields['galaxy_credentials'] = []
 
     # Create the data that gets sent for create and update
     org_fields = {
         'name': new_name if new_name else (module.get_item_name(organization) if organization else name),
     }
-    if description is not None:
+    if description is not None or enforced_defaults:
         org_fields['description'] = description
     if default_ee is not None:
         org_fields['default_environment'] = module.resolve_name_to_id('execution_environments', default_ee)
-    if custom_virtualenv is not None:
+    elif default_ee is None and enforced_defaults:
+        org_fields['default_environment'] = ''
+    if custom_virtualenv is not None or enforced_defaults:
         org_fields['custom_virtualenv'] = custom_virtualenv
     if max_hosts is not None:
         org_fields['max_hosts'] = max_hosts
+    elif max_hosts is None and enforced_defaults:
+        org_fields['max_hosts'] = 0
 
     # If the state was present and we can let the module build or update the existing organization, this will return on its own
     module.create_or_update_if_needed(

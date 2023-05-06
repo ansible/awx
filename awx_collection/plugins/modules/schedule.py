@@ -145,8 +145,8 @@ options:
       type: bool
     state:
       description:
-        - Desired state of the resource.
-      choices: ["present", "absent"]
+        - Enforced state enforces default values of any option not provided.
+      choices: ["present", "absent", "exists", enforced]
       default: "present"
       type: str
 extends_documentation_fragment: awx.awx.auth
@@ -174,7 +174,7 @@ EXAMPLES = '''
     name: "{{ sched1 }}"
     state: present
     unified_job_template: "Demo Job Template"
-    rrule: "{{ query(awx.awx.schedule_rruleset, '2022-04-30 10:30:45', rules=rrules, timezone='UTC' ) }}"
+    rrule: "{{ query('awx.awx.schedule_rruleset', '2022-04-30 10:30:45', rules=rrules, timezone='UTC' ) }}"
   vars:
     rrules:
       - frequency: 'day'
@@ -220,7 +220,7 @@ def main():
         unified_job_template=dict(),
         organization=dict(),
         enabled=dict(type='bool'),
-        state=dict(choices=['present', 'absent'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists', 'enforced'], default='present'),
     )
 
     # Create a module for ourselves
@@ -265,15 +265,29 @@ def main():
         search_fields['name'] = unified_job_template
         unified_job_template_id = module.get_one('unified_job_templates', **{'data': search_fields})['id']
         sched_search_fields['unified_job_template'] = unified_job_template_id
-    # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('schedules', name_or_id=name, **{'data': sched_search_fields})
 
+    # Attempt to look up an existing item based on the provided data
+    existing_item = module.get_one('schedules', name_or_id=name, check_exists=(state == 'exists'), **{'data': sched_search_fields})
+
+    # set the default for enforced defaults
+    enforced_defaults = False
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(existing_item)
+    elif state == 'enforced':
+        enforced_defaults = True
     association_fields = {}
+
+    # Fail early now if no unified job template provided now that enforced defaults set.
+    if unified_job_template is None and enforced_defaults:
+        module.fail_json(msg='When using enforced state unified_job_template is a required field')
 
     if credentials is not None:
         association_fields['credentials'] = []
         for item in credentials:
             association_fields['credentials'].append(module.resolve_name_to_id('credentials', item))
+    elif credentials is None and enforced_defaults:
+        association_fields['credentials'] = []
 
     # We need to clear out the name from the search fields so we can use name_or_id in the following searches
     if 'name' in search_fields:
@@ -287,6 +301,8 @@ def main():
                 module.fail_json(msg='Could not find label entry with name {0}'.format(item))
             else:
                 association_fields['labels'].append(label_id['id'])
+    elif labels is None and enforced_defaults:
+        association_fields['labels'] = []
 
     if instance_groups is not None:
         association_fields['instance_groups'] = []
@@ -296,41 +312,47 @@ def main():
                 module.fail_json(msg='Could not find instance_group entry with name {0}'.format(item))
             else:
                 association_fields['instance_groups'].append(instance_group_id['id'])
+    elif instance_groups is None and enforced_defaults:
+        association_fields['instance_groups'] = []
 
     # Create the data that gets sent for create and update
     new_fields = {}
     if rrule is not None:
         new_fields['rrule'] = rrule
+    elif rrule is None and enforced_defaults:
+        module.fail_json(msg='When using enforced state rrule is a required field')
     new_fields['name'] = new_name if new_name else (module.get_item_name(existing_item) if existing_item else name)
-    if description is not None:
+    if description is not None or enforced_defaults:
         new_fields['description'] = description
     if extra_data is not None:
         new_fields['extra_data'] = extra_data
-    if inventory is not None:
+    elif extra_data is None and enforced_defaults:
+        new_fields['extra_data'] = {}
+    if inventory is not None or enforced_defaults:
         new_fields['inventory'] = inventory_id
-    if scm_branch is not None:
+    if scm_branch is not None or enforced_defaults:
         new_fields['scm_branch'] = scm_branch
-    if job_type is not None:
+    if job_type is not None or enforced_defaults:
         new_fields['job_type'] = job_type
-    if job_tags is not None:
+    if job_tags is not None or enforced_defaults:
         new_fields['job_tags'] = job_tags
-    if skip_tags is not None:
+    if skip_tags is not None or enforced_defaults:
         new_fields['skip_tags'] = skip_tags
-    if limit is not None:
+    if limit is not None or enforced_defaults:
         new_fields['limit'] = limit
-    if diff_mode is not None:
+    if diff_mode is not None or enforced_defaults:
         new_fields['diff_mode'] = diff_mode
-    if verbosity is not None:
+    if verbosity is not None or enforced_defaults:
         new_fields['verbosity'] = verbosity
     if unified_job_template is not None:
         new_fields['unified_job_template'] = unified_job_template_id
-    if enabled is not None:
+    if enabled is not None or enforced_defaults:
         new_fields['enabled'] = enabled
-    if forks is not None:
+    if forks is not None or enforced_defaults:
         new_fields['forks'] = forks
-    if job_slice_count is not None:
+    if job_slice_count is not None or enforced_defaults:
         new_fields['job_slice_count'] = job_slice_count
-    if timeout is not None:
+    if timeout is not None or enforced_defaults:
         new_fields['timeout'] = timeout
 
     if execution_environment is not None:
@@ -342,19 +364,17 @@ def main():
                 module.fail_json(msg='could not find execution_environment entry with name {0}'.format(execution_environment))
             else:
                 new_fields['execution_environment'] = ee['id']
+    elif execution_environment is None and enforced_defaults:
+        new_fields['execution_environment'] = ''
 
-    if state == 'absent':
-        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(existing_item)
-    elif state == 'present':
-        # If the state was present and we can let the module build or update the existing item, this will return on its own
-        module.create_or_update_if_needed(
-            existing_item,
-            new_fields,
-            endpoint='schedules',
-            item_type='schedule',
-            associations=association_fields,
-        )
+    # If the state was present and we can let the module build or update the existing item, this will return on its own
+    module.create_or_update_if_needed(
+        existing_item,
+        new_fields,
+        endpoint='schedules',
+        item_type='schedule',
+        associations=association_fields,
+    )
 
 
 if __name__ == '__main__':
