@@ -273,7 +273,7 @@ prometheus-client==0.15.0
     # via -r /awx_devel/requirements/requirements.in
 psutil==5.9.4
     # via -r /awx_devel/requirements/requirements.in
-psycopg2==2.9.5
+psycopg==3.1.9
     # via -r /awx_devel/requirements/requirements.in
 ptyprocess==0.7.0
     # via pexpect
