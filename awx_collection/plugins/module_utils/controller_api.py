@@ -331,11 +331,6 @@ class ControllerAPIModule(ControllerModule):
             self.update_secrets = True
 
     @staticmethod
-    def param_to_endpoint(name):
-        exceptions = {'inventory': 'inventories', 'target_team': 'teams', 'workflow': 'workflow_job_templates'}
-        return exceptions.get(name, '{0}s'.format(name))
-
-    @staticmethod
     def get_name_field_from_endpoint(endpoint):
         return ControllerAPIModule.IDENTITY_FIELDS.get(endpoint, 'name')
 

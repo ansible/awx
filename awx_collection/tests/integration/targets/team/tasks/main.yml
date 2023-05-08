@@ -1,7 +1,12 @@
 ---
+- name: Generate a test ID
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
 - name: Generate names
   set_fact:
-    team_name: "AWX-Collection-tests-team-team-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    team_name: "AWX-Collection-tests-team-team-{{ test_id }}"
 
 - name: Attempt to add a team to a non-existant Organization
   team:

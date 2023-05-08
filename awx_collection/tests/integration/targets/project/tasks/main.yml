@@ -1,13 +1,18 @@
 ---
+- name: Generate a test ID
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
 - name: Generate names
   set_fact:
-    project_name1: "AWX-Collection-tests-project-project1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    project_name2: "AWX-Collection-tests-project-project2-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    project_name3: "AWX-Collection-tests-project-project3-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    jt1: "AWX-Collection-tests-project-jt1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    scm_cred_name: "AWX-Collection-tests-project-scm-cred-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    org_name: "AWX-Collection-tests-project-org-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    cred_name: "AWX-Collection-tests-project-cred-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    project_name1: "AWX-Collection-tests-project-project1-{{ test_id }}"
+    project_name2: "AWX-Collection-tests-project-project2-{{ test_id }}"
+    project_name3: "AWX-Collection-tests-project-project3-{{ test_id }}"
+    jt1: "AWX-Collection-tests-project-jt1-{{ test_id }}"
+    scm_cred_name: "AWX-Collection-tests-project-scm-cred-{{ test_id }}"
+    org_name: "AWX-Collection-tests-project-org-{{ test_id }}"
+    cred_name: "AWX-Collection-tests-project-cred-{{ test_id }}"
 
 - block:
     - name: Create an SCM Credential

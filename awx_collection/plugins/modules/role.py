@@ -24,11 +24,23 @@ options:
     user:
       description:
         - User that receives the permissions specified by the role.
+        - Deprecated, use 'users'.
       type: str
+    users:
+      description:
+        - Users that receive the permissions specified by the role.
+      type: list
+      elements: str
     team:
       description:
         - Team that receives the permissions specified by the role.
+        - Deprecated, use 'teams'.
       type: str
+    teams:
+      description:
+        - Teams that receive the permissions specified by the role.
+      type: list
+      elements: str
     role:
       description:
         - The role type to grant/revoke.
@@ -161,7 +173,9 @@ def main():
 
     argument_spec = dict(
         user=dict(),
+        users=dict(type='list', elements='str'),
         team=dict(),
+        teams=dict(type='list', elements='str'),
         role=dict(
             choices=[
                 "admin",
@@ -219,9 +233,9 @@ def main():
         'projects': 'project',
         'target_teams': 'target_team',
         'workflows': 'workflow',
+        'users': 'user',
+        'teams': 'team',
     }
-    # Singular parameters
-    resource_param_keys = ('user', 'team', 'lookup_organization')
 
     resources = {}
     for resource_group, old_name in resource_list_param_keys.items():
@@ -229,9 +243,9 @@ def main():
             resources.setdefault(resource_group, []).extend(module.params.get(resource_group))
         if module.params.get(old_name) is not None:
             resources.setdefault(resource_group, []).append(module.params.get(old_name))
-    for resource_group in resource_param_keys:
-        if module.params.get(resource_group) is not None:
-            resources[resource_group] = module.params.get(resource_group)
+    if module.params.get('lookup_organization') is not None:
+        resources['lookup_organization'] = module.params.get('lookup_organization')
+
     # Change workflows and target_teams key to its endpoint name.
     if 'workflows' in resources:
         resources['workflow_job_templates'] = resources.pop('workflows')
@@ -248,28 +262,13 @@ def main():
     # separate actors from resources
     actor_data = {}
     missing_items = []
-    for key in ('user', 'team'):
-        if key in resources:
-            if key == 'user':
-                lookup_data_populated = {}
-            else:
-                lookup_data_populated = lookup_data
-            # Attempt to look up project based on the provided name or ID and lookup data
-            data = module.get_one('{0}s'.format(key), name_or_id=resources[key], data=lookup_data_populated)
-            if data is None:
-                module.fail_json(
-                    msg='Unable to find {0} with name: {1}'.format(key, resources[key]), changed=False
-                )
-            else:
-                actor_data[key] = module.get_one('{0}s'.format(key), name_or_id=resources[key], data=lookup_data_populated)
-                resources.pop(key)
     # Lookup Resources
     resource_data = {}
     for key, value in resources.items():
         for resource in value:
             # Attempt to look up project based on the provided name or ID and lookup data
             if key in resources:
-                if key == 'organizations':
+                if key == 'organizations' or key == 'users':
                     lookup_data_populated = {}
                 else:
                     lookup_data_populated = lookup_data
@@ -277,14 +276,18 @@ def main():
             if data is None:
                 missing_items.append(resource)
             else:
-                resource_data.setdefault(key, []).append(data)
+                if key == 'users' or key == 'teams':
+                    actor_data.setdefault(key, []).append(data)
+                else:
+                    resource_data.setdefault(key, []).append(data)
     if len(missing_items) > 0:
         module.fail_json(
             msg='There were {0} missing items, missing items: {1}'.format(len(missing_items), missing_items), changed=False
         )
+
     # build association agenda
     associations = {}
-    for actor_type, actor in actor_data.items():
+    for actor_type, actors in actor_data.items():
         for key, value in resource_data.items():
             for resource in value:
                 resource_roles = resource['summary_fields']['object_roles']
@@ -294,9 +297,10 @@ def main():
                         msg='Resource {0} has no role {1}, available roles: {2}'.format(resource['url'], role_field, available_roles), changed=False
                     )
                 role_data = resource_roles[role_field]
-                endpoint = '/roles/{0}/{1}/'.format(role_data['id'], module.param_to_endpoint(actor_type))
+                endpoint = '/roles/{0}/{1}/'.format(role_data['id'], actor_type)
                 associations.setdefault(endpoint, [])
-                associations[endpoint].append(actor['id'])
+                for actor in actors:
+                    associations[endpoint].append(actor['id'])
 
     # perform associations
     for association_endpoint, new_association_list in associations.items():

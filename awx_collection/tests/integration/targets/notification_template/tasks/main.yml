@@ -1,12 +1,17 @@
 ---
+- name: Generate a test ID
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
 - name: Generate names
   set_fact:
-    slack_not: "AWX-Collection-tests-notification_template-slack-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    webhook_not: "AWX-Collection-tests-notification_template-wehbook-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    email_not: "AWX-Collection-tests-notification_template-email-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    twillo_not: "AWX-Collection-tests-notification_template-twillo-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    pd_not: "AWX-Collection-tests-notification_template-pd-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    irc_not: "AWX-Collection-tests-notification_template-irc-not-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    slack_not: "AWX-Collection-tests-notification_template-slack-not-{{ test_id }}"
+    webhook_not: "AWX-Collection-tests-notification_template-wehbook-not-{{ test_id }}"
+    email_not: "AWX-Collection-tests-notification_template-email-not-{{ test_id }}"
+    twillo_not: "AWX-Collection-tests-notification_template-twillo-not-{{ test_id }}"
+    pd_not: "AWX-Collection-tests-notification_template-pd-not-{{ test_id }}"
+    irc_not: "AWX-Collection-tests-notification_template-irc-not-{{ test_id }}"
 
 - name: Create Slack notification with custom messages
   notification_template:

@@ -1,6 +1,6 @@
 -include awx/ui_next/Makefile
 
-PYTHON ?= python3.9
+PYTHON := $(notdir $(shell for i in python3.9 python3; do command -v $$i; done|sed 1q))
 DOCKER_COMPOSE ?= docker-compose
 OFFICIAL ?= no
 NODE ?= node
@@ -42,7 +42,10 @@ TACACS ?= false
 
 VENV_BASE ?= /var/lib/awx/venv
 
-DEV_DOCKER_TAG_BASE ?= ghcr.io/ansible
+DEV_DOCKER_OWNER ?= ansible
+# Docker will only accept lowercase, so github names like Paul need to be paul
+DEV_DOCKER_OWNER_LOWER = $(shell echo $(DEV_DOCKER_OWNER) | tr A-Z a-z)
+DEV_DOCKER_TAG_BASE ?= ghcr.io/$(DEV_DOCKER_OWNER_LOWER)
 DEVEL_IMAGE_NAME ?= $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 
 RECEPTOR_IMAGE ?= quay.io/ansible/receptor:devel
@@ -606,7 +609,18 @@ VERSION:
 	@echo "awx: $(VERSION)"
 
 PYTHON_VERSION:
-	@echo "$(PYTHON)" | sed 's:python::'
+	@echo "$(subst python,,$(PYTHON))"
+
+.PHONY: version-for-buildyml
+version-for-buildyml:
+	@echo $(firstword $(subst +, ,$(VERSION)))
+# version-for-buildyml prints a special version string for build.yml,
+# chopping off the sha after the '+' sign.
+# tools/ansible/build.yml was doing this: make print-VERSION | cut -d + -f -1
+# This does the same thing in native make without
+# the pipe or the extra processes, and now the pb does `make version-for-buildyml`
+# Example:
+# 	22.1.1.dev38+g523c0d9781 becomes 22.1.1.dev38
 
 .PHONY: Dockerfile
 ## Generate Dockerfile for awx image
@@ -658,6 +672,7 @@ messages:
 	fi; \
 	$(PYTHON) manage.py makemessages -l en_us --keep-pot
 
+.PHONY: print-%
 print-%:
 	@echo $($*)
 
