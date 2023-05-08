@@ -2,6 +2,7 @@ aiohttp
 ansiconv==1.0.0  # UPGRADE BLOCKER: from 2013, consider replacing instead of upgrading
 asciichartpy
 asn1
+asyncpg
 azure-keyvault==1.1.0  # see UPGRADE BLOCKERs
 channels
 channels-redis==3.4.1  # see UPGRADE BLOCKERs
@@ -36,7 +37,6 @@ openshift
 pexpect==4.7.0 # see library notes
 prometheus_client
 psycopg2
-psycopg  # psycopg3 is used to listen for pg_notify messages from web servers in awx.main.wsrelay where asyncio is used
 psutil
 pygerduty
 pyparsing==2.4.6  # Upgrading to v3 of pyparsing introduce errors on smart host filtering: Expected 'or' term, found 'or'  (at char 15), (line:1, col:16)
