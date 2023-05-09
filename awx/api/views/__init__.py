@@ -3333,7 +3333,6 @@ class JobLabelList(SubListAPIView):
     serializer_class = serializers.LabelSerializer
     parent_model = models.Job
     relationship = 'labels'
-    parent_key = 'job'
 
 
 class WorkflowJobLabelList(JobLabelList):
