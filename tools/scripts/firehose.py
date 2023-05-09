@@ -38,7 +38,7 @@ from io import StringIO
 from time import time
 from uuid import uuid4
 
-import psycopg2
+import psycopg
 
 from django import setup as setup_django
 from django.db import connection
@@ -111,7 +111,7 @@ class YieldedRows(StringIO):
 
 
 def firehose(job, count, created_stamp, modified_stamp):
-    conn = psycopg2.connect(dsn)
+    conn = psycopg.connect(dsn)
     f = YieldedRows(job, count, created_stamp, modified_stamp)
     with conn.cursor() as cursor:
         cursor.copy_expert(
@@ -133,7 +133,7 @@ def firehose(job, count, created_stamp, modified_stamp):
 
 def cleanup(sql):
     print(sql)
-    conn = psycopg2.connect(dsn)
+    conn = psycopg.connect(dsn)
     with conn.cursor() as cursor:
         cursor.execute(sql)
     conn.commit()
@@ -221,7 +221,7 @@ def generate_jobs(jobs, batch_size, time_delta):
 
 
 def generate_events(events, job, time_delta):
-    conn = psycopg2.connect(dsn)
+    conn = psycopg.connect(dsn)
     cursor = conn.cursor()
 
     created_time = datetime.datetime.today() - time_delta - datetime.timedelta(seconds=5)
@@ -282,7 +282,7 @@ if __name__ == '__main__':
     days_delta = params.days_delta
     batch_size = params.batch_size
     try:
-        conn = psycopg2.connect(dsn)
+        conn = psycopg.connect(dsn)
         cursor = conn.cursor()
 
         # Drop all the indexes before generating jobs

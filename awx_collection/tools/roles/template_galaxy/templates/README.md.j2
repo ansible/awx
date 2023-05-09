@@ -124,7 +124,7 @@ Ansible source, set up a dedicated virtual environment:
 
 ```
 mkvirtualenv my_new_venv
-# may need to replace psycopg2 with psycopg2-binary in requirements/requirements.txt
+# may need to replace psycopg3 with psycopg3-binary in requirements/requirements.txt
 pip install -r requirements/requirements.txt -r requirements/requirements_dev.txt -r requirements/requirements_git.txt
 make clean-api
 pip install -e <path to your Ansible>
