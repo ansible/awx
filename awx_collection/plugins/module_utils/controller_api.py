@@ -47,35 +47,14 @@ class ItemNotDefined(Exception):
 class ControllerModule(AnsibleModule):
     url = None
     AUTH_ARGSPEC = dict(
-        controller_host=dict(
-            required=False,
-            aliases=['tower_host'],
-            fallback=(env_fallback, ['CONTROLLER_HOST', 'TOWER_HOST'])),
-        controller_username=dict(
-            required=False,
-            aliases=['tower_username'],
-            fallback=(env_fallback, ['CONTROLLER_USERNAME', 'TOWER_USERNAME'])),
-        controller_password=dict(
-            no_log=True,
-            aliases=['tower_password'],
-            required=False,
-            fallback=(env_fallback, ['CONTROLLER_PASSWORD', 'TOWER_PASSWORD'])),
-        validate_certs=dict(
-            type='bool',
-            aliases=['tower_verify_ssl'],
-            required=False,
-            fallback=(env_fallback, ['CONTROLLER_VERIFY_SSL', 'TOWER_VERIFY_SSL'])),
+        controller_host=dict(required=False, aliases=['tower_host'], fallback=(env_fallback, ['CONTROLLER_HOST', 'TOWER_HOST'])),
+        controller_username=dict(required=False, aliases=['tower_username'], fallback=(env_fallback, ['CONTROLLER_USERNAME', 'TOWER_USERNAME'])),
+        controller_password=dict(no_log=True, aliases=['tower_password'], required=False, fallback=(env_fallback, ['CONTROLLER_PASSWORD', 'TOWER_PASSWORD'])),
+        validate_certs=dict(type='bool', aliases=['tower_verify_ssl'], required=False, fallback=(env_fallback, ['CONTROLLER_VERIFY_SSL', 'TOWER_VERIFY_SSL'])),
         controller_oauthtoken=dict(
-            type='raw',
-            no_log=True,
-            aliases=['tower_oauthtoken'],
-            required=False,
-            fallback=(env_fallback, ['CONTROLLER_OAUTH_TOKEN', 'TOWER_OAUTH_TOKEN'])),
-        controller_config_file=dict(
-            type='path',
-            aliases=['tower_config_file'],
-            required=False,
-            default=None),
+            type='raw', no_log=True, aliases=['tower_oauthtoken'], required=False, fallback=(env_fallback, ['CONTROLLER_OAUTH_TOKEN', 'TOWER_OAUTH_TOKEN'])
+        ),
+        controller_config_file=dict(type='path', aliases=['tower_config_file'], required=False, default=None),
     )
     short_params = {
         'host': 'controller_host',
@@ -320,9 +299,7 @@ class ControllerAPIModule(ControllerModule):
     def __init__(self, argument_spec, direct_params=None, error_callback=None, warn_callback=None, **kwargs):
         kwargs['supports_check_mode'] = True
 
-        super().__init__(
-            argument_spec=argument_spec, direct_params=direct_params, error_callback=error_callback, warn_callback=warn_callback, **kwargs
-        )
+        super().__init__(argument_spec=argument_spec, direct_params=direct_params, error_callback=error_callback, warn_callback=warn_callback, **kwargs)
         self.session = Request(cookies=CookieJar(), validate_certs=self.verify_ssl)
 
         if 'update_secrets' in self.params:
@@ -400,7 +377,7 @@ class ControllerAPIModule(ControllerModule):
             response['json']['next'] = next_page
         return response
 
-    def get_one(self, endpoint, name_or_id=None, allow_none=True, **kwargs):
+    def get_one(self, endpoint, name_or_id=None, allow_none=True, check_exists=False, **kwargs):
         new_kwargs = kwargs.copy()
         if name_or_id:
             name_field = self.get_name_field_from_endpoint(endpoint)
@@ -441,6 +418,11 @@ class ControllerAPIModule(ControllerModule):
             # Or we weren't running with a or search and just got back too many to begin with.
             self.fail_wanted_one(response, endpoint, new_kwargs.get('data'))
 
+        if check_exists:
+            name_field = self.get_name_field_from_endpoint(endpoint)
+            self.json_output['id'] = response['json']['results'][0]['id']
+            self.exit_json(**self.json_output)
+
         return response['json']['results'][0]
 
     def fail_wanted_one(self, response, endpoint, query_params):
@@ -448,7 +430,8 @@ class ControllerAPIModule(ControllerModule):
         if len(sample['json']['results']) > 1:
             sample['json']['results'] = sample['json']['results'][:2] + ['...more results snipped...']
         url = self.build_url(endpoint, query_params)
-        display_endpoint = url.geturl()[len(self.host):]  # truncate to not include the base URL
+        host_length = len(self.host)
+        display_endpoint = url.geturl()[host_length:]  # truncate to not include the base URL
         self.fail_json(
             msg="Request to {0} returned {1} items, expected 1".format(display_endpoint, response['json']['count']),
             query=query_params,
@@ -970,11 +953,7 @@ class ControllerAPIModule(ControllerModule):
             # Attempt to delete our current token from /api/v2/tokens/
             # Post to the tokens endpoint with baisc auth to try and get a token
             endpoint = self.url_prefix.rstrip('/') + '/api/v2/tokens/{0}/'.format(self.oauth_token_id)
-            api_token_url = (
-                self.url._replace(
-                    path=endpoint, query=None  # in error cases, fail_json exists before exception handling
-                )
-            ).geturl()
+            api_token_url = (self.url._replace(path=endpoint, query=None)).geturl()  # in error cases, fail_json exists before exception handling
 
             try:
                 self.session.open(

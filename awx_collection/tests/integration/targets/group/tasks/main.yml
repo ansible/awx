@@ -19,9 +19,9 @@
     name: "{{ inv_name }}"
     organization: Default
     state: present
-  register: result
+  registuer: result
 
-- name: Create a Group
+- name: Create Group 1
   group:
     name: "{{ group_name1 }}"
     inventory: "{{ result.id }}"
@@ -34,7 +34,46 @@
     that:
       - "result is changed"
 
-- name: Create a Group
+- name: Create Group 1 with exists
+  group:
+    name: "{{ group_name1 }}"
+    inventory: "{{ inv_name }}"
+    state: exists
+    variables:
+      foo: bar
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+
+- name: Delete Group 1
+  group:
+    name: "{{ group_name1 }}"
+    inventory: "{{ inv_name }}"
+    state: absent
+    variables:
+      foo: bar
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Create Group 1 with exists
+  group:
+    name: "{{ group_name1 }}"
+    inventory: "{{ inv_name }}"
+    state: exists
+    variables:
+      foo: bar
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Create Group 2
   group:
     name: "{{ group_name2 }}"
     inventory: "{{ inv_name }}"
@@ -47,7 +86,7 @@
     that:
       - "result is changed"
 
-- name: Create a Group
+- name: Create Group 3
   group:
     name: "{{ group_name3 }}"
     inventory: "{{ inv_name }}"
@@ -69,7 +108,7 @@
     - "{{ host_name2 }}"
     - "{{ host_name3 }}"
 
-- name: Create a Group with hosts and sub group
+- name: Create Group 1 with hosts and sub group of Group 2
   group:
     name: "{{ group_name1 }}"
     inventory: "{{ inv_name }}"
@@ -83,7 +122,7 @@
       foo: bar
   register: result
 
-- name: Create a Group with hosts and sub group
+- name: Create Group 1 with hosts and sub group
   group:
     name: "{{ group_name1 }}"
     inventory: "{{ inv_name }}"
@@ -104,18 +143,7 @@
     that:
       - group1_host_count  == "3"
 
-- name: Delete a Group
-  group:
-    name: "{{ group_name1 }}"
-    inventory: "{{ inv_name }}"
-    state: absent
-  register: result
-
-- assert:
-    that:
-      - "result is changed"
-
-- name: Delete a Group
+- name: Delete Group 2
   group:
     name: "{{ group_name2 }}"
     inventory: "{{ inv_name }}"
@@ -127,7 +155,7 @@
     that:
       - "result is not changed"
 
-- name: Delete a Group
+- name: Delete Group 3
   group:
     name: "{{ group_name3 }}"
     inventory: "{{ inv_name }}"
@@ -136,7 +164,19 @@
 
 - assert:
     that:
-      - "result is not changed"
+      - "result is changed"
+
+# If we delete group 1 first it will delete group 2 and 3
+- name: Delete Group 1
+  group:
+    name: "{{ group_name1 }}"
+    inventory: "{{ inv_name }}"
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
 
 - name: Check module fails with correct msg
   group:

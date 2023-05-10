@@ -38,6 +38,42 @@
         that:
           - "result is changed"
 
+    - name: Create an Instance Group with exists
+      instance_group:
+        name: "{{ group_name1 }}"
+        policy_instance_percentage: 34
+        policy_instance_minimum: 12
+        state: exists
+      register: result
+
+    - assert:
+        that:
+          - "result is not changed"
+
+    - name: Delete an Instance Group
+      instance_group:
+        name: "{{ group_name1 }}"
+        policy_instance_percentage: 34
+        policy_instance_minimum: 12
+        state: absent
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Create an Instance Group with exists
+      instance_group:
+        name: "{{ group_name1 }}"
+        policy_instance_percentage: 34
+        policy_instance_minimum: 12
+        state: exists
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
     - name: Update an Instance Group
       instance_group:
         name: "{{ result.id }}"

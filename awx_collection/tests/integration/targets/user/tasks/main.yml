@@ -20,6 +20,42 @@
     that:
       - "result is changed"
 
+- name: Create a User with exists
+  user:
+    username: "{{ username }}"
+    first_name: Joe
+    password: "{{ 65535 | random | to_uuid }}"
+    state: exists
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+
+- name: Delete a User
+  user:
+    username: "{{ username }}"
+    first_name: Joe
+    password: "{{ 65535 | random | to_uuid }}"
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Create a User with exists
+  user:
+    username: "{{ username }}"
+    first_name: Joe
+    password: "{{ 65535 | random | to_uuid }}"
+    state: exists
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
 - name: Change a User by ID
   user:
     username: "{{ result.id }}"

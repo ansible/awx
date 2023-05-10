@@ -81,7 +81,7 @@ options:
     state:
       description:
         - Desired state of the resource.
-      choices: ["present", "absent"]
+      choices: ["present", "absent", "exists"]
       default: "present"
       type: str
 extends_documentation_fragment: awx.awx.auth
@@ -107,7 +107,7 @@ def main():
         policy_instance_list=dict(type='list', elements='str'),
         pod_spec_override=dict(),
         instances=dict(required=False, type="list", elements='str'),
-        state=dict(choices=['present', 'absent'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )
 
     # Create a module for ourselves
@@ -128,7 +128,7 @@ def main():
     state = module.params.get('state')
 
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('instance_groups', name_or_id=name)
+    existing_item = module.get_one('instance_groups', name_or_id=name, check_exists=(state == 'exists'))
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

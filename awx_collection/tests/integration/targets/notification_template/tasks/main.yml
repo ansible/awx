@@ -36,6 +36,75 @@
     that:
       - result is changed
 
+- name: Create Slack notification with custom messages with exists
+  notification_template:
+    name: "{{ slack_not }}"
+    organization: Default
+    notification_type: slack
+    notification_configuration:
+      token: a_token
+      channels:
+        - general
+    messages:
+      started:
+        message: "{{ '{{' }} job_friendly_name {{' }}' }} {{ '{{' }} job.id {{' }}' }} started"
+      success:
+        message: "{{ '{{' }} job_friendly_name {{ '}}' }} completed in {{ '{{' }} job.elapsed {{ '}}' }} seconds"
+      error:
+        message: "{{ '{{' }} job_friendly_name {{ '}}' }} FAILED! Please look at {{ '{{' }} job.url {{ '}}' }}"
+    state: exists
+  register: result
+
+- assert:
+    that:
+      - result is not changed
+
+- name: Delete Slack notification with custom messages
+  notification_template:
+    name: "{{ slack_not }}"
+    organization: Default
+    notification_type: slack
+    notification_configuration:
+      token: a_token
+      channels:
+        - general
+    messages:
+      started:
+        message: "{{ '{{' }} job_friendly_name {{' }}' }} {{ '{{' }} job.id {{' }}' }} started"
+      success:
+        message: "{{ '{{' }} job_friendly_name {{ '}}' }} completed in {{ '{{' }} job.elapsed {{ '}}' }} seconds"
+      error:
+        message: "{{ '{{' }} job_friendly_name {{ '}}' }} FAILED! Please look at {{ '{{' }} job.url {{ '}}' }}"
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Create Slack notification with custom messages with exists
+  notification_template:
+    name: "{{ slack_not }}"
+    organization: Default
+    notification_type: slack
+    notification_configuration:
+      token: a_token
+      channels:
+        - general
+    messages:
+      started:
+        message: "{{ '{{' }} job_friendly_name {{' }}' }} {{ '{{' }} job.id {{' }}' }} started"
+      success:
+        message: "{{ '{{' }} job_friendly_name {{ '}}' }} completed in {{ '{{' }} job.elapsed {{ '}}' }} seconds"
+      error:
+        message: "{{ '{{' }} job_friendly_name {{ '}}' }} FAILED! Please look at {{ '{{' }} job.url {{ '}}' }}"
+    state: exists
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
 - name: Delete Slack notification
   notification_template:
     name: "{{ slack_not }}"
