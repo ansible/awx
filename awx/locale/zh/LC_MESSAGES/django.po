@@ -661,7 +661,7 @@ msgstr "事件 '{}' 的预期字典，找到 {}"
 msgid ""
 "Workflow Approval event '{}' invalid, must be one of 'running', 'approved', "
 "'timed_out', or 'denied'"
-msgstr "工作流批准事件 '{}' 无效，必须是 'running'、'approved'、'timed_out' 或 'denied' 之一。"
+msgstr "工作流批准事件 '{}' 无效，必须是 'running'、'approved'、'timed_out' 或 'denied' 之一"
 
 #: awx/api/serializers.py:4444
 msgid "Expected dict for workflow approval event '{}', found {}"
@@ -1971,7 +1971,7 @@ msgid ""
 "HTTP headers and meta keys to search to determine remote host name or IP. "
 "Add additional items to this list, such as \"HTTP_X_FORWARDED_FOR\", if "
 "behind a reverse proxy. See the \"Proxy Support\" section of the "
-"Adminstrator guide for more details."
+"Administrator guide for more details."
 msgstr "为确定远程主机名或 IP 而搜索的 HTTP 标头和元键。如果位于反向代理后端，请将其他项添加到此列表，如 \"HTTP_X_FORWARDED_FOR\"。请参阅管理员指南的“代理支持”部分以了解更多详情。"
 
 #: awx/main/conf.py:85
@@ -1985,7 +1985,7 @@ msgid ""
 "REMOTE_HOST_HEADERS header values. If this setting is an empty list (the "
 "default), the headers specified by REMOTE_HOST_HEADERS will be trusted "
 "unconditionally')"
-msgstr "如果服务位于反向代理/负载均衡器后端，则使用此设置可将 Tower 应该信任自定义 REMOTE_HOST_HEADERS 标头值的代理服务器 IP 地址列入白名单。如果此设置为空列表（默认设置），则将无条件地信任由 REMOTE_HOST_HEADERS 指定的标头。"
+msgstr "如果服务位于反向代理/负载均衡器后端，则使用此设置可将 Tower 应该信任自定义 REMOTE_HOST_HEADERS 标头值的代理服务器 IP 地址列入白名单。如果此设置为空列表（默认设置），则将无条件地信任由 REMOTE_HOST_HEADERS 指定的标头"
 
 #: awx/main/conf.py:101
 msgid "License"
@@ -2308,7 +2308,7 @@ msgstr "存储的 Ansible 事实自上次修改后被视为有效的最长时间
 
 #: awx/main/conf.py:463
 msgid "Maximum number of forks per job"
-msgstr "每个作业的最大 fork 数量。"
+msgstr "每个作业的最大 fork 数量"
 
 #: awx/main/conf.py:464
 msgid ""
@@ -2460,7 +2460,7 @@ msgid ""
 msgstr "日志处理程序使用的级别阈值。从最低到最高的严重性为：DEBUG、INFO、WARNING、ERROR、CRITICAL。日志处理程序会忽略严重性低于阈值的消息。（类别 awx.anlytics 下的消息会忽略此设置）"
 
 #: awx/main/conf.py:631
-msgid "Maximum disk persistance for external log aggregation (in GB)"
+msgid "Maximum disk persistence for external log aggregation (in GB)"
 msgstr "外部日志聚合的最大磁盘持久性存储（以 GB 为单位）"
 
 #: awx/main/conf.py:633
@@ -2551,8 +2551,8 @@ msgid "Enable"
 msgstr "启用"
 
 #: awx/main/constants.py:27
-msgid "Doas"
-msgstr "Doas"
+msgid "Does"
+msgstr "Does"
 
 #: awx/main/constants.py:28
 msgid "Ksu"
@@ -3083,7 +3083,7 @@ msgstr "所有命名 url 图形节点的列表。"
 msgid ""
 "Read-only list of key-value pairs that exposes named URL graph topology. Use "
 "this list to programmatically generate named URLs for resources"
-msgstr "键值对的只读列表，显示命名 URL 图形拓扑。使用此列表以编程方式为资源生成命名 URL。"
+msgstr "键值对的只读列表，显示命名 URL 图形拓扑。使用此列表以编程方式为资源生成命名 URL"
 
 #: awx/main/migrations/_inventory_source_vars.py:142
 msgid "Image ID"
@@ -4031,7 +4031,7 @@ msgstr "清单脚本内容"
 msgid ""
 "If enabled, textual changes made to any templated files on the host are "
 "shown in the standard output"
-msgstr "如果启用，标准输出中会显示对主机上任何模板文件进行的文本更改。"
+msgstr "如果启用，标准输出中会显示对主机上任何模板文件进行的文本更改"
 
 #: awx/main/models/jobs.py:109
 msgid ""
@@ -4800,11 +4800,11 @@ msgid ""
 "Indicates that a job will not be created when True. Workflow runtime "
 "semantics will mark this True if the node is in a path that will decidedly "
 "not be ran. A value of False means the node may not run."
-msgstr "True 表示不会创建作业。如果节点位于肯定不会运行的路径中，则 Workflow 运行时语义会将此值标记为 True。False 值表示节点可能无法运行。"
+msgstr "True 表示不会创建任务。如果节点位于肯定不会运行的路径中，则 Workflow 运行时语义会将此值标记为 True。False 值表示节点可能无法运行。"
 
 #: awx/main/models/workflow.py:251
 msgid ""
-"An identifier coresponding to the workflow job template node that this node "
+"An identifier corresponding to the workflow job template node that this node "
 "was created from."
 msgstr "一个标识符，针对此节点从中创建的工作流作业模板节点。"
 
@@ -4926,7 +4926,7 @@ msgstr "从工作流生成的任务可能无法启动，因为它缺少了相关
 msgid ""
 "Job spawned from workflow could not start because it was not in the right "
 "state or required manual credentials"
-msgstr "从工作流生成的任务可能无法启动，因为它不处于正确的状态或需要手动凭证。"
+msgstr "从工作流生成的任务可能无法启动，因为它不处于正确的状态或需要手动凭证"
 
 #: awx/main/scheduler/task_manager.py:228
 msgid "No error handling paths found, marking workflow as failed"
@@ -4952,7 +4952,7 @@ msgstr "批准节点 {name} ({pk}) 已在 {timeout} 秒后过期。"
 msgid ""
 "Scheduled job could not start because it                     was not in the "
 "right state or required manual credentials"
-msgstr "调度的作业可能无法启动，因为它不处于正确的状态或需要手动凭证。"
+msgstr "调度的作业可能无法启动，因为它不处于正确的状态或需要手动凭证"
 
 #: awx/main/tasks.py:1728
 msgid "Job could not start because it does not have a valid inventory."
@@ -5527,7 +5527,7 @@ msgstr "Google OAuth2 额外参数"
 #: awx/sso/conf.py:606
 msgid ""
 "Extra arguments for Google OAuth2 login. You can restrict it to only allow a "
-"single domain to authenticate, even if the user is logged in with multple "
+"single domain to authenticate, even if the user is logged in with multiple "
 "Google accounts. Refer to the documentation for more detail."
 msgstr "用于 Google OAuth2 登录的额外参数。您可以将其限制为只允许单个域进行身份验证，即使用户使用多个 Google 帐户登录。请参阅相关文档了解更多详情。"
 
@@ -5911,7 +5911,7 @@ msgstr "SAML 服务提供商公共证书"
 
 #: awx/sso/conf.py:1290
 msgid ""
-"Create a keypair to use as a service provider (SP) and include the "
+"Create a key pair to use as a service provider (SP) and include the "
 "certificate content here."
 msgstr "创建一个密钥对，以用作服务提供商 (SP)，并在此包含证书内容。"
 
@@ -5921,7 +5921,7 @@ msgstr "SAML 服务提供商私钥"
 
 #: awx/sso/conf.py:1302
 msgid ""
-"Create a keypair to use as a service provider (SP) and include the private "
+"Create a key pair to use as a service provider (SP) and include the private "
 "key content here."
 msgstr "创建一个密钥对，以用作服务提供商 (SP)，并在此包含私钥内容。"
 

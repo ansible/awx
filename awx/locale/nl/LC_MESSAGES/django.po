@@ -1971,7 +1971,7 @@ msgid ""
 "HTTP headers and meta keys to search to determine remote host name or IP. "
 "Add additional items to this list, such as \"HTTP_X_FORWARDED_FOR\", if "
 "behind a reverse proxy. See the \"Proxy Support\" section of the "
-"Adminstrator guide for more details."
+"Administrator guide for more details."
 msgstr "HTTP-headers en metasleutels om te zoeken om de naam of het IP-adres van de externe host te bepalen. Voeg aan deze lijst extra items toe, zoals \"HTTP_X_FORWARDED_FOR\", wanneer achter een omgekeerde proxy. Zie de sectie 'proxy-ondersteuning' in de handleiding voor beheerders voor meer informatie."
 
 #: awx/main/conf.py:85
@@ -2460,7 +2460,7 @@ msgid ""
 msgstr "Drempelwaarde gebruikt door logboekhandler. Ernstcategorieën van laag naar hoog zijn DEBUG, INFO, WARNING, ERROR, CRITICAL. Berichten die minder streng zijn dan de drempelwaarde, worden genegeerd door de logboekhandler. (deze instelling wordt genegeerd door berichten onder de categorie awx.anlytics)"
 
 #: awx/main/conf.py:631
-msgid "Maximum disk persistance for external log aggregation (in GB)"
+msgid "Maximum disk persistence for external log aggregation (in GB)"
 msgstr "Maximale schijfduurzaamheid voor externe logboekaggregatie (in GB)"
 
 #: awx/main/conf.py:633
@@ -2551,8 +2551,8 @@ msgid "Enable"
 msgstr "Inschakelen"
 
 #: awx/main/constants.py:27
-msgid "Doas"
-msgstr "Doas"
+msgid "Does"
+msgstr "Doet"
 
 #: awx/main/constants.py:28
 msgid "Ksu"
@@ -4804,7 +4804,7 @@ msgstr "Geeft aan dat er geen taak wordt aangemaakt indien True. De semantische 
 
 #: awx/main/models/workflow.py:251
 msgid ""
-"An identifier coresponding to the workflow job template node that this node "
+"An identifier corresponding to the workflow job template node that this node "
 "was created from."
 msgstr "Een id die overeenkomt met het knooppunt voor het workflowtaaksjabloon waaruit dit knooppunt is gemaakt."
 
@@ -5526,7 +5526,7 @@ msgstr "Extra argumenten Google OAuth2"
 #: awx/sso/conf.py:606
 msgid ""
 "Extra arguments for Google OAuth2 login. You can restrict it to only allow a "
-"single domain to authenticate, even if the user is logged in with multple "
+"single domain to authenticate, even if the user is logged in with multiple "
 "Google accounts. Refer to the documentation for more detail."
 msgstr "Extra argumenten voor Google OAuth2-aanmelding. U kunt een beperking instellen, waardoor de authenticatie toegestaan is voor niet meer dan één domein, zelfs als de gebruiker aangemeld is met meerdere Google-accounts. Raadpleeg de documentatie voor meer informatie."
 
@@ -5910,7 +5910,7 @@ msgstr "Openbaar certificaat SAML-serviceprovider"
 
 #: awx/sso/conf.py:1290
 msgid ""
-"Create a keypair to use as a service provider (SP) and include the "
+"Create a key pair to use as a service provider (SP) and include the "
 "certificate content here."
 msgstr "Maak een sleutelpaar om dit te gebruiken als serviceprovider (SP) en neem de certificaatinhoud hier op."
 
@@ -5920,7 +5920,7 @@ msgstr "Privésleutel SAML-serviceprovider"
 
 #: awx/sso/conf.py:1302
 msgid ""
-"Create a keypair to use as a service provider (SP) and include the private "
+"Create a key pair to use as a service provider (SP) and include the private "
 "key content here."
 msgstr "Maak een sleutelpaar om dit te gebruiken als serviceprovider (SP) en neem de inhoud van de privésleutel hier op."
 

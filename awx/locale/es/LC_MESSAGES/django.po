@@ -2460,7 +2460,7 @@ msgid ""
 msgstr "El umbral de nivel utilizado por el controlador de registros. Los niveles de gravedad desde el menor hasta el mayor son DEBUG, INFO, WARNING, ERROR, CRITICAL. El controlador de registros ignorará los mensajes menos graves que el umbral (los mensajes de la categoría awx.anlytics omiten este ajuste)."
 
 #: awx/main/conf.py:631
-msgid "Maximum disk persistance for external log aggregation (in GB)"
+msgid "Maximum disk persistence for external log aggregation (in GB)"
 msgstr "Máxima persistencia del disco para la agregación de registros externos (en GB)"
 
 #: awx/main/conf.py:633
@@ -2551,8 +2551,8 @@ msgid "Enable"
 msgstr "Habilitar"
 
 #: awx/main/constants.py:27
-msgid "Doas"
-msgstr "Doas"
+msgid "Does"
+msgstr "En"
 
 #: awx/main/constants.py:28
 msgid "Ksu"
