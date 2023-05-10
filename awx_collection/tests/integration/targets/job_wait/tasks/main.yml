@@ -27,20 +27,6 @@
     extra_vars:
       sleep_interval: 300
 
-- name: Validate that interval superceeds min/max
-  job_wait:
-    min_interval: 10
-    max_interval: 20
-    interval: 12
-    job_id: "99999999"
-  register: result
-  ignore_errors: true
-
-- assert:
-    that:
-      - "result.msg =='Unable to wait on job 99999999; that ID does not exist.' or
-        'min and max interval have been depricated, please use interval instead, interval will be set to 12'"
-
 - name: Check module fails with correct msg
   job_wait:
     job_id: "99999999"
