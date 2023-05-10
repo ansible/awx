@@ -208,9 +208,15 @@ function MeshGraph({
         .attr('class', (_, i) => `link-${i}`)
         .attr('data-cy', (d) => `${d.source.hostname}-${d.target.hostname}`)
         .style('fill', 'none')
-        .style('stroke', (d) =>
-          d.link_state === 'removing' ? '#C9190B' : '#CCC'
-        )
+        .style('stroke', (d) => {
+          if (d.link_state === 'removing') {
+            return '#C9190B';
+          }
+          if (d.link_state === 'disconnected') {
+            return '#c9700b';
+          }
+          return '#CCC';
+        })
         .style('stroke-width', '2px')
         .style('stroke-dasharray', (d) => renderLinkState(d.link_state))
         .attr('pointer-events', 'none')
@@ -348,9 +354,15 @@ function MeshGraph({
             .selectAll(`.link-${s.index}`)
             .transition()
             .duration(50)
-            .style('stroke', (d) =>
-              d.link_state === 'removing' ? '#C9190B' : '#CCC'
-            )
+            .style('stroke', (d) => {
+              if (d.link_state === 'removing') {
+                return '#C9190B';
+              }
+              if (d.link_state === 'disconnected') {
+                return '#c9700b';
+              }
+              return '#CCC';
+            })
             .style('stroke-width', '2px')
             .attr('marker-end', 'url(#end)');
         });
