@@ -141,26 +141,12 @@ class PoolWorker(object):
             try:
                 # Manage timing data for performance and troubleshooting
                 task_data = self.managed_tasks[uuid]
-                task_data.update(finished_data)
-                if ('time_ack' in task_data) and ('time_pub' in task_data) and ('time_finish' in task_data):
-                    # NOTE: this code may run a long time after the task has finished
-                    # because the finished queue is only checked as needed
-                    time_pub = task_data['time_pub']
-                    ack_delta = task_data['time_ack'] - time_pub
-                    task = task_data.get('task', 'unknown')
-
-                    # record data to show in --history
-                    self.finished_record.append(task_data)
-
-                    # If task too a very long time to process, escalate log
-                    logger_method = logger.debug if ack_delta < 5.0 else logger.info
-
-                    logger_method(f'Concluded {uuid} {task}, {self.display_timing(task_data)}')
-                else:
-                    logger.warning(f'Unexpected missing timing data for task uuid={uuid}')
-
-                del task_data  # for garbage collection
-
+                task_data.update(self.managed_tasks[uuid])
+                # record data to show in --history
+                self.finished_record.append(self.managed_tasks[uuid])
+                # echo that data to debug logs
+                logger.debug((f'Concluded {uuid} {task_data.get("task", "unknown")}, {self.display_timing(self.managed_tasks[uuid])}'))
+                # Functionally, have worker marked as idle or ready for next task
                 del self.managed_tasks[uuid]
                 self.messages_finished += 1
             except KeyError:
@@ -170,11 +156,14 @@ class PoolWorker(object):
 
     @staticmethod
     def display_timing(task):
-        time_pub = task['time_pub']
-        time_pub_display = datetime.fromtimestamp(time_pub).strftime('%H:%M:%S UTC')
-        ack_delta = task['time_ack'] - time_pub
-        run_delta = task['time_finish'] - task['time_ack']
-        return f'pub={time_pub_display} ack={ack_delta:.4f}s run={run_delta:.4f}s'
+        if ('time_ack' in task) and ('time_pub' in task) and ('time_finish' in task):
+            time_pub = task['time_pub']
+            time_pub_display = datetime.fromtimestamp(time_pub).strftime('%H:%M:%S UTC')
+            ack_delta = task['time_ack'] - time_pub
+            run_delta = task['time_finish'] - task['time_ack']
+            return f'pub={time_pub_display} ack={ack_delta:.4f}s run={run_delta:.4f}s'
+        else:
+            return 'unexpectedly missing timing data'
 
     @property
     def current_task(self):
@@ -285,8 +274,6 @@ class WorkerPool(object):
         return idx, worker
 
     def debug(self, show_history=False):
-        for worker in self.workers:
-            worker.calculate_managed_tasks()
         task_tmpl = (
             '\n     - {% if "time_finish" in task %}finished {% elif loop.index0 == 0 %}running {% if "age" in task %}for: {{ "%.1f" % task["age"] }}s {% endif %}{% else %}queued {% endif %}'
             '{{ task["uuid"] }} '
