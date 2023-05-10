@@ -52,6 +52,16 @@ def test_job_relaunch_permission_denied_response(post, get, inventory, project, 
 
 
 @pytest.mark.django_db
+def test_label_sublist(get, admin_user, organization):
+    job = Job.objects.create()
+    label = Label.objects.create(organization=organization, name='Steve')
+    job.labels.add(label)
+    r = get(url=reverse('api:job_label_list', kwargs={'pk': job.pk}), user=admin_user, expect=200)
+    assert r.data['count'] == 1
+    assert r.data['results'].pop()['id'] == label.id
+
+
+@pytest.mark.django_db
 def test_job_relaunch_prompts_not_accepted_response(post, get, inventory, project, credential, net_credential, machine_credential):
     jt = JobTemplate.objects.create(name='testjt', inventory=inventory, project=project)
     jt.credentials.add(machine_credential)
