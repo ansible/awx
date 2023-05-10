@@ -22,7 +22,7 @@ class CustomAutoprogramDirective(AutoprogramDirective):
         nodes[0][0].children = [heading]
 
         # add a descriptive top synopsis of the reference guide
-        nodes[0].children.insert(1, paragraph(text=('This is an exhaustive guide of every available command in ' 'the awx CLI tool.')))
+        nodes[0].children.insert(1, paragraph(text=('This is an exhaustive guide of every available command in the awx CLI tool.')))
         disclaimer = (
             'The commands and parameters documented here can (and will) '
             'vary based on a variety of factors, such as the AWX API '
