@@ -140,12 +140,11 @@ class PoolWorker(object):
             uuid = finished_data['uuid']
             try:
                 # Manage timing data for performance and troubleshooting
-                task_data = self.managed_tasks[uuid]
-                task_data.update(self.managed_tasks[uuid])
+                self.managed_tasks[uuid].update(finished_data)
                 # record data to show in --history
                 self.finished_record.append(self.managed_tasks[uuid])
                 # echo that data to debug logs
-                logger.debug((f'Concluded {uuid} {task_data.get("task", "unknown")}, {self.display_timing(self.managed_tasks[uuid])}'))
+                logger.debug((f'Concluded {uuid} {self.managed_tasks[uuid].get("task", "unknown")}, {self.display_timing(self.managed_tasks[uuid])}'))
                 # Functionally, have worker marked as idle or ready for next task
                 del self.managed_tasks[uuid]
                 self.messages_finished += 1
@@ -290,7 +289,7 @@ class WorkerPool(object):
         if show_history:
             worker_extra = ''.join(['{% for task in w.finished_record %}', task_tmpl, '{% endfor %}'])
         tmpl = Template(
-            'Dispatcher started at: {{ st }} \n'
+            'Started at:  {{ st }} \n'
             'Recorded at: {{ dt }} \n'
             '{{ pool.name }}[pid:{{ pool.pid }}] workers total={{ workers|length }} {{ meta }} \n'
             '{% for w in workers %}'
