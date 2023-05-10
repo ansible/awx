@@ -146,7 +146,7 @@ options:
     state:
       description:
         - Desired state of the resource.
-      choices: ["present", "absent"]
+      choices: ["present", "absent", "exists"]
       default: "present"
       type: str
 extends_documentation_fragment: awx.awx.auth
@@ -220,7 +220,7 @@ def main():
         unified_job_template=dict(),
         organization=dict(),
         enabled=dict(type='bool'),
-        state=dict(choices=['present', 'absent'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )
 
     # Create a module for ourselves
@@ -265,8 +265,13 @@ def main():
         search_fields['name'] = unified_job_template
         unified_job_template_id = module.get_one('unified_job_templates', **{'data': search_fields})['id']
         sched_search_fields['unified_job_template'] = unified_job_template_id
+
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('schedules', name_or_id=name, **{'data': sched_search_fields})
+    existing_item = module.get_one('schedules', name_or_id=name, check_exists=(state == 'exists'), **{'data': sched_search_fields})
+
+    if state == 'absent':
+        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
+        module.delete_if_needed(existing_item)
 
     association_fields = {}
 
@@ -343,18 +348,14 @@ def main():
             else:
                 new_fields['execution_environment'] = ee['id']
 
-    if state == 'absent':
-        # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
-        module.delete_if_needed(existing_item)
-    elif state == 'present':
-        # If the state was present and we can let the module build or update the existing item, this will return on its own
-        module.create_or_update_if_needed(
-            existing_item,
-            new_fields,
-            endpoint='schedules',
-            item_type='schedule',
-            associations=association_fields,
-        )
+    # If the state was present and we can let the module build or update the existing item, this will return on its own
+    module.create_or_update_if_needed(
+        existing_item,
+        new_fields,
+        endpoint='schedules',
+        item_type='schedule',
+        associations=association_fields,
+    )
 
 
 if __name__ == '__main__':

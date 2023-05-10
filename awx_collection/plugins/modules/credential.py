@@ -247,7 +247,7 @@ def main():
     if organization:
         lookup_data['organization'] = org_id
 
-    credential = module.get_one('credentials', name_or_id=name, **{'data': lookup_data})
+    credential = module.get_one('credentials', name_or_id=name, check_exists=(state == 'exists'), **{'data': lookup_data})
 
     # Attempt to look up credential to copy based on the provided name
     if copy_from:
@@ -264,10 +264,6 @@ def main():
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(credential)
-
-    if state == 'exists' and credential is not None:
-        # If credential exists and state is exists, we're done here.
-        module.exit_json(**module.json_output)
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     if user:

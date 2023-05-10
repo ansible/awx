@@ -30,7 +30,7 @@
     organization: Default
     name: "{{ openstack_inv }}"
 
-- name: Create a source inventory
+- name: Create an source inventory
   inventory_source:
     name: "{{ openstack_inv_source }}"
     description: Source for Test inventory
@@ -41,6 +41,60 @@
     source_vars:
       private: false
     source: openstack
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Create an source inventory with exists
+  inventory_source:
+    name: "{{ openstack_inv_source }}"
+    description: Source for Test inventory
+    inventory: "{{ openstack_inv }}"
+    credential: "{{ credential_result.id }}"
+    overwrite: true
+    update_on_launch: true
+    source_vars:
+      private: false
+    source: openstack
+    state: exists
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+
+- name: Delete an source inventory
+  inventory_source:
+    name: "{{ openstack_inv_source }}"
+    description: Source for Test inventory
+    inventory: "{{ openstack_inv }}"
+    credential: "{{ credential_result.id }}"
+    overwrite: true
+    update_on_launch: true
+    source_vars:
+      private: false
+    source: openstack
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Create an source inventory with exists
+  inventory_source:
+    name: "{{ openstack_inv_source }}"
+    description: Source for Test inventory
+    inventory: "{{ openstack_inv }}"
+    credential: "{{ credential_result.id }}"
+    overwrite: true
+    update_on_launch: true
+    source_vars:
+      private: false
+    source: openstack
+    state: exists
   register: result
 
 - assert:

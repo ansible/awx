@@ -24,6 +24,43 @@
         that:
           - "result is changed"
 
+    - name: Run an application with exists
+      application:
+        name: "{{ app1_name }}"
+        authorization_grant_type: "password"
+        client_type: "public"
+        organization: "Default"
+        state: exists
+      register: result
+
+    - assert:
+        that:
+          - "result is not changed"
+
+    - name: Delete our application
+      application:
+        name: "{{ app1_name }}"
+        organization: "Default"
+        state: absent
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Run an application with exists
+      application:
+        name: "{{ app1_name }}"
+        authorization_grant_type: "password"
+        client_type: "public"
+        organization: "Default"
+        state: exists
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
     - name: Delete our application
       application:
         name: "{{ app1_name }}"

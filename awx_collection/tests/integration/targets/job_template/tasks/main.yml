@@ -10,6 +10,7 @@
     cred1: "AWX-Collection-tests-job_template-cred1-{{ test_id }}"
     cred2: "AWX-Collection-tests-job_template-cred2-{{ test_id }}"
     cred3: "AWX-Collection-tests-job_template-cred3-{{ test_id }}"
+    inv1: "AWX-Collection-tests-job_template-inv-{{ test_id }}"
     proj1: "AWX-Collection-tests-job_template-proj-{{ test_id }}"
     jt1: "AWX-Collection-tests-job_template-jt1-{{ test_id }}"
     jt2: "AWX-Collection-tests-job_template-jt2-{{ test_id }}"
@@ -24,6 +25,11 @@
     galaxy_credentials:
       - Ansible Galaxy
   register: result
+
+- name: Create an inventory
+  inventory:
+    name: "{{ inv1 }}"
+    organization: "{{ org_name }}"
 
 - name: Create a Demo Project
   project:
@@ -104,7 +110,7 @@
   job_template:
     name: "{{ jt1 }}"
     project: "{{ proj1 }}"
-    inventory: Demo Inventory
+    inventory: "{{ inv1 }}"
     playbook: hello_world.yml
     credentials:
       - "{{ cred1 }}"
@@ -113,6 +119,63 @@
       - "{{ group_name1 }}"
     job_type: run
     state: present
+  register: jt1_result
+
+- assert:
+    that:
+      - "jt1_result is changed"
+
+- name: Create Job Template 1 with exists
+  job_template:
+    name: "{{ jt1 }}"
+    project: "{{ proj1 }}"
+    inventory: "{{ inv1 }}"
+    playbook: hello_world.yml
+    credentials:
+      - "{{ cred1 }}"
+      - "{{ cred2 }}"
+    instance_groups:
+      - "{{ group_name1 }}"
+    job_type: run
+    state: exists
+  register: jt1_result
+
+- assert:
+    that:
+      - "jt1_result is not changed"
+
+- name: Delete Job Template 1
+  job_template:
+    name: "{{ jt1 }}"
+    project: "{{ proj1 }}"
+    inventory: "{{ inv1 }}"
+    playbook: hello_world.yml
+    credentials:
+      - "{{ cred1 }}"
+      - "{{ cred2 }}"
+    instance_groups:
+      - "{{ group_name1 }}"
+    job_type: run
+    state: absent
+  register: jt1_result
+
+- assert:
+    that:
+      - "jt1_result is changed"
+
+- name: Create Job Template 1 with exists
+  job_template:
+    name: "{{ jt1 }}"
+    project: "{{ proj1 }}"
+    inventory: "{{ inv1 }}"
+    playbook: hello_world.yml
+    credentials:
+      - "{{ cred1 }}"
+      - "{{ cred2 }}"
+    instance_groups:
+      - "{{ group_name1 }}"
+    job_type: run
+    state: exists
   register: jt1_result
 
 - assert:
@@ -218,7 +281,7 @@
     name: "{{ jt2 }}"
     organization: Default
     project: "{{ proj1 }}"
-    inventory: Demo Inventory
+    inventory: "{{ inv1 }}"
     playbook: hello_world.yml
     credential: "{{ cred3 }}"
     job_type: run
@@ -236,7 +299,7 @@
     name: "{{ jt2 }}"
     organization: Default
     project: "{{ proj1 }}"
-    inventory: Demo Inventory
+    inventory: "{{ inv1 }}"
     playbook: hello_world.yml
     credential: "{{ cred3 }}"
     job_type: run
@@ -384,7 +447,7 @@
   job_template:
     name: "{{ jt2 }}"
     project: "{{ proj1 }}"
-    inventory: Demo Inventory
+    inventory: "{{ inv1 }}"
     playbook: hello_world.yml
     credential: "{{ cred3 }}"
     job_type: run
@@ -442,6 +505,12 @@
   notification_template:
     name: "{{ webhook_not }}"
     organization: Default
+    state: absent
+
+- name: Delete an inventory
+  inventory:
+    name: "{{ inv1 }}"
+    organization: "{{ org_name }}"
     state: absent
 
 - name: "Remove the organization"
