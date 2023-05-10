@@ -39,6 +39,48 @@
         that:
           - result is changed
 
+    - name: Create a git project without credentials and wait with exists
+      project:
+        name: "{{ project_name1 }}"
+        organization: Default
+        scm_type: git
+        scm_url: https://github.com/ansible/test-playbooks
+        wait: true
+        state: exists
+      register: result
+
+    - assert:
+        that:
+          - result is not changed
+
+    - name: Delete a git project without credentials and wait
+      project:
+        name: "{{ project_name1 }}"
+        organization: Default
+        scm_type: git
+        scm_url: https://github.com/ansible/test-playbooks
+        wait: true
+        state: absent
+      register: result
+
+    - assert:
+        that:
+          - result is changed
+
+    - name: Create a git project without credentials and wait with exists
+      project:
+        name: "{{ project_name1 }}"
+        organization: Default
+        scm_type: git
+        scm_url: https://github.com/ansible/test-playbooks
+        wait: true
+        state: exists
+      register: result
+
+    - assert:
+        that:
+          - result is changed
+
     - name: Recreate the project to validate not changed
       project:
         name: "{{ project_name1 }}"

@@ -22,6 +22,48 @@
         that:
           - "result is changed"
 
+    - name: Add Tower credential type with exists
+      credential_type:
+        description: Credential type for Test
+        name: "{{ cred_type_name }}"
+        kind: cloud
+        inputs: {"fields": [{"type": "string", "id": "username", "label": "Username"}, {"secret": true, "type": "string", "id": "password", "label": "Password"}], "required": ["username", "password"]}
+        injectors: {"extra_vars": {"test": "foo"}}
+        state: exists
+      register: result
+
+    - assert:
+        that:
+          - "result is not changed"
+
+    - name: Delete the credential type
+      credential_type:
+        description: Credential type for Test
+        name: "{{ cred_type_name }}"
+        kind: cloud
+        inputs: {"fields": [{"type": "string", "id": "username", "label": "Username"}, {"secret": true, "type": "string", "id": "password", "label": "Password"}], "required": ["username", "password"]}
+        injectors: {"extra_vars": {"test": "foo"}}
+        state: absent
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Add Tower credential type with exists
+      credential_type:
+        description: Credential type for Test
+        name: "{{ cred_type_name }}"
+        kind: cloud
+        inputs: {"fields": [{"type": "string", "id": "username", "label": "Username"}, {"secret": true, "type": "string", "id": "password", "label": "Password"}], "required": ["username", "password"]}
+        injectors: {"extra_vars": {"test": "foo"}}
+        state: exists
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
     - name: Rename Tower credential type
       credential_type:
         name: "{{ cred_type_name }}"

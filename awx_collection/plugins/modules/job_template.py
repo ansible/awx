@@ -295,7 +295,7 @@ options:
       description:
         - Desired state of the resource.
       default: "present"
-      choices: ["present", "absent"]
+      choices: ["present", "absent", "exists"]
       type: str
     notification_templates_started:
       description:
@@ -444,7 +444,7 @@ def main():
         notification_templates_success=dict(type="list", elements='str'),
         notification_templates_error=dict(type="list", elements='str'),
         prevent_instance_group_fallback=dict(type="bool"),
-        state=dict(choices=['present', 'absent'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )
 
     # Create a module for ourselves
@@ -484,7 +484,7 @@ def main():
         new_fields['execution_environment'] = module.resolve_name_to_id('execution_environments', ee)
 
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('job_templates', name_or_id=name, **{'data': search_fields})
+    existing_item = module.get_one('job_templates', name_or_id=name, check_exists=(state == 'exists'), **{'data': search_fields})
 
     # Attempt to look up credential to copy based on the provided name
     if copy_from:

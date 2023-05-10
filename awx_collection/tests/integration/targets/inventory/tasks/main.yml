@@ -51,6 +51,45 @@
         that:
           - "result is changed"
 
+    - name: Create an Inventory with exists
+      inventory:
+        name: "{{ inv_name1 }}"
+        organization: Default
+        instance_groups:
+          - "{{ group_name1 }}"
+        state: exists
+      register: result
+
+    - assert:
+        that:
+          - "result is not changed"
+
+    - name: Delete an Inventory
+      inventory:
+        name: "{{ inv_name1 }}"
+        organization: Default
+        instance_groups:
+          - "{{ group_name1 }}"
+        state: absent
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Create an Inventory with exists
+      inventory:
+        name: "{{ inv_name1 }}"
+        organization: Default
+        instance_groups:
+          - "{{ group_name1 }}"
+        state: exists
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
     - name: Test Inventory module idempotency
       inventory:
         name: "{{ result.id }}"

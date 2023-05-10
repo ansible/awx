@@ -67,7 +67,7 @@ options:
       description:
         - Desired state of the resource.
       default: "present"
-      choices: ["present", "absent"]
+      choices: ["present", "absent", "exists"]
       type: str
     new_name:
       description:
@@ -115,7 +115,7 @@ def main():
         children=dict(type='list', elements='str', aliases=['groups']),
         preserve_existing_hosts=dict(type='bool', default=False),
         preserve_existing_children=dict(type='bool', default=False, aliases=['preserve_existing_groups']),
-        state=dict(choices=['present', 'absent'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )
 
     # Create a module for ourselves
@@ -135,7 +135,7 @@ def main():
     inventory_id = module.resolve_name_to_id('inventories', inventory)
 
     # Attempt to look up the object based on the provided name and inventory ID
-    group = module.get_one('groups', name_or_id=name, **{'data': {'inventory': inventory_id}})
+    group = module.get_one('groups', name_or_id=name, check_exists=(state == 'exists'), **{'data': {'inventory': inventory_id}})
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

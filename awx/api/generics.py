@@ -169,7 +169,7 @@ class APIView(views.APIView):
             self.__init_request_error__ = exc
         except UnsupportedMediaType as exc:
             exc.detail = _(
-                'You did not use correct Content-Type in your HTTP request. ' 'If you are using our REST API, the Content-Type must be application/json'
+                'You did not use correct Content-Type in your HTTP request. If you are using our REST API, the Content-Type must be application/json'
             )
             self.__init_request_error__ = exc
         return drf_request
@@ -522,14 +522,16 @@ class SubListAPIView(ParentMixin, ListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        sublist_qs = self.get_sublist_queryset(parent)
         if not self.filter_read_permission:
-            return optimize_queryset(sublist_qs)
-        qs = self.request.user.get_queryset(self.model).distinct()
-        return qs & sublist_qs
+            return optimize_queryset(self.get_sublist_queryset(parent))
+        qs = self.request.user.get_queryset(self.model)
+        if hasattr(self, 'parent_key'):
+            # This is vastly preferable for ReverseForeignKey relationships
+            return qs.filter(**{self.parent_key: parent})
+        return qs.distinct() & self.get_sublist_queryset(parent).distinct()
 
     def get_sublist_queryset(self, parent):
-        return getattrd(parent, self.relationship).distinct()
+        return getattrd(parent, self.relationship)
 
 
 class DestroyAPIView(generics.DestroyAPIView):
@@ -577,15 +579,6 @@ class SubListCreateAPIView(SubListAPIView, ListCreateAPIView):
         d = super(SubListCreateAPIView, self).get_description_context()
         d.update({'parent_key': getattr(self, 'parent_key', None)})
         return d
-
-    def get_queryset(self):
-        if hasattr(self, 'parent_key'):
-            # Prefer this filtering because ForeignKey allows us more assumptions
-            parent = self.get_parent_object()
-            self.check_parent_access(parent)
-            qs = self.request.user.get_queryset(self.model)
-            return qs.filter(**{self.parent_key: parent})
-        return super(SubListCreateAPIView, self).get_queryset()
 
     def create(self, request, *args, **kwargs):
         # If the object ID was not specified, it probably doesn't exist in the
