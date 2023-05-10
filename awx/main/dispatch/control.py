@@ -24,12 +24,11 @@ class Control(object):
         self.queuename = host or get_task_queuename()
 
     def status(self, *args, **kwargs):
-        r = redis.Redis.from_url(settings.BROKER_URL)
         if self.service == 'dispatcher':
-            stats = r.get(f'awx_{self.service}_statistics') or b''
-            return stats.decode('utf-8')
+            return self.control_with_reply('status', *args, **kwargs)
         else:
             workers = []
+            r = redis.Redis.from_url(settings.BROKER_URL)
             for key in r.keys('awx_callback_receiver_statistics_*'):
                 workers.append(r.get(key).decode('utf-8'))
             return '\n'.join(workers)
