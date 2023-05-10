@@ -91,7 +91,6 @@ EXAMPLES = '''
 '''
 
 from ..module_utils.controller_api import ControllerAPIModule
-import json
 
 
 def main():
@@ -116,15 +115,18 @@ def main():
     name = module.params.get('name')
     organization = module.params.get('organization')
     inventory = module.params.get('inventory')
-    optional_args['limit'] = module.params.get('limit')
     wait = module.params.get('wait')
     interval = module.params.get('interval')
     timeout = module.params.get('timeout')
 
-    # Special treatment of extra_vars parameter
-    extra_vars = module.params.get('extra_vars')
-    if extra_vars is not None:
-        optional_args['extra_vars'] = json.dumps(extra_vars)
+    for field_name in (
+        'limit',
+        'extra_vars',
+        'scm_branch',
+    ):
+        field_val = module.params.get(field_name)
+        if field_val is not None:
+            optional_args[field_name] = field_val
 
     # Create a datastructure to pass into our job launch
     post_data = {}

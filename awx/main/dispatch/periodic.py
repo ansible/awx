@@ -10,6 +10,7 @@ from django_guid import set_guid
 from django_guid.utils import generate_guid
 
 from awx.main.dispatch.worker import TaskWorker
+from awx.main.utils.db import set_connection_name
 
 logger = logging.getLogger('awx.main.dispatch.periodic')
 
@@ -21,6 +22,9 @@ class Scheduler(Scheduler):
         def run():
             ppid = os.getppid()
             logger.warning('periodic beat started')
+
+            set_connection_name('periodic')  # set application_name to distinguish from other dispatcher processes
+
             while True:
                 if os.getppid() != ppid:
                     # if the parent PID changes, this process has been orphaned

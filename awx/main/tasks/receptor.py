@@ -28,7 +28,7 @@ from awx.main.utils.common import (
 from awx.main.constants import MAX_ISOLATED_PATH_COLON_DELIMITER
 from awx.main.tasks.signals import signal_state, signal_callback, SignalExit
 from awx.main.models import Instance, InstanceLink, UnifiedJob
-from awx.main.dispatch import get_local_queuename
+from awx.main.dispatch import get_task_queuename
 from awx.main.dispatch.publish import task
 
 # Receptorctl
@@ -526,6 +526,10 @@ class AWXReceptorJob:
         pod_spec['spec']['containers'][0]['image'] = ee.image
         pod_spec['spec']['containers'][0]['args'] = ['ansible-runner', 'worker', '--private-data-dir=/runner']
 
+        if settings.AWX_RUNNER_KEEPALIVE_SECONDS:
+            pod_spec['spec']['containers'][0].setdefault('env', [])
+            pod_spec['spec']['containers'][0]['env'].append({'name': 'ANSIBLE_RUNNER_KEEPALIVE_SECONDS', 'value': str(settings.AWX_RUNNER_KEEPALIVE_SECONDS)})
+
         # Enforce EE Pull Policy
         pull_options = {"always": "Always", "missing": "IfNotPresent", "never": "Never"}
         if self.task and self.task.instance.execution_environment:
@@ -635,7 +639,7 @@ class AWXReceptorJob:
 #
 RECEPTOR_CONFIG_STARTER = (
     {'local-only': None},
-    {'log-level': 'debug'},
+    {'log-level': 'info'},
     {'node': {'firewallrules': [{'action': 'reject', 'tonode': settings.CLUSTER_HOST_ID, 'toservice': 'control'}]}},
     {'control-service': {'service': 'control', 'filename': '/var/run/receptor/receptor.sock', 'permissions': '0660'}},
     {'work-command': {'worktype': 'local', 'command': 'ansible-runner', 'params': 'worker', 'allowruntimeparams': True}},
@@ -664,6 +668,7 @@ RECEPTOR_CONFIG_STARTER = (
             'rootcas': '/etc/receptor/tls/ca/receptor-ca.crt',
             'cert': '/etc/receptor/tls/receptor.crt',
             'key': '/etc/receptor/tls/receptor.key',
+            'mintls13': False,
         }
     },
 )
@@ -708,7 +713,7 @@ def write_receptor_config():
     links.update(link_state=InstanceLink.States.ESTABLISHED)
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 def remove_deprovisioned_node(hostname):
     InstanceLink.objects.filter(source__hostname=hostname).update(link_state=InstanceLink.States.REMOVING)
     InstanceLink.objects.filter(target__hostname=hostname).update(link_state=InstanceLink.States.REMOVING)

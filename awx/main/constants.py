@@ -38,6 +38,8 @@ STANDARD_INVENTORY_UPDATE_ENV = {
     'ANSIBLE_INVENTORY_EXPORT': 'True',
     # Redirecting output to stderr allows JSON parsing to still work with -vvv
     'ANSIBLE_VERBOSE_TO_STDERR': 'True',
+    # if ansible-inventory --limit is used for an inventory import, unmatched should be a failure
+    'ANSIBLE_HOST_PATTERN_MISMATCH': 'error',
 }
 CAN_CANCEL = ('new', 'pending', 'waiting', 'running')
 ACTIVE_STATES = CAN_CANCEL
@@ -63,7 +65,7 @@ ENV_BLOCKLIST = frozenset(
         'INVENTORY_HOSTVARS',
         'AWX_HOST',
         'PROJECT_REVISION',
-        'SUPERVISOR_WEB_CONFIG_PATH',
+        'SUPERVISOR_CONFIG_PATH',
     )
 )
 
@@ -106,3 +108,9 @@ JOB_VARIABLE_PREFIXES = [
 ANSIBLE_RUNNER_NEEDS_UPDATE_MESSAGE = (
     '\u001b[31m \u001b[1m This can be caused if the version of ansible-runner in your execution environment is out of date.\u001b[0m'
 )
+
+# Values for setting SUBSCRIPTION_USAGE_MODEL
+SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS = 'unique_managed_hosts'
+
+# Shared prefetch to use for creating a queryset for the purpose of writing or saving facts
+HOST_FACTS_FIELDS = ('name', 'ansible_facts', 'ansible_facts_modified', 'modified', 'inventory_id')

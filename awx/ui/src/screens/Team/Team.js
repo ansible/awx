@@ -52,7 +52,7 @@ function Team({ setBreadcrumb }) {
       ),
       link: `/teams`,
       id: 99,
-      isBackButton: true,
+      persistentFilterKey: 'teams',
     },
     { name: t`Details`, link: `/teams/${id}/details`, id: 0 },
     { name: t`Access`, link: `/teams/${id}/access`, id: 1 },

@@ -23,7 +23,7 @@ function InventoryGroup({ setBreadcrumb, inventory }) {
   const [inventoryGroup, setInventoryGroup] = useState(null);
   const [contentLoading, setContentLoading] = useState(true);
   const [contentError, setContentError] = useState(null);
-  const { id: inventoryId, groupId } = useParams();
+  const { id: inventoryId, groupId, inventoryType } = useParams();
   const location = useLocation();
 
   useEffect(() => {
@@ -50,22 +50,22 @@ function InventoryGroup({ setBreadcrumb, inventory }) {
           {t`Back to Groups`}
         </>
       ),
-      link: `/inventories/inventory/${inventory.id}/groups`,
+      link: `/inventories/${inventoryType}/${inventoryId}/groups`,
       id: 99,
     },
     {
       name: t`Details`,
-      link: `/inventories/inventory/${inventory.id}/groups/${inventoryGroup?.id}/details`,
+      link: `/inventories/${inventoryType}/${inventoryId}/groups/${inventoryGroup?.id}/details`,
       id: 0,
     },
     {
       name: t`Related Groups`,
-      link: `/inventories/inventory/${inventory.id}/groups/${inventoryGroup?.id}/nested_groups`,
+      link: `/inventories/${inventoryType}/${inventoryId}/groups/${inventoryGroup?.id}/nested_groups`,
       id: 1,
     },
     {
       name: t`Hosts`,
-      link: `/inventories/inventory/${inventory.id}/groups/${inventoryGroup?.id}/nested_hosts`,
+      link: `/inventories/${inventoryType}/${inventoryId}/groups/${inventoryGroup?.id}/nested_hosts`,
       id: 2,
     },
   ];
@@ -105,32 +105,32 @@ function InventoryGroup({ setBreadcrumb, inventory }) {
       {showCardHeader && <RoutedTabs tabsArray={tabsArray} />}
       <Switch>
         <Redirect
-          from="/inventories/inventory/:id/groups/:groupId"
-          to="/inventories/inventory/:id/groups/:groupId/details"
+          from="/inventories/:inventoryType/:id/groups/:groupId"
+          to="/inventories/:inventoryType/:id/groups/:groupId/details"
           exact
         />
         {inventoryGroup && [
           <Route
             key="edit"
-            path="/inventories/inventory/:id/groups/:groupId/edit"
+            path="/inventories/:inventoryType/:id/groups/:groupId/edit"
           >
             <InventoryGroupEdit inventoryGroup={inventoryGroup} />
           </Route>,
           <Route
             key="details"
-            path="/inventories/inventory/:id/groups/:groupId/details"
+            path="/inventories/:inventoryType/:id/groups/:groupId/details"
           >
             <InventoryGroupDetail inventoryGroup={inventoryGroup} />
           </Route>,
           <Route
             key="hosts"
-            path="/inventories/inventory/:id/groups/:groupId/nested_hosts"
+            path="/inventories/:inventoryType/:id/groups/:groupId/nested_hosts"
           >
             <InventoryGroupHosts inventoryGroup={inventoryGroup} />
           </Route>,
           <Route
             key="relatedGroups"
-            path="/inventories/inventory/:id/groups/:groupId/nested_groups"
+            path="/inventories/:inventoryType/:id/groups/:groupId/nested_groups"
           >
             <InventoryRelatedGroups />
           </Route>,
@@ -138,7 +138,7 @@ function InventoryGroup({ setBreadcrumb, inventory }) {
         <Route key="not-found" path="*">
           <ContentError>
             {inventory && (
-              <Link to={`/inventories/inventory/${inventory.id}/details`}>
+              <Link to={`/inventories/:inventoryType/${inventory.id}/details`}>
                 {t`View Inventory Details`}
               </Link>
             )}

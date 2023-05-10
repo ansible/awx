@@ -269,7 +269,7 @@ class TowerSAMLIdentityProvider(BaseSAMLIdentityProvider):
             value = value[0]
         if conf_key in ('attr_first_name', 'attr_last_name', 'attr_username', 'attr_email') and value is None:
             logger.warning(
-                "Could not map user detail '%s' from SAML attribute '%s'; " "update SOCIAL_AUTH_SAML_ENABLED_IDPS['%s']['%s'] with the correct SAML attribute.",
+                "Could not map user detail '%s' from SAML attribute '%s'; update SOCIAL_AUTH_SAML_ENABLED_IDPS['%s']['%s'] with the correct SAML attribute.",
                 conf_key[5:],
                 key,
                 self.name,
@@ -385,10 +385,10 @@ def on_populate_user(sender, **kwargs):
             logger.warning('LDAP user {} has {} > max {} characters'.format(user.username, field, max_len))
 
     org_map = getattr(backend.settings, 'ORGANIZATION_MAP', {})
-    team_map = getattr(backend.settings, 'TEAM_MAP', {})
+    team_map_settings = getattr(backend.settings, 'TEAM_MAP', {})
     orgs_list = list(org_map.keys())
     team_map = {}
-    for team_name, team_opts in team_map.items():
+    for team_name, team_opts in team_map_settings.items():
         if not team_opts.get('organization', None):
             # You can't save the LDAP config in the UI w/o an org (or '' or null as the org) so if we somehow got this condition its an error
             logger.error("Team named {} in LDAP team map settings is invalid due to missing organization".format(team_name))
@@ -416,7 +416,7 @@ def on_populate_user(sender, **kwargs):
 
     # Compute in memory what the state is of the different LDAP teams
     desired_team_states = {}
-    for team_name, team_opts in team_map.items():
+    for team_name, team_opts in team_map_settings.items():
         if 'organization' not in team_opts:
             continue
         users_opts = team_opts.get('users', None)

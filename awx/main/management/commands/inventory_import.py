@@ -458,12 +458,19 @@ class Command(BaseCommand):
         # TODO: We disable variable overwrite here in case user-defined inventory variables get
         # mangled. But we still need to figure out a better way of processing multiple inventory
         # update variables mixing with each other.
-        all_obj = self.inventory
-        db_variables = all_obj.variables_dict
-        db_variables.update(self.all_group.variables)
-        if db_variables != all_obj.variables_dict:
-            all_obj.variables = json.dumps(db_variables)
-            all_obj.save(update_fields=['variables'])
+        # issue for this: https://github.com/ansible/awx/issues/11623
+
+        if self.inventory.kind == 'constructed' and self.inventory_source.overwrite_vars:
+            # NOTE: we had to add a exception case to not merge variables
+            # to make constructed inventory coherent
+            db_variables = self.all_group.variables
+        else:
+            db_variables = self.inventory.variables_dict
+            db_variables.update(self.all_group.variables)
+
+        if db_variables != self.inventory.variables_dict:
+            self.inventory.variables = json.dumps(db_variables)
+            self.inventory.save(update_fields=['variables'])
             logger.debug('Inventory variables updated from "all" group')
         else:
             logger.debug('Inventory variables unmodified')
@@ -522,16 +529,32 @@ class Command(BaseCommand):
     def _update_db_host_from_mem_host(self, db_host, mem_host):
         # Update host variables.
         db_variables = db_host.variables_dict
-        if self.overwrite_vars:
-            db_variables = mem_host.variables
-        else:
-            db_variables.update(mem_host.variables)
+        mem_variables = mem_host.variables
         update_fields = []
+
+        # Update host instance_id.
+        instance_id = self._get_instance_id(mem_variables)
+        if instance_id != db_host.instance_id:
+            old_instance_id = db_host.instance_id
+            db_host.instance_id = instance_id
+            update_fields.append('instance_id')
+
+        if self.inventory.kind == 'constructed':
+            # remote towervars so the constructed hosts do not have extra variables
+            for prefix in ('host', 'tower'):
+                for var in ('remote_{}_enabled', 'remote_{}_id'):
+                    mem_variables.pop(var.format(prefix), None)
+
+        if self.overwrite_vars:
+            db_variables = mem_variables
+        else:
+            db_variables.update(mem_variables)
+
         if db_variables != db_host.variables_dict:
             db_host.variables = json.dumps(db_variables)
             update_fields.append('variables')
         # Update host enabled flag.
-        enabled = self._get_enabled(mem_host.variables)
+        enabled = self._get_enabled(mem_variables)
         if enabled is not None and db_host.enabled != enabled:
             db_host.enabled = enabled
             update_fields.append('enabled')
@@ -540,12 +563,6 @@ class Command(BaseCommand):
             old_name = db_host.name
             db_host.name = mem_host.name
             update_fields.append('name')
-        # Update host instance_id.
-        instance_id = self._get_instance_id(mem_host.variables)
-        if instance_id != db_host.instance_id:
-            old_instance_id = db_host.instance_id
-            db_host.instance_id = instance_id
-            update_fields.append('instance_id')
         # Update host and display message(s) on what changed.
         if update_fields:
             db_host.save(update_fields=update_fields)
@@ -654,13 +671,19 @@ class Command(BaseCommand):
             mem_host = self.all_group.all_hosts[mem_host_name]
             import_vars = mem_host.variables
             host_desc = import_vars.pop('_awx_description', 'imported')
-            host_attrs = dict(variables=json.dumps(import_vars), description=host_desc)
+            host_attrs = dict(description=host_desc)
             enabled = self._get_enabled(mem_host.variables)
             if enabled is not None:
                 host_attrs['enabled'] = enabled
             if self.instance_id_var:
                 instance_id = self._get_instance_id(mem_host.variables)
                 host_attrs['instance_id'] = instance_id
+            if self.inventory.kind == 'constructed':
+                # remote towervars so the constructed hosts do not have extra variables
+                for prefix in ('host', 'tower'):
+                    for var in ('remote_{}_enabled', 'remote_{}_id'):
+                        import_vars.pop(var.format(prefix), None)
+            host_attrs['variables'] = json.dumps(import_vars)
             try:
                 sanitize_jinja(mem_host_name)
             except ValueError as e:
@@ -851,6 +874,7 @@ class Command(BaseCommand):
             logger.info('Updating inventory %d: %s' % (inventory.pk, inventory.name))
 
             # Create ad-hoc inventory source and inventory update objects
+            ee = get_default_execution_environment()
             with ignore_inventory_computed_fields():
                 source = Command.get_source_absolute_path(raw_source)
 
@@ -860,14 +884,22 @@ class Command(BaseCommand):
                     source_path=os.path.abspath(source),
                     overwrite=bool(options.get('overwrite', False)),
                     overwrite_vars=bool(options.get('overwrite_vars', False)),
+                    execution_environment=ee,
                 )
                 inventory_update = inventory_source.create_inventory_update(
-                    _eager_fields=dict(status='running', job_args=json.dumps(sys.argv), job_env=dict(os.environ.items()), job_cwd=os.getcwd())
+                    _eager_fields=dict(
+                        status='running', job_args=json.dumps(sys.argv), job_env=dict(os.environ.items()), job_cwd=os.getcwd(), execution_environment=ee
+                    )
                 )
 
-            data = AnsibleInventoryLoader(source=source, verbosity=verbosity).load()
+            try:
+                data = AnsibleInventoryLoader(source=source, verbosity=verbosity).load()
+                logger.debug('Finished loading from source: %s', source)
 
-            logger.debug('Finished loading from source: %s', source)
+            except SystemExit:
+                logger.debug("Error occurred while running ansible-inventory")
+                inventory_update.cancel()
+                sys.exit(1)
 
             status, tb, exc = 'error', '', None
             try:

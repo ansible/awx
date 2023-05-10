@@ -40,6 +40,7 @@ describe('<MiscAuthenticationDetail />', () => {
         SOCIAL_AUTH_ORGANIZATION_MAP: {},
         SOCIAL_AUTH_TEAM_MAP: {},
         SOCIAL_AUTH_USER_FIELDS: [],
+        SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL: false,
       },
     });
     await act(async () => {
@@ -79,6 +80,7 @@ describe('<MiscAuthenticationDetail />', () => {
     assertVariableDetail(wrapper, 'Social Auth Organization Map', '{}');
     assertVariableDetail(wrapper, 'Social Auth Team Map', '{}');
     assertVariableDetail(wrapper, 'Social Auth User Fields', '[]');
+    assertDetail(wrapper, 'Use Email address for usernames', 'Off');
     assertDetail(
       wrapper,
       'Allow External Users to Create OAuth2 Tokens',

@@ -2,6 +2,7 @@ receptor_user: awx
 receptor_group: awx
 receptor_verify: true
 receptor_tls: true
+receptor_mintls13: false
 receptor_work_commands:
   ansible-runner:
     command: ansible-runner

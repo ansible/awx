@@ -54,6 +54,51 @@
         that:
           - "result is changed"
 
+    - name: Add credential Input Source with exists
+      credential_input_source:
+        input_field_name: password
+        target_credential: "{{ target_cred_result.id }}"
+        source_credential: "{{ src_cred_result.id }}"
+        metadata:
+          object_query: "Safe=MY_SAFE;Object=AWX-user"
+          object_query_format: "Exact"
+        state: exists
+      register: result
+
+    - assert:
+        that:
+          - "result is not changed"
+
+    - name: Delete credential Input Source
+      credential_input_source:
+        input_field_name: password
+        target_credential: "{{ target_cred_result.id }}"
+        source_credential: "{{ src_cred_result.id }}"
+        metadata:
+          object_query: "Safe=MY_SAFE;Object=AWX-user"
+          object_query_format: "Exact"
+        state: absent
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Add credential Input Source with exists
+      credential_input_source:
+        input_field_name: password
+        target_credential: "{{ target_cred_result.id }}"
+        source_credential: "{{ src_cred_result.id }}"
+        metadata:
+          object_query: "Safe=MY_SAFE;Object=AWX-user"
+          object_query_format: "Exact"
+        state: exists
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
     - name: Add Second credential Lookup
       credential:
         description: Credential for Testing Source Change

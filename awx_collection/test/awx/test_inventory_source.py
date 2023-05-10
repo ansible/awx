@@ -112,6 +112,7 @@ def test_falsy_value(run_module, admin_user, base_inventory):
 # credential		?	?	o	o	r	r		r	r		r		r	r	o
 # source_project	?	?	r	-	-	-		-	-		-		-	-	-
 # source_path		?	?	r	-	-	-		-	-		-		-	-	-
+# scm_branch		?	?	r	-	-	-		-	-		-		-	-	-
 # verbosity			?	?	o	o	o	o		o	o		o		o	o	o
 # overwrite			?	?	o	o	o	o		o	o		o		o	o	o
 # overwrite_vars	?	?	o	o	o	o		o	o		o		o	o	o

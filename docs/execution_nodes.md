@@ -76,3 +76,28 @@ Wait a few minutes for the periodic AWX task to do a health check against the ne
 ## Removing instances
 
 You can remove an instance by clicking "Remove" in the Instances page, or by setting the instance `node_state` to "deprovisioning" via the API.
+
+## Troubleshooting
+
+### Fact cache not working
+
+Make sure the system timezone on the execution node matches `settings.TIME_ZONE` (default is 'UTC') on AWX.
+Fact caching relies on comparing modified times of artifact files, and these modified times are not timezone-aware. Therefore, it is critical that the timezones of the execution nodes match AWX's timezone setting.
+
+To set the system timezone to UTC
+
+`ln -s /usr/share/zoneinfo/Etc/UTC /etc/localtime`
+
+### Permission denied errors
+
+Jobs may fail with the following error
+```
+"msg":"exec container process `/usr/local/bin/entrypoint`: Permission denied"
+```
+or similar
+
+For RHEL based machines, this could due to SELinux that is enabled on the system.
+
+You can pass these `extra_settings` container options to override SELinux protections.
+
+`DEFAULT_CONTAINER_RUN_OPTIONS = ['--network', 'slirp4netns:enable_ipv6=true', '--security-opt', 'label=disable']`

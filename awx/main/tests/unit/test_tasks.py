@@ -371,7 +371,7 @@ class TestExtraVarSanitation(TestJobExecution):
     # are deemed trustable, because they can only be added by users w/ enough
     # privilege to add/modify a Job Template)
 
-    UNSAFE = '{{ lookup(' 'pipe' ',' 'ls -la' ') }}'
+    UNSAFE = "{{ lookup('pipe', 'ls -la') }}"
 
     def test_vars_unsafe_by_default(self, job, private_data_dir, mock_me):
         job.created_by = User(pk=123, username='angry-spud')
@@ -2008,7 +2008,7 @@ def test_project_update_no_ee(mock_me):
     with pytest.raises(RuntimeError) as e:
         task.build_env(job, {})
 
-    assert 'The project could not sync because there is no Execution Environment' in str(e.value)
+    assert 'The ProjectUpdate could not run because there is no Execution Environment' in str(e.value)
 
 
 @pytest.mark.parametrize(
