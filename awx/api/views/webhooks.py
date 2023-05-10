@@ -114,7 +114,7 @@ class WebhookReceiverBase(APIView):
         # Ensure that the full contents of the request are captured for multiple uses.
         request.body
 
-        logger.debug("headers: {}\n" "data: {}\n".format(request.headers, request.data))
+        logger.debug("headers: {}\ndata: {}\n".format(request.headers, request.data))
         obj = self.get_object()
         self.check_signature(obj)
 

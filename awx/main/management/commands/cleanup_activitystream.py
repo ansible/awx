@@ -23,7 +23,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--days', dest='days', type=int, default=90, metavar='N', help='Remove activity stream events more than N days old')
-        parser.add_argument('--dry-run', dest='dry_run', action='store_true', default=False, help='Dry run mode (show items that would ' 'be removed)')
+        parser.add_argument('--dry-run', dest='dry_run', action='store_true', default=False, help='Dry run mode (show items that would be removed)')
 
     def init_logging(self):
         log_levels = dict(enumerate([logging.ERROR, logging.INFO, logging.DEBUG, 0]))

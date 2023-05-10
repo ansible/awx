@@ -565,7 +565,7 @@ class LaunchConfigCredentialsBase(SubListAttachDetachAPIView):
         if self.relationship not in ask_mapping:
             return {"msg": _("Related template cannot accept {} on launch.").format(self.relationship)}
         elif sub.passwords_needed:
-            return {"msg": _("Credential that requires user input on launch " "cannot be used in saved launch configuration.")}
+            return {"msg": _("Credential that requires user input on launch cannot be used in saved launch configuration.")}
 
         ask_field_name = ask_mapping[self.relationship]
 
@@ -2501,7 +2501,7 @@ class JobTemplateSurveySpec(GenericAPIView):
                     return Response(
                         dict(
                             error=_(
-                                "$encrypted$ is a reserved keyword for password question defaults, " "survey question {idx} is type {survey_item[type]}."
+                                "$encrypted$ is a reserved keyword for password question defaults, survey question {idx} is type {survey_item[type]}."
                             ).format(**context)
                         ),
                         status=status.HTTP_400_BAD_REQUEST,
@@ -4056,7 +4056,7 @@ class UnifiedJobStdout(RetrieveAPIView):
                 return super(UnifiedJobStdout, self).retrieve(request, *args, **kwargs)
         except models.StdoutMaxBytesExceeded as e:
             response_message = _(
-                "Standard Output too large to display ({text_size} bytes), " "only download supported for sizes over {supported_size} bytes."
+                "Standard Output too large to display ({text_size} bytes), only download supported for sizes over {supported_size} bytes."
             ).format(text_size=e.total, supported_size=e.supported)
             if request.accepted_renderer.format == 'json':
                 return Response({'range': {'start': 0, 'end': 1, 'absolute_end': 1}, 'content': response_message})

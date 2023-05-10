@@ -800,7 +800,7 @@ class CredentialTypeInjectorField(JSONSchemaField):
     def validate_env_var_allowed(self, env_var):
         if env_var.startswith('ANSIBLE_'):
             raise django_exceptions.ValidationError(
-                _('Environment variable {} may affect Ansible configuration so its ' 'use is not allowed in credentials.').format(env_var),
+                _('Environment variable {} may affect Ansible configuration so its use is not allowed in credentials.').format(env_var),
                 code='invalid',
                 params={'value': env_var},
             )
