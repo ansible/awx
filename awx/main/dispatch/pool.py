@@ -5,8 +5,10 @@ import signal
 import sys
 import time
 import traceback
+import json
 from datetime import datetime
 from uuid import uuid4
+from collections import deque
 
 import collections
 from multiprocessing import Process
@@ -72,6 +74,7 @@ class PoolWorker(object):
         self.messages_finished = 0
         self.managed_tasks = collections.OrderedDict()
         self.finished = MPQueue(queue_size) if self.track_managed_tasks else NoOpResultQueue()
+        self.finished_record = deque(maxlen=10)  # only used for debugging information
         self.queue = MPQueue(queue_size)
         self.process = Process(target=target, args=(self.queue, self.finished) + args)
         self.process.daemon = True
@@ -127,23 +130,51 @@ class PoolWorker(object):
         finished = []
         for _ in range(self.finished.qsize()):
             try:
-                finished.append(self.finished.get(block=False))
+                finished.append(json.loads(self.finished.get(block=False)))
             except QueueEmpty:
                 break  # qsize is not always _totally_ up to date
 
         # if any tasks were finished, removed them from the managed tasks for
         # this worker
-        for uuid in finished:
+        for finished_data in finished:
+            uuid = finished_data['uuid']
             try:
+                # Manage timing data for performance and troubleshooting
+                task_data = self.managed_tasks[uuid]
+                task_data.update(finished_data)
+                if ('time_ack' in task_data) and ('time_pub' in task_data) and ('time_finish' in task_data):
+                    # NOTE: this code may run a long time after the task has finished
+                    # because the finished queue is only checked as needed
+                    time_pub = task_data['time_pub']
+                    ack_delta = task_data['time_ack'] - time_pub
+                    task = task_data.get('task', 'unknown')
+
+                    # record data to show in --history
+                    self.finished_record.append(task_data)
+
+                    # If task too a very long time to process, escalate log
+                    logger_method = logger.debug if ack_delta < 5.0 else logger.info
+
+                    logger_method(f'Concluded {uuid} {task}, {self.display_timing(task_data)}')
+                else:
+                    logger.warning(f'Unexpected missing timing data for task uuid={uuid}')
+
+                del task_data  # for garbage collection
+
                 del self.managed_tasks[uuid]
                 self.messages_finished += 1
             except KeyError:
-                # ansible _sometimes_ appears to send events w/ duplicate UUIDs;
-                # UUIDs for ansible events are *not* actually globally unique
-                # when this occurs, it's _fine_ to ignore this KeyError because
-                # the purpose of self.managed_tasks is to just track internal
-                # state of which events are *currently* being processed.
+                # this should never happen with an internally generated UUID
+                # but multiple tasks could be submitted with duplicate UUIDs
                 logger.warning('Event UUID {} appears to be have been duplicated.'.format(uuid))
+
+    @staticmethod
+    def display_timing(task):
+        time_pub = task['time_pub']
+        time_pub_display = datetime.fromtimestamp(time_pub).strftime('%H:%M:%S UTC')
+        ack_delta = task['time_ack'] - time_pub
+        run_delta = task['time_finish'] - task['time_ack']
+        return f'pub={time_pub_display} ack={ack_delta:.4f}s run={run_delta:.4f}s'
 
     @property
     def current_task(self):
@@ -225,6 +256,7 @@ class WorkerPool(object):
         self.min_workers = min_workers or settings.JOB_EVENT_WORKERS
         self.queue_size = queue_size or settings.JOB_EVENT_MAX_QUEUE_SIZE
         self.workers = []
+        self.started_time = time.time()
 
     def __len__(self):
         return len(self.workers)
@@ -252,8 +284,26 @@ class WorkerPool(object):
             logger.debug('scaling up worker pid:{}'.format(worker.pid))
         return idx, worker
 
-    def debug(self, *args, **kwargs):
+    def debug(self, show_history=False):
+        for worker in self.workers:
+            worker.calculate_managed_tasks()
+        task_tmpl = (
+            '\n     - {% if "time_finish" in task %}finished {% elif loop.index0 == 0 %}running {% if "age" in task %}for: {{ "%.1f" % task["age"] }}s {% endif %}{% else %}queued {% endif %}'
+            '{{ task["uuid"] }} '
+            '{% if "task" in task %}'
+            '{{ task["task"].rsplit(".", 1)[-1] }}'
+            # don't print kwargs, they often contain launch-time secrets
+            '(*{{ task.get("args", []) }})'
+            '{% if "time_finish" in task %}'
+            ' {{ w.display_timing(task) }}'
+            '{% endif %}'
+            '{% endif %}'
+        )
+        worker_extra = ''
+        if show_history:
+            worker_extra = ''.join(['{% for task in w.finished_record %}', task_tmpl, '{% endfor %}'])
         tmpl = Template(
+            'Dispatcher started at: {{ st }} \n'
             'Recorded at: {{ dt }} \n'
             '{{ pool.name }}[pid:{{ pool.pid }}] workers total={{ workers|length }} {{ meta }} \n'
             '{% for w in workers %}'
@@ -263,22 +313,19 @@ class WorkerPool(object):
             ' qsize={{ w.managed_tasks|length }}'
             ' rss={{ w.mb }}MB'
             '{% for task in w.managed_tasks.values() %}'
-            '\n     - {% if loop.index0 == 0 %}running {% if "age" in task %}for: {{ "%.1f" % task["age"] }}s {% endif %}{% else %}queued {% endif %}'
-            '{{ task["uuid"] }} '
-            '{% if "task" in task %}'
-            '{{ task["task"].rsplit(".", 1)[-1] }}'
-            # don't print kwargs, they often contain launch-time secrets
-            '(*{{ task.get("args", []) }})'
-            '{% endif %}'
+            f'{task_tmpl}'
             '{% endfor %}'
             '{% if not w.managed_tasks|length %}'
             ' [IDLE]'
+            f'{worker_extra}'
             '{% endif %}'
             '\n'
             '{% endfor %}'
         )
-        now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
-        return tmpl.render(pool=self, workers=self.workers, meta=self.debug_meta, dt=now)
+        datetime_fmt = '%Y-%m-%d %H:%M:%S UTC'
+        now = datetime.utcnow().strftime(datetime_fmt)
+        st = datetime.fromtimestamp(self.started_time).strftime(datetime_fmt)
+        return tmpl.render(pool=self, workers=self.workers, meta=self.debug_meta, dt=now, st=st)
 
     def write(self, preferred_queue, body):
         queue_order = sorted(range(len(self.workers)), key=lambda x: -1 if x == preferred_queue else x)

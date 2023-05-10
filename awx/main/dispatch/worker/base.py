@@ -63,10 +63,12 @@ class AWXConsumerBase(object):
     def control(self, body):
         logger.warning(f'Received control signal:\n{body}')
         control = body.get('control')
-        if control in ('status', 'running', 'cancel'):
+        if control in ('status', 'history', 'running', 'cancel'):
             reply_queue = body['reply_to']
             if control == 'status':
                 msg = '\n'.join([self.listening_on, self.pool.debug()])
+            elif control == 'history':
+                msg = '\n'.join([self.listening_on, self.pool.debug(show_history=True)])
             elif control == 'running':
                 msg = []
                 for worker in self.pool.workers:
@@ -93,9 +95,6 @@ class AWXConsumerBase(object):
             logger.error('unrecognized control message: {}'.format(control))
 
     def process_task(self, body):
-        if isinstance(body, dict):
-            body['time_ack'] = time.time()
-
         if 'control' in body:
             try:
                 return self.control(body)
@@ -235,18 +234,23 @@ class BaseWorker(object):
             except Exception as e:
                 logger.error("Exception on worker {}, restarting: ".format(idx) + str(e))
                 continue
+            return_data = {}
             try:
                 for conn in db.connections.all():
                     # If the database connection has a hiccup during the prior message, close it
                     # so we can establish a new connection
                     conn.close_if_unusable_or_obsolete()
+                # mark task start time for performance data
+                if isinstance(body, dict):
+                    return_data['time_ack'] = time.time()
                 self.perform_work(body, *args)
             except Exception:
                 logger.exception(f'Unhandled exception in perform_work in worker pid={os.getpid()}')
             finally:
                 if 'uuid' in body:
-                    uuid = body['uuid']
-                    finished.put(uuid)
+                    return_data['time_finish'] = time.time()
+                    return_data['uuid'] = body['uuid']
+                    finished.put(json.dumps(return_data))
         logger.debug('worker exiting gracefully pid:{}'.format(os.getpid()))
 
     def perform_work(self, body):
