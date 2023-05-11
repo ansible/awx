@@ -348,7 +348,22 @@ function InstanceList({ instanceGroup }) {
             { key: 'node_type', name: t`Node Type` },
           ]}
           modalNote={
-            <b>{t`Note: Manually associated instances may be automatically disassociated from an instance group if the instance is managed by policy rules.`}</b>
+            <b>
+              <Trans>
+                <b>
+                  Note: Manually associated instances may be automatically
+                  disassociated from an instance group if the instance is
+                  managed by{' '}
+                  <a
+                    href={policyRulesDocsLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    policy rules.
+                  </a>
+                </b>
+              </Trans>
+            </b>
           }
         />
       )}
