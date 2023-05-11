@@ -58,7 +58,7 @@ class ActionModule(ActionBase):
 
             if res.status_code != 200:
                 result['failed'] = True
-                result['msg'] = 'Expected {} to return a status code of 200 but returned status ' 'code "{}" instead with content "{}".'.format(
+                result['msg'] = 'Expected {} to return a status code of 200 but returned status code "{}" instead with content "{}".'.format(
                     url, res.status_code, res.content
                 )
                 return result
@@ -87,7 +87,7 @@ class ActionModule(ActionBase):
                     continue
                 elif res.status_code != 200:
                     result['failed'] = True
-                    result['msg'] = 'Expected {} to return a status code of 200 but returned status ' 'code "{}" instead with content "{}".'.format(
+                    result['msg'] = 'Expected {} to return a status code of 200 but returned status code "{}" instead with content "{}".'.format(
                         playbook_url, res.status_code, res.content
                     )
                     return result

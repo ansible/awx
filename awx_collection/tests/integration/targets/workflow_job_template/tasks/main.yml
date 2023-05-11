@@ -254,6 +254,65 @@
         that:
           - "result is changed"
 
+    - name: Create a workflow job template with exists
+      workflow_job_template:
+        name: "{{ wfjt_name }}"
+        organization: Default
+        inventory: Demo Inventory
+        extra_vars: {'foo': 'bar', 'another-foo': {'barz': 'bar2'}}
+        labels:
+          - "{{ lab1 }}"
+        ask_inventory_on_launch: true
+        ask_scm_branch_on_launch: true
+        ask_limit_on_launch: true
+        ask_tags_on_launch: true
+        ask_variables_on_launch: true
+        state: exists
+      register: result
+
+    - assert:
+        that:
+          - "result is not changed"
+
+    - name: Delete a workflow job template
+      workflow_job_template:
+        name: "{{ wfjt_name }}"
+        organization: Default
+        inventory: Demo Inventory
+        extra_vars: {'foo': 'bar', 'another-foo': {'barz': 'bar2'}}
+        labels:
+          - "{{ lab1 }}"
+        ask_inventory_on_launch: true
+        ask_scm_branch_on_launch: true
+        ask_limit_on_launch: true
+        ask_tags_on_launch: true
+        ask_variables_on_launch: true
+        state: absent
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Create a workflow job template with exists
+      workflow_job_template:
+        name: "{{ wfjt_name }}"
+        organization: Default
+        inventory: Demo Inventory
+        extra_vars: {'foo': 'bar', 'another-foo': {'barz': 'bar2'}}
+        # We don't try with the label here because after we delete the first WFJT the label is delete with it because it has no references
+        ask_inventory_on_launch: true
+        ask_scm_branch_on_launch: true
+        ask_limit_on_launch: true
+        ask_tags_on_launch: true
+        ask_variables_on_launch: true
+        state: exists
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
     - name: Create a workflow job template with bad label
       workflow_job_template:
         name: "{{ wfjt_name }}"

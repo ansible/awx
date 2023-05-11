@@ -118,7 +118,7 @@ options:
       description:
         - Desired state of the resource.
       default: "present"
-      choices: ["present", "absent"]
+      choices: ["present", "absent", "exists"]
       type: str
     notification_templates_started:
       description:
@@ -192,7 +192,7 @@ def main():
         notification_templates_started=dict(type="list", elements='str'),
         notification_templates_success=dict(type="list", elements='str'),
         notification_templates_error=dict(type="list", elements='str'),
-        state=dict(choices=['present', 'absent'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )
 
     # Create a module for ourselves
@@ -219,6 +219,7 @@ def main():
     inventory_source_object = module.get_one(
         'inventory_sources',
         name_or_id=name,
+        check_exists=(state == 'exists'),
         **{
             'data': {
                 'inventory': inventory_object['id'],

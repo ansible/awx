@@ -106,28 +106,28 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
     has_active_failures = models.BooleanField(
         default=False,
         editable=False,
-        help_text=_('This field is deprecated and will be removed in a future release. ' 'Flag indicating whether any hosts in this inventory have failed.'),
+        help_text=_('This field is deprecated and will be removed in a future release. Flag indicating whether any hosts in this inventory have failed.'),
     )
     total_hosts = models.PositiveIntegerField(
         default=0,
         editable=False,
-        help_text=_('This field is deprecated and will be removed in a future release. ' 'Total number of hosts in this inventory.'),
+        help_text=_('This field is deprecated and will be removed in a future release. Total number of hosts in this inventory.'),
     )
     hosts_with_active_failures = models.PositiveIntegerField(
         default=0,
         editable=False,
-        help_text=_('This field is deprecated and will be removed in a future release. ' 'Number of hosts in this inventory with active failures.'),
+        help_text=_('This field is deprecated and will be removed in a future release. Number of hosts in this inventory with active failures.'),
     )
     total_groups = models.PositiveIntegerField(
         default=0,
         editable=False,
-        help_text=_('This field is deprecated and will be removed in a future release. ' 'Total number of groups in this inventory.'),
+        help_text=_('This field is deprecated and will be removed in a future release. Total number of groups in this inventory.'),
     )
     has_inventory_sources = models.BooleanField(
         default=False,
         editable=False,
         help_text=_(
-            'This field is deprecated and will be removed in a future release. ' 'Flag indicating whether this inventory has any external inventory sources.'
+            'This field is deprecated and will be removed in a future release. Flag indicating whether this inventory has any external inventory sources.'
         ),
     )
     total_inventory_sources = models.PositiveIntegerField(
@@ -424,7 +424,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
             for t in tasks:
                 t.task_impact = t._get_task_impact()
             UnifiedJob.objects.bulk_update(tasks, ['task_impact'])
-        logger.debug("Finished updating inventory computed fields, pk={0}, in " "{1:.3f} seconds".format(self.pk, time.time() - start_time))
+        logger.debug("Finished updating inventory computed fields, pk={0}, in {1:.3f} seconds".format(self.pk, time.time() - start_time))
 
     def websocket_emit_status(self, status):
         connection.on_commit(
@@ -1055,16 +1055,16 @@ class InventorySourceOptions(BaseModel):
             # the actual inventory source being used (Amazon requires Amazon
             # credentials; Rackspace requires Rackspace credentials; etc...)
             if source.replace('ec2', 'aws') != cred.kind:
-                return _('Cloud-based inventory sources (such as %s) require ' 'credentials for the matching cloud service.') % source
+                return _('Cloud-based inventory sources (such as %s) require credentials for the matching cloud service.') % source
         # Allow an EC2 source to omit the credential.  If Tower is running on
         # an EC2 instance with an IAM Role assigned, boto will use credentials
         # from the instance metadata instead of those explicitly provided.
         elif source in CLOUD_PROVIDERS and source != 'ec2':
             return _('Credential is required for a cloud source.')
         elif source == 'custom' and cred and cred.credential_type.kind in ('scm', 'ssh', 'insights', 'vault'):
-            return _('Credentials of type machine, source control, insights and vault are ' 'disallowed for custom inventory sources.')
+            return _('Credentials of type machine, source control, insights and vault are disallowed for custom inventory sources.')
         elif source == 'scm' and cred and cred.credential_type.kind in ('insights', 'vault'):
-            return _('Credentials of type insights and vault are ' 'disallowed for scm inventory sources.')
+            return _('Credentials of type insights and vault are disallowed for scm inventory sources.')
         return None
 
     def get_cloud_credential(self):

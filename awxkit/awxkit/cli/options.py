@@ -55,7 +55,7 @@ def pk_or_name(v2, model_name, value, page=None):
             return int(results.results[0].id)
         if results.count > 1:
             raise argparse.ArgumentTypeError(
-                'Multiple {0} exist with that {1}. ' 'To look up an ID, run:\n' 'awx {0} list --{1} "{2}" -f human'.format(model_name, identity, value)
+                'Multiple {0} exist with that {1}. To look up an ID, run:\nawx {0} list --{1} "{2}" -f human'.format(model_name, identity, value)
             )
         raise argparse.ArgumentTypeError('Could not find any {0} with that {1}.'.format(model_name, identity))
 
@@ -119,7 +119,7 @@ class ResourceOptionsParser(object):
                     '--all',
                     dest='all_pages',
                     action='store_true',
-                    help=('fetch all pages of content from the API when ' 'returning results (instead of just the first page)'),
+                    help=('fetch all pages of content from the API when returning results (instead of just the first page)'),
                 )
                 parser.add_argument(
                     '--order_by',

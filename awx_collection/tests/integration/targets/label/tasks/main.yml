@@ -13,6 +13,22 @@
     name: "{{ label_name }}"
     organization: Default
     state: present
+  register: results
+
+- assert:
+    that:
+      - "results is changed"
+
+- name: Create a Label with exists
+  label:
+    name: "{{ label_name }}"
+    organization: Default
+    state: exists
+  register: results
+
+- assert:
+    that:
+      - "results is not changed"
 
 - name: Check module fails with correct msg
   label:

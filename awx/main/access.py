@@ -2234,7 +2234,7 @@ class WorkflowJobAccess(BaseAccess):
             if not node_access.can_add({'reference_obj': node}):
                 wj_add_perm = False
         if not wj_add_perm and self.save_messages:
-            self.messages['workflow_job_template'] = _('You do not have permission to the workflow job ' 'resources required for relaunch.')
+            self.messages['workflow_job_template'] = _('You do not have permission to the workflow job resources required for relaunch.')
         return wj_add_perm
 
     def can_cancel(self, obj):
