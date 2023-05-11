@@ -4,7 +4,6 @@ import random
 import signal
 import sys
 import time
-import traceback
 from datetime import datetime
 from uuid import uuid4
 
@@ -80,16 +79,24 @@ class PoolWorker(object):
         self.process.start()
 
     def put(self, body):
-        uuid = '?'
-        if isinstance(body, dict):
-            if not body.get('uuid'):
-                body['uuid'] = str(uuid4())
-            uuid = body['uuid']
-        if self.track_managed_tasks:
-            self.managed_tasks[uuid] = body
-        self.queue.put(body, block=True, timeout=5)
-        self.messages_sent += 1
-        self.calculate_managed_tasks()
+        """Returns True/False based on whether put was successful"""
+        try:
+            self.queue.put(body, block=True, timeout=5)
+        except QueueFull:
+            logger.warning(f"Queue for worker pid={self.pid} is full!")
+        except Exception:
+            logger.exception(f"Could not write to queue worker pid={self.pid}")
+        else:
+            self.messages_sent += 1
+            uuid = '?'
+            if isinstance(body, dict):
+                if not body.get('uuid'):
+                    body['uuid'] = str(uuid4())
+                uuid = body['uuid']
+            if self.track_managed_tasks:
+                self.managed_tasks[uuid] = body
+            return True
+        return False
 
     def quit(self):
         """
@@ -122,6 +129,9 @@ class PoolWorker(object):
 
     def calculate_managed_tasks(self):
         if not self.track_managed_tasks:
+            return
+        # optimization: if there are no active tasks then do not bother checking the queue
+        if not self.managed_tasks:
             return
         # look to see if any tasks were finished
         finished = []
@@ -281,18 +291,12 @@ class WorkerPool(object):
         return tmpl.render(pool=self, workers=self.workers, meta=self.debug_meta, dt=now)
 
     def write(self, preferred_queue, body):
+        """NOTE: not used by dispatcher and no longer used by callback receiver"""
         queue_order = sorted(range(len(self.workers)), key=lambda x: -1 if x == preferred_queue else x)
         write_attempt_order = []
         for queue_actual in queue_order:
-            try:
-                self.workers[queue_actual].put(body)
+            if self.workers[queue_actual].put(body):
                 return queue_actual
-            except QueueFull:
-                pass
-            except Exception:
-                tb = traceback.format_exc()
-                logger.warning("could not write to queue %s" % preferred_queue)
-                logger.warning("detail: {}".format(tb))
             write_attempt_order.append(preferred_queue)
         logger.error("could not write payload to any queue, attempted order: {}".format(write_attempt_order))
         return None
@@ -340,16 +344,8 @@ class AutoscalePool(WorkerPool):
         self.task_manager_timeout = settings.TASK_MANAGER_TIMEOUT + settings.TASK_MANAGER_TIMEOUT_GRACE_PERIOD
 
     @property
-    def should_grow(self):
-        if len(self.workers) < self.min_workers:
-            # If we don't have at least min_workers, add more
-            return True
-        # If every worker is busy doing something, add more
-        return all([w.busy for w in self.workers])
-
-    @property
     def full(self):
-        return len(self.workers) == self.max_workers
+        return len(self.workers) >= self.max_workers
 
     @property
     def debug_meta(self):
@@ -440,6 +436,7 @@ class AutoscalePool(WorkerPool):
         if self.full:
             # if we can't spawn more workers, just toss this message into a
             # random worker's backlog
+            logger.warning(f'Workers maxed, queuing task, load: {sum(len(w.managed_tasks) for w in self.workers)} / {len(self.workers)}')
             idx = random.choice(range(len(self.workers)))
             return idx, self.workers[idx]
         else:
@@ -451,8 +448,6 @@ class AutoscalePool(WorkerPool):
         try:
             if isinstance(body, dict) and body.get('bind_kwargs'):
                 self.add_bind_kwargs(body)
-            if self.should_grow:
-                self.up()
             # we don't care about "preferred queue" round robin distribution, just
             # find the first non-busy worker and claim it
             workers = self.workers[:]
@@ -462,11 +457,9 @@ class AutoscalePool(WorkerPool):
                     w.put(body)
                     break
             else:
-                task_name = 'unknown'
-                if isinstance(body, dict):
-                    task_name = body.get('task')
-                logger.warning(f'Workers maxed, queuing {task_name}, load: {sum(len(w.managed_tasks) for w in self.workers)} / {len(self.workers)}')
-                return super(AutoscalePool, self).write(preferred_queue, body)
+                # create new worker (if possible) and submit to that worker
+                idx, w = self.up()
+                w.put(body)
         except Exception:
             for conn in connections.all():
                 # If the database connection has a hiccup, re-establish a new

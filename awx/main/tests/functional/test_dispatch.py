@@ -182,7 +182,7 @@ class TestAutoScaling:
 
         # wait for the subprocesses to start working on their tasks and be marked busy
         time.sleep(1)
-        assert self.pool.should_grow
+        assert len(self.pool.workers) == self.pool.max_workers
 
         # write a third message, expect a new worker to spawn because all
         # workers are busy
@@ -242,7 +242,6 @@ class TestAutoScaling:
 
         # start with two workers, kill one of them
         assert len(self.pool) == 2
-        assert not self.pool.should_grow
         alive_pid = self.pool.workers[1].pid
         self.pool.workers[0].process.kill()
         self.pool.workers[0].process.join()  # waits for process to full terminate
