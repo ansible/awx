@@ -6,7 +6,7 @@ asyncpg
 azure-keyvault==1.1.0  # see UPGRADE BLOCKERs
 channels
 channels-redis==3.4.1  # see UPGRADE BLOCKERs
-cryptography
+cryptography>=39.0.1 ## https://github.com/ansible/awx/security/dependabot/90
 Cython<3 # Since the bump to PyYAML 5.4.1 this is now a mandatory dep
 daphne
 distro
