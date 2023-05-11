@@ -26,6 +26,7 @@ class Scheduler(Scheduler):
             set_connection_name('periodic')  # set application_name to distinguish from other dispatcher processes
 
             while True:
+                loop_start = time.time()
                 if os.getppid() != ppid:
                     # if the parent PID changes, this process has been orphaned
                     # via e.g., segfault or sigkill, we should exit too
@@ -38,10 +39,21 @@ class Scheduler(Scheduler):
                         # connection
                         conn.close_if_unusable_or_obsolete()
                     set_guid(generate_guid())
-                    self.run_pending()
+
+                    # same logic as run_pending but split up to give spacing between jobs
+                    # when more than 1 job is available to run now, put spacing between them
+                    # this is to spread out pressure on dispatcher worker pool,
+                    # avoiding need for excess reserve workers
+                    runnable_jobs = sorted(job for job in self.jobs if job.should_run)
+                    for job in runnable_jobs[:-1]:
+                        self._run_job(job)
+                        time.sleep(0.3)
+                    if runnable_jobs:
+                        self._run_job(runnable_jobs[-1])
+
                 except Exception:
                     logger.exception('encountered an error while scheduling periodic tasks')
-                time.sleep(idle_seconds)
+                time.sleep(idle_seconds - (time.time() - loop_start))
 
         process = Process(target=run)
         process.daemon = True
