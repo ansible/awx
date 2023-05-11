@@ -11091,11 +11091,11 @@ msgstr "{0, plural, one {You do not have permission to cancel the following job:
 
 #: components/Schedule/ScheduleDetail/FrequencyDetails.js:143
 msgid "{0, selectordinal, one {The first {dayOfWeek}} two {The second {dayOfWeek}} =3 {The third {dayOfWeek}} =4 {The fourth {dayOfWeek}} =5 {The fifth {dayOfWeek}}}"
-msgstr "{0, selectordinal, one {The first {dayOfWeek}} twee {The second {dayOfWeek}} =3 {The third {dayOfWeek}} =4 {The fourth {dayOfWeek}} =5 {The fifth {dayOfWeek}}}"
+msgstr "{0, selectordinal, one {The first {dayOfWeek}} two {The second {dayOfWeek}} =3 {The third {dayOfWeek}} =4 {The fourth {dayOfWeek}} =5 {The fifth {dayOfWeek}}}"
 
 #: components/Schedule/ScheduleDetail/FrequencyDetails.js:202
 msgid "{0, selectordinal, one {The first {weekday} of {month}} two {The second {weekday} of {month}} =3 {The third {weekday} of {month}} =4 {The fourth {weekday} of {month}} =5 {The fifth {weekday} of {month}}}"
-msgstr "{0, selectordinal, one {The first {weekday} van {month}} twee {The second {weekday} van {month}} =3 {The third {weekday} van {month}} =4 {The fourth {weekday} van {month}} =5 {The fifth {weekday} van {month}}}"
+msgstr "{0, selectordinal, one {The first {weekday} van {month}} two {The second {weekday} van {month}} =3 {The third {weekday} van {month}} =4 {The fourth {weekday} van {month}} =5 {The fifth {weekday} van {month}}}"
 
 #: screens/ActivityStream/ActivityStreamListItem.js:28
 msgid "{0} (deleted)"
