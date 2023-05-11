@@ -404,6 +404,11 @@ class ApiV2(base.Base):
 
         for resource in self._dependent_resources():
             endpoint = getattr(self, resource)
+            # The /api/v2/constructed_inventories endpoint is for the UI but will register as an Inventory endpoint causing import issues, so skip it
+            if endpoint == '/api/v2/constructed_inventories/':
+                log.debug("Ignoring /api/v2/constructed_inventories/ endpoint.")
+                continue
+
             # Load up existing objects, so that we can try to update or link to them
             self._cache.get_page(endpoint)
             imported = self._import_list(endpoint, data.get(resource) or [])
