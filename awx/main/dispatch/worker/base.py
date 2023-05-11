@@ -170,7 +170,7 @@ class AWXConsumerPG(AWXConsumerBase):
             # NOTE: if we run out of database connections, it is important to still run cleanup
             # so that we scale down workers and free up connections
             self.pool.cleanup()
-            self.last_cleanup = time.time()
+            self.last_cleanup = current_time
 
         # record subsystem metrics for the dispatcher
         if current_time - self.last_metrics_gather > 20:
@@ -178,6 +178,8 @@ class AWXConsumerPG(AWXConsumerBase):
                 self.subsystem_metrics.set(f'dispatcher_pool_{key}', value)
             self.subsystem_metrics.set('dispatcher_availability', self.listen_cumulative_time / (current_time - self.last_metrics_gather))
             self.subsystem_metrics.pipe_execute()
+            self.listen_cumulative_time = 0.0
+            self.last_metrics_gather = current_time
 
     def run(self, *args, **kwargs):
         super(AWXConsumerPG, self).run(*args, **kwargs)
