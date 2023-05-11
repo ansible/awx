@@ -121,7 +121,7 @@ msgstr "L'identifiant {} n'existe pas"
 
 #: awx/api/filters.py:82
 msgid "No related model for field {}."
-msgstr "Aucun modèle qui y soit lié pour le champ '{}'"
+msgstr "Aucun modèle qui y soit lié pour le champ {}."
 
 #: awx/api/filters.py:96
 msgid "Filtering on password fields is not allowed."
@@ -155,7 +155,7 @@ msgstr "N'a pas pu appliquer le filtre role_level à cette liste car son modèle
 msgid ""
 "You did not use correct Content-Type in your HTTP request. If you are using "
 "our REST API, the Content-Type must be application/json"
-msgstr "Vous n'avez pas utilisé le bon type de contenu dans votre requête HTTP. Si vous utilisez notre API REST, le type de contenu doit être application/json."
+msgstr "Vous n'avez pas utilisé le bon type de contenu dans votre requête HTTP. Si vous utilisez notre API REST, le type de contenu doit être application/json"
 
 #: awx/api/generics.py:220
 msgid " To establish a login session, visit"
@@ -313,7 +313,7 @@ msgstr "Type de client"
 
 #: awx/api/serializers.py:1241
 msgid "Redirect URIs"
-msgstr "Redirection d'URIs."
+msgstr "Redirection d'URIs"
 
 #: awx/api/serializers.py:1242
 msgid "Skip Authorization"
@@ -793,17 +793,17 @@ msgstr "Impossible de planifier les sources d'inventaire avec `update_on_project
 msgid ""
 "Count of jobs in the running or waiting state that are targeted for this "
 "instance"
-msgstr "Le nombre de jobs en cours d'exécution ou en attente qui sont ciblés pour cette instance."
+msgstr "Le nombre de jobs en cours d'exécution ou en attente qui sont ciblés pour cette instance"
 
 #: awx/api/serializers.py:4775
 msgid "Count of all jobs that target this instance"
-msgstr "Le nombre de jobs qui ciblent cette instance."
+msgstr "Le nombre de jobs qui ciblent cette instance"
 
 #: awx/api/serializers.py:4828
 msgid ""
 "Count of jobs in the running or waiting state that are targeted for this "
 "instance group"
-msgstr "Le nombre de jobs en cours d'exécution ou en attente qui sont ciblés pour ce groupe d'instances."
+msgstr "Le nombre de jobs en cours d'exécution ou en attente qui sont ciblés pour ce groupe d'instances"
 
 #: awx/api/serializers.py:4830
 msgid "Count of all jobs that target this instance group"
@@ -841,7 +841,7 @@ msgstr "Listes d'instances de stratégie"
 
 #: awx/api/serializers.py:4859
 msgid "List of exact-match Instances that will be assigned to this group"
-msgstr "Liste des cas de concordance exacte qui seront assignés à ce groupe."
+msgstr "Liste des cas de concordance exacte qui seront assignés à ce groupe"
 
 #: awx/api/serializers.py:4900
 msgid "Duplicate entry {}."
@@ -1971,7 +1971,7 @@ msgid ""
 "HTTP headers and meta keys to search to determine remote host name or IP. "
 "Add additional items to this list, such as \"HTTP_X_FORWARDED_FOR\", if "
 "behind a reverse proxy. See the \"Proxy Support\" section of the "
-"Adminstrator guide for more details."
+"Administrator guide for more details."
 msgstr "En-têtes HTTP et méta-clés à rechercher afin de déterminer le nom ou l'adresse IP d'un hôte distant. Ajoutez des éléments supplémentaires à cette liste, tels que \"HTTP_X_FORWARDED_FOR\", en présence d'un proxy inverse. Voir la section \"Support Proxy\" du Guide de l'administrateur pour obtenir des détails supplémentaires."
 
 #: awx/main/conf.py:85
@@ -2461,7 +2461,7 @@ msgid ""
 msgstr "Seuil de niveau utilisé par le gestionnaire de journal. Les niveaux de gravité sont les suivants (de la plus faible à la plus grave) : DEBUG (débogage), INFO, WARNING (avertissement), ERROR (erreur), CRITICAL (critique). Les messages moins graves que le seuil seront ignorés par le gestionnaire de journal. (les messages sous la catégorie awx.anlytics ignorent ce paramètre)"
 
 #: awx/main/conf.py:631
-msgid "Maximum disk persistance for external log aggregation (in GB)"
+msgid "Maximum disk persistence for external log aggregation (in GB)"
 msgstr "Persistance maximale du disque pour l'agrégation de journalisation externe (en Go)"
 
 #: awx/main/conf.py:633
@@ -2552,8 +2552,8 @@ msgid "Enable"
 msgstr "Activer"
 
 #: awx/main/constants.py:27
-msgid "Doas"
-msgstr "Comme"
+msgid "Does"
+msgstr "Does"
 
 #: awx/main/constants.py:28
 msgid "Ksu"
@@ -2797,7 +2797,7 @@ msgstr "URL Archivage sécurisé HashiCorp"
 #: awx/main/models/credential/__init__.py:923
 #: awx/main/models/credential/__init__.py:942
 msgid "Token"
-msgstr "Token"
+msgstr "Jeton"
 
 #: awx/main/credential_plugins/hashivault.py:25
 msgid "The access token used to authenticate to the Vault server"
@@ -3338,7 +3338,7 @@ msgstr "Clé secrète"
 
 #: awx/main/models/credential/__init__.py:714
 msgid "STS Token"
-msgstr "Token STS"
+msgstr "Jeton STS"
 
 #: awx/main/models/credential/__init__.py:718
 msgid ""
@@ -3549,7 +3549,7 @@ msgstr "Point d'accès de l’API OpenShift ou Kubernetes auprès duquel s’aut
 
 #: awx/main/models/credential/__init__.py:1088
 msgid "API authentication bearer token"
-msgstr "Token du porteur d'authentification d'API"
+msgstr "Jeton du porteur d'authentification d'API"
 
 #: awx/main/models/credential/__init__.py:1100
 msgid "Certificate Authority data"
@@ -3593,7 +3593,7 @@ msgstr "L'URL d'un serveur Keycloak token_endpoint, si vous utilisez l'authentif
 
 #: awx/main/models/credential/__init__.py:1167
 msgid "API Token"
-msgstr "Token API"
+msgstr "Jeton API"
 
 #: awx/main/models/credential/__init__.py:1170
 msgid "A token to use for authentication against the Galaxy instance."
@@ -4805,7 +4805,7 @@ msgstr "Indique qu'une tâche ne sera pas créée lorsqu'elle est sur True. La s
 
 #: awx/main/models/workflow.py:251
 msgid ""
-"An identifier coresponding to the workflow job template node that this node "
+"An identifier corresponding to the workflow job template node that this node "
 "was created from."
 msgstr "Identifiant correspondant au nœud du modèle de tâche de flux de travail à partir duquel ce nœud a été créé."
 
@@ -5528,7 +5528,7 @@ msgstr "Arguments OAuth2 supplémentaires pour Google"
 #: awx/sso/conf.py:606
 msgid ""
 "Extra arguments for Google OAuth2 login. You can restrict it to only allow a "
-"single domain to authenticate, even if the user is logged in with multple "
+"single domain to authenticate, even if the user is logged in with multiple "
 "Google accounts. Refer to the documentation for more detail."
 msgstr "Arguments supplémentaires pour l'authentification OAuth2. Vous pouvez autoriser un seul domaine à s'authentifier, même si l'utilisateur est connecté avec plusieurs comptes Google. Voir la documentation pour obtenir plus d'informations."
 
@@ -5912,9 +5912,9 @@ msgstr "Certificat public du fournisseur de services SAML"
 
 #: awx/sso/conf.py:1290
 msgid ""
-"Create a keypair to use as a service provider (SP) and include the "
+"Create a key pair to use as a service provider (SP) and include the "
 "certificate content here."
-msgstr "Créez une paire de clés qui puisse être utilisée comme fournisseur de services (SP) et entrez le contenu du certificat ici."
+msgstr "Créez une paire de clés qui puisse être utilisée comme fournisseur de services (SP) et saisir le contenu du certificat ici."
 
 #: awx/sso/conf.py:1301
 msgid "SAML Service Provider Private Key"
@@ -5922,9 +5922,9 @@ msgstr "Clé privée du fournisseur de services SAML"
 
 #: awx/sso/conf.py:1302
 msgid ""
-"Create a keypair to use as a service provider (SP) and include the private "
+"Create a key pair to use as a service provider (SP) and include the private "
 "key content here."
-msgstr "Créez une paire de clés qui puisse être utilisée comme fournisseur de services (SP) et entrez le contenu de la clé privée ici."
+msgstr "Créez une paire de clés qui puisse être utilisée comme fournisseur de services (SP) et saisir le contenu de la clé privée ici."
 
 #: awx/sso/conf.py:1312
 msgid "SAML Service Provider Organization Info"
