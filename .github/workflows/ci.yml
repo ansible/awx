@@ -3,7 +3,7 @@ name: CI
 env:
   LC_ALL: "C.UTF-8" # prevent ERROR: Ansible could not initialize the preferred locale: unsupported locale setting
   CI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  DEV_DOCKER_TAG_BASE: ghcr.io/${{ github.repository_owner }}
+  DEV_DOCKER_OWNER: ${{ github.repository_owner }}
   COMPOSE_TAG: ${{ github.base_ref || 'devel' }}
 on:
   pull_request:

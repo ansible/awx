@@ -46,7 +46,8 @@ export default function useLaunchSteps(
   surveyConfig,
   resource,
   labels,
-  instanceGroups
+  instanceGroups,
+  resourceDefaultCredentials
 ) {
   const [visited, setVisited] = useState({});
   const [isReady, setIsReady] = useState(false);
@@ -56,7 +57,7 @@ export default function useLaunchSteps(
     useCredentialsStep(
       launchConfig,
       resource,
-      resource.summary_fields.credentials || [],
+      resourceDefaultCredentials,
       true
     ),
     useCredentialPasswordsStep(
