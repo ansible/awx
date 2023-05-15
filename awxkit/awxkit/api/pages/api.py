@@ -253,7 +253,13 @@ class ApiV2(base.Base):
     # Import methods
 
     def _dependent_resources(self):
-        page_resource = {getattr(self, resource)._create().__item_class__: resource for resource in self.json}
+        page_resource = {}
+        for resource in self.json:
+            # The /api/v2/constructed_inventories endpoint is for the UI but will register as an Inventory endpoint
+            # We want to map the type to /api/v2/inventories/ which works for constructed too
+            if resource == 'constructed_inventory':
+                continue
+            page_resource[getattr(self, resource)._create().__item_class__] = resource
         data_pages = [getattr(self, resource)._create().__item_class__ for resource in EXPORTABLE_RESOURCES]
 
         for page_cls in itertools.chain(*has_create.page_creation_order(*data_pages)):
@@ -404,10 +410,6 @@ class ApiV2(base.Base):
 
         for resource in self._dependent_resources():
             endpoint = getattr(self, resource)
-            # The /api/v2/constructed_inventories endpoint is for the UI but will register as an Inventory endpoint causing import issues, so skip it
-            if endpoint == '/api/v2/constructed_inventories/':
-                log.debug("Ignoring /api/v2/constructed_inventories/ endpoint.")
-                continue
 
             # Load up existing objects, so that we can try to update or link to them
             self._cache.get_page(endpoint)
