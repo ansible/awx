@@ -613,3 +613,20 @@ def host_metric_table(since, full_path, until, **kwargs):
         since.isoformat(), until.isoformat(), since.isoformat(), until.isoformat()
     )
     return _copy_table(table='host_metric', query=host_metric_query, path=full_path)
+
+
+@register('host_metric_summary_monthly_table', '1.0', format='csv', description=_('HostMetricSummaryMonthly export, full sync'), expensive=trivial_slicing)
+def host_metric_summary_monthly_table(since, full_path, **kwargs):
+    query = '''
+    COPY (SELECT main_hostmetricsummarymonthly.id,
+                 main_hostmetricsummarymonthly.date,
+                 main_hostmetricsummarymonthly.license_capacity,
+                 main_hostmetricsummarymonthly.license_consumed,
+                 main_hostmetricsummarymonthly.hosts_added,
+                 main_hostmetricsummarymonthly.hosts_deleted,
+                 main_hostmetricsummarymonthly.indirectly_managed_hosts
+          FROM main_hostmetricsummarymonthly
+          ORDER BY main_hostmetricsummarymonthly.id ASC) TO STDOUT WITH CSV HEADER
+    '''
+
+    return _copy_table(table='host_metric_summary_monthly', query=query, path=full_path)
