@@ -114,6 +114,11 @@ function NotificationTemplateListItem({
             <b>{template.name}</b>
           </Link>
         </TdBreakWord>
+        <Td dataLabel={t`Oragnization`}>
+          <Link to={`/organizations/${template.summary_fields.organization.id}/details`}>
+            <b>{template.summary_fields.organization.name}</b>
+          </Link>
+        </Td>
         <Td dataLabel={t`Status`}>
           {status && <StatusLabel status={status} />}
         </Td>
