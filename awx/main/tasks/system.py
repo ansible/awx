@@ -63,6 +63,7 @@ from awx.main.utils.common import (
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
 from awx.main.tasks.receptor import get_receptor_ctl, worker_info, worker_cleanup, administrative_workunit_reaper, write_receptor_config
+from awx.main.tasks.handlers import HostMetricSummaryMonthlyTask
 from awx.main.consumers import emit_channel_notification
 from awx.main import analytics
 from awx.conf import settings_registry
@@ -389,8 +390,13 @@ def cleanup_host_metrics():
 
     cleanup_interval_secs = getattr(settings, 'CLEANUP_HOST_METRICS_INTERVAL', 30) * 86400
     if not last_time or ((now() - last_time).total_seconds() > cleanup_interval_secs):
-        months_ago = getattr(settings, 'CLEANUP_HOST_METRICS_THRESHOLD', 12)
+        months_ago = getattr(settings, 'CLEANUP_HOST_METRICS_SOFT_THRESHOLD', 12)
         HostMetric.cleanup_task(months_ago)
+
+
+@task(queue=get_task_queuename)
+def host_metric_summary_monthly():
+    HostMetricSummaryMonthlyTask().execute()
 
 
 @task(queue=get_task_queuename)

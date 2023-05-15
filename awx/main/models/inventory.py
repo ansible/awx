@@ -910,7 +910,7 @@ class HostMetric(models.Model):
 
 class HostMetricSummaryMonthly(models.Model):
     """
-    HostMetric summaries computed by scheduled task <TODO> monthly
+    HostMetric summaries computed by scheduled task 'awx.main.tasks.system.host_metric_summary_monthly' monthly
     """
 
     date = models.DateField(unique=True)

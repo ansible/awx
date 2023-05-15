@@ -472,6 +472,7 @@ CELERYBEAT_SCHEDULE = {
     'send_subsystem_metrics': {'task': 'awx.main.analytics.analytics_tasks.send_subsystem_metrics', 'schedule': timedelta(seconds=20)},
     'cleanup_images': {'task': 'awx.main.tasks.system.cleanup_images_and_files', 'schedule': timedelta(hours=3)},
     'cleanup_host_metrics': {'task': 'awx.main.tasks.system.cleanup_host_metrics', 'schedule': timedelta(days=1)},
+    'host_metric_summary_monthly': {'task': 'awx.main.tasks.system.host_metric_summary_monthly', 'schedule': timedelta(weeks=1)},
 }
 
 # Django Caching Configuration
@@ -1054,4 +1055,6 @@ CLEANUP_HOST_METRICS_LAST_TS = None
 # Host metrics cleanup - minimal interval between two cleanups in days
 CLEANUP_HOST_METRICS_INTERVAL = 30  # days
 # Host metrics cleanup - soft-delete HostMetric records with last_automation < [threshold] (in months)
-CLEANUP_HOST_METRICS_THRESHOLD = 12  # months
+CLEANUP_HOST_METRICS_SOFT_THRESHOLD = 12  # months
+# Host metrics cleanup - delete HostMetric record with deleted=True and last_deleted < [threshold]
+CLEANUP_HOST_METRICS_HARD_THRESHOLD = 36  # months
