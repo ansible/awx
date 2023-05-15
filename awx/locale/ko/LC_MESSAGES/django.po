@@ -702,7 +702,7 @@ msgstr "HTTP 메서드는 'POST' 또는 'PUT'이어야 합니다."
 
 #: awx/api/serializers.py:4551
 msgid "Missing required fields for Notification Configuration: {}."
-msgstr "알림 구성에 누락된 필수 필드: {}"
+msgstr "알림 구성에 누락된 필수 필드: {}."
 
 #: awx/api/serializers.py:4554
 msgid "Configuration field '{}' incorrect type, expected {}."
@@ -841,7 +841,7 @@ msgstr "정책 인스턴스 목록"
 
 #: awx/api/serializers.py:4859
 msgid "List of exact-match Instances that will be assigned to this group"
-msgstr "이 그룹에 할당할 정확히 일치하는 인스턴스 목록입니다."
+msgstr "이 그룹에 할당할 정확히 일치하는 인스턴스 목록입니다"
 
 #: awx/api/serializers.py:4900
 msgid "Duplicate entry {}."
@@ -854,7 +854,7 @@ msgstr "{}은 기존 인스턴스의 유효한 호스트 이름이 아닙니다.
 #: awx/api/serializers.py:4904 awx/api/serializers.py:4909
 #: awx/api/serializers.py:4914
 msgid "Containerized instances may not be managed via the API"
-msgstr "컨테이너화된 인스턴스는 API를 통해 관리할 수 없습니다."
+msgstr "컨테이너화된 인스턴스는 API를 통해 관리할 수 없습니다"
 
 #: awx/api/serializers.py:4919 awx/api/serializers.py:4922
 #, python-format
@@ -863,13 +863,13 @@ msgstr "%s 인스턴스 그룹 이름은 변경할 수 없습니다."
 
 #: awx/api/serializers.py:4928
 msgid "Only Kubernetes credentials can be associated with an Instance Group"
-msgstr "Kubernetes 자격 증명만 인스턴스 그룹과 연결할 수 있습니다."
+msgstr "Kubernetes 자격 증명만 인스턴스 그룹과 연결할 수 있습니다"
 
 #: awx/api/serializers.py:4935
 msgid ""
 "is_container_group must be True when associating a credential to an Instance "
 "Group"
-msgstr "자격 증명을 인스턴스 그룹에 연결할 때 is_container_group은 True여야 합니다."
+msgstr "자격 증명을 인스턴스 그룹에 연결할 때 is_container_group은 True여야 합니다"
 
 #: awx/api/serializers.py:4971
 msgid ""
@@ -885,7 +885,7 @@ msgstr "존재하는 경우 역할 또는 관계를 정의하는 모델을 표�
 msgid ""
 "A summary of the new and changed values when an object is created, updated, "
 "or deleted"
-msgstr "개체가 생성, 업데이트 또는 삭제될 때 새 값과 변경된 값에 대한 요약입니다."
+msgstr "개체가 생성, 업데이트 또는 삭제될 때 새 값과 변경된 값에 대한 요약입니다"
 
 #: awx/api/serializers.py:5021
 msgid ""
@@ -907,7 +907,7 @@ msgstr "지정된 오브젝트와 관련하여 수행된 작업입니다."
 
 #: awx/api/views/__init__.py:205
 msgid "Not found."
-msgstr "찾을 수 없음"
+msgstr "찾을 수 없음."
 
 #: awx/api/views/__init__.py:213
 msgid "Dashboard"
@@ -1009,7 +1009,7 @@ msgstr "팀에 시스템 수준 권한을 부여할 수 없습니다."
 msgid ""
 "You cannot grant credential access to a team when the Organization field "
 "isn't set, or belongs to a different organization"
-msgstr "조직 필드가 설정되지 않았거나 다른 조직에 속해 있으면 팀에 자격 증명 액세스 권한을 부여할 수 없습니다."
+msgstr "조직 필드가 설정되지 않았거나 다른 조직에 속해 있으면 팀에 자격 증명 액세스 권한을 부여할 수 없습니다"
 
 #: awx/api/views/__init__.py:720
 msgid "Only the 'pull' field can be edited for managed execution environments."
@@ -1079,11 +1079,11 @@ msgstr "OAuth 토큰 세부 정보"
 msgid ""
 "You cannot grant credential access to a user not in the credentials' "
 "organization"
-msgstr "인증 정보의 조직에 없는 사용자에게 인증 정보 액세스 권한을 부여할 수 없습니다."
+msgstr "인증 정보의 조직에 없는 사용자에게 인증 정보 액세스 권한을 부여할 수 없습니다"
 
 #: awx/api/views/__init__.py:1187 awx/api/views/__init__.py:4308
 msgid "You cannot grant private credential access to another user"
-msgstr "다른 사용자에게 개인 인증 정보 액세스 권한을 부여할 수 없습니다."
+msgstr "다른 사용자에게 개인 인증 정보 액세스 권한을 부여할 수 없습니다"
 
 #: awx/api/views/__init__.py:1284
 #, python-format
@@ -1100,11 +1100,11 @@ msgstr "관리 인증 정보 유형에 대해 삭제할 수 없습니다"
 
 #: awx/api/views/__init__.py:1316
 msgid "Credential types that are in use cannot be deleted"
-msgstr "사용 중인 인증 정보 유형을 삭제할 수 없습니다."
+msgstr "사용 중인 인증 정보 유형을 삭제할 수 없습니다"
 
 #: awx/api/views/__init__.py:1429
 msgid "Deletion not allowed for managed credentials"
-msgstr "관리 인증 정보는 삭제할 수 없습니다."
+msgstr "관리 인증 정보는 삭제할 수 없습니다"
 
 #: awx/api/views/__init__.py:1473
 msgid "External Credential Test"
@@ -1190,7 +1190,7 @@ msgstr "설문 조사 질문 %s은/는 json 오브젝트가 아닙니다."
 #: awx/api/views/__init__.py:2443
 #, python-brace-format
 msgid "'{field_name}' missing from survey question {idx}"
-msgstr "설문 조사 질문 {idx}에 '{field_name}'이/가 없습니다."
+msgstr "설문 조사 질문 {idx}에 '{field_name}'이/가 없습니다"
 
 #: awx/api/views/__init__.py:2455
 #, python-brace-format
@@ -1815,7 +1815,7 @@ msgstr "팀에서 조직을 변경할 수 없습니다."
 
 #: awx/main/access.py:1302
 msgid "The {} role cannot be assigned to a team"
-msgstr "팀에 {} 역할을 할당할 수 없습니다."
+msgstr "팀에 {} 역할을 할당할 수 없습니다"
 
 #: awx/main/access.py:1565
 msgid "Insufficient access to Job Template credentials."
@@ -1971,7 +1971,7 @@ msgid ""
 "HTTP headers and meta keys to search to determine remote host name or IP. "
 "Add additional items to this list, such as \"HTTP_X_FORWARDED_FOR\", if "
 "behind a reverse proxy. See the \"Proxy Support\" section of the "
-"Adminstrator guide for more details."
+"Administrator guide for more details."
 msgstr "원격 호스트 이름 또는 IP를 확인하기 위해 검색할 HTTP 헤더 및 메타 키입니다. 역방향 프록시 뒤에 \"HTTP_X_FORWARDED_FOR\"와 같은 항목을 이 목록에 추가합니다. 자세한 내용은 관리자 가이드의 \"프록시 지원\" 섹션을 참조하십시오."
 
 #: awx/main/conf.py:85
@@ -1985,7 +1985,7 @@ msgid ""
 "REMOTE_HOST_HEADERS header values. If this setting is an empty list (the "
 "default), the headers specified by REMOTE_HOST_HEADERS will be trusted "
 "unconditionally')"
-msgstr "서비스가 역방향 프록시/로드 밸런서 뒤에 있는 경우 이 설정을 사용하여 서비스에서 사용자 정의 REMOTE_HOST_HEADERS 헤더 값을 신뢰해야 하는 프록시 IP 주소를 구성합니다. 이 설정이 빈 목록(기본값)이면 REMOTE_HOST_HEADERS에서 지정한 헤더를 신뢰할 수 있습니다."
+msgstr "서비스가 역방향 프록시/로드 밸런서 뒤에 있는 경우 이 설정을 사용하여 서비스에서 사용자 정의 REMOTE_HOST_HEADERS 헤더 값을 신뢰해야 하는 프록시 IP 주소를 구성합니다. 이 설정이 빈 목록(기본값)이면 REMOTE_HOST_HEADERS에서 지정한 헤더를 신뢰할 수 있습니다"
 
 #: awx/main/conf.py:101
 msgid "License"
@@ -2367,7 +2367,7 @@ msgstr "로깅 수집기 암호/토큰"
 msgid ""
 "Password or authentication token for external log aggregator (if required; "
 "HTTP/s only)."
-msgstr "외부 로그 수집기의 암호 또는 인증 토큰(필요한 경우, HTTP/s만 지원)"
+msgstr "외부 로그 수집기의 암호 또는 인증 토큰(필요한 경우, HTTP/s만 지원)."
 
 #: awx/main/conf.py:528
 msgid "Loggers Sending Data to Log Aggregator Form"
@@ -2385,7 +2385,7 @@ msgstr "HTTP 로그를 수집기에 보낼 로거 목록입니다. 여기에는 
 "awx - 서비스 로그\n"
 "activity_stream - 활동 스트림 기록\n"
 "job_events - Ansible 작업 이벤트의 콜백 데이터\n"
-"system_tracking - 스캔 작업에서 수집된 사실"
+"system_tracking - 스캔 작업에서 수집된 사실."
 
 #: awx/main/conf.py:544
 msgid "Log System Tracking Facts Individually"
@@ -2460,8 +2460,8 @@ msgid ""
 msgstr "로그 처리기에서 사용하는 수준 임계값입니다. 심각도는 가장 낮은 순에서 가장 높은 순으로 DEBUG, INFO, WARNING, ERROR, CRITICAL입니다. 임계값보다 덜 심각한 메시지는 로그 처리기에서 무시됩니다. ( awx.anlytics 카테고리의 메세지는 이 설정을 무시함)"
 
 #: awx/main/conf.py:631
-msgid "Maximum disk persistance for external log aggregation (in GB)"
-msgstr "외부 로그 집계를 위한 최대 디스크 영구 저장소(GB)"
+msgid "Maximum disk persistence for external log aggregation (in GB)"
+msgstr "외부 로그 집계를 위한 최대 디스크 지속성 (GB)"
 
 #: awx/main/conf.py:633
 msgid ""
@@ -2548,11 +2548,11 @@ msgstr "Runas"
 
 #: awx/main/constants.py:26
 msgid "Enable"
-msgstr "Enable"
+msgstr "활성화"
 
 #: awx/main/constants.py:27
-msgid "Doas"
-msgstr "Doas"
+msgid "Does"
+msgstr "Does"
 
 #: awx/main/constants.py:28
 msgid "Ksu"
@@ -2669,7 +2669,7 @@ msgstr "Centrify API 사용자"
 #: awx/main/credential_plugins/centrify_vault.py:19
 msgid ""
 "Centrify API User, having necessary permissions as mentioned in support doc"
-msgstr "Centrify API 사용자는 지원 문서에 언급된 대로 필요한 권한을 갖습니다."
+msgstr "Centrify API 사용자는 지원 문서에 언급된 대로 필요한 권한을 갖습니다"
 
 #: awx/main/credential_plugins/centrify_vault.py:23
 msgid "Centrify API Password"
@@ -2843,7 +2843,7 @@ msgstr "Approle Auth 경로"
 msgid ""
 "The AppRole Authentication path to use if one isn't provided in the metadata "
 "when linking to an input field. Defaults to 'approle'"
-msgstr "입력 필드에 연결할 때 메타데이터에 제공되지 않는 경우 사용할 AppRole 인증 경로입니다. 기본값은 'approle'입니다."
+msgstr "입력 필드에 연결할 때 메타데이터에 제공되지 않는 경우 사용할 AppRole 인증 경로입니다. 기본값은 'approle'입니다"
 
 #: awx/main/credential_plugins/hashivault.py:64
 msgid "Path to Secret"
@@ -2949,7 +2949,7 @@ msgstr "시크릿 ID"
 
 #: awx/main/credential_plugins/tss.py:32
 msgid "The integer ID of the secret"
-msgstr "시크릿의 정수 ID입니다."
+msgstr "시크릿의 정수 ID입니다"
 
 #: awx/main/credential_plugins/tss.py:37
 msgid "Secret Field"
@@ -2957,17 +2957,17 @@ msgstr "시크릿 필드"
 
 #: awx/main/credential_plugins/tss.py:38
 msgid "The field to extract from the secret"
-msgstr "시크릿에서 추출할 필드입니다."
+msgstr "시크릿에서 추출할 필드입니다"
 
 #: awx/main/fields.py:68
 #, python-brace-format
 msgid "'{value}' is not one of ['{allowed_values}']"
-msgstr "'{value}'은/는 ['{allowed_values}'] 중 하나가 아닙니다."
+msgstr "'{value}'은/는 ['{allowed_values}'] 중 하나가 아닙니다"
 
 #: awx/main/fields.py:418
 #, python-brace-format
 msgid "{type} provided in relative path {path}, expected {expected_type}"
-msgstr " 상대 경로 {path}에 {type}이/가 제공됨, {expected_type} 예상됨"
+msgstr "상대 경로 {path}에 {type}이/가 제공됨, {expected_type} 예상됨"
 
 #: awx/main/fields.py:422
 #, python-brace-format
@@ -2986,12 +2986,12 @@ msgstr "%s에 필요"
 
 #: awx/main/fields.py:592
 msgid "secret values must be of type string, not {}"
-msgstr "시크릿값은 {}이 아닌 문자열 유형이어야 합니다."
+msgstr "시크릿값은 {}이 아닌 문자열 유형이어야 합니다"
 
 #: awx/main/fields.py:629
 #, python-format
 msgid "cannot be set unless \"%s\" is set"
-msgstr "\"%s\"이/가 설정되어 있지 않으면 설정할 수 없습니다."
+msgstr "\"%s\"이/가 설정되어 있지 않으면 설정할 수 없습니다"
 
 #: awx/main/fields.py:658
 msgid "must be set when SSH key is encrypted."
@@ -3007,7 +3007,7 @@ msgstr "'종속 항목'은 사용자 정의 인증 정보에 대해 지원되지
 
 #: awx/main/fields.py:728
 msgid "\"tower\" is a reserved field name"
-msgstr "\"Tower\"는 예약된 필드 이름입니다."
+msgstr "\"Tower\"는 예약된 필드 이름입니다"
 
 #: awx/main/fields.py:735
 #, python-format
@@ -3016,7 +3016,7 @@ msgstr "필드 ID는 고유해야 합니다 (%s)"
 
 #: awx/main/fields.py:749
 msgid "{} is not a {}"
-msgstr "{}은/는 {}이/가 아닙니다."
+msgstr "{}은/는 {}이/가 아닙니다"
 
 #: awx/main/fields.py:760
 #, python-brace-format
@@ -3044,7 +3044,7 @@ msgstr "예약된 'tower' 네임스페이스 컨테이너를 직접 참조할 �
 
 #: awx/main/fields.py:866
 msgid "Must use multi-file syntax when injecting multiple files"
-msgstr "여러 파일을 삽입할 때 다중 파일 구문을 사용해야 합니다."
+msgstr "여러 파일을 삽입할 때 다중 파일 구문을 사용해야 합니다"
 
 #: awx/main/fields.py:884
 #, python-brace-format
@@ -3083,7 +3083,7 @@ msgstr "이름이 지정된 url 그래프 노드 목록입니다."
 msgid ""
 "Read-only list of key-value pairs that exposes named URL graph topology. Use "
 "this list to programmatically generate named URLs for resources"
-msgstr "이름이 지정된 URL 그래프 토폴로지를 표시하는 키-값 쌍의 읽기 전용 목록입니다. 이 목록을 사용하여 리소스에 대해 이름이 지정된 URL을 프로그래밍 방식으로 생성합니다."
+msgstr "이름이 지정된 URL 그래프 토폴로지를 표시하는 키-값 쌍의 읽기 전용 목록입니다. 이 목록을 사용하여 리소스에 대해 이름이 지정된 URL을 프로그래밍 방식으로 생성합니다"
 
 #: awx/main/migrations/_inventory_source_vars.py:142
 msgid "Image ID"
@@ -3261,7 +3261,7 @@ msgstr "JSON 또는 YAML 구문을 사용하여 인젝터를 입력합니다. �
 #: awx/main/models/credential/__init__.py:412
 #, python-format
 msgid "adding %s credential type"
-msgstr "인증 정보 유형  %s 추가 중"
+msgstr "인증 정보 유형 %s 추가 중"
 
 #: awx/main/models/credential/__init__.py:590
 #: awx/main/models/credential/__init__.py:672
@@ -3390,7 +3390,7 @@ msgstr "지역 이름"
 
 #: awx/main/models/credential/__init__.py:774
 msgid "For some cloud providers, like OVH, region must be specified"
-msgstr "OVH와 같은 일부 클라우드 공급자의 경우 지역을 지정해야 합니다."
+msgstr "OVH와 같은 일부 클라우드 공급자의 경우 지역을 지정해야 합니다"
 
 #: awx/main/models/credential/__init__.py:778
 #: awx/main/models/credential/__init__.py:1054
@@ -3483,7 +3483,7 @@ msgstr "GitHub 개인 액세스 토큰"
 
 #: awx/main/models/credential/__init__.py:926
 msgid "This token needs to come from your profile settings in GitHub"
-msgstr "이 토큰은 GitHub의 프로필 설정에서 가져와야 합니다."
+msgstr "이 토큰은 GitHub의 프로필 설정에서 가져와야 합니다"
 
 #: awx/main/models/credential/__init__.py:936
 msgid "GitLab Personal Access Token"
@@ -3491,7 +3491,7 @@ msgstr "GitLab 개인 액세스 토큰"
 
 #: awx/main/models/credential/__init__.py:945
 msgid "This token needs to come from your profile settings in GitLab"
-msgstr "이 토큰은 GitLab의 프로필 설정에서 가져와야 합니다."
+msgstr "이 토큰은 GitLab의 프로필 설정에서 가져와야 합니다"
 
 #: awx/main/models/credential/__init__.py:979 awx/main/models/inventory.py:812
 msgid "Red Hat Virtualization"
@@ -3600,11 +3600,11 @@ msgstr "Galaxy 인스턴스에 대해 인증에 사용할 토큰입니다."
 
 #: awx/main/models/credential/__init__.py:1209
 msgid "Target must be a non-external credential"
-msgstr "대상은 비외부 자격 증명이어야 합니다."
+msgstr "대상은 비외부 자격 증명이어야 합니다"
 
 #: awx/main/models/credential/__init__.py:1214
 msgid "Source must be an external credential"
-msgstr "소스는 외부 자격 증명이어야 합니다."
+msgstr "소스는 외부 자격 증명이어야 합니다"
 
 #: awx/main/models/credential/__init__.py:1220
 msgid "Input field must be defined on target credential (options are {})."
@@ -3955,7 +3955,7 @@ msgid ""
 "The host would be marked enabled. If power_state where any value other than "
 "powered_on then the host would be disabled when imported. If the key is not "
 "found then the host will be enabled"
-msgstr "enabled_var가 설정된 경우에만 사용됩니다. 호스트가 활성화된 것으로 간주될 때의 값입니다. 예를 들어 enabled_var=\"status.power_state\" 및 enabled_value=\"powered_on\" {   \"status\": {     \"power_state\": \"powered_on\",     \"created\": \"2020-08-04T18:13:04+00:00\",     \"healthy\": true    } 호스트 변수가 있는 경우    \"name\": \"foobar\",    \"ip_address\": \"192.168.2.1\"}호스트는 활성화된 것으로 표시됩니다. power_state가 powered_on 이외의 값이면 가져올 때 호스트가 비활성화됩니다. 키를 찾을 수 없으면 호스트가 활성화됩니다."
+msgstr "enabled_var가 설정된 경우에만 사용됩니다. 호스트가 활성화된 것으로 간주될 때의 값입니다. 예를 들어 enabled_var=\"status.power_state\" 및 enabled_value=\"powered_on\" {   \"status\": {     \"power_state\": \"powered_on\",     \"created\": \"2020-08-04T18:13:04+00:00\",     \"healthy\": true    } 호스트 변수가 있는 경우    \"name\": \"foobar\",    \"ip_address\": \"192.168.2.1\"}호스트는 활성화된 것으로 표시됩니다. power_state가 powered_on 이외의 값이면 가져올 때 호스트가 비활성화됩니다. 키를 찾을 수 없으면 호스트가 활성화됩니다"
 
 #: awx/main/models/inventory.py:878
 msgid "Regex where only matching hosts will be imported."
@@ -4031,7 +4031,7 @@ msgstr "인벤토리 스크립트 콘텐츠"
 msgid ""
 "If enabled, textual changes made to any templated files on the host are "
 "shown in the standard output"
-msgstr "활성화하면 호스트의 템플릿 파일에 대한 텍스트 변경 사항이 표준 출력에 표시됩니다."
+msgstr "활성화하면 호스트의 템플릿 파일에 대한 텍스트 변경 사항이 표준 출력에 표시됩니다"
 
 #: awx/main/models/jobs.py:109
 msgid ""
@@ -4164,11 +4164,11 @@ msgstr "실행에 사용할 컨테이너 이미지입니다."
 
 #: awx/main/models/mixins.py:490
 msgid "Local absolute file path containing a custom Python virtualenv to use"
-msgstr "사용할 사용자 지정 Python virtualenv가 포함된 로컬 절대 파일 경로입니다."
+msgstr "사용할 사용자 지정 Python virtualenv가 포함된 로컬 절대 파일 경로입니다"
 
 #: awx/main/models/mixins.py:496
 msgid "{} is not a valid virtualenv in {}"
-msgstr "{}은 {}에서 유효한 virtualenv가 아닙니다."
+msgstr "{}은 {}에서 유효한 virtualenv가 아닙니다"
 
 #: awx/main/models/mixins.py:540 awx/main/models/mixins.py:575
 msgid "Service that webhook requests will be accepted from"
@@ -4240,7 +4240,7 @@ msgstr "실패"
 
 #: awx/main/models/notifications.py:514
 msgid "status must be either running, succeeded or failed"
-msgstr "상태는 실행 중(running), 성공 (succeeded) 또는 실패 (failed)여야 합니다."
+msgstr "상태는 실행 중(running), 성공 (succeeded) 또는 실패 (failed)여야 합니다"
 
 #: awx/main/models/oauth.py:32
 msgid "application"
@@ -4305,7 +4305,7 @@ msgstr "허용되는 범위, 추가로 사용자 권한을 제한합니다. 허�
 msgid ""
 "OAuth2 Tokens cannot be created by users associated with an external "
 "authentication provider ({})"
-msgstr "OAuth2 토큰은 외부 인증 공급자({})와 연결된 사용자가 생성할 수 없습니다."
+msgstr "OAuth2 토큰은 외부 인증 공급자({})와 연결된 사용자가 생성할 수 없습니다"
 
 #: awx/main/models/organization.py:44
 msgid "Maximum number of hosts allowed to be managed by this organization."
@@ -4533,11 +4533,11 @@ msgstr "승인"
 
 #: awx/main/models/rbac.py:56
 msgid "Can manage all aspects of the system"
-msgstr "시스템의 모든 측면을 관리할 수 있습니다."
+msgstr "시스템의 모든 측면을 관리할 수 있습니다"
 
 #: awx/main/models/rbac.py:57
 msgid "Can view all aspects of the system"
-msgstr "시스템의 모든 측면을 볼 수 있습니다."
+msgstr "시스템의 모든 측면을 볼 수 있습니다"
 
 #: awx/main/models/rbac.py:58
 #, python-format
@@ -4547,80 +4547,80 @@ msgstr "%s에서 임시 명령을 실행할 수 있습니다"
 #: awx/main/models/rbac.py:59
 #, python-format
 msgid "Can manage all aspects of the %s"
-msgstr "%s의 모든 측면을 관리할 수 있습니다."
+msgstr "%s의 모든 측면을 관리할 수 있습니다"
 
 #: awx/main/models/rbac.py:60
 #, python-format
 msgid "Can manage all projects of the %s"
-msgstr "%s의 모든 프로젝트를 관리할 수 있습니다."
+msgstr "%s의 모든 프로젝트를 관리할 수 있습니다"
 
 #: awx/main/models/rbac.py:61
 #, python-format
 msgid "Can manage all inventories of the %s"
-msgstr "%s의 모든 인벤토리를 관리할 수 있습니다."
+msgstr "%s의 모든 인벤토리를 관리할 수 있습니다"
 
 #: awx/main/models/rbac.py:62
 #, python-format
 msgid "Can manage all credentials of the %s"
-msgstr "%s의 모든 자격 증명을 관리할 수 있습니다."
+msgstr "%s의 모든 자격 증명을 관리할 수 있습니다"
 
 #: awx/main/models/rbac.py:63
 #, python-format
 msgid "Can manage all job templates of the %s"
-msgstr "%s의 모든 작업 템플릿을 관리할 수 있습니다."
+msgstr "%s의 모든 작업 템플릿을 관리할 수 있습니다"
 
 #: awx/main/models/rbac.py:64
 #, python-format
 msgid "Can manage all execution environments of the %s"
-msgstr "%s의 모든 실행 환경을 관리할 수 있습니다."
+msgstr "%s의 모든 실행 환경을 관리할 수 있습니다"
 
 #: awx/main/models/rbac.py:65
 #, python-format
 msgid "Can manage all workflows of the %s"
-msgstr "%s의 모든 워크플로우를 관리할 수 있습니다."
+msgstr "%s의 모든 워크플로우를 관리할 수 있습니다"
 
 #: awx/main/models/rbac.py:66
 #, python-format
 msgid "Can manage all notifications of the %s"
-msgstr "%s의 모든 알림을 관리할 수 있습니다."
+msgstr "%s의 모든 알림을 관리할 수 있습니다"
 
 #: awx/main/models/rbac.py:67
 #, python-format
 msgid "Can view all aspects of the %s"
-msgstr "%s의 모든 측면을 볼 수 있습니다."
+msgstr "%s의 모든 측면을 볼 수 있습니다"
 
 #: awx/main/models/rbac.py:69
 msgid "May run any executable resources in the organization"
-msgstr "조직에서 실행 가능한 리소스를 모두 실행할 수 있습니다."
+msgstr "조직에서 실행 가능한 리소스를 모두 실행할 수 있습니다"
 
 #: awx/main/models/rbac.py:70
 #, python-format
 msgid "May run the %s"
-msgstr "%s을/를 실행할 수 있습니다."
+msgstr "%s을/를 실행할 수 있습니다"
 
 #: awx/main/models/rbac.py:72
 #, python-format
 msgid "User is a member of the %s"
-msgstr "사용자는 %s의 구성원입니다."
+msgstr "사용자는 %s의 구성원입니다"
 
 #: awx/main/models/rbac.py:73
 #, python-format
 msgid "May view settings for the %s"
-msgstr "%s의 설정을 볼 수 있습니다."
+msgstr "%s의 설정을 볼 수 있습니다"
 
 #: awx/main/models/rbac.py:74
 #, python-format
 msgid "May update the %s"
-msgstr "%s을/를 업데이트할 수 있습니다."
+msgstr "%s을/를 업데이트할 수 있습니다"
 
 #: awx/main/models/rbac.py:75
 #, python-format
 msgid "Can use the %s in a job template"
-msgstr "작업 템플릿에서 %s을/를 사용할 수 있습니다."
+msgstr "작업 템플릿에서 %s을/를 사용할 수 있습니다"
 
 #: awx/main/models/rbac.py:76
 msgid "Can approve or deny a workflow approval node"
-msgstr "워크플로우 승인 노드를 승인하거나 거부할 수 있습니다."
+msgstr "워크플로우 승인 노드를 승인하거나 거부할 수 있습니다"
 
 #: awx/main/models/rbac.py:142
 msgid "roles"
@@ -4787,7 +4787,7 @@ msgstr "이 작업과 관련된 수신자 작업 단위 ID입니다."
 msgid ""
 "If enabled then the node will only run if all of the parent nodes have met "
 "the criteria to reach this node"
-msgstr "활성화된 경우 노드는 모든 상위 노드가 이 노드에 도달하기 위한 조건을 충족한 경우에만 노드가 실행됩니다."
+msgstr "활성화된 경우 노드는 모든 상위 노드가 이 노드에 도달하기 위한 조건을 충족한 경우에만 노드가 실행됩니다"
 
 #: awx/main/models/workflow.py:168
 msgid ""
@@ -4804,9 +4804,9 @@ msgstr "True는 작업이 생성되지 않음을 의미합니다. Workflow 런�
 
 #: awx/main/models/workflow.py:251
 msgid ""
-"An identifier coresponding to the workflow job template node that this node "
+"An identifier corresponding to the workflow job template node that this node "
 "was created from."
-msgstr "이 노드가 생성된 워크플로우 작업 템플릿 노드에 대한 식별자입니다."
+msgstr "이 노드가 생성된 워크플로우 작업 템플릿 노드에 해당하는 식별자입니다."
 
 #: awx/main/models/workflow.py:302
 #, python-brace-format
@@ -4920,13 +4920,13 @@ msgstr "워크플로에서 생성된 워크플로 작업은 재귀를 유발하�
 msgid ""
 "Job spawned from workflow could not start because it was missing a related "
 "resource such as project or inventory"
-msgstr "워크플로우에서 생성된 작업은 프로젝트 또는 인벤토리와 같은 관련 리소스가 누락되었기 때문에 시작할 수 없었습니다."
+msgstr "워크플로우에서 생성된 작업은 프로젝트 또는 인벤토리와 같은 관련 리소스가 누락되었기 때문에 시작할 수 없었습니다"
 
 #: awx/main/scheduler/task_manager.py:187
 msgid ""
 "Job spawned from workflow could not start because it was not in the right "
 "state or required manual credentials"
-msgstr "워크플로에서 생성된 작업이 올바른 상태가 아니거나 수동 자격 증명이 필요하기 때문에 시작하지 못할 수 있습니다."
+msgstr "워크플로에서 생성된 작업이 올바른 상태가 아니거나 수동 자격 증명이 필요하기 때문에 시작하지 못할 수 있습니다"
 
 #: awx/main/scheduler/task_manager.py:228
 msgid "No error handling paths found, marking workflow as failed"
@@ -4952,7 +4952,7 @@ msgstr "승인 노드 {name} ({pk})이/가 {timeout} 초 후에 만료되었습�
 msgid ""
 "Scheduled job could not start because it                     was not in the "
 "right state or required manual credentials"
-msgstr "올바른 상태가 아니거나 수동 인증 정보가 없기 때문에 예약된 작업을 시작하지 못할 수 있습니다."
+msgstr "올바른 상태가 아니거나 수동 인증 정보가 없기 때문에 예약된 작업을 시작하지 못할 수 있습니다"
 
 #: awx/main/tasks.py:1728
 msgid "Job could not start because it does not have a valid inventory."
@@ -5010,12 +5010,12 @@ msgstr "지원되지 않는 %s URL"
 #: awx/main/utils/common.py:318
 #, python-format
 msgid "Unsupported host \"%s\" for file:// URL"
-msgstr "file:// URL에 대한 호스트 \"%s\"은/는 지원되지 않습니다."
+msgstr "file:// URL에 대한 호스트 \"%s\"은/는 지원되지 않습니다"
 
 #: awx/main/utils/common.py:320
 #, python-format
 msgid "Host is required for %s URL"
-msgstr "%s URL에 호스트가 필요합니다."
+msgstr "%s URL에 호스트가 필요합니다"
 
 #: awx/main/utils/common.py:338
 #, python-format
@@ -5025,7 +5025,7 @@ msgstr "사용자 이름은 %s에 대한 SSH 액세스의 \"git\"이어야 합�
 #: awx/main/utils/common.py:662
 #, python-brace-format
 msgid "Input type `{data_type}` is not a dictionary"
-msgstr "입력 유형 '{data_type}'은/는 사전이 아닙니다."
+msgstr "입력 유형 '{data_type}'은/는 사전이 아닙니다"
 
 #: awx/main/utils/common.py:692
 #, python-brace-format
@@ -5335,7 +5335,7 @@ msgid ""
 "The group type may need to be changed based on the type of the LDAP server.  "
 "Values are listed at: https://django-auth-ldap.readthedocs.io/en/stable/"
 "groups.html#types-of-groups"
-msgstr "LDAP 서버의 유형에 따라 그룹 유형을 변경해야 할 수 있습니다. 값은 https://django-auth-ldap.readthedocs.io/en/stable/groups.html#types-of-groups에 나열됩니다."
+msgstr "LDAP 서버의 유형에 따라 그룹 유형을 변경해야 할 수 있습니다. 값은 https://django-auth-ldap.readthedocs.io/en/stable/groups.html#types-of-groups에 나열됩니다"
 
 #: awx/sso/conf.py:317
 msgid "LDAP Group Type Parameters"
@@ -5449,7 +5449,7 @@ msgstr "TACACS + 포트"
 
 #: awx/sso/conf.py:505
 msgid "Port number of TACACS+ server."
-msgstr "TACACS+ 서버의 포트 번호"
+msgstr "TACACS+ 서버의 포트 번호."
 
 #: awx/sso/conf.py:516
 msgid "TACACS+ Secret"
@@ -5494,7 +5494,7 @@ msgstr "Google OAuth2"
 
 #: awx/sso/conf.py:569
 msgid "Google OAuth2 Key"
-msgstr "Google OAuth2 Key"
+msgstr "Google OAuth2 키"
 
 #: awx/sso/conf.py:570
 msgid "The OAuth2 key from your web application."
@@ -5525,7 +5525,7 @@ msgstr "Google OAuth2 추가 인수"
 #: awx/sso/conf.py:606
 msgid ""
 "Extra arguments for Google OAuth2 login. You can restrict it to only allow a "
-"single domain to authenticate, even if the user is logged in with multple "
+"single domain to authenticate, even if the user is logged in with multiple "
 "Google accounts. Refer to the documentation for more detail."
 msgstr "Google OAuth2 로그인에 대한 추가 인수입니다. 사용자가 여러 Google 계정으로 로그인한 경우에도 단일 도메인만 인증할 수 있도록 제한할 수 있습니다. 자세한 내용은 문서를 참조하십시오."
 
@@ -5710,7 +5710,7 @@ msgstr "GitHub Enterprise 개발자 애플리케이션의 OAuth2 시크릿(Clien
 
 #: awx/sso/conf.py:930
 msgid "GitHub Enterprise OAuth2 Organization Map"
-msgstr "GitHub Enterprise 조직"
+msgstr "GitHub Enterprise OAuth2 조직"
 
 #: awx/sso/conf.py:942
 msgid "GitHub Enterprise OAuth2 Team Map"
@@ -5822,7 +5822,7 @@ msgstr "Azure AD OAuth2 콜백 URL"
 msgid ""
 "Provide this URL as the callback URL for your application as part of your "
 "registration process. Refer to the documentation for more detail. "
-msgstr "이 URL을 등록 프로세스의 일부로 애플리케이션의 콜백 URL로 제공합니다. 자세한 내용은 설명서를 참조하십시오."
+msgstr "이 URL을 등록 프로세스의 일부로 애플리케이션의 콜백 URL로 제공합니다. 자세한 내용은 설명서를 참조하십시오. "
 
 #: awx/sso/conf.py:1165 awx/sso/conf.py:1177 awx/sso/conf.py:1188
 #: awx/sso/conf.py:1200 awx/sso/conf.py:1212
@@ -5909,7 +5909,7 @@ msgstr "SAML 서비스 공급자 공개 인증서"
 
 #: awx/sso/conf.py:1290
 msgid ""
-"Create a keypair to use as a service provider (SP) and include the "
+"Create a key pair to use as a service provider (SP) and include the "
 "certificate content here."
 msgstr "서비스 공급자(SP)로 사용할 키 쌍을 만들고 여기에 인증서 콘텐츠를 포함합니다."
 
@@ -5919,7 +5919,7 @@ msgstr "SAML 서비스 공급자 개인 키"
 
 #: awx/sso/conf.py:1302
 msgid ""
-"Create a keypair to use as a service provider (SP) and include the private "
+"Create a key pair to use as a service provider (SP) and include the private "
 "key content here."
 msgstr "서비스 공급자(SP)로 사용할 키 쌍을 만들고 여기에 개인 키 콘텐츠를 포함합니다."
 
@@ -6107,7 +6107,7 @@ msgstr "계정이 비활성화됨"
 #: awx/sso/validators.py:24 awx/sso/validators.py:51
 #, python-format
 msgid "DN must include \"%%(user)s\" placeholder for username: %s"
-msgstr "DN에는 사용자 이름에 대한 \"%%(user)s\" 자리 표시자를 포함해야 합니다. %s"
+msgstr "DN에는 사용자 이름에 대한 \"%%(user)s\" 자리 표시자를 포함해야 합니다: %s"
 
 #: awx/sso/validators.py:31
 #, python-format
@@ -6121,7 +6121,7 @@ msgstr "잘못된 필터: %s"
 
 #: awx/sso/validators.py:74
 msgid "TACACS+ secret does not allow non-ascii characters"
-msgstr "TACACS+ 시크릿은 ASCII가 아닌 문자를 허용하지 않습니다."
+msgstr "TACACS+ 시크릿은 ASCII가 아닌 문자를 허용하지 않습니다"
 
 #: awx/templates/error.html:4
 msgid "AWX"

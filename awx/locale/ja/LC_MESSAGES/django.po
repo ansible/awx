@@ -155,11 +155,11 @@ msgstr "モデルがアクセスコントロールにロールを使用してい
 msgid ""
 "You did not use correct Content-Type in your HTTP request. If you are using "
 "our REST API, the Content-Type must be application/json"
-msgstr "HTTP 要求で正しい Content-Type (コンテンツタイプ) が使用されていません。REST API を使用している場合、Content-Type (コンテンツタイプ) は「application/json」でなければなりません。"
+msgstr "HTTP 要求で正しい Content-Type (コンテンツタイプ) が使用されていません。REST API を使用している場合、Content-Type (コンテンツタイプ) は「application/json」でなければなりません"
 
 #: awx/api/generics.py:220
 msgid " To establish a login session, visit"
-msgstr "ログインセッションを確立するには、以下にアクセスしてください。"
+msgstr "ログインセッションを確立するには、以下にアクセスしてください"
 
 #: awx/api/generics.py:634 awx/api/generics.py:694
 msgid "\"id\" field must be an integer."
@@ -326,7 +326,7 @@ msgstr "max_hosts を変更できません。"
 #: awx/api/serializers.py:1391
 #, python-brace-format
 msgid "Cannot change local_path for {scm_type}-based projects"
-msgstr "{scm_type} ベースのプロジェクトの local_path を変更できません。"
+msgstr "{scm_type} ベースのプロジェクトの local_path を変更できません"
 
 #: awx/api/serializers.py:1395
 msgid "This path is already being used by another manual project."
@@ -414,7 +414,7 @@ msgstr "スマートインベントリーのグループを作成できません
 
 #: awx/api/serializers.py:1995
 msgid "Cloud credential to use for inventory updates."
-msgstr "インベントリー更新に使用するクラウド認証情報"
+msgstr "インベントリー更新に使用するクラウド認証情報。"
 
 #: awx/api/serializers.py:2025
 msgid "`{}` is a prohibited environment variable"
@@ -443,7 +443,7 @@ msgstr "SCM タイプでない場合は %s を設定できません。"
 
 #: awx/api/serializers.py:2246
 msgid "The project used for this job."
-msgstr "このジョブに使用するプロジェクト"
+msgstr "このジョブに使用するプロジェクト。"
 
 #: awx/api/serializers.py:2491
 msgid "Modifications not allowed for managed credential types"
@@ -512,7 +512,7 @@ msgstr "「user」、「team」、または「organization」のいずれか 1 �
 #: awx/api/serializers.py:2713
 msgid ""
 "Credential organization must be set and match before assigning to a team"
-msgstr "認証情報の組織が設定され、一致している状態でチームに割り当てる必要があります。"
+msgstr "認証情報の組織が設定され、一致している状態でチームに割り当てる必要があります"
 
 #: awx/api/serializers.py:2834
 msgid "This field is required."
@@ -619,13 +619,13 @@ msgstr "複数の {} 認証情報を割り当てることができません。"
 
 #: awx/api/serializers.py:4229
 msgid "Cannot assign a Credential of kind `{}`"
-msgstr "`{}`の種類の認証情報を割り当てることができません。"
+msgstr "`{}` の種類の認証情報を割り当てることができません"
 
 #: awx/api/serializers.py:4241
 msgid ""
 "Removing {} credential at launch time without replacement is not supported. "
 "Provided list lacked credential(s): {}."
-msgstr "置き換えなしで起動時に {} 認証情報を削除することはサポートされていません。指定された一覧には認証情報がありません: {}"
+msgstr "置き換えなしで起動時に {} 認証情報を削除することはサポートされていません。指定された一覧には認証情報がありませんでした: {}."
 
 #: awx/api/serializers.py:4338
 msgid "The inventory associated with this Workflow is being deleted."
@@ -633,11 +633,11 @@ msgstr "このワークフローに関連付けられているインベントリ
 
 #: awx/api/serializers.py:4405
 msgid "Message type '{}' invalid, must be either 'message' or 'body'"
-msgstr "メッセージタイプ '{}' が無効です。'メッセージ' または 'ボディー' のいずれかに指定する必要があります。"
+msgstr "メッセージタイプ '{}' が無効です。'メッセージ' または 'ボディー' のいずれかに指定する必要があります"
 
 #: awx/api/serializers.py:4411
 msgid "Expected string for '{}', found {}, "
-msgstr "'{}' の文字列が必要ですが、{} が見つかりました。 "
+msgstr "'{}' の文字列が必要ですが、{} が見つかりました, "
 
 #: awx/api/serializers.py:4415
 msgid "Messages cannot contain newlines (found newline in {} event)"
@@ -645,27 +645,27 @@ msgstr "メッセージでは改行を追加できません ({} イベントに�
 
 #: awx/api/serializers.py:4421
 msgid "Expected dict for 'messages' field, found {}"
-msgstr "'messages' フィールドには辞書が必要ですが、{} が見つかりました。"
+msgstr "'messages' フィールドには辞書が必要ですが、{} が見つかりました"
 
 #: awx/api/serializers.py:4425
 msgid ""
 "Event '{}' invalid, must be one of 'started', 'success', 'error', or "
 "'workflow_approval'"
-msgstr "イベント '{}' は無効です。'started'、'success'、'error' または 'workflow_approval' のいずれかでなければなりません。"
+msgstr "イベント '{}' は無効です。'started'、'success'、'error' または 'workflow_approval' のいずれかでなければなりません"
 
 #: awx/api/serializers.py:4431
 msgid "Expected dict for event '{}', found {}"
-msgstr "イベント '{}' には辞書が必要ですが、{} が見つかりました。"
+msgstr "イベント '{}' には辞書が必要ですが、{} が見つかりました"
 
 #: awx/api/serializers.py:4437
 msgid ""
 "Workflow Approval event '{}' invalid, must be one of 'running', 'approved', "
 "'timed_out', or 'denied'"
-msgstr "ワークフロー承認イベント '{}' が無効です。'running'、'approved'、'timed_out' または 'denied' のいずれかでなければなりません。"
+msgstr "ワークフロー承認イベント '{}' が無効です。'running'、'approved'、'timed_out' または 'denied' のいずれかでなければなりません"
 
 #: awx/api/serializers.py:4444
 msgid "Expected dict for workflow approval event '{}', found {}"
-msgstr "ワークフロー承認イベント '{}' には辞書が必要ですが、{} が見つかりました。"
+msgstr "ワークフロー承認イベント '{}' には辞書が必要ですが、{} が見つかりました"
 
 #: awx/api/serializers.py:4471
 msgid "Unable to render message '{}': {}"
@@ -716,7 +716,7 @@ msgstr "通知ボディー"
 msgid ""
 "Valid DTSTART required in rrule. Value should start with: DTSTART:"
 "YYYYMMDDTHHMMSSZ"
-msgstr "有効な DTSTART が rrule で必要です。値は DTSTART:YYYYMMDDTHHMMSSZ で開始する必要があります。"
+msgstr "有効な DTSTART が rrule で必要です。値は DTSTART:YYYYMMDDTHHMMSSZ で開始する必要があります"
 
 #: awx/api/serializers.py:4657
 msgid ""
@@ -907,7 +907,7 @@ msgstr "指定されたオブジェクトについて実行されたアクショ
 
 #: awx/api/views/__init__.py:205
 msgid "Not found."
-msgstr "見つかりません"
+msgstr "見つかりません。"
 
 #: awx/api/views/__init__.py:213
 msgid "Dashboard"
@@ -1128,7 +1128,7 @@ msgstr "このホストのインベントリーはすでに削除されていま
 
 #: awx/api/views/__init__.py:1765
 msgid "Cyclical Group association."
-msgstr "循環的なグループの関連付け"
+msgstr "循環的なグループの関連付け。"
 
 #: awx/api/views/__init__.py:1928
 msgid "Inventory subset argument must be a string."
@@ -1190,7 +1190,7 @@ msgstr "Survey の質問 %s は json オブジェクトではありません。"
 #: awx/api/views/__init__.py:2443
 #, python-brace-format
 msgid "'{field_name}' missing from survey question {idx}"
-msgstr "Survey の質問 {idx} に '{field_name}' がありません。"
+msgstr "Survey の質問 {idx} に '{field_name}' がありません"
 
 #: awx/api/views/__init__.py:2455
 #, python-brace-format
@@ -1632,7 +1632,7 @@ msgstr "読み取り専用設定の例"
 
 #: awx/conf/conf.py:74
 msgid "Example setting that cannot be changed."
-msgstr "変更不可能な設定例"
+msgstr "変更不可能な設定例。"
 
 #: awx/conf/conf.py:90
 msgid "Example Setting"
@@ -1640,7 +1640,7 @@ msgstr "設定例"
 
 #: awx/conf/conf.py:91
 msgid "Example setting which can be different for each user."
-msgstr "ユーザーごとに異なる設定例"
+msgstr "ユーザーごとに異なる設定例。"
 
 #: awx/conf/conf.py:92 awx/conf/registry.py:78 awx/conf/views.py:51
 msgid "User"
@@ -1971,7 +1971,7 @@ msgid ""
 "HTTP headers and meta keys to search to determine remote host name or IP. "
 "Add additional items to this list, such as \"HTTP_X_FORWARDED_FOR\", if "
 "behind a reverse proxy. See the \"Proxy Support\" section of the "
-"Adminstrator guide for more details."
+"Administrator guide for more details."
 msgstr "リモートホスト名または IP を判別するために検索する HTTP ヘッダーおよびメタキーです。リバースプロキシーの後ろの場合は、\"HTTP_X_FORWARDED_FOR\" のように項目をこの一覧に追加します。詳細は、Administrator Guide の「Proxy Support」セクションを参照してください。"
 
 #: awx/main/conf.py:85
@@ -2005,7 +2005,7 @@ msgstr "Red Hat のお客様ユーザー名"
 msgid ""
 "This username is used to send data to Insights for Ansible Automation "
 "Platform"
-msgstr "このユーザー名は、Insights for Ansible Automation Platform にデータを送信するために使用されます。"
+msgstr "このユーザー名は、Insights for Ansible Automation Platform にデータを送信するために使用されます"
 
 #: awx/main/conf.py:127
 msgid "Red Hat customer password"
@@ -2015,7 +2015,7 @@ msgstr "Red Hat のお客様パスワード"
 msgid ""
 "This password is used to send data to Insights for Ansible Automation "
 "Platform"
-msgstr "このパスワードは、Insights for Ansible Automation Platform にデータを送信するために使用されます。"
+msgstr "このパスワードは、Insights for Ansible Automation Platform にデータを送信するために使用されます"
 
 #: awx/main/conf.py:140
 msgid "Red Hat or Satellite username"
@@ -2322,7 +2322,7 @@ msgstr "ログアグリゲーター"
 
 #: awx/main/conf.py:475
 msgid "Hostname/IP where external logs will be sent to."
-msgstr "外部ログの送信先のホスト名/IP"
+msgstr "外部ログの送信先のホスト名/IP。"
 
 #: awx/main/conf.py:476 awx/main/conf.py:486 awx/main/conf.py:498
 #: awx/main/conf.py:508 awx/main/conf.py:520 awx/main/conf.py:537
@@ -2385,7 +2385,7 @@ msgstr "HTTP ログをコレクターに送信するロガーの一覧です。�
 "awx - サービスログ\n"
 "activity_stream - アクティビティーストリームレコード\n"
 "job_events - Ansible ジョブイベントからのコールバックデータ\n"
-"system_tracking - スキャンジョブから生成されるファクト"
+"system_tracking - スキャンジョブから生成されるファクト。"
 
 #: awx/main/conf.py:544
 msgid "Log System Tracking Facts Individually"
@@ -2405,7 +2405,7 @@ msgstr "外部ログの有効化"
 
 #: awx/main/conf.py:559
 msgid "Enable sending logs to external log aggregator."
-msgstr "外部ログアグリゲーターへのログ送信の有効化"
+msgstr "外部ログアグリゲーターへのログ送信の有効化。"
 
 #: awx/main/conf.py:568
 msgid "Cluster-wide unique identifier."
@@ -2457,11 +2457,11 @@ msgid ""
 "DEBUG, INFO, WARNING, ERROR, CRITICAL. Messages less severe than the "
 "threshold will be ignored by log handler. (messages under category awx."
 "anlytics ignore this setting)"
-msgstr "ログハンドラーによって使用されるレベルのしきい値です。重大度は低い順から高い順に DEBUG、INFO、WARNING、ERROR、CRITICAL になります。しきい値より重大度の低いメッセージはログハンドラーによって無視されます (カテゴリー awx.anlytics の下にあるメッセージはこの設定を無視します)。"
+msgstr "ログハンドラーによって使用されるレベルのしきい値です。重大度は低い順から高い順に DEBUG、INFO、WARNING、ERROR、CRITICAL になります。しきい値より重大度の低いメッセージはログハンドラーによって無視されます (カテゴリー awx.anlytics の下にあるメッセージはこの設定を無視します)"
 
 #: awx/main/conf.py:631
-msgid "Maximum disk persistance for external log aggregation (in GB)"
-msgstr "外部ログ集計の最大ディスク永続性 (GB)"
+msgid "Maximum disk persistence for external log aggregation (in GB)"
+msgstr "外部ログ集計の最大ディスク永続性 (GB 単位)"
 
 #: awx/main/conf.py:633
 msgid ""
@@ -2499,7 +2499,7 @@ msgstr "Insights for Ansible Automation Platform の最終収集日。"
 msgid ""
 "Last gathered entries for expensive collectors for Insights for Ansible "
 "Automation Platform."
-msgstr "Insights for Ansible Automation Platform でコストがかかっているコレクターに関して最後に収集されたエントリー"
+msgstr "Insights for Ansible Automation Platform でコストがかかっているコレクターに関して最後に収集されたエントリー。"
 
 #: awx/main/conf.py:686
 msgid "Insights for Ansible Automation Platform Gather Interval"
@@ -2507,7 +2507,7 @@ msgstr "Insights for Ansible Automation Platform の収集間隔"
 
 #: awx/main/conf.py:687
 msgid "Interval (in seconds) between data gathering."
-msgstr "データ収集の間隔 (秒単位)"
+msgstr "データ収集の間隔 (秒単位)。"
 
 #: awx/main/conf.py:701
 msgid ""
@@ -2548,11 +2548,11 @@ msgstr "Runas"
 
 #: awx/main/constants.py:26
 msgid "Enable"
-msgstr "有効化"
+msgstr "Enable"
 
 #: awx/main/constants.py:27
-msgid "Doas"
-msgstr "Doas"
+msgid "Does"
+msgstr "Does"
 
 #: awx/main/constants.py:28
 msgid "Ksu"
@@ -2601,7 +2601,7 @@ msgstr "オブジェクトの検索クエリー。例: Safe=TestSafe;Object=test
 
 #: awx/main/credential_plugins/aim.py:50
 msgid "Object Query Format"
-msgstr "オブジェクトクエリーフォーマット (必須)"
+msgstr "オブジェクトクエリーフォーマット"
 
 #: awx/main/credential_plugins/aim.py:53
 msgid "Reason"
@@ -2642,7 +2642,7 @@ msgstr "シークレット名"
 
 #: awx/main/credential_plugins/azure_kv.py:43
 msgid "The name of the secret to look up."
-msgstr "検索するシークレット名"
+msgstr "検索するシークレット名。"
 
 #: awx/main/credential_plugins/azure_kv.py:47
 #: awx/main/credential_plugins/conjur.py:45
@@ -2884,7 +2884,7 @@ msgstr "キー名"
 
 #: awx/main/credential_plugins/hashivault.py:112
 msgid "The name of the key to look up in the secret."
-msgstr "シークレットで検索するキーの名前"
+msgstr "シークレットで検索するキーの名前。"
 
 #: awx/main/credential_plugins/hashivault.py:116
 msgid "Secret Version (v2 only)"
@@ -2900,7 +2900,7 @@ msgstr "ロール名"
 
 #: awx/main/credential_plugins/hashivault.py:136
 msgid "The name of the role used to sign."
-msgstr "署名に使用するロール名"
+msgstr "署名に使用するロール名。"
 
 #: awx/main/credential_plugins/hashivault.py:139
 msgid "Valid Principals"
@@ -2962,7 +2962,7 @@ msgstr "シークレットから抽出するフィールド"
 #: awx/main/fields.py:68
 #, python-brace-format
 msgid "'{value}' is not one of ['{allowed_values}']"
-msgstr "'{value}' は ['{allowed_values}'] のいずれでもありません。"
+msgstr "'{value}' は ['{allowed_values}'] のいずれでもありません"
 
 #: awx/main/fields.py:418
 #, python-brace-format
@@ -3044,7 +3044,7 @@ msgstr "予約された `tower` 名前空間コンテナーを直接参照する
 
 #: awx/main/fields.py:866
 msgid "Must use multi-file syntax when injecting multiple files"
-msgstr "複数ファイルの挿入時に複数ファイル構文を使用する必要があります。"
+msgstr "複数ファイルの挿入時に複数ファイル構文を使用する必要があります"
 
 #: awx/main/fields.py:884
 #, python-brace-format
@@ -3083,7 +3083,7 @@ msgstr "すべての名前付き URL グラフノードの一覧です。"
 msgid ""
 "Read-only list of key-value pairs that exposes named URL graph topology. Use "
 "this list to programmatically generate named URLs for resources"
-msgstr "名前付き URL グラフトポロジーを公開するキーと値のペアの読み取り専用一覧です。この一覧を使用してリソースの名前付き URL をプログラムで生成します。"
+msgstr "名前付き URL グラフトポロジーを公開するキーと値のペアの読み取り専用一覧です。この一覧を使用してリソースの名前付き URL をプログラムで生成します"
 
 #: awx/main/migrations/_inventory_source_vars.py:142
 msgid "Image ID"
@@ -3424,7 +3424,7 @@ msgstr "Satellite 6 URL"
 msgid ""
 "Enter the URL that corresponds to your Red Hat Satellite 6 server. For "
 "example, https://satellite.example.org"
-msgstr "Red Hat Satellite 6 Server に対応する URL を入力します (例: https://satellite.example.org)。"
+msgstr "Red Hat Satellite 6 Server に対応する URL を入力します (例: https://satellite.example.org)"
 
 #: awx/main/models/credential/__init__.py:840 awx/main/models/inventory.py:807
 msgid "Google Compute Engine"
@@ -3483,7 +3483,7 @@ msgstr "GitHub パーソナルアクセストークン"
 
 #: awx/main/models/credential/__init__.py:926
 msgid "This token needs to come from your profile settings in GitHub"
-msgstr "このトークンは GitHub のプロファイル設定から取得する必要があります。"
+msgstr "このトークンは GitHub のプロファイル設定から取得する必要があります"
 
 #: awx/main/models/credential/__init__.py:936
 msgid "GitLab Personal Access Token"
@@ -3491,7 +3491,7 @@ msgstr "GitLab パーソナルアクセストークン"
 
 #: awx/main/models/credential/__init__.py:945
 msgid "This token needs to come from your profile settings in GitLab"
-msgstr "このトークンは GitLab のプロファイル設定から取得する必要があります。"
+msgstr "このトークンは GitLab のプロファイル設定から取得する必要があります"
 
 #: awx/main/models/credential/__init__.py:979 awx/main/models/inventory.py:812
 msgid "Red Hat Virtualization"
@@ -3600,11 +3600,11 @@ msgstr "Galaxy インスタンスに対する認証に使用するトークン�
 
 #: awx/main/models/credential/__init__.py:1209
 msgid "Target must be a non-external credential"
-msgstr "ターゲットには、外部の認証情報以外を使用してください。"
+msgstr "ターゲットには、外部の認証情報以外を使用してください"
 
 #: awx/main/models/credential/__init__.py:1214
 msgid "Source must be an external credential"
-msgstr "ソースは、外部の認証情報でなければなりません。"
+msgstr "ソースは、外部の認証情報でなければなりません"
 
 #: awx/main/models/credential/__init__.py:1220
 msgid "Input field must be defined on target credential (options are {})."
@@ -3741,20 +3741,20 @@ msgstr "エラー"
 
 #: awx/main/models/execution_environments.py:17
 msgid "Always pull container before running."
-msgstr "実行前に必ずコンテナーをプルする"
+msgstr "実行前に必ずコンテナーをプルします。"
 
 #: awx/main/models/execution_environments.py:18
 msgid "Only pull the image if not present before running."
-msgstr "イメージが存在しない場合のみ実行前にプルする"
+msgstr "イメージが存在しない場合のみ実行前にプルします。"
 
 #: awx/main/models/execution_environments.py:19
 msgid "Never pull container before running."
-msgstr "実行前にコンテナーをプルしない"
+msgstr "実行前にコンテナーをプルしないでください。"
 
 #: awx/main/models/execution_environments.py:29
 msgid ""
 "The organization used to determine access to this execution environment."
-msgstr "実行環境にアクセスできるかを決定する時に使用する組織"
+msgstr "実行環境にアクセスできるかを決定する時に使用する組織。"
 
 #: awx/main/models/execution_environments.py:33
 msgid "image location"
@@ -3781,7 +3781,7 @@ msgstr "このグループに自動的に割り当てるインスタンスの割
 #: awx/main/models/ha.py:185
 msgid ""
 "Static minimum number of Instances to automatically assign to this group"
-msgstr "このグループに自動的に割り当てるインスタンスの静的な最小数。"
+msgstr "このグループに自動的に割り当てるインスタンスの静的な最小数"
 
 #: awx/main/models/ha.py:187
 msgid ""
@@ -3943,7 +3943,7 @@ msgid ""
 "enabled variable may be specified as \"foo.bar\", in which case the lookup "
 "will traverse into nested dicts, equivalent to: from_dict.get(\"foo\", {})."
 "get(\"bar\", default)"
-msgstr "ホスト変数の指定された辞書から有効な状態を取得します。有効な変数は「foo.bar」として指定できます。その場合、ルックアップはネストされた辞書に移動します。これは、from_dict.get(\"foo\", {}).get(\"bar\", default) と同等です。"
+msgstr "ホスト変数の指定された辞書から有効な状態を取得します。有効な変数は「foo.bar」として指定できます。その場合、ルックアップはネストされた辞書に移動します。これは、from_dict.get(\"foo\", {}).get(\"bar\", default) と同等です"
 
 #: awx/main/models/inventory.py:857
 msgid ""
@@ -4031,7 +4031,7 @@ msgstr "インベントリースクリプトの内容"
 msgid ""
 "If enabled, textual changes made to any templated files on the host are "
 "shown in the standard output"
-msgstr "有効にされている場合、ホストのテンプレート化されたファイルに追加されるテキストの変更が標準出力に表示されます。"
+msgstr "有効にされている場合、ホストのテンプレート化されたファイルに追加されるテキストの変更が標準出力に表示されます"
 
 #: awx/main/models/jobs.py:109
 msgid ""
@@ -4116,7 +4116,7 @@ msgstr "{status_value} は、有効なステータスオプションではあり
 #: awx/main/models/jobs.py:888
 msgid ""
 "Inventory applied as a prompt, assuming job template prompts for inventory"
-msgstr "インベントリーがプロンプトとして適用されると、ジョブテンプレートでインベントリーをプロンプトで要求することが前提となります。"
+msgstr "インベントリーがプロンプトとして適用されると、ジョブテンプレートでインベントリーをプロンプトで要求することが前提となります"
 
 #: awx/main/models/jobs.py:1039
 msgid "job host summaries"
@@ -4168,7 +4168,7 @@ msgstr "使用するカスタム Python virtualenv を含むローカルの絶�
 
 #: awx/main/models/mixins.py:496
 msgid "{} is not a valid virtualenv in {}"
-msgstr "{}は{}の有効な virtualenv ではありません"
+msgstr "{} は {} の有効な virtualenv ではありません"
 
 #: awx/main/models/mixins.py:540 awx/main/models/mixins.py:575
 msgid "Service that webhook requests will be accepted from"
@@ -4224,7 +4224,7 @@ msgstr "IRC"
 
 #: awx/main/models/notifications.py:78
 msgid "Optional custom messages for notification template."
-msgstr "通知テンプレートのオプションのカスタムメッセージ"
+msgstr "通知テンプレートのオプションのカスタムメッセージ。"
 
 #: awx/main/models/notifications.py:201 awx/main/models/unified_jobs.py:74
 msgid "Pending"
@@ -4240,7 +4240,7 @@ msgstr "失敗"
 
 #: awx/main/models/notifications.py:514
 msgid "status must be either running, succeeded or failed"
-msgstr "ステータスは、実行中、成功、失敗のいずれかでなければなりません。"
+msgstr "ステータスは、実行中、成功、失敗のいずれかでなければなりません"
 
 #: awx/main/models/oauth.py:32
 msgid "application"
@@ -4305,11 +4305,11 @@ msgstr "許可されたスコープで、ユーザーのパーミッションを
 msgid ""
 "OAuth2 Tokens cannot be created by users associated with an external "
 "authentication provider ({})"
-msgstr "OAuth2 トークンは、外部の認証プロバイダー ({}) に関連付けられたユーザーが作成することはできません。"
+msgstr "OAuth2 トークンは、外部の認証プロバイダー ({}) に関連付けられたユーザーが作成することはできません"
 
 #: awx/main/models/organization.py:44
 msgid "Maximum number of hosts allowed to be managed by this organization."
-msgstr "この組織が管理可能な最大ホスト数"
+msgstr "この組織が管理可能な最大ホスト数。"
 
 #: awx/main/models/organization.py:54
 msgid "The default execution environment for jobs run by this organization."
@@ -4457,7 +4457,7 @@ msgstr "実行予定のプロジェクト更新 Playbook の一部。"
 #: awx/main/models/projects.py:512
 msgid ""
 "The SCM Revision discovered by this update for the given project and branch."
-msgstr "指定のプロジェクトおよびブランチ用にこの更新が検出した SCM リビジョン"
+msgstr "指定のプロジェクトおよびブランチ用にこの更新が検出した SCM リビジョン。"
 
 #: awx/main/models/rbac.py:35
 msgid "System Administrator"
@@ -4690,7 +4690,7 @@ msgstr "更新中"
 
 #: awx/main/models/unified_jobs.py:171
 msgid "The organization used to determine access to this template."
-msgstr "このテンプレートにアクセスできるかを決定する時に使用する組織"
+msgstr "このテンプレートにアクセスできるかを決定する時に使用する組織。"
 
 #: awx/main/models/unified_jobs.py:457
 msgid "Field is not allowed on launch."
@@ -4768,7 +4768,7 @@ msgstr "ジョブが実行されたインスタンスグループ"
 
 #: awx/main/models/unified_jobs.py:701
 msgid "The organization used to determine access to this unified job."
-msgstr "この統一されたジョブにアクセスできるかを決定する時に使用する組織"
+msgstr "この統一されたジョブにアクセスできるかを決定する時に使用する組織。"
 
 #: awx/main/models/unified_jobs.py:711
 msgid ""
@@ -4804,7 +4804,7 @@ msgstr "True であればジョブは作成されません。ノードが絶対�
 
 #: awx/main/models/workflow.py:251
 msgid ""
-"An identifier coresponding to the workflow job template node that this node "
+"An identifier corresponding to the workflow job template node that this node "
 "was created from."
 msgstr "このノードの作成元のワークフロージョブテンプレートノードに対応する ID。"
 
@@ -4835,11 +4835,11 @@ msgstr "承認ノード (タイムアウトが割り当てられている場合)
 
 #: awx/main/notifications/grafana_backend.py:85
 msgid "Error converting time {} or timeEnd {} to int."
-msgstr "time {} または timeEnd {} を int に変換中のエラー"
+msgstr "time {} または timeEnd {} を int に変換中のエラー。"
 
 #: awx/main/notifications/grafana_backend.py:87
 msgid "Error converting time {} and/or timeEnd {} to int."
-msgstr "time {} および/または timeEnd {} を int に変換中のエラー"
+msgstr "time {} および/または timeEnd {} を int に変換中のエラー。"
 
 #: awx/main/notifications/grafana_backend.py:100
 #: awx/main/notifications/grafana_backend.py:102
@@ -5090,18 +5090,18 @@ msgstr "1 つ以上の秘密鍵が必要です。"
 #, python-format
 msgid ""
 "At least %(min_keys)d private keys are required, only %(key_count)d provided."
-msgstr "最低でも %(min_keys)d の秘密鍵が必要です。提供数: %(key_count)d のみ"
+msgstr "最低でも %(min_keys)d の秘密鍵が必要ですが、提供数は %(key_count)d のみです。"
 
 #: awx/main/validators.py:138
 #, python-format
 msgid "Only one private key is allowed, %(key_count)d provided."
-msgstr "秘密鍵は 1 つのみ許可されます。提供数: %(key_count)d"
+msgstr "秘密鍵は 1 つのみ許可されますが、提供数は %(key_count)d です。"
 
 #: awx/main/validators.py:140
 #, python-format
 msgid ""
 "No more than %(max_keys)d private keys are allowed, %(key_count)d provided."
-msgstr "%(max_keys)d を超える秘密鍵は使用できません。提供数: %(key_count)d"
+msgstr "%(max_keys)d を超える秘密鍵は使用できませんが、提供数は %(key_count)d です。"
 
 #: awx/main/validators.py:145
 msgid "Exactly one certificate is required."
@@ -5116,18 +5116,18 @@ msgstr "1 つ以上の証明書が必要です。"
 msgid ""
 "At least %(min_certs)d certificates are required, only %(cert_count)d "
 "provided."
-msgstr "最低でも %(min_certs)d 証明書が必要です。提供数: %(cert_count)d のみ"
+msgstr "最低でも %(min_certs)d 証明書が必要ですが、提供数は %(cert_count)d のみです。"
 
 #: awx/main/validators.py:152
 #, python-format
 msgid "Only one certificate is allowed, %(cert_count)d provided."
-msgstr "証明書は 1 つのみ許可されます。提供数: %(cert_count)d"
+msgstr "証明書は 1 つのみ許可されますが、提供数は %(cert_count)d です。"
 
 #: awx/main/validators.py:154
 #, python-format
 msgid ""
 "No more than %(max_certs)d certificates are allowed, %(cert_count)d provided."
-msgstr "%(max_certs)d を超えて証明書を指定できません。提供数: %(cert_count)d"
+msgstr "%(max_certs)d を超えて証明書を指定できませんが、提供数は %(cert_count)d です。"
 
 #: awx/main/validators.py:289
 #, python-brace-format
@@ -5181,13 +5181,17 @@ msgid ""
 "controls which users are placed into which organizations based on their\n"
 "username and email address. Configuration details are available in the \n"
 "documentation."
-msgstr "ソーシャル認証アカウントから組織管理者/ユーザーへのマッピングです。この設定は、ユーザー名およびメールアドレスに基づいてどのユーザーをどの組織に配置するかを管理します。設定の詳細については、ドキュメントを参照してください。"
+msgstr "ソーシャル認証アカウントから組織管理者/ユーザーへのマッピングです。この設定は、\n"
+"ユーザー名およびメールアドレスに基づいて\n"
+"どのユーザーをどの組織に配置するかを管理します。設定の詳細については、\n"
+"ドキュメントを参照してください。"
 
 #: awx/sso/conf.py:81
 msgid ""
 "Mapping of team members (users) from social auth accounts. Configuration\n"
 "details are available in the documentation."
-msgstr "ソーシャル認証アカウントからチームメンバー (ユーザー) へのマッピングです。設定の詳細については、ドキュメントを参照してください。"
+msgstr "ソーシャル認証アカウントからチームメンバー (ユーザー) へのマッピングです。設定の詳細については、\n"
+"ドキュメントを参照してください。"
 
 #: awx/sso/conf.py:101
 msgid "Authentication Backends"
@@ -5498,7 +5502,7 @@ msgstr "Google OAuth2 キー"
 
 #: awx/sso/conf.py:570
 msgid "The OAuth2 key from your web application."
-msgstr "web アプリケーションの OAuth2 キー"
+msgstr "web アプリケーションの OAuth2 キー。"
 
 #: awx/sso/conf.py:581
 msgid "Google OAuth2 Secret"
@@ -5506,7 +5510,7 @@ msgstr "Google OAuth2 シークレット"
 
 #: awx/sso/conf.py:582
 msgid "The OAuth2 secret from your web application."
-msgstr "web アプリケーションの OAuth2 シークレット"
+msgstr "web アプリケーションの OAuth2 シークレット。"
 
 #: awx/sso/conf.py:593
 msgid "Google OAuth2 Allowed Domains"
@@ -5525,7 +5529,7 @@ msgstr "Google OAuth2 追加引数"
 #: awx/sso/conf.py:606
 msgid ""
 "Extra arguments for Google OAuth2 login. You can restrict it to only allow a "
-"single domain to authenticate, even if the user is logged in with multple "
+"single domain to authenticate, even if the user is logged in with multiple "
 "Google accounts. Refer to the documentation for more detail."
 msgstr "Google OAuth2 ログインの追加引数です。ユーザーが複数の Google アカウントでログインしている場合でも、単一ドメインの認証のみを許可するように制限できます。詳細については、ドキュメントを参照してください。"
 
@@ -5648,7 +5652,7 @@ msgstr "GitHub チーム ID"
 msgid ""
 "Find the numeric team ID using the Github API: http://fabian-kostadinov."
 "github.io/2015/01/16/how-to-find-a-github-team-id/."
-msgstr "Github API を使用して数値のチーム ID を検索します: http://fabian-kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/"
+msgstr "Github API を使用して数値のチーム ID を検索します: http://fabian-kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/。"
 
 #: awx/sso/conf.py:841
 msgid "GitHub Team OAuth2 Organization Map"
@@ -5804,7 +5808,7 @@ msgstr "GitHub Enterprise チーム ID"
 msgid ""
 "Find the numeric team ID using the Github Enterprise API: http://fabian-"
 "kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/."
-msgstr "Github Enterprise API を使用して数値のチーム ID を検索します: http://fabian-kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/"
+msgstr "Github Enterprise API を使用して数値のチーム ID を検索します: http://fabian-kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/。"
 
 #: awx/sso/conf.py:1133
 msgid "GitHub Enterprise Team OAuth2 Organization Map"
@@ -5909,7 +5913,7 @@ msgstr "SAML サービスプロバイダーの公開証明書"
 
 #: awx/sso/conf.py:1290
 msgid ""
-"Create a keypair to use as a service provider (SP) and include the "
+"Create a key pair to use as a service provider (SP) and include the "
 "certificate content here."
 msgstr "サービスプロバイダー (SP) として使用するためのキーペアを作成し、ここに証明書の内容を組み込みます。"
 
@@ -5919,7 +5923,7 @@ msgstr "SAML サービスプロバイダーの秘密鍵｜"
 
 #: awx/sso/conf.py:1302
 msgid ""
-"Create a keypair to use as a service provider (SP) and include the private "
+"Create a key pair to use as a service provider (SP) and include the private "
 "key content here."
 msgstr "サービスプロバイダー (SP) として使用するためのキーペアを作成し、ここに秘密鍵の内容を組み込みます。"
 
@@ -6027,7 +6031,7 @@ msgstr "無効なフィールドです。"
 #: awx/sso/fields.py:246
 #, python-brace-format
 msgid "Invalid connection option(s): {invalid_options}."
-msgstr "無効な接続オプション: {invalid_options}"
+msgstr "無効な接続オプション: {invalid_options}。"
 
 #: awx/sso/fields.py:322
 msgid "Base"
@@ -6061,7 +6065,7 @@ msgstr "LDAPSearch または LDAPSearchUnion のインスタンスが必要で�
 #: awx/sso/fields.py:408
 #, python-brace-format
 msgid "Invalid user attribute(s): {invalid_attrs}."
-msgstr "無効なユーザー属性: {invalid_attrs}"
+msgstr "無効なユーザー属性: {invalid_attrs}。"
 
 #: awx/sso/fields.py:425
 #, python-brace-format
@@ -6083,17 +6087,17 @@ msgstr "無効な group_type パラメーター。辞書のインスタンスが
 #: awx/sso/fields.py:476
 #, python-brace-format
 msgid "Invalid key(s): {invalid_keys}."
-msgstr "無効なキー: {invalid_keys}"
+msgstr "無効なキー: {invalid_keys}。"
 
 #: awx/sso/fields.py:500
 #, python-brace-format
 msgid "Invalid user flag: \"{invalid_flag}\"."
-msgstr "無効なユーザーフラグ: \"{invalid_flag}\""
+msgstr "無効なユーザーフラグ: \"{invalid_flag}\"。"
 
 #: awx/sso/fields.py:649
 #, python-brace-format
 msgid "Invalid language code(s) for org info: {invalid_lang_codes}."
-msgstr "組織情報の無効な言語コード: {invalid_lang_codes}"
+msgstr "組織情報の無効な言語コード: {invalid_lang_codes}。"
 
 #: awx/sso/pipeline.py:27
 #, python-brace-format
