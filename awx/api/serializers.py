@@ -4691,7 +4691,7 @@ class BulkJobNodeSerializer(WorkflowJobNodeSerializer):
 
     class Meta:
         model = WorkflowJobNode
-        fields = ('*', 'credentials', 'labels', 'instance_groups')  # m2m fields are not canonical for WJ nodes, TODO: add instance_groups once supported
+        fields = ('*', 'credentials', 'labels', 'instance_groups')  # m2m fields are not canonical for WJ nodes
 
     def validate(self, attrs):
         return super(LaunchConfigurationBaseSerializer, self).validate(attrs)
