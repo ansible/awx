@@ -235,7 +235,7 @@ class WebSocketRelayManager(object):
                     # If we don't get an IP, just try the hostname, maybe it resolves
                     ip = hostname
                 if ip is None:
-                    logger.warning(f"Received invalid online heartbeet, missing hostname or ip: {payload}")
+                    logger.warning(f"Received invalid online heartbeet, missing hostname and ip: {payload}")
                     return
                 self.known_hosts[hostname] = ip
                 logger.debug(f"Web host {hostname} ({ip}) online heartbeat received.")
@@ -246,7 +246,7 @@ class WebSocketRelayManager(object):
                     # If we don't get an IP, just try the hostname, maybe it resolves
                     ip = hostname
                 if ip is None:
-                    logger.warning(f"Received invalid offline heartbeet, missing hostname or ip: {payload}")
+                    logger.warning(f"Received invalid offline heartbeet, missing hostname and ip: {payload}")
                     return
                 self.cleanup_offline_host(ip)
                 logger.debug(f"Web host {hostname} ({ip}) offline heartbeat received.")
@@ -295,7 +295,6 @@ class WebSocketRelayManager(object):
 
         # Establishes a websocket connection to /websocket/relay on all API servers
         while True:
-            # logger.info("Current known hosts: {}".format(self.known_hosts))
             future_remote_hosts = self.known_hosts.keys()
             current_remote_hosts = self.relay_connections.keys()
             deleted_remote_hosts = set(current_remote_hosts) - set(future_remote_hosts)
