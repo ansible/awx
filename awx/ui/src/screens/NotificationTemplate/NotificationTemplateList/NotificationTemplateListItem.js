@@ -114,17 +114,17 @@ function NotificationTemplateListItem({
             <b>{template.name}</b>
           </Link>
         </TdBreakWord>
-        <Td dataLabel={t`Oragnization`}>
-          <Link to={`/organizations/${template.summary_fields.organization.id}/details`}>
-            <b>{template.summary_fields.organization.name}</b>
-          </Link>
-        </Td>
         <Td dataLabel={t`Status`}>
           {status && <StatusLabel status={status} />}
         </Td>
         <Td dataLabel={t`Type`}>
           {NOTIFICATION_TYPES[template.notification_type] ||
             template.notification_type}
+        </Td>
+        <Td dataLabel={t`Oragnization`}>
+          <Link to={`/organizations/${template.summary_fields.organization.id}/details`}>
+            <b>{template.summary_fields.organization.name}</b>
+          </Link>
         </Td>
         <ActionsTd dataLabel={t`Actions`}>
           <ActionItem visible tooltip={t`Test notification`}>
