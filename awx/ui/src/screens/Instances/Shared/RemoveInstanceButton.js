@@ -33,7 +33,7 @@ function RemoveInstanceButton({ itemsToRemove, onRemove, isK8s }) {
   const [removeDetails, setRemoveDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const cannotRemove = (item) => item.node_type !== 'execution';
+  const cannotRemove = (item) => !(item.node_type === 'execution' || item.node_type === 'hop');
 
   const toggleModal = async (isOpen) => {
     setRemoveDetails(null);
