@@ -288,7 +288,18 @@ class ApiV2(base.Base):
                     if asset['natural_key']['type'] == 'user':
                         # We should only impose a default password if the resource doesn't exist.
                         post_data.setdefault('password', 'abc123')
-                    _page = endpoint.post(post_data)
+                    try:
+                        _page = endpoint.post(post_data)
+                    except exc.NoContent:
+                        # desired exception under some circumstances, e.g. labels that already exist
+                        if _page is None and 'name' in post_data:
+                            results = endpoint.get(all_pages=True).results
+                            for item in results:
+                                if item['name'] == post_data['name']:
+                                    _page = item.get()
+                                    break
+                            else:
+                                raise
                     changed = True
                     if asset['natural_key']['type'] == 'project':
                         # When creating a project, we need to wait for its
@@ -308,8 +319,6 @@ class ApiV2(base.Base):
 
                     _page = _page.put(post_data)
                     changed = True
-            except exc.NoContent:  # desired exception under some circumstances, e.g. labels that already exist
-                pass
             except (exc.Common, AssertionError) as e:
                 identifier = asset.get("name", None) or asset.get("username", None) or asset.get("hostname", None)
                 log.error(f'{endpoint} "{identifier}": {e}.')
