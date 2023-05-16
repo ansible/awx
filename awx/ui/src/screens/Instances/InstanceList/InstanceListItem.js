@@ -137,7 +137,7 @@ function InstanceListItem({
             rowIndex,
             isSelected,
             onSelect,
-            disable: !isExecutionNode,
+            disable: !(isExecutionNode || isHopNode),
           }}
           dataLabel={t`Selected`}
         />
