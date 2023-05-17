@@ -174,8 +174,7 @@ class AWXConsumerPG(AWXConsumerBase):
 
         # record subsystem metrics for the dispatcher
         if current_time - self.last_metrics_gather > 20:
-            for key, value in self.pool.produce_subsystem_metrics().items():
-                self.subsystem_metrics.set(f'dispatcher_pool_{key}', value)
+            self.pool.produce_subsystem_metrics(self.subsystem_metrics)
             self.subsystem_metrics.set('dispatcher_availability', self.listen_cumulative_time / (current_time - self.last_metrics_gather))
             self.subsystem_metrics.pipe_execute()
             self.listen_cumulative_time = 0.0

@@ -212,7 +212,7 @@ class Metrics:
             # dispatcher subsystem metrics
             SetIntM('dispatcher_pool_scale_up_events', 'Number of times local dispatcher scaled up a worker since startup'),
             SetIntM('dispatcher_pool_active_task_count', 'Number of active tasks in the worker pool when last task was submitted'),
-            SetIntM('dispatcher_pool_worker_count', 'Highest number of workers in worker pool in last collection interval, about 20s'),
+            SetIntM('dispatcher_pool_max_worker_count', 'Highest number of workers in worker pool in last collection interval, about 20s'),
             SetFloatM('dispatcher_availability', 'Fraction of time (in last collection interval) dispatcher was able to receive messages'),
         ]
         # turn metric list into dictionary with the metric name as a key

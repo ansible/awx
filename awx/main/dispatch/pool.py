@@ -344,14 +344,11 @@ class AutoscalePool(WorkerPool):
         self.scale_up_ct = 0
         self.worker_count_max = 0
 
-    def produce_subsystem_metrics(self):
-        metrics_data = {
-            'scale_up_events': self.scale_up_ct,
-            'active_task_count': sum(len(w.managed_tasks) for w in self.workers),
-            'worker_count': self.worker_count_max,
-        }
+    def produce_subsystem_metrics(self, metrics_object):
+        metrics_object.set('dispatcher_pool_scale_up_events', self.scale_up_ct)
+        metrics_object.set('dispatcher_pool_active_task_count', sum(len(w.managed_tasks) for w in self.workers))
+        metrics_object.set('dispatcher_pool_max_worker_count', self.worker_count_max)
         self.worker_count_max = len(self.workers)
-        return metrics_data
 
     @property
     def should_grow(self):
