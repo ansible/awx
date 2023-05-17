@@ -78,7 +78,7 @@ options:
       description:
         - Desired state of the resource.
       default: "present"
-      choices: ["present", "absent"]
+      choices: ["present", "absent", "exists"]
       type: str
 extends_documentation_fragment: awx.awx.auth
 '''
@@ -149,7 +149,7 @@ def main():
         host_filter=dict(),
         instance_groups=dict(type="list", elements='str'),
         prevent_instance_group_fallback=dict(type='bool'),
-        state=dict(choices=['present', 'absent'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists'], default='present'),
         input_inventories=dict(type='list', elements='str'),
     )
 
@@ -172,7 +172,7 @@ def main():
     org_id = module.resolve_name_to_id('organizations', organization)
 
     # Attempt to look up inventory based on the provided name and org ID
-    inventory = module.get_one('inventories', name_or_id=name, **{'data': {'organization': org_id}})
+    inventory = module.get_one('inventories', name_or_id=name, check_exists=(state == 'exists'), **{'data': {'organization': org_id}})
 
     # Attempt to look up credential to copy based on the provided name
     if copy_from:

@@ -33,7 +33,7 @@ def parse_args():
         '--project-file',
         dest='project_file',
         default=os.getenv('AWXKIT_PROJECT_FILE'),
-        help='Path for yml project config file.' 'If not provided or set by AWXKIT_PROJECT_FILE, projects will not have default SCM_URL',
+        help='Path for yml project config file.If not provided or set by AWXKIT_PROJECT_FILE, projects will not have default SCM_URL',
     )
     parser.add_argument('-f', '--file', dest='akit_script', default=False, help='akit script file to run in interactive session.')
     parser.add_argument('-x', '--non-interactive', action='store_true', dest='non_interactive', help='Do not run in interactive mode.')

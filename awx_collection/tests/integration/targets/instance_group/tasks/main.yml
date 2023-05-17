@@ -2,6 +2,7 @@
 - name: Generate test id
   set_fact:
     test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
 
 - name: Generate names
   set_fact:
@@ -31,6 +32,42 @@
         policy_instance_percentage: 34
         policy_instance_minimum: 12
         state: present
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Create an Instance Group with exists
+      instance_group:
+        name: "{{ group_name1 }}"
+        policy_instance_percentage: 34
+        policy_instance_minimum: 12
+        state: exists
+      register: result
+
+    - assert:
+        that:
+          - "result is not changed"
+
+    - name: Delete an Instance Group
+      instance_group:
+        name: "{{ group_name1 }}"
+        policy_instance_percentage: 34
+        policy_instance_minimum: 12
+        state: absent
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Create an Instance Group with exists
+      instance_group:
+        name: "{{ group_name1 }}"
+        policy_instance_percentage: 34
+        policy_instance_minimum: 12
+        state: exists
       register: result
 
     - assert:

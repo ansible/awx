@@ -97,7 +97,7 @@ options:
       description:
         - Desired state of the resource.
       default: "present"
-      choices: ["present", "absent"]
+      choices: ["present", "absent", "exists"]
       type: str
 extends_documentation_fragment: awx.awx.auth
 '''
@@ -222,7 +222,7 @@ def main():
         notification_type=dict(choices=['email', 'grafana', 'irc', 'mattermost', 'pagerduty', 'rocketchat', 'slack', 'twilio', 'webhook']),
         notification_configuration=dict(type='dict'),
         messages=dict(type='dict'),
-        state=dict(choices=['present', 'absent'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )
 
     # Create a module for ourselves
@@ -248,6 +248,7 @@ def main():
     existing_item = module.get_one(
         'notification_templates',
         name_or_id=name,
+        check_exists=(state == 'exists'),
         **{
             'data': {
                 'organization': organization_id,

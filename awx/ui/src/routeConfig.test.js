@@ -101,10 +101,8 @@ describe('getRouteConfig', () => {
       '/credential_types',
       '/notification_templates',
       '/instance_groups',
-      '/instances',
       '/applications',
       '/execution_environments',
-      '/topology_view',
     ]);
   });
 
@@ -237,10 +235,8 @@ describe('getRouteConfig', () => {
       '/credential_types',
       '/notification_templates',
       '/instance_groups',
-      '/instances',
       '/applications',
       '/execution_environments',
-      '/topology_view',
     ]);
   });
 
@@ -268,10 +264,8 @@ describe('getRouteConfig', () => {
       '/credential_types',
       '/notification_templates',
       '/instance_groups',
-      '/instances',
       '/applications',
       '/execution_environments',
-      '/topology_view',
     ]);
   });
 });

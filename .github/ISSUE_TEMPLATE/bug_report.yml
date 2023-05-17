@@ -19,6 +19,8 @@ body:
           required: true
         - label: I understand that AWX is open source software provided for free and that I might not receive a timely response.
           required: true
+        - label: I am **NOT** reporting a (potential) security vulnerability. (These should be emailed to `security@ansible.com` instead.)
+          required: true
 
   - type: textarea
     id: summary

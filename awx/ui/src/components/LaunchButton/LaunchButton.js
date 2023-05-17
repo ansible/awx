@@ -43,6 +43,7 @@ function LaunchButton({ resource, children }) {
   const [surveyConfig, setSurveyConfig] = useState(null);
   const [labels, setLabels] = useState([]);
   const [isLaunching, setIsLaunching] = useState(false);
+  const [resourceCredentials, setResourceCredentials] = useState([]);
   const [error, setError] = useState(null);
 
   const handleLaunch = async () => {
@@ -81,6 +82,13 @@ function LaunchButton({ resource, children }) {
         }));
 
         setLabels(allLabels);
+      }
+
+      if (launch.ask_credential_on_launch) {
+        const {
+          data: { results: templateCredentials },
+        } = await JobTemplatesAPI.readCredentials(resource.id);
+        setResourceCredentials(templateCredentials);
       }
 
       if (canLaunchWithoutPrompt(launch)) {
@@ -208,6 +216,7 @@ function LaunchButton({ resource, children }) {
           labels={labels}
           onLaunch={launchWithParams}
           onCancel={() => setShowLaunchPrompt(false)}
+          resourceDefaultCredentials={resourceCredentials}
         />
       )}
     </>

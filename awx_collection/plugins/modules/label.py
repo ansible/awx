@@ -41,7 +41,7 @@ options:
       description:
         - Desired state of the resource.
       default: "present"
-      choices: ["present"]
+      choices: ["present", "exists"]
       type: str
 extends_documentation_fragment: awx.awx.auth
 '''
@@ -62,7 +62,7 @@ def main():
         name=dict(required=True),
         new_name=dict(),
         organization=dict(required=True),
-        state=dict(choices=['present'], default='present'),
+        state=dict(choices=['present', 'exists'], default='present'),
     )
 
     # Create a module for ourselves
@@ -72,6 +72,7 @@ def main():
     name = module.params.get('name')
     new_name = module.params.get("new_name")
     organization = module.params.get('organization')
+    state = module.params.get("state")
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     organization_id = None
@@ -82,6 +83,7 @@ def main():
     existing_item = module.get_one(
         'labels',
         name_or_id=name,
+        check_exists=(state == 'exists'),
         **{
             'data': {
                 'organization': organization_id,

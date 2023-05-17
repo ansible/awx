@@ -62,7 +62,7 @@ from wsgiref.util import FileWrapper
 
 # AWX
 from awx.main.tasks.system import send_notifications, update_inventory_computed_fields
-from awx.main.access import get_user_queryset, HostAccess
+from awx.main.access import get_user_queryset
 from awx.api.generics import (
     APIView,
     BaseUsersList,
@@ -565,7 +565,7 @@ class LaunchConfigCredentialsBase(SubListAttachDetachAPIView):
         if self.relationship not in ask_mapping:
             return {"msg": _("Related template cannot accept {} on launch.").format(self.relationship)}
         elif sub.passwords_needed:
-            return {"msg": _("Credential that requires user input on launch " "cannot be used in saved launch configuration.")}
+            return {"msg": _("Credential that requires user input on launch cannot be used in saved launch configuration.")}
 
         ask_field_name = ask_mapping[self.relationship]
 
@@ -794,13 +794,7 @@ class ExecutionEnvironmentActivityStreamList(SubListAPIView):
     parent_model = models.ExecutionEnvironment
     relationship = 'activitystream_set'
     search_fields = ('changes',)
-
-    def get_queryset(self):
-        parent = self.get_parent_object()
-        self.check_parent_access(parent)
-
-        qs = self.request.user.get_queryset(self.model)
-        return qs.filter(execution_environment=parent)
+    filter_read_permission = False
 
 
 class ProjectList(ListCreateAPIView):
@@ -1634,13 +1628,7 @@ class InventoryHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIVie
     parent_model = models.Inventory
     relationship = 'hosts'
     parent_key = 'inventory'
-
-    def get_queryset(self):
-        inventory = self.get_parent_object()
-        qs = getattrd(inventory, self.relationship).all()
-        # Apply queryset optimizations
-        qs = qs.select_related(*HostAccess.select_related).prefetch_related(*HostAccess.prefetch_related)
-        return qs
+    filter_read_permission = False
 
 
 class HostGroupsList(SubListCreateAttachDetachAPIView):
@@ -2513,7 +2501,7 @@ class JobTemplateSurveySpec(GenericAPIView):
                     return Response(
                         dict(
                             error=_(
-                                "$encrypted$ is a reserved keyword for password question defaults, " "survey question {idx} is type {survey_item[type]}."
+                                "$encrypted$ is a reserved keyword for password question defaults, survey question {idx} is type {survey_item[type]}."
                             ).format(**context)
                         ),
                         status=status.HTTP_400_BAD_REQUEST,
@@ -2581,16 +2569,7 @@ class JobTemplateCredentialsList(SubListCreateAttachDetachAPIView):
     serializer_class = serializers.CredentialSerializer
     parent_model = models.JobTemplate
     relationship = 'credentials'
-
-    def get_queryset(self):
-        # Return the full list of credentials
-        parent = self.get_parent_object()
-        self.check_parent_access(parent)
-        sublist_qs = getattrd(parent, self.relationship)
-        sublist_qs = sublist_qs.prefetch_related(
-            'created_by', 'modified_by', 'admin_role', 'use_role', 'read_role', 'admin_role__parents', 'admin_role__members'
-        )
-        return sublist_qs
+    filter_read_permission = False
 
     def is_valid_relation(self, parent, sub, created=False):
         if sub.unique_hash() in [cred.unique_hash() for cred in parent.credentials.all()]:
@@ -2780,6 +2759,7 @@ class JobTemplateInstanceGroupsList(SubListAttachDetachAPIView):
     serializer_class = serializers.InstanceGroupSerializer
     parent_model = models.JobTemplate
     relationship = 'instance_groups'
+    filter_read_permission = False
 
 
 class JobTemplateAccessList(ResourceAccessList):
@@ -2870,16 +2850,7 @@ class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, Su
     relationship = ''
     enforce_parent_relationship = 'workflow_job_template'
     search_fields = ('unified_job_template__name', 'unified_job_template__description')
-
-    '''
-    Limit the set of WorkflowJobTemplateNodes to the related nodes of specified by
-    'relationship'
-    '''
-
-    def get_queryset(self):
-        parent = self.get_parent_object()
-        self.check_parent_access(parent)
-        return getattr(parent, self.relationship).all()
+    filter_read_permission = False
 
     def is_valid_relation(self, parent, sub, created=False):
         if created:
@@ -2954,14 +2925,7 @@ class WorkflowJobNodeChildrenBaseList(SubListAPIView):
     parent_model = models.WorkflowJobNode
     relationship = ''
     search_fields = ('unified_job_template__name', 'unified_job_template__description')
-
-    #
-    # Limit the set of WorkflowJobNodes to the related nodes of specified by self.relationship
-    #
-    def get_queryset(self):
-        parent = self.get_parent_object()
-        self.check_parent_access(parent)
-        return getattr(parent, self.relationship).all()
+    filter_read_permission = False
 
 
 class WorkflowJobNodeSuccessNodesList(WorkflowJobNodeChildrenBaseList):
@@ -3140,11 +3104,8 @@ class WorkflowJobTemplateWorkflowNodesList(SubListCreateAPIView):
     relationship = 'workflow_job_template_nodes'
     parent_key = 'workflow_job_template'
     search_fields = ('unified_job_template__name', 'unified_job_template__description')
-
-    def get_queryset(self):
-        parent = self.get_parent_object()
-        self.check_parent_access(parent)
-        return getattr(parent, self.relationship).order_by('id')
+    ordering = ('id',)  # assure ordering by id for consistency
+    filter_read_permission = False
 
 
 class WorkflowJobTemplateJobsList(SubListAPIView):
@@ -3236,11 +3197,8 @@ class WorkflowJobWorkflowNodesList(SubListAPIView):
     relationship = 'workflow_job_nodes'
     parent_key = 'workflow_job'
     search_fields = ('unified_job_template__name', 'unified_job_template__description')
-
-    def get_queryset(self):
-        parent = self.get_parent_object()
-        self.check_parent_access(parent)
-        return getattr(parent, self.relationship).order_by('id')
+    ordering = ('id',)  # assure ordering by id for consistency
+    filter_read_permission = False
 
 
 class WorkflowJobCancel(GenericCancelView):
@@ -3375,7 +3333,6 @@ class JobLabelList(SubListAPIView):
     serializer_class = serializers.LabelSerializer
     parent_model = models.Job
     relationship = 'labels'
-    parent_key = 'job'
 
 
 class WorkflowJobLabelList(JobLabelList):
@@ -3554,11 +3511,7 @@ class BaseJobHostSummariesList(SubListAPIView):
     relationship = 'job_host_summaries'
     name = _('Job Host Summaries List')
     search_fields = ('host_name',)
-
-    def get_queryset(self):
-        parent = self.get_parent_object()
-        self.check_parent_access(parent)
-        return getattr(parent, self.relationship).select_related('job', 'job__job_template', 'host')
+    filter_read_permission = False
 
 
 class HostJobHostSummariesList(BaseJobHostSummariesList):
@@ -4102,7 +4055,7 @@ class UnifiedJobStdout(RetrieveAPIView):
                 return super(UnifiedJobStdout, self).retrieve(request, *args, **kwargs)
         except models.StdoutMaxBytesExceeded as e:
             response_message = _(
-                "Standard Output too large to display ({text_size} bytes), " "only download supported for sizes over {supported_size} bytes."
+                "Standard Output too large to display ({text_size} bytes), only download supported for sizes over {supported_size} bytes."
             ).format(text_size=e.total, supported_size=e.supported)
             if request.accepted_renderer.format == 'json':
                 return Response({'range': {'start': 0, 'end': 1, 'absolute_end': 1}, 'content': response_message})

@@ -1,14 +1,25 @@
 ---
+- name: Generate a test ID
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
 - name: Generate hostnames
   set_fact:
-    hostname1: "AWX-Collection-tests-instance1.{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}.example.com"
-    hostname2: "AWX-Collection-tests-instance2.{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}.example.com"
-    hostname3: "AWX-Collection-tests-instance3.{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}.example.com"
+    hostname1: "AWX-Collection-tests-instance1.{{ test_id }}.example.com"
+    hostname2: "AWX-Collection-tests-instance2.{{ test_id }}.example.com"
+    hostname3: "AWX-Collection-tests-instance3.{{ test_id }}.example.com"
   register: facts
 
-- name: Show hostnames
-  debug:
-    var: facts
+- name: Get the k8s setting
+  set_fact:
+    IS_K8S: "{{ controller_settings['IS_K8S'] | default(False) }}"
+  vars:
+    controller_settings: "{{ lookup('awx.awx.controller_api', 'settings/all') }}"
+
+- debug:
+    msg: "Skipping instance test since this is instance is not running on a K8s platform"
+  when: not IS_K8S
 
 - block:
     - name: Create an instance
@@ -57,3 +68,5 @@
         - "{{ hostname1 }}"
         - "{{ hostname2 }}"
         - "{{ hostname3 }}"
+
+  when: IS_K8S

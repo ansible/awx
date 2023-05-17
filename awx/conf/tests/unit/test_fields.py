@@ -35,7 +35,7 @@ class TestStringListBooleanField:
         field = StringListBooleanField()
         with pytest.raises(ValidationError) as e:
             field.to_internal_value(value)
-        assert e.value.detail[0] == "Expected None, True, False, a string or list " "of strings but got {} instead.".format(type(value))
+        assert e.value.detail[0] == "Expected None, True, False, a string or list of strings but got {} instead.".format(type(value))
 
     @pytest.mark.parametrize("value_in, value_known", FIELD_VALUES)
     def test_to_representation_valid(self, value_in, value_known):
@@ -48,7 +48,7 @@ class TestStringListBooleanField:
         field = StringListBooleanField()
         with pytest.raises(ValidationError) as e:
             field.to_representation(value)
-        assert e.value.detail[0] == "Expected None, True, False, a string or list " "of strings but got {} instead.".format(type(value))
+        assert e.value.detail[0] == "Expected None, True, False, a string or list of strings but got {} instead.".format(type(value))
 
 
 class TestListTuplesField:
@@ -67,7 +67,7 @@ class TestListTuplesField:
         field = ListTuplesField()
         with pytest.raises(ValidationError) as e:
             field.to_internal_value(value)
-        assert e.value.detail[0] == "Expected a list of tuples of max length 2 " "but got {} instead.".format(t)
+        assert e.value.detail[0] == "Expected a list of tuples of max length 2 but got {} instead.".format(t)
 
 
 class TestStringListPathField:
