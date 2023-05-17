@@ -141,7 +141,7 @@ class Role(models.Model):
         app_label = 'main'
         verbose_name_plural = _('roles')
         db_table = 'main_rbac_roles'
-        index_together = [("content_type", "object_id")]
+        indexes = [models.Index(fields=["content_type", "object_id"])]
         ordering = ("content_type", "object_id")
 
     role_field = models.TextField(null=False)
@@ -447,10 +447,10 @@ class RoleAncestorEntry(models.Model):
         app_label = 'main'
         verbose_name_plural = _('role_ancestors')
         db_table = 'main_rbac_role_ancestors'
-        index_together = [
-            ("ancestor", "content_type_id", "object_id"),  # used by get_roles_on_resource
-            ("ancestor", "content_type_id", "role_field"),  # used by accessible_objects
-            ("ancestor", "descendent"),  # used by rebuild_role_ancestor_list in the NOT EXISTS clauses.
+        indexes = [
+            models.Index(fields=["ancestor", "content_type_id", "object_id"]),  # used by get_roles_on_resource
+            models.Index(fields=["ancestor", "content_type_id", "role_field"]),  # used by accessible_objects
+            models.Index(fields=["ancestor", "descendent"]),  # used by rebuild_role_ancestor_list in the NOT EXISTS clauses.
         ]
 
     descendent = models.ForeignKey(Role, null=False, on_delete=models.CASCADE, related_name='+')
