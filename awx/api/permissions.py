@@ -120,14 +120,22 @@ class ModelAccessPermission(permissions.BasePermission):
         return result
 
     def has_permission(self, request, view, obj=None):
-        logger.debug('has_permission(user=%s method=%s data=%r, %s, %r)', request.user, request.method, request.data, view.__class__.__name__, obj)
+        logger.debug(
+            'has_permission(user=%s method=%s data=%r, %s, %r)',
+            request.user,
+            request.method,
+            request.data,
+            view.__class__.__name__,
+            obj,
+            extra={'volume_tag': 'rbac'},
+        )
         try:
             response = self.check_permissions(request, view, obj)
         except Exception as e:
-            logger.debug('has_permission raised %r', e, exc_info=True)
+            logger.debug('has_permission raised %r', e, exc_info=True, extra={'volume_tag': 'rbac'})
             raise
         else:
-            logger.debug('has_permission returned %r', response)
+            logger.debug('has_permission returned %r', response, extra={'volume_tag': 'rbac'})
             return response
 
     def has_object_permission(self, request, view, obj):

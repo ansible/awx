@@ -106,6 +106,8 @@ class ExternalLoggerEnabled(Filter):
 
 
 class DynamicLevelFilter(Filter):
+    allow_list = FieldFromSettings('LOG_AGGREGATOR_HIGH_VOLUME_ALLOW_LIST')
+
     def filter(self, record):
         """Filters out logs that have a level below the threshold defined
         by the databse setting LOG_AGGREGATOR_LEVEL
@@ -118,6 +120,10 @@ class DynamicLevelFilter(Filter):
                 cutoff_level = logging._nameToLevel[settings.LOG_AGGREGATOR_LEVEL]
             except Exception:
                 cutoff_level = logging.WARNING
+
+        if hasattr(record, 'volume_tag'):
+            if record.volume_tag not in self.allow_list:
+                return False
 
         return bool(record.levelno >= cutoff_level)
 

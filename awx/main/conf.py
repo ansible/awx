@@ -680,6 +680,22 @@ register(
     category_slug='logging',
 )
 register(
+    'LOG_AGGREGATOR_HIGH_VOLUME_ALLOW_LIST',
+    field_class=fields.StringListField,
+    label=_('High Volume DEBUG-level Loggers to Allow'),
+    help_text=_(
+        'Normally these loggers are filtered out, add to this list to emit these logs. '
+        'Choices are [events, system_tasks, websockets, rbac, metrics]. '
+        'events - logs reated to processing of job output. '
+        'system_tasks - periodically emitted logs about internal tasks. '
+        'websockets - processing of messages to send websockets to clients. '
+        'rbac - permission check activity for requests. '
+        'metrics - activity recording and saving data for /api/v2/metrics/.'
+    ),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
     'LOG_AGGREGATOR_MAX_DISK_USAGE_GB',
     field_class=fields.IntegerField,
     default=1,

@@ -73,7 +73,7 @@ class TaskWorker(BaseWorker):
                 log_extra = f' took {time_publish:.4f} to ack, {time_waiting:.4f} in local dispatcher'
                 logger_method = logger.info
         # don't print kwargs, they often contain launch-time secrets
-        logger_method(f'task {uuid} starting {task}(*{args}){log_extra}')
+        logger_method(f'task {uuid} starting {task}(*{args}){log_extra}', extra={'volume_tag': 'system_tasks'})
 
         return _call(*args, **kwargs)
 

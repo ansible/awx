@@ -32,7 +32,7 @@ class Command(BaseCommand):
     def do_heartbeat_loop(self):
         while True:
             with pg_bus_conn() as conn:
-                logger.debug('Sending heartbeat')
+                logger.debug('Sending heartbeat', extra={'volume_tag': 'system_tasks'})
                 conn.notify('web_ws_heartbeat', self.construct_payload())
             time.sleep(settings.BROADCAST_WEBSOCKET_BEACON_FROM_WEB_RATE_SECONDS)
 

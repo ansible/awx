@@ -88,8 +88,8 @@ class RelayWebsocketStatsManager:
                 await redis_conn.set(self._redis_key, stats_data_str)
 
                 await asyncio.sleep(settings.BROADCAST_WEBSOCKET_STATS_POLL_RATE_SECONDS)
-        except Exception as e:
-            logger.warning(e)
+        except Exception:
+            logger.exception('Error in run loop for relay websocket manager')
             await asyncio.sleep(settings.BROADCAST_WEBSOCKET_STATS_POLL_RATE_SECONDS)
             self.start()
 
