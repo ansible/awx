@@ -2,6 +2,9 @@
 
 import awx.main.fields
 import awx.main.utils.polymorphic
+
+from awx.main.migrations._removed_fields import OrderedManyToManyField
+
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
@@ -386,7 +389,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='joblaunchconfig',
             name='instance_groups',
-            field=awx.main.fields.OrderedManyToManyField(
+            field=OrderedManyToManyField(
                 blank=True, editable=False, related_name='%(class)ss', through='main.JobLaunchConfigInstanceGroupMembership', to='main.instancegroup'
             ),
         ),
@@ -516,7 +519,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='organization',
             name='galaxy_credentials',
-            field=awx.main.fields.OrderedManyToManyField(
+            field=OrderedManyToManyField(
                 blank=True, related_name='%(class)s_galaxy_credentials', through='main.OrganizationGalaxyCredentialMembership', to='main.credential'
             ),
         ),
