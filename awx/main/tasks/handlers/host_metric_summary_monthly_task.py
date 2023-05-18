@@ -4,21 +4,24 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.db.models import Count
 from django.db.models.functions import TruncMonth
+from django.utils.timezone import now
 from awx.main.models.inventory import HostMetric, HostMetricSummaryMonthly
 from awx.conf.license import get_license
 
 
 class HostMetricSummaryMonthlyTask:
     """
-    This task computes last <threshold> months of HostMetricSummaryMonthly table
+    This task computes last [threshold] months of HostMetricSummaryMonthly table
+    [threshold] is setting CLEANUP_HOST_METRICS_HARD_THRESHOLD
     Each record in the table represents changes in HostMetric table in one month
-    <threshold> is setting CLEANUP_HOST_METRICS_HARD_THRESHOLD
     It always overrides all the months newer than <threshold>, never updates older months
     Algorithm:
     - hosts_added are HostMetric records with first_automation in given month
     - hosts_deleted are HostMetric records with deleted=True and last_deleted in given month
+    - - HostMetrics soft-deleted before <threshold> also increases hosts_deleted in their last_deleted month
     - license_consumed is license_consumed(previous month) + hosts_added - hosts_deleted
-    - - license_consumed for first updated month is computed also from all host metrics created before this month
+    - - license_consumed for HostMetricSummaryMonthly.date < [threshold] is computed also from
+        all HostMetrics.first_automation < [threshold]
     - license_capacity is set only for current month, and it's never updated (value taken from current subscription)
     """
 
@@ -52,6 +55,9 @@ class HostMetricSummaryMonthlyTask:
         # Create/Update stats
         HostMetricSummaryMonthly.objects.bulk_create(self.records_to_create, batch_size=1000)
         HostMetricSummaryMonthly.objects.bulk_update(self.records_to_update, ['license_consumed', 'hosts_added', 'hosts_deleted'], batch_size=1000)
+
+        # Set timestamp of last run
+        settings.HOST_METRIC_SUMMARY_TASK_LAST_TS = now()
 
     def _get_license_consumed_before(self, month):
         license_consumed = 0

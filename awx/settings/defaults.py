@@ -1056,5 +1056,10 @@ CLEANUP_HOST_METRICS_LAST_TS = None
 CLEANUP_HOST_METRICS_INTERVAL = 30  # days
 # Host metrics cleanup - soft-delete HostMetric records with last_automation < [threshold] (in months)
 CLEANUP_HOST_METRICS_SOFT_THRESHOLD = 12  # months
-# Host metrics cleanup - delete HostMetric record with deleted=True and last_deleted < [threshold]
+# Host metrics cleanup
+# - delete HostMetric record with deleted=True and last_deleted < [threshold]
+# - also threshold for computing HostMetricSummaryMonthly (command/scheduled task)
 CLEANUP_HOST_METRICS_HARD_THRESHOLD = 36  # months
+
+# Host metric summary monthly task - last time of run
+HOST_METRIC_SUMMARY_TASK_LAST_TS = None
