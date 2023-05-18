@@ -7,7 +7,7 @@ needs_triage:
 "component:ui":
   - "\\[X\\] UI"
 "component:ui_next":
-  - "\\[X\\] UI (tech preview)"
+  - "\\[X\\] UI \\(tech preview\\)"
 "component:api":
   - "\\[X\\] API"
 "component:docs":
