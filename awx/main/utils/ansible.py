@@ -18,7 +18,7 @@ __all__ = ['skip_directory', 'could_be_playbook', 'could_be_inventory']
 
 
 valid_playbook_re = re.compile(r'^\s*?-?\s*?(?:hosts|(ansible\.builtin\.)?include|(ansible\.builtin\.)?import_playbook):\s*?.*?$')
-valid_inventory_re = re.compile(r'^[# {},a-zA-Z0-9_.=\[\]]')
+valid_inventory_re = re.compile(r'^[a-zA-Z0-9_.=\[\]]')
 
 
 def skip_directory(relative_directory_path):
