@@ -106,10 +106,6 @@ function TroubleshootingEdit() {
             <Form autoComplete="off" onSubmit={formik.handleSubmit}>
               <FormColumnLayout>
                 <BooleanField
-                  name="AWX_CALLBACK_PROFILE"
-                  config={debug.AWX_CALLBACK_PROFILE}
-                />
-                <BooleanField
                   name="AWX_CLEANUP_PATHS"
                   config={debug.AWX_CLEANUP_PATHS}
                 />

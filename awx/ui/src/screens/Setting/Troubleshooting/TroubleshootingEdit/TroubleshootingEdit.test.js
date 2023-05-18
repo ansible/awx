@@ -76,9 +76,7 @@ describe('<TroubleshootingEdit />', () => {
       wrapper.find('Form').invoke('onSubmit')();
     });
     expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
-    const {
-      ...jobRequest
-    } = mockTroubleshootingSettings;
+    const { ...jobRequest } = mockTroubleshootingSettings;
     expect(SettingsAPI.updateAll).toHaveBeenCalledWith(jobRequest);
   });
 

@@ -849,16 +849,6 @@ register(
 )
 
 register(
-    'AWX_CALLBACK_PROFILE',
-    field_class=fields.BooleanField,
-    label=_('Debug callback timing'),
-    default=False,
-    help_text=_('Debug callback code timing'),
-    category=('Debug'),
-    category_slug='debug',
-)
-
-register(
     'AWX_CLEANUP_PATHS',
     field_class=fields.BooleanField,
     label=_('Enable or Disable tmp dir cleanup'),
@@ -883,7 +873,7 @@ register(
     field_class=fields.StringListField,
     label=_('Container Run Options'),
     default=['--network', 'slirp4netns:enable_ipv6=true'],
-    help_text=_('List of options to pass to podman run'),
+    help_text=_("List of options to pass to podman run example: ['--network', 'slirp4netns:enable_ipv6=true', '--log-level', 'debug']"),
     category=('Jobs'),
     category_slug='jobs',
 )

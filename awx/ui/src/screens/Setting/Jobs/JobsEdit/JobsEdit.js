@@ -215,6 +215,10 @@ function JobsEdit() {
                   config={jobs.AD_HOC_COMMANDS}
                 />
                 <ObjectField
+                  name="DEFAULT_CONTAINER_RUN_OPTIONS"
+                  config={jobs.DEFAULT_CONTAINER_RUN_OPTIONS}
+                />
+                <ObjectField
                   name="AWX_ANSIBLE_CALLBACK_PLUGINS"
                   config={jobs.AWX_ANSIBLE_CALLBACK_PLUGINS}
                 />
