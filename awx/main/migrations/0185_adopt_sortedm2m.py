@@ -6,7 +6,7 @@ import sortedm2m.fields
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0182_constructed_inventory'),
+        ('main', '0184_django_indexes'),
     ]
 
     operations = [
