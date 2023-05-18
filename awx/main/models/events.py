@@ -31,6 +31,27 @@ logger = logging.getLogger('awx.main.models.events')
 __all__ = ['JobEvent', 'ProjectUpdateEvent', 'AdHocCommandEvent', 'InventoryUpdateEvent', 'SystemJobEvent']
 
 
+EVENT_HELP_TEXT = _('Ansible callback method identifier')
+FAILED_HELP_TEXT = _('Event data indicated failure, or is a parent of a failed event')
+CHANGED_HELP_TEXT = _('Event data indicated a change happened, or is a parent of a changed event')
+UUID_HELP_TEXT = _('Unique identifier from ansible-runner for this event')
+ROLE_HELP_TEXT = _('Ansible role this event was produced in')
+TASK_HELP_TEXT = _('Name of task')
+COUNTER_HELP_TEXT = _('Counter within context of a job that can establish ordering')
+STDOUT_HELP_TEXT = _('TTY output, including stdout and stderr produced directly by the event callback or as a side effect of it')
+VERBOSITY_HELP_TEXT = _('Verbosity level of this event, as given by Ansible core')
+START_LINE_HELP_TEXT = _('The first line number in overall job output of the stdout field text')
+END_LINE_HELP_TEXT = _('The last line number')
+CREATED_HELP_TEXT = _('The created timestamp from ansible-runner when event data was first produced')
+MODIFIED_HELP_TEXT = _('Usually the time when the event was saved by the callback receiver')
+JOB_CREATED_HELP_TEXT = _('Created timestamp of associated job, used for table partitioning')
+EVENT_DATA_HELP_TEXT = _('Data from ansible-runner about this Ansible event')
+
+# shared with ad hoc
+HOST_HELP_TEXT = _('Associated host this event acted on, when applicable')
+HOST_NAME_HELP_TEXT = _('The name for the associated host for auditing purposes')
+
+
 def sanitize_event_keys(kwargs, valid_keys):
     # Sanity check: Don't honor keys that we don't recognize.
     for key in list(kwargs.keys()):
@@ -208,74 +229,22 @@ class BasePlaybookEvent(CreatedModifiedModel):
     EVENT_CHOICES = [(x[1], x[2]) for x in EVENT_TYPES]
     LEVEL_FOR_EVENT = dict([(x[1], x[0]) for x in EVENT_TYPES])
 
-    event = models.CharField(
-        max_length=100,
-        choices=EVENT_CHOICES,
-    )
-    event_data = JSONBlob(default=dict, blank=True)
-    failed = models.BooleanField(
-        default=False,
-        editable=False,
-    )
-    changed = models.BooleanField(
-        default=False,
-        editable=False,
-    )
-    uuid = models.CharField(
-        max_length=1024,
-        default='',
-        editable=False,
-    )
-    playbook = models.CharField(
-        max_length=1024,
-        default='',
-        editable=False,
-    )
-    play = models.CharField(
-        max_length=1024,
-        default='',
-        editable=False,
-    )
-    role = models.CharField(
-        max_length=1024,
-        default='',
-        editable=False,
-    )
-    task = models.CharField(
-        max_length=1024,
-        default='',
-        editable=False,
-    )
-    counter = models.PositiveIntegerField(
-        default=0,
-        editable=False,
-    )
-    stdout = models.TextField(
-        default='',
-        editable=False,
-    )
-    verbosity = models.PositiveIntegerField(
-        default=0,
-        editable=False,
-    )
-    start_line = models.PositiveIntegerField(
-        default=0,
-        editable=False,
-    )
-    end_line = models.PositiveIntegerField(
-        default=0,
-        editable=False,
-    )
-    created = models.DateTimeField(
-        null=True,
-        default=None,
-        editable=False,
-    )
-    modified = models.DateTimeField(
-        default=None,
-        editable=False,
-        db_index=True,
-    )
+    event = models.CharField(max_length=100, choices=EVENT_CHOICES, help_text=EVENT_HELP_TEXT)
+    event_data = JSONBlob(default=dict, blank=True, help_text=EVENT_DATA_HELP_TEXT)
+    failed = models.BooleanField(default=False, editable=False, help_text=FAILED_HELP_TEXT)
+    changed = models.BooleanField(default=False, editable=False, help_text=CHANGED_HELP_TEXT)
+    uuid = models.CharField(max_length=1024, default='', editable=False, help_text=UUID_HELP_TEXT)
+    playbook = models.CharField(max_length=1024, default='', editable=False, help_text=_('Playbook this event was produced in'))
+    play = models.CharField(max_length=1024, default='', editable=False, help_text=_('Play this event was produced in'))
+    role = models.CharField(max_length=1024, default='', editable=False, help_text=ROLE_HELP_TEXT)
+    task = models.CharField(max_length=1024, default='', editable=False, help_text=_('Name of task'))
+    counter = models.PositiveIntegerField(default=0, editable=False, help_text=COUNTER_HELP_TEXT)
+    stdout = models.TextField(default='', editable=False, help_text=STDOUT_HELP_TEXT)
+    verbosity = models.PositiveIntegerField(default=0, editable=False, help_text=VERBOSITY_HELP_TEXT)
+    start_line = models.PositiveIntegerField(default=0, editable=False, help_text=START_LINE_HELP_TEXT)
+    end_line = models.PositiveIntegerField(default=0, editable=False, help_text=END_LINE_HELP_TEXT)
+    created = models.DateTimeField(null=True, default=None, editable=False, help_text=CREATED_HELP_TEXT)
+    modified = models.DateTimeField(default=None, editable=False, db_index=True, help_text=MODIFIED_HELP_TEXT)
 
     @property
     def event_level(self):
@@ -496,6 +465,7 @@ class JobEvent(BasePlaybookEvent):
         on_delete=models.DO_NOTHING,
         editable=False,
         db_index=False,
+        help_text=_('Event gives a piece of output data of this job'),
     )
     # When we partitioned the table we accidentally "lost" the foreign key constraint.
     # However this is good because the cascade on delete at the django layer was causing DB issues
@@ -509,18 +479,11 @@ class JobEvent(BasePlaybookEvent):
         on_delete=models.DO_NOTHING,
         editable=False,
         db_constraint=False,
+        help_text=HOST_HELP_TEXT,
     )
-    host_name = models.CharField(
-        max_length=1024,
-        default='',
-        editable=False,
-    )
-    parent_uuid = models.CharField(
-        max_length=1024,
-        default='',
-        editable=False,
-    )
-    job_created = models.DateTimeField(null=True, editable=False)
+    host_name = models.CharField(max_length=1024, default='', editable=False, help_text=HOST_NAME_HELP_TEXT)
+    parent_uuid = models.CharField(max_length=1024, default='', editable=False, help_text=_('The uuid for the direct parent event of this event'))
+    job_created = models.DateTimeField(null=True, editable=False, help_text=JOB_CREATED_HELP_TEXT)
 
     def get_absolute_url(self, request=None):
         return reverse('api:job_event_detail', kwargs={'pk': self.pk}, request=request)
@@ -656,8 +619,9 @@ class ProjectUpdateEvent(BasePlaybookEvent):
         on_delete=models.DO_NOTHING,
         editable=False,
         db_index=False,
+        help_text=_('Event gives a piece of output data of this project update'),
     )
-    job_created = models.DateTimeField(null=True, editable=False)
+    job_created = models.DateTimeField(null=True, editable=False, help_text=JOB_CREATED_HELP_TEXT)
 
     @property
     def host_name(self):
@@ -683,42 +647,15 @@ class BaseCommandEvent(CreatedModifiedModel):
     class Meta:
         abstract = True
 
-    event_data = JSONBlob(default=dict, blank=True)
-    uuid = models.CharField(
-        max_length=1024,
-        default='',
-        editable=False,
-    )
-    counter = models.PositiveIntegerField(
-        default=0,
-        editable=False,
-    )
-    stdout = models.TextField(
-        default='',
-        editable=False,
-    )
-    verbosity = models.PositiveIntegerField(
-        default=0,
-        editable=False,
-    )
-    start_line = models.PositiveIntegerField(
-        default=0,
-        editable=False,
-    )
-    end_line = models.PositiveIntegerField(
-        default=0,
-        editable=False,
-    )
-    created = models.DateTimeField(
-        null=True,
-        default=None,
-        editable=False,
-    )
-    modified = models.DateTimeField(
-        default=None,
-        editable=False,
-        db_index=True,
-    )
+    event_data = JSONBlob(default=dict, blank=True, help_text=EVENT_DATA_HELP_TEXT)
+    uuid = models.CharField(max_length=1024, default='', editable=False, help_text=UUID_HELP_TEXT)
+    counter = models.PositiveIntegerField(default=0, editable=False, help_text=COUNTER_HELP_TEXT)
+    stdout = models.TextField(default='', editable=False, help_text=STDOUT_HELP_TEXT)
+    verbosity = models.PositiveIntegerField(default=0, editable=False, help_text=VERBOSITY_HELP_TEXT)
+    start_line = models.PositiveIntegerField(default=0, editable=False, help_text=START_LINE_HELP_TEXT)
+    end_line = models.PositiveIntegerField(default=0, editable=False, help_text=END_LINE_HELP_TEXT)
+    created = models.DateTimeField(null=True, default=None, editable=False, help_text=CREATED_HELP_TEXT)
+    modified = models.DateTimeField(default=None, editable=False, db_index=True, help_text=MODIFIED_HELP_TEXT)
 
     def __str__(self):
         return u'%s @ %s' % (self.get_event_display(), self.created.isoformat())
@@ -816,24 +753,16 @@ class AdHocCommandEvent(BaseCommandEvent):
     EVENT_CHOICES = [(x[0], x[1]) for x in EVENT_TYPES]
 
     id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
-    event = models.CharField(
-        max_length=100,
-        choices=EVENT_CHOICES,
-    )
-    failed = models.BooleanField(
-        default=False,
-        editable=False,
-    )
-    changed = models.BooleanField(
-        default=False,
-        editable=False,
-    )
+    event = models.CharField(max_length=100, choices=EVENT_CHOICES, help_text=EVENT_HELP_TEXT)
+    failed = models.BooleanField(default=False, editable=False, help_text=FAILED_HELP_TEXT)
+    changed = models.BooleanField(default=False, editable=False, help_text=CHANGED_HELP_TEXT)
     ad_hoc_command = models.ForeignKey(
         'AdHocCommand',
         related_name='ad_hoc_command_events',
         on_delete=models.DO_NOTHING,
         editable=False,
         db_index=False,
+        help_text=_('Event gives a piece of output data of this ad hoc command'),
     )
     # We need to keep this as a FK in the model because AdHocCommand uses a ManyToMany field
     #   to hosts through adhoc_events. But in https://github.com/ansible/awx/pull/8236/ we
@@ -847,13 +776,10 @@ class AdHocCommandEvent(BaseCommandEvent):
         on_delete=models.SET_NULL,
         editable=False,
         db_constraint=False,
+        help_text=HOST_HELP_TEXT,
     )
-    host_name = models.CharField(
-        max_length=1024,
-        default='',
-        editable=False,
-    )
-    job_created = models.DateTimeField(null=True, editable=False)
+    host_name = models.CharField(max_length=1024, default='', editable=False, help_text=HOST_NAME_HELP_TEXT)
+    job_created = models.DateTimeField(null=True, editable=False, help_text=JOB_CREATED_HELP_TEXT)
 
     def get_absolute_url(self, request=None):
         return reverse('api:ad_hoc_command_event_detail', kwargs={'pk': self.pk}, request=request)
@@ -898,8 +824,9 @@ class InventoryUpdateEvent(BaseCommandEvent):
         on_delete=models.DO_NOTHING,
         editable=False,
         db_index=False,
+        help_text=_('Event gives a piece of output data of this inventory update'),
     )
-    job_created = models.DateTimeField(null=True, editable=False)
+    job_created = models.DateTimeField(null=True, editable=False, help_text=JOB_CREATED_HELP_TEXT)
 
     @property
     def event(self):
@@ -943,8 +870,9 @@ class SystemJobEvent(BaseCommandEvent):
         on_delete=models.DO_NOTHING,
         editable=False,
         db_index=False,
+        help_text=_('Event gives a piece of output data of this system job'),
     )
-    job_created = models.DateTimeField(null=True, editable=False)
+    job_created = models.DateTimeField(null=True, editable=False, help_text=JOB_CREATED_HELP_TEXT)
 
     @property
     def event(self):

@@ -23,6 +23,7 @@ from awx.main.models.base import PrimordialModel
 from awx.main.models.jobs import LaunchTimeConfig
 from awx.main.utils import ignore_inventory_computed_fields
 from awx.main.consumers import emit_channel_notification
+from awx.main.constants import NAME_HELP_TEXT
 
 import pytz
 
@@ -69,13 +70,9 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
     objects = ScheduleManager()
 
     unified_job_template = models.ForeignKey(
-        'UnifiedJobTemplate',
-        related_name='schedules',
-        on_delete=models.CASCADE,
+        'UnifiedJobTemplate', related_name='schedules', on_delete=models.CASCADE, help_text=_("Template that this schedule will run.")
     )
-    name = models.CharField(
-        max_length=512,
-    )
+    name = models.CharField(max_length=512, help_text=NAME_HELP_TEXT)
     enabled = models.BooleanField(default=True, help_text=_("Enables processing of this schedule."))
     dtstart = models.DateTimeField(null=True, default=None, editable=False, help_text=_("The first occurrence of the schedule occurs on or after this time."))
     dtend = models.DateTimeField(

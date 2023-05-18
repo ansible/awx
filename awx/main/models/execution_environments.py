@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from awx.api.versioning import reverse
 from awx.main.models.base import CommonModel
 from awx.main.validators import validate_container_image_name
+from awx.main.constants import MANAGED_HELP_TEXT
 
 
 __all__ = ['ExecutionEnvironment']
@@ -34,7 +35,7 @@ class ExecutionEnvironment(CommonModel):
         help_text=_("The full image location, including the container registry, image name, and version tag."),
         validators=[validate_container_image_name],
     )
-    managed = models.BooleanField(default=False, editable=False)
+    managed = models.BooleanField(default=False, editable=False, help_text=MANAGED_HELP_TEXT)
     credential = models.ForeignKey(
         'Credential',
         related_name='%(class)ss',
@@ -42,6 +43,7 @@ class ExecutionEnvironment(CommonModel):
         null=True,
         default=None,
         on_delete=models.SET_NULL,
+        help_text=_('Credential to authenticate to the image registry to pull this image'),
     )
     pull = models.CharField(
         max_length=16,

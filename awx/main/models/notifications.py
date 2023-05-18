@@ -61,14 +61,14 @@ class NotificationTemplate(CommonModelNameNotUnique):
         null=True,
         on_delete=models.CASCADE,
         related_name='notification_templates',
+        help_text=_('The organization used for purposes of access and inheritance'),
     )
 
     notification_type = models.CharField(
-        max_length=32,
-        choices=NOTIFICATION_TYPE_CHOICES,
+        max_length=32, choices=NOTIFICATION_TYPE_CHOICES, help_text=_('Identifies the type of external system this notification template will send to')
     )
 
-    notification_configuration = prevent_search(models.JSONField(default=dict))
+    notification_configuration = prevent_search(models.JSONField(default=dict, help_text=_('Controls content sent to the external system')))
 
     def default_messages():
         return {'started': None, 'success': None, 'error': None, 'workflow_approval': None}
@@ -205,37 +205,40 @@ class Notification(CreatedModifiedModel):
         app_label = 'main'
         ordering = ('pk',)
 
-    notification_template = models.ForeignKey('NotificationTemplate', related_name='notifications', on_delete=models.CASCADE, editable=False)
+    notification_template = models.ForeignKey(
+        'NotificationTemplate',
+        related_name='notifications',
+        on_delete=models.CASCADE,
+        editable=False,
+        help_text=_('The notifiation template that configured the behavior of this notification'),
+    )
     status = models.CharField(
         max_length=20,
         choices=NOTIFICATION_STATE_CHOICES,
         default='pending',
         editable=False,
+        help_text=_('Identifies the progress or outcome of the notification'),
     )
-    error = models.TextField(
-        blank=True,
-        default='',
-        editable=False,
-    )
+    error = models.TextField(blank=True, default='', editable=False, help_text=_('Error text from sending the notification, if appliable'))
     notifications_sent = models.IntegerField(
-        default=0,
-        editable=False,
+        default=0, editable=False, help_text=_('Number of notifications sent as part of this notification, usually either 1 or 0')
     )
     notification_type = models.CharField(
-        max_length=32,
-        choices=NotificationTemplate.NOTIFICATION_TYPE_CHOICES,
+        max_length=32, choices=NotificationTemplate.NOTIFICATION_TYPE_CHOICES, help_text=_('Short identifier of the type of external service this sends to')
     )
     recipients = models.TextField(
         blank=True,
         default='',
         editable=False,
+        help_text=_('Addressees of this notification'),
     )
     subject = models.TextField(
         blank=True,
         default='',
         editable=False,
+        help_text=_('When applicable, the subject text of this notification'),
     )
-    body = models.JSONField(default=dict, blank=True)
+    body = models.JSONField(default=dict, blank=True, help_text=_('Body text of this notification'))
 
     def get_absolute_url(self, request=None):
         return reverse('api:notification_detail', kwargs={'pk': self.pk}, request=request)

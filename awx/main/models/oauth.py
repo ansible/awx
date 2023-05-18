@@ -16,6 +16,7 @@ from oauthlib import oauth2
 
 from awx.sso.common import get_external_account
 from awx.main.fields import OAuth2ClientSecretField
+from awx.main.constants import DESCRIPTION_HELP_TEXT
 
 
 DATA_URI_RE = re.compile(r'.*')  # FIXME
@@ -47,14 +48,9 @@ class OAuth2Application(AbstractApplication):
         (GRANT_PASSWORD, _("Resource owner password-based")),
     )
 
-    description = models.TextField(
-        default='',
-        blank=True,
-    )
+    description = models.TextField(default='', blank=True, help_text=DESCRIPTION_HELP_TEXT)
     logo_data = models.TextField(
-        default='',
-        editable=False,
-        validators=[RegexValidator(DATA_URI_RE)],
+        default='', editable=False, validators=[RegexValidator(DATA_URI_RE)], help_text=_('Byte data used to render logo on login page')
     )
     organization = models.ForeignKey(
         'Organization',
@@ -93,15 +89,8 @@ class OAuth2AccessToken(AbstractAccessToken):
         related_name="%(app_label)s_%(class)s",
         help_text=_('The user representing the token owner'),
     )
-    description = models.TextField(
-        default='',
-        blank=True,
-    )
-    last_used = models.DateTimeField(
-        null=True,
-        default=None,
-        editable=False,
-    )
+    description = models.TextField(default='', blank=True, help_text=DESCRIPTION_HELP_TEXT)
+    last_used = models.DateTimeField(null=True, default=None, editable=False, help_text=_('Last time token was used to make a request'))
     scope = models.TextField(
         blank=True,
         default='write',
@@ -109,7 +98,7 @@ class OAuth2AccessToken(AbstractAccessToken):
             'Allowed scopes, further restricts user\'s permissions. Must be a simple space-separated string with allowed scopes [\'read\', \'write\'].'
         ),
     )
-    modified = models.DateTimeField(editable=False, auto_now=True)
+    modified = models.DateTimeField(editable=False, auto_now=True, help_text=_('Timestamp of last user modification'))
 
     def is_valid(self, scopes=None):
         valid = super(OAuth2AccessToken, self).is_valid(scopes)

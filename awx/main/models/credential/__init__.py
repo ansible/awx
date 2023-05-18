@@ -31,6 +31,7 @@ from awx.main.fields import (
     CredentialTypeInjectorField,
     DynamicCredentialInputField,
 )
+from awx.main.constants import MANAGED_HELP_TEXT
 from awx.main.utils import decrypt_field, classproperty, set_environ
 from awx.main.utils.safe_yaml import safe_dump
 from awx.main.utils.execution_environments import to_container_path
@@ -94,7 +95,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         on_delete=models.CASCADE,
         help_text=_('Specify the type of credential you want to create. Refer to the documentation for details on each type.'),
     )
-    managed = models.BooleanField(default=False, editable=False)
+    managed = models.BooleanField(default=False, editable=False, help_text=MANAGED_HELP_TEXT)
     organization = models.ForeignKey(
         'Organization',
         null=True,
@@ -102,6 +103,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         blank=True,
         on_delete=models.CASCADE,
         related_name='credentials',
+        help_text=_('Organization used for purposes of access management'),
     )
     inputs = CredentialInputField(
         blank=True, default=dict, help_text=_('Enter inputs using either JSON or YAML syntax. Refer to the documentation for example syntax.')
@@ -343,9 +345,9 @@ class CredentialType(CommonModelNameNotUnique):
         ('cryptography', _('Cryptography')),
     )
 
-    kind = models.CharField(max_length=32, choices=KIND_CHOICES)
-    managed = models.BooleanField(default=False, editable=False)
-    namespace = models.CharField(max_length=1024, null=True, default=None, editable=False)
+    kind = models.CharField(max_length=32, choices=KIND_CHOICES, help_text=_('Distinguishes the way credentials of this type may be used'))
+    managed = models.BooleanField(default=False, editable=False, help_text=MANAGED_HELP_TEXT)
+    namespace = models.CharField(max_length=1024, null=True, default=None, editable=False, help_text=_('Short identifier for lookup purposes.'))
     inputs = CredentialTypeInputField(
         blank=True, default=dict, help_text=_('Enter inputs using either JSON or YAML syntax. Refer to the documentation for example syntax.')
     )
@@ -1215,17 +1217,17 @@ class CredentialInputSource(PrimordialModel):
         related_name='input_sources',
         on_delete=models.CASCADE,
         null=True,
+        help_text=_('This credential input source will look up fields for the inputs of this target credential'),
     )
     source_credential = models.ForeignKey(
         'Credential',
         related_name='target_input_sources',
         on_delete=models.CASCADE,
         null=True,
+        help_text=_('The credential used to authenticate to the secret management system'),
     )
-    input_field_name = models.CharField(
-        max_length=1024,
-    )
-    metadata = DynamicCredentialInputField(blank=True, default=dict)
+    input_field_name = models.CharField(max_length=1024, help_text=_('The name inside of the target credential inputs this will provide'))
+    metadata = DynamicCredentialInputField(blank=True, default=dict, help_text=_('Additional parameters for lookup plugin to use'))
 
     def clean_target_credential(self):
         if self.target_credential.credential_type.kind == 'external':

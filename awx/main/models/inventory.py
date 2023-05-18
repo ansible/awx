@@ -515,11 +515,7 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
         unique_together = (("name", "inventory"),)  # FIXME: Add ('instance_id', 'inventory') after migration.
         ordering = ('name',)
 
-    inventory = models.ForeignKey(
-        'Inventory',
-        related_name='hosts',
-        on_delete=models.CASCADE,
-    )
+    inventory = models.ForeignKey('Inventory', related_name='hosts', on_delete=models.CASCADE, help_text=_('Inventory this host is part of'))
     smart_inventories = models.ManyToManyField(
         'Inventory',
         related_name='+',
@@ -549,6 +545,7 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
         default=None,
         editable=False,
         on_delete=models.SET_NULL,
+        help_text=_('Last job that acted on this host. If limit or host pattern does not matche host, this will not be set.'),
     )
     last_job_host_summary = models.ForeignKey(
         'JobHostSummary',
@@ -558,6 +555,7 @@ class Host(CommonModelNameNotUnique, RelatedJobsMixin):
         default=None,
         editable=False,
         on_delete=models.SET_NULL,
+        help_text=_('Last playbook summary details from a job that acted on this host.'),
     )
     inventory_sources = models.ManyToManyField(
         'InventorySource',
@@ -665,11 +663,7 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
         unique_together = (("name", "inventory"),)
         ordering = ('name',)
 
-    inventory = models.ForeignKey(
-        'Inventory',
-        related_name='groups',
-        on_delete=models.CASCADE,
-    )
+    inventory = models.ForeignKey('Inventory', related_name='groups', on_delete=models.CASCADE, help_text=_('Inventory this group is part of'))
     # Can also be thought of as: parents == member_of, children == members
     parents = models.ManyToManyField(
         'self',
@@ -860,7 +854,7 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
 
 
 class HostMetric(models.Model):
-    hostname = models.CharField(unique=True, max_length=512)
+    hostname = models.CharField(unique=True, max_length=512, help_text=_('Corresponds to the name field of the host model'))
     first_automation = models.DateTimeField(auto_now_add=True, null=False, db_index=True, help_text=_('When the host was first automated against'))
     last_automation = models.DateTimeField(db_index=True, help_text=_('When the host was last automated against'))
     last_deleted = models.DateTimeField(null=True, db_index=True, help_text=_('When the host was last deleted'))
@@ -940,11 +934,13 @@ class InventorySourceOptions(BaseModel):
         choices=SOURCE_CHOICES,
         blank=False,
         default=None,
+        help_text=_('The type of inventory update.'),
     )
     source_path = models.CharField(
         max_length=1024,
         blank=True,
         default='',
+        help_text=_('File path of -i option when sourced from a file in a project or from awx-manage command.'),
     )
     source_vars = models.TextField(
         blank=True,
@@ -1011,6 +1007,7 @@ class InventorySourceOptions(BaseModel):
         choices=INVENTORY_UPDATE_VERBOSITY_CHOICES,
         blank=True,
         default=1,
+        help_text=_('Level of logs to write from ansible-inventory as well as from database writing logs.'),
     )
     limit = models.TextField(
         blank=True,
@@ -1100,6 +1097,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
         null=True,
         default=None,
         on_delete=models.CASCADE,
+        help_text=_('Inventory to update with content produced by this inventory source'),
     )
 
     source_project = models.ForeignKey(
@@ -1112,12 +1110,10 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, CustomVirtualE
         null=True,
     )
 
-    update_on_launch = models.BooleanField(
-        default=False,
-    )
+    update_on_launch = models.BooleanField(default=False, help_text=_('Whether to automatically update this inventory source before a job runs.'))
 
     update_cache_timeout = models.PositiveIntegerField(
-        default=0,
+        default=0, help_text=_('Prevents additional update_on_launch triggered updates within this many second of each other')
     )
 
     @classmethod
@@ -1278,20 +1274,24 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
         null=True,
         default=None,
         on_delete=models.DO_NOTHING,
+        help_text=_('Inventory that this update acts on.'),
     )
     inventory_source = models.ForeignKey(
         'InventorySource',
         related_name='inventory_updates',
         editable=False,
         on_delete=models.CASCADE,
+        help_text=_('The inventory source where details for this update input.'),
     )
     license_error = models.BooleanField(
         default=False,
         editable=False,
+        help_text=_('Marks whether this inventory update failed due to a license error.'),
     )
     org_host_limit_error = models.BooleanField(
         default=False,
         editable=False,
+        help_text=_('Marks whether this inventory update failed due to its organization max_hosts restriction.'),
     )
     source_project_update = models.ForeignKey(
         'ProjectUpdate',

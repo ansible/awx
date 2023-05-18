@@ -18,6 +18,7 @@ from awx.main.models.base import prevent_search, AD_HOC_JOB_TYPE_CHOICES, VERBOS
 from awx.main.models.events import AdHocCommandEvent, UnpartitionedAdHocCommandEvent
 from awx.main.models.unified_jobs import UnifiedJob
 from awx.main.models.notifications import JobNotificationMixin, NotificationTemplate
+from awx.main.constants import JOB_TYPE_HELP_TEXT, DIFF_MODE_HELP_TEXT, LIMIT_HELP_TEXT, FORKS_HELP_TEXT, VERBOSITY_HELP_TEXT, BECOME_ENABLED_HELP_TEXT
 
 logger = logging.getLogger('awx.main.models.ad_hoc_commands')
 
@@ -29,64 +30,27 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
         app_label = 'main'
         ordering = ('id',)
 
-    diff_mode = models.BooleanField(
-        default=False,
-    )
-    job_type = models.CharField(
-        max_length=64,
-        choices=AD_HOC_JOB_TYPE_CHOICES,
-        default='run',
-    )
+    diff_mode = models.BooleanField(default=False, help_text=DIFF_MODE_HELP_TEXT)
+    job_type = models.CharField(max_length=64, choices=AD_HOC_JOB_TYPE_CHOICES, default='run', help_text=JOB_TYPE_HELP_TEXT)
     inventory = models.ForeignKey(
-        'Inventory',
-        related_name='ad_hoc_commands',
-        null=True,
-        on_delete=models.SET_NULL,
+        'Inventory', related_name='ad_hoc_commands', null=True, on_delete=models.SET_NULL, help_text=_('Inventory this ad hoc command runs against')
     )
-    limit = models.TextField(
-        blank=True,
-        default='',
-    )
+    limit = models.TextField(blank=True, default='', help_text=LIMIT_HELP_TEXT)
     credential = models.ForeignKey(
-        'Credential',
-        related_name='ad_hoc_commands',
-        null=True,
-        default=None,
-        on_delete=models.SET_NULL,
+        'Credential', related_name='ad_hoc_commands', null=True, default=None, on_delete=models.SET_NULL, help_text=_('Machine credential for ad hoc command')
     )
-    module_name = models.CharField(
-        max_length=1024,
-        default='',
-        blank=True,
-    )
-    module_args = models.TextField(
-        blank=True,
-        default='',
-    )
-    forks = models.PositiveIntegerField(
-        blank=True,
-        default=0,
-    )
-    verbosity = models.PositiveIntegerField(
-        choices=VERBOSITY_CHOICES,
-        blank=True,
-        default=0,
-    )
-    become_enabled = models.BooleanField(
-        default=False,
-    )
+    module_name = models.CharField(max_length=1024, default='', blank=True, help_text=_('The name of the action to execute, passed as -m to ansible CLI'))
+    module_args = models.TextField(blank=True, default='', help_text=_('The actions options to execute in k=v format, passed as -a to ansible CLI'))
+    forks = models.PositiveIntegerField(blank=True, default=0, help_text=FORKS_HELP_TEXT)
+    verbosity = models.PositiveIntegerField(choices=VERBOSITY_CHOICES, blank=True, default=0, help_text=VERBOSITY_HELP_TEXT)
+    become_enabled = models.BooleanField(default=False, help_text=BECOME_ENABLED_HELP_TEXT)
     hosts = models.ManyToManyField(
         'Host',
         related_name='ad_hoc_commands',
         editable=False,
         through='AdHocCommandEvent',
     )
-    extra_vars = prevent_search(
-        models.TextField(
-            blank=True,
-            default='',
-        )
-    )
+    extra_vars = prevent_search(models.TextField(blank=True, default='', help_text=_('Additional variables passed via --extra-vars')))
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 

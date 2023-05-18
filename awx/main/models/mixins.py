@@ -44,6 +44,9 @@ __all__ = [
 ]
 
 
+SURVEY_PASSWORDS_HELP_TEXT = _("Used to track which extra_vars should have values encrypted.")
+
+
 class ResourceMixin(models.Model):
     class Meta:
         abstract = True
@@ -102,8 +105,9 @@ class SurveyJobTemplateMixin(models.Model):
 
     survey_enabled = models.BooleanField(
         default=False,
+        help_text=_('If true, the survey will be enabled.'),
     )
-    survey_spec = prevent_search(models.JSONField(default=dict, blank=True))
+    survey_spec = prevent_search(models.JSONField(default=dict, blank=True, help_text=_('Definition for launch time survey questions.')))
 
     ask_inventory_on_launch = AskForField(
         blank=True,
@@ -396,6 +400,7 @@ class SurveyJobMixin(models.Model):
             default=dict,
             editable=False,
             blank=True,
+            help_text=SURVEY_PASSWORDS_HELP_TEXT,
         )
     )
 
