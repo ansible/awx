@@ -17,8 +17,6 @@ logger = logging.getLogger('awx.main.dispatch.periodic')
 
 class Scheduler(Scheduler):
     def run_continuously(self):
-        idle_seconds = max(1, min(self.jobs).period.total_seconds() / 2)
-
         def run():
             ppid = os.getppid()
             logger.warning('periodic beat started')
@@ -26,7 +24,6 @@ class Scheduler(Scheduler):
             set_connection_name('periodic')  # set application_name to distinguish from other dispatcher processes
 
             while True:
-                loop_start = time.time()
                 if os.getppid() != ppid:
                     # if the parent PID changes, this process has been orphaned
                     # via e.g., segfault or sigkill, we should exit too
@@ -53,7 +50,10 @@ class Scheduler(Scheduler):
 
                 except Exception:
                     logger.exception('encountered an error while scheduling periodic tasks')
-                time.sleep(idle_seconds - (time.time() - loop_start))
+
+                idle_seconds = self.idle_seconds
+                if idle_seconds and idle_seconds > 0:
+                    time.sleep(idle_seconds)
 
         process = Process(target=run)
         process.daemon = True
