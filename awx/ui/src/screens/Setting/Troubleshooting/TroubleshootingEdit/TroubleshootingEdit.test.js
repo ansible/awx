@@ -101,7 +101,7 @@ describe('<TroubleshootingEdit />', () => {
     await act(async () => {
       wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
     });
-    expect(history.location.pathname).toEqual('/settings/jobs/details');
+    expect(history.location.pathname).toEqual('/settings/troubleshooting/details');
   });
 
   test('should display ContentError on throw', async () => {
@@ -111,7 +111,7 @@ describe('<TroubleshootingEdit />', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <SettingsProvider value={mockAllOptions.actions}>
-          <JobsEdit />
+          <TroubleshootingEdit />
         </SettingsProvider>
       );
     });

@@ -86,6 +86,7 @@ function JobsEdit() {
       ),
       AWX_TASK_ENV: formatJson(form.AWX_TASK_ENV),
       GALAXY_TASK_ENV: formatJson(form.GALAXY_TASK_ENV),
+      DEFAULT_CONTAINER_RUN_OPTIONS: formatJson(form.DEFAULT_CONTAINER_RUN_OPTIONS),
     });
   };
 
