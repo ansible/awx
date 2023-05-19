@@ -101,7 +101,9 @@ describe('<TroubleshootingEdit />', () => {
     await act(async () => {
       wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
     });
-    expect(history.location.pathname).toEqual('/settings/troubleshooting/details');
+    expect(history.location.pathname).toEqual(
+      '/settings/troubleshooting/details'
+    );
   });
 
   test('should display ContentError on throw', async () => {
