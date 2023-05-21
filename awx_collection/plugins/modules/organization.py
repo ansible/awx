@@ -47,12 +47,13 @@ options:
     max_hosts:
       description:
         - The max hosts allowed in this organizations
+        - Enforced state enforces default values of any option not provided.
       type: int
     state:
       description:
         - Desired state of the resource.
       default: "present"
-      choices: ["present", "absent", "exists"]
+      choices: ["present", "absent", "exists", "enforced"]
       type: str
     instance_groups:
       description:
@@ -130,7 +131,7 @@ def main():
         notification_templates_error=dict(type="list", elements='str'),
         notification_templates_approvals=dict(type="list", elements='str'),
         galaxy_credentials=dict(type="list", elements='str'),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists', 'enforced'], default='present'),
     )
 
     # Create a module for ourselves
@@ -148,9 +149,17 @@ def main():
     # Attempt to look up organization based on the provided name
     organization = module.get_one('organizations', name_or_id=name, check_exists=(state == 'exists'))
 
+    # set the default for enforced defaults
+    enforced_defaults = False
+
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(organization)
+    elif state == 'enforced':
+        enforced_defaults = True
+        # organization_defaults = module.get_options_endpoint('organizations')
+        # module.fail_json(msg="{0}".format(organization_defaults))
+
     # Attempt to look up associated field items the user specified.
     association_fields = {}
 

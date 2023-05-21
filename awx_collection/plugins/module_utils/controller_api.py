@@ -339,6 +339,9 @@ class ControllerAPIModule(ControllerModule):
     def get_endpoint(self, endpoint, *args, **kwargs):
         return self.make_request('GET', endpoint, **kwargs)
 
+    def get_options_endpoint(self, endpoint, *args, **kwargs):
+        return self.make_request('OPTIONS', endpoint, **kwargs)
+
     def patch_endpoint(self, endpoint, *args, **kwargs):
         # Handle check mode
         if self.check_mode:
@@ -468,7 +471,7 @@ class ControllerAPIModule(ControllerModule):
             # If we have a oauth token, we just use a bearer header
             headers['Authorization'] = 'Bearer {0}'.format(self.oauth_token)
 
-        if method in ['POST', 'PUT', 'PATCH']:
+        if method in ['POST', 'PUT', 'PATCH', 'OPTIONS']:
             headers.setdefault('Content-Type', 'application/json')
             kwargs['headers'] = headers
 
