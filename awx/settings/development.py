@@ -61,8 +61,9 @@ DEBUG_TOOLBAR_CONFIG = {'ENABLE_STACKTRACES': True}
 SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
 INSTALL_UUID = '00000000-0000-0000-0000-000000000000'
 
-BASE_VENV_PATH = "/var/lib/awx/venv/"
-AWX_VENV_PATH = os.path.join(BASE_VENV_PATH, "awx")
+# Ansible base virtualenv paths and enablement
+# only used for deprecated fields and management commands for them
+BASE_VENV_PATH = os.path.realpath("/var/lib/awx/venv")
 
 CLUSTER_HOST_ID = socket.gethostname()
 

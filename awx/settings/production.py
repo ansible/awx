@@ -30,14 +30,9 @@ SECRET_KEY = None
 # See https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = []
 
-# The heartbeat file for the scheduler
-SCHEDULE_METADATA_LOCATION = '/var/lib/awx/.tower_cycle'
-
 # Ansible base virtualenv paths and enablement
+# only used for deprecated fields and management commands for them
 BASE_VENV_PATH = os.path.realpath("/var/lib/awx/venv")
-
-# Base virtualenv paths and enablement
-AWX_VENV_PATH = os.path.join(BASE_VENV_PATH, "awx")
 
 # Very important that this is editable (not read_only) in the API
 AWX_ISOLATION_SHOW_PATHS = [

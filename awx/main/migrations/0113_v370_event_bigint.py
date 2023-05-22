@@ -12,21 +12,16 @@ def migrate_event_data(apps, schema_editor):
     # https://www.postgresql.org/docs/9.1/datatype-numeric.html)
     for tblname in ('main_jobevent', 'main_inventoryupdateevent', 'main_projectupdateevent', 'main_adhoccommandevent', 'main_systemjobevent'):
         with connection.cursor() as cursor:
-            # rename the current event table
-            cursor.execute(f'ALTER TABLE {tblname} RENAME TO _old_{tblname};')
-            # create a *new* table with the same schema
-            cursor.execute(f'CREATE TABLE {tblname} (LIKE _old_{tblname} INCLUDING ALL);')
-            # alter the *new* table so that the primary key is a big int
+            # This loop used to do roughly the following:
+            #     Rename the table to _old_<tablename>
+            #     Create a new table form the old table (it would have no rows)
+            #     Drop the old sequnce and create a new on tied to the new table and set the sequence to the last number from the old table
+            # This used to work with postgres spitting out a NOTICE and DETAIL
+            # With the django 4.2 upgrade that changed to an ERROR and HINT
+            # By the time we hit the 4.2 upgrade, no one should be upgrading a database this old directly to this new schema
+            # So we no longer really care about having to do all of this work, we only need a table with a bigint ID field
+            # And this can be achieved by just changing the id column type...
             cursor.execute(f'ALTER TABLE {tblname} ALTER COLUMN id TYPE bigint USING id::bigint;')
-
-            # recreate counter for the new table's primary key to
-            # start where the *old* table left off (we have to do this because the
-            # counter changed from an int to a bigint)
-            cursor.execute(f'DROP SEQUENCE IF EXISTS "{tblname}_id_seq" CASCADE;')
-            cursor.execute(f'CREATE SEQUENCE "{tblname}_id_seq";')
-            cursor.execute(f'ALTER TABLE "{tblname}" ALTER COLUMN "id" ' f"SET DEFAULT nextval('{tblname}_id_seq');")
-            cursor.execute(f"SELECT setval('{tblname}_id_seq', (SELECT MAX(id) FROM _old_{tblname}), true);")
-            cursor.execute(f'DROP TABLE _old_{tblname};')
 
 
 class FakeAlterField(migrations.AlterField):
