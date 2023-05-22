@@ -32,8 +32,12 @@ The notable modules for this component are:
 
 * `awx/main/consumers.py` - the django-channels "consumers" where websocket
   clients are actually handled (think of these like views, but specific to
-  websockets). This is also where `emit_channel_notification` is defined, which
-  is what the task system calls to actually send out notifications.
+  websockets).
+
+  * This is also where `emit_channel_notification` is defined, which is what the
+    task system calls to actually send out notifications. This sends a message
+    to the local Redis instance where wsrelay (discussed below) will pick it
+    up and relay it out to the web nodes.
 
 * `awx/main/wsrelay.py` (formerly `awx/main/wsbroadcast.py`) - an asyncio
   websockets _client_ that connects to the "relay" (fka. "broadcast")
@@ -143,7 +147,7 @@ mitigate replay attack windows.
 Note that the nonce timestamp is considered valid if it is within 300 second
 threshold. This is to allow for machine clock skews.
 
-```json
+```python
 {
     "secret": settings.BROADCAST_WEBSOCKET_SECRET,
     "nonce": time.now()
