@@ -851,7 +851,7 @@ LOGGING = {
         'awx.conf': {'handlers': ['null'], 'level': 'WARNING'},
         'awx.conf.settings': {'handlers': ['null'], 'level': 'WARNING'},
         'awx.main': {'handlers': ['null']},
-        'awx.main.commands.run_callback_receiver': {'handlers': ['callback_receiver']},  # level handled by dynamic_level_filter
+        'awx.main.commands.run_callback_receiver': {'handlers': ['callback_receiver'], 'level': 'INFO'},  # very noisey debug-level logs
         'awx.main.dispatch': {'handlers': ['dispatcher']},
         'awx.main.consumers': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'INFO'},
         'awx.main.rsyslog_configurer': {'handlers': ['rsyslog_configurer']},
@@ -859,9 +859,9 @@ LOGGING = {
         'awx.main.heartbeet': {'handlers': ['heartbeet']},
         'awx.main.wsrelay': {'handlers': ['wsrelay']},
         'awx.main.commands.inventory_import': {'handlers': ['inventory_import'], 'propagate': False},
-        'awx.main.tasks': {'handlers': ['task_system', 'external_logger'], 'propagate': False},
-        'awx.main.analytics': {'handlers': ['task_system', 'external_logger'], 'level': 'INFO', 'propagate': False},
-        'awx.main.scheduler': {'handlers': ['task_system', 'external_logger'], 'propagate': False},
+        'awx.main.tasks': {'handlers': ['task_system', 'external_logger', 'console'], 'propagate': False},
+        'awx.main.analytics': {'handlers': ['task_system', 'external_logger', 'console'], 'level': 'INFO', 'propagate': False},
+        'awx.main.scheduler': {'handlers': ['task_system', 'external_logger', 'console'], 'propagate': False},
         'awx.main.access': {'level': 'INFO'},  # very verbose debug-level logs
         'awx.main.signals': {'level': 'INFO'},  # very verbose debug-level logs
         'awx.api.permissions': {'level': 'INFO'},  # very verbose debug-level logs
