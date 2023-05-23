@@ -2,16 +2,13 @@ import json
 import logging
 import time
 import hmac
-import asyncio
 import redis
 
-from django.core.serializers.json import DjangoJSONEncoder
 from django.conf import settings
 from django.utils.encoding import force_bytes
 from django.contrib.auth.models import User
 
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
-from channels.layers import get_channel_layer
 from channels.db import database_sync_to_async
 
 logger = logging.getLogger('awx.main.consumers')
@@ -102,7 +99,7 @@ class RelayConsumer(AsyncJsonWebsocketConsumer):
         await self.send(event['text'])
 
     async def receive_json(self, data):
-        (group, message) = unwrap_broadcast_msg(data)
+        (group, message) = (data['group'], data['message'])
         if group == "metrics":
             message = json.loads(message['text'])
             conn = redis.Redis.from_url(settings.BROKER_URL)
@@ -216,36 +213,3 @@ class EventConsumer(AsyncJsonWebsocketConsumer):
 
     async def internal_message(self, event):
         await self.send(event['text'])
-
-
-def run_sync(func):
-    event_loop = asyncio.new_event_loop()
-    event_loop.run_until_complete(func)
-    event_loop.close()
-
-
-def _dump_payload(payload):
-    try:
-        return json.dumps(payload, cls=DjangoJSONEncoder)
-    except ValueError:
-        logger.error("Invalid payload to emit")
-        return None
-
-
-def unwrap_broadcast_msg(payload: dict):
-    return (payload['group'], payload['message'])
-
-
-def emit_channel_notification(group, payload):
-    payload_dumped = _dump_payload(payload)
-    if payload_dumped is None:
-        return
-
-    channel_layer = get_channel_layer()
-
-    run_sync(
-        channel_layer.group_send(
-            group,
-            {"type": "internal.message", "text": payload_dumped, "needs_relay": True},
-        )
-    )

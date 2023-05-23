@@ -6,7 +6,7 @@ import logging
 from django.conf import settings
 from django.apps import apps
 
-from awx.main.consumers import emit_channel_notification
+from awx.main.utils.websockets import emit_websocket_payload
 from awx.main.utils import is_testing
 
 root_key = settings.SUBSYSTEM_METRICS_REDIS_KEY_PREFIX
@@ -310,7 +310,7 @@ class Metrics:
                 }
                 # store the serialized data locally as well, so that load_other_metrics will read it
                 self.conn.set(root_key + '_instance_' + self.instance_name, serialized_metrics)
-                emit_channel_notification("metrics", payload)
+                emit_websocket_payload("metrics", payload)
 
                 self.previous_send_metrics.set(current_time)
                 self.previous_send_metrics.store_value(self.conn)

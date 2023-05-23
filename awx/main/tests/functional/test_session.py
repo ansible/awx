@@ -26,7 +26,7 @@ def test_login_json_not_allowed(get, accept, status):
 
 
 @pytest.mark.django_db
-@mock.patch('awx.main.consumers.emit_channel_notification')
+@mock.patch('awx.utils.websockets.emit_websocket_payload')
 def test_sessions_unlimited(emit, admin):
     assert Session.objects.count() == 0
     for i in range(5):
@@ -37,7 +37,7 @@ def test_sessions_unlimited(emit, admin):
 
 
 @pytest.mark.django_db
-@mock.patch('awx.main.consumers.emit_channel_notification')
+@mock.patch('awx.utils.websockets.emit_websocket_payload')
 def test_session_overlimit(emit, admin, alice):
     # If SESSIONS_PER_USER=3, only persist the three most recently created sessions
     assert Session.objects.count() == 0

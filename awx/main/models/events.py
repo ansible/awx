@@ -17,12 +17,12 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.encoding import force_str
 
 from awx.api.versioning import reverse
-from awx.main import consumers
 from awx.main.fields import JSONBlob
 from awx.main.managers import DeferJobCreatedManager
 from awx.main.constants import MINIMAL_EVENTS
 from awx.main.models.base import CreatedModifiedModel
 from awx.main.utils import ignore_inventory_computed_fields, camelcase_to_underscore
+from awx.main.utils.websockets import emit_websocket_payload
 
 analytics_logger = logging.getLogger('awx.analytics.job_events')
 
@@ -78,7 +78,7 @@ def emit_event_detail(event):
         url = '/api/v2/ad_hoc_command_events/{}'.format(event.id)
     group = camelcase_to_underscore(cls.__name__) + 's'
     timestamp = event.created.isoformat()
-    consumers.emit_channel_notification(
+    emit_websocket_payload(
         '-'.join([group, str(getattr(event, relation))]),
         {
             'id': event.id,
