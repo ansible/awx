@@ -146,6 +146,7 @@ class AWXConsumerRedis(AWXConsumerBase):
 
         while True:
             logger.debug(f'{os.getpid()} is alive')
+            db.connection.close()
             time.sleep(60)
 
 
