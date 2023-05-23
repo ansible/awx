@@ -2,6 +2,7 @@ import logging
 import json
 
 from django.core.management.base import BaseCommand
+
 from awx.main.dispatch import pg_bus_conn
 from awx.main.dispatch.worker.task import TaskWorker
 
@@ -18,7 +19,7 @@ class Command(BaseCommand):
 
     def handle(self, *arg, **options):
         try:
-            with pg_bus_conn(new_connection=True) as conn:
+            with pg_bus_conn() as conn:
                 conn.listen("tower_settings_change")
                 for e in conn.events(yield_timeouts=True):
                     if e is not None:

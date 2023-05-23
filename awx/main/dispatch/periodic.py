@@ -33,14 +33,14 @@ class Scheduler(Scheduler):
                     logger.warning(f'periodic beat exiting gracefully pid:{pid}')
                     raise SystemExit()
                 try:
-                    for conn in connections.all():
-                        # If the database connection has a hiccup, re-establish a new
-                        # connection
-                        conn.close_if_unusable_or_obsolete()
                     set_guid(generate_guid())
                     self.run_pending()
                 except Exception:
                     logger.exception('encountered an error while scheduling periodic tasks')
+                for conn in connections.all():
+                    # If the database connection has a hiccup, re-establish a new
+                    # connection
+                    conn.close()
                 time.sleep(idle_seconds)
 
         process = Process(target=run)
