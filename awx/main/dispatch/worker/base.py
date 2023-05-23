@@ -181,6 +181,13 @@ class AWXConsumerPG(AWXConsumerBase):
             self.listen_cumulative_time = 0.0
             self.last_metrics_gather = current_time
 
+        # close all connections before entering the select on pg_notify to minimize conn use
+        for django_connection in db.connections.all():
+            django_connection.close()
+
+        self.pg_is_down = False
+        self.listen_start = time.time()
+
     def run(self, *args, **kwargs):
         super(AWXConsumerPG, self).run(*args, **kwargs)
 
@@ -195,14 +202,12 @@ class AWXConsumerPG(AWXConsumerBase):
                     if init is False:
                         self.worker.on_start()
                         init = True
-                    self.listen_start = time.time()
+                    self.run_periodic_tasks()
                     for e in conn.events(yield_timeouts=True):
                         self.listen_cumulative_time += time.time() - self.listen_start
                         if e is not None:
                             self.process_task(json.loads(e.payload))
                         self.run_periodic_tasks()
-                        self.pg_is_down = False
-                        self.listen_start = time.time()
                     if self.should_stop:
                         return
             except psycopg2.InterfaceError:
@@ -223,8 +228,6 @@ class AWXConsumerPG(AWXConsumerBase):
                     if self.should_stop:
                         return
                     time.sleep(0.1)
-                for conn in db.connections.all():
-                    conn.close_if_unusable_or_obsolete()
             except Exception:
                 # Log unanticipated exception in addition to writing to stderr to get timestamps and other metadata
                 logger.exception('Encountered unhandled error in dispatcher main loop')
@@ -245,6 +248,9 @@ class BaseWorker(object):
             if os.getppid() != ppid:
                 break
             try:
+                # Reduce connection use by closing connections while we wait for work
+                for conn in db.connections.all():
+                    conn.close()
                 body = self.read(queue)
                 if body == 'QUIT':
                     break
@@ -254,10 +260,6 @@ class BaseWorker(object):
                 logger.error("Exception on worker {}, restarting: ".format(idx) + str(e))
                 continue
             try:
-                for conn in db.connections.all():
-                    # If the database connection has a hiccup during the prior message, close it
-                    # so we can establish a new connection
-                    conn.close_if_unusable_or_obsolete()
                 self.perform_work(body, *args)
             except Exception:
                 logger.exception(f'Unhandled exception in perform_work in worker pid={os.getpid()}')

@@ -7,6 +7,7 @@ import sys
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
+from django.db import connection
 
 from awx.main.dispatch import pg_bus_conn
 
@@ -53,7 +54,7 @@ class Command(BaseCommand):
         return json.dumps(payload)
 
     def notify_listener_and_exit(self, *args):
-        with pg_bus_conn(new_connection=False) as conn:
+        with pg_bus_conn() as conn:
             conn.notify('web_heartbeet', self.construct_payload(action='offline'))
         sys.exit(0)
 
@@ -62,6 +63,7 @@ class Command(BaseCommand):
             with pg_bus_conn() as conn:
                 logger.debug('Sending heartbeat')
                 conn.notify('web_heartbeet', self.construct_payload())
+            connection.close()
             time.sleep(settings.BROADCAST_WEBSOCKET_BEACON_FROM_WEB_RATE_SECONDS)
 
     def handle(self, *arg, **options):
