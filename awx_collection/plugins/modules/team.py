@@ -42,7 +42,7 @@ options:
     state:
       description:
         - Desired state of the resource.
-      choices: ["present", "absent"]
+      choices: ["present", "absent", "exists"]
       default: "present"
       type: str
 extends_documentation_fragment: awx.awx.auth
@@ -69,7 +69,7 @@ def main():
         new_name=dict(),
         description=dict(),
         organization=dict(required=True),
-        state=dict(choices=['present', 'absent'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )
 
     # Create a module for ourselves
@@ -86,7 +86,7 @@ def main():
     org_id = module.resolve_name_to_id('organizations', organization)
 
     # Attempt to look up team based on the provided name and org ID
-    team = module.get_one('teams', name_or_id=name, **{'data': {'organization': org_id}})
+    team = module.get_one('teams', name_or_id=name, check_exists=(state == 'exists'), **{'data': {'organization': org_id}})
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

@@ -29,6 +29,45 @@
     that:
       - "result is changed"
 
+- name: Create a Host with exists
+  host:
+    name: "{{ host_name }}"
+    inventory: "{{ inv_name }}"
+    state: exists
+    variables:
+      foo: bar
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+
+- name: Delete a Host
+  host:
+    name: "{{ host_name }}"
+    inventory: "{{ inv_name }}"
+    state: absent
+    variables:
+      foo: bar
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Create a Host with exists
+  host:
+    name: "{{ host_name }}"
+    inventory: "{{ inv_name }}"
+    state: exists
+    variables:
+      foo: bar
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
 - name: Delete a Host
   host:
     name: "{{ result.id }}"

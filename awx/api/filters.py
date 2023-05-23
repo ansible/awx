@@ -347,7 +347,7 @@ class FieldLookupBackend(BaseFilterBackend):
                         args.append(Q(**{k: v}))
                 for role_name in role_filters:
                     if not hasattr(queryset.model, 'accessible_pk_qs'):
-                        raise ParseError(_('Cannot apply role_level filter to this list because its model ' 'does not use roles for access control.'))
+                        raise ParseError(_('Cannot apply role_level filter to this list because its model does not use roles for access control.'))
                     args.append(Q(pk__in=queryset.model.accessible_pk_qs(request.user, role_name)))
                 if or_filters:
                     q = Q()
