@@ -146,10 +146,14 @@ class TaskBase:
                         signal.signal(signal.SIGUSR1, original_sigusr1)
                     commit_start = time.time()
 
+                logger.debug(f"Commiting {self.prefix} Scheduler changes")
+                time_delta = time.time() - commit_start
+
                 if self.prefix == "task_manager":
-                    self.subsystem_metrics.set(f"{self.prefix}_commit_seconds", time.time() - commit_start)
+                    self.subsystem_metrics.set(f"{self.prefix}_commit_seconds", time_delta)
                 self.record_aggregate_metrics()
-                logger.debug(f"Finishing {self.prefix} Scheduler")
+
+                logger.debug(f"Finished {self.prefix} Scheduler commit in {time_delta} seconds")
 
 
 class WorkflowManager(TaskBase):
