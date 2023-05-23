@@ -52,7 +52,7 @@ options:
       description:
         - Desired state of the resource.
       default: "present"
-      choices: ["present", "absent"]
+      choices: ["present", "absent", "exists"]
       type: str
     instance_groups:
       description:
@@ -130,7 +130,7 @@ def main():
         notification_templates_error=dict(type="list", elements='str'),
         notification_templates_approvals=dict(type="list", elements='str'),
         galaxy_credentials=dict(type="list", elements='str'),
-        state=dict(choices=['present', 'absent'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )
 
     # Create a module for ourselves
@@ -146,7 +146,7 @@ def main():
     state = module.params.get('state')
 
     # Attempt to look up organization based on the provided name
-    organization = module.get_one('organizations', name_or_id=name)
+    organization = module.get_one('organizations', name_or_id=name, check_exists=(state == 'exists'))
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

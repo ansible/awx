@@ -371,7 +371,7 @@ class TestExtraVarSanitation(TestJobExecution):
     # are deemed trustable, because they can only be added by users w/ enough
     # privilege to add/modify a Job Template)
 
-    UNSAFE = '{{ lookup(' 'pipe' ',' 'ls -la' ') }}'
+    UNSAFE = "{{ lookup('pipe', 'ls -la') }}"
 
     def test_vars_unsafe_by_default(self, job, private_data_dir, mock_me):
         job.created_by = User(pk=123, username='angry-spud')

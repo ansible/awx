@@ -69,7 +69,7 @@ options:
     state:
       description:
         - Desired state of the resource.
-      choices: ["present", "absent"]
+      choices: ["present", "absent", "exists"]
       default: "present"
       type: str
 extends_documentation_fragment: awx.awx.auth
@@ -137,7 +137,7 @@ def main():
         password=dict(no_log=True),
         update_secrets=dict(type='bool', default=True, no_log=False),
         organization=dict(),
-        state=dict(choices=['present', 'absent'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )
 
     # Create a module for ourselves
@@ -158,7 +158,7 @@ def main():
     # Attempt to look up the related items the user specified (these will fail the module if not found)
 
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('users', name_or_id=username)
+    existing_item = module.get_one('users', name_or_id=username, check_exists=(state == 'exists'))
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

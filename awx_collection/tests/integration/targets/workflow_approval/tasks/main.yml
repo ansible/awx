@@ -2,13 +2,15 @@
 - name: Generate a random string for names
   set_fact:
     test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    test_prefix: AWX-Collection-tests-workflow_approval
+  when: test_id is not defined
 
 - name: Generate random names for test objects
   set_fact:
     org_name: "{{ test_prefix }}-org-{{ test_id }}"
     approval_node_name: "{{ test_prefix }}-node-{{ test_id }}"
     wfjt_name: "{{ test_prefix }}-wfjt-{{ test_id }}"
+  vars:
+    test_prefix: AWX-Collection-tests-workflow_approval
 
 - block:
     - name: Create a new organization for test isolation

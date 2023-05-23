@@ -390,7 +390,7 @@ class LDAPSearchUnionField(fields.ListField):
             search_args = []
             for i in range(len(data)):
                 if not isinstance(data[i], list):
-                    raise ValidationError('In order to ultilize LDAP Union, input element No. %d' ' should be a search query array.' % (i + 1))
+                    raise ValidationError('In order to ultilize LDAP Union, input element No. %d should be a search query array.' % (i + 1))
                 try:
                     search_args.append(self.ldap_search_field_class().run_validation(data[i]))
                 except Exception as e:

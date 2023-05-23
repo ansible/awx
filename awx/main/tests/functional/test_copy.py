@@ -124,6 +124,24 @@ def test_inventory_copy(inventory, group_factory, post, get, alice, organization
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize(
+    "is_admin, can_copy, status",
+    [
+        [True, True, 200],
+        [False, False, 200],
+    ],
+)
+def test_workflow_job_template_copy_access(get, admin_user, alice, workflow_job_template, is_admin, can_copy, status):
+    url = reverse('api:workflow_job_template_copy', kwargs={'pk': workflow_job_template.pk})
+    if is_admin:
+        response = get(url, user=admin_user, expect=status)
+    else:
+        workflow_job_template.organization.auditor_role.members.add(alice)
+        response = get(url, user=alice, expect=status)
+    assert response.data['can_copy'] == can_copy
+
+
+@pytest.mark.django_db
 def test_workflow_job_template_copy(workflow_job_template, post, get, admin, organization):
     '''
     Tests the FIELDS_TO_PRESERVE_AT_COPY attribute on WFJTs
