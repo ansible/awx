@@ -267,11 +267,11 @@ run-wsrelay:
 	$(PYTHON) manage.py run_wsrelay
 
 ## Start the heartbeat process in background in development environment.
-run-heartbeet:
+run-ws-heartbeat:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py run_heartbeet
+	$(PYTHON) manage.py run_ws_heartbeat
 
 reports:
 	mkdir -p $@
