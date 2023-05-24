@@ -290,13 +290,6 @@ class BaseTask(object):
             content = safe_dump(vars, safe_dict)
         return self.write_private_data_file(private_data_dir, 'extravars', content, sub_dir='env')
 
-    def add_awx_venv(self, env):
-        env['VIRTUAL_ENV'] = settings.AWX_VENV_PATH
-        if 'PATH' in env:
-            env['PATH'] = os.path.join(settings.AWX_VENV_PATH, "bin") + ":" + env['PATH']
-        else:
-            env['PATH'] = os.path.join(settings.AWX_VENV_PATH, "bin")
-
     def build_env(self, instance, private_data_dir, private_data_files=None):
         """
         Build environment dictionary for ansible-playbook.
