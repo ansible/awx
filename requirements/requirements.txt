@@ -411,8 +411,10 @@ social-auth-core[openidconnect]==4.3.0
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   social-auth-app-django
-sqlparse==0.4.3
-    # via django
+sqlparse==0.4.4
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   django
 tacacs-plus==1.0
     # via -r /awx_devel/requirements/requirements.in
 tempora==5.1.0
