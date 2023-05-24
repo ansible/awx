@@ -4,6 +4,7 @@ import datetime
 from datetime import timezone
 import logging
 from collections import defaultdict
+import time
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -383,8 +384,17 @@ class BasePlaybookEvent(CreatedModifiedModel):
                         .distinct()
                     )  # noqa
 
-                    job.get_event_queryset().filter(uuid__in=changed).update(changed=True)
-                    job.get_event_queryset().filter(uuid__in=failed).update(failed=True)
+                    # NOTE: we take a set of changed and failed parent uuids because the subquery
+                    # complicates the plan with large event tables causing very long query execution time
+                    changed_start = time.time()
+                    changed_res = job.get_event_queryset().filter(uuid__in=set(changed)).update(changed=True)
+                    failed_start = time.time()
+                    failed_res = job.get_event_queryset().filter(uuid__in=set(failed)).update(failed=True)
+                    logger.debug(
+                        f'Event propagation for job {job.id}: '
+                        f'marked {changed_res} as changed in {failed_start - changed_start:.4f}s, '
+                        f'{failed_res} as failed in {time.time() - failed_start:.4f}s'
+                    )
 
         for field in ('playbook', 'play', 'task', 'role'):
             value = force_str(event_data.get(field, '')).strip()
