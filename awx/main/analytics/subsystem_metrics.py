@@ -209,6 +209,11 @@ class Metrics:
             SetFloatM('workflow_manager_recorded_timestamp', 'Unix timestamp when metrics were last recorded'),
             SetFloatM('workflow_manager_spawn_workflow_graph_jobs_seconds', 'Time spent spawning workflow tasks'),
             SetFloatM('workflow_manager_get_tasks_seconds', 'Time spent loading workflow tasks from db'),
+            # dispatcher subsystem metrics
+            SetIntM('dispatcher_pool_scale_up_events', 'Number of times local dispatcher scaled up a worker since startup'),
+            SetIntM('dispatcher_pool_active_task_count', 'Number of active tasks in the worker pool when last task was submitted'),
+            SetIntM('dispatcher_pool_max_worker_count', 'Highest number of workers in worker pool in last collection interval, about 20s'),
+            SetFloatM('dispatcher_availability', 'Fraction of time (in last collection interval) dispatcher was able to receive messages'),
         ]
         # turn metric list into dictionary with the metric name as a key
         self.METRICS = {}

@@ -264,7 +264,6 @@ options:
       description:
         - Maximum time in seconds to wait for a job to finish (server-side).
       type: int
-      default: 0
     job_slice_count:
       description:
         - The number of jobs to slice into at runtime. Will cause the Job Template to launch a workflow if value is greater than 1.
