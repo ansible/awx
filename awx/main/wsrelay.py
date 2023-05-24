@@ -209,15 +209,15 @@ class WebSocketRelayManager(object):
         # hostname -> ip
         self.known_hosts: Dict[str, str] = dict()
 
-    async def on_heartbeet(self, conn, pid, channel, payload):
+    async def on_ws_heartbeat(self, conn, pid, channel, payload):
         try:
-            if not payload or channel != "web_heartbeet":
+            if not payload or channel != "web_ws_heartbeat":
                 return
 
             try:
                 payload = json.loads(payload)
             except json.JSONDecodeError:
-                logmsg = "Failed to decode message from pg_notify channel `web_heartbeet`"
+                logmsg = "Failed to decode message from pg_notify channel `web_ws_heartbeat`"
                 if logger.isEnabledFor(logging.DEBUG):
                     logmsg = "{} {}".format(logmsg, payload)
                     logger.warning(logmsg)
@@ -235,7 +235,7 @@ class WebSocketRelayManager(object):
                     # If we don't get an IP, just try the hostname, maybe it resolves
                     ip = hostname
                 if ip is None:
-                    logger.warning(f"Received invalid online heartbeet, missing hostname and ip: {payload}")
+                    logger.warning(f"Received invalid online ws_heartbeat, missing hostname and ip: {payload}")
                     return
                 self.known_hosts[hostname] = ip
                 logger.debug(f"Web host {hostname} ({ip}) online heartbeat received.")
@@ -246,14 +246,14 @@ class WebSocketRelayManager(object):
                     # If we don't get an IP, just try the hostname, maybe it resolves
                     ip = hostname
                 if ip is None:
-                    logger.warning(f"Received invalid offline heartbeet, missing hostname and ip: {payload}")
+                    logger.warning(f"Received invalid offline ws_heartbeat, missing hostname and ip: {payload}")
                     return
                 self.cleanup_offline_host(ip)
                 logger.debug(f"Web host {hostname} ({ip}) offline heartbeat received.")
         except Exception as e:
             # This catch-all is the same as the one above. asyncio will eat the exception
             # but we want to know about it.
-            logger.exception(f"on_heartbeet exception: {e}")
+            logger.exception(f"on_ws_heartbeat exception: {e}")
 
     def cleanup_offline_host(self, hostname):
         """
@@ -291,7 +291,7 @@ class WebSocketRelayManager(object):
             # We cannot include these because asyncpg doesn't allow all the options that psycopg does.
             # **database_conf.get("OPTIONS", {}),
         )
-        await async_conn.add_listener("web_heartbeet", self.on_heartbeet)
+        await async_conn.add_listener("web_ws_heartbeat", self.on_ws_heartbeat)
 
         # Establishes a websocket connection to /websocket/relay on all API servers
         while True:

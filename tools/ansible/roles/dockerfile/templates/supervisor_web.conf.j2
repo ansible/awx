@@ -55,12 +55,12 @@ stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
 
-[program:heartbeet]
+[program:ws-heartbeat]
 {% if kube_dev | bool %}
-command = make run-heartbeet
+command = make run-ws-heartbeat
 directory = /awx_devel
 {% else %}
-command = awx-manage run_heartbeet
+command = awx-manage run_ws_heartbeat
 directory = /var/lib/awx
 {% endif %}
 autorestart = true
@@ -103,7 +103,7 @@ stderr_logfile_maxbytes=0
 {% endif %}
 
 [group:tower-processes]
-programs=nginx,uwsgi,daphne,awx-cache-clear,heartbeet
+programs=nginx,uwsgi,daphne,awx-cache-clear,ws-heartbeat
 priority=5
 
 [eventlistener:superwatcher]

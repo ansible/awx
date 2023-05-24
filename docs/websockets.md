@@ -44,7 +44,7 @@ The notable modules for this component are:
   endpoint. This is a daemon. It formerly ran in each web container, but now
   runs in each task container instead.
 
-* `awx/main/management/commands/run_heartbeet.py` - discussed below, used to
+* `awx/main/management/commands/run_ws_heartbeat.py` - discussed below, used to
   send a heartbeat payload to pg_notify every few seconds, so that all task
   pods running `wsrelay.py` (above) know about each web pod.
 
@@ -103,7 +103,7 @@ that care about them.
 
 ### The Heartbeet
 
-There is also a "heartbeet" system (a play on "heartbeat"), that goes along with
+There is also a "ws_heartbeat" system, that goes along with
 the above. Remember that `wsrelay` lives in each task pod, and there could be an
 arbitrary number of web and task pods (independent of each other). Because of
 this, `wsrelay` (on all task pods) needs to know which web pods are up and need
@@ -111,7 +111,7 @@ to be connected to (on their "relay" endpoints). To accomplish this, we use
 pg_notify, since web and task pods are all able to connect to the database and
 we are safely able to use it as a central communication point.
 
-In each web container, there is a process, `run_heartbeet.py` which will send
+In each web container, there is a process, `run_ws_heartbeat.py` which will send
 out a heartbeat payload to pg_notify, every
 `settings.BROADCAST_WEBSOCKET_BEACON_FROM_WEB_RATE_SECONDS` seconds. This is
 done in a broadcast fashion to a specific pg_notify channel, and each `wsrelay`
@@ -120,7 +120,7 @@ these messages. When `wsrelay` sees this heartbeat packet, it checks to see if
 the web node is known already. If not, it creates a connection to it, and adds
 it to its list of nodes to relay websocket messages to.
 
-It can also handle web nodes going offline. If `run_heartbeet.py` detects
+It can also handle web nodes going offline. If `run_ws_heartbeat.py` detects
 SIGTERM or SIGINT, it will send an "offline" heartbeat packet, and `wsrelay`
 will work to *remove* the web node from its list of active connections.
 
