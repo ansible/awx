@@ -40,7 +40,7 @@ class UnifiedJob(HasStatus, base.Base):
         Default behavior is to replace newline characters with a space, but this can be modified, including replacement
         with ''. Pass replace_newlines=None to disable.
 
-        Additionally, you may replace any ' ' with another character (including ''). This is applied after the newline
+        Additionally, you may replace any  with another character (including ''). This is applied after the newline
         replacement. Default behavior is to not replace spaces.
         """
         self.wait_until_completed()
@@ -147,7 +147,7 @@ class UnifiedJob(HasStatus, base.Base):
                     if host_loc.startswith(expected_prefix):
                         return host_loc
         raise RuntimeError(
-            'Could not find a controller private_data_dir for this job. ' 'Searched for volume mount to {} inside of args {}'.format(expected_prefix, job_args)
+            'Could not find a controller private_data_dir for this job. Searched for volume mount to {} inside of args {}'.format(expected_prefix, job_args)
         )
 
 

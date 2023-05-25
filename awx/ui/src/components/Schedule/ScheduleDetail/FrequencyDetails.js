@@ -122,6 +122,18 @@ function sortWeekday(a, b) {
 }
 
 function RunOnDetail({ type, options, prefix }) {
+  const weekdays = {
+    sunday: t`Sunday`,
+    monday: t`Monday`,
+    tuesday: t`Tuesday`,
+    wednesday: t`Wednesday`,
+    thursday: t`Thursday`,
+    friday: t`Friday`,
+    saturday: t`Saturday`,
+    day: t`day`,
+    weekday: t`weekday`,
+    weekendDay: t`weekend day`,
+  };
   if (type === 'month') {
     if (options.runOn === 'day') {
       return (
@@ -132,16 +144,16 @@ function RunOnDetail({ type, options, prefix }) {
         />
       );
     }
-    const dayOfWeek = options.runOnTheDay;
+    const dayOfWeek = weekdays[options.runOnTheDay];
     return (
       <Detail
         label={t`Run on`}
         value={
-          options.runOnDayNumber === -1 ? (
+          options.runOnTheOccurrence === -1 ? (
             t`The last ${dayOfWeek}`
           ) : (
             <SelectOrdinal
-              value={options.runOnDayNumber}
+              value={options.runOnTheOccurrence}
               one={`The first ${dayOfWeek}`}
               two={`The second ${dayOfWeek}`}
               _3={`The third ${dayOfWeek}`}
@@ -178,18 +190,6 @@ function RunOnDetail({ type, options, prefix }) {
         />
       );
     }
-    const weekdays = {
-      sunday: t`Sunday`,
-      monday: t`Monday`,
-      tuesday: t`Tuesday`,
-      wednesday: t`Wednesday`,
-      thursday: t`Thursday`,
-      friday: t`Friday`,
-      saturday: t`Saturday`,
-      day: t`day`,
-      weekday: t`weekday`,
-      weekendDay: t`weekend day`,
-    };
     const weekday = weekdays[options.runOnTheDay];
     const month = months[options.runOnTheMonth];
     return (

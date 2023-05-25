@@ -253,7 +253,13 @@ class ApiV2(base.Base):
     # Import methods
 
     def _dependent_resources(self):
-        page_resource = {getattr(self, resource)._create().__item_class__: resource for resource in self.json}
+        page_resource = {}
+        for resource in self.json:
+            # The /api/v2/constructed_inventories endpoint is for the UI but will register as an Inventory endpoint
+            # We want to map the type to /api/v2/inventories/ which works for constructed too
+            if resource == 'constructed_inventory':
+                continue
+            page_resource[getattr(self, resource)._create().__item_class__] = resource
         data_pages = [getattr(self, resource)._create().__item_class__ for resource in EXPORTABLE_RESOURCES]
 
         for page_cls in itertools.chain(*has_create.page_creation_order(*data_pages)):
@@ -282,7 +288,18 @@ class ApiV2(base.Base):
                     if asset['natural_key']['type'] == 'user':
                         # We should only impose a default password if the resource doesn't exist.
                         post_data.setdefault('password', 'abc123')
-                    _page = endpoint.post(post_data)
+                    try:
+                        _page = endpoint.post(post_data)
+                    except exc.NoContent:
+                        # desired exception under some circumstances, e.g. labels that already exist
+                        if _page is None and 'name' in post_data:
+                            results = endpoint.get(all_pages=True).results
+                            for item in results:
+                                if item['name'] == post_data['name']:
+                                    _page = item.get()
+                                    break
+                            else:
+                                raise
                     changed = True
                     if asset['natural_key']['type'] == 'project':
                         # When creating a project, we need to wait for its
@@ -302,8 +319,6 @@ class ApiV2(base.Base):
 
                     _page = _page.put(post_data)
                     changed = True
-            except exc.NoContent:  # desired exception under some circumstances, e.g. labels that already exist
-                pass
             except (exc.Common, AssertionError) as e:
                 identifier = asset.get("name", None) or asset.get("username", None) or asset.get("hostname", None)
                 log.error(f'{endpoint} "{identifier}": {e}.')
@@ -404,6 +419,7 @@ class ApiV2(base.Base):
 
         for resource in self._dependent_resources():
             endpoint = getattr(self, resource)
+
             # Load up existing objects, so that we can try to update or link to them
             self._cache.get_page(endpoint)
             imported = self._import_list(endpoint, data.get(resource) or [])

@@ -1,9 +1,14 @@
 ---
+- name: Generate a test ID
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
 - name: Generate names
   set_fact:
-    jt_name1: "AWX-Collection-tests-job_launch-jt1-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    jt_name2: "AWX-Collection-tests-job_launch-jt2-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    proj_name: "AWX-Collection-tests-job_launch-project-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    jt_name1: "AWX-Collection-tests-job_launch-jt1-{{ test_id }}"
+    jt_name2: "AWX-Collection-tests-job_launch-jt2-{{ test_id }}"
+    proj_name: "AWX-Collection-tests-job_launch-project-{{ test_id }}"
 
 - name: Launch a Job Template
   job_launch:

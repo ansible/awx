@@ -1,24 +1,16 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+# Python
 import base64
 import os
 import re  # noqa
-import sys
 import tempfile
 import socket
 from datetime import timedelta
 
-
-if "pytest" in sys.modules:
-    IS_TESTING_MODE = True
-    from unittest import mock
-
-    with mock.patch('__main__.__builtins__.dir', return_value=[]):
-        import ldap
-else:
-    IS_TESTING_MODE = False
-    import ldap
+# python-ldap
+import ldap
 
 
 DEBUG = True
@@ -121,9 +113,6 @@ JOBOUTPUT_ROOT = '/var/lib/awx/job_status/'
 
 # Absolute filesystem path to the directory to store logs
 LOG_ROOT = '/var/log/tower/'
-
-# The heartbeat file for the scheduler
-SCHEDULE_METADATA_LOCATION = os.path.join(BASE_DIR, '.tower_cycle')
 
 # Django gettext files path: locale/<lang-code>/LC_MESSAGES/django.po, django.mo
 LOCALE_PATHS = (os.path.join(BASE_DIR, 'locale'),)
@@ -403,6 +392,7 @@ AUTHENTICATION_BACKENDS = (
 OAUTH2_PROVIDER_APPLICATION_MODEL = 'main.OAuth2Application'
 OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = 'main.OAuth2AccessToken'
 OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL = 'oauth2_provider.RefreshToken'
+OAUTH2_PROVIDER_ID_TOKEN_MODEL = "oauth2_provider.IDToken"
 
 OAUTH2_PROVIDER = {'ACCESS_TOKEN_EXPIRE_SECONDS': 31536000000, 'AUTHORIZATION_CODE_EXPIRE_SECONDS': 600, 'REFRESH_TOKEN_EXPIRE_SECONDS': 2628000}
 ALLOW_OAUTH2_FOR_EXTERNAL_USERS = False
@@ -734,10 +724,10 @@ CONTROLLER_INSTANCE_ID_VAR = 'remote_tower_id'
 # ---------------------
 # ----- Foreman -----
 # ---------------------
-SATELLITE6_ENABLED_VAR = 'foreman_enabled'
+SATELLITE6_ENABLED_VAR = 'foreman_enabled,foreman.enabled'
 SATELLITE6_ENABLED_VALUE = 'True'
 SATELLITE6_EXCLUDE_EMPTY_GROUPS = True
-SATELLITE6_INSTANCE_ID_VAR = 'foreman_id'
+SATELLITE6_INSTANCE_ID_VAR = 'foreman_id,foreman.id'
 # SATELLITE6_GROUP_PREFIX and SATELLITE6_GROUP_PATTERNS defined in source vars
 
 # ----------------
@@ -795,8 +785,6 @@ INSIGHTS_AGENT_MIME = 'application/example'
 INSIGHTS_SYSTEM_ID_FILE = '/etc/redhat-access-insights/machine-id'
 INSIGHTS_CERT_PATH = "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
 
-TOWER_SETTINGS_MANIFEST = {}
-
 # Settings related to external logger configuration
 LOG_AGGREGATOR_ENABLED = False
 LOG_AGGREGATOR_TCP_TIMEOUT = 5
@@ -807,11 +795,6 @@ LOG_AGGREGATOR_MAX_DISK_USAGE_PATH = '/var/lib/awx'
 LOG_AGGREGATOR_RSYSLOGD_DEBUG = False
 LOG_AGGREGATOR_RSYSLOGD_ERROR_LOG_FILE = '/var/log/tower/rsyslog.err'
 API_400_ERROR_LOG_FORMAT = 'status {status_code} received by user {user_name} attempting to access {url_path} from {remote_addr}'
-
-# The number of retry attempts for websocket session establishment
-# If you're encountering issues establishing websockets in a cluster,
-# raising this value can help
-CHANNEL_LAYER_RECEIVE_MAX_RETRY = 10
 
 ASGI_APPLICATION = "awx.main.routing.application"
 
@@ -868,17 +851,17 @@ LOGGING = {
         'awx.conf': {'handlers': ['null'], 'level': 'WARNING'},
         'awx.conf.settings': {'handlers': ['null'], 'level': 'WARNING'},
         'awx.main': {'handlers': ['null']},
-        'awx.main.commands.run_callback_receiver': {'handlers': ['callback_receiver']},  # level handled by dynamic_level_filter
+        'awx.main.commands.run_callback_receiver': {'handlers': ['callback_receiver'], 'level': 'INFO'},  # very noisey debug-level logs
         'awx.main.dispatch': {'handlers': ['dispatcher']},
         'awx.main.consumers': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'INFO'},
         'awx.main.rsyslog_configurer': {'handlers': ['rsyslog_configurer']},
         'awx.main.cache_clear': {'handlers': ['cache_clear']},
-        'awx.main.heartbeet': {'handlers': ['heartbeet']},
+        'awx.main.ws_heartbeat': {'handlers': ['ws_heartbeat']},
         'awx.main.wsrelay': {'handlers': ['wsrelay']},
         'awx.main.commands.inventory_import': {'handlers': ['inventory_import'], 'propagate': False},
-        'awx.main.tasks': {'handlers': ['task_system', 'external_logger'], 'propagate': False},
-        'awx.main.analytics': {'handlers': ['task_system', 'external_logger'], 'level': 'INFO', 'propagate': False},
-        'awx.main.scheduler': {'handlers': ['task_system', 'external_logger'], 'propagate': False},
+        'awx.main.tasks': {'handlers': ['task_system', 'external_logger', 'console'], 'propagate': False},
+        'awx.main.analytics': {'handlers': ['task_system', 'external_logger', 'console'], 'level': 'INFO', 'propagate': False},
+        'awx.main.scheduler': {'handlers': ['task_system', 'external_logger', 'console'], 'propagate': False},
         'awx.main.access': {'level': 'INFO'},  # very verbose debug-level logs
         'awx.main.signals': {'level': 'INFO'},  # very verbose debug-level logs
         'awx.api.permissions': {'level': 'INFO'},  # very verbose debug-level logs
@@ -907,7 +890,7 @@ handler_config = {
     'job_lifecycle': {'filename': 'job_lifecycle.log', 'formatter': 'job_lifecycle'},
     'rsyslog_configurer': {'filename': 'rsyslog_configurer.log'},
     'cache_clear': {'filename': 'cache_clear.log'},
-    'heartbeet': {'filename': 'heartbeet.log'},
+    'ws_heartbeat': {'filename': 'ws_heartbeat.log'},
 }
 
 # If running on a VM, we log to files. When running in a container, we log to stdout.
@@ -962,7 +945,8 @@ AWX_CLEANUP_PATHS = True
 # Allow ansible-runner to store env folder (may contain sensitive information)
 AWX_RUNNER_OMIT_ENV_FILES = True
 
-# Allow ansible-runner to save ansible output (may cause performance issues)
+# Allow ansible-runner to save ansible output
+# (changing to False may cause performance issues)
 AWX_RUNNER_SUPPRESS_OUTPUT_FILE = True
 
 # https://github.com/ansible/ansible-runner/pull/1191/files

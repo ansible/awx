@@ -204,7 +204,7 @@
         "type": "list",
         "required": false,
         "label": "Paths to expose to isolated jobs",
-        "help_text": "List of paths that would otherwise be hidden to expose to isolated jobs. Enter one path per line.",
+        "help_text": "List of paths that would otherwise be hidden to expose to isolated jobs. Enter one path per line. Volumes will be mounted from the execution node to the container. The supported format is HOST-DIR[:CONTAINER-DIR[:OPTIONS]]. ",
         "category": "Jobs",
         "category_slug": "jobs",
         "default": [],
@@ -231,26 +231,36 @@
           "read_only": false
         }
       },
+      "AWX_RUNNER_KEEPALIVE_SECONDS": {
+        "type": "integer",
+        "required": true,
+        "label": "K8S Ansible Runner Keep-Alive Message Interval",
+        "help_text": "Only applies to jobs running in a Container Group. If not 0, send a message every so-many seconds to keep connection open.",
+        "category": "Jobs",
+        "category_slug": "jobs",
+        "placeholder": 240,
+        "default": 0
+      },
       "GALAXY_TASK_ENV": {
         "type": "nested object",
-         "required": true,
+        "required": true,
         "label": "Environment Variables for Galaxy Commands",
-         "help_text": "Additional environment variables set for invocations of ansible-galaxy within project updates. Useful if you must use a proxy server for ansible-galaxy but not git.",
-         "category": "Jobs",
-         "category_slug": "jobs",
-         "placeholder": {
-              "HTTP_PROXY": "myproxy.local:8080"
-          },
-         "default": {
-             "ANSIBLE_FORCE_COLOR": "false",
-              "GIT_SSH_COMMAND": "ssh -o StrictHostKeyChecking=no"
+        "help_text": "Additional environment variables set for invocations of ansible-galaxy within project updates. Useful if you must use a proxy server for ansible-galaxy but not git.",
+        "category": "Jobs",
+        "category_slug": "jobs",
+        "placeholder": {
+          "HTTP_PROXY": "myproxy.local:8080"
         },
-          "child": {
-            "type": "string",
-              "required": true,
-            "read_only": false
+        "default": {
+          "ANSIBLE_FORCE_COLOR": "false",
+          "GIT_SSH_COMMAND": "ssh -o StrictHostKeyChecking=no"
+        },
+        "child": {
+          "type": "string",
+          "required": true,
+          "read_only": false
         }
-       },
+      },
       "INSIGHTS_TRACKING_STATE": {
         "type": "boolean",
         "required": false,
@@ -334,6 +344,16 @@
         "category_slug": "jobs",
         "default": 1024
       },
+      "MAX_WEBSOCKET_EVENT_RATE": {
+        "type": "integer",
+        "required": false,
+        "label": "Job Event Maximum Websocket Messages Per Second",
+        "help_text": "Maximum number of messages to update the UI live job output with per second. Value of 0 means no limit.",
+        "min_value": 0,
+        "category": "Jobs",
+        "category_slug": "jobs",
+        "default": 30
+      },
       "SCHEDULE_MAX_JOBS": {
         "type": "integer",
         "required": true,
@@ -343,16 +363,6 @@
         "category": "Jobs",
         "category_slug": "jobs",
         "default": 10
-      },
-      "AWX_RUNNER_KEEPALIVE_SECONDS": {
-        "type": "integer",
-        "required": true,
-        "label": "K8S Ansible Runner Keep-Alive Message Interval",
-        "help_text": "Only applies to K8S deployments and container_group jobs. If not 0, send a message every so-many seconds to keep connection open.",
-        "category": "Jobs",
-        "category_slug": "jobs",
-        "placeholder": 240,
-        "default": 0
       },
       "AWX_ANSIBLE_CALLBACK_PLUGINS": {
         "type": "list",
@@ -383,7 +393,7 @@
         "type": "integer",
         "required": false,
         "label": "Default Job Idle Timeout",
-        "help_text": "If no output is detected from ansible in this number of seconds the execution will be terminated. Use value of 0 to used default idle_timeout is 600s.",
+        "help_text": "If no output is detected from ansible in this number of seconds the execution will be terminated. Use value of 0 to indicate that no idle timeout should be imposed.",
         "min_value": 0,
         "category": "Jobs",
         "category_slug": "jobs",
@@ -489,10 +499,16 @@
         "type": "list",
         "required": false,
         "label": "Loggers Sending Data to Log Aggregator Form",
-        "help_text": "List of loggers that will send HTTP logs to the collector, these can include any or all of: \nawx - service logs\nactivity_stream - activity stream records\njob_events - callback data from Ansible job events\nsystem_tracking - facts gathered from scan jobs.",
+        "help_text": "List of loggers that will send HTTP logs to the collector, these can include any or all of: \nawx - service logs\nactivity_stream - activity stream records\njob_events - callback data from Ansible job events\nsystem_tracking - facts gathered from scan jobs\nbroadcast_websocket - errors pertaining to websockets broadcast metrics\n",
         "category": "Logging",
         "category_slug": "logging",
-        "default": ["awx", "activity_stream", "job_events", "system_tracking"],
+        "default": [
+          "awx",
+          "activity_stream",
+          "job_events",
+          "system_tracking",
+          "broadcast_websocket"
+        ],
         "child": {
           "type": "string",
           "required": true,
@@ -639,14 +655,50 @@
         "unit": "seconds",
         "default": 14400
       },
+      "BULK_JOB_MAX_LAUNCH": {
+        "type": "integer",
+        "required": false,
+        "label": "Max jobs to allow bulk jobs to launch",
+        "help_text": "Max jobs to allow bulk jobs to launch",
+        "category": "Bulk Actions",
+        "category_slug": "bulk",
+        "default": 100
+      },
+      "BULK_HOST_MAX_CREATE": {
+        "type": "integer",
+        "required": false,
+        "label": "Max number of hosts to allow to be created in a single bulk action",
+        "help_text": "Max number of hosts to allow to be created in a single bulk action",
+        "category": "Bulk Actions",
+        "category_slug": "bulk",
+        "default": 100
+      },
       "UI_NEXT": {
         "type": "boolean",
         "required": false,
         "label": "Enable Preview of New User Interface",
-        "help_text": "'Enable preview of new user interface.",
+        "help_text": "Enable preview of new user interface.",
         "category": "System",
         "category_slug": "system",
         "default": true
+      },
+      "SUBSCRIPTION_USAGE_MODEL": {
+        "type": "choice",
+        "required": false,
+        "label": "Defines subscription usage model and shows Host Metrics",
+        "category": "System",
+        "category_slug": "system",
+        "default": "",
+        "choices": [
+          [
+            "",
+            "Default model for AWX - no subscription. Deletion of host_metrics will not be considered for purposes of managed host counting"
+          ],
+          [
+            "unique_managed_hosts",
+            "Usage based on unique managed nodes in a large historical time frame and delete functionality for no longer used managed nodes"
+          ]
+        ]
       },
       "SESSION_COOKIE_AGE": {
         "type": "integer",
@@ -740,6 +792,15 @@
           ["detailed", "Detailed"]
         ]
       },
+      "ALLOW_METRICS_FOR_ANONYMOUS_USERS": {
+        "type": "boolean",
+        "required": false,
+        "label": "Allow anonymous users to poll metrics",
+        "help_text": "If true, anonymous users are allowed to poll metrics.",
+        "category": "Authentication",
+        "category_slug": "authentication",
+        "default": false
+      },
       "CUSTOM_LOGIN_INFO": {
         "type": "string",
         "required": false,
@@ -782,7 +843,7 @@
         "type": "nested object",
         "required": false,
         "label": "Social Auth Organization Map",
-        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
+        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the\ndocumentation.",
         "category": "Authentication",
         "category_slug": "authentication",
         "placeholder": {
@@ -867,39 +928,6 @@
         "category": "Authentication",
         "category_slug": "authentication",
         "default": false
-      },
-      "SOCIAL_AUTH_OIDC_KEY": {
-        "type": "string",
-        "label": "OIDC Key",
-        "help_text": "The OIDC key (Client ID) from your IDP.",
-        "category": "Generic OIDC",
-        "category_slug": "oidc",
-        "default": ""
-      },
-      "SOCIAL_AUTH_OIDC_SECRET": {
-        "type": "string",
-        "label": "OIDC Secret",
-        "help_text": "The OIDC secret (Client Secret) from your IDP.",
-        "category": "Generic OIDC",
-        "category_slug": "oidc",
-        "default": ""
-      },
-      "SOCIAL_AUTH_OIDC_OIDC_ENDPOINT": {
-        "type": "string",
-        "label": "OIDC Provider URL",
-        "help_text": "The URL for your OIDC provider, e.g.: http(s)://hostname/.",
-        "category": "Generic OIDC",
-        "category_slug": "oidc",
-        "default": ""
-      },
-      "SOCIAL_AUTH_OIDC_VERIFY_SSL": {
-        "type": "boolean",
-        "required": false,
-        "label": "Verify OIDC Provider Certificate",
-        "help_text": "Verify the OIDC provider ssl certificate.",
-        "category": "Generic OIDC",
-        "category_slug": "oidc",
-        "default": true
       },
       "AUTH_LDAP_SERVER_URI": {
         "type": "string",
@@ -2726,7 +2754,7 @@
         "type": "nested object",
         "required": false,
         "label": "Google OAuth2 Organization Map",
-        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
+        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the\ndocumentation.",
         "category": "Google OAuth2",
         "category_slug": "google-oauth2",
         "placeholder": {
@@ -2810,7 +2838,7 @@
         "type": "nested object",
         "required": false,
         "label": "GitHub OAuth2 Organization Map",
-        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
+        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the\ndocumentation.",
         "category": "GitHub OAuth2",
         "category_slug": "github",
         "placeholder": {
@@ -2903,7 +2931,7 @@
         "type": "nested object",
         "required": false,
         "label": "GitHub Organization OAuth2 Organization Map",
-        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
+        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the\ndocumentation.",
         "category": "GitHub Organization OAuth2",
         "category_slug": "github-org",
         "placeholder": {
@@ -2996,7 +3024,7 @@
         "type": "nested object",
         "required": false,
         "label": "GitHub Team OAuth2 Organization Map",
-        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
+        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the\ndocumentation.",
         "category": "GitHub Team OAuth2",
         "category_slug": "github-team",
         "placeholder": {
@@ -3098,7 +3126,7 @@
         "type": "nested object",
         "required": false,
         "label": "GitHub Enterprise OAuth2 Organization Map",
-        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
+        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the\ndocumentation.",
         "category": "GitHub Enterprise OAuth2",
         "category_slug": "github-enterprise",
         "placeholder": {
@@ -3209,7 +3237,7 @@
         "type": "nested object",
         "required": false,
         "label": "GitHub Enterprise Organization OAuth2 Organization Map",
-        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
+        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the\ndocumentation.",
         "category": "GitHub Enterprise Organization OAuth2",
         "category_slug": "github-enterprise-org",
         "placeholder": {
@@ -3320,7 +3348,7 @@
         "type": "nested object",
         "required": false,
         "label": "GitHub Enterprise Team OAuth2 Organization Map",
-        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
+        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the\ndocumentation.",
         "category": "GitHub Enterprise Team OAuth2",
         "category_slug": "github-enterprise-team",
         "placeholder": {
@@ -3404,7 +3432,7 @@
         "type": "nested object",
         "required": false,
         "label": "Azure AD OAuth2 Organization Map",
-        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
+        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the\ndocumentation.",
         "category": "Azure AD OAuth2",
         "category_slug": "azuread-oauth2",
         "placeholder": {
@@ -3465,6 +3493,42 @@
             "read_only": false
           }
         }
+      },
+      "SOCIAL_AUTH_OIDC_KEY": {
+        "type": "string",
+        "required": false,
+        "label": "OIDC Key",
+        "help_text": "The OIDC key (Client ID) from your IDP.",
+        "category": "Generic OIDC",
+        "category_slug": "oidc",
+        "default": null
+      },
+      "SOCIAL_AUTH_OIDC_SECRET": {
+        "type": "string",
+        "required": false,
+        "label": "OIDC Secret",
+        "help_text": "The OIDC secret (Client Secret) from your IDP.",
+        "category": "Generic OIDC",
+        "category_slug": "oidc",
+        "default": ""
+      },
+      "SOCIAL_AUTH_OIDC_OIDC_ENDPOINT": {
+        "type": "string",
+        "required": false,
+        "label": "OIDC Provider URL",
+        "help_text": "The URL for your OIDC provider including the path up to /.well-known/openid-configuration",
+        "category": "Generic OIDC",
+        "category_slug": "oidc",
+        "default": ""
+      },
+      "SOCIAL_AUTH_OIDC_VERIFY_SSL": {
+        "type": "boolean",
+        "required": false,
+        "label": "Verify OIDC Provider Certificate",
+        "help_text": "Verify the OIDC provider ssl certificate.",
+        "category": "Generic OIDC",
+        "category_slug": "oidc",
+        "default": true
       },
       "SAML_AUTO_CREATE_OBJECTS": {
         "type": "boolean",
@@ -3678,7 +3742,7 @@
         "type": "nested object",
         "required": false,
         "label": "SAML Organization Map",
-        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
+        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the\ndocumentation.",
         "category": "SAML",
         "category_slug": "saml",
         "placeholder": {
@@ -3813,20 +3877,62 @@
         "help_text": "Used to map super users and system auditors from SAML.",
         "category": "SAML",
         "category_slug": "saml",
-        "placeholder": {
-          "is_superuser_attr": "saml_attr",
-          "is_superuser_value": "value",
-          "is_superuser_role": "saml_role",
-          "is_system_auditor_attr": "saml_attr",
-          "is_system_auditor_value": "value",
-          "is_system_auditor_role": "saml_role"
-        },
+        "placeholder": [
+          ["is_superuser_attr", "saml_attr"],
+          ["is_superuser_value", ["value"]],
+          ["is_superuser_role", ["saml_role"]],
+          ["remove_superusers", true],
+          ["is_system_auditor_attr", "saml_attr"],
+          ["is_system_auditor_value", ["value"]],
+          ["is_system_auditor_role", ["saml_role"]],
+          ["remove_system_auditors", true]
+        ],
         "default": {},
         "child": {
           "type": "field",
           "required": true,
           "read_only": false
         }
+      },
+      "LOCAL_PASSWORD_MIN_LENGTH": {
+        "type": "integer",
+        "required": false,
+        "label": "Minimum number of characters in local password",
+        "help_text": "Minimum number of characters required in a local password. 0 means no minimum",
+        "min_value": 0,
+        "category": "Authentication",
+        "category_slug": "authentication",
+        "default": 0
+      },
+      "LOCAL_PASSWORD_MIN_DIGITS": {
+        "type": "integer",
+        "required": false,
+        "label": "Minimum number of digit characters in local password",
+        "help_text": "Minimum number of digit characters required in a local password. 0 means no minimum",
+        "min_value": 0,
+        "category": "Authentication",
+        "category_slug": "authentication",
+        "default": 0
+      },
+      "LOCAL_PASSWORD_MIN_UPPER": {
+        "type": "integer",
+        "required": false,
+        "label": "Minimum number of uppercase characters in local password",
+        "help_text": "Minimum number of uppercase characters required in a local password. 0 means no minimum",
+        "min_value": 0,
+        "category": "Authentication",
+        "category_slug": "authentication",
+        "default": 0
+      },
+      "LOCAL_PASSWORD_MIN_SPECIAL": {
+        "type": "integer",
+        "required": false,
+        "label": "Minimum number of special characters in local password",
+        "help_text": "Minimum number of special characters required in a local password. 0 means no minimum",
+        "min_value": 0,
+        "category": "Authentication",
+        "category_slug": "authentication",
+        "default": 0
       }
     },
     "GET": {
@@ -3873,7 +3979,7 @@
       "REMOTE_HOST_HEADERS": {
         "type": "list",
         "label": "Remote Host Headers",
-        "help_text": "HTTP headers and meta keys to search to determine remote host name or IP. Add additional items to this list, such as \"HTTP_X_FORWARDED_FOR\", if behind a reverse proxy. See the \"Proxy Support\" section of the Adminstrator guide for more details.",
+        "help_text": "HTTP headers and meta keys to search to determine remote host name or IP. Add additional items to this list, such as \"HTTP_X_FORWARDED_FOR\", if behind a reverse proxy. See the \"Proxy Support\" section of the AAP Installation guide for more details.",
         "category": "System",
         "category_slug": "system",
         "defined_in_file": false,
@@ -3950,6 +4056,20 @@
         "category_slug": "system",
         "defined_in_file": false
       },
+      "DEFAULT_CONTROL_PLANE_QUEUE_NAME": {
+        "type": "string",
+        "label": "The instance group where control plane tasks run",
+        "category": "System",
+        "category_slug": "system",
+        "defined_in_file": false
+      },
+      "DEFAULT_EXECUTION_QUEUE_NAME": {
+        "type": "string",
+        "label": "The instance group where user jobs run (currently only on non-VM installs)",
+        "category": "System",
+        "category_slug": "system",
+        "defined_in_file": false
+      },
       "DEFAULT_EXECUTION_ENVIRONMENT": {
         "type": "field",
         "label": "Global default execution environment",
@@ -4004,7 +4124,7 @@
       "AWX_ISOLATION_SHOW_PATHS": {
         "type": "list",
         "label": "Paths to expose to isolated jobs",
-        "help_text": "List of paths that would otherwise be hidden to expose to isolated jobs. Enter one path per line.",
+        "help_text": "List of paths that would otherwise be hidden to expose to isolated jobs. Enter one path per line. Volumes will be mounted from the execution node to the container. The supported format is HOST-DIR[:CONTAINER-DIR[:OPTIONS]]. ",
         "category": "Jobs",
         "category_slug": "jobs",
         "defined_in_file": false,
@@ -4023,26 +4143,25 @@
           "type": "string"
         }
       },
+      "AWX_RUNNER_KEEPALIVE_SECONDS": {
+        "type": "integer",
+        "label": "K8S Ansible Runner Keep-Alive Message Interval",
+        "help_text": "Only applies to jobs running in a Container Group. If not 0, send a message every so-many seconds to keep connection open.",
+        "category": "Jobs",
+        "category_slug": "jobs",
+        "defined_in_file": false
+      },
       "GALAXY_TASK_ENV": {
         "type": "nested object",
-         "required": true,
         "label": "Environment Variables for Galaxy Commands",
-         "help_text": "Additional environment variables set for invocations of ansible-galaxy within project updates. Useful if you must use a proxy server for ansible-galaxy but not git.",
-         "category": "Jobs",
-         "category_slug": "jobs",
-         "placeholder": {
-              "HTTP_PROXY": "myproxy.local:8080"
-          },
-         "default": {
-             "ANSIBLE_FORCE_COLOR": "false",
-              "GIT_SSH_COMMAND": "ssh -o StrictHostKeyChecking=no"
-        },
-          "child": {
-            "type": "string",
-              "required": true,
-            "read_only": false
+        "help_text": "Additional environment variables set for invocations of ansible-galaxy within project updates. Useful if you must use a proxy server for ansible-galaxy but not git.",
+        "category": "Jobs",
+        "category_slug": "jobs",
+        "defined_in_file": false,
+        "child": {
+          "type": "string"
         }
-       },
+      },
       "INSIGHTS_TRACKING_STATE": {
         "type": "boolean",
         "label": "Gather data for Automation Analytics",
@@ -4117,6 +4236,15 @@
         "category_slug": "jobs",
         "defined_in_file": false
       },
+      "MAX_WEBSOCKET_EVENT_RATE": {
+        "type": "integer",
+        "label": "Job Event Maximum Websocket Messages Per Second",
+        "help_text": "Maximum number of messages to update the UI live job output with per second. Value of 0 means no limit.",
+        "min_value": 0,
+        "category": "Jobs",
+        "category_slug": "jobs",
+        "defined_in_file": false
+      },
       "SCHEDULE_MAX_JOBS": {
         "type": "integer",
         "label": "Maximum Scheduled Jobs",
@@ -4125,15 +4253,6 @@
         "category": "Jobs",
         "category_slug": "jobs",
         "defined_in_file": false
-      },
-      "AWX_RUNNER_KEEPALIVE_SECONDS": {
-        "type": "integer",
-        "label": "K8S Ansible Runner Keep-Alive Message Interval",
-        "help_text": "Only applies to K8S deployments and container_group jobs. If not 0, send a message every so-many seconds to keep connection open.",
-        "category": "Jobs",
-        "category_slug": "jobs",
-        "placeholder": 240,
-        "default": 0
       },
       "AWX_ANSIBLE_CALLBACK_PLUGINS": {
         "type": "list",
@@ -4159,7 +4278,7 @@
       "DEFAULT_JOB_IDLE_TIMEOUT": {
         "type": "integer",
         "label": "Default Job Idle Timeout",
-        "help_text": "If no output is detected from ansible in this number of seconds the execution will be terminated. Use value of 0 to used default idle_timeout is 600s.",
+        "help_text": "If no output is detected from ansible in this number of seconds the execution will be terminated. Use value of 0 to indicate that no idle timeout should be imposed.",
         "min_value": 0,
         "category": "Jobs",
         "category_slug": "jobs",
@@ -4255,7 +4374,7 @@
       "LOG_AGGREGATOR_LOGGERS": {
         "type": "list",
         "label": "Loggers Sending Data to Log Aggregator Form",
-        "help_text": "List of loggers that will send HTTP logs to the collector, these can include any or all of: \nawx - service logs\nactivity_stream - activity stream records\njob_events - callback data from Ansible job events\nsystem_tracking - facts gathered from scan jobs.",
+        "help_text": "List of loggers that will send HTTP logs to the collector, these can include any or all of: \nawx - service logs\nactivity_stream - activity stream records\njob_events - callback data from Ansible job events\nsystem_tracking - facts gathered from scan jobs\nbroadcast_websocket - errors pertaining to websockets broadcast metrics\n",
         "category": "Logging",
         "category_slug": "logging",
         "defined_in_file": false,
@@ -4359,12 +4478,11 @@
       },
       "API_400_ERROR_LOG_FORMAT": {
         "type": "string",
-        "required": false,
         "label": "Log Format For API 4XX Errors",
         "help_text": "The format of logged messages when an API 4XX error occurs, the following variables will be substituted: \nstatus_code - The HTTP status code of the error\nuser_name - The user name attempting to use the API\nurl_path - The URL path to the API endpoint called\nremote_addr - The remote address seen for the user\nerror - The error set by the api endpoint\nVariables need to be in the format {<variable name>}.",
         "category": "Logging",
         "category_slug": "logging",
-        "default": "status {status_code} received by user {user_name} attempting to access {url_path} from {remote_addr}"
+        "defined_in_file": false
       },
       "AUTOMATION_ANALYTICS_LAST_GATHER": {
         "type": "datetime",
@@ -4390,6 +4508,30 @@
         "defined_in_file": false,
         "unit": "seconds"
       },
+      "IS_K8S": {
+        "type": "boolean",
+        "label": "Is k8s",
+        "help_text": "Indicates whether the instance is part of a kubernetes-based deployment.",
+        "category": "System",
+        "category_slug": "system",
+        "defined_in_file": false
+      },
+      "BULK_JOB_MAX_LAUNCH": {
+        "type": "integer",
+        "label": "Max jobs to allow bulk jobs to launch",
+        "help_text": "Max jobs to allow bulk jobs to launch",
+        "category": "Bulk Actions",
+        "category_slug": "bulk",
+        "defined_in_file": false
+      },
+      "BULK_HOST_MAX_CREATE": {
+        "type": "integer",
+        "label": "Max number of hosts to allow to be created in a single bulk action",
+        "help_text": "Max number of hosts to allow to be created in a single bulk action",
+        "category": "Bulk Actions",
+        "category_slug": "bulk",
+        "defined_in_file": false
+      },
       "UI_NEXT": {
         "type": "boolean",
         "label": "Enable Preview of New User Interface",
@@ -4397,6 +4539,23 @@
         "category": "System",
         "category_slug": "system",
         "defined_in_file": false
+      },
+      "SUBSCRIPTION_USAGE_MODEL": {
+        "type": "choice",
+        "label": "Defines subscription usage model and shows Host Metrics",
+        "category": "System",
+        "category_slug": "system",
+        "defined_in_file": false,
+        "choices": [
+          [
+            "",
+            "Default model for AWX - no subscription. Deletion of host_metrics will not be considered for purposes of managed host counting"
+          ],
+          [
+            "unique_managed_hosts",
+            "Usage based on unique managed nodes in a large historical time frame and delete functionality for no longer used managed nodes"
+          ]
+        ]
       },
       "SESSION_COOKIE_AGE": {
         "type": "integer",
@@ -4463,6 +4622,14 @@
         "category_slug": "authentication",
         "defined_in_file": false
       },
+      "ALLOW_METRICS_FOR_ANONYMOUS_USERS": {
+        "type": "boolean",
+        "label": "Allow anonymous users to poll metrics",
+        "help_text": "If true, anonymous users are allowed to poll metrics.",
+        "category": "Authentication",
+        "category_slug": "authentication",
+        "defined_in_file": false
+      },
       "PENDO_TRACKING_STATE": {
         "type": "choice",
         "label": "User Analytics Tracking State",
@@ -4523,7 +4690,7 @@
       "SOCIAL_AUTH_ORGANIZATION_MAP": {
         "type": "nested object",
         "label": "Social Auth Organization Map",
-        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
+        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the\ndocumentation.",
         "category": "Authentication",
         "category_slug": "authentication",
         "defined_in_file": false,
@@ -4569,39 +4736,7 @@
         "help_text": "Enabling this setting will tell social auth to use the full Email as username instead of the full name",
         "category": "Authentication",
         "category_slug": "authentication",
-        "default": false
-      },
-      "SOCIAL_AUTH_OIDC_KEY": {
-        "type": "string",
-        "label": "OIDC Key",
-        "help_text": "The OIDC key (Client ID) from your IDP.",
-        "category": "Generic OIDC",
-        "category_slug": "oidc",
-        "default": ""
-      },
-      "SOCIAL_AUTH_OIDC_SECRET": {
-        "type": "string",
-        "label": "OIDC Secret",
-        "help_text": "The OIDC secret (Client Secret) from your IDP.",
-        "category": "Generic OIDC",
-        "category_slug": "oidc",
-        "default": ""
-      },
-      "SOCIAL_AUTH_OIDC_OIDC_ENDPOINT": {
-        "type": "string",
-        "label": "OIDC Provider URL",
-        "help_text": "The URL for your OIDC provider, e.g.: http(s)://hostname/.",
-        "category": "Generic OIDC",
-        "category_slug": "oidc",
-        "default": ""
-      },
-      "SOCIAL_AUTH_OIDC_VERIFY_SSL": {
-        "type": "boolean",
-        "label": "Verify OIDC Provider Certificate",
-        "help_text": "Verify the OIDC provider ssl certificate.",
-        "category": "Generic OIDC",
-        "category_slug": "oidc",
-        "default": true
+        "defined_in_file": false
       },
       "AUTH_LDAP_SERVER_URI": {
         "type": "string",
@@ -5830,7 +5965,7 @@
       "SOCIAL_AUTH_GOOGLE_OAUTH2_ORGANIZATION_MAP": {
         "type": "nested object",
         "label": "Google OAuth2 Organization Map",
-        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
+        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the\ndocumentation.",
         "category": "Google OAuth2",
         "category_slug": "google-oauth2",
         "defined_in_file": false,
@@ -5886,7 +6021,7 @@
       "SOCIAL_AUTH_GITHUB_ORGANIZATION_MAP": {
         "type": "nested object",
         "label": "GitHub OAuth2 Organization Map",
-        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
+        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the\ndocumentation.",
         "category": "GitHub OAuth2",
         "category_slug": "github",
         "defined_in_file": false,
@@ -5950,7 +6085,7 @@
       "SOCIAL_AUTH_GITHUB_ORG_ORGANIZATION_MAP": {
         "type": "nested object",
         "label": "GitHub Organization OAuth2 Organization Map",
-        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
+        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the\ndocumentation.",
         "category": "GitHub Organization OAuth2",
         "category_slug": "github-org",
         "defined_in_file": false,
@@ -6014,7 +6149,7 @@
       "SOCIAL_AUTH_GITHUB_TEAM_ORGANIZATION_MAP": {
         "type": "nested object",
         "label": "GitHub Team OAuth2 Organization Map",
-        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
+        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the\ndocumentation.",
         "category": "GitHub Team OAuth2",
         "category_slug": "github-team",
         "defined_in_file": false,
@@ -6086,7 +6221,7 @@
       "SOCIAL_AUTH_GITHUB_ENTERPRISE_ORGANIZATION_MAP": {
         "type": "nested object",
         "label": "GitHub Enterprise OAuth2 Organization Map",
-        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
+        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the\ndocumentation.",
         "category": "GitHub Enterprise OAuth2",
         "category_slug": "github-enterprise",
         "defined_in_file": false,
@@ -6166,7 +6301,7 @@
       "SOCIAL_AUTH_GITHUB_ENTERPRISE_ORG_ORGANIZATION_MAP": {
         "type": "nested object",
         "label": "GitHub Enterprise Organization OAuth2 Organization Map",
-        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
+        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the\ndocumentation.",
         "category": "GitHub Enterprise Organization OAuth2",
         "category_slug": "github-enterprise-org",
         "defined_in_file": false,
@@ -6246,7 +6381,7 @@
       "SOCIAL_AUTH_GITHUB_ENTERPRISE_TEAM_ORGANIZATION_MAP": {
         "type": "nested object",
         "label": "GitHub Enterprise Team OAuth2 Organization Map",
-        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
+        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the\ndocumentation.",
         "category": "GitHub Enterprise Team OAuth2",
         "category_slug": "github-enterprise-team",
         "defined_in_file": false,
@@ -6302,7 +6437,7 @@
       "SOCIAL_AUTH_AZUREAD_OAUTH2_ORGANIZATION_MAP": {
         "type": "nested object",
         "label": "Azure AD OAuth2 Organization Map",
-        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
+        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the\ndocumentation.",
         "category": "Azure AD OAuth2",
         "category_slug": "azuread-oauth2",
         "defined_in_file": false,
@@ -6330,6 +6465,38 @@
             "read_only": false
           }
         }
+      },
+      "SOCIAL_AUTH_OIDC_KEY": {
+        "type": "string",
+        "label": "OIDC Key",
+        "help_text": "The OIDC key (Client ID) from your IDP.",
+        "category": "Generic OIDC",
+        "category_slug": "oidc",
+        "defined_in_file": false
+      },
+      "SOCIAL_AUTH_OIDC_SECRET": {
+        "type": "string",
+        "label": "OIDC Secret",
+        "help_text": "The OIDC secret (Client Secret) from your IDP.",
+        "category": "Generic OIDC",
+        "category_slug": "oidc",
+        "defined_in_file": false
+      },
+      "SOCIAL_AUTH_OIDC_OIDC_ENDPOINT": {
+        "type": "string",
+        "label": "OIDC Provider URL",
+        "help_text": "The URL for your OIDC provider including the path up to /.well-known/openid-configuration",
+        "category": "Generic OIDC",
+        "category_slug": "oidc",
+        "defined_in_file": false
+      },
+      "SOCIAL_AUTH_OIDC_VERIFY_SSL": {
+        "type": "boolean",
+        "label": "Verify OIDC Provider Certificate",
+        "help_text": "Verify the OIDC provider ssl certificate.",
+        "category": "Generic OIDC",
+        "category_slug": "oidc",
+        "defined_in_file": false
       },
       "SAML_AUTO_CREATE_OBJECTS": {
         "type": "boolean",
@@ -6469,7 +6636,7 @@
       "SOCIAL_AUTH_SAML_ORGANIZATION_MAP": {
         "type": "nested object",
         "label": "SAML Organization Map",
-        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the \ndocumentation.",
+        "help_text": "Mapping to organization admins/users from social auth accounts. This setting\ncontrols which users are placed into which organizations based on their\nusername and email address. Configuration details are available in the\ndocumentation.",
         "category": "SAML",
         "category_slug": "saml",
         "defined_in_file": false,
@@ -6522,7 +6689,7 @@
       },
       "SOCIAL_AUTH_SAML_USER_FLAGS_BY_ATTR": {
         "type": "nested object",
-	      "label": "SAML User Flags Attribute Mapping",
+        "label": "SAML User Flags Attribute Mapping",
         "help_text": "Used to map super users and system auditors from SAML.",
         "category": "SAML",
         "category_slug": "saml",
@@ -6530,6 +6697,42 @@
         "child": {
           "type": "field"
         }
+      },
+      "LOCAL_PASSWORD_MIN_LENGTH": {
+        "type": "integer",
+        "label": "Minimum number of characters in local password",
+        "help_text": "Minimum number of characters required in a local password. 0 means no minimum",
+        "min_value": 0,
+        "category": "Authentication",
+        "category_slug": "authentication",
+        "defined_in_file": false
+      },
+      "LOCAL_PASSWORD_MIN_DIGITS": {
+        "type": "integer",
+        "label": "Minimum number of digit characters in local password",
+        "help_text": "Minimum number of digit characters required in a local password. 0 means no minimum",
+        "min_value": 0,
+        "category": "Authentication",
+        "category_slug": "authentication",
+        "defined_in_file": false
+      },
+      "LOCAL_PASSWORD_MIN_UPPER": {
+        "type": "integer",
+        "label": "Minimum number of uppercase characters in local password",
+        "help_text": "Minimum number of uppercase characters required in a local password. 0 means no minimum",
+        "min_value": 0,
+        "category": "Authentication",
+        "category_slug": "authentication",
+        "defined_in_file": false
+      },
+      "LOCAL_PASSWORD_MIN_SPECIAL": {
+        "type": "integer",
+        "label": "Minimum number of special characters in local password",
+        "help_text": "Minimum number of special characters required in a local password. 0 means no minimum",
+        "min_value": 0,
+        "category": "Authentication",
+        "category_slug": "authentication",
+        "defined_in_file": false
       },
       "NAMED_URL_FORMATS": {
         "type": "nested object",

@@ -101,6 +101,9 @@
       set_fact:
         users: "{{ query(plugin_name, 'users', query_params={ 'username__endswith': test_id, 'page_size': 2 }, return_ids=True ) }}"
 
+    - debug:
+        msg: "{{ users }}"
+
     - name: Assert that user list has 2 ids only and that they are strings, not ints
       assert:
         that:

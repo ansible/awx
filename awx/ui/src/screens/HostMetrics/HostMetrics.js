@@ -132,12 +132,6 @@ function HostMetrics() {
                   {t`Automation`}
                 </HeaderCell>
                 <HeaderCell
-                  sortKey="used_in_inventories"
-                  tooltip={t`How many inventories is the host in, recomputed on a weekly schedule`}
-                >
-                  {t`Inventories`}
-                </HeaderCell>
-                <HeaderCell
                   sortKey="deleted_counter"
                   tooltip={t`How many times was the host deleted`}
                 >

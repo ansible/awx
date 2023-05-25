@@ -716,7 +716,7 @@ def parse_yaml_or_json(vars_str, silent_failure=True):
             if silent_failure:
                 return {}
             raise ParseError(
-                _('Cannot parse as JSON (error: {json_error}) or ' 'YAML (error: {yaml_error}).').format(json_error=str(json_err), yaml_error=str(yaml_err))
+                _('Cannot parse as JSON (error: {json_error}) or YAML (error: {yaml_error}).').format(json_error=str(json_err), yaml_error=str(yaml_err))
             )
     return vars_dict
 

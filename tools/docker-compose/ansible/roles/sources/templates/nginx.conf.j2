@@ -44,6 +44,11 @@ http {
         add_header Strict-Transport-Security max-age=15768000;
         add_header X-Content-Type-Options nosniff;
 
+        # Pretty error pages
+        {% for error_page in custom_error_pages %}
+        error_page {{ error_page.error_code }} {{ error_page.web_path }};
+        {% endfor %}
+
         include /etc/nginx/conf.d/*.conf;
     }
 
@@ -70,6 +75,10 @@ http {
         add_header Strict-Transport-Security max-age=15768000;
         add_header X-Content-Type-Options nosniff;
 
+        # Pretty error pages
+        {% for error_page in custom_error_pages %}
+        error_page {{ error_page.error_code }} {{ error_page.web_path }};
+        {% endfor %}
 
         include /etc/nginx/conf.d/*.conf;
     }

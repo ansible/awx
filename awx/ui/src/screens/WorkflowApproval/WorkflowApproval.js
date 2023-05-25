@@ -70,7 +70,7 @@ function WorkflowApproval({ setBreadcrumb }) {
         </>
       ),
       link: `/workflow_approvals`,
-      isBackButton: true,
+      persistentFilterKey: 'workflowApprovals',
       id: 99,
     },
     {
