@@ -81,7 +81,7 @@ def test_delete_same_named_schedule(run_module, project, inventory, admin_user):
     ],
 )
 def test_rrule_lookup_plugin(collection_import, freq, kwargs, expect):
-    LookupModule = collection_import('plugins.lookup.schedule_rrule').LookupModule
+    LookupModule = collection_import('plugins.lookup.schedule_rrule').LookupModule()
     generated_rule = LookupModule.get_rrule(freq, kwargs)
     assert generated_rule == expect
     rrule_checker = SchedulePreviewSerializer()
@@ -92,7 +92,7 @@ def test_rrule_lookup_plugin(collection_import, freq, kwargs, expect):
 
 @pytest.mark.parametrize("freq", ('none', 'minute', 'hour', 'day', 'week', 'month'))
 def test_empty_schedule_rrule(collection_import, freq):
-    LookupModule = collection_import('plugins.lookup.schedule_rrule').LookupModule
+    LookupModule = collection_import('plugins.lookup.schedule_rrule').LookupModule()
     if freq == 'day':
         pfreq = 'DAILY'
     elif freq == 'none':
@@ -136,7 +136,7 @@ def test_empty_schedule_rrule(collection_import, freq):
     ],
 )
 def test_rrule_lookup_plugin_failure(collection_import, freq, kwargs, msg):
-    LookupModule = collection_import('plugins.lookup.schedule_rrule').LookupModule
+    LookupModule = collection_import('plugins.lookup.schedule_rrule').LookupModule()
     with pytest.raises(AnsibleError) as e:
         assert LookupModule.get_rrule(freq, kwargs)
     assert msg in str(e.value)

@@ -21,9 +21,11 @@ function ContainerGroupEdit({ instanceGroup }) {
     result: initialPodSpec,
   } = useRequest(
     useCallback(async () => {
-      const { data } = await InstanceGroupsAPI.readOptions();
-      return data.actions.POST.pod_spec_override.default;
-    }, []),
+      const { data } = await InstanceGroupsAPI.readInstanceGroupOptions(
+        instanceGroup.id
+      );
+      return data.actions.PUT.pod_spec_override.default;
+    }, [instanceGroup.id]),
     {
       initialPodSpec: {},
     }
@@ -39,6 +41,10 @@ function ContainerGroupEdit({ instanceGroup }) {
         name: values.name,
         credential: values.credential ? values.credential.id : null,
         pod_spec_override: values.override ? values.pod_spec_override : null,
+        max_forks: values.max_forks ? values.max_forks : 0,
+        max_concurrent_jobs: values.max_concurrent_jobs
+          ? values.max_concurrent_jobs
+          : 0,
         is_container_group: true,
       });
       history.push(detailsIUrl);

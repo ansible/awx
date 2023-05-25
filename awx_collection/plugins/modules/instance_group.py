@@ -41,19 +41,26 @@ options:
         - Signifies that this InstanceGroup should act as a ContainerGroup. If no credential is specified, the underlying Pod's ServiceAccount will be used.
       required: False
       type: bool
-      default: False
     policy_instance_percentage:
       description:
         - Minimum percentage of all instances that will be automatically assigned to this group when new instances come online.
       required: False
       type: int
-      default: '0'
     policy_instance_minimum:
       description:
         - Static minimum number of Instances that will be automatically assign to this group when new instances come online.
       required: False
       type: int
-      default: '0'
+    max_concurrent_jobs:
+      description:
+        - Maximum number of concurrent jobs to run on this group. Zero means no limit.
+      required: False
+      type: int
+    max_forks:
+      description:
+        - Max forks to execute on this group. Zero means no limit.
+      required: False
+      type: int
     policy_instance_list:
       description:
         - List of exact-match Instances that will be assigned to this group
@@ -74,7 +81,7 @@ options:
     state:
       description:
         - Desired state of the resource.
-      choices: ["present", "absent"]
+      choices: ["present", "absent", "exists"]
       default: "present"
       type: str
 extends_documentation_fragment: awx.awx.auth
@@ -92,13 +99,15 @@ def main():
         name=dict(required=True),
         new_name=dict(),
         credential=dict(),
-        is_container_group=dict(type='bool', default=False),
-        policy_instance_percentage=dict(type='int', default='0'),
-        policy_instance_minimum=dict(type='int', default='0'),
+        is_container_group=dict(type='bool'),
+        policy_instance_percentage=dict(type='int'),
+        policy_instance_minimum=dict(type='int'),
+        max_concurrent_jobs=dict(type='int'),
+        max_forks=dict(type='int'),
         policy_instance_list=dict(type='list', elements='str'),
         pod_spec_override=dict(),
-        instances=dict(required=False, type="list", elements='str', default=None),
-        state=dict(choices=['present', 'absent'], default='present'),
+        instances=dict(required=False, type="list", elements='str'),
+        state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )
 
     # Create a module for ourselves
@@ -111,13 +120,15 @@ def main():
     is_container_group = module.params.get('is_container_group')
     policy_instance_percentage = module.params.get('policy_instance_percentage')
     policy_instance_minimum = module.params.get('policy_instance_minimum')
+    max_concurrent_jobs = module.params.get('max_concurrent_jobs')
+    max_forks = module.params.get('max_forks')
     policy_instance_list = module.params.get('policy_instance_list')
     pod_spec_override = module.params.get('pod_spec_override')
     instances = module.params.get('instances')
     state = module.params.get('state')
 
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('instance_groups', name_or_id=name)
+    existing_item = module.get_one('instance_groups', name_or_id=name, check_exists=(state == 'exists'))
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
@@ -144,6 +155,10 @@ def main():
         new_fields['policy_instance_percentage'] = policy_instance_percentage
     if policy_instance_minimum is not None:
         new_fields['policy_instance_minimum'] = policy_instance_minimum
+    if max_concurrent_jobs is not None:
+        new_fields['max_concurrent_jobs'] = max_concurrent_jobs
+    if max_forks is not None:
+        new_fields['max_forks'] = max_forks
     if policy_instance_list is not None:
         new_fields['policy_instance_list'] = policy_instance_list
     if pod_spec_override is not None:

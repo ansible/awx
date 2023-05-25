@@ -38,9 +38,12 @@ EXPORTABLE_RELATIONS = ['Roles', 'NotificationTemplates', 'WorkflowJobTemplateNo
 DEPENDENT_EXPORT = [
     ('JobTemplate', 'Label'),
     ('JobTemplate', 'SurveySpec'),
+    ('JobTemplate', 'Schedule'),
     ('WorkflowJobTemplate', 'Label'),
     ('WorkflowJobTemplate', 'SurveySpec'),
+    ('WorkflowJobTemplate', 'Schedule'),
     ('WorkflowJobTemplate', 'WorkflowJobTemplateNode'),
+    ('InventorySource', 'Schedule'),
     ('Inventory', 'Group'),
     ('Inventory', 'Host'),
     ('Inventory', 'Label'),
@@ -63,7 +66,6 @@ DEPENDENT_NONEXPORT = [
 
 
 class Api(base.Base):
-
     pass
 
 
@@ -71,7 +73,6 @@ page.register_page(resources.api, Api)
 
 
 class ApiV2(base.Base):
-
     # Export methods
 
     def _export(self, _page, post_fields):
@@ -213,11 +214,23 @@ class ApiV2(base.Base):
         assets = (self._export(asset, post_fields) for asset in endpoint.results)
         return [asset for asset in assets if asset is not None]
 
+    def _check_for_int(self, value):
+        return isinstance(value, int) or (isinstance(value, str) and value.isdecimal())
+
     def _filtered_list(self, endpoint, value):
-        if isinstance(value, int) or value.isdecimal():
+        if isinstance(value, list) and len(value) == 1:
+            value = value[0]
+        if self._check_for_int(value):
             return endpoint.get(id=int(value))
+
         options = self._cache.get_options(endpoint)
         identifier = next(field for field in options['search_fields'] if field in ('name', 'username', 'hostname'))
+        if isinstance(value, list):
+            if all(self._check_for_int(item) for item in value):
+                identifier = 'or__id'
+            else:
+                identifier = 'or__' + identifier
+
         return endpoint.get(**{identifier: value}, all_pages=True)
 
     def export_assets(self, **kwargs):
@@ -240,7 +253,13 @@ class ApiV2(base.Base):
     # Import methods
 
     def _dependent_resources(self):
-        page_resource = {getattr(self, resource)._create().__item_class__: resource for resource in self.json}
+        page_resource = {}
+        for resource in self.json:
+            # The /api/v2/constructed_inventories endpoint is for the UI but will register as an Inventory endpoint
+            # We want to map the type to /api/v2/inventories/ which works for constructed too
+            if resource == 'constructed_inventory':
+                continue
+            page_resource[getattr(self, resource)._create().__item_class__] = resource
         data_pages = [getattr(self, resource)._create().__item_class__ for resource in EXPORTABLE_RESOURCES]
 
         for page_cls in itertools.chain(*has_create.page_creation_order(*data_pages)):
@@ -269,13 +288,30 @@ class ApiV2(base.Base):
                     if asset['natural_key']['type'] == 'user':
                         # We should only impose a default password if the resource doesn't exist.
                         post_data.setdefault('password', 'abc123')
-                    _page = endpoint.post(post_data)
+                    try:
+                        _page = endpoint.post(post_data)
+                    except exc.NoContent:
+                        # desired exception under some circumstances, e.g. labels that already exist
+                        if _page is None and 'name' in post_data:
+                            results = endpoint.get(all_pages=True).results
+                            for item in results:
+                                if item['name'] == post_data['name']:
+                                    _page = item.get()
+                                    break
+                            else:
+                                raise
                     changed = True
                     if asset['natural_key']['type'] == 'project':
                         # When creating a project, we need to wait for its
                         # first project update to finish so that associated
                         # JTs have valid options for playbook names
-                        _page.wait_until_completed()
+                        try:
+                            _page.wait_until_completed(timeout=300)
+                        except AssertionError:
+                            # If the project update times out, try to
+                            # carry on in the hopes that it will
+                            # finish before it is needed.
+                            pass
                 else:
                     # If we are an existing project and our scm_tpye is not changing don't try and import the local_path setting
                     if asset['natural_key']['type'] == 'project' and 'local_path' in post_data and _page['scm_type'] == post_data['scm_type']:
@@ -283,8 +319,6 @@ class ApiV2(base.Base):
 
                     _page = _page.put(post_data)
                     changed = True
-            except exc.NoContent:  # desired exception under some circumstances, e.g. labels that already exist
-                pass
             except (exc.Common, AssertionError) as e:
                 identifier = asset.get("name", None) or asset.get("username", None) or asset.get("hostname", None)
                 log.error(f'{endpoint} "{identifier}": {e}.')
@@ -385,6 +419,7 @@ class ApiV2(base.Base):
 
         for resource in self._dependent_resources():
             endpoint = getattr(self, resource)
+
             # Load up existing objects, so that we can try to update or link to them
             self._cache.get_page(endpoint)
             imported = self._import_list(endpoint, data.get(resource) or [])

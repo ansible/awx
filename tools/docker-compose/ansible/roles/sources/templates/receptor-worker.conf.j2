@@ -8,15 +8,17 @@
     address: tools_receptor_hop:5555
     redial: true
 
+{% if sign_work|bool %}
 - work-verification:
     publickey: /etc/receptor/work_public_key.pem
+{% endif %}
 
 - work-command:
     worktype: ansible-runner
     command: ansible-runner
     params: worker
     allowruntimeparams: true
-    verifysignature: true
+    verifysignature: {{ sign_work }}
 
 - control-service:
     service: control

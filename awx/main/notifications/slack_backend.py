@@ -16,7 +16,6 @@ WEBSOCKET_TIMEOUT = 30
 
 
 class SlackBackend(AWXBaseEmailBackend, CustomNotificationBase):
-
     init_parameters = {"token": {"label": "Token", "type": "password"}, "channels": {"label": "Destination Channels", "type": "list"}}
     recipient_parameter = "channels"
     sender_parameter = None

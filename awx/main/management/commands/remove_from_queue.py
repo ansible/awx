@@ -7,7 +7,6 @@ from django.core.management.base import BaseCommand, CommandError
 
 
 class Command(BaseCommand):
-
     help = (
         "Remove an instance (specified by --hostname) from the specified queue (instance group).\n"
         "In order remove the queue, use the `unregister_queue` command."

@@ -71,7 +71,7 @@ class Metadata(metadata.SimpleMetadata):
                 'url': _('URL for this {}.'),
                 'related': _('Data structure with URLs of related resources.'),
                 'summary_fields': _(
-                    'Data structure with name/description for related resources.  ' 'The output for some objects may be limited for performance reasons.'
+                    'Data structure with name/description for related resources.  The output for some objects may be limited for performance reasons.'
                 ),
                 'created': _('Timestamp when this {} was created.'),
                 'modified': _('Timestamp when this {} was last modified.'),
@@ -128,7 +128,7 @@ class Metadata(metadata.SimpleMetadata):
         # Special handling of notification configuration where the required properties
         # are conditional on the type selected.
         if field.field_name == 'notification_configuration':
-            for (notification_type_name, notification_tr_name, notification_type_class) in NotificationTemplate.NOTIFICATION_TYPES:
+            for notification_type_name, notification_tr_name, notification_type_class in NotificationTemplate.NOTIFICATION_TYPES:
                 field_info[notification_type_name] = notification_type_class.init_parameters
 
         # Special handling of notification messages where the required properties
@@ -138,7 +138,7 @@ class Metadata(metadata.SimpleMetadata):
         except (AttributeError, KeyError):
             view_model = None
         if view_model == NotificationTemplate and field.field_name == 'messages':
-            for (notification_type_name, notification_tr_name, notification_type_class) in NotificationTemplate.NOTIFICATION_TYPES:
+            for notification_type_name, notification_tr_name, notification_type_class in NotificationTemplate.NOTIFICATION_TYPES:
                 field_info[notification_type_name] = notification_type_class.default_messages
 
         # Update type of fields returned...

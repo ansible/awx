@@ -1,8 +1,8 @@
 import datetime
 import asyncio
 import logging
-import aioredis
 import redis
+import redis.asyncio
 import re
 
 from prometheus_client import (
@@ -65,7 +65,7 @@ class FixedSlidingWindow:
         return sum(self.buckets.values()) or 0
 
 
-class BroadcastWebsocketStatsManager:
+class RelayWebsocketStatsManager:
     def __init__(self, event_loop, local_hostname):
         self._local_hostname = local_hostname
 
@@ -74,7 +74,7 @@ class BroadcastWebsocketStatsManager:
         self._redis_key = BROADCAST_WEBSOCKET_REDIS_KEY_NAME
 
     def new_remote_host_stats(self, remote_hostname):
-        self._stats[remote_hostname] = BroadcastWebsocketStats(self._local_hostname, remote_hostname)
+        self._stats[remote_hostname] = RelayWebsocketStats(self._local_hostname, remote_hostname)
         return self._stats[remote_hostname]
 
     def delete_remote_host_stats(self, remote_hostname):
@@ -82,7 +82,7 @@ class BroadcastWebsocketStatsManager:
 
     async def run_loop(self):
         try:
-            redis_conn = await aioredis.create_redis_pool(settings.BROKER_URL)
+            redis_conn = await redis.asyncio.Redis.from_url(settings.BROKER_URL)
             while True:
                 stats_data_str = ''.join(stat.serialize() for stat in self._stats.values())
                 await redis_conn.set(self._redis_key, stats_data_str)
@@ -107,7 +107,7 @@ class BroadcastWebsocketStatsManager:
         return parser.text_string_to_metric_families(stats_str.decode('UTF-8'))
 
 
-class BroadcastWebsocketStats:
+class RelayWebsocketStats:
     def __init__(self, local_hostname, remote_hostname):
         self._local_hostname = local_hostname
         self._remote_hostname = remote_hostname
@@ -122,8 +122,8 @@ class BroadcastWebsocketStats:
             'Number of messages received, to be forwarded, by the broadcast websocket system',
             registry=self._registry,
         )
-        self._messages_received = Gauge(
-            f'awx_{self.remote_name}_messages_received',
+        self._messages_received_current_conn = Gauge(
+            f'awx_{self.remote_name}_messages_received_currrent_conn',
             'Number forwarded messages received by the broadcast websocket system, for the duration of the current connection',
             registry=self._registry,
         )
@@ -144,13 +144,13 @@ class BroadcastWebsocketStats:
 
     def record_message_received(self):
         self._internal_messages_received_per_minute.record()
-        self._messages_received.inc()
+        self._messages_received_current_conn.inc()
         self._messages_received_total.inc()
 
     def record_connection_established(self):
         self._connection.state('connected')
         self._connection_start.set_to_current_time()
-        self._messages_received.set(0)
+        self._messages_received_current_conn.set(0)
 
     def record_connection_lost(self):
         self._connection.state('disconnected')

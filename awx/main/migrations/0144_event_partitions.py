@@ -67,7 +67,6 @@ class FakeAddField(migrations.AddField):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0143_hostmetric'),
     ]

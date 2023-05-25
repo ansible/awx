@@ -35,6 +35,7 @@ from cryptography import x509
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
+from awx.main.constants import SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS
 
 MAX_INSTANCES = 9999999
 
@@ -169,6 +170,8 @@ class Licenser(object):
 
             license.setdefault('sku', sub['pool']['productId'])
             license.setdefault('subscription_name', sub['pool']['productName'])
+            license.setdefault('subscription_id', sub['pool']['subscriptionId'])
+            license.setdefault('account_number', sub['pool']['accountNumber'])
             license.setdefault('pool_id', sub['pool']['id'])
             license.setdefault('product_name', sub['pool']['productName'])
             license.setdefault('valid_key', True)
@@ -183,6 +186,14 @@ class Licenser(object):
             instances = sub['quantity']
             license['instance_count'] = license.get('instance_count', 0) + instances
             license['subscription_name'] = re.sub(r'[\d]* Managed Nodes', '%d Managed Nodes' % license['instance_count'], license['subscription_name'])
+
+            license['support_level'] = ''
+            license['usage'] = ''
+            for attr in sub['pool'].get('productAttributes', []):
+                if attr.get('name') == 'support_level':
+                    license['support_level'] = attr.get('value')
+                elif attr.get('name') == 'usage':
+                    license['usage'] = attr.get('value')
 
         if not license:
             logger.error("No valid subscriptions found in manifest")
@@ -276,7 +287,10 @@ class Licenser(object):
                     license['productId'] = sub['product_id']
                     license['quantity'] = int(sub['quantity'])
                     license['support_level'] = sub['support_level']
+                    license['usage'] = sub['usage']
                     license['subscription_name'] = sub['name']
+                    license['subscriptionId'] = sub['subscription_id']
+                    license['accountNumber'] = sub['account_number']
                     license['id'] = sub['upstream_pool_id']
                     license['endDate'] = sub['end_date']
                     license['productName'] = "Red Hat Ansible Automation"
@@ -303,7 +317,7 @@ class Licenser(object):
     def generate_license_options_from_entitlements(self, json):
         from dateutil.parser import parse
 
-        ValidSub = collections.namedtuple('ValidSub', 'sku name support_level end_date trial quantity pool_id satellite')
+        ValidSub = collections.namedtuple('ValidSub', 'sku name support_level end_date trial quantity pool_id satellite subscription_id account_number usage')
         valid_subs = []
         for sub in json:
             satellite = sub.get('satellite')
@@ -332,15 +346,23 @@ class Licenser(object):
                 sku = sub['productId']
                 trial = sku.startswith('S')  # i.e.,, SER/SVC
                 support_level = ''
+                usage = ''
                 pool_id = sub['id']
+                subscription_id = sub['subscriptionId']
+                account_number = sub['accountNumber']
                 if satellite:
                     support_level = sub['support_level']
+                    usage = sub['usage']
                 else:
                     for attr in sub.get('productAttributes', []):
                         if attr.get('name') == 'support_level':
                             support_level = attr.get('value')
+                        elif attr.get('name') == 'usage':
+                            usage = attr.get('value')
 
-                valid_subs.append(ValidSub(sku, sub['productName'], support_level, end_date, trial, quantity, pool_id, satellite))
+                valid_subs.append(
+                    ValidSub(sku, sub['productName'], support_level, end_date, trial, quantity, pool_id, satellite, subscription_id, account_number, usage)
+                )
 
         if valid_subs:
             licenses = []
@@ -349,6 +371,7 @@ class Licenser(object):
                 license._attrs['instance_count'] = int(sub.quantity)
                 license._attrs['sku'] = sub.sku
                 license._attrs['support_level'] = sub.support_level
+                license._attrs['usage'] = sub.usage
                 license._attrs['license_type'] = 'enterprise'
                 if sub.trial:
                     license._attrs['trial'] = True
@@ -363,6 +386,8 @@ class Licenser(object):
                 license._attrs['valid_key'] = True
                 license.update(license_date=int(sub.end_date.strftime('%s')))
                 license.update(pool_id=sub.pool_id)
+                license.update(subscription_id=sub.subscription_id)
+                license.update(account_number=sub.account_number)
                 licenses.append(license._attrs.copy())
             return licenses
 
@@ -382,8 +407,19 @@ class Licenser(object):
 
         current_instances = Host.objects.active_count()
         license_date = int(attrs.get('license_date', 0) or 0)
-        automated_instances = HostMetric.objects.count()
-        first_host = HostMetric.objects.only('first_automation').order_by('first_automation').first()
+
+        subscription_model = getattr(settings, 'SUBSCRIPTION_USAGE_MODEL', '')
+        if subscription_model == SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS:
+            automated_instances = HostMetric.active_objects.count()
+            first_host = HostMetric.active_objects.only('first_automation').order_by('first_automation').first()
+            attrs['deleted_instances'] = HostMetric.objects.filter(deleted=True).count()
+            attrs['reactivated_instances'] = HostMetric.active_objects.filter(deleted_counter__gte=1).count()
+        else:
+            automated_instances = 0
+            first_host = HostMetric.objects.only('first_automation').order_by('first_automation').first()
+            attrs['deleted_instances'] = 0
+            attrs['reactivated_instances'] = 0
+
         if first_host:
             automated_since = int(first_host.first_automation.timestamp())
         else:

@@ -17,7 +17,6 @@ __all__ = ['Setting']
 
 
 class Setting(CreatedModifiedModel):
-
     key = models.CharField(max_length=255)
     value = JSONBlob(null=True)
     user = prevent_search(models.ForeignKey('auth.User', related_name='settings', default=None, null=True, editable=False, on_delete=models.CASCADE))

@@ -2,12 +2,8 @@
 # All Rights Reserved.
 
 # Python
-import codecs
-import datetime
 import logging
-import os
 import time
-import json
 from urllib.parse import urljoin
 
 
@@ -15,10 +11,9 @@ from urllib.parse import urljoin
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.functions import Cast
 
 # from django.core.cache import cache
-from django.utils.encoding import smart_str
-from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import FieldDoesNotExist
 
@@ -27,6 +22,7 @@ from rest_framework.exceptions import ParseError
 
 # AWX
 from awx.api.versioning import reverse
+from awx.main.constants import HOST_FACTS_FIELDS
 from awx.main.models.base import (
     BaseModel,
     CreatedModifiedModel,
@@ -59,8 +55,6 @@ from awx.main.constants import JOB_VARIABLE_PREFIXES
 
 
 logger = logging.getLogger('awx.main.models.jobs')
-analytics_logger = logging.getLogger('awx.analytics.job_events')
-system_tracking_logger = logging.getLogger('awx.analytics.system_tracking')
 
 __all__ = ['JobTemplate', 'JobLaunchConfig', 'Job', 'JobHostSummary', 'SystemJobTemplate', 'SystemJob']
 
@@ -107,7 +101,7 @@ class JobOptions(BaseModel):
         max_length=1024,
         default='',
         blank=True,
-        help_text=_('Branch to use in job run. Project default used if blank. ' 'Only allowed if project allow_override field is set to true.'),
+        help_text=_('Branch to use in job run. Project default used if blank. Only allowed if project allow_override field is set to true.'),
     )
     forks = models.PositiveIntegerField(
         blank=True,
@@ -259,7 +253,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     job_slice_count = models.PositiveIntegerField(
         blank=True,
         default=1,
-        help_text=_("The number of jobs to slice into at runtime. " "Will cause the Job Template to launch a workflow if value is greater than 1."),
+        help_text=_("The number of jobs to slice into at runtime. Will cause the Job Template to launch a workflow if value is greater than 1."),
     )
 
     admin_role = ImplicitRoleField(parent_role=['organization.job_template_admin_role'])
@@ -577,12 +571,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         default=None,
         on_delete=models.SET_NULL,
     )
-    hosts = models.ManyToManyField(
-        'Host',
-        related_name='jobs',
-        editable=False,
-        through='JobHostSummary',
-    )
+    hosts = models.ManyToManyField('Host', related_name='jobs', editable=False, through='JobHostSummary', through_fields=('job', 'host'))
     artifacts = JSONBlob(
         default=dict,
         blank=True,
@@ -607,12 +596,12 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     job_slice_number = models.PositiveIntegerField(
         blank=True,
         default=0,
-        help_text=_("If part of a sliced job, the ID of the inventory slice operated on. " "If not part of sliced job, parameter is not used."),
+        help_text=_("If part of a sliced job, the ID of the inventory slice operated on. If not part of sliced job, parameter is not used."),
     )
     job_slice_count = models.PositiveIntegerField(
         blank=True,
         default=1,
-        help_text=_("If ran as part of sliced jobs, the total number of slices. " "If 1, job is not part of a sliced job."),
+        help_text=_("If ran as part of sliced jobs, the total number of slices. If 1, job is not part of a sliced job."),
     )
 
     def _get_parent_field_name(self):
@@ -830,6 +819,9 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             for name in JOB_VARIABLE_PREFIXES:
                 r['{}_job_template_id'.format(name)] = self.job_template.pk
                 r['{}_job_template_name'.format(name)] = self.job_template.name
+        if self.execution_node:
+            for name in JOB_VARIABLE_PREFIXES:
+                r['{}_execution_node'.format(name)] = self.execution_node
         return r
 
     '''
@@ -844,72 +836,26 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     def get_notification_friendly_name(self):
         return "Job"
 
-    def _get_inventory_hosts(self, only=['name', 'ansible_facts', 'ansible_facts_modified', 'modified', 'inventory_id']):
-        if not self.inventory:
-            return []
-        host_queryset = self.inventory.hosts.only(*only)
-        return self.inventory.get_sliced_hosts(host_queryset, self.job_slice_number, self.job_slice_count)
+    def get_hosts_for_fact_cache(self):
+        """
+        Builds the queryset to use for writing or finalizing the fact cache
+        these need to be the 'real' hosts associated with the job.
+        For constructed inventories, that means the original (input inventory) hosts
+        when slicing, that means only returning hosts in that slice
+        """
+        Host = JobHostSummary._meta.get_field('host').related_model
+        if not self.inventory_id:
+            return Host.objects.none()
 
-    def start_job_fact_cache(self, destination, modification_times, timeout=None):
-        self.log_lifecycle("start_job_fact_cache")
-        os.makedirs(destination, mode=0o700)
-        hosts = self._get_inventory_hosts()
-        if timeout is None:
-            timeout = settings.ANSIBLE_FACT_CACHE_TIMEOUT
-        if timeout > 0:
-            # exclude hosts with fact data older than `settings.ANSIBLE_FACT_CACHE_TIMEOUT seconds`
-            timeout = now() - datetime.timedelta(seconds=timeout)
-            hosts = hosts.filter(ansible_facts_modified__gte=timeout)
-        for host in hosts:
-            filepath = os.sep.join(map(str, [destination, host.name]))
-            if not os.path.realpath(filepath).startswith(destination):
-                system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
-                continue
-            try:
-                with codecs.open(filepath, 'w', encoding='utf-8') as f:
-                    os.chmod(f.name, 0o600)
-                    json.dump(host.ansible_facts, f)
-            except IOError:
-                system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
-                continue
-            # make note of the time we wrote the file so we can check if it changed later
-            modification_times[filepath] = os.path.getmtime(filepath)
+        if self.inventory.kind == 'constructed':
+            id_field = Host._meta.get_field('id')
+            host_qs = Host.objects.filter(id__in=self.inventory.hosts.exclude(instance_id='').values_list(Cast('instance_id', output_field=id_field)))
+        else:
+            host_qs = self.inventory.hosts
 
-    def finish_job_fact_cache(self, destination, modification_times):
-        self.log_lifecycle("finish_job_fact_cache")
-        for host in self._get_inventory_hosts():
-            filepath = os.sep.join(map(str, [destination, host.name]))
-            if not os.path.realpath(filepath).startswith(destination):
-                system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
-                continue
-            if os.path.exists(filepath):
-                # If the file changed since we wrote it pre-playbook run...
-                modified = os.path.getmtime(filepath)
-                if modified > modification_times.get(filepath, 0):
-                    with codecs.open(filepath, 'r', encoding='utf-8') as f:
-                        try:
-                            ansible_facts = json.load(f)
-                        except ValueError:
-                            continue
-                        host.ansible_facts = ansible_facts
-                        host.ansible_facts_modified = now()
-                        host.save(update_fields=['ansible_facts', 'ansible_facts_modified'])
-                        system_tracking_logger.info(
-                            'New fact for inventory {} host {}'.format(smart_str(host.inventory.name), smart_str(host.name)),
-                            extra=dict(
-                                inventory_id=host.inventory.id,
-                                host_name=host.name,
-                                ansible_facts=host.ansible_facts,
-                                ansible_facts_modified=host.ansible_facts_modified.isoformat(),
-                                job_id=self.id,
-                            ),
-                        )
-            else:
-                # if the file goes missing, ansible removed it (likely via clear_facts)
-                host.ansible_facts = {}
-                host.ansible_facts_modified = now()
-                system_tracking_logger.info('Facts cleared for inventory {} host {}'.format(smart_str(host.inventory.name), smart_str(host.name)))
-                host.save()
+        host_qs = host_qs.only(*HOST_FACTS_FIELDS)
+        host_qs = self.inventory.get_sliced_hosts(host_qs, self.job_slice_number, self.job_slice_count)
+        return host_qs
 
 
 class LaunchTimeConfigBase(BaseModel):
@@ -1131,6 +1077,15 @@ class JobHostSummary(CreatedModifiedModel):
         editable=False,
     )
     host = models.ForeignKey('Host', related_name='job_host_summaries', null=True, default=None, on_delete=models.SET_NULL, editable=False)
+    constructed_host = models.ForeignKey(
+        'Host',
+        related_name='constructed_host_summaries',
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+        editable=False,
+        help_text='Only for jobs run against constructed inventories, this links to the host inside the constructed inventory.',
+    )
 
     host_name = models.CharField(
         max_length=1024,

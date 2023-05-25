@@ -9,7 +9,6 @@ from unittest import mock
 
 
 class AlwaysPassBackend(object):
-
     user = None
 
     def authenticate(self, **credentials):

@@ -43,7 +43,6 @@ __all__ = ['Project', 'ProjectUpdate']
 
 
 class ProjectOptions(models.Model):
-
     SCM_TYPE_CHOICES = [
         ('', _('Manual')),
         ('git', _('Git')),
@@ -75,7 +74,7 @@ class ProjectOptions(models.Model):
             return []
 
     local_path = models.CharField(
-        max_length=1024, blank=True, help_text=_('Local path (relative to PROJECTS_ROOT) containing ' 'playbooks and related files for this project.')
+        max_length=1024, blank=True, help_text=_('Local path (relative to PROJECTS_ROOT) containing playbooks and related files for this project.')
     )
 
     scm_type = models.CharField(
@@ -277,11 +276,11 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
     scm_update_cache_timeout = models.PositiveIntegerField(
         default=0,
         blank=True,
-        help_text=_('The number of seconds after the last project update ran that a new ' 'project update will be launched as a job dependency.'),
+        help_text=_('The number of seconds after the last project update ran that a new project update will be launched as a job dependency.'),
     )
     allow_override = models.BooleanField(
         default=False,
-        help_text=_('Allow changing the SCM branch or revision in a job template ' 'that uses this project.'),
+        help_text=_('Allow changing the SCM branch or revision in a job template that uses this project.'),
     )
 
     # credential (keys) used to validate content signature
@@ -470,6 +469,29 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
 
     def get_absolute_url(self, request=None):
         return reverse('api:project_detail', kwargs={'pk': self.pk}, request=request)
+
+    def get_reason_if_failed(self):
+        """
+        If the project is in a failed or errored state, return a human-readable
+        error message explaining why. Otherwise return None.
+
+        This is used during validation in the serializer and also by
+        RunProjectUpdate/RunInventoryUpdate.
+        """
+
+        if self.status not in ('error', 'failed'):
+            return None
+
+        latest_update = self.project_updates.last()
+        if latest_update is not None and latest_update.failed:
+            failed_validation_tasks = latest_update.project_update_events.filter(
+                event='runner_on_failed',
+                play="Perform project signature/checksum verification",
+            )
+            if failed_validation_tasks:
+                return _("Last project update failed due to signature validation failure.")
+
+        return _("Missing a revision to run due to failed project update.")
 
     '''
     RelatedJobsMixin

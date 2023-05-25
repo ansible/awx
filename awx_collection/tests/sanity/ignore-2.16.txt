@@ -1,0 +1,3 @@
+plugins/modules/export.py validate-modules:nonexistent-parameter-documented  # needs awxkit to construct argspec
+plugins/modules/import.py pylint:unused-import  # Simply used as a feature flag conditional
+test/awx/conftest.py pylint:unused-import  # Used to make sure we are importing the right awxkit, see comment in conftest.py near imports

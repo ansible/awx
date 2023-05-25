@@ -161,7 +161,7 @@ class Export(CustomCommand):
             # 1) the resource flag is not used at all, which will result in the attr being None
             # 2) the resource flag is used with no argument, which will result in the attr being ''
             # 3) the resource flag is used with an argument, and the attr will be that argument's value
-            resources.add_argument('--{}'.format(resource), nargs='?', const='')
+            resources.add_argument('--{}'.format(resource), nargs='*')
 
     def handle(self, client, parser):
         self.extend_parser(parser)
@@ -197,8 +197,10 @@ def parse_resource(client, skip_deprecated=False):
 
     if hasattr(client, 'v2'):
         for k in client.v2.json.keys():
-            if k in ('dashboard',):
-                # the Dashboard API is deprecated and not supported
+            if k in ('dashboard', 'config'):
+                # - the Dashboard API is deprecated and not supported
+                # - the Config command is already dealt with by the
+                #    CustomCommand section above
                 continue
 
             # argparse aliases are *only* supported in Python3 (not 2.7)

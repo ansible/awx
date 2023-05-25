@@ -1971,7 +1971,7 @@ msgid ""
 "HTTP headers and meta keys to search to determine remote host name or IP. "
 "Add additional items to this list, such as \"HTTP_X_FORWARDED_FOR\", if "
 "behind a reverse proxy. See the \"Proxy Support\" section of the "
-"Adminstrator guide for more details."
+"Administrator guide for more details."
 msgstr "Los encabezados HTTP y las llaves de activación para buscar y determinar el nombre de host remoto o IP. Añada elementos adicionales a esta lista, como \"HTTP_X_FORWARDED_FOR\", si está detrás de un proxy inverso. Consulte la sección \"Soporte de proxy\" de la guía del adminstrador para obtener más información."
 
 #: awx/main/conf.py:85
@@ -4804,7 +4804,7 @@ msgstr "Indica que un trabajo no se creará cuando es sea True. La semántica de
 
 #: awx/main/models/workflow.py:251
 msgid ""
-"An identifier coresponding to the workflow job template node that this node "
+"An identifier corresponding to the workflow job template node that this node "
 "was created from."
 msgstr "Un identificador que corresponde al nodo de plantilla de tarea del flujo de trabajo a partir del cual se creó este nodo."
 
@@ -5526,7 +5526,7 @@ msgstr "Argumentos adicionales para Google OAuth2"
 #: awx/sso/conf.py:606
 msgid ""
 "Extra arguments for Google OAuth2 login. You can restrict it to only allow a "
-"single domain to authenticate, even if the user is logged in with multple "
+"single domain to authenticate, even if the user is logged in with multiple "
 "Google accounts. Refer to the documentation for more detail."
 msgstr "Argumentos adicionales para el inicio de sesión en Google OAuth2. Puede limitarlo para permitir la autenticación de un solo dominio, incluso si el usuario ha iniciado sesión con varias cuentas de Google. Consulte la documentación para obtener información detallada."
 
@@ -5910,7 +5910,7 @@ msgstr "Certificado público del proveedor de servicio SAML"
 
 #: awx/sso/conf.py:1290
 msgid ""
-"Create a keypair to use as a service provider (SP) and include the "
+"Create a key pair to use as a service provider (SP) and include the "
 "certificate content here."
 msgstr "Crear un par de claves para usar como proveedor de servicio (SP) e incluir el contenido del certificado aquí."
 
@@ -5920,7 +5920,7 @@ msgstr "Clave privada del proveedor de servicio SAML"
 
 #: awx/sso/conf.py:1302
 msgid ""
-"Create a keypair to use as a service provider (SP) and include the private "
+"Create a key pair to use as a service provider (SP) and include the private "
 "key content here."
 msgstr "Crear un par de claves para usar como proveedor de servicio (SP) e incluir el contenido de la clave privada aquí."
 
@@ -6238,3 +6238,4 @@ msgstr "%s se está actualizando."
 #: awx/ui/urls.py:24
 msgid "This page will refresh when complete."
 msgstr "Esta página se actualizará cuando se complete."
+

@@ -1,25 +1,22 @@
 # Dependency Management
 
-The `requirements.txt` file is generated from `requirements.in`, using `pip-tools` `pip-compile`.
+The `requirements.txt` file is generated from `requirements.in` and `requirements_git.txt`, using `pip-tools` and `pip-compile`.
 
 ## How To Use
 
-Commands should be run from inside the `./requirements` directory of the awx repository.
+Commands should be run in the awx container from inside the `./requirements` directory of the awx repository.
 
 ### Upgrading or Adding Select Libraries
 
 If you need to add or upgrade one targeted library, then modify `requirements.in`,
 then run the script:
 
-`./updater.sh`
-
-NOTE: `./updater.sh` uses /usr/bin/python3.6, to match the current python version
-(3.6) used to build releases.
+`./updater.sh run`
 
 #### Upgrading Unpinned Dependency
 
 If you require a new version of a dependency that does not have a pinned version
-for a fix or feature, pin a minimum version and run `./updater.sh`. For example,
+for a fix or feature, pin a minimum version in `requirements.in` and run `./updater.sh run`. For example,
 replace the line `asgi-amqp` with `asgi-amqp>=1.1.4`, and consider leaving a
 note.
 
@@ -35,14 +32,14 @@ You can upgrade (`pip-compile --upgrade`) the dependencies by running
 ## Licenses and Source Files
 
 If any library has a change to its license with the upgrade, then the license for that library
-inside of `docs/licenses` needs to be updated.
+inside of `licenses` needs to be updated.
 
 For libraries that have source distribution requirements (LGPL as an example),
 a tarball of the library is kept along with the license.
 To download the PyPI tarball, you can run this command:
 
 ```
-pip download <pypi library name> -d docs/licenses/ --no-binary :all: --no-deps
+pip download <pypi library name> -d licenses/ --no-binary :all: --no-deps
 ```
 
 Make sure to delete the old tarball if it is an upgrade.
@@ -69,6 +66,48 @@ The override of `names_digest` could easily be broken in a future version.
 Check that the import remains the same in the desired version.
 
 https://github.com/django/django/blob/af5ec222ccd24e81f9fec6c34836a4e503e7ccf7/django/db/backends/base/schema.py#L7
+
+### django-split-settings
+
+When we attemed to upgrade past 1.0.0 the build process in GitHub failed on the docker build step with the following error:
+
+```
+#19 [builder 12/12] RUN AWX_SETTINGS_FILE=/dev/null SKIP_SECRET_KEY_CHECK=yes SKIP_PG_VERSION_CHECK=yes /var/lib/awx/venv/awx/bin/awx-manage collectstatic --noinput --clear
+#19 sha256:cd5adb08d3aa92504348338475db9f8bb820b4f67ba5b75edf9ae7554175f1d0
+#19 0.725 Traceback (most recent call last):
+#19 0.725   File \"/var/lib/awx/venv/awx/bin/awx-manage\", line 8, in <module>
+#19 0.726     sys.exit(manage())
+#19 0.726   File \"/var/lib/awx/venv/awx/lib64/python3.9/site-packages/awx/__init__.py\", line 178, in manage
+#19 0.726     prepare_env()
+#19 0.726   File \"/var/lib/awx/venv/awx/lib64/python3.9/site-packages/awx/__init__.py\", line 133, in prepare_env
+#19 0.726     if not settings.DEBUG:  # pragma: no cover
+#19 0.726   File \"/var/lib/awx/venv/awx/lib64/python3.9/site-packages/django/conf/__init__.py\", line 82, in __getattr__
+#19 0.726     self._setup(name)
+#19 0.726   File \"/var/lib/awx/venv/awx/lib64/python3.9/site-packages/django/conf/__init__.py\", line 69, in _setup
+#19 0.726     self._wrapped = Settings(settings_module)
+#19 0.726   File \"/var/lib/awx/venv/awx/lib64/python3.9/site-packages/django/conf/__init__.py\", line 170, in __init__
+#19 0.726     mod = importlib.import_module(self.SETTINGS_MODULE)
+#19 0.726   File \"/usr/lib64/python3.9/importlib/__init__.py\", line 127, in import_module
+#19 0.726     return _bootstrap._gcd_import(name[level:], package, level)
+#19 0.726   File \"<frozen importlib._bootstrap>\", line 1030, in _gcd_import
+#19 0.726   File \"<frozen importlib._bootstrap>\", line 1007, in _find_and_load
+#19 0.726   File \"<frozen importlib._bootstrap>\", line 986, in _find_and_load_unlocked
+#19 0.726   File \"<frozen importlib._bootstrap>\", line 680, in _load_unlocked
+#19 0.726   File \"<frozen importlib._bootstrap_external>\", line 850, in exec_module
+#19 0.726   File \"<frozen importlib._bootstrap>\", line 228, in _call_with_frames_removed
+#19 0.726   File \"/var/lib/awx/venv/awx/lib64/python3.9/site-packages/awx/settings/production.py\", line 74, in <module>
+#19 0.726     include(settings_file, optional(settings_files), scope=locals())
+#19 0.726   File \"/var/lib/awx/venv/awx/lib64/python3.9/site-packages/split_settings/tools.py\", line 116, in include
+#19 0.726     module = module_from_spec(spec)  # type: ignore
+#19 0.726   File \"<frozen importlib._bootstrap>\", line 562, in module_from_spec
+#19 0.726 AttributeError: 'NoneType' object has no attribute 'loader'
+#19 ERROR: executor failed running [/bin/sh -c AWX_SETTINGS_FILE=/dev/null SKIP_SECRET_KEY_CHECK=yes SKIP_PG_VERSION_CHECK=yes /var/lib/awx/venv/awx/bin/awx-manage collectstatic --noinput --clear]: exit code: 1
+```
+
+The various versions past 1.0.0 talk about adding and removing support for different python versions so there may be a mismatch in what the versions of the library support vs what is being built inside the container. Ironically, we did not experience the problem on our local containers when running `collectstatic` so we think it has something to do specifically with the build process.
+
+This issue was not picked up by any existing QE testing, only when building in GitHub.
+
 
 ### social-auth-app-django
 
@@ -101,13 +140,31 @@ ImportError: cannot import name 'KeyVaultClient'
 
 ### pip, setuptools and setuptools_scm
 
-The offline installer needs to have functionality confirmed before upgrading these.
+If modifying these libraries make sure testing with the offline build is performed to confirm they are functionally working.
 Versions need to match the versions used in the pip bootstrapping step
 in the top-level Makefile.
 
 ### cryptography
 
-The offline installer needs to have functionality confirmed before upgrading these.
+If modifying this library make sure testing with the offline build is performed to confirm it is functionally working.
+
+### channels-redis
+
+Due to an upstream bug (linked below), we see `RuntimeError: Event loop is closed` errors with newer versions of `channels-redis`.
+Upstream is aware of the bug and it is likely to be fixed in the next release according to the issue linked below.
+For now, we pin to the old version, 3.4.1
+
+* https://github.com/django/channels_redis/issues/332
+* https://github.com/ansible/awx/issues/13313
+
+### hiredis
+
+The hiredis 2.1.0 release doesn't provide source distribution on PyPI which prevents users to build that python package from the
+sources.
+Downgrading to 2.0.0 (which provides source distribution) until the channels-redis issue is fixed or a newer hiredis version is
+available on PyPi with source distribution.
+
+* https://github.com/redis/hiredis-py/issues/138
 
 ## Library Notes
 

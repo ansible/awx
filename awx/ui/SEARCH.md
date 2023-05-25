@@ -280,7 +280,7 @@ All of these functions act on the react-router history using the `pushHistorySta
 
 **a note on sort_columns and search_columns**
 
-We have split out column configuration into separate search and sort column array props--these are passed to the search and sort columns. Both accept an isDefault prop for one of the items in the array to be the default option selected when going to the page. Sort column items can pass an isNumeric boolean in order to chnage the iconography of the sort UI element. Search column items can pass type and if applicable choices, in order to configure the right-hand side of the search bar.
+We have split out column configuration into separate search and sort column array props--these are passed to the search and sort columns. Both accept an isDefault prop for one of the items in the array to be the default option selected when going to the page. Sort column items can pass an isNumeric boolean in order to change the iconography of the sort UI element. Search column items can pass type and if applicable choices, in order to configure the right-hand side of the search bar.
 
 ### FilterTags component
 
@@ -301,7 +301,7 @@ For the UI url params, we want to only encode those params that aren't defaults,
 
 #### mergeParams vs. replaceParams
 
-**mergeParams** is used to suppport putting values with the same key
+**mergeParams** is used to support putting values with the same key
 
 From a UX perspective, we wanted to be able to support searching on the same key multiple times (i.e. searching for things like `?foo=bar&foo=baz`). We do this by creating an array of all values. i.e.:
 

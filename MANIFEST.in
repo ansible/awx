@@ -6,13 +6,14 @@ recursive-include awx/templates *.html
 recursive-include awx/api/templates *.md *.html *.yml
 recursive-include awx/ui/build *.html
 recursive-include awx/ui/build *
+recursive-include awx/ui_next/build *
 recursive-include awx/playbooks *.yml
 recursive-include awx/lib/site-packages *
 recursive-include awx/plugins *.ps1
 recursive-include requirements *.txt
 recursive-include requirements *.yml
 recursive-include config *
-recursive-include docs/licenses *
+recursive-include licenses *
 recursive-exclude awx devonly.py*
 recursive-exclude awx/api/tests *
 recursive-exclude awx/main/tests *

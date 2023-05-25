@@ -169,7 +169,8 @@ class TestInventorySourceInjectors:
         CLOUD_PROVIDERS constant contains the same names as what are
         defined within the injectors
         """
-        assert set(CLOUD_PROVIDERS) == set(InventorySource.injectors.keys())
+        # slight exception case for constructed, because it has a FQCN but is not a cloud source
+        assert set(CLOUD_PROVIDERS) | set(['constructed']) == set(InventorySource.injectors.keys())
 
     @pytest.mark.parametrize('source,filename', [('ec2', 'aws_ec2.yml'), ('openstack', 'openstack.yml'), ('gce', 'gcp_compute.yml')])
     def test_plugin_filenames(self, source, filename):
@@ -230,7 +231,6 @@ def setup_ec2_gce(organization):
 
 @pytest.fixture
 def setup_inventory_groups(inventory, group_factory):
-
     groupA = group_factory('test_groupA')
     groupB = group_factory('test_groupB')
 
@@ -271,6 +271,7 @@ def test_inventory_update_excessively_long_name(inventory, inventory_source):
 class TestHostManager:
     def test_host_filter_not_smart(self, setup_ec2_gce, organization):
         smart_inventory = Inventory(name='smart', organization=organization, host_filter='inventory_sources__source=ec2')
+        smart_inventory.save()
         assert len(smart_inventory.hosts.all()) == 0
 
     def test_host_distinctness(self, setup_inventory_groups, organization):

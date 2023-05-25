@@ -9,7 +9,6 @@ from awx.main.migrations._multi_cred import migrate_to_multi_cred, migrate_back_
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0012_v322_update_cred_types'),
     ]

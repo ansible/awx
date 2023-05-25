@@ -155,12 +155,11 @@ class FieldLookupBackend(BaseFilterBackend):
         'search',
     )
 
-    # A list of fields that we know can be filtered on without the possiblity
+    # A list of fields that we know can be filtered on without the possibility
     # of introducing duplicates
     NO_DUPLICATES_ALLOW_LIST = (CharField, IntegerField, BooleanField, TextField)
 
     def get_fields_from_lookup(self, model, lookup):
-
         if '__' in lookup and lookup.rsplit('__', 1)[-1] in self.SUPPORTED_LOOKUPS:
             path, suffix = lookup.rsplit('__', 1)
         else:
@@ -269,7 +268,7 @@ class FieldLookupBackend(BaseFilterBackend):
                     continue
 
                 # HACK: make `created` available via API for the Django User ORM model
-                # so it keep compatiblity with other objects which exposes the `created` attr.
+                # so it keep compatibility with other objects which exposes the `created` attr.
                 if queryset.model._meta.object_name == 'User' and key.startswith('created'):
                     key = key.replace('created', 'date_joined')
 
@@ -348,7 +347,7 @@ class FieldLookupBackend(BaseFilterBackend):
                         args.append(Q(**{k: v}))
                 for role_name in role_filters:
                     if not hasattr(queryset.model, 'accessible_pk_qs'):
-                        raise ParseError(_('Cannot apply role_level filter to this list because its model ' 'does not use roles for access control.'))
+                        raise ParseError(_('Cannot apply role_level filter to this list because its model does not use roles for access control.'))
                     args.append(Q(pk__in=queryset.model.accessible_pk_qs(request.user, role_name)))
                 if or_filters:
                     q = Q()

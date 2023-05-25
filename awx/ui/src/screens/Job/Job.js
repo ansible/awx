@@ -124,7 +124,7 @@ function Job({ setBreadcrumb }) {
         </>
       ),
       link: `/jobs`,
-      isBackButton: true,
+      persistentFilterKey: 'jobs',
       id: 99,
     },
     { name: t`Details`, link: `${match.url}/details`, id: 0 },

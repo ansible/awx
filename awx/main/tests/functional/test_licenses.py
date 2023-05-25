@@ -26,12 +26,12 @@ def test_python_and_js_licenses():
                 return (is_gpl, is_lgpl)
 
         def find_embedded_source_version(path, name):
-            for entry in os.listdir(path):
-                # Check variations of '-' and '_' in filenames due to python
-                for fname in [name, name.replace('-', '_')]:
-                    if entry.startswith(fname) and entry.endswith('.tar.gz'):
-                        v = entry.split(name + '-')[1].split('.tar.gz')[0]
-                        return v
+            files = os.listdir(path)
+            tgz_files = [f for f in files if f.endswith('.tar.gz')]
+            for tgz in tgz_files:
+                pkg_name = tgz.split('-')[0].split('_')[0]
+                if pkg_name == name:
+                    return tgz.split('-')[1].split('.tar.gz')[0]
             return None
 
         list = {}
@@ -121,8 +121,8 @@ def test_python_and_js_licenses():
         return errors
 
     base_dir = settings.BASE_DIR
-    api_licenses = index_licenses('%s/../docs/licenses' % base_dir)
-    ui_licenses = index_licenses('%s/../docs/licenses/ui' % base_dir)
+    api_licenses = index_licenses('%s/../licenses' % base_dir)
+    ui_licenses = index_licenses('%s/../licenses/ui' % base_dir)
     api_requirements = read_api_requirements('%s/../requirements' % base_dir)
     ui_requirements = read_ui_requirements('%s/ui' % base_dir)
 

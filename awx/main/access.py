@@ -561,7 +561,6 @@ class NotificationAttachMixin(BaseAccess):
 
 
 class InstanceAccess(BaseAccess):
-
     model = Instance
     prefetch_related = ('rampart_groups',)
 
@@ -579,7 +578,6 @@ class InstanceAccess(BaseAccess):
         return super(InstanceAccess, self).can_unattach(obj, sub_obj, relationship, relationship, data=data)
 
     def can_add(self, data):
-
         return self.user.is_superuser
 
     def can_change(self, obj, data):
@@ -590,18 +588,39 @@ class InstanceAccess(BaseAccess):
 
 
 class InstanceGroupAccess(BaseAccess):
+    """
+    I can see Instance Groups when I am:
+       - a superuser(system administrator)
+       - at least read_role on the instance group
+    I can edit Instance Groups when I am:
+       - a superuser
+       - admin role on the Instance group
+    I can add/delete Instance Groups:
+       - a superuser(system administrator)
+    I can use Instance Groups when I have:
+       - use_role on the instance group
+    """
 
     model = InstanceGroup
     prefetch_related = ('instances',)
 
     def filtered_queryset(self):
-        return InstanceGroup.objects.filter(organization__in=Organization.accessible_pk_qs(self.user, 'admin_role')).distinct()
+        return self.model.accessible_objects(self.user, 'read_role')
+
+    @check_superuser
+    def can_use(self, obj):
+        return self.user in obj.use_role
 
     def can_add(self, data):
         return self.user.is_superuser
 
+    @check_superuser
     def can_change(self, obj, data):
-        return self.user.is_superuser
+        return self.can_admin(obj)
+
+    @check_superuser
+    def can_admin(self, obj):
+        return self.user in obj.admin_role
 
     def can_delete(self, obj):
         if obj.name in [settings.DEFAULT_EXECUTION_QUEUE_NAME, settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME]:
@@ -848,7 +867,7 @@ class OrganizationAccess(NotificationAttachMixin, BaseAccess):
             return RoleAccess(self.user).can_attach(rel_role, sub_obj, 'members', *args, **kwargs)
 
         if relationship == "instance_groups":
-            if self.user.is_superuser:
+            if self.user in obj.admin_role and self.user in sub_obj.use_role:
                 return True
             return False
         return super(OrganizationAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
@@ -937,7 +956,7 @@ class InventoryAccess(BaseAccess):
 
     def can_attach(self, obj, sub_obj, relationship, *args, **kwargs):
         if relationship == "instance_groups":
-            if self.user.can_access(type(sub_obj), "read", sub_obj) and self.user in obj.organization.admin_role:
+            if self.user in sub_obj.use_role and self.user in obj.admin_role:
                 return True
             return False
         return super(InventoryAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
@@ -993,9 +1012,6 @@ class HostAccess(BaseAccess):
         if data and 'name' in data:
             self.check_license(add_host_name=data['name'])
 
-            # Check the per-org limit
-            self.check_org_host_limit({'inventory': obj.inventory}, add_host_name=data['name'])
-
         # Checks for admin or change permission on inventory, controls whether
         # the user can edit variable data.
         return obj and self.user in obj.inventory.admin_role
@@ -1033,7 +1049,9 @@ class GroupAccess(BaseAccess):
         return Group.objects.filter(inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
 
     def can_add(self, data):
-        if not data or 'inventory' not in data:
+        if not data:  # So the browseable API will work
+            return Inventory.accessible_objects(self.user, 'admin_role').exists()
+        if 'inventory' not in data:
             return False
         # Checks for admin or change permission on inventory.
         return self.check_related('inventory', Inventory, data)
@@ -1675,11 +1693,12 @@ class JobTemplateAccess(NotificationAttachMixin, UnifiedCredentialsMixin, BaseAc
         return self.user.is_superuser or self.user in obj.admin_role
 
     @check_superuser
+    # object here is the job template. sub_object here is what is being attached
     def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
         if relationship == "instance_groups":
             if not obj.organization:
                 return False
-            return self.user.can_access(type(sub_obj), "read", sub_obj) and self.user in obj.organization.admin_role
+            return self.user in sub_obj.use_role and self.user in obj.admin_role
         return super(JobTemplateAccess, self).can_attach(obj, sub_obj, relationship, data, skip_sub_obj_read_check=skip_sub_obj_read_check)
 
     @check_superuser
@@ -1856,8 +1875,6 @@ class JobLaunchConfigAccess(UnifiedCredentialsMixin, BaseAccess):
     def _related_filtered_queryset(self, cls):
         if cls is Label:
             return LabelAccess(self.user).filtered_queryset()
-        elif cls is InstanceGroup:
-            return InstanceGroupAccess(self.user).filtered_queryset()
         else:
             return cls._accessible_pk_qs(cls, self.user, 'use_role')
 
@@ -1869,6 +1886,7 @@ class JobLaunchConfigAccess(UnifiedCredentialsMixin, BaseAccess):
 
     @check_superuser
     def can_add(self, data, template=None):
+        # WARNING: duplicated with BulkJobLaunchSerializer, check when changing permission levels
         # This is a special case, we don't check related many-to-many elsewhere
         # launch RBAC checks use this
         if 'reference_obj' in data:
@@ -2001,7 +2019,16 @@ class WorkflowJobNodeAccess(BaseAccess):
     )
 
     def filtered_queryset(self):
-        return self.model.objects.filter(workflow_job__unified_job_template__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
+        return self.model.objects.filter(
+            Q(workflow_job__unified_job_template__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
+            | Q(workflow_job__organization__in=Organization.objects.filter(Q(admin_role__members=self.user)))
+        )
+
+    def can_read(self, obj):
+        """Overriding this opens up detail view access for bulk jobs, where the workflow job has no associated workflow job template."""
+        if obj.workflow_job.is_bulk_job and obj.workflow_job.created_by_id == self.user.id:
+            return True
+        return super().can_read(obj)
 
     @check_superuser
     def can_add(self, data):
@@ -2127,7 +2154,16 @@ class WorkflowJobAccess(BaseAccess):
     )
 
     def filtered_queryset(self):
-        return WorkflowJob.objects.filter(unified_job_template__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
+        return WorkflowJob.objects.filter(
+            Q(unified_job_template__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role'))
+            | Q(organization__in=Organization.objects.filter(Q(admin_role__members=self.user)), is_bulk_job=True)
+        )
+
+    def can_read(self, obj):
+        """Overriding this opens up detail view access for bulk jobs, where the workflow job has no associated workflow job template."""
+        if obj.is_bulk_job and obj.created_by_id == self.user.id:
+            return True
+        return super().can_read(obj)
 
     def can_add(self, data):
         # Old add-start system for launching jobs is being depreciated, and
@@ -2198,7 +2234,7 @@ class WorkflowJobAccess(BaseAccess):
             if not node_access.can_add({'reference_obj': node}):
                 wj_add_perm = False
         if not wj_add_perm and self.save_messages:
-            self.messages['workflow_job_template'] = _('You do not have permission to the workflow job ' 'resources required for relaunch.')
+            self.messages['workflow_job_template'] = _('You do not have permission to the workflow job resources required for relaunch.')
         return wj_add_perm
 
     def can_cancel(self, obj):
@@ -2355,7 +2391,6 @@ class JobEventAccess(BaseAccess):
 
 
 class UnpartitionedJobEventAccess(JobEventAccess):
-
     model = UnpartitionedJobEvent
 
 
@@ -2700,46 +2735,66 @@ class ActivityStreamAccess(BaseAccess):
         # 'job_template', 'job', 'project', 'project_update', 'workflow_job',
         # 'inventory_source', 'workflow_job_template'
 
-        inventory_set = Inventory.accessible_objects(self.user, 'read_role')
-        credential_set = Credential.accessible_objects(self.user, 'read_role')
+        q = Q(user=self.user)
+        inventory_set = Inventory.accessible_pk_qs(self.user, 'read_role')
+        if inventory_set:
+            q |= (
+                Q(ad_hoc_command__inventory__in=inventory_set)
+                | Q(inventory__in=inventory_set)
+                | Q(host__inventory__in=inventory_set)
+                | Q(group__inventory__in=inventory_set)
+                | Q(inventory_source__inventory__in=inventory_set)
+                | Q(inventory_update__inventory_source__inventory__in=inventory_set)
+            )
+
+        credential_set = Credential.accessible_pk_qs(self.user, 'read_role')
+        if credential_set:
+            q |= Q(credential__in=credential_set)
+
         auditing_orgs = (
             (Organization.accessible_objects(self.user, 'admin_role') | Organization.accessible_objects(self.user, 'auditor_role'))
             .distinct()
             .values_list('id', flat=True)
         )
-        project_set = Project.accessible_objects(self.user, 'read_role')
-        jt_set = JobTemplate.accessible_objects(self.user, 'read_role')
-        team_set = Team.accessible_objects(self.user, 'read_role')
-        wfjt_set = WorkflowJobTemplate.accessible_objects(self.user, 'read_role')
-        app_set = OAuth2ApplicationAccess(self.user).filtered_queryset()
-        token_set = OAuth2TokenAccess(self.user).filtered_queryset()
+        if auditing_orgs:
+            q |= (
+                Q(user__in=auditing_orgs.values('member_role__members'))
+                | Q(organization__in=auditing_orgs)
+                | Q(notification_template__organization__in=auditing_orgs)
+                | Q(notification__notification_template__organization__in=auditing_orgs)
+                | Q(label__organization__in=auditing_orgs)
+                | Q(role__in=Role.objects.filter(ancestors__in=self.user.roles.all()) if auditing_orgs else [])
+            )
 
-        return qs.filter(
-            Q(ad_hoc_command__inventory__in=inventory_set)
-            | Q(o_auth2_application__in=app_set)
-            | Q(o_auth2_access_token__in=token_set)
-            | Q(user__in=auditing_orgs.values('member_role__members'))
-            | Q(user=self.user)
-            | Q(organization__in=auditing_orgs)
-            | Q(inventory__in=inventory_set)
-            | Q(host__inventory__in=inventory_set)
-            | Q(group__inventory__in=inventory_set)
-            | Q(inventory_source__inventory__in=inventory_set)
-            | Q(inventory_update__inventory_source__inventory__in=inventory_set)
-            | Q(credential__in=credential_set)
-            | Q(team__in=team_set)
-            | Q(project__in=project_set)
-            | Q(project_update__project__in=project_set)
-            | Q(job_template__in=jt_set)
-            | Q(job__job_template__in=jt_set)
-            | Q(workflow_job_template__in=wfjt_set)
-            | Q(workflow_job_template_node__workflow_job_template__in=wfjt_set)
-            | Q(workflow_job__workflow_job_template__in=wfjt_set)
-            | Q(notification_template__organization__in=auditing_orgs)
-            | Q(notification__notification_template__organization__in=auditing_orgs)
-            | Q(label__organization__in=auditing_orgs)
-            | Q(role__in=Role.objects.filter(ancestors__in=self.user.roles.all()) if auditing_orgs else [])
-        ).distinct()
+        project_set = Project.accessible_pk_qs(self.user, 'read_role')
+        if project_set:
+            q |= Q(project__in=project_set) | Q(project_update__project__in=project_set)
+
+        jt_set = JobTemplate.accessible_pk_qs(self.user, 'read_role')
+        if jt_set:
+            q |= Q(job_template__in=jt_set) | Q(job__job_template__in=jt_set)
+
+        wfjt_set = WorkflowJobTemplate.accessible_pk_qs(self.user, 'read_role')
+        if wfjt_set:
+            q |= (
+                Q(workflow_job_template__in=wfjt_set)
+                | Q(workflow_job_template_node__workflow_job_template__in=wfjt_set)
+                | Q(workflow_job__workflow_job_template__in=wfjt_set)
+            )
+
+        team_set = Team.accessible_pk_qs(self.user, 'read_role')
+        if team_set:
+            q |= Q(team__in=team_set)
+
+        app_set = OAuth2ApplicationAccess(self.user).filtered_queryset()
+        if app_set:
+            q |= Q(o_auth2_application__in=app_set)
+
+        token_set = OAuth2TokenAccess(self.user).filtered_queryset()
+        if token_set:
+            q |= Q(o_auth2_access_token__in=token_set)
+
+        return qs.filter(q).distinct()
 
     def can_add(self, data):
         return False
@@ -2897,3 +2952,19 @@ class WorkflowApprovalTemplateAccess(BaseAccess):
 for cls in BaseAccess.__subclasses__():
     access_registry[cls.model] = cls
 access_registry[UnpartitionedJobEvent] = UnpartitionedJobEventAccess
+
+
+def optimize_queryset(queryset):
+    """
+    A utility method in case you already have a queryset and just want to
+    apply the standard optimizations for that model.
+    In other words, use if you do not want to start from filtered_queryset for some reason.
+    """
+    if not queryset.model or queryset.model not in access_registry:
+        return queryset
+    access_class = access_registry[queryset.model]
+    if access_class.select_related:
+        queryset = queryset.select_related(*access_class.select_related)
+    if access_class.prefetch_related:
+        queryset = queryset.prefetch_related(*access_class.prefetch_related)
+    return queryset

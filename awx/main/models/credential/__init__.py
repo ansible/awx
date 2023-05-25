@@ -91,7 +91,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         related_name='credentials',
         null=False,
         on_delete=models.CASCADE,
-        help_text=_('Specify the type of credential you want to create. Refer ' 'to the documentation for details on each type.'),
+        help_text=_('Specify the type of credential you want to create. Refer to the documentation for details on each type.'),
     )
     managed = models.BooleanField(default=False, editable=False)
     organization = models.ForeignKey(
@@ -103,7 +103,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         related_name='credentials',
     )
     inputs = CredentialInputField(
-        blank=True, default=dict, help_text=_('Enter inputs using either JSON or YAML syntax. ' 'Refer to the documentation for example syntax.')
+        blank=True, default=dict, help_text=_('Enter inputs using either JSON or YAML syntax. Refer to the documentation for example syntax.')
     )
     admin_role = ImplicitRoleField(
         parent_role=[
@@ -195,6 +195,9 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
 
     @cached_property
     def dynamic_input_fields(self):
+        # if the credential is not yet saved we can't access the input_sources
+        if not self.id:
+            return []
         return [obj.input_field_name for obj in self.input_sources.all()]
 
     def _password_field_allows_ask(self, field):
@@ -343,12 +346,12 @@ class CredentialType(CommonModelNameNotUnique):
     managed = models.BooleanField(default=False, editable=False)
     namespace = models.CharField(max_length=1024, null=True, default=None, editable=False)
     inputs = CredentialTypeInputField(
-        blank=True, default=dict, help_text=_('Enter inputs using either JSON or YAML syntax. ' 'Refer to the documentation for example syntax.')
+        blank=True, default=dict, help_text=_('Enter inputs using either JSON or YAML syntax. Refer to the documentation for example syntax.')
     )
     injectors = CredentialTypeInjectorField(
         blank=True,
         default=dict,
-        help_text=_('Enter injectors using either JSON or YAML syntax. ' 'Refer to the documentation for example syntax.'),
+        help_text=_('Enter injectors using either JSON or YAML syntax. Refer to the documentation for example syntax.'),
     )
 
     @classmethod
@@ -528,9 +531,13 @@ class CredentialType(CommonModelNameNotUnique):
 
         if 'INVENTORY_UPDATE_ID' not in env:
             # awx-manage inventory_update does not support extra_vars via -e
-            extra_vars = {}
-            for var_name, tmpl in self.injectors.get('extra_vars', {}).items():
-                extra_vars[var_name] = sandbox_env.from_string(tmpl).render(**namespace)
+            def build_extra_vars(node):
+                if isinstance(node, dict):
+                    return {build_extra_vars(k): build_extra_vars(v) for k, v in node.items()}
+                elif isinstance(node, list):
+                    return [build_extra_vars(x) for x in node]
+                else:
+                    return sandbox_env.from_string(node).render(**namespace)
 
             def build_extra_vars_file(vars, private_dir):
                 handle, path = tempfile.mkstemp(dir=os.path.join(private_dir, 'env'))
@@ -540,6 +547,7 @@ class CredentialType(CommonModelNameNotUnique):
                 os.chmod(path, stat.S_IRUSR)
                 return path
 
+            extra_vars = build_extra_vars(self.injectors.get('extra_vars', {}))
             if extra_vars:
                 path = build_extra_vars_file(extra_vars, private_data_dir)
                 container_path = to_container_path(path, private_data_dir)
@@ -547,7 +555,6 @@ class CredentialType(CommonModelNameNotUnique):
 
 
 class ManagedCredentialType(SimpleNamespace):
-
     registry = {}
 
     def __init__(self, namespace, **kwargs):
@@ -598,9 +605,7 @@ ManagedCredentialType(
                 'id': 'become_method',
                 'label': gettext_noop('Privilege Escalation Method'),
                 'type': 'string',
-                'help_text': gettext_noop(
-                    'Specify a method for "become" operations. This is ' 'equivalent to specifying the --become-method ' 'Ansible parameter.'
-                ),
+                'help_text': gettext_noop('Specify a method for "become" operations. This is equivalent to specifying the --become-method Ansible parameter.'),
             },
             {
                 'id': 'become_username',
@@ -742,7 +747,7 @@ ManagedCredentialType(
                 'id': 'host',
                 'label': gettext_noop('Host (Authentication URL)'),
                 'type': 'string',
-                'help_text': gettext_noop('The host to authenticate with.  For example, ' 'https://openstack.business.com/v2.0/'),
+                'help_text': gettext_noop('The host to authenticate with.  For example, https://openstack.business.com/v2.0/'),
             },
             {
                 'id': 'project',
@@ -793,7 +798,7 @@ ManagedCredentialType(
                 'id': 'host',
                 'label': gettext_noop('VCenter Host'),
                 'type': 'string',
-                'help_text': gettext_noop('Enter the hostname or IP address that corresponds ' 'to your VMware vCenter.'),
+                'help_text': gettext_noop('Enter the hostname or IP address that corresponds to your VMware vCenter.'),
             },
             {'id': 'username', 'label': gettext_noop('Username'), 'type': 'string'},
             {
@@ -818,7 +823,7 @@ ManagedCredentialType(
                 'id': 'host',
                 'label': gettext_noop('Satellite 6 URL'),
                 'type': 'string',
-                'help_text': gettext_noop('Enter the URL that corresponds to your Red Hat ' 'Satellite 6 server. For example, https://satellite.example.org'),
+                'help_text': gettext_noop('Enter the URL that corresponds to your Red Hat Satellite 6 server. For example, https://satellite.example.org'),
             },
             {'id': 'username', 'label': gettext_noop('Username'), 'type': 'string'},
             {
@@ -843,7 +848,7 @@ ManagedCredentialType(
                 'id': 'username',
                 'label': gettext_noop('Service Account Email Address'),
                 'type': 'string',
-                'help_text': gettext_noop('The email address assigned to the Google Compute ' 'Engine service account.'),
+                'help_text': gettext_noop('The email address assigned to the Google Compute Engine service account.'),
             },
             {
                 'id': 'project',
@@ -863,7 +868,7 @@ ManagedCredentialType(
                 'format': 'ssh_private_key',
                 'secret': True,
                 'multiline': True,
-                'help_text': gettext_noop('Paste the contents of the PEM file associated ' 'with the service account email.'),
+                'help_text': gettext_noop('Paste the contents of the PEM file associated with the service account email.'),
             },
         ],
         'required': ['username', 'ssh_key_data'],
@@ -881,7 +886,7 @@ ManagedCredentialType(
                 'id': 'subscription',
                 'label': gettext_noop('Subscription ID'),
                 'type': 'string',
-                'help_text': gettext_noop('Subscription ID is an Azure construct, which is ' 'mapped to a username.'),
+                'help_text': gettext_noop('Subscription ID is an Azure construct, which is mapped to a username.'),
             },
             {'id': 'username', 'label': gettext_noop('Username'), 'type': 'string'},
             {
@@ -902,7 +907,7 @@ ManagedCredentialType(
                 'id': 'cloud_environment',
                 'label': gettext_noop('Azure Cloud Environment'),
                 'type': 'string',
-                'help_text': gettext_noop('Environment variable AZURE_CLOUD_ENVIRONMENT when' ' using Azure GovCloud or Azure stack.'),
+                'help_text': gettext_noop('Environment variable AZURE_CLOUD_ENVIRONMENT when using Azure GovCloud or Azure stack.'),
             },
         ],
         'required': ['subscription'],
@@ -1033,7 +1038,7 @@ ManagedCredentialType(
                 'label': gettext_noop('Username'),
                 'type': 'string',
                 'help_text': gettext_noop(
-                    'Red Hat Ansible Automation Platform username id to authenticate as.' 'This should not be set if an OAuth token is being used.'
+                    'Red Hat Ansible Automation Platform username id to authenticate as.This should not be set if an OAuth token is being used.'
                 ),
             },
             {
@@ -1047,7 +1052,7 @@ ManagedCredentialType(
                 'label': gettext_noop('OAuth Token'),
                 'type': 'string',
                 'secret': True,
-                'help_text': gettext_noop('An OAuth token to use to authenticate with.' 'This should not be set if username/password are being used.'),
+                'help_text': gettext_noop('An OAuth token to use to authenticate with.This should not be set if username/password are being used.'),
             },
             {'id': 'verify_ssl', 'label': gettext_noop('Verify SSL'), 'type': 'boolean', 'secret': False},
         ],
@@ -1158,7 +1163,7 @@ ManagedCredentialType(
                 'id': 'auth_url',
                 'label': gettext_noop('Auth Server URL'),
                 'type': 'string',
-                'help_text': gettext_noop('The URL of a Keycloak server token_endpoint, if using ' 'SSO auth.'),
+                'help_text': gettext_noop('The URL of a Keycloak server token_endpoint, if using SSO auth.'),
             },
             {
                 'id': 'token',

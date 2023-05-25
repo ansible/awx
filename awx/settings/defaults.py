@@ -1,47 +1,23 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+# Python
 import base64
 import os
 import re  # noqa
-import sys
 import tempfile
 import socket
 from datetime import timedelta
 
+# python-ldap
+import ldap
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
-
-def is_testing(argv=None):
-    import sys
-
-    '''Return True if running django or py.test unit tests.'''
-    if 'PYTEST_CURRENT_TEST' in os.environ.keys():
-        return True
-    argv = sys.argv if argv is None else argv
-    if len(argv) >= 1 and ('py.test' in argv[0] or 'py/test.py' in argv[0]):
-        return True
-    elif len(argv) >= 2 and argv[1] == 'test':
-        return True
-    return False
-
-
-def IS_TESTING(argv=None):
-    return is_testing(argv)
-
-
-if "pytest" in sys.modules:
-    from unittest import mock
-
-    with mock.patch('__main__.__builtins__.dir', return_value=[]):
-        import ldap
-else:
-    import ldap
 
 DEBUG = True
 SQL_DEBUG = DEBUG
+
+# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 # FIXME: it would be nice to cycle back around and allow this to be
 # BigAutoField going forward, but we'd have to be explicit about our
@@ -101,7 +77,11 @@ USE_L10N = True
 
 USE_TZ = True
 
-STATICFILES_DIRS = (os.path.join(BASE_DIR, 'ui', 'build', 'static'), os.path.join(BASE_DIR, 'static'))
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'ui', 'build', 'static'),
+    os.path.join(BASE_DIR, 'ui_next', 'build'),
+    os.path.join(BASE_DIR, 'static'),
+]
 
 # Absolute filesystem path to the directory where static file are collected via
 # the collectstatic command.
@@ -134,9 +114,6 @@ JOBOUTPUT_ROOT = '/var/lib/awx/job_status/'
 # Absolute filesystem path to the directory to store logs
 LOG_ROOT = '/var/log/tower/'
 
-# The heartbeat file for the scheduler
-SCHEDULE_METADATA_LOCATION = os.path.join(BASE_DIR, '.tower_cycle')
-
 # Django gettext files path: locale/<lang-code>/LC_MESSAGES/django.po, django.mo
 LOCALE_PATHS = (os.path.join(BASE_DIR, 'locale'),)
 
@@ -146,6 +123,13 @@ NAMED_URL_GRAPH = {}
 # Maximum number of the same job that can be waiting to run when launching from scheduler
 # Note: This setting may be overridden by database settings.
 SCHEDULE_MAX_JOBS = 10
+
+# Bulk API related settings
+# Maximum number of jobs that can be launched in 1 bulk job
+BULK_JOB_MAX_LAUNCH = 100
+
+# Maximum number of host that can be created in 1 bulk host create
+BULK_HOST_MAX_CREATE = 100
 
 SITE_ID = 1
 
@@ -233,6 +217,9 @@ JOB_EVENT_MAX_QUEUE_SIZE = 10000
 # The number of job events to migrate per-transaction when moving from int -> bigint
 JOB_EVENT_MIGRATION_CHUNK_SIZE = 1000000
 
+# The prefix of the redis key that stores metrics
+SUBSYSTEM_METRICS_REDIS_KEY_PREFIX = "awx_metrics"
+
 # Histogram buckets for the callback_receiver_batch_events_insert_db metric
 SUBSYSTEM_METRICS_BATCH_INSERT_BUCKETS = [10, 50, 150, 350, 650, 2000]
 
@@ -253,6 +240,14 @@ START_TASK_LIMIT = 100
 # We have the grace period so the task manager can bail out before the timeout.
 TASK_MANAGER_TIMEOUT = 300
 TASK_MANAGER_TIMEOUT_GRACE_PERIOD = 60
+
+# Number of seconds _in addition to_ the task manager timeout a job can stay
+# in waiting without being reaped
+JOB_WAITING_GRACE_PERIOD = 60
+
+# Number of seconds after a container group job finished time to wait
+# before the awx_k8s_reaper task will tear down the pods
+K8S_POD_REAPER_GRACE_PERIOD = 60
 
 # Disallow sending session cookies over insecure connections
 SESSION_COOKIE_SECURE = True
@@ -300,7 +295,12 @@ TEMPLATES = [
             ],
             'builtins': ['awx.main.templatetags.swagger'],
         },
-        'DIRS': [os.path.join(BASE_DIR, 'templates'), os.path.join(BASE_DIR, 'ui', 'build'), os.path.join(BASE_DIR, 'ui', 'public')],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
+            os.path.join(BASE_DIR, 'ui', 'build'),
+            os.path.join(BASE_DIR, 'ui', 'public'),
+            os.path.join(BASE_DIR, 'ui_next', 'build', 'awx'),
+        ],
     },
 ]
 
@@ -314,11 +314,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.sessions',
     'django.contrib.sites',
+    # daphne has to be installed before django.contrib.staticfiles for the app to startup
+    # According to channels 4.0 docs you install daphne instead of channels now
+    'daphne',
     'django.contrib.staticfiles',
     'oauth2_provider',
     'rest_framework',
     'django_extensions',
-    'channels',
     'polymorphic',
     'taggit',
     'social_django',
@@ -390,6 +392,7 @@ AUTHENTICATION_BACKENDS = (
 OAUTH2_PROVIDER_APPLICATION_MODEL = 'main.OAuth2Application'
 OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = 'main.OAuth2AccessToken'
 OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL = 'oauth2_provider.RefreshToken'
+OAUTH2_PROVIDER_ID_TOKEN_MODEL = "oauth2_provider.IDToken"
 
 OAUTH2_PROVIDER = {'ACCESS_TOKEN_EXPIRE_SECONDS': 31536000000, 'AUTHORIZATION_CODE_EXPIRE_SECONDS': 600, 'REFRESH_TOKEN_EXPIRE_SECONDS': 2628000}
 ALLOW_OAUTH2_FOR_EXTERNAL_USERS = False
@@ -426,6 +429,9 @@ AUTH_BASIC_ENABLED = True
 # when trying to access a UI page that requries authentication.
 LOGIN_REDIRECT_OVERRIDE = ''
 
+# Note: This setting may be overridden by database settings.
+ALLOW_METRICS_FOR_ANONYMOUS_USERS = False
+
 DEVSERVER_DEFAULT_ADDR = '0.0.0.0'
 DEVSERVER_DEFAULT_PORT = '8013'
 
@@ -459,6 +465,7 @@ CELERYBEAT_SCHEDULE = {
     'receptor_reaper': {'task': 'awx.main.tasks.system.awx_receptor_workunit_reaper', 'schedule': timedelta(seconds=60)},
     'send_subsystem_metrics': {'task': 'awx.main.analytics.analytics_tasks.send_subsystem_metrics', 'schedule': timedelta(seconds=20)},
     'cleanup_images': {'task': 'awx.main.tasks.system.cleanup_images_and_files', 'schedule': timedelta(hours=3)},
+    'cleanup_host_metrics': {'task': 'awx.main.tasks.system.cleanup_host_metrics', 'schedule': timedelta(days=1)},
 }
 
 # Django Caching Configuration
@@ -478,21 +485,15 @@ _SOCIAL_AUTH_PIPELINE_BASE = (
     'social_core.pipeline.user.get_username',
     'social_core.pipeline.social_auth.associate_by_email',
     'social_core.pipeline.user.create_user',
-    'awx.sso.pipeline.check_user_found_or_created',
+    'awx.sso.social_base_pipeline.check_user_found_or_created',
     'social_core.pipeline.social_auth.associate_user',
     'social_core.pipeline.social_auth.load_extra_data',
-    'awx.sso.pipeline.set_is_active_for_new_user',
+    'awx.sso.social_base_pipeline.set_is_active_for_new_user',
     'social_core.pipeline.user.user_details',
-    'awx.sso.pipeline.prevent_inactive_login',
+    'awx.sso.social_base_pipeline.prevent_inactive_login',
 )
-SOCIAL_AUTH_PIPELINE = _SOCIAL_AUTH_PIPELINE_BASE + ('awx.sso.pipeline.update_user_orgs', 'awx.sso.pipeline.update_user_teams')
-SOCIAL_AUTH_SAML_PIPELINE = _SOCIAL_AUTH_PIPELINE_BASE + (
-    'awx.sso.pipeline.update_user_orgs_by_saml_attr',
-    'awx.sso.pipeline.update_user_teams_by_saml_attr',
-    'awx.sso.pipeline.update_user_orgs',
-    'awx.sso.pipeline.update_user_teams',
-    'awx.sso.pipeline.update_user_flags',
-)
+SOCIAL_AUTH_PIPELINE = _SOCIAL_AUTH_PIPELINE_BASE + ('awx.sso.social_pipeline.update_user_orgs', 'awx.sso.social_pipeline.update_user_teams')
+SOCIAL_AUTH_SAML_PIPELINE = _SOCIAL_AUTH_PIPELINE_BASE + ('awx.sso.saml_pipeline.populate_user', 'awx.sso.saml_pipeline.update_user_flags')
 SAML_AUTO_CREATE_OBJECTS = True
 
 SOCIAL_AUTH_LOGIN_URL = '/'
@@ -723,10 +724,10 @@ CONTROLLER_INSTANCE_ID_VAR = 'remote_tower_id'
 # ---------------------
 # ----- Foreman -----
 # ---------------------
-SATELLITE6_ENABLED_VAR = 'foreman_enabled'
+SATELLITE6_ENABLED_VAR = 'foreman_enabled,foreman.enabled'
 SATELLITE6_ENABLED_VALUE = 'True'
 SATELLITE6_EXCLUDE_EMPTY_GROUPS = True
-SATELLITE6_INSTANCE_ID_VAR = 'foreman_id'
+SATELLITE6_INSTANCE_ID_VAR = 'foreman_id,foreman.id'
 # SATELLITE6_GROUP_PREFIX and SATELLITE6_GROUP_PATTERNS defined in source vars
 
 # ----------------
@@ -753,6 +754,13 @@ CUSTOM_EXCLUDE_EMPTY_GROUPS = False
 SCM_EXCLUDE_EMPTY_GROUPS = False
 # SCM_INSTANCE_ID_VAR =
 
+# ----------------
+# -- Constructed --
+# ----------------
+CONSTRUCTED_INSTANCE_ID_VAR = 'remote_tower_id'
+
+CONSTRUCTED_EXCLUDE_EMPTY_GROUPS = False
+
 # ---------------------
 # -- Activity Stream --
 # ---------------------
@@ -775,8 +783,7 @@ INSIGHTS_URL_BASE = "https://example.org"
 INSIGHTS_AGENT_MIME = 'application/example'
 # See https://github.com/ansible/awx-facts-playbooks
 INSIGHTS_SYSTEM_ID_FILE = '/etc/redhat-access-insights/machine-id'
-
-TOWER_SETTINGS_MANIFEST = {}
+INSIGHTS_CERT_PATH = "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
 
 # Settings related to external logger configuration
 LOG_AGGREGATOR_ENABLED = False
@@ -788,11 +795,6 @@ LOG_AGGREGATOR_MAX_DISK_USAGE_PATH = '/var/lib/awx'
 LOG_AGGREGATOR_RSYSLOGD_DEBUG = False
 LOG_AGGREGATOR_RSYSLOGD_ERROR_LOG_FILE = '/var/log/tower/rsyslog.err'
 API_400_ERROR_LOG_FORMAT = 'status {status_code} received by user {user_name} attempting to access {url_path} from {remote_addr}'
-
-# The number of retry attempts for websocket session establishment
-# If you're encountering issues establishing websockets in a cluster,
-# raising this value can help
-CHANNEL_LAYER_RECEIVE_MAX_RETRY = 10
 
 ASGI_APPLICATION = "awx.main.routing.application"
 
@@ -849,18 +851,22 @@ LOGGING = {
         'awx.conf': {'handlers': ['null'], 'level': 'WARNING'},
         'awx.conf.settings': {'handlers': ['null'], 'level': 'WARNING'},
         'awx.main': {'handlers': ['null']},
-        'awx.main.commands.run_callback_receiver': {'handlers': ['callback_receiver']},  # level handled by dynamic_level_filter
+        'awx.main.commands.run_callback_receiver': {'handlers': ['callback_receiver'], 'level': 'INFO'},  # very noisey debug-level logs
         'awx.main.dispatch': {'handlers': ['dispatcher']},
         'awx.main.consumers': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'INFO'},
-        'awx.main.wsbroadcast': {'handlers': ['wsbroadcast']},
+        'awx.main.rsyslog_configurer': {'handlers': ['rsyslog_configurer']},
+        'awx.main.cache_clear': {'handlers': ['cache_clear']},
+        'awx.main.ws_heartbeat': {'handlers': ['ws_heartbeat']},
+        'awx.main.wsrelay': {'handlers': ['wsrelay']},
         'awx.main.commands.inventory_import': {'handlers': ['inventory_import'], 'propagate': False},
-        'awx.main.tasks': {'handlers': ['task_system', 'external_logger'], 'propagate': False},
-        'awx.main.analytics': {'handlers': ['task_system', 'external_logger'], 'level': 'INFO', 'propagate': False},
-        'awx.main.scheduler': {'handlers': ['task_system', 'external_logger'], 'propagate': False},
+        'awx.main.tasks': {'handlers': ['task_system', 'external_logger', 'console'], 'propagate': False},
+        'awx.main.analytics': {'handlers': ['task_system', 'external_logger', 'console'], 'level': 'INFO', 'propagate': False},
+        'awx.main.scheduler': {'handlers': ['task_system', 'external_logger', 'console'], 'propagate': False},
         'awx.main.access': {'level': 'INFO'},  # very verbose debug-level logs
         'awx.main.signals': {'level': 'INFO'},  # very verbose debug-level logs
         'awx.api.permissions': {'level': 'INFO'},  # very verbose debug-level logs
         'awx.analytics': {'handlers': ['external_logger'], 'level': 'INFO', 'propagate': False},
+        'awx.analytics.broadcast_websocket': {'handlers': ['console', 'file', 'wsrelay', 'external_logger'], 'level': 'INFO', 'propagate': False},
         'awx.analytics.performance': {'handlers': ['console', 'file', 'tower_warnings', 'external_logger'], 'level': 'DEBUG', 'propagate': False},
         'awx.analytics.job_lifecycle': {'handlers': ['console', 'job_lifecycle'], 'level': 'DEBUG', 'propagate': False},
         'django_auth_ldap': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
@@ -878,10 +884,13 @@ handler_config = {
     'tower_warnings': {'filename': 'tower.log'},
     'callback_receiver': {'filename': 'callback_receiver.log'},
     'dispatcher': {'filename': 'dispatcher.log', 'formatter': 'dispatcher'},
-    'wsbroadcast': {'filename': 'wsbroadcast.log'},
+    'wsrelay': {'filename': 'wsrelay.log'},
     'task_system': {'filename': 'task_system.log'},
     'rbac_migrations': {'filename': 'tower_rbac_migrations.log'},
     'job_lifecycle': {'filename': 'job_lifecycle.log', 'formatter': 'job_lifecycle'},
+    'rsyslog_configurer': {'filename': 'rsyslog_configurer.log'},
+    'cache_clear': {'filename': 'cache_clear.log'},
+    'ws_heartbeat': {'filename': 'ws_heartbeat.log'},
 }
 
 # If running on a VM, we log to files. When running in a container, we log to stdout.
@@ -936,8 +945,14 @@ AWX_CLEANUP_PATHS = True
 # Allow ansible-runner to store env folder (may contain sensitive information)
 AWX_RUNNER_OMIT_ENV_FILES = True
 
-# Allow ansible-runner to save ansible output (may cause performance issues)
+# Allow ansible-runner to save ansible output
+# (changing to False may cause performance issues)
 AWX_RUNNER_SUPPRESS_OUTPUT_FILE = True
+
+# https://github.com/ansible/ansible-runner/pull/1191/files
+# Interval in seconds between the last message and keep-alive messages that
+# ansible-runner will send
+AWX_RUNNER_KEEPALIVE_SECONDS = 0
 
 # Delete completed work units in receptor
 RECEPTOR_RELEASE_WORK = True
@@ -987,12 +1002,22 @@ BROADCAST_WEBSOCKET_NEW_INSTANCE_POLL_RATE_SECONDS = 10
 # How often websocket process will generate stats
 BROADCAST_WEBSOCKET_STATS_POLL_RATE_SECONDS = 5
 
+# How often should web instances advertise themselves?
+BROADCAST_WEBSOCKET_BEACON_FROM_WEB_RATE_SECONDS = 15
+
 DJANGO_GUID = {'GUID_HEADER_NAME': 'X-API-Request-Id'}
 
 # Name of the default task queue
 DEFAULT_EXECUTION_QUEUE_NAME = 'default'
 # pod spec used when the default execution queue is a container group, e.g. when deploying on k8s/ocp with the operator
 DEFAULT_EXECUTION_QUEUE_POD_SPEC_OVERRIDE = ''
+# Max number of concurrently consumed forks for the default execution queue
+# Zero means no limit
+DEFAULT_EXECUTION_QUEUE_MAX_FORKS = 0
+# Max number of concurrently running jobs for the default execution queue
+# Zero means no limit
+DEFAULT_EXECUTION_QUEUE_MAX_CONCURRENT_JOBS = 0
+
 # Name of the default controlplane queue
 DEFAULT_CONTROL_PLANE_QUEUE_NAME = 'controlplane'
 
@@ -1004,16 +1029,19 @@ DEFAULT_CONTAINER_RUN_OPTIONS = ['--network', 'slirp4netns:enable_ipv6=true']
 # Mount exposed paths as hostPath resource in k8s/ocp
 AWX_MOUNT_ISOLATED_PATHS_ON_K8S = False
 
-# Time out task managers if they take longer than this many seconds
-TASK_MANAGER_TIMEOUT = 300
-
-# Number of seconds _in addition to_ the task manager timeout a job can stay
-# in waiting without being reaped
-JOB_WAITING_GRACE_PERIOD = 60
-
-# Number of seconds after a container group job finished time to wait
-# before the awx_k8s_reaper task will tear down the pods
-K8S_POD_REAPER_GRACE_PERIOD = 60
-
 # This is overridden downstream via /etc/tower/conf.d/cluster_host_id.py
 CLUSTER_HOST_ID = socket.gethostname()
+
+UI_NEXT = True
+
+# License compliance for total host count. Possible values:
+# - '': No model - Subscription not counted from Host Metrics
+# - 'unique_managed_hosts': Compliant = automated - deleted hosts (using /api/v2/host_metrics/)
+SUBSCRIPTION_USAGE_MODEL = ''
+
+# Host metrics cleanup - last time of the cleanup run (soft-deleting records)
+CLEANUP_HOST_METRICS_LAST_TS = None
+# Host metrics cleanup - minimal interval between two cleanups in days
+CLEANUP_HOST_METRICS_INTERVAL = 30  # days
+# Host metrics cleanup - soft-delete HostMetric records with last_automation < [threshold] (in months)
+CLEANUP_HOST_METRICS_THRESHOLD = 12  # months

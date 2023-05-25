@@ -4,6 +4,7 @@ import { getJobModel } from 'util/jobs';
 
 export default function useWsJob(initialJob) {
   const [job, setJob] = useState(initialJob);
+  const [pendingMessages, setPendingMessages] = useState([]);
   const lastMessage = useWebsocket({
     jobs: ['status_changed'],
     control: ['limit_reached_1'],
@@ -13,29 +14,47 @@ export default function useWsJob(initialJob) {
     setJob(initialJob);
   }, [initialJob]);
 
+  const processMessage = (message) => {
+    if (message.unified_job_id !== job.id) {
+      return;
+    }
+
+    if (
+      ['successful', 'failed', 'error', 'cancelled'].includes(message.status)
+    ) {
+      fetchJob();
+    }
+    setJob(updateJob(job, message));
+  };
+
+  async function fetchJob() {
+    const { data } = await getJobModel(job.type).readDetail(job.id);
+    setJob(data);
+  }
+
   useEffect(
     () => {
-      async function fetchJob() {
-        const { data } = await getJobModel(job.type).readDetail(job.id);
-        setJob(data);
-      }
-
-      if (!job || lastMessage?.unified_job_id !== job.id) {
+      if (!lastMessage) {
         return;
       }
-
-      if (
-        ['successful', 'failed', 'error', 'cancelled'].includes(
-          lastMessage.status
-        )
-      ) {
-        fetchJob();
-      } else {
-        setJob(updateJob(job, lastMessage));
+      if (job) {
+        processMessage(lastMessage);
+      } else if (lastMessage.unified_job_id) {
+        setPendingMessages(pendingMessages.concat(lastMessage));
       }
     },
     [lastMessage] // eslint-disable-line react-hooks/exhaustive-deps
   );
+
+  useEffect(() => {
+    if (!job || !pendingMessages.length) {
+      return;
+    }
+    pendingMessages.forEach((message) => {
+      processMessage(message);
+    });
+    setPendingMessages([]);
+  }, [job, pendingMessages]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return job;
 }

@@ -9,7 +9,6 @@ def copy_allowed_ips(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [('conf', '0006_v331_ldap_group_type')]
 
     operations = [migrations.RunPython(copy_allowed_ips)]

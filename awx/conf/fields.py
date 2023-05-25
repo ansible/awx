@@ -21,7 +21,7 @@ logger = logging.getLogger('awx.conf.fields')
 # Use DRF fields to convert/validate settings:
 # - to_representation(obj) should convert a native Python object to a primitive
 #   serializable type. This primitive type will be what is presented in the API
-#   and stored in the JSON field in the datbase.
+#   and stored in the JSON field in the database.
 # - to_internal_value(data) should convert the primitive type back into the
 #   appropriate Python type to be used in settings.
 
@@ -47,7 +47,6 @@ class IntegerField(IntegerField):
 
 
 class StringListField(ListField):
-
     child = CharField()
 
     def to_representation(self, value):
@@ -57,7 +56,6 @@ class StringListField(ListField):
 
 
 class StringListBooleanField(ListField):
-
     default_error_messages = {'type_error': _('Expected None, True, False, a string or list of strings but got {input_type} instead.')}
     child = CharField()
 
@@ -96,7 +94,6 @@ class StringListBooleanField(ListField):
 
 
 class StringListPathField(StringListField):
-
     default_error_messages = {'type_error': _('Expected list of strings but got {input_type} instead.'), 'path_error': _('{path} is not a valid path choice.')}
 
     def to_internal_value(self, paths):
@@ -126,7 +123,6 @@ class StringListIsolatedPathField(StringListField):
     }
 
     def to_internal_value(self, paths):
-
         if isinstance(paths, (list, tuple)):
             for p in paths:
                 if not isinstance(p, str):

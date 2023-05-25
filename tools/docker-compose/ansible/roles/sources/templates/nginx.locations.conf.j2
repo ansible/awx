@@ -1,0 +1,37 @@
+location {{ (ingress_path + '/static').replace('//', '/') }} {
+    alias /var/lib/awx/public/static/;
+}
+
+location {{ (ingress_path + '/favicon.ico').replace('//', '/') }} {
+    alias /awx_devel/awx/public/static/favicon.ico;
+}
+
+location {{ (ingress_path + '/websocket').replace('//', '/') }} {
+    # Pass request to the upstream alias
+    proxy_pass http://daphne;
+    # Require http version 1.1 to allow for upgrade requests
+    proxy_http_version 1.1;
+    # We want proxy_buffering off for proxying to websockets.
+    proxy_buffering off;
+    # http://en.wikipedia.org/wiki/X-Forwarded-For
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    # enable this if you use HTTPS:
+    proxy_set_header X-Forwarded-Proto https;
+    # pass the Host: header from the client for the sake of redirects
+    proxy_set_header Host $http_host;
+    # We've set the Host header, so we don't need Nginx to muddle
+    # about with redirects
+    proxy_redirect off;
+    # Depending on the request value, set the Upgrade and
+    # connection headers
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection $connection_upgrade;
+}
+
+location {{ ingress_path }} {
+    # Add trailing / if missing
+    rewrite ^(.*[^/])$ $1/ permanent;
+    uwsgi_read_timeout 120s;
+    uwsgi_pass uwsgi;
+    include /etc/nginx/uwsgi_params;
+}

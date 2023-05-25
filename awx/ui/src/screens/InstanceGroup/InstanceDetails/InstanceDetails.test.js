@@ -42,6 +42,8 @@ const instanceGroup = {
   credential: null,
   policy_instance_percentage: 100,
   policy_instance_minimum: 0,
+  max_concurrent_jobs: 0,
+  max_forks: 0,
   policy_instance_list: ['receptor-1', 'receptor-2'],
   pod_spec_override: '',
   summary_fields: {

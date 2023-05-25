@@ -10,7 +10,9 @@ import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { JobTemplatesAPI, SchedulesAPI, WorkflowJobTemplatesAPI } from 'api';
 import { parseVariableField, jsonToYaml } from 'util/yaml';
 import { useConfig } from 'contexts/Config';
-import parseRuleObj from '../shared/parseRuleObj';
+import InstanceGroupLabels from 'components/InstanceGroupLabels';
+import parseRuleObj, { UnsupportedRRuleError } from '../shared/parseRuleObj';
+import UnsupportedRRuleAlert from '../shared/UnsupportedRRuleAlert';
 import FrequencyDetails from './FrequencyDetails';
 import AlertModal from '../../AlertModal';
 import { CardBody, CardActionsRow } from '../../Card';
@@ -26,11 +28,6 @@ import ChipGroup from '../../ChipGroup';
 import { VariablesDetail } from '../../CodeEditor';
 import { VERBOSITY } from '../../VerbositySelectField';
 import getHelpText from '../../../screens/Template/shared/JobTemplate.helptext';
-
-const buildLinkURL = (instance) =>
-  instance.is_container_group
-    ? '/instance_groups/container_group/'
-    : '/instance_groups/';
 
 const PromptDivider = styled(Divider)`
   margin-top: var(--pf-global--spacer--lg);
@@ -186,8 +183,20 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
     month: t`Month`,
     year: t`Year`,
   };
-  const { frequency, frequencyOptions, exceptionFrequency, exceptionOptions } =
-    parseRuleObj(schedule);
+  let rruleError;
+  let frequency = [];
+  let frequencyOptions = {};
+  let exceptionFrequency = [];
+  let exceptionOptions = {};
+  try {
+    ({ frequency, frequencyOptions, exceptionFrequency, exceptionOptions } =
+      parseRuleObj(schedule));
+  } catch (parseRuleError) {
+    if (parseRuleError instanceof UnsupportedRRuleError) {
+      rruleError = parseRuleError;
+    }
+  }
+
   const repeatFrequency = frequency.length
     ? frequency.map((f) => frequencies[f]).join(', ')
     : t`None (Run Once)`;
@@ -498,26 +507,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
                 fullWidth
                 label={t`Instance Groups`}
                 value={
-                  <ChipGroup
-                    numChips={5}
-                    totalChips={instanceGroups.length}
-                    ouiaId="instance-group-chips"
-                  >
-                    {instanceGroups.map((ig) => (
-                      <Link
-                        to={`${buildLinkURL(ig)}${ig.id}/details`}
-                        key={ig.id}
-                      >
-                        <Chip
-                          key={ig.id}
-                          ouiaId={`instance-group-${ig.id}-chip`}
-                          isReadOnly
-                        >
-                          {ig.name}
-                        </Chip>
-                      </Link>
-                    ))}
-                  </ChipGroup>
+                  <InstanceGroupLabels labels={instanceGroups} isLinkable />
                 }
                 isEmpty={instanceGroups.length === 0}
               />
@@ -625,6 +615,7 @@ function ScheduleDetail({ hasDaysToKeepField, schedule, surveyConfig }) {
           </PromptDetailList>
         </>
       )}
+      {rruleError && <UnsupportedRRuleAlert schedule={schedule} />}
       <CardActionsRow>
         {summary_fields?.user_capabilities?.edit && (
           <Button

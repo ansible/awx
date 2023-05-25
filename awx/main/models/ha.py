@@ -17,15 +17,20 @@ from django.db.models import Sum
 import redis
 from solo.models import SingletonModel
 
+# AWX
 from awx import __version__ as awx_application_version
 from awx.api.versioning import reverse
-from awx.main.fields import JSONBlob
+from awx.main.fields import JSONBlob, ImplicitRoleField
 from awx.main.managers import InstanceManager, UUID_DEFAULT
 from awx.main.constants import JOB_FOLDER_PREFIX
 from awx.main.models.base import BaseModel, HasEditsMixin, prevent_search
+from awx.main.models.rbac import (
+    ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
+    ROLE_SINGLETON_SYSTEM_AUDITOR,
+)
 from awx.main.models.unified_jobs import UnifiedJob
 from awx.main.utils.common import get_corrected_cpu, get_cpu_effective_capacity, get_corrected_memory, get_mem_effective_capacity
-from awx.main.models.mixins import RelatedJobsMixin
+from awx.main.models.mixins import RelatedJobsMixin, ResourceMixin
 
 # ansible-runner
 from ansible_runner.utils.capacity import get_cpu_count, get_mem_in_bytes
@@ -233,11 +238,12 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         if not isinstance(vargs.get('grace_period'), int):
             vargs['grace_period'] = 60  # grace period of 60 minutes, need to set because CLI default will not take effect
         if 'exclude_strings' not in vargs and vargs.get('file_pattern'):
-            active_pks = list(
-                UnifiedJob.objects.filter(
-                    (models.Q(execution_node=self.hostname) | models.Q(controller_node=self.hostname)) & models.Q(status__in=('running', 'waiting'))
-                ).values_list('pk', flat=True)
-            )
+            active_job_qs = UnifiedJob.objects.filter(status__in=('running', 'waiting'))
+            if self.node_type == 'execution':
+                active_job_qs = active_job_qs.filter(execution_node=self.hostname)
+            else:
+                active_job_qs = active_job_qs.filter(controller_node=self.hostname)
+            active_pks = list(active_job_qs.values_list('pk', flat=True))
             if active_pks:
                 vargs['exclude_strings'] = [JOB_FOLDER_PREFIX % job_id for job_id in active_pks]
         if 'remove_images' in vargs or 'image_prune' in vargs:
@@ -351,7 +357,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         self.save_health_data(awx_application_version, get_cpu_count(), get_mem_in_bytes(), update_last_seen=True, errors=errors)
 
 
-class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
+class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin, ResourceMixin):
     """A model representing a Queue/Group of AWX Instances."""
 
     name = models.CharField(max_length=250, unique=True)
@@ -378,6 +384,26 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
             default='',
         )
     )
+    admin_role = ImplicitRoleField(
+        parent_role=[
+            'singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
+        ]
+    )
+    use_role = ImplicitRoleField(
+        parent_role=[
+            'admin_role',
+        ]
+    )
+    read_role = ImplicitRoleField(
+        parent_role=[
+            'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
+            'use_role',
+            'admin_role',
+        ]
+    )
+
+    max_concurrent_jobs = models.IntegerField(default=0, help_text=_("Maximum number of concurrent jobs to run on this group. Zero means no limit."))
+    max_forks = models.IntegerField(default=0, help_text=_("Max forks to execute on this group. Zero means no limit."))
     policy_instance_percentage = models.IntegerField(default=0, help_text=_("Percentage of Instances to automatically assign to this group"))
     policy_instance_minimum = models.IntegerField(default=0, help_text=_("Static minimum number of Instances to automatically assign to this group"))
     policy_instance_list = JSONBlob(
@@ -391,6 +417,8 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
 
     @property
     def capacity(self):
+        if self.is_container_group:
+            return self.max_forks
         return sum(inst.capacity for inst in self.instances.all())
 
     @property
@@ -468,7 +496,6 @@ def on_instance_deleted(sender, instance, using, **kwargs):
 
 
 class UnifiedJobTemplateInstanceGroupMembership(models.Model):
-
     unifiedjobtemplate = models.ForeignKey('UnifiedJobTemplate', on_delete=models.CASCADE)
     instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
     position = models.PositiveIntegerField(
@@ -479,7 +506,6 @@ class UnifiedJobTemplateInstanceGroupMembership(models.Model):
 
 
 class OrganizationInstanceGroupMembership(models.Model):
-
     organization = models.ForeignKey('Organization', on_delete=models.CASCADE)
     instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
     position = models.PositiveIntegerField(
@@ -490,7 +516,6 @@ class OrganizationInstanceGroupMembership(models.Model):
 
 
 class InventoryInstanceGroupMembership(models.Model):
-
     inventory = models.ForeignKey('Inventory', on_delete=models.CASCADE)
     instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
     position = models.PositiveIntegerField(
@@ -501,7 +526,6 @@ class InventoryInstanceGroupMembership(models.Model):
 
 
 class JobLaunchConfigInstanceGroupMembership(models.Model):
-
     joblaunchconfig = models.ForeignKey('JobLaunchConfig', on_delete=models.CASCADE)
     instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
     position = models.PositiveIntegerField(
@@ -512,7 +536,6 @@ class JobLaunchConfigInstanceGroupMembership(models.Model):
 
 
 class ScheduleInstanceGroupMembership(models.Model):
-
     schedule = models.ForeignKey('Schedule', on_delete=models.CASCADE)
     instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
     position = models.PositiveIntegerField(
@@ -523,7 +546,6 @@ class ScheduleInstanceGroupMembership(models.Model):
 
 
 class WorkflowJobTemplateNodeBaseInstanceGroupMembership(models.Model):
-
     workflowjobtemplatenode = models.ForeignKey('WorkflowJobTemplateNode', on_delete=models.CASCADE)
     instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
     position = models.PositiveIntegerField(
@@ -534,7 +556,6 @@ class WorkflowJobTemplateNodeBaseInstanceGroupMembership(models.Model):
 
 
 class WorkflowJobNodeBaseInstanceGroupMembership(models.Model):
-
     workflowjobnode = models.ForeignKey('WorkflowJobNode', on_delete=models.CASCADE)
     instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
     position = models.PositiveIntegerField(
@@ -545,7 +566,6 @@ class WorkflowJobNodeBaseInstanceGroupMembership(models.Model):
 
 
 class WorkflowJobInstanceGroupMembership(models.Model):
-
     workflowjobnode = models.ForeignKey('WorkflowJob', on_delete=models.CASCADE)
     instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
     position = models.PositiveIntegerField(

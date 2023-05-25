@@ -5,7 +5,6 @@ from awx.conf.fields import StringListBooleanField, StringListPathField, ListTup
 
 
 class TestStringListBooleanField:
-
     FIELD_VALUES = [
         ("hello", "hello"),
         (("a", "b"), ["a", "b"]),
@@ -36,7 +35,7 @@ class TestStringListBooleanField:
         field = StringListBooleanField()
         with pytest.raises(ValidationError) as e:
             field.to_internal_value(value)
-        assert e.value.detail[0] == "Expected None, True, False, a string or list " "of strings but got {} instead.".format(type(value))
+        assert e.value.detail[0] == "Expected None, True, False, a string or list of strings but got {} instead.".format(type(value))
 
     @pytest.mark.parametrize("value_in, value_known", FIELD_VALUES)
     def test_to_representation_valid(self, value_in, value_known):
@@ -49,11 +48,10 @@ class TestStringListBooleanField:
         field = StringListBooleanField()
         with pytest.raises(ValidationError) as e:
             field.to_representation(value)
-        assert e.value.detail[0] == "Expected None, True, False, a string or list " "of strings but got {} instead.".format(type(value))
+        assert e.value.detail[0] == "Expected None, True, False, a string or list of strings but got {} instead.".format(type(value))
 
 
 class TestListTuplesField:
-
     FIELD_VALUES = [([('a', 'b'), ('abc', '123')], [("a", "b"), ("abc", "123")])]
 
     FIELD_VALUES_INVALID = [("abc", type("abc")), ([('a', 'b', 'c'), ('abc', '123', '456')], type(('a',))), (['a', 'b'], type('a')), (123, type(123))]
@@ -69,11 +67,10 @@ class TestListTuplesField:
         field = ListTuplesField()
         with pytest.raises(ValidationError) as e:
             field.to_internal_value(value)
-        assert e.value.detail[0] == "Expected a list of tuples of max length 2 " "but got {} instead.".format(t)
+        assert e.value.detail[0] == "Expected a list of tuples of max length 2 but got {} instead.".format(t)
 
 
 class TestStringListPathField:
-
     FIELD_VALUES = [
         ((".", "..", "/"), [".", "..", "/"]),
         (("/home",), ["/home"]),

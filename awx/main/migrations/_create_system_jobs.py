@@ -15,7 +15,6 @@ only if new system job templates were created (i.e. new database).
 
 
 def create_clearsessions_jt(apps, schema_editor):
-
     SystemJobTemplate = apps.get_model('main', 'SystemJobTemplate')
     Schedule = apps.get_model('main', 'Schedule')
     ContentType = apps.get_model('contenttypes', 'ContentType')
@@ -48,7 +47,6 @@ def create_clearsessions_jt(apps, schema_editor):
 
 
 def create_cleartokens_jt(apps, schema_editor):
-
     SystemJobTemplate = apps.get_model('main', 'SystemJobTemplate')
     Schedule = apps.get_model('main', 'Schedule')
     ContentType = apps.get_model('contenttypes', 'ContentType')

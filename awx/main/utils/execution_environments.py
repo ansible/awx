@@ -1,4 +1,5 @@
 import os
+import logging
 from pathlib import Path
 
 from django.conf import settings
@@ -6,8 +7,15 @@ from django.conf import settings
 from awx.main.models.execution_environments import ExecutionEnvironment
 
 
+logger = logging.getLogger(__name__)
+
+
 def get_control_plane_execution_environment():
-    return ExecutionEnvironment.objects.filter(organization=None, managed=True).first()
+    ee = ExecutionEnvironment.objects.filter(organization=None, managed=True).first()
+    if ee == None:
+        logger.error('Failed to find control plane ee, there are no managed EEs without organizations')
+        raise RuntimeError("Failed to find default control plane EE")
+    return ee
 
 
 def get_default_execution_environment():

@@ -43,6 +43,7 @@ describe('<MiscSystemDetail />', () => {
         AUTOMATION_ANALYTICS_LAST_ENTRIES:
           '{"foo": "2021-11-24R06:35:15.179Z"}',
         AUTOMATION_ANALYTICS_GATHER_INTERVAL: 14400,
+        UI_NEXT: true,
       },
     });
     ExecutionEnvironmentsAPI.readDetail = jest.fn();
@@ -113,6 +114,7 @@ describe('<MiscSystemDetail />', () => {
     assertVariableDetail(wrapper, 'Remote Host Headers', '[]');
     assertVariableDetail(wrapper, 'Proxy IP Allowed List', '[]');
     assertDetail(wrapper, 'Global default execution environment', 'Foo');
+    assertDetail(wrapper, 'Enable Preview of New User Interface', 'On');
   });
 
   test('should render execution environment as not configured', async () => {

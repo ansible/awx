@@ -20,7 +20,7 @@ DOCUMENTATION = """
 ---
 module: workflow_node_wait
 author: "Sean Sullivan (@sean-m-sullivan)"
-short_description: Approve an approval node in a workflow job.
+short_description: Wait for a workflow node to finish.
 description:
     - Approve an approval node in a workflow job. See
       U(https://www.ansible.com/tower) for an overview.
@@ -43,7 +43,7 @@ options:
       type: float
     timeout:
       description:
-        - Maximum time in seconds to wait for a workflow job to to reach approval node.
+        - Maximum time in seconds to wait for a workflow job to reach approval node.
       default: 10
       type: int
 extends_documentation_fragment: awx.awx.auth

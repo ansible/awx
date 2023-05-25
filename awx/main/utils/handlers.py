@@ -17,7 +17,6 @@ from awx.main.exceptions import PostRunError
 
 
 class RSysLogHandler(logging.handlers.SysLogHandler):
-
     append_nul = False
 
     def _connect_unixsocket(self, address):
@@ -103,6 +102,10 @@ ColorHandler = logging.StreamHandler
 if settings.COLOR_LOGS is True:
     try:
         from logutils.colorize import ColorizingStreamHandler
+        import colorama
+
+        colorama.deinit()
+        colorama.init(wrap=False, convert=False, strip=False)
 
         class ColorHandler(ColorizingStreamHandler):
             def colorize(self, line, record):
@@ -110,7 +113,7 @@ if settings.COLOR_LOGS is True:
                 # logs rendered with cyan text
                 previous_level_map = self.level_map.copy()
                 if record.name == "awx.analytics.job_lifecycle":
-                    self.level_map[logging.DEBUG] = (None, 'cyan', True)
+                    self.level_map[logging.INFO] = (None, 'cyan', True)
                 msg = super(ColorHandler, self).colorize(line, record)
                 self.level_map = previous_level_map
                 return msg

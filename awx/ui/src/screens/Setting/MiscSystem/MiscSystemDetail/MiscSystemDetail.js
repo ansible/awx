@@ -60,7 +60,8 @@ function MiscSystemDetail() {
         'DEFAULT_EXECUTION_ENVIRONMENT',
         'PROXY_IP_ALLOWED_LIST',
         'AUTOMATION_ANALYTICS_LAST_GATHER',
-        'AUTOMATION_ANALYTICS_LAST_ENTRIES'
+        'AUTOMATION_ANALYTICS_LAST_ENTRIES',
+        'UI_NEXT'
       );
 
       const mergedData = {};

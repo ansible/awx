@@ -53,6 +53,16 @@ https://github.com/ansible/awx/#get-involved \
 Thank you once again for this and your interest in AWX!
 
 
+### Red Hat Support Team
+- Hi! \
+\
+It appears that you are using an RPM build for RHEL. Please reach out to the Red Hat support team and submit a ticket. \
+\
+Here is the link to do so: \
+\
+https://access.redhat.com/support \
+\
+Thank you for your submission and for supporting AWX!
 
 
 ## Common
@@ -95,6 +105,13 @@ The Ansible Community is looking at building an EE that corresponds to all of th
 
 ### Oracle AWX
 We'd be happy to help if you can reproduce this with AWX since we do not have Oracle's Linux Automation Manager. If you need help with this specific version of Oracles Linux Automation Manager you will need to contact your Oracle for support. 
+
+### Community Resolved
+Hi,
+
+We are happy to see that it appears a fix has been provided for your issue, so we will go ahead and close this ticket. Please feel free to reopen if any other problems arise.
+
+<name of community member who helped> thanks so much for taking the time to write a thoughtful and helpful response to this issue!
 
 ### AWX Release
 Subject: Announcing AWX Xa.Ya.za and AWX-Operator Xb.Yb.zb

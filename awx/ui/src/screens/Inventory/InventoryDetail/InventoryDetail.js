@@ -23,6 +23,7 @@ import { InventoriesAPI } from 'api';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import { Inventory } from 'types';
 import { relatedResourceDeleteRequests } from 'util/getRelatedResourceDeleteDetails';
+import InstanceGroupLabels from 'components/InstanceGroupLabels';
 import getHelpText from '../shared/Inventory.helptext';
 
 function InventoryDetail({ inventory }) {
@@ -105,23 +106,7 @@ function InventoryDetail({ inventory }) {
           <Detail
             fullWidth
             label={t`Instance Groups`}
-            value={
-              <ChipGroup
-                numChips={5}
-                totalChips={instanceGroups?.length}
-                ouiaId="instance-group-chips"
-              >
-                {instanceGroups?.map((ig) => (
-                  <Chip
-                    key={ig.id}
-                    isReadOnly
-                    ouiaId={`instance-group-${ig.id}-chip`}
-                  >
-                    {ig.name}
-                  </Chip>
-                ))}
-              </ChipGroup>
-            }
+            value={<InstanceGroupLabels labels={instanceGroups} isLinkable />}
             isEmpty={instanceGroups.length === 0}
           />
         )}

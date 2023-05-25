@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 DOCUMENTATION = """
-    lookup: schedule_rruleset
+    name: schedule_rruleset
     author: John Westcott IV (@john-westcott-iv)
     short_description: Generate an rruleset string
     requirements:
@@ -31,7 +31,8 @@ DOCUMENTATION = """
       rules:
         description:
           - Array of rules in the rruleset
-        type: array
+        type: list
+        elements: dict
         required: True
         suboptions:
           frequency:
@@ -136,40 +137,44 @@ try:
     import pytz
     from dateutil import rrule
 except ImportError as imp_exc:
-    raise_from(AnsibleError('{0}'.format(imp_exc)), imp_exc)
+    LIBRARY_IMPORT_ERROR = imp_exc
+else:
+    LIBRARY_IMPORT_ERROR = None
 
 
 class LookupModule(LookupBase):
-    frequencies = {
-        'none': rrule.DAILY,
-        'minute': rrule.MINUTELY,
-        'hour': rrule.HOURLY,
-        'day': rrule.DAILY,
-        'week': rrule.WEEKLY,
-        'month': rrule.MONTHLY,
-    }
-
-    weekdays = {
-        'monday': rrule.MO,
-        'tuesday': rrule.TU,
-        'wednesday': rrule.WE,
-        'thursday': rrule.TH,
-        'friday': rrule.FR,
-        'saturday': rrule.SA,
-        'sunday': rrule.SU,
-    }
-
-    set_positions = {
-        'first': 1,
-        'second': 2,
-        'third': 3,
-        'fourth': 4,
-        'last': -1,
-    }
-
     # plugin constructor
     def __init__(self, *args, **kwargs):
+        if LIBRARY_IMPORT_ERROR:
+            raise_from(AnsibleError('{0}'.format(LIBRARY_IMPORT_ERROR)), LIBRARY_IMPORT_ERROR)
         super().__init__(*args, **kwargs)
+
+        self.frequencies = {
+            'none': rrule.DAILY,
+            'minute': rrule.MINUTELY,
+            'hour': rrule.HOURLY,
+            'day': rrule.DAILY,
+            'week': rrule.WEEKLY,
+            'month': rrule.MONTHLY,
+        }
+
+        self.weekdays = {
+            'monday': rrule.MO,
+            'tuesday': rrule.TU,
+            'wednesday': rrule.WE,
+            'thursday': rrule.TH,
+            'friday': rrule.FR,
+            'saturday': rrule.SA,
+            'sunday': rrule.SU,
+        }
+
+        self.set_positions = {
+            'first': 1,
+            'second': 2,
+            'third': 3,
+            'fourth': 4,
+            'last': -1,
+        }
 
     @staticmethod
     def parse_date_time(date_string):
@@ -188,14 +193,14 @@ class LookupModule(LookupBase):
         # something: [1,2,3] - A list of ints
         return_values = []
         # If they give us a single int, lets make it a list of ints
-        if type(rule[field_name]) == int:
+        if isinstance(rule[field_name], int):
             rule[field_name] = [rule[field_name]]
         # If its not a list, we need to split it into a list
-        if type(rule[field_name]) != list:
+        if not isinstance(rule[field_name], list):
             rule[field_name] = rule[field_name].split(',')
         for value in rule[field_name]:
             # If they have a list of strs we want to strip the str incase its space delineated
-            if type(value) == str:
+            if isinstance(value, str):
                 value = value.strip()
             # If value happens to be an int (from a list of ints) we need to coerce it into a str for the re.match
             if not re.match(r"^\d+$", str(value)) or int(value) < min_value or int(value) > max_value:
@@ -205,7 +210,8 @@ class LookupModule(LookupBase):
 
     def process_list(self, field_name, rule, valid_list, rule_number):
         return_values = []
-        if type(rule[field_name]) != list:
+        # If its not a list, we need to split it into a list
+        if not isinstance(rule[field_name], list):
             rule[field_name] = rule[field_name].split(',')
         for value in rule[field_name]:
             value = value.strip()
@@ -260,11 +266,11 @@ class LookupModule(LookupBase):
             frequency = rule.get('frequency', None)
             if not frequency:
                 raise AnsibleError("Rule {0} is missing a frequency".format(rule_number))
-            if frequency not in LookupModule.frequencies:
+            if frequency not in self.frequencies:
                 raise AnsibleError('Frequency of rule {0} is invalid {1}'.format(rule_number, frequency))
 
             rrule_kwargs = {
-                'freq': LookupModule.frequencies[frequency],
+                'freq': self.frequencies[frequency],
                 'interval': rule.get('interval', 1),
                 'dtstart': start_date,
             }
@@ -287,7 +293,7 @@ class LookupModule(LookupBase):
                             )
 
             if 'bysetpos' in rule:
-                rrule_kwargs['bysetpos'] = self.process_list('bysetpos', rule, LookupModule.set_positions, rule_number)
+                rrule_kwargs['bysetpos'] = self.process_list('bysetpos', rule, self.set_positions, rule_number)
 
             if 'bymonth' in rule:
                 rrule_kwargs['bymonth'] = self.process_integer('bymonth', rule, 1, 12, rule_number)
@@ -302,7 +308,7 @@ class LookupModule(LookupBase):
                 rrule_kwargs['byweekno'] = self.process_integer('byweekno', rule, 1, 52, rule_number)
 
             if 'byweekday' in rule:
-                rrule_kwargs['byweekday'] = self.process_list('byweekday', rule, LookupModule.weekdays, rule_number)
+                rrule_kwargs['byweekday'] = self.process_list('byweekday', rule, self.weekdays, rule_number)
 
             if 'byhour' in rule:
                 rrule_kwargs['byhour'] = self.process_integer('byhour', rule, 0, 23, rule_number)

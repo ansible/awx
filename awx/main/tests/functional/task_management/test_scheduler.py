@@ -18,7 +18,7 @@ def test_single_job_scheduler_launch(hybrid_instance, controlplane_instance_grou
     j = create_job(objects.job_template)
     with mocker.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
-        TaskManager.start_task.assert_called_once_with(j, controlplane_instance_group, [], instance)
+        TaskManager.start_task.assert_called_once_with(j, controlplane_instance_group, instance)
 
 
 @pytest.mark.django_db
@@ -240,12 +240,82 @@ def test_multi_jt_capacity_blocking(hybrid_instance, job_template_factory, mocke
         mock_task_impact.return_value = 505
         with mock.patch.object(TaskManager, "start_task", wraps=tm.start_task) as mock_job:
             tm.schedule()
-            mock_job.assert_called_once_with(j1, controlplane_instance_group, [], instance)
+            mock_job.assert_called_once_with(j1, controlplane_instance_group, instance)
             j1.status = "successful"
             j1.save()
     with mock.patch.object(TaskManager, "start_task", wraps=tm.start_task) as mock_job:
         tm.schedule()
-        mock_job.assert_called_once_with(j2, controlplane_instance_group, [], instance)
+        mock_job.assert_called_once_with(j2, controlplane_instance_group, instance)
+
+
+@pytest.mark.django_db
+def test_max_concurrent_jobs_ig_capacity_blocking(hybrid_instance, job_template_factory, mocker):
+    """When max_concurrent_jobs of an instance group is more restrictive than capacity of instances, enforce max_concurrent_jobs."""
+    instance = hybrid_instance
+    controlplane_instance_group = instance.rampart_groups.first()
+    # We will expect only 1 job to be started
+    controlplane_instance_group.max_concurrent_jobs = 1
+    controlplane_instance_group.save()
+    num_jobs = 3
+    jobs = []
+    for i in range(num_jobs):
+        jobs.append(
+            create_job(job_template_factory(f'jt{i}', organization=f'org{i}', project=f'proj{i}', inventory=f'inv{i}', credential=f'cred{i}').job_template)
+        )
+    tm = TaskManager()
+    task_impact = 1
+
+    # Sanity check that multiple jobs would run if not for the max_concurrent_jobs setting.
+    assert task_impact * num_jobs < controlplane_instance_group.capacity
+    tm = TaskManager()
+    with mock.patch('awx.main.models.Job.task_impact', new_callable=mock.PropertyMock) as mock_task_impact:
+        mock_task_impact.return_value = task_impact
+        with mock.patch.object(TaskManager, "start_task", wraps=tm.start_task) as mock_job:
+            tm.schedule()
+            mock_job.assert_called_once()
+            jobs[0].status = 'running'
+            jobs[0].controller_node = instance.hostname
+            jobs[0].execution_node = instance.hostname
+            jobs[0].instance_group = controlplane_instance_group
+            jobs[0].save()
+
+    # while that job is running, we should not start another job
+    with mock.patch('awx.main.models.Job.task_impact', new_callable=mock.PropertyMock) as mock_task_impact:
+        mock_task_impact.return_value = task_impact
+        with mock.patch.object(TaskManager, "start_task", wraps=tm.start_task) as mock_job:
+            tm.schedule()
+            mock_job.assert_not_called()
+    # now job is done, we should start one of the two other jobs
+    jobs[0].status = 'successful'
+    jobs[0].save()
+    with mock.patch('awx.main.models.Job.task_impact', new_callable=mock.PropertyMock) as mock_task_impact:
+        mock_task_impact.return_value = task_impact
+        with mock.patch.object(TaskManager, "start_task", wraps=tm.start_task) as mock_job:
+            tm.schedule()
+            mock_job.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_max_forks_ig_capacity_blocking(hybrid_instance, job_template_factory, mocker):
+    """When max_forks of an instance group is less than the capacity of instances, enforce max_forks."""
+    instance = hybrid_instance
+    controlplane_instance_group = instance.rampart_groups.first()
+    controlplane_instance_group.max_forks = 15
+    controlplane_instance_group.save()
+    task_impact = 10
+    num_jobs = 2
+    # Sanity check that 2 jobs would run if not for the max_forks setting.
+    assert controlplane_instance_group.max_forks < controlplane_instance_group.capacity
+    assert task_impact * num_jobs > controlplane_instance_group.max_forks
+    assert task_impact * num_jobs < controlplane_instance_group.capacity
+    for i in range(num_jobs):
+        create_job(job_template_factory(f'jt{i}', organization=f'org{i}', project=f'proj{i}', inventory=f'inv{i}', credential=f'cred{i}').job_template)
+    tm = TaskManager()
+    with mock.patch('awx.main.models.Job.task_impact', new_callable=mock.PropertyMock) as mock_task_impact:
+        mock_task_impact.return_value = task_impact
+        with mock.patch.object(TaskManager, "start_task", wraps=tm.start_task) as mock_job:
+            tm.schedule()
+            mock_job.assert_called_once()
 
 
 @pytest.mark.django_db
@@ -267,12 +337,12 @@ def test_single_job_dependencies_project_launch(controlplane_instance_group, job
             pu = [x for x in p.project_updates.all()]
             assert len(pu) == 1
             TaskManager().schedule()
-            TaskManager.start_task.assert_called_once_with(pu[0], controlplane_instance_group, [j], instance)
+            TaskManager.start_task.assert_called_once_with(pu[0], controlplane_instance_group, instance)
             pu[0].status = "successful"
             pu[0].save()
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
-        TaskManager.start_task.assert_called_once_with(j, controlplane_instance_group, [], instance)
+        TaskManager.start_task.assert_called_once_with(j, controlplane_instance_group, instance)
 
 
 @pytest.mark.django_db
@@ -295,12 +365,12 @@ def test_single_job_dependencies_inventory_update_launch(controlplane_instance_g
             iu = [x for x in ii.inventory_updates.all()]
             assert len(iu) == 1
             TaskManager().schedule()
-            TaskManager.start_task.assert_called_once_with(iu[0], controlplane_instance_group, [j], instance)
+            TaskManager.start_task.assert_called_once_with(iu[0], controlplane_instance_group, instance)
             iu[0].status = "successful"
             iu[0].save()
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
-        TaskManager.start_task.assert_called_once_with(j, controlplane_instance_group, [], instance)
+        TaskManager.start_task.assert_called_once_with(j, controlplane_instance_group, instance)
 
 
 @pytest.mark.django_db
@@ -342,7 +412,7 @@ def test_job_dependency_with_already_updated(controlplane_instance_group, job_te
             mock_iu.assert_not_called()
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
-        TaskManager.start_task.assert_called_once_with(j, controlplane_instance_group, [], instance)
+        TaskManager.start_task.assert_called_once_with(j, controlplane_instance_group, instance)
 
 
 @pytest.mark.django_db
@@ -372,9 +442,7 @@ def test_shared_dependencies_launch(controlplane_instance_group, job_template_fa
         TaskManager().schedule()
         pu = p.project_updates.first()
         iu = ii.inventory_updates.first()
-        TaskManager.start_task.assert_has_calls(
-            [mock.call(iu, controlplane_instance_group, [j1, j2], instance), mock.call(pu, controlplane_instance_group, [j1, j2], instance)]
-        )
+        TaskManager.start_task.assert_has_calls([mock.call(iu, controlplane_instance_group, instance), mock.call(pu, controlplane_instance_group, instance)])
         pu.status = "successful"
         pu.finished = pu.created + timedelta(seconds=1)
         pu.save()
@@ -383,9 +451,7 @@ def test_shared_dependencies_launch(controlplane_instance_group, job_template_fa
         iu.save()
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
-        TaskManager.start_task.assert_has_calls(
-            [mock.call(j1, controlplane_instance_group, [], instance), mock.call(j2, controlplane_instance_group, [], instance)]
-        )
+        TaskManager.start_task.assert_has_calls([mock.call(j1, controlplane_instance_group, instance), mock.call(j2, controlplane_instance_group, instance)])
     pu = [x for x in p.project_updates.all()]
     iu = [x for x in ii.inventory_updates.all()]
     assert len(pu) == 1
@@ -409,7 +475,7 @@ def test_job_not_blocking_project_update(controlplane_instance_group, job_templa
         project_update.status = "pending"
         project_update.save()
         TaskManager().schedule()
-        TaskManager.start_task.assert_called_once_with(project_update, controlplane_instance_group, [], instance)
+        TaskManager.start_task.assert_called_once_with(project_update, controlplane_instance_group, instance)
 
 
 @pytest.mark.django_db
@@ -433,7 +499,7 @@ def test_job_not_blocking_inventory_update(controlplane_instance_group, job_temp
 
         DependencyManager().schedule()
         TaskManager().schedule()
-        TaskManager.start_task.assert_called_once_with(inventory_update, controlplane_instance_group, [], instance)
+        TaskManager.start_task.assert_called_once_with(inventory_update, controlplane_instance_group, instance)
 
 
 @pytest.mark.django_db

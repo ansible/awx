@@ -240,7 +240,6 @@ class TestJobRelaunchAccess:
 
 @pytest.mark.django_db
 class TestJobAndUpdateCancels:
-
     # used in view: job_template_launch
     def test_jt_self_cancel(self, deploy_jobtemplate, jt_user):
         job = Job(job_template=deploy_jobtemplate, created_by=jt_user)

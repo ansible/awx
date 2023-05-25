@@ -95,6 +95,22 @@
       - results is failed
       - "'In rule 2 end_on must either be an integer or in the format YYYY-MM-DD [HH:MM:SS]' in results.msg"
 
+- name: Every Mondays
+  set_fact:
+    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45', rules=rrules, timezone='UTC' ) }}"
+  ignore_errors: True
+  register: results
+  vars:
+    rrules:
+      - frequency: 'day'
+        interval: 1
+        byweekday: 'monday'
+
+- assert:
+    that:
+      - results is success
+      - "'DTSTART;TZID=UTC:20220430T103045 RRULE:FREQ=DAILY;BYDAY=MO;INTERVAL=1' == complex_rule"
+
 
 - name: call rruleset with an invalid byweekday
   set_fact:

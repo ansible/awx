@@ -32,7 +32,7 @@ from polymorphic.models import PolymorphicModel
 
 # AWX
 from awx.main.models.base import CommonModelNameNotUnique, PasswordFieldsModel, NotificationFieldsModel, prevent_search
-from awx.main.dispatch import get_local_queuename
+from awx.main.dispatch import get_task_queuename
 from awx.main.dispatch.control import Control as ControlDispatcher
 from awx.main.registrar import activity_stream_registrar
 from awx.main.models.mixins import ResourceMixin, TaskManagerUnifiedJobMixin, ExecutionEnvironmentMixin
@@ -1129,7 +1129,6 @@ class UnifiedJob(
             # (`stdout`) directly to a file
 
             with connection.cursor() as cursor:
-
                 if enforce_max_bytes:
                     # detect the length of all stdout for this UnifiedJob, and
                     # if it exceeds settings.STDOUT_MAX_BYTES_DISPLAY bytes,
@@ -1305,6 +1304,8 @@ class UnifiedJob(
                     status_data['instance_group_name'] = None
             elif status in ['successful', 'failed', 'canceled'] and self.finished:
                 status_data['finished'] = datetime.datetime.strftime(self.finished, "%Y-%m-%dT%H:%M:%S.%fZ")
+            elif status == 'running':
+                status_data['started'] = datetime.datetime.strftime(self.finished, "%Y-%m-%dT%H:%M:%S.%fZ")
             status_data.update(self.websocket_emit_data())
             status_data['group_name'] = 'jobs'
             if getattr(self, 'unified_job_template_id', None):
@@ -1349,12 +1350,12 @@ class UnifiedJob(
                 if required in defined_fields and not credential.has_input(required):
                     missing_credential_inputs.append(required)
 
-        if missing_credential_inputs:
-            self.job_explanation = '{} cannot start because Credential {} does not provide one or more required fields ({}).'.format(
-                self._meta.verbose_name.title(), credential.name, ', '.join(sorted(missing_credential_inputs))
-            )
-            self.save(update_fields=['job_explanation'])
-            return (False, None)
+            if missing_credential_inputs:
+                self.job_explanation = '{} cannot start because Credential {} does not provide one or more required fields ({}).'.format(
+                    self._meta.verbose_name.title(), credential.name, ', '.join(sorted(missing_credential_inputs))
+                )
+                self.save(update_fields=['job_explanation'])
+                return (False, None)
 
         needed = self.get_passwords_needed_to_start()
         try:
@@ -1566,7 +1567,7 @@ class UnifiedJob(
         return r
 
     def get_queue_name(self):
-        return self.controller_node or self.execution_node or get_local_queuename()
+        return self.controller_node or self.execution_node or get_task_queuename()
 
     @property
     def is_container_group_task(self):

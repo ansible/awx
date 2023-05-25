@@ -14,6 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework import serializers
 
 # AWX
 from awx.main.models import ActivityStream, Inventory, JobTemplate, Role, User, InstanceGroup, InventoryUpdateEvent, InventoryUpdate
@@ -31,6 +32,7 @@ from awx.api.views.labels import LabelSubListCreateAttachDetachView
 
 from awx.api.serializers import (
     InventorySerializer,
+    ConstructedInventorySerializer,
     ActivityStreamSerializer,
     RoleSerializer,
     InstanceGroupSerializer,
@@ -46,7 +48,6 @@ logger = logging.getLogger('awx.api.views.organization')
 
 
 class InventoryUpdateEventsList(SubListAPIView):
-
     model = InventoryUpdateEvent
     serializer_class = InventoryUpdateEventSerializer
     parent_model = InventoryUpdate
@@ -66,13 +67,11 @@ class InventoryUpdateEventsList(SubListAPIView):
 
 
 class InventoryList(ListCreateAPIView):
-
     model = Inventory
     serializer_class = InventorySerializer
 
 
 class InventoryDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
-
     model = Inventory
     serializer_class = InventorySerializer
 
@@ -82,7 +81,9 @@ class InventoryDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIVie
 
         # Do not allow changes to an Inventory kind.
         if kind is not None and obj.kind != kind:
-            return Response(dict(error=_('You cannot turn a regular inventory into a "smart" inventory.')), status=status.HTTP_405_METHOD_NOT_ALLOWED)
+            return Response(
+                dict(error=_('You cannot turn a regular inventory into a "smart" or "constructed" inventory.')), status=status.HTTP_405_METHOD_NOT_ALLOWED
+            )
         return super(InventoryDetail, self).update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
@@ -97,8 +98,30 @@ class InventoryDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIVie
             return Response(dict(error=_("{0}".format(e))), status=status.HTTP_400_BAD_REQUEST)
 
 
-class InventoryActivityStreamList(SubListAPIView):
+class ConstructedInventoryDetail(InventoryDetail):
+    serializer_class = ConstructedInventorySerializer
 
+
+class ConstructedInventoryList(InventoryList):
+    serializer_class = ConstructedInventorySerializer
+
+    def get_queryset(self):
+        r = super().get_queryset()
+        return r.filter(kind='constructed')
+
+
+class InventoryInputInventoriesList(SubListAttachDetachAPIView):
+    model = Inventory
+    serializer_class = InventorySerializer
+    parent_model = Inventory
+    relationship = 'input_inventories'
+
+    def is_valid_relation(self, parent, sub, created=False):
+        if sub.kind == 'constructed':
+            raise serializers.ValidationError({'error': 'You cannot add a constructed inventory to another constructed inventory.'})
+
+
+class InventoryActivityStreamList(SubListAPIView):
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
     parent_model = Inventory
@@ -113,7 +136,6 @@ class InventoryActivityStreamList(SubListAPIView):
 
 
 class InventoryInstanceGroupsList(SubListAttachDetachAPIView):
-
     model = InstanceGroup
     serializer_class = InstanceGroupSerializer
     parent_model = Inventory
@@ -121,13 +143,11 @@ class InventoryInstanceGroupsList(SubListAttachDetachAPIView):
 
 
 class InventoryAccessList(ResourceAccessList):
-
     model = User  # needs to be User for AccessLists's
     parent_model = Inventory
 
 
 class InventoryObjectRolesList(SubListAPIView):
-
     model = Role
     serializer_class = RoleSerializer
     parent_model = Inventory
@@ -140,7 +160,6 @@ class InventoryObjectRolesList(SubListAPIView):
 
 
 class InventoryJobTemplateList(SubListAPIView):
-
     model = JobTemplate
     serializer_class = JobTemplateSerializer
     parent_model = Inventory
@@ -154,11 +173,9 @@ class InventoryJobTemplateList(SubListAPIView):
 
 
 class InventoryLabelList(LabelSubListCreateAttachDetachView):
-
     parent_model = Inventory
 
 
 class InventoryCopy(CopyAPIView):
-
     model = Inventory
     copy_return_serializer_class = InventorySerializer

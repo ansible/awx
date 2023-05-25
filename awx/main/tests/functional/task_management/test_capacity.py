@@ -4,7 +4,7 @@ from awx.main.models import (
     Instance,
     InstanceGroup,
 )
-from awx.main.scheduler.task_manager_models import TaskManagerInstanceGroups, TaskManagerInstances
+from awx.main.scheduler.task_manager_models import TaskManagerInstanceGroups
 
 
 class TestInstanceGroupInstanceMapping(TransactionTestCase):
@@ -23,11 +23,10 @@ class TestInstanceGroupInstanceMapping(TransactionTestCase):
     def test_mapping(self):
         self.sample_cluster()
         with self.assertNumQueries(3):
-            instances = TaskManagerInstances([])  # empty task list
-            instance_groups = TaskManagerInstanceGroups(instances_by_hostname=instances)
+            instance_groups = TaskManagerInstanceGroups()
 
         ig_instance_map = instance_groups.instance_groups
 
-        assert set(i.hostname for i in ig_instance_map['ig_small']['instances']) == set(['i1'])
-        assert set(i.hostname for i in ig_instance_map['ig_large']['instances']) == set(['i2', 'i3'])
-        assert set(i.hostname for i in ig_instance_map['default']['instances']) == set(['i2'])
+        assert set(i.hostname for i in ig_instance_map['ig_small'].instances) == set(['i1'])
+        assert set(i.hostname for i in ig_instance_map['ig_large'].instances) == set(['i2', 'i3'])
+        assert set(i.hostname for i in ig_instance_map['default'].instances) == set(['i2'])

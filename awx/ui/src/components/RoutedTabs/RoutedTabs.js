@@ -7,6 +7,7 @@ import {
 } from '@patternfly/react-core';
 import { useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
+import { getPersistentFilters } from 'components/PersistentFilters';
 
 const Tabs = styled(PFTabs)`
   & > ul {
@@ -40,8 +41,8 @@ function RoutedTabs({ tabsArray }) {
     const match = tabsArray.find((tab) => tab.id === eventKey);
     if (match) {
       event.preventDefault();
-      const link = match.isBackButton
-        ? `${match.link}?restoreFilters=true`
+      const link = match.persistentFilterKey
+        ? `${match.link}${getPersistentFilters(match.persistentFilterKey)}`
         : match.link;
       history.push(link);
     }

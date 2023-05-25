@@ -48,7 +48,6 @@ def revert_tower_settings(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [('conf', '0001_initial'), ('main', '0004_squashed_v310_release')]
 
     run_before = [('main', '0005_squashed_v310_v313_updates')]
