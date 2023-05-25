@@ -140,12 +140,12 @@ def main():
 
     # The exporter code currently works like the following:
     #   Empty string == all assets of that type
-    #   Non-Empty string = just one asset of that type (by name or ID)
+    #   Non-Empty string = just a list of assets of that type (by name or ID)
     #   Asset type not present or None = skip asset type (unless everything is None, then export all)
     # Here we are going to setup a dict of values to export
     export_args = {}
     for resource in EXPORTABLE_RESOURCES:
-        if module.params.get('all') or module.params.get(resource) == 'all':
+        if module.params.get('all') or module.params.get(resource) == ['all']:
             # If we are exporting everything or we got the keyword "all" we pass in an empty string for this asset type
             export_args[resource] = ''
         else:
