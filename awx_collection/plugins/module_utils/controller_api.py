@@ -17,7 +17,7 @@ import time
 import re
 from json import loads, dumps
 from os.path import isfile, expanduser, split, join, exists, isdir
-from os import access, R_OK, getcwd
+from os import access, R_OK, getcwd, environ
 
 
 try:
@@ -131,9 +131,11 @@ class ControllerModule(AnsibleModule):
             self.url.hostname.replace(char, "")
         # Try to resolve the hostname
         try:
-            addrinfolist = getaddrinfo(self.url.hostname, self.url.port, proto=IPPROTO_TCP)
-            for family, kind, proto, canonical, sockaddr in addrinfolist:
-                sockaddr[0]
+            proxy_env_var_name = "{0}_proxy".format(self.url.scheme)
+            if not environ.get(proxy_env_var_name) and not environ.get(proxy_env_var_name.upper()):
+                addrinfolist = getaddrinfo(self.url.hostname, self.url.port, proto=IPPROTO_TCP)
+                for family, kind, proto, canonical, sockaddr in addrinfolist:
+                    sockaddr[0]
         except Exception as e:
             self.fail_json(msg="Unable to resolve controller_host ({1}): {0}".format(self.url.hostname, e))
 

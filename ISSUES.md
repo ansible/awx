@@ -31,7 +31,7 @@ If your issue isn't considered high priority, then please be patient as it may t
 
 `state:needs_info` The issue needs more information. This could be more debug output, more specifics out the system such as version information. Any detail that is currently preventing this issue from moving forward. This should be considered a blocked state.
 
-`state:needs_review` The issue/pull request needs to be reviewed by other maintainers and contributors. This is usually used when there is a question out to another maintainer or when a person is less familar with an area of the code base the issue is for.
+`state:needs_review` The issue/pull request needs to be reviewed by other maintainers and contributors. This is usually used when there is a question out to another maintainer or when a person is less familiar with an area of the code base the issue is for.
 
 `state:needs_revision` More commonly used on pull requests, this state represents that there are changes that are being waited on.
 
