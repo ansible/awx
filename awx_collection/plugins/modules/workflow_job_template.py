@@ -216,7 +216,7 @@ options:
           type: str
         skip_tags:
           description:
-            - Tags to skip, applied as a prompt, if job tempalte prompts for job tags
+            - Tags to skip, applied as a prompt, if job template prompts for job tags
           type: str
         limit:
           description:
@@ -433,6 +433,10 @@ options:
       default: False
       aliases:
         - destroy_current_schema
+    job_name_template:
+      description:
+        - A Jinja2 template to be used as a the name of the job when launching the template
+      type: str
 
 extends_documentation_fragment: awx.awx.auth
 '''
@@ -838,6 +842,7 @@ def main():
         notification_templates_approvals=dict(type="list", elements='str'),
         workflow_nodes=dict(type='list', elements='dict', aliases=['schema']),
         destroy_current_nodes=dict(type='bool', default=False, aliases=['destroy_current_schema']),
+        job_name_template=dict(),
         state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )
 
@@ -911,6 +916,7 @@ def main():
         'webhook_service',
         'job_tags',
         'skip_tags',
+        'job_name_template',
     ):
         field_val = module.params.get(field_name)
         if field_val is not None:

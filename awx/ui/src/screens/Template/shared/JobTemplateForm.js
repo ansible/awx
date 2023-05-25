@@ -366,6 +366,13 @@ function JobTemplateForm({
             onError={setContentError}
           />
         </FormGroup>
+        <FormField
+          id="template-job_name_template"
+          name="job_name_template"
+          type="text"
+          label={t`Job Name Template`}
+          tooltip={helpText.jobNameTemplate}
+        />
         <FormFullWidthLayout>
           <FieldWithPrompt
             fieldId="template-credentials"
@@ -683,6 +690,7 @@ JobTemplateForm.defaultProps = {
       project: null,
       credentials: [],
     },
+    job_name_template: '',
     isNew: true,
   },
   submitError: null,
@@ -755,6 +763,7 @@ const FormikApp = withFormik({
       webhook_credential: template?.summary_fields?.webhook_credential || null,
       execution_environment:
         template.summary_fields?.execution_environment || null,
+      job_name_template: template.job_name_template || '',
     };
     if (resourceValues !== null) {
       if (resourceValues.type === 'credentials') {

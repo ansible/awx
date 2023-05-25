@@ -690,7 +690,7 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
 
     class Meta:
         model = UnifiedJobTemplate
-        fields = ('*', 'last_job_run', 'last_job_failed', 'next_job_run', 'status', 'execution_environment')
+        fields = ('*', 'last_job_run', 'last_job_failed', 'next_job_run', 'status', 'execution_environment', 'job_name_template')
 
     def get_related(self, obj):
         res = super(UnifiedJobTemplateSerializer, self).get_related(obj)
@@ -3251,6 +3251,17 @@ class JobTemplateMixin(object):
                     raise serializers.ValidationError(msg)
             else:
                 raise serializers.ValidationError(msg)
+
+        job_name_template = attrs.get('job_name_template', None)
+        if job_name_template:
+            from jinja2 import Environment
+            from jinja2.exceptions import TemplateSyntaxError
+
+            j2_environment = Environment()
+            try:
+                j2_environment.from_string(job_name_template)
+            except TemplateSyntaxError:
+                raise serializers.ValidationError('job_name_template is invalid')
 
         return super().validate(attrs)
 

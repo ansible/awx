@@ -26,6 +26,7 @@ const wfHelpTextStrings = () => ({
       <p>{t`Webhooks: Enable Webhook for this workflow job template.`}</p>
     </>
   ),
+  jobNameTemplate: t`A jinja2 template to give the name of a job launched by this job template. Defaults to the name of the job template. You can reference the job object by {{ job.X }} and the extra_vars by {{ extra_vars.Y }}. Note, only values at the creation time of the job are available. For example, job.work_unit_id is populated after the job launch and would not be available as a field.`,
 });
 
 export default wfHelpTextStrings;
