@@ -5489,6 +5489,13 @@ class InstanceSerializer(BaseSerializer):
 
         if peers_from_control_nodes and node_type not in (Instance.Types.EXECUTION, Instance.Types.HOP):
             raise serializers.ValidationError("peers_from_control_nodes can only be enabled for execution or hop nodes.")
+
+        if node_type in (Instance.Types.CONTROL):
+            if self.instance and 'peers' in attrs and set(self.instance.peers.all()) != set(attrs['peers']):
+                raise serializers.ValidationError(
+                    "Setting peers manually for control nodes is not allowed. Enable peers_from_control_nodes on the hop and execution nodes instead."
+                )
+
         return super().validate(attrs)
 
     def validate_node_type(self, value):
