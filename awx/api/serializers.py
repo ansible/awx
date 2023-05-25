@@ -4686,7 +4686,6 @@ class BulkJobNodeSerializer(WorkflowJobNodeSerializer):
     # many-to-many fields
     credentials = serializers.ListField(child=serializers.IntegerField(min_value=1), required=False)
     labels = serializers.ListField(child=serializers.IntegerField(min_value=1), required=False)
-    # TODO: Use instance group role added via PR 13584(once merged), for now everything related to instance group is commented
     instance_groups = serializers.ListField(child=serializers.IntegerField(min_value=1), required=False)
 
     class Meta:
