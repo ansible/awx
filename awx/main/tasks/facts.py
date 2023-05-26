@@ -40,7 +40,7 @@ def start_fact_cache(hosts, destination, log_data, timeout=None, inventory_id=No
             continue  # facts are expired - do not write them
         filepath = os.sep.join(map(str, [destination, host.name]))
         if not os.path.realpath(filepath).startswith(destination):
-            system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
+            system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)), extra={'volume_tag': 'system_tracking'})
             continue
         try:
             with codecs.open(filepath, 'w', encoding='utf-8') as f:
@@ -49,7 +49,7 @@ def start_fact_cache(hosts, destination, log_data, timeout=None, inventory_id=No
                 log_data['written_ct'] += 1
                 last_filepath_written = filepath
         except IOError:
-            system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
+            system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)), extra={'volume_tag': 'system_tracking'})
             continue
     # make note of the time we wrote the last file so we can check if any file changed later
     if last_filepath_written:
@@ -76,7 +76,7 @@ def finish_fact_cache(hosts, destination, facts_write_time, log_data, job_id=Non
     for host in hosts:
         filepath = os.sep.join(map(str, [destination, host.name]))
         if not os.path.realpath(filepath).startswith(destination):
-            system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
+            system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)), extra={'volume_tag': 'system_tasks'})
             continue
         if os.path.exists(filepath):
             # If the file changed since we wrote the last facts file, pre-playbook run...
@@ -98,6 +98,7 @@ def finish_fact_cache(hosts, destination, facts_write_time, log_data, job_id=Non
                             ansible_facts=host.ansible_facts,
                             ansible_facts_modified=host.ansible_facts_modified.isoformat(),
                             job_id=job_id,
+                            volume_tag='system_tracking',
                         ),
                     )
                     log_data['updated_ct'] += 1
@@ -108,7 +109,9 @@ def finish_fact_cache(hosts, destination, facts_write_time, log_data, job_id=Non
             host.ansible_facts = {}
             host.ansible_facts_modified = now()
             hosts_to_update.append(host)
-            system_tracking_logger.info('Facts cleared for inventory {} host {}'.format(smart_str(host.inventory.name), smart_str(host.name)))
+            system_tracking_logger.info(
+                'Facts cleared for inventory {} host {}'.format(smart_str(host.inventory.name), smart_str(host.name)), extra={'volume_tag': 'system_tracking'}
+            )
             log_data['cleared_ct'] += 1
         if len(hosts_to_update) > 100:
             Host.objects.bulk_update(hosts_to_update, ['ansible_facts', 'ansible_facts_modified'])

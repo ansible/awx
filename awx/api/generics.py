@@ -67,7 +67,6 @@ __all__ = [
 ]
 
 logger = logging.getLogger('awx.api.generics')
-analytics_logger = logging.getLogger('awx.analytics.performance')
 
 
 class LoggedLoginView(auth_views.LoginView):

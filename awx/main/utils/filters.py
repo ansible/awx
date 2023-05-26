@@ -63,7 +63,7 @@ def record_is_blocked(record):
 
 
 class ExternalLoggerEnabled(Filter):
-    enabled_loggers = FieldFromSettings('LOG_AGGREGATOR_LOGGERS')
+    dynamic_loggers = FieldFromSettings('LOG_AGGREGATOR_LOGGERS')
     enabled_flag = FieldFromSettings('LOG_AGGREGATOR_ENABLED')
 
     def __init__(self, **kwargs):
@@ -83,47 +83,43 @@ class ExternalLoggerEnabled(Filter):
         False - should not be logged
         True - should be logged
         """
-        # Do not send exceptions to external logger
+        # Do not send logging exceptions to external logger
         if record_is_blocked(record):
             return False
+
         # General enablement
         if not self.enabled_flag:
             return False
 
-        # Logger type enablement
-        loggers = self.enabled_loggers
-        if not loggers:
-            return False
-        if record.name.startswith('awx.analytics'):
-            base_path, headline_name = record.name.rsplit('.', 1)
-            return bool(headline_name in loggers)
-        else:
-            if '.' in record.name:
-                base_name, trailing_path = record.name.split('.', 1)
-            else:
-                base_name = record.name
-            return bool(base_name in loggers)
+        # External log handler uses this filter AND the dynamic level filter
+        # we send general server logs only if "awx" is in LOG_AGGREGATOR_LOGGERS
+        return bool(record.name.startswith('awx.analytics') or ('awx' in self.dynamic_loggers))
 
 
 class DynamicLevelFilter(Filter):
-    allow_list = FieldFromSettings('LOG_AGGREGATOR_HIGH_VOLUME_ALLOW_LIST')
+    dynamic_loggers = FieldFromSettings('LOG_AGGREGATOR_LOGGERS')
+    dynamic_level = FieldFromSettings('LOG_AGGREGATOR_LEVEL')
 
     def filter(self, record):
-        """Filters out logs that have a level below the threshold defined
-        by the databse setting LOG_AGGREGATOR_LEVEL
         """
+        Filters out logs that
+        have a level below the threshold defined by the databse setting LOG_AGGREGATOR_LEVEL
+        or have a volume_tag which is not in LOG_AGGREGATOR_LOGGERS
+        """
+        # Filter noisy logs that are not allowed by LOG_AGGREGATOR_LOGGERS
+        if hasattr(record, 'volume_tag'):
+            if record.volume_tag not in self.dynamic_loggers:
+                return False
+
+        # Filter according to global log level from database settings
         if record_is_blocked(record):
             # Fine to write denied loggers to file, apply default filtering level
             cutoff_level = logging.WARNING
         else:
             try:
-                cutoff_level = logging._nameToLevel[settings.LOG_AGGREGATOR_LEVEL]
+                cutoff_level = logging._nameToLevel[self.dynamic_level]
             except Exception:
                 cutoff_level = logging.WARNING
-
-        if hasattr(record, 'volume_tag'):
-            if record.volume_tag not in self.allow_list:
-                return False
 
         return bool(record.levelno >= cutoff_level)
 

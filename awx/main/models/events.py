@@ -401,7 +401,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
             if value != getattr(self, field):
                 setattr(self, field, value)
         if settings.LOG_AGGREGATOR_ENABLED:
-            analytics_logger.info('Event data saved.', extra=dict(python_objects=dict(job_event=self)))
+            analytics_logger.info('Event data saved.', extra=dict(python_objects=dict(job_event=self), volume_tag='job_events'))
 
     @classmethod
     def create_from_data(cls, **kwargs):
@@ -866,7 +866,7 @@ class AdHocCommandEvent(BaseCommandEvent):
         if isinstance(res, dict) and res.get('changed', False):
             self.changed = True
 
-        analytics_logger.info('Event data saved.', extra=dict(python_objects=dict(job_event=self)))
+        analytics_logger.info('Event data saved.', extra=dict(python_objects=dict(job_event=self), volume_tag='job_events'))
 
 
 class UnpartitionedAdHocCommandEvent(AdHocCommandEvent):

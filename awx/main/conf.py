@@ -579,16 +579,20 @@ register(
 register(
     'LOG_AGGREGATOR_LOGGERS',
     field_class=fields.StringListField,
-    default=['awx', 'activity_stream', 'job_events', 'system_tracking', 'broadcast_websocket'],
-    label=_('Loggers Sending Data to Log Aggregator Form'),
+    default=['awx', 'activity_stream', 'job_events', 'system_tracking', 'job_lifecycle', 'websockets'],
+    label=_('Select Loggers to Enable'),
     help_text=_(
-        'List of loggers that will send HTTP logs to the collector, these can '
-        'include any or all of: \n'
-        'awx - service logs\n'
+        'Enable logging for special tags.\n'
+        'awx - (external) include to send general system logs to external log collector\n'
+        'job_events - (external) callback data from Ansible job events\n'
+        'events - (non-default) system logs related to processing of events\n'
+        'system_tracking - (external) facts gathered from scan jobs\n'
         'activity_stream - activity stream records\n'
-        'job_events - callback data from Ansible job events\n'
-        'system_tracking - facts gathered from scan jobs\n'
-        'broadcast_websocket - errors pertaining to websockets broadcast metrics\n'
+        'system_tasks - (non-default) periodically emitted logs about internal tasks.\n'
+        'performance - (non-default) give internally measured timing data for requests.\n'
+        'websockets - processing of messages to send websockets to clients.\n'
+        'rbac - permission check activity for requests.\n'
+        'metrics - activity recording and saving data for /api/v2/metrics/.'
     ),
     category=_('Logging'),
     category_slug='logging',
@@ -675,22 +679,6 @@ register(
         ' are DEBUG, INFO, WARNING, ERROR, CRITICAL. Messages less severe '
         'than the threshold will be ignored by log handler. (messages under category '
         'awx.anlytics ignore this setting)'
-    ),
-    category=_('Logging'),
-    category_slug='logging',
-)
-register(
-    'LOG_AGGREGATOR_HIGH_VOLUME_ALLOW_LIST',
-    field_class=fields.StringListField,
-    label=_('High Volume DEBUG-level Loggers to Allow'),
-    help_text=_(
-        'Normally these loggers are filtered out, add to this list to emit these logs. '
-        'Choices are [events, system_tasks, websockets, rbac, metrics]. '
-        'events - logs reated to processing of job output. '
-        'system_tasks - periodically emitted logs about internal tasks. '
-        'websockets - processing of messages to send websockets to clients. '
-        'rbac - permission check activity for requests. '
-        'metrics - activity recording and saving data for /api/v2/metrics/.'
     ),
     category=_('Logging'),
     category_slug='logging',

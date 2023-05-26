@@ -277,7 +277,6 @@ class TaskManagerModels:
             from awx.main.models import UnifiedJob
 
             if instance_group_queryset is not None:
-                logger.debug("******************INSTANCE GROUP QUERYSET PASSED -- FILTERING TASKS ****************************")
                 # Sometimes things like the serializer pass a queryset that looks at not all instance groups. in this case,
                 # we also need to filter the tasks we look at
                 tasks = UnifiedJob.objects.filter(status__in=task_status_filter_list, instance_group__in=[ig.id for ig in instance_group_queryset]).only(
