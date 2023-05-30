@@ -29,6 +29,7 @@ describe('<MiscSystemDetail />', () => {
         TOWER_URL_BASE: 'https://towerhost',
         REMOTE_HOST_HEADERS: [],
         PROXY_IP_ALLOWED_LIST: [],
+        CSRF_TRUSTED_ORIGINS: [],
         LICENSE: null,
         REDHAT_USERNAME: 'name1',
         REDHAT_PASSWORD: '$encrypted$',
