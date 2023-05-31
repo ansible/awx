@@ -99,7 +99,8 @@
           "fieldName",
           "splitButtonVariant",
           "pageKey",
-          "textId"
+          "textId",
+          "rel"
         ],
         "ignore": [
           "Ansible",

@@ -254,6 +254,7 @@ function Tooltip({
                       href={`${instanceDetail.related?.install_bundle}`}
                       target="_blank"
                       variant="secondary"
+                      rel="noopener noreferrer"
                     >
                       <DownloadIcon />
                     </PFButton>

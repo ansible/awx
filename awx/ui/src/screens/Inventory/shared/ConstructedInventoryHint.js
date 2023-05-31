@@ -43,6 +43,7 @@ function ConstructedInventoryHint() {
           )}/html/userguide/inventories.html#constructed-inventories`}
           component="a"
           target="_blank"
+          rel="noopener noreferrer"
         >
           {t`View constructed inventory documentation here`}{' '}
           <ExternalLinkAltIcon />
