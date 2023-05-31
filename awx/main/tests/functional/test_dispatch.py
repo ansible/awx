@@ -3,6 +3,7 @@ import multiprocessing
 import random
 import signal
 import time
+import yaml
 from unittest import mock
 
 from django.utils.timezone import now as tz_now
@@ -13,6 +14,7 @@ from awx.main.dispatch import reaper
 from awx.main.dispatch.pool import StatefulPoolWorker, WorkerPool, AutoscalePool
 from awx.main.dispatch.publish import task
 from awx.main.dispatch.worker import BaseWorker, TaskWorker
+from awx.main.dispatch.periodic import Scheduler
 
 
 '''
@@ -439,3 +441,76 @@ class TestJobReaper(object):
         assert job.started > ref_time
         assert job.status == 'running'
         assert job.job_explanation == ''
+
+
+@pytest.mark.django_db
+class TestScheduler:
+    def test_too_many_schedules_freak_out(self):
+        with pytest.raises(RuntimeError):
+            Scheduler({'job1': {'schedule': datetime.timedelta(seconds=1)}, 'job2': {'schedule': datetime.timedelta(seconds=1)}})
+
+    def test_spread_out(self):
+        scheduler = Scheduler(
+            {
+                'job1': {'schedule': datetime.timedelta(seconds=16)},
+                'job2': {'schedule': datetime.timedelta(seconds=16)},
+                'job3': {'schedule': datetime.timedelta(seconds=16)},
+                'job4': {'schedule': datetime.timedelta(seconds=16)},
+            }
+        )
+        assert [job.offset for job in scheduler.jobs] == [0, 4, 8, 12]
+
+    def test_missed_schedule(self, mocker):
+        scheduler = Scheduler({'job1': {'schedule': datetime.timedelta(seconds=10)}})
+        assert scheduler.jobs[0].missed_runs(time.time() - scheduler.global_start) == 0
+        mocker.patch('awx.main.dispatch.periodic.time.time', return_value=scheduler.global_start + 50)
+        scheduler.get_and_mark_pending()
+        assert scheduler.jobs[0].missed_runs(50) > 1
+
+    def test_advance_schedule(self, mocker):
+        scheduler = Scheduler(
+            {
+                'job1': {'schedule': datetime.timedelta(seconds=30)},
+                'joba': {'schedule': datetime.timedelta(seconds=20)},
+                'jobb': {'schedule': datetime.timedelta(seconds=20)},
+            }
+        )
+        for job in scheduler.jobs:
+            # HACK: the offsets automatically added make this a hard test to write... so remove offsets
+            job.offset = 0.0
+        mocker.patch('awx.main.dispatch.periodic.time.time', return_value=scheduler.global_start + 29)
+        to_run = scheduler.get_and_mark_pending()
+        assert set(job.name for job in to_run) == set(['joba', 'jobb'])
+        mocker.patch('awx.main.dispatch.periodic.time.time', return_value=scheduler.global_start + 39)
+        to_run = scheduler.get_and_mark_pending()
+        assert len(to_run) == 1
+        assert to_run[0].name == 'job1'
+
+    @staticmethod
+    def get_job(scheduler, name):
+        for job in scheduler.jobs:
+            if job.name == name:
+                return job
+
+    def test_scheduler_debug(self, mocker):
+        scheduler = Scheduler(
+            {
+                'joba': {'schedule': datetime.timedelta(seconds=20)},
+                'jobb': {'schedule': datetime.timedelta(seconds=50)},
+                'jobc': {'schedule': datetime.timedelta(seconds=500)},
+                'jobd': {'schedule': datetime.timedelta(seconds=20)},
+            }
+        )
+        rel_time = 119.9  # slightly under the 6th 20-second bin, to avoid offset problems
+        current_time = scheduler.global_start + rel_time
+        mocker.patch('awx.main.dispatch.periodic.time.time', return_value=current_time - 1.0e-8)
+        self.get_job(scheduler, 'jobb').mark_run(rel_time)
+        self.get_job(scheduler, 'jobd').mark_run(rel_time - 20.0)
+
+        output = scheduler.debug()
+        data = yaml.safe_load(output)
+        assert data['schedule_list']['jobc']['last_run_seconds_ago'] is None
+        assert data['schedule_list']['joba']['missed_runs'] == 4
+        assert data['schedule_list']['jobd']['missed_runs'] == 3
+        assert data['schedule_list']['jobd']['completed_runs'] == 1
+        assert data['schedule_list']['jobb']['next_run_in_seconds'] > 25.0
