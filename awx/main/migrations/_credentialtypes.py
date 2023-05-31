@@ -1,6 +1,9 @@
+import logging
+
 from awx.main.models import CredentialType
 from django.db.models import Q
 
+logger = logging.getLogger('awx.main.migrations')
 
 DEPRECATED_CRED_KIND = {
     'rax': {
@@ -76,3 +79,14 @@ def add_tower_verify_field(apps, schema_editor):
 def remove_become_methods(apps, schema_editor):
     # this is no longer necessary; schemas are defined in code
     pass
+
+
+def migrate_credential_type(apps, namespace):
+    ns_types = apps.get_model('main', 'CredentialType').objects.filter(namespace=namespace).order_by('created')
+    if ns_types.count() == 2:
+        original, renamed = ns_types.all()
+        logger.info(f'There are credential types to migrate in the "{namespace}" namespace: {original.name}')
+        apps.get_model('main', 'Credential').objects.filter(credential_type_id=original.id).update(credential_type_id=renamed.id)
+
+        logger.info(f'Removing old credential type: {renamed.name}')
+        original.delete()

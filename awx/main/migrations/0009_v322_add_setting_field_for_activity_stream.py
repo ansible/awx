@@ -7,7 +7,6 @@ import awx.main.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0008_v320_drop_v1_credential_fields'),
     ]

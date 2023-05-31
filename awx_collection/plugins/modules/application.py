@@ -60,7 +60,7 @@ options:
       description:
         - Desired state of the resource.
       default: "present"
-      choices: ["present", "absent"]
+      choices: ["present", "absent", "exists"]
       type: str
     skip_authorization:
       description:
@@ -106,7 +106,7 @@ def main():
         client_type=dict(choices=['public', 'confidential']),
         organization=dict(required=True),
         redirect_uris=dict(type="list", elements='str'),
-        state=dict(choices=['present', 'absent'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists'], default='present'),
         skip_authorization=dict(type='bool'),
     )
 
@@ -127,7 +127,7 @@ def main():
     org_id = module.resolve_name_to_id('organizations', organization)
 
     # Attempt to look up application based on the provided name and org ID
-    application = module.get_one('applications', name_or_id=name, **{'data': {'organization': org_id}})
+    application = module.get_one('applications', name_or_id=name, check_exists=(state == 'exists'), **{'data': {'organization': org_id}})
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

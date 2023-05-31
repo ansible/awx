@@ -151,7 +151,9 @@ EXAMPLES = '''
   job_launch:
     job_template: "My Job Template"
     inventory: "My Inventory"
-    credential: "My Credential"
+    credentials:
+      - "My Credential"
+      - "suplementary cred"
   register: job
 - name: Wait for job max 120s
   job_wait:
@@ -180,10 +182,10 @@ def main():
     argument_spec = dict(
         name=dict(required=True, aliases=['job_template']),
         job_type=dict(choices=['run', 'check']),
-        inventory=dict(default=None),
+        inventory=dict(),
         organization=dict(),
         # Credentials will be a str instead of a list for backwards compatability
-        credentials=dict(type='list', default=None, aliases=['credential'], elements='str'),
+        credentials=dict(type='list', aliases=['credential'], elements='str'),
         limit=dict(),
         tags=dict(type='list', elements='str'),
         extra_vars=dict(type='dict'),
@@ -200,7 +202,7 @@ def main():
         job_timeout=dict(type='int'),
         wait=dict(default=False, type='bool'),
         interval=dict(default=2.0, type='float'),
-        timeout=dict(default=None, type='int'),
+        timeout=dict(type='int'),
     )
 
     # Create a module for ourselves

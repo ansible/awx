@@ -77,7 +77,7 @@ def test_credential_validation_error_with_multiple_owner_fields(post, admin, ali
     }
     response = post(reverse('api:credential_list'), params, admin)
     assert response.status_code == 400
-    assert response.data['detail'][0] == ("Only one of 'user', 'team', or 'organization' should be provided, " "received organization, team, user fields.")
+    assert response.data['detail'][0] == ("Only one of 'user', 'team', or 'organization' should be provided, received organization, team, user fields.")
 
 
 @pytest.mark.django_db
@@ -925,7 +925,7 @@ def test_credential_type_mutability(patch, organization, admin, credentialtype_s
 
     response = _change_credential_type()
     assert response.status_code == 400
-    expected = ['You cannot change the credential type of the credential, ' 'as it may break the functionality of the resources using it.']
+    expected = ['You cannot change the credential type of the credential, as it may break the functionality of the resources using it.']
     assert response.data['credential_type'] == expected
 
     response = patch(reverse('api:credential_detail', kwargs={'pk': cred.pk}), {'name': 'Worst credential ever'}, admin)
@@ -962,7 +962,7 @@ def test_vault_credential_type_mutability(patch, organization, admin, credential
 
     response = _change_credential_type()
     assert response.status_code == 400
-    expected = ['You cannot change the credential type of the credential, ' 'as it may break the functionality of the resources using it.']
+    expected = ['You cannot change the credential type of the credential, as it may break the functionality of the resources using it.']
     assert response.data['credential_type'] == expected
 
     response = patch(reverse('api:credential_detail', kwargs={'pk': cred.pk}), {'name': 'Worst credential ever'}, admin)
@@ -994,7 +994,7 @@ def test_cloud_credential_type_mutability(patch, organization, admin, credential
 
     response = _change_credential_type()
     assert response.status_code == 400
-    expected = ['You cannot change the credential type of the credential, ' 'as it may break the functionality of the resources using it.']
+    expected = ['You cannot change the credential type of the credential, as it may break the functionality of the resources using it.']
     assert response.data['credential_type'] == expected
 
     response = patch(reverse('api:credential_detail', kwargs={'pk': cred.pk}), {'name': 'Worst credential ever'}, admin)

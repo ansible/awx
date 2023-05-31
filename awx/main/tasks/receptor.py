@@ -28,7 +28,7 @@ from awx.main.utils.common import (
 from awx.main.constants import MAX_ISOLATED_PATH_COLON_DELIMITER
 from awx.main.tasks.signals import signal_state, signal_callback, SignalExit
 from awx.main.models import Instance, InstanceLink, UnifiedJob
-from awx.main.dispatch import get_local_queuename
+from awx.main.dispatch import get_task_queuename
 from awx.main.dispatch.publish import task
 
 # Receptorctl
@@ -63,7 +63,7 @@ def read_receptor_config():
 
 def work_signing_enabled(config_data):
     for section in config_data:
-        if 'work-verification' in section:
+        if 'work-signing' in section:
             return True
     return False
 
@@ -186,7 +186,6 @@ def run_until_complete(node, timing_data=None, **kwargs):
     stdout = ''
 
     try:
-
         resultfile = receptor_ctl.get_work_results(unit_id)
 
         while run_timing < 20.0:
@@ -206,7 +205,6 @@ def run_until_complete(node, timing_data=None, **kwargs):
         stdout = str(stdout, encoding='utf-8')
 
     finally:
-
         if settings.RECEPTOR_RELEASE_WORK:
             res = receptor_ctl.simple_command(f"work release {unit_id}")
             if res != {'released': unit_id}:
@@ -411,9 +409,11 @@ class AWXReceptorJob:
                     unit_status = receptor_ctl.simple_command(f'work status {self.unit_id}')
                     detail = unit_status.get('Detail', None)
                     state_name = unit_status.get('StateName', None)
+                    stdout_size = unit_status.get('StdoutSize', 0)
                 except Exception:
                     detail = ''
                     state_name = ''
+                    stdout_size = 0
                     logger.exception(f'An error was encountered while getting status for work unit {self.unit_id}')
 
                 if 'exceeded quota' in detail:
@@ -424,9 +424,16 @@ class AWXReceptorJob:
                     return
 
                 try:
-                    resultsock = receptor_ctl.get_work_results(self.unit_id, return_sockfile=True)
-                    lines = resultsock.readlines()
-                    receptor_output = b"".join(lines).decode()
+                    receptor_output = ''
+                    if state_name == 'Failed' and self.task.runner_callback.event_ct == 0:
+                        # if receptor work unit failed and no events were emitted, work results may
+                        # contain useful information about why the job failed. In case stdout is
+                        # massive, only ask for last 1000 bytes
+                        startpos = max(stdout_size - 1000, 0)
+                        resultsock, resultfile = receptor_ctl.get_work_results(self.unit_id, startpos=startpos, return_socket=True, return_sockfile=True)
+                        resultsock.setblocking(False)  # this makes resultfile reads non blocking
+                        lines = resultfile.readlines()
+                        receptor_output = b"".join(lines).decode()
                     if receptor_output:
                         self.task.runner_callback.delay_update(result_traceback=receptor_output)
                     elif detail:
@@ -518,6 +525,10 @@ class AWXReceptorJob:
 
         pod_spec['spec']['containers'][0]['image'] = ee.image
         pod_spec['spec']['containers'][0]['args'] = ['ansible-runner', 'worker', '--private-data-dir=/runner']
+
+        if settings.AWX_RUNNER_KEEPALIVE_SECONDS:
+            pod_spec['spec']['containers'][0].setdefault('env', [])
+            pod_spec['spec']['containers'][0]['env'].append({'name': 'ANSIBLE_RUNNER_KEEPALIVE_SECONDS', 'value': str(settings.AWX_RUNNER_KEEPALIVE_SECONDS)})
 
         # Enforce EE Pull Policy
         pull_options = {"always": "Always", "missing": "IfNotPresent", "never": "Never"}
@@ -628,7 +639,7 @@ class AWXReceptorJob:
 #
 RECEPTOR_CONFIG_STARTER = (
     {'local-only': None},
-    {'log-level': 'debug'},
+    {'log-level': 'info'},
     {'node': {'firewallrules': [{'action': 'reject', 'tonode': settings.CLUSTER_HOST_ID, 'toservice': 'control'}]}},
     {'control-service': {'service': 'control', 'filename': '/var/run/receptor/receptor.sock', 'permissions': '0660'}},
     {'work-command': {'worktype': 'local', 'command': 'ansible-runner', 'params': 'worker', 'allowruntimeparams': True}},
@@ -657,6 +668,7 @@ RECEPTOR_CONFIG_STARTER = (
             'rootcas': '/etc/receptor/tls/ca/receptor-ca.crt',
             'cert': '/etc/receptor/tls/receptor.crt',
             'key': '/etc/receptor/tls/receptor.key',
+            'mintls13': False,
         }
     },
 )
@@ -701,7 +713,7 @@ def write_receptor_config():
     links.update(link_state=InstanceLink.States.ESTABLISHED)
 
 
-@task(queue=get_local_queuename)
+@task(queue=get_task_queuename)
 def remove_deprovisioned_node(hostname):
     InstanceLink.objects.filter(source__hostname=hostname).update(link_state=InstanceLink.States.REMOVING)
     InstanceLink.objects.filter(target__hostname=hostname).update(link_state=InstanceLink.States.REMOVING)

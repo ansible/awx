@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { useParams, useHistory } from 'react-router-dom';
-import { t, Plural } from '@lingui/macro';
+import { t, Trans, Plural } from '@lingui/macro';
 import {
   Button,
   Progress,
@@ -71,6 +71,10 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
   const [showHealthCheckAlert, setShowHealthCheckAlert] = useState(false);
   const [forks, setForks] = useState();
 
+  const policyRulesDocsLink = `${getDocsBaseUrl(
+    config
+  )}/html/administration/containers_instance_groups.html#ag-instance-group-policies`;
+
   const {
     isLoading,
     error: contentError,
@@ -81,35 +85,30 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
       const {
         data: { results },
       } = await InstanceGroupsAPI.readInstances(instanceGroup.id);
-      let instanceDetails;
       const isAssociated = results.some(
         ({ id: instId }) => instId === parseInt(instanceId, 10)
       );
 
       if (isAssociated) {
-        const [{ data: details }, { data: healthCheckData }] =
-          await Promise.all([
-            InstancesAPI.readDetail(instanceId),
-            InstancesAPI.readHealthCheckDetail(instanceId),
-          ]);
-
-        instanceDetails = details;
-        setHealthCheck(healthCheckData);
-      } else {
-        throw new Error(
-          `This instance is not associated with this instance group`
+        const { data: details } = await InstancesAPI.readDetail(instanceId);
+        if (details.node_type === 'execution') {
+          const { data: healthCheckData } =
+            await InstancesAPI.readHealthCheckDetail(instanceId);
+          setHealthCheck(healthCheckData);
+        }
+        setBreadcrumb(instanceGroup, details);
+        setForks(
+          computeForks(
+            details.mem_capacity,
+            details.cpu_capacity,
+            details.capacity_adjustment
+          )
         );
+        return { instance: details };
       }
-
-      setBreadcrumb(instanceGroup, instanceDetails);
-      setForks(
-        computeForks(
-          instanceDetails.mem_capacity,
-          instanceDetails.cpu_capacity,
-          instanceDetails.capacity_adjustment
-        )
+      throw new Error(
+        `This instance is not associated with this instance group`
       );
-      return { instance: instanceDetails };
     }, [instanceId, setBreadcrumb, instanceGroup]),
     { instance: {}, isLoading: true }
   );
@@ -324,6 +323,23 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
               itemsToDisassociate={[instance]}
               isProtectedInstanceGroup={instanceGroup.name === 'controlplane'}
               modalTitle={t`Disassociate instance from instance group?`}
+              modalNote={
+                instance.managed_by_policy ? (
+                  <Trans>
+                    <b>
+                      Note: This instance may be re-associated with this
+                      instance group if it is managed by{' '}
+                      <a
+                        href={policyRulesDocsLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        policy rules.
+                      </a>
+                    </b>
+                  </Trans>
+                ) : null
+              }
             />
           )}
           <InstanceToggle

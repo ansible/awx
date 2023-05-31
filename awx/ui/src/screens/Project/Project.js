@@ -99,7 +99,7 @@ function Project({ setBreadcrumb }) {
       ),
       link: `/projects`,
       id: 99,
-      isBackButton: true,
+      persistentFilterKey: 'projects',
     },
     { name: t`Details`, link: `/projects/${id}/details` },
     { name: t`Access`, link: `/projects/${id}/access` },
@@ -179,7 +179,7 @@ function Project({ setBreadcrumb }) {
                 searchParams={{
                   project__id: project.id,
                 }}
-                projectName={project.name}
+                resourceName={project.name}
               />
             </Route>
             {project?.scm_type && project.scm_type !== '' && (

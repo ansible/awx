@@ -5,8 +5,8 @@ import tempfile
 import shutil
 
 from awx.main.tasks.jobs import RunJob
-from awx.main.tasks.system import execution_node_health_check, _cleanup_images_and_files
-from awx.main.models import Instance, Job
+from awx.main.tasks.system import execution_node_health_check, _cleanup_images_and_files, handle_work_error
+from awx.main.models import Instance, Job, InventoryUpdate, ProjectUpdate
 
 
 @pytest.fixture
@@ -52,7 +52,6 @@ def test_folder_cleanup_stale_file(mock_job_folder, mock_me):
 def test_folder_cleanup_running_job(mock_job_folder, mock_me):
     me_inst = Instance.objects.create(hostname='local_node', uuid='00000000-0000-0000-0000-000000000000')
     with mock.patch.object(Instance.objects, 'me', return_value=me_inst):
-
         job = Job.objects.create(id=123, controller_node=me_inst.hostname, status='running')
         _cleanup_images_and_files(grace_period=0)
         assert os.path.exists(mock_job_folder)  # running job should prevent folder from getting deleted
@@ -74,3 +73,17 @@ def test_does_not_run_reaped_job(mocker, mock_me):
     job.refresh_from_db()
     assert job.status == 'failed'
     mock_run.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_handle_work_error_nested(project, inventory_source):
+    pu = ProjectUpdate.objects.create(status='failed', project=project, celery_task_id='1234')
+    iu = InventoryUpdate.objects.create(status='pending', inventory_source=inventory_source, source='scm')
+    job = Job.objects.create(status='pending')
+    iu.dependent_jobs.add(pu)
+    job.dependent_jobs.add(pu, iu)
+    handle_work_error({'type': 'project_update', 'id': pu.id})
+    iu.refresh_from_db()
+    job.refresh_from_db()
+    assert iu.job_explanation == f'Previous Task Failed: {{"job_type": "project_update", "job_name": "", "job_id": "{pu.id}"}}'
+    assert job.job_explanation == f'Previous Task Failed: {{"job_type": "inventory_update", "job_name": "", "job_id": "{iu.id}"}}'

@@ -107,12 +107,12 @@ Below is an example of a SAML attribute that contains admin attributes:
 These properties can be defined either by a role or an attribute with the following configuration options:
 ```
 {
-  "is_superuser_role": "awx_admins",
+  "is_superuser_role": ["awx_admins"],
   "is_superuser_attr": "is_superuser",
-  "is_superuser_value": "IT-Superadmin",
-  "is_system_auditor_role": "awx_auditors",
+  "is_superuser_value": ["IT-Superadmin"],
+  "is_system_auditor_role": ["awx_auditors"],
   "is_system_auditor_attr": "is_system_auditor",
-  "is_system_auditor_value": "Auditor"
+  "is_system_auditor_value": ["Auditor"]
 }
 ```
 

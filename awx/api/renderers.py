@@ -22,7 +22,6 @@ class SurrogateEncoder(encoders.JSONEncoder):
 
 
 class DefaultJSONRenderer(renderers.JSONRenderer):
-
     encoder_class = SurrogateEncoder
 
 
@@ -61,7 +60,7 @@ class BrowsableAPIRenderer(renderers.BrowsableAPIRenderer):
             delattr(renderer_context['view'], '_request')
 
     def get_raw_data_form(self, data, view, method, request):
-        # Set a flag on the view to indiciate to the view/serializer that we're
+        # Set a flag on the view to indicate to the view/serializer that we're
         # creating a raw data form for the browsable API.  Store the original
         # request method to determine how to populate the raw data form.
         if request.method in {'OPTIONS', 'DELETE'}:
@@ -95,7 +94,6 @@ class BrowsableAPIRenderer(renderers.BrowsableAPIRenderer):
 
 
 class PlainTextRenderer(renderers.BaseRenderer):
-
     media_type = 'text/plain'
     format = 'txt'
 
@@ -106,18 +104,15 @@ class PlainTextRenderer(renderers.BaseRenderer):
 
 
 class DownloadTextRenderer(PlainTextRenderer):
-
     format = "txt_download"
 
 
 class AnsiTextRenderer(PlainTextRenderer):
-
     media_type = 'text/plain'
     format = 'ansi'
 
 
 class AnsiDownloadRenderer(PlainTextRenderer):
-
     format = "ansi_download"
 
 

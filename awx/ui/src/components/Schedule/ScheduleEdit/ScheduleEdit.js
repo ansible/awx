@@ -113,6 +113,9 @@ function ScheduleEdit({
             days: values.daysToKeep,
           });
         } else {
+          if (typeof requestData.extra_data === 'string') {
+            requestData.extra_data = JSON.parse(requestData.extra_data);
+          }
           requestData.extra_data.days = values.daysToKeep;
         }
       }

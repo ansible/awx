@@ -1,0 +1,59 @@
+---
+- name: Generate a random string for names
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
+- name: Generate random names for test objects
+  set_fact:
+    org_name: "{{ test_prefix }}-org-{{ test_id }}"
+    approval_node_name: "{{ test_prefix }}-node-{{ test_id }}"
+    wfjt_name: "{{ test_prefix }}-wfjt-{{ test_id }}"
+  vars:
+    test_prefix: AWX-Collection-tests-workflow_approval
+
+- block:
+    - name: Create a new organization for test isolation
+      organization:
+        name: "{{ org_name }}"
+
+    - name: Create a workflow job template
+      workflow_job_template:
+        name: "{{ wfjt_name }}"
+        organization: "{{ org_name }}"
+
+    - name: Create approval node
+      workflow_job_template_node:
+        identifier: approval_test
+        approval_node:
+          name: "{{ approval_node_name }}"  # Referenced later on
+          timeout: 900
+        workflow: "{{ wfjt_name }}"
+
+    # Launch and approve the workflow
+    - name: Launch the workflow
+      workflow_launch:
+        workflow_template: "{{ wfjt_name }}"
+        wait: False
+      register: workflow_job
+
+    - name: Wait for approval node to activate and approve
+      workflow_approval:
+        workflow_job_id: "{{ workflow_job.id }}"
+        name: "{{ approval_node_name }}"
+        interval: 10
+        timeout: 20
+        action: approve
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+          - "result is not failed"
+
+  always:
+    - name: Delete the workflow job template
+      workflow_job_template:
+        name: "{{ wfjt_name }}"
+        state: absent
+      ignore_errors: True

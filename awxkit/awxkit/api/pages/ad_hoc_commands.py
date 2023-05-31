@@ -9,7 +9,6 @@ from . import page
 
 
 class AdHocCommand(HasCreate, UnifiedJob):
-
     dependencies = [Inventory, Credential]
 
     def relaunch(self, payload={}):
@@ -30,7 +29,6 @@ class AdHocCommand(HasCreate, UnifiedJob):
         return update_payload(payload, optional_fields, kwargs)
 
     def create_payload(self, module_name='ping', module_args=np, job_type=np, limit=np, verbosity=np, inventory=Inventory, credential=Credential, **kwargs):
-
         self.create_and_update_dependencies(inventory, credential)
 
         payload = self.payload(
@@ -47,7 +45,6 @@ class AdHocCommand(HasCreate, UnifiedJob):
         return payload
 
     def create(self, module_name='ping', module_args=np, job_type=np, limit=np, verbosity=np, inventory=Inventory, credential=Credential, **kwargs):
-
         payload = self.create_payload(
             module_name=module_name,
             module_args=module_args,
@@ -65,7 +62,6 @@ page.register_page([resources.ad_hoc_command], AdHocCommand)
 
 
 class AdHocCommands(page.PageList, AdHocCommand):
-
     pass
 
 

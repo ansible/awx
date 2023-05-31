@@ -79,6 +79,11 @@ class HostManager(models.Manager):
         return qs
 
 
+class HostMetricActiveManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(deleted=False)
+
+
 def get_ig_ig_mapping(ig_instance_mapping, instance_ig_mapping):
     # Create IG mapping by union of all groups their instances are members of
     ig_ig_mapping = {}
@@ -158,7 +163,11 @@ class InstanceManager(models.Manager):
                     return (False, instance)
 
             # Create new instance, and fill in default values
-            create_defaults = {'node_state': Instance.States.INSTALLED, 'capacity': 0}
+            create_defaults = {
+                'node_state': Instance.States.INSTALLED,
+                'capacity': 0,
+                'listener_port': 27199,
+            }
             if defaults is not None:
                 create_defaults.update(defaults)
             uuid_option = {}

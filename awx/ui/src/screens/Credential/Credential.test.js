@@ -6,7 +6,9 @@ import {
   mountWithContexts,
   waitForElement,
 } from '../../../testUtils/enzymeHelpers';
-import mockCredential from './shared/data.scmCredential.json';
+import mockMachineCredential from './shared/data.machineCredential.json';
+import mockSCMCredential from './shared/data.scmCredential.json';
+import mockCyberArkCredential from './shared/data.cyberArkCredential.json';
 import Credential from './Credential';
 
 jest.mock('../../api');
@@ -20,20 +22,34 @@ jest.mock('react-router-dom', () => ({
 
 describe('<Credential />', () => {
   let wrapper;
+  afterEach(() => {
+    jest.clearAllMocks();
 
-  beforeEach(() => {
-    CredentialsAPI.readDetail.mockResolvedValueOnce({
-      data: mockCredential,
-    });
+    wrapper.unmount();
   });
 
-  test('initially renders user-based credential successfully', async () => {
+  test('initially renders user-based machine credential successfully', async () => {
+    CredentialsAPI.readDetail.mockResolvedValueOnce({
+      data: mockMachineCredential,
+    });
     await act(async () => {
       wrapper = mountWithContexts(<Credential setBreadcrumb={() => {}} />);
     });
     wrapper.update();
     expect(wrapper.find('Credential').length).toBe(1);
     expect(wrapper.find('RoutedTabs li').length).toBe(4);
+  });
+
+  test('initially renders user-based SCM credential successfully', async () => {
+    CredentialsAPI.readDetail.mockResolvedValueOnce({
+      data: mockSCMCredential,
+    });
+    await act(async () => {
+      wrapper = mountWithContexts(<Credential setBreadcrumb={() => {}} />);
+    });
+    wrapper.update();
+    expect(wrapper.find('Credential').length).toBe(1);
+    expect(wrapper.find('RoutedTabs li').length).toBe(3);
   });
 
   test('should render expected tabs', async () => {
@@ -43,6 +59,19 @@ describe('<Credential />', () => {
       'Access',
       'Job Templates',
     ];
+    await act(async () => {
+      wrapper = mountWithContexts(<Credential setBreadcrumb={() => {}} />);
+    });
+    wrapper.find('RoutedTabs li').forEach((tab, index) => {
+      expect(tab.text()).toEqual(expectedTabs[index]);
+    });
+  });
+
+  test('should not render job template tab', async () => {
+    CredentialsAPI.readDetail.mockResolvedValueOnce({
+      data: { ...mockCyberArkCredential, kind: 'registry' },
+    });
+    const expectedTabs = ['Back to Credentials', 'Details', 'Access'];
     await act(async () => {
       wrapper = mountWithContexts(<Credential setBreadcrumb={() => {}} />);
     });
@@ -75,3 +104,4 @@ describe('<Credential />', () => {
     await waitForElement(wrapper, 'ContentError', (el) => el.length === 1);
   });
 });
+describe('<Credential> should not show job template tab', () => {});

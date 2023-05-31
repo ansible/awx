@@ -4,6 +4,7 @@ __metaclass__ = type
 
 from ansible.module_utils.basic import AnsibleModule, env_fallback
 from ansible.module_utils.urls import Request, SSLValidationError, ConnectionError
+from ansible.module_utils.parsing.convert_bool import boolean as strtobool
 from ansible.module_utils.six import PY2
 from ansible.module_utils.six import raise_from, string_types
 from ansible.module_utils.six.moves import StringIO
@@ -11,14 +12,21 @@ from ansible.module_utils.six.moves.urllib.error import HTTPError
 from ansible.module_utils.six.moves.http_cookiejar import CookieJar
 from ansible.module_utils.six.moves.urllib.parse import urlparse, urlencode
 from ansible.module_utils.six.moves.configparser import ConfigParser, NoOptionError
-from distutils.version import LooseVersion as Version
 from socket import getaddrinfo, IPPROTO_TCP
 import time
 import re
 from json import loads, dumps
 from os.path import isfile, expanduser, split, join, exists, isdir
-from os import access, R_OK, getcwd
-from distutils.util import strtobool
+from os import access, R_OK, getcwd, environ
+
+
+try:
+    from ansible.module_utils.compat.version import LooseVersion as Version
+except ImportError:
+    try:
+        from distutils.version import LooseVersion as Version
+    except ImportError:
+        raise AssertionError('To use this plugin or module with ansible-core 2.11, you need to use Python < 3.12 with distutils.version present')
 
 try:
     import yaml
@@ -39,35 +47,14 @@ class ItemNotDefined(Exception):
 class ControllerModule(AnsibleModule):
     url = None
     AUTH_ARGSPEC = dict(
-        controller_host=dict(
-            required=False,
-            aliases=['tower_host'],
-            fallback=(env_fallback, ['CONTROLLER_HOST', 'TOWER_HOST'])),
-        controller_username=dict(
-            required=False,
-            aliases=['tower_username'],
-            fallback=(env_fallback, ['CONTROLLER_USERNAME', 'TOWER_USERNAME'])),
-        controller_password=dict(
-            no_log=True,
-            aliases=['tower_password'],
-            required=False,
-            fallback=(env_fallback, ['CONTROLLER_PASSWORD', 'TOWER_PASSWORD'])),
-        validate_certs=dict(
-            type='bool',
-            aliases=['tower_verify_ssl'],
-            required=False,
-            fallback=(env_fallback, ['CONTROLLER_VERIFY_SSL', 'TOWER_VERIFY_SSL'])),
+        controller_host=dict(required=False, aliases=['tower_host'], fallback=(env_fallback, ['CONTROLLER_HOST', 'TOWER_HOST'])),
+        controller_username=dict(required=False, aliases=['tower_username'], fallback=(env_fallback, ['CONTROLLER_USERNAME', 'TOWER_USERNAME'])),
+        controller_password=dict(no_log=True, aliases=['tower_password'], required=False, fallback=(env_fallback, ['CONTROLLER_PASSWORD', 'TOWER_PASSWORD'])),
+        validate_certs=dict(type='bool', aliases=['tower_verify_ssl'], required=False, fallback=(env_fallback, ['CONTROLLER_VERIFY_SSL', 'TOWER_VERIFY_SSL'])),
         controller_oauthtoken=dict(
-            type='raw',
-            no_log=True,
-            aliases=['tower_oauthtoken'],
-            required=False,
-            fallback=(env_fallback, ['CONTROLLER_OAUTH_TOKEN', 'TOWER_OAUTH_TOKEN'])),
-        controller_config_file=dict(
-            type='path',
-            aliases=['tower_config_file'],
-            required=False,
-            default=None),
+            type='raw', no_log=True, aliases=['tower_oauthtoken'], required=False, fallback=(env_fallback, ['CONTROLLER_OAUTH_TOKEN', 'TOWER_OAUTH_TOKEN'])
+        ),
+        controller_config_file=dict(type='path', aliases=['tower_config_file'], required=False, default=None),
     )
     short_params = {
         'host': 'controller_host',
@@ -144,9 +131,11 @@ class ControllerModule(AnsibleModule):
             self.url.hostname.replace(char, "")
         # Try to resolve the hostname
         try:
-            addrinfolist = getaddrinfo(self.url.hostname, self.url.port, proto=IPPROTO_TCP)
-            for family, kind, proto, canonical, sockaddr in addrinfolist:
-                sockaddr[0]
+            proxy_env_var_name = "{0}_proxy".format(self.url.scheme)
+            if not environ.get(proxy_env_var_name) and not environ.get(proxy_env_var_name.upper()):
+                addrinfolist = getaddrinfo(self.url.hostname, self.url.port, proto=IPPROTO_TCP)
+                for family, kind, proto, canonical, sockaddr in addrinfolist:
+                    sockaddr[0]
         except Exception as e:
             self.fail_json(msg="Unable to resolve controller_host ({1}): {0}".format(self.url.hostname, e))
 
@@ -312,20 +301,13 @@ class ControllerAPIModule(ControllerModule):
     def __init__(self, argument_spec, direct_params=None, error_callback=None, warn_callback=None, **kwargs):
         kwargs['supports_check_mode'] = True
 
-        super().__init__(
-            argument_spec=argument_spec, direct_params=direct_params, error_callback=error_callback, warn_callback=warn_callback, **kwargs
-        )
+        super().__init__(argument_spec=argument_spec, direct_params=direct_params, error_callback=error_callback, warn_callback=warn_callback, **kwargs)
         self.session = Request(cookies=CookieJar(), validate_certs=self.verify_ssl)
 
         if 'update_secrets' in self.params:
             self.update_secrets = self.params.pop('update_secrets')
         else:
             self.update_secrets = True
-
-    @staticmethod
-    def param_to_endpoint(name):
-        exceptions = {'inventory': 'inventories', 'target_team': 'teams', 'workflow': 'workflow_job_templates'}
-        return exceptions.get(name, '{0}s'.format(name))
 
     @staticmethod
     def get_name_field_from_endpoint(endpoint):
@@ -397,7 +379,7 @@ class ControllerAPIModule(ControllerModule):
             response['json']['next'] = next_page
         return response
 
-    def get_one(self, endpoint, name_or_id=None, allow_none=True, **kwargs):
+    def get_one(self, endpoint, name_or_id=None, allow_none=True, check_exists=False, **kwargs):
         new_kwargs = kwargs.copy()
         if name_or_id:
             name_field = self.get_name_field_from_endpoint(endpoint)
@@ -438,6 +420,11 @@ class ControllerAPIModule(ControllerModule):
             # Or we weren't running with a or search and just got back too many to begin with.
             self.fail_wanted_one(response, endpoint, new_kwargs.get('data'))
 
+        if check_exists:
+            name_field = self.get_name_field_from_endpoint(endpoint)
+            self.json_output['id'] = response['json']['results'][0]['id']
+            self.exit_json(**self.json_output)
+
         return response['json']['results'][0]
 
     def fail_wanted_one(self, response, endpoint, query_params):
@@ -445,7 +432,8 @@ class ControllerAPIModule(ControllerModule):
         if len(sample['json']['results']) > 1:
             sample['json']['results'] = sample['json']['results'][:2] + ['...more results snipped...']
         url = self.build_url(endpoint, query_params)
-        display_endpoint = url.geturl()[len(self.host):]  # truncate to not include the base URL
+        host_length = len(self.host)
+        display_endpoint = url.geturl()[host_length:]  # truncate to not include the base URL
         self.fail_json(
             msg="Request to {0} returned {1} items, expected 1".format(display_endpoint, response['json']['count']),
             query=query_params,
@@ -967,11 +955,7 @@ class ControllerAPIModule(ControllerModule):
             # Attempt to delete our current token from /api/v2/tokens/
             # Post to the tokens endpoint with baisc auth to try and get a token
             endpoint = self.url_prefix.rstrip('/') + '/api/v2/tokens/{0}/'.format(self.oauth_token_id)
-            api_token_url = (
-                self.url._replace(
-                    path=endpoint, query=None  # in error cases, fail_json exists before exception handling
-                )
-            ).geturl()
+            api_token_url = (self.url._replace(path=endpoint, query=None)).geturl()  # in error cases, fail_json exists before exception handling
 
             try:
                 self.session.open(

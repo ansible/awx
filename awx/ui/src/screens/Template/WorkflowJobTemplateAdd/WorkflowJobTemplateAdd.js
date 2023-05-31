@@ -24,6 +24,7 @@ function WorkflowJobTemplateAdd() {
       limit,
       job_tags,
       skip_tags,
+      scm_branch,
       ...templatePayload
     } = values;
     templatePayload.inventory = inventory?.id;
@@ -32,6 +33,7 @@ function WorkflowJobTemplateAdd() {
     templatePayload.limit = limit === '' ? null : limit;
     templatePayload.job_tags = job_tags === '' ? null : job_tags;
     templatePayload.skip_tags = skip_tags === '' ? null : skip_tags;
+    templatePayload.scm_branch = scm_branch === '' ? null : scm_branch;
     const organizationId =
       organization?.id || inventory?.summary_fields?.organization.id;
     try {

@@ -14,7 +14,6 @@ def remove_hipchat_notifications(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0115_v370_schedule_set_null'),
     ]

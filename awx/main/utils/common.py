@@ -80,7 +80,6 @@ __all__ = [
     'set_environ',
     'IllegalArgumentError',
     'get_custom_venv_choices',
-    'get_external_account',
     'ScheduleTaskManager',
     'ScheduleDependencyManager',
     'ScheduleWorkflowManager',
@@ -361,7 +360,6 @@ def update_scm_url(scm_type, url, username=True, password=True, check_special_ca
 
 
 def get_allowed_fields(obj, serializer_mapping):
-
     if serializer_mapping is not None and obj.__class__ in serializer_mapping:
         serializer_actual = serializer_mapping[obj.__class__]()
         allowed_fields = [x for x in serializer_actual.fields if not serializer_actual.fields[x].read_only] + ['id']
@@ -631,7 +629,6 @@ def prefetch_page_capabilities(model, page, prefetch_list, user):
         mapping[obj.id] = {}
 
     for prefetch_entry in prefetch_list:
-
         display_method = None
         if type(prefetch_entry) is dict:
             display_method = list(prefetch_entry.keys())[0]
@@ -719,7 +716,7 @@ def parse_yaml_or_json(vars_str, silent_failure=True):
             if silent_failure:
                 return {}
             raise ParseError(
-                _('Cannot parse as JSON (error: {json_error}) or ' 'YAML (error: {yaml_error}).').format(json_error=str(json_err), yaml_error=str(yaml_err))
+                _('Cannot parse as JSON (error: {json_error}) or YAML (error: {yaml_error}).').format(json_error=str(json_err), yaml_error=str(yaml_err))
             )
     return vars_dict
 
@@ -1089,29 +1086,6 @@ def get_search_fields(model):
 def has_model_field_prefetched(model_obj, field_name):
     # NOTE: Update this function if django internal implementation changes.
     return getattr(getattr(model_obj, field_name, None), 'prefetch_cache_name', '') in getattr(model_obj, '_prefetched_objects_cache', {})
-
-
-def get_external_account(user):
-    from django.conf import settings
-
-    account_type = None
-    if getattr(settings, 'AUTH_LDAP_SERVER_URI', None):
-        try:
-            if user.pk and user.profile.ldap_dn and not user.has_usable_password():
-                account_type = "ldap"
-        except AttributeError:
-            pass
-    if (
-        getattr(settings, 'SOCIAL_AUTH_GOOGLE_OAUTH2_KEY', None)
-        or getattr(settings, 'SOCIAL_AUTH_GITHUB_KEY', None)
-        or getattr(settings, 'SOCIAL_AUTH_GITHUB_ORG_KEY', None)
-        or getattr(settings, 'SOCIAL_AUTH_GITHUB_TEAM_KEY', None)
-        or getattr(settings, 'SOCIAL_AUTH_SAML_ENABLED_IDPS', None)
-    ) and user.social_auth.all():
-        account_type = "social"
-    if (getattr(settings, 'RADIUS_SERVER', None) or getattr(settings, 'TACACSPLUS_HOST', None)) and user.enterprise_auth.all():
-        account_type = "enterprise"
-    return account_type
 
 
 class classproperty:

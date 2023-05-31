@@ -52,7 +52,8 @@ function MiscSystemEdit() {
         'REMOTE_HOST_HEADERS',
         'TOWER_URL_BASE',
         'DEFAULT_EXECUTION_ENVIRONMENT',
-        'PROXY_IP_ALLOWED_LIST'
+        'PROXY_IP_ALLOWED_LIST',
+        'UI_NEXT'
       );
 
       const mergedData = {};
@@ -222,6 +223,7 @@ function MiscSystemEdit() {
                   type="number"
                   isRequired
                 />
+                <BooleanField name="UI_NEXT" config={system.UI_NEXT} />
                 <ObjectField
                   name="AUTOMATION_ANALYTICS_LAST_ENTRIES"
                   config={system.AUTOMATION_ANALYTICS_LAST_ENTRIES}

@@ -27,6 +27,7 @@ function AssociateModal({
   isModalOpen = false,
   displayKey = 'name',
   ouiaId,
+  modalNote,
 }) {
   const history = useHistory();
   const { selected, handleSelect } = useSelected([]);
@@ -120,6 +121,7 @@ function AssociateModal({
         </Button>,
       ]}
     >
+      {modalNote}
       <OptionsList
         displayKey={displayKey}
         contentError={contentError}

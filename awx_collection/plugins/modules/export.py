@@ -86,6 +86,16 @@ options:
         - workflow names to export
       type: list
       elements: str
+    applications:
+      description:
+        - OAuth2 application names to export
+      type: list
+      elements: str
+    schedules:
+      description:
+        - schedule names to export
+      type: list
+      elements: str
 requirements:
   - "awxkit >= 9.3.0"
 notes:
@@ -149,7 +159,7 @@ def main():
     # Here we are going to setup a dict of values to export
     export_args = {}
     for resource in EXPORTABLE_RESOURCES:
-        if module.params.get('all') or module.params.get(resource) == 'all':
+        if module.params.get('all') or module.params.get(resource) == ['all']:
             # If we are exporting everything or we got the keyword "all" we pass in an empty string for this asset type
             export_args[resource] = ''
         else:

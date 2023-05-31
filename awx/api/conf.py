@@ -1,5 +1,4 @@
 # Django
-from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
 # Django REST Framework
@@ -9,6 +8,7 @@ from rest_framework import serializers
 from awx.conf import fields, register, register_validate
 from awx.api.fields import OAuth2ProviderField
 from oauth2_provider.settings import oauth2_settings
+from awx.sso.common import is_remote_auth_enabled
 
 
 register(
@@ -96,22 +96,20 @@ register(
     category=_('Authentication'),
     category_slug='authentication',
 )
+register(
+    'ALLOW_METRICS_FOR_ANONYMOUS_USERS',
+    field_class=fields.BooleanField,
+    default=False,
+    label=_('Allow anonymous users to poll metrics'),
+    help_text=_('If true, anonymous users are allowed to poll metrics.'),
+    category=_('Authentication'),
+    category_slug='authentication',
+)
 
 
 def authentication_validate(serializer, attrs):
-    remote_auth_settings = [
-        'AUTH_LDAP_SERVER_URI',
-        'SOCIAL_AUTH_GOOGLE_OAUTH2_KEY',
-        'SOCIAL_AUTH_GITHUB_KEY',
-        'SOCIAL_AUTH_GITHUB_ORG_KEY',
-        'SOCIAL_AUTH_GITHUB_TEAM_KEY',
-        'SOCIAL_AUTH_SAML_ENABLED_IDPS',
-        'RADIUS_SERVER',
-        'TACACSPLUS_HOST',
-    ]
-    if attrs.get('DISABLE_LOCAL_AUTH', False):
-        if not any(getattr(settings, s, None) for s in remote_auth_settings):
-            raise serializers.ValidationError(_("There are no remote authentication systems configured."))
+    if attrs.get('DISABLE_LOCAL_AUTH', False) and not is_remote_auth_enabled():
+        raise serializers.ValidationError(_("There are no remote authentication systems configured."))
     return attrs
 
 

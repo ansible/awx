@@ -1,10 +1,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import {
-  WorkflowApprovalsAPI,
-  WorkflowJobTemplatesAPI,
-  WorkflowJobsAPI,
-} from 'api';
+import { WorkflowApprovalsAPI, WorkflowJobsAPI } from 'api';
 import { formatDateString } from 'util/dates';
 import {
   mountWithContexts,
@@ -22,146 +18,6 @@ jest.mock('react-router-dom', () => ({
     id: 218,
   }),
 }));
-
-const workflowJobTemplate = {
-  id: 8,
-  type: 'workflow_job_template',
-  url: '/api/v2/workflow_job_templates/8/',
-  related: {
-    named_url: '/api/v2/workflow_job_templates/00++/',
-    created_by: '/api/v2/users/1/',
-    modified_by: '/api/v2/users/1/',
-    last_job: '/api/v2/workflow_jobs/111/',
-    workflow_jobs: '/api/v2/workflow_job_templates/8/workflow_jobs/',
-    schedules: '/api/v2/workflow_job_templates/8/schedules/',
-    launch: '/api/v2/workflow_job_templates/8/launch/',
-    webhook_key: '/api/v2/workflow_job_templates/8/webhook_key/',
-    webhook_receiver: '/api/v2/workflow_job_templates/8/github/',
-    workflow_nodes: '/api/v2/workflow_job_templates/8/workflow_nodes/',
-    labels: '/api/v2/workflow_job_templates/8/labels/',
-    activity_stream: '/api/v2/workflow_job_templates/8/activity_stream/',
-    notification_templates_started:
-      '/api/v2/workflow_job_templates/8/notification_templates_started/',
-    notification_templates_success:
-      '/api/v2/workflow_job_templates/8/notification_templates_success/',
-    notification_templates_error:
-      '/api/v2/workflow_job_templates/8/notification_templates_error/',
-    notification_templates_approvals:
-      '/api/v2/workflow_job_templates/8/notification_templates_approvals/',
-    access_list: '/api/v2/workflow_job_templates/8/access_list/',
-    object_roles: '/api/v2/workflow_job_templates/8/object_roles/',
-    survey_spec: '/api/v2/workflow_job_templates/8/survey_spec/',
-    copy: '/api/v2/workflow_job_templates/8/copy/',
-  },
-  summary_fields: {
-    last_job: {
-      id: 111,
-      name: '00',
-      description: '',
-      finished: '2022-05-10T17:29:52.978531Z',
-      status: 'successful',
-      failed: false,
-    },
-    last_update: {
-      id: 111,
-      name: '00',
-      description: '',
-      status: 'successful',
-      failed: false,
-    },
-    created_by: {
-      id: 1,
-      username: 'admin',
-      first_name: '',
-      last_name: '',
-    },
-    modified_by: {
-      id: 1,
-      username: 'admin',
-      first_name: '',
-      last_name: '',
-    },
-    object_roles: {
-      admin_role: {
-        description: 'Can manage all aspects of the workflow job template',
-        name: 'Admin',
-        id: 34,
-      },
-      execute_role: {
-        description: 'May run the workflow job template',
-        name: 'Execute',
-        id: 35,
-      },
-      read_role: {
-        description: 'May view settings for the workflow job template',
-        name: 'Read',
-        id: 36,
-      },
-      approval_role: {
-        description: 'Can approve or deny a workflow approval node',
-        name: 'Approve',
-        id: 37,
-      },
-    },
-    user_capabilities: {
-      edit: true,
-      delete: true,
-      start: true,
-      schedule: true,
-      copy: true,
-    },
-    labels: {
-      count: 1,
-      results: [
-        {
-          id: 2,
-          name: 'Test2',
-        },
-      ],
-    },
-    survey: {
-      title: '',
-      description: '',
-    },
-    recent_jobs: [
-      {
-        id: 111,
-        status: 'successful',
-        finished: '2022-05-10T17:29:52.978531Z',
-        canceled_on: null,
-        type: 'workflow_job',
-      },
-      {
-        id: 104,
-        status: 'failed',
-        finished: '2022-05-10T15:26:22.233170Z',
-        canceled_on: null,
-        type: 'workflow_job',
-      },
-    ],
-  },
-  created: '2022-05-05T14:13:36.123027Z',
-  modified: '2022-05-05T17:44:44.071447Z',
-  name: '00',
-  description: '',
-  last_job_run: '2022-05-10T17:29:52.978531Z',
-  last_job_failed: false,
-  next_job_run: null,
-  status: 'successful',
-  extra_vars: '{\n  "foo": "bar",\n  "baz": "qux"\n}',
-  organization: null,
-  survey_enabled: true,
-  allow_simultaneous: true,
-  ask_variables_on_launch: true,
-  inventory: null,
-  limit: null,
-  scm_branch: '',
-  ask_inventory_on_launch: true,
-  ask_scm_branch_on_launch: true,
-  ask_limit_on_launch: true,
-  webhook_service: 'github',
-  webhook_credential: null,
-};
 
 const workflowJob = {
   id: 111,
@@ -270,9 +126,6 @@ const workflowJob = {
 
 describe('<WorkflowApprovalDetail />', () => {
   beforeEach(() => {
-    WorkflowJobTemplatesAPI.readDetail.mockResolvedValue({
-      data: workflowJobTemplate,
-    });
     WorkflowJobsAPI.readDetail.mockResolvedValue({ data: workflowJob });
   });
 
@@ -482,9 +335,6 @@ describe('<WorkflowApprovalDetail />', () => {
   });
 
   test('should not load Labels', async () => {
-    WorkflowJobTemplatesAPI.readDetail.mockResolvedValue({
-      data: workflowJobTemplate,
-    });
     WorkflowJobsAPI.readDetail.mockResolvedValue({
       data: {
         ...workflowApproval,
@@ -620,5 +470,17 @@ describe('<WorkflowApprovalDetail />', () => {
       'Modal[title="Error!"]',
       (el) => el.length === 0
     );
+  });
+
+  test('should fetch its workflow job details', async () => {
+    let wrapper;
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <WorkflowApprovalDetail workflowApproval={workflowApproval} />
+      );
+    });
+    waitForElement(wrapper, 'WorkflowApprovalDetail', (el) => el.length > 0);
+    expect(WorkflowJobsAPI.readDetail).toHaveBeenCalledTimes(1);
+    expect(WorkflowJobsAPI.readDetail).toHaveBeenCalledWith(216);
   });
 });

@@ -8,13 +8,13 @@ function InventoryRelatedGroups() {
     <Switch>
       <Route
         key="addRelatedGroups"
-        path="/inventories/inventory/:id/groups/:groupId/nested_groups/add"
+        path="/inventories/:inventoryType/:id/groups/:groupId/nested_groups/add"
       >
         <InventoryRelatedGroupAdd />
       </Route>
       <Route
         key="relatedGroups"
-        path="/inventories/inventory/:id/groups/:groupId/nested_groups"
+        path="/inventories/:inventoryType/:id/groups/:groupId/nested_groups"
       >
         <InventoryRelatedGroupList />
       </Route>

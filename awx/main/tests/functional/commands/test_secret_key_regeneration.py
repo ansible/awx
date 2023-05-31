@@ -171,13 +171,17 @@ class TestKeyRegeneration:
 
     def test_use_custom_key_with_empty_tower_secret_key_env_var(self):
         os.environ['TOWER_SECRET_KEY'] = ''
-        new_key = call_command('regenerate_secret_key', '--use-custom-key')
-        assert settings.SECRET_KEY != new_key
+        with pytest.raises(SystemExit) as e:
+            call_command('regenerate_secret_key', '--use-custom-key')
+        assert e.type == SystemExit
+        assert e.value.code == 1
 
     def test_use_custom_key_with_no_tower_secret_key_env_var(self):
         os.environ.pop('TOWER_SECRET_KEY', None)
-        new_key = call_command('regenerate_secret_key', '--use-custom-key')
-        assert settings.SECRET_KEY != new_key
+        with pytest.raises(SystemExit) as e:
+            call_command('regenerate_secret_key', '--use-custom-key')
+        assert e.type == SystemExit
+        assert e.value.code == 1
 
     def test_with_tower_secret_key_env_var(self):
         custom_key = 'MXSq9uqcwezBOChl/UfmbW1k4op+bC+FQtwPqgJ1u9XV'

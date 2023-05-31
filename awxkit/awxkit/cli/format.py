@@ -139,7 +139,7 @@ def format_jq(output, fmt):
         if fmt == '.':
             return output
         raise ImportError(
-            'To use `-f jq`, you must install the optional jq dependency.\n' '`pip install jq`\n',
+            'To use `-f jq`, you must install the optional jq dependency.\n`pip install jq`\n',
             'Note that some platforms may require additional programs to '
             'build jq from source (like `libtool`).\n'
             'See https://pypi.org/project/jq/ for instructions.',

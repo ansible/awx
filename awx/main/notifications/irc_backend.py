@@ -17,7 +17,6 @@ logger = logging.getLogger('awx.main.notifications.irc_backend')
 
 
 class IrcBackend(AWXBaseEmailBackend, CustomNotificationBase):
-
     init_parameters = {
         "server": {"label": "IRC Server Address", "type": "string"},
         "port": {"label": "IRC Server Port", "type": "int"},

@@ -14,7 +14,6 @@ logger = logging.getLogger('awx.main.notifications.mattermost_backend')
 
 
 class MattermostBackend(AWXBaseEmailBackend, CustomNotificationBase):
-
     init_parameters = {"mattermost_url": {"label": "Target URL", "type": "string"}, "mattermost_no_verify_ssl": {"label": "Verify SSL", "type": "bool"}}
     recipient_parameter = "mattermost_url"
     sender_parameter = None

@@ -48,7 +48,7 @@ options:
     state:
       description:
         - Desired state of the resource.
-      choices: ["present", "absent"]
+      choices: ["present", "absent", "exists"]
       default: "present"
       type: str
 
@@ -80,7 +80,7 @@ def main():
         target_credential=dict(required=True),
         source_credential=dict(),
         metadata=dict(type="dict"),
-        state=dict(choices=['present', 'absent'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )
 
     # Create a module for ourselves
@@ -101,7 +101,7 @@ def main():
         'target_credential': target_credential_id,
         'input_field_name': input_field_name,
     }
-    credential_input_source = module.get_one('credential_input_sources', **{'data': lookup_data})
+    credential_input_source = module.get_one('credential_input_sources', check_exists=(state == 'exists'), **{'data': lookup_data})
 
     if state == 'absent':
         module.delete_if_needed(credential_input_source)

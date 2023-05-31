@@ -32,7 +32,7 @@ from polymorphic.models import PolymorphicModel
 
 # AWX
 from awx.main.models.base import CommonModelNameNotUnique, PasswordFieldsModel, NotificationFieldsModel, prevent_search
-from awx.main.dispatch import get_local_queuename
+from awx.main.dispatch import get_task_queuename
 from awx.main.dispatch.control import Control as ControlDispatcher
 from awx.main.registrar import activity_stream_registrar
 from awx.main.models.mixins import ResourceMixin, TaskManagerUnifiedJobMixin, ExecutionEnvironmentMixin
@@ -1129,7 +1129,6 @@ class UnifiedJob(
             # (`stdout`) directly to a file
 
             with connection.cursor() as cursor:
-
                 if enforce_max_bytes:
                     # detect the length of all stdout for this UnifiedJob, and
                     # if it exceeds settings.STDOUT_MAX_BYTES_DISPLAY bytes,
@@ -1568,7 +1567,7 @@ class UnifiedJob(
         return r
 
     def get_queue_name(self):
-        return self.controller_node or self.execution_node or get_local_queuename()
+        return self.controller_node or self.execution_node or get_task_queuename()
 
     @property
     def is_container_group_task(self):

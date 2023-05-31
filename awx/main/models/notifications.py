@@ -37,7 +37,6 @@ __all__ = ['NotificationTemplate', 'Notification']
 
 
 class NotificationTemplate(CommonModelNameNotUnique):
-
     NOTIFICATION_TYPES = [
         ('email', _('Email'), CustomEmailBackend),
         ('slack', _('Slack'), SlackBackend),
@@ -285,7 +284,7 @@ class JobNotificationMixin(object):
         'workflow_url',
         'scm_branch',
         'artifacts',
-        {'host_status_counts': ['skipped', 'ok', 'changed', 'failed', 'failures', 'dark' 'processed', 'rescued', 'ignored']},
+        {'host_status_counts': ['skipped', 'ok', 'changed', 'failed', 'failures', 'dark', 'processed', 'rescued', 'ignored']},
         {
             'summary_fields': [
                 {

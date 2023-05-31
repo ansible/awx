@@ -232,7 +232,6 @@ class ImplicitRoleField(models.ForeignKey):
             field_names = [field_names]
 
         for field_name in field_names:
-
             if field_name.startswith('singleton:'):
                 continue
 
@@ -244,7 +243,6 @@ class ImplicitRoleField(models.ForeignKey):
             field = getattr(cls, field_name, None)
 
             if field and type(field) is ReverseManyToOneDescriptor or type(field) is ManyToManyDescriptor:
-
                 if '.' in field_attr:
                     raise Exception('Referencing deep roles through ManyToMany fields is unsupported.')
 
@@ -629,7 +627,6 @@ class CredentialInputField(JSONSchemaField):
         # `ssh_key_unlock` requirements are very specific and can't be
         # represented without complicated JSON schema
         if model_instance.credential_type.managed is True and 'ssh_key_unlock' in defined_fields:
-
             # in order to properly test the necessity of `ssh_key_unlock`, we
             # need to know the real value of `ssh_key_data`; for a payload like:
             # {
@@ -791,7 +788,8 @@ class CredentialTypeInjectorField(JSONSchemaField):
                     'type': 'object',
                     'patternProperties': {
                         # http://docs.ansible.com/ansible/playbooks_variables.html#what-makes-a-valid-variable-name
-                        '^[a-zA-Z_]+[a-zA-Z0-9_]*$': {'type': 'string'},
+                        # plus, add ability to template
+                        r'^[a-zA-Z_\{\}]+[a-zA-Z0-9_\{\}]*$': {"anyOf": [{'type': 'string'}, {'type': 'array'}, {'$ref': '#/properties/extra_vars'}]}
                     },
                     'additionalProperties': False,
                 },
@@ -802,7 +800,7 @@ class CredentialTypeInjectorField(JSONSchemaField):
     def validate_env_var_allowed(self, env_var):
         if env_var.startswith('ANSIBLE_'):
             raise django_exceptions.ValidationError(
-                _('Environment variable {} may affect Ansible configuration so its ' 'use is not allowed in credentials.').format(env_var),
+                _('Environment variable {} may affect Ansible configuration so its use is not allowed in credentials.').format(env_var),
                 code='invalid',
                 params={'value': env_var},
             )
@@ -858,27 +856,44 @@ class CredentialTypeInjectorField(JSONSchemaField):
                 template_name = template_name.split('.')[1]
                 setattr(valid_namespace['tower'].filename, template_name, 'EXAMPLE_FILENAME')
 
+        def validate_template_string(type_, key, tmpl):
+            try:
+                sandbox.ImmutableSandboxedEnvironment(undefined=StrictUndefined).from_string(tmpl).render(valid_namespace)
+            except UndefinedError as e:
+                raise django_exceptions.ValidationError(
+                    _('{sub_key} uses an undefined field ({error_msg})').format(sub_key=key, error_msg=e),
+                    code='invalid',
+                    params={'value': value},
+                )
+            except SecurityError as e:
+                raise django_exceptions.ValidationError(_('Encountered unsafe code execution: {}').format(e))
+            except TemplateSyntaxError as e:
+                raise django_exceptions.ValidationError(
+                    _('Syntax error rendering template for {sub_key} inside of {type} ({error_msg})').format(sub_key=key, type=type_, error_msg=e),
+                    code='invalid',
+                    params={'value': value},
+                )
+
+        def validate_extra_vars(key, node):
+            if isinstance(node, dict):
+                for k, v in node.items():
+                    validate_template_string("extra_vars", 'a key' if key is None else key, k)
+                    validate_extra_vars(k if key is None else "{key}.{k}".format(key=key, k=k), v)
+            elif isinstance(node, list):
+                for i, x in enumerate(node):
+                    validate_extra_vars("{key}[{i}]".format(key=key, i=i), x)
+            else:
+                validate_template_string("extra_vars", key, node)
+
         for type_, injector in value.items():
             if type_ == 'env':
                 for key in injector.keys():
                     self.validate_env_var_allowed(key)
-            for key, tmpl in injector.items():
-                try:
-                    sandbox.ImmutableSandboxedEnvironment(undefined=StrictUndefined).from_string(tmpl).render(valid_namespace)
-                except UndefinedError as e:
-                    raise django_exceptions.ValidationError(
-                        _('{sub_key} uses an undefined field ({error_msg})').format(sub_key=key, error_msg=e),
-                        code='invalid',
-                        params={'value': value},
-                    )
-                except SecurityError as e:
-                    raise django_exceptions.ValidationError(_('Encountered unsafe code execution: {}').format(e))
-                except TemplateSyntaxError as e:
-                    raise django_exceptions.ValidationError(
-                        _('Syntax error rendering template for {sub_key} inside of {type} ({error_msg})').format(sub_key=key, type=type_, error_msg=e),
-                        code='invalid',
-                        params={'value': value},
-                    )
+            if type_ == 'extra_vars':
+                validate_extra_vars(None, injector)
+            else:
+                for key, tmpl in injector.items():
+                    validate_template_string(type_, key, tmpl)
 
 
 class AskForField(models.BooleanField):
@@ -939,6 +954,16 @@ class OrderedManyToManyDescriptor(ManyToManyDescriptor):
                 def get_queryset(self):
                     return super(OrderedManyRelatedManager, self).get_queryset().order_by('%s__position' % self.through._meta.model_name)
 
+                def add(self, *objects):
+                    if len(objects) > 1:
+                        raise RuntimeError('Ordered many-to-many fields do not support multiple objects')
+                    return super().add(*objects)
+
+                def remove(self, *objects):
+                    if len(objects) > 1:
+                        raise RuntimeError('Ordered many-to-many fields do not support multiple objects')
+                    return super().remove(*objects)
+
             return OrderedManyRelatedManager
 
         return add_custom_queryset_to_many_related_manager(
@@ -956,13 +981,12 @@ class OrderedManyToManyField(models.ManyToManyField):
     by a special `position` column on the M2M table
     """
 
-    def _update_m2m_position(self, sender, **kwargs):
-        if kwargs.get('action') in ('post_add', 'post_remove'):
-            order_with_respect_to = None
-            for field in sender._meta.local_fields:
-                if isinstance(field, models.ForeignKey) and isinstance(kwargs['instance'], field.related_model):
-                    order_with_respect_to = field.name
-            for i, ig in enumerate(sender.objects.filter(**{order_with_respect_to: kwargs['instance'].pk})):
+    def _update_m2m_position(self, sender, instance, action, **kwargs):
+        if action in ('post_add', 'post_remove'):
+            descriptor = getattr(instance, self.name)
+            order_with_respect_to = descriptor.source_field_name
+
+            for i, ig in enumerate(sender.objects.filter(**{order_with_respect_to: instance.pk})):
                 if ig.position != i:
                     ig.position = i
                     ig.save()

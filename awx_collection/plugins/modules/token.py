@@ -35,7 +35,6 @@ options:
         - Optional description of this access token.
       required: False
       type: str
-      default: ''
     application:
       description:
         - The application tied to this token.
@@ -46,7 +45,6 @@ options:
         - Allowed scopes, further restricts user's permissions. Must be a simple space-separated string with allowed scopes ['read', 'write'].
       required: False
       type: str
-      default: 'write'
       choices: ["read", "write"]
     existing_token:
       description: The data structure produced from token in create mode to be used with state absent.
@@ -136,7 +134,7 @@ def main():
     argument_spec = dict(
         description=dict(),
         application=dict(),
-        scope=dict(choices=['read', 'write'], default='write'),
+        scope=dict(choices=['read', 'write']),
         existing_token=dict(type='dict', no_log=False),
         existing_token_id=dict(),
         state=dict(choices=['present', 'absent'], default='present'),

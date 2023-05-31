@@ -7,7 +7,6 @@ from awx.main.migrations._inventory_source import delete_custom_inv_source
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0136_scm_track_submodules'),
     ]

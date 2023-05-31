@@ -22,7 +22,6 @@ class PendoTrackingStateField(fields.ChoiceField):
 
 
 class CustomLogoField(fields.CharField):
-
     CUSTOM_LOGO_RE = re.compile(r'^data:image/(?:png|jpeg|gif);base64,([A-Za-z0-9+/=]+?)$')
 
     default_error_messages = {

@@ -10,7 +10,6 @@ from django.core.management.base import BaseCommand, CommandError
 
 
 class Command(BaseCommand):
-
     help = (
         "Remove specified queue (instance group) from database.\n"
         "Instances inside of queue will continue to exist, \n"

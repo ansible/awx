@@ -1,17 +1,42 @@
+import os
 import psycopg2
 import select
 
 from contextlib import contextmanager
 
+from awx.settings.application_name import get_application_name
+
 from django.conf import settings
 from django.db import connection as pg_connection
-
 
 NOT_READY = ([], [], [])
 
 
 def get_local_queuename():
     return settings.CLUSTER_HOST_ID
+
+
+def get_task_queuename():
+    if os.getenv('AWX_COMPONENT') != 'web':
+        return settings.CLUSTER_HOST_ID
+
+    from awx.main.models.ha import Instance
+
+    random_task_instance = (
+        Instance.objects.filter(
+            node_type__in=(Instance.Types.CONTROL, Instance.Types.HYBRID),
+            node_state=Instance.States.READY,
+            enabled=True,
+        )
+        .only('hostname')
+        .order_by('?')
+        .first()
+    )
+
+    if random_task_instance is None:
+        raise ValueError('No task instances are READY and Enabled.')
+
+    return random_task_instance.hostname
 
 
 class PubSub(object):
@@ -60,10 +85,11 @@ def pg_bus_conn(new_connection=False):
     '''
 
     if new_connection:
-        conf = settings.DATABASES['default']
-        conn = psycopg2.connect(
-            dbname=conf['NAME'], host=conf['HOST'], user=conf['USER'], password=conf['PASSWORD'], port=conf['PORT'], **conf.get("OPTIONS", {})
-        )
+        conf = settings.DATABASES['default'].copy()
+        conf['OPTIONS'] = conf.get('OPTIONS', {}).copy()
+        # Modify the application name to distinguish from other connections the process might use
+        conf['OPTIONS']['application_name'] = get_application_name(settings.CLUSTER_HOST_ID, function='listener')
+        conn = psycopg2.connect(dbname=conf['NAME'], host=conf['HOST'], user=conf['USER'], password=conf['PASSWORD'], port=conf['PORT'], **conf['OPTIONS'])
         # Django connection.cursor().connection doesn't have autocommit=True on by default
         conn.set_session(autocommit=True)
     else:

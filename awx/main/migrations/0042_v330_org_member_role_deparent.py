@@ -9,7 +9,6 @@ from awx.main.migrations._rbac import rebuild_role_hierarchy
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0041_v330_update_oauth_refreshtoken'),
     ]

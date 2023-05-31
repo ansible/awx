@@ -98,7 +98,7 @@ function ManagementJob({ setBreadcrumb }) {
           {t`Back to management jobs`}
         </>
       ),
-      isBackButton: true,
+      persistentFilterKey: 'managementJobs',
     },
   ];
 

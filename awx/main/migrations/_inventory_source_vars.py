@@ -158,7 +158,7 @@ class ec2(PluginFileInjector):
         return {
             # vars that change
             'ec2_block_devices': (
-                "dict(block_device_mappings | map(attribute='device_name') | list | zip(block_device_mappings " "| map(attribute='ebs.volume_id') | list))"
+                "dict(block_device_mappings | map(attribute='device_name') | list | zip(block_device_mappings | map(attribute='ebs.volume_id') | list))"
             ),
             'ec2_dns_name': 'public_dns_name',
             'ec2_group_name': 'placement.group_name',
@@ -635,7 +635,7 @@ class satellite6(PluginFileInjector):
             "environment": {
                 "prefix": "{}environment_".format(group_prefix),
                 "separator": "",
-                "key": "foreman['environment_name'] | lower | regex_replace(' ', '') | " "regex_replace('[^A-Za-z0-9_]', '_') | regex_replace('none', '')",
+                "key": "foreman['environment_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_') | regex_replace('none', '')",
             },
             "location": {
                 "prefix": "{}location_".format(group_prefix),
@@ -656,7 +656,7 @@ class satellite6(PluginFileInjector):
             "content_view": {
                 "prefix": "{}content_view_".format(group_prefix),
                 "separator": "",
-                "key": "foreman['content_facet_attributes']['content_view_name'] | " "lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')",
+                "key": "foreman['content_facet_attributes']['content_view_name'] | lower | regex_replace(' ', '') | regex_replace('[^A-Za-z0-9_]', '_')",
             },
         }
 

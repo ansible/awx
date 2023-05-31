@@ -1,5 +1,4 @@
 class Resources(object):
-
     _activity = r'activity_stream/\d+/'
     _activity_stream = 'activity_stream/'
     _ad_hoc_command = r'ad_hoc_commands/\d+/'
@@ -14,6 +13,8 @@ class Resources(object):
     _applications = 'applications/'
     _auth = 'auth/'
     _authtoken = 'authtoken/'
+    _bulk = 'bulk/'
+    _bulk_job_launch = 'bulk/job_launch/'
     _config = 'config/'
     _config_attach = 'config/attach/'
     _credential = r'credentials/\d+/'
@@ -43,6 +44,8 @@ class Resources(object):
     _groups = 'groups/'
     _host = r'hosts/\d+/'
     _host_groups = r'hosts/\d+/groups/'
+    _host_metrics = 'host_metrics/'
+    _host_metric = r'host_metrics/\d+/'
     _host_insights = r'hosts/\d+/insights/'
     _host_related_ad_hoc_commands = r'hosts/\d+/ad_hoc_commands/'
     _host_related_fact_version = r'hosts/\d+/fact_versions/\d+/'
@@ -58,7 +61,9 @@ class Resources(object):
     _instance_related_jobs = r'instances/\d+/jobs/'
     _instances = 'instances/'
     _inventories = 'inventories/'
+    _constructed_inventories = 'constructed_inventories/'
     _inventory = r'inventories/\d+/'
+    _constructed_inventory = r'constructed_inventories/\d+/'
     _inventory_access_list = r'inventories/\d+/access_list/'
     _inventory_copy = r'inventories/\d+/copy/'
     _inventory_labels = r'inventories/\d+/labels/'

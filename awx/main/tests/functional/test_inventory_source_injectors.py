@@ -121,7 +121,7 @@ def read_content(private_data_dir, raw_env, inventory_update):
                     break
                 alias = 'file_reference_{}'.format(i)
             else:
-                raise RuntimeError('Test not able to cope with >10 references by env vars. ' 'Something probably went very wrong.')
+                raise RuntimeError('Test not able to cope with >10 references by env vars. Something probably went very wrong.')
             file_aliases[abs_file_path] = alias
             for env_key in inverse_env[runner_path]:
                 env[env_key] = '{{{{ {} }}}}'.format(alias)
@@ -234,7 +234,7 @@ def test_inventory_update_injected_content(this_kind, inventory, fake_credential
             source_dir = os.path.join(base_dir, this_kind)  # this_kind is a global
 
             if not os.path.exists(source_dir):
-                raise FileNotFoundError('Maybe you never made reference files? ' 'MAKE_INVENTORY_REFERENCE_FILES=true py.test ...\noriginal: {}')
+                raise FileNotFoundError('Maybe you never made reference files? MAKE_INVENTORY_REFERENCE_FILES=true py.test ...\noriginal: {}')
             files_dir = os.path.join(source_dir, 'files')
             try:
                 expected_file_list = os.listdir(files_dir)

@@ -17,7 +17,7 @@ module: subscriptions
 author: "John Westcott IV (@john-westcott-iv)"
 short_description: Get subscription list
 description:
-    - Get subscriptions available to  Automation Platform Controller. See
+    - Get subscriptions available to Automation Platform Controller. See
       U(https://www.ansible.com/tower) for an overview.
 options:
     username:
@@ -39,6 +39,7 @@ options:
         - Note This is a client side search, not an API side search
       required: False
       type: dict
+      default: {}
 extends_documentation_fragment: awx.awx.auth
 '''
 

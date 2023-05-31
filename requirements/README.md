@@ -148,6 +148,24 @@ in the top-level Makefile.
 
 If modifying this library make sure testing with the offline build is performed to confirm it is functionally working.
 
+### channels-redis
+
+Due to an upstream bug (linked below), we see `RuntimeError: Event loop is closed` errors with newer versions of `channels-redis`.
+Upstream is aware of the bug and it is likely to be fixed in the next release according to the issue linked below.
+For now, we pin to the old version, 3.4.1
+
+* https://github.com/django/channels_redis/issues/332
+* https://github.com/ansible/awx/issues/13313
+
+### hiredis
+
+The hiredis 2.1.0 release doesn't provide source distribution on PyPI which prevents users to build that python package from the
+sources.
+Downgrading to 2.0.0 (which provides source distribution) until the channels-redis issue is fixed or a newer hiredis version is
+available on PyPi with source distribution.
+
+* https://github.com/redis/hiredis-py/issues/138
+
 ## Library Notes
 
 ### pexpect

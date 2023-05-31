@@ -7,6 +7,7 @@ const userProfile = {
   isOrgAdmin: false,
   isNotificationAdmin: false,
   isExecEnvAdmin: false,
+  systemConfig: { SUBSCRIPTION_USAGE_MODEL: 'unique_managed_hosts' },
 };
 
 const filterPaths = (sidebar) => {
@@ -29,6 +30,7 @@ describe('getRouteConfig', () => {
       '/schedules',
       '/activity_stream',
       '/workflow_approvals',
+      '/host_metrics',
       '/templates',
       '/credentials',
       '/projects',
@@ -58,6 +60,7 @@ describe('getRouteConfig', () => {
       '/schedules',
       '/activity_stream',
       '/workflow_approvals',
+      '/host_metrics',
       '/templates',
       '/credentials',
       '/projects',
@@ -98,10 +101,8 @@ describe('getRouteConfig', () => {
       '/credential_types',
       '/notification_templates',
       '/instance_groups',
-      '/instances',
       '/applications',
       '/execution_environments',
-      '/topology_view',
     ]);
   });
 
@@ -127,6 +128,7 @@ describe('getRouteConfig', () => {
       '/teams',
       '/credential_types',
       '/notification_templates',
+      '/instance_groups',
       '/applications',
       '/execution_environments',
     ]);
@@ -150,6 +152,7 @@ describe('getRouteConfig', () => {
       '/users',
       '/teams',
       '/credential_types',
+      '/instance_groups',
       '/applications',
       '/execution_environments',
     ]);
@@ -173,6 +176,7 @@ describe('getRouteConfig', () => {
       '/users',
       '/teams',
       '/credential_types',
+      '/instance_groups',
       '/applications',
       '/execution_environments',
     ]);
@@ -201,6 +205,7 @@ describe('getRouteConfig', () => {
       '/teams',
       '/credential_types',
       '/notification_templates',
+      '/instance_groups',
       '/applications',
       '/execution_environments',
     ]);
@@ -230,10 +235,8 @@ describe('getRouteConfig', () => {
       '/credential_types',
       '/notification_templates',
       '/instance_groups',
-      '/instances',
       '/applications',
       '/execution_environments',
-      '/topology_view',
     ]);
   });
 
@@ -261,10 +264,8 @@ describe('getRouteConfig', () => {
       '/credential_types',
       '/notification_templates',
       '/instance_groups',
-      '/instances',
       '/applications',
       '/execution_environments',
-      '/topology_view',
     ]);
   });
 });

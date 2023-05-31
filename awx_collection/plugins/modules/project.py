@@ -46,7 +46,6 @@ options:
       description:
         - Type of SCM resource.
       choices: ["manual", "git", "svn", "insights", "archive"]
-      default: "manual"
       type: str
     scm_url:
       description:
@@ -60,12 +59,10 @@ options:
       description:
         - The branch to use for the SCM resource.
       type: str
-      default: ''
     scm_refspec:
       description:
         - The refspec to use for the SCM resource.
       type: str
-      default: ''
     credential:
       description:
         - Name of the credential to use with this SCM resource.
@@ -76,28 +73,23 @@ options:
       description:
         - Remove local modifications before updating.
       type: bool
-      default: 'no'
     scm_delete_on_update:
       description:
         - Remove the repository completely before updating.
       type: bool
-      default: 'no'
     scm_track_submodules:
       description:
         - Track submodules latest commit on specified branch.
       type: bool
-      default: 'no'
     scm_update_on_launch:
       description:
         - Before an update to the local repository before launching a job with this project.
       type: bool
-      default: 'no'
     scm_update_cache_timeout:
       description:
         - Cache Timeout to cache prior project syncs for a certain number of seconds.
             Only valid if scm_update_on_launch is to True, otherwise ignored.
       type: int
-      default: 0
     allow_override:
       description:
         - Allow changing the SCM branch or revision in a job template that uses this project.
@@ -109,7 +101,6 @@ options:
         - The amount of time (in seconds) to run before the SCM Update is canceled. A value of 0 means no timeout.
         - If waiting for the project to update this will abort after this
           amount of seconds
-      default: 0
       type: int
       aliases:
         - job_timeout
@@ -131,7 +122,7 @@ options:
       description:
         - Desired state of the resource.
       default: "present"
-      choices: ["present", "absent"]
+      choices: ["present", "absent", "exists"]
       type: str
     wait:
       description:
@@ -262,26 +253,26 @@ def main():
         new_name=dict(),
         copy_from=dict(),
         description=dict(),
-        scm_type=dict(choices=['manual', 'git', 'svn', 'insights', 'archive'], default='manual'),
+        scm_type=dict(choices=['manual', 'git', 'svn', 'insights', 'archive']),
         scm_url=dict(),
         local_path=dict(),
         scm_branch=dict(),
         scm_refspec=dict(),
         credential=dict(aliases=['scm_credential']),
-        scm_clean=dict(type='bool', default=False),
-        scm_delete_on_update=dict(type='bool', default=False),
-        scm_track_submodules=dict(type='bool', default=False),
-        scm_update_on_launch=dict(type='bool', default=False),
-        scm_update_cache_timeout=dict(type='int', default=0),
+        scm_clean=dict(type='bool'),
+        scm_delete_on_update=dict(type='bool'),
+        scm_track_submodules=dict(type='bool'),
+        scm_update_on_launch=dict(type='bool'),
+        scm_update_cache_timeout=dict(type='int'),
         allow_override=dict(type='bool', aliases=['scm_allow_override']),
-        timeout=dict(type='int', default=0, aliases=['job_timeout']),
+        timeout=dict(type='int', aliases=['job_timeout']),
         default_environment=dict(),
         custom_virtualenv=dict(),
         organization=dict(),
         notification_templates_started=dict(type="list", elements='str'),
         notification_templates_success=dict(type="list", elements='str'),
         notification_templates_error=dict(type="list", elements='str'),
-        state=dict(choices=['present', 'absent'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists'], default='present'),
         wait=dict(type='bool', default=True),
         update_project=dict(default=False, type='bool'),
         interval=dict(default=2.0, type='float'),
@@ -293,13 +284,15 @@ def main():
         argument_spec=argument_spec,
     )
 
+    # Alias for manual projects
+    if module.params.get('scm_type') == "manual":
+        module.params['scm_type'] = ''
+
     # Extract our parameters
     name = module.params.get('name')
     new_name = module.params.get("new_name")
     copy_from = module.params.get('copy_from')
     scm_type = module.params.get('scm_type')
-    if scm_type == "manual":
-        scm_type = ""
     local_path = module.params.get('local_path')
     credential = module.params.get('credential')
     scm_update_on_launch = module.params.get('scm_update_on_launch')
@@ -320,7 +313,7 @@ def main():
         lookup_data['organization'] = org_id
 
     # Attempt to look up project based on the provided name and org ID
-    project = module.get_one('projects', name_or_id=name, data=lookup_data)
+    project = module.get_one('projects', name_or_id=name, check_exists=(state == 'exists'), data=lookup_data)
 
     # Attempt to look up credential to copy based on the provided name
     if copy_from:
@@ -337,12 +330,6 @@ def main():
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(project)
-
-    if credential is not None:
-        credential = module.resolve_name_to_id('credentials', credential)
-
-    if signature_validation_credential is not None:
-        signature_validation_credential = module.resolve_name_to_id('credentials', signature_validation_credential)
 
     # Attempt to look up associated field items the user specified.
     association_fields = {}
@@ -368,20 +355,18 @@ def main():
     # Create the data that gets sent for create and update
     project_fields = {
         'name': new_name if new_name else (module.get_item_name(project) if project else name),
-        'scm_type': scm_type,
-        'organization': org_id,
-        'scm_update_on_launch': scm_update_on_launch,
-        'scm_update_cache_timeout': scm_update_cache_timeout,
-        'signature_validation_credential': signature_validation_credential,
     }
 
     for field_name in (
+        'scm_type',
         'scm_url',
         'scm_branch',
         'scm_refspec',
         'scm_clean',
         'scm_delete_on_update',
-        "scm_track_submodules",
+        'scm_track_submodules',
+        'scm_update_on_launch',
+        'scm_update_cache_timeout',
         'timeout',
         'scm_update_cache_timeout',
         'custom_virtualenv',
@@ -392,15 +377,23 @@ def main():
         if field_val is not None:
             project_fields[field_name] = field_val
 
-    if credential is not None:
-        project_fields['credential'] = credential
-    if default_ee is not None:
-        project_fields['default_environment'] = module.resolve_name_to_id('execution_environments', default_ee)
-    if scm_type == '':
-        if local_path is not None:
-            project_fields['local_path'] = local_path
+    for variable, field, endpoint in (
+        (default_ee, 'default_environment', 'execution_environments'),
+        (credential, 'credential', 'credentials'),
+        (signature_validation_credential, 'signature_validation_credential', 'credentials'),
+    ):
+        if variable is not None:
+            project_fields[field] = module.resolve_name_to_id(endpoint, variable)
 
-    if scm_update_cache_timeout != 0 and scm_update_on_launch is not True:
+    if org_id is not None:
+        # this is resolved earlier, so save an API call and don't do it again in the loop above
+        project_fields['organization'] = org_id
+
+    # Respect local_path if scm_type is manual type or not specified
+    if scm_type in ('', None) and local_path is not None:
+        project_fields['local_path'] = local_path
+
+    if scm_update_cache_timeout not in (0, None) and scm_update_on_launch is not True:
         module.warn('scm_update_cache_timeout will be ignored since scm_update_on_launch was not set to true')
 
     # If we are doing a not manual project, register our on_change method

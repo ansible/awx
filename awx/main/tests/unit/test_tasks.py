@@ -371,7 +371,7 @@ class TestExtraVarSanitation(TestJobExecution):
     # are deemed trustable, because they can only be added by users w/ enough
     # privilege to add/modify a Job Template)
 
-    UNSAFE = '{{ lookup(' 'pipe' ',' 'ls -la' ') }}'
+    UNSAFE = "{{ lookup('pipe', 'ls -la') }}"
 
     def test_vars_unsafe_by_default(self, job, private_data_dir, mock_me):
         job.created_by = User(pk=123, username='angry-spud')
@@ -1209,6 +1209,42 @@ class TestJobCredentials(TestJobExecution):
         assert extra_vars["turbo_button"] == "True"
         return ['successful', 0]
 
+    def test_custom_environment_injectors_with_nested_extra_vars(self, private_data_dir, job, mock_me):
+        task = jobs.RunJob()
+        some_cloud = CredentialType(
+            kind='cloud',
+            name='SomeCloud',
+            managed=False,
+            inputs={'fields': [{'id': 'host', 'label': 'Host', 'type': 'string'}]},
+            injectors={'extra_vars': {'auth': {'host': '{{host}}'}}},
+        )
+        credential = Credential(pk=1, credential_type=some_cloud, inputs={'host': 'example.com'})
+        job.credentials.add(credential)
+
+        args = task.build_args(job, private_data_dir, {})
+        credential.credential_type.inject_credential(credential, {}, {}, args, private_data_dir)
+        extra_vars = parse_extra_vars(args, private_data_dir)
+
+        assert extra_vars["auth"]["host"] == "example.com"
+
+    def test_custom_environment_injectors_with_templated_extra_vars_key(self, private_data_dir, job, mock_me):
+        task = jobs.RunJob()
+        some_cloud = CredentialType(
+            kind='cloud',
+            name='SomeCloud',
+            managed=False,
+            inputs={'fields': [{'id': 'environment', 'label': 'Environment', 'type': 'string'}, {'id': 'host', 'label': 'Host', 'type': 'string'}]},
+            injectors={'extra_vars': {'{{environment}}_auth': {'host': '{{host}}'}}},
+        )
+        credential = Credential(pk=1, credential_type=some_cloud, inputs={'environment': 'test', 'host': 'example.com'})
+        job.credentials.add(credential)
+
+        args = task.build_args(job, private_data_dir, {})
+        credential.credential_type.inject_credential(credential, {}, {}, args, private_data_dir)
+        extra_vars = parse_extra_vars(args, private_data_dir)
+
+        assert extra_vars["test_auth"]["host"] == "example.com"
+
     def test_custom_environment_injectors_with_complicated_boolean_template(self, job, private_data_dir, mock_me):
         task = jobs.RunJob()
         some_cloud = CredentialType(
@@ -1972,7 +2008,7 @@ def test_project_update_no_ee(mock_me):
     with pytest.raises(RuntimeError) as e:
         task.build_env(job, {})
 
-    assert 'The project could not sync because there is no Execution Environment' in str(e.value)
+    assert 'The ProjectUpdate could not run because there is no Execution Environment' in str(e.value)
 
 
 @pytest.mark.parametrize(

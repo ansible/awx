@@ -32,7 +32,7 @@ backend nodes
     option httpchk HEAD / HTTP/1.1\r\nHost:localhost
 {% for i in range(control_plane_node_count|int) %}
     {% set container_postfix = loop.index %}
-    server tools_awx_{{ container_postfix }} tools_awx_{{ container_postfix }}:8013 check
+    server tools_awx_{{ container_postfix }} tools_awx_{{ container_postfix }}:8013 check inter 10s
 {% endfor %}
 
 backend nodes_ssl
@@ -40,7 +40,7 @@ backend nodes_ssl
     balance roundrobin
 {% for i in range(control_plane_node_count|int) %}
     {% set container_postfix = loop.index %}
-    server tools_awx_{{ container_postfix }} tools_awx_{{ container_postfix }}:8043 check
+    server tools_awx_{{ container_postfix }} tools_awx_{{ container_postfix }}:8043 check inter 10s
 {% endfor %}
 
 listen stats

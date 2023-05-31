@@ -339,7 +339,7 @@ describe('Visualizer', () => {
         results: [],
       },
     });
-    WorkflowJobTemplateNodesAPI.replace.mockRejectedValue(new Error());
+    WorkflowJobTemplateNodesAPI.update.mockRejectedValue(new Error());
     await act(async () => {
       wrapper = mountWithContexts(
         <svg>
@@ -355,7 +355,7 @@ describe('Visualizer', () => {
       wrapper.find('Button#visualizer-save').simulate('click');
     });
     wrapper.update();
-    expect(WorkflowJobTemplateNodesAPI.replace).toHaveBeenCalledTimes(1);
+    expect(WorkflowJobTemplateNodesAPI.update).toHaveBeenCalledTimes(1);
     expect(
       wrapper.find('AlertModal[title="Error saving the workflow!"]').length
     ).toBe(1);
@@ -465,7 +465,7 @@ describe('Visualizer', () => {
         results: [],
       },
     });
-    WorkflowJobTemplateNodesAPI.replace.mockResolvedValue({
+    WorkflowJobTemplateNodesAPI.update.mockResolvedValue({
       data: {
         id: 9000,
         summary_fields: {
@@ -492,7 +492,7 @@ describe('Visualizer', () => {
       wrapper.find('Button#visualizer-save').simulate('click');
     });
     wrapper.update();
-    expect(WorkflowJobTemplateNodesAPI.replace).toHaveBeenCalledTimes(1);
+    expect(WorkflowJobTemplateNodesAPI.update).toHaveBeenCalledTimes(1);
     expect(WorkflowApprovalTemplatesAPI.update).toHaveBeenCalledTimes(1);
     expect(
       wrapper.find('AlertModal[title="Error saving the workflow!"]').length
@@ -774,7 +774,7 @@ describe('Visualizer', () => {
         results: [],
       },
     });
-    WorkflowJobTemplateNodesAPI.replace.mockResolvedValue();
+    WorkflowJobTemplateNodesAPI.update.mockResolvedValue();
     WorkflowJobTemplateNodesAPI.disassociateCredentials.mockRejectedValue(
       new Error()
     );
@@ -865,7 +865,7 @@ describe('Visualizer', () => {
         results: [],
       },
     });
-    WorkflowJobTemplateNodesAPI.replace.mockResolvedValue();
+    WorkflowJobTemplateNodesAPI.update.mockResolvedValue();
     WorkflowJobTemplateNodesAPI.disassociateCredentials.mockResolvedValue();
     WorkflowJobTemplateNodesAPI.associateCredentials.mockRejectedValue(
       new Error()

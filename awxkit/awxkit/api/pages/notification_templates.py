@@ -15,7 +15,6 @@ notification_types = ('email', 'irc', 'pagerduty', 'slack', 'twilio', 'webhook',
 
 
 class NotificationTemplate(HasCopy, HasCreate, base.Base):
-
     dependencies = [Organization]
     NATURAL_KEY = ('organization', 'name')
 
@@ -40,7 +39,7 @@ class NotificationTemplate(HasCopy, HasCreate, base.Base):
         """
         try:
             super(NotificationTemplate, self).silent_delete()
-        except (exc.MethodNotAllowed):
+        except exc.MethodNotAllowed:
             pass
 
     def payload(self, organization, notification_type='slack', messages=not_provided, **kwargs):
@@ -156,7 +155,6 @@ page.register_page(
 
 
 class NotificationTemplates(page.PageList, NotificationTemplate):
-
     pass
 
 
@@ -175,7 +173,6 @@ page.register_page(
 
 
 class NotificationTemplateCopy(base.Base):
-
     pass
 
 
@@ -183,7 +180,6 @@ page.register_page(resources.notification_template_copy, NotificationTemplateCop
 
 
 class NotificationTemplateTest(base.Base):
-
     pass
 
 
