@@ -79,6 +79,7 @@ def construct_rsyslog_conf_template(settings=settings):
             'action.resumeRetryCount="-1"',
             'template="awx"',
             f'action.resumeInterval="{timeout}"',
+            f'queue.spoolDirectory="{spool_directory}"',
             'queue.filename="awx-external-logger-action-queue"',
             f'queue.maxdiskspace="{max_disk_space_action_queue}g"',
             'queue.type="LinkedList"',
