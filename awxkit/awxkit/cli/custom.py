@@ -1,7 +1,7 @@
 import functools
 import json
 
-from .stdout import monitor, monitor_workflow
+from .stdout import DEFAULT_POLL_INTERVAL_SECONDS, MINIMUM_POLL_INTERVAL_SECONDS, monitor, monitor_workflow
 from .utils import CustomRegistryMeta, color_enabled
 from awxkit import api
 from awxkit.exceptions import NoContent
@@ -56,6 +56,16 @@ class Launchable(object):
         parser.choices[self.action].add_argument('--monitor', action='store_true', help='If set, prints stdout of the launched job until it finishes.')
         parser.choices[self.action].add_argument('--action-timeout', type=int, help='If set with --monitor or --wait, time out waiting on job completion.')
         parser.choices[self.action].add_argument('--wait', action='store_true', help='If set, waits until the launched job finishes.')
+        parser.choices[self.action].add_argument(
+            '--poll-interval',
+            type=float,
+            default=DEFAULT_POLL_INTERVAL_SECONDS,
+            help=(
+                'If set with --monitor or --wait, interval between polling in seconds.'
+                f' Default is {DEFAULT_POLL_INTERVAL_SECONDS};'
+                f' minimum is {MINIMUM_POLL_INTERVAL_SECONDS}.'
+            ),
+        )
 
         launch_time_options = self.page.connection.options(self.options_endpoint)
         if launch_time_options.ok:
@@ -71,6 +81,7 @@ class Launchable(object):
                 self.page.connection.session,
                 print_stdout=not kwargs.get('wait'),
                 action_timeout=kwargs.get('action_timeout'),
+                interval=kwargs.get('poll_interval')
             )
             if status:
                 response.json['status'] = status
@@ -83,6 +94,7 @@ class Launchable(object):
             'monitor': kwargs.pop('monitor', False),
             'wait': kwargs.pop('wait', False),
             'action_timeout': kwargs.pop('action_timeout', False),
+            'interval': kwargs.pop('poll_interval', DEFAULT_POLL_INTERVAL_SECONDS),
         }
         response = self.page.get().related.get(self.action).post(kwargs)
         self.monitor(response, **monitor_kwargs)

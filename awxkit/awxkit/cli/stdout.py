@@ -8,8 +8,12 @@ import time
 from .utils import cprint, color_enabled, STATUS_COLORS
 from awxkit.utils import to_str
 
+DEFAULT_POLL_INTERVAL_SECONDS = 2.0
+MINIMUM_POLL_INTERVAL_SECONDS = 0.25
 
-def monitor_workflow(response, session, print_stdout=True, action_timeout=None, interval=0.25):
+
+def monitor_workflow(
+        response, session, print_stdout=True, action_timeout=None, interval=DEFAULT_POLL_INTERVAL_SECONDS):
     get = response.url.get
     payload = {
         'order_by': 'finished',
@@ -45,6 +49,7 @@ def monitor_workflow(response, session, print_stdout=True, action_timeout=None, 
 
     started = time.time()
     seen = set()
+    interval_seconds = max(MINIMUM_POLL_INTERVAL_SECONDS, interval)
     while True:
         if action_timeout and time.time() - started > action_timeout:
             if print_stdout:
@@ -58,7 +63,7 @@ def monitor_workflow(response, session, print_stdout=True, action_timeout=None, 
             # all at the end
             fetch(seen)
 
-        time.sleep(0.25)
+        time.sleep(interval_seconds)
         json = get().json
         if json.finished:
             fetch(seen)
@@ -68,7 +73,8 @@ def monitor_workflow(response, session, print_stdout=True, action_timeout=None, 
     return get().json.status
 
 
-def monitor(response, session, print_stdout=True, action_timeout=None, interval=0.25):
+def monitor(
+        response, session, print_stdout=True, action_timeout=None, interval=DEFAULT_POLL_INTERVAL_SECONDS):
     get = response.url.get
     payload = {'order_by': 'start_line', 'no_truncate': True}
     if response.type == 'job':
@@ -96,6 +102,7 @@ def monitor(response, session, print_stdout=True, action_timeout=None, interval=
         cprint('------Starting Standard Out Stream------', 'red')
 
     started = time.time()
+    interval_seconds = max(MINIMUM_POLL_INTERVAL_SECONDS, interval)
     while True:
         if action_timeout and time.time() - started > action_timeout:
             if print_stdout:
@@ -105,7 +112,7 @@ def monitor(response, session, print_stdout=True, action_timeout=None, interval=
         if next_line:
             payload['start_line__gte'] = next_line
 
-        time.sleep(0.25)
+        time.sleep(interval_seconds)
         json = get().json
         if json.event_processing_finished is True or json.status in ('error', 'canceled'):
             fetch(next_line)
