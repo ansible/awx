@@ -118,6 +118,7 @@ function InstanceListItem({
   return (
     <>
       <Tr
+        data-testid="instances list item"
         id={`instance-row-${instance.id}`}
         ouiaId={`instance-row-${instance.id}`}
       >
