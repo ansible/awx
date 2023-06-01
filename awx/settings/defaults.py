@@ -1047,3 +1047,5 @@ CLEANUP_HOST_METRICS_LAST_TS = None
 CLEANUP_HOST_METRICS_INTERVAL = 30  # days
 # Host metrics cleanup - soft-delete HostMetric records with last_automation < [threshold] (in months)
 CLEANUP_HOST_METRICS_THRESHOLD = 12  # months
+# Feature flag to allow Instance API regardless if AWX is running on K8s
+FEATURE_API_INSTANCE_MANAGEMENT = False
