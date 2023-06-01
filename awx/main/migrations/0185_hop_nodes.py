@@ -49,4 +49,5 @@ class Migration(migrations.Migration):
                 validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(65535)],
             ),
         ),
+        migrations.RunPython(set_peers_from_control_nodes_true),
     ]
