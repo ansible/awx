@@ -143,9 +143,10 @@ class AWXConsumerRedis(AWXConsumerBase):
     def run(self, *args, **kwargs):
         super(AWXConsumerRedis, self).run(*args, **kwargs)
         self.worker.on_start()
+        logger.info(f'Callback receiver started with pid={os.getpid()}')
+        db.connection.close()  # logs use database, so close connection
 
         while True:
-            logger.debug(f'{os.getpid()} is alive')
             time.sleep(60)
 
 
