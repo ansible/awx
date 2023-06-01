@@ -9,7 +9,7 @@ class Command(BaseCommand):
     """Command used to precreate database partitions to avoid pg_dump locks"""
 
     def add_arguments(self, parser: CommandParser) -> None:
-        parser.add_argument('--count', dest='count', action='store', help='The amount of hours of partitions to create', type=int)
+        parser.add_argument('--count', dest='count', action='store', help='The amount of hours of partitions to create', type=int, default=1)
 
     def _create_partitioned_tables(self, count):
         start = now()
@@ -21,4 +21,4 @@ class Command(BaseCommand):
             count -= 1
 
     def handle(self, **options):
-        self._create_partitioned_tables(options.get('count', 1))
+        self._create_partitioned_tables(count=options.get('count'))
