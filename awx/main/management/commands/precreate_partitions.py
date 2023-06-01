@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.utils.timezone import now
 from django.core.management.base import BaseCommand, CommandParser
 from datetime import timedelta
