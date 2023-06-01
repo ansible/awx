@@ -12,6 +12,7 @@ import useModal from 'hooks/useModal';
 import useRequest from 'hooks/useRequest';
 import { SettingsAPI } from 'api';
 import {
+  BooleanField,
   ChoiceField,
   EncryptedField,
   InputField,
@@ -116,7 +117,7 @@ function TACACSEdit() {
                   name="TACACSPLUS_AUTH_PROTOCOL"
                   config={tacacs.TACACSPLUS_AUTH_PROTOCOL}
                 />
-                <ChoiceField
+                <BooleanField
                   name="TACACSPLUS_REM_ADDR"
                   config={tacacs.TACACSPLUS_REM_ADDR}
                 />
