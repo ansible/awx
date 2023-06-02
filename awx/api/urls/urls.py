@@ -167,10 +167,13 @@ urlpatterns = [
 ]
 if MODE == 'development':
     # Only include these if we are in the development environment
-    from awx.api.swagger import SwaggerSchemaView
-
-    urlpatterns += [re_path(r'^swagger/$', SwaggerSchemaView.as_view(), name='swagger_view')]
+    from awx.api.swagger import schema_view
 
     from awx.api.urls.debug import urls as debug_urls
 
     urlpatterns += [re_path(r'^debug/', include(debug_urls))]
+    urlpatterns += [
+        re_path(r'^swagger(?P<format>\.json|\.yaml)/$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+        re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+        re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    ]
