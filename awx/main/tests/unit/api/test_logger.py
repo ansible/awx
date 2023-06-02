@@ -47,7 +47,7 @@ data_loggly = {
             '\n'.join(
                 [
                     'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
-                    'action(type="omhttp" server="logs-01.loggly.com" serverport="80" usehttps="off" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" errorfile="/var/log/tower/rsyslog.err" restpath="inputs/1fd38090-2af1-4e1e-8d80-492899da0f71/tag/http/")',  # noqa
+                    'action(type="omhttp" server="logs-01.loggly.com" serverport="80" usehttps="off" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" queue.spoolDirectory="/var/lib/awx" queue.filename="awx-external-logger-action-queue" queue.maxdiskspace="1g" queue.type="LinkedList" queue.saveOnShutdown="on" errorfile="/var/log/tower/rsyslog.err" restpath="inputs/1fd38090-2af1-4e1e-8d80-492899da0f71/tag/http/")',  # noqa
                 ]
             ),
         ),
@@ -89,7 +89,7 @@ data_loggly = {
             '\n'.join(
                 [
                     'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
-                    'action(type="omhttp" server="yoursplunk" serverport="443" usehttps="on" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" errorfile="/var/log/tower/rsyslog.err" restpath="services/collector/event")',  # noqa
+                    'action(type="omhttp" server="yoursplunk" serverport="443" usehttps="on" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" queue.spoolDirectory="/var/lib/awx" queue.filename="awx-external-logger-action-queue" queue.maxdiskspace="1g" queue.type="LinkedList" queue.saveOnShutdown="on" errorfile="/var/log/tower/rsyslog.err" restpath="services/collector/event")',  # noqa
                 ]
             ),
         ),
@@ -103,7 +103,7 @@ data_loggly = {
             '\n'.join(
                 [
                     'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
-                    'action(type="omhttp" server="yoursplunk" serverport="80" usehttps="off" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" errorfile="/var/log/tower/rsyslog.err" restpath="services/collector/event")',  # noqa
+                    'action(type="omhttp" server="yoursplunk" serverport="80" usehttps="off" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" queue.spoolDirectory="/var/lib/awx" queue.filename="awx-external-logger-action-queue" queue.maxdiskspace="1g" queue.type="LinkedList" queue.saveOnShutdown="on" errorfile="/var/log/tower/rsyslog.err" restpath="services/collector/event")',  # noqa
                 ]
             ),
         ),
@@ -117,7 +117,7 @@ data_loggly = {
             '\n'.join(
                 [
                     'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
-                    'action(type="omhttp" server="yoursplunk" serverport="8088" usehttps="on" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" errorfile="/var/log/tower/rsyslog.err" restpath="services/collector/event")',  # noqa
+                    'action(type="omhttp" server="yoursplunk" serverport="8088" usehttps="on" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" queue.spoolDirectory="/var/lib/awx" queue.filename="awx-external-logger-action-queue" queue.maxdiskspace="1g" queue.type="LinkedList" queue.saveOnShutdown="on" errorfile="/var/log/tower/rsyslog.err" restpath="services/collector/event")',  # noqa
                 ]
             ),
         ),
@@ -131,7 +131,7 @@ data_loggly = {
             '\n'.join(
                 [
                     'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
-                    'action(type="omhttp" server="yoursplunk" serverport="8088" usehttps="on" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" errorfile="/var/log/tower/rsyslog.err" restpath="services/collector/event")',  # noqa
+                    'action(type="omhttp" server="yoursplunk" serverport="8088" usehttps="on" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" queue.spoolDirectory="/var/lib/awx" queue.filename="awx-external-logger-action-queue" queue.maxdiskspace="1g" queue.type="LinkedList" queue.saveOnShutdown="on" errorfile="/var/log/tower/rsyslog.err" restpath="services/collector/event")',  # noqa
                 ]
             ),
         ),
@@ -145,7 +145,7 @@ data_loggly = {
             '\n'.join(
                 [
                     'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
-                    'action(type="omhttp" server="yoursplunk.org" serverport="8088" usehttps="on" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" errorfile="/var/log/tower/rsyslog.err" restpath="services/collector/event")',  # noqa
+                    'action(type="omhttp" server="yoursplunk.org" serverport="8088" usehttps="on" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" queue.spoolDirectory="/var/lib/awx" queue.filename="awx-external-logger-action-queue" queue.maxdiskspace="1g" queue.type="LinkedList" queue.saveOnShutdown="on" errorfile="/var/log/tower/rsyslog.err" restpath="services/collector/event")',  # noqa
                 ]
             ),
         ),
@@ -159,7 +159,7 @@ data_loggly = {
             '\n'.join(
                 [
                     'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
-                    'action(type="omhttp" server="yoursplunk.org" serverport="8088" usehttps="off" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" errorfile="/var/log/tower/rsyslog.err" restpath="services/collector/event")',  # noqa
+                    'action(type="omhttp" server="yoursplunk.org" serverport="8088" usehttps="off" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" queue.spoolDirectory="/var/lib/awx" queue.filename="awx-external-logger-action-queue" queue.maxdiskspace="1g" queue.type="LinkedList" queue.saveOnShutdown="on" errorfile="/var/log/tower/rsyslog.err" restpath="services/collector/event")',  # noqa
                 ]
             ),
         ),
@@ -173,7 +173,7 @@ data_loggly = {
             '\n'.join(
                 [
                     'template(name="awx" type="string" string="%rawmsg-after-pri%")\nmodule(load="omhttp")',
-                    'action(type="omhttp" server="endpoint5.collection.us2.sumologic.com" serverport="443" usehttps="on" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" errorfile="/var/log/tower/rsyslog.err" restpath="receiver/v1/http/ZaVnC4dhaV0qoiETY0MrM3wwLoDgO1jFgjOxE6-39qokkj3LGtOroZ8wNaN2M6DtgYrJZsmSi4-36_Up5TbbN_8hosYonLKHSSOSKY845LuLZBCBwStrHQ==")',  # noqa
+                    'action(type="omhttp" server="endpoint5.collection.us2.sumologic.com" serverport="443" usehttps="on" allowunsignedcerts="off" skipverifyhost="off" action.resumeRetryCount="-1" template="awx" action.resumeInterval="5" queue.spoolDirectory="/var/lib/awx" queue.filename="awx-external-logger-action-queue" queue.maxdiskspace="1g" queue.type="LinkedList" queue.saveOnShutdown="on" errorfile="/var/log/tower/rsyslog.err" restpath="receiver/v1/http/ZaVnC4dhaV0qoiETY0MrM3wwLoDgO1jFgjOxE6-39qokkj3LGtOroZ8wNaN2M6DtgYrJZsmSi4-36_Up5TbbN_8hosYonLKHSSOSKY845LuLZBCBwStrHQ==")',  # noqa
                 ]
             ),
         ),

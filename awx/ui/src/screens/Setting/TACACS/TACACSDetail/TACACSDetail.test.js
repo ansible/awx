@@ -23,6 +23,7 @@ describe('<TACACSDetail />', () => {
         TACACSPLUS_SECRET: '$encrypted$',
         TACACSPLUS_SESSION_TIMEOUT: 5,
         TACACSPLUS_AUTH_PROTOCOL: 'ascii',
+        TACACSPLUS_REM_ADDR: false,
       },
     });
   });
