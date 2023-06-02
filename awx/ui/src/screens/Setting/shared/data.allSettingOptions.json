@@ -2708,6 +2708,15 @@
           ["pap", "pap"]
         ]
       },
+      "TACACSPLUS_REM_ADDR": {
+        "type": "boolean",
+        "required": false,
+        "label": "TACACS+ client address sending enabled",
+        "help_text": "Enable the client address sending by TACACS+ client.",
+        "category": "TACACS+",
+        "category_slug": "tacacsplus",
+        "default": false
+      },
       "SOCIAL_AUTH_GOOGLE_OAUTH2_KEY": {
         "type": "string",
         "required": false,
@@ -5935,6 +5944,15 @@
           ["ascii", "ascii"],
           ["pap", "pap"]
         ]
+      },
+      "TACACSPLUS_REM_ADDR": {
+        "type": "boolean",
+        "required": false,
+        "label": "TACACS+ client address sending enabled",
+        "help_text": "Enable the client address sending by TACACS+ client.",
+        "category": "TACACS+",
+        "category_slug": "tacacsplus",
+        "defined_in_file": false
       },
       "SOCIAL_AUTH_GOOGLE_OAUTH2_CALLBACK_URL": {
         "type": "string",
