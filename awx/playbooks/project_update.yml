@@ -189,11 +189,12 @@
   connection: local
   name: Install content with ansible-galaxy command if necessary
   vars:
-    galaxy_task_env:  # configure in settings
-    additional_collections_env:
-      # These environment variables are used for installing collections, in addition to galaxy_task_env
-      # setting the collections paths silences warnings
+    galaxy_task_env:  # configured in settings
+    # additional_galaxy_env contains environment variables are used for installing roles and collections and will take precedence over items in galaxy_task_env
+    additional_galaxy_env:
+      # These paths control where ansible-galaxy installs collections and roles on top the filesystem
       ANSIBLE_COLLECTIONS_PATHS: "{{ projects_root }}/.__awx_cache/{{ local_path }}/stage/requirements_collections"
+      ANSIBLE_ROLES_PATH: "{{ projects_root }}/.__awx_cache/{{ local_path }}/stage/requirements_roles"
       # Put the local tmp directory in same volume as collection destination
       # otherwise, files cannot be moved accross volumes and will cause error
       ANSIBLE_LOCAL_TEMP: "{{ projects_root }}/.__awx_cache/{{ local_path }}/stage/tmp"
@@ -212,40 +213,50 @@
         - name: End play due to disabled content sync
           ansible.builtin.meta: end_play
 
-    - name: Fetch galaxy roles from requirements.(yml/yaml)
-      ansible.builtin.command: >
-        ansible-galaxy role install -r {{ item }}
-        --roles-path {{ projects_root }}/.__awx_cache/{{ local_path }}/stage/requirements_roles
-        {{ ' -' + 'v' * ansible_verbosity if ansible_verbosity else '' }}
-      args:
-        chdir: "{{ project_path | quote }}"
-      register: galaxy_result
-      with_fileglob:
-        - "{{ project_path | quote }}/roles/requirements.yaml"
-        - "{{ project_path | quote }}/roles/requirements.yml"
-      changed_when: "'was installed successfully' in galaxy_result.stdout"
-      environment: "{{ galaxy_task_env }}"
-      when: roles_enabled | bool
-      tags:
-        - install_roles
+    - block:
+        - name: Fetch galaxy roles from roles/requirements.(yml/yaml)
+          ansible.builtin.command:
+            cmd: "ansible-galaxy role install -r {{ item }} {{ verbosity }}"
+          register: galaxy_result
+          with_fileglob:
+            - "{{ project_path | quote }}/roles/requirements.yaml"
+            - "{{ project_path | quote }}/roles/requirements.yml"
+          changed_when: "'was installed successfully' in galaxy_result.stdout"
+          when: roles_enabled | bool
+          tags:
+            - install_roles
 
-    - name: Fetch galaxy collections from collections/requirements.(yml/yaml)
-      ansible.builtin.command: >
-        ansible-galaxy collection install -r {{ item }}
-        --collections-path {{ projects_root }}/.__awx_cache/{{ local_path }}/stage/requirements_collections
-        {{ ' -' + 'v' * ansible_verbosity if ansible_verbosity else '' }}
-      args:
-        chdir: "{{ project_path | quote }}"
-      register: galaxy_collection_result
-      with_fileglob:
-        - "{{ project_path | quote }}/collections/requirements.yaml"
-        - "{{ project_path | quote }}/collections/requirements.yml"
-        - "{{ project_path | quote }}/requirements.yaml"
-        - "{{ project_path | quote }}/requirements.yml"
-      changed_when: "'Installing ' in galaxy_collection_result.stdout"
-      environment: "{{ additional_collections_env | combine(galaxy_task_env) }}"
-      when:
-        - "ansible_version.full is version_compare('2.9', '>=')"
-        - collections_enabled | bool
-      tags:
-        - install_collections
+        - name: Fetch galaxy collections from collections/requirements.(yml/yaml)
+          ansible.builtin.command:
+            cmd: "ansible-galaxy collection install -r {{ item }} {{ verbosity }}"
+          register: galaxy_collection_result
+          with_fileglob:
+            - "{{ project_path | quote }}/collections/requirements.yaml"
+            - "{{ project_path | quote }}/collections/requirements.yml"
+          changed_when: "'Nothing to do.' not in galaxy_collection_result.stdout"
+          when:
+            - "ansible_version.full is version_compare('2.9', '>=')"
+            - collections_enabled | bool
+          tags:
+            - install_collections
+
+        - name: Fetch galaxy roles and collections from requirements.(yml/yaml)
+          ansible.builtin.command:
+            cmd: "ansible-galaxy install -r {{ item }} {{ verbosity }}"
+          register: galaxy_combined_result
+          with_fileglob:
+            - "{{ project_path | quote }}/requirements.yaml"
+            - "{{ project_path | quote }}/requirements.yml"
+          changed_when: "'Nothing to do.' not in galaxy_combined_result.stdout"
+          when:
+            - "ansible_version.full is version_compare('2.10', '>=')"
+            - collections_enabled | bool
+            - roles_enabled | bool
+          tags:
+            - install_collections
+            - install_roles
+
+      # We combine our additional_galaxy_env into galaxy_task_env so that our values are preferred over anything a user would set
+      environment: "{{ galaxy_task_env | combine(additional_galaxy_env) }}"
+      vars:
+        verbosity: "{{ (ansible_verbosity) | ternary('-'+'v'*ansible_verbosity, '') }}"
