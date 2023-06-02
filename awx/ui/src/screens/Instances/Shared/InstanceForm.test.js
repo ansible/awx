@@ -89,6 +89,7 @@ describe('<InstanceForm />', () => {
     expect(handleSubmit).toBeCalledWith({
       description: 'This is a repeat song',
       enabled: true,
+      managed_by_policy: true,
       hostname: 'new Foo',
       listener_port: 'This is a repeat song',
       node_state: 'installed',

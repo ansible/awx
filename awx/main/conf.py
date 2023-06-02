@@ -684,11 +684,28 @@ register(
     field_class=fields.IntegerField,
     default=1,
     min_value=1,
-    label=_('Maximum disk persistance for external log aggregation (in GB)'),
+    label=_('Maximum disk persistence for external log aggregation (in GB)'),
     help_text=_(
         'Amount of data to store (in gigabytes) during an outage of '
         'the external log aggregator (defaults to 1). '
-        'Equivalent to the rsyslogd queue.maxdiskspace setting.'
+        'Equivalent to the rsyslogd queue.maxdiskspace setting for main_queue. '
+        'Notably, this is used for the rsyslogd main queue (for input messages).'
+    ),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
+    'LOG_AGGREGATOR_ACTION_MAX_DISK_USAGE_GB',
+    field_class=fields.IntegerField,
+    default=1,
+    min_value=1,
+    label=_('Maximum disk persistence for rsyslogd action queuing (in GB)'),
+    help_text=_(
+        'Amount of data to store (in gigabytes) if an rsyslog action takes time '
+        'to process an incoming message (defaults to 1). '
+        'Equivalent to the rsyslogd queue.maxdiskspace setting on the action (e.g. omhttp). '
+        'Like LOG_AGGREGATOR_MAX_DISK_USAGE_GB, it stores files in the directory specified '
+        'by LOG_AGGREGATOR_MAX_DISK_USAGE_PATH.'
     ),
     category=_('Logging'),
     category_slug='logging',

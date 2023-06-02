@@ -11,8 +11,11 @@ case "$1" in
 	status)
 		exec systemctl status automation-controller.service $CONTROLLER_SERVICES
 		;;
-        *)
-                echo "Usage: automation-controller-service start|stop|restart|status"
-                exit 1
-                ;;
+	enable|disable)
+		exec systemctl $1 automation-controller.service $CONTROLLER_SERVICES
+		;;
+	*)
+		echo "Usage: automation-controller-service start|stop|restart|status|enable|disable"
+		exit 1
+		;;
 esac

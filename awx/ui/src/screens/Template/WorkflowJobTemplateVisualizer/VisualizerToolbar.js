@@ -108,6 +108,7 @@ function VisualizerToolbar({
               variant="plain"
               component="a"
               target="_blank"
+              rel="noopener noreferrer"
               href={`${getDocsBaseUrl(
                 config
               )}/html/userguide/workflow_templates.html#ug-wf-editor`}

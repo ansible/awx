@@ -22,7 +22,7 @@ class Command(BaseCommand):
 
     def handle(self, *arg, **options):
         try:
-            with pg_bus_conn(new_connection=True) as conn:
+            with pg_bus_conn() as conn:
                 conn.listen("rsyslog_configurer")
                 # reconfigure rsyslog on start up
                 reconfigure_rsyslog()

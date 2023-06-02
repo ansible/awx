@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { useParams, useHistory } from 'react-router-dom';
-import { t, Plural } from '@lingui/macro';
+import { t, Trans, Plural } from '@lingui/macro';
 import {
   Button,
   Progress,
@@ -70,6 +70,10 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
   const [healthCheck, setHealthCheck] = useState({});
   const [showHealthCheckAlert, setShowHealthCheckAlert] = useState(false);
   const [forks, setForks] = useState();
+
+  const policyRulesDocsLink = `${getDocsBaseUrl(
+    config
+  )}/html/administration/containers_instance_groups.html#ag-instance-group-policies`;
 
   const {
     isLoading,
@@ -319,6 +323,23 @@ function InstanceDetails({ setBreadcrumb, instanceGroup }) {
               itemsToDisassociate={[instance]}
               isProtectedInstanceGroup={instanceGroup.name === 'controlplane'}
               modalTitle={t`Disassociate instance from instance group?`}
+              modalNote={
+                instance.managed_by_policy ? (
+                  <Trans>
+                    <b>
+                      Note: This instance may be re-associated with this
+                      instance group if it is managed by{' '}
+                      <a
+                        href={policyRulesDocsLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        policy rules.
+                      </a>
+                    </b>
+                  </Trans>
+                ) : null
+              }
             />
           )}
           <InstanceToggle

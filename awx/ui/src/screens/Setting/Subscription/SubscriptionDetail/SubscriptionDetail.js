@@ -206,6 +206,7 @@ function SubscriptionDetail() {
             href="https://www.redhat.com/contact"
             variant="link"
             target="_blank"
+            rel="noopener noreferrer"
             isInline
           >
             contact us.

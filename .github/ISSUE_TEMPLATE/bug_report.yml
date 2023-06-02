@@ -44,6 +44,7 @@ body:
       label: Select the relevant components
       options:
         - label: UI
+        - label: UI (tech preview)
         - label: API
         - label: Docs
         - label: Collection

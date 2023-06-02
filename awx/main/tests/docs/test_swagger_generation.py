@@ -7,7 +7,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.functional import Promise
 from django.utils.encoding import force_str
 
-from openapi_codec.encode import generate_swagger_object
+from drf_yasg.codecs import OpenAPICodecJson
 import pytest
 
 from awx.api.versioning import drf_reverse
@@ -43,12 +43,12 @@ class TestSwaggerGeneration:
     @pytest.fixture(autouse=True, scope='function')
     def _prepare(self, get, admin):
         if not self.__class__.JSON:
-            url = drf_reverse('api:swagger_view') + '?format=openapi'
+            url = drf_reverse('api:schema-swagger-ui') + '?format=openapi'
             response = get(url, user=admin)
-            data = generate_swagger_object(response.data)
+            codec = OpenAPICodecJson([])
+            data = codec.generate_swagger_object(response.data)
             if response.has_header('X-Deprecated-Paths'):
                 data['deprecated_paths'] = json.loads(response['X-Deprecated-Paths'])
-            data.update(response.accepted_renderer.get_customizations() or {})
 
             data['host'] = None
             data['schemes'] = ['https']
@@ -60,12 +60,21 @@ class TestSwaggerGeneration:
                 # change {version} in paths to the actual default API version (e.g., v2)
                 revised_paths[path.replace('{version}', settings.REST_FRAMEWORK['DEFAULT_VERSION'])] = node
                 for method in node:
+                    # Ignore any parameters methods, these cause issues because it can come as an array instead of a dict
+                    # Which causes issues in the last for loop in here
+                    if method == 'parameters':
+                        continue
+
                     if path in deprecated_paths:
                         node[method]['deprecated'] = True
                     if 'description' in node[method]:
                         # Pop off the first line and use that as the summary
                         lines = node[method]['description'].splitlines()
-                        node[method]['summary'] = lines.pop(0).strip('#:')
+                        # If there was a description then set the summary as the description, otherwise make something up
+                        if lines:
+                            node[method]['summary'] = lines.pop(0).strip('#:')
+                        else:
+                            node[method]['summary'] = f'No Description for {method} on {path}'
                         node[method]['description'] = '\n'.join(lines)
 
                     # remove the required `version` parameter
@@ -90,13 +99,13 @@ class TestSwaggerGeneration:
         # The number of API endpoints changes over time, but let's just check
         # for a reasonable number here; if this test starts failing, raise/lower the bounds
         paths = JSON['paths']
-        assert 250 < len(paths) < 350
-        assert list(paths['/api/'].keys()) == ['get']
-        assert list(paths['/api/v2/'].keys()) == ['get']
-        assert list(sorted(paths['/api/v2/credentials/'].keys())) == ['get', 'post']
-        assert list(sorted(paths['/api/v2/credentials/{id}/'].keys())) == ['delete', 'get', 'patch', 'put']
-        assert list(paths['/api/v2/settings/'].keys()) == ['get']
-        assert list(paths['/api/v2/settings/{category_slug}/'].keys()) == ['get', 'put', 'patch', 'delete']
+        assert 250 < len(paths) < 375
+        assert set(list(paths['/api/'].keys())) == set(['get', 'parameters'])
+        assert set(list(paths['/api/v2/'].keys())) == set(['get', 'parameters'])
+        assert set(list(sorted(paths['/api/v2/credentials/'].keys()))) == set(['get', 'post', 'parameters'])
+        assert set(list(sorted(paths['/api/v2/credentials/{id}/'].keys()))) == set(['delete', 'get', 'patch', 'put', 'parameters'])
+        assert set(list(paths['/api/v2/settings/'].keys())) == set(['get', 'parameters'])
+        assert set(list(paths['/api/v2/settings/{category_slug}/'].keys())) == set(['get', 'put', 'patch', 'delete', 'parameters'])
 
     @pytest.mark.parametrize(
         'path',
