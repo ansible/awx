@@ -554,6 +554,16 @@ register(
     category_slug='tacacsplus',
 )
 
+register(
+    'TACACSPLUS_REM_ADDR',
+    field_class=fields.BooleanField,
+    default=True,
+    label=_('TACACS+ client address sending enabled'),
+    help_text=_('Enable the client address sending by TACACS+ client.'),
+    category=_('TACACS+'),
+    category_slug='tacacsplus',
+)
+
 ###############################################################################
 # GOOGLE OAUTH2 AUTHENTICATION SETTINGS
 ###############################################################################

@@ -419,6 +419,7 @@ TACACSPLUS_PORT = 49
 TACACSPLUS_SECRET = ''
 TACACSPLUS_SESSION_TIMEOUT = 5
 TACACSPLUS_AUTH_PROTOCOL = 'ascii'
+TACACSPLUS_REM_ADDR = False
 
 # Enable / Disable HTTP Basic Authentication used in the API browser
 # Note: Session limits are not enforced when using HTTP Basic Authentication.
