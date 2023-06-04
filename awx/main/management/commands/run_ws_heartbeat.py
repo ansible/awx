@@ -29,7 +29,7 @@ class Command(BaseCommand):
             conn.notify('web_ws_heartbeat', self.construct_payload(action='offline'))
         sys.exit(0)
 
-    def do_hearbeat_loop(self):
+    def do_heartbeat_loop(self):
         while True:
             with pg_bus_conn() as conn:
                 logger.debug('Sending heartbeat')
@@ -42,4 +42,4 @@ class Command(BaseCommand):
 
         # Note: We don't really try any reconnect logic to pg_notify here,
         # just let supervisor restart if we fail.
-        self.do_hearbeat_loop()
+        self.do_heartbeat_loop()
