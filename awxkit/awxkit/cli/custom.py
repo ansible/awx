@@ -57,7 +57,9 @@ class Launchable(object):
         parser.choices[self.action].add_argument('--action-timeout', type=int, help='If set with --monitor or --wait, time out waiting on job completion.')
         parser.choices[self.action].add_argument('--wait', action='store_true', help='If set, waits until the launched job finishes.')
         parser.choices[self.action].add_argument(
-            '--interval', type=float, help='If set with --monitor or --wait, amount of time to wait in seconds between api calls.'
+            '--interval',
+            type=float,
+            help='If set with --monitor or --wait, amount of time to wait in seconds between api calls. Minimum value is 2.5 seconds to avoid overwhelming the api',
         )
 
         launch_time_options = self.page.connection.options(self.options_endpoint)

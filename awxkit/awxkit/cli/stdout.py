@@ -58,7 +58,7 @@ def monitor_workflow(response, session, print_stdout=True, action_timeout=None, 
             # all at the end
             fetch(seen)
 
-        time.sleep(interval)
+        time.sleep(max(2.5, interval))
         json = get().json
         if json.finished:
             fetch(seen)
@@ -105,7 +105,7 @@ def monitor(response, session, print_stdout=True, action_timeout=None, interval=
         if next_line:
             payload['start_line__gte'] = next_line
 
-        time.sleep(interval)
+        time.sleep(max(2.5, interval))
         json = get().json
         if json.event_processing_finished is True or json.status in ('error', 'canceled'):
             fetch(next_line)
