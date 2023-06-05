@@ -7,8 +7,6 @@
       user:
         name: "{{ receptor_user }}"
         shell: /bin/bash
-    - name: Enable Copr repo for Receptor
-      command: dnf copr enable ansible-awx/receptor -y
     - import_role:
         name: ansible.receptor.podman
     - import_role:
@@ -16,5 +14,4 @@
     - name: Install ansible-runner
       pip:
         name: ansible-runner
-        executable: pip3.9
 {% endverbatim %}
