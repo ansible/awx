@@ -19,7 +19,7 @@ class Command(BaseCommand):
         while count > 0:
             for table in tables:
                 create_partition(table, start)
-                print(f'Creating partitions for {table} {start}')
+                print(f'Created partitions for {table} {start}')
             start = start + timedelta(hours=1)
             count -= 1
 
