@@ -17,10 +17,7 @@ from django.utils.timezone import now
 
 # AWX
 from awx.main.models import Job, AdHocCommand, ProjectUpdate, InventoryUpdate, SystemJob, WorkflowJob, Notification
-
-
-def unified_job_class_to_event_table_name(job_class):
-    return f'main_{job_class().event_class.__name__.lower()}'
+from awx.main.utils import unified_job_class_to_event_table_name
 
 
 def partition_table_name(job_class, dt):
