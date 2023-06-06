@@ -57,13 +57,11 @@ class InstanceInstallBundle(GenericAPIView):
 
         with io.BytesIO() as f:
             with tarfile.open(fileobj=f, mode='w:gz') as tar:
-                # copy /etc/receptor/tls/ca/receptor-ca.crt to receptor/tls/ca in the tar file
-                tar.add(
-                    os.path.realpath('/etc/receptor/tls/ca/receptor-ca.crt'), arcname=f"{instance_obj.hostname}_install_bundle/receptor/tls/ca/receptor-ca.crt"
-                )
+                # copy /etc/receptor/tls/ca/mesh-CA.crt to receptor/tls/ca in the tar file
+                tar.add(os.path.realpath('/etc/receptor/tls/ca/mesh-CA.crt'), arcname=f"{instance_obj.hostname}_install_bundle/receptor/tls/ca/mesh-CA.crt")
 
-                # copy /etc/receptor/signing/work-public-key.pem to receptor/work-public-key.pem
-                tar.add('/etc/receptor/signing/work-public-key.pem', arcname=f"{instance_obj.hostname}_install_bundle/receptor/work-public-key.pem")
+                # copy /etc/receptor/work_public_key.pem to receptor/work_public_key.pem
+                tar.add('/etc/receptor/work_public_key.pem', arcname=f"{instance_obj.hostname}_install_bundle/receptor/work_public_key.pem")
 
                 # generate and write the receptor key to receptor/tls/receptor.key in the tar file
                 key, cert = generate_receptor_tls(instance_obj)
@@ -161,14 +159,14 @@ def generate_receptor_tls(instance_obj):
         .sign(key, hashes.SHA256())
     )
 
-    # sign csr with the receptor ca key from /etc/receptor/ca/receptor-ca.key
-    with open('/etc/receptor/tls/ca/receptor-ca.key', 'rb') as f:
+    # sign csr with the receptor ca key from /etc/receptor/ca/mesh-CA.key
+    with open('/etc/receptor/tls/ca/mesh-CA.key', 'rb') as f:
         ca_key = serialization.load_pem_private_key(
             f.read(),
             password=None,
         )
 
-    with open('/etc/receptor/tls/ca/receptor-ca.crt', 'rb') as f:
+    with open('/etc/receptor/tls/ca/mesh-CA.crt', 'rb') as f:
         ca_cert = x509.load_pem_x509_certificate(f.read())
 
     cert = (

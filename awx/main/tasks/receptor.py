@@ -665,7 +665,7 @@ RECEPTOR_CONFIG_STARTER = (
     {
         'tls-client': {
             'name': 'tlsclient',
-            'rootcas': '/etc/receptor/tls/ca/receptor-ca.crt',
+            'rootcas': '/etc/receptor/tls/ca/mesh-CA.crt',
             'cert': '/etc/receptor/tls/receptor.crt',
             'key': '/etc/receptor/tls/receptor.key',
             'mintls13': False,
