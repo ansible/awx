@@ -1,5 +1,6 @@
 # Copyright (c) 2019 Ansible, Inc.
 # All Rights Reserved.
+# -*-coding:utf-8-*-
 
 
 class CustomNotificationBase(object):
