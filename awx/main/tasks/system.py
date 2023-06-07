@@ -317,13 +317,8 @@ def send_notifications(notification_list, job_id=None):
 @task(queue=get_task_queuename)
 def gather_analytics():
     from awx.conf.models import Setting
-    from rest_framework.fields import DateTimeField
 
-    last_gather = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_GATHER').first()
-    last_time = DateTimeField().to_internal_value(last_gather.value) if last_gather and last_gather.value else None
-    gather_time = now()
-
-    if not last_time or ((gather_time - last_time).total_seconds() > settings.AUTOMATION_ANALYTICS_GATHER_INTERVAL):
+    if _is_run_threshold_reached(Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_GATHER').first(), settings.AUTOMATION_ANALYTICS_GATHER_INTERVAL):
         analytics.gather()
 
 
@@ -382,21 +377,37 @@ def cleanup_images_and_files():
 
 @task(queue=get_task_queuename)
 def cleanup_host_metrics():
+    """Run cleanup host metrics ~each month"""
     from awx.conf.models import Setting
-    from rest_framework.fields import DateTimeField
 
-    last_cleanup = Setting.objects.filter(key='CLEANUP_HOST_METRICS_LAST_TS').first()
-    last_time = DateTimeField().to_internal_value(last_cleanup.value) if last_cleanup and last_cleanup.value else None
-
-    cleanup_interval_secs = getattr(settings, 'CLEANUP_HOST_METRICS_INTERVAL', 30) * 86400
-    if not last_time or ((now() - last_time).total_seconds() > cleanup_interval_secs):
+    if _is_run_threshold_reached(
+        Setting.objects.filter(key='CLEANUP_HOST_METRICS_LAST_TS').first(), getattr(settings, 'CLEANUP_HOST_METRICS_INTERVAL', 30) * 86400
+    ):
         months_ago = getattr(settings, 'CLEANUP_HOST_METRICS_SOFT_THRESHOLD', 12)
+        logger.info("TASK STATUS: cleanup_host_metrics: STARTED")
         HostMetric.cleanup_task(months_ago)
+        logger.info("TASK STATUS: cleanup_host_metrics: FINISHED")
 
 
 @task(queue=get_task_queuename)
 def host_metric_summary_monthly():
-    HostMetricSummaryMonthlyTask().execute()
+    """Run cleanup host metrics summary monthly task each week"""
+    from awx.conf.models import Setting
+
+    if _is_run_threshold_reached(
+        Setting.objects.filter(key='HOST_METRIC_SUMMARY_TASK_LAST_TS').first(), getattr(settings, 'HOST_METRIC_SUMMARY_TASK_INTERVAL', 7) * 86400
+    ):
+        logger.info("TASK STATUS: host_metric_summary_monthly: STARTED")
+        HostMetricSummaryMonthlyTask().execute()
+        logger.info("TASK STATUS: host_metric_summary_monthly: FINISHED")
+
+
+def _is_run_threshold_reached(setting, threshold_seconds):
+    from rest_framework.fields import DateTimeField
+
+    last_time = DateTimeField().to_internal_value(setting.value) if setting and setting.value else 0
+
+    return (now() - last_time).total_seconds() > threshold_seconds
 
 
 @task(queue=get_task_queuename)

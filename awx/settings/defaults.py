@@ -471,8 +471,8 @@ CELERYBEAT_SCHEDULE = {
     'receptor_reaper': {'task': 'awx.main.tasks.system.awx_receptor_workunit_reaper', 'schedule': timedelta(seconds=60)},
     'send_subsystem_metrics': {'task': 'awx.main.analytics.analytics_tasks.send_subsystem_metrics', 'schedule': timedelta(seconds=20)},
     'cleanup_images': {'task': 'awx.main.tasks.system.cleanup_images_and_files', 'schedule': timedelta(hours=3)},
-    'cleanup_host_metrics': {'task': 'awx.main.tasks.system.cleanup_host_metrics', 'schedule': timedelta(days=1)},
-    'host_metric_summary_monthly': {'task': 'awx.main.tasks.system.host_metric_summary_monthly', 'schedule': timedelta(weeks=1)},
+    'cleanup_host_metrics': {'task': 'awx.main.tasks.system.cleanup_host_metrics', 'schedule': timedelta(hours=3, minutes=30)},
+    'host_metric_summary_monthly': {'task': 'awx.main.tasks.system.host_metric_summary_monthly', 'schedule': timedelta(hours=4)},
 }
 
 # Django Caching Configuration
@@ -1063,3 +1063,4 @@ CLEANUP_HOST_METRICS_HARD_THRESHOLD = 36  # months
 
 # Host metric summary monthly task - last time of run
 HOST_METRIC_SUMMARY_TASK_LAST_TS = None
+HOST_METRIC_SUMMARY_TASK_INTERVAL = 7  # days
