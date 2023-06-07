@@ -122,7 +122,9 @@ function NotificationTemplateListItem({
             template.notification_type}
         </Td>
         <Td dataLabel={t`Oragnization`}>
-          <Link to={`/organizations/${template.summary_fields.organization.id}/details`}>
+          <Link
+            to={`/organizations/${template.summary_fields.organization.id}/details`}
+          >
             <b>{template.summary_fields.organization.name}</b>
           </Link>
         </Td>
