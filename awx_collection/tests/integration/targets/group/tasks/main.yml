@@ -9,10 +9,12 @@
     group_name1: "AWX-Collection-tests-group-group1-{{ test_id }}"
     group_name2: "AWX-Collection-tests-group-group2-{{ test_id }}"
     group_name3: "AWX-Collection-tests-group-group3-{{ test_id }}"
+    group_name4: "AWX-Collection-tests-group-group4-{{ test_id }}"
     inv_name: "AWX-Collection-tests-group-inv-{{ test_id }}"
     host_name1: "AWX-Collection-tests-group-host1-{{ test_id }}"
     host_name2: "AWX-Collection-tests-group-host2-{{ test_id }}"
     host_name3: "AWX-Collection-tests-group-host3-{{ test_id }}"
+    host_name4: "AWX-Collection-tests-group-host4-{{ test_id }}"
 
 - name: Create an Inventory
   inventory:
@@ -20,6 +22,26 @@
     organization: Default
     state: present
   registuer: result
+
+- name: Create a Host
+  host:
+    name: "{{ host_name4 }}"
+    inventory: "{{ inv_name }}"
+    state: present
+  register: result
+
+- name: Add Host to Group
+  group:
+    name: "{{ group_name1 }}"
+    inventory: "{{ inv_name }}"
+    hosts:
+      - "{{ host_name4 }}"
+    preserve_existing_hosts: true
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
 
 - name: Create Group 1
   group:

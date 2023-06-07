@@ -50,7 +50,7 @@ tss_inputs = {
 
 
 def tss_backend(**kwargs):
-    if 'domain' in kwargs:
+    if kwargs.get("domain"):
         authorizer = DomainPasswordGrantAuthorizer(kwargs['server_url'], kwargs['username'], kwargs['password'], kwargs['domain'])
     else:
         authorizer = PasswordGrantAuthorizer(kwargs['server_url'], kwargs['username'], kwargs['password'])
