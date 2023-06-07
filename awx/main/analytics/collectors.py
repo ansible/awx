@@ -34,7 +34,8 @@ data _since_ the last report date - i.e., new data in the last 24 hours)
 """
 
 
-def trivial_slicing(key, since, until, last_gather, **kwargs):
+def trivial_slicing(key, last_gather, **kwargs):
+    since, until = kwargs.get('since', None), kwargs.get('until', now())
     if since is not None:
         return [(since, until)]
 
@@ -47,7 +48,8 @@ def trivial_slicing(key, since, until, last_gather, **kwargs):
     return [(last_entry, until)]
 
 
-def four_hour_slicing(key, since, until, last_gather, **kwargs):
+def four_hour_slicing(key, last_gather, **kwargs):
+    since, until = kwargs.get('since', None), kwargs.get('until', now())
     if since is not None:
         last_entry = since
     else:
@@ -68,12 +70,13 @@ def four_hour_slicing(key, since, until, last_gather, **kwargs):
         start = end
 
 
-def host_metric_slicing(key, since, until, last_gather, **kwargs):
+def host_metric_slicing(key, last_gather, **kwargs):
     """
     Slicing doesn't start 4 weeks ago, but sends whole table monthly or first time
     """
     from awx.main.models.inventory import HostMetric
 
+    since, until = kwargs.get('since', None), kwargs.get('until', now())
     if since is not None:
         return [(since, until)]
 
@@ -544,7 +547,12 @@ def workflow_job_template_node_table(since, full_path, **kwargs):
 
 
 @register(
-    'host_metric_table', '1.0', format='csv', description=_('Host Metric data, incremental/full sync'), fnc_slicing=host_metric_slicing, full_sync_interval=30
+    'host_metric_table',
+    '1.0',
+    format='csv',
+    description=_('Host Metric data, incremental/full sync'),
+    fnc_slicing=host_metric_slicing,
+    full_sync_interval_days=30,
 )
 def host_metric_table(since, full_path, until, **kwargs):
     host_metric_query = '''COPY (SELECT main_hostmetric.id,
@@ -565,7 +573,7 @@ def host_metric_table(since, full_path, until, **kwargs):
     return _copy_table(table='host_metric', query=host_metric_query, path=full_path)
 
 
-@register('host_metric_summary_monthly_table', '1.0', format='csv', description=_('HostMetricSummaryMonthly export, full sync'), expensive=trivial_slicing)
+@register('host_metric_summary_monthly_table', '1.0', format='csv', description=_('HostMetricSummaryMonthly export, full sync'), fnc_slicing=trivial_slicing)
 def host_metric_summary_monthly_table(since, full_path, **kwargs):
     query = '''
     COPY (SELECT main_hostmetricsummarymonthly.id,

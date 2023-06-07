@@ -30,7 +30,7 @@ djangorestframework-yaml
 filelock
 GitPython>=3.1.37  # CVE-2023-41040
 hiredis==2.0.0  # see UPGRADE BLOCKERs
-insights-analytics-collector==0.2.0
+insights-analytics-collector==0.3.2
 irc
 jinja2>=3.1.3  # CVE-2024-22195
 JSON-log-formatter
