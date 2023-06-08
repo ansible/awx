@@ -472,7 +472,7 @@ CELERYBEAT_SCHEDULE = {
     'send_subsystem_metrics': {'task': 'awx.main.analytics.analytics_tasks.send_subsystem_metrics', 'schedule': timedelta(seconds=20)},
     'cleanup_images': {'task': 'awx.main.tasks.system.cleanup_images_and_files', 'schedule': timedelta(hours=3)},
     'cleanup_host_metrics': {'task': 'awx.main.tasks.system.cleanup_host_metrics', 'schedule': timedelta(hours=3, minutes=30)},
-    'host_metric_summary_monthly': {'task': 'awx.main.tasks.system.host_metric_summary_monthly', 'schedule': timedelta(hours=4)},
+    'host_metric_summary_monthly': {'task': 'awx.main.tasks.host_metrics.host_metric_summary_monthly', 'schedule': timedelta(hours=4)},
 }
 
 # Django Caching Configuration

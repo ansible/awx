@@ -1,12 +1,35 @@
 import datetime
 from dateutil.relativedelta import relativedelta
+import logging
 
 from django.conf import settings
 from django.db.models import Count
 from django.db.models.functions import TruncMonth
 from django.utils.timezone import now
+from rest_framework.fields import DateTimeField
+from awx.main.dispatch import get_task_queuename
+from awx.main.dispatch.publish import task
 from awx.main.models.inventory import HostMetric, HostMetricSummaryMonthly
 from awx.conf.license import get_license
+
+logger = logging.getLogger('awx.main.tasks.host_metric_summary_monthly')
+
+
+@task(queue=get_task_queuename)
+def host_metric_summary_monthly():
+    """Run cleanup host metrics summary monthly task each week"""
+    if _is_run_threshold_reached(
+        getattr(settings, 'HOST_METRIC_SUMMARY_TASK_LAST_TS', None), getattr(settings, 'HOST_METRIC_SUMMARY_TASK_INTERVAL', 7) * 86400
+    ):
+        logger.info(f"Executing host_metric_summary_monthly, last ran at {getattr(settings, 'HOST_METRIC_SUMMARY_TASK_LAST_TS', '---')}")
+        HostMetricSummaryMonthlyTask().execute()
+        logger.info("Finished host_metric_summary_monthly")
+
+
+def _is_run_threshold_reached(setting, threshold_seconds):
+    last_time = DateTimeField().to_internal_value(setting) if setting else 0
+
+    return (now() - last_time).total_seconds() > threshold_seconds
 
 
 class HostMetricSummaryMonthlyTask:
@@ -78,7 +101,7 @@ class HostMetricSummaryMonthlyTask:
 
     def _load_hosts_added(self):
         """
-        SELECT 1 as id, date_trunc('month', first_automation) as month,
+        SELECT date_trunc('month', first_automation) as month,
                count(first_automation) AS hosts_added
         FROM main_hostmetric
         GROUP BY month
@@ -102,11 +125,11 @@ class HostMetricSummaryMonthlyTask:
 
     def _load_hosts_deleted(self):
         """
-        SELECT 1 as id, date_trunc('month', last_deleted) as month,
+        SELECT date_trunc('month', last_deleted) as month,
                count(last_deleted) AS hosts_deleted
         FROM main_hostmetric
         WHERE deleted = True
-        GROUP BY month
+        GROUP BY 1 # equal to "GROUP BY month"
         ORDER by month;
         """
         result = (

@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from awx.main.tasks.handlers import HostMetricSummaryMonthlyTask
+from awx.main.tasks.host_metrics import HostMetricSummaryMonthlyTask
 
 
 class Command(BaseCommand):
