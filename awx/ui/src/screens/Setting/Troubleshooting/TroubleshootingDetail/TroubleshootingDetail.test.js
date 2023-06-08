@@ -12,11 +12,11 @@ import {
 } from '../../shared/settingTestUtils';
 import mockAllOptions from '../../shared/data.allSettingOptions.json';
 import mockJobSettings from '../../shared/data.jobSettings.json';
-import JobsDetail from './JobsDetail';
+import TroubleshootingDetail from './TroubleshootingDetail';
 
 jest.mock('../../../../api');
 
-describe('<JobsDetail />', () => {
+describe('<TroubleshootingDetail />', () => {
   let wrapper;
 
   beforeEach(() => {
@@ -29,7 +29,7 @@ describe('<JobsDetail />', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <SettingsProvider value={mockAllOptions.actions}>
-          <JobsDetail />
+          <TroubleshootingDetail />
         </SettingsProvider>
       );
     });
@@ -41,7 +41,7 @@ describe('<JobsDetail />', () => {
   });
 
   test('initially renders without crashing', () => {
-    expect(wrapper.find('JobsDetail').length).toBe(1);
+    expect(wrapper.find('TroubleshootingDetail').length).toBe(1);
   });
 
   test('should render expected tabs', () => {
@@ -89,7 +89,7 @@ describe('<JobsDetail />', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <SettingsProvider value={mockAllOptions.actions}>
-          <JobsDetail />
+          <TroubleshootingDetail />
         </SettingsProvider>,
         {
           context: { config },
@@ -105,7 +105,7 @@ describe('<JobsDetail />', () => {
     await act(async () => {
       wrapper = mountWithContexts(
         <SettingsProvider value={mockAllOptions.actions}>
-          <JobsDetail />
+          <TroubleshootingDetail />
         </SettingsProvider>
       );
     });

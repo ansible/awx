@@ -8,7 +8,7 @@ import {
   waitForElement,
 } from '../../../../../testUtils/enzymeHelpers';
 import mockAllOptions from '../../shared/data.allSettingOptions.json';
-import mockTroubleshootingSettings from 'data.defaultTroubleshootingSettings.json';
+import mockTroubleshootingSettings from './data.defaultTroubleshootingSettings.json';
 import TroubleshootingEdit from './TroubleshootingEdit';
 
 jest.mock('../../../../api');
@@ -47,7 +47,7 @@ describe('<TroubleshootingEdit />', () => {
   });
 
   test('initially renders without crashing', () => {
-    expect(wrapper.find('JobsEdit').length).toBe(1);
+    expect(wrapper.find('TroubleshootingEdit').length).toBe(1);
   });
 
   test('should successfully send default values to api on form revert all', async () => {
@@ -67,7 +67,7 @@ describe('<TroubleshootingEdit />', () => {
     });
     wrapper.update();
     expect(SettingsAPI.revertCategory).toHaveBeenCalledTimes(1);
-    expect(SettingsAPI.revertCategory).toHaveBeenCalledWith('jobs');
+    expect(SettingsAPI.revertCategory).toHaveBeenCalledWith('debug');
   });
 
   test('should successfully send request to api on form submission', async () => {
@@ -76,8 +76,8 @@ describe('<TroubleshootingEdit />', () => {
       wrapper.find('Form').invoke('onSubmit')();
     });
     expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
-    const { ...jobRequest } = mockTroubleshootingSettings;
-    expect(SettingsAPI.updateAll).toHaveBeenCalledWith(jobRequest);
+    const { ...troubleshootingRequest } = mockTroubleshootingSettings;
+    expect(SettingsAPI.updateAll).toHaveBeenCalledWith(troubleshootingRequest);
   });
 
   test('should display error message on unsuccessful submission', async () => {
@@ -97,7 +97,7 @@ describe('<TroubleshootingEdit />', () => {
     expect(SettingsAPI.updateAll).toHaveBeenCalledTimes(1);
   });
 
-  test('should navigate to job settings detail when cancel is clicked', async () => {
+  test('should navigate to troubleshooting settings detail when cancel is clicked', async () => {
     await act(async () => {
       wrapper.find('button[aria-label="Cancel"]').invoke('onClick')();
     });

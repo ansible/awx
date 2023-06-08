@@ -43,7 +43,7 @@ describe('<Troubleshooting />', () => {
         context: { router: { history } },
       });
     });
-    expect(wrapper.find('JobsEdit').length).toBe(1);
+    expect(wrapper.find('TroubleshootingEdit').length).toBe(1);
   });
 
   test('should show content error when user navigates to erroneous route', async () => {
