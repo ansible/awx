@@ -883,7 +883,7 @@ class LaunchTimeConfigBase(BaseModel):
     )
     # All standard fields are stored in this dictionary field
     # This is a solution to the nullable CharField problem, specific to prompting
-    char_prompts = JSONBlob(default=dict, blank=True)
+    char_prompts = models.JSONField(default=dict, blank=True)
 
     # Define fields that are not really fields, but alias to char_prompts lookups
     limit = NullablePromptPseudoField('limit')
@@ -960,7 +960,7 @@ class LaunchTimeConfig(LaunchTimeConfigBase):
     # Special case prompting fields, even more special than the other ones
     extra_data = JSONBlob(default=dict, blank=True)
     survey_passwords = prevent_search(
-        JSONBlob(
+        models.JSONField(
             default=dict,
             editable=False,
             blank=True,
