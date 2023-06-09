@@ -16,8 +16,7 @@ from django.test.utils import override_settings
 @pytest.mark.django_db
 def test_get_notification_template_list(get, user, notification_template):
     url = reverse('api:notification_template_list')
-    response = get(url, user('admin', True))
-    assert response.status_code == 200
+    response = get(url, user('admin', True), expect=200)
     assert len(response.data['results']) == 1
 
 
@@ -35,8 +34,8 @@ def test_basic_parameterization(get, post, user, organization):
             notification_configuration=dict(url="http://localhost", disable_ssl_verification=False, headers={"Test": "Header"}),
         ),
         u,
+        expect=201,
     )
-    assert response.status_code == 201
     url = reverse('api:notification_template_detail', kwargs={'pk': response.data['id']})
     response = get(url, u)
     assert 'related' in response.data
@@ -69,8 +68,8 @@ def test_encrypted_subfields(get, post, user, organization):
             notification_configuration=dict(account_sid="dummy", account_token="shouldhide", from_number="+19999999999", to_numbers=["9998887777"]),
         ),
         u,
+        expect=201,
     )
-    assert response.status_code == 201
     notification_template_actual = NotificationTemplate.objects.get(id=response.data['id'])
     url = reverse('api:notification_template_detail', kwargs={'pk': response.data['id']})
     response = get(url, u)
@@ -96,8 +95,8 @@ def test_inherited_notification_templates(get, post, user, organization, project
                 notification_configuration=dict(url="http://localhost", disable_ssl_verification=False, headers={"Test": "Header"}),
             ),
             u,
+            expect=201,
         )
-        assert response.status_code == 201
         notification_templates.append(response.data['id'])
     i = Inventory.objects.create(name='test', organization=organization)
     i.save()
@@ -122,8 +121,7 @@ def test_disallow_delete_when_notifications_pending(delete, user, notification_t
     u = user('superuser', True)
     url = reverse('api:notification_template_detail', kwargs={'pk': notification_template.id})
     Notification.objects.create(notification_template=notification_template, status='pending')
-    response = delete(url, user=u)
-    assert response.status_code == 405
+    delete(url, user=u, expect=405)
 
 
 @pytest.mark.django_db
@@ -133,9 +131,8 @@ def test_notification_template_list_includes_notification_errors(get, user, noti
     Notification.objects.create(notification_template=notification_template, status='successful')
     url = reverse('api:notification_template_list')
     u = user('superuser', True)
-    response = get(url, user=u)
+    response = get(url, user=u, expect=200)
 
-    assert response.status_code == 200
     notifications = response.data['results'][0]['summary_fields']['recent_notifications']
     assert len(notifications) == 3
     statuses = [n['status'] for n in notifications]
@@ -163,8 +160,8 @@ def test_custom_environment_injection(post, user, organization):
             notification_configuration=dict(url="https://example.org", disable_ssl_verification=False, http_method="POST", headers={"Test": "Header"}),
         ),
         u,
+        expect=201,
     )
-    assert response.status_code == 201
     template = NotificationTemplate.objects.get(pk=response.data['id'])
     with pytest.raises(ConnectionError), override_settings(AWX_TASK_ENV={'HTTPS_PROXY': '192.168.50.100:1234'}), mock.patch.object(
         HTTPAdapter, 'send'
