@@ -55,7 +55,7 @@ from awx.main.utils import polymorphic
 from awx.main.constants import ACTIVE_STATES, CAN_CANCEL, JOB_VARIABLE_PREFIXES
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.consumers import emit_channel_notification
-from awx.main.fields import AskForField, OrderedManyToManyField, JSONBlob
+from awx.main.fields import AskForField, OrderedManyToManyField
 
 __all__ = ['UnifiedJobTemplate', 'UnifiedJob', 'StdoutMaxBytesExceeded']
 
@@ -668,7 +668,7 @@ class UnifiedJob(
         editable=False,
     )
     job_env = prevent_search(
-        JSONBlob(
+        models.JSONField(
             default=dict,
             blank=True,
             editable=False,

@@ -24,7 +24,7 @@ from awx.main.utils import parse_yaml_or_json, get_custom_venv_choices, get_lice
 from awx.main.utils.execution_environments import get_default_execution_environment
 from awx.main.utils.encryption import decrypt_value, get_encryption_key, is_encrypted
 from awx.main.utils.polymorphic import build_polymorphic_ctypes_map
-from awx.main.fields import AskForField, JSONBlob
+from awx.main.fields import AskForField
 from awx.main.constants import ACTIVE_STATES
 
 
@@ -103,7 +103,7 @@ class SurveyJobTemplateMixin(models.Model):
     survey_enabled = models.BooleanField(
         default=False,
     )
-    survey_spec = prevent_search(JSONBlob(default=dict, blank=True))
+    survey_spec = prevent_search(models.JSONField(default=dict, blank=True))
 
     ask_inventory_on_launch = AskForField(
         blank=True,
@@ -392,7 +392,7 @@ class SurveyJobMixin(models.Model):
         abstract = True
 
     survey_passwords = prevent_search(
-        JSONBlob(
+        models.JSONField(
             default=dict,
             editable=False,
             blank=True,
