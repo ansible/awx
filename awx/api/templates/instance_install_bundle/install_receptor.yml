@@ -14,7 +14,4 @@
     - name: Install ansible-runner
       pip:
         name: ansible-runner
-    - name: Install receptorctl
-      pip:
-        name: receptorctl
 {% endverbatim %}
