@@ -295,7 +295,7 @@ class SurveyJobTemplateMixin(models.Model):
                     errors.append("Value %s for '%s' expected to be one of %s." % (data[survey_element['variable']], survey_element['variable'], choice_list))
         return errors
 
-    def _accept_or_ignore_variables(self, data, errors=None, _exclude_errors=(), extra_passwords=None):
+    def _accept_or_ignore_variables(self, data, errors=None, _exclude_errors=()):
         survey_is_enabled = self.survey_enabled and self.survey_spec
         extra_vars = data.copy()
         if errors is None:
@@ -310,7 +310,7 @@ class SurveyJobTemplateMixin(models.Model):
                 key = survey_element.get('variable', None)
                 value = data.get(key, None)
                 validate_required = 'required' not in _exclude_errors
-                if extra_passwords and key in extra_passwords and is_encrypted(value):
+                if is_encrypted(value):
                     element_errors = self._survey_element_validation(
                         survey_element, {key: decrypt_value(get_encryption_key('value', pk=None), value)}, validate_required=validate_required
                     )
@@ -391,23 +391,17 @@ class SurveyJobMixin(models.Model):
     class Meta:
         abstract = True
 
-    survey_passwords = prevent_search(
-        JSONBlob(
-            default=dict,
-            editable=False,
-            blank=True,
-        )
-    )
-
     def display_extra_vars(self):
         """
         Hides fields marked as passwords in survey.
         """
-        if self.survey_passwords:
-            extra_vars = json.loads(self.extra_vars)
-            for key, value in self.survey_passwords.items():
-                if key in extra_vars:
-                    extra_vars[key] = value
+        extra_vars = json.loads(self.extra_vars)
+        changed = False
+        for key in extra_vars:
+            if is_encrypted(extra_vars.get(key)):
+                extra_vars[key] = '$encrypted$'
+                changed = True
+        if changed:
             return json.dumps(extra_vars)
         else:
             return self.extra_vars
@@ -416,12 +410,17 @@ class SurveyJobMixin(models.Model):
         """
         Decrypts fields marked as passwords in survey.
         """
-        if self.survey_passwords:
-            extra_vars = json.loads(self.extra_vars)
-            for key in self.survey_passwords:
-                value = extra_vars.get(key)
-                if value and isinstance(value, str) and value.startswith('$encrypted$'):
+        extra_vars = self.extra_vars_dict
+        changed = False
+        for key in extra_vars:
+            value = extra_vars[key]
+            if value and isinstance(value, str) and is_encrypted(value):
+                try:
                     extra_vars[key] = decrypt_value(get_encryption_key('value', pk=None), value)
+                    changed = True
+                except Exception as exc:
+                    logger.info(f'Could not decrypt {key} from template {self.id}, error: {exc}')
+        if changed:
             return json.dumps(extra_vars)
         else:
             return self.extra_vars
