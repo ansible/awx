@@ -11,3 +11,15 @@ datasources:
     jsonData:
       timeInterval: 5s
     uid: awx_prometheus
+  - name: AWX PostgreSQL
+    type: postgres
+    isDefault: false
+    url: postgres:5432
+    user: db_monitor
+    database: awx
+    jsonData:
+      timeInterval: "10s"
+      postgresVersion: 1200
+      sslmode: disable
+    readOnly: true
+    uid: awx_postgres
