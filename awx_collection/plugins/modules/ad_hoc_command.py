@@ -160,7 +160,7 @@ def main():
     post_data['inventory'] = module.resolve_name_to_id('inventories', inventory)
     post_data['credential'] = module.resolve_name_to_id('credentials', credential)
     if execution_environment:
-        post_data['execution_environment'] = module.resolve_name_to_id('execution_environment', execution_environment)
+        post_data['execution_environment'] = module.resolve_name_to_id('execution_environments', execution_environment)
 
     # Launch the ad hoc command
     results = module.post_endpoint('ad_hoc_commands', **{'data': post_data})
