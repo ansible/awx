@@ -178,7 +178,8 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     )
     listener_port = models.PositiveIntegerField(
         blank=True,
-        default=27199,
+        null=True,
+        default=None,
         validators=[MinValueValidator(1), MaxValueValidator(65535)],
         help_text=_("Port that Receptor will listen for incoming connections on."),
     )
