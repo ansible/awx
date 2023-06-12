@@ -1,0 +1,37 @@
+---
+name: CI
+env:
+  LC_ALL: "C.UTF-8" # prevent ERROR: Ansible could not initialize the preferred locale: unsupported locale setting
+  CI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  DEV_DOCKER_TAG_BASE: ghcr.io/${{ github.repository_owner }}
+  COMPOSE_TAG: ${{ github.base_ref || 'devel' }}
+on:
+  push:
+    branches:
+      - devel
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  api-test:
+    name: api-test
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Run tests and generate coverage report
+        run: AWX_DOCKER_CMD='/start_tests.sh' make github_ci_runner
+
+      - name: SonarCloud Scan
+        # We want this to run even if the tests fail
+        if: (success() || failure()) && github.repository == 'ansible/awx'
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
