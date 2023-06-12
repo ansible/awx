@@ -5486,6 +5486,7 @@ class InstanceSerializer(BaseSerializer):
             raise serializers.ValidationError("Can only create instances on Kubernetes or OpenShift.")
         node_type = get_field_from_model_or_attrs("node_type")
         peers_from_control_nodes = get_field_from_model_or_attrs("peers_from_control_nodes")
+        listener_port = get_field_from_model_or_attrs("listener_port")
 
         if peers_from_control_nodes and node_type not in (Instance.Types.EXECUTION, Instance.Types.HOP):
             raise serializers.ValidationError("peers_from_control_nodes can only be enabled for execution or hop nodes.")
@@ -5495,6 +5496,12 @@ class InstanceSerializer(BaseSerializer):
                 raise serializers.ValidationError(
                     "Setting peers manually for control nodes is not allowed. Enable peers_from_control_nodes on the hop and execution nodes instead."
                 )
+
+        if peers_from_control_nodes and listener_port is None:
+            raise serializers.ValidationError(_("Field listener_port must be a valid integer when peers_from_control_nodes is enabled."))
+        for peer in attrs.get('peers', []):
+            if peer.listener_port is None:
+                raise serializers.ValidationError(_("Field listener_port must be set on peer ") + peer.hostname + ".")
 
         return super().validate(attrs)
 
