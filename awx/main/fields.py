@@ -102,10 +102,22 @@ class JSONBlob(JSONField):
         if not prepared:
             value = self.get_prep_value(value)
         try:
-            return json.dumps(value)
+            # Null characters are not allowed in text fields and JSONBlobs are JSON data but saved as text
+            # So we want to make sure we strip out any null characters also note, these "should" be escaped by the dumps process:
+            #     >>> my_obj = { 'test': '\x00' }
+            #     >>> import json
+            #     >>> json.dumps(my_obj)
+            #     '{"test": "\\u0000"}'
+            # But just to be safe, lets remove them if they are there. \x00 and \u0000 are the same:
+            #     >>> string = "\x00"
+            #     >>> "\u0000" in string
+            #     True
+            dumped_value = json.dumps(value)
+            if "\x00" in dumped_value:
+                dumped_value = dumped_value.replace("\x00", '')
+            return dumped_value
         except Exception as e:
-            logger.error(f"Failed to dump JSONField {self.name}: {e}")
-            logger.error(f"{value}")
+            logger.error(f"Failed to dump JSONField {self.name}: {e} value: {value}")
 
         return value
 
