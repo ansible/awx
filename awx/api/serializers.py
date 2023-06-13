@@ -5387,7 +5387,7 @@ class InstanceSerializer(BaseSerializer):
     jobs_running = serializers.IntegerField(help_text=_('Count of jobs in the running or waiting state that are targeted for this instance'), read_only=True)
     jobs_total = serializers.IntegerField(help_text=_('Count of all jobs that target this instance'), read_only=True)
     health_check_pending = serializers.SerializerMethodField()
-    peers = PeersSerializer(many=True)
+    peers = PeersSerializer(many=True, required=False)
 
     class Meta:
         model = Instance
