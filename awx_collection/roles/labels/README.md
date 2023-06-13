@@ -113,7 +113,7 @@ controller_labels:
         ignore_files: [controller_config.yml.template]
         extensions: ["yml"]
   roles:
-    - {role: infra.controller_configuration.labels, when: controller_labels is defined}
+    - {role: awx.controller_configuration.labels, when: controller_labels is defined}
 ```
 
 ## License

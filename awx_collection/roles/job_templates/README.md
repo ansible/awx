@@ -293,7 +293,7 @@ controller_templates:
         ignore_files: [controller_config.yml.template]
         extensions: ["yml"]
   roles:
-    - {role: infra.controller_configuration.job_templates, when: controller_templates is defined}
+    - {role: awx.controller_configuration.job_templates, when: controller_templates is defined}
 ```
 
 ## License

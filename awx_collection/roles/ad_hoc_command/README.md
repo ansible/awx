@@ -95,7 +95,7 @@ controller_ad_hoc_commands:
         ignore_files: [controller_config.yml.template]
         extensions: ["yml"]
   roles:
-    - {role: infra.controller_configuration.ad_hoc_command, when: controller_ad_hoc_commands is defined}
+    - {role: awx.controller_configuration.ad_hoc_command, when: controller_ad_hoc_commands is defined}
 
 ```
 

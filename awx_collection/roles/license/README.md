@@ -120,7 +120,7 @@ controller_license:
         ignore_files: [controller_config.yml.template]
         extensions: ["yml"]
   roles:
-    - {role: infra.controller_configuration.license, when: controller_license is defined}
+    - {role: awx.controller_configuration.license, when: controller_license is defined}
 ```
 
 ### Standard Subscription lookup Role Usage
@@ -139,7 +139,7 @@ controller_license:
     redhat_subscription_password: changeme
 
   roles:
-    - {role: infra.controller_configuration.license}
+    - {role: awx.controller_configuration.license}
 ```
 
 ## License

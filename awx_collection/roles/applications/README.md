@@ -135,7 +135,7 @@ controller_applications:
         ignore_files: [controller_config.yml.template]
         extensions: ["yml"]
   roles:
-    - {role: infra.controller_configuration.applications, when: controller_applications is defined}
+    - {role: awx.controller_configuration.applications, when: controller_applications is defined}
 ```
 
 ## License

@@ -98,7 +98,7 @@ controller_launch_jobs:
         ignore_files: [controller_config.yml.template]
         extensions: ["yml"]
   roles:
-    - {role: infra.controller_configuration.job_launch, when: controller_launch_jobs is defined}
+    - {role: awx.controller_configuration.job_launch, when: controller_launch_jobs is defined}
 ```
 
 ## License

@@ -98,7 +98,7 @@ This also speeds up the overall role.
         ignore_files: [controller_config.yml.template]
         extensions: ["yml"]
   roles:
-    - {role: infra.controller_configuration.teams, when: controller_teams is defined}
+    - {role: awx.controller_configuration.teams, when: controller_teams is defined}
 ```
 
 ## License

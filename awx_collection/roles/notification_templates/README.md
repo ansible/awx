@@ -189,7 +189,7 @@ controller_notifications:
         ignore_files: [controller_config.yml.template]
         extensions: ["yml"]
   roles:
-    - {role: infra.controller_configuration.notification_templates, when: controller_notifications is defined}
+    - {role: awx.controller_configuration.notification_templates, when: controller_notifications is defined}
 ```
 
 ## License

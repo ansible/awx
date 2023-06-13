@@ -125,7 +125,7 @@ controller_execution_environments:
   tasks:
     - name: Add Execution Environments
       include_role:
-        name: infra.controller_configuration.execution_environments
+        name: awx.controller_configuration.execution_environments
 ```
 
 ## License

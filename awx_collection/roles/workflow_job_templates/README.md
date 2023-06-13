@@ -418,7 +418,7 @@ controller_workflows:
         ignore_files: [controller_config.yml.template]
         extensions: ["yml"]
   roles:
-    - {role: infra.controller_configuration.workflow_job_templates, when: controller_workflows is defined}
+    - {role: awx.controller_configuration.workflow_job_templates, when: controller_workflows is defined}
 
 ```
 

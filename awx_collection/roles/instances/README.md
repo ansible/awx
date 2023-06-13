@@ -114,7 +114,7 @@ controller_instances:
         ignore_files: [controller_config.yml.template]
         extensions: ["yml"]
   roles:
-    - {role: infra.controller_configuration.instances, when: controller_instances is defined}
+    - {role: awx.controller_configuration.instances, when: controller_instances is defined}
 ```
 
 ## License

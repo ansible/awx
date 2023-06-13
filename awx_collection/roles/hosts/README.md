@@ -152,7 +152,7 @@ controller_hosts:
         ignore_files: [controller_config.yml.template]
         extensions: ["yml"]
   roles:
-    - {role: infra.controller_configuration.hosts, when: controller_hosts is defined}
+    - {role: awx.controller_configuration.hosts, when: controller_hosts is defined}
 ```
 
 ## License

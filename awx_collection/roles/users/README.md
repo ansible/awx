@@ -134,7 +134,7 @@ controller_user_accounts:
         ignore_files: [controller_config.yml.template]
         extensions: ["yml"]
   roles:
-    - {role: infra.controller_configuration.users, when: controller_user_accounts is defined}
+    - {role: awx.controller_configuration.users, when: controller_user_accounts is defined}
 ```
 
 ## License

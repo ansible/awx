@@ -179,7 +179,7 @@ controller_organizations:
         ignore_files: [controller_config.yml.template]
         extensions: ["yml"]
   roles:
-    - {role: infra.controller_configuration.organizations, when: controller_organizations is defined}
+    - {role: awx.controller_configuration.organizations, when: controller_organizations is defined}
 ```
 
 ## License

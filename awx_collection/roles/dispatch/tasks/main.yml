@@ -1,5 +1,5 @@
 ---
-- name: "Run infra.controller_configuration.{{ __role.role }}"
+- name: "Run awx.controller_configuration.{{ __role.role }}"
   ansible.builtin.include_role:
     name: "{{ __role.role }}"
     apply:

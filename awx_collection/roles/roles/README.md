@@ -172,7 +172,7 @@ controller_roles:
         ignore_files: [controller_config.yml.template]
         extensions: ["yml"]
   roles:
-    - {role: infra.controller_configuration.roles, when: controller_roles is defined}
+    - {role: awx.controller_configuration.roles, when: controller_roles is defined}
 ```
 
 ## License

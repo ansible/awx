@@ -166,7 +166,7 @@ controller_projects:
         ignore_files: [controller_config.yml.template]
         extensions: ["yml"]
   roles:
-    - {role: infra.controller_configuration.projects, when: controller_projects is defined}
+    - {role: awx.controller_configuration.projects, when: controller_projects is defined}
 ```
 
 ## License
