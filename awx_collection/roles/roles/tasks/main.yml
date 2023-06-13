@@ -1,0 +1,58 @@
+---
+- name: Create Role Based Access Entry on Controller
+  role:
+    user:                           "{{ __controller_role_item.user | default(omit, true) }}"
+    users:                          "{{ __controller_role_item.user | default(( [] if controller_configuration_role_enforce_defaults else omit), true) }}"
+    team:                           "{{ __controller_role_item.team | default(omit, true) }}"
+    teams:                          "{{ __controller_role_item.team | default(( [] if controller_configuration_role_enforce_defaults else omit), true) }}"
+    role:                           "{{ __controller_role_item.role | mandatory }}"
+    target_team:                    "{{ __controller_role_item.target_team | default(omit, true) }}"
+    target_teams:                   "{{ __controller_role_item.target_teams | default(( [] if controller_configuration_role_enforce_defaults else omit), true) }}"
+    inventory:                      "{{ __controller_role_item.inventory | default(omit, true) }}"
+    inventories:                    "{{ __controller_role_item.inventories | default(( [] if controller_configuration_role_enforce_defaults else omit), true) }}"
+    job_template:                   "{{ __controller_role_item.job_template | default(omit, true) }}"
+    job_templates:                  "{{ __controller_role_item.job_templates | default(( [] if controller_configuration_role_enforce_defaults else omit), true) }}"
+    workflow:                       "{{ __controller_role_item.workflow | default(omit, true) }}"
+    workflows:                      "{{ __controller_role_item.workflows | default(( [] if controller_configuration_role_enforce_defaults else omit), true) }}"
+    credential:                     "{{ __controller_role_item.credential | default(omit, true) }}"
+    credentials:                    "{{ __controller_role_item.credentials | default(( [] if controller_configuration_role_enforce_defaults else omit), true) }}"
+    organization:                   "{{ __controller_role_item.organization | default(omit, true) }}"
+    organizations:                  "{{ __controller_role_item.organizations | default(( [] if controller_configuration_role_enforce_defaults else omit), true) }}"
+    lookup_organization:            "{{ __controller_role_item.lookup_organization | default(omit, true) }}"
+    project:                        "{{ __controller_role_item.project | default(omit, true) }}"
+    projects:                       "{{ __controller_role_item.projects | default(( [] if controller_configuration_role_enforce_defaults else omit), true) }}"
+    state:                          "{{ __controller_role_item.state | default(controller_state | default('present')) }}"
+
+    # Role Standard Options
+    controller_username:            "{{ controller_username | default(omit, true) }}"
+    controller_password:            "{{ controller_password | default(omit, true) }}"
+    controller_oauthtoken:          "{{ controller_oauthtoken | default(omit, true) }}"
+    controller_host:                "{{ controller_hostname | default(omit, true) }}"
+    controller_config_file:         "{{ controller_config_file | default(omit, true) }}"
+    validate_certs:                 "{{ controller_validate_certs | default(omit) }}"
+  loop: "{{ controller_roles }}"
+  loop_control:
+    loop_var: __controller_role_item
+  no_log: "{{ controller_configuration_role_secure_logging }}"
+  async: 1000
+  poll: 0
+  register: __controller_role_job_async
+  changed_when: not __controller_role_job_async.changed
+  vars:
+    ansible_async_dir: '/tmp/.ansible_async'
+
+- name: "Configure Roles | Wait for finish the Roles creation"
+  ansible.builtin.async_status:
+    jid: "{{ __controller_role_job_async_results_item.ansible_job_id }}"
+  register: __controller_role_job_async_result
+  until: __controller_role_job_async_result.finished
+  retries: "{{ controller_configuration_role_async_retries }}"
+  delay: "{{ controller_configuration_role_async_delay }}"
+  loop: "{{ __controller_role_job_async.results }}"
+  loop_control:
+    loop_var: __controller_role_job_async_results_item
+  when: __controller_role_job_async_results_item.ansible_job_id is defined
+  no_log: "{{ controller_configuration_role_secure_logging }}"
+  vars:
+    ansible_async_dir: '/tmp/.ansible_async'
+...

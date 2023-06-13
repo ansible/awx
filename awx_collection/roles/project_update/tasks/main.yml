@@ -1,0 +1,47 @@
+---
+# Update Controller Projects
+- name: Run Controller project update
+  project_update:
+    name:                     "{{ __project_update_update_item.name }}"
+    organization:             "{{ __project_update_update_item.organization.name | default(__project_update_update_item.organization | default(omit, true)) }}"
+    wait:                     "{{ __project_update_update_item.wait | default(omit) }}"
+    interval:                 "{{ __project_update_update_item.interval | default(controller_configuration_project_update_async_delay) }}"
+    timeout:                  "{{ __project_update_update_item.timeout | default(omit, true) }}"
+
+    # Role Standard Options
+    controller_username:      "{{ controller_username | default(omit, true) }}"
+    controller_password:      "{{ controller_password | default(omit, true) }}"
+    controller_oauthtoken:    "{{ controller_oauthtoken | default(omit, true) }}"
+    controller_host:          "{{ controller_hostname | default(omit, true) }}"
+    controller_config_file:   "{{ controller_config_file | default(omit, true) }}"
+    validate_certs:           "{{ controller_validate_certs | default(omit) }}"
+  loop: "{{ projects if projects is defined else controller_projects }}"
+  loop_control:
+    loop_var: "__project_update_update_item"
+  no_log: "{{ controller_configuration_project_update_secure_logging }}"
+  when:
+    - controller_projects is defined
+    - __project_update_update_item.update_project | default(true)
+    - __project_update_update_item.state | default('present') != "absent"
+  async: 1000
+  poll: 0
+  register: __project_update_job_async
+  changed_when: not __project_update_job_async.changed
+  vars:
+    ansible_async_dir: '/tmp/.ansible_async'
+
+- name: "Configure Controller Projects | Wait for finish the projects creation"
+  ansible.builtin.async_status:
+    jid: "{{ __project_update_job_async_results_item.ansible_job_id }}"
+  register: __project_update_job_async_result
+  until: __project_update_job_async_result.finished
+  retries: "{{ controller_configuration_project_update_async_retries }}"
+  delay: "{{ controller_configuration_project_update_async_delay }}"
+  loop: "{{ __project_update_job_async.results }}"
+  loop_control:
+    loop_var: __project_update_job_async_results_item
+  when: __project_update_job_async_results_item.ansible_job_id is defined
+  no_log: "{{ controller_configuration_project_update_secure_logging }}"
+  vars:
+    ansible_async_dir: '/tmp/.ansible_async'
+...

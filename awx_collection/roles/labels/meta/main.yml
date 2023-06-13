@@ -1,0 +1,28 @@
+---
+galaxy_info:
+  role_name: "labels"
+  author: "Andrew J. Huffman, Kedar Kulkarni"
+  description: "An Ansible role to create labels in Ansible Controller.."
+  company: "Red Hat"
+
+  license: "MIT"
+
+  min_ansible_version: "2.4"
+
+  platforms:
+    - name: "EL"
+      versions:
+        - "all"
+
+  galaxy_tags:
+    - "controller"
+    - "aap"
+    - "awx"
+    - "configuration"
+    - "label"
+    - "labels"
+
+collections:
+  - ansible.controller
+  - awx.awx
+...

@@ -1,0 +1,43 @@
+---
+- name: Add Controller Credential Input Sources
+  credential_input_source:
+    target_credential:              "{{ __cred_input_src_item.target_credential | mandatory }}"
+    input_field_name:               "{{ __cred_input_src_item.input_field_name | mandatory }}"
+    source_credential:              "{{ __cred_input_src_item.source_credential | default(omit, true) }}"
+    description:                    "{{ __cred_input_src_item.description | default(( '' if controller_configuration_credential_input_sources_enforce_defaults else omit), true) }}"
+    metadata:                       "{{ __cred_input_src_item.metadata | default(( {} if controller_configuration_credential_input_sources_enforce_defaults else omit), true) }}"
+    state:                          "{{ __cred_input_src_item.state | default(controller_state | default('present')) }}"
+
+    # Role specific options
+    controller_username:            "{{ controller_username | default(omit, true) }}"
+    controller_password:            "{{ controller_password | default(omit, true) }}"
+    controller_oauthtoken:          "{{ controller_oauthtoken | default(omit, true) }}"
+    controller_host:                "{{ controller_hostname | default(omit, true) }}"
+    controller_config_file:         "{{ controller_config_file | default(omit, true) }}"
+    validate_certs:                 "{{ controller_validate_certs | default(omit) }}"
+  loop: "{{ controller_credential_input_sources }}"
+  loop_control:
+    loop_var: "__cred_input_src_item"
+  no_log: "{{ controller_configuration_credential_input_sources_secure_logging }}"
+  async: 1000
+  poll: 0
+  register: __credential_input_sources_job_async
+  changed_when: not __credential_input_sources_job_async.changed
+  vars:
+    ansible_async_dir: '/tmp/.ansible_async'
+
+- name: "Create Controller Credential Input Sources | Wait for finish the Controller Credential Input Sources creation"
+  ansible.builtin.async_status:
+    jid: "{{ __credential_input_sources_job_async_results_item.ansible_job_id }}"
+  register: __credential_input_sources_job_async_result
+  until: __credential_input_sources_job_async_result.finished
+  retries: "{{ controller_configuration_credential_input_sources_async_retries }}"
+  delay: "{{ controller_configuration_credential_input_sources_async_delay }}"
+  loop: "{{ __credential_input_sources_job_async.results }}"
+  loop_control:
+    loop_var: __credential_input_sources_job_async_results_item
+  when: __credential_input_sources_job_async_results_item.ansible_job_id is defined
+  no_log: "{{ controller_configuration_credential_input_sources_secure_logging }}"
+  vars:
+    ansible_async_dir: '/tmp/.ansible_async'
+...

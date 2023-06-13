@@ -1,0 +1,8 @@
+---
+# list of dicts describing Controller workflow templates
+controller_workflows: []
+workflow_job_templates_secure_logging: "{{ controller_configuration_secure_logging | default('false') }}"
+controller_configuration_workflow_async_retries: "{{ controller_configuration_async_retries | default(30) }}"
+controller_configuration_workflow_async_delay: "{{ controller_configuration_async_delay | default(1) }}"
+controller_configuration_workflows_enforce_defaults: "{{ controller_configuration_enforce_defaults | default('false') }}"
+...

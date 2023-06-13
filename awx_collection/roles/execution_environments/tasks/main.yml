@@ -1,0 +1,47 @@
+---
+# Create Controller Execution Environments
+- name: Add Controller Execution Environments
+  execution_environment:
+    name:                           "{{ __execution_environments_item.name | mandatory }}"
+    new_name:                       "{{ __execution_environments_item.new_name | default(omit, true) }}"
+    description:                    "{{ __execution_environments_item.description | default(( '' if controller_configuration_execution_environments_enforce_defaults else omit), true) }}"
+    image:                          "{{ __execution_environments_item.image | mandatory }}"
+    organization:                   "{{ __execution_environments_item.organization.name | default(__execution_environments_item.organization | default(( '' if controller_configuration_execution_environments_enforce_defaults else omit), true)) }}"
+    credential:                     "{{ __execution_environments_item.credential | default(( '' if controller_configuration_execution_environments_enforce_defaults else omit), true) }}"
+    pull:                           "{{ __execution_environments_item.pull | default(( 'missing' if controller_configuration_execution_environments_enforce_defaults else omit), true) }}"
+    state:                          "{{ __execution_environments_item.state | default(controller_state | default('present')) }}"
+
+    # Role specific options
+    controller_username:            "{{ controller_username | default(omit, true) }}"
+    controller_password:            "{{ controller_password | default(omit, true) }}"
+    controller_oauthtoken:          "{{ controller_oauthtoken | default(omit, true) }}"
+    controller_host:                "{{ controller_hostname | default(omit, true) }}"
+    controller_config_file:         "{{ controller_config_file | default(omit, true) }}"
+    validate_certs:                 "{{ controller_validate_certs | default(omit) }}"
+  loop: "{{ execution_environments if execution_environments is defined else controller_execution_environments }}"
+  loop_control:
+    loop_var: "__execution_environments_item"
+  no_log: "{{ controller_configuration_execution_environments_secure_logging }}"
+  when: controller_execution_environments is defined
+  async: 1000
+  poll: 0
+  register: __execution_environments_job_async
+  changed_when: not __execution_environments_job_async.changed
+  vars:
+    ansible_async_dir: '/tmp/.ansible_async'
+
+- name: "Create Controller Execution Environments | Wait for finish the Controller Execution Environments creation"
+  ansible.builtin.async_status:
+    jid: "{{ __execution_environments_job_async_results_item.ansible_job_id }}"
+  register: __execution_environments_job_async_result
+  until: __execution_environments_job_async_result.finished
+  retries: "{{ controller_configuration_execution_environments_async_retries }}"
+  delay: "{{ controller_configuration_execution_environments_async_delay }}"
+  loop: "{{ __execution_environments_job_async.results }}"
+  loop_control:
+    loop_var: __execution_environments_job_async_results_item
+  when: __execution_environments_job_async_results_item.ansible_job_id is defined
+  no_log: "{{ controller_configuration_execution_environments_secure_logging }}"
+  vars:
+    ansible_async_dir: '/tmp/.ansible_async'
+...

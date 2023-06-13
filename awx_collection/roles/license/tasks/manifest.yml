@@ -1,0 +1,57 @@
+---
+# tasks file for license role - manifest
+
+- name: Ensure manifest is set
+  ansible.builtin.assert:
+    that: controller_license.manifest_file is defined or controller_license.manifest is defined or controller_license.manifest_url is defined or controller_license.manifest_content is defined or controller_license.pool_id is defined
+    fail_msg: "Must set a source for the manifest or pool. Please set 'manifest_file', 'manifest_url', 'manifest_content', or 'pool_id'"
+
+- name: Move manifest file to temporary location
+  ansible.builtin.copy:
+    src: "{{ controller_license.manifest_file | default(controller_license.manifest) }}"
+    dest: "{{ __controller_manifest_path }}"
+    mode: 0600
+  when:
+    - controller_license.manifest_file is defined or controller_license.manifest is defined
+
+- name: Fetch manifest from URL
+  ansible.builtin.get_url:
+    url: "{{ controller_license.manifest_url }}"
+    dest: "{{ __controller_manifest_path }}"
+    username: "{{ controller_license.manifest_username | default(omit) }}"
+    password: "{{ controller_license.manifest_password | default(omit) }}"
+    mode: 0600
+  when:
+    - controller_license.manifest_url is defined
+    - not controller_license.manifest_file is defined
+    - not controller_license.manifest is defined
+
+- name: Create manifest file from base64 encoded content
+  ansible.builtin.template:
+    src: controller_manifest.j2
+    dest: "{{ __controller_manifest_path }}"
+    mode: 0600
+  when:
+    - controller_license.manifest_content is defined
+    - not controller_license.manifest_url is defined
+    - not controller_license.manifest_file is defined
+    - not controller_license.manifest is defined
+
+- name: Install the Controller license
+  license:
+    manifest:                       "{{ __controller_manifest_path | default(omit) }}"
+    eula_accepted:                  "{{ controller_license.eula_accepted | default(omit) }}"  # Depreciated only for Tower 3.8.x or lower
+    pool_id:                        "{{ controller_license.pool_id | default(omit) }}"
+    force:                          "{{ controller_license.force | default(omit) }}"
+    state:                          "{{ controller_license.state | default(omit) }}"
+
+    # Role Standard Options
+    controller_username:            "{{ controller_username | default(omit, true) }}"
+    controller_password:            "{{ controller_password | default(omit, true) }}"
+    controller_oauthtoken:          "{{ controller_oauthtoken | default(omit, true) }}"
+    controller_host:                "{{ controller_hostname | default(omit, true) }}"
+    controller_config_file:         "{{ controller_config_file | default(omit, true) }}"
+    validate_certs:                 "{{ controller_validate_certs | default(omit) }}"
+  no_log: "{{ controller_configuration_license_secure_logging }}"
+  when: controller_license is defined
+...

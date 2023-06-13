@@ -1,0 +1,12 @@
+---
+controller_teams:
+  - name: "team1"
+    description: "My first team"
+    organization: "Default"
+  - name: "team2"
+    description: "My second team"
+    organization: "Default"
+  - name: "team3"
+    description: "My third team"
+    organization: "Default"
+...

@@ -1,0 +1,3 @@
+---
+controller_configuration_job_launch_secure_logging: "{{ controller_configuration_secure_logging | default('false') }}"
+...

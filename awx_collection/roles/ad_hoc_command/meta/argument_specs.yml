@@ -1,0 +1,120 @@
+---
+argument_specs:
+  main:
+    short_description: An Ansible Role to run a list of ad hoc commands on Ansible Controller.
+    options:
+      controller_ad_hoc_commands:
+        description: Data structure describing your ad hoc commands to run
+        type: list
+        elements: dict
+        # options:
+        #   job_type:
+        #     default: run
+        #     required: false
+        #     type: str
+        #     description: Job_type to use for the ad hoc command. Either run or check.
+        #   inventory:
+        #     required: true
+        #     type: str
+        #     description: Inventory to use for the ad hoc command.
+        #   limit:
+        #     required: false
+        #     type: str
+        #     description: Limit to use for the ad hoc command.
+        #   credential:
+        #     required: true
+        #     type: str
+        #     description: Credential to use for ad hoc command.
+        #   execution_environment:
+        #     required: false
+        #     type: str
+        #     description: Execution Environment to use for ad hoc command.
+        #   module_name:
+        #     required: true
+        #     type: str
+        #     description: The Ansible module to execute.
+        #   module_args:
+        #     required: false
+        #     type: str
+        #     description: The arguments to pass to the module.
+        #   forks:
+        #     default: 0
+        #     required: false
+        #     type: int
+        #     description: The number of forks to use for this ad hoc execution.
+        #   verbosity:
+        #     default: 0
+        #     required: false
+        #     type: int
+        #     description: Verbosity level for this ad hoc command run
+        #   extra_vars:
+        #     required: false
+        #     type: dict
+        #     description: Extra variables to use for the ad hoc command.
+        #   become_enabled:
+        #     required: false
+        #     type: bool
+        #     description: If the become flag should be set.
+        #   diff_mode:
+        #     required: false
+        #     type: bool
+        #     description: Show the changes made by Ansible tasks where supported
+        #   wait:
+        #     default: false
+        #     required: false
+        #     type: bool
+        #     description: Wait for the command to complete.
+        #   interval:
+        #     default: 2
+        #     required: false
+        #     type: int
+        #     description: The interval to request an update from controller.
+        #   timeout:
+        #     required: false
+        #     type: int
+        #     description: If waiting for the command to complete this will abort after this amount of seconds.
+
+      # No_log variables
+      controller_configuration_ad_hoc_command_secure_logging:
+        default: "{{ controller_configuration_secure_logging | default(false) }}"
+        required: false
+        type: bool
+        description: Whether or not to include the sensitive ad_hoc_command role tasks in the log. Set this value to `true` if you will be providing your sensitive values from elsewhere.
+      controller_configuration_secure_logging:
+        default: false
+        required: false
+        type: bool
+        description: This variable enables secure logging across all roles as a default.
+
+      # Generic across all roles
+      controller_state:
+        default: present
+        required: false
+        description: The state all objects will take unless overridden by object default
+        type: str
+      controller_hostname:
+        default: None
+        required: false
+        description: URL to the Ansible Controller Server.
+        type: str
+      controller_validate_certs:
+        default: true
+        required: false
+        description: Whether or not to validate the Ansible Controller Server's SSL certificate.
+        type: str
+      controller_username:
+        default: None
+        required: false
+        description: Admin User on the Ansible Controller Server. Either username / password or oauthtoken need to be specified.
+        type: str
+      controller_password:
+        default: None
+        required: false
+        description: Controller Admin User's password on the Ansible Controller Server. This should be stored in an Ansible Vault at vars/controller-secrets.yml or elsewhere and called from a parent playbook. Either username / password or oauthtoken need to be specified.
+        type: str
+      controller_oauthtoken:
+        default: None
+        required: false
+        description: Controller Admin User's token on the Ansible Controller Server. This should be stored in an Ansible Vault at or elsewhere and called from a parent playbook. Either username / password or oauthtoken need to be specified.
+        type: str
+...

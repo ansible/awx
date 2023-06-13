@@ -1,0 +1,46 @@
+---
+galaxy_info:
+  role_name: "notifications"
+  author: "Tom Page"
+  description: "An Ansible Role to create notifications in Ansible Controller."
+  company: "Red Hat"
+
+  # If the issue tracker for your role is not on github, uncomment the
+  # next line and provide a value
+  # issue_tracker_url: http://example.com/issue/tracker
+  license: "MIT"
+
+  min_ansible_version: "2.8"
+
+  # Optionally specify the branch Galaxy will use when accessing the GitHub
+  # repo for this role. During role install, if no tags are available,
+  # Galaxy will use this branch. During import Galaxy will access files on
+  # this branch. If Travis integration is configured, only notifications for this
+  # branch will be accepted. Otherwise, in all cases, the repo's default branch
+  # (usually master) will be used.
+
+  # github_branch:
+
+  #
+  # platforms is a list of platforms, and each platform has a name and a list of versions.
+  #
+  platforms:
+    - name: "EL"
+      versions:
+        - "all"
+
+  galaxy_tags:
+    - "controller"
+    - "aap"
+    - "awx"
+    - "notification"
+    - "notifications"
+
+collections:
+  - ansible.controller
+  - awx.awx
+
+dependencies: []
+# List your role dependencies here, one per line. Be sure to remove the '[]' above,
+# if you add dependencies to this list.
+...

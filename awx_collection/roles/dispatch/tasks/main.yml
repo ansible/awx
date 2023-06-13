@@ -1,0 +1,22 @@
+---
+- name: "Run infra.controller_configuration.{{ __role.role }}"
+  ansible.builtin.include_role:
+    name: "{{ __role.role }}"
+    apply:
+      tags: "{{ __role.tags }}"
+  when: vars[__role.var] is defined
+  tags: always
+  loop: "{{ controller_configuration_dispatcher_roles }}"
+  loop_control:
+    loop_var: __role
+  vars:
+    assign_galaxy_credentials_to_org: false
+    assign_default_ee_to_org: false
+
+- name: Include Tasks to add Galaxy credentials and Execution Environments to Organizations
+  ansible.builtin.include_role:
+    name: organizations
+    apply:
+      tags:
+        - organizations
+...

@@ -1,0 +1,42 @@
+---
+- name: Create Ansible Controller Team
+  team:
+    name:                     "{{ __controller_team_item.name | mandatory }}"
+    new_name:                 "{{ __controller_team_item.new_name | default(omit, true) }}"
+    description:              "{{ __controller_team_item.description | default(( '' if controller_configuration_teams_enforce_defaults else omit), true) }}"
+    organization:             "{{ __controller_team_item.organization.name | default(__controller_team_item.organization) | mandatory }}"
+    state:                    "{{ __controller_team_item.state | default(controller_state | default('present')) }}"
+
+    # Role Standard Options
+    controller_config_file:   "{{ controller_config_file | default(omit, true) }}"
+    controller_host:          "{{ controller_hostname | default(omit, true) }}"
+    controller_password:      "{{ controller_password | default(omit, true) }}"
+    controller_username:      "{{ controller_username | default(omit, true) }}"
+    controller_oauthtoken:    "{{ controller_oauthtoken | default(omit, true) }}"
+    validate_certs:           "{{ controller_validate_certs | default(omit) }}"
+  loop: "{{ teams if teams is defined else controller_teams }}"
+  loop_control:
+    loop_var: __controller_team_item
+  no_log: "{{ controller_configuration_teams_secure_logging }}"
+  async: 1000
+  poll: 0
+  register: __controller_team_job_async
+  changed_when: not __controller_team_job_async.changed
+  vars:
+    ansible_async_dir: '/tmp/.ansible_async'
+
+- name: "Configure Teams | Wait for finish the Teams creation"
+  ansible.builtin.async_status:
+    jid: "{{ __controller_team_job_async_results_item.ansible_job_id }}"
+  register: __controller_team_job_async_result
+  until: __controller_team_job_async_result.finished
+  retries: "{{ controller_configuration_teams_async_retries }}"
+  delay: "{{ controller_configuration_teams_async_delay }}"
+  loop: "{{ __controller_team_job_async.results }}"
+  loop_control:
+    loop_var: __controller_team_job_async_results_item
+  when: __controller_team_job_async_results_item.ansible_job_id is defined
+  no_log: "{{ controller_configuration_teams_secure_logging }}"
+  vars:
+    ansible_async_dir: '/tmp/.ansible_async'
+...

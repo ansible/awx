@@ -1,0 +1,46 @@
+---
+# Add Controller Instances
+- name: Add Controller Instance
+  instance:
+    hostname:                       "{{ __controller_instance_item.hostname | mandatory }}"
+    capacity_adjustment:            "{{ __controller_instance_item.capacity_adjustment | default(( 1.0 if controller_configuration_instances_enforce_defaults else omit), true) }}"
+    enabled:                        "{{ __controller_instance_item.enabled | default(( true if controller_configuration_instances_enforce_defaults else omit), true) }}"
+    managed_by_policy:              "{{ __controller_instance_item.managed_by_policy | default(( true if controller_configuration_instances_enforce_defaults else omit), true) }}"
+    node_type:                      "{{ __controller_instance_item.node_type | default(omit, true) }}"
+    node_state:                     "{{ __controller_instance_item.node_state | default(omit, true) }}"
+    listener_port:                  "{{ __controller_instance_item.listener_port | default(( 27199 if controller_configuration_instances_enforce_defaults else omit), true) }}"
+
+    # Role Standard Options
+    controller_username:            "{{ controller_username | default(omit, true) }}"
+    controller_password:            "{{ controller_password | default(omit, true) }}"
+    controller_oauthtoken:          "{{ controller_oauthtoken | default(omit, true) }}"
+    controller_host:                "{{ controller_hostname | default(omit, true) }}"
+    controller_config_file:         "{{ controller_config_file | default(omit, true) }}"
+    validate_certs:                 "{{ controller_validate_certs | default(omit) }}"
+  loop: "{{ controller_instances }}"
+  loop_control:
+    loop_var: __controller_instance_item
+  no_log: "{{ controller_configuration_instances_secure_logging }}"
+  when: controller_instances is defined
+  async: 1000
+  poll: 0
+  register: __instance_job_async
+  changed_when: not __instance_job_async.changed
+  vars:
+    ansible_async_dir: '/tmp/.ansible_async'
+
+- name: "Configure Controller instances | Wait for finish the instance creation"
+  ansible.builtin.async_status:
+    jid: "{{ __instance_job_async_results_item.ansible_job_id }}"
+  register: __instance_job_async_result
+  until: __instance_job_async_result.finished
+  retries: "{{ controller_configuration_instances_async_retries }}"
+  delay: "{{ controller_configuration_instances_async_delay }}"
+  loop: "{{ __instance_job_async.results }}"
+  loop_control:
+    loop_var: __instance_job_async_results_item
+  when: __instance_job_async_results_item.ansible_job_id is defined
+  no_log: "{{ controller_configuration_instances_secure_logging }}"
+  vars:
+    ansible_async_dir: '/tmp/.ansible_async'
+...

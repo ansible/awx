@@ -1,0 +1,111 @@
+---
+argument_specs:
+  main:
+    short_description: An Ansible Role to create notification templates on Ansible Controller.
+    options:
+      controller_notification_templates:
+        description: Data structure describing your notification_templates
+        type: list
+        elements: dict
+        # options:
+        #   name:
+        #     required: true
+        #     type: str
+        #     description: Name of notification_template
+        #   new_name:
+        #     required: false
+        #     type: str
+        #     description: Name of notification_template, used in updating
+        #   copy_from:
+        #     required: false
+        #     type: str
+        #     description: Name or id to copy the notification_template from. This will copy an existing notification_template and change any parameters supplied.
+        #   description:
+        #     required: false
+        #     type: str
+        #     description: Description to use for the notification_template.
+        #   organization:
+        #     required: false
+        #     type: str
+        #     description: Organization this notification_template belongs to.
+        #   notification_type:
+        #     required: false
+        #     type: str
+        #     description: The type of notification to be sent.
+        #   notification_configuration:
+        #     required: false
+        #     type: str
+        #     description: The notification configuration file. Note providing this field would disable all depreciated notification-configuration-related fields.
+        #   messages:
+        #     required: false
+        #     type: list
+        #     elements: str
+        #     description: Optional custom messages for notification template. Assumes any instance of two space __ are used for adding variables and removes them. Does not effect single space.
+        #   state:
+        #     default: "{{ controller_state | default('present') }}"
+        #     required: false
+        #     type: str
+        #     description: Desired state of the resource.
+
+      # Async variables
+      controller_configuration_notification_templates_async_retries:
+        default: "{{ controller_configuration_async_retries | default(30) }}"
+        required: false
+        description: This variable sets the number of retries to attempt for the role.
+      controller_configuration_async_retries:
+        default: 30
+        required: false
+        description: This variable sets number of retries across all roles as a default.
+      controller_configuration_notification_templates_async_delay:
+        default: "{{ controller_configuration_async_delay | default(1) }}"
+        required: false
+        description: This variable sets delay between retries for the role.
+      controller_configuration_async_delay:
+        default: 1
+        required: false
+        description: This variable sets delay between retries across all roles as a default.
+
+      # No_log variables
+      controller_configuration_notification_templates_secure_logging:
+        default: "{{ controller_configuration_secure_logging | default(false) }}"
+        required: false
+        type: bool
+        description: Whether or not to include the sensitive tasks from this role in the log. Set this value to `true` if you will be providing your sensitive values from elsewhere.
+      controller_configuration_secure_logging:
+        default: false
+        required: false
+        type: bool
+        description: This variable enables secure logging across all roles as a default.
+
+      # Generic across all roles
+      controller_state:
+        default: present
+        required: false
+        description: The state all objects will take unless overridden by object default
+        type: str
+      controller_hostname:
+        default: None
+        required: false
+        description: URL to the Ansible Controller Server.
+        type: str
+      controller_validate_certs:
+        default: true
+        required: false
+        description: Whether or not to validate the Ansible Controller Server's SSL certificate.
+        type: str
+      controller_username:
+        default: None
+        required: false
+        description: Admin User on the Ansible Controller Server. Either username / password or oauthtoken need to be specified.
+        type: str
+      controller_password:
+        default: None
+        required: false
+        description: Controller Admin User's password on the Ansible Controller Server. This should be stored in an Ansible Vault at vars/controller-secrets.yml or elsewhere and called from a parent playbook. Either username / password or oauthtoken need to be specified.
+        type: str
+      controller_oauthtoken:
+        default: None
+        required: false
+        description: Controller Admin User's token on the Ansible Controller Server. This should be stored in an Ansible Vault at or elsewhere and called from a parent playbook. Either username / password or oauthtoken need to be specified.
+        type: str
+...

@@ -1,0 +1,6 @@
+---
+controller_configuration_license_secure_logging: "{{ controller_configuration_secure_logging | default('false') }}"
+_redhat_cop_license_filters:
+  product_name: Red Hat Ansible Automation Platform
+  support_level: Self-Support
+...

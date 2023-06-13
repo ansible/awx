@@ -1,0 +1,7 @@
+---
+controller_ad_hoc_commands:
+  command_id: 2
+  fail_if_not_running: false
+  interval: 1
+  timeout: 10
+...

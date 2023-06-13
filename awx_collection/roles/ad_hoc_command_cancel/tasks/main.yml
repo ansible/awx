@@ -1,0 +1,22 @@
+---
+# Cancel Ad Hoc Commands
+- name: Cancel Controller ad hoc command
+  ad_hoc_command_cancel:
+    command_id:             "{{ __ad_hoc_command_cancel_item.id }}"
+    fail_if_not_running:    "{{ __ad_hoc_command_cancel_item.fail_if_not_running | default(omit) }}"
+    interval:               "{{ __ad_hoc_command_cancel_item.interval | default(omit) }}"
+    timeout:                "{{ __ad_hoc_command_cancel_item.timeout | default(omit, true) }}"
+
+    # Role Standard Options
+    controller_username:         "{{ controller_username | default(omit, true) }}"
+    controller_password:         "{{ controller_password | default(omit, true) }}"
+    controller_oauthtoken:       "{{ controller_oauthtoken | default(omit, true) }}"
+    controller_host:             "{{ controller_hostname | default(omit, true) }}"
+    controller_config_file:      "{{ controller_config_file | default(omit, true) }}"
+    validate_certs:         "{{ controller_validate_certs | default(omit) }}"
+  loop: "{{ controller_ad_hoc_commands_cancel }}"
+  loop_control:
+    loop_var: "__ad_hoc_command_cancel_item"
+  no_log: "{{ controller_configuration_ad_hoc_command_cancel_secure_logging }}"
+  when: controller_ad_hoc_commands_cancel is defined
+...

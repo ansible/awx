@@ -1,0 +1,17 @@
+---
+controller_notifications:
+  - name: Email notification
+    # description: Send out emails for Controller jobs
+    organization: Default
+    notification_type: email
+    notification_configuration:
+      host: smtp.example.com
+      recipients:
+        - admin@example.com
+      sender: tower0@example.com
+      port: 25
+      username: ''
+      password: ''
+      use_tls: false
+      use_ssl: false
+...

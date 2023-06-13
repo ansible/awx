@@ -1,0 +1,195 @@
+---
+argument_specs:
+  main:
+    short_description: An Ansible Role to create projects on Ansible Controller.
+    options:
+      controller_projects:
+        description: Data structure describing your projects
+        type: list
+        elements: dict
+        # options:
+        #   name:
+        #     required: true
+        #     type: str
+        #     description: Name of project
+        #   copy_from:
+        #     required: false
+        #     type: str
+        #     description: Name or id to copy the project from. This will copy an existing project and change any parameters supplied.
+        #   description:
+        #     required: false
+        #     type: str
+        #     description: Description to use for the project.
+        #   organization:
+        #     required: false
+        #     type: str
+        #     description: Organization this project belongs to.
+        #   scm_type:
+        #     required: false
+        #     type: str
+        #     choices:
+        #       - manual
+        #       - git
+        #       - svn
+        #       - insights
+        #       - archive
+        #     description: Type of SCM resource.
+        #   scm_url:
+        #     required: false
+        #     type: str
+        #     description: URL of SCM resource.
+        #   default_environment:
+        #     required: false
+        #     type: str
+        #     description: Default Execution Environment to use for jobs relating to the project.
+        #   local_path:
+        #     required: false
+        #     type: str
+        #     description: The server playbook directory for manual projects.
+        #   scm_branch:
+        #     required: false
+        #     type: str
+        #     description: The branch to use for the SCM resource.
+        #   scm_refspec:
+        #     required: false
+        #     type: str
+        #     description: The refspec to use for the SCM resource.
+        #   credential:
+        #     required: false
+        #     type: str
+        #     description: Name of the credential to use with this SCM resource.
+        #   signature_validation_credential:
+        #     required: false
+        #     type: str
+        #     description: Name of the credential to use for signature validation. If signature validation credential is provided, signature validation will be enabled.
+        #   scm_clean:
+        #     required: false
+        #     type: bool
+        #     description: Remove local modifications before updating.
+        #   scm_delete_on_update:
+        #     required: false
+        #     type: bool
+        #     description: Remove the repository completely before updating.
+        #   scm_track_submodules:
+        #     required: false
+        #     type: bool
+        #     description: Track submodules latest commit on specified branch.
+        #   scm_update_on_launch:
+        #     required: false
+        #     type: bool
+        #     description: Before an update to the local repository before launching a job with this project.
+        #   scm_update_cache_timeout:
+        #     required: false
+        #     type: int
+        #     description: Cache Timeout to cache prior project syncs for a certain number of seconds. Only valid if scm_update_on_launch is to True, otherwise ignored.
+        #   allow_override:
+        #     required: false
+        #     type: bool
+        #     description: Allow changing the SCM branch or revision in a job template that uses this project.
+        #   timeout:
+        #     required: false
+        #     type: int
+        #     description: The amount of time (in seconds) to run before the SCM Update is canceled. A value of 0 means no timeout.
+        #   custom_virtualenv:
+        #     required: false
+        #     type: str
+        #     description: Local absolute file path containing a custom Python virtualenv to use.
+        #   notification_templates_started:
+        #     required: false
+        #     type: list
+        #     elements: str
+        #     description: The notifications on started to use for this organization in a list.
+        #   notification_templates_success:
+        #     required: false
+        #     type: list
+        #     elements: str
+        #     description: The notifications on success to use for this organization in a list.
+        #   notification_templates_error:
+        #     required: false
+        #     type: list
+        #     elements: str
+        #     description: The notifications on error to use for this organization in a list.
+        #   wait:
+        #     default: true
+        #     required: false
+        #     type: bool
+        #     description: Provides option to wait for completed project sync before returning.
+        #   update_project:
+        #     default: false
+        #     required: false
+        #     type: str
+        #     description: Force project to update after changes.Used in conjunction with wait, interval, and timeout.
+        #   interval:
+        #     default: "{{ controller_configuration_projects_async_delay }}"
+        #     required: false
+        #     type: float
+        #     description: The interval to request an update from controller. Requires wait.
+        #   state:
+        #     default: "{{ controller_state | default('present') }}"
+        #     required: false
+        #     type: str
+        #     description: Desired state of the resource.
+
+      # Async variables
+      controller_configuration_projects_async_retries:
+        default: "{{ controller_configuration_async_retries | default(30) }}"
+        required: false
+        description: This variable sets the number of retries to attempt for the role.
+      controller_configuration_async_retries:
+        default: 30
+        required: false
+        description: This variable sets number of retries across all roles as a default.
+      controller_configuration_projects_async_delay:
+        default: "{{ controller_configuration_async_delay | default(1) }}"
+        required: false
+        description: This variable sets delay between retries for the role.
+      controller_configuration_async_delay:
+        default: 1
+        required: false
+        description: This variable sets delay between retries across all roles as a default.
+
+
+      # No_log variables
+      controller_configuration_projects_secure_logging:
+        default: "{{ controller_configuration_secure_logging | default(false) }}"
+        required: false
+        type: bool
+        description: Whether or not to include the sensitive tasks from this role in the log. Set this value to `true` if you will be providing your sensitive values from elsewhere.
+      controller_configuration_secure_logging:
+        default: false
+        required: false
+        type: bool
+        description: This variable enables secure logging across all roles as a default.
+
+      # Generic across all roles
+      controller_state:
+        default: present
+        required: false
+        description: The state all objects will take unless overridden by object default
+        type: str
+      controller_hostname:
+        default: None
+        required: false
+        description: URL to the Ansible Controller Server.
+        type: str
+      controller_validate_certs:
+        default: true
+        required: false
+        description: Whether or not to validate the Ansible Controller Server's SSL certificate.
+        type: str
+      controller_username:
+        default: None
+        required: false
+        description: Admin User on the Ansible Controller Server. Either username / password or oauthtoken need to be specified.
+        type: str
+      controller_password:
+        default: None
+        required: false
+        description: Controller Admin User's password on the Ansible Controller Server. This should be stored in an Ansible Vault at vars/controller-secrets.yml or elsewhere and called from a parent playbook. Either username / password or oauthtoken need to be specified.
+        type: str
+      controller_oauthtoken:
+        default: None
+        required: false
+        description: Controller Admin User's token on the Ansible Controller Server. This should be stored in an Ansible Vault at or elsewhere and called from a parent playbook. Either username / password or oauthtoken need to be specified.
+        type: str
+...

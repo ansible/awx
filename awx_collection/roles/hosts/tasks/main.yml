@@ -1,0 +1,44 @@
+---
+- name: Add Controller host
+  host:
+    name:                   "{{ __controller_host_item.name | mandatory }}"
+    new_name:               "{{ __controller_host_item.new_name | default(omit, true) }}"
+    description:            "{{ __controller_host_item.description | default(( '' if controller_configuration_host_enforce_defaults else omit), true) }}"
+    inventory:              "{{ __controller_host_item.inventory | mandatory }}"
+    enabled:                "{{ __controller_host_item.enabled | default(( false if controller_configuration_host_enforce_defaults else omit), true) }}"
+    state:                  "{{ __controller_host_item.state | default(controller_state | default('present')) }}"
+    variables:              "{{ __controller_host_item.variables | default(( {} if controller_configuration_host_enforce_defaults else omit), true) | regex_replace('[ ]{2,}', '') }}"
+
+    # Role Standard Options
+    controller_host:        "{{ controller_hostname | default(omit, true) }}"
+    controller_username:    "{{ controller_username | default(omit, true) }}"
+    controller_password:    "{{ controller_password | default(omit, true) }}"
+    controller_oauthtoken:  "{{ controller_oauthtoken | default(omit, true) }}"
+    controller_config_file: "{{ controller_config_file | default(omit, true) }}"
+    validate_certs:         "{{ controller_validate_certs | default(omit) }}"
+  loop: "{{ controller_hosts }}"
+  loop_control:
+    loop_var: __controller_host_item
+  no_log: "{{ controller_configuration_hosts_secure_logging }}"
+  async: 1000
+  poll: 0
+  register: __host_job_async
+  changed_when: not __host_job_async.changed
+  vars:
+    ansible_async_dir: '/tmp/.ansible_async'
+
+- name: "Configure Controller Hosts | Wait for finish the Hosts creation"
+  ansible.builtin.async_status:
+    jid: "{{ __host_job_async_results_item.ansible_job_id }}"
+  register: __host_job_async_result
+  until: __host_job_async_result.finished
+  retries: "{{ controller_configuration_hosts_async_retries }}"
+  delay: "{{ controller_configuration_hosts_async_delay }}"
+  loop: "{{ __host_job_async.results }}"
+  loop_control:
+    loop_var: __host_job_async_results_item
+  when: __host_job_async_results_item.ansible_job_id is defined
+  no_log: "{{ controller_configuration_hosts_secure_logging }}"
+  vars:
+    ansible_async_dir: '/tmp/.ansible_async'
+...

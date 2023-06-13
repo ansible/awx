@@ -1,0 +1,46 @@
+---
+- name: Add Controller notifications
+  notification_template:
+    name:                           "{{ __controller_notification_item.name | mandatory }}"
+    new_name:                       "{{ __controller_notification_item.new_name | default(omit, true) }}"
+    copy_from:                      "{{ __controller_notification_item.copy_from | default(omit, true) }}"
+    description:                    "{{ __controller_notification_item.description | default(( '' if controller_configuration_notifications_enforce_defaults else omit), true) }}"
+    organization:                   "{{ __controller_notification_item.organization.name | default(__controller_notification_item.organization) | mandatory }}"
+    notification_type:              "{{ __controller_notification_item.notification_type | default(omit, true) | mandatory}}"
+    notification_configuration:     "{{ __controller_notification_item.notification_configuration | default(( {} if controller_configuration_notifications_enforce_defaults else omit), true) }}"
+    messages:                       "{{ __controller_notification_item.messages | default(( {} if controller_configuration_notifications_enforce_defaults else omit), true) | regex_replace('[ ]{2,}', '') }}"
+    state:                          "{{ __controller_notification_item.state | default(controller_state | default('present')) }}"
+
+    # Role Standard Options
+    controller_host:                "{{ controller_hostname | default(omit, true) }}"
+    controller_username:            "{{ controller_username | default(omit, true) }}"
+    controller_password:            "{{ controller_password | default(omit, true) }}"
+    controller_oauthtoken:          "{{ controller_oauthtoken | default(omit, true) }}"
+    controller_config_file:         "{{ controller_config_file | default(omit, true) }}"
+    validate_certs:                 "{{ controller_validate_certs | default(omit) }}"
+  loop: "{{ notification_templates if notification_templates is defined else controller_notifications }}"
+  loop_control:
+    loop_var: __controller_notification_item
+  no_log: "{{ controller_configuration_notifications_secure_logging }}"
+  async: 1000
+  poll: 0
+  register: __controller_notification_job_async
+  changed_when: not __controller_notification_job_async.changed
+  vars:
+    ansible_async_dir: '/tmp/.ansible_async'
+
+- name: "Configure notifications | Wait for finish the notifications creation"
+  ansible.builtin.async_status:
+    jid: "{{ __controller_notification_job_async_results_item.ansible_job_id }}"
+  register: __controller_notification_job_async_result
+  until: __controller_notification_job_async_result.finished
+  retries: "{{ controller_configuration_notifications_async_retries }}"
+  delay: "{{ controller_configuration_notifications_async_delay }}"
+  loop: "{{ __controller_notification_job_async.results }}"
+  loop_control:
+    loop_var: __controller_notification_job_async_results_item
+  when: __controller_notification_job_async_results_item.ansible_job_id is defined
+  no_log: "{{ controller_configuration_notifications_secure_logging }}"
+  vars:
+    ansible_async_dir: '/tmp/.ansible_async'
+...

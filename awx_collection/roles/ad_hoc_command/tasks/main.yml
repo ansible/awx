@@ -1,0 +1,34 @@
+---
+# Run Ad Hoc Commands
+- name: Run Controller ad hoc command
+  ad_hoc_command:
+    job_type:               "{{ __ad_hoc_command_item.job_type | default('run') }}"
+    inventory:              "{{ __ad_hoc_command_item.inventory }}"
+    limit:                  "{{ __ad_hoc_command_item.limit | default(omit, true) }}"
+    credential:             "{{ __ad_hoc_command_item.credential }}"
+    execution_environment:  "{{ __ad_hoc_command_item.execution_environment | default(omit, true) }}"
+    module_name:            "{{ __ad_hoc_command_item.module_name }}"
+    module_args:            "{{ __ad_hoc_command_item.module_args | default(omit, true) }}"
+    forks:                  "{{ __ad_hoc_command_item.forks | default(omit, true) }}"
+    verbosity:              "{{ __ad_hoc_command_item.verbosity | default(omit, true) }}"
+    extra_vars:             "{{ __ad_hoc_command_item.extra_vars | default(omit, true) }}"
+    become_enabled:         "{{ __ad_hoc_command_item.become_enabled | default(omit) }}"
+    diff_mode:              "{{ __ad_hoc_command_item.diff_mode | default(omit) }}"
+    wait:                   "{{ __ad_hoc_command_item.wait | default(omit) }}"
+    interval:               "{{ __ad_hoc_command_item.interval | default(omit) }}"
+    timeout:                "{{ __ad_hoc_command_item.timeout | default(omit, true) }}"
+
+    # Role Standard Options
+    controller_username:    "{{ controller_username | default(omit, true) }}"
+    controller_password:    "{{ controller_password | default(omit, true) }}"
+    controller_oauthtoken:  "{{ controller_oauthtoken | default(omit, true) }}"
+    controller_host:        "{{ controller_hostname | default(omit, true) }}"
+    controller_config_file: "{{ controller_config_file | default(omit, true) }}"
+    validate_certs:         "{{ controller_validate_certs | default(omit) }}"
+  loop: "{{ controller_ad_hoc_commands }}"
+  loop_control:
+    loop_var: "__ad_hoc_command_item"
+  no_log: "{{ controller_configuration_ad_hoc_command_secure_logging }}"
+  register: controller_ad_hoc_commands_output
+  when: controller_ad_hoc_commands is defined
+...

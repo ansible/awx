@@ -1,0 +1,99 @@
+---
+argument_specs:
+  main:
+    short_description: An Ansible Role to call other roles to create objects on Ansible Controller.
+    options:
+      controller_configuration_dispatcher_roles:
+        default:
+          - {role: settings, var: controller_settings, tags: settings}
+          - {role: organizations, var: controller_organizations, tags: organizations}
+          - {role: labels, var: controller_labels, tags: labels}
+          - {role: users, var: controller_user_accounts, tags: users}
+          - {role: teams, var: controller_teams, tags: teams}
+          - {role: credential_types, var: controller_credential_types, tags: credential_types}
+          - {role: credentials, var: controller_credentials, tags: credentials}
+          - {role: credential_input_sources, var: controller_credential_input_sources, tags: credential_input_sources}
+          - {role: notification_templates, var: controller_notifications, tags: notification_templates}
+          - {role: projects, var: controller_projects, tags: projects}
+          - {role: inventories, var: controller_inventories, tags: inventories}
+          - {role: inventory_sources, var: controller_inventory_sources, tags: inventory_sources}
+          - {role: inventory_source_update, var: controller_inventory_sources, tags: inventory_sources}
+          - {role: execution_environments, var: controller_execution_environments, tags: execution_environments}
+          - {role: applications, var: controller_applications, tags: applications}
+          - {role: instances, var: controller_instances, tags: instances}
+          - {role: instance_groups, var: controller_instance_groups, tags: instance_groups}
+          - {role: project_update, var: controller_projects, tags: projects}
+          - {role: hosts, var: controller_hosts, tags: hosts}
+          - {role: groups, var: controller_groups, tags: inventories}
+          - {role: job_templates, var: controller_templates, tags: job_templates}
+          - {role: workflow_job_templates, var: controller_workflows, tags: workflow_job_templates}
+          - {role: schedules, var: controller_schedules, tags: schedules}
+          - {role: roles, var: controller_roles, tags: roles}
+        required: false
+        description: List of roles, variables and tags to run through
+        type: list
+        elements: dict
+        options:
+          role:
+            required: true
+            description: Name of role from this collection to call
+            type: str
+          var:
+            required: true
+            description: Name of variable to be passed to the role
+            type: str
+          tags:
+            required: false
+            description: Tags to be applied to the role so tagging can be used to run only part of a playbook
+
+
+      # Async variables
+      controller_configuration_async_retries:
+        default: 30
+        required: false
+        description: This variable sets number of retries across all roles as a default.
+      controller_configuration_async_delay:
+        default: 1
+        required: false
+        description: This variable sets delay between retries across all roles as a default.
+
+
+      # No_log variables
+      controller_configuration_secure_logging:
+        default: false
+        required: false
+        type: bool
+        description: This variable enables secure logging across all roles as a default.
+
+      # Generic across all roles
+      controller_state:
+        default: present
+        required: false
+        description: The state all objects will take unless overridden by object default
+        type: str
+      controller_hostname:
+        default: None
+        required: false
+        description: URL to the Ansible Controller Server.
+        type: str
+      controller_validate_certs:
+        default: true
+        required: false
+        description: Whether or not to validate the Ansible Controller Server's SSL certificate.
+        type: str
+      controller_username:
+        default: None
+        required: false
+        description: Admin User on the Ansible Controller Server. Either username / password or oauthtoken need to be specified.
+        type: str
+      controller_password:
+        default: None
+        required: false
+        description: Controller Admin User's password on the Ansible Controller Server. This should be stored in an Ansible Vault at vars/controller-secrets.yml or elsewhere and called from a parent playbook. Either username / password or oauthtoken need to be specified.
+        type: str
+      controller_oauthtoken:
+        default: None
+        required: false
+        description: Controller Admin User's token on the Ansible Controller Server. This should be stored in an Ansible Vault at or elsewhere and called from a parent playbook. Either username / password or oauthtoken need to be specified.
+        type: str
+...
