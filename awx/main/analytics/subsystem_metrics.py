@@ -209,6 +209,11 @@ class Metrics:
             SetFloatM('workflow_manager_recorded_timestamp', 'Unix timestamp when metrics were last recorded'),
             SetFloatM('workflow_manager_spawn_workflow_graph_jobs_seconds', 'Time spent spawning workflow tasks'),
             SetFloatM('workflow_manager_get_tasks_seconds', 'Time spent loading workflow tasks from db'),
+            # dispatcher subsystem metrics
+            SetIntM('dispatcher_pool_scale_up_events', 'Number of times local dispatcher scaled up a worker since startup'),
+            SetIntM('dispatcher_pool_active_task_count', 'Number of active tasks in the worker pool when last task was submitted'),
+            SetIntM('dispatcher_pool_max_worker_count', 'Highest number of workers in worker pool in last collection interval, about 20s'),
+            SetFloatM('dispatcher_availability', 'Fraction of time (in last collection interval) dispatcher was able to receive messages'),
         ]
         # turn metric list into dictionary with the metric name as a key
         self.METRICS = {}
@@ -298,11 +303,13 @@ class Metrics:
         try:
             current_time = time.time()
             if current_time - self.previous_send_metrics.decode(self.conn) > self.send_metrics_interval:
+                serialized_metrics = self.serialize_local_metrics()
                 payload = {
                     'instance': self.instance_name,
-                    'metrics': self.serialize_local_metrics(),
+                    'metrics': serialized_metrics,
                 }
-
+                # store the serialized data locally as well, so that load_other_metrics will read it
+                self.conn.set(root_key + '_instance_' + self.instance_name, serialized_metrics)
                 emit_channel_notification("metrics", payload)
 
                 self.previous_send_metrics.set(current_time)

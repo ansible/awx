@@ -82,11 +82,7 @@ const frequencyTypes = {
 };
 
 function parseRrule(rruleString, schedule, values) {
-  const { frequency, options } = parseRule(
-    rruleString,
-    schedule,
-    values.exceptionFrequency
-  );
+  const { frequency, options } = parseRule(rruleString, schedule);
 
   if (values.frequencyOptions[frequency]) {
     throw new UnsupportedRRuleError(
@@ -105,11 +101,7 @@ function parseRrule(rruleString, schedule, values) {
 }
 
 function parseExRule(exruleString, schedule, values) {
-  const { frequency, options } = parseRule(
-    exruleString,
-    schedule,
-    values.exceptionFrequency
-  );
+  const { frequency, options } = parseRule(exruleString, schedule);
 
   if (values.exceptionOptions[frequency]) {
     throw new UnsupportedRRuleError(
@@ -129,7 +121,7 @@ function parseExRule(exruleString, schedule, values) {
   };
 }
 
-function parseRule(ruleString, schedule, frequencies) {
+function parseRule(ruleString, schedule) {
   const {
     origOptions: {
       bymonth,
@@ -178,9 +170,6 @@ function parseRule(ruleString, schedule, frequencies) {
     throw new Error(`Unexpected rrule frequency: ${freq}`);
   }
   const frequency = frequencyTypes[freq];
-  if (frequencies.includes(frequency)) {
-    throw new Error(`Duplicate frequency types not supported (${frequency})`);
-  }
 
   if (freq === RRule.WEEKLY && byweekday) {
     options.daysOfWeek = byweekday;

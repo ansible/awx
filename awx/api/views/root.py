@@ -20,6 +20,7 @@ from rest_framework import status
 
 import requests
 
+from awx import MODE
 from awx.api.generics import APIView
 from awx.conf.registry import settings_registry
 from awx.main.analytics import all_collectors
@@ -54,6 +55,8 @@ class ApiRootView(APIView):
         data['custom_logo'] = settings.CUSTOM_LOGO
         data['custom_login_info'] = settings.CUSTOM_LOGIN_INFO
         data['login_redirect_override'] = settings.LOGIN_REDIRECT_OVERRIDE
+        if MODE == 'development':
+            data['swagger'] = drf_reverse('api:schema-swagger-ui')
         return Response(data)
 
 
@@ -126,6 +129,7 @@ class ApiVersionRootView(APIView):
         data['workflow_job_nodes'] = reverse('api:workflow_job_node_list', request=request)
         data['mesh_visualizer'] = reverse('api:mesh_visualizer_view', request=request)
         data['bulk'] = reverse('api:bulk', request=request)
+        data['analytics'] = reverse('api:analytics_root_view', request=request)
         return Response(data)
 
 

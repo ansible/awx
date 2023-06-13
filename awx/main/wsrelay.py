@@ -5,13 +5,14 @@ from typing import Dict
 
 import aiohttp
 from aiohttp import client_exceptions
+import aioredis
 
 from channels.layers import get_channel_layer
 
 from django.conf import settings
 from django.apps import apps
 
-import psycopg
+import asyncpg
 
 from awx.main.analytics.broadcast_websocket import (
     RelayWebsocketStats,
@@ -180,6 +181,9 @@ class WebsocketRelayConnection:
                         return
 
                     continue
+                except aioredis.errors.ConnectionClosedError:
+                    logger.info(f"Producer {name} lost connection to Redis, shutting down.")
+                    return
 
                 await websocket.send_json(wrap_broadcast_msg(group, msg))
         except ConnectionResetError:
@@ -205,64 +209,92 @@ class WebSocketRelayManager(object):
         # hostname -> ip
         self.known_hosts: Dict[str, str] = dict()
 
-    async def pg_consumer(self, conn):
+    async def on_ws_heartbeat(self, conn, pid, channel, payload):
         try:
-            await conn.execute("LISTEN web_heartbeet")
-            async for notif in conn.notifies():
-                if notif is not None and notif.channel == "web_heartbeet":
-                    try:
-                        payload = json.loads(notif.payload)
-                    except json.JSONDecodeError:
-                        logmsg = "Failed to decode message from pg_notify channel `web_heartbeet`"
-                        if logger.isEnabledFor(logging.DEBUG):
-                            logmsg = "{} {}".format(logmsg, payload)
-                        logger.warning(logmsg)
-                        continue
+            if not payload or channel != "web_ws_heartbeat":
+                return
 
-                    # Skip if the message comes from the same host we are running on
-                    # In this case, we'll be sharing a redis, no need to relay.
-                    if payload.get("hostname") == self.local_hostname:
-                        continue
+            try:
+                payload = json.loads(payload)
+            except json.JSONDecodeError:
+                logmsg = "Failed to decode message from pg_notify channel `web_ws_heartbeat`"
+                if logger.isEnabledFor(logging.DEBUG):
+                    logmsg = "{} {}".format(logmsg, payload)
+                    logger.warning(logmsg)
+                return
 
-                    if payload.get("action") == "online":
-                        hostname = payload["hostname"]
-                        ip = payload["ip"]
-                        if ip is None:
-                            # If we don't get an IP, just try the hostname, maybe it resolves
-                            ip = hostname
-                        self.known_hosts[hostname] = ip
-                        logger.debug(f"Web host {hostname} ({ip}) online heartbeat received.")
-                    elif payload.get("action") == "offline":
-                        hostname = payload["hostname"]
-                        del self.known_hosts[hostname]
-                        logger.debug(f"Web host {hostname} ({ip}) offline heartbeat received.")
+            # Skip if the message comes from the same host we are running on
+            # In this case, we'll be sharing a redis, no need to relay.
+            if payload.get("hostname") == self.local_hostname:
+                return
+
+            if payload.get("action") == "online":
+                hostname = payload.get("hostname")
+                ip = payload.get("ip")
+                if ip is None:
+                    # If we don't get an IP, just try the hostname, maybe it resolves
+                    ip = hostname
+                if ip is None:
+                    logger.warning(f"Received invalid online ws_heartbeat, missing hostname and ip: {payload}")
+                    return
+                self.known_hosts[hostname] = ip
+                logger.debug(f"Web host {hostname} ({ip}) online heartbeat received.")
+            elif payload.get("action") == "offline":
+                hostname = payload.get("hostname")
+                ip = payload.get("ip")
+                if ip is None:
+                    # If we don't get an IP, just try the hostname, maybe it resolves
+                    ip = hostname
+                if ip is None:
+                    logger.warning(f"Received invalid offline ws_heartbeat, missing hostname and ip: {payload}")
+                    return
+                self.cleanup_offline_host(ip)
+                logger.debug(f"Web host {hostname} ({ip}) offline heartbeat received.")
         except Exception as e:
             # This catch-all is the same as the one above. asyncio will eat the exception
             # but we want to know about it.
-            logger.exception(f"pg_consumer exception: {e}")
+            logger.exception(f"on_ws_heartbeat exception: {e}")
+
+    def cleanup_offline_host(self, hostname):
+        """
+        Given a hostname, try to cancel its task/connection and remove it from
+        the list of hosts we know about.
+        If the host isn't in the list, assume that it was already deleted and
+        don't error.
+        """
+        if hostname in self.relay_connections:
+            self.relay_connections[hostname].cancel()
+            del self.relay_connections[hostname]
+
+        if hostname in self.known_hosts:
+            del self.known_hosts[hostname]
+
+        try:
+            self.stats_mgr.delete_remote_host_stats(hostname)
+        except KeyError:
+            pass
 
     async def run(self):
         event_loop = asyncio.get_running_loop()
 
-        stats_mgr = RelayWebsocketStatsManager(event_loop, self.local_hostname)
-        stats_mgr.start()
+        self.stats_mgr = RelayWebsocketStatsManager(event_loop, self.local_hostname)
+        self.stats_mgr.start()
 
         # Set up a pg_notify consumer for allowing web nodes to "provision" and "deprovision" themselves gracefully.
         database_conf = settings.DATABASES['default']
-        async_conn = await psycopg.AsyncConnection.connect(
-            dbname=database_conf['NAME'],
+        async_conn = await asyncpg.connect(
+            database=database_conf['NAME'],
             host=database_conf['HOST'],
             user=database_conf['USER'],
             password=database_conf['PASSWORD'],
             port=database_conf['PORT'],
-            **database_conf.get("OPTIONS", {}),
+            # We cannot include these because asyncpg doesn't allow all the options that psycopg does.
+            # **database_conf.get("OPTIONS", {}),
         )
-        await async_conn.set_autocommit(True)
-        event_loop.create_task(self.pg_consumer(async_conn))
+        await async_conn.add_listener("web_ws_heartbeat", self.on_ws_heartbeat)
 
         # Establishes a websocket connection to /websocket/relay on all API servers
         while True:
-            # logger.info("Current known hosts: {}".format(self.known_hosts))
             future_remote_hosts = self.known_hosts.keys()
             current_remote_hosts = self.relay_connections.keys()
             deleted_remote_hosts = set(current_remote_hosts) - set(future_remote_hosts)
@@ -291,13 +323,10 @@ class WebSocketRelayManager(object):
                 logger.info(f"Adding {new_remote_hosts} to websocket broadcast list")
 
             for h in deleted_remote_hosts:
-                self.relay_connections[h].cancel()
-                del self.relay_connections[h]
-                del self.known_hosts[h]
-                stats_mgr.delete_remote_host_stats(h)
+                self.cleanup_offline_host(h)
 
             for h in new_remote_hosts:
-                stats = stats_mgr.new_remote_host_stats(h)
+                stats = self.stats_mgr.new_remote_host_stats(h)
                 relay_connection = WebsocketRelayConnection(name=self.local_hostname, stats=stats, remote_host=self.known_hosts[h])
                 relay_connection.start()
                 self.relay_connections[h] = relay_connection

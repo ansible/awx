@@ -179,7 +179,7 @@ options:
     state:
       description:
         - Desired state of the resource.
-      choices: ["present", "absent"]
+      choices: ["present", "absent", "exists"]
       default: "present"
       type: str
 extends_documentation_fragment: awx.awx.auth
@@ -285,7 +285,7 @@ def main():
         job_slice_count=dict(type='int'),
         labels=dict(type='list', elements='str'),
         timeout=dict(type='int'),
-        state=dict(choices=['present', 'absent'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )
     mutually_exclusive = [("unified_job_template", "approval_node")]
     required_if = [
@@ -327,7 +327,7 @@ def main():
         search_fields['workflow_job_template'] = new_fields['workflow_job_template'] = workflow_job_template_id
 
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('workflow_job_template_nodes', **{'data': search_fields})
+    existing_item = module.get_one('workflow_job_template_nodes', check_exists=(state == 'exists'), **{'data': search_fields})
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

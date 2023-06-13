@@ -82,7 +82,7 @@ class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
         related_name='%(class)ss_always',
     )
     all_parents_must_converge = models.BooleanField(
-        default=False, help_text=_("If enabled then the node will only run if all of the parent nodes " "have met the criteria to reach this node")
+        default=False, help_text=_("If enabled then the node will only run if all of the parent nodes have met the criteria to reach this node")
     )
     unified_job_template = models.ForeignKey(
         'UnifiedJobTemplate',
@@ -181,7 +181,7 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         max_length=512,
         default=uuid4,
         blank=False,
-        help_text=_('An identifier for this node that is unique within its workflow. ' 'It is copied to workflow job nodes corresponding to this node.'),
+        help_text=_('An identifier for this node that is unique within its workflow. It is copied to workflow job nodes corresponding to this node.'),
     )
     instance_groups = OrderedManyToManyField(
         'InstanceGroup',
@@ -334,7 +334,7 @@ class WorkflowJobNode(WorkflowNodeBase):
             accepted_fields, ignored_fields, errors = ujt_obj._accept_or_ignore_job_kwargs(**node_prompts_data)
             if errors:
                 logger.info(
-                    _('Bad launch configuration starting template {template_pk} as part of ' 'workflow {workflow_pk}. Errors:\n{error_text}').format(
+                    _('Bad launch configuration starting template {template_pk} as part of workflow {workflow_pk}. Errors:\n{error_text}').format(
                         template_pk=ujt_obj.pk, workflow_pk=self.pk, error_text=errors
                     )
                 )
@@ -647,7 +647,7 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
         null=True,
         default=None,
         on_delete=models.SET_NULL,
-        help_text=_("If automatically created for a sliced job run, the job template " "the workflow job was created from."),
+        help_text=_("If automatically created for a sliced job run, the job template the workflow job was created from."),
     )
     is_sliced_job = models.BooleanField(default=False)
     is_bulk_job = models.BooleanField(default=False)
@@ -714,7 +714,7 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
         wj = self.get_workflow_job()
         while wj and wj.workflow_job_template_id:
             if wj.pk in wj_ids:
-                logger.critical('Cycles detected in the workflow jobs graph, ' 'this is not normal and suggests task manager degeneracy.')
+                logger.critical('Cycles detected in the workflow jobs graph, this is not normal and suggests task manager degeneracy.')
                 break
             wj_ids.add(wj.pk)
             ancestors.append(wj.workflow_job_template)

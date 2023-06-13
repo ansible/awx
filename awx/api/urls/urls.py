@@ -42,6 +42,7 @@ from awx.api.views.bulk import (
 from awx.api.views.mesh_visualizer import MeshVisualizer
 
 from awx.api.views.metrics import MetricsView
+from awx.api.views.analytics import AWX_ANALYTICS_API_PREFIX
 
 from .organization import urls as organization_urls
 from .user import urls as user_urls
@@ -82,7 +83,7 @@ from .oauth2 import urls as oauth2_urls
 from .oauth2_root import urls as oauth2_root_urls
 from .workflow_approval_template import urls as workflow_approval_template_urls
 from .workflow_approval import urls as workflow_approval_urls
-
+from .analytics import urls as analytics_urls
 
 v2_urls = [
     re_path(r'^$', ApiV2RootView.as_view(), name='api_v2_root_view'),
@@ -147,6 +148,7 @@ v2_urls = [
     re_path(r'^unified_job_templates/$', UnifiedJobTemplateList.as_view(), name='unified_job_template_list'),
     re_path(r'^unified_jobs/$', UnifiedJobList.as_view(), name='unified_job_list'),
     re_path(r'^activity_stream/', include(activity_stream_urls)),
+    re_path(rf'^{AWX_ANALYTICS_API_PREFIX}/', include(analytics_urls)),
     re_path(r'^workflow_approval_templates/', include(workflow_approval_template_urls)),
     re_path(r'^workflow_approvals/', include(workflow_approval_urls)),
     re_path(r'^bulk/$', BulkView.as_view(), name='bulk'),
@@ -165,10 +167,13 @@ urlpatterns = [
 ]
 if MODE == 'development':
     # Only include these if we are in the development environment
-    from awx.api.swagger import SwaggerSchemaView
-
-    urlpatterns += [re_path(r'^swagger/$', SwaggerSchemaView.as_view(), name='swagger_view')]
+    from awx.api.swagger import schema_view
 
     from awx.api.urls.debug import urls as debug_urls
 
     urlpatterns += [re_path(r'^debug/', include(debug_urls))]
+    urlpatterns += [
+        re_path(r'^swagger(?P<format>\.json|\.yaml)/$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+        re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+        re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    ]

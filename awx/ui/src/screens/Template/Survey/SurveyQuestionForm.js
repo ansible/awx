@@ -264,7 +264,7 @@ function SurveyQuestionForm({
                         config
                       )}/html/userguide/job_templates.html#surveys`}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                     >
                       {t`documentation`}
                     </a>{' '}

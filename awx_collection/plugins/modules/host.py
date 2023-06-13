@@ -50,7 +50,7 @@ options:
     state:
       description:
         - Desired state of the resource.
-      choices: ["present", "absent"]
+      choices: ["present", "absent", "exists"]
       default: "present"
       type: str
 extends_documentation_fragment: awx.awx.auth
@@ -83,7 +83,7 @@ def main():
         inventory=dict(required=True),
         enabled=dict(type='bool'),
         variables=dict(type='dict'),
-        state=dict(choices=['present', 'absent'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )
 
     # Create a module for ourselves
@@ -102,7 +102,7 @@ def main():
     inventory_id = module.resolve_name_to_id('inventories', inventory)
 
     # Attempt to look up host based on the provided name and inventory ID
-    host = module.get_one('hosts', name_or_id=name, **{'data': {'inventory': inventory_id}})
+    host = module.get_one('hosts', name_or_id=name, check_exists=(state == 'exists'), **{'data': {'inventory': inventory_id}})
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

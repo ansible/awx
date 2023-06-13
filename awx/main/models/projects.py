@@ -74,7 +74,7 @@ class ProjectOptions(models.Model):
             return []
 
     local_path = models.CharField(
-        max_length=1024, blank=True, help_text=_('Local path (relative to PROJECTS_ROOT) containing ' 'playbooks and related files for this project.')
+        max_length=1024, blank=True, help_text=_('Local path (relative to PROJECTS_ROOT) containing playbooks and related files for this project.')
     )
 
     scm_type = models.CharField(
@@ -276,11 +276,11 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
     scm_update_cache_timeout = models.PositiveIntegerField(
         default=0,
         blank=True,
-        help_text=_('The number of seconds after the last project update ran that a new ' 'project update will be launched as a job dependency.'),
+        help_text=_('The number of seconds after the last project update ran that a new project update will be launched as a job dependency.'),
     )
     allow_override = models.BooleanField(
         default=False,
-        help_text=_('Allow changing the SCM branch or revision in a job template ' 'that uses this project.'),
+        help_text=_('Allow changing the SCM branch or revision in a job template that uses this project.'),
     )
 
     # credential (keys) used to validate content signature

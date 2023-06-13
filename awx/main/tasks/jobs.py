@@ -290,13 +290,6 @@ class BaseTask(object):
             content = safe_dump(vars, safe_dict)
         return self.write_private_data_file(private_data_dir, 'extravars', content, sub_dir='env')
 
-    def add_awx_venv(self, env):
-        env['VIRTUAL_ENV'] = settings.AWX_VENV_PATH
-        if 'PATH' in env:
-            env['PATH'] = os.path.join(settings.AWX_VENV_PATH, "bin") + ":" + env['PATH']
-        else:
-            env['PATH'] = os.path.join(settings.AWX_VENV_PATH, "bin")
-
     def build_env(self, instance, private_data_dir, private_data_files=None):
         """
         Build environment dictionary for ansible-playbook.
@@ -1268,7 +1261,7 @@ class RunProjectUpdate(BaseTask):
 
         galaxy_creds_are_defined = project_update.project.organization and project_update.project.organization.galaxy_credentials.exists()
         if not galaxy_creds_are_defined and (settings.AWX_ROLES_ENABLED or settings.AWX_COLLECTIONS_ENABLED):
-            logger.warning('Galaxy role/collection syncing is enabled, but no ' f'credentials are configured for {project_update.project.organization}.')
+            logger.warning('Galaxy role/collection syncing is enabled, but no credentials are configured for {project_update.project.organization}.')
 
         extra_vars.update(
             {

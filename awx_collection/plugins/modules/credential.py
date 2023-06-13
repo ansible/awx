@@ -87,7 +87,7 @@ options:
     update_secrets:
       description:
         - C(true) will always update encrypted values.
-        - C(false) will only updated encrypted values if a change is absolutely known to be needed.
+        - C(false) will only update encrypted values if a change is absolutely known to be needed.
       type: bool
       default: true
     user:
@@ -100,8 +100,8 @@ options:
       type: str
     state:
       description:
-        - Desired state of the resource.
-      choices: ["present", "absent"]
+        - Desired state of the resource. C(exists) will not modify the resource if it is present.
+      choices: ["present", "absent", "exists"]
       default: "present"
       type: str
 
@@ -216,7 +216,7 @@ def main():
         update_secrets=dict(type='bool', default=True, no_log=False),
         user=dict(),
         team=dict(),
-        state=dict(choices=['present', 'absent'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )
 
     # Create a module for ourselves
@@ -247,7 +247,7 @@ def main():
     if organization:
         lookup_data['organization'] = org_id
 
-    credential = module.get_one('credentials', name_or_id=name, **{'data': lookup_data})
+    credential = module.get_one('credentials', name_or_id=name, check_exists=(state == 'exists'), **{'data': lookup_data})
 
     # Attempt to look up credential to copy based on the provided name
     if copy_from:

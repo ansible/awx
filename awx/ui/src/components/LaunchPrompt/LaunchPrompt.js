@@ -19,6 +19,7 @@ function PromptModalForm({
   labels,
   surveyConfig,
   instanceGroups,
+  resourceDefaultCredentials,
 }) {
   const { setFieldTouched, values } = useFormikContext();
   const [showDescription, setShowDescription] = useState(false);
@@ -35,9 +36,9 @@ function PromptModalForm({
     surveyConfig,
     resource,
     labels,
-    instanceGroups
+    instanceGroups,
+    resourceDefaultCredentials
   );
-
   const handleSubmit = async () => {
     const postValues = {};
     const setValue = (key, value) => {
