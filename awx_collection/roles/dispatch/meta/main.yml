@@ -36,7 +36,6 @@ galaxy_info:
     - "dispatch"
 
 collections:
-  - ansible.controller
   - awx.awx
 
 dependencies: []

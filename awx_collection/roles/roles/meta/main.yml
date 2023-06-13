@@ -63,7 +63,6 @@ galaxy_info:
     #       Maximum 20 tags per role.
 
 collections:
-  - ansible.controller
   - awx.awx
 
 dependencies: []

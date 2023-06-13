@@ -36,7 +36,6 @@ galaxy_info:
     - "jobtemplates"
 
 collections:
-  - ansible.controller
   - awx.awx
 
 dependencies: []

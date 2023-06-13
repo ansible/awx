@@ -6,11 +6,7 @@ An Ansible Role to cancel a list of ad hoc commands on Ansible Controller.
 
 ## Requirements
 
-ansible-galaxy collection install -r tests/collections/requirements.yml to be installed
-Currently:
-  awx.awx
-  or
-  ansible.controller
+ansible-galaxy collection install awx.awx
 
 ## Variables
 

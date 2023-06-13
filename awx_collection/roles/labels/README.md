@@ -4,11 +4,7 @@ An Ansible role to create labels for templates on Ansible Controller.
 
 ## Requirements
 
-ansible-galaxy collection install -r tests/collections/requirements.yml to be installed
-Currently:
-  awx.awx
-  or
-  ansible.controller
+ansible-galaxy collection install awx.awx
 
 ## Variables
 

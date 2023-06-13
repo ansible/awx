@@ -37,7 +37,6 @@ galaxy_info:
     - "workflows"
 
 collections:
-  - ansible.controller
   - awx.awx
 
 dependencies: []

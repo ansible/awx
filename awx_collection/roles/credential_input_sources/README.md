@@ -6,11 +6,7 @@ An Ansible Role to create credential input sources on Ansible Controller, the be
 
 ## Requirements
 
-ansible-galaxy collection install -r tests/collections/requirements.yml to be installed
-Currently:
-  awx.awx
-  or
-  ansible.controller
+ansible-galaxy collection install awx.awx
 
 ## Variables
 

@@ -42,7 +42,6 @@ galaxy_info:
     - "credentialinputsources"
 
 collections:
-  - ansible.controller
   - awx.awx
 
 dependencies: []
