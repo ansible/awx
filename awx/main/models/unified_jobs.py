@@ -51,10 +51,10 @@ from awx.main.utils.common import (
     get_capacity_type,
 )
 from awx.main.utils.encryption import encrypt_dict, decrypt_field
+from awx.main.utils.websockets import emit_websocket_payload
 from awx.main.utils import polymorphic
 from awx.main.constants import ACTIVE_STATES, CAN_CANCEL, JOB_VARIABLE_PREFIXES
 from awx.main.redact import UriCleaner, REPLACE_STR
-from awx.main.consumers import emit_channel_notification
 from awx.main.fields import AskForField, OrderedManyToManyField, JSONBlob
 
 __all__ = ['UnifiedJobTemplate', 'UnifiedJob', 'StdoutMaxBytesExceeded']
@@ -1310,12 +1310,12 @@ class UnifiedJob(
             status_data['group_name'] = 'jobs'
             if getattr(self, 'unified_job_template_id', None):
                 status_data['unified_job_template_id'] = self.unified_job_template_id
-            emit_channel_notification('jobs-status_changed', status_data)
+            emit_websocket_payload('jobs-status_changed', status_data)
 
             if self.spawned_by_workflow:
                 status_data['group_name'] = "workflow_events"
                 status_data['workflow_job_template_id'] = self.unified_job_template.id
-                emit_channel_notification('workflow_events-' + str(self.workflow_job_id), status_data)
+                emit_websocket_payload('workflow_events-' + str(self.workflow_job_id), status_data)
         except IOError:  # includes socket errors
             logger.exception('%s failed to emit channel msg about status change', self.log_format)
 

@@ -34,10 +34,10 @@ The notable modules for this component are:
   clients are actually handled (think of these like views, but specific to
   websockets).
 
-  * This is also where `emit_channel_notification` is defined, which is what the
-    task system calls to actually send out notifications. This sends a message
-    to the local Redis instance where wsrelay (discussed below) will pick it
-    up and relay it out to the web nodes.
+* `awx/main/utils/websockets.py` - this is where `emit_websocket_payload` is
+  defined, which is what the task system calls to actually send out
+  notifications. This sends a message to the local Redis instance where wsrelay
+  (discussed below) will pick it up and relay it out to the web nodes.
 
 * `awx/main/wsrelay.py` (formerly `awx/main/wsbroadcast.py`) - an asyncio
   websockets _client_ that connects to the "relay" (fka. "broadcast")

@@ -15,11 +15,11 @@ import psutil
 
 import redis
 
-from awx.main.consumers import emit_channel_notification
 from awx.main.models import JobEvent, AdHocCommandEvent, ProjectUpdateEvent, InventoryUpdateEvent, SystemJobEvent, UnifiedJob
 from awx.main.constants import ACTIVE_STATES
 from awx.main.models.events import emit_event_detail
 from awx.main.utils.profiling import AWXProfiler
+from awx.main.utils.websockets import emit_websocket_payload
 import awx.main.analytics.subsystem_metrics as s_metrics
 from .base import BaseWorker
 
@@ -250,7 +250,7 @@ class CallbackBrokerWorker(BaseWorker):
                         # closed. don't actually persist them to the database; we
                         # just use them to report `summary` websocket events as an
                         # approximation for when a job is "done"
-                        emit_channel_notification('jobs-summary', dict(group_name='jobs', unified_job_id=job_identifier, final_counter=final_counter))
+                        emit_websocket_payload('jobs-summary', dict(group_name='jobs', unified_job_id=job_identifier, final_counter=final_counter))
 
                         if notification_trigger_event:
                             job_stats_wrapup(job_identifier)

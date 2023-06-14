@@ -62,8 +62,8 @@ from awx.main.utils.common import (
 
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
+from awx.main.utils.websockets import emit_websocket_payload
 from awx.main.tasks.receptor import get_receptor_ctl, worker_info, worker_cleanup, administrative_workunit_reaper, write_receptor_config
-from awx.main.consumers import emit_channel_notification
 from awx.main import analytics
 from awx.conf import settings_registry
 from awx.main.analytics.subsystem_metrics import Metrics
@@ -707,7 +707,7 @@ def awx_periodic_scheduler():
                 )
                 new_unified_job.save(update_fields=['status', 'job_explanation'])
                 new_unified_job.websocket_emit_status("failed")
-            emit_channel_notification('schedules-changed', dict(id=schedule.id, group_name="schedules"))
+            emit_websocket_payload('schedules-changed', dict(id=schedule.id, group_name="schedules"))
         state.save()
 
 
@@ -843,7 +843,7 @@ def delete_inventory(inventory_id, user_id, retries=5):
             for host in i.hosts.iterator():
                 host.job_events_as_primary_host.update(host=None)
             i.delete()
-            emit_channel_notification('inventories-status_changed', {'group_name': 'inventories', 'inventory_id': inventory_id, 'status': 'deleted'})
+            emit_websocket_payload('inventories-status_changed', {'group_name': 'inventories', 'inventory_id': inventory_id, 'status': 'deleted'})
             logger.debug('Deleted inventory {} as user {}.'.format(inventory_id, user_id))
         except Inventory.DoesNotExist:
             logger.exception("Delete Inventory failed due to missing inventory: " + str(inventory_id))

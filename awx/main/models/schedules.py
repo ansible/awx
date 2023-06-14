@@ -22,7 +22,7 @@ from awx.main.fields import OrderedManyToManyField
 from awx.main.models.base import PrimordialModel
 from awx.main.models.jobs import LaunchTimeConfig
 from awx.main.utils import ignore_inventory_computed_fields
-from awx.main.consumers import emit_channel_notification
+from awx.main.utils.websockets import emit_websocket_payload
 
 import pytz
 
@@ -292,7 +292,7 @@ class Schedule(PrimordialModel, LaunchTimeConfig):
         changed = self.update_computed_fields_no_save()
         if not changed:
             return
-        emit_channel_notification('schedules-changed', dict(id=self.id, group_name='schedules'))
+        emit_websocket_payload('schedules-changed', dict(id=self.id, group_name='schedules'))
         # Must save self here before calling unified_job_template computed fields
         # in order for that method to be correct
         # by adding modified to update fields, we avoid updating modified time

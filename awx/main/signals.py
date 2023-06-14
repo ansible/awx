@@ -55,6 +55,7 @@ from awx.main.models import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
 )
 from awx.main.constants import CENSOR_VALUE
+from awx.main.utils.websockets import emit_websocket_payload
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, get_current_apps
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
 from awx.main.tasks.system import update_inventory_computed_fields, handle_removed_image
@@ -62,8 +63,6 @@ from awx.main.fields import (
     is_implicit_parent,
     update_role_parentage_for_instance,
 )
-
-from awx.main import consumers
 
 from awx.conf.utils import conf_to_dict
 
@@ -664,7 +663,7 @@ def save_user_session_membership(sender, **kwargs):
             Session.objects.filter(session_key__in=[membership.session_id]).delete()
             membership.delete()
         if len(expired):
-            consumers.emit_channel_notification('control-limit_reached_{}'.format(user_id), dict(group_name='control', reason='limit_reached'))
+            emit_websocket_payload('control-limit_reached_{}'.format(user_id), dict(group_name='control', reason='limit_reached'))
 
 
 @receiver(post_save, sender=OAuth2AccessToken)
