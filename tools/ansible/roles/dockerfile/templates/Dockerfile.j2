@@ -105,6 +105,8 @@ USER root
 # Import the gpg key for DNF to work
 RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
 
+ADD https://copr.fedorainfracloud.org/coprs/ansible/Rsyslog/repo/epel-9/ansible-Rsyslog-epel-9.repo /etc/yum.repos.d/ansible-Rsyslog-epel-9.repo
+
 # Install runtime requirements
 RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     dnf config-manager --set-enabled crb && \
@@ -122,7 +124,7 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     python3-psycopg2 \
     python3-setuptools \
     rsync \
-    https://download.copr.fedorainfracloud.org/results/ansible/Rsyslog/epel-9-x86_64/06076718-rsyslog/rsyslog-8.2102.0-106.el9.x86_64.rpm \
+    rsyslog-8.2102.0-106.el9 \
     subversion \
     sudo \
     vim-minimal \
