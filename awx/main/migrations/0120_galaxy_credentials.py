@@ -2,7 +2,7 @@
 
 import logging
 
-import awx.main.fields
+from awx.main.migrations._removed_fields import OrderedManyToManyField
 
 from django.db import migrations, models
 import django.db.models.deletion
@@ -49,7 +49,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='organization',
             name='galaxy_credentials',
-            field=awx.main.fields.OrderedManyToManyField(
+            field=OrderedManyToManyField(
                 blank=True, related_name='organization_galaxy_credentials', through='main.OrganizationGalaxyCredentialMembership', to='main.Credential'
             ),
         ),

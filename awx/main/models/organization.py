@@ -10,10 +10,12 @@ from django.contrib.sessions.models import Session
 from django.utils.timezone import now as tz_now
 from django.utils.translation import gettext_lazy as _
 
+# Django sorted many-to-many
+from sortedm2m.fields import SortedManyToManyField
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.fields import AutoOneToOneField, ImplicitRoleField, OrderedManyToManyField
+from awx.main.fields import AutoOneToOneField, ImplicitRoleField
 from awx.main.models.base import BaseModel, CommonModel, CommonModelNameNotUnique, CreatedModifiedModel, NotificationFieldsModel
 from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
@@ -34,10 +36,8 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
         app_label = 'main'
         ordering = ('name',)
 
-    instance_groups = OrderedManyToManyField('InstanceGroup', blank=True, through='OrganizationInstanceGroupMembership')
-    galaxy_credentials = OrderedManyToManyField(
-        'Credential', blank=True, through='OrganizationGalaxyCredentialMembership', related_name='%(class)s_galaxy_credentials'
-    )
+    instance_groups = SortedManyToManyField('InstanceGroup', blank=True, sort_value_field_name='position', related_name='organization_instance_groups')
+    galaxy_credentials = SortedManyToManyField('Credential', blank=True, related_name='orgs_using_as_galaxy', sort_value_field_name='position')
     max_hosts = models.PositiveIntegerField(
         blank=True,
         default=0,
@@ -113,16 +113,6 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
 
     def _get_related_jobs(self):
         return UnifiedJob.objects.non_polymorphic().filter(organization=self)
-
-
-class OrganizationGalaxyCredentialMembership(models.Model):
-    organization = models.ForeignKey('Organization', on_delete=models.CASCADE)
-    credential = models.ForeignKey('Credential', on_delete=models.CASCADE)
-    position = models.PositiveIntegerField(
-        null=True,
-        default=None,
-        db_index=True,
-    )
 
 
 class Team(CommonModelNameNotUnique, ResourceMixin):

@@ -23,6 +23,9 @@ from django.urls import resolve
 from django.utils.timezone import now
 from django.db.models import Q
 
+# Django sorted many-to-many
+from sortedm2m.fields import SortedManyToManyField
+
 # REST Framework
 from rest_framework.exceptions import ParseError
 
@@ -33,7 +36,6 @@ from awx.main.consumers import emit_channel_notification
 from awx.main.fields import (
     ImplicitRoleField,
     SmartFilterField,
-    OrderedManyToManyField,
 )
 from awx.main.managers import HostManager, HostMetricActiveManager
 from awx.main.models.base import BaseModel, CommonModelNameNotUnique, VarsDictProperty, CLOUD_INVENTORY_SOURCES, prevent_search, accepts_json
@@ -59,16 +61,6 @@ from awx.main.utils.licensing import server_product_name
 __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate', 'SmartInventoryMembership', 'HostMetric', 'HostMetricSummaryMonthly']
 
 logger = logging.getLogger('awx.main.models.inventory')
-
-
-class InventoryConstructedInventoryMembership(models.Model):
-    constructed_inventory = models.ForeignKey('Inventory', on_delete=models.CASCADE, related_name='constructed_inventory_memberships')
-    input_inventory = models.ForeignKey('Inventory', on_delete=models.CASCADE)
-    position = models.PositiveIntegerField(
-        null=True,
-        default=None,
-        db_index=True,
-    )
 
 
 class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
@@ -153,19 +145,14 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         default=None,
         help_text=_('Filter that will be applied to the hosts of this inventory.'),
     )
-    input_inventories = OrderedManyToManyField(
+    input_inventories = SortedManyToManyField(
         'Inventory',
         blank=True,
-        through_fields=('constructed_inventory', 'input_inventory'),
         related_name='destination_inventories',
+        sort_value_field_name='position',
         help_text=_('Only valid for constructed inventories, this links to the inventories that will be used.'),
-        through='InventoryConstructedInventoryMembership',
     )
-    instance_groups = OrderedManyToManyField(
-        'InstanceGroup',
-        blank=True,
-        through='InventoryInstanceGroupMembership',
-    )
+    instance_groups = SortedManyToManyField('InstanceGroup', blank=True, sort_value_field_name='position', related_name='inventory_instance_groups')
     admin_role = ImplicitRoleField(
         parent_role='organization.inventory_admin_role',
     )

@@ -17,6 +17,9 @@ from django.db.models.functions import Cast
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import FieldDoesNotExist
 
+# Django sorted many-to-many
+from sortedm2m.fields import SortedManyToManyField
+
 # REST Framework
 from rest_framework.exceptions import ParseError
 
@@ -40,7 +43,7 @@ from awx.main.models.notifications import (
     JobNotificationMixin,
 )
 from awx.main.utils import parse_yaml_or_json, getattr_dne, NullablePromptPseudoField, polymorphic
-from awx.main.fields import ImplicitRoleField, AskForField, JSONBlob, OrderedManyToManyField
+from awx.main.fields import ImplicitRoleField, AskForField, JSONBlob
 from awx.main.models.mixins import (
     ResourceMixin,
     SurveyJobTemplateMixin,
@@ -1022,8 +1025,8 @@ class JobLaunchConfig(LaunchTimeConfig):
     )
 
     # Instance Groups needed for non-unified job / unified JT models
-    instance_groups = OrderedManyToManyField(
-        'InstanceGroup', related_name='%(class)ss', blank=True, editable=False, through='JobLaunchConfigInstanceGroupMembership'
+    instance_groups = SortedManyToManyField(
+        'InstanceGroup', blank=True, sort_value_field_name='position', editable=False, related_name='launch_config_instance_groups'
     )
 
     def has_user_prompts(self, template):

@@ -14,7 +14,7 @@ def test_job_template_copy(
     post, get, project, inventory, machine_credential, vault_credential, credential, alice, job_template_with_survey_passwords, admin, organization
 ):
     label = Label.objects.create(name="foobar", organization=organization)
-    ig = InstanceGroup.objects.create(name="bazbar", organization=organization)
+    ig = InstanceGroup.objects.create(name="bazbar")
     job_template_with_survey_passwords.project = project
     job_template_with_survey_passwords.inventory = inventory
     job_template_with_survey_passwords.labels.add(label)
@@ -154,7 +154,7 @@ def test_workflow_job_template_copy(workflow_job_template, post, get, admin, org
     ee = ExecutionEnvironment.objects.create(name="barfoo", organization=organization)
     workflow_job_template.execution_environment = ee
 
-    ig = InstanceGroup.objects.create(name="bazbar", organization=organization)
+    ig = InstanceGroup.objects.create(name="bazbar")
     workflow_job_template.instance_groups.add(ig)
 
     workflow_job_template.save()

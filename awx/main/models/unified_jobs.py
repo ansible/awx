@@ -24,6 +24,9 @@ from django.utils.timezone import now
 from django.utils.encoding import smart_str
 from django.contrib.contenttypes.models import ContentType
 
+# Django sorted many-to-many
+from sortedm2m.fields import SortedManyToManyField
+
 # REST Framework
 from rest_framework.exceptions import ParseError
 
@@ -55,7 +58,7 @@ from awx.main.utils import polymorphic
 from awx.main.constants import ACTIVE_STATES, CAN_CANCEL, JOB_VARIABLE_PREFIXES
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.consumers import emit_channel_notification
-from awx.main.fields import AskForField, OrderedManyToManyField, JSONBlob
+from awx.main.fields import AskForField, JSONBlob
 
 __all__ = ['UnifiedJobTemplate', 'UnifiedJob', 'StdoutMaxBytesExceeded']
 
@@ -176,7 +179,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         related_name='%(class)ss',
     )
     labels = models.ManyToManyField("Label", blank=True, related_name='%(class)s_labels')
-    instance_groups = OrderedManyToManyField('InstanceGroup', blank=True, through='UnifiedJobTemplateInstanceGroupMembership')
+    instance_groups = SortedManyToManyField('InstanceGroup', blank=True, sort_value_field_name='position', related_name='unifiedjobtemplate_instance_groups')
 
     def get_absolute_url(self, request=None):
         real_instance = self.get_real_instance()
