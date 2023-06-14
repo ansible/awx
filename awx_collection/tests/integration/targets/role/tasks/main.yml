@@ -198,7 +198,6 @@
 
     - name: Add Joe to workflow approve role
       role:
-        user: "{{ username }}"
         users:
           - "{{ username }}2"
         role: approval
