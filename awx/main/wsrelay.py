@@ -232,28 +232,20 @@ class WebSocketRelayManager(object):
                 if payload.get("hostname") == self.local_hostname:
                     return
 
-                if payload.get("action") == "online":
+                action = payload.get("action")
+
+                if action in ("online", "offline"):
                     hostname = payload.get("hostname")
-                    ip = payload.get("ip")
+                    ip = payload.get("ip") or hostname  # try back to hostname if ip isn't supplied
                     if ip is None:
-                        # If we don't get an IP, just try the hostname, maybe it resolves
-                        ip = hostname
-                    if ip is None:
-                        logger.warning(f"Received invalid online ws_heartbeat, missing hostname and ip: {payload}")
+                        logger.warning(f"Received invalid {action} ws_heartbeat, missing hostname and ip: {payload}")
                         return
+                    logger.debug(f"Web host {hostname} ({ip}) {action} heartbeat received.")
+
+                if action == "online":
                     self.known_hosts[hostname] = ip
-                    logger.debug(f"Web host {hostname} ({ip}) online heartbeat received.")
-                elif payload.get("action") == "offline":
-                    hostname = payload.get("hostname")
-                    ip = payload.get("ip")
-                    if ip is None:
-                        # If we don't get an IP, just try the hostname, maybe it resolves
-                        ip = hostname
-                    if ip is None:
-                        logger.warning(f"Received invalid offline ws_heartbeat, missing hostname and ip: {payload}")
-                        return
-                    self.cleanup_offline_host(ip)
-                    logger.debug(f"Web host {hostname} ({ip}) offline heartbeat received.")
+                elif action == "offline":
+                    self.cleanup_offline_host(hostname)
             except Exception as e:
                 # This catch-all is the same as the one above. asyncio will eat the exception
                 # but we want to know about it.
