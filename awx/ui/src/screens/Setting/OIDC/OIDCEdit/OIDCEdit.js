@@ -13,10 +13,12 @@ import useRequest from 'hooks/useRequest';
 import { SettingsAPI } from 'api';
 import { RevertAllAlert, RevertFormActionGroup } from '../../shared';
 import {
+  ObjectField,
   EncryptedField,
   InputField,
   BooleanField,
 } from '../../shared/SharedFields';
+import { formatJson } from '../../shared/settingUtils';
 
 function OIDCEdit() {
   const history = useHistory();
@@ -69,6 +71,12 @@ function OIDCEdit() {
   const handleSubmit = async (form) => {
     await submitForm({
       ...form,
+      SOCIAL_AUTH_OIDC_ORGANIZATION_REMOTE_MAP: formatJson(
+        form.SOCIAL_AUTH_OIDC_ORGANIZATION_REMOTE_MAP
+      ),
+      SOCIAL_AUTH_OIDC_TEAM_REMOTE_MAP: formatJson(
+        form.SOCIAL_AUTH_OIDC_TEAM_REMOTE_MAP
+      ),
     });
   };
 
@@ -121,6 +129,18 @@ function OIDCEdit() {
                 <BooleanField
                   name="SOCIAL_AUTH_OIDC_VERIFY_SSL"
                   config={OIDC.SOCIAL_AUTH_OIDC_VERIFY_SSL}
+                />
+                <BooleanField
+                  name="SOCIAL_AUTH_OIDC_AUTO_CREATE_OBJECTS"
+                  config={OIDC.SOCIAL_AUTH_OIDC_AUTO_CREATE_OBJECTS}
+                />
+                <ObjectField
+                  name="SOCIAL_AUTH_OIDC_ORGANIZATION_REMOTE_MAP"
+                  config={OIDC.SOCIAL_AUTH_OIDC_ORGANIZATION_REMOTE_MAP}
+                />
+                <ObjectField
+                  name="SOCIAL_AUTH_OIDC_TEAM_REMOTE_MAP"
+                  config={OIDC.SOCIAL_AUTH_OIDC_TEAM_REMOTE_MAP}
                 />
                 {submitError && <FormSubmitError error={submitError} />}
                 {revertError && <FormSubmitError error={revertError} />}

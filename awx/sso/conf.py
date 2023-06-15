@@ -35,6 +35,9 @@ from awx.sso.fields import (
     SAMLUserFlagsAttrField,
     SocialOrganizationMapField,
     SocialTeamMapField,
+    SocialOrganizationRemoteMapField,
+    SocialTeamRemoteMapField,
+    SocialUserFlagsRemoteMapField,
 )
 from awx.main.validators import validate_private_key, validate_certificate
 from awx.sso.validators import validate_ldap_bind_dn, validate_tacacsplus_disallow_nonascii  # noqa
@@ -1269,6 +1272,77 @@ register(
     help_text=_('Verify the OIDC provider ssl certificate.'),
     category=_('Generic OIDC'),
     category_slug='oidc',
+)
+
+register(
+    'SOCIAL_AUTH_OIDC_ORGANIZATION_REMOTE_MAP',
+    field_class=SocialOrganizationRemoteMapField,
+    allow_null=True,
+    default=None,
+    label=_('Generic OIDC Organization Attribute Mapping'),
+    help_text=_('Used to translate user organization membership.'),
+    category=_('Generic OIDC'),
+    category_slug='oidc',
+    placeholder=collections.OrderedDict(
+        [
+            ('social_auth_member_scope', 'roles'),
+            ('remove_members', True),
+            (
+                'org_map',
+                [
+                    collections.OrderedDict([('organization', 'Red Hat')]),
+                    collections.OrderedDict([('organization', 'Ansible')]),
+                ],
+            ),
+        ]
+    ),
+)
+
+register(
+    'SOCIAL_AUTH_OIDC_TEAM_REMOTE_MAP',
+    field_class=SocialTeamRemoteMapField,
+    allow_null=True,
+    default=None,
+    label=_('Generic OIDC Team Attribute Mapping'),
+    help_text=_('Used to translate user team membership.'),
+    category=_('Generic OIDC'),
+    category_slug='oidc',
+    placeholder=collections.OrderedDict(
+        [
+            ('social_auth_member_scope', 'roles'),
+            ('remove_members', True),
+            (
+                'team_org_map',
+                [
+                    collections.OrderedDict([('team', 'Marketing'), ('organization', 'Red Hat')]),
+                    collections.OrderedDict([('team', 'Human Resources'), ('organization', 'Red Hat')]),
+                    collections.OrderedDict([('team', 'Engineering'), ('organization', 'Red Hat')]),
+                    collections.OrderedDict([('team', 'Engineering'), ('organization', 'Ansible')]),
+                    collections.OrderedDict([('team', 'Quality Engineering'), ('organization', 'Ansible')]),
+                    collections.OrderedDict([('team', 'Sales'), ('organization', 'Ansible')]),
+                ],
+            ),
+        ]
+    ),
+)
+
+register(
+    'SOCIAL_AUTH_OIDC_USER_FLAGS_REMOTE_MAP',
+    field_class=SocialUserFlagsRemoteMapField,
+    allow_null=True,
+    default=None,
+    label=_('Generic OIDC User Flags Mapping'),
+    help_text=_('Used to map super users and system auditors from Generic OIDC.'),
+    category=_('Generic OIDC'),
+    category_slug='oidc',
+    placeholder=[
+        ('is_superuser_scope', 'roles'),
+        ('is_superuser_value', 'SUPERADMIN'),
+        ('remove_superusers', True),
+        ('is_system_auditor_scope', 'roles'),
+        ('is_system_auditor_value', 'AUDITOR'),
+        ('remove_system_auditors', True),
+    ],
 )
 
 ###############################################################################
