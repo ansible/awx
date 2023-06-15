@@ -66,7 +66,7 @@
 
     - name: Get a keycloak token
       uri:
-        url: "https://localhost:8443/auth/realms/master/protocol/openid-connect/token"
+        url: "https://localhost:8443/realms/master/protocol/openid-connect/token"
         method: POST
         body_format: form-urlencoded
         body:
@@ -84,7 +84,7 @@
 
     - name: Create the AWX realm
       uri:
-        url: "https://localhost:8443/auth/admin/realms"
+        url: "https://localhost:8443/admin/realms"
         method: POST
         body_format: json
         body: "{{ lookup('file', keycloak_realm_template) }}"

@@ -66,6 +66,9 @@ services:
       - "8043:8043"  # https
       - "2222:2222"  # receptor foo node
       - "3000:3001"  # used by the UI dev env
+{% if enable_keycloak|bool %}
+      - "8443:8443"  # used by keycloak
+{% endif %}
 {% endif %}
   redis_{{ container_postfix }}:
     image: redis:latest
@@ -94,18 +97,21 @@ services:
 {% endif %}
 {% if enable_keycloak|bool %}
   keycloak:
-    image: quay.io/keycloak/keycloak:15.0.2
+    image: quay.io/keycloak/keycloak:21.1.1
     container_name: tools_keycloak_1
     hostname: keycloak
+    command: start --proxy edge --hostname-strict=false
     user: "{{ ansible_user_uid }}"
-    ports:
-      - "8443:8443"
     environment:
       DB_VENDOR: postgres
       DB_ADDR: postgres
       DB_DATABASE: keycloak
       DB_USER: {{ pg_username }}
       DB_PASSWORD: {{ pg_password }}
+      KC_HOSTNAME_URL: https://localhost:8443/
+      KC_HOSTNAME_ADMIN_URL: https://localhost:8443/
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
     depends_on:
       - postgres
 {% endif %}

@@ -21,9 +21,9 @@
     "SOCIAL_AUTH_SAML_ENABLED_IDPS": {
         "Keycloak": {
             "attr_user_permanent_id": "name_id",
-            "entity_id": "https://{{ container_reference }}:8443/auth/realms/awx",
+            "entity_id": "https://{{ container_reference }}:8443/realms/awx",
             "attr_groups": "groups",
-            "url": "https://{{ container_reference }}:8443/auth/realms/awx/protocol/saml",
+            "url": "https://{{ container_reference }}:8443/realms/awx/protocol/saml",
             "attr_first_name": "first_name",
             "x509cert": "{{ public_key_content | regex_replace('\\n', '') }}",
             "attr_email": "email",
