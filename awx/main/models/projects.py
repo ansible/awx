@@ -479,7 +479,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         RunProjectUpdate/RunInventoryUpdate.
         """
 
-        if self.status not in ('error', 'failed'):
+        if self.status not in ('error', 'failed') or self.scm_update_on_launch:
             return None
 
         latest_update = self.project_updates.last()
