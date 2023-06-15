@@ -30,7 +30,7 @@ def migrate_event_data(apps, schema_editor):
             # otherwise, the schema changes we would make on the old jobevents table
             # (namely, dropping the primary key constraint) would cause the migration
             # to suffer a serious performance degradation
-            cursor.execute(f'CREATE TABLE tmp_{tblname} ' f'(LIKE _unpartitioned_{tblname} INCLUDING ALL)')
+            cursor.execute(f'CREATE TABLE tmp_{tblname} (LIKE _unpartitioned_{tblname} INCLUDING ALL)')
 
             # drop primary key constraint; in a partioned table
             # constraints must include the partition key itself
@@ -48,7 +48,7 @@ def migrate_event_data(apps, schema_editor):
             cursor.execute(f'DROP TABLE tmp_{tblname}')
 
             # recreate primary key constraint
-            cursor.execute(f'ALTER TABLE ONLY {tblname} ' f'ADD CONSTRAINT {tblname}_pkey_new PRIMARY KEY (id, job_created);')
+            cursor.execute(f'ALTER TABLE ONLY {tblname} ADD CONSTRAINT {tblname}_pkey_new PRIMARY KEY (id, job_created);')
 
     with connection.cursor() as cursor:
         """
