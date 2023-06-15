@@ -2,23 +2,23 @@
 # Create Controller applications
 - name: Add Controller Applications
   application:
-    name:                           "{{ __application_item.name | mandatory }}"
-    new_name:                       "{{ __application_item.new_name | default(omit, true) }}"
-    organization:                   "{{ __application_item.organization | mandatory }}"
-    description:                    "{{ __application_item.description | default(( '' if controller_configuration_applications_enforce_defaults else omit), true) }}"
-    authorization_grant_type:       "{{ __application_item.authorization_grant_type | default('password') }}"
-    client_type:                    "{{ __application_item.client_type | default('public') }}"
-    redirect_uris:                  "{{ __application_item.redirect_uris | default([]) }}"
-    skip_authorization:             "{{ __application_item.skip_authorization | default(( false if controller_configuration_applications_enforce_defaults else omit), true) }}"
-    state:                          "{{ __application_item.state | default(controller_state | default('present')) }}"
+    name: "{{ __application_item.name | mandatory }}"
+    new_name: "{{ __application_item.new_name | default(omit, true) }}"
+    organization: "{{ __application_item.organization | mandatory }}"
+    description: "{{ __application_item.description | default(( '' if controller_configuration_applications_enforce_defaults else omit), true) }}"
+    authorization_grant_type: "{{ __application_item.authorization_grant_type | default('password') }}"
+    client_type: "{{ __application_item.client_type | default('public') }}"
+    redirect_uris: "{{ __application_item.redirect_uris | default([]) }}"
+    skip_authorization: "{{ __application_item.skip_authorization | default(( false if controller_configuration_applications_enforce_defaults else omit), true) }}"
+    state: "{{ __application_item.state | default(controller_state | default('present')) }}"
 
     # Role specific options
-    controller_username:            "{{ controller_username | default(omit, true) }}"
-    controller_password:            "{{ controller_password | default(omit, true) }}"
-    controller_oauthtoken:          "{{ controller_oauthtoken | default(omit, true) }}"
-    controller_host:                "{{ controller_hostname | default(omit, true) }}"
-    controller_config_file:         "{{ controller_config_file | default(omit, true) }}"
-    validate_certs:                 "{{ controller_validate_certs | default(omit) }}"
+    controller_username: "{{ controller_username | default(omit, true) }}"
+    controller_password: "{{ controller_password | default(omit, true) }}"
+    controller_oauthtoken: "{{ controller_oauthtoken | default(omit, true) }}"
+    controller_host: "{{ controller_hostname | default(omit, true) }}"
+    controller_config_file: "{{ controller_config_file | default(omit, true) }}"
+    validate_certs: "{{ controller_validate_certs | default(omit) }}"
   loop: "{{ applications if applications is defined else controller_applications }}"
   loop_control:
     loop_var: "__application_item"

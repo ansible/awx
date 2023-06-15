@@ -2,20 +2,20 @@
 # Update Inventory sources
 - name: Run Controller inventory source update
   inventory_source_update:
-    name:                     "{{ __inventory_source_update_item.name }}"
-    inventory:                "{{ __inventory_source_update_item.inventory }}"
-    organization:             "{{ __inventory_source_update_item.organization | default(omit, true) }}"
-    wait:                     "{{ __inventory_source_update_item.wait | default(omit) }}"
-    interval:                 "{{ __inventory_source_update_item.interval | default(controller_configuration_inventory_source_update_async_delay) }}"
-    timeout:                  "{{ __inventory_source_update_item.timeout | default(omit, true) }}"
+    name: "{{ __inventory_source_update_item.name }}"
+    inventory: "{{ __inventory_source_update_item.inventory }}"
+    organization: "{{ __inventory_source_update_item.organization | default(omit, true) }}"
+    wait: "{{ __inventory_source_update_item.wait | default(omit) }}"
+    interval: "{{ __inventory_source_update_item.interval | default(controller_configuration_inventory_source_update_async_delay) }}"
+    timeout: "{{ __inventory_source_update_item.timeout | default(omit, true) }}"
 
     # Role Standard Options
-    controller_username:      "{{ controller_username | default(omit, true) }}"
-    controller_password:      "{{ controller_password | default(omit, true) }}"
-    controller_oauthtoken:    "{{ controller_oauthtoken | default(omit, true) }}"
-    controller_host:          "{{ controller_hostname | default(omit, true) }}"
-    controller_config_file:   "{{ controller_config_file | default(omit, true) }}"
-    validate_certs:           "{{ controller_validate_certs | default(omit) }}"
+    controller_username: "{{ controller_username | default(omit, true) }}"
+    controller_password: "{{ controller_password | default(omit, true) }}"
+    controller_oauthtoken: "{{ controller_oauthtoken | default(omit, true) }}"
+    controller_host: "{{ controller_hostname | default(omit, true) }}"
+    controller_config_file: "{{ controller_config_file | default(omit, true) }}"
+    validate_certs: "{{ controller_validate_certs | default(omit) }}"
   loop: "{{ inventory_sources if inventory_sources is defined else controller_inventory_sources }}"
   loop_control:
     loop_var: "__inventory_source_update_item"

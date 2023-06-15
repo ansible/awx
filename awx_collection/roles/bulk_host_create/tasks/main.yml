@@ -2,16 +2,16 @@
 # Create Job Template
 - name: Add Controller hosts in bulk
   bulk_host_create:
-    hosts:                              "{{ __controller_bulk_hosts_item.hosts }}"
-    inventory:                          "{{ __controller_bulk_hosts_item.inventory }}"
+    hosts: "{{ __controller_bulk_hosts_item.hosts }}"
+    inventory: "{{ __controller_bulk_hosts_item.inventory }}"
 
     # Role Standard options
-    controller_username:                "{{ controller_username | default(omit, true) }}"
-    controller_password:                "{{ controller_password | default(omit, true) }}"
-    controller_oauthtoken:              "{{ controller_oauthtoken | default(omit, true) }}"
-    controller_host:                    "{{ controller_hostname | default(omit, true) }}"
-    controller_config_file:             "{{ controller_config_file | default(omit, true) }}"
-    validate_certs:                 "{{ controller_validate_certs | default(omit) }}"
+    controller_username: "{{ controller_username | default(omit, true) }}"
+    controller_password: "{{ controller_password | default(omit, true) }}"
+    controller_oauthtoken: "{{ controller_oauthtoken | default(omit, true) }}"
+    controller_host: "{{ controller_hostname | default(omit, true) }}"
+    controller_config_file: "{{ controller_config_file | default(omit, true) }}"
+    validate_certs: "{{ controller_validate_certs | default(omit) }}"
   loop: "{{ controller_bulk_hosts }}"
   loop_control:
     loop_var: __controller_bulk_hosts_item

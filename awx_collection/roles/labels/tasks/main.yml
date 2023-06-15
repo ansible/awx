@@ -1,18 +1,18 @@
 ---
 - name: Add a label to Controller
   label:
-    name:                                 "{{ __controller_label_item.name | mandatory }}"
-    new_name:                             "{{ __controller_label_item.new_name | default(omit, true) }}"
-    organization:                         "{{ __controller_label_item.organization | mandatory }}"
-    state:                                "{{ __controller_label_item.state | default(controller_state | default('present')) }}"
+    name: "{{ __controller_label_item.name | mandatory }}"
+    new_name: "{{ __controller_label_item.new_name | default(omit, true) }}"
+    organization: "{{ __controller_label_item.organization | mandatory }}"
+    state: "{{ __controller_label_item.state | default(controller_state | default('present')) }}"
 
     # Role Standard Options
-    controller_config_file:               "{{ controller_config_file | default(omit, true) }}"
-    controller_host:                      "{{ controller_hostname | default(omit, true) }}"
-    controller_username:                  "{{ controller_username | default(omit, true) }}"
-    controller_password:                  "{{ controller_password | default(omit, true) }}"
-    controller_oauthtoken:                "{{ controller_oauthtoken | default(omit, true) }}"
-    validate_certs:                       "{{ controller_validate_certs | default(omit) }}"
+    controller_config_file: "{{ controller_config_file | default(omit, true) }}"
+    controller_host: "{{ controller_hostname | default(omit, true) }}"
+    controller_username: "{{ controller_username | default(omit, true) }}"
+    controller_password: "{{ controller_password | default(omit, true) }}"
+    controller_oauthtoken: "{{ controller_oauthtoken | default(omit, true) }}"
+    validate_certs: "{{ controller_validate_certs | default(omit) }}"
   loop: "{{ controller_labels }}"
   loop_control:
     loop_var: __controller_label_item

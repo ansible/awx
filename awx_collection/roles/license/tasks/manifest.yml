@@ -39,19 +39,19 @@
 
 - name: Install the Controller license
   license:
-    manifest:                       "{{ __controller_manifest_path | default(omit) }}"
-    eula_accepted:                  "{{ controller_license.eula_accepted | default(omit) }}"  # Depreciated only for Tower 3.8.x or lower
-    pool_id:                        "{{ controller_license.pool_id | default(omit) }}"
-    force:                          "{{ controller_license.force | default(omit) }}"
-    state:                          "{{ controller_license.state | default(omit) }}"
+    manifest: "{{ __controller_manifest_path | default(omit) }}"
+    eula_accepted: "{{ controller_license.eula_accepted | default(omit) }}"  # Depreciated only for Tower 3.8.x or lower
+    pool_id: "{{ controller_license.pool_id | default(omit) }}"
+    force: "{{ controller_license.force | default(omit) }}"
+    state: "{{ controller_license.state | default(omit) }}"
 
     # Role Standard Options
-    controller_username:            "{{ controller_username | default(omit, true) }}"
-    controller_password:            "{{ controller_password | default(omit, true) }}"
-    controller_oauthtoken:          "{{ controller_oauthtoken | default(omit, true) }}"
-    controller_host:                "{{ controller_hostname | default(omit, true) }}"
-    controller_config_file:         "{{ controller_config_file | default(omit, true) }}"
-    validate_certs:                 "{{ controller_validate_certs | default(omit) }}"
+    controller_username: "{{ controller_username | default(omit, true) }}"
+    controller_password: "{{ controller_password | default(omit, true) }}"
+    controller_oauthtoken: "{{ controller_oauthtoken | default(omit, true) }}"
+    controller_host: "{{ controller_hostname | default(omit, true) }}"
+    controller_config_file: "{{ controller_config_file | default(omit, true) }}"
+    validate_certs: "{{ controller_validate_certs | default(omit) }}"
   no_log: "{{ controller_configuration_license_secure_logging }}"
   when: controller_license is defined
 ...

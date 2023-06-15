@@ -2,23 +2,23 @@
 # Launch Controller Workflow
 - name: Launch a Controller Workflow
   workflow_launch:
-    name:                     "{{ __workflow_launch_item.name }}"
-    organization:             "{{ __workflow_launch_item.organization | default(omit, true) }}"
-    inventory:                "{{ __workflow_launch_item.inventory | default(omit, true) }}"
-    limit:                    "{{ __workflow_launch_item.limit | default(omit, true) }}"
-    scm_branch:               "{{ __workflow_launch_item.scm_branch | default(omit, true) }}"
-    extra_vars:               "{{ __workflow_launch_item.extra_vars | default(omit, true) }}"
-    wait:                     "{{ __workflow_launch_item.wait | default(omit) }}"
-    interval:                 "{{ __workflow_launch_item.interval | default(omit) }}"
-    timeout:                  "{{ __workflow_launch_item.timeout | default(omit, true) }}"
+    name: "{{ __workflow_launch_item.name }}"
+    organization: "{{ __workflow_launch_item.organization | default(omit, true) }}"
+    inventory: "{{ __workflow_launch_item.inventory | default(omit, true) }}"
+    limit: "{{ __workflow_launch_item.limit | default(omit, true) }}"
+    scm_branch: "{{ __workflow_launch_item.scm_branch | default(omit, true) }}"
+    extra_vars: "{{ __workflow_launch_item.extra_vars | default(omit, true) }}"
+    wait: "{{ __workflow_launch_item.wait | default(omit) }}"
+    interval: "{{ __workflow_launch_item.interval | default(omit) }}"
+    timeout: "{{ __workflow_launch_item.timeout | default(omit, true) }}"
 
     # Role Standard Options
-    controller_username:     "{{ controller_username | default(omit, true) }}"
-    controller_password:     "{{ controller_password | default(omit, true) }}"
-    controller_oauthtoken:   "{{ controller_oauthtoken | default(omit, true) }}"
-    controller_host:         "{{ controller_hostname | default(omit, true) }}"
-    controller_config_file:  "{{ controller_config_file | default(omit, true) }}"
-    validate_certs:     "{{ controller_validate_certs | default(omit) }}"
+    controller_username: "{{ controller_username | default(omit, true) }}"
+    controller_password: "{{ controller_password | default(omit, true) }}"
+    controller_oauthtoken: "{{ controller_oauthtoken | default(omit, true) }}"
+    controller_host: "{{ controller_hostname | default(omit, true) }}"
+    controller_config_file: "{{ controller_config_file | default(omit, true) }}"
+    validate_certs: "{{ controller_validate_certs | default(omit) }}"
   loop: "{{ controller_workflow_launch_jobs }}"
   loop_control:
     loop_var: "__workflow_launch_item"

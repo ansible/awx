@@ -7,28 +7,28 @@
     password: "{{ redhat_subscription_password }}"
     filters: "{{ controller_license.filters | default(_redhat_cop_license_filters) }}"
     # Role Standard Options
-    controller_username:            "{{ controller_username | default(omit, true) }}"
-    controller_password:            "{{ controller_password | default(omit, true) }}"
-    controller_oauthtoken:          "{{ controller_oauthtoken | default(omit, true) }}"
-    controller_host:                "{{ controller_hostname | default(omit, true) }}"
-    controller_config_file:         "{{ controller_config_file | default(omit, true) }}"
-    validate_certs:                 "{{ controller_validate_certs | default(omit) }}"
+    controller_username: "{{ controller_username | default(omit, true) }}"
+    controller_password: "{{ controller_password | default(omit, true) }}"
+    controller_oauthtoken: "{{ controller_oauthtoken | default(omit, true) }}"
+    controller_host: "{{ controller_hostname | default(omit, true) }}"
+    controller_config_file: "{{ controller_config_file | default(omit, true) }}"
+    validate_certs: "{{ controller_validate_certs | default(omit) }}"
   register: subscription
   when: controller_license.pool_id is not defined
 
 - name: Install the Controller license
   license:
-    pool_id:                        "{{ controller_license.pool_id | default(subscription.subscriptions[(controller_license.list_num | default(0))].pool_id)}}"
-    force:                          "{{ controller_license.force | default(omit) }}"
-    state:                          "{{ controller_license.state | default(omit) }}"
+    pool_id: "{{ controller_license.pool_id | default(subscription.subscriptions[(controller_license.list_num | default(0))].pool_id)}}"
+    force: "{{ controller_license.force | default(omit) }}"
+    state: "{{ controller_license.state | default(omit) }}"
 
     # Role Standard Options
-    controller_username:            "{{ controller_username | default(omit, true) }}"
-    controller_password:            "{{ controller_password | default(omit, true) }}"
-    controller_oauthtoken:          "{{ controller_oauthtoken | default(omit, true) }}"
-    controller_host:                "{{ controller_hostname | default(omit, true) }}"
-    controller_config_file:         "{{ controller_config_file | default(omit, true) }}"
-    validate_certs:                 "{{ controller_validate_certs | default(omit) }}"
+    controller_username: "{{ controller_username | default(omit, true) }}"
+    controller_password: "{{ controller_password | default(omit, true) }}"
+    controller_oauthtoken: "{{ controller_oauthtoken | default(omit, true) }}"
+    controller_host: "{{ controller_hostname | default(omit, true) }}"
+    controller_config_file: "{{ controller_config_file | default(omit, true) }}"
+    validate_certs: "{{ controller_validate_certs | default(omit) }}"
   no_log: "{{ controller_configuration_license_secure_logging }}"
   when: controller_license is defined
 ...

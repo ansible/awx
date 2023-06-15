@@ -3,24 +3,24 @@
 # the FQCN cannot be used here.
 - name: Add controller group  # noqa fqcn[action-core]
   group:
-    name:                           "{{ controller_groups_item.name | mandatory }}"
-    new_name:                       "{{ controller_groups_item.new_name | default(omit, true) }}"
-    description:                    "{{ controller_groups_item.description | default(( '' if controller_configuration_groups_enforce_defaults else omit), true) }}"
-    inventory:                      "{{ controller_groups_item.inventory | mandatory }}"
-    variables:                      "{{ controller_groups_item.variables | default(( {} if controller_configuration_groups_enforce_defaults else omit), true) | regex_replace('[ ]{2,}', '') }}"
-    hosts:                          "{{ controller_groups_item.hosts | default(( [] if controller_configuration_groups_enforce_defaults else omit), true) }}"
-    children:                       "{{ controller_groups_item.children | default(( [] if controller_configuration_groups_enforce_defaults else omit), true) }}"
-    preserve_existing_hosts:        "{{ controller_groups_item.preserve_existing_hosts | default(( false if controller_configuration_groups_enforce_defaults else omit)) }}"
-    preserve_existing_children:     "{{ controller_groups_item.preserve_existing_children | default(( false if controller_configuration_groups_enforce_defaults else omit)) }}"
-    state:                          "{{ controller_groups_item.state | default(controller_state | default('present')) }}"
+    name: "{{ controller_groups_item.name | mandatory }}"
+    new_name: "{{ controller_groups_item.new_name | default(omit, true) }}"
+    description: "{{ controller_groups_item.description | default(( '' if controller_configuration_groups_enforce_defaults else omit), true) }}"
+    inventory: "{{ controller_groups_item.inventory | mandatory }}"
+    variables: "{{ controller_groups_item.variables | default(( {} if controller_configuration_groups_enforce_defaults else omit), true) | regex_replace('[ ]{2,}', '') }}"
+    hosts: "{{ controller_groups_item.hosts | default(( [] if controller_configuration_groups_enforce_defaults else omit), true) }}"
+    children: "{{ controller_groups_item.children | default(( [] if controller_configuration_groups_enforce_defaults else omit), true) }}"
+    preserve_existing_hosts: "{{ controller_groups_item.preserve_existing_hosts | default(( false if controller_configuration_groups_enforce_defaults else omit)) }}"
+    preserve_existing_children: "{{ controller_groups_item.preserve_existing_children | default(( false if controller_configuration_groups_enforce_defaults else omit)) }}"
+    state: "{{ controller_groups_item.state | default(controller_state | default('present')) }}"
 
     # Role Standard Options
-    controller_username:            "{{ controller_username | default(omit, true) }}"
-    controller_password:            "{{ controller_password | default(omit, true) }}"
-    controller_oauthtoken:          "{{ controller_oauthtoken | default(omit, true) }}"
-    controller_host:                "{{ controller_hostname | default(omit, true) }}"
-    controller_config_file:         "{{ controller_config_file | default(omit, true) }}"
-    validate_certs:                 "{{ controller_validate_certs | default(omit) }}"
+    controller_username: "{{ controller_username | default(omit, true) }}"
+    controller_password: "{{ controller_password | default(omit, true) }}"
+    controller_oauthtoken: "{{ controller_oauthtoken | default(omit, true) }}"
+    controller_host: "{{ controller_hostname | default(omit, true) }}"
+    controller_config_file: "{{ controller_config_file | default(omit, true) }}"
+    validate_certs: "{{ controller_validate_certs | default(omit) }}"
   loop: "{{ controller_groups }}"
   loop_control:
     loop_var: controller_groups_item
