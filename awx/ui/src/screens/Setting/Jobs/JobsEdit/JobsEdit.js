@@ -86,6 +86,9 @@ function JobsEdit() {
       ),
       AWX_TASK_ENV: formatJson(form.AWX_TASK_ENV),
       GALAXY_TASK_ENV: formatJson(form.GALAXY_TASK_ENV),
+      DEFAULT_CONTAINER_RUN_OPTIONS: formatJson(
+        form.DEFAULT_CONTAINER_RUN_OPTIONS
+      ),
     });
   };
 
@@ -213,6 +216,10 @@ function JobsEdit() {
                 <ObjectField
                   name="AD_HOC_COMMANDS"
                   config={jobs.AD_HOC_COMMANDS}
+                />
+                <ObjectField
+                  name="DEFAULT_CONTAINER_RUN_OPTIONS"
+                  config={jobs.DEFAULT_CONTAINER_RUN_OPTIONS}
                 />
                 <ObjectField
                   name="AWX_ANSIBLE_CALLBACK_PLUGINS"
