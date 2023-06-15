@@ -40,14 +40,13 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     postgresql-devel \
     python3-devel \
     python3-pip \
-    python3-psycopg2 \
     python3-setuptools \
     swig \
     unzip \
     xmlsec1-devel \
     xmlsec1-openssl-devel
 
-RUN pip3 install virtualenv build
+RUN pip3 install virtualenv build psycopg
 
 {% if image_architecture == 'ppc64le'  %}
     RUN dnf -y update && dnf install -y wget && \
@@ -121,7 +120,6 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     python3-devel \
     python3-libselinux \
     python3-pip \
-    python3-psycopg2 \
     python3-setuptools \
     rsync \
     rsyslog-8.2102.0-106.el9 \
@@ -133,7 +131,7 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     xmlsec1-openssl && \
     dnf -y clean all
 
-RUN pip3 install virtualenv supervisor dumb-init
+RUN pip3 install virtualenv supervisor dumb-init psycopg
 
 RUN rm -rf /root/.cache && rm -rf /tmp/*
 
