@@ -1,0 +1,5 @@
+{
+  "AWX_CLEANUP_PATHS": false,
+  "AWX_REQUEST_PROFILE": false,
+  "RECEPTOR_RELEASE_WORK": false
+}

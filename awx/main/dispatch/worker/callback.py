@@ -191,7 +191,9 @@ class CallbackBrokerWorker(BaseWorker):
                             e._retry_count = retry_count
 
                             # special sanitization logic for postgres treatment of NUL 0x00 char
-                            if (retry_count == 1) and isinstance(exc_indv, ValueError) and ("\x00" in e.stdout):
+                            # This used to check the class of the exception but on the postgres3 upgrade it could appear
+                            #   as either DataError or ValueError, so now lets just try if its there.
+                            if (retry_count == 1) and ("\x00" in e.stdout):
                                 e.stdout = e.stdout.replace("\x00", "")
 
                             if retry_count >= self.INDIVIDUAL_EVENT_RETRIES:

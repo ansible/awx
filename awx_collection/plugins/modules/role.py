@@ -245,12 +245,11 @@ def main():
             resources.setdefault(resource_group, []).append(module.params.get(old_name))
     if module.params.get('lookup_organization') is not None:
         resources['lookup_organization'] = module.params.get('lookup_organization')
-
-    # Change workflows and target_teams key to its endpoint name.
+    if module.params.get('instance_groups') is not None:
+        resources['instance_groups'] = module.params.get('instance_groups')
+    # Change workflows to its endpoint name.
     if 'workflows' in resources:
         resources['workflow_job_templates'] = resources.pop('workflows')
-    if 'target_teams' in resources:
-        resources['teams'] = resources.pop('target_teams')
 
     # Set lookup data to use
     lookup_data = {}
@@ -267,17 +266,21 @@ def main():
     for key, value in resources.items():
         for resource in value:
             # Attempt to look up project based on the provided name or ID and lookup data
-            if key in resources:
-                if key == 'organizations' or key == 'users':
-                    lookup_data_populated = {}
-                else:
-                    lookup_data_populated = lookup_data
-            data = module.get_one(key, name_or_id=resource, data=lookup_data_populated)
+            lookup_key = key
+            if key == 'organizations' or key == 'users':
+                lookup_data_populated = {}
+            else:
+                lookup_data_populated = lookup_data
+            if key == 'target_teams':
+                lookup_key = 'teams'
+            data = module.get_one(lookup_key, name_or_id=resource, data=lookup_data_populated)
             if data is None:
                 missing_items.append(resource)
             else:
                 if key == 'users' or key == 'teams':
                     actor_data.setdefault(key, []).append(data)
+                elif key == 'target_teams':
+                    resource_data.setdefault('teams', []).append(data)
                 else:
                     resource_data.setdefault(key, []).append(data)
     if len(missing_items) > 0:
