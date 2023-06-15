@@ -47,6 +47,13 @@ azure-keyvault==1.1.0
     # via -r /awx_devel/requirements/requirements.in
 azure-nspkg==3.0.2
     # via azure-keyvault
+boto3==1.26.102
+    # via -r /awx_devel/requirements/requirements.in
+botocore==1.29.102
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   boto3
+    #   s3transfer
 cachetools==5.2.0
     # via google-auth
     # via
@@ -211,6 +218,10 @@ jaraco-text==3.11.0
     #   jaraco-collections
 jinja2==3.1.2
     # via -r /awx_devel/requirements/requirements.in
+jmespath==1.0.1
+    # via
+    #   boto3
+    #   botocore
 json-log-formatter==0.5.1
     # via -r /awx_devel/requirements/requirements.in
 jsonschema==4.17.3
@@ -315,6 +326,7 @@ python-daemon==2.3.2
 python-dateutil==2.8.2
     # via
     #   adal
+    #   botocore
     #   kubernetes
     #   receptorctl
 python-dsv-sdk==1.0.1
@@ -374,6 +386,8 @@ rsa==4.9
     # via
     #   google-auth
     #   python-jose
+s3transfer==0.6.0
+    # via boto3
 schedule==0.6.0
     # via -r /awx_devel/requirements/requirements.in
 semantic-version==2.10.0
@@ -440,6 +454,7 @@ typing-extensions==4.4.0
     #   twisted
 urllib3==1.26.13
     # via
+    #   botocore
     #   kubernetes
     #   requests
 uwsgi==2.0.21

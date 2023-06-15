@@ -4,6 +4,8 @@ asciichartpy
 asn1
 asyncpg
 azure-keyvault==1.1.0  # see UPGRADE BLOCKERs
+boto3
+botocore
 channels
 channels-redis==3.4.1  # see UPGRADE BLOCKERs
 cryptography>=39.0.1 ## https://github.com/ansible/awx/security/dependabot/90
