@@ -17,7 +17,6 @@ from jinja2.exceptions import TemplateSyntaxError, UndefinedError, SecurityError
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.fields import JSONBlob
 from awx.main.models.base import CommonModelNameNotUnique, CreatedModifiedModel, prevent_search
 from awx.main.utils import encrypt_field, decrypt_field, set_environ
 from awx.main.notifications.email_backend import CustomEmailBackend
@@ -69,12 +68,12 @@ class NotificationTemplate(CommonModelNameNotUnique):
         choices=NOTIFICATION_TYPE_CHOICES,
     )
 
-    notification_configuration = prevent_search(JSONBlob(default=dict))
+    notification_configuration = prevent_search(models.JSONField(default=dict))
 
     def default_messages():
         return {'started': None, 'success': None, 'error': None, 'workflow_approval': None}
 
-    messages = JSONBlob(null=True, blank=True, default=default_messages, help_text=_('Optional custom messages for notification template.'))
+    messages = models.JSONField(null=True, blank=True, default=default_messages, help_text=_('Optional custom messages for notification template.'))
 
     def has_message(self, condition):
         potential_template = self.messages.get(condition, {})
@@ -236,7 +235,7 @@ class Notification(CreatedModifiedModel):
         default='',
         editable=False,
     )
-    body = JSONBlob(default=dict, blank=True)
+    body = models.JSONField(default=dict, blank=True)
 
     def get_absolute_url(self, request=None):
         return reverse('api:notification_detail', kwargs={'pk': self.pk}, request=request)

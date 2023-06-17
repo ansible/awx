@@ -20,7 +20,7 @@ from solo.models import SingletonModel
 # AWX
 from awx import __version__ as awx_application_version
 from awx.api.versioning import reverse
-from awx.main.fields import JSONBlob, ImplicitRoleField
+from awx.main.fields import ImplicitRoleField
 from awx.main.managers import InstanceManager, UUID_DEFAULT
 from awx.main.constants import JOB_FOLDER_PREFIX
 from awx.main.models.base import BaseModel, HasEditsMixin, prevent_search
@@ -406,7 +406,7 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin, ResourceMi
     max_forks = models.IntegerField(default=0, help_text=_("Max forks to execute on this group. Zero means no limit."))
     policy_instance_percentage = models.IntegerField(default=0, help_text=_("Percentage of Instances to automatically assign to this group"))
     policy_instance_minimum = models.IntegerField(default=0, help_text=_("Static minimum number of Instances to automatically assign to this group"))
-    policy_instance_list = JSONBlob(
+    policy_instance_list = models.JSONField(
         default=list, blank=True, help_text=_("List of exact-match Instances that will always be automatically assigned to this group")
     )
 

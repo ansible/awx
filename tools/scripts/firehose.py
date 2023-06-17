@@ -38,7 +38,7 @@ from io import StringIO
 from time import time
 from uuid import uuid4
 
-import psycopg2
+import psycopg
 
 from django import setup as setup_django
 from django.db import connection
@@ -98,42 +98,32 @@ class YieldedRows(StringIO):
             )
             self.rowlist.append(row)
 
-    def read(self, x):
-        if self.rows <= 0:
-            self.close()
-            return ''
-        elif self.rows >= 1 and self.rows < 1000:
-            event_rows = self.rowlist[random.randrange(len(self.rowlist))] * self.rows
-            self.rows -= self.rows
-            return event_rows
-        self.rows -= 1000
-        return self.rowlist[random.randrange(len(self.rowlist))] * 1000
-
 
 def firehose(job, count, created_stamp, modified_stamp):
-    conn = psycopg2.connect(dsn)
+    conn = psycopg.connect(dsn)
     f = YieldedRows(job, count, created_stamp, modified_stamp)
-    with conn.cursor() as cursor:
-        cursor.copy_expert(
-            (
-                'COPY '
-                'main_jobevent('
-                'created, modified, job_created, event, event_data, failed, changed, '
-                'host_name, play, role, task, counter, host_id, job_id, uuid, '
-                'parent_uuid, end_line, playbook, start_line, stdout, verbosity'
-                ') '
-                'FROM STDIN'
-            ),
-            f,
-            size=1024 * 1000,
-        )
-    conn.commit()
-    conn.close()
+    sql = '''
+          COPY main_jobevent(
+            created, modified, job_created, event, event_data, failed, changed,
+            host_name, play, role, task, counter, host_id, job_id, uuid,
+            parent_uuid, end_line, playbook, start_line, stdout, verbosity
+          ) FROM STDIN
+    '''
+    try:
+        with conn.cursor() as cursor:
+            with cursor.copy(sql) as copy:
+                copy.write("".join(f.rowlist))
+    except Exception as e:
+        print("Failed to import events")
+        print(e)
+    finally:
+        conn.commit()
+        conn.close()
 
 
 def cleanup(sql):
     print(sql)
-    conn = psycopg2.connect(dsn)
+    conn = psycopg.connect(dsn)
     with conn.cursor() as cursor:
         cursor.execute(sql)
     conn.commit()
@@ -221,7 +211,7 @@ def generate_jobs(jobs, batch_size, time_delta):
 
 
 def generate_events(events, job, time_delta):
-    conn = psycopg2.connect(dsn)
+    conn = psycopg.connect(dsn)
     cursor = conn.cursor()
 
     created_time = datetime.datetime.today() - time_delta - datetime.timedelta(seconds=5)
@@ -282,7 +272,7 @@ if __name__ == '__main__':
     days_delta = params.days_delta
     batch_size = params.batch_size
     try:
-        conn = psycopg2.connect(dsn)
+        conn = psycopg.connect(dsn)
         cursor = conn.cursor()
 
         # Drop all the indexes before generating jobs
