@@ -4,6 +4,7 @@ import { truncateString } from '../../../util/strings';
 import {
   NODE_STATE_COLOR_KEY,
   NODE_TYPE_SYMBOL_KEY,
+  LINK_STATE_COLOR_KEY,
   LABEL_TEXT_MAX_LENGTH,
   ICONS,
 } from '../constants';
@@ -18,6 +19,12 @@ export function getHeight(selector) {
 
 export function renderStateColor(nodeState) {
   return NODE_STATE_COLOR_KEY[nodeState] ? NODE_STATE_COLOR_KEY[nodeState] : '';
+}
+
+export function renderLinkStatusColor(linkState) {
+  return LINK_STATE_COLOR_KEY[linkState]
+    ? LINK_STATE_COLOR_KEY[linkState]
+    : '#ccc';
 }
 
 export function renderLabelText(nodeState, name) {
@@ -45,8 +52,8 @@ export function renderLabelIcons(nodeState) {
       ready: 'checkmark',
       installed: 'clock',
       unavailable: 'exclaimation',
-      'provision-fail': 'exclaimation',
       'deprovision-fail': 'exclaimation',
+      'provision-fail': 'exclaimation',
       provisioning: 'plus',
       deprovisioning: 'minus',
     };
@@ -59,15 +66,17 @@ export function renderLabelIcons(nodeState) {
 export function renderIconPosition(nodeState, bbox) {
   if (nodeState) {
     const iconPositionMapper = {
-      ready: `translate(${bbox.x - 15}, ${bbox.y + 3}), scale(0.02)`,
-      installed: `translate(${bbox.x - 18}, ${bbox.y + 1}), scale(0.03)`,
-      unavailable: `translate(${bbox.x - 9}, ${bbox.y + 3}), scale(0.02)`,
-      'provision-fail': `translate(${bbox.x - 9}, ${bbox.y + 3}), scale(0.02)`,
-      'deprovision-fail': `translate(${bbox.x - 9}, ${
-        bbox.y + 3
+      ready: `translate(${bbox.x - 4.5}, ${bbox.y - 4.5}), scale(0.02)`,
+      installed: `translate(${bbox.x - 6.5}, ${bbox.y - 6.5}), scale(0.025)`,
+      unavailable: `translate(${bbox.x - 2}, ${bbox.y - 4.4}), scale(0.02)`,
+      'provision-fail': `translate(${bbox.x - 2}, ${bbox.y - 4}), scale(0.02)`,
+      'deprovision-fail': `translate(${bbox.x - 2}, ${
+        bbox.y - 4
       }), scale(0.02)`,
-      provisioning: `translate(${bbox.x - 12}, ${bbox.y + 3}), scale(0.02)`,
-      deprovisioning: `translate(${bbox.x - 12}, ${bbox.y + 3}), scale(0.02)`,
+      provisioning: `translate(${bbox.x - 4.5}, ${bbox.y - 4.5}), scale(0.02)`,
+      deprovisioning: `translate(${bbox.x - 4.5}, ${
+        bbox.y - 4.5
+      }), scale(0.02)`,
     };
     return iconPositionMapper[nodeState] ? iconPositionMapper[nodeState] : ``;
   }
@@ -86,6 +95,7 @@ export function redirectToDetailsPage(selectedNode, history) {
 export function renderLinkState(linkState) {
   const linkPattern = {
     established: null,
+    disconnected: 3,
     adding: 3,
     removing: 3,
   };
@@ -101,7 +111,9 @@ export function getRandomInt(min, max) {
 const generateRandomLinks = (n, r) => {
   const links = [];
   function getRandomLinkState() {
-    return ['established', 'adding', 'removing'][getRandomInt(0, 2)];
+    return ['established', 'adding', 'removing', 'disconnected'][
+      getRandomInt(0, 3)
+    ];
   }
   for (let i = 0; i < r; i++) {
     const link = {
@@ -142,7 +154,7 @@ export const generateRandomNodes = (n) => {
       hostname: `node-${id}`,
       node_type: randomType,
       node_state: randomState,
-      enabled: Math.random() < 0.5,
+      enabled: Math.random() < 0.9,
     };
     nodes.push(node);
   }
