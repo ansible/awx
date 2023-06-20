@@ -5506,6 +5506,9 @@ class InstanceSerializer(BaseSerializer):
         return super().validate(attrs)
 
     def validate_node_type(self, value):
+        if not self.instance and value not in [Instance.Types.HOP, Instance.Types.EXECUTION]:
+            raise serializers.ValidationError("Can only create execution nodes.")
+
         if self.instance and self.instance.node_type != value:
             raise serializers.ValidationError(_("Cannot change node type."))
 
