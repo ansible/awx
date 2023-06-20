@@ -167,7 +167,6 @@ class InstanceManager(models.Manager):
             create_defaults = {
                 'node_state': Instance.States.INSTALLED,
                 'capacity': 0,
-                'listener_port': 27199,
             }
             if defaults is not None:
                 create_defaults.update(defaults)
