@@ -11,7 +11,7 @@ def set_peers_from_control_nodes_true(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0184_django_indexes'),
+        ('main', '0185_move_JSONBlob_to_JSONField'),
     ]
 
     operations = [

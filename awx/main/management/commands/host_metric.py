@@ -35,7 +35,15 @@ class Command(BaseCommand):
 
     def host_metric_summary_monthly_queryset(self, result, offset=0, limit=BATCHED_FETCH_COUNT):
         list_of_queryset = list(
-            result.values('id', 'date', 'license_consumed', 'license_capacity', 'hosts_added', 'hosts_deleted', 'indirectly_managed_hosts',).order_by(
+            result.values(
+                'id',
+                'date',
+                'license_consumed',
+                'license_capacity',
+                'hosts_added',
+                'hosts_deleted',
+                'indirectly_managed_hosts',
+            ).order_by(
                 'date'
             )[offset : offset + limit]
         )
