@@ -155,7 +155,7 @@ function JobsEdit() {
                 />
                 <InputField
                   name="AWX_RUNNER_KEEPALIVE_SECONDS"
-                  config={jobs.AWX_RUNNER_KEEPALIVE_SECONDS}
+                  config={jobs.AWX_RUNNER_KEEPALIVE_SECONDS ?? null}
                   type={options?.AWX_RUNNER_KEEPALIVE_SECONDS ? 'number' : undefined}
                 />
                 <InputField
