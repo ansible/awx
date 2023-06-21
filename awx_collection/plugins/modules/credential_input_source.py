@@ -41,9 +41,38 @@ options:
         - The credential which will have its input defined by this source
       required: true
       type: str
+    target_organization:
+      description:
+        - Organization that should own the target credential.
+    target_credential_type:
+      description:
+        - The credential type of the target to be used for lookup
+        - Can be a built-in credential type such as "Machine", or a custom credential type such as "My Credential Type"
+        - Choices include Amazon Web Services, Ansible Galaxy/Automation Hub API Token, Centrify Vault Credential Provider Lookup,
+          Container Registry, CyberArk Central Credential Provider Lookup, CyberArk Conjur Secret Lookup, Google Compute Engine,
+          GitHub Personal Access Token, GitLab Personal Access Token, GPG Public Key, HashiCorp Vault Secret Lookup, HashiCorp Vault Signed SSH,
+          Insights, Machine, Microsoft Azure Key Vault, Microsoft Azure Resource Manager, Network, OpenShift or Kubernetes API
+          Bearer Token, OpenStack, Red Hat Ansible Automation Platform, Red Hat Satellite 6, Red Hat Virtualization, Source Control,
+          Thycotic DevOps Secrets Vault, Thycotic Secret Server, Vault, VMware vCenter, or a custom credential type
+      type: str
     source_credential:
       description:
         - The credential which is the source of the credential lookup
+      type: str
+    source_organization:
+      description:
+        - Organization that should own the source credential.
+      type: str
+    source_credential_type:
+      description:
+        - The credential type of the source to be used for lookup
+        - Can be a built-in credential type such as "Machine", or a custom credential type such as "My Credential Type"
+        - Choices include Amazon Web Services, Ansible Galaxy/Automation Hub API Token, Centrify Vault Credential Provider Lookup,
+          Container Registry, CyberArk Central Credential Provider Lookup, CyberArk Conjur Secret Lookup, Google Compute Engine,
+          GitHub Personal Access Token, GitLab Personal Access Token, GPG Public Key, HashiCorp Vault Secret Lookup, HashiCorp Vault Signed SSH,
+          Insights, Machine, Microsoft Azure Key Vault, Microsoft Azure Resource Manager, Network, OpenShift or Kubernetes API
+          Bearer Token, OpenStack, Red Hat Ansible Automation Platform, Red Hat Satellite 6, Red Hat Virtualization, Source Control,
+          Thycotic DevOps Secrets Vault, Thycotic Secret Server, Vault, VMware vCenter, or a custom credential type
       type: str
     state:
       description:
@@ -78,7 +107,11 @@ def main():
         description=dict(),
         input_field_name=dict(required=True),
         target_credential=dict(required=True),
+        target_organization=dict(),
+        target_credential_type=dict(),
         source_credential=dict(),
+        source_organization=dict(),
+        source_credential_type=dict(),
         metadata=dict(type="dict"),
         state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )
@@ -90,17 +123,29 @@ def main():
     description = module.params.get('description')
     input_field_name = module.params.get('input_field_name')
     target_credential = module.params.get('target_credential')
+    target_organization = module.params.get('target_organization')
+    target_credential_type = module.params.get('target_credential_type')
     source_credential = module.params.get('source_credential')
+    source_organization = module.params.get('source_organization')
+    source_credential_type = module.params.get('source_credential_type')
     metadata = module.params.get('metadata')
     state = module.params.get('state')
 
-    target_credential_id = module.resolve_name_to_id('credentials', target_credential)
+    # Set lookup data
+    target_lookup_data = {}
+    if target_credential_type:
+        cred_type_id = module.resolve_name_to_id('credential_types', target_credential_type)
+        target_lookup_data['credential_type'] = cred_type_id
+    if target_organization:
+        target_lookup_data['organization'] = module.resolve_name_to_id('organizations', organization)
+    target_credential_id = module.get_one('credentials', name_or_id=target_credential, **{'data': target_lookup_data})['id']
 
     # Attempt to look up the object based on the target credential and input field
-    lookup_data = {
+    target_lookup_data = {
         'target_credential': target_credential_id,
         'input_field_name': input_field_name,
     }
+
     credential_input_source = module.get_one('credential_input_sources', check_exists=(state == 'exists'), **{'data': lookup_data})
 
     if state == 'absent':
