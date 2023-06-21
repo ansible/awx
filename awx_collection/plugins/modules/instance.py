@@ -97,7 +97,7 @@ def main():
         node_type=dict(type='str', choices=['execution', 'hop']),
         node_state=dict(type='str', choices=['deprovisioning', 'installed']),
         listener_port=dict(type='int'),
-        peers=dict(type='str'),
+        peers=dict(required=False, type="list", elements='str'),
     )
 
     # Create a module for ourselves
@@ -142,5 +142,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-
 
