@@ -61,7 +61,7 @@
         scm_url: https://github.com/ansible/test-playbooks
         wait: true
         state: exists
-        request_timeout: .1
+        request_timeout: .001
       register: result
       ignore_errors: true
 

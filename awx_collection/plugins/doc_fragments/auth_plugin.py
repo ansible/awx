@@ -71,7 +71,8 @@ options:
   request_timeout:
     description:
     - Specify the timeout Ansible should use in requests to the controller host.
-    - Defaults to 10s, but this is handled by the shared module_utils code
+    - Defaults to 10 seconds
+    - This will not work with the export or import modules.
     type: float
     env:
     - name: CONTROLLER_REQUEST_TIMEOUT
