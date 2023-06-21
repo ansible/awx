@@ -129,8 +129,8 @@ def main():
         new_fields['node_state'] = node_state
     if listener_port is not None:
         new_fields['listener_port'] = listener_port
-    if peers  is not None:
-      new_fields['peers'] = peers
+    if peers is not None:
+        new_fields['peers'] = peers
 
     module.create_or_update_if_needed(
         existing_item,
