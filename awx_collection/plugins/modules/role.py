@@ -235,6 +235,7 @@ def main():
         'workflows': 'workflow',
         'users': 'user',
         'teams': 'team',
+        'instance_groups': 'instance_group',
     }
 
     resources = {}
