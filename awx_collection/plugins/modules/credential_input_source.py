@@ -45,6 +45,21 @@ options:
       description:
         - The credential which is the source of the credential lookup
       type: str
+    organization:
+      description:
+        - Organization that should own the target credential.
+      type: str
+    credential_type:
+      description:
+        - The credential type of the target to be used for lookup
+        - Can be a built-in credential type such as "Machine", or a custom credential type such as "My Credential Type"
+        - Choices include Amazon Web Services, Ansible Galaxy/Automation Hub API Token, Centrify Vault Credential Provider Lookup,
+          Container Registry, CyberArk Central Credential Provider Lookup, CyberArk Conjur Secret Lookup, Google Compute Engine,
+          GitHub Personal Access Token, GitLab Personal Access Token, GPG Public Key, HashiCorp Vault Secret Lookup, HashiCorp Vault Signed SSH,
+          Insights, Machine, Microsoft Azure Key Vault, Microsoft Azure Resource Manager, Network, OpenShift or Kubernetes API
+          Bearer Token, OpenStack, Red Hat Ansible Automation Platform, Red Hat Satellite 6, Red Hat Virtualization, Source Control,
+          Thycotic DevOps Secrets Vault, Thycotic Secret Server, Vault, VMware vCenter, or a custom credential type
+      type: str
     state:
       description:
         - Desired state of the resource.
@@ -79,6 +94,8 @@ def main():
         input_field_name=dict(required=True),
         target_credential=dict(required=True),
         source_credential=dict(),
+        organization=dict(),
+        credential_type=dict(),
         metadata=dict(type="dict"),
         state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )
@@ -91,16 +108,26 @@ def main():
     input_field_name = module.params.get('input_field_name')
     target_credential = module.params.get('target_credential')
     source_credential = module.params.get('source_credential')
+    organization = module.params.get('organization')
+    credential_type = module.params.get('credential_type')
     metadata = module.params.get('metadata')
     state = module.params.get('state')
 
-    target_credential_id = module.resolve_name_to_id('credentials', target_credential)
+    # Set lookup data
+    lookup_data = {}
+    if credential_type:
+        cred_type_id = module.resolve_name_to_id('credential_types', credential_type)
+        lookup_data['credential_type'] = cred_type_id
+    if organization:
+        lookup_data['organization'] = module.resolve_name_to_id('organizations', organization)
+    target_credential_id = module.get_one('credentials', name_or_id=target_credential, **{'data': lookup_data})['id']
 
     # Attempt to look up the object based on the target credential and input field
     lookup_data = {
         'target_credential': target_credential_id,
         'input_field_name': input_field_name,
     }
+
     credential_input_source = module.get_one('credential_input_sources', check_exists=(state == 'exists'), **{'data': lookup_data})
 
     if state == 'absent':
