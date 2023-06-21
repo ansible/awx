@@ -63,6 +63,11 @@ options:
         - Port that Receptor will listen for incoming connections on.
       required: False
       type: int
+    peers:
+      description:
+        - Peer to a hop or execution node from a control node.
+      required: False
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
