@@ -525,6 +525,9 @@ class PageCache(object):
 
         options_page = self.get_options(page)
 
+        if options_page is None:
+            return None
+
         if 'POST' not in options_page.r.headers.get('Allow', ''):
             return None
 
