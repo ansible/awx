@@ -67,7 +67,8 @@ options:
       description:
         - Peer to a hop or execution node from a control node.
       required: False
-      type: str
+      type: list
+      elements: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
