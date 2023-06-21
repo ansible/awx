@@ -6,9 +6,9 @@ on:
       - opened
       - reopened
 
-    permissions:
-      contents: read # to fetch code
-      issues: write # to label issues
+permissions:
+  contents: write # to fetch code
+  issues: write # to label issues
 
 jobs:
   triage:

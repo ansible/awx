@@ -4,6 +4,8 @@ asciichartpy
 asn1
 asyncpg
 azure-keyvault==1.1.0  # see UPGRADE BLOCKERs
+boto3
+botocore
 channels
 channels-redis==3.4.1  # see UPGRADE BLOCKERs
 cryptography>=39.0.1 ## https://github.com/ansible/awx/security/dependabot/90
@@ -36,7 +38,7 @@ Markdown  # used for formatting API help
 openshift
 pexpect==4.7.0 # see library notes
 prometheus_client
-psycopg2
+psycopg
 psutil
 pygerduty
 pyparsing==2.4.6  # Upgrading to v3 of pyparsing introduce errors on smart host filtering: Expected 'or' term, found 'or'  (at char 15), (line:1, col:16)

@@ -258,6 +258,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
                         target="_blank"
                         variant="secondary"
                         dataCy="install-bundle-download-button"
+                        rel="noopener noreferrer"
                       >
                         <DownloadIcon />
                       </Button>

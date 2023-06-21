@@ -29,8 +29,6 @@ SHELL_PLUS_PRINT_SQL = False
 # show colored logs in the dev environment
 # to disable this, set `COLOR_LOGS = False` in awx/settings/local_settings.py
 LOGGING['handlers']['console']['()'] = 'awx.main.utils.handlers.ColorHandler'  # noqa
-# task system does not propagate to AWX, so color log these too
-LOGGING['handlers']['task_system'] = LOGGING['handlers']['console'].copy()  # noqa
 COLOR_LOGS = True
 
 ALLOWED_HOSTS = ['*']
@@ -51,7 +49,7 @@ INSIGHTS_TRACKING_STATE = False
 
 # debug toolbar and swagger assume that requirements/requirements_dev.txt are installed
 
-INSTALLED_APPS += ['rest_framework_swagger', 'debug_toolbar']  # NOQA
+INSTALLED_APPS += ['drf_yasg', 'debug_toolbar']  # NOQA
 
 MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE  # NOQA
 

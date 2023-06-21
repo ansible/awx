@@ -56,7 +56,7 @@ const jtHelpTextStrings = () => ({
       <a
         href={`${getDocsBaseUrl(config)}/html/userguide/scheduling.html`}
         target="_blank"
-        rel="noreferrer"
+        rel="noopener noreferrer"
       >
         {t`documentation`}
       </a>{' '}

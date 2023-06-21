@@ -7,7 +7,7 @@ import signal
 import sys
 import redis
 import json
-import psycopg2
+import psycopg
 import time
 from uuid import UUID
 from queue import Empty as QueueEmpty
@@ -143,9 +143,10 @@ class AWXConsumerRedis(AWXConsumerBase):
     def run(self, *args, **kwargs):
         super(AWXConsumerRedis, self).run(*args, **kwargs)
         self.worker.on_start()
+        logger.info(f'Callback receiver started with pid={os.getpid()}')
+        db.connection.close()  # logs use database, so close connection
 
         while True:
-            logger.debug(f'{os.getpid()} is alive')
             time.sleep(60)
 
 
@@ -204,10 +205,10 @@ class AWXConsumerPG(AWXConsumerBase):
                         self.listen_start = time.time()
                     if self.should_stop:
                         return
-            except psycopg2.InterfaceError:
+            except psycopg.InterfaceError:
                 logger.warning("Stale Postgres message bus connection, reconnecting")
                 continue
-            except (db.DatabaseError, psycopg2.OperationalError):
+            except (db.DatabaseError, psycopg.OperationalError):
                 # If we have attained stady state operation, tolerate short-term database hickups
                 if not self.pg_is_down:
                     logger.exception(f"Error consuming new events from postgres, will retry for {self.pg_max_wait} s")

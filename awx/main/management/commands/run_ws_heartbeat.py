@@ -29,12 +29,12 @@ class Command(BaseCommand):
             conn.notify('web_ws_heartbeat', self.construct_payload(action='offline'))
         sys.exit(0)
 
-    def do_hearbeat_loop(self):
-        with pg_bus_conn(new_connection=True) as conn:
-            while True:
+    def do_heartbeat_loop(self):
+        while True:
+            with pg_bus_conn() as conn:
                 logger.debug('Sending heartbeat')
                 conn.notify('web_ws_heartbeat', self.construct_payload())
-                time.sleep(settings.BROADCAST_WEBSOCKET_BEACON_FROM_WEB_RATE_SECONDS)
+            time.sleep(settings.BROADCAST_WEBSOCKET_BEACON_FROM_WEB_RATE_SECONDS)
 
     def handle(self, *arg, **options):
         signal.signal(signal.SIGTERM, self.notify_listener_and_exit)
@@ -42,4 +42,4 @@ class Command(BaseCommand):
 
         # Note: We don't really try any reconnect logic to pg_notify here,
         # just let supervisor restart if we fail.
-        self.do_hearbeat_loop()
+        self.do_heartbeat_loop()

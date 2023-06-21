@@ -46,6 +46,7 @@ function AnalyticsStep() {
             isInline
             ouiaId="tower-documentation-link"
             target="_blank"
+            rel="noopener noreferrer"
           >
             this Tower documentation page
           </Button>
@@ -116,6 +117,7 @@ function AnalyticsStep() {
           target="_blank"
           variant="secondary"
           ouiaId="analytics-link"
+          rel="noopener noreferrer"
         >
           <Trans>Learn more about Automation Analytics</Trans>
         </Button>

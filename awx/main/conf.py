@@ -684,11 +684,28 @@ register(
     field_class=fields.IntegerField,
     default=1,
     min_value=1,
-    label=_('Maximum disk persistance for external log aggregation (in GB)'),
+    label=_('Maximum disk persistence for external log aggregation (in GB)'),
     help_text=_(
         'Amount of data to store (in gigabytes) during an outage of '
         'the external log aggregator (defaults to 1). '
-        'Equivalent to the rsyslogd queue.maxdiskspace setting.'
+        'Equivalent to the rsyslogd queue.maxdiskspace setting for main_queue. '
+        'Notably, this is used for the rsyslogd main queue (for input messages).'
+    ),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
+    'LOG_AGGREGATOR_ACTION_MAX_DISK_USAGE_GB',
+    field_class=fields.IntegerField,
+    default=1,
+    min_value=1,
+    label=_('Maximum disk persistence for rsyslogd action queuing (in GB)'),
+    help_text=_(
+        'Amount of data to store (in gigabytes) if an rsyslog action takes time '
+        'to process an incoming message (defaults to 1). '
+        'Equivalent to the rsyslogd queue.maxdiskspace setting on the action (e.g. omhttp). '
+        'Like LOG_AGGREGATOR_MAX_DISK_USAGE_GB, it stores files in the directory specified '
+        'by LOG_AGGREGATOR_MAX_DISK_USAGE_PATH.'
     ),
     category=_('Logging'),
     category_slug='logging',
@@ -829,6 +846,46 @@ register(
     allow_null=True,
     category=_('System'),
     category_slug='system',
+)
+
+register(
+    'AWX_CLEANUP_PATHS',
+    field_class=fields.BooleanField,
+    label=_('Enable or Disable tmp dir cleanup'),
+    default=True,
+    help_text=_('Enable or Disable TMP Dir cleanup'),
+    category=('Debug'),
+    category_slug='debug',
+)
+
+register(
+    'AWX_REQUEST_PROFILE',
+    field_class=fields.BooleanField,
+    label=_('Debug Web Requests'),
+    default=False,
+    help_text=_('Debug web request python timing'),
+    category=('Debug'),
+    category_slug='debug',
+)
+
+register(
+    'DEFAULT_CONTAINER_RUN_OPTIONS',
+    field_class=fields.StringListField,
+    label=_('Container Run Options'),
+    default=['--network', 'slirp4netns:enable_ipv6=true'],
+    help_text=_("List of options to pass to podman run example: ['--network', 'slirp4netns:enable_ipv6=true', '--log-level', 'debug']"),
+    category=('Jobs'),
+    category_slug='jobs',
+)
+
+register(
+    'RECEPTOR_RELEASE_WORK',
+    field_class=fields.BooleanField,
+    label=_('Release Receptor Work'),
+    default=True,
+    help_text=_('Release receptor work'),
+    category=('Debug'),
+    category_slug='debug',
 )
 
 

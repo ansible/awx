@@ -90,6 +90,7 @@ __all__ = [
     'get_event_partition_epoch',
     'cleanup_new_process',
     'log_excess_runtime',
+    'unified_job_class_to_event_table_name',
 ]
 
 
@@ -1219,3 +1220,7 @@ def log_excess_runtime(func_logger, cutoff=5.0, debug_cutoff=5.0, msg=None, add_
         return _new_func
 
     return log_excess_runtime_decorator
+
+
+def unified_job_class_to_event_table_name(job_class):
+    return f'main_{job_class().event_class.__name__.lower()}'
