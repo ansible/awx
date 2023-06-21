@@ -1,7 +1,7 @@
 ---
 argument_specs:
   main:
-    short_description: An Ansible Role to run a list of ad hoc commands on Ansible Controller.
+    short_description: An Ansible Role to create bulk hosts on Ansible Controller.
     options:
       controller_bulk_hosts:
         description: Data structure describing a bulk of hosts to run
