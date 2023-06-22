@@ -1,7 +1,9 @@
 import pytest
 import yaml
+from unittest import mock
 
 from django.db.utils import IntegrityError
+from django.test.utils import override_settings
 
 from awx.api.versioning import reverse
 from awx.main.models import Instance
@@ -254,3 +256,55 @@ def test_group_vars(get, admin_user):
     assert has_peer(execution_vars, 'hop2:6789')
     assert not has_peer(execution_vars, 'hop1:6789')
     assert execution_vars.get('receptor_listener', False)
+
+
+@pytest.mark.django_db
+def test_write_receptor_config_called(admin_user, post):
+    '''
+    Assert that write_receptor_config is called
+    when certain instances are created, or if
+    peers_from_control_nodes changes.
+    In general, write_receptor_config should only
+    be called when necessary, as it will reload
+    receptor backend connections which is not trivial.
+    '''
+    with override_settings(IS_K8S=True):
+        with mock.patch('awx.main.models.ha.schedule_write_receptor_config') as write_method:
+            # new control instance but nothing to peer to (no)
+            control = Instance.objects.create(hostname='control1', node_type='control')
+            write_method.assert_not_called()
+
+            # new hop node with peers_from_control_nodes False (no)
+            hop1 = Instance.objects.create(hostname='hop1', node_type='hop', listener_port=6789, peers_from_control_nodes=False)
+            hop1.delete()
+            write_method.assert_not_called()
+
+            # new hop node with peers_from_control_nodes True (yes)
+            hop1 = Instance.objects.create(hostname='hop1', node_type='hop', listener_port=6789, peers_from_control_nodes=True)
+            write_method.assert_called()
+            write_method.reset_mock()
+
+            # new control instance but with something to peer to (yes)
+            Instance.objects.create(hostname='control2', node_type='control')
+            write_method.assert_called()
+            write_method.reset_mock()
+
+            # new hop node with peers_from_control_nodes False and peered to another hop node (no)
+            hop2 = Instance.objects.create(hostname='hop2', node_type='hop', listener_port=6789, peers_from_control_nodes=False)
+            hop2.peers.add(hop1)
+            hop2.delete()
+            write_method.assert_not_called()
+
+            # changing peers_from_control_nodes to False (yes)
+            hop1.peers_from_control_nodes = False
+            hop1.save()
+            write_method.assert_called()
+            write_method.reset_mock()
+
+            # deleting hop node that has peers_from_control_nodes to False (no)
+            hop1.delete()
+            write_method.assert_not_called()
+
+            # deleting control nodes (no)
+            control.delete()
+            write_method.assert_not_called()

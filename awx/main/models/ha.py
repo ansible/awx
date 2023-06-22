@@ -477,14 +477,31 @@ def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs
         instance.set_default_policy_fields()
 
 
+def schedule_write_receptor_config(broadcast=True):
+    from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
+
+    # broadcast to all control instances to update their receptor configs
+    if broadcast:
+        connection.on_commit(lambda: write_receptor_config.apply_async(queue='tower_broadcast_all'))
+    else:
+        write_receptor_config()  # just run locally
+
+
 @receiver(post_save, sender=Instance)
 def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
-    should_write_config = False
+    '''
+    Here we link control nodes to hop or execution nodes based on the
+    peers_from_control_nodes field.
+    write_receptor_config should be called on each control node when:
+    1. new node is created with peers_from_control_nodes enabled
+    2. a node changes its value of peers_from_control_nodes
+    3. a new control node comes online and has instances to peer to
+    '''
     if created and settings.IS_K8S and instance.node_type in [Instance.Types.CONTROL, Instance.Types.HYBRID]:
         inst = Instance.objects.filter(peers_from_control_nodes=True)
         if set(instance.peers.all()) != set(inst):
             instance.peers.set(inst)
-            should_write_config = True
+            schedule_write_receptor_config(broadcast=False)
 
     if settings.IS_K8S and instance.node_type in [Instance.Types.HOP, Instance.Types.EXECUTION]:
         if instance.node_state == Instance.States.DEPROVISIONING:
@@ -498,17 +515,11 @@ def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
                 control_instances = Instance.objects.filter(node_type__in=[Instance.Types.CONTROL, Instance.Types.HYBRID])
                 if set(instance.peers_from.all()) != control_instances:
                     instance.peers_from.set(control_instances)
-                    should_write_config = True
+                    schedule_write_receptor_config()  # keep method separate to make pytest mocking easier
             else:
                 if instance.peers_from.exists():
                     instance.peers_from.clear()
-                    should_write_config = True
-
-    if should_write_config:
-        from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
-
-        # broadcast to all control instances to update their receptor configs
-        connection.on_commit(lambda: write_receptor_config.apply_async(queue='tower_broadcast_all'))
+                    schedule_write_receptor_config()
 
     if created or instance.has_policy_changes():
         schedule_policy_task()
@@ -524,10 +535,7 @@ def on_instance_group_deleted(sender, instance, using, **kwargs):
 def on_instance_deleted(sender, instance, using, **kwargs):
     schedule_policy_task()
     if settings.IS_K8S and instance.node_type in (Instance.Types.EXECUTION, Instance.Types.HOP) and instance.peers_from_control_nodes:
-        from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
-
-        # broadcast to all control instances to update their receptor configs
-        connection.on_commit(lambda: write_receptor_config.apply_async(queue='tower_broadcast_all'))
+        schedule_write_receptor_config()
 
 
 @receiver(post_save, sender=InstanceLink)
