@@ -65,13 +65,13 @@ options:
       type: int
     peers:
       description:
-        - Peer to a hop or execution node from a control node.
+        - List of peers to connect outbound to. Only configurable for hop and execution nodes.
       required: False
       type: list
       elements: str
     peers_from_control_nodes:
       description:
-        - Set hop or execution node to peer from a control node.
+        - If enabled, control plane nodes will automatically peer to this node.
       required: False
       type: bool
 extends_documentation_fragment: awx.awx.auth
@@ -119,7 +119,7 @@ def main():
     node_state = module.params.get('node_state')
     listener_port = module.params.get('listener_port')
     peers = module.params.get('peers')
-    peers_from_control_nodes =module.params.get('peers_from_control_nodes')
+    peers_from_control_nodes = module.params.get('peers_from_control_nodes')
     # Attempt to look up an existing item based on the provided data
     existing_item = module.get_one('instances', name_or_id=hostname)
 
