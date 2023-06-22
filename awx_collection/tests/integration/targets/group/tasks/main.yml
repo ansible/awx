@@ -21,7 +21,7 @@
     name: "{{ inv_name }}"
     organization: Default
     state: present
-  registuer: result
+  register: result
 
 - name: Create a Host
   host:
