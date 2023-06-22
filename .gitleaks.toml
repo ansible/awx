@@ -1,0 +1,8 @@
+[allowlist]
+  description = "Global Allowlist"
+
+  # Ignore based on any subset of the file path
+  paths = [
+    # Ignore all example certs
+    '''\/tests\/integration\/targets\/config_roles\/tasks\/configs\/ssh_private_key.yml'''
+  ]
