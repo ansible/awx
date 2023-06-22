@@ -1,0 +1,49 @@
+---
+controller_notifications:
+  - name: irc-satqe-chat-notification
+    description: Notify us on job in IRC!
+    organization: Satellite
+    notification_type: irc
+    notification_configuration:
+      use_tls: false
+      use_ssl: false
+      password: ''  # this is required even if there's no password
+      port: 6667
+      server: irc.freenode.com
+      nickname: Ansible-Tower-Stage-Bot-01
+      targets:
+        - "#my-channel"
+    messages:
+      success:
+        body: '{"fields": {"project": {"id": "11111"},"summary": "Lab {  { job.status
+          }} Ansible Tower {  { job.name }}","description": "{  { job.status }} in {  {
+          job.name }} {  { job.id }} {  {url}}","issuetype": {"id": "1"}}}'
+  - name: Email notification
+    description: Send out emails for tower jobs
+    organization: Default
+    notification_type: email
+    notification_configuration:
+      username: ''  # this is required even if there's no username
+      sender: tower0@example.com
+      recipients:
+        - admin@example.com
+      use_tls: false
+      host: smtp.example.com
+      use_ssl: false
+      password: ''  # this is required even if there's no password
+      port: 25
+  - name: Email notification differential
+    description: Send out emails for tower jobs
+    organization: Default
+    notification_type: email
+    notification_configuration:
+      username: ''  # this is required even if there's no username
+      sender: tower0@example.com
+      recipients:
+        - admin@example.com
+      use_tls: false
+      host: smtp.example.com
+      use_ssl: false
+      password: ''  # this is required even if there's no password
+      port: 25
+...

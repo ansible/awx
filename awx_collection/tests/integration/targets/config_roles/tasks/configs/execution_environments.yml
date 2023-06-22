@@ -1,0 +1,6 @@
+---
+controller_execution_environments:
+  - name: "My EE"
+    image: quay.io/ansible/awx-ee
+    pull: always
+...

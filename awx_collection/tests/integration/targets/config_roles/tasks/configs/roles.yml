@@ -1,0 +1,27 @@
+---
+controller_roles:
+  - inventory:  RHVM-01
+    team: satlab-admin
+    role: admin
+  - inventory:  RHVM-02
+    team: satellite-qe
+    role: use
+  - inventory:  RHVM-02
+    team: satlab-admin
+    role: admin
+  # - workflow:  Test workflow 1
+  #   team: satellite-qe
+  #   role: execute
+  # - credential: test-vault-creds
+  #   team: satellite-qe
+  #   role: use
+  - project: Test Project
+    team: satellite-qe
+    role: use
+  - project: Test Project
+    team: satlab-admin
+    role: admin
+  - job_template: test-template-1
+    team: satellite-qe
+    role: execute
+...

@@ -1,0 +1,8 @@
+---
+temp_controller_bulk_launch_jobs:
+  - name: My Bulk Job Launch
+    jobs:
+      - unified_job_template: 7
+      - unified_job_template: 15
+    organization: Default
+...

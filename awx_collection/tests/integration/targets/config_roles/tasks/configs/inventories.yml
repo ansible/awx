@@ -1,0 +1,25 @@
+---
+# Commented out content is serving as example for you to add new content.
+controller_inventories:
+  - name: localhost
+    description: inventory for localhost
+    organization: Satellite
+  - name: satlab-admin-inventory
+    description: Load inventory from satlab-admin hosts file
+    organization: Default
+  - name: RHVM-01
+    organization: Satellite
+    description: created by Ansible Playbook - for RHVM-01
+    variables:
+      site_subnet: "{% raw %}{  % if site == 'SITE-2' %}10.200.{  % else %}10.100.{  % endif%}{% endraw %}"
+      remote_subnet: "{% raw %}{  % if site == 'SITE-2' %}10.100.{  % else %}10.200.{  % endif%}{% endraw %}"
+  - name: RHVM-02
+    organization: Satellite
+    description: created by Ansible Playbook - for RHVM-02
+    prevent_instance_group_fallback: true
+  - name: Test Inventory - Smart
+    organization: Default
+    description: created by Ansible Playbook
+    kind: smart
+    host_filter:  "name__icontains=localhost"
+...
