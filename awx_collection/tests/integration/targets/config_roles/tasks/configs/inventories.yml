@@ -21,5 +21,5 @@ controller_inventories:
     organization: Default
     description: created by Ansible Playbook
     kind: smart
-    host_filter:  "name__icontains=localhost"
+    host_filter: "name__icontains=localhost"
 ...

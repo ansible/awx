@@ -1,12 +1,12 @@
 ---
 controller_roles:
-  - inventory:  RHVM-01
+  - inventory: RHVM-01
     team: satlab-admin
     role: admin
-  - inventory:  RHVM-02
+  - inventory: RHVM-02
     team: satellite-qe
     role: use
-  - inventory:  RHVM-02
+  - inventory: RHVM-02
     team: satlab-admin
     role: admin
   # - workflow:  Test workflow 1
