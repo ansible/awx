@@ -31,18 +31,3 @@ def remove_encrypted(value):
     if isinstance(value, dict):
         return {k: remove_encrypted(v) for k, v in value.items()}
     return value
-
-
-def get_post_fields(page, cache):
-    options_page = cache.get_options(page)
-    if options_page is None:
-        return None
-
-    if 'POST' not in options_page.r.headers.get('Allow', ''):
-        return None
-
-    if 'POST' in options_page.json['actions']:
-        return options_page.json['actions']['POST']
-    else:
-        log.warning("Insufficient privileges on %s, inferring POST fields from description.", options_page.endpoint)
-        return parse_description(options_page.json['description'])
