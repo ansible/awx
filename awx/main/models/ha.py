@@ -184,7 +184,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         help_text=_("Port that Receptor will listen for incoming connections on."),
     )
 
-    peers = models.ManyToManyField('self', symmetrical=False, through=InstanceLink, through_fields=('source', 'target'))
+    peers = models.ManyToManyField('self', symmetrical=False, through=InstanceLink, through_fields=('source', 'target'), related_name='peers_from')
     peers_from_control_nodes = models.BooleanField(default=False, help_text=_("If True, control plane cluster nodes should automatically peer to it."))
 
     class Meta:
@@ -479,14 +479,32 @@ def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs
 
 @receiver(post_save, sender=Instance)
 def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
-    if settings.IS_K8S and instance.node_type in (Instance.Types.EXECUTION, Instance.Types.HOP):
+    should_write_config = False
+    if created and settings.IS_K8S and instance.node_type in [Instance.Types.CONTROL, Instance.Types.HYBRID]:
+        inst = Instance.objects.filter(peers_from_control_nodes=True)
+        if set(instance.peers.all()) != set(inst):
+            instance.peers.set(inst)
+            should_write_config = True
+
+    if settings.IS_K8S and instance.node_type in [Instance.Types.HOP, Instance.Types.EXECUTION]:
         if instance.node_state == Instance.States.DEPROVISIONING:
             from awx.main.tasks.receptor import remove_deprovisioned_node  # prevents circular import
 
             # wait for jobs on the node to complete, then delete the
             # node and kick off write_receptor_config
             connection.on_commit(lambda: remove_deprovisioned_node.apply_async([instance.hostname]))
+        else:
+            if instance.peers_from_control_nodes:
+                control_instances = Instance.objects.filter(node_type__in=[Instance.Types.CONTROL, Instance.Types.HYBRID])
+                if set(instance.peers_from.all()) != control_instances:
+                    instance.peers_from.set(control_instances)
+                    should_write_config = True
+            else:
+                if instance.peers_from.exists():
+                    instance.peers_from.clear()
+                    should_write_config = True
 
+    if should_write_config:
         from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
 
         # broadcast to all control instances to update their receptor configs
@@ -509,7 +527,12 @@ def on_instance_deleted(sender, instance, using, **kwargs):
         from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
 
         # broadcast to all control instances to update their receptor configs
-        connection.on_commit(lambda: write_receptor_config.apply_async(kwargs=dict(force=True), queue='tower_broadcast_all'))
+        connection.on_commit(lambda: write_receptor_config.apply_async(queue='tower_broadcast_all'))
+
+
+@receiver(post_save, sender=InstanceLink)
+def on_instancelink_save(sender, instance, using, **kwargs):
+    logger.warning("instancelink saved")
 
 
 class UnifiedJobTemplateInstanceGroupMembership(models.Model):
