@@ -69,6 +69,11 @@ options:
       required: False
       type: list
       elements: str
+    peers_from_control_nodes:
+      description:
+        - Set hop or execution node to peer from a control node.
+      required: False
+      type: bool
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -98,7 +103,8 @@ def main():
         node_type=dict(type='str', choices=['execution', 'hop']),
         node_state=dict(type='str', choices=['deprovisioning', 'installed']),
         listener_port=dict(type='int'),
-        peers=dict(required=False, type="list", elements='str'),
+        peers=dict(required=False, type='list', elements='str'),
+        peers_from_control_nodes=dict(required=False, type='bool'),
     )
 
     # Create a module for ourselves
@@ -113,6 +119,7 @@ def main():
     node_state = module.params.get('node_state')
     listener_port = module.params.get('listener_port')
     peers = module.params.get('peers')
+    peers_from_control_nodes =module.params.get('peers_from_control_nodes')
     # Attempt to look up an existing item based on the provided data
     existing_item = module.get_one('instances', name_or_id=hostname)
 
@@ -132,6 +139,8 @@ def main():
         new_fields['listener_port'] = listener_port
     if peers is not None:
         new_fields['peers'] = peers
+    if peers_from_control_nodes is not None:
+        new_fields['peers_from_control_nodes'] = peers_from_control_nodes
 
     module.create_or_update_if_needed(
         existing_item,
@@ -143,4 +152,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-    
+
