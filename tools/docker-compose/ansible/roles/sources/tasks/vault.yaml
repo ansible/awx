@@ -6,6 +6,7 @@
       register: vault_secret
       loop:
         - vault_password
+
     - ansible.builtin.template:
         src: "secrets.yml.j2"
         dest: "{{ sources_dest }}/secrets/{{ item.item }}.yml"
@@ -13,6 +14,7 @@
       loop: "{{ vault_secret.results }}"
       loop_control:
         label: "{{ item.item }}"
+
     - include_vars: "{{ sources_dest }}/secrets/{{ item.item }}.yml"
       loop: "{{ vault_secret.results }}"
       no_log: true
