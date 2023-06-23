@@ -235,7 +235,7 @@ services:
 {% endif %}
 {% if enable_vault|bool %}
   vault:
-    image: vault:latest
+    image: hashicorp/vault:latest
     container_name: tools_vault_1
     hostname: vault
     ports:
