@@ -259,7 +259,7 @@ def test_group_vars(get, admin_user):
 
 
 @pytest.mark.django_db
-def test_write_receptor_config_called(admin_user, post):
+def test_write_receptor_config_called():
     '''
     Assert that write_receptor_config is called
     when certain instances are created, or if
@@ -308,3 +308,47 @@ def test_write_receptor_config_called(admin_user, post):
             # deleting control nodes (no)
             control.delete()
             write_method.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_write_receptor_config_data():
+    '''
+    Assert the correct peers are included in data that will
+    be written to receptor.conf
+    '''
+    with override_settings(IS_K8S=True):
+        from awx.main.tasks.receptor import RECEPTOR_CONFIG_STARTER
+
+        with mock.patch('awx.main.tasks.receptor.read_receptor_config', return_value=list(RECEPTOR_CONFIG_STARTER)):
+            from awx.main.tasks.receptor import generate_config_data
+
+            _, should_update = generate_config_data()
+            assert not should_update
+
+            # not peered, so config file should not be updated
+            for i in range(3):
+                Instance.objects.create(hostname=f"exNo-{i}", node_type='execution', listener_port=6789, peers_from_control_nodes=False)
+
+            _, should_update = generate_config_data()
+            assert not should_update
+
+            # peered, so config file should be updated
+            expected_peers = []
+            for i in range(3):
+                expected_peers.append(f"hop-{i}:6789")
+                Instance.objects.create(hostname=f"hop-{i}", node_type='hop', listener_port=6789, peers_from_control_nodes=True)
+
+            for i in range(3):
+                expected_peers.append(f"exYes-{i}:6789")
+                Instance.objects.create(hostname=f"exYes-{i}", node_type='execution', listener_port=6789, peers_from_control_nodes=True)
+
+            new_config, should_update = generate_config_data()
+            assert should_update
+
+            peers = []
+            for entry in new_config:
+                for key, value in entry.items():
+                    if key == "tcp-peer":
+                        peers.append(value['address'])
+
+            assert set(expected_peers) == set(peers)

@@ -675,64 +675,80 @@ RECEPTOR_CONFIG_STARTER = (
 )
 
 
+def should_update_config(instances):
+    '''
+    checks that the list of instances matches the list of
+    tcp-peers in the config
+    '''
+    current_config = read_receptor_config()  # this gets receptor conf lock
+    current_peers = []
+    for config_entry in current_config:
+        for key, value in config_entry.items():
+            if key.endswith('-peer'):
+                current_peers.append(value['address'])
+    intended_peers = [f"{i.hostname}:{i.listener_port}" for i in instances]
+    # TODO remove this logging line
+    logger.warning(f"current {current_peers} intended {intended_peers}")
+    if set(current_peers) == set(intended_peers):
+        return False  # config file is already update to date
+
+    return True
+
+
+def generate_config_data():
+    # returns two values
+    #   receptor config - based on current database peers
+    #   should_update   - If True, receptor_config differs from the receptor conf file on disk
+    instances = Instance.objects.filter(node_type__in=(Instance.Types.EXECUTION, Instance.Types.HOP), peers_from_control_nodes=True)
+
+    receptor_config = list(RECEPTOR_CONFIG_STARTER)
+    for instance in instances:
+        peer = {'tcp-peer': {'address': f'{instance.hostname}:{instance.listener_port}', 'tls': 'tlsclient'}}
+        receptor_config.append(peer)
+    should_update = should_update_config(instances)
+    return receptor_config, should_update
+
+
+def reload_receptor():
+    logger.warning("Receptor config changed, reloading receptor")
+
+    # This needs to be outside of the lock because this function itself will acquire the lock.
+    receptor_ctl = get_receptor_ctl()
+
+    attempts = 10
+    for backoff in range(1, attempts + 1):
+        try:
+            receptor_ctl.simple_command("reload")
+            break
+        except ValueError:
+            logger.warning(f"Unable to reload Receptor configuration. {attempts-backoff} attempts left.")
+            time.sleep(backoff)
+    else:
+        raise RuntimeError("Receptor reload failed")
+
+
 @task()
 def write_receptor_config():
     """
     This task runs async on each control node, K8S only.
     It is triggered whenever remote is added or removed, or if peers_from_control_nodes
     is flipped.
-    it is possible for write_receptor_config to be called multiple times.
+    It is possible for write_receptor_config to be called multiple times.
     For example, if new instances are added in quick succession.
-    We should grab an advisory lock first to make sure this runs one at time.
+    To prevent that case, each control node first grabs a DB advisory lock, specific
+    to just that control node (i.e. multiple control nodes can run this function
+    at the same time, since it only writes the local receptor config file)
     """
-    with advisory_lock(f"write_receptor_config_lock", wait=True):
-        '''
-        need to determine if a reload is required.
-        1. read current receptor config file
-        2. get the addresses of each tcp-peer entry, e.g. hop1:27199
-        3. check intended peers based on instances with peers_from_control_nodes enabled
-        4. if the current config items match the intended items, return
-        '''
-        current_config = read_receptor_config()
-        current_peers = []
-        for config_entry in current_config:
-            for key, value in config_entry.items():
-                if key.endswith('-peer'):
-                    current_peers.append(value['address'])
-        instances = Instance.objects.filter(node_type__in=(Instance.Types.EXECUTION, Instance.Types.HOP), peers_from_control_nodes=True)
-        intended_peers = [f"{i.hostname}:{i.listener_port}" for i in instances]
-        # TODO remove this logging line
-        logger.warning(f"current {current_peers} intended {intended_peers}")
-        if set(current_peers) == set(intended_peers):
-            return  # config file is already update to date
-
+    with advisory_lock(f"{settings.CLUSTER_HOST_ID}_write_receptor_config", wait=True):
         # Config file needs to be updated
-        lock = FileLock(__RECEPTOR_CONF_LOCKFILE)
-        with lock:
-            receptor_config = list(RECEPTOR_CONFIG_STARTER)
+        receptor_config, should_update = generate_config_data()
+        if should_update:
+            lock = FileLock(__RECEPTOR_CONF_LOCKFILE)
+            with lock:
+                with open(__RECEPTOR_CONF, 'w') as file:
+                    yaml.dump(receptor_config, file, default_flow_style=False)
 
-            for instance in instances:
-                peer = {'tcp-peer': {'address': f'{instance.hostname}:{instance.listener_port}', 'tls': 'tlsclient'}}
-                receptor_config.append(peer)
-
-            with open(__RECEPTOR_CONF, 'w') as file:
-                yaml.dump(receptor_config, file, default_flow_style=False)
-
-            logger.warning("Receptor config changed, reloading receptor")
-
-        # This needs to be outside of the lock because this function itself will acquire the lock.
-        receptor_ctl = get_receptor_ctl()
-
-        attempts = 10
-        for backoff in range(1, attempts + 1):
-            try:
-                receptor_ctl.simple_command("reload")
-                break
-            except ValueError:
-                logger.warning(f"Unable to reload Receptor configuration. {attempts-backoff} attempts left.")
-                time.sleep(backoff)
-        else:
-            raise RuntimeError("Receptor reload failed")
+            reload_receptor()
 
 
 @task(queue=get_task_queuename)
