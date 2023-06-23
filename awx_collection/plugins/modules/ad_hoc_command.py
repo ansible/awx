@@ -145,6 +145,7 @@ def main():
     wait = module.params.get('wait')
     interval = module.params.get('interval')
     timeout = module.params.get('timeout')
+    execution_environment = module.params.get('execution_environment')
 
     # Create a datastructure to pass into our command launch
     post_data = {
@@ -158,6 +159,8 @@ def main():
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     post_data['inventory'] = module.resolve_name_to_id('inventories', inventory)
     post_data['credential'] = module.resolve_name_to_id('credentials', credential)
+    if execution_environment:
+        post_data['execution_environment'] = module.resolve_name_to_id('execution_environments', execution_environment)
 
     # Launch the ad hoc command
     results = module.post_endpoint('ad_hoc_commands', **{'data': post_data})
