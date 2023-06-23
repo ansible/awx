@@ -95,6 +95,13 @@ extends_documentation_fragment: awx.awx.auth
 '''
 
 EXAMPLES = '''
+- name: Launch an Ad Hoc Command waiting for it to finish
+  ad_hoc_command:
+    inventory: Demo Inventory
+    credential: Demo Credential
+    module_name: command
+    module_args: echo I <3 Ansible
+    wait: true
 '''
 
 RETURN = '''
