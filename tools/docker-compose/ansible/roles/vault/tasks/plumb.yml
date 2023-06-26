@@ -1,0 +1,56 @@
+---
+- name: Load vault keys
+  include_vars:
+    file: "{{ vault_file }}"
+
+- name: Create a HashiCorp Vault Credential
+  awx.awx.credential:
+    credential_type: HashiCorp Vault Secret Lookup
+    name: Vault Lookup Cred
+    organization: Default
+    inputs:
+      api_version: "v1"
+      cacert: ""
+      default_auth_path: "approle"
+      kubernetes_role: ""
+      namespace: ""
+      role_id: ""
+      secret_id: ""
+      token: "{{ Initial_Root_Token }}"
+      url: "http://tools_vault_1:1234"
+  register: vault_cred
+
+- name: Create a custom credential type
+  awx.awx.credential_type:
+    name: Vault Custom Cred Type
+    kind: cloud
+    injectors:
+      extra_vars:
+        the_secret_from_vault: "{{ '{{' }} password {{ '}}' }}"
+    inputs:
+      fields:
+        - type: "string"
+          id: "password"
+          label: "Password"
+          secret: true
+  register: custom_vault_cred_type
+
+- name: Create a credential of the custom type
+  awx.awx.credential:
+    credential_type: "{{ custom_vault_cred_type.id }}"
+    name: Credential From Vault
+    inputs: {}
+    organization: Default
+  register: custom_credential
+
+- name: Use the Vault Credential For the new credential
+  awx.awx.credential_input_source:
+    input_field_name: password
+    target_credential: "{{ custom_credential.id }}"
+    source_credential: "{{ vault_cred.id }}"
+    metadata:
+      auth_path: ""
+      secret_backend: "my_engine"
+      secret_key: "my_key"
+      secret_path: "/my_root/my_folder"
+      secret_version: ""

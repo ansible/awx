@@ -1,0 +1,14 @@
+---
+- name: Load vault keys
+  include_vars:
+    file: "{{ vault_file }}"
+
+- name: Unseal the vault
+  flowerysong.hvault.seal:
+    vault_addr: "http://localhost:1234"
+    state: unsealed
+    key: "{{ item }}"
+  loop:
+    - "{{ Unseal_Key_1 }}"
+    - "{{ Unseal_Key_2 }}"
+    - "{{ Unseal_Key_3 }}"

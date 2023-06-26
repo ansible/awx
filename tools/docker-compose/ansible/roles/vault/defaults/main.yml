@@ -1,0 +1,2 @@
+---
+vault_file: "{{ sources_dest }}/secrets/vault_init.yml"
