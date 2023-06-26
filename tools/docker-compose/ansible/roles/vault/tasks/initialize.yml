@@ -1,0 +1,62 @@
+---
+- name: See if vault has been initialized
+  ansible.builtin.stat:
+    path: "{{ vault_file }}"
+  register: vault_secret_file_info
+
+- block:
+    - name: Start the vault
+      community.docker.docker_compose:
+        state: present
+        services: vault
+        project_src: "{{ sources_dest }}"
+
+    - name: Run the initialization
+      community.docker.docker_container_exec:
+        command: vault operator init
+        container: tools_vault_1
+        env:
+          VAULT_ADDR: "http://127.0.0.1:1234"
+      register: vault_initialization
+
+    - name: Write out initialization file
+      copy:
+        # lines 1-4 are the keys, 6 is the root token
+        content: |
+          {{ vault_initialization.stdout_lines[0] | regex_replace('Unseal Key ', 'Unseal_Key_') }}
+          {{ vault_initialization.stdout_lines[1] | regex_replace('Unseal Key ', 'Unseal_Key_') }}
+          {{ vault_initialization.stdout_lines[2] | regex_replace('Unseal Key ', 'Unseal_Key_') }}
+          {{ vault_initialization.stdout_lines[3] | regex_replace('Unseal Key ', 'Unseal_Key_') }}
+          {{ vault_initialization.stdout_lines[4] | regex_replace('Unseal Key ', 'Unseal_Key_') }}
+          {{ vault_initialization.stdout_lines[6] | regex_replace('Initial Root Token', 'Initial_Root_Token') }}
+        dest: "{{ vault_file }}"
+
+    - name: Unlock the vault
+      include_role:
+        name: vault
+        tasks_from: unseal.yml
+
+    - name: Create an engine
+      flowerysong.hvault.engine:
+        path: "my_engine"
+        type: "kv"
+        vault_addr: "http://localhost:1234"
+        token: "{{ Initial_Root_Token }}"
+      register: engine
+
+    - name: Create a secret
+      flowerysong.hvault.kv:
+        mount_point: "my_engine/my_root"
+        key: "my_folder"
+        value:
+          my_key: "this_is_the_secret_value"
+        vault_addr: "http://localhost:1234"
+        token: "{{ Initial_Root_Token }}"
+
+  always:
+    - name: Stop the vault
+      community.docker.docker_compose:
+        state: absent
+        project_src: "{{ sources_dest }}"
+
+  when: not vault_secret_file_info.stat.exists
