@@ -37,6 +37,8 @@ SPLUNK ?= false
 PROMETHEUS ?= false
 # If set to true docker-compose will also start a grafana instance
 GRAFANA ?= false
+# If set to true docker-compose will also start a hashicorp vault instance
+VAULT ?= false
 # If set to true docker-compose will also start a tacacs+ instance
 TACACS ?= false
 
@@ -525,6 +527,7 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e enable_splunk=$(SPLUNK) \
 	    -e enable_prometheus=$(PROMETHEUS) \
 	    -e enable_grafana=$(GRAFANA) \
+	    -e enable_vault=$(VAULT) \
 	    -e enable_tacacs=$(TACACS) \
             $(EXTRA_SOURCES_ANSIBLE_OPTS)
 
