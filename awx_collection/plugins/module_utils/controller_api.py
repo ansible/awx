@@ -56,6 +56,8 @@ class ControllerModule(AnsibleModule):
         ),
         controller_config_file=dict(type='path', aliases=['tower_config_file'], required=False, default=None),
     )
+    # Associations of these types are ordered and have special consideration in the modified associations function
+    ordered_associations = ['instance_groups', 'galaxy_credentials']
     short_params = {
         'host': 'controller_host',
         'username': 'controller_username',
@@ -681,7 +683,7 @@ class ControllerAPIModule(ControllerModule):
         existing_associated_ids = [association['id'] for association in response['json']['results']]
 
         # Some associations can be ordered (like galaxy credentials)
-        if association_endpoint.strip('/').split('/')[-1] in ('instance_groups', 'galaxy_credentials'):
+        if association_endpoint.strip('/').split('/')[-1] in self.ordered_associations:
             if existing_associated_ids == new_association_list:
                 return  # If the current associations EXACTLY match the desired associations then we can return
             removal_list = existing_associated_ids  # because of ordering, we have to remove everything
