@@ -62,14 +62,14 @@ class ControllerModule(AnsibleModule):
         'username': 'controller_username',
         'password': 'controller_password',
         'verify_ssl': 'validate_certs',
-        'req_timeout': 'request_timeout',
+        'request_timeout': 'request_timeout',
         'oauth_token': 'controller_oauthtoken',
     }
     host = '127.0.0.1'
     username = None
     password = None
     verify_ssl = True
-    req_timeout = 10
+    request_timeout = 10
     oauth_token = None
     oauth_token_id = None
     authenticated = False
@@ -305,7 +305,7 @@ class ControllerAPIModule(ControllerModule):
         kwargs['supports_check_mode'] = True
 
         super().__init__(argument_spec=argument_spec, direct_params=direct_params, error_callback=error_callback, warn_callback=warn_callback, **kwargs)
-        self.session = Request(cookies=CookieJar(), timeout=self.req_timeout, validate_certs=self.verify_ssl)
+        self.session = Request(cookies=CookieJar(), timeout=self.request_timeout, validate_certs=self.verify_ssl)
 
         if 'update_secrets' in self.params:
             self.update_secrets = self.params.pop('update_secrets')
@@ -483,7 +483,7 @@ class ControllerAPIModule(ControllerModule):
             response = self.session.open(
                 method, url.geturl(),
                 headers=headers,
-                timeout=self.req_timeout,
+                timeout=self.request_timeout,
                 validate_certs=self.verify_ssl,
                 follow_redirects=True,
                 data=data
@@ -605,7 +605,7 @@ class ControllerAPIModule(ControllerModule):
                     'POST',
                     api_token_url,
                     validate_certs=self.verify_ssl,
-                    timeout=self.req_timeout,
+                    timeout=self.request_timeout,
                     follow_redirects=True,
                     force_basic_auth=True,
                     url_username=self.username,
@@ -973,7 +973,7 @@ class ControllerAPIModule(ControllerModule):
                     'DELETE',
                     api_token_url,
                     validate_certs=self.verify_ssl,
-                    timeout=self.req_timeout,
+                    timeout=self.request_timeout,
                     follow_redirects=True,
                     force_basic_auth=True,
                     url_username=self.username,
