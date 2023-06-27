@@ -141,7 +141,7 @@ awx-manage run_dispatcher --reload
 
 * * *
 
-In the following sections, we will go further into the details regarding AWX tasks.  They are all decorated by `@task()` in [awx/awx/main/tasks.py](https://github.com/ansible/awx/blob/devel/awx/main/tasks.py)
+In the following sections, we will go further into the details regarding AWX tasks.  They are all decorated by `@task()` and most of them live in [awx/main/tasks/](https://github.com/ansible/awx/blob/devel/awx/main/tasks) files.
 
 ## Housekeeping Tasks
 

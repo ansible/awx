@@ -1,3 +1,6 @@
+---
+title: Named URLs
+---
 Starting from API V2, the Named URL feature lets users access AWX resources via resource-specific human-readable identifiers. Previously, the only way of accessing a resource object without auxiliary query string was via resource primary key number(*e.g.*, via URL path `/api/v2/hosts/2/`). Now users can use named URL to do the same thing, for example, via URL path `/api/v2/hosts/host_name++inv_name++org_name/`.
 
 

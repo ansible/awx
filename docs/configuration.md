@@ -1,8 +1,12 @@
+---
+hide:
+  - toc
+---
 AWX configuration gives AWX users the ability to adjust multiple runtime parameters of AWX, which enables much more fine-grained control over AWX runs.
 
 ## Usage manual
 
-#### To Use:
+#### To Use
 The REST endpoint for CRUD operations against AWX configurations can be found at `/api/v2/settings/`. GETing to that endpoint will return a list of available AWX configuration categories and their URLs, such as `"system": "/api/v2/settings/system/"`. The URL given to each category is the endpoint for CRUD operations against individual settings under that category.
 
 Here is a typical AWX configuration category GET response:
@@ -29,7 +33,7 @@ X-API-Time: 0.026s
 
 The returned body is a JSON of key-value pairs, where the key is the name of the AWX configuration setting, and the value is the value of that setting. To update the settings, simply update setting values and PUT/PATCH to the same endpoint.
 
-#### To Develop:
+#### To Develop
 Each Django app in AWX should have a `conf.py` file where related settings get registered. Below is the general format for `conf.py`:
 
 ```python

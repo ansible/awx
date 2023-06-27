@@ -80,7 +80,7 @@ systems with a `forks` value of `5`, then the actual `forks` value from the pers
 Jobs have two types of impact. Task "execution" impact and task "control" impact.
 
 For instances that are the "controller_node" for a task,
-the impact is set by settings.AWX_CONTROL_NODE_TASK_IMPACT and it is the same no matter what type of job.
+the impact is set by `settings.AWX_CONTROL_NODE_TASK_IMPACT` and it is the same no matter what type of job.
 
 For instances that are the "execution_node" for a task, the impact is calculated as following:
 
@@ -92,15 +92,17 @@ Other job types have a fixed execution impact:
 * Project Updates: 1
 * System Jobs: 5
 
-For jobs that execute on the same node as they are controlled by, both settings.AWX_CONTROL_NODE_TASK_IMPACT and the job task execution impact apply.
+For jobs that execute on the same node as they are controlled by, both `settings.AWX_CONTROL_NODE_TASK_IMPACT` and the job task execution impact apply.
 
 Examples:
-Given settings.AWX_CONTROL_NODE_TASK_IMPACT is 1:
+
+Given `settings.AWX_CONTROL_NODE_TASK_IMPACT` is 1:
+
   - Project updates (where the execution_node is always the same as the controller_node), have a total impact of 2.
   - Container group jobs (where the execution node is not a member of the cluster) only control impact applies, and the controller node has a total task impact of 1.
   - A job executing on a "hybrid" node where both control and execution will occur on the same node has the task impact of (1 overhead for ansible main process) + (min(forks,hosts)) + (1 control node task impact). Meaning a Job running on a hybrid node with forks set to 1 would have a total task impact of 3.
 
-### Selecting the Right settings.AWX_CONTROL_NODE_TASK_IMPACT
+### Selecting the Right `settings.AWX_CONTROL_NODE_TASK_IMPACT`
 
 This setting allows you to determine how much impact controlling jobs has. This
 can be helpful if you notice symptoms of your control plane exceeding desired

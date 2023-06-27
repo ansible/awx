@@ -5,7 +5,7 @@ AWX supports the use of Ansible Collections. This section will give ways to use 
 ### Project Collections Requirements
 
 If you specify a collections requirements file in SCM at `collections/requirements.yml` of a project,
- then AWX will install collections from that file to a special cache folder in project updates.
+then AWX will install collections from that file to a special cache folder in project updates.
 Before a job runs, the roles and/or collections will be copied from the special
 cache folder to the job temporary folder.
 

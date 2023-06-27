@@ -1,3 +1,6 @@
+---
+title: CORS
+---
 ## CORS Support
 
 AWX supports custom CORS headers via the Django CORS Middleware

@@ -1,3 +1,10 @@
+!!! note
+
+    The documentation found within this site is meant for **developers** of, and
+    **contributors** to, the Ansible AWX project. The documents found here are
+    not official
+    [project documentation](https://docs.ansible.com/ansible-tower/).
+
 # AWX
 
 AWX provides a web interface and distributed task engine for scheduling and

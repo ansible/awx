@@ -1,3 +1,8 @@
+---
+tags:
+  - architecture
+  - internals
+---
 # AWX Clustering Overview
 
 AWX supports multi-node configurations. Here is an example configuration with two control plane nodes.
@@ -34,20 +39,21 @@ AWX supports multi-node configurations. Here is an example configuration with tw
 ```
 
 There are two main deployment types, virtual machines (VM) or K8S. Ansible Automation Platform (AAP) can be installed via VM or K8S deployments. The upstream AWX project can only be installed via a K8S deployment. Either deployment type supports cluster scaling.
+
 - Control plane nodes run a number of background services that are managed by supervisord
-  - dispatcher
-  - wsbroadcast
-  - callback receiver
-  - receptor (*managed under systemd)
-  - redis (*managed under systemd)
-  - uwsgi
-  - daphne
-  - rsyslog
+    - dispatcher
+    - wsbroadcast
+    - callback receiver
+    - receptor (*managed under systemd)
+    - redis (*managed under systemd)
+    - uwsgi
+    - daphne
+    - rsyslog
 - For K8S deployments, these background processes are containerized
-  - `awx-ee`: receptor
-  - `awx-web`: uwsgi, daphne, wsbroadcast, rsyslog
-  - `awx-task`: dispatcher, callback receiver
-  - `redis`: redis
+    - `awx-ee`: receptor
+    - `awx-web`: uwsgi, daphne, wsbroadcast, rsyslog
+    - `awx-task`: dispatcher, callback receiver
+    - `redis`: redis
 - Each control node is monolithic and contains all the necessary components for handling API requests and running jobs.
 - A load balancer in front of the cluster can handle incoming web requests and send them control nodes based on load balancing rules (e.g. round robin)
 - All control nodes on the cluster interact single, shared Postgres database
@@ -61,10 +67,11 @@ For K8s deployments, scaling up is handled by changing the number of replicas in
 After scaling up, the new control plane node is registered in the database as a new `Instance`.
 
 Instance types:
-`hybrid` (AAP only) - control plane node that can also run jobs
-`control` - control plane node that cannot run jobs
-`execution` - not a control node, this instance can only run jobs
-`hop` (AAP only) - not a control node, this instance serves to route traffic from control nodes to execution nodes
+
+- `hybrid` (AAP only) - control plane node that can also run jobs
+- `control` - control plane node that cannot run jobs
+- `execution` - not a control node, this instance can only run jobs
+- `hop` (AAP only) - not a control node, this instance serves to route traffic from control nodes to execution nodes
 
 Note, hybrid (AAP only) and control nodes are identical other than the `type` indicated in the database. `control`-type nodes still have all the machinery to run jobs, but are disabled through the API. The reason is that users may wish to provision control nodes with less hardware resources, and have a separate fleet of nodes to run jobs (i.e. execution nodes).
 
@@ -137,27 +144,27 @@ Node health is determined by the `cluster_node_heartbeat`. This is a periodic ta
 
 1. Get a list of instances registered to the database.
 2. `inspect_execution_nodes` looks at each execution node
-  a. get a DB advisory lock so that only a single control plane node runs this inspection at given time.
-  b. set `last_seen` based on Receptor's own heartbeat system
-    - Each node on the Receptor mesh sends advertisements out to other nodes. The `Time` field in this payload can be used to set `last_seen`
-  c. use `receptorctl status` to gather node information advertised on the Receptor mesh
-  d. run `execution_node_health_check`
-    - This is an async task submitted to the dispatcher and attempts to run `ansible-runner --worker-info` against that node
-    - This command will return important information about the node's hardware resources like CPU cores, total memory, and ansible-runner version
-    - This information will be used to calculate capacity for that instance
+    1. get a DB advisory lock so that only a single control plane node runs this inspection at given time.
+    2. set `last_seen` based on Receptor's own heartbeat system
+        - Each node on the Receptor mesh sends advertisements out to other nodes. The `Time` field in this payload can be used to set `last_seen`
+    3. use `receptorctl status` to gather node information advertised on the Receptor mesh
+    4. run `execution_node_health_check`
+        - This is an async task submitted to the dispatcher and attempts to run `ansible-runner --worker-info` against that node
+        - This command will return important information about the node's hardware resources like CPU cores, total memory, and ansible-runner version
+        - This information will be used to calculate capacity for that instance
 3. Determine if other nodes are lost based the `last_seen` value determined in step 2
-  a. `grace_period = settings.CLUSTER_NODE_HEARTBEAT_PERIOD * settings.CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE`
-  b. if `last_seen` is before this grace period, mark instance as lost
+    1. `grace_period = settings.CLUSTER_NODE_HEARTBEAT_PERIOD * settings.CLUSTER_NODE_MISSED_HEARTBEAT_TOLERANCE`
+    2. if `last_seen` is before this grace period, mark instance as lost
 4. Determine if *this* node is lost and run `local_health_check`
-  a. call `get_cpu_count` and `get_mem_in_bytes` directly from ansible-runner, which is what `ansible-runner --worker-info` calls under the hood
+    1. call `get_cpu_count` and `get_mem_in_bytes` directly from ansible-runner, which is what `ansible-runner --worker-info` calls under the hood
 5. If *this* instance was not found in the database, register it
 6. Compare *this* node's ansible-runner version with that of other instances
-  a. if this version is older, call `stop_local_services` which shuts down itself
+    1. if this version is older, call `stop_local_services` which shuts down itself
 7. For other instances marked as lost (step 3)
-  a. reap running, pending, and waiting jobs on that instance (mark them as failed)
-  b. delete instance from DB instance list
+    1. reap running, pending, and waiting jobs on that instance (mark them as failed)
+    2. delete instance from DB instance list
 8. `cluster_node_heartbeat` is called from the dispatcher, and the dispatcher parent process passes `worker_tasks` data to this method
-  a. reap local jobs that are not active (that is, no dispatcher worker is actively processing it)
+    1. reap local jobs that are not active (that is, no dispatcher worker is actively processing it)
 
 ## Instance groups
 
