@@ -661,7 +661,11 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
 
     @property
     def event_processing_finished(self):
-        return True
+        return True  # workflow jobs do not have events
+
+    @property
+    def has_unpartitioned_events(self):
+        return False  # workflow jobs do not have events
 
     def _get_parent_field_name(self):
         if self.job_template_id:
@@ -914,7 +918,11 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
 
     @property
     def event_processing_finished(self):
-        return True
+        return True  # approval jobs do not have events
+
+    @property
+    def has_unpartitioned_events(self):
+        return False  # approval jobs do not have events
 
     def send_approval_notification(self, approval_status):
         from awx.main.tasks.system import send_notifications  # avoid circular import
