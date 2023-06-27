@@ -129,6 +129,7 @@ function AWXLogin({ alt, isAuthenticated }) {
 
   const setLocalStorageAndRedirect = useCallback(() => {
     if (userId && !hasVerifiedUser.current) {
+      window.localStorage.setItem(SESSION_USER_ID, JSON.stringify(userId));
       const verifyIsNewUser = () => {
         const previousUserId = JSON.parse(
           window.localStorage.getItem(SESSION_USER_ID)
@@ -140,7 +141,6 @@ function AWXLogin({ alt, isAuthenticated }) {
       };
       isNewUser.current = verifyIsNewUser();
       hasVerifiedUser.current = true;
-      window.localStorage.setItem(SESSION_USER_ID, JSON.stringify(userId));
     }
   }, [userId]);
 
