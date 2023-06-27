@@ -233,6 +233,19 @@ services:
     privileged: true
   {% endfor %}
 {% endif %}
+{% if enable_vault|bool %}
+  vault:
+    image: hashicorp/vault:latest
+    container_name: tools_vault_1
+    hostname: vault
+    ports:
+      - "1234:1234"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: "{{ vault_password }}"
+      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:1234"
+    cap_add:
+      - IPC_LOCK
+{% endif %}
 
 volumes:
   awx_db:

@@ -67,9 +67,59 @@ def __enum_validate__(validator, enums, instance, schema):
 Draft4Validator.VALIDATORS['enum'] = __enum_validate__
 
 
+import logging
+
+logger = logging.getLogger('awx.main.fields')
+
+
 class JSONBlob(JSONField):
+    # Cringe... a JSONField that is back ended with a TextField.
+    # This field was a legacy custom field type that tl;dr; was a TextField
+    # Over the years, with Django upgrades, we were able to go to a JSONField instead of the custom field
+    # However, we didn't want to have large customers with millions of events to update from text to json during an upgrade
+    # So we keep this field type as backended with TextField.
     def get_internal_type(self):
         return "TextField"
+
+    # postgres uses a Jsonb field as the default backend
+    # with psycopg2 it was using a psycopg2._json.Json class internally
+    # with psycopg3 it uses a psycopg.types.json.Jsonb class internally
+    # The binary class was not compatible with a text field, so we are going to override these next two methods and ensure we are using a string
+
+    def from_db_value(self, value, expression, connection):
+        if value is None:
+            return value
+
+        if isinstance(value, str):
+            try:
+                return json.loads(value)
+            except Exception as e:
+                logger.error(f"Failed to load JSONField {self.name}: {e}")
+
+        return value
+
+    def get_db_prep_value(self, value, connection, prepared=False):
+        if not prepared:
+            value = self.get_prep_value(value)
+        try:
+            # Null characters are not allowed in text fields and JSONBlobs are JSON data but saved as text
+            # So we want to make sure we strip out any null characters also note, these "should" be escaped by the dumps process:
+            #     >>> my_obj = { 'test': '\x00' }
+            #     >>> import json
+            #     >>> json.dumps(my_obj)
+            #     '{"test": "\\u0000"}'
+            # But just to be safe, lets remove them if they are there. \x00 and \u0000 are the same:
+            #     >>> string = "\x00"
+            #     >>> "\u0000" in string
+            #     True
+            dumped_value = json.dumps(value)
+            if "\x00" in dumped_value:
+                dumped_value = dumped_value.replace("\x00", '')
+            return dumped_value
+        except Exception as e:
+            logger.error(f"Failed to dump JSONField {self.name}: {e} value: {value}")
+
+        return value
 
 
 # Based on AutoOneToOneField from django-annoying:

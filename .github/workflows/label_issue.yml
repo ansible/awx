@@ -6,9 +6,9 @@ on:
       - opened
       - reopened
 
-    permissions:
-      contents: read # to fetch code
-      issues: write # to label issues
+permissions:
+  contents: write # to fetch code
+  issues: write # to label issues
 
 jobs:
   triage:
@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Label Issue
-        uses: github/issue-labeler@v2.4.1
+        uses: github/issue-labeler@v3.1
         with:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
           not-before: 2021-12-07T07:00:00Z
