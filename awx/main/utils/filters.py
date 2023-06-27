@@ -34,13 +34,14 @@ class FieldFromSettings(object):
         over value in settings
     """
 
-    def __init__(self, setting_name):
+    def __init__(self, setting_name, default=None):
         self.setting_name = setting_name
+        self.default = default
 
     def __get__(self, instance, type=None):
         if self.setting_name in getattr(instance, 'settings_override', {}):
             return instance.settings_override[self.setting_name]
-        return getattr(settings, self.setting_name, None)
+        return getattr(settings, self.setting_name, self.default)
 
     def __set__(self, instance, value):
         if value is None:
@@ -63,8 +64,8 @@ def record_is_blocked(record):
 
 
 class ExternalLoggerEnabled(Filter):
-    dynamic_loggers = FieldFromSettings('LOG_AGGREGATOR_LOGGERS')
-    enabled_flag = FieldFromSettings('LOG_AGGREGATOR_ENABLED')
+    dynamic_loggers = FieldFromSettings('LOG_AGGREGATOR_LOGGERS', default=())
+    enabled_flag = FieldFromSettings('LOG_AGGREGATOR_ENABLED', default=False)
 
     def __init__(self, **kwargs):
         super(ExternalLoggerEnabled, self).__init__()
@@ -97,8 +98,8 @@ class ExternalLoggerEnabled(Filter):
 
 
 class DynamicLevelFilter(Filter):
-    dynamic_loggers = FieldFromSettings('LOG_AGGREGATOR_LOGGERS')
-    dynamic_level = FieldFromSettings('LOG_AGGREGATOR_LEVEL')
+    dynamic_loggers = FieldFromSettings('LOG_AGGREGATOR_LOGGERS', default=())
+    dynamic_level = FieldFromSettings('LOG_AGGREGATOR_LEVEL', default='INFO')
 
     def filter(self, record):
         """
