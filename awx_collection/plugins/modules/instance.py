@@ -66,6 +66,7 @@ options:
     peers:
       description:
         - List of peers to connect outbound to. Only configurable for hop and execution nodes.
+        - To remove the peer relationship from a node, provide that node with an empty list.  `peers: []`
       required: False
       type: list
       elements: str
