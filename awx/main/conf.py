@@ -848,6 +848,46 @@ register(
     category_slug='system',
 )
 
+register(
+    'AWX_CLEANUP_PATHS',
+    field_class=fields.BooleanField,
+    label=_('Enable or Disable tmp dir cleanup'),
+    default=True,
+    help_text=_('Enable or Disable TMP Dir cleanup'),
+    category=('Debug'),
+    category_slug='debug',
+)
+
+register(
+    'AWX_REQUEST_PROFILE',
+    field_class=fields.BooleanField,
+    label=_('Debug Web Requests'),
+    default=False,
+    help_text=_('Debug web request python timing'),
+    category=('Debug'),
+    category_slug='debug',
+)
+
+register(
+    'DEFAULT_CONTAINER_RUN_OPTIONS',
+    field_class=fields.StringListField,
+    label=_('Container Run Options'),
+    default=['--network', 'slirp4netns:enable_ipv6=true'],
+    help_text=_("List of options to pass to podman run example: ['--network', 'slirp4netns:enable_ipv6=true', '--log-level', 'debug']"),
+    category=('Jobs'),
+    category_slug='jobs',
+)
+
+register(
+    'RECEPTOR_RELEASE_WORK',
+    field_class=fields.BooleanField,
+    label=_('Release Receptor Work'),
+    default=True,
+    help_text=_('Release receptor work'),
+    category=('Debug'),
+    category_slug='debug',
+)
+
 
 def logging_validate(serializer, attrs):
     if not serializer.instance or not hasattr(serializer.instance, 'LOG_AGGREGATOR_HOST') or not hasattr(serializer.instance, 'LOG_AGGREGATOR_TYPE'):

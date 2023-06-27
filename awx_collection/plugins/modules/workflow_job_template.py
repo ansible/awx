@@ -991,6 +991,7 @@ def main():
     # Destroy current nodes if selected.
     if destroy_current_nodes:
         destroy_workflow_nodes(module, response, workflow_job_template_id)
+        module.json_output['changed'] = True
 
     # Work thorugh and lookup value for schema fields
     if workflow_nodes:
