@@ -156,7 +156,7 @@ class CallbackBrokerWorker(BaseWorker):
             for cls, events in self.buff.items():
                 if not events:
                     continue
-                logger.debug(f'{cls.__name__}.objects.bulk_create({len(events)})', extra={'volume_tag': 'events'})
+                logger.debug(f'{cls.__name__}.objects.bulk_create({len(events)})', extra={'volume_tag': 'event_processing'})
                 for e in events:
                     e.modified = now  # this can be set before created because now is set above on line 149
                     if not e.created:

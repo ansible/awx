@@ -585,7 +585,7 @@ register(
         'Enable logging for special tags.\n'
         'awx - (external) include to send general system logs to external log collector\n'
         'job_events - (external) callback data from Ansible job events\n'
-        'events - (non-default) system logs related to processing of events\n'
+        'event_processing - (non-default) system logs related to processing of events\n'
         'system_tracking - (external) facts gathered from scan jobs\n'
         'activity_stream - activity stream records\n'
         'system_tasks - (non-default) periodically emitted logs about internal tasks.\n'
