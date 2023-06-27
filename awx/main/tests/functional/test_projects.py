@@ -4,7 +4,7 @@ from unittest import mock  # noqa
 import pytest
 
 from awx.api.versioning import reverse
-from awx.main.models import Project
+from awx.main.models import Project, JobTemplate
 
 from django.core.exceptions import ValidationError
 
@@ -451,3 +451,19 @@ def test_project_list_ordering_with_duplicate_names(get, order_by, organization_
         results = get(reverse('api:project_list'), objects.superusers.admin, QUERY_STRING='order_by=%s' % order_by).data['results']
         project_ids[x] = [proj['id'] for proj in results]
     assert project_ids[0] == project_ids[1] == project_ids[2] == [1, 2, 3, 4, 5]
+
+
+@pytest.mark.django_db
+def test_project_failed_update(post, project, admin, inventory):
+    """Test to ensure failed projects with update on launch will create launch rather than error"""
+    jt = JobTemplate.objects.create(project=project, inventory=inventory)
+    # set project to update on launch and set status to failed
+    project.update_fields(scm_update_on_launch=True)
+    project.update()
+    project.project_updates.last().update_fields(status='failed')
+    response = post(reverse('api:job_template_launch', kwargs={'pk': jt.pk}), user=admin, expect=201)
+    assert response.status_code == 201
+    # set project to not update on launch and validate still 400's
+    project.update_fields(scm_update_on_launch=False)
+    response = post(reverse('api:job_template_launch', kwargs={'pk': jt.pk}), user=admin, expect=400)
+    assert response.status_code == 400

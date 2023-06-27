@@ -56,6 +56,11 @@ class Launchable(object):
         parser.choices[self.action].add_argument('--monitor', action='store_true', help='If set, prints stdout of the launched job until it finishes.')
         parser.choices[self.action].add_argument('--action-timeout', type=int, help='If set with --monitor or --wait, time out waiting on job completion.')
         parser.choices[self.action].add_argument('--wait', action='store_true', help='If set, waits until the launched job finishes.')
+        parser.choices[self.action].add_argument(
+            '--interval',
+            type=float,
+            help='If set with --monitor or --wait, amount of time to wait in seconds between api calls. Minimum value is 2.5 seconds to avoid overwhelming the api',
+        )
 
         launch_time_options = self.page.connection.options(self.options_endpoint)
         if launch_time_options.ok:
@@ -71,6 +76,7 @@ class Launchable(object):
                 self.page.connection.session,
                 print_stdout=not kwargs.get('wait'),
                 action_timeout=kwargs.get('action_timeout'),
+                interval=kwargs.get('interval'),
             )
             if status:
                 response.json['status'] = status
@@ -83,6 +89,7 @@ class Launchable(object):
             'monitor': kwargs.pop('monitor', False),
             'wait': kwargs.pop('wait', False),
             'action_timeout': kwargs.pop('action_timeout', False),
+            'interval': kwargs.pop('interval', 5),
         }
         response = self.page.get().related.get(self.action).post(kwargs)
         self.monitor(response, **monitor_kwargs)

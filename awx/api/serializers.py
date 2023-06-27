@@ -1629,8 +1629,8 @@ class ProjectUpdateDetailSerializer(ProjectUpdateSerializer):
         fields = ('*', 'host_status_counts', 'playbook_counts')
 
     def get_playbook_counts(self, obj):
-        task_count = obj.project_update_events.filter(event='playbook_on_task_start').count()
-        play_count = obj.project_update_events.filter(event='playbook_on_play_start').count()
+        task_count = obj.get_event_queryset().filter(event='playbook_on_task_start').count()
+        play_count = obj.get_event_queryset().filter(event='playbook_on_play_start').count()
 
         data = {'play_count': play_count, 'task_count': task_count}
 
@@ -5435,7 +5435,7 @@ class InstanceSerializer(BaseSerializer):
         res = super(InstanceSerializer, self).get_related(obj)
         res['jobs'] = self.reverse('api:instance_unified_jobs_list', kwargs={'pk': obj.pk})
         res['instance_groups'] = self.reverse('api:instance_instance_groups_list', kwargs={'pk': obj.pk})
-        if settings.IS_K8S and obj.node_type in (Instance.Types.EXECUTION,):
+        if obj.node_type in [Instance.Types.EXECUTION, Instance.Types.HOP]:
             res['install_bundle'] = self.reverse('api:instance_install_bundle', kwargs={'pk': obj.pk})
         res['peers'] = self.reverse('api:instance_peers_list', kwargs={"pk": obj.pk})
         if self.context['request'].user.is_superuser or self.context['request'].user.is_system_auditor:

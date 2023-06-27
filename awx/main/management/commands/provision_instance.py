@@ -35,7 +35,7 @@ class Command(BaseCommand):
 
             from awx.main.management.commands.register_queue import RegisterQueue
 
-            (changed, instance) = Instance.objects.register(ip_address=os.environ.get('MY_POD_IP'), node_type='control', uuid=settings.SYSTEM_UUID)
+            (changed, instance) = Instance.objects.register(ip_address=os.environ.get('MY_POD_IP'), node_type='control', node_uuid=settings.SYSTEM_UUID)
             RegisterQueue(settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME, 100, 0, [], is_container_group=False).register()
             RegisterQueue(
                 settings.DEFAULT_EXECUTION_QUEUE_NAME,
@@ -48,7 +48,7 @@ class Command(BaseCommand):
                 max_concurrent_jobs=settings.DEFAULT_EXECUTION_QUEUE_MAX_CONCURRENT_JOBS,
             ).register()
         else:
-            (changed, instance) = Instance.objects.register(hostname=hostname, node_type=node_type, uuid=uuid)
+            (changed, instance) = Instance.objects.register(hostname=hostname, node_type=node_type, node_uuid=uuid)
         if changed:
             print("Successfully registered instance {}".format(hostname))
         else:

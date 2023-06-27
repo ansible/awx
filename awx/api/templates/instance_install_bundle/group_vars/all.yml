@@ -9,7 +9,7 @@ receptor_work_commands:
     params: worker
     allowruntimeparams: true
     verifysignature: true
-custom_worksign_public_keyfile: receptor/work-public-key.pem
+custom_worksign_public_keyfile: receptor/work_public_key.pem
 custom_tls_certfile: receptor/tls/receptor.crt
 custom_tls_keyfile: receptor/tls/receptor.key
 custom_ca_certfile: receptor/tls/ca/receptor-ca.crt

@@ -3,7 +3,6 @@
 import logging
 import yaml
 
-from django.conf import settings
 from django.core.cache import cache as django_cache
 from django.core.management.base import BaseCommand
 from django.db import connection as django_connection
@@ -15,10 +14,6 @@ from awx.main.dispatch.worker import AWXConsumerPG, TaskWorker
 from awx.main.dispatch import periodic
 
 logger = logging.getLogger('awx.main.dispatch')
-
-
-def construct_bcast_queue_name(common_name):
-    return common_name + '_' + settings.CLUSTER_HOST_ID
 
 
 class Command(BaseCommand):

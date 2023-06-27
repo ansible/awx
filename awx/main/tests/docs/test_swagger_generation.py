@@ -171,4 +171,8 @@ class TestSwaggerGeneration:
             data = re.sub(r'[0-9]{4}-[0-9]{2}-[0-9]{2}(T|\s)[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]+(Z|\+[0-9]{2}:[0-9]{2})?', r'2018-02-01T08:00:00.000000Z', data)
             data = re.sub(r'''(\s+"client_id": ")([a-zA-Z0-9]{40})("\,\s*)''', r'\1xxxx\3', data)
             data = re.sub(r'"action_node": "[^"]+"', '"action_node": "awx"', data)
+
+            # replace uuids to prevent needless diffs
+            pattern = r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+            data = re.sub(pattern, r'00000000-0000-0000-0000-000000000000', data)
             f.write(data)
