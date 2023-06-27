@@ -19,6 +19,7 @@ from solo.models import SingletonModel
 
 # AWX
 from awx import __version__ as awx_application_version
+from awx.main.utils import is_testing
 from awx.api.versioning import reverse
 from awx.main.fields import ImplicitRoleField
 from awx.main.managers import InstanceManager, UUID_DEFAULT
@@ -484,7 +485,8 @@ def schedule_write_receptor_config(broadcast=True):
     if broadcast:
         connection.on_commit(lambda: write_receptor_config.apply_async(queue='tower_broadcast_all'))
     else:
-        write_receptor_config()  # just run locally
+        if not is_testing():
+            write_receptor_config()  # just run locally
 
 
 @receiver(post_save, sender=Instance)
