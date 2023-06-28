@@ -1,6 +1,5 @@
 ---
 tags:
-  - feature
   - credentials
 ---
 Extracting Credential Values

@@ -1,6 +1,6 @@
 ---
 tags:
-  - architecture
+  - feature
 ---
 # Bulk API Overview
 

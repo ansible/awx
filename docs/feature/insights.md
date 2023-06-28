@@ -1,6 +1,6 @@
 ---
 tags:
-  - debugging
+  - feature
 ---
 # Insights Integration
 Insights provides remediation playbooks that Tower executes. Tower also provides a view of Insights-discovered misconfigurations and problems via proxying Insights API requests. Credentials to access the Insights API are stored in Tower and can be related to an Inventory in which Insights hosts  are presumed to exist. This same Insights Credential can be attached to a Tower Project. The Tower Project will pull the Insights remediation plans whenever a Project Update runs.
