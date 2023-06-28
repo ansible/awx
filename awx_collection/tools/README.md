@@ -19,23 +19,13 @@ It is intended as a tool for writing new modules or enforcing consistency.
 
 These instructions assume you have ansible-core and the collection installed.
 To install the collection in-place (to pick up any local changes to source)
-the `make symlink_collection` will simplink the `awx_collection/` folder to
-the approprate place under `~/.ansible/collections`.
+the `make symlink_collection` will simlink the `awx_collection/` folder to
+the appropriate place under `~/.ansible/collections`.
 
 This is a shortcut for quick validation of tests that bypasses `ansible-test`.
-To use this, you need the `~/.tower_cli.cfg` config file populated,
-which can be done via the deprecated `tower-cli login <username>` or manually
-writing it, where the format looks like:
 
-```
-[general]
-host = https://localhost:8043/
-verify_ssl = false
-username = admin
-password = password
-```
-
-TODO: adjust playbook to allow using environment variables as well.
+Authentication is automatically set up using the admin_password secret.
+This might stop working if you delete the `tools/docker-compose/_sources` folder.
 
 To run some sample modules:
 

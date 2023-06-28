@@ -1,5 +1,28 @@
 ---
-- hosts: localhost
+# NOTE: Using a token makes tests run significantly faster
+- name: Generate an OAuth2 token for the test run
+  hosts: localhost
+  gather_facts: false
+  connection: local
+  collections:
+    - awx.awx
+  tasks:
+    - name: Create a new token using username/password
+      awx.awx.token:
+        description: 'Token used for collection tests {{ now() }}'
+        scope: write
+        state: present
+        controller_username: admin
+        controller_password: >-
+          {{ (lookup('ansible.builtin.file',
+          '{{ playbook_dir }}/../../tools/docker-compose/_sources/secrets/admin_password.yml') | from_yaml
+          )['admin_password'] }}
+        validate_certs: false
+        controller_host: https://localhost:8043/
+
+
+- name: Run the integration tests
+  hosts: localhost
   gather_facts: false
   connection: local
   collections:
@@ -8,6 +31,11 @@
     collection_location: "{{ playbook_dir }}/.."
     loc_tests: "{{ collection_location }}/tests/integration/targets/"
     test: ad_hoc_command,host,role
+    auth_env:
+      CONTROLLER_VERIFY_SSL: false
+      CONTROLLER_HOST: https://localhost:8043/
+      CONTROLLER_OAUTH_TOKEN: "{{ controller_token['token'] }}"
+  environment: "{{ auth_env }}"
   tasks:
     - name: DEBUG - make sure variables are what we expect
       debug:
