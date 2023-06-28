@@ -155,26 +155,30 @@ Support for artifacts starts in Ansible and is carried through in AWX. The `set_
 
 To best understand the nuances of workflow run logic, we will look at an example workflow run as it progresses through the 'running' state. In the workflow examples below, nodes are labeled `<do_not_run, job_status, node_id>` where `do_not_run` can be `RUN` or `DNR` where `DNR` means 'do not run the node' and `RUN` which means 'run the node'. Nodes start out with `do_not_run = False` depicted as `RUN` in the pictures below. When nodes are known to not run they will be marked `DNR` and the state will not change. `job_status` is the job's status associated with the node. `node_id` is the unique ID for the workflow job node.
 
-<p align="center">
-    <img src="img/workflow_step0.png">
-    Workflow before running has started.
-</p>
-<p align="center">
-    <img src="img/workflow_step1.png">
-    Root nodes are selected to run. A root node is a node with no incoming nodes. Node 0 is selected to run and results in a status of `'successful'`. Nodes 1, 4, and 5 are marked `'DNR'` because they are in the failure path. Node 6 is not marked `'DNR'` because nodes 2 and 3 may run and result and node 6 running. The same reasoning is why nodes 7, 8, 9 are not marked `'DNR'`.
-</p>
-<p align="center">
-    <img src="img/workflow_step2.png">
-    Nodes 2 and 3 are selected to run and their job results are both `'successful'`. Node 6 is not marked `'DNR'` because node 3 will trigger node 6.
-</p>
-<p align="center">
-    <img src="img/workflow_step3.png">
-    Node 6 is selected to run and the job results in `'failed'`. Node 8 is marked `'DNR'` because of the success path. Nodes 7 and 8 will be ran in the next cycle.
-</p>
-<p align="center">
-    <img src="img/workflow_step4.png">
-    Node 7 and 8 are selected to run and their job results are both `'successful'`.
-</p>
+<figure markdown>
+  ![Step 0](../img/workflow_step0.png)
+  <figcaption>Workflow before running has started.</figcaption>
+</figure>
+
+<figure markdown>
+  ![Step 1](../img/workflow_step1.png)
+  <figcaption>Root nodes are selected to run. A root node is a node with no incoming nodes. Node 0 is selected to run and results in a status of `'successful'`. Nodes 1, 4, and 5 are marked `'DNR'` because they are in the failure path. Node 6 is not marked `'DNR'` because nodes 2 and 3 may run and result and node 6 running. The same reasoning is why nodes 7, 8, 9 are not marked `'DNR'`.</figcaption>
+</figure>
+
+<figure markdown>
+  ![Step 2](../img/workflow_step2.png)
+  <figcaption>Nodes 2 and 3 are selected to run and their job results are both `'successful'`. Node 6 is not marked `'DNR'` because node 3 will trigger node 6.</figcaption>
+</figure>
+
+<figure markdown>
+  ![Step 3](../img/workflow_step3.png)
+  <figcaption>Node 6 is selected to run and the job results in `'failed'`. Node 8 is marked `'DNR'` because of the success path. Nodes 7 and 8 will be ran in the next cycle.</figcaption>
+</figure>
+
+<figure markdown>
+  ![Step 4](../img/workflow_step4.png)
+  <figcaption>Node 7 and 8 are selected to run and their job results are both `'successful'`.</figcaption>
+</figure>
 
 The resulting state of the workflow job run above would be `'successful'`. Although individual nodes fail, the overall workflow job status is `'successful'` because all individual node failures have error handling paths (`'failed_nodes'` or `'always_nodes'`).
 

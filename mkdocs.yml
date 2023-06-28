@@ -17,6 +17,8 @@ extra_css:
   - css/colors.css
 markdown_extensions:
   - admonition
+  - attr_list
+  - md_in_html
   - pymdownx.highlight:
   - pymdownx.inlinehilite
   - pymdownx.snippets
@@ -24,6 +26,7 @@ markdown_extensions:
   - toc:
       toc_depth: 0
 plugins:
+  - glightbox
   - search
   - tags:
       tags_file: _tags.md

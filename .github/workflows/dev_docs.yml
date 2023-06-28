@@ -1,0 +1,39 @@
+name: Development Docs
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  mkdocs:
+    runs-on: ubuntu-latest
+    name: mkdocs
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements/requirements_devdocs.txt
+
+
+      - name: Lint the files
+        run: |
+          cd docs
+          errors=0
+          for file in `find -type f -name '*.md'`; do
+            ./lint_awx_doc.py $file || errors=$((errors+1))
+          done
+          if [[ $errors -ne 0 ]]; then
+            echo "Encountered $errors errors"
+            exit 1
+          fi
+
+      - name: Build the site
+        run: |
+          mkdocs build --clean
+
+      # TODO: Deploy the site somewhere (gh pages?)

@@ -23,7 +23,7 @@ a limited time, and can be revoked at any time.
 In session authentication, users log in using the `/api/login/` endpoint. A GET to `/api/login/` displays the
 login page of API browser:
 
-![Example session log in page](../img/auth_session_1.png?raw=true)
+![Example session log in page](../../img/auth_session_1.png?raw=true)
 
 Users should enter correct username and password before clicking on the 'LOG IN' button, which fires a POST
 to `/api/login/` to actually log the user in. The return code of a successful login is 302, meaning upon

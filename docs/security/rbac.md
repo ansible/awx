@@ -32,7 +32,7 @@ capabilities are implicitly granted to all parents. (Technically speaking, this
 forms a directional acyclic graph instead of a strict hierarchy, but the
 concept should remain intuitive.)
 
-![Example RBAC hierarchy](img/rbac_example.png?raw=true)
+![Example RBAC hierarchy](../img/rbac_example.png?raw=true)
 
 
 ### Implementation Overview

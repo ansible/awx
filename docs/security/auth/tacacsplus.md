@@ -40,7 +40,7 @@ We provide [a playbook](https://github.com/jangsutsr/ansible-role-tacacs) to ins
 3. In Tower, create a test inventory with the only host to be the spawned CentOS machine.
 4. In Tower, create and run a job template using the created project and inventory with parameters setup as below:
 
-![Example tacacs+ setup jt parameters](../img/auth_tacacsplus_1.png?raw=true)
+![Example tacacs+ setup jt parameters](../../img/auth_tacacsplus_1.png?raw=true)
 
 The playbook creates a user named 'tower' with ascii password default to 'login' and modifiable by `extra_var` `ascii_password` and pap password default to 'papme' and modifiable by `extra_var` `pap_password`. In order to configure TACACS+ server to meet custom test needs, we need to modify server-side file `/etc/tac_plus.conf` and `sudo service tac_plus restart` to restart the daemon. Details on how to modify config file can be found [here](http://manpages.ubuntu.com/manpages/xenial/man5/tac_plus.conf.5.html).
 

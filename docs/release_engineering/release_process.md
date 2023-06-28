@@ -13,16 +13,16 @@ If you need to revert a release, please refer to the [Revert a Release](#revert-
 
 Find the latest releases of the projects on the right hand side of the screen:
 
-![Latest Release](img/latest-release.png)
+![Latest Release](../img/latest-release.png)
 
 2. Open the compare screen for the two projects [AWX](https://github.com/ansible/awx/compare) and [AWX Operator](https://github.com/ansible/awx-operator/compare).
 In the two dropdowns near the top of the page leave the `compare` menu at devel and select the drop down for `base` and then select `tags` and finally select the latest release from step 1:
 
-![PR Compare Screen](img/compare-screen.png)
+![PR Compare Screen](../img/compare-screen.png)
 
 The page will now automatically update with a list of PRs that are in `AWX/devel` but not in the last release.
 
-![PR Compare List](img/pr_compare_list.png)
+![PR Compare List](../img/pr_compare_list.png)
 
 ## Select the next release version
 
@@ -63,7 +63,7 @@ Once you are on the Stage Release workflow page:
 4. Populate the inputs.
 5. Click the "Run workflow" button.
 
-![Staging AWX](img/stage-release.png)
+![Staging AWX](../img/stage-release.png)
 
 This workflow will:
 
@@ -82,7 +82,7 @@ Once staging is complete we can complete the release of awx and the operator.
 
 2. Click the pencil icon on the draft:
 
-![Verify draft release](img/verify-draft-release.png)
+![Verify draft release](../img/verify-draft-release.png)
 
 3. Click the generate release notes button (turns grey after clicking once)
 
@@ -94,25 +94,25 @@ Released with AWX Operator v0.23.0
 
 5. Click "Publish Release":
 
-![Publish release](img/publish-release.png)
+![Publish release](../img/publish-release.png)
 
 Once the release is published, another workflow called [Promote Release](https://github.com/ansible/awx/actions/workflows/promote.yml) will start running:
 
-![Promote release](img/promote-release.png)
+![Promote release](../img/promote-release.png)
 
 This workflow will take the generated images and promote them to quay.io in addition it will also release awxkit and the awx.awx collection. The overall process will not take long.
 
 6. Once the workflow is finished, verify that the new image is present on the [Repository Tags](https://quay.io/repository/ansible/awx?tag=latest&tab=tags) on Quay:
 
-![Verify released AWX image](img/verify-released-awx-image.png)
+![Verify released AWX image](../img/verify-released-awx-image.png)
 
 7. Go to the awx.awx collection on [Ansible Galaxy](https://galaxy.ansible.com/awx/awx) and validate the latest version matches and was updated recently:
 
-![Verify release awx.awx collection](img/galaxy.png)
+![Verify release awx.awx collection](../img/galaxy.png)
 
 8. Go to awxkit's page on [PiPy](https://pypi.org/project/awxkit/#history) and validate the latest release is there:
 
-![Verify awxkit](img/pypi.png)
+![Verify awxkit](../img/pypi.png)
 
 ### Releasing the AWX operator
 
@@ -122,13 +122,13 @@ Once the AWX image is live, we can now release the AWX operator.
 
 Once published, the workflow [Promote AWX Operator image](https://github.com/ansible/awx-operator/actions/workflows/promote.yaml) will run:
 
-![Operator Promotion](img/operator-promote.png)
+![Operator Promotion](../img/operator-promote.png)
 
 This workflow will take the generated images and promote them to quay.io.
 
 2. Once complete, verify the image is on the [awx-operator Quay repository](https://quay.io/repository/ansible/awx-operator?tab=tags):
 
-![Verify released awx-operator image](img/verify-released-awx-operator-image.png)
+![Verify released awx-operator image](../img/verify-released-awx-operator-image.png)
 
 ## Notify the AWX mailing list
 Send an email to the [AWX Mailing List](mailto:awx-project@googlegroups.com) with a message format of type "AWX Release" from the [mailing list triage standard replies](../.github/triage_replies.md#awx-release)
@@ -150,16 +150,16 @@ Here are the steps needed to revert an AWX and an AWX-Operator release. Dependin
 
 1. Navigate to the [AWX Release Page](https://github.com/ansible/awx/releases) and delete the AWX Release that needs to be removed.
 
-![Revert-1-Image](img/revert-1.png)
+![Revert-1-Image](../img/revert-1.png)
 
 2. Navigate to the [AWX Tags Page](https://github.com/ansible/awx/tags) and delete the AWX Tag that got created by the Github Actions Workflow from when you originally tried to release AWX. You need delete the release in step 1 before you can do this step. The tag must not be tied to a release if you want to delete a tag.
 
-![Tag-Revert-1-Image](img/tag-revert-1.png)
+![Tag-Revert-1-Image](../img/tag-revert-1.png)
 [comment]: <> (Need an image here for actually deleting an orphaned tag, place here during next release)
 
 3. Navigate to the [AWX Operator Release Page]() and delete the AWX-Operator release that needss to tbe removed.
 
-![Revert-2-Image](img/revert-2.png)
+![Revert-2-Image](../img/revert-2.png)
 
 4. Navigate to [quay.io](https://quay.io/repository/ansible/awx?tag=latest&tab=tags) and delete the published AWX image(s) and tags.
 

@@ -55,7 +55,7 @@ The notable modules for this component are:
 
 ## Before the web/task split
 
-<img src="img/websockets-old.png">
+![Old Design](../img/websockets-old.png)
 
 Consider a Kubernetes deployment of AWX. Before the web task split, each pod had
 a web container, a task container, and a redis container (and possibly others,
@@ -78,7 +78,7 @@ own pod-local Redis for django-channels to process it.
 
 ## Current Implementation
 
-<img src="img/websockets-new.png">
+![New Design](../img/websockets-new.png)
 
 In the post web/task split world, web and task containers live in entirely
 independent pods, each with their own Redis. The former `wsbroadcast` has been

@@ -1,9 +1,7 @@
 ---
+title: ansible-runner Integration
 tags:
   - internals
----
----
-title: ansible-runner Integration
 ---
 ## Ansible Runner Integration Overview
 
