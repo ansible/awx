@@ -1,17 +1,20 @@
 site_name: Ansible AWX Developer Documentation
 theme:
   name: material
+  logo: img/logo.png
   palette:
     - scheme: default
-      primary: light blue
+      primary: custom
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
     - scheme: slate
-      primary: light blue
+      primary: custom
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
+extra_css:
+  - css/colors.css
 markdown_extensions:
   - admonition
   - pymdownx.highlight:
@@ -21,14 +24,22 @@ markdown_extensions:
   - toc:
       toc_depth: 0
 plugins:
+  - search
   - tags:
       tags_file: _tags.md
+      # tags_allowed is an sponsored feature in mkdocs-material
+      # Until/unless it lands in the public version, we can make our own custom
+      # check.
       tags_allowed:
         - architecture
         - development
         - internals
-        - api
+        - auth
         - ui
         - feature
         - releng
         - security
+        - debugging
+        - deprecated
+        - inventory
+        - credentials
