@@ -94,7 +94,7 @@ export default function FrequencyDetails({
           value={getRunEveryLabel()}
           dataCy={`${prefix}-run-every`}
         />
-        {type === 'week' ? (
+        {type === 'week' && options.daysOfWeek ? (
           <Detail
             label={t`On days`}
             value={options.daysOfWeek
