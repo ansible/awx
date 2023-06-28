@@ -7,35 +7,32 @@ tags:
 
 AWX supports multi-node configurations. Here is an example configuration with two control plane nodes.
 
-```
-       ┌───────────────────────────┐
-       │      Load-balancer        │
-       │   (configured separately) │
-       └───┬───────────────────┬───┘
-           │   round robin API │
-           ▼       requests    ▼
+```mermaid
+flowchart TB
+    lb("Load-balancer (configured separately)")
 
-  AWX Control               AWX Control
-    Node 1                    Node 2
-┌──────────────┐           ┌──────────────┐
-│              │           │              │
-│ ┌──────────┐ │           │ ┌──────────┐ │
-│ │ awx-task │ │           │ │ awx-task │ │
-│ ├──────────┤ │           │ ├──────────┤ │
-│ │ awx-ee   │ │           │ │ awx-ee   │ │
-│ ├──────────┤ │           │ ├──────────┤ │
-│ │ awx-web  │ │           │ │ awx-web  │ │
-│ ├──────────┤ │           │ ├──────────┤ │
-│ │ redis    │ │           │ │ redis    │ │
-│ └──────────┘ │           │ └──────────┘ │
-│              │           │              │
-└──────────────┴─────┬─────┴──────────────┘
-                     │
-                     │
-               ┌─────▼─────┐
-               │ Postgres  │
-               │ database  │
-               └───────────┘
+    subgraph node1[AWX Control Node 1]
+        t1("awx-task")
+        e1("awx-ee")
+        w1("awx-web")
+        r1("redis")
+    end
+
+    subgraph node2[AWX Control Node 2]
+        t2("awx-task")
+        e2("awx-ee")
+        w2("awx-web")
+        r2("redis")
+    end
+
+    subgraph Postgres
+        p("database")
+    end
+
+    lb --> node1
+    lb --> node2
+    node1 --> p
+    node2 --> p
 ```
 
 There are two main deployment types, virtual machines (VM) or K8S. Ansible Automation Platform (AAP) can be installed via VM or K8S deployments. The upstream AWX project can only be installed via a K8S deployment. Either deployment type supports cluster scaling.

@@ -1,3 +1,4 @@
+---
 site_name: Ansible AWX Developer Documentation
 theme:
   name: material
@@ -22,7 +23,11 @@ markdown_extensions:
   - pymdownx.highlight:
   - pymdownx.inlinehilite
   - pymdownx.snippets
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - toc:
       toc_depth: 0
 plugins:

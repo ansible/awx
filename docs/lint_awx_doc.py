@@ -44,7 +44,7 @@ class AWXDocLinter:
 
         try:
             # If it has metadata, then parse the lines between --- as YAML
-            metadata = yaml.safe_load(self.data.split('---')[1])
+            metadata = yaml.load(self.data.split('---')[1], Loader=yaml.FullLoader)
             self.metadata = metadata
         except yaml.YAMLError as e:
             self.report(f'Invalid YAML: {e}', False)
