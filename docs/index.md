@@ -1,3 +1,6 @@
+---
+title: Ansible AWX Developer Documentation
+---
 !!! note
 
     The documentation found within this site is meant for **developers** of, and

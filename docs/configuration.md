@@ -3,7 +3,6 @@ hide:
   - toc
 tags:
   - development
-  - API
 ---
 AWX configuration gives AWX users the ability to adjust multiple runtime parameters of AWX, which enables much more fine-grained control over AWX runs.
 
