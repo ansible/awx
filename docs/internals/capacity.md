@@ -1,3 +1,7 @@
+---
+tags:
+  - internals
+---
 ## AWX Capacity Determination and Job Impact
 
 The AWX capacity system determines how many jobs can run on an Instance given the amount of resources

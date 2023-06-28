@@ -1,8 +1,34 @@
 site_name: Ansible AWX Developer Documentation
 theme:
   name: material
+  palette:
+    - scheme: default
+      primary: light blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: light blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
 markdown_extensions:
+  - admonition
   - pymdownx.highlight:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - toc:
+      toc_depth: 0
+plugins:
+  - tags:
+      tags_file: _tags.md
+      tags_allowed:
+        - architecture
+        - development
+        - internals
+        - api
+        - ui
+        - feature
+        - releng
+        - security

@@ -1,3 +1,7 @@
+---
+tags:
+  - internals
+---
 # AWX as an Ansible Fact Cache
 
 AWX can store and retrieve per-host facts via an Ansible Fact Cache Plugin.

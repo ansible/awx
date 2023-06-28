@@ -1,3 +1,7 @@
+---
+tags:
+  - debugging
+---
 # Slow API Endpoint
 
 The time it takes from the start of an HTTP request until the time the last byte arrives at the client is the full request response. If you eliminate the client entirely it is the time after the client sends the HTTP request (ending in `\n\n`) until the time the server responds with the first byte of the response.
@@ -24,4 +28,3 @@ Allow this IP address by adding it to the `INTERNAL_IPS` variable in your new ov
 right side.  If you don't see it, make sure to set `DEBUG=True`.  
 > Note that enabling DDT is detrimental to the performance of AWX and adds overhead to every API request.  It is
 recommended to keep this turned off when you are not using it.  
-

@@ -1,3 +1,7 @@
+---
+tags:
+  - releng
+---
 # Building the AWX Image
 
 ## Build & Push Image

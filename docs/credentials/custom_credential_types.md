@@ -1,3 +1,7 @@
+---
+tags:
+  - credentials
+---
 Custom Credential Types Overview
 ================================
 

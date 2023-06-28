@@ -1,3 +1,7 @@
+---
+tags:
+  - auth
+---
 ## Introduction
 
 Session-based authentication is the main authentication method, and auth tokens have been replaced by OAuth 2 tokens.

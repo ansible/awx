@@ -1,3 +1,8 @@
+---
+tags:
+  - inventory
+  - feature
+---
 # SCM Inventory
 
 Users can create inventory sources that use content in the source tree of

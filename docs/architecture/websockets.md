@@ -1,3 +1,8 @@
+---
+tags:
+  - architecture
+  - internals
+---
 # Websockets
 
 AWX uses websockets to update the UI in realtime as events happen within the

@@ -1,3 +1,7 @@
+---
+tags:
+  - security
+---
 # Role-Based Access Control (RBAC)
 
 This document describes the RBAC implementation of the AWX Software.

@@ -1,3 +1,7 @@
+---
+tags:
+  - development
+---
 # Running Development Environment in Kubernetes
 
 ## Start Minikube

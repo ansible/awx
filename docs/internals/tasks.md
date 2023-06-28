@@ -1,3 +1,7 @@
+---
+tags:
+  - internals
+---
 Background Tasks in AWX
 =======================
 

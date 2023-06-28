@@ -1,3 +1,7 @@
+---
+tags:
+  - deprecated
+---
 # Inventory Refresh Overview
 AWX should have an inventory view that is more aligned towards systems management
 rather than merely maintaining inventory for automation.

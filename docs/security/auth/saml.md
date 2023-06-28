@@ -1,3 +1,7 @@
+---
+tags:
+  - security
+---
 # SAML
 Security Assertion Markup Language, or SAML, is an open standard for exchanging authentication and/or authorization data between an identity provider (*i.e.*, LDAP) and a service provider (*i.e.*, AWX). More concretely, AWX can be configured to talk with SAML in order to authenticate (create/login/logout) users of AWX. User Team and Organization membership can be embedded in the SAML response to AWX.
 

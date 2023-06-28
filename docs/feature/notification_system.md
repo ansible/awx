@@ -1,3 +1,7 @@
+---
+tags:
+  - feature
+---
 # Notification System Overview
 
 A Notification Template is an instance of a notification type (Email, Slack, Webhook, etc.) with a name, description, and a defined configuration. A few examples include:

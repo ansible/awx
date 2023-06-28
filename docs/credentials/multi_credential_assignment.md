@@ -1,3 +1,7 @@
+---
+tags:
+  - credentials
+---
 Multi-Credential Assignment
 ===========================
 

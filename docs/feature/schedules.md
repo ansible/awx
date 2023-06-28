@@ -1,3 +1,7 @@
+---
+tags:
+  - feature
+---
 ## Scheduled Jobs
 
 AWX allows jobs to run on a schedule (with optional recurrence rules) via

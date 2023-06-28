@@ -1,3 +1,7 @@
+---
+tags:
+  - debugging
+---
 # Subsystem Metrics
 
 The subsystem metrics offers a flexible way to collect and aggregate metrics across the application and display them at the `api/v2/metrics` endpoint.

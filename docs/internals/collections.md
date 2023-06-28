@@ -1,3 +1,7 @@
+---
+tags:
+  - internals
+---
 ## Collections
 
 AWX supports the use of Ansible Collections. This section will give ways to use Collections in job runs.

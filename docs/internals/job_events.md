@@ -1,3 +1,7 @@
+---
+tags:
+  - internals
+---
 ## Ansible Callback and Job Events
 
 There is no concept of a job event in Ansible. Job Events are JSON structures, created when Ansible calls the runner callback plugin hooks (*i.e.*, `v2_playbook_on_task_start`, `v2_runner_on_ok`, etc.). The Job Event data structures contain data from the parameters of the callback hooks plus unique IDs that reference other Job Events. There is usually a one-to-one relationship between a Job Event and an Ansible callback plugin function call.

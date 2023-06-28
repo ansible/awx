@@ -1,3 +1,7 @@
+---
+tags:
+  - feature
+---
 ## Launch-time Configurations / Prompting
 
 Admins of templates in AWX have the option to allow fields to be overwritten

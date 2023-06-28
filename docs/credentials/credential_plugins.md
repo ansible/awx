@@ -1,3 +1,7 @@
+---
+tags:
+  - credentials
+---
 Credential Plugins
 ==================
 

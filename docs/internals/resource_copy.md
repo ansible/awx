@@ -1,3 +1,7 @@
+---
+tags:
+  - internals
+---
 Starting from Tower 3.3 and API V2, users are able to copy some existing resource objects to quickly
 create new resource objects via POSTing to the corresponding `/copy/` endpoint. A new `CopyAPIView` class
 is introduced as the base view class for `/copy/` endpoints. It mimics the process of manually fetching

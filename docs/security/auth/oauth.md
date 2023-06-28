@@ -1,3 +1,7 @@
+---
+tags:
+  - auth
+---
 ## Introduction
 OAuth2 is the AWX means of token-based authentication. Users
 will be able to manage OAuth2 tokens as well as applications, a server-side representation of API

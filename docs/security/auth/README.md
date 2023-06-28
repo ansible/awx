@@ -1,3 +1,7 @@
+---
+tags:
+  - auth
+---
 This folder describes third-party authentications supported by AWX. These authentications can be configured and enabled inside AWX.
 
 When a user wants to log into AWX, she can explicitly choose some of the supported authentications to log in instead of AWX's own authentication using username and password. Here is a list of such authentications:

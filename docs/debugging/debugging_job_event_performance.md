@@ -1,3 +1,7 @@
+---
+tags:
+  - debugging
+---
 # AWX Job Event Performance Debugging
 
 ## The Job Event Critical Path

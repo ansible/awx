@@ -1,3 +1,7 @@
+---
+tags:
+  - architecture
+---
 # Execution Environments
 
 All jobs use container isolation for environment consistency and security.

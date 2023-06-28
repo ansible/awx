@@ -1,3 +1,8 @@
+---
+tags:
+  - inventory
+  - architecture
+---
 # Transition to Ansible Inventory Plugins
 
 For cloud inventory sources (such as ec2, gce, etc.) inventory updates changed from using deprecated inventory scripts, to using YAML files which are parsed by their respective inventory plugin.

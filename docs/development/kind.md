@@ -1,3 +1,7 @@
+---
+tags:
+  - development
+---
 # Running Development Environment in Kubernetes using Kind Cluster
 
 ## Start Kind Cluster

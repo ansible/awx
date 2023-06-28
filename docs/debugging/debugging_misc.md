@@ -1,3 +1,7 @@
+---
+tags:
+  - debugging
+---
 Debugging
 =========
 

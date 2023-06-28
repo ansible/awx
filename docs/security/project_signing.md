@@ -1,3 +1,7 @@
+---
+tags:
+  - security
+---
 # Project Signing and Verification
 
 Project signing and verification allows project maintainers to sign their

@@ -1,3 +1,8 @@
+---
+tags:
+  - feature
+---
+
 # Adding execution nodes to AWX
 
 Stand-alone execution nodes can be added to run alongside the Kubernetes deployment of AWX. These machines will not be a part of the AWX Kubernetes cluster. The control nodes running in the cluster will connect and submit work to these machines via Receptor. The machines be registered in AWX as type "execution" instances, meaning they will only be used to run AWX Jobs (i.e. they will not dispatch work or handle web requests as control nodes do).

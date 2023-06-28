@@ -1,3 +1,7 @@
+---
+tags:
+  - releng
+---
 # Releasing AWX (and awx-operator)
 
 The release process for AWX is completely automated as of version 19.5.0.

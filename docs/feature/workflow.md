@@ -1,3 +1,7 @@
+---
+tags:
+  - feature
+---
 ## AWX Workflow Overview
 
 Workflows are structured compositions of AWX job resources. The only job of a workflow is to trigger other jobs in specific orders to achieve certain goals, such as tracking the full set of jobs that were part of a release process as a single unit.

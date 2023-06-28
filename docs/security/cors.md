@@ -1,5 +1,7 @@
 ---
 title: CORS
+tags:
+  - security
 ---
 ## CORS Support
 

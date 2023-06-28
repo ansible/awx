@@ -1,3 +1,8 @@
+---
+tags:
+  - inventory
+  - feature
+---
 ### Constructed inventory in AWX
 
 Constructed inventory is a separate "kind" of inventory, along-side of

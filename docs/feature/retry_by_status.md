@@ -1,3 +1,7 @@
+---
+tags:
+  - feature
+---
 # Relaunch on Hosts with Status
 
 This feature allows the user to relaunch a job, targeting only the hosts marked

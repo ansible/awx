@@ -1,3 +1,7 @@
+---
+tags:
+  - internals
+---
 # Task Manager System Overview
 
 The task management system is made up of three separate components:

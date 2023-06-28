@@ -1,3 +1,7 @@
+---
+tags:
+  - debugging
+---
 # Integration With Third-Party Log Aggregators
 
 This feature builds in the capability to send detailed logs to several kinds

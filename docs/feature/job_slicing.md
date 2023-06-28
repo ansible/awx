@@ -1,3 +1,8 @@
+---
+tags:
+  - feature
+---
+
 # Job Slicing Overview
 
 Ansible, by default, runs jobs from a single control instance. At best, a single Ansible job can be sliced up on a single system via forks but this doesn't fully take advantage of AWX's ability to distribute work to multiple nodes in a cluster.

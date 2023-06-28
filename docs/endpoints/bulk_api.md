@@ -1,3 +1,7 @@
+---
+tags:
+  - architecture
+---
 # Bulk API Overview
 
 Bulk API endpoints allows to perform bulk operations in single web request. There are currently following bulk api actions:
