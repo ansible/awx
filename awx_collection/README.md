@@ -16,9 +16,9 @@ This Ansible collection allows for easy interaction with an AWX server via Ansib
 
 This source for this collection lives in the `awx_collection` folder inside of the
 AWX GitHub repository.
-The previous home for this collection was inside the folder [lib/ansible/modules/web_infrastructure/ansible_tower](https://github.com/ansible/ansible/tree/stable-2.9/lib/ansible/modules/web_infrastructure/ansible_tower) in the Ansible repo,
-as well as other places for the inventory plugin, module utils, and
-doc fragment.
+The previous home for this collection was inside the folder [lib/ansible/modules/web_infrastructure/ansible_tower](https://github.com/ansible/ansible/tree/stable-2.9/lib/ansible/modules/web_infrastructure/ansible_tower) in the ansible/ansible repo
+(as well as other places for the inventory plugin, module utils, and
+doc fragments). The current home for this collection is [./awx_collection](https://github.com/ansible/awx/tree/devel/awx_collection) in the ansible/awx repo.
 
 ## Building and Installing
 
