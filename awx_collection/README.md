@@ -107,13 +107,14 @@ The following notes are changes that may require changes to playbooks:
 ### What are AWX and Ansible Tower?
 - Source: https://github.com/ansible/awx :
   > AWX provides a web-based user interface, REST API, and task engine built on top of Ansible. It is one of the upstream projects for Red Hat Ansible Automation Platform.
-  - AWX is an open source web app written in Python with Django REST Framework (DRF) and ReactJS for running Ansible tasks (as playbooks, roles, and collections thereof) on inventoried nodes and searchably logging output.
+  - AWX is an open source web app written in Python with Django REST Framework (DRF) and ReactJS for running Ansible tasks (as playbooks, roles, and collections thereof) on inventoried nodes with ansible-runner and searchably logging output.
 - Docs: https://docs.ansible.com/ansible-tower/
 - Docs: https://docs.ansible.com/ansible-tower/latest/html/installandreference/
 - Docs: https://docs.ansible.com/ansible-tower/latest/html/towerapi/
 - Docs: https://docs.ansible.com/ansible-tower/latest/html/towercli/
 - Docs: https://docs.ansible.com/ansible-tower/latest/html/userguide/
 - Docs: https://docs.ansible.com/ansible-tower/latest/html/administration/
+- Docs: https://docs.ansible.com/ansible-tower/latest/html/administration/logging.html
 - Docs: https://docs.ansible.com/ansible-tower/latest/html/administration/security_best_practices.html
 - Docs: https://www.ansible.com/products/awx-project/faq
 
