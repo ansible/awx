@@ -28,7 +28,7 @@ class TestPeers:
         '''
         can only add hop and execution nodes via API
         '''
-        r = post(
+        post(
             url=reverse('api:instance_list'),
             data={"hostname": "abc", "node_type": node_type},
             user=admin_user,
@@ -40,7 +40,7 @@ class TestPeers:
         cannot change node type
         '''
         hop = Instance.objects.create(hostname='abc', node_type="hop")
-        r = patch(
+        patch(
             url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
             data={"node_type": "execution"},
             user=admin_user,
@@ -52,7 +52,7 @@ class TestPeers:
         '''
         listener_port can be None
         '''
-        r = post(
+        post(
             url=reverse('api:instance_list'),
             data={"hostname": "abc", "node_type": node_type, "listener_port": None},
             user=admin_user,
@@ -64,7 +64,7 @@ class TestPeers:
         '''
         only hop and execution nodes can have peers_from_control_nodes set to True
         '''
-        r = post(
+        post(
             url=reverse('api:instance_list'),
             data={"hostname": "abc", "peers_from_control_nodes": True, "node_type": node_type, "listener_port": 6789},
             user=admin_user,
@@ -75,8 +75,8 @@ class TestPeers:
         '''
         if adding instance to peers list, that instance must have listener_port set
         '''
-        hop = Instance.objects.create(hostname='abc', node_type="hop", listener_port=None)
-        r = post(
+        Instance.objects.create(hostname='abc', node_type="hop", listener_port=None)
+        post(
             url=reverse('api:instance_list'),
             data={"hostname": "ex", "peers_from_control_nodes": False, "node_type": "execution", "listener_port": None, "peers": ["abc"]},
             user=admin_user,
@@ -88,14 +88,14 @@ class TestPeers:
         if peers_from_control_nodes is True, listener_port must an integer
         Assert that all other combinations are allowed
         '''
-        control = Instance.objects.create(hostname='abc', node_type="control")
+        Instance.objects.create(hostname='abc', node_type="control")
         i = 0
         for node_type in ['hop', 'execution']:
             for peers_from in [True, False]:
                 for listener_port in [None, 6789]:
                     # only disallowed case is when peers_from is True and listener port is None
                     disallowed = peers_from and not listener_port
-                    r = post(
+                    post(
                         url=reverse('api:instance_list'),
                         data={"hostname": f"abc{i}", "peers_from_control_nodes": peers_from, "node_type": node_type, "listener_port": listener_port},
                         user=admin_user,
@@ -112,32 +112,32 @@ class TestPeers:
         hop1 = Instance.objects.create(hostname='hop1', node_type='hop', peers_from_control_nodes=True, listener_port=6789)
         hop2 = Instance.objects.create(hostname='hop2', node_type='hop', peers_from_control_nodes=False, listener_port=6789)
         assert [hop1] == list(control.peers.all())  # only hop1 should be peered
-        r = patch(
+        patch(
             url=reverse('api:instance_detail', kwargs={'pk': control.pk}),
             data={"peers": ["hop2"]},
             user=admin_user,
             expect=400,  # cannot add peers directly
         )
-        r = patch(
+        patch(
             url=reverse('api:instance_detail', kwargs={'pk': control.pk}),
             data={"peers": ["hop1"]},
             user=admin_user,
             expect=200,  # patching with current peers list should be okay
         )
-        r = patch(
+        patch(
             url=reverse('api:instance_detail', kwargs={'pk': control.pk}),
             data={"peers": []},
             user=admin_user,
             expect=400,  # cannot remove peers directly
         )
-        r = patch(
+        patch(
             url=reverse('api:instance_detail', kwargs={'pk': control.pk}),
             data={},
             user=admin_user,
             expect=200,  # patching without data should be fine too
         )
         # patch hop2
-        r = patch(
+        patch(
             url=reverse('api:instance_detail', kwargs={'pk': hop2.pk}),
             data={"peers_from_control_nodes": True},
             user=admin_user,
@@ -151,7 +151,7 @@ class TestPeers:
         cannot change hostname
         '''
         hop = Instance.objects.create(hostname='hop', node_type='hop')
-        r = patch(
+        patch(
             url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
             data={"hostname": "hop2"},
             user=admin_user,
@@ -163,13 +163,13 @@ class TestPeers:
         only allow setting to deprovisioning
         '''
         hop = Instance.objects.create(hostname='hop', node_type='hop', node_state='installed')
-        r = patch(
+        patch(
             url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
             data={"node_state": "deprovisioning"},
             user=admin_user,
             expect=200,
         )
-        r = patch(
+        patch(
             url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
             data={"node_state": "ready"},
             user=admin_user,
