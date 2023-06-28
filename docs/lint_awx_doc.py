@@ -44,7 +44,7 @@ class AWXDocLinter:
 
         try:
             # If it has metadata, then parse the lines between --- as YAML
-            metadata = yaml.load(self.data.split('---')[1], Loader=yaml.FullLoader)
+            metadata = yaml.safe_load(self.data.split('---')[1])
             self.metadata = metadata
         except yaml.YAMLError as e:
             self.report(f'Invalid YAML: {e}', False)
@@ -58,7 +58,7 @@ class AWXDocLinter:
     def only_permitted_tags(self):
         # Pull out permitted tags from mkdocs.yml
         with open('../mkdocs.yml') as f:
-            mkdocs = yaml.safe_load(f)
+            mkdocs = yaml.load(f, Loader=yaml.FullLoader)
             for plugin in mkdocs['plugins']:
                 if type(plugin) == dict and 'tags' in plugin:
                     self.permitted_tags = plugin['tags']['tags_allowed']
