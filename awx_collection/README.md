@@ -14,7 +14,7 @@
 
 The AWX Ansible collection allows for easy interaction with an AWX server via Ansible playbooks.
 
-- Ansible Galaxy: [galaxy.ansible.com/awx/awx](https://galaxy.ansible.com/awx/awx).
+- Ansible Galaxy: [galaxy.ansible.com/awx/awx](https://galaxy.ansible.com/awx/awx)
 - Source: [github.com/ansible/awx/./awx_collection](https://github.com/ansible/awx/tree/devel/awx_collection)
 - Docs: [`./awx_collection/README.md`](https://github.com/ansible/awx/blob/devel/awx_collection/README.md)
 
@@ -111,6 +111,7 @@ The following notes are changes that may require changes to playbooks:
 - Docs: https://docs.ansible.com/ansible-tower/
 - Docs: https://docs.ansible.com/ansible-tower/latest/html/installandreference/
 - Docs: https://docs.ansible.com/ansible-tower/latest/html/towerapi/
+- Docs: https://docs.ansible.com/ansible-tower/latest/html/towercli/
 - Docs: https://docs.ansible.com/ansible-tower/latest/html/userguide/
 - Docs: https://docs.ansible.com/ansible-tower/latest/html/administration/
 - Docs: https://docs.ansible.com/ansible-tower/latest/html/administration/security_best_practices.html
