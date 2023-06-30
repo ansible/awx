@@ -92,15 +92,17 @@ services:
     - "awx_{{ container_postfix }}"
   {% endfor %}
 {% endif %}
-{% if enable_keycloak|bool %}
+{% if enabled_containers['keycloak']|bool %}
   keycloak:
-    image: quay.io/keycloak/keycloak:15.0.2
+    image: quay.io/keycloak/keycloak:{{ keycloak_container_version }}
     container_name: tools_keycloak_1
     hostname: keycloak
     user: "{{ ansible_user_uid }}"
     ports:
-      - "8443:8443"
+      - "{{ keycloak_exposed_port }}:8443"
     environment:
+      KEYCLOAK_USER: "{{ keycloak_username }}"
+      KEYCLOAK_PASSWORD: "{{ keycloak_password }}"
       DB_VENDOR: postgres
       DB_ADDR: postgres
       DB_DATABASE: keycloak
@@ -109,18 +111,18 @@ services:
     depends_on:
       - postgres
 {% endif %}
-{% if enable_ldap|bool %}
+{% if enabled_containers['ldap'] | bool %}
   ldap:
-    image: bitnami/openldap:2
+    image: bitnami/openldap:{{ ldap_image_version }}
     container_name: tools_ldap_1
     hostname: ldap
     user: "{{ ansible_user_uid }}"
     ports:
-      - "389:1389"
-      - "636:1636"
+      - "{{ ldap_exposed_ldap_port }}:1389"
+      - "{{ ldap_exposed_ldaps_port }}:1636"
     environment:
-      LDAP_ADMIN_USERNAME: admin
-      LDAP_ADMIN_PASSWORD: admin
+      LDAP_ADMIN_USERNAME: {{ ldap_admin_username }}
+      LDAP_ADMIN_PASSWORD: {{ ldap_admin_password }}
       LDAP_CUSTOM_LDIF_DIR: /opt/bitnami/openldap/ldiffs
       LDAP_ENABLE_TLS: "yes"
       LDAP_LDAPS_PORT_NUMBER: 1636
@@ -132,26 +134,26 @@ services:
       - '../../docker-compose/_sources/ldap_certs:/opt/bitnami/openldap/certs'
       - '../../docker-compose/_sources/ldap_diffs:/opt/bitnami/openldap/ldiffs'
 {% endif %}
-{% if enable_splunk|bool %}
+{% if enabled_containers['splunk']|bool %}
   splunk:
-    image: splunk/splunk:latest
+    image: splunk/splunk:{{ splunk_image_version }}
     container_name: tools_splunk_1
     hostname: splunk
     ports:
-      - "8000:8000"
-      - "8089:8089"
-      - "9199:9199"
+      - "{{ splunk_exposed_http_admin_port }}:8000"
+      - "{{ splunk_exposed_api_port }}:8089"
+      - "{{ splunk_exposed_logging_port }}:9199"
     environment:
       SPLUNK_START_ARGS: --accept-license
-      SPLUNK_PASSWORD: splunk_admin
+      SPLUNK_PASSWORD: {{ splunk_admin_password }}
 {% endif %}
-{% if enable_prometheus|bool %}
+{% if enabled_containers['prometheus']|bool %}
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:{{ prometheus_container_version }}
     container_name: tools_prometheus_1
     hostname: prometheus
     ports:
-      - "9090:9090"
+      - "{{ prometheus_exposed_port }}:9090"
     volumes:
       - "../../docker-compose/_sources/prometheus.yml:/etc/prometheus/prometheus.yml"
       - "prometheus_storage:/prometheus:rw"
@@ -160,35 +162,37 @@ services:
       - awx_{{ loop.index }}:awx{{ loop.index }} # because underscores are not valid in hostnames
 {% endfor %}
 {% endif %}
-{% if enable_grafana|bool %}
+{% if enabled_containers['grafana']|bool %}
   grafana:
-    image: grafana/grafana-enterprise:latest
+    image: grafana/grafana-enterprise:{{ grafana_container_version }}
     container_name: tools_grafana_1
     hostname: grafana
     ports:
-      - "3001:3000"
+      - "{{ grafana_exposed_port }}:3000"
     volumes:
-      - "../../grafana:/etc/grafana/provisioning"
+      - "../../docker-compose/_sources/grafana:/etc/grafana/provisioning"
       - "grafana_storage:/var/lib/grafana:rw"
     links:
       - prometheus
     depends_on:
       - prometheus
 {% endif %}
-{% if enable_tacacs|bool %}
+{% if enabled_containers['tacacs']|bool %}
   tacacs:
-    image: dchidell/docker-tacacs
+    image: dchidell/docker-tacacs:{{ tacacs_container_version }}
     container_name: tools_tacacs_1
     hostname: tacacs
     ports:
       - "49:49"
 {% endif %}
-  # A useful container that simply passes through log messages to the console
-  # helpful for testing awx/tower logging
-  # logstash:
-  #   build:
-  #     context: ./docker-compose
-  #     dockerfile: Dockerfile-logstash
+{% if enabled_containers['logstash']|bool %}
+  # A useful container that simply passes through log messages to the console helpful for testing awx/tower logging
+  logstash:
+    image: docker.elastic.co/logstash/logstash:{{ logstash_container_version }}
+    container_name: tools_logstash_1
+    volumes:
+      - "../../docker-compose/_sources/logstash.conf:/usr/share/logstash/pipeline/logstash.conf"
+{% endif %}
   postgres:
     image: postgres:12
     container_name: tools_postgres_1
@@ -201,20 +205,20 @@ services:
       POSTGRES_PASSWORD: {{ pg_password }}
     volumes:
       - "awx_db:/var/lib/postgresql/data"
-{% if enable_pgbouncer|bool %}
+{% if enabled_containers['pgbouncer']|bool %}
   pgbouncer:
-    image: bitnami/pgbouncer:latest
+    image: bitnami/pgbouncer:{{ pgbouncer_container_version }}
     container_name: tools_pgbouncer_1
     hostname: pgbouncer
     environment:
       POSTGRESQL_USERNAME: {{ pg_username }}
       POSTGRESQL_DATABASE: {{ pg_database }}
-      PGBOUNCER_DATABASE: {{ pg_database }}
       POSTGRESQL_PASSWORD: {{ pg_password }}
       POSTGRESQL_HOST: {{ pg_hostname | default('postgres') }}
       POSTGRESQL_PORT: {{ pg_port }}
+      PGBOUNCER_DATABASE: {{ pg_database }}
       PGBOUNCER_AUTH_TYPE: trust
-      PGBOUNCER_PORT: {{ pgbouncer_port }}
+      PGBOUNCER_PORT: 6432
       PGBOUNCER_DEFAULT_POOL_SIZE: {{ pgbouncer_max_pool_size }}
       # This is the default, but we're being explicit here because it's important:
       # pg_notify will NOT work in transaction mode.
@@ -252,16 +256,16 @@ services:
     privileged: true
   {% endfor %}
 {% endif %}
-{% if enable_vault|bool %}
+{% if enabled_containers['vault'] | bool %}
   vault:
-    image: hashicorp/vault:1.14
+    image: hashicorp/vault:{{ vault_container_version }}
     container_name: tools_vault_1
     command: server
     hostname: vault
     ports:
-      - "1234:1234"
+      - "{{ vault_exposed_port }}:{{ vault_exposed_port }}"
     environment:
-      VAULT_LOCAL_CONFIG: '{"storage": {"file": {"path": "/vault/file"}}, "listener": [{"tcp": { "address": "0.0.0.0:1234", "tls_disable": true}}], "default_lease_ttl": "168h", "max_lease_ttl": "720h", "ui": true}'
+      VAULT_LOCAL_CONFIG: '{"storage": {"file": {"path": "/vault/file"}}, "listener": [{"tcp": { "address": "0.0.0.0:{{ vault_exposed_port }}", "tls_disable": true}}], "default_lease_ttl": "168h", "max_lease_ttl": "720h", "ui": true}'
     cap_add:
       - IPC_LOCK
     volumes:
@@ -276,20 +280,20 @@ volumes:
   redis_socket_{{ container_postfix }}:
     name: tools_redis_socket_{{ container_postfix }}
 {% endfor -%}
-{% if enable_ldap|bool %}
+{% if enabled_containers['ldap'] | bool %}
   openldap_data:
     name: tools_ldap_1
     driver: local
 {% endif %}
-{% if enable_vault|bool %}
+{% if enabled_containers['vault'] | bool %}
   hashicorp_vault_data:
     name: tools_vault_1
 {% endif %}
-{% if enable_prometheus|bool %}
+{% if enabled_containers['prometheus']|bool %}
   prometheus_storage:
     name: tools_prometheus_storage
 {% endif %}
-{% if enable_grafana|bool %}
+{% if enabled_containers['grafana']|bool %}
   grafana_storage:
     name: tools_grafana_storage
 {% endif %}

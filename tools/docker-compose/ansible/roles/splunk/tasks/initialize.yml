@@ -1,0 +1,30 @@
+---
+- block:
+    - name: Start splunk
+      community.docker.docker_compose:
+        state: present
+        services: splunk
+        project_src: "{{ sources_dest }}"
+
+    - name: create splunk_data_input_network
+      splunk.es.data_input_network:
+        name: "{{ splunk_exposed_logging_port }}"
+        protocol: "tcp"
+        source: "http:tower_logging_collections"
+        sourcetype: "httpevent"
+        state: "present"
+      vars:
+        ansible_network_os: splunk.es.splunk
+        ansible_user: admin
+        ansible_httpapi_pass: "{{ splunk_admin_password }}"
+        ansible_httpapi_port: "{{ splunk_exposed_api_port }}"
+        ansible_httpapi_use_ssl: yes
+        ansible_httpapi_validate_certs: False
+        ansible_connection: httpapi
+
+  always:
+    - name: Stop splunk
+      community.docker.docker_compose:
+        state: absent
+        services: splunk
+        project_src: "{{ sources_dest }}"

@@ -1,8 +1,8 @@
 input {
 	http {
 		port => 8085
-		user => awx_logger
-		password => "workflows"
+		user => {{ logstash_username }}
+		password => "{{ logstash_password }}"
 	}
 	udp {
 		port => 8086
@@ -11,18 +11,15 @@ input {
 		port => 8087
 	}
 }
-
 ## Add your filters / logstash plugins configuration here
-
 filter {
 	json {
 		source => "message"
 	}
 }
-
 output {
 	stdout { codec => rubydebug }
 	file {
-		path => "/logstash.log"
+		path => "/usr/share/logstash/logstash.log"
 	}
 }

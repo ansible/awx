@@ -5,7 +5,7 @@
     "SOCIAL_AUTH_SAML_SP_PRIVATE_KEY": "{{ private_key_content | regex_replace('\\n', '') }}",
     "SOCIAL_AUTH_SAML_ORG_INFO": {
         "en-US": {
-            "url": "https://{{ container_reference }}:8443",
+            "url": "https://{{ container_reference }}:{{ keycloak_exposed_port }}",
             "name": "Keycloak",
             "displayname": "Keycloak Solutions Engineering"
         }
@@ -21,9 +21,9 @@
     "SOCIAL_AUTH_SAML_ENABLED_IDPS": {
         "Keycloak": {
             "attr_user_permanent_id": "name_id",
-            "entity_id": "https://{{ container_reference }}:8443/auth/realms/awx",
+            "entity_id": "https://{{ container_reference }}:{{ keycloak_exposed_port }}/auth/realms/awx",
             "attr_groups": "groups",
-            "url": "https://{{ container_reference }}:8443/auth/realms/awx/protocol/saml",
+            "url": "https://{{ container_reference }}:{{ keycloak_exposed_port }}/auth/realms/awx/protocol/saml",
             "attr_first_name": "first_name",
             "x509cert": "{{ public_key_content | regex_replace('\\n', '') }}",
             "attr_email": "email",

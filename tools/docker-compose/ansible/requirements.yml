@@ -3,3 +3,4 @@ collections:
   - awx.awx
   - flowerysong.hvault
   - community.docker
+  - splunk.es

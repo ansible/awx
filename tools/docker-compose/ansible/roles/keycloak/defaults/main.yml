@@ -1,0 +1,4 @@
+---
+private_key_file: ../_sources/keycloak.key
+public_key_file: ../_sources/keycloak.cert
+keycloak_realm_template: ../_sources/keycloak.awx.realm.json

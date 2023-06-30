@@ -1,10 +1,12 @@
 ---
-- name: Run any pre-hooks for other container
+- name: Run any pre-hooks for containers
   hosts: localhost
   gather_facts: false
   tasks:
-    - name: Initialize vault
-      include_role:
-        name: vault
+    - include_role:
+        name: "{{ item.key }}"
         tasks_from: initialize
-      when: enable_vault | bool
+      loop: "{{ enabled_containers | dict2items }}"
+      when: enabled_containers[item.key] | bool
+      loop_control:
+        label: "{{ item.key }}"

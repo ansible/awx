@@ -1,0 +1,6 @@
+---
+- name: Render prometheus config
+  template:
+    src: "prometheus.yml.j2"
+    dest: "{{ sources_dest }}/prometheus.yml"
+  when: enable_prometheus|bool

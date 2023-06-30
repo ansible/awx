@@ -1,7 +1,7 @@
 {
-    "AUTH_LDAP_1_SERVER_URI": "ldap://{{ container_reference }}:389",
-    "AUTH_LDAP_1_BIND_DN": "cn=admin,dc=example,dc=org",
-    "AUTH_LDAP_1_BIND_PASSWORD": "admin",
+    "AUTH_LDAP_1_SERVER_URI": "ldap://{{ container_reference }}:{{ ldap_exposed_ldap_port }}",
+    "AUTH_LDAP_1_BIND_DN": "cn={{ ldap_admin_username }},dc=example,dc=org",
+    "AUTH_LDAP_1_BIND_PASSWORD": "{{ ldap_admin_password }}",
     "AUTH_LDAP_1_START_TLS": false,
     "AUTH_LDAP_1_CONNECTION_OPTIONS": {
         "OPT_REFERRALS": 0,

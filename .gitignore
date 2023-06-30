@@ -7,6 +7,9 @@ reference-schema.json
 .tags
 .tags1
 
+# Container customizations
+container_startup.yml
+
 # User level pre-commit hooks
 pre-commit-user
 
