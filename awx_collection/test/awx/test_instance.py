@@ -9,7 +9,7 @@ from django.test.utils import override_settings
 
 
 @pytest.mark.django_db
-def test_hop_node_scenario(run_module, admin_user):
+def test_peers_adding_and_removing(run_module, admin_user):
     with override_settings(IS_K8S=True):
         result = run_module(
             'instance',
