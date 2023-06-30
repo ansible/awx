@@ -70,3 +70,60 @@
         - "{{ hostname3 }}"
 
   when: IS_K8S
+
+- block:
+    - name: Create hop node 1
+      awx.awx.instance:
+        hostname: hopnode1
+        node_type: hop
+        node_state: installed
+        listener_port: 27199
+        peers_from_control_nodes: True
+      register: result
+
+    - assert:
+        that:
+          - result is changed
+
+    - name: Create hop node 2
+      awx.awx.instance:
+        hostname: hopnode2
+        node_type: hop
+        node_state: installed
+        listener_port: 27199
+        peers_from_control_nodes: True
+      register: result
+
+    - assert:
+        that:
+          - result is changed
+
+    - name: Create execution node
+      awx.awx.instance:
+        hostname: executionnode
+        node_type: execution
+        node_state: installed
+        listener_port: 27199
+        peers:
+          - "hopnode1"
+          - "hopnode2"
+      register: result
+
+    - assert:
+        that:
+          - result is changed
+
+    - name: Remove execution node peers
+      awx.awx.instance:
+        hostname: executionnode
+        node_type: execution
+        node_state: installed
+        listener_port: 27199
+        peers: []
+      register: result
+
+    - assert:
+        that:
+          - result is changed
+
+  when: IS_K8S
