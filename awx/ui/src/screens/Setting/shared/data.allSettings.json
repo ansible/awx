@@ -29,6 +29,7 @@
   "AWX_ISOLATION_SHOW_PATHS": [],
   "AWX_TASK_ENV": {},
   "AWX_RUNNER_KEEPALIVE_SECONDS": 0,
+  "GIT_TASK_ENV": {},
   "GALAXY_TASK_ENV": {
       "ANSIBLE_FORCE_COLOR": "false",
       "GIT_SSH_COMMAND": "ssh -o StrictHostKeyChecking=no"

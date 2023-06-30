@@ -267,6 +267,23 @@
               "placeholder": 240,
               "default": 0
           },
+          "GIT_TASK_ENV": {
+              "type": "nested object",
+              "required": true,
+              "label": "Environment Variables for Git module",
+              "help_text": "Environment variables to use when running the ansible.builtin.git module within project updates. Useful if you have to change a git config with GIT_CONFIG_PARAMETERS, for example, or use a proxy server.",
+              "category": "Jobs",
+              "category_slug": "jobs",
+              "placeholder": {
+                  "GIT_CONFIG_PARAMETERS": "'protocol.file.allow=always'"
+              },
+              "default": {},
+              "child": {
+                  "type": "string",
+                  "required": true,
+                  "read_only": false
+              }
+          },
           "GALAXY_TASK_ENV": {
               "type": "nested object",
               "required": true,
@@ -4673,6 +4690,17 @@
               "category": "Jobs",
               "category_slug": "jobs",
               "defined_in_file": false
+          },
+          "GIT_TASK_ENV": {
+              "type": "nested object",
+              "label": "Environment Variables for Git module",
+              "help_text": "Environment variables to use when running the ansible.builtin.git module within project updates. Useful if you have to change a git config with GIT_CONFIG_PARAMETERS, for example, or use a proxy server.",
+              "category": "Jobs",
+              "category_slug": "jobs",
+              "defined_in_file": false,
+              "child": {
+                  "type": "string"
+              }
           },
           "GALAXY_TASK_ENV": {
               "type": "nested object",
