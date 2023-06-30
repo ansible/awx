@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import MagicMock
 
 from awx.api.versioning import reverse
 from awx.main.middleware import SetRemoteAddrFromRemoteHostHeader
@@ -6,12 +7,13 @@ from awx.main.middleware import SetRemoteAddrFromRemoteHostHeader
 
 @pytest.mark.django_db
 def test_proxy_ip_allowed(get, patch, admin):
+    get_response = MagicMock()
     url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'system'})
-    patch(url, user=admin, data={'REMOTE_HOST_HEADERS': ['HTTP_X_FROM_THE_LOAD_BALANCER', 'REMOTE_ADDR', 'REMOTE_HOST']})
+    middleware = SetRemoteAddrFromRemoteHostHeader(get_response)
 
     # By default, `PROXY_IP_ALLOWED_LIST` is disabled, so custom `REMOTE_HOST_HEADERS`
     # should just pass through
-    middleware = SetRemoteAddrFromRemoteHostHeader()
+    patch(url, user=admin, data={'REMOTE_HOST_HEADERS': ['HTTP_X_FROM_THE_LOAD_BALANCER', 'REMOTE_ADDR', 'REMOTE_HOST']})
     get(url, user=admin, middleware=middleware, HTTP_X_FROM_THE_LOAD_BALANCER='some-actual-ip')
     assert middleware.environ['HTTP_X_FROM_THE_LOAD_BALANCER'] == 'some-actual-ip'
 
@@ -19,20 +21,17 @@ def test_proxy_ip_allowed(get, patch, admin):
     # from 8.9.10.11, the custom `HTTP_X_FROM_THE_LOAD_BALANCER` header should
     # be stripped
     patch(url, user=admin, data={'PROXY_IP_ALLOWED_LIST': ['10.0.1.100']})
-    middleware = SetRemoteAddrFromRemoteHostHeader()
     get(url, user=admin, middleware=middleware, REMOTE_ADDR='8.9.10.11', HTTP_X_FROM_THE_LOAD_BALANCER='some-actual-ip')
     assert 'HTTP_X_FROM_THE_LOAD_BALANCER' not in middleware.environ
 
     # If 8.9.10.11 is added to `PROXY_IP_ALLOWED_LIST` the
     # `HTTP_X_FROM_THE_LOAD_BALANCER` header should be passed through again
     patch(url, user=admin, data={'PROXY_IP_ALLOWED_LIST': ['10.0.1.100', '8.9.10.11']})
-    middleware = SetRemoteAddrFromRemoteHostHeader()
     get(url, user=admin, middleware=middleware, REMOTE_ADDR='8.9.10.11', HTTP_X_FROM_THE_LOAD_BALANCER='some-actual-ip')
     assert middleware.environ['HTTP_X_FROM_THE_LOAD_BALANCER'] == 'some-actual-ip'
 
     # Allow allowed list of proxy hostnames in addition to IP addresses
     patch(url, user=admin, data={'PROXY_IP_ALLOWED_LIST': ['my.proxy.example.org']})
-    middleware = SetRemoteAddrFromRemoteHostHeader()
     get(url, user=admin, middleware=middleware, REMOTE_ADDR='8.9.10.11', REMOTE_HOST='my.proxy.example.org', HTTP_X_FROM_THE_LOAD_BALANCER='some-actual-ip')
     assert middleware.environ['HTTP_X_FROM_THE_LOAD_BALANCER'] == 'some-actual-ip'
 
