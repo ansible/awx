@@ -44,6 +44,7 @@ options:
     target_organization:
       description:
         - Organization that should own the target credential.
+      type: str
     target_credential_type:
       description:
         - The credential type of the target to be used for lookup
@@ -134,20 +135,19 @@ def main():
     # Set lookup data
     target_lookup_data = {}
     if target_credential_type:
-        cred_type_id = module.resolve_name_to_id('credential_types', target_credential_type)
-        target_lookup_data['credential_type'] = cred_type_id
+        target_lookup_data['credential_type'] = module.resolve_name_to_id('credential_types', target_credential_type)
     if target_organization:
-        target_lookup_data['organization'] = module.resolve_name_to_id('organizations', organization)
+        target_lookup_data['organization'] = module.resolve_name_to_id('organizations', target_organization)
+
     target_credential_id = module.get_one('credentials', name_or_id=target_credential, **{'data': target_lookup_data})['id']
 
     # Attempt to look up the object based on the target credential and input field
-    target_lookup_data = {
+    credential_input_source_lookup_data = {
         'target_credential': target_credential_id,
         'input_field_name': input_field_name,
     }
 
-    credential_input_source = module.get_one('credential_input_sources', check_exists=(state == 'exists'), **{'data': lookup_data})
-
+    credential_input_source = module.get_one('credential_input_sources', check_exists=(state == 'exists'), **{'data': credential_input_source_lookup_data})
     if state == 'absent':
         module.delete_if_needed(credential_input_source)
 
@@ -157,7 +157,13 @@ def main():
         'input_field_name': input_field_name,
     }
     if source_credential:
-        credential_input_source_fields['source_credential'] = module.resolve_name_to_id('credentials', source_credential)
+        source_lookup_data = {}
+        if source_credential_type:
+            source_lookup_data['credential_type'] = module.resolve_name_to_id('credential_types', source_credential_type)
+        if source_organization:
+            source_lookup_data['organization'] = module.resolve_name_to_id('organizations', source_organization)
+        credential_input_source_fields['source_credential'] = module.get_one('credentials', name_or_id=source_credential, **{'data': source_lookup_data})['id']
+
     if metadata:
         credential_input_source_fields['metadata'] = metadata
     if description:

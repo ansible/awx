@@ -1,27 +1,56 @@
 ---
 - name: Generate a random string for test
-  set_fact:
+  ansible.builtin.set_fact:
     test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
   when: test_id is not defined
 
 - name: Generate names
-  set_fact:
+  ansible.builtin.set_fact:
     src_cred_name: "AWX-Collection-tests-credential_input_source-src_cred-{{ test_id }}"
     target_cred_name: "AWX-Collection-tests-credential_input_source-target_cred-{{ test_id }}"
+    org_name: "AWX-Collection-tests-organization-org-{{ test_id }}"
 
-- block:
+- name: Run tests
+  block:
+    - name: Create {{ org_name }}
+      organization:
+        name: "{{ org_name }}"
+      register: org_result
+
+    - name: Assert creation of {{ org_name }}
+      ansible.builtin.assert:
+        that:
+          - "org_result is changed"
+
     - name: Add credential Lookup
       credential:
         description: Credential for Testing Source
         name: "{{ src_cred_name }}"
         credential_type: CyberArk Central Credential Provider Lookup
+        organization: Default
         inputs:
           url: "https://cyberark.example.com"
           app_id: "My-App-ID"
-        organization: Default
       register: src_cred_result
 
-    - assert:
+    - name: Assert Source Cred Created
+      ansible.builtin.assert:
+        that:
+          - "src_cred_result is changed"
+
+    - name: Add credential Lookup different type
+      credential:
+        description: Credential for Testing Source
+        name: "{{ src_cred_name }}"
+        credential_type: "HashiCorp Vault Secret Lookup"
+        organization: Default
+        inputs:
+          url: "https://hashi.example.com"
+          role_id: "My-App-ID"
+      register: src_cred_result
+
+    - name: Assert Source Cred 2 Created
+      ansible.builtin.assert:
         that:
           - "src_cred_result is changed"
 
@@ -30,72 +59,108 @@
         description: Credential for Testing Target
         name: "{{ target_cred_name }}"
         credential_type: Machine
+        organization: Default
         inputs:
           username: user
-        organization: Default
       register: target_cred_result
 
-    - assert:
+    - name: Assert Target Cred Created
+      ansible.builtin.assert:
+        that:
+          - "target_cred_result is changed"
+
+    - name: Add credential Target different org
+      credential:
+        description: Credential for Testing Target
+        name: "{{ target_cred_name }}"
+        credential_type: Machine
+        organization: "{{ org_name }}"
+        inputs:
+          username: user
+      register: target_cred_result
+
+    - name: Assert Target Cred 2 Created
+      ansible.builtin.assert:
         that:
           - "target_cred_result is changed"
 
     - name: Add credential Input Source
       credential_input_source:
         input_field_name: password
-        target_credential: "{{ target_cred_result.id }}"
-        source_credential: "{{ src_cred_result.id }}"
+        target_credential: "{{ target_cred_name }}"
+        target_organization: Default
+        target_credential_type: Machine
+        source_credential: "{{ src_cred_name }}"
+        source_organization: Default
+        source_credential_type: CyberArk Central Credential Provider Lookup
         metadata:
           object_query: "Safe=MY_SAFE;Object=AWX-user"
           object_query_format: "Exact"
         state: present
       register: result
 
-    - assert:
+    - name: Assert credential Input Source Created
+      ansible.builtin.assert:
         that:
           - "result is changed"
 
     - name: Add credential Input Source with exists
       credential_input_source:
         input_field_name: password
-        target_credential: "{{ target_cred_result.id }}"
-        source_credential: "{{ src_cred_result.id }}"
+        target_credential: "{{ target_cred_name }}"
+        target_organization: Default
+        target_credential_type: Machine
+        source_credential: "{{ src_cred_name }}"
+        source_organization: Default
+        source_credential_type: CyberArk Central Credential Provider Lookup
         metadata:
           object_query: "Safe=MY_SAFE;Object=AWX-user"
           object_query_format: "Exact"
         state: exists
       register: result
 
-    - assert:
+    - name: Assert credential Input Source not changed
+      ansible.builtin.assert:
         that:
           - "result is not changed"
 
     - name: Delete credential Input Source
       credential_input_source:
         input_field_name: password
-        target_credential: "{{ target_cred_result.id }}"
-        source_credential: "{{ src_cred_result.id }}"
+        target_credential: "{{ target_cred_name }}"
+        target_organization: Default
+        target_credential_type: Machine
+        source_credential: "{{ src_cred_name }}"
+        source_organization: Default
+        source_credential_type: CyberArk Central Credential Provider Lookup
         metadata:
           object_query: "Safe=MY_SAFE;Object=AWX-user"
           object_query_format: "Exact"
         state: absent
       register: result
 
-    - assert:
+    - name: Assert credential Input Source Deleted
+      ansible.builtin.assert:
         that:
           - "result is changed"
 
     - name: Add credential Input Source with exists
       credential_input_source:
         input_field_name: password
-        target_credential: "{{ target_cred_result.id }}"
-        source_credential: "{{ src_cred_result.id }}"
+        target_credential: "{{ target_cred_name }}"
+        target_organization: Default
+        target_credential_type: Machine
+        source_credential: "{{ src_cred_name }}"
+        source_organization: Default
+        source_credential_type: CyberArk Central Credential Provider Lookup
         metadata:
           object_query: "Safe=MY_SAFE;Object=AWX-user"
           object_query_format: "Exact"
         state: exists
       register: result
 
-    - assert:
+    - name: Assert credential Input Source reCreated
+      ansible.builtin.assert:
         that:
           - "result is changed"
 
@@ -110,14 +175,23 @@
         organization: Default
       register: result
 
+    - name: Assert 2nd credential Input Source Changed
+      ansible.builtin.assert:
+        that:
+          - "result is changed"
+
     - name: Change credential Input Source
       credential_input_source:
         input_field_name: password
         target_credential: "{{ target_cred_name }}"
+        target_organization: Default
+        target_credential_type: Machine
         source_credential: "{{ src_cred_name }}-2"
         state: present
+      register: result
 
-    - assert:
+    - name: Assert credential Input Source Changed
+      ansible.builtin.assert:
         that:
           - "result is changed"
 
@@ -126,10 +200,13 @@
       credential_input_source:
         input_field_name: password
         target_credential: "{{ target_cred_name }}"
+        target_organization: Default
+        target_credential_type: Machine
         state: absent
       register: result
 
-    - assert:
+    - name: Assert Removal
+      ansible.builtin.assert:
         that:
           - "result is changed"
 
@@ -138,6 +215,14 @@
         name: "{{ src_cred_name }}"
         organization: Default
         credential_type: CyberArk Central Credential Provider Lookup
+        state: absent
+      register: result
+
+    - name: Remove credential Lookup in alt org
+      credential:
+        name: "{{ src_cred_name }}"
+        organization: Default
+        credential_type: "HashiCorp Vault Secret Lookup"
         state: absent
       register: result
 
@@ -154,5 +239,19 @@
         name: "{{ target_cred_name }}"
         organization: Default
         credential_type: Machine
+        state: absent
+      register: result
+
+    - name: Remove credential in alt org
+      credential:
+        name: "{{ target_cred_name }}"
+        organization: "{{ org_name }}"
+        credential_type: Machine
+        state: absent
+      register: result
+
+    - name: "Remove the organization"
+      organization:
+        name: "{{ org_name }}"
         state: absent
       register: result
