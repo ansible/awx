@@ -4,7 +4,7 @@ import django.core.validators
 from django.db import migrations, models
 
 
-def set_peers_from_control_nodes_true(apps, schema_editor):
+def automatically_peer_from_control_plane(apps, schema_editor):
     Instance = apps.get_model('main', 'Instance')
     Instance.objects.filter(node_type='execution').update(peers_from_control_nodes=True)
 
@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='instance',
-            name='peers_from_control_nodes',
+            name='automatically_peer_from_control_plane',
             field=models.BooleanField(default=False, help_text='If True, control plane cluster nodes should automatically peer to it.'),
         ),
         migrations.AlterField(
@@ -49,5 +49,5 @@ class Migration(migrations.Migration):
                 validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(65535)],
             ),
         ),
-        migrations.RunPython(set_peers_from_control_nodes_true),
+        migrations.RunPython(automatically_peer_from_control_plane),
     ]
