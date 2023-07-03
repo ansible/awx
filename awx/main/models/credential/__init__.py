@@ -341,6 +341,7 @@ class CredentialType(CommonModelNameNotUnique):
         ('kubernetes', _('Kubernetes')),
         ('galaxy', _('Galaxy/Automation Hub')),
         ('cryptography', _('Cryptography')),
+        ('sigstore', _('Sigstore')),
     )
 
     kind = models.CharField(max_length=32, choices=KIND_CHOICES)
@@ -1233,6 +1234,90 @@ ManagedCredentialType(
             },
         ],
         'required': ['configuration'],
+    },
+)
+
+ManagedCredentialType(
+    namespace='sigstore',
+    kind='sigstore',
+    name=gettext_noop('Sigstore verification parameters'),
+    inputs={
+        'fields': [
+            {
+                'id': 'rekor_url',
+                'label': gettext_noop('Rekor instance URL'),
+                'type': 'string',
+                'help_text': gettext_noop('The URL of the Sigstore Rekor instance the signatures were logged to.'),
+            },
+            {
+                'id': 'tuf_url',
+                'label': gettext_noop('TUF instance URL'),
+                'type': 'string',
+                'help_text': gettext_noop('The URL of the TUF instance used to retrieve Rekor and Fulcio public keys.'),
+            },
+            {
+                'id': 'rekor_root_pubkey',
+                'label': gettext_noop('Rekor root public key'),
+                'type': 'string',
+                'help_text': gettext_noop('The PEM public key for the Rekor instance.'),
+            },
+            {
+                'id': 'certificate_chain',
+                'label': gettext_noop('Fulcio certificate chain'),
+                'type': 'string',
+                'help_text': gettext_noop('Chain of PEM CA certificates to verify the Fulcio signing certificate.'),
+            },
+            {
+                'id': 'cert_identity',
+                'label': gettext_noop('Sigstore certificate identity'),
+                'type': 'string',
+                'help_text': gettext_noop('The OIDC identity of the signer to look for in the certificate SAN (i.e. email address, GitHub Actions workflow).'),
+            },
+            {
+                'id': 'oidc_issuer',
+                'label': gettext_noop('Sigstore OIDC provider URL'),
+                'type': 'string',
+                'help_text': gettext_noop('The URL of the OIDC provider that issued the signer identity.'),
+            },
+            {
+                'id': 'github_trigger',
+                'label': gettext_noop('Sigstore GitHub Actions trigger'),
+                'type': 'string',
+                'help_text': gettext_noop('The GitHub Actions event name that triggered the workflow.'),
+            },
+            {
+                'id': 'github_sha',
+                'label': gettext_noop('Sigstore git commit SHA'),
+                'type': 'string',
+                'help_text': gettext_noop('The git commit SHA that the workflow run was invoked with.'),
+            },
+            {
+                'id': 'github_name',
+                'label': gettext_noop('Sigstore github workflow name'),
+                'type': 'string',
+                'help_text': gettext_noop('The name of the workflow that was triggered.'),
+            },
+            {
+                'id': 'github_repository',
+                'label': gettext_noop('Sigstore github repository'),
+                'type': 'string',
+                'help_text': gettext_noop('The repository slug that the workflow was triggered under.'),
+            },
+            {
+                'id': 'github_ref',
+                'label': gettext_noop('Sigstore github ref'),
+                'type': 'string',
+                'help_text': gettext_noop('The git ref that the workflow was invoked with.'),
+            },
+            {
+                'id': 'verify_offline',
+                'label': gettext_noop('Sigstore verify offline'),
+                'type': 'boolean',
+                'default': False,
+                'help_text': gettext_noop('Verify signatures offline (default: False).'),
+            },
+        ],
+        'required': ['rekor_url'],
     },
 )
 

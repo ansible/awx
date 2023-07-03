@@ -52,6 +52,7 @@ social-auth-app-django==5.4.0  # see UPGRADE BLOCKERs
 sqlparse>=0.4.4   # Required by django https://github.com/ansible/awx/security/dependabot/96
 redis
 requests
+sigstore==2.0.0rc1
 slack-sdk
 tacacs_plus==1.0  # UPGRADE BLOCKER: auth does not work with later versions
 twilio
