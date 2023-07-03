@@ -71,7 +71,7 @@ services:
     image: redis:latest
     container_name: tools_redis_{{ container_postfix }}
     volumes:
-      - "../../redis/redis.conf:/usr/local/etc/redis/redis.conf"
+      - "../../redis/redis.conf:/usr/local/etc/redis/redis.conf:Z"
       - "redis_socket_{{ container_postfix }}:/var/run/redis/:rw"
     entrypoint: ["redis-server"]
     command: ["/usr/local/etc/redis/redis.conf"]
