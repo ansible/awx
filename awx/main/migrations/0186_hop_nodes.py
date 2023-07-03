@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='instance',
-            name='automatically_peer_from_control_plane',
+            name='peers_from_control_nodes',
             field=models.BooleanField(default=False, help_text='If True, control plane cluster nodes should automatically peer to it.'),
         ),
         migrations.AlterField(
