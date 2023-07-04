@@ -1,0 +1,5 @@
+---
+collections:
+  - awx.awx
+  - flowerysong.hvault
+  - community.docker
