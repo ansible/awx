@@ -62,7 +62,7 @@ function DateTimePicker({ dateFieldName, timeFieldName, label }) {
           }
           time={timeField.value}
           {...timeField}
-          onChange={(time) => timeHelpers.setValue(time)}
+          onChange={(_, time) => timeHelpers.setValue(time)}
         />
       </DateTimeGroup>
     </FormGroup>
