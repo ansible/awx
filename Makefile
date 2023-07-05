@@ -27,6 +27,8 @@ COLLECTION_TEMPLATE_VERSION ?= false
 # NOTE: This defaults the container image version to the branch that's active
 COMPOSE_TAG ?= $(GIT_BRANCH)
 MAIN_NODE_TYPE ?= hybrid
+# If set to true docker-compose will also start a pgbouncer instance and use it
+PGBOUNCER ?= false
 # If set to true docker-compose will also start a keycloak instance
 KEYCLOAK ?= false
 # If set to true docker-compose will also start an ldap instance
@@ -522,6 +524,7 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e control_plane_node_count=$(CONTROL_PLANE_NODE_COUNT) \
 	    -e execution_node_count=$(EXECUTION_NODE_COUNT) \
 	    -e minikube_container_group=$(MINIKUBE_CONTAINER_GROUP) \
+	    -e enable_pgbouncer=$(PGBOUNCER) \
 	    -e enable_keycloak=$(KEYCLOAK) \
 	    -e enable_ldap=$(LDAP) \
 	    -e enable_splunk=$(SPLUNK) \

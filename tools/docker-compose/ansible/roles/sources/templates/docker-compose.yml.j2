@@ -201,6 +201,25 @@ services:
       POSTGRES_PASSWORD: {{ pg_password }}
     volumes:
       - "awx_db:/var/lib/postgresql/data"
+{% if enable_pgbouncer|bool %}
+  pgbouncer:
+    image: bitnami/pgbouncer:latest
+    container_name: tools_pgbouncer_1
+    hostname: pgbouncer
+    environment:
+      POSTGRESQL_USERNAME: {{ pg_username }}
+      POSTGRESQL_DATABASE: {{ pg_database }}
+      PGBOUNCER_DATABASE: {{ pg_database }}
+      POSTGRESQL_PASSWORD: {{ pg_password }}
+      POSTGRESQL_HOST: {{ pg_hostname | default('postgres') }}
+      POSTGRESQL_PORT: {{ pg_port }}
+      PGBOUNCER_AUTH_TYPE: trust
+      PGBOUNCER_PORT: {{ pgbouncer_port }}
+      PGBOUNCER_DEFAULT_POOL_SIZE: {{ pgbouncer_max_pool_size }}
+      # This is the default, but we're being explicit here because it's important:
+      # pg_notify will NOT work in transaction mode.
+      PGBOUNCER_POOL_MODE: session
+{% endif %}
 {% if execution_node_count|int > 0 %}
   receptor-hop:
     image: {{ receptor_image }}
