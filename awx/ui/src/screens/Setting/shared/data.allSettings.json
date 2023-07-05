@@ -9,6 +9,7 @@
       "REMOTE_HOST"
   ],
   "PROXY_IP_ALLOWED_LIST": [],
+  "CSRF_TRUSTED_ORIGINS": [],
   "LICENSE": {},
   "REDHAT_USERNAME": "",
   "REDHAT_PASSWORD": "",
