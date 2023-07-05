@@ -71,7 +71,7 @@ services:
     image: redis:latest
     container_name: tools_redis_{{ container_postfix }}
     volumes:
-      - "../../redis/redis.conf:/usr/local/etc/redis/redis.conf"
+      - "../../redis/redis.conf:/usr/local/etc/redis/redis.conf:Z"
       - "redis_socket_{{ container_postfix }}:/var/run/redis/:rw"
     entrypoint: ["redis-server"]
     command: ["/usr/local/etc/redis/redis.conf"]
@@ -233,6 +233,21 @@ services:
     privileged: true
   {% endfor %}
 {% endif %}
+{% if enable_vault|bool %}
+  vault:
+    image: hashicorp/vault:1.14
+    container_name: tools_vault_1
+    command: server
+    hostname: vault
+    ports:
+      - "1234:1234"
+    environment:
+      VAULT_LOCAL_CONFIG: '{"storage": {"file": {"path": "/vault/file"}}, "listener": [{"tcp": { "address": "0.0.0.0:1234", "tls_disable": true}}], "default_lease_ttl": "168h", "max_lease_ttl": "720h", "ui": true}'
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - 'hashicorp_vault_data:/vault/file'
+{% endif %}
 
 volumes:
   awx_db:
@@ -246,6 +261,10 @@ volumes:
   openldap_data:
     name: tools_ldap_1
     driver: local
+{% endif %}
+{% if enable_vault|bool %}
+  hashicorp_vault_data:
+    name: tools_vault_1
 {% endif %}
 {% if enable_prometheus|bool %}
   prometheus_storage:

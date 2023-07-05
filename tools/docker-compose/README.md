@@ -303,7 +303,7 @@ To bring up a 1 node AWX + minikube that is accessible from AWX run the followin
 Start minikube
 
 ```bash
-(host)$minikube start --cpus=4  --memory=8g --addons=ingress`
+(host)$minikube start --cpus=4  --memory=8g --addons=ingress
 ```
 
 Start AWX
@@ -496,6 +496,62 @@ ansible-playbook tools/docker-compose/ansible/plumb_tacacs.yml
 ```
 
 Once the playbook is done running tacacs+ should now be setup in your development environment. This server has the accounts listed on https://hub.docker.com/r/dchidell/docker-tacacs
+
+### HashiVault Integration
+
+Run a HashiVault container alongside of AWX.
+
+```bash
+VAULT=true make docker-compose
+```
+
+You can find the initialization data at `tools/docker-compose/_sources/secrets/vault_init.yml`,
+This includes the unseal keys and a root token.
+
+You will need to unseal the HashiVault each time the container is started.
+The easiest way to do that is to run:
+```bash
+ansible-playbook tools/docker-compose/ansible/unseal_vault.yml
+```
+This will perform the unseal and also display the root token for login.
+
+For demo purposes, Vault will be auto-configured to include a Key Value (KV) vault called `my_engine` along with a secret called `my_key` in `/my_engine/my_root/my_folder`.
+The secret value is `this_is_the_secret_value`.
+
+To create a secret connected to this vault in AWX you can run the following playbook:
+```bash
+export CONTROLLER_USERNAME=<your username>
+export CONTROLLER_PASSWORD=<your password>
+ansible-playbook tools/docker-compose/ansible/plumb_vault.yml
+```
+
+This will create the following items in your AWX instance:
+* A credential called `Vault Lookup Cred` tied to the vault instance.
+* A custom credential type called `Vault Custom Cred Type`.
+* A credential called `Credential From Vault` which is of the created type using the `Vault Lookup Cred` to get the password.
+
+The custom credential type adds a variable when used in a playbook called `the_secret_from_vault`.
+If you have a playbook like:
+```
+---
+- name: Show a vault secret
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  tasks:
+    - debug:
+        var: the_secret_from_vault
+```
+
+And run it through AWX with the credential `Credential From Vault` tied to it, the debug should result in `this_is_the_secret_value`
+
+The extremely non-obvious input is the fact that the fact prefixes "data/" unexpectedly.
+This was discovered by inspecting the secret with the vault CLI, which may help with future troubleshooting.
+
+```
+docker exec -it -e VAULT_TOKEN=<token> tools_vault_1 vault kv get --address=http://127.0.0.1:1234 my_engine/my_root/my_folder
+```
+
 
 ### Prometheus and Grafana integration
 

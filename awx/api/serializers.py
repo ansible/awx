@@ -1629,8 +1629,8 @@ class ProjectUpdateDetailSerializer(ProjectUpdateSerializer):
         fields = ('*', 'host_status_counts', 'playbook_counts')
 
     def get_playbook_counts(self, obj):
-        task_count = obj.project_update_events.filter(event='playbook_on_task_start').count()
-        play_count = obj.project_update_events.filter(event='playbook_on_play_start').count()
+        task_count = obj.get_event_queryset().filter(event='playbook_on_task_start').count()
+        play_count = obj.get_event_queryset().filter(event='playbook_on_play_start').count()
 
         data = {'play_count': play_count, 'task_count': task_count}
 

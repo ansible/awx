@@ -265,6 +265,8 @@ def kv_backend(**kwargs):
 
     if secret_key:
         try:
+            if (secret_key != 'data') and (secret_key not in json['data']) and ('data' in json['data']):
+                return json['data']['data'][secret_key]
             return json['data'][secret_key]
         except KeyError:
             raise RuntimeError('{} is not present at {}'.format(secret_key, secret_path))
