@@ -1609,6 +1609,26 @@ class HostDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
         return super(HostDetail, self).delete(request, *args, **kwargs)
 
 
+class HostAnsibleFactsList(ListAPIView):
+    always_allow_superuser = False
+    model = models.Host
+    serializer_class = serializers.HostFactsSerializer
+
+    def get_queryset(self):
+        qs = super(HostAnsibleFactsList, self).get_queryset()
+        filter_string = self.request.query_params.get('host_filter', None)
+        if filter_string:
+            filter_qs = SmartFilter.query_from_string(filter_string)
+            qs &= filter_qs
+        return qs.distinct()
+
+    def list(self, *args, **kwargs):
+        try:
+            return super(HostAnsibleFactsList, self).list(*args, **kwargs)
+        except Exception as e:
+            return Response(dict(error=_(str(e))), status=status.HTTP_400_BAD_REQUEST)
+
+
 class HostAnsibleFactsDetail(RetrieveAPIView):
     model = models.Host
     serializer_class = serializers.AnsibleFactsSerializer

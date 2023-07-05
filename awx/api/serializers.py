@@ -2009,6 +2009,21 @@ class HostSerializer(BaseSerializerWithVariables):
         return obj.inventory_sources.exists()
 
 
+class HostFactsSerializer(BaseSerializer):
+    class Meta:
+        model = Host
+        fields = (
+            'id',
+            'name',
+            'url',
+            'description',
+            'created',
+            'modified',
+            'variables',
+            'ansible_facts',
+        )
+
+
 class AnsibleFactsSerializer(BaseSerializer):
     class Meta:
         model = Host

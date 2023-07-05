@@ -106,6 +106,7 @@ class ApiVersionRootView(APIView):
         data['inventory_updates'] = reverse('api:inventory_update_list', request=request)
         data['groups'] = reverse('api:group_list', request=request)
         data['hosts'] = reverse('api:host_list', request=request)
+        data['hosts_facts'] = reverse('api:host_ansible_facts_list', request=request)
         data['host_metrics'] = reverse('api:host_metric_list', request=request)
         # It will be enabled in future version of the AWX
         # data['host_metric_summary_monthly'] = reverse('api:host_metric_summary_monthly_list', request=request)
