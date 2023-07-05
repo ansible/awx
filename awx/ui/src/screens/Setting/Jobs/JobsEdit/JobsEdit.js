@@ -233,10 +233,7 @@ function JobsEdit() {
                   config={jobs.AWX_ISOLATION_SHOW_PATHS}
                 />
                 <ObjectField name="AWX_TASK_ENV" config={jobs.AWX_TASK_ENV} />
-                <ObjectField
-                  name="GIT_TASK_ENV"
-                  config={jobs.GIT_TASK_ENV}
-                />
+                <ObjectField name="GIT_TASK_ENV" config={jobs.GIT_TASK_ENV} />
                 <ObjectField
                   name="GALAXY_TASK_ENV"
                   config={jobs.GALAXY_TASK_ENV}
