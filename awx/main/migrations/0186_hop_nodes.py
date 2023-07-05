@@ -9,11 +9,7 @@ def automatically_peer_from_control_plane(apps, schema_editor):
     with override_settings(IS_K8S=True):
         Instance = apps.get_model('main', 'Instance')
         Instance.objects.filter(node_type='execution').update(peers_from_control_nodes=True)
-
-
-def set_listener_port_for_control_nodes(apps, schema_editor):
-    Instance = apps.get_model('main', 'Instance')
-    Instance.objects.filter(node_type='control').set(listener_port=None)
+        Instance.objects.filter(node_type='control').update(listener_port=None)
 
 
 class Migration(migrations.Migration):
