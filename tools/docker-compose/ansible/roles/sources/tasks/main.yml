@@ -101,10 +101,6 @@
   include_tasks: ldap.yml
   when: enable_ldap | bool
 
-- name: Include Vault tasks if enabled
-  include_tasks: vault.yaml
-  when: enable_vault | bool
-
 - name: Render Docker-Compose
   template:
     src: docker-compose.yml.j2

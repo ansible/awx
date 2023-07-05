@@ -1,0 +1,10 @@
+---
+- name: Run any pre-hooks for other container
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Initialize vault
+      include_role:
+        name: vault
+        tasks_from: initialize
+      when: enable_vault | bool

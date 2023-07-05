@@ -12,7 +12,7 @@ receptor_work_commands:
 custom_worksign_public_keyfile: receptor/work_public_key.pem
 custom_tls_certfile: receptor/tls/receptor.crt
 custom_tls_keyfile: receptor/tls/receptor.key
-custom_ca_certfile: receptor/tls/ca/receptor-ca.crt
+custom_ca_certfile: receptor/tls/ca/mesh-CA.crt
 receptor_protocol: 'tcp'
 receptor_listener: true
 receptor_port: {{ instance.listener_port }}
