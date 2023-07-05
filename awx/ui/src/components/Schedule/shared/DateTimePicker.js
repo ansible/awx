@@ -24,10 +24,10 @@ function DateTimePicker({ dateFieldName, timeFieldName, label }) {
     validate: combine([required(null), validateTime()]),
   });
 
-  const onDateChange = (inputDate, newDate) => {
+  const onDateChange = (_, dateString, date) => {
     dateHelpers.setTouched();
-    if (isValidDate(newDate) && inputDate === yyyyMMddFormat(newDate)) {
-      dateHelpers.setValue(inputDate);
+    if (isValidDate(date) && dateString === yyyyMMddFormat(date)) {
+      dateHelpers.setValue(dateString);
     }
   };
 
