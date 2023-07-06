@@ -31,6 +31,12 @@ SHELL_PLUS_PRINT_SQL = False
 COLOR_LOGS = True
 LOGGING['handlers']['console']['()'] = 'awx.main.utils.handlers.ColorHandler'  # noqa
 
+# Normally, we want development to log to stdout, but if someone specifies AWX_LOGGING_MODE=file
+# then we want to avoid /var/log/tower because it probably does not exist
+for name, config in LOGGING['handlers'].items():  # noqa
+    if 'filename' in config and not os.path.exists(LOG_ROOT):
+        config['filename'] = config['filename'].replace(LOG_ROOT, BASE_DIR)  # noqa
+
 ALLOWED_HOSTS = ['*']
 
 mimetypes.add_type("image/svg+xml", ".svg", True)
