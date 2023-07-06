@@ -1,6 +1,7 @@
 from unittest import mock
 import pytest
 import json
+import yaml
 
 
 from awx.api.versioning import reverse
@@ -279,3 +280,98 @@ def test_redact_survey_passwords_in_activity_stream(job_template_with_survey_pas
     changes_dict = json.loads(AS_record.changes)
     extra_vars = json.loads(changes_dict['extra_vars'])
     assert extra_vars['secret_key'] == '$encrypted$'
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    'default, status',
+    [
+        ('', 200),
+        ('foo', 400),
+        (31, 400),
+        (None, 400),
+        (True, 200),
+        (False, 200),
+    ],
+)
+def test_survey_spec_boolean_defaults(job_template_factory, post, admin_user, default, status):
+    objects = job_template_factory('jt', organization='org1', project='prj', inventory='inv', credential='cred')
+    job_template = objects.job_template
+    job_template.survey_enabled = True
+    job_template.save()
+    input_data = {
+        'description': 'A survey',
+        'spec': [{'index': 0, 'question_name': 'Does this work?', 'required': False, 'variable': 'maybe_it_works', 'type': 'bool', 'default': default}],
+        'name': 'my survey',
+    }
+    resp = post(url=reverse('api:job_template_survey_spec', kwargs={'pk': job_template.id}), data=input_data, user=admin_user, expect=status)
+    if status == 400:
+        assert 'expected to be bool.' in str(resp.data)
+
+
+# This just acts as a placeholder for a value that we don't expect to be in the
+# response.  We can't use None because what if it is null in the response somehow?
+var_not_expected = object()
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    'default, required, payload, status, expected, err_substr',
+    [
+        ('', False, {'mybool': True}, 201, True, None),
+        ('', True, {}, 400, var_not_expected, "'mybool' value missing"),
+        ('', False, {}, 201, var_not_expected, None),
+        ('', True, {'mybool': True}, 201, True, None),
+        ('', True, {'mybool': False}, 201, False, None),
+        ('', False, {'mybool': False}, 201, False, None),
+        ('', False, {'mybool': 'foo'}, 400, var_not_expected, "'mybool' expected to be a boolean"),
+        (True, False, {}, 201, True, None),
+        (True, True, {}, 400, var_not_expected, "'mybool' value missing"),
+        (True, False, {'mybool': True}, 201, True, None),
+        (True, True, {'mybool': True}, 201, True, None),
+        (True, True, {'mybool': False}, 201, False, None),
+        (True, False, {'mybool': False}, 201, False, None),
+        (True, False, {}, 201, True, None),
+        (False, False, {}, 201, False, None),
+        (False, True, {}, 400, var_not_expected, "'mybool' value missing"),
+        (False, False, {'mybool': True}, 201, True, None),
+        (False, True, {'mybool': True}, 201, True, None),
+        (False, True, {'mybool': False}, 201, False, None),
+        (False, False, {'mybool': False}, 201, False, None),
+        (False, False, {}, 201, False, None),
+    ],
+)
+@pytest.mark.parametrize(
+    'serialize',
+    [
+        yaml.safe_dump,
+        json.dumps,
+    ],
+)
+def test_survey_spec_boolean_accepted(job_template_factory, post, admin_user, default, required, payload, status, expected, err_substr, serialize):
+    objects = job_template_factory('jt', organization='org1', project='prj', inventory='inv', credential='cred')
+    job_template = objects.job_template
+    job_template.survey_enabled = True
+    job_template.save()
+    input_data = {
+        'description': 'A survey',
+        'spec': [
+            {'index': 0, 'question_name': 'Does this work?', 'required': required, 'variable': 'mybool', 'type': 'bool', 'default': default},
+        ],
+        'name': 'my survey',
+    }
+    post(url=reverse('api:job_template_survey_spec', kwargs={'pk': job_template.id}), data=input_data, user=admin_user, expect=200)
+
+    serialized_payload = serialize(payload)
+
+    resp = post(reverse('api:job_template_launch', kwargs={'pk': job_template.pk}), data=dict(extra_vars=serialized_payload), user=admin_user, expect=status)
+    if status == 400:
+        assert err_substr in str(resp.data)
+    else:
+        job = Job.objects.get(pk=resp.data['id'])
+        vars_dict = json.loads(job.extra_vars)
+
+        if expected is var_not_expected:
+            assert 'mybool' not in vars_dict
+        else:
+            assert vars_dict['mybool'] == expected
