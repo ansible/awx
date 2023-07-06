@@ -53,6 +53,7 @@ function MiscSystemEdit() {
         'TOWER_URL_BASE',
         'DEFAULT_EXECUTION_ENVIRONMENT',
         'PROXY_IP_ALLOWED_LIST',
+        'CSRF_TRUSTED_ORIGINS',
         'UI_NEXT'
       );
 
@@ -95,6 +96,7 @@ function MiscSystemEdit() {
     await submitForm({
       ...form,
       PROXY_IP_ALLOWED_LIST: formatJson(form.PROXY_IP_ALLOWED_LIST),
+      CSRF_TRUSTED_ORIGINS: formatJson(form.CSRF_TRUSTED_ORIGINS),
       REMOTE_HOST_HEADERS: formatJson(form.REMOTE_HOST_HEADERS),
       DEFAULT_EXECUTION_ENVIRONMENT:
         form.DEFAULT_EXECUTION_ENVIRONMENT?.id || null,
@@ -237,6 +239,11 @@ function MiscSystemEdit() {
                 <ObjectField
                   name="PROXY_IP_ALLOWED_LIST"
                   config={system.PROXY_IP_ALLOWED_LIST}
+                  isRequired
+                />
+                <ObjectField
+                  name="CSRF_TRUSTED_ORIGINS"
+                  config={system.CSRF_TRUSTED_ORIGINS}
                   isRequired
                 />
                 {submitError && <FormSubmitError error={submitError} />}
