@@ -2,11 +2,11 @@
 
 import django.core.validators
 from django.db import migrations, models
-from django.test.utils import override_settings
+from django.conf import settings
 
 
 def automatically_peer_from_control_plane(apps, schema_editor):
-    with override_settings(IS_K8S=True):
+    if settings.IS_K8S:
         Instance = apps.get_model('main', 'Instance')
         Instance.objects.filter(node_type='execution').update(peers_from_control_nodes=True)
         Instance.objects.filter(node_type='control').update(listener_port=None)
