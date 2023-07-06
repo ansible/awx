@@ -2444,7 +2444,7 @@ class JobTemplateSurveySpec(GenericAPIView):
             if 'default' in survey_item and survey_item['default'] != '':
                 if not isinstance(survey_item['default'], SURVEY_TYPE_MAPPING[qtype]):
                     type_label = 'string'
-                    if qtype in ['integer', 'float']:
+                    if qtype in ['integer', 'float', 'bool']:
                         type_label = qtype
                     return Response(
                         dict(
