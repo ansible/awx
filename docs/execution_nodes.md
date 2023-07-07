@@ -21,7 +21,26 @@ Below is an example of a single AWX pod connecting to two different execution no
 
 Note, if the AWX deployment is scaled up, the new AWX pod will also make TCP connections to each execution node.
 
+# Adding hop nodes to AWX
 
+Hop nodes can be added to sit between the control plane of awx and stand alone execution nodes. These machines will not be a part of the AWX Kubernetes cluster. The machines will be registered in AWX as type "hop" instances, meaning they will only handle inbound / outbound traffic for otherwise unreachable nodes in a different or more strict network. 
+
+Below is an example of a singular AWX pod with singular hop node between the pod and execution node 2. 
+
+```
+                                                       AWX POD
+                                                   ┌──────────────┐
+                                                   │              │
+                                                   │ ┌──────────┐ │
+┌─────────────────┐   ┌─────────────────┐          │ │ awx-task │ │
+│execution node 2 ├──►│     hop node    │◄────┐    │ ├──────────┤ │
+└─────────────────┘   ├─────────────────┤     ├────┼─┤ awx-ee   │ │
+                      │ execution node 1│◄────┘    │ ├──────────┤ │
+                      └─────────────────┘ Receptor │ │ awx-web  │ │
+                                            TCP    │ └──────────┘ │
+                                           Peers   │              │
+                                                   └──────────────┘
+```
 ## Overview
 Adding an execution instance involves a handful of steps:
 
