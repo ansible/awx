@@ -964,6 +964,9 @@ AWX_RUNNER_KEEPALIVE_SECONDS = 0
 # Delete completed work units in receptor
 RECEPTOR_RELEASE_WORK = True
 
+# K8S only. Use receptor_log_level on AWX spec to set this properly
+RECEPTOR_LOG_LEVEL = 'info'
+
 MIDDLEWARE = [
     'django_guid.middleware.guid_middleware',
     'awx.main.middleware.SettingsCacheMiddleware',
