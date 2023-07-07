@@ -232,7 +232,7 @@
 
         - name: Fetch galaxy collections from collections/requirements.(yml/yaml)
           ansible.builtin.command:
-            cmd: "ansible-galaxy collection install -r {{ item }} {{ verbosity }}"
+            cmd: "ansible-galaxy collection install -r {{ req_file }} {{ verbosity }}"
           register: galaxy_collection_result
           vars:
             req_file: "{{ req_candidates | first_found }}"
