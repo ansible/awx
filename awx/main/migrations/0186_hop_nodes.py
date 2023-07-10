@@ -2,11 +2,14 @@
 
 import django.core.validators
 from django.db import migrations, models
+from django.conf import settings
 
 
-def set_peers_from_control_nodes_true(apps, schema_editor):
-    Instance = apps.get_model('main', 'Instance')
-    Instance.objects.filter(node_type='execution').update(peers_from_control_nodes=True)
+def automatically_peer_from_control_plane(apps, schema_editor):
+    if settings.IS_K8S:
+        Instance = apps.get_model('main', 'Instance')
+        Instance.objects.filter(node_type='execution').update(peers_from_control_nodes=True)
+        Instance.objects.filter(node_type='control').update(listener_port=None)
 
 
 class Migration(migrations.Migration):
@@ -49,5 +52,5 @@ class Migration(migrations.Migration):
                 validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(65535)],
             ),
         ),
-        migrations.RunPython(set_peers_from_control_nodes_true),
+        migrations.RunPython(automatically_peer_from_control_plane),
     ]
