@@ -1,9 +1,27 @@
 # Releasing AWX (and awx-operator)
 
-The release process for AWX is completely automated as of version 19.5.0.
+The release process for AWX is mostly automated as of version 19.5.0.
 
 If you need to revert a release, please refer to the [Revert a Release](#revert-a-release) section.
-## Get latest release version and list of new work
+
+## Select the next release version
+
+There are two methods you can use to get the next release version. The manual way and the automated way.
+
+### Automated Way
+
+#### Get a github token
+
+Log into your github account, under your user icon go to Settings => Developer Settings => Personal Access Tokens => Tokens (classic).
+Select the Generate new token => Generate new token (classic)
+Fill in the note, select no scopes select "Generate token".
+Copy the token and create a file in your awx repo called `.github_creds`. Enter the token in this file.
+Run `./tools/scripts/get_next_release.py`
+This will use your token to go query for the PRs in the release and scan their bodies to select X/Y/Z and suggest new versions and spit out notifications.
+
+### Manual Way
+
+#### Get latest release version and list of new work
 
 1. Open the main project page for [AWX](https://github.com/ansible/awx/releases) and [AWX Operator](https://github.com/ansible/awx-operator/releases).
 
@@ -20,9 +38,9 @@ The page will now automatically update with a list of PRs that are in `AWX/devel
 
 ![PR Compare List](img/pr_compare_list.png)
 
-## Select the next release version
-
 Use this list of PRs to decide if this is a X-stream (major) release, Y-stream (minor) release, or a Z-stream (patch) release. Use [semver](https://semver.org/#summary) to help determine what kind of release is needed.
+
+#### Select the next release version
 
 Indicators of a Z-stream release:
 
@@ -126,16 +144,19 @@ This workflow will take the generated images and promote them to quay.io.
 
 ![Verify released awx-operator image](img/verify-released-awx-operator-image.png)
 
-## Notify the AWX mailing list
-Send an email to the [AWX Mailing List](mailto:awx-project@googlegroups.com) with a message format of type "AWX Release" from the [mailing list triage standard replies](../.github/triage_replies.md#awx-release)
+## Send notifications
+Send notifications to the following groups:
+  * AWX Mailing List
+  * #social:ansible.com IRC (@newsbot for inclusion in bullhorn)
+  * #awx:ansible.com (no @newsbot in this room)
+  * #ansible-controller slack channel 
 
-## Send an IRC message over matrix to #social:ansible.com for bullhorn:
+These messages are templated out for you in the output of `get_next_release.yml`.
 
-@newsbot
-We're happy to announce that [AWX version 21.1.0](https://github.com/ansible/awx/releases/tag/21.1.0) is now available!
-We're happy to announce that [AWX Operator version 0.22.0](https://github.com/ansible/awx-operator/releases/tag/0.22.0) is now available!
+Note: the slack message is the same as the IRC message.
 
-## Send the same IRC message (less the @newsbot) to #awx:ansible.com
+## Create operator hub PRs.
+Operator hub PRs are generated via an Ansible Playbook. See someone on the AWX team for the location of the playbooks and instructions on how to run them.
 
 ## Revert a Release
 
