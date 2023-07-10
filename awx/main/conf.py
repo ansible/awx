@@ -95,6 +95,20 @@ register(
 )
 
 register(
+    'CSRF_TRUSTED_ORIGINS',
+    default=[],
+    field_class=fields.StringListField,
+    label=_('CSRF Trusted Origins List'),
+    help_text=_(
+        "If the service is behind a reverse proxy/load balancer, use this setting "
+        "to configure the schema://addresses from which the service should trust "
+        "Origin header values. "
+    ),
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
     'LICENSE',
     field_class=fields.DictField,
     default=lambda: {},

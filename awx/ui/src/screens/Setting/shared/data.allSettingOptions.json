@@ -78,6 +78,20 @@
                   "read_only": false
               }
           },
+          "CSRF_TRUSTED_ORIGINS": {
+              "type": "list",
+              "required": true,
+              "label": "CSRF Origins List",
+              "help_text": "If the service is behind a reverse proxy/load balancer, use this setting to configure the schema://addresses from which the service should trust Origin header values. ",
+              "category": "System",
+              "category_slug": "system",
+              "default": [],
+              "child": {
+                  "type": "string",
+                  "required": true,
+                  "read_only": false
+              }
+          },
           "REDHAT_USERNAME": {
               "type": "string",
               "required": false,
@@ -4480,6 +4494,17 @@
               "type": "list",
               "label": "Proxy IP Allowed List",
               "help_text": "If the service is behind a reverse proxy/load balancer, use this setting to configure the proxy IP addresses from which the service should trust custom REMOTE_HOST_HEADERS header values. If this setting is an empty list (the default), the headers specified by REMOTE_HOST_HEADERS will be trusted unconditionally')",
+              "category": "System",
+              "category_slug": "system",
+              "defined_in_file": false,
+              "child": {
+                  "type": "string"
+              }
+          },
+          "CSRF_TRUSTED_ORIGINS": {
+              "type": "list",
+              "label": "CSRF Origins List",
+              "help_text": "If the service is behind a reverse proxy/load balancer, use this setting to configure the schema://addresses from which the service should trust Origin header values. ",
               "category": "System",
               "category_slug": "system",
               "defined_in_file": false,
