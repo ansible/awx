@@ -82,6 +82,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'ui_next', 'build'),
     os.path.join(BASE_DIR, 'static'),
 ]
+/awx_devel/awx/ui_next/build
 
 # Absolute filesystem path to the directory where static file are collected via
 # the collectstatic command.
@@ -304,7 +305,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'templates'),
             os.path.join(BASE_DIR, 'ui', 'build'),
             os.path.join(BASE_DIR, 'ui', 'public'),
-            os.path.join(BASE_DIR, 'ui_next', 'build', 'awx'),
+            os.path.join(BASE_DIR, '/awx/ui_next', 'build', 'awx'),
         ],
     },
 ]
