@@ -118,6 +118,12 @@ $ make docker-compose
 
 > For running docker-compose detached mode, start the containers using the following command: `$ make docker-compose COMPOSE_UP_OPTS=-d`
 
+If you have encountered the infinitely-repeating `Waiting for postgres to be ready to accept connections` message during the execution, try to do the following:
+
+1. Stop and delete awx-related docker containers.
+2. Delete all associated docker volumes.
+3. Delete all associated docker networks.
+4. Repeat the process from scratch.
 
 ##### _(alternative method)_ Spin up a development environment with customized mesh node cluster
 
