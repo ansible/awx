@@ -100,6 +100,7 @@ class TestSwaggerGeneration:
         # for a reasonable number here; if this test starts failing, raise/lower the bounds
         paths = JSON['paths']
         assert 250 < len(paths) < 375
+        raise Exception(f'found count of paths: {len(paths)}')
         assert set(list(paths['/api/'].keys())) == set(['get', 'parameters'])
         assert set(list(paths['/api/v2/'].keys())) == set(['get', 'parameters'])
         assert set(list(sorted(paths['/api/v2/credentials/'].keys()))) == set(['get', 'post', 'parameters'])
