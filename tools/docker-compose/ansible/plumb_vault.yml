@@ -1,0 +1,8 @@
+---
+- name: Plumb AWX for Vault
+  hosts: localhost
+  gather_facts: False
+  tasks:
+    - include_role:
+        name: vault
+        tasks_from: plumb

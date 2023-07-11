@@ -639,11 +639,11 @@ class AWXReceptorJob:
 #
 RECEPTOR_CONFIG_STARTER = (
     {'local-only': None},
-    {'log-level': 'info'},
+    {'log-level': settings.RECEPTOR_LOG_LEVEL},
     {'node': {'firewallrules': [{'action': 'reject', 'tonode': settings.CLUSTER_HOST_ID, 'toservice': 'control'}]}},
     {'control-service': {'service': 'control', 'filename': '/var/run/receptor/receptor.sock', 'permissions': '0660'}},
     {'work-command': {'worktype': 'local', 'command': 'ansible-runner', 'params': 'worker', 'allowruntimeparams': True}},
-    {'work-signing': {'privatekey': '/etc/receptor/signing/work_private_key.pem', 'tokenexpiration': '1m'}},
+    {'work-signing': {'privatekey': '/etc/receptor/work_private_key.pem', 'tokenexpiration': '1m'}},
     {
         'work-kubernetes': {
             'worktype': 'kubernetes-runtime-auth',

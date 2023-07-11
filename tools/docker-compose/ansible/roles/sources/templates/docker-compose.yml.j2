@@ -71,7 +71,7 @@ services:
     image: redis:latest
     container_name: tools_redis_{{ container_postfix }}
     volumes:
-      - "../../redis/redis.conf:/usr/local/etc/redis/redis.conf"
+      - "../../redis/redis.conf:/usr/local/etc/redis/redis.conf:Z"
       - "redis_socket_{{ container_postfix }}:/var/run/redis/:rw"
     entrypoint: ["redis-server"]
     command: ["/usr/local/etc/redis/redis.conf"]
@@ -201,6 +201,25 @@ services:
       POSTGRES_PASSWORD: {{ pg_password }}
     volumes:
       - "awx_db:/var/lib/postgresql/data"
+{% if enable_pgbouncer|bool %}
+  pgbouncer:
+    image: bitnami/pgbouncer:latest
+    container_name: tools_pgbouncer_1
+    hostname: pgbouncer
+    environment:
+      POSTGRESQL_USERNAME: {{ pg_username }}
+      POSTGRESQL_DATABASE: {{ pg_database }}
+      PGBOUNCER_DATABASE: {{ pg_database }}
+      POSTGRESQL_PASSWORD: {{ pg_password }}
+      POSTGRESQL_HOST: {{ pg_hostname | default('postgres') }}
+      POSTGRESQL_PORT: {{ pg_port }}
+      PGBOUNCER_AUTH_TYPE: trust
+      PGBOUNCER_PORT: {{ pgbouncer_port }}
+      PGBOUNCER_DEFAULT_POOL_SIZE: {{ pgbouncer_max_pool_size }}
+      # This is the default, but we're being explicit here because it's important:
+      # pg_notify will NOT work in transaction mode.
+      PGBOUNCER_POOL_MODE: session
+{% endif %}
 {% if execution_node_count|int > 0 %}
   receptor-hop:
     image: {{ receptor_image }}
@@ -233,6 +252,21 @@ services:
     privileged: true
   {% endfor %}
 {% endif %}
+{% if enable_vault|bool %}
+  vault:
+    image: hashicorp/vault:1.14
+    container_name: tools_vault_1
+    command: server
+    hostname: vault
+    ports:
+      - "1234:1234"
+    environment:
+      VAULT_LOCAL_CONFIG: '{"storage": {"file": {"path": "/vault/file"}}, "listener": [{"tcp": { "address": "0.0.0.0:1234", "tls_disable": true}}], "default_lease_ttl": "168h", "max_lease_ttl": "720h", "ui": true}'
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - 'hashicorp_vault_data:/vault/file'
+{% endif %}
 
 volumes:
   awx_db:
@@ -246,6 +280,10 @@ volumes:
   openldap_data:
     name: tools_ldap_1
     driver: local
+{% endif %}
+{% if enable_vault|bool %}
+  hashicorp_vault_data:
+    name: tools_vault_1
 {% endif %}
 {% if enable_prometheus|bool %}
   prometheus_storage:

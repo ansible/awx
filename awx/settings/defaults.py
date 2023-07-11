@@ -158,6 +158,11 @@ REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 # REMOTE_HOST_HEADERS will be trusted unconditionally')
 PROXY_IP_ALLOWED_LIST = []
 
+# If we are behind a reverse proxy/load balancer, use this setting to
+# allow the scheme://addresses from which Tower should trust csrf requests from
+# If this setting is an empty list (the default), we will only trust ourself
+CSRF_TRUSTED_ORIGINS = []
+
 CUSTOM_VENV_PATHS = []
 
 # Warning: this is a placeholder for a database setting
@@ -958,6 +963,9 @@ AWX_RUNNER_KEEPALIVE_SECONDS = 0
 
 # Delete completed work units in receptor
 RECEPTOR_RELEASE_WORK = True
+
+# K8S only. Use receptor_log_level on AWX spec to set this properly
+RECEPTOR_LOG_LEVEL = 'info'
 
 MIDDLEWARE = [
     'django_guid.middleware.guid_middleware',

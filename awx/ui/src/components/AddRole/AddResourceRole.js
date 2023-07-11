@@ -50,7 +50,7 @@ const userSortColumns = [
 const teamSearchColumns = [
   {
     name: t`Name`,
-    key: 'name',
+    key: 'name__icontains',
     isDefault: true,
   },
   {

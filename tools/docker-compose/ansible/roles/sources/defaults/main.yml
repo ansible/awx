@@ -1,5 +1,4 @@
 ---
-sources_dest: '../_sources'
 compose_name: 'docker-compose.yml'
 awx_image: 'ghcr.io/ansible/awx_devel'
 pg_port: 5432
@@ -36,3 +35,8 @@ enable_splunk: false
 enable_grafana: false
 enable_prometheus: false
 scrape_interval: '5s'
+
+# pgbouncer
+enable_pgbouncer: false
+pgbouncer_port: 6432
+pgbouncer_max_pool_size: 70

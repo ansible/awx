@@ -1,5 +1,7 @@
 from collections import OrderedDict
 
+from django.utils.translation import gettext_lazy as _
+
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer
 from rest_framework.reverse import reverse
@@ -18,6 +20,9 @@ from awx.api import (
 
 
 class BulkView(APIView):
+    name = _('Bulk')
+    swagger_topic = 'Bulk'
+
     permission_classes = [IsAuthenticated]
     renderer_classes = [
         renderers.BrowsableAPIRenderer,
