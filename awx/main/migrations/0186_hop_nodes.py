@@ -28,6 +28,11 @@ class Migration(migrations.Migration):
             field=models.BooleanField(default=False, help_text='If True, control plane cluster nodes should automatically peer to it.'),
         ),
         migrations.AlterField(
+            model_name='instance',
+            name='peers',
+            field=models.ManyToManyField(related_name='peers_from', through='main.InstanceLink', to='main.instance'),
+        ),
+        migrations.AlterField(
             model_name='instancelink',
             name='link_state',
             field=models.CharField(
