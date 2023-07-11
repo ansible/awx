@@ -376,8 +376,8 @@ def cleanup_images_and_files():
 
 @task(queue=get_task_queuename)
 def cleanup_host_metrics():
-    """TODO: move to host_metrics in follow-up PR
-    Run cleanup host metrics ~each month"""
+    """Run cleanup host metrics ~each month"""
+    # TODO: move whole method to host_metrics in follow-up PR
     from awx.conf.models import Setting
 
     if is_run_threshold_reached(

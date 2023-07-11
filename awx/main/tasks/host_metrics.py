@@ -27,7 +27,7 @@ def host_metric_summary_monthly():
 
 
 def _is_run_threshold_reached(setting, threshold_seconds):
-    last_time = DateTimeField().to_internal_value(setting) if setting else 0
+    last_time = DateTimeField().to_internal_value(setting) if setting else DateTimeField().to_internal_value('1970-01-01')
 
     return (now() - last_time).total_seconds() > threshold_seconds
 
@@ -100,13 +100,14 @@ class HostMetricSummaryMonthlyTask:
         self.existing_summaries_cnt = len(self.existing_summaries)
 
     def _load_hosts_added(self):
-        """
-        SELECT date_trunc('month', first_automation) as month,
-               count(first_automation) AS hosts_added
-        FROM main_hostmetric
-        GROUP BY month
-        ORDER by month;
-        """
+        """Aggregates hosts added each month, by the 'first_automation' timestamp"""
+        #
+        # -- SQL translation (for better code readability)
+        # SELECT date_trunc('month', first_automation) as month,
+        #        count(first_automation) AS hosts_added
+        # FROM main_hostmetric
+        # GROUP BY month
+        # ORDER by month;
         result = (
             HostMetric.objects.annotate(month=TruncMonth('first_automation'))
             .values('month')
@@ -125,13 +126,18 @@ class HostMetricSummaryMonthlyTask:
 
     def _load_hosts_deleted(self):
         """
-        SELECT date_trunc('month', last_deleted) as month,
-               count(last_deleted) AS hosts_deleted
-        FROM main_hostmetric
-        WHERE deleted = True
-        GROUP BY 1 # equal to "GROUP BY month"
-        ORDER by month;
+        Aggregates hosts deleted each month, by the 'last_deleted' timestamp.
+        Host metrics have to be deleted NOW to be counted as deleted before
+        (by intention - statistics can change retrospectively by re-automation of previously deleted host)
         """
+        #
+        # -- SQL translation (for better code readability)
+        # SELECT date_trunc('month', last_deleted) as month,
+        #       count(last_deleted) AS hosts_deleted
+        # FROM main_hostmetric
+        # WHERE deleted = True
+        # GROUP BY 1 # equal to "GROUP BY month"
+        # ORDER by month;
         result = (
             HostMetric.objects.annotate(month=TruncMonth('last_deleted'))
             .values('month')
@@ -175,6 +181,7 @@ class HostMetricSummaryMonthlyTask:
         return summary
 
     def _update_summary(self, summary, month, license_consumed):
+        """Updates the metric with hosts added and deleted and set license info for current month"""
         # Get month counts from host metrics, zero if not found
         hosts_added, hosts_deleted = 0, 0
         if metric := self.host_metrics.get(month, None):
