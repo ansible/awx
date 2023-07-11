@@ -56,6 +56,10 @@ services:
       - "redis_socket_{{ container_postfix }}:/var/run/redis/:rw"
     privileged: true
     tty: true
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     ports:
       - "{{ awx_sdb_port_start }}-{{ awx_sdb_port_end }}:{{ awx_sdb_port_start }}-{{ awx_sdb_port_end }}"  # sdb-listen
 {% if control_plane_node_count|int == 1 %}
