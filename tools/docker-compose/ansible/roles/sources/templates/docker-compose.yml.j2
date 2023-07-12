@@ -207,7 +207,7 @@ services:
   #     context: ../../docker-compose
   #     dockerfile: Dockerfile-logstash
   postgres:
-    image: postgres:12
+    image: postgres:15
     container_name: tools_postgres_1
     # additional logging settings for postgres can be found https://www.postgresql.org/docs/current/runtime-config-logging.html
     command: postgres -c log_destination=stderr -c log_min_messages=info -c log_min_duration_statement={{ pg_log_min_duration_statement|default(1000) }} -c max_connections={{ pg_max_connections|default(1024) }}
@@ -217,7 +217,7 @@ services:
       POSTGRES_DB: {{ pg_database }}
       POSTGRES_PASSWORD: {{ pg_password }}
     volumes:
-      - "awx_db:/var/lib/postgresql/data"
+      - "awx_db_15:/var/lib/postgresql/data"
     networks:
       - awx
     ports:
@@ -305,8 +305,9 @@ services:
 {% endif %}
 
 volumes:
-  awx_db:
-    name: tools_awx_db
+{# For the postgres 15 db upgrade we changed the mount name because 15 can't load a 12 DB #}
+  awx_db_15:
+    name: tools_awx_db_15
 {% for i in range(control_plane_node_count|int) -%}
   {% set container_postfix = loop.index %}
   redis_socket_{{ container_postfix }}:
