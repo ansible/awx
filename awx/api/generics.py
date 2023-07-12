@@ -345,6 +345,12 @@ class GenericAPIView(generics.GenericAPIView, APIView):
     #   serializer_class = SerializerClass
 
     def get_serializer(self, *args, **kwargs):
+        add_fields = self.request.query_params.get('add_fields', None)
+        remove_fields = self.request.query_params.get('remove_fields', None)
+        if add_fields:
+            kwargs.update({'add_fields': add_fields.split(',')})
+        if remove_fields:
+            kwargs.update({'remove_fields': remove_fields.split(',')})
         serializer = super(GenericAPIView, self).get_serializer(*args, **kwargs)
         # Override when called from browsable API to generate raw data form;
         # update serializer "validated" data to be displayed by the raw data

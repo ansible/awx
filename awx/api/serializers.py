@@ -39,6 +39,7 @@ from rest_framework import fields
 from rest_framework import serializers
 from rest_framework import validators
 from rest_framework.utils.serializer_helpers import ReturnList
+from rest_framework.utils import model_meta
 
 # Django-Polymorphic
 from polymorphic.models import PolymorphicModel
@@ -342,6 +343,8 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
     modified = serializers.SerializerMethodField()
 
     def __init__(self, *args, **kwargs):
+        add_fields = kwargs.pop('add_fields', None)
+        remove_fields = kwargs.pop('remove_fields', None)
         super(BaseSerializer, self).__init__(*args, **kwargs)
         # The following lines fix the problem of being able to pass JSON dict into PrimaryKeyRelatedField.
         data = kwargs.get('data', False)
@@ -351,9 +354,32 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
                     if isinstance(data.get(field_name, False), dict):
                         raise serializers.ValidationError(_('Cannot use dictionary for %s' % field_name))
 
+        if remove_fields is not None:
+            for field_name in remove_fields:
+                if field_name in self.fields:
+                    self.fields.pop(field_name)
+
+        if add_fields is not None:
+            add_fields_list = set(add_fields)
+            models = self._get_model_fields(add_fields_list, self.get_fields(), self.get_extra_kwargs())
+
+            for field_name in add_fields_list:
+                if field_name not in self.fields and field_name in models:
+                    field_class, field_kwargs = self.get_field_class(field_name, models[field_name].model)
+                    if field_class:
+                        self.fields[field_name] = field_class(**field_kwargs)
+
     @property
     def version(self):
         return 2
+
+    def get_field_class(self, field_name, field_model):
+        depth = getattr(self.Meta, 'depth', 0)
+        if depth is not None:
+            assert depth >= 0, "'depth' may not be negative."
+            assert depth <= 10, "'depth' may not be greater than 10."
+        field_class, field_kwargs = self.build_field(field_name, model_meta.get_field_info(field_model), field_model, False)
+        return field_class, field_kwargs
 
     def get_type(self, obj):
         return get_type_for_model(self.Meta.model)
