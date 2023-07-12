@@ -23,9 +23,13 @@ Note, if the AWX deployment is scaled up, the new AWX pod will also make TCP con
 
 # Adding hop nodes to AWX
 
-Hop nodes can be added to sit between the control plane of awx and stand alone execution nodes. These machines will not be a part of the AWX Kubernetes cluster. The machines will be registered in AWX as type "hop" instances, meaning they will only handle inbound / outbound traffic for otherwise unreachable nodes in a different or more strict network. 
+Hop nodes can be added to sit between the control plane of AWX and stand alone execution nodes. These machines will not be a part of the AWX Kubernetes cluster. The machines will be registered in AWX as node type "hop", meaning they will only handle inbound / outbound traffic for otherwise unreachable nodes in a different or more strict network. 
 
-Below is an example of a singular AWX pod with singular hop node between the pod and execution node 2. 
+Hop nodes can be added 2 ways, either through the UI or via 2 API fields in AWX on an instances endpoint, those fields are `peers` and `peers_from_control_node`. 
+
+The `peers` field can be used to create a hop node to handle both inbound and outbound traffic between the control plane and execution node or 2 execution nodes. Do note that in order to have a peer accepted, the instance that is the peer must have its `listener_port` defined or else a validation errror will be thrown. `peers_from_control_node` is a bolean key that can be flipped to true if the instance is a hop node between the control plane and an execution node. If this bolean is set to true, similar to above, the `listener_port` will need to be set on the same instance. 
+
+Below is an example of a singular AWX pod with singular hop node between the control plane and execution node 2. In this diagram, hop node is an instance that has `peers_from_control_node` set to true and is also in the `peers` list of execution node 2.
 
 ```
                                                        AWX POD
@@ -54,7 +58,7 @@ Adding an execution instance involves a handful of steps:
 ### Start machine
 
 Bring a machine online with a compatible Red Hat family OS (e.g. RHEL 8 and 9). This machines needs a static IP, or a resolvable DNS hostname that the AWX cluster can access. The machine will also need an available open port to establish inbound TCP connections on (default is 27199).
-
+ can
 In general the more CPU cores and memory the machine has, the more jobs that can be scheduled to run on that machine at once. See https://docs.ansible.com/automation-controller/4.2.1/html/userguide/jobs.html#at-capacity-determination-and-job-impact for more information on capacity.
 
 
