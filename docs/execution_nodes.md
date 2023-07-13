@@ -4,21 +4,21 @@ Stand-alone execution nodes can be added to run alongside the Kubernetes deploym
 
 Hop nodes can be added to sit between the control plane of AWX and stand alone execution nodes. These machines will not be a part of the AWX Kubernetes cluster. The machines will be registered in AWX as node type "hop", meaning they will only handle inbound / outbound traffic for otherwise unreachable nodes in a different or more strict network. 
 
-Below is an example of an AWX pod with 2 excution nodes. Traffic to execution node 2 flows through a hop node that is setup between it and the control plane.
+Below is an example of an AWX Task pod with two excution nodes. Traffic to execution node 2 flows through a hop node that is setup between it and the control plane.
 
 ```
-                                                       AWX POD
+                                                     AWX TASK POD
                                                    ┌──────────────┐
                                                    │              │
                                                    │ ┌──────────┐ │
 ┌─────────────────┐   ┌─────────────────┐          │ │ awx-task │ │
 │execution node 2 ├──►│     hop node    │◄────┐    │ ├──────────┤ │
 └─────────────────┘   ├─────────────────┤     ├────┼─┤ awx-ee   │ │
-                      │ execution node 1│◄────┘    │ ├──────────┤ │
-                      └─────────────────┘ Receptor │ │ awx-web  │ │
-                                            TCP    │ └──────────┘ │
-                                           Peers   │              │
-                                                   └──────────────┘
+                      │ execution node 1│◄────┘    │ └──────────┘ │
+                      └─────────────────┘ Receptor │              | 
+                                            TCP    └──────────────┘
+                                           Peers                 
+                                                   
 ```
 
 ## Overview
