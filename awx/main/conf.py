@@ -863,6 +863,15 @@ register(
 )
 
 register(
+    'HOST_METRIC_SUMMARY_TASK_LAST_TS',
+    field_class=fields.DateTimeField,
+    label=_('Last computing date of HostMetricSummaryMonthly'),
+    allow_null=True,
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
     'AWX_CLEANUP_PATHS',
     field_class=fields.BooleanField,
     label=_('Enable or Disable tmp dir cleanup'),

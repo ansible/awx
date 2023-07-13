@@ -316,13 +316,8 @@ def send_notifications(notification_list, job_id=None):
 @task(queue=get_task_queuename)
 def gather_analytics():
     from awx.conf.models import Setting
-    from rest_framework.fields import DateTimeField
 
-    last_gather = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_GATHER').first()
-    last_time = DateTimeField().to_internal_value(last_gather.value) if last_gather and last_gather.value else None
-    gather_time = now()
-
-    if not last_time or ((gather_time - last_time).total_seconds() > settings.AUTOMATION_ANALYTICS_GATHER_INTERVAL):
+    if is_run_threshold_reached(Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_GATHER').first(), settings.AUTOMATION_ANALYTICS_GATHER_INTERVAL):
         analytics.gather()
 
 
@@ -381,16 +376,25 @@ def cleanup_images_and_files():
 
 @task(queue=get_task_queuename)
 def cleanup_host_metrics():
+    """Run cleanup host metrics ~each month"""
+    # TODO: move whole method to host_metrics in follow-up PR
     from awx.conf.models import Setting
+
+    if is_run_threshold_reached(
+        Setting.objects.filter(key='CLEANUP_HOST_METRICS_LAST_TS').first(), getattr(settings, 'CLEANUP_HOST_METRICS_INTERVAL', 30) * 86400
+    ):
+        months_ago = getattr(settings, 'CLEANUP_HOST_METRICS_SOFT_THRESHOLD', 12)
+        logger.info("Executing cleanup_host_metrics")
+        HostMetric.cleanup_task(months_ago)
+        logger.info("Finished cleanup_host_metrics")
+
+
+def is_run_threshold_reached(setting, threshold_seconds):
     from rest_framework.fields import DateTimeField
 
-    last_cleanup = Setting.objects.filter(key='CLEANUP_HOST_METRICS_LAST_TS').first()
-    last_time = DateTimeField().to_internal_value(last_cleanup.value) if last_cleanup and last_cleanup.value else None
+    last_time = DateTimeField().to_internal_value(setting.value) if setting and setting.value else DateTimeField().to_internal_value('1970-01-01')
 
-    cleanup_interval_secs = getattr(settings, 'CLEANUP_HOST_METRICS_INTERVAL', 30) * 86400
-    if not last_time or ((now() - last_time).total_seconds() > cleanup_interval_secs):
-        months_ago = getattr(settings, 'CLEANUP_HOST_METRICS_THRESHOLD', 12)
-        HostMetric.cleanup_task(months_ago)
+    return (now() - last_time).total_seconds() > threshold_seconds
 
 
 @task(queue=get_task_queuename)
