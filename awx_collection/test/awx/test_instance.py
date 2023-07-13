@@ -20,7 +20,7 @@ def test_peers_adding_and_removing(run_module, admin_user):
 
         hop_node_1 = Instance.objects.get(pk=result.get('id'))
 
-        assert hop_node_1.peers_from_control_nodes == True
+        assert hop_node_1.peers_from_control_nodes is True
         assert hop_node_1.node_type == 'hop'
 
         result = run_module(
