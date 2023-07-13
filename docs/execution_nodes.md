@@ -54,7 +54,7 @@ Below is a table of configuartions for the [diagram](#adding-execution-nodes-to-
 |------------------|---------------|-------------------------|--------------|
 | execution node 1 | 27199         | true                    | []           |
 | hop node         | 27199         | true                    | []           |
-| execution node 2 | null          | false                   | [`hop node`] |
+| execution node 2 | null          | false                   | ["hop node"] |
 
 Listener port needs to be set if peers_from_control_nodes is enabled or the instance is a peer.
 
