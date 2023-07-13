@@ -2,34 +2,9 @@
 
 Stand-alone execution nodes can be added to run alongside the Kubernetes deployment of AWX. These machines will not be a part of the AWX Kubernetes cluster. The control nodes running in the cluster will connect and submit work to these machines via Receptor. The machines be registered in AWX as type "execution" instances, meaning they will only be used to run AWX Jobs (i.e. they will not dispatch work or handle web requests as control nodes do).
 
-Below is an example of a single AWX pod connecting to two different execution nodes. For each execution node, the awx-ee container makes an outbound TCP connection to the machine via Receptor.
-
-```
-                                 AWX POD
-                             ┌──────────────┐
-                             │              │
-                             │ ┌──────────┐ │
-┌─────────────────┐          │ │ awx-task │ │
-│ execution node 1│◄────┐    │ ├──────────┤ │
-├─────────────────┤     ├────┼─┤ awx-ee   │ │
-│ execution node 2│◄────┘    │ ├──────────┤ │
-└─────────────────┘ Receptor │ │ awx-web  │ │
-                      TCP    │ └──────────┘ │
-                     Peers   │              │
-                             └──────────────┘
-```
-
-Note, if the AWX deployment is scaled up, the new AWX pod will also make TCP connections to each execution node.
-
-# Adding hop nodes to AWX
-
 Hop nodes can be added to sit between the control plane of AWX and stand alone execution nodes. These machines will not be a part of the AWX Kubernetes cluster. The machines will be registered in AWX as node type "hop", meaning they will only handle inbound / outbound traffic for otherwise unreachable nodes in a different or more strict network. 
 
-Hop nodes can be added 2 ways, either through the UI or via 2 API fields in AWX on an instances endpoint, those fields are `peers` and `peers_from_control_node`. 
-
-The `peers` field can be used to create a hop node to handle both inbound and outbound traffic between the control plane and execution node or 2 execution nodes. Do note that in order to have a peer accepted, the instance that is the peer must have its `listener_port` defined or else a validation errror will be thrown. `peers_from_control_node` is a bolean key that can be flipped to true if the instance is a hop node between the control plane and an execution node. If this bolean is set to true, similar to above, the `listener_port` will need to be set on the same instance. 
-
-Below is an example of a singular AWX pod with singular hop node between the control plane and execution node 2. In this diagram, hop node is an instance that has `peers_from_control_node` set to true and is also in the `peers` list of execution node 2.
+Below is an example of an AWX pod with 2 excution nodes. Traffic to execution node 2 flows through a hop node that is setup between it and the control plane.
 
 ```
                                                        AWX POD
@@ -45,6 +20,7 @@ Below is an example of a singular AWX pod with singular hop node between the con
                                            Peers   │              │
                                                    └──────────────┘
 ```
+
 ## Overview
 Adding an execution instance involves a handful of steps:
 
@@ -57,7 +33,7 @@ Adding an execution instance involves a handful of steps:
 
 ### Start machine
 
-Bring a machine online with a compatible Red Hat family OS (e.g. RHEL 8 and 9). This machines needs a static IP, or a resolvable DNS hostname that the AWX cluster can access. The machine will also need an available open port to establish inbound TCP connections on (default is 27199).
+Bring a machine online with a compatible Red Hat family OS (e.g. RHEL 8 and 9). This machines needs a static IP, or a resolvable DNS hostname that the AWX cluster can access. If the listerner_port is defined, the machine will also need an available open port to establish inbound TCP connections on (default is 27199).
 
 In general the more CPU cores and memory the machine has, the more jobs that can be scheduled to run on that machine at once. See https://docs.ansible.com/automation-controller/4.2.1/html/userguide/jobs.html#at-capacity-determination-and-job-impact for more information on capacity.
 
@@ -66,9 +42,21 @@ In general the more CPU cores and memory the machine has, the more jobs that can
 
 Use the Instance page or `api/v2/instances` endpoint to add a new instance.
 - `hostname` ("Name" in UI) is the IP address or DNS name of your machine.
-- `node_type` is "execution"
+- `node_type` is "execution" or "hop"
 - `node_state` is "installed"
-- `listener_port` is an open port on the remote machine used to establish inbound TCP connections. Defaults to 27199.
+- `listener_port` is an open port on the remote machine used to establish inbound TCP connections. Defaults to null.
+- `peers` is a list of instance hostnames to connect outbound to.
+- `peers_from_control_nodes` boolean, if True, control plane nodes will automatically peer to this instance.
+
+Below is a table of configuartions for the [diagram](#adding-execution-nodes-to-awx) above.
+
+| instance name    | listener_port | peers_from_control_nodes | peers        |
+|------------------|---------------|-------------------------|--------------|
+| execution node 1 | 27199         | true                    | []           |
+| hop node         | 27199         | true                    | []           |
+| execution node 2 | null          | false                   | [`hop node`] |
+
+Listener port needs to be set if peers_from_control_nodes is enabled or the instance is a peer.
 
 
 ### Download the install bundle
