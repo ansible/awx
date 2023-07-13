@@ -477,7 +477,7 @@ CELERYBEAT_SCHEDULE = {
 
 # Django Caching Configuration
 DJANGO_REDIS_IGNORE_EXCEPTIONS = True
-CACHES = {'default': {'BACKEND': 'django_redis.cache.RedisCache', 'LOCATION': 'unix:/var/run/redis/redis.sock?db=1'}}
+CACHES = {'default': {'BACKEND': 'django.core.cache.backends.redis.RedisCache', 'LOCATION': 'unix:/var/run/redis/redis.sock?db=1'}}
 
 # Social Auth configuration.
 SOCIAL_AUTH_STRATEGY = 'social_django.strategy.DjangoStrategy'
