@@ -33,7 +33,7 @@ Adding an execution instance involves a handful of steps:
 
 ### Start machine
 
-Bring a machine online with a compatible Red Hat family OS (e.g. RHEL 8 and 9). This machines needs a static IP, or a resolvable DNS hostname that the AWX cluster can access. If the listerner_port is defined, the machine will also need an available open port to establish inbound TCP connections on (default is 27199).
+Bring a machine online with a compatible Red Hat family OS (e.g. RHEL 8 and 9). This machines needs a static IP, or a resolvable DNS hostname that the AWX cluster can access. If the listerner_port is defined, the machine will also need an available open port to establish inbound TCP connections on (e.g. 27199).
 
 In general the more CPU cores and memory the machine has, the more jobs that can be scheduled to run on that machine at once. See https://docs.ansible.com/automation-controller/4.2.1/html/userguide/jobs.html#at-capacity-determination-and-job-impact for more information on capacity.
 
