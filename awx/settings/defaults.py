@@ -327,7 +327,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_extensions',
     'polymorphic',
-    'taggit',
     'social_django',
     'django_guid',
     'corsheaders',

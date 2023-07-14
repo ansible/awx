@@ -23,7 +23,6 @@ django-polymorphic
 django-pglocks
 django-solo
 django-split-settings==1.0.0    # We hit a strange issue where the release process errored when upgrading past 1.0.0 see UPGRADE BLOCKERS
-django-taggit
 djangorestframework
 djangorestframework-yaml
 filelock
