@@ -48,6 +48,15 @@
     - assert:
         that: "result is changed"
 
+    - name: Rerun to ensure no changes with enforced
+      organization:
+        name: "{{ org_name }}"
+        state: enforced
+      register: result
+
+    - assert:
+        that: "result is not changed"
+
     - name: "Add back items to organization to show enforced default worked"
       organization:
         name: "{{ org_name }}"

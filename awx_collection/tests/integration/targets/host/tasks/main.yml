@@ -58,6 +58,17 @@
         that:
           - "result is changed"
 
+    - name: Rerun to ensure no changes with enforced
+      host:
+        name: "{{ host_name }}"
+        inventory: "{{ inv_name }}"
+        state: enforced
+      register: result
+
+    - assert:
+        that:
+          - "result is not changed"
+
     - name: Create a Host with enforced values
       host:
         name: "{{ host_name }}"

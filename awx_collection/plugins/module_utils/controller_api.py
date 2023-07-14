@@ -350,7 +350,7 @@ class ControllerAPIModule(ControllerModule):
                 'new_fields': {
                     'description': '' if endpoint != 'applications' else endpoint_defaults['description']['default'],
                     'client_type': 'public',
-                    'redirect_uris': '' if endpoint != 'applications' else endpoint_defaults['redirect_uris']['default'],
+                    'redirect_uris': [],
                     'authorization_grant_type': 'password',
                     'skip_authorization': False if endpoint != 'applications' else endpoint_defaults['skip_authorization']['default'],
                 },

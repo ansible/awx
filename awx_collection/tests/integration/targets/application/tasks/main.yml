@@ -53,6 +53,17 @@
         that:
           - "result is changed"
 
+    - name: Rerun to ensure no changes with enforced
+      application:
+        name: "{{ app1_name }}"
+        organization: "Default"
+        state: enforced
+      register: result
+
+    - assert:
+        that:
+          - "result is not changed"
+
     - name: Delete our application
       application:
         name: "{{ app1_name }}"

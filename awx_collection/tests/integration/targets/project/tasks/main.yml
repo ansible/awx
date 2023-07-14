@@ -75,6 +75,23 @@
         that:
           - result is changed
 
+    - name: Rerun to ensure no changes with enforced
+      project:
+        name: "{{ project_name1 }}"
+        description: ""
+        organization: Default
+        scm_delete_on_update: False
+        scm_update_on_launch: False
+        timeout: 0
+        scm_type: git
+        scm_url: https://github.com/ansible/test-playbooks
+        state: enforced
+      register: result
+
+    - assert:
+        that:
+          - result is not changed
+
     - name: Check enforced options set
       project:
         name: "{{ project_name1 }}"

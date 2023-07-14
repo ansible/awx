@@ -163,6 +163,19 @@
         that:
           - "jt1_result is changed"
 
+    - name: Rerun to ensure no changes with enforced
+      job_template:
+        name: "{{ jt1 }}"
+        project: "{{ proj1 }}"
+        inventory: "{{ inv1 }}"
+        playbook: hello_world.yml
+        state: enforced
+      register: jt1_result
+
+    - assert:
+        that:
+          - "jt1_result is not changed"
+
     - name: Make sure enforced values went through
       job_template:
         name: "{{ jt1 }}"

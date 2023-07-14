@@ -288,6 +288,19 @@
         that:
           - "result is changed"
 
+    - name: Rerun to ensure no changes with enforced
+      workflow_job_template:
+        name: "{{ wfjt_name }}"
+        organization: Default
+        inventory: Demo Inventory
+        # We don't try with the label here because after we delete the first WFJT the label is delete with it because it has no references
+        state: enforced
+      register: result
+
+    - assert:
+        that:
+          - "result is not changed"
+
     - name: Check enforced options
       workflow_job_template:
         name: "{{ wfjt_name }}"

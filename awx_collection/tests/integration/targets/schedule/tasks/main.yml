@@ -90,6 +90,18 @@
         that:
           - result is changed
 
+    - name: Rerun to ensure no changes with enforced
+      schedule:
+        name: "{{ sched1 }}"
+        state: enforced
+        unified_job_template: "Demo Job Template"
+        rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
+      register: result
+
+    - assert:
+        that:
+          - result is not changed
+
     - name: Ensure defaults were reset.
       schedule:
         name: "{{ sched1 }}"

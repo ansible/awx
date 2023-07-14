@@ -79,6 +79,18 @@
         that:
           - "result is changed"
 
+    - name: Rerun to ensure no changes with enforced
+      inventory_source:
+        name: "{{ openstack_inv_source }}"
+        inventory: "{{ openstack_inv }}"
+        state: enforced
+        source: openstack
+      register: result
+
+    - assert:
+        that:
+          - "result is not changed"
+
     - name: Check enforced values set
       inventory_source:
         name: "{{ openstack_inv_source }}"
