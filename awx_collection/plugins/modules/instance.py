@@ -62,6 +62,13 @@ options:
         - Port that Receptor will listen for incoming connections on.
       required: False
       type: int
+    state:
+      description:
+        - Desired state of the resource. C(exists) will not modify the resource if it is present.
+        - Enforced state C(enforced) will default values of any option not provided.
+      default: "present"
+      choices: ["present", "exists", "enforced"]
+      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -91,6 +98,7 @@ def main():
         node_type=dict(type='str', choices=['execution']),
         node_state=dict(type='str', choices=['deprovisioning', 'installed']),
         listener_port=dict(type='int'),
+        state=dict(choices=['present', 'exists', 'enforced'], default='present'),
     )
 
     # Create a module for ourselves
@@ -104,12 +112,18 @@ def main():
     node_type = module.params.get('node_type')
     node_state = module.params.get('node_state')
     listener_port = module.params.get('listener_port')
+    state = module.params.get('state')
 
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('instances', name_or_id=hostname)
+    existing_item = module.get_one('instances', name_or_id=hostname, check_exists=(state == 'exists'))
+
+    if state == 'enforced':
+        new_fields = module.get_enforced_defaults('instances')[0]
+    else:
+        new_fields = {}
 
     # Create the data that gets sent for create and update
-    new_fields = {'hostname': hostname}
+    new_fields['hostname'] = hostname
     if capacity_adjustment is not None:
         new_fields['capacity_adjustment'] = capacity_adjustment
     if enabled is not None:

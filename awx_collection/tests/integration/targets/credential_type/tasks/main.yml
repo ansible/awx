@@ -8,7 +8,8 @@
   set_fact:
     cred_type_name: "AWX-Collection-tests-credential_type-cred-type-{{ test_id }}"
 
-- block:
+- name: Run Tests
+  block:
     - name: Add Tower credential type
       credential_type:
         description: Credential type for Test
@@ -30,6 +31,29 @@
         inputs: {"fields": [{"type": "string", "id": "username", "label": "Username"}, {"secret": true, "type": "string", "id": "password", "label": "Password"}], "required": ["username", "password"]}
         injectors: {"extra_vars": {"test": "foo"}}
         state: exists
+      register: result
+
+    - assert:
+        that:
+          - "result is not changed"
+
+    - name: Add credential type with enforced
+      credential_type:
+        name: "{{ cred_type_name }}"
+        state: enforced
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Add credential type with present expecting no change
+      credential_type:
+        description: ''
+        name: "{{ cred_type_name }}"
+        inputs: {}
+        injectors: {}
+        state: present
       register: result
 
     - assert:
@@ -85,7 +109,3 @@
       loop:
         - "{{ cred_type_name }}"
         - "{{ cred_type_name }}a"
-
-    - assert:
-        that:
-          - "result is changed"

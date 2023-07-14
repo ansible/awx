@@ -68,9 +68,10 @@ options:
       default: true
     state:
       description:
-        - Desired state of the resource.
-      choices: ["present", "absent", "exists"]
+        - Desired state of the resource. C(exists) will not modify the resource if it is present.
+        - Enforced state C(enforced) will default values of any option not provided.
       default: "present"
+      choices: ["present", "absent", "exists", "enforced"]
       type: str
 extends_documentation_fragment: awx.awx.auth
 '''
@@ -137,7 +138,7 @@ def main():
         password=dict(no_log=True),
         update_secrets=dict(type='bool', default=True, no_log=False),
         organization=dict(),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists', 'enforced'], default='present'),
     )
 
     # Create a module for ourselves
@@ -163,9 +164,12 @@ def main():
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(existing_item)
+    elif state == 'enforced':
+        new_fields = module.get_enforced_defaults('users')[0]
+    else:
+        new_fields = {}
 
     # Create the data that gets sent for create and update
-    new_fields = {}
     if username is not None:
         new_fields['username'] = new_username if new_username else (module.get_item_name(existing_item) if existing_item else username)
     if first_name is not None:

@@ -58,9 +58,10 @@ options:
       elements: str
     state:
       description:
-        - Desired state of the resource.
+        - Desired state of the resource. C(exists) will not modify the resource if it is present.
+        - Enforced state C(enforced) will default values of any option not provided.
       default: "present"
-      choices: ["present", "absent", "exists"]
+      choices: ["present", "absent", "exists", "enforced"]
       type: str
     skip_authorization:
       description:
@@ -106,7 +107,7 @@ def main():
         client_type=dict(choices=['public', 'confidential']),
         organization=dict(required=True),
         redirect_uris=dict(type="list", elements='str'),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists', 'enforced'], default='present'),
         skip_authorization=dict(type='bool'),
     )
 
@@ -121,6 +122,7 @@ def main():
     client_type = module.params.get('client_type')
     organization = module.params.get('organization')
     redirect_uris = module.params.get('redirect_uris')
+    skip_authorization = module.params.get('skip_authorization')
     state = module.params.get('state')
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
@@ -132,23 +134,27 @@ def main():
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(application)
+    elif state == 'enforced':
+        new_fields = module.get_enforced_defaults('applications')[0]
+    else:
+        new_fields = {}
 
     # Create the data that gets sent for create and update
-    application_fields = {
-        'name': new_name if new_name else (module.get_item_name(application) if application else name),
-        'organization': org_id,
-    }
+    new_fields['name'] = new_name if new_name else (module.get_item_name(application) if application else name)
+    new_fields['organization'] = org_id
     if authorization_grant_type is not None:
-        application_fields['authorization_grant_type'] = authorization_grant_type
+        new_fields['authorization_grant_type'] = authorization_grant_type
     if client_type is not None:
-        application_fields['client_type'] = client_type
+        new_fields['client_type'] = client_type
     if description is not None:
-        application_fields['description'] = description
+        new_fields['description'] = description
     if redirect_uris is not None:
-        application_fields['redirect_uris'] = ' '.join(redirect_uris)
+        new_fields['redirect_uris'] = ' '.join(redirect_uris)
+    if skip_authorization is not None:
+        new_fields['skip_authorization'] = skip_authorization
 
     # If the state was present and we can let the module build or update the existing application, this will return on its own
-    module.create_or_update_if_needed(application, application_fields, endpoint='applications', item_type='application')
+    module.create_or_update_if_needed(application, new_fields, endpoint='applications', item_type='application')
 
 
 if __name__ == '__main__':

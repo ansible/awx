@@ -57,9 +57,10 @@ options:
       type: dict
     state:
       description:
-        - Desired state of the resource.
+        - Desired state of the resource. C(exists) will not modify the resource if it is present.
+        - Enforced state C(enforced) will default values of any option not provided.
       default: "present"
-      choices: ["present", "absent", "exists"]
+      choices: ["present", "absent", "exists", "enforced"]
       type: str
 extends_documentation_fragment: awx.awx.auth
 '''
@@ -98,7 +99,7 @@ def main():
         kind=dict(choices=list(KIND_CHOICES.keys())),
         inputs=dict(type='dict'),
         injectors=dict(type='dict'),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists', 'enforced'], default='present'),
     )
 
     # Create a module for ourselves
@@ -110,30 +111,30 @@ def main():
     kind = module.params.get('kind')
     state = module.params.get('state')
 
-    # These will be passed into the create/updates
-    credential_type_params = {
-        'managed': False,
-    }
-    if kind:
-        credential_type_params['kind'] = kind
-    if module.params.get('description'):
-        credential_type_params['description'] = module.params.get('description')
-    if module.params.get('inputs'):
-        credential_type_params['inputs'] = module.params.get('inputs')
-    if module.params.get('injectors'):
-        credential_type_params['injectors'] = module.params.get('injectors')
-
     # Attempt to look up credential_type based on the provided name
     credential_type = module.get_one('credential_types', name_or_id=name, check_exists=(state == 'exists'))
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(credential_type)
+    elif state == 'enforced':
+        new_fields = module.get_enforced_defaults('credential_types')[0]
+    else:
+        new_fields = {}
 
-    credential_type_params['name'] = new_name if new_name else (module.get_item_name(credential_type) if credential_type else name)
+    # These will be passed into the create/updates
+    new_fields['name'] = new_name if new_name else (module.get_item_name(credential_type) if credential_type else name)
+    if kind:
+        new_fields['kind'] = kind
+    if module.params.get('description'):
+        new_fields['description'] = module.params.get('description')
+    if module.params.get('inputs'):
+        new_fields['inputs'] = module.params.get('inputs')
+    if module.params.get('injectors'):
+        new_fields['injectors'] = module.params.get('injectors')
 
     # If the state was present and we can let the module build or update the existing credential type, this will return on its own
-    module.create_or_update_if_needed(credential_type, credential_type_params, endpoint='credential_types', item_type='credential type')
+    module.create_or_update_if_needed(credential_type, new_fields, endpoint='credential_types', item_type='credential type')
 
 
 if __name__ == '__main__':

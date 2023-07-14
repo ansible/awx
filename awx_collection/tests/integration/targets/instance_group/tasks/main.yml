@@ -10,7 +10,8 @@
     group_name2: "AWX-Collection-tests-instance_group-group2-{{ test_id }}"
     cred_name1: "AWX-Collection-tests-instance_group-cred1-{{ test_id }}"
 
-- block:
+- name: Run Tests
+  block:
     - name: Create an OpenShift Credential
       credential:
         name: "{{ cred_name1 }}"
@@ -44,6 +45,30 @@
         policy_instance_percentage: 34
         policy_instance_minimum: 12
         state: exists
+      register: result
+
+    - assert:
+        that:
+          - "result is not changed"
+
+    - name: Create an Instance Group with enforced
+      instance_group:
+        name: "{{ group_name1 }}"
+        state: enforced
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Create an Instance Group with enforced values
+      instance_group:
+        name: "{{ group_name1 }}"
+        max_concurrent_jobs: 0
+        max_forks: 0
+        policy_instance_percentage: 0
+        policy_instance_minimum: 0
+        policy_instance_list: []
       register: result
 
     - assert:

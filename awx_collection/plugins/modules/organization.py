@@ -51,7 +51,8 @@ options:
       type: int
     state:
       description:
-        - Desired state of the resource.
+        - Desired state of the resource. C(exists) will not modify the resource if it is present.
+        - Enforced state C(enforced) will default values of any option not provided.
       default: "present"
       choices: ["present", "absent", "exists", "enforced"]
       type: str
@@ -149,19 +150,18 @@ def main():
     # Attempt to look up organization based on the provided name
     organization = module.get_one('organizations', name_or_id=name, check_exists=(state == 'exists'))
 
-    # set the default for enforced defaults
-    enforced_defaults = False
-
+    # Create the data that gets sent for create and update depending on state
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(organization)
     elif state == 'enforced':
-        enforced_defaults = True
-        # organization_defaults = module.get_options_endpoint('organizations')
-        # module.fail_json(msg="{0}".format(organization_defaults))
+        new_fields, association_fields = module.get_enforced_defaults('organizations')
+    else:
+        association_fields = {}
+        new_fields = {}
 
-    # Attempt to look up associated field items the user specified.
-    association_fields = {}
+    # Set Name
+    new_fields['name'] = new_name if new_name else (module.get_item_name(organization) if organization else name)
 
     instance_group_names = module.params.get('instance_groups')
     if instance_group_names is not None:
@@ -199,23 +199,19 @@ def main():
         for item in galaxy_credentials:
             association_fields['galaxy_credentials'].append(module.resolve_name_to_id('credentials', item))
 
-    # Create the data that gets sent for create and update
-    org_fields = {
-        'name': new_name if new_name else (module.get_item_name(organization) if organization else name),
-    }
     if description is not None:
-        org_fields['description'] = description
+        new_fields['description'] = description
     if default_ee is not None:
-        org_fields['default_environment'] = module.resolve_name_to_id('execution_environments', default_ee)
+        new_fields['default_environment'] = module.resolve_name_to_id('execution_environments', default_ee)
     if custom_virtualenv is not None:
-        org_fields['custom_virtualenv'] = custom_virtualenv
+        new_fields['custom_virtualenv'] = custom_virtualenv
     if max_hosts is not None:
-        org_fields['max_hosts'] = max_hosts
+        new_fields['max_hosts'] = max_hosts
 
     # If the state was present and we can let the module build or update the existing organization, this will return on its own
     module.create_or_update_if_needed(
         organization,
-        org_fields,
+        new_fields,
         endpoint='organizations',
         item_type='organization',
         associations=association_fields,

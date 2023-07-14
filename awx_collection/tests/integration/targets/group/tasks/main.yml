@@ -16,246 +16,275 @@
     host_name3: "AWX-Collection-tests-group-host3-{{ test_id }}"
     host_name4: "AWX-Collection-tests-group-host4-{{ test_id }}"
 
-- name: Create an Inventory
-  inventory:
-    name: "{{ inv_name }}"
-    organization: Default
-    state: present
-  register: result
+- name: Run Tests
+  block:
+    - name: Create an Inventory
+      inventory:
+        name: "{{ inv_name }}"
+        organization: Default
+        state: present
+      register: result
 
-- name: Create a Host
-  host:
-    name: "{{ host_name4 }}"
-    inventory: "{{ inv_name }}"
-    state: present
-  register: result
+    - name: Create a Host
+      host:
+        name: "{{ host_name4 }}"
+        inventory: "{{ inv_name }}"
+        state: present
+      register: result
 
-- name: Add Host to Group
-  group:
-    name: "{{ group_name1 }}"
-    inventory: "{{ inv_name }}"
-    hosts:
-      - "{{ host_name4 }}"
-    preserve_existing_hosts: true
-  register: result
+    - name: Add Host to Group
+      group:
+        name: "{{ group_name1 }}"
+        inventory: "{{ inv_name }}"
+        hosts:
+          - "{{ host_name4 }}"
+        preserve_existing_hosts: true
+      register: result
 
-- assert:
-    that:
-      - "result is changed"
+    - assert:
+        that:
+          - "result is changed"
 
-- name: Create Group 1
-  group:
-    name: "{{ group_name1 }}"
-    inventory: "{{ result.id }}"
-    state: present
-    variables:
-      foo: bar
-  register: result
+    - name: Create Group 1
+      group:
+        name: "{{ group_name1 }}"
+        description: this is a description
+        inventory: "{{ result.id }}"
+        state: present
+        variables:
+          foo: bar
+      register: result
 
-- assert:
-    that:
-      - "result is changed"
+    - assert:
+        that:
+          - "result is changed"
 
-- name: Create Group 1 with exists
-  group:
-    name: "{{ group_name1 }}"
-    inventory: "{{ inv_name }}"
-    state: exists
-    variables:
-      foo: bar
-  register: result
+    - name: Create Group 1 with exists
+      group:
+        name: "{{ group_name1 }}"
+        inventory: "{{ inv_name }}"
+        state: exists
+        variables:
+          foo: bar
+      register: result
 
-- assert:
-    that:
-      - "result is not changed"
+    - assert:
+        that:
+          - "result is not changed"
 
-- name: Delete Group 1
-  group:
-    name: "{{ group_name1 }}"
-    inventory: "{{ inv_name }}"
-    state: absent
-    variables:
-      foo: bar
-  register: result
+    - name: Create Group 1 with enforced
+      group:
+        name: "{{ group_name1 }}"
+        inventory: "{{ inv_name }}"
+        state: enforced
+      register: result
 
-- assert:
-    that:
-      - "result is changed"
+    - assert:
+        that:
+          - "result is changed"
 
-- name: Create Group 1 with exists
-  group:
-    name: "{{ group_name1 }}"
-    inventory: "{{ inv_name }}"
-    state: exists
-    variables:
-      foo: bar
-  register: result
+    - name: Create Group 1 with enforced values
+      group:
+        name: "{{ group_name1 }}"
+        description: ''
+        inventory: "{{ inv_name }}"
+        variables: {}
+        hosts: []
+        children: []
+      register: result
 
-- assert:
-    that:
-      - "result is changed"
+    - assert:
+        that:
+          - "result is not changed"
 
-- name: Create Group 2
-  group:
-    name: "{{ group_name2 }}"
-    inventory: "{{ inv_name }}"
-    state: present
-    variables:
-      foo: bar
-  register: result
+    - name: Delete Group 1
+      group:
+        name: "{{ group_name1 }}"
+        inventory: "{{ inv_name }}"
+        state: absent
+        variables:
+          foo: bar
+      register: result
 
-- assert:
-    that:
-      - "result is changed"
+    - assert:
+        that:
+          - "result is changed"
 
-- name: Create Group 3
-  group:
-    name: "{{ group_name3 }}"
-    inventory: "{{ inv_name }}"
-    state: present
-    variables:
-      foo: bar
-  register: result
+    - name: Create Group 1 with exists
+      group:
+        name: "{{ group_name1 }}"
+        inventory: "{{ inv_name }}"
+        state: exists
+        variables:
+          foo: bar
+      register: result
 
-- assert:
-    that:
-      - "result is changed"
+    - assert:
+        that:
+          - "result is changed"
 
-- name: add hosts
-  host:
-    name: "{{ item }}"
-    inventory: "{{ inv_name }}"
-  loop:
-    - "{{ host_name1 }}"
-    - "{{ host_name2 }}"
-    - "{{ host_name3 }}"
+    - name: Create Group 2
+      group:
+        name: "{{ group_name2 }}"
+        inventory: "{{ inv_name }}"
+        state: present
+        variables:
+          foo: bar
+      register: result
 
-- name: Create Group 1 with hosts and sub group of Group 2
-  group:
-    name: "{{ group_name1 }}"
-    inventory: "{{ inv_name }}"
-    hosts:
-      - "{{ host_name1 }}"
-      - "{{ host_name2 }}"
-    children:
-      - "{{ group_name2 }}"
-    state: present
-    variables:
-      foo: bar
-  register: result
+    - assert:
+        that:
+          - "result is changed"
 
-- name: Create Group 1 with hosts and sub group
-  group:
-    name: "{{ group_name1 }}"
-    inventory: "{{ inv_name }}"
-    hosts:
-      - "{{ host_name3 }}"
-    children:
-      - "{{ group_name3 }}"
-    state: present
-    preserve_existing_hosts: true
-    preserve_existing_children: true
-  register: result
+    - name: Create Group 3
+      group:
+        name: "{{ group_name3 }}"
+        inventory: "{{ inv_name }}"
+        state: present
+        variables:
+          foo: bar
+      register: result
 
-- name: "Find number of hosts in {{ group_name1 }}"
-  set_fact:
-    group1_host_count: "{{ lookup('awx.awx.controller_api', 'groups/{{result.id}}/all_hosts/') |length}}"
+    - assert:
+        that:
+          - "result is changed"
 
-- assert:
-    that:
-      - group1_host_count  == "3"
+    - name: add hosts
+      host:
+        name: "{{ item }}"
+        inventory: "{{ inv_name }}"
+      loop:
+        - "{{ host_name1 }}"
+        - "{{ host_name2 }}"
+        - "{{ host_name3 }}"
 
-- name: Delete Group 2
-  group:
-    name: "{{ group_name2 }}"
-    inventory: "{{ inv_name }}"
-    state: absent
-  register: result
+    - name: Create Group 1 with hosts and sub group of Group 2
+      group:
+        name: "{{ group_name1 }}"
+        inventory: "{{ inv_name }}"
+        hosts:
+          - "{{ host_name1 }}"
+          - "{{ host_name2 }}"
+        children:
+          - "{{ group_name2 }}"
+        state: present
+        variables:
+          foo: bar
+      register: result
 
-# In this case, group 2 was last a child of group1 so deleting group1 deleted group2
-- assert:
-    that:
-      - "result is not changed"
+    - name: Create Group 1 with hosts and sub group
+      group:
+        name: "{{ group_name1 }}"
+        inventory: "{{ inv_name }}"
+        hosts:
+          - "{{ host_name3 }}"
+        children:
+          - "{{ group_name3 }}"
+        state: present
+        preserve_existing_hosts: true
+        preserve_existing_children: true
+      register: result
 
-- name: Delete Group 3
-  group:
-    name: "{{ group_name3 }}"
-    inventory: "{{ inv_name }}"
-    state: absent
-  register: result
+    - name: "Find number of hosts in {{ group_name1 }}"
+      set_fact:
+        group1_host_count: "{{ lookup('awx.awx.controller_api', 'groups/{{result.id}}/all_hosts/') |length}}"
 
-- assert:
-    that:
-      - "result is changed"
+    - assert:
+        that:
+          - group1_host_count  == "3"
 
-# If we delete group 1 first it will delete group 2 and 3
-- name: Delete Group 1
-  group:
-    name: "{{ group_name1 }}"
-    inventory: "{{ inv_name }}"
-    state: absent
-  register: result
+    - name: Delete Group 2
+      group:
+        name: "{{ group_name2 }}"
+        inventory: "{{ inv_name }}"
+        state: absent
+      register: result
 
-- assert:
-    that:
-      - "result is changed"
+    # In this case, group 2 was last a child of group1 so deleting group1 deleted group2
+    - assert:
+        that:
+          - "result is not changed"
 
-- name: Check module fails with correct msg
-  group:
-    name: test-group
-    description: Group Description
-    inventory: test-non-existing-inventory
-    state: present
-  register: result
-  ignore_errors: true
+    - name: Delete Group 3
+      group:
+        name: "{{ group_name3 }}"
+        inventory: "{{ inv_name }}"
+        state: absent
+      register: result
 
-- assert:
-    that:
-      - "result is failed"
-      - "result is not changed"
-      - "'test-non-existing-inventory' in result.msg"
-      - "result.total_results == 0"
+    - assert:
+        that:
+          - "result is changed"
 
-- name: add hosts
-  host:
-    name: "{{ item }}"
-    inventory: "{{ inv_name }}"
-  loop:
-    - "{{ host_name1 }}"
-    - "{{ host_name2 }}"
-    - "{{ host_name3 }}"
+    # If we delete group 1 first it will delete group 2 and 3
+    - name: Delete Group 1
+      group:
+        name: "{{ group_name1 }}"
+        inventory: "{{ inv_name }}"
+        state: absent
+      register: result
 
-- name: add mid level group
-  group:
-    name: "{{ group_name2 }}"
-    inventory: "{{ inv_name }}"
-    hosts:
-      - "{{ host_name3 }}"
+    - assert:
+        that:
+          - "result is changed"
 
-- name: add top group
-  group:
-    name: "{{ group_name3 }}"
-    inventory: "{{ inv_name }}"
-    hosts:
-      - "{{ host_name1 }}"
-      - "{{ host_name2 }}"
-    children:
-      - "{{ group_name2 }}"
+    - name: Check module fails with correct msg
+      group:
+        name: test-group
+        description: Group Description
+        inventory: test-non-existing-inventory
+        state: present
+      register: result
+      ignore_errors: true
 
-- name: Delete the parent group
-  group:
-    name: "{{ group_name3 }}"
-    inventory: "{{ inv_name }}"
-    state: absent
+    - assert:
+        that:
+          - "result is failed"
+          - "result is not changed"
+          - "'test-non-existing-inventory' in result.msg"
+          - "result.total_results == 0"
 
-- name: Delete the child group
-  group:
-    name: "{{ group_name2 }}"
-    inventory: "{{ inv_name }}"
-    state: absent
+    - name: add hosts
+      host:
+        name: "{{ item }}"
+        inventory: "{{ inv_name }}"
+      loop:
+        - "{{ host_name1 }}"
+        - "{{ host_name2 }}"
+        - "{{ host_name3 }}"
 
-- name: Delete an Inventory
-  inventory:
-    name: "{{ inv_name }}"
-    organization: Default
-    state: absent
+    - name: add mid level group
+      group:
+        name: "{{ group_name2 }}"
+        inventory: "{{ inv_name }}"
+        hosts:
+          - "{{ host_name3 }}"
+
+    - name: add top group
+      group:
+        name: "{{ group_name3 }}"
+        inventory: "{{ inv_name }}"
+        hosts:
+          - "{{ host_name1 }}"
+          - "{{ host_name2 }}"
+        children:
+          - "{{ group_name2 }}"
+
+    - name: Delete the parent group
+      group:
+        name: "{{ group_name3 }}"
+        inventory: "{{ inv_name }}"
+        state: absent
+
+    - name: Delete the child group
+      group:
+        name: "{{ group_name2 }}"
+        inventory: "{{ inv_name }}"
+        state: absent
+
+  always:
+    - name: Delete an Inventory
+      inventory:
+        name: "{{ inv_name }}"
+        organization: Default
+        state: absent

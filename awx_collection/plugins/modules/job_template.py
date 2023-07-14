@@ -292,9 +292,10 @@ options:
       elements: str
     state:
       description:
-        - Desired state of the resource.
+        - Desired state of the resource. C(exists) will not modify the resource if it is present.
+        - Enforced state C(enforced) will default values of any option not provided.
       default: "present"
-      choices: ["present", "absent", "exists"]
+      choices: ["present", "absent", "exists", "enforced"]
       type: str
     notification_templates_started:
       description:
@@ -443,7 +444,7 @@ def main():
         notification_templates_success=dict(type="list", elements='str'),
         notification_templates_error=dict(type="list", elements='str'),
         prevent_instance_group_fallback=dict(type="bool"),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists', 'enforced'], default='present'),
     )
 
     # Create a module for ourselves
@@ -500,6 +501,11 @@ def main():
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(existing_item)
+    elif state == 'enforced':
+        new_fields, association_fields = module.get_enforced_defaults('job_templates')
+    else:
+        association_fields = {}
+        new_fields = {}
 
     # Create the data that gets sent for create and update
     new_fields['name'] = new_name if new_name else (module.get_item_name(existing_item) if existing_item else name)
@@ -577,8 +583,6 @@ def main():
             new_fields['project'] = module.resolve_name_to_id('projects', project)
     if webhook_credential is not None:
         new_fields['webhook_credential'] = module.resolve_name_to_id('credentials', webhook_credential)
-
-    association_fields = {}
 
     if credentials is not None:
         association_fields['credentials'] = []

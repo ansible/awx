@@ -258,6 +258,7 @@
       workflow_job_template:
         name: "{{ wfjt_name }}"
         organization: Default
+        description: this is a description
         inventory: Demo Inventory
         extra_vars: {'foo': 'bar', 'another-foo': {'barz': 'bar2'}}
         labels:
@@ -268,6 +269,37 @@
         ask_tags_on_launch: true
         ask_variables_on_launch: true
         state: exists
+      register: result
+
+    - assert:
+        that:
+          - "result is not changed"
+
+    - name: Create a workflow job template with enforced
+      workflow_job_template:
+        name: "{{ wfjt_name }}"
+        organization: Default
+        inventory: Demo Inventory
+        # We don't try with the label here because after we delete the first WFJT the label is delete with it because it has no references
+        state: enforced
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Check enforced options
+      workflow_job_template:
+        name: "{{ wfjt_name }}"
+        description: ''
+        organization: Default
+        inventory: Demo Inventory
+
+        ask_inventory_on_launch: False
+        ask_scm_branch_on_launch: False
+        ask_limit_on_launch: False
+        ask_tags_on_launch: False
+        ask_variables_on_launch: False
       register: result
 
     - assert:
@@ -820,6 +852,7 @@
     - name: Delete copied workflow job template
       workflow_job_template:
         name: "copy_{{ wfjt_name }}"
+        organization: Default
         state: absent
       register: result
 

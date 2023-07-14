@@ -340,7 +340,305 @@ class ControllerAPIModule(ControllerModule):
         return self.make_request('GET', endpoint, **kwargs)
 
     def get_options_endpoint(self, endpoint, *args, **kwargs):
-        return self.make_request('OPTIONS', endpoint, **kwargs)
+        return self.make_request('OPTIONS', endpoint, **kwargs)['json']['actions']['POST']
+
+    def get_enforced_defaults(self, endpoint, *args, **kwargs):
+        endpoint_defaults = self.get_options_endpoint(endpoint)
+
+        default_fields = {
+            'applications': {
+                'new_fields': {
+                    'description': '' if endpoint != 'applications' else endpoint_defaults['description']['default'],
+                    'client_type': 'public',
+                    'redirect_uris': '' if endpoint != 'applications' else endpoint_defaults['redirect_uris']['default'],
+                    'authorization_grant_type': 'password',
+                    'skip_authorization': False if endpoint != 'applications' else endpoint_defaults['skip_authorization']['default'],
+                },
+                'association_fields': {},
+            },
+            'credentials': {
+                'new_fields': {
+                    'description': '' if endpoint != 'credentials' else endpoint_defaults['description']['default'],
+                    'inputs': {} if endpoint != 'credentials' else endpoint_defaults['inputs']['default'],
+                },
+                'association_fields': {},
+            },
+            'credential_types': {
+                'new_fields': {
+                    'description': '' if endpoint != 'credential_types' else endpoint_defaults['description']['default'],
+                    'kind': 'cloud',
+                    'inputs': {} if endpoint != 'credential_types' else endpoint_defaults['inputs']['default'],
+                    'injectors': {} if endpoint != 'credential_types' else endpoint_defaults['injectors']['default'],
+                },
+                'association_fields': {},
+            },
+            'credential_input_sources': {
+                'new_fields': {
+                    'description': '' if endpoint != 'credential_input_sources' else endpoint_defaults['description']['default'],
+                    'metadata': {} if endpoint != 'credential_input_sources' else endpoint_defaults['metadata']['default'],
+                },
+                'association_fields': {},
+            },
+            'execution_environments': {
+                'new_fields': {
+                    'description': '' if endpoint != 'execution_environments' else endpoint_defaults['description']['default'],
+                    'pull': 'missing',  # Module default, is '' in the API.
+                },
+                'association_fields': {},
+            },
+            'groups': {
+                'new_fields': {
+                    'description': '' if endpoint != 'groups' else endpoint_defaults['description']['default'],
+                    'variables': '' if endpoint != 'groups' else endpoint_defaults['variables']['default'],
+                },
+                'association_fields': {
+                    'hosts': [],
+                    'children': [],
+                },
+            },
+            'hosts': {
+                'new_fields': {
+                    'description': '' if endpoint != 'hosts' else endpoint_defaults['description']['default'],
+                    'variables': '' if endpoint != 'hosts' else endpoint_defaults['variables']['default'],
+                    'enabled': True if endpoint != 'hosts' else endpoint_defaults['enabled']['default'],
+                },
+                'association_fields': {},
+            },
+            'instance_groups': {
+                'new_fields': {
+                    'max_concurrent_jobs': 0 if endpoint != 'instance_groups' else endpoint_defaults['max_concurrent_jobs']['default'],
+                    'max_forks': 0 if endpoint != 'instance_groups' else endpoint_defaults['max_forks']['default'],
+                    'is_container_group': False,
+                    'policy_instance_percentage': 0 if endpoint != 'instance_groups' else endpoint_defaults['policy_instance_percentage']['default'],
+                    'policy_instance_minimum': 0 if endpoint != 'instance_groups' else endpoint_defaults['policy_instance_minimum']['default'],
+                    'policy_instance_list': [],
+                    'pod_spec_override': '' if endpoint != 'instance_groups' else dumps(endpoint_defaults['pod_spec_override']['default']),
+                },
+                'association_fields': {
+                    'instances': [],
+                },
+            },
+            'instances': {
+                'new_fields': {
+                    'capacity_adjustment': 1.0 if endpoint != 'instances' else endpoint_defaults['capacity_adjustment']['default'],
+                    'enabled': True if endpoint != 'instances' else endpoint_defaults['enabled']['default'],
+                    'managed_by_policy': True if endpoint != 'instances' else endpoint_defaults['managed_by_policy']['default'],
+                    'node_type': 'execution' if endpoint != 'instances' else endpoint_defaults['node_type']['default'],
+                    'listener_port': 27199 if endpoint != 'instances' else endpoint_defaults['listener_port']['default'],
+                },
+                'association_fields': {},
+            },
+            'inventory_sources': {
+                'new_fields': {
+                    'description': '' if endpoint != 'inventory_sources' else endpoint_defaults['description']['default'],
+                    'source': 'scm',  # this is what defaults in the module, no default in API.
+                    'source_path': '' if endpoint != 'inventory_sources' else endpoint_defaults['source_path']['default'],
+                    'source_vars': '' if endpoint != 'inventory_sources' else endpoint_defaults['source_vars']['default'],
+                    'scm_branch': '' if endpoint != 'inventory_sources' else endpoint_defaults['scm_branch']['default'],
+                    'enabled_var': '' if endpoint != 'inventory_sources' else endpoint_defaults['enabled_var']['default'],
+                    'enabled_value': '' if endpoint != 'inventory_sources' else endpoint_defaults['enabled_value']['default'],
+                    'host_filter': '' if endpoint != 'inventory_sources' else endpoint_defaults['host_filter']['default'],
+                    'overwrite': False if endpoint != 'inventory_sources' else endpoint_defaults['overwrite']['default'],
+                    'overwrite_vars': False if endpoint != 'inventory_sources' else endpoint_defaults['overwrite_vars']['default'],
+                    'timeout': 0 if endpoint != 'inventory_sources' else endpoint_defaults['timeout']['default'],
+                    'verbosity': 1 if endpoint != 'inventory_sources' else endpoint_defaults['verbosity']['default'],
+                    'limit': '' if endpoint != 'inventory_sources' else endpoint_defaults['limit']['default'],
+                    'update_on_launch': False if endpoint != 'inventory_sources' else endpoint_defaults['update_on_launch']['default'],
+                    'update_cache_timeout': 0 if endpoint != 'inventory_sources' else endpoint_defaults['update_cache_timeout']['default'],
+                    'source_project': '',  # No Default in the API, but this resets if set and default value is null.
+                },
+                'association_fields': {
+                    'notification_templates_started': [],
+                    'notification_templates_success': [],
+                    'notification_templates_error': [],
+                },
+            },
+            'inventories': {
+                'new_fields': {
+                    'description': '' if endpoint != 'inventories' else endpoint_defaults['description']['default'],
+                    'kind': '' if endpoint != 'inventories' else endpoint_defaults['kind']['default'],
+                    'host_filter': '' if endpoint != 'inventories' else endpoint_defaults['host_filter']['default'],
+                    'variables': '' if endpoint != 'inventories' else endpoint_defaults['variables']['default'],
+                    'prevent_instance_group_fallback': False if endpoint != 'inventories' else endpoint_defaults['prevent_instance_group_fallback']['default'],
+                },
+                'association_fields': {
+                    'instance_groups': [],
+                    'input_inventories': [],
+                },
+            },
+            'job_templates': {
+                'new_fields': {
+                    'description': '' if endpoint != 'job_templates' else endpoint_defaults['description']['default'],
+                    'job_type': 'run' if endpoint != 'job_templates' else endpoint_defaults['job_type']['default'],
+                    'scm_branch': '' if endpoint != 'job_templates' else endpoint_defaults['scm_branch']['default'],
+                    'forks': 0 if endpoint != 'job_templates' else endpoint_defaults['forks']['default'],
+                    'limit': '' if endpoint != 'job_templates' else endpoint_defaults['limit']['default'],
+                    'verbosity': 0 if endpoint != 'job_templates' else endpoint_defaults['verbosity']['default'],
+                    'extra_vars': '' if endpoint != 'job_templates' else endpoint_defaults['extra_vars']['default'],
+                    'job_tags': '' if endpoint != 'job_templates' else endpoint_defaults['job_tags']['default'],
+                    'force_handlers': False if endpoint != 'job_templates' else endpoint_defaults['force_handlers']['default'],
+                    'skip_tags': '' if endpoint != 'job_templates' else endpoint_defaults['skip_tags']['default'],
+                    'start_at_task': '' if endpoint != 'job_templates' else endpoint_defaults['start_at_task']['default'],
+                    'timeout': 0 if endpoint != 'job_templates' else endpoint_defaults['timeout']['default'],
+                    'use_fact_cache': False if endpoint != 'job_templates' else endpoint_defaults['use_fact_cache']['default'],
+                    'host_config_key': '' if endpoint != 'job_templates' else endpoint_defaults['host_config_key']['default'],
+                    'ask_scm_branch_on_launch': False if endpoint != 'job_templates' else endpoint_defaults['ask_scm_branch_on_launch']['default'],
+                    'ask_diff_mode_on_launch': False if endpoint != 'job_templates' else endpoint_defaults['ask_diff_mode_on_launch']['default'],
+                    'ask_variables_on_launch': False if endpoint != 'job_templates' else endpoint_defaults['ask_variables_on_launch']['default'],
+                    'ask_limit_on_launch': False if endpoint != 'job_templates' else endpoint_defaults['ask_limit_on_launch']['default'],
+                    'ask_tags_on_launch': False if endpoint != 'job_templates' else endpoint_defaults['ask_tags_on_launch']['default'],
+                    'ask_skip_tags_on_launch': False if endpoint != 'job_templates' else endpoint_defaults['ask_skip_tags_on_launch']['default'],
+                    'ask_job_type_on_launch': False if endpoint != 'job_templates' else endpoint_defaults['ask_job_type_on_launch']['default'],
+                    'ask_verbosity_on_launch': False if endpoint != 'job_templates' else endpoint_defaults['ask_verbosity_on_launch']['default'],
+                    'ask_inventory_on_launch': False if endpoint != 'job_templates' else endpoint_defaults['ask_inventory_on_launch']['default'],
+                    'ask_credential_on_launch': False if endpoint != 'job_templates' else endpoint_defaults['ask_credential_on_launch']['default'],
+                    'ask_execution_environment_on_launch': False
+                    if endpoint != 'job_templates'
+                    else endpoint_defaults['ask_execution_environment_on_launch']['default'],
+                    'ask_labels_on_launch': False if endpoint != 'job_templates' else endpoint_defaults['ask_labels_on_launch']['default'],
+                    'ask_forks_on_launch': False if endpoint != 'job_templates' else endpoint_defaults['ask_forks_on_launch']['default'],
+                    'ask_job_slice_count_on_launch': False if endpoint != 'job_templates' else endpoint_defaults['ask_job_slice_count_on_launch']['default'],
+                    'ask_instance_groups_on_launch': False if endpoint != 'job_templates' else endpoint_defaults['ask_instance_groups_on_launch']['default'],
+                    'ask_timeout_on_launch': False if endpoint != 'job_templates' else endpoint_defaults['ask_timeout_on_launch']['default'],
+                    'survey_enabled': False if endpoint != 'job_templates' else endpoint_defaults['survey_enabled']['default'],
+                    'become_enabled': False if endpoint != 'job_templates' else endpoint_defaults['become_enabled']['default'],
+                    'diff_mode': False if endpoint != 'job_templates' else endpoint_defaults['diff_mode']['default'],
+                    'allow_simultaneous': False if endpoint != 'job_templates' else endpoint_defaults['allow_simultaneous']['default'],
+                    'job_slice_count': 1 if endpoint != 'job_templates' else endpoint_defaults['job_slice_count']['default'],
+                    'webhook_service': '',
+                    'prevent_instance_group_fallback': False
+                    if endpoint != 'job_templates'
+                    else endpoint_defaults['prevent_instance_group_fallback']['default'],
+                },
+                'association_fields': {
+                    'credentials': [],
+                    'labels': [],
+                    'notification_templates_started': [],
+                    'notification_templates_success': [],
+                    'notification_templates_error': [],
+                    'instance_groups': [],
+                },
+            },
+            'notification_templates': {
+                'new_fields': {
+                    'description': '' if endpoint != 'notification_templates' else endpoint_defaults['description']['default'],
+                    'messages': {} if endpoint != 'notification_templates' else endpoint_defaults['messages']['default'],
+                },
+                'association_fields': {},
+            },
+            'organizations': {
+                'new_fields': {
+                    'description': '' if endpoint != 'organizations' else endpoint_defaults['description']['default'],
+                    'default_environment': '',
+                    'custom_virtualenv': '',
+                    'max_hosts': 0 if endpoint != 'organizations' else endpoint_defaults['max_hosts']['default'],
+                },
+                'association_fields': {
+                    'instance_groups': [],
+                    'notification_templates_started': [],
+                    'notification_templates_success': [],
+                    'notification_templates_error': [],
+                    'notification_templates_approvals': [],
+                    'galaxy_credentials': [],
+                },
+            },
+            'projects': {
+                'new_fields': {
+                    'description': '' if endpoint != 'projects' else endpoint_defaults['description']['default'],
+                    'scm_type': '' if endpoint != 'projects' else endpoint_defaults['scm_type']['default'],
+                    'scm_url': '' if endpoint != 'projects' else endpoint_defaults['scm_url']['default'],
+                    'scm_branch': '' if endpoint != 'projects' else endpoint_defaults['scm_branch']['default'],
+                    'scm_refspec': '' if endpoint != 'projects' else endpoint_defaults['scm_refspec']['default'],
+                    'scm_clean': False if endpoint != 'projects' else endpoint_defaults['scm_clean']['default'],
+                    'scm_delete_on_update': False if endpoint != 'projects' else endpoint_defaults['scm_delete_on_update']['default'],
+                    'scm_track_submodules': False if endpoint != 'projects' else endpoint_defaults['scm_track_submodules']['default'],
+                    'scm_update_on_launch': False if endpoint != 'projects' else endpoint_defaults['scm_update_on_launch']['default'],
+                    'scm_update_cache_timeout': 0 if endpoint != 'projects' else endpoint_defaults['scm_update_cache_timeout']['default'],
+                    'timeout': 0 if endpoint != 'projects' else endpoint_defaults['timeout']['default'],
+                    'allow_override': False if endpoint != 'projects' else endpoint_defaults['allow_override']['default'],
+                },
+                'association_fields': {
+                    'notification_templates_started': [],
+                    'notification_templates_success': [],
+                    'notification_templates_error': [],
+                },
+            },
+            'schedules': {
+                'new_fields': {
+                    'description': '' if endpoint != 'schedules' else endpoint_defaults['description']['default'],
+                    'job_type': None,
+                    'enabled': True,
+                    'job_slice_count': None,
+                    'timeout': None,
+                    'execution_environment': None,
+                },
+                'association_fields': {
+                    'labels': [],
+                    'instance_groups': [],
+                },
+            },
+            'teams': {
+                'new_fields': {
+                    'description': '' if endpoint != 'teams' else endpoint_defaults['description']['default'],
+                },
+                'association_fields': {},
+            },
+            'users': {
+                'new_fields': {
+                    'first_name': '',
+                    'last_name': '',
+                    'email': '',
+                    'is_superuser': False if endpoint != 'users' else endpoint_defaults['is_superuser']['default'],
+                    'is_system_auditor': False if endpoint != 'users' else endpoint_defaults['is_system_auditor']['default'],
+                },
+                'association_fields': {},
+            },
+            'workflow_job_templates': {
+                'new_fields': {
+                    'description': '' if endpoint != 'workflow_job_templates' else endpoint_defaults['description']['default'],
+                    'survey_enabled': False if endpoint != 'workflow_job_templates' else endpoint_defaults['survey_enabled']['default'],
+                    'allow_simultaneous': False if endpoint != 'workflow_job_templates' else endpoint_defaults['allow_simultaneous']['default'],
+                    'limit': None if endpoint != 'workflow_job_templates' else endpoint_defaults['limit']['default'],
+                    'scm_branch': None if endpoint != 'workflow_job_templates' else endpoint_defaults['scm_branch']['default'],
+                    'extra_vars': '',
+                    'ask_inventory_on_launch': False if endpoint != 'workflow_job_templates' else endpoint_defaults['ask_inventory_on_launch']['default'],
+                    'ask_scm_branch_on_launch': False if endpoint != 'workflow_job_templates' else endpoint_defaults['ask_scm_branch_on_launch']['default'],
+                    'ask_limit_on_launch': False if endpoint != 'workflow_job_templates' else endpoint_defaults['ask_limit_on_launch']['default'],
+                    'ask_variables_on_launch': False if endpoint != 'workflow_job_templates' else endpoint_defaults['ask_variables_on_launch']['default'],
+                    'ask_labels_on_launch': False if endpoint != 'workflow_job_templates' else endpoint_defaults['ask_labels_on_launch']['default'],
+                    'ask_tags_on_launch': False if endpoint != 'workflow_job_templates' else endpoint_defaults['ask_tags_on_launch']['default'],
+                    'ask_skip_tags_on_launch': False if endpoint != 'workflow_job_templates' else endpoint_defaults['ask_skip_tags_on_launch']['default'],
+                    'webhook_service': '',
+                    'job_tags': None if endpoint != 'workflow_job_templates' else endpoint_defaults['job_tags']['default'],
+                    'skip_tags': None if endpoint != 'workflow_job_templates' else endpoint_defaults['skip_tags']['default'],
+                },
+                'association_fields': {
+                    'notification_templates_started': [],
+                    'notification_templates_success': [],
+                    'notification_templates_error': [],
+                    'notification_templates_approvals': [],
+                    'labels': [],
+                },
+            },
+            'workflow_job_template_nodes': {
+                'new_fields': {
+                    'extra_data': '',
+                    'all_parents_must_converge': False
+                    if endpoint != 'workflow_job_template_nodes'
+                    else endpoint_defaults['all_parents_must_converge']['default'],
+                },
+                'association_fields': {
+                    'always_nodes': [],
+                    'success_nodes': [],
+                    'failure_nodes': [],
+                    'credentials': [],
+                    'instance_groups': [],
+                    'labels': [],
+                },
+            },
+        }
+
+        return default_fields[endpoint]['new_fields'], default_fields[endpoint]['association_fields']
 
     def patch_endpoint(self, endpoint, *args, **kwargs):
         # Handle check mode

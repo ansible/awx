@@ -10,11 +10,16 @@
     app2_name: "AWX-Collection-tests-application-app2-{{ test_id }}"
     app3_name: "AWX-Collection-tests-application-app3-{{ test_id }}"
 
-- block:
+- name: Run Tests
+  block:
     - name: Create an application
       application:
         name: "{{ app1_name }}"
-        authorization_grant_type: "password"
+        description: this is a description
+        authorization_grant_type: password
+        redirect_uris:
+          - http://tower.com/api/v2/
+          - http://tower.com/api/v2/teams
         client_type: "public"
         organization: "Default"
         state: present
@@ -24,7 +29,7 @@
         that:
           - "result is changed"
 
-    - name: Run an application with exists
+    - name: Run an application with exists, with different parameters
       application:
         name: "{{ app1_name }}"
         authorization_grant_type: "password"
@@ -36,6 +41,17 @@
     - assert:
         that:
           - "result is not changed"
+
+    - name: Run an application with enforced and lacking fields
+      application:
+        name: "{{ app1_name }}"
+        organization: "Default"
+        state: enforced
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
 
     - name: Delete our application
       application:

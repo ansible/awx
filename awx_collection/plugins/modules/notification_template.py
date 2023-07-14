@@ -95,9 +95,10 @@ options:
       type: dict
     state:
       description:
-        - Desired state of the resource.
+        - Desired state of the resource. C(exists) will not modify the resource if it is present.
+        - Enforced state C(enforced) will default values of any option not provided.
       default: "present"
-      choices: ["present", "absent", "exists"]
+      choices: ["present", "absent", "exists", "enforced"]
       type: str
 extends_documentation_fragment: awx.awx.auth
 '''
@@ -222,7 +223,7 @@ def main():
         notification_type=dict(choices=['email', 'grafana', 'irc', 'mattermost', 'pagerduty', 'rocketchat', 'slack', 'twilio', 'webhook']),
         notification_configuration=dict(type='dict'),
         messages=dict(type='dict'),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists', 'enforced'], default='present'),
     )
 
     # Create a module for ourselves
@@ -271,13 +272,16 @@ def main():
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(existing_item)
+    elif state == 'enforced':
+        new_fields = module.get_enforced_defaults('notification_templates')[0]
+    else:
+        new_fields = {}
 
     final_notification_configuration = {}
     if notification_configuration is not None:
         final_notification_configuration.update(notification_configuration)
 
     # Create the data that gets sent for create and update
-    new_fields = {}
     if final_notification_configuration:
         new_fields['notification_configuration'] = final_notification_configuration
     new_fields['name'] = new_name if new_name else (module.get_item_name(existing_item) if existing_item else name)

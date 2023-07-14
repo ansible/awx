@@ -65,9 +65,10 @@ options:
         - preserve_existing_groups
     state:
       description:
-        - Desired state of the resource.
+        - Desired state of the resource. C(exists) will not modify the resource if it is present.
+        - Enforced state C(enforced) will default values of any option not provided.
       default: "present"
-      choices: ["present", "absent", "exists"]
+      choices: ["present", "absent", "exists", "enforced"]
       type: str
     new_name:
       description:
@@ -115,7 +116,7 @@ def main():
         children=dict(type='list', elements='str', aliases=['groups']),
         preserve_existing_hosts=dict(type='bool', default=False),
         preserve_existing_children=dict(type='bool', default=False, aliases=['preserve_existing_groups']),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists', 'enforced'], default='present'),
     )
 
     # Create a module for ourselves
@@ -140,18 +141,20 @@ def main():
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(group)
+    elif state == 'enforced':
+        new_fields, association_fields = module.get_enforced_defaults('groups')
+    else:
+        association_fields = {}
+        new_fields = {}
 
     # Create the data that gets sent for create and update
-    group_fields = {
-        'name': new_name if new_name else (module.get_item_name(group) if group else name),
-        'inventory': inventory_id,
-    }
+    new_fields['name'] = new_name if new_name else (module.get_item_name(group) if group else name)
+    new_fields['inventory'] = inventory_id
     if description is not None:
-        group_fields['description'] = description
+        new_fields['description'] = description
     if variables is not None:
-        group_fields['variables'] = json.dumps(variables)
+        new_fields['variables'] = json.dumps(variables)
 
-    association_fields = {}
     for resource, relationship in (('hosts', 'hosts'), ('groups', 'children')):
         name_list = module.params.get(relationship)
         if name_list is None:
@@ -179,7 +182,7 @@ def main():
             association_fields[relationship] = id_list
 
     # If the state was present we can let the module build or update the existing group, this will return on its own
-    module.create_or_update_if_needed(group, group_fields, endpoint='groups', item_type='group', associations=association_fields)
+    module.create_or_update_if_needed(group, new_fields, endpoint='groups', item_type='group', associations=association_fields)
 
 
 if __name__ == '__main__':

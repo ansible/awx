@@ -76,9 +76,10 @@ options:
       type: bool
     state:
       description:
-        - Desired state of the resource.
+        - Desired state of the resource. C(exists) will not modify the resource if it is present.
+        - Enforced state C(enforced) will default values of any option not provided.
       default: "present"
-      choices: ["present", "absent", "exists"]
+      choices: ["present", "absent", "exists", "enforced"]
       type: str
 extends_documentation_fragment: awx.awx.auth
 '''
@@ -149,7 +150,7 @@ def main():
         host_filter=dict(),
         instance_groups=dict(type="list", elements='str'),
         prevent_instance_group_fallback=dict(type='bool'),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists', 'enforced'], default='present'),
         input_inventories=dict(type='list', elements='str'),
     )
 
@@ -189,22 +190,23 @@ def main():
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(inventory)
+    elif state == 'enforced':
+        new_fields, association_fields = module.get_enforced_defaults('inventories')
+    else:
+        association_fields = {}
+        new_fields = {}
 
     # Create the data that gets sent for create and update
-    inventory_fields = {
-        'name': new_name if new_name else (module.get_item_name(inventory) if inventory else name),
-        'organization': org_id,
-        'kind': kind,
-        'host_filter': host_filter,
-    }
+    new_fields['name'] = new_name if new_name else (module.get_item_name(inventory) if inventory else name)
+    new_fields['organization'] = org_id
+    new_fields['kind'] = kind
+    new_fields['host_filter'] = host_filter
     if prevent_instance_group_fallback is not None:
-        inventory_fields['prevent_instance_group_fallback'] = prevent_instance_group_fallback
+        new_fields['prevent_instance_group_fallback'] = prevent_instance_group_fallback
     if description is not None:
-        inventory_fields['description'] = description
+        new_fields['description'] = description
     if variables is not None:
-        inventory_fields['variables'] = json.dumps(variables)
-
-    association_fields = {}
+        new_fields['variables'] = json.dumps(variables)
 
     instance_group_names = module.params.get('instance_groups')
     if instance_group_names is not None:
@@ -213,7 +215,7 @@ def main():
             association_fields['instance_groups'].append(module.resolve_name_to_id('instance_groups', item))
 
     # We need to perform a check to make sure you are not trying to convert a regular inventory into a smart one.
-    if inventory and inventory['kind'] == '' and inventory_fields['kind'] == 'smart':
+    if inventory and inventory['kind'] == '' and new_fields['kind'] == 'smart':
         module.fail_json(msg='You cannot turn a regular inventory into a "smart" inventory.')
 
     if kind == 'constructed':
@@ -226,7 +228,7 @@ def main():
     # If the state was present and we can let the module build or update the existing inventory, this will return on its own
     module.create_or_update_if_needed(
         inventory,
-        inventory_fields,
+        new_fields,
         endpoint='inventories',
         item_type='inventory',
         associations=association_fields,

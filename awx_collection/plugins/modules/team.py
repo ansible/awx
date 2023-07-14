@@ -41,9 +41,10 @@ options:
       type: str
     state:
       description:
-        - Desired state of the resource.
-      choices: ["present", "absent", "exists"]
+        - Desired state of the resource. C(exists) will not modify the resource if it is present.
+        - Enforced state C(enforced) will default values of any option not provided.
       default: "present"
+      choices: ["present", "absent", "exists", "enforced"]
       type: str
 extends_documentation_fragment: awx.awx.auth
 '''
@@ -69,7 +70,7 @@ def main():
         new_name=dict(),
         description=dict(),
         organization=dict(required=True),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists', 'enforced'], default='present'),
     )
 
     # Create a module for ourselves
@@ -91,14 +92,19 @@ def main():
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(team)
+    elif state == 'enforced':
+        new_fields = module.get_enforced_defaults('teams')[0]
+    else:
+        new_fields = {}
 
     # Create the data that gets sent for create and update
-    team_fields = {'name': new_name if new_name else (module.get_item_name(team) if team else name), 'organization': org_id}
+    new_fields['name'] = new_name if new_name else (module.get_item_name(team) if team else name)
+    new_fields['organization'] = org_id
     if description is not None:
-        team_fields['description'] = description
+        new_fields['description'] = description
 
     # If the state was present and we can let the module build or update the existing team, this will return on its own
-    module.create_or_update_if_needed(team, team_fields, endpoint='teams', item_type='team')
+    module.create_or_update_if_needed(team, new_fields, endpoint='teams', item_type='team')
 
 
 if __name__ == '__main__':

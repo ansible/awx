@@ -80,9 +80,10 @@ options:
       elements: str
     state:
       description:
-        - Desired state of the resource.
-      choices: ["present", "absent", "exists"]
+        - Desired state of the resource. C(exists) will not modify the resource if it is present.
+        - Enforced state C(enforced) will default values of any option not provided.
       default: "present"
+      choices: ["present", "absent", "exists", "enforced"]
       type: str
 extends_documentation_fragment: awx.awx.auth
 '''
@@ -107,7 +108,7 @@ def main():
         policy_instance_list=dict(type='list', elements='str'),
         pod_spec_override=dict(),
         instances=dict(required=False, type="list", elements='str'),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists', 'enforced'], default='present'),
     )
 
     # Create a module for ourselves
@@ -133,19 +134,22 @@ def main():
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(existing_item)
+    elif state == 'enforced':
+        new_fields, association_fields = module.get_enforced_defaults('instance_groups')
+    else:
+        association_fields = {}
+        new_fields = {}
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     credential_id = None
     if credential:
         credential_id = module.resolve_name_to_id('credentials', credential)
-    instances_ids = None
     if instances is not None:
-        instances_ids = []
+        association_fields['instances'] = []
         for item in instances:
-            instances_ids.append(module.resolve_name_to_id('instances', item))
+            association_fields['instances'].append(module.resolve_name_to_id('instances', item))
 
     # Create the data that gets sent for create and update
-    new_fields = {}
     new_fields['name'] = new_name if new_name else (module.get_item_name(existing_item) if existing_item else name)
     if credential is not None:
         new_fields['credential'] = credential_id
@@ -170,9 +174,7 @@ def main():
         new_fields,
         endpoint='instance_groups',
         item_type='instance_group',
-        associations={
-            'instances': instances_ids,
-        },
+        associations=association_fields,
     )
 
 

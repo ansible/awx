@@ -47,9 +47,10 @@ options:
       type: str
     state:
       description:
-        - Desired state of the resource.
-      choices: ["present", "absent", "exists"]
+        - Desired state of the resource. C(exists) will not modify the resource if it is present.
+        - Enforced state C(enforced) will default values of any option not provided.
       default: "present"
+      choices: ["present", "absent", "exists", "enforced"]
       type: str
 
 extends_documentation_fragment: awx.awx.auth
@@ -80,7 +81,7 @@ def main():
         target_credential=dict(required=True),
         source_credential=dict(),
         metadata=dict(type="dict"),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists', 'enforced'], default='present'),
     )
 
     # Create a module for ourselves
@@ -105,22 +106,24 @@ def main():
 
     if state == 'absent':
         module.delete_if_needed(credential_input_source)
+    elif state == 'enforced':
+        new_fields = module.get_enforced_defaults('credential_input_sources')[0]
+    else:
+        new_fields = {}
 
     # Create the data that gets sent for create and update
-    credential_input_source_fields = {
-        'target_credential': target_credential_id,
-        'input_field_name': input_field_name,
-    }
+    new_fields['target_credential'] = target_credential_id
+    new_fields['input_field_name'] = input_field_name
     if source_credential:
-        credential_input_source_fields['source_credential'] = module.resolve_name_to_id('credentials', source_credential)
+        new_fields['source_credential'] = module.resolve_name_to_id('credentials', source_credential)
     if metadata:
-        credential_input_source_fields['metadata'] = metadata
+        new_fields['metadata'] = metadata
     if description:
-        credential_input_source_fields['description'] = description
+        new_fields['description'] = description
 
     # If the state was present we can let the module build or update the existing group, this will return on its own
     module.create_or_update_if_needed(
-        credential_input_source, credential_input_source_fields, endpoint='credential_input_sources', item_type='credential_input_source'
+        credential_input_source, new_fields, endpoint='credential_input_sources', item_type='credential_input_source'
     )
 
 
