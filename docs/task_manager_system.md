@@ -69,12 +69,12 @@ Responsible for looking at each pending task and determining whether Task Manage
 1. Get pending, waiting, and running tasks that have `dependencies_processed = True`
 2. Before processing pending tasks, the task manager first processes running tasks. This allows it to build a dependency graph and account for the currently consumed capacity in the system.
     a. dependency graph is just an internal data structure that tracks which jobs are currently running. It also handles "soft" blocking logic
-    b. the capacity is tracked in memory on the `TaskManagerInstances` and `TaskManagerInstanceGroups` objects which are  in-memory representations of the instances and instance groups. These data structures are used to help track what consumed capacity will be as we decide that we will start new tasks, and until such time that we actually commit the state changes to the database.
+    b. the capacity is tracked in memory on the `TaskManagerInstances` and `TaskManagerInstanceGroups` objects which are in-memory representations of the instances and instance groups. These data structures are used to help track what consumed capacity will be as we decide that we will start new tasks, and until such time that we actually commit the state changes to the database.
 3. For each pending task:
     a. Check if total number of tasks started on this task manager cycle is > `start_task_limit`
-    b. Check if [timed out](#Timing Out)
-    b. Check if task is blocked
-    c. Check if preferred instances have enough capacity to run the task
+    b. Check if [timed out](#timing-out)
+    c. Check if task is blocked
+    d. Check if preferred instances have enough capacity to run the task
 4. Start the task by changing status to `waiting` and submitting task to dispatcher
 
 
@@ -82,12 +82,12 @@ Responsible for looking at each pending task and determining whether Task Manage
 
 Responsible for looking at each workflow job and determining if next node can run
 
-### Worflow Manager Steps
+### Workflow Manager Steps
 
 1. Get all running workflow jobs
 2. Build up a workflow DAG for each workflow job
 3. For each workflow job:
-    a. Check if [timed out](#Timing Out)
+    a. Check if [timed out](#timing-out)
     b. Check if next node can start based on previous node status and the associated success / failure / always logic
 4. Create new task and signal start
 
@@ -96,7 +96,7 @@ Responsible for looking at each workflow job and determining if next node can ru
 
 Each of the three managers has a single entry point, `schedule()`. The `schedule()` function tries to acquire a single, global lock recorded in the database. If the lock cannot be acquired, the method returns. The failure to acquire the lock indicates that there is another instance currently running `schedule()`.
 
-Each manager runs inside of an atomic DB transaction. If the dispatcher task that is running the manager is killed, none of the created tasks or updates will take effect.
+Each manager runs inside an atomic DB transaction. If the dispatcher task that is running the manager is killed, none of the created tasks or updates will take effect.
 
 ### Hybrid Scheduler: Periodic + Event
 
@@ -112,7 +112,7 @@ Empirically, the periodic task manager has been effective in the past and will c
 
 ### Bulk Reschedule 
 
-Typically each manager is ran asynchronously via the dispatcher system. Dispatcher tasks take resources, so it is important to not schedule tasks unnecessarily. We also need a mechanism to run the manager *after* an atomic transaction block.
+Typically, each manager runs asynchronously via the dispatcher system. Dispatcher tasks take resources, so it is important to not schedule tasks unnecessarily. We also need a mechanism to run the manager *after* an atomic transaction block.
 
 Scheduling the managers are facilitated through the `ScheduleTaskManager`, `ScheduleDependencyManager`, and `ScheduleWorkflowManager` classes. These are utilities that help prevent too many managers from being started via the dispatcher system. Think of it as a "do once" mechanism.
 
@@ -127,9 +127,9 @@ In the above code, we only want to schedule the TaskManager once after all `task
 
 ### Timing out
 
-Because of the global lock of the each manager, only one manager can run at a time. If that manager gets stuck for whatever reason, it is important to kill it and let a new one take its place. As such, there is special code in the parent dispatcher process to SIGKILL any of the task system managers after a few minutes.
+Because of the global lock of the manager, only one manager can run at a time. If that manager gets stuck for whatever reason, it is important to kill it and let a new one take its place. As such, there is special code in the parent dispatcher process to SIGKILL any of the task system managers after a few minutes.
 
-There is an important side effect to this. Because the manager `schedule()` runs in a transaction, the next run will have re-process the same tasks again. This could lead a manager never being able to progress from one run to the next, as each time it times out. In this situation the task system is effectively stuck as new tasks cannot start. To mitigate this, each manager will check if is is about to hit the time out period and bail out early if so. This gives the manager enough time to commit the DB transaction, and the next manager cycle will be able to start with the next set of unprocessed tasks. This ensures that the system can still make incremental progress under high workloads (i.e. many pending tasks).
+There is an important side effect to this. Because the manager `schedule()` runs in a transaction, the next run will have re-process the same tasks again. This could lead a manager never being able to progress from one run to the next, as each time it times out. In this situation the task system is effectively stuck as new tasks cannot start. To mitigate this, each manager will check if it is about to hit the time out period and bail out early if so. This gives the manager enough time to commit the DB transaction, and the next manager cycle will be able to start with the next set of unprocessed tasks. This ensures that the system can still make incremental progress under high workloads (i.e. many pending tasks).
 
 
 ### Job Lifecycle
@@ -146,7 +146,7 @@ There is an important side effect to this. Because the manager `schedule()` runs
 
 ### Node Affinity Decider
 
-The Task Manager decides which exact node a job will run on. It does so by considering user-configured group execution policy and user-configured capacity. First, the set of groups on which a job _can_ run on is constructed (see the AWX document on [Clustering](https://github.com/ansible/awx/blob/devel/docs/clustering.md)). The groups are traversed until a node within that group is found. The node with the largest remaining capacity (after accounting for the job's task impact) is chosen first. If there are no instances that can fit the job, then the largest *idle* node is chosen, regardless whether the job fits within its capacity limits. In this second case, it is possible for the instance to exceed its capacity in order to run the job.
+The Task Manager decides which exact node a job will run on. It does so by considering user-configured group execution policy and user-configured capacity. First, the set of groups on which a job _can_ run on is constructed (see the AWX document on [Clustering](./clustering.md)). The groups are traversed until a node within that group is found. The node with the largest remaining capacity (after accounting for the job's task impact) is chosen first. If there are no instances that can fit the job, then the largest *idle* node is chosen, regardless whether the job fits within its capacity limits. In this second case, it is possible for the instance to exceed its capacity in order to run the job.
 
 
 ## Managers are short-lived
@@ -184,4 +184,4 @@ This is a feature in AWX where dynamic inventory and projects associated with Jo
 * Spawning of project updates and/or inventory updates should **not** be triggered when a related job template is launched **IF** there is an update && the last update finished successfully && the finished time puts the update within the configured cache window.
 * **Note:** `update on launch` spawned jobs (_i.e._, InventoryUpdate and ProjectUpdate) are considered dependent jobs; in other words, the `launch_type` is `dependent`. If a `dependent` job fails, then everything related to it should also fail.
 
-For example permutations of blocking, take a look at this [Task Manager Dependency Dependency Rules and Permutations](https://docs.google.com/a/redhat.com/document/d/1AOvKiTMSV0A2RHykHW66BZKBuaJ_l0SJ-VbMwvu-5Gk/edit?usp=sharing) doc.
+For example permutations of blocking, take a look at this [Task Manager Dependency Rules and Permutations](https://docs.google.com/a/redhat.com/document/d/1AOvKiTMSV0A2RHykHW66BZKBuaJ_l0SJ-VbMwvu-5Gk/edit?usp=sharing) doc.
