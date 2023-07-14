@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 if [ -z $AWX_IGNORE_BLACK ] ; then
 	python_files_changed=$(git diff --cached --name-only --diff-filter=AM | grep -E '\.py$')
 	if [ "x$python_files_changed" != "x" ] ; then
