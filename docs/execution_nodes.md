@@ -50,7 +50,7 @@ Use the Instance page or `api/v2/instances` endpoint to add a new instance.
 
 Below is a table of configuartions for the [diagram](#adding-execution-nodes-to-awx) above.
 
-| instance name    | listener_port | peers_from_control_nodes | peers        |
+| instance name    | listener_port | peers_from_control_nodes | peers       |
 |------------------|---------------|-------------------------|--------------|
 | execution node 1 | 27199         | true                    | []           |
 | hop node         | 27199         | true                    | []           |
