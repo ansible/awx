@@ -123,6 +123,9 @@ class PoolWorker(object):
     def calculate_managed_tasks(self):
         if not self.track_managed_tasks:
             return
+        # optimization: if there are no active tasks then do not bother checking the queue
+        if not self.managed_tasks:
+            return
         # look to see if any tasks were finished
         finished = []
         for _ in range(self.finished.qsize()):
@@ -253,6 +256,8 @@ class WorkerPool(object):
         return idx, worker
 
     def debug(self, *args, **kwargs):
+        for worker in self.workers:
+            worker.calculate_managed_tasks()
         tmpl = Template(
             'Recorded at: {{ dt }} \n'
             '{{ pool.name }}[pid:{{ pool.pid }}] workers total={{ workers|length }} {{ meta }} \n'

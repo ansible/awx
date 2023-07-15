@@ -17,7 +17,6 @@ from django.conf import settings
 
 from awx.main.dispatch.pool import WorkerPool
 from awx.main.dispatch import pg_bus_conn
-from awx.main.utils.common import log_excess_runtime
 from awx.main.utils.db import set_connection_name
 import awx.main.analytics.subsystem_metrics as s_metrics
 
@@ -42,8 +41,6 @@ class WorkerSignalHandler:
 
 
 class AWXConsumerBase(object):
-    last_stats = time.time()
-
     def __init__(self, name, worker, queues=[], pool=None):
         self.should_stop = False
 
@@ -116,16 +113,6 @@ class AWXConsumerBase(object):
         self.pool.write(queue, body)
         self.total_messages += 1
 
-    @log_excess_runtime(logger)
-    def record_statistics(self):
-        if time.time() - self.last_stats > 1:  # buffer stat recording to once per second
-            try:
-                self.redis.set(f'awx_{self.name}_statistics', self.pool.debug())
-                self.last_stats = time.time()
-            except Exception:
-                logger.exception(f"encountered an error communicating with redis to store {self.name} statistics")
-                self.last_stats = time.time()
-
     def run(self, *args, **kwargs):
         signal.signal(signal.SIGINT, self.stop)
         signal.signal(signal.SIGTERM, self.stop)
@@ -164,8 +151,6 @@ class AWXConsumerPG(AWXConsumerBase):
         self.listen_cumulative_time = 0.0
 
     def run_periodic_tasks(self):
-        self.record_statistics()  # maintains time buffer in method
-
         current_time = time.time()
         if current_time - self.last_cleanup > 60:  # same as cluster_node_heartbeat
             # NOTE: if we run out of database connections, it is important to still run cleanup
