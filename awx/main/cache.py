@@ -14,7 +14,10 @@ IGNORED_EXCEPTIONS = (TimeoutError, ResponseError, ConnectionError, socket.timeo
 CONNECTION_INTERRUPTED_SENTINEL = object()
 
 
-def optionally_ignore_exceptions(func, return_value=None):
+def optionally_ignore_exceptions(func=None, return_value=None):
+    if func is None:
+        return functools.partial(optionally_ignore_exceptions, return_value=return_value)
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         try:
@@ -37,9 +40,15 @@ class AWXRedisCache(RedisCache):
     def add(self, key, value, timeout=DEFAULT_TIMEOUT, version=None):
         return super().add(key, value, timeout, version)
 
-    @optionally_ignore_exceptions
-    def get(self, key, default=None, version=None):
+    @optionally_ignore_exceptions(return_value=CONNECTION_INTERRUPTED_SENTINEL)
+    def _get(self, key, default=None, version=None):
         return super().get(key, default, version)
+
+    def get(self, key, default=None, version=None):
+        value = self._get(key, default, version)
+        if value is CONNECTION_INTERRUPTED_SENTINEL:
+            return default
+        return value
 
     @optionally_ignore_exceptions
     def set(self, key, value, timeout=DEFAULT_TIMEOUT, version=None):
