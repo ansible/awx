@@ -422,6 +422,7 @@ def emit_activity_stream_change(instance):
             object1=instance.object1,
             object2=instance.object2,
             summary_fields=summary_fields,
+            volume_tag='activity_stream',
         ),
     )
 

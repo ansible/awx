@@ -802,6 +802,7 @@ LOG_AGGREGATOR_ACTION_MAX_DISK_USAGE_GB = 1  # Action queue
 LOG_AGGREGATOR_MAX_DISK_USAGE_PATH = '/var/lib/awx'
 LOG_AGGREGATOR_RSYSLOGD_DEBUG = False
 LOG_AGGREGATOR_RSYSLOGD_ERROR_LOG_FILE = '/var/log/tower/rsyslog.err'
+LOG_AGGREGATOR_HIGH_VOLUME_ALLOW_LIST = []
 API_400_ERROR_LOG_FORMAT = 'status {status_code} received by user {user_name} attempting to access {url_path} from {remote_addr}'
 
 ASGI_APPLICATION = "awx.main.routing.application"
@@ -859,28 +860,26 @@ LOGGING = {
         'awx.conf': {'handlers': ['null'], 'level': 'WARNING'},
         'awx.conf.settings': {'handlers': ['null'], 'level': 'WARNING'},
         'awx.main': {'handlers': ['null']},
-        'awx.main.commands.run_callback_receiver': {'handlers': ['callback_receiver'], 'level': 'INFO'},  # very noisey debug-level logs
+        'awx.main.commands.run_callback_receiver': {'handlers': ['callback_receiver']},  # see volume_tag "events"
         'awx.main.dispatch': {'handlers': ['dispatcher']},
-        'awx.main.consumers': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'INFO'},
         'awx.main.rsyslog_configurer': {'handlers': ['rsyslog_configurer']},
         'awx.main.cache_clear': {'handlers': ['cache_clear']},
         'awx.main.ws_heartbeat': {'handlers': ['ws_heartbeat']},
         'awx.main.wsrelay': {'handlers': ['wsrelay']},
         'awx.main.commands.inventory_import': {'handlers': ['inventory_import'], 'propagate': False},
         'awx.main.tasks': {'handlers': ['task_system', 'external_logger', 'console'], 'propagate': False},
-        'awx.main.analytics': {'handlers': ['task_system', 'external_logger', 'console'], 'level': 'INFO', 'propagate': False},
+        'awx.main.analytics': {'handlers': ['task_system', 'external_logger', 'console'], 'propagate': False},
         'awx.main.scheduler': {'handlers': ['task_system', 'external_logger', 'console'], 'propagate': False},
-        'awx.main.access': {'level': 'INFO'},  # very verbose debug-level logs
-        'awx.main.signals': {'level': 'INFO'},  # very verbose debug-level logs
-        'awx.api.permissions': {'level': 'INFO'},  # very verbose debug-level logs
-        'awx.analytics': {'handlers': ['external_logger'], 'level': 'INFO', 'propagate': False},
-        'awx.analytics.broadcast_websocket': {'handlers': ['console', 'file', 'wsrelay', 'external_logger'], 'level': 'INFO', 'propagate': False},
-        'awx.analytics.performance': {'handlers': ['console', 'file', 'tower_warnings', 'external_logger'], 'level': 'DEBUG', 'propagate': False},
-        'awx.analytics.job_lifecycle': {'handlers': ['console', 'job_lifecycle'], 'level': 'DEBUG', 'propagate': False},
-        'django_auth_ldap': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
-        'social': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
-        'system_tracking_migrations': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
-        'rbac_migrations': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
+        # awx.analytics.* are privileged for external logger, in addition to those listed, these have no customizations
+        # - awx.analytics.performance
+        # - awx.analytics.activity_stream
+        'awx.analytics.job_lifecycle': {'handlers': ['console', 'external_logger', 'job_lifecycle'], 'propagate': False},
+        'awx.analytics.job_events': {'handlers': ['external_logger'], 'propagate': False},
+        'awx.analytics.system_tracking': {'handlers': ['external_logger'], 'propagate': False},
+        'django_auth_ldap': {'handlers': ['console', 'file', 'tower_warnings']},
+        'social': {'handlers': ['console', 'file', 'tower_warnings']},
+        'system_tracking_migrations': {'handlers': ['console', 'file', 'tower_warnings']},
+        'rbac_migrations': {'handlers': ['console', 'file', 'tower_warnings']},
     },
 }
 

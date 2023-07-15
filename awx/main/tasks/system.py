@@ -512,7 +512,6 @@ def inspect_execution_nodes(instance_list):
 
 @task(queue=get_task_queuename, bind_kwargs=['dispatch_time', 'worker_tasks'])
 def cluster_node_heartbeat(dispatch_time=None, worker_tasks=None):
-    logger.debug("Cluster node heartbeat task.")
     nowtime = now()
     instance_list = list(Instance.objects.filter(node_state__in=(Instance.States.READY, Instance.States.UNAVAILABLE, Instance.States.INSTALLED)))
     this_inst = None
@@ -622,7 +621,6 @@ def awx_receptor_workunit_reaper():
     """
     if not settings.RECEPTOR_RELEASE_WORK:
         return
-    logger.debug("Checking for unreleased receptor work units")
     receptor_ctl = get_receptor_ctl()
     receptor_work_list = receptor_ctl.simple_command("work list")
 
@@ -660,14 +658,13 @@ def awx_k8s_reaper():
 def awx_periodic_scheduler():
     with advisory_lock('awx_periodic_scheduler_lock', wait=False) as acquired:
         if acquired is False:
-            logger.debug("Not running periodic scheduler, another task holds lock")
+            logger.debug("Not running periodic scheduler, another task holds lock", extra={'volume_tag': 'system_tasks'})
             return
-        logger.debug("Starting periodic scheduler")
 
         run_now = now()
         state = TowerScheduleState.get_solo()
         last_run = state.schedule_last_run
-        logger.debug("Last scheduler run was: %s", last_run)
+        logger.debug(f"Starting periodic scheduler, last run was {last_run}", extra={'volume_tag': 'system_tasks'})
         state.schedule_last_run = run_now
         state.save()
 

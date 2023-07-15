@@ -112,11 +112,11 @@ class TaskBase:
             current_time = time.time()
             time_last_recorded = current_time - self.subsystem_metrics.decode(f"{self.prefix}_recorded_timestamp")
             if time_last_recorded > settings.SUBSYSTEM_METRICS_TASK_MANAGER_RECORD_INTERVAL:
-                logger.debug(f"recording {self.prefix} metrics, last recorded {time_last_recorded} seconds ago")
+                logger.debug(f"recording {self.prefix} metrics, last recorded {time_last_recorded} seconds ago", extra={'volume_tag': 'metrics'})
                 self.subsystem_metrics.set(f"{self.prefix}_recorded_timestamp", current_time)
                 self.subsystem_metrics.pipe_execute()
             else:
-                logger.debug(f"skipping recording {self.prefix} metrics, last recorded {time_last_recorded} seconds ago")
+                logger.debug(f"skipping recording {self.prefix} metrics, last recorded {time_last_recorded} seconds ago", extra={'volume_tag': 'metrics'})
 
     def record_aggregate_metrics_and_exit(self, *args):
         self.record_aggregate_metrics()
@@ -128,9 +128,9 @@ class TaskBase:
             with advisory_lock(f"{self.prefix}_lock", wait=False) as acquired:
                 with transaction.atomic():
                     if acquired is False:
-                        logger.debug(f"Not running {self.prefix} scheduler, another task holds lock")
+                        logger.debug(f"Not running {self.prefix} scheduler, another task holds lock", extra={'volume_tag': 'system_tasks'})
                         return
-                    logger.debug(f"Starting {self.prefix} Scheduler")
+                    logger.debug(f"Starting {self.prefix} Scheduler", extra={'volume_tag': 'system_tasks'})
                     # if sigterm due to timeout, still record metrics
                     signal.signal(signal.SIGTERM, self.record_aggregate_metrics_and_exit)
                     self._schedule()
@@ -139,7 +139,7 @@ class TaskBase:
                 if self.prefix == "task_manager":
                     self.subsystem_metrics.set(f"{self.prefix}_commit_seconds", time.time() - commit_start)
                 self.record_aggregate_metrics()
-                logger.debug(f"Finishing {self.prefix} Scheduler")
+                logger.debug(f"Finishing {self.prefix} Scheduler", extra={'volume_tag': 'system_tasks'})
 
 
 class WorkflowManager(TaskBase):

@@ -20,7 +20,7 @@ from django.conf import settings
 BROADCAST_WEBSOCKET_REDIS_KEY_NAME = 'broadcast_websocket_stats'
 
 
-logger = logging.getLogger('awx.analytics.broadcast_websocket')
+logger = logging.getLogger('awx.main.analytics.broadcast_websocket')
 
 
 def dt_to_seconds(dt):
@@ -88,8 +88,8 @@ class RelayWebsocketStatsManager:
                 await redis_conn.set(self._redis_key, stats_data_str)
 
                 await asyncio.sleep(settings.BROADCAST_WEBSOCKET_STATS_POLL_RATE_SECONDS)
-        except Exception as e:
-            logger.warning(e)
+        except Exception:
+            logger.exception('Error in run loop for relay websocket manager')
             await asyncio.sleep(settings.BROADCAST_WEBSOCKET_STATS_POLL_RATE_SECONDS)
             self.start()
 

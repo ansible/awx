@@ -159,7 +159,9 @@ def check_user_access(user, model_class, action, *args, **kwargs):
     access_instance = access_class(user)
     access_method = getattr(access_instance, 'can_%s' % action)
     result = access_method(*args, **kwargs)
-    logger.debug('%s.%s %r returned %r', access_instance.__class__.__name__, getattr(access_method, '__name__', 'unknown'), args, result)
+    logger.debug(
+        '%s.%s %r returned %r', access_instance.__class__.__name__, getattr(access_method, '__name__', 'unknown'), args, result, extra={'volume_tag': 'rbac'}
+    )
     return result
 
 
@@ -171,7 +173,7 @@ def check_user_access_with_errors(user, model_class, action, *args, **kwargs):
     access_instance = access_class(user, save_messages=True)
     access_method = getattr(access_instance, 'can_%s' % action, None)
     result = access_method(*args, **kwargs)
-    logger.debug('%s.%s %r returned %r', access_instance.__class__.__name__, access_method.__name__, args, result)
+    logger.debug('%s.%s %r returned %r', access_instance.__class__.__name__, access_method.__name__, args, result, extra={'volume_tag': 'rbac'})
     return (result, access_instance.messages)
 
 
