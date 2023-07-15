@@ -108,7 +108,7 @@ options:
     verbosity:
       description:
         - Control the output level Ansible produces as the playbook runs. 0 - Normal, 1 - Verbose, 2 - More Verbose, 3 - Debug, 4 - Connection Debug.
-      choices: [0, 1, 2, 3, 4]
+      choices: [0, 1, 2, 3, 4, 5]
       type: int
     extra_vars:
       description:
@@ -404,7 +404,7 @@ def main():
         instance_groups=dict(type="list", elements='str'),
         forks=dict(type='int'),
         limit=dict(),
-        verbosity=dict(type='int', choices=[0, 1, 2, 3, 4]),
+        verbosity=dict(type='int', choices=[0, 1, 2, 3, 4, 5]),
         extra_vars=dict(type='dict'),
         job_tags=dict(),
         force_handlers=dict(type='bool', aliases=['force_handlers_enabled']),
