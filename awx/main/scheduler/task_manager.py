@@ -102,21 +102,24 @@ class TaskBase:
 
     def record_aggregate_metrics(self, *args):
         if not is_testing():
-            # increment task_manager_schedule_calls regardless if the other
-            # metrics are recorded
-            s_metrics.Metrics(auto_pipe_execute=True).inc(f"{self.prefix}__schedule_calls", 1)
-            # Only record metrics if the last time recording was more
-            # than SUBSYSTEM_METRICS_TASK_MANAGER_RECORD_INTERVAL ago.
-            # Prevents a short-duration task manager that runs directly after a
-            # long task manager to override useful metrics.
-            current_time = time.time()
-            time_last_recorded = current_time - self.subsystem_metrics.decode(f"{self.prefix}_recorded_timestamp")
-            if time_last_recorded > settings.SUBSYSTEM_METRICS_TASK_MANAGER_RECORD_INTERVAL:
-                logger.debug(f"recording {self.prefix} metrics, last recorded {time_last_recorded} seconds ago")
-                self.subsystem_metrics.set(f"{self.prefix}_recorded_timestamp", current_time)
-                self.subsystem_metrics.pipe_execute()
-            else:
-                logger.debug(f"skipping recording {self.prefix} metrics, last recorded {time_last_recorded} seconds ago")
+            try:
+                # increment task_manager_schedule_calls regardless if the other
+                # metrics are recorded
+                s_metrics.Metrics(auto_pipe_execute=True).inc(f"{self.prefix}__schedule_calls", 1)
+                # Only record metrics if the last time recording was more
+                # than SUBSYSTEM_METRICS_TASK_MANAGER_RECORD_INTERVAL ago.
+                # Prevents a short-duration task manager that runs directly after a
+                # long task manager to override useful metrics.
+                current_time = time.time()
+                time_last_recorded = current_time - self.subsystem_metrics.decode(f"{self.prefix}_recorded_timestamp")
+                if time_last_recorded > settings.SUBSYSTEM_METRICS_TASK_MANAGER_RECORD_INTERVAL:
+                    logger.debug(f"recording {self.prefix} metrics, last recorded {time_last_recorded} seconds ago")
+                    self.subsystem_metrics.set(f"{self.prefix}_recorded_timestamp", current_time)
+                    self.subsystem_metrics.pipe_execute()
+                else:
+                    logger.debug(f"skipping recording {self.prefix} metrics, last recorded {time_last_recorded} seconds ago")
+            except Exception:
+                logger.exception(f"Error saving metrics for {self.prefix}")
 
     def record_aggregate_metrics_and_exit(self, *args):
         self.record_aggregate_metrics()
