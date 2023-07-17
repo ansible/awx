@@ -17,6 +17,6 @@ class Command(BaseCommand):
         months_ago = options.get('months-ago') or None
 
         if not months_ago:
-            months_ago = getattr(settings, 'CLEANUP_HOST_METRICS_THRESHOLD', 12)
+            months_ago = getattr(settings, 'CLEANUP_HOST_METRICS_SOFT_THRESHOLD', 12)
 
         HostMetric.cleanup_task(months_ago)
