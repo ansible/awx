@@ -59,7 +59,8 @@ jobs:
       - name: Checkout awx-operator
         uses: actions/checkout@v2
         with:
-          repository: ansible/awx-operator
+          repository: relrod/awx-operator
+          ref: attempt-2
           path: awx-operator
 
       - name: Get python version from Makefile
