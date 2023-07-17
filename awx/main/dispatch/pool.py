@@ -417,16 +417,16 @@ class AutoscalePool(WorkerPool):
                 # the task manager to never do more work
                 current_task = w.current_task
                 if current_task and isinstance(current_task, dict):
-                    endings = ['tasks.task_manager', 'tasks.dependency_manager', 'tasks.workflow_manager']
+                    endings = ('tasks.task_manager', 'tasks.dependency_manager', 'tasks.workflow_manager')
                     current_task_name = current_task.get('task', '')
-                    if any(current_task_name.endswith(e) for e in endings):
+                    if current_task_name.endswith(endings):
                         if 'started' not in current_task:
                             w.managed_tasks[current_task['uuid']]['started'] = time.time()
                         age = time.time() - current_task['started']
                         w.managed_tasks[current_task['uuid']]['age'] = age
                         if age > self.task_manager_timeout:
-                            logger.error(f'{current_task_name} has held the advisory lock for {age}, sending SIGTERM to {w.pid}')
-                            os.kill(w.pid, signal.SIGTERM)
+                            logger.error(f'{current_task_name} has held the advisory lock for {age}, sending SIGUSR1 to {w.pid}')
+                            os.kill(w.pid, signal.SIGUSR1)
 
         for m in orphaned:
             # if all the workers are dead, spawn at least one

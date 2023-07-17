@@ -123,6 +123,9 @@ class TaskBase:
         sys.exit(1)
 
     def schedule(self):
+        # Always be able to restore the original signal handler if we finish
+        original_sigusr1 = signal.getsignal(signal.SIGUSR1)
+
         # Lock
         with task_manager_bulk_reschedule():
             with advisory_lock(f"{self.prefix}_lock", wait=False) as acquired:
@@ -132,13 +135,19 @@ class TaskBase:
                         return
                     logger.debug(f"Starting {self.prefix} Scheduler")
                     # if sigterm due to timeout, still record metrics
-                    signal.signal(signal.SIGTERM, self.record_aggregate_metrics_and_exit)
+                    signal.signal(signal.SIGUSR1, self.record_aggregate_metrics_and_exit)
                     self._schedule()
                     commit_start = time.time()
 
                 if self.prefix == "task_manager":
                     self.subsystem_metrics.set(f"{self.prefix}_commit_seconds", time.time() - commit_start)
                 self.record_aggregate_metrics()
+
+                # Reset the signal handler back to the default just in case anything
+                # else uses the same signal for other purposes
+                logger.debug('Resetting SIGUSR1 handler')
+                signal.signal(signal.SIGUSR1, original_sigusr1)
+
                 logger.debug(f"Finishing {self.prefix} Scheduler")
 
 
