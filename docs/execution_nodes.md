@@ -2,25 +2,24 @@
 
 Stand-alone execution nodes can be added to run alongside the Kubernetes deployment of AWX. These machines will not be a part of the AWX Kubernetes cluster. The control nodes running in the cluster will connect and submit work to these machines via Receptor. The machines be registered in AWX as type "execution" instances, meaning they will only be used to run AWX Jobs (i.e. they will not dispatch work or handle web requests as control nodes do).
 
-Below is an example of a single AWX pod connecting to two different execution nodes. For each execution node, the awx-ee container makes an outbound TCP connection to the machine via Receptor.
+Hop nodes can be added to sit between the control plane of AWX and stand alone execution nodes. These machines will not be a part of the AWX Kubernetes cluster. The machines will be registered in AWX as node type "hop", meaning they will only handle inbound / outbound traffic for otherwise unreachable nodes in a different or more strict network. 
+
+Below is an example of an AWX Task pod with two excution nodes. Traffic to execution node 2 flows through a hop node that is setup between it and the control plane.
 
 ```
-                                 AWX POD
-                             ┌──────────────┐
-                             │              │
-                             │ ┌──────────┐ │
-┌─────────────────┐          │ │ awx-task │ │
-│ execution node 1│◄────┐    │ ├──────────┤ │
-├─────────────────┤     ├────┼─┤ awx-ee   │ │
-│ execution node 2│◄────┘    │ ├──────────┤ │
-└─────────────────┘ Receptor │ │ awx-web  │ │
-                      TCP    │ └──────────┘ │
-                     Peers   │              │
-                             └──────────────┘
+                                                     AWX TASK POD
+                                                   ┌──────────────┐
+                                                   │              │
+                                                   │ ┌──────────┐ │
+┌─────────────────┐   ┌─────────────────┐          │ │ awx-task │ │
+│execution node 2 ├──►│     hop node    │◄────┐    │ ├──────────┤ │
+└─────────────────┘   ├─────────────────┤     ├────┼─┤ awx-ee   │ │
+                      │ execution node 1│◄────┘    │ └──────────┘ │
+                      └─────────────────┘ Receptor │              | 
+                                            TCP    └──────────────┘
+                                           Peers                 
+                                                   
 ```
-
-Note, if the AWX deployment is scaled up, the new AWX pod will also make TCP connections to each execution node.
-
 
 ## Overview
 Adding an execution instance involves a handful of steps:
@@ -34,7 +33,7 @@ Adding an execution instance involves a handful of steps:
 
 ### Start machine
 
-Bring a machine online with a compatible Red Hat family OS (e.g. RHEL 8 and 9). This machines needs a static IP, or a resolvable DNS hostname that the AWX cluster can access. The machine will also need an available open port to establish inbound TCP connections on (default is 27199).
+Bring a machine online with a compatible Red Hat family OS (e.g. RHEL 8 and 9). This machines needs a static IP, or a resolvable DNS hostname that the AWX cluster can access. If the listerner_port is defined, the machine will also need an available open port to establish inbound TCP connections on (e.g. 27199).
 
 In general the more CPU cores and memory the machine has, the more jobs that can be scheduled to run on that machine at once. See https://docs.ansible.com/automation-controller/4.2.1/html/userguide/jobs.html#at-capacity-determination-and-job-impact for more information on capacity.
 
@@ -43,9 +42,21 @@ In general the more CPU cores and memory the machine has, the more jobs that can
 
 Use the Instance page or `api/v2/instances` endpoint to add a new instance.
 - `hostname` ("Name" in UI) is the IP address or DNS name of your machine.
-- `node_type` is "execution"
+- `node_type` is "execution" or "hop"
 - `node_state` is "installed"
-- `listener_port` is an open port on the remote machine used to establish inbound TCP connections. Defaults to 27199.
+- `listener_port` is an open port on the remote machine used to establish inbound TCP connections. Defaults to null.
+- `peers` is a list of instance hostnames to connect outbound to.
+- `peers_from_control_nodes` boolean, if True, control plane nodes will automatically peer to this instance.
+
+Below is a table of configuartions for the [diagram](#adding-execution-nodes-to-awx) above.
+
+| instance name    | listener_port | peers_from_control_nodes | peers       |
+|------------------|---------------|-------------------------|--------------|
+| execution node 1 | 27199         | true                    | []           |
+| hop node         | 27199         | true                    | []           |
+| execution node 2 | null          | false                   | ["hop node"] |
+
+Listener port needs to be set if peers_from_control_nodes is enabled or the instance is a peer.
 
 
 ### Download the install bundle
