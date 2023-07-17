@@ -134,20 +134,19 @@ class TaskBase:
                         logger.debug(f"Not running {self.prefix} scheduler, another task holds lock")
                         return
                     logger.debug(f"Starting {self.prefix} Scheduler")
-                    # if sigterm due to timeout, still record metrics
+                    # if sigusr1 due to timeout, still record metrics
                     signal.signal(signal.SIGUSR1, self.record_aggregate_metrics_and_exit)
-                    self._schedule()
+                    try:
+                        self._schedule()
+                    finally:
+                        # Reset the signal handler back to the default just in case anything
+                        # else uses the same signal for other purposes
+                        signal.signal(signal.SIGUSR1, original_sigusr1)
                     commit_start = time.time()
 
                 if self.prefix == "task_manager":
                     self.subsystem_metrics.set(f"{self.prefix}_commit_seconds", time.time() - commit_start)
                 self.record_aggregate_metrics()
-
-                # Reset the signal handler back to the default just in case anything
-                # else uses the same signal for other purposes
-                logger.debug('Resetting SIGUSR1 handler')
-                signal.signal(signal.SIGUSR1, original_sigusr1)
-
                 logger.debug(f"Finishing {self.prefix} Scheduler")
 
 
