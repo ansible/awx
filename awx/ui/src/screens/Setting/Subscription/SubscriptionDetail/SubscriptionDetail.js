@@ -89,7 +89,8 @@ function SubscriptionDetail() {
             />
           )}
           {typeof automatedInstancesCount !== 'undefined' &&
-            automatedInstancesCount !== null && (
+            automatedInstancesCount !== null &&
+            systemConfig?.SUBSCRIPTION_USAGE_MODEL !== '' && (
               <Detail
                 dataCy="subscription-hosts-automated"
                 label={t`Hosts automated`}
@@ -105,11 +106,13 @@ function SubscriptionDetail() {
                 }
               />
             )}
-          <Detail
-            dataCy="subscription-hosts-imported"
-            label={t`Hosts imported`}
-            value={license_info.current_instances}
-          />
+          {systemConfig?.SUBSCRIPTION_USAGE_MODEL !== '' && (
+            <Detail
+              dataCy="subscription-hosts-imported"
+              label={t`Hosts imported`}
+              value={license_info.current_instances}
+            />
+          )}
           {systemConfig?.SUBSCRIPTION_USAGE_MODEL ===
             'unique_managed_hosts' && (
             <Detail
@@ -134,20 +137,23 @@ function SubscriptionDetail() {
               value={license_info.reactivated_instances}
             />
           )}
-          {license_info.instance_count < 9999999 && (
-            <Detail
-              dataCy="subscription-hosts-available"
-              label={t`Hosts available`}
-              value={license_info.available_instances}
-            />
-          )}
-          {license_info.instance_count >= 9999999 && (
-            <Detail
-              dataCy="subscription-unlimited-hosts-available"
-              label={t`Hosts available`}
-              value={t`Unlimited`}
-            />
-          )}
+
+          {systemConfig?.SUBSCRIPTION_USAGE_MODEL !== '' &&
+            license_info.instance_count < 9999999 && (
+              <Detail
+                dataCy="subscription-hosts-available"
+                label={t`Hosts available`}
+                value={license_info.available_instances}
+              />
+            )}
+          {systemConfig?.SUBSCRIPTION_USAGE_MODEL !== '' &&
+            license_info.instance_count >= 9999999 && (
+              <Detail
+                dataCy="subscription-unlimited-hosts-available"
+                label={t`Hosts available`}
+                value={t`Unlimited`}
+              />
+            )}
           <Detail
             dataCy="subscription-type"
             label={t`Subscription type`}
