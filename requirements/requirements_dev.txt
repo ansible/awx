@@ -6,13 +6,13 @@ drf-yasg
 ipython>=7.31.1 # https://github.com/ansible/awx/security/dependabot/30
 unittest2
 black
-pytest!=7.0.0
+pytest
 pytest-cov
 pytest-django
 pytest-pythonpath
-pytest-mock==1.11.1
+pytest-mock
 pytest-timeout
-pytest-xdist==1.34.0 # 2.0.0 broke zuul for some reason
+pytest-xdist
 tox  # for awxkit
 logutils
 jupyter
