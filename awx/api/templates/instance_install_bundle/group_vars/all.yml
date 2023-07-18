@@ -29,8 +29,8 @@ receptor_peers:
     protocol: tcp
 {% endfor %}
 {% endif %}
-receptor_dependencies:
-  - python3-pip
+receptor_python_packages:
+  - ansible-runner
 {% verbatim %}
 podman_user: "{{ receptor_user }}"
 podman_group: "{{ receptor_group }}"

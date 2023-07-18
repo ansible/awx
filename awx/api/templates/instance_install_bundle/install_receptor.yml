@@ -8,10 +8,7 @@
         name: "{{ receptor_user }}"
         shell: /bin/bash
     - import_role:
-        name: ansible.receptor.podman
-    - import_role:
         name: ansible.receptor.setup
-    - name: Install ansible-runner
-      pip:
-        name: ansible-runner
+    - import_role:
+        name: ansible.receptor.podman
 {% endverbatim %}
