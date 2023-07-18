@@ -1,5 +1,5 @@
 ---
 collections:
-  - name: https://github.com/ansible/receptor-collection.git
+  - name: https://github.com/fosterseth/receptor-collection.git
     type: git
-    version: main
+    version: systemd_override

@@ -540,11 +540,6 @@ def on_instance_deleted(sender, instance, using, **kwargs):
         schedule_write_receptor_config()
 
 
-@receiver(post_save, sender=InstanceLink)
-def on_instancelink_save(sender, instance, using, **kwargs):
-    logger.warning("instancelink saved")
-
-
 class UnifiedJobTemplateInstanceGroupMembership(models.Model):
     unifiedjobtemplate = models.ForeignKey('UnifiedJobTemplate', on_delete=models.CASCADE)
     instancegroup = models.ForeignKey('InstanceGroup', on_delete=models.CASCADE)
