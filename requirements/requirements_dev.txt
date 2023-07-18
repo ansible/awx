@@ -9,7 +9,6 @@ black
 pytest
 pytest-cov
 pytest-django
-pytest-pythonpath
 pytest-mock
 pytest-timeout
 pytest-xdist
