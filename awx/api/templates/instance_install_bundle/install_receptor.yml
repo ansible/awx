@@ -16,5 +16,5 @@
     - name: Install ansible-runner
       pip:
         name: ansible-runner
-        executable: pip3.9
+        executable: pip3
 {% endverbatim %}
