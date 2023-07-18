@@ -47,7 +47,7 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     xmlsec1-devel \
     xmlsec1-openssl-devel
 
-RUN pip3 install virtualenv build psycopg
+RUN pip3.11 install virtualenv build psycopg
 
 {% if image_architecture == 'ppc64le'  %}
     RUN dnf -y update && dnf install -y wget && \
@@ -120,7 +120,7 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     postgresql \
     python3.11 \
     python3.11-devel \
-    python3.11-libselinux \
+    python3-libselinux \
     python3.11-pip \
     python3.11-setuptools \
     rsync \
@@ -133,7 +133,7 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     xmlsec1-openssl && \
     dnf -y clean all
 
-RUN pip3 install virtualenv supervisor dumb-init psycopg
+RUN pip3.11 install virtualenv supervisor dumb-init psycopg
 
 RUN rm -rf /root/.cache && rm -rf /tmp/*
 
@@ -165,7 +165,7 @@ RUN dnf -y install \
     unzip && \
     npm install -g n && n 16.13.1 && npm install -g npm@8.5.0 && dnf remove -y nodejs
 
-RUN pip3 install black git+https://github.com/coderanger/supervisor-stdout setuptools-scm
+RUN pip3.11 install black git+https://github.com/coderanger/supervisor-stdout setuptools-scm
 
 # This package randomly fails to download.
 # It is nice to have in the dev env, but not necessary.
