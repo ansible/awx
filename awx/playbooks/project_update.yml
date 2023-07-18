@@ -255,6 +255,9 @@
           tags:
             - install_collections
             - install_roles
+      module_defaults:
+        ansible.builtin.command:
+          chdir: "{{ project_path | quote }}"
 
       # We combine our additional_galaxy_env into galaxy_task_env so that our values are preferred over anything a user would set
       environment: "{{ galaxy_task_env | combine(additional_galaxy_env) }}"
