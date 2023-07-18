@@ -38,9 +38,10 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     patch \
     postgresql \
     postgresql-devel \
-    python3-devel \
-    python3-pip \
-    python3-setuptools \
+    python3.11 \
+    python311-devel \
+    python311-pip \
+    python311-setuptools \
     swig \
     unzip \
     xmlsec1-devel \
@@ -117,10 +118,11 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     nginx \
     "openldap >= 2.6.2-3" \
     postgresql \
-    python3-devel \
-    python3-libselinux \
-    python3-pip \
-    python3-setuptools \
+    python3.11 \
+    python311-devel \
+    python311-libselinux \
+    python311-pip \
+    python311-setuptools \
     rsync \
     rsyslog-8.2102.0-106.el9 \
     subversion \
@@ -168,7 +170,7 @@ RUN pip3 install black git+https://github.com/coderanger/supervisor-stdout setup
 # This package randomly fails to download.
 # It is nice to have in the dev env, but not necessary.
 # Add it back to the list above if the repo ever straighten up.
-RUN dnf --enablerepo=baseos-debug -y install python3-debuginfo || :
+RUN dnf --enablerepo=baseos-debug -y install python311-debuginfo || :
 
 RUN dnf install -y epel-next-release && dnf install -y inotify-tools && dnf remove -y epel-next-release
 {% endif %}
