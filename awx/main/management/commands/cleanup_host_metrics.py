@@ -1,22 +1,24 @@
-from awx.main.models import HostMetric
 from django.core.management.base import BaseCommand
-from django.conf import settings
+from django.utils.translation import gettext_lazy as _
+from awx.main.tasks.host_metrics import HostMetricTask
 
 
 class Command(BaseCommand):
     """
-    Run soft-deleting of HostMetrics
+    Run soft/hard-deleting of HostMetrics
     """
 
-    help = 'Run soft-deleting of HostMetrics'
+    help = 'Run soft/hard-deleting of HostMetrics'
 
     def add_arguments(self, parser):
-        parser.add_argument('--months-ago', type=int, dest='months-ago', action='store', help='Threshold in months for soft-deleting')
+        parser.add_argument('--soft', type=int, nargs='?', default=None, const=0, help='Threshold in months for soft-deleting')
+        parser.add_argument('--hard', type=int, nargs='?', default=None, const=0, help='Threshold in months for hard-deleting')
 
     def handle(self, *args, **options):
-        months_ago = options.get('months-ago') or None
+        soft_threshold = options.get('soft')
+        hard_threshold = options.get('hard')
 
-        if not months_ago:
-            months_ago = getattr(settings, 'CLEANUP_HOST_METRICS_SOFT_THRESHOLD', 12)
+        if soft_threshold is None and hard_threshold is None:
+            return _("Specify either --soft or --hard argument")
 
-        HostMetric.cleanup_task(months_ago)
+        HostMetricTask().cleanup(soft_threshold=soft_threshold, hard_threshold=hard_threshold)
