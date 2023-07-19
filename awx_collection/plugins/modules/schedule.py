@@ -44,7 +44,7 @@ options:
       type: str
     execution_environment:
       description:
-        - Execution Environment applied as a prompt, assuming jot template prompts for execution environment
+        - Execution Environment name or ID applied as a prompt, assuming job template prompts for execution environment
       type: str
     extra_data:
       description:
@@ -57,12 +57,12 @@ options:
       type: int
     instance_groups:
       description:
-        - List of Instance Groups applied as a prompt, assuming job template prompts for instance groups
+        - List of Instance Group names or IDs applied as a prompt, assuming job template prompts for instance groups
       type: list
       elements: str
     inventory:
       description:
-        - Inventory applied as a prompt, assuming job template prompts for inventory
+        - Inventory name or ID applied as a prompt, assuming job template prompts for inventory
       required: False
       type: str
     job_slice_count:
@@ -76,7 +76,7 @@ options:
       elements: str
     credentials:
       description:
-        - List of credentials applied as a prompt, assuming job template prompts for credentials
+        - List of credential names or IDs applied as a prompt, assuming job template prompts for credentials
       type: list
       elements: str
     scm_branch:
@@ -130,12 +130,12 @@ options:
         - 5
     unified_job_template:
       description:
-        - Name of unified job template to schedule. Used to look up an already existing schedule.
+        - Name or ID of unified job template to schedule. Used to look up an already existing schedule.
       required: False
       type: str
     organization:
       description:
-        - The organization the unified job template exists in.
+        - The organization name or ID the unified job template exists in.
         - Used for looking up the unified job template, not a direct model field.
       type: str
     enabled:

@@ -44,7 +44,7 @@ options:
       type: str
     organization:
       description:
-        - Organization the inventory belongs to.
+        - Organization name or ID the inventory belongs to.
       required: True
       type: str
     variables:
@@ -62,12 +62,12 @@ options:
       type: str
     instance_groups:
       description:
-        - list of Instance Groups for this Organization to run on.
+        - list of Instance Group names or IDs for this Organization to run on.
       type: list
       elements: str
     input_inventories:
       description:
-        - List of Inventories to use as input for Constructed Inventory.
+        - List of Inventory names or IDs to use as input for Constructed Inventory.
       type: list
       elements: str
     prevent_instance_group_fallback:

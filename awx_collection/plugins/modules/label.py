@@ -34,7 +34,7 @@ options:
       type: str
     organization:
       description:
-        - Organization this label belongs to.
+        - Organization name or ID this label belongs to.
       required: True
       type: str
     state:

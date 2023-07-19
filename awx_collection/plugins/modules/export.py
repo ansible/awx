@@ -28,72 +28,72 @@ options:
       default: 'False'
     organizations:
       description:
-        - organization names to export
+        - organization names or IDs to export
       type: list
       elements: str
     users:
       description:
-        - user names to export
+        - user names or IDs to export
       type: list
       elements: str
     teams:
       description:
-        - team names to export
+        - team names or IDs to export
       type: list
       elements: str
     credential_types:
       description:
-        - credential type names to export
+        - credential type names or IDs to export
       type: list
       elements: str
     credentials:
       description:
-        - credential names to export
+        - credential names or IDs to export
       type: list
       elements: str
     execution_environments:
       description:
-        - execution environment names to export
+        - execution environment names or IDs to export
       type: list
       elements: str
     notification_templates:
       description:
-        - notification template names to export
+        - notification template names or IDs to export
       type: list
       elements: str
     inventory_sources:
       description:
-        - inventory soruces to export
+        - inventory source name or IDs to export
       type: list
       elements: str
     inventory:
       description:
-        - inventory names to export
+        - inventory names or IDs to export
       type: list
       elements: str
     projects:
       description:
-        - project names to export
+        - project names or IDs to export
       type: list
       elements: str
     job_templates:
       description:
-        - job template names to export
+        - job template names or IDs to export
       type: list
       elements: str
     workflow_job_templates:
       description:
-        - workflow names to export
+        - workflow names or IDs to export
       type: list
       elements: str
     applications:
       description:
-        - OAuth2 application names to export
+        - OAuth2 application names or IDs to export
       type: list
       elements: str
     schedules:
       description:
-        - schedule names to export
+        - schedule names or IDs to export
       type: list
       elements: str
 requirements:

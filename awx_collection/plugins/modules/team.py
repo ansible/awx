@@ -36,7 +36,7 @@ options:
       type: str
     organization:
       description:
-        - Organization the team should be made a member of.
+        - Organization name or ID the team should be made a member of.
       required: True
       type: str
     state:
