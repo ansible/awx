@@ -76,8 +76,6 @@ Modify `inventory.yml`. Set the `ansible_user` and any other ansible variables t
 
 `ansible-playbook -i inventory.yml install_receptor.yml` to start installing Receptor on the remote machine.
 
-Note, the playbook will enable the [Copr ansible-awx/receptor repository](https://copr.fedorainfracloud.org/coprs/ansible-awx/receptor/) so that Receptor can be installed.
-
 
 ### Wait for instance to be Ready
 
