@@ -13,7 +13,7 @@ export const DEFAULT_NODE_COLOR = 'white';
 export const DEFAULT_NODE_HIGHLIGHT_COLOR = '#eee';
 export const DEFAULT_NODE_LABEL_TEXT_COLOR = 'white';
 export const DEFAULT_NODE_SYMBOL_TEXT_COLOR = 'black';
-export const DEFAULT_NODE_STROKE_COLOR = '#ccc';
+export const DEFAULT_NODE_STROKE_COLOR = '#6A6E73';
 export const DEFAULT_FONT_SIZE = '12px';
 export const LABEL_TEXT_MAX_LENGTH = 15;
 export const MARGIN = 15;
@@ -25,6 +25,13 @@ export const NODE_STATE_COLOR_KEY = {
   installed: '#0066CC',
   provisioning: '#666',
   deprovisioning: '#666',
+};
+
+export const LINK_STATE_COLOR_KEY = {
+  established: '#6A6E73',
+  disconnected: '#CCC',
+  adding: '#3E8635',
+  removing: '#C9190B',
 };
 
 export const NODE_TYPE_SYMBOL_KEY = {
