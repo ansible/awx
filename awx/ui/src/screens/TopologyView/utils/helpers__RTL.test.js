@@ -73,7 +73,7 @@ describe('renderIconPosition', () => {
   const bbox = { x: 400, y: 400, width: 10, height: 20 };
   test('returns correct label icon', () => {
     expect(renderIconPosition('ready', bbox)).toBe(
-      `translate(${bbox.x - 15}, ${bbox.y + 3}), scale(0.02)`
+      `translate(${bbox.x - 4.5}, ${bbox.y - 4.5}), scale(0.02)`
     );
   });
   test('returns empty string if state is not found', () => {
