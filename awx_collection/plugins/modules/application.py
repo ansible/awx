@@ -48,7 +48,7 @@ options:
       required: False
     organization:
       description:
-        - Name or ID of organization for application.
+        - Name, ID, or named URL of organization for application.
       type: str
       required: True
     redirect_uris:

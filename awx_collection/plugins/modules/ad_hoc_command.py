@@ -29,12 +29,12 @@ options:
       choices: [ 'run', 'check' ]
     execution_environment:
       description:
-        - Execution Environment name or ID to use for the ad hoc command.
+        - Execution Environment name, ID, or named URL to use for the ad hoc command.
       required: False
       type: str
     inventory:
       description:
-        - Inventory name or ID to use for the ad hoc command.
+        - Inventory name, ID, or named URL to use for the ad hoc command.
       required: True
       type: str
     limit:
@@ -43,7 +43,7 @@ options:
       type: str
     credential:
       description:
-        - Credential name or ID to use for ad hoc command.
+        - Credential name, ID, or named URL to use for ad hoc command.
       required: True
       type: str
     module_name:

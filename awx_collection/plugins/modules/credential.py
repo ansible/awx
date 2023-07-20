@@ -45,7 +45,7 @@ options:
       type: str
     organization:
       description:
-        - Organization name or ID that should own the credential.
+        - Organization name, ID, or named URL that should own the credential.
       type: str
     credential_type:
       description:
@@ -92,11 +92,11 @@ options:
       default: true
     user:
       description:
-        - User name or ID that should own this credential.
+        - User name, ID, or named URL that should own this credential.
       type: str
     team:
       description:
-        - Team name or ID that should own this credential.
+        - Team name, ID, or named URL that should own this credential.
       type: str
     state:
       description:

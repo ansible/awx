@@ -34,17 +34,17 @@ options:
       type: str
     inventory:
       description:
-        - Inventory name or ID to use for the job, only used if prompt for inventory is set.
+        - Inventory name, ID, or named URL to use for the job, only used if prompt for inventory is set.
       type: str
     organization:
       description:
-        - Organization name or ID the job template exists in.
+        - Organization name, ID, or named URL the job template exists in.
         - Used to help lookup the object, cannot be modified using this module.
         - If not provided, will lookup by name only, which does not work with duplicates.
       type: str
     credentials:
       description:
-        - Credential names or IDs to use for job, only used if prompt for credential is set.
+        - Credential names, IDs, or named URLs to use for job, only used if prompt for credential is set.
       type: list
       aliases: ['credential']
       elements: str
@@ -88,7 +88,7 @@ options:
       type: dict
     execution_environment:
       description:
-        - Execution environment name or ID to use for the job, only used if prompt for execution environment is set.
+        - Execution environment name, ID, or named URL to use for the job, only used if prompt for execution environment is set.
       type: str
     forks:
       description:
@@ -96,7 +96,7 @@ options:
       type: int
     instance_groups:
       description:
-        - Instance group names or IDs to use for the job, only used if prompt for instance groups is set.
+        - Instance group names, IDs, or named URLs to use for the job, only used if prompt for instance groups is set.
       type: list
       elements: str
     job_slice_count:
