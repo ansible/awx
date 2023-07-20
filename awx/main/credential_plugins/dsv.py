@@ -2,7 +2,7 @@ from .plugin import CredentialPlugin
 
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
-from thycotic.secrets.vault import SecretsVault
+from delinea.secrets.vault import SecretsVault
 
 
 dsv_inputs = {
