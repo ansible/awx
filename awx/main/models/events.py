@@ -586,19 +586,15 @@ class JobEvent(BasePlaybookEvent):
             JobHostSummary.objects.bulk_create(summaries.values())
 
             # update the last_job_id and last_job_host_summary_id
-            # in single queries
             host_mapping = dict((summary['host_id'], summary['id']) for summary in JobHostSummary.objects.filter(job_id=job.id).values('id', 'host_id'))
+            Host.objects.filter(id__in=host_mapping.keys()).update(last_job_id=job.id)
+
             updated_hosts = set()
             for h in all_hosts:
-                # if the hostname *shows up* in the playbook_on_stats event
-                if h.name in hostnames:
-                    h.last_job_id = job.id
-                    updated_hosts.add(h)
                 if h.id in host_mapping:
                     h.last_job_host_summary_id = host_mapping[h.id]
                     updated_hosts.add(h)
-
-            Host.objects.bulk_update(list(updated_hosts), ['last_job_id', 'last_job_host_summary_id'], batch_size=100)
+            Host.objects.bulk_update(list(updated_hosts), ['last_job_host_summary_id'], batch_size=100)
 
             # Create/update Host Metrics
             self._update_host_metrics(updated_hosts_list)
