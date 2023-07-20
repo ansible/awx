@@ -1,6 +1,6 @@
-import { LabelsAPI, OrganizationsAPI } from '../api';
+import { LabelsAPI, OrganizationsAPI, JobTemplatesAPI } from '../api';
 
-async function createNewLabels(labels = [], organization = null) {
+export async function createNewLabels(labels = [], organization = null) {
   let error = null;
   const labelIds = [];
 
@@ -54,4 +54,32 @@ async function createNewLabels(labels = [], organization = null) {
   };
 }
 
-export default createNewLabels;
+export async function createNewLabelsOnLaunch(labels = [], resource = null) {
+  let error = null;
+  const labelIds = [];
+
+  try {
+    const labelRequests = [];
+    const jobTemplateId = resource.id;
+    const orgId = resource.organization;
+
+    labels.forEach((label) => {
+      labelRequests.push(
+        JobTemplatesAPI.associateLabel(jobTemplateId, label, orgId).then(
+          ({ data }) => {
+            labelIds.push(data.id);
+          }
+        )
+      );
+    });
+
+    await Promise.all(labelRequests);
+  } catch (err) {
+    error = err;
+  }
+
+  return {
+    labelIds,
+    error,
+  };
+}

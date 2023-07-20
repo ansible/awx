@@ -5,7 +5,7 @@ import { Formik, useFormikContext } from 'formik';
 import { useDismissableError } from 'hooks/useRequest';
 import mergeExtraVars from 'util/prompt/mergeExtraVars';
 import getSurveyValues from 'util/prompt/getSurveyValues';
-import createNewLabels from 'util/labels';
+import { createNewLabelsOnLaunch } from 'util/labels';
 import ContentLoading from '../ContentLoading';
 import ContentError from '../ContentError';
 import useLaunchSteps from './useLaunchSteps';
@@ -67,7 +67,6 @@ function PromptModalForm({
     setValue('forks', values.forks);
     setValue('job_slice_count', values.job_slice_count);
     setValue('execution_environment', values.execution_environment?.id);
-
     if (launchConfig.ask_instance_groups_on_launch) {
       const instanceGroupIds = [];
       values.instance_groups.forEach((instance_group) => {
@@ -77,14 +76,9 @@ function PromptModalForm({
     }
 
     if (launchConfig.ask_labels_on_launch) {
-      const { labelIds } = createNewLabels(
-        values.labels,
-        resource.organization
-      );
-
+      const { labelIds } = createNewLabelsOnLaunch(values.labels, resource);
       setValue('labels', labelIds);
     }
-
     onSubmit(postValues);
   };
   const { error, dismissError } = useDismissableError(contentError);

@@ -8,7 +8,7 @@ import { getAddedAndRemoved } from 'util/lists';
 import { parseVariableField } from 'util/yaml';
 import mergeExtraVars from 'util/prompt/mergeExtraVars';
 import getSurveyValues from 'util/prompt/getSurveyValues';
-import createNewLabels from 'util/labels';
+import { createNewLabels } from 'util/labels';
 import ScheduleForm from '../shared/ScheduleForm';
 import buildRuleSet from '../shared/buildRuleSet';
 import { CardBody } from '../../Card';
