@@ -347,7 +347,7 @@ pytz==2022.6
     #   irc
     #   tempora
     #   twilio
-pyyaml==6.0
+pyyaml==6.0.1
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   ansible-runner

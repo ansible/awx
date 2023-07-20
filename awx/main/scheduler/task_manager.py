@@ -102,27 +102,33 @@ class TaskBase:
 
     def record_aggregate_metrics(self, *args):
         if not is_testing():
-            # increment task_manager_schedule_calls regardless if the other
-            # metrics are recorded
-            s_metrics.Metrics(auto_pipe_execute=True).inc(f"{self.prefix}__schedule_calls", 1)
-            # Only record metrics if the last time recording was more
-            # than SUBSYSTEM_METRICS_TASK_MANAGER_RECORD_INTERVAL ago.
-            # Prevents a short-duration task manager that runs directly after a
-            # long task manager to override useful metrics.
-            current_time = time.time()
-            time_last_recorded = current_time - self.subsystem_metrics.decode(f"{self.prefix}_recorded_timestamp")
-            if time_last_recorded > settings.SUBSYSTEM_METRICS_TASK_MANAGER_RECORD_INTERVAL:
-                logger.debug(f"recording {self.prefix} metrics, last recorded {time_last_recorded} seconds ago")
-                self.subsystem_metrics.set(f"{self.prefix}_recorded_timestamp", current_time)
-                self.subsystem_metrics.pipe_execute()
-            else:
-                logger.debug(f"skipping recording {self.prefix} metrics, last recorded {time_last_recorded} seconds ago")
+            try:
+                # increment task_manager_schedule_calls regardless if the other
+                # metrics are recorded
+                s_metrics.Metrics(auto_pipe_execute=True).inc(f"{self.prefix}__schedule_calls", 1)
+                # Only record metrics if the last time recording was more
+                # than SUBSYSTEM_METRICS_TASK_MANAGER_RECORD_INTERVAL ago.
+                # Prevents a short-duration task manager that runs directly after a
+                # long task manager to override useful metrics.
+                current_time = time.time()
+                time_last_recorded = current_time - self.subsystem_metrics.decode(f"{self.prefix}_recorded_timestamp")
+                if time_last_recorded > settings.SUBSYSTEM_METRICS_TASK_MANAGER_RECORD_INTERVAL:
+                    logger.debug(f"recording {self.prefix} metrics, last recorded {time_last_recorded} seconds ago")
+                    self.subsystem_metrics.set(f"{self.prefix}_recorded_timestamp", current_time)
+                    self.subsystem_metrics.pipe_execute()
+                else:
+                    logger.debug(f"skipping recording {self.prefix} metrics, last recorded {time_last_recorded} seconds ago")
+            except Exception:
+                logger.exception(f"Error saving metrics for {self.prefix}")
 
     def record_aggregate_metrics_and_exit(self, *args):
         self.record_aggregate_metrics()
         sys.exit(1)
 
     def schedule(self):
+        # Always be able to restore the original signal handler if we finish
+        original_sigusr1 = signal.getsignal(signal.SIGUSR1)
+
         # Lock
         with task_manager_bulk_reschedule():
             with advisory_lock(f"{self.prefix}_lock", wait=False) as acquired:
@@ -131,9 +137,14 @@ class TaskBase:
                         logger.debug(f"Not running {self.prefix} scheduler, another task holds lock")
                         return
                     logger.debug(f"Starting {self.prefix} Scheduler")
-                    # if sigterm due to timeout, still record metrics
-                    signal.signal(signal.SIGTERM, self.record_aggregate_metrics_and_exit)
-                    self._schedule()
+                    # if sigusr1 due to timeout, still record metrics
+                    signal.signal(signal.SIGUSR1, self.record_aggregate_metrics_and_exit)
+                    try:
+                        self._schedule()
+                    finally:
+                        # Reset the signal handler back to the default just in case anything
+                        # else uses the same signal for other purposes
+                        signal.signal(signal.SIGUSR1, original_sigusr1)
                     commit_start = time.time()
 
                 if self.prefix == "task_manager":
