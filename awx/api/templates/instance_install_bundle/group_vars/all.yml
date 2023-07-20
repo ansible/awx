@@ -29,7 +29,7 @@ receptor_peers:
     protocol: tcp
 {% endfor %}
 {% endif %}
-receptor_python_packages:
+additional_python_packages:
   - ansible-runner
 {% verbatim %}
 podman_user: "{{ receptor_user }}"
