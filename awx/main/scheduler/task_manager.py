@@ -165,7 +165,6 @@ class WorkflowManager(TaskBase):
                 logger.warning("Workflow manager has reached time out while processing running workflows, exiting loop early")
                 ScheduleWorkflowManager().schedule()
                 # Do not process any more workflow jobs. Stop here.
-                # Maybe we should schedule another WorkflowManager run
                 break
             dag = WorkflowDAG(workflow_job)
             status_changed = False
@@ -180,8 +179,8 @@ class WorkflowManager(TaskBase):
                     workflow_job.save(update_fields=['status', 'start_args'])
                     status_changed = True
             else:
-                workflow_nodes = dag.mark_dnr_nodes()
-                WorkflowJobNode.objects.bulk_update(workflow_nodes, ['do_not_run'])
+                dnr_nodes = dag.mark_dnr_nodes()
+                WorkflowJobNode.objects.bulk_update(dnr_nodes, ['do_not_run'])
                 # If workflow is now done, we do special things to mark it as done.
                 is_done = dag.is_workflow_done()
                 if is_done:
@@ -261,6 +260,7 @@ class WorkflowManager(TaskBase):
                         job.status = 'failed'
                         job.save(update_fields=['status', 'job_explanation'])
                         job.websocket_emit_status('failed')
+                        ScheduleWorkflowManager().schedule()
 
                     # TODO: should we emit a status on the socket here similar to tasks.py awx_periodic_scheduler() ?
                     # emit_websocket_notification('/socket.io/jobs', '', dict(id=))
