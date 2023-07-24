@@ -33,7 +33,7 @@ options:
       type: str
     credential:
       description:
-        - Credential to authenticate with Kubernetes or OpenShift.  Must be of type "OpenShift or Kubernetes API Bearer Token".
+        - Credential name, ID, or named URL to authenticate with Kubernetes or OpenShift.  Must be of type "OpenShift or Kubernetes API Bearer Token".
       required: False
       type: str
     is_container_group:
@@ -74,7 +74,7 @@ options:
       type: str
     instances:
       description:
-        - The instances associated with this instance_group
+        - The instance names, IDs, or named URLs associated with this instance_group
       required: False
       type: list
       elements: str

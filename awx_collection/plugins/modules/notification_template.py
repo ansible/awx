@@ -44,7 +44,7 @@ options:
       type: str
     organization:
       description:
-        - The organization the notification belongs to.
+        - The organization name, ID, or named URL the notification belongs to.
       type: str
     notification_type:
       description:

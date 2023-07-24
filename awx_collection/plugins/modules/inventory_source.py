@@ -36,7 +36,7 @@ options:
       type: str
     inventory:
       description:
-        - Inventory the group should be made a member of.
+        - Inventory name, ID, or named URL the group should be made a member of.
       required: True
       type: str
     source:
@@ -70,11 +70,11 @@ options:
       type: str
     credential:
       description:
-        - Credential to use for the source.
+        - Credential name, ID, or named URL to use for the source.
       type: str
     execution_environment:
       description:
-        - Execution Environment to use for the source.
+        - Execution Environment name, ID, or named URL to use for the source.
       type: str
     custom_virtualenv:
       description:
@@ -107,7 +107,7 @@ options:
       type: int
     source_project:
       description:
-        - Project to use as source with scm option
+        - Project name, ID, or named URL to use as source with scm option
       type: str
     scm_branch:
       description:

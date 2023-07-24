@@ -65,7 +65,7 @@ options:
       type: str
     credential:
       description:
-        - Name of the credential to use with this SCM resource.
+        - Name, ID, or named URL of the credential to use with this SCM resource.
       type: str
       aliases:
         - scm_credential
@@ -106,7 +106,7 @@ options:
         - job_timeout
     default_environment:
       description:
-        - Default Execution Environment to use for jobs relating to the project.
+        - Default Execution Environment name, ID, or named URL to use for jobs relating to the project.
       type: str
     custom_virtualenv:
       description:
@@ -116,7 +116,7 @@ options:
       type: str
     organization:
       description:
-        - Name of organization for project.
+        - Name, ID, or named URL of organization for the project.
       type: str
     state:
       description:
@@ -162,7 +162,7 @@ options:
       type: float
     signature_validation_credential:
       description:
-        - Name of the credential to use for signature validation.
+        - Name, ID, or named URL of the credential to use for signature validation.
         - If signature validation credential is provided, signature validation will be enabled.
       type: str
 
