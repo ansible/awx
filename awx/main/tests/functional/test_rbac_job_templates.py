@@ -356,12 +356,15 @@ def test_job_template_mixed_permission(rando, bob, project, inventory):
     # remove use perm on inventory and add use to associated project
     job_template.inventory.use_role.members.remove(rando)
     job_template.project.use_role.members.add(rando)
+
+    assert not access.can_change(job_template, {'project': proj1.pk})  # blocked by inventory
+
     proj1.use_role.members.remove(rando)
     inv1.use_role.members.add(rando)
 
     assert not access.can_change(job_template, {'project': proj2.pk})
-    assert access.can_change(job_template, {'project': project.pk})
-    assert access.can_change(job_template, {'inventory': inv1.pk})
+    assert access.can_change(job_template, {'project': job_template.project.pk})  # no change...
+    assert not access.can_change(job_template, {'inventory': inv1.pk})  # lacks inv1 access
 
     # remove project and inventory permission
     job_template.project.use_role.members.remove(rando)

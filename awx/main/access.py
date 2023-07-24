@@ -1623,6 +1623,15 @@ class JobTemplateAccess(NotificationAttachMixin, UnifiedCredentialsMixin, BaseAc
         return self.user in obj.execute_role
 
     def can_change(self, obj, data):
+        """
+        User can modify any JT setting (like diff_mode) that does not involve related objects
+         - if they have the admin_role to the JT
+
+        If they modify a related project or inventory it becomes more complicated.
+         - they can set the EE if they have read_role to the EE, irrelevant of current
+         - they always need use_role to current and new inventory
+         - they need use_role only to the new project, if changing the project
+        """
         if self.user not in obj.admin_role and not self.user.is_superuser:
             return False
         if data is None:
@@ -1631,18 +1640,12 @@ class JobTemplateAccess(NotificationAttachMixin, UnifiedCredentialsMixin, BaseAc
         data = dict(data)
         if self.changes_are_non_sensitive(obj, data):
             return True
-        if not self.check_related('execution_environment', ExecutionEnvironment, data, obj=obj, role_field='read_role'):
-            return False
-        for required_field, cls in (('inventory', Inventory), ('project', Project)):
-            is_mandatory = True
-            if not getattr(obj, '{}_id'.format(required_field)):
-                is_mandatory = False
-            if not self.check_related(required_field, cls, data, obj=obj, role_field='use_role', mandatory=is_mandatory):
-                if required_field in data:
-                    new_obj = get_object_from_data(required_field, cls, data)
-                    return self.user in new_obj.use_role and (self.user in obj.inventory.use_role or self.user in obj.project.use_role)
-                return False
-        return True
+
+        return bool(
+            self.check_related('execution_environment', ExecutionEnvironment, data, obj=obj, role_field='read_role')
+            and self.check_related('inventory', Inventory, data, obj=obj, role_field='use_role', mandatory=True)
+            and self.check_related('project', Project, data, obj=None, role_field='use_role')
+        )
 
     def changes_are_non_sensitive(self, obj, data):
         """
