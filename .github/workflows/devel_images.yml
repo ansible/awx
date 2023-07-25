@@ -48,8 +48,11 @@ jobs:
           DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER_LC} COMPOSE_TAG=${GITHUB_REF##*/} make awx-kube-dev-build
           DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER_LC} COMPOSE_TAG=${GITHUB_REF##*/} make awx-kube-build
 
-      - name: Push image
+      - name: Push development images
         run: |
           docker push ghcr.io/${OWNER_LC}/awx_devel:${GITHUB_REF##*/}
           docker push ghcr.io/${OWNER_LC}/awx_kube_devel:${GITHUB_REF##*/}
-          docker push ghcr.io/${OWNER_LC}/awx:${GITHUB_REF##*/}
+
+      - name: Push AWX k8s image, only for upstream and feature branches
+        run: docker push ghcr.io/${OWNER_LC}/awx:${GITHUB_REF##*/}
+        if: endsWith(github.repository, '/awx')

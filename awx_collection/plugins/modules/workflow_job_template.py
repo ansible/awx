@@ -58,7 +58,7 @@ options:
         - ask_tags
     organization:
       description:
-        - Organization the workflow job template exists in.
+        - Organization name, ID, or named URL the workflow job template exists in.
         - Used to help lookup the object, cannot be modified using this module.
         - If not provided, will lookup by name only, which does not work with duplicates.
       type: str
@@ -72,7 +72,7 @@ options:
       type: bool
     inventory:
       description:
-        - Inventory applied as a prompt, assuming job template prompts for inventory
+        - Name, ID, or named URL of inventory applied as a prompt, assuming job template prompts for inventory
       type: str
     limit:
       description:

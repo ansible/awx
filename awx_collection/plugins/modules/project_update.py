@@ -27,7 +27,7 @@ options:
         - project
     organization:
       description:
-        - Organization the project exists in.
+        - Organization name, ID, or named URL the project exists in.
         - Used to help lookup the object, cannot be modified using this module.
         - If not provided, will lookup by name only, which does not work with duplicates.
       type: str
