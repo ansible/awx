@@ -2,6 +2,10 @@ location {{ (ingress_path + '/static').replace('//', '/') }} {
     alias /var/lib/awx/public/static/;
 }
 
+location {{ (ingress_path + '/locales').replace('//', '/') }} {
+    alias /var/lib/awx/public/static/awx/locales;
+}
+
 location {{ (ingress_path + '/favicon.ico').replace('//', '/') }} {
     alias /awx_devel/awx/public/static/favicon.ico;
 }
