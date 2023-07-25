@@ -56,6 +56,8 @@ class ControllerModule(AnsibleModule):
         ),
         controller_config_file=dict(type='path', aliases=['tower_config_file'], required=False, default=None),
     )
+    # Associations of these types are ordered and have special consideration in the modified associations function
+    ordered_associations = ['instance_groups', 'galaxy_credentials']
     short_params = {
         'host': 'controller_host',
         'username': 'controller_username',
@@ -680,17 +682,26 @@ class ControllerAPIModule(ControllerModule):
         response = self.get_all_endpoint(association_endpoint)
         existing_associated_ids = [association['id'] for association in response['json']['results']]
 
-        # Disassociate anything that is in existing_associated_ids but not in new_association_list
-        ids_to_remove = list(set(existing_associated_ids) - set(new_association_list))
-        for an_id in ids_to_remove:
+        # Some associations can be ordered (like galaxy credentials)
+        if association_endpoint.strip('/').split('/')[-1] in self.ordered_associations:
+            if existing_associated_ids == new_association_list:
+                return  # If the current associations EXACTLY match the desired associations then we can return
+            removal_list = existing_associated_ids  # because of ordering, we have to remove everything
+            addition_list = new_association_list  # re-add everything back in-order
+        else:
+            if set(existing_associated_ids) == set(new_association_list):
+                return
+            removal_list = set(existing_associated_ids) - set(new_association_list)
+            addition_list = set(new_association_list) - set(existing_associated_ids)
+
+        for an_id in removal_list:
             response = self.post_endpoint(association_endpoint, **{'data': {'id': int(an_id), 'disassociate': True}})
             if response['status_code'] == 204:
                 self.json_output['changed'] = True
             else:
                 self.fail_json(msg="Failed to disassociate item {0}".format(response['json'].get('detail', response['json'])))
 
-        # Associate anything that is in new_association_list but not in `association`
-        for an_id in list(set(new_association_list) - set(existing_associated_ids)):
+        for an_id in addition_list:
             response = self.post_endpoint(association_endpoint, **{'data': {'id': int(an_id)}})
             if response['status_code'] == 204:
                 self.json_output['changed'] = True
