@@ -1,0 +1,73 @@
+---
+- block:
+    - name: generate random string for project
+      set_fact:
+        org_name: "AWX-Collection-tests-organization-org-{{ test_id }}"
+        cred: "AWX-Collection-tests-job_template-cred-{{ test_id }}"
+        inv: "AWX-Collection-tests-job_template-inv-{{ test_id }}"
+        proj: "AWX-Collection-tests-job_template-proj-{{ test_id }}"
+        jt: "AWX-Collection-tests-job_template-jt-{{ test_id }}"
+
+    - name: "Create a new organization"
+      organization:
+        name: "{{ org_name }}"
+        galaxy_credentials:
+          - Ansible Galaxy
+
+    - name: Create an inventory
+      inventory:
+        name: "{{ inv }}"
+        organization: "{{ org_name }}"
+
+    - name: Create a Demo Project
+      project:
+        name: "{{ proj }}"
+        organization: "{{ org_name }}"
+        state: present
+        scm_type: git
+        scm_url: https://github.com/ansible/ansible-tower-samples.git
+
+    - name: Create Credential
+      credential:
+        name: "{{ cred }}"
+        organization: "{{ org_name }}"
+        credential_type: Machine
+
+    - name: Create Job Template
+      job_template:
+        name: "{{ jt }}"
+        project: "{{ proj }}++{{ org_name }}"
+        inventory: "{{ inv }}++{{ org_name }}"
+        playbook: hello_world.yml
+        credentials:
+          - "{{ cred }}++Machine+ssh++"
+        job_type: run
+        state: present
+
+  always:
+    - name: Delete the Job Template
+      job_template:
+        name: "{{ jt }}"
+        state: absent
+
+    - name: Delete the Demo Project
+      project:
+        name: "{{ proj }}++{{ org_name }}"
+        state: absent
+
+    - name: Delete Credential
+      credential:
+        name: "{{ cred }}++Machine+ssh++{{ org_name }}"
+        credential_type: Machine
+        state: absent
+
+    - name: Delete the inventory
+      inventory:
+        name: "{{ inv }}++{{ org_name }}"
+        organization: "{{ org_name }}"
+        state: absent
+
+    - name: Remove the organization
+      organization:
+        name: "{{ org_name }}"
+        state: absent
