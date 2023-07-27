@@ -16,7 +16,6 @@ import taggit.managers
 
 
 def delete_old_system_job_types(apps, schema_editor):
-
     SystemJobTemplate = apps.get_model('main', 'SystemJobTemplate')
     Schedule = apps.get_model('main', 'Schedule')
 

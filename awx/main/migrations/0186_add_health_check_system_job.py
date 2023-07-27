@@ -6,7 +6,6 @@ from awx.main.migrations._create_system_jobs import create_system_job_templates
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('main', '0185_move_JSONBlob_to_JSONField'),
     ]
