@@ -22,8 +22,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunSQL([("DROP TABLE IF EXISTS taggit_tag CASCADE;")]),
-        migrations.RunSQL([("DROP TABLE IF EXISTS taggit_taggeditem CASCADE;")]),
+        migrations.RunSQL("DROP TABLE IF EXISTS taggit_tag CASCADE;"),
+        migrations.RunSQL("DROP TABLE IF EXISTS taggit_taggeditem CASCADE;"),
         migrations.RunPython(delete_taggit_contenttypes),
         migrations.RunPython(delete_taggit_migration_records),
     ]
