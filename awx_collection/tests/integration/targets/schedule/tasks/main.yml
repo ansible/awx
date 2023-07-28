@@ -225,6 +225,7 @@
       schedule:
         name: "{{ sched2 }}"
         state: present
+        organization: Default
         unified_job_template: "{{ jt1 }}"
         rrule: "DTSTART:20191219T130551Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1"
         description: "This hopefully will work"
