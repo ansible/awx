@@ -5391,7 +5391,7 @@ class InstanceSerializer(BaseSerializer):
 
     class Meta:
         model = Instance
-        read_only_fields = ('ip_address', 'uuid', 'version')
+        read_only_fields = ('uuid', 'version')
         fields = (
             'id',
             'hostname',
@@ -5487,6 +5487,10 @@ class InstanceSerializer(BaseSerializer):
         node_type = get_field_from_model_or_attrs("node_type")
         peers_from_control_nodes = get_field_from_model_or_attrs("peers_from_control_nodes")
         listener_port = get_field_from_model_or_attrs("listener_port")
+        ip_address = get_field_from_model_or_attrs("ip_address")
+        hostname = get_field_from_model_or_attrs("hostname")
+        if not ip_address:
+            attrs["ip_address"] = hostname
 
         if peers_from_control_nodes and node_type not in (Instance.Types.EXECUTION, Instance.Types.HOP):
             raise serializers.ValidationError(_("peers_from_control_nodes can only be enabled for execution or hop nodes."))
@@ -5549,7 +5553,19 @@ class InstanceSerializer(BaseSerializer):
 class InstanceHealthCheckSerializer(BaseSerializer):
     class Meta:
         model = Instance
-        read_only_fields = ('uuid', 'hostname', 'version', 'last_health_check', 'errors', 'cpu', 'memory', 'cpu_capacity', 'mem_capacity', 'capacity')
+        read_only_fields = (
+            'uuid',
+            'hostname',
+            'ip_address',
+            'version',
+            'last_health_check',
+            'errors',
+            'cpu',
+            'memory',
+            'cpu_capacity',
+            'mem_capacity',
+            'capacity',
+        )
         fields = read_only_fields
 
 
