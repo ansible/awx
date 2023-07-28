@@ -899,18 +899,18 @@ class HostMetric(models.Model):
 
             last_automation_before = now() - dateutil.relativedelta.relativedelta(months=months_ago)
 
-            logger.info(f'Cleanup [HostMetric]: soft-deleting records last automated before {last_automation_before}')
+            logger.info(f'cleanup_host_metrics: soft-deleting records last automated before {last_automation_before}')
             HostMetric.active_objects.filter(last_automation__lt=last_automation_before).update(
                 deleted=True, deleted_counter=models.F('deleted_counter') + 1, last_deleted=now()
             )
             settings.CLEANUP_HOST_METRICS_LAST_TS = now()
         except (TypeError, ValueError):
-            logger.error(f"Cleanup [HostMetric]: months_ago({months_ago}) has to be a positive integer value")
+            logger.error(f"cleanup_host_metrics: months_ago({months_ago}) has to be a positive integer value")
 
 
 class HostMetricSummaryMonthly(models.Model):
     """
-    HostMetric summaries computed by scheduled task <TODO> monthly
+    HostMetric summaries computed by scheduled task 'awx.main.tasks.system.host_metric_summary_monthly' monthly
     """
 
     date = models.DateField(unique=True)

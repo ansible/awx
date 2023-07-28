@@ -121,6 +121,13 @@ function NotificationTemplateListItem({
           {NOTIFICATION_TYPES[template.notification_type] ||
             template.notification_type}
         </Td>
+        <Td dataLabel={t`Oragnization`}>
+          <Link
+            to={`/organizations/${template.summary_fields.organization.id}/details`}
+          >
+            <b>{template.summary_fields.organization.name}</b>
+          </Link>
+        </Td>
         <ActionsTd dataLabel={t`Actions`}>
           <ActionItem visible tooltip={t`Test notification`}>
             <Button

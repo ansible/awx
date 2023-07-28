@@ -32,7 +32,7 @@ options:
       type: str
     inventory:
       description:
-        - Inventory the group should be made a member of.
+        - Inventory name, ID, or named URL that the group should be made a member of.
       required: True
       type: str
     variables:
@@ -41,12 +41,12 @@ options:
       type: dict
     hosts:
       description:
-        - List of hosts that should be put in this group.
+        - List of host names, IDs, or named URLs that should be put in this group.
       type: list
       elements: str
     children:
       description:
-        - List of groups that should be nested inside in this group.
+        - List of groups names, IDs, or named URLs that should be nested inside in this group.
       type: list
       elements: str
       aliases:
