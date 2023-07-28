@@ -10,9 +10,7 @@ def delete_taggit_contenttypes(apps, schema_editor):
 
 
 def delete_taggit_migration_records(apps, schema_editor):
-    from django.db.migrations.recorder import MigrationRecorder
-
-    recorder = MigrationRecorder(connection=schema_editor.connection)
+    recorder = migrations.recorder.MigrationRecorder(connection=schema_editor.connection)
     recorder.migration_qs.filter(app='taggit').delete()
 
 
