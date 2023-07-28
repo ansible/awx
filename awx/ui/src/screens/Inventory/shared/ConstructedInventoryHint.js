@@ -122,7 +122,7 @@ function ConstructedInventoryHint() {
       <br />
       <Panel>
         <CardBody>
-          <Form>
+          <Form autoComplete="off">
             <b>{t`Constructed inventory examples`}</b>
             <LimitToIntersectionExample />
             <FilterOnNestedGroupExample />
