@@ -704,7 +704,8 @@ def generate_config_data():
 
     receptor_config = list(RECEPTOR_CONFIG_STARTER)
     for instance in instances:
-        peer = {'tcp-peer': {'address': f'{instance.hostname}:{instance.listener_port}', 'tls': 'tlsclient'}}
+        host_or_ip = instance.ip_address or instance.hostname
+        peer = {'tcp-peer': {'address': f'{host_or_ip}:{instance.listener_port}', 'tls': 'tlsclient'}}
         receptor_config.append(peer)
     should_update = should_update_config(instances)
     return receptor_config, should_update
