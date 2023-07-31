@@ -117,7 +117,6 @@ django==4.2.3
     #   django-oauth-toolkit
     #   django-polymorphic
     #   django-solo
-    #   django-taggit
     #   djangorestframework
 django-auth-ldap==4.1.0
     # via -r /awx_devel/requirements/requirements.in
@@ -139,8 +138,6 @@ django-polymorphic==3.1.0
 django-solo==2.0.0
     # via -r /awx_devel/requirements/requirements.in
 django-split-settings==1.0.0
-    # via -r /awx_devel/requirements/requirements.in
-django-taggit==3.1.0
     # via -r /awx_devel/requirements/requirements.in
 djangorestframework==3.14.0
     # via -r /awx_devel/requirements/requirements.in
