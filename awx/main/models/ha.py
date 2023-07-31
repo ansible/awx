@@ -513,14 +513,14 @@ def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
             # node and kick off write_receptor_config
             connection.on_commit(lambda: remove_deprovisioned_node.apply_async([instance.hostname]))
         else:
+            control_instances = set(Instance.objects.filter(node_type__in=[Instance.Types.CONTROL, Instance.Types.HYBRID]))
             if instance.peers_from_control_nodes:
-                control_instances = Instance.objects.filter(node_type__in=[Instance.Types.CONTROL, Instance.Types.HYBRID])
-                if set(instance.peers_from.all()) != control_instances:
-                    instance.peers_from.set(control_instances)
+                if (control_instances & set(instance.peers_from.all())) != set(control_instances):
+                    instance.peers_from.add(*control_instances)
                     schedule_write_receptor_config()  # keep method separate to make pytest mocking easier
             else:
-                if instance.peers_from.exists():
-                    instance.peers_from.clear()
+                if set(control_instances) & set(instance.peers_from.all()):
+                    instance.peers_from.remove(*control_instances)
                     schedule_write_receptor_config()
 
     if created or instance.has_policy_changes():

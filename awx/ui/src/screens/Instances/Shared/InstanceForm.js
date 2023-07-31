@@ -63,8 +63,7 @@ function InstanceFormFields({ isEdit }) {
         label={t`Listener Port`}
         name="listener_port"
         type="number"
-        tooltip={t`Select the port that Receptor will listen on for incoming connections. Default is 27199.`}
-        isRequired
+        tooltip={t`Select the port that Receptor will listen on for incoming connections, e.g. 27199.`}
       />
       <FormGroup
         fieldId="instance-type"
@@ -122,8 +121,8 @@ function InstanceFormFields({ isEdit }) {
         <CheckboxField
           id="peers_from_control_nodes"
           name="peers_from_control_nodes"
-          label={t`Connect to control nodes`}
-          tooltip={t`Connect this instance to control nodes. If disabled, instance will be connected only to peers selected.`}
+          label={t`Peers from control nodes`}
+          tooltip={t`If enabled, control nodes will peer to this instance automatically. If disabled, instance will be connected only to associated peers.`}
         />
       </FormGroup>
     </>
@@ -146,17 +145,16 @@ function InstanceForm({
           description: instance.description || '',
           node_type: instance.node_type || 'execution',
           node_state: instance.node_state || 'installed',
-          listener_port: instance.listener_port || 27199,
+          listener_port: instance.listener_port,
           enabled: instance.enabled || true,
           managed_by_policy: instance.managed_by_policy || true,
-          peers_from_control_nodes: instance.peers_from_control_nodes
-            ? true
-            : !isEdit,
+          peers_from_control_nodes: instance.peers_from_control_nodes || false,
           peers: instance_peers,
         }}
         onSubmit={(values) => {
           handleSubmit({
             ...values,
+            listener_port: values.listener_port === '' ? null : values.listener_port,
             peers: values.peers.map((peer) => peer.hostname || peer),
           });
         }}
