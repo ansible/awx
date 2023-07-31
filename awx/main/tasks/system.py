@@ -368,9 +368,7 @@ def send_notifications(notification_list, job_id=None):
 
 @task(queue=get_task_queuename)
 def gather_analytics():
-    from awx.conf.models import Setting
-
-    if is_run_threshold_reached(Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_GATHER').first(), settings.AUTOMATION_ANALYTICS_GATHER_INTERVAL):
+    if is_run_threshold_reached(getattr(settings, 'AUTOMATION_ANALYTICS_LAST_GATHER', None), settings.AUTOMATION_ANALYTICS_GATHER_INTERVAL):
         analytics.gather()
 
 
