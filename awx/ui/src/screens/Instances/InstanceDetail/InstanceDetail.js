@@ -210,7 +210,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
           <Detail label={t`Instance Port`} value={instance.listener_port} />
           {(isExecutionNode || isHopNode) && (
             <Detail
-              label={t`Connection to control nodes`}
+              label={t`Peers from control nodes`}
               value={instance.peers_from_control_nodes ? t`On` : t`Off`}
             />
           )}
