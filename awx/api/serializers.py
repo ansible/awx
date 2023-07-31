@@ -5501,8 +5501,12 @@ class InstanceSerializer(BaseSerializer):
                     _("Setting peers manually for control nodes is not allowed. Enable peers_from_control_nodes on the hop and execution nodes instead.")
                 )
 
-        if peers_from_control_nodes and listener_port is None:
+        if not listener_port and peers_from_control_nodes:
             raise serializers.ValidationError(_("Field listener_port must be a valid integer when peers_from_control_nodes is enabled."))
+
+        if not listener_port and self.instance and self.instance.peers_from.exists():
+            raise serializers.ValidationError(_("Field listener_port must be a valid integer when other nodes peer to it."))
+
         for peer in attrs.get('peers', []):
             if peer.listener_port is None:
                 raise serializers.ValidationError(_("Field listener_port must be set on peer ") + peer.hostname + ".")
@@ -5544,7 +5548,10 @@ class InstanceSerializer(BaseSerializer):
         return value
 
     def validate_listener_port(self, value):
-        if self.instance and self.instance.listener_port != value:
+        """
+        Cannot change listener port, unless going from none to integer, and vice versa
+        """
+        if value and self.instance and self.instance.listener_port and self.instance.listener_port != value:
             raise serializers.ValidationError(_("Cannot change listener port."))
 
         return value
