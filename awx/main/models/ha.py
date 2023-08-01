@@ -72,7 +72,7 @@ class InstanceLink(BaseModel):
         REMOVING = 'removing', _('Removing')
 
     link_state = models.CharField(
-        choices=States.choices, default=States.DISCONNECTED, max_length=16, help_text=_("Indicates the current life cycle stage of this peer link.")
+        choices=States.choices, default=States.ADDING, max_length=16, help_text=_("Indicates the current life cycle stage of this peer link.")
     )
 
     class Meta:
@@ -181,7 +181,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         blank=True,
         null=True,
         default=None,
-        validators=[MinValueValidator(1), MaxValueValidator(65535)],
+        validators=[MinValueValidator(1024), MaxValueValidator(65535)],
         help_text=_("Port that Receptor will listen for incoming connections on."),
     )
 

@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
             name='link_state',
             field=models.CharField(
                 choices=[('adding', 'Adding'), ('established', 'Established'), ('disconnected', 'Disconnected'), ('removing', 'Removing')],
-                default='disconnected',
+                default='adding',
                 help_text='Indicates the current life cycle stage of this peer link.',
                 max_length=16,
             ),
@@ -54,7 +54,7 @@ class Migration(migrations.Migration):
                 default=None,
                 help_text='Port that Receptor will listen for incoming connections on.',
                 null=True,
-                validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(65535)],
+                validators=[django.core.validators.MinValueValidator(1024), django.core.validators.MaxValueValidator(65535)],
             ),
         ),
         migrations.RunPython(automatically_peer_from_control_plane),

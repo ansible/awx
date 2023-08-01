@@ -688,8 +688,7 @@ def should_update_config(instances):
             if key.endswith('-peer'):
                 current_peers.append(value['address'])
     intended_peers = [f"{i.hostname}:{i.listener_port}" for i in instances]
-    # TODO remove this logging line
-    logger.warning(f"current {current_peers} intended {intended_peers}")
+    logger.debug(f"Peers current {current_peers} intended {intended_peers}")
     if set(current_peers) == set(intended_peers):
         return False  # config file is already update to date
 
@@ -700,7 +699,7 @@ def generate_config_data():
     # returns two values
     #   receptor config - based on current database peers
     #   should_update   - If True, receptor_config differs from the receptor conf file on disk
-    instances = Instance.objects.filter(node_type__in=(Instance.Types.EXECUTION, Instance.Types.HOP), peers_from_control_nodes=True)
+    instances = Instance.objects.me().peers.all()
 
     receptor_config = list(RECEPTOR_CONFIG_STARTER)
     for instance in instances:
