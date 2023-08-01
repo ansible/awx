@@ -211,7 +211,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
     def get_absolute_url(self, request=None):
         if request is not None:
             # circular import
-            from awx.api.urls.inventory import constructed_inventory_urls
+            from awx.api.urls.api_v2.constructed_inventories import urls as constructed_inventory_urls
 
             route = resolve(request.path_info)
             if any(route.url_name == url.name for url in constructed_inventory_urls):
