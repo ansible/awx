@@ -3,6 +3,9 @@
 
 from itertools import chain
 
+from awx.settings.application_name import set_application_name
+from django.conf import settings
+
 
 def get_all_field_names(model):
     # Implements compatibility with _meta.get_all_field_names
@@ -18,3 +21,7 @@ def get_all_field_names(model):
             )
         )
     )
+
+
+def set_connection_name(function):
+    set_application_name(settings.DATABASES, settings.CLUSTER_HOST_ID, function=function)

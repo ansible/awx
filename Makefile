@@ -1,6 +1,7 @@
 -include awx/ui_next/Makefile
 
-PYTHON ?= python3.9
+PYTHON := $(notdir $(shell for i in python3.9 python3; do command -v $$i; done|sed 1q))
+SHELL := bash
 DOCKER_COMPOSE ?= docker-compose
 OFFICIAL ?= no
 NODE ?= node
@@ -8,7 +9,7 @@ NPM_BIN ?= npm
 CHROMIUM_BIN=/tmp/chrome-linux/chrome
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 MANAGEMENT_COMMAND ?= awx-manage
-VERSION := $(shell $(PYTHON) tools/scripts/scm_version.py)
+VERSION ?= $(shell $(PYTHON) tools/scripts/scm_version.py)
 
 # ansible-test requires semver compatable version, so we allow overrides to hack it
 COLLECTION_VERSION ?= $(shell $(PYTHON) tools/scripts/scm_version.py | cut -d . -f 1-3)
@@ -27,6 +28,8 @@ COLLECTION_TEMPLATE_VERSION ?= false
 # NOTE: This defaults the container image version to the branch that's active
 COMPOSE_TAG ?= $(GIT_BRANCH)
 MAIN_NODE_TYPE ?= hybrid
+# If set to true docker-compose will also start a pgbouncer instance and use it
+PGBOUNCER ?= false
 # If set to true docker-compose will also start a keycloak instance
 KEYCLOAK ?= false
 # If set to true docker-compose will also start an ldap instance
@@ -37,17 +40,24 @@ SPLUNK ?= false
 PROMETHEUS ?= false
 # If set to true docker-compose will also start a grafana instance
 GRAFANA ?= false
+# If set to true docker-compose will also start a hashicorp vault instance
+VAULT ?= false
+# If set to true docker-compose will also start a tacacs+ instance
+TACACS ?= false
 
 VENV_BASE ?= /var/lib/awx/venv
 
-DEV_DOCKER_TAG_BASE ?= ghcr.io/ansible
+DEV_DOCKER_OWNER ?= ansible
+# Docker will only accept lowercase, so github names like Paul need to be paul
+DEV_DOCKER_OWNER_LOWER = $(shell echo $(DEV_DOCKER_OWNER) | tr A-Z a-z)
+DEV_DOCKER_TAG_BASE ?= ghcr.io/$(DEV_DOCKER_OWNER_LOWER)
 DEVEL_IMAGE_NAME ?= $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 
 RECEPTOR_IMAGE ?= quay.io/ansible/receptor:devel
 
 # Python packages to install only from source (not from binary wheels)
 # Comma separated list
-SRC_ONLY_PKGS ?= cffi,pycparser,psycopg2,twilio
+SRC_ONLY_PKGS ?= cffi,pycparser,psycopg,twilio
 # These should be upgraded in the AWX and Ansible venv before attempting
 # to install the actual requirements
 VENV_BOOTSTRAP ?= pip==21.2.4 setuptools==65.6.3 setuptools_scm[toml]==7.0.5 wheel==0.38.4
@@ -262,11 +272,11 @@ run-wsrelay:
 	$(PYTHON) manage.py run_wsrelay
 
 ## Start the heartbeat process in background in development environment.
-run-heartbeet:
+run-ws-heartbeat:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py run_heartbeet
+	$(PYTHON) manage.py run_ws_heartbeat
 
 reports:
 	mkdir -p $@
@@ -294,13 +304,13 @@ swagger: reports
 check: black
 
 api-lint:
-	BLACK_ARGS="--check" make black
+	BLACK_ARGS="--check" $(MAKE) black
 	flake8 awx
 	yamllint -s .
 
+## Run egg_info_dev to generate awx.egg-info for development.
 awx-link:
 	[ -d "/awx_devel/awx.egg-info" ] || $(PYTHON) /awx_devel/tools/scripts/egg_info_dev
-	cp -f /tmp/awx.egg-link /var/lib/awx/venv/awx/lib/$(PYTHON)/site-packages/awx.egg-link
 
 TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/sso/tests
 PYTEST_ARGS ?= -n auto
@@ -319,7 +329,7 @@ github_ci_setup:
 	# CI_GITHUB_TOKEN is defined in .github files
 	echo $(CI_GITHUB_TOKEN) | docker login ghcr.io -u $(GITHUB_ACTOR) --password-stdin
 	docker pull $(DEVEL_IMAGE_NAME) || :  # Pre-pull image to warm build cache
-	make docker-compose-build
+	$(MAKE) docker-compose-build
 
 ## Runs AWX_DOCKER_CMD inside a new docker container.
 docker-runner:
@@ -369,7 +379,7 @@ test_collection_sanity:
 	rm -rf $(COLLECTION_INSTALL)
 	if ! [ -x "$(shell command -v ansible-test)" ]; then pip install ansible-core; fi
 	ansible --version
-	COLLECTION_VERSION=1.0.0 make install_collection
+	COLLECTION_VERSION=1.0.0 $(MAKE) install_collection
 	cd $(COLLECTION_INSTALL) && ansible-test sanity $(COLLECTION_SANITY_ARGS)
 
 test_collection_integration: install_collection
@@ -515,13 +525,20 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e control_plane_node_count=$(CONTROL_PLANE_NODE_COUNT) \
 	    -e execution_node_count=$(EXECUTION_NODE_COUNT) \
 	    -e minikube_container_group=$(MINIKUBE_CONTAINER_GROUP) \
+	    -e enable_pgbouncer=$(PGBOUNCER) \
 	    -e enable_keycloak=$(KEYCLOAK) \
 	    -e enable_ldap=$(LDAP) \
 	    -e enable_splunk=$(SPLUNK) \
 	    -e enable_prometheus=$(PROMETHEUS) \
-	    -e enable_grafana=$(GRAFANA) $(EXTRA_SOURCES_ANSIBLE_OPTS)
+	    -e enable_grafana=$(GRAFANA) \
+	    -e enable_vault=$(VAULT) \
+	    -e enable_tacacs=$(TACACS) \
+            $(EXTRA_SOURCES_ANSIBLE_OPTS)
 
 docker-compose: awx/projects docker-compose-sources
+	ansible-galaxy install --ignore-certs -r tools/docker-compose/ansible/requirements.yml;
+	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/initialize_containers.yml \
+	  -e enable_vault=$(VAULT);
 	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_OPTS) up $(COMPOSE_UP_OPTS) --remove-orphans
 
 docker-compose-credential-plugins: awx/projects docker-compose-sources
@@ -552,19 +569,28 @@ docker-compose-container-group-clean:
 	fi
 	rm -rf tools/docker-compose-minikube/_sources/
 
-## Base development image build
-docker-compose-build:
-	ansible-playbook tools/ansible/dockerfile.yml -e build_dev=True -e receptor_image=$(RECEPTOR_IMAGE)
-	DOCKER_BUILDKIT=1 docker build -t $(DEVEL_IMAGE_NAME) \
-	    --build-arg BUILDKIT_INLINE_CACHE=1 \
-	    --cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .
+.PHONY: Dockerfile.dev
+## Generate Dockerfile.dev for awx_devel image
+Dockerfile.dev: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
+	ansible-playbook tools/ansible/dockerfile.yml \
+		-e dockerfile_name=Dockerfile.dev \
+		-e build_dev=True \
+		-e receptor_image=$(RECEPTOR_IMAGE)
+
+## Build awx_devel image for docker compose development environment
+docker-compose-build: Dockerfile.dev
+	DOCKER_BUILDKIT=1 docker build \
+		-f Dockerfile.dev \
+		-t $(DEVEL_IMAGE_NAME) \
+		--build-arg BUILDKIT_INLINE_CACHE=1 \
+		--cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .
 
 docker-clean:
 	-$(foreach container_id,$(shell docker ps -f name=tools_awx -aq && docker ps -f name=tools_receptor -aq),docker stop $(container_id); docker rm -f $(container_id);)
 	-$(foreach image_id,$(shell docker images --filter=reference='*/*/*awx_devel*' --filter=reference='*/*awx_devel*' --filter=reference='*awx_devel*' -aq),docker rmi --force $(image_id);)
 
 docker-clean-volumes: docker-compose-clean docker-compose-container-group-clean
-	docker volume rm -f tools_awx_db tools_grafana_storage tools_prometheus_storage $(docker volume ls --filter name=tools_redis_socket_ -q)
+	docker volume rm -f tools_awx_db tools_vault_1 tools_grafana_storage tools_prometheus_storage $(docker volume ls --filter name=tools_redis_socket_ -q)
 
 docker-refresh: docker-clean docker-compose
 
@@ -576,7 +602,7 @@ docker-compose-cluster-elk: awx/projects docker-compose-sources
 	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
 
 docker-compose-container-group:
-	MINIKUBE_CONTAINER_GROUP=true make docker-compose
+	MINIKUBE_CONTAINER_GROUP=true $(MAKE) docker-compose
 
 clean-elk:
 	docker stop tools_kibana_1
@@ -593,12 +619,36 @@ VERSION:
 	@echo "awx: $(VERSION)"
 
 PYTHON_VERSION:
-	@echo "$(PYTHON)" | sed 's:python::'
+	@echo "$(subst python,,$(PYTHON))"
+
+.PHONY: version-for-buildyml
+version-for-buildyml:
+	@echo $(firstword $(subst +, ,$(VERSION)))
+# version-for-buildyml prints a special version string for build.yml,
+# chopping off the sha after the '+' sign.
+# tools/ansible/build.yml was doing this: make print-VERSION | cut -d + -f -1
+# This does the same thing in native make without
+# the pipe or the extra processes, and now the pb does `make version-for-buildyml`
+# Example:
+# 	22.1.1.dev38+g523c0d9781 becomes 22.1.1.dev38
 
 .PHONY: Dockerfile
+## Generate Dockerfile for awx image
 Dockerfile: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
-	ansible-playbook tools/ansible/dockerfile.yml -e receptor_image=$(RECEPTOR_IMAGE)
+	ansible-playbook tools/ansible/dockerfile.yml \
+		-e receptor_image=$(RECEPTOR_IMAGE) \
+		-e headless=$(HEADLESS)
 
+## Build awx image for deployment on Kubernetes environment.
+awx-kube-build: Dockerfile
+	DOCKER_BUILDKIT=1 docker build -f Dockerfile \
+		--build-arg VERSION=$(VERSION) \
+		--build-arg SETUPTOOLS_SCM_PRETEND_VERSION=$(VERSION) \
+		--build-arg HEADLESS=$(HEADLESS) \
+		-t $(DEV_DOCKER_TAG_BASE)/awx:$(COMPOSE_TAG) .
+
+.PHONY: Dockerfile.kube-dev
+## Generate Docker.kube-dev for awx_kube_devel image
 Dockerfile.kube-dev: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
 	ansible-playbook tools/ansible/dockerfile.yml \
 	    -e dockerfile_name=Dockerfile.kube-dev \
@@ -613,13 +663,6 @@ awx-kube-dev-build: Dockerfile.kube-dev
 	    --cache-from=$(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) \
 	    -t $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) .
 
-## Build awx image for deployment on Kubernetes environment.
-awx-kube-build: Dockerfile
-	DOCKER_BUILDKIT=1 docker build -f Dockerfile \
-		--build-arg VERSION=$(VERSION) \
-		--build-arg SETUPTOOLS_SCM_PRETEND_VERSION=$(VERSION) \
-		--build-arg HEADLESS=$(HEADLESS) \
-		-t $(DEV_DOCKER_TAG_BASE)/awx:$(COMPOSE_TAG) .
 
 # Translation TASKS
 # --------------------------------------
@@ -627,10 +670,12 @@ awx-kube-build: Dockerfile
 ## generate UI .pot file, an empty template of strings yet to be translated
 pot: $(UI_BUILD_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run extract-template --clean
+	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run extract-template --clean
 
 ## generate UI .po files for each locale (will update translated strings for `en`)
 po: $(UI_BUILD_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui --loglevel warn run extract-strings -- --clean
+	$(NPM_BIN) --prefix awx/ui_next --loglevel warn run extract-strings -- --clean
 
 ## generate API django .pot .po
 messages:
@@ -639,6 +684,7 @@ messages:
 	fi; \
 	$(PYTHON) manage.py makemessages -l en_us --keep-pot
 
+.PHONY: print-%
 print-%:
 	@echo $($*)
 
@@ -650,12 +696,12 @@ HELP_FILTER=.PHONY
 ## Display help targets
 help:
 	@printf "Available targets:\n"
-	@make -s help/generate | grep -vE "\w($(HELP_FILTER))"
+	@$(MAKE) -s help/generate | grep -vE "\w($(HELP_FILTER))"
 
 ## Display help for all targets
 help/all:
 	@printf "Available targets:\n"
-	@make -s help/generate
+	@$(MAKE) -s help/generate
 
 ## Generate help output from MAKEFILE_LIST
 help/generate:
@@ -679,4 +725,4 @@ help/generate:
 
 ## Display help for ui-next targets
 help/ui-next:
-	@make -s help MAKEFILE_LIST="awx/ui_next/Makefile"
+	@$(MAKE) -s help MAKEFILE_LIST="awx/ui_next/Makefile"

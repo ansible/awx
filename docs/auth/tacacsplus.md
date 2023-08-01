@@ -8,7 +8,8 @@ TACACS+ is configured by settings configuration and is available under `/api/v2/
     "TACACSPLUS_PORT": 49,
     "TACACSPLUS_SECRET": "secret",
     "TACACSPLUS_SESSION_TIMEOUT": 5,
-    "TACACSPLUS_AUTH_PROTOCOL": "ascii"
+    "TACACSPLUS_AUTH_PROTOCOL": "ascii",
+    "TACACSPLUS_REM_ADDR": "false"
 }
 ```
 Each field is explained below:
@@ -20,6 +21,7 @@ Each field is explained below:
 | `TACACSPLUS_SECRET`          | String              | '' (empty string)   | Shared secret for authenticating to TACACS+ server.                |
 | `TACACSPLUS_SESSION_TIMEOUT` | Integer             | 5                   | TACACS+ session timeout value in seconds.                          |
 | `TACACSPLUS_AUTH_PROTOCOL`   | String with choices | 'ascii'             | The authentication protocol used by TACACS+ client (choices are `ascii` and `pap`).                |
+| `TACACSPLUS_REM_ADDR`        | Boolean             | false               | Enable the client address sending by TACACS+ client.               |
 
 Under the hood, AWX uses [open-source TACACS+ python client](https://github.com/ansible/tacacs_plus) to communicate with the remote TACACS+ server. During authentication, AWX passes username and password to TACACS+ client, which packs up auth information and sends it to the TACACS+ server. Based on what the server returns, AWX will invalidate login attempt if authentication fails. If authentication passes, AWX will create a user if she does not exist in database, and log the user in.
 

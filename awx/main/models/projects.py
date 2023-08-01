@@ -33,7 +33,7 @@ from awx.main.models.mixins import ResourceMixin, TaskManagerProjectUpdateMixin,
 from awx.main.utils import update_scm_url, polymorphic
 from awx.main.utils.ansible import skip_directory, could_be_inventory, could_be_playbook
 from awx.main.utils.execution_environments import get_control_plane_execution_environment
-from awx.main.fields import ImplicitRoleField, JSONBlob
+from awx.main.fields import ImplicitRoleField
 from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
@@ -74,7 +74,7 @@ class ProjectOptions(models.Model):
             return []
 
     local_path = models.CharField(
-        max_length=1024, blank=True, help_text=_('Local path (relative to PROJECTS_ROOT) containing ' 'playbooks and related files for this project.')
+        max_length=1024, blank=True, help_text=_('Local path (relative to PROJECTS_ROOT) containing playbooks and related files for this project.')
     )
 
     scm_type = models.CharField(
@@ -276,11 +276,11 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
     scm_update_cache_timeout = models.PositiveIntegerField(
         default=0,
         blank=True,
-        help_text=_('The number of seconds after the last project update ran that a new ' 'project update will be launched as a job dependency.'),
+        help_text=_('The number of seconds after the last project update ran that a new project update will be launched as a job dependency.'),
     )
     allow_override = models.BooleanField(
         default=False,
-        help_text=_('Allow changing the SCM branch or revision in a job template ' 'that uses this project.'),
+        help_text=_('Allow changing the SCM branch or revision in a job template that uses this project.'),
     )
 
     # credential (keys) used to validate content signature
@@ -303,7 +303,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         help_text=_('The last revision fetched by a project update'),
     )
 
-    playbook_files = JSONBlob(
+    playbook_files = models.JSONField(
         default=list,
         blank=True,
         editable=False,
@@ -311,7 +311,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         help_text=_('List of playbooks found in the project'),
     )
 
-    inventory_files = JSONBlob(
+    inventory_files = models.JSONField(
         default=list,
         blank=True,
         editable=False,
@@ -479,7 +479,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         RunProjectUpdate/RunInventoryUpdate.
         """
 
-        if self.status not in ('error', 'failed'):
+        if self.status not in ('error', 'failed') or self.scm_update_on_launch:
             return None
 
         latest_update = self.project_updates.last()

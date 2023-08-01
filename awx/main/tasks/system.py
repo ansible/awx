@@ -316,13 +316,8 @@ def send_notifications(notification_list, job_id=None):
 @task(queue=get_task_queuename)
 def gather_analytics():
     from awx.conf.models import Setting
-    from rest_framework.fields import DateTimeField
 
-    last_gather = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_GATHER').first()
-    last_time = DateTimeField().to_internal_value(last_gather.value) if last_gather and last_gather.value else None
-    gather_time = now()
-
-    if not last_time or ((gather_time - last_time).total_seconds() > settings.AUTOMATION_ANALYTICS_GATHER_INTERVAL):
+    if is_run_threshold_reached(Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_GATHER').first(), settings.AUTOMATION_ANALYTICS_GATHER_INTERVAL):
         analytics.gather()
 
 
@@ -381,16 +376,25 @@ def cleanup_images_and_files():
 
 @task(queue=get_task_queuename)
 def cleanup_host_metrics():
+    """Run cleanup host metrics ~each month"""
+    # TODO: move whole method to host_metrics in follow-up PR
     from awx.conf.models import Setting
+
+    if is_run_threshold_reached(
+        Setting.objects.filter(key='CLEANUP_HOST_METRICS_LAST_TS').first(), getattr(settings, 'CLEANUP_HOST_METRICS_INTERVAL', 30) * 86400
+    ):
+        months_ago = getattr(settings, 'CLEANUP_HOST_METRICS_SOFT_THRESHOLD', 12)
+        logger.info("Executing cleanup_host_metrics")
+        HostMetric.cleanup_task(months_ago)
+        logger.info("Finished cleanup_host_metrics")
+
+
+def is_run_threshold_reached(setting, threshold_seconds):
     from rest_framework.fields import DateTimeField
 
-    last_cleanup = Setting.objects.filter(key='CLEANUP_HOST_METRICS_LAST_TS').first()
-    last_time = DateTimeField().to_internal_value(last_cleanup.value) if last_cleanup and last_cleanup.value else None
+    last_time = DateTimeField().to_internal_value(setting.value) if setting and setting.value else DateTimeField().to_internal_value('1970-01-01')
 
-    cleanup_interval_secs = getattr(settings, 'CLEANUP_HOST_METRICS_INTERVAL', 30) * 86400
-    if not last_time or ((now() - last_time).total_seconds() > cleanup_interval_secs):
-        months_ago = getattr(settings, 'CLEANUP_HOST_METRICS_THRESHOLD', 12)
-        HostMetric.cleanup_task(months_ago)
+    return (now() - last_time).total_seconds() > threshold_seconds
 
 
 @task(queue=get_task_queuename)
@@ -541,7 +545,7 @@ def cluster_node_heartbeat(dispatch_time=None, worker_tasks=None):
             logger.warning(f'Heartbeat skew - interval={(nowtime - last_last_seen).total_seconds():.4f}, expected={settings.CLUSTER_NODE_HEARTBEAT_PERIOD}')
     else:
         if settings.AWX_AUTO_DEPROVISION_INSTANCES:
-            (changed, this_inst) = Instance.objects.register(ip_address=os.environ.get('MY_POD_IP'), node_type='control', uuid=settings.SYSTEM_UUID)
+            (changed, this_inst) = Instance.objects.register(ip_address=os.environ.get('MY_POD_IP'), node_type='control', node_uuid=settings.SYSTEM_UUID)
             if changed:
                 logger.warning(f'Recreated instance record {this_inst.hostname} after unexpected removal')
             this_inst.local_health_check()
@@ -839,10 +843,7 @@ def delete_inventory(inventory_id, user_id, retries=5):
             user = None
     with ignore_inventory_computed_fields(), ignore_inventory_group_removal(), impersonate(user):
         try:
-            i = Inventory.objects.get(id=inventory_id)
-            for host in i.hosts.iterator():
-                host.job_events_as_primary_host.update(host=None)
-            i.delete()
+            Inventory.objects.get(id=inventory_id).delete()
             emit_channel_notification('inventories-status_changed', {'group_name': 'inventories', 'inventory_id': inventory_id, 'status': 'deleted'})
             logger.debug('Deleted inventory {} as user {}.'.format(inventory_id, user_id))
         except Inventory.DoesNotExist:
@@ -893,15 +894,8 @@ def _reconstruct_relationships(copy_mapping):
 
 
 @task(queue=get_task_queuename)
-def deep_copy_model_obj(model_module, model_name, obj_pk, new_obj_pk, user_pk, uuid, permission_check_func=None):
-    sub_obj_list = cache.get(uuid)
-    if sub_obj_list is None:
-        logger.error('Deep copy {} from {} to {} failed unexpectedly.'.format(model_name, obj_pk, new_obj_pk))
-        return
-
+def deep_copy_model_obj(model_module, model_name, obj_pk, new_obj_pk, user_pk, permission_check_func=None):
     logger.debug('Deep copy {} from {} to {}.'.format(model_name, obj_pk, new_obj_pk))
-    from awx.api.generics import CopyAPIView
-    from awx.main.signals import disable_activity_stream
 
     model = getattr(importlib.import_module(model_module), model_name, None)
     if model is None:
@@ -913,6 +907,28 @@ def deep_copy_model_obj(model_module, model_name, obj_pk, new_obj_pk, user_pk, u
     except ObjectDoesNotExist:
         logger.warning("Object or user no longer exists.")
         return
+
+    o2m_to_preserve = {}
+    fields_to_preserve = set(getattr(model, 'FIELDS_TO_PRESERVE_AT_COPY', []))
+
+    for field in model._meta.get_fields():
+        if field.name in fields_to_preserve:
+            if field.one_to_many:
+                try:
+                    field_val = getattr(obj, field.name)
+                except AttributeError:
+                    continue
+                o2m_to_preserve[field.name] = field_val
+
+    sub_obj_list = []
+    for o2m in o2m_to_preserve:
+        for sub_obj in o2m_to_preserve[o2m].all():
+            sub_model = type(sub_obj)
+            sub_obj_list.append((sub_model.__module__, sub_model.__name__, sub_obj.pk))
+
+    from awx.api.generics import CopyAPIView
+    from awx.main.signals import disable_activity_stream
+
     with transaction.atomic(), ignore_inventory_computed_fields(), disable_activity_stream():
         copy_mapping = {}
         for sub_obj_setup in sub_obj_list:

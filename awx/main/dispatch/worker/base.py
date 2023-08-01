@@ -7,7 +7,7 @@ import signal
 import sys
 import redis
 import json
-import psycopg2
+import psycopg
 import time
 from uuid import UUID
 from queue import Empty as QueueEmpty
@@ -18,6 +18,8 @@ from django.conf import settings
 from awx.main.dispatch.pool import WorkerPool
 from awx.main.dispatch import pg_bus_conn
 from awx.main.utils.common import log_excess_runtime
+from awx.main.utils.db import set_connection_name
+import awx.main.analytics.subsystem_metrics as s_metrics
 
 if 'run_callback_receiver' in sys.argv:
     logger = logging.getLogger('awx.main.commands.run_callback_receiver')
@@ -119,10 +121,9 @@ class AWXConsumerBase(object):
         if time.time() - self.last_stats > 1:  # buffer stat recording to once per second
             try:
                 self.redis.set(f'awx_{self.name}_statistics', self.pool.debug())
-                self.last_stats = time.time()
             except Exception:
                 logger.exception(f"encountered an error communicating with redis to store {self.name} statistics")
-                self.last_stats = time.time()
+            self.last_stats = time.time()
 
     def run(self, *args, **kwargs):
         signal.signal(signal.SIGINT, self.stop)
@@ -141,9 +142,10 @@ class AWXConsumerRedis(AWXConsumerBase):
     def run(self, *args, **kwargs):
         super(AWXConsumerRedis, self).run(*args, **kwargs)
         self.worker.on_start()
+        logger.info(f'Callback receiver started with pid={os.getpid()}')
+        db.connection.close()  # logs use database, so close connection
 
         while True:
-            logger.debug(f'{os.getpid()} is alive')
             time.sleep(60)
 
 
@@ -153,17 +155,33 @@ class AWXConsumerPG(AWXConsumerBase):
         self.pg_max_wait = settings.DISPATCHER_DB_DOWNTOWN_TOLLERANCE
         # if no successful loops have ran since startup, then we should fail right away
         self.pg_is_down = True  # set so that we fail if we get database errors on startup
-        self.pg_down_time = time.time() - self.pg_max_wait  # allow no grace period
-        self.last_cleanup = time.time()
+        init_time = time.time()
+        self.pg_down_time = init_time - self.pg_max_wait  # allow no grace period
+        self.last_cleanup = init_time
+        self.subsystem_metrics = s_metrics.Metrics(auto_pipe_execute=False)
+        self.last_metrics_gather = init_time
+        self.listen_cumulative_time = 0.0
 
     def run_periodic_tasks(self):
         self.record_statistics()  # maintains time buffer in method
 
-        if time.time() - self.last_cleanup > 60:  # same as cluster_node_heartbeat
+        current_time = time.time()
+        if current_time - self.last_cleanup > 60:  # same as cluster_node_heartbeat
             # NOTE: if we run out of database connections, it is important to still run cleanup
             # so that we scale down workers and free up connections
             self.pool.cleanup()
-            self.last_cleanup = time.time()
+            self.last_cleanup = current_time
+
+        # record subsystem metrics for the dispatcher
+        if current_time - self.last_metrics_gather > 20:
+            try:
+                self.pool.produce_subsystem_metrics(self.subsystem_metrics)
+                self.subsystem_metrics.set('dispatcher_availability', self.listen_cumulative_time / (current_time - self.last_metrics_gather))
+                self.subsystem_metrics.pipe_execute()
+            except Exception:
+                logger.exception(f"encountered an error trying to store {self.name} metrics")
+            self.listen_cumulative_time = 0.0
+            self.last_metrics_gather = current_time
 
     def run(self, *args, **kwargs):
         super(AWXConsumerPG, self).run(*args, **kwargs)
@@ -179,17 +197,20 @@ class AWXConsumerPG(AWXConsumerBase):
                     if init is False:
                         self.worker.on_start()
                         init = True
+                    self.listen_start = time.time()
                     for e in conn.events(yield_timeouts=True):
+                        self.listen_cumulative_time += time.time() - self.listen_start
                         if e is not None:
                             self.process_task(json.loads(e.payload))
                         self.run_periodic_tasks()
                         self.pg_is_down = False
+                        self.listen_start = time.time()
                     if self.should_stop:
                         return
-            except psycopg2.InterfaceError:
+            except psycopg.InterfaceError:
                 logger.warning("Stale Postgres message bus connection, reconnecting")
                 continue
-            except (db.DatabaseError, psycopg2.OperationalError):
+            except (db.DatabaseError, psycopg.OperationalError):
                 # If we have attained stady state operation, tolerate short-term database hickups
                 if not self.pg_is_down:
                     logger.exception(f"Error consuming new events from postgres, will retry for {self.pg_max_wait} s")
@@ -219,6 +240,7 @@ class BaseWorker(object):
     def work_loop(self, queue, finished, idx, *args):
         ppid = os.getppid()
         signal_handler = WorkerSignalHandler()
+        set_connection_name('worker')  # set application_name to distinguish from other dispatcher processes
         while not signal_handler.kill_now:
             # if the parent PID changes, this process has been orphaned
             # via e.g., segfault or sigkill, we should exit too
@@ -230,8 +252,8 @@ class BaseWorker(object):
                     break
             except QueueEmpty:
                 continue
-            except Exception as e:
-                logger.error("Exception on worker {}, restarting: ".format(idx) + str(e))
+            except Exception:
+                logger.exception("Exception on worker {}, reconnecting: ".format(idx))
                 continue
             try:
                 for conn in db.connections.all():

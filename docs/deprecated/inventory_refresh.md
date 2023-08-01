@@ -94,7 +94,7 @@ In the above example, the search is limited to the "US-East" inventory and
 hosts with a name containing "nyc".
 
 
-### Acceptance Critera
+### Acceptance Criteria
 
 When verifying acceptance, ensure the following statements are true:
 ``

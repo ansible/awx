@@ -48,7 +48,7 @@ options:
           type: str
     inventory:
       description:
-        - Inventory name or ID the hosts should be made a member of.
+        - Inventory name, ID, or named URL the hosts should be made a member of.
       required: True
       type: str
 extends_documentation_fragment: awx.awx.auth

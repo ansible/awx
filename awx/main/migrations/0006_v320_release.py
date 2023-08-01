@@ -2,13 +2,9 @@
 # Python
 from __future__ import unicode_literals
 
-# Psycopg2
-from psycopg2.extensions import AsIs
-
 # Django
 from django.db import connection, migrations, models, OperationalError, ProgrammingError
 from django.conf import settings
-import taggit.managers
 
 # AWX
 import awx.main.fields
@@ -136,8 +132,8 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.RunSQL(
-            [("CREATE INDEX host_ansible_facts_default_gin ON %s USING gin" "(ansible_facts jsonb_path_ops);", [AsIs(Host._meta.db_table)])],
-            [('DROP INDEX host_ansible_facts_default_gin;', None)],
+            sql="CREATE INDEX host_ansible_facts_default_gin ON {} USING gin(ansible_facts jsonb_path_ops);".format(Host._meta.db_table),
+            reverse_sql='DROP INDEX host_ansible_facts_default_gin;',
         ),
         # SCM file-based inventories
         migrations.AddField(
@@ -319,10 +315,6 @@ class Migration(migrations.Migration):
         migrations.RemoveField(
             model_name='permission',
             name='project',
-        ),
-        migrations.RemoveField(
-            model_name='permission',
-            name='tags',
         ),
         migrations.RemoveField(
             model_name='permission',
@@ -511,12 +503,6 @@ class Migration(migrations.Migration):
                         editable=False,
                         to=settings.AUTH_USER_MODEL,
                         null=True,
-                    ),
-                ),
-                (
-                    'tags',
-                    taggit.managers.TaggableManager(
-                        to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags'
                     ),
                 ),
             ],

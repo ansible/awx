@@ -57,7 +57,7 @@ function CredentialType({ setBreadcrumb }) {
       ),
       link: '/credential_types',
       id: 99,
-      isBackButton: true,
+      persistentFilterKey: 'credentialTypes',
     },
     {
       name: t`Details`,

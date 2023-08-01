@@ -99,7 +99,7 @@ function ExternalTestModal({
               </Button>,
             ]}
           >
-            <Form>
+            <Form autoComplete="off">
               <FormFullWidthLayout>
                 {credentialType.inputs.metadata.map((field) => {
                   const isRequired = credentialType.inputs?.required.includes(

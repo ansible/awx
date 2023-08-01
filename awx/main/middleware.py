@@ -122,7 +122,7 @@ class URLModificationMiddleware(MiddlewareMixin):
             field_class=fields.DictField,
             read_only=True,
             label=_('Formats of all available named urls'),
-            help_text=_('Read-only list of key-value pairs that shows the standard format of all ' 'available named URLs.'),
+            help_text=_('Read-only list of key-value pairs that shows the standard format of all available named URLs.'),
             category=_('Named URL'),
             category_slug='named-url',
         )

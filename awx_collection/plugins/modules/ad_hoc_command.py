@@ -29,12 +29,12 @@ options:
       choices: [ 'run', 'check' ]
     execution_environment:
       description:
-        - Execution Environment to use for the ad hoc command.
+        - Execution Environment name, ID, or named URL to use for the ad hoc command.
       required: False
       type: str
     inventory:
       description:
-        - Inventory to use for the ad hoc command.
+        - Inventory name, ID, or named URL to use for the ad hoc command.
       required: True
       type: str
     limit:
@@ -43,7 +43,7 @@ options:
       type: str
     credential:
       description:
-        - Credential to use for ad hoc command.
+        - Credential name, ID, or named URL to use for ad hoc command.
       required: True
       type: str
     module_name:
@@ -95,6 +95,13 @@ extends_documentation_fragment: awx.awx.auth
 '''
 
 EXAMPLES = '''
+- name: Launch an Ad Hoc Command waiting for it to finish
+  ad_hoc_command:
+    inventory: Demo Inventory
+    credential: Demo Credential
+    module_name: command
+    module_args: echo I <3 Ansible
+    wait: true
 '''
 
 RETURN = '''
@@ -145,6 +152,7 @@ def main():
     wait = module.params.get('wait')
     interval = module.params.get('interval')
     timeout = module.params.get('timeout')
+    execution_environment = module.params.get('execution_environment')
 
     # Create a datastructure to pass into our command launch
     post_data = {
@@ -158,6 +166,8 @@ def main():
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     post_data['inventory'] = module.resolve_name_to_id('inventories', inventory)
     post_data['credential'] = module.resolve_name_to_id('credentials', credential)
+    if execution_environment:
+        post_data['execution_environment'] = module.resolve_name_to_id('execution_environments', execution_environment)
 
     # Launch the ad hoc command
     results = module.post_endpoint('ad_hoc_commands', **{'data': post_data})

@@ -41,16 +41,16 @@ options:
       type: str
     organization:
       description:
-        - The organization the execution environment belongs to.
+        - The organization name, ID, or named URL that the execution environment belongs to.
       type: str
     credential:
       description:
-        - Name of the credential to use for the execution environment.
+        - Name, ID, or named URL of the credential to use for the execution environment.
       type: str
     state:
       description:
         - Desired state of the resource.
-      choices: ["present", "absent"]
+      choices: ["present", "absent", "exists"]
       default: "present"
       type: str
     pull:
@@ -83,7 +83,7 @@ def main():
         description=dict(),
         organization=dict(),
         credential=dict(),
-        state=dict(choices=['present', 'absent'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists'], default='present'),
         # NOTE: Default for pull differs from API (which is blank by default)
         pull=dict(choices=['always', 'missing', 'never'], default='missing'),
     )
@@ -99,7 +99,7 @@ def main():
     state = module.params.get('state')
     pull = module.params.get('pull')
 
-    existing_item = module.get_one('execution_environments', name_or_id=name)
+    existing_item = module.get_one('execution_environments', name_or_id=name, check_exists=(state == 'exists'))
 
     if state == 'absent':
         module.delete_if_needed(existing_item)

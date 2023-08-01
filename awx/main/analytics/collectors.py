@@ -399,7 +399,10 @@ def _copy_table(table, query, path):
     file_path = os.path.join(path, table + '_table.csv')
     file = FileSplitter(filespec=file_path)
     with connection.cursor() as cursor:
-        cursor.copy_expert(query, file)
+        with cursor.copy(query) as copy:
+            while data := copy.read():
+                byte_data = bytes(data)
+                file.write(byte_data.decode())
     return file.file_list()
 
 

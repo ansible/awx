@@ -339,6 +339,17 @@ class AutoscalePool(WorkerPool):
         # but if the task takes longer than the time defined here, we will force it to stop here
         self.task_manager_timeout = settings.TASK_MANAGER_TIMEOUT + settings.TASK_MANAGER_TIMEOUT_GRACE_PERIOD
 
+        # initialize some things for subsystem metrics periodic gathering
+        # the AutoscalePool class does not save these to redis directly, but reports via produce_subsystem_metrics
+        self.scale_up_ct = 0
+        self.worker_count_max = 0
+
+    def produce_subsystem_metrics(self, metrics_object):
+        metrics_object.set('dispatcher_pool_scale_up_events', self.scale_up_ct)
+        metrics_object.set('dispatcher_pool_active_task_count', sum(len(w.managed_tasks) for w in self.workers))
+        metrics_object.set('dispatcher_pool_max_worker_count', self.worker_count_max)
+        self.worker_count_max = len(self.workers)
+
     @property
     def should_grow(self):
         if len(self.workers) < self.min_workers:
@@ -406,16 +417,16 @@ class AutoscalePool(WorkerPool):
                 # the task manager to never do more work
                 current_task = w.current_task
                 if current_task and isinstance(current_task, dict):
-                    endings = ['tasks.task_manager', 'tasks.dependency_manager', 'tasks.workflow_manager']
+                    endings = ('tasks.task_manager', 'tasks.dependency_manager', 'tasks.workflow_manager')
                     current_task_name = current_task.get('task', '')
-                    if any(current_task_name.endswith(e) for e in endings):
+                    if current_task_name.endswith(endings):
                         if 'started' not in current_task:
                             w.managed_tasks[current_task['uuid']]['started'] = time.time()
                         age = time.time() - current_task['started']
                         w.managed_tasks[current_task['uuid']]['age'] = age
                         if age > self.task_manager_timeout:
-                            logger.error(f'{current_task_name} has held the advisory lock for {age}, sending SIGTERM to {w.pid}')
-                            os.kill(w.pid, signal.SIGTERM)
+                            logger.error(f'{current_task_name} has held the advisory lock for {age}, sending SIGUSR1 to {w.pid}')
+                            os.kill(w.pid, signal.SIGUSR1)
 
         for m in orphaned:
             # if all the workers are dead, spawn at least one
@@ -443,7 +454,12 @@ class AutoscalePool(WorkerPool):
             idx = random.choice(range(len(self.workers)))
             return idx, self.workers[idx]
         else:
-            return super(AutoscalePool, self).up()
+            self.scale_up_ct += 1
+            ret = super(AutoscalePool, self).up()
+            new_worker_ct = len(self.workers)
+            if new_worker_ct > self.worker_count_max:
+                self.worker_count_max = new_worker_ct
+            return ret
 
     def write(self, preferred_queue, body):
         if 'guid' in body:

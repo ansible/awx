@@ -1,24 +1,16 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+# Python
 import base64
 import os
 import re  # noqa
-import sys
 import tempfile
 import socket
 from datetime import timedelta
 
-
-if "pytest" in sys.modules:
-    IS_TESTING_MODE = True
-    from unittest import mock
-
-    with mock.patch('__main__.__builtins__.dir', return_value=[]):
-        import ldap
-else:
-    IS_TESTING_MODE = False
-    import ldap
+# python-ldap
+import ldap
 
 
 DEBUG = True
@@ -122,9 +114,6 @@ JOBOUTPUT_ROOT = '/var/lib/awx/job_status/'
 # Absolute filesystem path to the directory to store logs
 LOG_ROOT = '/var/log/tower/'
 
-# The heartbeat file for the scheduler
-SCHEDULE_METADATA_LOCATION = os.path.join(BASE_DIR, '.tower_cycle')
-
 # Django gettext files path: locale/<lang-code>/LC_MESSAGES/django.po, django.mo
 LOCALE_PATHS = (os.path.join(BASE_DIR, 'locale'),)
 
@@ -168,6 +157,11 @@ REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 # If this setting is an empty list (the default), the headers specified by
 # REMOTE_HOST_HEADERS will be trusted unconditionally')
 PROXY_IP_ALLOWED_LIST = []
+
+# If we are behind a reverse proxy/load balancer, use this setting to
+# allow the scheme://addresses from which Tower should trust csrf requests from
+# If this setting is an empty list (the default), we will only trust ourself
+CSRF_TRUSTED_ORIGINS = []
 
 CUSTOM_VENV_PATHS = []
 
@@ -333,7 +327,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_extensions',
     'polymorphic',
-    'taggit',
     'social_django',
     'django_guid',
     'corsheaders',
@@ -403,6 +396,7 @@ AUTHENTICATION_BACKENDS = (
 OAUTH2_PROVIDER_APPLICATION_MODEL = 'main.OAuth2Application'
 OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = 'main.OAuth2AccessToken'
 OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL = 'oauth2_provider.RefreshToken'
+OAUTH2_PROVIDER_ID_TOKEN_MODEL = "oauth2_provider.IDToken"
 
 OAUTH2_PROVIDER = {'ACCESS_TOKEN_EXPIRE_SECONDS': 31536000000, 'AUTHORIZATION_CODE_EXPIRE_SECONDS': 600, 'REFRESH_TOKEN_EXPIRE_SECONDS': 2628000}
 ALLOW_OAUTH2_FOR_EXTERNAL_USERS = False
@@ -429,6 +423,7 @@ TACACSPLUS_PORT = 49
 TACACSPLUS_SECRET = ''
 TACACSPLUS_SESSION_TIMEOUT = 5
 TACACSPLUS_AUTH_PROTOCOL = 'ascii'
+TACACSPLUS_REM_ADDR = False
 
 # Enable / Disable HTTP Basic Authentication used in the API browser
 # Note: Session limits are not enforced when using HTTP Basic Authentication.
@@ -475,12 +470,13 @@ CELERYBEAT_SCHEDULE = {
     'receptor_reaper': {'task': 'awx.main.tasks.system.awx_receptor_workunit_reaper', 'schedule': timedelta(seconds=60)},
     'send_subsystem_metrics': {'task': 'awx.main.analytics.analytics_tasks.send_subsystem_metrics', 'schedule': timedelta(seconds=20)},
     'cleanup_images': {'task': 'awx.main.tasks.system.cleanup_images_and_files', 'schedule': timedelta(hours=3)},
-    'cleanup_host_metrics': {'task': 'awx.main.tasks.system.cleanup_host_metrics', 'schedule': timedelta(days=1)},
+    'cleanup_host_metrics': {'task': 'awx.main.tasks.system.cleanup_host_metrics', 'schedule': timedelta(hours=3, minutes=30)},
+    'host_metric_summary_monthly': {'task': 'awx.main.tasks.host_metrics.host_metric_summary_monthly', 'schedule': timedelta(hours=4)},
 }
 
 # Django Caching Configuration
 DJANGO_REDIS_IGNORE_EXCEPTIONS = True
-CACHES = {'default': {'BACKEND': 'django_redis.cache.RedisCache', 'LOCATION': 'unix:/var/run/redis/redis.sock?db=1'}}
+CACHES = {'default': {'BACKEND': 'awx.main.cache.AWXRedisCache', 'LOCATION': 'unix:/var/run/redis/redis.sock?db=1'}}
 
 # Social Auth configuration.
 SOCIAL_AUTH_STRATEGY = 'social_django.strategy.DjangoStrategy'
@@ -734,10 +730,10 @@ CONTROLLER_INSTANCE_ID_VAR = 'remote_tower_id'
 # ---------------------
 # ----- Foreman -----
 # ---------------------
-SATELLITE6_ENABLED_VAR = 'foreman_enabled'
+SATELLITE6_ENABLED_VAR = 'foreman_enabled,foreman.enabled'
 SATELLITE6_ENABLED_VALUE = 'True'
 SATELLITE6_EXCLUDE_EMPTY_GROUPS = True
-SATELLITE6_INSTANCE_ID_VAR = 'foreman_id'
+SATELLITE6_INSTANCE_ID_VAR = 'foreman_id,foreman.id'
 # SATELLITE6_GROUP_PREFIX and SATELLITE6_GROUP_PATTERNS defined in source vars
 
 # ----------------
@@ -795,23 +791,17 @@ INSIGHTS_AGENT_MIME = 'application/example'
 INSIGHTS_SYSTEM_ID_FILE = '/etc/redhat-access-insights/machine-id'
 INSIGHTS_CERT_PATH = "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
 
-TOWER_SETTINGS_MANIFEST = {}
-
 # Settings related to external logger configuration
 LOG_AGGREGATOR_ENABLED = False
 LOG_AGGREGATOR_TCP_TIMEOUT = 5
 LOG_AGGREGATOR_VERIFY_CERT = True
 LOG_AGGREGATOR_LEVEL = 'INFO'
-LOG_AGGREGATOR_MAX_DISK_USAGE_GB = 1
+LOG_AGGREGATOR_MAX_DISK_USAGE_GB = 1  # Main queue
+LOG_AGGREGATOR_ACTION_MAX_DISK_USAGE_GB = 1  # Action queue
 LOG_AGGREGATOR_MAX_DISK_USAGE_PATH = '/var/lib/awx'
 LOG_AGGREGATOR_RSYSLOGD_DEBUG = False
 LOG_AGGREGATOR_RSYSLOGD_ERROR_LOG_FILE = '/var/log/tower/rsyslog.err'
 API_400_ERROR_LOG_FORMAT = 'status {status_code} received by user {user_name} attempting to access {url_path} from {remote_addr}'
-
-# The number of retry attempts for websocket session establishment
-# If you're encountering issues establishing websockets in a cluster,
-# raising this value can help
-CHANNEL_LAYER_RECEIVE_MAX_RETRY = 10
 
 ASGI_APPLICATION = "awx.main.routing.application"
 
@@ -868,17 +858,17 @@ LOGGING = {
         'awx.conf': {'handlers': ['null'], 'level': 'WARNING'},
         'awx.conf.settings': {'handlers': ['null'], 'level': 'WARNING'},
         'awx.main': {'handlers': ['null']},
-        'awx.main.commands.run_callback_receiver': {'handlers': ['callback_receiver']},  # level handled by dynamic_level_filter
+        'awx.main.commands.run_callback_receiver': {'handlers': ['callback_receiver'], 'level': 'INFO'},  # very noisey debug-level logs
         'awx.main.dispatch': {'handlers': ['dispatcher']},
         'awx.main.consumers': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'INFO'},
         'awx.main.rsyslog_configurer': {'handlers': ['rsyslog_configurer']},
         'awx.main.cache_clear': {'handlers': ['cache_clear']},
-        'awx.main.heartbeet': {'handlers': ['heartbeet']},
+        'awx.main.ws_heartbeat': {'handlers': ['ws_heartbeat']},
         'awx.main.wsrelay': {'handlers': ['wsrelay']},
         'awx.main.commands.inventory_import': {'handlers': ['inventory_import'], 'propagate': False},
-        'awx.main.tasks': {'handlers': ['task_system', 'external_logger'], 'propagate': False},
-        'awx.main.analytics': {'handlers': ['task_system', 'external_logger'], 'level': 'INFO', 'propagate': False},
-        'awx.main.scheduler': {'handlers': ['task_system', 'external_logger'], 'propagate': False},
+        'awx.main.tasks': {'handlers': ['task_system', 'external_logger', 'console'], 'propagate': False},
+        'awx.main.analytics': {'handlers': ['task_system', 'external_logger', 'console'], 'level': 'INFO', 'propagate': False},
+        'awx.main.scheduler': {'handlers': ['task_system', 'external_logger', 'console'], 'propagate': False},
         'awx.main.access': {'level': 'INFO'},  # very verbose debug-level logs
         'awx.main.signals': {'level': 'INFO'},  # very verbose debug-level logs
         'awx.api.permissions': {'level': 'INFO'},  # very verbose debug-level logs
@@ -907,7 +897,7 @@ handler_config = {
     'job_lifecycle': {'filename': 'job_lifecycle.log', 'formatter': 'job_lifecycle'},
     'rsyslog_configurer': {'filename': 'rsyslog_configurer.log'},
     'cache_clear': {'filename': 'cache_clear.log'},
-    'heartbeet': {'filename': 'heartbeet.log'},
+    'ws_heartbeat': {'filename': 'ws_heartbeat.log'},
 }
 
 # If running on a VM, we log to files. When running in a container, we log to stdout.
@@ -962,7 +952,8 @@ AWX_CLEANUP_PATHS = True
 # Allow ansible-runner to store env folder (may contain sensitive information)
 AWX_RUNNER_OMIT_ENV_FILES = True
 
-# Allow ansible-runner to save ansible output (may cause performance issues)
+# Allow ansible-runner to save ansible output
+# (changing to False may cause performance issues)
 AWX_RUNNER_SUPPRESS_OUTPUT_FILE = True
 
 # https://github.com/ansible/ansible-runner/pull/1191/files
@@ -972,6 +963,9 @@ AWX_RUNNER_KEEPALIVE_SECONDS = 0
 
 # Delete completed work units in receptor
 RECEPTOR_RELEASE_WORK = True
+
+# K8S only. Use receptor_log_level on AWX spec to set this properly
+RECEPTOR_LOG_LEVEL = 'info'
 
 MIDDLEWARE = [
     'django_guid.middleware.guid_middleware',
@@ -1060,4 +1054,12 @@ CLEANUP_HOST_METRICS_LAST_TS = None
 # Host metrics cleanup - minimal interval between two cleanups in days
 CLEANUP_HOST_METRICS_INTERVAL = 30  # days
 # Host metrics cleanup - soft-delete HostMetric records with last_automation < [threshold] (in months)
-CLEANUP_HOST_METRICS_THRESHOLD = 12  # months
+CLEANUP_HOST_METRICS_SOFT_THRESHOLD = 12  # months
+# Host metrics cleanup
+# - delete HostMetric record with deleted=True and last_deleted < [threshold]
+# - also threshold for computing HostMetricSummaryMonthly (command/scheduled task)
+CLEANUP_HOST_METRICS_HARD_THRESHOLD = 36  # months
+
+# Host metric summary monthly task - last time of run
+HOST_METRIC_SUMMARY_TASK_LAST_TS = None
+HOST_METRIC_SUMMARY_TASK_INTERVAL = 7  # days

@@ -101,7 +101,7 @@ class JobOptions(BaseModel):
         max_length=1024,
         default='',
         blank=True,
-        help_text=_('Branch to use in job run. Project default used if blank. ' 'Only allowed if project allow_override field is set to true.'),
+        help_text=_('Branch to use in job run. Project default used if blank. Only allowed if project allow_override field is set to true.'),
     )
     forks = models.PositiveIntegerField(
         blank=True,
@@ -253,7 +253,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     job_slice_count = models.PositiveIntegerField(
         blank=True,
         default=1,
-        help_text=_("The number of jobs to slice into at runtime. " "Will cause the Job Template to launch a workflow if value is greater than 1."),
+        help_text=_("The number of jobs to slice into at runtime. Will cause the Job Template to launch a workflow if value is greater than 1."),
     )
 
     admin_role = ImplicitRoleField(parent_role=['organization.job_template_admin_role'])
@@ -596,12 +596,12 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     job_slice_number = models.PositiveIntegerField(
         blank=True,
         default=0,
-        help_text=_("If part of a sliced job, the ID of the inventory slice operated on. " "If not part of sliced job, parameter is not used."),
+        help_text=_("If part of a sliced job, the ID of the inventory slice operated on. If not part of sliced job, parameter is not used."),
     )
     job_slice_count = models.PositiveIntegerField(
         blank=True,
         default=1,
-        help_text=_("If ran as part of sliced jobs, the total number of slices. " "If 1, job is not part of a sliced job."),
+        help_text=_("If ran as part of sliced jobs, the total number of slices. If 1, job is not part of a sliced job."),
     )
 
     def _get_parent_field_name(self):
@@ -883,7 +883,7 @@ class LaunchTimeConfigBase(BaseModel):
     )
     # All standard fields are stored in this dictionary field
     # This is a solution to the nullable CharField problem, specific to prompting
-    char_prompts = JSONBlob(default=dict, blank=True)
+    char_prompts = models.JSONField(default=dict, blank=True)
 
     # Define fields that are not really fields, but alias to char_prompts lookups
     limit = NullablePromptPseudoField('limit')
@@ -960,7 +960,7 @@ class LaunchTimeConfig(LaunchTimeConfigBase):
     # Special case prompting fields, even more special than the other ones
     extra_data = JSONBlob(default=dict, blank=True)
     survey_passwords = prevent_search(
-        JSONBlob(
+        models.JSONField(
             default=dict,
             editable=False,
             blank=True,

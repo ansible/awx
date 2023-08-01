@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { t } from '@lingui/macro';
+import { t, Trans } from '@lingui/macro';
 import { useLocation, useParams } from 'react-router-dom';
 import 'styled-components/macro';
 
@@ -22,6 +22,8 @@ import useRequest, {
 import useSelected from 'hooks/useSelected';
 import { InstanceGroupsAPI, InstancesAPI } from 'api';
 import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
+import getDocsBaseUrl from 'util/getDocsBaseUrl';
+import { useConfig } from 'contexts/Config';
 import HealthCheckButton from 'components/HealthCheckButton/HealthCheckButton';
 import HealthCheckAlert from 'components/HealthCheckAlert';
 import InstanceListItem from './InstanceListItem';
@@ -33,12 +35,17 @@ const QS_CONFIG = getQSConfig('instance', {
 });
 
 function InstanceList({ instanceGroup }) {
+  const config = useConfig();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showHealthCheckAlert, setShowHealthCheckAlert] = useState(false);
   const [pendingHealthCheck, setPendingHealthCheck] = useState(false);
   const [canRunHealthCheck, setCanRunHealthCheck] = useState(true);
   const location = useLocation();
   const { id: instanceGroupId } = useParams();
+
+  const policyRulesDocsLink = `${getDocsBaseUrl(
+    config
+  )}/html/administration/containers_instance_groups.html#ag-instance-group-policies`;
 
   const {
     result: {
@@ -262,6 +269,25 @@ function InstanceList({ instanceGroup }) {
                 itemsToDisassociate={selected}
                 modalTitle={t`Disassociate instance from instance group?`}
                 isProtectedInstanceGroup={instanceGroup.name === 'controlplane'}
+                modalNote={
+                  selected.some(
+                    (instance) => instance.managed_by_policy === true
+                  ) ? (
+                    <Trans>
+                      <b>
+                        Note: Instances may be re-associated with this instance
+                        group if they are managed by{' '}
+                        <a
+                          href={policyRulesDocsLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          policy rules.
+                        </a>
+                      </b>
+                    </Trans>
+                  ) : null
+                }
               />,
               <HealthCheckButton
                 isDisabled={!canAdd || !canRunHealthCheck}
@@ -321,6 +347,24 @@ function InstanceList({ instanceGroup }) {
             { key: 'hostname', name: t`Name` },
             { key: 'node_type', name: t`Node Type` },
           ]}
+          modalNote={
+            <b>
+              <Trans>
+                <b>
+                  Note: Manually associated instances may be automatically
+                  disassociated from an instance group if the instance is
+                  managed by{' '}
+                  <a
+                    href={policyRulesDocsLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    policy rules.
+                  </a>
+                </b>
+              </Trans>
+            </b>
+          }
         />
       )}
       {error && (

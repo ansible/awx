@@ -5,6 +5,7 @@ from typing import Dict
 
 import aiohttp
 from aiohttp import client_exceptions
+import aioredis
 
 from channels.layers import get_channel_layer
 
@@ -180,6 +181,9 @@ class WebsocketRelayConnection:
                         return
 
                     continue
+                except aioredis.errors.ConnectionClosedError:
+                    logger.info(f"Producer {name} lost connection to Redis, shutting down.")
+                    return
 
                 await websocket.send_json(wrap_broadcast_msg(group, msg))
         except ConnectionResetError:
@@ -205,47 +209,85 @@ class WebSocketRelayManager(object):
         # hostname -> ip
         self.known_hosts: Dict[str, str] = dict()
 
-    async def pg_consumer(self, conn):
-        try:
-            await conn.execute("LISTEN web_heartbeet")
-            async for notif in conn.notifies():
-                if notif is not None and notif.channel == "web_heartbeet":
-                    try:
-                        payload = json.loads(notif.payload)
-                    except json.JSONDecodeError:
-                        logmsg = "Failed to decode message from pg_notify channel `web_heartbeet`"
-                        if logger.isEnabledFor(logging.DEBUG):
-                            logmsg = "{} {}".format(logmsg, payload)
+    async def on_ws_heartbeat(self, conn):
+        await conn.execute("LISTEN web_ws_heartbeat")
+        async for notif in conn.notifies():
+            if notif is None:
+                continue
+            try:
+                if not notif.payload or notif.channel != "web_ws_heartbeat":
+                    return
+
+                try:
+                    payload = json.loads(notif.payload)
+                except json.JSONDecodeError:
+                    logmsg = "Failed to decode message from pg_notify channel `web_ws_heartbeat`"
+                    if logger.isEnabledFor(logging.DEBUG):
+                        logmsg = "{} {}".format(logmsg, payload)
                         logger.warning(logmsg)
-                        continue
+                    return
 
-                    # Skip if the message comes from the same host we are running on
-                    # In this case, we'll be sharing a redis, no need to relay.
-                    if payload.get("hostname") == self.local_hostname:
-                        continue
+                # Skip if the message comes from the same host we are running on
+                # In this case, we'll be sharing a redis, no need to relay.
+                if payload.get("hostname") == self.local_hostname:
+                    return
 
-                    if payload.get("action") == "online":
-                        hostname = payload["hostname"]
-                        ip = payload["ip"]
-                        if ip is None:
-                            # If we don't get an IP, just try the hostname, maybe it resolves
-                            ip = hostname
-                        self.known_hosts[hostname] = ip
-                        logger.debug(f"Web host {hostname} ({ip}) online heartbeat received.")
-                    elif payload.get("action") == "offline":
-                        hostname = payload["hostname"]
-                        del self.known_hosts[hostname]
-                        logger.debug(f"Web host {hostname} ({ip}) offline heartbeat received.")
-        except Exception as e:
-            # This catch-all is the same as the one above. asyncio will eat the exception
-            # but we want to know about it.
-            logger.exception(f"pg_consumer exception: {e}")
+                action = payload.get("action")
+
+                if action in ("online", "offline"):
+                    hostname = payload.get("hostname")
+                    ip = payload.get("ip") or hostname  # try back to hostname if ip isn't supplied
+                    if ip is None:
+                        logger.warning(f"Received invalid {action} ws_heartbeat, missing hostname and ip: {payload}")
+                        return
+                    logger.debug(f"Web host {hostname} ({ip}) {action} heartbeat received.")
+
+                if action == "online":
+                    self.known_hosts[hostname] = ip
+                elif action == "offline":
+                    await self.cleanup_offline_host(hostname)
+            except Exception as e:
+                # This catch-all is the same as the one above. asyncio will eat the exception
+                # but we want to know about it.
+                logger.exception(f"on_ws_heartbeat exception: {e}")
+
+    async def cleanup_offline_host(self, hostname):
+        """
+        Given a hostname, try to cancel its task/connection and remove it from
+        the list of hosts we know about.
+        If the host isn't in the list, assume that it was already deleted and
+        don't error.
+        """
+        if hostname in self.relay_connections:
+            self.relay_connections[hostname].cancel()
+
+            # Wait for the task to actually run its cancel/completion logic
+            # otherwise it might get GC'd too early when we del it below.
+            # Being GC'd too early could generate a scary message in logs:
+            # "Task was destroyed but it is pending!"
+            try:
+                await asyncio.wait_for(self.relay_connections[hostname].async_task, timeout=10)
+            except asyncio.TimeoutError:
+                logger.warning(f"Tried to cancel relay connection for {hostname} but it timed out during cleanup.")
+            except asyncio.CancelledError:
+                # Handle the case where the task was already cancelled by the time we got here.
+                pass
+
+            del self.relay_connections[hostname]
+
+        if hostname in self.known_hosts:
+            del self.known_hosts[hostname]
+
+        try:
+            self.stats_mgr.delete_remote_host_stats(hostname)
+        except KeyError:
+            pass
 
     async def run(self):
         event_loop = asyncio.get_running_loop()
 
-        stats_mgr = RelayWebsocketStatsManager(event_loop, self.local_hostname)
-        stats_mgr.start()
+        self.stats_mgr = RelayWebsocketStatsManager(event_loop, self.local_hostname)
+        self.stats_mgr.start()
 
         # Set up a pg_notify consumer for allowing web nodes to "provision" and "deprovision" themselves gracefully.
         database_conf = settings.DATABASES['default']
@@ -258,11 +300,10 @@ class WebSocketRelayManager(object):
             **database_conf.get("OPTIONS", {}),
         )
         await async_conn.set_autocommit(True)
-        event_loop.create_task(self.pg_consumer(async_conn))
+        event_loop.create_task(self.on_ws_heartbeat(async_conn))
 
         # Establishes a websocket connection to /websocket/relay on all API servers
         while True:
-            # logger.info("Current known hosts: {}".format(self.known_hosts))
             future_remote_hosts = self.known_hosts.keys()
             current_remote_hosts = self.relay_connections.keys()
             deleted_remote_hosts = set(current_remote_hosts) - set(future_remote_hosts)
@@ -286,18 +327,13 @@ class WebSocketRelayManager(object):
 
             if deleted_remote_hosts:
                 logger.info(f"Removing {deleted_remote_hosts} from websocket broadcast list")
+                await asyncio.gather(self.cleanup_offline_host(h) for h in deleted_remote_hosts)
 
             if new_remote_hosts:
                 logger.info(f"Adding {new_remote_hosts} to websocket broadcast list")
 
-            for h in deleted_remote_hosts:
-                self.relay_connections[h].cancel()
-                del self.relay_connections[h]
-                del self.known_hosts[h]
-                stats_mgr.delete_remote_host_stats(h)
-
             for h in new_remote_hosts:
-                stats = stats_mgr.new_remote_host_stats(h)
+                stats = self.stats_mgr.new_remote_host_stats(h)
                 relay_connection = WebsocketRelayConnection(name=self.local_hostname, stats=stats, remote_host=self.known_hosts[h])
                 relay_connection.start()
                 self.relay_connections[h] = relay_connection

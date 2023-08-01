@@ -58,6 +58,12 @@ function InstanceFormFields() {
           label={t`Enable Instance`}
           tooltip={t`Set the instance enabled or disabled. If disabled, jobs will not be assigned to this instance.`}
         />
+        <CheckboxField
+          id="managed-by-policy"
+          name="managed_by_policy"
+          label={t`Managed by Policy`}
+          tooltip={t`Controls whether or not this instance is managed by policy. If enabled, the instance will be available for automatic assignment to and unassignment from instance groups based on policy rules.`}
+        />
       </FormGroup>
     </>
   );
@@ -79,6 +85,7 @@ function InstanceForm({
           node_state: 'installed',
           listener_port: 27199,
           enabled: true,
+          managed_by_policy: true,
         }}
         onSubmit={(values) => {
           handleSubmit(values);

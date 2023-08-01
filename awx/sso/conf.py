@@ -100,7 +100,7 @@ register(
     'AUTHENTICATION_BACKENDS',
     field_class=AuthenticationBackendsField,
     label=_('Authentication Backends'),
-    help_text=_('List of authentication backends that are enabled based on ' 'license features and other authentication settings.'),
+    help_text=_('List of authentication backends that are enabled based on license features and other authentication settings.'),
     read_only=True,
     depends_on=AuthenticationBackendsField.get_all_required_settings(),
     category=_('Authentication'),
@@ -360,7 +360,7 @@ def _register_ldap(append=None):
         default=None,
         label=_('LDAP Deny Group'),
         help_text=_(
-            'Group DN denied from login. If specified, user will not be ' 'allowed to login if a member of this group.  Only one deny group ' 'is supported.'
+            'Group DN denied from login. If specified, user will not be allowed to login if a member of this group.  Only one deny group is supported.'
         ),
         category=_('LDAP'),
         category_slug='ldap',
@@ -426,7 +426,7 @@ def _register_ldap(append=None):
         field_class=LDAPTeamMapField,
         default={},
         label=_('LDAP Team Map'),
-        help_text=_('Mapping between team members (users) and LDAP groups. Configuration' ' details are available in the documentation.'),
+        help_text=_('Mapping between team members (users) and LDAP groups. Configuration details are available in the documentation.'),
         category=_('LDAP'),
         category_slug='ldap',
         placeholder=collections.OrderedDict(
@@ -461,7 +461,7 @@ register(
     allow_blank=True,
     default='',
     label=_('RADIUS Server'),
-    help_text=_('Hostname/IP of RADIUS server. RADIUS authentication is ' 'disabled if this setting is empty.'),
+    help_text=_('Hostname/IP of RADIUS server. RADIUS authentication is disabled if this setting is empty.'),
     category=_('RADIUS'),
     category_slug='radius',
     placeholder='radius.example.com',
@@ -554,6 +554,16 @@ register(
     category_slug='tacacsplus',
 )
 
+register(
+    'TACACSPLUS_REM_ADDR',
+    field_class=fields.BooleanField,
+    default=True,
+    label=_('TACACS+ client address sending enabled'),
+    help_text=_('Enable the client address sending by TACACS+ client.'),
+    category=_('TACACS+'),
+    category_slug='tacacsplus',
+)
+
 ###############################################################################
 # GOOGLE OAUTH2 AUTHENTICATION SETTINGS
 ###############################################################################
@@ -564,9 +574,7 @@ register(
     read_only=True,
     default=SocialAuthCallbackURL('google-oauth2'),
     label=_('Google OAuth2 Callback URL'),
-    help_text=_(
-        'Provide this URL as the callback URL for your application as part ' 'of your registration process. Refer to the ' 'documentation for more detail.'
-    ),
+    help_text=_('Provide this URL as the callback URL for your application as part of your registration process. Refer to the documentation for more detail.'),
     category=_('Google OAuth2'),
     category_slug='google-oauth2',
     depends_on=['TOWER_URL_BASE'],
@@ -602,7 +610,7 @@ register(
     field_class=fields.StringListField,
     default=[],
     label=_('Google OAuth2 Allowed Domains'),
-    help_text=_('Update this setting to restrict the domains who are allowed to ' 'login using Google OAuth2.'),
+    help_text=_('Update this setting to restrict the domains who are allowed to login using Google OAuth2.'),
     category=_('Google OAuth2'),
     category_slug='google-oauth2',
     placeholder=['example.com'],
@@ -658,9 +666,7 @@ register(
     read_only=True,
     default=SocialAuthCallbackURL('github'),
     label=_('GitHub OAuth2 Callback URL'),
-    help_text=_(
-        'Provide this URL as the callback URL for your application as part ' 'of your registration process. Refer to the ' 'documentation for more detail.'
-    ),
+    help_text=_('Provide this URL as the callback URL for your application as part of your registration process. Refer to the documentation for more detail.'),
     category=_('GitHub OAuth2'),
     category_slug='github',
     depends_on=['TOWER_URL_BASE'],
@@ -723,9 +729,7 @@ register(
     read_only=True,
     default=SocialAuthCallbackURL('github-org'),
     label=_('GitHub Organization OAuth2 Callback URL'),
-    help_text=_(
-        'Provide this URL as the callback URL for your application as part ' 'of your registration process. Refer to the ' 'documentation for more detail.'
-    ),
+    help_text=_('Provide this URL as the callback URL for your application as part of your registration process. Refer to the documentation for more detail.'),
     category=_('GitHub Organization OAuth2'),
     category_slug='github-org',
     depends_on=['TOWER_URL_BASE'],
@@ -760,7 +764,7 @@ register(
     allow_blank=True,
     default='',
     label=_('GitHub Organization Name'),
-    help_text=_('The name of your GitHub organization, as used in your ' 'organization\'s URL: https://github.com/<yourorg>/.'),
+    help_text=_('The name of your GitHub organization, as used in your organization\'s URL: https://github.com/<yourorg>/.'),
     category=_('GitHub Organization OAuth2'),
     category_slug='github-org',
 )
@@ -839,7 +843,7 @@ register(
     allow_blank=True,
     default='',
     label=_('GitHub Team ID'),
-    help_text=_('Find the numeric team ID using the Github API: ' 'http://fabian-kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/.'),
+    help_text=_('Find the numeric team ID using the Github API: http://fabian-kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/.'),
     category=_('GitHub Team OAuth2'),
     category_slug='github-team',
 )
@@ -878,9 +882,7 @@ register(
     read_only=True,
     default=SocialAuthCallbackURL('github-enterprise'),
     label=_('GitHub Enterprise OAuth2 Callback URL'),
-    help_text=_(
-        'Provide this URL as the callback URL for your application as part ' 'of your registration process. Refer to the ' 'documentation for more detail.'
-    ),
+    help_text=_('Provide this URL as the callback URL for your application as part of your registration process. Refer to the documentation for more detail.'),
     category=_('GitHub Enterprise OAuth2'),
     category_slug='github-enterprise',
     depends_on=['TOWER_URL_BASE'],
@@ -892,7 +894,7 @@ register(
     allow_blank=True,
     default='',
     label=_('GitHub Enterprise URL'),
-    help_text=_('The URL for your Github Enterprise instance, e.g.: http(s)://hostname/. Refer to Github Enterprise ' 'documentation for more details.'),
+    help_text=_('The URL for your Github Enterprise instance, e.g.: http(s)://hostname/. Refer to Github Enterprise documentation for more details.'),
     category=_('GitHub Enterprise OAuth2'),
     category_slug='github-enterprise',
 )
@@ -904,7 +906,7 @@ register(
     default='',
     label=_('GitHub Enterprise API URL'),
     help_text=_(
-        'The API URL for your GitHub Enterprise instance, e.g.: http(s)://hostname/api/v3/. Refer to Github ' 'Enterprise documentation for more details.'
+        'The API URL for your GitHub Enterprise instance, e.g.: http(s)://hostname/api/v3/. Refer to Github Enterprise documentation for more details.'
     ),
     category=_('GitHub Enterprise OAuth2'),
     category_slug='github-enterprise',
@@ -967,9 +969,7 @@ register(
     read_only=True,
     default=SocialAuthCallbackURL('github-enterprise-org'),
     label=_('GitHub Enterprise Organization OAuth2 Callback URL'),
-    help_text=_(
-        'Provide this URL as the callback URL for your application as part ' 'of your registration process. Refer to the ' 'documentation for more detail.'
-    ),
+    help_text=_('Provide this URL as the callback URL for your application as part of your registration process. Refer to the documentation for more detail.'),
     category=_('GitHub Enterprise Organization OAuth2'),
     category_slug='github-enterprise-org',
     depends_on=['TOWER_URL_BASE'],
@@ -981,7 +981,7 @@ register(
     allow_blank=True,
     default='',
     label=_('GitHub Enterprise Organization URL'),
-    help_text=_('The URL for your Github Enterprise instance, e.g.: http(s)://hostname/. Refer to Github Enterprise ' 'documentation for more details.'),
+    help_text=_('The URL for your Github Enterprise instance, e.g.: http(s)://hostname/. Refer to Github Enterprise documentation for more details.'),
     category=_('GitHub Enterprise OAuth2'),
     category_slug='github-enterprise-org',
 )
@@ -993,7 +993,7 @@ register(
     default='',
     label=_('GitHub Enterprise Organization API URL'),
     help_text=_(
-        'The API URL for your GitHub Enterprise instance, e.g.: http(s)://hostname/api/v3/. Refer to Github ' 'Enterprise documentation for more details.'
+        'The API URL for your GitHub Enterprise instance, e.g.: http(s)://hostname/api/v3/. Refer to Github Enterprise documentation for more details.'
     ),
     category=_('GitHub Enterprise OAuth2'),
     category_slug='github-enterprise-org',
@@ -1028,7 +1028,7 @@ register(
     allow_blank=True,
     default='',
     label=_('GitHub Enterprise Organization Name'),
-    help_text=_('The name of your GitHub Enterprise organization, as used in your ' 'organization\'s URL: https://github.com/<yourorg>/.'),
+    help_text=_('The name of your GitHub Enterprise organization, as used in your organization\'s URL: https://github.com/<yourorg>/.'),
     category=_('GitHub Enterprise Organization OAuth2'),
     category_slug='github-enterprise-org',
 )
@@ -1084,7 +1084,7 @@ register(
     allow_blank=True,
     default='',
     label=_('GitHub Enterprise Team URL'),
-    help_text=_('The URL for your Github Enterprise instance, e.g.: http(s)://hostname/. Refer to Github Enterprise ' 'documentation for more details.'),
+    help_text=_('The URL for your Github Enterprise instance, e.g.: http(s)://hostname/. Refer to Github Enterprise documentation for more details.'),
     category=_('GitHub Enterprise OAuth2'),
     category_slug='github-enterprise-team',
 )
@@ -1096,7 +1096,7 @@ register(
     default='',
     label=_('GitHub Enterprise Team API URL'),
     help_text=_(
-        'The API URL for your GitHub Enterprise instance, e.g.: http(s)://hostname/api/v3/. Refer to Github ' 'Enterprise documentation for more details.'
+        'The API URL for your GitHub Enterprise instance, e.g.: http(s)://hostname/api/v3/. Refer to Github Enterprise documentation for more details.'
     ),
     category=_('GitHub Enterprise OAuth2'),
     category_slug='github-enterprise-team',
@@ -1131,7 +1131,7 @@ register(
     allow_blank=True,
     default='',
     label=_('GitHub Enterprise Team ID'),
-    help_text=_('Find the numeric team ID using the Github Enterprise API: ' 'http://fabian-kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/.'),
+    help_text=_('Find the numeric team ID using the Github Enterprise API: http://fabian-kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/.'),
     category=_('GitHub Enterprise Team OAuth2'),
     category_slug='github-enterprise-team',
 )
@@ -1170,9 +1170,7 @@ register(
     read_only=True,
     default=SocialAuthCallbackURL('azuread-oauth2'),
     label=_('Azure AD OAuth2 Callback URL'),
-    help_text=_(
-        'Provide this URL as the callback URL for your application as part' ' of your registration process. Refer to the' ' documentation for more detail. '
-    ),
+    help_text=_('Provide this URL as the callback URL for your application as part of your registration process. Refer to the documentation for more detail. '),
     category=_('Azure AD OAuth2'),
     category_slug='azuread-oauth2',
     depends_on=['TOWER_URL_BASE'],
@@ -1291,7 +1289,7 @@ register(
     field_class=fields.BooleanField,
     default=True,
     label=_('Automatically Create Organizations and Teams on SAML Login'),
-    help_text=_('When enabled (the default), mapped Organizations and Teams ' 'will be created automatically on successful SAML login.'),
+    help_text=_('When enabled (the default), mapped Organizations and Teams will be created automatically on successful SAML login.'),
     category=_('SAML'),
     category_slug='saml',
 )
@@ -1318,7 +1316,7 @@ register(
     read_only=True,
     default=get_saml_metadata_url,
     label=_('SAML Service Provider Metadata URL'),
-    help_text=_('If your identity provider (IdP) allows uploading an XML ' 'metadata file, you can download one from this URL.'),
+    help_text=_('If your identity provider (IdP) allows uploading an XML metadata file, you can download one from this URL.'),
     category=_('SAML'),
     category_slug='saml',
 )
@@ -1346,7 +1344,7 @@ register(
     required=True,
     validators=[validate_certificate],
     label=_('SAML Service Provider Public Certificate'),
-    help_text=_('Create a keypair to use as a service provider (SP) ' 'and include the certificate content here.'),
+    help_text=_('Create a keypair to use as a service provider (SP) and include the certificate content here.'),
     category=_('SAML'),
     category_slug='saml',
 )
@@ -1358,7 +1356,7 @@ register(
     required=True,
     validators=[validate_private_key],
     label=_('SAML Service Provider Private Key'),
-    help_text=_('Create a keypair to use as a service provider (SP) ' 'and include the private key content here.'),
+    help_text=_('Create a keypair to use as a service provider (SP) and include the private key content here.'),
     category=_('SAML'),
     category_slug='saml',
     encrypted=True,
@@ -1369,7 +1367,7 @@ register(
     field_class=SAMLOrgInfoField,
     required=True,
     label=_('SAML Service Provider Organization Info'),
-    help_text=_('Provide the URL, display name, and the name of your app. Refer to' ' the documentation for example syntax.'),
+    help_text=_('Provide the URL, display name, and the name of your app. Refer to the documentation for example syntax.'),
     category=_('SAML'),
     category_slug='saml',
     placeholder=collections.OrderedDict(
@@ -1383,7 +1381,7 @@ register(
     allow_blank=True,
     required=True,
     label=_('SAML Service Provider Technical Contact'),
-    help_text=_('Provide the name and email address of the technical contact for' ' your service provider. Refer to the documentation' ' for example syntax.'),
+    help_text=_('Provide the name and email address of the technical contact for your service provider. Refer to the documentation for example syntax.'),
     category=_('SAML'),
     category_slug='saml',
     placeholder=collections.OrderedDict([('givenName', 'Technical Contact'), ('emailAddress', 'techsup@example.com')]),
@@ -1395,7 +1393,7 @@ register(
     allow_blank=True,
     required=True,
     label=_('SAML Service Provider Support Contact'),
-    help_text=_('Provide the name and email address of the support contact for your' ' service provider. Refer to the documentation for' ' example syntax.'),
+    help_text=_('Provide the name and email address of the support contact for your service provider. Refer to the documentation for example syntax.'),
     category=_('SAML'),
     category_slug='saml',
     placeholder=collections.OrderedDict([('givenName', 'Support Contact'), ('emailAddress', 'support@example.com')]),
@@ -1457,9 +1455,7 @@ register(
     allow_null=True,
     default={'requestedAuthnContext': False},
     label=_('SAML Security Config'),
-    help_text=_(
-        'A dict of key value pairs that are passed to the underlying' ' python-saml security setting' ' https://github.com/onelogin/python-saml#settings'
-    ),
+    help_text=_('A dict of key value pairs that are passed to the underlying python-saml security setting https://github.com/onelogin/python-saml#settings'),
     category=_('SAML'),
     category_slug='saml',
     placeholder=collections.OrderedDict(
@@ -1491,7 +1487,7 @@ register(
     allow_null=True,
     default=None,
     label=_('SAML Service Provider extra configuration data'),
-    help_text=_('A dict of key value pairs to be passed to the underlying' ' python-saml Service Provider configuration setting.'),
+    help_text=_('A dict of key value pairs to be passed to the underlying python-saml Service Provider configuration setting.'),
     category=_('SAML'),
     category_slug='saml',
     placeholder=collections.OrderedDict(),
@@ -1601,6 +1597,50 @@ register(
         ('is_system_auditor_role', ['saml_role']),
         ('remove_system_auditors', True),
     ],
+)
+
+register(
+    'LOCAL_PASSWORD_MIN_LENGTH',
+    field_class=fields.IntegerField,
+    min_value=0,
+    default=0,
+    label=_('Minimum number of characters in local password'),
+    help_text=_('Minimum number of characters required in a local password. 0 means no minimum'),
+    category=_('Authentication'),
+    category_slug='authentication',
+)
+
+register(
+    'LOCAL_PASSWORD_MIN_DIGITS',
+    field_class=fields.IntegerField,
+    min_value=0,
+    default=0,
+    label=_('Minimum number of digit characters in local password'),
+    help_text=_('Minimum number of digit characters required in a local password. 0 means no minimum'),
+    category=_('Authentication'),
+    category_slug='authentication',
+)
+
+register(
+    'LOCAL_PASSWORD_MIN_UPPER',
+    field_class=fields.IntegerField,
+    min_value=0,
+    default=0,
+    label=_('Minimum number of uppercase characters in local password'),
+    help_text=_('Minimum number of uppercase characters required in a local password. 0 means no minimum'),
+    category=_('Authentication'),
+    category_slug='authentication',
+)
+
+register(
+    'LOCAL_PASSWORD_MIN_SPECIAL',
+    field_class=fields.IntegerField,
+    min_value=0,
+    default=0,
+    label=_('Minimum number of special characters in local password'),
+    help_text=_('Minimum number of special characters required in a local password. 0 means no minimum'),
+    category=_('Authentication'),
+    category_slug='authentication',
 )
 
 
