@@ -300,7 +300,7 @@ def main():
         for item in credentials:
             association_fields['credentials'].append(module.resolve_name_to_id('credentials', item))
 
-    # We need to clear out the organization from the search fields the searches for labels and instance_groups doesnt support it and won't be needed anymore after
+    # We need to clear out the organization from the search fields the searches for labels and instance_groups doesnt support it and won't be needed anymore
     if 'organization' in search_fields:
         del search_fields['organization']
 
