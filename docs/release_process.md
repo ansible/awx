@@ -158,6 +158,27 @@ Note: the slack message is the same as the IRC message.
 ## Create operator hub PRs.
 Operator hub PRs are generated via an Ansible Playbook. See someone on the AWX team for the location of the playbooks and instructions on how to run them.
 
+## Adding New Operator to Operator Hub
+
+1. If you have not already fork the repos:
+  * https://github.com/redhat-openshift-ecosystem/community-operators-prod
+  * https://github.com/k8s-operatorhub/community-operators
+
+2. If you have not already, install
+  * [the operator-sdk](https://sdk.operatorframework.io/docs/installation/)
+  * [kustomize](https://kustomize.io/)
+  * [opm](https://docs.openshift.com/container-platform/4.9/cli_reference/opm/cli-opm-install.html)
+
+3. Download the script from https://gist.github.com/rooftopcellist/0e232f26666dee45be1d8a69270d63c2 into your awx-operator repo as release_operator_hub.sh
+
+4. Make sure you are logged into quay.io with `docker login quay.io`
+
+5. Run the script like `OPERATOR_PATH=<path to your operator repo> VERSION=1.1.2 PREV_VERSION=1.1.1 FORK=john-westcott-iv ./release_operator_hub.sh`
+  * Make sure to change the new and previous versions and update your fork!
+
+6. Create the PRs as described by the output of the script. Submit them just the way they are when you open them.
+
+
 ## Revert a Release
 
 Decide whether or not you can just fall-forward with a new AWX Release to fix a bad release. If you need to remove published artifacts from publically facing repositories, follow the steps below.

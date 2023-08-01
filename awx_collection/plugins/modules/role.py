@@ -23,22 +23,22 @@ description:
 options:
     user:
       description:
-        - User that receives the permissions specified by the role.
+        - User name, ID, or named URL that receives the permissions specified by the role.
         - Deprecated, use 'users'.
       type: str
     users:
       description:
-        - Users that receive the permissions specified by the role.
+        - User names, IDs, or named URLs that receive the permissions specified by the role.
       type: list
       elements: str
     team:
       description:
-        - Team that receives the permissions specified by the role.
+        - Team name, ID, or named URL that receives the permissions specified by the role.
         - Deprecated, use 'teams'.
       type: str
     teams:
       description:
-        - Teams that receive the permissions specified by the role.
+        - Team names, IDs, or named URLs that receive the permissions specified by the role.
       type: list
       elements: str
     role:
@@ -50,87 +50,87 @@ options:
       type: str
     target_team:
       description:
-        - Team that the role acts on.
+        - Team name, ID, or named URL that the role acts on.
         - For example, make someone a member or an admin of a team.
         - Members of a team implicitly receive the permissions that the team has.
         - Deprecated, use 'target_teams'.
       type: str
     target_teams:
       description:
-        - Team that the role acts on.
+        - Team names, IDs, or named URLs that the role acts on.
         - For example, make someone a member or an admin of a team.
         - Members of a team implicitly receive the permissions that the team has.
       type: list
       elements: str
     inventory:
       description:
-        - Inventory the role acts on.
+        - Inventory name, ID, or named URL the role acts on.
         - Deprecated, use 'inventories'.
       type: str
     inventories:
       description:
-        - Inventory the role acts on.
+        - Inventory names, IDs, or named URLs the role acts on.
       type: list
       elements: str
     job_template:
       description:
-        - The job template the role acts on.
+        - The job template name, ID, or named URL the role acts on.
         - Deprecated, use 'job_templates'.
       type: str
     job_templates:
       description:
-        - The job template the role acts on.
+        - The job template names, IDs, or named URLs the role acts on.
       type: list
       elements: str
     workflow:
       description:
-        - The workflow job template the role acts on.
+        - The workflow job template name, ID, or named URL the role acts on.
         - Deprecated, use 'workflows'.
       type: str
     workflows:
       description:
-        - The workflow job template the role acts on.
+        - The workflow job template names, IDs, or named URLs the role acts on.
       type: list
       elements: str
     credential:
       description:
-        - Credential the role acts on.
+        - Credential name, ID, or named URL the role acts on.
         - Deprecated, use 'credentials'.
       type: str
     credentials:
       description:
-        - Credential the role acts on.
+        - Credential names, IDs, or named URLs the role acts on.
       type: list
       elements: str
     organization:
       description:
-        - Organization the role acts on.
+        - Organization name, ID, or named URL the role acts on.
         - Deprecated, use 'organizations'.
       type: str
     organizations:
       description:
-        - Organization the role acts on.
+        - Organization names, IDs, or named URLs the role acts on.
       type: list
       elements: str
     lookup_organization:
       description:
-        - Organization the inventories, job templates, projects, or workflows the items exists in.
+        - Organization name, ID, or named URL the inventories, job templates, projects, or workflows the items exists in.
         - Used to help lookup the object, for organization roles see organization.
         - If not provided, will lookup by name only, which does not work with duplicates.
       type: str
     project:
       description:
-        - Project the role acts on.
+        - Project name, ID, or named URL the role acts on.
         - Deprecated, use 'projects'.
       type: str
     projects:
       description:
-        - Project the role acts on.
+        - Project names, IDs, or named URLs the role acts on.
       type: list
       elements: str
     instance_groups:
       description:
-        - Instance Group the role acts on.
+        - Instance Group names, IDs, or named URLs the role acts on.
       type: list
       elements: str
     state:
@@ -266,7 +266,7 @@ def main():
     resource_data = {}
     for key, value in resources.items():
         for resource in value:
-            # Attempt to look up project based on the provided name or ID and lookup data
+            # Attempt to look up project based on the provided name, ID, or named URL and lookup data
             lookup_key = key
             if key == 'organizations' or key == 'users':
                 lookup_data_populated = {}

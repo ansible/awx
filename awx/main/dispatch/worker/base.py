@@ -121,10 +121,9 @@ class AWXConsumerBase(object):
         if time.time() - self.last_stats > 1:  # buffer stat recording to once per second
             try:
                 self.redis.set(f'awx_{self.name}_statistics', self.pool.debug())
-                self.last_stats = time.time()
             except Exception:
                 logger.exception(f"encountered an error communicating with redis to store {self.name} statistics")
-                self.last_stats = time.time()
+            self.last_stats = time.time()
 
     def run(self, *args, **kwargs):
         signal.signal(signal.SIGINT, self.stop)
@@ -175,9 +174,12 @@ class AWXConsumerPG(AWXConsumerBase):
 
         # record subsystem metrics for the dispatcher
         if current_time - self.last_metrics_gather > 20:
-            self.pool.produce_subsystem_metrics(self.subsystem_metrics)
-            self.subsystem_metrics.set('dispatcher_availability', self.listen_cumulative_time / (current_time - self.last_metrics_gather))
-            self.subsystem_metrics.pipe_execute()
+            try:
+                self.pool.produce_subsystem_metrics(self.subsystem_metrics)
+                self.subsystem_metrics.set('dispatcher_availability', self.listen_cumulative_time / (current_time - self.last_metrics_gather))
+                self.subsystem_metrics.pipe_execute()
+            except Exception:
+                logger.exception(f"encountered an error trying to store {self.name} metrics")
             self.listen_cumulative_time = 0.0
             self.last_metrics_gather = current_time
 
@@ -250,8 +252,8 @@ class BaseWorker(object):
                     break
             except QueueEmpty:
                 continue
-            except Exception as e:
-                logger.error("Exception on worker {}, restarting: ".format(idx) + str(e))
+            except Exception:
+                logger.exception("Exception on worker {}, reconnecting: ".format(idx))
                 continue
             try:
                 for conn in db.connections.all():

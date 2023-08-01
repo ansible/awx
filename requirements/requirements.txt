@@ -123,7 +123,6 @@ django==4.2.3
     #   django-oauth-toolkit
     #   django-polymorphic
     #   django-solo
-    #   django-taggit
     #   djangorestframework
 django-auth-ldap==4.3.0
     # via -r /awx_devel/requirements/requirements.in
@@ -164,8 +163,6 @@ frozenlist==1.4.0
     # via
     #   aiohttp
     #   aiosignal
-future==0.18.3
-    # via django-radius
 gitdb==4.0.10
     # via gitpython
 gitpython==3.1.32
@@ -323,6 +320,12 @@ pyrad==2.4
     # via django-radius
 python-daemon==3.0.1
     # via ansible-runner
+pyrsistent==0.19.2
+    # via jsonschema
+python-daemon==3.0.1
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   ansible-runner
 python-dateutil==2.8.2
     # via
     #   adal
@@ -406,7 +409,6 @@ setuptools-scm[toml]==7.1.0
     # via -r /awx_devel/requirements/requirements.in
 six==1.16.0
     # via
-    #   ansible-runner
     #   automat
     #   azure-core
     #   django-pglocks

@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 # Django
 from django.db import connection, migrations, models, OperationalError, ProgrammingError
 from django.conf import settings
-import taggit.managers
 
 # AWX
 import awx.main.fields
@@ -319,10 +318,6 @@ class Migration(migrations.Migration):
         ),
         migrations.RemoveField(
             model_name='permission',
-            name='tags',
-        ),
-        migrations.RemoveField(
-            model_name='permission',
             name='team',
         ),
         migrations.RemoveField(
@@ -508,12 +503,6 @@ class Migration(migrations.Migration):
                         editable=False,
                         to=settings.AUTH_USER_MODEL,
                         null=True,
-                    ),
-                ),
-                (
-                    'tags',
-                    taggit.managers.TaggableManager(
-                        to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags'
                     ),
                 ),
             ],

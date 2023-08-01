@@ -12,8 +12,6 @@ import django.db.models.deletion
 from django.conf import settings
 from django.utils.timezone import now
 
-import taggit.managers
-
 
 def create_system_job_templates(apps, schema_editor):
     """
@@ -125,7 +123,6 @@ class Migration(migrations.Migration):
     ]
 
     dependencies = [
-        ('taggit', '0002_auto_20150616_2121'),
         ('contenttypes', '0002_remove_content_type_name'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('main', '0001_initial'),
@@ -255,12 +252,6 @@ class Migration(migrations.Migration):
                 (
                     'organization',
                     models.ForeignKey(related_name='notification_templates', on_delete=django.db.models.deletion.SET_NULL, to='main.Organization', null=True),
-                ),
-                (
-                    'tags',
-                    taggit.managers.TaggableManager(
-                        to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags'
-                    ),
                 ),
             ],
         ),
@@ -719,12 +710,6 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         to='main.Organization',
                         help_text='Organization this label belongs to.',
-                    ),
-                ),
-                (
-                    'tags',
-                    taggit.managers.TaggableManager(
-                        to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags'
                     ),
                 ),
             ],

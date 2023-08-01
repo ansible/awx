@@ -36,7 +36,7 @@ options:
       type: str
     inventory:
       description:
-        - Inventory the host should be made a member of.
+        - Inventory name, ID, or named URL the host should be made a member of.
       required: True
       type: str
     enabled:

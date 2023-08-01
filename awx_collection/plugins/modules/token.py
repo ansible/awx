@@ -37,7 +37,7 @@ options:
       type: str
     application:
       description:
-        - The application tied to this token.
+        - The application name, ID, or named URL tied to this token.
       required: False
       type: str
     scope:
