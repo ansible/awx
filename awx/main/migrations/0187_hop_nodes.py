@@ -14,7 +14,7 @@ def automatically_peer_from_control_plane(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0185_move_JSONBlob_to_JSONField'),
+        ('main', '0186_drop_django_taggit'),
     ]
 
     operations = [
