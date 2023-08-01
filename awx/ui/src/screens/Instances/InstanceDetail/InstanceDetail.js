@@ -214,6 +214,25 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
               value={instance.peers_from_control_nodes ? t`On` : t`Off`}
             />
           )}
+          {instance.related?.install_bundle && (
+            <Detail
+              label={t`Install Bundle`}
+              value={
+                <Tooltip content={t`Click to download bundle`}>
+                  <Button
+                    component="a"
+                    isSmall
+                    href={`${instance.related?.install_bundle}`}
+                    target="_blank"
+                    variant="secondary"
+                    dataCy="install-bundle-download-button"
+                  >
+                    <DownloadIcon />
+                  </Button>
+                </Tooltip>
+              }
+            />
+          )}
           {!isHopNode && (
             <>
               <Detail
