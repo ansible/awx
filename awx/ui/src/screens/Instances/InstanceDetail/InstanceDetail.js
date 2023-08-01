@@ -209,29 +209,32 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
           <Detail label={t`Host`} value={instance.ip_address} />
           <Detail label={t`Instance Port`} value={instance.listener_port} />
           {(isExecutionNode || isHopNode) && (
-            <Detail
-              label={t`Peers from control nodes`}
-              value={instance.peers_from_control_nodes ? t`On` : t`Off`}
-            />
-          )}
-          {instance.related?.install_bundle && (
-            <Detail
-              label={t`Install Bundle`}
-              value={
-                <Tooltip content={t`Click to download bundle`}>
-                  <Button
-                    component="a"
-                    isSmall
-                    href={`${instance.related?.install_bundle}`}
-                    target="_blank"
-                    variant="secondary"
-                    dataCy="install-bundle-download-button"
-                  >
-                    <DownloadIcon />
-                  </Button>
-                </Tooltip>
-              }
-            />
+            <>
+              {instance.related?.install_bundle && (
+                <Detail
+                  label={t`Install Bundle`}
+                  value={
+                    <Tooltip content={t`Click to download bundle`}>
+                      <Button
+                        component="a"
+                        isSmall
+                        href={`${instance.related?.install_bundle}`}
+                        target="_blank"
+                        variant="secondary"
+                        dataCy="install-bundle-download-button"
+                        rel="noopener noreferrer"
+                      >
+                        <DownloadIcon />
+                      </Button>
+                    </Tooltip>
+                  }
+                />
+              )}
+              <Detail
+                label={t`Peers from control nodes`}
+                value={instance.peers_from_control_nodes ? t`On` : t`Off`}
+              />
+            </>
           )}
           {!isHopNode && (
             <>
@@ -273,26 +276,6 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
                 }
                 value={formatHealthCheckTimeStamp(instance.last_health_check)}
               />
-              {instance.related?.install_bundle && (
-                <Detail
-                  label={t`Install Bundle`}
-                  value={
-                    <Tooltip content={t`Click to download bundle`}>
-                      <Button
-                        component="a"
-                        isSmall
-                        href={`${instance.related?.install_bundle}`}
-                        target="_blank"
-                        variant="secondary"
-                        dataCy="install-bundle-download-button"
-                        rel="noopener noreferrer"
-                      >
-                        <DownloadIcon />
-                      </Button>
-                    </Tooltip>
-                  }
-                />
-              )}
               <Detail
                 label={t`Capacity Adjustment`}
                 dataCy="capacity-adjustment"
