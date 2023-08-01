@@ -7,6 +7,7 @@ import ipaddress
 import os
 import tarfile
 import time
+import re
 
 import asn1
 from awx.api import serializers
@@ -41,6 +42,8 @@ RECEPTOR_OID = "1.3.6.1.4.1.2312.19.1"
 # │   │   └── receptor.key
 # │   └── work-public-key.pem
 # └── requirements.yml
+
+
 class InstanceInstallBundle(GenericAPIView):
     name = _('Install Bundle')
     model = models.Instance
@@ -123,7 +126,9 @@ def generate_group_vars_all_yml(instance_obj):
     for instance in instance_obj.peers.all():
         host_or_ip = instance.ip_address or instance.hostname
         peers.append(dict(host=host_or_ip, port=instance.listener_port))
-    return render_to_string("instance_install_bundle/group_vars/all.yml", context=dict(instance=instance_obj, peers=peers))
+    all_yaml = render_to_string("instance_install_bundle/group_vars/all.yml", context=dict(instance=instance_obj, peers=peers))
+    # convert consecutive newlines with a single newline
+    return re.sub(r'\n+', '\n', all_yaml)
 
 
 def generate_receptor_tls(instance_obj):
