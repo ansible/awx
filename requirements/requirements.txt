@@ -102,7 +102,9 @@ daphne==3.0.2
     #   -r /awx_devel/requirements/requirements.in
     #   channels
 dataclasses==0.6
-    # via python-tss-sdk
+    # via
+    #   python-dsv-sdk
+    #   python-tss-sdk
 defusedxml==0.7.1
     # via
     #   python3-openid
@@ -144,8 +146,6 @@ django-polymorphic==3.1.0
 django-solo==2.1.0
     # via -r /awx_devel/requirements/requirements.in
 django-split-settings==1.0.0
-    # via -r /awx_devel/requirements/requirements.in
-django-taggit==4.0.0
     # via -r /awx_devel/requirements/requirements.in
 djangorestframework==3.14.0
     # via -r /awx_devel/requirements/requirements.in
@@ -320,8 +320,6 @@ pyrad==2.4
     # via django-radius
 python-daemon==3.0.1
     # via ansible-runner
-pyrsistent==0.19.2
-    # via jsonschema
 python-daemon==3.0.1
     # via
     #   -r /awx_devel/requirements/requirements.in
@@ -332,7 +330,7 @@ python-dateutil==2.8.2
     #   botocore
     #   kubernetes
     #   receptorctl
-python-dsv-sdk==1.0.4
+python-dsv-sdk==1.0.1
     # via -r /awx_devel/requirements/requirements.in
 python-jose==3.3.0
     # via social-auth-core
