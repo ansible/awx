@@ -9,7 +9,6 @@ botocore
 channels
 channels-redis==3.4.1  # see UPGRADE BLOCKERs
 cryptography>=41.0.2  # CVE-2023-38325
-Cython<3 # Since the bump to PyYAML 5.4.1 this is now a mandatory dep
 daphne
 distro
 django==4.2.6  # CVE-2023-43665
