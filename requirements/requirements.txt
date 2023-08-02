@@ -319,8 +319,6 @@ pyparsing==2.4.6
 pyrad==2.4
     # via django-radius
 python-daemon==3.0.1
-    # via ansible-runner
-python-daemon==3.0.1
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   ansible-runner
