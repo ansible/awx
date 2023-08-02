@@ -366,7 +366,7 @@ class BaseAccess(object):
             report_violation = lambda message: None
         else:
             report_violation = lambda message: logger.warning(message)
-        if validation_info.get('trial', False) is True or validation_info['instance_count'] == 10:  # basic 10 license
+        if validation_info.get('trial', False) is True:
 
             def report_violation(message):  # noqa
                 raise PermissionDenied(message)
