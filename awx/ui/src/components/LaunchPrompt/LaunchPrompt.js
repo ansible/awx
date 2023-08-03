@@ -77,7 +77,7 @@ function PromptModalForm({
     }
 
     if (launchConfig.ask_labels_on_launch) {
-      const { labelIds } = createNewLabels(
+      const { labelIds } = await createNewLabels(
         values.labels,
         resource.organization
       );
