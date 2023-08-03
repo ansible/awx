@@ -44,7 +44,7 @@ options:
       type: str
     organization:
       description:
-        - The user will be created as a member of that organization (needed for organization admins to create new organization users).
+        - The user will be created as a member of that organization name, ID, or named URL (needed for organization admins to create new organization users).
       type: str
     is_superuser:
       description:

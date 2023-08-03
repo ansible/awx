@@ -28,8 +28,8 @@ SHELL_PLUS_PRINT_SQL = False
 
 # show colored logs in the dev environment
 # to disable this, set `COLOR_LOGS = False` in awx/settings/local_settings.py
-LOGGING['handlers']['console']['()'] = 'awx.main.utils.handlers.ColorHandler'  # noqa
 COLOR_LOGS = True
+LOGGING['handlers']['console']['()'] = 'awx.main.utils.handlers.ColorHandler'  # noqa
 
 ALLOWED_HOSTS = ['*']
 

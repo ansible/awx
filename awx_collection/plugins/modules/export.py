@@ -28,72 +28,72 @@ options:
       default: 'False'
     organizations:
       description:
-        - organization names to export
+        - organization names, IDs, or named URLs to export
       type: list
       elements: str
     users:
       description:
-        - user names to export
+        - user names, IDs, or named URLs to export
       type: list
       elements: str
     teams:
       description:
-        - team names to export
+        - team names, IDs, or named URLs to export
       type: list
       elements: str
     credential_types:
       description:
-        - credential type names to export
+        - credential type names, IDs, or named URLs to export
       type: list
       elements: str
     credentials:
       description:
-        - credential names to export
+        - credential names, IDs, or named URLs to export
       type: list
       elements: str
     execution_environments:
       description:
-        - execution environment names to export
+        - execution environment names, IDs, or named URLs to export
       type: list
       elements: str
     notification_templates:
       description:
-        - notification template names to export
+        - notification template names, IDs, or named URLs to export
       type: list
       elements: str
     inventory_sources:
       description:
-        - inventory soruces to export
+        - inventory source name, ID, or named URLs to export
       type: list
       elements: str
     inventory:
       description:
-        - inventory names to export
+        - inventory names, IDs, or named URLs to export
       type: list
       elements: str
     projects:
       description:
-        - project names to export
+        - project names, IDs, or named URLs to export
       type: list
       elements: str
     job_templates:
       description:
-        - job template names to export
+        - job template names, IDs, or named URLs to export
       type: list
       elements: str
     workflow_job_templates:
       description:
-        - workflow names to export
+        - workflow names, IDs, or named URLs to export
       type: list
       elements: str
     applications:
       description:
-        - OAuth2 application names to export
+        - OAuth2 application names, IDs, or named URLs to export
       type: list
       elements: str
     schedules:
       description:
-        - schedule names to export
+        - schedule names, IDs, or named URLs to export
       type: list
       elements: str
 requirements:
@@ -154,7 +154,7 @@ def main():
 
     # The exporter code currently works like the following:
     #   Empty string == all assets of that type
-    #   Non-Empty string = just a list of assets of that type (by name or ID)
+    #   Non-Empty string = just a list of assets of that type (by name, ID, or named URL)
     #   Asset type not present or None = skip asset type (unless everything is None, then export all)
     # Here we are going to setup a dict of values to export
     export_args = {}
