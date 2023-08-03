@@ -233,6 +233,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
     @property
     def health_check_pending(self):
+        return False
         if self.health_check_started is None:
             return False
         if self.last_health_check is None:
@@ -309,7 +310,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
             self.cpu_capacity = 0
             self.mem_capacity = 0  # formula has a non-zero offset, so we make sure it is 0 for hop nodes
         else:
-            self.cpu_capacity = get_cpu_effective_capacity(self.cpu)
+            self.cpu_capacity = get_cpu_effective_capacity(self.cpu, self.node_type)
             self.mem_capacity = get_mem_effective_capacity(self.memory)
         self.set_capacity_value()
 
@@ -333,7 +334,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
             self.version = version
             update_fields.append('version')
 
-        new_cpu = get_corrected_cpu(cpu)
+        new_cpu = get_corrected_cpu(cpu, self.node_type)
         if new_cpu != self.cpu:
             self.cpu = new_cpu
             update_fields.append('cpu')
