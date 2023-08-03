@@ -178,9 +178,10 @@ options:
       type: int
     state:
       description:
-        - Desired state of the resource.
-      choices: ["present", "absent", "exists"]
+        - Desired state of the resource. C(exists) will not modify the resource if it is present.
+        - Enforced state C(enforced) will default values of any option not provided.
       default: "present"
+      choices: ["present", "absent", "exists", "enforced"]
       type: str
 extends_documentation_fragment: awx.awx.auth
 '''
@@ -285,7 +286,7 @@ def main():
         job_slice_count=dict(type='int'),
         labels=dict(type='list', elements='str'),
         timeout=dict(type='int'),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists', 'enforced'], default='present'),
     )
     mutually_exclusive = [("unified_job_template", "approval_node")]
     required_if = [
@@ -305,7 +306,6 @@ def main():
     identifier = module.params.get('identifier')
     state = module.params.get('state')
     approval_node = module.params.get('approval_node')
-    new_fields = {}
     lookup_organization = module.params.get('lookup_organization')
     search_fields = {'identifier': identifier}
 
@@ -324,7 +324,7 @@ def main():
                 msg="The workflow {0} in organization {1} was not found on the controller instance server".format(workflow_job_template, organization)
             )
         workflow_job_template_id = wfjt_data['id']
-        search_fields['workflow_job_template'] = new_fields['workflow_job_template'] = workflow_job_template_id
+        search_fields['workflow_job_template'] = workflow_job_template_id
 
     # Attempt to look up an existing item based on the provided data
     existing_item = module.get_one('workflow_job_template_nodes', check_exists=(state == 'exists'), **{'data': search_fields})
@@ -332,7 +332,14 @@ def main():
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(existing_item)
+    elif state == 'enforced':
+        new_fields, association_fields = module.get_enforced_defaults('workflow_job_template_nodes')
+    else:
+        association_fields = {}
+        new_fields = {}
 
+    # Set Workflow Job Template
+    new_fields['workflow_job_template'] = workflow_job_template_id
     # Set lookup data to use
     search_fields = {}
     if lookup_organization:
@@ -365,7 +372,6 @@ def main():
         if field_val:
             new_fields[field_name] = field_val
 
-    association_fields = {}
     for association in ('always_nodes', 'success_nodes', 'failure_nodes', 'credentials', 'instance_groups', 'labels'):
         name_list = module.params.get(association)
         if name_list is None:

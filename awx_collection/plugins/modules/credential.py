@@ -101,8 +101,9 @@ options:
     state:
       description:
         - Desired state of the resource. C(exists) will not modify the resource if it is present.
-      choices: ["present", "absent", "exists"]
+        - Enforced state C(enforced) will default values of any option not provided.
       default: "present"
+      choices: ["present", "absent", "exists", "enforced"]
       type: str
 
 extends_documentation_fragment: awx.awx.auth
@@ -216,7 +217,7 @@ def main():
         update_secrets=dict(type='bool', default=True, no_log=False),
         user=dict(),
         team=dict(),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists', 'enforced'], default='present'),
     )
 
     # Create a module for ourselves
@@ -264,6 +265,10 @@ def main():
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(credential)
+    elif state == 'enforced':
+        new_fields = module.get_enforced_defaults('credentials')[0]
+    else:
+        new_fields = {}
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     if user:
@@ -272,29 +277,26 @@ def main():
         team_id = module.resolve_name_to_id('teams', team)
 
     # Create the data that gets sent for create and update
-    credential_fields = {
-        'name': new_name if new_name else (module.get_item_name(credential) if credential else name),
-        'credential_type': cred_type_id,
-    }
-
+    new_fields['name'] = new_name if new_name else (module.get_item_name(credential) if credential else name)
+    new_fields['credential_type'] = cred_type_id
     if inputs:
-        credential_fields['inputs'] = inputs
+        new_fields['inputs'] = inputs
     if description:
-        credential_fields['description'] = description
+        new_fields['description'] = description
     if organization:
-        credential_fields['organization'] = org_id
+        new_fields['organization'] = org_id
 
     # If we don't already have a credential (and we are creating one) we can add user/team
     # The API does not appear to do anything with these after creation anyway
     # NOTE: We can't just add these on a modification because they are never returned from a GET so it would always cause a changed=True
     if not credential:
         if user:
-            credential_fields['user'] = user_id
+            new_fields['user'] = user_id
         if team:
-            credential_fields['team'] = team_id
+            new_fields['team'] = team_id
 
     # If the state was present we can let the module build or update the existing group, this will return on its own
-    module.create_or_update_if_needed(credential, credential_fields, endpoint='credentials', item_type='credential')
+    module.create_or_update_if_needed(credential, new_fields, endpoint='credentials', item_type='credential')
 
 
 if __name__ == '__main__':

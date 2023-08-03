@@ -120,9 +120,10 @@ options:
       type: str
     state:
       description:
-        - Desired state of the resource.
+        - Desired state of the resource. C(exists) will not modify the resource if it is present.
+        - Enforced state C(enforced) will default values of any option not provided.
       default: "present"
-      choices: ["present", "absent", "exists"]
+      choices: ["present", "absent", "exists", "enforced"]
       type: str
     wait:
       description:
@@ -272,7 +273,7 @@ def main():
         notification_templates_started=dict(type="list", elements='str'),
         notification_templates_success=dict(type="list", elements='str'),
         notification_templates_error=dict(type="list", elements='str'),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists', 'enforced'], default='present'),
         wait=dict(type='bool', default=True),
         update_project=dict(default=False, type='bool'),
         interval=dict(default=2.0, type='float'),
@@ -330,10 +331,13 @@ def main():
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(project)
+    elif state == 'enforced':
+        new_fields, association_fields = module.get_enforced_defaults('projects')
+    else:
+        association_fields = {}
+        new_fields = {}
 
     # Attempt to look up associated field items the user specified.
-    association_fields = {}
-
     notifications_start = module.params.get('notification_templates_started')
     if notifications_start is not None:
         association_fields['notification_templates_started'] = []
@@ -353,10 +357,7 @@ def main():
             association_fields['notification_templates_error'].append(module.resolve_name_to_id('notification_templates', item))
 
     # Create the data that gets sent for create and update
-    project_fields = {
-        'name': new_name if new_name else (module.get_item_name(project) if project else name),
-    }
-
+    new_fields['name'] = new_name if new_name else (module.get_item_name(project) if project else name)
     for field_name in (
         'scm_type',
         'scm_url',
@@ -368,14 +369,13 @@ def main():
         'scm_update_on_launch',
         'scm_update_cache_timeout',
         'timeout',
-        'scm_update_cache_timeout',
         'custom_virtualenv',
         'description',
         'allow_override',
     ):
         field_val = module.params.get(field_name)
         if field_val is not None:
-            project_fields[field_name] = field_val
+            new_fields[field_name] = field_val
 
     for variable, field, endpoint in (
         (default_ee, 'default_environment', 'execution_environments'),
@@ -383,15 +383,15 @@ def main():
         (signature_validation_credential, 'signature_validation_credential', 'credentials'),
     ):
         if variable is not None:
-            project_fields[field] = module.resolve_name_to_id(endpoint, variable)
+            new_fields[field] = module.resolve_name_to_id(endpoint, variable)
 
     if org_id is not None:
         # this is resolved earlier, so save an API call and don't do it again in the loop above
-        project_fields['organization'] = org_id
+        new_fields['organization'] = org_id
 
     # Respect local_path if scm_type is manual type or not specified
     if scm_type in ('', None) and local_path is not None:
-        project_fields['local_path'] = local_path
+        new_fields['local_path'] = local_path
 
     if scm_update_cache_timeout not in (0, None) and scm_update_on_launch is not True:
         module.warn('scm_update_cache_timeout will be ignored since scm_update_on_launch was not set to true')
@@ -405,7 +405,7 @@ def main():
     # If the state was present and we can let the module build or update the existing project, this will return on its own
     response = module.create_or_update_if_needed(
         project,
-        project_fields,
+        new_fields,
         endpoint='projects',
         item_type='project',
         associations=association_fields,

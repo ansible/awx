@@ -10,7 +10,8 @@
     org_name2: "AWX-Collection-tests-export-organization2-{{ test_id }}"
     inventory_name1: "AWX-Collection-tests-export-inv1-{{ test_id }}"
 
-- block:
+- name: Run Tests
+  block:
     - name: Create some organizations
       organization:
         name: "{{ item }}"

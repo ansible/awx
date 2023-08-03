@@ -21,9 +21,10 @@
     msg: "Skipping instance test since this is instance is not running on a K8s platform"
   when: not IS_K8S
 
-- block:
+- name: Run Tests
+  block:
     - name: Create an instance
-      awx.awx.instance:
+      instance:
         hostname: "{{ item }}"
         node_type: execution
         node_state: installed
@@ -37,7 +38,7 @@
           - result is changed
 
     - name: Create an instance with non-default config
-      awx.awx.instance:
+      instance:
         hostname: "{{ hostname3 }}"
         node_type: execution
         node_state: installed
@@ -50,7 +51,7 @@
           - result is changed
 
     - name: Update an instance
-      awx.awx.instance:
+      instance:
         hostname: "{{ hostname1 }}"
         capacity_adjustment: 0.7
       register: result
@@ -59,9 +60,44 @@
         that:
           - result is changed
 
+    - name: Set an instance with enforced
+      instance:
+        hostname: "{{ hostname1 }}"
+        state: enforced
+      register: result
+
+    - assert:
+        that:
+          - result is changed
+
+    - name: Rerun to ensure no changes with enforced
+      instance:
+        hostname: "{{ hostname1 }}"
+        state: enforced
+      register: result
+
+    - assert:
+        that:
+          - result is not changed
+
+    - name: Update an instance enforced defaults for no change
+      instance:
+        hostname: "{{ hostname1 }}"
+        capacity_adjustment: 1.0
+        enabled: True
+        manged_by_policy: True
+        node_type: execution
+        listener_port: 27199
+      register: result
+
+    - assert:
+        that:
+          - result is not changed
+
+
   always:
     - name: Deprovision the instances
-      awx.awx.instance:
+      instance:
         hostname: "{{ item }}"
         node_state: deprovisioning
       with_items:

@@ -11,8 +11,8 @@
     cred_name1: "AWX-Collection-tests-inventory-cred1-{{ test_id }}"
     group_name1: "AWX-Collection-tests-instance_group-group1-{{ test_id }}"
 
-- block:
-
+- name: Run Tests
+  block:
     - name: Create an Instance Group
       instance_group:
         name: "{{ group_name1 }}"
@@ -41,7 +41,10 @@
     - name: Create an Inventory
       inventory:
         name: "{{ inv_name1 }}"
+        description: this is a description
         organization: Default
+        variables:
+          foo: bar
         instance_groups:
           - "{{ group_name1 }}"
         state: present
@@ -57,6 +60,42 @@
         organization: Default
         instance_groups:
           - "{{ group_name1 }}"
+        state: exists
+      register: result
+
+    - assert:
+        that:
+          - "result is not changed"
+
+    - name: Create an Inventory with enforced
+      inventory:
+        name: "{{ inv_name1 }}"
+        organization: Default
+        state: enforced
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Rerun to ensure no changes with enforced
+      inventory:
+        name: "{{ inv_name1 }}"
+        organization: Default
+        state: enforced
+      register: result
+
+    - assert:
+        that:
+          - "result is not changed"
+
+    - name: Check enforced values
+      inventory:
+        name: "{{ inv_name1 }}"
+        description: ''
+        organization: Default
+        instance_groups: []
+        variables: {}
         state: exists
       register: result
 

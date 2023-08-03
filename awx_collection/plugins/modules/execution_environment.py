@@ -49,9 +49,10 @@ options:
       type: str
     state:
       description:
-        - Desired state of the resource.
-      choices: ["present", "absent", "exists"]
+        - Desired state of the resource. C(exists) will not modify the resource if it is present.
+        - Enforced state C(enforced) will default values of any option not provided.
       default: "present"
+      choices: ["present", "absent", "exists", "enforced"]
       type: str
     pull:
       description:
@@ -83,7 +84,7 @@ def main():
         description=dict(),
         organization=dict(),
         credential=dict(),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists', 'enforced'], default='present'),
         # NOTE: Default for pull differs from API (which is blank by default)
         pull=dict(choices=['always', 'missing', 'never'], default='missing'),
     )
@@ -96,30 +97,31 @@ def main():
     new_name = module.params.get("new_name")
     image = module.params.get('image')
     description = module.params.get('description')
-    state = module.params.get('state')
+    organization = module.params.get('organization')
+    credential = module.params.get('credential')
     pull = module.params.get('pull')
+    state = module.params.get('state')
 
     existing_item = module.get_one('execution_environments', name_or_id=name, check_exists=(state == 'exists'))
 
     if state == 'absent':
         module.delete_if_needed(existing_item)
+    elif state == 'enforced':
+        new_fields = module.get_enforced_defaults('execution_environments')[0]
+    else:
+        new_fields = {}
 
-    new_fields = {
-        'name': new_name if new_name else (module.get_item_name(existing_item) if existing_item else name),
-        'image': image,
-    }
+    # Create the data that gets sent for create and update
+    new_fields['name'] = new_name if new_name else (module.get_item_name(existing_item) if existing_item else name)
+    new_fields['image'] = image
     if description:
         new_fields['description'] = description
-
     if pull:
         new_fields['pull'] = pull
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
-    organization = module.params.get('organization')
     if organization:
         new_fields['organization'] = module.resolve_name_to_id('organizations', organization)
-
-    credential = module.params.get('credential')
     if credential:
         new_fields['credential'] = module.resolve_name_to_id('credentials', credential)
 

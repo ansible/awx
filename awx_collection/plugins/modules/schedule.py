@@ -145,9 +145,10 @@ options:
       type: bool
     state:
       description:
-        - Desired state of the resource.
-      choices: ["present", "absent", "exists"]
+        - Desired state of the resource. C(exists) will not modify the resource if it is present.
+        - Enforced state C(enforced) will default values of any option not provided.
       default: "present"
+      choices: ["present", "absent", "exists", "enforced"]
       type: str
 extends_documentation_fragment: awx.awx.auth
 '''
@@ -174,7 +175,7 @@ EXAMPLES = '''
     name: "{{ sched1 }}"
     state: present
     unified_job_template: "Demo Job Template"
-    rrule: "{{ query(awx.awx.schedule_rruleset, '2022-04-30 10:30:45', rules=rrules, timezone='UTC' ) }}"
+    rrule: "{{ query('awx.awx.schedule_rruleset', '2022-04-30 10:30:45', rules=rrules, timezone='UTC' ) }}"
   vars:
     rrules:
       - frequency: 'day'
@@ -220,7 +221,7 @@ def main():
         unified_job_template=dict(),
         organization=dict(),
         enabled=dict(type='bool'),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists', 'enforced'], default='present'),
     )
 
     # Create a module for ourselves
@@ -272,8 +273,11 @@ def main():
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(existing_item)
-
-    association_fields = {}
+    elif state == 'enforced':
+        new_fields, association_fields = module.get_enforced_defaults('schedules')
+    else:
+        association_fields = {}
+        new_fields = {}
 
     if credentials is not None:
         association_fields['credentials'] = []
@@ -303,7 +307,6 @@ def main():
                 association_fields['instance_groups'].append(instance_group_id['id'])
 
     # Create the data that gets sent for create and update
-    new_fields = {}
     if rrule is not None:
         new_fields['rrule'] = rrule
     new_fields['name'] = new_name if new_name else (module.get_item_name(existing_item) if existing_item else name)

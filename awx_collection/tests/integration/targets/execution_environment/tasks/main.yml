@@ -8,7 +8,8 @@
   set_fact:
     ee_name: "AWX-Collection-tests-ee-{{ test_id }}"
 
-- block:
+- name: Run Tests
+  block:
     - name: Add an EE
       execution_environment:
         name: "{{ ee_name }}"
@@ -63,6 +64,43 @@
     - assert:
         that:
           - "result is changed"
+
+    - name: Add an EE with enforced
+      execution_environment:
+        name: "{{ ee_name }}"
+        image: quay.io/ansible/awx-ee
+        organization: Default
+        state: enforced
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Rerun to ensure no changes with enforced
+      execution_environment:
+        name: "{{ ee_name }}"
+        image: quay.io/ansible/awx-ee
+        organization: Default
+        state: enforced
+      register: result
+
+    - assert:
+        that:
+          - "result is not changed"
+
+    - name: Add an EE with default values that don't change
+      execution_environment:
+        name: "{{ ee_name }}"
+        description: ""
+        image: quay.io/ansible/awx-ee
+        pull: missing
+        organization: Default
+      register: result
+
+    - assert:
+        that:
+          - "result is not changed"
 
     - name: Associate the Test EE with Default Org (this should fail)
       execution_environment:

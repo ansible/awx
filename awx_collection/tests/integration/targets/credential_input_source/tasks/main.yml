@@ -9,7 +9,8 @@
     src_cred_name: "AWX-Collection-tests-credential_input_source-src_cred-{{ test_id }}"
     target_cred_name: "AWX-Collection-tests-credential_input_source-target_cred-{{ test_id }}"
 
-- block:
+- name: Run Tests
+  block:
     - name: Add credential Lookup
       credential:
         description: Credential for Testing Source
@@ -42,6 +43,7 @@
     - name: Add credential Input Source
       credential_input_source:
         input_field_name: password
+        description: this is a description
         target_credential: "{{ target_cred_result.id }}"
         source_credential: "{{ src_cred_result.id }}"
         metadata:
@@ -68,6 +70,42 @@
     - assert:
         that:
           - "result is not changed"
+
+    - name: Add credential Lookup
+      credential:
+        description: Credential for Testing Source
+        name: "{{ src_cred_name }}-Conjur"
+        credential_type: CyberArk Conjur Secrets Manager Lookup
+        inputs:
+          url: "https://cyberark.example.com"
+          api_key: "1234"
+          account: admin
+          username: admin
+        organization: Default
+
+    - name: Add credential Input Source with enforced
+      credential_input_source:
+        input_field_name: password
+        target_credential: "{{ target_cred_result.id }}"
+        source_credential: "{{ src_cred_name }}-Conjur"
+        state: enforced
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Add credential Input Source after enforced ensure not changed
+      credential_input_source:
+        input_field_name: password
+        target_credential: "{{ target_cred_result.id }}"
+        source_credential: "{{ src_cred_name }}-Conjur"
+      register: result
+
+    - assert:
+        that:
+          - "result is not changed"
+
 
     - name: Delete credential Input Source
       credential_input_source:
@@ -146,6 +184,14 @@
         name: "{{ src_cred_name }}-2"
         organization: Default
         credential_type: CyberArk Central Credential Provider Lookup
+        state: absent
+      register: result
+
+    - name: Remove Conjur credential
+      credential:
+        name: "{{ src_cred_name }}-Conjur"
+        organization: Default
+        credential_type: Machine
         state: absent
       register: result
 

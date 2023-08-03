@@ -39,7 +39,7 @@ options:
       type: str
     state:
       description:
-        - Desired state of the resource.
+        - Desired state of the resource. C(exists) will not modify the resource if it is present.
       default: "present"
       choices: ["present", "exists"]
       type: str

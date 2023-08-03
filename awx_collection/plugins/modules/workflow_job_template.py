@@ -140,12 +140,10 @@ options:
       elements: str
     state:
       description:
-        - Desired state of the resource.
-      choices:
-        - present
-        - absent
-        - exists
+        - Desired state of the resource. C(exists) will not modify the resource if it is present.
+        - Enforced state C(enforced) will default values of any option not provided.
       default: "present"
+      choices: ["present", "absent", "exists", "enforced"]
       type: str
     notification_templates_started:
       description:
@@ -843,7 +841,7 @@ def main():
         notification_templates_approvals=dict(type="list", elements='str'),
         workflow_nodes=dict(type='list', elements='dict', aliases=['schema']),
         destroy_current_nodes=dict(type='bool', default=False, aliases=['destroy_current_schema']),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists', 'enforced'], default='present'),
     )
 
     # Create a module for ourselves
@@ -861,14 +859,14 @@ def main():
         workflow_nodes = module.params.get('workflow_nodes')
     destroy_current_nodes = module.params.get('destroy_current_nodes')
 
-    new_fields = {}
     search_fields = {}
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
+    organization_id = None
     organization = module.params.get('organization')
     if organization:
         organization_id = module.resolve_name_to_id('organizations', organization)
-        search_fields['organization'] = new_fields['organization'] = organization_id
+        search_fields['organization'] = organization_id
 
     # Attempt to look up an existing item based on the provided data
     existing_item = module.get_one('workflow_job_templates', name_or_id=name, check_exists=(state == 'exists'), **{'data': search_fields})
@@ -888,6 +886,11 @@ def main():
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(existing_item)
+    elif state == 'enforced':
+        new_fields, association_fields = module.get_enforced_defaults('workflow_job_templates')
+    else:
+        association_fields = {}
+        new_fields = {}
 
     inventory = module.params.get('inventory')
     if inventory:
@@ -899,6 +902,7 @@ def main():
 
     # Create the data that gets sent for create and update
     new_fields['name'] = new_name if new_name else (module.get_item_name(existing_item) if existing_item else name)
+    new_fields['organization'] = organization_id
     for field_name in (
         'description',
         'survey_enabled',
@@ -923,8 +927,6 @@ def main():
 
     if 'extra_vars' in new_fields:
         new_fields['extra_vars'] = json.dumps(new_fields['extra_vars'])
-
-    association_fields = {}
 
     notifications_start = module.params.get('notification_templates_started')
     if notifications_start is not None:

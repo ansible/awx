@@ -49,9 +49,10 @@ options:
       type: dict
     state:
       description:
-        - Desired state of the resource.
-      choices: ["present", "absent", "exists"]
+        - Desired state of the resource. C(exists) will not modify the resource if it is present.
+        - Enforced state C(enforced) will default values of any option not provided.
       default: "present"
+      choices: ["present", "absent", "exists", "enforced"]
       type: str
 extends_documentation_fragment: awx.awx.auth
 '''
@@ -83,7 +84,7 @@ def main():
         inventory=dict(required=True),
         enabled=dict(type='bool'),
         variables=dict(type='dict'),
-        state=dict(choices=['present', 'absent', 'exists'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists', 'enforced'], default='present'),
     )
 
     # Create a module for ourselves
@@ -107,20 +108,22 @@ def main():
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this
         module.delete_if_needed(host)
+    elif state == 'enforced':
+        new_fields = module.get_enforced_defaults('hosts')[0]
+    else:
+        new_fields = {}
 
     # Create the data that gets sent for create and update
-    host_fields = {
-        'name': new_name if new_name else (module.get_item_name(host) if host else name),
-        'inventory': inventory_id,
-        'enabled': enabled,
-    }
+    new_fields['name'] = new_name if new_name else (module.get_item_name(host) if host else name)
+    new_fields['inventory'] = inventory_id
+    new_fields['enabled'] = enabled
     if description is not None:
-        host_fields['description'] = description
+        new_fields['description'] = description
     if variables is not None:
-        host_fields['variables'] = json.dumps(variables)
+        new_fields['variables'] = json.dumps(variables)
 
     # If the state was present and we can let the module build or update the existing host, this will return on its own
-    module.create_or_update_if_needed(host, host_fields, endpoint='hosts', item_type='host')
+    module.create_or_update_if_needed(host, new_fields, endpoint='hosts', item_type='host')
 
 
 if __name__ == '__main__':

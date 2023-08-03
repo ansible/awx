@@ -32,6 +32,17 @@
     that:
       - "result is not changed"
 
+- name: Create a User with exists
+  user:
+    username: "{{ username }}"
+    password: "{{ 65535 | random | to_uuid }}"
+    state: enforced
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
 - name: Delete a User
   user:
     username: "{{ username }}"
@@ -171,7 +182,8 @@
       - "'Unable to resolve controller_host' in result.msg or
         'Can not verify ssl with non-https protocol' in result.exception"
 
-- block:
+- name: Run Tests
+  block:
     - name: Generate an org name
       set_fact:
         org_name: "AWX-Collection-tests-organization-org-{{ test_id }}"

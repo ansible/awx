@@ -9,87 +9,140 @@
     host_name: "AWX-Collection-tests-host-host-{{ test_id }}"
     inv_name: "AWX-Collection-tests-host-inv-{{ test_id }}"
 
-- name: Create an Inventory
-  inventory:
-    name: "{{ inv_name }}"
-    organization: Default
-    state: present
-  register: result
+- name: Run Tests
+  block:
+    - name: Create an Inventory
+      inventory:
+        name: "{{ inv_name }}"
+        organization: Default
+        state: present
+      register: result
 
-- name: Create a Host
-  host:
-    name: "{{ host_name }}"
-    inventory: "{{ result.id }}"
-    state: present
-    variables:
-      foo: bar
-  register: result
+    - name: Create a Host
+      host:
+        name: "{{ host_name }}"
+        description: this is a description
+        enabled: False
+        inventory: "{{ result.id }}"
+        state: present
+        variables:
+          foo: bar
+      register: result
 
-- assert:
-    that:
-      - "result is changed"
+    - assert:
+        that:
+          - "result is changed"
 
-- name: Create a Host with exists
-  host:
-    name: "{{ host_name }}"
-    inventory: "{{ inv_name }}"
-    state: exists
-    variables:
-      foo: bar
-  register: result
+    - name: Create a Host with exists
+      host:
+        name: "{{ host_name }}"
+        inventory: "{{ inv_name }}"
+        state: exists
+        variables:
+          foo: bar
+      register: result
 
-- assert:
-    that:
-      - "result is not changed"
+    - assert:
+        that:
+          - "result is not changed"
 
-- name: Delete a Host
-  host:
-    name: "{{ host_name }}"
-    inventory: "{{ inv_name }}"
-    state: absent
-    variables:
-      foo: bar
-  register: result
 
-- assert:
-    that:
-      - "result is changed"
+    - name: Create a Host with enforced
+      host:
+        name: "{{ host_name }}"
+        inventory: "{{ inv_name }}"
+        state: enforced
+      register: result
 
-- name: Create a Host with exists
-  host:
-    name: "{{ host_name }}"
-    inventory: "{{ inv_name }}"
-    state: exists
-    variables:
-      foo: bar
-  register: result
+    - assert:
+        that:
+          - "result is changed"
 
-- assert:
-    that:
-      - "result is changed"
+    - name: Rerun to ensure no changes with enforced
+      host:
+        name: "{{ host_name }}"
+        inventory: "{{ inv_name }}"
+        state: enforced
+      register: result
 
-- name: Delete a Host
-  host:
-    name: "{{ result.id }}"
-    inventory: "{{ inv_name }}"
-    state: absent
-  register: result
+    - assert:
+        that:
+          - "result is not changed"
 
-- assert:
-    that:
-      - "result is changed"
+    - name: Create a Host with enforced values
+      host:
+        name: "{{ host_name }}"
+        inventory: "{{ inv_name }}"
+        description: ""
+        enabled: True
+        variables: {}
+      register: result
 
-- name: Check module fails with correct msg
-  host:
-    name: test-host
-    description: Host Description
-    inventory: test-non-existing-inventory
-    state: present
-  register: result
-  ignore_errors: true
+    - assert:
+        that:
+          - "result is changed"
 
-- assert:
-    that:
-      - "result is failed"
-      - "'test-non-existing-inventory' in result.msg"
-      - "result.total_results == 0"
+    - name: Delete a Host
+      host:
+        name: "{{ host_name }}"
+        inventory: "{{ inv_name }}"
+        state: absent
+        variables:
+          foo: bar
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Create a Host with exists
+      host:
+        name: "{{ host_name }}"
+        inventory: "{{ inv_name }}"
+        state: exists
+        variables:
+          foo: bar
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Delete a Host
+      host:
+        name: "{{ result.id }}"
+        inventory: "{{ inv_name }}"
+        state: absent
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Check module fails with correct msg
+      host:
+        name: test-host
+        description: Host Description
+        inventory: test-non-existing-inventory
+        state: present
+      register: result
+      ignore_errors: true
+
+    - assert:
+        that:
+          - "result is failed"
+          - "'test-non-existing-inventory' in result.msg"
+          - "result.total_results == 0"
+
+  always:
+    - name: Delete Host
+      host:
+        name: "{{ host_name }}"
+        inventory: "{{ inv_name }}"
+        state: absent
+
+    - name: Delete Inventory
+      inventory:
+        name: "{{ inv_name }}"
+        organization: Default
+        state: absent
