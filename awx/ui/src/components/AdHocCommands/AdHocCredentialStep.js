@@ -91,7 +91,7 @@ function AdHocCredentialStep({ credentialTypeId }) {
       {meta.touched && meta.error && (
         <CredentialErrorAlert variant="danger" isInline title={meta.error} />
       )}
-      <Form>
+      <Form autoComplete="off">
         <FormGroup
           fieldId="credential"
           label={t`Machine Credential`}

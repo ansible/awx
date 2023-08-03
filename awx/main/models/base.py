@@ -7,9 +7,6 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.utils.translation import gettext_lazy as _
 from django.utils.timezone import now
 
-# Django-Taggit
-from taggit.managers import TaggableManager
-
 # Django-CRUM
 from crum import get_current_user
 
@@ -300,8 +297,6 @@ class PrimordialModel(HasEditsMixin, CreatedModifiedModel):
         editable=False,
         on_delete=models.SET_NULL,
     )
-
-    tags = TaggableManager(blank=True)
 
     def __init__(self, *args, **kwargs):
         r = super(PrimordialModel, self).__init__(*args, **kwargs)

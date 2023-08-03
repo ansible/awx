@@ -15,5 +15,5 @@
 
 "dependencies":
   - any: ["awx/ui/package.json"]
-  - any: ["awx/requirements/*.txt"]
-  - any: ["awx/requirements/requirements.in"]
+  - any: ["requirements/*.txt"]
+  - any: ["requirements/requirements.in"]

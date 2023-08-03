@@ -175,7 +175,7 @@ The first time you start the environment, database migrations need to run in ord
 ```bash
 awx_1        | Operations to perform:
 awx_1        |   Synchronize unmigrated apps: solo, api, staticfiles, debug_toolbar, messages, channels, django_extensions, ui, rest_framework, polymorphic
-awx_1        |   Apply all migrations: sso, taggit, sessions, sites, kombu_transport_django, social_auth, contenttypes, auth, conf, main
+awx_1        |   Apply all migrations: sso, sessions, sites, kombu_transport_django, social_auth, contenttypes, auth, conf, main
 awx_1        | Synchronizing apps without migrations:
 awx_1        |   Creating tables...
 awx_1        |     Running deferred SQL...

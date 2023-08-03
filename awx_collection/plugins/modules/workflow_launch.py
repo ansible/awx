@@ -27,13 +27,13 @@ options:
         - workflow_template
     organization:
       description:
-        - Organization the workflow job template exists in.
+        - Organization name, ID, or named URL the workflow job template exists in.
         - Used to help lookup the object, cannot be modified using this module.
         - If not provided, will lookup by name only, which does not work with duplicates.
       type: str
     inventory:
       description:
-        - Inventory to use for the job ran with this workflow, only used if prompt for inventory is set.
+        - Inventory name, ID, or named URL to use for the job ran with this workflow, only used if prompt for inventory is set.
       type: str
     limit:
       description:

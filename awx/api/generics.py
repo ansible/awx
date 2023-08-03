@@ -232,7 +232,8 @@ class APIView(views.APIView):
 
         response = super(APIView, self).finalize_response(request, response, *args, **kwargs)
         time_started = getattr(self, 'time_started', None)
-        response['X-API-Product-Version'] = get_awx_version()
+        if request.user.is_authenticated:
+            response['X-API-Product-Version'] = get_awx_version()
         response['X-API-Product-Name'] = server_product_name()
 
         response['X-API-Node'] = settings.CLUSTER_HOST_ID

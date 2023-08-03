@@ -178,6 +178,7 @@ function NotificationTemplatesList() {
                 <HeaderCell sortKey="name">{t`Name`}</HeaderCell>
                 <HeaderCell>{t`Status`}</HeaderCell>
                 <HeaderCell sortKey="notification_type">{t`Type`}</HeaderCell>
+                <HeaderCell sortKey="organization">{t`Organization`}</HeaderCell>
                 <HeaderCell>{t`Actions`}</HeaderCell>
               </HeaderRow>
             }

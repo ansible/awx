@@ -41,11 +41,11 @@ options:
       type: str
     organization:
       description:
-        - The organization the execution environment belongs to.
+        - The organization name, ID, or named URL that the execution environment belongs to.
       type: str
     credential:
       description:
-        - Name of the credential to use for the execution environment.
+        - Name, ID, or named URL of the credential to use for the execution environment.
       type: str
     state:
       description:
