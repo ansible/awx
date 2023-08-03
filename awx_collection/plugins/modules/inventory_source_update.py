@@ -35,7 +35,7 @@ options:
       type: str
     organization:
       description:
-        - Name of the inventory source's inventory's organization.
+        - Name, ID, or named URL of the inventory source's inventory's organization.
       type: str
     wait:
       description:

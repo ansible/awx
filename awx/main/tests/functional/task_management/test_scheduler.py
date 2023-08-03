@@ -331,15 +331,13 @@ def test_single_job_dependencies_project_launch(controlplane_instance_group, job
     p.save(skip_update=True)
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         dm = DependencyManager()
-        with mock.patch.object(DependencyManager, "create_project_update", wraps=dm.create_project_update) as mock_pu:
-            dm.schedule()
-            mock_pu.assert_called_once_with(j)
-            pu = [x for x in p.project_updates.all()]
-            assert len(pu) == 1
-            TaskManager().schedule()
-            TaskManager.start_task.assert_called_once_with(pu[0], controlplane_instance_group, instance)
-            pu[0].status = "successful"
-            pu[0].save()
+        dm.schedule()
+        pu = [x for x in p.project_updates.all()]
+        assert len(pu) == 1
+        TaskManager().schedule()
+        TaskManager.start_task.assert_called_once_with(pu[0], controlplane_instance_group, instance)
+        pu[0].status = "successful"
+        pu[0].save()
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
         TaskManager.start_task.assert_called_once_with(j, controlplane_instance_group, instance)
@@ -359,15 +357,14 @@ def test_single_job_dependencies_inventory_update_launch(controlplane_instance_g
     i.inventory_sources.add(ii)
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         dm = DependencyManager()
-        with mock.patch.object(DependencyManager, "create_inventory_update", wraps=dm.create_inventory_update) as mock_iu:
-            dm.schedule()
-            mock_iu.assert_called_once_with(j, ii)
-            iu = [x for x in ii.inventory_updates.all()]
-            assert len(iu) == 1
-            TaskManager().schedule()
-            TaskManager.start_task.assert_called_once_with(iu[0], controlplane_instance_group, instance)
-            iu[0].status = "successful"
-            iu[0].save()
+        dm.schedule()
+        assert ii.inventory_updates.count() == 1
+        iu = [x for x in ii.inventory_updates.all()]
+        assert len(iu) == 1
+        TaskManager().schedule()
+        TaskManager.start_task.assert_called_once_with(iu[0], controlplane_instance_group, instance)
+        iu[0].status = "successful"
+        iu[0].save()
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
         TaskManager.start_task.assert_called_once_with(j, controlplane_instance_group, instance)
@@ -382,11 +379,11 @@ def test_inventory_update_launches_project_update(controlplane_instance_group, s
     iu = ii.create_inventory_update()
     iu.status = "pending"
     iu.save()
+    assert project.project_updates.count() == 0
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         dm = DependencyManager()
-        with mock.patch.object(DependencyManager, "create_project_update", wraps=dm.create_project_update) as mock_pu:
-            dm.schedule()
-            mock_pu.assert_called_with(iu, project_id=project.id)
+        dm.schedule()
+    assert project.project_updates.count() == 1
 
 
 @pytest.mark.django_db
@@ -407,9 +404,8 @@ def test_job_dependency_with_already_updated(controlplane_instance_group, job_te
     j.save()
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         dm = DependencyManager()
-        with mock.patch.object(DependencyManager, "create_inventory_update", wraps=dm.create_inventory_update) as mock_iu:
-            dm.schedule()
-            mock_iu.assert_not_called()
+        dm.schedule()
+        assert ii.inventory_updates.count() == 0
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
         TaskManager.start_task.assert_called_once_with(j, controlplane_instance_group, instance)
@@ -442,7 +438,9 @@ def test_shared_dependencies_launch(controlplane_instance_group, job_template_fa
         TaskManager().schedule()
         pu = p.project_updates.first()
         iu = ii.inventory_updates.first()
-        TaskManager.start_task.assert_has_calls([mock.call(iu, controlplane_instance_group, instance), mock.call(pu, controlplane_instance_group, instance)])
+        TaskManager.start_task.assert_has_calls(
+            [mock.call(iu, controlplane_instance_group, instance), mock.call(pu, controlplane_instance_group, instance)], any_order=True
+        )
         pu.status = "successful"
         pu.finished = pu.created + timedelta(seconds=1)
         pu.save()
@@ -451,7 +449,9 @@ def test_shared_dependencies_launch(controlplane_instance_group, job_template_fa
         iu.save()
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
-        TaskManager.start_task.assert_has_calls([mock.call(j1, controlplane_instance_group, instance), mock.call(j2, controlplane_instance_group, instance)])
+        TaskManager.start_task.assert_has_calls(
+            [mock.call(j1, controlplane_instance_group, instance), mock.call(j2, controlplane_instance_group, instance)], any_order=True
+        )
     pu = [x for x in p.project_updates.all()]
     iu = [x for x in ii.inventory_updates.all()]
     assert len(pu) == 1

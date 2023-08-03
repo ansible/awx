@@ -67,7 +67,7 @@ function MetadataStep() {
   return (
     <>
       {fields.length > 0 && (
-        <Form>
+        <Form autoComplete="off">
           <FormFullWidthLayout>
             {fields.map((field) => {
               if (field.type === 'string') {
