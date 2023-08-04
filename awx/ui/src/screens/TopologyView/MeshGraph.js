@@ -181,7 +181,6 @@ function MeshGraph({
         .data([
           'end',
           'end-active',
-          'end-disconnected',
           'end-adding',
           'end-removing',
         ])
@@ -197,7 +196,6 @@ function MeshGraph({
       mesh.select('#end').attr('refX', 23).attr('fill', '#6A6E73');
       mesh.select('#end-removing').attr('refX', 23).attr('fill', '#C9190B');
       mesh.select('#end-adding').attr('refX', 23).attr('fill', '#3E8635');
-      mesh.select('#end-disconnected').attr('refX', 23).attr('fill', '#CCC');
       mesh.select('#end-active').attr('refX', 18).attr('fill', '#0066CC');
 
       // Add links
@@ -214,9 +212,6 @@ function MeshGraph({
         .attr('x2', (d) => d.target.x)
         .attr('y2', (d) => d.target.y)
         .attr('marker-end', (d) => {
-          if (d.link_state === 'disconnected') {
-            return 'url(#end-disconnected)';
-          }
           if (d.link_state === 'adding') {
             return 'url(#end-adding)';
           }
@@ -366,9 +361,6 @@ function MeshGraph({
             .style('stroke', (d) => renderLinkStatusColor(d.link_state))
             .style('stroke-width', '2px')
             .attr('marker-end', (d) => {
-              if (d.link_state === 'disconnected') {
-                return 'url(#end-disconnected)';
-              }
               if (d.link_state === 'adding') {
                 return 'url(#end-adding)';
               }

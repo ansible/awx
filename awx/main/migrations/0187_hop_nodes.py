@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
             model_name='instancelink',
             name='link_state',
             field=models.CharField(
-                choices=[('adding', 'Adding'), ('established', 'Established'), ('disconnected', 'Disconnected'), ('removing', 'Removing')],
+                choices=[('adding', 'Adding'), ('established', 'Established'), ('removing', 'Removing')],
                 default='adding',
                 help_text='Indicates the current life cycle stage of this peer link.',
                 max_length=16,

@@ -29,7 +29,6 @@ export const NODE_STATE_COLOR_KEY = {
 
 export const LINK_STATE_COLOR_KEY = {
   established: '#6A6E73',
-  disconnected: '#CCC',
   adding: '#3E8635',
   removing: '#C9190B',
 };

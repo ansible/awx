@@ -514,11 +514,15 @@ def execution_node_health_check(node):
 
 def inspect_established_receptor_connections(mesh_status):
     '''
-    detect active/inactive receptor links
+    Flips link state from ADDING to ESTABLISHED
+    If the InstanceLink source and target match the entries
+    in Known Connection Costs, flip to Established.
     '''
     from awx.main.models import InstanceLink
 
-    all_links = InstanceLink.objects.all()
+    all_links = InstanceLink.objects.filter(link_state=InstanceLink.States.ADDING)
+    if not all_links.exists():
+        return
     active_receptor_conns = mesh_status['KnownConnectionCosts']
     update_links = []
     for link in all_links:
@@ -527,10 +531,6 @@ def inspect_established_receptor_connections(mesh_status):
                 if link.link_state is not InstanceLink.States.ESTABLISHED:
                     link.link_state = InstanceLink.States.ESTABLISHED
                     update_links.append(link)
-            else:
-                if link.link_state is not InstanceLink.States.DISCONNECTED:
-                    link.link_state = InstanceLink.States.DISCONNECTED
-                    update_links.append(link)
 
     InstanceLink.objects.bulk_update(update_links, ['link_state'])
 
@@ -538,7 +538,6 @@ def inspect_established_receptor_connections(mesh_status):
 def inspect_execution_and_hop_nodes(instance_list):
     with advisory_lock('inspect_execution_and_hop_nodes_lock', wait=False):
         node_lookup = {inst.hostname: inst for inst in instance_list}
-
         ctl = get_receptor_ctl()
         mesh_status = ctl.simple_command('status')
 
