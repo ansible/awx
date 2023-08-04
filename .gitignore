@@ -1,5 +1,6 @@
 # Ignore generated schema
 swagger.json
+!docs/docsite/rst/rest_api/_swagger/swagger.json
 schema.json
 reference-schema.json
 
@@ -165,3 +166,6 @@ use_dev_supervisor.txt
 
 awx/ui_next/src
 awx/ui_next/build
+
+# Docs build
+docs/docsite/build/
