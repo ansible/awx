@@ -68,7 +68,6 @@ class InstanceLink(BaseModel):
     class States(models.TextChoices):
         ADDING = 'adding', _('Adding')
         ESTABLISHED = 'established', _('Established')
-        DISCONNECTED = 'disconnected', _('Disconnected')
         REMOVING = 'removing', _('Removing')
 
     link_state = models.CharField(
