@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { t } from '@lingui/macro';
-import { RolesAPI, TeamsAPI, UsersAPI, OrganizationsAPI } from 'api';
+import { RolesAPI, TeamsAPI, UsersAPI } from 'api';
 import { getQSConfig, parseQueryString } from 'util/qs';
 import useRequest, { useDeleteItems } from 'hooks/useRequest';
-import { useUserProfile, useConfig } from 'contexts/Config';
+import { useUserProfile } from 'contexts/Config';
 import AddResourceRole from '../AddRole/AddResourceRole';
 import AlertModal from '../AlertModal';
 import DataListToolbar from '../DataListToolbar';
@@ -25,8 +25,7 @@ const QS_CONFIG = getQSConfig('access', {
 });
 
 function ResourceAccessList({ apiModel, resource }) {
-  const { isSuperUser, isOrgAdmin } = useUserProfile();
-  const { me } = useConfig();
+  const { isSuperUser } = useUserProfile();
   const [submitError, setSubmitError] = useState(null);
   const [deletionRecord, setDeletionRecord] = useState(null);
   const [deletionRole, setDeletionRole] = useState(null);
@@ -34,42 +33,15 @@ function ResourceAccessList({ apiModel, resource }) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const location = useLocation();
 
-  const {
-    isLoading: isFetchingOrgAdmins,
-    error: errorFetchingOrgAdmins,
-    request: fetchOrgAdmins,
-    result: { isCredentialOrgAdmin },
-  } = useRequest(
-    useCallback(async () => {
-      if (
-        isSuperUser ||
-        resource.type !== 'credential' ||
-        !isOrgAdmin ||
-        !resource?.organization
-      ) {
-        return false;
-      }
-      const {
-        data: { count },
-      } = await OrganizationsAPI.readAdmins(resource.organization, {
-        id: me.id,
-      });
-      return { isCredentialOrgAdmin: !!count };
-    }, [me.id, isOrgAdmin, isSuperUser, resource.type, resource.organization]),
-    {
-      isCredentialOrgAdmin: false,
-    }
-  );
-
-  useEffect(() => {
-    fetchOrgAdmins();
-  }, [fetchOrgAdmins]);
-
   let canAddAdditionalControls = false;
   if (isSuperUser) {
     canAddAdditionalControls = true;
   }
-  if (resource.type === 'credential' && isOrgAdmin && isCredentialOrgAdmin) {
+  if (
+    resource.type === 'credential' &&
+    resource?.summary_fields?.user_capabilities?.edit &&
+    resource?.organization
+  ) {
     canAddAdditionalControls = true;
   }
   if (resource.type !== 'credential') {
@@ -195,8 +167,8 @@ function ResourceAccessList({ apiModel, resource }) {
   return (
     <>
       <PaginatedTable
-        error={contentError || errorFetchingOrgAdmins}
-        hasContentLoading={isLoading || isDeleteLoading || isFetchingOrgAdmins}
+        error={contentError}
+        hasContentLoading={isLoading || isDeleteLoading}
         items={accessRecords}
         itemCount={itemCount}
         pluralizedItemName={t`Roles`}

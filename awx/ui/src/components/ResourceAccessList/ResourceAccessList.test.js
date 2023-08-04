@@ -463,7 +463,7 @@ describe('<ResourceAccessList />', () => {
     expect(wrapper.find('ToolbarAddButton').length).toEqual(1);
   });
 
-  test('should not show add button for non system admin & non org admin', async () => {
+  test('should not show add button for a user without edit permissions on the credential', async () => {
     useUserProfile.mockImplementation(() => {
       return {
         isSuperUser: false,
@@ -476,7 +476,21 @@ describe('<ResourceAccessList />', () => {
     let wrapper;
     await act(async () => {
       wrapper = mountWithContexts(
-        <ResourceAccessList resource={credential} apiModel={CredentialsAPI} />,
+        <ResourceAccessList
+          resource={{
+            ...credential,
+            summary_fields: {
+              ...credential.summary_fields,
+              user_capabilities: {
+                edit: false,
+                delete: false,
+                copy: false,
+                use: false,
+              },
+            },
+          }}
+          apiModel={CredentialsAPI}
+        />,
         { context: { router: { credentialHistory } } }
       );
     });
