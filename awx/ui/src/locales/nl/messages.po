@@ -8096,8 +8096,8 @@ msgid "Skipped"
 msgstr "Overgeslagen"
 
 #: components/StatusLabel/StatusLabel.js:50
-msgid "Skipped'"
-msgstr "Overgeslagen'"
+msgid "Skipped"
+msgstr "Overgeslagen"
 
 #: components/NotificationList/NotificationList.js:200
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.js:141
