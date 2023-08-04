@@ -95,7 +95,6 @@ export function redirectToDetailsPage(selectedNode, history) {
 export function renderLinkState(linkState) {
   const linkPattern = {
     established: null,
-    disconnected: 3,
     adding: 3,
     removing: 3,
   };
@@ -111,7 +110,7 @@ export function getRandomInt(min, max) {
 const generateRandomLinks = (n, r) => {
   const links = [];
   function getRandomLinkState() {
-    return ['established', 'adding', 'removing', 'disconnected'][
+    return ['established', 'adding', 'removing'][
       getRandomInt(0, 3)
     ];
   }

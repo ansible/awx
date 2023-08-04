@@ -260,22 +260,6 @@ function Legend() {
                 y1="9"
                 x2="20"
                 y2="9"
-                stroke="#ccc"
-                strokeWidth="4"
-                strokeDasharray="6"
-              />
-            </svg>
-          </DescriptionListTerm>
-          <DescriptionListDescription>{t`Disconnected`}</DescriptionListDescription>
-        </DescriptionListGroup>
-        <DescriptionListGroup>
-          <DescriptionListTerm>
-            <svg width="20" height="15" xmlns="http://www.w3.org/2000/svg">
-              <line
-                x1="0"
-                y1="9"
-                x2="20"
-                y2="9"
                 stroke="#3E8635"
                 strokeWidth="4"
                 strokeDasharray="6"
