@@ -34,6 +34,9 @@ class Control(object):
                 workers.append(r.get(key).decode('utf-8'))
             return '\n'.join(workers)
 
+    def history(self, *args, **kwargs):
+        return self.control_with_reply('history', *args, **kwargs)
+
     def running(self, *args, **kwargs):
         return self.control_with_reply('running', *args, **kwargs)
 

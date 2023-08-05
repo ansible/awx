@@ -21,6 +21,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--status', dest='status', action='store_true', help='print the internal state of any running dispatchers')
+        parser.add_argument('--history', dest='history', action='store_true', help='show completed tasks of workers up to a certain limit')
         parser.add_argument('--running', dest='running', action='store_true', help='print the UUIDs of any tasked managed by this dispatcher')
         parser.add_argument(
             '--reload',
@@ -39,12 +40,10 @@ class Command(BaseCommand):
         )
 
     def handle(self, *arg, **options):
-        if options.get('status'):
-            print(Control('dispatcher').status())
-            return
-        if options.get('running'):
-            print(Control('dispatcher').running())
-            return
+        for option in ('status', 'history', 'running'):
+            if options.get(option):
+                print(getattr(Control('dispatcher'), option)())
+                return
         if options.get('reload'):
             return Control('dispatcher').control({'control': 'reload'})
         if options.get('cancel'):
