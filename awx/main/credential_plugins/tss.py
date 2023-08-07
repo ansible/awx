@@ -4,13 +4,7 @@ from django.utils.translation import gettext_lazy as _
 try:
     from delinea.secrets.server import DomainPasswordGrantAuthorizer, PasswordGrantAuthorizer, SecretServer, ServerSecret
 except ImportError:
-    try:
-        from thycotic.secrets.server import DomainPasswordGrantAuthorizer, PasswordGrantAuthorizer, SecretServer, ServerSecret
-    except ImportError:
-        SecretServer = None
-        ServerSecret = None
-        PasswordGrantAuthorizer = None
-        DomainPasswordGrantAuthorizer = None
+    from thycotic.secrets.server import DomainPasswordGrantAuthorizer, PasswordGrantAuthorizer, SecretServer, ServerSecret
 
 tss_inputs = {
     'fields': [
