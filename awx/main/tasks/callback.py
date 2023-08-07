@@ -31,6 +31,7 @@ class RunnerCallback:
         self.model = model
         self.update_attempts = int(settings.DISPATCHER_DB_DOWNTOWN_TOLLERANCE / 5)
         self.wrapup_event_dispatched = False
+        self.artifacts_processed = False
         self.extra_update_fields = {}
 
     def update_model(self, pk, _attempt=0, **updates):
@@ -210,6 +211,9 @@ class RunnerCallback:
             result_traceback = status_data.get('result_traceback', None)
             if result_traceback:
                 self.delay_update(result_traceback=result_traceback)
+
+    def artifacts_handler(self, artifact_dir):
+        self.artifacts_processed = True
 
 
 class RunnerCallbackForProjectUpdate(RunnerCallback):
