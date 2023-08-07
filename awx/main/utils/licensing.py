@@ -175,7 +175,12 @@ class Licenser(object):
             license.setdefault('pool_id', sub['pool']['id'])
             license.setdefault('product_name', sub['pool']['productName'])
             license.setdefault('valid_key', True)
-            license.setdefault('license_type', 'enterprise')
+            if sub['pool']['productId'].startswith('S'):
+                license.setdefault('trial', True)
+                license.setdefault('license_type', 'trial')
+            else:
+                license.setdefault('trial', False)
+                license.setdefault('license_type', 'enterprise')
             license.setdefault('satellite', False)
             # Use the nearest end date
             endDate = parse_date(sub['endDate'])
