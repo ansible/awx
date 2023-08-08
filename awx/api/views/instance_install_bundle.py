@@ -83,7 +83,7 @@ class InstanceInstallBundle(GenericAPIView):
                 tar_addfile(cert_tarinfo, cert)
 
                 # generate and write install_receptor.yml to the tar file
-                playbook = generate_playbook().encode('utf-8')
+                playbook = generate_playbook(instance_obj).encode('utf-8')
                 playbook_tarinfo = tarfile.TarInfo(f"{instance_obj.hostname}_install_bundle/install_receptor.yml")
                 tar_addfile(playbook_tarinfo, playbook)
 
@@ -109,8 +109,10 @@ class InstanceInstallBundle(GenericAPIView):
             return response
 
 
-def generate_playbook():
-    return render_to_string("instance_install_bundle/install_receptor.yml")
+def generate_playbook(instance_obj):
+    playbook_yaml = render_to_string("instance_install_bundle/install_receptor.yml", context=dict(instance=instance_obj))
+    # convert consecutive newlines with a single newline
+    return re.sub(r'\n+', '\n', playbook_yaml)
 
 
 def generate_requirements_yml():
