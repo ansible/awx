@@ -129,7 +129,6 @@ class ApiVersionRootView(APIView):
         data['mesh_visualizer'] = reverse('api:mesh_visualizer_view', request=request)
         data['bulk'] = reverse('api:bulk', request=request)
         data['analytics'] = reverse('api:analytics_root_view', request=request)
-        data['peers'] = reverse('api:peers_list', request=request)
         return Response(data)
 
 
