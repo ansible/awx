@@ -4,12 +4,16 @@ receptor_group: awx
 receptor_verify: true
 receptor_tls: true
 receptor_mintls13: false
+{% if instance.node_type == "execution" %}
 receptor_work_commands:
   ansible-runner:
     command: ansible-runner
     params: worker
     allowruntimeparams: true
     verifysignature: true
+additional_python_packages:
+  - ansible-runner
+{% endif %}
 custom_worksign_public_keyfile: receptor/work_public_key.pem
 custom_tls_certfile: receptor/tls/receptor.crt
 custom_tls_keyfile: receptor/tls/receptor.key
@@ -29,8 +33,6 @@ receptor_peers:
     protocol: tcp
 {% endfor %}
 {% endif %}
-additional_python_packages:
-  - ansible-runner
 {% verbatim %}
 podman_user: "{{ receptor_user }}"
 podman_group: "{{ receptor_group }}"

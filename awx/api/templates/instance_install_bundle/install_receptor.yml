@@ -9,6 +9,8 @@
         shell: /bin/bash
     - import_role:
         name: ansible.receptor.setup
+{% endverbatim %}
+{% if instance.node_type == "execution" %}
     - import_role:
         name: ansible.receptor.podman
-{% endverbatim %}
+{% endif %}
