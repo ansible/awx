@@ -827,7 +827,7 @@ def convert_mem_str_to_bytes(mem_str):
     return max(1, conversions[mem_unit](mem))
 
 
-def get_corrected_memory(memory):
+def get_corrected_memory(memory, node_type=None):
     from django.conf import settings
 
     settings_absmem = getattr(settings, 'SYSTEM_TASK_ABS_MEM', None)
@@ -835,6 +835,8 @@ def get_corrected_memory(memory):
 
     # Runner returns memory in bytes
     # so we convert memory from settings to bytes as well.
+    if node_type == 'execution':
+        return memory
     if env_absmem is not None:
         return convert_mem_str_to_bytes(env_absmem)
     elif settings_absmem is not None:

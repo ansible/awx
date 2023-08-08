@@ -233,7 +233,6 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
     @property
     def health_check_pending(self):
-        return False
         if self.health_check_started is None:
             return False
         if self.last_health_check is None:
@@ -339,7 +338,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
             self.cpu = new_cpu
             update_fields.append('cpu')
 
-        new_memory = get_corrected_memory(memory)
+        new_memory = get_corrected_memory(memory, self.node_type)
         if new_memory != self.memory:
             self.memory = new_memory
             update_fields.append('memory')
