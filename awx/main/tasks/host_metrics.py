@@ -63,10 +63,10 @@ class HostMetricTask:
             threshold = getattr(settings, 'CLEANUP_HOST_METRICS_SOFT_THRESHOLD', 12)
 
         last_automation_before = now() - relativedelta(months=threshold)
-        logger.info(f'cleanup_host_metrics: soft-deleting records last automated before {last_automation_before}')
-        HostMetric.active_objects.filter(last_automation__lt=last_automation_before).update(
+        rows = HostMetric.active_objects.filter(last_automation__lt=last_automation_before).update(
             deleted=True, deleted_counter=F('deleted_counter') + 1, last_deleted=now()
         )
+        logger.info(f'cleanup_host_metrics: soft-deleted records last automated before {last_automation_before}, affected rows: {rows}')
 
     @staticmethod
     def hard_cleanup(threshold=None):
@@ -74,9 +74,9 @@ class HostMetricTask:
             threshold = getattr(settings, 'CLEANUP_HOST_METRICS_HARD_THRESHOLD', 36)
 
         last_deleted_before = now() - relativedelta(months=threshold)
-        logger.info(f'cleanup_host_metrics: hard-deleting records last deleted before {last_deleted_before}')
         queryset = HostMetric.objects.filter(deleted=True, last_deleted__lt=last_deleted_before)
-        queryset._raw_delete(queryset.db)
+        rows = queryset.delete()
+        logger.info(f'cleanup_host_metrics: hard-deleted records which were soft deleted before {last_deleted_before}, affected rows: {rows[0]}')
 
 
 class HostMetricSummaryMonthlyTask:

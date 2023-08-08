@@ -1,24 +1,19 @@
 import pytest
 
-from awx.main.management.commands.cleanup_host_metrics import Command
+from awx.main.tasks.host_metrics import HostMetricTask
 from awx.main.models.inventory import HostMetric
 from awx.main.tests.factories.fixtures import mk_host_metric
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
-
-
-def test_no_args():
-    assert Command().handle() == _("Specify either --soft or --hard argument")
 
 
 @pytest.mark.django_db
 def test_no_host_metrics():
     """No-crash test"""
     assert HostMetric.objects.count() == 0
-    Command().handle(soft=0, hard=0)
-    Command().handle(soft=24, hard=42)
+    HostMetricTask().cleanup(soft_threshold=0, hard_threshold=0)
+    HostMetricTask().cleanup(soft_threshold=24, hard_threshold=42)
     assert HostMetric.objects.count() == 0
 
 
@@ -40,9 +35,9 @@ def test_soft_delete(threshold):
 
     for i in range(2):
         if threshold == settings.CLEANUP_HOST_METRICS_SOFT_THRESHOLD:
-            Command().handle(soft=0)  # default value should be loaded from settings
+            HostMetricTask().cleanup(soft_threshold=0)
         else:
-            Command().handle(soft=threshold)
+            HostMetricTask().cleanup(soft_threshold=threshold)
         assert HostMetric.objects.count() == 8
 
         hostnames = []
@@ -71,9 +66,9 @@ def test_hard_delete(threshold):
 
     for i in range(2):
         if threshold == settings.CLEANUP_HOST_METRICS_HARD_THRESHOLD:
-            Command().handle(hard=0)  # default value should be loaded from settings
+            HostMetricTask().cleanup(hard_threshold=0)
         else:
-            Command().handle(hard=threshold)
+            HostMetricTask().cleanup(hard_threshold=threshold)
         assert HostMetric.objects.count() == 6
 
         hostnames = []

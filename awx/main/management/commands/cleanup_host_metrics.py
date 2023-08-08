@@ -1,24 +1,22 @@
 from django.core.management.base import BaseCommand
-from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 from awx.main.tasks.host_metrics import HostMetricTask
 
 
 class Command(BaseCommand):
     """
-    Run soft/hard-deleting of HostMetrics
+    This command provides cleanup task for HostMetric model.
+    There are two modes, which run in following order:
+    - soft cleanup
+    - - Perform soft-deletion of all host metrics last automated 12 months ago or before.
+        This is the same as issuing a DELETE request to /api/v2/host_metrics/N/ for all host metrics that match the criteria.
+    - - updates columns delete, deleted_counter and last_deleted
+    - hard cleanup
+    - - Permanently erase from the database all host metrics last automated 36 months ago or before.
+        This operation happens after the soft deletion has finished.
     """
 
-    help = 'Run soft/hard-deleting of HostMetrics'
-
-    def add_arguments(self, parser):
-        parser.add_argument('--soft', type=int, nargs='?', default=None, const=0, help='Threshold in months for soft-deleting')
-        parser.add_argument('--hard', type=int, nargs='?', default=None, const=0, help='Threshold in months for hard-deleting')
+    help = 'Run soft and hard-deletion of HostMetrics'
 
     def handle(self, *args, **options):
-        soft_threshold = options.get('soft')
-        hard_threshold = options.get('hard')
-
-        if soft_threshold is None and hard_threshold is None:
-            return _("Specify either --soft or --hard argument")
-
-        HostMetricTask().cleanup(soft_threshold=soft_threshold, hard_threshold=hard_threshold)
+        HostMetricTask().cleanup(soft_threshold=settings.CLEANUP_HOST_METRICS_SOFT_THRESHOLD, hard_threshold=settings.CLEANUP_HOST_METRICS_HARD_THRESHOLD)
