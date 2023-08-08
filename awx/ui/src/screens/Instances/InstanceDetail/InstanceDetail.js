@@ -207,7 +207,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
           />
           <Detail label={t`Node Type`} value={instance.node_type} />
           <Detail label={t`Host`} value={instance.ip_address} />
-          <Detail label={t`Instance Port`} value={instance.listener_port} />
+          <Detail label={t`Listener Port`} value={instance.listener_port} />
           {(isExecutionNode || isHopNode) && (
             <>
               {instance.related?.install_bundle && (

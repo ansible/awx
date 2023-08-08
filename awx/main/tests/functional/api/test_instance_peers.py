@@ -9,6 +9,14 @@ from awx.main.models import Instance
 from awx.api.views.instance_install_bundle import generate_group_vars_all_yml
 
 
+def has_peer(group_vars, peer):
+    peers = group_vars.get('receptor_peers', [])
+    for p in peers:
+        if f"{p['host']}:{p['port']}" == peer:
+            return True
+    return False
+
+
 @pytest.mark.django_db
 class TestPeers:
     @pytest.fixture(autouse=True)
@@ -190,6 +198,19 @@ class TestPeers:
         hop.delete()
         assert not control.peers.exists()
 
+    def test_control_node_retains_other_peers(self):
+        '''
+        if a new node comes online, other peer relationships should
+        remain intact
+        '''
+        hop1 = Instance.objects.create(hostname='hop1', ip_address="10.10.10.10", node_type='hop', listener_port=6789, peers_from_control_nodes=True)
+        hop2 = Instance.objects.create(hostname='hop2', node_type='hop', listener_port=6789, peers_from_control_nodes=False)
+        hop1.peers.add(hop2)
+
+        control = Instance.objects.create(hostname='control', node_type='control', listener_port=None)
+
+        assert hop1.peers.exists()
+
     def test_group_vars(self, get, admin_user):
         '''
         control > hop1 > hop2 < execution
@@ -206,13 +227,6 @@ class TestPeers:
         hop1_vars = yaml.safe_load(generate_group_vars_all_yml(hop1))
         hop2_vars = yaml.safe_load(generate_group_vars_all_yml(hop2))
         execution_vars = yaml.safe_load(generate_group_vars_all_yml(execution))
-
-        def has_peer(group_vars, peer):
-            peers = group_vars.get('receptor_peers', [])
-            for p in peers:
-                if f"{p['host']}:{p['port']}" == peer:
-                    return True
-            return False
 
         # control group vars assertions
         assert control_vars.get('receptor_host_identifier', '') == 'control'
@@ -239,6 +253,18 @@ class TestPeers:
         assert has_peer(execution_vars, 'hop2:6789')
         assert not has_peer(execution_vars, 'hop1:6789')
         assert execution_vars.get('receptor_listener', False)
+
+    def test_group_vars_ip_address_over_hostname(self):
+        '''
+        test that ip_address has precedence over hostname in group_vars all.yml
+        '''
+        hop1 = Instance.objects.create(hostname='hop1', node_type='hop', listener_port=6789, peers_from_control_nodes=True)
+        hop2 = Instance.objects.create(hostname='hop2', ip_address="10.10.10.10", node_type='hop', listener_port=6789, peers_from_control_nodes=False)
+        hop1.peers.add(hop2)
+
+        hop1_vars = yaml.safe_load(generate_group_vars_all_yml(hop1))
+
+        assert has_peer(hop1_vars, "10.10.10.10:6789")
 
     def test_write_receptor_config_called(self):
         '''

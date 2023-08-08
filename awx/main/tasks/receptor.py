@@ -699,7 +699,7 @@ def generate_config_data():
     # returns two values
     #   receptor config - based on current database peers
     #   should_update   - If True, receptor_config differs from the receptor conf file on disk
-    instances = Instance.objects.me().peers.all()
+    instances = Instance.objects.filter(node_type__in=(Instance.Types.EXECUTION, Instance.Types.HOP), peers_from_control_nodes=True)
 
     receptor_config = list(RECEPTOR_CONFIG_STARTER)
     for instance in instances:

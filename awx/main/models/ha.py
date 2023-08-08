@@ -12,7 +12,7 @@ from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.utils.timezone import now, timedelta
-from django.db.models import Sum
+from django.db.models import Sum, Q
 
 import redis
 from solo.models import SingletonModel
@@ -79,12 +79,21 @@ class InstanceLink(BaseModel):
         ordering = ("id",)
         constraints = [models.CheckConstraint(check=~models.Q(source=models.F('target')), name='source_and_target_can_not_be_equal')]
 
-    def get_absolute_url(self, request=None):
-        return reverse('api:peers_detail', kwargs={'pk': self.pk}, request=request)
-
 
 class Instance(HasPolicyEditsMixin, BaseModel):
     """A model representing an AWX instance running against this database."""
+
+    class Meta:
+        app_label = 'main'
+        ordering = ("hostname",)
+        constraints = [
+            models.UniqueConstraint(
+                fields=["ip_address"],
+                condition=~Q(ip_address=""),  # don't apply to constraint to empty entries
+                name="unique_ip_address_not_empty",
+                violation_error_message=_("Field ip_address must be unique."),
+            )
+        ]
 
     def __str__(self):
         return self.hostname
@@ -99,7 +108,6 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         null=True,
         default=None,
         max_length=50,
-        unique=True,
     )
     # Auto-fields, implementation is different from BaseModel
     created = models.DateTimeField(auto_now_add=True)
@@ -186,10 +194,6 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
     peers = models.ManyToManyField('self', symmetrical=False, through=InstanceLink, through_fields=('source', 'target'), related_name='peers_from')
     peers_from_control_nodes = models.BooleanField(default=False, help_text=_("If True, control plane cluster nodes should automatically peer to it."))
-
-    class Meta:
-        app_label = 'main'
-        ordering = ("hostname",)
 
     POLICY_FIELDS = frozenset(('managed_by_policy', 'hostname', 'capacity_adjustment'))
 

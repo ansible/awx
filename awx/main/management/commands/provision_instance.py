@@ -25,17 +25,20 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--hostname', dest='hostname', type=str, help="Hostname used during provisioning")
+        parser.add_argument('--listener_port', dest='listener_port', type=int, help="Receptor listener port")
         parser.add_argument('--node_type', type=str, default='hybrid', choices=['control', 'execution', 'hop', 'hybrid'], help="Instance Node type")
         parser.add_argument('--uuid', type=str, help="Instance UUID")
 
-    def _register_hostname(self, hostname, node_type, uuid):
+    def _register_hostname(self, hostname, node_type, uuid, listener_port):
         if not hostname:
             if not settings.AWX_AUTO_DEPROVISION_INSTANCES:
                 raise CommandError('Registering with values from settings only intended for use in K8s installs')
 
             from awx.main.management.commands.register_queue import RegisterQueue
 
-            (changed, instance) = Instance.objects.register(ip_address=os.environ.get('MY_POD_IP'), node_type='control', node_uuid=settings.SYSTEM_UUID)
+            (changed, instance) = Instance.objects.register(
+                ip_address=os.environ.get('MY_POD_IP'), listener_port=listener_port, node_type='control', node_uuid=settings.SYSTEM_UUID
+            )
             RegisterQueue(settings.DEFAULT_CONTROL_PLANE_QUEUE_NAME, 100, 0, [], is_container_group=False).register()
             RegisterQueue(
                 settings.DEFAULT_EXECUTION_QUEUE_NAME,
@@ -48,7 +51,7 @@ class Command(BaseCommand):
                 max_concurrent_jobs=settings.DEFAULT_EXECUTION_QUEUE_MAX_CONCURRENT_JOBS,
             ).register()
         else:
-            (changed, instance) = Instance.objects.register(hostname=hostname, node_type=node_type, node_uuid=uuid)
+            (changed, instance) = Instance.objects.register(hostname=hostname, node_type=node_type, node_uuid=uuid, listener_port=listener_port)
         if changed:
             print("Successfully registered instance {}".format(hostname))
         else:
@@ -58,6 +61,6 @@ class Command(BaseCommand):
     @transaction.atomic
     def handle(self, **options):
         self.changed = False
-        self._register_hostname(options.get('hostname'), options.get('node_type'), options.get('uuid'))
+        self._register_hostname(options.get('hostname'), options.get('node_type'), options.get('uuid'), options.get('listener_port'))
         if self.changed:
             print("(changed: True)")
