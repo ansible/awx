@@ -5484,13 +5484,11 @@ class InstanceSerializer(BaseSerializer):
 
         if not self.instance and not settings.IS_K8S:
             raise serializers.ValidationError(_("Can only create instances on Kubernetes or OpenShift."))
+
         node_type = get_field_from_model_or_attrs("node_type")
         peers_from_control_nodes = get_field_from_model_or_attrs("peers_from_control_nodes")
         listener_port = get_field_from_model_or_attrs("listener_port")
-        ip_address = get_field_from_model_or_attrs("ip_address")
-        hostname = get_field_from_model_or_attrs("hostname")
-        if not ip_address:
-            attrs["ip_address"] = hostname
+        peers = attrs.get('peers', [])
 
         if peers_from_control_nodes and node_type not in (Instance.Types.EXECUTION, Instance.Types.HOP):
             raise serializers.ValidationError(_("peers_from_control_nodes can only be enabled for execution or hop nodes."))
@@ -5507,15 +5505,19 @@ class InstanceSerializer(BaseSerializer):
         if not listener_port and self.instance and self.instance.peers_from.exists():
             raise serializers.ValidationError(_("Field listener_port must be a valid integer when other nodes peer to it."))
 
-        for peer in attrs.get('peers', []):
+        for peer in peers:
             if peer.listener_port is None:
                 raise serializers.ValidationError(_("Field listener_port must be set on peer ") + peer.hostname + ".")
+
+        if not settings.IS_K8S:
+            if self.instance and set(self.instance.peers.all()) != set(peers):
+                raise serializers.ValidationError(_("Cannot change peers."))
 
         return super().validate(attrs)
 
     def validate_node_type(self, value):
         if not self.instance and value not in [Instance.Types.HOP, Instance.Types.EXECUTION]:
-            raise serializers.ValidationError("Can only create execution nodes.")
+            raise serializers.ValidationError(_("Can only create execution or hop nodes."))
 
         if self.instance and self.instance.node_type != value:
             raise serializers.ValidationError(_("Cannot change node type."))
@@ -5539,11 +5541,19 @@ class InstanceSerializer(BaseSerializer):
 
     def validate_hostname(self, value):
         """
-        - Hostname cannot be "localhost" - but can be something like localhost.domain
-        - Cannot change the hostname of an-already instantiated & initialized Instance object
+        Cannot change the hostname
         """
         if self.instance and self.instance.hostname != value:
             raise serializers.ValidationError(_("Cannot change hostname."))
+
+        return value
+
+    def validate_ip_address(self, value):
+        """
+        Cannot change ip address
+        """
+        if self.instance and self.instance.ip_address != value:
+            raise serializers.ValidationError(_("Cannot change ip_address."))
 
         return value
 
@@ -5553,6 +5563,15 @@ class InstanceSerializer(BaseSerializer):
         """
         if value and self.instance and self.instance.listener_port and self.instance.listener_port != value:
             raise serializers.ValidationError(_("Cannot change listener port."))
+
+        return value
+
+    def validate_peers_from_control_nodes(self, value):
+        """
+        Can only enable for K8S based deployments
+        """
+        if value and not settings.IS_K8S:
+            raise serializers.ValidationError(_("Can only be enabled on Kubernetes or Openshift."))
 
         return value
 
