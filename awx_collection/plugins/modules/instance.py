@@ -140,8 +140,6 @@ def main():
         new_fields['listener_port'] = listener_port
     if peers is not None:
         new_fields['peers'] = peers
-    if peers is None:
-        peers = ['']
     if peers_from_control_nodes is not None:
         new_fields['peers_from_control_nodes'] = peers_from_control_nodes
 
