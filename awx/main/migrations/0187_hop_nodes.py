@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='instance',
             name='ip_address',
-            field=models.CharField(blank=True, default=None, max_length=50, null=True),
+            field=models.CharField(blank=True, default='', max_length=50),
         ),
         migrations.AlterField(
             model_name='instance',
