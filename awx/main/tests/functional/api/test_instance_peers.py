@@ -23,15 +23,16 @@ class TestPeers:
     def configure_settings(self, settings):
         settings.IS_K8S = True
 
-    def test_prevent_peering_to_self(self):
+    @pytest.mark.parametrize('node_type', ['control', 'hybrid'])
+    def test_prevent_peering_to_self(self, node_type):
         '''
         cannot peer to self
         '''
-        control_instance = Instance.objects.create(hostname='abc', node_type="control")
+        control_instance = Instance.objects.create(hostname='abc', node_type=node_type)
         with pytest.raises(IntegrityError):
             control_instance.peers.add(control_instance)
 
-    @pytest.mark.parametrize('node_type', ['control', 'hop', 'execution'])
+    @pytest.mark.parametrize('node_type', ['control', 'hybrid', 'hop', 'execution'])
     def test_creating_node(self, node_type, admin_user, post):
         '''
         can only add hop and execution nodes via API
@@ -40,7 +41,7 @@ class TestPeers:
             url=reverse('api:instance_list'),
             data={"hostname": "abc", "node_type": node_type},
             user=admin_user,
-            expect=400 if node_type == 'control' else 201,
+            expect=400 if node_type in ['control', 'hybrid'] else 201,
         )
 
     def test_changing_node_type(self, admin_user, patch):
@@ -67,7 +68,7 @@ class TestPeers:
             expect=201,
         )
 
-    @pytest.mark.parametrize('node_type, allowed', [('control', False), ('hop', True), ('execution', True)])
+    @pytest.mark.parametrize('node_type, allowed', [('control', False), ('hybrid', False), ('hop', True), ('execution', True)])
     def test_peers_from_control_nodes_allowed(self, node_type, allowed, post, admin_user):
         '''
         only hop and execution nodes can have peers_from_control_nodes set to True
@@ -96,7 +97,6 @@ class TestPeers:
         if peers_from_control_nodes is True, listener_port must an integer
         Assert that all other combinations are allowed
         '''
-        Instance.objects.create(hostname='abc', node_type="control")
         i = 0
         for node_type in ['hop', 'execution']:
             for peers_from in [True, False]:
@@ -111,12 +111,13 @@ class TestPeers:
                     )
                     i += 1
 
-    def test_disallow_modify_peers_control_nodes(self, admin_user, patch):
+    @pytest.mark.parametrize('node_type', ['control', 'hybrid'])
+    def test_disallow_modifying_peers_control_nodes(self, node_type, admin_user, patch):
         '''
         for control nodes, peers field should not be
         modified directly via patch.
         '''
-        control = Instance.objects.create(hostname='abc', node_type='control')
+        control = Instance.objects.create(hostname='abc', node_type=node_type)
         hop1 = Instance.objects.create(hostname='hop1', node_type='hop', peers_from_control_nodes=True, listener_port=6789)
         hop2 = Instance.objects.create(hostname='hop2', node_type='hop', peers_from_control_nodes=False, listener_port=6789)
         assert [hop1] == list(control.peers.all())  # only hop1 should be peered
@@ -151,7 +152,6 @@ class TestPeers:
             user=admin_user,
             expect=200,  # patching without data should be fine too
         )
-        control.refresh_from_db()
         assert {hop1, hop2} == set(control.peers.all())  # hop1 and hop2 should now be peered from control node
 
     def test_disallow_changing_hostname(self, admin_user, patch):
@@ -162,6 +162,15 @@ class TestPeers:
         patch(
             url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
             data={"hostname": "hop2"},
+            user=admin_user,
+            expect=400,
+        )
+
+    def test_disallow_changing_ip_address(self, admin_user, patch):
+        hop = Instance.objects.create(hostname='hop', ip_address='10.10.10.10', node_type='hop')
+        patch(
+            url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
+            data={"ip_address": "12.12.12.12"},
             user=admin_user,
             expect=400,
         )
@@ -184,7 +193,8 @@ class TestPeers:
             expect=400,
         )
 
-    def test_control_node_automatically_peers(self):
+    @pytest.mark.parametrize('node_type', ['control', 'hybrid'])
+    def test_control_node_automatically_peers(self, node_type):
         '''
         a new control node should automatically
         peer to hop
@@ -193,12 +203,13 @@ class TestPeers:
         '''
 
         hop = Instance.objects.create(hostname='hop', node_type='hop', peers_from_control_nodes=True, listener_port=6789)
-        control = Instance.objects.create(hostname='abc', node_type='control')
+        control = Instance.objects.create(hostname='abc', node_type=node_type)
         assert hop in control.peers.all()
         hop.delete()
         assert not control.peers.exists()
 
-    def test_control_node_retains_other_peers(self):
+    @pytest.mark.parametrize('node_type', ['control', 'hybrid'])
+    def test_control_node_retains_other_peers(self, node_type):
         '''
         if a new node comes online, other peer relationships should
         remain intact
@@ -207,7 +218,7 @@ class TestPeers:
         hop2 = Instance.objects.create(hostname='hop2', node_type='hop', listener_port=6789, peers_from_control_nodes=False)
         hop1.peers.add(hop2)
 
-        control = Instance.objects.create(hostname='control', node_type='control', listener_port=None)
+        control = Instance.objects.create(hostname='control', node_type=node_type, listener_port=None)
 
         assert hop1.peers.exists()
 
