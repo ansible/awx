@@ -115,9 +115,12 @@ class InstanceManager(models.Manager):
             return node[0]
         raise RuntimeError("No instance found with the current cluster host id")
 
-    def register(self, node_uuid=None, hostname=None, ip_address=None, listener_port=None, node_type='hybrid', defaults=None):
+    def register(self, node_uuid=None, hostname=None, ip_address="", listener_port=None, node_type='hybrid', defaults=None):
         if not hostname:
             hostname = settings.CLUSTER_HOST_ID
+
+        if not ip_address:
+            ip_address = ""
 
         with advisory_lock('instance_registration_%s' % hostname):
             if settings.AWX_AUTO_DEPROVISION_INSTANCES:
