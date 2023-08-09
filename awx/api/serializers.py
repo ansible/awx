@@ -5374,11 +5374,6 @@ class InstanceNodeSerializer(BaseSerializer):
         fields = ('id', 'hostname', 'node_type', 'node_state', 'enabled')
 
 
-class PeersSerializer(serializers.StringRelatedField):
-    def to_internal_value(self, value):
-        return Instance.objects.get(hostname=value)
-
-
 class InstanceSerializer(BaseSerializer):
     show_capabilities = ['edit']
 
@@ -5387,7 +5382,7 @@ class InstanceSerializer(BaseSerializer):
     jobs_running = serializers.IntegerField(help_text=_('Count of jobs in the running or waiting state that are targeted for this instance'), read_only=True)
     jobs_total = serializers.IntegerField(help_text=_('Count of all jobs that target this instance'), read_only=True)
     health_check_pending = serializers.SerializerMethodField()
-    peers = PeersSerializer(many=True, required=False)
+    peers = serializers.SlugRelatedField(many=True, required=False, slug_field="hostname", queryset=Instance.objects.all())
 
     class Meta:
         model = Instance
@@ -5493,7 +5488,7 @@ class InstanceSerializer(BaseSerializer):
         if peers_from_control_nodes and node_type not in (Instance.Types.EXECUTION, Instance.Types.HOP):
             raise serializers.ValidationError(_("peers_from_control_nodes can only be enabled for execution or hop nodes."))
 
-        if node_type == Instance.Types.CONTROL:
+        if node_type in [Instance.Types.CONTROL, Instance.Types.HYBRID]:
             if self.instance and 'peers' in attrs and set(self.instance.peers.all()) != set(attrs['peers']):
                 raise serializers.ValidationError(
                     _("Setting peers manually for control nodes is not allowed. Enable peers_from_control_nodes on the hop and execution nodes instead.")
