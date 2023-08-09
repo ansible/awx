@@ -38,12 +38,12 @@ options:
       type: dict
     target_credential:
       description:
-        - The credential which will have its input defined by this source
+        - The credential name, ID, or named URL which will have its input defined by this source
       required: true
       type: str
     source_credential:
       description:
-        - The credential which is the source of the credential lookup
+        - The credential name, ID, or named URL which is the source of the credential lookup
       type: str
     state:
       description:

@@ -36,7 +36,7 @@ options:
       type: str
     default_environment:
       description:
-        - Default Execution Environment to use for jobs owned by the Organization.
+        - Default Execution Environment name, ID, or named URL to use for jobs owned by the Organization.
       type: str
     custom_virtualenv:
       description:
@@ -56,7 +56,7 @@ options:
       type: str
     instance_groups:
       description:
-        - list of Instance Groups for this Organization to run on.
+        - list of Instance Group names, IDs, or named URLs for this Organization to run on.
       type: list
       elements: str
     notification_templates_started:
@@ -81,7 +81,7 @@ options:
       elements: str
     galaxy_credentials:
       description:
-        - list of Ansible Galaxy credentials to associate to the organization
+        - list of Ansible Galaxy credential names, IDs, or named URLs to associate to the organization
       type: list
       elements: str
 extends_documentation_fragment: awx.awx.auth

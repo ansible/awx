@@ -49,11 +49,11 @@ options:
       type: str
     inventory:
       description:
-        - Name of the inventory to use for the job template.
+        - Name, ID, or named URL of the inventory to use for the job template.
       type: str
     organization:
       description:
-        - Organization the job template exists in.
+        - Organization name, ID, or named URL the job template exists in.
         - Used to help lookup the object, cannot be modified using this module.
         - The Organization is inferred from the associated project
         - If not provided, will lookup by name only, which does not work with duplicates.
@@ -61,7 +61,7 @@ options:
       type: str
     project:
       description:
-        - Name of the project to use for the job template.
+        - Name, ID, or named URL of the project to use for the job template.
       type: str
     playbook:
       description:
@@ -69,22 +69,22 @@ options:
       type: str
     credential:
       description:
-        - Name of the credential to use for the job template.
+        - Name, ID, or named URL of the credential to use for the job template.
         - Deprecated, use 'credentials'.
       type: str
     credentials:
       description:
-        - List of credentials to use for the job template.
+        - List of credential names, IDs, or named URLs to use for the job template.
       type: list
       elements: str
     vault_credential:
       description:
-        - Name of the vault credential to use for the job template.
+        - Name, ID, or named URL of the vault credential to use for the job template.
         - Deprecated, use 'credentials'.
       type: str
     execution_environment:
       description:
-        - Execution Environment to use for the job template.
+        - Execution Environment name, ID, or named URL to use for the job template.
       type: str
     custom_virtualenv:
       description:
@@ -94,7 +94,7 @@ options:
       type: str
     instance_groups:
       description:
-        - list of Instance Groups for this Organization to run on.
+        - list of Instance Group names, IDs, or named URLs for this Organization to run on.
       type: list
       elements: str
     forks:
@@ -108,7 +108,7 @@ options:
     verbosity:
       description:
         - Control the output level Ansible produces as the playbook runs. 0 - Normal, 1 - Verbose, 2 - More Verbose, 3 - Debug, 4 - Connection Debug.
-      choices: [0, 1, 2, 3, 4]
+      choices: [0, 1, 2, 3, 4, 5]
       type: int
     extra_vars:
       description:
@@ -404,7 +404,7 @@ def main():
         instance_groups=dict(type="list", elements='str'),
         forks=dict(type='int'),
         limit=dict(),
-        verbosity=dict(type='int', choices=[0, 1, 2, 3, 4]),
+        verbosity=dict(type='int', choices=[0, 1, 2, 3, 4, 5]),
         extra_vars=dict(type='dict'),
         job_tags=dict(),
         force_handlers=dict(type='bool', aliases=['force_handlers_enabled']),
