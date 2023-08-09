@@ -292,7 +292,7 @@ class Licenser(object):
                     license['productId'] = sub['product_id']
                     license['quantity'] = int(sub['quantity'])
                     license['support_level'] = sub['support_level']
-                    license['usage'] = sub['usage']
+                    license['usage'] = sub.get('usage')
                     license['subscription_name'] = sub['name']
                     license['subscriptionId'] = sub['subscription_id']
                     license['accountNumber'] = sub['account_number']
