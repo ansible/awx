@@ -1,7 +1,6 @@
 import argparse
 import unittest
 from io import StringIO
-import pytest
 
 from awxkit.api.pages import Page
 from awxkit.cli.options import ResourceOptionsParser
