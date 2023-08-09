@@ -105,8 +105,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     hostname = models.CharField(max_length=250, unique=True)
     ip_address = models.CharField(
         blank=True,
-        null=True,
-        default=None,
+        default="",
         max_length=50,
     )
     # Auto-fields, implementation is different from BaseModel

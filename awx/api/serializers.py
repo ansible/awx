@@ -5477,6 +5477,14 @@ class InstanceSerializer(BaseSerializer):
         def get_field_from_model_or_attrs(fd):
             return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)
 
+        def check_peers_changed():
+            '''
+            return True if
+            - 'peers' in attrs
+            - instance peers matches peers in attrs
+            '''
+            return self.instance and 'peers' in attrs and set(self.instance.peers.all()) != set(attrs['peers'])
+
         if not self.instance and not settings.IS_K8S:
             raise serializers.ValidationError(_("Can only create instances on Kubernetes or OpenShift."))
 
@@ -5489,7 +5497,7 @@ class InstanceSerializer(BaseSerializer):
             raise serializers.ValidationError(_("peers_from_control_nodes can only be enabled for execution or hop nodes."))
 
         if node_type in [Instance.Types.CONTROL, Instance.Types.HYBRID]:
-            if self.instance and 'peers' in attrs and set(self.instance.peers.all()) != set(attrs['peers']):
+            if check_peers_changed():
                 raise serializers.ValidationError(
                     _("Setting peers manually for control nodes is not allowed. Enable peers_from_control_nodes on the hop and execution nodes instead.")
                 )
@@ -5505,7 +5513,7 @@ class InstanceSerializer(BaseSerializer):
                 raise serializers.ValidationError(_("Field listener_port must be set on peer ") + peer.hostname + ".")
 
         if not settings.IS_K8S:
-            if self.instance and set(self.instance.peers.all()) != set(peers):
+            if check_peers_changed():
                 raise serializers.ValidationError(_("Cannot change peers."))
 
         return super().validate(attrs)
