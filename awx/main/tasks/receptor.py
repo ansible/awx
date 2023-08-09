@@ -464,6 +464,7 @@ class AWXReceptorJob:
             event_handler=self.task.runner_callback.event_handler,
             finished_callback=self.task.runner_callback.finished_callback,
             status_handler=self.task.runner_callback.status_handler,
+            artifacts_handler=self.task.runner_callback.artifacts_handler,
             **self.runner_params,
         )
 
