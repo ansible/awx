@@ -70,6 +70,9 @@ def update_hosts(host_list):
         try:
             raw_update_hosts(host_list)
         except OperationalError as exc:
+            # Deadlocks can happen if this runs at the same time as another large query
+            # inventory updates and updating last_job_host_summary are candidates for conflict
+            # but these would resolve easily on a retry
             if 'deadlock detected' in str(exc) and i + 1 < max_tries:
                 logger.info(f'Deadlock saving host facts retry {i}')
                 continue
