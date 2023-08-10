@@ -58,14 +58,19 @@ def start_fact_cache(hosts, destination, log_data, timeout=None, inventory_id=No
     return None
 
 
+def raw_update_hosts(host_list):
+    Host.objects.bulk_update(host_list, ['ansible_facts', 'ansible_facts_modified'])
+
+
 def update_hosts(host_list):
     if not host_list:
         return
-    for i in range(5):
+    max_tries = 5
+    for i in range(max_tries):
         try:
-            Host.objects.bulk_update(host_list, ['ansible_facts', 'ansible_facts_modified'])
+            raw_update_hosts(host_list)
         except OperationalError as exc:
-            if 'deadlock detected' in str(exc):
+            if 'deadlock detected' in str(exc) and i + 1 < max_tries:
                 logger.info(f'Deadlock saving host facts retry {i}')
                 continue
             else:
