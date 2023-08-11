@@ -9,6 +9,7 @@ from django.conf import settings
 from django.db.models.query import QuerySet
 from django.utils.encoding import smart_str
 from django.utils.timezone import now
+from django.db import OperationalError
 
 # AWX
 from awx.main.utils.common import log_excess_runtime
@@ -55,6 +56,28 @@ def start_fact_cache(hosts, destination, log_data, timeout=None, inventory_id=No
     if last_filepath_written:
         return os.path.getmtime(last_filepath_written)
     return None
+
+
+def raw_update_hosts(host_list):
+    Host.objects.bulk_update(host_list, ['ansible_facts', 'ansible_facts_modified'])
+
+
+def update_hosts(host_list, max_tries=5):
+    if not host_list:
+        return
+    for i in range(max_tries):
+        try:
+            raw_update_hosts(host_list)
+        except OperationalError as exc:
+            # Deadlocks can happen if this runs at the same time as another large query
+            # inventory updates and updating last_job_host_summary are candidates for conflict
+            # but these would resolve easily on a retry
+            if i + 1 < max_tries:
+                logger.info(f'OperationalError (suspected deadlock) saving host facts retry {i}, message: {exc}')
+                continue
+            else:
+                raise
+        break
 
 
 @log_excess_runtime(
@@ -111,7 +134,5 @@ def finish_fact_cache(hosts, destination, facts_write_time, log_data, job_id=Non
             system_tracking_logger.info('Facts cleared for inventory {} host {}'.format(smart_str(host.inventory.name), smart_str(host.name)))
             log_data['cleared_ct'] += 1
         if len(hosts_to_update) > 100:
-            Host.objects.bulk_update(hosts_to_update, ['ansible_facts', 'ansible_facts_modified'])
-            hosts_to_update = []
-    if hosts_to_update:
-        Host.objects.bulk_update(hosts_to_update, ['ansible_facts', 'ansible_facts_modified'])
+            update_hosts(hosts_to_update)
+    update_hosts(hosts_to_update)
