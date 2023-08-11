@@ -845,10 +845,10 @@ def get_corrected_memory(memory, node_type=None):
     return memory
 
 
-def get_mem_effective_capacity(mem_bytes):
+def get_mem_effective_capacity(mem_bytes, node_type=None):
     from django.conf import settings
 
-    mem_bytes = get_corrected_memory(mem_bytes)
+    mem_bytes = get_corrected_memory(mem_bytes, node_type)
 
     settings_mem_mb_per_fork = getattr(settings, 'SYSTEM_TASK_FORKS_MEM', None)
     env_mem_mb_per_fork = os.getenv('SYSTEM_TASK_FORKS_MEM', None)
