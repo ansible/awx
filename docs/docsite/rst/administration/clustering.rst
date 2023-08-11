@@ -42,7 +42,7 @@ Setup Considerations
    single: clustering; setup considerations
    pair: clustering; PostgreSQL
 
-This section covers initial setup of clusters only. For upgrading an existing cluster, refer to :ref:`Upgrade Planning <upgrade-migration-guide:upgrade_planning>` of the |atumg|.
+This section covers initial setup of clusters only. For upgrading an existing cluster, refer to the |atumg|.
 
 Important considerations to note in the new clustering environment:
 

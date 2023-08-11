@@ -11,7 +11,6 @@ AWX Administration
   :numbered:
 
   self
-  license-support
   init_script
   custom_inventory_script
   scm-inv-source

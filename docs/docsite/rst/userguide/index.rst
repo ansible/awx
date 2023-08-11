@@ -12,7 +12,6 @@ User Guide
 
    self
    overview
-   license-support
    logging_in
    main_menu
    search_sort

@@ -137,11 +137,9 @@ Access this view to see your workflow approval queue. The list contains actions 
 Host Metrics
 ~~~~~~~~~~~~~
 
-This view allows you to view the activity associated with hosts, which include counts on those that have been automated, used in inventories, and deleted. 
+This view allows you to view the activity associated with hosts, which include counts on those that have been automated, used in inventories, and deleted.
 
 .. image:: ../common/images/ug-host-metrics.png
-
-See :ref:`subscription compliance <subscription_compliance>` for further detail.
 
 
 Resources and Access
