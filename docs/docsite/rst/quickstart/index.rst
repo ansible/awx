@@ -13,7 +13,6 @@ AWX Quickstart
    self
    quick_start
    login_superuser
-   import_license
    examine_dashboard
    setup
    create_organization

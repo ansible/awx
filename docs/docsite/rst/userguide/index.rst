@@ -14,7 +14,6 @@ User Guide
    overview
    license-support
    logging_in
-   import_license
    main_menu
    search_sort
    organizations

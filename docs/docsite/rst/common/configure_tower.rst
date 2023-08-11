@@ -102,14 +102,3 @@ Custom Logos and Images
 
 
 .. include:: ../common/logos_branding.rst
-
-
-Subscription
-================
-.. index:: 
-   pair: license; UI
-   pair: import; license
-   pair: subscription; settings
-
-
-.. include:: ../common/import_license.rst
