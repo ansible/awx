@@ -15,19 +15,6 @@ Scaling your mesh is only available on Openshift deployments of |aap| and is pos
 Prerequisites
 ~~~~~~~~~~~~~~
 
-- Be sure you have the minimum requirements for the RHEL virtual machine before proceeding. Refer to `Red Hat Ansible Automation Platform system requirements <https://access.redhat.com/documentation/en-us/red_hat_ansible_automation_platform/2.2/html/red_hat_ansible_automation_platform_installation_guide/planning-installation#red_hat_ansible_automation_platform_system_requirements>`_ for details.
-
-- RHEL nodes must properly be subscribed to:
-
-	- RHEL subscription and with **baseos** and **appstream** repositories enabled
-	- |AAP| subscription and the proper |AAP| channel enabled:
-
-	::
-
-		ansible-automation-platform-2.3-for-rhel-8-x86_64-rpms for RHEL 8
-		ansible-automation-platform-2.3-for-rhel-9-x86_64-rpms for RHEL 9
-
-
 - The system that is going to run the ``ansible-playbook`` requires the collection ``ansible.receptor`` to be installed:
 
 	- If machine has access to the internet:

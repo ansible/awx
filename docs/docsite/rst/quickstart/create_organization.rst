@@ -21,10 +21,7 @@ From the left navigation bar, click **Organizations**.
 
 A default organization has been automatically created and is available to all users of the automation controller. It can be used as is or edited later as needed. 
 
-For the purpose of this Quick Start Guide, leave the default organization as is. 
-
-.. note::
-    If you are using the controller with a Basic subscription, you must use the default organization. Only Enterprise or Premium licenses have the ability to add new organizations beyond the default.
+For the purpose of this Quick Start Guide, leave the default organization as is.
 
 To edit the default organization later, expand its properties by clicking the Edit (|edit|) button and entering the appropriate details, then save your changes. 
 

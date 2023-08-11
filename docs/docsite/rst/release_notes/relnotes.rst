@@ -162,11 +162,11 @@ Automation Controller Version 4.3.1
 
 **Automation Controller fixes:**
 
-- Fixed issue upgrading to Ansible Automation Platform 2.3 
+- Fixed issue upgrading
 
 **Automation Controller UI fixes**:
 
-- The Hosts Automated field on the Subscriptions Detail page is now correctly translated
+- The Hosts Automated field is now correctly translated
 
 
 Automation Controller Version 4.3 
@@ -284,10 +284,6 @@ Automation Controller Version 4.3
 .. tower #5609:
 
 - Added options for setting the priority class on the control plane and PostgreSQL pods
-
-.. tower #6063:
-
-- Subscription Details indicating whether the customer is in or out-of-compliance with their subscriptions
 
 .. tower-packaging #1718:
 
@@ -557,7 +553,7 @@ None for this release
 - Forks information no longer missing in running job details
 - Upon saving a schedule, the date chooser no longer changes to the day before the selected date
 - References to Ansible Tower are replaced with Automation Controller throughout the UI, including tooltips where documentation is referenced
-- Corrected translations for the Japanese Subscription settings screen
+- Corrected translations for the Japanese settings screen
 
 
 **Installation fixes specific to Automation Controller**:
@@ -637,8 +633,6 @@ Automation Controller Version 4.2
 
 - Fixed list search/pagination filters in place when clicking the **Back to <N>** button. Applies to all top-level list pages except the Schedules page.
 
-- Updated Subscription and inventory usage details, including a status indicating whether the customer is in or out-of-compliance with their subscriptions
-
 - Survey wizard now handles multiple choice/multi-select question-answers in both array and string form formerly only strings were supported
 
 - Fixed error that resulted from relaunching an adhoc command with password
@@ -692,7 +686,6 @@ Automation Controller Version 4.1.2
 - System management jobs are now able to be canceled 
 - Rsyslog no longer needs manual intervention to send out logs after hitting a 40x error
 - Credential lookup plugins now respect the ``AWX_TASK_ENV`` setting
-- Fixed the controller to list valid subscriptions from Satellite when having multiple quantities from the same SKU
 - Updated Receptor version to 1.2.1, which includes several fixes
 
 **Execution Environment fixes**:
@@ -842,7 +835,6 @@ Automation Controller Version 4.0
 - PostgreSQL used to PostgreSQL 12, and moved to partitioned databases for performance
 - The “container groups” feature to general availability from Tech Preview; now fully utilizes execution environments
 - Insights remediation to use new Red Hat Insights inventory source rather than utilizing scan playbooks with arbitrary inventory
-- Subscriptions display to count hosts automated on instead of  hosts imported
 - Inventory source, credential, and Ansible content collection to reference `controller` instead of `tower`
 
 **Deprecated**

@@ -29,17 +29,6 @@ Assuming that the repository has already been configured for signing and verific
 Prerequisites
 --------------
 
-- RHEL nodes must properly be subscribed to:
-
-	- RHEL subscription and with **baseos** and **appstream** repositories enabled
-	- |AAP| subscription and the proper |AAP| channel enabled:
-
-	::
-
-		ansible-automation-platform-2.3-for-rhel-8-x86_64-rpms for RHEL 8
-		ansible-automation-platform-2.3-for-rhel-9-x86_64-rpms for RHEL 9
-
-
 - A valid GPG public/private keypair is required for signing content. Refer to `How to create GPG keypairs`_ for details.
 
 .. _`How to create GPG keypairs`: https://www.redhat.com/sysadmin/creating-gpg-keypairs 

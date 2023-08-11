@@ -490,4 +490,4 @@ Refer to `Managing Red Hat Certified and Ansible Galaxy Collections in Ansible H
   If updates are needed from Galaxy or Collections, a sync is performed that downloads the required roles, consuming that much more space in your /tmp file. In cases where you have a big project (around 10 GB), disk space on ``/tmp`` may be an issue.
 
 
-For more information on collections, refer to `Using Collections <https://docs.ansible.com/ansible/latest/user_guide/collections_using.html>`_.  For more information on how Red Hat itself publishes one of these official collections, which can be used to automate your |at| install directly, refer to the `AWX Ansible Collection <https://cloud.redhat.com/ansible/automation-hub/ansible/tower/docs>`_ documentation. This page is accessible with your Red Hat customer credentials as part of your |rhaap| subscription.
+For more information on collections, refer to `Using Collections <https://docs.ansible.com/ansible/latest/user_guide/collections_using.html>`_.
