@@ -59,3 +59,12 @@ def test_SYSTEM_TASK_ABS_CPU_conversion(value, converted_value, cpu_capacity):
         assert convert_cpu_str_to_decimal_cpu(value) == converted_value
         assert get_corrected_cpu(-1) == converted_value
         assert get_cpu_effective_capacity(-1) == cpu_capacity
+
+
+def test_execution_node_mem_capacity(value, get_mem_effective_capacity, get_corrected_memory):
+    with mock.patch('django.conf.settings') as mock_settings:
+        mock_settings.SYSTEM_TASK_ABS_MEM = value
+        mock_settings.SYSTEM_TASK_FORKS_MEM = 100
+        mock_settings.IS_K8S = True
+        assert get_mem_effective_capacity(value)
+        assert get_corrected_memory(value)
