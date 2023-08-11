@@ -28,9 +28,7 @@ Upgrade Planning
 
 This section covers changes that you should keep in mind as you attempt to upgrade your |at| instance.
 
-- Even if you already have a valid license from a previous version, you must still provide your credentials or a subscriptions manifest again upon upgrading to the latest automation controller. See :ref:`import_subscription` in the |atu|.
-- If you need to upgrade |rhel| and |at|, you will need to do a backup and restore of your controller data (from the automation controller). Refer to :ref:`ag_backup_restore` in the |ata| for further detail.
-- Clustered upgrades require special attention to instance and instance groups prior to starting the upgrade. See `Editing the Red Hat Ansible Automation Platform installer inventory file <https://access.redhat.com/documentation/en-us/red_hat_ansible_automation_platform/2.2/html/red_hat_ansible_automation_platform_installation_guide/single-machine-scenario#editing_the_red_hat_ansible_automation_platform_installer_inventory_file>`_ and :ref:`ag_clustering` for details.
+- Clustered upgrades require special attention to instance and instance groups prior to starting the upgrade. See `:ref:`ag_clustering` for details.
 
 
 Obtaining the Installer

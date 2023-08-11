@@ -69,11 +69,9 @@ If hiding of these secrets is required, the files that these secrets are read fr
     If the secrets system is down, the controller will be unable to get the information and may fail in a way that would be recoverable once the service is restored. Using some redundancy on that system is highly recommended.
 
 
-If, for any reason you believe the ``SECRET_KEY`` the controller generated for you has been compromised and needs to be regenerated, you can run a tool from the installer that behaves much like the controller backup and restore tool. To generate a new secret key:
+If, for any reason you believe the ``SECRET_KEY`` the controller generated for you has been compromised and needs to be regenerated, you can run a tool from the installer that behaves much like the controller backup and restore tool.
 
-1. **Backup your controller database before you do anything else!** Follow the procedure described in the :ref:`Backing Up and Restoring <administration:ag_backup_restore>` section of this guide.
-
-2.  Using the inventory from your install (same inventory with which you run backups/restores), run ``setup.sh -k``.
+To generate a new secret key, run ``setup.sh -k`` using the inventory from your install.
 
 A backup copy of the prior key is saved in ``/etc/tower/``.
 

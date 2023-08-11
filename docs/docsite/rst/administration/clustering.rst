@@ -158,8 +158,6 @@ Each controller instance is made up of several different services working collab
 
 The controller is configured in such a way that if any of these services or their components fail, then all services are restarted. If these fail sufficiently often in a short span of time, then the entire instance will be placed offline in an automated fashion in order to allow remediation without causing unexpected behavior.
 
-For backing up and restoring a clustered environment, refer to :ref:`ag_clustering_backup_restore` section. 
-
 
 Job Runtime Behavior
 ---------------------

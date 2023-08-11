@@ -37,7 +37,6 @@ AWX Administration
   authentication_timeout
   kerberos_auth
   session_limits
-  backup_restore
   custom_rebranding
   usability_data_collection
   troubleshooting
