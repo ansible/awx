@@ -62,10 +62,9 @@ def raw_update_hosts(host_list):
     Host.objects.bulk_update(host_list, ['ansible_facts', 'ansible_facts_modified'])
 
 
-def update_hosts(host_list):
+def update_hosts(host_list, max_tries=5):
     if not host_list:
         return
-    max_tries = 5
     for i in range(max_tries):
         try:
             raw_update_hosts(host_list)
@@ -74,7 +73,7 @@ def update_hosts(host_list):
             # inventory updates and updating last_job_host_summary are candidates for conflict
             # but these would resolve easily on a retry
             if i + 1 < max_tries:
-                logger.info(f'OperationalError (suspected deadlock) saving host facts retry {i}, error: {exc}')
+                logger.info(f'OperationalError (suspected deadlock) saving host facts retry {i}, message: {exc}')
                 continue
             else:
                 raise
