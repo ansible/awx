@@ -73,8 +73,8 @@ def update_hosts(host_list):
             # Deadlocks can happen if this runs at the same time as another large query
             # inventory updates and updating last_job_host_summary are candidates for conflict
             # but these would resolve easily on a retry
-            if 'deadlock detected' in str(exc) and i + 1 < max_tries:
-                logger.info(f'Deadlock saving host facts retry {i}')
+            if i + 1 < max_tries:
+                logger.info(f'OperationalError (suspected deadlock) saving host facts retry {i}, error: {exc}')
                 continue
             else:
                 raise
