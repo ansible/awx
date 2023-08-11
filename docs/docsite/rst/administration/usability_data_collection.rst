@@ -1,8 +1,5 @@
 .. _usability_data_collection:
 
-.. include:: ../common/user-data-tracking.rst
-
-
 .. _user_data_insights:
 
 Automation Analytics

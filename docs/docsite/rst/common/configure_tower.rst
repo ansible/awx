@@ -94,9 +94,6 @@ Access the User Interface settings by clicking **Settings** from the left naviga
 .. image:: ../common/images/configure-tower-ui.png
 
 
-.. include:: ../common/user-data-tracking.rst
-
-
 Custom Logos and Images
 ------------------------
 
