@@ -135,4 +135,5 @@ def finish_fact_cache(hosts, destination, facts_write_time, log_data, job_id=Non
             log_data['cleared_ct'] += 1
         if len(hosts_to_update) > 100:
             update_hosts(hosts_to_update)
+            hosts_to_update = []
     update_hosts(hosts_to_update)
