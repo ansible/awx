@@ -38,7 +38,6 @@ AWX Administration
   kerberos_auth
   session_limits
   custom_rebranding
-  usability_data_collection
   troubleshooting
   tipsandtricks
   postface
