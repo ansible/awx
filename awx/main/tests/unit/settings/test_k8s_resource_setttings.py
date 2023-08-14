@@ -61,10 +61,26 @@ def test_SYSTEM_TASK_ABS_CPU_conversion(value, converted_value, cpu_capacity):
         assert get_cpu_effective_capacity(-1) == cpu_capacity
 
 
-def test_execution_node_mem_capacity(value, get_mem_effective_capacity, get_corrected_memory):
+@pytest.mark.parametrize(
+    "value, mem_capacity",
+    [
+        ('2G', 19),
+        ('4G', 38),
+        ('2Gi', 20),
+        ('2.1G', 1),  # expressing memory with non-integers is not supported, and we'll fall back to 1 fork for memory capacity.
+        ('4Gi', 40),
+        ('2M', 1),
+        ('3M', 1),
+        ('2Mi', 1),
+        ('2048Mi', 20),
+        ('4096Mi', 40),
+        ('64G', 610),
+        ('64Garbage', 1),
+    ],
+)
+def test_execution_node_mem_capacity(get_mem_effective_capacity, value, mem_capacity):
     with mock.patch('django.conf.settings') as mock_settings:
-        mock_settings.SYSTEM_TASK_ABS_MEM = value
+        mock_settings.SYSTEM_TASK_ABS_MEM = "1G"
         mock_settings.SYSTEM_TASK_FORKS_MEM = 100
         mock_settings.IS_K8S = True
-        assert get_mem_effective_capacity(value)
-        assert get_corrected_memory(value)
+        assert get_mem_effective_capacity(value) == mem_capacity
