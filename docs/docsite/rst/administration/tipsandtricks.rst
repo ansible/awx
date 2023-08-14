@@ -203,7 +203,7 @@ This returns a JSON object that you can parse and use to extract the 'id' field,
 
 You can also pass extra variables to the Job Template call, such as is shown in the following example:
 
-::
+.. code-block:: text
 
     curl -f -k -H 'Content-Type: application/json' -XPOST \
         -d '{"extra_vars": "{\"foo\": \"bar\"}"}' \

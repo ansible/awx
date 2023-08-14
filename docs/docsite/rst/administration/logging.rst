@@ -122,26 +122,26 @@ Splunk
 
 |At|'s Splunk logging integration uses the Splunk HTTP Collector. When configuring a SPLUNK logging aggregator, add the full URL to the HTTP Event Collector host, like in the following example:
 
-::
+   .. code-block:: text
 
-  https://yourcontrollerfqdn.com/api/v2/settings/logging
+      https://example.com/api/v2/settings/logging
 
-  {
-      "LOG_AGGREGATOR_HOST": "https://yoursplunk:8088/services/collector/event",
-      "LOG_AGGREGATOR_PORT": null,
-      "LOG_AGGREGATOR_TYPE": "splunk",
-      "LOG_AGGREGATOR_USERNAME": "",
-      "LOG_AGGREGATOR_PASSWORD": "$encrypted$",
-      "LOG_AGGREGATOR_LOGGERS": [
-          "awx",
-          "activity_stream",
-          "job_events",
-          "system_tracking"
-      ],
-      "LOG_AGGREGATOR_INDIVIDUAL_FACTS": false,
-      "LOG_AGGREGATOR_ENABLED": true,
-      "LOG_AGGREGATOR_CONTROLLER_UUID": ""
-  }
+      {
+          "LOG_AGGREGATOR_HOST": "https://splunk_host:8088/services/collector/event",
+          "LOG_AGGREGATOR_PORT": null,
+          "LOG_AGGREGATOR_TYPE": "splunk",
+          "LOG_AGGREGATOR_USERNAME": "",
+          "LOG_AGGREGATOR_PASSWORD": "$encrypted$",
+          "LOG_AGGREGATOR_LOGGERS": [
+              "awx",
+              "activity_stream",
+              "job_events",
+              "system_tracking"
+          ],
+          "LOG_AGGREGATOR_INDIVIDUAL_FACTS": false,
+          "LOG_AGGREGATOR_ENABLED": true,
+          "LOG_AGGREGATOR_CONTROLLER_UUID": ""
+      }
 
 Splunk HTTP Event Collector listens on 8088 by default so it is necessary to provide the full HEC event URL (with port) in order for incoming requests to be processed successfully. These values are entered in the example below:
 

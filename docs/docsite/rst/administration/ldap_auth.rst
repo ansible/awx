@@ -9,7 +9,7 @@ Setting up LDAP Authentication
    
 
 .. note::
-  
+
   If the LDAP server you want to connect to has a certificate that is self-signed or signed by a corporate internal certificate authority (CA), the CA certificate must be added to the system's trusted CAs. Otherwise, connection to the LDAP server will result in an error that the certificate issuer is not recognized.
 
 Administrators use LDAP as a source for account authentication information for the controller users. User authentication is provided, but not the synchronization of user permissions and credentials. Organization membership (as well as the organization admin) and team memberships can be synchronized.
@@ -337,11 +337,11 @@ Referrals
 
 Active Directory uses "referrals" in case the queried object is not available in its database. It has been noted that this does not work properly with the django LDAP client and, most of the time, it helps to disable referrals. Disable LDAP referrals by adding the following lines to your ``/etc/tower/conf.d/custom.py`` file:
 
-::
+  .. code-block:: bash
 
-  AUTH_LDAP_GLOBAL_OPTIONS = {
-      ldap.OPT_REFERRALS: False,
-  }
+    AUTH_LDAP_GLOBAL_OPTIONS = {
+        ldap.OPT_REFERRALS: False,
+    }
 
 
 .. _ldap_auth_perf_tips:
@@ -352,7 +352,7 @@ LDAP authentication performance tips
 .. index::
    pair: best practices; ldap
 
-When an LDAP user authenticates, by default, all user-related attributes will be updated in the database on each log in. In some environments, this operation can be skipped due to performance issues. To avoid it, you can disable the option `AUTH_LDAP_ALWAYS_UPDATE_USER`. Refer to the `Knowledge Base Article 5823061`_ for its configuration and usage instructions. Please note that new users will still be created and get their attributes pushed to the database on their first login.
+When an LDAP user authenticates, by default, all user-related attributes will be updated in the database on each log in. In some environments, this operation can be skipped due to performance issues. To avoid it, you can disable the option `AUTH_LDAP_ALWAYS_UPDATE_USER`.
 
 .. warning::
 

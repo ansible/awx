@@ -40,7 +40,6 @@ Automation Controller Version 4.3.9
 
 - Allow configuration of resource requirements for init containers 
 - Added ``postgres_storage_class`` to the OpenShift UI and fixed PostgreSQL Storage requirements display 
-.. source: RHBA-2023:2719,2727
 
 **Automation Controller fixes:**
 
@@ -52,8 +51,6 @@ Automation Controller Version 4.3.9
 - Removed case-sensitive credential name search in ad-hoc commands prompts 
 - Using the **Back to list** button now maintains previous search filters 
 - Topology view and Instances are only available as options on the left navigation menu options to System Administrators and System Auditors 
-.. source: RHBA-2023:3448
-.. last platform entry: RHBA-2023:3575
 
 
 Automation Controller Version 4.3.8

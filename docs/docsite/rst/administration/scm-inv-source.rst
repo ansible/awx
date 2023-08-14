@@ -31,7 +31,7 @@ You can specify environment variables when you edit the SCM inventory source its
 
 The better way is to create a new credential type for the inventory script you are going to use. The credential type will need to specify all the necessary types of inputs. Then, when you create a credential of this type, the secrets will be stored in an encrypted form. If you apply that credential to the inventory source, the script will have access to those inputs like environment variables or files. 
 
-For more detail, refer to :ref:`Credential types <userguide:ug_credential_types>`.
+For more detail, refer to :ref:`Credential types <ug_credential_types>`.
 
 
 SCM Inventory Source Fields

@@ -82,40 +82,40 @@ Tokens, on the other hand, are resources used to actually authenticate incoming 
 
 Individual tokens are accessible via their primary keys: ``/api/<version>/tokens/<pk>/``. Here is an example of a typical token:
 
-::
+  .. code-block:: text
 
-    {
-        "id": 4,
-        "type": "o_auth2_access_token",
-        "url": "/api/v2/tokens/4/",
-        "related": {
-            "user": "/api/v2/users/1/",
-            "application": "/api/v2/applications/1/",
-            "activity_stream": "/api/v2/tokens/4/activity_stream/"
-    },
-        "summary_fields": {
-            "application": {
-                "id": 1,
-                "name": "Default application for root",
-                "client_id": "mcU5J5uGQcEQMgAZyr5JUnM3BqBJpgbgL9fLOVch"
-            },
-            "user": {
-                "id": 1,
-                "username": "root",
-                "first_name": "",
-                "last_name": ""
-            }
-        },
-        "created": "2018-02-23T14:39:32.618932Z",
-        "modified": "2018-02-23T14:39:32.643626Z",
-        "description": "App Token Test",
-        "user": 1,
-        "token": "*************",
-        "refresh_token": "*************",
-        "application": 1,
-        "expires": "2018-02-24T00:39:32.618279Z",
-        "scope": "read"
-    },
+      {
+          "id": 4,
+          "type": "o_auth2_access_token",
+          "url": "/api/v2/tokens/4/",
+          "related": {
+              "user": "/api/v2/users/1/",
+              "application": "/api/v2/applications/1/",
+              "activity_stream": "/api/v2/tokens/4/activity_stream/"
+      },
+          "summary_fields": {
+              "application": {
+                  "id": 1,
+                  "name": "Default application for root",
+                  "client_id": "mcU5J5uGQcEQMgAZyr5JUnM3BqBJpgbgL9fLOVch"
+              },
+              "user": {
+                  "id": 1,
+                  "username": "root",
+                  "first_name": "",
+                  "last_name": ""
+              }
+          },
+          "created": "2018-02-23T14:39:32.618932Z",
+          "modified": "2018-02-23T14:39:32.643626Z",
+          "description": "App Token Test",
+          "user": 1,
+          "token": "*************",
+          "refresh_token": "*************",
+          "application": 1,
+          "expires": "2018-02-24T00:39:32.618279Z",
+          "scope": "read"
+      },
 
 
 For an OAuth 2 token, the only fully editable fields are ``scope`` and ``description``. The ``application`` field is non-editable on update, and all other fields are entirely non-editable, and are auto-populated during creation, as follows:
@@ -171,7 +171,7 @@ In |at|, the OAuth 2 system is built on top of the `Django Oauth Toolkit`_, whic
     You can also request tokens using the ``/api/o/token`` endpoint by specifying ``null`` for the application type.
 
 
-Alternatively, you can :ref:`add tokens <userguide:ug_tokens_auth_create>` for users through the controller user interface, as well as configure the expiration of an access token and its associated refresh token (if applicable).  
+Alternatively, you can :ref:`add tokens <ug_tokens_auth_create>` for users through the controller user interface, as well as configure the expiration of an access token and its associated refresh token (if applicable).  
 
 .. image:: ../common/images/configure-tower-system-misc-sys-token-expire.png
 
@@ -249,7 +249,7 @@ This page lists OAuth 2 utility endpoints used for authorization, token refresh,
 
 .. note::
 
-    You can perform any of the application functions described here using the controller user interface. Refer to the :ref:`Applications <userguide:ug_applications_auth>` section of the |atu| for more detail.
+    You can perform any of the application functions described here using the controller user interface. Refer to the :ref:`Applications <ug_applications_auth>` section of the |atu| for more detail.
 
  
 
@@ -334,16 +334,16 @@ The ``password`` grant type or ``Resource owner password-based`` grant type is i
 
 Logging in is not required for ``password`` grant type, so you can simply use curl to acquire a personal access token through the ``/api/v2/tokens/`` endpoint:
 
-::
+  .. code-block:: text
 
-    curl -k --user <user>:<password> -H "Content-type: application/json" \
-    -X POST \
-    --data '{
-        "description": "Token for Nagios Monitoring app",
-        "application": 1,
-        "scope": "write"
-    }' \
-    https://<controller>/api/v2/tokens/
+      curl -k --user <user>:<password> -H "Content-type: application/json" \
+      -X POST \
+      --data '{
+          "description": "Token for Nagios Monitoring app",
+          "application": 1,
+          "scope": "write"
+      }' \
+      https://<controller>/api/v2/tokens/
 
 
 .. note::

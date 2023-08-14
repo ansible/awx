@@ -28,16 +28,16 @@ Using the curl tool, you can see the activity that occurs when you log into the 
 
 1. GET to the ``/api/login/`` endpoint to grab the ``csrftoken`` cookie.
 
-::
-	
+.. code-block:: text
+
 	curl -k -c - https://<controller-host>/api/login/
-  
-	localhost	FALSE	/	FALSE	0   csrftoken	
+
+	localhost	FALSE	/	FALSE	0   csrftoken
 	AswSFn5p1qQvaX4KoRZN6A5yer0Pq0VG2cXMTzZnzuhaY0L4tiidYqwf5PXZckuj
 
 2. POST to the ``/api/login/`` endpoint with username, password, and X-CSRFToken=<token-value>.
 
-::
+.. code-block:: text
 
 	curl -X POST -H 'Content-Type: application/x-www-form-urlencoded' \
   	--referer https://<controller-host>/api/login/ \
@@ -50,7 +50,7 @@ All of this is done by the |at| when you log in to the UI or API in the browser,
 
 A typical response might look like:
 
-::
+.. code-block:: text
 
 	Server: nginx
 	Date: <current date>
@@ -80,8 +80,6 @@ When a user is successfully authenticated with this method, the server will resp
 
 	The session expiration time can be changed by specifying it in the ``SESSION_COOKIE_AGE`` parameter. Refer to :ref:`ag_session_limits` for further detail.
 
-
-
 Basic Authentication
 ---------------------
 
@@ -89,12 +87,12 @@ Basic Authentication (Basic Auth) is stateless, thus the base64-encoded ``userna
 
 Example with curl:
 
-::
+.. code-block:: text
 
-	curl -X GET -H 'Authorization: Basic dXNlcjpwYXNzd29yZA==’ https://<controller-host>/api/v2/credentials -k -L
+   curl -X GET -H 'Authorization: Basic dXNlcjpwYXNzd29yZA==’ https://<controller-host>/api/v2/credentials -k -L
 
-	# the --user flag adds this Authorization header for us
-	curl -X GET --user 'user:password' https://<controller-host>/api/v2/credentials -k -L
+   # the --user flag adds this Authorization header for us
+   curl -X GET --user 'user:password' https://<controller-host>/api/v2/credentials -k -L
 
 For more information about the Basic HTTP Authentication scheme, see `RFC 7617 <https://datatracker.ietf.org/doc/html/rfc7617>`_.
 
@@ -137,9 +135,9 @@ Token authentication is best used for any programmatic use of the |at| API, such
 
 **Curl Example**
 
-::
+.. code-block:: text
 
-	curl -u user:password -k -X POST https://<controller-host>/api/v2/tokens/
+   curl -u user:password -k -X POST https://<controller-host>/api/v2/tokens/
 
 
 This call will return JSON data like:
@@ -148,8 +146,8 @@ This call will return JSON data like:
 
 The value of the ``token`` property is what you can now use to perform a GET request for an |at| resource, e.g., Hosts.
 
-::
-	
+.. code-block:: text
+
 	curl -k -X POST \
   	  -H “Content-Type: application/json”
   	  -H “Authorization: Bearer <oauth2-token-value>” \
@@ -157,7 +155,7 @@ The value of the ``token`` property is what you can now use to perform a GET req
 
 Similarly, you can launch a job by making a POST to the job template that you want to launch.
 
-::
+.. code-block:: text
 
 	curl -k -X POST \
   	  -H "Authorization: Bearer <oauth2-token-value>" \
@@ -175,7 +173,7 @@ For more information on how to use OAuth 2 in the |at| in the context of integra
 
 If you need to write custom requests, you can write a Python script using `Python library requests <https://pypi.org/project/requests/>`_, like in this example:
 
-::
+.. code-block:: text
 
 	import requests
 	oauth2_token_value = 'y1Q8ye4hPvT61aQq63Da6N1C25jiA'   # your token value from controller
@@ -188,7 +186,7 @@ If you need to write custom requests, you can write a Python script using `Pytho
 	allow_redirects=False, verify=False)
 
 	# prints json returned from controller with formatting
-	print(json.dumps(response.json(), indent=4, sort_keys=True))        
+	print(json.dumps(response.json(), indent=4, sort_keys=True))
 
 
 .. _api_sso_auth:

@@ -174,6 +174,6 @@ Other tasks such as the ability to make a duplicate copy and re-launch a workflo
 
 .. ^^
 
-For more information on performing the tasks described in this section, refer to the :ref:`Administration Guide <administration:ag_start>`. 
+For more information on performing the tasks described in this section, refer to the :ref:`Administration Guide <ag_start>`. 
 
 

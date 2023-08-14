@@ -880,10 +880,10 @@ The '7' in this sample URL is the job template ID in Automation Controller.
 
 The request from the host must be a POST. Here is an example using curl (all on a single line):
 
-::
+.. code-block:: bash
 
-    curl -k -f -i -H 'Content-Type:application/json' -XPOST -d '{"host_config_key": "redhat"}' \ 
-                      https://<CONTROLLER_SERVER_NAME>/api/v2/job_templates/7/callback/
+   curl -k -f -i -H 'Content-Type:application/json' -XPOST -d '{"host_config_key": "redhat"}' \ 
+                    https://<CONTROLLER_SERVER_NAME>/api/v2/job_templates/7/callback/
 
 The requesting host must be defined in your inventory for the callback to succeed. If Automation Controller fails to locate the host either by name or IP address in one of your defined inventories, the request is denied. When running a Job Template in this way, the host initiating the playbook run against itself must be in the inventory. If the host is missing from the inventory, the Job Template will fail with a "No Hosts Matched" type error message.
 
@@ -937,11 +937,13 @@ Just as you can pass ``extra_vars`` in a regular Job Template, you can also pass
 
 You can also pass extra variables to the Job Template call using ``curl``, such as is shown in the following example::
 
-    root@localhost:~$ curl -f -H 'Content-Type: application/json' -XPOST \
+.. code-block:: bash
+
+   root@localhost:~$ curl -f -H 'Content-Type: application/json' -XPOST \
                      -d '{"host_config_key": "redhat", "extra_vars": "{\"foo\": \"bar\"}"}' \
                      https://<CONTROLLER_SERVER_NAME>/api/v2/job_templates/7/callback
 
-For more information, refer to :ref:`Launching Jobs with Curl<administration:launch_jobs_curl>`.
+For more information, refer to :ref:`Launching Jobs with Curl<launch_jobs_curl>`.
 
 
 .. _ug_jobtemplates_extravars:
@@ -966,7 +968,7 @@ For example, say that you have a defined variable for an inventory for ``debug =
 
 To ensure that the variables you need to pass are not overridden, ensure they are included by redefining them in the survey. Keep in mind that extra variables can be defined at the inventory, group, and host levels. 
 
-If specifying the ``ALLOW_JINJA_IN_EXTRA_VARS`` parameter, refer to the :ref:`Controller Tips and Tricks <administration:ag_tips_jinja_extravars>` section of the |ata| to configure it in the Jobs Settings screen of the controller UI.
+If specifying the ``ALLOW_JINJA_IN_EXTRA_VARS`` parameter, refer to the :ref:`Controller Tips and Tricks <ag_tips_jinja_extravars>` section of the |ata| to configure it in the Jobs Settings screen of the controller UI.
 
 .. index::
    pair: job templates; job variables

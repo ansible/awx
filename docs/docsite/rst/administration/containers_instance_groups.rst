@@ -68,7 +68,7 @@ The current behavior expects a member of an ``instance_group_*`` be part of ``au
 
 As a result of running the installer, you will get the error below:
 
-::
+   .. code-block:: bash
 
 	TASK [ansible.automation_platform_installer.check_config_static : Validate mesh topology] ***
 	fatal: [126-addr.tatu.home -> localhost]: FAILED! => {"msg": "The host '110-addr.tatu.home' is not present in either [automationcontroller] or [execution_nodes]"}
@@ -93,10 +93,10 @@ To fix this, you could move the box ``110-addr.tatu.home`` to an ``execution_nod
 
 This results in:
 
-::
+   .. code-block:: bash
 
-	TASK [ansible.automation_platform_installer.check_config_static : Validate mesh topology] ***
-	ok: [126-addr.tatu.home -> localhost] => {"changed": false, "mesh": {"110-addr.tatu.home": {"node_type": "execution", "peers": [], "receptor_control_filename": "receptor.sock", "receptor_control_service_name": "control", "receptor_listener": true, "receptor_listener_port": 8928, "receptor_listener_protocol": "tcp", "receptor_log_level": "info"}, "126-addr.tatu.home": {"node_type": "control", "peers": ["110-addr.tatu.home"], "receptor_control_filename": "receptor.sock", "receptor_control_service_name": "control", "receptor_listener": false, "receptor_listener_port": 27199, "receptor_listener_protocol": "tcp", "receptor_log_level": "info"}}}
+	  TASK [ansible.automation_platform_installer.check_config_static : Validate mesh topology] ***
+	  ok: [126-addr.tatu.home -> localhost] => {"changed": false, "mesh": {"110-addr.tatu.home": {"node_type": "execution", "peers": [], "receptor_control_filename": "receptor.sock", "receptor_control_service_name": "control", "receptor_listener": true, "receptor_listener_port": 8928, "receptor_listener_protocol": "tcp", "receptor_log_level": "info"}, "126-addr.tatu.home": {"node_type": "control", "peers": ["110-addr.tatu.home"], "receptor_control_filename": "receptor.sock", "receptor_control_service_name": "control", "receptor_listener": false, "receptor_listener_port": 27199, "receptor_listener_protocol": "tcp", "receptor_log_level": "info"}}}
 
 Upon upgrading from controller 4.0 or earlier, the legacy ``instance_group_`` member will most likely have the awx code installed, which would cause that node to be placed in the ``automationcontroller`` group. 
 
@@ -111,9 +111,9 @@ Instance groups can be created by POSTing to ``/api/v2/instance_groups`` as a sy
 
 Once created, instances can be associated with an instance group with:
 
-::
+   .. code-block:: bash
 
-	HTTP POST /api/v2/instance_groups/x/instances/ {'id': y}`
+	  HTTP POST /api/v2/instance_groups/x/instances/ {'id': y}`
 
 An instance that is added to an instance group will automatically reconfigure itself to listen on the group's work queue. See the following section, :ref:`ag_instance_group_policies`, for more details.
 
@@ -168,17 +168,17 @@ If you have a special instance which needs to be exclusively assigned to a speci
 
 This will prevent the Instance from being automatically added to other groups based on percentage and minimum policy; it will only belong to the groups you've manually assigned it to:
 
-::
+   .. code-block:: bash
 
-	HTTP PATCH /api/v2/instance_groups/N/
-	{
-    	"policy_instance_list": ["special-instance"]
-	}
+	  HTTP PATCH /api/v2/instance_groups/N/
+	  {
+    	  "policy_instance_list": ["special-instance"]
+	  }
 
-	HTTP PATCH /api/v2/instances/X/
-	{
-    	"managed_by_policy": False
-	}
+	  HTTP PATCH /api/v2/instances/X/
+	  {
+    	  "managed_by_policy": False
+	  }
 
 
 .. _ag_instance_groups_job_runtime_behavior:
@@ -287,7 +287,7 @@ Similarly, deprovisioning instance groups in the controller does not automatical
 
 	Example: ``awx-manage unregister_queue --queuename=<name>``
 
-Removing an instance's membership from an instance group in the inventory file and re-running the setup playbook does not ensure the instance won't be added back to a group. To be sure that an instance will not be added back to a group, remove via the API and also remove it in your inventory file, or you can stop defining instance groups in the inventory file altogether. You can also manage instance group topology through the |at| User Interface. For more information on managing instance groups in the UI, refer to :ref:`Instance Groups <userguide:ug_instance_groups>` in the |atu|.
+Removing an instance's membership from an instance group in the inventory file and re-running the setup playbook does not ensure the instance won't be added back to a group. To be sure that an instance will not be added back to a group, remove via the API and also remove it in your inventory file, or you can stop defining instance groups in the inventory file altogether. You can also manage instance group topology through the |at| User Interface. For more information on managing instance groups in the UI, refer to :ref:`Instance Groups <ug_instance_groups>` in the |atu|.
 
 .. note::
 

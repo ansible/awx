@@ -33,4 +33,4 @@ To edit the default organization later, expand its properties by clicking the Ed
 
 .. |Organizations - default expanded| image:: ../common/images/qs-organization-default-expand-properties.png
 
-Enterprise and Premium license users who want to add a new organization should refer to the :ref:`Organizations <userguide:ug_organizations>` section in the |atu|.
+Enterprise and Premium license users who want to add a new organization should refer to the :ref:`Organizations <ug_organizations>` section in the |atu|.

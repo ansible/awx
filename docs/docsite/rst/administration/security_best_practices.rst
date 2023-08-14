@@ -92,7 +92,7 @@ Django password policies
 
 Controller admins can leverage Django to set password policies at creation time via ``AUTH_PASSWORD_VALIDATORS`` to validate controller user passwords. In the ``custom.py`` file located at ``/etc/tower/conf.d`` of your controller instance, add the following code block example:
 
-::
+.. code-block:: text
 
 
 	AUTH_PASSWORD_VALIDATORS = [
@@ -116,4 +116,3 @@ Controller admins can leverage Django to set password policies at creation time 
 For more information, see `Password management in Django <https://docs.djangoproject.com/en/3.2/topics/auth/passwords/#module-django.contrib.auth.password_validation>`_ in addition to the example posted above.
 
 Be sure to restart your controller instance for the change to take effect. See :ref:`ag_restart_tower` for detail.
- 

@@ -167,8 +167,6 @@ The following keys are valid for this section:
 **galaxy**
   Ansible Collections to be installed from Galaxy. This may be a filename, a dictionary, or a multi-line string representation of an Ansible Galaxy ``requirements.yml`` file (see below for examples). Read more about the requirements file format in the `Galaxy user guide <https://docs.ansible.com/ansible/latest/galaxy/user_guide.html#install-multiple-collections-with-a-requirements-file>`_.
 
-.. _python_deps:
-
 **python**
   The Python installation requirements. This may either be a filename, or a list of requirements (see below for an example). Ansible Builder combines all the Python requirements files from all collections into a single file using the ``requirements-parser`` library. This library supports complex syntax, including references to other files. If multiple collections require the same *package name*, Ansible Builder combines them into a single entry and combines the constraints. Certain package names are specifically *ignored* by ``ansible-builder``, meaning that Ansible Builder does not include them in the combined file of Python dependencies, even if a collection lists them as dependencies. These include test packages and packages that provide Ansible itself. The full list can be found in ``EXCLUDE_REQUIREMENTS`` in ``src/ansible_builder/_target_scripts/introspect.py``. If you need to include one of these ignored package names, use the ``--user-pip`` option of the ``introspect`` command to list it in the user requirements file. Packages supplied this way are not processed against the list of excluded Python packages.
 
@@ -228,7 +226,7 @@ And this example uses inline values:
 
     ansible-builder introspect --sanitize ~/.ansible/collections/
 
-The ``--sanitize`` option reviews all of the collection requirements and removes duplicates. It also removes any Python requirements that should normally be excluded (see :ref:`python_deps` anove). Use the ``-v3`` option to ``introspect`` to see logging messages about requirements that are being excluded. 
+The ``--sanitize`` option reviews all of the collection requirements and removes duplicates. It also removes any Python requirements that should normally be excluded. Use the ``-v3`` option to ``introspect`` to see logging messages about requirements that are being excluded. 
 
 
 images

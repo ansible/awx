@@ -25,10 +25,10 @@ For more details on the job results, refer to :ref:`ug_jobs`.
 
 Congratulations! Your controller installation is officially setup and running properly. To learn more about these controller features or to learn about administration tasks, the controller API, etc., refer to the following documentation sets:
 
-- :ref:`Automation Controller User Guide <userguide:ug_start>`
-- :ref:`Automation Controller Administration Guide <administration:ag_start>`
-- :ref:`Automation Controller API Guide<controllerapi:api_start>`
-- :ref:`Automation Controller Release Notes <release-notes:releasenotes_start>`
+- :ref:`Automation Controller User Guide <ug_start>`
+- :ref:`Automation Controller Administration Guide <ag_start>`
+- :ref:`Automation Controller API Guide<api_start>`
+- :ref:`Automation Controller Release Notes <releasenotes_start>`
 - `Ansible Documentation`_
 
 .. _Ansible Documentation: http://docs.ansible.com/

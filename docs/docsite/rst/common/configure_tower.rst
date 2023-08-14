@@ -58,7 +58,7 @@ The System tab allows you to define the base URL for the controller host, config
     
     .. image:: ../common/images/configure-tower-system-logging-types.png
     
-    For more information about each of the logging aggregation types, refer to the :ref:`Controller Logging and Aggregation <administration:ag_logging>` section of the |ata|.
+    For more information about each of the logging aggregation types, refer to the :ref:`Controller Logging and Aggregation <ag_logging>` section of the |ata|.
 
 
 3. Set the configurable options from the fields provided. Click the tooltip |help| icon next to the field that you need additional information or details about. Below is an example of the System settings window.

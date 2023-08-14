@@ -96,4 +96,4 @@ To view the jobs associated with the instance group, click the **Jobs** tab of t
 
 Each job displays the job status, ID, and name; type of job, time started and completed, who started the job; and applicable resources associated with it, such as template, inventory, project, |ee|, etc.
 
-The instances are run in accordance with instance group policies. Refer to :ref:`Instance Group Policies <administration:ag_instance_group_policies>` in the |ata|.
+The instances are run in accordance with instance group policies. Refer to :ref:`Instance Group Policies <ag_instance_group_policies>` in the |ata|.

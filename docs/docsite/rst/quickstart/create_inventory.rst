@@ -5,7 +5,7 @@ Create a new Inventory
    single: inventory; create new
    single: inventory; add to organization
 
-An inventory is a collection of hosts managed by the controller. Organizations are assigned to inventories, while permissions to launch playbooks against inventories are controlled at the user and/or team level. For more information, refer to :ref:`Inventories <userguide:ug_inventories>`, :ref:`Users - Permissions <userguide:ug_users_permissions>`, and :ref:`Teams - Permissions <userguide:ug_teams_permissions>` in the |atu|.
+An inventory is a collection of hosts managed by the controller. Organizations are assigned to inventories, while permissions to launch playbooks against inventories are controlled at the user and/or team level. For more information, refer to :ref:`Inventories <ug_inventories>`, :ref:`Users - Permissions <ug_users_permissions>`, and :ref:`Teams - Permissions <ug_teams_permissions>` in the |atu|.
 
 To view existing inventories, click **Inventories** from the left navigation bar.
 

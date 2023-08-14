@@ -5,7 +5,7 @@
 **New Features**
 
 - Administrative users can now enable a :ref:`tech preview of the new controller UI <ug_ui_main>`, which includes some basic and limited functionality around creating and viewing the resources needed to launch a job template 
-- A tech preview version of the Automation Calculator utility that shows a report that represents possible savings to the subscriber  See :ref:`analytics_reports` for more information.
+- A tech preview version of the Automation Calculator utility that shows a report that represents possible savings to the subscriber.
 - IBM Z/Power support has been added as a tech preview feature for aap 2.4 and ARM support is added so you can now run at on an ARM machine with or without using the bundle installer 
 - Ability to :ref:`launch multiple jobs at once <ug_JobTemplates_bulk_api>` via a new API endpoint, ``/api/v2/bulk/job_launch`` 
 - Ability to :ref:`add multiple hosts at once <ug_inventories_add_host_bulk_api>` via a new API endpoint, ``/api/v2/bulk/host_create`` 

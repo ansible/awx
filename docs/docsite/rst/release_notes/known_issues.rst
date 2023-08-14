@@ -73,7 +73,7 @@ Browsers ignoring the ``autocomplete=off`` setting
 Login via HTTP requires workaround
 ====================================
 
-To access controller nodes behind your load balancer (in traditional cluster controller installs) via HTTP, refer to the procedure described in the :ref:`Troubleshooting section <administration:admin_troubleshooting>` of the |ata|.
+To access controller nodes behind your load balancer (in traditional cluster controller installs) via HTTP, refer to the procedure described in the :ref:`Troubleshooting section <admin_troubleshooting>` of the |ata|.
 
 Job slicing and limit interactions
 =====================================
@@ -131,9 +131,9 @@ VMWare Self-Signed Certs
 
 If you have a VMware instance that uses a self-signed certificate, then you will need to add the following to the `Source Vars` configuration of the Cloud Group:
 
-::
+.. code-block:: text
 
-  "source_vars": "---\nvalidate_certs: False",
+   "source_vars": "---\nvalidate_certs: False",
 
 You can set this in inventory source for VMware vCenter as follows:
 

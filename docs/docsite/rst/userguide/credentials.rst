@@ -12,7 +12,7 @@ You can grant users and teams the ability to use these credentials, without actu
 
 .. note::
 
-    The |at| encrypts passwords and key information in the database and never makes secret information visible via the API. See :ref:`Automation Controller Administration Guide <administration:ag_secret_handling>` for details.
+    The |at| encrypts passwords and key information in the database and never makes secret information visible via the API. See :ref:`Automation Controller Administration Guide <ag_secret_handling>` for details.
 
 .. _how_credentials_work:
 
@@ -26,7 +26,7 @@ The |at| uses SSH to connect to remote hosts (or the Windows equivalent).  In or
 
 If passwords are used, the |at| handles those by responding directly to the password prompt and decrypting the password before writing it to the prompt.
 
-.. (commented out from note above, add back once api guide is extended again) Refer to :ref:`Unified Job List API Endpoint <controllerapi:unified_job_list>` in the |atapi| for more information.
+.. (commented out from note above, add back once api guide is extended again) Refer to :ref:`Unified Job List API Endpoint <unified_job_list>` in the |atapi| for more information.
 
 
 

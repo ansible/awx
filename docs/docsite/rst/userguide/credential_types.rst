@@ -135,102 +135,97 @@ To create a new credential type:
     When creating a new credential type, do not use reserved variable names that start with ``ANSIBLE_`` for the **INPUT** and **INJECTOR** names and IDs, as they are invalid for custom credential types. 
 
 3. In the **Input Configuration** field, specify an input schema which defines a set of ordered fields for that type. The format can be in YAML or JSON, as shown:
-  
+
   **YAML**
 
-  ::
+  .. code-block:: yaml
 
-    fields:
-      - type: string
-        id: username
-        label: Username
-      - type: string
-        id: password
-        label: Password
-        secret: true
-    required:
-      - username
-      - password 
-
-  View more YAML examples at `<http://www.yaml.org/start.html>`_.
+     fields:
+       - type: string
+         id: username
+         label: Username
+       - type: string
+         id: password
+         label: Password
+         secret: true
+     required:
+       - username
+       - password
 
   **JSON**
 
-  ::
+  .. code-block:: json
 
-    {
-    "fields": [
-      {
-      "type": "string",
-      "id": "username",
-      "label": "Username"
-      },
-      {
-      "secret": true,
-      "type": "string",
-      "id": "password",
-      "label": "Password"
-       }
-      ],
-     "required": ["username", "password"]
-    }
+     {
+     "fields": [
+       {
+       "type": "string",
+       "id": "username",
+       "label": "Username"
+       },
+       {
+       "secret": true,
+       "type": "string",
+       "id": "password",
+       "label": "Password"
+        }
+       ],
+      "required": ["username", "password"]
+     }
 
+  The configuration in JSON format below show each field and how they are used:
 
-  View more JSON examples at `<www.json.org>`_.
+  .. code-block:: text
 
-  The configuration in JSON format below show each field and how they are used: 
+     {
+       "fields": [{
+         "id": "api_token",               # required - a unique name used to
+                                          # reference the field value
 
-  ::
+         "label": "API Token",            # required - a unique label for the
+                                          # field
 
-    {
-      "fields": [{
-        "id": "api_token",               # required - a unique name used to
-                                         # reference the field value
+         "help_text": "User-facing short text describing the field.",
 
-        "label": "API Token",            # required - a unique label for the
-                                         # field
+         "type": ("string" | "boolean")   # defaults to 'string'
 
-        "help_text": "User-facing short text describing the field.",
+         "choices": ["A", "B", "C"]       # (only applicable to `type=string`)
 
-        "type": ("string" | "boolean")   # defaults to 'string'
-        
-        "choices": ["A", "B", "C"]       # (only applicable to `type=string`)
+         "format": "ssh_private_key"      # optional, can be used to enforce data
+                                          # format validity for SSH private key
+                                          # data (only applicable to `type=string`)
 
-        "format": "ssh_private_key"      # optional, can be used to enforce data
-                                         # format validity for SSH private key
-                                         # data (only applicable to `type=string`)
+         "secret": true,                  # if true, the field value will be encrypted
 
-        "secret": true,                  # if true, the field value will be encrypted
+         "multiline": false               # if true, the field should be rendered
+                                          # as multi-line for input entry
+                                          # (only applicable to `type=string`)
+     },{
+         # field 2...
+     },{
+         # field 3...
+     }],
 
-        "multiline": false               # if true, the field should be rendered
-                                         # as multi-line for input entry
-                                         # (only applicable to `type=string`)
-    },{
-        # field 2...
-    },{
-        # field 3...
-    }],
-
-    "required": ["api_token"]            # optional; one or more fields can be marked as required
-    },
+     "required": ["api_token"]            # optional; one or more fields can be marked as required
+     },
 
 When ``type=string``, fields can optionally specify multiple choice options:
 
-  ::
+  .. code-block:: text
 
-    {
-      "fields": [{
-          "id": "api_token",          # required - a unique name used to reference the field value
-          "label": "API Token",       # required - a unique label for the field
-          "type": "string",
-          "choices": ["A", "B", "C"]
-      }]
-    },
+     {
+       "fields": [{
+           "id": "api_token",          # required - a unique name used to reference the field value
+           "label": "API Token",       # required - a unique label for the field
+           "type": "string",
+           "choices": ["A", "B", "C"]
+       }]
+     },
 
 
 4. In the **Injector Configuration** field, enter environment variables or extra variables that specify the values a credential type can inject. The format can be in YAML or JSON (see examples in the previous step). The configuration in JSON format below show each field and how they are used: 
 
-::
+.. code-block:: json
 
   {
     "file": {
@@ -246,7 +241,7 @@ When ``type=string``, fields can optionally specify multiple choice options:
 
 Credential Types can also generate temporary files to support .ini files or certificate/key data:
 
-::
+.. code-block:: json
 
   {
     "file": {
@@ -259,7 +254,7 @@ Credential Types can also generate temporary files to support .ini files or cert
 
 In this example, the |at| will write a temporary file that contains:
 
-::
+.. code-block:: text
 
   [mycloud]\ntoken=SOME_TOKEN_VALUE
 
@@ -270,7 +265,7 @@ An example of referencing multiple files in a custom credential template is as f
 
 **Inputs**
 
-::
+.. code-block:: json
 
   {
     "fields": [{
@@ -286,7 +281,7 @@ An example of referencing multiple files in a custom credential template is as f
 
 **Injectors**
 
-::
+.. code-block:: json
 
     {
       "file": {

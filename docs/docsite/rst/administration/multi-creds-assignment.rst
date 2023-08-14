@@ -32,10 +32,10 @@ Job templates now have a single interface for credential assignment. From the AP
 
 You can associate and disassociate credentials using ``POST`` requests, similar to the behavior in the deprecated ``extra_credentials`` endpoint:
 
-::
+   .. code-block:: text
 
-    POST /api/v2/job_templates/N/credentials/ {'associate': true, 'id': 'X'}
-    POST /api/v2/job_templates/N/credentials/ {'disassociate': true, 'id': 'Y'}
+      POST /api/v2/job_templates/N/credentials/ {'associate': true, 'id': 'X'}
+      POST /api/v2/job_templates/N/credentials/ {'disassociate': true, 'id': 'Y'}
 
 
 Under this model, a job template is considered valid even when there are *no* credentials assigned to it. This model also provides users the ability to assign multiple Vault credentials to a job template.
@@ -49,9 +49,9 @@ used as a way to specify a Machine/SSH credential to satisfy the minimum credent
 
 Under the new unified credential list model, this attribute still exists, but it is no longer "requiring" a credential.  Now when ``ask_credential_on_launch`` is ``True``, it signifies that if desired, you may specify a list of credentials at launch time to override those defined on the job template. For example:
 
-::
+   .. code-block:: text
 
-    POST /api/v2/job_templates/N/launch/ {'credentials': [A, B, C]}`
+      POST /api/v2/job_templates/N/launch/ {'credentials': [A, B, C]}`
 
 If ``ask_credential_on_launch`` is ``False``, it signifies that custom credentials provided in the ``POST /api/v2/job_templates/N/launch/`` will be ignored.
 
@@ -71,14 +71,14 @@ Vault credentials now have an optional field, ``vault_id``, which is analogous t
 
 2. Assign multiple vault credentials to the job template via the new credentials endpoint:
 
-::
+   .. code-block:: text
 
-    POST /api/v2/job_templates/N/credentials/
+      POST /api/v2/job_templates/N/credentials/
 
-    {
-        'associate': true,
-        'id': X
-    }
+      {
+          'associate': true,
+          'id': X
+      }
 
 Alternatively, you can perform the same assignment in the controller User Interface in the *Create Credential* page:
 
@@ -96,31 +96,31 @@ Prompted Vault Credentials
 
 Passwords for Vault credentials that are marked with "Prompt on launch", the launch endpoint of any related Job Templates will communicate necessary Vault passwords via the ``passwords_needed_to_start`` key: 
 
-::
+   .. code-block:: text
 
-    GET /api/v2/job_templates/N/launch/
-    {
-        'passwords_needed_to_start': [
-            'vault_password.X',
-            'vault_password.Y',
-        ]
-    }
+      GET /api/v2/job_templates/N/launch/
+      {
+          'passwords_needed_to_start': [
+              'vault_password.X',
+              'vault_password.Y',
+          ]
+      }
 
 ``X`` and ``Y`` in the above example are primary keys of the associated Vault credentials.
 
-::
+   .. code-block:: text
 
-    POST /api/v2/job_templates/N/launch/
-    {
-        'credential_passwords': {
-            'vault_password.X': 'first-vault-password'
-            'vault_password.Y': 'second-vault-password'
-        }
-    } 
+      POST /api/v2/job_templates/N/launch/
+      {
+          'credential_passwords': {
+              'vault_password.X': 'first-vault-password'
+              'vault_password.Y': 'second-vault-password'
+          }
+      }
 
 
 Linked credentials
 ^^^^^^^^^^^^^^^^^^^
 
-Instead of uploading sensitive credential information into the controller, you can link credential fields to external systems and using them to run your playbooks. Refer to the :ref:`Secret Management System <userguide:ug_credential_plugins>` section of the |atu|.
+Instead of uploading sensitive credential information into the controller, you can link credential fields to external systems and using them to run your playbooks. Refer to the :ref:`Secret Management System <ug_credential_plugins>` section of the |atu|.
 

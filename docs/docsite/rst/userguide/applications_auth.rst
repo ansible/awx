@@ -65,7 +65,7 @@ The New Application window opens.
 - **Name** (required): provide a name for the application you want to create
 - **Description**: optionally provide a short description for your application
 - **Organization** (required): provide an organization for which this application is associated
-- **Authorization Grant Type** (required): Select from one of the grant types to use in order for the user to acquire tokens for this application. Refer to :ref:`grant types <administration:ag_oauth2_token_auth_grant_types>` in the Applications section of the |ata|.
+- **Authorization Grant Type** (required): Select from one of the grant types to use in order for the user to acquire tokens for this application. Refer to :ref:`grant types <ag_oauth2_token_auth_grant_types>` in the Applications section of the |ata|.
 - **Redirect URIS**: Provide a list of allowed URIs, separated by spaces. This is required if you specified the grant type to be **Authorization code**.
 - **Client Type** (required): Select the level of security of the client device
 
@@ -101,7 +101,7 @@ Tokens are added through the Users screen and can be associated with an applicat
 
 .. note::
 
-		You can only create OAuth 2 Tokens for your user via the API or UI, which means you can only access your own user profile in order to configure or view your tokens. If you are an admin and need to create or remove tokens for other users, see the revoke and create commands in the :ref:`Token and session management <administration:ag_token_utility>` section of the |ata|. 
+		You can only create OAuth 2 Tokens for your user via the API or UI, which means you can only access your own user profile in order to configure or view your tokens. If you are an admin and need to create or remove tokens for other users, see the revoke and create commands in the :ref:`Token and session management <ag_token_utility>` section of the |ata|. 
 
 .. include:: ../common/add-token.rst
 
