@@ -175,7 +175,7 @@ Configuring the ``controllerhost`` hostname for notifications
 .. index:: 
    pair: notifications; hostname configuration
 
-In the :ref:`System Settings <configure_tower_system>`, you can replace ``https://controller.example.com`` in the **Base URL of The Controller Host** field with your preferred hostname to change the notification hostname.     
+In the :ref:`System Settings <configure_awx_system>`, you can replace ``https://controller.example.com`` in the **Base URL of The Controller Host** field with your preferred hostname to change the notification hostname.     
 
 .. image:: ../common/images/configure-tower-system-misc-baseurl.png
 

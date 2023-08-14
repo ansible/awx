@@ -40,7 +40,7 @@ On the main Dashboard view, a summary appears listing your current **Job Status*
 
 The very last item in the navigation bar is **Settings**, which provides access to the controller configuration Settings. 
 
-The Settings page allows administrators to configure authentication, jobs, system-level attributes, customize the user interface, and product license information. Refer to :ref:`ag_configure_tower` section for more detail.
+The Settings page allows administrators to configure authentication, jobs, system-level attributes, customize the user interface, and product license information. Refer to :ref:`ag_configure_awx` section for more detail.
 
 .. image:: ../common/images/ug-settings-menu-screen.png
 

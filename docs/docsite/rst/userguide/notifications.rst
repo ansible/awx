@@ -513,7 +513,7 @@ Configure the ``host`` hostname for notifications
 .. index:: 
    pair: notifications; hostname configuration
 
-In the :ref:`System Settings <configure_tower_system>`, you can replace the default value in the **Base URL of the service** field with your preferred hostname to change the notification hostname.     
+In the :ref:`System Settings <configure_awx_system>`, you can replace the default value in the **Base URL of the service** field with your preferred hostname to change the notification hostname.     
 
 .. image:: ../common/images/configure-tower-system-misc-baseurl.png
 

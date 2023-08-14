@@ -9,4 +9,4 @@ To enter the Settings window for |at|, click **Settings** from the left navigati
 
 .. image:: ../common/images/ug-settings-menu-screen.png
 
-For more information on configuring these settings, refer to :ref:`ag_configure_tower` section of the |ata|.
+For more information on configuring these settings, refer to :ref:`ag_configure_awx` section of the |ata|.

@@ -27,7 +27,7 @@ AWX Administration
   secret_handling
   security_best_practices
   tower-manage
-  configure_tower_in_tower
+  configure_awx
   isolation_variables
   oauth2_token_auth
   social_auth
