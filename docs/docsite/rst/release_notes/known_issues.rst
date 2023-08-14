@@ -56,7 +56,7 @@ A change was made to the way the ansible-runner component is launched (the execu
 Deleted default orgs produces duplicate Ansible-Galaxy credentials
 ====================================================================
 
-Despite being able to run subsequent installs when deleting the default organization, it does not automatically remove or fix duplicate Ansible-Galaxy credentials. Refer to the KCS article on `How to remove duplicated Ansible-Galaxy credentials from the database <https://access.redhat.com/solutions/6653321>`_ for further detail. 
+Despite being able to run subsequent installs when deleting the default organization, it does not automatically remove or fix duplicate Ansible-Galaxy credentials.
 
 
 Isolated nodes unsupported in an OpenShift deployment
@@ -143,7 +143,7 @@ You can set this in inventory source for VMware vCenter as follows:
 awx-manage inventory_import user
 ================================================
 
-In general, the use of ``awx-manage`` commands is supported when executed by the root or awx user. However, in |at| 4.0, even when run as the root user, the command ``awx-manage inventory_import`` fails to authenticate with the private registry where the Red Hat execution environments are hosted. The workaround is to run the command as the ``awx`` user, given that the images should be pre-pulled by the installer which correctly authenticates.
+In general, the use of ``awx-manage`` commands is supported when executed by the root or awx user. However, in |at| 4.0, even when run as the root user, the command ``awx-manage inventory_import`` fails to authenticate with the private registry where the execution environments are hosted. The workaround is to run the command as the ``awx`` user, given that the images should be pre-pulled by the installer which correctly authenticates.
 
 Upgrading Tower 3.8 existing Instance Groups on OCP deployments
 =================================================================

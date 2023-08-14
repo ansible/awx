@@ -27,9 +27,6 @@ Release Notes
    pair: release notes; v4.4
 
 
-Refer to the latest `Product Documentation for Red Hat Ansible Automation Platform <https://access.redhat.com/documentation/en-us/red_hat_ansible_automation_platform/>`_ for the complete ap documentation.
-
-
 Automation Controller Version 4.4
 ===================================
 
@@ -822,7 +819,6 @@ Automation Controller Version 4.0
 - The ability to disable local system users and only pull users from configured identity providers
 - Additional Prometheus metrics for tracking job event processing performance
 - New ``awx-manage`` command for dumping host automation information
-- Red Hat Insights as an inventory source
 - Ability to set server-side password policies using Django's ``AUTH_PASSWORD_VALIDATORS`` setting
 - Support for Centrify Vault as a credential lookup plugin
 - Support for namespaces in Hashicorp Vault credential plugin
@@ -834,7 +830,6 @@ Automation Controller Version 4.0
 - Nginx used to version 1.18
 - PostgreSQL used to PostgreSQL 12, and moved to partitioned databases for performance
 - The “container groups” feature to general availability from Tech Preview; now fully utilizes execution environments
-- Insights remediation to use new Red Hat Insights inventory source rather than utilizing scan playbooks with arbitrary inventory
 - Inventory source, credential, and Ansible content collection to reference `controller` instead of `tower`
 
 **Deprecated**
