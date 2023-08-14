@@ -7,7 +7,7 @@ Topology Viewer
 .. index::
    pair: topology;viewer
    
-The topology viewer allows you to view node type, node health, and specific details about each node if you already have a mesh topology deployed. In order to access the topology viewer from the controller user interface, you must have System Administrator or System Auditor permissions. To learn more about automation mesh, refer to the `Red Hat Ansible Automation Mesh Guide <https://access.redhat.com/documentation/en-us/red_hat_ansible_automation_platform/2.1/html/red_hat_ansible_automation_platform_automation_mesh_guide/assembly-planning-mesh>`_ on `access.redhat.com <https://access.redhat.com/documentation/en-us/red_hat_ansible_automation_platform>`_.
+The topology viewer allows you to view node type, node health, and specific details about each node if you already have a mesh topology deployed. In order to access the topology viewer from the controller user interface, you must have System Administrator or System Auditor permissions.
 
 
 To access the topology viewer from the controller user interface:
@@ -30,7 +30,7 @@ You can also click and drag to pan around; and use the scroll wheel on your mous
 To reset the view to its default view, click **Reset zoom**. 
 
 
-3. Refer to the Legend to the left of the graphic to identify the type of nodes that are represented. See `Control and execution planes <https://access.redhat.com/documentation/en-us/red_hat_ansible_automation_platform/2.1/html/red_hat_ansible_automation_platform_automation_mesh_guide/assembly-planning-mesh#con-automation-mesh-node-types>`_ for more information on each type of node.
+3. Refer to the Legend to the left of the graphic to identify the type of nodes that are represented.
 
 
 .. note::

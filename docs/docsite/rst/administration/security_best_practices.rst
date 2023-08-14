@@ -7,15 +7,6 @@ Security Best Practices
 |At| out-of-the-box is deployed in a secure fashion for use to automate typical environments. However, managing certain operating system environments, automation, and automation platforms, may require some additional best practices to ensure security. This document describes best practices for automation in a secure manner. 
 
 
-General best practices
------------------------
-
-An application is only as secure as the underlying system. To secure |rhel|, start with the release-appropriate security guide:
-
-- For |rhel| 8: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/security_hardening/index
-- For |rhel| 9: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/security_hardening
-
-
 Understand the architecture of Ansible and the controller
 ----------------------------------------------------------
 
@@ -75,7 +66,7 @@ Several resources exist in the controller and elsewhere to ensure a secure platf
 Audit and logging functionality
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-For any administrative access, it is key to audit and watch for actions. For the system overall, this can be done via the `built in audit support <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/security_hardening/auditing-the-system_security-hardening>`_ and via the built-in logging support. 
+For any administrative access, it is key to audit and watch for actions.
 
 For |at|, this is done via the built-in Activity Stream support that logs all changes within the controller, as well as via the automation logs.
 

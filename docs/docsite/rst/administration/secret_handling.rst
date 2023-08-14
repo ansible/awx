@@ -62,7 +62,7 @@ they are all needed to be read by the |at| service at startup
 in an automated fashion. All secrets are protected by Unix permissions,
 and restricted to root and the |at| service user awx.
 
-If hiding of these secrets is required, the files that these secrets are read from are interpreted Python. These files can be adjusted to retrieve these secrets via some other mechanism anytime a service restarts. Doing so is a customer provided modification that may need to be reapplied every upgrade. Red Hat Support and Red Hat Consulting has examples of such modifications.
+If hiding of these secrets is required, the files that these secrets are read from are interpreted Python. These files can be adjusted to retrieve these secrets via some other mechanism anytime a service restarts.
 
 .. note::
 

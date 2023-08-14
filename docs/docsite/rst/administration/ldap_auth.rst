@@ -10,7 +10,7 @@ Setting up LDAP Authentication
 
 .. note::
   
-  If the LDAP server you want to connect to has a certificate that is self-signed or signed by a corporate internal certificate authority (CA), the CA certificate must be added to the system's trusted CAs. Otherwise, connection to the LDAP server will result in an error that the certificate issuer is not recognized. Refer to Knowledge Base article, `How Do I Import CA Certificate (openldap, AD, IDM, FreeIPA) Required for LDAPS Integration? <https://access.redhat.com/solutions/5136201>`_. If prompted, use your Red Hat customer credentials to login.
+  If the LDAP server you want to connect to has a certificate that is self-signed or signed by a corporate internal certificate authority (CA), the CA certificate must be added to the system's trusted CAs. Otherwise, connection to the LDAP server will result in an error that the certificate issuer is not recognized.
 
 Administrators use LDAP as a source for account authentication information for the controller users. User authentication is provided, but not the synchronization of user permissions and credentials. Organization membership (as well as the organization admin) and team memberships can be synchronized.
 
@@ -358,6 +358,4 @@ When an LDAP user authenticates, by default, all user-related attributes will be
 
   
   With this option set to False, no changes to LDAP user's attributes will be updated. Attributes will only be updated the first time the user is created.
-
-  .. _`Knowledge Base Article 5823061`: https://access.redhat.com/solutions/5823061
 

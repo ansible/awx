@@ -5,7 +5,7 @@ Improving Controller Performance
 .. index::
    pair: performance; controller
 
-This section aims to provide the guidelines for tuning |at| for performance and scalability. Although care has been given to make the content applicable to cover a wide set of use cases, please reach out to Red Hat Support if there is a use case not covered here.
+This section aims to provide the guidelines for tuning |at| for performance and scalability.
 
 .. _ag_performance_improvements:
 
@@ -229,7 +229,7 @@ Capacity planning for Operator based Deployments
 .. index::
    pair: Operator; deployment
 
-For Operator based deployments, refer to `Red Hat Ansible Automation Platform Performance Considerations for Operator Based Installations <https://access.redhat.com/documentation/en-us/red_hat_ansible_automation_platform/2.3/html/red_hat_ansible_automation_platform_performance_considerations_for_operator_based_installations/index>`_, which includes all pertinent adjustments for that specific deployment.
+For Operator based deployments, refer to `Ansible AWX Operator documentation <https://ansible.readthedocs.io/projects/awx-operator>`_.
 
 
 Monitoring Controller
@@ -245,9 +245,7 @@ Monitoring the actual CPU and memory utilization of your hosts is important beca
 
 If CPU or memory usage is very high, consider lowering the capacity adjustment on affected instances in the controller. This will limit how many jobs are run on or controlled by this instance.
 
-Using this in combination with application level metrics can help identify what was happening in the application when and if any service degradation occurred. Especially when working with Red Hat support or account teams, having information about |at|’s performance over time can be very useful in diagnosing problems or doing capacity planning for future growth.
-
-Additional insights into automation usage are available when users enable data collection for Automation Analytics. Refer to the product documentation for `Automation analytics and Red Hat Insights for Red Hat Ansible Automation Platform <https://www.ansible.com/products/insights-for-ansible>`_ for more detail.
+Using this in combination with application level metrics can help identify what was happening in the application when and if any service degradation occurred. Having information about |at|’s performance over time can be very useful in diagnosing problems or doing capacity planning for future growth.
 
 
 Database Settings

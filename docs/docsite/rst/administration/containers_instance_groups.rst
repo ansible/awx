@@ -356,8 +356,6 @@ You may provide additional customizations, if needed. Click **Expand** to view t
 
 	The image used at job launch time is determined by which |ee| is associated with the job. If a Container Registry credential is associated with the |ee|, then the controller will attempt to make a ``ImagePullSecret`` to pull the image. If you prefer not to give the service account permission to manage secrets, you must pre-create the ``ImagePullSecret`` and specify it on the pod spec, and omit any credential from the |ee| used.
 
-	Refer to the *Allowing Pods to Reference Images from Other Secured Registries* section of the `Red Hat Container Registry Authentication article <https://access.redhat.com/RegistryAuthentication>`_ for more information on how to create image pull secrets.
-
 Once the container group is successfully created, the **Details** tab of the newly created container group remains, which allows you to review and edit your container group information. This is the same menu that is opened if the Edit (|edit-button|) button is clicked from the **Instance Group** link. You can also edit **Instances** and review **Jobs** associated with this instance group.
 
 .. |edit-button| image:: ../common/images/edit-button.png

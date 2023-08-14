@@ -103,9 +103,7 @@ SAML allows the exchange of authentication and authorization data between an Ide
 
 .. image:: ../common/images/configure-tower-auth-saml-topology.png
 
-The following instructions describe |at| as the service provider. To authenticate users through RHSSO (keycloak), refer to the `Red Hat Single Sign On Integration with the Automation Controller`_ blog.
-
-.. _`Red Hat Single Sign On Integration with the Automation Controller`: https://www.ansible.com/blog/red-hat-single-sign-on-integration-with-ansible-tower
+The following instructions describe |at| as the service provider.
 
 To setup SAML authentication:
 

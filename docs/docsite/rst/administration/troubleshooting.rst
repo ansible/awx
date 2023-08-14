@@ -17,8 +17,6 @@ Error logs
 
 The controller server errors are logged in ``/var/log/tower``. Supervisors logs can be found in ``/var/log/supervisor/``. Nginx web server errors are logged in the httpd error log. Configure other controller logging needs in ``/etc/tower/conf.d/``.
 
-Explore client-side issues using the JavaScript console built into most browsers and report any errors to Ansible via the Red Hat Customer portal at https://access.redhat.com/.
-
 
 .. _admin_troubleshooting_sosreport:
 
@@ -27,11 +25,7 @@ sosreport
 .. index::
    pair: troubleshooting; sosreport
 
-The ``sosreport`` is a utility that collects diagnostic information for Support to be able to use to analyze and investigate the issues you report. To properly provide Technical Support this information, refer to the `Knowledgebase article for sosreport <https://access.redhat.com/solutions/3592>`_ from the Red Hat Customer portal to perform the following procedures:
-
-1. `Install the sosreport <https://access.redhat.com/solutions/3592#install>`_ utility.
-2. `Generate an sosreport <https://access.redhat.com/solutions/3592#command>`_.
-3. Provide the sosreport to Red Hat Support.
+The ``sosreport`` is a utility that collects diagnostic information for root cause analysis.
 
 
 Problems connecting to your host
