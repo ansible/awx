@@ -1004,8 +1004,6 @@ Red Hat Satellite 6
 
 If you encounter an issue with the controller inventory not having the "related groups" from Satellite, you might need to define these variables in the inventory source. See the inventory plugins template example for :ref:`ir_plugin_satellite` in the |atir| for detail.
 
-If you see the message, ``"no foreman.id" variable(s) when syncing the inventory``, refer to the solution on the Red Hat Customer Portal at: https://access.redhat.com/solutions/5826451. Be sure to login with your customer credentials to access the full article.
-
 
 .. _ug_source_insights:
 

@@ -455,8 +455,6 @@ You can create different repos with different namespaces/collections in them. Bu
 
 .. image:: ../common/images/projects-create-ah-credential.png
 
-Refer to `Managing Red Hat Certified and Ansible Galaxy Collections in Ansible Hub <https://access.redhat.com/documentation/en-us/red_hat_ansible_automation_platform/1.2/html/managing_red_hat_certified_and_ansible_galaxy_collections_in_automation_hub/index>`_ for |ah| UI-specific instructions.
-
 5. Navigate to the organization for which you want to be able to sync content from |ah| and add the new |ah| credential to the organization. This step allows you to associate each organization with the |ah| credential (i.e. repo) that you want to be able to use content from.
 
 .. image:: ../common/images/projects-organizations-add-ah-credential.png
@@ -470,8 +468,6 @@ Refer to `Managing Red Hat Certified and Ansible Galaxy Collections in Ansible H
   - *Stage*: ``Namespace 1`` with only collection ``A`` so: ``namespace1.collectionA:v1.5.0`` on |ah|, you will have a repo URL for *Prod* and *Stage*.
 
   You can create an |ah| credential for each one. Then you can assign different levels of access to different organizations. For example, you can create a Developers organization has access to both repos, while an Operations organization just has access to the |ah| **Prod** repo only.
-
-  Refer to `Managing User Access in Ansible Hub <https://access.redhat.com/documentation/en-us/red_hat_ansible_automation_platform/1.0/html/managing_user_access_in_automation_hub/index>`_ for |ah| UI-specific instructions.
 
 6. If the |ah| has self-signed certificates, click the toggle to enable the setting **Ignore Ansible Galaxy SSL Certificate Verification**. For **public Automation Hub**, which uses a signed certificate, click the toggle to disable it instead. Note this is a global setting:
 

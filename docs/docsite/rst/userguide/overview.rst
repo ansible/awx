@@ -207,7 +207,7 @@ Container Platform Support
 .. index::
    pair: features; container support
 
-|aap| is available as a containerized pod service for Red Hat OpenShift Container Platform that can be scaled up and down easily as needed.
+|aap| is available as a containerized pod service for Kubernetes environments that can be scaled up and down easily as needed.
 
 
 Workflow Enhancements

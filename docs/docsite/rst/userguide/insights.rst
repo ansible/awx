@@ -34,9 +34,7 @@ To create a new credential for use with Insights:
 
 .. image:: ../common/images/credential-types-popup-window-insights.png
 
-7. Enter a valid Insights credential in the **Username** and **Password** fields. The Insights credential is the user's `Red Hat Customer Portal`_ account username and password.
-
-	.. _`Red Hat Customer Portal`: https://access.redhat.com
+7. Enter a valid Insights credential in the **Username** and **Password** fields.
 
 |Credentials - create with demo insights credentials|
 
