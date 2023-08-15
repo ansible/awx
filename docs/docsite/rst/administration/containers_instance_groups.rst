@@ -303,7 +303,7 @@ Container Groups
    single: container groups
    pair: containers; instance groups
 
-|aap| supports :term:`Container Groups`, which allow you to execute jobs in the controller regardless of whether the controller is installed as a standalone, in  a virtual environment, or in a container. Container groups act as a pool of resources within a virtual environment. You can create instance groups to point to an OpenShift container, which are job environments that are provisioned on-demand as a Pod that exists only for the duration of the playbook run. This is known as the ephemeral execution model and ensures a clean environment for every job run.
+AWX supports :term:`Container Groups`, which allow you to execute jobs in the controller regardless of whether the controller is installed as a standalone, in  a virtual environment, or in a container. Container groups act as a pool of resources within a virtual environment. You can create instance groups to point to an OpenShift container, which are job environments that are provisioned on-demand as a Pod that exists only for the duration of the playbook run. This is known as the ephemeral execution model and ensures a clean environment for every job run.
 
 In some cases, it is desirable to have container groups be "always-on", which is configured through the creation of an instance.
 
@@ -340,7 +340,7 @@ To create a container group:
 Customize the Pod spec
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-|aap| provides a simple default Pod specification, however, you can provide a custom YAML (or JSON) document that overrides the default Pod spec. This field uses any custom fields (i.e. ``ImagePullSecrets``) that can be "serialized" as valid Pod JSON or YAML. A full list of options can be found in the `OpenShift documentation <https://docs.openshift.com/online/pro/architecture/core_concepts/pods_and_services.html>`_.
+AWX provides a simple default Pod specification, however, you can provide a custom YAML (or JSON) document that overrides the default Pod spec. This field uses any custom fields (i.e. ``ImagePullSecrets``) that can be "serialized" as valid Pod JSON or YAML. A full list of options can be found in the `OpenShift documentation <https://docs.openshift.com/online/pro/architecture/core_concepts/pods_and_services.html>`_.
 
 To customize the Pod spec, specify the namespace in the **Pod Spec Override** field by using the toggle to enable and expand the **Pod Spec Override** field and click **Save** when done.
 

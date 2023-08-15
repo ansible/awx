@@ -92,9 +92,6 @@ rst_epilog = """
 .. |Ees| replace:: Execution environments
 .. |ee| replace:: execution environment
 .. |ees| replace:: execution environments
-.. |atversion| replace:: Automation Controller Version %s
-.. |atversionshort| replace:: Automation Controller v%s
-.. |atversionshortest| replace:: Automation Controller %s
 .. |versionshortest| replace:: v%s
 .. [pubdateshort| replace:: %s
 .. |pubdate| replace:: %s
@@ -102,7 +99,5 @@ rst_epilog = """
 .. |rhaa| replace:: Red Hat Ansible Automation
 .. |rhaap| replace:: Red Hat Ansible Automation Platform
 .. |RHAT| replace:: Red Hat Ansible Automation Platform controller
-.. |atng| replace:: Automation Controller Networking Guide
-.. |atn| replace:: Controller Networking
 
 """ % (version, version, shortversion, version, pubdateshort, pubdate)

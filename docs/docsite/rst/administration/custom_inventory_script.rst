@@ -15,7 +15,7 @@ If you use custom inventory scripts, migrate to sourcing these scripts from a pr
 
 If you are migrating to |ees|, see:
 
-- :ref:`upgrade_venv`
+- :ref:`upgrade_venv` 
 - :ref:`mesh_topology_ee` in the |atumg| to validate your topology
 
 If you already have a mesh topology set up and want to view node type, node health, and specific details about each node, see :ref:`ag_topology_viewer` later in this guide.

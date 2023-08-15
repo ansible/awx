@@ -1,8 +1,8 @@
 .. _ag_custom_rebranding:
 
-*******************************************
-Using Custom Logos in automation controller
-*******************************************
+***************************
+Using Custom Logos in AWX
+***************************
 
 .. index::
    single: custom logo

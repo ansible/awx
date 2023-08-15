@@ -500,10 +500,9 @@ The following ways you can modify your nodes:
 This button only appears in the right hand panel if the target or child node has more than one parent. All nodes must be linked to at least one other node at all times so you must create a new link before removing an old one.
 
 
-Click the settings icon (|settings|) to zoom, pan, or reposition the view. Alternatively, you can drag the workflow diagram to reposition it on the screen or use the scroll on your mouse to zoom.
+Click the Tools icon (|tools|) to zoom, pan, or reposition the view. Alternatively, you can drag the workflow diagram to reposition it on the screen or use the scroll on your mouse to zoom.
 
-.. |settings| image:: ../common/images/settings.png
-
+.. |tools| image:: ../common/images/tools.png
 
 
 

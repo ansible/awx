@@ -15,7 +15,7 @@ Clustering is sharing load between hosts. Each instance should be able to act as
 
 Each instance should be able to join the controller cluster and expand its ability to execute jobs. This is a simple system where jobs can and will run anywhere rather than be directed on where to run. Also, clustered instances can be grouped into different pools/queues, called :ref:`ag_instance_groups`.
 
-|aap| supports container-based clusters using Kubernetes, meaning new controller instances can be installed on this platform without any variation or diversion in functionality. You can create instance groups to point to a Kubernetes container. For more detail, see the :ref:`ag_ext_exe_env` section.
+AWX supports container-based clusters using Kubernetes, meaning new controller instances can be installed on this platform without any variation or diversion in functionality. You can create instance groups to point to a Kubernetes container. For more detail, see the :ref:`ag_ext_exe_env` section.
 
 
 **Supported Operating Systems**
@@ -24,11 +24,10 @@ Each instance should be able to join the controller cluster and expand its abili
    single: clustering; operating systems
    pair: clustering; RHEL
    pair: clustering; Centos
-   pair: clustering; Ubuntu
 
 The following operating systems are supported for establishing a clustered environment:
 
-- |rhel| 7 or later (RHEL8 recommended, can be either RHEL 7 or Centos 7 instances)
+- |rhel| 8 or later (RHEL9 recommended)
 
 
 .. note::
@@ -168,7 +167,7 @@ The way jobs are run and reported to a 'normal' user of controller does not chan
 
 |Controller Cluster example|
 
-.. |Controller Cluster example| image:: ../common/images/tower-clustering-visual.png
+.. |Controller Cluster example| image:: ../common/images/clustering-visual.png
 
 - Project updates run successfully on any instance that could potentially run a job. Projects will sync themselves to the correct version on the instance immediately prior to running the job. If the needed revision is already locally checked out and Galaxy or Collections updates are not needed, then a sync may not be performed. 
 

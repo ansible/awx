@@ -2,7 +2,7 @@
 |at| supports the use of a custom logo. You can add a custom logo by uploading an image; and supply a custom login message from the **User Interface settings** of the Settings menu. 
 
 
-.. image:: ../common/images/configure-tower-ui.png 
+.. image:: ../common/images/configure-awx-ui.png 
 
 
 

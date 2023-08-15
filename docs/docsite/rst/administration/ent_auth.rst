@@ -52,9 +52,9 @@ To set up enterprise authentication for Microsoft Azure Active Directory (AD), y
 
 7. Click **Save** when done.
 
-8. To verify that the authentication was configured correctly, logout of |at| and the login screen will now display the Microsoft Azure logo to allow logging in with those credentials.
+8. To verify that the authentication was configured correctly, logout of AWX and the login screen will now display the Microsoft Azure logo to allow logging in with those credentials.
 
-.. image:: ../common/images/configure-tower-auth-azure-logo.png
+.. image:: ../common/images/configure-awx-auth-azure-logo.png
 
 
 For application registering basics in Azure AD, refer to the `Azure AD Identity Platform (v2)`_ overview. 
@@ -77,7 +77,7 @@ RADIUS settings
     pair: authentication; RADIUS Authentication Settings
 
 
-|at| can be configured to centrally use RADIUS as a source for authentication information.
+AWX can be configured to centrally use RADIUS as a source for authentication information.
 
 1. Click **Settings** from the left navigation bar.
 
@@ -99,11 +99,11 @@ SAML settings
     pair: authentication; SAML Service Provider
 
 
-SAML allows the exchange of authentication and authorization data between an Identity Provider (IdP - a system of servers that provide the Single Sign On service) and a Service Provider (in this case, |at|). |at| can be configured to talk with SAML in order to authenticate (create/login/logout) controller users. User Team and Organization membership can be embedded in the SAML response to the controller. 
+SAML allows the exchange of authentication and authorization data between an Identity Provider (IdP - a system of servers that provide the Single Sign On service) and a Service Provider (in this case, AWX). AWX can be configured to talk with SAML in order to authenticate (create/login/logout) controller users. User Team and Organization membership can be embedded in the SAML response to the controller. 
 
-.. image:: ../common/images/configure-tower-auth-saml-topology.png
+.. image:: ../common/images/configure-awx-auth-saml-topology.png
 
-The following instructions describe |at| as the service provider.
+The following instructions describe AWX as the service provider. 
 
 To setup SAML authentication:
 
@@ -121,7 +121,7 @@ To setup SAML authentication:
 
 In this example, the Service Provider is the controller cluster, and therefore, the ID is set to the controller Cluster FQDN. 
 
-.. image:: ../common/images/configure-tower-auth-saml-spentityid.png
+.. image:: ../common/images/configure-awx-auth-saml-spentityid.png
 
 5. Create a server certificate for the Ansible cluster. Typically when an Ansible cluster is configured, the controller nodes will be configured to handle HTTP traffic only and the load balancer will be an SSL Termination Point. In this case, an SSL certificate is required for the load balancer, and not for the individual controller Cluster Nodes. SSL can either be enabled or disabled per individual controller node, but should be disabled when using an SSL terminated load balancer. It is recommended to use a non-expiring self signed certificate to avoid periodically updating certificates. This way, authentication will not fail in case someone forgets to update the certificate.
 
@@ -131,7 +131,7 @@ In this example, the Service Provider is the controller cluster, and therefore, 
 
 If you are using a CA bundle with your certificate, include the entire bundle in this field.
 
-.. image:: ../common/images/configure-tower-auth-saml-cert.png
+.. image:: ../common/images/configure-awx-auth-saml-cert.png
 
 As an example for public certs:
 
@@ -166,7 +166,7 @@ As an example for private keys:
 
 For example:
 
-.. image:: ../common/images/configure-tower-auth-saml-org-info.png
+.. image:: ../common/images/configure-awx-auth-saml-org-info.png
 
 .. note:: 
    These fields are required in order to properly configure SAML within the controller.
@@ -182,7 +182,7 @@ For example:
 
 For example:
 
-.. image:: ../common/images/configure-tower-auth-saml-techcontact-info.png
+.. image:: ../common/images/configure-awx-auth-saml-techcontact-info.png
 
 9. Provide the IdP with the support contact information in the **SAML Service Provider Support Contact** field. Do not remove the contents of this field.
 
@@ -195,7 +195,7 @@ For example:
 
 For example:
 
-.. image:: ../common/images/configure-tower-auth-saml-suppcontact-info.png
+.. image:: ../common/images/configure-awx-auth-saml-suppcontact-info.png
 
 10. In the **SAML Enabled Identity Providers** field, provide information on how to connect to each Identity Provider listed. The controller expects the following SAML attributes in the example below:
 
@@ -237,7 +237,7 @@ Configure the required keys for each IDp:
     }
   }
 
-.. image:: ../common/images/configure-tower-auth-saml-idps.png
+.. image:: ../common/images/configure-awx-auth-saml-idps.png
 
 .. warning::
 
@@ -248,7 +248,7 @@ Configure the required keys for each IDp:
 
     The IdP provides the email, last name and firstname using the well known SAML urn. The IdP uses a custom SAML attribute to identify a user, which is an attribute that the controller is unable to read. Instead, the controller can understand the unique identifier name, which is the URN. Use the URN listed in the SAML “Name” attribute for the user attributes as shown in the example below.
 
-    .. image:: ../common/images/configure-tower-auth-saml-idps-urn.png
+    .. image:: ../common/images/configure-awx-auth-saml-idps-urn.png
 
 11. Optionally provide the **SAML Organization Map**. For further detail, see :ref:`ag_org_team_maps`.
 
@@ -459,7 +459,7 @@ If ``role`` and ``attr`` are both specified for either ``superuser`` or ``system
 | Yes                   | Yes       | Unset                       | False       | True          | Yes        |
 +-----------------------+-----------+-----------------------------+-------------+---------------+------------+
 
-Each time a SAML user authenticates to |at|, these checks will be performed and the user flags will be altered as needed. If ``System Administrator`` or ``System Auditor`` is set for a SAML user within the UI, the SAML adapter will override the UI setting based on the rules above. If you would prefer that the user flags for SAML users do not get removed when a SAML user logs in, you can set the ``remove_`` flag to ``false``. With the remove flag set to ``false``, a user flag set to ``true`` through either the UI, API or SAML adapter will not be removed. However, if a user does not have the flag, and the above rules determine the flag should be added, it will be added, even if the flag is ``false``.
+Each time a SAML user authenticates to AWX, these checks will be performed and the user flags will be altered as needed. If ``System Administrator`` or ``System Auditor`` is set for a SAML user within the UI, the SAML adapter will override the UI setting based on the rules above. If you would prefer that the user flags for SAML users do not get removed when a SAML user logs in, you can set the ``remove_`` flag to ``false``. With the remove flag set to ``false``, a user flag set to ``true`` through either the UI, API or SAML adapter will not be removed. However, if a user does not have the flag, and the above rules determine the flag should be added, it will be added, even if the flag is ``false``.
 
 Example::
 
@@ -476,9 +476,9 @@ Example::
 
 19. To verify that the authentication was configured correctly, load the auto-generated URL found in the **SAML Service Provider Metadata URL** into a browser. It should output XML output, otherwise, it is not configured correctly. 
 
-    Alternatively,  logout of |at| and the login screen will now display the SAML logo to indicate it as a alternate method of logging into |at|.
+    Alternatively,  logout of AWX and the login screen will now display the SAML logo to indicate it as a alternate method of logging into AWX.
 
-    .. image:: ../common/images/configure-tower-auth-saml-logo.png
+    .. image:: ../common/images/configure-awx-auth-saml-logo.png
 
 
 Transparent SAML Logins
@@ -494,13 +494,13 @@ For transparent logins to work, you must first get IdP-initiated logins to work.
 
 2. Once this is working, specify the redirect URL for non-logged-in users to somewhere other than the default controller login page by using the **Login redirect override URL** field in the Miscellaneous Authentication settings window of the **Settings** menu, accessible from the left navigation bar. This should be set to ``/sso/login/saml/?idp=<name-of-your-idp>`` for transparent SAML login, as shown in the example.
 
-.. image:: ../common/images/configure-tower-system-login-redirect-url.png
+.. image:: ../common/images/configure-awx-system-login-redirect-url.png
 
 .. note::
 
     The above is a sample of a typical IdP format, but may not be the correct format for your particular case. You may need to reach out to your IdP for the correct transparent redirect URL as that URL is not the same for all IdPs.
 
-3. After transparent SAML login is configured, to log in using local credentials or a different SSO, go directly to ``https://<your-tower-server>/login``.  This provides the standard controller login page, including SSO authentication buttons, and allows you to log in with any configured method.
+3. After transparent SAML login is configured, to log in using local credentials or a different SSO, go directly to ``https://<your-awx-server>/login``.  This provides the standard controller login page, including SSO authentication buttons, and allows you to log in with any configured method.
 
 
 Enabling Logging for SAML
@@ -518,7 +518,7 @@ TACACS+ settings
     pair: authentication; TACACS+ Authentication Settings
 
 
-Terminal Access Controller Access-Control System Plus (TACACS+) is a protocol that handles remote authentication and related services for networked access control through a centralized server. In particular, TACACS+ provides authentication, authorization and accounting (AAA) services, in which you can configure |at| to use as a source for authentication.
+Terminal Access Controller Access-Control System Plus (TACACS+) is a protocol that handles remote authentication and related services for networked access control through a centralized server. In particular, TACACS+ provides authentication, authorization and accounting (AAA) services, in which you can configure AWX to use as a source for authentication.
 
 .. note::
 
@@ -536,7 +536,7 @@ Terminal Access Controller Access-Control System Plus (TACACS+) is a protocol th
 - **TACACS+ Auth Session Timeout**: Session timeout value in seconds. The default is 5 seconds.
 - **TACACS+ Authentication Protocol**: The protocol used by TACACS+ client. Options are **ascii** or **pap**.
 
-.. image:: ../common/images/configure-tower-auth-tacacs.png
+.. image:: ../common/images/configure-awx-auth-tacacs.png
 
 4. Click **Save** when done.
 
@@ -562,7 +562,7 @@ To configure OIDC in controller:
 
 The example below shows specific values associated to GitHub as the generic IdP:
 
- .. image:: ../common/images/configure-tower-auth-oidc.png
+ .. image:: ../common/images/configure-awx-auth-oidc.png
 
 4. Click **Save** when done.
 
@@ -571,7 +571,7 @@ The example below shows specific values associated to GitHub as the generic IdP:
 
     There is currently no support for team and organization mappings for OIDC at this time. The OIDC adapter does authentication only and not authorization. In other words, it is only capable of authenticating whether this user is who they say they are, not authorizing what this user is allowed to do. Configuring generic OIDC creates the UserID appended with an ID/key to differentiate the same user ID originating from two different sources and therefore, considered different users. So one will get an ID of just the user name and the second will be the ``username-<random number>``.
 
-5. To verify that the authentication was configured correctly, logout of |at| and the login screen will now display the OIDC logo to indicate it as a alternate method of logging into |at|.
+5. To verify that the authentication was configured correctly, logout of AWX and the login screen will now display the OIDC logo to indicate it as a alternate method of logging into AWX.
 
- .. image:: ../common/images/configure-tower-auth-oidc-logo.png
+ .. image:: ../common/images/configure-awx-auth-oidc-logo.png
 

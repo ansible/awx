@@ -14,11 +14,9 @@ Changing the Default Timeout for Authentication
 
 The default length of time, in seconds, that your supplied token is valid can be changed in the System Settings screen of the controller user interface:
 
-1. From the Settings (|settings|) Menu screen, click **System**. 
+1. Click the **Settings** from the left navigation bar.  
 
-.. |settings| image:: ../common/images/settings.png
-
-2. Click **Miscellaneous Authentication settings** under the System settings.
+3. Click **Miscellaneous Authentication settings** under the System settings.
 
 3. Click **Edit**.
 
