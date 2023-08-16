@@ -22,7 +22,7 @@ $(UI_NEXT_DIR)/build:
 	@$(MAKE) $(UI_NEXT_DIR)/src/build/awx
 	@echo "=== Copying $(UI_NEXT_DIR)/src/build to $(UI_NEXT_DIR)/build ==="
 	@rm -rf $(UI_NEXT_DIR)/build
-	@cp -r $(UI_NEXT_DIR)/src/build $(UI_NEXT_DIR)
+	@cp -r $(UI_NEXT_DIR)/src/build $(UI_NEXT_DIR) && mv build/awx/index.html build/awx/index_awx.html
 	@echo "=== Done building $(UI_NEXT_DIR)/build ==="
 
 .PHONY: ui-next/src/build
