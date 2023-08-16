@@ -830,13 +830,15 @@ def convert_mem_str_to_bytes(mem_str):
 
 def get_corrected_memory(memory, node_type=None):
     from django.conf import settings
+    from awx.main.models.ha import Instance
 
     settings_absmem = getattr(settings, 'SYSTEM_TASK_ABS_MEM', None)
     env_absmem = os.getenv('SYSTEM_TASK_ABS_MEM', None)
 
     # Runner returns memory in bytes
     # so we convert memory from settings to bytes as well.
-    if node_type == 'execution':
+
+    if node_type == Instance.Types.EXECUTION:
         return memory
     if env_absmem is not None:
         return convert_mem_str_to_bytes(env_absmem)
