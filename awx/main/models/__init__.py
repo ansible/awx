@@ -3,6 +3,7 @@
 
 # Django
 from django.conf import settings  # noqa
+from django.db import connection
 from django.db.models.signals import pre_delete  # noqa
 
 # AWX
@@ -97,6 +98,58 @@ User.add_to_class('get_queryset', get_user_queryset)
 User.add_to_class('can_access', check_user_access)
 User.add_to_class('can_access_with_errors', check_user_access_with_errors)
 User.add_to_class('accessible_objects', user_accessible_objects)
+
+
+def convert_jsonfields():
+    if connection.vendor != 'postgresql':
+        return
+
+    # fmt: off
+    fields = [
+        ('main_activitystream', 'id', (
+            'deleted_actor',
+            'setting',
+        )),
+        ('main_job', 'unifiedjob_ptr_id', (
+            'survey_passwords',
+        )),
+        ('main_joblaunchconfig', 'id', (
+            'char_prompts',
+            'survey_passwords',
+        )),
+        ('main_notification', 'id', (
+            'body',
+        )),
+        ('main_unifiedjob', 'id', (
+            'job_env',
+        )),
+        ('main_workflowjob', 'unifiedjob_ptr_id', (
+            'char_prompts',
+            'survey_passwords',
+        )),
+        ('main_workflowjobnode', 'id', (
+            'char_prompts',
+            'survey_passwords',
+        )),
+    ]
+    # fmt: on
+
+    with connection.cursor() as cursor:
+        for table, pkfield, columns in fields:
+            # Do the renamed old columns still exist?  If so, run the task.
+            old_columns = ','.join(f"'{column}_old'" for column in columns)
+            cursor.execute(
+                f"""
+                select count(1) from information_schema.columns
+                where
+                  table_name = %s and column_name in ({old_columns});
+                """,
+                (table,),
+            )
+            if cursor.fetchone()[0]:
+                from awx.main.tasks.system import migrate_jsonfield
+
+                migrate_jsonfield.apply_async([table, pkfield, columns])
 
 
 def cleanup_created_modified_by(sender, **kwargs):

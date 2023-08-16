@@ -495,7 +495,6 @@ class TentativePage(str):
 class PageCache(object):
     def __init__(self):
         self.options = {}
-        self.post_fields = {}
         self.pages_by_url = {}
         self.pages_by_natural_key = {}
 
@@ -516,29 +515,6 @@ class PageCache(object):
             return self.options.setdefault(url, None)
 
         return self.options.setdefault(url, options)
-
-    def get_post_fields(self, page):
-        url = page.endpoint if isinstance(page, Page) else str(page)
-        key = get_registered_page(url)
-        if key in self.post_fields:
-            return self.post_fields[key]
-
-        options_page = self.get_options(page)
-
-        if options_page is None:
-            return None
-
-        if 'POST' not in options_page.r.headers.get('Allow', ''):
-            return None
-
-        if 'POST' in options_page.json['actions']:
-            post_fields = options_page.json['actions']['POST']
-        else:
-            log.warning("Insufficient privileges on %s, inferring POST fields from description.", options_page.endpoint)
-            post_fields = utils.parse_description(options_page.json['description'])
-        self.post_fields[key] = post_fields
-
-        return post_fields
 
     def set_page(self, page):
         log.debug("set_page: %s %s", type(page), page.endpoint)

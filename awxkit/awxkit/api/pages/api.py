@@ -162,7 +162,7 @@ class ApiV2(base.Base):
                 export_key = 'create_approval_template'
                 rel_option_endpoint = _page.related.get('create_approval_template')
 
-            rel_post_fields = self._cache.get_post_fields(rel_option_endpoint)
+            rel_post_fields = utils.get_post_fields(rel_option_endpoint, self._cache)
             if rel_post_fields is None:
                 log.debug("%s is a read-only endpoint.", rel_endpoint)
                 continue
@@ -202,7 +202,7 @@ class ApiV2(base.Base):
         return utils.remove_encrypted(fields)
 
     def _export_list(self, endpoint):
-        post_fields = self._cache.get_post_fields(endpoint)
+        post_fields = utils.get_post_fields(endpoint, self._cache)
         if post_fields is None:
             return None
 
@@ -267,7 +267,7 @@ class ApiV2(base.Base):
 
     def _import_list(self, endpoint, assets):
         log.debug("_import_list -- endpoint: %s, assets: %s", endpoint.endpoint, repr(assets))
-        post_fields = self._cache.get_post_fields(endpoint)
+        post_fields = utils.get_post_fields(endpoint, self._cache)
 
         changed = False
 
