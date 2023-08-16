@@ -5,9 +5,12 @@ UI_NEXT_DIR := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
 #  NOTE: you will not be able to build within the docker-compose development environment if you use this option
 UI_NEXT_LOCAL ?=
 
-# Git repo and branch to the UI_NEXT repo
+## Git repo and branch to the UI_NEXT repo
 UI_NEXT_GIT_REPO ?= https://github.com/ansible/ansible-ui.git
 UI_NEXT_GIT_BRANCH ?= main
+
+## Product name to display on the UI used in UI_NEXT build process
+PRODUCT ?= AWX
 
 .PHONY: ui-next
 ## Default build target of ui-next Makefile, builds ui-next/build
@@ -32,7 +35,7 @@ ui-next/src/build: $(UI_NEXT_DIR)/src/build/awx
 ## True target for ui-next/src/build. Build ui_next from source.
 $(UI_NEXT_DIR)/src/build/awx: $(UI_NEXT_DIR)/src $(UI_NEXT_DIR)/src/node_modules/webpack
 	@echo "=== Building ui_next ==="
-	@cd $(UI_NEXT_DIR)/src && npm run build:awx
+	@cd $(UI_NEXT_DIR)/src && PRODUCT=$(PRODUCT) PUBLIC_PATH=/static/awx npm run build:awx
 
 .PHONY: ui-next/src
 ## Clone or link src of UI_NEXT to ui-next/src, will re-clone/link/update if necessary.
