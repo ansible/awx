@@ -333,7 +333,7 @@ python-ldap==3.4.3
     #   django-auth-ldap
 python-string-utils==1.0.0
     # via openshift
-python-tss-sdk==1.0.0
+python-tss-sdk==1.2.1
     # via -r /awx_devel/requirements/requirements.in
 python3-openid==3.2.0
     # via social-auth-core
