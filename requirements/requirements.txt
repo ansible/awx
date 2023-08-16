@@ -380,8 +380,6 @@ rsa==4.9
     #   python-jose
 s3transfer==0.6.0
     # via boto3
-schedule==0.6.0
-    # via -r /awx_devel/requirements/requirements.in
 semantic-version==2.10.0
     # via setuptools-rust
 service-identity==21.1.0

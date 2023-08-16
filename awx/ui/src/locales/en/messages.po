@@ -8722,8 +8722,8 @@ msgid "Skipped"
 msgstr "Skipped"
 
 #: components/StatusLabel/StatusLabel.js:50
-msgid "Skipped'"
-msgstr "Skipped'"
+msgid "Skipped"
+msgstr "Skipped"
 
 #: components/NotificationList/NotificationList.js:200
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.js:141

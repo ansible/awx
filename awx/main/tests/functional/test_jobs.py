@@ -6,6 +6,7 @@ import json
 from awx.main.models import (
     Job,
     Instance,
+    Host,
     JobHostSummary,
     InventoryUpdate,
     InventorySource,
@@ -18,6 +19,9 @@ from awx.main.models import (
     ExecutionEnvironment,
 )
 from awx.main.tasks.system import cluster_node_heartbeat
+from awx.main.tasks.facts import update_hosts
+
+from django.db import OperationalError
 from django.test.utils import override_settings
 
 
@@ -110,6 +114,51 @@ def test_job_notification_host_data(inventory, machine_credential, project, job_
     assert job.notification_data()['hosts'] == {
         'single-host': {'failed': True, 'changed': 1, 'dark': 2, 'failures': 3, 'ok': 4, 'processed': 3, 'skipped': 2, 'rescued': 1, 'ignored': 0}
     }
+
+
+@pytest.mark.django_db
+class TestAnsibleFactsSave:
+    current_call = 0
+
+    def test_update_hosts_deleted_host(self, inventory):
+        hosts = [Host.objects.create(inventory=inventory, name=f'foo{i}') for i in range(3)]
+        for host in hosts:
+            host.ansible_facts = {'foo': 'bar'}
+        last_pk = hosts[-1].pk
+        assert inventory.hosts.count() == 3
+        Host.objects.get(pk=last_pk).delete()
+        assert inventory.hosts.count() == 2
+        update_hosts(hosts)
+        assert inventory.hosts.count() == 2
+        for host in inventory.hosts.all():
+            host.refresh_from_db()
+            assert host.ansible_facts == {'foo': 'bar'}
+
+    def test_update_hosts_forever_deadlock(self, inventory, mocker):
+        hosts = [Host.objects.create(inventory=inventory, name=f'foo{i}') for i in range(3)]
+        for host in hosts:
+            host.ansible_facts = {'foo': 'bar'}
+        db_mock = mocker.patch('awx.main.tasks.facts.Host.objects.bulk_update')
+        db_mock.side_effect = OperationalError('deadlock detected')
+        with pytest.raises(OperationalError):
+            update_hosts(hosts)
+
+    def fake_bulk_update(self, host_list):
+        if self.current_call > 2:
+            return Host.objects.bulk_update(host_list, ['ansible_facts', 'ansible_facts_modified'])
+        self.current_call += 1
+        raise OperationalError('deadlock detected')
+
+    def test_update_hosts_resolved_deadlock(self, inventory, mocker):
+        hosts = [Host.objects.create(inventory=inventory, name=f'foo{i}') for i in range(3)]
+        for host in hosts:
+            host.ansible_facts = {'foo': 'bar'}
+        self.current_call = 0
+        mocker.patch('awx.main.tasks.facts.raw_update_hosts', new=self.fake_bulk_update)
+        update_hosts(hosts)
+        for host in inventory.hosts.all():
+            host.refresh_from_db()
+            assert host.ansible_facts == {'foo': 'bar'}
 
 
 @pytest.mark.django_db
