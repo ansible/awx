@@ -5386,7 +5386,7 @@ class InstanceSerializer(BaseSerializer):
 
     class Meta:
         model = Instance
-        read_only_fields = ('uuid', 'version')
+        read_only_fields = ('ip_address', 'uuid', 'version')
         fields = (
             'id',
             'hostname',
@@ -5548,15 +5548,6 @@ class InstanceSerializer(BaseSerializer):
         """
         if self.instance and self.instance.hostname != value:
             raise serializers.ValidationError(_("Cannot change hostname."))
-
-        return value
-
-    def validate_ip_address(self, value):
-        """
-        Cannot change ip address
-        """
-        if self.instance and self.instance.ip_address != value:
-            raise serializers.ValidationError(_("Cannot change ip_address."))
 
         return value
 

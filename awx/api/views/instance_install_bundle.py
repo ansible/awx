@@ -126,8 +126,7 @@ def generate_inventory_yml(instance_obj):
 def generate_group_vars_all_yml(instance_obj):
     peers = []
     for instance in instance_obj.peers.all():
-        host_or_ip = instance.ip_address or instance.hostname
-        peers.append(dict(host=host_or_ip, port=instance.listener_port))
+        peers.append(dict(host=instance.hostname, port=instance.listener_port))
     all_yaml = render_to_string("instance_install_bundle/group_vars/all.yml", context=dict(instance=instance_obj, peers=peers))
     # convert consecutive newlines with a single newline
     return re.sub(r'\n+', '\n', all_yaml)
