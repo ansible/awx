@@ -35,7 +35,7 @@ ui-next/src/build: $(UI_NEXT_DIR)/src/build/awx
 ## True target for ui-next/src/build. Build ui_next from source.
 $(UI_NEXT_DIR)/src/build/awx: $(UI_NEXT_DIR)/src $(UI_NEXT_DIR)/src/node_modules/webpack
 	@echo "=== Building ui_next ==="
-	@cd $(UI_NEXT_DIR)/src && PRODUCT="$(PRODUCT)" PUBLIC_PATH=/static/awx npm run build:awx
+	@cd $(UI_NEXT_DIR)/src && PRODUCT="$(PRODUCT)" PUBLIC_PATH=/static/awx/ npm run build:awx
 	@mv $(UI_NEXT_DIR)/src/build/awx/index.html $(UI_NEXT_DIR)/src/build/awx/index_awx.html
 
 .PHONY: ui-next/src
