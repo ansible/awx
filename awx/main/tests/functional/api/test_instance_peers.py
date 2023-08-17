@@ -166,15 +166,6 @@ class TestPeers:
             expect=400,
         )
 
-    def test_disallow_changing_ip_address(self, admin_user, patch):
-        hop = Instance.objects.create(hostname='hop', ip_address='10.10.10.10', node_type='hop')
-        patch(
-            url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
-            data={"ip_address": "12.12.12.12"},
-            user=admin_user,
-            expect=400,
-        )
-
     def test_disallow_changing_node_state(self, admin_user, patch):
         '''
         only allow setting to deprovisioning
@@ -214,7 +205,7 @@ class TestPeers:
         if a new node comes online, other peer relationships should
         remain intact
         '''
-        hop1 = Instance.objects.create(hostname='hop1', ip_address="10.10.10.10", node_type='hop', listener_port=6789, peers_from_control_nodes=True)
+        hop1 = Instance.objects.create(hostname='hop1', node_type='hop', listener_port=6789, peers_from_control_nodes=True)
         hop2 = Instance.objects.create(hostname='hop2', node_type='hop', listener_port=6789, peers_from_control_nodes=False)
         hop1.peers.add(hop2)
 
@@ -264,18 +255,6 @@ class TestPeers:
         assert has_peer(execution_vars, 'hop2:6789')
         assert not has_peer(execution_vars, 'hop1:6789')
         assert execution_vars.get('receptor_listener', False)
-
-    def test_group_vars_ip_address_over_hostname(self):
-        '''
-        test that ip_address has precedence over hostname in group_vars all.yml
-        '''
-        hop1 = Instance.objects.create(hostname='hop1', node_type='hop', listener_port=6789, peers_from_control_nodes=True)
-        hop2 = Instance.objects.create(hostname='hop2', ip_address="10.10.10.10", node_type='hop', listener_port=6789, peers_from_control_nodes=False)
-        hop1.peers.add(hop2)
-
-        hop1_vars = yaml.safe_load(generate_group_vars_all_yml(hop1))
-
-        assert has_peer(hop1_vars, "10.10.10.10:6789")
 
     def test_write_receptor_config_called(self):
         '''
