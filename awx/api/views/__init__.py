@@ -343,6 +343,7 @@ class InstanceDetail(RetrieveUpdateAPIView):
         # these fields are only valid on creation of an instance, so they unwanted on detail view
         data.pop('node_type', None)
         data.pop('hostname', None)
+        data.pop('ip_address', None)
         return super(InstanceDetail, self).update_raw_data(data)
 
     def update(self, request, *args, **kwargs):
