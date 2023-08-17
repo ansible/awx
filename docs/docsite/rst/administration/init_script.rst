@@ -1,7 +1,7 @@
 .. _ag_restart_tower:
 
-Starting, Stopping, and Restarting the Controller
--------------------------------------------------------------------
+Starting, Stopping, and Restarting AWX
+----------------------------------------
 
 .. index::
    single: controller admin utility script
@@ -14,7 +14,7 @@ Starting, Stopping, and Restarting the Controller
    single: restart controller
 
 
-|At| ships with an *admin utility script*, ``automation-controller-service``, that can start, stop, and restart all the controller services running on the current single controller node (including the message queue components, and the database if it is an integrated installation). External databases must be explicitly managed by the administrator. The services script resides in ``/usr/bin/automation-controller-service`` and can be invoked as follows:
+AWX contains an *admin utility script*, ``automation-controller-service``, that can start, stop, and restart all the controller services running on the current single controller node (including the message queue components, and the database if it is an integrated installation). External databases must be explicitly managed by the administrator. The services script resides in ``/usr/bin/automation-controller-service`` and can be invoked as follows:
 
 ::
 

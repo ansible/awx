@@ -10,7 +10,7 @@ Managing Capacity With Instances
    pair: remove;capacity
    pair: add;capacity
 
-Scaling your mesh is only available on Openshift deployments of |aap| and is possible through adding or removing nodes from your cluster dynamically, through the **Instances** resource of the |at| User Interface, without running the installation script.
+Scaling your mesh is only available on Openshift deployments of |aap| and is possible through adding or removing nodes from your cluster dynamically, through the **Instances** resource of the AWX User Interface, without running the installation script.
 
 Prerequisites
 ~~~~~~~~~~~~~~
@@ -29,7 +29,7 @@ Prerequisites
 	- If machine does not have access to the internet, refer to `Downloading a collection from Automation Hub <https://docs.ansible.com/ansible/latest/galaxy/user_guide.html#downloading-a-collection-from-automation-hub>`_ to configure `Automation Hub <https://console.redhat.com/ansible/automation-hub>`_ in Ansible Galaxy locally.
 
 
-- If you are using the default |ee| (provided with the controller) to run on remote execution nodes, you must add a pull secret in the controller that contains the credential for pulling the |ee| image. To do this, create a pull secret on the |aa| Controller namespace and configure the ``ee_pull_credentials_secret`` parameter in the Operator:
+- If you are using the default |ee| (provided with AWX) to run on remote execution nodes, you must add a pull secret in AWX that contains the credential for pulling the |ee| image. To do this, create a pull secret on the AWX namespace and configure the ``ee_pull_credentials_secret`` parameter in the Operator:
 
 	1. Create a secret:
 	::
@@ -41,7 +41,7 @@ Prerequisites
 
 	::
 
-		oc edit automationcontrollers <instance name>
+		oc edit awx <instance name>
 
 	2. Add ``ee_pull_credentials_secret ee-pull-secret`` to the spec:
 	::
@@ -49,7 +49,7 @@ Prerequisites
 		spec.ee_pull_credentials_secret=ee-pull-secret
 
 
-- To manage instances from the controller user interface, you must have System Administrator or System Auditor permissions.
+- To manage instances from the AWX user interface, you must have System Administrator or System Auditor permissions.
 
 
 Manage instances
@@ -86,7 +86,7 @@ From this page, you can add, remove or run health checks on your nodes. Use the 
 
 .. note::
 
-	You can still remove an instance even if it is active and jobs are running on it. The controller will attempt to wait for any jobs running on this node to complete before actually removing it.
+	You can still remove an instance even if it is active and jobs are running on it. AWXwill attempt to wait for any jobs running on this node to complete before actually removing it.
 
 Click **Remove** to confirm.
 
@@ -137,7 +137,7 @@ Upon successful creation, the Details of the created instance opens.
 
 .. note::
 
-	The proceeding steps 4-8 are intended to be ran from any computer that has SSH access to the newly created instance. It should not be ran from a machine that is part of the AAP deployment.
+	The proceeding steps 4-8 are intended to be ran from any computer that has SSH access to the newly created instance. 
 
 4. Click the download button next to the **Install Bundle** field to download the tarball that includes this new instance and the files relevant to install the node into the mesh.
 

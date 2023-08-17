@@ -5,9 +5,9 @@ User Authentication with Kerberos
     pair: user authentication; Kerberos
     pair: Kerberos; Active Directory (AD)
 
-User authentication via Active Directory (AD), also referred to as authentication through Kerberos, is supported through the |at|.
+User authentication via Active Directory (AD), also referred to as authentication through Kerberos, is supported through AWX.
 
-To get started, first set up the Kerberos packages in the controller system so that you can successfully generate a Kerberos ticket. To install the packages, use the following steps:
+To get started, first set up the Kerberos packages in AWX so that you can successfully generate a Kerberos ticket. To install the packages, use the following steps:
 
 ::
 

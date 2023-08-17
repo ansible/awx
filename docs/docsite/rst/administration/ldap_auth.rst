@@ -12,17 +12,17 @@ Setting up LDAP Authentication
 
   If the LDAP server you want to connect to has a certificate that is self-signed or signed by a corporate internal certificate authority (CA), the CA certificate must be added to the system's trusted CAs. Otherwise, connection to the LDAP server will result in an error that the certificate issuer is not recognized.
 
-Administrators use LDAP as a source for account authentication information for the controller users. User authentication is provided, but not the synchronization of user permissions and credentials. Organization membership (as well as the organization admin) and team memberships can be synchronized.
+Administrators use LDAP as a source for account authentication information for AWX users. User authentication is provided, but not the synchronization of user permissions and credentials. Organization membership (as well as the organization admin) and team memberships can be synchronized.
 
-When so configured, a user who logs in with an LDAP username and password automatically gets a controller account created for them and they can be automatically placed into organizations as either regular users or organization administrators.
+When so configured, a user who logs in with an LDAP username and password automatically gets an AWX account created for them and they can be automatically placed into organizations as either regular users or organization administrators.
 
 Users created via an LDAP login cannot change their username, first name, last name, or set a local password for themselves. This is also tunable to restrict editing of other field names.
 
-To configure LDAP integration for the controller:
+To configure LDAP integration for AWX:
 
 1. First, create a user in LDAP that has access to read the entire LDAP structure.
 
-2. Test if you can make successful queries to the LDAP server, use the ``ldapsearch`` command, which is a command line tool that can be installed on the controller system's command line as well as on other Linux and OSX systems. Use the following command to query the ldap server, where *josie* and *Josie4Cloud* are replaced by attributes that work for your setup:
+2. Test if you can make successful queries to the LDAP server, use the ``ldapsearch`` command, which is a command line tool that can be installed on AWX command line as well as on other Linux and OSX systems. Use the following command to query the ldap server, where *josie* and *Josie4Cloud* are replaced by attributes that work for your setup:
 
 ::
 
@@ -32,14 +32,14 @@ Here ``CN=josie,CN=users,DC=website,DC=com`` is the Distinguished Name of the co
 
 .. note::
 
-  The ``ldapsearch`` utility is not automatically pre-installed with |at|, however, you can install it from the ``openldap-clients`` package.
+  The ``ldapsearch`` utility is not automatically pre-installed with AWX, however, you can install it from the ``openldap-clients`` package.
 
-3. In the |at| User Interface, click **Settings** from the left navigation and click to select **LDAP settings** from the list of Authentication options. 
+3. In the AWX User Interface, click **Settings** from the left navigation and click to select **LDAP settings** from the list of Authentication options. 
 
 
   Multiple LDAP configurations are not needed per LDAP server, but you can configure multiple LDAP servers from this page, otherwise, leave the server at **Default**:
 
-  .. image:: ../common/images/configure-tower-auth-ldap-servers.png
+  .. image:: ../common/images/configure-awx-auth-ldap-servers.png
 
   |
 
@@ -48,7 +48,7 @@ Here ``CN=josie,CN=users,DC=website,DC=com`` is the Distinguished Name of the co
 
 4. To enter or modify the LDAP server address to connect to, click **Edit** and enter  in the **LDAP Server URI** field using the same format as the one prepopulated in the text field:
 
-.. image:: ../common/images/configure-tower-auth-ldap-server-uri.png
+.. image:: ../common/images/configure-awx-auth-ldap-server-uri.png
 
 .. note::
 
@@ -58,7 +58,7 @@ Here ``CN=josie,CN=users,DC=website,DC=com`` is the Distinguished Name of the co
 
 5. Enter the password to use for the Binding user in the **LDAP Bind Password** text field. In this example, the password is 'passme':
 
-.. image:: ../common/images/configure-tower-auth-ldap-bind-pwd.png
+.. image:: ../common/images/configure-awx-auth-ldap-bind-pwd.png
 
 6. Click to select a group type from the **LDAP Group Type** drop-down menu list. 
 
@@ -78,27 +78,27 @@ Here ``CN=josie,CN=users,DC=website,DC=com`` is the Distinguished Name of the co
   - ``NestedMemberDNGroupType`` 
   - ``PosixUIDGroupType``
 
-  The LDAP Group Types that are supported by the controller leverage the underlying `django-auth-ldap library`_. To specify the parameters for the selected group type, see :ref:`Step 15 <ldap_grp_params>` below.
+  The LDAP Group Types that are supported by leveraging the underlying `django-auth-ldap library`_. To specify the parameters for the selected group type, see :ref:`Step 15 <ldap_grp_params>` below.
 
   .. _`django-auth-ldap library`: https://django-auth-ldap.readthedocs.io/en/latest/groups.html#types-of-groups
 
 
 7. The **LDAP Start TLS** is disabled by default. To enable TLS when the LDAP connection is not using SSL, click the toggle to **ON**. 
 
-.. image:: ../common/images/configure-tower-auth-ldap-start-tls.png
+.. image:: ../common/images/configure-awx-auth-ldap-start-tls.png
 
-8. Enter the Distinguished Name in the **LDAP Bind DN** text field to specify the user that the controller uses to connect (Bind) to the LDAP server. Below uses the example, ``CN=josie,CN=users,DC=website,DC=com``:
+8. Enter the Distinguished Name in the **LDAP Bind DN** text field to specify the user that AWX uses to connect (Bind) to the LDAP server. Below uses the example, ``CN=josie,CN=users,DC=website,DC=com``:
 
-.. image:: ../common/images/configure-tower-auth-ldap-bind-dn.png
+.. image:: ../common/images/configure-awx-auth-ldap-bind-dn.png
 
 
 9. If that name is stored in key ``sAMAccountName``, the **LDAP User DN Template** populates with ``(sAMAccountName=%(user)s)``. Active Directory stores the username to ``sAMAccountName``. Similarly, for OpenLDAP, the key is ``uid``--hence the line becomes ``(uid=%(user)s)``.
 
-10. Enter the group distinguish name to allow users within that group to access the controller in the **LDAP Require Group** field, using the same format as the one shown in the text field, ``CN=controller Users,OU=Users,DC=website,DC=com``.
+10. Enter the group distinguish name to allow users within that group to access AWX in the **LDAP Require Group** field, using the same format as the one shown in the text field, ``CN=awx Users,OU=Users,DC=website,DC=com``.
 
-.. image:: ../common/images/configure-tower-auth-ldap-req-group.png
+.. image:: ../common/images/configure-awx-auth-ldap-req-group.png
 
-11. Enter the group distinguish name to prevent users within that group to access the controller in the **LDAP Deny Group** field, using the same format as the one shown in the text field. In this example, leave the field blank. 
+11. Enter the group distinguish name to prevent users within that group to access AWX in the **LDAP Deny Group** field, using the same format as the one shown in the text field. In this example, leave the field blank. 
 
 
 12. Enter where to search for users while authenticating in the **LDAP User Search** field using the same format as the one shown in the text field. In this example, use:
@@ -121,7 +121,7 @@ The second line specifies the scope where the users should be searched:
 
 The third line specifies the key name where the user name is stored.
 
-.. image:: ../common/images/configure-tower-authen-ldap-user-search.png
+.. image:: ../common/images/configure-awx-authen-ldap-user-search.png
 
 .. note::
 
@@ -161,7 +161,7 @@ The third line specifies the key name where the user name is stored.
 - The second lines specifies the scope and is the same as that for the user directive.
 - The third line specifies what the ``objectclass`` of a group object is in the LDAP you are using.
 
-.. image:: ../common/images/configure-tower-authen-ldap-group-search.png
+.. image:: ../common/images/configure-awx-authen-ldap-group-search.png
 
 14. Enter the user attributes in the **LDAP User Attribute Map** the text field. In this example, use:
 
@@ -176,11 +176,11 @@ The third line specifies the key name where the user name is stored.
 
 The above example retrieves users by last name from the key ``sn``. You can use the same LDAP query for the user to figure out what keys they are stored under.
 
-.. image:: ../common/images/configure-tower-auth-ldap-user-attrb-map.png
+.. image:: ../common/images/configure-awx-auth-ldap-user-attrb-map.png
 
 .. _ldap_grp_params:
 
-15. Depending on the selected **LDAP Group Type**, different parameters are available in the **LDAP Group Type Parameters** field to account for this. ``LDAP_GROUP_TYPE_PARAMS`` is a dictionary, which will be converted by the controller to kwargs and passed to the LDAP Group Type class selected. There are two common parameters used by any of the LDAP Group Type; ``name_attr`` and ``member_attr``. Where ``name_attr`` defaults to ``cn`` and ``member_attr`` defaults to ``member``:
+15. Depending on the selected **LDAP Group Type**, different parameters are available in the **LDAP Group Type Parameters** field to account for this. ``LDAP_GROUP_TYPE_PARAMS`` is a dictionary, which will be converted by AWX to kwargs and passed to the LDAP Group Type class selected. There are two common parameters used by any of the LDAP Group Type; ``name_attr`` and ``member_attr``. Where ``name_attr`` defaults to ``cn`` and ``member_attr`` defaults to ``member``:
 
   ::
 
@@ -202,7 +202,7 @@ The above example retrieves users by last name from the key ``sn``. You can use 
 
 The above example retrieves users who are flagged as superusers or as auditor in their profile.
 
-.. image:: ../common/images/configure-tower-auth-ldap-user-flags.png 
+.. image:: ../common/images/configure-awx-auth-ldap-user-flags.png 
 
 17. For details on completing the mapping fields, see :ref:`ag_ldap_org_team_maps`. 
 
@@ -214,7 +214,7 @@ With these values entered on this form, you can now make a successful authentica
 
 .. note::
 
-  The controller does not actively sync users, but they are created during their initial login.
+  AWX does not actively sync users, but they are created during their initial login.
   To improve performance associated with LDAP authentication, see :ref:`ldap_auth_perf_tips` at the end of this chapter.
 
 
@@ -232,7 +232,7 @@ LDAP Organization and Team Mapping
    pair: authentication; team mapping
    single: team mapping
 
-You can control which users are placed into which controller organizations based on LDAP attributes (mapping out between your organization admins/users and LDAP groups).  
+You can control which users are placed into which organizations based on LDAP attributes (mapping out between your organization admins/users and LDAP groups).  
 
 Keys are organization names. Organizations will be created if not present. Values are dictionaries defining the options for each organization's membership. For each organization, it is possible to specify what groups are automatically users of the organization and also what groups can administer the organization.  
 
@@ -274,10 +274,7 @@ Keys are organization names. Organizations will be created if not present. Value
 
 Mapping between team members (users) and LDAP groups. Keys are team names (will be created if not present). Values are dictionaries of options for each team's membership, where each can contain the following parameters:
 
-**organization**: string. The name of the organization to which the team
-   belongs.  The team will be created if the combination of organization and
-   team name does not exist.  The organization will first be created if it
-   does not exist.
+**organization**: string. The name of the organization to which the team belongs. The team will be created if the combination of organization and team name does not exist. The organization will first be created if it does not exist.
 
 **users**: None, True/False, string or list/tuple of strings.
 
@@ -335,7 +332,7 @@ Referrals
     pair: LDAP; referrals
     pair: troubleshooting; LDAP referrals
 
-Active Directory uses "referrals" in case the queried object is not available in its database. It has been noted that this does not work properly with the django LDAP client and, most of the time, it helps to disable referrals. Disable LDAP referrals by adding the following lines to your ``/etc/tower/conf.d/custom.py`` file:
+Active Directory uses "referrals" in case the queried object is not available in its database. It has been noted that this does not work properly with the django LDAP client and, most of the time, it helps to disable referrals. Disable LDAP referrals by adding the following lines to your ``/etc/awx/conf.d/custom.py`` file:
 
   .. code-block:: bash
 
