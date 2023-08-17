@@ -25,7 +25,7 @@ $(UI_NEXT_DIR)/build:
 	@$(MAKE) $(UI_NEXT_DIR)/src/build/awx
 	@echo "=== Copying $(UI_NEXT_DIR)/src/build to $(UI_NEXT_DIR)/build ==="
 	@rm -rf $(UI_NEXT_DIR)/build
-	@cp -r $(UI_NEXT_DIR)/src/build $(UI_NEXT_DIR) && mv build/awx/index.html build/awx/index_awx.html
+	@cp -r $(UI_NEXT_DIR)/src/build $(UI_NEXT_DIR)
 	@echo "=== Done building $(UI_NEXT_DIR)/build ==="
 
 .PHONY: ui-next/src/build
@@ -35,7 +35,8 @@ ui-next/src/build: $(UI_NEXT_DIR)/src/build/awx
 ## True target for ui-next/src/build. Build ui_next from source.
 $(UI_NEXT_DIR)/src/build/awx: $(UI_NEXT_DIR)/src $(UI_NEXT_DIR)/src/node_modules/webpack
 	@echo "=== Building ui_next ==="
-	@cd $(UI_NEXT_DIR)/src && PRODUCT=$(PRODUCT) PUBLIC_PATH=/static/awx npm run build:awx
+	@cd $(UI_NEXT_DIR)/src && PRODUCT="$(PRODUCT)" PUBLIC_PATH=/static/awx npm run build:awx
+	@mv $(UI_NEXT_DIR)/src/build/awx/index.html $(UI_NEXT_DIR)/src/build/awx/index_awx.html
 
 .PHONY: ui-next/src
 ## Clone or link src of UI_NEXT to ui-next/src, will re-clone/link/update if necessary.
