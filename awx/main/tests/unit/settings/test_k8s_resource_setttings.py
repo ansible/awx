@@ -78,13 +78,15 @@ def test_SYSTEM_TASK_ABS_CPU_conversion(value, converted_value, cpu_capacity):
         ('64Garbage', 1, 1),
     ],
 )
-def test_execution_node_mem_capacity(get_mem_effective_capacity, value, mem_capacity):
+def test_execution_node_mem_capacity(value, converted_value, mem_capacity):
     with mock.patch('django.conf.settings') as mock_settings:
         mock_settings.SYSTEM_TASK_ABS_MEM = value
         mock_settings.SYSTEM_TASK_FORKS_MEM = 100
         mock_settings.IS_K8S = True
         mock_settings.node_type == 'execution'
-        assert get_mem_effective_capacity(value) == mem_capacity
+        assert convert_mem_str_to_bytes(value) == converted_value
+        assert get_corrected_memory(-1) == converted_value
+        assert get_mem_effective_capacity(-1) == mem_capacity
 
 
 @pytest.mark.parametrize(
