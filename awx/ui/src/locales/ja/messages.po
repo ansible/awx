@@ -8118,8 +8118,8 @@ msgid "Skipped"
 msgstr "スキップ済"
 
 #: components/StatusLabel/StatusLabel.js:50
-msgid "Skipped'"
-msgstr "スキップ済'"
+msgid "Skipped"
+msgstr "スキップ済"
 
 #: components/NotificationList/NotificationList.js:200
 #: screens/NotificationTemplate/NotificationTemplateList/NotificationTemplateList.js:141

@@ -333,7 +333,7 @@ python-ldap==3.4.3
     #   django-auth-ldap
 python-string-utils==1.0.0
     # via openshift
-python-tss-sdk==1.0.0
+python-tss-sdk==1.2.1
     # via -r /awx_devel/requirements/requirements.in
 python3-openid==3.2.0
     # via social-auth-core
@@ -380,8 +380,6 @@ rsa==4.9
     #   python-jose
 s3transfer==0.6.0
     # via boto3
-schedule==0.6.0
-    # via -r /awx_devel/requirements/requirements.in
 semantic-version==2.10.0
     # via setuptools-rust
 service-identity==21.1.0

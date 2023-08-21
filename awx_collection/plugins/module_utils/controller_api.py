@@ -51,6 +51,7 @@ class ControllerModule(AnsibleModule):
         controller_username=dict(required=False, aliases=['tower_username'], fallback=(env_fallback, ['CONTROLLER_USERNAME', 'TOWER_USERNAME'])),
         controller_password=dict(no_log=True, aliases=['tower_password'], required=False, fallback=(env_fallback, ['CONTROLLER_PASSWORD', 'TOWER_PASSWORD'])),
         validate_certs=dict(type='bool', aliases=['tower_verify_ssl'], required=False, fallback=(env_fallback, ['CONTROLLER_VERIFY_SSL', 'TOWER_VERIFY_SSL'])),
+        request_timeout=dict(type='float', required=False, fallback=(env_fallback, ['CONTROLLER_REQUEST_TIMEOUT'])),
         controller_oauthtoken=dict(
             type='raw', no_log=True, aliases=['tower_oauthtoken'], required=False, fallback=(env_fallback, ['CONTROLLER_OAUTH_TOKEN', 'TOWER_OAUTH_TOKEN'])
         ),
@@ -63,12 +64,14 @@ class ControllerModule(AnsibleModule):
         'username': 'controller_username',
         'password': 'controller_password',
         'verify_ssl': 'validate_certs',
+        'request_timeout': 'request_timeout',
         'oauth_token': 'controller_oauthtoken',
     }
     host = '127.0.0.1'
     username = None
     password = None
     verify_ssl = True
+    request_timeout = 10
     oauth_token = None
     oauth_token_id = None
     authenticated = False
@@ -304,7 +307,7 @@ class ControllerAPIModule(ControllerModule):
         kwargs['supports_check_mode'] = True
 
         super().__init__(argument_spec=argument_spec, direct_params=direct_params, error_callback=error_callback, warn_callback=warn_callback, **kwargs)
-        self.session = Request(cookies=CookieJar(), validate_certs=self.verify_ssl)
+        self.session = Request(cookies=CookieJar(), timeout=self.request_timeout, validate_certs=self.verify_ssl)
 
         if 'update_secrets' in self.params:
             self.update_secrets = self.params.pop('update_secrets')
@@ -500,7 +503,14 @@ class ControllerAPIModule(ControllerModule):
             data = dumps(kwargs.get('data', {}))
 
         try:
-            response = self.session.open(method, url.geturl(), headers=headers, validate_certs=self.verify_ssl, follow_redirects=True, data=data)
+            response = self.session.open(
+                method, url.geturl(),
+                headers=headers,
+                timeout=self.request_timeout,
+                validate_certs=self.verify_ssl,
+                follow_redirects=True,
+                data=data
+            )
         except (SSLValidationError) as ssl_err:
             self.fail_json(msg="Could not establish a secure connection to your host ({1}): {0}.".format(url.netloc, ssl_err))
         except (ConnectionError) as con_err:
@@ -612,6 +622,7 @@ class ControllerAPIModule(ControllerModule):
                     'POST',
                     api_token_url,
                     validate_certs=self.verify_ssl,
+                    timeout=self.request_timeout,
                     follow_redirects=True,
                     force_basic_auth=True,
                     url_username=self.username,
@@ -988,6 +999,7 @@ class ControllerAPIModule(ControllerModule):
                     'DELETE',
                     api_token_url,
                     validate_certs=self.verify_ssl,
+                    timeout=self.request_timeout,
                     follow_redirects=True,
                     force_basic_auth=True,
                     url_username=self.username,

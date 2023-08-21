@@ -210,7 +210,7 @@ JOB_EVENT_WORKERS = 4
 
 # The number of seconds to buffer callback receiver bulk
 # writes in memory before flushing via JobEvent.objects.bulk_create()
-JOB_EVENT_BUFFER_SECONDS = 0.1
+JOB_EVENT_BUFFER_SECONDS = 1
 
 # The interval at which callback receiver statistics should be
 # recorded
@@ -453,7 +453,7 @@ RECEPTOR_SERVICE_ADVERTISEMENT_PERIOD = 60  # https://github.com/ansible/recepto
 EXECUTION_NODE_REMEDIATION_CHECKS = 60 * 30  # once every 30 minutes check if an execution node errors have been resolved
 
 # Amount of time dispatcher will try to reconnect to database for jobs and consuming new work
-DISPATCHER_DB_DOWNTOWN_TOLLERANCE = 40
+DISPATCHER_DB_DOWNTIME_TOLERANCE = 40
 
 BROKER_URL = 'unix:///var/run/redis/redis.sock'
 CELERYBEAT_SCHEDULE = {
