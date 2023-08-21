@@ -770,10 +770,11 @@ def get_corrected_cpu(cpu_count, node_type=None):  # formerlly get_cpu_capacity
     return cpu_count  # no correction
 
 
-def get_cpu_effective_capacity(cpu_count, node_type=None):
+def get_cpu_effective_capacity(cpu_count, is_control_plane=False):
     from django.conf import settings
 
-    cpu_count = get_corrected_cpu(cpu_count, node_type)
+    if is_control_plane:
+        cpu_count = get_corrected_cpu(cpu_count)
 
     settings_forkcpu = getattr(settings, 'SYSTEM_TASK_FORKS_CPU', None)
     env_forkcpu = os.getenv('SYSTEM_TASK_FORKS_CPU', None)
@@ -848,10 +849,11 @@ def get_corrected_memory(memory, node_type=None):
     return memory
 
 
-def get_mem_effective_capacity(mem_bytes, node_type=None):
+def get_mem_effective_capacity(mem_bytes, is_control_plane=False):
     from django.conf import settings
 
-    mem_bytes = get_corrected_memory(mem_bytes, node_type)
+    if is_control_plane:
+        mem_bytes = get_corrected_memory(mem_bytes)
 
     settings_mem_mb_per_fork = getattr(settings, 'SYSTEM_TASK_FORKS_MEM', None)
     env_mem_mb_per_fork = os.getenv('SYSTEM_TASK_FORKS_MEM', None)
