@@ -751,17 +751,15 @@ def convert_cpu_str_to_decimal_cpu(cpu_str):
     return max(0.1, round(cpu, 1))
 
 
-def get_corrected_cpu(cpu_count, node_type=None):  # formerlly get_cpu_capacity
+def get_corrected_cpu(cpu_count):  # formerlly get_cpu_capacity
     """Some environments will do a correction to the reported CPU number
     because the given OpenShift value is a lie
     """
     from django.conf import settings
-    from awx.main.models.ha import Instance
 
     settings_abscpu = getattr(settings, 'SYSTEM_TASK_ABS_CPU', None)
     env_abscpu = os.getenv('SYSTEM_TASK_ABS_CPU', None)
-    if node_type == Instance.Types.EXECUTION:
-        return cpu_count
+
     if env_abscpu is not None:
         return convert_cpu_str_to_decimal_cpu(env_abscpu)
     elif settings_abscpu is not None:
