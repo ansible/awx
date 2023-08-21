@@ -1,5 +1,6 @@
 import pytest
 import yaml
+import itertools
 from unittest import mock
 
 from django.db.utils import IntegrityError
@@ -25,18 +26,18 @@ class TestPeers:
 
     @pytest.mark.parametrize('node_type', ['control', 'hybrid'])
     def test_prevent_peering_to_self(self, node_type):
-        '''
+        """
         cannot peer to self
-        '''
+        """
         control_instance = Instance.objects.create(hostname='abc', node_type=node_type)
         with pytest.raises(IntegrityError):
             control_instance.peers.add(control_instance)
 
     @pytest.mark.parametrize('node_type', ['control', 'hybrid', 'hop', 'execution'])
     def test_creating_node(self, node_type, admin_user, post):
-        '''
+        """
         can only add hop and execution nodes via API
-        '''
+        """
         post(
             url=reverse('api:instance_list'),
             data={"hostname": "abc", "node_type": node_type},
@@ -45,9 +46,9 @@ class TestPeers:
         )
 
     def test_changing_node_type(self, admin_user, patch):
-        '''
+        """
         cannot change node type
-        '''
+        """
         hop = Instance.objects.create(hostname='abc', node_type="hop")
         patch(
             url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
@@ -58,9 +59,9 @@ class TestPeers:
 
     @pytest.mark.parametrize('node_type', ['hop', 'execution'])
     def test_listener_port_null(self, node_type, admin_user, post):
-        '''
+        """
         listener_port can be None
-        '''
+        """
         post(
             url=reverse('api:instance_list'),
             data={"hostname": "abc", "node_type": node_type, "listener_port": None},
@@ -70,9 +71,9 @@ class TestPeers:
 
     @pytest.mark.parametrize('node_type, allowed', [('control', False), ('hybrid', False), ('hop', True), ('execution', True)])
     def test_peers_from_control_nodes_allowed(self, node_type, allowed, post, admin_user):
-        '''
+        """
         only hop and execution nodes can have peers_from_control_nodes set to True
-        '''
+        """
         post(
             url=reverse('api:instance_list'),
             data={"hostname": "abc", "peers_from_control_nodes": True, "node_type": node_type, "listener_port": 6789},
@@ -81,9 +82,9 @@ class TestPeers:
         )
 
     def test_listener_port_is_required(self, admin_user, post):
-        '''
+        """
         if adding instance to peers list, that instance must have listener_port set
-        '''
+        """
         Instance.objects.create(hostname='abc', node_type="hop", listener_port=None)
         post(
             url=reverse('api:instance_list'),
@@ -93,30 +94,27 @@ class TestPeers:
         )
 
     def test_peers_from_control_nodes_listener_port_enabled(self, admin_user, post):
-        '''
+        """
         if peers_from_control_nodes is True, listener_port must an integer
         Assert that all other combinations are allowed
-        '''
-        i = 0
-        for node_type in ['hop', 'execution']:
-            for peers_from in [True, False]:
-                for listener_port in [None, 6789]:
-                    # only disallowed case is when peers_from is True and listener port is None
-                    disallowed = peers_from and not listener_port
-                    post(
-                        url=reverse('api:instance_list'),
-                        data={"hostname": f"abc{i}", "peers_from_control_nodes": peers_from, "node_type": node_type, "listener_port": listener_port},
-                        user=admin_user,
-                        expect=400 if disallowed else 201,
-                    )
-                    i += 1
+        """
+        for index, item in enumerate(itertools.product(['hop', 'execution'], [True, False], [None, 6789])):
+            node_type, peers_from, listener_port = item
+            # only disallowed case is when peers_from is True and listener port is None
+            disallowed = peers_from and not listener_port
+            post(
+                url=reverse('api:instance_list'),
+                data={"hostname": f"abc{index}", "peers_from_control_nodes": peers_from, "node_type": node_type, "listener_port": listener_port},
+                user=admin_user,
+                expect=400 if disallowed else 201,
+            )
 
     @pytest.mark.parametrize('node_type', ['control', 'hybrid'])
     def test_disallow_modifying_peers_control_nodes(self, node_type, admin_user, patch):
-        '''
+        """
         for control nodes, peers field should not be
         modified directly via patch.
-        '''
+        """
         control = Instance.objects.create(hostname='abc', node_type=node_type)
         hop1 = Instance.objects.create(hostname='hop1', node_type='hop', peers_from_control_nodes=True, listener_port=6789)
         hop2 = Instance.objects.create(hostname='hop2', node_type='hop', peers_from_control_nodes=False, listener_port=6789)
@@ -155,9 +153,9 @@ class TestPeers:
         assert {hop1, hop2} == set(control.peers.all())  # hop1 and hop2 should now be peered from control node
 
     def test_disallow_changing_hostname(self, admin_user, patch):
-        '''
+        """
         cannot change hostname
-        '''
+        """
         hop = Instance.objects.create(hostname='hop', node_type='hop')
         patch(
             url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
@@ -167,9 +165,9 @@ class TestPeers:
         )
 
     def test_disallow_changing_node_state(self, admin_user, patch):
-        '''
+        """
         only allow setting to deprovisioning
-        '''
+        """
         hop = Instance.objects.create(hostname='hop', node_type='hop', node_state='installed')
         patch(
             url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
@@ -186,12 +184,12 @@ class TestPeers:
 
     @pytest.mark.parametrize('node_type', ['control', 'hybrid'])
     def test_control_node_automatically_peers(self, node_type):
-        '''
+        """
         a new control node should automatically
         peer to hop
 
         peer to hop should be removed if hop is deleted
-        '''
+        """
 
         hop = Instance.objects.create(hostname='hop', node_type='hop', peers_from_control_nodes=True, listener_port=6789)
         control = Instance.objects.create(hostname='abc', node_type=node_type)
@@ -201,10 +199,10 @@ class TestPeers:
 
     @pytest.mark.parametrize('node_type', ['control', 'hybrid'])
     def test_control_node_retains_other_peers(self, node_type):
-        '''
+        """
         if a new node comes online, other peer relationships should
         remain intact
-        '''
+        """
         hop1 = Instance.objects.create(hostname='hop1', node_type='hop', listener_port=6789, peers_from_control_nodes=True)
         hop2 = Instance.objects.create(hostname='hop2', node_type='hop', listener_port=6789, peers_from_control_nodes=False)
         hop1.peers.add(hop2)
@@ -214,9 +212,9 @@ class TestPeers:
         assert hop1.peers.exists()
 
     def test_group_vars(self, get, admin_user):
-        '''
+        """
         control > hop1 > hop2 < execution
-        '''
+        """
         control = Instance.objects.create(hostname='control', node_type='control', listener_port=None)
         hop1 = Instance.objects.create(hostname='hop1', node_type='hop', listener_port=6789, peers_from_control_nodes=True)
         hop2 = Instance.objects.create(hostname='hop2', node_type='hop', listener_port=6789, peers_from_control_nodes=False)
@@ -257,14 +255,14 @@ class TestPeers:
         assert execution_vars.get('receptor_listener', False)
 
     def test_write_receptor_config_called(self):
-        '''
+        """
         Assert that write_receptor_config is called
         when certain instances are created, or if
         peers_from_control_nodes changes.
         In general, write_receptor_config should only
         be called when necessary, as it will reload
         receptor backend connections which is not trivial.
-        '''
+        """
         with mock.patch('awx.main.models.ha.schedule_write_receptor_config') as write_method:
             # new control instance but nothing to peer to (no)
             control = Instance.objects.create(hostname='control1', node_type='control')
@@ -306,10 +304,10 @@ class TestPeers:
             write_method.assert_not_called()
 
     def test_write_receptor_config_data(self):
-        '''
+        """
         Assert the correct peers are included in data that will
         be written to receptor.conf
-        '''
+        """
         from awx.main.tasks.receptor import RECEPTOR_CONFIG_STARTER
 
         with mock.patch('awx.main.tasks.receptor.read_receptor_config', return_value=list(RECEPTOR_CONFIG_STARTER)):
