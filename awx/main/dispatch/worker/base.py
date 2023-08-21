@@ -162,7 +162,7 @@ class AWXConsumerRedis(AWXConsumerBase):
 class AWXConsumerPG(AWXConsumerBase):
     def __init__(self, *args, schedule=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.pg_max_wait = settings.DISPATCHER_DB_DOWNTIME_TOLERANCE
+        self.pg_max_wait = getattr(settings, 'DISPATCHER_DB_DOWNTOWN_TOLLERANCE', settings.DISPATCHER_DB_DOWNTIME_TOLERANCE)
         # if no successful loops have ran since startup, then we should fail right away
         self.pg_is_down = True  # set so that we fail if we get database errors on startup
         init_time = time.time()
