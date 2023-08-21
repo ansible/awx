@@ -76,3 +76,24 @@ def test_hashivault_handle_auth_kubernetes():
 def test_hashivault_handle_auth_not_enough_args():
     with pytest.raises(Exception):
         hashivault.handle_auth()
+
+
+class TestDelineaImports:
+    """
+    These module have a try-except for ImportError which will allow using the older library
+    but we do not want the awx_devel image to have the older library,
+    so these tests are designed to fail if these wind up using the fallback import
+    """
+
+    def test_dsv_import(self):
+        from awx.main.credential_plugins.dsv import SecretsVault  # noqa
+
+        # assert this module as opposed to older thycotic.secrets.vault
+        assert SecretsVault.__module__ == 'delinea.secrets.vault'
+
+    def test_tss_import(self):
+        from awx.main.credential_plugins.tss import DomainPasswordGrantAuthorizer, PasswordGrantAuthorizer, SecretServer, ServerSecret  # noqa
+
+        for cls in (DomainPasswordGrantAuthorizer, PasswordGrantAuthorizer, SecretServer, ServerSecret):
+            # assert this module as opposed to older thycotic.secrets.server
+            assert cls.__module__ == 'delinea.secrets.server'
