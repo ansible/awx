@@ -309,8 +309,8 @@ class Instance(HasPolicyEditsMixin, BaseModel):
             self.cpu_capacity = 0
             self.mem_capacity = 0  # formula has a non-zero offset, so we make sure it is 0 for hop nodes
         else:
-            self.cpu_capacity = get_cpu_effective_capacity(self.cpu, is_control_plane=bool(self.node_type in (Instance.Types.EXECUTION,)))
-            self.mem_capacity = get_mem_effective_capacity(self.memory, is_control_plane=bool(self.node_type in (Instance.Types.EXECUTION,)))
+            self.cpu_capacity = get_cpu_effective_capacity(self.cpu, is_execution_node=bool(self.node_type in (Instance.Types.EXECUTION,)))
+            self.mem_capacity = get_mem_effective_capacity(self.memory, is_execution_node=bool(self.node_type in (Instance.Types.EXECUTION,)))
         self.set_capacity_value()
 
     def save_health_data(self, version=None, cpu=0, memory=0, uuid=None, update_last_seen=False, errors=''):
