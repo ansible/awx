@@ -1,4 +1,3 @@
-receptor_host_identifier: {{ instance.hostname }}
 receptor_user: awx
 receptor_group: awx
 receptor_verify: true
