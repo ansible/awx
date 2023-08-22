@@ -1,16 +1,16 @@
-{% verbatim %}
 ---
 - hosts: all
   become: yes
   tasks:
     - name: Create the receptor user
       user:
+{% verbatim %}
         name: "{{ receptor_user }}"
-        shell: /bin/bash
-    - import_role:
-        name: ansible.receptor.setup
 {% endverbatim %}
+        shell: /bin/bash
 {% if instance.node_type == "execution" %}
     - import_role:
         name: ansible.receptor.podman
 {% endif %}
+    - import_role:
+        name: ansible.receptor.setup
