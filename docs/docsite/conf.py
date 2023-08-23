@@ -93,11 +93,11 @@ rst_epilog = """
 .. |ee| replace:: execution environment
 .. |ees| replace:: execution environments
 .. |versionshortest| replace:: v%s
-.. [pubdateshort| replace:: %s
+.. |pubdateshort| replace:: %s
 .. |pubdate| replace:: %s
 .. |rhel| replace:: Red Hat Enterprise Linux
 .. |rhaa| replace:: Red Hat Ansible Automation
 .. |rhaap| replace:: Red Hat Ansible Automation Platform
 .. |RHAT| replace:: Red Hat Ansible Automation Platform controller
 
-""" % (version, version, shortversion, version, pubdateshort, pubdate)
+""" % (version, pubdateshort, pubdate)
