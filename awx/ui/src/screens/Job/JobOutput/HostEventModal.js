@@ -53,13 +53,9 @@ const getStdOutValue = (hostEvent) => {
   const res = hostEvent?.event_data?.res;
 
   let stdOut;
-  if (taskAction === 'debug' && res.result && res.result.stdout) {
+  if (taskAction === 'debug' && res?.result?.stdout) {
     stdOut = res.result.stdout;
-  } else if (
-    taskAction === 'yum' &&
-    res.results &&
-    Array.isArray(res.results)
-  ) {
+  } else if (taskAction === 'yum' && Array.isArray(res?.results)) {
     stdOut = res.results.join('\n');
   } else if (res?.stdout) {
     stdOut = Array.isArray(res.stdout) ? res.stdout.join(' ') : res.stdout;
