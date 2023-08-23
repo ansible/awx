@@ -474,7 +474,7 @@ Inventory Plugins
 .. index::
    pair: inventories; plugins
 
-Inventory updates use dynamically-generated YAML files which are parsed by their respective inventory plugin. In |atversion|, users can provide the new style inventory plugin config directly to the controller via the inventory source ``source_vars`` for all the following inventory sources:
+Inventory updates use dynamically-generated YAML files which are parsed by their respective inventory plugin. Users can provide the new style inventory plugin config directly to the controller via the inventory source ``source_vars`` for all the following inventory sources:
 
 - :ref:`ug_source_ec2`
 - :ref:`ug_source_gce`

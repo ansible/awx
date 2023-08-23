@@ -1,5 +1,5 @@
-Release Notes for |atversion|
-==============================
+Release Notes
+=============
 
 
 .. include:: ../common/relnotes_current.rst
