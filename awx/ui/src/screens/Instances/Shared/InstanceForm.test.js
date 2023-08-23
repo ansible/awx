@@ -65,7 +65,7 @@ describe('<InstanceForm />', () => {
     expect(handleCancel).toBeCalled();
   });
 
-  test('should call handleSubmit when Cancel button is clicked', async () => {
+  test('should call handleSubmit when Save button is clicked', async () => {
     expect(handleSubmit).not.toHaveBeenCalled();
     await act(async () => {
       wrapper.find('input#hostname').simulate('change', {
@@ -73,9 +73,6 @@ describe('<InstanceForm />', () => {
       });
       wrapper.find('input#instance-description').simulate('change', {
         target: { value: 'This is a repeat song', name: 'description' },
-      });
-      wrapper.find('input#instance-port').simulate('change', {
-        target: { value: 'This is a repeat song', name: 'listener_port' },
       });
     });
     wrapper.update();
@@ -91,10 +88,9 @@ describe('<InstanceForm />', () => {
       enabled: true,
       managed_by_policy: true,
       hostname: 'new Foo',
-      listener_port: 'This is a repeat song',
       node_state: 'installed',
       node_type: 'execution',
-      peers_from_control_nodes: true,
+      peers_from_control_nodes: false,
       peers: [],
     });
   });
