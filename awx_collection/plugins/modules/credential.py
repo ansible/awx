@@ -46,6 +46,7 @@ options:
     organization:
       description:
         - Organization name, ID, or named URL that should own the credential.
+        - This parameter is mutually exclusive with C(team) and C(user).
       type: str
     credential_type:
       description:
@@ -93,10 +94,12 @@ options:
     user:
       description:
         - User name, ID, or named URL that should own this credential.
+        - This parameter is mutually exclusive with C(organization) and C(team).
       type: str
     team:
       description:
         - Team name, ID, or named URL that should own this credential.
+        - This parameter is mutually exclusive with C(organization) and C(user).
       type: str
     state:
       description:
@@ -219,8 +222,13 @@ def main():
         state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )
 
+    mutually_exclusive = [("organization", "user", "team")]
+
     # Create a module for ourselves
-    module = ControllerAPIModule(argument_spec=argument_spec)
+    module = ControllerAPIModule(
+        argument_spec=argument_spec,
+        mutually_exclusive=mutually_exclusive
+    )
 
     # Extract our parameters
     name = module.params.get('name')
