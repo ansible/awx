@@ -1,7 +1,10 @@
 from .plugin import CredentialPlugin
 from django.utils.translation import gettext_lazy as _
 
-from thycotic.secrets.server import DomainPasswordGrantAuthorizer, PasswordGrantAuthorizer, SecretServer, ServerSecret
+try:
+    from delinea.secrets.server import DomainPasswordGrantAuthorizer, PasswordGrantAuthorizer, SecretServer, ServerSecret
+except ImportError:
+    from thycotic.secrets.server import DomainPasswordGrantAuthorizer, PasswordGrantAuthorizer, SecretServer, ServerSecret
 
 tss_inputs = {
     'fields': [

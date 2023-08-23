@@ -21,6 +21,27 @@ function ConstructedInventoryEdit({ inventory }) {
   const constructedInventoryId = inventory.id;
 
   const {
+    isLoading: isLoadingOptions,
+    error: optionsError,
+    request: fetchOptions,
+    result: options,
+  } = useRequest(
+    useCallback(
+      () =>
+        ConstructedInventoriesAPI.readConstructedInventoryOptions(
+          constructedInventoryId,
+          'PUT'
+        ),
+      [constructedInventoryId]
+    ),
+    null
+  );
+
+  useEffect(() => {
+    fetchOptions();
+  }, [fetchOptions]);
+
+  const {
     result: { initialInstanceGroups, initialInputInventories },
     request: fetchedRelatedData,
     error: contentError,
@@ -44,6 +65,7 @@ function ConstructedInventoryEdit({ inventory }) {
       isLoading: true,
     }
   );
+
   useEffect(() => {
     fetchedRelatedData();
   }, [fetchedRelatedData]);
@@ -99,12 +121,12 @@ function ConstructedInventoryEdit({ inventory }) {
 
   const handleCancel = () => history.push(detailsUrl);
 
-  if (isLoading) {
-    return <ContentLoading />;
+  if (contentError || optionsError) {
+    return <ContentError error={contentError || optionsError} />;
   }
 
-  if (contentError) {
-    return <ContentError error={contentError} />;
+  if (isLoading || isLoadingOptions || (!options && !optionsError)) {
+    return <ContentLoading />;
   }
 
   return (
@@ -116,6 +138,7 @@ function ConstructedInventoryEdit({ inventory }) {
         constructedInventory={inventory}
         instanceGroups={initialInstanceGroups}
         inputInventories={initialInputInventories}
+        options={options}
       />
     </CardBody>
   );

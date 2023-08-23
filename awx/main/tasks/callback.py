@@ -29,7 +29,7 @@ class RunnerCallback:
         self.safe_env = {}
         self.event_ct = 0
         self.model = model
-        self.update_attempts = int(settings.DISPATCHER_DB_DOWNTOWN_TOLLERANCE / 5)
+        self.update_attempts = int(settings.DISPATCHER_DB_DOWNTIME_TOLERANCE / 5)
         self.wrapup_event_dispatched = False
         self.artifacts_processed = False
         self.extra_update_fields = {}

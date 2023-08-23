@@ -214,7 +214,7 @@ class LookupModule(LookupBase):
         if not isinstance(rule[field_name], list):
             rule[field_name] = rule[field_name].split(',')
         for value in rule[field_name]:
-            value = value.strip()
+            value = value.strip().lower()
             if value not in valid_list:
                 raise AnsibleError('In rule {0} {1} must only contain values in {2}'.format(rule_number, field_name, ', '.join(valid_list.keys())))
             return_values.append(valid_list[value])

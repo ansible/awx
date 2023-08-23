@@ -1,14 +1,10 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { Formik, useField, useFormikContext } from 'formik';
 import { func, shape } from 'prop-types';
 import { t } from '@lingui/macro';
-import { ConstructedInventoriesAPI } from 'api';
 import { minMaxValue, required } from 'util/validators';
-import useRequest from 'hooks/useRequest';
 import { Form, FormGroup } from '@patternfly/react-core';
 import { VariablesField } from 'components/CodeEditor';
-import ContentError from 'components/ContentError';
-import ContentLoading from 'components/ContentLoading';
 import FormActionGroup from 'components/FormActionGroup/FormActionGroup';
 import FormField, { FormSubmitError } from 'components/FormField';
 import { FormFullWidthLayout, FormColumnLayout } from 'components/FormLayout';
@@ -165,6 +161,7 @@ function ConstructedInventoryForm({
   onCancel,
   onSubmit,
   submitError,
+  options,
 }) {
   const initialValues = {
     kind: 'constructed',
@@ -178,32 +175,6 @@ function ConstructedInventoryForm({
     verbosity: constructedInventory?.verbosity || 0,
     source_vars: constructedInventory?.source_vars || '---',
   };
-
-  const {
-    isLoading,
-    error,
-    request: fetchOptions,
-    result: options,
-  } = useRequest(
-    useCallback(async () => {
-      const res = await ConstructedInventoriesAPI.readOptions();
-      const { data } = res;
-      return data.actions.POST;
-    }, []),
-    null
-  );
-
-  useEffect(() => {
-    fetchOptions();
-  }, [fetchOptions]);
-
-  if (isLoading || (!options && !error)) {
-    return <ContentLoading />;
-  }
-
-  if (error) {
-    return <ContentError error={error} />;
-  }
 
   return (
     <Formik initialValues={initialValues} onSubmit={onSubmit}>

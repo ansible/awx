@@ -112,7 +112,7 @@ class BaseTask(object):
 
     def __init__(self):
         self.cleanup_paths = []
-        self.update_attempts = int(settings.DISPATCHER_DB_DOWNTOWN_TOLLERANCE / 5)
+        self.update_attempts = int(settings.DISPATCHER_DB_DOWNTIME_TOLERANCE / 5)
         self.runner_callback = self.callback_class(model=self.model)
 
     def update_model(self, pk, _attempt=0, **updates):

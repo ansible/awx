@@ -1,13 +1,42 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Card, PageSection } from '@patternfly/react-core';
 import { ConstructedInventoriesAPI, InventoriesAPI } from 'api';
+import useRequest from 'hooks/useRequest';
 import { CardBody } from 'components/Card';
+import ContentError from 'components/ContentError';
+import ContentLoading from 'components/ContentLoading';
 import ConstructedInventoryForm from '../shared/ConstructedInventoryForm';
 
 function ConstructedInventoryAdd() {
   const history = useHistory();
   const [submitError, setSubmitError] = useState(null);
+
+  const {
+    isLoading: isLoadingOptions,
+    error: optionsError,
+    request: fetchOptions,
+    result: options,
+  } = useRequest(
+    useCallback(async () => {
+      const res = await ConstructedInventoriesAPI.readOptions();
+      const { data } = res;
+      return data.actions.POST;
+    }, []),
+    null
+  );
+
+  useEffect(() => {
+    fetchOptions();
+  }, [fetchOptions]);
+
+  if (isLoadingOptions || (!options && !optionsError)) {
+    return <ContentLoading />;
+  }
+
+  if (optionsError) {
+    return <ContentError error={optionsError} />;
+  }
 
   const handleCancel = () => {
     history.push('/inventories');
@@ -48,6 +77,7 @@ function ConstructedInventoryAdd() {
             onCancel={handleCancel}
             onSubmit={handleSubmit}
             submitError={submitError}
+            options={options}
           />
         </CardBody>
       </Card>
