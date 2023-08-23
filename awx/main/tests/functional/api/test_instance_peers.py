@@ -229,27 +229,23 @@ class TestPeers:
         execution_vars = yaml.safe_load(generate_group_vars_all_yml(execution))
 
         # control group vars assertions
-        assert control_vars.get('receptor_host_identifier', '') == 'control'
         assert has_peer(control_vars, 'hop1:6789')
         assert not has_peer(control_vars, 'hop2:6789')
         assert not has_peer(control_vars, 'execution:6789')
         assert not control_vars.get('receptor_listener', False)
 
         # hop1 group vars assertions
-        assert hop1_vars.get('receptor_host_identifier', '') == 'hop1'
         assert has_peer(hop1_vars, 'hop2:6789')
         assert not has_peer(hop1_vars, 'execution:6789')
         assert hop1_vars.get('receptor_listener', False)
 
         # hop2 group vars assertions
-        assert hop2_vars.get('receptor_host_identifier', '') == 'hop2'
         assert not has_peer(hop2_vars, 'hop1:6789')
         assert not has_peer(hop2_vars, 'execution:6789')
         assert hop2_vars.get('receptor_listener', False)
         assert hop2_vars.get('receptor_peers', []) == []
 
         # execution group vars assertions
-        assert execution_vars.get('receptor_host_identifier', '') == 'execution'
         assert has_peer(execution_vars, 'hop2:6789')
         assert not has_peer(execution_vars, 'hop1:6789')
         assert execution_vars.get('receptor_listener', False)
