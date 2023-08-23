@@ -154,7 +154,8 @@ function InstanceForm({
         onSubmit={(values) => {
           handleSubmit({
             ...values,
-            listener_port: values.listener_port === '' ? null : values.listener_port,
+            listener_port:
+              values.listener_port === '' ? null : values.listener_port,
             peers: values.peers.map((peer) => peer.hostname || peer),
           });
         }}

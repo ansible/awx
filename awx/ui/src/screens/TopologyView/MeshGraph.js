@@ -178,12 +178,7 @@ function MeshGraph({
       mesh
         .append('defs')
         .selectAll('marker')
-        .data([
-          'end',
-          'end-active',
-          'end-adding',
-          'end-removing',
-        ])
+        .data(['end', 'end-active', 'end-adding', 'end-removing'])
         .join('marker')
         .attr('id', String)
         .attr('viewBox', '0 -5 10 10')

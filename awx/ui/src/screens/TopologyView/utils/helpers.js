@@ -110,9 +110,7 @@ export function getRandomInt(min, max) {
 const generateRandomLinks = (n, r) => {
   const links = [];
   function getRandomLinkState() {
-    return ['established', 'adding', 'removing'][
-      getRandomInt(0, 3)
-    ];
+    return ['established', 'adding', 'removing'][getRandomInt(0, 3)];
   }
   for (let i = 0; i < r; i++) {
     const link = {
