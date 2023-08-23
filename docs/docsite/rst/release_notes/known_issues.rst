@@ -47,6 +47,20 @@ Known Issues
     :local:
 
 
+.. _ki_csrf_trusted_origin_setting:
+
+The ``CSRF_TRUSTED_ORIGIN`` setting
+====================================
+
+The ``CSRF_TRUSTED_ORIGIN`` setting may be required if you are using AWX behind a load balancer. With the update to Django 4.2, CSRF (Cross Sight Request Forgery) checking is more strict. Because of this, using AWX behind a load balancer can cause issues when it previously worked. If you encounter an error like the following, you will need to add the sources to the ``CSRF_TRUSTED_ORIGIN`` settings.
+
+::
+
+   WARNING [b336a554] django.security.csrf Forbidden (Origin checking failed - https://localhost:3001 does not match any trusted origins.): /api/login/
+
+Refer to the `Django csrf-trusted-origins documentation <https://docs.djangoproject.com/en/4.2/ref/settings/#csrf-trusted-origins>`_ for further detail on how to resolve this error.
+
+
 Launching the ansible-runner component not working as expected
 ================================================================
 

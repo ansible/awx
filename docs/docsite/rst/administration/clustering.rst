@@ -49,6 +49,8 @@ Important considerations to note in the new clustering environment:
 
 - When spinning up a cluster, the database node should be a standalone server, and PostgreSQL should not be installed on one of the controller nodes.
 
+- PgBouncer is not recommended for connection pooling with AWX. Currently, AWX relies heavily on ``pg_notify`` for sending messages across various components, and therefore, PgBouncer cannot readily be used in transaction pooling mode.
+
 - The maximum supported instances in a cluster is 20.
 
 - All instances should be reachable from all other instances and they should be able to reach the database. It is also important for the hosts to have a stable address and/or hostname (depending on how the controller host is configured).
