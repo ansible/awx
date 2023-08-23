@@ -176,7 +176,7 @@ function RemoveInstanceButton({ itemsToRemove, onRemove, isK8s }) {
             </Button>,
           ]}
         >
-          <div>{t`This action will remove the following instances:`}</div>
+          <div>{t`This action will remove the following instance and you may need to rerun the install bundle for any instance that was previously connected to:`}</div>
           {itemsToRemove.map((item) => (
             <span key={item.id} id={`item-to-be-removed-${item.id}`}>
               <strong>{item.hostname}</strong>

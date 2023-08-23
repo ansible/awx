@@ -11,6 +11,7 @@ import DisassociateButton from 'components/DisassociateButton';
 import AssociateModal from 'components/AssociateModal';
 import ErrorDetail from 'components/ErrorDetail';
 import AlertModal from 'components/AlertModal';
+import useToast, { AlertVariant } from 'hooks/useToast';
 import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
 import { useLocation, useParams } from 'react-router-dom';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
@@ -30,6 +31,7 @@ function InstancePeerList({ setBreadcrumb }) {
   const location = useLocation();
   const { id } = useParams();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { addToast, Toast, toastProps } = useToast();
   const readInstancesOptions = useCallback(
     () => InstancesAPI.readOptions(id),
     [id]
@@ -114,8 +116,14 @@ function InstancePeerList({ setBreadcrumb }) {
         ];
         await InstancesAPI.update(instance.id, { peers: new_peers });
         fetchPeers();
+        addToast({
+          id: instancesPeerToAssociate,
+          title: t`${selected_hostname} added as a peer. Please be sure to run the install bundle for ${instance.hostname} again in order to see changes take effect.`,
+          variant: AlertVariant.success,
+          hasTimeout: true,
+        });
       },
-      [instance, fetchPeers]
+      [instance, fetchPeers, addToast]
     )
   );
 
@@ -134,7 +142,12 @@ function InstancePeerList({ setBreadcrumb }) {
       }
       await InstancesAPI.update(instance.id, { peers: new_peers });
       fetchPeers();
-    }, [instance, selected, fetchPeers])
+      addToast({
+        title: t`${selected_hostname} removed. Please be sure to run the install bundle for ${instance.hostname} again in order to see changes take effect.`,
+        variant: AlertVariant.success,
+        hasTimeout: true,
+      });
+    }, [instance, selected, fetchPeers, addToast])
   );
 
   const { error, dismissError } = useDismissableError(
@@ -239,6 +252,7 @@ function InstancePeerList({ setBreadcrumb }) {
           ]}
         />
       )}
+      <Toast {...toastProps} />
       {error && (
         <AlertModal
           isOpen={error}
