@@ -207,7 +207,8 @@ class TestPeers:
         hop2 = Instance.objects.create(hostname='hop2', node_type='hop', listener_port=6789, peers_from_control_nodes=False)
         hop1.peers.add(hop2)
 
-        control = Instance.objects.create(hostname='control', node_type=node_type, listener_port=None)
+        # a control node is added
+        Instance.objects.create(hostname='control', node_type=node_type, listener_port=None)
 
         assert hop1.peers.exists()
 
