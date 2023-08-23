@@ -15,20 +15,20 @@ Logging and Aggregation
    pair: logging; Elastic stack
    pair: logging; rsyslog
 
-Logging is a feature that provides the capability to send detailed logs to several kinds of 3rd party external log aggregation services. Services connected to this data feed serve as a useful means in gaining insight into the controller usage or technical trends. The data can be used to analyze events in the infrastructure, monitor for anomalies, and correlate events from one service with events in another. The types of data that are most useful to the controller are job fact data, job events/job runs, activity stream data, and log messages. The data is sent in JSON format over a HTTP connection using minimal service-specific tweaks engineered in a custom handler or via an imported library. 
+Logging is a feature that provides the capability to send detailed logs to several kinds of 3rd party external log aggregation services. Services connected to this data feed serve as a useful means in gaining insight into AWX usage or technical trends. The data can be used to analyze events in the infrastructure, monitor for anomalies, and correlate events from one service with events in another. The types of data that are most useful to AWX are job fact data, job events/job runs, activity stream data, and log messages. The data is sent in JSON format over a HTTP connection using minimal service-specific tweaks engineered in a custom handler or via an imported library. 
 
-Installing |at| will install a newer version of rsyslog, which will replace the version that comes with the RHEL base. The version of rsyslog that is installed by |at| does not include the following rsyslog modules:  
+Installing controller will install a newer version of rsyslog, which will replace the version that comes with the RHEL base. The version of rsyslog that is installed by controller does not include the following rsyslog modules:  
 
 - rsyslog-udpspoof.x86_64
 - rsyslog-libdbi.x86_64
 
-After installing |at|, use only the controller provided rsyslog package for any logging outside of the controller that may have previously been done with the RHEL provided rsyslog package. If you already use rsyslog for logging system logs on the controller instances, you can continue to use rsyslog to handle logs from outside of the controller by running a separate rsyslog process (using the same version of rsyslog that the controller is), and pointing it to a separate /etc/rsyslog.conf.
+After installing AWX, use only AWX provided rsyslog package for any logging outside of AWX that may have previously been done with the RHEL provided rsyslog package. If you already use rsyslog for logging system logs on AWX instances, you can continue to use rsyslog to handle logs from outside of AWX by running a separate rsyslog process (using the same version of rsyslog that AWX is), and pointing it to a separate /etc/rsyslog.conf.
 
 .. note::
 
-  For systems that use rsyslog outside of the controller (on the controller VM/machine), consider any conflict that may arise with also using new version of rsyslog that comes with the controller. 
+  For systems that use rsyslog outside of AWX, consider any conflict that may arise with also using new version of rsyslog that comes with AWX. 
   
-You can configure from the ``/api/v2/settings/logging/`` endpoint how the controller rsyslog process handles messages that have not yet been sent in the event that your external logger goes offline:  
+You can configure from the ``/api/v2/settings/logging/`` endpoint how AWX rsyslog process handles messages that have not yet been sent in the event that your external logger goes offline:  
 
 - ``LOG_AGGREGATOR_MAX_DISK_USAGE_GB``: specifies the amount of data to store (in gigabytes) during an outage of the external log aggregator (defaults to 1). Equivalent to the ``rsyslogd queue.maxdiskspace`` setting.
 
@@ -43,7 +43,7 @@ Loggers
 Below are special loggers (except for ``awx``, which constitutes generic server logs) that provide large amount of information in a predictable structured or semi-structured format, following the same structure as one would expect if obtaining the data from the API: 
 
 - ``job_events``: Provides data returned from the Ansible callback module
-- ``activity_stream``: Displays the record of changes to the objects within the |at| application
+- ``activity_stream``: Displays the record of changes to the objects within the AWX application
 - ``system_tracking``: Provides fact data gathered by Ansible ``setup`` module (i.e. ``gather_facts: True``) when job templates are ran with **Enable Fact Cache** selected
 - ``awx``: Provides generic server logs, which include logs that would normally be written to a file. It contains the standard metadata that all logs have, except it only has the message from the log statement.
 
@@ -51,14 +51,14 @@ These loggers only use log-level of INFO, except for the ``awx`` logger, which m
 
 Additionally, the standard controller logs are be deliverable through this same mechanism. It is apparent how to enable or disable each of these five sources of data without manipulating a complex dictionary in your local settings file, as well as adjust the log-level consumed from the standard controller logs.
 
-To configure various logging components in |at|, click **Settings** from the left navigation bar then select **Logging settings** from the list of System options. 
+To configure various logging components in AWX, click **Settings** from the left navigation bar then select **Logging settings** from the list of System options. 
 
 Log message schema
 ~~~~~~~~~~~~~~~~~~~~
 
 Common schema for all loggers:
 
-- ``cluster_host_id``: Unique identifier of the host within the controller cluster
+- ``cluster_host_id``: Unique identifier of the host within the AWX cluster
 - ``level``: Standard python log level, roughly reflecting the significance of the event All of the data loggers as a part of this feature use INFO level, but the other controller logs will use different levels as appropriate
 - ``logger_name``: Name of the logger we use in the settings, for example, "activity_stream" 
 - ``@timestamp``: Time of log 
@@ -104,7 +104,7 @@ This is a intended to be a lower-volume source of information about changes in j
 In addition to common fields, these logs include fields present on the job model.
 
 
-Controller logs
+AWX logs
 ~~~~~~~~~~~~~~~~
 
 In addition to the common fields, this contains a ``msg`` field with the log message. Errors contain a separate ``traceback`` field. These logs can be enabled or disabled with the ``ENABLE EXTERNAL LOGGING`` option from the Logging settings page.
@@ -120,7 +120,7 @@ The logging aggregator service works with the following monitoring and data anal
 Splunk
 ^^^^^^^^
 
-|At|'s Splunk logging integration uses the Splunk HTTP Collector. When configuring a SPLUNK logging aggregator, add the full URL to the HTTP Event Collector host, like in the following example:
+AWX's Splunk logging integration uses the Splunk HTTP Collector. When configuring a SPLUNK logging aggregator, add the full URL to the HTTP Event Collector host, like in the following example:
 
    .. code-block:: text
 
@@ -145,7 +145,7 @@ Splunk
 
 Splunk HTTP Event Collector listens on 8088 by default so it is necessary to provide the full HEC event URL (with port) in order for incoming requests to be processed successfully. These values are entered in the example below:
 
-.. image:: ../common/images/logging-splunk-tower-example.png
+.. image:: ../common/images/logging-splunk-awx-example.png
 
 
 For further instructions on configuring the HTTP Event Collector, refer to the `Splunk documentation`_.
@@ -158,7 +158,7 @@ Loggly
 
 To set up the sending of logs through Loggly's HTTP endpoint, refer to https://www.loggly.com/docs/http-endpoint/. Loggly uses the URL convention described at http://logs-01.loggly.com/inputs/TOKEN/tag/http/, which is shown inputted in the **Logging Aggregator** field in the example below:
 
-.. image:: ../common/images/logging-loggly-tower-example.png
+.. image:: ../common/images/logging-loggly-awx-example.png
 
 
 Sumologic
@@ -214,7 +214,7 @@ To set up logging to any of the aggregator types:
 
 - **Logging Aggregator Type**: Click to select the aggregator service from the drop-down menu:
 
-.. image:: ../common/images/configure-tower-system-logging-types.png
+.. image:: ../common/images/configure-awx-system-logging-types.png
 
 - **Logging Aggregator Username**: Enter the username of the logging aggregator if it requires it.
 - **Logging Aggregator Password/Token**: Enter the password of the logging aggregator if it requires it.
@@ -230,11 +230,11 @@ To set up logging to any of the aggregator types:
 
 5. Review your entries for your chosen logging aggregation. Below is an example of one set up for Splunk:
 
-.. image:: ../common/images/configure-tower-system-logging-splunk-example.png
+.. image:: ../common/images/configure-awx-system-logging-splunk-example.png
 
 7. When done, click **Save** to apply the settings or **Cancel** to abandon the changes.
 
-8. To verify if your configuration is set up correctly, click **Save** first then click **Test**. This sends a test log message to the log aggregator using the current logging configuration in |at|. You should check to make sure this test message was received by your external log aggregator.  
+8. To verify if your configuration is set up correctly, click **Save** first then click **Test**. This sends a test log message to the log aggregator using the current logging configuration in AWX. You should check to make sure this test message was received by your external log aggregator.  
 
 .. note::
 
@@ -267,16 +267,12 @@ Items surrounded by ``{}`` will be substituted when the log error is generated. 
 - **status_code**: The HTTP status code the API is returning
 - **user_name**: The name of the user that was authenticated when making the API request
 - **url_path**: The path portion of the URL being called (aka the API endpoint)
-- **remote_addr**: The remote address received by Controller
+- **remote_addr**: The remote address received by AWX
 - **error**: The error message returned by the API or, if no error is specified, the HTTP status as text
 
 
 Troubleshoot Logging
 ---------------------
-
-Logging Aggregation
-~~~~~~~~~~~~~~~~~~~~
-If you have sent a message with the test button to your configured logging service via http/https, but did not receive the message, check the ``/var/log/tower/rsyslog.err`` log file. This is where errors are stored if they occurred when authenticating rsyslog with an http/https external logging service. Note that if there are no errors, this file will not exist. 
 
 API 4XX Errors
 ~~~~~~~~~~~~~~~~~~~~

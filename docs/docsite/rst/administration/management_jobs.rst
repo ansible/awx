@@ -9,7 +9,7 @@ Management Jobs
    single: removing old data
 
 
-**Management Jobs** assist in the cleaning of old data from the controller, including system tracking information, tokens, job histories, and activity streams. You can use this if you have specific retention policies or need to decrease the storage used by your controller database. Click **Management Jobs** from the left navigation bar.
+**Management Jobs** assist in the cleaning of old data from AWX, including system tracking information, tokens, job histories, and activity streams. You can use this if you have specific retention policies or need to decrease the storage used by your controller database. Click **Management Jobs** from the left navigation bar.
 
 |management jobs|
 
@@ -81,7 +81,7 @@ To review or set notifications associated with a management job:
 
 .. image:: ../common/images/management-job-notifications.png
 
-If none exist, see :ref:`ug_notifications` in the |atu| for more information.
+If none exist, see :ref:`ug_notifications` for more information.
 
 .. image:: ../common/images/management-job-notifications-empty.png
 
@@ -101,7 +101,7 @@ To remove expired OAuth2 tokens, click on the launch (|launch|) button beside **
 
 You can review or set a schedule for cleaning up expired OAuth2 tokens by performing the same procedure described for activity stream management jobs. See :ref:`ag_mgmt_job_schedule` for detail.
 
-You can also set or review notifications associated with this management job the same way as described in :ref:`ag_mgmt_job_notify` for activity stream management jobs, and refer to :ref:`ug_notifications` in the |atu| for more detail.
+You can also set or review notifications associated with this management job the same way as described in :ref:`ag_mgmt_job_notify` for activity stream management jobs, and refer to :ref:`ug_notifications` for more detail.
 
 
 Cleanup Expired Sessions
@@ -115,7 +115,7 @@ To remove expired sessions, click on the launch (|launch|) button beside **Clean
 
 You can review or set a schedule for cleaning up expired sessions by performing the same procedure described for activity stream management jobs. See :ref:`ag_mgmt_job_schedule` for detail.
 
-You can also set or review notifications associated with this management job the same way as described in :ref:`ag_mgmt_job_notify` for activity stream management jobs, and refer to :ref:`ug_notifications` in the |atu| for more detail.
+You can also set or review notifications associated with this management job the same way as described in :ref:`ag_mgmt_job_notify` for activity stream management jobs, and refer to :ref:`ug_notifications` for more detail.
 
 
 Removing Old Job History 
@@ -141,4 +141,4 @@ Enter the number of days of data you would like to save and click **Launch**.
 
 You can review or set a schedule for cleaning up old job history by performing the same procedure described for activity stream management jobs. See :ref:`ag_mgmt_job_schedule` for detail.
 
-You can also set or review notifications associated with this management job the same way as described in :ref:`ag_mgmt_job_notify` for activity stream management jobs, and refer to :ref:`ug_notifications` in the |atu| for more detail.
+You can also set or review notifications associated with this management job the same way as described in :ref:`ag_mgmt_job_notify` for activity stream management jobs, and refer to :ref:`ug_notifications` for more detail.
