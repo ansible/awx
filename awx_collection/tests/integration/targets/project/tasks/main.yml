@@ -53,6 +53,23 @@
         that:
           - result is not changed
 
+    - name: Create a git project and wait with short request timeout.
+      project:
+        name: "{{ project_name1 }}"
+        organization: Default
+        scm_type: git
+        scm_url: https://github.com/ansible/test-playbooks
+        wait: true
+        state: exists
+        request_timeout: .001
+      register: result
+      ignore_errors: true
+
+    - assert:
+        that:
+          - result is failed
+          - "'timed out' in result.msg"
+
     - name: Delete a git project without credentials and wait
       project:
         name: "{{ project_name1 }}"

@@ -85,7 +85,11 @@ click==8.1.6
     # via receptorctl
 constantly==15.1.0
     # via twisted
+<<<<<<< HEAD
 cryptography==41.0.2
+=======
+cryptography==41.0.3
+>>>>>>> upstream/devel
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   adal
@@ -102,9 +106,7 @@ daphne==3.0.2
     #   -r /awx_devel/requirements/requirements.in
     #   channels
 dataclasses==0.6
-    # via
-    #   python-dsv-sdk
-    #   python-tss-sdk
+    # via python-dsv-sdk
 defusedxml==0.7.1
     # via
     #   python3-openid
@@ -313,7 +315,13 @@ pyjwt==2.8.0
     #   social-auth-core
     #   twilio
 pyopenssl==23.2.0
+<<<<<<< HEAD
     # via twisted
+=======
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   twisted
+>>>>>>> upstream/devel
 pyparsing==2.4.6
     # via -r /awx_devel/requirements/requirements.in
 pyrad==2.4
@@ -338,7 +346,7 @@ python-ldap==3.4.3
     #   django-auth-ldap
 python-string-utils==1.0.0
     # via openshift
-python-tss-sdk==1.0.0
+python-tss-sdk==1.2.1
     # via -r /awx_devel/requirements/requirements.in
 python3-openid==3.2.0
     # via social-auth-core
@@ -393,8 +401,6 @@ rsa==4.9
     #   python-jose
 s3transfer==0.6.1
     # via boto3
-schedule==0.6.0
-    # via -r /awx_devel/requirements/requirements.in
 semantic-version==2.10.0
     # via setuptools-rust
 service-identity==23.1.0

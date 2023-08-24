@@ -1,0 +1,35 @@
+---
+name: Check body for reference to jira
+on:
+  pull_request:
+    branches:
+      - release_**
+jobs:
+  pr-check:
+    if: github.repository_owner == 'ansible' && github.repository != 'awx'
+    name: Scan PR description for JIRA links
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Check for JIRA lines
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          echo "$PR_BODY" | grep "JIRA: None" > no_jira
+          echo "$PR_BODY" | grep "JIRA: https://.*[0-9]+"> jira
+          exit 0
+        # We exit 0 and set the shell to prevent the returns from the greps from failing this step
+        # See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#exit-codes-and-error-action-preference
+        shell: bash {0}
+
+      - name: Check for exactly one item
+        run: |
+          if [ $(cat no_jira jira | wc -l) != 1 ] ; then
+            echo "The PR body must contain exactly one of [ 'JIRA: None' or 'JIRA: <one or more links>' ]"
+            echo "We counted $(cat no_jira jira | wc -l)"
+            exit 255;
+          else
+            exit 0;
+          fi
