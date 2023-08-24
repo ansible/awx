@@ -8,7 +8,7 @@ boto3
 botocore
 channels
 channels-redis==3.4.1  # see UPGRADE BLOCKERs
-cryptography>=39.0.1 ## https://github.com/ansible/awx/security/dependabot/90
+cryptography>=41.0.2  # CVE-2023-38325
 Cython<3 # Since the bump to PyYAML 5.4.1 this is now a mandatory dep
 daphne
 distro
@@ -39,6 +39,7 @@ prometheus_client
 psycopg
 psutil
 pygerduty
+pyopenssl>=23.2.0  # resolve dep conflict from cryptography pin above
 pyparsing==2.4.6  # Upgrading to v3 of pyparsing introduce errors on smart host filtering: Expected 'or' term, found 'or'  (at char 15), (line:1, col:16)
 python-daemon>3.0.0
 python-dsv-sdk
