@@ -315,13 +315,9 @@ pyjwt==2.8.0
     #   social-auth-core
     #   twilio
 pyopenssl==23.2.0
-<<<<<<< HEAD
-    # via twisted
-=======
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   twisted
->>>>>>> upstream/devel
 pyparsing==2.4.6
     # via -r /awx_devel/requirements/requirements.in
 pyrad==2.4
