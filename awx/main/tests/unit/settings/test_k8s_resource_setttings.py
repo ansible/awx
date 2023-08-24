@@ -38,8 +38,7 @@ def test_SYSTEM_TASK_ABS_MEM_conversion(value, converted_value, mem_capacity):
         assert get_corrected_memory(-1) == converted_value
         assert get_mem_effective_capacity(-1) == mem_capacity
         # SYSTEM_TASK_ABS_MEM should not effect memory and capacity for execution nodes
-        assert get_corrected_memory(2147483648, 'execution') == 2147483648
-        assert get_mem_effective_capacity(2147483648, 'execution') == 20
+        assert get_mem_effective_capacity(2147483648, is_control_node=False) == 20
 
 
 @pytest.mark.parametrize(
@@ -60,8 +59,7 @@ def test_SYSTEM_TASK_ABS_CPU_conversion(value, converted_value, cpu_capacity):
         mock_settings.SYSTEM_TASK_ABS_CPU = value
         mock_settings.SYSTEM_TASK_FORKS_CPU = 4
         assert convert_cpu_str_to_decimal_cpu(value) == converted_value
-        assert get_corrected_cpu(8) == converted_value
+        assert get_corrected_cpu(-1) == converted_value
         assert get_cpu_effective_capacity(-1) == cpu_capacity
         # SYSTEM_TASK_ABS_CPU should not effect cpu count and capacity for execution nodes
-        assert get_corrected_cpu(2.0, 'execution') == 2.0
-        assert get_cpu_effective_capacity(2.0, 'execution') == 8
+        assert get_cpu_effective_capacity(2.0, is_control_node=False) == 8
