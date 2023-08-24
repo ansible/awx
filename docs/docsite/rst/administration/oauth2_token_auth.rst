@@ -121,7 +121,7 @@ Individual tokens are accessible via their primary keys: ``/api/<version>/tokens
 For an OAuth 2 token, the only fully editable fields are ``scope`` and ``description``. The ``application`` field is non-editable on update, and all other fields are entirely non-editable, and are auto-populated during creation, as follows:
 
 - ``user`` field corresponds to the user the token is created for, and in this case, is also the user creating the token
-- ``expires`` is generated according to the controller configuration setting ``OAUTH2_PROVIDER``
+- ``expires`` is generated according to AWX configuration setting ``OAUTH2_PROVIDER``
 - ``token`` and ``refresh_token`` are auto-generated to be non-clashing random strings
 
 Both application tokens and personal access tokens are shown at the ``/api/v2/tokens/`` endpoint. The ``application`` field in the personal access tokens is always **null**. This is a good way to differentiate the two types of tokens.
@@ -150,7 +150,7 @@ The easiest and most common way to obtain an OAuth 2 token is to create a person
 
 ::
 
-    curl -XPOST -k -H "Content-type: application/json" -d '{"description":"Personal controller CLI token", "application":null, "scope":"write"}' https://<USERNAME>:<PASSWORD>@<CONTROLLER_SERVER>/api/v2/users/<USER_ID>/personal_tokens/ | python -m json.tool
+    curl -XPOST -k -H "Content-type: application/json" -d '{"description":"Personal AWX CLI token", "application":null, "scope":"write"}' https://<USERNAME>:<PASSWORD>@<AWX_SERVER>/api/v2/users/<USER_ID>/personal_tokens/ | python -m json.tool
 
 You could also pipe the JSON output through ``jq``, if installed.
 
@@ -159,10 +159,10 @@ Following is an example of using the personal token to access an API endpoint us
 
 ::
 
-	curl -k -H "Authorization: Bearer <token>" -H "Content-Type: application/json" -X POST  -d '{}' https://controller/api/v2/job_templates/5/launch/
+	curl -k -H "Authorization: Bearer <token>" -H "Content-Type: application/json" -X POST  -d '{}' https://awx/api/v2/job_templates/5/launch/
 
 
-In |at|, the OAuth 2 system is built on top of the `Django Oauth Toolkit`_, which provides dedicated endpoints for authorizing, revoking, and refreshing tokens. These endpoints can be found under the ``/api/v2/users/<USER_ID>/personal_tokens/`` endpoint, which also provides detailed examples on some typical usage of those endpoints. These special OAuth 2 endpoints only support using the ``x-www-form-urlencoded`` **Content-type**, so none of the ``api/o/*`` endpoints accept ``application/json``. 
+In AWX, the OAuth 2 system is built on top of the `Django Oauth Toolkit`_, which provides dedicated endpoints for authorizing, revoking, and refreshing tokens. These endpoints can be found under the ``/api/v2/users/<USER_ID>/personal_tokens/`` endpoint, which also provides detailed examples on some typical usage of those endpoints. These special OAuth 2 endpoints only support using the ``x-www-form-urlencoded`` **Content-type**, so none of the ``api/o/*`` endpoints accept ``application/json``. 
 
 
 .. _`Django Oauth Toolkit`: https://django-oauth-toolkit.readthedocs.io/en/latest/
@@ -171,15 +171,15 @@ In |at|, the OAuth 2 system is built on top of the `Django Oauth Toolkit`_, whic
     You can also request tokens using the ``/api/o/token`` endpoint by specifying ``null`` for the application type.
 
 
-Alternatively, you can :ref:`add tokens <ug_tokens_auth_create>` for users through the controller user interface, as well as configure the expiration of an access token and its associated refresh token (if applicable).  
+Alternatively, you can :ref:`add tokens <ug_tokens_auth_create>` for users through the AWX user interface, as well as configure the expiration of an access token and its associated refresh token (if applicable).  
 
-.. image:: ../common/images/configure-tower-system-misc-sys-token-expire.png
+.. image:: ../common/images/configure-awx-system-misc-sys-token-expire.png
 
 
 Token scope mask over RBAC system
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The scope of an OAuth 2 token is a space-separated string composed of valid scope keywords, 'read' and 'write'. These keywords are configurable and used to specify permission level of the authenticated API client. Read and write scopes provide a mask layer over the Role-Based Access Control (RBAC) permission system of |at|. Specifically, a 'write' scope gives the authenticated user the full permissions the RBAC system provides, while a 'read' scope gives the authenticated user only read permissions the RBAC system provides. Note that 'write' implies 'read' as well.
+The scope of an OAuth 2 token is a space-separated string composed of valid scope keywords, 'read' and 'write'. These keywords are configurable and used to specify permission level of the authenticated API client. Read and write scopes provide a mask layer over the Role-Based Access Control (RBAC) permission system of AWX. Specifically, a 'write' scope gives the authenticated user the full permissions the RBAC system provides, while a 'read' scope gives the authenticated user only read permissions the RBAC system provides. Note that 'write' implies 'read' as well.
 
 For example, if you have administrative permissions to a job template, you can view, modify, launch, and delete the job template if authenticated via session or basic authentication. In contrast, if you are authenticated using OAuth 2 token, and the related token scope is 'read', you can only view, but not manipulate or launch the job template, despite being an administrator. If the token scope is 'write' or 'read write', you can take full advantage of the job template as its administrator. 
 
@@ -217,7 +217,7 @@ This returns a <token-value> that you can use to authenticate with for future re
 
 ::
 
-    curl -H "Authorization: Bearer <token-value>" -H "Content-Type: application/json" -X GET https://<controller>/api/v2/users/ 
+    curl -H "Authorization: Bearer <token-value>" -H "Content-Type: application/json" -X GET https://<awx>/api/v2/users/ 
 
 
 The ``-k`` flag may be needed if you have not set up a CA yet and are using SSL.
@@ -227,14 +227,14 @@ To revoke a token, you can make a DELETE on the detail page for that token, usin
 
 ::
 
-    curl -ku <user>:<password> -X DELETE https://<controller>/api/v2/tokens/<pk>/
+    curl -ku <user>:<password> -X DELETE https://<awx>/api/v2/tokens/<pk>/
 
 
 Similarly, using a token:
 
 ::
 
-    curl -H "Authorization: Bearer <token-value>" -X DELETE https://<controller>/api/v2/tokens/<pk>/ -k
+    curl -H "Authorization: Bearer <token-value>" -X DELETE https://<awx>/api/v2/tokens/<pk>/ -k
 
 
 .. _ag_oauth2_token_auth_grant_types:
@@ -242,14 +242,14 @@ Similarly, using a token:
 Application Functions
 -----------------------
 
-This page lists OAuth 2 utility endpoints used for authorization, token refresh, and revoke. The ``/api/o/`` endpoints are not meant to be used in browsers and do not support HTTP GET. The endpoints prescribed here strictly follow RFC specifications for OAuth 2, so use that for detailed reference. The following is an example of the typical usage of these endpoints in the controller, in particular, when creating an application using various grant types:
+This page lists OAuth 2 utility endpoints used for authorization, token refresh, and revoke. The ``/api/o/`` endpoints are not meant to be used in browsers and do not support HTTP GET. The endpoints prescribed here strictly follow RFC specifications for OAuth 2, so use that for detailed reference. The following is an example of the typical usage of these endpoints in AWX, in particular, when creating an application using various grant types:
 
    - Authorization Code
    - Password
 
 .. note::
 
-    You can perform any of the application functions described here using the controller user interface. Refer to the :ref:`Applications <ug_applications_auth>` section of the |atu| for more detail.
+    You can perform any of the application functions described here using AWX user interface. Refer to the :ref:`ug_applications_auth` section of the |atu| for more detail.
 
  
 
@@ -260,9 +260,9 @@ The application ``authorization code`` grant type should be used when access tok
 
 .. note::
 
-    You can only use the ``authorization code`` type to acquire an access token when using an application. When integrating an external webapp with |at|, that webapp may need to create OAuth2 Tokens on behalf of users in that other webapp. Creating an application in the controller with the ``authorization code`` grant type is the preferred way to do this because:
+    You can only use the ``authorization code`` type to acquire an access token when using an application. When integrating an external webapp with AWX, that webapp may need to create OAuth2 Tokens on behalf of users in that other webapp. Creating an application in AWX with the ``authorization code`` grant type is the preferred way to do this because:
 
-    - this allows an external application to obtain a token from the controller for a user, using their credentials.
+    - this allows an external application to obtain a token from AWX for a user, using their credentials.
     - compartmentalized tokens issued for a particular application allows those tokens to be easily managed (revoke all tokens associated with that application without having to revoke *all* tokens in the system, for example)
 
  To create an application named *AuthCodeApp* with the ``authorization-code`` grant type, perform a POST to the ``/api/v2/applications/`` endpoint:
@@ -273,7 +273,7 @@ The application ``authorization code`` grant type should be used when access tok
         "name": "AuthCodeApp",
         "user": 1,
         "client_type": "confidential",
-        "redirect_uris": "http://<controller>/api/v2",
+        "redirect_uris": "http://<awx>/api/v2",
         "authorization_grant_type": "authorization-code",
         "skip_authorization": false
     }
@@ -283,9 +283,9 @@ The application ``authorization code`` grant type should be used when access tok
 
 The workflow that occurs when you issue a **GET** to the ``authorize`` endpoint from the client application with the ``response_type``, ``client_id``, ``redirect_uris``, and ``scope``:
 
-1. The controller responds with the authorization code and status to the ``redirect_uri`` specified in the application. 
-2. The client application then makes a **POST** to the ``api/o/token/`` endpoint on the controller with the ``code``, ``client_id``, ``client_secret``, ``grant_type``, and ``redirect_uri``. 
-3. The controller responds with the ``access_token``, ``token_type``, ``refresh_token``, and ``expires_in``. 
+1. AWX responds with the authorization code and status to the ``redirect_uri`` specified in the application. 
+2. The client application then makes a **POST** to the ``api/o/token/`` endpoint on AWX with the ``code``, ``client_id``, ``client_secret``, ``grant_type``, and ``redirect_uri``. 
+3. AWX responds with the ``access_token``, ``token_type``, ``refresh_token``, and ``expires_in``. 
 
 
 Refer to `Django's Test Your Authorization Server`_ toolkit to test this flow.
@@ -294,12 +294,12 @@ Refer to `Django's Test Your Authorization Server`_ toolkit to test this flow.
 
 You may specify the number of seconds an authorization code remains valid in the **System settings** screen: 
 
-.. image:: ../common/images/configure-tower-system-misc-sys-authcode-expire.png
+.. image:: ../common/images/configure-awx-system-misc-sys-authcode-expire.png
 
 
 Requesting an access token after this duration will fail. The duration defaults to 600 seconds (10 minutes), based on the `RFC6749 <https://tools.ietf.org/html/rfc6749>`_ recommendation. 
 
-The best way to set up app integrations with |at| using the Authorization Code grant type is to whitelist the origins for those cross-site requests. More generally, you need to whitelist the service or application you are integrating with the controller, for which you want to provide access tokens. To do this, have your Administrator add this whitelist to their local controller settings:
+The best way to set up app integrations with AWX using the Authorization Code grant type is to whitelist the origins for those cross-site requests. More generally, you need to whitelist the service or application you are integrating with AWX, for which you want to provide access tokens. To do this, have your Administrator add this whitelist to their local AWX settings:
 
 ::
 
@@ -308,7 +308,7 @@ The best way to set up app integrations with |at| using the Authorization Code g
         r"http://www.example.com*"
     ]
 
-Where ``http://django-oauth-toolkit.herokuapp.com`` and ``http://www.example.com`` are applications needing tokens with which to access the controller.
+Where ``http://django-oauth-toolkit.herokuapp.com`` and ``http://www.example.com`` are applications needing tokens with which to access AWX.
 
 Application using ``password`` grant type
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -343,7 +343,7 @@ Logging in is not required for ``password`` grant type, so you can simply use cu
           "application": 1,
           "scope": "write"
       }' \
-      https://<controller>/api/v2/tokens/
+      https://<awx>/api/v2/tokens/
 
 
 .. note::
@@ -401,7 +401,7 @@ The ``/api/o/token/`` endpoint is used for refreshing the access token:
     curl -X POST \
         -d "grant_type=refresh_token&refresh_token=AL0NK9TTpv0qp54dGbC4VUZtsZ9r8z" \
         -u "gwSPoasWSdNkMDtBN3Hu2WYQpPWCO9SwUEsKK22l:fI6ZpfocHYBGfm1tP92r0yIgCyfRdDQt0Tos9L8a4fNsJjQQMwp9569eIaUBsaVDgt2eiwOGe0bg5m5vCSstClZmtdy359RVx2rQK5YlIWyPlrolpt2LEpVeKXWaiybo" \
-        http://<controller>/api/o/token/ -i
+        http://<awx>/api/o/token/ -i
 
 
 In the above POST request, ``refresh_token`` is provided by ``refresh_token`` field of the access token above that. The authentication information is of format ``<client_id>:<client_secret>``, where ``client_id`` and ``client_secret`` are the corresponding fields of the underlying related application of the access token.
@@ -443,7 +443,7 @@ Revoking an access token by this method is the same as deleting the token resour
 
     curl -X POST -d "token=rQONsve372fQwuc2pn76k3IHDCYpi7" \
     -u "gwSPoasWSdNkMDtBN3Hu2WYQpPWCO9SwUEsKK22l:fI6ZpfocHYBGfm1tP92r0yIgCyfRdDQt0Tos9L8a4fNsJjQQMwp9569eIaUBsaVDgt2eiwOGe0bg5m5vCSstClZmtdy359RVx2rQK5YlIWyPlrolpt2LEpVeKXWaiybo" \
-    http://<controller>/api/o/revoke_token/ -i
+    http://<awx>/api/o/revoke_token/ -i
 
 .. note::
 
@@ -458,9 +458,9 @@ Revoking an access token by this method is the same as deleting the token resour
 Alternatively, you can use the ``manage`` utility, :ref:`ag_manage_utility_revoke_tokens`, to revoke tokens as described in the the :ref:`ag_token_utility` section. 
 
 
-This setting can be configured at the system-level in the |at| User Interface: 
+This setting can be configured at the system-level in the AWX User Interface: 
 
-.. image:: ../common/images/configure-tower-system-oauth2-tokens-toggle.png
+.. image:: ../common/images/configure-awx-system-oauth2-tokens-toggle.png
 
 
 Upon success, a response of ``200 OK`` displays. Verify the deletion by checking whether the token is present in the ``/api/v2/tokens/`` endpoint.

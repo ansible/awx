@@ -39,5 +39,4 @@ AWX Administration
   custom_rebranding
   troubleshooting
   tipsandtricks
-  postface
 ..  monitoring

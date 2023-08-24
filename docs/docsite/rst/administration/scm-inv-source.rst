@@ -7,7 +7,7 @@ Inventory File Importing
    single: inventory file importing
    single: inventory scripts; custom
 
-The controller allows you to choose an inventory file from source control, rather than creating one from scratch. This function is the same as custom inventory scripts, except that the contents are obtained from source control instead of editing their contents browser. This means, the files are non-editable and as inventories are updated at the source, the inventories within the projects are also updated accordingly, including the ``group_vars`` and ``host_vars`` files or directory associated with them. SCM types can consume both inventory files and scripts, the overlap between inventory files and custom types in that both do scripts.
+AWX allows you to choose an inventory file from source control, rather than creating one from scratch. This function is the same as custom inventory scripts, except that the contents are obtained from source control instead of editing their contents browser. This means, the files are non-editable and as inventories are updated at the source, the inventories within the projects are also updated accordingly, including the ``group_vars`` and ``host_vars`` files or directory associated with them. SCM types can consume both inventory files and scripts, the overlap between inventory files and custom types in that both do scripts.
 
 Any imported hosts will have a description of "imported" by default. This can be overridden by setting the ``_awx_description`` variable on a given host. For example, if importing from a sourced .ini file, you could add the following host variables:
 
@@ -25,7 +25,7 @@ In order to use old inventory scripts in source control, see :ref:`ug_customscri
 Custom Dynamic Inventory Scripts
 ---------------------------------
 
-A custom dynamic inventory script stored in version control can be imported and run. This makes it much easier to make changes to an inventory script — rather than having to copy and paste one into the controller, it is pulled directly from source control and then executed. The script must be written to handle any credentials needed for doing its work and you are responsible for installing any Python libraries needed by the script (which is the same requirement for custom dynamic inventory scripts). And this applies to both user-defined inventory source scripts and SCM sources as they are both exposed to Ansible *virtualenv* requirements related to playbooks.
+A custom dynamic inventory script stored in version control can be imported and run. This makes it much easier to make changes to an inventory script — rather than having to copy and paste one into AWX, it is pulled directly from source control and then executed. The script must be written to handle any credentials needed for doing its work and you are responsible for installing any Python libraries needed by the script (which is the same requirement for custom dynamic inventory scripts). And this applies to both user-defined inventory source scripts and SCM sources as they are both exposed to Ansible *virtualenv* requirements related to playbooks.
 
 You can specify environment variables when you edit the SCM inventory source itself. For some scripts, this will be sufficient, however, this is not a secure way to store secret information that gives access to cloud providers or inventory.
 
@@ -47,7 +47,7 @@ The source fields used are:
 
 An update of the project automatically triggers an inventory update where it is used. An update of the project is scheduled immediately after creation of the inventory source. Neither inventory nor project updates are blocked while a related job is running. In cases where you have a big project (around 10 GB), disk space on ``/tmp`` may be an issue.
 
-You can specify a location manually in the controller User Interface from the Create Inventory Source page. Refer to the :ref:`ug_inventories` section of the |atu| for instructions on creating an inventory source.
+You can specify a location manually in the AWX User Interface from the Create Inventory Source page. Refer to the :ref:`ug_inventories` section of the |atu| for instructions on creating an inventory source.
 
 This listing should be refreshed to latest SCM info on a project update. If no inventory sources use a project as an SCM inventory source, then the inventory listing may not be refreshed on update.
 
@@ -61,5 +61,5 @@ An inventory update can be performed while a related job is running.
 Supported File Syntax
 ^^^^^^^^^^^^^^^^^^^^^^
 
-|At| uses the ``ansible-inventory`` module from Ansible to process inventory files, and supports all valid inventory syntax that the controller requires.
+AWX uses the ``ansible-inventory`` module from Ansible to process inventory files, and supports all valid inventory syntax that AWX requires.
 
