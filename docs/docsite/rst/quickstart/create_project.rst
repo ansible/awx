@@ -5,9 +5,9 @@ Setting up a Project
    single: projects
 
 
-A Project is a logical collection of Ansible playbooks, represented in the controller.
+A Project is a logical collection of Ansible playbooks, represented in AWX.
 
-You can manage playbooks and playbook directories by either placing them manually under the Project Base Path on your controller server, or by placing your playbooks into a source code management (SCM) system supported by the controller, including Git, Subversion, and Mercurial.
+You can manage playbooks and playbook directories by either placing them manually under the Project Base Path on your AWX server, or by placing your playbooks into a source code management (SCM) system supported by AWX, including Git, Subversion, and Mercurial.
 
 .. note::
 

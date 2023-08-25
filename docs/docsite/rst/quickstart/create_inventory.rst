@@ -5,13 +5,13 @@ Create a new Inventory
    single: inventory; create new
    single: inventory; add to organization
 
-An inventory is a collection of hosts managed by the controller. Organizations are assigned to inventories, while permissions to launch playbooks against inventories are controlled at the user and/or team level. For more information, refer to :ref:`Inventories <ug_inventories>`, :ref:`Users - Permissions <ug_users_permissions>`, and :ref:`Teams - Permissions <ug_teams_permissions>` in the |atu|.
+An inventory is a collection of hosts managed by AWX. Organizations are assigned to inventories, while permissions to launch playbooks against inventories are controlled at the user and/or team level. For more information, refer to :ref:`Inventories <ug_inventories>`, :ref:`Users - Permissions <ug_users_permissions>`, and :ref:`Teams - Permissions <ug_teams_permissions>` in the |atu|.
 
 To view existing inventories, click **Inventories** from the left navigation bar.
 
 .. image:: ../common/images/qs-inventories-default-list-view.png
 
-|at| provides a demo inventory for you to use as you learn how the controller works. It can be used as is or edited later as needed. You may create another inventory if necessary. Refer to :ref:`ug_inventories_add` in the |atu| for detail.
+|at| provides a demo inventory for you to use as you learn how AWX works. It can be used as is or edited later as needed. You may create another inventory if necessary. Refer to :ref:`ug_inventories_add` in the |atu| for detail.
 
 For the purpose of this Quick Start Guide, leave the default inventory as is. 
 
@@ -37,7 +37,7 @@ To add new groups, click the **Add** button in the Groups screen.
 
 Similarly, in the **Hosts** tab, click the **Add** button to add hosts to groups.
 
-For the purposes of this Quick Start and to test that the controller is setup properly, a local host has been added for your use.
+For the purposes of this Quick Start and to test that AWX is setup properly, a local host has been added for your use.
 
 .. image:: ../common/images/qs-inventories-default-host.png
 

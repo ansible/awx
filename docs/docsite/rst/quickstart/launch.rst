@@ -15,7 +15,7 @@ From the Templates list view, click the Launch (|launch|) button to run the Demo
 .. |Job templates - home launch| image:: ../common/images/qs-job-templates-list-view-click-launch.png
 
 
-The initial job launch returns a status page which updates automatically using the controller's Live Event feature until the job is complete. Once complete, the job results look like the following:
+The initial job launch returns a status page which updates automatically using AWX's Live Event feature until the job is complete. Once complete, the job results look like the following:
 
 |Job templates - demo run complete|
 
@@ -23,12 +23,12 @@ The initial job launch returns a status page which updates automatically using t
 
 For more details on the job results, refer to :ref:`ug_jobs`.
 
-Congratulations! Your controller installation is officially setup and running properly. To learn more about these controller features or to learn about administration tasks, the controller API, etc., refer to the following documentation sets:
+Congratulations! Your AWX installation is officially setup and running properly. To learn more about these AWX features or to learn about administration tasks, the AWX API, etc., refer to the following documentation sets:
 
-- :ref:`Automation Controller User Guide <ug_start>`
-- :ref:`Automation Controller Administration Guide <ag_start>`
-- :ref:`Automation Controller API Guide<api_start>`
-- :ref:`Automation Controller Release Notes <releasenotes_start>`
+- :ref:`AWX User Guide <ug_start>`
+- :ref:`AWX Administration Guide <ag_start>`
+- :ref:`AWX API Guide<api_start>`
+- :ref:`AWX Release Notes <releasenotes_start>`
 - `Ansible Documentation`_
 
 .. _Ansible Documentation: http://docs.ansible.com/

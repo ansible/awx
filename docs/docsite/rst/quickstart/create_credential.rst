@@ -4,7 +4,7 @@ Create a Credential
 .. index::
    single: credentials; create 
 
-Credentials authenticate the controller user to launch Ansible playbooks, which can include passwords and SSH keys, against inventory hosts. You can also require the controller user to enter a password or key phrase when a playbook launches using the credentials feature of the controller.
+Credentials authenticate the AWX user to launch Ansible playbooks, which can include passwords and SSH keys, against inventory hosts. You can also require the AWX user to enter a password or key phrase when a playbook launches using the credentials feature of AWX.
 
 Access the list of credentials by clicking **Credentials** from the left navigation bar.
 

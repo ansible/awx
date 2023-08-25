@@ -5,7 +5,7 @@
    pair: settings menu; configure the controller
 
 
-To enter the Settings window for |at|, click **Settings** from the left navigation bar. This page allows you to modify your controller's configuration, such as settings associated with authentication, jobs, system, and user interface.
+To enter the Settings window for AWX, click **Settings** from the left navigation bar. This page allows you to modify your AWX configuration, such as settings associated with authentication, jobs, system, and user interface.
 
 .. image:: ../common/images/ug-settings-menu-screen.png
 
