@@ -4,7 +4,7 @@
    single: playbook setup
    pair: playbook setup; setup.sh
 
-The Tower setup playbook script uses the ``inventory`` file and is invoked as ``./setup.sh`` from the path where you unpacked the Tower installer tarball.  
+AWX setup playbook script uses the ``inventory`` file and is invoked as ``./setup.sh`` from the path where you unpacked the AWX installer tarball.  
 
 ::
 

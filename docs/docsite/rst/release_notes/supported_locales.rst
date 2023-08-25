@@ -6,11 +6,11 @@ Supported Locales
    single: locales supported
 
 
-Ansible Tower supports the following locales for UTC-friendly date and time information.
+AWX supports the following locales for UTC-friendly date and time information.
 
-Tower automatically sets the locale preference based on the user's browser settings. For Safari, Internet Explorer, and older versions of Chrome as well as FireFox, this is handled automatically. 
+AWX automatically sets the locale preference based on the user's browser settings. For Safari, Internet Explorer, and older versions of Chrome as well as FireFox, this is handled automatically. 
 
-For newer versions of Chrome (v32 and later) and FireFox (v32 and later), Tower uses the language preferences set from your browser's language settings. The browser lists the user's preferred languages and selects the first in the array as the user's top choice, which Tower uses as the preferred locale. This means that you can change your browser's language and change your Tower locale preferences (although you may need to reload/refresh Tower in your browser to see this change.)
+For newer versions of Chrome (v32 and later) and FireFox (v32 and later), AWX uses the language preferences set from your browser's language settings. The browser lists the user's preferred languages and selects the first in the array as the user's top choice, which AWX uses as the preferred locale. This means that you can change your browser's language and change your AWX locale preferences (although you may need to reload/refresh AWX in your browser to see this change.)
 
 
 .. - ``ar`` -- Arabic 

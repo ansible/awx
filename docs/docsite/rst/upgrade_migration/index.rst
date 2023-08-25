@@ -11,6 +11,5 @@ Upgrading and Migrating AWX Deployments
    :numbered:
 
    self
-   release_notes
    upgrade_considerations
    upgrade_to_ees
