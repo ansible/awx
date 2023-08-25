@@ -14,12 +14,12 @@ adding it to the **Custom Login Info** text field.
 
 For example, if you uploaded a specific logo, and added the following text:
 
-.. image:: ../common/images/configure-tower-ui-logo-filled.png
+.. image:: ../common/images/configure-awx-ui-logo-filled.png
 
 
 The Tower login dialog would look like this:
 
-.. image:: ../common/images/configure-tower-ui-angry-spud-login.png
+.. image:: ../common/images/configure-awx-ui-angry-spud-login.png
 
 
 

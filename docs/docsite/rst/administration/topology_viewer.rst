@@ -7,10 +7,10 @@ Topology Viewer
 .. index::
    pair: topology;viewer
    
-The topology viewer allows you to view node type, node health, and specific details about each node if you already have a mesh topology deployed. In order to access the topology viewer from the controller user interface, you must have System Administrator or System Auditor permissions.
+The topology viewer allows you to view node type, node health, and specific details about each node if you already have a mesh topology deployed. In order to access the topology viewer from the AWX user interface, you must have System Administrator or System Auditor permissions.
 
 
-To access the topology viewer from the controller user interface:
+To access the topology viewer from the AWX user interface:
 
 1. In the Administration menu from left navigation bar, click **Topology View**.
 
@@ -37,7 +37,7 @@ To reset the view to its default view, click **Reset zoom**.
 
 	If the Legend is not present, use the toggle on the upper right corner of the window to enable it.
 
-The Legend shows the :ref:`node status <node_statuses>` by color, which is indicative of the health of the node. The status of **Error** in the legend encompasses the **Unavailable** state (as displayed in the Instances list view) plus any future error conditions encountered in later versions of the controller. Also depicted in the legend are the link statuses:
+The Legend shows the :ref:`node status <node_statuses>` by color, which is indicative of the health of the node. The status of **Error** in the legend encompasses the **Unavailable** state (as displayed in the Instances list view) plus any future error conditions encountered in later versions of AWX. Also depicted in the legend are the link statuses:
 
 	- **Established**: this is a link state that indicates a peer connection between nodes that are either ready, unavailable, or disabled
 	- **Adding**: this is a link state indicating a peer connection between nodes that was selected to be added to the mesh topology

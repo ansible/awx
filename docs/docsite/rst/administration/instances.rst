@@ -10,7 +10,7 @@ Managing Capacity With Instances
    pair: remove;capacity
    pair: add;capacity
 
-Scaling your mesh is only available on Openshift deployments of |aap| and is possible through adding or removing nodes from your cluster dynamically, through the **Instances** resource of the AWX User Interface, without running the installation script.
+Scaling your mesh is only available on Openshift deployments of AWX and is possible through adding or removing nodes from your cluster dynamically, through the **Instances** resource of the AWX User Interface, without running the installation script.
 
 Prerequisites
 ~~~~~~~~~~~~~~

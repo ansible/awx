@@ -1,8 +1,8 @@
 .. _admin_troubleshooting:
 
-**************************************
-Troubleshooting the controller
-**************************************
+***********************
+Troubleshooting AWX
+***********************
 
 .. index:: 
    single: troubleshooting
@@ -15,7 +15,7 @@ Error logs
    pair: troubleshooting; general help
    pair: troubleshooting; error logs
 
-The controller server errors are logged in ``/var/log/tower``. Supervisors logs can be found in ``/var/log/supervisor/``. Nginx web server errors are logged in the httpd error log. Configure other controller logging needs in ``/etc/tower/conf.d/``.
+AWX server errors are logged in ``/var/log/tower``. Supervisors logs can be found in ``/var/log/supervisor/``. Nginx web server errors are logged in the httpd error log. Configure other controller logging needs in ``/etc/tower/conf.d/``.
 
 
 .. _admin_troubleshooting_sosreport:
@@ -39,17 +39,17 @@ If you are unable to run the ``helloworld.yml`` example playbook from the Quick 
 - Can you ``ssh`` to your host? Ansible depends on SSH access to the servers you are managing.
 - Are your hostnames and IPs correctly added in your inventory file? (Check for typos.)
 
-Unable to login to the controller via HTTP
-=============================================
+Unable to login to AWX via HTTP
+==================================
 
-Access to the controller is intentionally restricted through a secure protocol (HTTPS). In cases where your configuration is set up to run a controller node behind a load balancer or proxy as "HTTP only", and you only want to access it without SSL (for troubleshooting, for example), you must add the following settings in the ``custom.py`` file located at ``/etc/tower/conf.d`` of your controller instance:
+Access to AWX is intentionally restricted through a secure protocol (HTTPS). In cases where your configuration is set up to run a controller node behind a load balancer or proxy as "HTTP only", and you only want to access it without SSL (for troubleshooting, for example), you must add the following settings in the ``custom.py`` file located at ``/etc/tower/conf.d`` of your controller instance:
  
 :: 
 
   SESSION_COOKIE_SECURE = False
   CSRF_COOKIE_SECURE = False
 
-Changing these settings to ``False`` will allow the controller to manage cookies and login sessions when using the HTTP protocol. This must be done on every node of a cluster installation to properly take effect.
+Changing these settings to ``False`` will allow AWX to manage cookies and login sessions when using the HTTP protocol. This must be done on every node of a cluster installation to properly take effect.
 
 To apply the changes, run:
 
@@ -67,7 +67,7 @@ WebSockets port for live events not working
    pair: troubleshooting; websockets
 
 
-|at| uses port 80/443 on the controller server to stream live updates of playbook activity and other events to the client browser. These ports are configured for 80/443 by default, but if they are blocked by firewalls, close any firewall rules that opened up or added for the previous websocket ports, this will ensure your firewall allows traffic through this port.
+AWX uses port 80/443 on the AWX server to stream live updates of playbook activity and other events to the client browser. These ports are configured for 80/443 by default, but if they are blocked by firewalls, close any firewall rules that opened up or added for the previous websocket ports, this will ensure your firewall allows traffic through this port.
 
 
 Problems running a playbook
@@ -89,7 +89,7 @@ Problems when running a job
 .. index::
    pair: troubleshooting; job does not run
 
-If you are having trouble running a job from a playbook, you should review the playbook YAML file. When importing a playbook, either manually or via a source control mechanism, keep in mind that the host definition is controlled by the controller and should be set to ``hosts: all``. 
+If you are having trouble running a job from a playbook, you should review the playbook YAML file. When importing a playbook, either manually or via a source control mechanism, keep in mind that the host definition is controlled by AWX and should be set to ``hosts: all``. 
 
 
 Playbooks aren't showing up in the "Job Template" drop-down
@@ -118,10 +118,10 @@ If you are attempting to run a playbook Job and it stays in the "Pending" state 
 
 - Ensure all supervisor services are running via ``supervisorctl status``.
 - Check to ensure that the ``/var/`` partition has more than 1 GB of space available. Jobs will not complete with insufficient space on the ``/var/`` partition.
-- Run ``automation-controller-service restart`` on the controller server.
+- Run ``automation-controller-service restart`` on the AWX server.
 
 
-If you continue to have problems, run ``sosreport`` as root on the controller server, then file a `support request`_ with the result.
+If you continue to have problems, run ``sosreport`` as root on the AWX server, then file a `support request`_ with the result.
 
 .. _`support request`: http://support.ansible.com/
 
@@ -131,7 +131,7 @@ Cancel a controller job
 .. index:: 
    pair: troubleshooting; job cancellation
 
-When issuing a ``cancel`` request on a currently running controller job, the controller issues a ``SIGINT`` to the ``ansible-playbook`` process. While this causes Ansible to stop dispatching new tasks and exit, in many cases, module tasks that were already dispatched to remote hosts will run to completion. This behavior is similar to pressing ``Ctrl-C`` during a command-line Ansible run.
+When issuing a ``cancel`` request on a currently running controller job, AWX issues a ``SIGINT`` to the ``ansible-playbook`` process. While this causes Ansible to stop dispatching new tasks and exit, in many cases, module tasks that were already dispatched to remote hosts will run to completion. This behavior is similar to pressing ``Ctrl-C`` during a command-line Ansible run.
  
 With respect to software dependencies, if a running job is canceled, the job is essentially removed but the dependencies will remain.
 
@@ -149,7 +149,7 @@ For example, say that you performed a clustered installation. Next, say that you
 When setting up an external database which has been used in a prior installation, the database used for the clustered node must be manually cleared before any additional installations can succeed.
 
 
-Private EC2 VPC Instances in the controller Inventory
+Private EC2 VPC Instances in the AWX Inventory
 =======================================================
 
 .. index::
@@ -157,9 +157,9 @@ Private EC2 VPC Instances in the controller Inventory
     pair: troubleshooting; EC2 VPC instances
 
 
-By default, the controller only shows instances in a VPC that have an Elastic IP (EIP) associated with them. To see all of your VPC instances, perform the following steps:
+By default, AWX only shows instances in a VPC that have an Elastic IP (EIP) associated with them. To see all of your VPC instances, perform the following steps:
 
-1. In the controller interface, select your inventory. 
+1. In the AWX interface, select your inventory. 
 2. Click on the group that has the Source set to AWS, and click on the Source tab. 
 3. In the ``Source Variables`` box, enter:
 
@@ -171,7 +171,7 @@ Next, save and then trigger an update of the group. Once this is done, you shoul
 
 .. note::
 
-  The controller must be running inside the VPC with access to those instances if you want to configure them.
+  AWX must be running inside the VPC with access to those instances if you want to configure them.
 
 
 
@@ -182,7 +182,7 @@ Troubleshooting "Error: provided hosts list is empty"
     pair: troubleshooting; hosts list
     single: hosts lists (empty)
 
-If you receive the message "Skipping: No Hosts Matched" when you are trying to run a playbook through the controller, here are a few things to check:
+If you receive the message "Skipping: No Hosts Matched" when you are trying to run a playbook through AWX, here are a few things to check:
 
 - Make sure that your hosts declaration line in your playbook matches the name of your group/host in inventory exactly (these are case sensitive).  
 - If it does match and you are using Ansible Core 2.0 or later, check your group names for spaces and modify them to use underscores or no spaces to ensure that the groups can be recognized.

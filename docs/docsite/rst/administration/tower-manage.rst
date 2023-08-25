@@ -81,7 +81,7 @@ Token and session management
    single: awx-manage; token management
    single: awx-manage; session management
 
-|at| supports the following commands for OAuth2 token management:
+AWX supports the following commands for OAuth2 token management:
 
 .. contents::
     :local:

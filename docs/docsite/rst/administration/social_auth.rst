@@ -9,9 +9,9 @@ Setting up Social Authentication
 
 Authentication methods help simplify logins for end users--offering single sign-ons using existing login information to sign into a third party website rather than creating a new login account specifically for that website. 
 
-Account authentication can be configured in the |at| User Interface and saved to the PostgreSQL database. For instructions, refer to the :ref:`ag_configure_awx` section. 
+Account authentication can be configured in the AWX User Interface and saved to the PostgreSQL database. For instructions, refer to the :ref:`ag_configure_awx` section. 
 
-Account authentication in |at| can be configured to centrally use OAuth2, while enterprise-level account authentication can be configured for SAML, RADIUS, or even LDAP as a source for authentication information. See :ref:`ag_ent_auth`.
+Account authentication in AWX can be configured to centrally use OAuth2, while enterprise-level account authentication can be configured for SAML, RADIUS, or even LDAP as a source for authentication information. See :ref:`ag_ent_auth`.
 
 For websites, such as Microsoft Azure, Google or GitHub, that provide account information, account information is often implemented using the OAuth standard. OAuth is a secure authorization protocol which is commonly used in conjunction with account authentication to grant 3rd party applications a "session token" allowing them to make API calls to providers on the user’s behalf.
 
@@ -27,7 +27,7 @@ GitHub settings
 .. index::
     pair: authentication; GitHub OAuth2
 
-To set up social authentication for GitHub, you will need to obtain an OAuth2 key and secret for a web application. To do this, you must first register the new application with GitHub at https://github.com/settings/developers. In order to register the application, you must supply it with your homepage URL, which is the **Callback URL** shown in the Details tab for the GitHub default settings page. The OAuth2 key (Client ID) and secret (Client Secret) will be used to supply the required fields in the |at| User Interface. 
+To set up social authentication for GitHub, you will need to obtain an OAuth2 key and secret for a web application. To do this, you must first register the new application with GitHub at https://github.com/settings/developers. In order to register the application, you must supply it with your homepage URL, which is the **Callback URL** shown in the Details tab for the GitHub default settings page. The OAuth2 key (Client ID) and secret (Client Secret) will be used to supply the required fields in the AWX User Interface. 
 
 1. Click **Settings** from the left navigation bar.
 
@@ -45,9 +45,9 @@ The **GitHub OAuth2 Callback URL** field is already pre-populated and non-editab
 
 7. Click **Save** when done.
 
-8. To verify that the authentication was configured correctly, logout of |at| and the login screen will now display the GitHub logo to allow logging in with those credentials.
+8. To verify that the authentication was configured correctly, logout of AWX and the login screen will now display the GitHub logo to allow logging in with those credentials.
 
-.. image:: ../common/images/configure-tower-auth-github-logo.png
+.. image:: ../common/images/configure-awx-auth-github-logo.png
 
 
 .. _ag_auth_github_org:
@@ -62,9 +62,9 @@ When defining account authentication with either an organization or a team withi
 
 You can also choose to allow all by specifying non-organization or non-team based settings (as shown above).
 
-You can limit users who can login to the controller by limiting only those in an organization or on a team within an organization. 
+You can limit users who can login to AWX by limiting only those in an organization or on a team within an organization. 
 
-To set up social authentication for a GitHub Organization, you will need to obtain an OAuth2 key and secret for a web application. To do this, you must first register your organization-owned application at ``https://github.com/organizations/<yourorg>/settings/applications``. In order to register the application, you must supply it with your Authorization callback URL, which is the **Callback URL** shown in the Details page. Each key and secret must belong to a unique application and cannot be shared or reused between different authentication backends. The OAuth2 key (Client ID) and secret (Client Secret) will be used to supply the required fields in the |at| User Interface.  
+To set up social authentication for a GitHub Organization, you will need to obtain an OAuth2 key and secret for a web application. To do this, you must first register your organization-owned application at ``https://github.com/organizations/<yourorg>/settings/applications``. In order to register the application, you must supply it with your Authorization callback URL, which is the **Callback URL** shown in the Details page. Each key and secret must belong to a unique application and cannot be shared or reused between different authentication backends. The OAuth2 key (Client ID) and secret (Client Secret) will be used to supply the required fields in the AWX User Interface.  
 
 1. Click **Settings** from the left navigation bar.
 
@@ -86,9 +86,9 @@ Once the application is registered, GitHub displays the Client ID and Client Sec
 
 8. Click **Save** when done.
 
-9. To verify that the authentication was configured correctly, logout of |at| and the login screen will now display the GitHub Organization logo to allow logging in with those credentials.
+9. To verify that the authentication was configured correctly, logout of AWX and the login screen will now display the GitHub Organization logo to allow logging in with those credentials.
 
-.. image:: ../common/images/configure-tower-auth-github-orgs-logo.png
+.. image:: ../common/images/configure-awx-auth-github-orgs-logo.png
 
 
 .. _ag_auth_github_team:
@@ -100,9 +100,9 @@ GitHub Team settings
     pair: authentication; GitHub Team
 
 
-To set up social authentication for a GitHub Team, you will need to obtain an OAuth2 key and secret for a web application. To do this, you must first register your team-owned application at ``https://github.com/organizations/<yourorg>/settings/applications``. In order to register the application, you must supply it with your Authorization callback URL, which is the **Callback URL** shown in the Details page. Each key and secret must belong to a unique application and cannot be shared or reused between different authentication backends. The OAuth2 key (Client ID) and secret (Client Secret) will be used to supply the required fields in the |at| User Interface.  
+To set up social authentication for a GitHub Team, you will need to obtain an OAuth2 key and secret for a web application. To do this, you must first register your team-owned application at ``https://github.com/organizations/<yourorg>/settings/applications``. In order to register the application, you must supply it with your Authorization callback URL, which is the **Callback URL** shown in the Details page. Each key and secret must belong to a unique application and cannot be shared or reused between different authentication backends. The OAuth2 key (Client ID) and secret (Client Secret) will be used to supply the required fields in the AWX User Interface.  
 
-1. Find the numeric team ID using the GitHub API: http://fabian-kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/. The Team ID will be used to supply a required field in the |at| User Interface.
+1. Find the numeric team ID using the GitHub API: http://fabian-kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/. The Team ID will be used to supply a required field in the AWX User Interface.
 
 2. Click **Settings** from the left navigation bar.
 
@@ -122,9 +122,9 @@ The **GitHub Team OAuth2 Callback URL** field is already pre-populated and non-e
 
 9. Click **Save** when done.
 
-10. To verify that the authentication was configured correctly, logout of |at| and the login screen will now display the GitHub Team logo to allow logging in with those credentials.
+10. To verify that the authentication was configured correctly, logout of AWX and the login screen will now display the GitHub Team logo to allow logging in with those credentials.
 
-.. image:: ../common/images/configure-tower-auth-github-teams-logo.png
+.. image:: ../common/images/configure-awx-auth-github-teams-logo.png
 
 
 GitHub Enterprise settings
@@ -135,7 +135,7 @@ GitHub Enterprise settings
 
 To set up social authentication for a GitHub Enterprise, you will need to obtain a GitHub Enterprise URL, an API URL, OAuth2 key and secret for a web application. To obtain the URLs, refer to the GitHub documentation on `GitHub Enterprise administration <https://docs.github.com/en/enterprise-server@3.1/rest/reference/enterprise-admin>`_ . To obtain the  key and secret, you must first register your enterprise-owned application at ``https://github.com/organizations/<yourorg>/settings/applications``. In order to register the application, you must supply it with your Authorization callback URL, which is the **Callback URL** shown in the Details page. Because its hosted on site and not github.com, you must specify which auth adapter it will talk to. 
 
-Each key and secret must belong to a unique application and cannot be shared or reused between different authentication backends. The OAuth2 key (Client ID) and secret (Client Secret) will be used to supply the required fields in the |at| User Interface.  
+Each key and secret must belong to a unique application and cannot be shared or reused between different authentication backends. The OAuth2 key (Client ID) and secret (Client Secret) will be used to supply the required fields in the AWX User Interface.  
 
 1. Click **Settings** from the left navigation bar.
 
@@ -159,9 +159,9 @@ The **GitHub Enterprise OAuth2 Callback URL** field is already pre-populated and
 
 10. Click **Save** when done.
 
-11. To verify that the authentication was configured correctly, logout of |at| and the login screen will now display the GitHub Enterprise logo to allow logging in with those credentials.
+11. To verify that the authentication was configured correctly, logout of AWX and the login screen will now display the GitHub Enterprise logo to allow logging in with those credentials.
 
-.. image:: ../common/images/configure-tower-auth-github-ent-logo.png
+.. image:: ../common/images/configure-awx-auth-github-ent-logo.png
 
 
 GitHub Enterprise Organization settings
@@ -172,7 +172,7 @@ GitHub Enterprise Organization settings
 
 To set up social authentication for a GitHub Enterprise Org, you will need to obtain a GitHub Enterprise Org URL, an Org API URL, an Org OAuth2 key and secret for a web application. To obtain the URLs, refer to the GitHub documentation on `GitHub Enterprise administration <https://docs.github.com/en/enterprise-server@3.1/rest/reference/enterprise-admin>`_ . To obtain the  key and secret, you must first register your enterprise organization-owned application at ``https://github.com/organizations/<yourorg>/settings/applications``. In order to register the application, you must supply it with your Authorization callback URL, which is the **Callback URL** shown in the Details page. Because its hosted on site and not github.com, you must specify which auth adapter it will talk to. 
 
-Each key and secret must belong to a unique application and cannot be shared or reused between different authentication backends. The OAuth2 key (Client ID) and secret (Client Secret) will be used to supply the required fields in the |at| User Interface.  
+Each key and secret must belong to a unique application and cannot be shared or reused between different authentication backends. The OAuth2 key (Client ID) and secret (Client Secret) will be used to supply the required fields in the AWX User Interface.  
 
 1. Click **Settings** from the left navigation bar.
 
@@ -198,9 +198,9 @@ The **GitHub Enterprise Organization OAuth2 Callback URL** field is already pre-
 
 11. Click **Save** when done.
 
-12. To verify that the authentication was configured correctly, logout of |at| and the login screen will now display the GitHub Enterprise Organization logo to allow logging in with those credentials.
+12. To verify that the authentication was configured correctly, logout of AWX and the login screen will now display the GitHub Enterprise Organization logo to allow logging in with those credentials.
 
-.. image:: ../common/images/configure-tower-auth-github-ent-org-logo.png
+.. image:: ../common/images/configure-awx-auth-github-ent-org-logo.png
 
 
 GitHub Enterprise Team settings
@@ -211,9 +211,9 @@ GitHub Enterprise Team settings
 
 To set up social authentication for a GitHub Enterprise teams, you will need to obtain a GitHub Enterprise Org URL, an Org API URL, an Org OAuth2 key and secret for a web application. To obtain the URLs, refer to the GitHub documentation on `GitHub Enterprise administration <https://docs.github.com/en/enterprise-server@3.1/rest/reference/enterprise-admin>`_ . To obtain the  key and secret, you must first register your enterprise team-owned application at ``https://github.com/organizations/<yourorg>/settings/applications``. In order to register the application, you must supply it with your Authorization callback URL, which is the **Callback URL** shown in the Details page. Because its hosted on site and not github.com, you must specify which auth adapter it will talk to. 
 
-Each key and secret must belong to a unique application and cannot be shared or reused between different authentication backends. The OAuth2 key (Client ID) and secret (Client Secret) will be used to supply the required fields in the |at| User Interface.  
+Each key and secret must belong to a unique application and cannot be shared or reused between different authentication backends. The OAuth2 key (Client ID) and secret (Client Secret) will be used to supply the required fields in the AWX User Interface.  
 
-1. Find the numeric team ID using the GitHub API: http://fabian-kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/. The Team ID will be used to supply a required field in the |at| User Interface.
+1. Find the numeric team ID using the GitHub API: http://fabian-kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/. The Team ID will be used to supply a required field in the AWX User Interface.
 
 2. Click **Settings** from the left navigation bar.
 
@@ -239,9 +239,9 @@ The **GitHub Enterprise Team OAuth2 Callback URL** field is already pre-populate
 
 12. Click **Save** when done.
 
-13. To verify that the authentication was configured correctly, logout of |at| and the login screen will now display the GitHub Enterprise Teams logo to allow logging in with those credentials.
+13. To verify that the authentication was configured correctly, logout of AWX and the login screen will now display the GitHub Enterprise Teams logo to allow logging in with those credentials.
 
-.. image:: ../common/images/configure-tower-auth-github-ent-teams-logo.png
+.. image:: ../common/images/configure-awx-auth-github-ent-teams-logo.png
 
 
 .. _ag_auth_google_oauth2:
@@ -252,7 +252,7 @@ Google OAuth2 settings
 .. index::
     pair: authentication; Google OAuth2
 
-To set up social authentication for Google, you will need to obtain an OAuth2 key and secret for a web application. To do this, you must first create a project and set it up with Google. Refer to https://support.google.com/googleapi/answer/6158849 for instructions. If you already completed the setup process, you can access those credentials by going to the Credentials section of the `Google API Manager Console <https://console.developers.google.com/>`_. The OAuth2 key (Client ID) and secret (Client secret) will be used to supply the required fields in the |at| User Interface.  
+To set up social authentication for Google, you will need to obtain an OAuth2 key and secret for a web application. To do this, you must first create a project and set it up with Google. Refer to https://support.google.com/googleapi/answer/6158849 for instructions. If you already completed the setup process, you can access those credentials by going to the Credentials section of the `Google API Manager Console <https://console.developers.google.com/>`_. The OAuth2 key (Client ID) and secret (Client secret) will be used to supply the required fields in the AWX User Interface.  
 
 1. Click **Settings** from the left navigation bar.
 
@@ -266,7 +266,7 @@ The **Google OAuth2 Callback URL** field is already pre-populated and non-editab
 
   - Copy and paste Google's Client secret into the **Google OAuth2 Secret** field. 
 
-    .. image:: ../common/images/configure-tower-auth-google.png
+    .. image:: ../common/images/configure-awx-auth-google.png
 
 4. To complete the remaining optional fields, refer to the tooltips in each of the fields for instructions and required format. 
 
@@ -274,11 +274,9 @@ The **Google OAuth2 Callback URL** field is already pre-populated and non-editab
 
 6. Click **Save** when done.
 
-7. To verify that the authentication was configured correctly, logout of |at| and the login screen will now display the Google logo to indicate it as a alternate method of logging into |at|.
+7. To verify that the authentication was configured correctly, logout of AWX and the login screen will now display the Google logo to indicate it as a alternate method of logging into AWX.
 
-.. image:: ../common/images/configure-tower-auth-google-logo.png
-
-
+.. image:: ../common/images/configure-awx-auth-google-logo.png
 
 
 
@@ -296,7 +294,7 @@ Organization and Team Mapping
 Organization mapping
 ~~~~~~~~~~~~~~~~~~~~~
 
-You will need to control which users are placed into which controller organizations based on their username and email address (mapping out your organization admins/users from social or enterprise-level authentication accounts).  
+You will need to control which users are placed into which organizations based on their username and email address (mapping out your organization admins/users from social or enterprise-level authentication accounts).  
 
 Dictionary keys are organization names. Organizations will be created, if not already present and if the license allows for multiple organizations. Otherwise, the single default organization is used regardless of the key.  
 
@@ -329,7 +327,7 @@ Values are dictionaries defining the options for each organization's membership.
             "users": true
         },
         "Test Org 2": {
-            "admins": ["admin@example.com", "/^controller-[^@]+?@.*$/i"],
+            "admins": ["admin@example.com", "/^awx-[^@]+?@.*$/i"],
             "users": "/^[^@].*?@example\\.com$/"
         }
     }
@@ -390,7 +388,7 @@ Team mappings may be specified separately for each account authentication backen
     SOCIAL_AUTH_GITHUB_TEAM_TEAM_MAP = {}
     SOCIAL_AUTH_SAML_TEAM_MAP = {}
 
-Uncomment the line below (i.e. set ``SOCIAL_AUTH_USER_FIELDS`` to an empty list) to prevent new user accounts from being created.  Only users who have previously logged in to the controller using social or enterprise-level authentication or have a user account with a matching email address will be able to login.
+Uncomment the line below (i.e. set ``SOCIAL_AUTH_USER_FIELDS`` to an empty list) to prevent new user accounts from being created.  Only users who have previously logged in to AWX using social or enterprise-level authentication or have a user account with a matching email address will be able to login.
 
 ::
 
