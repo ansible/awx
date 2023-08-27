@@ -169,6 +169,9 @@
         name: "{{ jt1_name }}"
         project: "{{ demo_project_name }}"
         inventory: Demo Inventory
+        ask_inventory_on_launch: true
+        ask_credential_on_launch: true
+        ask_labels_on_launch: true
         playbook: hello_world.yml
         job_type: run
         state: present
@@ -710,7 +713,7 @@
         name: "{{ wfjt_name }}"
         inventory: Demo Inventory
         extra_vars: {'foo': 'bar', 'another-foo': {'barz': 'bar2'}}
-        schema:
+        workflow_nodes:
           - identifier: node101
             unified_job_template:
               name: "{{ project_inv_source_result.id }}"
@@ -721,30 +724,52 @@
             related:
               failure_nodes:
                 - identifier: node201
+          - identifier: node102
+            unified_job_template:
+              organization:
+                name: "{{ org_name }}"
+              name: "{{ demo_project_name_2 }}"
+              type: project
+            related:
+              success_nodes:
+                - identifier: node201
           - identifier: node201
             unified_job_template:
               organization:
                 name: Default
               name: "{{ jt1_name }}"
               type: job_template
-            credentials: []
+            inventory:
+              name: Demo Inventory
+              organization:
+                name: Default
             related:
               success_nodes:
+                - identifier: node401
+              failure_nodes:
                 - identifier: node301
-          - identifier: node202
-            unified_job_template:
-              organization:
-                name: "{{ org_name }}"
-              name: "{{ project_inv_source }}"
-              type: project
+              always_nodes: []
+              credentials:
+                - name: "{{ scm_cred_name }}"
+                  organization:
+                    name: Default
+              instance_groups:
+                - name: "{{ ig1 }}"
+              labels:
+                - name: "{{ lab1 }}"
+                  organization:
+                    name: "{{ org_name }}"
           - all_parents_must_converge: false
             identifier: node301
             unified_job_template:
-              organization:
-                name: Default
-              name: "{{ jt2_name }}"
-              type: job_template
-          - identifier: Cleanup Job
+              description: Approval node for example
+              timeout: 900
+              type: workflow_approval
+              name: "{{ approval_node_name }}"
+            related:
+              success_nodes:
+                - identifier: node401
+          - identifier: node401
             unified_job_template:
               name: Cleanup Activity Stream
               type: system_job_template
