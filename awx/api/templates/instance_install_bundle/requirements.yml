@@ -1,5 +1,4 @@
 ---
 collections:
-  - name: https://github.com/ansible/receptor-collection.git
-    type: git
-    version: main
+  - name: ansible.receptor
+    version: 2.0.0
