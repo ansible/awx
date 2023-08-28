@@ -17,6 +17,7 @@ from jinja2 import sandbox
 from django.db import models
 from django.utils.translation import gettext_lazy as _, gettext_noop
 from django.core.exceptions import ValidationError
+from django.conf import settings
 from django.utils.encoding import force_str
 from django.utils.functional import cached_property
 from django.utils.timezone import now
@@ -30,7 +31,7 @@ from awx.main.fields import (
     CredentialTypeInjectorField,
     DynamicCredentialInputField,
 )
-from awx.main.utils import decrypt_field, classproperty
+from awx.main.utils import decrypt_field, classproperty, set_environ
 from awx.main.utils.safe_yaml import safe_dump
 from awx.main.utils.execution_environments import to_container_path
 from awx.main.validators import validate_ssh_private_key
@@ -1252,7 +1253,9 @@ class CredentialInputSource(PrimordialModel):
                 backend_kwargs[field_name] = value
 
         backend_kwargs.update(self.metadata)
-        return backend(**backend_kwargs)
+
+        with set_environ(**settings.AWX_TASK_ENV):
+            return backend(**backend_kwargs)
 
     def get_absolute_url(self, request=None):
         view_name = 'api:credential_input_source_detail'
