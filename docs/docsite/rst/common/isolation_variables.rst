@@ -17,6 +17,6 @@ field of the Jobs setting screen, or in the REST API at ``/api/v2/settings/jobs`
 
 The above fields can be found in the Jobs Settings window:
 
-.. image:: ../common/images/configure-tower-jobs-isolated-jobs-fields.png
+.. image:: ../common/images/configure-awx-jobs-isolated-jobs-fields.png
 
 .. end reused section

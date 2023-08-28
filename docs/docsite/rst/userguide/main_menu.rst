@@ -11,9 +11,9 @@ The User Interface offers a friendly graphical framework for your IT orchestrati
 
 .. note::
 
-  The new controller User Interface is available for tech preview and is subject to change in a future release. To preview the new UI, click the **Enable Preview of New User Interface** toggle to **On** from the Miscellaneous System option of the Settings menu. 
+  The new AWX User Interface is available for tech preview and is subject to change in a future release. To preview the new UI, click the **Enable Preview of New User Interface** toggle to **On** from the Miscellaneous System option of the Settings menu. 
 
-  .. image:: ../common/images/configure-tower-system-misc-preview-newui.png
+  .. image:: ../common/images/configure-awx-system-misc-preview-newui.png
 
   After saving, logout and log back in to access the new UI from the preview banner. To return to the current UI, click the link on the top banner where indicated.
 
@@ -74,7 +74,7 @@ The **Recent Templates** section of this display shows a summary of the most rec
 
 .. note::
 
-    Clicking on **Dashboard** from the left navigation bar or the |aap| logo at any time returns you to the Dashboard. 
+    Clicking on **Dashboard** from the left navigation bar or the AWX logo at any time returns you to the Dashboard. 
 
 
 Jobs view
@@ -134,18 +134,10 @@ Access this view to see your workflow approval queue. The list contains actions 
 :ref:`ug_wf_approval_nodes` for further detail.
 
 
-Host Metrics
-~~~~~~~~~~~~~
-
-This view allows you to view the activity associated with hosts, which include counts on those that have been automated, used in inventories, and deleted.
-
-.. image:: ../common/images/ug-host-metrics.png
-
-
 Resources and Access
 ---------------------
 
-The **Resources** and **Access** menus provide you access to the various components of |at| and allow you to configure who has permissions for those resources:
+The **Resources** and **Access** menus provide you access to the various components of AWX and allow you to configure who has permissions for those resources:
 
 - Templates (:ref:`ug_JobTemplates` and :ref:`ug_wf_templates`)
 - :ref:`ug_credentials`

@@ -6,7 +6,7 @@ Jobs
 .. index::
    single: jobs
 
-A :term:`job` is an instance of |at| launching an Ansible playbook against an inventory of hosts.
+A :term:`job` is an instance of AWX launching an Ansible playbook against an inventory of hosts.
 
 The **Jobs** link displays a list of jobs and their statuses--shown as completed successfully or failed, or as an active (running) job. 
 The default view is collapsed (**Compact**) with the job name, status, job type, and start/finish times, but you can expand to see more information. You can sort this list by various criteria, and perform a search to filter the jobs of interest.
@@ -49,7 +49,7 @@ Inventory Sync Jobs
 
 When an inventory sync is executed, the full results automatically display in the Output tab. This shows the same information you would see if you ran it through the Ansible command line, and can be useful for debugging. The ``ANSIBLE_DISPLAY_ARGS_TO_STDOUT`` is set to ``False`` by default for all playbook runs. This matches Ansible's default behavior. This does not display task arguments in task headers in the Job Detail interface to avoid leaking certain sensitive module parameters to stdout.  If you wish to restore the prior behavior (despite the security implications), you can set ``ANSIBLE_DISPLAY_ARGS_TO_STDOUT`` to ``True`` via the ``AWX_TASK_ENV`` configuration setting. For more details, refer to the `ANSIBLE_DISPLAY_ARGS_TO_STDOUT`_.
 
-   .. _`ANSIBLE_DISPLAY_ARGS_TO_STDOUT`: http://docs.ansible.com/ansible/latest/reference_appendices/config.html#envvar-ANSIBLE_DISPLAY_ARGS_TO_STDOUT
+   .. _`ANSIBLE_DISPLAY_ARGS_TO_STDOUT`: https://docs.ansible.com/ansible/latest/reference_appendices/config.html#envvar-ANSIBLE_DISPLAY_ARGS_TO_STDOUT
 
 
 The icons at the top right corner of the Output tab allow you to relaunch (|launch|), download (|download|) the job output, or delete (|delete|) the job.
@@ -95,7 +95,7 @@ Notable details of the job executed are:
 
 -  **Execution node**: The node used to execute the job.
 
--  **Instance Group**: The name of the instance group used with this job (controller is the default instance group).
+-  **Instance Group**: The name of the instance group used with this job (AWX is the default instance group).
 
 By clicking on these items, where appropriate, you can view the corresponding job templates, projects, and other objects.
 
@@ -232,7 +232,7 @@ Things to note when viewing details in the expand/collapse mode:
 
 Click on a line of an event from the **Standard Out** pane and a **Host Events** dialog displays in a separate window. This window shows the host that was affected by that particular event.
 
-.. note:: Upgrading to the latest versions of |aap| involves progressively migrating all historical playbook output and events. This migration process is gradual, and happens automatically in the background after installation is complete. Installations with very large amounts of historical job output (tens, or hundreds of GB of output) may notice missing job output until migration is complete. Most recent data will show up at the top of the output, followed by older events. Migrating jobs with a large amount of events may take longer than jobs with a smaller amount.
+.. note:: Upgrading to the latest versions of AWX involves progressively migrating all historical playbook output and events. This migration process is gradual, and happens automatically in the background after installation is complete. Installations with very large amounts of historical job output (tens, or hundreds of GB of output) may notice missing job output until migration is complete. Most recent data will show up at the top of the output, followed by older events. Migrating jobs with a large amount of events may take longer than jobs with a smaller amount.
 
 
 Host Details
@@ -299,8 +299,8 @@ By clicking on these items, where appropriate, you can view the corresponding jo
 
 .. _ug_job_concurrency:
 
-Automation Controller Capacity Determination and Job Impact
------------------------------------------------------------
+AWX Capacity Determination and Job Impact
+-------------------------------------------
 
 .. index::
    pair: jobs; capacity

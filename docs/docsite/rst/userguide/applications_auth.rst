@@ -10,11 +10,11 @@ Applications
     pair: applications; tokens
 
 
-Creating and configuring token-based authentication for external applications is available starting in |at| 3.3. This makes it easier for external applications such as ServiceNow and Jenkins to integrate with |at|. OAuth 2 allows you to use tokens to share certain data with an application without disclosing login information, and furthermore, these tokens can be scoped as "read-only".  You create an application that is representative of the external application you are integrating with, then use it to create tokens for that application to use on behalf of the users of the external application.  
+Creating and configuring token-based authentication for external applications makes it easier for external applications such as ServiceNow and Jenkins to integrate with AWX. OAuth 2 allows you to use tokens to share certain data with an application without disclosing login information, and furthermore, these tokens can be scoped as "read-only".  You create an application that is representative of the external application you are integrating with, then use it to create tokens for that application to use on behalf of the users of the external application.  
 
 Having these tokens associated to an application resource gives you the ability to manage all tokens issued for a particular application more easily. By separating token issuance under Applications, you can revoke all tokens based on the Application without having to revoke all tokens in the system.
 
-When integrating an external web app with |at| that web app may need to create OAuth2 Tokens on behalf of users in that other web app. Creating an application with the Authorization Code grant type is the preferred way to do this because:
+When integrating an external web app with AWX that web app may need to create OAuth2 Tokens on behalf of users in that other web app. Creating an application with the Authorization Code grant type is the preferred way to do this because:
 
 - external applications can obtain a token for users, using their credentials
 - compartmentalized tokens issued for a particular application, allows those tokens to be easily managed (revoke all tokens associated with that application, for example)
@@ -26,7 +26,7 @@ Getting Started with Applications
 .. index:: 
    pair: applications; getting started
 
-Access the Applications page by clicking **Applications** from the left navigation bar. The Applications page displays a search-able list of all available Applications currently managed by the controller and can be sorted by **Name**.
+Access the Applications page by clicking **Applications** from the left navigation bar. The Applications page displays a search-able list of all available Applications currently managed by AWX and can be sorted by **Name**.
 
 |Applications - home with example apps|
 
@@ -48,7 +48,7 @@ Create a new application
 
 Token-based authentication for users can be configured in the Applications window.  
 
-1. In the |at| User Interface, click **Applications** from the left navigation bar. 
+1. In the AWX User Interface, click **Applications** from the left navigation bar. 
 
 The Applications window opens. 
 

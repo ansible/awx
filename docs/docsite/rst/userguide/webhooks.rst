@@ -9,7 +9,7 @@ Working with Webhooks
    pair: webhooks; GitLab
    pair: webhooks; payload
 
-A :term:`Webhook` provides the ability to execute specified commands between apps over the web. |at| currently provides webhook integration with GitHub and GitLab. This section describes the procedure for setting up a webhook through their respective services. 
+A :term:`Webhook` provides the ability to execute specified commands between apps over the web. AWX currently provides webhook integration with GitHub and GitLab. This section describes the procedure for setting up a webhook through their respective services. 
 
 .. contents::
     :local:
@@ -24,9 +24,9 @@ The webhook post-status-back functionality for GitHub and GitLab is designed for
 GitHub webhook setup
 ---------------------
 
-|At| has the ability to run jobs based on a triggered webhook event coming in. Job status information (pending, error, success) can be sent back only for pull request events. If you determine you do not want |at| to post job statuses back to the webhook service, skip steps 1-2, and go directly to :ref:`step 3 <ug_webhooks_setup_github>`.
+AWX has the ability to run jobs based on a triggered webhook event coming in. Job status information (pending, error, success) can be sent back only for pull request events. If you determine you do not want AWX to post job statuses back to the webhook service, skip steps 1-2, and go directly to :ref:`step 3 <ug_webhooks_setup_github>`.
 
-1. Optionally generate a personal access token (PAT) for use with |at|.
+1. Optionally generate a personal access token (PAT) for use with AWX.
 
 	a. In the profile settings of your GitHub account, click **Settings**.
 	
@@ -59,7 +59,7 @@ GitHub webhook setup
 
 	d. Click **Save**. Now your job template is set up to be able to post back to GitHub. An example of one may look like this:
 
-	.. image:: ../common/images/webhooks-tower-to-github-status.png
+	.. image:: ../common/images/webhooks-awx-to-github-status.png
 
 .. _ug_webhooks_setup_github:
 
@@ -104,9 +104,9 @@ For more information, refer to the `GitHub Webhooks developer documentation <htt
 GitLab webhook setup
 ---------------------
 
-|At| has the ability to run jobs based on a triggered webhook event coming in. Job status information (pending, error, success) can be sent back only for merge request events. If you determine you do not want |at| to post job statuses back to the webhook service, skip steps 1-2, and go directly to :ref:`step 3 <ug_webhooks_setup_gitlab>`.
+AWX has the ability to run jobs based on a triggered webhook event coming in. Job status information (pending, error, success) can be sent back only for merge request events. If you determine you do not want AWX to post job statuses back to the webhook service, skip steps 1-2, and go directly to :ref:`step 3 <ug_webhooks_setup_gitlab>`.
 
-1. Optionally, generate a personal access token (PAT). This token gives |at| the ability to post statuses back when we run jobs based on a webhook coming in. 
+1. Optionally, generate a personal access token (PAT). This token gives AWX the ability to post statuses back when we run jobs based on a webhook coming in. 
 
 	a. In the profile settings of your GitLab account, click **Settings**.
 	
@@ -116,7 +116,7 @@ GitLab webhook setup
 
 	c. In the **Name** field, enter a brief description about what this PAT will be used for.
 	d. Skip the **Expires at** field unless you want to set an expiration date for your webhook.
-	e. In the Scopes fields, select the ones applicable to your integration. For |at|, API is the only selection necessary.
+	e. In the Scopes fields, select the ones applicable to your integration. For AWX, API is the only selection necessary.
 
 	.. image:: ../common/images/webhooks-create-webhook-gitlab-scope.png
 
@@ -139,7 +139,7 @@ GitLab webhook setup
 
 	d. Click **Save**. Now your job template is set up to be able to post back to GitLab. An example of one may look like this:
 
-	.. image:: ../common/images/webhooks-tower-to-gitlab-status.png
+	.. image:: ../common/images/webhooks-awx-to-gitlab-status.png
 
 
 .. _ug_webhooks_setup_gitlab:

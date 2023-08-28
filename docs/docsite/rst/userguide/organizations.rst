@@ -6,11 +6,11 @@ Organizations
 .. index::
    single: organizations
 
-An :term:`Organization` is a logical collection of **Users**, **Teams**, **Projects**, and **Inventories**, and is the highest level in the |at| object hierarchy.
+An :term:`Organization` is a logical collection of **Users**, **Teams**, **Projects**, and **Inventories**, and is the highest level in the AWX object hierarchy.
 
-|tower hierarchy|
+|awx hierarchy|
 
-.. |tower hierarchy| image:: ../common/images/TowerHierarchy.png
+.. |awx hierarchy| image:: ../common/images/AWXHierarchy.png
 
 Access the Organizations page by clicking **Organizations** from the left navigation bar. The Organizations page displays all of the existing organizations for your installation. Organizations can be searched by **Name** or **Description**. Modify and remove organizations using the **Edit** and **Delete** buttons.
 
@@ -40,22 +40,13 @@ Creating a New Organization
 
 - Enter the **Name** for your organization (required).
 - Enter a **Description** for the organization.
-- The **Max Hosts** is only editable by a superuser to set an upper limit on the number of license hosts that an organization can have. Setting this value to **0** signifies no limit. If you try to add a host to an organization that has reached or exceeded its cap on hosts, an error message displays:
-
-  .. image:: ../common/images/organizations-max-hosts-error.png
-
-The inventory sync output view also shows the host limit error. Click **Details** for additional detail about the error.
-
-  .. image:: ../common/images/organizations-max-hosts-error-output-view.png
-
 - Enter **Instance Groups** on which to run this organization. 
-- Enter the name of the execution environment or search for an existing **Default Execution Environment** on which to run this organization. See :ref:`upgrade_venv` in the |atumg| for more information.
+- Enter the name of the execution environment or search for an existing **Execution Environment** on which to run this organization. See :ref:`ug_execution_environments` for more information.
 - If used, enter the **Galaxy Credentials** or search from a list of existing ones.
-
 
 3. Click **Save** to finish creating the organization.
 
-Once created, |at| displays the Organization details, and allows for the managing access and execution environments for the organization.
+Once created, AWX displays the Organization details, and allows for the managing access and execution environments for the organization.
 
 |Organizations - show record for example organization|
 

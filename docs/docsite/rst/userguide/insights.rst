@@ -91,7 +91,7 @@ Create Insights Inventory
 .. index:: 
    pair: inventory; Insights
 
-The Insights playbook contains a `hosts:` line where the value is the hostname that Insights itself knows about,  which may be different than the hostname that Tower knows about. To use an Insights playbook, you will need an Insights inventory.
+The Insights playbook contains a `hosts:` line where the value is the hostname that Insights itself knows about,  which may be different than the hostname that AWX knows about. To use an Insights playbook, you will need an Insights inventory.
 
 To create a new inventory for use with Insights, see :ref:`ug_source_insights`.
 
@@ -101,7 +101,7 @@ Remediate Insights Inventory
 .. index:: 
    pair: inventory; Insights
 
-Remediation of an Insights inventory allows Tower to run Insights playbooks with a single click. This is done by creating a Job Template to run the Insights remediation.
+Remediation of an Insights inventory allows AWX to run Insights playbooks with a single click. This is done by creating a Job Template to run the Insights remediation.
 
 1. Click **Job Templates** from the left navigation bar to access the Job Templates page.
 

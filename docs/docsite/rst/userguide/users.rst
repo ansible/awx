@@ -7,7 +7,7 @@ Users
    single: users
    
 
-A :term:`User` is someone who has access to |at| with associated permissions and credentials. Access the Users page by clicking **Users** from the left navigation bar. The User list may be sorted and searched by **Username**, **First Name**, or **Last Name** and click the headers to toggle your sorting preference. 
+A :term:`User` is someone who has access to AWX with associated permissions and credentials. Access the Users page by clicking **Users** from the left navigation bar. The User list may be sorted and searched by **Username**, **First Name**, or **Last Name** and click the headers to toggle your sorting preference. 
 
 .. image:: ../common/images/users-home-with-example-users.png
    :alt: Users - home with example users
@@ -36,7 +36,7 @@ Three types of Users can be assigned:
 
 - **System Auditor**: Auditors implicitly inherit the read-only capability for all objects within the environment.
 
-- **System Administrator**: A System Administrator (also known as Superuser) has full system administration privileges -- with full read and write privileges over the entire installation. A System Administrator is typically responsible for managing all aspects of |at| and delegating responsibilities for day-to-day work to various Users. Assign with caution!
+- **System Administrator**: A System Administrator (also known as Superuser) has full system administration privileges -- with full read and write privileges over the entire installation. A System Administrator is typically responsible for managing all aspects of AWX and delegating responsibilities for day-to-day work to various Users. Assign with caution!
 
 .. image:: ../common/images/users-create-user-form-types.png
    :alt: User Types   
@@ -73,7 +73,7 @@ When you log in as yourself, and view the details of your own user profile, you 
 Delete a User
 ~~~~~~~~~~~~~~~
 
-Before you can delete a user, you must have user permissions. When you delete a user account, the name and email of the user are permanently removed from |at|.
+Before you can delete a user, you must have user permissions. When you delete a user account, the name and email of the user are permanently removed from AWX.
 
 1. Expand the **Access** menu from the left navigation bar, and click **Users** to display a list of the current users.
 
@@ -122,7 +122,7 @@ Users - Roles
    pair: users; roles
 
 
-The set of permissions assigned to this user (role-based access controls) that provide the ability to read, modify, and administer projects, inventories, job templates, and other |at| elements are Roles. 
+The set of permissions assigned to this user (role-based access controls) that provide the ability to read, modify, and administer projects, inventories, job templates, and other AWX elements are Roles. 
 
 .. note::
 

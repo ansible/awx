@@ -10,7 +10,7 @@ Use Source Control
 .. index::
    pair: best practices; source control
 
-While |at| supports playbooks stored directly on the server, best practice is to store your playbooks, roles, and any associated details in source control. This way you have an audit trail describing when and why you changed the rules that are automating your infrastructure. Plus, it allows for easy sharing of playbooks with other parts of your infrastructure or team.
+While AWX supports playbooks stored directly on the server, best practice is to store your playbooks, roles, and any associated details in source control. This way you have an audit trail describing when and why you changed the rules that are automating your infrastructure. Plus, it allows for easy sharing of playbooks with other parts of your infrastructure or team.
 
 Ansible file and directory structure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -21,10 +21,10 @@ Ansible file and directory structure
 Please review the `Ansible Tips and Tricks <https://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html>`_ from the Ansible documentation. If creating a common set of roles to use across projects, these should be accessed via source control submodules, or a common location such as ``/opt``. Projects should not expect to import roles or content from other projects.
 
 .. note::
-    Playbooks should not use the ``vars_prompt`` feature, as |at| does not interactively allow for ``vars_prompt`` questions. If you must use ``vars_prompt``, refer to and make use of the :ref:`ug_surveys` functionality.
+    Playbooks should not use the ``vars_prompt`` feature, as AWX does not interactively allow for ``vars_prompt`` questions. If you must use ``vars_prompt``, refer to and make use of the :ref:`ug_surveys` functionality.
 
 .. note::
-    Playbooks should not use the ``pause`` feature of Ansible without a timeout, as |at| does not allow for interactively cancelling a pause. If you must use ``pause``, ensure that you set a timeout.
+    Playbooks should not use the ``pause`` feature of Ansible without a timeout, as AWX does not allow for interactively cancelling a pause. If you must use ``pause``, ensure that you set a timeout.
 
 Jobs run use the playbook directory as the current working
 directory, although jobs should be coded to use the ``playbook_dir``
@@ -48,7 +48,7 @@ Variable Management for Inventory
 
 Keeping variable data along with the hosts and groups definitions (see the inventory
 editor) is encouraged, rather than using ``group_vars/`` and
-``host_vars/``. If you use dynamic inventory sources, the controller can sync
+``host_vars/``. If you use dynamic inventory sources, AWX can sync
 such variables with the database as long as the **Overwrite Variables**
 option is not set.
 

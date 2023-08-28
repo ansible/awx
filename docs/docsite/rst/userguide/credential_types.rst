@@ -30,11 +30,11 @@ A "managed" credential type of ``kind=galaxy`` represents a content source for f
     
     /api/v2/organizations/N/galaxy_credentials/
 
-Installations of the |at| migrates existing Galaxy-oriented setting values in such a way that post-upgrade, proper credentials are created and attached to every Organization. After upgrading to the latest version , every organization that existed prior to upgrade now has a list of (one or more) "Galaxy" credentials associated with it.
+Installations of AWX migrates existing Galaxy-oriented setting values in such a way that post-upgrade, proper credentials are created and attached to every Organization. After upgrading to the latest version, every organization that existed prior to upgrade now has a list of (one or more) "Galaxy" credentials associated with it.
 
 Additionally, post-upgrade, these settings are not be visible (or editable) from the ``/api/v2/settings/jobs/`` endpoint.
 
-The |at| should still continue to fetch roles directly from public Galaxy even if galaxy.ansible.com is not the first credential in the list for the Organization. The global "Galaxy" settings are no longer configured at the jobs level, but at the Organization level in the User Interface. The Organization's Add and Edit windows have an optional **Credential** lookup field for credentials of ``kind=galaxy``. 
+AWX should still continue to fetch roles directly from public Galaxy even if galaxy.ansible.com is not the first credential in the list for the Organization. The global "Galaxy" settings are no longer configured at the jobs level, but at the Organization level in the User Interface. The Organization's Add and Edit windows have an optional **Credential** lookup field for credentials of ``kind=galaxy``. 
 
 .. image:: ../common/images/organizations-galaxy-credentials.png
 
@@ -53,7 +53,7 @@ Support for version 2 of the API (``api/v2/``) means a one-to-many relationship 
 
 ::
     
-    $ curl "https://controller.example.org/api/v2/credentials/?credential_type__namespace=aws"
+    $ curl "https://awx.example.org/api/v2/credentials/?credential_type__namespace=aws"
 
 
 In the V2 CredentialType model, the relationships are defined as follows:
@@ -83,7 +83,7 @@ In the V2 CredentialType model, the relationships are defined as follows:
 Content verification
 ---------------------
 
-|At| uses GNU Privacy Guard (GPG) to verify content. For more information, refer to `The GNU Privacy Handbook <https://www.gnupg.org/gph/en/manual/c14.html#:~:text=GnuPG%20uses%20public%2Dkey%20cryptography,the%20user%20wants%20to%20communicate>`_.
+AWX uses GNU Privacy Guard (GPG) to verify content. For more information, refer to `The GNU Privacy Handbook <https://www.gnupg.org/gph/en/manual/c14.html#:~:text=GnuPG%20uses%20public%2Dkey%20cryptography,the%20user%20wants%20to%20communicate>`_.
 
 
 
@@ -252,7 +252,7 @@ Credential Types can also generate temporary files to support .ini files or cert
     }
   }
 
-In this example, the |at| will write a temporary file that contains:
+In this example, AWX will write a temporary file that contains:
 
 .. code-block:: text
 

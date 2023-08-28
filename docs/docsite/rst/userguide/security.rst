@@ -6,9 +6,9 @@ Security
 .. index::
    single: security
 
-The following sections will help you gain an understanding of how |at| handles and lets you control file system security.
+The following sections will help you gain an understanding of how AWX handles and lets you control file system security.
 
-All playbooks are executed via the ``awx`` file system user. For running jobs, |at| offers job isolation via the use of Linux containers. This projection ensures jobs can only access playbooks, roles, and data from the Project directory for that job template.
+All playbooks are executed via the ``awx`` file system user. For running jobs, AWX offers job isolation via the use of Linux containers. This projection ensures jobs can only access playbooks, roles, and data from the Project directory for that job template.
 
 For credential security, users may choose to upload locked SSH keys and set the unlock password to "ask". You can also choose to have the system prompt them for SSH credentials or sudo passwords rather than having the system store them in the database.
 
@@ -22,7 +22,7 @@ Playbook Access and Information Sharing
    pair: playbooks; process isolation
 
 
-|At|'s use of automation execution environments and Linux containers prevents playbooks from reading files outside of their project directory. 
+AWX's use of automation execution environments and Linux containers prevents playbooks from reading files outside of their project directory. 
 
 By default, the only data exposed to the ansible-playbook process inside the container is the current project being used.
 
@@ -49,13 +49,13 @@ Role-Based Access Controls
    single: role-based access controls
    pair: security; RBAC
 
-Role-Based Access Controls (RBAC) are built into |at| and allow administrators to delegate access to server inventories, organizations, and more. Administrators can also centralize the management of various credentials, allowing end users to leverage a needed secret without ever exposing that secret to the end user. RBAC controls allow the controller to help you increase security and streamline management.
+Role-Based Access Controls (RBAC) are built into AWX and allow administrators to delegate access to server inventories, organizations, and more. Administrators can also centralize the management of various credentials, allowing end users to leverage a needed secret without ever exposing that secret to the end user. RBAC controls allow AWX to help you increase security and streamline management.
 
 RBACs are easiest to think of in terms of Roles which define precisely who or what can see, change, or delete an "object" for which a specific capability is being set. RBAC is the practice of granting roles to users or teams.
 
-There are a few main concepts that you should become familiar with regarding |at|'s RBAC design--roles, resources, and users. Users can be members of a role, which gives them certain access to any resources associated with that role, or any resources associated with "descendant" roles.
+There are a few main concepts that you should become familiar with regarding AWX's RBAC design--roles, resources, and users. Users can be members of a role, which gives them certain access to any resources associated with that role, or any resources associated with "descendant" roles.
 
-A role is essentially a collection of capabilities. Users are granted access to these capabilities and the controller's resources through the roles to which they are assigned or through roles inherited through the role hierarchy.
+A role is essentially a collection of capabilities. Users are granted access to these capabilities and AWX's resources through the roles to which they are assigned or through roles inherited through the role hierarchy.
 
 Roles associate a group of capabilities with a group of users. All capabilities are derived from membership within a role. Users receive capabilities only through the roles to which they are assigned or through roles they inherit through the role hierarchy. All members of a role have all capabilities granted to that role. Within an organization, roles are relatively stable, while users and capabilities are both numerous and may change rapidly. Users can have many roles.
 
@@ -88,23 +88,23 @@ Often, you will have many Roles in a system and you will want some roles to incl
 
 .. |rbac-heirarchy-morecomplex| image:: ../common/images/rbac-heirarchy-morecomplex.png
 
-RBAC controls also give you the capability to explicitly permit User and Teams of Users to run playbooks against certain sets of hosts. Users and teams are restricted to just the sets of playbooks and hosts to which they are granted capabilities. And, with |at|, you can create or import as many Users and Teams as you require--create users and teams manually or import them from LDAP or Active Directory.
+RBAC controls also give you the capability to explicitly permit User and Teams of Users to run playbooks against certain sets of hosts. Users and teams are restricted to just the sets of playbooks and hosts to which they are granted capabilities. And, with AWX, you can create or import as many Users and Teams as you require--create users and teams manually or import them from LDAP or Active Directory.
 
 RBACs are easiest to think of in terms of who or what can see, change, or delete an "object" for which a specific capability is being determined.
 
 Applying RBAC
 ~~~~~~~~~~~~~~~~~
 
-The following sections cover how to apply |at|'s RBAC system in your environment.
+The following sections cover how to apply AWX's RBAC system in your environment.
 
 
 Editing Users
 ^^^^^^^^^^^^^^^
 
-When editing a user, a |at| system administrator may specify the user as being either a *System Administrator* (also referred to as the Superuser) or a *System Auditor*.
+When editing a user, a AWX system administrator may specify the user as being either a *System Administrator* (also referred to as the Superuser) or a *System Auditor*.
 
-- System administrators implicitly inherit all capabilities for all objects (read/write/execute) within the |at| environment.
-- System Auditors implicitly inherit the read-only capability for all objects within the |at| environment.
+- System administrators implicitly inherit all capabilities for all objects (read/write/execute) within the AWX environment.
+- System Auditors implicitly inherit the read-only capability for all objects within the AWX environment.
 
 Editing Organizations
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -118,9 +118,9 @@ When editing an organization, system administrators may specify the following ro
 
 Users/teams that are members of an organization can view their organization administrator. 
 
-Users who are organization administrators implicitly inherit all capabilities for all objects within that |at| organization. 
+Users who are organization administrators implicitly inherit all capabilities for all objects within that AWX organization. 
 
-Users who are organization auditors implicitly inherit the read-only capability for all objects within that |at| organization.
+Users who are organization auditors implicitly inherit the read-only capability for all objects within that AWX organization.
 
 
 Editing Projects in an Organization
@@ -142,7 +142,7 @@ Administrators can also specify one or more users/teams (from those that are mem
 Creating Inventories and Credentials within an Organization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-All access that is granted to use, read, or write credentials is handled through roles, which use |at|'s RBAC system to grant ownership, auditor, or usage roles.
+All access that is granted to use, read, or write credentials is handled through roles, which use AWX's RBAC system to grant ownership, auditor, or usage roles.
 
 System administrators and organization administrators may create inventories and credentials within organizations under their administrative capabilities. 
 
@@ -156,7 +156,7 @@ Editing Job Templates
 
 System administrators, organization administrators, and project administrators, within a project under their administrative capabilities, may create and modify new job templates for that project. 
 
-When editing a job template, administrators (|at|, organization, and project) can select among the inventory and credentials in the organization for which they have usage capabilities or they may leave those fields blank so that they will be selected at runtime. 
+When editing a job template, administrators (AWX, organization, and project) can select among the inventory and credentials in the organization for which they have usage capabilities or they may leave those fields blank so that they will be selected at runtime. 
 
 Additionally, they may specify one or more users/teams (from those that are members of that project) that have execution capabilities for that job template. The execution capability is valid regardless of any explicit capabilities the user/team may have been granted against the inventory or credential specified in the job template.
 
@@ -184,7 +184,7 @@ All access that is granted to use, read, or write credentials is handled through
 Built-in roles
 ^^^^^^^^^^^^^^
 
-The following table lists the RBAC system roles and a brief description of the how that role is defined with regard to privileges in |at|.
+The following table lists the RBAC system roles and a brief description of the how that role is defined with regard to privileges in AWX.
 
 +-----------------------------------------------------------------------+------------------------------------------------------------------------------------------+
 | System Role                                                           | What it can do                                                                           |
@@ -215,14 +215,14 @@ The following table lists the RBAC system roles and a brief description of the h
 +-----------------------------------------------------------------------+------------------------------------------------------------------------------------------+
 
 
-A Singleton Role is a special role that grants system-wide permissions. |at| currently provides two built-in Singleton Roles but the ability to create or customize a Singleton Role is not supported at this time.
+A Singleton Role is a special role that grants system-wide permissions. AWX currently provides two built-in Singleton Roles but the ability to create or customize a Singleton Role is not supported at this time.
 
 Common Team Roles - "Personas"
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-|At| support personnel typically works on ensuring that the controller is available and manages it a way to balance supportability and ease-of-use for users. Often, |at| support will assign “Organization Owner/Admin” to users in order to allow them to create a new Organization and add members from their team the respective access needed. This minimizes supporting individuals and focuses more on maintaining uptime of the service and assisting users who are using |at|.
+Support personnel typically works on ensuring that AWX is available and manages it a way to balance supportability and ease-of-use for users. Often, support will assign “Organization Owner/Admin” to users in order to allow them to create a new Organization and add members from their team the respective access needed. This minimizes supporting individuals and focuses more on maintaining uptime of the service and assisting users who are using AWX.
 
-Below are some common roles managed by the |at| Organization:
+Below are some common roles managed by the AWX Organization:
 
 +-----------------------+------------------------+-----------------------------------------------------------------------------------------------------------+
 | | System Role         | | Common User          | | Description                                                                                             |
@@ -236,7 +236,7 @@ Below are some common roles managed by the |at| Organization:
 | | Auditor             | | Security Engineer -  | | This account can view all aspects of the organization in read-only mode.                                |
 |                       | | Project Manager      | | This may be good for a user who checks in and maintains compliance.                                     |
 |                       |                        | | This might also be a good role for a service account who manages or                                     |
-|                       |                        | | ships job data from |at| to some other data collector.                                                  |
+|                       |                        | | ships job data from AWX to some other data  collector.                                                  |
 +-----------------------+------------------------+-----------------------------------------------------------------------------------------------------------+
 | | Member -            | | All other users      | | These users by default as an organization member do not receive any access to any aspect                |
 | | Team                |                        | | of the organization. In order to grant them access the respective organization owner needs              |

@@ -3,13 +3,13 @@ A ``ContainerGroup`` is a type of ``InstanceGroup`` that has an associated Crede
 
 - A namespace you can launch into (every cluster has a “default” namespace, but you may want to use a specific namespace)
 - A service account that has the roles that allow it to launch and manage Pods in this namespace
-- If you will be using |ees| in a private registry, and have a Container Registry credential associated to them in the automation controller, the service account also needs the roles to get, create, and delete secrets in the namespace. If you do not want to give these roles to the service account, you can pre-create the ``ImagePullSecrets`` and specify them on the pod spec for the ContainerGroup. In this case, the |ee| should NOT have a Container Registry credential associated, or the controller will attempt to create the secret for you in the namespace.
+- If you will be using |ees| in a private registry, and have a Container Registry credential associated to them in AWX, the service account also needs the roles to get, create, and delete secrets in the namespace. If you do not want to give these roles to the service account, you can pre-create the ``ImagePullSecrets`` and specify them on the pod spec for the ContainerGroup. In this case, the |ee| should NOT have a Container Registry credential associated, or AWX will attempt to create the secret for you in the namespace.
 - A token associated with that service account (OpenShift or Kubernetes Bearer Token)
 - A CA certificate associated with the cluster
 
-This section describes creating a Service Account in an Openshift cluster (or K8s) in order to be used to run jobs in a container group via |at|. After the Service Account is created, its credentials are provided to the controller in the form of an Openshift or Kubernetes API bearer token credential. Below describes how to create a service account and collect the needed information for configuring |at|. 
+This section describes creating a Service Account in an Openshift cluster (or K8s) in order to be used to run jobs in a container group via AWX. After the Service Account is created, its credentials are provided to AWX in the form of an Openshift or Kubernetes API bearer token credential. Below describes how to create a service account and collect the needed information for configuring AWX. 
 
-To configure the controller:
+To configure AWX:
 
 1. To create a service account, you may download and use this sample service account, :download:`containergroup sa <../common/containergroup-sa.yml>` and modify it as needed to obtain the above credentials.
 

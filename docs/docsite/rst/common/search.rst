@@ -2,7 +2,7 @@
 .. index::
    single: searching
  
-The |at| has a powerful search tool that provides both search and filter capabilities that span across multiple functions. Acceptable search criteria are provided in an expandable "cheat-sheet" accessible from the **Advanced** option from the **Name** drop-down menu in the search field. From there, use the combination of **Set Type**, **Key**, **Lookup type** to filter.
+AWX has a powerful search tool that provides both search and filter capabilities that span across multiple functions. Acceptable search criteria are provided in an expandable "cheat-sheet" accessible from the **Advanced** option from the **Name** drop-down menu in the search field. From there, use the combination of **Set Type**, **Key**, **Lookup type** to filter.
 
 |key sheet|
 
@@ -18,7 +18,7 @@ These searching tips assume that you are not searching hosts. Most of this secti
 
 2. ``organization.name:Default``  This example shows a Related Field Search. The period in the left-hand portion separates the model from the field in this case. Depending on how deep/complex the search is, you could have multiple periods in that left-hand portion.
 
-3. ``foobar``    Simple string (key term) search that will find all instances of that term using an ``icontains`` search against the name and description fields. If a space is used between terms (e.g. foo bar), then any results that contain both terms will be returned. If the terms are wrapped in quotes (e.g. "foo bar"), the controller will search for the entire string with the terms appearing together. Specific name searches will search against the API name. For example, ``Management job`` in the user interface is ``system_job`` in the API.
+3. ``foobar``    Simple string (key term) search that will find all instances of that term using an ``icontains`` search against the name and description fields. If a space is used between terms (e.g. foo bar), then any results that contain both terms will be returned. If the terms are wrapped in quotes (e.g. "foo bar"), AWX will search for the entire string with the terms appearing together. Specific name searches will search against the API name. For example, ``Management job`` in the user interface is ``system_job`` in the API.
 
 4. ``organization:Default``  This example shows a Related Field search but without specifying a field to go along with the organization. This is supported by the API and is analogous to a simple string search but done against the organization (will do an ``icontains`` search against both the name and description).
 
@@ -72,11 +72,11 @@ The left-hand side of the search string must start with `organization` (ex: ``or
 Other search considerations
 ------------------------------
 
-The following are a few things about searching in the controller that you should be aware of:
+The following are a few things about searching in AWX that you should be aware of:
 
 - There's currently no supported syntax for **OR** queries. All search terms get **AND**'d in the query parameters.
 - The left-hand portion of a search parameter can be wrapped in quotes to support searching for strings with spaces.
-- Currently, the values in the Fields are direct attributes expected to be returned in a **GET** request.  Whenever you search against one of the values, the controller essentially does an ``__icontains`` search. So, for example, ``name:localhost`` would send back ``?name__icontains=localhost``. The controller currently performs this search for every Field value, even ``id``, which is not ideal.
+- Currently, the values in the Fields are direct attributes expected to be returned in a **GET** request.  Whenever you search against one of the values, AWX essentially does an ``__icontains`` search. So, for example, ``name:localhost`` would send back ``?name__icontains=localhost``. AWX currently performs this search for every Field value, even ``id``, which is not ideal.
 
 
 Sort

@@ -8,11 +8,11 @@ Projects
 
 A :term:`Project` is a logical collection of Ansible playbooks.
 
-You can manage playbooks and playbook directories by either placing them manually under the Project Base Path on your server, or by placing your playbooks into a source code management (SCM) system supported by |at|, including Git, Subversion, and Red Hat Insights. To create a Red Hat Insights project, refer to :ref:`insights`.
+You can manage playbooks and playbook directories by either placing them manually under the Project Base Path on your server, or by placing your playbooks into a source code management (SCM) system supported by AWX, including Git, Subversion, and Red Hat Insights. To create a Red Hat Insights project, refer to :ref:`insights`.
 
 .. note::
 
-    By default, the Project Base Path is ``/var/lib/awx/projects``, but this may have been modified by the administrator. It is configured in ``/etc/tower/conf.d/custom.py``. Use caution when editing this file, as incorrect settings can disable your installation.
+    By default, the Project Base Path is ``/var/lib/awx/projects``, but this may have been modified by the administrator. It is configured in ``/etc/awx/conf.d/custom.py``. Use caution when editing this file, as incorrect settings can disable your installation.
 
 The Projects page displays the list of the projects that are currently available. The default view is collapsed (**Compact**) with project name and its status, but you can use the arrow next to each entry to expand for more information.
 
@@ -56,6 +56,7 @@ For each project listed, you can get the latest SCM revision (|refresh|), edit t
 
 .. include:: ../common/work_items_deletion_warning.rst
 
+
 .. _ug_projects_add:
 
 Add a new project
@@ -84,6 +85,10 @@ To create a new project:
 
 3. Click **Save** when done.
 
+The following describes ways projects are sourced in AWX:
+
+.. contents::
+    :local:
 
 .. _ug_manual:
 
@@ -96,7 +101,7 @@ Manage playbooks manually
 
 -  Create one or more directories to store playbooks under the Project Base Path (for example, /var/lib/awx/projects/).
 -  Create or copy playbook files into the playbook directory.
--  Ensure that the playbook directory and files are owned by the same UNIX user and group that the |at| service runs as.
+-  Ensure that the playbook directory and files are owned by the same UNIX user and group that the AWX service runs as.
 -  Ensure that the permissions are appropriate for the playbook directories and files.
 
 If adding a manual project, each project path inside of the project root folder can only be assigned to one project. If you receive the following message, ensure that you have not already assigned the project path to an existing project:
@@ -159,7 +164,7 @@ To configure playbooks to use source control, in the Project **Details** tab:
   -  **Clean** - Removes any local modifications prior to performing an update.
   -  **Delete** - Deletes the local repository in its entirety prior to performing an update. Depending on the size of the repository this may significantly increase the amount of time required to complete an update.
   -  **Track submodules** - Tracks the latest commit. See more details in the tooltip |tooltip|.
-  -  **Update Revision on Launch** - Updates the revision of the project to the current revision in the remote source control, as well as cache the roles directory from :ref:`Galaxy <ug_galaxy>` or :ref:`Collections <ug_collections>`. |At| ensures that the local revision matches and that the roles and collections are up-to-date with the last update. Also, to avoid job overflows if jobs are spawned faster than the project can sync, selecting this allows you to configure a Cache Timeout to cache prior project syncs for a certain number of seconds.
+  -  **Update Revision on Launch** - Updates the revision of the project to the current revision in the remote source control, as well as cache the roles directory from :ref:`Galaxy <ug_galaxy>` or :ref:`Collections <ug_collections>`. AWX ensures that the local revision matches and that the roles and collections are up-to-date with the last update. Also, to avoid job overflows if jobs are spawned faster than the project can sync, selecting this allows you to configure a Cache Timeout to cache prior project syncs for a certain number of seconds.
   -  **Allow Branch Override** - Allows a job template or an inventory source that uses this project to launch with a specified SCM branch or revision other than that of the project's. For more detail, see :ref:`job branch overriding <ug_job_branching>`.
 
     .. image:: ../common/images/projects-create-scm-project-branch-override-checked.png
@@ -169,7 +174,7 @@ To configure playbooks to use source control, in the Project **Details** tab:
   .. tip::
     Using a GitHub link offers an easy way to use a playbook. To help get you started, use the ``helloworld.yml`` file available at: https://github.com/ansible/tower-example.git
 
-    This link offers a very similar playbook to the one created manually in the instructions found in the :ref:`Automation Controller Quick Setup Guide <qs_start>`. Using it will not alter or harm your system in anyway.
+    This link offers a very similar playbook to the one created manually in the instructions found in the :ref:`qs_start`. Using it will not alter or harm your system in anyway.
 
 
 SCM Type - Red Hat Insights
@@ -190,7 +195,7 @@ To configure playbooks to use Red Hat Insights, in the Project **Details** tab:
 
   -  **Clean** - Removes any local modifications prior to performing an update.
   -  **Delete** - Deletes the local repository in its entirety prior to performing an update. Depending on the size of the repository this may significantly increase the amount of time required to complete an update.
-  -  **Update Revision on Launch** - Updates the revision of the project to the current revision in the remote source control, as well as cache the roles directory from :ref:`Galaxy <ug_galaxy>` or :ref:`Collections <ug_collections>`. |At| ensures that the local revision matches and that the roles and collections are up-to-date with the last update. Also, to avoid job overflows if jobs are spawned faster than the project can sync, selecting this allows you to configure a Cache Timeout to cache prior project syncs for a certain number of seconds.
+  -  **Update Revision on Launch** - Updates the revision of the project to the current revision in the remote source control, as well as cache the roles directory from :ref:`Galaxy <ug_galaxy>` or :ref:`Collections <ug_collections>`. AWX ensures that the local revision matches and that the roles and collections are up-to-date with the last update. Also, to avoid job overflows if jobs are spawned faster than the project can sync, selecting this allows you to configure a Cache Timeout to cache prior project syncs for a certain number of seconds.
 
   .. image:: ../common/images/projects-create-scm-insights.png
 
@@ -264,7 +269,7 @@ Work with Permissions
 .. index::
    pair: projects; permissions
 
-The set of permissions assigned to this project (role-based access controls) that provide the ability to read, modify, and administer projects, inventories, job templates, and other |at| elements are Privileges.
+The set of permissions assigned to this project (role-based access controls) that provide the ability to read, modify, and administer projects, inventories, job templates, and other AWX elements are Privileges.
 
 You can access the project permissions via the **Access** tab next to the **Details** tab. This screen displays a list of users that currently have permissions to this project. The list may be sorted and searched by **Username**, **First Name**, or **Last Name**.
 
@@ -343,7 +348,7 @@ Ansible Galaxy Support
    single: Galaxy support
 
 
-At the end of a Project update, |at| searches for a file called ``requirements.yml`` in the ``roles`` directory, located at ``<project-top-level-directory>/roles/requirements.yml``. If this file is found, the following command automatically runs:
+At the end of a Project update, AWX searches for a file called ``requirements.yml`` in the ``roles`` directory, located at ``<project-top-level-directory>/roles/requirements.yml``. If this file is found, the following command automatically runs:
 
 ::
 
@@ -352,18 +357,18 @@ At the end of a Project update, |at| searches for a file called ``requirements.y
 
 This file allows you to reference Galaxy roles or roles within other repositories which can be checked out in conjunction with your own project. The addition of this Ansible Galaxy support eliminates the need to create git submodules for achieving this result. Given that SCM projects (along with roles/collections) are pulled into and executed from a private job environment, a <private job directory> specific to the project within ``/tmp`` is created by default. However, you can specify another **Job Execution Path** based on your environment in the Jobs Settings tab of the Settings window:
 
-.. image:: ../common/images/configure-tower-jobs-execution-path.png
+.. image:: ../common/images/configure-awx-jobs-execution-path.png
 
 The cache directory is a subdirectory inside the global projects folder. The content may be copied from the cache location to ``<job private directory>/requirements_roles`` location.
 
-By default, |at| has a system-wide setting that allows roles to be dynamically downloaded from the ``roles/requirements.yml`` file for SCM projects. You may turn off this setting in the **Jobs settings** screen of the Settings menu by switching the **Enable Role Download** toggle button to **OFF**.
+By default, AWX has a system-wide setting that allows roles to be dynamically downloaded from the ``roles/requirements.yml`` file for SCM projects. You may turn off this setting in the **Jobs settings** screen of the Settings menu by switching the **Enable Role Download** toggle button to **OFF**.
 
-.. image:: ../common/images/configure-tower-jobs-download-roles.png
+.. image:: ../common/images/configure-awx-jobs-download-roles.png
 
 
-Whenever a project sync runs, |at| determines if the project source and any roles from Galaxy and/or Collections are out of date with the project. Project updates will download the roles inside the update.
+Whenever a project sync runs, AWX determines if the project source and any roles from Galaxy and/or Collections are out of date with the project. Project updates will download the roles inside the update.
 
-If jobs need to pick up a change made to an upstream role, updating the project will ensure this happens. A change to the role means that a new commit was pushed to the *provision-role* source control. To make this change take effect in a job, you do not need to push a new commit to the *playbooks* repo, but you **do need** to update the project, which downloads roles to a local cache. For instance, say you have two git repositories in source control. The first one is *playbooks* and the project in |at| points to this URL. The second one is *provision-role* and it is referenced by the ``roles/requirements.yml`` file inside of the *playbooks* git repo.
+If jobs need to pick up a change made to an upstream role, updating the project will ensure this happens. A change to the role means that a new commit was pushed to the *provision-role* source control. To make this change take effect in a job, you do not need to push a new commit to the *playbooks* repo, but you **do need** to update the project, which downloads roles to a local cache. For instance, say you have two git repositories in source control. The first one is *playbooks* and the project in AWX points to this URL. The second one is *provision-role* and it is referenced by the ``roles/requirements.yml`` file inside of the *playbooks* git repo.
 
 .. this section is used in collections support section below
 
@@ -391,7 +396,7 @@ If there are any directories that should specifically be exposed, you can specif
     The primary file you may want to add to ``AWX_ISOLATION_SHOW_PATHS`` is ``/var/lib/awx/.ssh``, if your playbooks need to use keys or settings defined there.
 
 
-If you made changes in the settings file, be sure to restart services with the ``automation-controller-service restart`` command after your changes have been saved.
+If you made changes in the settings file, be sure to restart services with the ``awx-service restart`` command after your changes have been saved.
 
 .. end reused section
 
@@ -399,12 +404,7 @@ If you made changes in the settings file, be sure to restart services with the `
 In the User Interface, you can configure these settings in the Jobs settings window.
 
 
-.. image:: ../common/images/configure-tower-jobs-path-to-expose.png
-
-
-.. note::
-
-  The **Primary Galaxy Server Username** and **Primary Galaxy Server Password** fields are no longer configurable in |at| 3.8. We recommend using tokens to access Galaxy or |ah| instead.
+.. image:: ../common/images/configure-awx-jobs-path-to-expose.png
 
 
 .. _ug_collections:
@@ -416,11 +416,11 @@ Collections Support
    single: Ansible collections
    single: collections support
 
-|At| supports project-specific `Ansible collections <https://docs.ansible.com/ansible/latest/user_guide/collections_using.html>`_ in job runs. If you specify a collections requirements file in the SCM at ``collections/requirements.yml``, |at| will install collections in that file in the implicit project sync before a job run.
+AWX supports project-specific `Ansible collections <https://docs.ansible.com/ansible/latest/collections_guide/index.html>`_ in job runs. If you specify a collections requirements file in the SCM at ``collections/requirements.yml``, AWX will install collections in that file in the implicit project sync before a job run.
 
-By default, |at| has a system-wide setting that allows collections to be dynamically downloaded from the ``collections/requirements.yml`` file for SCM projects. You may turn off this setting in the **Jobs settings** tab of the Settings menu by switching the **Enable Collections Download** toggle button to **OFF**.
+By default, AWX has a system-wide setting that allows collections to be dynamically downloaded from the ``collections/requirements.yml`` file for SCM projects. You may turn off this setting in the **Jobs settings** tab of the Settings menu by switching the **Enable Collections Download** toggle button to **OFF**.
 
-  .. image:: ../common/images/configure-tower-jobs-download-collections.png
+  .. image:: ../common/images/configure-awx-jobs-download-collections.png
 
 Roles and collections are locally cached for performance reasons, and you will need to select **Update Revision on Launch** in the project SCM Update Options to ensure this:
 
@@ -432,7 +432,7 @@ Roles and collections are locally cached for performance reasons, and you will n
 Using Collections via Hub
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Before |at| can use |ah| as the default source for collections content, you need to create an API token in the |ah| UI so that it could be specified in |at|. You may connect to a private |ah| or a public |ah| collection, the only difference is which URL you specify.
+Before AWX can use |ah| as the default source for collections content, you need to create an API token in the |ah| UI so that it could be specified in AWX. You may connect to a private |ah| or a public |ah| collection, the only difference is which URL you specify.
 
 1. Navigate to https://cloud.redhat.com/ansible/automation-hub/token and click **Load token**.
 
@@ -473,11 +473,11 @@ You can create different repos with different namespaces/collections in them. Bu
 
 .. image:: ../common/images/settings-jobs-ignore-galaxy-certs.png
 
-7. Create a project, where the source repository specifies the necessary collections in a requirements file located in the ``collections/requirements.yml`` file. Refer to the syntax described in the Ansible documentation: https://docs.ansible.com/ansible/latest/user_guide/collections_using.html#install-multiple-collections-with-a-requirements-file.
+7. Create a project, where the source repository specifies the necessary collections in a requirements file located in the ``collections/requirements.yml`` file. Refer to the syntax described in the corresponding `Ansible documentation <https://docs.ansible.com/ansible/latest/user_guide/collections_using.html#install-multiple-collections-with-a-requirements-file>`_.
 
 .. image:: ../common/images/projects-add-ah-source-repo.png
 
-8. In the Projects list view, click |update| to run an update against this project. |At| fetches the Galaxy collections from the ``collections/requirements.yml`` file and report it as changed; and the collections will now be installed for any job template using this project.
+8. In the Projects list view, click |update| to run an update against this project. AWX fetches the Galaxy collections from the ``collections/requirements.yml`` file and report it as changed; and the collections will now be installed for any job template using this project.
 
 .. |update| image:: ../common/images/refresh-gray.png
 

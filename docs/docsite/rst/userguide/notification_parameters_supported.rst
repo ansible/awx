@@ -11,7 +11,7 @@ Supported Attributes for Custom Notifications
 This section describes the list of supported job attributes and the proper syntax for constructing the message text for notifications. The supported job attributes are:
 
 - ``allow_simultaneous`` - (boolean) indicates if multiple jobs can run simultaneously from the JT associated with this job
-- ``controller_node`` - (string) the instance that managed the isolated execution environment
+- ``awx_node`` - (string) the instance that managed the isolated execution environment
 - ``created`` - (datetime) timestamp when this job was created
 - ``custom_virtualenv`` - (string) custom virtual environment used to execute job
 - ``description`` - (string) optional description of the job
@@ -41,7 +41,7 @@ This section describes the list of supported job attributes and the proper synta
 - ``timeout`` - (int) amount of time (in seconds) to run before the task is canceled
 - ``type`` - (choice) data type for this job
 - ``url`` - (string) URL for this job
-- ``use_fact_cache`` - (boolean) if enabled for job, the controller acts as an Ansible Fact Cache Plugin, persisting facts at the end of a playbook run to the database and caching facts for use by Ansible
+- ``use_fact_cache`` - (boolean) if enabled for job, AWX acts as an Ansible Fact Cache Plugin, persisting facts at the end of a playbook run to the database and caching facts for use by Ansible
 - ``verbosity`` - (choice) 0 through 5 (corresponding to Normal through WinRM Debug)
 - ``host_status_counts`` (count of hosts uniquely assigned to each status)
    - ``skipped`` (integer)
@@ -108,7 +108,7 @@ In addition to the job attributes, there are some other variables that can be ad
 - ``job_friendly_name`` - (string) the friendly name of the job
 - ``job_metadata`` - (string) job metadata as a JSON string, for example::
 
-    {'url': 'https://towerhost/$/jobs/playbook/13',
+    {'url': 'https://awxhost/$/jobs/playbook/13',
      'traceback': '',
      'status': 'running',
      'started': '2019-08-07T21:46:38.362630+00:00',

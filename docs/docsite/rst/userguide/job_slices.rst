@@ -13,7 +13,7 @@ Job Slicing
 A :term:`sliced job` refers to the concept of a distributed job. Distributed jobs are used for running a job across a very large number of hosts, allowing you to run multiple ansible-playbooks, each on a subset of an inventory, that can be scheduled in parallel across a cluster. 
 
 
-By default, Ansible runs jobs from a single control instance. For jobs that do not require cross-host orchestration, job slicing takes advantage of |at|'s ability to distribute work to multiple nodes in a cluster. Job slicing works by adding a Job Template field ``job_slice_count``, which specifies the number of jobs into which to slice the Ansible run. When this number is greater than 1, |at| will generate a workflow from a job template instead of a job. The inventory will be distributed evenly amongst the slice jobs. The workflow job is then started, and proceeds as though it were a normal workflow. When launching a job, the API will return either a job resource (if ``job_slice_count = 1``) or a workflow job resource. The corresponding User Interface will redirect to the appropriate screen to display the status of the run.
+By default, Ansible runs jobs from a single control instance. For jobs that do not require cross-host orchestration, job slicing takes advantage of AWX's ability to distribute work to multiple nodes in a cluster. Job slicing works by adding a Job Template field ``job_slice_count``, which specifies the number of jobs into which to slice the Ansible run. When this number is greater than 1, AWX will generate a workflow from a job template instead of a job. The inventory will be distributed evenly amongst the slice jobs. The workflow job is then started, and proceeds as though it were a normal workflow. When launching a job, the API will return either a job resource (if ``job_slice_count = 1``) or a workflow job resource. The corresponding User Interface will redirect to the appropriate screen to display the status of the run.
 
 
 Job slice considerations
@@ -43,7 +43,7 @@ Consider the following when setting up job slices:
 
 .. warning::
 
-	Any job that intends to orchestrate across hosts (rather than just applying changes to individual hosts) should not be configured as a slice job. Any job that does, may fail, and |at| will not attempt to discover or account for playbooks that fail when run as slice jobs.
+	Any job that intends to orchestrate across hosts (rather than just applying changes to individual hosts) should not be configured as a slice job. Any job that does, may fail, and AWX will not attempt to discover or account for playbooks that fail when run as slice jobs.
 
 
 .. _ug_job_slice_execution:
@@ -64,8 +64,6 @@ The :ref:`ug_JobTemplates` section provides additional detail on performing the 
 - Relaunch the whole workflow or individual jobs after slice jobs finish running
 - View the details about the workflow and slice jobs after a launching a job template
 - Search slice jobs specifically after you create them (see subsequent section, :ref:`ug_job_slice_search`)
-
-
 
 
 .. _ug_job_slice_search:

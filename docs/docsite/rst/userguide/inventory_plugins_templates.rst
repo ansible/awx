@@ -6,7 +6,7 @@ Supported Inventory Plugin Templates
 .. index::
     pair: templates;inventory plugins
 
-Upon upgrade to 4.x, existing configurations will be migrated to the new format that will produce a backwards compatible inventory output. Use the templates below to help aid in migrating your inventories to the new style inventory plugin output.
+Upon upgrades, existing configurations will be migrated to the new format that will produce a backwards compatible inventory output. Use the templates below to help aid in migrating your inventories to the new style inventory plugin output.
 
 .. contents::
     :local:
@@ -383,8 +383,8 @@ Red Hat Ansible Automation Platform
 ----------------------------------------
 
 .. index:: 
-   pair: inventories; |aap|
-   pair: inventory plugins; |aap|
+   pair: inventories; Red Hat Ansible Automation Platform
+   pair: inventory plugins; Red Hat Ansible Automation Platform
 
 ::
 

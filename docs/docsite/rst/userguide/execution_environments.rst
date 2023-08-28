@@ -99,13 +99,13 @@ Use an execution environment in jobs
 
 In order to use an |ee| in a job, a few components are required:
 
-- An |ee| must have been created using |ab|. See :ref:`build_ee` for detail. Once an |ee| is created, you can use it to run jobs. Use the |at| user interface to specify the |ee| to use in your job templates.
+- An |ee| must have been created using |ab|. See :ref:`build_ee` for detail. Once an |ee| is created, you can use it to run jobs. Use the AWX user interface to specify the |ee| to use in your job templates.
 
 - Depending on whether an |ee| is made available for global use or tied to an organization, you must have the appropriate level of administrator privileges in order to use an |ee| in a job. |Ees| tied to an organization require Organization administrators to be able to run jobs with those |ees|.
 
 - Before running a job or job template that uses an |ee| that has a credential assigned to it, be sure that the credential contains a username, host, and password.
 
-1. Click **Execution Environments** from the left navigation bar of the controller user interface. 
+1. Click **Execution Environments** from the left navigation bar of the AWX user interface. 
 
 2. Add an |ee| by selecting the **Add** button.
 
@@ -145,7 +145,7 @@ Execution environment mount options
 
 .. https://github.com/ansible/product-docs/issues/1647 and https://github.com/ansible/awx/issues/10787
 
-Rebuilding an |ee| is one way to add certs, but inheriting certs from the host provides a more convenient solution. For VM-based installs, the controller automatically mounts the system trust store in the |ee| when jobs run. 
+Rebuilding an |ee| is one way to add certs, but inheriting certs from the host provides a more convenient solution.  
 
 .. https://github.com/ansible/tower/issues/5383
 
@@ -153,7 +153,7 @@ Additionally, you may customize |ee| mount options and mount paths in the **Path
 
 In some cases where the ``/etc/ssh/*`` files were added to the |ee| image due to customization of an |ee|, an SSH error may occur. For example, exposing the ``/etc/ssh/ssh_config.d:/etc/ssh/ssh_config.d:O`` path allows the container to be mounted, but the ownership permissions are not mapped correctly. 
 
-If you encounter this error, or have upgraded from an older version of the controller (e.g. 3.8.x), perform the following steps:
+If you encounter this error, or have upgraded from an older version of AWX, perform the following steps:
 
 1. Change the container ownership on the mounted volume  to ``root``.
 

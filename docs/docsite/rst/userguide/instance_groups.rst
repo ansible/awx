@@ -37,7 +37,7 @@ To create a new instance group:
 
 3. Enter the appropriate details into the following fields:
 
--  **Name**. Names must be unique and must not be named *controller*. 
+-  **Name**. Names must be unique and must not be named *awx*. 
 -  **Policy instance minimum**. Enter the minimum number of instances to automatically assign to this group when new instances come online.
 -  **Policy instance percentage**. Use the slider to select a minimum percentage of instances to automatically assign to this group when new instances come online.
 

@@ -6,9 +6,9 @@ Overview
 .. index::
    pair: overview; features
 
-Thank you for your interest in |rhaap|. |aap| makes it possible for users across an organization to share, vet, and manage automation content by means of a simple, powerful, and agentless technical implementation. IT managers can provide guidelines on how automation is applied to individual teams. Meanwhile, automation developers retain the freedom to write tasks that use existing knowledge, without the operational overhead of conforming to complex tools and frameworks. It is a more secure and stable foundation for deploying end-to-end automation solutions, from hybrid cloud to the edge. 
+Thank you for your interest in AWX. AWX makes it possible for users across an organization to share, vet, and manage automation content by means of a simple, powerful, and agentless technical implementation. IT managers can provide guidelines on how automation is applied to individual teams. Meanwhile, automation developers retain the freedom to write tasks that use existing knowledge, without the operational overhead of conforming to complex tools and frameworks. It is a more secure and stable foundation for deploying end-to-end automation solutions, from hybrid cloud to the edge. 
 
-|aap| includes |at|, which allows users to define, operate, scale, and delegate automation across their enterprise.
+AWX allows users to define, operate, scale, and delegate automation across their organization.
 
 
 Real-time Playbook Output and Exploration
@@ -25,7 +25,7 @@ Watch playbooks run in real time, seeing each host as they check in. Easily go b
 .. index::
    pair: features; automation
 
-Access your favorite projects and re-trigger execution from the web interface with a minimum of clicking. |at| will ask for input variables, prompt for your credentials, kick off and monitor the job, and display results and host history over time.
+Access your favorite projects and re-trigger execution from the web interface with a minimum of clicking. AWX will ask for input variables, prompt for your credentials, kick off and monitor the job, and display results and host history over time.
 
 
 Enhanced and Simplified Role-Based Access Control and Auditing
@@ -34,15 +34,15 @@ Enhanced and Simplified Role-Based Access Control and Auditing
 .. index::
    pair: features; role-based access control
 
-|At| allows for the granting of permissions to perform a specific task (such as to view, create, or modify a file) to different teams or explicit users through role-based access control (RBAC). 
+AWX allows for the granting of permissions to perform a specific task (such as to view, create, or modify a file) to different teams or explicit users through role-based access control (RBAC). 
 
-Keep some projects private, while allowing some users to edit inventory and others to run playbooks against only certain systems--either in check (dry run) or live mode. You can also allow certain users to use credentials without exposing the credentials to them. Regardless of what you do, |at| records the history of operations and who made them--including objects edited and jobs launched.
+Keep some projects private, while allowing some users to edit inventory and others to run playbooks against only certain systems--either in check (dry run) or live mode. You can also allow certain users to use credentials without exposing the credentials to them. Regardless of what you do, AWX records the history of operations and who made them--including objects edited and jobs launched.
 
-Based on user feedback, |at| both expands and simplifies its role-based access control. No longer is job template visibility configured via a combination of permissions on inventory, projects, and credentials. If you want to give any user or team permissions to use a job template, just assign permissions directly on the job template. Similarly, credentials are now full objects in |at|'s RBAC system, and can be assigned to multiple users and/or teams for use.
+Based on user feedback, AWX both expands and simplifies its role-based access control. No longer is job template visibility configured via a combination of permissions on inventory, projects, and credentials. If you want to give any user or team permissions to use a job template, just assign permissions directly on the job template. Similarly, credentials are now full objects in AWX's RBAC system, and can be assigned to multiple users and/or teams for use.
 
-|At| includes an ‘Auditor’ type, who can see all aspects of the systems automation, but has no permission to run or change automation, for those that need a system-level auditor. (This may also be useful for a service account that scrapes automation information from the REST API.) Refer to :ref:`rbac-ug` for more information.
+AWX includes an ‘Auditor’ type, who can see all aspects of the systems automation, but has no permission to run or change automation, for those that need a system-level auditor. (This may also be useful for a service account that scrapes automation information from the REST API.) Refer to :ref:`rbac-ug` for more information.
 
-Subsequent releases of |at| provides more granular permissions, making it easier to delegate inside your organizations and remove automation bottlenecks.
+Subsequent releases of AWX provides more granular permissions, making it easier to delegate inside your organizations and remove automation bottlenecks.
 
 
 Cloud & Autoscaling Flexibility
@@ -52,7 +52,7 @@ Cloud & Autoscaling Flexibility
    pair: features; autoscaling flexibility
    pair: features; cloud flexibility
 
-|At| features a powerful provisioning callback feature that allows nodes to request configuration on demand. While optional, this is an ideal solution for a cloud auto-scaling scenario, integrating with provisioning servers like Cobbler, or when dealing with managed systems with unpredictable uptimes. Requiring no management software to be installed on remote nodes, the callback solution can be triggered via a simple call to 'curl' or 'wget', and is easily embeddable in init scripts, kickstarts, or preseeds. Access is controlled such that only machines in inventory can request configuration.
+AWX features a powerful provisioning callback feature that allows nodes to request configuration on demand. While optional, this is an ideal solution for a cloud auto-scaling scenario, integrating with provisioning servers like Cobbler, or when dealing with managed systems with unpredictable uptimes. Requiring no management software to be installed on remote nodes, the callback solution can be triggered via a simple call to 'curl' or 'wget', and is easily embeddable in init scripts, kickstarts, or preseeds. Access is controlled such that only machines in inventory can request configuration.
 
 
 The Ideal RESTful API
@@ -61,7 +61,7 @@ The Ideal RESTful API
 .. index::
    pair: features; RESTful API
 
-The |at| REST API is the ideal RESTful API for a systems management application, with all resources fully discoverable, paginated, searchable, and well modeled. A styled API browser allows API exploration from the API root at ``http://<server name>/api/``, showing off every resource and relation. Everything that can be done in the user interface can be done in the API - and more.
+The AWX REST API is the ideal RESTful API for a systems management application, with all resources fully discoverable, paginated, searchable, and well modeled. A styled API browser allows API exploration from the API root at ``http://<server name>/api/``, showing off every resource and relation. Everything that can be done in the user interface can be done in the API - and more.
 
 Backup and Restore
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -69,7 +69,7 @@ Backup and Restore
 .. index::
    pair: features; backup and restore
 
-The ability to backup and restore your system(s) has been integrated into the |aap| setup playbook, making it easy for you to backup and replicate your instance as needed.
+The ability to backup and restore your system(s) has been integrated into the AWX setup playbook, making it easy for you to backup and replicate your instance as needed.
 
 Ansible Galaxy Integration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -77,7 +77,7 @@ Ansible Galaxy Integration
 .. index::
    pair: features; Ansible Galaxy integration
 
-When it comes to describing your automation, everyone repeats the DRY mantra--"Don’t Repeat Yourself." Using centralized copies of Ansible roles, such as in Ansible Galaxy, allows you to bring that philosophy to your playbooks. By including an Ansible Galaxy requirements.yml file in your project directory, |at| automatically fetches the roles your playbook needs from Galaxy, GitHub, or your local source control. Refer to :ref:`ug_galaxy` for more information. 
+When it comes to describing your automation, everyone repeats the DRY mantra--"Don’t Repeat Yourself." Using centralized copies of Ansible roles, such as in Ansible Galaxy, allows you to bring that philosophy to your playbooks. By including an Ansible Galaxy requirements.yml file in your project directory, AWX automatically fetches the roles your playbook needs from Galaxy, GitHub, or your local source control. Refer to :ref:`ug_galaxy` for more information. 
 
 Inventory Support for OpenStack
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -90,16 +90,16 @@ Ansible is committed to making OpenStack simple for everyone to use. As part of 
 
 
 Remote Command Execution
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. index::
    pair: features; remote command execution
 
-Often times, you just need to do a simple task on a few hosts, whether it’s add a single user, update a single security vulnerability, or restart a misbehaving service. |At| includes remote command execution--any task that you can describe as a single Ansible play can be run on a host or group of hosts in your inventory, allowing you to get managing your systems quickly and easily. Plus, it is all backed by an RBAC engine and detailed audit logging, removing any questions regarding who has done what to what machines.
+Often times, you just need to do a simple task on a few hosts, whether it’s add a single user, update a single security vulnerability, or restart a misbehaving service. AWX includes remote command execution--any task that you can describe as a single Ansible play can be run on a host or group of hosts in your inventory, allowing you to get managing your systems quickly and easily. Plus, it is all backed by an RBAC engine and detailed audit logging, removing any questions regarding who has done what to what machines.
 
 
 System Tracking
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 .. index::
    pair: features; system tracking
@@ -115,7 +115,7 @@ Integrated Notifications
 .. index::
    pair: features; notifications
 
-|at| allows you to easily keep track of the status of your automation. You can configure stackable notifications for job templates, projects, or entire organizations, and configure different notifications for job start, job success, job failure, and job approval (for workflow nodes). The following notification sources are supported:
+AWX allows you to easily keep track of the status of your automation. You can configure stackable notifications for job templates, projects, or entire organizations, and configure different notifications for job start, job success, job failure, and job approval (for workflow nodes). The following notification sources are supported:
 
 - Email
 - Grafana
@@ -159,7 +159,7 @@ Red Hat Insights Integration
 .. index::
    pair: features; playbooks, Red Hat Insights
 
-|At| supports integration with Red Hat Insights, which allows Insights playbooks to be used as a |aap| Project.
+AWX supports integration with Red Hat Insights, which allows Insights playbooks to be used as a Project.
 
 
 Enhanced User Interface
@@ -189,7 +189,7 @@ Authentication Enhancements
    pair: features; authentication
    pair: features; OAuth 2 token
 
-|At| supports LDAP, SAML, token-based authentication. Enhanced LDAP and SAML support allows you to integrate your enterprise account information in a more flexible manner. Token-based Authentication allows for easily authentication of third-party tools and services with |at| via integrated OAuth 2 token support.
+AWX supports LDAP, SAML, token-based authentication. Enhanced LDAP and SAML support allows you to integrate your enterprise account information in a more flexible manner. Token-based Authentication allows for easily authentication of third-party tools and services with AWX via integrated OAuth 2 token support.
 
 Cluster Management
 ~~~~~~~~~~~~~~~~~~~~
@@ -207,7 +207,7 @@ Container Platform Support
 .. index::
    pair: features; container support
 
-|aap| is available as a containerized pod service for Kubernetes environments that can be scaled up and down easily as needed.
+AWX is available as a containerized pod service for Kubernetes environments that can be scaled up and down easily as needed.
 
 
 Workflow Enhancements
@@ -221,12 +221,12 @@ Workflow Enhancements
    pair: features; workflows, pause
 
 
-In order to better model your complex provisioning, deployment, and orchestration workflows, |at| expanded workflows in a number
+In order to better model your complex provisioning, deployment, and orchestration workflows, AWX expanded workflows in a number
 of ways:
 
 - **Inventory overrides for Workflows**. You can now override an inventory across a workflow at workflow definition time, or even at launch time. Define your application deployment workflow, and then easily re-use them in multiple environments.
 
-- **Convergence nodes for Workflows**. When modeling complex processes, you sometimes need to wait for multiple steps to finish before proceeding. Now |at| workflows can easily replicate this; workflow steps can now wait for any number of prior workflow steps to complete properly before proceeding.
+- **Convergence nodes for Workflows**. When modeling complex processes, you sometimes need to wait for multiple steps to finish before proceeding. Now AWX workflows can easily replicate this; workflow steps can now wait for any number of prior workflow steps to complete properly before proceeding.
 
 - **Workflow Nesting**. Re-use individual workflows as components of a larger workflow. Examples include combining provisioning and application deployment workflows into a single master workflow.
 
@@ -240,8 +240,8 @@ Job Distribution
    pair: features; jobs, slicing
    pair: features; jobs, distribution
 
-As automation moves enterprise-wide, the need to automate at scale grows. |At| offer the ability to take a fact gathering or
-configuration job running across thousands of machines and slice it into individual job slices that can be distributed across your |at| cluster for increased reliability, faster job completion, and better cluster utilization. If you need to change a parameter across 15,000 switches at
+As automation moves enterprise-wide, the need to automate at scale grows. AWX offer the ability to take a fact gathering or
+configuration job running across thousands of machines and slice it into individual job slices that can be distributed across your AWX cluster for increased reliability, faster job completion, and better cluster utilization. If you need to change a parameter across 15,000 switches at
 scale, or gather information across your multi-thousand-node RHEL estate, you can now do so easily.
 
 
@@ -252,7 +252,7 @@ Support for deployment in a FIPS-enabled environment
    pair: features; environment, FIPS
 
 
-If you require running your environment in restricted modes such as FIPS, |at| deploys and runs in such environments.
+If you require running your environment in restricted modes such as FIPS, AWX deploys and runs in such environments.
 
 
 Limit the number of hosts per organization
@@ -261,7 +261,7 @@ Limit the number of hosts per organization
 .. index::
    pair: features; limiting, hosts
 
-Lots of large organizations have instances shared among many organizations. They do not want any one organization to be able to use all the licensed hosts, this feature allows superusers to set a specified upper limit on how many licensed hosts may be allocated to each organization. The |at| algorithm factors changes in the limit for an organization and the number of total hosts across all organizations. Any inventory updates will fail if an inventory sync brings an organization out of compliance with the policy. Additionally, superusers are able to 'over-allocate' their licenses, with a warning.
+Lots of large organizations have instances shared among many organizations. They do not want any one organization to be able to use all the licensed hosts, this feature allows superusers to set a specified upper limit on how many licensed hosts may be allocated to each organization. The AWX algorithm factors changes in the limit for an organization and the number of total hosts across all organizations. Any inventory updates will fail if an inventory sync brings an organization out of compliance with the policy. Additionally, superusers are able to 'over-allocate' their licenses, with a warning.
 
 
 Inventory Plugins
@@ -270,7 +270,7 @@ Inventory Plugins
 .. index::
    pair: features; inventory plugins
 
-Updated |at| to use the following inventory plugins from upstream collections if inventory updates are run with Ansible 2.9:
+Updated AWX to use the following inventory plugins from upstream collections if inventory updates are run with Ansible 2.9 and later:
 
 - amazon.aws.aws_ec2
 - community.vmware.vmware_vm_inventory
@@ -290,16 +290,5 @@ Secret Management System
    pair: features; credential plugins
    pair: features; credential management
 
-With a secret management system, external credentials are stored and supplied for use in |at| so you don't have to provide them directly. 
+With a secret management system, external credentials are stored and supplied for use in AWX so you don't have to provide them directly. 
 
-
-|ah| Integration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. index::
-   pair: content provider; Automation Hub
-   single: Automation Hub
-
-|ah| will act as a content provider for |at|, which requires both an |at| deployment and an |ah| deployment running alongside each other.
-
-.. ^content reused in common/requirements.rst and general_install_notes.rst

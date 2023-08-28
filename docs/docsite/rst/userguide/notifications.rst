@@ -93,7 +93,7 @@ Notification Types
    triple: notifications; types; Twilio
    triple: notifications; types; Webhook
 
-Notification types supported with |at|: 
+Notification types supported with AWX: 
 
 .. contents::
     :local:
@@ -112,21 +112,21 @@ You must provide the following details to setup an email notification:
 - Recipient list
 - Sender email
 - Port
-- Timeout (in seconds): allows you to specify up to 120 seconds, the length of time |at| may attempt connecting to the email server before giving up.
+- Timeout (in seconds): allows you to specify up to 120 seconds, the length of time AWX may attempt connecting to the email server before giving up.
 
 .. image:: ../common/images/notification-template-email.png
 
 Grafana
 ------------
 
-Grafana is a fairly straightforward integration. First, create an API Key in the `Grafana system`_ (this is the token that is given to |at|). 
+Grafana is a fairly straightforward integration. First, create an API Key in the `Grafana system`_ (this is the token that is given to AWX). 
 
 .. _`Grafana system`: http://docs.grafana.org/tutorials/api_org_token_howto/
 
 You must provide the following details to setup a Grafana notification:
 
 - Grafana URL: The URL of the Grafana API service, generally ``http://yourcompany.grafana.com``.
-- Grafana API Key: The user must first create an API Key in the Grafana system (this is the token that is given to |at|).
+- Grafana API Key: The user must first create an API Key in the Grafana system (this is the token that is given to AWX).
 
 The other options of note are:
 
@@ -172,11 +172,11 @@ The Mattermost notification type provides a simple interface to Mattermost's mes
 PagerDuty
 ------------
 
-PagerDuty is a fairly straightforward integration. First, create an API Key in the `PagerDuty system`_ (this is the token that is given to |at|) and then create a "Service" which provides an "Integration Key" that will also be given to |at|. The other required options are:
+PagerDuty is a fairly straightforward integration. First, create an API Key in the `PagerDuty system`_ (this is the token that is given to AWX) and then create a "Service" which provides an "Integration Key" that will also be given to AWX. The other required options are:
 
 .. _`PagerDuty system`: https://support.pagerduty.com/docs/generating-api-keys
 
-- API Token: The user must first create an API Key in the PagerDuty system (this is the token that is given to |at|).
+- API Token: The user must first create an API Key in the PagerDuty system (this is the token that is given to AWX).
 - PagerDuty Subdomain: When you sign up for the PagerDuty account, you receive a unique subdomain to communicate with. For instance, if you signed up as "testuser", the web dashboard will be at ``testuser.pagerduty.com`` and you will give the API ``testuser`` as the subdomain (not the full domain).
 - API Service/Integration Key 
 - Client Identifier: This will be sent along with the alert content to the pagerduty service to help identify the service that is using the api key/service. This is helpful if multiple integrations are using the same API key and service.
@@ -236,7 +236,7 @@ To setup Twilio, provide the following details:
 Webhook
 ---------
 
-The webhook notification type provides a simple interface to sending POSTs to a predefined web service. |at| will POST to this address using application/json content type with the data payload containing all relevant details in json format. Some web service APIs expect HTTP requests to be in a certain format with certain fields. You can configure more of the webhook notification in the following ways:
+The webhook notification type provides a simple interface to sending POSTs to a predefined web service. AWX will POST to this address using application/json content type with the data payload containing all relevant details in json format. Some web service APIs expect HTTP requests to be in a certain format with certain fields. You can configure more of the webhook notification in the following ways:
 
 - configure the HTTP method (using **POST** or **PUT**)
 - body of the outgoing request
@@ -262,7 +262,7 @@ The parameters for configuring webhooks are:
 Webhook payloads
 ^^^^^^^^^^^^^^^^^
 
-|At| sends by default the following data at the webhook endpoint: 
+AWX sends by default the following data at the webhook endpoint: 
 
 ::
 
@@ -283,7 +283,7 @@ Webhook payloads
    hosts
    http method
 
-An example of a ``started`` notifications via webhook message as it is returned by |at|:
+An example of a ``started`` notifications via webhook message as it is returned by AWX:
 
 ::
 
@@ -293,7 +293,7 @@ An example of a ``started`` notifications via webhook message as it is returned 
    "hosts": {}}POST / HTTP/1.1
 
 
-|At| returns by default the following data at the webhook endpoint for a ``success``/``fail`` status: 
+AWX returns by default the following data at the webhook endpoint for a ``success``/``fail`` status: 
 
 ::
 
@@ -314,7 +314,7 @@ An example of a ``started`` notifications via webhook message as it is returned 
    hosts
 
 
-An example of a ``success``/``fail`` notifications via webhook message as it is returned by |at|:
+An example of a ``success``/``fail`` notifications via webhook message as it is returned by AWX:
 
 ::
 
@@ -344,11 +344,11 @@ You can provide a custom message for various job events:
 - Workflow running
 - Workflow timed out
 
-The message forms vary depending on the type of notification you are configuring. For example, messages for email and PagerDuty notifications have the appearance of a typical email form with a subject and body, in which case, |at| displays the fields as **Message** and **Message Body**. Other notification types only expect a **Message** for each type of event:
+The message forms vary depending on the type of notification you are configuring. For example, messages for email and PagerDuty notifications have the appearance of a typical email form with a subject and body, in which case, AWX displays the fields as **Message** and **Message Body**. Other notification types only expect a **Message** for each type of event:
 
 .. image:: ../common/images/notification-template-customize-simple.png
 
-The **Message** fields are pre-populated with a template containing a top-level variable, ``job`` coupled with an attribute, such as ``id`` or ``name``, for example. Templates are enclosed in curly braces and may draw from a fixed set of fields provided by |at|, as shown in the pre-populated **Messages** fields. 
+The **Message** fields are pre-populated with a template containing a top-level variable, ``job`` coupled with an attribute, such as ``id`` or ``name``, for example. Templates are enclosed in curly braces and may draw from a fixed set of fields provided by AWX, as shown in the pre-populated **Messages** fields. 
 
 .. image:: ../common/images/notification-template-customize-simple-syntax.png
 
@@ -464,7 +464,7 @@ For more detail, refer to `Using variables with Jinja2`_.
 .. _`Using variables with Jinja2`: https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#using-variables-with-jinja2
 
 
-|At| requires valid syntax in order to retrieve the correct data to display the messages. For a list of supported attributes and the proper syntax construction, refer to the :ref:`ir_notifications_reference` section of this guide.
+AWX requires valid syntax in order to retrieve the correct data to display the messages. For a list of supported attributes and the proper syntax construction, refer to the :ref:`ir_notifications_reference` section of this guide.
 
 
 If you create a notification template that uses invalid syntax or references unusable fields, an error message displays indicating the nature of the error. If you delete a notification’s custom message, the default message is shown in its place.
@@ -515,23 +515,23 @@ Configure the ``host`` hostname for notifications
 
 In the :ref:`System Settings <configure_awx_system>`, you can replace the default value in the **Base URL of the service** field with your preferred hostname to change the notification hostname.     
 
-.. image:: ../common/images/configure-tower-system-misc-baseurl.png
+.. image:: ../common/images/configure-awx-system-misc-baseurl.png
 
-Refreshing your license also changes the notification hostname. New installations of |at| should not have to set the hostname for notifications.
+Refreshing your license also changes the notification hostname. New installations of AWX should not have to set the hostname for notifications.
 
-Reset the ``TOWER_URL_BASE``
+Reset the ``AWX_URL_BASE``
 ------------------------------
 
 .. index:: 
-   pair: notifications; troubleshooting TOWER_URL_BASE
-   pair: notifications; resetting the TOWER_URL_BASE
+   pair: notifications; troubleshooting AWX_URL_BASE
+   pair: notifications; resetting the AWX_URL_BASE
 
 
-The primary way that |at| determines how the base URL (``TOWER_URL_BASE``) is defined is by looking at an incoming request and setting the server address based on that incoming request. 
+The primary way that AWX determines how the base URL (``AWX_URL_BASE``) is defined is by looking at an incoming request and setting the server address based on that incoming request. 
 
-|At| takes settings values from the database first. If no settings values are found, it falls back to using the values from the settings files.  If a user posts a license by navigating to the |at| host's IP adddress, the posted license is written to the settings entry in the database.
+AWX takes settings values from the database first. If no settings values are found, it falls back to using the values from the settings files.  If a user posts a license by navigating to the AWX host's IP adddress, the posted license is written to the settings entry in the database.
 
-To change the ``TOWER_URL_BASE`` if the wrong address has been picked up, navigate to **Miscellaneous System settings** from the Settings menu using the DNS entry you wish to appear in notifications, and re-add your license. 
+To change the ``AWX_URL_BASE`` if the wrong address has been picked up, navigate to **Miscellaneous System settings** from the Settings menu using the DNS entry you wish to appear in notifications, and re-add your license. 
 
 
 

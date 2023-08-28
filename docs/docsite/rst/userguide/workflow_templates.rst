@@ -73,7 +73,7 @@ To create a new workflow job template:
      - Optionally choose the inventory to be used with this template from the inventories available to the currently logged in user.
      - Yes
    * - **Limit**
-     - A host pattern to further constrain the list of hosts managed or affected by the playbook. Multiple patterns can be separated by colons (``:``). As with core Ansible, ``a:b`` means "in group a or b", ``a:b:&c`` means "in a or b but must be in c", and ``a:!b`` means "in a, and definitely not in b". For more information and examples refer to `Patterns <http://docs.ansible.com/intro_patterns.html>`_ in the Ansible documentation.
+     - A host pattern to further constrain the list of hosts managed or affected by the playbook. Multiple patterns can be separated by colons (``:``). As with core Ansible, ``a:b`` means "in group a or b", ``a:b:&c`` means "in a or b but must be in c", and ``a:!b`` means "in a, and definitely not in b". For more information and examples refer to `Patterns <https://docs.ansible.com/ansible/latest/inventory_guide/intro_patterns.html>`_ in the Ansible documentation.
      - Yes     
    * - **Source control branch**
      - Select a branch for the workflow. This branch is applied to all workflow job template nodes that prompt for a branch.
@@ -87,7 +87,7 @@ To create a new workflow job template:
      - * Yes. If selected, even if a default value is supplied, you will be prompted upon launch to supply additional labels if needed. 
        * You will not be able to delete existing labels - clicking (|x-circle|) only removes the newly added labels, not existing default labels.
    * - **Variables**
-     - * Pass extra command line variables to the playbook. This is the "-e" or "--extra-vars" command line parameter for ansible-playbook that is documented in the Ansible documentation at `Passing Variables on the Command Line <http://docs.ansible.com/playbooks_variables.html#passing-variables-on-the-command-line>`_.
+     - * Pass extra command line variables to the playbook. This is the "-e" or "--extra-vars" command line parameter for ansible-playbook that is documented in the Ansible documentation at `Passing Variables on the Command Line <https://docs.ansible.com/ansible/latest/reference_appendices/general_precedence.html>`_.
        * Provide key/value pairs using either YAML or JSON. These variables have a maximum value of precedence and overrides other variables specified elsewhere. An example value might be:
 
         ::
@@ -97,10 +97,10 @@ To create a new workflow job template:
      - * Yes. If you want to be able to specify ``extra_vars`` on a schedule, you must select **Prompt on Launch** for **Variables** on the workflow job template, or a enable a survey on the workflow job template, then those answered survey questions become ``extra_vars``.
        * For more information about extra variables, refer to :ref:`ug_wf_templates_extravars`.
    * - **Job Tags**
-     - Begin typing and selecting the **Create x** drop-down to specify which parts of the playbook should be executed. For more information and examples refer to `Tags <https://docs.ansible.com/ansible/latest/user_guide/playbooks_tags.html>`_ in the Ansible documentation.
+     - Begin typing and selecting the **Create x** drop-down to specify which parts of the playbook should be executed. For more information and examples refer to `Tags <https://https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html>`_ in the Ansible documentation.
      - Yes
    * - **Skip Tags**
-     - Begin typing and selecting the **Create x** drop-down to specify certain tasks or parts of the playbook to skip. For more information and examples refer to `Tags <https://docs.ansible.com/ansible/latest/user_guide/playbooks_tags.html>`_ in the Ansible documentation.
+     - Begin typing and selecting the **Create x** drop-down to specify certain tasks or parts of the playbook to skip. For more information and examples refer to `Tags <https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html>`_ in the Ansible documentation.
      - Yes
 
 .. |x-circle| image:: ../common/images/x-delete-button.png
@@ -122,7 +122,7 @@ To create a new workflow job template:
     Upon **Save**, additional fields populate and the Workflow Visualizer automatically opens.
 
     - **Webhook URL**: Automatically populated with the URL for the webhook service to POST requests to.
-    - **Webhook Key**: Generated shared secret to be used by the webhook service to sign payloads sent to |at|. This must be configured in the settings on the webhook service in order for |at| to accept webhooks from this service.  
+    - **Webhook Key**: Generated shared secret to be used by the webhook service to sign payloads sent to AWX. This must be configured in the settings on the webhook service in order for AWX to accept webhooks from this service.  
 
     For additional information on setting up webhooks, see :ref:`ug_webhooks`.
 
@@ -377,7 +377,7 @@ Likewise, if a workflow template used in the workflow has **Prompt on Launch** s
 
 .. note::
 
-  For workflow job templates with promptable fields that are required, but do not have a default, you must provide those values when creating a node before the **Select** button becomes enabled. The two cases that disable the **Select** button until a value is provided via the **Prompt** button: 1) when you select the **Prompt on Launch** checkbox in a workflow job template, but do not provide a default, or 2) when you create a survey question that is required but do not provide a default answer. However, this is **NOT** the case with credentials. Credentials that require a password on launch are **not permitted** when creating a workflow node, since everything needed to launch the node must be provided when the node is created. So, if a workflow job template prompts for credentials, |at| prevents you from being able to select a credential that requires a password.
+  For workflow job templates with promptable fields that are required, but do not have a default, you must provide those values when creating a node before the **Select** button becomes enabled. The two cases that disable the **Select** button until a value is provided via the **Prompt** button: 1) when you select the **Prompt on Launch** checkbox in a workflow job template, but do not provide a default, or 2) when you create a survey question that is required but do not provide a default answer. However, this is **NOT** the case with credentials. Credentials that require a password on launch are **not permitted** when creating a workflow node, since everything needed to launch the node must be provided when the node is created. So, if a workflow job template prompts for credentials, AWX prevents you from being able to select a credential that requires a password.
 
   You must also click **Select** when the prompt wizard closes in order to apply the changes at that node. Otherwise, any changes you make will revert back to the values set in the actual job template.
 
@@ -522,7 +522,7 @@ Launch a workflow template by any of the following ways:
 
 .. |launch| image:: ../common/images/launch-button.png
 
-Along with any extra variables set in the workflow job template and survey, |at| automatically adds the same variables as those added for a workflow job template upon launch. Additionally, |at| automatically redirects the web browser to the Jobs Details page for this job, displaying the progress and the results.
+Along with any extra variables set in the workflow job template and survey, AWX automatically adds the same variables as those added for a workflow job template upon launch. Additionally, AWX automatically redirects the web browser to the Jobs Details page for this job, displaying the progress and the results.
 
 Events related to approvals on workflows display in the Activity Stream (|activity-stream|) with detailed information about the approval requests, if any. 
 
@@ -534,7 +534,7 @@ Events related to approvals on workflows display in the Activity Stream (|activi
 Copy a Workflow Template
 -------------------------------
 
-|at| allows you the ability to copy a workflow template. If you choose to copy a workflow template, it **does not** copy any associated schedule, notifications, or permissions. Schedules and notifications must be recreated by the user or admin creating the copy of the workflow template. The user copying the workflow template will be granted the admin permission, but no permissions are assigned (copied) to the workflow template.
+AWX allows you the ability to copy a workflow template. If you choose to copy a workflow template, it **does not** copy any associated schedule, notifications, or permissions. Schedules and notifications must be recreated by the user or admin creating the copy of the workflow template. The user copying the workflow template will be granted the admin permission, but no permissions are assigned (copied) to the workflow template.
 
 1. Access the workflow template that you want to copy from the **Templates** menu on the left navigation bar or while in the Workflow Job Template Details view, scroll to the bottom to access it from a list of templates.
 
@@ -585,8 +585,8 @@ To ensure that the variables you need to pass are not overridden, ensure they ar
    single: variable precedence
    single: extra_vars
 
-The following table notes the behavior (hierarchy) of variable precedence in |at| as it compares to variable precedence in Ansible.
+The following table notes the behavior (hierarchy) of variable precedence in AWX as it compares to variable precedence in Ansible.
 
 **Variable Precedence Hierarchy (last listed wins)**
 
-.. image:: ../common/images/Architecture-Tower_Variable_Precedence_Hierarchy-Workflows.png
+.. image:: ../common/images/Architecture-AWX_Variable_Precedence_Hierarchy-Workflows.png

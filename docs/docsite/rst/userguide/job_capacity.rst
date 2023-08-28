@@ -1,7 +1,7 @@
 
 This section describes how to determine capacity for instance groups and its impact to your jobs. For container groups, see :ref:`ag_container_capacity` in the |ata|.
 
-The |at| capacity system determines how many jobs can run on an instance given the amount of resources available to the instance and the size of the jobs that are running (referred to as *Impact*). The algorithm used to determine this is based entirely on two things:
+AWX capacity system determines how many jobs can run on an instance given the amount of resources available to the instance and the size of the jobs that are running (referred to as *Impact*). The algorithm used to determine this is based entirely on two things:
 
 - How much memory is available to the system (``mem_capacity``)
 - How much CPU is available to the system (``cpu_capacity``)
@@ -21,9 +21,9 @@ For information on sliced jobs and their impact to capacity, see :ref:`ug_job_sl
 Resource determination for capacity algorithm
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The capacity algorithms are defined in order to determine how many forks a system is capable of running simultaneously. This controls how many systems Ansible itself will communicate with simultaneously. Increasing the number of forks a |at| system is running will, in general, allow jobs to run faster by performing more work in parallel. The trade-off is that this will increase the load on the system, which could cause work to slow down overall.
+The capacity algorithms are defined in order to determine how many forks a system is capable of running simultaneously. This controls how many systems Ansible itself will communicate with simultaneously. Increasing the number of forks an AWX system is running will, in general, allow jobs to run faster by performing more work in parallel. The trade-off is that this will increase the load on the system, which could cause work to slow down overall.
 
-|At| can operate in two modes when determining capacity. ``mem_capacity`` (the default) will allow you to over-commit CPU resources while protecting the system from running out of memory. If most of your work is not CPU-bound, then selecting this mode will maximize the number of forks.
+AWX can operate in two modes when determining capacity. ``mem_capacity`` (the default) will allow you to over-commit CPU resources while protecting the system from running out of memory. If most of your work is not CPU-bound, then selecting this mode will maximize the number of forks.
 
 
 Memory relative capacity
@@ -72,13 +72,13 @@ When selecting the capacity, it's important to understand how each job type affe
 
 It's helpful to understand what forks mean to Ansible: https://www.ansible.com/blog/ansible-performance-tuning (see the section on "Know Your Forks").
 
-The default forks value for Ansible is 5. However, if |at| knows that you're running against fewer systems than that, then the actual concurrency value will be lower.
+The default forks value for Ansible is 5. However, if AWX knows that you're running against fewer systems than that, then the actual concurrency value will be lower.
 
-When a job is run, |at| will add 1 to the number of forks selected to compensate for the Ansible parent process. So if you are running a playbook against 5 systems with a forks value of 5, then the actual forks value from the perspective of Job Impact will be 6.
+When a job is run, AWX will add 1 to the number of forks selected to compensate for the Ansible parent process. So if you are running a playbook against 5 systems with a forks value of 5, then the actual forks value from the perspective of Job Impact will be 6.
 
 
-Impact of job types in automation controller
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Impact of job types in AWX
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Jobs and Ad-hoc jobs follow the above model, forks + 1. If you set a fork value on your job template, your job capacity value will be the minimum of the forks value supplied, and the number of hosts that you have, plus one. The plus one is to account for the parent Ansible process.
 

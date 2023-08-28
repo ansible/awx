@@ -41,7 +41,7 @@ Consider the following scenarios for building workflows:
 
   .. image:: ../common/images/wf-node-convergence.png
 
-In the example provided, |at| runs the first two job templates in parallel. When they both finish and succeed as specified, the 3rd downstream (:ref:`convergence node <convergence_node>`), will trigger.
+In the example provided, AWX runs the first two job templates in parallel. When they both finish and succeed as specified, the 3rd downstream (:ref:`convergence node <convergence_node>`), will trigger.
 
 - Prompts for inventory and surveys will apply to workflow nodes in workflow job templates.
 
@@ -56,7 +56,7 @@ In the example provided, |at| runs the first two job templates in parallel. When
   .. include:: ../common/job-slicing-rule.rst
 
 
-- You can build a recursive workflow, but if |at| detects an error, it will stop at the time the nested workflow attempts to run.
+- You can build a recursive workflow, but if AWX detects an error, it will stop at the time the nested workflow attempts to run.
 
 - Artifacts gathered in jobs in the sub-workflow will be passed to downstream nodes.
 
@@ -82,13 +82,13 @@ Also similar to job templates, workflows use surveys to specify variables to be 
 
 Workflows utilize the same behavior (hierarchy) of variable precedence as Job Templates with the exception of three additional variables. Refer to the Variable Precedence Hierarchy in the :ref:`ug_jobtemplates_extravars` section of the Job Templates chapter of this guide. The three additional variables include:
 
-.. image:: ../common/images/Architecture-Tower_Variable_Precedence_Hierarchy-Workflows.png
+.. image:: ../common/images/Architecture-AWX_Variable_Precedence_Hierarchy-Workflows.png
 
 Workflows included in a workflow will follow the same variable precedence - they will only inherit variables if they are specifically prompted for, or defined as part of a survey.
 
 In addition to the workflow ``extra_vars``, jobs and workflows ran as part of a workflow can inherit variables in the artifacts dictionary of a parent job in the workflow (also combining with ancestors further upstream in its branch). These can be defined by the ``set_stats`` `Ansible module`_.
 
-.. _`Ansible module`: https://docs.ansible.com/ansible/latest/modules/set_stats_module.html
+.. _`Ansible module`: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/set_stats_module.html
 
 If you use the ``set_stats`` module in your playbook, you can produce results that can be consumed downstream by another job, for example, notify users as to the success or failure of an integration run. In this example, there are two playbooks that can be combined in a workflow to exercise artifact passing:
 

@@ -42,7 +42,7 @@ To create a new Team:
 
 3. Click **Save**.
 
-Once the Team is successfully created, |at| opens the **Details** dialog, which also allows you to review and edit your Team information. 
+Once the Team is successfully created, AWX opens the **Details** dialog, which also allows you to review and edit your Team information. 
 
 |Teams - example team successfully created|
 
@@ -98,7 +98,7 @@ Selecting the **Roles** view displays a list of the permissions that are current
 
 .. |Teams - permissions list| image:: ../common/images/teams-permissions-sample-roles.png
 
-The set of privileges assigned to Teams that provide the ability to read, modify, and administer projects, inventories, and other |at| elements are permissions. By default, the Team is given the "read" permission (also called a role).
+The set of privileges assigned to Teams that provide the ability to read, modify, and administer projects, inventories, and other AWX elements are permissions. By default, the Team is given the "read" permission (also called a role).
 
 Permissions must be set explicitly via an Inventory, Project, Job Template, or within the Organization view.
 
