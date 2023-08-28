@@ -42,7 +42,7 @@ def test_orphan_unified_job_creation(instance, inventory):
 @mock.patch('awx.main.models.ha.get_mem_effective_capacity', lambda mem: 62)
 def test_job_capacity_and_with_inactive_node():
     i = Instance.objects.create(hostname='test-1')
-    i.save_health_data('18.0.1', 2, 8000)
+    i.save_health_data('18.0.1', 2, 8000, is_control_node=True)
     assert i.enabled is True
     assert i.capacity_adjustment == 1.0
     assert i.capacity == 62
