@@ -1327,9 +1327,6 @@ class RunProjectUpdate(BaseTask):
                 github_trigger = signature_validation_credential.get_input('github_trigger', default='')
                 extra_vars['github_trigger'] = github_trigger
 
-                github_sha = signature_validation_credential.get_input('github_sha', default='')
-                extra_vars['github_sha'] = github_sha
-
                 github_name = signature_validation_credential.get_input('github_name', default='')
                 extra_vars['github_name'] = github_name
 

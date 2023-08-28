@@ -16,8 +16,8 @@ from ansible_sign.checksum import (
 from ansible_sign.checksum.differ import DistlibManifestChecksumFileExistenceDiffer
 from ansible_sign.signing import (
     GPGVerifier,
-    SigstoreVerifier,
 )
+
 from sigstore._internal.ctfe import CTKeyring
 from sigstore._internal.tuf import TrustUpdater
 from sigstore.errors import Error
@@ -262,15 +262,12 @@ class ActionModule(ActionBase):
             ]
 
             github_trigger = self.params.get("github_trigger")
-            github_sha = self.params.get("github_sha")
             github_name = self.params.get("github_name")
             github_repo = self.params.get("github_repo")
             github_ref = self.params.get("github_ref")
 
             if workflow_trigger:
                 inner_policies.append(policy.GitHubWorkflowTrigger(workflow_trigger))
-            if workflow_sha:
-                inner_policies.append(policy.GitHubWorkflowSHA(workflow_sha))
             if workflow_name:
                 inner_policies.append(policy.GitHubWorkflowName(workflow_name))
             if workflow_repository:

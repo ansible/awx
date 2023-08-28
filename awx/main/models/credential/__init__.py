@@ -1286,12 +1286,6 @@ ManagedCredentialType(
                 'help_text': gettext_noop('The GitHub Actions event name that triggered the workflow.'),
             },
             {
-                'id': 'github_sha',
-                'label': gettext_noop('Sigstore git commit SHA'),
-                'type': 'string',
-                'help_text': gettext_noop('The git commit SHA that the workflow run was invoked with.'),
-            },
-            {
                 'id': 'github_name',
                 'label': gettext_noop('Sigstore github workflow name'),
                 'type': 'string',

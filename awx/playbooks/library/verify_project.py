@@ -77,10 +77,6 @@ options:
     description:
       - The GitHub Actions event name that triggered the workflow.
       - Required when I(validation_type=sigstore).
-  github_sha:
-    description:
-      - The git commit SHA that the workflow run was invoked with.
-      - Required when I(validation_type=sigstore).
   github_name:
     description:
       - The name of the workflow that was triggered.

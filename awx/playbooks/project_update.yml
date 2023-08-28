@@ -26,7 +26,6 @@
 # cert_identity: The OIDC identity of the signer to look for in the certificate SAN (i.e. email address, GitHub Actions workflow)
 # oidc_issuer: The URL of the OIDC provider that issued the signer identity
 # github_trigger: The GitHub Actions event name that triggered the workflow
-# github_sha: The git commit SHA that the workflow run was invoked with
 # github_name: The name of the workflow that was triggered
 # github_repository: The repository slug that the workflow was triggered under
 # github_ref: The git ref that the workflow was invoked with
@@ -200,7 +199,6 @@
         cert_identity: "{{ cert_identity }}"
         oidc_issuer: "{{ oidc_issuer }}"
         github_trigger: "{{ github_trigger }}"
-        github_sha: "{{ github_sha }}"
         github_name: "{{ github_name }}"
         github_repository: "{{ github_repository }}"
         github_ref: "{{ github_ref }}"
