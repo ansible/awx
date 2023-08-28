@@ -7,6 +7,7 @@ on:
     types: [opened, edited, reopened, synchronize]
 jobs:
   pr-check:
+    if: github.repository_owner == 'ansible' && endsWith(github.repository, 'awx')
     name: Scan PR description for semantic versioning keywords
     runs-on: ubuntu-latest
     permissions:
