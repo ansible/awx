@@ -18,6 +18,15 @@ def test_no_host_metrics():
 
 
 @pytest.mark.django_db
+def test_delete_exception():
+    """Crash test"""
+    with pytest.raises(ValueError):
+        HostMetricTask().soft_cleanup("")
+    with pytest.raises(TypeError):
+        HostMetricTask().hard_cleanup(set())
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize('threshold', [settings.CLEANUP_HOST_METRICS_SOFT_THRESHOLD, 20])
 def test_soft_delete(threshold):
     """Metrics with last_automation < threshold are updated to deleted=True"""
@@ -34,18 +43,11 @@ def test_soft_delete(threshold):
     assert HostMetric.active_objects.count() == 4
 
     for i in range(2):
-        if threshold == settings.CLEANUP_HOST_METRICS_SOFT_THRESHOLD:
-            HostMetricTask().cleanup(soft_threshold=0)
-        else:
-            HostMetricTask().cleanup(soft_threshold=threshold)
+        HostMetricTask().cleanup(soft_threshold=threshold)
         assert HostMetric.objects.count() == 8
 
-        hostnames = []
-        qs = HostMetric.objects.filter(deleted=False).order_by('hostname')
-        for host in list(qs):
-            hostnames.append(host.hostname)
-
-        assert hostnames == ['host_1', 'host_3']
+        hostnames = set(HostMetric.objects.filter(deleted=False).order_by('hostname').values_list('hostname', flat=True))
+        assert hostnames == {'host_1', 'host_3'}
 
 
 @pytest.mark.django_db
@@ -65,18 +67,11 @@ def test_hard_delete(threshold):
     assert HostMetric.active_objects.count() == 4
 
     for i in range(2):
-        if threshold == settings.CLEANUP_HOST_METRICS_HARD_THRESHOLD:
-            HostMetricTask().cleanup(hard_threshold=0)
-        else:
-            HostMetricTask().cleanup(hard_threshold=threshold)
+        HostMetricTask().cleanup(hard_threshold=threshold)
         assert HostMetric.objects.count() == 6
 
-        hostnames = []
-        qs = HostMetric.objects.order_by('hostname')
-        for host in list(qs):
-            hostnames.append(host.hostname)
-
-        assert hostnames == ['host_1', 'host_2', 'host_3', 'host_4', 'host_5', 'host_7']
+        hostnames = set(HostMetric.objects.order_by('hostname').values_list('hostname', flat=True))
+        assert hostnames == {'host_1', 'host_2', 'host_3', 'host_4', 'host_5', 'host_7'}
 
 
 def ago(months=0, hours=0):

@@ -50,17 +50,22 @@ class HostMetricTask:
         :param soft_threshold: (int)
         :param hard_threshold: (int)
         """
-        if soft_threshold is not None:
-            self.soft_cleanup(soft_threshold)
         if hard_threshold is not None:
             self.hard_cleanup(hard_threshold)
+        if soft_threshold is not None:
+            self.soft_cleanup(soft_threshold)
 
         settings.CLEANUP_HOST_METRICS_LAST_TS = now()
 
     @staticmethod
     def soft_cleanup(threshold=None):
-        if not threshold:
+        if threshold is None:
             threshold = getattr(settings, 'CLEANUP_HOST_METRICS_SOFT_THRESHOLD', 12)
+
+        try:
+            threshold = int(threshold)
+        except (ValueError, TypeError) as e:
+            raise type(e)("soft_threshold has to be convertible to number") from e
 
         last_automation_before = now() - relativedelta(months=threshold)
         rows = HostMetric.active_objects.filter(last_automation__lt=last_automation_before).update(
@@ -70,8 +75,13 @@ class HostMetricTask:
 
     @staticmethod
     def hard_cleanup(threshold=None):
-        if not threshold:
+        if threshold is None:
             threshold = getattr(settings, 'CLEANUP_HOST_METRICS_HARD_THRESHOLD', 36)
+
+        try:
+            threshold = int(threshold)
+        except (ValueError, TypeError) as e:
+            raise type(e)("hard_threshold has to be convertible to number") from e
 
         last_deleted_before = now() - relativedelta(months=threshold)
         queryset = HostMetric.objects.filter(deleted=True, last_deleted__lt=last_deleted_before)
