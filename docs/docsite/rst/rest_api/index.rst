@@ -21,7 +21,7 @@ AWX REST API
    access_resources
    read_only_fields
    authentication
-   api_ref
+.. api_ref
 
 ..  intro
 .. auth_token

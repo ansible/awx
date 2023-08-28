@@ -5,7 +5,7 @@ import shlex
 from datetime import datetime
 from importlib import import_module
 
-sys.path.insert(0, os.path.abspath('./rst/rest_api/_swagger'))
+#sys.path.insert(0, os.path.abspath('./rst/rest_api/_swagger'))
 
 project = u'Ansible AWX'
 copyright = u'2023, Red Hat'
@@ -25,6 +25,8 @@ html_short_title = 'AWX community documentation'
 
 htmlhelp_basename = 'AWX_docs'
 
+# include the swagger extension to build rest api reference
+#'swagger',
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
@@ -33,7 +35,6 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.ifconfig',
     'sphinx_ansible_theme',
-    'swagger',
 ]
 
 html_theme = 'sphinx_ansible_theme'

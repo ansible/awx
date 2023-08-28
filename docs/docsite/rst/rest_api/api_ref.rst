@@ -1,3 +1,5 @@
+:orphan:
+
 Controller API Reference Guide
 ================================
 
