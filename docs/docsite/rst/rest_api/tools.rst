@@ -5,7 +5,7 @@ Tools
 .. index::
    single: tools
 
-This document offers a basic understanding of the REST API used by |at|. 
+This document offers a basic understanding of the REST API used by AWX. 
 
 REST stands for Representational State Transfer and is sometimes spelled as "ReST". It relies on a stateless, client-server, and cacheable communications protocol, usually the HTTP protocol.
 

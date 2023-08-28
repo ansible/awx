@@ -1,14 +1,14 @@
 .. _ag_configure_awx:
 
-Controller Configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+AWX Configuration
+~~~~~~~~~~~~~~~~~~~
 
 .. index::
-   single: configure controller
+   single: configure AWX
 
 .. _configure_awx_overview:
 
-You can configure various controller settings within the Settings screen in the following tabs:
+You can configure various AWX settings within the Settings screen in the following tabs:
 
 .. image:: ../common/images/ug-settings-menu-screen.png
 
@@ -36,7 +36,7 @@ Jobs
    single: jobs
    pair: configuration; jobs
 
-The Jobs tab allows you to configure the types of modules that are allowed to be used by the controller's Ad Hoc Commands feature, set limits on the number of jobs that can be scheduled, define their output size, and other details pertaining to working with Jobs in the controller.
+The Jobs tab allows you to configure the types of modules that are allowed to be used by AWX's Ad Hoc Commands feature, set limits on the number of jobs that can be scheduled, define their output size, and other details pertaining to working with Jobs in AWX.
 
 1. From the left navigation bar, click **Settings** from the left navigation bar and select **Jobs settings** from the Settings screen.
 
@@ -46,7 +46,7 @@ The Jobs tab allows you to configure the types of modules that are allowed to be
 
     The values for all the timeouts are in seconds.
 
-.. image:: ../common/images/configure-tower-jobs.png
+.. image:: ../common/images/configure-awx-jobs.png
 
 3. Click **Save** to apply the settings or **Cancel** to abandon the changes.
 
@@ -58,26 +58,26 @@ System
 .. index::
    pair: configuration; system
 
-The System tab allows you to define the base URL for the controller host, configure alerts, enable activity capturing, control visibility of users, enable certain controller features and functionality through a license file, and configure logging aggregation options.
+The System tab allows you to define the base URL for the AWX host, configure alerts, enable activity capturing, control visibility of users, enable certain AWX features and functionality through a license file, and configure logging aggregation options.
 
 1. From the left navigation bar, click **Settings**.
 
 2. The right side of the Settings window is a set of configurable System settings. Select from the following options:
 
-  - **Miscellaneous System settings**: enable activity streams, specify the default execution environment, define the base URL for the controller host, enable controller administration alerts, set user visibility, define analytics, specify usernames and passwords, and configure proxies.
+  - **Miscellaneous System settings**: enable activity streams, specify the default execution environment, define the base URL for the AWX host, enable AWX administration alerts, set user visibility, define analytics, specify usernames and passwords, and configure proxies.
   - **Miscellaneous Authentication settings**: configure options associated with authentication methods (built-in or SSO), sessions (timeout, number of sessions logged in, tokens), and social authentication mapping.
   - **Logging settings**: configure logging options based on the type you choose:
 
     .. image:: ../common/images/configure-awx-system-logging-types.png
 
-    For more information about each of the logging aggregation types, refer to the :ref:`Controller Logging and Aggregation <ag_logging>` section of the |ata|.
+    For more information about each of the logging aggregation types, refer to the :ref:`ag_logging` section of the |ata|.
 
 
 3. Set the configurable options from the fields provided. Click the tooltip |help| icon next to the field that you need additional information or details about. Below is an example of the System settings window.
 
 .. |help| image:: ../common/images/tooltips-icon.png
 
-.. image:: ../common/images/configure-tower-system.png
+.. image:: ../common/images/configure-awx-system.png
 
 .. note::
 

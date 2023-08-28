@@ -22,7 +22,7 @@ The default length of time, in seconds, that your supplied token is valid can be
 
 4. Enter the timeout period in seconds in the **Idle Time Force Log Out** text field.
 
-.. image:: ../common/images/configure-tower-system-timeout.png
+.. image:: ../common/images/configure-awx-system-timeout.png
 
 4. Click **Save** to apply your changes.
 

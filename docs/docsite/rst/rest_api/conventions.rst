@@ -8,9 +8,7 @@ Conventions
    pair: content type; JSON
 
 
-|aap| controller uses a standard REST API, rooted at ``/api/`` on the server. The API is versioned for compatibility reasons, and currently ``api/v2/`` is the latest available version. You can see information about what API versions are available by querying ``/api/``.
-
-``/api/v1/`` has been discontinued as of |at| version 3.6. Refer to previous versions of the api for details on v1.
+AWX uses a standard REST API, rooted at ``/api/`` on the server. The API is versioned for compatibility reasons, and currently ``api/v2/`` is the latest available version. You can see information about what API versions are available by querying ``/api/``.
 
 You may have to specify the content/type on **POST** or **PUT** requests accordingly.
 

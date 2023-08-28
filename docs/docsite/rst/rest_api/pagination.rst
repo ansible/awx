@@ -20,7 +20,7 @@ To get the next page, simply request the page given by the 'next' sequential URL
 
 Use the ``page_size=XX`` query string parameter to change the number of results returned for each request. 
 
-The ``page_size`` has a default maximum limit configured to 200, which is enforced when a user tries a value beyond it, for example, ``?page_size=1000``. However, you can change this limit by setting the value in ``/etc/tower/conf.d/<some file>.py`` to something higher, e.g. ``MAX_PAGE_SIZE=1000``.
+The ``page_size`` has a default maximum limit configured to 200, which is enforced when a user tries a value beyond it, for example, ``?page_size=1000``. However, you can change this limit by setting the value in ``/etc/awx/conf.d/<some file>.py`` to something higher, e.g. ``MAX_PAGE_SIZE=1000``.
 
 Use the ``page`` query string parameter to retrieve a particular page of results.
 

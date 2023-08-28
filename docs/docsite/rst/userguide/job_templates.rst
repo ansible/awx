@@ -66,7 +66,7 @@ To create a new job template:
         * **Run**: Execute the playbook when launched, running Ansible tasks on the selected hosts.
         * **Check**: Perform a "dry run" of the playbook and report changes that would be made without actually making them. Tasks that do not support check mode will be skipped and will not report potential changes.
        
-       More information on job types can be found in the `Playbooks: Special Topics <http://docs.ansible.com/playbooks_special_topics.html>`_ section of the Ansible documentation.
+       More information on job types can be found in the `Playbook execution <https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_intro.html#playbook-execution>`_ section of the Ansible documentation.
 
      - Yes
    * - **Inventory**
@@ -106,7 +106,7 @@ To create a new job template:
      - * If selected, even if a default value is supplied, you will be prompted upon launch to supply additional labels if needed. 
        * You will not be able to delete existing labels - clicking (|x-circle|) only removes the newly added labels, not existing default labels.
    * - **Variables**
-     - * Pass extra command line variables to the playbook. This is the "-e" or "--extra-vars" command line parameter for ansible-playbook that is documented in the Ansible documentation at `Passing Variables on the Command Line <http://docs.ansible.com/playbooks_variables.html#passing-variables-on-the-command-line>`_.
+     - * Pass extra command line variables to the playbook. This is the "-e" or "--extra-vars" command line parameter for ansible-playbook that is documented in the Ansible documentation at `Passing Variables on the Command Line <https://docs.ansible.com/ansible/latest/reference_appendices/general_precedence.html>`_.
        * Provide key/value pairs using either YAML or JSON. These variables have a maximum value of precedence and overrides other variables specified elsewhere. An example value might be:
 
         ::
@@ -118,7 +118,7 @@ To create a new job template:
      - The number of parallel or simultaneous processes to use while executing the playbook. A value of zero uses the Ansible default setting, which is 5 parallel processes unless overridden in ``/etc/ansible/ansible.cfg``.
      - Yes
    * - **Limit**
-     - A host pattern to further constrain the list of hosts managed or affected by the playbook. Multiple patterns can be separated by colons (``:``). As with core Ansible, ``a:b`` means "in group a or b", ``a:b:&c`` means "in a or b but must be in c", and ``a:!b`` means "in a, and definitely not in b". For more information and examples refer to `Patterns <http://docs.ansible.com/intro_patterns.html>`_ in the Ansible documentation.
+     - A host pattern to further constrain the list of hosts managed or affected by the playbook. Multiple patterns can be separated by colons (``:``). As with core Ansible, ``a:b`` means "in group a or b", ``a:b:&c`` means "in a or b but must be in c", and ``a:!b`` means "in a, and definitely not in b". For more information and examples refer to `Patterns <https://docs.ansible.com/ansible/latest/inventory_guide/intro_patterns.html>`_ in the Ansible documentation.
      - Yes
    * - **Verbosity**
      - Control the level of output Ansible produces as the playbook executes. Choose the verbosity from Normal to various Verbose or Debug settings. This only appears in the "details" report view. Verbose logging includes the output of all commands. Debug logging is exceedingly verbose and includes information on SSH operations that can be useful in certain support instances. Most users do not need to see debug mode output.
@@ -146,10 +146,10 @@ To create a new job template:
        * If you prompt for an instance group, what you enter replaces the normal instance group hierarchy and overrides all of the organizations' and inventories' instance groups.
        * Instance Groups prompts will show up as its own step in a subsequent prompt window. 
    * - **Job Tags**
-     - Begin typing and selecting the **Create x** drop-down to specify which parts of the playbook should be executed. For more information and examples refer to `Tags <https://docs.ansible.com/ansible/latest/user_guide/playbooks_tags.html>`_ in the Ansible documentation.
+     - Begin typing and selecting the **Create x** drop-down to specify which parts of the playbook should be executed. For more information and examples refer to `Tags <https://https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html>`_ in the Ansible documentation.
      - Yes
    * - **Skip Tags**
-     - Begin typing and selecting the **Create x** drop-down to specify certain tasks or parts of the playbook to skip. For more information and examples refer to `Tags <https://docs.ansible.com/ansible/latest/user_guide/playbooks_tags.html>`_ in the Ansible documentation.
+     - Begin typing and selecting the **Create x** drop-down to specify certain tasks or parts of the playbook to skip. For more information and examples refer to `Tags <https://https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html>`_ in the Ansible documentation.
      - Yes
 
 .. |search| image:: ../common/images/search-button.png
@@ -525,7 +525,6 @@ Supported OSes for ``scan_facts.yml``
 If you use the ``scan_facts.yml`` playbook with use fact cache, ensure that your OS is supported:
 
 - |rhel| 5, 6, & 7
-- Ubuntu 16.04 (Support for Unbuntu is deprecated and will be removed in a future release)
 - OEL 6 & 7
 - SLES 11 & 12
 - Debian 6, 7, 8
@@ -540,24 +539,6 @@ Pre-scan Setup
 ~~~~~~~~~~~~~~~~~~
 
 The following are examples of playbooks that configure certain distributions so that scan jobs can be run against them.
-
-**Bootstrap Ubuntu (16.04)**
-
-::
-
-  ---
-
-  - name: Get Ubuntu 16, and on ready
-   hosts: all
-   sudo: yes
-   gather_facts: no
-
-   tasks:
-
-   - name: install python-simplejson
-     raw: sudo apt-get -y update
-     raw: sudo apt-get -y install python-simplejson
-     raw: sudo apt-get install python-apt
 
 
 **Bootstrap Fedora (23, 24)**
@@ -635,9 +616,8 @@ To use a custom fact module, ensure that it lives in the ``/library/`` subdirect
     }
   ]
 
-Refer to the `Module Provided 'Facts'`_ section of the Ansible documentation for more information.
+Refer to the `Creating an info or a facts module <https://docs.ansible.com/ansible/latest/dev_guide/developing_modules_general.html#creating-an-info-or-a-facts-module>`_ section of the Ansible documentation for more information.
 
-  .. _`Module Provided 'Facts'`: http://docs.ansible.com/ansible/latest/dev_guide/developing_modules_general.html#module-provided-facts
 
 .. _ug_fact_caching:
 
@@ -650,7 +630,7 @@ Fact Caching
 
 AWX can store and retrieve facts on a per-host basis through an Ansible Fact Cache plugin. This behavior is configurable on a per-job template basis. Fact caching is turned off by default but can be enabled to serve fact requests for all hosts in an inventory related to the job running. This allows you to use job templates with ``--limit`` while still having access to the entire inventory of host facts. A global timeout setting that the plugin enforces per-host, can be specified (in seconds) through the Jobs settings menu:
 
-.. image:: ../common/images/configure-tower-jobs-fact-cache-timeout.png
+.. image:: ../common/images/configure-awx-jobs-fact-cache-timeout.png
 
 Upon launching a job that uses fact cache (``use_fact_cache=True``), AWX will store all ``ansible_facts`` associated with each host in the inventory associated with the job.  The Ansible Fact Cache plugin that ships with AWX will only be enabled on jobs with fact cache enabled (``use_fact_cache=True``).
 
@@ -683,7 +663,7 @@ You can choose to use cached facts in your job by enabling it in the **Options**
 
 To clear facts, you need to run the Ansible ``clear_facts`` `meta task`_. Below is an example playbook that uses the Ansible ``clear_facts`` meta task.
 
-.. _`meta task`: http://docs.ansible.com/ansible/latest/modules/meta_module.html#examples
+.. _`meta task`: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/meta_module.html#examples
 
 ::
   
@@ -882,14 +862,14 @@ The requesting host must be defined in your inventory for the callback to succee
 
 Successful requests result in an entry on the Jobs tab, where the results and history can be viewed.
 
-While the callback can be accessed via REST, the suggested method of using the callback is to use one of the example scripts that ships with AWX - ``/usr/share/awx/request_tower_configuration.sh`` (Linux/UNIX) or ``/usr/share/awx/request_tower_configuration.ps1`` (Windows). Usage is described in the source code of the file by passing the ``-h`` flag, as shown below:
+While the callback can be accessed via REST, the suggested method of using the callback is to use one of the example scripts that ships with AWX - ``/usr/share/awx/request_awx_configuration.sh`` (Linux/UNIX) or ``/usr/share/awx/request_awx_configuration.ps1`` (Windows). Usage is described in the source code of the file by passing the ``-h`` flag, as shown below:
 
 ::
 
-  ./request_tower_configuration.sh -h
-  Usage: ./request_tower_configuration.sh <options>
+  ./request_awx_configuration.sh -h
+  Usage: ./request_awx_configuration.sh <options>
 
-  Request server configuration from Ansible Tower.
+  Request server configuration from AWX.
 
   OPTIONS:
    -h      Show this message
@@ -906,9 +886,9 @@ This script has some intelligence, it knows how to retry commands and is therefo
 
   Please note that this is an example script. You should edit this script if you need more dynamic behavior when detecting failure scenarios, as any non-200 error code may not be a transient error requiring retry.
 
-Most likely you will use callbacks with dynamic inventory in AWX, such as pulling cloud inventory from one of the supported cloud providers. In these cases, along with setting *Update On Launch*, be sure to configure an inventory cache timeout for the inventory source, to avoid hammering of your Cloud's API endpoints. Since the ``request_tower_configuration.sh`` script polls once per minute for up to ten minutes, a suggested cache invalidation time for inventory (configured on the inventory source itself) would be one or two minutes.
+Most likely you will use callbacks with dynamic inventory in AWX, such as pulling cloud inventory from one of the supported cloud providers. In these cases, along with setting *Update On Launch*, be sure to configure an inventory cache timeout for the inventory source, to avoid hammering of your Cloud's API endpoints. Since the ``request_awx_configuration.sh`` script polls once per minute for up to ten minutes, a suggested cache invalidation time for inventory (configured on the inventory source itself) would be one or two minutes.
 
-While we recommend against running the ``request_tower_configuration.sh`` script from a cron job, a suggested cron interval would be perhaps every 30 minutes. Repeated configuration can be easily handled by scheduling in AWX, so the primary use of callbacks by most users is to enable a base image that is bootstrapped into the latest configuration upon coming online. To do so, running at first boot is a better practice. First boot scripts are just simple init scripts that typically self-delete, so you would set up an init script that called a copy of the ``request_tower_configuration.sh`` script and make that into an autoscaling image.
+While we recommend against running the ``request_awx_configuration.sh`` script from a cron job, a suggested cron interval would be perhaps every 30 minutes. Repeated configuration can be easily handled by scheduling in AWX, so the primary use of callbacks by most users is to enable a base image that is bootstrapped into the latest configuration upon coming online. To do so, running at first boot is a better practice. First boot scripts are just simple init scripts that typically self-delete, so you would set up an init script that called a copy of the ``request_awx_configuration.sh`` script and make that into an autoscaling image.
 
 Passing Extra Variables to Provisioning Callbacks
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -997,7 +977,7 @@ The following table notes the behavior (hierarchy) of variable precedence in AWX
 
 **AWX Variable Precedence Hierarchy (last listed wins)**
 
-.. image:: ../common/images/Architecture-Tower_Variable_Precedence_Hierarchy.png
+.. image:: ../common/images/Architecture-AWX_Variable_Precedence_Hierarchy.png
 
 
 Relaunching Job Templates

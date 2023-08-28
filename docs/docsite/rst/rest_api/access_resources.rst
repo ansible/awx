@@ -5,7 +5,7 @@ Access Resources
 .. index::
    single: access resources
 
-Traditionally, |at| uses a primary key to access individual resource objects. The named URL feature allows you to access controller resources via resource-specific human-readable identifiers. The named URL via URL path ``/api/v2/hosts/host_name++inv_name++org_name/``, for example, allows you to access a resource object without an auxiliary query string.
+Traditionally, AWX uses a primary key to access individual resource objects. The named URL feature allows you to access AWX resources via resource-specific human-readable identifiers. The named URL via URL path ``/api/v2/hosts/host_name++inv_name++org_name/``, for example, allows you to access a resource object without an auxiliary query string.
 
 Configuration Settings
 =========================
@@ -74,6 +74,6 @@ For resources satisfying rule #2 above, if traced back via the extra foreign key
 - Treat generated unique identifiers as the rest of the identifier components. Sort them in lexicographic order of corresponding foreign keys.
 - Combine all components together using ``++`` to generate the final identifier format.
 
-In reference to the example above, when generating an identifier format for resource ``Foo``, the controller generates the stand-alone formats, ``<name>+<choice>`` for ``Foo`` and ``<fk.name>+<fk.choice>`` for ``Bar``, then combine them together to be ``<name>+<choice>++<fk.name>+<fk.choice>``.
+In reference to the example above, when generating an identifier format for resource ``Foo``, AWX generates the stand-alone formats, ``<name>+<choice>`` for ``Foo`` and ``<fk.name>+<fk.choice>`` for ``Bar``, then combine them together to be ``<name>+<choice>++<fk.name>+<fk.choice>``.
 
-When generating identifiers according to the given identifier format, there are cases where a foreign key may point to nowhere. In this case, the controller substitutes the part of the format corresponding to the resource the foreign key should point to with an empty string ''. For example, if a ``Foo`` object has the name ='alice', choice ='yes', but ``fk`` field = None, its resulting identifier will be ``alice+yes++``.
+When generating identifiers according to the given identifier format, there are cases where a foreign key may point to nowhere. In this case, AWX substitutes the part of the format corresponding to the resource the foreign key should point to with an empty string ''. For example, if a ``Foo`` object has the name ='alice', choice ='yes', but ``fk`` field = None, its resulting identifier will be ``alice+yes++``.

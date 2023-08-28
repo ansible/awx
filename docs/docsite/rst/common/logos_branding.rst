@@ -1,9 +1,8 @@
 
-|at| supports the use of a custom logo. You can add a custom logo by uploading an image; and supply a custom login message from the **User Interface settings** of the Settings menu. 
+AWX supports the use of a custom logo and login message. You can add a custom logo by uploading an image; and supply a custom login message from the **User Interface settings** of the Settings menu. 
 
 
 .. image:: ../common/images/configure-awx-ui.png 
-
 
 
 For the custom logo to look its best, use a ``.png`` file with a transparent background. GIF, PNG, and JPEG formats are supported.

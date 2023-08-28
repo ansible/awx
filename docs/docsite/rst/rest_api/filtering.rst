@@ -12,25 +12,25 @@ For example, to find the groups that contain the name "foo":
 
 ::
 
-    http://<controller server name>/api/v2/groups/?name__contains=foo
+    http://<awx server name>/api/v2/groups/?name__contains=foo
 
 To find an exact match:
 
 ::
 
-    http://<controller server name>/api/v2/groups/?name=foo
+    http://<awx server name>/api/v2/groups/?name=foo
 
 If a resource is of an integer type, you must add ``\_\_int`` to the end to cast your string input value to an integer, like so:
 
 ::
 
-    http://<controller server name>/api/v2/arbitrary_resource/?x__int=5
+    http://<awx server name>/api/v2/arbitrary_resource/?x__int=5
 
 Related resources can also be queried, like so:
 
 ::
 
-    http://<controller server name>/api/v2/users/?first_name__icontains=kim
+    http://<awx server name>/api/v2/users/?first_name__icontains=kim
 
 This will return all users with names that include the string "Kim" in them.
 
@@ -38,7 +38,7 @@ You can also filter against multiple fields at once:
 
 ::
 
-    http://<controller server name>/api/v2/groups/?name__icontains=test&has_active_failures=false
+    http://<awx server name>/api/v2/groups/?name__icontains=test&has_active_failures=false
 
 This finds all groups containing the name "test" that has no active failures.
 
