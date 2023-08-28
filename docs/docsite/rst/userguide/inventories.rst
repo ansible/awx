@@ -47,10 +47,6 @@ An example of inventories of various states, including one with detail for a dis
 
     .. |copy| image:: ../common/images/copy-button.png
 
-    .. |delete| image:: ../common/images/delete-button.png
-
-
-.. include:: ../common/work_items_deletion_warning.rst
 
 .. _ug_inventories_smart:
 
