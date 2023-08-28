@@ -1,6 +1,5 @@
 # Ignore generated schema
 swagger.json
-!docs/docsite/rst/rest_api/_swagger/swagger.json
 schema.json
 reference-schema.json
 
