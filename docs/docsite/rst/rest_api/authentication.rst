@@ -1,5 +1,5 @@
 ******************************************
-Authentication Methods Using the API 
+Authentication Methods Using the API
 ******************************************
 
 .. index::
@@ -100,7 +100,7 @@ For more information about the Basic HTTP Authentication scheme, see `RFC 7617 <
 
 	You can disable the Basic Auth for security purposes from the Miscellaneous Authentication settings of the controller UI Settings menu:
 
-	.. image:: ../common/images/configure-tower-auth-basic-off.png
+	.. image:: ../common/images/configure-awx-auth-basic-off.png
 
 .. _api_oauth2_auth:
 

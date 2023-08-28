@@ -3,7 +3,7 @@
 Execution Environments
 ======================
 
-.. index:: 
+.. index::
    single: execution environment
    pair: add; execution environment
    pair: jobs; add execution environment
@@ -50,9 +50,7 @@ An |ee| is expected to contain:
   - content in ansible-base
   - custom user needs
 
-Building a new |ee| involves a definition (a ``.yml`` file) that specifies which content you would like to include in your |ee|, such as collections, Python requirements, and system-level packages. The content from the output generated from migrating to |ees| has some of the required data that can be piped to a file or pasted into this definition file. See :ref:`migrate_new_venv` for more detail. If you did not migrate from a virtual environment, you can create a definition file with the required data outlined in :ref:`ref_ee_definition`. 
-
-Collection developers can declare requirements for their content by providing the appropriate metadata. For more information, refer to :ref:`ref_collections_metadata`.
+Building a new |ee| involves a definition (a ``.yml`` file) that specifies which content you would like to include in your |ee|, such as collections, Python requirements, and system-level packages. The content from the output generated from migrating to |ees| has some of the required data that can be piped to a file or pasted into this definition file.
 
 
 Run the builder

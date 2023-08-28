@@ -189,7 +189,7 @@ Job Runtime Behavior
 When you run a job associated with a instance group, some behaviors worth noting are:
 
 - If a cluster is divided into separate instance groups, then the behavior is similar to the cluster as a whole. If two instances are assigned to a group then either one is just as likely to receive a job as any other in the same group.
-- As controller instances are brought online, it effectively expands the work capacity of the system. If those instances are also placed into instance groups, then they also expand that group's capacity. If an instance is performing work and it is a member of multiple groups, then capacity will be reduced from all groups for which it is a member. De-provisioning an instance will remove capacity from the cluster wherever that instance was assigned. See the :ref:`ag_cluster_deprovision` section for more detail.
+- As AWX instances are brought online, it effectively expands the work capacity of the system. If those instances are also placed into instance groups, then they also expand that group's capacity. If an instance is performing work and it is a member of multiple groups, then capacity will be reduced from all groups for which it is a member. De-provisioning an instance will remove capacity from the cluster wherever that instance was assigned.
 
 .. note::
 	Not all instances are required to be provisioned with an equal capacity.
@@ -288,11 +288,6 @@ Similarly, deprovisioning instance groups in the controller does not automatical
 	Example: ``awx-manage unregister_queue --queuename=<name>``
 
 Removing an instance's membership from an instance group in the inventory file and re-running the setup playbook does not ensure the instance won't be added back to a group. To be sure that an instance will not be added back to a group, remove via the API and also remove it in your inventory file, or you can stop defining instance groups in the inventory file altogether. You can also manage instance group topology through the |at| User Interface. For more information on managing instance groups in the UI, refer to :ref:`Instance Groups <ug_instance_groups>` in the |atu|.
-
-.. note::
-
-	If you have isolated instance groups created in older versions of the controller (3.8.x and earlier) and want to migrate them to execution nodes to make them compatible for use with the automation mesh architecture, see :ref:`migrate_iso_to_exe` in the |atumg|. 
-
 
 .. _ag_container_groups:
 

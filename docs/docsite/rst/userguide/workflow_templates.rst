@@ -5,7 +5,7 @@ Workflow Job Templates
 
 .. index::
    single: workflow job templates
-   
+
 A :term:`workflow job template` links together a sequence of disparate resources that accomplishes the task of tracking the full set of jobs that were part of the release process as a single unit. These resources may include:
 
 - job templates
@@ -74,7 +74,7 @@ To create a new workflow job template:
      - Yes
    * - **Limit**
      - A host pattern to further constrain the list of hosts managed or affected by the playbook. Multiple patterns can be separated by colons (``:``). As with core Ansible, ``a:b`` means "in group a or b", ``a:b:&c`` means "in a or b but must be in c", and ``a:!b`` means "in a, and definitely not in b". For more information and examples refer to `Patterns <https://docs.ansible.com/ansible/latest/inventory_guide/intro_patterns.html>`_ in the Ansible documentation.
-     - Yes     
+     - Yes
    * - **Source control branch**
      - Select a branch for the workflow. This branch is applied to all workflow job template nodes that prompt for a branch.
      - Yes
@@ -97,11 +97,13 @@ To create a new workflow job template:
      - * Yes. If you want to be able to specify ``extra_vars`` on a schedule, you must select **Prompt on Launch** for **Variables** on the workflow job template, or a enable a survey on the workflow job template, then those answered survey questions become ``extra_vars``.
        * For more information about extra variables, refer to :ref:`ug_wf_templates_extravars`.
    * - **Job Tags**
-     - Begin typing and selecting the **Create x** drop-down to specify which parts of the playbook should be executed. For more information and examples refer to `Tags <https://https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html>`_ in the Ansible documentation.
+     - Begin typing and selecting the **Create x** drop-down to specify which parts of the playbook should be executed.
      - Yes
    * - **Skip Tags**
-     - Begin typing and selecting the **Create x** drop-down to specify certain tasks or parts of the playbook to skip. For more information and examples refer to `Tags <https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html>`_ in the Ansible documentation.
+     - Begin typing and selecting the **Create x** drop-down to specify certain tasks or parts of the playbook to skip.
      - Yes
+
+For more information about **Job Tags** and **Skip Tags**, refer to `Tags <https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_tags.html>`_ in the Ansible documentation.
 
 .. |x-circle| image:: ../common/images/x-delete-button.png
 
@@ -110,7 +112,7 @@ To create a new workflow job template:
 
 3. **Options**: Specify options for launching this workflow job template, if necessary.
 
-  - Check **Enable Webhooks** to turn on the ability to interface with a predefined SCM system web service that is used to launch a workflow job template. Currently supported SCM systems are GitHub and GitLab.  
+  - Check **Enable Webhooks** to turn on the ability to interface with a predefined SCM system web service that is used to launch a workflow job template. Currently supported SCM systems are GitHub and GitLab.
 
 .. _ug_wfjt_enable_webhooks:
 

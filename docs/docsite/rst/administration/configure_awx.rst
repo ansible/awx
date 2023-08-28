@@ -68,7 +68,7 @@ The System tab allows you to define the base URL for the controller host, config
   - **Miscellaneous Authentication settings**: configure options associated with authentication methods (built-in or SSO), sessions (timeout, number of sessions logged in, tokens), and social authentication mapping.
   - **Logging settings**: configure logging options based on the type you choose:
 
-    .. image:: ../common/images/configure-tower-system-logging-types.png
+    .. image:: ../common/images/configure-awx-system-logging-types.png
 
     For more information about each of the logging aggregation types, refer to the :ref:`Controller Logging and Aggregation <ag_logging>` section of the |ata|.
 
@@ -103,7 +103,7 @@ The User Interface tab allows you to set controller analytics settings, as well 
 Access the User Interface settings by clicking **Settings** from the left navigation bar and select **User Interface settings** from the Settings screen. Click **Edit** to configure your preferences.
 
 
-.. image:: ../common/images/configure-tower-ui.png
+.. image:: ../common/images/configure-awx-ui.png
 
 
 Custom Logos and Images
