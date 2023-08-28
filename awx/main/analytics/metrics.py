@@ -1,5 +1,5 @@
 from django.conf import settings
-from prometheus_client import CollectorRegistry, Gauge, Info, generate_latest
+from prometheus_client import CollectorRegistry, Gauge, Counter, Info, generate_latest
 
 from awx.conf.license import get_license
 from awx.main.utils import get_awx_version
@@ -42,9 +42,17 @@ def metrics():
     )
     RUNNING_JOBS = Gauge('awx_running_jobs_total', 'Number of running jobs on the system', registry=REGISTRY)
     PENDING_JOBS = Gauge('awx_pending_jobs_total', 'Number of pending jobs on the system', registry=REGISTRY)
-    STATUS = Gauge(
-        'awx_status_total',
-        'Status of Job launched',
+    STARTED_STATUS = Gauge(
+        'awx_status_started',
+        'Status of Job started',
+        [
+            'status',
+        ],
+        registry=REGISTRY,
+    )
+    COMPLETED_STATUS = Counter(
+        'awx_status_completed',
+        'Status of Jobs completed',
         [
             'status',
         ],
@@ -176,7 +184,13 @@ def metrics():
     statuses = all_job_data.get('status', {})
     states = set(dict(UnifiedJob.STATUS_CHOICES).keys()) - set(['new'])
     for state in states:
-        STATUS.labels(status=state).set(statuses.get(state, 0))
+        if state in ['pending', 'waiting', 'running']:
+            # transient states go to gauge
+            STARTED_STATUS.labels(status=state).set(statuses.get(state, 0))
+        elif state in ['successful', 'failed', 'error', 'canceled']:
+            # terminal states go to counter
+            increment_amount = COMPLETED_STATUS.labels(status=state)._value.get() - statuses.get(state, 0)
+            COMPLETED_STATUS.labels(status=state).inc(increment_amount)
 
     RUNNING_JOBS.set(current_counts['running_jobs'])
     PENDING_JOBS.set(current_counts['pending_jobs'])
