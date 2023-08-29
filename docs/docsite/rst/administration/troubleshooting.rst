@@ -9,14 +9,42 @@ Troubleshooting AWX
    single: help
   
 
-Error logs
-================
+Error logging and extra settings
+=================================
 .. index::
    pair: troubleshooting; general help
    pair: troubleshooting; error logs
 
-AWX server errors are logged in ``/var/log/tower``. Supervisors logs can be found in ``/var/log/supervisor/``. Nginx web server errors are logged in the httpd error log. Configure other controller logging needs in ``/etc/tower/conf.d/``.
+AWX server errors are streamed and not logged, however you may be able to pass them in on the AWX spec file.
 
+With ``extra_settings``, you can pass multiple custom settings via the ``awx-operator``. The parameter ``extra_settings``  will be appended to the ``/etc/tower/settings.py`` file and can be an alternative to the ``extra_volumes`` parameter.
+
++----------------+----------------+---------+
+| Name           | Description    | Default |
++----------------+----------------+---------+
+| extra_settings | Extra settings | ''      |
++----------------+----------------+---------+
+
+Parameters configured in ``extra_settings`` are set as read-only settings in AWX.  As a result, they cannot be changed in the UI after deployment. If you need to change the setting after the initial deployment, you need to change it on the AWX CR spec.  
+
+Example configuration of ``extra_settings`` parameter:
+
+::
+
+   spec:
+     extra_settings:
+       - setting: MAX_PAGE_SIZE
+         value: "500"
+        
+       - setting: AUTH_LDAP_BIND_DN
+         value: "cn=admin,dc=example,dc=com"
+      
+      - setting: LOG_AGGREGATOR_LEVEL
+        value: "'DEBUG'"
+
+For some settings, such as ``LOG_AGGREGATOR_LEVEL``, the value may need double quotes as shown in the above example.
+
+.. taken from https://github.com/ansible/awx-operator/blob/devel/docs/user-guide/advanced-configuration/extra-settings.md
 
 .. _admin_troubleshooting_sosreport:
 
