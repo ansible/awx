@@ -97,17 +97,4 @@ User Interface
    pair: logo; custom
    pair: login message; custom
 
-
-The User Interface tab allows you to set controller analytics settings, as well as configure custom logos and login messages
-
-Access the User Interface settings by clicking **Settings** from the left navigation bar and select **User Interface settings** from the Settings screen. Click **Edit** to configure your preferences.
-
-
-.. image:: ../common/images/configure-awx-ui.png
-
-
-Custom Logos and Images
-------------------------
-
-
 .. include:: ../common/logos_branding.rst
