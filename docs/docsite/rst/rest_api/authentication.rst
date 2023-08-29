@@ -13,7 +13,7 @@ This chapter describes the numerous enterprise authentication methods, the best 
 .. contents::
     :local:
 
-AWX is designed for organizations to centralize and control their automation with a visual dashboard for out-of-the box control while providing a REST API to integrate with your other tooling on a deeper level. AWX supports a number of authentication methods to make it easy to embed AWX into existing tools and processes to help ensure the right people can access controller resources. 
+AWX is designed for organizations to centralize and control their automation with a visual dashboard for out-of-the box control while providing a REST API to integrate with your other tooling on a deeper level. AWX supports a number of authentication methods to make it easy to embed AWX into existing tools and processes to help ensure the right people can access AWX resources. 
 
 .. _api_session_auth:
 
@@ -30,7 +30,7 @@ Using the curl tool, you can see the activity that occurs when you log into AWX.
 
 .. code-block:: text
 
-	curl -k -c - https://<controller-host>/api/login/
+	curl -k -c - https://<awx-host>/api/login/
 
 	localhost	FALSE	/	FALSE	0   csrftoken
 	AswSFn5p1qQvaX4KoRZN6A5yer0Pq0VG2cXMTzZnzuhaY0L4tiidYqwf5PXZckuj
@@ -40,11 +40,11 @@ Using the curl tool, you can see the activity that occurs when you log into AWX.
 .. code-block:: text
 
 	curl -X POST -H 'Content-Type: application/x-www-form-urlencoded' \
-  	--referer https://<controller-host>/api/login/ \
+  	--referer https://<awx-host>/api/login/ \
   	-H 'X-CSRFToken: K580zVVm0rWX8pmNylz5ygTPamgUJxifrdJY0UDtMMoOis5Q1UOxRmV9918BUBIN' \
   	--data 'username=root&password=reverse' \
   	--cookie 'csrftoken=K580zVVm0rWX8pmNylz5ygTPamgUJxifrdJY0UDtMMoOis5Q1UOxRmV9918BUBIN' \
-  	https://<controller-host>/api/login/ -k -D - -o /dev/null
+  	https://<awx-host>/api/login/ -k -D - -o /dev/null
 
 All of this is done by the AWX when you log in to the UI or API in the browser, and should only be used when authenticating in the browser. For programmatic integration with AWX, see :ref:`api_oauth2_auth`.
 
@@ -89,10 +89,10 @@ Example with curl:
 
 .. code-block:: text
 
-   curl -X GET -H 'Authorization: Basic dXNlcjpwYXNzd29yZA==’ https://<controller-host>/api/v2/credentials -k -L
+   curl -X GET -H 'Authorization: Basic dXNlcjpwYXNzd29yZA==’ https://<awx-host>/api/v2/credentials -k -L
 
    # the --user flag adds this Authorization header for us
-   curl -X GET --user 'user:password' https://<controller-host>/api/v2/credentials -k -L
+   curl -X GET --user 'user:password' https://<awx-host>/api/v2/credentials -k -L
 
 For more information about the Basic HTTP Authentication scheme, see `RFC 7617 <https://datatracker.ietf.org/doc/html/rfc7617>`_.
 
@@ -137,7 +137,7 @@ Token authentication is best used for any programmatic use of the AWX API, such 
 
 .. code-block:: text
 
-   curl -u user:password -k -X POST https://<controller-host>/api/v2/tokens/
+   curl -u user:password -k -X POST https://<awx-host>/api/v2/tokens/
 
 
 This call will return JSON data like:
@@ -151,7 +151,7 @@ The value of the ``token`` property is what you can now use to perform a GET req
 	curl -k -X POST \
   	  -H “Content-Type: application/json”
   	  -H “Authorization: Bearer <oauth2-token-value>” \
-  	  https://<controller-host>/api/v2/hosts/ 
+  	  https://<awx-host>/api/v2/hosts/ 
 
 Similarly, you can launch a job by making a POST to the job template that you want to launch.
 
@@ -161,13 +161,13 @@ Similarly, you can launch a job by making a POST to the job template that you wa
   	  -H "Authorization: Bearer <oauth2-token-value>" \
   	  -H "Content-Type: application/json" \
   	  --data '{"limit" : "ansible"}' \
-  	  https://<controller-host>/api/v2/job_templates/14/launch/ 
+  	  https://<awx-host>/api/v2/job_templates/14/launch/ 
 
 
 **Python Example**
 
 `awxkit <https://pypi.org/project/awxkit/>`_ is an open source tool that makes it easy to use HTTP requests to access the AWX API. 
-You can have awxkit acquire a PAT on your behalf by using the ``awxkit login`` command. Refer to the `AWX Command Line Interface <https://docs.ansible.com/automation-controller/latest/html/controllercli/index.html>`_ for more detail.
+You can have awxkit acquire a PAT on your behalf by using the ``awxkit login`` command. Refer to the `api_start`_ for more detail.
 
 For more information on how to use OAuth 2 in AWX in the context of integrating external applications, see :ref:`ag_oauth2_token_auth` in the |ata|. 
 
@@ -176,16 +176,16 @@ If you need to write custom requests, you can write a Python script using `Pytho
 .. code-block:: text
 
 	import requests
-	oauth2_token_value = 'y1Q8ye4hPvT61aQq63Da6N1C25jiA'   # your token value from controller
-	url = 'https://<controller-host>/api/v2/users/'
+	oauth2_token_value = 'y1Q8ye4hPvT61aQq63Da6N1C25jiA'   # your token value from AWX
+	url = 'https://<awx-host>/api/v2/users/'
 	payload = {}
 	headers = {'Authorization': 'Bearer ' + oauth2_token_value,}
 
-	# makes request to controller user endpoint
+	# makes request to awx user endpoint
 	response = requests.request('GET', url, headers=headers, data=payload,
 	allow_redirects=False, verify=False)
 
-	# prints json returned from controller with formatting
+	# prints json returned from awx with formatting
 	print(json.dumps(response.json(), indent=4, sort_keys=True))
 
 
