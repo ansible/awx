@@ -494,7 +494,7 @@ For transparent logins to work, you must first get IdP-initiated logins to work.
 
 2. Once this is working, specify the redirect URL for non-logged-in users to somewhere other than the default controller login page by using the **Login redirect override URL** field in the Miscellaneous Authentication settings window of the **Settings** menu, accessible from the left navigation bar. This should be set to ``/sso/login/saml/?idp=<name-of-your-idp>`` for transparent SAML login, as shown in the example.
 
-.. image:: ../common/images/configure-tower-system-login-redirect-url.png
+.. image:: ../common/images/configure-awx-system-login-redirect-url.png
 
 .. note::
 
