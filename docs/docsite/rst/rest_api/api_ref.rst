@@ -1,5 +1,7 @@
 :orphan:
 
+.. _api_reference:
+
 AWX API Reference Guide
 ================================
 
