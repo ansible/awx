@@ -48,7 +48,6 @@ from awx.main.models import (
     Inventory,
     SmartInventoryMembership,
     Job,
-    HostMetric,
     convert_jsonfields,
 )
 from awx.main.constants import ACTIVE_STATES
@@ -64,6 +63,7 @@ from awx.main.utils.common import (
 
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
+from awx.main.tasks.helpers import is_run_threshold_reached
 from awx.main.tasks.receptor import get_receptor_ctl, worker_info, worker_cleanup, administrative_workunit_reaper, write_receptor_config
 from awx.main.consumers import emit_channel_notification
 from awx.main import analytics
@@ -368,9 +368,7 @@ def send_notifications(notification_list, job_id=None):
 
 @task(queue=get_task_queuename)
 def gather_analytics():
-    from awx.conf.models import Setting
-
-    if is_run_threshold_reached(Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_GATHER').first(), settings.AUTOMATION_ANALYTICS_GATHER_INTERVAL):
+    if is_run_threshold_reached(getattr(settings, 'AUTOMATION_ANALYTICS_LAST_GATHER', None), settings.AUTOMATION_ANALYTICS_GATHER_INTERVAL):
         analytics.gather()
 
 
@@ -425,29 +423,6 @@ def handle_removed_image(remove_images=None):
 @task(queue=get_task_queuename)
 def cleanup_images_and_files():
     _cleanup_images_and_files()
-
-
-@task(queue=get_task_queuename)
-def cleanup_host_metrics():
-    """Run cleanup host metrics ~each month"""
-    # TODO: move whole method to host_metrics in follow-up PR
-    from awx.conf.models import Setting
-
-    if is_run_threshold_reached(
-        Setting.objects.filter(key='CLEANUP_HOST_METRICS_LAST_TS').first(), getattr(settings, 'CLEANUP_HOST_METRICS_INTERVAL', 30) * 86400
-    ):
-        months_ago = getattr(settings, 'CLEANUP_HOST_METRICS_SOFT_THRESHOLD', 12)
-        logger.info("Executing cleanup_host_metrics")
-        HostMetric.cleanup_task(months_ago)
-        logger.info("Finished cleanup_host_metrics")
-
-
-def is_run_threshold_reached(setting, threshold_seconds):
-    from rest_framework.fields import DateTimeField
-
-    last_time = DateTimeField().to_internal_value(setting.value) if setting and setting.value else DateTimeField().to_internal_value('1970-01-01')
-
-    return (now() - last_time).total_seconds() > threshold_seconds
 
 
 @task(queue=get_task_queuename)

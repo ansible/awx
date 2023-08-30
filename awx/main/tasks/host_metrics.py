@@ -3,33 +3,90 @@ from dateutil.relativedelta import relativedelta
 import logging
 
 from django.conf import settings
-from django.db.models import Count
+from django.db.models import Count, F
 from django.db.models.functions import TruncMonth
 from django.utils.timezone import now
-from rest_framework.fields import DateTimeField
 from awx.main.dispatch import get_task_queuename
 from awx.main.dispatch.publish import task
 from awx.main.models.inventory import HostMetric, HostMetricSummaryMonthly
+from awx.main.tasks.helpers import is_run_threshold_reached
 from awx.conf.license import get_license
 
-logger = logging.getLogger('awx.main.tasks.host_metric_summary_monthly')
+logger = logging.getLogger('awx.main.tasks.host_metrics')
+
+
+@task(queue=get_task_queuename)
+def cleanup_host_metrics():
+    if is_run_threshold_reached(getattr(settings, 'CLEANUP_HOST_METRICS_LAST_TS', None), getattr(settings, 'CLEANUP_HOST_METRICS_INTERVAL', 30) * 86400):
+        logger.info(f"Executing cleanup_host_metrics, last ran at {getattr(settings, 'CLEANUP_HOST_METRICS_LAST_TS', '---')}")
+        HostMetricTask().cleanup(
+            soft_threshold=getattr(settings, 'CLEANUP_HOST_METRICS_SOFT_THRESHOLD', 12),
+            hard_threshold=getattr(settings, 'CLEANUP_HOST_METRICS_HARD_THRESHOLD', 36),
+        )
+        logger.info("Finished cleanup_host_metrics")
 
 
 @task(queue=get_task_queuename)
 def host_metric_summary_monthly():
     """Run cleanup host metrics summary monthly task each week"""
-    if _is_run_threshold_reached(
-        getattr(settings, 'HOST_METRIC_SUMMARY_TASK_LAST_TS', None), getattr(settings, 'HOST_METRIC_SUMMARY_TASK_INTERVAL', 7) * 86400
-    ):
+    if is_run_threshold_reached(getattr(settings, 'HOST_METRIC_SUMMARY_TASK_LAST_TS', None), getattr(settings, 'HOST_METRIC_SUMMARY_TASK_INTERVAL', 7) * 86400):
         logger.info(f"Executing host_metric_summary_monthly, last ran at {getattr(settings, 'HOST_METRIC_SUMMARY_TASK_LAST_TS', '---')}")
         HostMetricSummaryMonthlyTask().execute()
         logger.info("Finished host_metric_summary_monthly")
 
 
-def _is_run_threshold_reached(setting, threshold_seconds):
-    last_time = DateTimeField().to_internal_value(setting) if setting else DateTimeField().to_internal_value('1970-01-01')
+class HostMetricTask:
+    """
+    This class provides cleanup task for HostMetric model.
+    There are two modes:
+    - soft cleanup (updates columns delete, deleted_counter and last_deleted)
+    - hard cleanup (deletes from the db)
+    """
 
-    return (now() - last_time).total_seconds() > threshold_seconds
+    def cleanup(self, soft_threshold=None, hard_threshold=None):
+        """
+        Main entrypoint, runs either soft cleanup, hard cleanup or both
+
+        :param soft_threshold: (int)
+        :param hard_threshold: (int)
+        """
+        if hard_threshold is not None:
+            self.hard_cleanup(hard_threshold)
+        if soft_threshold is not None:
+            self.soft_cleanup(soft_threshold)
+
+        settings.CLEANUP_HOST_METRICS_LAST_TS = now()
+
+    @staticmethod
+    def soft_cleanup(threshold=None):
+        if threshold is None:
+            threshold = getattr(settings, 'CLEANUP_HOST_METRICS_SOFT_THRESHOLD', 12)
+
+        try:
+            threshold = int(threshold)
+        except (ValueError, TypeError) as e:
+            raise type(e)("soft_threshold has to be convertible to number") from e
+
+        last_automation_before = now() - relativedelta(months=threshold)
+        rows = HostMetric.active_objects.filter(last_automation__lt=last_automation_before).update(
+            deleted=True, deleted_counter=F('deleted_counter') + 1, last_deleted=now()
+        )
+        logger.info(f'cleanup_host_metrics: soft-deleted records last automated before {last_automation_before}, affected rows: {rows}')
+
+    @staticmethod
+    def hard_cleanup(threshold=None):
+        if threshold is None:
+            threshold = getattr(settings, 'CLEANUP_HOST_METRICS_HARD_THRESHOLD', 36)
+
+        try:
+            threshold = int(threshold)
+        except (ValueError, TypeError) as e:
+            raise type(e)("hard_threshold has to be convertible to number") from e
+
+        last_deleted_before = now() - relativedelta(months=threshold)
+        queryset = HostMetric.objects.filter(deleted=True, last_deleted__lt=last_deleted_before)
+        rows = queryset.delete()
+        logger.info(f'cleanup_host_metrics: hard-deleted records which were soft deleted before {last_deleted_before}, affected rows: {rows[0]}')
 
 
 class HostMetricSummaryMonthlyTask:
