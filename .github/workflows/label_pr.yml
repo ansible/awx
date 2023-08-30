@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Label PR - Community
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
       - name: Install python requests
         run: pip install requests

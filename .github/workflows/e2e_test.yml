@@ -19,13 +19,13 @@ jobs:
         job: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Get python version from Makefile
         run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
 
       - name: Install python ${{ env.py_version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ env.py_version }}
 
@@ -53,7 +53,7 @@ jobs:
           docker pull quay.io/awx/awx_cypress_base:latest
 
       - name: Checkout test project
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: ${{ github.repository_owner }}/tower-qa
           ssh-key: ${{ secrets.QA_REPO_KEY }}

@@ -17,13 +17,13 @@ jobs:
       packages: write
       contents: read
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Get python version from Makefile
         run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
 
       - name: Install python ${{ env.py_version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ env.py_version }}       
 

@@ -35,7 +35,7 @@ jobs:
           - name: ui-test-general
             command: make ui-test-general
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Run check ${{ matrix.tests.name }}
         run: AWX_DOCKER_CMD='${{ matrix.tests.command }}' make github_ci_runner
@@ -43,7 +43,7 @@ jobs:
   dev-env:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Run smoke test
         run: make github_ci_setup && ansible-playbook tools/docker-compose/ansible/smoke-test.yml -v
@@ -52,12 +52,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout awx
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: awx
 
       - name: Checkout awx-operator
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: ansible/awx-operator
           path: awx-operator
@@ -67,7 +67,7 @@ jobs:
         run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
 
       - name: Install python ${{ env.py_version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ env.py_version }}
 
@@ -102,7 +102,7 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # The containers that GitHub Actions use have Ansible installed, so upgrade to make sure we have the latest version.
       - name: Upgrade ansible-core
