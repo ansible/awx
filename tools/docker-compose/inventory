@@ -17,3 +17,6 @@ localhost ansible_connection=local ansible_python_interpreter="/usr/bin/env pyth
 
 # awx_image="ghcr.io/ansible/awx_devel"
 # migrate_local_docker=false
+
+# Metrics settings
+prometheus_disable_created_series=true
