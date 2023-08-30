@@ -764,7 +764,6 @@ def awx_periodic_scheduler():
                 new_unified_job.save(update_fields=['status', 'job_explanation'])
                 new_unified_job.websocket_emit_status("failed")
             emit_channel_notification('schedules-changed', dict(id=schedule.id, group_name="schedules"))
-        state.save()
 
 
 def schedule_manager_success_or_error(instance):
