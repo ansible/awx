@@ -33,6 +33,7 @@ import Roles from './models/Roles';
 import Root from './models/Root';
 import Schedules from './models/Schedules';
 import Settings from './models/Settings';
+import SubscriptionUsage from './models/SubscriptionUsage';
 import SystemJobs from './models/SystemJobs';
 import SystemJobTemplates from './models/SystemJobTemplates';
 import Teams from './models/Teams';
@@ -82,6 +83,7 @@ const RolesAPI = new Roles();
 const RootAPI = new Root();
 const SchedulesAPI = new Schedules();
 const SettingsAPI = new Settings();
+const SubscriptionUsageAPI = new SubscriptionUsage();
 const SystemJobsAPI = new SystemJobs();
 const SystemJobTemplatesAPI = new SystemJobTemplates();
 const TeamsAPI = new Teams();
@@ -132,6 +134,7 @@ export {
   RootAPI,
   SchedulesAPI,
   SettingsAPI,
+  SubscriptionUsageAPI,
   SystemJobsAPI,
   SystemJobTemplatesAPI,
   TeamsAPI,
