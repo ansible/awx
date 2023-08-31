@@ -9,7 +9,7 @@ Management Jobs
    single: removing old data
 
 
-**Management Jobs** assist in the cleaning of old data from AWX, including system tracking information, tokens, job histories, and activity streams. You can use this if you have specific retention policies or need to decrease the storage used by your controller database. Click **Management Jobs** from the left navigation bar.
+**Management Jobs** assist in the cleaning of old data from AWX, including system tracking information, tokens, job histories, and activity streams. You can use this if you have specific retention policies or need to decrease the storage used by your AWX database. Click **Management Jobs** from the left navigation bar.
 
 |management jobs|
 
@@ -137,7 +137,7 @@ Enter the number of days of data you would like to save and click **Launch**.
 
 .. note::
 
-    The initial job run for a controller resource (e.g. Projects, Job Templates) is excluded from **Cleanup Job Details**, regardless of retention value.
+    The initial job run for an AWX resource (e.g. Projects, Job Templates) is excluded from **Cleanup Job Details**, regardless of retention value.
 
 You can review or set a schedule for cleaning up old job history by performing the same procedure described for activity stream management jobs. See :ref:`ag_mgmt_job_schedule` for detail.
 

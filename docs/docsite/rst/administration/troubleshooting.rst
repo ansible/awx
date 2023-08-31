@@ -8,6 +8,7 @@ Troubleshooting AWX
    single: troubleshooting
    single: help
   
+.. _admin_troubleshooting_extra_settings:
 
 Error logging and extra settings
 =================================
@@ -39,8 +40,8 @@ Example configuration of ``extra_settings`` parameter:
        - setting: AUTH_LDAP_BIND_DN
          value: "cn=admin,dc=example,dc=com"
       
-      - setting: LOG_AGGREGATOR_LEVEL
-        value: "'DEBUG'"
+       - setting: LOG_AGGREGATOR_LEVEL
+         value: "'DEBUG'"
 
 For some settings, such as ``LOG_AGGREGATOR_LEVEL``, the value may need double quotes as shown in the above example.
 
@@ -70,7 +71,9 @@ If you are unable to run the ``helloworld.yml`` example playbook from the Quick 
 Unable to login to AWX via HTTP
 ==================================
 
-Access to AWX is intentionally restricted through a secure protocol (HTTPS). In cases where your configuration is set up to run an AWX node behind a load balancer or proxy as "HTTP only", and you only want to access it without SSL (for troubleshooting, for example), you must add the following settings in the ``custom.py`` file located at ``/etc/tower/conf.d`` of your AWX instance:
+Access to AWX is intentionally restricted through a secure protocol (HTTPS). In cases where your configuration is set up to run an AWX node behind a load balancer or proxy as "HTTP only", and you only want to access it without SSL (for troubleshooting, for example), you may change the settings of the ``/etc/tower/conf.d`` of your AWX instance. The operator has ``extra_settings`` that allows you to change a file-based setting in OCP. See :ref:`admin_troubleshooting_extra_settings` for detail.
+
+Once in the spec, set the following accordingly:
  
 :: 
 

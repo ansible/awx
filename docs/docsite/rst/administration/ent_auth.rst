@@ -99,7 +99,7 @@ SAML settings
     pair: authentication; SAML Service Provider
 
 
-SAML allows the exchange of authentication and authorization data between an Identity Provider (IdP - a system of servers that provide the Single Sign On service) and a Service Provider (in this case, AWX). AWX can be configured to talk with SAML in order to authenticate (create/login/logout) controller users. User Team and Organization membership can be embedded in the SAML response to the controller. 
+SAML allows the exchange of authentication and authorization data between an Identity Provider (IdP - a system of servers that provide the Single Sign On service) and a Service Provider (in this case, AWX). AWX can be configured to talk with SAML in order to authenticate (create/login/logout) AWX users. User Team and Organization membership can be embedded in the SAML response to AWX. 
 
 .. image:: ../common/images/configure-awx-auth-saml-topology.png
 
@@ -113,17 +113,17 @@ To setup SAML authentication:
 
 3. The **SAML Assertion Consume Service (ACS) URL** and **SAML Service Provider Metadata URL** fields are pre-populated and are non-editable. Contact the Identity Provider administrator and provide the information contained in these fields. 
 
-4. Click **Edit** and set the **SAML Service Provider Entity ID** to be the same as the **Base URL of the controller host** field that can be found in the Miscellaneous System settings screen by clicking **Settings** from the left navigation bar. Through the API, it can be viewed in the ``/api/v2/settings/system``, under the ``CONTROLLER_BASE_URL`` variable. The Entity ID can be set to any one of the individual controller cluster nodes, but it is good practice to set it to the URL of the Service Provider. Ensure that the Base URL matches the FQDN of the load balancer (if used).
+4. Click **Edit** and set the **SAML Service Provider Entity ID** to be the same as the **Base URL of the service** field that can be found in the Miscellaneous System settings screen by clicking **Settings** from the left navigation bar. Through the API, it can be viewed in the ``/api/v2/settings/system``, under the ``TOWER_URL_BASE`` variable. The Entity ID can be set to any one of the individual AWX cluster nodes, but it is good practice to set it to the URL of the Service Provider. Ensure that the Base URL matches the FQDN of the load balancer (if used).
 
 .. note:: 
 
-    The Base URL is different for each node in a cluster. Commonly, a load balancer will sit in front of many controller cluster nodes to provide a single entry point, the controller Cluster FQDN. The SAML Service Provider must be able establish an outbound connection and route to the controller Cluster Node or the controller Cluster FQDN set in the SAML Service Provider Entity ID.
+    The Base URL is different for each node in a cluster. Commonly, a load balancer will sit in front of many AWX cluster nodes to provide a single entry point, the AWX Cluster FQDN. The SAML Service Provider must be able establish an outbound connection and route to the AWX Cluster Node or the AWX Cluster FQDN set in the SAML Service Provider Entity ID.
 
-In this example, the Service Provider is the controller cluster, and therefore, the ID is set to the controller Cluster FQDN. 
+In this example, the Service Provider is the AWX cluster, and therefore, the ID is set to the AWX Cluster FQDN. 
 
 .. image:: ../common/images/configure-awx-auth-saml-spentityid.png
 
-5. Create a server certificate for the Ansible cluster. Typically when an Ansible cluster is configured, the controller nodes will be configured to handle HTTP traffic only and the load balancer will be an SSL Termination Point. In this case, an SSL certificate is required for the load balancer, and not for the individual controller Cluster Nodes. SSL can either be enabled or disabled per individual controller node, but should be disabled when using an SSL terminated load balancer. It is recommended to use a non-expiring self signed certificate to avoid periodically updating certificates. This way, authentication will not fail in case someone forgets to update the certificate.
+5. Create a server certificate for the Ansible cluster. Typically when an Ansible cluster is configured, AWX nodes will be configured to handle HTTP traffic only and the load balancer will be an SSL Termination Point. In this case, an SSL certificate is required for the load balancer, and not for the individual AWX Cluster Nodes. SSL can either be enabled or disabled per individual AWX node, but should be disabled when using an SSL terminated load balancer. It is recommended to use a non-expiring self signed certificate to avoid periodically updating certificates. This way, authentication will not fail in case someone forgets to update the certificate.
 
 .. note:: 
 
@@ -141,7 +141,7 @@ As an example for public certs:
     ... cert text ...
     -----END CERTIFICATE——
 
-6. Create an optional private key for the controller to use as a service provider (SP) and enter it in the **SAML Service Provider Private Key** field.  
+6. Create an optional private key for AWX to use as a service provider (SP) and enter it in the **SAML Service Provider Private Key** field.  
 
 As an example for private keys:
 
@@ -152,7 +152,7 @@ As an example for private keys:
     -----END PRIVATE KEY——
 
 
-7. Provide the IdP with some details about the controller cluster during the SSO process in the **SAML Service Provider Organization Info** field.
+7. Provide the IdP with some details about the AWX cluster during the SSO process in the **SAML Service Provider Organization Info** field.
 
 ::
 
@@ -169,7 +169,7 @@ For example:
 .. image:: ../common/images/configure-awx-auth-saml-org-info.png
 
 .. note:: 
-   These fields are required in order to properly configure SAML within the controller.
+   These fields are required in order to properly configure SAML within AWX.
 
 8. Provide the IdP with the technical contact information in the **SAML Service Provider Technical Contact** field. Do not remove the contents of this field.
 
@@ -197,7 +197,7 @@ For example:
 
 .. image:: ../common/images/configure-awx-auth-saml-suppcontact-info.png
 
-10. In the **SAML Enabled Identity Providers** field, provide information on how to connect to each Identity Provider listed. The controller expects the following SAML attributes in the example below:
+10. In the **SAML Enabled Identity Providers** field, provide information on how to connect to each Identity Provider listed. AWX expects the following SAML attributes in the example below:
 
 ::
 
@@ -210,12 +210,12 @@ If these attributes are not known, map existing SAML attributes to lastname, fir
 
 Configure the required keys for each IDp:
 
-    - ``attr_user_permanent_id`` - the unique identifier for the user. It can be configured to match any of the attribute sent from the IdP. Usually, it is set to ``name_id`` if ``SAML:nameid`` attribute is sent to the controller node or it can be the username attribute, or a custom unique identifier.
-    - ``entity_id`` - the Entity ID provided by the Identity Provider administrator. The admin creates a SAML profile for the controller and it generates a unique URL.
-    - ``url`` - the Single Sign On (SSO) URL the controller redirects the user to, when SSO is activated.
+    - ``attr_user_permanent_id`` - the unique identifier for the user. It can be configured to match any of the attribute sent from the IdP. Usually, it is set to ``name_id`` if ``SAML:nameid`` attribute is sent to the AWX node or it can be the username attribute, or a custom unique identifier.
+    - ``entity_id`` - the Entity ID provided by the Identity Provider administrator. The admin creates a SAML profile for AWX and it generates a unique URL.
+    - ``url`` - the Single Sign On (SSO) URL AWX redirects the user to, when SSO is activated.
     - ``x509_cert`` - the certificate provided by the IdP admin generated from the SAML profile created on the Identity Provider. Remove the ``--BEGIN CERTIFICATE--`` and ``--END CERTIFICATE--`` headers, then enter the cert as one non-breaking string. 
 
- Multiple SAML IdPs are supported. Some IdPs may provide user data using attribute names that differ from the default OIDs (https://github.com/omab/python-social-auth/blob/master/social/backends/saml.py). The SAML ``NameID`` is a special attribute used by some Identity Providers to tell the Service Provider (the controller cluster) what the unique user identifier is. If it is used, set the ``attr_user_permanent_id`` to ``name_id`` as shown in the example. Other attribute names may be overridden for each IdP as shown below. 
+ Multiple SAML IdPs are supported. Some IdPs may provide user data using attribute names that differ from the default OIDs (https://github.com/omab/python-social-auth/blob/master/social/backends/saml.py). The SAML ``NameID`` is a special attribute used by some Identity Providers to tell the Service Provider (AWX cluster) what the unique user identifier is. If it is used, set the ``attr_user_permanent_id`` to ``name_id`` as shown in the example. Other attribute names may be overridden for each IdP as shown below. 
 
 ::
 
@@ -246,13 +246,13 @@ Configure the required keys for each IDp:
 
 .. note::
 
-    The IdP provides the email, last name and firstname using the well known SAML urn. The IdP uses a custom SAML attribute to identify a user, which is an attribute that the controller is unable to read. Instead, the controller can understand the unique identifier name, which is the URN. Use the URN listed in the SAML “Name” attribute for the user attributes as shown in the example below.
+    The IdP provides the email, last name and firstname using the well known SAML urn. The IdP uses a custom SAML attribute to identify a user, which is an attribute that AWX is unable to read. Instead, AWX can understand the unique identifier name, which is the URN. Use the URN listed in the SAML “Name” attribute for the user attributes as shown in the example below.
 
     .. image:: ../common/images/configure-awx-auth-saml-idps-urn.png
 
 11. Optionally provide the **SAML Organization Map**. For further detail, see :ref:`ag_org_team_maps`.
 
-12. The controller can be configured to look for particular attributes that contain Team and Organization membership to associate with users when they log into the controller. The attribute names are defined in the **SAML Organization Attribute Mapping** and the **SAML Team Attribute Mapping** fields. 
+12. AWX can be configured to look for particular attributes that contain Team and Organization membership to associate with users when they log into AWX. The attribute names are defined in the **SAML Organization Attribute Mapping** and the **SAML Team Attribute Mapping** fields. 
 
 **Example SAML Organization Attribute Mapping**
 
@@ -275,7 +275,7 @@ Below is an example SAML attribute that embeds user organization membership in t
     </saml2:AttributeStatement> 
 
 
-Below is the corresponding controller configuration.
+Below is the corresponding AWX configuration.
 
 ::
 
@@ -331,7 +331,7 @@ Below is another example of a SAML attribute that contains a Team membership in 
 
 - ``saml_attr``: The SAML attribute name where the team array can be found.
 - ``remove``: Set ``remove`` to **True** to remove user from all Teams before adding the user to the list of Teams. To keep the user in whatever Team(s) they are in while adding the user to the Team(s) in the SAML attribute, set ``remove`` to **False**.
-- ``team_org_map``: An array of dictionaries of the form ``{ "team": "<AWX Team Name>", "organization": "<AWX Org Name>" }`` that defines mapping from controller Team -> controller Organization. This is needed because the same named Team can exist in multiple Organizations in the controller. The organization to which a team listed in a SAML attribute belongs to, would be ambiguous without this mapping.
+- ``team_org_map``: An array of dictionaries of the form ``{ "team": "<AWX Team Name>", "organization": "<AWX Org Name>" }`` that defines mapping from AWX Team -> AWX Organization. This is needed because the same named Team can exist in multiple Organizations in AWX. The organization to which a team listed in a SAML attribute belongs to, would be ambiguous without this mapping.
 
 You could create an alias to override both Teams and Orgs in the **SAML Team Attribute Mapping**. This option becomes very handy in cases when the SAML backend sends out complex group names, like in the example below:  
 
@@ -354,7 +354,7 @@ You could create an alias to override both Teams and Orgs in the **SAML Team Att
      "saml_attr": "member-of"
     }
 
-Once the user authenticates, the controller creates organization and team aliases, as expected.
+Once the user authenticates, AWX creates organization and team aliases, as expected.
 
 
 13. Optionally provide team membership mapping in the **SAML Team Map** field. For further detail, see :ref:`ag_org_team_maps`.
@@ -363,7 +363,7 @@ Once the user authenticates, the controller creates organization and team aliase
 
 .. _`OneLogin's SAML Python Toolkit`: https://github.com/onelogin/python-saml#settings
 
-The controller uses the ``python-social-auth`` library when users log in through SAML. This library relies on the ``python-saml`` library to make available the settings for the next two optional fields, **SAML Service Provider Extra Configuration Data** and **SAML IDP to EXTRA_DATA Attribute Mapping**. 
+AWX uses the ``python-social-auth`` library when users log in through SAML. This library relies on the ``python-saml`` library to make available the settings for the next two optional fields, **SAML Service Provider Extra Configuration Data** and **SAML IDP to EXTRA_DATA Attribute Mapping**. 
 
 15. The **SAML Service Provider Extra Configuration Data** field is equivalent to the ``SOCIAL_AUTH_SAML_SP_EXTRA`` in the API. Refer to the `python-saml library documentation`_ to learn about the valid service provider extra (``SP_EXTRA``) parameters.
 
@@ -492,7 +492,7 @@ For transparent logins to work, you must first get IdP-initiated logins to work.
 
 1. Set the ``RelayState`` on the IdP to the key of the IdP definition in the ``SAML Enabled Identity Providers`` field as previously described. In the example given above, ``RelayState`` would need to be either ``myidp`` or ``onelogin``.
 
-2. Once this is working, specify the redirect URL for non-logged-in users to somewhere other than the default controller login page by using the **Login redirect override URL** field in the Miscellaneous Authentication settings window of the **Settings** menu, accessible from the left navigation bar. This should be set to ``/sso/login/saml/?idp=<name-of-your-idp>`` for transparent SAML login, as shown in the example.
+2. Once this is working, specify the redirect URL for non-logged-in users to somewhere other than the default AWX login page by using the **Login redirect override URL** field in the Miscellaneous Authentication settings window of the **Settings** menu, accessible from the left navigation bar. This should be set to ``/sso/login/saml/?idp=<name-of-your-idp>`` for transparent SAML login, as shown in the example.
 
 .. image:: ../common/images/configure-awx-system-login-redirect-url.png
 
@@ -500,7 +500,7 @@ For transparent logins to work, you must first get IdP-initiated logins to work.
 
     The above is a sample of a typical IdP format, but may not be the correct format for your particular case. You may need to reach out to your IdP for the correct transparent redirect URL as that URL is not the same for all IdPs.
 
-3. After transparent SAML login is configured, to log in using local credentials or a different SSO, go directly to ``https://<your-awx-server>/login``.  This provides the standard controller login page, including SSO authentication buttons, and allows you to log in with any configured method.
+3. After transparent SAML login is configured, to log in using local credentials or a different SSO, go directly to ``https://<your-awx-server>/login``.  This provides the standard AWX login page, including SSO authentication buttons, and allows you to log in with any configured method.
 
 
 Enabling Logging for SAML
@@ -545,9 +545,9 @@ Terminal Access Controller Access-Control System Plus (TACACS+) is a protocol th
 
 Generic OIDC settings
 ----------------------
-Similar to SAML, OpenID Connect (OIDC) is uses the OAuth 2.0 framework. It allows third-party applications to verify the identity and obtain basic end-user information. The main difference between OIDC and SMAL is that SAML has a service provider (SP)-to-IdP trust relationship, whereas OIDC establishes the trust with the channel (HTTPS) that is used to obtain the security token. To obtain the credentials needed to setup OIDC with controller, refer to the documentation from the identity provider (IdP) of your choice that has OIDC support.
+Similar to SAML, OpenID Connect (OIDC) is uses the OAuth 2.0 framework. It allows third-party applications to verify the identity and obtain basic end-user information. The main difference between OIDC and SMAL is that SAML has a service provider (SP)-to-IdP trust relationship, whereas OIDC establishes the trust with the channel (HTTPS) that is used to obtain the security token. To obtain the credentials needed to setup OIDC with AWX, refer to the documentation from the identity provider (IdP) of your choice that has OIDC support.
 
-To configure OIDC in controller:
+To configure OIDC in AWX:
 
 1. Click **Settings** from the left navigation bar.
 

@@ -78,7 +78,7 @@ You should also:
 
 - Ensure that the hostname is the proper client hostname matching the entry in AD and is not the IP address. 
 
-- In the username declaration, ensure that the domain name (the text after ``@``) is properly entered with regard to upper- and lower-case letters, as Kerberos is case sensitive. For the controller, you should also ensure that the inventory looks the same.
+- In the username declaration, ensure that the domain name (the text after ``@``) is properly entered with regard to upper- and lower-case letters, as Kerberos is case sensitive. For AWX, you should also ensure that the inventory looks the same.
 
 
 .. note:: 
@@ -88,7 +88,7 @@ You should also:
 
 Now, running a playbook should run as expected. You can test this by running the playbook as the ``awx`` user.
 
-Once you have verified that playbooks work properly, integration with the controller is easy. Generate the Kerberos ticket as the ``awx`` user and the controller should automatically pick up the generated ticket for authentication.
+Once you have verified that playbooks work properly, integration with AWX is easy. Generate the Kerberos ticket as the ``awx`` user and AWX should automatically pick up the generated ticket for authentication.
 
 .. note::
 
@@ -115,25 +115,3 @@ Ansible defaults to automatically managing Kerberos tickets when both the userna
 To disable automatic ticket management (e.g., to use an existing SSO ticket or call ``kinit`` manually to populate the default credential cache), set ``ansible_winrm_kinit_mode=manual`` via the inventory.
 
 Automatic ticket management requires a standard kinit binary on the control host system path. To specify a different location or binary name, set the ``ansible_winrm_kinit_cmd`` inventory variable to the fully-qualified path to an MIT krbv5 kinit-compatible binary.
-
-.. Kerberos tickets are generated every 24 hours, as the default lifetime of a ticket is 24 hours. If you need to change this, edit the ``/etc/krb.conf`` file.
-
-.. Another approach is to use ``cron`` to ``kinit`` the process every 24 hours. To automate this, you must generate a keytab file which stores the user password so that ``kinit`` will not prompt for the user password.  Use the following steps to generate this keytab file and then get the kerberos ticket:
-
-.. ::
-
-..   > ktutil
-..    ktutil:  addent -password -p username@WEBSITE.COM -k 1 -e aes256-cts-hmac-sha1-96
-..    provide password
-..    ktutil:  wkt username.keytab
-..    ktutil:  quit
-
-.. Now, add the following command to ``cron``:
-
-.. ::
-
-..  kinit username@WEBSITE.COM -k -t username.keytab
-
-.. (note) Make sure the system time is in sync between AD, the controller, and the clients. 
-
-.. (note) Client hostnames can looked up via DNS, both normally and reversed.

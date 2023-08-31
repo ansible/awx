@@ -61,10 +61,10 @@ If hiding of these secrets is required, the files that these secrets are read fr
 
 .. note::
 
-    If the secrets system is down, the controller will be unable to get the information and may fail in a way that would be recoverable once the service is restored. Using some redundancy on that system is highly recommended.
+    If the secrets system is down, AWX will be unable to get the information and may fail in a way that would be recoverable once the service is restored. Using some redundancy on that system is highly recommended.
 
 
-If, for any reason you believe the ``SECRET_KEY`` the controller generated for you has been compromised and needs to be regenerated, you can run a tool from the installer that behaves much like the controller backup and restore tool.
+If, for any reason you believe the ``SECRET_KEY`` AWX generated for you has been compromised and needs to be regenerated, you can run a tool from the installer that behaves much like AWX backup and restore tool.
 
 To generate a new secret key, run ``setup.sh -k`` using the inventory from your install.
 
@@ -85,15 +85,15 @@ include:
 
 -  “password” type survey fields entries
 
-To encrypt secret fields, the controller uses AES in CBC mode with a 256-bit key
+To encrypt secret fields, AWX uses AES in CBC mode with a 256-bit key
 for encryption, PKCS7 padding, and HMAC using SHA256 for authentication.
 The encryption/decryption process derives the AES-256 bit encryption key
 from the ``SECRET_KEY`` (described above), the field name of the model field
 and the database assigned auto-incremented record ID. Thus, if any
-attribute used in the key generation process changes, the controller fails to
+attribute used in the key generation process changes, AWX fails to
 correctly decrypt the secret. AWX is designed such that the
 ``SECRET_KEY`` is never readable in playbooks AWX launches, that
-these secrets are never readable by the controller users, and no secret field values
+these secrets are never readable by AWX users, and no secret field values
 are ever made available via the AWX REST API. If a secret value is
 used in a playbook, we recommend using ``no_log`` on the task so that
 it is not accidentally logged.

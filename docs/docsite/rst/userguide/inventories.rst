@@ -1082,7 +1082,7 @@ Red Hat Ansible Automation Platform
 
   .. image:: ../common/images/inventories-create-source-rhaap-example.png
 
-4. Use the **Source Variables** field to override variables used by the ``controller`` inventory plugin. Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two. For a detailed description of these variables, view the `controller inventory plugin <https://cloud.redhat.com/ansible/automation-hub/repo/published/ansible/controller/content/inventory/controller>`__ (requires your Red Hat Customer login).
+4. Use the **Source Variables** field to override variables used by the ``controller`` inventory plugin. Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two. 
 
 .. _ug_customscripts:
 

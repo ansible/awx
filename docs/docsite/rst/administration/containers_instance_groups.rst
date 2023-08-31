@@ -7,7 +7,7 @@ Container and Instance Groups
    pair: container; groups
    pair: instance; groups
 
-The controller allows you to execute jobs via ansible playbook runs directly on a member of the cluster or in a namespace of an Openshift cluster with the necessary service account provisioned called a Container Group. You can execute jobs in a container group only as-needed per playbook. For more information, see :ref:`ag_container_groups` towards the end of this section.
+AWX allows you to execute jobs via ansible playbook runs directly on a member of the cluster or in a namespace of an Openshift cluster with the necessary service account provisioned called a Container Group. You can execute jobs in a container group only as-needed per playbook. For more information, see :ref:`ag_container_groups` towards the end of this section.
 
 For |ees|, see :ref:`ug_execution_environments` in the |atu|.
 
@@ -26,7 +26,7 @@ When a job associated with one of the resources executes, it will be assigned to
 
 Here are some of the things to consider when working with instance groups:
 
-- You may optionally define other groups and group instances in those groups. These groups should be prefixed with ``instance_group_``. Instances are required to be in the ``automationcontroller`` or ``execution_nodes`` group alongside other ``instance_group_`` groups. In a clustered setup, at least one instance **must** be present in the ``automationcontroller`` group, which will appear as ``controlplane`` in the API instance groups. See :ref:`ag_automationcontroller_group_policies` for example scenarios.
+- You may optionally define other groups and group instances in those groups. These groups should be prefixed with ``instance_group_``. Instances are required to be in the ``awx`` or ``execution_nodes`` group alongside other ``instance_group_`` groups. In a clustered setup, at least one instance **must** be present in the ``awx`` group, which will appear as ``controlplane`` in the API instance groups. See :ref:`ag_awx_group_policies` for example scenarios.
 
 - A ``default`` API instance group is automatically created with all nodes capable of running jobs. Technically, it is like any other instance group but if a specific instance group is not associated with a specific resource, then job execution will always fall back to the ``default`` instance group. The ``default`` instance group always exists (it cannot be deleted nor renamed).
 
@@ -35,29 +35,29 @@ Here are some of the things to consider when working with instance groups:
 - Do not name any instance the same as a group name.
 
 
-.. _ag_automationcontroller_group_policies:
+.. _ag_awx_group_policies:
 
-``automationcontroller`` group policies
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+``awx`` group policies
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. index::
-   pair: policies; automationcontroller groups
+   pair: policies; awx groups
 
 Use the following criteria when defining nodes:
 
-- nodes in the ``automationcontroller`` group can define ``node_type`` hostvar to be ``hybrid`` (default) or ``control``
+- nodes in the ``awx`` group can define ``node_type`` hostvar to be ``hybrid`` (default) or ``control``
 - nodes in the ``execution_nodes`` group can define ``node_type`` hostvar to be ``execution`` (default) or ``hop``
 
 You can define custom groups in the inventory file by naming groups with ``instance_group_*`` where ``*`` becomes the name of the group in the API. Or, you can create custom instance groups in the API after the install has finished. 
 
-The current behavior expects a member of an ``instance_group_*`` be part of ``automationcontroller`` or ``execution_nodes`` group. Consider this example scenario:
+The current behavior expects a member of an ``instance_group_*`` be part of ``awx`` or ``execution_nodes`` group. Consider this example scenario:
 
 ::
 
-	[automationcontroller]
+	[awx]
 	126-addr.tatu.home ansible_host=192.168.111.126  node_type=control
 
-	[automationcontroller:vars]
+	[awx:vars]
 	peers=execution_nodes
 
 	[execution_nodes]
@@ -71,17 +71,17 @@ As a result of running the installer, you will get the error below:
    .. code-block:: bash
 
 	TASK [ansible.automation_platform_installer.check_config_static : Validate mesh topology] ***
-	fatal: [126-addr.tatu.home -> localhost]: FAILED! => {"msg": "The host '110-addr.tatu.home' is not present in either [automationcontroller] or [execution_nodes]"}
+	fatal: [126-addr.tatu.home -> localhost]: FAILED! => {"msg": "The host '110-addr.tatu.home' is not present in either [awx] or [execution_nodes]"}
 
 
 To fix this, you could move the box ``110-addr.tatu.home`` to an ``execution_node`` group.
 
 ::
 
-	[automationcontroller]
+	[awx]
 	126-addr.tatu.home ansible_host=192.168.111.126  node_type=control
 
-	[automationcontroller:vars]
+	[awx:vars]
 	peers=execution_nodes
 
 	[execution_nodes]
@@ -98,7 +98,7 @@ This results in:
 	  TASK [ansible.automation_platform_installer.check_config_static : Validate mesh topology] ***
 	  ok: [126-addr.tatu.home -> localhost] => {"changed": false, "mesh": {"110-addr.tatu.home": {"node_type": "execution", "peers": [], "receptor_control_filename": "receptor.sock", "receptor_control_service_name": "control", "receptor_listener": true, "receptor_listener_port": 8928, "receptor_listener_protocol": "tcp", "receptor_log_level": "info"}, "126-addr.tatu.home": {"node_type": "control", "peers": ["110-addr.tatu.home"], "receptor_control_filename": "receptor.sock", "receptor_control_service_name": "control", "receptor_listener": false, "receptor_listener_port": 27199, "receptor_listener_protocol": "tcp", "receptor_log_level": "info"}}}
 
-Upon upgrading from controller 4.0 or earlier, the legacy ``instance_group_`` member will most likely have the awx code installed, which would cause that node to be placed in the ``automationcontroller`` group. 
+Upon upgrading from older versions of awx, the legacy ``instance_group_`` member will most likely have the awx code installed, which would cause that node to be placed in the ``awx`` group. 
 
 
 Configuring Instance Groups from the API
@@ -127,11 +127,11 @@ Instance group policies
    pair: policies; instance groups
    pair: clustering; instance group policies
 
-You can configure controller instances to automatically join Instance Groups when they come online by defining a :term:`policy`. These policies are evaluated for every new instance that comes online.
+You can configure AWX instances to automatically join Instance Groups when they come online by defining a :term:`policy`. These policies are evaluated for every new instance that comes online.
 
 Instance Group Policies are controlled by three optional fields on an ``Instance Group``:
 
-- ``policy_instance_percentage``: This is a number between 0 - 100. It guarantees that this percentage of active controller instances will be added to this Instance Group. As new instances come online, if the number of Instances in this group relative to the total number of instances is less than the given percentage, then new ones will be added until the percentage condition is satisfied.
+- ``policy_instance_percentage``: This is a number between 0 - 100. It guarantees that this percentage of active AWX instances will be added to this Instance Group. As new instances come online, if the number of Instances in this group relative to the total number of instances is less than the given percentage, then new ones will be added until the percentage condition is satisfied.
 - ``policy_instance_minimum``: This policy attempts to keep at least this many instances in the Instance Group. If the number of available instances is lower than this minimum, then all instances will be placed in this Instance Group.
 - ``policy_instance_list``: This is a fixed list of instance names to always include in this Instance Group.
 
@@ -232,7 +232,7 @@ Likewise, an administrator could assign multiple groups to each organization as 
 
 .. |Instance Group example| image:: ../common/images/instance-groups-scenarios.png
 
-Arranging resources in this way offers a lot of flexibility. Also, you can create instance groups with only one instance, thus allowing you to direct work towards a very specific Host in the controller cluster.
+Arranging resources in this way offers a lot of flexibility. Also, you can create instance groups with only one instance, thus allowing you to direct work towards a very specific Host in the AWX cluster.
 
 .. _ag_instancegrp_cpacity:
 
@@ -249,7 +249,7 @@ Sometimes there is external business logic which may drive the desire to limit t
 
 For traditional instances and instance groups, there could be a desire to allow two organizations to run jobs on the same underlying instances, but limit each organization's total number of concurrent jobs. This can be achieved by creating an instance group for each organization and assigning the value for ``max_concurrent_jobs``.
 
-For container groups, the controller is generally not aware of the resource limits of the OpenShift cluster. There may be limits set on the number of pods on a namespace, or only resources available to schedule a certain number of pods at a time if no auto-scaling is in place. Again, in this case, we can adjust the value for ``max_concurrent_jobs``.
+For container groups, AWX is generally not aware of the resource limits of the OpenShift cluster. There may be limits set on the number of pods on a namespace, or only resources available to schedule a certain number of pods at a time if no auto-scaling is in place. Again, in this case, we can adjust the value for ``max_concurrent_jobs``.
 
 Another parameter available is ``max_forks``. This provides additional flexibility for capping the capacity consumed on an instance group or container group. This may be used if jobs with a wide variety of inventory sizes and "forks" values are being run. This way, you can limit an organization to run up to 10 jobs concurrently, but consume no more than 50 forks at a time.
 
@@ -274,16 +274,16 @@ Deprovision Instance Groups
 .. index::
    pair: groups; deprovisioning
 
-Re-running the setup playbook does not automatically deprovision instances since clusters do not currently distinguish between an instance that was taken offline intentionally or due to failure. Instead, shut down all services on the controller instance and then run the deprovisioning tool from any other instance:
+Re-running the setup playbook does not automatically deprovision instances since clusters do not currently distinguish between an instance that was taken offline intentionally or due to failure. Instead, shut down all services on the AWX instance and then run the deprovisioning tool from any other instance:
 
-#. Shut down the instance or stop the service with the command, ``automation-controller-service stop``.
+#. Shut down the instance or stop the service with the command, ``automation-awx-service stop``.
 
-#. Run the deprovision command ``$ awx-manage deprovision_instance --hostname=<name used in inventory file>`` from another instance to remove it from the controller cluster registry.
+#. Run the deprovision command ``$ awx-manage deprovision_instance --hostname=<name used in inventory file>`` from another instance to remove it from the AWX cluster registry.
 
 	Example: ``awx-manage deprovision_instance --hostname=hostB``
 
 
-Similarly, deprovisioning instance groups in the controller does not automatically deprovision or remove instance groups, even though re-provisioning will often cause these to be unused. They may still show up in API endpoints and stats monitoring. These groups can be removed with the following command:
+Similarly, deprovisioning instance groups in AWX does not automatically deprovision or remove instance groups, even though re-provisioning will often cause these to be unused. They may still show up in API endpoints and stats monitoring. These groups can be removed with the following command:
 
 	Example: ``awx-manage unregister_queue --queuename=<name>``
 
@@ -298,7 +298,7 @@ Container Groups
    single: container groups
    pair: containers; instance groups
 
-AWX supports :term:`Container Groups`, which allow you to execute jobs in the controller regardless of whether the controller is installed as a standalone, in  a virtual environment, or in a container. Container groups act as a pool of resources within a virtual environment. You can create instance groups to point to an OpenShift container, which are job environments that are provisioned on-demand as a Pod that exists only for the duration of the playbook run. This is known as the ephemeral execution model and ensures a clean environment for every job run.
+AWX supports :term:`Container Groups`, which allow you to execute jobs in AWX regardless of whether AWX is installed as a standalone, in  a virtual environment, or in a container. Container groups act as a pool of resources within a virtual environment. You can create instance groups to point to an OpenShift container, which are job environments that are provisioned on-demand as a Pod that exists only for the duration of the playbook run. This is known as the ephemeral execution model and ensures a clean environment for every job run.
 
 In some cases, it is desirable to have container groups be "always-on", which is configured through the creation of an instance.
 
@@ -318,7 +318,7 @@ Create a container group
 
 To create a container group:
 
-1. Use the controller user interface to create an :ref:`ug_credentials_ocp_k8s` credential that will be used with your container group, see :ref:`ug_credentials_add` in the |atu| for detail.
+1. Use the AWX user interface to create an :ref:`ug_credentials_ocp_k8s` credential that will be used with your container group, see :ref:`ug_credentials_add` in the |atu| for detail.
 
 2. Create a new container group by navigating to the Instance Groups configuration window by clicking **Instance Groups** from the left navigation bar.
 
@@ -349,7 +349,7 @@ You may provide additional customizations, if needed. Click **Expand** to view t
 
 .. note::
 
-	The image used at job launch time is determined by which |ee| is associated with the job. If a Container Registry credential is associated with the |ee|, then the controller will attempt to make a ``ImagePullSecret`` to pull the image. If you prefer not to give the service account permission to manage secrets, you must pre-create the ``ImagePullSecret`` and specify it on the pod spec, and omit any credential from the |ee| used.
+	The image used at job launch time is determined by which |ee| is associated with the job. If a Container Registry credential is associated with the |ee|, then AWX will attempt to make a ``ImagePullSecret`` to pull the image. If you prefer not to give the service account permission to manage secrets, you must pre-create the ``ImagePullSecret`` and specify it on the pod spec, and omit any credential from the |ee| used.
 
 Once the container group is successfully created, the **Details** tab of the newly created container group remains, which allows you to review and edit your container group information. This is the same menu that is opened if the Edit (|edit-button|) button is clicked from the **Instance Group** link. You can also edit **Instances** and review **Jobs** associated with this instance group.
 
@@ -417,7 +417,7 @@ When you run a job associated with a container group, you can see the details of
 Kubernetes API failure conditions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-When running a container group and the Kubernetes API responds that the resource quota has been exceeded, the controller keeps the job in pending state. Other failures result in the traceback of the **Error Details** field showing the failure reason, similar to the example here: 
+When running a container group and the Kubernetes API responds that the resource quota has been exceeded, AWX keeps the job in pending state. Other failures result in the traceback of the **Error Details** field showing the failure reason, similar to the example here: 
 
 ::
 
@@ -435,8 +435,8 @@ Capacity limits and quotas for containers are defined via objects in the Kuberne
 
 - To set limits on all pods within a given namespace, use the ``LimitRange`` object. Refer to the OpenShift documentation for `Quotas and Limit Ranges <https://docs.openshift.com/online/pro/dev_guide/compute_resources.html#overview>`_.
 
-- To set limits directly on the pod definition launched by the controller, see :ref:`ag_customize_pod_spec` and refer to the OpenShift documentation to set the options to `compute resources <https://docs.openshift.com/online/pro/dev_guide/compute_resources.html#dev-compute-resources>`_.
+- To set limits directly on the pod definition launched by AWX, see :ref:`ag_customize_pod_spec` and refer to the OpenShift documentation to set the options to `compute resources <https://docs.openshift.com/online/pro/dev_guide/compute_resources.html#dev-compute-resources>`_.
 
 .. Note::
 
-	Container groups do not use the capacity algorithm that normal nodes use. You would need to explicitly set the number of forks at the job template level, for instance. If forks are configured in the controller, that setting will be passed along to the container.
+	Container groups do not use the capacity algorithm that normal nodes use. You would need to explicitly set the number of forks at the job template level, for instance. If forks are configured in AWX, that setting will be passed along to the container.

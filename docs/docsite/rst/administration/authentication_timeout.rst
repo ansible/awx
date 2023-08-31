@@ -12,7 +12,7 @@ Changing the Default Timeout for Authentication
    pair: timeout; session
 
 
-The default length of time, in seconds, that your supplied token is valid can be changed in the System Settings screen of the controller user interface:
+The default length of time, in seconds, that your supplied token is valid can be changed in the System Settings screen of the AWX user interface:
 
 1. Click the **Settings** from the left navigation bar.  
 
@@ -28,4 +28,4 @@ The default length of time, in seconds, that your supplied token is valid can be
 
 .. note::
 
-  If you are accessing the controller directly and are having trouble getting your authentication to stay, in that you have to keep logging in over and over, try clearing your web browser's cache. In situations like this, it is often found that the authentication token has been cached in the browser session and must be cleared.
+  If you are accessing AWX directly and are having trouble getting your authentication to stay, in that you have to keep logging in over and over, try clearing your web browser's cache. In situations like this, it is often found that the authentication token has been cached in the browser session and must be cleared.

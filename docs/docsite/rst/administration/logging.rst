@@ -17,7 +17,7 @@ Logging and Aggregation
 
 Logging is a feature that provides the capability to send detailed logs to several kinds of 3rd party external log aggregation services. Services connected to this data feed serve as a useful means in gaining insight into AWX usage or technical trends. The data can be used to analyze events in the infrastructure, monitor for anomalies, and correlate events from one service with events in another. The types of data that are most useful to AWX are job fact data, job events/job runs, activity stream data, and log messages. The data is sent in JSON format over a HTTP connection using minimal service-specific tweaks engineered in a custom handler or via an imported library. 
 
-Installing controller will install a newer version of rsyslog, which will replace the version that comes with the RHEL base. The version of rsyslog that is installed by controller does not include the following rsyslog modules:  
+Installing AWX will install a newer version of rsyslog, which will replace the version that comes with the RHEL base. The version of rsyslog that is installed by AWX does not include the following rsyslog modules:  
 
 - rsyslog-udpspoof.x86_64
 - rsyslog-libdbi.x86_64
@@ -49,7 +49,7 @@ Below are special loggers (except for ``awx``, which constitutes generic server 
 
 These loggers only use log-level of INFO, except for the ``awx`` logger, which may be any given level.
 
-Additionally, the standard controller logs are be deliverable through this same mechanism. It is apparent how to enable or disable each of these five sources of data without manipulating a complex dictionary in your local settings file, as well as adjust the log-level consumed from the standard controller logs.
+Additionally, the standard AWX logs are be deliverable through this same mechanism. It is apparent how to enable or disable each of these five sources of data without manipulating a complex dictionary in your local settings file, as well as adjust the log-level consumed from the standard AWX logs.
 
 To configure various logging components in AWX, click **Settings** from the left navigation bar then select **Logging settings** from the list of System options. 
 
@@ -59,7 +59,7 @@ Log message schema
 Common schema for all loggers:
 
 - ``cluster_host_id``: Unique identifier of the host within the AWX cluster
-- ``level``: Standard python log level, roughly reflecting the significance of the event All of the data loggers as a part of this feature use INFO level, but the other controller logs will use different levels as appropriate
+- ``level``: Standard python log level, roughly reflecting the significance of the event All of the data loggers as a part of this feature use INFO level, but the other AWX logs will use different levels as appropriate
 - ``logger_name``: Name of the logger we use in the settings, for example, "activity_stream" 
 - ``@timestamp``: Time of log 
 - ``path``: File path in code where the log was generated 
@@ -189,7 +189,7 @@ AWX's Splunk logging integration uses the Splunk HTTP Collector. When configurin
           ],
           "LOG_AGGREGATOR_INDIVIDUAL_FACTS": false,
           "LOG_AGGREGATOR_ENABLED": true,
-          "LOG_AGGREGATOR_CONTROLLER_UUID": ""
+          "LOG_AGGREGATOR_TOWER_UUID": ""
       }
 
 Splunk HTTP Event Collector listens on 8088 by default so it is necessary to provide the full HEC event URL (with port) in order for incoming requests to be processed successfully. These values are entered in the example below:
