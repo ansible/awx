@@ -49,8 +49,8 @@
 - name: Cancel the command
   ad_hoc_command_cancel:
     command_id: "{{ command.id }}"
+    request_timeout: 60
   register: results
-  ignore_errors: true
 
 - assert:
     that:

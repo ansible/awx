@@ -1,0 +1,89 @@
+# This currently *always* uses the "warm build cache" image
+# We should do something to allow forcing a rebuild, probably by looking for
+# some string in the commit message or something.
+
+name: Run AWX (devel environment)
+description: Runs AWX with `make docker-compose`
+inputs:
+  github-token:
+    description: GitHub Token for registry access
+    required: true
+  build-ui:
+    description: Should the UI be built?
+    required: false
+    default: false
+    type: boolean
+outputs:
+  ip:
+    description: The IP of the tools_awx_1 container
+    value: ${{ steps.data.outputs.ip }}
+  admin-token:
+    description: OAuth token for admin user
+    value: ${{ steps.data.outputs.admin_token }}
+runs:
+  using: composite
+  steps:
+    - name: Get python version from Makefile
+      shell: bash
+      run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
+
+    - name: Upgrade ansible-core
+      shell: bash
+      run: python3 -m pip install --upgrade ansible-core
+
+    - name: Install system deps
+      shell: bash
+      run: sudo apt-get install -y gettext
+
+    - name: Log in to registry
+      shell: bash
+      run: |
+        echo "${{ inputs.github-token }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+    - name: Pre-pull latest available devel image and build HEAD on top of it
+      shell: bash
+      run: |
+        docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }}
+        DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} \
+        COMPOSE_TAG=${{ github.base_ref }} \
+        make docker-compose-build
+
+    - name: Start AWX
+      shell: bash
+      run: |
+        DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} \
+        COMPOSE_TAG=${{ github.base_ref }} \
+        COMPOSE_UP_OPTS="-d" \
+        make docker-compose
+
+    - name: Update default AWX password
+      shell: bash
+      run: |
+        while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' -k https://localhost:8043/api/v2/ping/)" != "200" ]]
+        do
+        echo "Waiting for AWX..."
+        sleep 5
+        done
+        echo "AWX is up, updating the password..."
+        docker exec -i tools_awx_1 sh <<-EOSH
+          awx-manage update_password --username=admin --password=password
+        EOSH
+
+    - name: Build UI
+      # This must be a string comparison in composite actions:
+      # https://github.com/actions/runner/issues/2238
+      if: ${{ inputs.build-ui == 'true' }}
+      shell: bash
+      run: |
+        docker exec -i tools_awx_1 sh <<-EOSH
+          make ui-devel
+        EOSH
+
+    - name: Get instance data
+      id: data
+      shell: bash
+      run: |
+        AWX_IP=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' tools_awx_1)
+        ADMIN_TOKEN=$(docker exec -i tools_awx_1 awx-manage create_oauth2_token --user admin)
+        echo "ip=$AWX_IP" >> $GITHUB_OUTPUT
+        echo "admin_token=$ADMIN_TOKEN" >> $GITHUB_OUTPUT

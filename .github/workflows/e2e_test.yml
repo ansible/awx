@@ -21,32 +21,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Get python version from Makefile
-        run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
-
-      - name: Install python ${{ env.py_version }}
-        uses: actions/setup-python@v4
+      - uses: ./.github/actions/run_awx_devel
+        id: awx
         with:
-          python-version: ${{ env.py_version }}
-
-      - name: Install system deps
-        run: sudo apt-get install -y gettext
-
-      - name: Log in to registry
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-      - name: Pre-pull image to warm build cache
-        run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }}
-
-      - name: Build UI
-        run: |
-          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ github.base_ref }} make ui-devel
-
-      - name: Start AWX
-        run: |
-          DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} COMPOSE_TAG=${{ github.base_ref }} make docker-compose &> make-docker-compose-output.log &
+          build-ui: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          log-filename: e2e-${{ matrix.job }}.log
 
       - name: Pull awx_cypress_base image
         run: |
@@ -65,18 +45,6 @@ jobs:
           cd ${{ secrets.E2E_PROJECT }}/ui-tests/awx-pf-tests
           docker build -t awx-pf-tests .
 
-      - name: Update default AWX password
-        run: |
-          while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' -k https://localhost:8043/api/v2/ping/)" != "200" ]]
-          do
-          echo "Waiting for AWX..."
-          sleep 5;
-          done
-          echo "AWX is up, updating the password..."
-          docker exec -i tools_awx_1 sh <<-EOSH
-            awx-manage update_password --username=admin --password=password
-          EOSH
-
       - name: Run E2E tests
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
@@ -86,7 +54,7 @@ jobs:
           export COMMIT_INFO_SHA=$GITHUB_SHA
           export COMMIT_INFO_REMOTE=$GITHUB_REPOSITORY_OWNER
           cd ${{ secrets.E2E_PROJECT }}/ui-tests/awx-pf-tests
-          AWX_IP=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' tools_awx_1)
+          AWX_IP=${{ steps.awx.outputs.ip }}
           printenv > .env
           echo "Executing tests:"
           docker run \
@@ -102,8 +70,6 @@ jobs:
           -w /e2e \
           awx-pf-tests run --project .
 
-      - name: Save AWX logs
-        uses: actions/upload-artifact@v2
+      - uses: ./.github/actions/upload_awx_devel_logs
         with:
-          name: AWX-logs-${{ matrix.job }}
-          path: make-docker-compose-output.log
+          log-filename: e2e-${{ matrix.job }}.log
