@@ -13,6 +13,7 @@
 # scm_accept_hostkey: true/false (only for git, set automatically)
 # scm_refspec: a refspec to fetch in addition to obtaining version
 # scm_track_submodules: true/false
+# scm_depth: depth of clone (only for git)
 # roles_enabled: Value of the global setting to enable roles downloading
 # collections_enabled: Value of the global setting to enable collections downloading
 # galaxy_task_env: environment variables to use specifically for ansible-galaxy commands
@@ -47,6 +48,7 @@
             force: "{{ scm_clean }}"
             track_submodules: "{{ scm_track_submodules | default(omit) }}"
             accept_hostkey: "{{ scm_accept_hostkey | default(omit) }}"
+            depth: "{{ scm_depth | default(omit) }}"
           register: git_result
 
         - name: Set the git repository version

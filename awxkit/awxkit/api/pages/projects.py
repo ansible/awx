@@ -38,6 +38,7 @@ class Project(HasCopy, HasCreate, HasNotifications, UnifiedJobTemplate):
             'scm_update_cache_timeout',
             'scm_update_on_launch',
             'scm_refspec',
+            'scm_depth',
             'allow_override',
             'signature_validation_credential',
         )

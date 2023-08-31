@@ -1397,6 +1397,7 @@ class ProjectOptionsSerializer(BaseSerializer):
             'credential',
             'timeout',
             'scm_revision',
+            'scm_depth',
         )
 
     def get_related(self, obj):
@@ -1429,6 +1430,8 @@ class ProjectOptionsSerializer(BaseSerializer):
             errors['scm_refspec'] = _('SCM refspec can only be used with git projects.')
         if attrs.get('scm_track_submodules') and scm_type != 'git':
             errors['scm_track_submodules'] = _('SCM track_submodules can only be used with git projects.')
+        if attrs.get('scm_depth') and scm_type != 'git':
+            errors['scm_depth'] = _('SCM depth can only be used with git projects.')
 
         if errors:
             raise serializers.ValidationError(errors)

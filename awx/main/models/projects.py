@@ -118,6 +118,12 @@ class ProjectOptions(models.Model):
         default=False,
         help_text=_('Track submodules latest commits on defined branch.'),
     )
+    scm_depth = models.IntegerField(
+        blank=True,
+        null=True,
+        verbose_name=_('SCM depth'),
+        help_text=_("Specifies the depth to checkout."),
+    )
     credential = models.ForeignKey(
         'Credential',
         related_name='%(class)ss',
