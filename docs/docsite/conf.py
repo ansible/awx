@@ -53,20 +53,6 @@ release = 'AWX latest'
 
 language = 'en'
 
-# The following content is not available as part of an RST document but as
-# part of an html layout. This is why we are integrating the translation here.
-ansible_latest_link = {
-    'ko': 'Automation Controller의 최신 버전을 사용하고 계십니까? 사용 중인 컨트롤러 버전과 가장 일치하는 <a class="DocSiteProduct-versionheader" href="http://docs.ansible.com/automation.html">Automation Controller 문서</a> 세트를 찾으십시오.',
-    'ja': '最新の Automation Controller を利用されていますか?お使いの Controller に最適な <a class="DocSiteProduct-versionheader" href="http://docs.ansible.com/automation.html">Automation Controller</a> ドキュメントをご参照ください。',
-    'zh': '您是否正在使用最新和最好的 Automation Controller 版本? 请选择与您的 Controller 版本匹配的 <a class="DocSiteProduct-versionheader" href="http://docs.ansible.com/automation.html">Automation Controller 文档</a>.',
-    'en': 'Are you using the latest and greatest version of Automation Controller? Find the <a class="DocSiteProduct-versionheader" href="http://docs.ansible.com/automation.html">Automation Controller documentation</a> set which best matches your version of the controller.'
-}
-
-lang = os.getenv('LANGUAGE', 'en')
-if lang not in ansible_latest_link:
-    lang = 'en'
-latest_link = ansible_latest_link[lang]
-
 locale_dirs = ['locale/']   # path is example but recommended.
 gettext_compact = False     # optional.
 
