@@ -167,7 +167,7 @@ Similarly, you can launch a job by making a POST to the job template that you wa
 **Python Example**
 
 `awxkit <https://pypi.org/project/awxkit/>`_ is an open source tool that makes it easy to use HTTP requests to access the AWX API. 
-You can have awxkit acquire a PAT on your behalf by using the ``awxkit login`` command. Refer to the `api_start`_ for more detail.
+You can have awxkit acquire a PAT on your behalf by using the ``awxkit login`` command. Refer to the :ref:`api_start` for more detail.
 
 For more information on how to use OAuth 2 in AWX in the context of integrating external applications, see :ref:`ag_oauth2_token_auth` in the |ata|. 
 
