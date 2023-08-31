@@ -87,7 +87,7 @@ def _update_user_orgs(backend, desired_org_state, orgs_to_create, user=None):
             is_member_expression = org_opts.get(user_type, None)
             remove_members = bool(org_opts.get('remove_{}'.format(user_type), remove))
             has_role = _update_m2m_from_expression(user, is_member_expression, remove_members)
-            desired_org_state[organization_name][role_name] = has_role
+            desired_org_state[organization_name][role_name] = desired_org_state[organization_name].get(role_name, False) or has_role
 
 
 def _update_user_teams(backend, desired_team_state, teams_to_create, user=None):
