@@ -70,7 +70,7 @@ If you are unable to run the ``helloworld.yml`` example playbook from the Quick 
 Unable to login to AWX via HTTP
 ==================================
 
-Access to AWX is intentionally restricted through a secure protocol (HTTPS). In cases where your configuration is set up to run a controller node behind a load balancer or proxy as "HTTP only", and you only want to access it without SSL (for troubleshooting, for example), you must add the following settings in the ``custom.py`` file located at ``/etc/tower/conf.d`` of your controller instance:
+Access to AWX is intentionally restricted through a secure protocol (HTTPS). In cases where your configuration is set up to run an AWX node behind a load balancer or proxy as "HTTP only", and you only want to access it without SSL (for troubleshooting, for example), you must add the following settings in the ``custom.py`` file located at ``/etc/tower/conf.d`` of your AWX instance:
  
 :: 
 
@@ -83,7 +83,7 @@ To apply the changes, run:
 
 ::
 
-   automation-controller-service restart
+   awx-service restart
 
 
 WebSockets port for live events not working
@@ -146,7 +146,7 @@ If you are attempting to run a playbook Job and it stays in the "Pending" state 
 
 - Ensure all supervisor services are running via ``supervisorctl status``.
 - Check to ensure that the ``/var/`` partition has more than 1 GB of space available. Jobs will not complete with insufficient space on the ``/var/`` partition.
-- Run ``automation-controller-service restart`` on the AWX server.
+- Run ``awx-service restart`` on the AWX server.
 
 
 If you continue to have problems, run ``sosreport`` as root on the AWX server, then file a `support request`_ with the result.
@@ -154,12 +154,12 @@ If you continue to have problems, run ``sosreport`` as root on the AWX server, t
 .. _`support request`: http://support.ansible.com/
 
 
-Cancel a controller job
+Cancel an AWX job
 =========================
 .. index:: 
    pair: troubleshooting; job cancellation
 
-When issuing a ``cancel`` request on a currently running controller job, AWX issues a ``SIGINT`` to the ``ansible-playbook`` process. While this causes Ansible to stop dispatching new tasks and exit, in many cases, module tasks that were already dispatched to remote hosts will run to completion. This behavior is similar to pressing ``Ctrl-C`` during a command-line Ansible run.
+When issuing a ``cancel`` request on a currently running AWX job, AWX issues a ``SIGINT`` to the ``ansible-playbook`` process. While this causes Ansible to stop dispatching new tasks and exit, in many cases, module tasks that were already dispatched to remote hosts will run to completion. This behavior is similar to pressing ``Ctrl-C`` during a command-line Ansible run.
  
 With respect to software dependencies, if a running job is canceled, the job is essentially removed but the dependencies will remain.
 

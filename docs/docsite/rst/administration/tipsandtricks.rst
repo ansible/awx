@@ -173,7 +173,7 @@ Configuring the ``awxhost`` hostname for notifications
 .. index:: 
    pair: notifications; hostname configuration
 
-In the :ref:`System Settings <configure_awx_system>`, you can replace ``https://towerhost`` in the **Base URL of the service** field with your preferred hostname to change the notification hostname.     
+In the :ref:`System Settings <configure_awx_system>`, you can replace ``https://awxhost`` in the **Base URL of the service** field with your preferred hostname to change the notification hostname.     
 
 .. image:: ../common/images/configure-awx-system-misc-baseurl.png
 

@@ -38,7 +38,6 @@ Known Issues
    pair: known issues; VMWare self-signed certs
    pair: known issues; self-signed certs (VMWare)
    pair: known issues; awx-manage inventory_import user
-   pair: known issues; upgrading tower 3.8 existing instance groups on OCP deployments
    pair: known issues; duplicate Ansible-Galaxy credentials
    pair: known issues; deleted default orgs
 
@@ -117,7 +116,7 @@ Server error when accessing SAML metadata via hostname
 
 When AWX is accessed via hostname only (e.g. https://my-little-awx), trying to read the SAML metadata from /sso/metadata/saml/ generates a ``sp_acs_url_invalid`` server error.
 
-A configuration in which uses SAML when accessing AWX via hostname only instead of an FQDN, is not supported. Doing so will generate an error that is captured in the tower.log file and in the browser with full traceback information.
+A configuration in which uses SAML when accessing AWX via hostname only instead of an FQDN, is not supported. Doing so will generate an error that is captured in the browser with full traceback information.
 
 
 SAML authentication revokes admin role upon login

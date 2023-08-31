@@ -145,8 +145,6 @@ Execution environment mount options
 
 Rebuilding an |ee| is one way to add certs, but inheriting certs from the host provides a more convenient solution.  
 
-.. https://github.com/ansible/tower/issues/5383
-
 Additionally, you may customize |ee| mount options and mount paths in the **Paths to expose to isolated jobs** field of the Job Settings page, where it supports podman-style volume mount syntax. Refer to the `Podman documentation <https://docs.podman.io/en/latest/markdown/podman-run.1.html#volume-v-source-volume-host-dir-container-dir-options>`_ for detail.
 
 In some cases where the ``/etc/ssh/*`` files were added to the |ee| image due to customization of an |ee|, an SSH error may occur. For example, exposing the ``/etc/ssh/ssh_config.d:/etc/ssh/ssh_config.d:O`` path allows the container to be mounted, but the ownership permissions are not mapped correctly. 

@@ -248,7 +248,7 @@ Credential Types can also generate temporary files to support .ini files or cert
         "template": "[mycloud]\ntoken={{ api_token }}"
     },
     "env": {
-        "MY_CLOUD_INI_FILE": "{{ tower.filename }}"
+        "MY_CLOUD_INI_FILE": "{{ awx.filename }}"
     }
   }
 
@@ -289,8 +289,8 @@ An example of referencing multiple files in a custom credential template is as f
         "template.key_file": "[mykey]\n{{ key }}"
     },
     "env": {
-        "MY_CERT_INI_FILE": "{{ tower.filename.cert_file }}",
-        "MY_KEY_INI_FILE": "{{ tower.filename.key_file }}"
+        "MY_CERT_INI_FILE": "{{ awx.filename.cert_file }}",
+        "MY_KEY_INI_FILE": "{{ awx.filename.key_file }}"
     }
   }
 

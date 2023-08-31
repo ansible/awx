@@ -480,7 +480,7 @@ Inventory updates use dynamically-generated YAML files which are parsed by their
 - :ref:`ug_source_insights`
 - :ref:`ug_source_openstack`
 - :ref:`ug_source_rhv`
-- :ref:`ug_source_tower`
+- :ref:`ug_source_rhaap`
 
 
 Newly created configurations for inventory sources will contain the default plugin configuration values. If you want your newly created inventory sources to match the output of legacy sources, you must apply a specific set of configuration values for that source. To ensure backward compatibility, AWX uses "templates" for each of these sources to force the output of inventory plugins into the legacy format. Refer to :ref:`ir_inv_plugin_templates_reference` section of this guide for each source and their respective templates to help you migrate to the new style inventory plugin output.
@@ -1065,7 +1065,7 @@ Red Hat Virtualization
 
   Red Hat Virtualization (ovirt) inventory source requests are secure by default. To change this default setting, set the key ``ovirt_insecure`` to **true** in ``source_variables``, which is only available from the API details of the inventory source at the ``/api/v2/inventory_sources/N/`` endpoint.
 
-.. _ug_source_tower:
+.. _ug_source_rhaap:
 
 Red Hat Ansible Automation Platform
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
