@@ -90,6 +90,10 @@ options:
         - Cache Timeout to cache prior project syncs for a certain number of seconds.
             Only valid if scm_update_on_launch is to True, otherwise ignored.
       type: int
+    scm_depth:
+      description:
+        - Specifies the depth to checkout.
+      type: int
     allow_override:
       description:
         - Allow changing the SCM branch or revision in a job template that uses this project.
