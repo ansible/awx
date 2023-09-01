@@ -7,6 +7,7 @@ env:
   COMPOSE_TAG: ${{ github.base_ref || 'devel' }}
 on:
   pull_request:
+    paths-ignore: 'docs/**'
 jobs:
   common-tests:
     name: ${{ matrix.tests.name }}
@@ -95,13 +96,6 @@ jobs:
         env:
           AWX_TEST_IMAGE: awx
           AWX_TEST_VERSION: ci
-
-  docsite-build:
-    name: docsite test build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Assure docs can be built
-        run: tox -e docs
 
   collection-sanity:
     name: awx_collection sanity
