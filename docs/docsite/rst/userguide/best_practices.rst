@@ -47,7 +47,7 @@ Variable Management for Inventory
    pair: best practices; variable inventory management
 
 Keeping variable data along with the hosts and groups definitions (see the inventory
-editor) is encouraged, rather than using ``group_vars/`` and
+editor) is encouraged, rather than using ``group_vars/ and
 ``host_vars/``. If you use dynamic inventory sources, AWX can sync
 such variables with the database as long as the **Overwrite Variables**
 option is not set.
