@@ -7,7 +7,9 @@ env:
   COMPOSE_TAG: ${{ github.base_ref || 'devel' }}
 on:
   pull_request:
-    paths-ignore: 'docs/**'
+    paths-ignore:
+      - 'docs/**'
+      - '.github/workflows/docs.yml'
 jobs:
   common-tests:
     name: ${{ matrix.tests.name }}
