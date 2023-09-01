@@ -96,6 +96,13 @@ jobs:
           AWX_TEST_IMAGE: awx
           AWX_TEST_VERSION: ci
 
+  docsite-build:
+    name: docsite test build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assure docs can be built
+        run: tox -e docs
+
   collection-sanity:
     name: awx_collection sanity
     runs-on: ubuntu-latest
