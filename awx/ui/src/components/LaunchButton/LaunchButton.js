@@ -47,6 +47,9 @@ function LaunchButton({ resource, children }) {
   const [error, setError] = useState(null);
 
   const handleLaunch = async () => {
+    if (isLaunching) {
+      return;
+    }
     setIsLaunching(true);
     const readLaunch =
       resource.type === 'workflow_job_template'
@@ -104,6 +107,10 @@ function LaunchButton({ resource, children }) {
   };
 
   const launchWithParams = async (params) => {
+    if (isLaunching) {
+      return;
+    }
+    setIsLaunching(true);
     try {
       let jobPromise;
 
@@ -141,6 +148,9 @@ function LaunchButton({ resource, children }) {
     let readRelaunch;
     let relaunch;
 
+    if (isLaunching) {
+      return;
+    }
     setIsLaunching(true);
     if (resource.type === 'inventory_update') {
       // We'll need to handle the scenario where the src no longer exists
