@@ -245,7 +245,7 @@ function Legend() {
                 y1="9"
                 x2="20"
                 y2="9"
-                stroke="#666"
+                stroke="#6A6E73"
                 strokeWidth="4"
               />
             </svg>
@@ -260,7 +260,7 @@ function Legend() {
                 y1="9"
                 x2="20"
                 y2="9"
-                stroke="#666"
+                stroke="#3E8635"
                 strokeWidth="4"
                 strokeDasharray="6"
               />

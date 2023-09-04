@@ -5356,10 +5356,16 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
 class InstanceLinkSerializer(BaseSerializer):
     class Meta:
         model = InstanceLink
-        fields = ('source', 'target', 'link_state')
+        fields = ('id', 'url', 'related', 'source', 'target', 'link_state')
 
-    source = serializers.SlugRelatedField(slug_field="hostname", read_only=True)
-    target = serializers.SlugRelatedField(slug_field="hostname", read_only=True)
+    source = serializers.SlugRelatedField(slug_field="hostname", queryset=Instance.objects.all())
+    target = serializers.SlugRelatedField(slug_field="hostname", queryset=Instance.objects.all())
+
+    def get_related(self, obj):
+        res = super(InstanceLinkSerializer, self).get_related(obj)
+        res['source_instance'] = self.reverse('api:instance_detail', kwargs={'pk': obj.source.id})
+        res['target_instance'] = self.reverse('api:instance_detail', kwargs={'pk': obj.target.id})
+        return res
 
 
 class InstanceNodeSerializer(BaseSerializer):
@@ -5376,6 +5382,7 @@ class InstanceSerializer(BaseSerializer):
     jobs_running = serializers.IntegerField(help_text=_('Count of jobs in the running or waiting state that are targeted for this instance'), read_only=True)
     jobs_total = serializers.IntegerField(help_text=_('Count of all jobs that target this instance'), read_only=True)
     health_check_pending = serializers.SerializerMethodField()
+    peers = serializers.SlugRelatedField(many=True, required=False, slug_field="hostname", queryset=Instance.objects.all())
 
     class Meta:
         model = Instance
@@ -5412,6 +5419,8 @@ class InstanceSerializer(BaseSerializer):
             'node_state',
             'ip_address',
             'listener_port',
+            'peers',
+            'peers_from_control_nodes',
         )
         extra_kwargs = {
             'node_type': {'initial': Instance.Types.EXECUTION, 'default': Instance.Types.EXECUTION},
@@ -5464,22 +5473,57 @@ class InstanceSerializer(BaseSerializer):
     def get_health_check_pending(self, obj):
         return obj.health_check_pending
 
-    def validate(self, data):
-        if self.instance:
-            if self.instance.node_type == Instance.Types.HOP:
-                raise serializers.ValidationError("Hop node instances may not be changed.")
-        else:
-            if not settings.IS_K8S:
-                raise serializers.ValidationError("Can only create instances on Kubernetes or OpenShift.")
-        return data
+    def validate(self, attrs):
+        def get_field_from_model_or_attrs(fd):
+            return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)
+
+        def check_peers_changed():
+            '''
+            return True if
+            - 'peers' in attrs
+            - instance peers matches peers in attrs
+            '''
+            return self.instance and 'peers' in attrs and set(self.instance.peers.all()) != set(attrs['peers'])
+
+        if not self.instance and not settings.IS_K8S:
+            raise serializers.ValidationError(_("Can only create instances on Kubernetes or OpenShift."))
+
+        node_type = get_field_from_model_or_attrs("node_type")
+        peers_from_control_nodes = get_field_from_model_or_attrs("peers_from_control_nodes")
+        listener_port = get_field_from_model_or_attrs("listener_port")
+        peers = attrs.get('peers', [])
+
+        if peers_from_control_nodes and node_type not in (Instance.Types.EXECUTION, Instance.Types.HOP):
+            raise serializers.ValidationError(_("peers_from_control_nodes can only be enabled for execution or hop nodes."))
+
+        if node_type in [Instance.Types.CONTROL, Instance.Types.HYBRID]:
+            if check_peers_changed():
+                raise serializers.ValidationError(
+                    _("Setting peers manually for control nodes is not allowed. Enable peers_from_control_nodes on the hop and execution nodes instead.")
+                )
+
+        if not listener_port and peers_from_control_nodes:
+            raise serializers.ValidationError(_("Field listener_port must be a valid integer when peers_from_control_nodes is enabled."))
+
+        if not listener_port and self.instance and self.instance.peers_from.exists():
+            raise serializers.ValidationError(_("Field listener_port must be a valid integer when other nodes peer to it."))
+
+        for peer in peers:
+            if peer.listener_port is None:
+                raise serializers.ValidationError(_("Field listener_port must be set on peer ") + peer.hostname + ".")
+
+        if not settings.IS_K8S:
+            if check_peers_changed():
+                raise serializers.ValidationError(_("Cannot change peers."))
+
+        return super().validate(attrs)
 
     def validate_node_type(self, value):
-        if not self.instance:
-            if value not in (Instance.Types.EXECUTION,):
-                raise serializers.ValidationError("Can only create execution nodes.")
-        else:
-            if self.instance.node_type != value:
-                raise serializers.ValidationError("Cannot change node type.")
+        if not self.instance and value not in [Instance.Types.HOP, Instance.Types.EXECUTION]:
+            raise serializers.ValidationError(_("Can only create execution or hop nodes."))
+
+        if self.instance and self.instance.node_type != value:
+            raise serializers.ValidationError(_("Cannot change node type."))
 
         return value
 
@@ -5487,30 +5531,41 @@ class InstanceSerializer(BaseSerializer):
         if self.instance:
             if value != self.instance.node_state:
                 if not settings.IS_K8S:
-                    raise serializers.ValidationError("Can only change the state on Kubernetes or OpenShift.")
+                    raise serializers.ValidationError(_("Can only change the state on Kubernetes or OpenShift."))
                 if value != Instance.States.DEPROVISIONING:
-                    raise serializers.ValidationError("Can only change instances to the 'deprovisioning' state.")
-                if self.instance.node_type not in (Instance.Types.EXECUTION,):
-                    raise serializers.ValidationError("Can only deprovision execution nodes.")
+                    raise serializers.ValidationError(_("Can only change instances to the 'deprovisioning' state."))
+                if self.instance.node_type not in (Instance.Types.EXECUTION, Instance.Types.HOP):
+                    raise serializers.ValidationError(_("Can only deprovision execution or hop nodes."))
         else:
             if value and value != Instance.States.INSTALLED:
-                raise serializers.ValidationError("Can only create instances in the 'installed' state.")
+                raise serializers.ValidationError(_("Can only create instances in the 'installed' state."))
 
         return value
 
     def validate_hostname(self, value):
         """
-        - Hostname cannot be "localhost" - but can be something like localhost.domain
-        - Cannot change the hostname of an-already instantiated & initialized Instance object
+        Cannot change the hostname
         """
         if self.instance and self.instance.hostname != value:
-            raise serializers.ValidationError("Cannot change hostname.")
+            raise serializers.ValidationError(_("Cannot change hostname."))
 
         return value
 
     def validate_listener_port(self, value):
-        if self.instance and self.instance.listener_port != value:
-            raise serializers.ValidationError("Cannot change listener port.")
+        """
+        Cannot change listener port, unless going from none to integer, and vice versa
+        """
+        if value and self.instance and self.instance.listener_port and self.instance.listener_port != value:
+            raise serializers.ValidationError(_("Cannot change listener port."))
+
+        return value
+
+    def validate_peers_from_control_nodes(self, value):
+        """
+        Can only enable for K8S based deployments
+        """
+        if value and not settings.IS_K8S:
+            raise serializers.ValidationError(_("Can only be enabled on Kubernetes or Openshift."))
 
         return value
 
@@ -5518,7 +5573,19 @@ class InstanceSerializer(BaseSerializer):
 class InstanceHealthCheckSerializer(BaseSerializer):
     class Meta:
         model = Instance
-        read_only_fields = ('uuid', 'hostname', 'version', 'last_health_check', 'errors', 'cpu', 'memory', 'cpu_capacity', 'mem_capacity', 'capacity')
+        read_only_fields = (
+            'uuid',
+            'hostname',
+            'ip_address',
+            'version',
+            'last_health_check',
+            'errors',
+            'cpu',
+            'memory',
+            'cpu_capacity',
+            'mem_capacity',
+            'capacity',
+        )
         fields = read_only_fields
 
 

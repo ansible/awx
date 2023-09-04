@@ -341,17 +341,18 @@ class InstanceDetail(RetrieveUpdateAPIView):
 
     def update_raw_data(self, data):
         # these fields are only valid on creation of an instance, so they unwanted on detail view
-        data.pop('listener_port', None)
         data.pop('node_type', None)
         data.pop('hostname', None)
+        data.pop('ip_address', None)
         return super(InstanceDetail, self).update_raw_data(data)
 
     def update(self, request, *args, **kwargs):
         r = super(InstanceDetail, self).update(request, *args, **kwargs)
         if status.is_success(r.status_code):
             obj = self.get_object()
-            obj.set_capacity_value()
-            obj.save(update_fields=['capacity'])
+            capacity_changed = obj.set_capacity_value()
+            if capacity_changed:
+                obj.save(update_fields=['capacity'])
             r.data = serializers.InstanceSerializer(obj, context=self.get_serializer_context()).to_representation(obj)
         return r
 

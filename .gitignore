@@ -165,3 +165,6 @@ use_dev_supervisor.txt
 
 awx/ui_next/src
 awx/ui_next/build
+
+# Docs build
+docs/docsite/build/

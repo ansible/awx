@@ -115,9 +115,12 @@ class InstanceManager(models.Manager):
             return node[0]
         raise RuntimeError("No instance found with the current cluster host id")
 
-    def register(self, node_uuid=None, hostname=None, ip_address=None, node_type='hybrid', defaults=None):
+    def register(self, node_uuid=None, hostname=None, ip_address="", listener_port=None, node_type='hybrid', defaults=None):
         if not hostname:
             hostname = settings.CLUSTER_HOST_ID
+
+        if not ip_address:
+            ip_address = ""
 
         with advisory_lock('instance_registration_%s' % hostname):
             if settings.AWX_AUTO_DEPROVISION_INSTANCES:
@@ -157,6 +160,9 @@ class InstanceManager(models.Manager):
                 if instance.node_type != node_type:
                     instance.node_type = node_type
                     update_fields.append('node_type')
+                if instance.listener_port != listener_port:
+                    instance.listener_port = listener_port
+                    update_fields.append('listener_port')
                 if update_fields:
                     instance.save(update_fields=update_fields)
                     return (True, instance)
@@ -167,12 +173,11 @@ class InstanceManager(models.Manager):
             create_defaults = {
                 'node_state': Instance.States.INSTALLED,
                 'capacity': 0,
-                'listener_port': 27199,
             }
             if defaults is not None:
                 create_defaults.update(defaults)
             uuid_option = {'uuid': node_uuid if node_uuid is not None else uuid.uuid4()}
             if node_type == 'execution' and 'version' not in create_defaults:
                 create_defaults['version'] = RECEPTOR_PENDING
-            instance = self.create(hostname=hostname, ip_address=ip_address, node_type=node_type, **create_defaults, **uuid_option)
+            instance = self.create(hostname=hostname, ip_address=ip_address, listener_port=listener_port, node_type=node_type, **create_defaults, **uuid_option)
         return (True, instance)

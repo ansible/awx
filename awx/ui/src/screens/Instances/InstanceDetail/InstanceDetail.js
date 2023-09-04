@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory, useParams, Link } from 'react-router-dom';
 import { t, Plural } from '@lingui/macro';
 import {
   Button,
@@ -116,6 +116,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
       setBreadcrumb(instance);
     }
   }, [instance, setBreadcrumb]);
+
   const { error: healthCheckError, request: fetchHealthCheck } = useRequest(
     useCallback(async () => {
       const { status } = await InstancesAPI.healthCheck(id);
@@ -205,13 +206,42 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
             }
           />
           <Detail label={t`Node Type`} value={instance.node_type} />
+          <Detail label={t`Host`} value={instance.ip_address} />
+          <Detail label={t`Listener Port`} value={instance.listener_port} />
+          {(isExecutionNode || isHopNode) && (
+            <>
+              {instance.related?.install_bundle && (
+                <Detail
+                  label={t`Install Bundle`}
+                  value={
+                    <Tooltip content={t`Click to download bundle`}>
+                      <Button
+                        component="a"
+                        isSmall
+                        href={`${instance.related?.install_bundle}`}
+                        target="_blank"
+                        variant="secondary"
+                        dataCy="install-bundle-download-button"
+                        rel="noopener noreferrer"
+                      >
+                        <DownloadIcon />
+                      </Button>
+                    </Tooltip>
+                  }
+                />
+              )}
+              <Detail
+                label={t`Peers from control nodes`}
+                value={instance.peers_from_control_nodes ? t`On` : t`Off`}
+              />
+            </>
+          )}
           {!isHopNode && (
             <>
               <Detail
                 label={t`Policy Type`}
                 value={instance.managed_by_policy ? t`Auto` : t`Manual`}
               />
-              <Detail label={t`Host`} value={instance.ip_address} />
               <Detail label={t`Running Jobs`} value={instance.jobs_running} />
               <Detail label={t`Total Jobs`} value={instance.jobs_total} />
               {instanceGroups && (
@@ -246,26 +276,6 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
                 }
                 value={formatHealthCheckTimeStamp(instance.last_health_check)}
               />
-              {instance.related?.install_bundle && (
-                <Detail
-                  label={t`Install Bundle`}
-                  value={
-                    <Tooltip content={t`Click to download bundle`}>
-                      <Button
-                        component="a"
-                        isSmall
-                        href={`${instance.related?.install_bundle}`}
-                        target="_blank"
-                        variant="secondary"
-                        dataCy="install-bundle-download-button"
-                        rel="noopener noreferrer"
-                      >
-                        <DownloadIcon />
-                      </Button>
-                    </Tooltip>
-                  }
-                />
-              )}
               <Detail
                 label={t`Capacity Adjustment`}
                 dataCy="capacity-adjustment"
@@ -327,9 +337,20 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
             />
           )}
         </DetailList>
-        {!isHopNode && (
-          <CardActionsRow>
-            {config?.me?.is_superuser && isK8s && isExecutionNode && (
+        <CardActionsRow>
+          {config?.me?.is_superuser && isK8s && (isExecutionNode || isHopNode) && (
+            <Button
+              ouiaId="instance-detail-edit-button"
+              aria-label={t`edit`}
+              component={Link}
+              to={`/instances/${id}/edit`}
+            >
+              {t`Edit`}
+            </Button>
+          )}
+          {config?.me?.is_superuser &&
+            isK8s &&
+            (isExecutionNode || isHopNode) && (
               <RemoveInstanceButton
                 dataCy="remove-instance-button"
                 itemsToRemove={[instance]}
@@ -337,32 +358,31 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
                 onRemove={removeInstances}
               />
             )}
-            {isExecutionNode && (
-              <Tooltip content={t`Run a health check on the instance`}>
-                <Button
-                  isDisabled={
-                    !config?.me?.is_superuser || instance.health_check_pending
-                  }
-                  variant="primary"
-                  ouiaId="health-check-button"
-                  onClick={fetchHealthCheck}
-                  isLoading={instance.health_check_pending}
-                  spinnerAriaLabel={t`Running health check`}
-                >
-                  {instance.health_check_pending
-                    ? t`Running health check`
-                    : t`Run health check`}
-                </Button>
-              </Tooltip>
-            )}
-            <InstanceToggle
-              css="display: inline-flex;"
-              fetchInstances={fetchDetails}
-              instance={instance}
-              dataCy="enable-instance"
-            />
-          </CardActionsRow>
-        )}
+          {isExecutionNode && (
+            <Tooltip content={t`Run a health check on the instance`}>
+              <Button
+                isDisabled={
+                  !config?.me?.is_superuser || instance.health_check_pending
+                }
+                variant="primary"
+                ouiaId="health-check-button"
+                onClick={fetchHealthCheck}
+                isLoading={instance.health_check_pending}
+                spinnerAriaLabel={t`Running health check`}
+              >
+                {instance.health_check_pending
+                  ? t`Running health check`
+                  : t`Run health check`}
+              </Button>
+            </Tooltip>
+          )}
+          <InstanceToggle
+            css="display: inline-flex;"
+            fetchInstances={fetchDetails}
+            instance={instance}
+            dataCy="enable-instance"
+          />
+        </CardActionsRow>
 
         {error && (
           <AlertModal

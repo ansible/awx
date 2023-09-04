@@ -12,13 +12,14 @@ from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.utils.timezone import now, timedelta
-from django.db.models import Sum
+from django.db.models import Sum, Q
 
 import redis
 from solo.models import SingletonModel
 
 # AWX
 from awx import __version__ as awx_application_version
+from awx.main.utils import is_testing
 from awx.api.versioning import reverse
 from awx.main.fields import ImplicitRoleField
 from awx.main.managers import InstanceManager, UUID_DEFAULT
@@ -70,15 +71,32 @@ class InstanceLink(BaseModel):
         REMOVING = 'removing', _('Removing')
 
     link_state = models.CharField(
-        choices=States.choices, default=States.ESTABLISHED, max_length=16, help_text=_("Indicates the current life cycle stage of this peer link.")
+        choices=States.choices, default=States.ADDING, max_length=16, help_text=_("Indicates the current life cycle stage of this peer link.")
     )
 
     class Meta:
         unique_together = ('source', 'target')
+        ordering = ("id",)
+        constraints = [models.CheckConstraint(check=~models.Q(source=models.F('target')), name='source_and_target_can_not_be_equal')]
 
 
 class Instance(HasPolicyEditsMixin, BaseModel):
     """A model representing an AWX instance running against this database."""
+
+    class Meta:
+        app_label = 'main'
+        ordering = ("hostname",)
+        constraints = [
+            models.UniqueConstraint(
+                fields=["ip_address"],
+                condition=~Q(ip_address=""),  # don't apply to constraint to empty entries
+                name="unique_ip_address_not_empty",
+                violation_error_message=_("Field ip_address must be unique."),
+            )
+        ]
+
+    def __str__(self):
+        return self.hostname
 
     objects = InstanceManager()
 
@@ -87,10 +105,8 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     hostname = models.CharField(max_length=250, unique=True)
     ip_address = models.CharField(
         blank=True,
-        null=True,
-        default=None,
+        default="",
         max_length=50,
-        unique=True,
     )
     # Auto-fields, implementation is different from BaseModel
     created = models.DateTimeField(auto_now_add=True)
@@ -169,16 +185,14 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     )
     listener_port = models.PositiveIntegerField(
         blank=True,
-        default=27199,
-        validators=[MinValueValidator(1), MaxValueValidator(65535)],
+        null=True,
+        default=None,
+        validators=[MinValueValidator(1024), MaxValueValidator(65535)],
         help_text=_("Port that Receptor will listen for incoming connections on."),
     )
 
-    peers = models.ManyToManyField('self', symmetrical=False, through=InstanceLink, through_fields=('source', 'target'))
-
-    class Meta:
-        app_label = 'main'
-        ordering = ("hostname",)
+    peers = models.ManyToManyField('self', symmetrical=False, through=InstanceLink, through_fields=('source', 'target'), related_name='peers_from')
+    peers_from_control_nodes = models.BooleanField(default=False, help_text=_("If True, control plane cluster nodes should automatically peer to it."))
 
     POLICY_FIELDS = frozenset(('managed_by_policy', 'hostname', 'capacity_adjustment'))
 
@@ -279,6 +293,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         return update_fields
 
     def set_capacity_value(self):
+        old_val = self.capacity
         """Sets capacity according to capacity adjustment rule (no save)"""
         if self.enabled and self.node_type != 'hop':
             lower_cap = min(self.mem_capacity, self.cpu_capacity)
@@ -286,6 +301,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
             self.capacity = lower_cap + (higher_cap - lower_cap) * self.capacity_adjustment
         else:
             self.capacity = 0
+        return int(self.capacity) != int(old_val)  # return True if value changed
 
     def refresh_capacity_fields(self):
         """Update derived capacity fields from cpu and memory (no save)"""
@@ -464,21 +480,50 @@ def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs
         instance.set_default_policy_fields()
 
 
+def schedule_write_receptor_config(broadcast=True):
+    from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
+
+    # broadcast to all control instances to update their receptor configs
+    if broadcast:
+        connection.on_commit(lambda: write_receptor_config.apply_async(queue='tower_broadcast_all'))
+    else:
+        if not is_testing():
+            write_receptor_config()  # just run locally
+
+
 @receiver(post_save, sender=Instance)
 def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
-    if settings.IS_K8S and instance.node_type in (Instance.Types.EXECUTION,):
+    '''
+    Here we link control nodes to hop or execution nodes based on the
+    peers_from_control_nodes field.
+    write_receptor_config should be called on each control node when:
+    1. new node is created with peers_from_control_nodes enabled
+    2. a node changes its value of peers_from_control_nodes
+    3. a new control node comes online and has instances to peer to
+    '''
+    if created and settings.IS_K8S and instance.node_type in [Instance.Types.CONTROL, Instance.Types.HYBRID]:
+        inst = Instance.objects.filter(peers_from_control_nodes=True)
+        if set(instance.peers.all()) != set(inst):
+            instance.peers.set(inst)
+            schedule_write_receptor_config(broadcast=False)
+
+    if settings.IS_K8S and instance.node_type in [Instance.Types.HOP, Instance.Types.EXECUTION]:
         if instance.node_state == Instance.States.DEPROVISIONING:
             from awx.main.tasks.receptor import remove_deprovisioned_node  # prevents circular import
 
             # wait for jobs on the node to complete, then delete the
             # node and kick off write_receptor_config
             connection.on_commit(lambda: remove_deprovisioned_node.apply_async([instance.hostname]))
-
-        if instance.node_state == Instance.States.INSTALLED:
-            from awx.main.tasks.receptor import write_receptor_config  # prevents circular import
-
-            # broadcast to all control instances to update their receptor configs
-            connection.on_commit(lambda: write_receptor_config.apply_async(queue='tower_broadcast_all'))
+        else:
+            control_instances = set(Instance.objects.filter(node_type__in=[Instance.Types.CONTROL, Instance.Types.HYBRID]))
+            if instance.peers_from_control_nodes:
+                if (control_instances & set(instance.peers_from.all())) != set(control_instances):
+                    instance.peers_from.add(*control_instances)
+                    schedule_write_receptor_config()  # keep method separate to make pytest mocking easier
+            else:
+                if set(control_instances) & set(instance.peers_from.all()):
+                    instance.peers_from.remove(*control_instances)
+                    schedule_write_receptor_config()
 
     if created or instance.has_policy_changes():
         schedule_policy_task()
@@ -493,6 +538,8 @@ def on_instance_group_deleted(sender, instance, using, **kwargs):
 @receiver(post_delete, sender=Instance)
 def on_instance_deleted(sender, instance, using, **kwargs):
     schedule_policy_task()
+    if settings.IS_K8S and instance.node_type in (Instance.Types.EXECUTION, Instance.Types.HOP) and instance.peers_from_control_nodes:
+        schedule_write_receptor_config()
 
 
 class UnifiedJobTemplateInstanceGroupMembership(models.Model):

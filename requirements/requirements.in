@@ -26,7 +26,7 @@ django-split-settings==1.0.0    # We hit a strange issue where the release proce
 djangorestframework
 djangorestframework-yaml
 filelock
-GitPython>=3.1.30  # CVE-2022-24439
+GitPython>=3.1.32  # CVE-2023-40267
 hiredis==2.0.0  # see UPGRADE BLOCKERs
 irc
 jinja2
