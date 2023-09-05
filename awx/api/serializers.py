@@ -120,7 +120,6 @@ from awx.main.scheduler.task_manager_models import TaskManagerModels
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.signals import update_inventory_computed_fields
 
-
 from awx.main.validators import vars_validate_or_raise
 
 from awx.api.versioning import reverse
@@ -190,7 +189,6 @@ SUMMARIZABLE_FK_FIELDS = {
     'approved_or_denied_by': ('id', 'username', 'first_name', 'last_name'),
     'credential_type': DEFAULT_SUMMARY_FIELDS,
 }
-
 
 # These fields can be edited on a constructed inventory's generated source (possibly by using the constructed
 # inventory's special API endpoint, but also by using the inventory sources endpoint).
@@ -2199,6 +2197,75 @@ class BulkHostCreateSerializer(serializers.Serializer):
         return_data['url'] = reverse('api:inventory_detail', kwargs={'pk': validated_data['inventory'].id})
         return_data['hosts'] = host_data
         return return_data
+
+
+class BulkHostDeleteSerializer(serializers.Serializer):
+    inventory = serializers.PrimaryKeyRelatedField(
+        queryset=Inventory.objects.all(), required=True, write_only=True, help_text=_('Primary Key ID of inventory to delete hosts from.')
+    )
+    hosts = serializers.ListField(
+        allow_empty=False,
+        max_length=250,
+        write_only=True,
+        help_text=_('List of hosts ids to be deleted, e.g. [105, 130, 131, 200]'),
+    )
+
+    class Meta:
+        model = Inventory
+        fields = ('inventory', 'hosts')
+        read_only_fields = ()
+
+    def validate(self, attrs):
+        request = self.context.get('request', None)
+        inv = attrs['inventory']
+        if inv.kind != '':
+            raise serializers.ValidationError(_('Hosts can only be deleted from manual inventories (not smart or constructed types).'))
+        if len(attrs['hosts']) > settings.BULK_HOST_MAX_DELETE:
+            raise serializers.ValidationError(_('Number of hosts exceeds system setting BULK_HOST_MAX_DELETE'))
+        if request and not request.user.is_superuser:
+            if request.user not in inv.admin_role:
+                raise serializers.ValidationError(_(f'Inventory with id {inv.id} not found or lack permissions to add hosts.'))
+
+        inventory_hosts = list(Host.objects.get_queryset())
+        if len(inventory_hosts) == 0:
+            raise serializers.ValidationError(_(f'f"There are no hosts in inventory : {inv}.'))
+
+        attrs['in_inv'] = list()
+        hosts_to_delete = list()
+        for host in attrs['hosts']:
+            for inv_host in inventory_hosts:
+                if host == inv_host.id:
+                    attrs['in_inv'].append(inv_host)
+                    inventory_hosts.remove(inv_host)
+                    hosts_to_delete.append(host)
+                    break
+        if len(hosts_to_delete) < len(attrs['hosts']):
+            raise serializers.ValidationError(
+                {"inventory": "Not all hosts are in the inventory", "hosts": list(set(attrs['hosts']).difference(hosts_to_delete))}
+            )
+        return attrs
+
+    def delete(self, validated_data):
+        result = {"hosts": dict()}
+        changes = {'deleted_hosts': list()}
+        for host in validated_data['in_inv']:
+            try:
+                host_name = host.name
+                host_id = host.id
+                host.delete()
+                result["hosts"][host_id] = f"The host {host_name} was deleted"
+                changes['deleted_hosts'].append({"host_id": host_id, "host_name": host_name})
+            except Exception as e:
+                raise serializers.ValidationError({"detail": _(f"cannot delete host ({id}), host deletion error {e}")})
+        request = self.context.get('request', None)
+        activity_entry = ActivityStream.objects.create(
+            operation='update',
+            object1='inventory',
+            changes=json.dumps(changes),
+            actor=request.user,
+        )
+        activity_entry.inventory.add(validated_data['inventory'])
+        return result
 
 
 class GroupTreeSerializer(GroupSerializer):
