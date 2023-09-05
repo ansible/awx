@@ -768,14 +768,13 @@ def get_corrected_cpu(cpu_count):  # formerlly get_cpu_capacity
     return cpu_count  # no correction
 
 
-def get_cpu_effective_capacity(cpu_count):
+def get_cpu_effective_capacity(cpu_count, is_control_node=False):
     from django.conf import settings
-
-    cpu_count = get_corrected_cpu(cpu_count)
 
     settings_forkcpu = getattr(settings, 'SYSTEM_TASK_FORKS_CPU', None)
     env_forkcpu = os.getenv('SYSTEM_TASK_FORKS_CPU', None)
-
+    if is_control_node:
+        cpu_count = get_corrected_cpu(cpu_count)
     if env_forkcpu:
         forkcpu = int(env_forkcpu)
     elif settings_forkcpu:
@@ -834,6 +833,7 @@ def get_corrected_memory(memory):
 
     # Runner returns memory in bytes
     # so we convert memory from settings to bytes as well.
+
     if env_absmem is not None:
         return convert_mem_str_to_bytes(env_absmem)
     elif settings_absmem is not None:
@@ -842,14 +842,13 @@ def get_corrected_memory(memory):
     return memory
 
 
-def get_mem_effective_capacity(mem_bytes):
+def get_mem_effective_capacity(mem_bytes, is_control_node=False):
     from django.conf import settings
-
-    mem_bytes = get_corrected_memory(mem_bytes)
 
     settings_mem_mb_per_fork = getattr(settings, 'SYSTEM_TASK_FORKS_MEM', None)
     env_mem_mb_per_fork = os.getenv('SYSTEM_TASK_FORKS_MEM', None)
-
+    if is_control_node:
+        mem_bytes = get_corrected_memory(mem_bytes)
     if env_mem_mb_per_fork:
         mem_mb_per_fork = int(env_mem_mb_per_fork)
     elif settings_mem_mb_per_fork:

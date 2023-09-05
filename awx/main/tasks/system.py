@@ -466,7 +466,6 @@ def execution_node_health_check(node):
     data = worker_info(node)
 
     prior_capacity = instance.capacity
-
     instance.save_health_data(
         version='ansible-runner-' + data.get('runner_version', '???'),
         cpu=data.get('cpu_count', 0),
