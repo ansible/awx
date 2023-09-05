@@ -17,10 +17,3 @@ jobs:
 
       - name: Assure docs can be built
         run: tox -e docs
-
-      - name: Upload html build as artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: docsite-html
-          path: docs/docsite/build/html
-          retention-days: 5
