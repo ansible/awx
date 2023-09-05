@@ -1,0 +1,19 @@
+---
+name: Docsite CI
+on:
+  pull_request:
+    paths:
+      - 'docs/**'
+      - '.github/workflows/docs.yml'
+jobs:
+  docsite-build:
+    name: docsite test build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: install tox
+        run: pip install tox
+
+      - name: Assure docs can be built
+        run: tox -e docs
