@@ -10,6 +10,7 @@ ignore: |
   tools/docker-compose/_sources
   # django template files
   awx/api/templates/instance_install_bundle/**
+  .readthedocs.yaml
 
 extends: default
 
