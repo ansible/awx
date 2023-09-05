@@ -2227,14 +2227,14 @@ class BulkHostDeleteSerializer(serializers.Serializer):
                 raise serializers.ValidationError(_(f'Inventory with id {inv.id} not found or lack permissions to add hosts.'))
 
         # Getting list of all host objects in the inventory, filtered by the list of the hosts to delete
-        inventory_hosts = list(x for x in list(Host.objects.get_queryset()) if x.id in attrs['hosts'])
+        attrs['in_inv'] = list(x for x in list(Host.objects.get_queryset()) if x.id in attrs['hosts'])
 
-        if len(inventory_hosts) == 0:
+        if len(attrs['in_inv']) == 0:
             raise serializers.ValidationError(_(f'f"There are no hosts in inventory : {inv}.'))
 
-        if len(inventory_hosts) < len(attrs['hosts']):
+        if len(attrs['in_inv']) < len(attrs['hosts']):
             raise serializers.ValidationError(
-                {"inventory": "Not all hosts are in the inventory", "hosts": list(set(attrs['hosts']).difference(inventory_hosts))}
+                {"inventory": "Not all hosts are in the inventory", "hosts": list(set(attrs['hosts']).difference(attrs['in_inv']))}
             )
         return attrs
 
