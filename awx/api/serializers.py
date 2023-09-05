@@ -3233,7 +3233,7 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
         if get_field_from_model_or_attrs('host_config_key') and not inventory:
             raise serializers.ValidationError({'host_config_key': _("Cannot enable provisioning callback without an inventory set.")})
 
-        prompting_error_message = _("Must either set a default value or ask to prompt on launch.")
+        prompting_error_message = _("You must either set a default value or ask to prompt on launch.")
         if project is None:
             raise serializers.ValidationError({'project': _("Job Templates must have a project assigned.")})
         elif inventory is None and not get_field_from_model_or_attrs('ask_inventory_on_launch'):
