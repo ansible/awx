@@ -2227,10 +2227,9 @@ class BulkHostDeleteSerializer(serializers.Serializer):
                 raise serializers.ValidationError(_(f'Inventory with id {inv.id} not found or lack permissions to add hosts.'))
 
         # Getting list of all host objects in the inventory, filtered by the list of the hosts to delete
-        attrs['in_inv'] = list(x for x in list(Host.objects.get_queryset()) if x.id in attrs['hosts'])
-
+        attrs['in_inv'] = Host.objects.get_queryset().filter(pk__in=attrs['hosts'])
         if len(attrs['in_inv']) == 0:
-            raise serializers.ValidationError(_(f'f"There are no hosts in inventory : {inv}.'))
+            raise serializers.ValidationError(_(f"There are no hosts in inventory : {inv}. {attrs['in_inv']}"))
 
         if len(attrs['in_inv']) < len(attrs['hosts']):
             raise serializers.ValidationError(
@@ -2242,14 +2241,14 @@ class BulkHostDeleteSerializer(serializers.Serializer):
         result = {"hosts": dict()}
         changes = {'deleted_hosts': list()}
         for host in validated_data['in_inv']:
-            try:
-                host_name = host.name
-                host_id = host.id
-                host.delete()
-                result["hosts"][host_id] = f"The host {host_name} was deleted"
-                changes['deleted_hosts'].append({"host_id": host_id, "host_name": host_name})
-            except Exception as e:
-                raise serializers.ValidationError({"detail": _(f"cannot delete host ({id}), host deletion error {e}")})
+            result["hosts"][host.id] = f"The host {host.name} was deleted"
+            changes['deleted_hosts'].append({"host_id": host.id, "host_name": host.name})
+
+        try:
+            validated_data['in_inv'].delete()
+        except Exception as e:
+            raise serializers.ValidationError({"detail": _(f"cannot delete hosts, host deletion error {e}")})
+
         request = self.context.get('request', None)
         activity_entry = ActivityStream.objects.create(
             operation='update',
