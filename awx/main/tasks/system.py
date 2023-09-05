@@ -518,6 +518,12 @@ def inspect_execution_and_hop_nodes(instance_list):
 
         inspect_established_receptor_connections(mesh_status)
 
+        for instance in instance_list:
+            if instance.node_type == Instance.Types.HOP and mesh_status['KnownConnectionCosts'].get(instance.hostname):
+                if instance.node_state in (Instance.States.UNAVAILABLE, Instance.States.INSTALLED):
+                    logger.warning(f'Hop node {instance.hostname}, has joined the receptor mesh')
+                instance.save_health_data(errors='', update_last_seen=True)
+
         nowtime = now()
         workers = mesh_status['Advertisements']
 
@@ -530,6 +536,10 @@ def inspect_execution_and_hop_nodes(instance_list):
                 logger.warning(f"Unrecognized node advertising on mesh: {hostname}")
                 continue
 
+            # Only execution nodes should be dealt with by execution_node_health_check
+            if instance.node_type == Instance.Types.HOP:
+                continue
+
             # Control-plane nodes are dealt with via local_health_check instead.
             if instance.node_type in (Instance.Types.CONTROL, Instance.Types.HYBRID):
                 continue
@@ -539,13 +549,6 @@ def inspect_execution_and_hop_nodes(instance_list):
                 continue
             instance.last_seen = last_seen
             instance.save(update_fields=['last_seen'])
-
-            # Only execution nodes should be dealt with by execution_node_health_check
-            if instance.node_type == Instance.Types.HOP:
-                if instance.node_state in (Instance.States.UNAVAILABLE, Instance.States.INSTALLED):
-                    logger.warning(f'Hop node {hostname}, has rejoined the receptor mesh')
-                    instance.save_health_data(errors='')
-                continue
 
             if instance.node_state in (Instance.States.UNAVAILABLE, Instance.States.INSTALLED):
                 # if the instance *was* lost, but has appeared again,

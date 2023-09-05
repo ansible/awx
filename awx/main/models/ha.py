@@ -315,12 +315,15 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
     def save_health_data(self, version=None, cpu=0, memory=0, uuid=None, update_last_seen=False, errors=''):
         update_fields = ['errors']
-        if self.node_type != 'hop':
+        if self.node_type != Instance.Types.HOP:
             self.last_health_check = now()
             update_fields.append('last_health_check')
 
         if update_last_seen:
-            self.last_seen = self.last_health_check
+            if self.node_type == Instance.Types.HOP:
+                self.last_seen = now()
+            else:
+                self.last_seen = self.last_health_check
             update_fields.append('last_seen')
 
         if uuid is not None and self.uuid != uuid:
