@@ -143,6 +143,26 @@ class BulkHostCreate(CustomAction):
         return response
 
 
+class BulkHostDelete(CustomAction):
+    action = 'host_delete'
+    resource = 'bulk'
+
+    @property
+    def options_endpoint(self):
+        return self.page.endpoint + '{}/'.format(self.action)
+
+    def add_arguments(self, parser, resource_options_parser):
+        options = self.page.connection.options(self.options_endpoint)
+        if options.ok:
+            options = options.json()['actions']['POST']
+            resource_options_parser.options['HOSTDELETEPOST'] = options
+            resource_options_parser.build_query_arguments(self.action, 'HOSTDELETEPOST')
+
+    def perform(self, **kwargs):
+        response = self.page.get().host_delete.post(kwargs)
+        return response
+
+
 class ProjectUpdate(Launchable, CustomAction):
     action = 'update'
     resource = 'projects'
