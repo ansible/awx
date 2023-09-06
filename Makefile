@@ -79,7 +79,7 @@ I18N_FLAG_FILE = .i18n_built
 	sdist \
 	ui-release ui-devel \
 	VERSION PYTHON_VERSION docker-compose-sources \
-	.git/hooks/pre-commit github_ci_setup github_ci_runner
+	.git/hooks/pre-commit
 
 clean-tmp:
 	rm -rf tmp/
@@ -324,20 +324,9 @@ test:
 	cd awxkit && $(VENV_BASE)/awx/bin/tox -re py3
 	awx-manage check_migrations --dry-run --check  -n 'missing_migration_file'
 
-## Login to Github container image registry, pull image, then build image.
-github_ci_setup:
-	# GITHUB_ACTOR is automatic github actions env var
-	# CI_GITHUB_TOKEN is defined in .github files
-	echo $(CI_GITHUB_TOKEN) | docker login ghcr.io -u $(GITHUB_ACTOR) --password-stdin
-	docker pull $(DEVEL_IMAGE_NAME) || :  # Pre-pull image to warm build cache
-	$(MAKE) docker-compose-build
-
 ## Runs AWX_DOCKER_CMD inside a new docker container.
 docker-runner:
 	docker run -u $(shell id -u) --rm -v $(shell pwd):/awx_devel/:Z --workdir=/awx_devel $(DEVEL_IMAGE_NAME) $(AWX_DOCKER_CMD)
-
-## Builds image and runs AWX_DOCKER_CMD in it, mainly for .github checks.
-github_ci_runner: github_ci_setup docker-runner
 
 test_collection:
 	rm -f $(shell ls -d $(VENV_BASE)/awx/lib/python* | head -n 1)/no-global-site-packages.txt
