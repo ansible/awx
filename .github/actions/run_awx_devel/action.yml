@@ -1,8 +1,4 @@
-# This currently *always* uses the "warm build cache" image
-# We should do something to allow forcing a rebuild, probably by looking for
-# some string in the commit message or something.
-
-name: Run AWX (devel environment)
+name: Run AWX docker-compose
 description: Runs AWX with `make docker-compose`
 inputs:
   build-ui:

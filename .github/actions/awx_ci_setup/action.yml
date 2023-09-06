@@ -1,7 +1,3 @@
-# This currently *always* uses the "warm build cache" image
-# We should do something to allow forcing a rebuild, probably by looking for
-# some string in the commit message or something.
-
 name: Setup images for AWX
 description: Builds new awx_devel image
 inputs:
@@ -27,10 +23,13 @@ runs:
       run: |
         echo "${{ inputs.github-token }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-    - name: Pre-pull latest available devel image and build HEAD on top of it
+    - name: Pre-pull latest devel image to warm cache
+      shell: bash
+      run: docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }}
+
+    - name: Build image for current source checkout
       shell: bash
       run: |
-        docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }}
         DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} \
         COMPOSE_TAG=${{ github.base_ref }} \
         make docker-compose-build

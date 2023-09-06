@@ -59,7 +59,6 @@ jobs:
         id: awx
         with:
           build-ui: false
-          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run smoke test
         run: ansible-playbook tools/docker-compose/ansible/smoke-test.yml -v
@@ -156,7 +155,6 @@ jobs:
         id: awx
         with:
           build-ui: false
-          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install dependencies for running tests
         run: |
