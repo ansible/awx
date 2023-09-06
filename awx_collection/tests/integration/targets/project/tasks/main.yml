@@ -264,7 +264,7 @@
         name: "{{ project_name3 }}"
         organization: Default
         scm_type: archive
-        scm_url: https://github.com/ansible/ansible-tower-samples/archive/refs/tags/1.0.0.tar.gz
+        scm_url: https://github.com/ansible/test-playbooks/archive/refs/tags/1.0.0.tar.gz
         wait: true
         update_project: true
       register: result
