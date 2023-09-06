@@ -11,6 +11,7 @@ import {
   WorkflowJobsAPI,
   WorkflowJobTemplatesAPI,
 } from 'api';
+import useToast, { AlertVariant } from 'hooks/useToast';
 import AlertModal from '../AlertModal';
 import ErrorDetail from '../ErrorDetail';
 import LaunchPrompt from '../LaunchPrompt';
@@ -45,9 +46,20 @@ function LaunchButton({ resource, children }) {
   const [isLaunching, setIsLaunching] = useState(false);
   const [resourceCredentials, setResourceCredentials] = useState([]);
   const [error, setError] = useState(null);
+  const { addToast, Toast, toastProps } = useToast();
+
+  const showToast = () => {
+    addToast({
+      id: resource.id,
+      title: t`A job has already been launched`,
+      variant: AlertVariant.info,
+      hasTimeout: true,
+    });
+  };
 
   const handleLaunch = async () => {
     if (isLaunching) {
+      showToast();
       return;
     }
     setIsLaunching(true);
@@ -108,6 +120,7 @@ function LaunchButton({ resource, children }) {
 
   const launchWithParams = async (params) => {
     if (isLaunching) {
+      showToast();
       return;
     }
     setIsLaunching(true);
@@ -149,6 +162,7 @@ function LaunchButton({ resource, children }) {
     let relaunch;
 
     if (isLaunching) {
+      showToast();
       return;
     }
     setIsLaunching(true);
@@ -207,6 +221,7 @@ function LaunchButton({ resource, children }) {
         handleRelaunch,
         isLaunching,
       })}
+      <Toast {...toastProps} />
       {error && (
         <AlertModal
           isOpen={error}
