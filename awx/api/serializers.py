@@ -2224,10 +2224,10 @@ class BulkHostDeleteSerializer(serializers.Serializer):
             raise serializers.ValidationError(_('Number of hosts exceeds system setting BULK_HOST_MAX_DELETE'))
         if request and not request.user.is_superuser:
             if request.user not in inv.admin_role:
-                raise serializers.ValidationError(_(f'Inventory with id {inv.id} not found or lack permissions to add hosts.'))
+                raise serializers.ValidationError(_(f'Inventory with id {inv.id} not found or lack permissions to delete hosts from.'))
 
         # Getting list of all host objects in the inventory, filtered by the list of the hosts to delete
-        attrs['in_inv'] = Host.objects.get_queryset().filter(pk__in=attrs['hosts'])
+        attrs['in_inv'] = Host.objects.get_queryset().filter(pk__in=attrs['hosts'], inventory=inv.id)
         if len(attrs['in_inv']) == 0:
             raise serializers.ValidationError(_(f"There are no hosts in inventory : {inv}. {attrs['in_inv']}"))
 
