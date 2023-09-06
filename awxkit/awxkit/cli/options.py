@@ -9,7 +9,6 @@ import yaml
 from distutils.util import strtobool
 
 from .custom import CustomAction
-from .associate import AssociationParser, DisAssociationParser
 from .format import add_output_formatting_arguments
 from .resource import DEPRECATED_RESOURCES_REVERSE
 
@@ -90,8 +89,7 @@ class ResourceOptionsParser(object):
         self.page = page
         self.resource = resource
         self.parser = parser
-        options_json = self.page.options().json
-        self.options = getattr(options_json, 'actions', {'GET': {}})
+        self.options = getattr(self.page.options().json, 'actions', {'GET': {}})
         self.get_allowed_options()
         if self.resource != 'settings':
             # /api/v2/settings is a special resource that doesn't have
@@ -107,7 +105,6 @@ class ResourceOptionsParser(object):
         if '299' in warning and 'deprecated' in warning:
             self.deprecated = True
         self.allowed_options = options.headers.get('Allow', '').split(', ')
-        self.related_associations = options.json().get('related_associations', {})
 
     def build_list_actions(self):
         action_map = {
@@ -148,15 +145,6 @@ class ResourceOptionsParser(object):
             )
             if method == 'get':
                 add_output_formatting_arguments(parser, {})
-
-        if self.resource != 'settings' and hasattr(self, 'related_associations'):
-            # all normal resources are also considered to have association abilities
-            self.parser.add_parser('associate', help='Associate via a related endpoint')
-            self.associate = AssociationParser(self.page, self.resource)
-            self.associate.add_arguments(self.parser, self.related_associations)
-            self.parser.add_parser('disassociate', help='Disassociate via a related endpoint')
-            self.disassociate = DisAssociationParser(self.page, self.resource)
-            self.disassociate.add_arguments(self.parser, self.related_associations)
 
     def build_query_arguments(self, method, http_method):
         required_group = None
