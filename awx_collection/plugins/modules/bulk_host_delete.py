@@ -34,7 +34,7 @@ extends_documentation_fragment: awx.awx.auth
 
 EXAMPLES = '''
 - name: Bulk host delete
-  bulk_host_create:
+  bulk_host_delete:
     inventory: 1
     hosts:
       - 1
