@@ -289,7 +289,10 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         if update_last_seen:
             update_fields += ['last_seen']
         if perform_save:
-            self.save(update_fields=update_fields)
+            from awx.main.signals import disable_activity_stream
+
+            with disable_activity_stream():
+                self.save(update_fields=update_fields)
         return update_fields
 
     def set_capacity_value(self):
