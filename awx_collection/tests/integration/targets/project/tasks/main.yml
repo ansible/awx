@@ -191,13 +191,13 @@
           - "'Non_Existing_Credential' in result.msg"
           - "result.total_results == 0"
 
-    - name: Create a git project without credentials without waiting
+    - name: Create a git project using a branch and allowing branch override
       project:
         name: "{{ project_name3 }}"
         organization: Default
         scm_type: git
         scm_branch: empty_branch
-        scm_url: https://github.com/ansible/ansible-tower-samples
+        scm_url: https://github.com/ansible/test-playbooks
         allow_override: true
       register: result
 
@@ -211,7 +211,7 @@
         organization: Default
         scm_type: git
         scm_branch: empty_branch
-        scm_url: https://github.com/ansible/ansible-tower-samples
+        scm_url: https://github.com/ansible/test-playbooks
         allow_override: true
         wait: true
         update_project: true
