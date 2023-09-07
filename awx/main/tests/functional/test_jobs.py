@@ -38,8 +38,8 @@ def test_orphan_unified_job_creation(instance, inventory):
 
 @pytest.mark.django_db
 @mock.patch('awx.main.tasks.system.inspect_execution_and_hop_nodes', lambda *args, **kwargs: None)
-@mock.patch('awx.main.models.ha.get_cpu_effective_capacity', lambda cpu: 8)
-@mock.patch('awx.main.models.ha.get_mem_effective_capacity', lambda mem: 62)
+@mock.patch('awx.main.models.ha.get_cpu_effective_capacity', lambda cpu, is_control_node: 8)
+@mock.patch('awx.main.models.ha.get_mem_effective_capacity', lambda mem, is_control_node: 62)
 def test_job_capacity_and_with_inactive_node():
     i = Instance.objects.create(hostname='test-1')
     i.save_health_data('18.0.1', 2, 8000)

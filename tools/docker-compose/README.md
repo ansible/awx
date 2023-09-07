@@ -138,15 +138,16 @@ docker network prune
 
 ##### _(alternative method)_ Spin up a development environment with customized mesh node cluster
 
-With the introduction of Receptor, a cluster (of containers) with execution nodes and a hop node can be created by the docker-compose Makefile target.
-By default, it will create 1 hybrid node, 1 hop node, and 2 execution nodes.
-You can switch the type of AWX nodes between hybrid and control with this syntax.
+A cluster (of containers) with execution nodes and a hop node can be created by the docker-compose Makefile target.
+By default, it will create 1 hybrid node.
+You can switch the type of AWX nodes between hybrid and control with `MAIN_NODE_TYPE`.
 
 ```
-MAIN_NODE_TYPE=control COMPOSE_TAG=devel make docker-compose
+MAIN_NODE_TYPE=control EXECUTION_NODE_COUNT=2 COMPOSE_TAG=devel make docker-compose
 ```
 
 Running the above command will create a cluster of 1 control node, 1 hop node, and 2 execution nodes.
+A hop node is automatically created whenever there are 1 or more execution nodes.
 
 The number of nodes can be changed:
 

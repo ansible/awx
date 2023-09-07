@@ -61,6 +61,10 @@
     organization: Default
     state: absent
   register: result
+  until: result is changed  # wait for the project update to settle
+  retries: 6
+  delay: 5
+
 
 - assert:
     that:

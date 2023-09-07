@@ -21,14 +21,14 @@
     name: "{{ inv_name }}"
     organization: Default
     state: present
-  register: result
+  register: inv_result
 
 - name: Create a Host
   host:
     name: "{{ host_name4 }}"
     inventory: "{{ inv_name }}"
     state: present
-  register: result
+  register: host_result
 
 - name: Add Host to Group
   group:
@@ -37,16 +37,18 @@
     hosts:
       - "{{ host_name4 }}"
     preserve_existing_hosts: true
-  register: result
+  register: group_result
 
 - assert:
     that:
-      - "result is changed"
+      - inv_result is changed
+      - host_result is changed
+      - group_result is changed
 
 - name: Create Group 1
   group:
     name: "{{ group_name1 }}"
-    inventory: "{{ result.id }}"
+    inventory: "{{ inv_result.id }}"
     state: present
     variables:
       foo: bar
@@ -165,18 +167,6 @@
     that:
       - group1_host_count  == "3"
 
-- name: Delete Group 2
-  group:
-    name: "{{ group_name2 }}"
-    inventory: "{{ inv_name }}"
-    state: absent
-  register: result
-
-# In this case, group 2 was last a child of group1 so deleting group1 deleted group2
-- assert:
-    that:
-      - "result is not changed"
-
 - name: Delete Group 3
   group:
     name: "{{ group_name3 }}"
@@ -199,6 +189,18 @@
 - assert:
     that:
       - "result is changed"
+
+- name: Delete Group 2
+  group:
+    name: "{{ group_name2 }}"
+    inventory: "{{ inv_name }}"
+    state: absent
+  register: result
+
+# In this case, group 2 was last a child of group1 so deleting group1 deleted group2
+- assert:
+    that:
+      - "result is not changed"
 
 - name: Check module fails with correct msg
   group:
