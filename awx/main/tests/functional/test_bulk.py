@@ -309,3 +309,81 @@ def test_bulk_job_set_all_prompt(job_template, organization, inventory, project,
     assert node[0].limit == 'kansas'
     assert node[0].skip_tags == 'foobar'
     assert node[0].job_tags == 'untagged'
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('num_hosts, num_queries', [(1, 40), (10, 40)])
+def test_bulk_host_delete_num_queries(organization, inventory, post, get, user, num_hosts, num_queries, django_assert_max_num_queries):
+    '''
+    If I am a...
+      org admin
+      inventory admin at org level
+      admin of a particular inventory
+      superuser
+
+    Bulk Host delete should take under a certain number of queries
+    '''
+    inventory.organization = organization
+    inventory_admin = user('inventory_admin', False)
+    org_admin = user('org_admin', False)
+    org_inv_admin = user('org_admin', False)
+    superuser = user('admin', True)
+    for u in [org_admin, org_inv_admin, inventory_admin]:
+        organization.member_role.members.add(u)
+    organization.admin_role.members.add(org_admin)
+    organization.inventory_admin_role.members.add(org_inv_admin)
+    inventory.admin_role.members.add(inventory_admin)
+
+    for u in [org_admin, inventory_admin, org_inv_admin, superuser]:
+        hosts = [{'name': uuid4()} for i in range(num_hosts)]
+        bulk_host_create_response = post(reverse('api:bulk_host_create'), {'inventory': inventory.id, 'hosts': hosts}, u, expect=201).data
+        hosts_ids = [host.get('id') for host in bulk_host_create_response['hosts']]
+        with django_assert_max_num_queries(num_queries):
+            bulk_host_delete_response = post(reverse('api:bulk_host_delete'), {'inventory': inventory.id, 'hosts': hosts_ids}, u, expect=201).data
+            assert len(bulk_host_delete_response['hosts'].keys()) == len(hosts), f"unexpected number of hosts deleted for user {u}"
+
+
+@pytest.mark.django_db
+def test_bulk_host_delete_rbac(organization, inventory, post, get, user):
+    '''
+    If I am a...
+      org admin
+      inventory admin at org level
+      admin of a particular invenotry
+          ... I can bulk add hosts
+
+    Everyone else cannot
+    '''
+    inventory.organization = organization
+    inventory_admin = user('inventory_admin', False)
+    org_admin = user('org_admin', False)
+    org_inv_admin = user('org_admin', False)
+    auditor = user('auditor', False)
+    member = user('member', False)
+    use_inv_member = user('member', False)
+    for u in [org_admin, org_inv_admin, auditor, member, inventory_admin, use_inv_member]:
+        organization.member_role.members.add(u)
+    organization.admin_role.members.add(org_admin)
+    organization.inventory_admin_role.members.add(org_inv_admin)
+    inventory.admin_role.members.add(inventory_admin)
+    inventory.use_role.members.add(use_inv_member)
+    organization.auditor_role.members.add(auditor)
+
+    for indx, u in enumerate([org_admin, inventory_admin, org_inv_admin]):
+        bulk_host_create_response = post(
+            reverse('api:bulk_host_create'), {'inventory': inventory.id, 'hosts': [{'name': f'foobar-{indx}'}]}, u, expect=201
+        ).data
+        assert len(bulk_host_create_response['hosts']) == 1, f"unexpected number of hosts created for user {u}"
+        assert Host.objects.filter(inventory__id=inventory.id)[0].name == 'foobar-0'
+        hosts_ids = [host.get('id') for host in bulk_host_create_response['hosts']]
+        bulk_host_delete_response = post(reverse('api:bulk_host_delete'), {'inventory': inventory.id, 'hosts': hosts_ids}, u, expect=201).data
+        assert len(bulk_host_delete_response['hosts'].keys()) == 1, f"unexpected number of hosts deleted for user {u}"
+
+    for indx, u in enumerate([member, auditor, use_inv_member]):
+        bulk_host_create_response = post(
+            reverse('api:bulk_host_create'), {'inventory': inventory.id, 'hosts': [{'name': f'foobar2-{indx}'}]}, u, expect=400
+        ).data
+        assert bulk_host_create_response['__all__'][0] == f'Inventory with id {inventory.id} not found or lack permissions to add hosts.'
+        hosts_ids = [host.get('id') for host in bulk_host_create_response['hosts']]
+        bulk_host_delete_response = post(reverse('api:bulk_host_delete'), {'inventory': inventory.id, 'hosts': hosts_ids}, u, expect=201).data
+        assert len(bulk_host_delete_response['hosts'].keys()) == 1, f"unexpected number of hosts deleted for user {u}"
