@@ -60,7 +60,7 @@ def test_bulk_host_delete(run_module, admin_user, inventory):
     )
     assert not result.get('failed', False), result.get('msg', result)
     assert result.get('changed'), result
-    resp_hosts_ids = inventory.hosts.all().values_list('id', flat=True)
+    resp_hosts_ids = list(inventory.hosts.all().values_list('id', flat=True))
     result = run_module(
         'bulk_host_delete',
         {
