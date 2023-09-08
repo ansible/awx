@@ -416,6 +416,10 @@ class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetacl
             res['created_by'] = self.reverse('api:user_detail', kwargs={'pk': obj.created_by.pk})
         if getattr(obj, 'modified_by', None):
             res['modified_by'] = self.reverse('api:user_detail', kwargs={'pk': obj.modified_by.pk})
+        # Add links for all editable sublists here
+        if hasattr(self, 'sublists'):
+            for related_name, view_name in self.sublists:
+                res[related_name] = self.reverse(f'api:{view_name}', kwargs={'pk': obj.pk})
         return res
 
     def _get_summary_fields(self, obj):
@@ -954,6 +958,13 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
 
 
 class UserSerializer(BaseSerializer):
+    sublists = (
+        ('teams', 'user_teams_list'),
+        ('organizations', 'user_organizations_list'),
+        ('admin_of_organizations', 'user_admin_of_organizations_list'),
+        ('roles', 'user_roles_list'),
+    )
+
     password = serializers.CharField(required=False, default='', help_text=_('Field used to change the password.'))
     ldap_dn = serializers.CharField(source='profile.ldap_dn', read_only=True)
     external_account = serializers.SerializerMethodField(help_text=_('Set if the account is managed by an external service'))
@@ -1062,12 +1073,8 @@ class UserSerializer(BaseSerializer):
         res = super(UserSerializer, self).get_related(obj)
         res.update(
             dict(
-                teams=self.reverse('api:user_teams_list', kwargs={'pk': obj.pk}),
-                organizations=self.reverse('api:user_organizations_list', kwargs={'pk': obj.pk}),
-                admin_of_organizations=self.reverse('api:user_admin_of_organizations_list', kwargs={'pk': obj.pk}),
                 projects=self.reverse('api:user_projects_list', kwargs={'pk': obj.pk}),
                 credentials=self.reverse('api:user_credentials_list', kwargs={'pk': obj.pk}),
-                roles=self.reverse('api:user_roles_list', kwargs={'pk': obj.pk}),
                 activity_stream=self.reverse('api:user_activity_stream_list', kwargs={'pk': obj.pk}),
                 access_list=self.reverse('api:user_access_list', kwargs={'pk': obj.pk}),
                 tokens=self.reverse('api:o_auth2_token_list', kwargs={'pk': obj.pk}),
@@ -1315,6 +1322,16 @@ class OAuth2ApplicationSerializer(BaseSerializer):
 
 class OrganizationSerializer(BaseSerializer):
     show_capabilities = ['edit', 'delete']
+    sublists = (
+        ('users', 'organization_users_list'),
+        ('admins', 'organization_admins_list'),
+        ('notification_templates_started', 'organization_notification_templates_started_list'),
+        ('notification_templates_success', 'organization_notification_templates_success_list'),
+        ('notification_templates_error', 'organization_notification_templates_error_list'),
+        ('notification_templates_approvals', 'organization_notification_templates_approvals_list'),
+        ('instance_groups', 'organization_instance_groups_list'),
+        ('galaxy_credentials', 'organization_galaxy_credentials_list'),
+    )
 
     class Meta:
         model = Organization
@@ -1329,21 +1346,13 @@ class OrganizationSerializer(BaseSerializer):
             inventories=self.reverse('api:organization_inventories_list', kwargs={'pk': obj.pk}),
             job_templates=self.reverse('api:organization_job_templates_list', kwargs={'pk': obj.pk}),
             workflow_job_templates=self.reverse('api:organization_workflow_job_templates_list', kwargs={'pk': obj.pk}),
-            users=self.reverse('api:organization_users_list', kwargs={'pk': obj.pk}),
-            admins=self.reverse('api:organization_admins_list', kwargs={'pk': obj.pk}),
             teams=self.reverse('api:organization_teams_list', kwargs={'pk': obj.pk}),
             credentials=self.reverse('api:organization_credential_list', kwargs={'pk': obj.pk}),
             applications=self.reverse('api:organization_applications_list', kwargs={'pk': obj.pk}),
             activity_stream=self.reverse('api:organization_activity_stream_list', kwargs={'pk': obj.pk}),
             notification_templates=self.reverse('api:organization_notification_templates_list', kwargs={'pk': obj.pk}),
-            notification_templates_started=self.reverse('api:organization_notification_templates_started_list', kwargs={'pk': obj.pk}),
-            notification_templates_success=self.reverse('api:organization_notification_templates_success_list', kwargs={'pk': obj.pk}),
-            notification_templates_error=self.reverse('api:organization_notification_templates_error_list', kwargs={'pk': obj.pk}),
-            notification_templates_approvals=self.reverse('api:organization_notification_templates_approvals_list', kwargs={'pk': obj.pk}),
             object_roles=self.reverse('api:organization_object_roles_list', kwargs={'pk': obj.pk}),
             access_list=self.reverse('api:organization_access_list', kwargs={'pk': obj.pk}),
-            instance_groups=self.reverse('api:organization_instance_groups_list', kwargs={'pk': obj.pk}),
-            galaxy_credentials=self.reverse('api:organization_galaxy_credentials_list', kwargs={'pk': obj.pk}),
         )
         if obj.default_environment:
             res['default_environment'] = self.reverse('api:execution_environment_detail', kwargs={'pk': obj.default_environment_id})
@@ -1472,6 +1481,12 @@ class ExecutionEnvironmentSerializer(BaseSerializer):
 
 
 class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
+    sublists = (
+        ('notification_templates_started', 'project_notification_templates_started_list'),
+        ('notification_templates_success', 'project_notification_templates_success_list'),
+        ('notification_templates_error', 'project_notification_templates_error_list'),
+    )
+
     status = serializers.ChoiceField(choices=Project.PROJECT_STATUS_CHOICES, read_only=True)
     last_update_failed = serializers.BooleanField(read_only=True)
     last_updated = serializers.DateTimeField(read_only=True)
@@ -1508,9 +1523,6 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
                 scm_inventory_sources=self.reverse('api:project_scm_inventory_sources', kwargs={'pk': obj.pk}),
                 schedules=self.reverse('api:project_schedules_list', kwargs={'pk': obj.pk}),
                 activity_stream=self.reverse('api:project_activity_stream_list', kwargs={'pk': obj.pk}),
-                notification_templates_started=self.reverse('api:project_notification_templates_started_list', kwargs={'pk': obj.pk}),
-                notification_templates_success=self.reverse('api:project_notification_templates_success_list', kwargs={'pk': obj.pk}),
-                notification_templates_error=self.reverse('api:project_notification_templates_error_list', kwargs={'pk': obj.pk}),
                 access_list=self.reverse('api:project_access_list', kwargs={'pk': obj.pk}),
                 object_roles=self.reverse('api:project_object_roles_list', kwargs={'pk': obj.pk}),
                 copy=self.reverse('api:project_copy', kwargs={'pk': obj.pk}),
@@ -1674,6 +1686,12 @@ class LabelsListMixin(object):
 
 
 class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
+    sublists = (
+        ('labels', 'inventory_label_list'),
+        ('instance_groups', 'inventory_instance_groups_list'),
+        ('input_inventories', 'inventory_input_inventories'),
+    )
+
     show_capabilities = ['edit', 'delete', 'adhoc', 'copy']
     capabilities_prefetch = ['admin', 'adhoc', {'copy': 'organization.inventory_admin'}]
 
@@ -1708,9 +1726,7 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
                 ad_hoc_commands=self.reverse('api:inventory_ad_hoc_commands_list', kwargs={'pk': obj.pk}),
                 access_list=self.reverse('api:inventory_access_list', kwargs={'pk': obj.pk}),
                 object_roles=self.reverse('api:inventory_object_roles_list', kwargs={'pk': obj.pk}),
-                instance_groups=self.reverse('api:inventory_instance_groups_list', kwargs={'pk': obj.pk}),
                 copy=self.reverse('api:inventory_copy', kwargs={'pk': obj.pk}),
-                labels=self.reverse('api:inventory_label_list', kwargs={'pk': obj.pk}),
             )
         )
         if obj.kind in ('', 'constructed'):
@@ -1723,7 +1739,6 @@ class InventorySerializer(LabelsListMixin, BaseSerializerWithVariables):
         if obj.organization:
             res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk})
         if obj.kind == 'constructed':
-            res['input_inventories'] = self.reverse('api:inventory_input_inventories', kwargs={'pk': obj.pk})
             res['constructed_url'] = self.reverse('api:constructed_inventory_detail', kwargs={'pk': obj.pk})
         return res
 
@@ -1857,6 +1872,8 @@ class InventoryScriptSerializer(InventorySerializer):
 
 
 class HostSerializer(BaseSerializerWithVariables):
+    sublists = (('groups', 'host_groups_list'),)
+
     show_capabilities = ['edit', 'delete']
     capabilities_prefetch = ['inventory.admin']
 
@@ -1892,7 +1909,6 @@ class HostSerializer(BaseSerializerWithVariables):
         res.update(
             dict(
                 variable_data=self.reverse('api:host_variable_data', kwargs={'pk': obj.pk}),
-                groups=self.reverse('api:host_groups_list', kwargs={'pk': obj.pk}),
                 all_groups=self.reverse('api:host_all_groups_list', kwargs={'pk': obj.pk}),
                 job_events=self.reverse('api:host_job_events_list', kwargs={'pk': obj.pk}),
                 job_host_summaries=self.reverse('api:host_job_host_summaries_list', kwargs={'pk': obj.pk}),
@@ -2018,6 +2034,10 @@ class AnsibleFactsSerializer(BaseSerializer):
 
 
 class GroupSerializer(BaseSerializerWithVariables):
+    sublists = (
+        ('children', 'group_hosts_list'),
+        ('hosts', 'group_children_list'),
+    )
     show_capabilities = ['copy', 'edit', 'delete']
     capabilities_prefetch = ['inventory.admin', 'inventory.adhoc']
 
@@ -2038,9 +2058,7 @@ class GroupSerializer(BaseSerializerWithVariables):
         res.update(
             dict(
                 variable_data=self.reverse('api:group_variable_data', kwargs={'pk': obj.pk}),
-                hosts=self.reverse('api:group_hosts_list', kwargs={'pk': obj.pk}),
                 potential_children=self.reverse('api:group_potential_children_list', kwargs={'pk': obj.pk}),
-                children=self.reverse('api:group_children_list', kwargs={'pk': obj.pk}),
                 all_hosts=self.reverse('api:group_all_hosts_list', kwargs={'pk': obj.pk}),
                 job_events=self.reverse('api:group_job_events_list', kwargs={'pk': obj.pk}),
                 job_host_summaries=self.reverse('api:group_job_host_summaries_list', kwargs={'pk': obj.pk}),
@@ -2301,6 +2319,13 @@ class InventorySourceOptionsSerializer(BaseSerializer):
 
 
 class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOptionsSerializer):
+    sublists = (
+        ('notification_templates_started', 'inventory_source_notification_templates_started_list'),
+        ('notification_templates_success', 'inventory_source_notification_templates_success_list'),
+        ('notification_templates_error', 'inventory_source_notification_templates_error_list'),
+        ('credentials', 'inventory_source_credentials_list'),
+    )
+
     status = serializers.ChoiceField(choices=InventorySource.INVENTORY_SOURCE_STATUS_CHOICES, read_only=True)
     last_update_failed = serializers.BooleanField(read_only=True)
     last_updated = serializers.DateTimeField(read_only=True)
@@ -2325,9 +2350,6 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
                 activity_stream=self.reverse('api:inventory_source_activity_stream_list', kwargs={'pk': obj.pk}),
                 hosts=self.reverse('api:inventory_source_hosts_list', kwargs={'pk': obj.pk}),
                 groups=self.reverse('api:inventory_source_groups_list', kwargs={'pk': obj.pk}),
-                notification_templates_started=self.reverse('api:inventory_source_notification_templates_started_list', kwargs={'pk': obj.pk}),
-                notification_templates_success=self.reverse('api:inventory_source_notification_templates_success_list', kwargs={'pk': obj.pk}),
-                notification_templates_error=self.reverse('api:inventory_source_notification_templates_error_list', kwargs={'pk': obj.pk}),
             )
         )
         if obj.inventory:
@@ -2339,8 +2361,6 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             res['current_update'] = self.reverse('api:inventory_update_detail', kwargs={'pk': obj.current_update.pk})
         if obj.last_update:
             res['last_update'] = self.reverse('api:inventory_update_detail', kwargs={'pk': obj.last_update.pk})
-        else:
-            res['credentials'] = self.reverse('api:inventory_source_credentials_list', kwargs={'pk': obj.pk})
         return res
 
     def build_relational_field(self, field_name, relation_info):
@@ -2569,6 +2589,10 @@ class InventoryUpdateCancelSerializer(InventoryUpdateSerializer):
 
 
 class TeamSerializer(BaseSerializer):
+    sublists = (
+        ('users', 'team_users_list'),
+        ('roles', 'team_roles_list'),
+    )
     show_capabilities = ['edit', 'delete']
 
     class Meta:
@@ -2580,9 +2604,7 @@ class TeamSerializer(BaseSerializer):
         res.update(
             dict(
                 projects=self.reverse('api:team_projects_list', kwargs={'pk': obj.pk}),
-                users=self.reverse('api:team_users_list', kwargs={'pk': obj.pk}),
                 credentials=self.reverse('api:team_credentials_list', kwargs={'pk': obj.pk}),
-                roles=self.reverse('api:team_roles_list', kwargs={'pk': obj.pk}),
                 object_roles=self.reverse('api:team_object_roles_list', kwargs={'pk': obj.pk}),
                 activity_stream=self.reverse('api:team_activity_stream_list', kwargs={'pk': obj.pk}),
                 access_list=self.reverse('api:team_access_list', kwargs={'pk': obj.pk}),
@@ -2600,6 +2622,11 @@ class TeamSerializer(BaseSerializer):
 
 
 class RoleSerializer(BaseSerializer):
+    sublists = (
+        ('users', 'role_users_list'),
+        ('teams', 'role_teams_list'),
+    )
+
     class Meta:
         model = Role
         fields = ('*', '-created', '-modified')
@@ -2623,8 +2650,6 @@ class RoleSerializer(BaseSerializer):
 
     def get_related(self, obj):
         ret = super(RoleSerializer, self).get_related(obj)
-        ret['users'] = self.reverse('api:role_users_list', kwargs={'pk': obj.pk})
-        ret['teams'] = self.reverse('api:role_teams_list', kwargs={'pk': obj.pk})
         try:
             if obj.content_object:
                 ret.update(reverse_gfk(obj.content_object, self.context.get('request')))
@@ -3060,9 +3085,7 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
             setattr(obj, 'project', None)
         if obj.organization_id:
             res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization_id})
-        if isinstance(obj, UnifiedJobTemplate):
-            res['credentials'] = self.reverse('api:job_template_credentials_list', kwargs={'pk': obj.pk})
-        elif isinstance(obj, UnifiedJob):
+        if isinstance(obj, UnifiedJob):
             res['credentials'] = self.reverse('api:job_credentials_list', kwargs={'pk': obj.pk})
 
         return res
@@ -3155,6 +3178,14 @@ class JobTemplateMixin(object):
 class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobOptionsSerializer):
     show_capabilities = ['start', 'schedule', 'copy', 'edit', 'delete']
     capabilities_prefetch = ['admin', 'execute', {'copy': ['project.use', 'inventory.use']}]
+    sublists = (
+        ('notification_templates_started', 'job_template_notification_templates_started_list'),
+        ('notification_templates_success', 'job_template_notification_templates_success_list'),
+        ('notification_templates_error', 'job_template_notification_templates_error_list'),
+        ('labels', 'job_template_label_list'),
+        ('instance_groups', 'job_template_instance_groups_list'),
+        ('credentials', 'job_template_credentials_list'),
+    )
 
     status = serializers.ChoiceField(choices=JobTemplate.JOB_TEMPLATE_STATUS_CHOICES, read_only=True, required=False)
 
@@ -3204,14 +3235,9 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
                 if obj.webhook_service
                 else ''
             ),
-            notification_templates_started=self.reverse('api:job_template_notification_templates_started_list', kwargs={'pk': obj.pk}),
-            notification_templates_success=self.reverse('api:job_template_notification_templates_success_list', kwargs={'pk': obj.pk}),
-            notification_templates_error=self.reverse('api:job_template_notification_templates_error_list', kwargs={'pk': obj.pk}),
             access_list=self.reverse('api:job_template_access_list', kwargs={'pk': obj.pk}),
             survey_spec=self.reverse('api:job_template_survey_spec', kwargs={'pk': obj.pk}),
-            labels=self.reverse('api:job_template_label_list', kwargs={'pk': obj.pk}),
             object_roles=self.reverse('api:job_template_object_roles_list', kwargs={'pk': obj.pk}),
-            instance_groups=self.reverse('api:job_template_instance_groups_list', kwargs={'pk': obj.pk}),
             slice_workflow_jobs=self.reverse('api:job_template_slice_workflow_jobs_list', kwargs={'pk': obj.pk}),
             copy=self.reverse('api:job_template_copy', kwargs={'pk': obj.pk}),
         )
@@ -3582,6 +3608,12 @@ class AdHocCommandRelaunchSerializer(AdHocCommandSerializer):
 
 
 class SystemJobTemplateSerializer(UnifiedJobTemplateSerializer):
+    sublists = (
+        ('notification_templates_started', 'system_job_template_notification_templates_started_list'),
+        ('notification_templates_success', 'system_job_template_notification_templates_success_list'),
+        ('notification_templates_error', 'system_job_template_notification_templates_error_list'),
+    )
+
     class Meta:
         model = SystemJobTemplate
         fields = ('*', 'job_type')
@@ -3593,9 +3625,6 @@ class SystemJobTemplateSerializer(UnifiedJobTemplateSerializer):
                 jobs=self.reverse('api:system_job_template_jobs_list', kwargs={'pk': obj.pk}),
                 schedules=self.reverse('api:system_job_template_schedules_list', kwargs={'pk': obj.pk}),
                 launch=self.reverse('api:system_job_template_launch', kwargs={'pk': obj.pk}),
-                notification_templates_started=self.reverse('api:system_job_template_notification_templates_started_list', kwargs={'pk': obj.pk}),
-                notification_templates_success=self.reverse('api:system_job_template_notification_templates_success_list', kwargs={'pk': obj.pk}),
-                notification_templates_error=self.reverse('api:system_job_template_notification_templates_error_list', kwargs={'pk': obj.pk}),
             )
         )
         return res
@@ -3637,6 +3666,14 @@ class SystemJobCancelSerializer(SystemJobSerializer):
 class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJobTemplateSerializer):
     show_capabilities = ['start', 'schedule', 'edit', 'copy', 'delete']
     capabilities_prefetch = ['admin', 'execute', {'copy': 'organization.workflow_admin'}]
+    sublists = (
+        ('notification_templates_started', 'workflow_job_template_notification_templates_started_list'),
+        ('notification_templates_success', 'workflow_job_template_notification_templates_success_list'),
+        ('notification_templates_error', 'workflow_job_template_notification_templates_error_list'),
+        ('notification_templates_approvals', 'workflow_job_template_notification_templates_approvals_list'),
+        ('labels', 'workflow_job_template_label_list'),
+    )
+
     limit = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     scm_branch = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
 
@@ -3681,12 +3718,7 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
                 else ''
             ),
             workflow_nodes=self.reverse('api:workflow_job_template_workflow_nodes_list', kwargs={'pk': obj.pk}),
-            labels=self.reverse('api:workflow_job_template_label_list', kwargs={'pk': obj.pk}),
             activity_stream=self.reverse('api:workflow_job_template_activity_stream_list', kwargs={'pk': obj.pk}),
-            notification_templates_started=self.reverse('api:workflow_job_template_notification_templates_started_list', kwargs={'pk': obj.pk}),
-            notification_templates_success=self.reverse('api:workflow_job_template_notification_templates_success_list', kwargs={'pk': obj.pk}),
-            notification_templates_error=self.reverse('api:workflow_job_template_notification_templates_error_list', kwargs={'pk': obj.pk}),
-            notification_templates_approvals=self.reverse('api:workflow_job_template_notification_templates_approvals_list', kwargs={'pk': obj.pk}),
             access_list=self.reverse('api:workflow_job_template_access_list', kwargs={'pk': obj.pk}),
             object_roles=self.reverse('api:workflow_job_template_object_roles_list', kwargs={'pk': obj.pk}),
             survey_spec=self.reverse('api:workflow_job_template_survey_spec', kwargs={'pk': obj.pk}),
@@ -3903,9 +3935,6 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
             res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory_id})
         if obj.execution_environment_id:
             res['execution_environment'] = self.reverse('api:execution_environment_detail', kwargs={'pk': obj.execution_environment_id})
-        res['labels'] = self.reverse('api:{}_labels_list'.format(get_type_for_model(self.Meta.model)), kwargs={'pk': obj.pk})
-        res['credentials'] = self.reverse('api:{}_credentials_list'.format(get_type_for_model(self.Meta.model)), kwargs={'pk': obj.pk})
-        res['instance_groups'] = self.reverse('api:{}_instance_groups_list'.format(get_type_for_model(self.Meta.model)), kwargs={'pk': obj.pk})
         return res
 
     def _build_mock_obj(self, attrs):
@@ -4019,6 +4048,14 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
     failure_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     always_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     exclude_errors = ('required',)  # required variables may be provided by WFJT or on launch
+    sublists = (
+        ('success_nodes', 'workflow_job_template_node_success_nodes_list'),
+        ('failure_nodes', 'workflow_job_template_node_failure_nodes_list'),
+        ('always_nodes', 'workflow_job_template_node_always_nodes_list'),
+        ('labels', 'workflow_job_template_node_labels_list'),
+        ('credentials', 'workflow_job_template_node_credentials_list'),
+        ('instance_groups', 'workflow_job_template_node_instance_groups_list'),
+    )
 
     class Meta:
         model = WorkflowJobTemplateNode
@@ -5278,6 +5315,7 @@ class SchedulePreviewSerializer(BaseSerializer):
 
 class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSerializer):
     show_capabilities = ['edit', 'delete']
+    sublists = (('labels', 'schedule_labels_list'), ('credentials', 'schedule_credentials_list'), ('instance_groups', 'schedule_instance_groups_list'))
 
     timezone = serializers.SerializerMethodField(
         help_text=_(
@@ -5376,6 +5414,10 @@ class InstanceNodeSerializer(BaseSerializer):
 
 class InstanceSerializer(BaseSerializer):
     show_capabilities = ['edit']
+    sublists = (
+        ('instance_groups', 'instance_instance_groups_list'),
+        ('peers', 'instance_peers_list'),
+    )
 
     consumed_capacity = serializers.SerializerMethodField()
     percent_capacity_remaining = serializers.SerializerMethodField()
@@ -5443,10 +5485,8 @@ class InstanceSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(InstanceSerializer, self).get_related(obj)
         res['jobs'] = self.reverse('api:instance_unified_jobs_list', kwargs={'pk': obj.pk})
-        res['instance_groups'] = self.reverse('api:instance_instance_groups_list', kwargs={'pk': obj.pk})
         if obj.node_type in [Instance.Types.EXECUTION, Instance.Types.HOP]:
             res['install_bundle'] = self.reverse('api:instance_install_bundle', kwargs={'pk': obj.pk})
-        res['peers'] = self.reverse('api:instance_peers_list', kwargs={"pk": obj.pk})
         if self.context['request'].user.is_superuser or self.context['request'].user.is_system_auditor:
             if obj.node_type == 'execution':
                 res['health_check'] = self.reverse('api:instance_health_check', kwargs={'pk': obj.pk})
@@ -5617,6 +5657,8 @@ class HostMetricSummaryMonthlySerializer(BaseSerializer):
 
 class InstanceGroupSerializer(BaseSerializer):
     show_capabilities = ['edit', 'delete']
+    sublists = (('instances', 'instance_group_instance_list'),)
+
     capacity = serializers.SerializerMethodField()
     consumed_capacity = serializers.SerializerMethodField()
     percent_capacity_remaining = serializers.SerializerMethodField()
@@ -5699,7 +5741,6 @@ class InstanceGroupSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(InstanceGroupSerializer, self).get_related(obj)
         res['jobs'] = self.reverse('api:instance_group_unified_jobs_list', kwargs={'pk': obj.pk})
-        res['instances'] = self.reverse('api:instance_group_instance_list', kwargs={'pk': obj.pk})
         res['access_list'] = self.reverse('api:instance_group_access_list', kwargs={'pk': obj.pk})
         res['object_roles'] = self.reverse('api:instance_group_object_role_list', kwargs={'pk': obj.pk})
         if obj.credential:
