@@ -15,7 +15,7 @@ There are two methods you can use to get the next release version. The manual wa
 Log into your github account, under your user icon go to Settings => Developer Settings => Personal Access Tokens => Tokens (classic).
 Select the Generate new token => Generate new token (classic)
 Fill in the note, select no scopes select "Generate token".
-Copy the token and create a file in your awx repo called `.github_creds`. Enter the token in this file.
+Copy the token and create a file at `~/.github_creds` or in your awx repo as `.github_creds`. Enter the token in this file.
 Run `./tools/scripts/get_next_release.py`
 This will use your token to go query for the PRs in the release and scan their bodies to select X/Y/Z and suggest new versions and spit out notifications.
 
@@ -149,7 +149,7 @@ Send notifications to the following groups:
   * AWX Mailing List
   * #social:ansible.com IRC (@newsbot for inclusion in bullhorn)
   * #awx:ansible.com (no @newsbot in this room)
-  * #ansible-controller slack channel 
+  * #ansible-controller slack channel
 
 These messages are templated out for you in the output of `get_next_release.yml`.
 
