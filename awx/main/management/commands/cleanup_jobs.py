@@ -150,6 +150,9 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--days', dest='days', type=int, default=90, metavar='N', help='Remove jobs/updates executed more than N days ago. Defaults to 90.')
         parser.add_argument('--dry-run', dest='dry_run', action='store_true', default=False, help='Dry run mode (show items that would be removed)')
+        parser.add_argument(
+            '--batch-size', dest='batch_size', type=int, default=100000, metavar='X', help='Remove jobs in batch of X jobs. Defaults to 100000.'
+        )
         parser.add_argument('--jobs', dest='only_jobs', action='store_true', default=False, help='Remove jobs')
         parser.add_argument('--ad-hoc-commands', dest='only_ad_hoc_commands', action='store_true', default=False, help='Remove ad hoc commands')
         parser.add_argument('--project-updates', dest='only_project_updates', action='store_true', default=False, help='Remove project updates')
@@ -226,8 +229,6 @@ class Command(BaseCommand):
                 cursor.execute(f'DROP TABLE _unpartitioned_{tblname}')
 
     def cleanup_jobs(self):
-        batch_size = 100000
-
         # Hack to avoid doing N+1 queries as each item in the Job query set does
         # an individual query to get the underlying UnifiedJob.
         Job.polymorphic_super_sub_accessors_replaced = True
@@ -242,8 +243,8 @@ class Command(BaseCommand):
         deleted = 0
         info = qs.aggregate(min=Min('id'), max=Max('id'))
         if info['min'] is not None:
-            for start in range(info['min'], info['max'] + 1, batch_size):
-                qs_batch = qs.filter(id__gte=start, id__lte=start + batch_size)
+            for start in range(info['min'], info['max'] + 1, self.batch_size):
+                qs_batch = qs.filter(id__gte=start, id__lte=start + self.batch_size)
                 pk_list = qs_batch.values_list('id', flat=True)
 
                 _, results = qs_batch.delete()
@@ -402,6 +403,7 @@ class Command(BaseCommand):
         self.init_logging()
         self.days = int(options.get('days', 90))
         self.dry_run = bool(options.get('dry_run', False))
+        self.batch_size = int(options.get('batch_size', 100000))
         try:
             self.cutoff = now() - datetime.timedelta(days=self.days)
         except OverflowError:
