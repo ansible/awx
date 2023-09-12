@@ -1164,10 +1164,20 @@ def create_partition(tblname, start=None):
     try:
         with transaction.atomic():
             with connection.cursor() as cursor:
+                r_tuples = cursor.execute(f"SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = '{tblname}_{partition_label}');")
+                for row in r_tuples:  # should only have 1
+                    for val in row:  # should only have 1
+                        if val is True:
+                            logger.debug(f'Event partition table {tblname}_{partition_label} already exists')
+                            return
+
                 cursor.execute(
-                    f'CREATE TABLE IF NOT EXISTS {tblname}_{partition_label} '
-                    f'PARTITION OF {tblname} '
-                    f'FOR VALUES FROM (\'{start_timestamp}\') to (\'{end_timestamp}\');'
+                    f'CREATE TABLE {tblname}_{partition_label} '
+                    f'(LIKE {tblname} INCLUDING DEFAULTS INCLUDING CONSTRAINTS); '
+                    f'ALTER TABLE {tblname}_{partition_label} ADD CONSTRAINT y{partition_label} '
+                    f'CHECK ( job_created >= TIMESTAMP \'{start_timestamp}\' AND job_created < TIMESTAMP \'{end_timestamp}\' ); '
+                    f'ALTER TABLE {tblname} ATTACH PARTITION {tblname}_{partition_label} '
+                    f'FOR VALUES FROM (\'{start_timestamp}\') TO (\'{end_timestamp}\'); '
                 )
     except ProgrammingError as e:
         logger.debug(f'Caught known error due to existing partition: {e}')
