@@ -1,10 +1,8 @@
 .. _releasenotes_start:
 
-=================
-AWX Release Notes
-=================
-
-AWX Release Notes
+===================
+Release Notes TOC
+===================
 
 .. toctree::
    :maxdepth: 2

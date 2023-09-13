@@ -1,10 +1,8 @@
 .. _ug_start:
 
-==========
-User Guide
-==========
-
-User Guide
+================
+User Guide TOC
+================
 
 .. toctree::
    :maxdepth: 2
