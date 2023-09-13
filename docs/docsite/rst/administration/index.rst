@@ -1,10 +1,8 @@
 .. _ag_start:
 
-==================
-AWX Administration
-==================
-
-AWX Administration
+=========================
+Administration Guide TOC
+=========================
 
 .. toctree::
   :maxdepth: 2

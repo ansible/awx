@@ -1,10 +1,8 @@
 .. _qs_start:
 
-==============
-AWX Quickstart
-==============
-
-AWX Quickstart
+================
+Quickstart TOC
+================
 
 .. toctree::
    :maxdepth: 2

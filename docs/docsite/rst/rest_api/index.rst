@@ -1,10 +1,8 @@
 .. _api_start:
 
-============
-AWX REST API
-============
-
-AWX REST API
+==============
+REST API TOC
+==============
 
 .. toctree::
    :maxdepth: 2

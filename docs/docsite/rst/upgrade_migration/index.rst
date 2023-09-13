@@ -1,10 +1,8 @@
 .. _upgrade_migration_start:
 
-=======================================
-Upgrading and Migrating AWX Deployments
-=======================================
-
-Upgrading and Migrating AWX Deployments
+=========================================
+Upgrading and Migrating Deployments TOC
+=========================================
 
 .. toctree::
    :maxdepth: 2
