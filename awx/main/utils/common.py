@@ -1172,10 +1172,7 @@ def create_partition(tblname, start=None):
                             return
 
                 cursor.execute(
-                    f'CREATE TABLE {tblname}_{partition_label} '
-                    f'(LIKE {tblname} INCLUDING DEFAULTS INCLUDING CONSTRAINTS); '
-                    f'ALTER TABLE {tblname}_{partition_label} ADD CONSTRAINT y{partition_label} '
-                    f'CHECK ( job_created >= TIMESTAMP \'{start_timestamp}\' AND job_created < TIMESTAMP \'{end_timestamp}\' ); '
+                    f'CREATE TABLE {tblname}_{partition_label} (LIKE {tblname} INCLUDING DEFAULTS INCLUDING CONSTRAINTS); '
                     f'ALTER TABLE {tblname} ATTACH PARTITION {tblname}_{partition_label} '
                     f'FOR VALUES FROM (\'{start_timestamp}\') TO (\'{end_timestamp}\'); '
                 )
