@@ -1174,7 +1174,7 @@ def create_partition(tblname, start=None):
                 cursor.execute(
                     f'CREATE TABLE {tblname}_{partition_label} (LIKE {tblname} INCLUDING DEFAULTS INCLUDING CONSTRAINTS); '
                     f'ALTER TABLE {tblname} ATTACH PARTITION {tblname}_{partition_label} '
-                    f'FOR VALUES FROM (\'{start_timestamp}\') TO (\'{end_timestamp}\'); '
+                    f'FOR VALUES FROM (\'{start_timestamp}\') TO (\'{end_timestamp}\');'
                 )
     except ProgrammingError as e:
         logger.debug(f'Caught known error due to existing partition: {e}')
