@@ -33,7 +33,18 @@ def project_update(mocker):
 
 @pytest.fixture
 def job(mocker, job_template, project_update):
-    return mocker.MagicMock(pk=5, job_template=job_template, project_update=project_update, workflow_job_id=None, execution_environment_id=None)
+    return mocker.MagicMock(
+        pk=5,
+        job_template=job_template,
+        project_update=project_update,
+        workflow_job_id=None,
+        execution_environment_id=None,
+        created_by=mocker.MagicMock(pk=42),
+        modified_by=mocker.MagicMock(pk=43),
+        inventory=mocker.MagicMock(pk=44),
+        project=mocker.MagicMock(pk=45),
+        organization_id=46,
+    )
 
 
 @pytest.fixture
@@ -46,8 +57,6 @@ def jobs(mocker):
     return [Job(id=x, name='job-%d' % x) for x in range(0, 25)]
 
 
-@mock.patch('awx.api.serializers.UnifiedJobTemplateSerializer.get_related', lambda x, y: {})
-@mock.patch('awx.api.serializers.JobOptionsSerializer.get_related', lambda x, y: {})
 class TestJobSerializerGetRelated:
     @pytest.mark.parametrize(
         "related_resource_name",

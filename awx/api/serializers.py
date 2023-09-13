@@ -4108,6 +4108,14 @@ class WorkflowJobNodeSerializer(LaunchConfigurationBaseSerializer):
     success_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     failure_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     always_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    sublists = (
+        ('success_nodes', 'workflow_job_node_success_nodes_list'),
+        ('failure_nodes', 'workflow_job_node_failure_nodes_list'),
+        ('always_nodes', 'workflow_job_node_always_nodes_list'),
+        ('labels', 'workflow_job_node_labels_list'),
+        ('credentials', 'workflow_job_node_credentials_list'),
+        ('instance_groups', 'workflow_job_node_instance_groups_list'),
+    )
 
     class Meta:
         model = WorkflowJobNode

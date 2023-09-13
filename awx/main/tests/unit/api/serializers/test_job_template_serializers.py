@@ -32,6 +32,11 @@ def job_template(mocker):
     mock_jt.webhook_service = ''
     mock_jt.organization_id = None
     mock_jt.webhook_credential_id = None
+    mock_jt.created_by = mocker.MagicMock(pk=98)
+    mock_jt.modified_by = mocker.MagicMock(pk=99)
+    mock_jt.inventory = mocker.MagicMock(pk=100)
+    mock_jt.project = mocker.MagicMock(pk=101)
+    mock_jt.execution_environment_id = 102
     return mock_jt
 
 
@@ -45,8 +50,6 @@ def jobs(mocker):
     return [Job(id=x, name='job-%d' % x) for x in range(0, 25)]
 
 
-@mock.patch('awx.api.serializers.UnifiedJobTemplateSerializer.get_related', lambda x, y: {})
-@mock.patch('awx.api.serializers.JobOptionsSerializer.get_related', lambda x, y: {})
 class TestJobTemplateSerializerGetRelated:
     @pytest.mark.parametrize(
         "related_resource_name",
