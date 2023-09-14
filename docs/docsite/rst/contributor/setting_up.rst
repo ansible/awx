@@ -2,7 +2,7 @@
 Setting up your development environment
 ========================================
 
-The AWX docs is developed using the python toolchain. The contents itself is authored in ReStructuredText (rst) 
+The AWX docs are developed using the Python toolchain. The content itself is authored in ReStructuredText (rst).
 
 Prerequisites
 ---------------
