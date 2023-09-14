@@ -121,7 +121,6 @@ jobs:
   collection-integration:
     name: awx_collection integration
     runs-on: ubuntu-latest
-    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -147,6 +146,7 @@ jobs:
           python3 -m pip install -r awx_collection/requirements.txt
 
       - name: Run integration tests
+        continue-on-error: true
         run: |
           echo "::remove-matcher owner=python::"  # Disable annoying annotations from setup-python
           echo '[general]' > ~/.tower_cli.cfg
