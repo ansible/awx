@@ -1,6 +1,5 @@
 # Python
 import pytest
-from unittest import mock
 
 # AWX
 from awx.api.serializers import (
