@@ -340,7 +340,7 @@ def test_bulk_host_delete_num_queries(organization, inventory, post, get, user, 
             bulk_host_create_response = post(reverse('api:bulk_host_create'), {'inventory': inventory.id, 'hosts': hosts}, u, expect=201).data
             assert len(bulk_host_create_response['hosts']) == len(hosts), f"unexpected number of hosts created for user {u}"
             hosts_ids = [host['id'] for host in bulk_host_create_response['hosts']]
-            bulk_host_delete_response = post(reverse('api:bulk_host_delete'), {'inventory': inventory.id, 'hosts': hosts_ids}, u, expect=201).data
+            bulk_host_delete_response = post(reverse('api:bulk_host_delete'), {'hosts': hosts_ids}, u, expect=201).data
             assert len(bulk_host_delete_response['hosts'].keys()) == len(hosts), f"unexpected number of hosts deleted for user {u}"
 
 
@@ -377,7 +377,7 @@ def test_bulk_host_delete_rbac(organization, inventory, post, get, user):
         assert len(bulk_host_create_response['hosts']) == 1, f"unexpected number of hosts created for user {u}"
         assert Host.objects.filter(inventory__id=inventory.id)[0].name == 'foobar-0'
         hosts_ids = [host['id'] for host in bulk_host_create_response['hosts']]
-        bulk_host_delete_response = post(reverse('api:bulk_host_delete'), {'inventory': inventory.id, 'hosts': hosts_ids}, u, expect=201).data
+        bulk_host_delete_response = post(reverse('api:bulk_host_delete'), {'hosts': hosts_ids}, u, expect=201).data
         assert len(bulk_host_delete_response['hosts'].keys()) == 1, f"unexpected number of hosts deleted for user {u}"
 
     for indx, u in enumerate([member, auditor, use_inv_member]):
@@ -386,5 +386,5 @@ def test_bulk_host_delete_rbac(organization, inventory, post, get, user):
         ).data
         assert bulk_host_create_response['__all__'][0] == f'Inventory with id {inventory.id} not found or lack permissions to add hosts.'
         hosts_ids = [host['id'] for host in bulk_host_create_response['hosts']]
-        bulk_host_delete_response = post(reverse('api:bulk_host_delete'), {'inventory': inventory.id, 'hosts': hosts_ids}, u, expect=201).data
+        bulk_host_delete_response = post(reverse('api:bulk_host_delete'), {'hosts': hosts_ids}, u, expect=201).data
         assert len(bulk_host_delete_response['hosts'].keys()) == 1, f"unexpected number of hosts deleted for user {u}"
