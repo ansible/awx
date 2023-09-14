@@ -3,17 +3,15 @@
 missing_modules = []
 try:
     import requests
-except:
+except ImportError:
     missing_modules.append('requests')
 import json
 import os
-import re
 import sys
-import time
 
 try:
     import semantic_version
-except:
+except ImportError:
     missing_modules.append('semantic_version')
 
 if len(missing_modules) > 0:
@@ -55,7 +53,7 @@ def getNextReleases():
                 try:
                     if a_pr['html_url'] in pr_votes:
                         continue
-                except:
+                except KeyError:
                     print("Unable to check on PR")
                     print(json.dumps(a_pr, indent=4))
                     sys.exit(255)
@@ -133,14 +131,17 @@ def getNextReleases():
 # Load the users session information
 #
 session = requests.Session()
-try:
-    print("Loading credentials")
-    with open(".github_creds", "r") as f:
-        password = f.read().strip()
-    session.headers.update({'Authorization': 'bearer {}'.format(password), 'Accept': 'application/vnd.github.v3+json'})
-except Exception:
-    print("Failed to load credentials from ./.github_creds")
-    sys.exit(255)
+
+print("Loading credentials")
+CREDS_LOCATIONS = ('.github_creds', '~/.github_creds')
+for creds_loc in CREDS_LOCATIONS:
+    if os.path.exists(os.path.expanduser(creds_loc)):
+        with open(os.path.expanduser(creds_loc), "r") as f:
+            password = f.read().strip()
+            session.headers.update({'Authorization': 'bearer {}'.format(password), 'Accept': 'application/vnd.github.v3+json'})
+        break
+else:
+    raise Exception(f'Could not location github token in locations {CREDS_LOCATIONS}')
 
 versions = {
     'current': {},
