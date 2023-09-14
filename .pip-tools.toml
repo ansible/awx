@@ -1,0 +1,12 @@
+[tool.pip-tools]
+resolver = "backtracking"
+allow-unsafe = true
+strip-extras = true
+quiet = true
+output-file = "docs/docsite/requirements.txt"
+upgrade-package = [
+    "sphinx == 5.1.1",
+    "sphinx-ansible-theme == 0.9.1",
+    "docutils == 0.16",
+    "Jinja2 < 3.1",
+]
