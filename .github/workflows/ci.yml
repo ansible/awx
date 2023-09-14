@@ -146,7 +146,6 @@ jobs:
           python3 -m pip install -r awx_collection/requirements.txt
 
       - name: Run integration tests
-        continue-on-error: true
         run: |
           echo "::remove-matcher owner=python::"  # Disable annoying annotations from setup-python
           echo '[general]' > ~/.tower_cli.cfg
@@ -160,6 +159,7 @@ jobs:
 
       # Upload coverage report as artifact
       - uses: actions/upload-artifact@v3
+        if: always()
         with:
           name: coverage-${{ matrix.target-regex.name }}
           path: ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage/
