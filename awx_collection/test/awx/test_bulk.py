@@ -64,7 +64,6 @@ def test_bulk_host_delete(run_module, admin_user, inventory):
     result = run_module(
         'bulk_host_delete',
         {
-            'inventory': inventory.id,
             'hosts': resp_hosts_ids,
         },
         admin_user,
