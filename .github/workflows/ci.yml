@@ -123,6 +123,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
+      # need to continue-on-error to save docker-compose logs if error happened
+      continue-on-error: true
       matrix:
         target-regex:
           - name: a-h
