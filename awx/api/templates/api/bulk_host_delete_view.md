@@ -1,12 +1,11 @@
 # Bulk Host Delete
 
-This endpoint allows the client to delete multiple hosts from an inventory. 
-They may do this by providing the inventory ID and a list hosts ID's to be deleted.
+This endpoint allows the client to delete multiple hosts from inventories. 
+They may do this by providing a list hosts ID's to be deleted.
 
 Example:
 
     {
-        "inventory": 1,
         "hosts": [1, 2, 3, 4, 5]
     }
 

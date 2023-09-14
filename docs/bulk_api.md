@@ -105,11 +105,10 @@ The maximum number of hosts allowed to be added is controlled by the setting `BU
 
 Provides feature in the API that allows a single web request to delete multiple hosts from an inventory.
 
-Following is an example of a post request at the /api/v2/bulk/host_create:
+Following is an example of a post request at the /api/v2/bulk/host_delete:
 
 
     {
-        "inventory": 1,
         "hosts": [3, 4, 5, 6, 7 ,8, 9, 10]
     }
 
