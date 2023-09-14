@@ -165,6 +165,7 @@ jobs:
           path: ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage/
 
       - uses: ./.github/actions/upload_awx_devel_logs
+        if: always()
         with:
           log-filename: collection-integration-${{ matrix.target-regex.name }}.log
 
