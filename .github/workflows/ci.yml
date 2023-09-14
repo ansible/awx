@@ -118,9 +118,9 @@ jobs:
   collection-integration:
     name: awx_collection integration
     runs-on: ubuntu-latest
+    continue-on-error: true
     strategy:
       fail-fast: false
-      continue-on-error: true
       matrix:
         target-regex:
           - name: a-h
