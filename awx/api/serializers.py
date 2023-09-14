@@ -2200,9 +2200,6 @@ class BulkHostCreateSerializer(serializers.Serializer):
 
 
 class BulkHostDeleteSerializer(serializers.Serializer):
-    inventory = serializers.PrimaryKeyRelatedField(
-        queryset=Inventory.objects.all(), required=True, write_only=True, help_text=_('Primary Key ID of inventory to delete hosts from.')
-    )
     hosts = serializers.ListField(
         allow_empty=False,
         max_length=250,
@@ -2211,38 +2208,66 @@ class BulkHostDeleteSerializer(serializers.Serializer):
     )
 
     class Meta:
-        model = Inventory
-        fields = ('inventory', 'hosts')
+        model = Host
+        fields = 'hosts'
         read_only_fields = ()
 
     def validate(self, attrs):
         request = self.context.get('request', None)
-        inv = attrs['inventory']
-        if inv.kind != '':
-            raise serializers.ValidationError(_('Hosts can only be deleted from manual inventories (not smart or constructed types).'))
-        if len(attrs['hosts']) > settings.BULK_HOST_MAX_DELETE:
-            raise serializers.ValidationError(_('Number of hosts exceeds system setting BULK_HOST_MAX_DELETE'))
-        if request and not request.user.is_superuser:
-            if request.user not in inv.admin_role:
-                raise serializers.ValidationError(_(f'Inventory with id {inv.id} not found or lack permissions to delete hosts from.'))
 
-        # Getting list of all host objects in the inventory, filtered by the list of the hosts to delete
-        attrs['in_inv'] = Host.objects.get_queryset().filter(pk__in=attrs['hosts'], inventory=inv.id)
+        # Validating the number of hosts to be deleted
+        if len(attrs['hosts']) > settings.BULK_HOST_MAX_DELETE:
+            raise serializers.ValidationError(
+                {
+                    "ERROR": 'Number of hosts exceeds system setting BULK_HOST_MAX_DELETE',
+                    "BULK_HOST_MAX_DELETE": settings.BULK_HOST_MAX_DELETE,
+                    "Hosts_count": len(attrs['hosts']),
+                }
+            )
+
+        # Getting list of all host objects, filtered by the list of the hosts to delete
+        attrs['in_inv'] = Host.objects.get_queryset().filter(pk__in=attrs['hosts'])
+
+        # Converting the queryset data in a dict. to reduce the number of queries when
+        # manipulating the data
+        hosts_data = attrs['in_inv'].values()
+
         if len(attrs['in_inv']) == 0:
-            raise serializers.ValidationError(_(f"There are no hosts in inventory : {inv}. {attrs['in_inv']}"))
+            raise serializers.ValidationError({"ERROR": "There are no to delete"})
 
         if len(attrs['in_inv']) < len(attrs['hosts']):
-            raise serializers.ValidationError(
-                {"inventory": "Not all hosts are in the inventory", "hosts": list(set(attrs['hosts']).difference(attrs['in_inv']))}
-            )
+            hosts_exists = [host['id'] for host in hosts_data]
+            raise serializers.ValidationError({"ERROR": "Not all hosts are exists", "hosts": list(set(attrs['hosts']).difference(hosts_exists))})
+
+        # Getting all inventories that the hosts can be in
+        inv_list = list(set([host['inventory_id'] for host in hosts_data]))
+
+        errors = {"ERRORS": "Cannot delete host(s) from inventory", "Inventory": dict()}
+        for inv in Inventory.objects.get_queryset().filter(pk__in=inv_list).values():
+            if inv['kind'] != '':
+                errors["Inventory"][inv['id']] = {
+                    "Inventory_name": inv['name'],
+                    "reason": "Hosts can only be deleted from manual inventories (not smart or constructed types).",
+                }
+            if request and not request.user.is_superuser:
+                cur_user = User.objects.get_queryset().filter(username=request.user)
+                user_role_id = [r['id'] for r in Role.objects.get_queryset().filter(members__in=cur_user).values()]
+                if inv['admin_role_id'] not in user_role_id:
+                    errors["Inventory"][inv['id']] = {
+                        "Inventory_name": inv['name'],
+                        "reason": "Lack permissions to delete hosts from.",
+                    }
+        if errors["Inventory"] != {}:
+            raise serializers.ValidationError(errors)
+
         return attrs
 
     def delete(self, validated_data):
         result = {"hosts": dict()}
         changes = {'deleted_hosts': list()}
-        for host in validated_data['in_inv']:
-            result["hosts"][host.id] = f"The host {host.name} was deleted"
-            changes['deleted_hosts'].append({"host_id": host.id, "host_name": host.name})
+        for host in validated_data['in_inv'].values():
+            result["hosts"][host["id"]] = f"The host {host['name']} was deleted"
+            changes['deleted_hosts'].append({"host_id": host["id"], "host_name": host["name"]})
 
         try:
             validated_data['in_inv'].delete()
@@ -2250,13 +2275,12 @@ class BulkHostDeleteSerializer(serializers.Serializer):
             raise serializers.ValidationError({"detail": _(f"cannot delete hosts, host deletion error {e}")})
 
         request = self.context.get('request', None)
-        activity_entry = ActivityStream.objects.create(
-            operation='update',
-            object1='inventory',
+        ActivityStream.objects.create(
+            operation='delete',
+            object1='host',
             changes=json.dumps(changes),
             actor=request.user,
         )
-        activity_entry.inventory.add(validated_data['inventory'])
         return result
 
 
