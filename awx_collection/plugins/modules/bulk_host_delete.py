@@ -16,7 +16,7 @@ author: "Avi Layani (@Avilir)"
 short_description: Bulk host delete in Automation Platform Controller
 description:
     - Single-request bulk host deletion in Automation Platform Controller.
-    - Provides a way to delete many hosts at once from an inventory in Controller.
+    - Provides a way to delete many hosts at once from inventories in Controller.
 options:
     hosts:
       description:
@@ -24,18 +24,12 @@ options:
       required: True
       type: list
       elements: int
-    inventory:
-      description:
-        - Inventory name, ID, or named URL the hosts should be made a member of.
-      required: True
-      type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
 EXAMPLES = '''
 - name: Bulk host delete
   bulk_host_delete:
-    inventory: 1
     hosts:
       - 1
       - 2
@@ -48,20 +42,16 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         hosts=dict(required=True, type='list', elements='int'),
-        inventory=dict(required=True, type='str'),
     )
 
     # Create a module for ourselves
     module = ControllerAPIModule(argument_spec=argument_spec)
 
     # Extract our parameters
-    inv_name = module.params.get('inventory')
     hosts = module.params.get('hosts')
 
-    inv_id = module.resolve_name_to_id('inventories', inv_name)
-
-    # Launch the jobs
-    result = module.post_endpoint("bulk/host_delete", data={"inventory": inv_id, "hosts": hosts})
+    # Delete the hosts
+    result = module.post_endpoint("bulk/host_delete", data={"hosts": hosts})
 
     if result['status_code'] != 201:
         module.fail_json(msg="Failed to delete hosts, see response for details", response=result)
