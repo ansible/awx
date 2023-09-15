@@ -16,88 +16,14 @@ Execution Environments
 Building an Execution Environment
 ---------------------------------
 
-.. index::
-    single: execution environment
-    pair: build; execution environment
-
-
-Using Ansible content that depends on non-default dependencies (custom virtual environments) can be tricky. Packages must be installed on each node, play nicely with other software installed on the host system, and be kept in sync. Previously, jobs ran inside of a virtual environment at ``/var/lib/awx/venv/ansible`` by default, which was pre-loaded with dependencies for ansible-runner and certain types of Ansible content used by the Ansible control machine. 
-
-To help simplify this process, container images can be built that serve as Ansible `control nodes <https://docs.ansible.com/ansible/latest/network/getting_started/basic_concepts.html#control-node>`_. These container images are referred to as automation |ees|, which you can create with ansible-builder and then ansible-runner can make use of those images. 
-
-Install ansible-builder
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-In order to build images, either installations of podman or docker is required along with the ansible-builder Python package. The ``--container-runtime`` option needs to correspond to the Podman/Docker executable you intend to use.
-
-Refer to the latest `Quickstart for Ansible Builder <https://ansible.readthedocs.io/projects/builder/en/latest/#quickstart-for-ansible-builder>`_ for detail.
-
-.. _build_ee:
-
-Build an execution environment
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Ansible-builder is used to create an |ee|. 
-
-An |ee| is expected to contain:
-
-- Ansible
-- Ansible Runner
-- Ansible Collections
-- Python and/or system dependencies of:
-
-  - modules/plugins in collections
-  - content in ansible-base
-  - custom user needs
-
-Building a new |ee| involves a definition (a ``.yml`` file) that specifies which content you would like to include in your |ee|, such as collections, Python requirements, and system-level packages. The content from the output generated from migrating to |ees| has some of the required data that can be piped to a file or pasted into this definition file.
-
-
-Run the builder
-~~~~~~~~~~~~~~~~
-
-Once you created a definition, use this procedure to build your |ee|.
-
-The ``ansible-builder build`` command takes an |ee| definition as an input. It outputs the build context necessary for building an |ee| image, and proceeds with building that image. The image can be re-built with the build context elsewhere, and produces the same result. By default, it looks for a file named ``execution-environment.yml`` in the current directory.
-
-For the illustration purposes, the following example ``execution-environment.yml`` file is used as a starting point:
-
-::
-
-	---
-	version: 3
-	dependencies:
-	  galaxy: requirements.yml
-
-The content of ``requirements.yml``:
-
-::
-
-	---
-	collections:
-	  - name: awx.awx
-
-To build an |ee| using the files above, run:
-
-::	
-
-	$ ansible-builder build
-	...
-	STEP 7: COMMIT my-awx-ee
-	--> 09c930f5f6a
-	09c930f5f6ac329b7ddb321b144a029dbbfcc83bdfc77103968b7f6cdfc7bea2
-	Complete! The build context can be found at: context
-
-In addition to producing a ready-to-use container image, the build context is preserved, which can be rebuilt at a different time and/or location with the tooling of your choice, such as ``docker build`` or ``podman build``.
-
-For additional information about the ``ansible-builder build`` command, refer to Ansible's `CLI Usage <https://ansible.readthedocs.io/projects/builder/en/latest/usage/#cli-usage>`_ documentation.
+The `Getting started with Execution Environments guide` will give you a brief technology overview and show you how to build and test your first |ee| in a few easy steps.
 
 Use an execution environment in jobs
 ------------------------------------
 
 In order to use an |ee| in a job, a few components are required:
 
-- An |ee| must have been created using |ab|. See :ref:`build_ee` for detail. Once an |ee| is created, you can use it to run jobs. Use the AWX user interface to specify the |ee| to use in your job templates.
+- Use the AWX user interface to specify the |ee| you :ref:`build<ug_build_ees>` to use in your job templates.
 
 - Depending on whether an |ee| is made available for global use or tied to an organization, you must have the appropriate level of administrator privileges in order to use an |ee| in a job. |Ees| tied to an organization require Organization administrators to be able to run jobs with those |ees|.
 
