@@ -33,4 +33,9 @@ Ansible AWX helps teams manage complex multi-tier deployments by adding control,
 
    administration/index
    upgrade_migration/index
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Release notes
+
    release_notes/index
