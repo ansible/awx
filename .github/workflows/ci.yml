@@ -7,9 +7,6 @@ env:
   COMPOSE_TAG: ${{ github.base_ref || 'devel' }}
 on:
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '.github/workflows/docs.yml'
 jobs:
   common-tests:
     name: ${{ matrix.tests.name }}
@@ -159,11 +156,13 @@ jobs:
 
       # Upload coverage report as artifact
       - uses: actions/upload-artifact@v3
+        if: always()
         with:
           name: coverage-${{ matrix.target-regex.name }}
           path: ~/.ansible/collections/ansible_collections/awx/awx/tests/output/coverage/
 
       - uses: ./.github/actions/upload_awx_devel_logs
+        if: always()
         with:
           log-filename: collection-integration-${{ matrix.target-regex.name }}.log
 
