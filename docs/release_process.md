@@ -169,7 +169,7 @@ Operator hub PRs are generated via an Ansible Playbook. See someone on the AWX t
   * [kustomize](https://kustomize.io/)
   * [opm](https://docs.openshift.com/container-platform/4.9/cli_reference/opm/cli-opm-install.html)
 
-3. Download the script from https://gist.github.com/rooftopcellist/0e232f26666dee45be1d8a69270d63c2 into your awx-operator repo as release_operator_hub.sh
+3. Download the script from https://github.com/ansible/awx-operator/blob/devel/hack/publish-to-operator-hub.sh into your awx-operator repo as release_operator_hub.sh
 
 4. Make sure you are logged into quay.io with `docker login quay.io`
 
