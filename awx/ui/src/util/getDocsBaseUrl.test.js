@@ -6,7 +6,7 @@ describe('getDocsBaseUrl', () => {
       license_info: {
         license_type: 'open',
       },
-      version: '18.0.0',
+      version: '18.4.4',
     });
 
     expect(result).toEqual(
@@ -19,11 +19,11 @@ describe('getDocsBaseUrl', () => {
       license_info: {
         license_type: 'enterprise',
       },
-      version: '4.0.0',
+      version: '18.4.4',
     });
 
     expect(result).toEqual(
-      'https://docs.ansible.com/automation-controller/4.0.0'
+      'https://docs.ansible.com/automation-controller/18.4'
     );
   });
 
@@ -32,17 +32,17 @@ describe('getDocsBaseUrl', () => {
       license_info: {
         license_type: 'enterprise',
       },
-      version: '4.0.0-beta',
+      version: '7.0.0-beta',
     });
 
     expect(result).toEqual(
-      'https://docs.ansible.com/automation-controller/4.0.0'
+      'https://docs.ansible.com/automation-controller/7.0'
     );
   });
 
   it('should return latest version if license info missing', () => {
     const result = getDocsBaseUrl({
-      version: '18.0.0',
+      version: '18.4.4',
     });
 
     expect(result).toEqual(
