@@ -2035,8 +2035,8 @@ class AnsibleFactsSerializer(BaseSerializer):
 
 class GroupSerializer(BaseSerializerWithVariables):
     sublists = (
-        ('children', 'group_hosts_list'),
-        ('hosts', 'group_children_list'),
+        ('hosts', 'group_hosts_list'),
+        ('children', 'group_children_list'),
     )
     show_capabilities = ['copy', 'edit', 'delete']
     capabilities_prefetch = ['inventory.admin', 'inventory.adhoc']
