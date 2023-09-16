@@ -16,7 +16,7 @@
         command: vault operator init
         container: tools_vault_1
         env:
-          VAULT_ADDR: "http://127.0.0.1:1234"
+          VAULT_ADDR: "http://127.0.0.1:{{ vault_exposed_port }}"
       register: vault_initialization
 
     - name: Write out initialization file
@@ -40,7 +40,7 @@
       flowerysong.hvault.engine:
         path: "my_engine"
         type: "kv"
-        vault_addr: "http://localhost:1234"
+        vault_addr: "http://localhost:{{ vault_exposed_port }}"
         token: "{{ Initial_Root_Token }}"
       register: engine
 
@@ -50,7 +50,7 @@
         key: "my_folder"
         value:
           my_key: "this_is_the_secret_value"
-        vault_addr: "http://localhost:1234"
+        vault_addr: "http://localhost:{{ vault_exposed_port }}"
         token: "{{ Initial_Root_Token }}"
 
   always:

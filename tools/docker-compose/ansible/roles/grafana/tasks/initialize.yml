@@ -1,0 +1,15 @@
+---
+- name: Create the grafana source directory
+  file:
+    state: dir
+    path: '{{ sources_dest }}/grafana'
+
+- name: Laydown the source grafana configs
+  copy:
+    src: "{{ item }}}"
+    dest: "{{ sources_dest }}/grafana/{{ item }}"
+  loop:
+    - 'datasources/prometheus_source.yml'
+    - 'alerting/alerts.yml'
+    - 'dashboards/demo_dashboard.json'
+    - 'dashboards/awx_dashboard.yml'

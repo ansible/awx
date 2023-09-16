@@ -5,7 +5,7 @@
 
 - name: Unseal the vault
   flowerysong.hvault.seal:
-    vault_addr: "http://localhost:1234"
+    vault_addr: "http://localhost:{{ vault_exposed_port }}"
     state: unsealed
     key: "{{ item }}"
   loop:

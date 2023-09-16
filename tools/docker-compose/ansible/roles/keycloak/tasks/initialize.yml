@@ -1,0 +1,93 @@
+---
+- block:
+    - name: Start postgres
+      community.docker.docker_compose:
+        state: present
+        services: postgres
+        project_src: "{{ sources_dest }}"
+
+    - name: See if keycloak database already exists
+      community.docker.docker_container_exec:
+        command: /usr/bin/psql -U awx --command "SELECT 1 FROM pg_database WHERE datname = 'keycloak';"
+        container: tools_postgres_1
+      changed_when: False
+      register: db_check
+
+    - name: Create the keycloak database
+      community.docker.docker_container_exec:
+        command: /usr/bin/psql -U awx --command "CREATE DATABASE keycloak WITH encoding 'UTF8';"
+        container: tools_postgres_1
+      register: pg_initialization
+      when: "'0 rows' in db_check.stdout"
+
+    - name: Start keycloak
+      community.docker.docker_compose:
+        state: present
+        services: keycloak
+        project_src: "{{ sources_dest }}"
+
+    - name: Generate certificates for keycloak
+      command: 'openssl req -new -x509 -days 365 -nodes -out {{ public_key_file }} -keyout {{ private_key_file }} -subj "{{ cert_subject }}"'
+      args:
+        creates: "{{ public_key_file }}"
+
+    - name: Load certs, existing and new SAML settings
+      set_fact:
+        private_key: "{{ private_key_content }}"
+        public_key: "{{ public_key_content }}"
+        public_key_trimmed: "{{ public_key_content | regex_replace('-----BEGIN CERTIFICATE-----\\\\n', '') | regex_replace('\\\\n-----END CERTIFICATE-----', '') }}"
+      vars:
+        # We add the extra \\ in here so that when jinja is templating out the files we end up with \n in the strings.
+        public_key_content: "{{ lookup('file', public_key_file) | regex_replace('\n', '\\\\n') }}"
+        private_key_content: "{{ lookup('file', private_key_file) | regex_replace('\n', '\\\\n') }}"
+
+    - name: Get a keycloak token
+      uri:
+        url: "https://localhost:{{ keycloak_exposed_port }}/auth/realms/master/protocol/openid-connect/token"
+        method: POST
+        body_format: form-urlencoded
+        body:
+          client_id: "admin-cli"
+          username: "{{ keycloak_username }}"
+          password: "{{ keycloak_password }}"
+          grant_type: "password"
+        validate_certs: False
+      register: keycloak_response
+      until: "keycloak_response is successful"
+      retries: 50
+      delay: 6
+
+    - name: Template the AWX realm
+      template:
+        src: keycloak.awx.realm.json.j2
+        dest: "{{ keycloak_realm_template }}"
+
+    # Sometimes the API is up and running and we can get a key but things are fully initialized so we get a Loading... message
+    - name: See if the AWX realm already exists
+      community.docker.docker_container_exec:
+        command: /usr/bin/psql -U awx keycloak --command "SELECT 1 FROM realm WHERE id = 'awx';"
+        container: tools_postgres_1
+      changed_when: False
+      register: realm_check
+
+    # We want to see if we can make a call to the keycloak realm to see if the awx realm exists and not do this step if so
+    - name: Create the AWX realm if it does not exists
+      uri:
+        url: "https://localhost:{{ keycloak_exposed_port }}/auth/admin/realms"
+        method: POST
+        body_format: json
+        body: "{{ lookup('file', keycloak_realm_template) }}"
+        validate_certs: False
+        headers:
+          Authorization: "Bearer {{ keycloak_response.json.access_token }}"
+        # 409 conflict is returned if the realm already exists
+        status_code: [201, 409]
+      when: "'0 rows' in realm_check.stdout"
+      register: realm_status
+      changed_when: realm_status.status == 201
+
+  always:
+    - name: Shutdown containers
+      community.docker.docker_compose:
+        state: absent
+        project_src: "{{ sources_dest }}"

@@ -1,0 +1,69 @@
+---
+awx_host: https://localhost:8043
+awx_admin_username: admin
+awx_admin_password: admin
+container_reference: 10.0.0.71
+# This is where to put all the docker source files relative to the tools/docker-compose/ansible directory
+sources_dest: '../_sources'
+
+enabled_containers:
+  keycloak: "{{ keycloak_enabled | default(False) }}"
+  ldap: "{{ ldap_enabled | default(False) }}"
+  splunk: "{{ splunk_enabled | default(False) }}"
+  prometheus: "{{ prometheus_enabled | default(False) }}"
+  grafana: "{{ grafana_enabled | default(False) }}"
+  vault: "{{ vault_enabled | default(False) }}"
+  tacacs: "{{ tacacs_enabled | default(False) }}"
+  logstash: "{{ logstash_enabled | default(False) }}"
+  pgbouncer: "{{ pgbouncer_enabled | default(False) }}"
+
+# Receptor
+receptor_image: quay.io/ansible/receptor:devel
+
+# Keycloak settings
+keycloak_exposed_port: 8443
+keycloak_container_version: 15.0.2
+keycloak_username: admin
+keycloak_password: admin
+cert_subject: "/C=US/ST=NC/L=Durham/O=awx/CN="
+oidc_reference:
+
+# LDAP docker compose settings
+ldap_exposed_ldap_port: 389
+ldap_exposed_ldaps_port: 636
+ldap_image_version: 2
+ldap_admin_username: admin
+ldap_admin_password: admin
+
+# Splunk docker compose settings
+splunk_exposed_logging_port: 9199
+splunk_exposed_http_admin_port: 8000
+splunk_exposed_api_port: 8089
+splunk_image_version: latest
+splunk_admin_password: splunk_admin
+
+# Tacacs plus
+tacacs_container_version: latest
+
+# Vault docker compose settings
+vault_exposed_port: 1234
+vault_container_version: 1.14
+
+# Prometheus
+prometheus_exposed_port: 9090
+prometheus_container_version: latest
+prometheus_admin_password: admin
+scrape_interval: '5s'
+
+# Grafana
+grafana_exposed_port: 3001
+grafana_container_version: latest
+
+# Logstash
+logstash_container_version: 8.8.2
+logstash_username: awx_logger
+logstash_password: workflows
+
+# PgBouncer
+pgbouncer_container_version: latest
+pgbouncer_max_pool_size: 70

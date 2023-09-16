@@ -1,0 +1,24 @@
+---
+- name: Load existing and new Logging settings
+  set_fact:
+    existing_logging: "{{ lookup('awx.awx.controller_api', 'settings/logging', host=awx_host, username=awx_admin_username, password=awx_admin_password, verify_ssl=false) }}"
+    new_logging: "{{ lookup('template', 'logging.json.j2') }}"
+
+- name: Display existing Logging configuration
+  debug:
+    msg:
+      - "Here is your existing logging configuration for reference:"
+      - "{{ existing_logging }}"
+
+- name: Write out the existing content
+  copy:
+    dest: "../_sources/existing_logging.json"
+    content: "{{ existing_logging }}"
+
+- name: Configure AWX logging adapter
+  awx.awx.settings:
+    settings: "{{ new_logging }}"
+    controller_host: "{{ awx_host }}"
+    controller_username: "{{ awx_admin_username }}"
+    controller_password: "{{ awx_admin_password }}"
+    validate_certs: False

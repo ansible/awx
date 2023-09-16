@@ -1,0 +1,20 @@
+---
+- name: Plumb AWX for enabled side containers
+  hosts: localhost
+  gather_facts: False
+  environment:
+    CONTROLLER_USERNAME: admin
+    CONTROLLER_PASSWORD: admin
+    CONTROLLER_VERIFY_SSL: False
+    CONTROLLER_HOST: https://localhost:8043
+  tasks:
+    - name: Fail if logstash and splunk are both configured
+      fail:
+        msg: You should not enable both splunk and logstash at the same time!
+      when: enabled_containers['logstash'] | bool and enabled_containers['splunk'] | bool
+
+    - include_role:
+        name: "{{ item.key }}"
+        tasks_from: plumb
+      loop: "{{ enabled_containers | dict2items }}"
+      when: enabled_containers[item.key] | bool

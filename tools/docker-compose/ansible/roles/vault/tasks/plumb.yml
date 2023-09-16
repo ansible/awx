@@ -17,7 +17,7 @@
       role_id: ""
       secret_id: ""
       token: "{{ Initial_Root_Token }}"
-      url: "http://tools_vault_1:1234"
+      url: "http://tools_vault_1:{{ vault_exposed_port }}"
   register: vault_cred
 
 - name: Create a custom credential type

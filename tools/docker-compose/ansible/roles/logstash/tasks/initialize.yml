@@ -1,0 +1,5 @@
+---
+- name: Deploy the logstash conf file
+  template:
+    src: logstash.conf.j2
+    dest: "{{ sources_dest }}/logstash.conf"

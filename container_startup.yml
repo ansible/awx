@@ -1,0 +1,14 @@
+---
+awx_host: https://localhost:8043
+awx_admin_username: admin
+awx_admin_password: admin
+container_reference: '10.0.0.2'
+# keycloak_enabled: True
+# ldap_enabled: True
+# splunk_enabled: True
+# prometheus_enabled: True
+# grafana_enabled: True
+# vault_enabled: True
+# tacacs_enabled: True
+# logstash_enabled: True
+# pgbouncer_enabled: True

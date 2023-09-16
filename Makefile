@@ -28,22 +28,6 @@ COLLECTION_TEMPLATE_VERSION ?= false
 # NOTE: This defaults the container image version to the branch that's active
 COMPOSE_TAG ?= $(GIT_BRANCH)
 MAIN_NODE_TYPE ?= hybrid
-# If set to true docker-compose will also start a pgbouncer instance and use it
-PGBOUNCER ?= false
-# If set to true docker-compose will also start a keycloak instance
-KEYCLOAK ?= false
-# If set to true docker-compose will also start an ldap instance
-LDAP ?= false
-# If set to true docker-compose will also start a splunk instance
-SPLUNK ?= false
-# If set to true docker-compose will also start a prometheus instance
-PROMETHEUS ?= false
-# If set to true docker-compose will also start a grafana instance
-GRAFANA ?= false
-# If set to true docker-compose will also start a hashicorp vault instance
-VAULT ?= false
-# If set to true docker-compose will also start a tacacs+ instance
-TACACS ?= false
 
 VENV_BASE ?= /var/lib/awx/venv
 
@@ -52,8 +36,6 @@ DEV_DOCKER_OWNER ?= ansible
 DEV_DOCKER_OWNER_LOWER = $(shell echo $(DEV_DOCKER_OWNER) | tr A-Z a-z)
 DEV_DOCKER_TAG_BASE ?= ghcr.io/$(DEV_DOCKER_OWNER_LOWER)
 DEVEL_IMAGE_NAME ?= $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
-
-RECEPTOR_IMAGE ?= quay.io/ansible/receptor:devel
 
 # Python packages to install only from source (not from binary wheels)
 # Comma separated list
@@ -78,7 +60,8 @@ I18N_FLAG_FILE = .i18n_built
 	sdist \
 	ui-release ui-devel \
 	VERSION PYTHON_VERSION docker-compose-sources \
-	.git/hooks/pre-commit github_ci_setup github_ci_runner
+	.git/hooks/pre-commit github_ci_setup github_ci_runner \
+	plumb
 
 clean-tmp:
 	rm -rf tmp/
@@ -427,7 +410,7 @@ clean-ui:
 	rm -rf awx/ui/build
 	rm -rf awx/ui/src/locales/_build
 	rm -rf $(UI_BUILD_FLAG_FILE)
-        # the collectstatic command doesn't like it if this dir doesn't exist.
+	# the collectstatic command doesn't like it if this dir doesn't exist.
 	mkdir -p awx/ui/build/static
 
 awx/ui/node_modules:
@@ -521,25 +504,20 @@ docker-compose-sources: .git/hooks/pre-commit
 	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/sources.yml \
 	    -e awx_image=$(DEV_DOCKER_TAG_BASE)/awx_devel \
 	    -e awx_image_tag=$(COMPOSE_TAG) \
-	    -e receptor_image=$(RECEPTOR_IMAGE) \
 	    -e control_plane_node_count=$(CONTROL_PLANE_NODE_COUNT) \
 	    -e execution_node_count=$(EXECUTION_NODE_COUNT) \
 	    -e minikube_container_group=$(MINIKUBE_CONTAINER_GROUP) \
-	    -e enable_pgbouncer=$(PGBOUNCER) \
-	    -e enable_keycloak=$(KEYCLOAK) \
-	    -e enable_ldap=$(LDAP) \
-	    -e enable_splunk=$(SPLUNK) \
-	    -e enable_prometheus=$(PROMETHEUS) \
-	    -e enable_grafana=$(GRAFANA) \
-	    -e enable_vault=$(VAULT) \
-	    -e enable_tacacs=$(TACACS) \
+            -e @container_startup.yml \
+            -e @tools/docker-compose/ansible/docker_config.yml \
             $(EXTRA_SOURCES_ANSIBLE_OPTS)
 
 docker-compose: awx/projects docker-compose-sources
 	ansible-galaxy install --ignore-certs -r tools/docker-compose/ansible/requirements.yml;
-	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/initialize_containers.yml \
-	  -e enable_vault=$(VAULT);
+	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/initialize_containers.yml -e @container_startup.yml -e @tools/docker-compose/ansible/docker_config.yml;
 	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_OPTS) up $(COMPOSE_UP_OPTS) --remove-orphans
+
+plumb:
+	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/plumb.yml -e @container_startup.yml -e @tools/docker-compose/ansible/docker_config.yml
 
 docker-compose-credential-plugins: awx/projects docker-compose-sources
 	echo -e "\033[0;31mTo generate a CyberArk Conjur API key: docker exec -it tools_conjur_1 conjurctl account create quick-start\033[0m"
@@ -575,7 +553,8 @@ Dockerfile.dev: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
 	ansible-playbook tools/ansible/dockerfile.yml \
 		-e dockerfile_name=Dockerfile.dev \
 		-e build_dev=True \
-		-e receptor_image=$(RECEPTOR_IMAGE)
+		-e @container_startup.yml \
+		-e @tools/docker-compose/ansible/docker_config.yml
 
 ## Build awx_devel image for docker compose development environment
 docker-compose-build: Dockerfile.dev
@@ -636,7 +615,8 @@ version-for-buildyml:
 ## Generate Dockerfile for awx image
 Dockerfile: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
 	ansible-playbook tools/ansible/dockerfile.yml \
-		-e receptor_image=$(RECEPTOR_IMAGE) \
+		-e @container_startup.yml \
+		-e @tools/docker-compose/ansible/docker_config.yml \
 		-e headless=$(HEADLESS)
 
 ## Build awx image for deployment on Kubernetes environment.
@@ -654,7 +634,8 @@ Dockerfile.kube-dev: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
 	    -e dockerfile_name=Dockerfile.kube-dev \
 	    -e kube_dev=True \
 	    -e template_dest=_build_kube_dev \
-	    -e receptor_image=$(RECEPTOR_IMAGE)
+	    -e @container_startup.yml \
+	    -e @tools/docker-compose/ansible/docker_config.yml
 
 ## Build awx_kube_devel image for development on local Kubernetes environment.
 awx-kube-dev-build: Dockerfile.kube-dev
