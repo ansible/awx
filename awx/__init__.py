@@ -53,7 +53,12 @@ except ImportError:  # pragma: no cover
     MODE = 'production'
 
 
-from django.db import connection
+try:
+    import django  # noqa: F401
+except ImportError:
+    pass
+else:
+    from django.db import connection
 
 
 def find_commands(management_dir):
