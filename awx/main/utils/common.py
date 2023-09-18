@@ -23,7 +23,7 @@ from django.core.exceptions import ObjectDoesNotExist, FieldDoesNotExist
 from django.utils.dateparse import parse_datetime
 from django.utils.translation import gettext_lazy as _
 from django.utils.functional import cached_property
-from django.db import connection, transaction, ProgrammingError
+from django.db import connection, transaction, ProgrammingError, IntegrityError
 from django.db.models.fields.related import ForeignObjectRel, ManyToManyField
 from django.db.models.fields.related_descriptors import ForwardManyToOneDescriptor, ManyToManyDescriptor
 from django.db.models.query import QuerySet
@@ -1176,7 +1176,7 @@ def create_partition(tblname, start=None):
                     f'ALTER TABLE {tblname} ATTACH PARTITION {tblname}_{partition_label} '
                     f'FOR VALUES FROM (\'{start_timestamp}\') TO (\'{end_timestamp}\');'
                 )
-    except ProgrammingError as e:
+    except (ProgrammingError, IntegrityError) as e:
         if 'already exists' in str(e):
             logger.info(f'Caught known error due to partition creation race: {e}')
         else:
