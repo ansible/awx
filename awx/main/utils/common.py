@@ -1177,7 +1177,10 @@ def create_partition(tblname, start=None):
                     f'FOR VALUES FROM (\'{start_timestamp}\') TO (\'{end_timestamp}\');'
                 )
     except ProgrammingError as e:
-        logger.debug(f'Caught known error due to existing partition: {e}')
+        if 'already exists' in str(e):
+            logger.info(f'Caught known error due to partition creation race: {e}')
+        else:
+            raise
 
 
 def cleanup_new_process(func):
