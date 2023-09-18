@@ -2233,7 +2233,7 @@ class BulkHostDeleteSerializer(serializers.Serializer):
         hosts_data = attrs['in_inv'].values()
 
         if len(attrs['in_inv']) == 0:
-            raise serializers.ValidationError({"ERROR": "There are no to delete"})
+            raise serializers.ValidationError({"ERROR": "There are no hosts to delete"})
 
         if len(attrs['in_inv']) < len(attrs['hosts']):
             hosts_exists = [host['id'] for host in hosts_data]
