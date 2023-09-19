@@ -2146,6 +2146,7 @@ class BulkHostCreateSerializer(serializers.Serializer):
         if request and not request.user.is_superuser:
             if request.user not in inv.admin_role:
                 raise serializers.ValidationError(_(f'Inventory with id {inv.id} not found or lack permissions to add hosts.'))
+
         current_hostnames = set(inv.hosts.values_list('name', flat=True))
         new_names = [host['name'] for host in attrs['hosts']]
         duplicate_new_names = [n for n in new_names if n in current_hostnames or new_names.count(n) > 1]
@@ -2243,18 +2244,16 @@ class BulkHostDeleteSerializer(serializers.Serializer):
         inv_list = list(set([host['inventory_id'] for host in hosts_data]))
 
         errors = {"ERRORS": "Cannot delete host(s) from inventory", "Inventory": dict()}
-        for inv in Inventory.objects.get_queryset().filter(pk__in=inv_list).values():
-            if inv['kind'] != '':
-                errors["Inventory"][inv['id']] = {
-                    "Inventory_name": inv['name'],
+        for inv in Inventory.objects.get_queryset().filter(pk__in=inv_list):
+            if inv.kind != '':
+                errors["Inventory"][inv.id] = {
+                    "Inventory_name": inv.name,
                     "reason": "Hosts can only be deleted from manual inventories (not smart or constructed types).",
                 }
             if request and not request.user.is_superuser:
-                cur_user = User.objects.get_queryset().filter(username=request.user)
-                user_role_id = [r['id'] for r in Role.objects.get_queryset().filter(members__in=cur_user).values()]
-                if inv['admin_role_id'] not in user_role_id:
-                    errors["Inventory"][inv['id']] = {
-                        "Inventory_name": inv['name'],
+                if request.user not in inv.admin_role:
+                    errors["Inventory"][inv.id] = {
+                        "Inventory_name": inv.name,
                         "reason": "Lack permissions to delete hosts from.",
                     }
         if errors["Inventory"] != {}:
