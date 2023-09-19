@@ -6,6 +6,7 @@ DOCKER_COMPOSE ?= docker-compose
 OFFICIAL ?= no
 NODE ?= node
 NPM_BIN ?= npm
+KIND_BIN ?= $(shell which kind)
 CHROMIUM_BIN=/tmp/chrome-linux/chrome
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 MANAGEMENT_COMMAND ?= awx-manage
@@ -663,6 +664,9 @@ awx-kube-dev-build: Dockerfile.kube-dev
 	    --cache-from=$(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) \
 	    -t $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) .
 
+
+kind-dev-load: awx-kube-dev-build
+	$(KIND_BIN) load docker-image $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG)
 
 # Translation TASKS
 # --------------------------------------
