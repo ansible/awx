@@ -8,8 +8,6 @@ from awx.main.models.jobs import JobTemplate
 from awx.main.models import Organization, Inventory, WorkflowJob, ExecutionEnvironment, Host
 from awx.main.scheduler import TaskManager
 
-from django.db import connection
-
 
 @pytest.mark.django_db
 @pytest.mark.parametrize('num_hosts, num_queries', [(1, 15), (10, 15)])
