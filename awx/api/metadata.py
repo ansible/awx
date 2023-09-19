@@ -262,11 +262,16 @@ class Metadata(metadata.SimpleMetadata):
 
             if hasattr(serializer, 'sublists'):
                 # Provide tail path navigation to related associate disassociate endpoints
-                metadata['related_associations'] = []
+                metadata['associations'] = []
                 for key_name, view_name in serializer.sublists:
-                    url = reverse(f'api:{view_name}', kwargs={'pk': 42})
+                    url = reverse(f'api:{view_name}', kwargs={'pk': 1})
                     related_view = resolve(url).func.view_class
-                    metadata['related_associations'].append((key_name, related_view.model._meta.verbose_name_plural.replace(' ', '_')))
+                    rel_summary = {
+                        'relative_url': url.rstrip('/').rsplit('/', 1)[1],
+                        'related_entry': key_name,
+                        'resource': related_view.model._meta.verbose_name_plural.replace(' ', '_'),
+                    }
+                    metadata['associations'].append(rel_summary)
 
         # Add search fields if available from the view.
         if getattr(view, 'search_fields', None):
