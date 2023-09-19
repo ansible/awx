@@ -131,6 +131,9 @@ BULK_JOB_MAX_LAUNCH = 100
 # Maximum number of host that can be created in 1 bulk host create
 BULK_HOST_MAX_CREATE = 100
 
+# Maximum number of host that can be deleted in 1 bulk host delete
+BULK_HOST_MAX_DELETE = 250
+
 SITE_ID = 1
 
 # Make this unique, and don't share it with anybody.
