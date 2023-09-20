@@ -41,6 +41,13 @@ class SignalState:
     def restore_signals(self):
         signal.signal(signal.SIGTERM, self.original_sigterm)
         signal.signal(signal.SIGINT, self.original_sigint)
+        # if we got a SIGTERM while our signal handling was active, call parent methods.
+        if self.sigterm_flag:
+            if callable(self.original_sigterm):
+                self.original_sigterm()
+            if self.original_sigterm is not self.original_sigint:
+                if callable(self.original_sigint):
+                    self.original_sigint()
         self.reset()
 
 
