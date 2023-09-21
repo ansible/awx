@@ -1,14 +1,14 @@
 name: Run AWX docker-compose
 description: Runs AWX with `make docker-compose`
 inputs:
+  github-token:
+    description: GitHub Token to pass to awx_devel_image
+    required: true
   build-ui:
     description: Should the UI be built?
     required: false
     default: false
     type: boolean
-  github-token:
-    description: GitHub Token to pass to awx_devel_image
-    required: true
 outputs:
   ip:
     description: The IP of the tools_awx_1 container
