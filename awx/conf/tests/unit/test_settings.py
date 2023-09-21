@@ -13,6 +13,7 @@ from unittest import mock
 from django.conf import LazySettings
 from django.core.cache.backends.locmem import LocMemCache
 from django.core.exceptions import ImproperlyConfigured
+from django.db.utils import Error as DBError
 from django.utils.translation import gettext_lazy as _
 import pytest
 
@@ -331,3 +332,18 @@ def test_in_memory_cache_works(settings):
     with mock.patch.object(settings, '_get_local') as mock_get:
         assert settings.AWX_VAR == 'DEFAULT'
         mock_get.assert_not_called()
+
+
+@pytest.mark.defined_in_file(AWX_VAR=[])
+def test_getattr_with_database_error(settings):
+    """
+    If a setting is defined via the registry and has a null-ish default which is not None
+    then referencing that setting during a database outage should give that default
+    this is regression testing for a bug where it would return None
+    """
+    settings.registry.register('AWX_VAR', field_class=fields.StringListField, default=[], category=_('System'), category_slug='system')
+    settings._awx_conf_memoizedcache.clear()
+
+    with mock.patch('django.db.backends.base.base.BaseDatabaseWrapper.ensure_connection') as mock_ensure:
+        mock_ensure.side_effect = DBError('for test')
+        assert settings.AWX_VAR == []
