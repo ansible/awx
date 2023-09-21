@@ -23,7 +23,7 @@ For versions older than 23.0.0, refer to `AWX Release Notes <https://github.com/
 - Updated CI ``actions/checkout`` and ``actions/setup-python`` to latest versions to eliminate node warnings (@relrod #14398)
 - Allowed ``saml_admin_attr`` to work in conjunction with SAML Org Map (@john-westcott-iv #14285)
 - Removed unnecessary scheduler state save (@AlanCoding #14396)
-- Created AWX docsite with RST content (@oraNod #14328)
+- Created AWX docsite with RST content (@oraNod and @tvo318 #14328)
 - Corrected reporting for task container resource limits set (in K8s), revising the handling of execution nodes specifically. (@djyasin #14315)
 - Added check for building the AWX docsite (@AlanCoding #14406)
 - Added readthedocs configuration for AWX docs (@oraNod #14413)
