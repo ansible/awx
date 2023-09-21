@@ -19,10 +19,10 @@ outputs:
 runs:
   using: composite
   steps:
-      - name: Build awx_devel image for running checks
-        uses: ./.github/actions/awx_devel_image
-        with:
-          github-token: ${{ inputs.github-token }}
+    - name: Build awx_devel image for running checks
+      uses: ./.github/actions/awx_devel_image
+      with:
+        github-token: ${{ inputs.github-token }}
 
     - name: Upgrade ansible-core
       shell: bash
