@@ -442,13 +442,11 @@ Now we are ready to configure and plumb OpenLDAP with AWX. To do this we have pr
 
 Note: The default configuration will utilize the non-tls connection. If you want to use the tls configuration you will need to work through TLS negotiation issues because the LDAP server is using a self signed certificate.
 
-Before we can run the playbook we need to understand that LDAP will be communicated to from within the AWX container. Because of this, we have to tell AWX how to route traffic to the LDAP container through the `LDAP Server URI` settings. The playbook requires a variable called container_reference to be set. The container_reference variable needs to be how your AWX container will be able to talk to the LDAP container. See the SAML section for some examples for how to select a `container_reference`.
-
-Once you have your container reference you can run the playbook like:
+You can run the playbook like:
 ```bash
 export CONTROLLER_USERNAME=<your username>
 export CONTROLLER_PASSWORD=<your password>
-ansible-playbook tools/docker-compose/ansible/plumb_ldap.yml -e container_reference=<your container_reference here>
+ansible-playbook tools/docker-compose/ansible/plumb_ldap.yml
 ```
 
 
