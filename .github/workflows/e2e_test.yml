@@ -71,5 +71,6 @@ jobs:
           awx-pf-tests run --project .
 
       - uses: ./.github/actions/upload_awx_devel_logs
+        if: always()
         with:
           log-filename: e2e-${{ matrix.job }}.log

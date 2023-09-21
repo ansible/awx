@@ -2,9 +2,6 @@
 name: Docsite CI
 on:
   pull_request:
-    paths:
-      - 'docs/**'
-      - '.github/workflows/docs.yml'
 jobs:
   docsite-build:
     name: docsite test build
