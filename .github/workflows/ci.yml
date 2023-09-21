@@ -38,7 +38,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Build awx_devel image for running checks
-        uses: ./.github/actions/awx_ci_setup
+        uses: ./.github/actions/awx_devel_image
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -50,15 +50,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Build awx_devel image for running checks
-        uses: ./.github/actions/awx_ci_setup
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
       - uses: ./.github/actions/run_awx_devel
         id: awx
         with:
           build-ui: false
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run smoke test
         run: ansible-playbook tools/docker-compose/ansible/smoke-test.yml -v
@@ -146,15 +142,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Build awx_devel image for running checks
-        uses: ./.github/actions/awx_ci_setup
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
       - uses: ./.github/actions/run_awx_devel
         id: awx
         with:
           build-ui: false
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install dependencies for running tests
         run: |

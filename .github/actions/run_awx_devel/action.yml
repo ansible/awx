@@ -6,6 +6,9 @@ inputs:
     required: false
     default: false
     type: boolean
+  github-token:
+    description: GitHub Token to pass to awx_devel_image
+    required: true
 outputs:
   ip:
     description: The IP of the tools_awx_1 container
@@ -16,6 +19,11 @@ outputs:
 runs:
   using: composite
   steps:
+      - name: Build awx_devel image for running checks
+        uses: ./.github/actions/awx_devel_image
+        with:
+          github-token: ${{ inputs.github-token }}
+
     - name: Upgrade ansible-core
       shell: bash
       run: python3 -m pip install --upgrade ansible-core

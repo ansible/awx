@@ -21,16 +21,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Build awx_devel image for running checks
-        uses: ./.github/actions/awx_ci_setup
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
       - uses: ./.github/actions/run_awx_devel
         id: awx
         with:
           build-ui: true
-          log-filename: e2e-${{ matrix.job }}.log
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pull awx_cypress_base image
         run: |

@@ -4,13 +4,6 @@ inputs:
   github-token:
     description: GitHub Token for registry access
     required: true
-outputs:
-  ip:
-    description: The IP of the tools_awx_1 container
-    value: ${{ steps.data.outputs.ip }}
-  admin-token:
-    description: OAuth token for admin user
-    value: ${{ steps.data.outputs.admin_token }}
 runs:
   using: composite
   steps:
