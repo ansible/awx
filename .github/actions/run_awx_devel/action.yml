@@ -1,12 +1,8 @@
-# This currently *always* uses the "warm build cache" image
-# We should do something to allow forcing a rebuild, probably by looking for
-# some string in the commit message or something.
-
-name: Run AWX (devel environment)
+name: Run AWX docker-compose
 description: Runs AWX with `make docker-compose`
 inputs:
   github-token:
-    description: GitHub Token for registry access
+    description: GitHub Token to pass to awx_devel_image
     required: true
   build-ui:
     description: Should the UI be built?
@@ -23,9 +19,10 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Get python version from Makefile
-      shell: bash
-      run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
+    - name: Build awx_devel image for running checks
+      uses: ./.github/actions/awx_devel_image
+      with:
+        github-token: ${{ inputs.github-token }}
 
     - name: Upgrade ansible-core
       shell: bash
@@ -34,19 +31,6 @@ runs:
     - name: Install system deps
       shell: bash
       run: sudo apt-get install -y gettext
-
-    - name: Log in to registry
-      shell: bash
-      run: |
-        echo "${{ inputs.github-token }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-    - name: Pre-pull latest available devel image and build HEAD on top of it
-      shell: bash
-      run: |
-        docker pull ghcr.io/${{ github.repository_owner }}/awx_devel:${{ github.base_ref }}
-        DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} \
-        COMPOSE_TAG=${{ github.base_ref }} \
-        make docker-compose-build
 
     - name: Start AWX
       shell: bash

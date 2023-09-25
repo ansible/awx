@@ -26,7 +26,6 @@ jobs:
         with:
           build-ui: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          log-filename: e2e-${{ matrix.job }}.log
 
       - name: Pull awx_cypress_base image
         run: |

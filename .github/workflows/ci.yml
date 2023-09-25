@@ -37,16 +37,27 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Build awx_devel image for running checks
+        uses: ./.github/actions/awx_devel_image
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Run check ${{ matrix.tests.name }}
-        run: AWX_DOCKER_CMD='${{ matrix.tests.command }}' make github_ci_runner
+        run: AWX_DOCKER_CMD='${{ matrix.tests.command }}' make docker-runner
 
   dev-env:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
+      - uses: ./.github/actions/run_awx_devel
+        id: awx
+        with:
+          build-ui: false
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Run smoke test
-        run: make github_ci_setup && ansible-playbook tools/docker-compose/ansible/smoke-test.yml -v
+        run: ansible-playbook tools/docker-compose/ansible/smoke-test.yml -v
 
   awx-operator:
     runs-on: ubuntu-latest
