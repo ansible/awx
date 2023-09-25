@@ -1164,8 +1164,9 @@ def create_partition(tblname, start=None):
     try:
         with transaction.atomic():
             with connection.cursor() as cursor:
-                r_tuples = cursor.execute(f"SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = '{tblname}_{partition_label}');")
-                for row in r_tuples:  # should only have 1
+                cursor.execute(f"SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = '{tblname}_{partition_label}');")
+                row = cursor.fetchone()
+                if row is not None:
                     for val in row:  # should only have 1
                         if val is True:
                             logger.debug(f'Event partition table {tblname}_{partition_label} already exists')
