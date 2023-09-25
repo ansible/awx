@@ -26,7 +26,7 @@ Vertical scaling improvements
 .. index::
    pair: improvements; scaling
 
-Control nodes are responsible for processing the output of jobs and writing them to the database. The process that does this is called the callback receiver. The callback receiver has a configurable number of workers, controlled by the setting ``JOB_EVENT_WORKERS``. In the past, the default for this setting was always 4, regardless of the CPU or memory capacity of the node. Now, in traditional virtual machines, the ``JOB_EVENT_WORKERS`` will be set to the same as the number of CPU if that is greater than 4. This means administrators that provision larger control nodes will see greater ability for those nodes to keep up with the job output created by jobs without having to manually adjust ``JOB_EVENT_WORKERS``. 
+Control nodes are responsible for processing the output of jobs and writing them to the database. The process that does this is called the callback receiver. The callback receiver has a configurable number of workers, controlled by the setting ``JOB_EVENT_WORKERS``. In the past, the default for this setting was always 4, regardless of the CPU or memory capacity of the node. Now, in traditional virtual machines, the ``JOB_EVENT_WORKERS`` will be set to the same as the number of CPU if that is greater than 4. This means administrators that provision larger control nodes will see greater ability for those nodes to keep up with the job output created by jobs without having to manually adjust ``JOB_EVENT_WORKERS``.
 
 
 Job scheduling improvements
@@ -34,9 +34,9 @@ Job scheduling improvements
 .. index::
    pair: improvements; scheduling
 
-When jobs are created either via a schedule, a workflow, the UI or the API, they are first created in Pending state. To determine when and where to run this job, a background task called the Task Manager collects all pending and running jobs and determines where capacity is available to run the job. In previous versions of AWX, scheduling slowed as the number of pending and running jobs increased, and the Task Manager was vulnerable to timing out without having made any progress. The scenario exhibits symptoms of having thousands of pending jobs, available capacity, but no jobs starting. 
+When jobs are created either via a schedule, a workflow, the UI or the API, they are first created in Pending state. To determine when and where to run this job, a background task called the Task Manager collects all pending and running jobs and determines where capacity is available to run the job. In previous versions of AWX, scheduling slowed as the number of pending and running jobs increased, and the Task Manager was vulnerable to timing out without having made any progress. The scenario exhibits symptoms of having thousands of pending jobs, available capacity, but no jobs starting.
 
-Optimizations in the job scheduler have made scheduling faster, as well as safeguards to better ensure the scheduler commits its progress even if it is nearing time out. Additionally, work that previously occurred in the Task Manager that blocked its progress has been decoupled into separate, non-blocking work units executed by the Dispatcher. 
+Optimizations in the job scheduler have made scheduling faster, as well as safeguards to better ensure the scheduler commits its progress even if it is nearing time out. Additionally, work that previously occurred in the Task Manager that blocked its progress has been decoupled into separate, non-blocking work units executed by the Dispatcher.
 
 
 Database resource usage improvements
@@ -47,7 +47,7 @@ Database resource usage improvements
 
 The use of database connections by running jobs has dramatically decreased, which removes a previous limit to concurrent running jobs, as well reduces pressure on memory consumption of PostgreSQL.
 
-Each job in AWX has a worker process, called the dispatch worker, on the control node that started the process, which submits the work to the execution node via the Receptor, as well as consumes the output of the job and puts it in the Redis queue for the callback receiver to serialize the output and write it to the database as job events. 
+Each job in AWX has a worker process, called the dispatch worker, on the control node that started the process, which submits the work to the execution node via the Receptor, as well as consumes the output of the job and puts it in the Redis queue for the callback receiver to serialize the output and write it to the database as job events.
 
 The dispatch worker is also responsible for noticing if the job has been canceled by the user in order to then cancel the receptor work unit. In the past, the worker maintained multiple open database connections per job. This caused two main problems:
 
@@ -98,7 +98,7 @@ Capacity Planning
 Example capacity planning exercise
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. index::
-   pair: exercise; capacity planning   
+   pair: exercise; capacity planning
 
 Determining the number and size of instances to support the desired workload must take into account the following:
 
@@ -183,13 +183,13 @@ Control nodes
 ^^^^^^^^^^^^^^
 Vertically scaling a control node increases the number of jobs it can perform control tasks for, which requires both more CPU and memory. In general, scaling CPU alongside memory in the same proportion is recommended (e.g. 1 CPU: 4GB RAM). Even in the case where memory consumption is observed to be high, increasing the CPU of an instance can often relieve pressure, as most memory consumption of control nodes is usually from unprocessed events.
 
-As mentioned in the :ref:`ag_performance_improvements` section, increasing the number of CPU can also increase the job event processing rate of a control node. At this time, vertically scaling a control node does not increase the number of workers that handle web requests, so horizontally scaling is more effective, if the desire is to increase the API availability. 
+As mentioned in the :ref:`ag_performance_improvements` section, increasing the number of CPU can also increase the job event processing rate of a control node. At this time, vertically scaling a control node does not increase the number of workers that handle web requests, so horizontally scaling is more effective, if the desire is to increase the API availability.
 
 Execution Nodes
 ^^^^^^^^^^^^^^^^
 Vertical scaling an execution node will provide more forks for job execution. As mentioned in the example, a host with 16 GB of memory will by default, be assigned the capacity to run 137 “forks”, which at the default setting of 5 forks/job, will be able to run around 22 jobs concurrently. In general, scaling CPU alongside memory in the same proportion is recommended. Like control and hybrid nodes, there is a “capacity adjustment” on each execution instance that can be used to align actual utilization with the estimation of capacity consumption AWX makes. By default, all nodes are set to the top range of the capacity AWX estimates the node to have. If actual monitoring data reveals the node to be over-utilized, decreasing the capacity adjustment can help bring this in line with actual usage.
-	
-Vertically scaling execution will do exactly what the user expects and increase the number of concurrent jobs an instance can run. One downside is that concurrently running jobs on the same execution node, while isolated from each other in the sense that they cannot access the other’s data, can impact the other's performance, if a particular job is very resource-consumptive and overwhelms the node to the extent that it degrades performance of the entire node. Horizontal scaling the execution plane (e.g deploying more execution nodes) can provide some additional isolation of workloads, as well as allowing administrators to assign different instances to different instance groups, which can then be assigned to Organizations, Inventories, or Job Templates. This can enable something like an instance group that can only be used for running jobs against a “production” Inventory, this way jobs for development do not end up eating up capacity and causing higher priority jobs to queue waiting for capacity. 
+
+Vertically scaling execution will do exactly what the user expects and increase the number of concurrent jobs an instance can run. One downside is that concurrently running jobs on the same execution node, while isolated from each other in the sense that they cannot access the other’s data, can impact the other's performance, if a particular job is very resource-consumptive and overwhelms the node to the extent that it degrades performance of the entire node. Horizontal scaling the execution plane (e.g deploying more execution nodes) can provide some additional isolation of workloads, as well as allowing administrators to assign different instances to different instance groups, which can then be assigned to Organizations, Inventories, or Job Templates. This can enable something like an instance group that can only be used for running jobs against a “production” Inventory, this way jobs for development do not end up eating up capacity and causing higher priority jobs to queue waiting for capacity.
 
 
 Hop Nodes
@@ -198,7 +198,7 @@ Hop nodes have very low memory and CPU utilization and there is no significant m
 
 Hybrid nodes
 ^^^^^^^^^^^^^
-Hybrid nodes perform both execution and control tasks, so vertically scaling these nodes both increases the number of jobs they can run, and now in 4.3.0, how many events they can process. 
+Hybrid nodes perform both execution and control tasks, so vertically scaling these nodes both increases the number of jobs they can run, and now in 4.3.0, how many events they can process.
 
 
 Capacity planning for Operator based Deployments
@@ -240,23 +240,23 @@ The following are configurable settings in the database that may help improve pe
 	- ``work_mem`` (integer)
 	- ``maintenance_work_mem`` (integer)
 
-All of these parameters reside under the ``postgresql.conf`` file (inside ``$PDATA`` directory), which manages the configurations of the database server. 
+All of these parameters reside under the ``postgresql.conf`` file (inside ``$PDATA`` directory), which manages the configurations of the database server.
 
 The **shared_buffers** parameter determines how much memory is dedicated to the server for caching data. Set in ``postgresql.conf``, the default value for this parameter is::
 
 	#sharedPostgres_buffers = 128MB
- 
+
 The value should be set at 15%-25% of the machine’s total RAM. For example: if your machine’s RAM size is 32 GB, then the recommended value for ``shared_buffers`` is 8 GB. Please note that the database server needs to be restarted after this change.
 
 The **work_mem** parameter basically provides the amount of memory to be used by internal sort operations and hash tables before writing to temporary disk files. Sort operations are used for order by, distinct, and merge join operations. Hash tables are used in hash joins and hash based aggregation. Set in ``postgresql.conf``, the default value for this parameter is::
 
 	#work_mem = 4MB
 
-Setting the correct value of ``work_mem`` parameter can result in less disk-swapping, and therefore far quicker queries. 
+Setting the correct value of ``work_mem`` parameter can result in less disk-swapping, and therefore far quicker queries.
 
 We can use the formula below to calculate the optimal ``work_mem`` value for the database server::
 
-	Total RAM * 0.25 / max_connections 
+	Total RAM * 0.25 / max_connections
 
 The ``max_connections`` parameter is one of the GUC parameters to specify the maximum number of concurrent connections to the database server. Please note setting a large ``work_mem`` can cause issues like PostgreSQL server going out of memory (OOM), if there are too many open connections to the database.
 
@@ -264,10 +264,40 @@ The **maintenance_work_mem** parameter basically provides the maximum amount of 
 
 	#maintenance_work_mem = 64MB
 
-It is recommended to set this value higher than ``work_mem``; this can improve performance for vacuuming. In general, it should calculated as:: 
+It is recommended to set this value higher than ``work_mem``; this can improve performance for vacuuming. In general, it should calculated as::
 
 	Total RAM * 0.05
 
+Max Connections
+~~~~~~~~~~~~~~~~~~~~~
+
+For a realistic method of determining a value of ``max_connections``, a ballpark formula for AWX is outlined here.
+Database connections will scale with the number of control and hybrid nodes.
+Per-node connection needs are listed here.
+
+* Callback Receiver workers: 4 connections per node or the number of CPUs per node, whichever is larger
+* Dispatcher Workers: instance (forks) capacity plus 7
+* uWSGI workers: 16 connections per node
+* Listeners and auxiliary services: 4 connections per node
+* Reserve for installer and other actions: 5 connections in total
+
+Each of these points represent maximum expected connection use in high-load circumstances.
+To apply this, consider a cluster with 3 hybrid nodes, each with 8 CPUs and 16 GB of RAM.
+The capacity formula will determine a capacity of 132 forks per node based on the memory and capacity formula.
+
+    (3 nodes) x (
+    (8 CPUs / node) x (1 connection / CPU) +
+    (132 forks / node) x (1 connection / fork) + (7 connections / node) +
+    (16 connections / node) +
+    (4 connections / node)
+    ) + (5 connections)
+
+Adding up all the components comes out to 506 for this example cluster.
+Practically, this means that the max_connections should be set to something higher than this.
+Additional connections should be added to account for other platform components.
+
+This calculation is most sensitive to the number of forks per node. Database connections are briefly opened at the start of and end of jobs. Environments where bursts of many jobs start at once will be most likely to reach the theoretical max number of open database connections.
+The max number of jobs that would be started concurrently can be adjusted by modifying the effective capacity of the instances. This can be done with the SYSTEM_TASK_ABS_MEM setting, the capacity adjustment on instances, or with instance groups max jobs or max forks.
 
 AWX Settings
 ~~~~~~~~~~~~~~~~~~~~~
@@ -332,7 +362,7 @@ Task Manager (Job Scheduling) Settings
    pair: settings; job scheduling
 
 The task manager is a periodic task that collects tasks that need to be scheduled and determines what instances have capacity and are eligible for running them. Its job is to find and assign the control and execution instances, update the job’s status to waiting, and send the message to the control node via ``pg_notify`` for the dispatcher to pick up the task and start running it.
-	
+
 As mentioned in the :ref:`ag_performance_improvements` section, a number of optimizations and refactors of this process were implemented in version 4.3. One such refactor was to fix a defect that when the task manager did reach its timeout, it was terminated in such a way that it did not make any progress. Multiple changes were implemented to fix this, so that as the task manager approaches its timeout, it makes an effort to exit and commit any progress made on that run. These issues generally arise when there are thousands of pending jobs, so may not be applicable to your use case.
 
 The first “short-circuit” available to limit how much work the task manager attempts to do in one run is ``START_TASK_LIMIT``. The default is 100 jobs, which is a safe default. If there are remaining jobs to schedule, a new run of the task manager will be scheduled to run immediately after the current run. Users who are willing to risk potentially longer individual runs of the task manager in order to start more jobs in individual run may consider increasing the ``START_TASK_LIMIT``. One metric, the Prometheus metrics, available in ``/api/v2/metrics`` observes how long individual runs of the task manager take is “task_manager__schedule_seconds”.
