@@ -59,13 +59,8 @@ for instructions.
 
 If operating in a FIPS environment, `hashlib.md5()` will raise a `ValueError`,
 but will support the `usedforsecurity` keyword on RHEL and Centos systems.
-
-Keep an eye on https://code.djangoproject.com/ticket/28401
-
-The override of `names_digest` could easily be broken in a future version.
-Check that the import remains the same in the desired version.
-
-https://github.com/django/django/blob/af5ec222ccd24e81f9fec6c34836a4e503e7ccf7/django/db/backends/base/schema.py#L7
+This used to be a problem with `names_digest` function in Django, but
+was fixed upstream in Django 4.1.
 
 ### django-split-settings
 
@@ -172,4 +167,3 @@ available on PyPi with source distribution.
 
 Version 4.8 makes us a little bit nervous with changes to `searchwindowsize` https://github.com/pexpect/pexpect/pull/579/files
 Pin to `pexpect==4.7.x` until we have more time to move to `4.8` and test.
-

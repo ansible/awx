@@ -52,38 +52,13 @@ try:
 except ImportError:  # pragma: no cover
     MODE = 'production'
 
-import hashlib
 
 try:
     import django  # noqa: F401
-
-    HAS_DJANGO = True
 except ImportError:
-    HAS_DJANGO = False
+    pass
 else:
-    from django.db.backends.base import schema
-    from django.db.models import indexes
-    from django.db.backends.utils import names_digest
     from django.db import connection
-
-if HAS_DJANGO is True:
-    # See upgrade blocker note in requirements/README.md
-    try:
-        names_digest('foo', 'bar', 'baz', length=8)
-    except ValueError:
-
-        def names_digest(*args, length):
-            """
-            Generate a 32-bit digest of a set of arguments that can be used to shorten
-            identifying names.  Support for use in FIPS environments.
-            """
-            h = hashlib.md5(usedforsecurity=False)
-            for arg in args:
-                h.update(arg.encode())
-            return h.hexdigest()[:length]
-
-        schema.names_digest = names_digest
-        indexes.names_digest = names_digest
 
 
 def find_commands(management_dir):
