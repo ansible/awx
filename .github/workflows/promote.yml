@@ -40,8 +40,12 @@ jobs:
         if: ${{ github.repository_owner != 'ansible' }}
 
       - name: Build collection and publish to galaxy
+        env:
+          COLLECTION_NAMESPACE: ${{ env.collection_namespace }}
+          COLLECTION_VERSION: ${{ github.event.release.tag_name }}
+          COLLECTION_TEMPLATE_VERSION: true
         run: |
-          COLLECTION_TEMPLATE_VERSION=true COLLECTION_NAMESPACE=${{ env.collection_namespace }} make build_collection
+          make build_collection
           if [ "$(curl --head -sw '%{http_code}' https://galaxy.ansible.com/download/${{ env.collection_namespace }}-awx-${{ github.event.release.tag_name }}.tar.gz | tail -1)" == "302" ] ; then \
               echo "Galaxy release already done"; \
           else \
