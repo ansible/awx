@@ -3,4 +3,3 @@ resolver = "backtracking"
 allow-unsafe = true
 strip-extras = true
 quiet = true
-output-file = "docs/docsite/requirements.txt"
