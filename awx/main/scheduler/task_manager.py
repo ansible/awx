@@ -124,6 +124,13 @@ class TaskBase:
         self.record_aggregate_metrics()
         sys.exit(1)
 
+    def get_local_metrics(self):
+        data = {}
+        for k, metric in self.subsystem_metrics.METRICS.items():
+            if k.startswith(self.prefix) and metric.metric_has_changed:
+                data[k[len(self.prefix) + 1 :]] = metric.current_value
+        return data
+
     def schedule(self):
         # Always be able to restore the original signal handler if we finish
         original_sigusr1 = signal.getsignal(signal.SIGUSR1)
@@ -146,10 +153,14 @@ class TaskBase:
                         signal.signal(signal.SIGUSR1, original_sigusr1)
                     commit_start = time.time()
 
+                    logger.debug(f"Commiting {self.prefix} Scheduler changes")
+
                 if self.prefix == "task_manager":
                     self.subsystem_metrics.set(f"{self.prefix}_commit_seconds", time.time() - commit_start)
+                local_metrics = self.get_local_metrics()
                 self.record_aggregate_metrics()
-                logger.debug(f"Finishing {self.prefix} Scheduler")
+
+                logger.debug(f"Finished {self.prefix} Scheduler, timing data:\n{local_metrics}")
 
 
 class WorkflowManager(TaskBase):
