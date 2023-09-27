@@ -103,7 +103,7 @@ deprecated==1.2.13
     # via jwcrypto
 distro==1.8.0
     # via -r /awx_devel/requirements/requirements.in
-django==4.2.3
+django==4.2.5
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   channels
