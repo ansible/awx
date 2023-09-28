@@ -89,7 +89,7 @@ def coerce_type(module, value):
         if not HAS_YAML:
             module.fail_json(msg="yaml is not installed, try 'pip install pyyaml'")
         return yaml.safe_load(value)
-    elif value.lower in ('true', 'false', 't', 'f'):
+    elif value.lower() in ('true', 'false', 't', 'f'):
         return {'t': True, 'f': False}[value[0].lower()]
     try:
         return int(value)
