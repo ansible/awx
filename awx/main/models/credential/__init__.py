@@ -1216,6 +1216,26 @@ ManagedCredentialType(
     },
 )
 
+ManagedCredentialType(
+    namespace='terraform',
+    kind='cloud',
+    name=gettext_noop('Terraform backend configuration'),
+    managed=True,
+    inputs={
+        'fields': [
+            {
+                'id': 'configuration',
+                'label': gettext_noop('Backend configuration'),
+                'type': 'string',
+                'secret': True,
+                'multiline': True,
+                'help_text': gettext_noop('Terraform backend config as Hashicorp configuration language.'),
+            },
+        ],
+        'required': ['configuration'],
+    },
+)
+
 
 class CredentialInputSource(PrimordialModel):
     class Meta:
