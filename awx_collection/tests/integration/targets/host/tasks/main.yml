@@ -68,6 +68,11 @@
     that:
       - "result is changed"
 
+- name: Newly created host should have API default value for enabled
+  assert:
+    that:
+      - "lookup('awx.awx.controller_api', 'hosts/{{result.id}}/').enabled"
+
 - name: Delete a Host
   host:
     name: "{{ result.id }}"

@@ -809,6 +809,13 @@ class ControllerAPIModule(ControllerModule):
             # We will pull the item_name out from the new_item, if it exists
             item_name = self.get_item_name(new_item, allow_unknown=True)
 
+            # Remove null values - this assumes there are no nullable fields with non-null defaults
+            # the None value is used to indicate not-provided by Ansible and argparse
+            # this is needed so that boolean fields will not get a false value when not provided
+            for key in list(new_item.keys()):
+                if new_item[key] is None:
+                    new_item.pop(key)
+
             response = self.post_endpoint(endpoint, **{'data': new_item})
 
             # 200 is response from approval node creation on tower 3.7.3 or awx 15.0.0 or earlier.
