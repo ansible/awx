@@ -198,7 +198,7 @@ class Command(BaseCommand):
     def _handle_unpartitioned_events(self, model, pk_list):
         """
         If unpartitioned job events remain, it will cascade those from jobs in pk_list
-        if the unpartitioned table is no longe necessary, it will drop the table
+        if the unpartitioned table is no longer necessary, it will drop the table
         """
         tblname = unified_job_class_to_event_table_name(model)
         rel_name = model().event_parent_key
