@@ -896,7 +896,7 @@ Amazon Web Services EC2
 
 3. You can optionally specify the verbosity, host filter, enabled variable/value, and update options as described in the main procedure for :ref:`adding a source <ug_add_inv_common_fields>`.
 
-4. Use the **Source Variables** field to override variables used by the ``aws_ec2`` inventory plugin. Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two. For a detailed description of these variables, view the `aws_ec2 inventory plugin documenation <https://cloud.redhat.com/ansible/automation-hub/repo/published/amazon/aws/content/inventory/aws_ec2>`__.
+4. Use the **Source Variables** field to override variables used by the ``aws_ec2`` inventory plugin. Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two. For a detailed description of these variables, view the `aws_ec2 inventory plugin documentation <https://cloud.redhat.com/ansible/automation-hub/repo/published/amazon/aws/content/inventory/aws_ec2>`__.
 
 |Inventories - create source - AWS EC2 example|
 
@@ -924,7 +924,7 @@ Google Compute Engine
 
 3. You can optionally specify the verbosity, host filter, enabled variable/value, and update options as described in the main procedure for :ref:`adding a source <ug_add_inv_common_fields>`.
 
-4. Use the **Source Variables** field to override variables used by the ``gcp_compute`` inventory plugin. Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two. For a detailed description of these variables, view the `gcp_compute inventory plugin documenation <https://cloud.redhat.com/ansible/automation-hub/repo/published/google/cloud/content/inventory/gcp_compute>`__.
+4. Use the **Source Variables** field to override variables used by the ``gcp_compute`` inventory plugin. Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two. For a detailed description of these variables, view the `gcp_compute inventory plugin documentation <https://cloud.redhat.com/ansible/automation-hub/repo/published/google/cloud/content/inventory/gcp_compute>`__.
 
 
 .. _ug_source_azure:

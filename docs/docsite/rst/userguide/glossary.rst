@@ -37,7 +37,7 @@ Glossary
         Facts are simply things that are discovered about remote nodes. While they can be used in playbooks and templates just like variables, facts are things that are inferred, rather than set. Facts are automatically discovered when running plays by executing the internal setup module on the remote nodes. You never have to call the setup module explicitly, it just runs, but it can be disabled to save time if it is not needed. For the convenience of users who are switching from other configuration management systems, the fact module also pulls in facts from the ‘ohai’ and ‘facter’ tools if they are installed, which are fact libraries from Chef and Puppet, respectively.
 
     Forks
-        Ansible and AWX talk to remote nodes in parallel and the level of parallelism can be set serveral ways--during the creation or editing of a Job Template, by passing ``--forks``, or by editing the default in a configuration file. The default is a very conservative 5 forks, though if you have a lot of RAM, you can easily set this to a value like 50 for increased parallelism.
+        Ansible and AWX talk to remote nodes in parallel and the level of parallelism can be set several ways--during the creation or editing of a Job Template, by passing ``--forks``, or by editing the default in a configuration file. The default is a very conservative 5 forks, though if you have a lot of RAM, you can easily set this to a value like 50 for increased parallelism.
 
     Group
         A set of hosts in Ansible that can be addressed as a set, of which many may exist within a single Inventory.
