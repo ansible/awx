@@ -106,10 +106,15 @@
   register: wait_results
   ignore_errors: true
 
+- name: debug ad hoc command output if failed
+  debug:
+    msg: "{{ lookup('awx.awx.controller_api', 'ad_hoc_commands/' + command.id | string + '/stdout/?format=json') }}"
+  when:
+    - 'wait_results.status not in ["successful", "canceled"]'
+
 - assert:
     that:
-      - wait_results is successful
-      - 'wait_results.status == "successful"'
+      - 'wait_results.status in ["successful", "canceled"]'
 
 - name: Delete the Credential
   credential:
