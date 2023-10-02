@@ -362,7 +362,7 @@ def main():
         'timeout',
     ):
         field_val = module.params.get(field_name)
-        if field_val:
+        if field_val is not None:
             new_fields[field_name] = field_val
 
     association_fields = {}
