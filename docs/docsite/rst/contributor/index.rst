@@ -10,8 +10,7 @@ There are so many ways you can contribute to AWX.
 
 **Join us online**
 
-You can chat with us and ask questions on Matrix at `#awx:ansible.com <https://matrix.to/#/#awx:ansible.com>`_.
-Also visit the `forum.ansible.com <https://forum.ansible.com/>`_ to find contributor resources.
+You can chat with us and ask questions on Matrix at `#awx:ansible.com <https://matrix.to/#/#awx:ansible.com>`_ or visit the `Ansible Community Forum <https://forum.ansible.com/c/project/7/>`_ to find contributor resources.
 
 .. toctree::
    :maxdepth: 2
