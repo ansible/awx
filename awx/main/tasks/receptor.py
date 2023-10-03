@@ -703,8 +703,20 @@ def generate_config_data():
 
     receptor_config = list(RECEPTOR_CONFIG_STARTER)
     for instance in instances:
-        peer = {'tcp-peer': {'address': f'{instance.hostname}:{instance.listener_port}', 'tls': 'tlsclient'}}
-        receptor_config.append(peer)
+        if instance.listener_port:
+            peer = {'tcp-peer': {'address': f'{instance.hostname}:{instance.listener_port}', 'tls': 'tlsclient'}}
+            receptor_config.append(peer)
+        for address in instance.receptor_addresses.all():
+            if address.get_peer_type() and address.is_internal:
+                peer = {
+                    f'{address.get_peer_type()}': {
+                        'address': f'{address.get_full_address()}',
+                        'tls': 'tlsclient',
+                    }
+                }
+                receptor_config.append(peer)
+            else:
+                logger.warning(f"Receptor address {address} has unsupported peer type, skipping.")
     should_update = should_update_config(instances)
     return receptor_config, should_update
 
