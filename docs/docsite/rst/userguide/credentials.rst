@@ -613,7 +613,7 @@ Source Control credentials have several attributes that may be configured:
 .. note::
 
     Source Control credentials cannot be configured as "**Prompt on launch**". 
-    If you are using a GitHub account for a Source Control credential and you have 2FA (Two Factor Authenication) enabled on your account, you will need to use your Personal Access Token in the password field rather than your account password. 
+    If you are using a GitHub account for a Source Control credential and you have 2FA (Two Factor Authentication) enabled on your account, you will need to use your Personal Access Token in the password field rather than your account password. 
 
 
 Thycotic DevOps Secrets Vault
