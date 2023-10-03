@@ -14,10 +14,12 @@ Access the Teams page by clicking **Teams** from the left navigation bar. The te
 
 
 .. image:: ../common/images/organizations-teams-list.png
+   :alt: Teams Page
 
 Clicking the Edit (|edit-button|) button next to the list of **Teams** allows you to edit details about the team. You can also review **Users** and  **Permissions** associated with this Team.
 
 .. |edit-button| image:: ../common/images/edit-button.png
+   :alt: Edit Button
 
 
 .. _ug_team_create:
@@ -33,6 +35,7 @@ To create a new Team:
 |Teams - create new team|
 
 .. |Teams - create new team| image:: ../common/images/teams-create-new-team.png
+   :alt: Create New Team Form
 
 2. Enter the appropriate details into the following fields:
 
@@ -47,6 +50,7 @@ Once the Team is successfully created, AWX opens the **Details** dialog, which a
 |Teams - example team successfully created|
 
 .. |Teams - example team successfully created| image:: ../common/images/teams-example-team-successfully-created.png
+   :alt: Example Team Successfully Created
 
 
 Team Access
@@ -60,6 +64,7 @@ This tab displays the list of Users that are members of this Team. This list may
 |Teams - users list|
 
 .. |Teams - users list| image:: ../common/images/teams-users-list.png
+   :alt: Users List
 
 
 .. _ug_teams_permissions:
@@ -78,10 +83,12 @@ In order to add a user to a team, the user must already be created. Refer to :re
 To remove roles for a particular user, click the disassociate (x) button next to its resource.
 
 .. image:: ../common/images/permissions-disassociate.png
+   :alt: Disassociate Button
 
 This launches a confirmation dialog, asking you to confirm the disassociation.
  
 .. image:: ../common/images/permissions-disassociate-confirm.png
+   :alt: Disassociation Confirmation
 
 
 Team Roles
@@ -97,6 +104,7 @@ Selecting the **Roles** view displays a list of the permissions that are current
 |Teams - permissions list|
 
 .. |Teams - permissions list| image:: ../common/images/teams-permissions-sample-roles.png
+   :alt: Permissions List
 
 The set of privileges assigned to Teams that provide the ability to read, modify, and administer projects, inventories, and other AWX elements are permissions. By default, the Team is given the "read" permission (also called a role).
 
@@ -118,26 +126,22 @@ To add permissions to a Team:
 3. Click to select the resource to assign team roles and click **Next**.
 
 .. image:: ../common/images/teams-permissions-templates-select.png
+   :alt: Permissions Templates Select
 
 4. Click the checkbox beside the role to assign that role to your chosen type of resource. Different resources have different options available.
 
 .. image:: ../common/images/teams-permissions-template-roles.png
+   :alt: Permissions Template Roles
 
 
 5. Click **Save** when done, and the Add Permissions Wizard closes to display the updated profile for the user with the roles assigned for each selected resource.
 
 .. image:: ../common/images/teams-permissions-sample-roles.png
-  
+   :alt: Updated Profile
+
 To remove Permissions for a particular resource, click the disassociate (x) button next to its resource. This launches a confirmation dialog, asking you to confirm the disassociation.
 
 
 .. note:: 
 
    You can also add teams, individual, or multiple users and assign them permissions at the object level (projects, inventories, job templates, and workflow templates) as well. This feature reduces the time for an organization to onboard many users at one time. 
-
-
-
-
-
-
-
