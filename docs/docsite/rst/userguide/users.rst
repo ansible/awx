@@ -1,11 +1,10 @@
- .. _ug_users:
+.. _ug_users:
 
 Users
 -----
 
 .. index:: 
    single: users
-   
 
 A :term:`User` is someone who has access to AWX with associated permissions and credentials. Access the Users page by clicking **Users** from the left navigation bar. The User list may be sorted and searched by **Username**, **First Name**, or **Last Name** and click the headers to toggle your sorting preference. 
 
@@ -13,7 +12,6 @@ A :term:`User` is someone who has access to AWX with associated permissions and 
    :alt: Users - home with example users
 
 You can easily view permissions and user type information by looking beside their user name in the User overview screen.
-
 
 .. _ug_users_create:    
     
@@ -83,7 +81,6 @@ Before you can delete a user, you must have user permissions. When you delete a 
 
 3. Click **Delete** in the confirmation warning message to permanently delete the user.
 
-
 Users - Organizations
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -93,9 +90,8 @@ Users - Organizations
 This displays the list of organizations of which that user is a member. This list may be searched by Organization Name or Description.
 Organization membership cannot be modified from this display panel.
 
-|Users - Organizations list for example user|
-
-.. |Users - Organizations list for example user| image:: ../common/images/users-organizations-list-for-example-user.png
+|Users - Organizations list for example user| image:: ../common/images/users-organizations-list-for-example-user.png
+   :alt: Users - Organizations list for example user
 
 Users - Teams
 ~~~~~~~~~~~~~
@@ -107,10 +103,8 @@ This displays the list of teams of which that user is a member. This list may be
 
 Until a Team has been created and the user has been assigned to that team, the assigned Teams Details for the User appears blank.
 
-|Users - teams list for example user|
-
-.. |Users - teams list for example user| image:: ../common/images/users-teams-list-for-example-user.png
-
+|Users - teams list for example user| image:: ../common/images/users-teams-list-for-example-user.png
+   :alt: Users - teams list for example user
 
 .. _ug_users_roles:
 
@@ -121,7 +115,6 @@ Users - Roles
    pair: users; permissions
    pair: users; roles
 
-
 The set of permissions assigned to this user (role-based access controls) that provide the ability to read, modify, and administer projects, inventories, job templates, and other AWX elements are Roles. 
 
 .. note::
@@ -130,9 +123,8 @@ The set of permissions assigned to this user (role-based access controls) that p
 
 This screen displays a list of the roles that are currently assigned to the selected User and can be sorted and searched by **Name**, **Type**, or **Role**.
 
-|Users - permissions list for example user|
-
-.. |Users - permissions list for example user| image:: ../common/images/users-permissions-list-for-example-user.png
+|Users - permissions list for example user| image:: ../common/images/users-permissions-list-for-example-user.png
+   :alt: Users - permissions list for example user
 
 .. _ug_users_permissions:
 
@@ -151,23 +143,23 @@ To add permissions to a particular user:
 3. Click to select the resource to assign team roles and click **Next**.
 
 .. image:: ../common/images/users-permissions-IG-select.png
+   :alt: Users - Permissions IG Select
 
 4. Click the checkbox beside the role to assign that role to your chosen type of resource. Different resources have different options available.
 
 .. image:: ../common/images/users-permissions-IG-roles.png
-
+   :alt: Users - Permissions IG Roles
 
 5. Click **Save** when done, and the Add Permissions Wizard closes to display the updated profile for the user with the roles assigned for each selected resource.
 
 .. image:: ../common/images/users-permissions-sample-roles.png
+   :alt: Users - Permissions Sample Roles
   
 To remove Permissions for a particular resource, click the disassociate (x) button next to its resource. This launches a confirmation dialog, asking you to confirm the disassociation.
-
 
 .. note:: 
 
    You can also add teams, individual, or multiple users and assign them permissions at the object level (templates, credentials, inventories, projects, organizations, or instance groups) as well. This feature reduces the time for an organization to onboard many users at one time. 
-
 
 .. _ug_users_tokens:
 
@@ -179,4 +171,3 @@ The **Tokens** tab will only be present for your user (yourself). Before you add
 1. If not already selected, click on your user from the Users list view to configure your OAuth 2 tokens.
 
 .. include:: ../common/add-token.rst
-
