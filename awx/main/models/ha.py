@@ -108,6 +108,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         default="",
         max_length=50,
     )
+
     # Auto-fields, implementation is different from BaseModel
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
