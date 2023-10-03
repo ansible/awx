@@ -384,6 +384,19 @@ class InstancePeersList(SubListAPIView):
     relationship = 'peers'
 
 
+class ReceptorAddressesList(ListCreateAPIView):
+    name = _("Receptor Addresses")
+    model = models.ReceptorAddress
+    serializer_class = serializers.ReceptorAddressSerializer
+
+    def get_queryset(self):
+        return models.ReceptorAddress.objects.filter(instance=self.kwargs['pk'])
+
+    def post(self, request, *args, **kwargs):
+        request.data.update({'instance': self.kwargs['pk']})
+        return super().post(request, *args, **kwargs)
+
+
 class InstanceInstanceGroupsList(InstanceGroupMembershipMixin, SubListCreateAttachDetachAPIView):
     name = _("Instance's Instance Groups")
     model = models.InstanceGroup
