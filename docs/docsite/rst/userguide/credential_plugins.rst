@@ -48,6 +48,7 @@ Use the AWX User Interface to configure and use each of the supported 3-party se
    :alt: Applications - Button for managing key-related operations.
 .. image:: ../common/images/credentials-link-credential-prompt.png 
    :alt: Prompt for linking a credential field to Centrify Vault.
+
 4. Select the credential you want to link to, and click **Next**. This takes you to the **Metadata** tab of the input source. This example shows the Metadata prompt for HashiVault Secret Lookup. Metadata is specific to the input source you select. See the :ref:`ug_metadata_creds_inputs` table for details.
 
 .. image:: ../common/images/credentials-link-metadata-prompt.png
@@ -57,6 +58,7 @@ Use the AWX User Interface to configure and use each of the supported 3-party se
 
 .. image:: ../common/images/credentials-link-metadata-test-error.png
    :alt: Credentials link metadata Test Error
+   
 6. When done, click **OK**. This closes the prompt window and returns you to the Details screen of your target credential. **Repeat these steps**, starting with :ref:`step 3 above <ag_credential_plugins_link_step>` to complete the remaining input fields for the target credential. By linking the information in this manner, AWX retrieves sensitive information, such as username, password, keys, certificates, and tokens from the 3rd-party management systems and populates that data into the remaining fields of the target credential form.
 
 7. If necessary, supply any information manually for those fields that do not use linking as a way of retrieving sensitive information. Refer to the appropriate :ref:`ug_credentials_cred_types` for more detail about each of the fields.
