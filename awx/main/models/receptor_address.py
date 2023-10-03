@@ -27,3 +27,11 @@ class ReceptorAddress(models.Model):
             port = f":{self.port}"
 
         return f"{scheme}{self.address}{port}{path}"
+
+    def get_peer_type(self):
+        if self.protocol == 'tcp':
+            return 'tcp-peer'
+        elif self.protocol in ['ws', 'wss']:
+            return 'ws-peer'
+        else:
+            return None
