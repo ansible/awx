@@ -143,6 +143,7 @@ options:
         - Enables processing of this schedule.
       required: False
       type: bool
+      default: true
     state:
       description:
         - Desired state of the resource.
@@ -219,7 +220,7 @@ def main():
         verbosity=dict(type='int', choices=[0, 1, 2, 3, 4, 5]),
         unified_job_template=dict(),
         organization=dict(),
-        enabled=dict(type='bool'),
+        enabled=dict(type='bool', default=True),
         state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )
 

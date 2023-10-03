@@ -43,6 +43,7 @@ options:
       description:
         - If the host should be enabled.
       type: bool
+      default: true
     variables:
       description:
         - Variables to use for the host.
@@ -81,7 +82,7 @@ def main():
         new_name=dict(),
         description=dict(),
         inventory=dict(required=True),
-        enabled=dict(type='bool'),
+        enabled=dict(type='bool', default=True),
         variables=dict(type='dict'),
         state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )

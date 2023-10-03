@@ -20,6 +20,7 @@
   host:
     name: "{{ host_name }}"
     inventory: "{{ result.id }}"
+    description: 1234
     state: present
     variables:
       foo: bar
@@ -28,6 +29,25 @@
 - assert:
     that:
       - "result is changed"
+
+- name: Create a Host check the result is not changed to make sure defaults passed
+  host:
+    name: "{{ host_name }}"
+    inventory: "{{ inv_name }}"
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+
+- name: Use lookup to check that host was enabled
+  ansible.builtin.set_fact:
+    host_enabled_test: "lookup('awx.awx.controller_api', 'hosts/{{result.id}}/').enabled"
+
+- name: Newly created host should have API default value for enabled
+  assert:
+    that:
+      - host_enabled_test
 
 - name: Create a Host with exists
   host:

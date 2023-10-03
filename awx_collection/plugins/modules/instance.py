@@ -37,11 +37,13 @@ options:
         - If true, the instance will be enabled and used.
       required: False
       type: bool
+      default: true
     managed_by_policy:
       description:
         - Managed by policy
       required: False
       type: bool
+      default: true
     node_type:
       description:
         - Role that this node plays in the mesh.
@@ -99,8 +101,8 @@ def main():
     argument_spec = dict(
         hostname=dict(required=True),
         capacity_adjustment=dict(type='float'),
-        enabled=dict(type='bool'),
-        managed_by_policy=dict(type='bool'),
+        enabled=dict(type='bool', default=True),
+        managed_by_policy=dict(type='bool', default=True),
         node_type=dict(type='str', choices=['execution', 'hop']),
         node_state=dict(type='str', choices=['deprovisioning', 'installed']),
         listener_port=dict(type='int'),
