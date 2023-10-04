@@ -1,7 +1,27 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
+from awx.api.versioning import reverse
+from django.db.models import Sum, Q
 
 
 class ReceptorAddress(models.Model):
+    class Meta:
+        app_label = 'main'
+        constraints = [
+            models.UniqueConstraint(
+                fields=["address", "protocol", "websocket_path"],
+                condition=Q(port=None),
+                name="unique_receptor_address_no_port",
+                violation_error_message=_("Receptor address must be unique."),
+            ),
+            models.UniqueConstraint(
+                fields=["address", "port", "protocol", "websocket_path"],
+                condition=~Q(port=None),
+                name="unique_receptor_address_with_port",
+                violation_error_message=_("Receptor address must be unique."),
+            ),
+        ]
+
     address = models.CharField(max_length=255)
     port = models.IntegerField(null=True)
     protocol = models.CharField(max_length=10)
@@ -35,3 +55,6 @@ class ReceptorAddress(models.Model):
             return 'ws-peer'
         else:
             return None
+
+    def get_absolute_url(self, request=None):
+        return reverse('api:receptor_address_detail', kwargs={'pk': self.pk}, request=request)

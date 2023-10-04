@@ -5482,7 +5482,7 @@ class ReceptorAddressSerializer(BaseSerializer):
 
     class Meta:
         model = ReceptorAddress
-        fields = ('id', 'address', 'port', 'protocol', 'websocket_path', 'is_internal', 'instance', 'full_address')
+        fields = ('id', 'url', 'address', 'port', 'protocol', 'websocket_path', 'is_internal', 'instance', 'full_address')
         read_only = 'full_address'
 
     def get_full_address(self, obj):
@@ -5557,7 +5557,7 @@ class InstanceSerializer(BaseSerializer):
 
     def get_related(self, obj):
         res = super(InstanceSerializer, self).get_related(obj)
-        res['receptor_addresses'] = self.reverse('api:receptor_addresses_list', kwargs={'pk': obj.pk})
+        res['receptor_addresses'] = self.reverse('api:instance_receptor_addresses_list', kwargs={'pk': obj.pk})
         res['jobs'] = self.reverse('api:instance_unified_jobs_list', kwargs={'pk': obj.pk})
         res['instance_groups'] = self.reverse('api:instance_instance_groups_list', kwargs={'pk': obj.pk})
         if obj.node_type in [Instance.Types.EXECUTION, Instance.Types.HOP]:
