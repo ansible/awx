@@ -48,7 +48,7 @@ Install the setuptools package on Linux using pip:
 
 ::
 
-	import setuptools
+	python3 -c 'import setuptools'
 
 If no errors are returned, then the package was installed properly.
 
