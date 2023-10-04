@@ -3,10 +3,12 @@
 Projects specify the branch, tag, or reference to use from source control in the ``scm_branch`` field. These are represented by the values specified in the Project Details fields as shown.
 
 .. image:: ../common/images/projects-create-scm-project-branching-emphasized.png
+   :alt: Create New Project page with SCM branching options emphasized
 
 Projects have the option to "Allow Branch Override". When checked, project admins can delegate branch selection to the job templates that use that project (requiring only project ``use_role``). 
 
 .. image:: ../common/images/projects-create-scm-project-branch-override-checked.png
+   :alt: Allow Branch Override checkbox option in Project selected
 
 
 
@@ -22,6 +24,7 @@ If **Clean** is checked, AWX discards modified files in its local copy of the re
 .. _`Subversion`: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/subversion_module.html#parameters
 
 .. image:: ../common/images/projects-create-scm-project-clean-checked.png
+   :alt: Clean checkbox option in Project selected
 
 
 Project revision behavior
@@ -32,6 +35,7 @@ is stored when updated, and jobs using that project will employ this revision. P
 This revision is shown in the **Source Control Revision** field of the job and its respective project update.
 
 .. image:: ../common/images/jobs-output-branch-override-example.png
+   :alt: Project's Source Control Revision value
 
 Consequently, offline job runs are impossible for non-default branches. To be sure that a job is running a static version from source control, use tags or commit hashes. Project updates do not save the revision of all branches, only the project default branch.
 
