@@ -84,6 +84,7 @@ class ApiVersionRootView(APIView):
         data['ping'] = reverse('api:api_v2_ping_view', request=request)
         data['instances'] = reverse('api:instance_list', request=request)
         data['instance_groups'] = reverse('api:instance_group_list', request=request)
+        data['receptor_addresses'] = reverse('api:receptor_addresses_list', request=request)
         data['config'] = reverse('api:api_v2_config_view', request=request)
         data['settings'] = reverse('api:setting_category_list', request=request)
         data['me'] = reverse('api:user_me_list', request=request)

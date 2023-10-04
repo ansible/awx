@@ -57,6 +57,7 @@ from awx.main.models import (
     Project,
     ProjectUpdate,
     ProjectUpdateEvent,
+    ReceptorAddress,
     Role,
     Schedule,
     SystemJob,
@@ -2426,6 +2427,29 @@ class InventoryUpdateEventAccess(BaseAccess):
     def can_change(self, obj, data):
         return False
 
+    def can_delete(self, obj):
+        return False
+
+
+class ReceptorAddressAccess(BaseAccess):
+    """
+    I can see receptor address records whenever I can access the instance
+    """
+
+    model = ReceptorAddress
+
+    def filtered_queryset(self):
+        return self.model.objects.filter(Q(instance__in=Instance.accessible_pk_qs(self.user, 'read_role')))
+
+    @check_superuser
+    def can_add(self, data):
+        return False
+
+    @check_superuser
+    def can_change(self, obj, data):
+        return False
+
+    @check_superuser
     def can_delete(self, obj):
         return False
 
