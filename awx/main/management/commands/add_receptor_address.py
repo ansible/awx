@@ -1,8 +1,6 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved
 
-import os
-
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
@@ -28,11 +26,20 @@ class Command(BaseCommand):
         )
 
     def _add_address(self, **kwargs):
-        i = Instance.objects.get(hostname=kwargs.pop('hostname'))
-        kwargs['instance'] = i
-        ReceptorAddress.objects.create(**kwargs)
+        try:
+            instance = Instance.objects.get(hostname=kwargs.pop('hostname'))
+            kwargs['instance'] = instance
+            addr = ReceptorAddress.objects.create(**kwargs)
+            print(f"Successfully added receptor address {addr.get_full_address()}")
+            self.changed = True
+        except Exception as e:
+            self.changed = False
+            print(f"Error adding receptor address: {e}")
 
     @transaction.atomic
     def handle(self, **options):
+        self.changed = False
         address_options = {k: options[k] for k in ('hostname', 'address', 'port', 'protocol', 'websocket_path', 'is_internal')}
         self._add_address(**address_options)
+        if self.changed:
+            print("(changed: True)")
