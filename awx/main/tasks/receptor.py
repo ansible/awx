@@ -703,9 +703,10 @@ def generate_config_data():
 
     receptor_config = list(RECEPTOR_CONFIG_STARTER)
     for instance in instances:
-        if instance.listener_port:
-            peer = {'tcp-peer': {'address': f'{instance.hostname}:{instance.listener_port}', 'tls': 'tlsclient'}}
-            receptor_config.append(peer)
+        # receptor_addresses = instance.receptor_addresses.all()
+        # if not receptor_addresses.exists() and instance.listener_port:
+        #     peer = {'tcp-peer': {'address': f'{instance.hostname}:{instance.listener_port}', 'tls': 'tlsclient'}}
+        #     receptor_config.append(peer)
         for address in instance.receptor_addresses.all():
             if address.get_peer_type() and address.is_internal:
                 peer = {

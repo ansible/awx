@@ -21,9 +21,7 @@ class Command(BaseCommand):
         parser.add_argument('--port', dest='port', type=int, help="Receptor listener port")
         parser.add_argument('--protocol', dest='protocol', type=str, default='tcp', choices=['tcp', 'ws'], help="Protocol of the backend connection")
         parser.add_argument('--websocket_path', dest='websocket_path', type=str, default="", help="Path for websockets")
-        parser.add_argument(
-            '--is_internal', dest='is_internal', type=bool, default=False, help="If true, address only resolvable within the Kubernetes cluster"
-        )
+        parser.add_argument('--is_internal', action='store_true', help="If true, address only resolvable within the Kubernetes cluster")
 
     def _add_address(self, **kwargs):
         try:
