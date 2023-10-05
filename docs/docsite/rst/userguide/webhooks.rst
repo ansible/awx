@@ -86,10 +86,8 @@ AWX has the ability to run jobs based on a triggered webhook event coming in. Jo
 	c. Copy the contents of the **Webhook Key** from the job template above and paste it in the **Secret** field. 
 	d. Leave **Enable SSL verification** selected.
 
-		.. image:: ../common/images/webhooks-github-repo-add-webhook.png
+	.. image:: ../common/images/webhooks-github-repo-add-webhook.png
 		:alt: Add Webhook page
-
-	|
 
 	e. Next, you must select the types of events you want to trigger a webhook. Any such event will trigger the Job or Workflow. In order to have job status (pending, error, success) sent back to GitHub, you must select **Pull requests** in the individual events section.
 
