@@ -31,11 +31,11 @@ Access the Applications page by clicking **Applications** from the left navigati
 |Applications - home with example apps|
 
 .. |Applications - home with example apps| image:: ../common/images/apps-list-view-examples.png
-   :alt: Applications - home with example apps
+   :alt: Applications list view
 If no other applications exist, only a gray box with a message to add applications displays.
 
 .. image:: ../common/images/apps-list-view-empty.png
-   :alt: Empty Applications List View
+   :alt: No applications found in the list view
 
 .. _ug_applications_auth_create:
 
@@ -59,7 +59,7 @@ The New Application window opens.
 |Create application|
 
 .. |Create application| image:: ../common/images/apps-create-new.png
-   :alt: Create New Application Window
+   :alt: Create new application dialog
 
 3. Enter the following details in **Create New Application** window:
 
@@ -73,7 +73,7 @@ The New Application window opens.
 4. When done, click **Save** or **Cancel** to abandon your changes. Upon saving, the client ID displays in a pop-up window.
 
 .. image:: ../common/images/apps-client-id-popup.png
-   :alt: Client Id pop-up Window
+   :alt: Client ID popup
 
 Applications - Tokens
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -87,7 +87,7 @@ Selecting the **Tokens** view displays a list of the users that have tokens to a
 |Applications - tokens list|
 
 .. |Applications - tokens list| image:: ../common/images/apps-tokens-list-view-examples.png
-   :alt: Applications - Tokens List View
+   :alt: Application tokens list view
 Tokens can only access resources that its associated user can access, and can be limited further by specifying the scope of the token.
 
 
@@ -109,4 +109,4 @@ Tokens are added through the Users screen and can be associated with an applicat
 To verify the application in the example above now shows the user with the appropriate token, go to the **Tokens** tab of the Applications window:
 
 .. image:: ../common/images/apps-tokens-list-view-example2.png
-   :alt: Verifying User's Token in Applications Window
+   :alt: Verifying a specific user application token
