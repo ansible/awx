@@ -28,8 +28,9 @@ class Command(BaseCommand):
         parser.add_argument('--listener_port', dest='listener_port', type=int, help="Receptor listener port")
         parser.add_argument('--node_type', type=str, default='hybrid', choices=['control', 'execution', 'hop', 'hybrid'], help="Instance Node type")
         parser.add_argument('--uuid', type=str, help="Instance UUID")
+        parser.add_argument('--peers_from_control_nodes', action='store_true', help="If set, will automatically peer from control nodes")
 
-    def _register_hostname(self, hostname, node_type, uuid, listener_port):
+    def _register_hostname(self, hostname, node_type, uuid, listener_port, peers_from_control_nodes):
         if not hostname:
             if not settings.AWX_AUTO_DEPROVISION_INSTANCES:
                 raise CommandError('Registering with values from settings only intended for use in K8s installs')
@@ -51,7 +52,9 @@ class Command(BaseCommand):
                 max_concurrent_jobs=settings.DEFAULT_EXECUTION_QUEUE_MAX_CONCURRENT_JOBS,
             ).register()
         else:
-            (changed, instance) = Instance.objects.register(hostname=hostname, node_type=node_type, node_uuid=uuid, listener_port=listener_port)
+            (changed, instance) = Instance.objects.register(
+                hostname=hostname, node_type=node_type, node_uuid=uuid, listener_port=listener_port, peers_from_control_nodes=peers_from_control_nodes
+            )
         if changed:
             print("Successfully registered instance {}".format(hostname))
         else:
@@ -61,6 +64,8 @@ class Command(BaseCommand):
     @transaction.atomic
     def handle(self, **options):
         self.changed = False
-        self._register_hostname(options.get('hostname'), options.get('node_type'), options.get('uuid'), options.get('listener_port'))
+        self._register_hostname(
+            options.get('hostname'), options.get('node_type'), options.get('uuid'), options.get('listener_port'), options.get('peers_from_control_nodes')
+        )
         if self.changed:
             print("(changed: True)")
