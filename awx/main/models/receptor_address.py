@@ -1,7 +1,11 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
 from awx.api.versioning import reverse
 from django.db.models import Sum, Q
+
+from awx.main.models.ha import schedule_write_receptor_config
 
 
 class ReceptorAddress(models.Model):
@@ -58,3 +62,13 @@ class ReceptorAddress(models.Model):
 
     def get_absolute_url(self, request=None):
         return reverse('api:receptor_address_detail', kwargs={'pk': self.pk}, request=request)
+
+
+@receiver(post_save, sender=ReceptorAddress)
+def receptor_address_saved(sender, instance, **kwargs):
+    schedule_write_receptor_config(True)
+
+
+@receiver(post_delete, sender=ReceptorAddress)
+def receptor_address_deleted(sender, instance, **kwargs):
+    schedule_write_receptor_config(True)
