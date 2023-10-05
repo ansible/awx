@@ -32,6 +32,7 @@ Access the Applications page by clicking **Applications** from the left navigati
 
 .. |Applications - home with example apps| image:: ../common/images/apps-list-view-examples.png
    :alt: Applications list view
+
 If no other applications exist, only a gray box with a message to add applications displays.
 
 .. image:: ../common/images/apps-list-view-empty.png
@@ -88,6 +89,7 @@ Selecting the **Tokens** view displays a list of the users that have tokens to a
 
 .. |Applications - tokens list| image:: ../common/images/apps-tokens-list-view-examples.png
    :alt: Application tokens list view
+
 Tokens can only access resources that its associated user can access, and can be limited further by specifying the scope of the token.
 
 
