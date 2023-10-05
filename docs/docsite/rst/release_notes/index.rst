@@ -12,9 +12,9 @@ Likewise content in this guide can be removed or replaced if it applies to funct
 
 **Join us online**
 
-We talk about AWX documentation on Matrix at `#docs:ansible.im <https://matrix.to/#/#docs:ansible.im>`_ and on libera IRC at ``#ansible-docs`` if you ever want to join us and chat about the docs!
+We talk about AWX documentation on Matrix at `#docs:ansible.im <https://matrix.to/#/#docs:ansible.im>`_ if you ever want to join us and chat about the docs!
 
-You can also find lots of AWX discussion and get answers to questions at `forum.ansible.com <https://forum.ansible.com/>`_.
+You can also find lots of AWX discussion and get answers to questions on the `Ansible Community Forum <https://forum.ansible.com/c/project/7/>`_.
 
 .. toctree::
    :maxdepth: 2

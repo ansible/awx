@@ -33,7 +33,7 @@ Prerequisites
 
 .. _`How to create GPG keypairs`: https://www.redhat.com/sysadmin/creating-gpg-keypairs 
 
-	Vist the `GnuPG documentation <https://www.gnupg.org/documentation/index.html>`_ for more information regarding GPG keys.
+	Visit the `GnuPG documentation <https://www.gnupg.org/documentation/index.html>`_ for more information regarding GPG keys.
 
 	You can verify that you have a valid GPG keypair and in your default GnuPG keyring, with the following command:
 
