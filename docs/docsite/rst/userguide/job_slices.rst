@@ -28,6 +28,7 @@ Consider the following when setting up job slices:
 - When executed, a sliced job splits each inventory into a number of "slice size" chunks. It then queues jobs of ansible-playbook runs on each chunk of the appropriate inventory. The inventory fed into ansible-playbook is a pared-down version of the original inventory that only contains the hosts in that particular slice. The completed sliced job that displays on the Jobs list are labeled accordingly, with the number of sliced jobs that have run:
 
 .. image:: ../common/images/sliced-job-shown-jobs-list-view.png
+    :alt: Sliced job shown in Jobs list view
 
 
 - These sliced jobs follow normal scheduling behavior (number of forks, queuing due to capacity, assignation to instance groups based on inventory mapping).
@@ -54,6 +55,7 @@ Job slice execution behavior
 When jobs are sliced, they can run on any node and some may not run at the same time (insufficient capacity in the system, for example). When slice jobs are running, job details display the workflow and job slice(s) currently running, as well as a link to view their details individually.
 
 .. image:: ../common/images/sliced-job-shown-jobs-output-view.png
+    :alt: Sliced job shown in Jobs output view
 
 By default, job templates are not normally configured to execute simultaneously (``allow_simultaneous`` must be checked in the API or **Enable Concurrent Jobs** in the UI). Slicing overrides this behavior and implies ``allow_simultaneous`` even if that setting is unchecked. See :ref:`ug_JobTemplates` for information on how to specify this, as well as the number of job slices on your job template configuration.
 
