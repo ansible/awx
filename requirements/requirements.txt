@@ -1,6 +1,6 @@
 adal==1.2.7
     # via msrestazure
-aiohttp==3.8.3
+aiohttp==3.8.5
     # via -r /awx_devel/requirements/requirements.in
 aioredis==1.3.1
     # via channels-redis
