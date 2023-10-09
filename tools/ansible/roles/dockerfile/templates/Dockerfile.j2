@@ -270,6 +270,7 @@ RUN for dir in \
       /var/lib/awx/venv/awx/lib/python3.9/site-packages \
       /var/lib/awx/projects \
       /var/lib/awx/rsyslog \
+      /var/log/tower \
       /var/run/awx-rsyslog \
       /.ansible \
       /var/lib/shared/overlay-images \
@@ -292,6 +293,8 @@ RUN for dir in \
 
 {% if not build_dev|bool %}
 RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
+    ln -sf /dev/stdout /var/log/tower/profile && \
+    ln -sf /dev/stdout /var/log/tower/timing && \
     ln -sf /dev/stderr /var/log/nginx/error.log
 {% endif %}
 
