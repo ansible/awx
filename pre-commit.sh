@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 if [ -z $AWX_IGNORE_BLACK ] ; then
-	python_files_changed=$(git diff --cached --name-only --diff-filter=AM | grep -E '\.py$')
+	python_files_changed=$(git diff --cached --name-only --diff-filter=AM awx/ awxkit/ tools/ | grep -E '\.py$')
 	if [ "x$python_files_changed" != "x" ] ; then
         	black --check $python_files_changed || \
 		if [ $? != 0 ] ; then
