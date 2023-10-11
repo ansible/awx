@@ -495,7 +495,7 @@ def inspect_established_receptor_connections(mesh_status):
     update_links = []
     for link in all_links:
         if link.link_state != InstanceLink.States.REMOVING:
-            if link.target.hostname in active_receptor_conns.get(link.source.hostname, {}):
+            if link.target.instance.hostname in active_receptor_conns.get(link.source.hostname, {}):
                 if link.link_state is not InstanceLink.States.ESTABLISHED:
                     link.link_state = InstanceLink.States.ESTABLISHED
                     update_links.append(link)
