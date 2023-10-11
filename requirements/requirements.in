@@ -42,8 +42,8 @@ pygerduty
 pyopenssl>=23.2.0  # resolve dep conflict from cryptography pin above
 pyparsing==2.4.6  # Upgrading to v3 of pyparsing introduce errors on smart host filtering: Expected 'or' term, found 'or'  (at char 15), (line:1, col:16)
 python-daemon>3.0.0
-python-dsv-sdk
-python-tss-sdk==1.2.1
+python-dsv-sdk>=1.0.4
+python-tss-sdk>=1.2.1
 python-ldap
 pyyaml>=6.0.1
 receptorctl==1.3.0
