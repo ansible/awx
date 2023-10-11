@@ -5,32 +5,24 @@ from django.dispatch import receiver
 from awx.api.versioning import reverse
 from django.db.models import Sum, Q
 
-from awx.main.models.ha import schedule_write_receptor_config
-
 
 class ReceptorAddress(models.Model):
     class Meta:
         app_label = 'main'
         constraints = [
             models.UniqueConstraint(
-                fields=["address", "protocol", "websocket_path"],
-                condition=Q(port=None),
-                name="unique_receptor_address_no_port",
-                violation_error_message=_("Receptor address must be unique."),
-            ),
-            models.UniqueConstraint(
-                fields=["address", "port", "protocol", "websocket_path"],
-                condition=~Q(port=None),
-                name="unique_receptor_address_with_port",
-                violation_error_message=_("Receptor address must be unique."),
-            ),
+                fields=["address", "protocol"],
+                name="unique_receptor_address",
+                violation_error_message=_("Receptor address + protocol must be unique."),
+            )
         ]
 
     address = models.CharField(max_length=255)
-    port = models.IntegerField(null=True)
+    port = models.IntegerField(blank=False)
     protocol = models.CharField(max_length=10)
     websocket_path = models.CharField(max_length=255, default="", blank=True)
     is_internal = models.BooleanField(default=False)
+    peers_from_control_nodes = models.BooleanField(default=False)
     instance = models.ForeignKey(
         'Instance',
         related_name='receptor_addresses',
@@ -62,13 +54,3 @@ class ReceptorAddress(models.Model):
 
     def get_absolute_url(self, request=None):
         return reverse('api:receptor_address_detail', kwargs={'pk': self.pk}, request=request)
-
-
-@receiver(post_save, sender=ReceptorAddress)
-def receptor_address_saved(sender, instance, **kwargs):
-    schedule_write_receptor_config(True)
-
-
-@receiver(post_delete, sender=ReceptorAddress)
-def receptor_address_deleted(sender, instance, **kwargs):
-    schedule_write_receptor_config(True)
