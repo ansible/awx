@@ -34,6 +34,7 @@ from awx.main.models.rbac import (
 from awx.main.models.unified_jobs import UnifiedJob
 from awx.main.utils.common import get_corrected_cpu, get_cpu_effective_capacity, get_corrected_memory, get_mem_effective_capacity
 from awx.main.models.mixins import RelatedJobsMixin, ResourceMixin
+from awx.main.models.receptor_address import ReceptorAddress
 
 # ansible-runner
 from ansible_runner.utils.capacity import get_cpu_count, get_mem_in_bytes
@@ -64,8 +65,11 @@ class HasPolicyEditsMixin(HasEditsMixin):
 
 
 class InstanceLink(BaseModel):
-    source = models.ForeignKey('Instance', on_delete=models.CASCADE, related_name='+')
-    target = models.ForeignKey('Instance', on_delete=models.CASCADE, related_name='reverse_peers')
+    class Meta:
+        ordering = ("id",)
+
+    source = models.ForeignKey('Instance', on_delete=models.CASCADE)
+    target = models.ForeignKey('ReceptorAddress', on_delete=models.CASCADE)
 
     class States(models.TextChoices):
         ADDING = 'adding', _('Adding')
@@ -75,11 +79,6 @@ class InstanceLink(BaseModel):
     link_state = models.CharField(
         choices=States.choices, default=States.ADDING, max_length=16, help_text=_("Indicates the current life cycle stage of this peer link.")
     )
-
-    class Meta:
-        unique_together = ('source', 'target')
-        ordering = ("id",)
-        constraints = [models.CheckConstraint(check=~models.Q(source=models.F('target')), name='source_and_target_can_not_be_equal')]
 
 
 class Instance(HasPolicyEditsMixin, BaseModel):
@@ -194,7 +193,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         help_text=_("Port that Receptor will listen for incoming connections on."),
     )
 
-    peers = models.ManyToManyField('self', symmetrical=False, through=InstanceLink, through_fields=('source', 'target'), related_name='peers_from')
+    peers = models.ManyToManyField('ReceptorAddress', through=InstanceLink, through_fields=('source', 'target'), related_name='peers_from')
     peers_from_control_nodes = models.BooleanField(default=False, help_text=_("If True, control plane cluster nodes should automatically peer to it."))
 
     POLICY_FIELDS = frozenset(('managed_by_policy', 'hostname', 'capacity_adjustment'))
@@ -502,6 +501,29 @@ def schedule_write_receptor_config(broadcast=True):
             write_receptor_config()  # just run locally
 
 
+# TODO: don't use the receiver post save, just call this at the moment when we need it
+# that way we don't call this multiple times unnecessarily
+@receiver(post_save, sender=ReceptorAddress)
+def receptor_address_saved(sender, instance, **kwargs):
+    from awx.main.signals import disable_activity_stream
+
+    address = instance
+
+    with disable_activity_stream():
+        control_instances = set(Instance.objects.filter(node_type__in=[Instance.Types.CONTROL, Instance.Types.HYBRID]))
+        if address.peers_from_control_nodes:
+            address.peers_from.add(*control_instances)
+        else:
+            address.peers_from.remove(*control_instances)
+
+        schedule_write_receptor_config()
+
+
+@receiver(post_delete, sender=ReceptorAddress)
+def receptor_address_deleted(sender, instance, **kwargs):
+    schedule_write_receptor_config()
+
+
 @receiver(post_save, sender=Instance)
 def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
     '''
@@ -512,10 +534,12 @@ def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
     2. a node changes its value of peers_from_control_nodes
     3. a new control node comes online and has instances to peer to
     '''
+    from awx.main.signals import disable_activity_stream
+
     if created and settings.IS_K8S and instance.node_type in [Instance.Types.CONTROL, Instance.Types.HYBRID]:
-        inst = Instance.objects.filter(peers_from_control_nodes=True)
-        if set(instance.peers.all()) != set(inst):
-            instance.peers.set(inst)
+        peers_address = ReceptorAddress.objects.filter(peers_from_control_nodes=True)
+        with disable_activity_stream():
+            instance.peers.add(*peers_address)
             schedule_write_receptor_config(broadcast=False)
 
     if settings.IS_K8S and instance.node_type in [Instance.Types.HOP, Instance.Types.EXECUTION]:
@@ -525,16 +549,6 @@ def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
             # wait for jobs on the node to complete, then delete the
             # node and kick off write_receptor_config
             connection.on_commit(lambda: remove_deprovisioned_node.apply_async([instance.hostname]))
-        else:
-            control_instances = set(Instance.objects.filter(node_type__in=[Instance.Types.CONTROL, Instance.Types.HYBRID]))
-            if instance.peers_from_control_nodes:
-                if (control_instances & set(instance.peers_from.all())) != set(control_instances):
-                    instance.peers_from.add(*control_instances)
-                    schedule_write_receptor_config()  # keep method separate to make pytest mocking easier
-            else:
-                if set(control_instances) & set(instance.peers_from.all()):
-                    instance.peers_from.remove(*control_instances)
-                    schedule_write_receptor_config()
 
     if created or instance.has_policy_changes():
         schedule_policy_task()
