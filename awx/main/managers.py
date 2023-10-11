@@ -115,7 +115,7 @@ class InstanceManager(models.Manager):
             return node[0]
         raise RuntimeError("No instance found with the current cluster host id")
 
-    def register(self, node_uuid=None, hostname=None, ip_address="", listener_port=None, node_type='hybrid', peers_from_control_nodes=False, defaults=None):
+    def register(self, node_uuid=None, hostname=None, ip_address="", listener_port=None, node_type='hybrid', defaults=None):
         if not hostname:
             hostname = settings.CLUSTER_HOST_ID
 
@@ -180,13 +180,5 @@ class InstanceManager(models.Manager):
             uuid_option = {'uuid': node_uuid if node_uuid is not None else uuid.uuid4()}
             if node_type == 'execution' and 'version' not in create_defaults:
                 create_defaults['version'] = RECEPTOR_PENDING
-            instance = self.create(
-                hostname=hostname,
-                ip_address=ip_address,
-                listener_port=listener_port,
-                node_type=node_type,
-                peers_from_control_nodes=peers_from_control_nodes,
-                **create_defaults,
-                **uuid_option
-            )
+            instance = self.create(hostname=hostname, ip_address=ip_address, listener_port=listener_port, node_type=node_type, **create_defaults, **uuid_option)
         return (True, instance)

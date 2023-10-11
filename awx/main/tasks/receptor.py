@@ -27,7 +27,7 @@ from awx.main.utils.common import (
 )
 from awx.main.constants import MAX_ISOLATED_PATH_COLON_DELIMITER
 from awx.main.tasks.signals import signal_state, signal_callback, SignalExit
-from awx.main.models import Instance, InstanceLink, UnifiedJob
+from awx.main.models import Instance, InstanceLink, UnifiedJob, ReceptorAddress
 from awx.main.dispatch import get_task_queuename
 from awx.main.dispatch.publish import task
 from awx.main.utils.pglock import advisory_lock
@@ -676,49 +676,44 @@ RECEPTOR_CONFIG_STARTER = (
 )
 
 
-def should_update_config(instances):
+def should_update_config(new_config):
     '''
     checks that the list of instances matches the list of
     tcp-peers in the config
     '''
-    current_config = read_receptor_config()  # this gets receptor conf lock
-    current_peers = []
-    for config_entry in current_config:
-        for key, value in config_entry.items():
-            if key.endswith('-peer'):
-                current_peers.append(value['address'])
-    intended_peers = [f"{i.hostname}:{i.listener_port}" for i in instances]
-    logger.debug(f"Peers current {current_peers} intended {intended_peers}")
-    if set(current_peers) == set(intended_peers):
-        return False  # config file is already update to date
 
-    return True
+    current_config = read_receptor_config()  # this gets receptor conf lock
+    for config_entry in current_config:
+        if config_entry not in new_config:
+            logger.warning(f"{config_entry} should not be in receptor config. Updating.")
+            return True
+    for config_entry in new_config:
+        if config_entry not in current_config:
+            logger.warning(f"{config_entry} missing from receptor config. Updating.")
+            return True
+
+    return False
 
 
 def generate_config_data():
     # returns two values
     #   receptor config - based on current database peers
     #   should_update   - If True, receptor_config differs from the receptor conf file on disk
-    instances = Instance.objects.filter(node_type__in=(Instance.Types.EXECUTION, Instance.Types.HOP), peers_from_control_nodes=True)
+    addresses = ReceptorAddress.objects.filter(peers_from_control_nodes=True)
 
     receptor_config = list(RECEPTOR_CONFIG_STARTER)
-    for instance in instances:
-        # receptor_addresses = instance.receptor_addresses.all()
-        # if not receptor_addresses.exists() and instance.listener_port:
-        #     peer = {'tcp-peer': {'address': f'{instance.hostname}:{instance.listener_port}', 'tls': 'tlsclient'}}
-        #     receptor_config.append(peer)
-        for address in instance.receptor_addresses.all():
-            if address.get_peer_type() and address.is_internal:
-                peer = {
-                    f'{address.get_peer_type()}': {
-                        'address': f'{address.get_full_address()}',
-                        'tls': 'tlsclient',
-                    }
+    for address in addresses:
+        if address.get_peer_type() and address.is_internal:
+            peer = {
+                f'{address.get_peer_type()}': {
+                    'address': f'{address.get_full_address()}',
+                    'tls': 'tlsclient',
                 }
-                receptor_config.append(peer)
-            else:
-                logger.warning(f"Receptor address {address} has unsupported peer type, skipping.")
-    should_update = should_update_config(instances)
+            }
+            receptor_config.append(peer)
+        else:
+            logger.warning(f"Receptor address {address} has unsupported peer type, skipping.")
+    should_update = should_update_config(receptor_config)
     return receptor_config, should_update
 
 
@@ -760,14 +755,13 @@ def write_receptor_config():
             with lock:
                 with open(__RECEPTOR_CONF, 'w') as file:
                     yaml.dump(receptor_config, file, default_flow_style=False)
-
             reload_receptor()
 
 
 @task(queue=get_task_queuename)
 def remove_deprovisioned_node(hostname):
     InstanceLink.objects.filter(source__hostname=hostname).update(link_state=InstanceLink.States.REMOVING)
-    InstanceLink.objects.filter(target__hostname=hostname).update(link_state=InstanceLink.States.REMOVING)
+    InstanceLink.objects.filter(target__instance__hostname=hostname).update(link_state=InstanceLink.States.REMOVING)
 
     node_jobs = UnifiedJob.objects.filter(
         execution_node=hostname,

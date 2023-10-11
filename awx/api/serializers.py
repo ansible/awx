@@ -5459,16 +5459,24 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
 class InstanceLinkSerializer(BaseSerializer):
     class Meta:
         model = InstanceLink
-        fields = ('id', 'url', 'related', 'source', 'target', 'link_state')
+        fields = ('id', 'related', 'source', 'target', 'target_full_address', 'link_state')
 
     source = serializers.SlugRelatedField(slug_field="hostname", queryset=Instance.objects.all())
-    target = serializers.SlugRelatedField(slug_field="hostname", queryset=Instance.objects.all())
+
+    target = serializers.SerializerMethodField()
+    target_full_address = serializers.SerializerMethodField()
 
     def get_related(self, obj):
         res = super(InstanceLinkSerializer, self).get_related(obj)
         res['source_instance'] = self.reverse('api:instance_detail', kwargs={'pk': obj.source.id})
-        res['target_instance'] = self.reverse('api:instance_detail', kwargs={'pk': obj.target.id})
+        res['target_address'] = self.reverse('api:receptor_address_detail', kwargs={'pk': obj.target.id})
         return res
+
+    def get_target(self, obj):
+        return obj.target.instance.hostname
+
+    def get_target_full_address(self, obj):
+        return obj.target.get_full_address()
 
 
 class InstanceNodeSerializer(BaseSerializer):
@@ -5482,7 +5490,7 @@ class ReceptorAddressSerializer(BaseSerializer):
 
     class Meta:
         model = ReceptorAddress
-        fields = ('id', 'url', 'address', 'port', 'protocol', 'websocket_path', 'is_internal', 'instance', 'full_address')
+        fields = ('id', 'url', 'address', 'port', 'protocol', 'websocket_path', 'is_internal', 'instance', 'peers_from_control_nodes', 'full_address')
         read_only = 'full_address'
 
     def get_full_address(self, obj):
@@ -5497,7 +5505,6 @@ class InstanceSerializer(BaseSerializer):
     jobs_running = serializers.IntegerField(help_text=_('Count of jobs in the running or waiting state that are targeted for this instance'), read_only=True)
     jobs_total = serializers.IntegerField(help_text=_('Count of all jobs that target this instance'), read_only=True)
     health_check_pending = serializers.SerializerMethodField()
-    peers = serializers.SlugRelatedField(many=True, required=False, slug_field="hostname", queryset=Instance.objects.all())
 
     class Meta:
         model = Instance
@@ -5534,7 +5541,6 @@ class InstanceSerializer(BaseSerializer):
             'node_state',
             'ip_address',
             'listener_port',
-            'peers',
             'peers_from_control_nodes',
         )
         extra_kwargs = {
@@ -5562,7 +5568,6 @@ class InstanceSerializer(BaseSerializer):
         res['instance_groups'] = self.reverse('api:instance_instance_groups_list', kwargs={'pk': obj.pk})
         if obj.node_type in [Instance.Types.EXECUTION, Instance.Types.HOP]:
             res['install_bundle'] = self.reverse('api:instance_install_bundle', kwargs={'pk': obj.pk})
-        res['peers'] = self.reverse('api:instance_peers_list', kwargs={"pk": obj.pk})
         if self.context['request'].user.is_superuser or self.context['request'].user.is_system_auditor:
             if obj.node_type == 'execution':
                 res['health_check'] = self.reverse('api:instance_health_check', kwargs={'pk': obj.pk})
@@ -5607,30 +5612,30 @@ class InstanceSerializer(BaseSerializer):
         node_type = get_field_from_model_or_attrs("node_type")
         peers_from_control_nodes = get_field_from_model_or_attrs("peers_from_control_nodes")
         listener_port = get_field_from_model_or_attrs("listener_port")
-        peers = attrs.get('peers', [])
+        # peers = attrs.get('peers', [])
 
         if peers_from_control_nodes and node_type not in (Instance.Types.EXECUTION, Instance.Types.HOP):
             raise serializers.ValidationError(_("peers_from_control_nodes can only be enabled for execution or hop nodes."))
 
-        if node_type in [Instance.Types.CONTROL, Instance.Types.HYBRID]:
-            if check_peers_changed():
-                raise serializers.ValidationError(
-                    _("Setting peers manually for control nodes is not allowed. Enable peers_from_control_nodes on the hop and execution nodes instead.")
-                )
+        # if node_type in [Instance.Types.CONTROL, Instance.Types.HYBRID]:
+        #     if check_peers_changed():
+        #         raise serializers.ValidationError(
+        #             _("Setting peers manually for control nodes is not allowed. Enable peers_from_control_nodes on the hop and execution nodes instead.")
+        #         )
 
-        if not listener_port and peers_from_control_nodes:
-            raise serializers.ValidationError(_("Field listener_port must be a valid integer when peers_from_control_nodes is enabled."))
+        # if not listener_port and peers_from_control_nodes:
+        #     raise serializers.ValidationError(_("Field listener_port must be a valid integer when peers_from_control_nodes is enabled."))
 
-        if not listener_port and self.instance and self.instance.peers_from.exists():
-            raise serializers.ValidationError(_("Field listener_port must be a valid integer when other nodes peer to it."))
+        # if not listener_port and self.instance and self.instance.peers_from.exists():
+        #     raise serializers.ValidationError(_("Field listener_port must be a valid integer when other nodes peer to it."))
 
-        for peer in peers:
-            if peer.listener_port is None:
-                raise serializers.ValidationError(_("Field listener_port must be set on peer ") + peer.hostname + ".")
+        # for peer in peers:
+        #     if peer.listener_port is None:
+        #         raise serializers.ValidationError(_("Field listener_port must be set on peer ") + peer.hostname + ".")
 
-        if not settings.IS_K8S:
-            if check_peers_changed():
-                raise serializers.ValidationError(_("Cannot change peers."))
+        # if not settings.IS_K8S:
+        #     if check_peers_changed():
+        #         raise serializers.ValidationError(_("Cannot change peers."))
 
         return super().validate(attrs)
 
