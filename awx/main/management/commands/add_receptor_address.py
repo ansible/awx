@@ -22,6 +22,7 @@ class Command(BaseCommand):
         parser.add_argument('--protocol', dest='protocol', type=str, default='tcp', choices=['tcp', 'ws'], help="Protocol of the backend connection")
         parser.add_argument('--websocket_path', dest='websocket_path', type=str, default="", help="Path for websockets")
         parser.add_argument('--is_internal', action='store_true', help="If true, address only resolvable within the Kubernetes cluster")
+        parser.add_argument('--peers_from_control_nodes', action='store_true', help="If true, control nodes will peer to this address")
 
     def _add_address(self, **kwargs):
         try:
@@ -34,10 +35,9 @@ class Command(BaseCommand):
             self.changed = False
             print(f"Error adding receptor address: {e}")
 
-    @transaction.atomic
     def handle(self, **options):
         self.changed = False
-        address_options = {k: options[k] for k in ('hostname', 'address', 'port', 'protocol', 'websocket_path', 'is_internal')}
+        address_options = {k: options[k] for k in ('hostname', 'address', 'port', 'protocol', 'websocket_path', 'is_internal', 'peers_from_control_nodes')}
         self._add_address(**address_options)
         if self.changed:
             print("(changed: True)")
