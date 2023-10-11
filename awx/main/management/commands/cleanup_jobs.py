@@ -198,35 +198,44 @@ class Command(BaseCommand):
         delete_meta.delete_jobs()
         return (delete_meta.jobs_no_delete_count, delete_meta.jobs_to_delete_count)
 
-    def _handle_unpartitioned_events(self, model, pk_list):
+    def _handle_unpartitioned_events(self, model, pk_list, migrate_tables=True):
         """
         If unpartitioned job events remain, it will cascade those from jobs in pk_list
         if the unpartitioned table is no longer necessary, it will drop the table
         """
         tblname = unified_job_class_to_event_table_name(model)
         rel_name = model().event_parent_key
+
+        # Bail early if the unpartitioned table does not exist anymore
         with connection.cursor() as cursor:
             cursor.execute(f"SELECT 1 FROM pg_tables WHERE tablename = '_unpartitioned_{tblname}';")
             row = cursor.fetchone()
             if row is None:
                 self.logger.debug(f'Unpartitioned table for {rel_name} does not exist, you are fully migrated')
                 return
-        if pk_list:
+
+        # If we have reached a condition where we can drop the unpartitioned table, do so
+        if migrate_tables:
             with connection.cursor() as cursor:
-                pk_list_csv = ','.join(map(str, pk_list))
-                cursor.execute(f"DELETE FROM _unpartitioned_{tblname} WHERE {rel_name} IN ({pk_list_csv})")
-        with connection.cursor() as cursor:
-            # same as UnpartitionedJobEvent.objects.aggregate(Max('created'))
-            cursor.execute(f'SELECT MAX("_unpartitioned_{tblname}"."created") FROM "_unpartitioned_{tblname}"')
-            row = cursor.fetchone()
-            last_created = row[0]
+                # same as UnpartitionedJobEvent.objects.aggregate(Max('created'))
+                cursor.execute(f'SELECT MAX("_unpartitioned_{tblname}"."created") FROM "_unpartitioned_{tblname}";')
+                row = cursor.fetchone()
+                last_created = row[0]
             if last_created:
                 self.logger.info(f'Last event created in _unpartitioned_{tblname} was {last_created.isoformat()}')
             else:
                 self.logger.info(f'Table _unpartitioned_{tblname} has no events in it')
             if (last_created is None) or (last_created < self.cutoff):
                 self.logger.warning(f'Dropping table _unpartitioned_{tblname} since no records are newer than {self.cutoff}')
-                cursor.execute(f'DROP TABLE _unpartitioned_{tblname}')
+                with connection.cursor() as cursor:
+                    cursor.execute(f'DROP TABLE _unpartitioned_{tblname};')
+                return
+
+        # Table still exists, delete individual unpartitioned events
+        if pk_list:
+            with connection.cursor() as cursor:
+                pk_list_csv = ','.join(map(str, pk_list))
+                cursor.execute(f"DELETE FROM _unpartitioned_{tblname} WHERE {rel_name} IN ({pk_list_csv});")
 
     def cleanup_jobs(self):
         # Hack to avoid doing N+1 queries as each item in the Job query set does
@@ -240,6 +249,9 @@ class Command(BaseCommand):
             deleted = qs.count()
             return skipped, deleted
 
+        # Deal with dropping the unpartitioned job event table if possible based on time windows
+        self._handle_unpartitioned_events(Job, [])
+
         deleted = 0
         info = qs.aggregate(min=Min('id'), max=Max('id'))
         if info['min'] is not None:
@@ -249,7 +261,8 @@ class Command(BaseCommand):
 
                 _, results = qs_batch.delete()
                 deleted += results['main.Job']
-                self._handle_unpartitioned_events(Job, pk_list)
+                # Avoid dropping the job event table in case we have interacted with it already
+                self._handle_unpartitioned_events(Job, pk_list, migrate_tables=False)
 
         return skipped, deleted
 
