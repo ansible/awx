@@ -375,13 +375,13 @@ class InstanceUnifiedJobsList(SubListAPIView):
 
 
 class InstancePeersList(SubListAPIView):
-    name = _("Instance Peers")
+    name = _("Peers")
     parent_model = models.Instance
-    model = models.Instance
-    serializer_class = serializers.InstanceSerializer
+    model = models.ReceptorAddress
+    serializer_class = serializers.ReceptorAddressSerializer
     parent_access = 'read'
-    search_fields = {'hostname'}
     relationship = 'peers'
+    search_fields = 'address'
 
 
 class InstanceReceptorAddressesList(ListCreateAPIView):

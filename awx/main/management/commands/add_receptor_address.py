@@ -28,7 +28,11 @@ class Command(BaseCommand):
         try:
             instance = Instance.objects.get(hostname=kwargs.pop('hostname'))
             kwargs['instance'] = instance
-            addr = ReceptorAddress.objects.create(**kwargs)
+            # address and protocol are unique together for ReceptorAddress
+            # If an address has (address, protocol), it will update the rest of the values suppled in defaults dict
+            # if no address exists with (address, protocol), then a new address will be created
+            # these unique together fields need to be consistent with the unique constraint in the ReceptorAddress model
+            addr, _ = ReceptorAddress.objects.update_or_create(address=kwargs.pop('address'), protocol=kwargs.pop('protocol'), defaults=kwargs)
             print(f"Successfully added receptor address {addr.get_full_address()}")
             self.changed = True
         except Exception as e:
