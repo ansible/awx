@@ -75,6 +75,7 @@ LOGGER_BLOCKLIST = (
     'awx.main.utils.formatters',
     'awx.main.utils.filters',
     'awx.main.utils.encryption',
+    'awx.main.utils.external_logging',
     'awx.main.utils.log',
     # loggers that may be called getting logging settings
     'awx.conf',

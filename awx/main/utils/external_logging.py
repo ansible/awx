@@ -1,3 +1,4 @@
+import logging
 import os
 import shutil
 import tempfile
@@ -9,18 +10,60 @@ from awx.main.utils.reload import supervisor_service_command
 from awx.main.dispatch.publish import task
 
 
+logger = logging.getLogger('awx.main.utils.external_logging')
+
+
+def escape_quotes(x):
+    return x.replace('"', '\\"')
+
+
+# This and construct_rsyslog_conf_template take settings mainly so we can
+# test them without having to mock out the settings module.
+def validate_http_host_port(host, throw=False, settings=settings):
+    try:
+        # urlparse requires '//' to be provided if scheme is not specified
+        original_parsed = urlparse.urlsplit(host)
+        if (not original_parsed.scheme and not host.startswith('//')) or original_parsed.hostname is None:
+            host = 'https://%s' % (host)
+        parsed = urlparse.urlsplit(host)
+    except ValueError:
+        if throw:
+            raise
+        logger.exception('Invalid host provided for external logging')
+        return '', '', None
+
+    host = escape_quotes(parsed.hostname)
+    port = getattr(settings, 'LOG_AGGREGATOR_PORT', '')
+    try:
+        if parsed.port:
+            port = parsed.port
+    except ValueError:
+        if throw:
+            raise
+        logger.exception('Invalid port provided for external logging')
+
+    if not port:
+        port = 443 if parsed.scheme == 'https' else 80
+
+    return host, port, parsed
+
+
 def construct_rsyslog_conf_template(settings=settings):
     tmpl = ''
     parts = []
     enabled = getattr(settings, 'LOG_AGGREGATOR_ENABLED')
     host = getattr(settings, 'LOG_AGGREGATOR_HOST', '')
     port = getattr(settings, 'LOG_AGGREGATOR_PORT', '')
-    protocol = getattr(settings, 'LOG_AGGREGATOR_PROTOCOL', '')
     timeout = getattr(settings, 'LOG_AGGREGATOR_TCP_TIMEOUT', 5)
     max_disk_space_main_queue = getattr(settings, 'LOG_AGGREGATOR_MAX_DISK_USAGE_GB', 1)
     max_disk_space_action_queue = getattr(settings, 'LOG_AGGREGATOR_ACTION_MAX_DISK_USAGE_GB', 1)
     spool_directory = getattr(settings, 'LOG_AGGREGATOR_MAX_DISK_USAGE_PATH', '/var/lib/awx').rstrip('/')
     error_log_file = getattr(settings, 'LOG_AGGREGATOR_RSYSLOGD_ERROR_LOG_FILE', '')
+
+    def dev_null(parts):
+        parts.append('action(type="omfile" file="/dev/null")')  # rsyslog needs *at least* one valid action to start
+        tmpl = '\n'.join(parts)
+        return tmpl
 
     if not os.access(spool_directory, os.W_OK):
         spool_directory = '/var/lib/awx'
@@ -40,34 +83,21 @@ def construct_rsyslog_conf_template(settings=settings):
         ]
     )
 
-    def escape_quotes(x):
-        return x.replace('"', '\\"')
-
     if not enabled:
-        parts.append('action(type="omfile" file="/dev/null")')  # rsyslog needs *at least* one valid action to start
-        tmpl = '\n'.join(parts)
-        return tmpl
+        return dev_null(parts)
 
+    protocol = getattr(settings, 'LOG_AGGREGATOR_PROTOCOL', '')
     if protocol.startswith('http'):
-        # urlparse requires '//' to be provided if scheme is not specified
-        original_parsed = urlparse.urlsplit(host)
-        if (not original_parsed.scheme and not host.startswith('//')) or original_parsed.hostname is None:
-            host = 'https://%s' % (host)
-        parsed = urlparse.urlsplit(host)
+        host, port, parsed = validate_http_host_port(host, settings=settings)
 
-        host = escape_quotes(parsed.hostname)
-        try:
-            if parsed.port:
-                port = parsed.port
-        except ValueError:
-            port = settings.LOG_AGGREGATOR_PORT
+        if parsed is None:
+            logger.error('Could not parse host for external logging, logging to /dev/null')
+            return dev_null(parts)
 
         # https://github.com/rsyslog/rsyslog-doc/blob/master/source/configuration/modules/omhttp.rst
         ssl = 'on' if parsed.scheme == 'https' else 'off'
         skip_verify = 'off' if settings.LOG_AGGREGATOR_VERIFY_CERT else 'on'
         allow_unsigned = 'off' if settings.LOG_AGGREGATOR_VERIFY_CERT else 'on'
-        if not port:
-            port = 443 if parsed.scheme == 'https' else 80
 
         params = [
             'type="omhttp"',
@@ -116,7 +146,7 @@ def construct_rsyslog_conf_template(settings=settings):
             f'action(type="omfwd" target="{host}" port="{port}" protocol="{protocol}" action.resumeRetryCount="-1" action.resumeInterval="{timeout}" template="awx")'  # noqa
         )
     else:
-        parts.append('action(type="omfile" file="/dev/null")')  # rsyslog needs *at least* one valid action to start
+        return dev_null(parts)
     tmpl = '\n'.join(parts)
     return tmpl
 

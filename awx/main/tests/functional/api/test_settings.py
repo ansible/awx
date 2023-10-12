@@ -252,20 +252,68 @@ def _mock_logging_defaults():
 
 
 @pytest.mark.parametrize(
-    'key, value, error',
+    'new_settings, error, preexisting_settings',
     [
-        ['LOG_AGGREGATOR_TYPE', 'logstash', 'Cannot enable log aggregator without providing host.'],
-        ['LOG_AGGREGATOR_HOST', 'https://logstash', 'Cannot enable log aggregator without providing type.'],
+        [{'LOG_AGGREGATOR_TYPE': 'logstash'}, 'Cannot enable log aggregator without providing host.', {}],
+        [{'LOG_AGGREGATOR_HOST': 'https://logstash'}, 'Cannot enable log aggregator without providing type.', {}],
+        [{}, 'Cannot enable log aggregator without providing host.', {'LOG_AGGREGATOR_HOST': 'https://logstash'}],
+        [{}, 'Cannot enable log aggregator without providing type.', {'LOG_AGGREGATOR_TYPE': 'logstash'}],
+        [{'LOG_AGGREGATOR_TYPE': 'logstash'}, 'Cannot enable log aggregator without providing host.', {'LOG_AGGREGATOR_TYPE': 'splunk'}],
+        [{'LOG_AGGREGATOR_HOST': 'https://logstash'}, 'Cannot enable log aggregator without providing type.', {'LOG_AGGREGATOR_HOST': 'http://splunk'}],
+        [{}, 'Cannot enable log aggregator without providing host.', {}],
+        [{}, 'Cannot enable log aggregator without providing type.', {}],
+        [{'LOG_AGGREGATOR_TYPE': 'logstash', 'LOG_AGGREGATOR_HOST': 'https://[logstash'}, 'Invalid IPv6 URL', {}],
+        [{'LOG_AGGREGATOR_TYPE': 'logstash', 'LOG_AGGREGATOR_HOST': 'http:s//logstash'}, 'Port could not be cast', {}],
+        [{'LOG_AGGREGATOR_TYPE': 'logstash', 'LOG_AGGREGATOR_HOST': 'https://logstash:65537'}, 'Port out of range', {}],
+        [
+            {'LOG_AGGREGATOR_TYPE': 'logstash', 'LOG_AGGREGATOR_HOST': 'my.example.com:65537', 'LOG_AGGREGATOR_PROTOCOL': 'tcp'},
+            'Cannot specify a port number for protocol tcp',
+            {},
+        ],
+        [
+            {'LOG_AGGREGATOR_TYPE': 'logstash', 'LOG_AGGREGATOR_HOST': 'my.example.com:65537', 'LOG_AGGREGATOR_PROTOCOL': 'udp'},
+            'Cannot specify a port number for protocol udp',
+            {},
+        ],
     ],
 )
 @pytest.mark.django_db
-def test_logging_aggregator_missing_settings(put, post, admin, key, value, error):
-    _, mock_settings = _mock_logging_defaults()
-    mock_settings['LOG_AGGREGATOR_ENABLED'] = True
-    mock_settings[key] = value
-    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'logging'})
-    response = put(url, data=mock_settings, user=admin, expect=400)
-    assert error in str(response.data)
+def test_logging_aggregator_invalid_settings(put, post, admin, new_settings, error, preexisting_settings):
+    '''
+    Check the validator in various ways. If 'preexisting_settings' are given,
+    then restore the settings in the test database to the old values (or delete
+    the record entirely if it is new). This allows us to actually set settings
+    but not dirty the database for other tests.
+    '''
+
+    original_values = {}
+    undefined_settings = []
+
+    for k, v in preexisting_settings.items():
+        existing_setting = Setting.objects.filter(key=k).first()
+        if existing_setting:
+            original_values[k] = existing_setting.value
+            existing_setting.value = v
+            existing_setting.save()
+        else:
+            undefined_settings.append(k)
+            Setting.objects.create(key=k, value=v)
+
+    try:
+        _, mock_settings = _mock_logging_defaults()
+        mock_settings['LOG_AGGREGATOR_ENABLED'] = True
+        for k, v in new_settings.items():
+            mock_settings[k] = v
+        url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'logging'})
+        response = put(url, data=mock_settings, user=admin, expect=400)
+        assert error in str(response.data)
+    finally:
+        # Restore original values
+        for k, v in original_values.items():
+            Setting.objects.filter(key=k).update(value=v)
+        # Delete any settings we created
+        for k in undefined_settings:
+            Setting.objects.filter(key=k).delete()
 
 
 @pytest.mark.parametrize(

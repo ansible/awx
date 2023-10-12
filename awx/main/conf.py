@@ -2,6 +2,7 @@
 import logging
 
 # Django
+from django.utils.encoding import force_str
 from django.utils.translation import gettext_lazy as _
 
 # Django REST Framework
@@ -11,6 +12,7 @@ from rest_framework import serializers
 from awx.conf import fields, register, register_validate
 from awx.main.models import ExecutionEnvironment
 from awx.main.constants import SUBSCRIPTION_USAGE_MODEL_UNIQUE_HOSTS
+from awx.main.utils.external_logging import validate_http_host_port
 
 logger = logging.getLogger('awx.main.conf')
 
@@ -913,26 +915,56 @@ register(
 
 
 def logging_validate(serializer, attrs):
-    if not serializer.instance or not hasattr(serializer.instance, 'LOG_AGGREGATOR_HOST') or not hasattr(serializer.instance, 'LOG_AGGREGATOR_TYPE'):
+    needed_attrs = (
+        'LOG_AGGREGATOR_HOST',
+        'LOG_AGGREGATOR_TYPE',
+        'LOG_AGGREGATOR_PROTOCOL',
+    )
+    if not serializer.instance or not all(hasattr(serializer.instance, attr) for attr in needed_attrs) or not attrs.get('LOG_AGGREGATOR_ENABLED', False):
         return attrs
+
     errors = []
-    if attrs.get('LOG_AGGREGATOR_ENABLED', False):
-        if (
-            not serializer.instance.LOG_AGGREGATOR_HOST
-            and not attrs.get('LOG_AGGREGATOR_HOST', None)
-            or serializer.instance.LOG_AGGREGATOR_HOST
-            and not attrs.get('LOG_AGGREGATOR_HOST', True)
-        ):
-            errors.append('Cannot enable log aggregator without providing host.')
-        if (
-            not serializer.instance.LOG_AGGREGATOR_TYPE
-            and not attrs.get('LOG_AGGREGATOR_TYPE', None)
-            or serializer.instance.LOG_AGGREGATOR_TYPE
-            and not attrs.get('LOG_AGGREGATOR_TYPE', True)
-        ):
-            errors.append('Cannot enable log aggregator without providing type.')
+
+    new_host = attrs.get('LOG_AGGREGATOR_HOST', serializer.instance.LOG_AGGREGATOR_HOST)
+    new_type = attrs.get('LOG_AGGREGATOR_TYPE', serializer.instance.LOG_AGGREGATOR_TYPE)
+    new_protocol = attrs.get('LOG_AGGREGATOR_PROTOCOL', serializer.instance.LOG_AGGREGATOR_PROTOCOL)
+
+    if new_host:
+        # We can only do so much sanity checking here, because the host field is
+        # used for both:
+        #
+        #   - The hostname (when protocol is tcp/udp); and
+        #   - The full URL (when protocol is http(s)).
+        #
+        # Also it can include the port number, and even overrides
+        # LOG_AGGREGATOR_PORT... but only for protocol=https. If you try to
+        # enter my.tcp.server.example.com:1234, it won't work, and
+        # utils.external_logging.construct_rsyslog_conf_template will generate
+        # a config that sends all logs to /dev/null. :(
+
+        # Based on the above, we can do a tiny bit of validation based on
+        # the protocol.
+        if new_protocol in ('tcp', 'udp'):
+            # We know it can't have a port number
+            if ':' in new_host:
+                errors.append(
+                    _('Cannot specify a port number for protocol {new_protocol}, use LOG_AGGREGATOR_PORT for that instead.').format(new_protocol=new_protocol)
+                )
+        elif new_protocol == 'https':
+            # It would be really nice to check that if a port number is set here, then it's not also set in LOG_AGGREGATOR_PORT.
+            # But that would be a breaking change vs. silently preferring the port number in LOG_AGGREGATOR_HOST.
+            try:
+                host, port, parsed = validate_http_host_port(new_host, throw=True)
+            except ValueError as e:
+                errors.append(_('Invalid URL ({e}): {new_host}'.format(e=e, new_host=new_host)))
+    else:
+        errors.append(_('Cannot enable log aggregator without providing host.'))
+    if not new_type:
+        errors.append(_('Cannot enable log aggregator without providing type.'))
+
     if errors:
-        raise serializers.ValidationError(_('\n'.join(errors)))
+        raise serializers.ValidationError('\n'.join(force_str(e) for e in errors))
+
     return attrs
 
 
