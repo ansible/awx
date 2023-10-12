@@ -17,19 +17,18 @@ custom_worksign_public_keyfile: receptor/work_public_key.pem
 custom_tls_certfile: receptor/tls/receptor.crt
 custom_tls_keyfile: receptor/tls/receptor.key
 custom_ca_certfile: receptor/tls/ca/mesh-CA.crt
-receptor_protocol: 'tcp'
-{% if instance.listener_port %}
+{% if listener_port %}
+receptor_protocol: tcp
 receptor_listener: true
-receptor_port: {{ instance.listener_port }}
+receptor_port: {{ listener_port }}
 {% else %}
 receptor_listener: false
 {% endif %}
 {% if peers %}
 receptor_peers:
 {% for peer in peers %}
-  - host: {{ peer.host }}
-    port: {{ peer.port }}
-    protocol: tcp
+  - address: {{ peer.address }}
+    protocol: {{ peer.protocol}}
 {% endfor %}
 {% endif %}
 {% verbatim %}
