@@ -124,10 +124,19 @@ def generate_inventory_yml(instance_obj):
 
 
 def generate_group_vars_all_yml(instance_obj):
+    # get peers
     peers = []
-    for instance in instance_obj.peers.all():
-        peers.append(dict(host=instance.hostname, port=instance.listener_port))
-    all_yaml = render_to_string("instance_install_bundle/group_vars/all.yml", context=dict(instance=instance_obj, peers=peers))
+    for addr in instance_obj.peers.all():
+        peers.append(dict(address=addr.get_full_address(), protocol=addr.protocol))
+    context = dict(instance=instance_obj, peers=peers)
+
+    # we infer the listener port information from the first tcp receptor address
+    # currently for external remote nodes, we only support a single tcp backend listeners
+    listener_addr = instance_obj.receptor_addresses.filter(protocol="tcp").first()
+    if listener_addr:
+        context['listener_port'] = listener_addr.port
+
+    all_yaml = render_to_string("instance_install_bundle/group_vars/all.yml", context=context)
     # convert consecutive newlines with a single newline
     return re.sub(r'\n+', '\n', all_yaml)
 
