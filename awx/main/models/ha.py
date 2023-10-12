@@ -509,14 +509,13 @@ def receptor_address_saved(sender, instance, **kwargs):
 
     address = instance
 
-    with disable_activity_stream():
-        control_instances = set(Instance.objects.filter(node_type__in=[Instance.Types.CONTROL, Instance.Types.HYBRID]))
-        if address.peers_from_control_nodes:
-            address.peers_from.add(*control_instances)
-        else:
-            address.peers_from.remove(*control_instances)
+    control_instances = set(Instance.objects.filter(node_type__in=[Instance.Types.CONTROL, Instance.Types.HYBRID]))
+    if address.peers_from_control_nodes:
+        address.peers_from.add(*control_instances)
+    else:
+        address.peers_from.remove(*control_instances)
 
-        schedule_write_receptor_config()
+    schedule_write_receptor_config()
 
 
 @receiver(post_delete, sender=ReceptorAddress)
