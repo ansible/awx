@@ -49,19 +49,6 @@ Make sure to delete the old tarball if it is an upgrade.
 Anything pinned in `*.in` files involves additional manual work in
 order to upgrade. Some information related to that work is outlined here.
 
-### Django
-
-For any upgrade of Django, it must be confirmed that
-we don't regress on FIPS support before merging.
-
-See internal integration test knowledge base article `how_to_test_FIPS`
-for instructions.
-
-If operating in a FIPS environment, `hashlib.md5()` will raise a `ValueError`,
-but will support the `usedforsecurity` keyword on RHEL and Centos systems.
-This used to be a problem with `names_digest` function in Django, but
-was fixed upstream in Django 4.1.
-
 ### django-split-settings
 
 When we attemed to upgrade past 1.0.0 the build process in GitHub failed on the docker build step with the following error:
