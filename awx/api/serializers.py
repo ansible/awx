@@ -5505,6 +5505,7 @@ class InstanceSerializer(BaseSerializer):
     jobs_running = serializers.IntegerField(help_text=_('Count of jobs in the running or waiting state that are targeted for this instance'), read_only=True)
     jobs_total = serializers.IntegerField(help_text=_('Count of all jobs that target this instance'), read_only=True)
     health_check_pending = serializers.SerializerMethodField()
+    peers = serializers.PrimaryKeyRelatedField(many=True, required=False, queryset=ReceptorAddress.objects.all())
 
     class Meta:
         model = Instance
@@ -5540,8 +5541,7 @@ class InstanceSerializer(BaseSerializer):
             'node_type',
             'node_state',
             'ip_address',
-            'listener_port',
-            'peers_from_control_nodes',
+            'peers',
         )
         extra_kwargs = {
             'node_type': {'initial': Instance.Types.EXECUTION, 'default': Instance.Types.EXECUTION},
@@ -5565,6 +5565,7 @@ class InstanceSerializer(BaseSerializer):
         res = super(InstanceSerializer, self).get_related(obj)
         res['receptor_addresses'] = self.reverse('api:instance_receptor_addresses_list', kwargs={'pk': obj.pk})
         res['jobs'] = self.reverse('api:instance_unified_jobs_list', kwargs={'pk': obj.pk})
+        res['peers'] = self.reverse('api:instance_peers_list', kwargs={"pk": obj.pk})
         res['instance_groups'] = self.reverse('api:instance_instance_groups_list', kwargs={'pk': obj.pk})
         if obj.node_type in [Instance.Types.EXECUTION, Instance.Types.HOP]:
             res['install_bundle'] = self.reverse('api:instance_install_bundle', kwargs={'pk': obj.pk})
@@ -5610,12 +5611,7 @@ class InstanceSerializer(BaseSerializer):
             raise serializers.ValidationError(_("Can only create instances on Kubernetes or OpenShift."))
 
         node_type = get_field_from_model_or_attrs("node_type")
-        peers_from_control_nodes = get_field_from_model_or_attrs("peers_from_control_nodes")
-        listener_port = get_field_from_model_or_attrs("listener_port")
         # peers = attrs.get('peers', [])
-
-        if peers_from_control_nodes and node_type not in (Instance.Types.EXECUTION, Instance.Types.HOP):
-            raise serializers.ValidationError(_("peers_from_control_nodes can only be enabled for execution or hop nodes."))
 
         # if node_type in [Instance.Types.CONTROL, Instance.Types.HYBRID]:
         #     if check_peers_changed():
@@ -5669,24 +5665,6 @@ class InstanceSerializer(BaseSerializer):
         """
         if self.instance and self.instance.hostname != value:
             raise serializers.ValidationError(_("Cannot change hostname."))
-
-        return value
-
-    def validate_listener_port(self, value):
-        """
-        Cannot change listener port, unless going from none to integer, and vice versa
-        """
-        if value and self.instance and self.instance.listener_port and self.instance.listener_port != value:
-            raise serializers.ValidationError(_("Cannot change listener port."))
-
-        return value
-
-    def validate_peers_from_control_nodes(self, value):
-        """
-        Can only enable for K8S based deployments
-        """
-        if value and not settings.IS_K8S:
-            raise serializers.ValidationError(_("Can only be enabled on Kubernetes or Openshift."))
 
         return value
 
