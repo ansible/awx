@@ -68,6 +68,7 @@ To create a Notification Template:
 2. Click the **Add** button.
 
 .. image:: ../common/images/notifications-template-add-new.png
+   :alt: Create new notification template
 
 3. Enter the name of the notification and a description in their respective fields, and specify the organization (required) it belongs to.
 
@@ -115,6 +116,7 @@ You must provide the following details to setup an email notification:
 - Timeout (in seconds): allows you to specify up to 120 seconds, the length of time AWX may attempt connecting to the email server before giving up.
 
 .. image:: ../common/images/notification-template-email.png
+   :alt: Email notification template
 
 Grafana
 ------------
@@ -136,7 +138,7 @@ The other options of note are:
 - Disable SSL Verification: SSL verification is on by default, but you can choose to turn off verification the authenticity of the target's certificate. Environments that use internal or private CA's should select this option to disable verification.
 
 .. image:: ../common/images/notification-template-grafana.png
-
+   :alt: Grafana notification template
 
 IRC
 -----
@@ -154,6 +156,7 @@ Connectivity information is straightforward:
 
 
 .. image:: ../common/images/notification-template-irc.png
+   :alt: IRC notification template
 
 Mattermost
 ------------
@@ -167,6 +170,7 @@ The Mattermost notification type provides a simple interface to Mattermost's mes
 - Disable SSL Verification: Turns off verification of the authenticity of the target's certificate. Environments that use internal or private CA's should select this option to disable verification.
 
 .. image:: ../common/images/notification-template-mattermost.png
+   :alt: Mattermost notification template
 
 
 PagerDuty
@@ -182,6 +186,8 @@ PagerDuty is a fairly straightforward integration. First, create an API Key in t
 - Client Identifier: This will be sent along with the alert content to the pagerduty service to help identify the service that is using the api key/service. This is helpful if multiple integrations are using the same API key and service.
 
 .. image:: ../common/images/notification-template-pagerduty.png
+   :alt: PagerDuty notification template
+
 
 Rocket.Chat
 -------------
@@ -194,6 +200,7 @@ The Rocket.Chat notification type provides an interface to Rocket.Chat's collabo
 - Disable SSL Verification: Turns off verification of the authenticity of the target's certificate. Environments that use internal or private CA's should select this option to disable verification.
 
 .. image:: ../common/images/notification-template-rocketchat.png
+   :alt: Rocket.Chat notification template
 
 
 Slack
@@ -212,6 +219,7 @@ Once you have a bot/app set up, you must navigate to "Your Apps", click on the n
 You must also invite the notification bot to join the channel(s) in question in Slack. Note that private messages are not supported.
 
 .. image:: ../common/images/notification-template-slack.png
+   :alt: Slack notification template
 
 
 Twilio
@@ -231,6 +239,8 @@ To setup Twilio, provide the following details:
 - Account SID 
 
 .. image:: ../common/images/notification-template-twilio.png
+   :alt: Twilio notification template
+
 
 
 Webhook
@@ -257,6 +267,8 @@ The parameters for configuring webhooks are:
 
 
 .. image:: ../common/images/notification-template-webhook.png
+   :alt: Webhook notification template
+
 
 
 Webhook payloads
@@ -333,6 +345,8 @@ Create custom notifications
 You can :ref:`customize the text content <ir_notifications_reference>` of each of the :ref:`ug_notifications_types` by enabling the **Customize Messages** portion at the bottom of the notifications form using the toggle button. 
 
 .. image:: ../common/images/notification-template-customize.png
+   :alt: Custom notification template
+
 
 You can provide a custom message for various job events: 
 
@@ -347,10 +361,12 @@ You can provide a custom message for various job events:
 The message forms vary depending on the type of notification you are configuring. For example, messages for email and PagerDuty notifications have the appearance of a typical email form with a subject and body, in which case, AWX displays the fields as **Message** and **Message Body**. Other notification types only expect a **Message** for each type of event:
 
 .. image:: ../common/images/notification-template-customize-simple.png
+   :alt: Custom notification template example
 
 The **Message** fields are pre-populated with a template containing a top-level variable, ``job`` coupled with an attribute, such as ``id`` or ``name``, for example. Templates are enclosed in curly braces and may draw from a fixed set of fields provided by AWX, as shown in the pre-populated **Messages** fields. 
 
 .. image:: ../common/images/notification-template-customize-simple-syntax.png
+   :alt: Custom notification template example syntax
 
 This pre-populated field suggests commonly displayed messages to a recipient who is notified of an event. You can, however, customize these messages with different criteria by adding your own attribute(s) for the job as needed. Custom notification messages are rendered using Jinja - the same templating engine used by Ansible playbooks. 
 
@@ -474,8 +490,8 @@ If you create a notification template that uses invalid syntax or references unu
 
    If you save the notifications template without editing the custom message (or edit and revert back to the default values), the **Details** screen assumes the defaults and will not display the custom message tables. If you edit and save any of the values, the entire table displays in the **Details** screen.
 
-   .. image:: ../common/images/notifications-with-without-messages.png
-
+.. image:: ../common/images/notifications-with-without-messages.png
+   :alt: Notification template with and without a custom message
 
 .. _ug_notifications_on_off:
 
@@ -498,11 +514,12 @@ You can enable notifications on job start, job success, and job failure, or any 
 - Organizations
 
 .. image:: ../common/images/projects-notifications-example-list.png
-
+   :alt: List of project notifications
 
 For workflow templates that have approval nodes, in addition to *Start*, *Success*, and *Failure*, you can enable or disable certain approval-related events: 
 
 .. image:: ../common/images/wf-template-completed-notifications-view.png
+   :alt: List of project notifications with approval nodes option
 
 Refer to :ref:`ug_wf_approval_nodes` for additional detail on working with these types of nodes.
 
@@ -516,6 +533,7 @@ Configure the ``host`` hostname for notifications
 In the :ref:`System Settings <configure_awx_system>`, you can replace the default value in the **Base URL of the service** field with your preferred hostname to change the notification hostname.     
 
 .. image:: ../common/images/configure-awx-system-misc-baseurl.png
+   :alt: Configuring base URL with preferred hostname
 
 Refreshing your license also changes the notification hostname. New installations of AWX should not have to set the hostname for notifications.
 
