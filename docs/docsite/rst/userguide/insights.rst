@@ -29,6 +29,7 @@ To create a new credential for use with Insights:
 5. In the **Organization** field, optionally enter the name of the organization with which the credential is associated, or click the |search| button and select it from the pop-up window.
 
 .. |search| image:: ../common/images/search-button.png
+   :alt: Search button to select the organization from a pop-up window
 
 6. In the **Credential Type** field, enter **Insights** or select it from the drop-down list.
 
@@ -80,6 +81,7 @@ To create a new Insights project:
 All SCM/Project syncs occur automatically the first time you save a new project. However, if you want them to be updated to what is current in Insights, manually update the SCM-based project by clicking the |update| button under the project's available Actions.
 
 .. |update| image:: ../common/images/update-button.png
+   :alt: Update button to manually refresh the SCM-based project
 
 This process syncs your Insights project with your Insights account solution. Notice that the status dot beside the name of the project updates once the sync has run.
 
