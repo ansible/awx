@@ -110,4 +110,4 @@ Use the **Expose host paths for Container Groups** toggle to enable it.
 Once the playbook runs, the resulting Pod spec will display similar to the example below. Note the details of the ``volumeMounts`` and ``volumes`` sections.
 
 .. image:: ../common/images/mount-containers-playbook-run-podspec.png
-      :alt: Pod spec for the playbook run showing volumeMounts and volumes details
+   :alt: Pod spec for the playbook run showing volumeMounts and volumes details
