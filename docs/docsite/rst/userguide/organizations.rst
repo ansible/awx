@@ -11,6 +11,7 @@ An :term:`Organization` is a logical collection of **Users**, **Teams**, **Proje
 |awx hierarchy|
 
 .. |awx hierarchy| image:: ../common/images/AWXHierarchy.png
+   :alt: AWX Hierarchy
 
 Access the Organizations page by clicking **Organizations** from the left navigation bar. The Organizations page displays all of the existing organizations for your installation. Organizations can be searched by **Name** or **Description**. Modify and remove organizations using the **Edit** and **Delete** buttons.
 
@@ -20,10 +21,12 @@ Access the Organizations page by clicking **Organizations** from the left naviga
 |Organizations - home showing example organization|
 
 .. |Organizations - home showing example organization| image:: ../common/images/organizations-home-showing-example-organization.png
+   :alt: Example of organizations home page
 
 From this list view, you can edit the details of an organization (|edit button|) from the **Actions** menu.
 
 .. |edit button| image:: ../common/images/edit-button.png
+   :alt: Edit button
 
 .. _ug_organizations_create:
 
@@ -35,6 +38,7 @@ Creating a New Organization
 |Organizations - new organization form|
 
 .. |Organizations - new organization form| image:: ../common/images/organizations-new-organization-form.png
+   :alt: Create new organization form
 
 2. An organization has several attributes that may be configured:
 
@@ -51,7 +55,7 @@ Once created, AWX displays the Organization details, and allows for the managing
 |Organizations - show record for example organization|
 
 .. |Organizations - show record for example organization| image:: ../common/images/organizations-show-record-for-example-organization.png
-
+   :alt: Organization details tab with edit, delete options
 
 From the **Details** tab, you can edit or delete the organization. 
 
@@ -73,6 +77,7 @@ Clicking on **Access** (beside **Details** when viewing your organization), disp
 |Organizations - show users for example organization|
 
 .. |Organizations - show users for example organization| image:: ../common/images/organizations-show-users-permissions-organization.png
+   :alt: Organization Access tab with user permissions
 
 As you can manage the user membership for this Organization here, you can manage user membership on a per-user basis from the Users page by clicking **Users** from the left navigation bar. Organizations have a unique set of roles not described here. You can assign specific users certain levels of permissions within your organization, or allow them to act as an admin for a particular resource. Refer to :ref:`rbac-ug` for more information. 
 
@@ -102,12 +107,14 @@ Work with Notifications
 Clicking the **Notifications** tab allows you to review any notification integrations you have setup. 
 
 .. image:: ../common/images/organizations-notifications-samples-list.png
+   :alt: List of sample organization notifications
 
 Use the toggles to enable or disable the notifications to use with your particular organization. For more detail, see :ref:`ug_notifications_on_off`. 
 
 If no notifications have been set up, you must create them from the **Notifications** option on the left navigation bar.
 
 .. image:: ../common/images/organization-notifications-empty.png
+   :alt: Empty organization notifications list
 
 Refer to :ref:`ug_notifications_types` for additional details on configuring various notification types.
 
