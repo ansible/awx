@@ -541,7 +541,7 @@ The ``scan_files`` fact module is the only module that accepts parameters, passe
 Scan job templates should enable ``become`` and use credentials for which ``become`` is a possibility. You can enable become by checking the **Enable Privilege Escalation** from the Options menu:
 
 .. image:: ../common/images/job-templates-create-new-job-template-become.png
-    :alt: Job templates - create new job template
+    :alt: Job template with Privilege Escalation checked from the Options field.
 
 
 Supported OSes for ``scan_facts.yml``
@@ -656,7 +656,7 @@ Fact Caching
 AWX can store and retrieve facts on a per-host basis through an Ansible Fact Cache plugin. This behavior is configurable on a per-job template basis. Fact caching is turned off by default but can be enabled to serve fact requests for all hosts in an inventory related to the job running. This allows you to use job templates with ``--limit`` while still having access to the entire inventory of host facts. A global timeout setting that the plugin enforces per-host, can be specified (in seconds) through the Jobs settings menu:
 
 .. image:: ../common/images/configure-awx-jobs-fact-cache-timeout.png
-    :alt: Configure AWX jobs fact cache timeout
+    :alt: Jobs Settings window showing the location of the Per-Host Ansible Fact Cache Timeout parameter from the Edit Details screen.
 
 Upon launching a job that uses fact cache (``use_fact_cache=True``), AWX will store all ``ansible_facts`` associated with each host in the inventory associated with the job.  The Ansible Fact Cache plugin that ships with AWX will only be enabled on jobs with fact cache enabled (``use_fact_cache=True``).
 
