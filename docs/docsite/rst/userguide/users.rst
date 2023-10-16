@@ -61,10 +61,12 @@ The same window opens whether you click on the user's name, or the Edit (|edit-b
    If the user is not a newly-created user, the user's details screen displays the last login activity of that user. 
 
    .. image:: ../common/images/users-last-login-info.png
+      :alt: User details with last login information
 
 When you log in as yourself, and view the details of your own user profile, you can manage tokens from your user profile. See :ref:`ug_users_tokens` for more detail.
 
 .. image:: ../common/images/user-with-token-button.png
+   :alt: User details with Tokens tab highlighted
 
 .. _ug_users_delete:
     
@@ -78,6 +80,7 @@ Before you can delete a user, you must have user permissions. When you delete a 
 2. Select the check box(es) for the user(s) that you want to remove and click **Delete**.
 
 .. image:: ../common/images/users-home-users-checked-delete.png
+   :alt: Users list view with two users checked
 
 3. Click **Delete** in the confirmation warning message to permanently delete the user.
 
@@ -104,7 +107,7 @@ This displays the list of teams of which that user is a member. This list may be
 Until a Team has been created and the user has been assigned to that team, the assigned Teams Details for the User appears blank.
 
 |Users - teams list for example user| image:: ../common/images/users-teams-list-for-example-user.png
-   :alt: Users - teams list for example user
+   :alt: Users - teams list for example user - empty
 
 .. _ug_users_roles:
 
@@ -136,19 +139,19 @@ To add permissions to a particular user:
 1. Click the **Add** button, which opens the Add Permissions Wizard.
 
 .. image:: ../common/images/users-add-permissions-form.png
-   :alt: Add Permissions Form
+   :alt: Add User Permissions Form, first step, Add resource type
 
 2. Click to select the object for which the user will have access and click **Next**.
 
 3. Click to select the resource to assign team roles and click **Next**.
 
 .. image:: ../common/images/users-permissions-IG-select.png
-   :alt: Users - Permissions IG Select
+   :alt: Add User Permissions Form, second step, Select items from list - instance group checked
 
 4. Click the checkbox beside the role to assign that role to your chosen type of resource. Different resources have different options available.
 
 .. image:: ../common/images/users-permissions-IG-roles.png
-   :alt: Users - Permissions IG Roles
+   :alt: Add User Permissions Form, final step, Select roles to apply - "Use" role checked
 
 5. Click **Save** when done, and the Add Permissions Wizard closes to display the updated profile for the user with the roles assigned for each selected resource.
 
