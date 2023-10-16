@@ -1,3 +1,4 @@
+ 
 .. _ug_security:
 
 Security
@@ -197,7 +198,7 @@ The following table lists the RBAC system roles and a brief description of the h
 +-----------------------------------------------------------------------+------------------------------------------------------------------------------------------+
 | Admin Role - Organizations, Teams, Inventory, Projects, Job Templates | Manages all aspects of a defined Organization, Team, Inventory, Project, or Job Template |
 +-----------------------------------------------------------------------+------------------------------------------------------------------------------------------+
-| Auditor Role - All                                                    | Views all aspects of a defined Organization, Project, Inventory, or Job Template         |
+| Auditor Role - All                                                    | Views all aspects of a defined Organization, Team, Inventory, Project, or Job Template   |
 +-----------------------------------------------------------------------+------------------------------------------------------------------------------------------+
 | Execute Role - Job Templates                                          | Runs assigned Job Template                                                               |
 +-----------------------------------------------------------------------+------------------------------------------------------------------------------------------+
