@@ -14,7 +14,7 @@ Access the Teams page by clicking **Teams** from the left navigation bar. The te
 
 
 .. image:: ../common/images/organizations-teams-list.png
-   :alt: Teams Page
+   :alt: Teams page containing a list of teams and the organizations they belong to.
 
 Clicking the Edit (|edit-button|) button next to the list of **Teams** allows you to edit details about the team. You can also review **Users** and  **Permissions** associated with this Team.
 
@@ -64,7 +64,7 @@ This tab displays the list of Users that are members of this Team. This list may
 |Teams - users list|
 
 .. |Teams - users list| image:: ../common/images/teams-users-list.png
-   :alt: Users List
+   :alt: Teams list showing the Access tab displaying a list of users and their roles.
 
 
 .. _ug_teams_permissions:
@@ -83,7 +83,7 @@ In order to add a user to a team, the user must already be created. Refer to :re
 To remove roles for a particular user, click the disassociate (x) button next to its resource.
 
 .. image:: ../common/images/permissions-disassociate.png
-   :alt: Disassociate Button
+   :alt: Access tab with list of users and an arrow pointing to the disassociate button next to a user's role.
 
 This launches a confirmation dialog, asking you to confirm the disassociation.
  
@@ -104,7 +104,7 @@ Selecting the **Roles** view displays a list of the permissions that are current
 |Teams - permissions list|
 
 .. |Teams - permissions list| image:: ../common/images/teams-permissions-sample-roles.png
-   :alt: Permissions List
+   :alt: Permissions list with resource names, type and their associated roles.
 
 The set of privileges assigned to Teams that provide the ability to read, modify, and administer projects, inventories, and other AWX elements are permissions. By default, the Team is given the "read" permission (also called a role).
 
@@ -119,28 +119,27 @@ To add permissions to a Team:
 1. Click the **Add** button, which opens the Add Permissions Wizard.
 
 .. image:: ../common/images/teams-users-add-permissions-form.png 
-   :alt: Add Permissions Form
+   :alt: Add Teams Permissions Wizard step 1, choose the resource type.
 
 2. Click to select the object for which the team will have access and click **Next**.
 
 3. Click to select the resource to assign team roles and click **Next**.
 
 .. image:: ../common/images/teams-permissions-templates-select.png
-   :alt: Permissions Templates Select
+   :alt: Add Teams Permissions Wizard step 2, choose the resources from the list, Demo Job template selected.
 
 4. Click the checkbox beside the role to assign that role to your chosen type of resource. Different resources have different options available.
 
 .. image:: ../common/images/teams-permissions-template-roles.png
-   :alt: Permissions Template Roles
+   :alt: Add Teams Permissions Wizard step 3, choose the roles to apply to the previously selected resource.
 
 
-5. Click **Save** when done, and the Add Permissions Wizard closes to display the updated profile for the user with the roles assigned for each selected resource.
+5. Click **Save** when done, and the Add Permissions Wizard closes to display the updated profile for the team with the roles assigned for each selected resource.
 
 .. image:: ../common/images/teams-permissions-sample-roles.png
-   :alt: Updated Profile
+   :alt: Updated profile for each team's resources and their roles.
 
 To remove Permissions for a particular resource, click the disassociate (x) button next to its resource. This launches a confirmation dialog, asking you to confirm the disassociation.
-
 
 .. note:: 
 
