@@ -24,6 +24,7 @@ Assuming that the repository has already been configured for signing and verific
 4. When the user syncs the project, AWX (already configured, in this scenario) pulls in the new changes, checks that the public key associated with the project in AWX matches the private key that the checksum manifest was signed with (this prevents tampering with the checksum manifest itself), then re-calculates checksums of each file in the manifest to ensure that the checksum matches (and thus that no file has changed). It also looks to ensure that all files are accounted for: They must have been either included in, or excluded from, the ``MANIFEST.in`` file discussed below; if files have been added or removed unexpectedly, verification will fail.
 
 .. image:: ../common/images/content-sign-diagram.png
+   :alt: Content signing process diagram
 
 
 Prerequisites
@@ -68,16 +69,19 @@ In order to use the GPG key for content singing and validation in AWX, you must 
 5. Click **Save** when done.
 
 .. image:: ../common/images/credentials-gpg-details.png
+   :alt: Example GPG credential details
 
 This credential can now be selected in :ref:`projects <ug_projects_add>`, and content verification will automatically take place on future project syncs.
 
 .. image:: ../common/images/project-create-with-gpg-creds.png
+   :alt: Create project with example GPG credentials
 
 .. note::
 
   Use the project cache SCM timeout to control how often you want AWX to re-validate the signed content. When a project is configured to update on launch (of any job template configured to use that project), you can enable the cache timeout setting, which tells it to update after N seconds have passed since the last update. If validation is running too frequently, you can slow down how often project updates occur by specifying the time in the **Cache Timeout** field of the Option Details pane of the project.
 
   .. image:: ../common/images/project-update-launch-cache-timeout.png
+	 :alt: Checked Update Revision on Launch option with Cache Timeout value specified from the Create new project page
 
 
 
