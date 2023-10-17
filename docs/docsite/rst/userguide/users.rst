@@ -94,7 +94,7 @@ This displays the list of organizations of which that user is a member. This lis
 Organization membership cannot be modified from this display panel.
 
 |Users - Organizations list for example user| image:: ../common/images/users-organizations-list-for-example-user.png
-   :alt: Users - Organizations list for example user
+                                              :alt: Users - Organizations list for example user
 
 Users - Teams
 ~~~~~~~~~~~~~
@@ -107,7 +107,7 @@ This displays the list of teams of which that user is a member. This list may be
 Until a Team has been created and the user has been assigned to that team, the assigned Teams Details for the User appears blank.
 
 |Users - teams list for example user| image:: ../common/images/users-teams-list-for-example-user.png
-   :alt: Users - teams list for example user - empty
+                                      :alt: Users - teams list for example user - empty
 
 .. _ug_users_roles:
 
@@ -127,7 +127,7 @@ The set of permissions assigned to this user (role-based access controls) that p
 This screen displays a list of the roles that are currently assigned to the selected User and can be sorted and searched by **Name**, **Type**, or **Role**.
 
 |Users - permissions list for example user| image:: ../common/images/users-permissions-list-for-example-user.png
-   :alt: Users - permissions list for example user
+                                            :alt: Users - permissions list for example user
 
 .. _ug_users_permissions:
 
