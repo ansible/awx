@@ -12,6 +12,7 @@ import requests
 import socket
 import sys
 import time
+import json
 from base64 import b64encode
 from collections import OrderedDict
 
@@ -3761,6 +3762,9 @@ class AdHocCommandList(ListCreateAPIView):
             if not all(provided.values()):
                 data = dict(passwords_needed_to_start=needed)
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+        # Convert OrderedDict to JSON string
+        request.data['extra_vars'] = json.dumps(request.data['extra_vars'])
 
         response = super(AdHocCommandList, self).create(request, *args, **kwargs)
         if response.status_code != status.HTTP_201_CREATED:
