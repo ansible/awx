@@ -199,6 +199,8 @@ class Licenser(object):
                     license['support_level'] = attr.get('value')
                 elif attr.get('name') == 'usage':
                     license['usage'] = attr.get('value')
+                elif attr.get('name') == 'ph_product_name' and attr.get('value') == 'RHEL Developer':
+                    license['license_type'] == 'developer'
 
         if not license:
             logger.error("No valid subscriptions found in manifest")
