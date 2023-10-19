@@ -3764,7 +3764,6 @@ class AdHocCommandList(ListCreateAPIView):
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         # Convert OrderedDict to JSON string
-        request.data['extra_vars'] = json.dumps(request.data['extra_vars'])
         if request.data.get('extra_vars'):
             request.data['extra_vars'] = json.dumps(request.data['extra_vars'])
 
