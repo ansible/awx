@@ -16,7 +16,7 @@ Execution Environments
 Building an Execution Environment
 ---------------------------------
 
-The `Getting started with Execution Environments guide` will give you a brief technology overview and show you how to build and test your first |ee| in a few easy steps.
+The `Getting started with Execution Environments guide <https://ansible.readthedocs.io/en/latest/getting_started_ee/index.html>`_ will give you a brief technology overview and show you how to build and test your first |ee| in a few easy steps.
 
 Use an execution environment in jobs
 ------------------------------------
