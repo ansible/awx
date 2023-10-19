@@ -3765,6 +3765,8 @@ class AdHocCommandList(ListCreateAPIView):
 
         # Convert OrderedDict to JSON string
         request.data['extra_vars'] = json.dumps(request.data['extra_vars'])
+        if request.data.get('extra_vars'):
+            request.data['extra_vars'] = json.dumps(request.data['extra_vars'])
 
         response = super(AdHocCommandList, self).create(request, *args, **kwargs)
         if response.status_code != status.HTTP_201_CREATED:
