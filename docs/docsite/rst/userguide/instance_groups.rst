@@ -11,6 +11,7 @@ An :term:`Instance Group` provides the ability to group instances in a clustered
 |Instance Group policy example|
 
 .. |Instance Group policy example| image:: ../common/images/instance-groups_list_view.png
+   :alt: Instance groups list view showing example instance groups and one with capacity levels
 
 For more information about the policy or rules associated with instance groups, see the :ref:`ag_instance_groups` section of the |ata|.
 
@@ -34,6 +35,7 @@ To create a new instance group:
 |IG - create new IG|
 
 .. |IG - create new IG| image:: ../common/images/instance-group-create-new-ig.png
+   :alt: Create instance group form
 
 3. Enter the appropriate details into the following fields:
 
@@ -57,11 +59,12 @@ To create a new instance group:
 Once the instance group is successfully created, the **Details** tab of the newly created instance group remains, allowing you to review and edit your instance group information. This is the same screen that opens when the **Edit** (|edit-button|) button is clicked from the **Instance Groups** list view. You can also edit **Instances** and review **Jobs** associated with this instance group.
 
 .. |edit-button| image:: ../common/images/edit-button.png
+   :alt: Edit button
 
 |IG - example IG successfully created|
 
 .. |IG - example IG successfully created| image:: ../common/images/instance-group-example-ig-successfully-created.png
-
+	   :alt: Instance group details showing how to view instances and jobs associated with an instance group
 
 Associate instances to an instance group
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -75,6 +78,7 @@ To associate instances to an instance group:
 |IG - select instances|
 
 .. |IG - select instances| image:: ../common/images/instance-group-assoc-instances.png
+   :alt: Associating an instance with an instance group
 
 3. In the following example, the instances added to the instance group displays along with information about their capacity.
 
@@ -83,6 +87,7 @@ This view also allows you to edit some key attributes associated with the instan
 |IG - instances in IG callouts|
 
 .. |IG - instances in IG callouts| image:: ../common/images/instance-group-instances-example-callouts.png
+   :alt: Edit attributes associated with instances in an instance group
 
 
 View jobs associated with an instance group
@@ -93,6 +98,7 @@ To view the jobs associated with the instance group, click the **Jobs** tab of t
 |IG - instances jobs|
 
 .. |IG - instances jobs| image:: ../common/images/instance-group-jobs-list.png
+   :alt: Viewing jobs associated with an instance group
 
 Each job displays the job status, ID, and name; type of job, time started and completed, who started the job; and applicable resources associated with it, such as template, inventory, project, |ee|, etc.
 
