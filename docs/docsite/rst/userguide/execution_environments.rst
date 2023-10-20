@@ -48,16 +48,19 @@ In order to use an |ee| in a job, a few components are required:
 -  **Registry credential**: If the image has a protected container registry, provide the credential to access it.
 
 .. image:: ../common/images/ee-new-ee-form-filled.png
+   :alt: Create new Execution Environment form
 
 4. Click **Save**. 
 
 Now your newly added |ee| is ready to be used in a job template. To add an |ee| to a job template, specify it in the **Execution Environment** field of the job template, as shown in the example below. For more information on setting up a job template, see :ref:`ug_JobTemplates` in the |atu|.
 
 .. image:: ../common/images/job-template-with-example-ee-selected.png
+   :alt: Job template using newly created Execution Environment
 
 Once you added an |ee| to a job template, you can see those templates listed in the **Templates** tab of the |ee|:
 
 .. image:: ../common/images/ee-details-templates-list.png
+   :alt: Templates tab of the Execution Environment showing one job associated with it 
 
 
 Execution environment mount options
@@ -82,7 +85,8 @@ If you encounter this error, or have upgraded from an older version of AWX, perf
 2. In the **Paths to expose to isolated jobs** field of the Job Settings page, using the current example, expose the path as such:
 
 .. image:: ../common/images/settings-paths2expose-iso-jobs.png
-
+   :alt: Jobs Settings page showing Paths to expose to isolated jobs field with defaults
+   
 .. note::
 
 	The ``:O`` option is only supported for directories. It is highly recommended that you be as specific as possible, especially when specifying system paths. Mounting ``/etc`` or ``/usr`` directly have impact that make it difficult to troubleshoot. 
@@ -99,10 +103,11 @@ This informs podman to run a command similar to the example below, where the con
 To expose isolated paths in OpenShift or Kubernetes containers as HostPath, assume the following configuration:
 
 .. image:: ../common/images/settings-paths2expose-iso-jobs-mount-containers.png
+   :alt: Jobs Settings page showing Paths to expose to isolated jobs field with assumed configuration and Expose host paths for Container Group toggle enabled 
 
 Use the **Expose host paths for Container Groups** toggle to enable it. 
 
 Once the playbook runs, the resulting Pod spec will display similar to the example below. Note the details of the ``volumeMounts`` and ``volumes`` sections.
 
 .. image:: ../common/images/mount-containers-playbook-run-podspec.png
-
+   :alt: Pod spec for the playbook run showing volumeMounts and volumes details
