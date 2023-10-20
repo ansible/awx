@@ -11,7 +11,7 @@ An :term:`Instance Group` provides the ability to group instances in a clustered
 |Instance Group policy example|
 
 .. |Instance Group policy example| image:: ../common/images/instance-groups_list_view.png
-   :alt: Instance groups capacity levels based on policy algorithm
+   :alt: Instance groups list view showing example instance groups and one with capacity levels
 
 For more information about the policy or rules associated with instance groups, see the :ref:`ag_instance_groups` section of the |ata|.
 
@@ -59,12 +59,12 @@ To create a new instance group:
 Once the instance group is successfully created, the **Details** tab of the newly created instance group remains, allowing you to review and edit your instance group information. This is the same screen that opens when the **Edit** (|edit-button|) button is clicked from the **Instance Groups** list view. You can also edit **Instances** and review **Jobs** associated with this instance group.
 
 .. |edit-button| image:: ../common/images/edit-button.png
-   :alt: Editing instances and reviewing jobs associated with an instance group
+   :alt: Edit button
 
 |IG - example IG successfully created|
 
 .. |IG - example IG successfully created| image:: ../common/images/instance-group-example-ig-successfully-created.png
-
+	   :alt: Instance group details showing how to view instances and jobs associated with an instance group
 
 Associate instances to an instance group
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
