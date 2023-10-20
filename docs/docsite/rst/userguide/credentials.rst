@@ -52,7 +52,7 @@ Clicking on the link for the **Demo Credential** takes you to the **Details** vi
 |Credentials - home with demo credential details|
 
 .. |Credentials - home with demo credential details| image:: ../common/images/credentials-home-with-demo-credential-details.png
-    :alt: Credentials - home with demo credential details
+    :alt: Credentials - Demo credential details
 
 
 Clicking the **Access** tab shows you users and teams associated with this Credential and their granted roles (owner, admin, auditor, etc.)
@@ -61,7 +61,7 @@ Clicking the **Access** tab shows you users and teams associated with this Crede
 |Credentials - home with permissions credential details|
 
 .. |Credentials - home with permissions credential details| image:: ../common/images/credentials-home-with-permissions-detail.png
-    :alt: Credentials - home with permissions credential details
+    :alt: Credentials - Access tab for Demo credential containing two users with their roles
 
 .. note::
 
@@ -74,7 +74,7 @@ Clicking the **Job Templates** tab shows you the job templates associated with t
 
 
 .. image:: ../common/images/credentials-home-with-jt-detail.png
-    :alt: Credentials - home with job template detail
+    :alt: Credentials - Job Template tab for Demo credential with example job template
 
 You can click the **Add** button to assign this **Demo Credential** to additional job templates. Refer to the :ref:`ug_JobTemplates` section for further detail on creating a new job template.
 
@@ -93,7 +93,7 @@ To create a new credential:
 |Create credential|
 
 .. |Create credential| image:: ../common/images/credentials-create-credential.png
-    :alt: Create credential
+    :alt: Create credential form
 
 2. Enter the name for your new credential in the **Name** field.
 
@@ -152,7 +152,7 @@ AWX uses the following environment variables for AWS credentials and are fields 
 |Credentials - create AWS credential|
 
 .. |Credentials - create AWS credential| image:: ../common/images/credentials-create-aws-credential.png
-    :alt: Credentials - create AWS credential
+    :alt: Credentials - create AWS credential form
 
 Traditional Amazon Web Services credentials consist of the AWS **Access Key** and **Secret Key**. 
 
@@ -178,7 +178,7 @@ Selecting this credential allows AWX to access Galaxy or use a collection publis
 |Credentials - create galaxy credential|
 
 .. |Credentials - create galaxy credential| image:: ../common/images/credentials-create-galaxy-credential.png
-    :alt: Credentials - create galaxy credential
+    :alt: Credentials - create galaxy credential form
 
 To populate the **Galaxy Server URL** and the **Auth Server URL** fields, look for the corresponding fields of the |ah| section of the `Red Hat Hybrid Cloud Console <https://console.redhat.com/ansible/automation-hub/token>`_ labeled **Server URL** and **SSO URL**, respectively.
 
@@ -203,7 +203,7 @@ Aside from specifying a name, the **Authentication URL** is the only required fi
 |Credentials - create container credential|
 
 .. |Credentials - create container credential| image:: ../common/images/credentials-create-container-credential.png
-    :alt: Credentials - create container credential
+    :alt: Credentials - create container credential form
 
 
 CyberArk Central Credential Provider Lookup
@@ -228,7 +228,7 @@ Selecting this credential allows you to access GitHub using a Personal Access To
 |Credentials - create GitHub credential|
 
 .. |Credentials - create GitHub credential| image:: ../common/images/credentials-create-webhook-github-credential.png
-    :alt: Credentials - create GitHub credential
+    :alt: Credentials - create GitHub credential form
 
 GitHub PAT credentials require a value in the **Token** field, which is provided in your GitHub profile settings. 
 
@@ -247,7 +247,7 @@ Selecting this credential allows you to access GitLab using a Personal Access To
 |Credentials - create GitLab credential|
 
 .. |Credentials - create GitLab credential| image:: ../common/images/credentials-create-webhook-gitlab-credential.png
-    :alt: Credentials - create GitLab credential
+    :alt: Credentials - create GitLab credential form
 
 GitLab PAT credentials require a value in the **Token** field, which is provided in your GitLab profile settings. 
 
@@ -273,7 +273,7 @@ AWX uses the following environment variables for GCE credentials and are fields 
 |Credentials - create GCE credential|
 
 .. |Credentials - create GCE credential| image:: ../common/images/credentials-create-gce-credential.png
-    :alt: Credentials - create GCE credential
+    :alt: Credentials - create GCE credential form
 
 GCE credentials have the following inputs that are required:
 
@@ -297,7 +297,7 @@ Selecting this credential type allows you to create a credential that gives AWX 
 |Credentials - create GPG credential|
 
 .. |Credentials - create GPG credential| image:: ../common/images/credentials-create-gpg-credential.png
-    :alt: Credentials - create GPG credential
+    :alt: Credentials - create GPG credential form
 
 See :ref:`ug_content_signing` for detailed information on how to generate a valid keypair, use the CLI tool to sign content, and how to add the public key to AWX.
 
@@ -323,7 +323,7 @@ Selecting this credential type enables synchronization of cloud inventory with R
 |Credentials - create Insights credential|
 
 .. |Credentials - create Insights credential| image:: ../common/images/credentials-create-insights-credential.png
-    :alt: Credentials - create Insights credential
+    :alt: Credentials - create Insights credential form
 
 Insights credentials consist of the Insights **Username** and **Password**, which is the user’s Red Hat Customer Portal Account username and password.
 
@@ -342,7 +342,7 @@ Machine/SSH credentials do not use environment variables. Instead, they pass the
 |Credentials - create machine credential|
 
 .. |Credentials - create machine credential| image:: ../common/images/credentials-create-machine-credential.png
-    :alt: Credentials - create machine credential
+    :alt: Credentials - create machine credential form
 
 Machine credentials have several attributes that may be configured:
 
@@ -353,7 +353,7 @@ Machine credentials have several attributes that may be configured:
 - **Privilege Escalation Method**: Specifies the type of escalation privilege to assign to specific users. This is equivalent to specifying the ``--become-method=BECOME_METHOD`` parameter, where ``BECOME_METHOD`` could be any of the typical methods described below, or a custom method you've written. Begin entering the name of the method, and the appropriate name auto-populates.
 
 .. image:: ../common/images/credentials-create-machine-credential-priv-escalation.png
-    :alt: Credentials - create machine credential privilege escalation
+    :alt: Credentials - create machine credential privilege escalation drop-down menu
 
 
 - empty selection: If a task/play has ``become`` set to ``yes`` and is used with an empty selection, then it will default to ``sudo``
@@ -399,7 +399,7 @@ Selecting this credential type enables synchronization of cloud inventory with M
 |Credentials - create Azure credential|
 
 .. |Credentials - create Azure credential| image:: ../common/images/credentials-create-azure-credential.png
-    :alt: Credentials - create Azure credential
+    :alt: Credentials - create Azure credential form
 
 Microsoft Azure Resource Manager credentials have several attributes that may be configured:
 
@@ -468,7 +468,7 @@ AWX uses the following environment variables for Network credentials and are fie
 |Credentials - create network credential|
 
 .. |Credentials - create network credential| image:: ../common/images/credentials-create-network-credential.png
-    :alt: Credentials - create network credential
+    :alt: Credentials - create network credential form
 
 
 Network credentials have several attributes that may be configured:
@@ -500,7 +500,7 @@ Selecting this credential type allows you to create instance groups that point t
 |Credentials - create Containers credential|
 
 .. |Credentials - create Containers credential| image:: ../common/images/credentials-create-containers-credential.png
-    :alt: Credentials - create Containers credential
+    :alt: Credentials - create Containers credential form
 
 Container credentials have the following inputs:
 
@@ -524,7 +524,7 @@ Selecting this credential type enables synchronization of cloud inventory with O
 |Credentials - create OpenStack credential|
 
 .. |Credentials - create OpenStack credential| image:: ../common/images/credentials-create-openstack-credential.png
-    :alt: Credentials - create OpenStack credential
+    :alt: Credentials - create OpenStack credential form
 
 OpenStack credentials have the following inputs that are required:   
 
@@ -547,7 +547,7 @@ Red Hat Ansible Automation Platform
 Selecting this credential allows you to access a Red Hat Ansible Automation Platform instance. 
 
 .. image:: ../common/images/credentials-create-at-credential.png
-    :alt: Credentials - create Red Hat Ansible Automation Platform credential
+    :alt: Credentials - create Red Hat Ansible Automation Platform credential form
 
 The Red Hat Ansible Automation Platform credentials have the following inputs that are required:
 
@@ -574,7 +574,7 @@ AWX writes a Satellite configuration file based on fields prompted in the user i
 |Credentials - create Red Hat Satellite 6 credential|
 
 .. |Credentials - create Red Hat Satellite 6 credential| image:: ../common/images/credentials-create-rh-sat-credential.png
-    :alt: Credentials - create Red Hat Satellite 6 credential
+    :alt: Credentials - create Red Hat Satellite 6 credential form
 
 
 Satellite credentials have the following inputs that are required:   
@@ -605,7 +605,7 @@ AWX uses the following environment variables for Red Hat Virtualization credenti
 |Credentials - create rhv credential|
 
 .. |Credentials - create rhv credential| image:: ../common/images/credentials-create-rhv-credential.png
-    :alt: Credentials - create rhv credential
+    :alt: Credentials - create Red Hat Virtualization credential form
 
 RHV credentials have the following inputs that are required:
 
@@ -626,7 +626,7 @@ SCM (source control) credentials are used with Projects to clone and update loca
 |Credentials - create SCM credential|
 
 .. |Credentials - create SCM credential| image:: ../common/images/credentials-create-scm-credential.png
-    :alt: Credentials - create SCM credential
+    :alt: Credentials - create SCM credential form
 
 
 Source Control credentials have several attributes that may be configured:
@@ -663,7 +663,7 @@ Selecting this credential type enables synchronization of inventory with Ansible
 |Credentials - create Vault credential|
 
 .. |Credentials - create Vault credential| image:: ../common/images/credentials-create-vault-credential.png
-    :alt: Credentials - create Vault credential
+    :alt: Credentials - create Vault credential form
 
 
 Vault credentials require the **Vault Password** and an optional **Vault Identifier** if applying multi-Vault credentialing. For more information on AWX Multi-Vault support, refer to the :ref:`ag_multi_vault` section of the |ata|.
@@ -698,7 +698,7 @@ AWX uses the following environment variables for VMware vCenter credentials and 
 |Credentials - create VMware credential|
 
 .. |Credentials - create VMware credential| image:: ../common/images/credentials-create-vmware-credential.png
-    :alt: Credentials - create VMware credential
+    :alt: Credentials - create VMware credential form
 
 VMware credentials have the following inputs that are required:
 
