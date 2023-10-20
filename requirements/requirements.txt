@@ -349,7 +349,7 @@ pyyaml==6.0.1
     #   djangorestframework-yaml
     #   kubernetes
     #   receptorctl
-receptorctl==1.3.0
+receptorctl==1.4.2
     # via -r /awx_devel/requirements/requirements.in
 redis==4.3.5
     # via -r /awx_devel/requirements/requirements.in
