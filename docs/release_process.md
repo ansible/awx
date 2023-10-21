@@ -181,7 +181,7 @@ Operator hub PRs are generated via an Ansible Playbook. See someone on the AWX t
 
 ## Revert a Release
 
-Decide whether or not you can just fall-forward with a new AWX Release to fix a bad release. If you need to remove published artifacts from publically facing repositories, follow the steps below.
+Decide whether or not you can just fall-forward with a new AWX Release to fix a bad release. If you need to remove published artifacts from publicly facing repositories, follow the steps below.
 
 Here are the steps needed to revert an AWX and an AWX-Operator release. Depending on your use case, follow the steps for reverting just an AWX release, an Operator release or both.
 
@@ -195,7 +195,7 @@ Here are the steps needed to revert an AWX and an AWX-Operator release. Dependin
 ![Tag-Revert-1-Image](img/tag-revert-1.png)
 [comment]: <> (Need an image here for actually deleting an orphaned tag, place here during next release)
 
-3. Navigate to the [AWX Operator Release Page]() and delete the AWX-Operator release that needss to tbe removed.
+3. Navigate to the [AWX Operator Release Page]() and delete the AWX-Operator release that needs to be removed.
 
 ![Revert-2-Image](img/revert-2.png)
 
