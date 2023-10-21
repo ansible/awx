@@ -346,6 +346,7 @@ To customize the Pod spec, specify the namespace in the **Pod Spec Override** fi
 You may provide additional customizations, if needed. Click **Expand** to view the entire customization window.
 
 .. image:: ../common/images/instance-group-customize-cg-pod-expanded.png
+	:alt:  Screenshot showing an expanded customization window for instance group settings.
 
 .. note::
 
@@ -393,6 +394,7 @@ To verify the deployment and termination of your container:
 .. |Launch inventory with localhost| image:: ../common/images/inventories-launch-adhoc-cg-test-localhost.png
 
 .. image:: ../common/images/inventories-launch-adhoc-cg-test-localhost2.png
+	:alt: Screenshot of launching an inventory with localhost
 
 You can see in the jobs detail view the container was reached successfully using one of ad hoc jobs.
 

@@ -204,6 +204,7 @@ The way jobs are run and reported to a 'normal' user of AWX does not change. On 
 - When a job is submitted from the API interface it gets pushed into the dispatcher queue.  Each AWX instance will connect to and receive jobs from that queue using a particular scheduling algorithm. Any instance in the cluster is just as likely to receive the work and execute the task. If a instance fails while executing jobs, then the work is marked as permanently failed.
 
 .. image:: ../common/images/clustering-visual.png
+	:alt: An illustration depicting job distribution in an AWX cluster.
 
 - Project updates run successfully on any instance that could potentially run a job. Projects will sync themselves to the correct version on the instance immediately prior to running the job. If the needed revision is already locally checked out and Galaxy or Collections updates are not needed, then a sync may not be performed. 
 
