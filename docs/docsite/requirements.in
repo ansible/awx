@@ -1,0 +1,7 @@
+# This requirements file is used for AWX latest doc builds.
+
+sphinx # Tooling to build HTML from RST source.
+sphinx-ansible-theme # Ansible community theme for Sphinx doc builds.
+docutils # Tooling for RST processing and the swagger extension.
+Jinja2 # Requires investiation. Possibly inherited from previous repo with a custom theme.
+PyYaml # Requires investigation. Possibly used as tooling for swagger API reference content.
