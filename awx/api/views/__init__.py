@@ -3763,10 +3763,6 @@ class AdHocCommandList(ListCreateAPIView):
                 data = dict(passwords_needed_to_start=needed)
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        # Convert OrderedDict to JSON string
-        if request.data.get('extra_vars'):
-            request.data['extra_vars'] = json.dumps(request.data['extra_vars'])
-
         response = super(AdHocCommandList, self).create(request, *args, **kwargs)
         if response.status_code != status.HTTP_201_CREATED:
             return response

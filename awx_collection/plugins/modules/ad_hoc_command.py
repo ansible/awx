@@ -6,6 +6,7 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+import json
 
 __metaclass__ = type
 
@@ -161,7 +162,11 @@ def main():
     }
     for arg in ['job_type', 'limit', 'forks', 'verbosity', 'extra_vars', 'become_enabled', 'diff_mode']:
         if module.params.get(arg):
-            post_data[arg] = module.params.get(arg)
+            # extra_var can receive a dict or a string, if a dict covert it to a string
+            if arg == 'extra_vars' and type(module.params.get(arg)) is not str:
+                post_data[arg] = json.dumps(module.params.get(arg))
+            else:
+                post_data[arg] = module.params.get(arg)
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     post_data['inventory'] = module.resolve_name_to_id('inventories', inventory)
