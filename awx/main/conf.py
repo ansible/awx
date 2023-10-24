@@ -694,16 +694,18 @@ register(
     category_slug='logging',
 )
 register(
-    'LOG_AGGREGATOR_MAX_DISK_USAGE_GB',
+    'LOG_AGGREGATOR_ACTION_QUEUE_SIZE',
     field_class=fields.IntegerField,
-    default=1,
+    default=131072,
     min_value=1,
-    label=_('Maximum disk persistence for external log aggregation (in GB)'),
+    label=_('Maximum number of messages that can be stored in the log action queue'),
     help_text=_(
-        'Amount of data to store (in gigabytes) during an outage of '
-        'the external log aggregator (defaults to 1). '
-        'Equivalent to the rsyslogd queue.maxdiskspace setting for main_queue. '
-        'Notably, this is used for the rsyslogd main queue (for input messages).'
+        'Defines how large the rsyslog action queue can grow in number of messages '
+        'stored. This can have an impact on memory utilization. When the queue '
+        'reaches 75% of this number, the queue will start writing to disk '
+        '(queue.highWatermark in rsyslog). When it reaches 90%, NOTICE, INFO, and '
+        'DEBUG messages will start to be discarded (queue.discardMark with '
+        'queue.discardSeverity=5).'
     ),
     category=_('Logging'),
     category_slug='logging',
@@ -718,8 +720,7 @@ register(
         'Amount of data to store (in gigabytes) if an rsyslog action takes time '
         'to process an incoming message (defaults to 1). '
         'Equivalent to the rsyslogd queue.maxdiskspace setting on the action (e.g. omhttp). '
-        'Like LOG_AGGREGATOR_MAX_DISK_USAGE_GB, it stores files in the directory specified '
-        'by LOG_AGGREGATOR_MAX_DISK_USAGE_PATH.'
+        'It stores files in the directory specified by LOG_AGGREGATOR_MAX_DISK_USAGE_PATH.'
     ),
     category=_('Logging'),
     category_slug='logging',

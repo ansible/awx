@@ -17,7 +17,7 @@ def construct_rsyslog_conf_template(settings=settings):
     port = getattr(settings, 'LOG_AGGREGATOR_PORT', '')
     protocol = getattr(settings, 'LOG_AGGREGATOR_PROTOCOL', '')
     timeout = getattr(settings, 'LOG_AGGREGATOR_TCP_TIMEOUT', 5)
-    max_disk_space_main_queue = getattr(settings, 'LOG_AGGREGATOR_MAX_DISK_USAGE_GB', 1)
+    action_queue_size = getattr(settings, 'LOG_AGGREGATOR_ACTION_QUEUE_SIZE', 131072)
     max_disk_space_action_queue = getattr(settings, 'LOG_AGGREGATOR_ACTION_MAX_DISK_USAGE_GB', 1)
     spool_directory = getattr(settings, 'LOG_AGGREGATOR_MAX_DISK_USAGE_PATH', '/var/lib/awx').rstrip('/')
     error_log_file = getattr(settings, 'LOG_AGGREGATOR_RSYSLOGD_ERROR_LOG_FILE', '')
@@ -31,9 +31,9 @@ def construct_rsyslog_conf_template(settings=settings):
         'queue.saveOnShutdown="on"',
         'queue.syncqueuefiles="on"',  # (f)sync when checkpoint occurs
         'queue.checkpointInterval="1000"',  # Update disk queue every 1000 messages
-        'queue.size="131072"',
-        'queue.highwaterMark="98304"',  # 75% of 131072
-        'queue.discardMark="117964"',  # 90% of 131072
+        f'queue.size="{action_queue_size}"',  # max number of messages in queue
+        f'queue.highwaterMark="{int(action_queue_size * 0.75)}"',  # 75% of queue.size
+        f'queue.discardMark="{int(action_queue_size * 0.9)}"',  # 90% of queue.size
         'queue.discardSeverity="5"',  # Only discard notice, info, debug if we must discard anything
     ]
 
