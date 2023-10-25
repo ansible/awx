@@ -12,7 +12,6 @@ import requests
 import socket
 import sys
 import time
-import json
 from base64 import b64encode
 from collections import OrderedDict
 
