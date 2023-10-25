@@ -270,6 +270,9 @@ class WorkflowManager(TaskBase):
                         job.status = 'failed'
                         job.save(update_fields=['status', 'job_explanation'])
                         job.websocket_emit_status('failed')
+                        # NOTE: sending notification templates here is slightly worse performance
+                        # this is not yet optimized in the same way as for the TaskManager
+                        job.send_notification_templates('failed')
                         ScheduleWorkflowManager().schedule()
 
                     # TODO: should we emit a status on the socket here similar to tasks.py awx_periodic_scheduler() ?
@@ -430,6 +433,25 @@ class TaskManager(TaskBase):
         self.tm_models = TaskManagerModels()
         self.controlplane_ig = self.tm_models.instance_groups.controlplane_ig
 
+    def process_job_dep_failures(self, task):
+        """If job depends on a job that has failed, mark as failed and handle misc stuff."""
+        for dep in task.dependent_jobs.all():
+            # if we detect a failed or error dependency, go ahead and fail this task.
+            if dep.status in ("error", "failed"):
+                task.status = 'failed'
+                logger.warning(f'Previous task failed task: {task.id} dep: {dep.id} task manager')
+                task.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (
+                    get_type_for_model(type(dep)),
+                    dep.name,
+                    dep.id,
+                )
+                task.save(update_fields=['status', 'job_explanation'])
+                task.websocket_emit_status('failed')
+                self.pre_start_failed.append(task.id)
+                return True
+
+        return False
+
     def job_blocked_by(self, task):
         # TODO: I'm not happy with this, I think blocking behavior should be decided outside of the dependency graph
         #       in the old task manager this was handled as a method on each task object outside of the graph and
@@ -440,20 +462,6 @@ class TaskManager(TaskBase):
 
         for dep in task.dependent_jobs.all():
             if dep.status in ACTIVE_STATES:
-                return dep
-            # if we detect a failed or error dependency, go ahead and fail this
-            # task. The errback on the dependency takes some time to trigger,
-            # and we don't want the task to enter running state if its
-            # dependency has failed or errored.
-            elif dep.status in ("error", "failed"):
-                task.status = 'failed'
-                task.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (
-                    get_type_for_model(type(dep)),
-                    dep.name,
-                    dep.id,
-                )
-                task.save(update_fields=['status', 'job_explanation'])
-                task.websocket_emit_status('failed')
                 return dep
 
         return None
@@ -474,7 +482,6 @@ class TaskManager(TaskBase):
         if self.start_task_limit == 0:
             # schedule another run immediately after this task manager
             ScheduleTaskManager().schedule()
-        from awx.main.tasks.system import handle_work_error, handle_work_success
 
         task.status = 'waiting'
 
@@ -485,7 +492,7 @@ class TaskManager(TaskBase):
                 task.job_explanation += ' '
             task.job_explanation += 'Task failed pre-start check.'
             task.save()
-            # TODO: run error handler to fail sub-tasks and send notifications
+            self.pre_start_failed.append(task.id)
         else:
             if type(task) is WorkflowJob:
                 task.status = 'running'
@@ -507,19 +514,16 @@ class TaskManager(TaskBase):
         # apply_async does a NOTIFY to the channel dispatcher is listening to
         # postgres will treat this as part of the transaction, which is what we want
         if task.status != 'failed' and type(task) is not WorkflowJob:
-            task_actual = {'type': get_type_for_model(type(task)), 'id': task.id}
             task_cls = task._get_task_class()
             task_cls.apply_async(
                 [task.pk],
                 opts,
                 queue=task.get_queue_name(),
                 uuid=task.celery_task_id,
-                callbacks=[{'task': handle_work_success.name, 'kwargs': {'task_actual': task_actual}}],
-                errbacks=[{'task': handle_work_error.name, 'kwargs': {'task_actual': task_actual}}],
             )
 
-        # In exception cases, like a job failing pre-start checks, we send the websocket status message
-        # for jobs going into waiting, we omit this because of performance issues, as it should go to running quickly
+        # In exception cases, like a job failing pre-start checks, we send the websocket status message.
+        # For jobs going into waiting, we omit this because of performance issues, as it should go to running quickly
         if task.status != 'waiting':
             task.websocket_emit_status(task.status)  # adds to on_commit
 
@@ -540,6 +544,11 @@ class TaskManager(TaskBase):
             if self.timed_out():
                 logger.warning("Task manager has reached time out while processing pending jobs, exiting loop early")
                 break
+
+            has_failed = self.process_job_dep_failures(task)
+            if has_failed:
+                continue
+
             blocked_by = self.job_blocked_by(task)
             if blocked_by:
                 self.subsystem_metrics.inc(f"{self.prefix}_tasks_blocked", 1)
@@ -653,6 +662,11 @@ class TaskManager(TaskBase):
                 reap_job(j, 'failed')
 
     def process_tasks(self):
+        # maintain a list of jobs that went to an early failure state,
+        # meaning the dispatcher never got these jobs,
+        # that means we have to handle notifications for those
+        self.pre_start_failed = []
+
         running_tasks = [t for t in self.all_tasks if t.status in ['waiting', 'running']]
         self.process_running_tasks(running_tasks)
         self.subsystem_metrics.inc(f"{self.prefix}_running_processed", len(running_tasks))
@@ -661,6 +675,11 @@ class TaskManager(TaskBase):
 
         self.process_pending_tasks(pending_tasks)
         self.subsystem_metrics.inc(f"{self.prefix}_pending_processed", len(pending_tasks))
+
+        if self.pre_start_failed:
+            from awx.main.tasks.system import handle_failure_notifications
+
+            handle_failure_notifications.delay(self.pre_start_failed)
 
     def timeout_approval_node(self, task):
         if self.timed_out():

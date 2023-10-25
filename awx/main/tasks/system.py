@@ -53,13 +53,7 @@ from awx.main.models import (
 from awx.main.constants import ACTIVE_STATES
 from awx.main.dispatch.publish import task
 from awx.main.dispatch import get_task_queuename, reaper
-from awx.main.utils.common import (
-    get_type_for_model,
-    ignore_inventory_computed_fields,
-    ignore_inventory_group_removal,
-    ScheduleWorkflowManager,
-    ScheduleTaskManager,
-)
+from awx.main.utils.common import ignore_inventory_computed_fields, ignore_inventory_group_removal
 
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
@@ -765,63 +759,19 @@ def awx_periodic_scheduler():
             emit_channel_notification('schedules-changed', dict(id=schedule.id, group_name="schedules"))
 
 
-def schedule_manager_success_or_error(instance):
-    if instance.unifiedjob_blocked_jobs.exists():
-        ScheduleTaskManager().schedule()
-    if instance.spawned_by_workflow:
-        ScheduleWorkflowManager().schedule()
-
-
 @task(queue=get_task_queuename)
-def handle_work_success(task_actual):
-    try:
-        instance = UnifiedJob.get_instance_by_type(task_actual['type'], task_actual['id'])
-    except ObjectDoesNotExist:
-        logger.warning('Missing {} `{}` in success callback.'.format(task_actual['type'], task_actual['id']))
-        return
-    if not instance:
-        return
-    schedule_manager_success_or_error(instance)
-
-
-@task(queue=get_task_queuename)
-def handle_work_error(task_actual):
-    try:
-        instance = UnifiedJob.get_instance_by_type(task_actual['type'], task_actual['id'])
-    except ObjectDoesNotExist:
-        logger.warning('Missing {} `{}` in error callback.'.format(task_actual['type'], task_actual['id']))
-        return
-    if not instance:
-        return
-
-    subtasks = instance.get_jobs_fail_chain()  # reverse of dependent_jobs mostly
-    logger.debug(f'Executing error task id {task_actual["id"]}, subtasks: {[subtask.id for subtask in subtasks]}')
-
-    deps_of_deps = {}
-
-    for subtask in subtasks:
-        if subtask.celery_task_id != instance.celery_task_id and not subtask.cancel_flag and not subtask.status in ('successful', 'failed'):
-            # If there are multiple in the dependency chain, A->B->C, and this was called for A, blame B for clarity
-            blame_job = deps_of_deps.get(subtask.id, instance)
-            subtask.status = 'failed'
-            subtask.failed = True
-            if not subtask.job_explanation:
-                subtask.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (
-                    get_type_for_model(type(blame_job)),
-                    blame_job.name,
-                    blame_job.id,
-                )
-            subtask.save()
-            subtask.websocket_emit_status("failed")
-
-            for sub_subtask in subtask.get_jobs_fail_chain():
-                deps_of_deps[sub_subtask.id] = subtask
-
-    # We only send 1 job complete message since all the job completion message
-    # handling does is trigger the scheduler. If we extend the functionality of
-    # what the job complete message handler does then we may want to send a
-    # completion event for each job here.
-    schedule_manager_success_or_error(instance)
+def handle_failure_notifications(task_ids):
+    """A task-ified version of the method that sends notifications."""
+    found_task_ids = set()
+    for instance in UnifiedJob.objects.filter(id__in=task_ids):
+        found_task_ids.add(instance.id)
+        try:
+            instance.send_notification_templates('failed')
+        except Exception:
+            logger.exception(f'Error preparing notifications for task {instance.id}')
+    deleted_tasks = set(task_ids) - found_task_ids
+    if deleted_tasks:
+        logger.warning(f'Could not send notifications for {deleted_tasks} because they were not found in the database')
 
 
 @task(queue=get_task_queuename)
