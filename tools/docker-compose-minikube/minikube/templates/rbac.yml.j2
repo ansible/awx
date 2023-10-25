@@ -36,3 +36,12 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: {{ minikube_service_account_name }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ minikube_service_account_name }}
+  namespace: {{ minikube_service_account_namespace }}
+  annotations:
+    kubernetes.io/service-account.name: {{ minikube_service_account_name }}
+type: kubernetes.io/service-account-token
