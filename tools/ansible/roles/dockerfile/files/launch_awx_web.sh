@@ -15,6 +15,4 @@ fi
 
 set -e
 
-wait-for-migrations
-
 exec supervisord -c /etc/supervisord_web.conf
