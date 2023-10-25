@@ -45,7 +45,7 @@ of the awx-operator repo. If not, continue to the next section.
 ```
 # in awx-operator repo on the branch you want to use
 $ export IMAGE_TAG_BASE=quay.io/<username>/awx-operator
-$ export VERSION=<cusom-tag>
+$ export VERSION=<custom-tag>
 $ make docker-build
 $ docker push ${IMAGE_TAG_BASE}:${VERSION}
 ```
@@ -118,7 +118,7 @@ To access via the web browser, run the following command:
 $ minikube service awx-service --url
 ```
 
-To retreive your admin password
+To retrieve your admin password
 ```
 $ kubectl get secrets awx-admin-password -o json | jq '.data.password' | xargs | base64 -d
 ```
