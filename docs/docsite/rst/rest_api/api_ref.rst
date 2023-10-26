@@ -1,5 +1,3 @@
-:orphan:
-
 .. _api_reference:
 
 AWX API Reference Guide
@@ -48,7 +46,7 @@ The API Reference Manual provides in-depth documentation for the AWX REST API, i
     <script>
     window.onload = function() {
       $('head').append('<link rel="stylesheet" href="../_static/swagger-ui.css" type="text/css"></link>');
-      $('head').append('<link rel="stylesheet" href="../_static/tower.css" type="text/css"></link>');
+      $('head').append('<link rel="stylesheet" href="../_static/awx-rest-api.css" type="text/css"></link>');
       $('#swagger-ui').on('click', function(e) {
         // By default, swagger-ui has a show/hide toggle for headers, and
         // there's no way to turn it off; this code intercepts the click event
