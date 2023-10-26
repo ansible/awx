@@ -142,7 +142,7 @@ For more information about **Job Tags** and **Skip Tags**, refer to `Tags <https
 Saving the template exits the workflow template page and the Workflow Visualizer opens to allow you to build a workflow. See the :ref:`ug_wf_editor` section for further instructions. Otherwise, you may close the Workflow Visualizer to return to the Details tab of the newly saved template in order to review, edit, add permissions, notifications, schedules, and surveys, or view completed jobs and build a workflow template at a later time. Alternatively, you can click **Launch** to launch the workflow, but you must first save the template prior to launching, otherwise, the **Launch** button remains grayed-out. Also, note the **Notifications** tab is present only after the template has been saved.
 
 .. image:: ../common/images/wf-templates-wf-template-saved.png
-   :alt: workflow template - saved page
+   :alt: workflow template - saved template page
 
 
 
