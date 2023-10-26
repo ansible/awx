@@ -342,20 +342,20 @@ You can set up any combination of two or more of the following node types to bui
 1. In the details/edit view of a workflow template, click the **Visualizer** tab or from the Templates list view, click the (|wf-viz-icon|) icon to launch the Workflow Visualizer.
 
 .. image:: ../common/images/wf-editor-create-new.png
-   :alt: workflow template - 
+   :alt: workflow editor - create new
 
 2. Click the |start| button to display a list of nodes to add to your workflow.
 
 .. |start| image:: ../common/images/wf-start-button.png
-   :alt: workflow template - 
+   :alt: workflow editor - start button
 
 .. image:: ../common/images/wf-editor-create-new-add-template-list.png 
-   :alt: workflow template - 
+   :alt: workflow editor - create new add template
 
 3. On the right pane, select the type of node you want to add from the drop-down menu:
 
 .. image:: ../common/images/wf-add-node-selections.png
-   :alt: workflow template - 
+   :alt: workflow template - add node selections
 
 If selecting an **Approval** node, see :ref:`ug_wf_approval_nodes` for further detail.
 
@@ -385,7 +385,7 @@ For subsequent nodes, you can select one of the following scenarios (edge type) 
   If selected, the graphical view will label the node as **ALL**.
 
   .. image:: ../common/images/wf-editor-convergent-node-all.png
-   :alt: workflow template - 
+   :alt: workflow editor - convergent node all
 
 .. note::
 
@@ -395,12 +395,12 @@ For subsequent nodes, you can select one of the following scenarios (edge type) 
 7. If a job template used in the workflow has **Prompt on Launch** selected for any of its parameters, a **Prompt** button appears, allowing you to change those values at the node level. Use the wizard to change the value(s) in each of the tabs and click **Confirm** in the Preview tab.
 
 .. image:: ../common/images/wf-editor-prompt-button-wizard.png
-   :alt: workflow template - 
+   :alt: workflow editor - prompt button wizard
 
 Likewise, if a workflow template used in the workflow has **Prompt on Launch** selected for the inventory option, use the wizard to supply the inventory at the prompt. If the parent workflow has its own inventory, it will override any inventory that is supplied here.
 
 .. image:: ../common/images/wf-editor-prompt-button-inventory-wizard.png
-   :alt: workflow template - 
+   :alt: workflow editor - prompt button inventory wizard
 
 .. note::
 
@@ -409,33 +409,33 @@ Likewise, if a workflow template used in the workflow has **Prompt on Launch** s
   You must also click **Select** when the prompt wizard closes in order to apply the changes at that node. Otherwise, any changes you make will revert back to the values set in the actual job template.
 
 .. image:: ../common/images/wf-editor-wizard-buttons.png  
-   :alt: workflow template - 
+   :alt: workflow editor - wizard buttons
 
 Once the node is created, it is labeled with its job type. A template that is associated with each workflow node will run based on the selected run scenario as it proceeds. Click the compass (|compass|) icon to display the legend for each run scenario and their job types.
 
 .. _legend:
 
 .. |compass| image:: ../common/images/wf-editor-compass-button.png
-   :alt: workflow template - 
+   :alt: workflow editor - compass button
 
 .. image:: ../common/images/wf-editor-key-dropdown-list.png
-   :alt: workflow template - 
+   :alt: workflow editor - key dropdown list
 
 8. Hovering over a node allows you to add |add node| another node, view info |info node| about the node, edit |edit| the node details, edit an existing link |edit link|, or delete |delete node| the selected node.
 
 .. |add node| image:: ../common/images/wf-editor-add-button.png
-   :alt: workflow template - 
+   :alt: workflow editor - add button
 .. |edit link| image:: ../common/images/wf-editor-edit-link.png
-   :alt: workflow template - 
+   :alt: workflow editor - edit link
 .. |delete node| image:: ../common/images/wf-editor-delete-button.png
-   :alt: workflow template - 
+   :alt: workflow editor - delete button
 .. |info node| image:: ../common/images/wf-editor-info-button.png
-   :alt: workflow template - 
+   :alt: workflow editor - info button
 .. |edit| image:: ../common/images/edit-button.png
-   :alt: workflow template - 
+   :alt: workflow editor - edit button
 
 .. image:: ../common/images/wf-editor-create-new-add-template.png
-   :alt: workflow template - 
+   :alt: workflow editor - create new template
 
 
 9. When done adding/editing a node, click **Select** to save any modifications and render it on the graphical view. For possible ways to build your workflow, see :ref:`ug_wf_building_scenarios`.
@@ -455,27 +455,27 @@ Approval nodes
 Choosing an **Approval** node requires user intervention in order to advance the workflow. This functions as a means to pause the workflow in between playbooks so that a user can give approval to continue on to the next playbook in the workflow, giving the user a specified amount of time to intervene, but also allows the user to continue as quickly as possible without having to wait on some other trigger. 
 
 .. image:: ../common/images/wf-node-approval-form.png
-   :alt: workflow template - 
+   :alt: workflow node - approval form
 
 The default for the timeout is none, but you can specify the length of time before the request expires and automatically gets denied. After selecting and supplying the information for the approval node, it displays on the graphical view with a pause (|pause|) icon next to it.
 
 .. |pause| image:: ../common/images/wf-node-approval-icon.png
-   :alt: workflow template - 
+   :alt: workflow node - approval icon
 
 .. image:: ../common/images/wf-node-approval-node.png
-   :alt: workflow template - 
+   :alt: workflow node - approval node
 
 The approver is anyone who can execute the workflow job template containing the approval nodes, has org admin or above privileges (for the org associated with that workflow job template), or any user who has the *Approve* permission explicitly assigned to them within that specific workflow job template.
 
 .. image:: ../common/images/wf-node-approval-notifications.png
-   :alt: workflow template - 
+   :alt: workflow node - approval notifications
 
 If pending approval nodes are not approved within the specified time limit (if an expiration was assigned) or they are denied, then they are marked as "timed out" or "failed", respectively, and move on to the next "on fail node" or "always node". If approved, the "on success" path is taken. If you try to POST in the API to a node that has already been approved, denied or timed out, an error message notifies you that this action is redundant, and no further steps will be taken.
 
 Below shows the various levels of permissions allowed on approval workflows:
 
 .. image:: ../common/images/wf-node-approval-rbac.png
-   :alt: workflow template - 
+   :alt: workflow node - approval rbac
 
 .. source file located on google spreadsheet "Workflow approvals chart"
 
@@ -487,22 +487,22 @@ Node building scenarios
 You can add a sibling node by clicking the |add node| on the parent node: 
 
 .. image:: ../common/images/wf-editor-create-sibling-node.png
-   :alt: workflow template - 
+   :alt: workflow editor - create sibling node
 
 You can insert another node in between nodes by hovering over the line that connects the two until the |add node| appears. Clicking on the |add node| automatically inserts the node between the two nodes. 
 
 .. image:: ../common/images/wf-editor-insert-node-template.png
-   :alt: workflow template - 
+   :alt: workflow editor - insert node template
 
 To add a root node to depict a split scenario, click the |start| button again:
 
 .. image:: ../common/images/wf-editor-create-new-add-template-split.png
-   :alt: workflow template - 
+   :alt: workflow editor - create new add template split
 
 At any node where you want to create a split scenario, hover over the node from which the split scenario begins and click the |add node|. This essentially adds multiple nodes from the same parent node, creating sibling nodes:
 
 .. image:: ../common/images/wf-editor-create-siblings.png
-   :alt: workflow template - 
+   :alt: workflow editor - create siblings
 
 .. note::
 
@@ -514,7 +514,7 @@ If you want to undo the last inserted node, click on another node without making
 Below is an example of a workflow that contains all three types of jobs that is initiated by a job template that if it fails to run, proceed to the project sync job, and regardless of whether that fails or succeeds, proceed to the inventory sync job.  
 
 .. image:: ../common/images/wf-editor-create-new-add-template-example.png
-   :alt: workflow template - 
+   :alt: workflow editor - create new add template example
 
 Remember to refer to the Key at the top of the window to identify the meaning of the symbols and colors associated with the graphical depiction. 
 
@@ -525,7 +525,7 @@ Remember to refer to the Key at the top of the window to identify the meaning of
 
 
   .. image:: ../common/images/wf-node-delete-scenario.png
-   :alt: workflow template - 
+   :alt: workflow node - delete scenerio
 
 
 The following ways you can modify your nodes:
@@ -535,17 +535,17 @@ The following ways you can modify your nodes:
 - To edit the edge type for an existing link (success/failure/always), click on the link. The right pane displays the current selection. Make your changes and click **Save** to apply them to the graphical view.
 
  .. image:: ../common/images/wf-editor-wizard-edit-link.png
-   :alt: workflow template - 
+   :alt: workflow editor - wizard edit link
 
 - To add a new link from one node to another, click the link |edit link| icon that appears on each node. Doing this highlights the nodes that are possible to link to. These feasible options are indicated by the dotted lines. Invalid options are indicated by grayed out boxes (nodes) that would otherwise produce an invalid link. The example below shows the **Demo Project** as a possible option for the **e2e-ec20de52-project** to link to, as indicated by the arrows:
 
  .. image:: ../common/images/wf-node-link-scenario.png
-   :alt: workflow template - 
+   :alt: workflow node - link scenerio
 
 - To remove a link, click the link and click the **Unlink** button. 
 
  .. image:: ../common/images/wf-editor-wizard-unlink.png
-   :alt: workflow template - 
+   :alt: workflow editor - wizard unlink
 
 This button only appears in the right hand panel if the target or child node has more than one parent. All nodes must be linked to at least one other node at all times so you must create a new link before removing an old one.
 
@@ -553,7 +553,7 @@ This button only appears in the right hand panel if the target or child node has
 Click the Tools icon (|tools|) to zoom, pan, or reposition the view. Alternatively, you can drag the workflow diagram to reposition it on the screen or use the scroll on your mouse to zoom.
 
 .. |tools| image:: ../common/images/tools.png
-   :alt: workflow template - 
+   :alt: workflow template - tools icon
 
 
 
@@ -568,22 +568,22 @@ Launch a workflow template by any of the following ways:
 - Access the workflow templates list from the **Templates** menu on the left navigation bar or while in the workflow template Details view, scroll to the bottom to access the |launch| button from the list of templates.
 
 .. image:: ../common/images/wf-templates-wf-template-launch.png
-   :alt: workflow template - 
+   :alt: workflow template - workflow template launch
 
 - While in the Workflow Job Template Details view of the job you want to launch, click **Launch**. 
 
 .. |launch| image:: ../common/images/launch-button.png
-   :alt: workflow template - 
+   :alt: workflow template - launch button
 
 Along with any extra variables set in the workflow job template and survey, AWX automatically adds the same variables as those added for a workflow job template upon launch. Additionally, AWX automatically redirects the web browser to the Jobs Details page for this job, displaying the progress and the results.
 
 Events related to approvals on workflows display in the Activity Stream (|activity-stream|) with detailed information about the approval requests, if any. 
 
 .. |activity-stream| image:: ../common/images/activitystream.png
-   :alt: workflow template - 
+   :alt: workflow template - activitystream
 
 .. .. image:: ../common/images/wf-activity-stream-events.png
-   :alt: workflow template - 
+   :alt: workflow template - activity stream events
 
 
 Copy a Workflow Template
@@ -596,12 +596,12 @@ AWX allows you the ability to copy a workflow template. If you choose to copy a 
 2. Click the |copy| button.
 
 .. |copy| image:: ../common/images/copy-button.png
-   :alt: workflow template - 
+   :alt: workflow template - copy button
 
 A new template opens with the name of the template from which you copied and a timestamp.
 
 .. image:: ../common/images/wf-list-view-copy-example.png
-   :alt: workflow template - 
+   :alt: workflow list - view copy example
 
 Select the copied template and replace the contents of the **Name** field with a new name, and provide or modify the entries in the other fields to complete this template.
 
@@ -647,4 +647,4 @@ The following table notes the behavior (hierarchy) of variable precedence in AWX
 **Variable Precedence Hierarchy (last listed wins)**
 
 .. image:: ../common/images/Architecture-AWX_Variable_Precedence_Hierarchy-Workflows.png
-   :alt: workflow template - 
+   :alt: workflow template - Architecture AWX Variable Precedence Hierarchy Workflows
