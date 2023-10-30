@@ -37,8 +37,11 @@ class Control(object):
     def running(self, *args, **kwargs):
         return self.control_with_reply('running', *args, **kwargs)
 
-    def cancel(self, task_ids, *args, **kwargs):
-        return self.control_with_reply('cancel', *args, extra_data={'task_ids': task_ids}, **kwargs)
+    def cancel(self, task_ids, with_reply=True):
+        if with_reply:
+            return self.control_with_reply('cancel', extra_data={'task_ids': task_ids})
+        else:
+            self.control({'control': 'cancel', 'task_ids': task_ids, 'reply_to': None}, extra_data={'task_ids': task_ids})
 
     def schedule(self, *args, **kwargs):
         return self.control_with_reply('schedule', *args, **kwargs)
