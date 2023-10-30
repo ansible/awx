@@ -74,6 +74,8 @@ from awx.main.utils.common import (
     extract_ansible_vars,
     get_awx_version,
     create_partition,
+    ScheduleWorkflowManager,
+    ScheduleTaskManager,
 )
 from awx.conf.license import get_license
 from awx.main.utils.handlers import SpecialInventoryHandler
@@ -449,6 +451,12 @@ class BaseTask(object):
                 ansible_version_info = ee_ansible_info.readline()
                 instance.ansible_version = ansible_version_info
                 instance.save(update_fields=['ansible_version'])
+
+        # Run task manager appropriately for speculative dependencies
+        if instance.unifiedjob_blocked_jobs.exists():
+            ScheduleTaskManager().schedule()
+        if instance.spawned_by_workflow:
+            ScheduleWorkflowManager().schedule()
 
     def should_use_fact_cache(self):
         return False
