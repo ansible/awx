@@ -149,7 +149,7 @@ Send notifications to the following groups:
   * [Ansible Community forum](https://forum.ansible.com/)
   * #social:ansible.com IRC (@newsbot for inclusion in bullhorn)
   * #awx:ansible.com (no @newsbot in this room)
-  * #ansible-controller slack channel
+  * #aap-controller slack channel
 
 These messages are templated out for you in the output of `get_next_release.yml`.
 
