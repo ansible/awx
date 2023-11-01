@@ -71,7 +71,7 @@ The System tab allows you to define the base URL for the AWX host, configure ale
   - **Logging settings**: configure logging options based on the type you choose:
 
     .. image:: ../common/images/configure-awx-system-logging-types.png
-      :alt: Screenshot of the AWX system settings menu with options for system configuration.
+      :alt: Logging settings shown with the list of options for Logging Aggregator Types.
 
     For more information about each of the logging aggregation types, refer to the :ref:`ag_logging` section of the |ata|.
 
@@ -81,7 +81,7 @@ The System tab allows you to define the base URL for the AWX host, configure ale
 .. |help| image:: ../common/images/tooltips-icon.png
 
 .. image:: ../common/images/configure-awx-system.png
-   :alt: Screenshot of the AWX System settings window.
+   :alt: Miscellaneous System settings window showing all possible configurable options.
 
 .. note::
 
