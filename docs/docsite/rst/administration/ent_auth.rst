@@ -55,7 +55,7 @@ To set up enterprise authentication for Microsoft Azure Active Directory (AD), y
 8. To verify that the authentication was configured correctly, logout of AWX and the login screen will now display the Microsoft Azure logo to allow logging in with those credentials.
 
 .. image:: ../common/images/configure-awx-auth-azure-logo.png
-    :alt: Screenshot of the AWX login screen displaying the Microsoft Azure logo for authentication.
+    :alt: AWX login screen displaying the Microsoft Azure logo for authentication.
 
 
 For application registering basics in Azure AD, refer to the `Azure AD Identity Platform (v2)`_ overview. 
@@ -171,7 +171,7 @@ As an example for private keys:
 For example:
 
 .. image:: ../common/images/configure-awx-auth-saml-org-info.png
-    :alt: Configuring SAML Organization Information in AWX.
+    :alt: Configuring SAML Organization information in AWX.
 
 .. note:: 
    These fields are required in order to properly configure SAML within AWX.
@@ -188,7 +188,7 @@ For example:
 For example:
 
 .. image:: ../common/images/configure-awx-auth-saml-techcontact-info.png
-    :alt: Configuring SAML Technical Contact Information in AWX.
+    :alt: Configuring SAML Technical Contact information in AWX.
 
 9. Provide the IdP with the support contact information in the **SAML Service Provider Support Contact** field. Do not remove the contents of this field.
 
@@ -202,7 +202,7 @@ For example:
 For example:
 
 .. image:: ../common/images/configure-awx-auth-saml-suppcontact-info.png
-    :alt: Configuring SAML Support Contact Information in AWX.
+    :alt: Configuring SAML Support Contact information in AWX.
 
 10. In the **SAML Enabled Identity Providers** field, provide information on how to connect to each Identity Provider listed. AWX expects the following SAML attributes in the example below:
 
@@ -488,7 +488,7 @@ Example::
     Alternatively,  logout of AWX and the login screen will now display the SAML logo to indicate it as a alternate method of logging into AWX.
 
     .. image:: ../common/images/configure-awx-auth-saml-logo.png
-        :alt: Customizing the logo for the SAML Identity Provider (IdP) in AWX.
+        :alt: AWX login screen displaying the SAML logo for authentication.
 
 
 Transparent SAML Logins
@@ -505,7 +505,7 @@ For transparent logins to work, you must first get IdP-initiated logins to work.
 2. Once this is working, specify the redirect URL for non-logged-in users to somewhere other than the default AWX login page by using the **Login redirect override URL** field in the Miscellaneous Authentication settings window of the **Settings** menu, accessible from the left navigation bar. This should be set to ``/sso/login/saml/?idp=<name-of-your-idp>`` for transparent SAML login, as shown in the example.
 
 .. image:: ../common/images/configure-awx-system-login-redirect-url.png
-    :alt: Configuring the login redirect URL in AWX System Settings.
+    :alt: Configuring the login redirect URL in AWX Miscellaneous Authentication Settings.
 
 .. note::
 
@@ -548,7 +548,7 @@ Terminal Access Controller Access-Control System Plus (TACACS+) is a protocol th
 - **TACACS+ Authentication Protocol**: The protocol used by TACACS+ client. Options are **ascii** or **pap**.
 
 .. image:: ../common/images/configure-awx-auth-tacacs.png
-    :alt: TACACS+ configuration in AWX settings.
+    :alt: TACACS+ configuration details in AWX settings.
 
 4. Click **Save** when done.
 
@@ -575,7 +575,7 @@ To configure OIDC in AWX:
 The example below shows specific values associated to GitHub as the generic IdP:
 
  .. image:: ../common/images/configure-awx-auth-oidc.png
-    :alt: OpenID Connect (OIDC) configuration in AWX settings.
+    :alt: OpenID Connect (OIDC) configuration details in AWX settings.
 
 4. Click **Save** when done.
 
@@ -587,5 +587,4 @@ The example below shows specific values associated to GitHub as the generic IdP:
 5. To verify that the authentication was configured correctly, logout of AWX and the login screen will now display the OIDC logo to indicate it as a alternate method of logging into AWX.
 
  .. image:: ../common/images/configure-awx-auth-oidc-logo.png
-    :alt: Logo for OpenID Connect (OIDC) configuration in AWX settings.
-
+    :alt: AWX login screen displaying the OpenID Connect (OIDC) logo for authentication.
