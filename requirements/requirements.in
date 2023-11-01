@@ -27,7 +27,7 @@ djangorestframework
 djangorestframework-yaml
 filelock
 GitPython>=3.1.32  # CVE-2023-40267
-hiredis==2.0.0  # see UPGRADE BLOCKERs
+hiredis>=2.2.3  # need to prevent core dumps on uWSGI worker exit
 irc
 jinja2
 JSON-log-formatter

@@ -157,7 +157,7 @@ gitpython==3.1.32
     # via -r /awx_devel/requirements/requirements.in
 google-auth==2.14.1
     # via kubernetes
-hiredis==2.0.0
+hiredis==2.2.3
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   aioredis
