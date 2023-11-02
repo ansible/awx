@@ -28,7 +28,7 @@ class Command(BaseCommand):
 
     def handle(self, **options):
         # provides a mapping of hostname to Instance objects
-        nodes = Instance.objects.in_bulk(field_name='hostname')
+        nodes = Instance.objects.all().prefetch_related('receptor_addresses').in_bulk(field_name='hostname')
 
         if options['source'] not in nodes:
             raise CommandError(f"Host {options['source']} is not a registered instance.")
@@ -38,6 +38,12 @@ class Command(BaseCommand):
             raise CommandError("The option --peers may not be used with --exact.")
         if options['exact'] is not None and options['disconnect']:
             raise CommandError("The option --disconnect may not be used with --exact.")
+
+        # make sure peers and source instances only have one receptor address
+        for hostname, node in nodes.items():
+            if hostname in options.get('peers', []) or hostname == options['source']:
+                if node.receptor_addresses.count() > 1:
+                    raise CommandError(f"Instance {hostname} has more than one receptor address.")
 
         # No 1-cycles
         for collection in ('peers', 'disconnect', 'exact'):
@@ -60,7 +66,7 @@ class Command(BaseCommand):
             results = 0
             for target in options['peers']:
                 _, created = InstanceLink.objects.update_or_create(
-                    source=nodes[options['source']], target=nodes[target], defaults={'link_state': InstanceLink.States.ESTABLISHED}
+                    source=nodes[options['source']], target=nodes[target].receptor_addresses.get(), defaults={'link_state': InstanceLink.States.ESTABLISHED}
                 )
                 if created:
                     results += 1
@@ -72,7 +78,7 @@ class Command(BaseCommand):
             for target in options['disconnect']:
                 if target not in nodes:  # Be permissive, the node might have already been de-registered.
                     continue
-                n, _ = InstanceLink.objects.filter(source=nodes[options['source']], target=nodes[target]).delete()
+                n, _ = InstanceLink.objects.filter(source=nodes[options['source']], target=nodes[target].receptor_addresses.get()).delete()
                 results += n
 
             print(f"{results} peer links removed from the database.")
@@ -82,10 +88,10 @@ class Command(BaseCommand):
             with transaction.atomic():
                 peers = set(options['exact'])
                 links = set(InstanceLink.objects.filter(source=nodes[options['source']]).values_list('target__hostname', flat=True))
-                removals, _ = InstanceLink.objects.filter(source=nodes[options['source']], target__hostname__in=links - peers).delete()
+                removals, _ = InstanceLink.objects.filter(source=nodes[options['source']], target__instance__hostname__in=links - peers).delete()
                 for target in peers - links:
                     _, created = InstanceLink.objects.update_or_create(
-                        source=nodes[options['source']], target=nodes[target], defaults={'link_state': InstanceLink.States.ESTABLISHED}
+                        source=nodes[options['source']], target=nodes[target].receptor_addresses.get(), defaults={'link_state': InstanceLink.States.ESTABLISHED}
                     )
                     if created:
                         additions += 1
