@@ -140,6 +140,7 @@ The Instance Groups list view from the |at| User Interface provides a summary of
 |Instance Group policy example|
 
 .. |Instance Group policy example| image:: ../common/images/instance-groups_list_view.png
+		:alt: Instance Group list view with example instance group and container groups.
 
 See :ref:`ug_instance_groups_create` for further detail.
 
@@ -231,6 +232,7 @@ Likewise, an administrator could assign multiple groups to each organization as 
 	|Instance Group example|
 
 .. |Instance Group example| image:: ../common/images/instance-groups-scenarios.png
+		:alt: Illustration showing grouping scenarios.
 
 Arranging resources in this way offers a lot of flexibility. Also, you can create instance groups with only one instance, thus allowing you to direct work towards a very specific Host in the AWX cluster.
 
@@ -327,6 +329,7 @@ To create a container group:
 |IG - create new CG|
 
 .. |IG - create new CG| image:: ../common/images/instance-group-create-new-cg.png
+		:alt: Create new container group form.
 
 4. Enter a name for your new container group and select the credential previously created to associate it to the container group.
 
@@ -342,10 +345,12 @@ To customize the Pod spec, specify the namespace in the **Pod Spec Override** fi
 |IG - CG customize pod|
 
 .. |IG - CG customize pod| image:: ../common/images/instance-group-customize-cg-pod.png
+		:alt: Create new container group form with the option to custom the pod spec.
 
 You may provide additional customizations, if needed. Click **Expand** to view the entire customization window.
 
 .. image:: ../common/images/instance-group-customize-cg-pod-expanded.png
+	:alt: The expanded view for customizing the pod spec.
 
 .. note::
 
@@ -354,10 +359,12 @@ You may provide additional customizations, if needed. Click **Expand** to view t
 Once the container group is successfully created, the **Details** tab of the newly created container group remains, which allows you to review and edit your container group information. This is the same menu that is opened if the Edit (|edit-button|) button is clicked from the **Instance Group** link. You can also edit **Instances** and review **Jobs** associated with this instance group.
 
 .. |edit-button| image:: ../common/images/edit-button.png
+		:alt: Edit button.
 
 |IG - example CG successfully created|
 
 .. |IG - example CG successfully created| image:: ../common/images/instance-group-example-cg-successfully-created.png
+		:alt: Example of the successfully created instance group as shown in the Jobs tab of the Instance groups window.
 
 Container groups and instance groups are labeled accordingly.
 
@@ -375,6 +382,7 @@ To verify the deployment and termination of your container:
 |Dummy inventory|
 
 .. |Dummy inventory| image:: ../common/images/inventories-create-new-cg-test-inventory.png
+		:alt: Example of creating a new container group test inventory.
 
 2. Create "localhost" host in inventory with variables:
 
@@ -385,6 +393,7 @@ To verify the deployment and termination of your container:
 |Inventory with localhost|
 
 .. |Inventory with localhost| image:: ../common/images/inventories-create-new-cg-test-localhost.png
+		:alt: The new container group test inventory showing the populated variables.
 
 3. Launch an ad hoc job against the localhost using the *ping* or *setup* module. Even though the **Machine Credential** field is required, it does not matter which one is selected for this simple test.
 
@@ -393,13 +402,14 @@ To verify the deployment and termination of your container:
 .. |Launch inventory with localhost| image:: ../common/images/inventories-launch-adhoc-cg-test-localhost.png
 
 .. image:: ../common/images/inventories-launch-adhoc-cg-test-localhost2.png
+	:alt: Launching a Ping adhoc command on the newly created inventory with localhost.
 
 You can see in the jobs detail view the container was reached successfully using one of ad hoc jobs.
 
 |Inventory with localhost ping success|
 
 .. |Inventory with localhost ping success| image:: ../common/images/inventories-launch-adhoc-cg-test-localhost-success.png
-
+	:alt: Jobs output view showing a successfully ran adhoc job.
 
 If you have an OpenShift UI, you can see Pods appear and disappear as they deploy and terminate. Alternatively, you can use the CLI to perform a ``get pod`` operation on your namespace to watch these same events occurring in real-time.
 
@@ -412,6 +422,7 @@ When you run a job associated with a container group, you can see the details of
 |IG - instances jobs|
 
 .. |IG - instances jobs| image:: ../common/images/instance-group-job-details-with-cgs.png
+	:alt: Example Job details window showing the associated execution environment and container group.
 
 
 Kubernetes API failure conditions
