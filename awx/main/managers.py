@@ -161,9 +161,6 @@ class InstanceManager(models.Manager):
                 if instance.node_type != node_type:
                     instance.node_type = node_type
                     update_fields.append('node_type')
-                if instance.listener_port != listener_port:
-                    instance.listener_port = listener_port
-                    update_fields.append('listener_port')
                 if update_fields:
                     instance.save(update_fields=update_fields)
                     return (True, instance)
@@ -183,10 +180,13 @@ class InstanceManager(models.Manager):
             instance = self.create(
                 hostname=hostname,
                 ip_address=ip_address,
-                listener_port=listener_port,
                 node_type=node_type,
                 peers_from_control_nodes=peers_from_control_nodes,
                 **create_defaults,
                 **uuid_option
             )
+            from awx.main.management.commands.add_receptor_address import add_address
+
+            if listener_port:
+                add_address(address=hostname, hostname=hostname, port=listener_port, protocol='tcp')
         return (True, instance)

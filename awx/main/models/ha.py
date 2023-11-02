@@ -185,13 +185,6 @@ class Instance(HasPolicyEditsMixin, BaseModel):
     node_state = models.CharField(
         choices=States.choices, default=States.READY, max_length=16, help_text=_("Indicates the current life cycle stage of this instance.")
     )
-    listener_port = models.PositiveIntegerField(
-        blank=True,
-        null=True,
-        default=None,
-        validators=[MinValueValidator(1024), MaxValueValidator(65535)],
-        help_text=_("Port that Receptor will listen for incoming connections on."),
-    )
 
     peers = models.ManyToManyField('ReceptorAddress', through=InstanceLink, through_fields=('source', 'target'), related_name='peers_from')
     peers_from_control_nodes = models.BooleanField(default=False, help_text=_("If True, control plane cluster nodes should automatically peer to it."))
