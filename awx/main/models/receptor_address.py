@@ -18,8 +18,8 @@ class ReceptorAddress(models.Model):
         ]
 
     address = models.CharField(max_length=255)
-    port = models.IntegerField(blank=False)
-    protocol = models.CharField(max_length=10)
+    port = models.IntegerField(default=27199)
+    protocol = models.CharField(max_length=10, default="tcp")
     websocket_path = models.CharField(max_length=255, default="", blank=True)
     is_internal = models.BooleanField(default=False)
     peers_from_control_nodes = models.BooleanField(default=False)
