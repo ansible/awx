@@ -16,7 +16,8 @@
         command: vault operator init
         container: tools_vault_1
         env:
-          VAULT_ADDR: "http://127.0.0.1:1234"
+          VAULT_ADDR: "https://127.0.0.1:1234"
+          VAULT_SKIP_VERIFY: "true"
       register: vault_initialization
 
     - name: Write out initialization file
@@ -36,11 +37,33 @@
         name: vault
         tasks_from: unseal.yml
 
+    - name: Create a cert auth mount
+      flowerysong.hvault.write:
+        path: "sys/auth/cert"
+        vault_addr: "https://localhost:1234"
+        validate_certs: false
+        token: "{{ Initial_Root_Token }}"
+        data:
+          type: "cert"
+
+    - name: Configure client certificate
+      flowerysong.hvault.write:
+        path: "auth/cert/certs/awx-client"
+        vault_addr: "https://localhost:1234"
+        validate_certs: false
+        token: "{{ Initial_Root_Token }}"
+        data:
+          name: awx-client
+          certificate: "{{ lookup('ansible.builtin.file', '{{ vault_client_cert }}') }}"
+          policies:
+            - root
+
     - name: Create an engine
       flowerysong.hvault.engine:
         path: "my_engine"
         type: "kv"
-        vault_addr: "http://localhost:1234"
+        vault_addr: "https://localhost:1234"
+        validate_certs: false
         token: "{{ Initial_Root_Token }}"
       register: engine
 
@@ -50,7 +73,8 @@
         key: "my_folder"
         value:
           my_key: "this_is_the_secret_value"
-        vault_addr: "http://localhost:1234"
+        vault_addr: "https://localhost:1234"
+        validate_certs: false
         token: "{{ Initial_Root_Token }}"
 
   always:

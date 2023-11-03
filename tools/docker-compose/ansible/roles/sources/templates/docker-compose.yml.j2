@@ -261,10 +261,11 @@ services:
     ports:
       - "1234:1234"
     environment:
-      VAULT_LOCAL_CONFIG: '{"storage": {"file": {"path": "/vault/file"}}, "listener": [{"tcp": { "address": "0.0.0.0:1234", "tls_disable": true}}], "default_lease_ttl": "168h", "max_lease_ttl": "720h", "ui": true}'
+      VAULT_LOCAL_CONFIG: '{"storage": {"file": {"path": "/vault/file"}}, "listener": [{"tcp": { "address": "0.0.0.0:1234", "tls_disable": false, "tls_cert_file": "/vault/tls/server.crt", "tls_key_file": "/vault/tls/server.key"}}], "default_lease_ttl": "168h", "max_lease_ttl": "720h", "ui": true}'
     cap_add:
       - IPC_LOCK
     volumes:
+      - '../../docker-compose/_sources/vault_certs:/vault/tls'
       - 'hashicorp_vault_data:/vault/file'
 {% endif %}
 
