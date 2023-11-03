@@ -1,6 +1,6 @@
 import requests
 
-url = "https://awx-public-ci-files.s3.amazonaws.com/swagger-test/swagger.json"
+url = "https://awx-public-ci-files.s3.amazonaws.com/community-docs/swagger.json"
 swagger_json = "./docs/docsite/rst/rest_api/_swagger/swagger.json"
 
 response = requests.get(url)
