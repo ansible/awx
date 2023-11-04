@@ -1239,6 +1239,9 @@ class RunProjectUpdate(BaseTask):
 
         return scm_url, extra_vars
 
+    def build_credentials_list(self, instance):
+        return [instance.credential]
+
     def build_inventory(self, instance, private_data_dir):
         return 'localhost,'
 
