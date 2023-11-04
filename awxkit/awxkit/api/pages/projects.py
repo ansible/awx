@@ -50,7 +50,7 @@ class Project(HasCopy, HasCreate, HasNotifications, UnifiedJobTemplate):
     def create_payload(self, name='', description='', scm_type='git', scm_url='', scm_branch='', organization=Organization, credential=None, **kwargs):
         if credential:
             if isinstance(credential, Credential):
-                if credential.ds.credential_type.namespace not in ('scm', 'insights'):
+                if credential.ds.credential_type.namespace not in ('scm', 'insights', 'azure_rm'):
                     credential = None  # ignore incompatible credential from HasCreate dependency injection
             elif credential in (Credential,):
                 credential = (Credential, dict(credential_type=(True, dict(kind='scm'))))
