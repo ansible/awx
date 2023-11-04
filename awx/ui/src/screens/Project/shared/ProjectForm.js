@@ -35,6 +35,11 @@ const fetchCredentials = async (credential) => {
     },
     {
       data: {
+        results: [azurermCredentialType],
+      },
+    },
+    {
+      data: {
         results: [insightsCredentialType],
       },
     },
@@ -45,13 +50,14 @@ const fetchCredentials = async (credential) => {
     },
   ] = await Promise.all([
     CredentialTypesAPI.read({ kind: 'scm' }),
+    CredentialTypesAPI.read({ namespace: 'azure_rm' }),
     CredentialTypesAPI.read({ name: 'Insights' }),
     CredentialTypesAPI.read({ kind: 'cryptography' }),
   ]);
 
   if (!credential) {
     return {
-      scm: { typeId: scmCredentialType.id },
+      scm: { typeIds: [scmCredentialType.id, azurermCredentialType.id] },
       insights: { typeId: insightsCredentialType.id },
       cryptography: { typeId: cryptographyCredentialType.id },
     };
@@ -60,8 +66,12 @@ const fetchCredentials = async (credential) => {
   const { credential_type_id } = credential;
   return {
     scm: {
-      typeId: scmCredentialType.id,
-      value: credential_type_id === scmCredentialType.id ? credential : null,
+      typeIds: [scmCredentialType.id, azurermCredentialType.id],
+      value:
+        credential_type_id === scmCredentialType.id ||
+        credential_type_id === azurermCredentialType.id
+          ? credential
+          : null,
     },
     insights: {
       typeId: insightsCredentialType.id,
@@ -367,13 +377,13 @@ function ProjectForm({ project, submitError, ...props }) {
   });
   const [scmTypeOptions, setScmTypeOptions] = useState(null);
   const [credentials, setCredentials] = useState({
-    scm: { typeId: null, value: null },
+    scm: { typeIds: null, value: null },
     insights: { typeId: null, value: null },
     cryptography: { typeId: null, value: null },
   });
   const [signatureValidationCredentials, setSignatureValidationCredentials] =
     useState({
-      scm: { typeId: null, value: null },
+      scm: { typeIds: null, value: null },
       insights: { typeId: null, value: null },
       cryptography: { typeId: null, value: null },
     });
