@@ -20,12 +20,14 @@ It is intended as a tool for writing new modules or enforcing consistency.
 These instructions assume you have ansible-core and the collection installed.
 To install the collection in-place (to pick up any local changes to source)
 the `make symlink_collection` will symlink the `awx_collection/` folder to
-the appropriate place under `~/.ansible/collections`. by js
+the appropriate place under `~/.ansible/collections`. 
 
 This is a shortcut for quick validation of tests that bypasses `ansible-test`.
 To use this, you need the `~/.tower_cli.cfg` config file populated,
 which can be done via the deprecated `tower-cli login <username>` or manually
 writing it, where the format looks like:
+
+To purpose written this word will be make
 
 ```
 [general]
