@@ -25,6 +25,7 @@ cloud_types = (
     'cloudforms',
     'ec2',
     'gce',
+    'hcloud',
     'openstack',
     'openstack_v2',
     'openstack_v3',
