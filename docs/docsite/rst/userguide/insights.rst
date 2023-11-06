@@ -41,7 +41,7 @@ To create a new credential for use with Insights:
 |Credentials - create with demo insights credentials|
 
 .. |Credentials - create with demo insights credentials| image:: ../common/images/insights-create-with-demo-credentials.png
-   :alt: Form for creating an Insights Credential with demo credentials
+   :alt: Create new credential form showing example Insights credential
 
 8. Click **Save** when done.
 
@@ -88,7 +88,7 @@ This process syncs your Insights project with your Insights account solution. No
 |Insights - demo insights project success|
 
 .. |Insights - demo insights project success| image:: ../common/images/insights-create-project-insights-succeed.png
-   :alt: Success confirmation after creating a demo Insights project
+   :alt: Projects list showing successfully created sample Insights project
 
 Create Insights Inventory
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -123,13 +123,13 @@ Remediation of an Insights inventory allows AWX to run Insights playbooks with a
 |Insights - maintenance plan template filled|
 
 .. |Insights - maintenance plan template filled| image:: ../common/images/insights-create-new-job-template-maintenance-plan-filled.png
-   :alt: Form for creating a maintenance plan template for Insights remediation
+   :alt: Form for creating a maintenance plan template for Insights remediation.
 
 3. Click **Save** when done. 
 
 4. Click the |launch| icon to launch the job template.
 
 .. |launch| image:: ../common/images/launch-button.png
-   :alt: Launch icon for starting the job template
+   :alt: Launch icon.
 
 Once complete, the job results display in the Job Details page.
