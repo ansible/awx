@@ -199,7 +199,7 @@ class ApiV2(base.Base):
                 return None
             fields['natural_key'] = natural_key
 
-        return utils.remove_encrypted(fields)
+        return fields
 
     def _export_list(self, endpoint):
         post_fields = utils.get_post_fields(endpoint, self._cache)
@@ -280,7 +280,7 @@ class ApiV2(base.Base):
                     _page = self._cache.get_by_natural_key(value)
                     post_data[field] = _page['id'] if _page is not None else None
                 else:
-                    post_data[field] = value
+                    post_data[field] = utils.remove_encrypted(value)
 
             _page = self._cache.get_by_natural_key(asset['natural_key'])
             try:
