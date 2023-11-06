@@ -1084,6 +1084,28 @@ Red Hat Ansible Automation Platform
 
 4. Use the **Source Variables** field to override variables used by the ``controller`` inventory plugin. Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two. 
 
+
+.. _ug_source_hcloud:
+
+Hetzner Cloud
+~~~~~~~~~~~~~~~~
+
+.. index::
+   pair: inventories; Hetzner Cloud
+
+
+1. To configure a HCloud-sourced inventory, select **Hetzner Cloud** from the Source field.
+
+2. The Create Source window expands with the required **Credential** field. Choose from an existing Hetzner Cloud Credential. For more information, refer to :ref:`ug_credentials`.
+
+3. You can optionally specify the verbosity, host filter, enabled variable/value, and update options as described in the main procedure for :ref:`adding a source <ug_add_inv_common_fields>`.
+
+4. Use the **Source Variables** field to override variables used by the ``hcloud`` inventory plugin. Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two. For a detailed description of these variables, view the `hcloud inventory plugin <https://github.com/ansible-collections/hetzner.hcloud/blob/main/plugins/inventory/hcloud.py>`__.
+
+|Inventories - create source - Hetzner Cloud example|
+
+.. |Inventories - create source - Hetzner Cloud example| image:: ../common/images/inventories-create-source-hcloud-example.png
+
 .. _ug_customscripts:
 
 Export old inventory scripts

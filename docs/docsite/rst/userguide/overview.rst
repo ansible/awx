@@ -280,6 +280,7 @@ Updated AWX to use the following inventory plugins from upstream collections if 
 - openstack.cloud.openstack
 - ovirt.ovirt.ovirt
 - awx.awx.tower
+- hetzner.hcloud.hcloud
 
 
 Secret Management System

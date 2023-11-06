@@ -312,6 +312,35 @@ HashiCorp Vault Signed SSH
 This is considered part of the secret management capability. See :ref:`ug_credentials_hashivaultssh` for more detail.
 
 
+Hetzner Cloud
+^^^^^^^^^^^^^^^^
+
+.. index::
+   pair: credential types; hcloud
+
+Selecting this credential type enables synchronization of inventory with Hetzner Cloud.
+
+AWX uses the following environment variables for Hetzner Cloudcredentials and are fields prompted in the user interface:
+
+::
+
+  HCLOUD_TOKEN
+
+
+|Credentials - create Hetzner Cloud credential|
+
+.. |Credentials - create Hetzner Cloud credential| image:: ../common/images/credentials-create-hcloud-credential.png
+    :alt: Credentials - create Hetzner Cloud credential form
+
+Hetzner Cloud credentials have the following inputs that are required:
+
+-  **API Token**: The API token of the project.
+
+.. note::
+
+    It is recommended to use a read-only API token.
+
+
 Insights
 ^^^^^^^^^^^
 
