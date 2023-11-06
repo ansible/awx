@@ -328,7 +328,7 @@ class DependencyManager(TaskBase):
         '''
         if (update is None) or (update.status in ['failed', 'canceled', 'error']):
             return True
-        if update.status in ['waiting', 'pending', 'running']:
+        if update.status in ['new', 'waiting', 'pending', 'running']:
             return False
 
         return bool(((update.finished + timedelta(seconds=cache_timeout))) < tz_now())
@@ -397,7 +397,7 @@ class DependencyManager(TaskBase):
 
     @timeit
     def _schedule(self):
-        self.get_tasks(dict(status__in=["pending"], dependencies_processed=False))
+        self.get_tasks(dict(status__in=["new", "pending"], dependencies_processed=False))
 
         if len(self.all_tasks) > 0:
             deps = self.generate_dependencies(self.all_tasks)
@@ -672,7 +672,7 @@ class TaskManager(TaskBase):
         self.process_running_tasks(running_tasks)
         self.subsystem_metrics.inc(f"{self.prefix}_running_processed", len(running_tasks))
 
-        pending_tasks = [t for t in self.all_tasks if t.status == 'pending']
+        pending_tasks = [t for t in self.all_tasks if t.status in ['new', 'pending']]
 
         self.process_pending_tasks(pending_tasks)
         self.subsystem_metrics.inc(f"{self.prefix}_pending_processed", len(pending_tasks))
@@ -704,7 +704,7 @@ class TaskManager(TaskBase):
 
     @timeit
     def _schedule(self):
-        self.get_tasks(dict(status__in=["pending", "waiting", "running"], dependencies_processed=True))
+        self.get_tasks(dict(status__in=["new", "pending", "waiting", "running"], dependencies_processed=True))
 
         self.after_lock_init()
         self.reap_jobs_from_orphaned_instances()
