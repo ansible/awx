@@ -333,12 +333,15 @@ class DependencyManager(TaskBase):
 
         return bool(((update.finished + timedelta(seconds=cache_timeout))) < tz_now())
 
-    def get_or_create_project_update(self, project_id):
+    def get_or_create_project_update(self, project_id, scm_branch=None):
         project = self.all_projects.get(project_id, None)
         if project is not None:
             latest_project_update = project.project_updates.filter(job_type='check').order_by("-created").first()
             if self.should_update_again(latest_project_update, project.scm_update_cache_timeout):
-                project_task = project.create_project_update(_eager_fields=dict(launch_type='dependency'))
+                fields = dict(launch_type='dependency')
+                if scm_branch and project.allow_override:
+                    fields['scm_branch'] = scm_branch
+                project_task = project.create_project_update(_eager_fields=fields)
                 project_task.signal_start()
                 return [project_task]
             else:
@@ -346,7 +349,7 @@ class DependencyManager(TaskBase):
         return []
 
     def gen_dep_for_job(self, task):
-        dependencies = self.get_or_create_project_update(task.project_id)
+        dependencies = self.get_or_create_project_update(task.project_id, task.scm_branch)
 
         try:
             start_args = json.loads(decrypt_field(task, field_name="start_args"))
@@ -358,7 +361,10 @@ class DependencyManager(TaskBase):
                 continue
             latest_inventory_update = inventory_source.inventory_updates.order_by("-created").first()
             if self.should_update_again(latest_inventory_update, inventory_source.update_cache_timeout):
-                inventory_task = inventory_source.create_inventory_update(_eager_fields=dict(launch_type='dependency'))
+                fields = dict(launch_type='dependency')
+                if task.scm_branch and task.project.allow_override:
+                    fields['scm_branch'] = task.scm_branch
+                inventory_task = inventory_source.create_inventory_update(_eager_fields=fields)
                 inventory_task.signal_start()
                 dependencies.append(inventory_task)
             else:
