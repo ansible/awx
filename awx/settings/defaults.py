@@ -336,6 +336,7 @@ INSTALLED_APPS = [
     'awx.ui',
     'awx.sso',
     'solo',
+    'ansible_base',
 ]
 
 INTERNAL_IPS = ('127.0.0.1',)
