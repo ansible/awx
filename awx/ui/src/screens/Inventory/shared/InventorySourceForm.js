@@ -25,6 +25,7 @@ import {
   ControllerSubForm,
   VMwareSubForm,
   VirtualizationSubForm,
+  HCloudSubForm,
 } from './InventorySourceSubForms';
 
 const buildSourceChoiceOptions = (options) => {
@@ -218,6 +219,14 @@ const InventorySourceFormFields = ({
                   <VMwareSubForm
                     autoPopulateCredential={
                       !source?.id || source?.source !== 'vmware'
+                    }
+                    sourceOptions={sourceOptions}
+                  />
+                ),
+                hcloud: (
+                  <HCloudSubForm
+                    autoPopulateCredential={
+                      !source?.id || source?.source !== 'hcloud'
                     }
                     sourceOptions={sourceOptions}
                   />

@@ -21,6 +21,8 @@ const ansibleDocUrls = {
     'https://docs.ansible.com/ansible/latest/collections/community/vmware/vmware_vm_inventory_inventory.html',
   constructed:
     'https://docs.ansible.com/ansible/latest/collections/ansible/builtin/constructed_inventory.html',
+  hcloud:
+    'https://docs.ansible.com/ansible/latest/collections/hetzner/hcloud/hcloud_inventory.html',
 };
 
 const getInventoryHelpTextStrings = () => ({

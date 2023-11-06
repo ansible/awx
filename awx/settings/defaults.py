@@ -755,6 +755,14 @@ SATELLITE6_INSTANCE_ID_VAR = 'foreman_id,foreman.id'
 INSIGHTS_INSTANCE_ID_VAR = 'insights_id'
 INSIGHTS_EXCLUDE_EMPTY_GROUPS = False
 
+# -------------------------
+# ----- Hetzner Cloud -----
+# -------------------------
+HCLOUD_ENABLED_VAR = 'status'
+HCLOUD_ENABLED_VALUE = 'running'
+HCLOUD_INSTANCE_ID_VAR = 'id'
+HCLOUD_EXCLUDE_EMPTY_GROUPS = True
+
 # ---------------------
 # ----- Custom -----
 # ---------------------

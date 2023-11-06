@@ -44,6 +44,7 @@ describe('InventorySourceDetail', () => {
                 ['openstack', 'OpenStack'],
                 ['rhv', 'Red Hat Virtualization'],
                 ['controller', 'Red Hat Ansible Automation Platform'],
+                ['hcloud', 'Hetzner Cloud'],
               ],
             },
           },

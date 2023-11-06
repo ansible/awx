@@ -570,6 +570,17 @@ class openstack(PluginFileInjector):
         return ret
 
 
+def hcloud(PluginFileInjector):
+    plugin_name = 'hcloud'
+    namespace = 'hetzner'
+    collection = 'hcloud'
+
+    def inventory_as_dict(self, inventory_source, private_data_dir):
+        ret = super(hcloud, self).inventory_as_dict(inventory_source, private_data_dir)
+
+        return ret
+
+
 class rhv(PluginFileInjector):
     """ovirt uses the custom credential templating, and that is all"""
 
