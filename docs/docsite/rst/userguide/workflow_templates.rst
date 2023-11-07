@@ -362,8 +362,6 @@ For subsequent nodes, you can select one of the following scenarios (edge type) 
 
   If selected, the graphical view will label the node as **ALL**.
 
-  .. image:: ../common/images/wf-editor-convergent-node-all.png
-
 .. note::
 
   If a node is a root node, or a node that does not have any nodes converging into it, setting the **Convergence** rule does not apply, as its behavior is dictated by the action that triggers it.
@@ -382,8 +380,6 @@ Likewise, if a workflow template used in the workflow has **Prompt on Launch** s
   For workflow job templates with promptable fields that are required, but do not have a default, you must provide those values when creating a node before the **Select** button becomes enabled. The two cases that disable the **Select** button until a value is provided via the **Prompt** button: 1) when you select the **Prompt on Launch** checkbox in a workflow job template, but do not provide a default, or 2) when you create a survey question that is required but do not provide a default answer. However, this is **NOT** the case with credentials. Credentials that require a password on launch are **not permitted** when creating a workflow node, since everything needed to launch the node must be provided when the node is created. So, if a workflow job template prompts for credentials, AWX prevents you from being able to select a credential that requires a password.
 
   You must also click **Select** when the prompt wizard closes in order to apply the changes at that node. Otherwise, any changes you make will revert back to the values set in the actual job template.
-
-.. image:: ../common/images/wf-editor-wizard-buttons.png  
 
 Once the node is created, it is labeled with its job type. A template that is associated with each workflow node will run based on the selected run scenario as it proceeds. Click the compass (|compass|) icon to display the legend for each run scenario and their job types.
 
