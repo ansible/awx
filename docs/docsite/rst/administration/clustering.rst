@@ -1,4 +1,3 @@
-
 .. _ag_clustering:
 
 Clustering
@@ -11,7 +10,7 @@ Clustering
 Clustering is sharing load between hosts. Each instance should be able to act as an entry point for UI and API access. This should enable AWX administrators to use load balancers in front of as many instances as they wish and maintain good data visibility.
 
 .. note::
-	Load balancing is optional and is entirely possible to have ingress on one or all instances as needed. The ``CSRF_TRUSTED_ORIGIN`` setting may be required if you are using AWX behind a load balancer. See :ref:`ki_csrf_trusted_origin_setting` for more detail.
+  Load balancing is optional and is entirely possible to have ingress on one or all instances as needed. The ``CSRF_TRUSTED_ORIGIN`` setting may be required if you are using AWX behind a load balancer. See :ref:`ki_csrf_trusted_origin_setting` for more detail.
 
 Each instance should be able to join AWX cluster and expand its ability to execute jobs. This is a simple system where jobs can and will run anywhere rather than be directed on where to run. Also, clustered instances can be grouped into different pools/queues, called :ref:`ag_instance_groups`.
 
@@ -107,61 +106,61 @@ Example of customization could be:
 
 ::
 
-	---
-	spec:
-  	  ...
-  	  node_selector: |
-  	    disktype: ssd
-  	    kubernetes.io/arch: amd64
-  	    kubernetes.io/os: linux
-  	  topology_spread_constraints: |
-  	    - maxSkew: 100
-	      topologyKey: "topology.kubernetes.io/zone"
-	      whenUnsatisfiable: "ScheduleAnyway"
-	      labelSelector:
-        	matchLabels:
-          	  app.kubernetes.io/name: "<resourcename>"
-  	  tolerations: |
-  	    - key: "dedicated"
-	      operator: "Equal"
-	      value: "AWX"
-	      effect: "NoSchedule"
-  	  task_tolerations: |
-  	    - key: "dedicated"
-	      operator: "Equal"
-	      value: "AWX_task"
-	      effect: "NoSchedule"
-  	  postgres_selector: |
-  	    disktype: ssd
-  	    kubernetes.io/arch: amd64
-  	    kubernetes.io/os: linux
-  	  postgres_tolerations: |
-  	    - key: "dedicated"
-	      operator: "Equal"
-	      value: "AWX"
-	      effect: "NoSchedule"
-  	  affinity:
-  	    nodeAffinity:
-	      preferredDuringSchedulingIgnoredDuringExecution:
-	      - weight: 1
-	        preference:
-          	  matchExpressions:
-          	  - key: another-node-label-key
-          	    operator: In
-          	    values:
-          	    - another-node-label-value
-          	    - another-node-label-value
-  	    podAntiAffinity:
-	      preferredDuringSchedulingIgnoredDuringExecution:
-	      - weight: 100
-	        podAffinityTerm:
-          	  labelSelector:
-          	    matchExpressions:
-          	    - key: security
-          	      operator: In
-          	      values:
-          	      - S2
-          	  topologyKey: topology.kubernetes.io/zone
+  ---
+  spec:
+      ...
+      node_selector: |
+        disktype: ssd
+        kubernetes.io/arch: amd64
+        kubernetes.io/os: linux
+      topology_spread_constraints: |
+        - maxSkew: 100
+        topologyKey: "topology.kubernetes.io/zone"
+        whenUnsatisfiable: "ScheduleAnyway"
+        labelSelector:
+          matchLabels:
+              app.kubernetes.io/name: "<resourcename>"
+      tolerations: |
+        - key: "dedicated"
+        operator: "Equal"
+        value: "AWX"
+        effect: "NoSchedule"
+      task_tolerations: |
+        - key: "dedicated"
+        operator: "Equal"
+        value: "AWX_task"
+        effect: "NoSchedule"
+      postgres_selector: |
+        disktype: ssd
+        kubernetes.io/arch: amd64
+        kubernetes.io/os: linux
+      postgres_tolerations: |
+        - key: "dedicated"
+        operator: "Equal"
+        value: "AWX"
+        effect: "NoSchedule"
+      affinity:
+        nodeAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          preference:
+              matchExpressions:
+              - key: another-node-label-key
+                operator: In
+                values:
+                - another-node-label-value
+                - another-node-label-value
+        podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: security
+                  operator: In
+                  values:
+                  - S2
+              topologyKey: topology.kubernetes.io/zone
 
 
 Status and Monitoring via Browser API
@@ -204,6 +203,7 @@ The way jobs are run and reported to a 'normal' user of AWX does not change. On 
 - When a job is submitted from the API interface it gets pushed into the dispatcher queue.  Each AWX instance will connect to and receive jobs from that queue using a particular scheduling algorithm. Any instance in the cluster is just as likely to receive the work and execute the task. If a instance fails while executing jobs, then the work is marked as permanently failed.
 
 .. image:: ../common/images/clustering-visual.png
+  :alt: An illustration depicting job distribution in an AWX cluster.
 
 - Project updates run successfully on any instance that could potentially run a job. Projects will sync themselves to the correct version on the instance immediately prior to running the job. If the needed revision is already locally checked out and Galaxy or Collections updates are not needed, then a sync may not be performed. 
 
@@ -218,5 +218,3 @@ Job Runs
 By default, when a job is submitted to the AWX queue, it can be picked up by any of the workers. However, you can control where a particular job runs, such as restricting the instances from which a job runs on. 
 
 In order to support temporarily taking an instance offline, there is a property enabled defined on each instance. When this property is disabled, no jobs will be assigned to that instance. Existing jobs will finish, but no new work will be assigned.
-
-

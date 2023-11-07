@@ -17,13 +17,16 @@ The **Templates** menu opens a list of the job templates that are currently avai
 |Job templates - home with example job template|
 
 .. |Job templates - home with example job template| image:: ../common/images/job-templates-home-with-example-job-template.png
+    :alt: Job templates - home with example job template
 
 
 From this screen, you can launch (|launch|), edit (|edit|), and copy (|copy|) a job template. To delete a job template, you must select one or more templates and click the **Delete** button. Before deleting a job template, be sure it is not used in a workflow job template.  
 
 .. |edit| image:: ../common/images/edit-button.png
+    :alt: Edit button
 
-.. |delete| image:: ../common/images/delete-button.png 
+.. |delete| image:: ../common/images/delete-button.png
+    :alt: Delete button
 
 
 .. include:: ../common/work_items_deletion_warning.rst
@@ -33,6 +36,7 @@ From this screen, you can launch (|launch|), edit (|edit|), and copy (|copy|) a 
       Job templates can be used to build a workflow template. For templates that show the Workflow Visualizer (|wf-viz-icon|) icon next to them are workflow templates. Clicking it allows you to graphically build a workflow. Many parameters in a job template allow you to enable **Prompt on Launch** that can be modified at the workflow level, and do not affect the values assigned at the job template level. For instructions, see the :ref:`ug_wf_editor` section. 
 
 .. |wf-viz-icon| image:: ../common/images/wf-viz-icon.png
+    :alt: Workflow Visualizer icon
 
 Create a Job Template
 -----------------------
@@ -153,10 +157,13 @@ To create a new job template:
      - Yes
 
 .. |search| image:: ../common/images/search-button.png
+    :alt: Search button
 
 .. |x-circle| image:: ../common/images/x-delete-button.png
+    :alt: Delete button
 
 .. |x| image:: ../common/images/x-button.png
+    :alt: X button
 
 
 3. **Options**: Specify options for launching this template, if necessary.
@@ -170,6 +177,7 @@ To create a new job template:
   If you enable webhooks, other fields display, prompting for additional information:
 
     .. image:: ../common/images/job-templates-options-webhooks.png
+        :alt: Job templates - options - webhooks
 
     - **Webhook Service**: Select which service to listen for webhooks from
     - **Webhook URL**: Automatically populated with the URL for the webhook service to POST requests to.
@@ -184,16 +192,19 @@ To create a new job template:
   - **Prevent Instance Group Fallback**: Check this option to allow only the instance groups listed in the **Instance Groups** field above to execute the job. If unchecked, all available instances in the execution pool will be used based on the hierarchy described in :ref:`ag_instance_groups_control_where_job_runs`.  Click the |help| icon for more information.
 
 .. |help| image:: ../common/images/tooltips-icon.png
+    :alt: Tooltip
 
 |Job templates - create new job template|
 
 .. |Job templates - create new job template| image:: ../common/images/job-templates-create-new-job-template.png
+    :alt: Job templates - create new job template
 
 4. When you have completed configuring the details of the job template, click **Save**. 
 
 Saving the template does not exit the job template page but advances to the Job Template Details tab for viewing. After saving the template, you can click **Launch** to launch the job, or click **Edit** to add or change the attributes of the template, such as permissions, notifications, view completed jobs, and add a survey (if the job type is not a scan). You must first save the template prior to launching, otherwise, the **Launch** button remains grayed-out.
 
 .. image:: ../common/images/job-templates-job-template-details.png
+    :alt: Job templates - job template details
 
 You can verify the template is saved when the newly created template appears on the Templates list view. 
 
@@ -211,6 +222,7 @@ Work with Notifications
 Clicking the **Notifications** tab allows you to review any notification integrations you have setup and their statuses, if they have ran. 
 
 .. image:: ../common/images/job-template-completed-notifications-view.png
+    :alt: Job templates - completed notifications view
 
 Use the toggles to enable or disable the notifications to use with your particular template. For more detail, see :ref:`ug_notifications_on_off`. 
 
@@ -223,11 +235,13 @@ View Completed Jobs
 The **Completed Jobs** tab provides the list of job templates that have ran. Click **Expanded** to view details of each job, including its status, ID, and name; type of job, time started and completed, who started the job; and which template, inventory, project, and credential were used. You can filter the list of completed jobs using any of these criteria.
 
 .. image:: ../common/images/job-template-completed-jobs-view.png
+    :alt: Job templates - completed jobs view
 
 
 Sliced jobs that display on this list are labeled accordingly, with the number of sliced jobs that have run:
 
 .. image:: ../common/images/sliced-job-shown-jobs-list-view.png
+    :alt: Sliced job shown in jobs list view
 
 
 Scheduling
@@ -242,6 +256,7 @@ Access the schedules for a particular job template from the **Schedules** tab.
 |Job Templates - schedule launch|
 
 .. |Job Templates - schedule launch| image:: ../common/images/job-templates-schedules.png
+    :alt: Job Templates - schedule launch
 
 
 Schedule a Job Template
@@ -316,6 +331,7 @@ To create a survey:
 -  **Default answer**: The default answer to the question. This value is pre-filled in the interface and is used if the answer is not provided by the user.
 
 .. image:: ../common/images/job-template-create-survey.png
+    :alt: Job templates - create survey
 
 
 3. Once you have entered the question information, click **Save** to add the question.
@@ -325,11 +341,13 @@ The survey question displays in the Survey list. For any question, you can click
 |job-template-completed-survey|
 
 .. |job-template-completed-survey| image:: ../common/images/job-template-completed-survey.png
+    :alt: Job templates - completed survey
 
 
 If you have more than one survey question, use the **Edit Order** button to rearrange the order of the questions by clicking and dragging on the grid icon. 
 
 .. image:: ../common/images/job-template-rearrange-survey.png
+    :alt: Job templates - rearrange survey
 
 
 4. To add more questions, click the **Add** button to add additional questions.
@@ -369,10 +387,12 @@ Launch a job template by any of the following ways:
 - Access the job template list from the **Templates** menu on the left navigation bar or while in the Job Template Details view, scroll to the bottom to access the |launch| button from the list of templates.
 
 .. image:: ../common/images/job-templates-home-with-example-job-template-launch.png
+    :alt: Job templates - home with example job template - launch
 
 - While in the Job Template Details view of the job template you want to launch, click **Launch**. 
 
 .. |launch| image:: ../common/images/launch-button.png
+    :alt: Launch button
 
 A job may require additional information to run. The following data may be requested at launch:
 
@@ -392,10 +412,12 @@ Below is an example job launch that prompts for Job Tags, and runs the example s
 |job-launch-with-prompt-job-tags|
 
 .. |job-launch-with-prompt-job-tags| image:: ../common/images/job-launch-with-prompt-at-launch-jobtags.png
+    :alt: Job launch with prompt job tags
 
 |job-launch-with-prompt-survey|
 
 .. |job-launch-with-prompt-survey| image:: ../common/images/job-launch-with-prompt-at-launch-survey.png
+    :alt: Job launch with prompt survey
 
 .. note::
 
@@ -445,6 +467,7 @@ Upon launch, AWX automatically redirects the web browser to the Job Status page 
 When slice jobs are running, job lists display the workflow and job slices, as well as a link to view their details individually.
 
 .. image:: ../common/images/sliced-job-shown-jobs-list-view.png
+    :alt: Sliced job shown in jobs list view
 
 .. _ug_JobTemplates_bulk_api:
 
@@ -465,6 +488,7 @@ If you choose to copy Job Template, it **does not** copy any associated schedule
 2. Click the |copy| button associated with the template you want to copy.
 
 .. |copy| image:: ../common/images/copy-button.png
+    :alt: Copy button
 
 The new template with the name of the template from which you copied and a timestamp displays in the list of templates.
 
@@ -517,6 +541,7 @@ The ``scan_files`` fact module is the only module that accepts parameters, passe
 Scan job templates should enable ``become`` and use credentials for which ``become`` is a possibility. You can enable become by checking the **Enable Privilege Escalation** from the Options menu:
 
 .. image:: ../common/images/job-templates-create-new-job-template-become.png
+    :alt: Job template with Privilege Escalation checked from the Options field.
 
 
 Supported OSes for ``scan_facts.yml``
@@ -631,6 +656,7 @@ Fact Caching
 AWX can store and retrieve facts on a per-host basis through an Ansible Fact Cache plugin. This behavior is configurable on a per-job template basis. Fact caching is turned off by default but can be enabled to serve fact requests for all hosts in an inventory related to the job running. This allows you to use job templates with ``--limit`` while still having access to the entire inventory of host facts. A global timeout setting that the plugin enforces per-host, can be specified (in seconds) through the Jobs settings menu:
 
 .. image:: ../common/images/configure-awx-jobs-fact-cache-timeout.png
+    :alt: Jobs Settings window showing the location of the Per-Host Ansible Fact Cache Timeout parameter from the Edit Details screen.
 
 Upon launching a job that uses fact cache (``use_fact_cache=True``), AWX will store all ``ansible_facts`` associated with each host in the inventory associated with the job.  The Ansible Fact Cache plugin that ships with AWX will only be enabled on jobs with fact cache enabled (``use_fact_cache=True``).
 
@@ -659,7 +685,8 @@ Fact caching saves a significant amount of time over running fact gathering. If 
 
 You can choose to use cached facts in your job by enabling it in the **Options** field of the Job Templates window.
 
-.. image:: ../common/images/job-templates-options-use-factcache.png  
+.. image:: ../common/images/job-templates-options-use-factcache.png
+    :alt: Job templates - options - use factcache
 
 To clear facts, you need to run the Ansible ``clear_facts`` `meta task`_. Below is an example playbook that uses the Ansible ``clear_facts`` meta task.
 
@@ -836,6 +863,7 @@ To enable callbacks, check the *Provisioning Callbacks* checkbox in the Job Temp
     If you intend to use AWX's provisioning callback feature with a dynamic inventory, Update on Launch should be set for the inventory group used in the Job Template.
 
 .. image:: ../common/images/provisioning-callbacks-config.png
+    :alt: Provisioning callbacks config
 
 Callbacks also require a Host Config Key, to ensure that foreign hosts with the URL cannot request configuration. Please provide a custom value for Host Config Key. The host key may be reused across multiple hosts to apply this job template against multiple hosts. Should you wish to control what hosts are able to request configuration, the key may be changed at any time.
 
@@ -978,6 +1006,7 @@ The following table notes the behavior (hierarchy) of variable precedence in AWX
 **AWX Variable Precedence Hierarchy (last listed wins)**
 
 .. image:: ../common/images/Architecture-AWX_Variable_Precedence_Hierarchy.png
+    :alt: AWX Variable Precedence Hierarchy
 
 
 Relaunching Job Templates

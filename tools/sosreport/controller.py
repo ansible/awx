@@ -74,3 +74,24 @@ class Controller(Plugin, RedHatPlugin):
             self.add_forbidden_path(path)
 
         self.add_cmd_output(SOSREPORT_CONTROLLER_COMMANDS)
+
+    def postproc(self):
+        # remove database password
+        jreg = r"(\s*\'PASSWORD\'\s*:(\s))(?:\"){1,}(.+)(?:\"){1,}"
+        repl = r"\1********"
+        self.do_path_regex_sub("/etc/tower/conf.d/postgres.py", jreg, repl)
+
+        # remove email password
+        jreg = r"(EMAIL_HOST_PASSWORD\s*=)\'(.+)\'"
+        repl = r"\1********"
+        self.do_path_regex_sub("/etc/tower/settings.py", jreg, repl)
+
+        # remove email password (if customized)
+        jreg = r"(EMAIL_HOST_PASSWORD\s*=)\'(.+)\'"
+        repl = r"\1********"
+        self.do_path_regex_sub("/etc/tower/conf.d/custom.py", jreg, repl)
+
+        # remove websocket secret
+        jreg = r"(BROADCAST_WEBSOCKET_SECRET\s*=\s*)\"(.+)\""
+        repl = r"\1********"
+        self.do_path_regex_sub("/etc/tower/conf.d/channels.py", jreg, repl)

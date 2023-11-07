@@ -980,6 +980,15 @@ class ControllerAPIModule(ControllerModule):
     def create_or_update_if_needed(
         self, existing_item, new_item, endpoint=None, item_type='unknown', on_create=None, on_update=None, auto_exit=True, associations=None
     ):
+        # Remove boolean values of certain specific types
+        # this is needed so that boolean fields will not get a false value when not provided
+        for key in list(new_item.keys()):
+            if key in self.argument_spec:
+                param_spec = self.argument_spec[key]
+                if 'type' in param_spec and param_spec['type'] == 'bool':
+                    if new_item[key] is None:
+                        new_item.pop(key)
+
         if existing_item:
             return self.update_if_needed(existing_item, new_item, on_update=on_update, auto_exit=auto_exit, associations=associations)
         else:

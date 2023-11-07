@@ -37,6 +37,7 @@ Additionally, post-upgrade, these settings are not be visible (or editable) from
 AWX should still continue to fetch roles directly from public Galaxy even if galaxy.ansible.com is not the first credential in the list for the Organization. The global "Galaxy" settings are no longer configured at the jobs level, but at the Organization level in the User Interface. The Organization's Add and Edit windows have an optional **Credential** lookup field for credentials of ``kind=galaxy``. 
 
 .. image:: ../common/images/organizations-galaxy-credentials.png
+    :alt: Create a new Organization with Galaxy Credentials
 
 It is very important to specify the order of these credentials as order sets precedence for the sync and lookup of the content.
 For more information, see :ref:`ug_organizations_create`.
@@ -99,6 +100,7 @@ Access the Credentials from clicking **Credential Types** from the left navigati
 |Credential Types - home empty|
 
 .. |Credential Types - home empty| image:: ../common/images/credential-types-home-empty.png
+    :alt: Credential Types view without any credential types populated
 
 
 If credential types have been created, this page displays a list of all existing and available Credential Types. 
@@ -106,10 +108,12 @@ If credential types have been created, this page displays a list of all existing
 |Credential Types - home with example credential types|
 
 .. |Credential Types - home with example credential types| image:: ../common/images/credential-types-home-with-example-types.png
+    :alt: Credential Types list view with example credential types
 
 To view more information about a credential type, click on its name or the Edit (|edit|) button from the **Actions** column.
 
 .. |edit| image:: ../common/images/edit-button.png
+    :alt: Edit button
 
 Each credential type displays its own unique configurations in the **Input Configuration** field and the **Injector Configuration** field, if applicable. Both YAML and JSON formats are supported in the configuration fields. 
 
@@ -127,6 +131,7 @@ To create a new credential type:
 |Create new credential type|
 
 .. |Create new credential type| image:: ../common/images/credential-types-create-new.png
+    :alt: Create new credential type form
 
 2. Enter the appropriate details in the **Name** and **Description** field.
 
@@ -302,6 +307,7 @@ An example of referencing multiple files in a custom credential template is as f
 |New credential type|
 
 .. |New credential type| image:: ../common/images/credential-types-new-listed.png
+    :alt: Credential Types list view with newly created credential type shown
 
 Click |edit| to modify the credential type options under the Actions column.
 
@@ -310,6 +316,7 @@ Click |edit| to modify the credential type options under the Actions column.
   In the Edit screen, you can modify the details or delete the credential. If the **Delete** button is grayed out, it is indication that the credential type that is being used by a credential, and you must delete the credential type from all the credentials that use it before you can delete it. Below is an example of such a message:
 
   .. image:: ../common/images/credential-types-delete-confirmation.png
+    :alt: Credential type delete confirmation
 
 
 7. Verify that the newly created credential type can be selected from the **Credential Type** selection window when creating a new credential:
@@ -317,5 +324,6 @@ Click |edit| to modify the credential type options under the Actions column.
 |Verify new credential type|
 
 .. |Verify new credential type| image:: ../common/images/credential-types-new-listed-verify.png
+    :alt: Newly created credential type selected from the credentials drop-down menu
 
 For details on how to create a new credential, see :ref:`ug_credentials`.

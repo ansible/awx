@@ -14,10 +14,11 @@ The default view is collapsed (**Compact**) with the job name, status, job type,
 |Jobs - home with example job|
 
 .. |Jobs - home with example job| image:: ../common/images/jobs-home-with-example-job.png
-
+                                  :alt: Jobs List with Example Jobs
 .. image:: ../common/images/jobs-list-all-expanded.png
+   :alt: Expanded Jobs List
 
-Actions you can take from this screen include viewing the details and standard output of a particular job, relaunching (|launch|) jobs, or removing selected jobs. The relaunch operation only applies to relaunches of playbook runs and does not apply to project/inventory updates, system jobs, workflow jobs, etc.
+Actions you can take from this screen include viewing the details and standard output of a particular job, relaunching (|launch|) jobs, or removing selected jobs.The relaunch operation only applies to relaunches of playbook runs and does not apply to project/inventory updates, system jobs, workflow jobs, etc.
 
 .. _ug_job_results:
 
@@ -29,12 +30,13 @@ When a job relaunches, you are directed the Jobs Output screen as the job runs. 
 
 
 .. image:: ../common/images/job-details-view-filters.png
-
+   :alt: Filter options in the Jobs Output window
 
 - The **Stdout** option is the default display that shows the job processes and output
 - The **Event** option allows you to filter by the event(s) of interest, such as errors, host failures, host retries, items skipped, etc. You can include as many events in the filter as necessary.
 
 .. image:: ../common/images/job-details-view-filters-examples.png
+   :alt: Selected filter examples from the Jobs Output window
 
 - The **Advanced** option is a refined search that allows you a combination of including or excluding criteria, searching by key, or by lookup type. For details about using Search, refer to the :ref:`ug_search` chapter.
 
@@ -55,14 +57,19 @@ When an inventory sync is executed, the full results automatically display in th
 The icons at the top right corner of the Output tab allow you to relaunch (|launch|), download (|download|) the job output, or delete (|delete|) the job.
 
 .. |launch| image:: ../common/images/launch-button.png
+            :alt: Launch Action Button
 .. |delete| image:: ../common/images/delete-button.png
+            :alt: Delete Action Button
 .. |cancel| image:: ../common/images/job-cancel-button.png
+            :alt: Cancel Action Button
 .. |download| image:: ../common/images/download.png
+              :alt: Download Action Button
 
 
 |job details example of inventory sync|
 
 .. |job details example of inventory sync| image:: ../common/images/jobs-show-job-results-for-inv-sync.png
+                                           :alt: Example output for a successful Inventory Sync job
 
 
 .. note:: An inventory update can be performed while a related job is running. In cases where you have a big project (around 10 GB), disk space on ``/tmp`` may be an issue.
@@ -71,11 +78,12 @@ The icons at the top right corner of the Output tab allow you to relaunch (|laun
 Inventory sync details
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Access the **Details** tab to provide details about the job execution. 
+Access the **Details** tab to provide details about the job execution.
 
 .. image:: ../common/images/jobs-show-job-details-for-inv-sync.png
+   :alt: Example details for an Inventory Sync job
 
-Notable details of the job executed are: 
+Notable details of the job executed are:
 
 -  **Status**: Can be any of the following:
 
@@ -109,15 +117,17 @@ SCM Inventory Jobs
 When an inventory sourced from an SCM is executed, the full results automatically display in the Output tab. This shows the same information you would see if you ran it through the Ansible command line, and can be useful for debugging. The icons at the top right corner of the Output tab allow you to relaunch (|launch|), download (|download|) the job output, or delete (|delete|) the job.
 
 .. image:: ../common/images/jobs-show-job-results-for-scm-job.png
+   :alt: Example output for a successful SCM job
 
 SCM inventory details
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Access the **Details** tab to provide details about the job execution and its associated project. 
+Access the **Details** tab to provide details about the job execution and its associated project.
 
 .. image:: ../common/images/jobs-show-job-details-for-scm-job.png
+   :alt: Example details for an SCM job
 
-Notable details of the job executed are: 
+Notable details of the job executed are:
 
 -  **Status**: Can be any of the following:
 
@@ -157,6 +167,7 @@ Playbook Run Jobs
 When a playbook is executed, the full results automatically display in the Output tab. This shows the same information you would see if you ran it through the Ansible command line, and can be useful for debugging. 
 
 .. image:: ../common/images/jobs-show-job-results-for-example-job.png
+   :alt: Example output for a successful playbook run
 
 The events summary captures a tally of events that were run as part of this playbook:
 
@@ -169,7 +180,7 @@ The events summary captures a tally of events that were run as part of this play
 - the amount of time it took to complete the playbook run in the **Elapsed** field
 
 .. image:: ../common/images/jobs-events-summary.png
-
+   :alt: Example summary details for a playbook
 
 The icons next to the events summary allow you to relaunch (|launch|), download (|download|) the job output, or delete (|delete|) the job. 
 
@@ -178,7 +189,7 @@ The host status bar runs across the top of the Output view. Hover over a section
 |Job - All Host Events|
 
 .. |Job - All Host Events| image:: ../common/images/job-all-host-events.png
-
+                           :alt: Show All Host Events
 
 The output for a Playbook job is also accessible after launching a job from the **Jobs** tab of its Job Templates page.
 
@@ -200,24 +211,27 @@ Use Search to look up specific events, hostnames, and their statuses. To filter 
 These statuses also display at bottom of each Stdout pane, in a group of "stats" called the Host Summary fields.
 
 .. image:: ../common/images/job-std-out-host-summary-rescued-ignored.png
-
+   :alt: Example summary details in standard output
 
 The example below shows a search with only unreachable hosts.
 
 .. image:: ../common/images/job-std-out-filter-failed.png
+   :alt: Example of errored jobs filtered by unreachable hosts
 
 For more details about using the Search, refer to the :ref:`ug_search` chapter.
 
 The standard output view displays all the events that occur on a particular job. By default, all rows are expanded so that all the details are displayed. Use the collapse-all button (|collapse-all|) to switch to a view that only contains the headers for plays and tasks. Click the (|expand-all|) button to view all lines of the standard output.
 
 .. |collapse-all| image:: ../common/images/job-details-view-std-out-collapse-all-icon.png
+                  :alt: Collapse All Icon
 .. |expand-all| image:: ../common/images/job-details-view-std-out-expand-all-icon.png
+                :alt: Expand All Icon
 
 Alternatively, you can display all the details of a specific play or task by clicking on the arrow icons next to them. Click an arrow from sideways to downward to expand the lines associated with that play or task. Click the arrow back to the sideways position to collapse and hide the lines.
 
 
 .. image:: ../common/images/job-details-view-std-out-expand-collapse-icons.png
-
+   :alt: Expand and Collapse Icons
 
 Things to note when viewing details in the expand/collapse mode:
 
@@ -250,7 +264,7 @@ The **Host Details** dialog shows information about the host affected by the sel
 - if applicable, the Ansible **Module** for the task, and any *arguments* for that module
 
 .. image:: ../common/images/job-details-host-hostevent.png
-
+   :alt: Host Events Details
 
 To view the results in JSON format, click on the **JSON** tab. To view the output of the task, click the **Standard Out**. To view errors from the output, click **Standard Error**.
 
@@ -262,7 +276,7 @@ Playbook run details
 Access the **Details** tab to provide details about the job execution. 
 
 .. image:: ../common/images/jobs-show-job-details-for-example-job.png
-
+   :alt: Example Job details for a playbook run
 
 Notable details of the job executed are:
 

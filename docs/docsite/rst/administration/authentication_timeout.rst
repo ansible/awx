@@ -23,6 +23,7 @@ The default length of time, in seconds, that your supplied token is valid can be
 4. Enter the timeout period in seconds in the **Idle Time Force Log Out** text field.
 
 .. image:: ../common/images/configure-awx-system-timeout.png
+   :alt: Miscellaneous Authentication settings showing the Idle Time Force Logout field where you can adjust the token validity period.
 
 4. Click **Save** to apply your changes.
 

@@ -1439,6 +1439,11 @@ class UnifiedJob(
         if not self.celery_task_id:
             return
         canceled = []
+        if not connection.get_autocommit():
+            # this condition is purpose-written for the task manager, when it cancels jobs in workflows
+            ControlDispatcher('dispatcher', self.controller_node).cancel([self.celery_task_id], with_reply=False)
+            return True  # task manager itself needs to act under assumption that cancel was received
+
         try:
             # Use control and reply mechanism to cancel and obtain confirmation
             timeout = 5

@@ -4,7 +4,7 @@ Stand-alone execution nodes can be added to run alongside the Kubernetes deploym
 
 Hop nodes can be added to sit between the control plane of AWX and stand alone execution nodes. These machines will not be a part of the AWX Kubernetes cluster. The machines will be registered in AWX as node type "hop", meaning they will only handle inbound / outbound traffic for otherwise unreachable nodes in a different or more strict network. 
 
-Below is an example of an AWX Task pod with two excution nodes. Traffic to execution node 2 flows through a hop node that is setup between it and the control plane.
+Below is an example of an AWX Task pod with two execution nodes. Traffic to execution node 2 flows through a hop node that is setup between it and the control plane.
 
 ```
                                                      AWX TASK POD
@@ -33,7 +33,7 @@ Adding an execution instance involves a handful of steps:
 
 ### Start machine
 
-Bring a machine online with a compatible Red Hat family OS (e.g. RHEL 8 and 9). This machines needs a static IP, or a resolvable DNS hostname that the AWX cluster can access. If the listerner_port is defined, the machine will also need an available open port to establish inbound TCP connections on (e.g. 27199).
+Bring a machine online with a compatible Red Hat family OS (e.g. RHEL 8 and 9). This machines needs a static IP, or a resolvable DNS hostname that the AWX cluster can access. If the listener_port is defined, the machine will also need an available open port to establish inbound TCP connections on (e.g. 27199).
 
 In general the more CPU cores and memory the machine has, the more jobs that can be scheduled to run on that machine at once. See https://docs.ansible.com/automation-controller/4.2.1/html/userguide/jobs.html#at-capacity-determination-and-job-impact for more information on capacity.
 
@@ -48,7 +48,7 @@ Use the Instance page or `api/v2/instances` endpoint to add a new instance.
 - `peers` is a list of instance hostnames to connect outbound to.
 - `peers_from_control_nodes` boolean, if True, control plane nodes will automatically peer to this instance.
 
-Below is a table of configuartions for the [diagram](#adding-execution-nodes-to-awx) above.
+Below is a table of configurations for the [diagram](#adding-execution-nodes-to-awx) above.
 
 | instance name    | listener_port | peers_from_control_nodes | peers       |
 |------------------|---------------|-------------------------|--------------|

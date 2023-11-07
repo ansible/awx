@@ -89,8 +89,9 @@ class AWXConsumerBase(object):
                 if task_ids and not msg:
                     logger.info(f'Could not locate running tasks to cancel with ids={task_ids}')
 
-            with pg_bus_conn() as conn:
-                conn.notify(reply_queue, json.dumps(msg))
+            if reply_queue is not None:
+                with pg_bus_conn() as conn:
+                    conn.notify(reply_queue, json.dumps(msg))
         elif control == 'reload':
             for worker in self.pool.workers:
                 worker.quit()

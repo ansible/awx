@@ -75,6 +75,7 @@ function SessionProvider({ children }) {
   const [sessionCountdown, setSessionCountdown] = useState(0);
   const [authRedirectTo, setAuthRedirectTo] = useState('/');
   const [isUserBeingLoggedOut, setIsUserBeingLoggedOut] = useState(false);
+  const [isRedirectLinkReceived, setIsRedirectLinkReceived] = useState(false);
 
   const {
     request: fetchLoginRedirectOverride,
@@ -99,6 +100,7 @@ function SessionProvider({ children }) {
 
   const logout = useCallback(async () => {
     setIsUserBeingLoggedOut(true);
+    setIsRedirectLinkReceived(false);
     if (!isSessionExpired.current) {
       setAuthRedirectTo('/logout');
       window.localStorage.setItem(SESSION_USER_ID, null);
@@ -111,6 +113,18 @@ function SessionProvider({ children }) {
     clearInterval(sessionIntervalId.current);
     return <Redirect to="/login" />;
   }, [setSessionTimeout, setSessionCountdown]);
+
+  useEffect(() => {
+    const unlisten = history.listen((location, action) => {
+      if (action === 'POP') {
+        setIsRedirectLinkReceived(true);
+      }
+    });
+
+    return () => {
+      unlisten(); // ensure that the listener is removed when the component unmounts
+    };
+  }, [history]);
 
   useEffect(() => {
     if (!isAuthenticated(document.cookie)) {
@@ -176,6 +190,8 @@ function SessionProvider({ children }) {
       logout,
       sessionCountdown,
       setAuthRedirectTo,
+      isRedirectLinkReceived,
+      setIsRedirectLinkReceived,
     }),
     [
       authRedirectTo,
@@ -186,6 +202,8 @@ function SessionProvider({ children }) {
       logout,
       sessionCountdown,
       setAuthRedirectTo,
+      isRedirectLinkReceived,
+      setIsRedirectLinkReceived,
     ]
   );
 
