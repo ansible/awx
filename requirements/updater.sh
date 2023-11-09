@@ -4,6 +4,7 @@ set -ue
 requirements_in="$(readlink -f ./requirements.in)"
 requirements="$(readlink -f ./requirements.txt)"
 requirements_git="$(readlink -f ./requirements_git.txt)"
+requirements_dev="$(readlink -f ./requirements_dev.txt)"
 pip_compile="pip-compile --no-header --quiet -r --allow-unsafe"
 
 _cleanup() {
@@ -21,7 +22,7 @@ generate_requirements() {
   # FIXME: https://github.com/jazzband/pip-tools/issues/1558
   ${venv}/bin/python3 -m pip install -U 'pip<22.0' pip-tools
 
-  ${pip_compile} "${requirements_in}" "${requirements_git}" --output-file requirements.txt
+  ${pip_compile} "$1" --output-file requirements.txt
   # consider the git requirements for purposes of resolving deps
   # Then remove any git+ lines from requirements.txt
   while IFS= read -r line; do
@@ -33,6 +34,8 @@ generate_requirements() {
 
 main() {
   base_dir=$(pwd)
+  dest_requirements="${requirements}"
+  input_requirements="${requirements_in} ${requirements_git}"
 
   _tmp=$(python -c "import tempfile; print(tempfile.mkdtemp(suffix='.awx-requirements', dir='/tmp'))")
 
@@ -40,6 +43,11 @@ main() {
 
   case $1 in
     "run")
+      NEEDS_HELP=0
+    ;;
+    "dev")
+      dest_requirements="${requirements_dev}"
+      input_requirements="${requirements_dev}"
       NEEDS_HELP=0
     ;;
     "upgrade")
@@ -67,6 +75,7 @@ main() {
     echo "help      Print this message"
     echo "run       Run the process only upgrading pinned libraries from requirements.in"
     echo "upgrade   Upgrade all libraries to latest while respecting pinnings"
+    echo "dev       Pin the development requirements file"
     echo ""
     exit
   fi
@@ -85,10 +94,10 @@ main() {
   cp -vf requirements.txt "${_tmp}"
   cd "${_tmp}"
 
-  generate_requirements
+  generate_requirements "${input_requirements}"
 
   echo "Changing $base_dir to /awx_devel/requirements"
-  cat requirements.txt | sed "s:$base_dir:/awx_devel/requirements:" > "${requirements}"
+  cat requirements.txt | sed "s:$base_dir:/awx_devel/requirements:" > "${dest_requirements}"
 
   _cleanup
 }
