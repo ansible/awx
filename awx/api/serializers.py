@@ -5491,10 +5491,33 @@ class ReceptorAddressSerializer(BaseSerializer):
     class Meta:
         model = ReceptorAddress
         fields = ('id', 'url', 'address', 'port', 'protocol', 'websocket_path', 'is_internal', 'instance', 'peers_from_control_nodes', 'full_address')
-        read_only = 'full_address'
+        read_only_fields = ('full_address',)
 
     def get_full_address(self, obj):
         return obj.get_full_address()
+
+    def validate(self, attrs):
+        def get_field_from_model_or_attrs(fd):
+            return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)
+
+        peers_from_control_nodes = get_field_from_model_or_attrs('peers_from_control_nodes')
+        instance = get_field_from_model_or_attrs('instance')
+
+        # only allow websocket_path to be set if protocol is ws
+        if attrs.get('protocol') != 'ws' and attrs.get('websocket_path'):
+            raise serializers.ValidationError(_("Can only set websocket path if protocol is ws"))
+
+        # an instance can only have one address with peers_from_control_nodes set to True
+        if peers_from_control_nodes:
+            for other_address in ReceptorAddress.objects.filter(instance=instance.id):
+                if other_address.peers_from_control_nodes:
+                    raise serializers.ValidationError(_("Only one address can set peers_from_control_nodes to True"))
+
+        # is_internal should be False
+        if attrs.get('is_internal') == True:
+            raise serializers.ValidationError(_("Only external addresses can be created"))
+
+        return super().validate(attrs)
 
 
 class InstanceSerializer(BaseSerializer):
@@ -5603,7 +5626,7 @@ class InstanceSerializer(BaseSerializer):
             '''
             return True if
             - 'peers' in attrs
-            - instance peers matches peers in attrs
+            - instance peers does not match peers in attrs
             '''
             return self.instance and 'peers' in attrs and set(self.instance.peers.all()) != set(attrs['peers'])
 
@@ -5611,27 +5634,16 @@ class InstanceSerializer(BaseSerializer):
             raise serializers.ValidationError(_("Can only create instances on Kubernetes or OpenShift."))
 
         node_type = get_field_from_model_or_attrs("node_type")
-        # peers = attrs.get('peers', [])
 
-        # if node_type in [Instance.Types.CONTROL, Instance.Types.HYBRID]:
-        #     if check_peers_changed():
-        #         raise serializers.ValidationError(
-        #             _("Setting peers manually for control nodes is not allowed. Enable peers_from_control_nodes on the hop and execution nodes instead.")
-        #         )
+        if node_type in [Instance.Types.CONTROL, Instance.Types.HYBRID]:
+            if check_peers_changed():
+                raise serializers.ValidationError(
+                    _("Setting peers manually for control nodes is not allowed. Enable peers_from_control_nodes on the hop and execution nodes instead.")
+                )
 
-        # if not listener_port and peers_from_control_nodes:
-        #     raise serializers.ValidationError(_("Field listener_port must be a valid integer when peers_from_control_nodes is enabled."))
-
-        # if not listener_port and self.instance and self.instance.peers_from.exists():
-        #     raise serializers.ValidationError(_("Field listener_port must be a valid integer when other nodes peer to it."))
-
-        # for peer in peers:
-        #     if peer.listener_port is None:
-        #         raise serializers.ValidationError(_("Field listener_port must be set on peer ") + peer.hostname + ".")
-
-        # if not settings.IS_K8S:
-        #     if check_peers_changed():
-        #         raise serializers.ValidationError(_("Cannot change peers."))
+        if not settings.IS_K8S:
+            if check_peers_changed():
+                raise serializers.ValidationError(_("Cannot change peers."))
 
         return super().validate(attrs)
 
