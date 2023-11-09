@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import gettext_lazy as _
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
@@ -18,7 +19,7 @@ class ReceptorAddress(models.Model):
         ]
 
     address = models.CharField(max_length=255)
-    port = models.IntegerField(default=27199)
+    port = models.IntegerField(default=27199, validators=[MinValueValidator(0), MaxValueValidator(65535)])
     protocol = models.CharField(max_length=10, default="tcp")
     websocket_path = models.CharField(max_length=255, default="", blank=True)
     is_internal = models.BooleanField(default=False)
