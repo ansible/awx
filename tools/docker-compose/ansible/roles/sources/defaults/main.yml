@@ -47,7 +47,6 @@ hashivault_server_public_keyfile: '{{ hashivault_cert_dir }}/server.crt'
 hashivault_server_private_keyfile: '{{ hashivault_cert_dir }}/server.key'
 hashivault_client_public_keyfile: '{{ hashivault_cert_dir }}/client.crt'
 hashivault_client_private_keyfile: '{{ hashivault_cert_dir }}/client.key'
-  
 # Metrics
 enable_splunk: false
 enable_grafana: false
