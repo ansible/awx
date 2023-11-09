@@ -1,4 +1,3 @@
-
 .. _ag_instances:
 
 Managing Capacity With Instances
@@ -58,6 +57,7 @@ Manage instances
 Click **Instances** from the left side navigation menu to access the Instances list.
 
 .. image:: ../common/images/instances_list_view.png
+	:alt: List view of instances in AWX
 
 The Instances list displays all the current nodes in your topology, along with relevant details:
 
@@ -83,6 +83,7 @@ The Instances list displays all the current nodes in your topology, along with r
 From this page, you can add, remove or run health checks on your nodes. Use the check boxes next to an instance to select it to remove or run a health check against. When a button is grayed-out, you do not have permission for that particular action. Contact your Administrator to grant you the required level of access. If you are able to remove an instance, you will receive a prompt for confirmation, like the one below:
 
 .. image:: ../common/images/instances_delete_prompt.png
+	:alt: Prompt for deleting instances in AWX.
 
 .. note::
 
@@ -95,6 +96,7 @@ Click **Remove** to confirm.
 If running a health check on an instance, at the top of the Details page, a message displays that the health check is in progress. 
 
 .. image:: ../common/images/instances_health_check.png
+	:alt: Health check for instances in AWX
 
 Click **Reload** to refresh the instance status. 
 
@@ -103,10 +105,12 @@ Click **Reload** to refresh the instance status.
 	Health checks are ran asynchronously, and may take up to a minute for the instance status to update, even with a refresh. The status may or may not change after the health check. At the bottom of the Details page, a timer/clock icon displays next to the last known health check date and time stamp if the health check task is currently running.
 
 	.. image:: ../common/images/instances_health_check_pending.png
+		:alt: Health check for instance still in pending state.
 
 The example health check shows the status updates with an error on node 'one':
 
 .. image:: ../common/images/topology-viewer-instance-with-errors.png
+	:alt: Health check showing an error in one of the instances.
 
 
 Add an instance
@@ -119,6 +123,7 @@ One of the ways to expand capacity is to create an instance, which serves as a n
 2. In the Instances list view, click the **Add** button and the Create new Instance window opens.
 
 .. image:: ../common/images/instances_create_new.png
+	:alt: Create a new instance form.
 
 An instance has several attributes that may be configured:
 
@@ -134,6 +139,7 @@ An instance has several attributes that may be configured:
 Upon successful creation, the Details of the created instance opens.
 
 .. image:: ../common/images/instances_create_details.png
+	:alt: Details of the newly created instance.
 
 .. note::
 
@@ -142,6 +148,7 @@ Upon successful creation, the Details of the created instance opens.
 4. Click the download button next to the **Install Bundle** field to download the tarball that includes this new instance and the files relevant to install the node into the mesh.
 
 .. image:: ../common/images/instances_install_bundle.png
+	:alt: Instance details showing the Download button in the Install Bundle field of the Details tab.
 
 5. Extract the downloaded ``tar.gz`` file from the location you downloaded it. The install bundle contains yaml files, certificates, and keys that will be used in the installation process.
 
@@ -179,6 +186,7 @@ The content of the ``inventory.yml`` file serves as a template and contains vari
 
 
 .. image:: ../common/images/instances_peers_tab.png
+	:alt: "Peers" tab showing two peers.
 
 You may run a health check by selecting the node and clicking the **Run health check** button from its Details page.
 

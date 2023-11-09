@@ -11,6 +11,7 @@ AWX Configuration
 You can configure various AWX settings within the Settings screen in the following tabs:
 
 .. image:: ../common/images/ug-settings-menu-screen.png
+   :alt: Screenshot of the AWX settings menu screen.
 
 Each tab contains fields with a **Reset** button, allowing you to revert any value entered back to the default value. **Reset All** allows you to revert all the values to their factory default values.
 
@@ -47,6 +48,7 @@ The Jobs tab allows you to configure the types of modules that are allowed to be
     The values for all the timeouts are in seconds.
 
 .. image:: ../common/images/configure-awx-jobs.png
+   :alt: Screenshot of the AWX job configuration settings.
 
 3. Click **Save** to apply the settings or **Cancel** to abandon the changes.
 
@@ -69,6 +71,7 @@ The System tab allows you to define the base URL for the AWX host, configure ale
   - **Logging settings**: configure logging options based on the type you choose:
 
     .. image:: ../common/images/configure-awx-system-logging-types.png
+      :alt: Logging settings shown with the list of options for Logging Aggregator Types.
 
     For more information about each of the logging aggregation types, refer to the :ref:`ag_logging` section of the |ata|.
 
@@ -78,6 +81,7 @@ The System tab allows you to define the base URL for the AWX host, configure ale
 .. |help| image:: ../common/images/tooltips-icon.png
 
 .. image:: ../common/images/configure-awx-system.png
+   :alt: Miscellaneous System settings window showing all possible configurable options.
 
 .. note::
 

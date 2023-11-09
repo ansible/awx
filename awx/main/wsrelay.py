@@ -3,6 +3,8 @@ import logging
 import asyncio
 from typing import Dict
 
+import ipaddress
+
 import aiohttp
 from aiohttp import client_exceptions
 import aioredis
@@ -71,7 +73,16 @@ class WebsocketRelayConnection:
         if not self.channel_layer:
             self.channel_layer = get_channel_layer()
 
-        uri = f"{self.protocol}://{self.remote_host}:{self.remote_port}/websocket/relay/"
+        # figure out if what we have is an ipaddress, IPv6 Addresses must have brackets added for uri
+        uri_hostname = self.remote_host
+        try:
+            # Throws ValueError if self.remote_host is a hostname like example.com, not an IPv4 or IPv6 ip address
+            if isinstance(ipaddress.ip_address(uri_hostname), ipaddress.IPv6Address):
+                uri_hostname = f"[{uri_hostname}]"
+        except ValueError:
+            pass
+
+        uri = f"{self.protocol}://{uri_hostname}:{self.remote_port}/websocket/relay/"
         timeout = aiohttp.ClientTimeout(total=10)
 
         secret_val = WebsocketSecretAuthHelper.construct_secret()
