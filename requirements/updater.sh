@@ -6,6 +6,7 @@ requirements="$(readlink -f ./requirements.txt)"
 requirements_git="$(readlink -f ./requirements_git.txt)"
 requirements_dev="$(readlink -f ./requirements_dev.txt)"
 pip_compile="pip-compile --no-header --quiet -r --allow-unsafe"
+sanitize_git=1
 
 _cleanup() {
   cd /
@@ -25,11 +26,13 @@ generate_requirements() {
   ${pip_compile} "$1" --output-file requirements.txt
   # consider the git requirements for purposes of resolving deps
   # Then remove any git+ lines from requirements.txt
-  while IFS= read -r line; do
-    if [[ $line != \#* ]]; then  # ignore comments
-      sed -i "\!${line%#*}!d" requirements.txt
-    fi
-  done < "${requirements_git}"
+  if [[ "$NEEDS_HELP" == "1" ]] ; then
+    while IFS= read -r line; do
+      if [[ $line != \#* ]]; then  # ignore comments
+        sed -i "\!${line%#*}!d" requirements.txt
+      fi
+    done < "${requirements_git}"
+  fi;
 }
 
 main() {
@@ -48,6 +51,7 @@ main() {
     "dev")
       dest_requirements="${requirements_dev}"
       input_requirements="${requirements_dev}"
+      sanitize_git=0
       NEEDS_HELP=0
     ;;
     "upgrade")
