@@ -5,7 +5,7 @@ import shlex
 from datetime import datetime
 from importlib import import_module
 
-#sys.path.insert(0, os.path.abspath('./rst/rest_api/_swagger'))
+sys.path.insert(0, os.path.abspath('./rst/rest_api/_swagger'))
 
 project = u'Ansible AWX'
 copyright = u'2023, Red Hat'
@@ -35,6 +35,7 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.ifconfig',
     'sphinx_ansible_theme',
+    'swagger',
 ]
 
 html_theme = 'sphinx_ansible_theme'
