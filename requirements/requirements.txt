@@ -476,9 +476,9 @@ zope-interface==5.5.2
     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
-pip==21.2.4
+pip==23.3.1
     # via -r /awx_devel/requirements/requirements.in
-setuptools==65.6.3
+setuptools==68.2.2
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   asciichartpy

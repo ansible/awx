@@ -58,8 +58,8 @@ twisted[tls]
 uWSGI
 uwsgitop
 wheel>=0.38.1 # CVE-2022-40898
-pip==21.2.4  # see UPGRADE BLOCKERs
-setuptools  # see UPGRADE BLOCKERs
+pip==23.3.1  # see UPGRADE BLOCKERs
+setuptools==68.2.2  # see UPGRADE BLOCKERs
 setuptools_scm[toml]  # see UPGRADE BLOCKERs, xmlsec build dep
 setuptools-rust >= 0.11.4 # cryptography build dep
 pkgconfig>=1.5.1  # xmlsec build dep - needed for offline build
