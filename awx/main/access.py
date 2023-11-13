@@ -20,7 +20,9 @@ from rest_framework.exceptions import ParseError, PermissionDenied
 # Django OAuth Toolkit
 from awx.main.models.oauth import OAuth2Application, OAuth2AccessToken
 
+# django-ansible-base
 from ansible_base.lib.utils.validation import to_python_boolean
+from ansible_base.rbac.models import RoleEvaluation
 
 # AWX
 from awx.main.utils import (
@@ -72,8 +74,6 @@ from awx.main.models import (
     WorkflowJobTemplateNode,
     WorkflowApproval,
     WorkflowApprovalTemplate,
-    ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
-    ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
 from awx.main.models.mixins import ResourceMixin
 
@@ -264,7 +264,7 @@ class BaseAccess(object):
         return self.can_change(obj, data)
 
     def can_delete(self, obj):
-        return self.user.is_superuser
+        return self.user.has_obj_perm(obj, 'delete')
 
     def can_copy(self, obj):
         return self.can_add({'reference_obj': obj})
@@ -651,9 +651,8 @@ class UserAccess(BaseAccess):
             qs = (
                 User.objects.filter(pk__in=Organization.accessible_objects(self.user, 'read_role').values('member_role__members'))
                 | User.objects.filter(pk=self.user.id)
-                | User.objects.filter(
-                    pk__in=Role.objects.filter(singleton_name__in=[ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR]).values('members')
-                )
+                | User.objects.filter(is_superuser=True)
+                | User.objects.filter(profile__is_system_auditor=True)
             ).distinct()
         return qs
 
@@ -711,6 +710,15 @@ class UserAccess(BaseAccess):
             if not allow_orphans:
                 # in these cases only superusers can modify orphan users
                 return False
+            if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
+                # Permission granted if the user has all permissions that the target user has
+                target_perms = set(
+                    RoleEvaluation.objects.filter(role__in=obj.has_roles.all()).values_list('object_id', 'content_type_id', 'codename').distinct()
+                )
+                user_perms = set(
+                    RoleEvaluation.objects.filter(role__in=self.user.has_roles.all()).values_list('object_id', 'content_type_id', 'codename').distinct()
+                )
+                return not (target_perms - user_perms)
             return not obj.roles.all().exclude(ancestors__in=self.user.roles.all()).exists()
         else:
             return self.is_all_org_admin(obj)
@@ -948,9 +956,6 @@ class InventoryAccess(BaseAccess):
     @check_superuser
     def can_update(self, obj):
         return self.user in obj.update_role
-
-    def can_delete(self, obj):
-        return self.can_admin(obj, None)
 
     def can_run_ad_hoc_commands(self, obj):
         return self.user in obj.adhoc_role
@@ -1405,8 +1410,12 @@ class ExecutionEnvironmentAccess(BaseAccess):
     def can_change(self, obj, data):
         if obj and obj.organization_id is None:
             raise PermissionDenied
-        if self.user not in obj.organization.execution_environment_admin_role:
-            raise PermissionDenied
+        if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
+            if not self.user.has_obj_perm(obj, 'change'):
+                raise PermissionDenied
+        else:
+            if self.user not in obj.organization.execution_environment_admin_role:
+                raise PermissionDenied
         if data and 'organization' in data:
             new_org = get_object_from_data('organization', Organization, data, obj=obj)
             if not new_org or self.user not in new_org.execution_environment_admin_role:
@@ -1796,7 +1805,15 @@ class JobAccess(BaseAccess):
                     return True
 
         # Standard permissions model without job template involved
-        if obj.organization and self.user in obj.organization.execute_role:
+        # NOTE: this is the best we can do without caching way more permissions
+        from django.contrib.contenttypes.models import ContentType
+
+        filter_kwargs = dict(
+            content_type_id=ContentType.objects.get_for_model(Organization),
+            object_id=obj.organization_id,
+            role_definition__permissions__codename='execute_jobtemplate',
+        )
+        if self.user.has_roles.filter(**filter_kwargs).exists():
             return True
         elif not (obj.job_template or obj.organization):
             raise PermissionDenied(_('Job has been orphaned from its job template and organization.'))
@@ -2592,6 +2609,8 @@ class ScheduleAccess(UnifiedCredentialsMixin, BaseAccess):
         if not JobLaunchConfigAccess(self.user).can_add(data):
             return False
         if not data:
+            if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
+                return self.user.has_roles.filter(permission_partials__codename__in=['execute_jobtemplate', 'update_project', 'update_inventory']).exists()
             return Role.objects.filter(role_field__in=['update_role', 'execute_role'], ancestors__in=self.user.roles.all()).exists()
 
         return self.check_related('unified_job_template', UnifiedJobTemplate, data, role_field='execute_role', mandatory=True)
@@ -2620,6 +2639,8 @@ class NotificationTemplateAccess(BaseAccess):
     prefetch_related = ('created_by', 'modified_by', 'organization')
 
     def filtered_queryset(self):
+        if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
+            return self.model.access_qs(self.user, 'view')
         return self.model.objects.filter(
             Q(organization__in=Organization.accessible_objects(self.user, 'notification_admin_role')) | Q(organization__in=self.user.auditor_of_organizations)
         ).distinct()
@@ -2788,7 +2809,7 @@ class ActivityStreamAccess(BaseAccess):
                 | Q(notification_template__organization__in=auditing_orgs)
                 | Q(notification__notification_template__organization__in=auditing_orgs)
                 | Q(label__organization__in=auditing_orgs)
-                | Q(role__in=Role.objects.filter(ancestors__in=self.user.roles.all()) if auditing_orgs else [])
+                | Q(role__in=Role.visible_roles(self.user) if auditing_orgs else [])
             )
 
         project_set = Project.accessible_pk_qs(self.user, 'read_role')
@@ -2845,13 +2866,10 @@ class RoleAccess(BaseAccess):
 
     def filtered_queryset(self):
         result = Role.visible_roles(self.user)
-        # Sanity check: is the requesting user an orphaned non-admin/auditor?
-        # if yes, make system admin/auditor mandatorily visible.
-        if not self.user.is_superuser and not self.user.is_system_auditor and not self.user.organizations.exists():
-            mandatories = ('system_administrator', 'system_auditor')
-            super_qs = Role.objects.filter(singleton_name__in=mandatories)
-            result = result | super_qs
-        return result
+        # Make system admin/auditor mandatorily visible.
+        mandatories = ('system_administrator', 'system_auditor')
+        super_qs = Role.objects.filter(singleton_name__in=mandatories)
+        return result | super_qs
 
     def can_add(self, obj, data):
         # Unsupported for now

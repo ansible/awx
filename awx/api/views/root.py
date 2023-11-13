@@ -132,6 +132,9 @@ class ApiVersionRootView(APIView):
         data['bulk'] = reverse('api:bulk', request=request)
         data['analytics'] = reverse('api:analytics_root_view', request=request)
         data['service_index'] = django_reverse('service-index-root')
+        data['role_definitions'] = django_reverse('roledefinition-list')
+        data['role_user_assignments'] = django_reverse('roleuserassignment-list')
+        data['role_team_assignments'] = django_reverse('roleteamassignment-list')
         return Response(data)
 
 
