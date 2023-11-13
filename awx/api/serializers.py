@@ -5505,17 +5505,17 @@ class ReceptorAddressSerializer(BaseSerializer):
 
         # only allow websocket_path to be set if protocol is ws
         if attrs.get('protocol') != 'ws' and attrs.get('websocket_path'):
-            raise serializers.ValidationError(_("Can only set websocket path if protocol is ws"))
+            raise serializers.ValidationError(_("Can only set websocket path if protocol is ws."))
 
         # an instance can only have one address with peers_from_control_nodes set to True
         if peers_from_control_nodes:
             for other_address in ReceptorAddress.objects.filter(instance=instance.id):
                 if other_address.peers_from_control_nodes:
-                    raise serializers.ValidationError(_("Only one address can set peers_from_control_nodes to True"))
+                    raise serializers.ValidationError(_("Only one address can set peers_from_control_nodes to True."))
 
         # is_internal should be False
         if attrs.get('is_internal') == True:
-            raise serializers.ValidationError(_("Only external addresses can be created"))
+            raise serializers.ValidationError(_("Only external addresses can be created."))
 
         return super().validate(attrs)
 
@@ -5528,7 +5528,9 @@ class InstanceSerializer(BaseSerializer):
     jobs_running = serializers.IntegerField(help_text=_('Count of jobs in the running or waiting state that are targeted for this instance'), read_only=True)
     jobs_total = serializers.IntegerField(help_text=_('Count of all jobs that target this instance'), read_only=True)
     health_check_pending = serializers.SerializerMethodField()
-    peers = serializers.PrimaryKeyRelatedField(many=True, required=False, queryset=ReceptorAddress.objects.all())
+    peers = serializers.PrimaryKeyRelatedField(
+        help_text=_('Primary keys of receptor addresses to peer to.'), many=True, required=False, queryset=ReceptorAddress.objects.all()
+    )
 
     class Meta:
         model = Instance
@@ -5644,6 +5646,18 @@ class InstanceSerializer(BaseSerializer):
         if not settings.IS_K8S:
             if check_peers_changed():
                 raise serializers.ValidationError(_("Cannot change peers."))
+
+        # cannot peer to self
+        peers_ids = [p.id for p in attrs.get('peers', [])]
+        if self.instance and self.instance.receptor_addresses.filter(id__in=peers_ids).exists():
+            raise serializers.ValidationError(_("Instance cannot peer to its own address."))
+
+        # cannot peer to an instance that is already peered to this instance
+        if self.instance and self.instance.receptor_addresses.all().exists():
+            instance_addresses = set(self.instance.receptor_addresses.all())
+            for p in attrs.get('peers', []):
+                if set(p.instance.peers.all()) & instance_addresses:
+                    raise serializers.ValidationError(_(f"Instance {p.instance.hostname} is already peered to this instance."))
 
         return super().validate(attrs)
 
