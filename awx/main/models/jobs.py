@@ -205,6 +205,9 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     class Meta:
         app_label = 'main'
         ordering = ('name',)
+        permissions = [('execute_jobtemplate', 'Can run this job template')]
+        # Remove add permission, ability to add comes from use permission for inventory, project, credentials
+        default_permissions = ('change', 'delete', 'view')
 
     job_type = models.CharField(
         max_length=64,

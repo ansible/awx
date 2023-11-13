@@ -104,11 +104,13 @@ class TestRolesAssociationEntries:
         else:
             assert len(entry_qs) == 1
         # unfortunate, the original creation does _not_ set a real is_auditor field
-        assert 'is_system_auditor' not in json.loads(entry_qs[0].changes)
+        assert 'is_system_auditor' not in json.loads(entry_qs[0].changes)  # NOTE: if this fails, see special note
+        # special note - if system auditor flag is moved to user model then we expect this assertion to be changed
+        # make sure that an extra entry is not created, expectation for count would change to 1
         if value:
-            auditor_changes = json.loads(entry_qs[1].changes)
-            assert auditor_changes['object2'] == 'user'
-            assert auditor_changes['object2_pk'] == u.pk
+            entry = entry_qs[1]
+            assert json.loads(entry.changes) == {'is_system_auditor': [False, True]}
+            assert entry.object1 == 'user'
 
     def test_user_no_op_api(self, system_auditor):
         as_ct = ActivityStream.objects.count()

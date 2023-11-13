@@ -83,6 +83,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         app_label = 'main'
         ordering = ('name',)
         unique_together = ('organization', 'name', 'credential_type')
+        permissions = [('use_credential', 'Can use credential in a job or related resource')]
 
     PASSWORD_FIELDS = ['inputs']
     FIELDS_TO_PRESERVE_AT_COPY = ['input_sources']

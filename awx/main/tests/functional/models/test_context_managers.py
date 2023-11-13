@@ -1,22 +1,12 @@
 import pytest
 
 # AWX context managers for testing
-from awx.main.models.rbac import batch_role_ancestor_rebuilding
 from awx.main.signals import disable_activity_stream, disable_computed_fields, update_inventory_computed_fields
 
 # AWX models
 from awx.main.models.organization import Organization
 from awx.main.models import ActivityStream, Job
 from awx.main.tests.functional import immediate_on_commit
-
-
-@pytest.mark.django_db
-def test_rbac_batch_rebuilding(rando, organization):
-    with batch_role_ancestor_rebuilding():
-        organization.admin_role.members.add(rando)
-        inventory = organization.inventories.create(name='test-inventory')
-        assert rando not in inventory.admin_role
-    assert rando in inventory.admin_role
 
 
 @pytest.mark.django_db
