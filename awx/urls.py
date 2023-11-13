@@ -2,7 +2,9 @@
 # All Rights Reserved.
 
 from django.conf import settings
-from django.urls import path, re_path, include
+from django.urls import re_path, include, path
+
+from ansible_base.lib.dynamic_config.dynamic_urls import api_urls, api_version_urls, root_urls
 
 from ansible_base.resource_registry.urls import urlpatterns as resource_api_urls
 
@@ -22,7 +24,10 @@ def get_urlpatterns(prefix=None):
     ]
 
     urlpatterns += [
-        path(f'api{prefix}v2/', include(resource_api_urls)),
+        # path(f'api{prefix}v2/', include(resource_api_urls)),
+        path('api/v2/', include(api_version_urls)),
+        path('api/', include(api_urls)),
+        path('', include(root_urls)),
         re_path(r'^sso/', include('awx.sso.urls', namespace='sso')),
         re_path(r'^sso/', include('social_django.urls', namespace='social')),
         re_path(r'^(?:api/)?400.html$', handle_400),
