@@ -272,7 +272,7 @@ class ResourceOptionsParser(object):
                         kwargs['required'] = required = True
                 if method == "host_delete":
                     if k == 'hosts':
-                        kwargs['type'] = 'list_of_ids'
+                        kwargs['type'] = list_of_json_or_yaml
                         kwargs['required'] = required = True
                 if method == "job_launch":
                     if k == 'jobs':
