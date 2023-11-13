@@ -2,12 +2,17 @@
 # All Rights Reserved.
 
 from django.conf import settings
-from django.urls import re_path, include
+from django.urls import re_path, include, path
+
+from ansible_base.lib.dynamic_config.dynamic_urls import api_urls, api_version_urls, root_urls
 
 from awx.main.views import handle_400, handle_403, handle_404, handle_500, handle_csp_violation, handle_login_redirect
 
 
 urlpatterns = [
+    path('api/v2/', include(api_version_urls)),
+    path('api/', include(api_urls)),
+    path('', include(root_urls)),
     re_path(r'', include('awx.ui.urls', namespace='ui')),
     re_path(r'^ui_next/.*', include('awx.ui_next.urls', namespace='ui_next')),
     re_path(r'^api/', include('awx.api.urls', namespace='api')),
