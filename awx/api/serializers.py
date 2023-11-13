@@ -21,7 +21,7 @@ from jinja2.exceptions import TemplateSyntaxError, UndefinedError, SecurityError
 # Django
 from django.conf import settings
 from django.contrib.auth import update_session_auth_hash
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
 from django.contrib.auth.password_validation import validate_password as django_validate_password
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ValidationError as DjangoValidationError
@@ -43,11 +43,13 @@ from rest_framework.utils.serializer_helpers import ReturnList
 # Django-Polymorphic
 from polymorphic.models import PolymorphicModel
 
+# django-ansible-base
 from ansible_base.lib.utils.models import get_type_for_model
+from ansible_base.rbac.models import RoleEvaluation
 
 # AWX
 from awx.main.access import get_user_capabilities
-from awx.main.constants import ACTIVE_STATES, CENSOR_VALUE
+from awx.main.constants import ACTIVE_STATES, CENSOR_VALUE, org_role_to_permission
 from awx.main.models import (
     ActivityStream,
     AdHocCommand,
@@ -102,7 +104,7 @@ from awx.main.models import (
     CLOUD_INVENTORY_SOURCES,
 )
 from awx.main.models.base import VERBOSITY_CHOICES, NEW_JOB_TYPE_CHOICES
-from awx.main.models.rbac import role_summary_fields_generator, RoleAncestorEntry
+from awx.main.models.rbac import role_summary_fields_generator, give_creator_permissions, get_role_codenames, to_permissions, get_role_from_object_role
 from awx.main.fields import ImplicitRoleField
 from awx.main.utils import (
     get_model_for_type,
@@ -2763,13 +2765,23 @@ class ResourceAccessListElementSerializer(UserSerializer):
         team_content_type = ContentType.objects.get_for_model(Team)
         content_type = ContentType.objects.get_for_model(obj)
 
-        def get_roles_on_resource(parent_role):
-            "Returns a string list of the roles a parent_role has for current obj."
-            return list(
-                RoleAncestorEntry.objects.filter(ancestor=parent_role, content_type_id=content_type.id, object_id=obj.id)
-                .values_list('role_field', flat=True)
-                .distinct()
-            )
+        reversed_org_map = {}
+        for k, v in org_role_to_permission.items():
+            reversed_org_map[v] = k
+        reversed_role_map = {}
+        for k, v in to_permissions.items():
+            reversed_role_map[v] = k
+
+        def get_roles_from_perms(perm_list):
+            """given a list of permission codenames return a list of role names"""
+            role_names = set()
+            for codename in perm_list:
+                action = codename.split('_', 1)[0]
+                if action in reversed_role_map:
+                    role_names.add(reversed_role_map[action])
+                elif codename in reversed_org_map:
+                    role_names.add(codename)
+            return list(role_names)
 
         def format_role_perm(role):
             role_dict = {'id': role.id, 'name': role.name, 'description': role.description}
@@ -2786,13 +2798,21 @@ class ResourceAccessListElementSerializer(UserSerializer):
             else:
                 # Singleton roles should not be managed from this view, as per copy/edit rework spec
                 role_dict['user_capabilities'] = {'unattach': False}
-            return {'role': role_dict, 'descendant_roles': get_roles_on_resource(role)}
+
+            if role.singleton_name:
+                descendant_perms = list(Permission.objects.filter(content_type=content_type).values_list('codename', flat=True))
+            else:
+                model_name = content_type.model
+                descendant_perms = [codename for codename in get_role_codenames(role) if codename.endswith(model_name)]
+
+            return {'role': role_dict, 'descendant_roles': get_roles_from_perms(descendant_perms)}
 
         def format_team_role_perm(naive_team_role, permissive_role_ids):
             ret = []
+            team = naive_team_role.content_object
             team_role = naive_team_role
             if naive_team_role.role_field == 'admin_role':
-                team_role = naive_team_role.content_object.member_role
+                team_role = team.member_role
             for role in team_role.children.filter(id__in=permissive_role_ids).all():
                 role_dict = {
                     'id': role.id,
@@ -2812,10 +2832,48 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 else:
                     # Singleton roles should not be managed from this view, as per copy/edit rework spec
                     role_dict['user_capabilities'] = {'unattach': False}
-                ret.append({'role': role_dict, 'descendant_roles': get_roles_on_resource(team_role)})
+
+                descendant_perms = list(
+                    RoleEvaluation.objects.filter(role__in=team.has_roles.all(), object_id=obj.id, content_type_id=content_type.id)
+                    .values_list('codename', flat=True)
+                    .distinct()
+                )
+
+                ret.append({'role': role_dict, 'descendant_roles': get_roles_from_perms(descendant_perms)})
             return ret
 
-        direct_permissive_role_ids = Role.objects.filter(content_type=content_type, object_id=obj.id).values_list('id', flat=True)
+        gfk_kwargs = dict(content_type_id=content_type.id, object_id=obj.id)
+        direct_permissive_role_ids = Role.objects.filter(**gfk_kwargs).values_list('id', flat=True)
+
+        if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
+            ret['summary_fields']['direct_access'] = []
+            ret['summary_fields']['indirect_access'] = []
+
+            new_roles_seen = set()
+            all_team_roles = set()
+            all_permissive_role_ids = set()
+            for evaluation in RoleEvaluation.objects.filter(role__users=user, **gfk_kwargs).prefetch_related('role'):
+                new_role = evaluation.role
+                if new_role.id in new_roles_seen:
+                    continue
+                new_roles_seen.add(new_role.id)
+                old_role = get_role_from_object_role(new_role)
+                all_permissive_role_ids.add(old_role.id)
+
+                if int(new_role.object_id) == obj.id and new_role.content_type_id == content_type.id:
+                    ret['summary_fields']['direct_access'].append(format_role_perm(old_role))
+                elif new_role.content_type_id == team_content_type.id:
+                    all_team_roles.add(old_role)
+                else:
+                    ret['summary_fields']['indirect_access'].append(format_role_perm(old_role))
+
+            ret['summary_fields']['direct_access'].extend(
+                [y for x in (format_team_role_perm(r, direct_permissive_role_ids) for r in all_team_roles) for y in x]
+            )
+            ret['summary_fields']['direct_access'].extend([y for x in (format_team_role_perm(r, all_permissive_role_ids) for r in all_team_roles) for y in x])
+
+            return ret
+
         all_permissive_role_ids = Role.objects.filter(content_type=content_type, object_id=obj.id).values_list('ancestors__id', flat=True)
 
         direct_access_roles = user.roles.filter(id__in=direct_permissive_role_ids).all()
@@ -3085,6 +3143,7 @@ class CredentialSerializerCreate(CredentialSerializer):
 
         if user:
             credential.admin_role.members.add(user)
+            give_creator_permissions(user, credential)
         if team:
             if not credential.organization or team.organization.id != credential.organization.id:
                 raise serializers.ValidationError({"detail": _("Credential organization must be set and match before assigning to a team")})
