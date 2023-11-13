@@ -33,6 +33,12 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
     class Meta:
         app_label = 'main'
         ordering = ('name',)
+        permissions = [
+            ('member_organization', 'Basic participation permissions for organization'),
+            ('audit_organization', 'Audit everything inside the organization'),
+        ]
+        # Remove add permission, only superuser can add
+        default_permissions = ('change', 'delete', 'view')
 
     instance_groups = OrderedManyToManyField('InstanceGroup', blank=True, through='OrganizationInstanceGroupMembership')
     galaxy_credentials = OrderedManyToManyField(
@@ -134,6 +140,7 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
         app_label = 'main'
         unique_together = [('organization', 'name')]
         ordering = ('organization__name', 'name')
+        permissions = [('member_team', 'Inherit all roles assigned to this team')]
 
     organization = models.ForeignKey(
         'Organization',
@@ -170,6 +177,7 @@ class Profile(CreatedModifiedModel):
         max_length=1024,
         default='',
     )
+    is_system_auditor = models.BooleanField(default=False, help_text=_('Can view everying in the system, proxies to User model'))
 
 
 class UserSessionMembership(BaseModel):

@@ -353,6 +353,7 @@ INSTALLED_APPS = [
     'awx.sso',
     'solo',
     'ansible_base.rest_filters',
+    'ansible_base.rbac',
 ]
 
 INTERNAL_IPS = ('127.0.0.1',)
@@ -493,6 +494,12 @@ CACHES = {'default': {'BACKEND': 'awx.main.cache.AWXRedisCache', 'LOCATION': 'un
 SOCIAL_AUTH_STRATEGY = 'social_django.strategy.DjangoStrategy'
 SOCIAL_AUTH_STORAGE = 'social_django.models.DjangoStorage'
 SOCIAL_AUTH_USER_MODEL = 'auth.User'
+ROLE_SINGLETON_USER_RELATIONSHIP = ''
+ROLE_SINGLETON_TEAM_RELATIONSHIP = ''
+
+# We want to short-circuit RBAC methods to get permission to system admins and auditors
+ROLE_BYPASS_SUPERUSER_FLAGS = ['is_superuser']
+ROLE_BYPASS_ACTION_FLAGS = {'view': 'is_system_auditor'}
 
 _SOCIAL_AUTH_PIPELINE_BASE = (
     'social_core.pipeline.social_auth.social_details',
@@ -1108,8 +1115,27 @@ METRICS_SUBSYSTEM_CONFIG = {
 # django-ansible-base
 ANSIBLE_BASE_TEAM_MODEL = 'main.Team'
 ANSIBLE_BASE_ORGANIZATION_MODEL = 'main.Organization'
+ANSIBLE_BASE_PERMISSION_MODEL = 'auth.Permission'
 
 from ansible_base.lib import dynamic_config  # noqa: E402
 
 settings_file = os.path.join(os.path.dirname(dynamic_config.__file__), 'dynamic_settings.py')
 include(settings_file)
+
+del settings_file
+
+# Settings for the ansible_base RBAC system
+
+# Settings for the RBAC system, override as necessary in app
+ANSIBLE_BASE_ROLE_PRECREATE = {
+    'object_admin': '{cls._meta.model_name}-admin',
+    'org_admin': 'organization-admin',
+    'org_children': 'organization-{cls._meta.model_name}-admin',
+    'special': '{cls._meta.model_name}-{action}',
+}
+
+# Use the new Gateway RBAC system for evaluations? You should. We will remove the old system soon.
+ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED = True
+
+# Permissions a user will get when creating a new item
+ANSIBLE_BASE_CREATOR_DEFAULTS = ['change', 'delete', 'execute', 'use', 'adhoc', 'approve', 'update', 'view']

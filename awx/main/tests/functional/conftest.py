@@ -28,7 +28,6 @@ from awx.main.models.organization import (
     Organization,
     Team,
 )
-from awx.main.models.rbac import Role
 from awx.main.models.notifications import NotificationTemplate, Notification
 from awx.main.models.events import (
     JobEvent,
@@ -421,7 +420,7 @@ def admin(user):
 @pytest.fixture
 def system_auditor(user):
     u = user('an-auditor', False)
-    Role.singleton('system_auditor').members.add(u)
+    u.is_system_auditor = True
     return u
 
 
