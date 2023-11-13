@@ -355,6 +355,7 @@ INSTALLED_APPS = [
     'ansible_base.rest_filters',
     'ansible_base.jwt_consumer',
     'ansible_base.resource_registry',
+    'ansible_base.rbac',
 ]
 
 
@@ -497,6 +498,12 @@ CACHES = {'default': {'BACKEND': 'awx.main.cache.AWXRedisCache', 'LOCATION': 'un
 SOCIAL_AUTH_STRATEGY = 'social_django.strategy.DjangoStrategy'
 SOCIAL_AUTH_STORAGE = 'social_django.models.DjangoStorage'
 SOCIAL_AUTH_USER_MODEL = 'auth.User'
+ROLE_SINGLETON_USER_RELATIONSHIP = ''
+ROLE_SINGLETON_TEAM_RELATIONSHIP = ''
+
+# We want to short-circuit RBAC methods to get permission to system admins and auditors
+ROLE_BYPASS_SUPERUSER_FLAGS = ['is_superuser']
+ROLE_BYPASS_ACTION_FLAGS = {'view': 'is_system_auditor'}
 
 _SOCIAL_AUTH_PIPELINE_BASE = (
     'social_core.pipeline.social_auth.social_details',
@@ -1121,11 +1128,11 @@ METRICS_SUBSYSTEM_CONFIG = {
 ANSIBLE_BASE_TEAM_MODEL = 'main.Team'
 ANSIBLE_BASE_ORGANIZATION_MODEL = 'main.Organization'
 ANSIBLE_BASE_RESOURCE_CONFIG_MODULE = 'awx.resource_api'
+ANSIBLE_BASE_PERMISSION_MODEL = 'main.Permission'
 
 from ansible_base.lib import dynamic_config  # noqa: E402
 
-settings_file = os.path.join(os.path.dirname(dynamic_config.__file__), 'dynamic_settings.py')
-include(settings_file)
+include(os.path.join(os.path.dirname(dynamic_config.__file__), 'dynamic_settings.py'))
 
 # Add a postfix to the API URL patterns
 # example if set to '' API pattern will be /api
@@ -1134,3 +1141,25 @@ OPTIONAL_API_URLPATTERN_PREFIX = ''
 
 # Use AWX base view, to give 401 on unauthenticated requests
 ANSIBLE_BASE_CUSTOM_VIEW_PARENT = 'awx.api.generics.APIView'
+
+# Settings for the ansible_base RBAC system
+
+# Settings for the RBAC system, override as necessary in app
+ANSIBLE_BASE_ROLE_PRECREATE = {
+    'object_admin': '{cls._meta.model_name}-admin',
+    'org_admin': 'organization-admin',
+    'org_children': 'organization-{cls._meta.model_name}-admin',
+    'special': '{cls._meta.model_name}-{action}',
+}
+
+# Use the new Gateway RBAC system for evaluations? You should. We will remove the old system soon.
+ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED = True
+
+# Permissions a user will get when creating a new item
+ANSIBLE_BASE_CREATOR_DEFAULTS = ['change', 'delete', 'execute', 'use', 'adhoc', 'approve', 'update', 'view']
+
+# This is a stopgap, will delete after resource registry integration
+ANSIBLE_BASE_SERVICE_PREFIX = "awx"
+
+# system username for django-ansible-base
+SYSTEM_USERNAME = None
