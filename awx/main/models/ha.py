@@ -6,6 +6,7 @@ import logging
 import os
 
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.exceptions import ValidationError
 from django.db import models, connection
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
@@ -67,6 +68,7 @@ class HasPolicyEditsMixin(HasEditsMixin):
 class InstanceLink(BaseModel):
     class Meta:
         ordering = ("id",)
+        constraints = [models.UniqueConstraint(fields=['source', 'target'], name='source_target_unique_together')]
 
     source = models.ForeignKey('Instance', on_delete=models.CASCADE)
     target = models.ForeignKey('ReceptorAddress', on_delete=models.CASCADE)
