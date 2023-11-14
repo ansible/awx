@@ -496,8 +496,6 @@ def schedule_write_receptor_config(broadcast=True):
             write_receptor_config()  # just run locally
 
 
-# TODO: don't use the receiver post save, just call this at the moment when we need it
-# that way we don't call this multiple times unnecessarily
 @receiver(post_save, sender=ReceptorAddress)
 def receptor_address_saved(sender, instance, **kwargs):
     from awx.main.signals import disable_activity_stream
@@ -506,16 +504,20 @@ def receptor_address_saved(sender, instance, **kwargs):
 
     control_instances = set(Instance.objects.filter(node_type__in=[Instance.Types.CONTROL, Instance.Types.HYBRID]))
     if address.peers_from_control_nodes:
-        address.peers_from.add(*control_instances)
+        if set(address.peers_from.all()) != control_instances:
+            address.peers_from.add(*control_instances)
+            schedule_write_receptor_config()
     else:
-        address.peers_from.remove(*control_instances)
-
-    schedule_write_receptor_config()
+        if address.peers_from.exists():
+            address.peers_from.remove(*control_instances)
+            schedule_write_receptor_config()
 
 
 @receiver(post_delete, sender=ReceptorAddress)
 def receptor_address_deleted(sender, instance, **kwargs):
-    schedule_write_receptor_config()
+    address = instance
+    if address.peers_from_control_nodes:
+        schedule_write_receptor_config()
 
 
 @receiver(post_save, sender=Instance)
@@ -531,10 +533,11 @@ def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
     from awx.main.signals import disable_activity_stream
 
     if created and settings.IS_K8S and instance.node_type in [Instance.Types.CONTROL, Instance.Types.HYBRID]:
-        peers_address = ReceptorAddress.objects.filter(peers_from_control_nodes=True)
-        with disable_activity_stream():
-            instance.peers.add(*peers_address)
-            schedule_write_receptor_config(broadcast=False)
+        peers_addresses = ReceptorAddress.objects.filter(peers_from_control_nodes=True)
+        if peers_addresses.exists():
+            with disable_activity_stream():
+                instance.peers.add(*peers_addresses)
+                schedule_write_receptor_config(broadcast=False)
 
     if settings.IS_K8S and instance.node_type in [Instance.Types.HOP, Instance.Types.EXECUTION]:
         if instance.node_state == Instance.States.DEPROVISIONING:

@@ -5652,12 +5652,18 @@ class InstanceSerializer(BaseSerializer):
         if self.instance and self.instance.receptor_addresses.filter(id__in=peers_ids).exists():
             raise serializers.ValidationError(_("Instance cannot peer to its own address."))
 
-        # cannot peer to an instance that is already peered to this instance
         if self.instance and self.instance.receptor_addresses.all().exists():
             instance_addresses = set(self.instance.receptor_addresses.all())
+            # cannot peer to an instance that is already peered to this instance
             for p in attrs.get('peers', []):
                 if set(p.instance.peers.all()) & instance_addresses:
                     raise serializers.ValidationError(_(f"Instance {p.instance.hostname} is already peered to this instance."))
+
+        # cannot peer to instance more than once
+        # compare length of set to original list to check for duplicates
+        peers_instances = [p.instance for p in attrs.get('peers', [])]
+        if len(set(peers_instances)) != len(peers_instances):
+            raise serializers.ValidationError(_("Cannot peer to the same instance more than once."))
 
         return super().validate(attrs)
 

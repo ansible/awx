@@ -703,7 +703,7 @@ def generate_config_data():
 
     receptor_config = list(RECEPTOR_CONFIG_STARTER)
     for address in addresses:
-        if address.get_peer_type() and address.is_internal:
+        if address.get_peer_type():
             peer = {
                 f'{address.get_peer_type()}': {
                     'address': f'{address.get_full_address()}',
