@@ -129,6 +129,10 @@ logger = logging.getLogger('awx.api.views')
 
 def unpartitioned_event_horizon(cls):
     with connection.cursor() as cursor:
+        cursor.execute(f"SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE table_name = '_unpartitioned_{cls._meta.db_table}';")
+        if not cursor.fetchone():
+            return 0
+    with connection.cursor() as cursor:
         try:
             cursor.execute(f'SELECT MAX(id) FROM _unpartitioned_{cls._meta.db_table}')
             return cursor.fetchone()[0] or -1
