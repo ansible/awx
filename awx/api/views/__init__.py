@@ -397,7 +397,7 @@ class InstanceReceptorAddressesList(ListCreateAPIView):
         return super().post(request, *args, **kwargs)
 
 
-class ReceptorAddressesList(ListAPIView):
+class ReceptorAddressesList(ListCreateAPIView):
     name = _("Receptor Addresses")
     model = models.ReceptorAddress
     serializer_class = serializers.ReceptorAddressSerializer
