@@ -24,7 +24,7 @@ class RunSQL(migrations.operations.special.RunSQL):
     def database_backwards(self, app_label, schema_editor, from_state, to_state):
         if not schema_editor.connection.vendor.startswith('postgres'):
             self.reverse_sql = self.sqlite_reverse_sql or migrations.RunSQL.noop
-        super().database_forwards(app_label, schema_editor, from_state, to_state)
+        super().database_backwards(app_label, schema_editor, from_state, to_state)
 
 
 class RunPython(migrations.operations.special.RunPython):
@@ -44,13 +44,13 @@ class RunPython(migrations.operations.special.RunPython):
 
     def database_forwards(self, app_label, schema_editor, from_state, to_state):
         if not schema_editor.connection.vendor.startswith('postgres'):
-            self.code = self.sqlite_code or self.code or migrations.RunPython.noop
+            self.code = self.sqlite_code or migrations.RunPython.noop
         super().database_forwards(app_label, schema_editor, from_state, to_state)
 
     def database_backwards(self, app_label, schema_editor, from_state, to_state):
         if not schema_editor.connection.vendor.startswith('postgres'):
             self.reverse_code = self.sqlite_reverse_code or migrations.RunPython.noop
-        super().database_forwards(app_label, schema_editor, from_state, to_state)
+        super().database_backwards(app_label, schema_editor, from_state, to_state)
 
 
 class _sqlitemigrations:
