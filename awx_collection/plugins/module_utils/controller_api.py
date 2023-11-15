@@ -930,6 +930,8 @@ class ControllerAPIModule(ControllerModule):
                     item_name = existing_item['id']
                 elif item_type == 'instance':
                     item_name = existing_item['hostname']
+                elif item_type == 'receptor_address':
+                    item_name = existing_item['address']
                 else:
                     item_name = existing_item['name']
                 item_id = existing_item['id']
