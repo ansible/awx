@@ -34,6 +34,7 @@ action_groups:
     - organization
     - project
     - project_update
+    - receptor_address
     - role
     - schedule
     - settings
