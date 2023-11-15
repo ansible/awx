@@ -16,6 +16,9 @@ pubdate = datetime.strptime(pubdateshort, '%Y-%m-%d').strftime('%B %d, %Y')
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
+
+# Favicon configuration
+html_favicon = 'https://github.com/ansible/awx/blob/devel/awx/ui/public/static/media/favicon.ico'
 #html_title = None
 html_title = 'Ansible AWX community documentation'
 
