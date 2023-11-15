@@ -3,6 +3,7 @@ from .plugin import CredentialPlugin
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from delinea.secrets.vault import PasswordGrantAuthorizer, SecretsVault
+from base64 import b64decode
 
 dsv_inputs = {
     'fields': [
@@ -44,8 +45,16 @@ dsv_inputs = {
             'help_text': _('The field to extract from the secret'),
             'type': 'string',
         },
+        {
+            'id': 'secret_decoding',
+            'label': _('Should the secret be base64 decoded?'),
+            'help_text': _('Specify whether the secret should be base64 decoded, typically used for storing files, such as SSH keys'),
+            'choices': ['No Decoding', 'Decode Base64'],
+            'type': 'string',
+            'default': 'No Decoding',
+        },
     ],
-    'required': ['tenant', 'client_id', 'client_secret', 'path', 'secret_field'],
+    'required': ['tenant', 'client_id', 'client_secret', 'path', 'secret_field', 'secret_decoding'],
 }
 
 if settings.DEBUG:
@@ -67,11 +76,17 @@ def dsv_backend(**kwargs):
     client_secret = kwargs['client_secret']
     secret_path = kwargs['path']
     secret_field = kwargs['secret_field']
+    # providing a default value to remain backward compatible for secrets that have not specified this option
+    secret_decoding = kwargs.get('secret_decoding', 'No Decoding')
 
     tenant_url = tenant_url_template.format(tenant_name, tenant_tld.strip("."))
 
     authorizer = PasswordGrantAuthorizer(tenant_url, client_id, client_secret)
     dsv_secret = SecretsVault(tenant_url, authorizer).get_secret(secret_path)
+
+    # files can be uploaded base64 decoded to DSV and thus decoding it only, when asked for
+    if secret_decoding == 'Decode Base64':
+        return b64decode(dsv_secret['data'][secret_field]).decode()
 
     return dsv_secret['data'][secret_field]
 
