@@ -603,6 +603,8 @@ Extra Variables
    pair: workflow templates; survey extra variables
    pair: surveys; extra variables
 
+.. <- Comment to separate the index and the note to avoid rendering issues.
+
 .. note::
 
     ``extra_vars`` passed to the job launch API are only honored if one of the following is true:
