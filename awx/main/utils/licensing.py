@@ -199,6 +199,8 @@ class Licenser(object):
                     license['support_level'] = attr.get('value')
                 elif attr.get('name') == 'usage':
                     license['usage'] = attr.get('value')
+                elif attr.get('name') == 'ph_product_name' and attr.get('value') == 'RHEL Developer':
+                    license['license_type'] = 'developer'
 
         if not license:
             logger.error("No valid subscriptions found in manifest")
@@ -322,7 +324,9 @@ class Licenser(object):
     def generate_license_options_from_entitlements(self, json):
         from dateutil.parser import parse
 
-        ValidSub = collections.namedtuple('ValidSub', 'sku name support_level end_date trial quantity pool_id satellite subscription_id account_number usage')
+        ValidSub = collections.namedtuple(
+            'ValidSub', 'sku name support_level end_date trial developer_license quantity pool_id satellite subscription_id account_number usage'
+        )
         valid_subs = []
         for sub in json:
             satellite = sub.get('satellite')
@@ -350,6 +354,7 @@ class Licenser(object):
 
                 sku = sub['productId']
                 trial = sku.startswith('S')  # i.e.,, SER/SVC
+                developer_license = False
                 support_level = ''
                 usage = ''
                 pool_id = sub['id']
@@ -364,9 +369,24 @@ class Licenser(object):
                             support_level = attr.get('value')
                         elif attr.get('name') == 'usage':
                             usage = attr.get('value')
+                        elif attr.get('name') == 'ph_product_name' and attr.get('value') == 'RHEL Developer':
+                            developer_license = True
 
                 valid_subs.append(
-                    ValidSub(sku, sub['productName'], support_level, end_date, trial, quantity, pool_id, satellite, subscription_id, account_number, usage)
+                    ValidSub(
+                        sku,
+                        sub['productName'],
+                        support_level,
+                        end_date,
+                        trial,
+                        developer_license,
+                        quantity,
+                        pool_id,
+                        satellite,
+                        subscription_id,
+                        account_number,
+                        usage,
+                    )
                 )
 
         if valid_subs:
@@ -381,6 +401,8 @@ class Licenser(object):
                 if sub.trial:
                     license._attrs['trial'] = True
                     license._attrs['license_type'] = 'trial'
+                if sub.developer_license:
+                    license._attrs['license_type'] = 'developer'
                 license._attrs['instance_count'] = min(MAX_INSTANCES, license._attrs['instance_count'])
                 human_instances = license._attrs['instance_count']
                 if human_instances == MAX_INSTANCES:
