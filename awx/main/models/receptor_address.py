@@ -19,13 +19,15 @@ class ReceptorAddress(models.Model):
         ]
 
     class Protocols(models.TextChoices):
-        TCP = 'tcp', _('TCP')
-        WS = 'ws', _('WS')
-        WSS = 'wss', _('WSS')
+        TCP = 'tcp', 'TCP'
+        WS = 'ws', 'WS'
+        WSS = 'wss', 'WSS'
 
     address = models.CharField(help_text=_("Routable address for this instance."), max_length=255)
     port = models.IntegerField(help_text=_("Port for the address."), default=27199, validators=[MinValueValidator(0), MaxValueValidator(65535)])
-    protocol = models.CharField(help_text=_("Protocol to use when connecting, 'tcp' or 'ws'."), max_length=10, default=Protocols.TCP, choices=Protocols.choices)
+    protocol = models.CharField(
+        help_text=_("Protocol to use when connecting, 'tcp', 'wss', or 'ws'."), max_length=10, default=Protocols.TCP, choices=Protocols.choices
+    )
     websocket_path = models.CharField(help_text=_("Websocket path."), max_length=255, default="", blank=True)
     is_internal = models.BooleanField(help_text=_("If True, only routable inside of the Kubernetes cluster."), default=False)
     peers_from_control_nodes = models.BooleanField(help_text=_("If True, control plane cluster nodes should automatically peer to it."), default=False)

@@ -42,7 +42,6 @@
         node_type: execution
         node_state: installed
         capacity_adjustment: 0.4
-        listener_port: 31337
       register: result
 
     - assert:
@@ -74,11 +73,24 @@
 - block:
     - name: Create hop node 1
       awx.awx.instance:
-        hostname: hopnode1
+        hostname: "{{ hostname1 }}"
         node_type: hop
         node_state: installed
-        listener_port: 27199
-        peers_from_control_nodes: True
+      register: result
+
+    - assert:
+        that:
+          - result is changed
+
+    - name: Create address for hop node 1
+      awx.awx.receptor_address:
+        address: "{{ hostname1 }}addr"
+        instance: "{{ hostname1 }}"
+        peers_from_control_nodes: false
+        port: 27199
+        protocol: ws
+        websocket_path: service
+        state: present
       register: result
 
     - assert:
@@ -87,11 +99,24 @@
 
     - name: Create hop node 2
       awx.awx.instance:
-        hostname: hopnode2
+        hostname: "{{ hostname2 }}"
         node_type: hop
         node_state: installed
-        listener_port: 27199
-        peers_from_control_nodes: True
+      register: result
+
+    - assert:
+        that:
+          - result is changed
+
+    - name: Create address for hop node 2
+      awx.awx.receptor_address:
+        address: "{{ hostname2 }}addr"
+        instance: "{{ hostname2 }}"
+        peers_from_control_nodes: false
+        port: 27199
+        protocol: ws
+        websocket_path: service
+        state: present
       register: result
 
     - assert:
@@ -100,13 +125,12 @@
 
     - name: Create execution node
       awx.awx.instance:
-        hostname: executionnode
+        hostname: "{{ hostname3 }}"
         node_type: execution
         node_state: installed
-        listener_port: 27199
         peers:
-          - "hopnode1"
-          - "hopnode2"
+          - "{{ hostname1 }}addr"
+          - "{{ hostname2 }}addr"
       register: result
 
     - assert:
@@ -115,15 +139,25 @@
 
     - name: Remove execution node peers
       awx.awx.instance:
-        hostname: executionnode
+        hostname: "{{ hostname3 }}"
         node_type: execution
         node_state: installed
-        listener_port: 27199
         peers: []
       register: result
 
     - assert:
         that:
           - result is changed
+
+  always:
+    - name: Deprovision the instances
+      awx.awx.instance:
+        hostname: "{{ item }}"
+        node_state: deprovisioning
+      with_items:
+        - "{{ hostname1 }}"
+        - "{{ hostname2 }}"
+        - "{{ hostname3 }}"
+
 
   when: IS_K8S
