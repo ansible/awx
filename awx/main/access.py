@@ -79,7 +79,6 @@ __all__ = [
     'get_user_queryset',
     'check_user_access',
     'check_user_access_with_errors',
-    'user_accessible_objects',
     'consumer_access',
 ]
 
@@ -134,10 +133,6 @@ def vars_are_encrypted(vars):
 
 def register_access(model_class, access_class):
     access_registry[model_class] = access_class
-
-
-def user_accessible_objects(user, role_name):
-    return ResourceMixin._accessible_objects(User, user, role_name)
 
 
 def get_user_queryset(user, model_class):

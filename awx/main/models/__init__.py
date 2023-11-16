@@ -91,13 +91,12 @@ from oauth2_provider.models import Grant, RefreshToken  # noqa -- needed django-
 
 # Add custom methods to User model for permissions checks.
 from django.contrib.auth.models import User  # noqa
-from awx.main.access import get_user_queryset, check_user_access, check_user_access_with_errors, user_accessible_objects  # noqa
+from awx.main.access import get_user_queryset, check_user_access, check_user_access_with_errors  # noqa
 
 
 User.add_to_class('get_queryset', get_user_queryset)
 User.add_to_class('can_access', check_user_access)
 User.add_to_class('can_access_with_errors', check_user_access_with_errors)
-User.add_to_class('accessible_objects', user_accessible_objects)
 
 
 def convert_jsonfields():
