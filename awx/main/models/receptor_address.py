@@ -35,6 +35,7 @@ class ReceptorAddress(models.Model):
         'Instance',
         related_name='receptor_addresses',
         on_delete=models.CASCADE,
+        null=False,
     )
 
     def __str__(self):
