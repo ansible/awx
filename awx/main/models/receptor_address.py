@@ -1,10 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import gettext_lazy as _
-from django.db.models.signals import post_save, post_delete
-from django.dispatch import receiver
 from awx.api.versioning import reverse
-from django.db.models import Sum, Q
 
 
 class ReceptorAddress(models.Model):
