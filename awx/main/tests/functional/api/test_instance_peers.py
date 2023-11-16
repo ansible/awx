@@ -1,9 +1,6 @@
 import pytest
 import yaml
-import itertools
 from unittest import mock
-
-from django.db.utils import IntegrityError
 
 from awx.api.versioning import reverse
 from awx.main.models import Instance, ReceptorAddress
@@ -84,7 +81,7 @@ class TestPeers:
         only one address can have peers_from_control_nodes set to True for a given instance
         """
         hop = Instance.objects.create(hostname='hop', node_type='hop')
-        hopaddr1 = ReceptorAddress.objects.create(instance=hop, address='hopaddr1', peers_from_control_nodes=True)
+        ReceptorAddress.objects.create(instance=hop, address='hopaddr1', peers_from_control_nodes=True)
         resp = post(
             url=reverse('api:instance_receptor_addresses_list', kwargs={'pk': hop.pk}),
             data={"address": "hopaddr2", "peers_from_control_nodes": True},
@@ -247,13 +244,13 @@ class TestPeers:
         """
         control = Instance.objects.create(hostname='control', node_type='control')
         hop1 = Instance.objects.create(hostname='hop1', node_type='hop')
-        hop1addr = ReceptorAddress.objects.create(instance=hop1, address='hop1addr', peers_from_control_nodes=True, port=6789)
+        ReceptorAddress.objects.create(instance=hop1, address='hop1addr', peers_from_control_nodes=True, port=6789)
 
         hop2 = Instance.objects.create(hostname='hop2', node_type='hop')
         hop2addr = ReceptorAddress.objects.create(instance=hop2, address='hop2addr', peers_from_control_nodes=False, port=6789)
 
         execution = Instance.objects.create(hostname='execution', node_type='execution')
-        executionaddr = ReceptorAddress.objects.create(instance=execution, address='executionaddr', peers_from_control_nodes=False, port=6789)
+        ReceptorAddress.objects.create(instance=execution, address='executionaddr', peers_from_control_nodes=False, port=6789)
 
         execution.peers.add(hop2addr)
         hop1.peers.add(hop2addr)
@@ -318,7 +315,7 @@ class TestPeers:
 
             # new address with peers_from_control_nodes False and peered to another hop node (no)
             hop2 = Instance.objects.create(hostname='hop2', node_type='hop')
-            hop2addr = ReceptorAddress.objects.create(instance=hop2, address='hop2addr', peers_from_control_nodes=False)
+            ReceptorAddress.objects.create(instance=hop2, address='hop2addr', peers_from_control_nodes=False)
             hop2.peers.add(hop1addr)
             hop2.delete()
             write_method.assert_not_called()
