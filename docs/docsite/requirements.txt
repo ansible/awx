@@ -8,13 +8,13 @@ alabaster==0.7.13
     # via sphinx
 ansible-pygments==0.1.1
     # via sphinx-ansible-theme
-babel==2.12.1
+babel==2.13.1
     # via sphinx
 certifi==2023.7.22
     # via requests
-charset-normalizer==3.2.0
+charset-normalizer==3.3.2
     # via requests
-docutils==0.16
+docutils==0.18.1
     # via
     #   -r docs/docsite/requirements.in
     #   sphinx
@@ -23,13 +23,13 @@ idna==3.4
     # via requests
 imagesize==1.4.1
     # via sphinx
-jinja2==3.0.3
+jinja2==3.1.2
     # via
     #   -r docs/docsite/requirements.in
     #   sphinx
 markupsafe==2.1.3
     # via jinja2
-packaging==23.1
+packaging==23.2
     # via sphinx
 pygments==2.16.1
     # via
@@ -41,7 +41,7 @@ requests==2.31.0
     # via sphinx
 snowballstemmer==2.2.0
     # via sphinx
-sphinx==5.1.1
+sphinx==7.2.6
     # via
     #   -r docs/docsite/requirements.in
     #   sphinx-ansible-theme
@@ -52,7 +52,7 @@ sphinx==5.1.1
     #   sphinxcontrib-jquery
     #   sphinxcontrib-qthelp
     #   sphinxcontrib-serializinghtml
-sphinx-ansible-theme==0.9.1
+sphinx-ansible-theme==0.10.2
     # via -r docs/docsite/requirements.in
 sphinx-rtd-theme==1.3.0
     # via sphinx-ansible-theme
@@ -70,5 +70,5 @@ sphinxcontrib-qthelp==1.0.6
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.9
     # via sphinx
-urllib3==2.0.4
+urllib3==2.1.0
     # via requests
