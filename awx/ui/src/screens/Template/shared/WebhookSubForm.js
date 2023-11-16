@@ -112,6 +112,12 @@ function WebhookSubForm({ templateType }) {
       label: t`GitLab`,
       isDisabled: false,
     },
+    {
+      value: 'bitbucket_dc',
+      key: 'bitbucket_dc',
+      label: t`Bitbucket Data Center`,
+      isDisabled: false,
+    },
   ];
 
   if (error || webhookKeyError) {
