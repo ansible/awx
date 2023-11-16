@@ -130,8 +130,8 @@ def main():
     if peers:
         for p in peers:
             if not p.isdigit():
-              p_id = module.get_one('receptor_addresses', allow_none=False, data={'address': p})
-              peers_ids.append(p_id['id'])
+                p_id = module.get_one('receptor_addresses', allow_none=False, data={'address': p})
+                peers_ids.append(p_id['id'])
             else:
                 peers_ids.append(p)
 
