@@ -19,7 +19,7 @@ from django.utils.translation import gettext_lazy as _
 
 # AWX
 from awx.main.models.base import prevent_search
-from awx.main.models.rbac import Role, RoleAncestorEntry, get_roles_on_resource
+from awx.main.models.rbac import Role, RoleAncestorEntry
 from awx.main.utils import parse_yaml_or_json, get_custom_venv_choices, get_licenser, polymorphic
 from awx.main.utils.execution_environments import get_default_execution_environment
 from awx.main.utils.encryption import decrypt_value, get_encryption_key, is_encrypted
@@ -54,10 +54,7 @@ class ResourceMixin(models.Model):
         Use instead of `MyModel.objects` when you want to only consider
         resources that a user has specific permissions for. For example:
         MyModel.accessible_objects(user, 'read_role').filter(name__istartswith='bar');
-        NOTE: This should only be used for list type things. If you have a
-        specific resource you want to check permissions on, it is more
-        performant to resolve the resource in question then call
-        `myresource.get_permissions(user)`.
+        NOTE: This should only be used for list type things.
         """
         return ResourceMixin._accessible_objects(cls, accessor, role_field)
 
@@ -85,15 +82,6 @@ class ResourceMixin(models.Model):
     @staticmethod
     def _accessible_objects(cls, accessor, role_field):
         return cls.objects.filter(pk__in=ResourceMixin._accessible_pk_qs(cls, accessor, role_field))
-
-    def get_permissions(self, accessor):
-        """
-        Returns a string list of the roles a accessor has for a given resource.
-        An accessor can be either a User, Role, or an arbitrary resource that
-        contains one or more Roles associated with it.
-        """
-
-        return get_roles_on_resource(self, accessor)
 
 
 class SurveyJobTemplateMixin(models.Model):
