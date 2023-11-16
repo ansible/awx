@@ -5,8 +5,7 @@ from decimal import Decimal
 import logging
 import os
 
-from django.core.validators import MinValueValidator, MaxValueValidator
-from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models, connection
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
@@ -505,12 +504,14 @@ def receptor_address_saved(sender, instance, **kwargs):
     control_instances = set(Instance.objects.filter(node_type__in=[Instance.Types.CONTROL, Instance.Types.HYBRID]))
     if address.peers_from_control_nodes:
         if set(address.peers_from.all()) != control_instances:
-            address.peers_from.add(*control_instances)
-            schedule_write_receptor_config()
+            with disable_activity_stream():
+                address.peers_from.add(*control_instances)
+                schedule_write_receptor_config()
     else:
         if address.peers_from.exists():
-            address.peers_from.remove(*control_instances)
-            schedule_write_receptor_config()
+            with disable_activity_stream():
+                address.peers_from.remove(*control_instances)
+                schedule_write_receptor_config()
 
 
 @receiver(post_delete, sender=ReceptorAddress)
