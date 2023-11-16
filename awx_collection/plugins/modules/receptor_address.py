@@ -88,7 +88,6 @@ def main():
         protocol=dict(type='str', choices=['tcp', 'ws', 'wss']),
         websocket_path=dict(type='str'),
         state=dict(choices=['present', 'absent', 'exists'], default='present'),
-
     )
 
     # Create a module for ourselves
@@ -106,7 +105,7 @@ def main():
     # Attempt to look up an existing instance
     receptor_address = module.get_one('receptor_addresses', allow_none=True, data=dict(address=address, protocol=protocol))
     if receptor_address:
-       receptor_address['type'] = 'receptor_address'
+        receptor_address['type'] = 'receptor_address'
 
     if receptor_address and state == 'absent':
         module.delete_if_needed(receptor_address)
@@ -116,13 +115,13 @@ def main():
     # Create the data that gets sent for create and update
     new_fields = {'instance': instance['id'], 'address': address}
     if port:
-      new_fields['port'] = port
+        new_fields['port'] = port
     if protocol:
-      new_fields['protocol'] = protocol
+        new_fields['protocol'] = protocol
     if peers_from_control_nodes:
-      new_fields['peers_from_control_nodes'] = peers_from_control_nodes
+        new_fields['peers_from_control_nodes'] = peers_from_control_nodes
     if websocket_path:
-      new_fields['websocket_path'] = websocket_path
+        new_fields['websocket_path'] = websocket_path
 
     module.create_or_update_if_needed(
         receptor_address,
