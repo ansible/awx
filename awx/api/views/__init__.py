@@ -376,31 +376,28 @@ class InstanceUnifiedJobsList(SubListAPIView):
 
 class InstancePeersList(SubListAPIView):
     name = _("Peers")
-    parent_model = models.Instance
     model = models.ReceptorAddress
     serializer_class = serializers.ReceptorAddressSerializer
+    parent_model = models.Instance
     parent_access = 'read'
     relationship = 'peers'
-    search_fields = 'address'
+    search_fields = ('address',)
 
 
-class InstanceReceptorAddressesList(ListCreateAPIView):
+class InstanceReceptorAddressesList(SubListCreateAPIView):
     name = _("Receptor Addresses")
     model = models.ReceptorAddress
+    parent_key = 'instance'
+    parent_model = models.Instance
     serializer_class = serializers.ReceptorAddressSerializer
-
-    def get_queryset(self):
-        return models.ReceptorAddress.objects.filter(instance=self.kwargs['pk'])
-
-    def post(self, request, *args, **kwargs):
-        request.data.update({'instance': self.kwargs['pk']})
-        return super().post(request, *args, **kwargs)
+    search_fields = ('address',)
 
 
 class ReceptorAddressesList(ListCreateAPIView):
     name = _("Receptor Addresses")
     model = models.ReceptorAddress
     serializer_class = serializers.ReceptorAddressSerializer
+    search_fields = ('address',)
 
 
 class ReceptorAddressDetail(RetrieveUpdateDestroyAPIView):
