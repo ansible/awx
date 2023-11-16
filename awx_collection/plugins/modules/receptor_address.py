@@ -82,10 +82,10 @@ def main():
     # Any additional arguments that are not fields of the item can be added here
     argument_spec = dict(
         address=dict(required=True, type='str'),
-        instance=dict(type='str'),
+        instance=dict(required=True, type='str'),
         peers_from_control_nodes=dict(type='bool'),
         port=dict(type='int'),
-        protocol=dict(type='str'),
+        protocol=dict(type='str', choices=['tcp', 'ws', 'wss']),
         websocket_path=dict(type='str'),
         state=dict(choices=['present', 'absent', 'exists'], default='present'),
 
