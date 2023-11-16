@@ -248,7 +248,7 @@ def test_completeness(collection_import, request, admin_user, job_template, exec
         singular_endpoint = '{0}'.format(endpoint)
         if singular_endpoint.endswith('ies'):
             singular_endpoint = singular_endpoint[:-3]
-        elif singular_endpoint.endswith('ses'): # receptor_addresses
+        elif singular_endpoint.endswith('ses'):  # receptor_addresses
             singular_endpoint = singular_endpoint[:-2]
         elif singular_endpoint != 'settings' and singular_endpoint.endswith('s'):
             singular_endpoint = singular_endpoint[:-1]
