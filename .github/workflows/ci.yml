@@ -20,6 +20,8 @@ jobs:
         tests:
           - name: api-test
             command: /start_tests.sh
+          - name: api-migrations
+            command: /start_tests.sh test_migrations
           - name: api-lint
             command: /var/lib/awx/venv/awx/bin/tox -e linters
           - name: api-swagger
