@@ -1143,7 +1143,7 @@ class SystemJobOptions(BaseModel):
         ('cleanup_activitystream', _('Remove activity stream entries older than a certain number of days')),
         ('cleanup_sessions', _('Removes expired browser sessions from the database')),
         ('cleanup_tokens', _('Removes expired OAuth 2 access tokens and refresh tokens')),
-        ('cleanup_schedules', _('Removes schedules with no next run and that have not been modified for a certain number of days')),
+        ('cleanup_schedules', _('Removes schedules without next run')),
     ]
 
     class Meta:

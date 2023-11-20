@@ -90,7 +90,7 @@ def create_cleanup_schedules_jt(apps, schema_editor):
         job_type='cleanup_schedules',
         defaults=dict(
             name='Cleanup Schedules',
-            description='Removes schedules with no next run and that have not been modified for a certain number of days',
+            description='Removes schedules without next run',
             polymorphic_ctype=sjt_ct,
             created=now_dt,
             modified=now_dt,
@@ -100,7 +100,7 @@ def create_cleanup_schedules_jt(apps, schema_editor):
         sched = Schedule(
             name='Cleanup Schedules',
             rrule='DTSTART:%s RRULE:FREQ=WEEKLY;INTERVAL=1' % schedule_time,
-            description='Removes schedules with no next run and that have not been modified for a certain number of days',
+            description='Removes schedules without next run',
             enabled=True,
             created=now_dt,
             modified=now_dt,

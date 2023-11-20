@@ -1,7 +1,5 @@
 import sys
 import pytest
-from datetime import datetime, timedelta
-from unittest import mock
 
 from io import StringIO
 
@@ -80,22 +78,16 @@ class TestCleanupSchedulesCases:
         assert Schedule.objects.count() == 1
 
     @pytest.mark.parametrize(
-        "days_since_modified,enabled,only_once,expected",
+        "enabled,only_once,expected",
         [
-            (3, True, True, 0),
-            (1, True, True, 1),
-            (3, True, False, 1),
-            (1, True, False, 1),
-            (3, False, False, 0),
-            (1, False, False, 1),
+            (True, True, 0),
+            (True, False, 1),
+            (False, False, 0),
         ],
     )
-    @mock.patch("django.utils.timezone.now", return_value=datetime.now())
-    def test_cleanup_schedules_of_regular_job_schedule(self, mocked_now, days_since_modified, enabled, only_once, expected):
+    def test_cleanup_schedules_of_regular_job_schedule(self, enabled, only_once, expected):
         jt = mk_job_template(name="Test")
         mk_schedule(name="Test", unified_job_template=jt, rrule=self.mk_rrule_str(only_once=only_once), enabled=enabled)
-        mocked_now.return_value = datetime.now() + timedelta(days=days_since_modified)
-
-        run_command("cleanup_schedules", days=2)
+        run_command("cleanup_schedules")
 
         assert Schedule.objects.count() == expected

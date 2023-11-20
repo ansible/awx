@@ -4,7 +4,6 @@ import logging
 # Django
 from django.db.models import Q
 from django.core.management.base import BaseCommand
-from django.utils.timezone import now
 
 # AWX
 from awx.main.models import Schedule, SystemJobTemplate
@@ -12,20 +11,12 @@ from awx.main.models import Schedule, SystemJobTemplate
 
 class Command(BaseCommand):
     """
-    Management command to cleanup old schedules.
+    Management command to cleanup schedules.
     """
 
-    help = 'Remove old schedules from the database'
+    help = 'Remove schedules without next run from the database'
 
     def add_arguments(self, parser):
-        parser.add_argument(
-            '--days',
-            dest='days',
-            type=int,
-            default=90,
-            metavar='N',
-            help='Remove schedules with no next run and that have not been modified for N days (system job schedules are excluded)',
-        )
         parser.add_argument('--dry-run', dest='dry_run', action='store_true', default=False, help='Dry run mode (show schedules that would be removed)')
         parser.add_argument(
             '--batch-size', dest='batch_size', type=int, default=500, metavar='X', help='Remove schedules in batch of X schedules. Defaults to 500.'
@@ -42,9 +33,7 @@ class Command(BaseCommand):
 
     def cleanup_schedules(self):
         schedules_to_delete = (
-            Schedule.objects.filter(Q(next_run__isnull=True), Q(modified__lt=self.cutoff))
-            .exclude(unified_job_template__in=SystemJobTemplate.objects.all())
-            .values_list('pk', flat=True)
+            Schedule.objects.filter(Q(next_run__isnull=True)).exclude(unified_job_template__in=SystemJobTemplate.objects.all()).values_list('pk', flat=True)
         )
 
         deleted = len(schedules_to_delete)
@@ -64,8 +53,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.verbosity = int(options.get('verbosity', 1))
         self.init_logging()
-        self.days = int(options.get('days', 90))
-        self.cutoff = now() - datetime.timedelta(days=self.days)
         self.dry_run = bool(options.get('dry_run', False))
         self.batch_size = int(options.get('batch_size', 500))
         self.cleanup_schedules()
