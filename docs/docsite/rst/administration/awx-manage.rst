@@ -59,7 +59,7 @@ This permanently deletes any :ref:`ug_activitystreams` data older than a specifi
 
 - ``manage cleanup_schedules [--help]``
 
-This permanently deletes schedules without next run.
+This permanently deletes schedules without next run. Disabled schedules can be skipped optionally.
 
 Cluster management
 ~~~~~~~~~~~~~~~~~~~~

@@ -78,16 +78,19 @@ class TestCleanupSchedulesCases:
         assert Schedule.objects.count() == 1
 
     @pytest.mark.parametrize(
-        "enabled,only_once,expected",
+        "skip_disabled,enabled,only_once,expected",
         [
-            (True, True, 0),
-            (True, False, 1),
-            (False, False, 0),
+            (True, True, True, 0),
+            (True, True, False, 1),
+            (True, False, False, 1),
+            (False, True, True, 0),
+            (False, True, False, 1),
+            (False, False, False, 0),
         ],
     )
-    def test_cleanup_schedules_of_regular_job_schedule(self, enabled, only_once, expected):
+    def test_cleanup_schedules_of_regular_job_schedule(self, skip_disabled, enabled, only_once, expected):
         jt = mk_job_template(name="Test")
         mk_schedule(name="Test", unified_job_template=jt, rrule=self.mk_rrule_str(only_once=only_once), enabled=enabled)
-        run_command("cleanup_schedules")
+        run_command("cleanup_schedules", skip_disabled=skip_disabled)
 
         assert Schedule.objects.count() == expected
