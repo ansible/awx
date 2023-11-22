@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
 from awx.api.versioning import reverse
@@ -18,6 +19,9 @@ class ExecutionEnvironment(CommonModel):
         ('missing', _("Only pull the image if not present before running.")),
         ('never', _("Never pull container before running.")),
     ]
+    # K8S does not support "newer" pull policy but non-K8S deployments benefit from it.
+    if not settings.IS_K8S:
+        PULL_CHOICES.insert(0, ('newer', _("Pull newer container if available, use local one otherwise."))),
 
     organization = models.ForeignKey(
         'Organization',
