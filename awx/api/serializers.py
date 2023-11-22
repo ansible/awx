@@ -2278,13 +2278,12 @@ class BulkHostDeleteSerializer(serializers.Serializer):
             raise serializers.ValidationError({"detail": _(f"cannot delete hosts, host deletion error {e}")})
 
         request = self.context.get('request', None)
-        activity_entry = ActivityStream.objects.create(
-            operation='update',
+        ActivityStream.objects.create(
+            operation='delete',
             object1='inventory',
             changes=json.dumps(changes),
             actor=request.user,
         )
-        activity_entry.inventory.add(validated_data['inventory'])
         return result
 
 
