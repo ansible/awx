@@ -19,12 +19,14 @@ The Inventories window displays a list of the inventories that are currently ava
 |Inventories - home with examples|
 
 .. |Inventories - home with examples| image:: ../common/images/inventories-home-with-examples.png
+   :alt: Inventories home with example
 
 The list of Inventory details includes:
 
 - **Name**: The inventory name. Clicking the Inventory name navigates to the properties screen for the selected inventory, which shows the inventory's groups and hosts. (This view is also accessible from the |edit button| icon.)
 
 .. |edit button| image:: ../common/images/edit-button.png
+   :alt: Edit button
 
 - **Status**
 
@@ -37,6 +39,7 @@ The statuses are:
 An example of inventories of various states, including one with detail for a disabled state:
 
 .. image:: ../common/images/inventories-home-with-status.png
+   :alt: Inventories home with status
 
 - **Type**: Identifies whether it is a standard inventory, a Smart inventory, or a constructed inventory.
 - **Organization**: The organization to which the inventory belongs.
@@ -46,7 +49,7 @@ An example of inventories of various states, including one with detail for a dis
     - **Copy** (|copy|): Makes a copy of an existing inventory as a template for creating a new one
 
     .. |copy| image:: ../common/images/copy-button.png
-
+       :alt: copy-button
 
 .. _ug_inventories_smart:
 
@@ -170,10 +173,12 @@ To use ``ansible_facts`` to define the host filter when creating Smart Inventori
 1. In the *Create new smart inventory screen*, click the |search| button next to the **Smart host filter** field to open a pop-up window to filter hosts for this inventory.
 
 .. image:: ../common/images/inventories-smart-create-filter-highlighted.png
+   :alt: Inventories smart create filter highlighted
 
 2. In the search pop-up window, change the search criteria from **Name** to **Advanced** and select **ansible_facts** from the **Key** field.
 
 .. image:: ../common/images/inventories-smart-define-host-filter.png
+   :alt: Inventories smart define host filter
 
 
 If you wanted to add an ansible fact of
@@ -186,24 +191,29 @@ If you wanted to add an ansible fact of
 In the search field, enter ``ansible_processor[]="GenuineIntel"`` (no extra spaces or ``__`` before the value) and press **[Enter]**.
 
 .. image:: ../common/images/inventories-smart-define-host-filter-facts.png
+   :alt: Inventories smart define host filter facts
 
 The resulting search criteria for the specified ansible fact populates in the lower part of the window.
 
 .. image:: ../common/images/inventories-smart-define-host-filter-facts2.png
+   :alt: Second inventories smart define host filter facts
 
 3. Click **Select** to add it to the **Smart host filter** field.
 
 .. image:: ../common/images/inventories-smart-create-filter-added.png
+   :alt: Inventories smart create filter added
 
 4. Click **Save** to save the new Smart Inventory.
 
 The Details tab of the new Smart Inventory opens and displays the specified ansible facts in the **Smart host filter** field.
 
 .. image:: ../common/images/inventories-smart-create-details.png
+   :alt: Inventories smart create details
 
 5. From the Details view, you can edit the **Smart host filter** field by clicking **Edit** and delete existing filter(s), clear all existing filters, or add new ones.
 
 .. image:: ../common/images/inventories-smart-define-host-filter-facts-group.png
+   :alt: Inventories smart define host filter facts group
 
 
 .. _ug_inventories_constructed:
@@ -246,6 +256,7 @@ The hosts inside the input inventory will fit one condition, the other condition
 neither, or both. This results in four hosts total for demonstration purposes.
 
 .. image:: ../common/images/inventories-constructed-inventory-venn.png
+   :alt: Inventories constructed invontory venn
 
 
 This folder defines the inventory as an ini type named ``two_conditions.ini``:
@@ -459,6 +470,7 @@ Follow the procedure described in the subsequent section, :ref:`ug_inventories_a
 Example of a constructed inventory details view:
 
 .. image:: ../common/images/inventories-constructed-inventory-details.png
+   :alt: Inventories constructed inventory details
 
 
 
@@ -515,6 +527,7 @@ The type of inventory is identified at the top of the create form.
 |Inventories_create_new - create new inventory|
 
 .. |Inventories_create_new - create new inventory| image:: ../common/images/inventories-create-new-inventory.png
+   :alt: Inventories create new create new inventory
 
 2. Enter the appropriate details into the following fields:
 
@@ -528,6 +541,7 @@ The type of inventory is identified at the top of the create form.
 - **Instance Groups**: Click the |search| button to open a separate window. Choose the instance group(s) for this inventory to run on. If the list is extensive, use the search to narrow the options. You may select multiple instance groups and sort them in the order you want them ran.
 
 .. image:: ../common/images/select-instance-groups-modal.png
+   :alt: Select instance groups modal
 
 - **Labels**: Optionally supply labels that describe this inventory, so they can be used to group and filter inventories and jobs.
 
@@ -546,6 +560,7 @@ The type of inventory is identified at the top of the create form.
   Set the ``prevent_instance_group_fallback`` option for Smart Inventories through the API.
 
 .. |help| image:: ../common/images/tooltips-icon.png
+   :alt: tooltips icon
 
 .. _constr_inv_source_vars:
 
@@ -555,10 +570,12 @@ The type of inventory is identified at the top of the create form.
   - **Source vars** for constructed inventories creates groups, specifically under the ``groups`` key of the data. It accepts Jinja2 template syntax, renders it for every host, makes a ``True``/``False`` evaluation, and includes the host in the group (from key of the entry) if the result is ``True``. This is particularly useful because you can paste that group name into the limit field to only include hosts in that group. See an example :ref:`here <constr_inv_example>`.
 
 .. |search| image:: ../common/images/search-button.png
+   :alt: Search button
 
 |Inventories_create_new_saved - create new inventory|
 
 .. |Inventories_create_new_saved - create new inventory| image:: ../common/images/inventories-create-new-saved-inventory.png
+   :alt: Create new inventory
 
 3. Click **Save** when done.
 
@@ -602,6 +619,7 @@ To create a new group for an inventory:
 |Inventories_manage_group_add|
 
 .. |Inventories_manage_group_add| image:: ../common/images/inventories-add-group-new.png
+   :alt: Inventores manage group add
 
 2. Enter the appropriate details into the required and optional fields:
 
@@ -634,12 +652,14 @@ The **Create Group** window closes and the newly created group displays as an en
 |Inventories add group subgroup|
 
 .. |Inventories add group subgroup| image:: ../common/images/inventories-add-group-subgroup-added.png
+   :alt: Inventories add group subgroup
 
 If you chose to add an existing group, available groups will appear in a separate selection window.
 
 |Inventories add group existing subgroup|
 
 .. |Inventories add group existing subgroup| image:: ../common/images/inventories-add-group-existing-subgroup.png
+   :alt: Inventories add group existing subgroup
 
 Once a group is selected, it displays as an entry in the list of groups associated with the group.
 
@@ -655,6 +675,7 @@ The list view displays all your inventory groups at once, or you can filter it t
 You may be able to delete a subgroup without concern for dependencies, since AWX will look for dependencies such as any child groups or hosts. If any exists, a confirmation dialog displays for you to choose whether to delete the root group and all of its subgroups and hosts; or promote the subgroup(s) so they become the top-level inventory group(s), along with their host(s).
 
 .. image:: ../common/images/inventories-groups-delete-root-with-children.png
+   :alt: Inventories group delete root with children
 
 .. _ug_inventories_add_host:
 
@@ -670,6 +691,7 @@ You can configure hosts for the inventory as well as for groups and groups withi
 3. If creating a new host, select the |toggle button| button to specify whether or not to include this host while running jobs.
 
 .. |toggle button| image:: ../common/images/on-off-toggle-button.png
+   :alt: On off toggle button
 
 4. Enter the appropriate details into the required and optional fields:
 
@@ -684,12 +706,14 @@ The **Create Host** window closes and the newly created host displays as an entr
 |Inventories add group host|
 
 .. |Inventories add group host| image:: ../common/images/inventories-add-group-host-added.png
+   :alt: Inventories add group host
 
 If you chose to add an existing host, available hosts will appear in a separate selection window.
 
 |Inventories add existing host|
 
 .. |Inventories add existing host| image:: ../common/images/inventories-add-existing-host.png
+   :alt: Inventories add existing host
 
 Once a host is selected, it displays as an entry in the list of hosts associated with the group. You can disassociate a host from this screen by selecting the host and click the **Disassociate** button.
 
@@ -704,12 +728,14 @@ list of hosts.
 |Inventories add group host emphasized|
 
 .. |Inventories add group host emphasized| image:: ../common/images/inventories-add-group-host-added-emphasized.png
+   :alt: Inventories add group host emphasized
 
 This opens the Details tab of the selected host.
 
 |Inventories add group host details|
 
 .. |Inventories add group host details| image:: ../common/images/inventories-add-group-host-details.png
+   :alt: Inventories add group host details
 
 7. Click the **Groups** tab to configure groups for the host.
 
@@ -718,6 +744,7 @@ This opens the Details tab of the selected host.
     Available groups appear in a separate selection window.
 
     .. image:: ../common/images/inventories-add-group-hosts-add-groups.png
+       :alt: Inventories add group hosts add groups
 
   b. Click to select the group(s) to associate with the host and click **Save**.
 
@@ -726,6 +753,7 @@ This opens the Details tab of the selected host.
 8. If a host was used to run a job, you can view details about those jobs in the **Completed Jobs** tab of the host and click **Expanded** to view details about each job.
 
 .. image:: ../common/images/inventories-add-host-view-completed-jobs.png
+   :alt: Inventories add host view completed jobs
 
 
 .. _ug_inventories_add_host_bulk_api:
@@ -750,6 +778,7 @@ This opens the Create Source window.
 |Inventories create source|
 
 .. |Inventories create source| image:: ../common/images/inventories-create-source.png
+   :alt: Inventories create source
 
 
 3. Enter the appropriate details into the required and optional fields:
@@ -816,6 +845,7 @@ This opens the Create Source window.
     The **Notifications** tab is only present after you save the newly-created source.
 
     .. image:: ../common/images/inventories-create-source-with-notifications-tab.png
+       :alt: Inventories create source with notification tab
 
 12.  To configure notifications for the source, click the **Notifications** tab.
 
@@ -831,6 +861,7 @@ Once a source is defined, it displays as an entry in the list of sources associa
 |Inventories view sources|
 
 .. |Inventories view sources| image:: ../common/images/inventories-view-sources.png
+   :alt: Inventories view source
 
 
 .. _ug_inventory_sources:
@@ -860,12 +891,14 @@ An inventory that is sourced from a project means that is uses the SCM type from
     This field only displays if the sourced project has the **Allow Branch Override** option checked:
 
     .. image:: ../common/images/projects-create-scm-project-branch-override-checked.png
+       :alt: Project create scm project branch override checked
 
   - **Credential**: Optionally specify the credential to use for this source.
   - **Project**: Required. Pre-populates with a default project, otherwise, specify the project this inventory is using as its source. Click the |search| button to choose from a list of projects. If the list is extensive, use the search to narrow the options.
   - **Inventory File**: Required. Select an inventory file associated with the sourced project. If not already populated, you can type it into the text field within the drop down menu to filter the extraneous file types. In addition to a flat file inventory, you can point to a directory or an inventory script.
 
     .. image:: ../common/images/inventories-create-source-sourced-from-project-filter.png
+       :alt: Inventories create source sourced from project filter
 
 3. You can optionally specify the verbosity, host filter, enabled variable/value, and update options as described in the main procedure for :ref:`adding a source <ug_add_inv_common_fields>`.
 
@@ -874,6 +907,7 @@ An inventory that is sourced from a project means that is uses the SCM type from
 |Inventories - create source - sourced from project example|
 
 .. |Inventories - create source - sourced from project example| image:: ../common/images/inventories-create-source-sourced-from-project-example.png
+   :alt: Inventories create source sourced from project example
 
 .. note:: If you are executing a custom inventory script from SCM, please make sure you set the execution bit (i.e. ``chmod +x``) on the script in your upstream source control. If you do not, AWX will throw a ``[Errno 13] Permission denied`` error upon execution.
 
@@ -901,6 +935,7 @@ Amazon Web Services EC2
 |Inventories - create source - AWS EC2 example|
 
 .. |Inventories - create source - AWS EC2 example| image:: ../common/images/inventories-create-source-AWS-example.png
+   :alt: Inventories create source AWS EC2 example
 
 .. note::
 
@@ -921,6 +956,7 @@ Google Compute Engine
 |Inventories - create source - GCE example|
 
 .. |Inventories - create source - GCE example| image:: ../common/images/inventories-create-source-GCE-example.png
+   :alt: Inventories create source GCE example
 
 3. You can optionally specify the verbosity, host filter, enabled variable/value, and update options as described in the main procedure for :ref:`adding a source <ug_add_inv_common_fields>`.
 
@@ -946,6 +982,7 @@ Microsoft Azure Resource Manager
 |Inventories - create source - Azure RM example|
 
 .. |Inventories - create source - Azure RM example| image:: ../common/images/inventories-create-source-azurerm-example.png
+   :alt: Inventories create source Azure RM example
 
 
 .. _ug_source_vmvcenter:
@@ -971,6 +1008,7 @@ VMware vCenter
 |Inventories - create source - VMware example|
 
 .. |Inventories - create source - VMWare example| image:: ../common/images/inventories-create-source-vmware-example.png
+   :alt: Inventories create source VMWare example
 
 
 .. _ug_source_satellite:
@@ -993,6 +1031,7 @@ Red Hat Satellite 6
 |Inventories - create source - RH Satellite example|
 
 .. |Inventories - create source - RH Satellite example| image:: ../common/images/inventories-create-source-rhsat6-example.png
+   :alt: Inventories create source RH Statellite example
 
 If you encounter an issue with AWX inventory not having the "related groups" from Satellite, you might need to define these variables in the inventory source. See the inventory plugins template example for :ref:`ir_plugin_satellite` in the |atir| for detail.
 
@@ -1017,6 +1056,7 @@ Red Hat Insights
 |Inventories - create source - RH Insights example|
 
 .. |Inventories - create source - RH Insights example| image:: ../common/images/inventories-create-source-insights-example.png
+   :alt: Inventories create source RH Insights example
 
 
 .. _ug_source_openstack:
@@ -1039,6 +1079,7 @@ OpenStack
 |Inventories - create source - OpenStack example|
 
 .. |Inventories - create source - OpenStack example| image:: ../common/images/inventories-create-source-openstack-example.png
+   :alt: Invetories create source OpenStack example
 
 
 .. _ug_source_rhv:
@@ -1060,6 +1101,7 @@ Red Hat Virtualization
 |Inventories - create source - RHV example|
 
 .. |Inventories - create source - RHV example| image:: ../common/images/inventories-create-source-rhv-example.png
+   :alt: Inventories create source RHV example
 
 .. note::
 
@@ -1081,6 +1123,7 @@ Red Hat Ansible Automation Platform
 3. You can optionally specify the verbosity, host filter, enabled variable/value, and update options as described in the main procedure for :ref:`adding a source <ug_add_inv_common_fields>`.
 
   .. image:: ../common/images/inventories-create-source-rhaap-example.png
+     :alt: Inventories create source rhaap example
 
 4. Use the **Source Variables** field to override variables used by the ``controller`` inventory plugin. Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two. 
 
@@ -1159,7 +1202,7 @@ If an inventory was used to run a job, you can view details about those jobs in 
 |Inventories view completed jobs|
 
 .. |Inventories view completed jobs| image:: ../common/images/inventories-view-completed-jobs.png
-
+   :alt: Inventories view completed jobs
 
 
 
@@ -1181,12 +1224,14 @@ To run an ad hoc command:
 |ad hoc-commands-inventory-home|
 
 .. |ad hoc-commands-inventory-home| image:: ../common/images/inventories-add-group-host-added.png
+   :alt: ad hoc commands inventory home
 
 2. Click the **Run Command** button.
 
 The Run command window opens.
 
 .. image:: ../common/images/ad-hoc-run-execute-command.png
+   :alt: ad hoc run execute command
 
 3. Enter the details for the following fields:
 
@@ -1216,10 +1261,12 @@ The Run command window opens.
 |ad hoc-commands-inventory-run-command|
 
 .. |ad hoc-commands-inventory-run-command| image:: ../common/images/ad-hoc-commands-inventory-run-command.png
+   :alt: ad hoc commands inventory run command
 
 4. Click **Next** to choose the |ee| you want the ad-hoc command to be run against.
 
 .. image:: ../common/images/ad-hoc-commands-inventory-run-command-ee.png
+   :alt: ad hoc inventory run command ee
 
 5. Click **Next** to choose the credential you want to use and click the **Launch** button.
 
@@ -1229,3 +1276,4 @@ The results display in the **Output** tab of the module's job window.
 |ad hoc-commands-inventory-results-example|
 
 .. |ad hoc-commands-inventory-results-example| image:: ../common/images/ad-hoc-commands-inventory-results-example.png
+   :alt: ad hoc commands inventory results example
