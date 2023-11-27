@@ -45,6 +45,7 @@ SOSREPORT_CONTROLLER_DIRS = [
     "/var/log/installer",
     "/var/log/unattended-upgrades",
     "/var/log/apport.log",
+    "/var/log/pcp/pmlogger",
 ]
 
 SOSREPORT_FORBIDDEN_PATHS = [
