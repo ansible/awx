@@ -15,7 +15,11 @@
           VAULT_ADDR: "https://127.0.0.1:1234"
           VAULT_SKIP_VERIFY: "true"
       register: vault_initialization
-      ignore_errors: true
+      failed_when:
+        - vault_initialization.rc != 0
+        - vault_initialization.stderr.find("Vault is already initialized") == -1
+      changed_when:
+        - vault_initialization.rc == 0
 
     - name: Write out initialization file
       copy:
@@ -43,6 +47,12 @@
         token: "{{ Initial_Root_Token }}"
         data:
           type: "cert"
+      register: vault_auth_cert
+      failed_when:
+        - vault_auth_cert.result.errors | default([]) | length > 0
+        - "'path is already in use at cert/' not in vault_auth_cert.result.errors | default([])"
+      changed_when:
+        - vault_auth_cert.result.errors | default([]) | length == 0
 
     - name: Configure client certificate
       flowerysong.hvault.write:
@@ -63,9 +73,8 @@
         vault_addr: "https://localhost:1234"
         validate_certs: false
         token: "{{ Initial_Root_Token }}"
-      register: engine
 
-    - name: Create a secret
+    - name: Create a demo secret
       flowerysong.hvault.kv:
         mount_point: "my_engine/my_root"
         key: "my_folder"
