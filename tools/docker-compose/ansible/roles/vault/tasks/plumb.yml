@@ -1,4 +1,7 @@
 ---
+- name: Set vault_addr
+  include_tasks: set_vault_addr.yml
+
 - name: Load vault keys
   include_vars:
     file: "{{ vault_file }}"
@@ -18,14 +21,14 @@
     validate_certs: false
     inputs:
       api_version: "v1"
-      cacert: "{{ lookup('ansible.builtin.file', '{{ vault_server_cert }}') }}"
+      cacert: "{{ lookup('ansible.builtin.file', '{{ vault_server_cert }}', errors='ignore') }}"
       default_auth_path: "cert"
       kubernetes_role: ""
       namespace: ""
-      client_cert_public: "{{ lookup('ansible.builtin.file', '{{ vault_client_cert }}') }}"
-      client_cert_private: "{{ lookup('ansible.builtin.file', '{{ vault_client_key }}') }}"
+      client_cert_public: "{{ lookup('ansible.builtin.file', '{{ vault_client_cert }}', errors='ignore') }}"
+      client_cert_private: "{{ lookup('ansible.builtin.file', '{{ vault_client_key }}', errors='ignore') }}"
       token: "{{ Initial_Root_Token }}"
-      url: "https://tools_vault_1:1234"
+      url: "{{ vault_addr_from_container }}"
   register: vault_cred
 
 - name: Create a custom credential type
