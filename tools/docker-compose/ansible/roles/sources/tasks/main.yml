@@ -102,7 +102,7 @@
   when: enable_ldap | bool
 
 - name: Include vault TLS tasks if enabled
-  include_tasks: vault.yml
+  include_tasks: vault_tls.yml
   when: enable_vault | bool
 
 - name: Render Docker-Compose
