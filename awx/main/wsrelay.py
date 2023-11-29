@@ -237,6 +237,8 @@ class WebSocketRelayManager(object):
                     if logger.isEnabledFor(logging.DEBUG):
                         logmsg = "{} {}".format(logmsg, payload)
                         logger.warning(logmsg)
+                    else:
+                        logger.warning("Heartbeat json payload malformed")
                     continue
 
                 # Skip if the message comes from the same host we are running on
