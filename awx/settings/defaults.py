@@ -488,15 +488,19 @@ _SOCIAL_AUTH_PIPELINE_BASE = (
     'social_core.pipeline.user.get_username',
     'social_core.pipeline.social_auth.associate_by_email',
     'social_core.pipeline.user.create_user',
+    'awx.sso.social_base_pipeline.check_user_found_or_created',
     'social_core.pipeline.social_auth.associate_user',
     'social_core.pipeline.social_auth.load_extra_data',
+    'awx.sso.social_base_pipeline.set_is_active_for_new_user',
     'social_core.pipeline.user.user_details',
+    'awx.sso.social_base_pipeline.prevent_inactive_login',
 )
 SOCIAL_AUTH_PIPELINE = _SOCIAL_AUTH_PIPELINE_BASE + ('awx.sso.social_pipeline.update_user_orgs', 'awx.sso.social_pipeline.update_user_teams')
 SOCIAL_AUTH_SAML_PIPELINE = _SOCIAL_AUTH_PIPELINE_BASE + ('awx.sso.saml_pipeline.populate_user', 'awx.sso.saml_pipeline.update_user_flags')
 SAML_AUTO_CREATE_OBJECTS = True
 
 SOCIAL_AUTH_LOGIN_URL = '/'
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/sso/complete/'
 SOCIAL_AUTH_LOGIN_ERROR_URL = '/sso/error/'
 SOCIAL_AUTH_INACTIVE_USER_URL = '/sso/inactive/'
 
