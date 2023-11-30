@@ -227,7 +227,7 @@ class WebSocketRelayManager(object):
                 continue
             try:
                 if not notif.payload or notif.channel != "web_ws_heartbeat":
-                    logger.warning(f"Unexpected Channel or Payload. {notif.channel}, {notif.payload}")
+                    logger.warning(f"Unexpected channel or missing payload. {notif.channel}, {notif.payload}")
                     continue
 
                 try:
