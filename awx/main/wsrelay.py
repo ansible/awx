@@ -236,9 +236,7 @@ class WebSocketRelayManager(object):
                     logmsg = "Failed to decode message from pg_notify channel `web_ws_heartbeat`"
                     if logger.isEnabledFor(logging.DEBUG):
                         logmsg = "{} {}".format(logmsg, payload)
-                        logger.warning(logmsg)
-                    else:
-                        logger.warning("Heartbeat json payload malformed")
+                    logger.warning(logmsg)
                     continue
 
                 # Skip if the message comes from the same host we are running on
