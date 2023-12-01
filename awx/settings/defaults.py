@@ -801,6 +801,10 @@ LOG_AGGREGATOR_ACTION_MAX_DISK_USAGE_GB = 1  # Action queue
 LOG_AGGREGATOR_MAX_DISK_USAGE_PATH = '/var/lib/awx'
 LOG_AGGREGATOR_RSYSLOGD_DEBUG = False
 LOG_AGGREGATOR_RSYSLOGD_ERROR_LOG_FILE = '/var/log/tower/rsyslog.err'
+
+LOG_AGGREGATOR_RSYSLOGD_SOCKET = '/var/run/awx-rsyslog/rsyslog.sock'
+LOG_AGGREGATOR_RSYSLOGD_UDP_ADDRESS = ("localhost", 5159)
+
 API_400_ERROR_LOG_FORMAT = 'status {status_code} received by user {user_name} attempting to access {url_path} from {remote_addr}'
 
 ASGI_APPLICATION = "awx.main.routing.application"
@@ -844,7 +848,7 @@ LOGGING = {
         'external_logger': {
             'class': 'awx.main.utils.handlers.RSysLogHandler',
             'formatter': 'json',
-            'address': '/var/run/awx-rsyslog/rsyslog.sock',
+            'address': LOG_AGGREGATOR_RSYSLOGD_SOCKET,
             'filters': ['external_log_enabled', 'dynamic_level_filter', 'guid'],
         },
     },
@@ -947,7 +951,7 @@ AWX_REQUEST_PROFILE_WITH_DOT = False
 AWX_CALLBACK_PROFILE = False
 
 # Delete temporary directories created to store playbook run-time
-AWX_CLEANUP_PATHS = True
+AWX_CLEANUP_PATHS = False
 
 # Allow ansible-runner to store env folder (may contain sensitive information)
 AWX_RUNNER_OMIT_ENV_FILES = True
@@ -962,7 +966,7 @@ AWX_RUNNER_SUPPRESS_OUTPUT_FILE = True
 AWX_RUNNER_KEEPALIVE_SECONDS = 0
 
 # Delete completed work units in receptor
-RECEPTOR_RELEASE_WORK = True
+RECEPTOR_RELEASE_WORK = False
 
 # K8S only. Use receptor_log_level on AWX spec to set this properly
 RECEPTOR_LOG_LEVEL = 'info'
