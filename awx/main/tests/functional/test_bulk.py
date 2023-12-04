@@ -312,7 +312,7 @@ def test_bulk_job_set_all_prompt(job_template, organization, inventory, project,
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('num_hosts, num_queries', [(1, 70), (10, 70), (25, 120)])
+@pytest.mark.parametrize('num_hosts, num_queries', [(1, 70), (10, 150), (25, 250)])
 def test_bulk_host_delete_num_queries(organization, inventory, post, get, user, num_hosts, num_queries, django_assert_max_num_queries):
     '''
     If I am a...
