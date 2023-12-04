@@ -23,6 +23,8 @@
         - vault_initialization.stderr.find("Vault is already initialized") == -1
       changed_when:
         - vault_initialization.rc == 0
+      retries: 5
+      delay: 5
 
     - name: Write out initialization file
       copy:
