@@ -2227,7 +2227,7 @@ class BulkHostDeleteSerializer(serializers.Serializer):
             )
 
         # Getting list of all host objects, filtered by the list of the hosts to delete
-        attrs['host_qs'] = Host.objects.get_queryset().filter(pk__in=attrs['hosts'])
+        attrs['host_qs'] = Host.objects.get_queryset().filter(pk__in=attrs['hosts']).only('id', 'inventory_id', 'name')
 
         # Converting the queryset data in a dict. to reduce the number of queries when
         # manipulating the data
