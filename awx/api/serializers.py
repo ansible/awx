@@ -2269,7 +2269,7 @@ class BulkHostDeleteSerializer(serializers.Serializer):
         result = {"hosts": dict()}
         changes = {'deleted_hosts': dict()}
         for inventory in validated_data['inventories']:
-            changes[inventory] = list()
+            changes['deleted_hosts'][inventory] = list()
 
         for host in validated_data['hosts_data']:
             result["hosts"][host["id"]] = f"The host {host['name']} was deleted"
