@@ -346,7 +346,6 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'awx.api.pagination.Pagination',
     'PAGE_SIZE': 25,
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'ansible_base.authentication.session.SessionAuthentication',
         'awx.api.authentication.LoggedOAuth2Authentication',
         'awx.api.authentication.SessionAuthentication',
         'awx.api.authentication.LoggedBasicAuthentication',
@@ -372,7 +371,12 @@ REST_FRAMEWORK = {
 }
 
 AUTHENTICATION_BACKENDS = (
-    "ansible_base.authentication.backend.AnsibleBaseAuth",
+    'awx.sso.backends.LDAPBackend',
+    'awx.sso.backends.LDAPBackend1',
+    'awx.sso.backends.LDAPBackend2',
+    'awx.sso.backends.LDAPBackend3',
+    'awx.sso.backends.LDAPBackend4',
+    'awx.sso.backends.LDAPBackend5',
     'awx.sso.backends.RADIUSBackend',
     'awx.sso.backends.TACACSPlusBackend',
     'social_core.backends.google.GoogleOAuth2',
@@ -873,7 +877,6 @@ LOGGING = {
         'awx.analytics.broadcast_websocket': {'handlers': ['console', 'file', 'wsrelay', 'external_logger'], 'level': 'INFO', 'propagate': False},
         'awx.analytics.performance': {'handlers': ['console', 'file', 'tower_warnings', 'external_logger'], 'level': 'DEBUG', 'propagate': False},
         'awx.analytics.job_lifecycle': {'handlers': ['console', 'job_lifecycle'], 'level': 'DEBUG', 'propagate': False},
-        'ansible_base': {'handlers': ['console'], 'level': 'DEBUG'},
         'django_auth_ldap': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
         'social': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
         'system_tracking_migrations': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
@@ -965,8 +968,6 @@ RECEPTOR_RELEASE_WORK = True
 # K8S only. Use receptor_log_level on AWX spec to set this properly
 RECEPTOR_LOG_LEVEL = 'info'
 
-ANSIBLE_BASE_AUTHENTICATOR_CLASS_PREFIXES = ["ansible_base.authenticator_plugins"]
-
 MIDDLEWARE = [
     'django_guid.middleware.guid_middleware',
     'awx.main.middleware.SettingsCacheMiddleware',
@@ -977,7 +978,6 @@ MIDDLEWARE = [
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'ansible_base.utils.middleware.AuthenticatorBackendMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'awx.main.middleware.DisableLocalAuthMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
