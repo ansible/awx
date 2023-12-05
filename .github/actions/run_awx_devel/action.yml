@@ -41,6 +41,7 @@ runs:
         make docker-compose
 
     - name: Update default AWX password
+      timeout-minutes: 10  # Give AWX time to come up... but not too much time.
       shell: bash
       run: |
         while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' -k https://localhost:8043/api/v2/ping/)" != "200" ]]

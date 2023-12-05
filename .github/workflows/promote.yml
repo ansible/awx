@@ -15,6 +15,7 @@ jobs:
   promote:
     if: endsWith(github.repository, '/awx')
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     steps:
       - name: Checkout awx
         uses: actions/checkout@v3
