@@ -2262,15 +2262,18 @@ class BulkHostDeleteSerializer(serializers.Serializer):
                 errors[inv.name] = "Hosts can only be deleted from manual inventories."
         if errors != {}:
             raise serializers.ValidationError({"inventories": errors})
-
+        attrs['inventories'] = inv_list
         return attrs
 
     def delete(self, validated_data):
         result = {"hosts": dict()}
-        changes = {'deleted_hosts': list()}
+        changes = {'deleted_hosts': dict()}
+        for inventory in validated_data['inventories']:
+            changes[inventory] = list()
+
         for host in validated_data['hosts_data']:
             result["hosts"][host["id"]] = f"The host {host['name']} was deleted"
-            changes['deleted_hosts'].append({"host_id": host["id"], "host_name": host["name"]})
+            changes['deleted_hosts'][host["inventory_id"]].append({"host_id": host["id"], "host_name": host["name"]})
 
         try:
             validated_data['host_qs'].delete()
@@ -2278,12 +2281,16 @@ class BulkHostDeleteSerializer(serializers.Serializer):
             raise serializers.ValidationError({"detail": _(f"cannot delete hosts, host deletion error {e}")})
 
         request = self.context.get('request', None)
-        ActivityStream.objects.create(
-            operation='delete',
-            object1='inventory',
-            changes=json.dumps(changes),
-            actor=request.user,
-        )
+
+        for inventory in validated_data['inventories']:
+            activity_entry = ActivityStream.objects.create(
+                operation='update',
+                object1='inventory',
+                changes=json.dumps(changes['deleted_hosts'][inventory]),
+                actor=request.user,
+            )
+            activity_entry.inventory.add(inventory)
+
         return result
 
 
