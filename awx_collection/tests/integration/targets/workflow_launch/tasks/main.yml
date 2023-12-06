@@ -57,7 +57,7 @@
     - assert:
         that:
           - result is failed
-          - "'Monitoring of Workflow Job - {{ wfjt_name1 }} aborted due to timeout' in result.msg"
+          - "'Monitoring of Workflow Job - '~ wfjt_name1 ~ ' aborted due to timeout' in result.msg"
 
     - name: Kick off a workflow and wait for it
       workflow_launch:

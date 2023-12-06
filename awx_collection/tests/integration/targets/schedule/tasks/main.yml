@@ -62,7 +62,7 @@
     - assert:
         that:
           - result is failed
-          - "'Unable to create schedulei '~ sched1 in result.msg"
+          - "'Unable to create schedule '~ sched1 in result.msg"
 
     - name: Build a real schedule
       schedule:
