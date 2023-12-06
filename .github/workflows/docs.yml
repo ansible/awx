@@ -6,6 +6,7 @@ jobs:
   docsite-build:
     name: docsite test build
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v3
 

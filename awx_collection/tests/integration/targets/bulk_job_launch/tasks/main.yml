@@ -60,7 +60,7 @@
       - result['job_info']['skip_tags'] == "skipbaz"
       - result['job_info']['limit'] == "localhost"
       - result['job_info']['job_tags'] == "Hello World"
-      - result['job_info']['inventory'] == {{ inventory_id }}
+      - result['job_info']['inventory'] == inventory_id | int
       - "result['job_info']['extra_vars'] == '{\"animal\": \"bear\", \"food\": \"carrot\"}'"
 
 # cleanup

@@ -12,6 +12,7 @@ jobs:
   push:
     if: endsWith(github.repository, '/awx') || startsWith(github.ref, 'refs/heads/release_')
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     permissions:
       packages: write
       contents: read

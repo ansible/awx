@@ -9,6 +9,7 @@ on:
 jobs:
   push:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       packages: write
       contents: read

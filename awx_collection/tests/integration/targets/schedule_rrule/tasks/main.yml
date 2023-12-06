@@ -9,7 +9,7 @@
 
 - name: Test too many params (failure from validation of terms)
   debug:
-    msg: "{{ query(plugin_name, 'none', 'weekly', start_date='2020-4-16 03:45:07') }}"
+    msg: "{{ query(plugin_name | string, 'none', 'weekly', start_date='2020-4-16 03:45:07') }}"
   ignore_errors: true
   register: result
 
