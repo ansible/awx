@@ -10,6 +10,7 @@ build:
       3.11
   commands:
     - pip install --user tox
-    - python3 -m tox -e docs
+    - python3 -m tox -e docs --notest -v
+    - python3 -m tox -e docs --skip-pkg-install -q
     - mkdir -p _readthedocs/html/
     - mv docs/docsite/build/html/* _readthedocs/html/
