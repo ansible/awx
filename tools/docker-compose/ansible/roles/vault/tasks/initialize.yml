@@ -1,4 +1,7 @@
 ---
+- name: Set vault_addr
+  include_tasks: set_vault_addr.yml
+
 - block:
     - name: Start the vault
       community.docker.docker_compose:
@@ -12,9 +15,16 @@
         command: vault operator init
         container: tools_vault_1
         env:
-          VAULT_ADDR: "http://127.0.0.1:1234"
+          VAULT_ADDR: "{{ vault_addr }}"
+          VAULT_SKIP_VERIFY: "true"
       register: vault_initialization
-      ignore_errors: true
+      failed_when:
+        - vault_initialization.rc != 0
+        - vault_initialization.stderr.find("Vault is already initialized") == -1
+      changed_when:
+        - vault_initialization.rc == 0
+      retries: 5
+      delay: 5
 
     - name: Write out initialization file
       copy:
@@ -34,21 +44,52 @@
         name: vault
         tasks_from: unseal.yml
 
+    - name: Configure the vault with cert auth
+      block:
+        - name: Create a cert auth mount
+          flowerysong.hvault.write:
+            path: "sys/auth/cert"
+            vault_addr: "{{ vault_addr_from_host }}"
+            validate_certs: false
+            token: "{{ Initial_Root_Token }}"
+            data:
+              type: "cert"
+          register: vault_auth_cert
+          failed_when:
+            - vault_auth_cert.result.errors | default([]) | length > 0
+            - "'path is already in use at cert/' not in vault_auth_cert.result.errors | default([])"
+          changed_when:
+            - vault_auth_cert.result.errors | default([]) | length == 0
+
+        - name: Configure client certificate
+          flowerysong.hvault.write:
+            path: "auth/cert/certs/awx-client"
+            vault_addr: "{{ vault_addr_from_host }}"
+            validate_certs: false
+            token: "{{ Initial_Root_Token }}"
+            data:
+              name: awx-client
+              certificate: "{{ lookup('ansible.builtin.file', '{{ vault_client_cert }}') }}"
+              policies:
+                - root
+      when: vault_tls | bool
+
     - name: Create an engine
       flowerysong.hvault.engine:
         path: "my_engine"
         type: "kv"
-        vault_addr: "http://localhost:1234"
+        vault_addr: "{{ vault_addr_from_host }}"
+        validate_certs: false
         token: "{{ Initial_Root_Token }}"
-      register: engine
 
-    - name: Create a secret
+    - name: Create a demo secret
       flowerysong.hvault.kv:
         mount_point: "my_engine/my_root"
         key: "my_folder"
         value:
           my_key: "this_is_the_secret_value"
-        vault_addr: "http://localhost:1234"
+        vault_addr: "{{ vault_addr_from_host }}"
+        validate_certs: false
         token: "{{ Initial_Root_Token }}"
 
   always:

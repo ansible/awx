@@ -252,7 +252,7 @@ services:
     privileged: true
   {% endfor %}
 {% endif %}
-{% if enable_vault|bool %}
+{% if enable_vault | bool %}
   vault:
     image: hashicorp/vault:1.14
     container_name: tools_vault_1
@@ -261,10 +261,17 @@ services:
     ports:
       - "1234:1234"
     environment:
+{% if vault_tls | bool %}
+      VAULT_LOCAL_CONFIG: '{"storage": {"file": {"path": "/vault/file"}}, "listener": [{"tcp": { "address": "0.0.0.0:1234", "tls_disable": false, "tls_cert_file": "/vault/tls/server.crt", "tls_key_file": "/vault/tls/server.key"}}], "default_lease_ttl": "168h", "max_lease_ttl": "720h", "ui": true}'
+{% else %}
       VAULT_LOCAL_CONFIG: '{"storage": {"file": {"path": "/vault/file"}}, "listener": [{"tcp": { "address": "0.0.0.0:1234", "tls_disable": true}}], "default_lease_ttl": "168h", "max_lease_ttl": "720h", "ui": true}'
+{% endif %}
     cap_add:
       - IPC_LOCK
     volumes:
+{% if vault_tls | bool %}
+      - '../../docker-compose/_sources/vault_certs:/vault/tls'
+{% endif %}
       - 'hashicorp_vault_data:/vault/file'
 {% endif %}
 

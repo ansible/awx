@@ -30,6 +30,24 @@ ldap_public_key_file: '{{ ldap_cert_dir }}/{{ ldap_public_key_file_name }}'
 ldap_private_key_file: '{{ ldap_cert_dir }}/{{ ldap_private_key_file_name }}'
 ldap_cert_subject: "/C=US/ST=NC/L=Durham/O=awx/CN="
 
+# Hashicorp Vault
+enable_vault: false
+vault_tls: false
+hashivault_cert_dir: '{{ sources_dest }}/vault_certs'
+hashivault_server_cert_subject: "/C=US/ST=NC/L=Durham/O=awx/CN=tools-vault-1"
+hashivault_server_cert_extensions:
+  - "subjectAltName = DNS:tools_vault_1, DNS:localhost"
+  - "keyUsage = digitalSignature, nonRepudiation"
+  - "extendedKeyUsage = serverAuth"
+hashivault_client_cert_extensions:
+  - "subjectAltName = DNS:awx-vault-client"
+  - "keyUsage = digitalSignature, nonRepudiation"
+  - "extendedKeyUsage = serverAuth, clientAuth"
+hashivault_client_cert_subject: "/C=US/ST=NC/L=Durham/O=awx/CN=awx-vault-client"
+hashivault_server_public_keyfile: '{{ hashivault_cert_dir }}/server.crt'
+hashivault_server_private_keyfile: '{{ hashivault_cert_dir }}/server.key'
+hashivault_client_public_keyfile: '{{ hashivault_cert_dir }}/client.crt'
+hashivault_client_private_keyfile: '{{ hashivault_cert_dir }}/client.key'
 # Metrics
 enable_splunk: false
 enable_grafana: false

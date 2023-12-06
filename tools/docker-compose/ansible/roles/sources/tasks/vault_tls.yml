@@ -1,0 +1,31 @@
+---
+- name: Create Certificates for HashiCorp Vault
+  block:
+    - name: Create Hashicorp Vault cert directory
+      file:
+        path: "{{ hashivault_cert_dir }}"
+        state: directory
+
+    - name: Generate vault server certificate
+      command: 'openssl req -new -newkey rsa:2048 -x509 -days 365 -nodes -out {{ hashivault_server_public_keyfile }} -keyout {{ hashivault_server_private_keyfile }} -subj "{{ hashivault_server_cert_subject }}"{% for ext in hashivault_server_cert_extensions %} -addext "{{ ext }}"{% endfor %}'
+      args:
+        creates: "{{ hashivault_server_public_keyfile }}"
+
+    - name: Generate vault test client certificate
+      command: 'openssl req -new -newkey rsa:2048 -x509 -days 365 -nodes -out {{ hashivault_client_public_keyfile }} -keyout {{ hashivault_client_private_keyfile }} -subj "{{ hashivault_client_cert_subject }}"{% for ext in hashivault_client_cert_extensions %} -addext "{{ ext }}"{% endfor %}'
+      args:
+        creates: "{{ hashivault_client_public_keyfile }}"
+
+    - name: Set mode for vault certificates
+      ansible.builtin.file:
+        path: "{{ hashivault_cert_dir }}"
+        recurse: true
+        state: directory
+        mode: 0777
+  when: vault_tls | bool
+
+- name: Delete Certificates for HashiCorp Vault
+  file:
+    path: "{{ hashivault_cert_dir }}"
+    state: absent
+  when: vault_tls | bool == false

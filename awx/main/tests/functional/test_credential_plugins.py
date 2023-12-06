@@ -40,6 +40,26 @@ def test_hashivault_kubernetes_auth():
         assert res == expected_res
 
 
+def test_hashivault_client_cert_auth_explicit_role():
+    kwargs = {
+        'client_cert_role': 'test-cert-1',
+    }
+    expected_res = {
+        'name': 'test-cert-1',
+    }
+    res = hashivault.client_cert_auth(**kwargs)
+    assert res == expected_res
+
+
+def test_hashivault_client_cert_auth_no_role():
+    kwargs = {}
+    expected_res = {
+        'name': None,
+    }
+    res = hashivault.client_cert_auth(**kwargs)
+    assert res == expected_res
+
+
 def test_hashivault_handle_auth_token():
     kwargs = {
         'token': 'the_token',
@@ -71,6 +91,22 @@ def test_hashivault_handle_auth_kubernetes():
             token = hashivault.handle_auth(**kwargs)
             method_mock.assert_called_with(**kwargs, auth_param={'role': 'the_kubernetes_role', 'jwt': 'the_jwt'})
             assert token == 'the_token'
+
+
+def test_hashivault_handle_auth_client_cert():
+    kwargs = {
+        'client_cert_public': "foo",
+        'client_cert_private': "bar",
+        'client_cert_role': 'test-cert-1',
+    }
+    auth_params = {
+        'name': 'test-cert-1',
+    }
+    with mock.patch.object(hashivault, 'method_auth') as method_mock:
+        method_mock.return_value = 'the_token'
+        token = hashivault.handle_auth(**kwargs)
+        method_mock.assert_called_with(**kwargs, auth_param=auth_params)
+        assert token == 'the_token'
 
 
 def test_hashivault_handle_auth_not_enough_args():

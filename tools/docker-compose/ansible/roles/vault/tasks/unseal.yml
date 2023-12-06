@@ -1,11 +1,15 @@
 ---
+- name: Set vault_addr
+  include_tasks: set_vault_addr.yml
+
 - name: Load vault keys
   include_vars:
     file: "{{ vault_file }}"
 
 - name: Unseal the vault
   flowerysong.hvault.seal:
-    vault_addr: "http://localhost:1234"
+    vault_addr: "{{ vault_addr_from_host }}"
+    validate_certs: false
     state: unsealed
     key: "{{ item }}"
   loop:
