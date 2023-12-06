@@ -10,6 +10,7 @@ jobs:
     if: github.repository_owner == 'ansible' && endsWith(github.repository, 'awx')
     name: Scan PR description for semantic versioning keywords
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       packages: write
       contents: read

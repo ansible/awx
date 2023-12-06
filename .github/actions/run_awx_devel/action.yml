@@ -43,10 +43,14 @@ runs:
     - name: Update default AWX password
       shell: bash
       run: |
-        while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' -k https://localhost:8043/api/v2/ping/)" != "200" ]]
-        do
-        echo "Waiting for AWX..."
-        sleep 5
+        SECONDS=0
+        while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' -k https://localhost:8043/api/v2/ping/)" != "200" ]]; do
+          if [[ $SECONDS -gt 600 ]]; then
+            echo "Timing out, AWX never came up"
+            exit 1
+          fi
+          echo "Waiting for AWX..."
+          sleep 5
         done
         echo "AWX is up, updating the password..."
         docker exec -i tools_awx_1 sh <<-EOSH
