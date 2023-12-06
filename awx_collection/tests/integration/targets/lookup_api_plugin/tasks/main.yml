@@ -132,7 +132,7 @@
 
     - name: Get the ID of the first user created and verify that it is correct
       assert:
-        that: "{{ query(plugin_name, 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }, return_ids=True)[0] }} == {{ user_creation_results['results'][0]['id'] }}"
+        that: "query(plugin_name, 'users', query_params={ 'username' : user_creation_results['results'][0]['item'] }, return_ids=True)[0] ==  user_creation_results['results'][0]['id'] | string"
 
     - name: Try to get an ID of someone who does not exist
       set_fact:

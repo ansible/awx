@@ -36,7 +36,7 @@
     - assert:
         that:
           - result is failed
-          - "'Unable to create schedule {{ sched1 }}' in result.msg"
+          - "'Unable to create schedule '~ sched1 in result.msg"
 
     - name: Create with options that the JT does not support
       schedule:
@@ -62,7 +62,7 @@
     - assert:
         that:
           - result is failed
-          - "'Unable to create schedule {{ sched1 }}' in result.msg"
+          - "'Unable to create schedule '~ sched1 in result.msg"
 
     - name: Build a real schedule
       schedule:
