@@ -64,7 +64,7 @@ class ResourceMixin(models.Model):
 
     @staticmethod
     def _accessible_pk_qs(cls, accessor, role_field, content_types=None):
-        if type(accessor) == User:
+        if accessor._meta.model_name == 'user':
             ancestor_roles = accessor.roles.all()
         elif type(accessor) == Role:
             ancestor_roles = [accessor]
