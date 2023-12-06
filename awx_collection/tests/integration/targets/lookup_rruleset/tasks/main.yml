@@ -11,7 +11,7 @@
 
 - name: Call ruleset with no rules
   set_fact:
-    complex_rule: "{{ query(ruleset_plugin_name, '2022-04-30 10:30:45') }}"
+    complex_rule: "{{ query(ruleset_plugin_name | string, '2022-04-30 10:30:45') }}"
   ignore_errors: True
   register: results
 
