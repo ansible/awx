@@ -170,7 +170,7 @@ class Role(models.Model):
         return reverse('api:role_detail', kwargs={'pk': self.pk}, request=request)
 
     def __contains__(self, accessor):
-        if type(accessor) == User:
+        if accessor._meta.model_name == 'user':
             return self.ancestors.filter(members=accessor).exists()
         elif accessor.__class__.__name__ == 'Team':
             return self.ancestors.filter(pk=accessor.member_role.id).exists()
