@@ -20,7 +20,6 @@ from django.contrib.auth.models import User  # noqa
 __all__ = [
     'Role',
     'batch_role_ancestor_rebuilding',
-    'get_roles_on_resource',
     'ROLE_SINGLETON_SYSTEM_ADMINISTRATOR',
     'ROLE_SINGLETON_SYSTEM_AUDITOR',
     'role_summary_fields_generator',
@@ -458,31 +457,6 @@ class RoleAncestorEntry(models.Model):
     role_field = models.TextField(null=False)
     content_type_id = models.PositiveIntegerField(null=False)
     object_id = models.PositiveIntegerField(null=False)
-
-
-def get_roles_on_resource(resource, accessor):
-    """
-    Returns a string list of the roles a accessor has for a given resource.
-    An accessor can be either a User, Role, or an arbitrary resource that
-    contains one or more Roles associated with it.
-    """
-
-    if type(accessor) == User:
-        roles = accessor.roles.all()
-    elif type(accessor) == Role:
-        roles = [accessor]
-    else:
-        accessor_type = ContentType.objects.get_for_model(accessor)
-        roles = Role.objects.filter(content_type__pk=accessor_type.id, object_id=accessor.id)
-
-    return [
-        role_field
-        for role_field in RoleAncestorEntry.objects.filter(
-            ancestor__in=roles, content_type_id=ContentType.objects.get_for_model(resource).id, object_id=resource.id
-        )
-        .values_list('role_field', flat=True)
-        .distinct()
-    ]
 
 
 def role_summary_fields_generator(content_object, role_field):

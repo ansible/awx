@@ -95,13 +95,6 @@ The `singleton` class method is a helper method on the `Role` model that helps i
 You may use the `user in some_role` syntax to check and see if the specified
 user is a member of the given role, **or** a member of any ancestor role.
 
-#### `get_roles_on_resource(resource, accessor)`
-
-This is a static method (not bound to a class) that will efficiently return the names
-of all roles that the `accessor` (a user or a team) has on a particular resource.
-The resource is a python object for something like an organization, credential, or job template.
-Return value is a list of strings like `["admin_role", "execute_role"]`.
-
 ### Fields
 
 #### `ImplicitRoleField`
