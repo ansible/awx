@@ -2670,7 +2670,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
         def get_roles_on_resource(parent_role):
             "Returns a string list of the roles a parent_role has for current obj."
             return list(
-                RoleAncestorEntry.objects.filter(ancestor=parent_role, content_type_id=content_type, object_id=obj.id)
+                RoleAncestorEntry.objects.filter(ancestor=parent_role, content_type_id=content_type.id, object_id=obj.id)
                 .values_list('role_field', flat=True)
                 .distinct()
             )
