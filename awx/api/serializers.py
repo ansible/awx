@@ -2690,7 +2690,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
             else:
                 # Singleton roles should not be managed from this view, as per copy/edit rework spec
                 role_dict['user_capabilities'] = {'unattach': False}
-            return {'role': role_dict, 'descendant_roles': get_roles_on_resource(obj, role)}
+            return {'role': role_dict, 'descendant_roles': get_roles_on_resource(role)}
 
         def format_team_role_perm(naive_team_role, permissive_role_ids):
             ret = []
@@ -2716,7 +2716,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 else:
                     # Singleton roles should not be managed from this view, as per copy/edit rework spec
                     role_dict['user_capabilities'] = {'unattach': False}
-                ret.append({'role': role_dict, 'descendant_roles': get_roles_on_resource(obj, team_role)})
+                ret.append({'role': role_dict, 'descendant_roles': get_roles_on_resource(team_role)})
             return ret
 
         direct_permissive_role_ids = Role.objects.filter(content_type=content_type, object_id=obj.id).values_list('id', flat=True)
