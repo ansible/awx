@@ -119,6 +119,7 @@ django==4.2.6
     #   djangorestframework
     #   drf-spectacular
     #   social-auth-app-django
+    # via -r /awx_devel/requirements/requirements_git.txt
 django-auth-ldap==4.1.0
     # via
     #   -r /awx_devel/requirements/requirements.in
