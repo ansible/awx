@@ -55,7 +55,7 @@ main() {
       echo ""
       NEEDS_HELP=1
     ;;
-  esac 
+  esac
 
   if [[ "$NEEDS_HELP" == "1" ]] ; then
     echo "This script generates requirements.txt from requirements.in and requirements_git.in"
@@ -73,6 +73,12 @@ main() {
 
   if [[ ! -d /awx_devel ]] ; then
       echo "This script should be run inside the awx container"
+      exit
+  fi
+
+  if [[ ! -z "$(tail -c 1 "${requirements_git}")" ]]
+  then
+      echo "No newline at end of ${requirements_git}, please add one"
       exit
   fi
 
