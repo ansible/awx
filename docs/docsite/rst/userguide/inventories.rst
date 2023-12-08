@@ -470,7 +470,7 @@ Follow the procedure described in the subsequent section, :ref:`ug_inventories_a
 Example of a constructed inventory details view:
 
 .. image:: ../common/images/inventories-constructed-inventory-details.png
-   :alt: Inventories constructed inventory details
+   :alt: Constructed inventory details
 
 
 
