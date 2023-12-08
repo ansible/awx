@@ -541,7 +541,7 @@ The type of inventory is identified at the top of the create form.
 - **Instance Groups**: Click the |search| button to open a separate window. Choose the instance group(s) for this inventory to run on. If the list is extensive, use the search to narrow the options. You may select multiple instance groups and sort them in the order you want them ran.
 
 .. image:: ../common/images/select-instance-groups-modal.png
-   :alt: Select instance groups modal
+   :alt: Select instance groups dialogue
 
 - **Labels**: Optionally supply labels that describe this inventory, so they can be used to group and filter inventories and jobs.
 
