@@ -527,7 +527,7 @@ The type of inventory is identified at the top of the create form.
 |Inventories_create_new - create new inventory|
 
 .. |Inventories_create_new - create new inventory| image:: ../common/images/inventories-create-new-inventory.png
-   :alt: Inventories create new create new inventory
+   :alt: Create new create new inventory
 
 2. Enter the appropriate details into the following fields:
 
