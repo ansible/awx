@@ -92,7 +92,7 @@ base_inputs = {
             'label': _('Username'),
             'type': 'string',
             'secret': False,
-            'help_text': _('Username for authentication.'),
+            'help_text': _('Username for user authentication.'),
         },
         {
             'id': 'password',
