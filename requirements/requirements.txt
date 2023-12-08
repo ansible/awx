@@ -411,7 +411,7 @@ service-identity==21.1.0
     # via twisted
 setuptools-rust==1.5.2
     # via -r /awx_devel/requirements/requirements.in
-setuptools-scm[toml]==7.0.5
+setuptools-scm[toml]==8.0.4
     # via -r /awx_devel/requirements/requirements.in
 six==1.16.0
     # via
