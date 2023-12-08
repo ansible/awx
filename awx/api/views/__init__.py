@@ -1397,7 +1397,7 @@ class OrganizationCredentialList(SubListCreateAPIView):
         self.check_parent_access(organization)
 
         user_visible = models.Credential.accessible_objects(self.request.user, 'read_role').all()
-        org_set = models.Credential.accessible_objects(organization.admin_role, 'read_role').all()
+        org_set = models.Credential.objects.filter(organization=organization)
 
         if self.request.user.is_superuser or self.request.user.is_system_auditor:
             return org_set
