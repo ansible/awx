@@ -256,7 +256,7 @@ The hosts inside the input inventory will fit one condition, the other condition
 neither, or both. This results in four hosts total for demonstration purposes.
 
 .. image:: ../common/images/inventories-constructed-inventory-venn.png
-   :alt: Inventories constructed invontory venn
+   :alt: Inventories constructed inventory Venn diagram
 
 
 This folder defines the inventory as an ini type named ``two_conditions.ini``:
