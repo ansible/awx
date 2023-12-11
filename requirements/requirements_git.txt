@@ -1,7 +1,6 @@
 git+https://github.com/ansible/system-certifi.git@devel#egg=certifi
 # Remove pbr from requirements.in when moving ansible-runner to requirements.in
-#git+https://github.com/ansible/ansible-runner.git@devel#egg=ansible-runner
-git+https://github.com/jessicamack/ansible-runner.git@upgrade-setuptools-scm#egg=ansible-runner
+git+https://github.com/ansible/ansible-runner.git@devel#egg=ansible-runner
 # django-radius library has not released since several dependency fixes were made
 # specifically need https://github.com/robgolding/django-radius/pull/27
 git+https://github.com/ansible/django-radius.git@develop#egg=django-radius
