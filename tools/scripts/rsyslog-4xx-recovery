@@ -11,11 +11,9 @@ def write_stdout(s):
     sys.stdout.write(s)
     sys.stdout.flush()
 
-
 def write_stderr(s):
     sys.stderr.write(s)
     sys.stderr.flush()
-
 
 def main():
     while 1:
@@ -30,23 +28,6 @@ def main():
             data = sys.stdin.read(int(headers["len"]))
         except ValueError as e:
             write_stderr(str(e))
-
-        # now decide what do to based on eventnames
-        if headers["eventname"] == "PROCESS_STATE_FATAL":
-            headers.update(
-                dict(
-                    [x.split(":") for x in sys.stdin.read(int(headers["len"])).split()]
-                )
-            )
-
-            try:
-                # incoming event that produced PROCESS_STATE_FATAL will have a PID. SIGTERM it!
-                write_stderr(
-                    f"{datetime.datetime.now(timezone.utc)} - sending SIGTERM to proc={headers} with data={headers}\n"
-                )
-                os.kill(headers["pid"], signal.SIGTERM)
-            except Exception as e:
-                write_stderr(str(e))
 
         # awx-rsyslog PROCESS_LOG_STDERR handler
         if headers["eventname"] == "PROCESS_LOG_STDERR":
