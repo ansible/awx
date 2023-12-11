@@ -15,6 +15,7 @@ stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
+stderr_events_enabled = true
 
 [program:awx-rsyslog-configurer]
 {% if kube_dev | bool %}
@@ -65,8 +66,8 @@ buffer_size = 100
 events=PROCESS_LOG_STDERR
 priority=0
 autorestart=true
-stdout_events_enabled = true
-stderr_events_enabled = true
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
 
 [unix_http_server]
 file=/var/run/supervisor/supervisor.rsyslog.sock
