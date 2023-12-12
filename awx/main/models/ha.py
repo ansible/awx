@@ -180,6 +180,8 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         help_text=_("Protocol to use for the Receptor listener, 'tcp', 'wss', or 'ws'."), max_length=10, default=Protocols.TCP, choices=Protocols.choices
     )
 
+    receptor_installation_method = settings.DEFAULT_RECEPTOR_INSTALLATION_METHOD
+
     class Types(models.TextChoices):
         CONTROL = 'control', _("Control plane node")
         EXECUTION = 'execution', _("Execution plane node")
