@@ -11,9 +11,11 @@ def write_stdout(s):
     sys.stdout.write(s)
     sys.stdout.flush()
 
+
 def write_stderr(s):
-    sys.stderr.write(s)
+    sys.stderr.write(f"[rsyslog-4xx-recovery] {s}")
     sys.stderr.flush()
+
 
 def main():
     while 1:
@@ -44,6 +46,15 @@ def main():
                             f"{datetime.datetime.now(timezone.utc)} - sending SIGTERM to proc=[{proc_details['processname']}] with pid=[{int(proc_details['pid'])}] due to log_message=[{log_message}]\n"
                         )
                         os.kill(int(proc_details["pid"]), signal.SIGTERM)
+                    except Exception as e:
+                        write_stderr(str(e))
+
+                if "action-0-omhttp queue: need to do hard cancellation" in log_message:
+                    try:
+                        write_stderr(
+                            f"{datetime.datetime.now(timezone.utc)} - sending SIGKILL to proc=[{proc_details['processname']}] with pid=[{int(proc_details['pid'])}] due to log_message=[{log_message}]\n"
+                        )
+                        os.kill(int(proc_details["pid"]), signal.SIGKILL)
                     except Exception as e:
                         write_stderr(str(e))
 
