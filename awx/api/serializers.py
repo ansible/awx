@@ -5504,6 +5504,7 @@ class InstanceSerializer(BaseSerializer):
             'reverse_peers',
             'listener_port',
             'protocol',
+            'receptor_installation_method',
         )
         extra_kwargs = {
             'node_type': {'initial': Instance.Types.EXECUTION, 'default': Instance.Types.EXECUTION},
