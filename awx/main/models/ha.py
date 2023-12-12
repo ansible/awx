@@ -187,7 +187,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         CONTAINER = 'container', _("Install via container")
 
     receptor_installation_method = models.CharField(
-        default=ReceptorInstallationMethods.RELEASE,
+        default=settings.DEFAULT_RECEPTOR_INSTALLATION_METHOD,
         choices=ReceptorInstallationMethods.choices,
         max_length=16,
         help_text=_("Select your preferred receptor installation method"),
