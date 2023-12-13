@@ -309,3 +309,139 @@ def test_bulk_job_set_all_prompt(job_template, organization, inventory, project,
     assert node[0].limit == 'kansas'
     assert node[0].skip_tags == 'foobar'
     assert node[0].job_tags == 'untagged'
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('num_hosts, num_queries', [(1, 70), (10, 150), (25, 250)])
+def test_bulk_host_delete_num_queries(organization, inventory, post, get, user, num_hosts, num_queries, django_assert_max_num_queries):
+    '''
+    If I am a...
+      org admin
+      inventory admin at org level
+      admin of a particular inventory
+      superuser
+
+    Bulk Host delete should take under a certain number of queries
+    '''
+    users_list = setup_admin_users_list(organization, inventory, user)
+    for u in users_list:
+        hosts = [{'name': str(uuid4())} for i in range(num_hosts)]
+        with django_assert_max_num_queries(num_queries):
+            bulk_host_create_response = post(reverse('api:bulk_host_create'), {'inventory': inventory.id, 'hosts': hosts}, u, expect=201).data
+            assert len(bulk_host_create_response['hosts']) == len(hosts), f"unexpected number of hosts created for user {u}"
+            hosts_ids_created = get_inventory_hosts(get, inventory.id, u)
+            bulk_host_delete_response = post(reverse('api:bulk_host_delete'), {'hosts': hosts_ids_created}, u, expect=201).data
+            assert len(bulk_host_delete_response['hosts'].keys()) == len(hosts), f"unexpected number of hosts deleted for user {u}"
+
+
+@pytest.mark.django_db
+def test_bulk_host_delete_rbac(organization, inventory, post, get, user):
+    '''
+    If I am a...
+      org admin
+      inventory admin at org level
+      admin of a particular invenotry
+          ... I can bulk delete hosts
+
+    Everyone else cannot
+    '''
+    admin_users_list = setup_admin_users_list(organization, inventory, user)
+    users_list = setup_none_admin_uses_list(organization, inventory, user)
+
+    for indx, u in enumerate(admin_users_list):
+        bulk_host_create_response = post(
+            reverse('api:bulk_host_create'), {'inventory': inventory.id, 'hosts': [{'name': f'foobar-{indx}'}]}, u, expect=201
+        ).data
+        assert len(bulk_host_create_response['hosts']) == 1, f"unexpected number of hosts created for user {u}"
+        assert Host.objects.filter(inventory__id=inventory.id)[0].name == f'foobar-{indx}'
+        hosts_ids_created = get_inventory_hosts(get, inventory.id, u)
+        bulk_host_delete_response = post(reverse('api:bulk_host_delete'), {'hosts': hosts_ids_created}, u, expect=201).data
+        assert len(bulk_host_delete_response['hosts'].keys()) == 1, f"unexpected number of hosts deleted by user {u}"
+
+    for indx, create_u in enumerate(admin_users_list):
+        bulk_host_create_response = post(
+            reverse('api:bulk_host_create'), {'inventory': inventory.id, 'hosts': [{'name': f'foobar2-{indx}'}]}, create_u, expect=201
+        ).data
+        print(bulk_host_create_response)
+        assert bulk_host_create_response['hosts'][0]['name'] == f'foobar2-{indx}'
+        hosts_ids_created = get_inventory_hosts(get, inventory.id, create_u)
+        print(f"Try to delete {hosts_ids_created}")
+        for delete_u in users_list:
+            bulk_host_delete_response = post(reverse('api:bulk_host_delete'), {'hosts': hosts_ids_created}, delete_u, expect=403).data
+            assert "Lack permissions to delete hosts from this inventory." in bulk_host_delete_response['inventories'].values()
+
+
+@pytest.mark.django_db
+def test_bulk_host_delete_from_multiple_inv(organization, inventory, post, get, user):
+    '''
+    If I am inventory admin at org level
+
+    Bulk Host delete should be enabled only on my inventory
+    '''
+    num_hosts = 10
+    inventory.organization = organization
+
+    # Create second inventory
+    inv2 = organization.inventories.create(name="second-test-inv")
+    inv2.organization = organization
+    admin2_user = user('inventory2_admin', False)
+    inv2.admin_role.members.add(admin2_user)
+
+    admin_user = user('inventory_admin', False)
+    inventory.admin_role.members.add(admin_user)
+
+    organization.member_role.members.add(admin_user)
+    organization.member_role.members.add(admin2_user)
+
+    hosts = [{'name': str(uuid4())} for i in range(num_hosts)]
+    hosts2 = [{'name': str(uuid4())} for i in range(num_hosts)]
+
+    # create hosts in each of the inventories
+    bulk_host_create_response = post(reverse('api:bulk_host_create'), {'inventory': inventory.id, 'hosts': hosts}, admin_user, expect=201).data
+    assert len(bulk_host_create_response['hosts']) == len(hosts), f"unexpected number of hosts created for user {admin_user}"
+
+    bulk_host_create_response2 = post(reverse('api:bulk_host_create'), {'inventory': inv2.id, 'hosts': hosts2}, admin2_user, expect=201).data
+    assert len(bulk_host_create_response2['hosts']) == len(hosts), f"unexpected number of hosts created for user {admin2_user}"
+
+    # get all hosts ids - from both inventories
+    hosts_ids_created = get_inventory_hosts(get, inventory.id, admin_user)
+    hosts_ids_created += get_inventory_hosts(get, inv2.id, admin2_user)
+
+    expected_error = "Lack permissions to delete hosts from this inventory."
+    # try to delete ALL hosts with admin user of inventory 1.
+    for inv_name, invadmin in zip([inv2.name, inventory.name], [admin_user, admin2_user]):
+        bulk_host_delete_response = post(reverse('api:bulk_host_delete'), {'hosts': hosts_ids_created}, invadmin, expect=403).data
+        result_message = bulk_host_delete_response['inventories'][inv_name]
+        assert result_message == expected_error, f"deleted hosts without permission by user {invadmin}"
+
+
+def setup_admin_users_list(organization, inventory, user):
+    inventory.organization = organization
+    inventory_admin = user('inventory_admin', False)
+    org_admin = user('org_admin', False)
+    org_inv_admin = user('org_admin', False)
+    superuser = user('admin', True)
+    for u in [org_admin, org_inv_admin, inventory_admin]:
+        organization.member_role.members.add(u)
+    organization.admin_role.members.add(org_admin)
+    organization.inventory_admin_role.members.add(org_inv_admin)
+    inventory.admin_role.members.add(inventory_admin)
+    return [inventory_admin, org_inv_admin, superuser, org_admin]
+
+
+def setup_none_admin_uses_list(organization, inventory, user):
+    inventory.organization = organization
+    auditor = user('auditor', False)
+    member = user('member', False)
+    use_inv_member = user('member', False)
+    for u in [auditor, member, use_inv_member]:
+        organization.member_role.members.add(u)
+    inventory.use_role.members.add(use_inv_member)
+    organization.auditor_role.members.add(auditor)
+    return [auditor, member, use_inv_member]
+
+
+def get_inventory_hosts(get, inv_id, use_user):
+    data = get(reverse('api:inventory_hosts_list', kwargs={'pk': inv_id}), use_user, expect=200).data
+    results = [host['id'] for host in data['results']]
+    return results

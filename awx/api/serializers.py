@@ -2201,6 +2201,99 @@ class BulkHostCreateSerializer(serializers.Serializer):
         return return_data
 
 
+class BulkHostDeleteSerializer(serializers.Serializer):
+    hosts = serializers.ListField(
+        allow_empty=False,
+        max_length=100000,
+        write_only=True,
+        help_text=_('List of hosts ids to be deleted, e.g. [105, 130, 131, 200]'),
+    )
+
+    class Meta:
+        model = Host
+        fields = ('hosts',)
+
+    def validate(self, attrs):
+        request = self.context.get('request', None)
+        max_hosts = settings.BULK_HOST_MAX_DELETE
+        # Validating the number of hosts to be deleted
+        if len(attrs['hosts']) > max_hosts:
+            raise serializers.ValidationError(
+                {
+                    "ERROR": 'Number of hosts exceeds system setting BULK_HOST_MAX_DELETE',
+                    "BULK_HOST_MAX_DELETE": max_hosts,
+                    "Hosts_count": len(attrs['hosts']),
+                }
+            )
+
+        # Getting list of all host objects, filtered by the list of the hosts to delete
+        attrs['host_qs'] = Host.objects.get_queryset().filter(pk__in=attrs['hosts']).only('id', 'inventory_id', 'name')
+
+        # Converting the queryset data in a dict. to reduce the number of queries when
+        # manipulating the data
+        attrs['hosts_data'] = attrs['host_qs'].values()
+
+        if len(attrs['host_qs']) == 0:
+            error_hosts = {host: "Hosts do not exist or you lack permission to delete it" for host in attrs['hosts']}
+            raise serializers.ValidationError({'hosts': error_hosts})
+
+        if len(attrs['host_qs']) < len(attrs['hosts']):
+            hosts_exists = [host['id'] for host in attrs['hosts_data']]
+            failed_hosts = list(set(attrs['hosts']).difference(hosts_exists))
+            error_hosts = {host: "Hosts do not exist or you lack permission to delete it" for host in failed_hosts}
+            raise serializers.ValidationError({'hosts': error_hosts})
+
+        # Getting all inventories that the hosts can be in
+        inv_list = list(set([host['inventory_id'] for host in attrs['hosts_data']]))
+
+        # Checking that the user have permission to all inventories
+        errors = dict()
+        for inv in Inventory.objects.get_queryset().filter(pk__in=inv_list):
+            if request and not request.user.is_superuser:
+                if request.user not in inv.admin_role:
+                    errors[inv.name] = "Lack permissions to delete hosts from this inventory."
+        if errors != {}:
+            raise PermissionDenied({"inventories": errors})
+
+        # check the inventory type only if the user have permission to it.
+        errors = dict()
+        for inv in Inventory.objects.get_queryset().filter(pk__in=inv_list):
+            if inv.kind != '':
+                errors[inv.name] = "Hosts can only be deleted from manual inventories."
+        if errors != {}:
+            raise serializers.ValidationError({"inventories": errors})
+        attrs['inventories'] = inv_list
+        return attrs
+
+    def delete(self, validated_data):
+        result = {"hosts": dict()}
+        changes = {'deleted_hosts': dict()}
+        for inventory in validated_data['inventories']:
+            changes['deleted_hosts'][inventory] = list()
+
+        for host in validated_data['hosts_data']:
+            result["hosts"][host["id"]] = f"The host {host['name']} was deleted"
+            changes['deleted_hosts'][host["inventory_id"]].append({"host_id": host["id"], "host_name": host["name"]})
+
+        try:
+            validated_data['host_qs'].delete()
+        except Exception as e:
+            raise serializers.ValidationError({"detail": _(f"cannot delete hosts, host deletion error {e}")})
+
+        request = self.context.get('request', None)
+
+        for inventory in validated_data['inventories']:
+            activity_entry = ActivityStream.objects.create(
+                operation='update',
+                object1='inventory',
+                changes=json.dumps(changes['deleted_hosts'][inventory]),
+                actor=request.user,
+            )
+            activity_entry.inventory.add(inventory)
+
+        return result
+
+
 class GroupTreeSerializer(GroupSerializer):
     children = serializers.SerializerMethodField()
 
