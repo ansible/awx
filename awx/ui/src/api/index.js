@@ -29,6 +29,7 @@ import Notifications from './models/Notifications';
 import Organizations from './models/Organizations';
 import ProjectUpdates from './models/ProjectUpdates';
 import Projects from './models/Projects';
+import ReceptorAddresses from './models/Receptor';
 import Roles from './models/Roles';
 import Root from './models/Root';
 import Schedules from './models/Schedules';
@@ -79,6 +80,7 @@ const NotificationsAPI = new Notifications();
 const OrganizationsAPI = new Organizations();
 const ProjectUpdatesAPI = new ProjectUpdates();
 const ProjectsAPI = new Projects();
+const ReceptorAPI = new ReceptorAddresses()
 const RolesAPI = new Roles();
 const RootAPI = new Root();
 const SchedulesAPI = new Schedules();
@@ -130,6 +132,7 @@ export {
   OrganizationsAPI,
   ProjectUpdatesAPI,
   ProjectsAPI,
+  ReceptorAPI,
   RolesAPI,
   RootAPI,
   SchedulesAPI,
