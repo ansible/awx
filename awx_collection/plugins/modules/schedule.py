@@ -262,8 +262,7 @@ def main():
         search_fields['organization'] = module.resolve_name_to_id('organizations', organization)
     unified_job_template_id = None
     if unified_job_template:
-        search_fields['name'] = unified_job_template
-        unified_job_template_id = module.get_one('unified_job_templates', **{'data': search_fields})['id']
+        unified_job_template_id = module.get_exactly_one('unified_job_templates', name_or_id=unified_job_template, **{'data': search_fields})['id']
         sched_search_fields['unified_job_template'] = unified_job_template_id
 
     # Attempt to look up an existing item based on the provided data
