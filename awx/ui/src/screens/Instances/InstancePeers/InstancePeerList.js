@@ -16,7 +16,7 @@ import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
 import { useLocation, useParams } from 'react-router-dom';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import DataListToolbar from 'components/DataListToolbar';
-import { InstancesAPI } from 'api';
+import { InstancesAPI, ReceptorAPI } from 'api';
 import useExpanded from 'hooks/useExpanded';
 import useSelected from 'hooks/useSelected';
 import InstancePeerListItem from './InstancePeerListItem';
@@ -24,7 +24,7 @@ import InstancePeerListItem from './InstancePeerListItem';
 const QS_CONFIG = getQSConfig('peer', {
   page: 1,
   page_size: 20,
-  order_by: 'hostname',
+  order_by: 'pk',
 });
 
 function InstancePeerList({ setBreadcrumb }) {
@@ -50,14 +50,28 @@ function InstancePeerList({ setBreadcrumb }) {
           data: { results, count: itemNumber },
         },
         actions,
+        instances,
       ] = await Promise.all([
         InstancesAPI.readDetail(id),
         InstancesAPI.readPeers(id, params),
         InstancesAPI.readOptions(),
+        InstancesAPI.read(),
       ]);
+
+      const address_list = []
+
+      for(let q = 0; q < results.length; q++) {
+        const receptor = results[q];
+        const host = instances.data.results.filter((obj) => obj.id === receptor.instance)[0];
+        const copy = receptor;
+        copy.hostname = host.hostname;
+        copy.node_type = host.node_type;
+        address_list.push(copy);
+      }
+
       return {
         instance: detail,
-        peers: results,
+        peers: address_list,
         count: itemNumber,
         relatedSearchableKeys: (actions?.data?.related_search_fields || []).map(
           (val) => val.slice(0, -8)
@@ -90,15 +104,60 @@ function InstancePeerList({ setBreadcrumb }) {
     useSelected(peers);
 
   const fetchInstancesToAssociate = useCallback(
-    (params) =>
-      InstancesAPI.read(
+    async (params) => {
+      const address_list = []
+
+      const instances = await InstancesAPI.read(
         mergeParams(params, {
-          ...{ not__id: id },
           ...{ not__node_type: ['control', 'hybrid'] },
-          ...{ not__hostname: instance.peers },
-        })
-      ),
-    [id, instance]
+      }))
+      const receptors = (await ReceptorAPI.read()).data.results;
+
+      // get instance ids of the current peered receptor ids
+      const already_peered_instance_ids = []
+      for(let h =0; h < instance.peers.length; h++) {
+        const matched = receptors.filter((obj) => obj.id === instance.peers[h]);
+        matched.forEach(element => {
+          already_peered_instance_ids.push(element.instance);
+        });
+      }
+
+      for(let q = 0; q < receptors.length; q++) {
+        const receptor = receptors[q];
+
+        if(already_peered_instance_ids.includes(receptor.instance)) {
+          // ignore reverse peers
+          continue
+        }
+
+        if(instance.peers.includes(receptor.id)) {
+          // no links to existing links
+          continue;
+        }
+
+        if(instance.id === receptor.instance) {
+          // no links to thy self
+          continue;
+        }
+
+        const host = instances.data.results.filter((obj) => obj.id === receptor.instance)[0];
+
+        if(host === undefined) {
+          // no hosts
+          continue;
+        }
+
+        const copy = receptor;
+        copy.hostname = host.hostname;
+        copy.node_type = host.node_type;
+        address_list.push(copy);
+      }
+
+      instances.data.results = address_list;
+
+      return instances;
+    },
+    [instance]
   );
 
   const {
@@ -108,17 +167,20 @@ function InstancePeerList({ setBreadcrumb }) {
   } = useRequest(
     useCallback(
       async (instancesPeerToAssociate) => {
-        const selected_hostname = instancesPeerToAssociate.map(
-          (obj) => obj.hostname
+
+        const selected_peers = instancesPeerToAssociate.map(
+          (obj) => obj.id
         );
+
         const new_peers = [
-          ...new Set([...instance.peers, ...selected_hostname]),
+          ...new Set([...instance.peers, ...selected_peers]),
         ];
         await InstancesAPI.update(instance.id, { peers: new_peers });
+
         fetchPeers();
         addToast({
           id: instancesPeerToAssociate,
-          title: t`${selected_hostname} added as a peer. Please be sure to run the install bundle for ${instance.hostname} again in order to see changes take effect.`,
+          title: t`Peers update on ${instance.hostname}.  Please be sure to run the install bundle for ${instance.hostname} again in order to see changes take effect.`,
           variant: AlertVariant.success,
           hasTimeout: true,
         });
@@ -133,17 +195,18 @@ function InstancePeerList({ setBreadcrumb }) {
     error: disassociateError,
   } = useRequest(
     useCallback(async () => {
-      const new_peers = [];
-      const selected_hostname = selected.map((obj) => obj.hostname);
-      for (let i = 0; i < instance.peers.length; i++) {
-        if (!selected_hostname.includes(instance.peers[i])) {
-          new_peers.push(instance.peers[i]);
-        }
+      let new_peers = instance.peers;
+
+      const selected_ids = selected.map((obj) => obj.id);
+
+      for (let i = 0; i < selected_ids.length; i++) {
+        new_peers = new_peers.filter((s_id) => s_id !== selected_ids[i]);
       }
       await InstancesAPI.update(instance.id, { peers: new_peers });
+
       fetchPeers();
       addToast({
-        title: t`${selected_hostname} removed. Please be sure to run the install bundle for ${instance.hostname} again in order to see changes take effect.`,
+        title: t`Peer removed. Please be sure to run the install bundle for ${instance.hostname} again in order to see changes take effect.`,
         variant: AlertVariant.success,
         hasTimeout: true,
       });
@@ -187,6 +250,8 @@ function InstancePeerList({ setBreadcrumb }) {
         ]}
         headerRow={
           <HeaderRow qsConfig={QS_CONFIG} isExpandable>
+            <HeaderCell sortKey="address">{t`Address`}</HeaderCell>
+            <HeaderCell sortKey="port">{t`Port`}</HeaderCell>
             <HeaderCell
               tooltip={t`Cannot run health check on hop nodes.`}
               sortKey="hostname"
@@ -243,10 +308,12 @@ function InstancePeerList({ setBreadcrumb }) {
           isModalOpen={isModalOpen}
           onAssociate={handlePeerAssociate}
           onClose={() => setIsModalOpen(false)}
-          title={t`Select Instances`}
+          title={t`Select Peer Addresses`}
           optionsRequest={readInstancesOptions}
           displayKey="hostname"
           columns={[
+            { key: 'address', name: t`Address` },
+            { key: 'port', name: t`Port` },
             { key: 'hostname', name: t`Name` },
             { key: 'node_type', name: t`Node Type` },
           ]}
