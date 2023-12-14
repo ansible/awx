@@ -10,7 +10,6 @@ from ansible_base.filters.rest_framework.field_lookup_backend import FieldLookup
 from awx.main.models import (
     AdHocCommand,
     ActivityStream,
-    Credential,
     Job,
     JobTemplate,
     SystemJob,

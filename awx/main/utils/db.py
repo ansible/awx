@@ -1,7 +1,6 @@
 # Copyright (c) 2017 Ansible by Red Hat
 # All Rights Reserved.
 
-from itertools import chain
 
 from awx.settings.application_name import set_application_name
 from django.conf import settings
