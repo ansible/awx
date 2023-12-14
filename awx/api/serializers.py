@@ -99,7 +99,7 @@ from awx.main.models import (
     CLOUD_INVENTORY_SOURCES,
 )
 from awx.main.models.base import VERBOSITY_CHOICES, NEW_JOB_TYPE_CHOICES
-from awx.main.models.rbac import get_roles_on_resource, role_summary_fields_generator
+from awx.main.models.rbac import role_summary_fields_generator, RoleAncestorEntry
 from awx.main.fields import ImplicitRoleField
 from awx.main.utils import (
     get_type_for_model,
@@ -2757,6 +2757,17 @@ class ResourceAccessListElementSerializer(UserSerializer):
         if 'summary_fields' not in ret:
             ret['summary_fields'] = {}
 
+        team_content_type = ContentType.objects.get_for_model(Team)
+        content_type = ContentType.objects.get_for_model(obj)
+
+        def get_roles_on_resource(parent_role):
+            "Returns a string list of the roles a parent_role has for current obj."
+            return list(
+                RoleAncestorEntry.objects.filter(ancestor=parent_role, content_type_id=content_type.id, object_id=obj.id)
+                .values_list('role_field', flat=True)
+                .distinct()
+            )
+
         def format_role_perm(role):
             role_dict = {'id': role.id, 'name': role.name, 'description': role.description}
             try:
@@ -2772,7 +2783,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
             else:
                 # Singleton roles should not be managed from this view, as per copy/edit rework spec
                 role_dict['user_capabilities'] = {'unattach': False}
-            return {'role': role_dict, 'descendant_roles': get_roles_on_resource(obj, role)}
+            return {'role': role_dict, 'descendant_roles': get_roles_on_resource(role)}
 
         def format_team_role_perm(naive_team_role, permissive_role_ids):
             ret = []
@@ -2798,11 +2809,8 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 else:
                     # Singleton roles should not be managed from this view, as per copy/edit rework spec
                     role_dict['user_capabilities'] = {'unattach': False}
-                ret.append({'role': role_dict, 'descendant_roles': get_roles_on_resource(obj, team_role)})
+                ret.append({'role': role_dict, 'descendant_roles': get_roles_on_resource(team_role)})
             return ret
-
-        team_content_type = ContentType.objects.get_for_model(Team)
-        content_type = ContentType.objects.get_for_model(obj)
 
         direct_permissive_role_ids = Role.objects.filter(content_type=content_type, object_id=obj.id).values_list('id', flat=True)
         all_permissive_role_ids = Role.objects.filter(content_type=content_type, object_id=obj.id).values_list('ancestors__id', flat=True)
