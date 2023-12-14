@@ -20,13 +20,14 @@ from django.core.exceptions import FieldDoesNotExist
 # REST Framework
 from rest_framework.exceptions import ParseError
 
+from ansible_base.utils.models import prevent_search
+
 # AWX
 from awx.api.versioning import reverse
 from awx.main.constants import HOST_FACTS_FIELDS
 from awx.main.models.base import (
     BaseModel,
     CreatedModifiedModel,
-    prevent_search,
     accepts_json,
     JOB_TYPE_CHOICES,
     NEW_JOB_TYPE_CHOICES,

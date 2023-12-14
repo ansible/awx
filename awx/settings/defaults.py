@@ -11,6 +11,7 @@ from datetime import timedelta
 
 # python-ldap
 import ldap
+from split_settings.tools import include
 
 
 DEBUG = True
@@ -354,12 +355,6 @@ REST_FRAMEWORK = {
         'awx.api.authentication.LoggedBasicAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': ('awx.api.permissions.ModelAccessPermission',),
-    'DEFAULT_FILTER_BACKENDS': (
-        'awx.api.filters.TypeFilterBackend',
-        'awx.api.filters.FieldLookupBackend',
-        'rest_framework.filters.SearchFilter',
-        'awx.api.filters.OrderByBackend',
-    ),
     'DEFAULT_PARSER_CLASSES': ('awx.api.parsers.JSONParser',),
     'DEFAULT_RENDERER_CLASSES': ('awx.api.renderers.DefaultJSONRenderer', 'awx.api.renderers.BrowsableAPIRenderer'),
     'DEFAULT_METADATA_CLASS': 'awx.api.metadata.Metadata',
@@ -1067,3 +1062,12 @@ CLEANUP_HOST_METRICS_HARD_THRESHOLD = 36  # months
 # Host metric summary monthly task - last time of run
 HOST_METRIC_SUMMARY_TASK_LAST_TS = None
 HOST_METRIC_SUMMARY_TASK_INTERVAL = 7  # days
+
+
+# django-ansible-base
+ANSIBLE_BASE_FEATURES = {'AUTHENTICATION': False, 'SWAGGER': False, 'FILTERING': True}
+
+from ansible_base import settings  # noqa: E402
+
+settings_file = os.path.join(os.path.dirname(settings.__file__), 'dynamic_settings.py')
+include(settings_file)

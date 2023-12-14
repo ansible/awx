@@ -17,6 +17,8 @@ from django.db.models import Sum, Q
 import redis
 from solo.models import SingletonModel
 
+from ansible_base.utils.models import prevent_search
+
 # AWX
 from awx import __version__ as awx_application_version
 from awx.main.utils import is_testing
@@ -24,7 +26,7 @@ from awx.api.versioning import reverse
 from awx.main.fields import ImplicitRoleField
 from awx.main.managers import InstanceManager, UUID_DEFAULT
 from awx.main.constants import JOB_FOLDER_PREFIX
-from awx.main.models.base import BaseModel, HasEditsMixin, prevent_search
+from awx.main.models.base import BaseModel, HasEditsMixin
 from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,

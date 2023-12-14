@@ -6,8 +6,10 @@ from django.conf import settings  # noqa
 from django.db import connection
 from django.db.models.signals import pre_delete  # noqa
 
+from ansible_base.utils.models import prevent_search
+
 # AWX
-from awx.main.models.base import BaseModel, PrimordialModel, prevent_search, accepts_json, CLOUD_INVENTORY_SOURCES, VERBOSITY_CHOICES  # noqa
+from awx.main.models.base import BaseModel, PrimordialModel, accepts_json, CLOUD_INVENTORY_SOURCES, VERBOSITY_CHOICES  # noqa
 from awx.main.models.unified_jobs import UnifiedJob, UnifiedJobTemplate, StdoutMaxBytesExceeded  # noqa
 from awx.main.models.organization import Organization, Profile, Team, UserSessionMembership  # noqa
 from awx.main.models.credential import Credential, CredentialType, CredentialInputSource, ManagedCredentialType, build_safe_env  # noqa

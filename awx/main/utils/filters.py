@@ -161,7 +161,7 @@ class SmartFilter(object):
             else:
                 # detect loops and restrict access to sensitive fields
                 # this import is intentional here to avoid a circular import
-                from awx.api.filters import FieldLookupBackend
+                from ansible_base.filters.rest_framework.field_lookup_backend import FieldLookupBackend
 
                 FieldLookupBackend().get_field_from_lookup(Host, k)
                 kwargs[k] = v

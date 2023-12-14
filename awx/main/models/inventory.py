@@ -25,6 +25,8 @@ from django.db.models import Q
 # REST Framework
 from rest_framework.exceptions import ParseError
 
+from ansible_base.utils.models import prevent_search
+
 # AWX
 from awx.api.versioning import reverse
 from awx.main.constants import CLOUD_PROVIDERS
@@ -35,7 +37,7 @@ from awx.main.fields import (
     OrderedManyToManyField,
 )
 from awx.main.managers import HostManager, HostMetricActiveManager
-from awx.main.models.base import BaseModel, CommonModelNameNotUnique, VarsDictProperty, CLOUD_INVENTORY_SOURCES, prevent_search, accepts_json
+from awx.main.models.base import BaseModel, CommonModelNameNotUnique, VarsDictProperty, CLOUD_INVENTORY_SOURCES, accepts_json
 from awx.main.models.events import InventoryUpdateEvent, UnpartitionedInventoryUpdateEvent
 from awx.main.models.unified_jobs import UnifiedJob, UnifiedJobTemplate
 from awx.main.models.mixins import (

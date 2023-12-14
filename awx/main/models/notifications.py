@@ -15,9 +15,11 @@ from django.utils.encoding import smart_str, force_str
 from jinja2 import sandbox, ChainableUndefined
 from jinja2.exceptions import TemplateSyntaxError, UndefinedError, SecurityError
 
+from ansible_base.utils.models import prevent_search
+
 # AWX
 from awx.api.versioning import reverse
-from awx.main.models.base import CommonModelNameNotUnique, CreatedModifiedModel, prevent_search
+from awx.main.models.base import CommonModelNameNotUnique, CreatedModifiedModel
 from awx.main.utils import encrypt_field, decrypt_field, set_environ
 from awx.main.notifications.email_backend import CustomEmailBackend
 from awx.main.notifications.slack_backend import SlackBackend
