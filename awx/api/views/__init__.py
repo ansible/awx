@@ -742,8 +742,8 @@ class TeamActivityStreamList(SubListAPIView):
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(
             Q(team=parent)
-            | Q(project__in=models.Project.accessible_objects(parent, 'read_role'))
-            | Q(credential__in=models.Credential.accessible_objects(parent, 'read_role'))
+            | Q(project__in=models.Project.accessible_objects(parent.member_role, 'read_role'))
+            | Q(credential__in=models.Credential.accessible_objects(parent.member_role, 'read_role'))
         )
 
 
@@ -1397,7 +1397,7 @@ class OrganizationCredentialList(SubListCreateAPIView):
         self.check_parent_access(organization)
 
         user_visible = models.Credential.accessible_objects(self.request.user, 'read_role').all()
-        org_set = models.Credential.accessible_objects(organization.admin_role, 'read_role').all()
+        org_set = models.Credential.objects.filter(organization=organization)
 
         if self.request.user.is_superuser or self.request.user.is_system_auditor:
             return org_set

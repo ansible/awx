@@ -15,7 +15,6 @@ from django.utils.translation import gettext_lazy as _
 
 # AWX
 from awx.api.versioning import reverse
-from django.contrib.auth.models import User  # noqa
 
 __all__ = [
     'Role',
@@ -171,14 +170,8 @@ class Role(models.Model):
     def __contains__(self, accessor):
         if accessor._meta.model_name == 'user':
             return self.ancestors.filter(members=accessor).exists()
-        elif accessor.__class__.__name__ == 'Team':
-            return self.ancestors.filter(pk=accessor.member_role.id).exists()
-        elif type(accessor) == Role:
-            return self.ancestors.filter(pk=accessor.pk).exists()
         else:
-            accessor_type = ContentType.objects.get_for_model(accessor)
-            roles = Role.objects.filter(content_type__pk=accessor_type.id, object_id=accessor.id)
-            return self.ancestors.filter(pk__in=roles).exists()
+            raise RuntimeError(f'Role evaluations only valid for users, received {accessor}')
 
     @property
     def name(self):
