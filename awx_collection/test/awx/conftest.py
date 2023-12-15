@@ -18,7 +18,20 @@ import pytest
 from ansible.module_utils.six import raise_from
 
 from awx.main.tests.functional.conftest import _request
-from awx.main.models import Organization, Project, Inventory, JobTemplate, Credential, CredentialType, ExecutionEnvironment, UnifiedJob
+from awx.main.tests.functional.conftest import credentialtype_scm, credentialtype_ssh  # noqa: F401; pylint: disable=unused-variable
+from awx.main.models import (
+    Organization,
+    Project,
+    Inventory,
+    JobTemplate,
+    Credential,
+    CredentialType,
+    ExecutionEnvironment,
+    UnifiedJob,
+    WorkflowJobTemplate,
+    NotificationTemplate,
+    Schedule,
+)
 
 from django.db import transaction
 
@@ -123,7 +136,7 @@ def run_module(request, collection_import):
             sanitize_dict(py_data)
             resp._content = bytes(json.dumps(django_response.data), encoding='utf8')
             resp.status_code = django_response.status_code
-            resp.headers = {'X-API-Product-Name': 'AWX', 'X-API-Product-Version': '0.0.1-devel'}
+            resp.headers = dict(django_response.headers)
 
             if request.config.getoption('verbose') > 0:
                 logger.info('%s %s by %s, code:%s', method, '/api/' + url.split('/api/')[1], request_user.username, resp.status_code)
@@ -236,10 +249,8 @@ def job_template(project, inventory):
 
 
 @pytest.fixture
-def machine_credential(organization):
-    ssh_type = CredentialType.defaults['ssh']()
-    ssh_type.save()
-    return Credential.objects.create(credential_type=ssh_type, name='machine-cred', inputs={'username': 'test_user', 'password': 'pas4word'})
+def machine_credential(credentialtype_ssh, organization):  # noqa: F811
+    return Credential.objects.create(credential_type=credentialtype_ssh, name='machine-cred', inputs={'username': 'test_user', 'password': 'pas4word'})
 
 
 @pytest.fixture
@@ -253,9 +264,7 @@ def vault_credential(organization):
 def kube_credential():
     ct = CredentialType.defaults['kubernetes_bearer_token']()
     ct.save()
-    return Credential.objects.create(
-        credential_type=ct, name='kube-cred', inputs={'host': 'my.cluster', 'bearer_token': 'my-token', 'verify_ssl': False}
-    )
+    return Credential.objects.create(credential_type=ct, name='kube-cred', inputs={'host': 'my.cluster', 'bearer_token': 'my-token', 'verify_ssl': False})
 
 
 @pytest.fixture
@@ -288,3 +297,42 @@ def mock_has_unpartitioned_events():
     # We mock this out to circumvent the migration query.
     with mock.patch.object(UnifiedJob, 'has_unpartitioned_events', new=False) as _fixture:
         yield _fixture
+
+
+@pytest.fixture
+def workflow_job_template(organization, inventory):
+    return WorkflowJobTemplate.objects.create(name='test-workflow_job_template', organization=organization, inventory=inventory)
+
+
+@pytest.fixture
+def notification_template(organization):
+    return NotificationTemplate.objects.create(
+        name='test-notification_template',
+        organization=organization,
+        notification_type="webhook",
+        notification_configuration=dict(
+            url="http://localhost",
+            username="",
+            password="",
+            headers={
+                "Test": "Header",
+            },
+        ),
+    )
+
+
+@pytest.fixture
+def scm_credential(credentialtype_scm, organization):  # noqa: F811
+    return Credential.objects.create(
+        credential_type=credentialtype_scm, name='scm-cred', inputs={'username': 'optimus', 'password': 'prime'}, organization=organization
+    )
+
+
+@pytest.fixture
+def rrule():
+    return 'DTSTART:20151117T050000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1'
+
+
+@pytest.fixture
+def schedule(job_template, rrule):
+    return Schedule.objects.create(unified_job_template=job_template, name='test-sched', rrule=rrule)
