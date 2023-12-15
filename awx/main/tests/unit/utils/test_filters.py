@@ -69,7 +69,7 @@ class mockHost:
 @mock.patch('awx.main.utils.filters.get_model', return_value=mockHost())
 class TestSmartFilterQueryFromString:
     @mock.patch(
-        'ansible_base.utils.filters.get_fields_from_path', lambda model, path: ([model], path)
+        'ansible_base.filters.rest_framework.field_lookup_backend.get_fields_from_path', lambda model, path: ([model], path)
     )  # disable field filtering, because a__b isn't a real Host field
     @pytest.mark.parametrize(
         "filter_string,q_expected",
