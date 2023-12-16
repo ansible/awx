@@ -951,7 +951,13 @@ class AskForField(models.BooleanField):
     Denotes whether to prompt on launch for another field on the same template
     """
 
+    fmt_string = _(
+        'If true, prompt for the corresponding field when a user launches this template. '
+        'Also controls whether schedules and workflows are allowed to provide the field.'
+    )
+
     def __init__(self, allows_field=None, **kwargs):
+        kwargs['help_text'] = self.fmt_string + kwargs.get('help_text', '')
         super(AskForField, self).__init__(**kwargs)
         self._allows_field = allows_field
 

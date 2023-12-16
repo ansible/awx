@@ -31,11 +31,13 @@ class ActivityStream(models.Model):
         ('disassociate', _("Entity was Disassociated with another Entity")),
     ]
 
-    actor = models.ForeignKey('auth.User', null=True, on_delete=models.SET_NULL, related_name='activity_stream')
-    operation = models.CharField(max_length=13, choices=OPERATION_CHOICES)
-    timestamp = models.DateTimeField(auto_now_add=True)
-    changes = accepts_json(models.TextField(blank=True))
-    deleted_actor = models.JSONField(null=True)
+    actor = models.ForeignKey(
+        'auth.User', null=True, on_delete=models.SET_NULL, related_name='activity_stream', help_text=_('The user who performed this action.')
+    )
+    operation = models.CharField(max_length=13, choices=OPERATION_CHOICES, help_text=_('Identifies the type of REST API action'))
+    timestamp = models.DateTimeField(auto_now_add=True, help_text=_('Timestamp of this change'))
+    changes = accepts_json(models.TextField(blank=True, help_text=_('Dictionary showing a difference, the created state, or the state prior to deletion')))
+    deleted_actor = models.JSONField(null=True, help_text=_('Details of actor stored for the case when a user is deleted from the system'))
     action_node = models.CharField(
         blank=True,
         default='',
@@ -44,9 +46,9 @@ class ActivityStream(models.Model):
         help_text=_("The cluster node the activity took place on."),
     )
 
-    object_relationship_type = models.TextField(blank=True)
-    object1 = models.TextField()
-    object2 = models.TextField()
+    object_relationship_type = models.TextField(blank=True, help_text=_('Identifies the name of the relationship for associations and disassociations'))
+    object1 = models.TextField(help_text=_('Type of the first object involved in the action'))
+    object2 = models.TextField(help_text=_('Type of the second object involved in the action'))
 
     user = models.ManyToManyField("auth.User", blank=True)
     organization = models.ManyToManyField("Organization", blank=True)
@@ -83,7 +85,7 @@ class ActivityStream(models.Model):
     o_auth2_application = models.ManyToManyField("OAuth2Application", blank=True)
     o_auth2_access_token = models.ManyToManyField("OAuth2AccessToken", blank=True)
 
-    setting = models.JSONField(default=dict, blank=True)
+    setting = models.JSONField(default=dict, blank=True, help_text=_('Details of a database setting changed in this action'))
 
     def __str__(self):
         operation = self.operation if 'operation' in self.__dict__ else '_delayed_'

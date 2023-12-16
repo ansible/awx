@@ -91,6 +91,7 @@ class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
         null=True,
         default=None,
         on_delete=models.SET_NULL,
+        help_text=_("Template that this node will run when and if its dependencies are satisfied."),
     )
 
     def get_parent_nodes(self):
@@ -176,6 +177,7 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         'WorkflowJobTemplate',
         related_name='workflow_job_template_nodes',
         on_delete=models.CASCADE,
+        help_text=_('The workflow job template this node is a part of'),
     )
     identifier = models.CharField(
         max_length=512,
@@ -246,6 +248,7 @@ class WorkflowJobNode(WorkflowNodeBase):
         null=True,
         default=None,
         on_delete=models.SET_NULL,
+        help_text=_('The unified job created for this node.'),
     )
     workflow_job = models.ForeignKey(
         'WorkflowJob',
@@ -254,11 +257,10 @@ class WorkflowJobNode(WorkflowNodeBase):
         null=True,
         default=None,
         on_delete=models.CASCADE,
+        help_text=_('The workflow job this node is a part of.'),
     )
     ancestor_artifacts = JSONBlob(
-        default=dict,
-        blank=True,
-        editable=False,
+        default=dict, blank=True, editable=False, help_text=_('Combined variables of artifacts from all upstream jobs in this workflow.')
     )
     do_not_run = models.BooleanField(
         default=False,
@@ -392,8 +394,7 @@ class WorkflowJobOptions(LaunchTimeConfigBase):
     extra_vars = accepts_json(
         prevent_search(
             models.TextField(
-                blank=True,
-                default='',
+                blank=True, default='', help_text=_('Variables that will be added (as a prompt) to extra_vars of jobs in this workflow that allow it')
             )
         )
     )
@@ -401,7 +402,10 @@ class WorkflowJobOptions(LaunchTimeConfigBase):
     instance_groups = OrderedManyToManyField(
         'InstanceGroup', related_name='workflow_job_instance_groups', blank=True, editable=False, through='WorkflowJobInstanceGroupMembership'
     )
-    allow_simultaneous = models.BooleanField(default=False)
+    allow_simultaneous = models.BooleanField(
+        default=False,
+        help_text=_('Allow multiple workflow jobs to run at the same time. This does not impact simultaneous rules of templates inside workflow.'),
+    )
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 
@@ -639,6 +643,7 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
         null=True,
         default=None,
         on_delete=models.SET_NULL,
+        help_text=_('Workflow job template this job was created from'),
     )
     job_template = models.ForeignKey(
         'JobTemplate',
@@ -649,8 +654,8 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
         on_delete=models.SET_NULL,
         help_text=_("If automatically created for a sliced job run, the job template the workflow job was created from."),
     )
-    is_sliced_job = models.BooleanField(default=False)
-    is_bulk_job = models.BooleanField(default=False)
+    is_sliced_job = models.BooleanField(default=False, help_text=_('If true, this was created from a sliced job template.'))
+    is_bulk_job = models.BooleanField(default=False, help_text=_('If true, this was created from the bulk job launch endpoint.'))
 
     def _set_default_dependencies_processed(self):
         self.dependencies_processed = True
@@ -830,6 +835,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         null=True,
         default=None,
         on_delete=models.SET_NULL,
+        help_text=_('Corresponding workflow approval template (associated with workflow job template) for this approval (associated with workflow job)'),
     )
     timeout = models.IntegerField(
         blank=True,
@@ -850,6 +856,7 @@ class WorkflowApproval(UnifiedJob, JobNotificationMixin):
         null=True,
         editable=False,
         on_delete=models.SET_NULL,
+        help_text=_('User who approved or denied this.'),
     )
 
     def _set_default_dependencies_processed(self):

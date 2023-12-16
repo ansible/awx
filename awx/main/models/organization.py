@@ -141,6 +141,7 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
         null=False,
         on_delete=models.CASCADE,
         related_name='teams',
+        help_text=_('Organization this team is a part of, for permission inheritance'),
     )
     admin_role = ImplicitRoleField(
         parent_role='organization.admin_role',

@@ -14,6 +14,18 @@ __all__ = [
     'STANDARD_INVENTORY_UPDATE_ENV',
 ]
 
+NAME_HELP_TEXT = _('Name of object to be displayed in list views. Also commonly used by clients for lookups.')
+MANAGED_HELP_TEXT = _('Indicates whether this resource is created and controlled automatically by server logic.')
+DESCRIPTION_HELP_TEXT = _('Extra information about this resource to show in its detail view.')
+
+# Job and ad hoc type field help_text
+JOB_TYPE_HELP_TEXT = _('If doing a check job the ansible-playbook --check option will be used.')
+DIFF_MODE_HELP_TEXT = _('If enabled, textual changes made to any templated files on the host are shown in the standard output')
+LIMIT_HELP_TEXT = _('Limit inventory to subset of hosts, passed to ansible-playbook as --limit')
+FORKS_HELP_TEXT = _('Number of parallel processes to use, passed to ansible-playbook as --forks')
+VERBOSITY_HELP_TEXT = _('Output verbosity, passed to ansible-playbook as -v to -vvvvvv')
+BECOME_ENABLED_HELP_TEXT = _('If true, passes --become to ansible-playbook for privilege escalation')
+
 CLOUD_PROVIDERS = ('azure_rm', 'ec2', 'gce', 'vmware', 'openstack', 'rhv', 'satellite6', 'controller', 'insights')
 PRIVILEGE_ESCALATION_METHODS = [
     ('sudo', _('Sudo')),

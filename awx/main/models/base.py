@@ -12,7 +12,7 @@ from crum import get_current_user
 
 # AWX
 from awx.main.utils import encrypt_field, parse_yaml_or_json
-from awx.main.constants import CLOUD_PROVIDERS
+from awx.main.constants import CLOUD_PROVIDERS, NAME_HELP_TEXT, DESCRIPTION_HELP_TEXT
 
 __all__ = [
     'prevent_search',
@@ -151,14 +151,8 @@ class CreatedModifiedModel(BaseModel):
     class Meta:
         abstract = True
 
-    created = models.DateTimeField(
-        default=None,
-        editable=False,
-    )
-    modified = models.DateTimeField(
-        default=None,
-        editable=False,
-    )
+    created = models.DateTimeField(default=None, editable=False, help_text=_('Timestamp of when this resource was created.'))
+    modified = models.DateTimeField(default=None, editable=False, help_text=_('Timestamp of last user modification of any fields or related objects.'))
 
     def save(self, *args, **kwargs):
         update_fields = list(kwargs.get('update_fields', []))
@@ -277,10 +271,7 @@ class PrimordialModel(HasEditsMixin, CreatedModifiedModel):
     class Meta:
         abstract = True
 
-    description = models.TextField(
-        blank=True,
-        default='',
-    )
+    description = models.TextField(blank=True, default='', help_text=DESCRIPTION_HELP_TEXT)
     created_by = models.ForeignKey(
         'auth.User',
         related_name='%s(class)s_created+',
@@ -288,6 +279,7 @@ class PrimordialModel(HasEditsMixin, CreatedModifiedModel):
         null=True,
         editable=False,
         on_delete=models.SET_NULL,
+        help_text=_('Record of the user who created this object via the API.'),
     )
     modified_by = models.ForeignKey(
         'auth.User',
@@ -296,6 +288,7 @@ class PrimordialModel(HasEditsMixin, CreatedModifiedModel):
         null=True,
         editable=False,
         on_delete=models.SET_NULL,
+        help_text=_('Record of the last user to modify this object, corresponding to the modified timestamp.'),
     )
 
     def __init__(self, *args, **kwargs):
@@ -355,10 +348,7 @@ class CommonModel(PrimordialModel):
     class Meta:
         abstract = True
 
-    name = models.CharField(
-        max_length=512,
-        unique=True,
-    )
+    name = models.CharField(max_length=512, unique=True, help_text=NAME_HELP_TEXT)
 
 
 class CommonModelNameNotUnique(PrimordialModel):
@@ -367,10 +357,7 @@ class CommonModelNameNotUnique(PrimordialModel):
     class Meta:
         abstract = True
 
-    name = models.CharField(
-        max_length=512,
-        unique=False,
-    )
+    name = models.CharField(max_length=512, unique=False, help_text=NAME_HELP_TEXT)
 
 
 class NotificationFieldsModel(BaseModel):

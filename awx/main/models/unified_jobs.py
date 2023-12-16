@@ -122,6 +122,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         editable=False,
         related_name='%(class)s_as_current_job+',
         on_delete=models.SET_NULL,
+        help_text=_('If allow_simultaneous is false, this should give the currently active job if one is running.'),
     )
     last_job = models.ForeignKey(
         'UnifiedJob',
@@ -130,24 +131,16 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         editable=False,
         related_name='%(class)s_as_last_job+',
         on_delete=models.SET_NULL,
+        help_text=_('Last job completed for this template.'),
     )
-    last_job_failed = models.BooleanField(
-        default=False,
-        editable=False,
-    )
-    last_job_run = models.DateTimeField(
-        null=True,
-        default=None,
-        editable=False,
-    )
+    last_job_failed = models.BooleanField(default=False, editable=False, help_text=_('Reflects the failed status of last_job.'))
+    last_job_run = models.DateTimeField(null=True, default=None, editable=False, help_text=_('The finished timestamp of last_job.'))
     # on_missed_schedule = models.CharField(
     #    max_length=32,
     #    choices=[],
     # )
     next_job_run = models.DateTimeField(
-        null=True,
-        default=None,
-        editable=False,
+        null=True, default=None, editable=False, help_text=_('If schedules are enabled for this template, the timestamp for next expected scheduled run.')
     )
     next_schedule = models.ForeignKey(  # Schedule entry responsible for next_job_run.
         'Schedule',
@@ -156,13 +149,9 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         editable=False,
         related_name='%(class)s_as_next_schedule+',
         on_delete=polymorphic.SET_NULL,
+        help_text=_('If schedules are enabled for this template, the next expected schedule to run.'),
     )
-    status = models.CharField(
-        max_length=32,
-        choices=ALL_STATUS_CHOICES,
-        default='ok',
-        editable=False,
-    )
+    status = models.CharField(max_length=32, choices=ALL_STATUS_CHOICES, default='ok', editable=False, help_text=_('Reflects the status of last_job.'))
     organization = models.ForeignKey(
         'Organization',
         blank=True,
@@ -564,6 +553,7 @@ class UnifiedJob(
     emitted_events = models.PositiveIntegerField(
         default=0,
         editable=False,
+        help_text=_("Total number of events produced by this job (cached field)."),
     )
     unified_job_template = models.ForeignKey(
         'UnifiedJobTemplate',
@@ -572,19 +562,24 @@ class UnifiedJob(
         editable=False,
         related_name='%(class)s_unified_jobs',
         on_delete=polymorphic.SET_NULL,
+        help_text=_("The template for this job, regardless of type. Same value as the type-specific field like job_template or project."),
     )
     created = models.DateTimeField(
         default=None,
         editable=False,
         db_index=True,  # add an index, this is a commonly queried field
+        help_text=_("Timestamp when launch request was received and unified job entry created."),
     )
-    launch_type = models.CharField(max_length=20, choices=LAUNCH_TYPE_CHOICES, default='manual', editable=False, db_index=True)
-    schedule = models.ForeignKey(  # Which schedule entry was responsible for starting this job.
+    launch_type = models.CharField(
+        max_length=20, choices=LAUNCH_TYPE_CHOICES, default='manual', editable=False, db_index=True, help_text=_("Information about the origin of this job.")
+    )
+    schedule = models.ForeignKey(
         'Schedule',
         null=True,
         default=None,
         editable=False,
         on_delete=polymorphic.SET_NULL,
+        help_text=_("If applicable, the schedule responsible for starting this job."),
     )
     dependent_jobs = models.ManyToManyField(
         'self',
@@ -602,7 +597,7 @@ class UnifiedJob(
         blank=True,
         default='',
         editable=False,
-        help_text=_("The instance that managed the execution environment."),
+        help_text=_("The instance that managed the execution of this job."),
     )
     notifications = models.ManyToManyField(
         'Notification',
@@ -613,6 +608,7 @@ class UnifiedJob(
         blank=True,
         default=False,
         editable=False,
+        help_text=_("This flag is changed to true when a request to cancel this job is received."),
     )
     status = models.CharField(
         max_length=20,
@@ -620,10 +616,12 @@ class UnifiedJob(
         default='new',
         editable=False,
         db_index=True,
+        help_text=_("Gives information about the progression and outcome of this job."),
     )
     failed = models.BooleanField(
         default=False,
         editable=False,
+        help_text=_("A true value corresponds to a non-zero return code of this job."),
     )
     started = models.DateTimeField(
         null=True,
@@ -659,6 +657,7 @@ class UnifiedJob(
             blank=True,
             default='',
             editable=False,
+            help_text=_("The CLI args for this job, given as a list like python sys.argv."),
         )
     )
     job_cwd = models.CharField(
@@ -666,12 +665,14 @@ class UnifiedJob(
         blank=True,
         default='',
         editable=False,
+        help_text=_("The working directory for this job. If containerized, gives location inside container."),
     )
     job_env = prevent_search(
         models.JSONField(
             default=dict,
             blank=True,
             editable=False,
+            help_text=_("Environment varaibles"),
         )
     )
     job_explanation = models.TextField(
@@ -685,18 +686,21 @@ class UnifiedJob(
             blank=True,
             default='',
             editable=False,
+            help_text=_("Internal encrypted field for passing information between systems"),
         )
     )
     result_traceback = models.TextField(
         blank=True,
         default='',
         editable=False,
+        help_text=_("For system errors running this job, a traceback or error output."),
     )
     celery_task_id = models.CharField(
         max_length=100,
         blank=True,
         default='',
         editable=False,
+        help_text=_("Internal task tracking id used by the run_dispatcher system service."),
     )
     labels = models.ManyToManyField("Label", blank=True, related_name='%(class)s_labels')
     instance_group = models.ForeignKey(

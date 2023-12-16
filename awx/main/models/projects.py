@@ -125,6 +125,7 @@ class ProjectOptions(models.Model):
         null=True,
         default=None,
         on_delete=models.SET_NULL,
+        help_text=_('Authentication necessary to pull from the source control repository. Must be SCM type.'),
     )
     timeout = models.IntegerField(
         blank=True,
@@ -524,12 +525,16 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         related_name='project_updates',
         on_delete=models.CASCADE,
         editable=False,
+        help_text=_("Project that this update is for."),
     )
 
     job_type = models.CharField(
         max_length=64,
         choices=PROJECT_UPDATE_JOB_TYPE_CHOICES,
         default='check',
+        help_text=_(
+            "Construct internal to projects. Check indicates that the project revision is updated from the remote. Run indicates a source tree update to last-known revision."
+        ),
     )
     job_tags = models.CharField(
         max_length=1024,

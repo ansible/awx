@@ -23,7 +23,7 @@ from awx.main.utils import is_testing
 from awx.api.versioning import reverse
 from awx.main.fields import ImplicitRoleField
 from awx.main.managers import InstanceManager, UUID_DEFAULT
-from awx.main.constants import JOB_FOLDER_PREFIX
+from awx.main.constants import JOB_FOLDER_PREFIX, NAME_HELP_TEXT
 from awx.main.models.base import BaseModel, HasEditsMixin, prevent_search
 from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
@@ -62,8 +62,8 @@ class HasPolicyEditsMixin(HasEditsMixin):
 
 
 class InstanceLink(BaseModel):
-    source = models.ForeignKey('Instance', on_delete=models.CASCADE, related_name='+')
-    target = models.ForeignKey('Instance', on_delete=models.CASCADE, related_name='reverse_peers')
+    source = models.ForeignKey('Instance', on_delete=models.CASCADE, related_name='+', help_text=_('Instance that establishes outbound connection'))
+    target = models.ForeignKey('Instance', on_delete=models.CASCADE, related_name='reverse_peers', help_text=_('Instance that receives the request'))
 
     class States(models.TextChoices):
         ADDING = 'adding', _('Adding')
@@ -78,6 +78,9 @@ class InstanceLink(BaseModel):
         unique_together = ('source', 'target')
         ordering = ("id",)
         constraints = [models.CheckConstraint(check=~models.Q(source=models.F('target')), name='source_and_target_can_not_be_equal')]
+
+
+SET_IN_REGISTRATION = _('Fields set in instance registration')
 
 
 class Instance(HasPolicyEditsMixin, BaseModel):
@@ -100,29 +103,21 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
     objects = InstanceManager()
 
-    # Fields set in instance registration
-    uuid = models.CharField(max_length=40, default=UUID_DEFAULT)
-    hostname = models.CharField(max_length=250, unique=True)
-    ip_address = models.CharField(
-        blank=True,
-        default="",
-        max_length=50,
-    )
+    uuid = models.CharField(max_length=40, default=UUID_DEFAULT, help_text=SET_IN_REGISTRATION)
+    hostname = models.CharField(max_length=250, unique=True, help_text=SET_IN_REGISTRATION)
+    ip_address = models.CharField(blank=True, default="", max_length=50, help_text=SET_IN_REGISTRATION)
     # Auto-fields, implementation is different from BaseModel
-    created = models.DateTimeField(auto_now_add=True)
-    modified = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True, help_text=_('Time this instance record was created'))
+    modified = models.DateTimeField(auto_now=True, help_text=_('Time this instance record was modified, not counting health checks'))
     # Fields defined in health check or heartbeat
-    version = models.CharField(max_length=120, blank=True)
+    version = models.CharField(max_length=120, blank=True, help_text=_('Version as reported by instance health check'))
     cpu = models.DecimalField(
-        default=Decimal(0.0),
-        max_digits=4,
-        decimal_places=1,
-        editable=False,
+        default=Decimal(0.0), max_digits=4, decimal_places=1, editable=False, help_text=_('CPU count as reported by instance health check')
     )
     memory = models.BigIntegerField(
         default=0,
         editable=False,
-        help_text=_('Total system memory of this instance in bytes.'),
+        help_text=_('Total system memory of this instance in bytes as reported by instance health check'),
     )
     errors = models.TextField(
         default='',
@@ -146,22 +141,19 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         help_text=_('Last time a health check was ran on this instance to refresh cpu, memory, and capacity.'),
     )
     # Capacity management
-    capacity = models.PositiveIntegerField(
-        default=100,
-        editable=False,
+    capacity = models.PositiveIntegerField(default=100, editable=False, help_text=_('Capacity of instance computed in its last health check'))
+    capacity_adjustment = models.DecimalField(
+        default=Decimal(1.0),
+        max_digits=3,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+        help_text=_('Controls whether capacity is weighted towards memory or CPU capacity'),
     )
-    capacity_adjustment = models.DecimalField(default=Decimal(1.0), max_digits=3, decimal_places=2, validators=[MinValueValidator(0)])
-    enabled = models.BooleanField(default=True)
-    managed_by_policy = models.BooleanField(default=True)
+    enabled = models.BooleanField(default=True, help_text=_('Allows manually disabling instance from receiving work'))
+    managed_by_policy = models.BooleanField(default=True, help_text=_('Controls whether instance is available to be added to instance groups by policy rules'))
 
-    cpu_capacity = models.IntegerField(
-        default=0,
-        editable=False,
-    )
-    mem_capacity = models.IntegerField(
-        default=0,
-        editable=False,
-    )
+    cpu_capacity = models.IntegerField(default=0, editable=False, help_text=_('Capacity of instance from last helth check, only considering processor count'))
+    mem_capacity = models.IntegerField(default=0, editable=False, help_text=_('Capacity of instance from last helth check, only considering available memory'))
 
     class Types(models.TextChoices):
         CONTROL = 'control', _("Control plane node")
@@ -384,16 +376,16 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin, ResourceMixin):
     """A model representing a Queue/Group of AWX Instances."""
 
-    name = models.CharField(max_length=250, unique=True)
-    created = models.DateTimeField(auto_now_add=True)
-    modified = models.DateTimeField(auto_now=True)
+    name = models.CharField(max_length=250, unique=True, help_text=NAME_HELP_TEXT)
+    created = models.DateTimeField(auto_now_add=True, help_text=_('Timestamp when this instance group was created by API or awx-manage command'))
+    modified = models.DateTimeField(auto_now=True, help_text=_('Timestamp of last user modification to this instance group'))
     instances = models.ManyToManyField(
         'Instance',
         related_name='rampart_groups',
         editable=False,
         help_text=_('Instances that are members of this InstanceGroup'),
     )
-    is_container_group = models.BooleanField(default=False)
+    is_container_group = models.BooleanField(default=False, help_text=_('Will run jobs in a new K8S pod, as opposed to traditional VM'))
     credential = models.ForeignKey(
         'Credential',
         related_name='%(class)ss',
@@ -401,12 +393,10 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin, ResourceMi
         null=True,
         default=None,
         on_delete=models.SET_NULL,
+        help_text=_('K8S credential used for authentication to cluster for container group type instance groups only'),
     )
     pod_spec_override = prevent_search(
-        models.TextField(
-            blank=True,
-            default='',
-        )
+        models.TextField(blank=True, default='', help_text=_('Only valid for container groups, merge generated pod spec with these values'))
     )
     admin_role = ImplicitRoleField(
         parent_role=[

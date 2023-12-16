@@ -50,8 +50,17 @@ from awx.main.models.mixins import (
     RelatedJobsMixin,
     WebhookMixin,
     WebhookTemplateMixin,
+    SURVEY_PASSWORDS_HELP_TEXT,
 )
-from awx.main.constants import JOB_VARIABLE_PREFIXES
+from awx.main.constants import (
+    JOB_VARIABLE_PREFIXES,
+    JOB_TYPE_HELP_TEXT,
+    DIFF_MODE_HELP_TEXT,
+    LIMIT_HELP_TEXT,
+    FORKS_HELP_TEXT,
+    VERBOSITY_HELP_TEXT,
+    BECOME_ENABLED_HELP_TEXT,
+)
 
 
 logger = logging.getLogger('awx.main.models.jobs')
@@ -67,15 +76,8 @@ class JobOptions(BaseModel):
     class Meta:
         abstract = True
 
-    diff_mode = models.BooleanField(
-        default=False,
-        help_text=_("If enabled, textual changes made to any templated files on the host are shown in the standard output"),
-    )
-    job_type = models.CharField(
-        max_length=64,
-        choices=JOB_TYPE_CHOICES,
-        default='run',
-    )
+    diff_mode = models.BooleanField(default=False, help_text=DIFF_MODE_HELP_TEXT)
+    job_type = models.CharField(max_length=64, choices=JOB_TYPE_CHOICES, default='run', help_text=JOB_TYPE_HELP_TEXT)
     inventory = models.ForeignKey(
         'Inventory',
         related_name='%(class)ss',
@@ -83,6 +85,7 @@ class JobOptions(BaseModel):
         null=True,
         default=None,
         on_delete=models.SET_NULL,
+        help_text=_('Related inventory to run against.'),
     )
     project = models.ForeignKey(
         'Project',
@@ -91,68 +94,34 @@ class JobOptions(BaseModel):
         default=None,
         blank=True,
         on_delete=models.SET_NULL,
+        help_text=_('Source control project.'),
     )
-    playbook = models.CharField(
-        max_length=1024,
-        default='',
-        blank=True,
-    )
+    playbook = models.CharField(max_length=1024, default='', blank=True, help_text=_('Ansible playbook to run from the project'))
     scm_branch = models.CharField(
         max_length=1024,
         default='',
         blank=True,
         help_text=_('Branch to use in job run. Project default used if blank. Only allowed if project allow_override field is set to true.'),
     )
-    forks = models.PositiveIntegerField(
-        blank=True,
-        default=0,
-    )
-    limit = models.TextField(
-        blank=True,
-        default='',
-    )
-    verbosity = models.PositiveIntegerField(
-        choices=VERBOSITY_CHOICES,
-        blank=True,
-        default=0,
-    )
+    forks = models.PositiveIntegerField(blank=True, default=0, help_text=FORKS_HELP_TEXT)
+    limit = models.TextField(blank=True, default='', help_text=LIMIT_HELP_TEXT)
+    verbosity = models.PositiveIntegerField(choices=VERBOSITY_CHOICES, blank=True, default=0, help_text=VERBOSITY_HELP_TEXT)
     extra_vars = prevent_search(
-        accepts_json(
-            models.TextField(
-                blank=True,
-                default='',
-            )
-        )
+        accepts_json(models.TextField(blank=True, default='', help_text=_('User variables to pass to ansible-playbook as --extra-vars')))
     )
-    job_tags = models.TextField(
-        blank=True,
-        default='',
-    )
+    job_tags = models.TextField(blank=True, default='', help_text=_('Only runs plays and tasks with tags, passed to ansible-playbook as --tags'))
     force_handlers = models.BooleanField(
-        blank=True,
-        default=False,
+        blank=True, default=False, help_text=_('If true, run handlers even if task fails, passed to ansible-playbook as --force-handlers')
     )
     skip_tags = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
+        max_length=1024, blank=True, default='', help_text=_('Skip plays and tasks with tags, passed to ansible-playbook as --skip-tags')
     )
     start_at_task = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
+        max_length=1024, blank=True, default='', help_text=_('Start playbook at task, passed to ansible-playbook as --start-at-task')
     )
-    become_enabled = models.BooleanField(
-        default=False,
-    )
-    allow_simultaneous = models.BooleanField(
-        default=False,
-    )
-    timeout = models.IntegerField(
-        blank=True,
-        default=0,
-        help_text=_("The amount of time (in seconds) to run before the task is canceled."),
-    )
+    become_enabled = models.BooleanField(default=False, help_text=BECOME_ENABLED_HELP_TEXT)
+    allow_simultaneous = models.BooleanField(default=False, help_text=_('Allow running multiple jobs from this playbook at the same time'))
+    timeout = models.IntegerField(blank=True, default=0, help_text=_("The amount of time (in seconds) to run before the task is canceled."))
     use_fact_cache = models.BooleanField(
         default=False,
         help_text=_(
@@ -205,51 +174,17 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         app_label = 'main'
         ordering = ('name',)
 
-    job_type = models.CharField(
-        max_length=64,
-        choices=NEW_JOB_TYPE_CHOICES,
-        default='run',
-    )
-    host_config_key = prevent_search(
-        models.CharField(
-            max_length=1024,
-            blank=True,
-            default='',
-        )
-    )
-    ask_diff_mode_on_launch = AskForField(
-        blank=True,
-        default=False,
-    )
-    ask_job_type_on_launch = AskForField(
-        blank=True,
-        default=False,
-    )
-    ask_verbosity_on_launch = AskForField(
-        blank=True,
-        default=False,
-    )
+    job_type = models.CharField(max_length=64, choices=NEW_JOB_TYPE_CHOICES, default='run', help_text=JOB_TYPE_HELP_TEXT)
+    host_config_key = prevent_search(models.CharField(max_length=1024, blank=True, default='', help_text=_('Token used for provisioning callback.')))
+    ask_diff_mode_on_launch = AskForField(blank=True, default=False)
+    ask_job_type_on_launch = AskForField(blank=True, default=False)
+    ask_verbosity_on_launch = AskForField(blank=True, default=False)
     ask_credential_on_launch = AskForField(blank=True, default=False, allows_field='credentials')
-    ask_execution_environment_on_launch = AskForField(
-        blank=True,
-        default=False,
-    )
-    ask_forks_on_launch = AskForField(
-        blank=True,
-        default=False,
-    )
-    ask_job_slice_count_on_launch = AskForField(
-        blank=True,
-        default=False,
-    )
-    ask_timeout_on_launch = AskForField(
-        blank=True,
-        default=False,
-    )
-    ask_instance_groups_on_launch = AskForField(
-        blank=True,
-        default=False,
-    )
+    ask_execution_environment_on_launch = AskForField(blank=True, default=False)
+    ask_forks_on_launch = AskForField(blank=True, default=False)
+    ask_job_slice_count_on_launch = AskForField(blank=True, default=False)
+    ask_timeout_on_launch = AskForField(blank=True, default=False)
+    ask_instance_groups_on_launch = AskForField(blank=True, default=False)
     job_slice_count = models.PositiveIntegerField(
         blank=True,
         default=1,
@@ -257,9 +192,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     )
 
     admin_role = ImplicitRoleField(parent_role=['organization.job_template_admin_role'])
-    execute_role = ImplicitRoleField(
-        parent_role=['admin_role', 'organization.execute_role'],
-    )
+    execute_role = ImplicitRoleField(parent_role=['admin_role', 'organization.execute_role'])
     read_role = ImplicitRoleField(
         parent_role=[
             'organization.auditor_role',
@@ -570,12 +503,14 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         null=True,
         default=None,
         on_delete=models.SET_NULL,
+        help_text=_('The template this job was launched from'),
     )
     hosts = models.ManyToManyField('Host', related_name='jobs', editable=False, through='JobHostSummary', through_fields=('job', 'host'))
     artifacts = JSONBlob(
         default=dict,
         blank=True,
         editable=False,
+        help_text=_('Data collected by set_stats task inside of playbook, can be passed between workflow nodes'),
     )
     scm_revision = models.CharField(
         max_length=1024,
@@ -883,7 +818,7 @@ class LaunchTimeConfigBase(BaseModel):
     )
     # All standard fields are stored in this dictionary field
     # This is a solution to the nullable CharField problem, specific to prompting
-    char_prompts = models.JSONField(default=dict, blank=True)
+    char_prompts = models.JSONField(default=dict, blank=True, help_text=_('Internal dictionary to hold values of job fields'))
 
     # Define fields that are not really fields, but alias to char_prompts lookups
     limit = NullablePromptPseudoField('limit')
@@ -958,12 +893,13 @@ class LaunchTimeConfig(LaunchTimeConfigBase):
         abstract = True
 
     # Special case prompting fields, even more special than the other ones
-    extra_data = JSONBlob(default=dict, blank=True)
+    extra_data = JSONBlob(default=dict, blank=True, help_text=_("Prompted variables to be added to extra_vars on launch."))
     survey_passwords = prevent_search(
         models.JSONField(
             default=dict,
             editable=False,
             blank=True,
+            help_text=SURVEY_PASSWORDS_HELP_TEXT,
         )
     )
     # Fields needed for non-unified job / unified JT models, because they are defined on unified models
@@ -976,7 +912,7 @@ class LaunchTimeConfig(LaunchTimeConfigBase):
         default=None,
         on_delete=polymorphic.SET_NULL,
         related_name='%(class)s_as_prompt',
-        help_text="The container image to be used for execution.",
+        help_text=_("The prompted container image to be used for execution."),
     )
 
     @property
@@ -1014,12 +950,7 @@ class JobLaunchConfig(LaunchTimeConfig):
     class Meta:
         app_label = 'main'
 
-    job = models.OneToOneField(
-        'UnifiedJob',
-        related_name='launch_config',
-        on_delete=models.CASCADE,
-        editable=False,
-    )
+    job = models.OneToOneField('UnifiedJob', related_name='launch_config', on_delete=models.CASCADE, editable=False)
 
     # Instance Groups needed for non-unified job / unified JT models
     instance_groups = OrderedManyToManyField(
@@ -1070,12 +1001,7 @@ class JobHostSummary(CreatedModifiedModel):
         verbose_name_plural = _('job host summaries')
         ordering = ('-pk',)
 
-    job = models.ForeignKey(
-        'Job',
-        related_name='job_host_summaries',
-        on_delete=models.CASCADE,
-        editable=False,
-    )
+    job = models.ForeignKey('Job', related_name='job_host_summaries', on_delete=models.CASCADE, editable=False)
     host = models.ForeignKey('Host', related_name='job_host_summaries', null=True, default=None, on_delete=models.SET_NULL, editable=False)
     constructed_host = models.ForeignKey(
         'Host',
@@ -1087,11 +1013,7 @@ class JobHostSummary(CreatedModifiedModel):
         help_text='Only for jobs run against constructed inventories, this links to the host inside the constructed inventory.',
     )
 
-    host_name = models.CharField(
-        max_length=1024,
-        default='',
-        editable=False,
-    )
+    host_name = models.CharField(max_length=1024, default='', editable=False)
 
     changed = models.PositiveIntegerField(default=0, editable=False)
     dark = models.PositiveIntegerField(default=0, editable=False)
@@ -1147,12 +1069,7 @@ class SystemJobOptions(BaseModel):
     class Meta:
         abstract = True
 
-    job_type = models.CharField(
-        max_length=32,
-        choices=SYSTEM_JOB_TYPE,
-        blank=True,
-        default='',
-    )
+    job_type = models.CharField(max_length=32, choices=SYSTEM_JOB_TYPE, blank=True, default='', help_text=JOB_TYPE_HELP_TEXT)
 
 
 class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
@@ -1240,13 +1157,11 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
         null=True,
         default=None,
         on_delete=models.SET_NULL,
+        help_text=_('The system job template this job was launched from'),
     )
 
     extra_vars = prevent_search(
-        models.TextField(
-            blank=True,
-            default='',
-        )
+        models.TextField(blank=True, default='', help_text=_('Variables converted into CLI arguments for the awx-manage command this job runs'))
     )
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
