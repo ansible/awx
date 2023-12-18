@@ -52,12 +52,10 @@ __all__ = [
     'get_awx_http_client_headers',
     'get_awx_version',
     'update_scm_url',
-    'get_type_for_model',
     'get_model_for_type',
     'copy_model_by_class',
     'copy_m2m_relationships',
     'prefetch_page_capabilities',
-    'to_python_boolean',
     'datetime_hook',
     'ignore_inventory_computed_fields',
     'ignore_inventory_group_removal',
@@ -108,18 +106,6 @@ def get_object_or_400(klass, *args, **kwargs):
         raise ParseError(*e.args)
     except queryset.model.MultipleObjectsReturned as e:
         raise ParseError(*e.args)
-
-
-def to_python_boolean(value, allow_none=False):
-    value = str(value)
-    if value.lower() in ('true', '1', 't'):
-        return True
-    elif value.lower() in ('false', '0', 'f'):
-        return False
-    elif allow_none and value.lower() in ('none', 'null'):
-        return None
-    else:
-        raise ValueError(_(u'Unable to convert "%s" to boolean') % value)
 
 
 def datetime_hook(d):
@@ -567,14 +553,6 @@ def copy_m2m_relationships(obj1, obj2, fields, kwargs=None):
                         src_field_value = override_field_val
                 dest_field = getattr(obj2, field_name)
                 dest_field.add(*list(src_field_value.all().values_list('id', flat=True)))
-
-
-def get_type_for_model(model):
-    """
-    Return type name for a given model class.
-    """
-    opts = model._meta.concrete_model._meta
-    return camelcase_to_underscore(opts.object_name)
 
 
 def get_model_for_type(type_name):

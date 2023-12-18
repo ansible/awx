@@ -43,6 +43,8 @@ from rest_framework.utils.serializer_helpers import ReturnList
 # Django-Polymorphic
 from polymorphic.models import PolymorphicModel
 
+from ansible_base.utils.models import get_type_for_model
+
 # AWX
 from awx.main.access import get_user_capabilities
 from awx.main.constants import ACTIVE_STATES, CENSOR_VALUE
@@ -102,7 +104,6 @@ from awx.main.models.base import VERBOSITY_CHOICES, NEW_JOB_TYPE_CHOICES
 from awx.main.models.rbac import role_summary_fields_generator, RoleAncestorEntry
 from awx.main.fields import ImplicitRoleField
 from awx.main.utils import (
-    get_type_for_model,
     get_model_for_type,
     camelcase_to_underscore,
     getattrd,

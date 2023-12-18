@@ -15,7 +15,6 @@ from awx.main.utils import encrypt_field, parse_yaml_or_json
 from awx.main.constants import CLOUD_PROVIDERS
 
 __all__ = [
-    'prevent_search',
     'VarsDictProperty',
     'BaseModel',
     'CreatedModifiedModel',
@@ -382,23 +381,6 @@ class NotificationFieldsModel(BaseModel):
     notification_templates_success = models.ManyToManyField("NotificationTemplate", blank=True, related_name='%(class)s_notification_templates_for_success')
 
     notification_templates_started = models.ManyToManyField("NotificationTemplate", blank=True, related_name='%(class)s_notification_templates_for_started')
-
-
-def prevent_search(relation):
-    """
-    Used to mark a model field or relation as "restricted from filtering"
-    e.g.,
-
-    class AuthToken(BaseModel):
-        user = prevent_search(models.ForeignKey(...))
-        sensitive_data = prevent_search(models.CharField(...))
-
-    The flag set by this function is used by
-    `awx.api.filters.FieldLookupBackend` to block fields and relations that
-    should not be searchable/filterable via search query params
-    """
-    setattr(relation, '__prevent_search__', True)
-    return relation
 
 
 def accepts_json(relation):

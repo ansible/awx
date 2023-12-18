@@ -16,8 +16,9 @@ from django.db.models.query import QuerySet
 from django.utils.crypto import get_random_string
 from django.utils.translation import gettext_lazy as _
 
+from ansible_base.utils.models import prevent_search
+
 # AWX
-from awx.main.models.base import prevent_search
 from awx.main.models.rbac import Role, RoleAncestorEntry
 from awx.main.utils import parse_yaml_or_json, get_custom_venv_choices, get_licenser, polymorphic
 from awx.main.utils.execution_environments import get_default_execution_environment

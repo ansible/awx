@@ -7,8 +7,10 @@ import json
 # Django
 from django.db import models
 
+from ansible_base.utils.models import prevent_search
+
 # AWX
-from awx.main.models.base import CreatedModifiedModel, prevent_search
+from awx.main.models.base import CreatedModifiedModel
 from awx.main.utils import encrypt_field
 from awx.conf import settings_registry
 
