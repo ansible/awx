@@ -405,6 +405,12 @@ class ReceptorAddressDetail(RetrieveUpdateDestroyAPIView):
     model = models.ReceptorAddress
     serializer_class = serializers.ReceptorAddressSerializer
 
+    def delete(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.canonical or obj.managed:
+            return Response({'detail': _('Cannot delete canonical or managed address.')}, status=status.HTTP_400_BAD_REQUEST)
+        return super(ReceptorAddressDetail, self).delete(request, *args, **kwargs)
+
 
 class InstanceInstanceGroupsList(InstanceGroupMembershipMixin, SubListCreateAttachDetachAPIView):
     name = _("Instance's Instance Groups")
