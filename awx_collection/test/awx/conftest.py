@@ -35,24 +35,36 @@ from awx.main.models import (
 
 from django.db import transaction
 
-try:
-    import tower_cli  # noqa
 
-    HAS_TOWER_CLI = True
-except ImportError:
-    HAS_TOWER_CLI = False
-
-try:
-    # Because awxkit will be a directory at the root of this makefile and we are using python3, import awxkit will work even if its not installed.
-    # However, awxkit will not contain api whih causes a stack failure down on line 170 when we try to mock it.
-    # So here we are importing awxkit.api to prevent that. Then you only get an error on tests for awxkit functionality.
-    import awxkit.api  # noqa
-
-    HAS_AWX_KIT = True
-except ImportError:
-    HAS_AWX_KIT = False
-
+HAS_TOWER_CLI = False
+HAS_AWX_KIT = False
 logger = logging.getLogger('awx.main.tests')
+
+
+@pytest.fixture(autouse=True)
+def awxkit_path_set(monkeypatch):
+    """Monkey patch sys.path, insert awxkit source code so that
+    the package does not need to be installed.
+    """
+    base_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, 'awxkit'))
+    monkeypatch.syspath_prepend(base_folder)
+
+
+@pytest.fixture(autouse=True)
+def import_awxkit():
+    global HAS_TOWER_CLI
+    global HAS_AWX_KIT
+    try:
+        import tower_cli  # noqa
+        HAS_TOWER_CLI = True
+    except ImportError:
+        HAS_TOWER_CLI = False
+
+    try:
+        import awxkit  # noqa
+        HAS_AWX_KIT = True
+    except ImportError:
+        HAS_AWX_KIT = False
 
 
 def sanitize_dict(din):
