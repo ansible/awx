@@ -5490,8 +5490,20 @@ class ReceptorAddressSerializer(BaseSerializer):
 
     class Meta:
         model = ReceptorAddress
-        fields = ('id', 'url', 'address', 'port', 'protocol', 'websocket_path', 'is_internal', 'instance', 'peers_from_control_nodes', 'full_address')
-        read_only_fields = ('full_address',)
+        fields = (
+            'id',
+            'url',
+            'address',
+            'port',
+            'websocket_path',
+            'k8s_routable',
+            'canonical',
+            'instance',
+            'managed',
+            'peers_from_control_nodes',
+            'full_address',
+        )
+        read_only_fields = ('full_address', 'managed', 'canonical', 'k8s_routable')
 
     def get_full_address(self, obj):
         return obj.get_full_address()
@@ -5500,24 +5512,46 @@ class ReceptorAddressSerializer(BaseSerializer):
         def get_field_from_model_or_attrs(fd):
             return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)
 
+        managed = get_field_from_model_or_attrs('managed')
+        canonical = get_field_from_model_or_attrs('canonical')
+
+        if managed:
+            raise serializers.ValidationError(_("Cannot modify a managed address."))
+
+        # cannot modify address field if canonical is True
+        if canonical and attrs.get('address') and self.instance and self.instance.address != attrs.get('address'):
+            raise serializers.ValidationError(_("Cannot modify address field if it is canonical."))
+
         peers_from_control_nodes = get_field_from_model_or_attrs('peers_from_control_nodes')
         instance = get_field_from_model_or_attrs('instance')
+        address = get_field_from_model_or_attrs('address')
 
-        # only allow websocket_path to be set if protocol is ws
-        if attrs.get('protocol') != 'ws' and attrs.get('websocket_path'):
+        if not instance.listener_port:
+            raise serializers.ValidationError(_("Instance must have a listener port set."))
+
+        # only allow websocket_path to be set if instance protocol is ws
+        if attrs.get('websocket_path') and instance and instance.protocol != 'ws':
             raise serializers.ValidationError(_("Can only set websocket path if protocol is ws."))
 
         # an instance can only have one address with peers_from_control_nodes set to True
         if peers_from_control_nodes:
             for other_address in ReceptorAddress.objects.filter(instance=instance.id):
-                if other_address.peers_from_control_nodes:
+                if other_address.address != address and other_address.peers_from_control_nodes:
                     raise serializers.ValidationError(_("Only one address can set peers_from_control_nodes to True."))
 
-        # is_internal should be False
-        if attrs.get('is_internal') == True:
+        # k8s_routable should be False
+        if attrs.get('k8s_routable') == True:
             raise serializers.ValidationError(_("Only external addresses can be created."))
 
         return super().validate(attrs)
+
+    def update(self, obj, validated_data):
+        addr = super(ReceptorAddressSerializer, self).update(obj, validated_data)
+        if addr.port != addr.instance.listener_port:
+            addr.instance.listener_port = addr.port
+            addr.instance.save(update_fields=['listener_port'])
+
+        return addr
 
 
 class InstanceSerializer(BaseSerializer):
@@ -5531,10 +5565,11 @@ class InstanceSerializer(BaseSerializer):
     peers = serializers.PrimaryKeyRelatedField(
         help_text=_('Primary keys of receptor addresses to peer to.'), many=True, required=False, queryset=ReceptorAddress.objects.all()
     )
+    reverse_peers = serializers.SerializerMethodField()
 
     class Meta:
         model = Instance
-        read_only_fields = ('ip_address', 'uuid', 'version')
+        read_only_fields = ('ip_address', 'uuid', 'version', 'managed', 'reverse_peers')
         fields = (
             'id',
             'hostname',
@@ -5565,8 +5600,12 @@ class InstanceSerializer(BaseSerializer):
             'managed_by_policy',
             'node_type',
             'node_state',
+            'managed',
             'ip_address',
             'peers',
+            'reverse_peers',
+            'listener_port',
+            'protocol',
         )
         extra_kwargs = {
             'node_type': {'initial': Instance.Types.EXECUTION, 'default': Instance.Types.EXECUTION},
@@ -5599,6 +5638,37 @@ class InstanceSerializer(BaseSerializer):
                 res['health_check'] = self.reverse('api:instance_health_check', kwargs={'pk': obj.pk})
         return res
 
+    def create(self, validated_data):
+        # create a managed receptor address if listener port is defined
+        kwargs = {
+            'port': validated_data.get('listener_port', None),
+            'canonical': True,
+        }
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+        instance = super(InstanceSerializer, self).create(validated_data)
+        if kwargs.get('port'):
+            instance.receptor_addresses.update_or_create(address=instance.hostname, defaults=kwargs)
+        else:
+            # delete the receptor address if the listener port is not defined
+            instance.receptor_addresses.filter(address=instance.hostname).delete()
+        return instance
+
+    def update(self, obj, validated_data):
+        # update the managed receptor address if listener port is defined
+        kwargs = {
+            'port': validated_data.get('listener_port', None),
+            'canonical': True,
+        }
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+        instance = super(InstanceSerializer, self).update(obj, validated_data)
+        if kwargs.get('port'):
+            instance.receptor_addresses.update_or_create(address=instance.hostname, defaults=kwargs)
+        else:
+            # delete the receptor address if the listener port is not defined
+            instance.receptor_addresses.filter(address=instance.hostname).delete()
+
+        return instance
+
     def get_summary_fields(self, obj):
         summary = super().get_summary_fields(obj)
 
@@ -5607,6 +5677,9 @@ class InstanceSerializer(BaseSerializer):
             summary['links'] = InstanceLinkSerializer(InstanceLink.objects.select_related('target', 'source').filter(source=obj), many=True).data
 
         return summary
+
+    def get_reverse_peers(self, obj):
+        return Instance.objects.prefetch_related('peers').filter(peers__in=obj.receptor_addresses.all()).values_list('id', flat=True)
 
     def get_consumed_capacity(self, obj):
         return obj.consumed_capacity
@@ -5683,8 +5756,8 @@ class InstanceSerializer(BaseSerializer):
                     raise serializers.ValidationError(_("Can only change the state on Kubernetes or OpenShift."))
                 if value != Instance.States.DEPROVISIONING:
                     raise serializers.ValidationError(_("Can only change instances to the 'deprovisioning' state."))
-                if self.instance.node_type not in (Instance.Types.EXECUTION, Instance.Types.HOP):
-                    raise serializers.ValidationError(_("Can only deprovision execution or hop nodes."))
+                if self.instance.managed:
+                    raise serializers.ValidationError(_("Cannot deprovision managed nodes."))
         else:
             if value and value != Instance.States.INSTALLED:
                 raise serializers.ValidationError(_("Can only create instances in the 'installed' state."))
