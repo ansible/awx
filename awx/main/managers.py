@@ -115,7 +115,17 @@ class InstanceManager(models.Manager):
             return node[0]
         raise RuntimeError("No instance found with the current cluster host id")
 
-    def register(self, node_uuid=None, hostname=None, ip_address="", listener_port=None, node_type='hybrid', peers_from_control_nodes=False, defaults=None):
+    def register(
+        self,
+        node_uuid=None,
+        hostname=None,
+        ip_address="",
+        listener_port=None,
+        protocol='tcp',
+        node_type='hybrid',
+        peers_from_control_nodes=False,
+        defaults=None,
+    ):
         if not hostname:
             hostname = settings.CLUSTER_HOST_ID
 
@@ -161,6 +171,12 @@ class InstanceManager(models.Manager):
                 if instance.node_type != node_type:
                     instance.node_type = node_type
                     update_fields.append('node_type')
+                if instance.protocol != protocol:
+                    instance.protocol = protocol
+                    update_fields.append('protocol')
+                if instance.listener_port != listener_port:
+                    instance.listener_port = listener_port
+                    update_fields.append('listener_port')
                 if update_fields:
                     instance.save(update_fields=update_fields)
                     return (True, instance)
@@ -171,6 +187,7 @@ class InstanceManager(models.Manager):
             create_defaults = {
                 'node_state': Instance.States.INSTALLED,
                 'capacity': 0,
+                'managed': True,
             }
             if defaults is not None:
                 create_defaults.update(defaults)
@@ -185,8 +202,5 @@ class InstanceManager(models.Manager):
                 **create_defaults,
                 **uuid_option
             )
-            from awx.main.management.commands.add_receptor_address import add_address
 
-            if listener_port:
-                add_address(address=hostname, hostname=hostname, port=listener_port, protocol='tcp')
         return (True, instance)
