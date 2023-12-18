@@ -63,14 +63,14 @@ class TestPeers:
         )
         assert 'Cannot change node type.' in str(resp.data)
 
-    def test_is_internal(self, admin_user, post):
+    def test_k8s_routable(self, admin_user, post):
         """
-        cannot set is_internal to True
+        cannot set k8s_routable to True
         """
         hop = Instance.objects.create(hostname='abc', node_type="hop")
         resp = post(
             url=reverse('api:instance_receptor_addresses_list', kwargs={'pk': hop.pk}),
-            data={"address": "hopaddr", "is_internal": True},
+            data={"address": "hopaddr", "k8s_routable": True},
             user=admin_user,
             expect=400,
         )
