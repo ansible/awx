@@ -5,7 +5,7 @@ from decimal import Decimal
 import logging
 import os
 
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models, connection
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
@@ -62,6 +62,12 @@ class HasPolicyEditsMixin(HasEditsMixin):
             raise RuntimeError('HasPolicyEditsMixin Model needs to set POLICY_FIELDS')
         new_values = self._get_fields_snapshot(fields_set=self.POLICY_FIELDS)
         return self._values_have_edits(new_values)
+
+
+class Protocols(models.TextChoices):
+    TCP = 'tcp', 'TCP'
+    WS = 'ws', 'WS'
+    WSS = 'wss', 'WSS'
 
 
 class InstanceLink(BaseModel):
@@ -165,6 +171,16 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         default=0,
         editable=False,
     )
+    listener_port = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        default=None,
+        validators=[MinValueValidator(0), MaxValueValidator(65535)],
+        help_text=_("Port that Receptor will listen for incoming connections on."),
+    )
+    protocol = models.CharField(
+        help_text=_("Protocol to use for the Receptor listener, 'tcp', 'wss', or 'ws'."), max_length=10, default=Protocols.TCP, choices=Protocols.choices
+    )
 
     class Types(models.TextChoices):
         CONTROL = 'control', _("Control plane node")
@@ -187,6 +203,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         choices=States.choices, default=States.READY, max_length=16, help_text=_("Indicates the current life cycle stage of this instance.")
     )
 
+    managed = models.BooleanField(help_text=_("If True, this instance is managed by the control plane."), default=False, editable=False)
     peers = models.ManyToManyField('ReceptorAddress', through=InstanceLink, through_fields=('source', 'target'), related_name='peers_from')
     peers_from_control_nodes = models.BooleanField(default=False, help_text=_("If True, control plane cluster nodes should automatically peer to it."))
 

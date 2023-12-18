@@ -8,13 +8,16 @@ from awx.main.models import Instance, ReceptorAddress
 
 def add_address(**kwargs):
     try:
-        instance = Instance.objects.get(hostname=kwargs.pop('hostname'))
+        instance = Instance.objects.get(hostname=kwargs.pop('instance'))
         kwargs['instance'] = instance
-        # address and protocol are unique together for ReceptorAddress
-        # If an address has (address, protocol), it will update the rest of the values suppled in defaults dict
-        # if no address exists with (address, protocol), then a new address will be created
-        # these unique together fields need to be consistent with the unique constraint in the ReceptorAddress model
-        addr, _ = ReceptorAddress.objects.update_or_create(address=kwargs.pop('address'), protocol=kwargs.pop('protocol'), defaults=kwargs)
+        # if ReceptorAddress already exists with address, just update
+        # otherwise, create new ReceptorAddress
+        addr, _ = ReceptorAddress.objects.update_or_create(address=kwargs.pop('address'), defaults=kwargs)
+
+        # update listener_port on instance if address is canonical
+        if addr.canonical:
+            addr.instance.listener_port = addr.port
+            addr.instance.save(update_fields=['listener_port'])
         print(f"Successfully added receptor address {addr.get_full_address()}")
         changed = True
     except Exception as e:
@@ -32,17 +35,22 @@ class Command(BaseCommand):
     help = "Add receptor address to an instance."
 
     def add_arguments(self, parser):
-        parser.add_argument('--hostname', dest='hostname', type=str, help="Hostname this address is added to")
+        parser.add_argument('--instance', dest='instance', type=str, help="Instance hostname this address is added to")
         parser.add_argument('--address', dest='address', type=str, help="Receptor address")
         parser.add_argument('--port', dest='port', type=int, help="Receptor listener port")
-        parser.add_argument('--protocol', dest='protocol', type=str, default='tcp', choices=['tcp', 'ws'], help="Protocol of the backend connection")
         parser.add_argument('--websocket_path', dest='websocket_path', type=str, default="", help="Path for websockets")
-        parser.add_argument('--is_internal', action='store_true', help="If true, address only resolvable within the Kubernetes cluster")
+        parser.add_argument('--k8s_routable', action='store_true', help="If true, address only resolvable within the Kubernetes cluster")
+        parser.add_argument('--canonical', action='store_true', help="If true, address is the canonical address for the instance")
         parser.add_argument('--peers_from_control_nodes', action='store_true', help="If true, control nodes will peer to this address")
+        parser.add_argument('--managed', action='store_true', help="If True, this address should be managed by the control plane.")
 
     def handle(self, **options):
         self.changed = False
-        address_options = {k: options[k] for k in ('hostname', 'address', 'port', 'protocol', 'websocket_path', 'is_internal', 'peers_from_control_nodes')}
+        address_options = {
+            k: options[k]
+            for k in ('instance', 'address', 'port', 'websocket_path', 'k8s_routable', 'peers_from_control_nodes', 'canonical', 'managed')
+            if options[k]
+        }
         self.changed = add_address(**address_options)
         if self.changed:
             print("(changed: True)")
