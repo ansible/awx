@@ -350,6 +350,10 @@ function ScheduleForm({
     startDate: currentDate,
     startTime: time,
     timezone: schedule.timezone || now.zoneName,
+    credentials:
+      credentials.length > 0 ? credentials : resourceDefaultCredentials,
+    labels: originalLabels.current,
+    instance_groups: originalInstanceGroups.current,
   };
 
   if (hasDaysToKeepField) {
