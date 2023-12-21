@@ -1,6 +1,6 @@
 export default function mergeArraysByCredentialType(
-  defaultCredentials,
-  overrides
+  defaultCredentials = [],
+  overrides = []
 ) {
   const mergedArray = [...defaultCredentials];
 
