@@ -1,14 +1,17 @@
-export default function mergeArraysByCredentialType(array1, array2) {
-  const mergedArray = [...array1];
+export default function mergeArraysByCredentialType(
+  defaultCredentials,
+  overrides
+) {
+  const mergedArray = [...defaultCredentials];
 
-  array2.forEach((obj2) => {
+  overrides.forEach((override) => {
     const index = mergedArray.findIndex(
-      (obj1) => obj1.credential_type === obj2.credential_type
+      (defaultCred) => defaultCred.credential_type === override.credential_type
     );
     if (index !== -1) {
       mergedArray.splice(index, 1);
     }
-    mergedArray.push(obj2);
+    mergedArray.push(override);
   });
 
   return mergedArray;
