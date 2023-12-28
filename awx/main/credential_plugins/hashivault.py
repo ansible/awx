@@ -227,6 +227,7 @@ def method_auth(**kwargs):
     cacert = kwargs.get('cacert', None)
 
     sess = requests.Session()
+    sess.mount(url, requests.adapters.HTTPAdapter(max_retries=5))
 
     # Namespace support
     if kwargs.get('namespace'):
@@ -263,6 +264,7 @@ def kv_backend(**kwargs):
     }
 
     sess = requests.Session()
+    sess.mount(url, requests.adapters.HTTPAdapter(max_retries=5))
     sess.headers['Authorization'] = 'Bearer {}'.format(token)
     # Compatibility header for older installs of Hashicorp Vault
     sess.headers['X-Vault-Token'] = token
@@ -333,6 +335,7 @@ def ssh_backend(**kwargs):
         request_kwargs['json']['valid_principals'] = kwargs['valid_principals']
 
     sess = requests.Session()
+    sess.mount(url, requests.adapters.HTTPAdapter(max_retries=5))
     sess.headers['Authorization'] = 'Bearer {}'.format(token)
     if kwargs.get('namespace'):
         sess.headers['X-Vault-Namespace'] = kwargs['namespace']
