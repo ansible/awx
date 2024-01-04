@@ -32,6 +32,10 @@ class Instances extends Base {
     return this.http.get(`${this.baseUrl}${instanceId}/receptor_addresses/`);
   }
 
+  updateReceptorAddresses(instanceId, data) {
+    return this.http.post(`${this.baseUrl}${instanceId}/receptor_addresses/`, data);
+  }
+
   deprovisionInstance(instanceId) {
     return this.http.patch(`${this.baseUrl}${instanceId}/`, {
       node_state: 'deprovisioning',
