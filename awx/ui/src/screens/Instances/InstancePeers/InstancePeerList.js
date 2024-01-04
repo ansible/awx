@@ -47,7 +47,7 @@ function InstancePeerList({ setBreadcrumb }) {
       const [
         { data: detail },
         {
-          data: { results, count: itemNumber },
+          data: { results },
         },
         actions,
         instances,
@@ -72,7 +72,7 @@ function InstancePeerList({ setBreadcrumb }) {
       return {
         instance: detail,
         peers: address_list,
-        count: itemNumber,
+        count: address_list.length,
         relatedSearchableKeys: (actions?.data?.related_search_fields || []).map(
           (val) => val.slice(0, -8)
         ),
@@ -283,7 +283,7 @@ function InstancePeerList({ setBreadcrumb }) {
                   key="disassociate"
                   onDisassociate={handlePeersDiassociate}
                   itemsToDisassociate={selected}
-                  modalTitle={t`Remove instance from peers?`}
+                  modalTitle={t`Remove peers?`}
                 />
               ),
             ]}
