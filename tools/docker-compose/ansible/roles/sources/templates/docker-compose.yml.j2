@@ -61,7 +61,7 @@ services:
 {% if control_plane_node_count|int == 1 %}
       - "6899:6899"
       - "8080:8080"  # unused but mapped for debugging
-      - "8888:8888"  # jupyter notebook
+      - "${AWX_JUPYTER_PORT:-8888}:8888"  # jupyter notebook
       - "8013:8013"  # http
       - "8043:8043"  # https
       - "2222:2222"  # receptor foo node
@@ -201,6 +201,8 @@ services:
       POSTGRES_PASSWORD: {{ pg_password }}
     volumes:
       - "awx_db:/var/lib/postgresql/data"
+    ports:
+       - "${AWX_PG_PORT:-5432}:5432"
 {% if enable_pgbouncer|bool %}
   pgbouncer:
     image: bitnami/pgbouncer:latest
