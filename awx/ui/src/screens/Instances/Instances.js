@@ -25,6 +25,7 @@ function Instances() {
       [`/instances/${instance.id}`]: `${instance.hostname}`,
       [`/instances/${instance.id}/details`]: t`Details`,
       [`/instances/${instance.id}/peers`]: t`Peers`,
+      [`/instances/${instance.id}/endpoints`]: t`Endpoints`,
       [`/instances/${instance.id}/edit`]: t`Edit Instance`,
     });
   }, []);
