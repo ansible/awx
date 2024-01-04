@@ -5,6 +5,10 @@ class ReceptorAddresses extends Base {
     super(http);
     this.baseUrl = 'api/v2/receptor_addresses/';
   }
+
+  updateReceptorAddresses(instanceId, data) {
+    return this.http.post(`${this.baseUrl}`, data);
+  }
 }
 
 export default ReceptorAddresses;
