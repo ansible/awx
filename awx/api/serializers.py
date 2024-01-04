@@ -5464,6 +5464,11 @@ class InstanceSerializer(BaseSerializer):
         help_text=_('Primary keys of receptor addresses to peer to.'), many=True, required=False, queryset=ReceptorAddress.objects.all()
     )
     reverse_peers = serializers.SerializerMethodField()
+    receptor_installation_method = serializers.ChoiceField(
+        choices=Instance.ReceptorInstallationMethods.filtered_choices(),
+        initial=Instance.ReceptorInstallationMethods.default_choice(),
+        default=Instance.ReceptorInstallationMethods.default_choice(),
+    )
 
     class Meta:
         model = Instance
