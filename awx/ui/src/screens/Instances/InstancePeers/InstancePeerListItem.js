@@ -43,7 +43,6 @@ function InstancePeerListItem({
           }}
           dataLabel={t`Selected`}
         />
-
         <Td id={labelId} dataLabel={t`Address`}>
           <Link to={`/instances/${peerInstance.instance}/details`}>
             <b>{peerInstance.address}</b>
