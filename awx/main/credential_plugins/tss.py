@@ -2,7 +2,7 @@ from .plugin import CredentialPlugin
 from django.utils.translation import gettext_lazy as _
 
 try:
-    from delinea.secrets.server import DomainPasswordGrantAuthorizer, PasswordGrantAuthorizer, SecretServer, ServerSecret
+    from delinea.secrets.vault import PasswordGrantAuthorizer, SecretsVault, VaultSecret
 except ImportError:
     from thycotic.secrets.server import DomainPasswordGrantAuthorizer, PasswordGrantAuthorizer, SecretServer, ServerSecret
 

@@ -129,7 +129,7 @@ class TestDelineaImports:
     """
 
     def test_dsv_import(self):
-        from awx.main.credential_plugins.dsv import SecretsVault  # noqa
+        from awx.main.credential_plugins.dsv import PasswordGrantAuthorizer, SecretsVault, VaultSecret  # noqa
 
         # assert this module as opposed to older thycotic.secrets.vault
         assert SecretsVault.__module__ == 'delinea.secrets.vault'
@@ -139,4 +139,4 @@ class TestDelineaImports:
 
         for cls in (DomainPasswordGrantAuthorizer, PasswordGrantAuthorizer, SecretServer, ServerSecret):
             # assert this module as opposed to older thycotic.secrets.server
-            assert cls.__module__ == 'delinea.secrets.server'
+            assert cls.__module__ == 'delinea.secrets.vault'
