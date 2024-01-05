@@ -85,6 +85,7 @@ class PubSub(object):
 
         while True:
             if select.select([self.conn], [], [], self.select_timeout) == NOT_READY:
+                self.ensure_connection()  # ping to make sure the connection is alive and prevent hangs
                 if yield_timeouts:
                     yield None
             else:

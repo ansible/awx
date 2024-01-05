@@ -164,9 +164,9 @@ class AWXConsumerPG(AWXConsumerBase):
         super().__init__(*args, **kwargs)
         self.pg_max_wait = settings.DISPATCHER_DB_DOWNTIME_TOLERANCE
         # if no successful loops have ran since startup, then we should fail right away
-        self.pg_is_down = True  # set so that we fail if we get database errors on startup
+        self.pg_is_down = False
         init_time = time.time()
-        self.pg_down_time = init_time - self.pg_max_wait  # allow no grace period
+        self.pg_down_time = init_time
         self.last_cleanup = init_time
         self.subsystem_metrics = s_metrics.Metrics(auto_pipe_execute=False)
         self.last_metrics_gather = init_time
@@ -215,9 +215,6 @@ class AWXConsumerPG(AWXConsumerBase):
                 self.dispatch_task(body)
 
         if self.pg_is_down:
-            # Test the pg connection to prevent false positives where we believe it to be working, but it is not sending messages
-            conn.ensure_connection()
-            # if prior line raises exception, that gets logged in exception handling
             logger.info(f'Dispatcher listener connection restored after {time.time() - self.pg_down_time:.3f}s')
             self.pg_is_down = False
 
@@ -242,6 +239,7 @@ class AWXConsumerPG(AWXConsumerBase):
                     # run_periodic_tasks run scheduled actions and gives time until next scheduled action
                     # this is saved to the conn (PubSub) object in order to modify read timeout in-loop
                     conn.select_timeout = self.run_periodic_tasks(conn)
+                    conn.ensure_connection()
                     # this is the main operational loop for awx-manage run_dispatcher
                     for e in conn.events(yield_timeouts=True):
                         self.listen_cumulative_time += time.time() - self.listen_start  # for metrics
