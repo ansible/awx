@@ -562,6 +562,7 @@ class WebhookTemplateMixin(models.Model):
     SERVICES = [
         ('github', "GitHub"),
         ('gitlab', "GitLab"),
+        ('bitbucket_dc', "BitBucket DataCenter"),
     ]
 
     webhook_service = models.CharField(max_length=16, choices=SERVICES, blank=True, help_text=_('Service that webhook requests will be accepted from'))
@@ -622,6 +623,7 @@ class WebhookMixin(models.Model):
         service_header = {
             'github': ('Authorization', 'token {}'),
             'gitlab': ('PRIVATE-TOKEN', '{}'),
+            'bitbucket_dc': ('Authorization', 'Bearer {}'),
         }
         service_statuses = {
             'github': {
@@ -639,6 +641,14 @@ class WebhookMixin(models.Model):
                 'error': 'failed',  # GitLab doesn't have an 'error' status distinct from 'failed' :(
                 'canceled': 'canceled',
             },
+            'bitbucket_dc': {
+                'pending': 'INPROGRESS',  # Bitbucket DC doesn't have any other statuses distinct from INPROGRESS, SUCCESSFUL, FAILED :(
+                'running': 'INPROGRESS',
+                'successful': 'SUCCESSFUL',
+                'failed': 'FAILED',
+                'error': 'FAILED',
+                'canceled': 'FAILED',
+            },
         }
 
         statuses = service_statuses[self.webhook_service]
@@ -647,11 +657,18 @@ class WebhookMixin(models.Model):
             return
         try:
             license_type = get_licenser().validate().get('license_type')
-            data = {
-                'state': statuses[status],
-                'context': 'ansible/awx' if license_type == 'open' else 'ansible/tower',
-                'target_url': self.get_ui_url(),
-            }
+            if self.webhook_service == 'bitbucket_dc':
+                data = {
+                    'state': statuses[status],
+                    'key': 'ansible/awx' if license_type == 'open' else 'ansible/tower',
+                    'url': self.get_ui_url(),
+                }
+            else:
+                data = {
+                    'state': statuses[status],
+                    'context': 'ansible/awx' if license_type == 'open' else 'ansible/tower',
+                    'target_url': self.get_ui_url(),
+                }
             k, v = service_header[self.webhook_service]
             headers = {k: v.format(self.webhook_credential.get_input('token')), 'Content-Type': 'application/json'}
             response = requests.post(status_api, data=json.dumps(data), headers=headers, timeout=30)
