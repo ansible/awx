@@ -191,7 +191,7 @@ class AWXConsumerPG(AWXConsumerBase):
         self.listen_cumulative_time = 0.0
         self.last_metrics_gather = current_time
 
-    def run_periodic_tasks(self):
+    def run_periodic_tasks(self, conn):
         """
         Run general periodic logic, and return maximum time in seconds before
         the next requested run
@@ -214,7 +214,13 @@ class AWXConsumerPG(AWXConsumerBase):
                 # bypasses pg_notify for scheduled tasks
                 self.dispatch_task(body)
 
-        self.pg_is_down = False
+        if self.pg_is_down:
+            # Test the pg connection to prevent false positives where we believe it to be working, but it is not sending messages
+            conn.ensure_connection()
+            # if prior line raises exception, that gets logged in exception handling
+            logger.info(f'Dispatcher listener connection restored after {time.time() - self.pg_down_time:.3f}s')
+            self.pg_is_down = False
+
         self.listen_start = time.time()
 
         return self.scheduler.time_until_next_run()
@@ -235,13 +241,13 @@ class AWXConsumerPG(AWXConsumerBase):
                         init = True
                     # run_periodic_tasks run scheduled actions and gives time until next scheduled action
                     # this is saved to the conn (PubSub) object in order to modify read timeout in-loop
-                    conn.select_timeout = self.run_periodic_tasks()
+                    conn.select_timeout = self.run_periodic_tasks(conn)
                     # this is the main operational loop for awx-manage run_dispatcher
                     for e in conn.events(yield_timeouts=True):
                         self.listen_cumulative_time += time.time() - self.listen_start  # for metrics
                         if e is not None:
                             self.process_task(json.loads(e.payload))
-                        conn.select_timeout = self.run_periodic_tasks()
+                        conn.select_timeout = self.run_periodic_tasks(conn)
                     if self.should_stop:
                         return
             except psycopg.InterfaceError:

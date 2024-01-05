@@ -59,6 +59,9 @@ class PubSub(object):
         with self.conn.cursor() as cur:
             cur.execute('SELECT pg_notify(%s, %s);', (channel, payload))
 
+    def ensure_connection(self):
+        self.conn.cursor().execute('SELECT 1')
+
     @staticmethod
     def current_notifies(conn):
         """
