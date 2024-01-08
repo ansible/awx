@@ -199,6 +199,7 @@ class InstanceManager(models.Manager):
                 ip_address=ip_address,
                 node_type=node_type,
                 peers_from_control_nodes=peers_from_control_nodes,
+                protocol=protocol,
                 **create_defaults,
                 **uuid_option
             )
