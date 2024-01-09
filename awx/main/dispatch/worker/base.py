@@ -18,7 +18,7 @@ from django.conf import settings
 
 from awx.main.dispatch.pool import WorkerPool
 from awx.main.dispatch.periodic import Scheduler
-from awx.main.dispatch import pg_bus_conn
+from awx.main.dispatch import pg_bus_conn, get_task_queuename
 from awx.main.utils.common import log_excess_runtime
 from awx.main.utils.db import set_connection_name
 import awx.main.analytics.subsystem_metrics as s_metrics
@@ -64,9 +64,9 @@ class AWXConsumerBase(object):
         return f'listening on {self.queues}'
 
     def control(self, body):
-        logger.warning(f'Received control signal:\n{body}')
+        logger.debug(f'Received control signal:\n{body}')
         control = body.get('control')
-        if control in ('status', 'schedule', 'running', 'cancel'):
+        if control in ('status', 'schedule', 'running', 'cancel', 'alive'):
             reply_queue = body['reply_to']
             if control == 'status':
                 msg = '\n'.join([self.listening_on, self.pool.debug()])
@@ -88,6 +88,9 @@ class AWXConsumerBase(object):
                         msg.append(task['uuid'])
                 if task_ids and not msg:
                     logger.info(f'Could not locate running tasks to cancel with ids={task_ids}')
+            elif control == 'alive':
+                self.last_alive_message = None
+                logger.debug('received alive message for self-check')
 
             if reply_queue is not None:
                 with pg_bus_conn() as conn:
@@ -171,6 +174,7 @@ class AWXConsumerPG(AWXConsumerBase):
         self.subsystem_metrics = s_metrics.Metrics(auto_pipe_execute=False)
         self.last_metrics_gather = init_time
         self.listen_cumulative_time = 0.0
+        self.last_alive_message = None
         if schedule:
             schedule = schedule.copy()
         else:
@@ -181,6 +185,8 @@ class AWXConsumerPG(AWXConsumerBase):
         schedule['pool_cleanup'] = {'control': self.pool.cleanup, 'schedule': timedelta(seconds=60)}
         # record subsystem metrics for the dispatcher
         schedule['metrics_gather'] = {'control': self.record_metrics, 'schedule': timedelta(seconds=20)}
+        # periodically send alive messages
+        schedule['alive_message'] = {'control': self.send_alive_message, 'schedule': timedelta(seconds=60)}
         self.scheduler = Scheduler(schedule)
 
     def record_metrics(self):
@@ -190,6 +196,17 @@ class AWXConsumerPG(AWXConsumerBase):
         self.subsystem_metrics.pipe_execute()
         self.listen_cumulative_time = 0.0
         self.last_metrics_gather = current_time
+
+    def send_alive_message(self):
+        """
+        This task sends alive message, and we test if expected message was received in run_periodic_tasks
+        the goal is to detect dropped connections, where listening to pg_notify gives us no indication
+        """
+        self.last_alive_message = time.time()
+        # sending message using ordinary Django connection here
+        with pg_bus_conn() as conn:
+            conn.notify(get_task_queuename(), json.dumps({'control': 'alive', 'reply_to': None}))
+        logger.debug('Sent alive message for self-assesment of pg_notify queue')
 
     def run_periodic_tasks(self, conn):
         """
@@ -218,6 +235,13 @@ class AWXConsumerPG(AWXConsumerBase):
             logger.info(f'Dispatcher listener connection restored after {time.time() - self.pg_down_time:.3f}s')
             self.pg_is_down = False
 
+        if self.last_alive_message:
+            delta = time.time() - self.last_alive_message
+            if delta > 20.0:
+                raise db.DatabaseError(f'pg_notify self-check missing after {delta:.3f}s, did you drop the connection?')
+            else:
+                logger.debug(f'still waiting for self-check message after {delta:.3f}s')
+
         self.listen_start = time.time()
 
         return self.scheduler.time_until_next_run()
@@ -239,7 +263,6 @@ class AWXConsumerPG(AWXConsumerBase):
                     # run_periodic_tasks run scheduled actions and gives time until next scheduled action
                     # this is saved to the conn (PubSub) object in order to modify read timeout in-loop
                     conn.select_timeout = self.run_periodic_tasks(conn)
-                    conn.ensure_connection()
                     # this is the main operational loop for awx-manage run_dispatcher
                     for e in conn.events(yield_timeouts=True):
                         self.listen_cumulative_time += time.time() - self.listen_start  # for metrics
@@ -252,6 +275,7 @@ class AWXConsumerPG(AWXConsumerBase):
                 logger.warning("Stale Postgres message bus connection, reconnecting")
                 continue
             except (db.DatabaseError, psycopg.OperationalError):
+                self.last_alive_message = None
                 # If we have attained stady state operation, tolerate short-term database hickups
                 if not self.pg_is_down:
                     logger.exception(f"Error consuming new events from postgres, will retry for {self.pg_max_wait} s")

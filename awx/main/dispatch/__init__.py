@@ -59,9 +59,6 @@ class PubSub(object):
         with self.conn.cursor() as cur:
             cur.execute('SELECT pg_notify(%s, %s);', (channel, payload))
 
-    def ensure_connection(self):
-        self.conn.cursor().execute('SELECT 1')
-
     @staticmethod
     def current_notifies(conn):
         """
@@ -85,7 +82,6 @@ class PubSub(object):
 
         while True:
             if select.select([self.conn], [], [], self.select_timeout) == NOT_READY:
-                self.ensure_connection()  # ping to make sure the connection is alive and prevent hangs
                 if yield_timeouts:
                     yield None
             else:
