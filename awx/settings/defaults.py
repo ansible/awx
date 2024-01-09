@@ -1063,3 +1063,7 @@ CLEANUP_HOST_METRICS_HARD_THRESHOLD = 36  # months
 # Host metric summary monthly task - last time of run
 HOST_METRIC_SUMMARY_TASK_LAST_TS = None
 HOST_METRIC_SUMMARY_TASK_INTERVAL = 7  # days
+
+
+RECEPTOR_INSTALLATION_METHODS = ['release', 'package', 'local', 'container']
+DEFAULT_RECEPTOR_INSTALLATION_METHOD = 'release'

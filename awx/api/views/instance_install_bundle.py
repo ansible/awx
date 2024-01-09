@@ -19,6 +19,7 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509 import DNSName, IPAddress, ObjectIdentifier, OtherName
 from cryptography.x509.oid import NameOID
+from django.conf import settings
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
@@ -51,6 +52,17 @@ class InstanceInstallBundle(GenericAPIView):
     permission_classes = (IsSystemAdminOrAuditor,)
 
     def get(self, request, *args, **kwargs):
+        receptor_installation_method = request.query_params.get('receptor_installation_method', settings.DEFAULT_RECEPTOR_INSTALLATION_METHOD)
+        if receptor_installation_method not in settings.RECEPTOR_INSTALLATION_METHODS:
+            return Response(
+                data=dict(msg=_(f"Invalid receptor installation method. Valid values are: {settings.RECEPTOR_INSTALLATION_METHODS}")),
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # remove receptor_installation_method from query_params
+        request.query_params._mutable = True
+        request.query_params.pop('receptor_installation_method', None)
+
         instance_obj = self.get_object()
 
         if instance_obj.node_type not in ('execution', 'hop'):
@@ -93,7 +105,7 @@ class InstanceInstallBundle(GenericAPIView):
                 tar_addfile(inventory_yml_tarinfo, inventory_yml)
 
                 # generate and write group_vars/all.yml to the tar file
-                group_vars = generate_group_vars_all_yml(instance_obj).encode('utf-8')
+                group_vars = generate_group_vars_all_yml(instance_obj, receptor_installation_method).encode('utf-8')
                 group_vars_tarinfo = tarfile.TarInfo(f"{instance_obj.hostname}_install_bundle/group_vars/all.yml")
                 tar_addfile(group_vars_tarinfo, group_vars)
 
@@ -123,12 +135,12 @@ def generate_inventory_yml(instance_obj):
     return render_to_string("instance_install_bundle/inventory.yml", context=dict(instance=instance_obj))
 
 
-def generate_group_vars_all_yml(instance_obj):
+def generate_group_vars_all_yml(instance_obj, receptor_installation_method):
     # get peers
     peers = []
     for addr in instance_obj.peers.all().prefetch_related('instance'):
         peers.append(dict(address=addr.get_full_address(), protocol=addr.instance.protocol))
-    context = dict(instance=instance_obj, peers=peers)
+    context = dict(instance=instance_obj, peers=peers, receptor_installation_method=receptor_installation_method)
 
     if instance_obj.listener_port:
         context['listener_port'] = instance_obj.listener_port
