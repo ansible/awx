@@ -167,9 +167,9 @@ class AWXConsumerPG(AWXConsumerBase):
         super().__init__(*args, **kwargs)
         self.pg_max_wait = settings.DISPATCHER_DB_DOWNTIME_TOLERANCE
         # if no successful loops have ran since startup, then we should fail right away
-        self.pg_is_down = False
+        self.pg_is_down = True  # set so that we fail if we get database errors on startup
         init_time = time.time()
-        self.pg_down_time = init_time
+        self.pg_down_time = init_time - self.pg_max_wait  # allow no grace period
         self.last_cleanup = init_time
         self.subsystem_metrics = s_metrics.Metrics(auto_pipe_execute=False)
         self.last_metrics_gather = init_time
@@ -232,7 +232,7 @@ class AWXConsumerPG(AWXConsumerBase):
                 self.dispatch_task(body)
 
         if self.pg_is_down:
-            logger.info(f'Dispatcher listener connection restored after {time.time() - self.pg_down_time:.3f}s')
+            logger.info('Dispatcher listener connection established')
             self.pg_is_down = False
 
         if self.last_alive_message:
