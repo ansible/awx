@@ -208,7 +208,7 @@ class AWXConsumerPG(AWXConsumerBase):
             conn.notify(get_task_queuename(), json.dumps({'control': 'alive', 'reply_to': None}))
         logger.debug('Sent alive message for self-assesment of pg_notify queue')
 
-    def run_periodic_tasks(self, conn):
+    def run_periodic_tasks(self):
         """
         Run general periodic logic, and return maximum time in seconds before
         the next requested run
@@ -262,13 +262,13 @@ class AWXConsumerPG(AWXConsumerBase):
                         init = True
                     # run_periodic_tasks run scheduled actions and gives time until next scheduled action
                     # this is saved to the conn (PubSub) object in order to modify read timeout in-loop
-                    conn.select_timeout = self.run_periodic_tasks(conn)
+                    conn.select_timeout = self.run_periodic_tasks()
                     # this is the main operational loop for awx-manage run_dispatcher
                     for e in conn.events(yield_timeouts=True):
                         self.listen_cumulative_time += time.time() - self.listen_start  # for metrics
                         if e is not None:
                             self.process_task(json.loads(e.payload))
-                        conn.select_timeout = self.run_periodic_tasks(conn)
+                        conn.select_timeout = self.run_periodic_tasks()
                     if self.should_stop:
                         return
             except psycopg.InterfaceError:
