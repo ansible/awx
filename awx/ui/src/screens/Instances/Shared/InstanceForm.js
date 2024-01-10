@@ -1,6 +1,6 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { t } from '@lingui/macro';
-import { Formik, useField, useFormikContext } from 'formik';
+import { Formik, useField } from 'formik';
 import { Form, FormGroup, CardBody } from '@patternfly/react-core';
 import { FormColumnLayout } from 'components/FormLayout';
 import FormField, {
@@ -9,7 +9,6 @@ import FormField, {
 } from 'components/FormField';
 import FormActionGroup from 'components/FormActionGroup';
 import AnsibleSelect from 'components/AnsibleSelect';
-import { PeersLookup } from 'components/Lookup';
 import { required } from 'util/validators';
 
 const INSTANCE_TYPES = [
@@ -23,16 +22,6 @@ function InstanceFormFields({ isEdit }) {
     validate: required(t`Set a value for this field`),
   });
 
-  const { setFieldValue } = useFormikContext();
-
-  const [peersField, peersMeta, peersHelpers] = useField('peers');
-
-  const handlePeersUpdate = useCallback(
-    (value) => {
-      setFieldValue('peers', value);
-    },
-    [setFieldValue]
-  );
   return (
     <>
       <FormField
@@ -91,20 +80,6 @@ function InstanceFormFields({ isEdit }) {
           isDisabled={isEdit}
         />
       </FormGroup>
-      <PeersLookup
-        helperTextInvalid={peersMeta.error}
-        isValid={!peersMeta.touched || !peersMeta.error}
-        onBlur={() => peersHelpers.setTouched()}
-        onChange={handlePeersUpdate}
-        value={peersField.value}
-        tooltip={t`Select the Peers Instances.`}
-        fieldName="peers"
-        formLabel={t`Peers`}
-        multiple
-        typePeers
-        id="peers"
-        isRequired
-      />
       <FormGroup fieldId="instance-option-checkboxes" label={t`Options`}>
         <CheckboxField
           id="enabled"
