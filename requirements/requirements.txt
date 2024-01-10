@@ -111,19 +111,15 @@ django==4.2.6
     #   django-cors-headers
     #   django-crum
     #   django-extensions
-    #   django-filter
     #   django-guid
     #   django-oauth-toolkit
     #   django-polymorphic
     #   django-solo
     #   djangorestframework
-    #   drf-spectacular
     #   social-auth-app-django
     # via -r /awx_devel/requirements/requirements_git.txt
 django-auth-ldap==4.1.0
-    # via
-    #   -r /awx_devel/requirements/requirements.in
-    #   django-ansible-base
+    # via -r /awx_devel/requirements/requirements.in
 django-cors-headers==3.13.0
     # via -r /awx_devel/requirements/requirements.in
 django-crum==0.7.9
@@ -132,8 +128,6 @@ django-crum==0.7.9
     #   django-ansible-base
 django-extensions==3.2.1
     # via -r /awx_devel/requirements/requirements.in
-django-filter==23.5
-    # via django-ansible-base
 django-guid==3.2.1
     # via -r /awx_devel/requirements/requirements.in
 django-oauth-toolkit==1.7.1
@@ -151,13 +145,10 @@ djangorestframework==3.14.0
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   django-ansible-base
-    #   drf-spectacular
 djangorestframework-yaml==2.0.0
     # via -r /awx_devel/requirements/requirements.in
 docutils==0.19
     # via python-daemon
-drf-spectacular==0.26.5
-    # via django-ansible-base
 ecdsa==0.18.0
     # via python-jose
 enum-compat==0.0.3
@@ -197,9 +188,7 @@ incremental==22.10.0
 inflect==6.0.2
     # via jaraco-text
 inflection==0.5.1
-    # via
-    #   django-ansible-base
-    #   drf-spectacular
+    # via django-ansible-base
 irc==20.1.0
     # via -r /awx_devel/requirements/requirements.in
 isodate==0.6.1
@@ -234,9 +223,7 @@ jmespath==1.0.1
 json-log-formatter==0.5.1
     # via -r /awx_devel/requirements/requirements.in
 jsonschema==4.17.3
-    # via
-    #   -r /awx_devel/requirements/requirements.in
-    #   drf-spectacular
+    # via -r /awx_devel/requirements/requirements.in
 jwcrypto==1.4.2
     # via django-oauth-toolkit
 kubernetes==25.3.0
@@ -351,7 +338,6 @@ python-jose==3.3.0
 python-ldap==3.4.3
     # via
     #   -r /awx_devel/requirements/requirements.in
-    #   django-ansible-base
     #   django-auth-ldap
 python-string-utils==1.0.0
     # via openshift
@@ -359,9 +345,7 @@ python-tss-sdk==1.2.1
     # via -r /awx_devel/requirements/requirements.in
 python3-openid==3.2.0
     # via social-auth-core
-    # via
-    #   -r /awx_devel/requirements/requirements_git.txt
-    #   django-ansible-base
+    # via -r /awx_devel/requirements/requirements_git.txt
 pytz==2022.6
     # via
     #   djangorestframework
@@ -373,7 +357,6 @@ pyyaml==6.0.1
     #   -r /awx_devel/requirements/requirements.in
     #   ansible-runner
     #   djangorestframework-yaml
-    #   drf-spectacular
     #   kubernetes
     #   receptorctl
 receptorctl==1.4.2
@@ -434,9 +417,7 @@ slack-sdk==3.19.4
 smmap==5.0.0
     # via gitdb
 social-auth-app-django==5.4.0
-    # via
-    #   -r /awx_devel/requirements/requirements.in
-    #   django-ansible-base
+    # via -r /awx_devel/requirements/requirements.in
 social-auth-core[openidconnect]==4.4.2
     # via
     #   -r /awx_devel/requirements/requirements.in
@@ -445,8 +426,6 @@ sqlparse==0.4.4
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   django
-tabulate==0.9.0
-    # via django-ansible-base
 tacacs-plus==1.0
     # via -r /awx_devel/requirements/requirements.in
 tempora==5.1.0
@@ -470,9 +449,7 @@ typing-extensions==4.4.0
     #   setuptools-rust
     #   setuptools-scm
     #   twisted
-uritemplate==4.1.1
-    # via drf-spectacular
-urllib3==1.26.13
+urllib3==1.26.17
     # via
     #   botocore
     #   kubernetes
