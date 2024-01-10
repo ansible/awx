@@ -2,10 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import 'styled-components/macro';
-import { Tooltip } from '@patternfly/react-core';
 import { Tr, Td, ExpandableRowContent } from '@patternfly/react-table';
 import { formatDateString } from 'util/dates';
-import StatusLabel from 'components/StatusLabel';
 import { Detail, DetailList } from 'components/DetailList';
 
 function InstancePeerListItem({
@@ -43,17 +41,6 @@ function InstancePeerListItem({
           }}
           dataLabel={t`Selected`}
         />
-        <Td id={labelId} dataLabel={t`Address`}>
-          <Link to={`/instances/${peerInstance.instance}/details`}>
-            <b>{peerInstance.address}</b>
-          </Link>
-        </Td>
-
-        <Td id={labelId} dataLabel={t`Port`}>
-          <Link to={`/instances/${peerInstance.instance}/details`}>
-            <b>{peerInstance.port}</b>
-          </Link>
-        </Td>
 
         <Td id={labelId} dataLabel={t`Name`}>
           <Link to={`/instances/${peerInstance.instance}/details`}>
@@ -61,23 +48,20 @@ function InstancePeerListItem({
           </Link>
         </Td>
 
-        <Td dataLabel={t`Status`}>
-          <Tooltip
-            content={
-              <div>
-                {t`Last Health Check`}
-                &nbsp;
-                {formatDateString(
-                  peerInstance.last_health_check ?? peerInstance.last_seen
-                )}
-              </div>
-            }
-          >
-            <StatusLabel status={peerInstance.node_state} />
-          </Tooltip>
+        <Td id={labelId} dataLabel={t`Address`}>
+          {peerInstance.address}
+        </Td>
+
+        <Td id={labelId} dataLabel={t`Port`}>
+          {peerInstance.port}
         </Td>
 
         <Td dataLabel={t`Node Type`}>{peerInstance.node_type}</Td>
+
+        <Td id={labelId} dataLabel={t`Canonical`}>
+          {peerInstance.canonical.toString()}
+        </Td>
+
       </Tr>
       {!isHopNode && (
         <Tr
