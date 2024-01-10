@@ -37,6 +37,18 @@ DATABASES = {
     }
 }
 
+# Special database overrides for dispatcher connections listening to pg_notify
+LISTENER_DATABASES = {
+    'default': {
+        'OPTIONS': {
+            'keepalives': 1,
+            'keepalives_idle': 5,
+            'keepalives_interval': 5,
+            'keepalives_count': 5,
+        },
+    }
+}
+
 # Whether or not the deployment is a K8S-based deployment
 # In K8S-based deployments, instances have zero capacity - all playbook
 # automation is intended to flow through defined Container Groups that
