@@ -967,6 +967,10 @@ RECEPTOR_RELEASE_WORK = True
 # K8S only. Use receptor_log_level on AWX spec to set this properly
 RECEPTOR_LOG_LEVEL = 'info'
 
+RECEPTOR_INSTALLATION_METHODS = ['release', 'package', 'local', 'container']
+
+DEFAULT_RECEPTOR_INSTALLATION_METHOD = 'release'
+
 MIDDLEWARE = [
     'django_guid.middleware.guid_middleware',
     'awx.main.middleware.SettingsCacheMiddleware',

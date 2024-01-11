@@ -180,6 +180,31 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         help_text=_("Protocol to use for the Receptor listener, 'tcp', 'wss', or 'ws'."), max_length=10, default=Protocols.TCP, choices=Protocols.choices
     )
 
+    class ReceptorInstallationMethods(models.TextChoices):
+        RELEASE = 'release', _("Install from GitHub release")
+        PACKAGE = 'package', _("Install from RPM package")
+        LOCAL = 'local', _("Install from local source")
+        CONTAINER = 'container', _("Install via container")
+
+        @classmethod
+        def filtered_choices(cls):
+            return [(method, label) for method, label in cls.choices if method in settings.RECEPTOR_INSTALLATION_METHODS]
+
+        @classmethod
+        def default_choice(cls):
+            filtered_choices = cls.filtered_choices()
+            for choice in filtered_choices:
+                if choice[0] == settings.DEFAULT_RECEPTOR_INSTALLATION_METHOD:
+                    return choice[0]
+            return filtered_choices[0][0]
+
+    receptor_installation_method = models.CharField(
+        default=ReceptorInstallationMethods.RELEASE,
+        choices=ReceptorInstallationMethods.choices,
+        max_length=16,
+        help_text=_("Select your preferred receptor installation method"),
+    )
+
     class Types(models.TextChoices):
         CONTROL = 'control', _("Control plane node")
         EXECUTION = 'execution', _("Execution plane node")
