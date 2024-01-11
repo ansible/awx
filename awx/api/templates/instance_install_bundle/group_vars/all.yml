@@ -35,4 +35,34 @@ receptor_peers:
 podman_user: "{{ receptor_user }}"
 podman_group: "{{ receptor_group }}"
 {% endverbatim %}
+
+# 'receptor_install_method' informs the playbook about which Receptor installation method to use.
+# Options: release, package, local, container
 receptor_install_method: "{{ instance.receptor_installation_method }}"
+
+# 'podman_internal_cidr' is used to configure the podman internal network. 
+# This parameter can be used to modify the podman internal CIDR to avoid potential network conflicts.
+# Default: 10.0.2.0/24
+podman_internal_cidr: 10.0.2.0/24
+
+# 'awx_isolation_base_path' is used to set the job execution path
+# This is the directory in which the service will create new temporary directories for job execution and isolation (such as credential files).
+# Default: "/tmp"
+awx_isolation_base_path: "{{ settings.AWX_ISOLATION_BASE_PATH }}"
+
+# 'receptor_image_registry' is used to define the registry used to pull the receptor image
+# Default: "quay.io/ansible"
+receptor_image_registry: quay.io/ansible
+# 'receptor_image_name' is used to define the image name of the receptor image
+# Default: "awx-ee"
+receptor_image_name: awx-ee
+# 'receptor_image_sha' is used to define the image digest of the receptor image
+receptor_image_sha: "sha256:7afed4512edacfae678e336c5c013d1f4c036ca9e32943ddd35c902d41a20aab"
+
+# Registry authentication variables below -
+## To pull the receptor image from a private registry uncomment and define both the `receptor_image_registry_username` and the `receptor_image_registry_token` variables
+## OR 
+## uncomment and define the `receptor_image_authfile_path` variable
+# receptor_image_registry_username: ''
+# receptor_image_registry_token: ''
+# receptor_image_authfile_path: ''
