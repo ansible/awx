@@ -35,3 +35,4 @@ receptor_peers:
 podman_user: "{{ receptor_user }}"
 podman_group: "{{ receptor_group }}"
 {% endverbatim %}
+receptor_install_method: "{{ instance.receptor_installation_method }}"
