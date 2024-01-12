@@ -227,7 +227,8 @@ class WebSocketRelayManager(object):
                 continue
             try:
                 if not notif.payload or notif.channel != "web_ws_heartbeat":
-                    return
+                    logger.warning(f"Unexpected channel or missing payload. {notif.channel}, {notif.payload}")
+                    continue
 
                 try:
                     payload = json.loads(notif.payload)
@@ -235,13 +236,15 @@ class WebSocketRelayManager(object):
                     logmsg = "Failed to decode message from pg_notify channel `web_ws_heartbeat`"
                     if logger.isEnabledFor(logging.DEBUG):
                         logmsg = "{} {}".format(logmsg, payload)
-                        logger.warning(logmsg)
-                    return
+                    logger.warning(logmsg)
+                    continue
 
                 # Skip if the message comes from the same host we are running on
                 # In this case, we'll be sharing a redis, no need to relay.
                 if payload.get("hostname") == self.local_hostname:
-                    return
+                    hostname = payload.get("hostname")
+                    logger.debug("Received a heartbeat request for {hostname}. Skipping as we use redis for local host.")
+                    continue
 
                 action = payload.get("action")
 
@@ -250,7 +253,7 @@ class WebSocketRelayManager(object):
                     ip = payload.get("ip") or hostname  # try back to hostname if ip isn't supplied
                     if ip is None:
                         logger.warning(f"Received invalid {action} ws_heartbeat, missing hostname and ip: {payload}")
-                        return
+                        continue
                     logger.debug(f"Web host {hostname} ({ip}) {action} heartbeat received.")
 
                 if action == "online":

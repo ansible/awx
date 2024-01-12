@@ -8,13 +8,14 @@ pidfile = /var/run/supervisor/supervisor.rsyslog.pid
 [program:awx-rsyslogd]
 command = rsyslogd -n -i /var/run/awx-rsyslog/rsyslog.pid -f /var/lib/awx/rsyslog/rsyslog.conf
 autorestart = true
-startsecs = 30
+startsecs = 0
 stopasgroup=true
 killasgroup=true
 stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
+stderr_events_enabled = true
 
 [program:awx-rsyslog-configurer]
 {% if kube_dev | bool %}
@@ -56,6 +57,15 @@ events=PROCESS_STATE_FATAL
 autorestart = true
 stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+
+[eventlistener:rsyslog-4xx-recovery]
+command=rsyslog-4xx-recovery
+buffer_size = 100
+events=PROCESS_LOG_STDERR
+priority=0
+autorestart=true
 stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
 

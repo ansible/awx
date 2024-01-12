@@ -42,6 +42,34 @@ base_inputs = {
             'help_text': _('The Secret ID for AppRole Authentication'),
         },
         {
+            'id': 'client_cert_public',
+            'label': _('Client Certificate'),
+            'type': 'string',
+            'multiline': True,
+            'help_text': _(
+                'The PEM-encoded client certificate used for TLS client authentication.'
+                ' This should include the certificate and any intermediate certififcates.'
+            ),
+        },
+        {
+            'id': 'client_cert_private',
+            'label': _('Client Certificate Key'),
+            'type': 'string',
+            'multiline': True,
+            'secret': True,
+            'help_text': _('The certificate private key used for TLS client authentication.'),
+        },
+        {
+            'id': 'client_cert_role',
+            'label': _('TLS Authentication Role'),
+            'type': 'string',
+            'multiline': False,
+            'help_text': _(
+                'The role configured in Hashicorp Vault for TLS client authentication.'
+                ' If not provided, Hashicorp Vault may assign roles based on the certificate used.'
+            ),
+        },
+        {
             'id': 'namespace',
             'label': _('Namespace name (Vault Enterprise only)'),
             'type': 'string',
@@ -164,8 +192,10 @@ def handle_auth(**kwargs):
         token = method_auth(**kwargs, auth_param=approle_auth(**kwargs))
     elif kwargs.get('kubernetes_role'):
         token = method_auth(**kwargs, auth_param=kubernetes_auth(**kwargs))
+    elif kwargs.get('client_cert_public') and kwargs.get('client_cert_private'):
+        token = method_auth(**kwargs, auth_param=client_cert_auth(**kwargs))
     else:
-        raise Exception('Either token or AppRole/Kubernetes authentication parameters must be set')
+        raise Exception('Either a token or AppRole, Kubernetes, or TLS authentication parameters must be set')
 
     return token
 
@@ -181,6 +211,10 @@ def kubernetes_auth(**kwargs):
     return {'role': kwargs['kubernetes_role'], 'jwt': jwt}
 
 
+def client_cert_auth(**kwargs):
+    return {'name': kwargs.get('client_cert_role')}
+
+
 def method_auth(**kwargs):
     # get auth method specific params
     request_kwargs = {'json': kwargs['auth_param'], 'timeout': 30}
@@ -193,13 +227,22 @@ def method_auth(**kwargs):
     cacert = kwargs.get('cacert', None)
 
     sess = requests.Session()
+
     # Namespace support
     if kwargs.get('namespace'):
         sess.headers['X-Vault-Namespace'] = kwargs['namespace']
     request_url = '/'.join([url, 'auth', auth_path, 'login']).rstrip('/')
     with CertFiles(cacert) as cert:
         request_kwargs['verify'] = cert
-        resp = sess.post(request_url, **request_kwargs)
+        # TLS client certificate support
+        if kwargs.get('client_cert_public') and kwargs.get('client_cert_private'):
+            # Add client cert to requests Session before making call
+            with CertFiles(kwargs['client_cert_public'], key=kwargs['client_cert_private']) as client_cert:
+                sess.cert = client_cert
+                resp = sess.post(request_url, **request_kwargs)
+        else:
+            # Make call without client certificate
+            resp = sess.post(request_url, **request_kwargs)
     resp.raise_for_status()
     token = resp.json()['auth']['client_token']
     return token

@@ -50,6 +50,7 @@ no_endpoint_for_module = [
 extra_endpoints = {
     'bulk_job_launch': '/api/v2/bulk/job_launch/',
     'bulk_host_create': '/api/v2/bulk/host_create/',
+    'bulk_host_delete': '/api/v2/bulk/host_delete/',
 }
 
 # Global module parameters we can ignore

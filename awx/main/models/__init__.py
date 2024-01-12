@@ -6,8 +6,10 @@ from django.conf import settings  # noqa
 from django.db import connection
 from django.db.models.signals import pre_delete  # noqa
 
+from ansible_base.utils.models import prevent_search
+
 # AWX
-from awx.main.models.base import BaseModel, PrimordialModel, prevent_search, accepts_json, CLOUD_INVENTORY_SOURCES, VERBOSITY_CHOICES  # noqa
+from awx.main.models.base import BaseModel, PrimordialModel, accepts_json, CLOUD_INVENTORY_SOURCES, VERBOSITY_CHOICES  # noqa
 from awx.main.models.unified_jobs import UnifiedJob, UnifiedJobTemplate, StdoutMaxBytesExceeded  # noqa
 from awx.main.models.organization import Organization, Profile, Team, UserSessionMembership  # noqa
 from awx.main.models.credential import Credential, CredentialType, CredentialInputSource, ManagedCredentialType, build_safe_env  # noqa
@@ -58,7 +60,6 @@ from awx.main.models.ha import (  # noqa
 from awx.main.models.rbac import (  # noqa
     Role,
     batch_role_ancestor_rebuilding,
-    get_roles_on_resource,
     role_summary_fields_generator,
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
@@ -92,13 +93,12 @@ from oauth2_provider.models import Grant, RefreshToken  # noqa -- needed django-
 
 # Add custom methods to User model for permissions checks.
 from django.contrib.auth.models import User  # noqa
-from awx.main.access import get_user_queryset, check_user_access, check_user_access_with_errors, user_accessible_objects  # noqa
+from awx.main.access import get_user_queryset, check_user_access, check_user_access_with_errors  # noqa
 
 
 User.add_to_class('get_queryset', get_user_queryset)
 User.add_to_class('can_access', check_user_access)
 User.add_to_class('can_access_with_errors', check_user_access_with_errors)
-User.add_to_class('accessible_objects', user_accessible_objects)
 
 
 def convert_jsonfields():

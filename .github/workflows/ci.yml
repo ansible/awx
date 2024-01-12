@@ -11,6 +11,7 @@ jobs:
   common-tests:
     name: ${{ matrix.tests.name }}
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     permissions:
       packages: write
       contents: read
@@ -20,6 +21,8 @@ jobs:
         tests:
           - name: api-test
             command: /start_tests.sh
+          - name: api-migrations
+            command: /start_tests.sh test_migrations
           - name: api-lint
             command: /var/lib/awx/venv/awx/bin/tox -e linters
           - name: api-swagger
@@ -47,6 +50,7 @@ jobs:
 
   dev-env:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v3
 
@@ -61,6 +65,7 @@ jobs:
 
   awx-operator:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - name: Checkout awx
         uses: actions/checkout@v3
@@ -110,6 +115,7 @@ jobs:
   collection-sanity:
     name: awx_collection sanity
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false
     steps:
@@ -129,6 +135,7 @@ jobs:
   collection-integration:
     name: awx_collection integration
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -180,6 +187,7 @@ jobs:
   collection-integration-coverage-combine:
     name: combine awx_collection integration coverage
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs:
       - collection-integration
     strategy:

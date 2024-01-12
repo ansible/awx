@@ -31,7 +31,7 @@ You can also find lots of AWX discussion and get answers to questions at `forum.
    access_resources
    read_only_fields
    authentication
-.. api_ref
+   api_ref
 
 ..  intro
 .. auth_token

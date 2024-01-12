@@ -3,6 +3,7 @@
 Bulk API endpoints allows to perform bulk operations in single web request. There are currently following bulk api actions:
 - /api/v2/bulk/job_launch
 - /api/v2/bulk/host_create
+- /api/v2/bulk/host_delete
 
 Making individual API calls in rapid succession or at high concurrency can overwhelm AWX's ability to serve web requests. When the application's ability to serve is exhausted, clients often receive 504 timeout errors.
 
@@ -99,3 +100,20 @@ Following is an example of a post request at the /api/v2/bulk/host_create:
 The above will add 6 hosts in the inventory.
 
 The maximum number of hosts allowed to be added is controlled by the setting `BULK_HOST_MAX_CREATE`. The default is 100 hosts. Additionally, nginx limits the maximum payload size, which is very likely when posting a large number of hosts in one request with variable data associated with them. The maximum payload size is 1MB unless overridden in your nginx config.
+
+
+## Bulk Host Delete
+
+Provides feature in the API that allows a single web request to delete multiple hosts from an inventory.
+
+Following is an example of a post request at the /api/v2/bulk/host_delete:
+
+
+    {
+        "hosts": [3, 4, 5, 6, 7 ,8, 9, 10]
+    }
+
+
+The above will delete 8 hosts from the inventory.
+
+The maximum number of hosts allowed to be deleted is controlled by the setting `BULK_HOST_MAX_DELETE`. The default is 250 hosts. Additionally, nginx limits the maximum payload size, which is very likely when posting a large number of hosts in one request with variable data associated with them. The maximum payload size is 1MB unless overridden in your nginx config.

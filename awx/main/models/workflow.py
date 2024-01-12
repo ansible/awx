@@ -23,9 +23,11 @@ from crum import get_current_user
 from jinja2 import sandbox
 from jinja2.exceptions import TemplateSyntaxError, UndefinedError, SecurityError
 
+from ansible_base.utils.models import prevent_search
+
 # AWX
 from awx.api.versioning import reverse
-from awx.main.models import prevent_search, accepts_json, UnifiedJobTemplate, UnifiedJob
+from awx.main.models import accepts_json, UnifiedJobTemplate, UnifiedJob
 from awx.main.models.notifications import NotificationTemplate, JobNotificationMixin
 from awx.main.models.base import CreatedModifiedModel, VarsDictProperty
 from awx.main.models.rbac import ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR

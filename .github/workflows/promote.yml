@@ -13,8 +13,9 @@ permissions:
 
 jobs:
   promote:
-    if: endsWith(github.repository, '/awx') 
+    if: endsWith(github.repository, '/awx')
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     steps:
       - name: Checkout awx
         uses: actions/checkout@v3
@@ -46,7 +47,7 @@ jobs:
           COLLECTION_TEMPLATE_VERSION: true
         run: |
           make build_collection
-          if [ "$(curl --head -sw '%{http_code}' https://galaxy.ansible.com/download/${{ env.collection_namespace }}-awx-${{ github.event.release.tag_name }}.tar.gz | tail -1)" == "302" ] ; then \
+          if [ "$(curl -L --head -sw '%{http_code}' https://galaxy.ansible.com/download/${{ env.collection_namespace }}-awx-${{ github.event.release.tag_name }}.tar.gz | tail -1)" == "302" ] ; then \
               echo "Galaxy release already done"; \
           else \
               ansible-galaxy collection publish \
@@ -65,7 +66,7 @@ jobs:
       - name: Build awxkit and upload to pypi
         run: |
           git reset --hard
-          cd awxkit && python3 setup.py bdist_wheel
+          cd awxkit && python3 setup.py sdist bdist_wheel
           twine upload \
             -r ${{ env.pypi_repo }} \
             -u ${{ secrets.PYPI_USERNAME }} \

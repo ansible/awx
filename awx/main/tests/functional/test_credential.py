@@ -81,6 +81,7 @@ def test_default_cred_types():
             'aws_secretsmanager_credential',
             'azure_kv',
             'azure_rm',
+            'bitbucket_dc_token',
             'centrify_vault_kv',
             'conjur',
             'controller',

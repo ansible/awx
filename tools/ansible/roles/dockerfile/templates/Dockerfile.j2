@@ -226,15 +226,18 @@ RUN ln -sf /awx_devel/{{ template_dest }}/supervisor_rsyslog.conf /etc/superviso
 ADD tools/ansible/roles/dockerfile/files/launch_awx_web.sh /usr/bin/launch_awx_web.sh
 ADD tools/ansible/roles/dockerfile/files/launch_awx_task.sh /usr/bin/launch_awx_task.sh
 ADD tools/ansible/roles/dockerfile/files/launch_awx_rsyslog.sh /usr/bin/launch_awx_rsyslog.sh
+ADD tools/scripts/rsyslog-4xx-recovery /usr/bin/rsyslog-4xx-recovery
 ADD {{ template_dest }}/supervisor_web.conf /etc/supervisord_web.conf
 ADD {{ template_dest }}/supervisor_task.conf /etc/supervisord_task.conf
 ADD {{ template_dest }}/supervisor_rsyslog.conf /etc/supervisord_rsyslog.conf
+ADD tools/scripts/awx-python /usr/bin/awx-python
 {% endif %}
 
 {% if (build_dev|bool) or (kube_dev|bool) %}
 RUN echo /awx_devel > /var/lib/awx/venv/awx/lib/python3.9/site-packages/awx.egg-link
 ADD tools/docker-compose/awx-manage /usr/local/bin/awx-manage
-ADD tools/scripts/awx-python /usr/bin/awx-python
+RUN ln -sf /awx_devel/tools/scripts/awx-python /usr/bin/awx-python
+RUN ln -sf /awx_devel/tools/scripts/rsyslog-4xx-recovery /usr/bin/rsyslog-4xx-recovery
 {% endif %}
 
 # Pre-create things we need to access

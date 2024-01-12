@@ -83,6 +83,7 @@ cryptography==41.0.3
     #   adal
     #   autobahn
     #   azure-keyvault
+    #   django-ansible-base
     #   jwcrypto
     #   pyopenssl
     #   service-identity
@@ -105,6 +106,7 @@ django==4.2.6
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   channels
+    #   django-ansible-base
     #   django-auth-ldap
     #   django-cors-headers
     #   django-crum
@@ -114,12 +116,16 @@ django==4.2.6
     #   django-polymorphic
     #   django-solo
     #   djangorestframework
+    #   social-auth-app-django
+    # via -r /awx_devel/requirements/requirements_git.txt
 django-auth-ldap==4.1.0
     # via -r /awx_devel/requirements/requirements.in
 django-cors-headers==3.13.0
     # via -r /awx_devel/requirements/requirements.in
 django-crum==0.7.9
-    # via -r /awx_devel/requirements/requirements.in
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   django-ansible-base
 django-extensions==3.2.1
     # via -r /awx_devel/requirements/requirements.in
 django-guid==3.2.1
@@ -136,7 +142,9 @@ django-solo==2.0.0
 django-split-settings==1.0.0
     # via -r /awx_devel/requirements/requirements.in
 djangorestframework==3.14.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   django-ansible-base
 djangorestframework-yaml==2.0.0
     # via -r /awx_devel/requirements/requirements.in
 docutils==0.19
@@ -179,6 +187,8 @@ incremental==22.10.0
     # via twisted
 inflect==6.0.2
     # via jaraco-text
+inflection==0.5.1
+    # via django-ansible-base
 irc==20.1.0
     # via -r /awx_devel/requirements/requirements.in
 isodate==0.6.1
@@ -384,7 +394,7 @@ service-identity==21.1.0
     # via twisted
 setuptools-rust==1.5.2
     # via -r /awx_devel/requirements/requirements.in
-setuptools-scm[toml]==7.0.5
+setuptools-scm[toml]==8.0.4
     # via -r /awx_devel/requirements/requirements.in
 six==1.16.0
     # via
@@ -406,9 +416,9 @@ slack-sdk==3.19.4
     # via -r /awx_devel/requirements/requirements.in
 smmap==5.0.0
     # via gitdb
-social-auth-app-django==5.0.0
+social-auth-app-django==5.4.0
     # via -r /awx_devel/requirements/requirements.in
-social-auth-core[openidconnect]==4.3.0
+social-auth-core[openidconnect]==4.4.2
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   social-auth-app-django
@@ -439,7 +449,7 @@ typing-extensions==4.4.0
     #   setuptools-rust
     #   setuptools-scm
     #   twisted
-urllib3==1.26.13
+urllib3==1.26.17
     # via
     #   botocore
     #   kubernetes

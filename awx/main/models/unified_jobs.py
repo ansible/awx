@@ -30,8 +30,10 @@ from rest_framework.exceptions import ParseError
 # Django-Polymorphic
 from polymorphic.models import PolymorphicModel
 
+from ansible_base.utils.models import prevent_search, get_type_for_model
+
 # AWX
-from awx.main.models.base import CommonModelNameNotUnique, PasswordFieldsModel, NotificationFieldsModel, prevent_search
+from awx.main.models.base import CommonModelNameNotUnique, PasswordFieldsModel, NotificationFieldsModel
 from awx.main.dispatch import get_task_queuename
 from awx.main.dispatch.control import Control as ControlDispatcher
 from awx.main.registrar import activity_stream_registrar
@@ -42,7 +44,6 @@ from awx.main.utils.common import (
     _inventory_updates,
     copy_model_by_class,
     copy_m2m_relationships,
-    get_type_for_model,
     parse_yaml_or_json,
     getattr_dne,
     ScheduleDependencyManager,

@@ -12,9 +12,11 @@ from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 
+from ansible_base.utils.models import prevent_search
+
 # AWX
 from awx.api.versioning import reverse
-from awx.main.models.base import prevent_search, AD_HOC_JOB_TYPE_CHOICES, VERBOSITY_CHOICES, VarsDictProperty
+from awx.main.models.base import AD_HOC_JOB_TYPE_CHOICES, VERBOSITY_CHOICES, VarsDictProperty
 from awx.main.models.events import AdHocCommandEvent, UnpartitionedAdHocCommandEvent
 from awx.main.models.unified_jobs import UnifiedJob
 from awx.main.models.notifications import JobNotificationMixin, NotificationTemplate

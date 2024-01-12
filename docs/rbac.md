@@ -95,7 +95,6 @@ The `singleton` class method is a helper method on the `Role` model that helps i
 You may use the `user in some_role` syntax to check and see if the specified
 user is a member of the given role, **or** a member of any ancestor role.
 
-
 ### Fields
 
 #### `ImplicitRoleField`
@@ -126,13 +125,17 @@ By mixing in the `ResourceMixin` to your model, you are turning your model in to
     objects.filter(name__istartswith='december')
 ```
 
-##### `get_permissions(self, user)`
+##### `accessible_pk_qs(cls, user, role_field)`
 
-`get_permissions` is an instance method that will give you the list of role names that the user has access to for a given object.
+`accessible_pk_qs` returns a queryset of ids that match the same role filter as `accessible_objects`.
+A key difference is that this is more performant to use in subqueries when filtering related models.
+
+Say that another model, `YourModel` has a ForeignKey reference to `MyModel` via a field `my_model`,
+and you want to return all instances of `YourModel` that have a visible related `MyModel`.
+The best way to do this is:
 
 ```python
-    >>> instance.get_permissions(admin)
-    ['admin_role', 'execute_role', 'read_role']
+    YourModel.filter(my_model=MyModel.accessible_pk_qs(user, 'admin_role'))
 ```
 
 ## Usage
@@ -144,10 +147,7 @@ After exploring the _Overview_, the usage of the RBAC implementation in your cod
     class Document(Model, ResourceMixin):
        ...
     # declare your new role
-    readonly_role = ImplicitRoleField(
-        role_name="readonly",
-        permissions={'read':True},
-    )
+    readonly_role = ImplicitRoleField()
 ```
 
 Now that your model is a resource and has a `Role` defined, you can begin to access the helper methods provided to you by the `ResourceMixin` for checking a user's access to your resource. Here is the output of a Python REPL session:
@@ -156,11 +156,11 @@ Now that your model is a resource and has a `Role` defined, you can begin to acc
     # we've created some documents and a user
     >>> document = Document.objects.filter(pk=1)
     >>> user = User.objects.first()
-    >>> user in document.read_role
+    >>> user in document.readonly_role
     False  # not accessible by default
     >>> document.readonly_role.members.add(user)
-    >>> user in document.read_role
+    >>> user in document.readonly_role
     True   # now it is accessible
-    >>> user in document.admin_role
+    >>> user in document.readonly_role
     False  # my role does not have admin permission
 ```

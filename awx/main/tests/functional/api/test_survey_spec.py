@@ -2,12 +2,12 @@ from unittest import mock
 import pytest
 import json
 
+from ansible_base.utils.models import get_type_for_model
 
 from awx.api.versioning import reverse
 from awx.main.models.jobs import JobTemplate, Job
 from awx.main.models.activity_stream import ActivityStream
 from awx.main.access import JobTemplateAccess
-from awx.main.utils.common import get_type_for_model
 
 
 @pytest.fixture

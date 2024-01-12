@@ -9,6 +9,7 @@ from django.conf import settings
 # AWX
 import awx.main.fields
 from awx.main.models import Host
+from ._sqlite_helper import dbawaremigrations
 
 
 def replaces():
@@ -131,9 +132,11 @@ class Migration(migrations.Migration):
                 help_text='If enabled, Tower will act as an Ansible Fact Cache Plugin; persisting facts at the end of a playbook run to the database and caching facts for use by Ansible.',
             ),
         ),
-        migrations.RunSQL(
+        dbawaremigrations.RunSQL(
             sql="CREATE INDEX host_ansible_facts_default_gin ON {} USING gin(ansible_facts jsonb_path_ops);".format(Host._meta.db_table),
             reverse_sql='DROP INDEX host_ansible_facts_default_gin;',
+            sqlite_sql=dbawaremigrations.RunSQL.noop,
+            sqlite_reverse_sql=dbawaremigrations.RunSQL.noop,
         ),
         # SCM file-based inventories
         migrations.AddField(
