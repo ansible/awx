@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { t } from '@lingui/macro';
 import 'styled-components/macro';
 import { Tr, Td } from '@patternfly/react-table';
