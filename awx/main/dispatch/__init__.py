@@ -107,7 +107,7 @@ def create_listener_connection():
 
     # Allow password-less authentication
     if 'PASSWORD' in conf:
-        conf['OPTIONS']['PASSWORD'] = conf.pop('PASSWORD')
+        conf['OPTIONS']['password'] = conf.pop('PASSWORD')
 
     connection_data = f"dbname={conf['NAME']} host={conf['HOST']} user={conf['USER']} port={conf['PORT']}"
     return psycopg.connect(connection_data, autocommit=True, **conf['OPTIONS'])
