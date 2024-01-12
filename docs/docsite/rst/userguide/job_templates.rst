@@ -110,7 +110,7 @@ To create a new job template:
      - * If selected, even if a default value is supplied, you will be prompted upon launch to supply additional labels if needed. 
        * You will not be able to delete existing labels - clicking (|x-circle|) only removes the newly added labels, not existing default labels.
    * - **Variables**
-     - * Pass extra command line variables to the playbook. This is the "-e" or "--extra-vars" command line parameter for ansible-playbook that is documented in the Ansible documentation at `Passing Variables on the Command Line <https://docs.ansible.com/ansible/latest/reference_appendices/general_precedence.html>`_.
+     - * Pass extra command line variables to the playbook. This is the "-e" or "--extra-vars" command line parameter for ansible-playbook that is documented in the Ansible documentation at `Defining variables at runtime <https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_variables.html#defining-variables-at-runtime>`_.
        * Provide key/value pairs using either YAML or JSON. These variables have a maximum value of precedence and overrides other variables specified elsewhere. An example value might be:
 
         ::
