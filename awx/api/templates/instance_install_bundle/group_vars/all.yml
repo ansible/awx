@@ -48,7 +48,7 @@ podman_internal_cidr: 10.0.2.0/24
 # 'awx_isolation_base_path' is used to set the job execution path
 # This is the directory in which the service will create new temporary directories for job execution and isolation (such as credential files).
 # Default: "/tmp"
-awx_isolation_base_path: "{{ settings.AWX_ISOLATION_BASE_PATH }}"
+awx_isolation_base_path: "{{ awx_isolation_base_path }}"
 
 # 'receptor_image_registry' is used to define the registry used to pull the receptor image
 # Default: "quay.io/ansible"

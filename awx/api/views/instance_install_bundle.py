@@ -23,6 +23,8 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
 from rest_framework import status
+from django.conf import settings
+
 
 # Red Hat has an OID namespace (RHANANA). Receptor has its own designation under that.
 RECEPTOR_OID = "1.3.6.1.4.1.2312.19.1"
@@ -128,7 +130,7 @@ def generate_group_vars_all_yml(instance_obj):
     peers = []
     for addr in instance_obj.peers.all().prefetch_related('instance'):
         peers.append(dict(address=addr.get_full_address(), protocol=addr.instance.protocol))
-    context = dict(instance=instance_obj, peers=peers)
+    context = dict(instance=instance_obj, peers=peers, awx_isolation_base_path=settings.AWX_ISOLATION_BASE_PATH)
 
     if instance_obj.listener_port:
         context['listener_port'] = instance_obj.listener_port
