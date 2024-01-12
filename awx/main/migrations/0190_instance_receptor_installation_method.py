@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0188_inbound_hop_nodes'),
+        ('main', '0189_inbound_hop_nodes'),
     ]
 
     operations = [
