@@ -204,3 +204,25 @@ class MigrationRanCheckMiddleware(MiddlewareMixin):
         plan = executor.migration_plan(executor.loader.graph.leaf_nodes())
         if bool(plan) and getattr(resolve(request.path), 'url_name', '') != 'migrations_notran':
             return redirect(reverse("ui:migrations_notran"))
+
+
+class SetRemoteAddrFromRemoteHostHeader(MiddlewareMixin):
+    environ = {}
+
+    def process_request(self, request):
+        # If there are any custom headers in REMOTE_HOST_HEADERS, make sure
+        # they respect the allowed proxy list
+        if all(
+            [
+                settings.PROXY_IP_ALLOWED_LIST,
+                request.environ.get('REMOTE_ADDR') not in settings.PROXY_IP_ALLOWED_LIST,
+                request.environ.get('REMOTE_HOST') not in settings.PROXY_IP_ALLOWED_LIST,
+            ]
+        ):
+            for custom_header in settings.REMOTE_HOST_HEADERS:
+                if custom_header.startswith('HTTP_'):
+                    request.environ.pop(custom_header, None)
+
+    def process_response(self, request, response):
+        self.environ = request.environ
+        return response
