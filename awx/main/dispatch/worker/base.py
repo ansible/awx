@@ -168,7 +168,7 @@ class AWXConsumerPG(AWXConsumerBase):
         init_time = time.time()
         self.pg_down_time = init_time - self.pg_max_wait  # allow no grace period
         self.last_cleanup = init_time
-        self.subsystem_metrics = s_metrics.Metrics(auto_pipe_execute=False)
+        self.subsystem_metrics = s_metrics.DispatcherMetrics(auto_pipe_execute=False)
         self.last_metrics_gather = init_time
         self.listen_cumulative_time = 0.0
         if schedule:

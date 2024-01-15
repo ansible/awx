@@ -106,7 +106,7 @@ class RelayConsumer(AsyncJsonWebsocketConsumer):
         if group == "metrics":
             message = json.loads(message['text'])
             conn = redis.Redis.from_url(settings.BROKER_URL)
-            conn.set(settings.SUBSYSTEM_METRICS_REDIS_KEY_PREFIX + "_instance_" + message['instance'], message['metrics'])
+            conn.set(settings.SUBSYSTEM_METRICS_REDIS_KEY_PREFIX + "-" + message['metrics_namespace'] + "_instance_" + message['instance'], message['metrics'])
         else:
             await self.channel_layer.group_send(group, message)
 
