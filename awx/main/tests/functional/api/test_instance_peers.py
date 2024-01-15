@@ -63,32 +63,76 @@ class TestPeers:
         )
         assert 'Cannot change node type.' in str(resp.data)
 
-    def test_k8s_routable(self, admin_user, post):
+    def test_listener_port(self, admin_user, patch):
         """
-        cannot set k8s_routable to True
+        setting listener_port should create a receptor address
+        cannot change listener_port to new value
+        unsetting listener_port should remove that address
         """
         hop = Instance.objects.create(hostname='abc', node_type="hop")
-        resp = post(
-            url=reverse('api:instance_receptor_addresses_list', kwargs={'pk': hop.pk}),
-            data={"address": "hopaddr", "k8s_routable": True},
+        patch(
+            url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
+            data={"listener_port": 27199},
             user=admin_user,
-            expect=400,
+            expect=200,  # can set a port
         )
-        assert 'Only external addresses can be created.' in str(resp.data)
+        assert ReceptorAddress.objects.filter(instance=hop, port=27199).exists()
+        resp = patch(
+            url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
+            data={"listener_port": 5678},
+            user=admin_user,
+            expect=400,  # cannot change port
+        )
+        assert 'Cannot change listener port.' in str(resp.data)
+        patch(
+            url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
+            data={"listener_port": None},
+            user=admin_user,
+            expect=200,  # can unset a port
+        )
+        assert not ReceptorAddress.objects.filter(instance=hop, port=27199).exists()
 
-    def test_multiple_peers_from_control_nodes(self, admin_user, post):
+    def test_changing_managed_listener_port(self, admin_user, patch):
         """
-        only one address can have peers_from_control_nodes set to True for a given instance
+        if instance is managed, cannot change listener port at all
         """
-        hop = Instance.objects.create(hostname='hop', node_type='hop')
-        ReceptorAddress.objects.create(instance=hop, address='hopaddr1', peers_from_control_nodes=True)
-        resp = post(
-            url=reverse('api:instance_receptor_addresses_list', kwargs={'pk': hop.pk}),
-            data={"address": "hopaddr2", "peers_from_control_nodes": True},
+        hop = Instance.objects.create(hostname='abc', node_type="hop", managed=True)
+        resp = patch(
+            url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
+            data={"listener_port": 5678},
             user=admin_user,
-            expect=400,
+            expect=400,  # cannot set port
         )
-        assert 'Only one address can set peers_from_control_nodes to True.' in str(resp.data)
+        assert 'Cannot change listener port for managed nodes.' in str(resp.data)
+        ReceptorAddress.objects.create(instance=hop, address='addr', port=27199)
+        resp = patch(
+            url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
+            data={"listener_port": None},
+            user=admin_user,
+            expect=400,  # cannot unset port
+        )
+        assert 'Cannot change listener port for managed nodes.' in str(resp.data)
+
+    def test_peers_from_control_nodes(self, admin_user, patch):
+        """
+        setting and unsetting peers_from_control_nodes on instance should change the
+        peers_from_control_nodes on the receptor address
+        """
+        hop = Instance.objects.create(hostname='abc', node_type="hop")
+        patch(
+            url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
+            data={"listener_port": 27199, "peers_from_control_nodes": True},
+            user=admin_user,
+            expect=200,
+        )
+        assert ReceptorAddress.objects.filter(instance=hop, port=27199, peers_from_control_nodes=True).exists()
+        patch(
+            url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
+            data={"peers_from_control_nodes": False},
+            user=admin_user,
+            expect=200,
+        )
+        assert ReceptorAddress.objects.filter(instance=hop, port=27199, peers_from_control_nodes=False).exists()
 
     def test_bidirectional_peering(self, admin_user, patch):
         """
@@ -125,16 +169,16 @@ class TestPeers:
         assert 'Cannot peer to the same instance more than once.' in str(resp.data)
 
     @pytest.mark.parametrize('node_type', ['control', 'hybrid'])
-    def test_modifying_peers_control_nodes(self, node_type, admin_user, patch):
+    def test_changing_peers_control_nodes(self, node_type, admin_user, patch):
         """
         for control nodes, peers field should not be
         modified directly via patch.
         """
         control = Instance.objects.create(hostname='abc', node_type=node_type)
         hop1 = Instance.objects.create(hostname='hop1', node_type='hop')
-        hop1addr = ReceptorAddress.objects.create(instance=hop1, address='hop1addr', peers_from_control_nodes=True)
+        hop1addr = ReceptorAddress.objects.create(instance=hop1, address='hop1', peers_from_control_nodes=True)
         hop2 = Instance.objects.create(hostname='hop2', node_type='hop')
-        hop2addr = ReceptorAddress.objects.create(instance=hop2, address='hop2addr')
+        hop2addr = ReceptorAddress.objects.create(instance=hop2, address='hop2')
         assert [hop1addr] == list(control.peers.all())  # only hop1addr should be peered
         resp = patch(
             url=reverse('api:instance_detail', kwargs={'pk': control.pk}),
@@ -166,10 +210,10 @@ class TestPeers:
         )
         # patch hop2
         patch(
-            url=reverse('api:receptor_address_detail', kwargs={'pk': hop2addr.pk}),
+            url=reverse('api:instance_detail', kwargs={'pk': hop2.pk}),
             data={"peers_from_control_nodes": True},
             user=admin_user,
-            expect=200,  # patching without data should be fine too
+            expect=200,
         )
         assert {hop1addr, hop2addr} == set(control.peers.all())  # hop1 and hop2 should now be peered from control node
 
@@ -206,6 +250,20 @@ class TestPeers:
         )
         assert "Can only change instances to the 'deprovisioning' state." in str(resp.data)
 
+    def test_changing_managed_node_state(self, admin_user, patch):
+        """
+        cannot change node state of managed node
+        """
+        hop = Instance.objects.create(hostname='hop', node_type='hop', managed=True)
+        resp = patch(
+            url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
+            data={"node_state": "deprovisioning"},
+            user=admin_user,
+            expect=400,
+        )
+
+        assert 'Cannot deprovision managed nodes.' in str(resp.data)
+
     @pytest.mark.parametrize('node_type', ['control', 'hybrid'])
     def test_control_node_automatically_peers(self, node_type):
         """
@@ -237,6 +295,24 @@ class TestPeers:
         Instance.objects.create(hostname='control', node_type=node_type)
 
         assert hop1.peers.exists()
+
+    def test_reverse_peers(self, admin_user, get):
+        """
+        if hop1 peers to hop2, hop1 should
+        be in hop2's reverse_peers list
+        """
+        hop1 = Instance.objects.create(hostname='hop1', node_type='hop')
+        hop2 = Instance.objects.create(hostname='hop2', node_type='hop')
+        hop2addr = ReceptorAddress.objects.create(instance=hop2, address='hop2addr')
+        hop1.peers.add(hop2addr)
+
+        resp = get(
+            url=reverse('api:instance_detail', kwargs={'pk': hop2.pk}),
+            user=admin_user,
+            expect=200,
+        )
+
+        assert hop1.pk in resp.data['reverse_peers']
 
     def test_group_vars(self):
         """

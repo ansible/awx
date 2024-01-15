@@ -4,6 +4,12 @@ from django.utils.translation import gettext_lazy as _
 from awx.api.versioning import reverse
 
 
+class Protocols(models.TextChoices):
+    TCP = 'tcp', 'TCP'
+    WS = 'ws', 'WS'
+    WSS = 'wss', 'WSS'
+
+
 class ReceptorAddress(models.Model):
     class Meta:
         app_label = 'main'
@@ -18,9 +24,11 @@ class ReceptorAddress(models.Model):
     address = models.CharField(help_text=_("Routable address for this instance."), max_length=255)
     port = models.IntegerField(help_text=_("Port for the address."), default=27199, validators=[MinValueValidator(0), MaxValueValidator(65535)])
     websocket_path = models.CharField(help_text=_("Websocket path."), max_length=255, default="", blank=True)
-    k8s_routable = models.BooleanField(help_text=_("If True, only routable inside of the Kubernetes cluster."), default=False)
-    canonical = models.BooleanField(help_text=_("If True, this address is the canonical address for the instance."), default=False)
-    managed = models.BooleanField(help_text=_("If True, this address is managed by the control plane."), default=False, editable=False)
+    protocol = models.CharField(
+        help_text=_("Protocol to use for the Receptor listener, 'tcp', 'wss', or 'ws'."), max_length=10, default=Protocols.TCP, choices=Protocols.choices
+    )
+    is_internal = models.BooleanField(help_text=_("If True, only routable within the Kubernetes cluster."), default=False)
+    canonical = models.BooleanField(help_text=_("If True, this address is the canonical address for the instance."), default=True)
     peers_from_control_nodes = models.BooleanField(help_text=_("If True, control plane cluster nodes should automatically peer to it."), default=False)
     instance = models.ForeignKey(
         'Instance',
@@ -36,10 +44,10 @@ class ReceptorAddress(models.Model):
         scheme = ""
         path = ""
         port = ""
-        if self.instance.protocol == "ws":
+        if self.protocol == "ws":
             scheme = "wss://"
 
-        if self.instance.protocol == "ws" and self.websocket_path:
+        if self.protocol == "ws" and self.websocket_path:
             path = f"/{self.websocket_path}"
 
         if self.port:
@@ -48,9 +56,9 @@ class ReceptorAddress(models.Model):
         return f"{scheme}{self.address}{port}{path}"
 
     def get_peer_type(self):
-        if self.instance.protocol == 'tcp':
+        if self.protocol == 'tcp':
             return 'tcp-peer'
-        elif self.instance.protocol in ['ws', 'wss']:
+        elif self.protocol in ['ws', 'wss']:
             return 'ws-peer'
         else:
             return None

@@ -64,12 +64,6 @@ class HasPolicyEditsMixin(HasEditsMixin):
         return self._values_have_edits(new_values)
 
 
-class Protocols(models.TextChoices):
-    TCP = 'tcp', 'TCP'
-    WS = 'ws', 'WS'
-    WSS = 'wss', 'WSS'
-
-
 class InstanceLink(BaseModel):
     class Meta:
         ordering = ("id",)
@@ -171,16 +165,6 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         default=0,
         editable=False,
     )
-    listener_port = models.PositiveIntegerField(
-        blank=True,
-        null=True,
-        default=None,
-        validators=[MinValueValidator(0), MaxValueValidator(65535)],
-        help_text=_("Port that Receptor will listen for incoming connections on."),
-    )
-    protocol = models.CharField(
-        help_text=_("Protocol to use for the Receptor listener, 'tcp', 'wss', or 'ws'."), max_length=10, default=Protocols.TCP, choices=Protocols.choices
-    )
 
     class Types(models.TextChoices):
         CONTROL = 'control', _("Control plane node")
@@ -205,7 +189,6 @@ class Instance(HasPolicyEditsMixin, BaseModel):
 
     managed = models.BooleanField(help_text=_("If True, this instance is managed by the control plane."), default=False, editable=False)
     peers = models.ManyToManyField('ReceptorAddress', through=InstanceLink, through_fields=('source', 'target'), related_name='peers_from')
-    peers_from_control_nodes = models.BooleanField(default=False, help_text=_("If True, control plane cluster nodes should automatically peer to it."))
 
     POLICY_FIELDS = frozenset(('managed_by_policy', 'hostname', 'capacity_adjustment'))
 
@@ -251,6 +234,22 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         if self.last_health_check is None:
             return True
         return self.health_check_started > self.last_health_check
+
+    @property
+    def canonical_address_port(self):
+        # note: don't create a different query for receptor addresses, as this is prefetched on the View for optimization
+        for addr in self.receptor_addresses.all():
+            if addr.canonical:
+                return addr.port
+        return None
+
+    @property
+    def canonical_address_peers_from_control_nodes(self):
+        # note: don't create a different query for receptor addresses, as this is prefetched on the View for optimization
+        for addr in self.receptor_addresses.all():
+            if addr.canonical:
+                return addr.peers_from_control_nodes
+        return False
 
     def get_cleanup_task_kwargs(self, **kwargs):
         """
@@ -578,8 +577,6 @@ def on_instance_group_deleted(sender, instance, using, **kwargs):
 @receiver(post_delete, sender=Instance)
 def on_instance_deleted(sender, instance, using, **kwargs):
     schedule_policy_task()
-    if settings.IS_K8S and instance.node_type in (Instance.Types.EXECUTION, Instance.Types.HOP) and instance.peers_from_control_nodes:
-        schedule_write_receptor_config()
 
 
 class UnifiedJobTemplateInstanceGroupMembership(models.Model):
