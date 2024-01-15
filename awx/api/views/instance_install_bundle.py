@@ -127,11 +127,12 @@ def generate_group_vars_all_yml(instance_obj):
     # get peers
     peers = []
     for addr in instance_obj.peers.all().prefetch_related('instance'):
-        peers.append(dict(address=addr.get_full_address(), protocol=addr.instance.protocol))
+        peers.append(dict(address=addr.get_full_address(), protocol=addr.protocol))
     context = dict(instance=instance_obj, peers=peers)
 
-    if instance_obj.listener_port:
-        context['listener_port'] = instance_obj.listener_port
+    listener_port = instance_obj.canonical_address_port
+    if listener_port:
+        context['listener_port'] = listener_port
 
     all_yaml = render_to_string("instance_install_bundle/group_vars/all.yml", context=context)
     # convert consecutive newlines with a single newline
