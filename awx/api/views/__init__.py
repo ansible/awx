@@ -337,11 +337,19 @@ class InstanceList(ListCreateAPIView):
     search_fields = ('hostname',)
     ordering = ('id',)
 
+    def get_queryset(self):
+        qs = super().get_queryset().prefetch_related('receptor_addresses')
+        return qs
+
 
 class InstanceDetail(RetrieveUpdateAPIView):
     name = _("Instance Detail")
     model = models.Instance
     serializer_class = serializers.InstanceSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset().prefetch_related('receptor_addresses')
+        return qs
 
     def update_raw_data(self, data):
         # these fields are only valid on creation of an instance, so they unwanted on detail view
@@ -384,7 +392,7 @@ class InstancePeersList(SubListAPIView):
     search_fields = ('address',)
 
 
-class InstanceReceptorAddressesList(SubListCreateAPIView):
+class InstanceReceptorAddressesList(SubListAPIView):
     name = _("Receptor Addresses")
     model = models.ReceptorAddress
     parent_key = 'instance'
@@ -393,23 +401,19 @@ class InstanceReceptorAddressesList(SubListCreateAPIView):
     search_fields = ('address',)
 
 
-class ReceptorAddressesList(ListCreateAPIView):
+class ReceptorAddressesList(ListAPIView):
     name = _("Receptor Addresses")
     model = models.ReceptorAddress
     serializer_class = serializers.ReceptorAddressSerializer
     search_fields = ('address',)
 
 
-class ReceptorAddressDetail(RetrieveUpdateDestroyAPIView):
+class ReceptorAddressDetail(RetrieveAPIView):
     name = _("Receptor Address Detail")
     model = models.ReceptorAddress
     serializer_class = serializers.ReceptorAddressSerializer
-
-    def delete(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.canonical or obj.managed:
-            return Response({'detail': _('Cannot delete canonical or managed address.')}, status=status.HTTP_400_BAD_REQUEST)
-        return super(ReceptorAddressDetail, self).delete(request, *args, **kwargs)
+    parent_model = models.Instance
+    relationship = 'receptor_addresses'
 
 
 class InstanceInstanceGroupsList(InstanceGroupMembershipMixin, SubListCreateAttachDetachAPIView):

@@ -120,10 +120,7 @@ class InstanceManager(models.Manager):
         node_uuid=None,
         hostname=None,
         ip_address="",
-        listener_port=None,
-        protocol='tcp',
         node_type='hybrid',
-        peers_from_control_nodes=False,
         defaults=None,
     ):
         if not hostname:
@@ -171,12 +168,6 @@ class InstanceManager(models.Manager):
                 if instance.node_type != node_type:
                     instance.node_type = node_type
                     update_fields.append('node_type')
-                if instance.protocol != protocol:
-                    instance.protocol = protocol
-                    update_fields.append('protocol')
-                if instance.listener_port != listener_port:
-                    instance.listener_port = listener_port
-                    update_fields.append('listener_port')
                 if update_fields:
                     instance.save(update_fields=update_fields)
                     return (True, instance)
@@ -194,14 +185,6 @@ class InstanceManager(models.Manager):
             uuid_option = {'uuid': node_uuid if node_uuid is not None else uuid.uuid4()}
             if node_type == 'execution' and 'version' not in create_defaults:
                 create_defaults['version'] = RECEPTOR_PENDING
-            instance = self.create(
-                hostname=hostname,
-                ip_address=ip_address,
-                node_type=node_type,
-                peers_from_control_nodes=peers_from_control_nodes,
-                protocol=protocol,
-                **create_defaults,
-                **uuid_option
-            )
+            instance = self.create(hostname=hostname, ip_address=ip_address, node_type=node_type, **create_defaults, **uuid_option)
 
         return (True, instance)
