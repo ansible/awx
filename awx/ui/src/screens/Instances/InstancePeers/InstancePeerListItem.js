@@ -61,7 +61,6 @@ function InstancePeerListItem({
         <Td id={labelId} dataLabel={t`Canonical`}>
           {peerInstance.canonical.toString()}
         </Td>
-
       </Tr>
       {!isHopNode && (
         <Tr

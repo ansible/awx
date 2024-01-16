@@ -5,9 +5,7 @@ import { Form, FormGroup, Modal } from '@patternfly/react-core';
 import { InstancesAPI } from 'api';
 import { Formik } from 'formik';
 import { FormColumnLayout } from 'components/FormLayout';
-import FormField, {
-  CheckboxField,
-} from 'components/FormField';
+import FormField, { CheckboxField } from 'components/FormField';
 import FormActionGroup from '../FormActionGroup/FormActionGroup';
 
 function AddEndpointModal({
@@ -17,7 +15,6 @@ function AddEndpointModal({
   instance,
   ouiaId,
 }) {
-
   const handleClose = () => {
     onClose();
   };
@@ -44,7 +41,7 @@ function AddEndpointModal({
     >
       <Formik
         initialValues={{
-          listener_port: 1001
+          listener_port: 1001,
         }}
         onSubmit={handleEndpointAdd}
       >
