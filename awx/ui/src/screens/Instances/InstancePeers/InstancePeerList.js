@@ -58,12 +58,14 @@ function InstancePeerList({ setBreadcrumb }) {
         InstancesAPI.read(),
       ]);
 
-      const address_list = []
+      const address_list = [];
 
-      for(let q = 0; q < results.length; q++) {
+      for (let q = 0; q < results.length; q++) {
         const receptor = results[q];
-        if(receptor.managed === true) continue;
-        const host = instances.data.results.filter((obj) => obj.id === receptor.instance)[0];
+        if (receptor.managed === true) continue;
+        const host = instances.data.results.filter(
+          (obj) => obj.id === receptor.instance
+        )[0];
         const copy = receptor;
         copy.hostname = host.hostname;
         copy.node_type = host.node_type;
@@ -106,44 +108,47 @@ function InstancePeerList({ setBreadcrumb }) {
 
   const fetchInstancesToAssociate = useCallback(
     async (params) => {
-      const address_list = []
+      const address_list = [];
 
       const instances = await InstancesAPI.read(
         mergeParams(params, {
           ...{ not__node_type: ['control', 'hybrid'] },
-      }))
+        })
+      );
       const receptors = (await ReceptorAPI.read()).data.results;
 
       // get instance ids of the current peered receptor ids
-      const already_peered_instance_ids = []
-      for(let h =0; h < instance.peers.length; h++) {
+      const already_peered_instance_ids = [];
+      for (let h = 0; h < instance.peers.length; h++) {
         const matched = receptors.filter((obj) => obj.id === instance.peers[h]);
-        matched.forEach(element => {
+        matched.forEach((element) => {
           already_peered_instance_ids.push(element.instance);
         });
       }
 
-      for(let q = 0; q < receptors.length; q++) {
+      for (let q = 0; q < receptors.length; q++) {
         const receptor = receptors[q];
 
-        if(already_peered_instance_ids.includes(receptor.instance)) {
+        if (already_peered_instance_ids.includes(receptor.instance)) {
           // ignore reverse peers
-          continue
+          continue;
         }
 
-        if(instance.peers.includes(receptor.id)) {
+        if (instance.peers.includes(receptor.id)) {
           // no links to existing links
           continue;
         }
 
-        if(instance.id === receptor.instance) {
+        if (instance.id === receptor.instance) {
           // no links to thy self
           continue;
         }
 
-        const host = instances.data.results.filter((obj) => obj.id === receptor.instance)[0];
+        const host = instances.data.results.filter(
+          (obj) => obj.id === receptor.instance
+        )[0];
 
-        if(host === undefined) {
+        if (host === undefined) {
           // no hosts
           continue;
         }
@@ -151,7 +156,7 @@ function InstancePeerList({ setBreadcrumb }) {
         const copy = receptor;
         copy.hostname = host.hostname;
         copy.node_type = host.node_type;
-        copy.canonical = copy.canonical.toString()
+        copy.canonical = copy.canonical.toString();
         address_list.push(copy);
       }
 
@@ -169,14 +174,9 @@ function InstancePeerList({ setBreadcrumb }) {
   } = useRequest(
     useCallback(
       async (instancesPeerToAssociate) => {
+        const selected_peers = instancesPeerToAssociate.map((obj) => obj.id);
 
-        const selected_peers = instancesPeerToAssociate.map(
-          (obj) => obj.id
-        );
-
-        const new_peers = [
-          ...new Set([...instance.peers, ...selected_peers]),
-        ];
+        const new_peers = [...new Set([...instance.peers, ...selected_peers])];
         await InstancesAPI.update(instance.id, { peers: new_peers });
 
         fetchPeers();
