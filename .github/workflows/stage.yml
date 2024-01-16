@@ -86,13 +86,19 @@ jobs:
             -e push=yes \
             -e awx_official=yes
 
-      - name: Log in to GHCR
-        run: |
-          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Log into registry ghcr.io
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d    # v3.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Log in to Quay
-        run: |
-          echo ${{ secrets.QUAY_TOKEN }} | docker login quay.io -u ${{ secrets.QUAY_USER }} --password-stdin
+      - name: Log into registry quay.io
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d    # v3.0.0
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USER }}
+          password: ${{ secrets.QUAY_TOKEN }}
 
       - name: tag awx-ee:latest with version input
         run: |
@@ -100,13 +106,13 @@ jobs:
           docker tag quay.io/ansible/awx-ee:latest ghcr.io/${{ github.repository_owner }}/awx-ee:${{ github.event.inputs.version }}
           docker push ghcr.io/${{ github.repository_owner }}/awx-ee:${{ github.event.inputs.version }}
 
-      - name: Build and stage awx-operator
+      - name: Stage awx-operator image
         working-directory: awx-operator
         run: |
-          BUILD_ARGS="--build-arg DEFAULT_AWX_VERSION=${{ github.event.inputs.version }} \
-                      --build-arg OPERATOR_VERSION=${{ github.event.inputs.operator_version }}" \
-          IMAGE_TAG_BASE=ghcr.io/${{ github.repository_owner }}/awx-operator \
-          VERSION=${{ github.event.inputs.operator_version }} make docker-build docker-push
+          BUILD_ARGS="--build-arg DEFAULT_AWX_VERSION=${{ github.event.inputs.default_awx_version }} \
+              --build-arg OPERATOR_VERSION=${{ github.event.inputs.version }}" \
+          IMG=ghcr.io/${{ github.repository_owner }}/awx-operator:${{ github.event.inputs.version }} \
+          make docker-buildx
 
       - name: Run test deployment with awx-operator
         working-directory: awx-operator
