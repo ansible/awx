@@ -58,6 +58,11 @@ options:
         - installed
       required: False
       type: str
+    listener_port:
+      description:
+        - Port that Receptor will listen for incoming connections on.
+      required: False
+      type: int
     peers:
       description:
         - List of peers to connect outbound to. Only configurable for hop and execution nodes.
@@ -67,6 +72,21 @@ options:
       required: False
       type: list
       elements: str
+    peers_from_control_nodes:
+      description:
+        - If enabled, control plane nodes will automatically peer to this node.
+      required: False
+      type: bool
+    receptor_installation_method:
+        description:
+            - The method used to install Receptor on this instance.
+        choices:
+            - release
+            - package
+            - container
+            - local
+        required: False
+        type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -107,7 +127,10 @@ def main():
         managed_by_policy=dict(type='bool'),
         node_type=dict(type='str', choices=['execution', 'hop']),
         node_state=dict(type='str', choices=['deprovisioning', 'installed']),
+        listener_port=dict(type='int'),
         peers=dict(required=False, type='list', elements='str'),
+        peers_from_control_nodes=dict(required=False, type='bool'),
+        receptor_installation_method=dict(type='str', choices=['release', 'package', 'container', 'local']),
     )
 
     # Create a module for ourselves
@@ -120,7 +143,10 @@ def main():
     managed_by_policy = module.params.get('managed_by_policy')
     node_type = module.params.get('node_type')
     node_state = module.params.get('node_state')
+    listener_port = module.params.get('listener_port')
     peers = module.params.get('peers')
+    peers_from_control_nodes = module.params.get('peers_from_control_nodes')
+    receptor_installation_method = module.params.get('receptor_installation_method')
     # Attempt to look up an existing item based on the provided data
     existing_item = module.get_one('instances', name_or_id=hostname)
 
@@ -147,8 +173,14 @@ def main():
         new_fields['node_type'] = node_type
     if node_state is not None:
         new_fields['node_state'] = node_state
+    if listener_port is not None:
+        new_fields['listener_port'] = listener_port
     if peers is not None:
         new_fields['peers'] = peers_ids
+    if peers_from_control_nodes is not None:
+        new_fields['peers_from_control_nodes'] = peers_from_control_nodes
+    if receptor_installation_method is not None:
+        new_fields['receptor_installation_method'] = receptor_installation_method
 
     module.create_or_update_if_needed(
         existing_item,

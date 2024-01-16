@@ -13,7 +13,7 @@ def test_peers_adding_and_removing(run_module, admin_user):
     with override_settings(IS_K8S=True):
         result = run_module(
             'instance',
-            {'hostname': 'hopnode', 'node_type': 'hop', 'node_state': 'installed'},
+            {'hostname': 'hopnode', 'node_type': 'hop', 'node_state': 'installed', 'listener_port': 6789},
             admin_user,
         )
         assert result['changed']
@@ -22,19 +22,12 @@ def test_peers_adding_and_removing(run_module, admin_user):
 
         assert hop_node.node_type == 'hop'
 
-        result = run_module(
-            'receptor_address',
-            {'address': 'hopnodeaddr', 'instance': 'hopnode', 'port': 6789},
-            admin_user,
-        )
-        assert result['changed']
-
         address = hop_node.receptor_addresses.get(pk=result.get('id'))
         assert address.port == 6789
 
         result = run_module(
             'instance',
-            {'hostname': 'executionnode', 'node_type': 'execution', 'node_state': 'installed', 'peers': ['hopnodeaddr']},
+            {'hostname': 'executionnode', 'node_type': 'execution', 'node_state': 'installed', 'peers': ['hopnode']},
             admin_user,
         )
         assert result['changed']
