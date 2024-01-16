@@ -104,7 +104,7 @@ class TestPeers:
             expect=400,  # cannot set port
         )
         assert 'Cannot change listener port for managed nodes.' in str(resp.data)
-        ReceptorAddress.objects.create(instance=hop, address='addr', port=27199)
+        ReceptorAddress.objects.create(instance=hop, address='addr', port=27199, canonical=True)
         resp = patch(
             url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
             data={"listener_port": None},
@@ -320,13 +320,13 @@ class TestPeers:
         """
         control = Instance.objects.create(hostname='control', node_type='control')
         hop1 = Instance.objects.create(hostname='hop1', node_type='hop')
-        ReceptorAddress.objects.create(instance=hop1, address='hop1addr', peers_from_control_nodes=True, port=6789)
+        ReceptorAddress.objects.create(instance=hop1, address='hop1addr', peers_from_control_nodes=True, port=6789, canonical=True)
 
         hop2 = Instance.objects.create(hostname='hop2', node_type='hop')
-        hop2addr = ReceptorAddress.objects.create(instance=hop2, address='hop2addr', peers_from_control_nodes=False, port=6789)
+        hop2addr = ReceptorAddress.objects.create(instance=hop2, address='hop2addr', peers_from_control_nodes=False, port=6789, canonical=True)
 
         execution = Instance.objects.create(hostname='execution', node_type='execution')
-        ReceptorAddress.objects.create(instance=execution, address='executionaddr', peers_from_control_nodes=False, port=6789)
+        ReceptorAddress.objects.create(instance=execution, address='executionaddr', peers_from_control_nodes=False, port=6789, canonical=True)
 
         execution.peers.add(hop2addr)
         hop1.peers.add(hop2addr)
