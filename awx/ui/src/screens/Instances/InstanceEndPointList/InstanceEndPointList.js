@@ -32,7 +32,13 @@ function InstanceEndPointList({ setBreadcrumb }) {
     isLoading,
     error: contentError,
     request: fetchEndpoints,
-    result: { instance, endpoints, count, relatedSearchableKeys, searchableKeys },
+    result: {
+      instance,
+      endpoints,
+      count,
+      relatedSearchableKeys,
+      searchableKeys,
+    },
   } = useRequest(
     useCallback(async () => {
       const [
@@ -47,15 +53,15 @@ function InstanceEndPointList({ setBreadcrumb }) {
         InstancesAPI.readOptions(),
       ]);
 
-      const endpoint_list = []
+      const endpoint_list = [];
 
-      for(let q = 0; q < results.length; q++) {
+      for (let q = 0; q < results.length; q++) {
         const receptor = results[q];
-        if(receptor.managed === true) continue;
-        if(id.toString() === receptor.instance.toString()) {
+        if (receptor.managed === true) continue;
+        if (id.toString() === receptor.instance.toString()) {
           receptor.name = detail.hostname;
           endpoint_list.push(receptor);
-          console.log(receptor)
+          console.log(receptor);
         }
       }
 
@@ -105,9 +111,7 @@ function InstanceEndPointList({ setBreadcrumb }) {
     <CardBody>
       <PaginatedTable
         contentError={contentError}
-        hasContentLoading={
-          isLoading
-        }
+        hasContentLoading={isLoading}
         items={endpoints}
         itemCount={count}
         pluralizedItemName={t`Endpoints`}
@@ -144,24 +148,26 @@ function InstanceEndPointList({ setBreadcrumb }) {
             isAllExpanded={isAllExpanded}
             onExpandAll={expandAll}
             qsConfig={QS_CONFIG}
-            additionalControls={[
-              // (isExecutionNode || isHopNode) && (
-              //   <ToolbarAddButton
-              //     ouiaId="add-endpoint-button"
-              //     key="add-endpoint"
-              //     defaultLabel={t`Add`}
-              //     onClick={() => setisAddEndpointModalOpen(true)}
-              //   />
-              // ),
-              // (isExecutionNode || isHopNode) && (
-              //   <ToolbarAddButton
-              //     ouiaId="delete-endpoint-button"
-              //     key="delete-endpoint"
-              //     defaultLabel={t`Delete`}
-              //     onClick={() => handleEndpointDelete()}
-              //   />
-              // ),
-            ]}
+            additionalControls={
+              [
+                // (isExecutionNode || isHopNode) && (
+                //   <ToolbarAddButton
+                //     ouiaId="add-endpoint-button"
+                //     key="add-endpoint"
+                //     defaultLabel={t`Add`}
+                //     onClick={() => setisAddEndpointModalOpen(true)}
+                //   />
+                // ),
+                // (isExecutionNode || isHopNode) && (
+                //   <ToolbarAddButton
+                //     ouiaId="delete-endpoint-button"
+                //     key="delete-endpoint"
+                //     defaultLabel={t`Delete`}
+                //     onClick={() => handleEndpointDelete()}
+                //   />
+                // ),
+              ]
+            }
           />
         )}
         renderRow={(endpoint, index) => (

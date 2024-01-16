@@ -55,7 +55,11 @@ function Instance({ setBreadcrumb }) {
   }, [request]);
 
   if (isK8s) {
-    tabsArray.push({ name: t`Endpoints`, link: `${match.url}/endpoints`, id: 1 });
+    tabsArray.push({
+      name: t`Endpoints`,
+      link: `${match.url}/endpoints`,
+      id: 1,
+    });
     tabsArray.push({ name: t`Peers`, link: `${match.url}/peers`, id: 2 });
   }
   if (isLoading) {
