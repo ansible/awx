@@ -585,6 +585,29 @@ docker-compose-build: Dockerfile.dev
 		--build-arg BUILDKIT_INLINE_CACHE=1 \
 		--cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .
 
+# ## Build awx_devel image for docker compose development environment for multiple architectures
+# docker-compose-buildx: Dockerfile.dev
+# 	DOCKER_BUILDKIT=1 docker build \
+# 		-f Dockerfile.dev \
+# 		-t $(DEVEL_IMAGE_NAME) \
+# 		--build-arg BUILDKIT_INLINE_CACHE=1 \
+# 		--cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .
+
+## Build awx_devel image for docker compose development environment for multiple architectures
+# PLATFORMS defines the target platforms for  the manager image be build to provide support to multiple
+# architectures. (i.e. make docker-buildx IMG=myregistry/mypoperator:0.0.1). To use this option you need to:
+# - able to use docker buildx . More info: https://docs.docker.com/build/buildx/
+# - have enable BuildKit, More info: https://docs.docker.com/develop/develop-images/build_enhancements/
+# - be able to push the image for your registry (i.e. if you do not inform a valid value via IMG=<myregistry/image:<tag>> than the export will fail)
+# To properly provided solutions that supports more than one platform you should use this option.
+PLATFORMS ?= linux/amd64,linux/arm64  # linux/ppc64le,linux/s390x
+.PHONY: docker-compose-buildx
+docker-compose-buildx: Dockerfile.dev ## Build and push docker image for the manager for cross-platform support
+	- docker buildx create --name project-v3-builder
+	docker buildx use project-v3-builder
+	- docker buildx build --push $(BUILD_ARGS) --platform=$(PLATFORMS) --tag $(DEVEL_IMAGE_NAME) -f Dockerfile.dev .
+	- docker buildx rm project-v3-builder
+
 docker-clean:
 	-$(foreach container_id,$(shell docker ps -f name=tools_awx -aq && docker ps -f name=tools_receptor -aq),docker stop $(container_id); docker rm -f $(container_id);)
 	-$(foreach image_id,$(shell docker images --filter=reference='*/*/*awx_devel*' --filter=reference='*/*awx_devel*' --filter=reference='*awx_devel*' -aq),docker rmi --force $(image_id);)
