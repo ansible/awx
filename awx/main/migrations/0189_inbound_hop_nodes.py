@@ -7,7 +7,7 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0187_hop_nodes'),
+        ('main', '0188_add_bitbucket_dc_webhook'),
     ]
 
     operations = [
