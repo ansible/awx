@@ -1071,3 +1071,7 @@ from ansible_base import settings  # noqa: E402
 
 settings_file = os.path.join(os.path.dirname(settings.__file__), 'dynamic_settings.py')
 include(settings_file)
+
+ANSIBLE_BASE_TEAM_MODEL = 'main.Team'
+
+ANSIBLE_BASE_ORGANIZATION_MODEL = 'main.Organization'
