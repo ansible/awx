@@ -35,17 +35,16 @@ function InstanceEndPointListItem({
       />
 
       <Td id={labelId} dataLabel={t`Address`}>
-          {peerEndpoint.address}
+        {peerEndpoint.address}
       </Td>
 
       <Td id={labelId} dataLabel={t`Port`}>
-          {peerEndpoint.port}
+        {peerEndpoint.port}
       </Td>
 
       <Td id={labelId} dataLabel={t`Canonical`}>
-          {peerEndpoint.canonical.toString()}
+        {peerEndpoint.canonical.toString()}
       </Td>
-
     </Tr>
   );
 }
