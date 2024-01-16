@@ -82,41 +82,11 @@
         that:
           - result is changed
 
-    - name: Create address for hop node 1
-      awx.awx.receptor_address:
-        address: "{{ hostname1 }}addr"
-        instance: "{{ hostname1 }}"
-        peers_from_control_nodes: false
-        port: 27199
-        protocol: ws
-        websocket_path: service
-        state: present
-      register: result
-
-    - assert:
-        that:
-          - result is changed
-
     - name: Create hop node 2
       awx.awx.instance:
         hostname: "{{ hostname2 }}"
         node_type: hop
         node_state: installed
-      register: result
-
-    - assert:
-        that:
-          - result is changed
-
-    - name: Create address for hop node 2
-      awx.awx.receptor_address:
-        address: "{{ hostname2 }}addr"
-        instance: "{{ hostname2 }}"
-        peers_from_control_nodes: false
-        port: 27199
-        protocol: ws
-        websocket_path: service
-        state: present
       register: result
 
     - assert:
@@ -129,8 +99,8 @@
         node_type: execution
         node_state: installed
         peers:
-          - "{{ hostname1 }}addr"
-          - "{{ hostname2 }}addr"
+          - "{{ hostname1 }}"
+          - "{{ hostname2 }}"
       register: result
 
     - assert:
