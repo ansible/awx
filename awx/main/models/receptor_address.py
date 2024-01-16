@@ -28,7 +28,7 @@ class ReceptorAddress(models.Model):
         help_text=_("Protocol to use for the Receptor listener, 'tcp', 'wss', or 'ws'."), max_length=10, default=Protocols.TCP, choices=Protocols.choices
     )
     is_internal = models.BooleanField(help_text=_("If True, only routable within the Kubernetes cluster."), default=False)
-    canonical = models.BooleanField(help_text=_("If True, this address is the canonical address for the instance."), default=True)
+    canonical = models.BooleanField(help_text=_("If True, this address is the canonical address for the instance."), default=False)
     peers_from_control_nodes = models.BooleanField(help_text=_("If True, control plane cluster nodes should automatically peer to it."), default=False)
     instance = models.ForeignKey(
         'Instance',

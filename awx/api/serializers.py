@@ -5612,6 +5612,7 @@ class InstanceSerializer(BaseSerializer):
             # delete the receptor address if the port is None
             instance.receptor_addresses.filter(address=instance.hostname).delete()
         elif kwargs:
+            kwargs['canonical'] = True
             instance.receptor_addresses.update_or_create(address=instance.hostname, defaults=kwargs)
 
         return instance
