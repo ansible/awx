@@ -33,7 +33,10 @@ class Instances extends Base {
   }
 
   updateReceptorAddresses(instanceId, data) {
-    return this.http.post(`${this.baseUrl}${instanceId}/receptor_addresses/`, data);
+    return this.http.post(
+      `${this.baseUrl}${instanceId}/receptor_addresses/`,
+      data
+    );
   }
 
   deprovisionInstance(instanceId) {
