@@ -214,7 +214,10 @@ class AWXConsumerPG(AWXConsumerBase):
                 # bypasses pg_notify for scheduled tasks
                 self.dispatch_task(body)
 
-        self.pg_is_down = False
+        if self.pg_is_down:
+            logger.info('Dispatcher listener connection established')
+            self.pg_is_down = False
+
         self.listen_start = time.time()
 
         return self.scheduler.time_until_next_run()
