@@ -5495,6 +5495,7 @@ class ReceptorAddressSerializer(BaseSerializer):
             'url',
             'address',
             'port',
+            'protocol',
             'websocket_path',
             'is_internal',
             'canonical',
