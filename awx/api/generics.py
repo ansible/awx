@@ -91,7 +91,7 @@ class LoggedLoginView(auth_views.LoginView):
         ret = super(LoggedLoginView, self).post(request, *args, **kwargs)
         if request.user.is_authenticated:
             logger.info(smart_str(u"User {} logged in from {}".format(self.request.user.username, request.META.get('REMOTE_ADDR', None))))
-            ret.set_cookie('userLoggedIn', 'true')
+            ret.set_cookie('userLoggedIn', 'true', secure=getattr(settings, 'SESSION_COOKIE_SECURE', False))
             ret.setdefault('X-API-Session-Cookie-Name', getattr(settings, 'SESSION_COOKIE_NAME', 'awx_sessionid'))
 
             return ret
@@ -107,7 +107,7 @@ class LoggedLogoutView(auth_views.LogoutView):
         original_user = getattr(request, 'user', None)
         ret = super(LoggedLogoutView, self).dispatch(request, *args, **kwargs)
         current_user = getattr(request, 'user', None)
-        ret.set_cookie('userLoggedIn', 'false')
+        ret.set_cookie('userLoggedIn', 'false', secure=getattr(settings, 'SESSION_COOKIE_SECURE', False))
         if (not current_user or not getattr(current_user, 'pk', True)) and current_user != original_user:
             logger.info("User {} logged out.".format(original_user.username))
         return ret
