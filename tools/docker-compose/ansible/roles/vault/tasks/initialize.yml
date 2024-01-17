@@ -92,6 +92,28 @@
         validate_certs: false
         token: "{{ Initial_Root_Token }}"
 
+    - name: Create ldap auth mount
+      flowerysong.hvault.write:
+        path: "sys/auth/ldap"
+        vault_addr: "{{ vault_addr_from_host }}"
+        validate_certs: false
+        token: "{{ Initial_Root_Token }}"
+        data:
+            type: "ldap"
+
+    - name: Configure ldap auth
+      flowerysong.hvault.ldap_config:
+        vault_addr: "{{ vault_addr_from_host }}"
+        validate_certs: false
+        token: "{{ Initial_Root_Token }}"
+        url: "ldap://ldap:1389"
+        binddn: "cn=awx_ldap_admin,ou=users,dc=example,dc=org"
+        bindpass: "admin123"
+        userdn: "ou=users,dc=example,dc=org"
+        deny_null_bind: "false"
+        discoverdn: "true"
+
+
   always:
     - name: Stop the vault
       community.docker.docker_compose:
