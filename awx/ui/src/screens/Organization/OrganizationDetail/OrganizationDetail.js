@@ -89,7 +89,7 @@ function OrganizationDetail({ organization }) {
           dataCy="organization-detail-name"
         />
         <Detail label={t`Description`} value={description} />
-        {license_info?.license_type === 'open' && (
+        {license_info?.license_type !== 'open' && (
           <Detail
             label={t`Max Hosts`}
             value={`${max_hosts}`}
