@@ -17,7 +17,7 @@ from django.utils.timezone import now as tz_now
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 
-from ansible_base.utils.models import get_type_for_model
+from ansible_base.lib.utils.models import get_type_for_model
 
 # AWX
 from awx.main.dispatch.reaper import reap_job

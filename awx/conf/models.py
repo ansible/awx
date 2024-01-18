@@ -7,7 +7,7 @@ import json
 # Django
 from django.db import models
 
-from ansible_base.utils.models import prevent_search
+from ansible_base.lib.utils.models import prevent_search
 
 # AWX
 from awx.main.models.base import CreatedModifiedModel

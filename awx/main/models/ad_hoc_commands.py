@@ -12,7 +12,7 @@ from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 
-from ansible_base.utils.models import prevent_search
+from ansible_base.lib.utils.models import prevent_search
 
 # AWX
 from awx.api.versioning import reverse

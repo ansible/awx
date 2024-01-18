@@ -25,7 +25,7 @@ from django.db.models import Q
 # REST Framework
 from rest_framework.exceptions import ParseError
 
-from ansible_base.utils.models import prevent_search
+from ansible_base.lib.utils.models import prevent_search
 
 # AWX
 from awx.api.versioning import reverse

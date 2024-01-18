@@ -16,7 +16,7 @@ from django.db.models.query import QuerySet
 from django.utils.crypto import get_random_string
 from django.utils.translation import gettext_lazy as _
 
-from ansible_base.utils.models import prevent_search
+from ansible_base.lib.utils.models import prevent_search
 
 # AWX
 from awx.main.models.rbac import Role, RoleAncestorEntry

@@ -352,7 +352,7 @@ INSTALLED_APPS = [
     'awx.ui',
     'awx.sso',
     'solo',
-    'ansible_base',
+    'ansible_base.rest_filters',
 ]
 
 INTERNAL_IPS = ('127.0.0.1',)
@@ -1077,13 +1077,10 @@ HOST_METRIC_SUMMARY_TASK_INTERVAL = 7  # days
 
 
 # django-ansible-base
-ANSIBLE_BASE_FEATURES = {'AUTHENTICATION': False, 'SWAGGER': False, 'FILTERING': True}
-
-from ansible_base import settings  # noqa: E402
-
-settings_file = os.path.join(os.path.dirname(settings.__file__), 'dynamic_settings.py')
-include(settings_file)
-
 ANSIBLE_BASE_TEAM_MODEL = 'main.Team'
-
 ANSIBLE_BASE_ORGANIZATION_MODEL = 'main.Organization'
+
+from ansible_base.lib import dynamic_config  # noqa: E402
+
+settings_file = os.path.join(os.path.dirname(dynamic_config.__file__), 'dynamic_settings.py')
+include(settings_file)

@@ -20,7 +20,7 @@ from rest_framework.exceptions import ParseError, PermissionDenied
 # Django OAuth Toolkit
 from awx.main.models.oauth import OAuth2Application, OAuth2AccessToken
 
-from ansible_base.utils.validation import to_python_boolean
+from ansible_base.lib.utils.validation import to_python_boolean
 
 # AWX
 from awx.main.utils import (

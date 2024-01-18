@@ -30,7 +30,7 @@ from rest_framework.exceptions import ParseError
 # Django-Polymorphic
 from polymorphic.models import PolymorphicModel
 
-from ansible_base.utils.models import prevent_search, get_type_for_model
+from ansible_base.lib.utils.models import prevent_search, get_type_for_model
 
 # AWX
 from awx.main.models.base import CommonModelNameNotUnique, PasswordFieldsModel, NotificationFieldsModel
