@@ -5615,10 +5615,14 @@ class InstanceSerializer(BaseSerializer):
         else:
             instance = super(InstanceSerializer, self).update(obj, validated_data)
 
+        # delete the receptor address if the port is expolisitly set to None
         if 'port' in kwargs and not kwargs['port']:
-            # delete the receptor address if the port is expolisitly set to None
             instance.receptor_addresses.filter(address=instance.hostname).delete()
-        elif 'port' in kwargs:
+        # only create or update if port is defined in validated_data or already exists in the
+        # canonical address
+        # this prevents creating a receptor address if peers_from_control_nodes is in
+        # validated_data but a port is not set
+        elif kwargs and ('port' in kwargs or instance.canonical_address_port):
             kwargs['canonical'] = True
             instance.receptor_addresses.update_or_create(address=instance.hostname, defaults=kwargs)
 
