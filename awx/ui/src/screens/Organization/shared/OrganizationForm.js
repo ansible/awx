@@ -63,7 +63,7 @@ function OrganizationFormFields({
         type="text"
         label={t`Description`}
       />
-      {license_info?.license_type === 'open' && (
+      {license_info?.license_type !== 'open' && (
         <FormField
           id="org-max_hosts"
           name="max_hosts"
