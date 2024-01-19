@@ -90,17 +90,18 @@ Glossary
     Node
         A node corresponds to entries in the instance database model, or the ``/api/v2/instances/`` endpoint, and is a machine participating in the cluster / mesh. The unified jobs API reports ``awx_node`` and ``execution_node`` fields. The execution node is where the job runs, and AWX node interfaces between the job and server functions.
 
-        +-----------+------------------------------------------------------------------------------------------------------+
-        | Node Type | Description                                                                                          |
-        +===========+======================================================================================================+
-        | Control   | Nodes that run persistent |aap| services, and delegate jobs to hybrid and execution nodes            |
-        +-----------+------------------------------------------------------------------------------------------------------+
-        | Hybrid    | Nodes that run persistent |aap| services and execute jobs                                            |
-        +-----------+------------------------------------------------------------------------------------------------------+
-        | Hop       | Used for relaying across the mesh only                                                               |
-        +-----------+------------------------------------------------------------------------------------------------------+
-        | Execution | Nodes that run jobs delivered from control nodes (jobs submitted from the user's Ansible automation) |
-        +-----------+------------------------------------------------------------------------------------------------------+
+        +-----------+-----------------------------------------------------------------------------------------------------------------+
+        | Node Type | Description                                                                                                     |
+        +-----------+-----------------------------------------------------------------------------------------------------------------+
+        | Control   | Nodes that run persistent Ansible Automation Platform services, and delegate jobs to hybrid and execution nodes |
+        +-----------+-----------------------------------------------------------------------------------------------------------------+
+        | Hybrid    | Nodes that run persistent Ansible Automation Platform services and execute jobs                                 |
+        |           | (not applicable to operator-based installations)                                                                |
+        +-----------+-----------------------------------------------------------------------------------------------------------------+
+        | Hop       | Used for relaying across the mesh only                                                                          |
+        +-----------+-----------------------------------------------------------------------------------------------------------------+
+        | Execution | Nodes that run jobs delivered from control nodes (jobs submitted from the user’s Ansible automation)            |
+        +-----------+-----------------------------------------------------------------------------------------------------------------+
 
     Notification Template
         An instance of a notification type (Email, Slack, Webhook, etc.) with a name, description, and a defined configuration.
