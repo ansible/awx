@@ -42,6 +42,10 @@ function InstanceEndPointListItem({
         {peerEndpoint.port}
       </Td>
 
+      <Td id={labelId} dataLabel={t`Protocol`}>
+        {peerEndpoint.protocol}
+      </Td>
+
       <Td id={labelId} dataLabel={t`Canonical`}>
         {peerEndpoint.canonical.toString()}
       </Td>
