@@ -149,4 +149,11 @@ class Migration(migrations.Migration):
             name='peers',
             field=models.ManyToManyField(related_name='peers_from', through='main.InstanceLink', to='main.receptoraddress'),
         ),
+        migrations.AlterField(
+            model_name='instancelink',
+            name='target',
+            field=models.ForeignKey(
+                help_text='The target receptor address of this peer link.', on_delete=django.db.models.deletion.CASCADE, to='main.receptoraddress'
+            ),
+        ),
     ]
