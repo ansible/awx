@@ -153,6 +153,10 @@ function InstancePeerList({ setBreadcrumb }) {
           continue;
         }
 
+        if(receptor.is_internal) {
+          continue;
+        }
+
         const copy = receptor;
         copy.hostname = host.hostname;
         copy.node_type = host.node_type;
@@ -318,7 +322,7 @@ function InstancePeerList({ setBreadcrumb }) {
             { key: 'address', name: t`Address` },
             { key: 'port', name: t`Port` },
             { key: 'node_type', name: t`Node Type` },
-            { key: 'canonical', name: t`Canonical` },
+            { key: 'protocol', name: t`Protocol` },
           ]}
         />
       )}
