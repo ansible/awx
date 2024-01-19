@@ -273,8 +273,14 @@ To associate peers with your node, click the **Associate** button to open a dial
 
 Execution nodes can peer with either hop nodes or other execution nodes. Hop nodes can only peer with execution nodes unless you check the **Peers from control nodes** check box from the **Options** field.
 
+.. note::
 
-You can remove an instance by clicking **Remove** in the Instances page, or by setting the instance ``node_state = deprovisioning`` via the API.
+	If you associate or disassociate a peer, a notification will inform you to re-run install bundle from the Peer Detail view (topology view has the download link).
+
+	.. image:: ../common/images/instances_associate_peer_reinstallmsg.png
+	:alt: Notification to re-run the installation bundle due to change in the peering. 
+
+You can remove an instance by clicking **Remove** in the Instances page, or by setting the instance ``node_state = deprovisioning`` via the API. Upon deleting, a pop-up message will appear to notify that you may need to re-run the install bundle to make sure things that were removed are no longer connected.
 
 
 10. To view a graphical representation of your updated topology, refer to the :ref:`ag_topology_viewer` section of this guide.
