@@ -280,7 +280,6 @@ Execution nodes can peer with either hop nodes or other execution nodes. Hop nod
 	.. image:: ../common/images/instances_associate_peer_reinstallmsg.png
 		:alt: Notification to re-run the installation bundle due to change in the peering. 
 
-
 You can remove an instance by clicking **Remove** in the Instances page, or by setting the instance ``node_state = deprovisioning`` via the API. Upon deleting, a pop-up message will appear to notify that you may need to re-run the install bundle to make sure things that were removed are no longer connected.
 
 
