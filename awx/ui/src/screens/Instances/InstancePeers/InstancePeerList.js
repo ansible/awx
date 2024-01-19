@@ -153,7 +153,7 @@ function InstancePeerList({ setBreadcrumb }) {
           continue;
         }
 
-        if(receptor.is_internal) {
+        if (receptor.is_internal) {
           continue;
         }
 
