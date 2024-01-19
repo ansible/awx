@@ -38,15 +38,18 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     patch \
     postgresql \
     postgresql-devel \
-    python3-devel \
-    python3-pip \
-    python3-setuptools \
+    python3.11 \
+    "python3.11-devel" \
+    "python3.11-pip" \
+    "python3.11-setuptools" \
+    "python3.11-packaging" \
+    "python3.11-psycopg2" \
     swig \
     unzip \
     xmlsec1-devel \
     xmlsec1-openssl-devel
 
-RUN pip3 install virtualenv build psycopg
+RUN pip3.11 install -vv build
 
 {% if image_architecture == 'ppc64le'  %}
     RUN dnf -y update && dnf install -y wget && \
@@ -117,10 +120,12 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     nginx \
     "openldap >= 2.6.2-3" \
     postgresql \
-    python3-devel \
-    python3-libselinux \
-    python3-pip \
-    python3-setuptools \
+    python3.11 \
+    "python3.11-devel" \
+    "python3.11-pip*" \
+    "python3.11-setuptools" \
+    "python3.11-packaging" \
+    "python3.11-psycopg2" \
     rsync \
     rsyslog-8.2102.0-106.el9 \
     subversion \
@@ -131,7 +136,7 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     xmlsec1-openssl && \
     dnf -y clean all
 
-RUN pip3 install virtualenv supervisor dumb-init psycopg
+RUN pip3.11 install -vv virtualenv supervisor dumb-init build
 
 RUN rm -rf /root/.cache && rm -rf /tmp/*
 
@@ -163,7 +168,8 @@ RUN dnf -y install \
     unzip && \
     npm install -g n && n 16.13.1 && npm install -g npm@8.5.0 && dnf remove -y nodejs
 
-RUN pip3 install black git+https://github.com/coderanger/supervisor-stdout setuptools-scm
+RUN pip3.11 install -vv git+https://github.com/coderanger/supervisor-stdout.git@973ba19967cdaf46d9c1634d1675fc65b9574f6e
+RUN pip3.11 install -vv black setuptools-scm build
 
 # This package randomly fails to download.
 # It is nice to have in the dev env, but not necessary.
@@ -234,7 +240,7 @@ ADD tools/scripts/awx-python /usr/bin/awx-python
 {% endif %}
 
 {% if (build_dev|bool) or (kube_dev|bool) %}
-RUN echo /awx_devel > /var/lib/awx/venv/awx/lib/python3.9/site-packages/awx.egg-link
+RUN echo /awx_devel > /var/lib/awx/venv/awx/lib/python3.11/site-packages/awx.egg-link
 ADD tools/docker-compose/awx-manage /usr/local/bin/awx-manage
 RUN ln -sf /awx_devel/tools/scripts/awx-python /usr/bin/awx-python
 RUN ln -sf /awx_devel/tools/scripts/rsyslog-4xx-recovery /usr/bin/rsyslog-4xx-recovery
@@ -269,8 +275,8 @@ RUN for dir in \
       /var/lib/awx/.local \
       /var/lib/awx/venv \
       /var/lib/awx/venv/awx/bin \
-      /var/lib/awx/venv/awx/lib/python3.9 \
-      /var/lib/awx/venv/awx/lib/python3.9/site-packages \
+      /var/lib/awx/venv/awx/lib/python3.11 \
+      /var/lib/awx/venv/awx/lib/python3.11/site-packages \
       /var/lib/awx/projects \
       /var/lib/awx/rsyslog \
       /var/run/awx-rsyslog \

@@ -1,4 +1,5 @@
 import argparse
+import pytest
 import unittest
 from io import StringIO
 
@@ -174,6 +175,8 @@ class TestOptions(unittest.TestCase):
         self.parser.choices['create'].print_help(out)
         assert '--verbosity {0,1,2,3,4,5}' in out.getvalue()
 
+    # https://github.com/ansible/awx/issues/13820
+    @pytest.mark.skip(reason="Breaks with 3.11 duplicate parser method list")
     def test_actions_with_primary_key(self):
         for method in ('get', 'modify', 'delete'):
             page = OptionsPage.from_json({'actions': {'GET': {}, 'POST': {}}})
