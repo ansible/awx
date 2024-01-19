@@ -12,7 +12,7 @@ from unittest import mock
 
 from rest_framework.exceptions import ParseError
 
-from ansible_base.utils.models import get_type_for_model
+from ansible_base.lib.utils.models import get_type_for_model
 
 from awx.main.utils import common
 from awx.api.validators import HostnameRegexValidator

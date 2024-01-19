@@ -17,7 +17,7 @@ from django.db.models import Sum, Q
 import redis
 from solo.models import SingletonModel
 
-from ansible_base.utils.models import prevent_search
+from ansible_base.lib.utils.models import prevent_search
 
 # AWX
 from awx import __version__ as awx_application_version

@@ -5,7 +5,7 @@ import pytest
 # Django
 from rest_framework.exceptions import PermissionDenied
 
-from ansible_base.filters.rest_framework.field_lookup_backend import FieldLookupBackend
+from ansible_base.rest_filters.rest_framework.field_lookup_backend import FieldLookupBackend
 
 from awx.main.models import (
     AdHocCommand,

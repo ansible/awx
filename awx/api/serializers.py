@@ -43,7 +43,7 @@ from rest_framework.utils.serializer_helpers import ReturnList
 # Django-Polymorphic
 from polymorphic.models import PolymorphicModel
 
-from ansible_base.utils.models import get_type_for_model
+from ansible_base.lib.utils.models import get_type_for_model
 
 # AWX
 from awx.main.access import get_user_capabilities

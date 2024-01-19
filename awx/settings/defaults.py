@@ -37,6 +37,18 @@ DATABASES = {
     }
 }
 
+# Special database overrides for dispatcher connections listening to pg_notify
+LISTENER_DATABASES = {
+    'default': {
+        'OPTIONS': {
+            'keepalives': 1,
+            'keepalives_idle': 5,
+            'keepalives_interval': 5,
+            'keepalives_count': 5,
+        },
+    }
+}
+
 # Whether or not the deployment is a K8S-based deployment
 # In K8S-based deployments, instances have zero capacity - all playbook
 # automation is intended to flow through defined Container Groups that
@@ -340,7 +352,7 @@ INSTALLED_APPS = [
     'awx.ui',
     'awx.sso',
     'solo',
-    'ansible_base',
+    'ansible_base.rest_filters',
 ]
 
 INTERNAL_IPS = ('127.0.0.1',)
@@ -1065,9 +1077,10 @@ HOST_METRIC_SUMMARY_TASK_INTERVAL = 7  # days
 
 
 # django-ansible-base
-ANSIBLE_BASE_FEATURES = {'AUTHENTICATION': False, 'SWAGGER': False, 'FILTERING': True}
+ANSIBLE_BASE_TEAM_MODEL = 'main.Team'
+ANSIBLE_BASE_ORGANIZATION_MODEL = 'main.Organization'
 
-from ansible_base import settings  # noqa: E402
+from ansible_base.lib import dynamic_config  # noqa: E402
 
-settings_file = os.path.join(os.path.dirname(settings.__file__), 'dynamic_settings.py')
+settings_file = os.path.join(os.path.dirname(dynamic_config.__file__), 'dynamic_settings.py')
 include(settings_file)
