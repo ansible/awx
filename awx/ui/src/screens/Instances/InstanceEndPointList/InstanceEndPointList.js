@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { t } from '@lingui/macro';
 import { CardBody } from 'components/Card';
 import PaginatedTable, {
@@ -138,10 +138,7 @@ function InstanceEndPointList({ setBreadcrumb }) {
             isAllExpanded={isAllExpanded}
             onExpandAll={expandAll}
             qsConfig={QS_CONFIG}
-            additionalControls={
-              [
-              ]
-            }
+            additionalControls={[]}
           />
         )}
         renderRow={(endpoint, index) => (
