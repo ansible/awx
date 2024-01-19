@@ -61,7 +61,6 @@ function InstanceEndPointList({ setBreadcrumb }) {
         if (id.toString() === receptor.instance.toString()) {
           receptor.name = detail.hostname;
           endpoint_list.push(receptor);
-          console.log(receptor);
         }
       }
 
@@ -137,6 +136,7 @@ function InstanceEndPointList({ setBreadcrumb }) {
           <HeaderRow qsConfig={QS_CONFIG} isExpandable>
             <HeaderCell sortKey="address">{t`Address`}</HeaderCell>
             <HeaderCell sortKey="port">{t`Port`}</HeaderCell>
+            <HeaderCell sortKey="protocol">{t`Protocol`}</HeaderCell>
             <HeaderCell sortKey="canonical">{t`Canonical`}</HeaderCell>
           </HeaderRow>
         }
