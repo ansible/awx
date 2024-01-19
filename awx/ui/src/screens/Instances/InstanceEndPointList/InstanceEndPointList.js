@@ -7,7 +7,6 @@ import PaginatedTable, {
   HeaderRow,
   // ToolbarAddButton,
 } from 'components/PaginatedTable';
-import AddEndpointModal from 'components/AddEndpointModal';
 import useToast from 'hooks/useToast';
 import { getQSConfig } from 'util/qs';
 import { useParams } from 'react-router-dom';
@@ -26,7 +25,6 @@ const QS_CONFIG = getQSConfig('peer', {
 
 function InstanceEndPointList({ setBreadcrumb }) {
   const { id } = useParams();
-  const [isAddEndpointModalOpen, setisAddEndpointModalOpen] = useState(false);
   const { Toast, toastProps } = useToast();
   const {
     isLoading,
@@ -98,14 +96,6 @@ function InstanceEndPointList({ setBreadcrumb }) {
   const { selected, isAllSelected, handleSelect, clearSelected, selectAll } =
     useSelected(endpoints);
 
-  // const handleEndpointDelete = async () => {
-  //   // console.log(selected)
-  //   // InstancesAPI.updateReceptorAddresses(instance.id, values);
-  // }
-
-  // const isHopNode = instance.node_type === 'hop';
-  // const isExecutionNode = instance.node_type === 'execution';
-
   return (
     <CardBody>
       <PaginatedTable
@@ -150,22 +140,6 @@ function InstanceEndPointList({ setBreadcrumb }) {
             qsConfig={QS_CONFIG}
             additionalControls={
               [
-                // (isExecutionNode || isHopNode) && (
-                //   <ToolbarAddButton
-                //     ouiaId="add-endpoint-button"
-                //     key="add-endpoint"
-                //     defaultLabel={t`Add`}
-                //     onClick={() => setisAddEndpointModalOpen(true)}
-                //   />
-                // ),
-                // (isExecutionNode || isHopNode) && (
-                //   <ToolbarAddButton
-                //     ouiaId="delete-endpoint-button"
-                //     key="delete-endpoint"
-                //     defaultLabel={t`Delete`}
-                //     onClick={() => handleEndpointDelete()}
-                //   />
-                // ),
               ]
             }
           />
@@ -182,14 +156,6 @@ function InstanceEndPointList({ setBreadcrumb }) {
           />
         )}
       />
-      {isAddEndpointModalOpen && (
-        <AddEndpointModal
-          isAddEndpointModalOpen={isAddEndpointModalOpen}
-          onClose={() => setisAddEndpointModalOpen(false)}
-          title={t`New endpoint`}
-          instance={instance}
-        />
-      )}
       <Toast {...toastProps} />
     </CardBody>
   );
