@@ -178,9 +178,10 @@ class TestOptions(unittest.TestCase):
     # https://github.com/ansible/awx/issues/13820
     @pytest.mark.skip(reason="Breaks with 3.11 duplicate parser method list")
     def test_actions_with_primary_key(self):
+        page = OptionsPage.from_json({'actions': {'GET': {}, 'POST': {}}})
+        ResourceOptionsParser(None, page, 'jobs', self.parser)
+
         for method in ('get', 'modify', 'delete'):
-            page = OptionsPage.from_json({'actions': {'GET': {}, 'POST': {}}})
-            ResourceOptionsParser(None, page, 'jobs', self.parser)
             assert method in self.parser.choices
 
             out = StringIO()
