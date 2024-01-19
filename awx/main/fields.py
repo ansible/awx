@@ -5,6 +5,7 @@
 import copy
 import json
 import re
+import sys
 import urllib.parse
 
 from jinja2 import sandbox, StrictUndefined
@@ -406,11 +407,13 @@ class SmartFilterField(models.TextField):
         # https://docs.python.org/2/library/stdtypes.html#truth-value-testing
         if not value:
             return None
-        value = urllib.parse.unquote(value)
-        try:
-            SmartFilter().query_from_string(value)
-        except RuntimeError as e:
-            raise models.base.ValidationError(e)
+        # avoid doing too much during migrations
+        if 'migrate' not in sys.argv:
+            value = urllib.parse.unquote(value)
+            try:
+                SmartFilter().query_from_string(value)
+            except RuntimeError as e:
+                raise models.base.ValidationError(e)
         return super(SmartFilterField, self).get_prep_value(value)
 
 
