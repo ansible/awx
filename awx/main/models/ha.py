@@ -69,7 +69,7 @@ class InstanceLink(BaseModel):
         ordering = ("id",)
 
     source = models.ForeignKey('Instance', on_delete=models.CASCADE, help_text=_("The source instance of this peer link."))
-    target = models.ForeignKey('ReceptorAddress', null=True, on_delete=models.CASCADE, help_text=_("The target receptor address of this peer link."))
+    target = models.ForeignKey('ReceptorAddress', on_delete=models.CASCADE, help_text=_("The target receptor address of this peer link."))
 
     class States(models.TextChoices):
         ADDING = 'adding', _('Adding')
