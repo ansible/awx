@@ -2,7 +2,7 @@ from unittest import mock
 import pytest
 import json
 
-from ansible_base.utils.models import get_type_for_model
+from ansible_base.lib.utils.models import get_type_for_model
 
 from awx.api.versioning import reverse
 from awx.main.models.jobs import JobTemplate, Job
