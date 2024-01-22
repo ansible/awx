@@ -622,6 +622,54 @@ class SocialTeamMapField(fields.DictField):
     child = SocialSingleTeamMapField()
 
 
+class SocialTeamOrgRemoteMapTeamOrgMapField(HybridDictField):
+    social_auth_member_value = fields.CharField(required=False, allow_null=True)
+    team = fields.CharField(required=True, allow_null=False)
+    organization = fields.CharField(required=True, allow_null=False)
+
+    child = _Forbidden()
+
+
+class SocialTeamRemoteMapField(HybridDictField):
+    team_org_map = fields.ListField(required=False, child=SocialTeamOrgRemoteMapTeamOrgMapField(), allow_null=True)
+    remove_members = fields.BooleanField(required=False)
+    social_auth_member_scope = fields.CharField(required=False, allow_null=True)
+
+    child = _Forbidden()
+
+
+class SocialOrganizationRemoteMapOrgMapField(HybridDictField):
+    social_auth_member_value = fields.CharField(required=False, allow_null=True)
+    social_auth_admin_value = fields.CharField(required=False, allow_null=True)
+    social_auth_auditor_value = fields.CharField(required=False, allow_null=True)
+    organization = fields.CharField(required=True, allow_null=False)
+
+    child = _Forbidden()
+
+
+class SocialOrganizationRemoteMapField(HybridDictField):
+    org_map = fields.ListField(required=False, child=SocialOrganizationRemoteMapOrgMapField(), allow_null=True)
+    remove_members = fields.BooleanField(required=False)
+    remove_admins = fields.BooleanField(required=False)
+    remove_auditors = fields.BooleanField(required=False)
+    social_auth_member_scope = fields.CharField(required=False, allow_null=True)
+    social_auth_admin_scope = fields.CharField(required=False, allow_null=True)
+    social_auth_auditor_scope = fields.CharField(required=False, allow_null=True)
+
+    child = _Forbidden()
+
+
+class SocialUserFlagsRemoteMapField(HybridDictField):
+    is_superuser_scope = fields.CharField(required=False, allow_null=True)
+    is_superuser_value = fields.StringListField(required=False, allow_null=True)
+    remove_superusers = fields.BooleanField(required=False, allow_null=True)
+    is_system_auditor_scope = fields.CharField(required=False, allow_null=True)
+    is_system_auditor_value = fields.StringListField(required=False, allow_null=True)
+    remove_system_auditors = fields.BooleanField(required=False, allow_null=True)
+
+    child = _Forbidden()
+
+
 class SAMLOrgInfoValueField(HybridDictField):
     name = fields.CharField()
     displayname = fields.CharField()

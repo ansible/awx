@@ -362,16 +362,6 @@ After running this command the following message should appear and you should be
 CREATE DATABASE
 ```
 
-The second one time command will be to start a Keycloak container to build our admin user; be sure to set pg_username and pg_password to work for you installation. Note: the command below set the username as admin with a password of admin, you can change this if you want. Also, if you are using your own container or have changed the pg_username please update the command accordingly.
-```bash
-PG_PASSWORD=`cat tools/docker-compose/_sources/secrets/pg_password.yml  | cut -f 2 -d \'`
-docker run --rm -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=admin --net=_sources_default \
-           -e DB_VENDOR=postgres -e DB_ADDR=postgres -e DB_DATABASE=keycloak -e DB_USER=awx -e DB_PASSWORD=${PG_PASSWORD} \
-           quay.io/keycloak/keycloak:15.0.2
-```
-
-Once you see a message like: `WFLYSRV0051: Admin console listening on http://127.0.0.1:9990` you can stop the container.
-
 Now that we have performed the one time setup anytime you want to run a Keycloak instance alongside AWX we can start docker-compose with the KEYCLOAK option to get a Keycloak instance with the command:
 ```bash
 KEYCLOAK=true make docker-compose
@@ -379,7 +369,7 @@ KEYCLOAK=true make docker-compose
 
 Go ahead and stop your existing docker-compose run and restart with Keycloak before proceeding to the next steps.
 
-Once the containers come up a new port (8443) should be exposed and the Keycloak interface should be running on that port. Connect to this through a url like `https://localhost:8443` to confirm that Keycloak has stared. If you wanted to login and look at Keycloak itself you could select the "Administration console" link and log into the UI the username/password set in the previous `docker run` command. For more information about Keycloak and links to their documentation see their project at https://github.com/keycloak/keycloak.
+Once the containers come up a new port (8443) should be exposed and the Keycloak interface should be running on that port. Connect to this through a url like `https://localhost:8443/admin` to confirm that Keycloak has stared. If you wanted to login and look at Keycloak itself you could select the "Administration console" link and log into the UI the username/password set in the previous `docker run` command. For more information about Keycloak and links to their documentation see their project at https://github.com/keycloak/keycloak.
 
 Now we are ready to configure and plumb Keycloak with AWX. To do this we have provided a playbook which will:
 * Create a certificate for SAML data exchange between Keycloak and AWX.

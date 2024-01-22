@@ -100,7 +100,26 @@
     ],
     "client": {
       "{{ container_reference }}:8043": [],
-      "awx_oidc_client": []
+      "awx_oidc_client": [
+        {
+          "id": "acd88b5c-8cb4-47af-8409-6ec9e335c983",
+          "name": "ORG_DEFAULT_ADMIN",
+          "description": "",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "525e0eeb-56ee-429f-a040-c6fc18072dc4",
+          "attributes": {}
+        },
+        {
+          "id": "5d9e4bb5-9fc5-40e4-9378-62b661f94c70",
+          "name": "ORG_DEFAULT_AUDITOR",
+          "description": "",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "525e0eeb-56ee-429f-a040-c6fc18072dc4",
+          "attributes": {}
+        }
+      ]
     }
   },
   "groups": [],
@@ -314,7 +333,7 @@
     {
       "id": "525e0eeb-56ee-429f-a040-c6fc18072dc4",
       "clientId": "awx_oidc_client",
-      "baseUrl": "",
+      "baseUrl": "https://{{ container_reference }}:8043",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
@@ -365,6 +384,22 @@
       "fullScopeAllowed": true,
       "nodeReRegistrationTimeout": -1,
       "protocolMappers": [
+        {
+          "id": "97ed4146-c8f8-445a-9501-c2510c53d3cb",
+          "name": "client roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-client-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "claim.name": "roles",
+            "jsonType.label": "String",
+            "usermodel.clientRoleMapping.clientId": "awx_oidc_client"
+          }
+        },
         {
           "id": "a8f4a0a8-ece4-4a9d-9e7b-830f23ba0067",
           "name": "AWX OIDC Group Membership",
@@ -1842,6 +1877,9 @@
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
     "realmRoles" : [ "default-roles-awx realm" ],
+    "clientRoles" : {
+      "awx_oidc_client" : [ "ORG_DEFAULT_ADMIN" ]
+    },
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -1867,6 +1905,9 @@
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
     "realmRoles" : [ "default-roles-awx realm" ],
+    "clientRoles" : {
+      "awx_oidc_client" : [ "ORG_DEFAULT_AUDITOR" ]
+    },
     "notBefore" : 0,
     "groups" : [ ]
   } ]
