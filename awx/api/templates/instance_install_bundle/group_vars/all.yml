@@ -18,7 +18,7 @@ custom_tls_certfile: receptor/tls/receptor.crt
 custom_tls_keyfile: receptor/tls/receptor.key
 custom_ca_certfile: receptor/tls/ca/mesh-CA.crt
 {% if listener_port %}
-receptor_protocol: tcp
+receptor_protocol: {{ listener_protocol }}
 receptor_listener: true
 receptor_port: {{ listener_port }}
 {% else %}
@@ -28,7 +28,7 @@ receptor_listener: false
 receptor_peers:
 {% for peer in peers %}
   - address: {{ peer.address }}
-    protocol: {{ peer.protocol}}
+    protocol: {{ peer.protocol }}
 {% endfor %}
 {% endif %}
 {% verbatim %}

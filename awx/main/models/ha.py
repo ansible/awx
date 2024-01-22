@@ -260,6 +260,10 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         return self.health_check_started > self.last_health_check
 
     @property
+    def canonical_address(self):
+        return self.receptor_addresses.filter(canonical=True).first()
+
+    @property
     def canonical_address_port(self):
         # note: don't create a different query for receptor addresses, as this is prefetched on the View for optimization
         for addr in self.receptor_addresses.all():
