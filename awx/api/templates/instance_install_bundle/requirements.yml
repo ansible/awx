@@ -1,5 +1,5 @@
 ---
 collections:
   - name: https://github.com/ansible/receptor-collection
-      type: git
-      version: feature_awx-mesh-ingress
+    type: git
+    version: main
