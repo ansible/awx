@@ -133,7 +133,8 @@ def generate_group_vars_all_yml(instance_obj):
     canonical_addr = instance_obj.canonical_address
     if canonical_addr:
         context['listener_port'] = canonical_addr.port
-        context['listener_protocol'] = canonical_addr.protocol
+        protocol = canonical_addr.protocol if canonical_addr.protocol != 'wss' else 'ws'
+        context['listener_protocol'] = protocol
 
     all_yaml = render_to_string("instance_install_bundle/group_vars/all.yml", context=context)
     # convert consecutive newlines with a single newline
