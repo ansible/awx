@@ -92,27 +92,61 @@
         validate_certs: false
         token: "{{ Initial_Root_Token }}"
 
-    - name: Create ldap auth mount
-      flowerysong.hvault.write:
-        path: "sys/auth/ldap"
-        vault_addr: "{{ vault_addr_from_host }}"
-        validate_certs: false
-        token: "{{ Initial_Root_Token }}"
-        data:
-            type: "ldap"
+    - name: Configure the vault ldap auth
+      block:
+        - name: Create ldap engine
+          flowerysong.hvault.engine:
+            path: "ldap_engine"
+            type: "kv"
+            vault_addr: "{{ vault_addr_from_host }}"
+            validate_certs: false
+            token: "{{ Initial_Root_Token }}"
 
-    - name: Configure ldap auth
-      flowerysong.hvault.ldap_config:
-        vault_addr: "{{ vault_addr_from_host }}"
-        validate_certs: false
-        token: "{{ Initial_Root_Token }}"
-        url: "ldap://ldap:1389"
-        binddn: "cn=awx_ldap_admin,ou=users,dc=example,dc=org"
-        bindpass: "admin123"
-        userdn: "ou=users,dc=example,dc=org"
-        deny_null_bind: "false"
-        discoverdn: "true"
+        - name: Create userpass engine
+          flowerysong.hvault.engine:
+            path: "userpass_engine"
+            type: "kv"
+            vault_addr: "{{ vault_addr_from_host }}"
+            validate_certs: false
+            token: "{{ Initial_Root_Token }}"
 
+        - name: Create ldap auth mount
+          flowerysong.hvault.write:
+            path: "sys/auth/ldap"
+            vault_addr: "{{ vault_addr_from_host }}"
+            validate_certs: false
+            token: "{{ Initial_Root_Token }}"
+            data:
+                type: "ldap"
+
+        - name: Configure ldap auth
+          flowerysong.hvault.ldap_config:
+            vault_addr: "{{ vault_addr_from_host }}"
+            validate_certs: false
+            token: "{{ Initial_Root_Token }}"
+            url: "ldap://ldap:1389"
+            binddn: "cn=awx_ldap_admin,ou=users,dc=example,dc=org"
+            bindpass: "admin123"
+            userdn: "ou=users,dc=example,dc=org"
+            deny_null_bind: "false"
+            discoverdn: "true"
+        # finish me
+        - name: Add awx_ldap_admin user to auth_method
+          flowerysong.hvault.ldap_user:
+            vault_addr: "{{ vault_addr_from_host }}"
+            validate_certs: false
+            token: "{{ Initial_Root_Token }}"
+            url: "ldap://ldap:1389"
+            state: present
+
+        - name: Create userpass auth mount
+          flowerysong.hvault.write:
+            path: "sys/auth/userpass"
+            vault_addr: "{{ vault_addr_from_host }}"
+            validate_certs: false
+            token: "{{ Initial_Root_Token }}"
+            data:
+                type: "userpass"
 
   always:
     - name: Stop the vault
