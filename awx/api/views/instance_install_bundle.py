@@ -130,9 +130,10 @@ def generate_group_vars_all_yml(instance_obj):
         peers.append(dict(address=addr.get_full_address(), protocol=addr.protocol))
     context = dict(instance=instance_obj, peers=peers)
 
-    listener_port = instance_obj.canonical_address_port
-    if listener_port:
-        context['listener_port'] = listener_port
+    canonical_addr = instance_obj.canonical_address
+    if canonical_addr:
+        context['listener_port'] = canonical_addr.port
+        context['listener_protocol'] = canonical_addr.protocol
 
     all_yaml = render_to_string("instance_install_bundle/group_vars/all.yml", context=context)
     # convert consecutive newlines with a single newline
