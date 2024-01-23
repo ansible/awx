@@ -5708,6 +5708,11 @@ class InstanceSerializer(BaseSerializer):
         if len(set(peers_instances)) != len(peers_instances):
             raise serializers.ValidationError(_("Cannot peer to the same instance more than once."))
 
+        # cannot enable peers_from_control_nodes if listener_port is not set
+        if attrs.get('peers_from_control_nodes'):
+            if not attrs.get('listener_port') and self.instance and self.instance.canonical_address_port is None:
+                raise serializers.ValidationError(_("Cannot enable peers_from_control_nodes if listener_port is not set."))
+
         return super().validate(attrs)
 
     def validate_node_type(self, value):
