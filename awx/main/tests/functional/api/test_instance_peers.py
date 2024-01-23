@@ -188,7 +188,7 @@ class TestPeers:
         for control nodes, peers field should not be
         modified directly via patch.
         """
-        control = Instance.objects.create(hostname='abc', node_type=node_type)
+        control = Instance.objects.create(hostname='abc', node_type=node_type, managed=True)
         hop1 = Instance.objects.create(hostname='hop1', node_type='hop')
         hop1addr = ReceptorAddress.objects.create(instance=hop1, address='hop1', peers_from_control_nodes=True, canonical=True)
         hop2 = Instance.objects.create(hostname='hop2', node_type='hop')
@@ -200,7 +200,7 @@ class TestPeers:
             user=admin_user,
             expect=400,  # cannot add peers manually
         )
-        assert 'Setting peers manually for control nodes is not allowed.' in str(resp.data)
+        assert 'Setting peers manually for managed nodes is not allowed.' in str(resp.data)
 
         patch(
             url=reverse('api:instance_detail', kwargs={'pk': control.pk}),
@@ -214,7 +214,7 @@ class TestPeers:
             user=admin_user,
             expect=400,  # cannot remove peers directly
         )
-        assert 'Setting peers manually for control nodes is not allowed.' in str(resp.data)
+        assert 'Setting peers manually for managed nodes is not allowed.' in str(resp.data)
 
         patch(
             url=reverse('api:instance_detail', kwargs={'pk': control.pk}),
