@@ -94,6 +94,20 @@
 
     - name: Configure the vault ldap auth
       block:
+        - name: Create ldap auth mount
+          flowerysong.hvault.write:
+            path: "sys/auth/ldap"
+            vault_addr: "{{ vault_addr_from_host }}"
+            validate_certs: false
+            token: "{{ Initial_Root_Token }}"
+            data:
+                type: "ldap"
+          register: vault_auth_ldap
+          changed_when: vault_auth_ldap.result.errors | default([]) | length == 0
+          failed_when:
+            - vault_auth_ldap.result.errors | default([]) | length > 0
+            - "'path is already in use at ldap/' not in vault_auth_ldap.result.errors | default([])"
+
         - name: Create ldap engine
           flowerysong.hvault.engine:
             path: "ldap_engine"
@@ -110,15 +124,6 @@
             validate_certs: false
             token: "{{ Initial_Root_Token }}"
 
-        - name: Create ldap auth mount
-          flowerysong.hvault.write:
-            path: "sys/auth/ldap"
-            vault_addr: "{{ vault_addr_from_host }}"
-            validate_certs: false
-            token: "{{ Initial_Root_Token }}"
-            data:
-                type: "ldap"
-
         - name: Configure ldap auth
           flowerysong.hvault.ldap_config:
             vault_addr: "{{ vault_addr_from_host }}"
@@ -130,14 +135,38 @@
             userdn: "ou=users,dc=example,dc=org"
             deny_null_bind: "false"
             discoverdn: "true"
-        # finish me
+
+        - name: Create ldap access policy
+          flowerysong.hvault.policy:
+            vault_addr: "{{ vault_addr_from_host }}"
+            validate_certs: false
+            token: "{{ Initial_Root_Token }}"
+            name: "ldap_engine"
+            policy:
+              ldap_engine/*: [create, read, update, delete, list]
+              sys/mounts:/*: [create, read, update, delete, list]
+              sys/mounts: [read]
+
+        - name: Create userpass access policy
+          flowerysong.hvault.policy:
+            vault_addr: "{{ vault_addr_from_host }}"
+            validate_certs: false
+            token: "{{ Initial_Root_Token }}"
+            name: "userpass_engine"
+            policy:
+              userpass_engine/*: [create, read, update, delete, list]
+              sys/mounts:/*: [create, read, update, delete, list]
+              sys/mounts: [read]
+
         - name: Add awx_ldap_admin user to auth_method
           flowerysong.hvault.ldap_user:
             vault_addr: "{{ vault_addr_from_host }}"
             validate_certs: false
             token: "{{ Initial_Root_Token }}"
-            url: "ldap://ldap:1389"
             state: present
+            name: "awx_ldap_admin"
+            policies:
+              - "ldap_engine"
 
         - name: Create userpass auth mount
           flowerysong.hvault.write:
@@ -147,6 +176,23 @@
             token: "{{ Initial_Root_Token }}"
             data:
                 type: "userpass"
+          register: vault_auth_userpass
+          changed_when: vault_auth_userpass.result.errors | default([]) | length == 0
+          failed_when:
+            - vault_auth_userpass.result.errors | default([]) | length > 0
+            - "'path is already in use at userpass/' not in vault_auth_userpass.result.errors | default([])"
+            
+
+        - name: Add awx_userpass_admin user to auth_method
+          flowerysong.hvault.write:
+            vault_addr: "{{ vault_addr_from_host }}"
+            validate_certs: false
+            token: "{{ Initial_Root_Token }}"
+            path: "auth/userpass/users/awx_userpass_admin"
+            data:
+              password: "admin123"
+              policies:
+                  - "userpass_engine"
 
   always:
     - name: Stop the vault
