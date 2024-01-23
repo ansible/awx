@@ -136,17 +136,24 @@ class TestPeers:
 
     def test_peers_from_control_nodes_without_listener_port(self, admin_user, patch):
         """
-        patching with peers_from_control_nodes should not create a receptor address
-        if port is not defined
+        patching with peers_from_control_nodes=True should fail if listener_port is not set
+        patching with peers_from_control_nodes=False should be NOOP if listener_port is not set
         """
         hop = Instance.objects.create(hostname='abc', node_type="hop")
-        patch(
+        resp = patch(
             url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
             data={"peers_from_control_nodes": True},
             user=admin_user,
+            expect=400,
+        )
+        assert 'Cannot enable peers_from_control_nodes if listener_port is not set' in str(resp.data)
+        patch(
+            url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
+            data={"peers_from_control_nodes": False},
+            user=admin_user,
             expect=200,
         )
-        assert not ReceptorAddress.objects.filter(instance=hop).exists()
+        assert not ReceptorAddress.objects.filter(instance=hop, peers_from_control_nodes=False).exists()
 
     def test_bidirectional_peering(self, admin_user, patch):
         """
