@@ -765,6 +765,34 @@ register(
     category=_('Logging'),
     category_slug='logging',
 )
+register(
+    'LOG_AGGREGATOR_OMHTTP_BATCH_ENABLED',
+    field_class=fields.BooleanField,
+    default=False,
+    label=_('Enable batching of log messages'),
+    help_text=_('Enable batching of log messages to HTTP based external log aggregator.'),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
+    'LOG_AGGREGATOR_OMHTTP_BATCH_MAXSIZE',
+    field_class=fields.IntegerField,
+    default=100,
+    label=_('Maximum number of messages to batch'),
+    help_text=_('Maximum number of messages to batch before sending to HTTP based external log aggregator.'),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
+    'LOG_AGGREGATOR_OMHTTP_BATCH_FORMAT',
+    field_class=fields.ChoiceField,
+    choices=['newline', 'jsonarray', 'kafkarest', 'lokirest'],
+    default='newline',
+    label=_('Format of batched messages'),
+    help_text=_('Format of batched messages to HTTP based external log aggregator.'),
+    category=_('Logging'),
+    category_slug='logging',
+)
 
 
 register(

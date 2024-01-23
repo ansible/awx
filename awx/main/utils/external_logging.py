@@ -37,12 +37,21 @@ def construct_rsyslog_conf_template(settings=settings):
         'queue.discardSeverity="5"',  # Only discard notice, info, debug if we must discard anything
     ]
 
+    batching_options = []
+    if getattr(settings, 'LOG_AGGREGATOR_OMHTTP_BATCH_ENABLED', False):
+        batching_options = [
+            'batch="on"',
+            f'batch.format="{getattr(settings, "LOG_AGGREGATOR_OMHTTP_BATCH_FORMAT", "newline")}"',
+            f'batch.maxsize="{getattr(settings, "LOG_AGGREGATOR_OMHTTP_BATCH_MAXSIZE", 100)}"',
+        ]
+
     if not os.access(spool_directory, os.W_OK):
         spool_directory = '/var/lib/awx'
 
     max_bytes = settings.MAX_EVENT_RES_DATA
     if settings.LOG_AGGREGATOR_RSYSLOGD_DEBUG:
         parts.append('$DebugLevel 2')
+
     parts.extend(
         [
             '$WorkDirectory /var/lib/awx/rsyslog',
@@ -83,17 +92,21 @@ def construct_rsyslog_conf_template(settings=settings):
         if not port:
             port = 443 if parsed.scheme == 'https' else 80
 
-        params = [
-            'type="omhttp"',
-            f'server="{host}"',
-            f'serverport="{port}"',
-            f'usehttps="{ssl}"',
-            f'allowunsignedcerts="{allow_unsigned}"',
-            f'skipverifyhost="{skip_verify}"',
-            'action.resumeRetryCount="-1"',
-            'template="awx"',
-            f'action.resumeInterval="{timeout}"',
-        ] + queue_options
+        params = (
+            [
+                'type="omhttp"',
+                f'server="{host}"',
+                f'serverport="{port}"',
+                f'usehttps="{ssl}"',
+                f'allowunsignedcerts="{allow_unsigned}"',
+                f'skipverifyhost="{skip_verify}"',
+                'action.resumeRetryCount="-1"',
+                'template="awx"',
+                f'action.resumeInterval="{timeout}"',
+            ]
+            + queue_options
+            + batching_options
+        )
         if error_log_file:
             params.append(f'errorfile="{error_log_file}"')
         if parsed.path:

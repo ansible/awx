@@ -812,6 +812,9 @@ LOG_AGGREGATOR_ACTION_MAX_DISK_USAGE_GB = 1  # Action queue
 LOG_AGGREGATOR_MAX_DISK_USAGE_PATH = '/var/lib/awx'
 LOG_AGGREGATOR_RSYSLOGD_DEBUG = False
 LOG_AGGREGATOR_RSYSLOGD_ERROR_LOG_FILE = '/var/log/tower/rsyslog.err'
+LOG_AGGREGATOR_OMHTTP_BATCH_ENABLED = False
+LOG_AGGREGATOR_OMHTTP_BATCH_MAXSIZE = 100
+LOG_AGGREGATOR_OMHTTP_BATCH_FORMAT = 'newline'  # Options: newline, jsonarray, kafkarest, lokirest
 API_400_ERROR_LOG_FORMAT = 'status {status_code} received by user {user_name} attempting to access {url_path} from {remote_addr}'
 
 ASGI_APPLICATION = "awx.main.routing.application"
