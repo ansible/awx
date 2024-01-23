@@ -5680,13 +5680,11 @@ class InstanceSerializer(BaseSerializer):
         if not self.instance and not settings.IS_K8S:
             raise serializers.ValidationError(_("Can only create instances on Kubernetes or OpenShift."))
 
-        node_type = get_field_from_model_or_attrs("node_type")
+        managed = get_field_from_model_or_attrs("managed")
 
-        if node_type in [Instance.Types.CONTROL, Instance.Types.HYBRID]:
+        if managed:
             if check_peers_changed():
-                raise serializers.ValidationError(
-                    _("Setting peers manually for control nodes is not allowed. Enable peers_from_control_nodes on the hop and execution nodes instead.")
-                )
+                raise serializers.ValidationError(_("Setting peers manually for managed nodes is not allowed."))
 
         if not settings.IS_K8S:
             if check_peers_changed():
