@@ -115,6 +115,8 @@ function InstanceListItem({
 
   const isHopNode = instance.node_type === 'hop';
   const isExecutionNode = instance.node_type === 'execution';
+  const isManaged = instance.managed;
+
   return (
     <>
       <Tr
@@ -138,7 +140,7 @@ function InstanceListItem({
             rowIndex,
             isSelected,
             onSelect,
-            disable: !(isExecutionNode || isHopNode),
+            disable: !(isExecutionNode || isHopNode || isManaged),
           }}
           dataLabel={t`Selected`}
         />

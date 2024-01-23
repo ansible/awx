@@ -144,6 +144,11 @@ function InstancePeerList({ setBreadcrumb }) {
           continue;
         }
 
+        if (instance.managed) {
+          // no managed nodes
+          continue;
+        }
+
         const host = instances.data.results.filter(
           (obj) => obj.id === receptor.instance
         )[0];
