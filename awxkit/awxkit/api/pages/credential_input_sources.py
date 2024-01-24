@@ -4,6 +4,7 @@ from . import page
 
 
 class CredentialInputSource(base.Base):
+    NATURAL_KEY = ('metadata', 'input_field_name')
     pass
 
 
