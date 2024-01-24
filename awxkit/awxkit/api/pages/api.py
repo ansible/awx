@@ -48,6 +48,7 @@ DEPENDENT_EXPORT = [
     ('Inventory', 'Host'),
     ('Inventory', 'Label'),
     ('WorkflowJobTemplateNode', 'WorkflowApprovalTemplate'),
+    ('Credential', 'CredentialInputSource'),
 ]
 
 
