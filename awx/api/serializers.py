@@ -5710,7 +5710,8 @@ class InstanceSerializer(BaseSerializer):
 
         # cannot enable peers_from_control_nodes if listener_port is not set
         if attrs.get('peers_from_control_nodes'):
-            if not attrs.get('listener_port') and self.instance and self.instance.canonical_address_port is None:
+            port = attrs.get('listener_port', -1)  # -1 denotes missing, None denotes explicit null
+            if (port is None) or (port == -1 and self.instance and self.instance.canonical_address is None):
                 raise serializers.ValidationError(_("Cannot enable peers_from_control_nodes if listener_port is not set."))
 
         return super().validate(attrs)
