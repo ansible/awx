@@ -5666,9 +5666,6 @@ class InstanceSerializer(BaseSerializer):
         if 'canonical_address_peers_from_control_nodes' in attrs:
             attrs['peers_from_control_nodes'] = attrs.pop('canonical_address_peers_from_control_nodes')
 
-        def get_field_from_model_or_attrs(fd):
-            return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)
-
         def check_peers_changed():
             '''
             return True if
@@ -5680,9 +5677,7 @@ class InstanceSerializer(BaseSerializer):
         if not self.instance and not settings.IS_K8S:
             raise serializers.ValidationError(_("Can only create instances on Kubernetes or OpenShift."))
 
-        managed = get_field_from_model_or_attrs("managed")
-
-        if managed:
+        if self.instance and self.instance.managed:
             if check_peers_changed():
                 raise serializers.ValidationError(_("Setting peers manually for managed nodes is not allowed."))
 
