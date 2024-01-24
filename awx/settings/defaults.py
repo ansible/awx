@@ -353,6 +353,7 @@ INSTALLED_APPS = [
     'awx.sso',
     'solo',
     'ansible_base.rest_filters',
+    'ansible_base.authentication',
 ]
 
 INTERNAL_IPS = ('127.0.0.1',)
@@ -362,6 +363,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'awx.api.pagination.Pagination',
     'PAGE_SIZE': 25,
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'ansible_base.authentication.session.SessionAuthentication',
         'awx.api.authentication.LoggedOAuth2Authentication',
         'awx.api.authentication.SessionAuthentication',
         'awx.api.authentication.LoggedBasicAuthentication',
@@ -381,12 +383,7 @@ REST_FRAMEWORK = {
 }
 
 AUTHENTICATION_BACKENDS = (
-    'awx.sso.backends.LDAPBackend',
-    'awx.sso.backends.LDAPBackend1',
-    'awx.sso.backends.LDAPBackend2',
-    'awx.sso.backends.LDAPBackend3',
-    'awx.sso.backends.LDAPBackend4',
-    'awx.sso.backends.LDAPBackend5',
+    'ansible_base.authentication.backend.AnsibleBaseAuth',
     'awx.sso.backends.RADIUSBackend',
     'awx.sso.backends.TACACSPlusBackend',
     'social_core.backends.google.GoogleOAuth2',
@@ -891,6 +888,7 @@ LOGGING = {
         'social': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
         'system_tracking_migrations': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
         'rbac_migrations': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'DEBUG'},
+        'ansible_base': {'handlers': ['console'], 'level': 'DEBUG'},
     },
 }
 
@@ -988,6 +986,7 @@ MIDDLEWARE = [
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'ansible_base.authentication.middleware.AuthenticatorBackendMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'awx.main.middleware.DisableLocalAuthMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
