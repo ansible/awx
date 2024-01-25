@@ -88,6 +88,20 @@ base_inputs = {
             ),
         },
         {
+            'id': 'username',
+            'label': _('Username'),
+            'type': 'string',
+            'secret': False,
+            'help_text': _('Username for user authentication.'),
+        },
+        {
+            'id': 'password',
+            'label': _('Password'),
+            'type': 'string',
+            'secret': True,
+            'help_text': _('Password for user authentication.'),
+        },
+        {
             'id': 'default_auth_path',
             'label': _('Path to Auth'),
             'type': 'string',
@@ -185,9 +199,10 @@ hashi_ssh_inputs['required'].extend(['public_key', 'role'])
 
 def handle_auth(**kwargs):
     token = None
-
     if kwargs.get('token'):
         token = kwargs['token']
+    elif kwargs.get('username') and kwargs.get('password'):
+        token = method_auth(**kwargs, auth_param=userpass_auth(**kwargs))
     elif kwargs.get('role_id') and kwargs.get('secret_id'):
         token = method_auth(**kwargs, auth_param=approle_auth(**kwargs))
     elif kwargs.get('kubernetes_role'):
@@ -195,9 +210,12 @@ def handle_auth(**kwargs):
     elif kwargs.get('client_cert_public') and kwargs.get('client_cert_private'):
         token = method_auth(**kwargs, auth_param=client_cert_auth(**kwargs))
     else:
-        raise Exception('Either a token or AppRole, Kubernetes, or TLS authentication parameters must be set')
-
+        raise Exception('Token, Username/Password, AppRole, Kubernetes, or TLS authentication parameters must be set')
     return token
+
+
+def userpass_auth(**kwargs):
+    return {'username': kwargs['username'], 'password': kwargs['password']}
 
 
 def approle_auth(**kwargs):
@@ -233,6 +251,8 @@ def method_auth(**kwargs):
     if kwargs.get('namespace'):
         sess.headers['X-Vault-Namespace'] = kwargs['namespace']
     request_url = '/'.join([url, 'auth', auth_path, 'login']).rstrip('/')
+    if kwargs['auth_param'].get('username'):
+        request_url = request_url + '/' + (kwargs['username'])
     with CertFiles(cacert) as cert:
         request_kwargs['verify'] = cert
         # TLS client certificate support
