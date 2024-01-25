@@ -5667,36 +5667,29 @@ class InstanceSerializer(BaseSerializer):
         if 'canonical_address_peers_from_control_nodes' in attrs:
             attrs['peers_from_control_nodes'] = attrs.pop('canonical_address_peers_from_control_nodes')
 
-        def check_peers_changed():
-            '''
-            return True if
-            - 'peers' in attrs
-            - instance peers does not match peers in attrs
-            '''
-            return self.instance and 'peers' in attrs and set(self.instance.peers.all()) != set(attrs['peers'])
-
         if not self.instance and not settings.IS_K8S:
             raise serializers.ValidationError(_("Can only create instances on Kubernetes or OpenShift."))
 
-        if self.instance and self.instance.managed:
-            if check_peers_changed():
-                raise serializers.ValidationError(_("Setting peers manually for managed nodes is not allowed."))
+        if self.instance and 'peers' in attrs:
+            instance_addresses = set(self.instance.receptor_addresses.all())
+            setting_peers = set(attrs['peers'])
+            peers_changed = set(self.instance.peers.all()) != setting_peers
 
-        if not settings.IS_K8S:
-            if check_peers_changed():
+            if not settings.IS_K8S and peers_changed:
                 raise serializers.ValidationError(_("Cannot change peers."))
 
-        # cannot peer to self
-        peers_ids = [p.id for p in attrs.get('peers', [])]
-        if self.instance and self.instance.receptor_addresses.filter(id__in=peers_ids).exists():
-            raise serializers.ValidationError(_("Instance cannot peer to its own address."))
+            if self.instance.managed and peers_changed:
+                raise serializers.ValidationError(_("Setting peers manually for managed nodes is not allowed."))
 
-        if self.instance and self.instance.receptor_addresses.all().exists():
-            instance_addresses = set(self.instance.receptor_addresses.all())
+            # cannot peer to self
+            if instance_addresses & setting_peers:
+                raise serializers.ValidationError(_("Instance cannot peer to its own address."))
+
             # cannot peer to an instance that is already peered to this instance
-            for p in attrs.get('peers', []):
-                if set(p.instance.peers.all()) & instance_addresses:
-                    raise serializers.ValidationError(_(f"Instance {p.instance.hostname} is already peered to this instance."))
+            if instance_addresses:
+                for p in setting_peers:
+                    if set(p.instance.peers.all()) & instance_addresses:
+                        raise serializers.ValidationError(_(f"Instance {p.instance.hostname} is already peered to this instance."))
 
         # cannot peer to an instance more than once
         peers_instances = Counter(p.instance_id for p in attrs.get('peers', []))
