@@ -5670,32 +5670,6 @@ class InstanceSerializer(BaseSerializer):
         if not self.instance and not settings.IS_K8S:
             raise serializers.ValidationError(_("Can only create instances on Kubernetes or OpenShift."))
 
-        if self.instance and 'peers' in attrs:
-            instance_addresses = set(self.instance.receptor_addresses.all())
-            setting_peers = set(attrs['peers'])
-            peers_changed = set(self.instance.peers.all()) != setting_peers
-
-            if not settings.IS_K8S and peers_changed:
-                raise serializers.ValidationError(_("Cannot change peers."))
-
-            if self.instance.managed and peers_changed:
-                raise serializers.ValidationError(_("Setting peers manually for managed nodes is not allowed."))
-
-            # cannot peer to self
-            if instance_addresses & setting_peers:
-                raise serializers.ValidationError(_("Instance cannot peer to its own address."))
-
-            # cannot peer to an instance that is already peered to this instance
-            if instance_addresses:
-                for p in setting_peers:
-                    if set(p.instance.peers.all()) & instance_addresses:
-                        raise serializers.ValidationError(_(f"Instance {p.instance.hostname} is already peered to this instance."))
-
-        # cannot peer to an instance more than once
-        peers_instances = Counter(p.instance_id for p in attrs.get('peers', []))
-        if any(count > 1 for count in peers_instances.values()):
-            raise serializers.ValidationError(_("Cannot peer to the same instance more than once."))
-
         # cannot enable peers_from_control_nodes if listener_port is not set
         if attrs.get('peers_from_control_nodes'):
             port = attrs.get('listener_port', -1)  # -1 denotes missing, None denotes explicit null
@@ -5748,6 +5722,35 @@ class InstanceSerializer(BaseSerializer):
                 raise serializers.ValidationError(_("Cannot change listener port."))
             if self.instance.managed and value != canonical_address_port:
                 raise serializers.ValidationError(_("Cannot change listener port for managed nodes."))
+        return value
+
+    def validate_peers(self, value):
+        # cannot peer to an instance more than once
+        peers_instances = Counter(p.instance_id for p in value)
+        if any(count > 1 for count in peers_instances.values()):
+            raise serializers.ValidationError(_("Cannot peer to the same instance more than once."))
+
+        if self.instance:
+            instance_addresses = set(self.instance.receptor_addresses.all())
+            setting_peers = set(value)
+            peers_changed = set(self.instance.peers.all()) != setting_peers
+
+            if not settings.IS_K8S and peers_changed:
+                raise serializers.ValidationError(_("Cannot change peers."))
+
+            if self.instance.managed and peers_changed:
+                raise serializers.ValidationError(_("Setting peers manually for managed nodes is not allowed."))
+
+            # cannot peer to self
+            if instance_addresses & setting_peers:
+                raise serializers.ValidationError(_("Instance cannot peer to its own address."))
+
+            # cannot peer to an instance that is already peered to this instance
+            if instance_addresses:
+                for p in setting_peers:
+                    if set(p.instance.peers.all()) & instance_addresses:
+                        raise serializers.ValidationError(_(f"Instance {p.instance.hostname} is already peered to this instance."))
+
         return value
 
 
