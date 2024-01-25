@@ -63,6 +63,183 @@ class TestPeers:
         )
         assert 'Cannot change node type.' in str(resp.data)
 
+    @pytest.mark.parametrize(
+        'payload_port, payload_peers_from, initial_port, initial_peers_from',
+        [
+            (-1, -1, None, None),
+            (-1, -1, 27199, False),
+            (-1, -1, 27199, True),
+            (None, -1, None, None),
+            (None, False, None, None),
+            (-1, False, None, None),
+            (27199, True, 27199, True),
+            (27199, False, 27199, False),
+            (27199, -1, 27199, True),
+            (27199, -1, 27199, False),
+            (-1, True, 27199, True),
+            (-1, False, 27199, False),
+        ],
+    )
+    def test_no_op(self, payload_port, payload_peers_from, initial_port, initial_peers_from, admin_user, patch):
+        node = Instance.objects.create(hostname='abc', node_type='hop')
+        if initial_port is not None:
+            ReceptorAddress.objects.create(address=node.hostname, port=initial_port, canonical=True, peers_from_control_nodes=initial_peers_from, instance=node)
+
+            assert ReceptorAddress.objects.filter(instance=node).count() == 1
+        else:
+            assert ReceptorAddress.objects.filter(instance=node).count() == 0
+
+        data = {'enabled': True}  # Just to have something to post.
+        if payload_port != -1:
+            data['listener_port'] = payload_port
+        if payload_peers_from != -1:
+            data['peers_from_control_nodes'] = payload_peers_from
+
+        patch(
+            url=reverse('api:instance_detail', kwargs={'pk': node.pk}),
+            data=data,
+            user=admin_user,
+            expect=200,
+        )
+
+        assert ReceptorAddress.objects.filter(instance=node).count() == (0 if initial_port is None else 1)
+        if initial_port is not None:
+            ra = ReceptorAddress.objects.get(instance=node, canonical=True)
+            assert ra.port == initial_port
+            assert ra.peers_from_control_nodes == initial_peers_from
+
+    @pytest.mark.parametrize(
+        'payload_port, payload_peers_from',
+        [
+            (27199, True),
+            (27199, False),
+            (27199, -1),
+        ],
+    )
+    def test_creates_canonical_address(self, payload_port, payload_peers_from, admin_user, patch):
+        node = Instance.objects.create(hostname='abc', node_type='hop')
+        assert ReceptorAddress.objects.filter(instance=node).count() == 0
+
+        data = {'enabled': True}  # Just to have something to post.
+        if payload_port != -1:
+            data['listener_port'] = payload_port
+        if payload_peers_from != -1:
+            data['peers_from_control_nodes'] = payload_peers_from
+
+        patch(
+            url=reverse('api:instance_detail', kwargs={'pk': node.pk}),
+            data=data,
+            user=admin_user,
+            expect=200,
+        )
+
+        assert ReceptorAddress.objects.filter(instance=node).count() == 1
+        ra = ReceptorAddress.objects.get(instance=node, canonical=True)
+        assert ra.port == payload_port
+        assert ra.peers_from_control_nodes == (payload_peers_from if payload_peers_from != -1 else False)
+
+    @pytest.mark.parametrize(
+        'payload_port, payload_peers_from, initial_port, initial_peers_from',
+        [
+            (None, False, 27199, True),
+            (None, -1, 27199, True),
+            (None, False, 27199, False),
+            (None, -1, 27199, False),
+        ],
+    )
+    def test_deletes_canonical_address(self, payload_port, payload_peers_from, initial_port, initial_peers_from, admin_user, patch):
+        node = Instance.objects.create(hostname='abc', node_type='hop')
+        ReceptorAddress.objects.create(address=node.hostname, port=initial_port, canonical=True, peers_from_control_nodes=initial_peers_from, instance=node)
+
+        assert ReceptorAddress.objects.filter(instance=node).count() == 1
+
+        data = {'enabled': True}  # Just to have something to post.
+        if payload_port != -1:
+            data['listener_port'] = payload_port
+        if payload_peers_from != -1:
+            data['peers_from_control_nodes'] = payload_peers_from
+
+        patch(
+            url=reverse('api:instance_detail', kwargs={'pk': node.pk}),
+            data=data,
+            user=admin_user,
+            expect=200,
+        )
+
+        assert ReceptorAddress.objects.filter(instance=node).count() == 0
+
+    @pytest.mark.parametrize(
+        'payload_port, payload_peers_from, initial_port, initial_peers_from',
+        [
+            (27199, True, 27199, False),
+            (27199, False, 27199, True),
+            (-1, True, 27199, False),
+            (-1, False, 27199, True),
+        ],
+    )
+    def test_updates_canonical_address(self, payload_port, payload_peers_from, initial_port, initial_peers_from, admin_user, patch):
+        node = Instance.objects.create(hostname='abc', node_type='hop')
+        ReceptorAddress.objects.create(address=node.hostname, port=initial_port, canonical=True, peers_from_control_nodes=initial_peers_from, instance=node)
+
+        assert ReceptorAddress.objects.filter(instance=node).count() == 1
+
+        data = {'enabled': True}  # Just to have something to post.
+        if payload_port != -1:
+            data['listener_port'] = payload_port
+        if payload_peers_from != -1:
+            data['peers_from_control_nodes'] = payload_peers_from
+
+        patch(
+            url=reverse('api:instance_detail', kwargs={'pk': node.pk}),
+            data=data,
+            user=admin_user,
+            expect=200,
+        )
+
+        assert ReceptorAddress.objects.filter(instance=node).count() == 1
+        ra = ReceptorAddress.objects.get(instance=node, canonical=True)
+        assert ra.port == initial_port  # At the present time, changing ports is not allowed
+        assert ra.peers_from_control_nodes == payload_peers_from
+
+    @pytest.mark.parametrize(
+        'payload_port, payload_peers_from, initial_port, initial_peers_from, error_msg',
+        [
+            (-1, True, None, None, "Cannot enable peers_from_control_nodes"),
+            (None, True, None, None, "Cannot enable peers_from_control_nodes"),
+            (None, True, 21799, True, "Cannot enable peers_from_control_nodes"),
+            (None, True, 21799, False, "Cannot enable peers_from_control_nodes"),
+            (21800, -1, 21799, True, "Cannot change listener port"),
+            (21800, True, 21799, True, "Cannot change listener port"),
+            (21800, False, 21799, True, "Cannot change listener port"),
+            (21800, -1, 21799, False, "Cannot change listener port"),
+            (21800, True, 21799, False, "Cannot change listener port"),
+            (21800, False, 21799, False, "Cannot change listener port"),
+        ],
+    )
+    def test_canonical_address_validation_error(self, payload_port, payload_peers_from, initial_port, initial_peers_from, error_msg, admin_user, patch):
+        node = Instance.objects.create(hostname='abc', node_type='hop')
+        if initial_port is not None:
+            ReceptorAddress.objects.create(address=node.hostname, port=initial_port, canonical=True, peers_from_control_nodes=initial_peers_from, instance=node)
+
+            assert ReceptorAddress.objects.filter(instance=node).count() == 1
+        else:
+            assert ReceptorAddress.objects.filter(instance=node).count() == 0
+
+        data = {'enabled': True}  # Just to have something to post.
+        if payload_port != -1:
+            data['listener_port'] = payload_port
+        if payload_peers_from != -1:
+            data['peers_from_control_nodes'] = payload_peers_from
+
+        resp = patch(
+            url=reverse('api:instance_detail', kwargs={'pk': node.pk}),
+            data=data,
+            user=admin_user,
+            expect=400,
+        )
+
+        assert error_msg in str(resp.data)
+
     def test_listener_port(self, admin_user, patch):
         """
         setting listener_port should create a receptor address
