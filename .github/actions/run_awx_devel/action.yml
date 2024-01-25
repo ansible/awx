@@ -71,7 +71,7 @@ runs:
       id: data
       shell: bash
       run: |
-        AWX_IP=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' tools_awx_1)
+        AWX_IP=$(docker inspect -f '{{.NetworkSettings.Networks._sources_awx.IPAddress}}' tools_awx_1)
         ADMIN_TOKEN=$(docker exec -i tools_awx_1 awx-manage create_oauth2_token --user admin)
         echo "ip=$AWX_IP" >> $GITHUB_OUTPUT
         echo "admin_token=$ADMIN_TOKEN" >> $GITHUB_OUTPUT
