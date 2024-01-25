@@ -6,7 +6,7 @@ import copy
 import json
 import logging
 import re
-from collections import OrderedDict
+from collections import Counter, OrderedDict
 from datetime import timedelta
 from uuid import uuid4
 
@@ -5697,10 +5697,9 @@ class InstanceSerializer(BaseSerializer):
                 if set(p.instance.peers.all()) & instance_addresses:
                     raise serializers.ValidationError(_(f"Instance {p.instance.hostname} is already peered to this instance."))
 
-        # cannot peer to instance more than once
-        # compare length of set to original list to check for duplicates
-        peers_instances = [p.instance for p in attrs.get('peers', [])]
-        if len(set(peers_instances)) != len(peers_instances):
+        # cannot peer to an instance more than once
+        peers_instances = Counter(p.instance_id for p in attrs.get('peers', []))
+        if any(count > 1 for count in peers_instances.values()):
             raise serializers.ValidationError(_("Cannot peer to the same instance more than once."))
 
         # cannot enable peers_from_control_nodes if listener_port is not set
