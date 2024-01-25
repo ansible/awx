@@ -126,7 +126,7 @@ def generate_inventory_yml(instance_obj):
 def generate_group_vars_all_yml(instance_obj):
     # get peers
     peers = []
-    for addr in instance_obj.peers.all().prefetch_related('instance'):
+    for addr in instance_obj.peers.select_related('instance'):
         peers.append(dict(address=addr.get_full_address(), protocol=addr.protocol))
     context = dict(instance=instance_obj, peers=peers)
 
