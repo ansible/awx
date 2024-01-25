@@ -522,11 +522,13 @@ def receptor_address_saved(sender, instance, **kwargs):
 
     control_instances = set(Instance.objects.filter(node_type__in=[Instance.Types.CONTROL, Instance.Types.HYBRID]))
     if address.peers_from_control_nodes:
+        # FIXME: you ought to be able to have more connections than just the control instances
         if set(address.peers_from.all()) != control_instances:
             with disable_activity_stream():
                 address.peers_from.add(*control_instances)
                 schedule_write_receptor_config()
     else:
+        # FIXME: you shouldn't unconditionally remove every peer when disabling peers_from_control_nodes
         if address.peers_from.exists():
             with disable_activity_stream():
                 address.peers_from.remove(*control_instances)
