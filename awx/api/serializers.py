@@ -5640,6 +5640,7 @@ class InstanceSerializer(BaseSerializer):
     def get_reverse_peers(self, obj):
         return Instance.objects.prefetch_related('peers').filter(peers__in=obj.receptor_addresses.all()).values_list('id', flat=True)
 
+    # FIXME: protocol should be blank, null, or missing if there is no canonical address
     def get_protocol(self, obj):
         # note: don't create a different query for receptor addresses, as this is prefetched on the View for optimization
         for addr in obj.receptor_addresses.all():
