@@ -30,7 +30,7 @@ The nodes (control, hop, and execution instances) are interconnected via recepto
 Prerequisites
 --------------
 
-- |rhel| (RHEL) operating system. Bring a machine online with a compatible Red Hat family OS (e.g. RHEL 8 and 9). This machines require a static IP, or a resolvable DNS hostname that the AWX cluster can access. If the ``listener_port`` is defined, the machine will also need an available open port on which to establish inbound TCP connections (e.g. 27199).
+- |rhel| (RHEL) or Debian operating system. Bring a machine online with a compatible Red Hat family OS (e.g. RHEL 8 and 9) or Debian 11. This machines require a static IP, or a resolvable DNS hostname that the AWX cluster can access. If the ``listener_port`` is defined, the machine will also need an available open port on which to establish inbound TCP connections (e.g. 27199).
 
   In general, the more CPU cores and memory the machine has, the more jobs that can be scheduled to run on that machine at once. See :ref:`ug_job_concurrency` for more information on capacity.
 
@@ -69,34 +69,6 @@ Prerequisites
 
 
 - To manage instances from the AWX user interface, you must have System Administrator or System Auditor permissions.
-
-
-Using a custom Receptor CA
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The control nodes on the K8S cluster will communicate with execution nodes via mutual TLS TCP connections, running via Receptor. Execution nodes will verify incoming connections by ensuring the x509 certificate was issued by a trusted Certificate Authority (CA).
-
-You may choose to provide your own CA for this validation. If no CA is provided, AWX operator will automatically generate one using OpenSSL.
-
-Given custom ``ca.crt`` and ``ca.key`` stored locally, run the following:
-
-::
-
-	kubectl create secret tls awx-demo-receptor-ca \
-   	--cert=/path/to/ca.crt --key=/path/to/ca.key
-
-The secret should be named ``{AWX Custom Resource name}-receptor-ca``. In the above, the AWX Custom Resource name is "awx-demo". Replace "awx-demo" with your AWX Custom Resource name.
-
-If this secret is created after AWX is deployed, run the following to restart the deployment:
-
-::
-
-	kubectl rollout restart deployment awx-demo
-
-
-.. note::
-
-	Changing the receptor CA will sever connections to any existing execution nodes. These nodes will enter an *Unavailable* state, and jobs will not be able to run on them. You will need to download and re-run the install bundle for each execution node. This will replace the TLS certificate files with those signed by the new CA. The execution nodes will then appear in a *Ready* state after a few minutes.
 
 
 Manage instances
@@ -285,6 +257,33 @@ You can remove an instance by clicking **Remove** in the Instances page, or by s
 
 10. To view a graphical representation of your updated topology, refer to the :ref:`ag_topology_viewer` section of this guide.
 
+
+Using a custom Receptor CA
+---------------------------
+
+The control nodes on the K8S cluster will communicate with execution nodes via mutual TLS TCP connections, running via Receptor. Execution nodes will verify incoming connections by ensuring the x509 certificate was issued by a trusted Certificate Authority (CA).
+
+You may choose to provide your own CA for this validation. If no CA is provided, AWX operator will automatically generate one using OpenSSL.
+
+Given custom ``ca.crt`` and ``ca.key`` stored locally, run the following:
+
+::
+
+	kubectl create secret tls awx-demo-receptor-ca \
+   	--cert=/path/to/ca.crt --key=/path/to/ca.key
+
+The secret should be named ``{AWX Custom Resource name}-receptor-ca``. In the above, the AWX Custom Resource name is "awx-demo". Replace "awx-demo" with your AWX Custom Resource name.
+
+If this secret is created after AWX is deployed, run the following to restart the deployment:
+
+::
+
+	kubectl rollout restart deployment awx-demo
+
+
+.. note::
+
+	Changing the receptor CA will sever connections to any existing execution nodes. These nodes will enter an *Unavailable* state, and jobs will not be able to run on them. You will need to download and re-run the install bundle for each execution node. This will replace the TLS certificate files with those signed by the new CA. The execution nodes will then appear in a *Ready* state after a few minutes.
 
 Troubleshooting
 ----------------
