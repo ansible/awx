@@ -19,7 +19,7 @@ Instances serve as nodes in your mesh topology. Automation mesh allows you to ex
 Automation mesh is useful for:
 
 - traversing difficult network topologies
-- bringing execution capabilities (the machine running ``ansible-playbook``) closer to you target hosts
+- bringing execution capabilities (the machine running ``ansible-playbook``) closer to your target hosts
 
 The nodes (control, hop, and execution instances) are interconnected via receptor, forming a virtual mesh.
 
@@ -30,11 +30,11 @@ The nodes (control, hop, and execution instances) are interconnected via recepto
 Prerequisites
 --------------
 
-- |rhel| (RHEL) or Debian operating system. Bring a machine online with a compatible Red Hat family OS (e.g. RHEL 8 and 9) or Debian 11. This machines require a static IP, or a resolvable DNS hostname that the AWX cluster can access. If the ``listener_port`` is defined, the machine will also need an available open port on which to establish inbound TCP connections (e.g. 27199).
+- |rhel| (RHEL) or Debian operating system. Bring a machine online with a compatible Red Hat family OS (e.g. RHEL 8 and 9) or Debian 11. This machine requires a static IP, or a resolvable DNS hostname that the AWX cluster can access. If the ``listener_port`` is defined, the machine will also need an available open port on which to establish inbound TCP connections (e.g. 27199).
 
   In general, the more CPU cores and memory the machine has, the more jobs that can be scheduled to run on that machine at once. See :ref:`ug_job_concurrency` for more information on capacity.
 
-- The system that is going to run the ``ansible-playbook`` requires the collection ``ansible.receptor`` to be installed:
+- The system that is going to run the install bundle to setup the remote node requires the collection ``ansible.receptor`` to be installed:
 
 	- If machine has access to the internet:
 
@@ -45,27 +45,7 @@ Prerequisites
 
 	Installing the receptor collection dependency from the ``requirements.yml`` file will consistently retrieve the receptor version specified there, as well as any other collection dependencies that may be needed in the future.
 
-	- If machine does not have access to the internet, refer to `Downloading a collection from Automation Hub <https://docs.ansible.com/ansible/latest/galaxy/user_guide.html#downloading-a-collection-from-automation-hub>`_ to configure `Automation Hub <https://console.redhat.com/ansible/automation-hub>`_ in Ansible Galaxy locally.
-
-
-- If you are using the default |ee| (provided with AWX) to run on remote execution nodes, you must add a pull secret in AWX that contains the credential for pulling the |ee| image. To do this, create a pull secret on the AWX namespace and configure the ``ee_pull_credentials_secret`` parameter in the Operator:
-
-	1. Create a secret:
-	::
-
-		oc create secret generic ee-pull-secret \
-    	  	 --from-literal=username=<username> \
-    	  	 --from-literal=password=<password> \
-    	  	 --from-literal=url=registry.redhat.io
-
-	::
-
-		oc edit awx <instance name>
-
-	2. Add ``ee_pull_credentials_secret ee-pull-secret`` to the spec:
-	::
-
-		spec.ee_pull_credentials_secret=ee-pull-secret
+	- If machine does not have access to the internet, refer to `Downloading a collection for offline use <https://docs.ansible.com/ansible/latest/collections_guide/collections_installing.html#downloading-a-collection-for-offline-use>`_.
 
 
 - To manage instances from the AWX user interface, you must have System Administrator or System Auditor permissions.
@@ -192,10 +172,6 @@ Upon successful creation, the Details of the one of the created instances opens.
 	The proceeding steps 4-8 are intended to be ran from any computer that has SSH access to the newly created instance. 
 
 4. Click the download button next to the **Install Bundle** field to download the tarball that contain files to allow AWX to make proper TCP connections to the remote machine.
-
-::
-
-	ansible-galaxy collection install -r requirements.yml
 
 .. image:: ../common/images/instances_install_bundle.png
 	:alt: Instance details showing the Download button in the Install Bundle field of the Details tab.
