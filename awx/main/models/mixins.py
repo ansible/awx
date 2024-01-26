@@ -527,7 +527,6 @@ class CustomVirtualEnvMixin(models.Model):
 
 
 class RelatedJobsMixin(object):
-
     """
     This method is intended to be overwritten.
     Called by get_active_jobs()
