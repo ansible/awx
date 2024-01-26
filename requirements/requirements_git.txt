@@ -5,4 +5,4 @@ git+https://github.com/ansible/ansible-runner.git@devel#egg=ansible-runner
 # specifically need https://github.com/robgolding/django-radius/pull/27
 git+https://github.com/ansible/django-radius.git@develop#egg=django-radius
 git+https://github.com/ansible/python3-saml.git@devel#egg=python3-saml
-django-ansible-base @ git+https://github.com/ansible/django-ansible-base@devel#egg=django-ansible-base[rest_filters]
+django-ansible-base @ git+https://github.com/ansible/django-ansible-base@devel#egg=django-ansible-base[rest_filters,jwt_consumer]
