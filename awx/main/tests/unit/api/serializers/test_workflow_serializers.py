@@ -12,7 +12,6 @@ from awx.main.models import Job, WorkflowJobTemplateNode, WorkflowJob, WorkflowJ
 
 
 @pytest.mark.django_db
-@mock.patch('awx.api.serializers.UnifiedJobTemplateSerializer.get_related', lambda x, y: {})
 class TestWorkflowJobTemplateSerializerGetRelated:
     @pytest.fixture
     def workflow_job_template(self, workflow_job_template_factory):
@@ -34,7 +33,6 @@ class TestWorkflowJobTemplateSerializerGetRelated:
         test_get_related(WorkflowJobTemplateSerializer, workflow_job_template, 'workflow_job_templates', related_resource_name)
 
 
-@mock.patch('awx.api.serializers.BaseSerializer.get_related', lambda x, y: {})
 class TestWorkflowNodeBaseSerializerGetRelated:
     @pytest.fixture
     def job_template(self, job_template_factory):
@@ -61,7 +59,6 @@ class TestWorkflowNodeBaseSerializerGetRelated:
 
 
 @pytest.mark.django_db
-@mock.patch('awx.api.serializers.BaseSerializer.get_related', lambda x, y: {})
 class TestWorkflowJobTemplateNodeSerializerGetRelated:
     @pytest.fixture
     def workflow_job_template_node(self):
@@ -210,7 +207,6 @@ class TestWorkflowJobTemplateNodeSerializerSurveyPasswords:
         assert attrs['extra_data'] == {}
 
 
-@mock.patch('awx.api.serializers.WorkflowJobTemplateNodeSerializer.get_related', lambda x, y: {})
 class TestWorkflowJobNodeSerializerGetRelated:
     @pytest.fixture
     def workflow_job_node(self):

@@ -12,6 +12,7 @@ from django.db.models.fields.related import ForeignKey
 from django.http import Http404
 from django.utils.encoding import force_str, smart_str
 from django.utils.translation import gettext_lazy as _
+from django.urls import resolve
 
 # Django REST Framework
 from rest_framework import exceptions
@@ -26,6 +27,7 @@ from awx.api.fields import ChoiceNullField
 from awx.main.fields import ImplicitRoleField
 from awx.main.models import NotificationTemplate
 from awx.main.utils.execution_environments import get_default_pod_spec
+from awx.api.versioning import reverse
 
 # Polymorphic
 from polymorphic.models import PolymorphicModel
@@ -257,6 +259,19 @@ class Metadata(metadata.SimpleMetadata):
             serializer = view.get_serializer()
             if hasattr(serializer, 'get_types'):
                 metadata['types'] = serializer.get_types()
+
+            if hasattr(serializer, 'sublists'):
+                # Provide tail path navigation to related associate disassociate endpoints
+                metadata['associations'] = []
+                for key_name, view_name in serializer.sublists:
+                    url = reverse(f'api:{view_name}', kwargs={'pk': 1})
+                    related_view = resolve(url).func.view_class
+                    rel_summary = {
+                        'relative_url': url.rstrip('/').rsplit('/', 1)[1],
+                        'related_entry': key_name,
+                        'resource': related_view.model._meta.verbose_name_plural.replace(' ', '_'),
+                    }
+                    metadata['associations'].append(rel_summary)
 
         # Add search fields if available from the view.
         if getattr(view, 'search_fields', None):

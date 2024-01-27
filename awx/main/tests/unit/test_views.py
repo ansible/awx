@@ -5,10 +5,18 @@ from unittest import mock
 from rest_framework import exceptions
 from rest_framework.generics import ListAPIView
 
+# Django
+from django.db.models.fields.reverse_related import ManyToManyRel
+from django.db.models.fields.related import ManyToManyField
+from django.urls import resolve
+
 # AWX
 from awx.main.views import ApiErrorView
+from awx.api.versioning import reverse
 from awx.api.views import JobList
-from awx.api.generics import ListCreateAPIView, SubListAttachDetachAPIView
+from awx.api import serializers
+from awx.api.generics import ListCreateAPIView, SubListAttachDetachAPIView, SubListCreateAttachDetachAPIView
+from awx.main.signals import model_serializer_mapping
 
 
 HTTP_METHOD_NAMES = [
@@ -91,3 +99,67 @@ def test_global_creation_always_possible(all_views):
         assert 'POST' in global_view().allowed_methods, 'Resource {} should be creatable in global list view {}. Can be created now in {}'.format(
             model, global_view, creatable_view
         )
+
+
+def test_associate_views_are_m2m(all_views):
+    for View in all_views:
+        if not issubclass(View, SubListCreateAttachDetachAPIView):
+            continue
+        cls = View.parent_model
+
+        # special exception for role teams
+        relationship = View.relationship
+        if View.relationship == 'member_role.parents':
+            relationship = 'parents'
+
+        for rel in relationship.split('.'):
+            try:
+                field = cls._meta.get_field(rel)
+                cls = field.remote_field.model
+            except Exception:
+                print(View)
+                raise
+        assert isinstance(field, (ManyToManyField, ManyToManyRel)), f'The sublist view {View} is of {type(field)}, which is not a m2m'
+
+
+def get_serializer_for_model(cls):
+    """
+    Go through a preference order to find the most representative serializer
+    for the specified model
+    """
+    serializer_mapping = model_serializer_mapping()
+    if cls in serializer_mapping:
+        return serializer_mapping[cls]
+    # not in activity stream serializer mapping, so just loop through serializers
+    for name in dir(serializers):
+        item = getattr(serializers, name)
+        try:
+            if issubclass(item, serializers.BaseSerializer) and hasattr(item.Meta, 'model'):
+                if item.Meta.model is cls:
+                    return item
+        except TypeError:
+            pass
+    raise Exception(f'Could not find a serializer for {cls}')
+
+
+def test_attach_detatch_views_are_marked(all_views):
+    for View in all_views:
+        if not issubclass(View, SubListCreateAttachDetachAPIView):
+            continue
+
+        parent_serializer = get_serializer_for_model(View.parent_model)
+        cls_sublists = getattr(parent_serializer, 'sublists', ())
+        found_classes = []
+        for key, view_name in cls_sublists:
+            url = reverse(f'api:{view_name}', kwargs={'pk': 42})
+            related_view = resolve(url).func.view_class
+            found_classes.append(related_view)
+            if related_view is View:
+                break
+        else:
+            lb = "\n"
+            raise Exception(
+                f'The view {View} is not listed in parent model {View.parent_model} serializer '
+                f'{parent_serializer} declared sublists:{lb}{lb.join([str(pair) for pair in cls_sublists])}'
+                f'{lb}{lb}Found views:{lb}{lb.join([str(v) for v in found_classes])}'
+            )

@@ -1626,7 +1626,7 @@ class HostAnsibleFactsDetail(RetrieveAPIView):
         return super().get(request, *args, **kwargs)
 
 
-class InventoryHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIView):
+class InventoryHostsList(HostRelatedSearchMixin, SubListCreateAPIView):
     model = models.Host
     serializer_class = serializers.HostSerializer
     parent_model = models.Inventory
@@ -1866,7 +1866,7 @@ class GroupDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class InventoryGroupsList(SubListCreateAttachDetachAPIView):
+class InventoryGroupsList(SubListCreateAPIView):
     model = models.Group
     serializer_class = serializers.GroupSerializer
     parent_model = models.Inventory
@@ -1874,7 +1874,7 @@ class InventoryGroupsList(SubListCreateAttachDetachAPIView):
     parent_key = 'inventory'
 
 
-class InventoryRootGroupsList(SubListCreateAttachDetachAPIView):
+class InventoryRootGroupsList(SubListCreateAPIView):
     model = models.Group
     serializer_class = serializers.GroupSerializer
     parent_model = models.Inventory
@@ -2813,7 +2813,7 @@ class WorkflowJobNodeLabelsList(SubListAPIView):
     relationship = 'labels'
 
 
-class WorkflowJobNodeInstanceGroupsList(SubListAttachDetachAPIView):
+class WorkflowJobNodeInstanceGroupsList(SubListAPIView):
     model = models.InstanceGroup
     serializer_class = serializers.InstanceGroupSerializer
     parent_model = models.WorkflowJobNode

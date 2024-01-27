@@ -127,7 +127,7 @@ class OrganizationProjectsList(SubListCreateAPIView):
     parent_key = 'organization'
 
 
-class OrganizationExecutionEnvironmentsList(SubListCreateAttachDetachAPIView):
+class OrganizationExecutionEnvironmentsList(SubListCreateAPIView):
     model = ExecutionEnvironment
     serializer_class = ExecutionEnvironmentSerializer
     parent_model = Organization
@@ -150,7 +150,7 @@ class OrganizationWorkflowJobTemplatesList(SubListCreateAPIView):
     parent_key = 'organization'
 
 
-class OrganizationTeamsList(SubListCreateAttachDetachAPIView):
+class OrganizationTeamsList(SubListCreateAPIView):
     model = Team
     serializer_class = TeamSerializer
     parent_model = Organization
@@ -166,7 +166,7 @@ class OrganizationActivityStreamList(SubListAPIView):
     search_fields = ('changes',)
 
 
-class OrganizationNotificationTemplatesList(SubListCreateAttachDetachAPIView):
+class OrganizationNotificationTemplatesList(SubListCreateAPIView):
     model = NotificationTemplate
     serializer_class = NotificationTemplateSerializer
     parent_model = Organization
