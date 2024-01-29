@@ -261,6 +261,13 @@ If this secret is created after AWX is deployed, run the following to restart th
 
 	Changing the receptor CA will sever connections to any existing execution nodes. These nodes will enter an *Unavailable* state, and jobs will not be able to run on them. You will need to download and re-run the install bundle for each execution node. This will replace the TLS certificate files with those signed by the new CA. The execution nodes will then appear in a *Ready* state after a few minutes.
 
+
+Using a private image for the default EE
+------------------------------------------
+
+Refer to the AWX Operator Documentation on `Default execution environments from private registries <https://ansible.readthedocs.io/projects/awx-operator/en/latest/user-guide/advanced-configuration/default-execution-environments-from-private-registries.html>`_ for detail.
+
+
 Troubleshooting
 ----------------
 
