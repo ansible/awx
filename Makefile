@@ -10,7 +10,7 @@ KIND_BIN ?= $(shell which kind)
 CHROMIUM_BIN=/tmp/chrome-linux/chrome
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 MANAGEMENT_COMMAND ?= awx-manage
-VERSION ?= $(shell $(PYTHON) tools/scripts/scm_version.py)
+VERSION ?= $(shell $(PYTHON) tools/scripts/scm_version.py 2> /dev/null)
 
 # ansible-test requires semver compatable version, so we allow overrides to hack it
 COLLECTION_VERSION ?= $(shell $(PYTHON) tools/scripts/scm_version.py | cut -d . -f 1-3)
