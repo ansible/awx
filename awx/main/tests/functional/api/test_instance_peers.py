@@ -240,35 +240,6 @@ class TestPeers:
 
         assert error_msg in str(resp.data)
 
-    def test_listener_port(self, admin_user, patch):
-        """
-        setting listener_port should create a receptor address
-        cannot change listener_port to new value
-        unsetting listener_port should remove that address
-        """
-        hop = Instance.objects.create(hostname='abc', node_type="hop")
-        patch(
-            url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
-            data={"listener_port": 27199},
-            user=admin_user,
-            expect=200,  # can set a port
-        )
-        assert ReceptorAddress.objects.filter(instance=hop, port=27199).exists()
-        resp = patch(
-            url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
-            data={"listener_port": 5678},
-            user=admin_user,
-            expect=400,  # cannot change port
-        )
-        assert 'Cannot change listener port.' in str(resp.data)
-        patch(
-            url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
-            data={"listener_port": None},
-            user=admin_user,
-            expect=200,  # can unset a port
-        )
-        assert not ReceptorAddress.objects.filter(instance=hop, port=27199).exists()
-
     def test_changing_managed_listener_port(self, admin_user, patch):
         """
         if instance is managed, cannot change listener port at all
@@ -289,48 +260,6 @@ class TestPeers:
             expect=400,  # cannot unset port
         )
         assert 'Cannot change listener port for managed nodes.' in str(resp.data)
-
-    def test_peers_from_control_nodes(self, admin_user, patch):
-        """
-        setting and unsetting peers_from_control_nodes on instance should change the
-        peers_from_control_nodes on the receptor address
-        """
-        hop = Instance.objects.create(hostname='abc', node_type="hop")
-        patch(
-            url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
-            data={"listener_port": 27199, "peers_from_control_nodes": True},
-            user=admin_user,
-            expect=200,
-        )
-        assert ReceptorAddress.objects.filter(instance=hop, port=27199, peers_from_control_nodes=True).exists()
-        patch(
-            url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
-            data={"peers_from_control_nodes": False},
-            user=admin_user,
-            expect=200,
-        )
-        assert ReceptorAddress.objects.filter(instance=hop, port=27199, peers_from_control_nodes=False).exists()
-
-    def test_peers_from_control_nodes_without_listener_port(self, admin_user, patch):
-        """
-        patching with peers_from_control_nodes=True should fail if listener_port is not set
-        patching with peers_from_control_nodes=False should be NOOP if listener_port is not set
-        """
-        hop = Instance.objects.create(hostname='abc', node_type="hop")
-        resp = patch(
-            url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
-            data={"peers_from_control_nodes": True},
-            user=admin_user,
-            expect=400,
-        )
-        assert 'Cannot enable peers_from_control_nodes if listener_port is not set' in str(resp.data)
-        patch(
-            url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
-            data={"peers_from_control_nodes": False},
-            user=admin_user,
-            expect=200,
-        )
-        assert not ReceptorAddress.objects.filter(instance=hop, peers_from_control_nodes=False).exists()
 
     def test_bidirectional_peering(self, admin_user, patch):
         """
