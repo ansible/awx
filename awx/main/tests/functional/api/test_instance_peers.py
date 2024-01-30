@@ -462,6 +462,33 @@ class TestPeers:
 
         assert 'Cannot deprovision managed nodes.' in str(resp.data)
 
+    def test_changing_managed_peers_from_control_nodes(self, admin_user, patch):
+        """
+        cannot change peers_from_control_nodes of managed node
+        """
+        hop = Instance.objects.create(hostname='hop', node_type='hop', managed=True)
+        ReceptorAddress.objects.create(instance=hop, address='hop', peers_from_control_nodes=True, canonical=True)
+        resp = patch(
+            url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
+            data={"peers_from_control_nodes": False},
+            user=admin_user,
+            expect=400,
+        )
+
+        assert 'Cannot change peers_from_control_nodes for managed nodes.' in str(resp.data)
+
+        hop.peers_from_control_nodes = False
+        hop.save()
+
+        resp = patch(
+            url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
+            data={"peers_from_control_nodes": False},
+            user=admin_user,
+            expect=400,
+        )
+
+        assert 'Cannot change peers_from_control_nodes for managed nodes.' in str(resp.data)
+
     @pytest.mark.parametrize('node_type', ['control', 'hybrid'])
     def test_control_node_automatically_peers(self, node_type):
         """
