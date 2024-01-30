@@ -353,6 +353,7 @@ INSTALLED_APPS = [
     'awx.sso',
     'solo',
     'ansible_base.rest_filters',
+    'ansible_base.authentication',
 ]
 
 INTERNAL_IPS = ('127.0.0.1',)
@@ -361,11 +362,11 @@ MAX_PAGE_SIZE = 200
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'awx.api.pagination.Pagination',
     'PAGE_SIZE': 25,
-    'DEFAULT_AUTHENTICATION_CLASSES': (
+    'DEFAULT_AUTHENTICATION_CLASSES': [
         'awx.api.authentication.LoggedOAuth2Authentication',
         'awx.api.authentication.SessionAuthentication',
         'awx.api.authentication.LoggedBasicAuthentication',
-    ),
+    ],
     'DEFAULT_PERMISSION_CLASSES': ('awx.api.permissions.ModelAccessPermission',),
     'DEFAULT_PARSER_CLASSES': ('awx.api.parsers.JSONParser',),
     'DEFAULT_RENDERER_CLASSES': ('awx.api.renderers.DefaultJSONRenderer', 'awx.api.renderers.BrowsableAPIRenderer'),
@@ -380,7 +381,7 @@ REST_FRAMEWORK = {
     # 'URL_FORMAT_OVERRIDE': None,
 }
 
-AUTHENTICATION_BACKENDS = (
+AUTHENTICATION_BACKENDS = [
     'awx.sso.backends.LDAPBackend',
     'awx.sso.backends.LDAPBackend1',
     'awx.sso.backends.LDAPBackend2',
@@ -400,7 +401,7 @@ AUTHENTICATION_BACKENDS = (
     'social_core.backends.azuread.AzureADOAuth2',
     'awx.sso.backends.SAMLAuth',
     'awx.main.backends.AWXModelBackend',
-)
+]
 
 
 # Django OAuth Toolkit settings
