@@ -5753,6 +5753,12 @@ class InstanceSerializer(BaseSerializer):
 
         return value
 
+    def validate_peers_from_control_nodes(self, value):
+        if self.instance and self.instance.managed and self.instance.canonical_address_peers_from_control_nodes != value:
+            raise serializers.ValidationError(_("Cannot change peers_from_control_nodes for managed nodes."))
+
+        return value
+
 
 class InstanceHealthCheckSerializer(BaseSerializer):
     class Meta:
