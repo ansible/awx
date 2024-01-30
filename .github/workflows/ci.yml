@@ -134,7 +134,7 @@ jobs:
 
   collection-integration:
     name: awx_collection integration
-    runs-on: ubuntu-latest
+    runs-on: ubicloud
     timeout-minutes: 60
     strategy:
       fail-fast: false
