@@ -95,17 +95,17 @@ class RunnerCallback:
         if self.parent_workflow_job_id:
             event_data['workflow_job_id'] = self.parent_workflow_job_id
         event_data['job_created'] = self.job_created
-        if self.host_map:
-            host = event_data.get('event_data', {}).get('host', '').strip()
-            if host:
-                event_data['host_name'] = host
-                if host in self.host_map:
-                    event_data['host_id'] = self.host_map[host]
-            else:
-                event_data['host_name'] = ''
-                event_data['host_id'] = ''
-            if event_data.get('event') == 'playbook_on_stats':
-                event_data['host_map'] = self.host_map
+
+        host = event_data.get('event_data', {}).get('host', '').strip()
+        if host:
+            event_data['host_name'] = host
+            if host in self.host_map:
+                event_data['host_id'] = self.host_map[host]
+        else:
+            event_data['host_name'] = ''
+            event_data['host_id'] = ''
+        if event_data.get('event') == 'playbook_on_stats':
+            event_data['host_map'] = self.host_map
 
         if isinstance(self, RunnerCallbackForProjectUpdate):
             # need a better way to have this check.
