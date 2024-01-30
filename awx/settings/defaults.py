@@ -1072,5 +1072,7 @@ ANSIBLE_BASE_ORGANIZATION_MODEL = 'main.Organization'
 
 from ansible_base.lib import dynamic_config  # noqa: E402
 
-settings_file = os.path.join(os.path.dirname(dynamic_config.__file__), 'dynamic_settings.py')
-include(settings_file)
+from ansible_base.lib import dynamic_config
+
+dab_settings = os.path.join(os.path.dirname(dynamic_config.__file__), 'dynamic_settings.py')
+include(dab_settings)
