@@ -1,24 +1,27 @@
 import ldap
+import pytest
 
-from awx.sso.backends import LDAPSettings
-from awx.sso.validators import validate_ldap_filter
+from ansible_base.authentication.authenticator_plugins.ldap import LDAPSettings, validate_ldap_filter
+
 from django.core.cache import cache
 
 
-def test_ldap_default_settings(mocker):
-    from_db = mocker.Mock(**{'order_by.return_value': []})
-    with mocker.patch('awx.conf.models.Setting.objects.filter', return_value=from_db):
-        settings = LDAPSettings()
-        assert settings.ORGANIZATION_MAP == {}
-        assert settings.TEAM_MAP == {}
+def test_ldap_default_settings(ldap_configuration):
+    settings = LDAPSettings(defaults=ldap_configuration)
+    assert settings.DENY_GROUP == None
+    assert settings.USER_QUERY_FIELD == None
 
 
-def test_ldap_default_network_timeout(mocker):
+def test_ldap_authenticatormap(ldap_authenticator_map):
+    assert ldap_authenticator_map.map_type == "team"
+    assert ldap_authenticator_map.team == None
+    assert ldap_authenticator_map.organization == None
+
+
+def test_ldap_default_network_timeout(ldap_configuration):
     cache.clear()  # clearing cache avoids picking up stray default for OPT_REFERRALS
-    from_db = mocker.Mock(**{'order_by.return_value': []})
-    with mocker.patch('awx.conf.models.Setting.objects.filter', return_value=from_db):
-        settings = LDAPSettings()
-        assert settings.CONNECTION_OPTIONS[ldap.OPT_NETWORK_TIMEOUT] == 30
+    settings = LDAPSettings(defaults=ldap_configuration)
+    assert settings.CONNECTION_OPTIONS[ldap.OPT_NETWORK_TIMEOUT] == 30
 
 
 def test_ldap_filter_validator():
