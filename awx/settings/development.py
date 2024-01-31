@@ -21,7 +21,7 @@ from split_settings.tools import optional, include
 from .defaults import *  # NOQA
 
 # awx-manage shell_plus --notebook
-NOTEBOOK_ARGUMENTS = ['--NotebookApp.token=', '--ip', '0.0.0.0', '--port', '8888', '--allow-root', '--no-browser']
+NOTEBOOK_ARGUMENTS = ['--NotebookApp.token=', '--ip', '0.0.0.0', '--port', '9888', '--allow-root', '--no-browser']
 
 # print SQL queries in shell_plus
 SHELL_PLUS_PRINT_SQL = False

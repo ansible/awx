@@ -19,7 +19,7 @@ The Topology View opens and displays a graphic representation of how each recept
 .. image:: ../common/images/topology-viewer-initial-view.png
 
 
-2. To adjust the zoom levels, or manipulate the graphic views, use the control buttons on the upper right-hand corner of the window.
+2. To adjust the zoom levels, refresh the current view, or manipulate the graphic views, use the control buttons on the upper right-hand corner of the window.
 
 .. image:: ../common/images/topology-viewer-view-controls.png
 
