@@ -139,7 +139,7 @@ function InstanceForm({
         {(formik) => (
           <Form autoComplete="off" onSubmit={formik.handleSubmit}>
             <FormColumnLayout>
-              <InstanceFormFields isEdit={isEdit} instance={instance}/>
+              <InstanceFormFields isEdit={isEdit} instance={instance} />
               <FormSubmitError error={submitError} />
               <FormActionGroup
                 onCancel={handleCancel}
