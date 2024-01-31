@@ -295,7 +295,9 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
                         value={instance.capacity_adjustment}
                         onChange={handleChangeValue}
                         isDisabled={
-                          !config?.me?.is_superuser || !instance.enabled || !isManaged
+                          !config?.me?.is_superuser ||
+                          !instance.enabled ||
+                          !isManaged
                         }
                         data-cy="slider"
                       />
@@ -339,16 +341,18 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
           )}
         </DetailList>
         <CardActionsRow>
-          {config?.me?.is_superuser && isK8s && (isExecutionNode || isHopNode || !isManaged) && (
-            <Button
-              ouiaId="instance-detail-edit-button"
-              aria-label={t`edit`}
-              component={Link}
-              to={`/instances/${id}/edit`}
-            >
-              {t`Edit`}
-            </Button>
-          )}
+          {config?.me?.is_superuser &&
+            isK8s &&
+            (isExecutionNode || isHopNode || !isManaged) && (
+              <Button
+                ouiaId="instance-detail-edit-button"
+                aria-label={t`edit`}
+                component={Link}
+                to={`/instances/${id}/edit`}
+              >
+                {t`Edit`}
+              </Button>
+            )}
           {config?.me?.is_superuser &&
             isK8s &&
             (isExecutionNode || isHopNode || !isManaged) && (
@@ -363,7 +367,9 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
             <Tooltip content={t`Run a health check on the instance`}>
               <Button
                 isDisabled={
-                  !config?.me?.is_superuser || instance.health_check_pending || !instance.managed
+                  !config?.me?.is_superuser ||
+                  instance.health_check_pending ||
+                  !instance.managed
                 }
                 variant="primary"
                 ouiaId="health-check-button"
