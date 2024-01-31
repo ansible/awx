@@ -369,7 +369,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
                 isDisabled={
                   !config?.me?.is_superuser ||
                   instance.health_check_pending ||
-                  !instance.managed
+                  instance.managed
                 }
                 variant="primary"
                 ouiaId="health-check-button"
