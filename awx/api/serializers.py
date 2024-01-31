@@ -5598,27 +5598,32 @@ class InstanceSerializer(BaseSerializer):
 
     def create_or_update(self, validated_data, obj=None, create=True):
         # create a managed receptor address if listener port is defined
-        kwargs = dict()
-        if 'listener_port' in validated_data:
-            kwargs['port'] = validated_data.pop('listener_port')
-        if 'peers_from_control_nodes' in validated_data:
-            kwargs['peers_from_control_nodes'] = validated_data.pop('peers_from_control_nodes')
+        port = validated_data.pop('listener_port', -1)
+        peers_from_control_nodes = validated_data.pop('peers_from_control_nodes', -1)
+
+        # delete the receptor address if the port is explicitly set to None
+        if obj and port == None:
+            obj.receptor_addresses.filter(address=obj.hostname).delete()
 
         if create:
             instance = super(InstanceSerializer, self).create(validated_data)
         else:
             instance = super(InstanceSerializer, self).update(obj, validated_data)
+            instance.refresh_from_db()  # instance canonical address lookup is deferred, so needs to be reloaded
 
-        # delete the receptor address if the port is expolisitly set to None
-        if 'port' in kwargs and not kwargs['port']:
-            instance.receptor_addresses.filter(address=instance.hostname).delete()
         # only create or update if port is defined in validated_data or already exists in the
         # canonical address
         # this prevents creating a receptor address if peers_from_control_nodes is in
         # validated_data but a port is not set
-        elif kwargs and ('port' in kwargs or instance.canonical_address_port):
-            kwargs['canonical'] = True
-            instance.receptor_addresses.update_or_create(address=instance.hostname, defaults=kwargs)
+        if (port != None and port != -1) or instance.canonical_address_port:
+            kwargs = {}
+            if port != -1:
+                kwargs['port'] = port
+            if peers_from_control_nodes != -1:
+                kwargs['peers_from_control_nodes'] = peers_from_control_nodes
+            if kwargs:
+                kwargs['canonical'] = True
+                instance.receptor_addresses.update_or_create(address=instance.hostname, defaults=kwargs)
 
         return instance
 
