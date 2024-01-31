@@ -140,7 +140,9 @@ django-polymorphic==3.1.0
 django-solo==2.0.0
     # via -r /awx_devel/requirements/requirements.in
 django-split-settings==1.0.0
-    # via -r /awx_devel/requirements/requirements.in
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   django-ansible-base
 djangorestframework==3.14.0
     # via
     #   -r /awx_devel/requirements/requirements.in
@@ -307,6 +309,7 @@ pygerduty==0.38.3
 pyjwt==2.6.0
     # via
     #   adal
+    #   django-ansible-base
     #   social-auth-core
     #   twilio
 pyopenssl==23.2.0
@@ -369,6 +372,7 @@ requests==2.28.1
     #   adal
     #   azure-core
     #   azure-keyvault
+    #   django-ansible-base
     #   django-oauth-toolkit
     #   kubernetes
     #   msrest
