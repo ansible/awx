@@ -67,6 +67,14 @@ class HasPolicyEditsMixin(HasEditsMixin):
 class InstanceLink(BaseModel):
     class Meta:
         ordering = ("id",)
+        # add constraint for source and target to be unique together
+        constraints = [
+            models.UniqueConstraint(
+                fields=["source", "target"],
+                name="unique_source_target",
+                violation_error_message=_("Field source and target must be unique together."),
+            )
+        ]
 
     source = models.ForeignKey('Instance', on_delete=models.CASCADE, help_text=_("The source instance of this peer link."))
     target = models.ForeignKey('ReceptorAddress', on_delete=models.CASCADE, help_text=_("The target receptor address of this peer link."))

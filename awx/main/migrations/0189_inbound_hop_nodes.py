@@ -141,4 +141,10 @@ class Migration(migrations.Migration):
                 help_text='The target receptor address of this peer link.', on_delete=django.db.models.deletion.CASCADE, to='main.receptoraddress'
             ),
         ),
+        migrations.AddConstraint(
+            model_name='instancelink',
+            constraint=models.UniqueConstraint(
+                fields=('source', 'target'), name='unique_source_target', violation_error_message='Field source and target must be unique together.'
+            ),
+        ),
     ]
