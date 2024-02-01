@@ -3,28 +3,18 @@ import { t } from '@lingui/macro';
 import 'styled-components/macro';
 import { Tr, Td } from '@patternfly/react-table';
 
-function InstanceEndPointListItem({
-  peerEndpoint,
+function InstanceListenerAddressListItem({
+  peerListenerAddress,
   isSelected,
   onSelect,
-  isExpanded,
-  onExpand,
   rowIndex,
 }) {
-  const labelId = `check-action-${peerEndpoint.id}`;
+  const labelId = `check-action-${peerListenerAddress.id}`;
   return (
     <Tr
-      id={`peerEndpoint-row-${peerEndpoint.id}`}
-      ouiaId={`peerEndpoint-row-${peerEndpoint.id}`}
+      id={`peerListenerAddress-row-${peerListenerAddress.id}`}
+      ouiaId={`peerListenerAddress-row-${peerListenerAddress.id}`}
     >
-      <Td
-        expand={{
-          rowIndex,
-          isExpanded,
-          onToggle: onExpand,
-        }}
-      />
-
       <Td
         select={{
           rowIndex,
@@ -35,22 +25,22 @@ function InstanceEndPointListItem({
       />
 
       <Td id={labelId} dataLabel={t`Address`}>
-        {peerEndpoint.address}
+        {peerListenerAddress.address}
       </Td>
 
       <Td id={labelId} dataLabel={t`Port`}>
-        {peerEndpoint.port}
+        {peerListenerAddress.port}
       </Td>
 
       <Td id={labelId} dataLabel={t`Protocol`}>
-        {peerEndpoint.protocol}
+        {peerListenerAddress.protocol}
       </Td>
 
       <Td id={labelId} dataLabel={t`Canonical`}>
-        {peerEndpoint.canonical.toString()}
+        {peerListenerAddress.canonical.toString()}
       </Td>
     </Tr>
   );
 }
 
-export default InstanceEndPointListItem;
+export default InstanceListenerAddressListItem;
