@@ -3352,11 +3352,17 @@ class JobRelaunchSerializer(BaseSerializer):
         choices=[('all', _('No change to job limit')), ('failed', _('All failed and unreachable hosts'))],
         write_only=True,
     )
+    job_type = serializers.ChoiceField(
+        required=False,
+        allow_null=True,
+        choices=NEW_JOB_TYPE_CHOICES,
+        write_only=True,
+    )
     credential_passwords = VerbatimField(required=True, write_only=True)
 
     class Meta:
         model = Job
-        fields = ('passwords_needed_to_start', 'retry_counts', 'hosts', 'credential_passwords')
+        fields = ('passwords_needed_to_start', 'retry_counts', 'hosts', 'job_type', 'credential_passwords')
 
     def validate_credential_passwords(self, value):
         pnts = self.instance.passwords_needed_to_start
