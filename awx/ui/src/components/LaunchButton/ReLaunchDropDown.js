@@ -13,6 +13,7 @@ import { RocketIcon } from '@patternfly/react-icons';
 
 function ReLaunchDropDown({
   isPrimary = false,
+  isRelaunchJobType = false,
   handleRelaunch,
   isLaunching,
   id = 'relaunch-job',
@@ -62,6 +63,44 @@ function ReLaunchDropDown({
     </DropdownItem>,
   ];
 
+  const dropdownItemsJobType = [
+    <DropdownItem
+      ouiaId={`${ouiaId}-on`}
+      aria-label={t`Relaunch on`}
+      key="relaunch_on"
+      component="div"
+      isPlainText
+    >
+      {t`Relaunch with job type`}
+    </DropdownItem>,
+    <DropdownSeparator key="separator" />,
+    <DropdownItem
+      ouiaId={`${ouiaId}-run-type`}
+      key="relaunch_run_type"
+      aria-label={t`Relaunch with job type run`}
+      component="button"
+      onClick={() => {
+        handleRelaunch({ job_type: 'run' });
+      }}
+      isDisabled={isLaunching}
+    >
+      {t`Run`}
+    </DropdownItem>,
+
+    <DropdownItem
+      ouiaId={`${ouiaId}-check-type`}
+      key="relaunch_check_type"
+      aria-label={t`Relaunch with job type check`}
+      component="button"
+      onClick={() => {
+        handleRelaunch({ job_type: 'check' });
+      }}
+      isDisabled={isLaunching}
+    >
+      {t`Check`}
+    </DropdownItem>,
+  ];
+
   if (isPrimary) {
     return (
       <Dropdown
@@ -69,7 +108,7 @@ function ReLaunchDropDown({
         position={DropdownPosition.left}
         direction={DropdownDirection.up}
         isOpen={isOpen}
-        dropdownItems={dropdownItems}
+        dropdownItems={isRelaunchJobType ? dropdownItemsJobType : dropdownItems}
         toggle={
           <DropdownToggle
             toggleIndicator={null}
@@ -92,7 +131,7 @@ function ReLaunchDropDown({
       isPlain
       position={DropdownPosition.right}
       isOpen={isOpen}
-      dropdownItems={dropdownItems}
+      dropdownItems={isRelaunchJobType ? dropdownItemsJobType : dropdownItems}
       toggle={
         <DropdownToggle
           toggleIndicator={null}

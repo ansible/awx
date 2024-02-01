@@ -246,6 +246,27 @@ describe('<JobListItem />', () => {
       .at(0);
     expect(credentials_detail.prop('isEmpty')).toEqual(true);
   });
+
+  test('dropdown receives isRelaunchJobType prop for job relaunch', () => {
+    wrapper = mountWithContexts(
+      <table>
+        <tbody>
+          <JobListItem
+            job={{
+              ...mockJob,
+              type: 'job',
+              job_type: 'run'
+            }}
+            onSelect={() => {}}
+            isSelected
+          />
+        </tbody>
+      </table>
+    );
+
+    const relaunchDropDown = wrapper.find('ReLaunchDropDown');
+    expect(relaunchDropDown.prop('isRelaunchJobType')).toBe(true);
+  });
 });
 
 describe('<JobListItem with failed job />', () => {
