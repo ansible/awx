@@ -6,6 +6,7 @@ import sys
 import time
 
 from .utils import cprint, color_enabled, STATUS_COLORS
+from awxkit.config import config
 from awxkit.utils import to_str
 
 
@@ -17,7 +18,7 @@ def monitor_workflow(response, session, print_stdout=True, action_timeout=None, 
     }
 
     def fetch(seen):
-        results = response.connection.get('/api/v2/unified_jobs', payload).json()['results']
+        results = response.connection.get(f"{config.api_base_path}v2/unified_jobs", payload).json()['results']
 
         # erase lines we've previously printed
         if print_stdout and sys.stdout.isatty():
