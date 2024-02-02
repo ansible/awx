@@ -286,12 +286,12 @@ For more detail about the Kubernetes auth method and its fields, refer to the `V
 
 For more detail about the TLS certificate auth method and its fields, refer to the `Vault documentation for TLS certificates auth method <https://developer.hashicorp.com/vault/docs/auth/cert>`_.
 
-Below shows an example of a configured HashiCorp Vault Secret Lookup LDAP credential.
+Below shows an example of a configured HashiCorp Vault Secret Lookup  credential for LDAP.
 
 .. image:: ../common/images/credentials-create-hashicorp-kv-credential.png 
    :alt: Example new HashiCorp Vault Secret lookup dialog
 
-To test the lookup, create another credential that uses the created lookup. In the example below shows the metadata for a machine credential:
+To test the lookup, create another credential that uses the HashiCorp Vault lookup. The example below shows the metadata for a machine credential configured to look up HashiCorp Vault secret credentials:
 
 .. image:: ../common/images/credentials-machine-test-hashicorp-metadata.png 
    :alt: Example machine credential lookup metadata for HashiCorp Vault.
@@ -317,6 +317,8 @@ When **HashiCorp Vault Signed SSH** is selected for **Credential Type**, provide
 - **TLS Authentication Role**: specify the role or certificate name in Vault that corresponds to your client certificate when using the TLS auth method. If it is not provided, Vault will attempt to match the certificate automatically
 - **Namespace name** specify the namespace name (Vault Enterprise only)
 - **Kubernetes role** specify the role name when using Kubernetes authentication
+- **Username**: enter the username of the user to be used to authenticate this service
+- **Password**: enter the password associated with the user to authenticate this service
 - **Path to Auth**: specify a path if other than the default path of ``/approle``
 
 For more detail about the Approle auth method and its fields, refer to the `Vault documentation for Approle Auth Method <https://developer.hashicorp.com/vault/docs/auth/approle>`_.
