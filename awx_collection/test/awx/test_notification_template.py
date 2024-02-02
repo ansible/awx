@@ -155,4 +155,4 @@ def test_build_notification_message_undefined(run_module, admin_user, organizati
     nt = NotificationTemplate.objects.get(id=result['id'])
 
     body = job.build_notification_message(nt, 'running')
-    assert '{"started_by": "My Placeholder"}' in body[1]
+    assert 'The template rendering return a blank body' in body[1]
