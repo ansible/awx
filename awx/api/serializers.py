@@ -5191,7 +5191,7 @@ class NotificationTemplateSerializer(BaseSerializer):
                         #         _("Webhook body for '{}' should be a json dictionary. Found type '{}'.".format(event, type(potential_body).__name__))
                         #     )
                     except Exception as exc:
-                        error_list.append(_("Webhook body for '{}' is not valid. The following gace an error ({}).".format(event, exc)))
+                        error_list.append(_("Webhook body for '{}' is not valid. The following gave an error ({}).".format(event, exc)))
 
         if error_list:
             raise serializers.ValidationError(error_list)
