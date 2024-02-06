@@ -554,7 +554,7 @@ def get_role_definition(role):
     action_name = f.name.rsplit("_", 1)[0]
     rd_name = f'{obj._meta.model_name}-{action_name}-compat'
     perm_list = get_role_codenames(role)
-    rd, created = RoleDefinition.objects.get_or_create(name=rd_name, permissions=perm_list, defaults={'content_type': role.content_type_id})
+    rd, created = RoleDefinition.objects.get_or_create(name=rd_name, permissions=perm_list, defaults={'content_type_id': role.content_type_id})
     return rd
 
 
