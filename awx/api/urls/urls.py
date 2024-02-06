@@ -163,8 +163,7 @@ v2_urls = [
 app_name = 'api'
 urlpatterns = [
     re_path(r'^$', ApiRootView.as_view(), name='api_root_view'),
-    re_path(r'^', include(api_urls)),
-    re_path(r'^(?P<version>(v2))/', include(api_version_urls + v2_urls)),
+    re_path(r'^(?P<version>(v2))/', include(v2_urls)),
     re_path(r'^login/$', LoggedLoginView.as_view(template_name='rest_framework/login.html', extra_context={'inside_login_context': True}), name='login'),
     re_path(r'^logout/$', LoggedLogoutView.as_view(next_page='/api/', redirect_field_name='next'), name='logout'),
     re_path(r'^o/', include(oauth2_root_urls)),

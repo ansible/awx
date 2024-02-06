@@ -6,13 +6,15 @@ from django.urls import re_path, include
 
 from awx.main.views import handle_400, handle_403, handle_404, handle_500, handle_csp_violation, handle_login_redirect
 
-from ansible_base.lib.dynamic_config.dynamic_urls import root_urls
+from ansible_base.lib.dynamic_config.dynamic_urls import root_urls, api_urls, api_version_urls
 
 
 urlpatterns = [
     re_path(r'', include(root_urls)),
     re_path(r'', include('awx.ui.urls', namespace='ui')),
     re_path(r'^ui_next/.*', include('awx.ui_next.urls', namespace='ui_next')),
+    re_path(r'^api/', include(api_urls)),
+    re_path(r'^api/v2/', include(api_version_urls)),
     re_path(r'^api/', include('awx.api.urls', namespace='api')),
     re_path(r'^sso/', include('awx.sso.urls', namespace='sso')),
     re_path(r'^sso/', include('social_django.urls', namespace='social')),
