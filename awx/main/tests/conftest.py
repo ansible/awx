@@ -219,3 +219,62 @@ def mock_me():
     me_mock = mock.MagicMock(return_value=Instance(id=1, hostname=settings.CLUSTER_HOST_ID, uuid='00000000-0000-0000-0000-000000000000'))
     with mock.patch.object(Instance.objects, 'me', me_mock):
         yield
+
+
+@pytest.fixture
+def ldap_configuration():
+    return {
+        "SERVER_URI": ["ldap://ldap06.example.com:389"],
+        "BIND_DN": "cn=ldapadmin,dc=example,dc=org",
+        "BIND_PASSWORD": "securepassword",
+        "START_TLS": False,
+        "CONNECTION_OPTIONS": {"OPT_REFERRALS": 0, "OPT_NETWORK_TIMEOUT": 30},
+        "USER_SEARCH": ["ou=users,dc=example,dc=org", "SCOPE_SUBTREE", "(cn=%(user)s)"],
+        "USER_DN_TEMPLATE": "cn=%(user)s,ou=users,dc=example,dc=org",
+        "USER_ATTR_MAP": {"email": "mail", "last_name": "sn", "first_name": "givenName"},
+        "GROUP_SEARCH": ["ou=groups,dc=example,dc=org", "SCOPE_SUBTREE", "(objectClass=groupOfNames)"],
+        "GROUP_TYPE": "MemberDNGroupType",
+        "GROUP_TYPE_PARAMS": {"name_attr": "cn", "member_attr": "member"},
+    }
+
+
+@pytest.fixture
+def ldap_authenticator(ldap_configuration):
+    from ansible_base.authentication.models import Authenticator
+
+    authenticator = Authenticator.objects.create(
+        name="Test LDAP Authenticator",
+        enabled=True,
+        create_objects=True,
+        users_unique=False,
+        remove_users=True,
+        type="ansible_base.authentication.authenticator_plugins.ldap",
+        configuration=ldap_configuration,
+    )
+    return authenticator
+
+
+@pytest.fixture
+def ldap_auth_data():
+    return {
+        "name": "Test LDAP Authenticator",
+        "summary_fields": {},
+        "enabled": True,
+        "create_objects": True,
+        "users_unique": False,
+        "remove_users": True,
+        "configuration": {
+            "BIND_DN": "cn=admin,dc=example,dc=org",
+            "BIND_PASSWORD": "$encrypted$",
+            "CONNECTION_OPTIONS": {"OPT_REFERRALS": 0, "OPT_NETWORK_TIMEOUT": 30},
+            "GROUP_SEARCH": ["ou=groups,dc=example,dc=org", "SCOPE_SUBTREE", "(objectClass=groupOfNames)"],
+            "GROUP_TYPE": "MemberDNGroupType",
+            "GROUP_TYPE_PARAMS": {"name_attr": "cn", "member_attr": "member"},
+            "SERVER_URI": ["ldap://host.docker.internal:389"],
+            "START_TLS": False,
+            "USER_ATTR_MAP": {"email": "mail", "last_name": "sn", "first_name": "givenName"},
+            "USER_DN_TEMPLATE": "cn=%(user)s,ou=users,dc=example,dc=org",
+            "USER_SEARCH": ["ou=users,dc=example,dc=org", "SCOPE_SUBTREE", "(cn=%(user)s)"],
+        },
+        "type": "ansible_base.authentication.authenticator_plugins.ldap",
+    }

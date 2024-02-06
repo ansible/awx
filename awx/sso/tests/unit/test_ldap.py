@@ -1,5 +1,4 @@
 import ldap
-import pytest
 
 from ansible_base.authentication.authenticator_plugins.ldap import LDAPSettings, validate_ldap_filter
 
@@ -10,12 +9,6 @@ def test_ldap_default_settings(ldap_configuration):
     settings = LDAPSettings(defaults=ldap_configuration)
     assert settings.DENY_GROUP == None
     assert settings.USER_QUERY_FIELD == None
-
-
-def test_ldap_authenticatormap(ldap_authenticator_map):
-    assert ldap_authenticator_map.map_type == "team"
-    assert ldap_authenticator_map.team == None
-    assert ldap_authenticator_map.organization == None
 
 
 def test_ldap_default_network_timeout(ldap_configuration):

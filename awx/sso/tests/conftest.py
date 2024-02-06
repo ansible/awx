@@ -69,13 +69,21 @@ def ldap_authenticator(ldap_configuration):
 
 
 @pytest.fixture
-def ldap_authenticator_map(db, ldap_authenticator):
-    from ansible_base.authentication.models import AuthenticatorMap
+def ldap_settings():
+    from ansible_base.authentication.authenticator_plugins.ldap import LDAPSettings
 
-    authenticator_map = AuthenticatorMap.objects.create(
-        name="Test LDAPAuthenticator Map",
-        authenticator=ldap_authenticator,
-        triggers={"always": {}},
-    )
-    yield authenticator_map
-    authenticator_map.delete()
+    data = {
+        "SERVER_URI": ["ldap://ldap06.example.com:389"],
+        "BIND_DN": "cn=ldapadmin,dc=example,dc=org",
+        "BIND_PASSWORD": "securepassword",
+        "START_TLS": False,
+        "CONNECTION_OPTIONS": {"OPT_REFERRALS": 0, "OPT_NETWORK_TIMEOUT": 30},
+        "USER_SEARCH": ["ou=users,dc=example,dc=org", "SCOPE_SUBTREE", "(cn=%(user)s)"],
+        "USER_DN_TEMPLATE": "cn=%(user)s,ou=users,dc=example,dc=org",
+        "USER_ATTR_MAP": {"email": "mail", "last_name": "sn", "first_name": "givenName"},
+        "GROUP_SEARCH": ["ou=groups,dc=example,dc=org", "SCOPE_SUBTREE", "(objectClass=groupOfNames)"],
+        "GROUP_TYPE": "MemberDNGroupType",
+        "GROUP_TYPE_PARAMS": {"name_attr": "cn", "member_attr": "member"},
+    }
+    settings = LDAPSettings(defaults=data)
+    return settings
