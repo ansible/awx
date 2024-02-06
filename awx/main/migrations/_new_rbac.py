@@ -193,21 +193,24 @@ def migrate_to_new_rbac(apps, schema_editor):
             if '%s' in description:
                 description = description % role.content_type.model
 
-            role_definition, created = RoleDefinition.objects.get_or_create(name=role_definition_name, defaults={'description': description})
+            role_definition, created = RoleDefinition.objects.get_or_create(
+                name=role_definition_name, defaults={'description': description, 'content_type': role.content_type_id}
+            )
 
             if created:
                 logger.info(f'Created custom Role Definition {role_definition_name}, pk={role_definition.pk}')
                 role_definition.permissions.set(perm_list)
 
         # Create the object role and add users to it
-        object_role, _ = ObjectRole.objects.get_or_create(role_definition=role_definition, object_id=role.object_id, content_type=role.content_type)
+        object_role_fields = dict(role_definition=role_definition, object_id=role.object_id, content_type=role.content_type)
+        object_role, _ = ObjectRole.objects.get_or_create(**object_role_fields)
 
         # Django seems to not process through_fields correctly in migrations
         # so it will use created_by as the target field name, which is incorrect, should be user
         # here we create the through model directly as a workaround for this apparent but
-        user_assignments = [UserAssignment(object_role=object_role, user=user) for user in role.members.all()]
+        user_assignments = [UserAssignment(object_role=object_role, user=user, **object_role_fields) for user in role.members.all()]
         UserAssignment.objects.bulk_create(user_assignments)
-        team_assignments = [TeamAssignment(object_role=object_role, team_id=tr.object_id) for tr in team_roles]
+        team_assignments = [TeamAssignment(object_role=object_role, team_id=tr.object_id, **object_role_fields) for tr in team_roles]
         TeamAssignment.objects.bulk_create(team_assignments)
         # object_role.users.add(*list(role.members.all()))
         # object_role.teams.add(*[tr.object_id for tr in team_roles])

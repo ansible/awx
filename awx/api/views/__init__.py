@@ -512,6 +512,7 @@ class InstanceGroupAccessList(ResourceAccessList):
 
 
 class InstanceGroupObjectRolesList(SubListAPIView):
+    deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializer
     parent_model = models.InstanceGroup
@@ -700,6 +701,7 @@ class TeamUsersList(BaseUsersList):
 
 
 class TeamRolesList(SubListAttachDetachAPIView):
+    deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializerWithParentAccess
     metadata_class = RoleMetadata
@@ -739,6 +741,7 @@ class TeamRolesList(SubListAttachDetachAPIView):
 
 
 class TeamObjectRolesList(SubListAPIView):
+    deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializer
     parent_model = models.Team
@@ -1051,6 +1054,7 @@ class ProjectAccessList(ResourceAccessList):
 
 
 class ProjectObjectRolesList(SubListAPIView):
+    deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializer
     parent_model = models.Project
@@ -1212,6 +1216,7 @@ class UserTeamsList(SubListAPIView):
 
 
 class UserRolesList(SubListAttachDetachAPIView):
+    deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializerWithParentAccess
     metadata_class = RoleMetadata
@@ -1486,6 +1491,7 @@ class CredentialAccessList(ResourceAccessList):
 
 
 class CredentialObjectRolesList(SubListAPIView):
+    deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializer
     parent_model = models.Credential
@@ -2829,6 +2835,7 @@ class JobTemplateAccessList(ResourceAccessList):
 
 
 class JobTemplateObjectRolesList(SubListAPIView):
+    deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializer
     parent_model = models.JobTemplate
@@ -3215,6 +3222,7 @@ class WorkflowJobTemplateAccessList(ResourceAccessList):
 
 
 class WorkflowJobTemplateObjectRolesList(SubListAPIView):
+    deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializer
     parent_model = models.WorkflowJobTemplate
@@ -4227,6 +4235,7 @@ class ActivityStreamDetail(RetrieveAPIView):
 
 
 class RoleList(ListAPIView):
+    deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializer
     permission_classes = (IsAuthenticated,)
@@ -4234,11 +4243,13 @@ class RoleList(ListAPIView):
 
 
 class RoleDetail(RetrieveAPIView):
+    deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializer
 
 
 class RoleUsersList(SubListAttachDetachAPIView):
+    deprecated = True
     model = models.User
     serializer_class = serializers.UserSerializer
     parent_model = models.Role
@@ -4273,6 +4284,7 @@ class RoleUsersList(SubListAttachDetachAPIView):
 
 
 class RoleTeamsList(SubListAttachDetachAPIView):
+    deprecated = True
     model = models.Team
     serializer_class = serializers.TeamSerializer
     parent_model = models.Role
@@ -4322,6 +4334,7 @@ class RoleTeamsList(SubListAttachDetachAPIView):
 
 
 class RoleParentsList(SubListAPIView):
+    deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializer
     parent_model = models.Role
@@ -4335,6 +4348,7 @@ class RoleParentsList(SubListAPIView):
 
 
 class RoleChildrenList(SubListAPIView):
+    deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializer
     parent_model = models.Role
