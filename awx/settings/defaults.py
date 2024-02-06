@@ -9,8 +9,6 @@ import tempfile
 import socket
 from datetime import timedelta
 
-# python-ldap
-import ldap
 from split_settings.tools import include
 
 
@@ -1071,8 +1069,6 @@ ANSIBLE_BASE_TEAM_MODEL = 'main.Team'
 ANSIBLE_BASE_ORGANIZATION_MODEL = 'main.Organization'
 
 from ansible_base.lib import dynamic_config  # noqa: E402
-
-from ansible_base.lib import dynamic_config
 
 dab_settings = os.path.join(os.path.dirname(dynamic_config.__file__), 'dynamic_settings.py')
 include(dab_settings)
