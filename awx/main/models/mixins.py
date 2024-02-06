@@ -80,7 +80,7 @@ class ResourceMixin(models.Model):
                     .values_list('object_id')
                     .distinct()
                 )
-            return cls.accessible_ids(accessor, to_permissions[role_field], content_types=content_types)
+            return cls.access_ids_qs(accessor, to_permissions[role_field], content_types=content_types)
         if accessor._meta.model_name == 'user':
             ancestor_roles = accessor.roles.all()
         elif type(accessor) == Role:

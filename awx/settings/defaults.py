@@ -1139,3 +1139,6 @@ ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED = True
 
 # Permissions a user will get when creating a new item
 ANSIBLE_BASE_CREATOR_DEFAULTS = ['change', 'delete', 'execute', 'use', 'adhoc', 'approve', 'update', 'view']
+
+# This is a stopgap, will delete after resource registry integration
+ANSIBLE_BASE_SERVICE_PREFIX = "awx"
