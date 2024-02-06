@@ -5177,16 +5177,21 @@ class NotificationTemplateSerializer(BaseSerializer):
                 body = messages[event].get('body', {})
                 if body:
                     try:
-                        rendered_body = (
-                            sandbox.ImmutableSandboxedEnvironment(undefined=DescriptiveUndefined).from_string(body).render(JobNotificationMixin.context_stub())
-                        )
-                        potential_body = json.loads(rendered_body)
-                        if not isinstance(potential_body, dict):
-                            error_list.append(
-                                _("Webhook body for '{}' should be a json dictionary. Found type '{}'.".format(event, type(potential_body).__name__))
-                            )
-                    except json.JSONDecodeError as exc:
-                        error_list.append(_("Webhook body for '{}' is not a valid json dictionary ({}).".format(event, exc)))
+                        sandbox.ImmutableSandboxedEnvironment(undefined=DescriptiveUndefined).from_string(body).render(JobNotificationMixin.context_stub())
+
+                        # https://github.com/ansible/awx/issues/14410
+
+                        # When rendering something such as "{{ job.id }}"
+                        # the return type is not a dict, unlike "{{ job_metadata }}" which is a dict
+
+                        # potential_body = json.loads(rendered_body)
+
+                        # if not isinstance(potential_body, dict):
+                        #     error_list.append(
+                        #         _("Webhook body for '{}' should be a json dictionary. Found type '{}'.".format(event, type(potential_body).__name__))
+                        #     )
+                    except Exception as exc:
+                        error_list.append(_("Webhook body for '{}' is not valid. The following gace an error ({}).".format(event, exc)))
 
         if error_list:
             raise serializers.ValidationError(error_list)
