@@ -113,6 +113,8 @@ The example health check shows the status updates with an error on node 'one':
 	:alt: Health check showing an error in one of the instances.
 
 
+.. _ag_instances_add:
+
 Add an instance
 ----------------
 
@@ -149,15 +151,15 @@ An instance has several attributes that may be configured:
 
 In the example diagram above, the configurations are as follows:
 
-+------------------+---------------+--------------------------+--------------+
-| instance name    | listener_port | peers_from_control_nodes | peers        |
-+==================+===============+==========================+==============+
-| execution node 1 | 27199         | true                     | []           |
-+------------------+---------------+--------------------------+--------------+
-| hop node         | 27199         | true                     | []           |
-+------------------+---------------+--------------------------+--------------+
-| execution node 2 | null          | false                    | ["hop node"] |
-+------------------+---------------+--------------------------+--------------+
++------------------+--------------------------------------------------+---------------+--------------------------+--------------+
+| instance type    | hostname                                         | listener_port | peers_from_control_nodes | peers        |
++==================+==================================================+===============+==========================+==============+
+| control plane    | awx-task-65d6d96987-mgn9j                        | 27199         | true                     | []           |
++------------------+--------------------------------------------------+---------------+--------------------------+--------------+
+| hop node         | awx-mesh-ingress-1                               | 27199         | true                     | []           |
++------------------+--------------------------------------------------+---------------+--------------------------+--------------+
+| execution node 2 | ec2-35-87-18-213.us-west-2.compute.amazonaws.com | null          | false                    | ["hop node"] |
++------------------+--------------------------------------------------+---------------+--------------------------+--------------+
 
 
 3. Once the attributes are configured, click **Save** to proceed.
@@ -193,7 +195,7 @@ Upon successful creation, the Details of the one of the created instances opens.
 	all:
 	  hosts:
 	    remote-execution:
-	      ansible_host: 18.206.206.34
+	      ansible_host: <hostname>
 	      ansible_user: <username> # user provided
 	      ansible_ssh_private_key_file: ~/.ssh/id_rsa
 
@@ -232,6 +234,99 @@ You can remove an instance by clicking **Remove** in the Instances page, or by s
 
 
 10. To view a graphical representation of your updated topology, refer to the :ref:`ag_topology_viewer` section of this guide.
+
+
+Configuring a mesh ingress
+---------------------------
+
+If a remote execution node is setup inside a datacenter to communicate with target hosts from a k8s cluster because the k8s cluster is unable to reach the hosts via SSH, it risks exposing port information. To solve this, a hop node is placed inside of the k8s cluster to route traffic from task pods to the execution node, eliminating the risk of exposing any ports since execution node connections are outbound only.
+
+A custom resource definition (CRD) called AWX mesh ingress was introduced as part of the operator, providing a way to stand up a hop node inside of the cluster to allow inbound connections. 
+
+1. Create a control node
+2. Crate a hop node
+3. Spin up another instance for the execution node
+4. Add instance to an instance group
+
+
+In order to create a mesh ingress for AWX, create an AWX Mesh Ingress Kubernetes resource, which is a hop node type. Creating this mesh ingress will create all the necessary resources.
+
+1. Run ``apply -f awxmeshingress-demo.yml``
+
+2. If you want redundant paths, you may create multiple ingress resources the same way.
+
+In this example, we created an ingress resource (awx-mesh-ingress-1) that will:
+	- stand up a pod that runs a receptor
+	- create services and routes that allow communication between the task container to the new ingress receptor instance 
+	- create a route that exposes the receptor listener in order to allow external nodes to peer into the receptor mesh
+
+.. note::
+	
+	In Openshift, the spec requires you to specify the ``deployment_name``, which is the AWX resource. In this example, ``deployment_name`` = awx 
+
+4. Once the operator spins everything up, it will register that new mesh ingress node to AWX. 
+
+.. image:: ../common/images/instances_list_with_meshingress_node.png
+		:alt: Instance list view showing the newly created mesh ingress node. 
+
+5. Click the **Listener Addresses** tab to view details associated with the listener addresses of the mesh ingress node. In this example, the mesh ingress has two listener addresses:
+
+	- one for internal, that is used for peering to by all control nodes (top) 
+	- one for external, that is exposed to a route so external execution nodes can peer into it (bottom))
+
+.. image:: ../common/images/instances_meshingress_listener_addresses.png
+		:alt: Details of each listener address associated with the mesh ingress.
+
+In the corresponding Topology view, you can see the AWX ingress node connected to the control plane.
+
+.. image:: ../common/images/topology-view-with-ingress.png
+	:alt: Topology view with ingress node connected to the control plane.
+
+
+6. Create a virtual machine, an instance that only allows inbound traffic for port 22 for SSH and that no other inbound traffic is allowed to this VM. This VM will be peering to the AWX control plane. An AWS VM is used for this example.
+
+7. Create an external execution node instance (leave listener port blank because the VM spun up doesn't allow any inbound traffic) that is capable of running playbooks (the ec2 node). See :ref:`ag_instances_add` for detail.
+
+8. Once the instance is created, peer the execution node to the mesh ingress node (awx-mesh-ingress-1).
+
+.. image:: ../common/images/instances-peer-execution-with-ingress.png
+	:alt: Associating a peer window showing a arrow pointing at the mesh ingress node.
+
+9. Download the install bundle from the instance's Details view (|download|) and install the requirements:
+
+::
+
+	install -r requirements.yml
+
+.. |download| image:: ../common/images/download-icon.png
+	:alt: Download icon.
+
+
+10. Run the playbook, specifying the ansible user and password that is needed to connect to this instance. This example playbook requires sudo permission.
+
+::
+
+	ansible-playbook install_receptor.yml -e ansible_user=ec2-user -I inventory.yml -v
+
+11. After the playbook finishes running, the topology view now shows the AWX control plane and the execution node peering into the mesh ingress node.
+
+.. image:: ../common/images/instances_peerings_into-mesh-ingress-node.png
+	:alt: Topology view showing execution node and control plane peering into the mesh ingress node.
+
+
+12. Run a health check against the execution node to ensure the execution node is successfully added and ready to be added to an instance group.
+
+.. image:: ../common/images/instances-execution-node-status-ready.png
+.. image:: ../common/images/topology-view-execution-node-status-ready.png
+	:alt: Execution node showing ready status in the Details view and in the Topology view.
+
+
+13. Create an instance group and add the execution node to it in order for it to be used in your job execution. Whatever execution environment image used to run a playbook needs to be accessible for your remote execution node. Everything you are using in your playbook also needs to be accessible from this remote execution node.
+
+.. image:: ../common/images/instances-job-template-using-remote-execution-ig.png
+	:alt: Job template using the instance group with the execution node to run jobs.
+
+Launching the job template will take a while in order to pull down new images. 
 
 
 Using a custom Receptor CA
