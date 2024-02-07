@@ -4,8 +4,9 @@ import logging
 from django.conf import settings
 from django.urls import re_path
 
-from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
+
+from ansible_base.lib.channels.middleware import DrfAuthMiddlewareStack
 
 from . import consumers
 
@@ -33,6 +34,6 @@ websocket_urlpatterns = [
 
 application = AWXProtocolTypeRouter(
     {
-        'websocket': AuthMiddlewareStack(URLRouter(websocket_urlpatterns)),
+        'websocket': DrfAuthMiddlewareStack(URLRouter(websocket_urlpatterns)),
     }
 )
