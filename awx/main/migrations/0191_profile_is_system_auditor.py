@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0189_add_django_permissions'),
+        ('main', '0190_add_django_permissions'),
     ]
     run_before = [
         ('dab_rbac', '__first__'),

@@ -23,7 +23,7 @@ def create_permissions_as_operation(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0190_profile_is_system_auditor'),
+        ('main', '0191_profile_is_system_auditor'),
         ('dab_rbac', '__first__'),
     ]
 

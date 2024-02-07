@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0188_add_bitbucket_dc_webhook'),
+        ('main', '0189_inbound_hop_nodes'),
     ]
 
     operations = [
