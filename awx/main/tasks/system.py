@@ -62,7 +62,7 @@ from awx.main.tasks.receptor import get_receptor_ctl, worker_info, worker_cleanu
 from awx.main.consumers import emit_channel_notification
 from awx.main import analytics
 from awx.conf import settings_registry
-from awx.main.analytics.subsystem_metrics import Metrics
+from awx.main.analytics.subsystem_metrics import DispatcherMetrics
 
 from rest_framework.exceptions import PermissionDenied
 
@@ -113,7 +113,7 @@ def dispatch_startup():
     cluster_node_heartbeat()
     reaper.startup_reaping()
     reaper.reap_waiting(grace_period=0)
-    m = Metrics()
+    m = DispatcherMetrics()
     m.reset_values()
 
 
@@ -495,7 +495,7 @@ def inspect_established_receptor_connections(mesh_status):
     update_links = []
     for link in all_links:
         if link.link_state != InstanceLink.States.REMOVING:
-            if link.target.hostname in active_receptor_conns.get(link.source.hostname, {}):
+            if link.target.instance.hostname in active_receptor_conns.get(link.source.hostname, {}):
                 if link.link_state is not InstanceLink.States.ESTABLISHED:
                     link.link_state = InstanceLink.States.ESTABLISHED
                     update_links.append(link)

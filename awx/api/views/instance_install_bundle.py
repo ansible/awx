@@ -124,10 +124,19 @@ def generate_inventory_yml(instance_obj):
 
 
 def generate_group_vars_all_yml(instance_obj):
+    # get peers
     peers = []
-    for instance in instance_obj.peers.all():
-        peers.append(dict(host=instance.hostname, port=instance.listener_port))
-    all_yaml = render_to_string("instance_install_bundle/group_vars/all.yml", context=dict(instance=instance_obj, peers=peers))
+    for addr in instance_obj.peers.select_related('instance'):
+        peers.append(dict(address=addr.get_full_address(), protocol=addr.protocol))
+    context = dict(instance=instance_obj, peers=peers)
+
+    canonical_addr = instance_obj.canonical_address
+    if canonical_addr:
+        context['listener_port'] = canonical_addr.port
+        protocol = canonical_addr.protocol if canonical_addr.protocol != 'wss' else 'ws'
+        context['listener_protocol'] = protocol
+
+    all_yaml = render_to_string("instance_install_bundle/group_vars/all.yml", context=context)
     # convert consecutive newlines with a single newline
     return re.sub(r'\n+', '\n', all_yaml)
 

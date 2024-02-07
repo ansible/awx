@@ -67,6 +67,8 @@ options:
       description:
         - List of peers to connect outbound to. Only configurable for hop and execution nodes.
         - To remove all current peers, set value to an empty list, [].
+        - Each item is an ID or address of a receptor address.
+        - If item is address, it must be unique across all receptor addresses.
       required: False
       type: list
       elements: str
@@ -83,12 +85,24 @@ EXAMPLES = '''
   awx.awx.instance:
     hostname: my-instance.prod.example.com
     capacity_adjustment: 0.4
-    listener_port: 31337
 
 - name: Deprovision the instance
   awx.awx.instance:
     hostname: my-instance.prod.example.com
     node_state: deprovisioning
+
+- name: Create execution node
+  awx.awx.instance:
+    hostname: execution.example.com
+    node_type: execution
+    peers:
+      - 12
+      - route.to.hop.example.com
+
+- name: Remove peers
+  awx.awx.instance:
+    hostname: execution.example.com
+    peers:
 '''
 
 from ..module_utils.controller_api import ControllerAPIModule
@@ -124,6 +138,17 @@ def main():
     # Attempt to look up an existing item based on the provided data
     existing_item = module.get_one('instances', name_or_id=hostname)
 
+    # peer item can be an id or address
+    # if address, get the id
+    peers_ids = []
+    if peers:
+        for p in peers:
+            if not p.isdigit():
+                p_id = module.get_one('receptor_addresses', allow_none=False, data={'address': p})
+                peers_ids.append(p_id['id'])
+            else:
+                peers_ids.append(p)
+
     # Create the data that gets sent for create and update
     new_fields = {'hostname': hostname}
     if capacity_adjustment is not None:
@@ -139,7 +164,7 @@ def main():
     if listener_port is not None:
         new_fields['listener_port'] = listener_port
     if peers is not None:
-        new_fields['peers'] = peers
+        new_fields['peers'] = peers_ids
     if peers_from_control_nodes is not None:
         new_fields['peers_from_control_nodes'] = peers_from_control_nodes
 

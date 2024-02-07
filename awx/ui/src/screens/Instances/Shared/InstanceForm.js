@@ -1,6 +1,6 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { t } from '@lingui/macro';
-import { Formik, useField, useFormikContext } from 'formik';
+import { Formik, useField } from 'formik';
 import { Form, FormGroup, CardBody } from '@patternfly/react-core';
 import { FormColumnLayout } from 'components/FormLayout';
 import FormField, {
@@ -9,7 +9,6 @@ import FormField, {
 } from 'components/FormField';
 import FormActionGroup from 'components/FormActionGroup';
 import AnsibleSelect from 'components/AnsibleSelect';
-import { PeersLookup } from 'components/Lookup';
 import { required } from 'util/validators';
 
 const INSTANCE_TYPES = [
@@ -17,22 +16,12 @@ const INSTANCE_TYPES = [
   { id: 'hop', name: t`Hop` },
 ];
 
-function InstanceFormFields({ isEdit }) {
+function InstanceFormFields({ isEdit, instance }) {
   const [instanceTypeField, instanceTypeMeta, instanceTypeHelpers] = useField({
     name: 'node_type',
     validate: required(t`Set a value for this field`),
   });
 
-  const { setFieldValue } = useFormikContext();
-
-  const [peersField, peersMeta, peersHelpers] = useField('peers');
-
-  const handlePeersUpdate = useCallback(
-    (value) => {
-      setFieldValue('peers', value);
-    },
-    [setFieldValue]
-  );
   return (
     <>
       <FormField
@@ -91,20 +80,6 @@ function InstanceFormFields({ isEdit }) {
           isDisabled={isEdit}
         />
       </FormGroup>
-      <PeersLookup
-        helperTextInvalid={peersMeta.error}
-        isValid={!peersMeta.touched || !peersMeta.error}
-        onBlur={() => peersHelpers.setTouched()}
-        onChange={handlePeersUpdate}
-        value={peersField.value}
-        tooltip={t`Select the Peers Instances.`}
-        fieldName="peers"
-        formLabel={t`Peers`}
-        multiple
-        typePeers
-        id="peers"
-        isRequired
-      />
       <FormGroup fieldId="instance-option-checkboxes" label={t`Options`}>
         <CheckboxField
           id="enabled"
@@ -123,6 +98,7 @@ function InstanceFormFields({ isEdit }) {
           name="peers_from_control_nodes"
           label={t`Peers from control nodes`}
           tooltip={t`If enabled, control nodes will peer to this instance automatically. If disabled, instance will be connected only to associated peers.`}
+          isDisabled={parseInt(instance.listener_port, 10) < 1024 || true}
         />
       </FormGroup>
     </>
@@ -163,7 +139,7 @@ function InstanceForm({
         {(formik) => (
           <Form autoComplete="off" onSubmit={formik.handleSubmit}>
             <FormColumnLayout>
-              <InstanceFormFields isEdit={isEdit} />
+              <InstanceFormFields isEdit={isEdit} instance={instance} />
               <FormSubmitError error={submitError} />
               <FormActionGroup
                 onCancel={handleCancel}

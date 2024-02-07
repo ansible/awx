@@ -183,6 +183,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
   }
   const isHopNode = instance.node_type === 'hop';
   const isExecutionNode = instance.node_type === 'execution';
+  const isManaged = instance.managed;
 
   return (
     <>
@@ -208,7 +209,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
           <Detail label={t`Node Type`} value={instance.node_type} />
           <Detail label={t`Host`} value={instance.ip_address} />
           <Detail label={t`Listener Port`} value={instance.listener_port} />
-          {(isExecutionNode || isHopNode) && (
+          {(isExecutionNode || isHopNode || !isManaged) && (
             <>
               {instance.related?.install_bundle && (
                 <Detail
@@ -294,7 +295,9 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
                         value={instance.capacity_adjustment}
                         onChange={handleChangeValue}
                         isDisabled={
-                          !config?.me?.is_superuser || !instance.enabled
+                          !config?.me?.is_superuser ||
+                          !instance.enabled ||
+                          !isManaged
                         }
                         data-cy="slider"
                       />
@@ -338,19 +341,21 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
           )}
         </DetailList>
         <CardActionsRow>
-          {config?.me?.is_superuser && isK8s && (isExecutionNode || isHopNode) && (
-            <Button
-              ouiaId="instance-detail-edit-button"
-              aria-label={t`edit`}
-              component={Link}
-              to={`/instances/${id}/edit`}
-            >
-              {t`Edit`}
-            </Button>
-          )}
           {config?.me?.is_superuser &&
             isK8s &&
-            (isExecutionNode || isHopNode) && (
+            (isExecutionNode || isHopNode || !isManaged) && (
+              <Button
+                ouiaId="instance-detail-edit-button"
+                aria-label={t`edit`}
+                component={Link}
+                to={`/instances/${id}/edit`}
+              >
+                {t`Edit`}
+              </Button>
+            )}
+          {config?.me?.is_superuser &&
+            isK8s &&
+            (isExecutionNode || isHopNode || !isManaged) && (
               <RemoveInstanceButton
                 dataCy="remove-instance-button"
                 itemsToRemove={[instance]}
@@ -362,7 +367,9 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
             <Tooltip content={t`Run a health check on the instance`}>
               <Button
                 isDisabled={
-                  !config?.me?.is_superuser || instance.health_check_pending
+                  !config?.me?.is_superuser ||
+                  instance.health_check_pending ||
+                  instance.managed
                 }
                 variant="primary"
                 ouiaId="health-check-button"
