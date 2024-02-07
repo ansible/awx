@@ -278,7 +278,7 @@ When **HashiCorp Vault Secret Lookup** is selected for **Credential Type**, prov
 
 For more detail about the Approle auth method and its fields, refer to the `Vault documentation for Approle Auth Method <https://developer.hashicorp.com/vault/docs/auth/approle>`_.
 
-LDAP authentication requires LDAP to be configured in HashiCorp's Vault UI and a policy added to the user. Cubbyhole is the name of the default secret mount. If you have proper permissions, you can create other mounts and write key values to those. For more detail about the LDAP auth method and its fields, refer to the `Vault documentation for LDAP auth method <https://developer.hashicorp.com/vault/docs/auth/ldap>`_.
+LDAP authentication requires LDAP to be configured in HashiCorp's Vault UI. A policy may be added to the user if they want access to a specific engine created. As long as the bind is set properly, the user should be able to successfully authenticate. Cubbyhole is the name of the default secret mount. If you have proper permissions, you can create other mounts and write key values to those. For more detail about the LDAP auth method and its fields, refer to the `Vault documentation for LDAP auth method <https://developer.hashicorp.com/vault/docs/auth/ldap>`_.
 
 For more detail about the userpass auth method and its fields, refer to the `Vault documentation for userpass auth method <https://developer.hashicorp.com/vault/docs/auth/userpass>`_.
 
