@@ -6,7 +6,7 @@ requirements="$(readlink -f ./requirements.txt)"
 requirements_git="$(readlink -f ./requirements_git.txt)"
 requirements_dev="$(readlink -f ./requirements_dev.txt)"
 pip_compile="pip-compile --no-header --quiet -r --allow-unsafe"
-sanitize_git=1
+sanitize_git="1"
 
 _cleanup() {
   cd /
@@ -26,7 +26,7 @@ generate_requirements() {
   ${pip_compile} "$1" --output-file requirements.txt
   # consider the git requirements for purposes of resolving deps
   # Then remove any git+ lines from requirements.txt
-  if [[ "$NEEDS_HELP" == "1" ]] ; then
+  if [[ "$sanitize_git" == "1" ]] ; then
     while IFS= read -r line; do
       if [[ $line != \#* ]]; then  # ignore comments
         sed -i "\!${line%#*}!d" requirements.txt
