@@ -264,7 +264,7 @@ class BaseAccess(object):
         return self.can_change(obj, data)
 
     def can_delete(self, obj):
-        return self.user.is_superuser
+        return self.user.has_obj_perm(obj, 'delete')
 
     def can_copy(self, obj):
         return self.can_add({'reference_obj': obj})
@@ -952,9 +952,6 @@ class InventoryAccess(BaseAccess):
     @check_superuser
     def can_update(self, obj):
         return self.user in obj.update_role
-
-    def can_delete(self, obj):
-        return self.can_admin(obj, None)
 
     def can_run_ad_hoc_commands(self, obj):
         return self.user in obj.adhoc_role
