@@ -73,7 +73,7 @@ main() {
     echo "This script generates requirements.txt from requirements.in and requirements_git.in"
     echo "It should be run from within the awx container"
     echo ""
-    echo "Usage: $0 [run|upgrade]"
+    echo "Usage: $0 [run|upgrade|dev]"
     echo ""
     echo "Commands:"
     echo "help      Print this message"
