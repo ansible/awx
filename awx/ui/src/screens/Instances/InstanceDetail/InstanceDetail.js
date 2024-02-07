@@ -209,7 +209,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
           <Detail label={t`Node Type`} value={instance.node_type} />
           <Detail label={t`Host`} value={instance.ip_address} />
           <Detail label={t`Listener Port`} value={instance.listener_port} />
-          {(isExecutionNode || isHopNode || !isManaged) && (
+          {!isManaged && (
             <>
               {instance.related?.install_bundle && (
                 <Detail
@@ -231,11 +231,13 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
                   }
                 />
               )}
-              <Detail
+            </>
+          )}
+          {(isExecutionNode || isHopNode) && (
+            <Detail
                 label={t`Peers from control nodes`}
                 value={instance.peers_from_control_nodes ? t`On` : t`Off`}
-              />
-            </>
+            />
           )}
           {!isHopNode && (
             <>
@@ -342,8 +344,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
         </DetailList>
         <CardActionsRow>
           {config?.me?.is_superuser &&
-            isK8s &&
-            (isExecutionNode || isHopNode || !isManaged) && (
+            isK8s && !isManaged && (
               <Button
                 ouiaId="instance-detail-edit-button"
                 aria-label={t`edit`}
@@ -354,8 +355,7 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
               </Button>
             )}
           {config?.me?.is_superuser &&
-            isK8s &&
-            (isExecutionNode || isHopNode || !isManaged) && (
+            isK8s && !isManaged && (
               <RemoveInstanceButton
                 dataCy="remove-instance-button"
                 itemsToRemove={[instance]}

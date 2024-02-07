@@ -98,7 +98,6 @@ function InstanceFormFields({ isEdit, instance }) {
           name="peers_from_control_nodes"
           label={t`Peers from control nodes`}
           tooltip={t`If enabled, control nodes will peer to this instance automatically. If disabled, instance will be connected only to associated peers.`}
-          isDisabled={parseInt(instance.listener_port, 10) < 1024 || true}
         />
       </FormGroup>
     </>
