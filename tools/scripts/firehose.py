@@ -66,7 +66,7 @@ class YieldedRows(StringIO):
     def __init__(self, job_id, rows, created_stamp, modified_stamp, *args, **kwargs):
         self.rows = rows
         self.rowlist = []
-        for (event, module) in itertools.product(EVENT_OPTIONS, MODULE_OPTIONS):
+        for event, module in itertools.product(EVENT_OPTIONS, MODULE_OPTIONS):
             event_data_json = {"task_action": module, "name": "Do a {} thing".format(module), "task": "Do a {} thing".format(module)}
             row = (
                 "\t".join(

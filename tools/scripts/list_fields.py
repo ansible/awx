@@ -6,15 +6,11 @@ def _get_class_full_name(cls_):
 
 
 class _ModelFieldRow(object):
-
     def __init__(self, field):
         self.field = field
         self.name = field.name
         self.type_ = _get_class_full_name(type(field))
-        if self.field.many_to_many\
-                or self.field.many_to_one\
-                or self.field.one_to_many\
-                or self.field.one_to_one:
+        if self.field.many_to_many or self.field.many_to_one or self.field.one_to_many or self.field.one_to_one:
             self.related_model = _get_class_full_name(self.field.remote_field.model)
         else:
             self.related_model = 'N/A'
