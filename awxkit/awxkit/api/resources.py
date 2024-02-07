@@ -1,3 +1,6 @@
+from awxkit.config import config
+
+
 class Resources(object):
     _activity = r'activity_stream/\d+/'
     _activity_stream = 'activity_stream/'
@@ -285,6 +288,9 @@ class Resources(object):
     common = api + r'v\d+/'
     v2 = api + 'v2/'
 
+    def __init__(self, api):
+        self.api = api
+
     def __getattr__(self, resource):
         if resource[:3] == '___':
             raise AttributeError('No existing resource: {}'.format(resource))
@@ -299,4 +305,4 @@ class Resources(object):
         return '{0}{1}'.format(getattr(self, prefix), getattr(self, resource))
 
 
-resources = Resources()
+resources = Resources(api=config.api_base_path)

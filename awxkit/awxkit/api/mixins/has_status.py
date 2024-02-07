@@ -3,6 +3,7 @@ import json
 
 from awxkit.utils import poll_until
 from awxkit.exceptions import WaitUntilTimeout
+from awxkit.config import config
 
 
 def bytes_to_str(obj):
@@ -83,7 +84,7 @@ class HasStatus(object):
         if getattr(self, 'job_explanation', '').startswith('Previous Task Failed'):
             try:
                 data = json.loads(self.job_explanation.replace('Previous Task Failed: ', ''))
-                dependency = self.walk('/api/v2/{0}s/{1}/'.format(data['job_type'], data['job_id']))
+                dependency = self.walk('/{0}v2/{1}s/{2}/'.format(config.api_base_path, data['job_type'], data['job_id']))
                 if hasattr(dependency, 'failure_output_details'):
                     msg += '\nDependency output:\n{}'.format(dependency.failure_output_details())
                 else:

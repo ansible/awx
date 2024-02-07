@@ -14,9 +14,7 @@ import yaml
 from awxkit.words import words
 from awxkit.exceptions import WaitUntilTimeout
 
-
 log = logging.getLogger(__name__)
-
 
 cloud_types = (
     'aws',
