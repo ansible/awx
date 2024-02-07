@@ -17,7 +17,7 @@ def parse_description(desc):
     options = {}
     desc_lines = []
     if 'POST' in desc:
-       desc_lines = desc[desc.index('POST') :].splitlines()
+        desc_lines = desc[desc.index('POST') :].splitlines()
     else:
         desc_lines = desc.splitlines()
     for line in desc_lines:
