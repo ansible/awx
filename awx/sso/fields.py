@@ -598,8 +598,10 @@ class SocialMapField(fields.ListField):
 
 class SocialSingleOrganizationMapField(HybridDictField):
     admins = SocialMapField(allow_null=True, required=False)
+    auditors = SocialMapField(allow_null=True, required=False)
     users = SocialMapField(allow_null=True, required=False)
     remove_admins = fields.BooleanField(required=False)
+    remove_auditors = fields.BooleanField(required=False)
     remove_users = fields.BooleanField(required=False)
     organization_alias = SocialMapField(allow_null=True, required=False)
 
