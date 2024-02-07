@@ -7,7 +7,7 @@ from awx.main.fields import ImplicitRoleField
 from awx.main.constants import role_name_to_perm_mapping
 
 
-logger = logging.getLogger('awx.main.migrations._new_rbac')
+logger = logging.getLogger('awx.main.migrations._dab_rbac')
 
 """
 Data structures and methods for the migration of old Role model to ObjectRole

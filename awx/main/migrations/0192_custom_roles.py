@@ -4,7 +4,7 @@ from django.db import migrations
 from django.contrib.auth.management import create_permissions
 from django.contrib.contenttypes.management import create_contenttypes
 
-from awx.main.migrations._new_rbac import migrate_to_new_rbac
+from awx.main.migrations._dab_rbac import migrate_to_new_rbac
 
 from ansible_base.rbac.migrations._managed_definitions import setup_managed_role_definitions
 

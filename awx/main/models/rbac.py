@@ -22,7 +22,7 @@ from awx.api.versioning import reverse
 
 # Ansible_base app
 from ansible_base.rbac.models import RoleDefinition
-from awx.main.migrations._new_rbac import build_role_map, get_permissions_for_role
+from awx.main.migrations._dab_rbac import build_role_map, get_permissions_for_role
 from awx.main.constants import role_name_to_perm_mapping, org_role_to_permission
 
 __all__ = [
