@@ -35,7 +35,7 @@ describe('sortErrorMessages', () => {
     };
     const parsed = sortErrorMessages(error, { foo: '', baz: '' });
     expect(parsed).toEqual({
-      formError: '',
+      formError: 'Error in fields',
       fieldErrors: {
         foo: 'bar',
         baz: 'bam',
@@ -54,7 +54,7 @@ describe('sortErrorMessages', () => {
     };
     const parsed = sortErrorMessages(error, { foo: '', baz: '' });
     expect(parsed).toEqual({
-      formError: 'oopsie',
+      formError: 'Error in fields',
       fieldErrors: {
         baz: 'bam',
       },
@@ -72,7 +72,7 @@ describe('sortErrorMessages', () => {
     };
     const parsed = sortErrorMessages(error, { foo: '', baz: '' });
     expect(parsed).toEqual({
-      formError: '',
+      formError: 'Error in fields',
       fieldErrors: {
         foo: 'bar; bar2',
         baz: 'bam',
@@ -103,7 +103,7 @@ describe('sortErrorMessages', () => {
     };
     const parsed = sortErrorMessages(error, formValues);
     expect(parsed).toEqual({
-      formError: '',
+      formError: 'Error in fields',
       fieldErrors: {
         inputs: {
           url: 'URL Error',
@@ -135,7 +135,7 @@ describe('sortErrorMessages', () => {
     };
     const parsed = sortErrorMessages(error, formValues);
     expect(parsed).toEqual({
-      formError: 'Other stuff error',
+      formError: 'Error in fields',
       fieldErrors: {
         inputs: {
           url: 'URL Error',

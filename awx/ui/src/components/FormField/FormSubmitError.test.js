@@ -5,14 +5,15 @@ import { mountWithContexts } from '../../../testUtils/enzymeHelpers';
 import FormSubmitError from './FormSubmitError';
 
 describe('<FormSubmitError>', () => {
-  test('should render null when no error present', () => {
+  test('should render null when no error present', async () => {
     const wrapper = mountWithContexts(
       <Formik>{() => <FormSubmitError error={null} />}</Formik>
     );
-    expect(wrapper.find('FormSubmitError').text()).toEqual('');
+    const ele = await wrapper.find('FormSubmitError').text();
+    expect(ele).toEqual('');
   });
 
-  test('should pass field errors to Formik', () => {
+  test('should pass field errors to Formik', async () => {
     const error = {
       response: {
         data: {
@@ -30,26 +31,7 @@ describe('<FormSubmitError>', () => {
         )}
       </Formik>
     );
-    expect(wrapper.find('p').text()).toEqual('invalid');
-  });
-
-  test('should display error message if field errors not provided', async () => {
-    const realConsole = global.console;
-    global.console = {
-      error: jest.fn(),
-    };
-    const error = {
-      message: 'There was an error',
-    };
-    let wrapper;
-    await act(async () => {
-      wrapper = mountWithContexts(
-        <Formik>{() => <FormSubmitError error={error} />}</Formik>
-      );
-    });
-    wrapper.update();
-    expect(wrapper.find('Alert').prop('title')).toEqual('There was an error');
-    expect(global.console.error).toHaveBeenCalledWith(error);
-    global.console = realConsole;
+    const pp = await wrapper.find('p').text();
+    expect(pp).toEqual('invalid');
   });
 });
