@@ -211,10 +211,10 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
           <Detail label={t`Listener Port`} value={instance.listener_port} />
           {!isManaged && instance.related?.install_bundle && (
             <Detail
-                label={t`Install Bundle`}
-                value={
+              label={t`Install Bundle`}
+              value={
                 <Tooltip content={t`Click to download bundle`}>
-                    <Button
+                  <Button
                     component="a"
                     isSmall
                     href={`${instance.related?.install_bundle}`}
@@ -222,11 +222,11 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
                     variant="secondary"
                     dataCy="install-bundle-download-button"
                     rel="noopener noreferrer"
-                    >
+                  >
                     <DownloadIcon />
-                    </Button>
+                  </Button>
                 </Tooltip>
-                }
+              }
             />
           )}
           {(isExecutionNode || isHopNode) && (
@@ -341,20 +341,20 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
         <CardActionsRow>
           {config?.me?.is_superuser && isK8s && !isManaged && (
             <>
-                <Button
+              <Button
                 ouiaId="instance-detail-edit-button"
                 aria-label={t`edit`}
                 component={Link}
                 to={`/instances/${id}/edit`}
-                >
+              >
                 {t`Edit`}
-                </Button>
-                <RemoveInstanceButton
+              </Button>
+              <RemoveInstanceButton
                 dataCy="remove-instance-button"
                 itemsToRemove={[instance]}
                 isK8s={isK8s}
                 onRemove={removeInstances}
-                />
+              />
             </>
           )}
           {isExecutionNode && (
