@@ -235,8 +235,8 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
           )}
           {(isExecutionNode || isHopNode) && (
             <Detail
-                label={t`Peers from control nodes`}
-                value={instance.peers_from_control_nodes ? t`On` : t`Off`}
+              label={t`Peers from control nodes`}
+              value={instance.peers_from_control_nodes ? t`On` : t`Off`}
             />
           )}
           {!isHopNode && (
@@ -343,26 +343,24 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
           )}
         </DetailList>
         <CardActionsRow>
-          {config?.me?.is_superuser &&
-            isK8s && !isManaged && (
-              <Button
-                ouiaId="instance-detail-edit-button"
-                aria-label={t`edit`}
-                component={Link}
-                to={`/instances/${id}/edit`}
-              >
-                {t`Edit`}
-              </Button>
-            )}
-          {config?.me?.is_superuser &&
-            isK8s && !isManaged && (
-              <RemoveInstanceButton
-                dataCy="remove-instance-button"
-                itemsToRemove={[instance]}
-                isK8s={isK8s}
-                onRemove={removeInstances}
-              />
-            )}
+          {config?.me?.is_superuser && isK8s && !isManaged && (
+            <Button
+              ouiaId="instance-detail-edit-button"
+              aria-label={t`edit`}
+              component={Link}
+              to={`/instances/${id}/edit`}
+            >
+              {t`Edit`}
+            </Button>
+          )}
+          {config?.me?.is_superuser && isK8s && !isManaged && (
+            <RemoveInstanceButton
+              dataCy="remove-instance-button"
+              itemsToRemove={[instance]}
+              isK8s={isK8s}
+              onRemove={removeInstances}
+            />
+          )}
           {isExecutionNode && (
             <Tooltip content={t`Run a health check on the instance`}>
               <Button
