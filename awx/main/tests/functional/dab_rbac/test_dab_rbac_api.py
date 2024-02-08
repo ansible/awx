@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse as django_reverse
 
 from awx.api.versioning import reverse
-from awx.main.models import JobTemplate, Inventory
+from awx.main.models import JobTemplate, Inventory, Organization
 
 from ansible_base.rbac.models import RoleDefinition
 
@@ -44,10 +44,25 @@ def test_assign_managed_role(admin_user, alice, rando, inventory, post):
 
 @pytest.mark.django_db
 def test_assign_custom_delete_role(admin_user, rando, inventory, delete, patch):
-    rd, _ = RoleDefinition.objects.get_or_create(name='inventory-delete', permissions=['delete_inventory', 'view_inventory'])
+    rd, _ = RoleDefinition.objects.get_or_create(
+        name='inventory-delete', permissions=['delete_inventory', 'view_inventory'], content_type=ContentType.objects.get_for_model(Inventory)
+    )
     rd.give_permission(rando, inventory)
     inv_id = inventory.pk
     inv_url = reverse('api:inventory_detail', kwargs={'pk': inv_id})
     patch(url=inv_url, data={"description": "new"}, user=rando, expect=403)
     delete(url=inv_url, user=rando, expect=202)
     assert Inventory.objects.get(id=inv_id).pending_deletion
+
+
+@pytest.mark.django_db
+def test_assign_custom_add_role(admin_user, rando, organization, post):
+    rd, _ = RoleDefinition.objects.get_or_create(
+        name='inventory-add', permissions=['add_inventory', 'view_organization'], content_type=ContentType.objects.get_for_model(Organization)
+    )
+    rd.give_permission(rando, organization)
+    url = reverse('api:inventory_list')
+    r = post(url=url, data={'name': 'abc', 'organization': organization.id}, user=rando, expect=201)
+    inv_id = r.data['id']
+    inventory = Inventory.objects.get(id=inv_id)
+    assert rando.has_obj_perm(inventory, 'change')

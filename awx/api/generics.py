@@ -475,7 +475,10 @@ class ListAPIView(generics.ListAPIView, GenericAPIView):
 
 class ListCreateAPIView(ListAPIView, generics.ListCreateAPIView):
     # Base class for a list view that allows creating new objects.
-    pass
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        if self.request and self.request.user:
+            give_creator_permissions(self.request.user, serializer.instance)
 
 
 class ParentMixin(object):
