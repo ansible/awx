@@ -539,7 +539,7 @@ docker-compose: awx/projects docker-compose-sources
 	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/initialize_containers.yml \
 	    -e enable_vault=$(VAULT) \
 	    -e vault_tls=$(VAULT_TLS) \
-		-e enable_ldap=$(LDAP);
+	    -e enable_ldap=$(LDAP);
 	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_OPTS) up $(COMPOSE_UP_OPTS) --remove-orphans
 
 docker-compose-credential-plugins: awx/projects docker-compose-sources

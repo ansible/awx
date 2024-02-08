@@ -101,7 +101,7 @@
             validate_certs: false
             token: "{{ Initial_Root_Token }}"
             data:
-                type: "ldap"
+              type: "ldap"
           register: vault_auth_ldap
           changed_when: vault_auth_ldap.result.errors | default([]) | length == 0
           failed_when:
@@ -196,7 +196,7 @@
         validate_certs: false
         token: "{{ Initial_Root_Token }}"
         data:
-            type: "userpass"
+          type: "userpass"
       register: vault_auth_userpass
       changed_when: vault_auth_userpass.result.errors | default([]) | length == 0
       failed_when:
@@ -212,7 +212,7 @@
         data:
           password: "{{ vault_userpass_password }}"
           policies:
-              - "userpass_engine"
+            - "userpass_engine"
 
   always:
     - name: Stop the vault
