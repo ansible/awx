@@ -34,6 +34,7 @@ from rest_framework.negotiation import DefaultContentNegotiation
 from ansible_base.rest_filters.rest_framework.field_lookup_backend import FieldLookupBackend
 from ansible_base.lib.utils.models import get_all_field_names
 from ansible_base.rbac.models import RoleEvaluation
+from ansible_base.rbac.permission_registry import permission_registry
 
 # AWX
 from awx.main.models import UnifiedJob, UnifiedJobTemplate, User, Role, Credential, WorkflowJobTemplateNode, WorkflowApprovalTemplate
@@ -477,8 +478,9 @@ class ListCreateAPIView(ListAPIView, generics.ListCreateAPIView):
     # Base class for a list view that allows creating new objects.
     def perform_create(self, serializer):
         super().perform_create(serializer)
-        if self.request and self.request.user:
-            give_creator_permissions(self.request.user, serializer.instance)
+        if serializer.Meta.model in permission_registry.all_registered_models:
+            if self.request and self.request.user:
+                give_creator_permissions(self.request.user, serializer.instance)
 
 
 class ParentMixin(object):
