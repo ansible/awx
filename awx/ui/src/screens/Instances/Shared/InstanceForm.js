@@ -16,7 +16,7 @@ const INSTANCE_TYPES = [
   { id: 'hop', name: t`Hop` },
 ];
 
-function InstanceFormFields({ isEdit, instance }) {
+function InstanceFormFields({ isEdit }) {
   const [instanceTypeField, instanceTypeMeta, instanceTypeHelpers] = useField({
     name: 'node_type',
     validate: required(t`Set a value for this field`),
@@ -138,7 +138,7 @@ function InstanceForm({
         {(formik) => (
           <Form autoComplete="off" onSubmit={formik.handleSubmit}>
             <FormColumnLayout>
-              <InstanceFormFields isEdit={isEdit} instance={instance} />
+              <InstanceFormFields isEdit={isEdit} />
               <FormSubmitError error={submitError} />
               <FormActionGroup
                 onCancel={handleCancel}

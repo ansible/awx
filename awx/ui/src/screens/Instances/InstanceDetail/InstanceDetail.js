@@ -209,29 +209,25 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
           <Detail label={t`Node Type`} value={instance.node_type} />
           <Detail label={t`Host`} value={instance.ip_address} />
           <Detail label={t`Listener Port`} value={instance.listener_port} />
-          {!isManaged && (
-            <>
-              {instance.related?.install_bundle && (
-                <Detail
-                  label={t`Install Bundle`}
-                  value={
-                    <Tooltip content={t`Click to download bundle`}>
-                      <Button
-                        component="a"
-                        isSmall
-                        href={`${instance.related?.install_bundle}`}
-                        target="_blank"
-                        variant="secondary"
-                        dataCy="install-bundle-download-button"
-                        rel="noopener noreferrer"
-                      >
-                        <DownloadIcon />
-                      </Button>
-                    </Tooltip>
-                  }
-                />
-              )}
-            </>
+          {!isManaged && instance.related?.install_bundle && (
+            <Detail
+                label={t`Install Bundle`}
+                value={
+                <Tooltip content={t`Click to download bundle`}>
+                    <Button
+                    component="a"
+                    isSmall
+                    href={`${instance.related?.install_bundle}`}
+                    target="_blank"
+                    variant="secondary"
+                    dataCy="install-bundle-download-button"
+                    rel="noopener noreferrer"
+                    >
+                    <DownloadIcon />
+                    </Button>
+                </Tooltip>
+                }
+            />
           )}
           {(isExecutionNode || isHopNode) && (
             <Detail
@@ -344,22 +340,22 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
         </DetailList>
         <CardActionsRow>
           {config?.me?.is_superuser && isK8s && !isManaged && (
-            <Button
-              ouiaId="instance-detail-edit-button"
-              aria-label={t`edit`}
-              component={Link}
-              to={`/instances/${id}/edit`}
-            >
-              {t`Edit`}
-            </Button>
-          )}
-          {config?.me?.is_superuser && isK8s && !isManaged && (
-            <RemoveInstanceButton
-              dataCy="remove-instance-button"
-              itemsToRemove={[instance]}
-              isK8s={isK8s}
-              onRemove={removeInstances}
-            />
+            <>
+                <Button
+                ouiaId="instance-detail-edit-button"
+                aria-label={t`edit`}
+                component={Link}
+                to={`/instances/${id}/edit`}
+                >
+                {t`Edit`}
+                </Button>
+                <RemoveInstanceButton
+                dataCy="remove-instance-button"
+                itemsToRemove={[instance]}
+                isK8s={isK8s}
+                onRemove={removeInstances}
+                />
+            </>
           )}
           {isExecutionNode && (
             <Tooltip content={t`Run a health check on the instance`}>
