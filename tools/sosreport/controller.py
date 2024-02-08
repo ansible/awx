@@ -66,7 +66,6 @@ class Controller(Plugin, RedHatPlugin):
     short_desc = "Ansible Automation Platform controller information"
 
     def setup(self):
-
         for path in SOSREPORT_CONTROLLER_DIRS:
             self.add_copy_spec(path)
 

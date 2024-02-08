@@ -20,7 +20,6 @@ from awx.main.analytics.broadcast_websocket import (
     RelayWebsocketStats,
     RelayWebsocketStatsManager,
 )
-import awx.main.analytics.subsystem_metrics as s_metrics
 
 logger = logging.getLogger('awx.main.wsrelay')
 
@@ -54,7 +53,6 @@ class WebsocketRelayConnection:
         self.protocol = protocol
         self.verify_ssl = verify_ssl
         self.channel_layer = None
-        self.subsystem_metrics = s_metrics.Metrics(instance_name=name)
         self.producers = dict()
         self.connected = False
 

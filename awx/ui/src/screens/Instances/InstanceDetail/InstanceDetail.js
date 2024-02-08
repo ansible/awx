@@ -209,33 +209,31 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
           <Detail label={t`Node Type`} value={instance.node_type} />
           <Detail label={t`Host`} value={instance.ip_address} />
           <Detail label={t`Listener Port`} value={instance.listener_port} />
-          {(isExecutionNode || isHopNode || !isManaged) && (
-            <>
-              {instance.related?.install_bundle && (
-                <Detail
-                  label={t`Install Bundle`}
-                  value={
-                    <Tooltip content={t`Click to download bundle`}>
-                      <Button
-                        component="a"
-                        isSmall
-                        href={`${instance.related?.install_bundle}`}
-                        target="_blank"
-                        variant="secondary"
-                        dataCy="install-bundle-download-button"
-                        rel="noopener noreferrer"
-                      >
-                        <DownloadIcon />
-                      </Button>
-                    </Tooltip>
-                  }
-                />
-              )}
-              <Detail
-                label={t`Peers from control nodes`}
-                value={instance.peers_from_control_nodes ? t`On` : t`Off`}
-              />
-            </>
+          {!isManaged && instance.related?.install_bundle && (
+            <Detail
+              label={t`Install Bundle`}
+              value={
+                <Tooltip content={t`Click to download bundle`}>
+                  <Button
+                    component="a"
+                    isSmall
+                    href={`${instance.related?.install_bundle}`}
+                    target="_blank"
+                    variant="secondary"
+                    dataCy="install-bundle-download-button"
+                    rel="noopener noreferrer"
+                  >
+                    <DownloadIcon />
+                  </Button>
+                </Tooltip>
+              }
+            />
+          )}
+          {(isExecutionNode || isHopNode) && (
+            <Detail
+              label={t`Peers from control nodes`}
+              value={instance.peers_from_control_nodes ? t`On` : t`Off`}
+            />
           )}
           {!isHopNode && (
             <>
@@ -341,9 +339,8 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
           )}
         </DetailList>
         <CardActionsRow>
-          {config?.me?.is_superuser &&
-            isK8s &&
-            (isExecutionNode || isHopNode || !isManaged) && (
+          {config?.me?.is_superuser && isK8s && !isManaged && (
+            <>
               <Button
                 ouiaId="instance-detail-edit-button"
                 aria-label={t`edit`}
@@ -352,17 +349,14 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
               >
                 {t`Edit`}
               </Button>
-            )}
-          {config?.me?.is_superuser &&
-            isK8s &&
-            (isExecutionNode || isHopNode || !isManaged) && (
               <RemoveInstanceButton
                 dataCy="remove-instance-button"
                 itemsToRemove={[instance]}
                 isK8s={isK8s}
                 onRemove={removeInstances}
               />
-            )}
+            </>
+          )}
           {isExecutionNode && (
             <Tooltip content={t`Run a health check on the instance`}>
               <Button

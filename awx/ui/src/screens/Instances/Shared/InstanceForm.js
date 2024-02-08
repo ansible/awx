@@ -16,7 +16,7 @@ const INSTANCE_TYPES = [
   { id: 'hop', name: t`Hop` },
 ];
 
-function InstanceFormFields({ isEdit, instance }) {
+function InstanceFormFields({ isEdit }) {
   const [instanceTypeField, instanceTypeMeta, instanceTypeHelpers] = useField({
     name: 'node_type',
     validate: required(t`Set a value for this field`),
@@ -98,7 +98,6 @@ function InstanceFormFields({ isEdit, instance }) {
           name="peers_from_control_nodes"
           label={t`Peers from control nodes`}
           tooltip={t`If enabled, control nodes will peer to this instance automatically. If disabled, instance will be connected only to associated peers.`}
-          isDisabled={parseInt(instance.listener_port, 10) < 1024 || true}
         />
       </FormGroup>
     </>
@@ -139,7 +138,7 @@ function InstanceForm({
         {(formik) => (
           <Form autoComplete="off" onSubmit={formik.handleSubmit}>
             <FormColumnLayout>
-              <InstanceFormFields isEdit={isEdit} instance={instance} />
+              <InstanceFormFields isEdit={isEdit} />
               <FormSubmitError error={submitError} />
               <FormActionGroup
                 onCancel={handleCancel}
