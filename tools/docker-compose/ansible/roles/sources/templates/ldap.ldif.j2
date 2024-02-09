@@ -84,3 +84,16 @@ objectClass: top
 objectClass: groupOfNames
 member: cn=awx_ldap_org_admin,ou=users,dc=example,dc=org
 
+{% if enable_ldap|bool and enable_vault|bool %}
+dn: cn={{ vault_ldap_username }},ou=users,dc=example,dc=org
+changetype: add
+mail: vault@example.org
+sn: LdapVaultAdmin
+cn: {{ vault_ldap_username }}
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+userPassword: {{ vault_ldap_password }}
+givenName: awx
+{% endif %}
