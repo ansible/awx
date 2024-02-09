@@ -377,12 +377,14 @@ function InstanceDetail({ setBreadcrumb, isK8s }) {
               </Button>
             </Tooltip>
           )}
-          <InstanceToggle
-            css="display: inline-flex;"
-            fetchInstances={fetchDetails}
-            instance={instance}
-            dataCy="enable-instance"
-          />
+          {!isHopNode && (
+            <InstanceToggle
+              css="display: inline-flex;"
+              fetchInstances={fetchDetails}
+              instance={instance}
+              dataCy="enable-instance"
+            />
+          )}
         </CardActionsRow>
 
         {error && (
