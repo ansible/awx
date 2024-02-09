@@ -263,29 +263,39 @@ When **HashiCorp Vault Secret Lookup** is selected for **Credential Type**, prov
 - **Server URL** (required): provide the URL used for communicating with HashiCorp Vault's secret management system
 - **Token**: specify the access token used to authenticate HashiCorp's server
 - **CA Certificate**: specify the CA certificate used to verify HashiCorp's server
-- **Approle Role_ID**: specify the ID for Approle authentication
+- **Approle Role_ID**: specify the ID if using Approle for authentication
 - **Approle Secret_ID**: specify the corresponding secret ID for Approle authentication
 - **Client Certificate**: specify a PEM-encoded client certificate when using the TLS auth method including any required intermediate certificates expected by Vault
 - **Client Certificate Key**: specify a PEM-encoded certificate private key when using the TLS auth method
 - **TLS Authentication Role**: specify the role or certificate name in Vault that corresponds to your client certificate when using the TLS auth method. If it is not provided, Vault will attempt to match the certificate automatically
 - **Namespace name** specify the namespace name (Vault Enterprise only)
 - **Kubernetes role** specify the role name when using Kubernetes authentication
+- **Username**: enter the username of the user to be used to authenticate this service
+- **Password**: enter the password associated with the user to authenticate this service
 - **Path to Auth**: specify a path if other than the default path of ``/approle``
 - **API Version** (required): select v1 for static lookups and v2 for versioned lookups
-- **Username and Password**: specify the username and password for the user account
 
-For more detail about the Approle auth method and its fields, refer to the `Vault documentation for Approle Auth Method <https://www.vaultproject.io/docs/auth/approle>`_.
 
-For more detail about the Userpass auth method and its fields, refer to the `Vault documentation for LDAP auth method <https://www.vaultproject.io/docs/auth/userpass>`_.
+For more detail about the Approle auth method and its fields, refer to the `Vault documentation for Approle Auth Method <https://developer.hashicorp.com/vault/docs/auth/approle>`_.
 
-For more detail about the Kubernetes auth method and its fields, refer to the `Vault documentation for Kubernetes auth method <https://developer.hashicorp.com/vault/docs/auth/kubernetes>` _.
+LDAP authentication requires LDAP to be configured in HashiCorp's Vault UI. A policy may be added to the user if they want access to a specific engine created. As long as the bind is set properly, the user should be able to successfully authenticate. Cubbyhole is the name of the default secret mount. If you have proper permissions, you can create other mounts and write key values to those. For more detail about the LDAP auth method and its fields, refer to the `Vault documentation for LDAP auth method <https://developer.hashicorp.com/vault/docs/auth/ldap>`_.
 
-For more detail about the TLS certificate auth method and its fields, refer to the `Vault documentation for TLS certificates auth method <https://developer.hashicorp.com/vault/docs/auth/cert>` _.
+For more detail about the userpass auth method and its fields, refer to the `Vault documentation for userpass auth method <https://developer.hashicorp.com/vault/docs/auth/userpass>`_.
 
-Below shows an example of a configured HashiCorp Vault Secret Lookup credential.
+For more detail about the Kubernetes auth method and its fields, refer to the `Vault documentation for Kubernetes auth method <https://developer.hashicorp.com/vault/docs/auth/kubernetes>`_.
+
+For more detail about the TLS certificate auth method and its fields, refer to the `Vault documentation for TLS certificates auth method <https://developer.hashicorp.com/vault/docs/auth/cert>`_.
+
+Below shows an example of a configured HashiCorp Vault Secret Lookup  credential for LDAP.
 
 .. image:: ../common/images/credentials-create-hashicorp-kv-credential.png 
    :alt: Example new HashiCorp Vault Secret lookup dialog
+
+To test the lookup, create another credential that uses the HashiCorp Vault lookup. The example below shows the metadata for a machine credential configured to look up HashiCorp Vault secret credentials:
+
+.. image:: ../common/images/credentials-machine-test-hashicorp-metadata.png 
+   :alt: Example machine credential lookup metadata for HashiCorp Vault.
+
 
 .. _ug_credentials_hashivaultssh:
 
@@ -307,13 +317,15 @@ When **HashiCorp Vault Signed SSH** is selected for **Credential Type**, provide
 - **TLS Authentication Role**: specify the role or certificate name in Vault that corresponds to your client certificate when using the TLS auth method. If it is not provided, Vault will attempt to match the certificate automatically
 - **Namespace name** specify the namespace name (Vault Enterprise only)
 - **Kubernetes role** specify the role name when using Kubernetes authentication
+- **Username**: enter the username of the user to be used to authenticate this service
+- **Password**: enter the password associated with the user to authenticate this service
 - **Path to Auth**: specify a path if other than the default path of ``/approle``
 
-For more detail about the Approle auth method and its fields, refer to the `Vault documentation for Approle Auth Method <https://www.vaultproject.io/docs/auth/approle>`_.
+For more detail about the Approle auth method and its fields, refer to the `Vault documentation for Approle Auth Method <https://developer.hashicorp.com/vault/docs/auth/approle>`_.
 
-For more detail about the Kubernetes auth method and its fields, refer to the `Vault documentation for Kubernetes auth method <https://developer.hashicorp.com/vault/docs/auth/kubernetes>` _.
+For more detail about the Kubernetes auth method and its fields, refer to the `Vault documentation for Kubernetes auth method <https://developer.hashicorp.com/vault/docs/auth/kubernetes>`_.
 
-For more detail about the TLS certificate auth method and its fields, refer to the `Vault documentation for TLS certificates auth method <https://developer.hashicorp.com/vault/docs/auth/cert>` _.
+For more detail about the TLS certificate auth method and its fields, refer to the `Vault documentation for TLS certificates auth method <https://developer.hashicorp.com/vault/docs/auth/cert>`_.
 
 Below shows an example of a configured HashiCorp SSH Secrets Engine credential.
 
