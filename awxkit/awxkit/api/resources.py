@@ -284,12 +284,9 @@ class Resources(object):
     _workflow_job_workflow_nodes = r'workflow_jobs/\d+/workflow_nodes/'
     _subscriptions = 'config/subscriptions/'
     _workflow_jobs = 'workflow_jobs/'
-    api = '/api/'
+    api = str(config.api_base_path)
     common = api + r'v\d+/'
     v2 = api + 'v2/'
-
-    def __init__(self, api):
-        self.api = api
 
     def __getattr__(self, resource):
         if resource[:3] == '___':
@@ -305,4 +302,4 @@ class Resources(object):
         return '{0}{1}'.format(getattr(self, prefix), getattr(self, resource))
 
 
-resources = Resources(api=config.api_base_path)
+resources = Resources()
