@@ -538,13 +538,15 @@ To create a secret connected to this vault in AWX you can run the following play
 ```bash
 export CONTROLLER_USERNAME=<your username>
 export CONTROLLER_PASSWORD=<your password>
-ansible-playbook tools/docker-compose/ansible/plumb_vault.yml
+ansible-playbook tools/docker-compose/ansible/plumb_vault.yml -e enable_ldap=false
 ```
 
 This will create the following items in your AWX instance:
 * A credential called `Vault Lookup Cred` tied to the vault instance.
+* A credential called `Vault UserPass Lookup Cred` tied to the vault instance.
 * A custom credential type called `Vault Custom Cred Type`.
-* A credential called `Credential From Vault` which is of the created type using the `Vault Lookup Cred` to get the password.
+* A credential called `Credential From HashiCorp Vault via Token Auth` which is of the created type using the `Vault Lookup Cred` to get the secret.
+* A credential called `Credential From HashiCorp Vault via UserPass Auth` which is of the created type using the `Vault Userpass Lookup Cred` to get the secret.
 
 The custom credential type adds a variable when used in a playbook called `the_secret_from_vault`.
 If you have a playbook like:
@@ -559,7 +561,46 @@ If you have a playbook like:
         var: the_secret_from_vault
 ```
 
-And run it through AWX with the credential `Credential From Vault` tied to it, the debug should result in `this_is_the_secret_value`
+And run it through AWX with the credential `Credential From Vault via Token Auth` tied to it, the debug should result in `this_is_the_secret_value`. If you run it through AWX with the credential `Credential From Vault via Userpass Auth`, the debug should result in `this_is_the_userpass_secret_value`. 
+
+### HashiVault with LDAP
+
+If you wish to have your OpenLDAP container connected to the Vault container, you will first need to have the OpenLDAP container running alongside AWX and Vault. 
+
+
+```bash
+
+VAULT=true LDAP=true make docker-compose
+
+```
+
+Similar to the above, you will need to unseal the vault before we can run the other needed playbooks. 
+
+```bash
+
+ansible-playbook tools/docker-compose/ansible/unseal_vault.yml
+
+```
+
+Now that the vault is unsealed, we can plumb the vault container now while passing true to enable_ldap extra var. 
+
+
+```bash
+
+export CONTROLLER_USERNAME=<your username>
+
+export CONTROLLER_PASSWORD=<your password>
+
+ansible-playbook tools/docker-compose/ansible/plumb_vault.yml -e enable_ldap=true
+
+```
+
+This will populate your AWX instance with LDAP specific items. 
+
+- A vault LDAP Lookup Cred tied to the LDAP `awx_ldap_vault` user called `Vault LDAP Lookup Cred`
+- A credential called `Credential From HashiCorp Vault via LDAP Auth`  which is of the created type using the `Vault LDAP Lookup Cred` to get the secret.
+
+And run it through AWX with the credential `Credential From HashiCorp Vault via LDAP Auth` tied to it, the debug should result in `this_is_the_ldap_secret_value`.
 
 The extremely non-obvious input is the fact that the fact prefixes "data/" unexpectedly.
 This was discovered by inspecting the secret with the vault CLI, which may help with future troubleshooting.
