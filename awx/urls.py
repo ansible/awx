@@ -10,7 +10,7 @@ from awx.main.views import handle_400, handle_403, handle_404, handle_500, handl
 
 
 urlpatterns = [
-    path('api/v1/', include(api_version_urls)),
+    path('api/v2/', include(api_version_urls)),
     path('api/', include(api_urls)),
     path('', include(root_urls)),
     re_path(r'', include('awx.ui.urls', namespace='ui')),
