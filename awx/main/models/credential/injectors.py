@@ -8,6 +8,16 @@ from django.conf import settings
 
 from awx.main.utils.execution_environments import to_container_path
 
+def vault_auth_aws(cred, env, private_data_dir):
+    creds = cred.get_input("auth_full_path")
+
+    env['AWS_ACCESS_KEY_ID'] = creds.get('access_key', '')
+    env['AWS_SECRET_ACCESS_KEY'] = creds.get('secret_key', '')
+
+    if 'security_token' in creds:
+        env['AWS_SESSION_TOKEN'] = creds.get('security_token', '')
+        env['AWS_SECURITY_TOKEN'] = env['AWS_SESSION_TOKEN']
+
 
 def aws(cred, env, private_data_dir):
     env['AWS_ACCESS_KEY_ID'] = cred.get_input('username', default='')

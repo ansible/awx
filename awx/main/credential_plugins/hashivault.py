@@ -196,6 +196,73 @@ hashi_ssh_inputs['metadata'] = (
 )
 hashi_ssh_inputs['required'].extend(['public_key', 'role'])
 
+hashi_auth_inputs = {
+    'fields': [
+        {
+            'id': 'url',
+            'label': _('Server URL'),
+            'type': 'string',
+            'format': 'url',
+            'help_text': _('The URL to the HashiCorp Vault'),
+        },
+        {
+            'id': 'token',
+            'label': _('Token'),
+            'type': 'string',
+            'secret': True,
+            'help_text': _('The access token used to authenticate to the Vault server'),
+        },
+        {
+            'id': 'cacert',
+            'label': _('CA Certificate'),
+            'type': 'string',
+            'multiline': True,
+            'help_text': _('The CA certificate used to verify the SSL certificate of the Vault server'),
+        },
+        {'id': 'role_id', 'label': _('AppRole role_id'), 'type': 'string', 'multiline': False,
+         'help_text': _('The Role ID for AppRole Authentication')},
+        {
+            'id': 'secret_id',
+            'label': _('AppRole secret_id'),
+            'type': 'string',
+            'multiline': False,
+            'secret': True,
+            'help_text': _('The Secret ID for AppRole Authentication'),
+        },
+        {
+            'id': 'namespace',
+            'label': _('Namespace name (Vault Enterprise only)'),
+            'type': 'string',
+            'multiline': False,
+            'help_text': _('Name of the namespace to use when authenticate and retrieve secrets'),
+        },
+        {
+            'id': 'kubernetes_role',
+            'label': _('Kubernetes role'),
+            'type': 'string',
+            'multiline': False,
+            'help_text': _(
+                'The Role for Kubernetes Authentication.'
+                ' This is the named role, configured in Vault server, for AWX pod auth policies.'
+                ' see https://www.vaultproject.io/docs/auth/kubernetes#configuration'
+            ),
+        },
+    ],
+    'metadata': [
+        {
+            'id': 'auth_full_path',
+            'label': _('Full path to the secret/engine role'),
+            'type': 'string',
+            'multiline': False,
+            'help_text': _(
+                'The full path where the secret engine is mounted including the role.'
+                'Ex: plt-aws/root/creds/role-name'
+            ),
+        },
+    ],
+    'required': ['url', 'auth_full_path'],
+}
+
 
 def handle_auth(**kwargs):
     token = None
@@ -379,6 +446,35 @@ def ssh_backend(**kwargs):
     return resp.json()['data']['signed_key']
 
 
+def auth_backend(**kwargs):
+    token = handle_auth(**kwargs)
+    url = urljoin(kwargs['url'], 'v1')
+    auth_full_path = kwargs['auth_full_path']
+    cacert = kwargs.get('cacert', None)
+
+    request_kwargs = {
+        'timeout': 30,
+        'allow_redirects': False,
+    }
+
+    sess = requests.Session()
+    sess.headers['Authorization'] = 'Bearer {}'.format(token)
+    sess.headers['X-Vault-Token'] = token
+    if kwargs.get('namespace'):
+        sess.headers['X-Vault-Namespace'] = kwargs['namespace']
+
+    request_url = urljoin(url, '/'.join(['v1', auth_full_path])).rstrip('/')
+
+    with CertFiles(cacert) as cert:
+        request_kwargs['verify'] = cert
+        response = sess.get(request_url, **request_kwargs)
+    raise_for_status(response)
+
+    return response.json().get("data", {})
+
+
 hashivault_kv_plugin = CredentialPlugin('HashiCorp Vault Secret Lookup', inputs=hashi_kv_inputs, backend=kv_backend)
 
 hashivault_ssh_plugin = CredentialPlugin('HashiCorp Vault Signed SSH', inputs=hashi_ssh_inputs, backend=ssh_backend)
+
+hashivault_auth_plugin = CredentialPlugin('HashiCorp Vault Auth', inputs=hashi_auth_inputs, backend=auth_backend)
