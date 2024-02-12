@@ -123,7 +123,7 @@ In restricted networking environment (inside a private network), where this conn
 	:alt: Mesh ingress architecture showing the peering relationship between nodes.
 
 
-An example of a mesh topology may look like the following:
+An example of a topology that uses mesh ingress may look like the following:
 
 .. list-table::
    :widths: 20 30 10 20 15
