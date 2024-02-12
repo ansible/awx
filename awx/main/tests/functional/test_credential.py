@@ -101,6 +101,7 @@ def test_default_cred_types():
             'satellite6',
             'scm',
             'ssh',
+            'terraform',
             'thycotic_dsv',
             'thycotic_tss',
             'vault',
