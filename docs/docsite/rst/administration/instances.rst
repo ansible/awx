@@ -114,7 +114,7 @@ An example of a simple topology may look like the following:
 Mesh topology
 ~~~~~~~~~~~~~~
 
-Mesh ingress is a concept that allow devices to peering indirectly into a restricted environment. Creating a remote execution node without enabling mesh ingress, you would have to allow inbound connection to the receptor listener port on the remote execution node.
+Mesh ingress is a feature that allows remote nodes to connect inbound to the control plane. This is especially useful when creating remote nodes in restricted networking environments that disallow inbound traffic.
 
 In restricted networking environment (inside a private network), where this connection is not allowed, using mesh ingress can allow the remote execution to connect *into* the AWX control plane instead of having to allow connection *from* the AWX control plane.
 
