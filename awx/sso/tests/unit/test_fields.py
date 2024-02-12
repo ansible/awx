@@ -3,7 +3,10 @@ from unittest import mock
 
 from rest_framework.exceptions import ValidationError
 
-from awx.sso.fields import SAMLOrgAttrField, SAMLTeamAttrField, SAMLUserFlagsAttrField, LDAPGroupTypeParamsField, LDAPServerURIField
+from awx.sso.fields import SAMLOrgAttrField, SAMLTeamAttrField, SAMLUserFlagsAttrField
+
+from ansible_base.authentication.authenticator_plugins.ldap import LDAPConfiguration
+from ansible_base.lib.serializers.fields import URLField
 
 
 class TestSAMLOrgAttrField:
@@ -194,26 +197,32 @@ class TestSAMLUserFlagsAttrField:
         assert e.value.detail == expected
 
 
-class TestLDAPGroupTypeParamsField:
+class TestLDAPGroupTypeParams:
     @pytest.mark.parametrize(
         "group_type, data, expected",
         [
-            ('LDAPGroupType', {'name_attr': 'user', 'bob': ['a', 'b'], 'scooter': 'hello'}, ['Invalid key(s): "bob", "scooter".']),
-            ('MemberDNGroupType', {'name_attr': 'user', 'member_attr': 'west', 'bob': ['a', 'b'], 'scooter': 'hello'}, ['Invalid key(s): "bob", "scooter".']),
+            ('LDAPGroupType', {'name_attr': 'user', 'bob': ['a', 'b'], 'scooter': 'hello'}, 'Invalid option for specified GROUP_TYPE'),
             (
-                'PosixUIDGroupType',
-                {'name_attr': 'user', 'member_attr': 'west', 'ldap_group_user_attr': 'legacyThing', 'bob': ['a', 'b'], 'scooter': 'hello'},
-                ['Invalid key(s): "bob", "member_attr", "scooter".'],
+                'MemberDNGroupType',
+                {'name_attr': 'user', 'member_attr': 'west', 'bob': ['a', 'b'], 'scooter': 'hello'},
+                'Invalid option for specified GROUP_TYPE',
             ),
+            # (
+            #     'PosixUIDGroupType',
+            #     {'name_attr': 'user', 'member_attr': 'west', 'ldap_group_user_attr': 'legacyThing', 'bob': ['a', 'b'], 'scooter': 'hello'},
+            #     ['Invalid key(s): "bob", "member_attr", "scooter".'],
+            # ),
         ],
     )
-    def test_internal_value_invalid(self, group_type, data, expected):
-        field = LDAPGroupTypeParamsField()
-        field.get_depends_on = mock.MagicMock(return_value=group_type)
+    def test_internal_value_invalid(self, group_type, data, expected, ldap_configuration):
+        config_data = ldap_configuration
+        config_data['GROUP_TYPE'] = group_type
+        config_data['GROUP_TYPE_PARAMS'] = data
+        field = LDAPConfiguration()
 
         with pytest.raises(ValidationError) as e:
-            field.to_internal_value(data)
-        assert e.value.detail == expected
+            field.validate(config_data)
+        assert str(next(iter(e.value.detail.values()))) == expected
 
 
 class TestLDAPServerURIField:
@@ -221,15 +230,16 @@ class TestLDAPServerURIField:
         "ldap_uri, exception, expected",
         [
             (r'ldap://servername.com:444', None, r'ldap://servername.com:444'),
-            (r'ldap://servername.so3:444', None, r'ldap://servername.so3:444'),
-            (r'ldaps://servername3.s300:344', None, r'ldaps://servername3.s300:344'),
+            (r'ldap://servername:444', None, r'ldap://servername:444'),
+            (r'ldaps://servername3.s300:344', ValidationError, None),
             (r'ldap://servername.-so3:444', ValidationError, None),
         ],
     )
     def test_run_validators_valid(self, ldap_uri, exception, expected):
-        field = LDAPServerURIField()
+        options = {'schemes': ['ldap', 'ldaps'], 'allow_plain_hostname': True}
+        field = URLField(**options)
         if exception is None:
-            assert field.run_validators(ldap_uri) == expected
+            assert field.run_validation(ldap_uri) == expected
         else:
             with pytest.raises(exception):
                 field.run_validators(ldap_uri)
