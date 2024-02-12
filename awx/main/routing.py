@@ -27,6 +27,7 @@ class AWXProtocolTypeRouter(ProtocolTypeRouter):
 
 
 websocket_urlpatterns = [
+    re_path(r'api/websocket/$', consumers.EventConsumer.as_asgi()),
     re_path(r'websocket/$', consumers.EventConsumer.as_asgi()),
     re_path(r'websocket/relay/$', consumers.RelayConsumer.as_asgi()),
 ]
