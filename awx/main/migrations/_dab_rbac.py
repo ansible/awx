@@ -66,6 +66,12 @@ def build_role_map(apps):
             else:
                 parent_roles = f.parent_role
 
+            # SPECIAL CASE: organization auditor_role is not a child of admin_role
+            # this makes no practical sense and conflicts with expected managed role
+            # so we put it in as a hack here
+            if f.name == 'auditor_role' and f.model._meta.model_name == 'organization':
+                parent_roles.append('admin_role')
+
             parent_list = []
             for rel_name in parent_roles:
                 parent_list.append(resolve_parent_role(f, rel_name))
