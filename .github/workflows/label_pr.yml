@@ -24,6 +24,38 @@ jobs:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
           configuration-path: .github/pr_labeler.yml
 
+  convert-to-draft:
+    runs-on: ubuntu-latest
+    name: Change failing PRS to draft
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 14
+
+    - name: Install dependencies
+      run: npm install -g github
+
+    - name: Check CI status
+      id: check-ci
+      run: |
+        status=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                -H "Accept: application/vnd.github.v3+json" \
+                https://api.github.com/repos/${{ github.repository }}/commits/${{ github.sha }}/check-suites | \
+                jq -r '.check_suites[0].conclusion')
+        echo "CI Status: $status"
+        echo "::set-output name=ci_status::$status"
+
+    - name: Convert to Draft on CI Failure
+      if: steps.check-ci.outputs.ci_status == 'failure'
+      run: gh pr edit ${{ github.event.number }} --draft
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   community:
     runs-on: ubuntu-latest
     timeout-minutes: 20
