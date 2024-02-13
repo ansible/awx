@@ -4,7 +4,7 @@
 
 - block:
     - name: Start the vault
-      community.docker.docker_compose:
+      community.docker.docker_compose_v2:
         state: present
         services: vault
         project_src: "{{ sources_dest }}"
@@ -216,7 +216,7 @@
 
   always:
     - name: Stop the vault
-      community.docker.docker_compose:
+      community.docker.docker_compose_v2:
         state: absent
         project_src: "{{ sources_dest }}"
       when: vault_start is defined and vault_start.changed
