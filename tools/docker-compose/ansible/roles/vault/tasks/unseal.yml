@@ -16,3 +16,7 @@
     - "{{ Unseal_Key_1 }}"
     - "{{ Unseal_Key_2 }}"
     - "{{ Unseal_Key_3 }}"
+  register: unseal_result
+  until: unseal_result is succeeded or unseal_result is failed and 'Connection refused' not in unseal_result.msg
+  retries: 5
+  delay: 1
