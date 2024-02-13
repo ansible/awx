@@ -2,6 +2,7 @@ import json
 import logging
 
 from django.db.models import ForeignKey
+from django.utils.timezone import now
 
 from awx.main.fields import ImplicitRoleField
 from awx.main.constants import role_name_to_perm_mapping
@@ -140,6 +141,7 @@ def migrate_to_new_rbac(apps, schema_editor):
     RoleUserAssignment = apps.get_model('dab_rbac', 'RoleUserAssignment')
     RoleTeamAssignment = apps.get_model('dab_rbac', 'RoleTeamAssignment')
     Permission = apps.get_model('auth', 'Permission')
+    migration_time = now()
 
     # remove add premissions that are not valid for migrations from old versions
     for perm_str in ('add_organization', 'add_jobtemplate'):
@@ -200,7 +202,8 @@ def migrate_to_new_rbac(apps, schema_editor):
                 description = description % role.content_type.model
 
             role_definition, created = RoleDefinition.objects.get_or_create(
-                name=role_definition_name, defaults={'description': description, 'content_type': role.content_type_id}
+                name=role_definition_name,
+                defaults={'description': description, 'content_type_id': role.content_type_id, 'created_on': migration_time, 'modified_on': migration_time},
             )
 
             if created:
