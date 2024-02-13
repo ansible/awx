@@ -10,7 +10,7 @@ location {{ (ingress_path + '/favicon.ico').replace('//', '/') }} {
     alias /awx_devel/awx/public/static/favicon.ico;
 }
 
-location ~ ({{ (ingress_path + '/websocket').replace('//', '/') }}|{{ (ingress_path + '/api/websocket').replace('//', '/') }}) {
+location ~ ^({{ (ingress_path + '/websocket/').replace('//', '/') }}|{{ (ingress_path + '/api/websocket/').replace('//', '/') }}) {
     # Pass request to the upstream alias
     proxy_pass http://daphne;
     # Require http version 1.1 to allow for upgrade requests
