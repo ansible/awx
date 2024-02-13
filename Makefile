@@ -591,7 +591,7 @@ docker-clean:
 	-$(foreach image_id,$(shell docker images --filter=reference='*/*/*awx_devel*' --filter=reference='*/*awx_devel*' --filter=reference='*awx_devel*' -aq),docker rmi --force $(image_id);)
 
 docker-clean-volumes: docker-compose-clean docker-compose-container-group-clean
-	docker volume rm -f tools_awx_db tools_vault_1 tools_grafana_storage tools_prometheus_storage $(docker volume ls --filter name=tools_redis_socket_ -q)
+	docker volume rm -f tools_awx_db tools_vault_1 tools_ldap_1 tools_grafana_storage tools_prometheus_storage $(docker volume ls --filter name=tools_redis_socket_ -q)
 
 docker-refresh: docker-clean docker-compose
 
