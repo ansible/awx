@@ -17,11 +17,12 @@ from django.utils.translation import gettext_lazy as _
 from django.apps import apps
 from django.conf import settings
 
-# AWX
-from awx.api.versioning import reverse
-
 # Ansible_base app
 from ansible_base.rbac.models import RoleDefinition
+from ansible_base.lib.utils.models import get_type_for_model
+
+# AWX
+from awx.api.versioning import reverse
 from awx.main.migrations._dab_rbac import build_role_map, get_permissions_for_role
 from awx.main.constants import role_name_to_perm_mapping, org_role_to_permission
 
@@ -568,9 +569,13 @@ def get_role_from_object_role(object_role):
         model_name, role_name, _ = rd.name.split('-')
         role_name += '_role'
     elif rd.name.endswith('-admin') and rd.name.count('-') == 2:
-        model_name, role_name = rd.name.split('-', 1)
-        role_name = role_name.replace('-', '_')
+        # cases like "organization-project-admin"
+        model_name, target_model_name, role_name = rd.name.split('-')
+        model_cls = apps.get_model('main', target_model_name)
+        target_model_name = get_type_for_model(model_cls)
+        role_name = f'{target_model_name}_admin_role'
     elif rd.name.endswith('-admin'):
+        # cases like "project-admin"
         model_name, _ = rd.name.rsplit('-', 1)
         role_name = 'admin_role'
     else:
