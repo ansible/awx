@@ -339,7 +339,7 @@ class WebSocketRelayManager(object):
 
             if deleted_remote_hosts:
                 logger.info(f"Removing {deleted_remote_hosts} from websocket broadcast list")
-                await asyncio.gather(self.cleanup_offline_host(h) for h in deleted_remote_hosts)
+                await asyncio.gather(*[self.cleanup_offline_host(h) for h in deleted_remote_hosts])
 
             if new_remote_hosts:
                 logger.info(f"Adding {new_remote_hosts} to websocket broadcast list")
