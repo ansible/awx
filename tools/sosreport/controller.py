@@ -12,7 +12,7 @@ SOSREPORT_CONTROLLER_COMMANDS = [
     "awx-manage run_dispatcher --status",  # controller dispatch worker status
     "awx-manage run_callback_receiver --status",  # controller callback worker status
     "awx-manage check_license --data",  # controller license status
-    "awx-manage run_wsbroadcast --status",  # controller broadcast websocket status
+    "awx-manage run_wsrelay --status",  # controller websocket relay status
     "supervisorctl status",  # controller process status
     "/var/lib/awx/venv/awx/bin/pip freeze",  # pip package list
     "/var/lib/awx/venv/awx/bin/pip freeze -l",  # pip package list without globally-installed packages
