@@ -1115,7 +1115,7 @@ METRICS_SUBSYSTEM_CONFIG = {
 # django-ansible-base
 ANSIBLE_BASE_TEAM_MODEL = 'main.Team'
 ANSIBLE_BASE_ORGANIZATION_MODEL = 'main.Organization'
-ANSIBLE_BASE_PERMISSION_MODEL = 'auth.Permission'
+ANSIBLE_BASE_PERMISSION_MODEL = 'main.Permission'
 
 from ansible_base.lib import dynamic_config  # noqa: E402
 
@@ -1142,3 +1142,6 @@ ANSIBLE_BASE_CREATOR_DEFAULTS = ['change', 'delete', 'execute', 'use', 'adhoc', 
 
 # This is a stopgap, will delete after resource registry integration
 ANSIBLE_BASE_SERVICE_PREFIX = "awx"
+
+# system username for django-ansible-base
+SYSTEM_USERNAME = None
