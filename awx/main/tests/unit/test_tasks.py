@@ -1085,6 +1085,27 @@ class TestJobCredentials(TestJobExecution):
         assert open(env['ANSIBLE_NET_SSH_KEYFILE'], 'r').read() == self.EXAMPLE_PRIVATE_KEY
         assert safe_env['ANSIBLE_NET_PASSWORD'] == HIDDEN_PASSWORD
 
+    def test_terraform_cloud_credentials(self, job, private_data_dir, mock_me):
+        terraform = CredentialType.defaults['terraform']()
+        hcl_config = '''
+        backend "s3" {
+            bucket = "s3_sample_bucket"
+            key    = "/tf_state/"
+            region = "us-east-1"
+        }
+        '''
+        credential = Credential(pk=1, credential_type=terraform, inputs={'configuration': hcl_config})
+        credential.inputs['configuration'] = encrypt_field(credential, 'configuration')
+        job.credentials.add(credential)
+
+        env = {}
+        safe_env = {}
+        credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
+
+        local_path = to_host_path(env['TF_BACKEND_CONFIG_FILE'], private_data_dir)
+        config = open(local_path, 'r').read()
+        assert config == hcl_config
+
     def test_custom_environment_injectors_with_jinja_syntax_error(self, private_data_dir, mock_me):
         some_cloud = CredentialType(
             kind='cloud',

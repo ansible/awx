@@ -122,3 +122,11 @@ def kubernetes_bearer_token(cred, env, private_data_dir):
         env['K8S_AUTH_SSL_CA_CERT'] = to_container_path(path, private_data_dir)
     else:
         env['K8S_AUTH_VERIFY_SSL'] = 'False'
+
+
+def terraform(cred, env, private_data_dir):
+    handle, path = tempfile.mkstemp(dir=os.path.join(private_data_dir, 'env'))
+    with os.fdopen(handle, 'w') as f:
+        os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
+        f.write(cred.get_input('configuration'))
+    env['TF_BACKEND_CONFIG_FILE'] = to_container_path(path, private_data_dir)

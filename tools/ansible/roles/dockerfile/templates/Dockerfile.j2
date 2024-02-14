@@ -22,6 +22,7 @@ RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
 RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     dnf config-manager --set-enabled crb && \
     dnf -y install \
+    iputils \
     gcc \
     gcc-c++ \
     git-core \

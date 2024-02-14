@@ -105,7 +105,11 @@ def create_listener_connection():
     for k, v in settings.LISTENER_DATABASES.get('default', {}).get('OPTIONS', {}).items():
         conf['OPTIONS'][k] = v
 
-    connection_data = f"dbname={conf['NAME']} host={conf['HOST']} user={conf['USER']} password={conf['PASSWORD']} port={conf['PORT']}"
+    # Allow password-less authentication
+    if 'PASSWORD' in conf:
+        conf['OPTIONS']['password'] = conf.pop('PASSWORD')
+
+    connection_data = f"dbname={conf['NAME']} host={conf['HOST']} user={conf['USER']} port={conf['PORT']}"
     return psycopg.connect(connection_data, autocommit=True, **conf['OPTIONS'])
 
 

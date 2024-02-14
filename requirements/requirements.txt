@@ -88,8 +88,6 @@ cryptography==41.0.3
     #   pyopenssl
     #   service-identity
     #   social-auth-core
-cython==0.29.32
-    # via -r /awx_devel/requirements/requirements.in
 daphne==3.0.2
     # via
     #   -r /awx_devel/requirements/requirements.in

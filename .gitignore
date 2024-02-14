@@ -169,3 +169,6 @@ awx/ui_next/build
 # Docs build stuff
 docs/docsite/build/
 _readthedocs/
+
+# Pyenv
+.python-version
