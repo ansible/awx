@@ -72,7 +72,7 @@ Instances make up the network of devices that communicate with one another. They
 Simple topology
 ~~~~~~~~~~~~~~~~
 
-One of the ways to expand job capacity is to create a standalone execution node can be added to run alongside the Kubernetes deployment of AWX. These machines will not be a part of the AWX Kubernetes cluster. The control nodes running in the cluster will connect and submit work to these machines via Receptor. The machines are registered in AWX as type "execution" instances, meaning they will only be used to run AWX jobs, not dispatch work or handle web requests as control nodes do.
+One of the ways to expand job capacity is to create a standalone execution node that can be added to run alongside the Kubernetes deployment of AWX. These machines will not be a part of the AWX Kubernetes cluster. The control nodes running in the cluster will connect and submit work to these machines via Receptor. The machines are registered in AWX as type "execution" instances, meaning they will only be used to run AWX jobs, not dispatch work or handle web requests as control nodes do.
 
 Hop nodes can be added to sit between the control plane of AWX and standalone execution nodes. These machines will not be a part of the AWX Kubernetes cluster and they will be registered in AWX as node type "hop", meaning they will only handle inbound and outbound traffic for otherwise unreachable nodes in a different or more strict network.
 
@@ -115,8 +115,6 @@ Mesh topology
 ~~~~~~~~~~~~~~
 
 Mesh ingress is a feature that allows remote nodes to connect inbound to the control plane. This is especially useful when creating remote nodes in restricted networking environments that disallow inbound traffic.
-
-In restricted networking environment (inside a private network), where this connection is not allowed, using mesh ingress can allow the remote execution to connect *into* the AWX control plane instead of having to allow connection *from* the AWX control plane.
 
 
 .. image:: ../common/images/instances_mesh_ingress_topology.png
