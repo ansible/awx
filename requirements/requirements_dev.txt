@@ -8,6 +8,7 @@ ipython>=7.31.1 # https://github.com/ansible/awx/security/dependabot/30
 unittest2
 black
 pytest!=7.0.0
+pytest-asyncio
 pytest-cov
 pytest-django
 pytest-mock==1.11.1
