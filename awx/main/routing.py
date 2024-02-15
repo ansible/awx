@@ -12,6 +12,7 @@ from . import consumers
 
 
 logger = logging.getLogger('awx.main.routing')
+_application = None
 
 
 class AWXProtocolTypeRouter(ProtocolTypeRouter):
@@ -66,11 +67,52 @@ websocket_relay_urlpatterns = [
     re_path(r'websocket/relay/$', consumers.RelayConsumer.as_asgi()),
 ]
 
-application = AWXProtocolTypeRouter(
-    {
-        'websocket': MultipleURLRouterAdapter(
-            URLRouter(websocket_relay_urlpatterns),
-            DrfAuthMiddlewareStack(URLRouter(websocket_urlpatterns)),
-        )
-    }
-)
+
+def application_func(cls=AWXProtocolTypeRouter) -> ProtocolTypeRouter:
+    return cls(
+        {
+            'websocket': MultipleURLRouterAdapter(
+                URLRouter(websocket_relay_urlpatterns),
+                DrfAuthMiddlewareStack(URLRouter(websocket_urlpatterns)),
+            )
+        }
+    )
+
+
+def __getattr__(name: str) -> ProtocolTypeRouter:
+    """
+    Defer instantiating application.
+    For testing, we just need it to NOT run on import.
+
+    https://peps.python.org/pep-0562/#specification
+
+    Normally, someone would get application from this module via:
+        from awx.main.routing import application
+
+    and do something with the application:
+        application.do_something()
+
+    What does the callstack look like when the import runs?
+    ...
+        awx.main.routing.__getattribute__(...)                              # <-- we don't define this so NOOP as far as we are concerned
+        if '__getattr__' in awx.main.routing.__dict__:                      # <-- this triggers the function we are in
+            return awx.main.routing.__dict__.__getattr__("application")
+
+    Why isn't this function simply implemented as:
+        def __getattr__(name):
+            if not _application:
+              _application = application_func()
+            return _application
+
+    It could. I manually tested it and it passes test_routing.py.
+
+    But my understanding after reading the PEP-0562 specification link above is that
+    performance would be a bit worse due to the extra __getattribute__ calls when
+    we reference non-global variables.
+    """
+    if name == "application":
+        globs = globals()
+        if not globs['_application']:
+            globs['_application'] = application_func()
+        return globs['_application']
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
