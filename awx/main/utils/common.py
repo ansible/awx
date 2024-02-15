@@ -1156,7 +1156,7 @@ def create_partition(tblname, start=None):
                     f'FOR VALUES FROM (\'{start_timestamp}\') TO (\'{end_timestamp}\');'
                 )
     except (ProgrammingError, IntegrityError) as e:
-        if 'already exists' in str(e):
+        if f'{tblname}_{partition_label}, 2200)' in str(e):
             logger.info(f'Caught known error due to partition creation race: {e}')
         else:
             raise
