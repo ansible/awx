@@ -5594,7 +5594,7 @@ class InstanceSerializer(BaseSerializer):
         res['jobs'] = self.reverse('api:instance_unified_jobs_list', kwargs={'pk': obj.pk})
         res['peers'] = self.reverse('api:instance_peers_list', kwargs={"pk": obj.pk})
         res['instance_groups'] = self.reverse('api:instance_instance_groups_list', kwargs={'pk': obj.pk})
-        if obj.node_type in [Instance.Types.EXECUTION, Instance.Types.HOP]:
+        if obj.node_type in [Instance.Types.EXECUTION, Instance.Types.HOP] and not obj.managed:
             res['install_bundle'] = self.reverse('api:instance_install_bundle', kwargs={'pk': obj.pk})
         if self.context['request'].user.is_superuser or self.context['request'].user.is_system_auditor:
             if obj.node_type == 'execution':
