@@ -75,6 +75,9 @@ SDIST_TAR_FILE ?= $(SDIST_TAR_NAME).tar.gz
 
 I18N_FLAG_FILE = .i18n_built
 
+## PLATFORMS defines the target platforms for  the manager image be build to provide support to multiple
+PLATFORMS ?= linux/amd64,linux/arm64  # linux/ppc64le,linux/s390x
+
 .PHONY: awx-link clean clean-tmp clean-venv requirements requirements_dev \
 	develop refresh adduser migrate dbchange \
 	receiver test test_unit test_coverage coverage_html \
@@ -532,7 +535,7 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e enable_vault=$(VAULT) \
 	    -e vault_tls=$(VAULT_TLS) \
 	    -e enable_tacacs=$(TACACS) \
-            $(EXTRA_SOURCES_ANSIBLE_OPTS)
+	    $(EXTRA_SOURCES_ANSIBLE_OPTS)
 
 docker-compose: awx/projects docker-compose-sources
 	ansible-galaxy install --ignore-certs -r tools/docker-compose/ansible/requirements.yml;
@@ -586,28 +589,20 @@ docker-compose-build: Dockerfile.dev
 		--build-arg BUILDKIT_INLINE_CACHE=1 \
 		--cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .
 
-# ## Build awx_devel image for docker compose development environment for multiple architectures
-# docker-compose-buildx: Dockerfile.dev
-# 	DOCKER_BUILDKIT=1 docker build \
-# 		-f Dockerfile.dev \
-# 		-t $(DEVEL_IMAGE_NAME) \
-# 		--build-arg BUILDKIT_INLINE_CACHE=1 \
-# 		--cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .
 
-## Build awx_devel image for docker compose development environment for multiple architectures
-# PLATFORMS defines the target platforms for  the manager image be build to provide support to multiple
-# architectures. (i.e. make docker-buildx IMG=myregistry/mypoperator:0.0.1). To use this option you need to:
-# - able to use docker buildx . More info: https://docs.docker.com/build/buildx/
-# - have enable BuildKit, More info: https://docs.docker.com/develop/develop-images/build_enhancements/
-# - be able to push the image for your registry (i.e. if you do not inform a valid value via IMG=<myregistry/image:<tag>> than the export will fail)
-# To properly provided solutions that supports more than one platform you should use this option.
-PLATFORMS ?= linux/amd64,linux/arm64  # linux/ppc64le,linux/s390x
 .PHONY: docker-compose-buildx
-docker-compose-buildx: Dockerfile.dev ## Build and push docker image for the manager for cross-platform support
-	- docker buildx create --name project-v3-builder
-	docker buildx use project-v3-builder
-	- docker buildx build --push $(BUILD_ARGS) --platform=$(PLATFORMS) --tag $(DEVEL_IMAGE_NAME) -f Dockerfile.dev .
-	- docker buildx rm project-v3-builder
+## Build awx_devel image for docker compose development environment for multiple architectures
+docker-compose-buildx: Dockerfile.dev
+	- docker buildx create --name docker-compose-buildx
+	docker buildx use docker-compose-buildx
+	- docker buildx build \
+		--push \
+		--build-arg BUILDKIT_INLINE_CACHE=1 \
+		--cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) \
+		--platform=$(PLATFORMS) \
+		--tag $(DEVEL_IMAGE_NAME) \
+		-f Dockerfile.dev .
+	- docker buildx rm docker-compose-buildx
 
 docker-clean:
 	-$(foreach container_id,$(shell docker ps -f name=tools_awx -aq && docker ps -f name=tools_receptor -aq),docker stop $(container_id); docker rm -f $(container_id);)
@@ -671,6 +666,21 @@ awx-kube-build: Dockerfile
 		--build-arg HEADLESS=$(HEADLESS) \
 		-t $(DEV_DOCKER_TAG_BASE)/awx:$(COMPOSE_TAG) .
 
+## Build multi-arch awx image for deployment on Kubernetes environment.
+awx-kube-buildx: Dockerfile
+	- docker buildx create --name awx-kube-buildx
+	docker buildx use awx-kube-buildx
+	- docker buildx build \
+		--push \
+		--build-arg VERSION=$(VERSION) \
+		--build-arg SETUPTOOLS_SCM_PRETEND_VERSION=$(VERSION) \
+		--build-arg HEADLESS=$(HEADLESS) \
+		--platform=$(PLATFORMS) \
+		--tag $(DEV_DOCKER_TAG_BASE)/awx:$(COMPOSE_TAG) \
+		-f Dockerfile .
+	- docker buildx rm awx-kube-buildx
+
+
 .PHONY: Dockerfile.kube-dev
 ## Generate Docker.kube-dev for awx_kube_devel image
 Dockerfile.kube-dev: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
@@ -687,6 +697,18 @@ awx-kube-dev-build: Dockerfile.kube-dev
 	    --cache-from=$(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) \
 	    -t $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) .
 
+## Build and push multi-arch awx_kube_devel image for development on local Kubernetes environment.
+awx-kube-dev-buildx: Dockerfile.kube-dev
+	- docker buildx create --name awx-kube-dev-buildx
+	docker buildx use awx-kube-dev-buildx
+	- docker buildx build \
+		--push \
+		--build-arg BUILDKIT_INLINE_CACHE=1 \
+		--cache-from=$(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) \
+		--platform=$(PLATFORMS) \
+		--tag $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) \
+		-f Dockerfile.kube-dev .
+	- docker buildx rm awx-kube-dev-buildx
 
 kind-dev-load: awx-kube-dev-build
 	$(KIND_BIN) load docker-image $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG)
