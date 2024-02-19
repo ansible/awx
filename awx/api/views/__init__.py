@@ -517,6 +517,7 @@ class InstanceGroupObjectRolesList(SubListAPIView):
     serializer_class = serializers.RoleSerializer
     parent_model = models.InstanceGroup
     search_fields = ('role_field', 'content_type__model')
+    deprecated = True
 
     def get_queryset(self):
         po = self.get_parent_object()
@@ -746,6 +747,7 @@ class TeamObjectRolesList(SubListAPIView):
     serializer_class = serializers.RoleSerializer
     parent_model = models.Team
     search_fields = ('role_field', 'content_type__model')
+    deprecated = True
 
     def get_queryset(self):
         po = self.get_parent_object()
@@ -1059,6 +1061,7 @@ class ProjectObjectRolesList(SubListAPIView):
     serializer_class = serializers.RoleSerializer
     parent_model = models.Project
     search_fields = ('role_field', 'content_type__model')
+    deprecated = True
 
     def get_queryset(self):
         po = self.get_parent_object()
@@ -1496,6 +1499,7 @@ class CredentialObjectRolesList(SubListAPIView):
     serializer_class = serializers.RoleSerializer
     parent_model = models.Credential
     search_fields = ('role_field', 'content_type__model')
+    deprecated = True
 
     def get_queryset(self):
         po = self.get_parent_object()
@@ -2840,6 +2844,7 @@ class JobTemplateObjectRolesList(SubListAPIView):
     serializer_class = serializers.RoleSerializer
     parent_model = models.JobTemplate
     search_fields = ('role_field', 'content_type__model')
+    deprecated = True
 
     def get_queryset(self):
         po = self.get_parent_object()
@@ -3227,6 +3232,7 @@ class WorkflowJobTemplateObjectRolesList(SubListAPIView):
     serializer_class = serializers.RoleSerializer
     parent_model = models.WorkflowJobTemplate
     search_fields = ('role_field', 'content_type__model')
+    deprecated = True
 
     def get_queryset(self):
         po = self.get_parent_object()
