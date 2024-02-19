@@ -573,6 +573,8 @@ def get_role_from_object_role(object_role):
         model_name, target_model_name, role_name = rd.name.split('-')
         model_cls = apps.get_model('main', target_model_name)
         target_model_name = get_type_for_model(model_cls)
+        if target_model_name == 'notification_template':
+            target_model_name = 'notification'  # total exception
         role_name = f'{target_model_name}_admin_role'
     elif rd.name.endswith('-admin'):
         # cases like "project-admin"

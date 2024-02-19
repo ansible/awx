@@ -131,7 +131,7 @@ role_name_to_perm_mapping = {
 org_role_to_permission = {
     'notification_admin_role': 'add_notificationtemplate',
     'project_admin_role': 'add_project',
-    'execute_role': 'execute_jobtemplate',  # TODO: also does not really work
+    'execute_role': 'execute_jobtemplate',
     'inventory_admin_role': 'add_inventory',
     'credential_admin_role': 'add_credential',
     'workflow_admin_role': 'add_workflowjobtemplate',
