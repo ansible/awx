@@ -35,7 +35,7 @@ runs:
     - name: Start AWX
       shell: bash
       run: |
-        DEV_DOCKER_TAG_BASE=ghcr.io/${{ github.repository_owner }} \
+        DEV_DOCKER_OWNER=${{ github.repository_owner }} \
         COMPOSE_TAG=${{ github.base_ref }} \
         COMPOSE_UP_OPTS="-d" \
         make docker-compose
