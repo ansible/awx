@@ -11,12 +11,12 @@ class APIConfig(ServiceAPIConfig):
 RESOURCE_LIST = (
     ResourceConfig(
         models.Organization,
-        shared_resource=SharedResource(serializer=OrganizationType, is_provider=True),
+        shared_resource=SharedResource(serializer=OrganizationType, is_provider=False),
     ),
-    ResourceConfig(models.User, shared_resource=SharedResource(serializer=UserType, is_provider=True), name_field="username"),
+    ResourceConfig(models.User, shared_resource=SharedResource(serializer=UserType, is_provider=False), name_field="username"),
     ResourceConfig(
         models.Team,
-        shared_resource=SharedResource(serializer=TeamType, is_provider=True),
+        shared_resource=SharedResource(serializer=TeamType, is_provider=False),
         parent_resources=[ParentResource(model=models.Organization, field_name="organization")],
     ),
 )
