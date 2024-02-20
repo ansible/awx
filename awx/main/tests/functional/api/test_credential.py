@@ -799,6 +799,23 @@ def test_vmware_create_fail_required_fields(post, organization, admin):
 
 
 #
+# Hetzner Cloud Credentials
+#
+@pytest.mark.django_db
+def test_hcloud_create_ok(post, organization, admin):
+    params = {'credential_type': 1, 'name': 'Best credential ever', 'inputs': {'token': 'areallycoolapitoken'}}
+    hcloud = CredentialType.defaults['hcloud']()
+    hcloud.save()
+    params['organization'] = organization.id
+    response = post(reverse('api:credential_list'), params, admin)
+    assert response.status_code == 201
+
+    assert Credential.objects.count() == 1
+    cred = Credential.objects.all()[:1].get()
+    assert decrypt_field(cred, 'token') == 'areallycoolapitoken'
+
+
+#
 # Openstack Credentials
 #
 @pytest.mark.django_db

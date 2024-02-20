@@ -103,6 +103,7 @@ function InventorySourcesList({ nodeResource, onUpdateNodeResource }) {
             [`openstack`, t`OpenStack`],
             [`rhv`, t`Red Hat Virtualization`],
             [`controller`, t`Red Hat Ansible Automation Platform`],
+            ['hcloud', 'Hetzner Cloud'],
           ],
         },
       ]}

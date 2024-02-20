@@ -296,6 +296,20 @@ VMware vCenter
 	strict: false
 	with_nested_properties: true   
 
+Hetzner Cloud
+--------------
+
+.. index::
+   pair: inventories; Hetzner Cloud
+   pair: inventories; hcloud
+   pair: inventory plugins; hcloud
+
+::
+
+	plugin: hetzner.hcloud.hcloud
+	locations:
+	- nbg1
+
 
 .. _ir_plugin_satellite:
 

@@ -1095,6 +1095,30 @@ ManagedCredentialType(
 )
 
 ManagedCredentialType(
+    namespace='hcloud',
+    kind='cloud',
+    name=gettext_noop('Hetzner Cloud'),
+    managed=True,
+    inputs={
+        'fields': [
+            {
+                'id': 'token',
+                'label': gettext_noop('API Token'),
+                'type': 'string',
+                'help_text': gettext_noop('The API Token for the project created in the Cloud Console. This should be a read-only token.'),
+                'secret': True,
+            },
+        ],
+        'required': ['token'],
+    },
+    injectors={
+        'env': {
+            'HCLOUD_TOKEN': '{{ token }}',
+        }
+    },
+)
+
+ManagedCredentialType(
     namespace='kubernetes_bearer_token',
     kind='kubernetes',
     name=gettext_noop('OpenShift or Kubernetes API Bearer Token'),

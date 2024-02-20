@@ -925,6 +925,7 @@ class InventorySourceOptions(BaseModel):
         ('rhv', _('Red Hat Virtualization')),
         ('controller', _('Red Hat Ansible Automation Platform')),
         ('insights', _('Red Hat Insights')),
+        ('hcloud', _('Hetzner Cloud')),
     ]
 
     # From the options of the Django management base command
@@ -1647,6 +1648,13 @@ class insights(PluginFileInjector):
     downstream_namespace = 'redhat'
     downstream_collection = 'insights'
     use_fqcn = True
+
+
+class hcloud(PluginFileInjector):
+    plugin_name = 'hcloud'
+    base_injector = 'managed'
+    namespace = 'hetzner'
+    collection = 'hcloud'
 
 
 class constructed(PluginFileInjector):

@@ -168,6 +168,7 @@ def test_send_notifications_list(mock_notifications_filter, mock_job_get, mocker
         ('VMWARE_PASSWORD', 'SECRET'),
         ('API_SECRET', 'SECRET'),
         ('ANSIBLE_GALAXY_SERVER_PRIMARY_GALAXY_TOKEN', 'SECRET'),
+        ('HCLOUD_TOKEN', 'SECRET'),
     ],
 )
 def test_safe_env_filtering(key, value):
@@ -992,6 +993,18 @@ class TestJobCredentials(TestJobExecution):
         assert env['VMWARE_HOST'] == 'https://example.org'
         assert safe_env['VMWARE_PASSWORD'] == HIDDEN_PASSWORD
 
+    def test_hcloud_credentials(self, private_data_dir, job, mock_me):
+        hcloud = CredentialType.defaults['hcloud']()
+        credential = Credential(pk=1, credential_type=hcloud, inputs={'token': 'secret'})
+        credential.inputs['token'] = encrypt_field(credential, 'token')
+        job.credentials.add(credential)
+
+        env = {}
+        safe_env = {}
+        credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
+
+        assert safe_env['HCLOUD_TOKEN'] == HIDDEN_PASSWORD
+
     def test_openstack_credentials(self, private_data_dir, job, mock_me):
         task = jobs.RunJob()
         task.instance = job
@@ -1639,6 +1652,27 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         env["VMWARE_PASSWORD"] == "secret",
         env["VMWARE_HOST"] == "https://example.org",
         env["VMWARE_VALIDATE_CERTS"] == "False",
+
+    def test_hcloud_source(self, inventory_update, private_data_dir, mocker, mock_me):
+        task = jobs.RunInventoryUpdate()
+        task.instance = inventory_update
+        hcloud = CredentialType.defaults['hcloud']()
+        inventory_update.source = 'hcloud'
+
+        def get_cred():
+            cred = Credential(pk=1, credential_type=hcloud, inputs={'token': 'secret'})
+            cred.inputs['token'] = encrypt_field(cred, 'token')
+            return cred
+
+        inventory_update.get_cloud_credential = get_cred
+        inventory_update.get_extra_credentials = mocker.Mock(return_value=[])
+
+        private_data_files, ssh_key_data = task.build_private_data_files(inventory_update, private_data_dir)
+        env = task.build_env(inventory_update, private_data_dir, private_data_files)
+
+        safe_env = build_safe_env(env)
+
+        assert safe_env["HCLOUD_TOKEN"] == HIDDEN_PASSWORD
 
     def test_azure_rm_source_with_tenant(self, private_data_dir, inventory_update, mocker, mock_me):
         task = jobs.RunInventoryUpdate()

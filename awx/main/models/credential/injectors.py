@@ -72,6 +72,10 @@ def vmware(cred, env, private_data_dir):
     env['VMWARE_VALIDATE_CERTS'] = str(settings.VMWARE_VALIDATE_CERTS)
 
 
+def hcloud(cred, env, private_data_dir):
+    env['HCLOUD_TOKEN'] = cred.get_input('token', default='')
+
+
 def _openstack_data(cred):
     openstack_auth = dict(
         auth_url=cred.get_input('host', default=''),

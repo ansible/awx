@@ -92,6 +92,7 @@ def test_default_cred_types():
             'gpg_public_key',
             'hashivault_kv',
             'hashivault_ssh',
+            'hcloud',
             'insights',
             'kubernetes_bearer_token',
             'net',
