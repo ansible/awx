@@ -13,6 +13,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.query import QuerySet
+from django.db.models.functions import Cast
 from django.utils.crypto import get_random_string
 from django.utils.translation import gettext_lazy as _
 
@@ -77,7 +78,8 @@ class ResourceMixin(models.Model):
 
                 return (
                     ObjectRole.objects.filter(role_definition__permissions__codename=codename, content_type=ContentType.objects.get_for_model(cls))
-                    .values_list('object_id')
+                    .annotate(int_object_id=Cast('object_id', models.IntegerField()))
+                    .values_list('int_object_id')
                     .distinct()
                 )
             return cls.access_ids_qs(accessor, to_permissions[role_field], content_types=content_types)
