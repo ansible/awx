@@ -259,6 +259,12 @@ class AWXConsumerPG(AWXConsumerBase):
                 current_downtime = time.time() - self.pg_down_time
                 if current_downtime > self.pg_max_wait:
                     logger.exception(f"Postgres event consumer has not recovered in {current_downtime} s, exiting")
+                    # Sending QUIT to multiprocess queue to signal workers to exit
+                    for worker in self.pool.workers:
+                        try:
+                            worker.quit()
+                        except Exception:
+                            logger.exception(f"Error sending QUIT to worker {worker}")
                     raise
                 # Wait for a second before next attempt, but still listen for any shutdown signals
                 for i in range(10):
@@ -270,6 +276,12 @@ class AWXConsumerPG(AWXConsumerBase):
             except Exception:
                 # Log unanticipated exception in addition to writing to stderr to get timestamps and other metadata
                 logger.exception('Encountered unhandled error in dispatcher main loop')
+                # Sending QUIT to multiprocess queue to signal workers to exit
+                for worker in self.pool.workers:
+                    try:
+                        worker.quit()
+                    except Exception:
+                        logger.exception(f"Error sending QUIT to worker {worker}")
                 raise
 
 
