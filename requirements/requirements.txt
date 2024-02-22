@@ -38,22 +38,12 @@ autocommand==2.2.2
 automat==22.10.0
     # via twisted
 azure-common==1.1.28
-    # via
-    #   azure-keyvault-certificates
-    #   azure-keyvault-keys
-    #   azure-keyvault-secrets
+    # via azure-keyvault
 azure-core==1.26.1
-    # via
-    #   azure-keyvault-certificates
-    #   azure-keyvault-keys
-    #   azure-keyvault-secrets
-azure-keyvault==4.2.0
+    # via msrest
+azure-keyvault==1.1.0
     # via -r /awx_devel/requirements/requirements.in
-azure-keyvault-certificates==4.7.0
-    # via azure-keyvault
-azure-keyvault-keys==4.8.0
-    # via azure-keyvault
-azure-keyvault-secrets==4.7.0
+azure-nspkg==3.0.2
     # via azure-keyvault
 boto3==1.26.102
     # via -r /awx_devel/requirements/requirements.in
@@ -67,6 +57,7 @@ cachetools==5.2.0
     # via
     #   -r /awx_devel/requirements/requirements_git.txt
     #   kubernetes
+    #   msrest
     #   requests
 cffi==1.15.1
     # via cryptography
@@ -85,8 +76,9 @@ constantly==15.1.0
 cryptography==41.0.7
     # via
     #   -r /awx_devel/requirements/requirements.in
+    #   adal
     #   autobahn
-    #   azure-keyvault-keys
+    #   azure-keyvault
     #   django-ansible-base
     #   jwcrypto
     #   pyopenssl
@@ -199,9 +191,7 @@ irc==20.1.0
     # via -r /awx_devel/requirements/requirements.in
 isodate==0.6.1
     # via
-    #   azure-keyvault-certificates
-    #   azure-keyvault-keys
-    #   azure-keyvault-secrets
+    #   msrest
     #   python3-saml
 jaraco-classes==3.2.3
     # via jaraco-collections
@@ -254,6 +244,12 @@ more-itertools==9.0.0
     #   jaraco-text
 msgpack==1.0.4
     # via channels-redis
+msrest==0.7.1
+    # via
+    #   azure-keyvault
+    #   msrestazure
+msrestazure==0.6.4
+    # via azure-keyvault
 multidict==6.0.2
     # via
     #   aiohttp
@@ -308,6 +304,7 @@ pygerduty==0.38.3
     # via -r /awx_devel/requirements/requirements.in
 pyjwt==2.6.0
     # via
+    #   adal
     #   django-ansible-base
     #   social-auth-core
     #   twilio
@@ -329,6 +326,7 @@ python-daemon==3.0.1
     #   ansible-runner
 python-dateutil==2.8.2
     # via
+    #   adal
     #   botocore
     #   kubernetes
     #   receptorctl
@@ -367,10 +365,13 @@ redis==4.3.5
 requests==2.28.1
     # via
     #   -r /awx_devel/requirements/requirements.in
+    #   adal
     #   azure-core
+    #   azure-keyvault
     #   django-ansible-base
     #   django-oauth-toolkit
     #   kubernetes
+    #   msrest
     #   python-dsv-sdk
     #   python-tss-sdk
     #   requests-oauthlib
@@ -379,6 +380,7 @@ requests==2.28.1
 requests-oauthlib==1.3.1
     # via
     #   kubernetes
+    #   msrest
     #   social-auth-core
 rsa==4.9
     # via
@@ -403,6 +405,7 @@ six==1.16.0
     #   google-auth
     #   isodate
     #   kubernetes
+    #   msrestazure
     #   openshift
     #   pygerduty
     #   pyrad
@@ -442,9 +445,6 @@ txaio==22.2.1
 typing-extensions==4.4.0
     # via
     #   azure-core
-    #   azure-keyvault-certificates
-    #   azure-keyvault-keys
-    #   azure-keyvault-secrets
     #   psycopg
     #   setuptools-rust
     #   setuptools-scm
