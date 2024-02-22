@@ -180,26 +180,17 @@ const OutputToolbar = ({ job, onDelete, isDeleteDisabled, jobStatus }) => {
             </LaunchButton>
           ) : (
             <LaunchButton resource={job}>
-              {({ handleRelaunch, isLaunching }) =>
-                (job.type === 'job' && (
-                  <ReLaunchDropDown
-                    handleRelaunch={handleRelaunch}
-                    isLaunching={isLaunching}
-                    ouiaId="job-output-relaunch-dropdown"
-                    isRelaunchJobType
-                  />
-                )) || (
-                  <Button
-                    ouiaId="job-output-relaunch-button"
-                    variant="plain"
-                    onClick={() => handleRelaunch()}
-                    aria-label={t`Relaunch`}
-                    isDisabled={isLaunching}
-                  >
-                    <RocketIcon />
-                  </Button>
-                )
-              }
+              {({ handleRelaunch, isLaunching }) => (
+                <Button
+                  ouiaId="job-output-relaunch-button"
+                  variant="plain"
+                  onClick={() => handleRelaunch()}
+                  aria-label={t`Relaunch`}
+                  isDisabled={isLaunching}
+                >
+                  <RocketIcon />
+                </Button>
+              )}
             </LaunchButton>
           )}
         </Tooltip>

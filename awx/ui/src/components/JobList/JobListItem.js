@@ -138,26 +138,17 @@ function JobListItem({
               </LaunchButton>
             ) : (
               <LaunchButton resource={job}>
-                {({ handleRelaunch, isLaunching }) =>
-                  (job.type === 'job' && (
-                    <ReLaunchDropDown
-                      handleRelaunch={handleRelaunch}
-                      isLaunching={isLaunching}
-                      id={`relaunch-job-${job.id}`}
-                      isRelaunchJobType
-                    />
-                  )) || (
-                    <Button
-                      ouiaId={`${job.id}-relaunch-button`}
-                      variant="plain"
-                      onClick={() => handleRelaunch()}
-                      aria-label={t`Relaunch`}
-                      isDisabled={isLaunching}
-                    >
-                      <RocketIcon />
-                    </Button>
-                  )
-                }
+                {({ handleRelaunch, isLaunching }) => (
+                  <Button
+                    ouiaId={`${job.id}-relaunch-button`}
+                    variant="plain"
+                    onClick={() => handleRelaunch()}
+                    aria-label={t`Relaunch`}
+                    isDisabled={isLaunching}
+                  >
+                    <RocketIcon />
+                  </Button>
+                )}
               </LaunchButton>
             )}
           </ActionItem>

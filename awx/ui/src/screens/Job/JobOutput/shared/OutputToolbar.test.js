@@ -120,36 +120,4 @@ describe('<OutputToolbar />', () => {
     );
     expect(wrapper.find('DeleteButton').length).toBe(0);
   });
-
-  test('should render ReLaunchDropDown for job type "job"', () => {
-    wrapper = mountWithContexts(
-      <OutputToolbar
-        job={{
-          ...mockJobData,
-          type: 'job',
-        }}
-        jobStatus="successful"
-        onDelete={() => {}}
-      />
-    );
-
-    expect(wrapper.find('ReLaunchDropDown').length).toBe(1);
-  });
-
-  test('should render original relaunch button for other job types', () => {
-    wrapper = mountWithContexts(
-      <OutputToolbar
-        job={{
-          ...mockJobData,
-          type: 'system_job',
-        }}
-        jobStatus="successful"
-        onDelete={() => {}}
-      />
-    );
-
-    expect(wrapper.find('ReLaunchDropDown').length).toBe(0);
-    expect(wrapper.find('Button[aria-label="Relaunch"]').length).toBe(1);
-    expect(wrapper.find('RocketIcon').length).toBe(1);
-  });
 });

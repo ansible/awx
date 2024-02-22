@@ -55,7 +55,11 @@ describe('ReLaunchDropDown', () => {
 
   test('dropdown with isRelaunchJobType renders job type items', () => {
     const wrapper = mountWithContexts(
-      <ReLaunchDropDown isRelaunchJobType handleRelaunch={handleRelaunch} />
+      <ReLaunchDropDown
+        isPrimary
+        isRelaunchJobType
+        handleRelaunch={handleRelaunch}
+      />
     );
 
     wrapper.find('button').simulate('click');

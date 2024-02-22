@@ -9,7 +9,7 @@ import {
   DropdownSeparator,
   DropdownDirection,
 } from '@patternfly/react-core';
-import { RocketIcon } from '@patternfly/react-icons';
+import { CaretUpIcon, RocketIcon } from '@patternfly/react-icons';
 
 function ReLaunchDropDown({
   isPrimary = false,
@@ -119,6 +119,7 @@ function ReLaunchDropDown({
             ouiaId="relaunch-job-toggle"
           >
             {t`Relaunch`}
+            <CaretUpIcon />
           </DropdownToggle>
         }
       />
@@ -131,7 +132,7 @@ function ReLaunchDropDown({
       isPlain
       position={DropdownPosition.right}
       isOpen={isOpen}
-      dropdownItems={isRelaunchJobType ? dropdownItemsJobType : dropdownItems}
+      dropdownItems={dropdownItems}
       toggle={
         <DropdownToggle
           toggleIndicator={null}
