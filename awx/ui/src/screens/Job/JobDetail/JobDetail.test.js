@@ -620,7 +620,9 @@ describe('<JobDetail />', () => {
     );
 
     expect(wrapper.find('ReLaunchDropDown').length).toBe(1);
-    expect(wrapper.find('Button[ouiaId="job-detail-relaunch-button"]').length).toBe(0);
+    expect(
+      wrapper.find('Button[ouiaId="job-detail-relaunch-button"]').length
+    ).toBe(0);
   });
 
   test('should render Button for other job types', () => {
@@ -633,7 +635,9 @@ describe('<JobDetail />', () => {
       />
     );
 
-    expect(wrapper.find('Button[ouiaId="job-detail-relaunch-button"]').length).toBe(1);
+    expect(
+      wrapper.find('Button[ouiaId="job-detail-relaunch-button"]').length
+    ).toBe(1);
     expect(wrapper.find('ReLaunchDropDown').length).toBe(0);
   });
 });

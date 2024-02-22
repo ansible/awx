@@ -578,7 +578,7 @@ function JobDetail({ job, inventorySourceLabels }) {
             </LaunchButton>
           ) : (
             <LaunchButton resource={job} aria-label={t`Relaunch`}>
-              {({ handleRelaunch, isLaunching }) => (
+              {({ handleRelaunch, isLaunching }) =>
                 (job.type === 'job' && (
                   <ReLaunchDropDown
                     handleRelaunch={handleRelaunch}
@@ -597,7 +597,7 @@ function JobDetail({ job, inventorySourceLabels }) {
                     {t`Relaunch`}
                   </Button>
                 )
-              )}
+              }
             </LaunchButton>
           ))}
         {isJobRunning(job.status) &&

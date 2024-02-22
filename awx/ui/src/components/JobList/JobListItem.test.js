@@ -255,7 +255,7 @@ describe('<JobListItem />', () => {
             job={{
               ...mockJob,
               type: 'job',
-              job_type: 'run'
+              job_type: 'run',
             }}
             onSelect={() => {}}
             isSelected

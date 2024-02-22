@@ -138,7 +138,7 @@ function JobListItem({
               </LaunchButton>
             ) : (
               <LaunchButton resource={job}>
-                {({ handleRelaunch, isLaunching }) => (
+                {({ handleRelaunch, isLaunching }) =>
                   (job.type === 'job' && (
                     <ReLaunchDropDown
                       handleRelaunch={handleRelaunch}
@@ -157,7 +157,7 @@ function JobListItem({
                       <RocketIcon />
                     </Button>
                   )
-                )}
+                }
               </LaunchButton>
             )}
           </ActionItem>

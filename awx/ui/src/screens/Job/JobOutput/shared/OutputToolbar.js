@@ -180,7 +180,7 @@ const OutputToolbar = ({ job, onDelete, isDeleteDisabled, jobStatus }) => {
             </LaunchButton>
           ) : (
             <LaunchButton resource={job}>
-              {({ handleRelaunch, isLaunching }) => (
+              {({ handleRelaunch, isLaunching }) =>
                 (job.type === 'job' && (
                   <ReLaunchDropDown
                     handleRelaunch={handleRelaunch}
@@ -199,7 +199,7 @@ const OutputToolbar = ({ job, onDelete, isDeleteDisabled, jobStatus }) => {
                     <RocketIcon />
                   </Button>
                 )
-              )}
+              }
             </LaunchButton>
           )}
         </Tooltip>
