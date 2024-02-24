@@ -119,7 +119,7 @@ def test_colorized_html_stdout(sqlite_copy, Parent, Child, relation, view, get, 
     url = reverse(view, kwargs={'pk': job.pk}) + '?format=html'
 
     response = get(url, user=admin, expect=200)
-    assert '.ansi36 { color: #2dbaba; }' in smart_str(response.content)
+    assert '.ansi36 { color: #00aaaa; }' in smart_str(response.content)
     for i in range(3):
         assert '<span class="ansi36">Testing {}</span>'.format(i) in smart_str(response.content)
 

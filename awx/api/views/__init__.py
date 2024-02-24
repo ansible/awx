@@ -48,8 +48,8 @@ from rest_framework import status
 from rest_framework_yaml.parsers import YAMLParser
 from rest_framework_yaml.renderers import YAMLRenderer
 
-# ANSIConv
-import ansiconv
+# ansi2html
+from ansi2html import Ansi2HTMLConverter
 
 # Python Social Auth
 from social_core.backends.utils import load_backends
@@ -4085,10 +4085,26 @@ class UnifiedJobStdout(RetrieveAPIView):
                 # Remove any ANSI escape sequences containing job event data.
                 content = re.sub(r'\x1b\[K(?:[A-Za-z0-9+/=]+\x1b\[\d+D)+\x1b\[K', '', content)
 
-                body = ansiconv.to_html(html.escape(content))
+                inline = len(content) < 5000
+                conv = Ansi2HTMLConverter(inline=inline, dark_bg=dark_bg, title=get_view_name(self.__class__))
+                if content_only:
+                    headers = ''
+                    if not inline:
+                        headers = conv.produce_headers()
+                    body = conv.convert(content, full=False)
+                    data = '\n'.join([headers, body])
+                    if inline:
+                        data = '<div class="nocode" style="color:{}; background-color:{}">{}</div>'.format(
+                            '#f5f5f5' if dark_bg else '#000000', '#000000' if dark_bg else '#f5f5f5', data
+                        )
+                    else:
+                        data = '<div class="nocode body_foreground body_background">{}</div>'.format(data)
 
-                context = {'title': get_view_name(self.__class__), 'body': mark_safe(body), 'dark': dark_bg, 'content_only': content_only}
-                data = render_to_string('api/stdout.html', context).strip()
+                else:
+                    data = conv.convert(content)
+
+                # Fix ugly grey background used by default.
+                data = data.replace('.body_background { background-color: #AAAAAA; }', '.body_background { background-color: #f5f5f5; }')
 
                 if target_format == 'api':
                     return Response(mark_safe(data))
