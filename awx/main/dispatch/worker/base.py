@@ -7,18 +7,21 @@ import signal
 import sys
 import redis
 import json
-import psycopg2
+import psycopg
 import time
 from uuid import UUID
 from queue import Empty as QueueEmpty
+from datetime import timedelta
 
 from django import db
 from django.conf import settings
 
 from awx.main.dispatch.pool import WorkerPool
+from awx.main.dispatch.periodic import Scheduler
 from awx.main.dispatch import pg_bus_conn
 from awx.main.utils.common import log_excess_runtime
 from awx.main.utils.db import set_connection_name
+import awx.main.analytics.subsystem_metrics as s_metrics
 
 if 'run_callback_receiver' in sys.argv:
     logger = logging.getLogger('awx.main.commands.run_callback_receiver')
@@ -63,10 +66,12 @@ class AWXConsumerBase(object):
     def control(self, body):
         logger.warning(f'Received control signal:\n{body}')
         control = body.get('control')
-        if control in ('status', 'running', 'cancel'):
+        if control in ('status', 'schedule', 'running', 'cancel'):
             reply_queue = body['reply_to']
             if control == 'status':
                 msg = '\n'.join([self.listening_on, self.pool.debug()])
+            if control == 'schedule':
+                msg = self.scheduler.debug()
             elif control == 'running':
                 msg = []
                 for worker in self.pool.workers:
@@ -84,24 +89,20 @@ class AWXConsumerBase(object):
                 if task_ids and not msg:
                     logger.info(f'Could not locate running tasks to cancel with ids={task_ids}')
 
-            with pg_bus_conn() as conn:
-                conn.notify(reply_queue, json.dumps(msg))
+            if reply_queue is not None:
+                with pg_bus_conn() as conn:
+                    conn.notify(reply_queue, json.dumps(msg))
         elif control == 'reload':
             for worker in self.pool.workers:
                 worker.quit()
         else:
             logger.error('unrecognized control message: {}'.format(control))
 
-    def process_task(self, body):
+    def dispatch_task(self, body):
+        """This will place the given body into a worker queue to run method decorated as a task"""
         if isinstance(body, dict):
             body['time_ack'] = time.time()
 
-        if 'control' in body:
-            try:
-                return self.control(body)
-            except Exception:
-                logger.exception(f"Exception handling control message: {body}")
-                return
         if len(self.pool):
             if "uuid" in body and body['uuid']:
                 try:
@@ -115,15 +116,24 @@ class AWXConsumerBase(object):
         self.pool.write(queue, body)
         self.total_messages += 1
 
+    def process_task(self, body):
+        """Routes the task details in body as either a control task or a task-task"""
+        if 'control' in body:
+            try:
+                return self.control(body)
+            except Exception:
+                logger.exception(f"Exception handling control message: {body}")
+                return
+        self.dispatch_task(body)
+
     @log_excess_runtime(logger)
     def record_statistics(self):
         if time.time() - self.last_stats > 1:  # buffer stat recording to once per second
             try:
                 self.redis.set(f'awx_{self.name}_statistics', self.pool.debug())
-                self.last_stats = time.time()
             except Exception:
                 logger.exception(f"encountered an error communicating with redis to store {self.name} statistics")
-                self.last_stats = time.time()
+            self.last_stats = time.time()
 
     def run(self, *args, **kwargs):
         signal.signal(signal.SIGINT, self.stop)
@@ -142,29 +152,75 @@ class AWXConsumerRedis(AWXConsumerBase):
     def run(self, *args, **kwargs):
         super(AWXConsumerRedis, self).run(*args, **kwargs)
         self.worker.on_start()
+        logger.info(f'Callback receiver started with pid={os.getpid()}')
+        db.connection.close()  # logs use database, so close connection
 
         while True:
-            logger.debug(f'{os.getpid()} is alive')
             time.sleep(60)
 
 
 class AWXConsumerPG(AWXConsumerBase):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, schedule=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.pg_max_wait = settings.DISPATCHER_DB_DOWNTOWN_TOLLERANCE
+        self.pg_max_wait = getattr(settings, 'DISPATCHER_DB_DOWNTOWN_TOLLERANCE', settings.DISPATCHER_DB_DOWNTIME_TOLERANCE)
         # if no successful loops have ran since startup, then we should fail right away
         self.pg_is_down = True  # set so that we fail if we get database errors on startup
-        self.pg_down_time = time.time() - self.pg_max_wait  # allow no grace period
-        self.last_cleanup = time.time()
+        init_time = time.time()
+        self.pg_down_time = init_time - self.pg_max_wait  # allow no grace period
+        self.last_cleanup = init_time
+        self.subsystem_metrics = s_metrics.DispatcherMetrics(auto_pipe_execute=False)
+        self.last_metrics_gather = init_time
+        self.listen_cumulative_time = 0.0
+        if schedule:
+            schedule = schedule.copy()
+        else:
+            schedule = {}
+        # add control tasks to be ran at regular schedules
+        # NOTE: if we run out of database connections, it is important to still run cleanup
+        # so that we scale down workers and free up connections
+        schedule['pool_cleanup'] = {'control': self.pool.cleanup, 'schedule': timedelta(seconds=60)}
+        # record subsystem metrics for the dispatcher
+        schedule['metrics_gather'] = {'control': self.record_metrics, 'schedule': timedelta(seconds=20)}
+        self.scheduler = Scheduler(schedule)
+
+    def record_metrics(self):
+        current_time = time.time()
+        self.pool.produce_subsystem_metrics(self.subsystem_metrics)
+        self.subsystem_metrics.set('dispatcher_availability', self.listen_cumulative_time / (current_time - self.last_metrics_gather))
+        self.subsystem_metrics.pipe_execute()
+        self.listen_cumulative_time = 0.0
+        self.last_metrics_gather = current_time
 
     def run_periodic_tasks(self):
-        self.record_statistics()  # maintains time buffer in method
+        """
+        Run general periodic logic, and return maximum time in seconds before
+        the next requested run
+        This may be called more often than that when events are consumed
+        so this should be very efficient in that
+        """
+        try:
+            self.record_statistics()  # maintains time buffer in method
+        except Exception as exc:
+            logger.warning(f'Failed to save dispatcher statistics {exc}')
 
-        if time.time() - self.last_cleanup > 60:  # same as cluster_node_heartbeat
-            # NOTE: if we run out of database connections, it is important to still run cleanup
-            # so that we scale down workers and free up connections
-            self.pool.cleanup()
-            self.last_cleanup = time.time()
+        for job in self.scheduler.get_and_mark_pending():
+            if 'control' in job.data:
+                try:
+                    job.data['control']()
+                except Exception:
+                    logger.exception(f'Error running control task {job.data}')
+            elif 'task' in job.data:
+                body = self.worker.resolve_callable(job.data['task']).get_async_body()
+                # bypasses pg_notify for scheduled tasks
+                self.dispatch_task(body)
+
+        if self.pg_is_down:
+            logger.info('Dispatcher listener connection established')
+            self.pg_is_down = False
+
+        self.listen_start = time.time()
+
+        return self.scheduler.time_until_next_run()
 
     def run(self, *args, **kwargs):
         super(AWXConsumerPG, self).run(*args, **kwargs)
@@ -180,17 +236,21 @@ class AWXConsumerPG(AWXConsumerBase):
                     if init is False:
                         self.worker.on_start()
                         init = True
+                    # run_periodic_tasks run scheduled actions and gives time until next scheduled action
+                    # this is saved to the conn (PubSub) object in order to modify read timeout in-loop
+                    conn.select_timeout = self.run_periodic_tasks()
+                    # this is the main operational loop for awx-manage run_dispatcher
                     for e in conn.events(yield_timeouts=True):
+                        self.listen_cumulative_time += time.time() - self.listen_start  # for metrics
                         if e is not None:
                             self.process_task(json.loads(e.payload))
-                        self.run_periodic_tasks()
-                        self.pg_is_down = False
+                        conn.select_timeout = self.run_periodic_tasks()
                     if self.should_stop:
                         return
-            except psycopg2.InterfaceError:
+            except psycopg.InterfaceError:
                 logger.warning("Stale Postgres message bus connection, reconnecting")
                 continue
-            except (db.DatabaseError, psycopg2.OperationalError):
+            except (db.DatabaseError, psycopg.OperationalError):
                 # If we have attained stady state operation, tolerate short-term database hickups
                 if not self.pg_is_down:
                     logger.exception(f"Error consuming new events from postgres, will retry for {self.pg_max_wait} s")
@@ -199,6 +259,12 @@ class AWXConsumerPG(AWXConsumerBase):
                 current_downtime = time.time() - self.pg_down_time
                 if current_downtime > self.pg_max_wait:
                     logger.exception(f"Postgres event consumer has not recovered in {current_downtime} s, exiting")
+                    # Sending QUIT to multiprocess queue to signal workers to exit
+                    for worker in self.pool.workers:
+                        try:
+                            worker.quit()
+                        except Exception:
+                            logger.exception(f"Error sending QUIT to worker {worker}")
                     raise
                 # Wait for a second before next attempt, but still listen for any shutdown signals
                 for i in range(10):
@@ -210,6 +276,12 @@ class AWXConsumerPG(AWXConsumerBase):
             except Exception:
                 # Log unanticipated exception in addition to writing to stderr to get timestamps and other metadata
                 logger.exception('Encountered unhandled error in dispatcher main loop')
+                # Sending QUIT to multiprocess queue to signal workers to exit
+                for worker in self.pool.workers:
+                    try:
+                        worker.quit()
+                    except Exception:
+                        logger.exception(f"Error sending QUIT to worker {worker}")
                 raise
 
 
@@ -232,8 +304,8 @@ class BaseWorker(object):
                     break
             except QueueEmpty:
                 continue
-            except Exception as e:
-                logger.error("Exception on worker {}, restarting: ".format(idx) + str(e))
+            except Exception:
+                logger.exception("Exception on worker {}, reconnecting: ".format(idx))
                 continue
             try:
                 for conn in db.connections.all():

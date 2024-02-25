@@ -143,13 +143,6 @@ def test_send_notifications_job_id(mocker):
         assert UnifiedJob.objects.get.called_with(id=1)
 
 
-def test_work_success_callback_missing_job():
-    task_data = {'type': 'project_update', 'id': 9999}
-    with mock.patch('django.db.models.query.QuerySet.get') as get_mock:
-        get_mock.side_effect = ProjectUpdate.DoesNotExist()
-        assert system.handle_work_success(task_data) is None
-
-
 @mock.patch('awx.main.models.UnifiedJob.objects.get')
 @mock.patch('awx.main.models.Notification.objects.filter')
 def test_send_notifications_list(mock_notifications_filter, mock_job_get, mocker):
@@ -371,7 +364,7 @@ class TestExtraVarSanitation(TestJobExecution):
     # are deemed trustable, because they can only be added by users w/ enough
     # privilege to add/modify a Job Template)
 
-    UNSAFE = '{{ lookup(' 'pipe' ',' 'ls -la' ') }}'
+    UNSAFE = "{{ lookup('pipe', 'ls -la') }}"
 
     def test_vars_unsafe_by_default(self, job, private_data_dir, mock_me):
         job.created_by = User(pk=123, username='angry-spud')
@@ -1091,6 +1084,27 @@ class TestJobCredentials(TestJobExecution):
             assert env['ANSIBLE_NET_AUTH_PASS'] == 'authorizeme'
         assert open(env['ANSIBLE_NET_SSH_KEYFILE'], 'r').read() == self.EXAMPLE_PRIVATE_KEY
         assert safe_env['ANSIBLE_NET_PASSWORD'] == HIDDEN_PASSWORD
+
+    def test_terraform_cloud_credentials(self, job, private_data_dir, mock_me):
+        terraform = CredentialType.defaults['terraform']()
+        hcl_config = '''
+        backend "s3" {
+            bucket = "s3_sample_bucket"
+            key    = "/tf_state/"
+            region = "us-east-1"
+        }
+        '''
+        credential = Credential(pk=1, credential_type=terraform, inputs={'configuration': hcl_config})
+        credential.inputs['configuration'] = encrypt_field(credential, 'configuration')
+        job.credentials.add(credential)
+
+        env = {}
+        safe_env = {}
+        credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
+
+        local_path = to_host_path(env['TF_BACKEND_CONFIG_FILE'], private_data_dir)
+        config = open(local_path, 'r').read()
+        assert config == hcl_config
 
     def test_custom_environment_injectors_with_jinja_syntax_error(self, private_data_dir, mock_me):
         some_cloud = CredentialType(

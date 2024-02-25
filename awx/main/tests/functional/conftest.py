@@ -1,8 +1,6 @@
 # Python
 import pytest
 from unittest import mock
-import tempfile
-import shutil
 import urllib.parse
 from unittest.mock import PropertyMock
 
@@ -789,25 +787,43 @@ def oauth_application(admin):
     return Application.objects.create(name='test app', user=admin, client_type='confidential', authorization_grant_type='password')
 
 
-@pytest.fixture
-def sqlite_copy_expert(request):
-    # copy_expert is postgres-specific, and SQLite doesn't support it; mock its
-    # behavior to test that it writes a file that contains stdout from events
-    path = tempfile.mkdtemp(prefix='job-event-stdout')
+class MockCopy:
+    events = []
+    index = -1
 
-    def write_stdout(self, sql, fd):
-        # simulate postgres copy_expert support with ORM code
+    def __init__(self, sql):
+        self.events = []
         parts = sql.split(' ')
         tablename = parts[parts.index('from') + 1]
         for cls in (JobEvent, AdHocCommandEvent, ProjectUpdateEvent, InventoryUpdateEvent, SystemJobEvent):
             if cls._meta.db_table == tablename:
                 for event in cls.objects.order_by('start_line').all():
-                    fd.write(event.stdout)
+                    self.events.append(event.stdout)
 
-    setattr(SQLiteCursorWrapper, 'copy_expert', write_stdout)
-    request.addfinalizer(lambda: shutil.rmtree(path))
-    request.addfinalizer(lambda: delattr(SQLiteCursorWrapper, 'copy_expert'))
-    return path
+    def read(self):
+        self.index = self.index + 1
+        if self.index < len(self.events):
+            return memoryview(self.events[self.index].encode())
+
+        return None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+
+@pytest.fixture
+def sqlite_copy(request, mocker):
+    # copy is postgres-specific, and SQLite doesn't support it; mock its
+    # behavior to test that it writes a file that contains stdout from events
+
+    def write_stdout(self, sql):
+        mock_copy = MockCopy(sql)
+        return mock_copy
+
+    mocker.patch.object(SQLiteCursorWrapper, 'copy', write_stdout, create=True)
 
 
 @pytest.fixture

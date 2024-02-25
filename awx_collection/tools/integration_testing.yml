@@ -1,0 +1,24 @@
+---
+- hosts: localhost
+  gather_facts: false
+  connection: local
+  collections:
+    - awx.awx
+  vars:
+    collection_location: "{{ playbook_dir }}/.."
+    loc_tests: "{{ collection_location }}/tests/integration/targets/"
+    test: ad_hoc_command,host,role
+  tasks:
+    - name: DEBUG - make sure variables are what we expect
+      debug:
+        msg: |
+          Running tests at location:
+              {{ loc_tests }}
+          Running tests folders:
+              {{ test | trim | split(',') }}
+
+    - name: "Include test targets"
+      include_tasks: "{{ loc_tests }}{{ test_name }}/tasks/main.yml"
+      loop: "{{ test | trim | split(',') }}"
+      loop_control:
+        loop_var: test_name

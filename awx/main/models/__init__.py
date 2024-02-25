@@ -3,14 +3,18 @@
 
 # Django
 from django.conf import settings  # noqa
+from django.db import connection
 from django.db.models.signals import pre_delete  # noqa
 
+from ansible_base.lib.utils.models import prevent_search
+
 # AWX
-from awx.main.models.base import BaseModel, PrimordialModel, prevent_search, accepts_json, CLOUD_INVENTORY_SOURCES, VERBOSITY_CHOICES  # noqa
+from awx.main.models.base import BaseModel, PrimordialModel, accepts_json, CLOUD_INVENTORY_SOURCES, VERBOSITY_CHOICES  # noqa
 from awx.main.models.unified_jobs import UnifiedJob, UnifiedJobTemplate, StdoutMaxBytesExceeded  # noqa
 from awx.main.models.organization import Organization, Profile, Team, UserSessionMembership  # noqa
 from awx.main.models.credential import Credential, CredentialType, CredentialInputSource, ManagedCredentialType, build_safe_env  # noqa
 from awx.main.models.projects import Project, ProjectUpdate  # noqa
+from awx.main.models.receptor_address import ReceptorAddress  # noqa
 from awx.main.models.inventory import (  # noqa
     CustomInventoryScript,
     Group,
@@ -56,7 +60,6 @@ from awx.main.models.ha import (  # noqa
 from awx.main.models.rbac import (  # noqa
     Role,
     batch_role_ancestor_rebuilding,
-    get_roles_on_resource,
     role_summary_fields_generator,
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
@@ -90,13 +93,64 @@ from oauth2_provider.models import Grant, RefreshToken  # noqa -- needed django-
 
 # Add custom methods to User model for permissions checks.
 from django.contrib.auth.models import User  # noqa
-from awx.main.access import get_user_queryset, check_user_access, check_user_access_with_errors, user_accessible_objects  # noqa
+from awx.main.access import get_user_queryset, check_user_access, check_user_access_with_errors  # noqa
 
 
 User.add_to_class('get_queryset', get_user_queryset)
 User.add_to_class('can_access', check_user_access)
 User.add_to_class('can_access_with_errors', check_user_access_with_errors)
-User.add_to_class('accessible_objects', user_accessible_objects)
+
+
+def convert_jsonfields():
+    if connection.vendor != 'postgresql':
+        return
+
+    # fmt: off
+    fields = [
+        ('main_activitystream', 'id', (
+            'deleted_actor',
+            'setting',
+        )),
+        ('main_job', 'unifiedjob_ptr_id', (
+            'survey_passwords',
+        )),
+        ('main_joblaunchconfig', 'id', (
+            'char_prompts',
+            'survey_passwords',
+        )),
+        ('main_notification', 'id', (
+            'body',
+        )),
+        ('main_unifiedjob', 'id', (
+            'job_env',
+        )),
+        ('main_workflowjob', 'unifiedjob_ptr_id', (
+            'char_prompts',
+            'survey_passwords',
+        )),
+        ('main_workflowjobnode', 'id', (
+            'char_prompts',
+            'survey_passwords',
+        )),
+    ]
+    # fmt: on
+
+    with connection.cursor() as cursor:
+        for table, pkfield, columns in fields:
+            # Do the renamed old columns still exist?  If so, run the task.
+            old_columns = ','.join(f"'{column}_old'" for column in columns)
+            cursor.execute(
+                f"""
+                select count(1) from information_schema.columns
+                where
+                  table_name = %s and column_name in ({old_columns});
+                """,
+                (table,),
+            )
+            if cursor.fetchone()[0]:
+                from awx.main.tasks.system import migrate_jsonfield
+
+                migrate_jsonfield.apply_async([table, pkfield, columns])
 
 
 def cleanup_created_modified_by(sender, **kwargs):

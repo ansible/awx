@@ -68,7 +68,9 @@ class mockHost:
 
 @mock.patch('awx.main.utils.filters.get_model', return_value=mockHost())
 class TestSmartFilterQueryFromString:
-    @mock.patch('awx.api.filters.get_fields_from_path', lambda model, path: ([model], path))  # disable field filtering, because a__b isn't a real Host field
+    @mock.patch(
+        'ansible_base.rest_filters.rest_framework.field_lookup_backend.get_fields_from_path', lambda model, path: ([model], path)
+    )  # disable field filtering, because a__b isn't a real Host field
     @pytest.mark.parametrize(
         "filter_string,q_expected",
         [
@@ -93,7 +95,7 @@ class TestSmartFilterQueryFromString:
     @pytest.mark.parametrize(
         "filter_string",
         [
-            'ansible_facts__facts__facts__blank=' 'ansible_facts__a__b__c__ space  =ggg',
+            'ansible_facts__facts__facts__blank=ansible_facts__a__b__c__ space  =ggg',
         ],
     )
     def test_invalid_filter_strings(self, mock_get_host_model, filter_string):
@@ -104,7 +106,7 @@ class TestSmartFilterQueryFromString:
     @pytest.mark.parametrize(
         "filter_string",
         [
-            'created_by__password__icontains=pbkdf2' 'search=foo or created_by__password__icontains=pbkdf2',
+            'created_by__password__icontains=pbkdf2search=foo or created_by__password__icontains=pbkdf2',
             'created_by__password__icontains=pbkdf2 or search=foo',
         ],
     )

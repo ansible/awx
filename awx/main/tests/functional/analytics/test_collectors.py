@@ -2,8 +2,8 @@ import pytest
 import tempfile
 import os
 import re
-import shutil
 import csv
+from io import StringIO
 
 from django.utils.timezone import now
 from datetime import timedelta
@@ -20,15 +20,16 @@ from awx.main.models import (
 )
 
 
-@pytest.fixture
-def sqlite_copy_expert(request):
-    # copy_expert is postgres-specific, and SQLite doesn't support it; mock its
-    # behavior to test that it writes a file that contains stdout from events
-    path = tempfile.mkdtemp(prefix="copied_tables")
+class MockCopy:
+    headers = None
+    results = None
+    sent_data = False
 
-    def write_stdout(self, sql, fd):
+    def __init__(self, sql, parent_connection):
         # Would be cool if we instead properly disected the SQL query and verified
         # it that way. But instead, we just take the naive approach here.
+        self.results = None
+        self.headers = None
         sql = sql.strip()
         assert sql.startswith("COPY (")
         assert sql.endswith(") TO STDOUT WITH CSV HEADER")
@@ -51,29 +52,49 @@ def sqlite_copy_expert(request):
             elif not line.endswith(","):
                 sql_new[-1] = sql_new[-1].rstrip(",")
         sql = "\n".join(sql_new)
+        parent_connection.execute(sql)
+        self.results = parent_connection.fetchall()
+        self.headers = [i[0] for i in parent_connection.description]
 
-        self.execute(sql)
-        results = self.fetchall()
-        headers = [i[0] for i in self.description]
+    def read(self):
+        if not self.sent_data:
+            mem_file = StringIO()
+            csv_handle = csv.writer(
+                mem_file,
+                delimiter=",",
+                quoting=csv.QUOTE_ALL,
+                escapechar="\\",
+                lineterminator="\n",
+            )
+            if self.headers:
+                csv_handle.writerow(self.headers)
+            if self.results:
+                csv_handle.writerows(self.results)
+            self.sent_data = True
+            return memoryview((mem_file.getvalue()).encode())
+        return None
 
-        csv_handle = csv.writer(
-            fd,
-            delimiter=",",
-            quoting=csv.QUOTE_ALL,
-            escapechar="\\",
-            lineterminator="\n",
-        )
-        csv_handle.writerow(headers)
-        csv_handle.writerows(results)
+    def __enter__(self):
+        return self
 
-    setattr(SQLiteCursorWrapper, "copy_expert", write_stdout)
-    request.addfinalizer(lambda: shutil.rmtree(path))
-    request.addfinalizer(lambda: delattr(SQLiteCursorWrapper, "copy_expert"))
-    return path
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+
+@pytest.fixture
+def sqlite_copy(request, mocker):
+    # copy is postgres-specific, and SQLite doesn't support it; mock its
+    # behavior to test that it writes a file that contains stdout from events
+
+    def write_stdout(self, sql):
+        mock_copy = MockCopy(sql, self)
+        return mock_copy
+
+    mocker.patch.object(SQLiteCursorWrapper, 'copy', write_stdout, create=True)
 
 
 @pytest.mark.django_db
-def test_copy_tables_unified_job_query(sqlite_copy_expert, project, inventory, job_template):
+def test_copy_tables_unified_job_query(sqlite_copy, project, inventory, job_template):
     """
     Ensure that various unified job types are in the output of the query.
     """
@@ -127,7 +148,7 @@ def workflow_job(states=["new", "new", "new", "new", "new"]):
 
 
 @pytest.mark.django_db
-def test_copy_tables_workflow_job_node_query(sqlite_copy_expert, workflow_job):
+def test_copy_tables_workflow_job_node_query(sqlite_copy, workflow_job):
     time_start = now() - timedelta(hours=9)
 
     with tempfile.TemporaryDirectory() as tmpdir:

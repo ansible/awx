@@ -30,8 +30,10 @@ from rest_framework.exceptions import ParseError
 # Django-Polymorphic
 from polymorphic.models import PolymorphicModel
 
+from ansible_base.lib.utils.models import prevent_search, get_type_for_model
+
 # AWX
-from awx.main.models.base import CommonModelNameNotUnique, PasswordFieldsModel, NotificationFieldsModel, prevent_search
+from awx.main.models.base import CommonModelNameNotUnique, PasswordFieldsModel, NotificationFieldsModel
 from awx.main.dispatch import get_task_queuename
 from awx.main.dispatch.control import Control as ControlDispatcher
 from awx.main.registrar import activity_stream_registrar
@@ -42,7 +44,6 @@ from awx.main.utils.common import (
     _inventory_updates,
     copy_model_by_class,
     copy_m2m_relationships,
-    get_type_for_model,
     parse_yaml_or_json,
     getattr_dne,
     ScheduleDependencyManager,
@@ -55,7 +56,7 @@ from awx.main.utils import polymorphic
 from awx.main.constants import ACTIVE_STATES, CAN_CANCEL, JOB_VARIABLE_PREFIXES
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.consumers import emit_channel_notification
-from awx.main.fields import AskForField, OrderedManyToManyField, JSONBlob
+from awx.main.fields import AskForField, OrderedManyToManyField
 
 __all__ = ['UnifiedJobTemplate', 'UnifiedJob', 'StdoutMaxBytesExceeded']
 
@@ -668,7 +669,7 @@ class UnifiedJob(
         editable=False,
     )
     job_env = prevent_search(
-        JSONBlob(
+        models.JSONField(
             default=dict,
             blank=True,
             editable=False,
@@ -1137,11 +1138,6 @@ class UnifiedJob(
                     if total > max_supported:
                         raise StdoutMaxBytesExceeded(total, max_supported)
 
-                # psycopg2's copy_expert writes bytes, but callers of this
-                # function assume a str-based fd will be returned; decode
-                # .write() calls on the fly to maintain this interface
-                _write = fd.write
-                fd.write = lambda s: _write(smart_str(s))
                 tbl = self._meta.db_table + 'event'
                 created_by_cond = ''
                 if self.has_unpartitioned_events:
@@ -1150,7 +1146,12 @@ class UnifiedJob(
                     created_by_cond = f"job_created='{self.created.isoformat()}' AND "
 
                 sql = f"copy (select stdout from {tbl} where {created_by_cond}{self.event_parent_key}={self.id} and stdout != '' order by start_line) to stdout"  # nosql
-                cursor.copy_expert(sql, fd)
+                # psycopg3's copy writes bytes, but callers of this
+                # function assume a str-based fd will be returned; decode
+                # .write() calls on the fly to maintain this interface
+                with cursor.copy(sql) as copy:
+                    while data := copy.read():
+                        fd.write(smart_str(bytes(data)))
 
                 if hasattr(fd, 'name'):
                     # If we're dealing with a physical file, use `sed` to clean
@@ -1439,6 +1440,11 @@ class UnifiedJob(
         if not self.celery_task_id:
             return
         canceled = []
+        if not connection.get_autocommit():
+            # this condition is purpose-written for the task manager, when it cancels jobs in workflows
+            ControlDispatcher('dispatcher', self.controller_node).cancel([self.celery_task_id], with_reply=False)
+            return True  # task manager itself needs to act under assumption that cancel was received
+
         try:
             # Use control and reply mechanism to cancel and obtain confirmation
             timeout = 5

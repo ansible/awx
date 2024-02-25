@@ -16,7 +16,9 @@ class SignalExit(Exception):
 class SignalState:
     def reset(self):
         self.sigterm_flag = False
-        self.is_active = False
+        self.sigint_flag = False
+
+        self.is_active = False  # for nested context managers
         self.original_sigterm = None
         self.original_sigint = None
         self.raise_exception = False
@@ -24,23 +26,36 @@ class SignalState:
     def __init__(self):
         self.reset()
 
-    def set_flag(self, *args):
-        """Method to pass into the python signal.signal method to receive signals"""
-        self.sigterm_flag = True
+    def raise_if_needed(self):
         if self.raise_exception:
             self.raise_exception = False  # so it is not raised a second time in error handling
             raise SignalExit()
 
+    def set_sigterm_flag(self, *args):
+        self.sigterm_flag = True
+        self.raise_if_needed()
+
+    def set_sigint_flag(self, *args):
+        self.sigint_flag = True
+        self.raise_if_needed()
+
     def connect_signals(self):
         self.original_sigterm = signal.getsignal(signal.SIGTERM)
         self.original_sigint = signal.getsignal(signal.SIGINT)
-        signal.signal(signal.SIGTERM, self.set_flag)
-        signal.signal(signal.SIGINT, self.set_flag)
+        signal.signal(signal.SIGTERM, self.set_sigterm_flag)
+        signal.signal(signal.SIGINT, self.set_sigint_flag)
         self.is_active = True
 
     def restore_signals(self):
         signal.signal(signal.SIGTERM, self.original_sigterm)
         signal.signal(signal.SIGINT, self.original_sigint)
+        # if we got a signal while context manager was active, call parent methods.
+        if self.sigterm_flag:
+            if callable(self.original_sigterm):
+                self.original_sigterm()
+        if self.sigint_flag:
+            if callable(self.original_sigint):
+                self.original_sigint()
         self.reset()
 
 
@@ -48,7 +63,7 @@ signal_state = SignalState()
 
 
 def signal_callback():
-    return signal_state.sigterm_flag
+    return bool(signal_state.sigterm_flag or signal_state.sigint_flag)
 
 
 def with_signal_handling(f):

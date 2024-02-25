@@ -74,6 +74,8 @@ from awx.main.utils.common import (
     extract_ansible_vars,
     get_awx_version,
     create_partition,
+    ScheduleWorkflowManager,
+    ScheduleTaskManager,
 )
 from awx.conf.license import get_license
 from awx.main.utils.handlers import SpecialInventoryHandler
@@ -112,7 +114,7 @@ class BaseTask(object):
 
     def __init__(self):
         self.cleanup_paths = []
-        self.update_attempts = int(settings.DISPATCHER_DB_DOWNTOWN_TOLLERANCE / 5)
+        self.update_attempts = int(getattr(settings, 'DISPATCHER_DB_DOWNTOWN_TOLLERANCE', settings.DISPATCHER_DB_DOWNTIME_TOLERANCE) / 5)
         self.runner_callback = self.callback_class(model=self.model)
 
     def update_model(self, pk, _attempt=0, **updates):
@@ -290,13 +292,6 @@ class BaseTask(object):
             content = safe_dump(vars, safe_dict)
         return self.write_private_data_file(private_data_dir, 'extravars', content, sub_dir='env')
 
-    def add_awx_venv(self, env):
-        env['VIRTUAL_ENV'] = settings.AWX_VENV_PATH
-        if 'PATH' in env:
-            env['PATH'] = os.path.join(settings.AWX_VENV_PATH, "bin") + ":" + env['PATH']
-        else:
-            env['PATH'] = os.path.join(settings.AWX_VENV_PATH, "bin")
-
     def build_env(self, instance, private_data_dir, private_data_files=None):
         """
         Build environment dictionary for ansible-playbook.
@@ -456,6 +451,12 @@ class BaseTask(object):
                 ansible_version_info = ee_ansible_info.readline()
                 instance.ansible_version = ansible_version_info
                 instance.save(update_fields=['ansible_version'])
+
+        # Run task manager appropriately for speculative dependencies
+        if instance.unifiedjob_blocked_jobs.exists():
+            ScheduleTaskManager().schedule()
+        if instance.spawned_by_workflow:
+            ScheduleWorkflowManager().schedule()
 
     def should_use_fact_cache(self):
         return False
@@ -926,6 +927,7 @@ class RunJob(SourceControlMixin, BaseTask):
         path_vars = (
             ('ANSIBLE_COLLECTIONS_PATHS', 'collections_paths', 'requirements_collections', '~/.ansible/collections:/usr/share/ansible/collections'),
             ('ANSIBLE_ROLES_PATH', 'roles_path', 'requirements_roles', '~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles'),
+            ('ANSIBLE_COLLECTIONS_PATH', 'collections_path', 'requirements_collections', '~/.ansible/collections:/usr/share/ansible/collections'),
         )
 
         config_values = read_ansible_config(os.path.join(private_data_dir, 'project'), list(map(lambda x: x[1], path_vars)))
@@ -1100,7 +1102,7 @@ class RunJob(SourceControlMixin, BaseTask):
             # actual `run()` call; this _usually_ means something failed in
             # the pre_run_hook method
             return
-        if self.should_use_fact_cache():
+        if self.should_use_fact_cache() and self.runner_callback.artifacts_processed:
             job.log_lifecycle("finish_job_fact_cache")
             finish_fact_cache(
                 job.get_hosts_for_fact_cache(),
@@ -1268,7 +1270,7 @@ class RunProjectUpdate(BaseTask):
 
         galaxy_creds_are_defined = project_update.project.organization and project_update.project.organization.galaxy_credentials.exists()
         if not galaxy_creds_are_defined and (settings.AWX_ROLES_ENABLED or settings.AWX_COLLECTIONS_ENABLED):
-            logger.warning('Galaxy role/collection syncing is enabled, but no ' f'credentials are configured for {project_update.project.organization}.')
+            logger.warning('Galaxy role/collection syncing is enabled, but no credentials are configured for {project_update.project.organization}.')
 
         extra_vars.update(
             {
@@ -1879,6 +1881,8 @@ class RunSystemJob(BaseTask):
             if system_job.job_type in ('cleanup_jobs', 'cleanup_activitystream'):
                 if 'days' in json_vars:
                     args.extend(['--days', str(json_vars.get('days', 60))])
+                if 'batch_size' in json_vars:
+                    args.extend(['--batch-size', str(json_vars['batch_size'])])
                 if 'dry_run' in json_vars and json_vars['dry_run']:
                     args.extend(['--dry-run'])
             if system_job.job_type == 'cleanup_jobs':

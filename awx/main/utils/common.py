@@ -23,7 +23,7 @@ from django.core.exceptions import ObjectDoesNotExist, FieldDoesNotExist
 from django.utils.dateparse import parse_datetime
 from django.utils.translation import gettext_lazy as _
 from django.utils.functional import cached_property
-from django.db import connection, transaction, ProgrammingError
+from django.db import connection, transaction, ProgrammingError, IntegrityError
 from django.db.models.fields.related import ForeignObjectRel, ManyToManyField
 from django.db.models.fields.related_descriptors import ForwardManyToOneDescriptor, ManyToManyDescriptor
 from django.db.models.query import QuerySet
@@ -52,12 +52,10 @@ __all__ = [
     'get_awx_http_client_headers',
     'get_awx_version',
     'update_scm_url',
-    'get_type_for_model',
     'get_model_for_type',
     'copy_model_by_class',
     'copy_m2m_relationships',
     'prefetch_page_capabilities',
-    'to_python_boolean',
     'datetime_hook',
     'ignore_inventory_computed_fields',
     'ignore_inventory_group_removal',
@@ -90,6 +88,7 @@ __all__ = [
     'get_event_partition_epoch',
     'cleanup_new_process',
     'log_excess_runtime',
+    'unified_job_class_to_event_table_name',
 ]
 
 
@@ -107,18 +106,6 @@ def get_object_or_400(klass, *args, **kwargs):
         raise ParseError(*e.args)
     except queryset.model.MultipleObjectsReturned as e:
         raise ParseError(*e.args)
-
-
-def to_python_boolean(value, allow_none=False):
-    value = str(value)
-    if value.lower() in ('true', '1', 't'):
-        return True
-    elif value.lower() in ('false', '0', 'f'):
-        return False
-    elif allow_none and value.lower() in ('none', 'null'):
-        return None
-    else:
-        raise ValueError(_(u'Unable to convert "%s" to boolean') % value)
 
 
 def datetime_hook(d):
@@ -568,14 +555,6 @@ def copy_m2m_relationships(obj1, obj2, fields, kwargs=None):
                 dest_field.add(*list(src_field_value.all().values_list('id', flat=True)))
 
 
-def get_type_for_model(model):
-    """
-    Return type name for a given model class.
-    """
-    opts = model._meta.concrete_model._meta
-    return camelcase_to_underscore(opts.object_name)
-
-
 def get_model_for_type(type_name):
     """
     Return model class for a given type name.
@@ -716,7 +695,7 @@ def parse_yaml_or_json(vars_str, silent_failure=True):
             if silent_failure:
                 return {}
             raise ParseError(
-                _('Cannot parse as JSON (error: {json_error}) or ' 'YAML (error: {yaml_error}).').format(json_error=str(json_err), yaml_error=str(yaml_err))
+                _('Cannot parse as JSON (error: {json_error}) or YAML (error: {yaml_error}).').format(json_error=str(json_err), yaml_error=str(yaml_err))
             )
     return vars_dict
 
@@ -767,14 +746,13 @@ def get_corrected_cpu(cpu_count):  # formerlly get_cpu_capacity
     return cpu_count  # no correction
 
 
-def get_cpu_effective_capacity(cpu_count):
+def get_cpu_effective_capacity(cpu_count, is_control_node=False):
     from django.conf import settings
-
-    cpu_count = get_corrected_cpu(cpu_count)
 
     settings_forkcpu = getattr(settings, 'SYSTEM_TASK_FORKS_CPU', None)
     env_forkcpu = os.getenv('SYSTEM_TASK_FORKS_CPU', None)
-
+    if is_control_node:
+        cpu_count = get_corrected_cpu(cpu_count)
     if env_forkcpu:
         forkcpu = int(env_forkcpu)
     elif settings_forkcpu:
@@ -833,6 +811,7 @@ def get_corrected_memory(memory):
 
     # Runner returns memory in bytes
     # so we convert memory from settings to bytes as well.
+
     if env_absmem is not None:
         return convert_mem_str_to_bytes(env_absmem)
     elif settings_absmem is not None:
@@ -841,14 +820,13 @@ def get_corrected_memory(memory):
     return memory
 
 
-def get_mem_effective_capacity(mem_bytes):
+def get_mem_effective_capacity(mem_bytes, is_control_node=False):
     from django.conf import settings
-
-    mem_bytes = get_corrected_memory(mem_bytes)
 
     settings_mem_mb_per_fork = getattr(settings, 'SYSTEM_TASK_FORKS_MEM', None)
     env_mem_mb_per_fork = os.getenv('SYSTEM_TASK_FORKS_MEM', None)
-
+    if is_control_node:
+        mem_bytes = get_corrected_memory(mem_bytes)
     if env_mem_mb_per_fork:
         mem_mb_per_fork = int(env_mem_mb_per_fork)
     elif settings_mem_mb_per_fork:
@@ -1164,13 +1142,24 @@ def create_partition(tblname, start=None):
     try:
         with transaction.atomic():
             with connection.cursor() as cursor:
+                cursor.execute(f"SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = '{tblname}_{partition_label}');")
+                row = cursor.fetchone()
+                if row is not None:
+                    for val in row:  # should only have 1
+                        if val is True:
+                            logger.debug(f'Event partition table {tblname}_{partition_label} already exists')
+                            return
+
                 cursor.execute(
-                    f'CREATE TABLE IF NOT EXISTS {tblname}_{partition_label} '
-                    f'PARTITION OF {tblname} '
-                    f'FOR VALUES FROM (\'{start_timestamp}\') to (\'{end_timestamp}\');'
+                    f'CREATE TABLE {tblname}_{partition_label} (LIKE {tblname} INCLUDING DEFAULTS INCLUDING CONSTRAINTS); '
+                    f'ALTER TABLE {tblname} ATTACH PARTITION {tblname}_{partition_label} '
+                    f'FOR VALUES FROM (\'{start_timestamp}\') TO (\'{end_timestamp}\');'
                 )
-    except ProgrammingError as e:
-        logger.debug(f'Caught known error due to existing partition: {e}')
+    except (ProgrammingError, IntegrityError) as e:
+        if 'already exists' in str(e):
+            logger.info(f'Caught known error due to partition creation race: {e}')
+        else:
+            raise
 
 
 def cleanup_new_process(func):
@@ -1219,3 +1208,7 @@ def log_excess_runtime(func_logger, cutoff=5.0, debug_cutoff=5.0, msg=None, add_
         return _new_func
 
     return log_excess_runtime_decorator
+
+
+def unified_job_class_to_event_table_name(job_class):
+    return f'main_{job_class().event_class.__name__.lower()}'

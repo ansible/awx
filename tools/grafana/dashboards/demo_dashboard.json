@@ -29,244 +29,308 @@
   "liveNow": false,
   "panels": [
     {
-      "collapsed": false,
+      "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
         "y": 0
       },
-      "id": 37,
-      "panels": [],
-      "title": "System",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "awx_prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 1
-      },
-      "id": 14,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
+      "id": 38,
+      "panels": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "awx_prometheus"
           },
-          "editorMode": "builder",
-          "expr": "awx_database_connections_total",
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Database",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {},
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [
-            {
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "N/A"
+          "description": "Fraction of time dispatcher is listening for new messages",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
                 }
               },
-              "type": "special"
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 1
+          },
+          "id": 39,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "awx_prometheus"
+              },
+              "editorMode": "builder",
+              "expr": "dispatcher_availability",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
             }
           ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "light-blue",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "short"
+          "title": "Dispatcher Availability",
+          "type": "timeseries"
         },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 5,
-        "x": 12,
-        "y": 1
-      },
-      "id": 25,
-      "links": [],
-      "maxDataPoints": 100,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "/^tower_version$/",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "9.1.6",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "000000021"
-          },
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "awx_system_info",
-          "format": "table",
-          "instant": true,
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "title": "Controller Version",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "awx_prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "displayName": "Instances",
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "light-blue",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 5,
-        "x": 12,
-        "y": 5
-      },
-      "id": 13,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "9.1.6",
-      "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "awx_prometheus"
           },
-          "editorMode": "code",
-          "expr": "count(awx_instance_info)",
-          "interval": "",
-          "legendFormat": "  ",
-          "range": true,
-          "refId": "A"
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 1
+          },
+          "id": 40,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "awx_prometheus"
+              },
+              "editorMode": "builder",
+              "expr": "dispatcher_pool_max_worker_count",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "awx_prometheus"
+              },
+              "editorMode": "builder",
+              "expr": "dispatcher_pool_active_task_count",
+              "hide": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "Dispatcher Workers",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "awx_prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 9
+          },
+          "id": 41,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "9.5.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "awx_prometheus"
+              },
+              "editorMode": "builder",
+              "expr": "dispatcher_pool_scale_up_events",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Dispatcher Pool Scale-Up Events",
+          "type": "timeseries"
         }
       ],
-      "title": "Controller Node Count",
-      "type": "stat"
+      "title": "Dispatcher",
+      "type": "row"
     },
     {
       "collapsed": true,
@@ -274,7 +338,248 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 9
+        "y": 1
+      },
+      "id": 37,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "awx_prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 26
+          },
+          "id": 14,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "awx_prometheus"
+              },
+              "editorMode": "builder",
+              "expr": "awx_database_connections_total",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Database",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {},
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "light-blue",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 5,
+            "x": 12,
+            "y": 26
+          },
+          "id": 25,
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "/^tower_version$/",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.5.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "000000021"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "awx_system_info",
+              "format": "table",
+              "instant": true,
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "title": "Controller Version",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "awx_prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "displayName": "Instances",
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "light-blue",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 5,
+            "x": 12,
+            "y": 30
+          },
+          "id": 13,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.5.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "awx_prometheus"
+              },
+              "editorMode": "code",
+              "expr": "count(awx_instance_info)",
+              "interval": "",
+              "legendFormat": "  ",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Controller Node Count",
+          "type": "stat"
+        }
+      ],
+      "title": "System",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 2
       },
       "id": 35,
       "panels": [
@@ -385,7 +690,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 10
+            "y": 26
           },
           "id": 8,
           "options": {
@@ -523,7 +828,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 10
+            "y": 26
           },
           "id": 29,
           "options": {
@@ -616,7 +921,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 18
+            "y": 34
           },
           "id": 16,
           "options": {
@@ -740,7 +1045,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 18
+            "y": 34
           },
           "id": 18,
           "options": {
@@ -840,7 +1145,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 26
+            "y": 42
           },
           "id": 27,
           "options": {
@@ -932,7 +1237,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 26
+            "y": 42
           },
           "id": 20,
           "options": {
@@ -973,7 +1278,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 10
+        "y": 3
       },
       "id": 33,
       "panels": [
@@ -1022,7 +1327,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -1064,7 +1370,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 2
+            "y": 27
           },
           "id": 12,
           "options": {
@@ -1164,7 +1470,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -1179,7 +1486,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 2
+            "y": 27
           },
           "id": 10,
           "options": {
@@ -1268,7 +1575,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 11
+        "y": 4
       },
       "id": 31,
       "panels": [
@@ -1336,7 +1643,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 36
+            "y": 28
           },
           "id": 26,
           "options": {
@@ -1455,7 +1762,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 36
+            "y": 28
           },
           "id": 24,
           "options": {
@@ -1504,7 +1811,7 @@
     }
   ],
   "refresh": "5s",
-  "schemaVersion": 37,
+  "schemaVersion": 38,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -1518,6 +1825,6 @@
   "timezone": "",
   "title": "awx-demo",
   "uid": "GISWZOXnk",
-  "version": 12,
+  "version": 13,
   "weekStart": ""
 }

@@ -1,0 +1,22 @@
+---
+- name: Set vault_addr
+  include_tasks: set_vault_addr.yml
+
+- name: Load vault keys
+  include_vars:
+    file: "{{ vault_file }}"
+
+- name: Unseal the vault
+  flowerysong.hvault.seal:
+    vault_addr: "{{ vault_addr_from_host }}"
+    validate_certs: false
+    state: unsealed
+    key: "{{ item }}"
+  loop:
+    - "{{ Unseal_Key_1 }}"
+    - "{{ Unseal_Key_2 }}"
+    - "{{ Unseal_Key_3 }}"
+  register: unseal_result
+  until: unseal_result is succeeded or unseal_result is failed and 'Connection refused' not in unseal_result.msg
+  retries: 5
+  delay: 1

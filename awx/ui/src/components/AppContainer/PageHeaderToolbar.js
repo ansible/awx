@@ -112,6 +112,7 @@ function PageHeaderToolbar({
                 target="_blank"
                 href={`${getDocsBaseUrl(config)}/html/userguide/index.html`}
                 ouiaId="help-dropdown-item"
+                rel="noopener noreferrer"
               >
                 {t`Help`}
               </DropdownItem>,

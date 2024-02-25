@@ -70,6 +70,7 @@ function SubscriptionStep() {
             ouiaId="request-subscription-button"
             target="_blank"
             variant="secondary"
+            rel="noopener noreferrer"
           >
             {t`Request subscription`}
           </Button>
@@ -103,6 +104,7 @@ function SubscriptionStep() {
                 variant="link"
                 target="_blank"
                 ouiaId="subscription-allocations-link"
+                rel="noopener noreferrer"
                 isInline
               >
                 subscription allocations
@@ -127,6 +129,7 @@ function SubscriptionStep() {
                       href="https://access.redhat.com/management/subscription_allocations"
                       variant="link"
                       target="_blank"
+                      rel="noopener noreferrer"
                       isInline
                       ouiaId="subscription-allocations-link"
                     >
@@ -140,6 +143,7 @@ function SubscriptionStep() {
                       )}/html/userguide/import_license.html`}
                       variant="link"
                       target="_blank"
+                      rel="noopener noreferrer"
                       ouiaId="import-license-link"
                       isInline
                     >

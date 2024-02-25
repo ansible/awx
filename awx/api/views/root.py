@@ -20,6 +20,7 @@ from rest_framework import status
 
 import requests
 
+from awx import MODE
 from awx.api.generics import APIView
 from awx.conf.registry import settings_registry
 from awx.main.analytics import all_collectors
@@ -54,6 +55,8 @@ class ApiRootView(APIView):
         data['custom_logo'] = settings.CUSTOM_LOGO
         data['custom_login_info'] = settings.CUSTOM_LOGIN_INFO
         data['login_redirect_override'] = settings.LOGIN_REDIRECT_OVERRIDE
+        if MODE == 'development':
+            data['swagger'] = drf_reverse('api:schema-swagger-ui')
         return Response(data)
 
 
@@ -81,6 +84,7 @@ class ApiVersionRootView(APIView):
         data['ping'] = reverse('api:api_v2_ping_view', request=request)
         data['instances'] = reverse('api:instance_list', request=request)
         data['instance_groups'] = reverse('api:instance_group_list', request=request)
+        data['receptor_addresses'] = reverse('api:receptor_addresses_list', request=request)
         data['config'] = reverse('api:api_v2_config_view', request=request)
         data['settings'] = reverse('api:setting_category_list', request=request)
         data['me'] = reverse('api:user_me_list', request=request)
@@ -104,8 +108,7 @@ class ApiVersionRootView(APIView):
         data['groups'] = reverse('api:group_list', request=request)
         data['hosts'] = reverse('api:host_list', request=request)
         data['host_metrics'] = reverse('api:host_metric_list', request=request)
-        # It will be enabled in future version of the AWX
-        # data['host_metric_summary_monthly'] = reverse('api:host_metric_summary_monthly_list', request=request)
+        data['host_metric_summary_monthly'] = reverse('api:host_metric_summary_monthly_list', request=request)
         data['job_templates'] = reverse('api:job_template_list', request=request)
         data['jobs'] = reverse('api:job_list', request=request)
         data['ad_hoc_commands'] = reverse('api:ad_hoc_command_list', request=request)

@@ -21,7 +21,6 @@ function HostMetricsListItem({ item, isSelected, onSelect, rowIndex }) {
         {formatDateString(item.last_automation)}
       </Td>
       <Td dataLabel={t`Automation`}>{item.automated_counter}</Td>
-      <Td dataLabel={t`Inventories`}>{item.used_in_inventories || 0}</Td>
       <Td dataLabel={t`Deleted`}>{item.deleted_counter}</Td>
     </Tr>
   );

@@ -122,7 +122,7 @@ export const InstanceGroup = shape({
 
 export const Instance = shape({
   id: number.isRequired,
-  name: string.isRequired,
+  hostname: string.isRequired,
 });
 
 export const Label = shape({

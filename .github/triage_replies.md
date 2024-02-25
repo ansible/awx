@@ -7,8 +7,8 @@
 
 ## PRs/Issues
 
-### Visit our mailing list
-- Hello, this appears to be less of a bug report or feature request and more of a question. Could you please ask this on our mailing list? See https://github.com/ansible/awx/#get-involved for information for ways to connect with us.
+### Visit the Forum or Matrix
+- Hello, this appears to be less of a bug report or feature request and more of a question. Could you please ask this on either the [Ansible AWX channel on Matrix](https://matrix.to/#/#awx:ansible.com) or the [Ansible Community Forum](https://forum.ansible.com/tag/awx)?
 
 ### Denied Submission
 

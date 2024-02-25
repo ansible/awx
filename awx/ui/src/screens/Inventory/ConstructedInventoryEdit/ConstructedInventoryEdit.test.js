@@ -51,27 +51,22 @@ describe('<ConstructedInventoryEdit />', () => {
   };
 
   beforeEach(async () => {
-    ConstructedInventoriesAPI.readOptions.mockResolvedValue({
-      data: {
-        related: {},
-        actions: {
-          POST: {
-            limit: {
-              label: 'Limit',
-              help_text: '',
-            },
-            update_cache_timeout: {
-              label: 'Update cache timeout',
-              help_text: 'help',
-            },
-            verbosity: {
-              label: 'Verbosity',
-              help_text: '',
-            },
-          },
+    ConstructedInventoriesAPI.readConstructedInventoryOptions.mockResolvedValue(
+      {
+        limit: {
+          label: 'Limit',
+          help_text: '',
         },
-      },
-    });
+        update_cache_timeout: {
+          label: 'Update cache timeout',
+          help_text: 'help',
+        },
+        verbosity: {
+          label: 'Verbosity',
+          help_text: '',
+        },
+      }
+    );
     InventoriesAPI.readInstanceGroups.mockResolvedValue({
       data: {
         results: associatedInstanceGroups,
@@ -165,6 +160,21 @@ describe('<ConstructedInventoryEdit />', () => {
         <ConstructedInventoryEdit inventory={mockInv} />
       );
     });
+    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
+    expect(wrapper.find('ContentError').length).toBe(1);
+  });
+
+  test('should throw content error if user has insufficient options permissions', async () => {
+    expect(wrapper.find('ContentError').length).toBe(0);
+    ConstructedInventoriesAPI.readConstructedInventoryOptions.mockImplementationOnce(
+      () => Promise.reject(new Error())
+    );
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <ConstructedInventoryEdit inventory={mockInv} />
+      );
+    });
+
     await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
     expect(wrapper.find('ContentError').length).toBe(1);
   });

@@ -484,15 +484,12 @@ function Visualizer({ template }) {
                 ?.unified_job_type === 'workflow_approval'
             ) {
               nodeRequests.push(
-                WorkflowJobTemplateNodesAPI.replace(
-                  node.originalNodeObject.id,
-                  {
-                    all_parents_must_converge: node.all_parents_must_converge,
-                    ...(replaceIdentifier(node) && {
-                      identifier: node.identifier,
-                    }),
-                  }
-                ).then(({ data }) => {
+                WorkflowJobTemplateNodesAPI.update(node.originalNodeObject.id, {
+                  all_parents_must_converge: node.all_parents_must_converge,
+                  ...(replaceIdentifier(node) && {
+                    identifier: node.identifier,
+                  }),
+                }).then(({ data }) => {
                   node.originalNodeObject = data;
                   approvalTemplateRequests.push(
                     WorkflowApprovalTemplatesAPI.update(
@@ -509,15 +506,12 @@ function Visualizer({ template }) {
               );
             } else {
               nodeRequests.push(
-                WorkflowJobTemplateNodesAPI.replace(
-                  node.originalNodeObject.id,
-                  {
-                    all_parents_must_converge: node.all_parents_must_converge,
-                    ...(replaceIdentifier(node) && {
-                      identifier: node.identifier,
-                    }),
-                  }
-                ).then(({ data }) => {
+                WorkflowJobTemplateNodesAPI.update(node.originalNodeObject.id, {
+                  all_parents_must_converge: node.all_parents_must_converge,
+                  ...(replaceIdentifier(node) && {
+                    identifier: node.identifier,
+                  }),
+                }).then(({ data }) => {
                   node.originalNodeObject = data;
                   approvalTemplateRequests.push(
                     WorkflowJobTemplateNodesAPI.createApprovalTemplate(
@@ -534,7 +528,7 @@ function Visualizer({ template }) {
             }
           } else {
             nodeRequests.push(
-              WorkflowJobTemplateNodesAPI.replace(node.originalNodeObject.id, {
+              WorkflowJobTemplateNodesAPI.update(node.originalNodeObject.id, {
                 ...node.promptValues,
                 execution_environment:
                   node.promptValues?.execution_environment?.id || null,

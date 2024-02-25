@@ -12,6 +12,10 @@ const template = {
   notification_type: 'slack',
   name: 'Test Notification',
   summary_fields: {
+    organization: {
+      id: 1,
+      name: 'Foo',
+    },
     user_capabilities: {
       edit: true,
       copy: true,
@@ -39,7 +43,7 @@ describe('<NotificationTemplateListItem />', () => {
     );
 
     const cells = wrapper.find('Td');
-    expect(cells).toHaveLength(5);
+    expect(cells).toHaveLength(6);
     expect(cells.at(1).text()).toEqual('Test Notification');
     expect(cells.at(2).text()).toEqual('Success');
     expect(cells.at(3).text()).toEqual('Slack');
@@ -133,6 +137,10 @@ describe('<NotificationTemplateListItem />', () => {
             template={{
               ...template,
               summary_fields: {
+                organization: {
+                  id: 3,
+                  name: 'Test',
+                },
                 user_capabilities: {
                   copy: false,
                   edit: false,

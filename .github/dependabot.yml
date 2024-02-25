@@ -1,19 +1,10 @@
 version: 2
 updates:
-  - package-ecosystem: "npm"
-    directory: "/awx/ui"
+  - package-ecosystem: "pip"
+    directory: "docs/docsite/"
     schedule:
-      interval: "monthly"
-    open-pull-requests-limit: 5
-    allow:
-      - dependency-type: "production"
-    reviewers:
-      - "AlexSCorey"
-      - "keithjgrant"
-      - "kialam"
-      - "mabashian"
-      - "marshmalien"
+      interval: "weekly"
+    open-pull-requests-limit: 2
     labels:
-      - "component:ui"
+      - "docs"
       - "dependencies"
-    target-branch: "devel"

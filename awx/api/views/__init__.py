@@ -62,7 +62,7 @@ from wsgiref.util import FileWrapper
 
 # AWX
 from awx.main.tasks.system import send_notifications, update_inventory_computed_fields
-from awx.main.access import get_user_queryset, HostAccess
+from awx.main.access import get_user_queryset
 from awx.api.generics import (
     APIView,
     BaseUsersList,
@@ -128,6 +128,10 @@ logger = logging.getLogger('awx.api.views')
 
 
 def unpartitioned_event_horizon(cls):
+    with connection.cursor() as cursor:
+        cursor.execute(f"SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE table_name = '_unpartitioned_{cls._meta.db_table}';")
+        if not cursor.fetchone():
+            return 0
     with connection.cursor() as cursor:
         try:
             cursor.execute(f'SELECT MAX(id) FROM _unpartitioned_{cls._meta.db_table}')
@@ -268,16 +272,24 @@ class DashboardJobsGraphView(APIView):
 
         success_query = user_unified_jobs.filter(status='successful')
         failed_query = user_unified_jobs.filter(status='failed')
+        canceled_query = user_unified_jobs.filter(status='canceled')
+        error_query = user_unified_jobs.filter(status='error')
 
         if job_type == 'inv_sync':
             success_query = success_query.filter(instance_of=models.InventoryUpdate)
             failed_query = failed_query.filter(instance_of=models.InventoryUpdate)
+            canceled_query = canceled_query.filter(instance_of=models.InventoryUpdate)
+            error_query = error_query.filter(instance_of=models.InventoryUpdate)
         elif job_type == 'playbook_run':
             success_query = success_query.filter(instance_of=models.Job)
             failed_query = failed_query.filter(instance_of=models.Job)
+            canceled_query = canceled_query.filter(instance_of=models.Job)
+            error_query = error_query.filter(instance_of=models.Job)
         elif job_type == 'scm_update':
             success_query = success_query.filter(instance_of=models.ProjectUpdate)
             failed_query = failed_query.filter(instance_of=models.ProjectUpdate)
+            canceled_query = canceled_query.filter(instance_of=models.ProjectUpdate)
+            error_query = error_query.filter(instance_of=models.ProjectUpdate)
 
         end = now()
         interval = 'day'
@@ -293,10 +305,12 @@ class DashboardJobsGraphView(APIView):
         else:
             return Response({'error': _('Unknown period "%s"') % str(period)}, status=status.HTTP_400_BAD_REQUEST)
 
-        dashboard_data = {"jobs": {"successful": [], "failed": []}}
+        dashboard_data = {"jobs": {"successful": [], "failed": [], "canceled": [], "error": []}}
 
         succ_list = dashboard_data['jobs']['successful']
         fail_list = dashboard_data['jobs']['failed']
+        canceled_list = dashboard_data['jobs']['canceled']
+        error_list = dashboard_data['jobs']['error']
 
         qs_s = (
             success_query.filter(finished__range=(start, end))
@@ -314,6 +328,22 @@ class DashboardJobsGraphView(APIView):
             .annotate(agg=Count('id', distinct=True))
         )
         data_f = {item['d']: item['agg'] for item in qs_f}
+        qs_c = (
+            canceled_query.filter(finished__range=(start, end))
+            .annotate(d=Trunc('finished', interval, tzinfo=end.tzinfo))
+            .order_by()
+            .values('d')
+            .annotate(agg=Count('id', distinct=True))
+        )
+        data_c = {item['d']: item['agg'] for item in qs_c}
+        qs_e = (
+            error_query.filter(finished__range=(start, end))
+            .annotate(d=Trunc('finished', interval, tzinfo=end.tzinfo))
+            .order_by()
+            .values('d')
+            .annotate(agg=Count('id', distinct=True))
+        )
+        data_e = {item['d']: item['agg'] for item in qs_e}
 
         start_date = start.replace(hour=0, minute=0, second=0, microsecond=0)
         for d in itertools.count():
@@ -322,6 +352,8 @@ class DashboardJobsGraphView(APIView):
                 break
             succ_list.append([time.mktime(date.timetuple()), data_s.get(date, 0)])
             fail_list.append([time.mktime(date.timetuple()), data_f.get(date, 0)])
+            canceled_list.append([time.mktime(date.timetuple()), data_c.get(date, 0)])
+            error_list.append([time.mktime(date.timetuple()), data_e.get(date, 0)])
 
         return Response(dashboard_data)
 
@@ -333,25 +365,34 @@ class InstanceList(ListCreateAPIView):
     search_fields = ('hostname',)
     ordering = ('id',)
 
+    def get_queryset(self):
+        qs = super().get_queryset().prefetch_related('receptor_addresses')
+        return qs
+
 
 class InstanceDetail(RetrieveUpdateAPIView):
     name = _("Instance Detail")
     model = models.Instance
     serializer_class = serializers.InstanceSerializer
 
+    def get_queryset(self):
+        qs = super().get_queryset().prefetch_related('receptor_addresses')
+        return qs
+
     def update_raw_data(self, data):
         # these fields are only valid on creation of an instance, so they unwanted on detail view
-        data.pop('listener_port', None)
         data.pop('node_type', None)
         data.pop('hostname', None)
+        data.pop('ip_address', None)
         return super(InstanceDetail, self).update_raw_data(data)
 
     def update(self, request, *args, **kwargs):
         r = super(InstanceDetail, self).update(request, *args, **kwargs)
         if status.is_success(r.status_code):
             obj = self.get_object()
-            obj.set_capacity_value()
-            obj.save(update_fields=['capacity'])
+            capacity_changed = obj.set_capacity_value()
+            if capacity_changed:
+                obj.save(update_fields=['capacity'])
             r.data = serializers.InstanceSerializer(obj, context=self.get_serializer_context()).to_representation(obj)
         return r
 
@@ -370,13 +411,37 @@ class InstanceUnifiedJobsList(SubListAPIView):
 
 
 class InstancePeersList(SubListAPIView):
-    name = _("Instance Peers")
+    name = _("Peers")
+    model = models.ReceptorAddress
+    serializer_class = serializers.ReceptorAddressSerializer
     parent_model = models.Instance
-    model = models.Instance
-    serializer_class = serializers.InstanceSerializer
     parent_access = 'read'
-    search_fields = {'hostname'}
     relationship = 'peers'
+    search_fields = ('address',)
+
+
+class InstanceReceptorAddressesList(SubListAPIView):
+    name = _("Receptor Addresses")
+    model = models.ReceptorAddress
+    parent_key = 'instance'
+    parent_model = models.Instance
+    serializer_class = serializers.ReceptorAddressSerializer
+    search_fields = ('address',)
+
+
+class ReceptorAddressesList(ListAPIView):
+    name = _("Receptor Addresses")
+    model = models.ReceptorAddress
+    serializer_class = serializers.ReceptorAddressSerializer
+    search_fields = ('address',)
+
+
+class ReceptorAddressDetail(RetrieveAPIView):
+    name = _("Receptor Address Detail")
+    model = models.ReceptorAddress
+    serializer_class = serializers.ReceptorAddressSerializer
+    parent_model = models.Instance
+    relationship = 'receptor_addresses'
 
 
 class InstanceInstanceGroupsList(InstanceGroupMembershipMixin, SubListCreateAttachDetachAPIView):
@@ -565,7 +630,7 @@ class LaunchConfigCredentialsBase(SubListAttachDetachAPIView):
         if self.relationship not in ask_mapping:
             return {"msg": _("Related template cannot accept {} on launch.").format(self.relationship)}
         elif sub.passwords_needed:
-            return {"msg": _("Credential that requires user input on launch " "cannot be used in saved launch configuration.")}
+            return {"msg": _("Credential that requires user input on launch cannot be used in saved launch configuration.")}
 
         ask_field_name = ask_mapping[self.relationship]
 
@@ -737,8 +802,8 @@ class TeamActivityStreamList(SubListAPIView):
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(
             Q(team=parent)
-            | Q(project__in=models.Project.accessible_objects(parent, 'read_role'))
-            | Q(credential__in=models.Credential.accessible_objects(parent, 'read_role'))
+            | Q(project__in=models.Project.accessible_objects(parent.member_role, 'read_role'))
+            | Q(credential__in=models.Credential.accessible_objects(parent.member_role, 'read_role'))
         )
 
 
@@ -794,13 +859,7 @@ class ExecutionEnvironmentActivityStreamList(SubListAPIView):
     parent_model = models.ExecutionEnvironment
     relationship = 'activitystream_set'
     search_fields = ('changes',)
-
-    def get_queryset(self):
-        parent = self.get_parent_object()
-        self.check_parent_access(parent)
-
-        qs = self.request.user.get_queryset(self.model)
-        return qs.filter(execution_environment=parent)
+    filter_read_permission = False
 
 
 class ProjectList(ListCreateAPIView):
@@ -1398,7 +1457,7 @@ class OrganizationCredentialList(SubListCreateAPIView):
         self.check_parent_access(organization)
 
         user_visible = models.Credential.accessible_objects(self.request.user, 'read_role').all()
-        org_set = models.Credential.accessible_objects(organization.admin_role, 'read_role').all()
+        org_set = models.Credential.objects.filter(organization=organization)
 
         if self.request.user.is_superuser or self.request.user.is_system_auditor:
             return org_set
@@ -1570,16 +1629,15 @@ class HostMetricDetail(RetrieveDestroyAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-# It will be enabled in future version of the AWX
-# class HostMetricSummaryMonthlyList(ListAPIView):
-#     name = _("Host Metrics Summary Monthly")
-#     model = models.HostMetricSummaryMonthly
-#     serializer_class = serializers.HostMetricSummaryMonthlySerializer
-#     permission_classes = (IsSystemAdminOrAuditor,)
-#     search_fields = ('date',)
-#
-#     def get_queryset(self):
-#         return self.model.objects.all()
+class HostMetricSummaryMonthlyList(ListAPIView):
+    name = _("Host Metrics Summary Monthly")
+    model = models.HostMetricSummaryMonthly
+    serializer_class = serializers.HostMetricSummaryMonthlySerializer
+    permission_classes = (IsSystemAdminOrAuditor,)
+    search_fields = ('date',)
+
+    def get_queryset(self):
+        return self.model.objects.all()
 
 
 class HostList(HostRelatedSearchMixin, ListCreateAPIView):
@@ -1634,13 +1692,7 @@ class InventoryHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIVie
     parent_model = models.Inventory
     relationship = 'hosts'
     parent_key = 'inventory'
-
-    def get_queryset(self):
-        inventory = self.get_parent_object()
-        qs = getattrd(inventory, self.relationship).all()
-        # Apply queryset optimizations
-        qs = qs.select_related(*HostAccess.select_related).prefetch_related(*HostAccess.prefetch_related)
-        return qs
+    filter_read_permission = False
 
 
 class HostGroupsList(SubListCreateAttachDetachAPIView):
@@ -2513,7 +2565,7 @@ class JobTemplateSurveySpec(GenericAPIView):
                     return Response(
                         dict(
                             error=_(
-                                "$encrypted$ is a reserved keyword for password question defaults, " "survey question {idx} is type {survey_item[type]}."
+                                "$encrypted$ is a reserved keyword for password question defaults, survey question {idx} is type {survey_item[type]}."
                             ).format(**context)
                         ),
                         status=status.HTTP_400_BAD_REQUEST,
@@ -2581,16 +2633,7 @@ class JobTemplateCredentialsList(SubListCreateAttachDetachAPIView):
     serializer_class = serializers.CredentialSerializer
     parent_model = models.JobTemplate
     relationship = 'credentials'
-
-    def get_queryset(self):
-        # Return the full list of credentials
-        parent = self.get_parent_object()
-        self.check_parent_access(parent)
-        sublist_qs = getattrd(parent, self.relationship)
-        sublist_qs = sublist_qs.prefetch_related(
-            'created_by', 'modified_by', 'admin_role', 'use_role', 'read_role', 'admin_role__parents', 'admin_role__members'
-        )
-        return sublist_qs
+    filter_read_permission = False
 
     def is_valid_relation(self, parent, sub, created=False):
         if sub.unique_hash() in [cred.unique_hash() for cred in parent.credentials.all()]:
@@ -2692,7 +2735,10 @@ class JobTemplateCallback(GenericAPIView):
         # Permission class should have already validated host_config_key.
         job_template = self.get_object()
         # Attempt to find matching hosts based on remote address.
-        matching_hosts = self.find_matching_hosts()
+        if job_template.inventory:
+            matching_hosts = self.find_matching_hosts()
+        else:
+            return Response({"msg": _("Cannot start automatically, an inventory is required.")}, status=status.HTTP_400_BAD_REQUEST)
         # If the host is not found, update the inventory before trying to
         # match again.
         inventory_sources_already_updated = []
@@ -2777,6 +2823,7 @@ class JobTemplateInstanceGroupsList(SubListAttachDetachAPIView):
     serializer_class = serializers.InstanceGroupSerializer
     parent_model = models.JobTemplate
     relationship = 'instance_groups'
+    filter_read_permission = False
 
 
 class JobTemplateAccessList(ResourceAccessList):
@@ -2867,16 +2914,7 @@ class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, Su
     relationship = ''
     enforce_parent_relationship = 'workflow_job_template'
     search_fields = ('unified_job_template__name', 'unified_job_template__description')
-
-    '''
-    Limit the set of WorkflowJobTemplateNodes to the related nodes of specified by
-    'relationship'
-    '''
-
-    def get_queryset(self):
-        parent = self.get_parent_object()
-        self.check_parent_access(parent)
-        return getattr(parent, self.relationship).all()
+    filter_read_permission = False
 
     def is_valid_relation(self, parent, sub, created=False):
         if created:
@@ -2951,14 +2989,7 @@ class WorkflowJobNodeChildrenBaseList(SubListAPIView):
     parent_model = models.WorkflowJobNode
     relationship = ''
     search_fields = ('unified_job_template__name', 'unified_job_template__description')
-
-    #
-    # Limit the set of WorkflowJobNodes to the related nodes of specified by self.relationship
-    #
-    def get_queryset(self):
-        parent = self.get_parent_object()
-        self.check_parent_access(parent)
-        return getattr(parent, self.relationship).all()
+    filter_read_permission = False
 
 
 class WorkflowJobNodeSuccessNodesList(WorkflowJobNodeChildrenBaseList):
@@ -3137,11 +3168,8 @@ class WorkflowJobTemplateWorkflowNodesList(SubListCreateAPIView):
     relationship = 'workflow_job_template_nodes'
     parent_key = 'workflow_job_template'
     search_fields = ('unified_job_template__name', 'unified_job_template__description')
-
-    def get_queryset(self):
-        parent = self.get_parent_object()
-        self.check_parent_access(parent)
-        return getattr(parent, self.relationship).order_by('id')
+    ordering = ('id',)  # assure ordering by id for consistency
+    filter_read_permission = False
 
 
 class WorkflowJobTemplateJobsList(SubListAPIView):
@@ -3233,11 +3261,8 @@ class WorkflowJobWorkflowNodesList(SubListAPIView):
     relationship = 'workflow_job_nodes'
     parent_key = 'workflow_job'
     search_fields = ('unified_job_template__name', 'unified_job_template__description')
-
-    def get_queryset(self):
-        parent = self.get_parent_object()
-        self.check_parent_access(parent)
-        return getattr(parent, self.relationship).order_by('id')
+    ordering = ('id',)  # assure ordering by id for consistency
+    filter_read_permission = False
 
 
 class WorkflowJobCancel(GenericCancelView):
@@ -3372,7 +3397,6 @@ class JobLabelList(SubListAPIView):
     serializer_class = serializers.LabelSerializer
     parent_model = models.Job
     relationship = 'labels'
-    parent_key = 'job'
 
 
 class WorkflowJobLabelList(JobLabelList):
@@ -3551,11 +3575,7 @@ class BaseJobHostSummariesList(SubListAPIView):
     relationship = 'job_host_summaries'
     name = _('Job Host Summaries List')
     search_fields = ('host_name',)
-
-    def get_queryset(self):
-        parent = self.get_parent_object()
-        self.check_parent_access(parent)
-        return getattr(parent, self.relationship).select_related('job', 'job__job_template', 'host')
+    filter_read_permission = False
 
 
 class HostJobHostSummariesList(BaseJobHostSummariesList):
@@ -4099,7 +4119,7 @@ class UnifiedJobStdout(RetrieveAPIView):
                 return super(UnifiedJobStdout, self).retrieve(request, *args, **kwargs)
         except models.StdoutMaxBytesExceeded as e:
             response_message = _(
-                "Standard Output too large to display ({text_size} bytes), " "only download supported for sizes over {supported_size} bytes."
+                "Standard Output too large to display ({text_size} bytes), only download supported for sizes over {supported_size} bytes."
             ).format(text_size=e.total, supported_size=e.supported)
             if request.accepted_renderer.format == 'json':
                 return Response({'range': {'start': 0, 'end': 1, 'absolute_end': 1}, 'content': response_message})

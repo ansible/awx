@@ -208,6 +208,6 @@ def test_auto_parenting():
 @pytest.mark.django_db
 def test_update_parents_keeps_teams(team, project):
     project.update_role.parents.add(team.member_role)
-    assert team.member_role in project.update_role  # test prep sanity check
+    assert list(Project.accessible_objects(team.member_role, 'update_role')) == [project]  # test prep sanity check
     update_role_parentage_for_instance(project)
-    assert team.member_role in project.update_role  # actual assertion
+    assert list(Project.accessible_objects(team.member_role, 'update_role')) == [project]  # actual assertion

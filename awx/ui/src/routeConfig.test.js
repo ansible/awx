@@ -31,6 +31,7 @@ describe('getRouteConfig', () => {
       '/activity_stream',
       '/workflow_approvals',
       '/host_metrics',
+      '/subscription_usage',
       '/templates',
       '/credentials',
       '/projects',
@@ -61,6 +62,7 @@ describe('getRouteConfig', () => {
       '/activity_stream',
       '/workflow_approvals',
       '/host_metrics',
+      '/subscription_usage',
       '/templates',
       '/credentials',
       '/projects',
@@ -101,10 +103,8 @@ describe('getRouteConfig', () => {
       '/credential_types',
       '/notification_templates',
       '/instance_groups',
-      '/instances',
       '/applications',
       '/execution_environments',
-      '/topology_view',
     ]);
   });
 
@@ -237,10 +237,8 @@ describe('getRouteConfig', () => {
       '/credential_types',
       '/notification_templates',
       '/instance_groups',
-      '/instances',
       '/applications',
       '/execution_environments',
-      '/topology_view',
     ]);
   });
 
@@ -268,10 +266,8 @@ describe('getRouteConfig', () => {
       '/credential_types',
       '/notification_templates',
       '/instance_groups',
-      '/instances',
       '/applications',
       '/execution_environments',
-      '/topology_view',
     ]);
   });
 });

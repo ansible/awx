@@ -42,6 +42,16 @@
     dest: "{{ sources_dest }}/SECRET_KEY"
   no_log: true
 
+- name: Find custom error pages
+  set_fact:
+    custom_error_pages: "{{ (custom_error_pages | default([])) + [new_error_page] }}"
+  vars:
+    new_error_page:
+      error_code: "{{ item | basename() | regex_replace('custom_(\\d+).html', '\\1') }}"
+      web_path: "{{ item | regex_replace('^.*/static', '/static') }}"
+  loop: "{{ lookup('ansible.builtin.fileglob', playbook_dir + '/../../../awx/static/custom_*.html', wantlist=True) }}"
+  when: (item | basename()) is regex("custom_\d+\.html")
+
 - name: Render configuration templates
   template:
     src: "{{ item }}.j2"
@@ -57,7 +67,7 @@
 
 - name: Get OS info for sdb
   shell: |
-    docker info | grep 'Operating System'
+    docker info 2> /dev/null | awk '/Os:/ { gsub(/Os:/, "Operating System:"); }/Operating System/ { print; }'
   register: os_info
   changed_when: false
 
@@ -90,6 +100,10 @@
 - name: Include LDAP tasks if enabled
   include_tasks: ldap.yml
   when: enable_ldap | bool
+
+- name: Include vault TLS tasks if enabled
+  include_tasks: vault_tls.yml
+  when: enable_vault | bool
 
 - name: Render Docker-Compose
   template:

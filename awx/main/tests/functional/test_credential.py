@@ -78,8 +78,10 @@ def test_default_cred_types():
         [
             'aim',
             'aws',
+            'aws_secretsmanager_credential',
             'azure_kv',
             'azure_rm',
+            'bitbucket_dc_token',
             'centrify_vault_kv',
             'conjur',
             'controller',
@@ -99,6 +101,7 @@ def test_default_cred_types():
             'satellite6',
             'scm',
             'ssh',
+            'terraform',
             'thycotic_dsv',
             'thycotic_tss',
             'vault',

@@ -2,6 +2,7 @@
 from collections import namedtuple
 import functools
 import importlib
+import itertools
 import json
 import logging
 import os
@@ -14,7 +15,7 @@ from datetime import datetime
 
 # Django
 from django.conf import settings
-from django.db import transaction, DatabaseError, IntegrityError
+from django.db import connection, transaction, DatabaseError, IntegrityError
 from django.db.models.fields.related import ForeignKey
 from django.utils.timezone import now, timedelta
 from django.utils.encoding import smart_str
@@ -47,26 +48,21 @@ from awx.main.models import (
     Inventory,
     SmartInventoryMembership,
     Job,
-    HostMetric,
+    convert_jsonfields,
 )
 from awx.main.constants import ACTIVE_STATES
 from awx.main.dispatch.publish import task
 from awx.main.dispatch import get_task_queuename, reaper
-from awx.main.utils.common import (
-    get_type_for_model,
-    ignore_inventory_computed_fields,
-    ignore_inventory_group_removal,
-    ScheduleWorkflowManager,
-    ScheduleTaskManager,
-)
+from awx.main.utils.common import ignore_inventory_computed_fields, ignore_inventory_group_removal
 
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
+from awx.main.tasks.helpers import is_run_threshold_reached
 from awx.main.tasks.receptor import get_receptor_ctl, worker_info, worker_cleanup, administrative_workunit_reaper, write_receptor_config
 from awx.main.consumers import emit_channel_notification
 from awx.main import analytics
 from awx.conf import settings_registry
-from awx.main.analytics.subsystem_metrics import Metrics
+from awx.main.analytics.subsystem_metrics import DispatcherMetrics
 
 from rest_framework.exceptions import PermissionDenied
 
@@ -85,6 +81,11 @@ def dispatch_startup():
     # TODO: Enable this on VM installs
     if settings.IS_K8S:
         write_receptor_config()
+
+    try:
+        convert_jsonfields()
+    except Exception:
+        logger.exception("Failed json field conversion, skipping.")
 
     startup_logger.debug("Syncing Schedules")
     for sch in Schedule.objects.all():
@@ -112,7 +113,7 @@ def dispatch_startup():
     cluster_node_heartbeat()
     reaper.startup_reaping()
     reaper.reap_waiting(grace_period=0)
-    m = Metrics()
+    m = DispatcherMetrics()
     m.reset_values()
 
 
@@ -127,6 +128,52 @@ def inform_cluster_of_shutdown():
         logger.warning('Normal shutdown signal for instance {}, removed self from capacity pool.'.format(this_inst.hostname))
     except Exception:
         logger.exception('Encountered problem with normal shutdown signal.')
+
+
+@task(queue=get_task_queuename)
+def migrate_jsonfield(table, pkfield, columns):
+    batchsize = 10000
+    with advisory_lock(f'json_migration_{table}', wait=False) as acquired:
+        if not acquired:
+            return
+
+        from django.db.migrations.executor import MigrationExecutor
+
+        # If Django is currently running migrations, wait until it is done.
+        while True:
+            executor = MigrationExecutor(connection)
+            if not executor.migration_plan(executor.loader.graph.leaf_nodes()):
+                break
+            time.sleep(120)
+
+        logger.warning(f"Migrating json fields for {table}: {', '.join(columns)}")
+
+        with connection.cursor() as cursor:
+            for i in itertools.count(0, batchsize):
+                # Are there even any rows in the table beyond this point?
+                cursor.execute(f"select count(1) from {table} where {pkfield} >= %s limit 1;", (i,))
+                if not cursor.fetchone()[0]:
+                    break
+
+                column_expr = ', '.join(f"{colname} = {colname}_old::jsonb" for colname in columns)
+                # If any of the old columns have non-null values, the data needs to be cast and copied over.
+                empty_expr = ' or '.join(f"{colname}_old is not null" for colname in columns)
+                cursor.execute(  # Only clobber the new fields if there is non-null data in the old ones.
+                    f"""
+                    update {table}
+                      set {column_expr}
+                      where {pkfield} >= %s and {pkfield} < %s
+                        and {empty_expr};
+                    """,
+                    (i, i + batchsize),
+                )
+                rows = cursor.rowcount
+                logger.debug(f"Batch {i} to {i + batchsize} copied on {table}, {rows} rows affected.")
+
+            column_expr = ', '.join(f"DROP COLUMN {column}_old" for column in columns)
+            cursor.execute(f"ALTER TABLE {table} {column_expr};")
+
+        logger.warning(f"Migration of {table} to jsonb is finished.")
 
 
 @task(queue=get_task_queuename)
@@ -315,14 +362,7 @@ def send_notifications(notification_list, job_id=None):
 
 @task(queue=get_task_queuename)
 def gather_analytics():
-    from awx.conf.models import Setting
-    from rest_framework.fields import DateTimeField
-
-    last_gather = Setting.objects.filter(key='AUTOMATION_ANALYTICS_LAST_GATHER').first()
-    last_time = DateTimeField().to_internal_value(last_gather.value) if last_gather and last_gather.value else None
-    gather_time = now()
-
-    if not last_time or ((gather_time - last_time).total_seconds() > settings.AUTOMATION_ANALYTICS_GATHER_INTERVAL):
+    if is_run_threshold_reached(getattr(settings, 'AUTOMATION_ANALYTICS_LAST_GATHER', None), settings.AUTOMATION_ANALYTICS_GATHER_INTERVAL):
         analytics.gather()
 
 
@@ -380,20 +420,6 @@ def cleanup_images_and_files():
 
 
 @task(queue=get_task_queuename)
-def cleanup_host_metrics():
-    from awx.conf.models import Setting
-    from rest_framework.fields import DateTimeField
-
-    last_cleanup = Setting.objects.filter(key='CLEANUP_HOST_METRICS_LAST_TS').first()
-    last_time = DateTimeField().to_internal_value(last_cleanup.value) if last_cleanup and last_cleanup.value else None
-
-    cleanup_interval_secs = getattr(settings, 'CLEANUP_HOST_METRICS_INTERVAL', 30) * 86400
-    if not last_time or ((now() - last_time).total_seconds() > cleanup_interval_secs):
-        months_ago = getattr(settings, 'CLEANUP_HOST_METRICS_THRESHOLD', 12)
-        HostMetric.cleanup_task(months_ago)
-
-
-@task(queue=get_task_queuename)
 def cluster_node_health_check(node):
     """
     Used for the health check endpoint, refreshes the status of the instance, but must be ran on target node
@@ -434,7 +460,6 @@ def execution_node_health_check(node):
     data = worker_info(node)
 
     prior_capacity = instance.capacity
-
     instance.save_health_data(
         version='ansible-runner-' + data.get('runner_version', '???'),
         cpu=data.get('cpu_count', 0),
@@ -455,12 +480,36 @@ def execution_node_health_check(node):
     return data
 
 
-def inspect_execution_nodes(instance_list):
-    with advisory_lock('inspect_execution_nodes_lock', wait=False):
-        node_lookup = {inst.hostname: inst for inst in instance_list}
+def inspect_established_receptor_connections(mesh_status):
+    '''
+    Flips link state from ADDING to ESTABLISHED
+    If the InstanceLink source and target match the entries
+    in Known Connection Costs, flip to Established.
+    '''
+    from awx.main.models import InstanceLink
 
+    all_links = InstanceLink.objects.filter(link_state=InstanceLink.States.ADDING)
+    if not all_links.exists():
+        return
+    active_receptor_conns = mesh_status['KnownConnectionCosts']
+    update_links = []
+    for link in all_links:
+        if link.link_state != InstanceLink.States.REMOVING:
+            if link.target.instance.hostname in active_receptor_conns.get(link.source.hostname, {}):
+                if link.link_state is not InstanceLink.States.ESTABLISHED:
+                    link.link_state = InstanceLink.States.ESTABLISHED
+                    update_links.append(link)
+
+    InstanceLink.objects.bulk_update(update_links, ['link_state'])
+
+
+def inspect_execution_and_hop_nodes(instance_list):
+    with advisory_lock('inspect_execution_and_hop_nodes_lock', wait=False):
+        node_lookup = {inst.hostname: inst for inst in instance_list}
         ctl = get_receptor_ctl()
         mesh_status = ctl.simple_command('status')
+
+        inspect_established_receptor_connections(mesh_status)
 
         nowtime = now()
         workers = mesh_status['Advertisements']
@@ -519,7 +568,7 @@ def cluster_node_heartbeat(dispatch_time=None, worker_tasks=None):
             this_inst = inst
             break
 
-    inspect_execution_nodes(instance_list)
+    inspect_execution_and_hop_nodes(instance_list)
 
     for inst in list(instance_list):
         if inst == this_inst:
@@ -541,7 +590,7 @@ def cluster_node_heartbeat(dispatch_time=None, worker_tasks=None):
             logger.warning(f'Heartbeat skew - interval={(nowtime - last_last_seen).total_seconds():.4f}, expected={settings.CLUSTER_NODE_HEARTBEAT_PERIOD}')
     else:
         if settings.AWX_AUTO_DEPROVISION_INSTANCES:
-            (changed, this_inst) = Instance.objects.register(ip_address=os.environ.get('MY_POD_IP'), node_type='control', uuid=settings.SYSTEM_UUID)
+            (changed, this_inst) = Instance.objects.register(ip_address=os.environ.get('MY_POD_IP'), node_type='control', node_uuid=settings.SYSTEM_UUID)
             if changed:
                 logger.warning(f'Recreated instance record {this_inst.hostname} after unexpected removal')
             this_inst.local_health_check()
@@ -708,66 +757,21 @@ def awx_periodic_scheduler():
                 new_unified_job.save(update_fields=['status', 'job_explanation'])
                 new_unified_job.websocket_emit_status("failed")
             emit_channel_notification('schedules-changed', dict(id=schedule.id, group_name="schedules"))
-        state.save()
-
-
-def schedule_manager_success_or_error(instance):
-    if instance.unifiedjob_blocked_jobs.exists():
-        ScheduleTaskManager().schedule()
-    if instance.spawned_by_workflow:
-        ScheduleWorkflowManager().schedule()
 
 
 @task(queue=get_task_queuename)
-def handle_work_success(task_actual):
-    try:
-        instance = UnifiedJob.get_instance_by_type(task_actual['type'], task_actual['id'])
-    except ObjectDoesNotExist:
-        logger.warning('Missing {} `{}` in success callback.'.format(task_actual['type'], task_actual['id']))
-        return
-    if not instance:
-        return
-    schedule_manager_success_or_error(instance)
-
-
-@task(queue=get_task_queuename)
-def handle_work_error(task_actual):
-    try:
-        instance = UnifiedJob.get_instance_by_type(task_actual['type'], task_actual['id'])
-    except ObjectDoesNotExist:
-        logger.warning('Missing {} `{}` in error callback.'.format(task_actual['type'], task_actual['id']))
-        return
-    if not instance:
-        return
-
-    subtasks = instance.get_jobs_fail_chain()  # reverse of dependent_jobs mostly
-    logger.debug(f'Executing error task id {task_actual["id"]}, subtasks: {[subtask.id for subtask in subtasks]}')
-
-    deps_of_deps = {}
-
-    for subtask in subtasks:
-        if subtask.celery_task_id != instance.celery_task_id and not subtask.cancel_flag and not subtask.status in ('successful', 'failed'):
-            # If there are multiple in the dependency chain, A->B->C, and this was called for A, blame B for clarity
-            blame_job = deps_of_deps.get(subtask.id, instance)
-            subtask.status = 'failed'
-            subtask.failed = True
-            if not subtask.job_explanation:
-                subtask.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % (
-                    get_type_for_model(type(blame_job)),
-                    blame_job.name,
-                    blame_job.id,
-                )
-            subtask.save()
-            subtask.websocket_emit_status("failed")
-
-            for sub_subtask in subtask.get_jobs_fail_chain():
-                deps_of_deps[sub_subtask.id] = subtask
-
-    # We only send 1 job complete message since all the job completion message
-    # handling does is trigger the scheduler. If we extend the functionality of
-    # what the job complete message handler does then we may want to send a
-    # completion event for each job here.
-    schedule_manager_success_or_error(instance)
+def handle_failure_notifications(task_ids):
+    """A task-ified version of the method that sends notifications."""
+    found_task_ids = set()
+    for instance in UnifiedJob.objects.filter(id__in=task_ids):
+        found_task_ids.add(instance.id)
+        try:
+            instance.send_notification_templates('failed')
+        except Exception:
+            logger.exception(f'Error preparing notifications for task {instance.id}')
+    deleted_tasks = set(task_ids) - found_task_ids
+    if deleted_tasks:
+        logger.warning(f'Could not send notifications for {deleted_tasks} because they were not found in the database')
 
 
 @task(queue=get_task_queuename)
@@ -839,10 +843,7 @@ def delete_inventory(inventory_id, user_id, retries=5):
             user = None
     with ignore_inventory_computed_fields(), ignore_inventory_group_removal(), impersonate(user):
         try:
-            i = Inventory.objects.get(id=inventory_id)
-            for host in i.hosts.iterator():
-                host.job_events_as_primary_host.update(host=None)
-            i.delete()
+            Inventory.objects.get(id=inventory_id).delete()
             emit_channel_notification('inventories-status_changed', {'group_name': 'inventories', 'inventory_id': inventory_id, 'status': 'deleted'})
             logger.debug('Deleted inventory {} as user {}.'.format(inventory_id, user_id))
         except Inventory.DoesNotExist:
@@ -893,15 +894,8 @@ def _reconstruct_relationships(copy_mapping):
 
 
 @task(queue=get_task_queuename)
-def deep_copy_model_obj(model_module, model_name, obj_pk, new_obj_pk, user_pk, uuid, permission_check_func=None):
-    sub_obj_list = cache.get(uuid)
-    if sub_obj_list is None:
-        logger.error('Deep copy {} from {} to {} failed unexpectedly.'.format(model_name, obj_pk, new_obj_pk))
-        return
-
+def deep_copy_model_obj(model_module, model_name, obj_pk, new_obj_pk, user_pk, permission_check_func=None):
     logger.debug('Deep copy {} from {} to {}.'.format(model_name, obj_pk, new_obj_pk))
-    from awx.api.generics import CopyAPIView
-    from awx.main.signals import disable_activity_stream
 
     model = getattr(importlib.import_module(model_module), model_name, None)
     if model is None:
@@ -913,6 +907,28 @@ def deep_copy_model_obj(model_module, model_name, obj_pk, new_obj_pk, user_pk, u
     except ObjectDoesNotExist:
         logger.warning("Object or user no longer exists.")
         return
+
+    o2m_to_preserve = {}
+    fields_to_preserve = set(getattr(model, 'FIELDS_TO_PRESERVE_AT_COPY', []))
+
+    for field in model._meta.get_fields():
+        if field.name in fields_to_preserve:
+            if field.one_to_many:
+                try:
+                    field_val = getattr(obj, field.name)
+                except AttributeError:
+                    continue
+                o2m_to_preserve[field.name] = field_val
+
+    sub_obj_list = []
+    for o2m in o2m_to_preserve:
+        for sub_obj in o2m_to_preserve[o2m].all():
+            sub_model = type(sub_obj)
+            sub_obj_list.append((sub_model.__module__, sub_model.__name__, sub_obj.pk))
+
+    from awx.api.generics import CopyAPIView
+    from awx.main.signals import disable_activity_stream
+
     with transaction.atomic(), ignore_inventory_computed_fields(), disable_activity_stream():
         copy_mapping = {}
         for sub_obj_setup in sub_obj_list:

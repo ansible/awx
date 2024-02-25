@@ -58,7 +58,7 @@ aim_inputs = {
             'id': 'object_property',
             'label': _('Object Property'),
             'type': 'string',
-            'help_text': _('The property of the object to return. Default: Content Ex: Username, Address, etc.'),
+            'help_text': _('The property of the object to return. Available properties: Username, Password and Address.'),
         },
         {
             'id': 'reason',
@@ -111,8 +111,12 @@ def aim_backend(**kwargs):
         object_property = 'Content'
     elif object_property.lower() == 'username':
         object_property = 'UserName'
+    elif object_property.lower() == 'password':
+        object_property = 'Content'
+    elif object_property.lower() == 'address':
+        object_property = 'Address'
     elif object_property not in res:
-        raise KeyError('Property {} not found in object'.format(object_property))
+        raise KeyError('Property {} not found in object, available properties: Username, Password and Address'.format(object_property))
     else:
         object_property = object_property.capitalize()
 

@@ -17,6 +17,11 @@ def test_explicit_hostname():
     assert client.token == "token"
 
 
+def test_websocket_suffix():
+    client = WSClient("token", "hostname", 566, ws_suffix='my-websocket/')
+    assert client.suffix == 'my-websocket/'
+
+
 @pytest.mark.parametrize(
     'url, result',
     [

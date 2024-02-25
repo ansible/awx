@@ -1,7 +1,12 @@
 ---
+- name: Generate a test ID
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
 - name: Generate names
   set_fact:
-    token_description: "AWX-Collection-tests-token-description-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    token_description: "AWX-Collection-tests-token-description-{{ test_id }}"
 
 - name: Try to use a token as a dict which is missing the token parameter
   job_list:

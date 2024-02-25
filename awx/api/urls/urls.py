@@ -30,12 +30,13 @@ from awx.api.views import (
     OAuth2TokenList,
     ApplicationOAuth2TokenList,
     OAuth2ApplicationDetail,
-    # HostMetricSummaryMonthlyList, # It will be enabled in future version of the AWX
+    HostMetricSummaryMonthlyList,
 )
 
 from awx.api.views.bulk import (
     BulkView,
     BulkHostCreateView,
+    BulkHostDeleteView,
     BulkJobLaunchView,
 )
 
@@ -84,6 +85,7 @@ from .oauth2_root import urls as oauth2_root_urls
 from .workflow_approval_template import urls as workflow_approval_template_urls
 from .workflow_approval import urls as workflow_approval_urls
 from .analytics import urls as analytics_urls
+from .receptor_address import urls as receptor_address_urls
 
 v2_urls = [
     re_path(r'^$', ApiV2RootView.as_view(), name='api_v2_root_view'),
@@ -123,8 +125,7 @@ v2_urls = [
     re_path(r'^constructed_inventories/', include(constructed_inventory_urls)),
     re_path(r'^hosts/', include(host_urls)),
     re_path(r'^host_metrics/', include(host_metric_urls)),
-    # It will be enabled in future version of the AWX
-    # re_path(r'^host_metric_summary_monthly/$', HostMetricSummaryMonthlyList.as_view(), name='host_metric_summary_monthly_list'),
+    re_path(r'^host_metric_summary_monthly/$', HostMetricSummaryMonthlyList.as_view(), name='host_metric_summary_monthly_list'),
     re_path(r'^groups/', include(group_urls)),
     re_path(r'^inventory_sources/', include(inventory_source_urls)),
     re_path(r'^inventory_updates/', include(inventory_update_urls)),
@@ -153,7 +154,9 @@ v2_urls = [
     re_path(r'^workflow_approvals/', include(workflow_approval_urls)),
     re_path(r'^bulk/$', BulkView.as_view(), name='bulk'),
     re_path(r'^bulk/host_create/$', BulkHostCreateView.as_view(), name='bulk_host_create'),
+    re_path(r'^bulk/host_delete/$', BulkHostDeleteView.as_view(), name='bulk_host_delete'),
     re_path(r'^bulk/job_launch/$', BulkJobLaunchView.as_view(), name='bulk_job_launch'),
+    re_path(r'^receptor_addresses/', include(receptor_address_urls)),
 ]
 
 
@@ -167,10 +170,13 @@ urlpatterns = [
 ]
 if MODE == 'development':
     # Only include these if we are in the development environment
-    from awx.api.swagger import SwaggerSchemaView
-
-    urlpatterns += [re_path(r'^swagger/$', SwaggerSchemaView.as_view(), name='swagger_view')]
+    from awx.api.swagger import schema_view
 
     from awx.api.urls.debug import urls as debug_urls
 
     urlpatterns += [re_path(r'^debug/', include(debug_urls))]
+    urlpatterns += [
+        re_path(r'^swagger(?P<format>\.json|\.yaml)/$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+        re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+        re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    ]

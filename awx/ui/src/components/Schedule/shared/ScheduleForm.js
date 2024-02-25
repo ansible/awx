@@ -20,6 +20,7 @@ import UnsupportedScheduleForm from './UnsupportedScheduleForm';
 import parseRuleObj, { UnsupportedRRuleError } from './parseRuleObj';
 import buildRuleObj from './buildRuleObj';
 import buildRuleSet from './buildRuleSet';
+import mergeArraysByCredentialType from './mergeArraysByCredentialType';
 
 const NUM_DAYS_PER_FREQUENCY = {
   week: 7,
@@ -350,6 +351,12 @@ function ScheduleForm({
     startDate: currentDate,
     startTime: time,
     timezone: schedule.timezone || now.zoneName,
+    credentials: mergeArraysByCredentialType(
+      resourceDefaultCredentials,
+      credentials
+    ),
+    labels: originalLabels.current,
+    instance_groups: originalInstanceGroups.current,
   };
 
   if (hasDaysToKeepField) {

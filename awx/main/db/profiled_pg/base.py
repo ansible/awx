@@ -87,7 +87,7 @@ class RecordedQueryLog(object):
             )
             log.commit()
             log.execute(
-                'INSERT INTO queries (pid, version, argv, time, sql, explain, bt) ' 'VALUES (?, ?, ?, ?, ?, ?, ?);',
+                'INSERT INTO queries (pid, version, argv, time, sql, explain, bt) VALUES (?, ?, ?, ?, ?, ?, ?);',
                 (os.getpid(), version, ' '.join(sys.argv), seconds, sql, explain, bt),
             )
             log.commit()

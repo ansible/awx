@@ -14,6 +14,6 @@ The CLI entry point `ansible-inventory` was introduced in Ansible 2.4. Inventory
 
 ## Writing Your Own Inventory File
 
-You can add an SCM inventory source that points to your own yaml file which specifies an inventory plugin. You can also apply a credential of a `managed` type to that inventory source that matches the credential you are using. For example, you could have an inventory file for the `amazon.aws.aws_ec2` plugin and use the build-in `aws` credential type.
+You can add an SCM inventory source that points to your own yaml file which specifies an inventory plugin. You can also apply a credential of a `managed` type to that inventory source that matches the credential you are using. For example, you could have an inventory file for the `amazon.aws.aws_ec2` plugin and use the built-in `aws` credential type.
 
 All built-in sources provide _secrets_ via environment variables.  These can be re-used for SCM-based inventory, and your inventory file can be used to specify non-sensitive configuration details such as the `keyed_groups` (to provide) or `hostvars` (to construct).

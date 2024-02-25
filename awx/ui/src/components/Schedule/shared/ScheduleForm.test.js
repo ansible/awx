@@ -885,6 +885,7 @@ describe('<ScheduleForm />', () => {
       ).toBe(true);
       await act(async () => {
         wrapper.find('DatePicker[aria-label="End date"]').prop('onChange')(
+          null,
           '2020-03-14',
           new Date('2020-03-14')
         );
@@ -905,6 +906,7 @@ describe('<ScheduleForm />', () => {
       const laterTime = DateTime.now().plus({ hours: 1 }).toFormat('h:mm a');
       await act(async () => {
         wrapper.find('DatePicker[aria-label="End date"]').prop('onChange')(
+          null,
           today,
           new Date(today)
         );
@@ -919,6 +921,7 @@ describe('<ScheduleForm />', () => {
       );
       await act(async () => {
         wrapper.find('TimePicker[aria-label="End time"]').prop('onChange')(
+          null,
           laterTime
         );
       });

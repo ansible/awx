@@ -8,6 +8,7 @@ action_groups:
     - application
     - bulk_job_launch
     - bulk_host_create
+    - bulk_host_delete
     - controller_meta
     - credential_input_source
     - credential

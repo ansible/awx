@@ -4,12 +4,10 @@ from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
 import django.db.models.expressions
-import taggit.managers
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('taggit', '0003_taggeditem_add_unique_index'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('main', '0123_drop_hg_support'),
     ]
@@ -67,12 +65,6 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name='executionenvironments',
                         to='main.Organization',
-                    ),
-                ),
-                (
-                    'tags',
-                    taggit.managers.TaggableManager(
-                        blank=True, help_text='A comma-separated list of tags.', through='taggit.TaggedItem', to='taggit.Tag', verbose_name='Tags'
                     ),
                 ),
             ],

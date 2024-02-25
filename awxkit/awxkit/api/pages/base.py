@@ -150,19 +150,21 @@ class Base(Page):
             HTTPBasicAuth(client_id, client_secret)(req)
             req.headers['Content-Type'] = 'application/x-www-form-urlencoded'
             resp = self.connection.post(
-                '/api/o/token/', data={"grant_type": "password", "username": username, "password": password, "scope": scope}, headers=req.headers
+                f"{config.api_base_path}o/token/",
+                data={"grant_type": "password", "username": username, "password": password, "scope": scope},
+                headers=req.headers,
             )
         elif client_id:
             req.headers['Content-Type'] = 'application/x-www-form-urlencoded'
             resp = self.connection.post(
-                '/api/o/token/',
+                f"{config.api_base_path}o/token/",
                 data={"grant_type": "password", "username": username, "password": password, "client_id": client_id, "scope": scope},
                 headers=req.headers,
             )
         else:
             HTTPBasicAuth(username, password)(req)
             resp = self.connection.post(
-                '/api/v2/users/{}/personal_tokens/'.format(username),
+                '{0}v2/users/{1}/personal_tokens/'.format(config.api_base_path, username),
                 json={"description": description, "application": None, "scope": scope},
                 headers=req.headers,
             )
@@ -207,7 +209,7 @@ class Base(Page):
                 jobs = []
                 for active_job in active_jobs:
                     job_type = active_job['type']
-                    endpoint = '/api/v2/{}s/{}/'.format(job_type, active_job['id'])
+                    endpoint = '{}v2/{}s/{}/'.format(config.api_base_path, job_type, active_job['id'])
                     job = self.walk(endpoint)
                     jobs.append(job)
                     job.cancel()

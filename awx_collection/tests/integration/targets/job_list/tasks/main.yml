@@ -16,7 +16,7 @@
 
 - assert:
     that:
-      - "{{ matching_jobs.count }} == 1"
+      - matching_jobs.count == 1
 
 - name: List failed jobs (which don't exist)
   job_list:
@@ -26,7 +26,7 @@
 
 - assert:
     that:
-      - "{{ successful_jobs.count }} == 0"
+      - successful_jobs.count == 0
 
 - name: Get ALL result pages!
   job_list:

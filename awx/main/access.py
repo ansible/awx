@@ -20,11 +20,12 @@ from rest_framework.exceptions import ParseError, PermissionDenied
 # Django OAuth Toolkit
 from awx.main.models.oauth import OAuth2Application, OAuth2AccessToken
 
+from ansible_base.lib.utils.validation import to_python_boolean
+
 # AWX
 from awx.main.utils import (
     get_object_or_400,
     get_pk_from_dict,
-    to_python_boolean,
     get_licenser,
 )
 from awx.main.models import (
@@ -56,6 +57,7 @@ from awx.main.models import (
     Project,
     ProjectUpdate,
     ProjectUpdateEvent,
+    ReceptorAddress,
     Role,
     Schedule,
     SystemJob,
@@ -79,7 +81,6 @@ __all__ = [
     'get_user_queryset',
     'check_user_access',
     'check_user_access_with_errors',
-    'user_accessible_objects',
     'consumer_access',
 ]
 
@@ -134,10 +135,6 @@ def vars_are_encrypted(vars):
 
 def register_access(model_class, access_class):
     access_registry[model_class] = access_class
-
-
-def user_accessible_objects(user, role_name):
-    return ResourceMixin._accessible_objects(User, user, role_name)
 
 
 def get_user_queryset(user, model_class):
@@ -366,9 +363,9 @@ class BaseAccess(object):
             report_violation = lambda message: None
         else:
             report_violation = lambda message: logger.warning(message)
-        if validation_info.get('trial', False) is True or validation_info['instance_count'] == 10:  # basic 10 license
+        if validation_info.get('trial', False) is True:
 
-            def report_violation(message):
+            def report_violation(message):  # noqa
                 raise PermissionDenied(message)
 
         if check_expiration and validation_info.get('time_remaining', None) is None:
@@ -2234,7 +2231,7 @@ class WorkflowJobAccess(BaseAccess):
             if not node_access.can_add({'reference_obj': node}):
                 wj_add_perm = False
         if not wj_add_perm and self.save_messages:
-            self.messages['workflow_job_template'] = _('You do not have permission to the workflow job ' 'resources required for relaunch.')
+            self.messages['workflow_job_template'] = _('You do not have permission to the workflow job resources required for relaunch.')
         return wj_add_perm
 
     def can_cancel(self, obj):
@@ -2430,6 +2427,29 @@ class InventoryUpdateEventAccess(BaseAccess):
     def can_change(self, obj, data):
         return False
 
+    def can_delete(self, obj):
+        return False
+
+
+class ReceptorAddressAccess(BaseAccess):
+    """
+    I can see receptor address records whenever I can access the instance
+    """
+
+    model = ReceptorAddress
+
+    def filtered_queryset(self):
+        return self.model.objects.filter(Q(instance__in=Instance.accessible_pk_qs(self.user, 'read_role')))
+
+    @check_superuser
+    def can_add(self, data):
+        return False
+
+    @check_superuser
+    def can_change(self, obj, data):
+        return False
+
+    @check_superuser
     def can_delete(self, obj):
         return False
 
@@ -2952,3 +2972,19 @@ class WorkflowApprovalTemplateAccess(BaseAccess):
 for cls in BaseAccess.__subclasses__():
     access_registry[cls.model] = cls
 access_registry[UnpartitionedJobEvent] = UnpartitionedJobEventAccess
+
+
+def optimize_queryset(queryset):
+    """
+    A utility method in case you already have a queryset and just want to
+    apply the standard optimizations for that model.
+    In other words, use if you do not want to start from filtered_queryset for some reason.
+    """
+    if not queryset.model or queryset.model not in access_registry:
+        return queryset
+    access_class = access_registry[queryset.model]
+    if access_class.select_related:
+        queryset = queryset.select_related(*access_class.select_related)
+    if access_class.prefetch_related:
+        queryset = queryset.prefetch_related(*access_class.prefetch_related)
+    return queryset

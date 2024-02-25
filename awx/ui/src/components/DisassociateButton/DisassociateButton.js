@@ -1,5 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { arrayOf, func, shape, string, oneOfType, number } from 'prop-types';
+import {
+  arrayOf,
+  func,
+  shape,
+  string,
+  oneOfType,
+  number,
+  node,
+} from 'prop-types';
 
 import { t } from '@lingui/macro';
 import { Button, Tooltip, DropdownItem } from '@patternfly/react-core';
@@ -180,7 +188,7 @@ DisassociateButton.propTypes = {
       })
     ),
   ]),
-  modalNote: string,
+  modalNote: node,
   modalTitle: string,
   onDisassociate: func.isRequired,
 };

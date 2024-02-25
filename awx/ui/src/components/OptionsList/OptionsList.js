@@ -125,19 +125,24 @@ const Item = shape({
   name: string.isRequired,
   url: string,
 });
+const InstanceItem = shape({
+  id: oneOfType([number, string]).isRequired,
+  hostname: string.isRequired,
+  url: string,
+});
 OptionsList.propTypes = {
   deselectItem: func.isRequired,
   displayKey: string,
   isSelectedDraggable: bool,
   multiple: bool,
   optionCount: number.isRequired,
-  options: arrayOf(Item).isRequired,
+  options: oneOfType([arrayOf(Item), arrayOf(InstanceItem)]).isRequired,
   qsConfig: QSConfig.isRequired,
   renderItemChip: func,
   searchColumns: SearchColumns,
   selectItem: func.isRequired,
   sortColumns: SortColumns,
-  value: arrayOf(Item).isRequired,
+  value: oneOfType([arrayOf(Item), arrayOf(InstanceItem)]).isRequired,
 };
 OptionsList.defaultProps = {
   isSelectedDraggable: false,

@@ -31,7 +31,7 @@ options:
       type: dict
     inventory:
       description:
-        - Inventory applied as a prompt, if job template prompts for inventory
+        - Name, ID, or named URL of the Inventory applied as a prompt, if job template prompts for inventory
       type: str
     scm_branch:
       description:
@@ -73,7 +73,7 @@ options:
         - '5'
     workflow_job_template:
       description:
-        - The workflow job template the node exists in.
+        - The workflow job template name, ID, or named URL the node exists in.
         - Used for looking up the node, cannot be modified after creation.
       required: True
       type: str
@@ -81,7 +81,7 @@ options:
         - workflow
     organization:
       description:
-        - The organization of the workflow job template the node exists in.
+        - The organization name, ID, or named URL of the workflow job template the node exists in.
         - Used for looking up the workflow, not a direct model field.
       type: str
     unified_job_template:
@@ -93,7 +93,7 @@ options:
       type: str
     lookup_organization:
       description:
-        - Organization the inventories, job template, project, inventory source the unified_job_template exists in.
+        - Organization name, ID, or named URL the inventories, job template, project, inventory source the unified_job_template exists in.
         - If not provided, will lookup by name only, which does not work with duplicates.
       type: str
     approval_node:
@@ -145,14 +145,14 @@ options:
       elements: str
     credentials:
       description:
-        - Credentials to be applied to job as launch-time prompts.
-        - List of credential names.
+        - Credential names, IDs, or named URLs to be applied to job as launch-time prompts.
+        - List of credential names, IDs, or named URLs.
         - Uniqueness is not handled rigorously.
       type: list
       elements: str
     execution_environment:
       description:
-        - Execution Environment applied as a prompt, assuming jot template prompts for execution environment
+        - Execution Environment name, ID, or named URL applied as a prompt, assuming job template prompts for execution environment
       type: str
     forks:
       description:
@@ -160,7 +160,7 @@ options:
       type: int
     instance_groups:
       description:
-        - List of Instance Groups applied as a prompt, assuming job template prompts for instance groups
+        - List of Instance Group names, IDs, or named URLs applied as a prompt, assuming job template prompts for instance groups
       type: list
       elements: str
     job_slice_count:
@@ -179,7 +179,7 @@ options:
     state:
       description:
         - Desired state of the resource.
-      choices: ["present", "absent"]
+      choices: ["present", "absent", "exists"]
       default: "present"
       type: str
 extends_documentation_fragment: awx.awx.auth
@@ -285,7 +285,7 @@ def main():
         job_slice_count=dict(type='int'),
         labels=dict(type='list', elements='str'),
         timeout=dict(type='int'),
-        state=dict(choices=['present', 'absent'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )
     mutually_exclusive = [("unified_job_template", "approval_node")]
     required_if = [
@@ -327,7 +327,7 @@ def main():
         search_fields['workflow_job_template'] = new_fields['workflow_job_template'] = workflow_job_template_id
 
     # Attempt to look up an existing item based on the provided data
-    existing_item = module.get_one('workflow_job_template_nodes', **{'data': search_fields})
+    existing_item = module.get_one('workflow_job_template_nodes', check_exists=(state == 'exists'), **{'data': search_fields})
 
     if state == 'absent':
         # If the state was absent we can let the module delete it if needed, the module will handle exiting from this

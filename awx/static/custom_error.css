@@ -1,0 +1,82 @@
+@font-face {
+    font-family: redhat-display-medium;
+    src: url('./RedHatDisplay-Medium.ttf');
+} 
+
+@font-face {
+    font-family: redhat-display-regular;
+    src: url('./RedHatDisplay-Regular.ttf');
+} 
+
+html, body {
+    height:100%;
+    width:100%;
+}
+
+body {
+    background-color: #F0F0F0;
+}
+
+.container {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    bottom: 24px;
+    left: 24px;
+}
+
+.upper_div {
+    background-color: #F8EBA7;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    height: 50%;
+    align-items: flex-end;
+    display: flex;
+    min-height: 450px;
+    width: 100%;
+}
+
+.main_image {
+    height: 450px;
+    width:auto;
+}
+
+.error_number {
+    position: absolute;
+    top: 23px;
+    right: 90px;
+    font-size:200px;
+    color: #FDBA48;
+    font-family: Impact, Haettenschweiler, "Franklin Gothic Bold", Charcoal, "Helvetica Inserat", "Bitstream Vera Sans Bold", "Arial Black", "sans serif";
+}
+
+.message_div {
+    background-color: #FFFFFF;
+    border: 1px solid #D2D2D2;
+    text-align: center;
+    height: 50%;
+    vertical-align: top;
+}
+
+.m1,.m2,.m3 {
+    color: #151515;
+    width: 100%;
+    font-family: redhat-display-medium;
+}
+
+.m1 {
+    font-size: 24px;
+    padding-top: 24px;
+}
+
+.m2 {
+    font-size: 20px;
+    padding-top: 20px;
+}
+
+.m3 {
+    font-size: 16px;
+    padding-top: 20px;
+    font-family: redhat-display-regular;
+}

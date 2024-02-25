@@ -253,7 +253,7 @@ def dict_to_mem_data(data, inventory=None):
                     if isinstance(hv, dict):
                         host.variables.update(hv)
                     else:
-                        logger.warning('Expected dict of vars for ' 'host "%s", got %s instead', hk, str(type(hv)))
+                        logger.warning('Expected dict of vars for host "%s", got %s instead', hk, str(type(hv)))
                     group.add_host(host)
             elif isinstance(hosts, (list, tuple)):
                 for hk in hosts:
@@ -262,13 +262,13 @@ def dict_to_mem_data(data, inventory=None):
                         continue
                     group.add_host(host)
             else:
-                logger.warning('Expected dict or list of "hosts" for ' 'group "%s", got %s instead', k, str(type(hosts)))
+                logger.warning('Expected dict or list of "hosts" for group "%s", got %s instead', k, str(type(hosts)))
             # Process group variables.
             vars = v.get('vars', {})
             if isinstance(vars, dict):
                 group.variables.update(vars)
             else:
-                logger.warning('Expected dict of vars for ' 'group "%s", got %s instead', k, str(type(vars)))
+                logger.warning('Expected dict of vars for group "%s", got %s instead', k, str(type(vars)))
             # Process child groups.
             children = v.get('children', [])
             if isinstance(children, (list, tuple)):
@@ -277,7 +277,7 @@ def dict_to_mem_data(data, inventory=None):
                     if child and c != 'ungrouped':
                         group.add_child_group(child)
             else:
-                logger.warning('Expected list of children for ' 'group "%s", got %s instead', k, str(type(children)))
+                logger.warning('Expected list of children for group "%s", got %s instead', k, str(type(children)))
 
         # Load host names from a list.
         elif isinstance(v, (list, tuple)):
@@ -288,7 +288,7 @@ def dict_to_mem_data(data, inventory=None):
                 group.add_host(host)
         else:
             logger.warning('')
-            logger.warning('Expected dict or list for group "%s", ' 'got %s instead', k, str(type(v)))
+            logger.warning('Expected dict or list for group "%s", got %s instead', k, str(type(v)))
 
         if k not in ['all', 'ungrouped']:
             inventory.all_group.add_child_group(group)
@@ -299,6 +299,6 @@ def dict_to_mem_data(data, inventory=None):
             if isinstance(meta_hostvars, dict):
                 v.variables.update(meta_hostvars)
             else:
-                logger.warning('Expected dict of vars for ' 'host "%s", got %s instead', k, str(type(meta_hostvars)))
+                logger.warning('Expected dict of vars for host "%s", got %s instead', k, str(type(meta_hostvars)))
 
     return inventory

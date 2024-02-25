@@ -139,6 +139,17 @@ function SettingList() {
         },
       ],
     },
+    {
+      header: t`Troubleshooting`,
+      description: t`View and edit debug options`,
+      id: 'troubleshooting',
+      routes: [
+        {
+          title: t`Troubleshooting settings`,
+          path: '/settings/troubleshooting',
+        },
+      ],
+    },
   ];
 
   if (Object.keys(config).length === 0) {

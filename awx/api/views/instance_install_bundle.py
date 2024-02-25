@@ -6,6 +6,8 @@ import io
 import ipaddress
 import os
 import tarfile
+import time
+import re
 
 import asn1
 from awx.api import serializers
@@ -40,6 +42,8 @@ RECEPTOR_OID = "1.3.6.1.4.1.2312.19.1"
 # │   │   └── receptor.key
 # │   └── work-public-key.pem
 # └── requirements.yml
+
+
 class InstanceInstallBundle(GenericAPIView):
     name = _('Install Bundle')
     model = models.Instance
@@ -49,56 +53,54 @@ class InstanceInstallBundle(GenericAPIView):
     def get(self, request, *args, **kwargs):
         instance_obj = self.get_object()
 
-        if instance_obj.node_type not in ('execution',):
+        if instance_obj.node_type not in ('execution', 'hop'):
             return Response(
-                data=dict(msg=_('Install bundle can only be generated for execution nodes.')),
+                data=dict(msg=_('Install bundle can only be generated for execution or hop nodes.')),
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         with io.BytesIO() as f:
             with tarfile.open(fileobj=f, mode='w:gz') as tar:
-                # copy /etc/receptor/tls/ca/receptor-ca.crt to receptor/tls/ca in the tar file
-                tar.add(
-                    os.path.realpath('/etc/receptor/tls/ca/receptor-ca.crt'), arcname=f"{instance_obj.hostname}_install_bundle/receptor/tls/ca/receptor-ca.crt"
-                )
+                # copy /etc/receptor/tls/ca/mesh-CA.crt to receptor/tls/ca in the tar file
+                tar.add(os.path.realpath('/etc/receptor/tls/ca/mesh-CA.crt'), arcname=f"{instance_obj.hostname}_install_bundle/receptor/tls/ca/mesh-CA.crt")
 
-                # copy /etc/receptor/signing/work-public-key.pem to receptor/work-public-key.pem
-                tar.add('/etc/receptor/signing/work-public-key.pem', arcname=f"{instance_obj.hostname}_install_bundle/receptor/work-public-key.pem")
+                # copy /etc/receptor/work_public_key.pem to receptor/work_public_key.pem
+                tar.add('/etc/receptor/work_public_key.pem', arcname=f"{instance_obj.hostname}_install_bundle/receptor/work_public_key.pem")
 
                 # generate and write the receptor key to receptor/tls/receptor.key in the tar file
                 key, cert = generate_receptor_tls(instance_obj)
 
+                def tar_addfile(tarinfo, filecontent):
+                    tarinfo.mtime = time.time()
+                    tarinfo.size = len(filecontent)
+                    tar.addfile(tarinfo, io.BytesIO(filecontent))
+
                 key_tarinfo = tarfile.TarInfo(f"{instance_obj.hostname}_install_bundle/receptor/tls/receptor.key")
-                key_tarinfo.size = len(key)
-                tar.addfile(key_tarinfo, io.BytesIO(key))
+                tar_addfile(key_tarinfo, key)
 
                 cert_tarinfo = tarfile.TarInfo(f"{instance_obj.hostname}_install_bundle/receptor/tls/receptor.crt")
                 cert_tarinfo.size = len(cert)
-                tar.addfile(cert_tarinfo, io.BytesIO(cert))
+                tar_addfile(cert_tarinfo, cert)
 
                 # generate and write install_receptor.yml to the tar file
-                playbook = generate_playbook().encode('utf-8')
+                playbook = generate_playbook(instance_obj).encode('utf-8')
                 playbook_tarinfo = tarfile.TarInfo(f"{instance_obj.hostname}_install_bundle/install_receptor.yml")
-                playbook_tarinfo.size = len(playbook)
-                tar.addfile(playbook_tarinfo, io.BytesIO(playbook))
+                tar_addfile(playbook_tarinfo, playbook)
 
                 # generate and write inventory.yml to the tar file
                 inventory_yml = generate_inventory_yml(instance_obj).encode('utf-8')
                 inventory_yml_tarinfo = tarfile.TarInfo(f"{instance_obj.hostname}_install_bundle/inventory.yml")
-                inventory_yml_tarinfo.size = len(inventory_yml)
-                tar.addfile(inventory_yml_tarinfo, io.BytesIO(inventory_yml))
+                tar_addfile(inventory_yml_tarinfo, inventory_yml)
 
                 # generate and write group_vars/all.yml to the tar file
                 group_vars = generate_group_vars_all_yml(instance_obj).encode('utf-8')
                 group_vars_tarinfo = tarfile.TarInfo(f"{instance_obj.hostname}_install_bundle/group_vars/all.yml")
-                group_vars_tarinfo.size = len(group_vars)
-                tar.addfile(group_vars_tarinfo, io.BytesIO(group_vars))
+                tar_addfile(group_vars_tarinfo, group_vars)
 
                 # generate and write requirements.yml to the tar file
                 requirements_yml = generate_requirements_yml().encode('utf-8')
                 requirements_yml_tarinfo = tarfile.TarInfo(f"{instance_obj.hostname}_install_bundle/requirements.yml")
-                requirements_yml_tarinfo.size = len(requirements_yml)
-                tar.addfile(requirements_yml_tarinfo, io.BytesIO(requirements_yml))
+                tar_addfile(requirements_yml_tarinfo, requirements_yml)
 
             # respond with the tarfile
             f.seek(0)
@@ -107,8 +109,10 @@ class InstanceInstallBundle(GenericAPIView):
             return response
 
 
-def generate_playbook():
-    return render_to_string("instance_install_bundle/install_receptor.yml")
+def generate_playbook(instance_obj):
+    playbook_yaml = render_to_string("instance_install_bundle/install_receptor.yml", context=dict(instance=instance_obj))
+    # convert consecutive newlines with a single newline
+    return re.sub(r'\n+', '\n', playbook_yaml)
 
 
 def generate_requirements_yml():
@@ -120,7 +124,21 @@ def generate_inventory_yml(instance_obj):
 
 
 def generate_group_vars_all_yml(instance_obj):
-    return render_to_string("instance_install_bundle/group_vars/all.yml", context=dict(instance=instance_obj))
+    # get peers
+    peers = []
+    for addr in instance_obj.peers.select_related('instance'):
+        peers.append(dict(address=addr.get_full_address(), protocol=addr.protocol))
+    context = dict(instance=instance_obj, peers=peers)
+
+    canonical_addr = instance_obj.canonical_address
+    if canonical_addr:
+        context['listener_port'] = canonical_addr.port
+        protocol = canonical_addr.protocol if canonical_addr.protocol != 'wss' else 'ws'
+        context['listener_protocol'] = protocol
+
+    all_yaml = render_to_string("instance_install_bundle/group_vars/all.yml", context=context)
+    # convert consecutive newlines with a single newline
+    return re.sub(r'\n+', '\n', all_yaml)
 
 
 def generate_receptor_tls(instance_obj):
@@ -161,14 +179,14 @@ def generate_receptor_tls(instance_obj):
         .sign(key, hashes.SHA256())
     )
 
-    # sign csr with the receptor ca key from /etc/receptor/ca/receptor-ca.key
-    with open('/etc/receptor/tls/ca/receptor-ca.key', 'rb') as f:
+    # sign csr with the receptor ca key from /etc/receptor/ca/mesh-CA.key
+    with open('/etc/receptor/tls/ca/mesh-CA.key', 'rb') as f:
         ca_key = serialization.load_pem_private_key(
             f.read(),
             password=None,
         )
 
-    with open('/etc/receptor/tls/ca/receptor-ca.crt', 'rb') as f:
+    with open('/etc/receptor/tls/ca/mesh-CA.crt', 'rb') as f:
         ca_cert = x509.load_pem_x509_certificate(f.read())
 
     cert = (

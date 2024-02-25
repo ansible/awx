@@ -168,7 +168,9 @@ describe('CredentialsStep', () => {
   test('should reset query params (credential.page) when selected credential type is changed', async () => {
     let wrapper;
     const history = createMemoryHistory({
-      initialEntries: ['?credential.page=2'],
+      initialEntries: [
+        '?credential.page=2&credential.page_size=5&credential.order_by=name',
+      ],
     });
     await act(async () => {
       wrapper = mountWithContexts(

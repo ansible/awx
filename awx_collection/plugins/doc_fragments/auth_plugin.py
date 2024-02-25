@@ -68,6 +68,14 @@ options:
         why: Collection name change
         alternatives: 'CONTROLLER_VERIFY_SSL'
     aliases: [ validate_certs ]
+  request_timeout:
+    description:
+    - Specify the timeout Ansible should use in requests to the controller host.
+    - Defaults to 10 seconds
+    - This will not work with the export or import modules.
+    type: float
+    env:
+    - name: CONTROLLER_REQUEST_TIMEOUT
 
 notes:
 - If no I(config_file) is provided we will attempt to use the tower-cli library

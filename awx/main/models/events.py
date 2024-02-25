@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+from datetime import timezone
 import logging
 from collections import defaultdict
+import time
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -10,7 +12,7 @@ from django.db import models, DatabaseError
 from django.db.models.functions import Cast
 from django.utils.dateparse import parse_datetime
 from django.utils.text import Truncator
-from django.utils.timezone import utc, now
+from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django.utils.encoding import force_str
 
@@ -122,8 +124,6 @@ class BasePlaybookEvent(CreatedModifiedModel):
         'parent_uuid',
         'start_line',
         'end_line',
-        'host_id',
-        'host_name',
         'verbosity',
     ]
     WRAPUP_EVENT = 'playbook_on_stats'
@@ -382,8 +382,17 @@ class BasePlaybookEvent(CreatedModifiedModel):
                         .distinct()
                     )  # noqa
 
-                    job.get_event_queryset().filter(uuid__in=changed).update(changed=True)
-                    job.get_event_queryset().filter(uuid__in=failed).update(failed=True)
+                    # NOTE: we take a set of changed and failed parent uuids because the subquery
+                    # complicates the plan with large event tables causing very long query execution time
+                    changed_start = time.time()
+                    changed_res = job.get_event_queryset().filter(uuid__in=set(changed)).update(changed=True)
+                    failed_start = time.time()
+                    failed_res = job.get_event_queryset().filter(uuid__in=set(failed)).update(failed=True)
+                    logger.debug(
+                        f'Event propagation for job {job.id}: '
+                        f'marked {changed_res} as changed in {failed_start - changed_start:.4f}s, '
+                        f'{failed_res} as failed in {time.time() - failed_start:.4f}s'
+                    )
 
         for field in ('playbook', 'play', 'task', 'role'):
             value = force_str(event_data.get(field, '')).strip()
@@ -422,7 +431,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
             if not isinstance(kwargs['created'], datetime.datetime):
                 kwargs['created'] = parse_datetime(kwargs['created'])
             if not kwargs['created'].tzinfo:
-                kwargs['created'] = kwargs['created'].replace(tzinfo=utc)
+                kwargs['created'] = kwargs['created'].replace(tzinfo=timezone.utc)
         except (KeyError, ValueError):
             kwargs.pop('created', None)
 
@@ -432,7 +441,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
             if not isinstance(kwargs['job_created'], datetime.datetime):
                 kwargs['job_created'] = parse_datetime(kwargs['job_created'])
             if not kwargs['job_created'].tzinfo:
-                kwargs['job_created'] = kwargs['job_created'].replace(tzinfo=utc)
+                kwargs['job_created'] = kwargs['job_created'].replace(tzinfo=timezone.utc)
         except (KeyError, ValueError):
             kwargs.pop('job_created', None)
 
@@ -462,7 +471,7 @@ class JobEvent(BasePlaybookEvent):
     An event/message logged from the callback when running a job.
     """
 
-    VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['job_id', 'workflow_job_id', 'job_created']
+    VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['job_id', 'workflow_job_id', 'job_created', 'host_id', 'host_name']
     JOB_REFERENCE = 'job_id'
 
     objects = DeferJobCreatedManager()
@@ -470,11 +479,11 @@ class JobEvent(BasePlaybookEvent):
     class Meta:
         app_label = 'main'
         ordering = ('pk',)
-        index_together = [
-            ('job', 'job_created', 'event'),
-            ('job', 'job_created', 'uuid'),
-            ('job', 'job_created', 'parent_uuid'),
-            ('job', 'job_created', 'counter'),
+        indexes = [
+            models.Index(fields=['job', 'job_created', 'event']),
+            models.Index(fields=['job', 'job_created', 'uuid']),
+            models.Index(fields=['job', 'job_created', 'parent_uuid']),
+            models.Index(fields=['job', 'job_created', 'counter']),
         ]
 
     id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
@@ -632,10 +641,10 @@ class ProjectUpdateEvent(BasePlaybookEvent):
     class Meta:
         app_label = 'main'
         ordering = ('pk',)
-        index_together = [
-            ('project_update', 'job_created', 'event'),
-            ('project_update', 'job_created', 'uuid'),
-            ('project_update', 'job_created', 'counter'),
+        indexes = [
+            models.Index(fields=['project_update', 'job_created', 'event']),
+            models.Index(fields=['project_update', 'job_created', 'uuid']),
+            models.Index(fields=['project_update', 'job_created', 'counter']),
         ]
 
     id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
@@ -734,7 +743,7 @@ class BaseCommandEvent(CreatedModifiedModel):
             if not isinstance(kwargs['created'], datetime.datetime):
                 kwargs['created'] = parse_datetime(kwargs['created'])
             if not kwargs['created'].tzinfo:
-                kwargs['created'] = kwargs['created'].replace(tzinfo=utc)
+                kwargs['created'] = kwargs['created'].replace(tzinfo=timezone.utc)
         except (KeyError, ValueError):
             kwargs.pop('created', None)
 
@@ -770,10 +779,10 @@ class AdHocCommandEvent(BaseCommandEvent):
     class Meta:
         app_label = 'main'
         ordering = ('-pk',)
-        index_together = [
-            ('ad_hoc_command', 'job_created', 'event'),
-            ('ad_hoc_command', 'job_created', 'uuid'),
-            ('ad_hoc_command', 'job_created', 'counter'),
+        indexes = [
+            models.Index(fields=['ad_hoc_command', 'job_created', 'event']),
+            models.Index(fields=['ad_hoc_command', 'job_created', 'uuid']),
+            models.Index(fields=['ad_hoc_command', 'job_created', 'counter']),
         ]
 
     EVENT_TYPES = [
@@ -875,9 +884,9 @@ class InventoryUpdateEvent(BaseCommandEvent):
     class Meta:
         app_label = 'main'
         ordering = ('-pk',)
-        index_together = [
-            ('inventory_update', 'job_created', 'uuid'),
-            ('inventory_update', 'job_created', 'counter'),
+        indexes = [
+            models.Index(fields=['inventory_update', 'job_created', 'uuid']),
+            models.Index(fields=['inventory_update', 'job_created', 'counter']),
         ]
 
     id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
@@ -920,9 +929,9 @@ class SystemJobEvent(BaseCommandEvent):
     class Meta:
         app_label = 'main'
         ordering = ('-pk',)
-        index_together = [
-            ('system_job', 'job_created', 'uuid'),
-            ('system_job', 'job_created', 'counter'),
+        indexes = [
+            models.Index(fields=['system_job', 'job_created', 'uuid']),
+            models.Index(fields=['system_job', 'job_created', 'counter']),
         ]
 
     id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')

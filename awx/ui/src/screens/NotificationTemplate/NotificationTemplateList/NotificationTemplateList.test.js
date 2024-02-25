@@ -20,6 +20,10 @@ const mockTemplates = {
         url: '/notification_templates/1',
         type: 'slack',
         summary_fields: {
+          organization: {
+            id: 1,
+            name: 'Foo',
+          },
           recent_notifications: [
             {
               status: 'success',
@@ -36,6 +40,10 @@ const mockTemplates = {
         id: 2,
         url: '/notification_templates/2',
         summary_fields: {
+          organization: {
+            id: 2,
+            name: 'Bar',
+          },
           recent_notifications: [],
           user_capabilities: {
             delete: true,
@@ -48,6 +56,10 @@ const mockTemplates = {
         id: 3,
         url: '/notification_templates/3',
         summary_fields: {
+          organization: {
+            id: 3,
+            name: 'Test',
+          },
           recent_notifications: [
             {
               status: 'failed',

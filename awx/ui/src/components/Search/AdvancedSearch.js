@@ -322,6 +322,7 @@ function AdvancedSearch({
           variant="plain"
           target="_blank"
           href={`${getDocsBaseUrl(config)}/html/userguide/search_sort.html`}
+          rel="noopener noreferrer"
         >
           <QuestionCircleIcon />
         </Button>

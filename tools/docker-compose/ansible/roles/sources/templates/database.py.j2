@@ -5,7 +5,12 @@ DATABASES = {
         'NAME': "{{ pg_database }}",
         'USER': "{{ pg_username }}",
         'PASSWORD': "{{ pg_password }}",
+{% if enable_pgbouncer|bool %}
+        'HOST': "pgbouncer",
+        'PORT': "{{ pgbouncer_port }}",
+{% else %}
         'HOST': "{{ pg_hostname | default('postgres') }}",
         'PORT': "{{ pg_port }}",
+{% endif %}
     }
 }

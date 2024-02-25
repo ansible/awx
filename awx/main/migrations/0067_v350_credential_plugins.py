@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
-import taggit.managers
 
 # AWX
 import awx.main.fields
@@ -20,7 +19,6 @@ def setup_tower_managed_defaults(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('taggit', '0002_auto_20150616_2121'),
         ('main', '0066_v350_inventorysource_custom_virtualenv'),
     ]
 
@@ -59,12 +57,6 @@ class Migration(migrations.Migration):
                 (
                     'source_credential',
                     models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='target_input_sources', to='main.Credential'),
-                ),
-                (
-                    'tags',
-                    taggit.managers.TaggableManager(
-                        blank=True, help_text='A comma-separated list of tags.', through='taggit.TaggedItem', to='taggit.Tag', verbose_name='Tags'
-                    ),
                 ),
                 (
                     'target_credential',

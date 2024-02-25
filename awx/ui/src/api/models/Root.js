@@ -4,7 +4,7 @@ class Root extends Base {
   constructor(http) {
     super(http);
     this.baseUrl = 'api/';
-    this.redirectURL = '/api/v2/config/';
+    this.redirectURL = 'api/v2/config/';
   }
 
   async login(username, password, redirect = this.redirectURL) {

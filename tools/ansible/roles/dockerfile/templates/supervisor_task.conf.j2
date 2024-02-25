@@ -56,6 +56,19 @@ stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
 
+{% if kube_dev | bool %}
+[program:awx-autoreload]
+command = /awx_devel/tools/docker-compose/awx-autoreload /awx_devel/awx 'supervisorctl -c /etc/supervisord_task.conf restart tower-processes:*'
+autostart = true
+autorestart = true
+stopasgroup=true
+killasgroup=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+{% endif %}
+
 [group:tower-processes]
 programs=dispatcher,callback-receiver,wsrelay
 priority=5

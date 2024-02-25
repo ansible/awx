@@ -1,5 +1,5 @@
 from datetime import datetime
-from django.utils.timezone import utc
+from datetime import timezone
 import pytest
 
 from awx.main.models import JobEvent, ProjectUpdateEvent, AdHocCommandEvent, InventoryUpdateEvent, SystemJobEvent
@@ -18,7 +18,7 @@ from awx.main.models import JobEvent, ProjectUpdateEvent, AdHocCommandEvent, Inv
 @pytest.mark.parametrize('created', [datetime(2018, 1, 1).isoformat(), datetime(2018, 1, 1)])
 def test_event_parse_created(job_identifier, cls, created):
     event = cls.create_from_data(**{job_identifier: 123, 'created': created})
-    assert event.created == datetime(2018, 1, 1).replace(tzinfo=utc)
+    assert event.created == datetime(2018, 1, 1).replace(tzinfo=timezone.utc)
 
 
 @pytest.mark.parametrize(

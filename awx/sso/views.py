@@ -38,7 +38,7 @@ class CompleteView(BaseRedirectView):
         response = super(CompleteView, self).dispatch(request, *args, **kwargs)
         if self.request.user and self.request.user.is_authenticated:
             logger.info(smart_str(u"User {} logged in".format(self.request.user.username)))
-            response.set_cookie('userLoggedIn', 'true')
+            response.set_cookie('userLoggedIn', 'true', secure=getattr(settings, 'SESSION_COOKIE_SECURE', False))
             response.setdefault('X-API-Session-Cookie-Name', getattr(settings, 'SESSION_COOKIE_NAME', 'awx_sessionid'))
         return response
 

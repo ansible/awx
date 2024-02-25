@@ -36,6 +36,7 @@ const QS_CONFIG = getQSConfig('instance', {
 function InstanceList() {
   const location = useLocation();
   const { me } = useConfig();
+  const canReadSettings = me.is_superuser || me.is_system_auditor;
   const [showHealthCheckAlert, setShowHealthCheckAlert] = useState(false);
   const [pendingHealthCheck, setPendingHealthCheck] = useState(false);
   const [canRunHealthCheck, setCanRunHealthCheck] = useState(true);
@@ -48,18 +49,24 @@ function InstanceList() {
   } = useRequest(
     useCallback(async () => {
       const params = parseQueryString(QS_CONFIG, location.search);
-      const [response, responseActions, sysSettings] = await Promise.all([
+
+      const [response, responseActions] = await Promise.all([
         InstancesAPI.read(params),
         InstancesAPI.readOptions(),
-        SettingsAPI.readCategory('system'),
       ]);
+
+      let sysSettings = {};
+      if (canReadSettings) {
+        sysSettings = await SettingsAPI.readCategory('system');
+      }
+
       const isPending = response.data.results.some(
         (i) => i.health_check_pending === true
       );
       setPendingHealthCheck(isPending);
       return {
         instances: response.data.results,
-        isK8s: sysSettings.data.IS_K8S,
+        isK8s: sysSettings?.data?.IS_K8S ?? false,
         count: response.data.count,
         actions: responseActions.data.actions,
         relatedSearchableKeys: (
@@ -67,7 +74,7 @@ function InstanceList() {
         ).map((val) => val.slice(0, -8)),
         searchableKeys: getSearchableKeys(responseActions.data.actions?.GET),
       };
-    }, [location.search]),
+    }, [location.search, canReadSettings]),
     {
       instances: [],
       count: 0,

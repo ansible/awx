@@ -97,8 +97,6 @@ class SpecialInventoryHandler(logging.Handler):
         self.event_handler(dispatch_data)
 
 
-ColorHandler = logging.StreamHandler
-
 if settings.COLOR_LOGS is True:
     try:
         from logutils.colorize import ColorizingStreamHandler
@@ -133,3 +131,5 @@ if settings.COLOR_LOGS is True:
     except ImportError:
         # logutils is only used for colored logs in the dev environment
         pass
+else:
+    ColorHandler = logging.StreamHandler

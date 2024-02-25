@@ -24,6 +24,7 @@ import SAML from './SAML';
 import SettingList from './SettingList';
 import TACACS from './TACACS';
 import UI from './UI';
+import Troubleshooting from './Troubleshooting';
 
 function Settings() {
   const { license_info = {}, me } = useConfig();
@@ -118,6 +119,9 @@ function Settings() {
     '/settings/ui': t`User Interface`,
     '/settings/ui/details': t`Details`,
     '/settings/ui/edit': t`Edit Details`,
+    '/settings/troubleshooting': t`Troubleshooting`,
+    '/settings/troubleshooting/details': t`Details`,
+    '/settings/troubleshooting/edit': t`Edit Details`,
   };
 
   if (error) {
@@ -190,6 +194,9 @@ function Settings() {
         </Route>
         <Route path="/settings/tacacs">
           <TACACS />
+        </Route>
+        <Route path="/settings/troubleshooting">
+          <Troubleshooting />
         </Route>
         <Route path="/settings/ui">
           <UI />

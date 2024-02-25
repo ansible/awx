@@ -9,13 +9,11 @@ from django.db import migrations, models
 import django.utils.timezone
 import django.db.models.deletion
 from django.conf import settings
-import taggit.managers
 import awx.main.fields
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('taggit', '0002_auto_20150616_2121'),
         ('contenttypes', '0002_remove_content_type_name'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
@@ -182,12 +180,6 @@ class Migration(migrations.Migration):
                         editable=False,
                         to=settings.AUTH_USER_MODEL,
                         null=True,
-                    ),
-                ),
-                (
-                    'tags',
-                    taggit.managers.TaggableManager(
-                        to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags'
                     ),
                 ),
             ],
@@ -529,12 +521,6 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    'tags',
-                    taggit.managers.TaggableManager(
-                        to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags'
-                    ),
-                ),
                 ('users', models.ManyToManyField(related_name='organizations', to=settings.AUTH_USER_MODEL, blank=True)),
             ],
             options={
@@ -589,12 +575,6 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    'tags',
-                    taggit.managers.TaggableManager(
-                        to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags'
-                    ),
-                ),
             ],
         ),
         migrations.CreateModel(
@@ -644,12 +624,6 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    'tags',
-                    taggit.managers.TaggableManager(
-                        to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags'
-                    ),
-                ),
             ],
             options={
                 'ordering': ['-next_run'],
@@ -687,12 +661,6 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ('organization', models.ForeignKey(related_name='teams', on_delete=django.db.models.deletion.SET_NULL, to='main.Organization', null=True)),
-                (
-                    'tags',
-                    taggit.managers.TaggableManager(
-                        to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags'
-                    ),
-                ),
                 ('users', models.ManyToManyField(related_name='teams', to=settings.AUTH_USER_MODEL, blank=True)),
             ],
             options={
@@ -1268,13 +1236,6 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AddField(
-            model_name='unifiedjobtemplate',
-            name='tags',
-            field=taggit.managers.TaggableManager(
-                to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags'
-            ),
-        ),
-        migrations.AddField(
             model_name='unifiedjob',
             name='created_by',
             field=models.ForeignKey(
@@ -1321,13 +1282,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='unifiedjob',
-            name='tags',
-            field=taggit.managers.TaggableManager(
-                to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags'
-            ),
-        ),
-        migrations.AddField(
-            model_name='unifiedjob',
             name='unified_job_template',
             field=models.ForeignKey(
                 related_name='unifiedjob_unified_jobs',
@@ -1371,13 +1325,6 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AddField(
-            model_name='inventory',
-            name='tags',
-            field=taggit.managers.TaggableManager(
-                to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags'
-            ),
-        ),
-        migrations.AddField(
             model_name='host',
             name='inventory',
             field=models.ForeignKey(related_name='hosts', on_delete=django.db.models.deletion.CASCADE, to='main.Inventory'),
@@ -1408,13 +1355,6 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AddField(
-            model_name='host',
-            name='tags',
-            field=taggit.managers.TaggableManager(
-                to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags'
-            ),
-        ),
-        migrations.AddField(
             model_name='group',
             name='hosts',
             field=models.ManyToManyField(help_text='Hosts associated directly with this group.', related_name='groups', to='main.Host', blank=True),
@@ -1442,13 +1382,6 @@ class Migration(migrations.Migration):
             field=models.ManyToManyField(related_name='children', to='main.Group', blank=True),
         ),
         migrations.AddField(
-            model_name='group',
-            name='tags',
-            field=taggit.managers.TaggableManager(
-                to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags'
-            ),
-        ),
-        migrations.AddField(
             model_name='custominventoryscript',
             name='organization',
             field=models.ForeignKey(
@@ -1457,13 +1390,6 @@ class Migration(migrations.Migration):
                 to='main.Organization',
                 help_text='Organization owning this inventory script',
                 null=True,
-            ),
-        ),
-        migrations.AddField(
-            model_name='custominventoryscript',
-            name='tags',
-            field=taggit.managers.TaggableManager(
-                to='taggit.Tag', through='taggit.TaggedItem', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags'
             ),
         ),
         migrations.AddField(

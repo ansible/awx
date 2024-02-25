@@ -22,7 +22,7 @@ class Command(BaseCommand):
                     '# Discovered Virtual Environments:',
                     '\n'.join(venvs),
                     '',
-                    '- To export the contents of a (deprecated) virtual environment, ' 'run the following command while supplying the path as an argument:',
+                    '- To export the contents of a (deprecated) virtual environment, run the following command while supplying the path as an argument:',
                     'awx-manage export_custom_venv /path/to/venv',
                     '',
                     '- To view the connections a (deprecated) virtual environment had in the database, run the following command while supplying the path as an argument:',

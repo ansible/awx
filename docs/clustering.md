@@ -126,7 +126,7 @@ The websocket backplane is handled by the wsbroadcast service that is part of th
 
 ### Postgres
 
-AWX is a Django application and uses the psycopg2 library to establish connections to the Postgres database.
+AWX is a Django application and uses the psycopg3 library to establish connections to the Postgres database.
 Only control nodes need direct access to the database.
 
 Importantly AWX relies on the Postgres notify system for inter-process communication. The dispatcher system spawns separate processes/threads that run in parallel. For example, it runs the task manager periodically, and the task manager needs to be able to communicate with the main dispatcher thread. It does this via `pg_notify`.

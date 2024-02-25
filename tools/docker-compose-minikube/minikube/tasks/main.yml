@@ -82,18 +82,11 @@
     name: '{{ minikube_service_account_name }}'
   register: service_account
 
-- name: Register serviceAccount secret name
-  set_fact:
-    _service_account_secret_name: '{{ service_account["resources"][0]["secrets"][0]["name"] }}'
-  when:
-    - service_account["resources"][0]["secrets"] | length
-    - '"name" in service_account["resources"][0]["secrets"][0]'
-
 - name: Retrieve bearer_token from serviceAccount secret
   k8s_info:
     kind: Secret
     namespace: '{{ minikube_service_account_namespace }}'
-    name: '{{ _service_account_secret_name }}'
+    name: '{{ minikube_service_account_name }}'
   register: _service_account_secret
 
 - name: Load Minikube Bearer Token

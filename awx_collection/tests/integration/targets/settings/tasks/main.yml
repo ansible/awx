@@ -1,4 +1,42 @@
 ---
+- name: Initialize starting project vvv setting to false
+  awx.awx.settings:
+    name: "PROJECT_UPDATE_VVV"
+    value: false
+
+- name: Change project vvv setting to true
+  awx.awx.settings:
+    name: "PROJECT_UPDATE_VVV"
+    value: true
+  register: result
+
+- name: Changing setting to true should have changed the value
+  assert:
+    that:
+      - "result is changed"
+
+- name: Change project vvv setting to true
+  awx.awx.settings:
+    name: "PROJECT_UPDATE_VVV"
+    value: true
+  register: result
+
+- name: Changing setting to true again should not change the value
+  assert:
+    that:
+      - "result is not changed"
+
+- name: Change project vvv setting back to false
+  awx.awx.settings:
+    name: "PROJECT_UPDATE_VVV"
+    value: false
+  register: result
+
+- name: Changing setting back to false should have changed the value
+  assert:
+    that:
+      - "result is changed"
+
 - name: Set the value of AWX_ISOLATION_SHOW_PATHS to a baseline
   settings:
     name: AWX_ISOLATION_SHOW_PATHS

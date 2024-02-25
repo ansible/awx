@@ -43,8 +43,8 @@ class Connection(object):
         self.session = requests.Session()
         self.uses_session_cookie = False
 
-    def get_session_requirements(self, next='/api/'):
-        self.get('/api/')  # this causes a cookie w/ the CSRF token to be set
+    def get_session_requirements(self, next=config.api_base_path):
+        self.get(config.api_base_path)  # this causes a cookie w/ the CSRF token to be set
         return dict(next=next)
 
     def login(self, username=None, password=None, token=None, **kwargs):
@@ -52,7 +52,7 @@ class Connection(object):
             _next = kwargs.get('next')
             if _next:
                 headers = self.session.headers.copy()
-                response = self.post('/api/login/', headers=headers, data=dict(username=username, password=password, next=_next))
+                response = self.post(f"{config.api_base_path}login/", headers=headers, data=dict(username=username, password=password, next=_next))
                 # The login causes a redirect so we need to search the history of the request to find the header
                 for historical_response in response.history:
                     if 'X-API-Session-Cookie-Name' in historical_response.headers:

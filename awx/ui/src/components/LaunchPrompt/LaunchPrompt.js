@@ -19,6 +19,7 @@ function PromptModalForm({
   labels,
   surveyConfig,
   instanceGroups,
+  resourceDefaultCredentials,
 }) {
   const { setFieldTouched, values } = useFormikContext();
   const [showDescription, setShowDescription] = useState(false);
@@ -35,9 +36,9 @@ function PromptModalForm({
     surveyConfig,
     resource,
     labels,
-    instanceGroups
+    instanceGroups,
+    resourceDefaultCredentials
   );
-
   const handleSubmit = async () => {
     const postValues = {};
     const setValue = (key, value) => {
@@ -76,7 +77,7 @@ function PromptModalForm({
     }
 
     if (launchConfig.ask_labels_on_launch) {
-      const { labelIds } = createNewLabels(
+      const { labelIds } = await createNewLabels(
         values.labels,
         resource.organization
       );

@@ -9,6 +9,7 @@ jobs:
     name: Update Dependabot Prs
     if:  contains(github.event.pull_request.labels.*.name, 'dependencies') && contains(github.event.pull_request.labels.*.name, 'component:ui')
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Checkout branch

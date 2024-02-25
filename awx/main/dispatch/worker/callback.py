@@ -72,7 +72,7 @@ class CallbackBrokerWorker(BaseWorker):
     def __init__(self):
         self.buff = {}
         self.redis = redis.Redis.from_url(settings.BROKER_URL)
-        self.subsystem_metrics = s_metrics.Metrics(auto_pipe_execute=False)
+        self.subsystem_metrics = s_metrics.CallbackReceiverMetrics(auto_pipe_execute=False)
         self.queue_pop = 0
         self.queue_name = settings.CALLBACK_QUEUE
         self.prof = AWXProfiler("CallbackBrokerWorker")
@@ -191,7 +191,9 @@ class CallbackBrokerWorker(BaseWorker):
                             e._retry_count = retry_count
 
                             # special sanitization logic for postgres treatment of NUL 0x00 char
-                            if (retry_count == 1) and isinstance(exc_indv, ValueError) and ("\x00" in e.stdout):
+                            # This used to check the class of the exception but on the postgres3 upgrade it could appear
+                            #   as either DataError or ValueError, so now lets just try if its there.
+                            if (retry_count == 1) and ("\x00" in e.stdout):
                                 e.stdout = e.stdout.replace("\x00", "")
 
                             if retry_count >= self.INDIVIDUAL_EVENT_RETRIES:

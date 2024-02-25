@@ -47,6 +47,12 @@ describe('LaunchButton', () => {
         variables_needed_to_start: [],
       },
     });
+    JobTemplatesAPI.readCredentials.mockResolvedValue({
+      data: {
+        count: 0,
+        results: [],
+      },
+    });
   });
 
   afterEach(() => jest.clearAllMocks());

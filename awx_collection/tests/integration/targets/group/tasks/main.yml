@@ -1,25 +1,54 @@
 ---
+- name: Generate a test ID
+  set_fact:
+    test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
+
 - name: Generate names
   set_fact:
-    group_name1: "AWX-Collection-tests-group-group-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    group_name2: "AWX-Collection-tests-group-group-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    group_name3: "AWX-Collection-tests-group-group-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    inv_name: "AWX-Collection-tests-group-inv-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    host_name1: "AWX-Collection-tests-group-host-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    host_name2: "AWX-Collection-tests-group-host-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
-    host_name3: "AWX-Collection-tests-group-host-{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+    group_name1: "AWX-Collection-tests-group-group1-{{ test_id }}"
+    group_name2: "AWX-Collection-tests-group-group2-{{ test_id }}"
+    group_name3: "AWX-Collection-tests-group-group3-{{ test_id }}"
+    group_name4: "AWX-Collection-tests-group-group4-{{ test_id }}"
+    inv_name: "AWX-Collection-tests-group-inv-{{ test_id }}"
+    host_name1: "AWX-Collection-tests-group-host1-{{ test_id }}"
+    host_name2: "AWX-Collection-tests-group-host2-{{ test_id }}"
+    host_name3: "AWX-Collection-tests-group-host3-{{ test_id }}"
+    host_name4: "AWX-Collection-tests-group-host4-{{ test_id }}"
 
 - name: Create an Inventory
   inventory:
     name: "{{ inv_name }}"
     organization: Default
     state: present
-  register: result
+  register: inv_result
 
-- name: Create a Group
+- name: Create a Host
+  host:
+    name: "{{ host_name4 }}"
+    inventory: "{{ inv_name }}"
+    state: present
+  register: host_result
+
+- name: Add Host to Group
   group:
     name: "{{ group_name1 }}"
-    inventory: "{{ result.id }}"
+    inventory: "{{ inv_name }}"
+    hosts:
+      - "{{ host_name4 }}"
+    preserve_existing_hosts: true
+  register: group_result
+
+- assert:
+    that:
+      - inv_result is changed
+      - host_result is changed
+      - group_result is changed
+
+- name: Create Group 1
+  group:
+    name: "{{ group_name1 }}"
+    inventory: "{{ inv_result.id }}"
     state: present
     variables:
       foo: bar
@@ -29,7 +58,46 @@
     that:
       - "result is changed"
 
-- name: Create a Group
+- name: Create Group 1 with exists
+  group:
+    name: "{{ group_name1 }}"
+    inventory: "{{ inv_name }}"
+    state: exists
+    variables:
+      foo: bar
+  register: result
+
+- assert:
+    that:
+      - "result is not changed"
+
+- name: Delete Group 1
+  group:
+    name: "{{ group_name1 }}"
+    inventory: "{{ inv_name }}"
+    state: absent
+    variables:
+      foo: bar
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Create Group 1 with exists
+  group:
+    name: "{{ group_name1 }}"
+    inventory: "{{ inv_name }}"
+    state: exists
+    variables:
+      foo: bar
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+- name: Create Group 2
   group:
     name: "{{ group_name2 }}"
     inventory: "{{ inv_name }}"
@@ -42,7 +110,7 @@
     that:
       - "result is changed"
 
-- name: Create a Group
+- name: Create Group 3
   group:
     name: "{{ group_name3 }}"
     inventory: "{{ inv_name }}"
@@ -64,7 +132,7 @@
     - "{{ host_name2 }}"
     - "{{ host_name3 }}"
 
-- name: Create a Group with hosts and sub group
+- name: Create Group 1 with hosts and sub group of Group 2
   group:
     name: "{{ group_name1 }}"
     inventory: "{{ inv_name }}"
@@ -78,7 +146,7 @@
       foo: bar
   register: result
 
-- name: Create a Group with hosts and sub group
+- name: Create Group 1 with hosts and sub group
   group:
     name: "{{ group_name1 }}"
     inventory: "{{ inv_name }}"
@@ -99,7 +167,19 @@
     that:
       - group1_host_count  == "3"
 
-- name: Delete a Group
+- name: Delete Group 3
+  group:
+    name: "{{ group_name3 }}"
+    inventory: "{{ inv_name }}"
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - "result is changed"
+
+# If we delete group 1 first it will delete group 2 and 3
+- name: Delete Group 1
   group:
     name: "{{ group_name1 }}"
     inventory: "{{ inv_name }}"
@@ -110,24 +190,14 @@
     that:
       - "result is changed"
 
-- name: Delete a Group
+- name: Delete Group 2
   group:
     name: "{{ group_name2 }}"
     inventory: "{{ inv_name }}"
     state: absent
   register: result
 
-- assert:
-    that:
-      - "result is changed"
-
-- name: Delete a Group
-  group:
-    name: "{{ group_name3 }}"
-    inventory: "{{ inv_name }}"
-    state: absent
-  register: result
-
+# In this case, group 2 was last a child of group1 so deleting group1 deleted group2
 - assert:
     that:
       - "result is not changed"

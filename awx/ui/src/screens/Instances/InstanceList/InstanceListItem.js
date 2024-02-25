@@ -114,10 +114,12 @@ function InstanceListItem({
   );
 
   const isHopNode = instance.node_type === 'hop';
-  const isExecutionNode = instance.node_type === 'execution';
+  const isManaged = instance.managed;
+
   return (
     <>
       <Tr
+        data-testid="instances list item"
         id={`instance-row-${instance.id}`}
         ouiaId={`instance-row-${instance.id}`}
       >
@@ -137,7 +139,7 @@ function InstanceListItem({
             rowIndex,
             isSelected,
             onSelect,
-            disable: !isExecutionNode,
+            disable: isManaged,
           }}
           dataLabel={t`Selected`}
         />

@@ -91,6 +91,11 @@ function CredentialEdit({ credential }) {
             modifiedData.user = me.id;
           }
         }
+
+        if (credential.kind === 'vault' && !credential.inputs?.vault_id) {
+          delete modifiedData.inputs.vault_id;
+        }
+
         const [{ data }] = await Promise.all([
           CredentialsAPI.update(credId, modifiedData),
           ...destroyInputSources(),
@@ -100,7 +105,7 @@ function CredentialEdit({ credential }) {
 
         return data;
       },
-      [me, credId]
+      [me, credId, credential]
     )
   );
 

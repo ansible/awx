@@ -95,6 +95,20 @@ register(
 )
 
 register(
+    'CSRF_TRUSTED_ORIGINS',
+    default=[],
+    field_class=fields.StringListField,
+    label=_('CSRF Trusted Origins List'),
+    help_text=_(
+        "If the service is behind a reverse proxy/load balancer, use this setting "
+        "to configure the schema://addresses from which the service should trust "
+        "Origin header values. "
+    ),
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
     'LICENSE',
     field_class=fields.DictField,
     default=lambda: {},
@@ -680,15 +694,33 @@ register(
     category_slug='logging',
 )
 register(
-    'LOG_AGGREGATOR_MAX_DISK_USAGE_GB',
+    'LOG_AGGREGATOR_ACTION_QUEUE_SIZE',
+    field_class=fields.IntegerField,
+    default=131072,
+    min_value=1,
+    label=_('Maximum number of messages that can be stored in the log action queue'),
+    help_text=_(
+        'Defines how large the rsyslog action queue can grow in number of messages '
+        'stored. This can have an impact on memory utilization. When the queue '
+        'reaches 75% of this number, the queue will start writing to disk '
+        '(queue.highWatermark in rsyslog). When it reaches 90%, NOTICE, INFO, and '
+        'DEBUG messages will start to be discarded (queue.discardMark with '
+        'queue.discardSeverity=5).'
+    ),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
+    'LOG_AGGREGATOR_ACTION_MAX_DISK_USAGE_GB',
     field_class=fields.IntegerField,
     default=1,
     min_value=1,
-    label=_('Maximum disk persistance for external log aggregation (in GB)'),
+    label=_('Maximum disk persistence for rsyslogd action queuing (in GB)'),
     help_text=_(
-        'Amount of data to store (in gigabytes) during an outage of '
-        'the external log aggregator (defaults to 1). '
-        'Equivalent to the rsyslogd queue.maxdiskspace setting.'
+        'Amount of data to store (in gigabytes) if an rsyslog action takes time '
+        'to process an incoming message (defaults to 1). '
+        'Equivalent to the rsyslogd queue.maxdiskspace setting on the action (e.g. omhttp). '
+        'It stores files in the directory specified by LOG_AGGREGATOR_MAX_DISK_USAGE_PATH.'
     ),
     category=_('Logging'),
     category_slug='logging',
@@ -796,6 +828,16 @@ register(
 )
 
 register(
+    'BULK_HOST_MAX_DELETE',
+    field_class=fields.IntegerField,
+    default=250,
+    label=_('Max number of hosts to allow to be deleted in a single bulk action'),
+    help_text=_('Max number of hosts to allow to be deleted in a single bulk action'),
+    category=_('Bulk Actions'),
+    category_slug='bulk',
+)
+
+register(
     'UI_NEXT',
     field_class=fields.BooleanField,
     default=False,
@@ -829,6 +871,55 @@ register(
     allow_null=True,
     category=_('System'),
     category_slug='system',
+)
+
+register(
+    'HOST_METRIC_SUMMARY_TASK_LAST_TS',
+    field_class=fields.DateTimeField,
+    label=_('Last computing date of HostMetricSummaryMonthly'),
+    allow_null=True,
+    category=_('System'),
+    category_slug='system',
+)
+
+register(
+    'AWX_CLEANUP_PATHS',
+    field_class=fields.BooleanField,
+    label=_('Enable or Disable tmp dir cleanup'),
+    default=True,
+    help_text=_('Enable or Disable TMP Dir cleanup'),
+    category=('Debug'),
+    category_slug='debug',
+)
+
+register(
+    'AWX_REQUEST_PROFILE',
+    field_class=fields.BooleanField,
+    label=_('Debug Web Requests'),
+    default=False,
+    help_text=_('Debug web request python timing'),
+    category=('Debug'),
+    category_slug='debug',
+)
+
+register(
+    'DEFAULT_CONTAINER_RUN_OPTIONS',
+    field_class=fields.StringListField,
+    label=_('Container Run Options'),
+    default=['--network', 'slirp4netns:enable_ipv6=true'],
+    help_text=_("List of options to pass to podman run example: ['--network', 'slirp4netns:enable_ipv6=true', '--log-level', 'debug']"),
+    category=('Jobs'),
+    category_slug='jobs',
+)
+
+register(
+    'RECEPTOR_RELEASE_WORK',
+    field_class=fields.BooleanField,
+    label=_('Release Receptor Work'),
+    default=True,
+    help_text=_('Release receptor work'),
+    category=('Debug'),
+    category_slug='debug',
 )
 
 

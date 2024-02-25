@@ -44,7 +44,7 @@ class Command(BaseCommand):
                         '- To list all (now deprecated) custom virtual environments run:',
                         'awx-manage list_custom_venvs',
                         '',
-                        '- To export the contents of a (deprecated) virtual environment, ' 'run the following command while supplying the path as an argument:',
+                        '- To export the contents of a (deprecated) virtual environment, run the following command while supplying the path as an argument:',
                         'awx-manage export_custom_venv /path/to/venv',
                         '',
                         '- Run these commands with `-q` to remove tool tips.',

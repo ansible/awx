@@ -1,0 +1,222 @@
+---
+- name: Set vault_addr
+  include_tasks: set_vault_addr.yml
+
+- block:
+    - name: Start the vault
+      community.docker.docker_compose_v2:
+        state: present
+        services: vault
+        project_src: "{{ sources_dest }}"
+      register: vault_start
+
+    - name: Run the initialization
+      community.docker.docker_container_exec:
+        command: vault operator init
+        container: tools_vault_1
+        env:
+          VAULT_ADDR: "{{ vault_addr }}"
+          VAULT_SKIP_VERIFY: "true"
+      register: vault_initialization
+      failed_when:
+        - vault_initialization.rc != 0
+        - vault_initialization.stderr.find("Vault is already initialized") == -1
+      changed_when:
+        - vault_initialization.rc == 0
+      retries: 5
+      delay: 5
+
+    - name: Write out initialization file
+      copy:
+        # lines 1-4 are the keys, 6 is the root token
+        content: |
+          {{ vault_initialization.stdout_lines[0] | regex_replace('Unseal Key ', 'Unseal_Key_') }}
+          {{ vault_initialization.stdout_lines[1] | regex_replace('Unseal Key ', 'Unseal_Key_') }}
+          {{ vault_initialization.stdout_lines[2] | regex_replace('Unseal Key ', 'Unseal_Key_') }}
+          {{ vault_initialization.stdout_lines[3] | regex_replace('Unseal Key ', 'Unseal_Key_') }}
+          {{ vault_initialization.stdout_lines[4] | regex_replace('Unseal Key ', 'Unseal_Key_') }}
+          {{ vault_initialization.stdout_lines[6] | regex_replace('Initial Root Token', 'Initial_Root_Token') }}
+        dest: "{{ vault_file }}"
+      when: (vault_initialization.stdout_lines | length) > 0
+
+    - name: Unlock the vault
+      include_role:
+        name: vault
+        tasks_from: unseal.yml
+
+    - name: Configure the vault with cert auth
+      block:
+        - name: Create a cert auth mount
+          flowerysong.hvault.write:
+            path: "sys/auth/cert"
+            vault_addr: "{{ vault_addr_from_host }}"
+            validate_certs: false
+            token: "{{ Initial_Root_Token }}"
+            data:
+              type: "cert"
+          register: vault_auth_cert
+          failed_when:
+            - vault_auth_cert.result.errors | default([]) | length > 0
+            - "'path is already in use at cert/' not in vault_auth_cert.result.errors | default([])"
+          changed_when:
+            - vault_auth_cert.result.errors | default([]) | length == 0
+
+        - name: Configure client certificate
+          flowerysong.hvault.write:
+            path: "auth/cert/certs/awx-client"
+            vault_addr: "{{ vault_addr_from_host }}"
+            validate_certs: false
+            token: "{{ Initial_Root_Token }}"
+            data:
+              name: awx-client
+              certificate: "{{ lookup('ansible.builtin.file', '{{ vault_client_cert }}') }}"
+              policies:
+                - root
+      when: vault_tls | bool
+
+    - name: Create an engine
+      flowerysong.hvault.engine:
+        path: "my_engine"
+        type: "kv"
+        vault_addr: "{{ vault_addr_from_host }}"
+        validate_certs: false
+        token: "{{ Initial_Root_Token }}"
+
+    - name: Create a demo secret
+      flowerysong.hvault.kv:
+        mount_point: "my_engine/my_root"
+        key: "my_folder"
+        value:
+          my_key: "this_is_the_secret_value"
+        vault_addr: "{{ vault_addr_from_host }}"
+        validate_certs: false
+        token: "{{ Initial_Root_Token }}"
+
+    - name: Configure the vault ldap auth
+      block:
+        - name: Create ldap auth mount
+          flowerysong.hvault.write:
+            path: "sys/auth/ldap"
+            vault_addr: "{{ vault_addr_from_host }}"
+            validate_certs: false
+            token: "{{ Initial_Root_Token }}"
+            data:
+              type: "ldap"
+          register: vault_auth_ldap
+          changed_when: vault_auth_ldap.result.errors | default([]) | length == 0
+          failed_when:
+            - vault_auth_ldap.result.errors | default([]) | length > 0
+            - "'path is already in use at ldap/' not in vault_auth_ldap.result.errors | default([])"
+
+        - name: Create ldap engine
+          flowerysong.hvault.engine:
+            path: "ldap_engine"
+            type: "kv"
+            vault_addr: "{{ vault_addr_from_host }}"
+            validate_certs: false
+            token: "{{ Initial_Root_Token }}"
+
+        - name: Create a ldap secret
+          flowerysong.hvault.kv:
+            mount_point: "ldap_engine/ldaps_root"
+            key: "ldap_secret"
+            value:
+              my_key: "this_is_the_ldap_secret_value"
+            vault_addr: "{{ vault_addr_from_host }}"
+            validate_certs: false
+            token: "{{ Initial_Root_Token }}"
+
+        - name: Configure ldap auth
+          flowerysong.hvault.ldap_config:
+            vault_addr: "{{ vault_addr_from_host }}"
+            validate_certs: false
+            token: "{{ Initial_Root_Token }}"
+            url: "ldap://ldap:1389"
+            binddn: "cn=awx_ldap_vault,ou=users,dc=example,dc=org"
+            bindpass: "vault123"
+            userdn: "ou=users,dc=example,dc=org"
+            deny_null_bind: "false"
+            discoverdn: "true"
+
+        - name: Create ldap access policy
+          flowerysong.hvault.policy:
+            vault_addr: "{{ vault_addr_from_host }}"
+            validate_certs: false
+            token: "{{ Initial_Root_Token }}"
+            name: "ldap_engine"
+            policy:
+              ldap_engine/*: [create, read, update, delete, list]
+              sys/mounts:/*: [create, read, update, delete, list]
+              sys/mounts: [read]
+
+        - name: Add awx_ldap_vault user to auth_method
+          flowerysong.hvault.ldap_user:
+            vault_addr: "{{ vault_addr_from_host }}"
+            validate_certs: false
+            token: "{{ Initial_Root_Token }}"
+            state: present
+            name: "{{ vault_ldap_username }}"
+            policies:
+              - "ldap_engine"
+      when: enable_ldap | bool
+
+    - name: Create userpass engine
+      flowerysong.hvault.engine:
+        path: "userpass_engine"
+        type: "kv"
+        vault_addr: "{{ vault_addr_from_host }}"
+        validate_certs: false
+        token: "{{ Initial_Root_Token }}"
+
+    - name: Create a userpass secret
+      flowerysong.hvault.kv:
+        mount_point: "userpass_engine/userpass_root"
+        key: "userpass_secret"
+        value:
+          my_key: "this_is_the_userpass_secret_value"
+        vault_addr: "{{ vault_addr_from_host }}"
+        validate_certs: false
+        token: "{{ Initial_Root_Token }}"
+
+    - name: Create userpass access policy
+      flowerysong.hvault.policy:
+        vault_addr: "{{ vault_addr_from_host }}"
+        validate_certs: false
+        token: "{{ Initial_Root_Token }}"
+        name: "userpass_engine"
+        policy:
+          userpass_engine/*: [create, read, update, delete, list]
+          sys/mounts:/*: [create, read, update, delete, list]
+          sys/mounts: [read]
+
+    - name: Create userpass auth mount
+      flowerysong.hvault.write:
+        path: "sys/auth/userpass"
+        vault_addr: "{{ vault_addr_from_host }}"
+        validate_certs: false
+        token: "{{ Initial_Root_Token }}"
+        data:
+          type: "userpass"
+      register: vault_auth_userpass
+      changed_when: vault_auth_userpass.result.errors | default([]) | length == 0
+      failed_when:
+        - vault_auth_userpass.result.errors | default([]) | length > 0
+        - "'path is already in use at userpass/' not in vault_auth_userpass.result.errors | default([])"
+
+    - name: Add awx_userpass_admin user to auth_method
+      flowerysong.hvault.write:
+        vault_addr: "{{ vault_addr_from_host }}"
+        validate_certs: false
+        token: "{{ Initial_Root_Token }}"
+        path: "auth/userpass/users/{{ vault_userpass_username }}"
+        data:
+          password: "{{ vault_userpass_password }}"
+          policies:
+            - "userpass_engine"
+
+  always:
+    - name: Stop the vault
+      community.docker.docker_compose_v2:
+        state: absent
+        project_src: "{{ sources_dest }}"
+      when: vault_start is defined and vault_start.changed

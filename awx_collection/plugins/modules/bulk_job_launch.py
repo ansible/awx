@@ -128,7 +128,7 @@ options:
       type: str
     inventory:
       description:
-        - Inventory name or ID to use for the jobs ran within the bulk job, only used if prompt for inventory is set.
+        - Inventory name, ID, or named URL to use for the jobs ran within the bulk job, only used if prompt for inventory is set.
       type: str
     scm_branch:
       description:

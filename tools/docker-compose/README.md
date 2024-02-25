@@ -118,18 +118,36 @@ $ make docker-compose
 
 > For running docker-compose detached mode, start the containers using the following command: `$ make docker-compose COMPOSE_UP_OPTS=-d`
 
+###### Solving database-related issues during initial startup
+
+If you have encountered the infinitely-repeating `Waiting for postgres to be ready to accept connections` message during the execution, try to do the following:
+
+1. Stop and delete AWX-related docker containers.
+2. Delete all associated docker volumes.
+3. Delete all associated docker networks.
+4. Repeat the process from scratch.
+
+If you have **only** AWX-related container entities in your system, you can simply stop and delete everything using the following commands:
+
+```bash
+docker stop $(docker ps -a -q)
+docker system prune -a
+docker volume prune
+docker network prune
+```
 
 ##### _(alternative method)_ Spin up a development environment with customized mesh node cluster
 
-With the introduction of Receptor, a cluster (of containers) with execution nodes and a hop node can be created by the docker-compose Makefile target.
-By default, it will create 1 hybrid node, 1 hop node, and 2 execution nodes.
-You can switch the type of AWX nodes between hybrid and control with this syntax.
+A cluster (of containers) with execution nodes and a hop node can be created by the docker-compose Makefile target.
+By default, it will create 1 hybrid node.
+You can switch the type of AWX nodes between hybrid and control with `MAIN_NODE_TYPE`.
 
 ```
-MAIN_NODE_TYPE=control COMPOSE_TAG=devel make docker-compose
+MAIN_NODE_TYPE=control EXECUTION_NODE_COUNT=2 COMPOSE_TAG=devel make docker-compose
 ```
 
 Running the above command will create a cluster of 1 control node, 1 hop node, and 2 execution nodes.
+A hop node is automatically created whenever there are 1 or more execution nodes.
 
 The number of nodes can be changed:
 
@@ -303,7 +321,7 @@ To bring up a 1 node AWX + minikube that is accessible from AWX run the followin
 Start minikube
 
 ```bash
-(host)$minikube start --cpus=4  --memory=8g --addons=ingress`
+(host)$minikube start --cpus=4  --memory=8g --addons=ingress
 ```
 
 Start AWX
@@ -424,13 +442,11 @@ Now we are ready to configure and plumb OpenLDAP with AWX. To do this we have pr
 
 Note: The default configuration will utilize the non-tls connection. If you want to use the tls configuration you will need to work through TLS negotiation issues because the LDAP server is using a self signed certificate.
 
-Before we can run the playbook we need to understand that LDAP will be communicated to from within the AWX container. Because of this, we have to tell AWX how to route traffic to the LDAP container through the `LDAP Server URI` settings. The playbook requires a variable called container_reference to be set. The container_reference variable needs to be how your AWX container will be able to talk to the LDAP container. See the SAML section for some examples for how to select a `container_reference`.
-
-Once you have your container reference you can run the playbook like:
+You can run the playbook like:
 ```bash
 export CONTROLLER_USERNAME=<your username>
 export CONTROLLER_PASSWORD=<your password>
-ansible-playbook tools/docker-compose/ansible/plumb_ldap.yml -e container_reference=<your container_reference here>
+ansible-playbook tools/docker-compose/ansible/plumb_ldap.yml
 ```
 
 
@@ -496,6 +512,103 @@ ansible-playbook tools/docker-compose/ansible/plumb_tacacs.yml
 ```
 
 Once the playbook is done running tacacs+ should now be setup in your development environment. This server has the accounts listed on https://hub.docker.com/r/dchidell/docker-tacacs
+
+### HashiVault Integration
+
+Run a HashiVault container alongside of AWX.
+
+```bash
+VAULT=true make docker-compose
+```
+
+You can find the initialization data at `tools/docker-compose/_sources/secrets/vault_init.yml`,
+This includes the unseal keys and a root token.
+
+You will need to unseal the HashiVault each time the container is started.
+The easiest way to do that is to run:
+```bash
+ansible-playbook tools/docker-compose/ansible/unseal_vault.yml
+```
+This will perform the unseal and also display the root token for login.
+
+For demo purposes, Vault will be auto-configured to include a Key Value (KV) vault called `my_engine` along with a secret called `my_key` in `/my_engine/my_root/my_folder`.
+The secret value is `this_is_the_secret_value`.
+
+To create a secret connected to this vault in AWX you can run the following playbook:
+```bash
+export CONTROLLER_USERNAME=<your username>
+export CONTROLLER_PASSWORD=<your password>
+ansible-playbook tools/docker-compose/ansible/plumb_vault.yml -e enable_ldap=false
+```
+
+This will create the following items in your AWX instance:
+* A credential called `Vault Lookup Cred` tied to the vault instance.
+* A credential called `Vault UserPass Lookup Cred` tied to the vault instance.
+* A custom credential type called `Vault Custom Cred Type`.
+* A credential called `Credential From HashiCorp Vault via Token Auth` which is of the created type using the `Vault Lookup Cred` to get the secret.
+* A credential called `Credential From HashiCorp Vault via UserPass Auth` which is of the created type using the `Vault Userpass Lookup Cred` to get the secret.
+
+The custom credential type adds a variable when used in a playbook called `the_secret_from_vault`.
+If you have a playbook like:
+```
+---
+- name: Show a vault secret
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  tasks:
+    - debug:
+        var: the_secret_from_vault
+```
+
+And run it through AWX with the credential `Credential From Vault via Token Auth` tied to it, the debug should result in `this_is_the_secret_value`. If you run it through AWX with the credential `Credential From Vault via Userpass Auth`, the debug should result in `this_is_the_userpass_secret_value`. 
+
+### HashiVault with LDAP
+
+If you wish to have your OpenLDAP container connected to the Vault container, you will first need to have the OpenLDAP container running alongside AWX and Vault. 
+
+
+```bash
+
+VAULT=true LDAP=true make docker-compose
+
+```
+
+Similar to the above, you will need to unseal the vault before we can run the other needed playbooks. 
+
+```bash
+
+ansible-playbook tools/docker-compose/ansible/unseal_vault.yml
+
+```
+
+Now that the vault is unsealed, we can plumb the vault container now while passing true to enable_ldap extra var. 
+
+
+```bash
+
+export CONTROLLER_USERNAME=<your username>
+
+export CONTROLLER_PASSWORD=<your password>
+
+ansible-playbook tools/docker-compose/ansible/plumb_vault.yml -e enable_ldap=true
+
+```
+
+This will populate your AWX instance with LDAP specific items. 
+
+- A vault LDAP Lookup Cred tied to the LDAP `awx_ldap_vault` user called `Vault LDAP Lookup Cred`
+- A credential called `Credential From HashiCorp Vault via LDAP Auth`  which is of the created type using the `Vault LDAP Lookup Cred` to get the secret.
+
+And run it through AWX with the credential `Credential From HashiCorp Vault via LDAP Auth` tied to it, the debug should result in `this_is_the_ldap_secret_value`.
+
+The extremely non-obvious input is the fact that the fact prefixes "data/" unexpectedly.
+This was discovered by inspecting the secret with the vault CLI, which may help with future troubleshooting.
+
+```
+docker exec -it -e VAULT_TOKEN=<token> tools_vault_1 vault kv get --address=http://127.0.0.1:1234 my_engine/my_root/my_folder
+```
+
 
 ### Prometheus and Grafana integration
 

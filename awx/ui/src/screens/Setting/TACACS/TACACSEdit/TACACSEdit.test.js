@@ -26,6 +26,7 @@ describe('<TACACSEdit />', () => {
         TACACSPLUS_SECRET: '$encrypted$',
         TACACSPLUS_SESSION_TIMEOUT: 123,
         TACACSPLUS_AUTH_PROTOCOL: 'ascii',
+        TACACSPLUS_REM_ADDR: false,
       },
     });
   });
@@ -112,6 +113,7 @@ describe('<TACACSEdit />', () => {
       TACACSPLUS_SECRET: '',
       TACACSPLUS_SESSION_TIMEOUT: 123,
       TACACSPLUS_AUTH_PROTOCOL: 'ascii',
+      TACACSPLUS_REM_ADDR: false,
     });
   });
 

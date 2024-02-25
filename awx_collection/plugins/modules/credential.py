@@ -45,7 +45,8 @@ options:
       type: str
     organization:
       description:
-        - Organization that should own the credential.
+        - Organization name, ID, or named URL that should own the credential.
+        - This parameter is mutually exclusive with C(team) and C(user).
       type: str
     credential_type:
       description:
@@ -57,6 +58,7 @@ options:
           Insights, Machine, Microsoft Azure Key Vault, Microsoft Azure Resource Manager, Network, OpenShift or Kubernetes API
           Bearer Token, OpenStack, Red Hat Ansible Automation Platform, Red Hat Satellite 6, Red Hat Virtualization, Source Control,
           Thycotic DevOps Secrets Vault, Thycotic Secret Server, Vault, VMware vCenter, or a custom credential type
+      required: True
       type: str
     inputs:
       description:
@@ -87,21 +89,23 @@ options:
     update_secrets:
       description:
         - C(true) will always update encrypted values.
-        - C(false) will only updated encrypted values if a change is absolutely known to be needed.
+        - C(false) will only update encrypted values if a change is absolutely known to be needed.
       type: bool
       default: true
     user:
       description:
-        - User that should own this credential.
+        - User name, ID, or named URL that should own this credential.
+        - This parameter is mutually exclusive with C(organization) and C(team).
       type: str
     team:
       description:
-        - Team that should own this credential.
+        - Team name, ID, or named URL that should own this credential.
+        - This parameter is mutually exclusive with C(organization) and C(user).
       type: str
     state:
       description:
-        - Desired state of the resource.
-      choices: ["present", "absent"]
+        - Desired state of the resource. C(exists) will not modify the resource if it is present.
+      choices: ["present", "absent", "exists"]
       default: "present"
       type: str
 
@@ -211,16 +215,21 @@ def main():
         copy_from=dict(),
         description=dict(),
         organization=dict(),
-        credential_type=dict(),
+        credential_type=dict(required=True),
         inputs=dict(type='dict', no_log=True),
         update_secrets=dict(type='bool', default=True, no_log=False),
         user=dict(),
         team=dict(),
-        state=dict(choices=['present', 'absent'], default='present'),
+        state=dict(choices=['present', 'absent', 'exists'], default='present'),
     )
 
+    mutually_exclusive = [("organization", "user", "team")]
+
     # Create a module for ourselves
-    module = ControllerAPIModule(argument_spec=argument_spec)
+    module = ControllerAPIModule(
+        argument_spec=argument_spec,
+        mutually_exclusive=mutually_exclusive
+    )
 
     # Extract our parameters
     name = module.params.get('name')
@@ -247,7 +256,7 @@ def main():
     if organization:
         lookup_data['organization'] = org_id
 
-    credential = module.get_one('credentials', name_or_id=name, **{'data': lookup_data})
+    credential = module.get_one('credentials', name_or_id=name, check_exists=(state == 'exists'), **{'data': lookup_data})
 
     # Attempt to look up credential to copy based on the provided name
     if copy_from:

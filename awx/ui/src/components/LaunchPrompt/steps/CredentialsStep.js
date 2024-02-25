@@ -1,6 +1,6 @@
 import 'styled-components/macro';
 import React, { useState, useCallback, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 
 import { t } from '@lingui/macro';
 import { useField } from 'formik';
@@ -8,7 +8,7 @@ import styled from 'styled-components';
 import { Alert, ToolbarItem } from '@patternfly/react-core';
 import { CredentialsAPI, CredentialTypesAPI } from 'api';
 import { getSearchableKeys } from 'components/PaginatedTable';
-import { getQSConfig, parseQueryString } from 'util/qs';
+import { getQSConfig, parseQueryString, updateQueryString } from 'util/qs';
 import useRequest from 'hooks/useRequest';
 import AnsibleSelect from '../../AnsibleSelect';
 import OptionsList from '../../OptionsList';
@@ -31,18 +31,18 @@ function CredentialsStep({
   allowCredentialsWithPasswords,
   defaultCredentials = [],
 }) {
+  const history = useHistory();
+  const location = useLocation();
   const [field, meta, helpers] = useField({
     name: 'credentials',
     validate: (val) =>
       credentialsValidator(
         allowCredentialsWithPasswords,
         val,
-        defaultCredentials
+        defaultCredentials ?? []
       ),
   });
   const [selectedType, setSelectedType] = useState(null);
-  const history = useHistory();
-
   const {
     result: types,
     error: typesError,
@@ -104,11 +104,31 @@ function CredentialsStep({
       credentialsValidator(
         allowCredentialsWithPasswords,
         field.value,
-        defaultCredentials
+        defaultCredentials ?? []
       )
     );
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
+
+  const removeAllSearchTerms = (qsConfig) => {
+    const oldParams = parseQueryString(qsConfig, location.search);
+    Object.keys(oldParams).forEach((key) => {
+      oldParams[key] = null;
+    });
+    const defaultParams = {
+      ...oldParams,
+      page: 1,
+      page_size: 5,
+      order_by: 'name',
+    };
+    const qs = updateQueryString(qsConfig, location.search, defaultParams);
+    pushHistoryState(qs);
+  };
+
+  const pushHistoryState = (qs) => {
+    const { pathname } = history.location;
+    history.push(qs ? `${pathname}?${qs}` : pathname);
+  };
 
   if (isTypesLoading) {
     return <ContentLoading />;
@@ -154,9 +174,7 @@ function CredentialsStep({
             value={selectedType && selectedType.id}
             onChange={(e, id) => {
               // Reset query params when the category of credentials is changed
-              history.replace({
-                search: '',
-              });
+              removeAllSearchTerms(QS_CONFIG);
               setSelectedType(types.find((o) => o.id === parseInt(id, 10)));
             }}
           />

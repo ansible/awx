@@ -43,10 +43,11 @@ describe('<DateTimePicker/>', () => {
 
     await act(async () => {
       wrapper.find('DatePicker').prop('onChange')(
+        null,
         '2021-05-29',
         new Date('Sat May 29 2021 00:00:00 GMT-0400 (Eastern Daylight Time)')
       );
-      wrapper.find('TimePicker').prop('onChange')('7:15 PM');
+      wrapper.find('TimePicker').prop('onChange')(null, '7:15 PM');
     });
     wrapper.update();
     expect(wrapper.find('DatePicker').prop('value')).toBe('2021-05-29');

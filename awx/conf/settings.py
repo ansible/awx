@@ -418,6 +418,10 @@ class SettingsWrapper(UserSettingsHolder):
         """Get value while accepting the in-memory cache if key is available"""
         with _ctit_db_wrapper(trans_safe=True):
             return self._get_local(name)
+        # If the last line did not return, that means we hit a database error
+        # in that case, we should not have a local cache value
+        # thus, return empty as a signal to use the default
+        return empty
 
     def __getattr__(self, name):
         value = empty

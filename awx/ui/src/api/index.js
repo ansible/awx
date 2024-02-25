@@ -29,10 +29,12 @@ import Notifications from './models/Notifications';
 import Organizations from './models/Organizations';
 import ProjectUpdates from './models/ProjectUpdates';
 import Projects from './models/Projects';
+import ReceptorAddresses from './models/Receptor';
 import Roles from './models/Roles';
 import Root from './models/Root';
 import Schedules from './models/Schedules';
 import Settings from './models/Settings';
+import SubscriptionUsage from './models/SubscriptionUsage';
 import SystemJobs from './models/SystemJobs';
 import SystemJobTemplates from './models/SystemJobTemplates';
 import Teams from './models/Teams';
@@ -78,10 +80,12 @@ const NotificationsAPI = new Notifications();
 const OrganizationsAPI = new Organizations();
 const ProjectUpdatesAPI = new ProjectUpdates();
 const ProjectsAPI = new Projects();
+const ReceptorAPI = new ReceptorAddresses();
 const RolesAPI = new Roles();
 const RootAPI = new Root();
 const SchedulesAPI = new Schedules();
 const SettingsAPI = new Settings();
+const SubscriptionUsageAPI = new SubscriptionUsage();
 const SystemJobsAPI = new SystemJobs();
 const SystemJobTemplatesAPI = new SystemJobTemplates();
 const TeamsAPI = new Teams();
@@ -128,10 +132,12 @@ export {
   OrganizationsAPI,
   ProjectUpdatesAPI,
   ProjectsAPI,
+  ReceptorAPI,
   RolesAPI,
   RootAPI,
   SchedulesAPI,
   SettingsAPI,
+  SubscriptionUsageAPI,
   SystemJobsAPI,
   SystemJobTemplatesAPI,
   TeamsAPI,

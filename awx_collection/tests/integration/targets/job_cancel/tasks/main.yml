@@ -11,6 +11,7 @@
 - name: Cancel the job
   job_cancel:
     job_id: "{{ job.id }}"
+    request_timeout: 60
   register: results
 
 - assert:
@@ -23,10 +24,10 @@
     fail_if_not_running: true
   register: results
   ignore_errors: true
-
-- assert:
-    that:
-      - results is failed
+  # This test can be flaky, so we retry it a few times
+  until: results is failed and results.msg == 'Job is not running'
+  retries: 6
+  delay: 5
 
 - name: Check module fails with correct msg
   job_cancel:

@@ -14,7 +14,7 @@ class ConfConfig(AppConfig):
     def ready(self):
         self.module.autodiscover()
 
-        if not set(sys.argv) & {'migrate', 'check_migrations'}:
+        if not set(sys.argv) & {'migrate', 'check_migrations', 'showmigrations'}:
             from .settings import SettingsWrapper
 
             SettingsWrapper.initialize()

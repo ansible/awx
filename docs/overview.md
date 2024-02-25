@@ -110,7 +110,7 @@ processes it spawns.  This allows Ansible events to be captured and persisted
 into the AWX database; this process is what drives the "streaming" web UI
 you'll see if you launch a job from the AWX web interface and watch its results
 appears on the screen.  AWX relies on stability in this plugin interface, the
-heirarchy of emitted events based on strategy, and _especially_ the structure
+hierarchy of emitted events based on strategy, and _especially_ the structure
 of event data to work across Ansible releases:
 
 ![Event Data Diagram](https://user-images.githubusercontent.com/722880/35641610-ae7f1dea-068e-11e8-84fb-0f96043d53e4.png)

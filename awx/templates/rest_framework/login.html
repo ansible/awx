@@ -19,7 +19,7 @@
           <input type="text" name="username" maxlength="100"
               autocapitalize="off"
               autocorrect="off" class="form-control textinput textInput"
-              id="id_username" required autofocus
+              id="id_username"  autocomplete="off" required autofocus
               {% if form.username.value %}value="{{ form.username.value }}"{% endif %}>
             {% if form.username.errors %}
             <p class="text-error">{{ form.username.errors|striptags }}</p>
@@ -31,7 +31,8 @@
         <div class="form-group">
           <label for="id_password">Password:</label>
           <input type="password" name="password" maxlength="100" autocapitalize="off"
-              autocorrect="off" class="form-control textinput textInput" id="id_password" required>
+              autocorrect="off" class="form-control textinput textInput" id="id_password"
+              autocomplete="off" required>
             {% if form.password.errors %}
             <p class="text-error">{{ form.password.errors|striptags }}</p>
             {% endif %}

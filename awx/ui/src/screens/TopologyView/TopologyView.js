@@ -45,6 +45,7 @@ function TopologyView() {
         zoomIn={zoomIn}
         zoomOut={zoomOut}
         zoomFit={zoomFit}
+        refresh={fetchMeshVisualizer}
         resetZoom={resetZoom}
         showZoomControls={showZoomControls}
       />

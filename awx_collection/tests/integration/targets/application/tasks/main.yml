@@ -2,6 +2,7 @@
 - name: Generate a test id
   set_fact:
     test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
 
 - name: Generate names
   set_fact:
@@ -17,6 +18,43 @@
         client_type: "public"
         organization: "Default"
         state: present
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Run an application with exists
+      application:
+        name: "{{ app1_name }}"
+        authorization_grant_type: "password"
+        client_type: "public"
+        organization: "Default"
+        state: exists
+      register: result
+
+    - assert:
+        that:
+          - "result is not changed"
+
+    - name: Delete our application
+      application:
+        name: "{{ app1_name }}"
+        organization: "Default"
+        state: absent
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Run an application with exists
+      application:
+        name: "{{ app1_name }}"
+        authorization_grant_type: "password"
+        client_type: "public"
+        organization: "Default"
+        state: exists
       register: result
 
     - assert:

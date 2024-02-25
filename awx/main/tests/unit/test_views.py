@@ -88,6 +88,6 @@ def test_global_creation_always_possible(all_views):
                 creatable_view = View
         if not creatable or not global_view:
             continue
-        assert 'POST' in global_view().allowed_methods, 'Resource {} should be creatable in global list view {}. ' 'Can be created now in {}'.format(
+        assert 'POST' in global_view().allowed_methods, 'Resource {} should be creatable in global list view {}. Can be created now in {}'.format(
             model, global_view, creatable_view
         )

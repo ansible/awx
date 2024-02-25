@@ -1,21 +1,28 @@
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { Route } from 'react-router-dom';
+import { Route, Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
+import * as ConfigContext from 'contexts/Config';
+import { within, render, waitFor, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import userEvent from '@testing-library/user-event';
+import { InstanceGroupsAPI, InstancesAPI, SettingsAPI } from 'api';
 
-import { InstancesAPI, SettingsAPI } from 'api';
-import {
-  mountWithContexts,
-  waitForElement,
-} from '../../../../testUtils/enzymeHelpers';
-
+import { I18nProvider } from '@lingui/react';
+import { i18n } from '@lingui/core';
+import { en } from 'make-plural/plurals';
+import english from '../../../../src/locales/en/messages';
 import InstanceList from './InstanceList';
 
-jest.mock('../../../api');
+jest.mock('../../../api/models/InstanceGroups');
+jest.mock('../../../api/models/Instances');
+jest.mock('../../../api/models/Settings');
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => ({
     id: 1,
+  }),
+  useLocation: () => ({
+    search: '',
   }),
 }));
 
@@ -39,6 +46,7 @@ const instances = [
     mem_capacity: 1,
     enabled: true,
     managed_by_policy: true,
+    hostname: 'alex',
   },
   {
     id: 2,
@@ -59,6 +67,7 @@ const instances = [
     mem_capacity: 1,
     enabled: true,
     managed_by_policy: false,
+    hostname: 'athena',
   },
   {
     id: 3,
@@ -79,6 +88,7 @@ const instances = [
     mem_capacity: 1,
     enabled: false,
     managed_by_policy: true,
+    hostname: 'apollo',
   },
   {
     id: 4,
@@ -99,15 +109,26 @@ const instances = [
     mem_capacity: 1,
     enabled: false,
     managed_by_policy: true,
+    hostname: 'Eno',
   },
 ];
 
-describe('<InstanceList/>', () => {
-  let wrapper;
-
+describe('<InstanceList />, React testing library tests', () => {
+  const user = userEvent.setup();
   const options = { data: { actions: { POST: true } } };
 
-  beforeEach(async () => {
+  const history = createMemoryHistory({
+    initialEntries: ['/instances'],
+  });
+
+  i18n.loadLocaleData({ en: { plurals: en } });
+  i18n.load({ en: english });
+  i18n.activate('en');
+
+  const customRender = (ui, isK8s = true) => {
+    jest.spyOn(ConfigContext, 'useConfig').mockImplementation(() => ({
+      me: { is_superuser: true },
+    }));
     InstancesAPI.read.mockResolvedValue({
       data: {
         count: instances.length,
@@ -115,57 +136,82 @@ describe('<InstanceList/>', () => {
       },
     });
     InstancesAPI.readOptions.mockResolvedValue(options);
-    SettingsAPI.readCategory.mockResolvedValue({ data: { IS_K8S: false } });
-    const history = createMemoryHistory({
-      initialEntries: ['/instances/1'],
+    SettingsAPI.readCategory.mockResolvedValue({ data: { IS_K8S: isK8s } });
+
+    InstanceGroupsAPI.read.mockResolvedValue({
+      data: { results: [{ id: 1 }], count: 1 },
     });
-    await act(async () => {
-      wrapper = mountWithContexts(
-        <Route path="/instances/:id">
-          <InstanceList />
-        </Route>,
-        {
-          context: {
-            router: { history, route: { location: history.location } },
+
+    return render(
+      <I18nProvider i18n={i18n}>
+        <Router history={history}>
+          <Route path="/instances">{ui} </Route>
+        </Router>
+      </I18nProvider>
+    );
+  };
+
+  test('Should show error modal on failure to deprovision instance', async () => {
+    InstancesAPI.deprovisionInstance.mockRejectedValue(
+      new Error({
+        response: {
+          config: {
+            method: 'post',
+            url: '/api/v2/instances',
           },
-        }
-      );
+          data: 'An error occurred',
+          status: 403,
+        },
+      })
+    );
+
+    await waitFor(() => customRender(<InstanceList />));
+
+    const selectedRowItem = screen.getByRole('checkbox', {
+      name: 'Select row 2',
     });
-    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
+    const button = screen.getByRole('button', { name: 'Remove' });
+
+    await user.click(selectedRowItem);
+    await user.click(button);
+
+    await waitFor(() => screen.getByRole('dialog'));
+    const deprovisionModal = screen.getByRole('dialog');
+    const removeButton = within(deprovisionModal).getByRole('button', {
+      name: 'Confirm remove',
+    });
+
+    await user.click(removeButton);
+    await waitFor(() =>
+      expect(InstancesAPI.deprovisionInstance).toBeCalledWith(3)
+    );
+    screen.getByText('Error!');
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  test('should have data fetched', () => {
-    expect(wrapper.find('InstanceList').length).toBe(1);
-  });
-
-  test('should fetch instances from the api and render them in the list', () => {
+  test('Should fetch instances from the api and render them in the list', async () => {
+    await waitFor(() => customRender(<InstanceList />));
     expect(InstancesAPI.read).toHaveBeenCalled();
     expect(InstancesAPI.readOptions).toHaveBeenCalled();
-    expect(wrapper.find('InstanceListItem').length).toBe(4);
+    expect(screen.getAllByTestId('instances list item')).toHaveLength(4);
   });
 
-  test('Should run health check', async () => {
-    // Ensures health check button is disabled on mount
-    expect(
-      wrapper.find('Button[ouiaId="health-check"]').prop('isDisabled')
-    ).toBe(true);
-    await act(async () =>
-      wrapper.find('DataListToolbar').prop('onSelectAll')(instances)
+  test('Should run health check, and inform user to reload the page', async () => {
+    await waitFor(() => customRender(<InstanceList />));
+    const selectedRowItem = screen.getByRole('checkbox', {
+      name: 'Select row 2',
+    });
+    const button = screen.getByRole('button', { name: 'Run health check' });
+
+    await user.click(selectedRowItem);
+    await user.click(button);
+
+    await waitFor(() =>
+      screen.getByText(
+        'Health check request(s) submitted. Please wait and reload the page.'
+      )
     );
-    wrapper.update();
-    await act(async () =>
-      wrapper.find('input[aria-label="Select row 3"]').prop('onChange')(false)
-    );
-    wrapper.update();
-    await act(async () =>
-      wrapper.find('Button[ouiaId="health-check"]').prop('onClick')()
-    );
-    expect(InstancesAPI.healthCheck).toBeCalledTimes(3);
   });
+
   test('Should render health check error', async () => {
     InstancesAPI.healthCheck.mockRejectedValue(
       new Error({
@@ -179,68 +225,26 @@ describe('<InstanceList/>', () => {
         },
       })
     );
-    expect(
-      wrapper.find('Button[ouiaId="health-check"]').prop('isDisabled')
-    ).toBe(true);
-    await act(async () =>
-      wrapper.find('input[aria-label="Select row 1"]').prop('onChange')(true)
-    );
-    wrapper.update();
-    expect(
-      wrapper.find('Button[ouiaId="health-check"]').prop('isDisabled')
-    ).toBe(false);
-    await act(async () =>
-      wrapper.find('Button[ouiaId="health-check"]').prop('onClick')()
-    );
-    wrapper.update();
-    expect(wrapper.find('AlertModal')).toHaveLength(1);
-  });
-  test('Should not show Add button', () => {
-    expect(wrapper.find('Button[ouiaId="instances-add-button"]')).toHaveLength(
-      0
-    );
-  });
-});
 
-describe('InstanceList should show Add button', () => {
-  let wrapper;
-
-  const options = { data: { actions: { POST: true } } };
-
-  beforeEach(async () => {
-    InstancesAPI.read.mockResolvedValue({
-      data: {
-        count: instances.length,
-        results: instances,
-      },
+    await waitFor(() => customRender(<InstanceList />));
+    const selectedRowItem = screen.getByRole('checkbox', {
+      name: 'Select row 2',
     });
-    InstancesAPI.readOptions.mockResolvedValue(options);
-    SettingsAPI.readCategory.mockResolvedValue({ data: { IS_K8S: true } });
-    const history = createMemoryHistory({
-      initialEntries: ['/instances/1'],
-    });
-    await act(async () => {
-      wrapper = mountWithContexts(
-        <Route path="/instances/:id">
-          <InstanceList />
-        </Route>,
-        {
-          context: {
-            router: { history, route: { location: history.location } },
-          },
-        }
-      );
-    });
-    await waitForElement(wrapper, 'ContentLoading', (el) => el.length === 0);
+    const button = screen.getByRole('button', { name: 'Run health check' });
+
+    await user.click(selectedRowItem);
+    await user.click(button);
+
+    expect(screen.getByText('Error!')).toBeInTheDocument();
+  });
+  test('Should show Add button', async () => {
+    await waitFor(() => customRender(<InstanceList />));
+    expect(screen.getByRole('link', { name: 'Add' })).toBeInTheDocument();
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  test('Should show Add button', () => {
-    expect(wrapper.find('Button[ouiaId="instances-add-button"]')).toHaveLength(
-      1
-    );
+  test('Should not show Add button', async () => {
+    await waitFor(() => customRender(<InstanceList />, false));
+    const add = screen.queryByText('Add');
+    expect(add).toBeNull();
   });
 });

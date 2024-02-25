@@ -329,3 +329,21 @@ def test_galaxy_credential_association(alice, admin, organization, post, get):
         'Public Galaxy 4',
         'Public Galaxy 5',
     ]
+
+
+@pytest.mark.django_db
+def test_org_admin_credential_count(org_admin, admin, organization, post, get):
+    galaxy = CredentialType.defaults['galaxy_api_token']()
+    galaxy.save()
+
+    for i in range(3):
+        cred = Credential.objects.create(credential_type=galaxy, name=f'test_{i}', inputs={'url': 'https://galaxy.ansible.com/'})
+        url = reverse('api:organization_galaxy_credentials_list', kwargs={'pk': organization.pk})
+        post(url, {'associate': True, 'id': cred.pk}, user=admin, expect=204)
+    # org admin should see all associated galaxy credentials
+    resp = get(url, user=org_admin)
+    assert resp.data['count'] == 3
+    # removing one to validate new count
+    post(url, {'disassociate': True, 'id': Credential.objects.get(name='test_1').pk}, user=admin, expect=204)
+    resp_new = get(url, user=org_admin)
+    assert resp_new.data['count'] == 2

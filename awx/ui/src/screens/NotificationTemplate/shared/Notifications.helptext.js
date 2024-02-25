@@ -35,7 +35,7 @@ const helpText = () => ({
       <a
         href="https://docs.djangoproject.com/en/4.0/ref/settings/#std:setting-EMAIL_USE_TLS"
         target="_blank"
-        rel="noreferrer"
+        rel="noopener noreferrer"
       >{t`documentation`}</a>{' '}
       <span>{t`for more information.`}</span>
     </>

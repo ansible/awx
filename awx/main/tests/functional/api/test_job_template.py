@@ -3,7 +3,7 @@ import pytest
 # AWX
 from awx.api.serializers import JobTemplateSerializer
 from awx.api.versioning import reverse
-from awx.main.models import Job, JobTemplate, CredentialType, WorkflowJobTemplate, Organization, Project
+from awx.main.models import Job, JobTemplate, CredentialType, WorkflowJobTemplate, Organization, Project, Inventory
 from awx.main.migrations import _save_password_keys as save_password_keys
 
 # Django
@@ -353,3 +353,19 @@ def test_job_template_branch_prompt_error(project, inventory, post, admin_user):
         expect=400,
     )
     assert 'Project does not allow overriding branch' in str(r.data['ask_scm_branch_on_launch'])
+
+
+@pytest.mark.django_db
+def test_job_template_missing_inventory(project, inventory, admin_user, post):
+    jt = JobTemplate.objects.create(
+        name='test-jt', inventory=inventory, ask_inventory_on_launch=True, project=project, playbook='helloworld.yml', host_config_key='abcd'
+    )
+    Inventory.objects.get(pk=inventory.pk).delete()
+    r = post(
+        url=reverse('api:job_template_callback', kwargs={'pk': jt.pk}),
+        data={'host_config_key': 'abcd'},
+        user=admin_user,
+        expect=400,
+    )
+    assert r.status_code == 400
+    assert "Cannot start automatically, an inventory is required." in str(r.data)

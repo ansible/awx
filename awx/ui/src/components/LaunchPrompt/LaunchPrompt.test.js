@@ -69,6 +69,20 @@ describe('LaunchPrompt', () => {
         spec: [{ type: 'text', variable: 'foo' }],
       },
     });
+    JobTemplatesAPI.readCredentials.mockResolvedValue({
+      data: {
+        results: [
+          {
+            id: 5,
+            name: 'cred that prompts',
+            credential_type: 1,
+            inputs: {
+              password: 'ASK',
+            },
+          },
+        ],
+      },
+    });
     InstanceGroupsAPI.read.mockResolvedValue({
       data: {
         results: [
@@ -212,6 +226,16 @@ describe('LaunchPrompt', () => {
               ],
             },
           }}
+          resourceDefaultCredentials={[
+            {
+              id: 5,
+              name: 'cred that prompts',
+              credential_type: 1,
+              inputs: {
+                password: 'ASK',
+              },
+            },
+          ]}
           onLaunch={noop}
           onCancel={noop}
           surveyConfig={{
@@ -289,6 +313,16 @@ describe('LaunchPrompt', () => {
           resource={resource}
           onLaunch={noop}
           onCancel={noop}
+          resourceDefaultCredentials={[
+            {
+              id: 5,
+              name: 'cred that prompts',
+              credential_type: 1,
+              inputs: {
+                password: 'ASK',
+              },
+            },
+          ]}
         />
       );
     });

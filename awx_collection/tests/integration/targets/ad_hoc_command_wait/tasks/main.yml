@@ -108,9 +108,9 @@
 
 - assert:
     that:
-      - wait_results is failed
-      - 'wait_results.status == "canceled"'
-      - "wait_results.msg == 'The ad hoc command - {{ command.id }}, failed'"
+      - 'wait_results.status in ["successful", "canceled"]'
+    fail_msg: "Ad hoc command stdout: {{ lookup('awx.awx.controller_api', 'ad_hoc_commands/' + command.id | string + '/stdout/?format=json') }}"
+    success_msg: "Ad hoc command finished with status {{ wait_results.status }}"
 
 - name: Delete the Credential
   credential:

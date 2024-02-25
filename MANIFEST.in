@@ -22,7 +22,7 @@ recursive-exclude awx/settings local_settings.py*
 include tools/scripts/request_tower_configuration.sh
 include tools/scripts/request_tower_configuration.ps1
 include tools/scripts/automation-controller-service
-include tools/scripts/failure-event-handler
+include tools/scripts/rsyslog-4xx-recovery
 include tools/scripts/awx-python
 include awx/playbooks/library/mkfifo.py
 include tools/sosreport/*

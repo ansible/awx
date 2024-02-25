@@ -91,7 +91,7 @@ function AdHocCredentialStep({ credentialTypeId }) {
       {meta.touched && meta.error && (
         <CredentialErrorAlert variant="danger" isInline title={meta.error} />
       )}
-      <Form>
+      <Form autoComplete="off">
         <FormGroup
           fieldId="credential"
           label={t`Machine Credential`}
@@ -115,16 +115,16 @@ function AdHocCredentialStep({ credentialTypeId }) {
             searchColumns={[
               {
                 name: t`Name`,
-                key: 'name',
+                key: 'name__icontains',
                 isDefault: true,
               },
               {
                 name: t`Created By (Username)`,
-                key: 'created_by__username',
+                key: 'created_by__username__icontains',
               },
               {
                 name: t`Modified By (Username)`,
-                key: 'modified_by__username',
+                key: 'modified_by__username__icontains',
               },
             ]}
             sortColumns={[

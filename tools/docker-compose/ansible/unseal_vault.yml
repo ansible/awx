@@ -1,0 +1,13 @@
+---
+- name: Run tasks post startup
+  hosts: localhost
+  gather_facts: False
+  tasks:
+    - name: Unseal the vault
+      include_role:
+        name: vault
+        tasks_from: unseal
+
+    - name: Display root token
+      debug:
+        var: Initial_Root_Token

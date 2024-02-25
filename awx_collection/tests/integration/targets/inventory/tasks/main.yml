@@ -2,6 +2,7 @@
 - name: Generate a test ID
   set_fact:
     test_id: "{{ lookup('password', '/dev/null chars=ascii_letters length=16') }}"
+  when: test_id is not defined
 
 - name: Generate names
   set_fact:
@@ -44,6 +45,45 @@
         instance_groups:
           - "{{ group_name1 }}"
         state: present
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Create an Inventory with exists
+      inventory:
+        name: "{{ inv_name1 }}"
+        organization: Default
+        instance_groups:
+          - "{{ group_name1 }}"
+        state: exists
+      register: result
+
+    - assert:
+        that:
+          - "result is not changed"
+
+    - name: Delete an Inventory
+      inventory:
+        name: "{{ inv_name1 }}"
+        organization: Default
+        instance_groups:
+          - "{{ group_name1 }}"
+        state: absent
+      register: result
+
+    - assert:
+        that:
+          - "result is changed"
+
+    - name: Create an Inventory with exists
+      inventory:
+        name: "{{ inv_name1 }}"
+        organization: Default
+        instance_groups:
+          - "{{ group_name1 }}"
+        state: exists
       register: result
 
     - assert:

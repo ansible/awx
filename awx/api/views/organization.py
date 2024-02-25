@@ -61,12 +61,6 @@ class OrganizationList(OrganizationCountsMixin, ListCreateAPIView):
     model = Organization
     serializer_class = OrganizationSerializer
 
-    def get_queryset(self):
-        qs = Organization.accessible_objects(self.request.user, 'read_role')
-        qs = qs.select_related('admin_role', 'auditor_role', 'member_role', 'read_role')
-        qs = qs.prefetch_related('created_by', 'modified_by')
-        return qs
-
 
 class OrganizationDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
     model = Organization
@@ -207,6 +201,7 @@ class OrganizationInstanceGroupsList(SubListAttachDetachAPIView):
     serializer_class = InstanceGroupSerializer
     parent_model = Organization
     relationship = 'instance_groups'
+    filter_read_permission = False
 
 
 class OrganizationGalaxyCredentialsList(SubListAttachDetachAPIView):
@@ -214,6 +209,7 @@ class OrganizationGalaxyCredentialsList(SubListAttachDetachAPIView):
     serializer_class = CredentialSerializer
     parent_model = Organization
     relationship = 'galaxy_credentials'
+    filter_read_permission = False
 
     def is_valid_relation(self, parent, sub, created=False):
         if sub.kind != 'galaxy_api_token':

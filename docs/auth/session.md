@@ -7,13 +7,12 @@ Session authentication is a safer way of utilizing HTTP(S) cookies. Theoreticall
 information from the cookie payload.
 
 Session authentication, on the other hand, sets a single `awx_sessionid` cookie. The `awx_sessionid`
-is *a random string which will be mapped to user authentication information by the server*. Crackers who
+is _a random string which will be mapped to user authentication information by the server_. Crackers who
 hijack cookies will only get the `awx_sessionid` itself, which does not imply any critical user info, is valid only for
 a limited time, and can be revoked at any time.
 
-> Note: The CSRF token will by default allow HTTP.  To increase security, the `CSRF_COOKIE_SECURE` setting should
-be set to True.
-
+> Note: The CSRF token will by default allow HTTP. To increase security, the `CSRF_COOKIE_SECURE` setting should
+> be set to True.
 
 ## Usage
 
@@ -27,14 +26,16 @@ to `/api/login/` to actually log the user in. The return code of a successful lo
 successful login, the browser will be redirected; the redirected destination is determined by the `next` form
 item described below.
 
-It should be noted that the POST body of `/api/login/` is *not* in JSON, but in HTTP form format. Four items should
+It should be noted that the POST body of `/api/login/` is _not_ in JSON, but in HTTP form format. Four items should
 be provided in the form:
-* `username`: The username of the user trying to log in.
-* `password`: The password of the user trying to log in.
-* `next`: The path of the redirect destination, in API browser `"/api/"` is used.
-* `csrfmiddlewaretoken`: The CSRF token, usually populated by using Django template `{% csrf_token %}`.
+
+- `username`: The username of the user trying to log in.
+- `password`: The password of the user trying to log in.
+- `next`: The path of the redirect destination, in API browser `"/api/"` is used.
+- `csrfmiddlewaretoken`: The CSRF token, usually populated by using Django template `{% csrf_token %}`.
 
 The `awx_session_id` is provided as a return `Set-Cookie` header. Here is a typical one:
+
 ```
 Set-Cookie: awx_sessionid=lwan8l5ynhrqvps280rg5upp7n3yp6ds; expires=Tue, 21-Nov-2017 16:33:13 GMT; httponly; Max-Age=1209600; Path=/
 ```
@@ -49,10 +50,11 @@ The name of the cookie is configurable by Tower Configuration setting `SESSION_C
 
 The duration of the cookie is configurable by Tower Configuration setting `SESSION_COOKIE_AGE` under
 category `authentication`. It is an integer denoting the number of seconds the session cookie should
-live. The default session cookie age is two weeks.  
+live. The default session cookie age is two weeks.
 
 After a valid session is acquired, a client should provide the `awx_sessionid` as a cookie for subsequent requests
 in order to be authenticated. For example:
+
 ```
 Cookie: awx_sessionid=lwan8l5ynhrqvps280rg5upp7n3yp6ds; ...
 ```
@@ -74,17 +76,16 @@ invalidated sessions. If a client finds its session in that list, it should try 
 Unlike tokens, sessions are meant to be short-lived and UI-only; therefore, whenever a user's password
 is updated, all sessions she owned will be invalidated and deleted.
 
-
 ## Acceptance Criteria
 
-* Users should be able to log in via the `/api/login/` endpoint by correctly providing all necessary fields.
-* Logged-in users should be able to authenticate themselves by providing correct session auth info.
-* Logged-in users should be able to log out via `/api/logout/`.
-* The duration of a session cookie should be configurable by `SESSION_COOKIE_AGE`.
-* The maximum number of concurrent login for one user should be configurable by `SESSIONS_PER_USER`,
+- Users should be able to log in via the `/api/login/` endpoint by correctly providing all necessary fields.
+- Logged-in users should be able to authenticate themselves by providing correct session auth info.
+- Logged-in users should be able to log out via `/api/logout/`.
+- The duration of a session cookie should be configurable by `SESSION_COOKIE_AGE`.
+- The maximum number of concurrent login for one user should be configurable by `SESSIONS_PER_USER`,
   and over-limit user sessions should be warned by websocket.
-* When a user's password is changed, all her sessions should be invalidated and deleted.
-* User should not be able to authenticate by HTTPS(S) request nor websocket connection using invalid
+- When a user's password is changed, all her sessions should be invalidated and deleted.
+- User should not be able to authenticate by HTTPS(S) request nor websocket connection using invalid
   sessions.
-* No existing behavior, like job runs, inventory updates or callback receiver, should be affected
+- No existing behavior, like job runs, inventory updates or callback receiver, should be affected
   by session auth.

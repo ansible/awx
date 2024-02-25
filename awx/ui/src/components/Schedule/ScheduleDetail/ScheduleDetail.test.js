@@ -587,4 +587,31 @@ describe('<ScheduleDetail />', () => {
       (el) => el.prop('isDisabled') === true
     );
   });
+  test('should display warning for unsupported recurrence rules ', async () => {
+    const unsupportedSchedule = {
+      ...schedule,
+      rrule:
+        'DTSTART:20221220T161500Z RRULE:FREQ=HOURLY;INTERVAL=1 EXRULE:FREQ=HOURLY;INTERVAL=1;BYDAY=TU;BYMONTHDAY=1,2,3,4,5,6,7 EXRULE:FREQ=HOURLY;INTERVAL=1;BYDAY=WE;BYMONTHDAY=2,3,4,5,6,7,8',
+    };
+    await act(async () => {
+      wrapper = mountWithContexts(
+        <Route
+          path="/templates/job_template/:id/schedules/:scheduleId"
+          component={() => <ScheduleDetail schedule={unsupportedSchedule} />}
+        />,
+        {
+          context: {
+            router: {
+              history,
+              route: {
+                location: history.location,
+                match: { params: { id: 1 } },
+              },
+            },
+          },
+        }
+      );
+    });
+    expect(wrapper.find('UnsupportedRRuleAlert').length).toBe(1);
+  });
 });

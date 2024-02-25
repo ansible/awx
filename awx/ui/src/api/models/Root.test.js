@@ -35,7 +35,7 @@ describe('RootAPI', () => {
 
     expect(mockHttp.post).toHaveBeenCalledTimes(2);
     expect(mockHttp.post.mock.calls[0]).toContainEqual(
-      'username=foo&password=bar&next=%2Fapi%2Fv2%2Fconfig%2F'
+      'username=foo&password=bar&next=api%2Fv2%2Fconfig%2F'
     );
     expect(mockHttp.post.mock.calls[1]).toContainEqual(
       'username=foo&password=bar&next=baz'

@@ -48,7 +48,6 @@ A list of _valid_ zone identifiers (which can vary by system) can be found at:
         ...
     ]
 
-
 ## UNTIL and Timezones
 
 `DTSTART` values provided to AWX _must_ provide timezone information (they may
@@ -58,26 +57,25 @@ Additionally, RFC5545 specifies that:
 
 > Furthermore, if the "DTSTART" property is specified as a date with local
 > time, then the UNTIL rule part MUST also be specified as a date with local
-> time.  If the "DTSTART" property is specified as a date with UTC time or
+> time. If the "DTSTART" property is specified as a date with UTC time or
 > a date with local time and time zone reference, then the UNTIL rule part
 > MUST be specified as a date with UTC time.
 
-Given this, `RRULE` values that specify `UNTIL` datetimes must *always* be in UTC.
+Given this, `RRULE` values that specify `UNTIL` datetimes must _always_ be in UTC.
 
 Valid:
-    `DTSTART:20180601T120000Z RRULE:FREQ=DAILY;INTERVAL=1;UNTIL=20180606T170000Z`
-    `DTSTART;TZID=America/New_York:20180601T120000 RRULE:FREQ=DAILY;INTERVAL=1;UNTIL=20180606T170000Z`
+`DTSTART:20180601T120000Z RRULE:FREQ=DAILY;INTERVAL=1;UNTIL=20180606T170000Z`
+`DTSTART;TZID=America/New_York:20180601T120000 RRULE:FREQ=DAILY;INTERVAL=1;UNTIL=20180606T170000Z`
 
 Not Valid:
 
     `DTSTART:20180601T120000Z RRULE:FREQ=DAILY;INTERVAL=1;UNTIL=20180606T170000`
     `DTSTART;TZID=America/New_York:20180601T120000 RRULE:FREQ=DAILY;INTERVAL=1;UNTIL=20180606T170000`
 
-
 ## Previewing Schedules
 
 AWX provides an endpoint for previewing the future dates and times for
-a specified `RRULE`.  A list of the next _ten_ occurrences will be returned in
+a specified `RRULE`. A list of the next _ten_ occurrences will be returned in
 local and UTC time:
 
     POST https://tower-host.example.org/api/v2/schedules/preview/
@@ -107,42 +105,40 @@ local and UTC time:
         ]
     }
 
-
 ## RRULE Limitations
 
 AWX implements the following constraints on top of the `RFC5545` specification:
 
-* The RRULE must start with the `DTSTART` attribute
-* At least one `RRULE` entry must be in the rrule
-* Strings with more than a single `DTSTART:` component are prohibited
-* The use of `RDATE` or `EXDATE`is prohibited
-* For any of the rules in the rrule:
-    * `Interval` must be included
-    * The use of `FREQ=SECONDLY` is prohibited
-    * The usage of a `BYDAY` with a prefixed number is prohibited
-    * The usage of both `COUNT` and `UNTIL` in the same rule is prohibited
-    * The use of `COUNT=` with a value over 999 is prohibited
+- The RRULE must start with the `DTSTART` attribute
+- At least one `RRULE` entry must be in the rrule
+- Strings with more than a single `DTSTART:` component are prohibited
+- The use of `RDATE` or `EXDATE`is prohibited
+- For any of the rules in the rrule:
+  - `Interval` must be included
+  - The use of `FREQ=SECONDLY` is prohibited
+  - The usage of a `BYDAY` with a prefixed number is prohibited
+  - The usage of both `COUNT` and `UNTIL` in the same rule is prohibited
+  - The use of `COUNT=` with a value over 999 is prohibited
 
 ## Implementation Details
 
 Any time an `awx.model.Schedule` is saved with a valid `rrule` value, the
-`dateutil` library is used to burst out a list of all occurrences.  From here,
+`dateutil` library is used to burst out a list of all occurrences. From here,
 the following dates are saved in the database:
 
-* `main_schedule.rrule` - the original `RRULE` string provided by the user
-* `main_schedule.dtstart` - the _first_ datetime in the list of all occurrences (coerced to UTC)
-* `main_schedule.dtend` - the _last_ datetime in the list of all occurrences (coerced to UTC)
-* `main_schedule.next_run` - the _next_ datetime in list after `utcnow()` (coerced to UTC)
+- `main_schedule.rrule` - the original `RRULE` string provided by the user
+- `main_schedule.dtstart` - the _first_ datetime in the list of all occurrences (coerced to UTC)
+- `main_schedule.dtend` - the _last_ datetime in the list of all occurrences (coerced to UTC)
+- `main_schedule.next_run` - the _next_ datetime in list after `utcnow()` (coerced to UTC)
 
 AWX makes use of [Celery Periodic Tasks
 (celerybeat)](http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html)
 to run a periodic task that discovers new jobs that need to run at a regular
-interval (by default, every 30 seconds).  When this task starts, it queries the
+interval (by default, every 30 seconds). When this task starts, it queries the
 database for Schedules where `Schedule.next_run` is between
-`scheduler_last_runtime()` and `utcnow()`.  For each of these, a new job is
+`scheduler_last_runtime()` and `utcnow()`. For each of these, a new job is
 launched, and `Schedule.next_run` is changed to the next chronological datetime
-in the list of all occurences.
-
+in the list of all occurrences.
 
 ## Complex RRULE Examples
 
@@ -161,5 +157,3 @@ Every 15 minutes Monday to Friday from 10:01am to 6:02pm (inclusive):
 Any Saturday whose month day is between 12 and 18:
 
     DTSTART:20191219T130551Z RRULE:FREQ=MONTHLY;INTERVAL=1;BYDAY=SA;BYMONTHDAY=12,13,14,15,16,17,18
-
-

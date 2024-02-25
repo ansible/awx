@@ -2,9 +2,11 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
+import random
+
 import pytest
 
-from awx.main.models import ActivityStream, JobTemplate, Job, NotificationTemplate
+from awx.main.models import ActivityStream, JobTemplate, Job, NotificationTemplate, Label
 
 
 @pytest.mark.django_db
@@ -241,6 +243,42 @@ def test_job_template_with_survey_encrypted_default(run_module, admin_user, proj
     silence_warning.assert_called_once_with(
         "The field survey_spec of job_template {0} has encrypted data and " "may inaccurately report task is changed.".format(result['id'])
     )
+
+
+@pytest.mark.django_db
+def test_associate_changed_status(run_module, admin_user, organization, project):
+    # create JT and labels
+    jt = JobTemplate.objects.create(name='foo', project=project, playbook='helloworld.yml')
+    labels = [Label.objects.create(name=f'foo{i}', organization=organization) for i in range(10)]
+
+    # sanity: no-op without labels involved
+    result = run_module('job_template', dict(name=jt.name, playbook='helloworld.yml'), admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+    assert result['changed'] is False
+
+    # first time adding labels, this should make the label list equal to what was specified
+    result = run_module('job_template', dict(name=jt.name, playbook='helloworld.yml', labels=[l.name for l in labels]), admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+    assert result['changed']
+    assert set(l.id for l in jt.labels.all()) == set(l.id for l in labels)
+
+    # shuffling the labels should not result in any change
+    random.shuffle(labels)
+    result = run_module('job_template', dict(name=jt.name, playbook='helloworld.yml', labels=[l.name for l in labels]), admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+    assert result['changed'] is False
+
+    # not specifying labels should not change labels
+    result = run_module('job_template', dict(name=jt.name, playbook='helloworld.yml'), admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+    assert result['changed'] is False
+
+    # should be able to remove only some labels
+    fewer_labels = labels[:7]
+    result = run_module('job_template', dict(name=jt.name, playbook='helloworld.yml', labels=[l.name for l in fewer_labels]), admin_user)
+    assert not result.get('failed', False), result.get('msg', result)
+    assert result['changed']
+    assert set(l.id for l in jt.labels.all()) == set(l.id for l in fewer_labels)
 
 
 @pytest.mark.django_db
