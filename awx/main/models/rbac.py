@@ -192,10 +192,7 @@ class Role(models.Model):
                 return True
 
             if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
-                if self.role_field not in to_permissions and self.content_object and self.content_object._meta.model_name == 'organization':
-                    # valid alternative for narrow exceptions with org roles
-                    if self.role_field not in org_role_to_permission:
-                        raise Exception(f'org {self.role_field} evaluated but not a translatable permission')
+                if self.content_object and self.content_object._meta.model_name == 'organization' and self.role_field in org_role_to_permission:
                     codename = org_role_to_permission[self.role_field]
 
                     return accessor.has_obj_perm(self.content_object, codename)
