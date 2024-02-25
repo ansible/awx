@@ -76,12 +76,7 @@ class ResourceMixin(models.Model):
 
                 codename = org_role_to_permission[role_field]
 
-                return (
-                    ObjectRole.objects.filter(role_definition__permissions__codename=codename, content_type=ContentType.objects.get_for_model(cls))
-                    .annotate(int_object_id=Cast('object_id', models.IntegerField()))
-                    .values_list('int_object_id')
-                    .distinct()
-                )
+                return cls.access_ids_qs(accessor, codename, content_types=content_types)
             return cls.access_ids_qs(accessor, to_permissions[role_field], content_types=content_types)
         if accessor._meta.model_name == 'user':
             ancestor_roles = accessor.roles.all()
