@@ -1805,15 +1805,7 @@ class JobAccess(BaseAccess):
                     return True
 
         # Standard permissions model without job template involved
-        # NOTE: this is the best we can do without caching way more permissions
-        from django.contrib.contenttypes.models import ContentType
-
-        filter_kwargs = dict(
-            content_type_id=ContentType.objects.get_for_model(Organization),
-            object_id=obj.organization_id,
-            role_definition__permissions__codename='execute_jobtemplate',
-        )
-        if self.user.has_roles.filter(**filter_kwargs).exists():
+        if obj.organization and self.user in obj.organization.execute_role:
             return True
         elif not (obj.job_template or obj.organization):
             raise PermissionDenied(_('Job has been orphaned from its job template and organization.'))
