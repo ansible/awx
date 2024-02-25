@@ -1161,5 +1161,8 @@ ANSIBLE_BASE_CREATOR_DEFAULTS = ['change', 'delete', 'execute', 'use', 'adhoc', 
 # This is a stopgap, will delete after resource registry integration
 ANSIBLE_BASE_SERVICE_PREFIX = "awx"
 
+# Temporary, for old roles API compatibility, save child permissions at organization level
+ANSIBLE_BASE_CACHE_PARENT_PERMISSIONS = True
+
 # system username for django-ansible-base
 SYSTEM_USERNAME = None

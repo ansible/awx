@@ -13,7 +13,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.query import QuerySet
-from django.db.models.functions import Cast
 from django.utils.crypto import get_random_string
 from django.utils.translation import gettext_lazy as _
 
@@ -67,21 +66,16 @@ class ResourceMixin(models.Model):
     @staticmethod
     def _accessible_pk_qs(cls, accessor, role_field, content_types=None):
         if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
-            if role_field not in to_permissions and cls._meta.model_name == 'organization':
-                # superficial alternative for narrow exceptions with org roles
-                # I think this mostly applies to organization members, which is not fully defined yet
+            if cls._meta.model_name == 'organization' and role_field in org_role_to_permission:
+                # Organization roles can not use the DAB RBAC shortcuts
+                # like Organization.access_qs(user, 'change_jobtemplate') is needed
+                # not just Organization.access_qs(user, 'change') is needed
                 if accessor.is_superuser:
                     return cls.objects.values_list('id')
-                from ansible_base.rbac.models import ObjectRole
 
                 codename = org_role_to_permission[role_field]
 
-                return (
-                    ObjectRole.objects.filter(role_definition__permissions__codename=codename, content_type=ContentType.objects.get_for_model(cls))
-                    .annotate(int_object_id=Cast('object_id', models.IntegerField()))
-                    .values_list('int_object_id')
-                    .distinct()
-                )
+                return cls.access_ids_qs(accessor, codename, content_types=content_types)
             return cls.access_ids_qs(accessor, to_permissions[role_field], content_types=content_types)
         if accessor._meta.model_name == 'user':
             ancestor_roles = accessor.roles.all()
