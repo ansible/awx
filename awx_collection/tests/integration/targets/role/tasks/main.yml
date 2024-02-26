@@ -200,7 +200,7 @@
       role:
         users:
           - "{{ username }}2"
-        role: approval
+        role: approve
         workflow: test-role-workflow
         state: present
       register: result
