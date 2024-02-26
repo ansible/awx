@@ -73,9 +73,9 @@ def test_grant_workflow_approve_permission(run_module, admin_user, organization,
     assert not result.get('failed', False), result.get('msg', result)
 
     if state == 'present':
-        assert rando in wfjt.approve_role
+        assert rando in wfjt.approval_role
     else:
-        assert rando not in wfjt.approve_role
+        assert rando not in wfjt.approval_role
 
 
 @pytest.mark.django_db
