@@ -1,5 +1,12 @@
+adal==1.2.7
+    # via msrestazure
 aiohttp==3.9.3
-    # via -r /awx_devel/requirements/requirements.in
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   aiohttp-retry
+    #   twilio
+aiohttp-retry==2.8.3
+    # via twilio
 aioredis==1.3.1
     # via channels-redis
 aiosignal==1.3.1
@@ -53,6 +60,7 @@ azure-core==1.30.0
     #   azure-keyvault-certificates
     #   azure-keyvault-keys
     #   azure-keyvault-secrets
+    #   msrest
 azure-identity==1.15.0
     # via -r /awx_devel/requirements/requirements.in
 azure-keyvault==4.2.0
@@ -75,6 +83,7 @@ cachetools==5.3.2
     # via
     #   -r /awx_devel/requirements/requirements_git.txt
     #   kubernetes
+    #   msrest
     #   requests
 cffi==1.16.0
     # via cryptography
@@ -90,9 +99,10 @@ click==8.1.7
     # via receptorctl
 constantly==23.10.4
     # via twisted
-cryptography==42.0.7
+cryptography==41.0.6
     # via
     #   -r /awx_devel/requirements/requirements.in
+    #   adal
     #   autobahn
     #   azure-identity
     #   azure-keyvault-keys
@@ -211,6 +221,7 @@ isodate==0.6.1
     #   azure-keyvault-certificates
     #   azure-keyvault-keys
     #   azure-keyvault-secrets
+    #   msrest
     #   python3-saml
 jaraco-collections==5.0.0
     # via irc
@@ -268,6 +279,8 @@ msal-extensions==1.1.0
     # via azure-identity
 msgpack==1.0.7
     # via channels-redis
+msrest==0.7.1
+    # via msrestazure
 msrestazure==0.6.4
     # via -r /awx_devel/requirements/requirements.in
 multidict==6.0.5
@@ -329,6 +342,7 @@ pygerduty==0.38.3
     # via -r /awx_devel/requirements/requirements.in
 pyjwt[crypto]==2.8.0
     # via
+    #   adal
     #   django-ansible-base
     #   msal
     #   social-auth-core
@@ -347,6 +361,7 @@ python-daemon==3.0.1
     #   ansible-runner
 python-dateutil==2.8.2
     # via
+    #   adal
     #   botocore
     #   kubernetes
     #   receptorctl
@@ -388,11 +403,13 @@ referencing==0.33.0
 requests==2.31.0
     # via
     #   -r /awx_devel/requirements/requirements.in
+    #   adal
     #   azure-core
     #   django-ansible-base
     #   django-oauth-toolkit
     #   kubernetes
     #   msal
+    #   msrest
     #   python-dsv-sdk
     #   python-tss-sdk
     #   requests-oauthlib
@@ -401,6 +418,7 @@ requests==2.31.0
 requests-oauthlib==1.3.1
     # via
     #   kubernetes
+    #   msrest
     #   social-auth-core
 rpds-py==0.18.0
     # via
@@ -428,6 +446,7 @@ six==1.16.0
     #   ecdsa
     #   isodate
     #   kubernetes
+    #   msrestazure
     #   openshift
     #   pygerduty
     #   pyrad
