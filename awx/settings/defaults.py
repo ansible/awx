@@ -355,6 +355,7 @@ INSTALLED_APPS = [
     'ansible_base.rest_filters',
     'ansible_base.jwt_consumer',
     'ansible_base.resource_registry',
+]
 
 
 INTERNAL_IPS = ('127.0.0.1',)
