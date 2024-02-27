@@ -9,7 +9,7 @@ boto3
 botocore
 channels
 channels-redis==3.4.1  # see UPGRADE BLOCKERs
-cryptography>=41.0.6  # CVE-2023-49083
+cryptography>=41.0.7  # CVE-2023-49083
 Cython<3 # this is needed as a build dependency, one day we may have separated build deps
 daphne
 distro
