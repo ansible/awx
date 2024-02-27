@@ -52,3 +52,10 @@ def test_organization_level_permissions(organization, inventory):
     assert set(Organization.access_qs(u2, 'add_inventory')) == set()
     assert set(Organization.access_qs(u1, 'add_workflowjobtemplate')) == set()
     assert set(Organization.access_qs(u2, 'add_workflowjobtemplate')) == set([organization])
+
+
+@pytest.mark.django_db
+def test_organization_execute_role(organization, rando):
+    organization.execute_role.members.add(rando)
+    assert rando in organization.execute_role
+    assert set(Organization.accessible_objects(rando, 'execute_role')) == set([organization])
