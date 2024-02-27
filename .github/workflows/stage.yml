@@ -102,9 +102,9 @@ jobs:
 
       - name: tag awx-ee:latest with version input
         run: |
-          docker pull quay.io/ansible/awx-ee:latest
-          docker tag quay.io/ansible/awx-ee:latest ghcr.io/${{ github.repository_owner }}/awx-ee:${{ github.event.inputs.version }}
-          docker push ghcr.io/${{ github.repository_owner }}/awx-ee:${{ github.event.inputs.version }}
+          docker buildx imagetools create \
+            quay.io/ansible/awx-ee:latest \
+            --tag ghcr.io/${{ github.repository_owner }}/awx-ee:${{ github.event.inputs.version }}
 
       - name: Stage awx-operator image
         working-directory: awx-operator

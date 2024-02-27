@@ -784,7 +784,7 @@ msgstr "Branche à utiliser dans l’exécution de la tâche. Projet par défaut
 
 #: screens/Inventory/shared/Inventory.helptext.js:155
 msgid "Branch to use on inventory sync. Project default used if blank. Only allowed if project allow_override field is set to true."
-msgstr ""
+msgstr "Branche à utiliser pour la synchronisation de l'inventaire. La valeur par défaut du projet est utilisée si elle est vide. Cette option n'est autorisée que si le champ allow_override du projet est défini sur vrai."
 
 #: components/About/About.js:45
 msgid "Brand Image"
@@ -2832,7 +2832,7 @@ msgstr "Entrez les variables avec la syntaxe JSON ou YAML.  Consultez la documen
 
 #: screens/Inventory/shared/SmartInventoryForm.js:94
 msgid "Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Controller documentation for example syntax."
-msgstr ""
+msgstr "Entrez les variables d'inventaire en utilisant la syntaxe JSON ou YAML. Utilisez le bouton d'option pour basculer entre les deux. Référez-vous à la documentation du contrôleur Ansible pour les exemples de syntaxe."
 
 #: screens/CredentialType/CredentialTypeDetails/CredentialTypeDetails.js:87
 msgid "Environment variables or extra variables that specify the values a credential type can inject."
@@ -3015,7 +3015,7 @@ msgstr "Recherche exacte sur le champ d'identification."
 
 #: components/Search/RelatedLookupTypeInput.js:38
 msgid "Exact search on name field."
-msgstr ""
+msgstr "Recherche exacte sur le champ nom."
 
 #: screens/Project/shared/Project.helptext.js:23
 msgid "Example URLs for GIT Source Control include:"
@@ -3242,7 +3242,7 @@ msgstr "Jobs ayant échoué"
 
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:262
 msgid "Failed to approve one or more workflow approval."
-msgstr ""
+msgstr "Échec de l'approbation d'une ou plusieurs validations de flux de travail."
 
 #: screens/WorkflowApproval/shared/WorkflowApprovalButton.js:56
 msgid "Failed to approve {0}."
@@ -3474,7 +3474,7 @@ msgstr "N'a pas réussi à supprimer {name}."
 
 #: screens/WorkflowApproval/WorkflowApprovalList/WorkflowApprovalList.js:263
 msgid "Failed to deny one or more workflow approval."
-msgstr ""
+msgstr "Échec du refus d'une ou plusieurs validations de flux de travail."
 
 #: screens/WorkflowApproval/shared/WorkflowDenyButton.js:51
 msgid "Failed to deny {0}."
@@ -3520,7 +3520,7 @@ msgstr "Echec du lancement du Job."
 
 #: screens/Inventory/InventoryHosts/InventoryHostItem.js:121
 msgid "Failed to load related groups."
-msgstr ""
+msgstr "Impossible de charger les groupes associés."
 
 #: screens/Instances/InstanceDetail/InstanceDetail.js:388
 #: screens/Instances/InstanceList/InstanceList.js:266
@@ -3972,12 +3972,12 @@ msgstr "Demande(s) de bilan de santé soumise(s). Veuillez patienter et recharge
 #: screens/Instances/InstanceDetail/InstanceDetail.js:234
 #: screens/Instances/InstanceList/InstanceListItem.js:242
 msgid "Health checks are asynchronous tasks. See the"
-msgstr ""
+msgstr "Les bilans de santé sont des tâches asynchrones. Veuillez consulter la documentation pour plus d'informations."
 
 #: screens/InstanceGroup/Instances/InstanceList.js:286
 #: screens/Instances/InstanceList/InstanceList.js:219
 msgid "Health checks can only be run on execution nodes."
-msgstr ""
+msgstr "Les bilans de santé ne peuvent être exécutées que sur les nœuds d'exécution."
 
 #: components/StatusLabel/StatusLabel.js:42
 msgid "Healthy"
@@ -5048,7 +5048,7 @@ msgstr "Lancer"
 
 #: components/TemplateList/TemplateListItem.js:214
 msgid "Launch Template"
-msgstr "Lacer le modèle."
+msgstr "Lancer le modèle."
 
 #: screens/ManagementJob/ManagementJobList/LaunchManagementPrompt.js:32
 #: screens/ManagementJob/ManagementJobList/LaunchManagementPrompt.js:34
@@ -9637,7 +9637,7 @@ msgstr "Utilisateur"
 
 #: components/AppContainer/PageHeaderToolbar.js:160
 msgid "User Details"
-msgstr "Détails de l'erreur"
+msgstr "Détails de l'utilisateur"
 
 #: screens/Setting/SettingList.js:121
 #: screens/Setting/Settings.js:118

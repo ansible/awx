@@ -83,11 +83,15 @@ jobs:
 
       - name: Re-tag and promote awx image
         run: |
-          docker pull ghcr.io/${{ github.repository }}:${{ github.event.release.tag_name }}
-          docker tag ghcr.io/${{ github.repository }}:${{ github.event.release.tag_name }} quay.io/${{ github.repository }}:${{ github.event.release.tag_name }}
-          docker tag ghcr.io/${{ github.repository }}:${{ github.event.release.tag_name }} quay.io/${{ github.repository }}:latest
-          docker push quay.io/${{ github.repository }}:${{ github.event.release.tag_name }}
-          docker push quay.io/${{ github.repository }}:latest
-          docker pull ghcr.io/${{ github.repository_owner }}/awx-ee:${{ github.event.release.tag_name }}
-          docker tag ghcr.io/${{ github.repository_owner }}/awx-ee:${{ github.event.release.tag_name }} quay.io/${{ github.repository_owner }}/awx-ee:${{ github.event.release.tag_name }}
-          docker push quay.io/${{ github.repository_owner }}/awx-ee:${{ github.event.release.tag_name }}
+          docker buildx imagetools create \
+            ghcr.io/${{ github.repository }}:${{ github.event.release.tag_name }} \
+            --tag quay.io/${{ github.repository }}:${{ github.event.release.tag_name }}
+          docker buildx imagetools create \
+            ghcr.io/${{ github.repository }}:${{ github.event.release.tag_name }} \
+            --tag quay.io/${{ github.repository }}:latest
+
+      - name: Re-tag and promote awx-ee image
+        run: |
+          docker buildx imagetools create \
+            ghcr.io/${{ github.repository_owner }}/awx-ee:${{ github.event.release.tag_name }} \
+            --tag quay.io/${{ github.repository_owner }}/awx-ee:${{ github.event.release.tag_name }}

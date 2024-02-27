@@ -13,7 +13,7 @@ Scaling your mesh is only available on Openshift and Kubernetes (K8S) deployment
 
 Instances serve as nodes in your mesh topology. Automation mesh allows you to extend the footprint of your automation. Where you launch a job and where the ``ansible-playbook`` runs can be in different locations.
 
-.. image:: ../common/images/instances_mesh_concept.png
+.. image:: ../common/images/instances_mesh_concept.drawio.png
 	:alt: Site A pointing to Site B and dotted arrows to two hosts from Site B 
 
 Automation mesh is useful for:
@@ -23,7 +23,7 @@ Automation mesh is useful for:
 
 The nodes (control, hop, and execution instances) are interconnected via receptor, forming a virtual mesh.
 
-.. image:: ../common/images/instances_mesh_concept_with_nodes.png
+.. image:: ../common/images/instances_mesh_concept_with_nodes.drawio.png
 	:alt: Control node pointing to hop node, which is pointing to two execution nodes.  
 
 
@@ -78,11 +78,11 @@ Hop nodes can be added to sit between the control plane of AWX and standalone ex
 
 Below is an example of an AWX task pod with two execution nodes. Traffic to execution node 2 flows through a hop node that is setup between it and the control plane.
 
-.. image:: ../common/images/instances_awx_task_pods_hopnode.png
+.. image:: ../common/images/instances_awx_task_pods_hopnode.drawio.png
 	:alt: AWX task pod with a hop node between the control plane of AWX and standalone execution nodes.
 
 
-An example of a simple topology may look like the following:
+Below are sample values used to configure each node in a simple topology:
 
 .. list-table::
    :widths: 20 30 10 20 15
@@ -95,9 +95,9 @@ An example of a simple topology may look like the following:
      - Peers
    * - Control plane
      - awx-task-65d6d96987-mgn9j
-     - 27199
-     - True
-     - []
+     - n/a
+     - n/a
+     - [hop node]
    * - Hop node
      - awx-hop-node
      - 27199
@@ -107,7 +107,7 @@ An example of a simple topology may look like the following:
      - awx-example.com
      - n/a
      - False
-     - ["hop node"]    
+     - [hop node]  
 
 
 
@@ -117,11 +117,11 @@ Mesh topology
 Mesh ingress is a feature that allows remote nodes to connect inbound to the control plane. This is especially useful when creating remote nodes in restricted networking environments that disallow inbound traffic.
 
 
-.. image:: ../common/images/instances_mesh_ingress_topology.png
+.. image:: ../common/images/instances_mesh_ingress_topology.drawio.png
 	:alt: Mesh ingress architecture showing the peering relationship between nodes.
 
 
-An example of a topology that uses mesh ingress may look like the following:
+Below are sample values used to configure each node in a mesh ingress topology:
 
 .. list-table::
    :widths: 20 30 10 20 15
@@ -133,12 +133,12 @@ An example of a topology that uses mesh ingress may look like the following:
      - Peers from control nodes
      - Peers
    * - Control plane
-     - awx-task-xyz
-     - 27199
-     - True
-     - []
+     - awx-task-65d6d96987-mgn9j
+     - n/a
+     - n/a
+     - [hop node]
    * - Hop node
-     - awx-hop-node
+     - awx-mesh-ingress-1
      - 27199
      - True
      - []     
@@ -146,13 +146,14 @@ An example of a topology that uses mesh ingress may look like the following:
      - awx-example.com
      - n/a
      - False
-     - ["hop node"]     
+     - [hop node]  
+    
 
 In order to create a mesh ingress for AWX, see the `Mesh Ingress <https://ansible.readthedocs.io/projects/awx-operator/en/latest/user-guide/advanced-configuration/mesh-ingress.html>`_ chapter of the AWX Operator Documentation for information on setting up this type of topology. The last step is to create a remote execution node and add the execution node to an instance group in order for it to be used in your job execution. Whatever execution environment image used to run a playbook needs to be accessible for your remote execution node. Everything you are using in your playbook also needs to be accessible from this remote execution node.
 
 .. image:: ../common/images/instances-job-template-using-remote-execution-ig.png
-	:alt: Job template using the instance group with the execution node to run jobs.
-
+    :alt: Job template using the instance group with the execution node to run jobs.
+    :width: 1400px
 
 
 .. _ag_instances_add:
@@ -167,7 +168,8 @@ To create an instance in AWX:
 2. In the Instances list view, click the **Add** button and the Create new Instance window opens.
 
 .. image:: ../common/images/instances_create_new.png
-	:alt: Create a new instance form.
+    :alt: Create a new instance form.
+    :width: 1400px
 
 An instance has several attributes that may be configured:
 
@@ -189,7 +191,8 @@ An instance has several attributes that may be configured:
 Upon successful creation, the Details of the one of the created instances opens.
 
 .. image:: ../common/images/instances_create_details.png
-	:alt: Details of the newly created instance.
+    :alt: Details of the newly created instance.
+    :width: 1400px
 
 .. note::
 
@@ -198,7 +201,8 @@ Upon successful creation, the Details of the one of the created instances opens.
 4. Click the download button next to the **Install Bundle** field to download the tarball that contain files to allow AWX to make proper TCP connections to the remote machine.
 
 .. image:: ../common/images/instances_install_bundle.png
-	:alt: Instance details showing the Download button in the Install Bundle field of the Details tab.
+    :alt: Instance details showing the Download button in the Install Bundle field of the Details tab.
+    :width: 1400px
 
 5. Extract the downloaded ``tar.gz`` file from the location you downloaded it. The install bundle contains TLS certificates and keys, a certificate authority, and a proper Receptor configuration file. To facilitate that these files will be in the right location on the remote machine, the install bundle includes an ``install_receptor.yml`` playbook. The playbook requires the Receptor collection which can be obtained via:
 
@@ -236,12 +240,14 @@ Wait a few minutes for the periodic AWX task to do a health check against the ne
 9. To view other instances within the same topology or associate peers, click the **Peers** tab. 
 
 .. image:: ../common/images/instances_peers_tab.png
-	:alt: "Peers" tab showing two peers.
+    :alt: "Peers" tab showing two peers.
+    :width: 1400px
 
 To associate peers with your node, click the **Associate** button to open a dialog box of instances eligible for peering.
 
 .. image:: ../common/images/instances_associate_peer.png
-	:alt:  Instances available to peer with the example hop node.
+    :alt:  Instances available to peer with the example hop node.
+    :width: 1400px
 
 Execution nodes can peer with either hop nodes or other execution nodes. Hop nodes can only peer with execution nodes unless you check the **Peers from control nodes** check box from the **Options** field.
 
@@ -249,8 +255,8 @@ Execution nodes can peer with either hop nodes or other execution nodes. Hop nod
 
 	If you associate or disassociate a peer, a notification will inform you to re-run the install bundle from the Peer Detail view (the :ref:`ag_topology_viewer` has the download link).
 
-	.. image:: ../common/images/instances_associate_peer_reinstallmsg.png
-		:alt: Notification to re-run the installation bundle due to change in the peering. 
+    .. image:: ../common/images/instances_associate_peer_reinstallmsg.png
+      :alt: Notification to re-run the installation bundle due to change in the peering.
 
 You can remove an instance by clicking **Remove** in the Instances page, or by setting the instance ``node_state = deprovisioning`` via the API. Upon deleting, a pop-up message will appear to notify that you may need to re-run the install bundle to make sure things that were removed are no longer connected.
 
@@ -264,7 +270,8 @@ Manage instances
 Click **Instances** from the left side navigation menu to access the Instances list.
 
 .. image:: ../common/images/instances_list_view.png
-	:alt: List view of instances in AWX
+    :alt: List view of instances in AWX
+    :width: 1400px
 
 The Instances list displays all the current nodes in your topology, along with relevant details:
 
@@ -290,7 +297,9 @@ The Instances list displays all the current nodes in your topology, along with r
 From this page, you can add, remove or run health checks on your nodes. Use the check boxes next to an instance to select it to remove or run a health check against. When a button is grayed-out, you do not have permission for that particular action. Contact your Administrator to grant you the required level of access. If you are able to remove an instance, you will receive a prompt for confirmation, like the one below:
 
 .. image:: ../common/images/instances_delete_prompt.png
-	:alt: Prompt for deleting instances in AWX.
+  :alt: Prompt for deleting instances in AWX
+  :width: 1400px
+
 
 .. note::
 
@@ -303,7 +312,8 @@ Click **Remove** to confirm.
 If running a health check on an instance, at the top of the Details page, a message displays that the health check is in progress. 
 
 .. image:: ../common/images/instances_health_check.png
-	:alt: Health check for instances in AWX
+  :alt: Health check for instances in AWX
+  :width: 1400px
 
 Click **Reload** to refresh the instance status. 
 
@@ -311,13 +321,14 @@ Click **Reload** to refresh the instance status.
 
 	Health checks are ran asynchronously, and may take up to a minute for the instance status to update, even with a refresh. The status may or may not change after the health check. At the bottom of the Details page, a timer/clock icon displays next to the last known health check date and time stamp if the health check task is currently running.
 
-	.. image:: ../common/images/instances_health_check_pending.png
-		:alt: Health check for instance still in pending state.
+  .. image:: ../common/images/instances_health_check_pending.png
+    :alt: Health check for instance still in pending state.
 
 The example health check shows the status updates with an error on node 'one':
 
 .. image:: ../common/images/topology-viewer-instance-with-errors.png
-	:alt: Health check showing an error in one of the instances.
+  :alt: Health check showing an error in one of the instances.
+  :width: 1400px
 
 
 Using a custom Receptor CA

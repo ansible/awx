@@ -5,11 +5,12 @@ import logging
 import threading
 import time
 import urllib.parse
+from pathlib import Path
 
 from django.conf import settings
 from django.contrib.auth import logout
 from django.contrib.auth.models import User
-from django.db.migrations.executor import MigrationExecutor
+from django.db.migrations.recorder import MigrationRecorder
 from django.db import connection
 from django.shortcuts import redirect
 from django.apps import apps
@@ -17,9 +18,11 @@ from django.utils.deprecation import MiddlewareMixin
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse, resolve
 
+from awx.main import migrations
 from awx.main.utils.named_url_graph import generate_graph, GraphNode
 from awx.conf import fields, register
 from awx.main.utils.profiling import AWXProfiler
+from awx.main.utils.common import memoize
 
 
 logger = logging.getLogger('awx.main.middleware')
@@ -198,9 +201,22 @@ class URLModificationMiddleware(MiddlewareMixin):
             request.path_info = new_path
 
 
+@memoize(ttl=20)
+def is_migrating():
+    latest_number = 0
+    latest_name = ''
+    for migration_path in Path(migrations.__path__[0]).glob('[0-9]*.py'):
+        try:
+            migration_number = int(migration_path.name.split('_', 1)[0])
+        except ValueError:
+            continue
+        if migration_number > latest_number:
+            latest_number = migration_number
+            latest_name = migration_path.name[: -len('.py')]
+    return not MigrationRecorder(connection).migration_qs.filter(app='main', name=latest_name).exists()
+
+
 class MigrationRanCheckMiddleware(MiddlewareMixin):
     def process_request(self, request):
-        executor = MigrationExecutor(connection)
-        plan = executor.migration_plan(executor.loader.graph.leaf_nodes())
-        if bool(plan) and getattr(resolve(request.path), 'url_name', '') != 'migrations_notran':
+        if is_migrating() and getattr(resolve(request.path), 'url_name', '') != 'migrations_notran':
             return redirect(reverse("ui:migrations_notran"))

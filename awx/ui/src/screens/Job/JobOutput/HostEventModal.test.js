@@ -2,6 +2,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import HostEventModal from './HostEventModal';
+import { jsonToYaml } from 'util/yaml';
 
 const hostEvent = {
   changed: true,
@@ -167,6 +168,8 @@ const jsonValue = `{
   ]
 }`;
 
+const yamlValue = jsonToYaml(jsonValue);
+
 describe('HostEventModal', () => {
   test('initially renders successfully', () => {
     const wrapper = shallow(
@@ -187,7 +190,7 @@ describe('HostEventModal', () => {
       <HostEventModal hostEvent={hostEvent} onClose={() => {}} isOpen />
     );
 
-    expect(wrapper.find('Tabs Tab').length).toEqual(4);
+    expect(wrapper.find('Tabs Tab').length).toEqual(5);
   });
 
   test('should initially show details tab', () => {
@@ -287,7 +290,7 @@ describe('HostEventModal', () => {
     expect(codeEditor.prop('value')).toEqual(jsonValue);
   });
 
-  test('should display Standard Out tab content on tab click', () => {
+  test('should display YAML tab content on tab click', () => {
     const wrapper = shallow(
       <HostEventModal hostEvent={hostEvent} onClose={() => {}} isOpen />
     );
@@ -297,6 +300,21 @@ describe('HostEventModal', () => {
     wrapper.update();
 
     const codeEditor = wrapper.find('Tab[eventKey=2] CodeEditor');
+    expect(codeEditor.prop('mode')).toBe('javascript');
+    expect(codeEditor.prop('readOnly')).toBe(true);
+    expect(codeEditor.prop('value')).toEqual(yamlValue);
+  });
+
+  test('should display Standard Out tab content on tab click', () => {
+    const wrapper = shallow(
+      <HostEventModal hostEvent={hostEvent} onClose={() => {}} isOpen />
+    );
+
+    const handleTabClick = wrapper.find('Tabs').prop('onSelect');
+    handleTabClick(null, 3);
+    wrapper.update();
+
+    const codeEditor = wrapper.find('Tab[eventKey=3] CodeEditor');
     expect(codeEditor.prop('mode')).toBe('javascript');
     expect(codeEditor.prop('readOnly')).toBe(true);
     expect(codeEditor.prop('value')).toEqual(hostEvent.event_data.res.stdout);
@@ -316,10 +334,10 @@ describe('HostEventModal', () => {
     );
 
     const handleTabClick = wrapper.find('Tabs').prop('onSelect');
-    handleTabClick(null, 3);
+    handleTabClick(null, 4);
     wrapper.update();
 
-    const codeEditor = wrapper.find('Tab[eventKey=3] CodeEditor');
+    const codeEditor = wrapper.find('Tab[eventKey=4] CodeEditor');
     expect(codeEditor.prop('mode')).toBe('javascript');
     expect(codeEditor.prop('readOnly')).toBe(true);
     expect(codeEditor.prop('value')).toEqual('error content');
@@ -351,10 +369,10 @@ describe('HostEventModal', () => {
     );
 
     const handleTabClick = wrapper.find('Tabs').prop('onSelect');
-    handleTabClick(null, 2);
+    handleTabClick(null, 3);
     wrapper.update();
 
-    const codeEditor = wrapper.find('Tab[eventKey=2] CodeEditor');
+    const codeEditor = wrapper.find('Tab[eventKey=3] CodeEditor');
     expect(codeEditor.prop('mode')).toBe('javascript');
     expect(codeEditor.prop('readOnly')).toBe(true);
     expect(codeEditor.prop('value')).toEqual('foo bar');
@@ -375,10 +393,10 @@ describe('HostEventModal', () => {
     );
 
     const handleTabClick = wrapper.find('Tabs').prop('onSelect');
-    handleTabClick(null, 2);
+    handleTabClick(null, 3);
     wrapper.update();
 
-    const codeEditor = wrapper.find('Tab[eventKey=2] CodeEditor');
+    const codeEditor = wrapper.find('Tab[eventKey=3] CodeEditor');
     expect(codeEditor.prop('mode')).toBe('javascript');
     expect(codeEditor.prop('readOnly')).toBe(true);
     expect(codeEditor.prop('value')).toEqual('baz\nbar');
@@ -394,10 +412,10 @@ describe('HostEventModal', () => {
     );
 
     const handleTabClick = wrapper.find('Tabs').prop('onSelect');
-    handleTabClick(null, 2);
+    handleTabClick(null, 3);
     wrapper.update();
 
-    const codeEditor = wrapper.find('Tab[eventKey=2] CodeEditor');
+    const codeEditor = wrapper.find('Tab[eventKey=3] CodeEditor');
     expect(codeEditor.prop('mode')).toBe('javascript');
     expect(codeEditor.prop('readOnly')).toBe(true);
     expect(codeEditor.prop('value')).toEqual(
