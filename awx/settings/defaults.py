@@ -353,6 +353,7 @@ INSTALLED_APPS = [
     'awx.sso',
     'solo',
     'ansible_base.rest_filters',
+    'ansible_base.jwt_consumer',
 ]
 
 INTERNAL_IPS = ('127.0.0.1',)
@@ -362,6 +363,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'awx.api.pagination.Pagination',
     'PAGE_SIZE': 25,
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'ansible_base.jwt_consumer.awx.auth.AwxJWTAuthentication',
         'awx.api.authentication.LoggedOAuth2Authentication',
         'awx.api.authentication.SessionAuthentication',
         'awx.api.authentication.LoggedBasicAuthentication',
