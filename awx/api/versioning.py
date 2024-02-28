@@ -24,6 +24,11 @@ def drf_reverse(viewname, args=None, kwargs=None, request=None, format=None, **e
     else:
         url = _reverse(viewname, args, kwargs, request, format, **extra)
 
+    if settings.URL_REPLACE_FROM_HEADER:
+        header_string = request.headers.get(settings.URL_REPLACE_FROM_HEADER['header'], None)
+        if header_string:
+            url = url.replace(settings.URL_REPLACE_FROM_HEADER['to_replace'], header_string)
+
     return url
 
 

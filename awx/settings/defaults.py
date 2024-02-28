@@ -165,6 +165,11 @@ ALLOWED_HOSTS = []
 # reverse proxy.
 REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 
+URL_REPLACE_FROM_HEADER = {
+    'header': 'Aap-Prefix',  # e.g. api/controller/v2
+    'to_replace': 'api/v2',  # the header string will replace this substring in the URL
+}
+
 # If we are behind a reverse proxy/load balancer, use this setting to
 # allow the proxy IP addresses from which Tower should trust custom
 # REMOTE_HOST_HEADERS header values
