@@ -98,6 +98,7 @@ awx/awx_test.sqlite3-journal
 !.vscode/
 .vscode/*
 !.vscode/launch.json
+!.vscode/tasks.json
 
 # Editors
 *.sw[poj]

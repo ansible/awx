@@ -1,7 +1,4 @@
 {
-  // Use IntelliSense to learn about possible attributes.
-  // Hover to view descriptions of existing attributes.
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
     {
@@ -10,7 +7,9 @@
       "request": "launch",
       "program": "manage.py",
       "args": ["run_ws_heartbeat"],
-      "django": true
+      "django": true,
+      "preLaunchTask": "start awx-ws-heartbeat",
+      "postDebugTask": "stop awx-ws-heartbeat"
     },
     {
       "name": "Python Debugger: run_callback_receiver",
@@ -26,7 +25,9 @@
       "request": "launch",
       "program": "manage.py",
       "args": ["run_dispatcher"],
-      "django": true
+      "django": true,
+      "preLaunchTask": "start awx-dispatcher",
+      "postDebugTask": "stop awx-dispatcher"
     },
     {
       "name": "Python Debugger: run_rsyslog_configurer",
@@ -34,7 +35,9 @@
       "request": "launch",
       "program": "manage.py",
       "args": ["run_rsyslog_configurer"],
-      "django": true
+      "django": true,
+      "preLaunchTask": "start awx-rsyslog-configurer",
+      "postDebugTask": "stop awx-rsyslog-configurer"
     },
     {
       "name": "Python Debugger: run_cache_clear",
@@ -42,7 +45,9 @@
       "request": "launch",
       "program": "manage.py",
       "args": ["run_cache_clear"],
-      "django": true
+      "django": true,
+      "preLaunchTask": "start awx-cache-clear",
+      "postDebugTask": "stop awx-cache-clear"
     },
     {
       "name": "Python Debugger: run_wsrelay",
@@ -50,7 +55,9 @@
       "request": "launch",
       "program": "manage.py",
       "args": ["run_wsrelay"],
-      "django": true
+      "django": true,
+      "preLaunchTask": "start awx-wsrelay",
+      "postDebugTask": "stop awx-wsrelay"
     },
     {
       "name": "Python Debugger: run_wsrelay",
@@ -58,7 +65,9 @@
       "request": "launch",
       "program": "manage.py",
       "args": ["run_wsrelay"],
-      "django": true
+      "django": true,
+      "preLaunchTask": "start awx-wsrelay",
+      "postDebugTask": "stop awx-wsrelay"
     },
     {
       "name": "Python Debugger: daphne",
@@ -66,15 +75,19 @@
       "request": "launch",
       "program": "/var/lib/awx/venv/awx/bin/daphne",
       "args": ["-b", "127.0.0.1", "-p", "8051", "awx.asgi:channel_layer"],
-      "django": true
+      "django": true,
+      "preLaunchTask": "stop awx-daphne",
+      "postDebugTask": "start awx-daphne"
     },
     {
-      "name": "Python Debugger: runserver_plus",
+      "name": "Python Debugger: uwsgi",
       "type": "debugpy",
       "request": "launch",
       "program": "manage.py",
       "args": ["runserver_plus", "0.0.0.0:8052", "--threaded"],
-      "django": true
+      "django": true,
+      "preLaunchTask": "stop awx-uwsgi",
+      "postDebugTask": "start awx-uwsgi"
     }
   ]
 }

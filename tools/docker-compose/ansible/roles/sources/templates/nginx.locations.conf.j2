@@ -41,7 +41,6 @@ location {{ ingress_path }} {
     error_page 502 = @fallback;
 }
 
-
 location @fallback {
     # Add trailing / if missing
     rewrite ^(.*)$http_host(.*[^/])$ $1$http_host$2/ permanent;
