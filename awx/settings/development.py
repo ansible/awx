@@ -117,3 +117,5 @@ from .application_name import set_application_name
 set_application_name(DATABASES, CLUSTER_HOST_ID)  # NOQA
 
 del set_application_name
+
+CSRF_TRUSTED_ORIGINS = ["https://localhost:8043"]  # TODO: fixme

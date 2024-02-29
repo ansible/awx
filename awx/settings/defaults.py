@@ -177,7 +177,7 @@ PROXY_IP_ALLOWED_LIST = []
 # If we are behind a reverse proxy/load balancer, use this setting to
 # allow the scheme://addresses from which Tower should trust csrf requests from
 # If this setting is an empty list (the default), we will only trust ourself
-CSRF_TRUSTED_ORIGINS = ["https://localhost:8043"]
+CSRF_TRUSTED_ORIGINS = []
 
 CUSTOM_VENV_PATHS = []
 
