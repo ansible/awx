@@ -72,6 +72,11 @@
             "command": "supervisorctl stop tower-processes:awx-uwsgi"
         },
         {
+            "label": "stop awx-uwsgi and install Werkzeug",
+            "type": "shell",
+            "command": "pip install Werkzeug; supervisorctl stop tower-processes:awx-uwsgi"
+        },
+        {
             "label": "start awx-ws-heartbeat",
             "type": "shell",
             "command": "supervisorctl start tower-processes:awx-ws-heartbeat"
