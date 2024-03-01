@@ -4,6 +4,8 @@
 from django.conf import settings
 from django.urls import re_path, include
 
+from ansible_base.resource_registry.urls import urlpatterns as resource_api_urls
+
 from awx.main.views import handle_400, handle_403, handle_404, handle_500, handle_csp_violation, handle_login_redirect
 
 
@@ -11,6 +13,7 @@ urlpatterns = [
     re_path(r'', include('awx.ui.urls', namespace='ui')),
     re_path(r'^ui_next/.*', include('awx.ui_next.urls', namespace='ui_next')),
     re_path(r'^api/', include('awx.api.urls', namespace='api')),
+    re_path(r'^api/v2/', include(resource_api_urls)),
     re_path(r'^sso/', include('awx.sso.urls', namespace='sso')),
     re_path(r'^sso/', include('social_django.urls', namespace='social')),
     re_path(r'^(?:api/)?400.html$', handle_400),
