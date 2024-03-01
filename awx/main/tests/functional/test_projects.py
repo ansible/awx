@@ -411,14 +411,14 @@ def test_project_delete(delete, organization, admin_user):
 
 
 @pytest.mark.parametrize(
-    'order_by, expected_names, expected_ids',
+    'order_by, expected_names',
     [
-        ('name', ['alice project', 'bob project', 'shared project'], [1, 2, 3]),
-        ('-name', ['shared project', 'bob project', 'alice project'], [3, 2, 1]),
+        ('name', ['alice project', 'bob project', 'shared project']),
+        ('-name', ['shared project', 'bob project', 'alice project']),
     ],
 )
 @pytest.mark.django_db
-def test_project_list_ordering_by_name(get, order_by, expected_names, expected_ids, organization_factory):
+def test_project_list_ordering_by_name(get, order_by, expected_names, organization_factory):
     'ensure sorted order of project list is maintained correctly when the requested order is invalid or not applicable'
     objects = organization_factory(
         'org1',
@@ -426,13 +426,11 @@ def test_project_list_ordering_by_name(get, order_by, expected_names, expected_i
         superusers=['admin'],
     )
     project_names = []
-    project_ids = []
     # TODO: ask for an order by here that doesn't apply
     results = get(reverse('api:project_list'), objects.superusers.admin, QUERY_STRING='order_by=%s' % order_by).data['results']
     for x in range(len(results)):
         project_names.append(results[x]['name'])
-        project_ids.append(results[x]['id'])
-    assert project_names == expected_names and project_ids == expected_ids
+    assert project_names == expected_names
 
 
 @pytest.mark.parametrize('order_by', ('name', '-name'))
@@ -450,7 +448,8 @@ def test_project_list_ordering_with_duplicate_names(get, order_by, organization_
     for x in range(3):
         results = get(reverse('api:project_list'), objects.superusers.admin, QUERY_STRING='order_by=%s' % order_by).data['results']
         project_ids[x] = [proj['id'] for proj in results]
-    assert project_ids[0] == project_ids[1] == project_ids[2] == [1, 2, 3, 4, 5]
+    assert project_ids[0] == project_ids[1] == project_ids[2]
+    assert project_ids[0] == sorted(project_ids[0])
 
 
 @pytest.mark.django_db
