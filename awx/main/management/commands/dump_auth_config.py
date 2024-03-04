@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import re
 
 from typing import Any
 from django.core.management.base import BaseCommand
@@ -11,49 +12,80 @@ from awx.conf import settings_registry
 class Command(BaseCommand):
     help = 'Dump the current auth configuration in django_ansible_base.authenticator format, currently support LDAP'
 
-    DAB_SAML_AUTHENTICATOR_KEYS = [
-        "SP_ENTITY_ID",
-        "SP_PUBLIC_CERT",
-        "SP_PRIVATE_KEY",
-        "ORG_INFO",
-        "TECHNICAL_CONTACT",
-        "SUPPORT_CONTACT",
-        "SP_EXTRA",
-        "SECURITY_CONFIG",
-        "EXTRA_DATA",
-        "ENABLED_IDPS",
-        "CALLBACK_URL",
-    ]
+    DAB_SAML_AUTHENTICATOR_KEYS = {
+        "SP_ENTITY_ID": True,
+        "SP_PUBLIC_CERT": True,
+        "SP_PRIVATE_KEY": True,
+        "ORG_INFO": True,
+        "TECHNICAL_CONTACT": True,
+        "SUPPORT_CONTACT": True,
+        "SP_EXTRA": False,
+        "SECURITY_CONFIG": False,
+        "EXTRA_DATA": False,
+        "ENABLED_IDPS": True,
+        "CALLBACK_URL": False,
+    }
 
-    def get_awx_saml_settings(self) -> tuple[bool, dict[str, Any]]:
+    DAB_LDAP_AUTHENTICATOR_KEYS = {
+        "SERVER_URI": True,
+        "BIND_DN": False,
+        "BIND_PASSWORD": False,
+        "CONNECTION_OPTIONS": False,
+        "GROUP_TYPE": True,
+        "GROUP_TYPE_PARAMS": True,
+        "GROUP_SEARCH": False,
+        "START_TLS": False,
+        "USER_DN_TEMPLATE": True,
+        "USER_ATTR_MAP": True,
+        "USER_SEARCH": False,
+    }
+
+    def get_awx_ldap_settings(self) -> dict[str, dict[str, Any]]:
+        awx_ldap_settings = {}
+
+        for awx_ldap_setting in settings_registry.get_registered_settings(category_slug='ldap'):
+            key = awx_ldap_setting.removeprefix("AUTH_LDAP_")
+            value = getattr(settings, awx_ldap_setting, None)
+            awx_ldap_settings[key] = value
+
+        grouped_settings = {}
+
+        for key, value in awx_ldap_settings.items():
+            match = re.search(r'(\d+)', key)
+            index = int(match.group()) if match else 0
+            new_key = re.sub(r'\d+_', '', key)
+
+            if index not in grouped_settings:
+                grouped_settings[index] = {}
+
+            grouped_settings[index][new_key] = value
+            if new_key == "GROUP_TYPE" and value:
+                grouped_settings[index][new_key] = type(value).__name__
+
+        return grouped_settings
+
+    def is_enabled(self, settings, keys):
+        for k in keys:
+            if not settings.get(k):
+                return False
+        return True
+
+    def get_awx_saml_settings(self) -> dict[str, Any]:
         # settings_registry.get_registered_settings(category_slug='saml', read_only=False)
         awx_saml_settings = {}
         for awx_saml_setting in settings_registry.get_registered_settings(category_slug='saml'):
-            # strip the prefix 'SOCIAL_AUTH_SAML_' from awx_saml_setting
             awx_saml_settings[awx_saml_setting.removeprefix("SOCIAL_AUTH_SAML_")] = getattr(settings, awx_saml_setting, None)
 
-        is_enabled = all(
-            [
-                getattr(settings, "SOCIAL_AUTH_SAML_SP_ENTITY_ID", None),
-                getattr(settings, "SOCIAL_AUTH_SAML_SP_PUBLIC_CERT", None),
-                getattr(settings, "SOCIAL_AUTH_SAML_SP_PRIVATE_KEY", None),
-                getattr(settings, "SOCIAL_AUTH_SAML_ORG_INFO", None),
-                getattr(settings, "SOCIAL_AUTH_SAML_TECHNICAL_CONTACT", None),
-                getattr(settings, "SOCIAL_AUTH_SAML_SUPPORT_CONTACT", None),
-                getattr(settings, "SOCIAL_AUTH_SAML_ENABLED_IDPS", None),
-            ]
-        )
+        return awx_saml_settings
 
-        return is_enabled, awx_saml_settings
-
-    def format_config_data(self, awx_settings, type, keys):
+    def format_config_data(self, enabled, awx_settings, type, keys):
         config = {
             "type": f"awx.authentication.authenticator_plugins.{type}",
-            "enabled": awx_settings[0],
+            "enabled": enabled,
             "configuration": {},
         }
         for k in keys:
-            v = awx_settings[1].get(k)
+            v = awx_settings.get(k)
             config["configuration"].update({k: v})
 
         return config
@@ -72,13 +104,31 @@ class Command(BaseCommand):
             data = []
 
             # dump SAML settings
-            data.append(
-                self.format_config_data(
-                    self.get_awx_saml_settings(),
-                    "saml",
-                    self.DAB_SAML_AUTHENTICATOR_KEYS,
-                ),
-            )
+            awx_saml_settings = self.get_awx_saml_settings()
+            awx_saml_enabled = self.is_enabled(awx_saml_settings, self.DAB_SAML_AUTHENTICATOR_KEYS)
+            if awx_saml_enabled:
+                data.append(
+                    self.format_config_data(
+                        awx_saml_enabled,
+                        awx_saml_settings,
+                        "saml",
+                        self.DAB_SAML_AUTHENTICATOR_KEYS,
+                    )
+                )
+
+            # dump LDAP settings
+            awx_ldap_group_settings = self.get_awx_ldap_settings()
+            for awx_ldap_settings in awx_ldap_group_settings.values():
+                enabled = self.is_enabled(awx_ldap_settings, self.DAB_LDAP_AUTHENTICATOR_KEYS)
+                if enabled:
+                    data.append(
+                        self.format_config_data(
+                            enabled,
+                            awx_ldap_settings,
+                            "ldap",
+                            self.DAB_LDAP_AUTHENTICATOR_KEYS,
+                        )
+                    )
 
             # write to file if requested
             if options["output_file"]:
