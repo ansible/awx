@@ -2,7 +2,9 @@
 # All Rights Reserved.
 
 # Python
+from collections import OrderedDict
 import logging
+import uuid
 
 import ldap
 
@@ -10,12 +12,14 @@ import ldap
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.conf import settings as django_settings
+from django.core.signals import setting_changed
 from django.utils.encoding import force_str
 
 # django-auth-ldap
 from django_auth_ldap.backend import LDAPSettings as BaseLDAPSettings
 from django_auth_ldap.backend import LDAPBackend as BaseLDAPBackend
 from django_auth_ldap.backend import populate_user
+from django.core.exceptions import ImproperlyConfigured
 
 # radiusauth
 from radiusauth.backends import RADIUSBackend as BaseRADIUSBackend
@@ -30,6 +34,7 @@ from social_core.backends.saml import SAMLIdentityProvider as BaseSAMLIdentityPr
 
 # Ansible Tower
 from awx.sso.models import UserEnterpriseAuth
+from awx.sso.common import create_org_and_teams, reconcile_users_org_team_mappings
 
 logger = logging.getLogger('awx.sso.backends')
 

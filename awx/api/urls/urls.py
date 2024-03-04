@@ -87,7 +87,6 @@ from .workflow_approval import urls as workflow_approval_urls
 from .analytics import urls as analytics_urls
 from .receptor_address import urls as receptor_address_urls
 
-from ansible_base.lib.dynamic_config.dynamic_urls import api_version_urls, api_urls
 
 v2_urls = [
     re_path(r'^$', ApiV2RootView.as_view(), name='api_v2_root_view'),
