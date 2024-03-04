@@ -341,7 +341,6 @@ class CredentialType(CommonModelNameNotUnique):
         ('kubernetes', _('Kubernetes')),
         ('galaxy', _('Galaxy/Automation Hub')),
         ('cryptography', _('Cryptography')),
-        ('sigstore', _('Sigstore')),
     )
 
     kind = models.CharField(max_length=32, choices=KIND_CHOICES)
@@ -1239,7 +1238,7 @@ ManagedCredentialType(
 
 ManagedCredentialType(
     namespace='sigstore',
-    kind='sigstore',
+    kind='cryptography',
     name=gettext_noop('Sigstore verification parameters'),
     inputs={
         'fields': [
