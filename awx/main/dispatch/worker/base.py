@@ -162,13 +162,13 @@ class AWXConsumerRedis(AWXConsumerBase):
 class AWXConsumerPG(AWXConsumerBase):
     def __init__(self, *args, schedule=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.pg_max_wait = settings.DISPATCHER_DB_DOWNTIME_TOLERANCE
+        self.pg_max_wait = getattr(settings, 'DISPATCHER_DB_DOWNTOWN_TOLLERANCE', settings.DISPATCHER_DB_DOWNTIME_TOLERANCE)
         # if no successful loops have ran since startup, then we should fail right away
         self.pg_is_down = True  # set so that we fail if we get database errors on startup
         init_time = time.time()
         self.pg_down_time = init_time - self.pg_max_wait  # allow no grace period
         self.last_cleanup = init_time
-        self.subsystem_metrics = s_metrics.Metrics(auto_pipe_execute=False)
+        self.subsystem_metrics = s_metrics.DispatcherMetrics(auto_pipe_execute=False)
         self.last_metrics_gather = init_time
         self.listen_cumulative_time = 0.0
         if schedule:
@@ -259,6 +259,12 @@ class AWXConsumerPG(AWXConsumerBase):
                 current_downtime = time.time() - self.pg_down_time
                 if current_downtime > self.pg_max_wait:
                     logger.exception(f"Postgres event consumer has not recovered in {current_downtime} s, exiting")
+                    # Sending QUIT to multiprocess queue to signal workers to exit
+                    for worker in self.pool.workers:
+                        try:
+                            worker.quit()
+                        except Exception:
+                            logger.exception(f"Error sending QUIT to worker {worker}")
                     raise
                 # Wait for a second before next attempt, but still listen for any shutdown signals
                 for i in range(10):
@@ -270,6 +276,12 @@ class AWXConsumerPG(AWXConsumerBase):
             except Exception:
                 # Log unanticipated exception in addition to writing to stderr to get timestamps and other metadata
                 logger.exception('Encountered unhandled error in dispatcher main loop')
+                # Sending QUIT to multiprocess queue to signal workers to exit
+                for worker in self.pool.workers:
+                    try:
+                        worker.quit()
+                    except Exception:
+                        logger.exception(f"Error sending QUIT to worker {worker}")
                 raise
 
 

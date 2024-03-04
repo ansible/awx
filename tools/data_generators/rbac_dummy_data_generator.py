@@ -53,7 +53,7 @@ from awx.main.models import (  # noqa
     WorkflowJobTemplateNode,
     batch_role_ancestor_rebuilding,
 )
-from awx.main.models.schedules import Schedule #noqa
+from awx.main.models.schedules import Schedule  # noqa
 
 from awx.main.signals import disable_activity_stream, disable_computed_fields  # noqa
 
@@ -594,8 +594,6 @@ def make_the_data():
                     )
                     schedule._is_new = _
                     schedules.append(schedule)
-
-
 
             print('# Creating %d Labels' % n_labels)
             org_idx = 0

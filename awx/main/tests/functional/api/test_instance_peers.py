@@ -1,19 +1,16 @@
 import pytest
 import yaml
-import itertools
 from unittest import mock
 
-from django.db.utils import IntegrityError
-
 from awx.api.versioning import reverse
-from awx.main.models import Instance
+from awx.main.models import Instance, ReceptorAddress
 from awx.api.views.instance_install_bundle import generate_group_vars_all_yml
 
 
 def has_peer(group_vars, peer):
     peers = group_vars.get('receptor_peers', [])
     for p in peers:
-        if f"{p['host']}:{p['port']}" == peer:
+        if p['address'] == peer:
             return True
     return False
 
@@ -24,119 +21,314 @@ class TestPeers:
     def configure_settings(self, settings):
         settings.IS_K8S = True
 
-    @pytest.mark.parametrize('node_type', ['control', 'hybrid'])
-    def test_prevent_peering_to_self(self, node_type):
+    @pytest.mark.parametrize('node_type', ['hop', 'execution'])
+    def test_peering_to_self(self, node_type, admin_user, patch):
         """
         cannot peer to self
         """
-        control_instance = Instance.objects.create(hostname='abc', node_type=node_type)
-        with pytest.raises(IntegrityError):
-            control_instance.peers.add(control_instance)
+        instance = Instance.objects.create(hostname='abc', node_type=node_type)
+        addr = ReceptorAddress.objects.create(instance=instance, address='abc', canonical=True)
+        resp = patch(
+            url=reverse('api:instance_detail', kwargs={'pk': instance.pk}),
+            data={"hostname": "abc", "node_type": node_type, "peers": [addr.id]},
+            user=admin_user,
+            expect=400,
+        )
+        assert 'Instance cannot peer to its own address.' in str(resp.data)
 
     @pytest.mark.parametrize('node_type', ['control', 'hybrid', 'hop', 'execution'])
     def test_creating_node(self, node_type, admin_user, post):
         """
         can only add hop and execution nodes via API
         """
-        post(
+        resp = post(
             url=reverse('api:instance_list'),
             data={"hostname": "abc", "node_type": node_type},
             user=admin_user,
             expect=400 if node_type in ['control', 'hybrid'] else 201,
         )
+        if resp.status_code == 400:
+            assert 'Can only create execution or hop nodes.' in str(resp.data)
 
     def test_changing_node_type(self, admin_user, patch):
         """
         cannot change node type
         """
         hop = Instance.objects.create(hostname='abc', node_type="hop")
-        patch(
+        resp = patch(
             url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
             data={"node_type": "execution"},
             user=admin_user,
             expect=400,
         )
+        assert 'Cannot change node type.' in str(resp.data)
 
-    @pytest.mark.parametrize('node_type', ['hop', 'execution'])
-    def test_listener_port_null(self, node_type, admin_user, post):
-        """
-        listener_port can be None
-        """
-        post(
-            url=reverse('api:instance_list'),
-            data={"hostname": "abc", "node_type": node_type, "listener_port": None},
+    @pytest.mark.parametrize(
+        'payload_port, payload_peers_from, initial_port, initial_peers_from',
+        [
+            (-1, -1, None, None),
+            (-1, -1, 27199, False),
+            (-1, -1, 27199, True),
+            (None, -1, None, None),
+            (None, False, None, None),
+            (-1, False, None, None),
+            (27199, True, 27199, True),
+            (27199, False, 27199, False),
+            (27199, -1, 27199, True),
+            (27199, -1, 27199, False),
+            (-1, True, 27199, True),
+            (-1, False, 27199, False),
+        ],
+    )
+    def test_no_op(self, payload_port, payload_peers_from, initial_port, initial_peers_from, admin_user, patch):
+        node = Instance.objects.create(hostname='abc', node_type='hop')
+        if initial_port is not None:
+            ReceptorAddress.objects.create(address=node.hostname, port=initial_port, canonical=True, peers_from_control_nodes=initial_peers_from, instance=node)
+
+            assert ReceptorAddress.objects.filter(instance=node).count() == 1
+        else:
+            assert ReceptorAddress.objects.filter(instance=node).count() == 0
+
+        data = {'enabled': True}  # Just to have something to post.
+        if payload_port != -1:
+            data['listener_port'] = payload_port
+        if payload_peers_from != -1:
+            data['peers_from_control_nodes'] = payload_peers_from
+
+        patch(
+            url=reverse('api:instance_detail', kwargs={'pk': node.pk}),
+            data=data,
             user=admin_user,
-            expect=201,
+            expect=200,
         )
 
-    @pytest.mark.parametrize('node_type, allowed', [('control', False), ('hybrid', False), ('hop', True), ('execution', True)])
-    def test_peers_from_control_nodes_allowed(self, node_type, allowed, post, admin_user):
-        """
-        only hop and execution nodes can have peers_from_control_nodes set to True
-        """
-        post(
-            url=reverse('api:instance_list'),
-            data={"hostname": "abc", "peers_from_control_nodes": True, "node_type": node_type, "listener_port": 6789},
+        assert ReceptorAddress.objects.filter(instance=node).count() == (0 if initial_port is None else 1)
+        if initial_port is not None:
+            ra = ReceptorAddress.objects.get(instance=node, canonical=True)
+            assert ra.port == initial_port
+            assert ra.peers_from_control_nodes == initial_peers_from
+
+    @pytest.mark.parametrize(
+        'payload_port, payload_peers_from',
+        [
+            (27199, True),
+            (27199, False),
+            (27199, -1),
+        ],
+    )
+    def test_creates_canonical_address(self, payload_port, payload_peers_from, admin_user, patch):
+        node = Instance.objects.create(hostname='abc', node_type='hop')
+        assert ReceptorAddress.objects.filter(instance=node).count() == 0
+
+        data = {'enabled': True}  # Just to have something to post.
+        if payload_port != -1:
+            data['listener_port'] = payload_port
+        if payload_peers_from != -1:
+            data['peers_from_control_nodes'] = payload_peers_from
+
+        patch(
+            url=reverse('api:instance_detail', kwargs={'pk': node.pk}),
+            data=data,
             user=admin_user,
-            expect=201 if allowed else 400,
+            expect=200,
         )
 
-    def test_listener_port_is_required(self, admin_user, post):
-        """
-        if adding instance to peers list, that instance must have listener_port set
-        """
-        Instance.objects.create(hostname='abc', node_type="hop", listener_port=None)
-        post(
-            url=reverse('api:instance_list'),
-            data={"hostname": "ex", "peers_from_control_nodes": False, "node_type": "execution", "listener_port": None, "peers": ["abc"]},
+        assert ReceptorAddress.objects.filter(instance=node).count() == 1
+        ra = ReceptorAddress.objects.get(instance=node, canonical=True)
+        assert ra.port == payload_port
+        assert ra.peers_from_control_nodes == (payload_peers_from if payload_peers_from != -1 else False)
+
+    @pytest.mark.parametrize(
+        'payload_port, payload_peers_from, initial_port, initial_peers_from',
+        [
+            (None, False, 27199, True),
+            (None, -1, 27199, True),
+            (None, False, 27199, False),
+            (None, -1, 27199, False),
+        ],
+    )
+    def test_deletes_canonical_address(self, payload_port, payload_peers_from, initial_port, initial_peers_from, admin_user, patch):
+        node = Instance.objects.create(hostname='abc', node_type='hop')
+        ReceptorAddress.objects.create(address=node.hostname, port=initial_port, canonical=True, peers_from_control_nodes=initial_peers_from, instance=node)
+
+        assert ReceptorAddress.objects.filter(instance=node).count() == 1
+
+        data = {'enabled': True}  # Just to have something to post.
+        if payload_port != -1:
+            data['listener_port'] = payload_port
+        if payload_peers_from != -1:
+            data['peers_from_control_nodes'] = payload_peers_from
+
+        patch(
+            url=reverse('api:instance_detail', kwargs={'pk': node.pk}),
+            data=data,
+            user=admin_user,
+            expect=200,
+        )
+
+        assert ReceptorAddress.objects.filter(instance=node).count() == 0
+
+    @pytest.mark.parametrize(
+        'payload_port, payload_peers_from, initial_port, initial_peers_from',
+        [
+            (27199, True, 27199, False),
+            (27199, False, 27199, True),
+            (-1, True, 27199, False),
+            (-1, False, 27199, True),
+        ],
+    )
+    def test_updates_canonical_address(self, payload_port, payload_peers_from, initial_port, initial_peers_from, admin_user, patch):
+        node = Instance.objects.create(hostname='abc', node_type='hop')
+        ReceptorAddress.objects.create(address=node.hostname, port=initial_port, canonical=True, peers_from_control_nodes=initial_peers_from, instance=node)
+
+        assert ReceptorAddress.objects.filter(instance=node).count() == 1
+
+        data = {'enabled': True}  # Just to have something to post.
+        if payload_port != -1:
+            data['listener_port'] = payload_port
+        if payload_peers_from != -1:
+            data['peers_from_control_nodes'] = payload_peers_from
+
+        patch(
+            url=reverse('api:instance_detail', kwargs={'pk': node.pk}),
+            data=data,
+            user=admin_user,
+            expect=200,
+        )
+
+        assert ReceptorAddress.objects.filter(instance=node).count() == 1
+        ra = ReceptorAddress.objects.get(instance=node, canonical=True)
+        assert ra.port == initial_port  # At the present time, changing ports is not allowed
+        assert ra.peers_from_control_nodes == payload_peers_from
+
+    @pytest.mark.parametrize(
+        'payload_port, payload_peers_from, initial_port, initial_peers_from, error_msg',
+        [
+            (-1, True, None, None, "Cannot enable peers_from_control_nodes"),
+            (None, True, None, None, "Cannot enable peers_from_control_nodes"),
+            (None, True, 21799, True, "Cannot enable peers_from_control_nodes"),
+            (None, True, 21799, False, "Cannot enable peers_from_control_nodes"),
+            (21800, -1, 21799, True, "Cannot change listener port"),
+            (21800, True, 21799, True, "Cannot change listener port"),
+            (21800, False, 21799, True, "Cannot change listener port"),
+            (21800, -1, 21799, False, "Cannot change listener port"),
+            (21800, True, 21799, False, "Cannot change listener port"),
+            (21800, False, 21799, False, "Cannot change listener port"),
+        ],
+    )
+    def test_canonical_address_validation_error(self, payload_port, payload_peers_from, initial_port, initial_peers_from, error_msg, admin_user, patch):
+        node = Instance.objects.create(hostname='abc', node_type='hop')
+        if initial_port is not None:
+            ReceptorAddress.objects.create(address=node.hostname, port=initial_port, canonical=True, peers_from_control_nodes=initial_peers_from, instance=node)
+
+            assert ReceptorAddress.objects.filter(instance=node).count() == 1
+        else:
+            assert ReceptorAddress.objects.filter(instance=node).count() == 0
+
+        data = {'enabled': True}  # Just to have something to post.
+        if payload_port != -1:
+            data['listener_port'] = payload_port
+        if payload_peers_from != -1:
+            data['peers_from_control_nodes'] = payload_peers_from
+
+        resp = patch(
+            url=reverse('api:instance_detail', kwargs={'pk': node.pk}),
+            data=data,
             user=admin_user,
             expect=400,
         )
 
-    def test_peers_from_control_nodes_listener_port_enabled(self, admin_user, post):
+        assert error_msg in str(resp.data)
+
+    def test_changing_managed_listener_port(self, admin_user, patch):
         """
-        if peers_from_control_nodes is True, listener_port must an integer
-        Assert that all other combinations are allowed
+        if instance is managed, cannot change listener port at all
         """
-        for index, item in enumerate(itertools.product(['hop', 'execution'], [True, False], [None, 6789])):
-            node_type, peers_from, listener_port = item
-            # only disallowed case is when peers_from is True and listener port is None
-            disallowed = peers_from and not listener_port
-            post(
-                url=reverse('api:instance_list'),
-                data={"hostname": f"abc{index}", "peers_from_control_nodes": peers_from, "node_type": node_type, "listener_port": listener_port},
-                user=admin_user,
-                expect=400 if disallowed else 201,
-            )
+        hop = Instance.objects.create(hostname='abc', node_type="hop", managed=True)
+        resp = patch(
+            url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
+            data={"listener_port": 5678},
+            user=admin_user,
+            expect=400,  # cannot set port
+        )
+        assert 'Cannot change listener port for managed nodes.' in str(resp.data)
+        ReceptorAddress.objects.create(instance=hop, address='hop', port=27199, canonical=True)
+        resp = patch(
+            url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
+            data={"listener_port": None},
+            user=admin_user,
+            expect=400,  # cannot unset port
+        )
+        assert 'Cannot change listener port for managed nodes.' in str(resp.data)
+
+    def test_bidirectional_peering(self, admin_user, patch):
+        """
+        cannot peer to node that is already to peered to it
+        if A -> B, then disallow B -> A
+        """
+        hop1 = Instance.objects.create(hostname='hop1', node_type='hop')
+        hop1addr = ReceptorAddress.objects.create(instance=hop1, address='hop1', canonical=True)
+        hop2 = Instance.objects.create(hostname='hop2', node_type='hop')
+        hop2addr = ReceptorAddress.objects.create(instance=hop2, address='hop2', canonical=True)
+        hop1.peers.add(hop2addr)
+        resp = patch(
+            url=reverse('api:instance_detail', kwargs={'pk': hop2.pk}),
+            data={"peers": [hop1addr.id]},
+            user=admin_user,
+            expect=400,
+        )
+        assert 'Instance hop1 is already peered to this instance.' in str(resp.data)
+
+    def test_multiple_peers_same_instance(self, admin_user, patch):
+        """
+        cannot peer to more than one address of the same instance
+        """
+        hop1 = Instance.objects.create(hostname='hop1', node_type='hop')
+        hop1addr1 = ReceptorAddress.objects.create(instance=hop1, address='hop1', canonical=True)
+        hop1addr2 = ReceptorAddress.objects.create(instance=hop1, address='hop1alternate')
+        hop2 = Instance.objects.create(hostname='hop2', node_type='hop')
+        resp = patch(
+            url=reverse('api:instance_detail', kwargs={'pk': hop2.pk}),
+            data={"peers": [hop1addr1.id, hop1addr2.id]},
+            user=admin_user,
+            expect=400,
+        )
+        assert 'Cannot peer to the same instance more than once.' in str(resp.data)
 
     @pytest.mark.parametrize('node_type', ['control', 'hybrid'])
-    def test_disallow_modifying_peers_control_nodes(self, node_type, admin_user, patch):
+    def test_changing_peers_control_nodes(self, node_type, admin_user, patch):
         """
         for control nodes, peers field should not be
         modified directly via patch.
         """
-        control = Instance.objects.create(hostname='abc', node_type=node_type)
-        hop1 = Instance.objects.create(hostname='hop1', node_type='hop', peers_from_control_nodes=True, listener_port=6789)
-        hop2 = Instance.objects.create(hostname='hop2', node_type='hop', peers_from_control_nodes=False, listener_port=6789)
-        assert [hop1] == list(control.peers.all())  # only hop1 should be peered
-        patch(
+        control = Instance.objects.create(hostname='abc', node_type=node_type, managed=True)
+        hop1 = Instance.objects.create(hostname='hop1', node_type='hop')
+        hop1addr = ReceptorAddress.objects.create(instance=hop1, address='hop1', peers_from_control_nodes=True, canonical=True)
+        hop2 = Instance.objects.create(hostname='hop2', node_type='hop')
+        hop2addr = ReceptorAddress.objects.create(instance=hop2, address='hop2', canonical=True)
+        assert [hop1addr] == list(control.peers.all())  # only hop1addr should be peered
+        resp = patch(
             url=reverse('api:instance_detail', kwargs={'pk': control.pk}),
-            data={"peers": ["hop2"]},
+            data={"peers": [hop2addr.id]},
             user=admin_user,
-            expect=400,  # cannot add peers directly
+            expect=400,  # cannot add peers manually
         )
+        assert 'Setting peers manually for managed nodes is not allowed.' in str(resp.data)
+
         patch(
             url=reverse('api:instance_detail', kwargs={'pk': control.pk}),
-            data={"peers": ["hop1"]},
+            data={"peers": [hop1addr.id]},
             user=admin_user,
             expect=200,  # patching with current peers list should be okay
         )
-        patch(
+        resp = patch(
             url=reverse('api:instance_detail', kwargs={'pk': control.pk}),
             data={"peers": []},
             user=admin_user,
             expect=400,  # cannot remove peers directly
         )
+        assert 'Setting peers manually for managed nodes is not allowed.' in str(resp.data)
+
         patch(
             url=reverse('api:instance_detail', kwargs={'pk': control.pk}),
             data={},
@@ -148,23 +340,25 @@ class TestPeers:
             url=reverse('api:instance_detail', kwargs={'pk': hop2.pk}),
             data={"peers_from_control_nodes": True},
             user=admin_user,
-            expect=200,  # patching without data should be fine too
+            expect=200,
         )
-        assert {hop1, hop2} == set(control.peers.all())  # hop1 and hop2 should now be peered from control node
+        assert {hop1addr, hop2addr} == set(control.peers.all())  # hop1 and hop2 should now be peered from control node
 
-    def test_disallow_changing_hostname(self, admin_user, patch):
+    def test_changing_hostname(self, admin_user, patch):
         """
         cannot change hostname
         """
         hop = Instance.objects.create(hostname='hop', node_type='hop')
-        patch(
+        resp = patch(
             url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
             data={"hostname": "hop2"},
             user=admin_user,
             expect=400,
         )
 
-    def test_disallow_changing_node_state(self, admin_user, patch):
+        assert 'Cannot change hostname.' in str(resp.data)
+
+    def test_changing_node_state(self, admin_user, patch):
         """
         only allow setting to deprovisioning
         """
@@ -175,12 +369,54 @@ class TestPeers:
             user=admin_user,
             expect=200,
         )
-        patch(
+        resp = patch(
             url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
             data={"node_state": "ready"},
             user=admin_user,
             expect=400,
         )
+        assert "Can only change instances to the 'deprovisioning' state." in str(resp.data)
+
+    def test_changing_managed_node_state(self, admin_user, patch):
+        """
+        cannot change node state of managed node
+        """
+        hop = Instance.objects.create(hostname='hop', node_type='hop', managed=True)
+        resp = patch(
+            url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
+            data={"node_state": "deprovisioning"},
+            user=admin_user,
+            expect=400,
+        )
+
+        assert 'Cannot deprovision managed nodes.' in str(resp.data)
+
+    def test_changing_managed_peers_from_control_nodes(self, admin_user, patch):
+        """
+        cannot change peers_from_control_nodes of managed node
+        """
+        hop = Instance.objects.create(hostname='hop', node_type='hop', managed=True)
+        ReceptorAddress.objects.create(instance=hop, address='hop', peers_from_control_nodes=True, canonical=True)
+        resp = patch(
+            url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
+            data={"peers_from_control_nodes": False},
+            user=admin_user,
+            expect=400,
+        )
+
+        assert 'Cannot change peers_from_control_nodes for managed nodes.' in str(resp.data)
+
+        hop.peers_from_control_nodes = False
+        hop.save()
+
+        resp = patch(
+            url=reverse('api:instance_detail', kwargs={'pk': hop.pk}),
+            data={"peers_from_control_nodes": False},
+            user=admin_user,
+            expect=400,
+        )
+
+        assert 'Cannot change peers_from_control_nodes for managed nodes.' in str(resp.data)
 
     @pytest.mark.parametrize('node_type', ['control', 'hybrid'])
     def test_control_node_automatically_peers(self, node_type):
@@ -191,9 +427,10 @@ class TestPeers:
         peer to hop should be removed if hop is deleted
         """
 
-        hop = Instance.objects.create(hostname='hop', node_type='hop', peers_from_control_nodes=True, listener_port=6789)
+        hop = Instance.objects.create(hostname='hop', node_type='hop')
+        hopaddr = ReceptorAddress.objects.create(instance=hop, address='hop', peers_from_control_nodes=True, canonical=True)
         control = Instance.objects.create(hostname='abc', node_type=node_type)
-        assert hop in control.peers.all()
+        assert hopaddr in control.peers.all()
         hop.delete()
         assert not control.peers.exists()
 
@@ -203,26 +440,50 @@ class TestPeers:
         if a new node comes online, other peer relationships should
         remain intact
         """
-        hop1 = Instance.objects.create(hostname='hop1', node_type='hop', listener_port=6789, peers_from_control_nodes=True)
-        hop2 = Instance.objects.create(hostname='hop2', node_type='hop', listener_port=6789, peers_from_control_nodes=False)
-        hop1.peers.add(hop2)
+        hop1 = Instance.objects.create(hostname='hop1', node_type='hop')
+        hop2 = Instance.objects.create(hostname='hop2', node_type='hop')
+        hop2addr = ReceptorAddress.objects.create(instance=hop2, address='hop2', canonical=True)
+        hop1.peers.add(hop2addr)
 
         # a control node is added
-        Instance.objects.create(hostname='control', node_type=node_type, listener_port=None)
+        Instance.objects.create(hostname='control', node_type=node_type)
 
         assert hop1.peers.exists()
 
-    def test_group_vars(self, get, admin_user):
+    def test_reverse_peers(self, admin_user, get):
+        """
+        if hop1 peers to hop2, hop1 should
+        be in hop2's reverse_peers list
+        """
+        hop1 = Instance.objects.create(hostname='hop1', node_type='hop')
+        hop2 = Instance.objects.create(hostname='hop2', node_type='hop')
+        hop2addr = ReceptorAddress.objects.create(instance=hop2, address='hop2', canonical=True)
+        hop1.peers.add(hop2addr)
+
+        resp = get(
+            url=reverse('api:instance_detail', kwargs={'pk': hop2.pk}),
+            user=admin_user,
+            expect=200,
+        )
+
+        assert hop1.pk in resp.data['reverse_peers']
+
+    def test_group_vars(self):
         """
         control > hop1 > hop2 < execution
         """
-        control = Instance.objects.create(hostname='control', node_type='control', listener_port=None)
-        hop1 = Instance.objects.create(hostname='hop1', node_type='hop', listener_port=6789, peers_from_control_nodes=True)
-        hop2 = Instance.objects.create(hostname='hop2', node_type='hop', listener_port=6789, peers_from_control_nodes=False)
-        execution = Instance.objects.create(hostname='execution', node_type='execution', listener_port=6789)
+        control = Instance.objects.create(hostname='control', node_type='control')
+        hop1 = Instance.objects.create(hostname='hop1', node_type='hop')
+        ReceptorAddress.objects.create(instance=hop1, address='hop1', peers_from_control_nodes=True, port=6789, canonical=True)
 
-        execution.peers.add(hop2)
-        hop1.peers.add(hop2)
+        hop2 = Instance.objects.create(hostname='hop2', node_type='hop')
+        hop2addr = ReceptorAddress.objects.create(instance=hop2, address='hop2', peers_from_control_nodes=False, port=6789, canonical=True)
+
+        execution = Instance.objects.create(hostname='execution', node_type='execution')
+        ReceptorAddress.objects.create(instance=execution, address='execution', peers_from_control_nodes=False, port=6789, canonical=True)
+
+        execution.peers.add(hop2addr)
+        hop1.peers.add(hop2addr)
 
         control_vars = yaml.safe_load(generate_group_vars_all_yml(control))
         hop1_vars = yaml.safe_load(generate_group_vars_all_yml(hop1))
@@ -265,13 +526,15 @@ class TestPeers:
             control = Instance.objects.create(hostname='control1', node_type='control')
             write_method.assert_not_called()
 
-            # new hop node with peers_from_control_nodes False (no)
-            hop1 = Instance.objects.create(hostname='hop1', node_type='hop', listener_port=6789, peers_from_control_nodes=False)
+            # new address with peers_from_control_nodes False (no)
+            hop1 = Instance.objects.create(hostname='hop1', node_type='hop')
+            hop1addr = ReceptorAddress.objects.create(instance=hop1, address='hop1', peers_from_control_nodes=False, canonical=True)
             hop1.delete()
             write_method.assert_not_called()
 
-            # new hop node with peers_from_control_nodes True (yes)
-            hop1 = Instance.objects.create(hostname='hop1', node_type='hop', listener_port=6789, peers_from_control_nodes=True)
+            # new address with peers_from_control_nodes True (yes)
+            hop1 = Instance.objects.create(hostname='hop1', node_type='hop')
+            hop1addr = ReceptorAddress.objects.create(instance=hop1, address='hop1', peers_from_control_nodes=True, canonical=True)
             write_method.assert_called()
             write_method.reset_mock()
 
@@ -280,20 +543,21 @@ class TestPeers:
             write_method.assert_called()
             write_method.reset_mock()
 
-            # new hop node with peers_from_control_nodes False and peered to another hop node (no)
-            hop2 = Instance.objects.create(hostname='hop2', node_type='hop', listener_port=6789, peers_from_control_nodes=False)
-            hop2.peers.add(hop1)
+            # new address with peers_from_control_nodes False and peered to another hop node (no)
+            hop2 = Instance.objects.create(hostname='hop2', node_type='hop')
+            ReceptorAddress.objects.create(instance=hop2, address='hop2', peers_from_control_nodes=False, canonical=True)
+            hop2.peers.add(hop1addr)
             hop2.delete()
             write_method.assert_not_called()
 
             # changing peers_from_control_nodes to False (yes)
-            hop1.peers_from_control_nodes = False
-            hop1.save()
+            hop1addr.peers_from_control_nodes = False
+            hop1addr.save()
             write_method.assert_called()
             write_method.reset_mock()
 
-            # deleting hop node that has peers_from_control_nodes to False (no)
-            hop1.delete()
+            # deleting address that has peers_from_control_nodes to False (no)
+            hop1.delete()  # cascade deletes to hop1addr
             write_method.assert_not_called()
 
             # deleting control nodes (no)
@@ -315,8 +579,8 @@ class TestPeers:
 
             # not peered, so config file should not be updated
             for i in range(3):
-                Instance.objects.create(hostname=f"exNo-{i}", node_type='execution', listener_port=6789, peers_from_control_nodes=False)
-
+                inst = Instance.objects.create(hostname=f"exNo-{i}", node_type='execution')
+                ReceptorAddress.objects.create(instance=inst, address=f"exNo-{i}", port=6789, peers_from_control_nodes=False, canonical=True)
             _, should_update = generate_config_data()
             assert not should_update
 
@@ -324,11 +588,13 @@ class TestPeers:
             expected_peers = []
             for i in range(3):
                 expected_peers.append(f"hop-{i}:6789")
-                Instance.objects.create(hostname=f"hop-{i}", node_type='hop', listener_port=6789, peers_from_control_nodes=True)
+                inst = Instance.objects.create(hostname=f"hop-{i}", node_type='hop')
+                ReceptorAddress.objects.create(instance=inst, address=f"hop-{i}", port=6789, peers_from_control_nodes=True, canonical=True)
 
             for i in range(3):
                 expected_peers.append(f"exYes-{i}:6789")
-                Instance.objects.create(hostname=f"exYes-{i}", node_type='execution', listener_port=6789, peers_from_control_nodes=True)
+                inst = Instance.objects.create(hostname=f"exYes-{i}", node_type='execution')
+                ReceptorAddress.objects.create(instance=inst, address=f"exYes-{i}", port=6789, peers_from_control_nodes=True, canonical=True)
 
             new_config, should_update = generate_config_data()
             assert should_update

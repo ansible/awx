@@ -20,7 +20,6 @@ from awx.main.analytics.broadcast_websocket import (
     RelayWebsocketStats,
     RelayWebsocketStatsManager,
 )
-import awx.main.analytics.subsystem_metrics as s_metrics
 
 logger = logging.getLogger('awx.main.wsrelay')
 
@@ -54,7 +53,6 @@ class WebsocketRelayConnection:
         self.protocol = protocol
         self.verify_ssl = verify_ssl
         self.channel_layer = None
-        self.subsystem_metrics = s_metrics.Metrics(instance_name=name)
         self.producers = dict()
         self.connected = False
 
@@ -341,7 +339,7 @@ class WebSocketRelayManager(object):
 
             if deleted_remote_hosts:
                 logger.info(f"Removing {deleted_remote_hosts} from websocket broadcast list")
-                await asyncio.gather(self.cleanup_offline_host(h) for h in deleted_remote_hosts)
+                await asyncio.gather(*[self.cleanup_offline_host(h) for h in deleted_remote_hosts])
 
             if new_remote_hosts:
                 logger.info(f"Adding {new_remote_hosts} to websocket broadcast list")

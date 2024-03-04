@@ -201,7 +201,11 @@ function NodeViewModal({ readOnly }) {
         overrides.limit = originalNodeObject.limit;
       }
       if (launchConfig.ask_verbosity_on_launch) {
-        overrides.verbosity = originalNodeObject.verbosity.toString();
+        overrides.verbosity =
+          originalNodeObject.verbosity !== undefined &&
+          originalNodeObject.verbosity !== null
+            ? originalNodeObject.verbosity.toString()
+            : '0';
       }
       if (launchConfig.ask_credential_on_launch) {
         overrides.credentials = originalNodeCredentials || [];

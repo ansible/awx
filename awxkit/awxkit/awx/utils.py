@@ -122,5 +122,5 @@ def as_user(v, username, password=None):
 
 
 def uses_sessions(connection):
-    session_login = connection.get('/api/login/')
+    session_login = connection.get(f"{config.api_base_path}login/")
     return session_login.status_code == 200

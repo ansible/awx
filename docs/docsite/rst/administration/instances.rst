@@ -13,7 +13,7 @@ Scaling your mesh is only available on Openshift and Kubernetes (K8S) deployment
 
 Instances serve as nodes in your mesh topology. Automation mesh allows you to extend the footprint of your automation. Where you launch a job and where the ``ansible-playbook`` runs can be in different locations.
 
-.. image:: ../common/images/instances_mesh_concept.png
+.. image:: ../common/images/instances_mesh_concept.drawio.png
 	:alt: Site A pointing to Site B and dotted arrows to two hosts from Site B 
 
 Automation mesh is useful for:
@@ -23,7 +23,7 @@ Automation mesh is useful for:
 
 The nodes (control, hop, and execution instances) are interconnected via receptor, forming a virtual mesh.
 
-.. image:: ../common/images/instances_mesh_concept_with_nodes.png
+.. image:: ../common/images/instances_mesh_concept_with_nodes.drawio.png
 	:alt: Control node pointing to hop node, which is pointing to two execution nodes.  
 
 
@@ -51,13 +51,227 @@ Prerequisites
 - To manage instances from the AWX user interface, you must have System Administrator or System Auditor permissions.
 
 
+Common topologies
+------------------
+
+Instances make up the network of devices that communicate with one another. They are the building blocks of an automation mesh. These building blocks serve as nodes in a mesh topology. There are several kinds of instances:
+
++-----------+-----------------------------------------------------------------------------------------------------------------+
+| Node Type | Description                                                                                                     |
++===========+=================================================================================================================+
+| Control   | Nodes that run persistent Ansible Automation Platform services, and delegate jobs to hybrid and execution nodes |
++-----------+-----------------------------------------------------------------------------------------------------------------+
+| Hybrid    | Nodes that run persistent Ansible Automation Platform services and execute jobs                                 |
+|           | (not applicable to operator-based installations)                                                                |
++-----------+-----------------------------------------------------------------------------------------------------------------+
+| Hop       | Used for relaying across the mesh only                                                                          |
++-----------+-----------------------------------------------------------------------------------------------------------------+
+| Execution | Nodes that run jobs delivered from control nodes (jobs submitted from the user’s Ansible automation)            |
++-----------+-----------------------------------------------------------------------------------------------------------------+
+
+Simple topology
+~~~~~~~~~~~~~~~~
+
+One of the ways to expand job capacity is to create a standalone execution node that can be added to run alongside the Kubernetes deployment of AWX. These machines will not be a part of the AWX Kubernetes cluster. The control nodes running in the cluster will connect and submit work to these machines via Receptor. The machines are registered in AWX as type "execution" instances, meaning they will only be used to run AWX jobs, not dispatch work or handle web requests as control nodes do.
+
+Hop nodes can be added to sit between the control plane of AWX and standalone execution nodes. These machines will not be a part of the AWX Kubernetes cluster and they will be registered in AWX as node type "hop", meaning they will only handle inbound and outbound traffic for otherwise unreachable nodes in a different or more strict network.
+
+Below is an example of an AWX task pod with two execution nodes. Traffic to execution node 2 flows through a hop node that is setup between it and the control plane.
+
+.. image:: ../common/images/instances_awx_task_pods_hopnode.drawio.png
+	:alt: AWX task pod with a hop node between the control plane of AWX and standalone execution nodes.
+
+
+Below are sample values used to configure each node in a simple topology:
+
+.. list-table::
+   :widths: 20 30 10 20 15
+   :header-rows: 1
+
+   * - Instance type
+     - Hostname
+     - Listener port
+     - Peers from control nodes
+     - Peers
+   * - Control plane
+     - awx-task-65d6d96987-mgn9j
+     - n/a
+     - n/a
+     - [hop node]
+   * - Hop node
+     - awx-hop-node
+     - 27199
+     - True
+     - []     
+   * - Execution node
+     - awx-example.com
+     - n/a
+     - False
+     - [hop node]  
+
+
+
+Mesh topology
+~~~~~~~~~~~~~~
+
+Mesh ingress is a feature that allows remote nodes to connect inbound to the control plane. This is especially useful when creating remote nodes in restricted networking environments that disallow inbound traffic.
+
+
+.. image:: ../common/images/instances_mesh_ingress_topology.drawio.png
+	:alt: Mesh ingress architecture showing the peering relationship between nodes.
+
+
+Below are sample values used to configure each node in a mesh ingress topology:
+
+.. list-table::
+   :widths: 20 30 10 20 15
+   :header-rows: 1
+
+   * - Instance type
+     - Hostname
+     - Listener port
+     - Peers from control nodes
+     - Peers
+   * - Control plane
+     - awx-task-65d6d96987-mgn9j
+     - n/a
+     - n/a
+     - [hop node]
+   * - Hop node
+     - awx-mesh-ingress-1
+     - 27199
+     - True
+     - []     
+   * - Execution node
+     - awx-example.com
+     - n/a
+     - False
+     - [hop node]  
+    
+
+In order to create a mesh ingress for AWX, see the `Mesh Ingress <https://ansible.readthedocs.io/projects/awx-operator/en/latest/user-guide/advanced-configuration/mesh-ingress.html>`_ chapter of the AWX Operator Documentation for information on setting up this type of topology. The last step is to create a remote execution node and add the execution node to an instance group in order for it to be used in your job execution. Whatever execution environment image used to run a playbook needs to be accessible for your remote execution node. Everything you are using in your playbook also needs to be accessible from this remote execution node.
+
+.. image:: ../common/images/instances-job-template-using-remote-execution-ig.png
+    :alt: Job template using the instance group with the execution node to run jobs.
+    :width: 1400px
+
+
+.. _ag_instances_add:
+
+Add an instance
+----------------
+
+To create an instance in AWX:
+
+1. Click **Instances** from the left side navigation menu of the AWX UI.
+
+2. In the Instances list view, click the **Add** button and the Create new Instance window opens.
+
+.. image:: ../common/images/instances_create_new.png
+    :alt: Create a new instance form.
+    :width: 1400px
+
+An instance has several attributes that may be configured:
+
+- Enter a fully qualified domain name (ping-able DNS) or IP address for your instance in the **Host Name** field (required). This field is equivalent to ``hostname`` in the API.
+- Optionally enter a **Description** for the instance
+- The **Instance State** field is auto-populated, indicating that it is being installed, and cannot be modified 
+- Optionally specify the **Listener Port** for the receptor to listen on for incoming connections. This is an open port on the remote machine used to establish inbound TCP connections. This field is equivalent to ``listener_port`` in the API. 
+- Select from the options in **Instance Type** field to specify the type you want to create. Only execution and hop nodes can be created as operator-based installations do not support hybrid nodes. This field is equivalent to ``node_type`` in the API. 
+- In the **Peers** field, select the instance hostnames you want your new instance to connect outbound to. 
+- In the **Options** fields:
+	- Check the **Enable Instance** box to make it available for jobs to run on an execution node.
+	- Check the **Managed by Policy** box to allow policy to dictate how the instance is assigned.
+	- Check the **Peers from control nodes** box to allow control nodes to peer to this instance automatically. Listener port needs to be set if this is enabled or the instance is a peer.
+
+
+
+3. Once the attributes are configured, click **Save** to proceed.
+
+Upon successful creation, the Details of the one of the created instances opens.
+
+.. image:: ../common/images/instances_create_details.png
+    :alt: Details of the newly created instance.
+    :width: 1400px
+
+.. note::
+
+	The proceeding steps 4-8 are intended to be ran from any computer that has SSH access to the newly created instance. 
+
+4. Click the download button next to the **Install Bundle** field to download the tarball that contain files to allow AWX to make proper TCP connections to the remote machine.
+
+.. image:: ../common/images/instances_install_bundle.png
+    :alt: Instance details showing the Download button in the Install Bundle field of the Details tab.
+    :width: 1400px
+
+5. Extract the downloaded ``tar.gz`` file from the location you downloaded it. The install bundle contains TLS certificates and keys, a certificate authority, and a proper Receptor configuration file. To facilitate that these files will be in the right location on the remote machine, the install bundle includes an ``install_receptor.yml`` playbook. The playbook requires the Receptor collection which can be obtained via:
+
+::
+
+	ansible-galaxy collection install -r requirements.yml
+
+6. Before running the ``ansible-playbook`` command, edit the following fields in the ``inventory.yml`` file:
+
+- ``ansible_user`` with the username running the installation
+- ``ansible_ssh_private_key_file`` to contain the filename of the private key used to connect to the instance
+
+::
+
+	---
+	all:
+	  hosts:
+	    remote-execution:
+	      ansible_host: <hostname>
+	      ansible_user: <username> # user provided
+	      ansible_ssh_private_key_file: ~/.ssh/id_rsa
+
+The content of the ``inventory.yml`` file serves as a template and contains variables for roles that are applied during the installation and configuration of a receptor node in a mesh topology. You may modify some of the other fields, or replace the file in its entirety for advanced scenarios. Refer to `Role Variables <https://github.com/ansible/receptor-collection/blob/main/README.md>`_ for more information on each variable.  
+
+7. Save the file to continue.
+
+8. Run the following command on the machine you want to update your mesh:
+
+::
+
+	ansible-playbook -i inventory.yml install_receptor.yml
+
+Wait a few minutes for the periodic AWX task to do a health check against the new instance. You may run a health check by selecting the node and clicking the **Run health check** button from its Details page at any time. Once the instances endpoint or page reports a "Ready" status for the instance, jobs are now ready to run on this machine!
+
+9. To view other instances within the same topology or associate peers, click the **Peers** tab. 
+
+.. image:: ../common/images/instances_peers_tab.png
+    :alt: "Peers" tab showing two peers.
+    :width: 1400px
+
+To associate peers with your node, click the **Associate** button to open a dialog box of instances eligible for peering.
+
+.. image:: ../common/images/instances_associate_peer.png
+    :alt:  Instances available to peer with the example hop node.
+    :width: 1400px
+
+Execution nodes can peer with either hop nodes or other execution nodes. Hop nodes can only peer with execution nodes unless you check the **Peers from control nodes** check box from the **Options** field.
+
+.. note::
+
+	If you associate or disassociate a peer, a notification will inform you to re-run the install bundle from the Peer Detail view (the :ref:`ag_topology_viewer` has the download link).
+
+    .. image:: ../common/images/instances_associate_peer_reinstallmsg.png
+      :alt: Notification to re-run the installation bundle due to change in the peering.
+
+You can remove an instance by clicking **Remove** in the Instances page, or by setting the instance ``node_state = deprovisioning`` via the API. Upon deleting, a pop-up message will appear to notify that you may need to re-run the install bundle to make sure things that were removed are no longer connected.
+
+
+10. To view a graphical representation of your updated topology, refer to the :ref:`ag_topology_viewer` section of this guide.
+
+
 Manage instances
 -----------------
 
 Click **Instances** from the left side navigation menu to access the Instances list.
 
 .. image:: ../common/images/instances_list_view.png
-	:alt: List view of instances in AWX
+    :alt: List view of instances in AWX
+    :width: 1400px
 
 The Instances list displays all the current nodes in your topology, along with relevant details:
 
@@ -83,7 +297,9 @@ The Instances list displays all the current nodes in your topology, along with r
 From this page, you can add, remove or run health checks on your nodes. Use the check boxes next to an instance to select it to remove or run a health check against. When a button is grayed-out, you do not have permission for that particular action. Contact your Administrator to grant you the required level of access. If you are able to remove an instance, you will receive a prompt for confirmation, like the one below:
 
 .. image:: ../common/images/instances_delete_prompt.png
-	:alt: Prompt for deleting instances in AWX.
+  :alt: Prompt for deleting instances in AWX
+  :width: 1400px
+
 
 .. note::
 
@@ -96,7 +312,8 @@ Click **Remove** to confirm.
 If running a health check on an instance, at the top of the Details page, a message displays that the health check is in progress. 
 
 .. image:: ../common/images/instances_health_check.png
-	:alt: Health check for instances in AWX
+  :alt: Health check for instances in AWX
+  :width: 1400px
 
 Click **Reload** to refresh the instance status. 
 
@@ -104,162 +321,20 @@ Click **Reload** to refresh the instance status.
 
 	Health checks are ran asynchronously, and may take up to a minute for the instance status to update, even with a refresh. The status may or may not change after the health check. At the bottom of the Details page, a timer/clock icon displays next to the last known health check date and time stamp if the health check task is currently running.
 
-	.. image:: ../common/images/instances_health_check_pending.png
-		:alt: Health check for instance still in pending state.
+  .. image:: ../common/images/instances_health_check_pending.png
+    :alt: Health check for instance still in pending state.
 
 The example health check shows the status updates with an error on node 'one':
 
 .. image:: ../common/images/topology-viewer-instance-with-errors.png
-	:alt: Health check showing an error in one of the instances.
-
-
-Add an instance
-----------------
-
-One of the ways to expand capacity is to create an instance. Standalone execution nodes can be added to run alongside the Kubernetes deployment of AWX. These machines will not be a part of the AWX Kubernetes cluster. The control nodes running in the cluster will connect and submit work to these machines via Receptor. The machines are registered in AWX as type "execution" instances, meaning they will only be used to run AWX jobs, not dispatch work or handle web requests as control nodes do.
-
-Hop nodes can be added to sit between the control plane of AWX and standalone execution nodes. These machines will not be a part of the AWX Kubernetes cluster and they will be registered in AWX as node type "hop", meaning they will only handle inbound and outbound traffic for otherwise unreachable nodes in a different or more strict network.
-
-Below is an example of an AWX task pod with two execution nodes. Traffic to execution node 2 flows through a hop node that is setup between it and the control plane.
-
-.. image:: ../common/images/instances_awx_task_pods_hopnode.png
-	:alt: AWX task pod with a hop node between the control plane of AWX and standalone execution nodes.
-
-To create an instance in AWV:
-
-1. Click **Instances** from the left side navigation menu of the AWX UI.
-
-2. In the Instances list view, click the **Add** button and the Create new Instance window opens.
-
-.. image:: ../common/images/instances_create_new.png
-	:alt: Create a new instance form.
-
-An instance has several attributes that may be configured:
-
-- Enter a fully qualified domain name (ping-able DNS) or IP address for your instance in the **Host Name** field (required). This field is equivalent to ``hostname`` in the API.
-- Optionally enter a **Description** for the instance
-- The **Instance State** field is auto-populated, indicating that it is being installed, and cannot be modified 
-- Optionally specify the **Listener Port** for the receptor to listen on for incoming connections. This is an open port on the remote machine used to establish inbound TCP connections. This field is equivalent to ``listener_port`` in the API. 
-- Select from the options in **Instance Type** field to specify the type you want to create. Only execution and hop nodes can be created as operator-based installations do not support hybrid nodes. This field is equivalent to ``node_type`` in the API. 
-- In the **Peers** field, select the instance hostnames you want your new instance to connect outbound to. 
-- In the **Options** fields:
-	- Check the **Enable Instance** box to make it available for jobs to run on an execution node.
-	- Check the **Managed by Policy** box to allow policy to dictate how the instance is assigned.
-	- Check the **Peers from control nodes** box to allow control nodes to peer to this instance automatically. Listener port needs to be set if this is enabled or the instance is a peer.
-
-In the example diagram above, the configurations are as follows:
-
-+------------------+---------------+--------------------------+--------------+
-| instance name    | listener_port | peers_from_control_nodes | peers        |
-+==================+===============+==========================+==============+
-| execution node 1 | 27199         | true                     | []           |
-+------------------+---------------+--------------------------+--------------+
-| hop node         | 27199         | true                     | []           |
-+------------------+---------------+--------------------------+--------------+
-| execution node 2 | null          | false                    | ["hop node"] |
-+------------------+---------------+--------------------------+--------------+
-
-
-3. Once the attributes are configured, click **Save** to proceed.
-
-Upon successful creation, the Details of the one of the created instances opens.
-
-.. image:: ../common/images/instances_create_details.png
-	:alt: Details of the newly created instance.
-
-.. note::
-
-	The proceeding steps 4-8 are intended to be ran from any computer that has SSH access to the newly created instance. 
-
-4. Click the download button next to the **Install Bundle** field to download the tarball that contain files to allow AWX to make proper TCP connections to the remote machine.
-
-.. image:: ../common/images/instances_install_bundle.png
-	:alt: Instance details showing the Download button in the Install Bundle field of the Details tab.
-
-5. Extract the downloaded ``tar.gz`` file from the location you downloaded it. The install bundle contains TLS certificates and keys, a certificate authority, and a proper Receptor configuration file. To facilitate that these files will be in the right location on the remote machine, the install bundle includes an ``install_receptor.yml`` playbook. The playbook requires the Receptor collection which can be obtained via:
-
-::
-
-	ansible-galaxy collection install -r requirements.yml
-
-6. Before running the ``ansible-playbook`` command, edit the following fields in the ``inventory.yml`` file:
-
-- ``ansible_user`` with the username running the installation
-- ``ansible_ssh_private_key_file`` to contain the filename of the private key used to connect to the instance
-
-::
-
-	---
-	all:
-	  hosts:
-	    remote-execution:
-	      ansible_host: 18.206.206.34
-	      ansible_user: <username> # user provided
-	      ansible_ssh_private_key_file: ~/.ssh/id_rsa
-
-The content of the ``inventory.yml`` file serves as a template and contains variables for roles that are applied during the installation and configuration of a receptor node in a mesh topology. You may modify some of the other fields, or replace the file in its entirety for advanced scenarios. Refer to `Role Variables <https://github.com/ansible/receptor-collection/blob/main/README.md>`_ for more information on each variable.  
-
-7. Save the file to continue.
-
-8. Run the following command on the machine you want to update your mesh:
-
-::
-
-	ansible-playbook -i inventory.yml install_receptor.yml
-
-Wait a few minutes for the periodic AWX task to do a health check against the new instance. You may run a health check by selecting the node and clicking the **Run health check** button from its Details page at any time. Once the instances endpoint or page reports a "Ready" status for the instance, jobs are now ready to run on this machine!
-
-9. To view other instances within the same topology or associate peers, click the **Peers** tab. 
-
-.. image:: ../common/images/instances_peers_tab.png
-	:alt: "Peers" tab showing two peers.
-
-To associate peers with your node, click the **Associate** button to open a dialog box of instances eligible for peering.
-
-.. image:: ../common/images/instances_associate_peer.png
-	:alt:  Instances available to peer with the example hop node.
-
-Execution nodes can peer with either hop nodes or other execution nodes. Hop nodes can only peer with execution nodes unless you check the **Peers from control nodes** check box from the **Options** field.
-
-.. note::
-
-	If you associate or disassociate a peer, a notification will inform you to re-run the install bundle from the Peer Detail view (the :ref:`ag_topology_viewer` has the download link).
-
-	.. image:: ../common/images/instances_associate_peer_reinstallmsg.png
-		:alt: Notification to re-run the installation bundle due to change in the peering. 
-
-You can remove an instance by clicking **Remove** in the Instances page, or by setting the instance ``node_state = deprovisioning`` via the API. Upon deleting, a pop-up message will appear to notify that you may need to re-run the install bundle to make sure things that were removed are no longer connected.
-
-
-10. To view a graphical representation of your updated topology, refer to the :ref:`ag_topology_viewer` section of this guide.
+  :alt: Health check showing an error in one of the instances.
+  :width: 1400px
 
 
 Using a custom Receptor CA
 ---------------------------
 
-The control nodes on the K8S cluster will communicate with execution nodes via mutual TLS TCP connections, running via Receptor. Execution nodes will verify incoming connections by ensuring the x509 certificate was issued by a trusted Certificate Authority (CA).
-
-You may choose to provide your own CA for this validation. If no CA is provided, AWX operator will automatically generate one using OpenSSL.
-
-Given custom ``ca.crt`` and ``ca.key`` stored locally, run the following:
-
-::
-
-	kubectl create secret tls awx-demo-receptor-ca \
-   	--cert=/path/to/ca.crt --key=/path/to/ca.key
-
-The secret should be named ``{AWX Custom Resource name}-receptor-ca``. In the above, the AWX Custom Resource name is "awx-demo". Replace "awx-demo" with your AWX Custom Resource name.
-
-If this secret is created after AWX is deployed, run the following to restart the deployment:
-
-::
-
-	kubectl rollout restart deployment awx-demo
-
-
-.. note::
-
-	Changing the receptor CA will sever connections to any existing execution nodes. These nodes will enter an *Unavailable* state, and jobs will not be able to run on them. You will need to download and re-run the install bundle for each execution node. This will replace the TLS certificate files with those signed by the new CA. The execution nodes will then appear in a *Ready* state after a few minutes.
+Refer to the AWX Operator Documentation, `Custom Receptor CA <https://ansible.readthedocs.io/projects/awx-operator/en/latest/user-guide/advanced-configuration/custom-receptor-certs.html>`_ for detail.
 
 
 Using a private image for the default EE

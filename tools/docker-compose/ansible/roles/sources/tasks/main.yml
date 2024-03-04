@@ -67,7 +67,7 @@
 
 - name: Get OS info for sdb
   shell: |
-    docker info | grep 'Operating System'
+    docker info 2> /dev/null | awk '/Os:/ { gsub(/Os:/, "Operating System:"); }/Operating System/ { print; }'
   register: os_info
   changed_when: false
 

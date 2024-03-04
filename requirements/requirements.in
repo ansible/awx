@@ -1,4 +1,4 @@
-aiohttp
+aiohttp>=3.8.6  # CVE-2023-47627
 ansiconv==1.0.0  # UPGRADE BLOCKER: from 2013, consider replacing instead of upgrading
 asciichartpy
 asn1
@@ -8,8 +8,8 @@ boto3
 botocore
 channels
 channels-redis==3.4.1  # see UPGRADE BLOCKERs
-cryptography>=41.0.2  # CVE-2023-38325
-Cython<3 # Since the bump to PyYAML 5.4.1 this is now a mandatory dep
+cryptography>=41.0.6  # CVE-2023-49083
+Cython<3 # this is needed as a build dependency, one day we may have separated build deps
 daphne
 distro
 django==4.2.6  # CVE-2023-43665
@@ -26,15 +26,15 @@ django-split-settings==1.0.0    # We hit a strange issue where the release proce
 djangorestframework
 djangorestframework-yaml
 filelock
-GitPython>=3.1.32  # CVE-2023-40267
+GitPython>=3.1.37  # CVE-2023-41040
 hiredis==2.0.0  # see UPGRADE BLOCKERs
 irc
-jinja2
+jinja2>=3.1.3  # CVE-2024-22195
 JSON-log-formatter
 jsonschema
 Markdown  # used for formatting API help
 openshift
-pexpect==4.7.0 # see library notes
+pexpect==4.7.0  # see library notes
 prometheus_client
 psycopg
 psutil
@@ -49,20 +49,20 @@ pyyaml>=6.0.1
 receptorctl
 social-auth-core[openidconnect]==4.4.2  # see UPGRADE BLOCKERs
 social-auth-app-django==5.4.0  # see UPGRADE BLOCKERs
-sqlparse >= 0.4.4   # Required by django https://github.com/ansible/awx/security/dependabot/96
+sqlparse>=0.4.4   # Required by django https://github.com/ansible/awx/security/dependabot/96
 redis
 requests
 slack-sdk
 tacacs_plus==1.0  # UPGRADE BLOCKER: auth does not work with later versions
 twilio
-twisted[tls]
+twisted[tls]>=23.10.0  # CVE-2023-46137
 uWSGI
 uwsgitop
-wheel>=0.38.1 # CVE-2022-40898
+wheel>=0.38.1  # CVE-2022-40898
 pip==21.2.4  # see UPGRADE BLOCKERs
 setuptools  # see UPGRADE BLOCKERs
 setuptools_scm[toml]  # see UPGRADE BLOCKERs, xmlsec build dep
-setuptools-rust >= 0.11.4 # cryptography build dep
+setuptools-rust>=0.11.4  # cryptography build dep
 pkgconfig>=1.5.1  # xmlsec build dep - needed for offline build
 
 # Temporarily added to use ansible-runner from git branch, to be removed

@@ -14,6 +14,7 @@ from awx.main.models.unified_jobs import UnifiedJob, UnifiedJobTemplate, StdoutM
 from awx.main.models.organization import Organization, Profile, Team, UserSessionMembership  # noqa
 from awx.main.models.credential import Credential, CredentialType, CredentialInputSource, ManagedCredentialType, build_safe_env  # noqa
 from awx.main.models.projects import Project, ProjectUpdate  # noqa
+from awx.main.models.receptor_address import ReceptorAddress  # noqa
 from awx.main.models.inventory import (  # noqa
     CustomInventoryScript,
     Group,

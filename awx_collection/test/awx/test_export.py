@@ -134,21 +134,17 @@ def test_export_simple(
 
 
 @pytest.mark.django_db
-def test_export_system_auditor(run_module, schedule, system_auditor):  # noqa: F811
+def test_export_system_auditor(run_module, organization, system_auditor):  # noqa: F811
     """
-    This test illustrates that deficiency of export when ran as non-root user (i.e. system auditor).
-    The OPTIONS endpoint does NOT return POST for a system auditor. This is bad for the export code
-    because it relies on crawling the OPTIONS POST response to determine the fields to export.
+    This test illustrates that export of resources can now happen
+    when ran as non-root user (i.e. system auditor). The OPTIONS
+    endpoint does NOT return POST for a system auditor, but now we
+    make a best-effort to parse the description string, which will
+    often have the fields.
     """
     result = run_module('export', dict(all=True), system_auditor)
-    assert result.get('failed', False), result.get('msg', result)
+    assert not result.get('failed', False), result.get('msg', result)
+    assert 'msg' not in result
+    assert 'assets' in result
 
-    assert 'Failed to export assets substring not found' in result['msg'], (
-        'If you found this error then you have probably fixed a feature! The export code attempts to assertain the POST fields from the `description` field,'
-        ' but both the API side and the client inference code are lacking.'
-    )
-
-    # r = result['assets']['schedules'][0]
-    # assert r['natural_key']['name'] == 'test-sched'
-
-    # assert 'rrule' not in r, 'If you found this error then you have probably fixed a feature! We WANT rrule to be found in the export schedule payload.'
+    find_by(result['assets'], 'organizations', 'name', 'Default')

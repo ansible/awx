@@ -128,7 +128,7 @@ The following credential types are supported with AWX:
 .. contents::
     :local:
 
-The credential types associated with Centrify, CyberArk, HashiCorp Vault, Microsoft Azure Key Management System (KMS), and Thycotic are part of the credential plugins capability that allows an external system to lookup your secrets information. See the :ref:`ug_credential_plugins` section for further detail.
+The credential types associated with AWS Secrets Manager, Centrify, CyberArk, HashiCorp Vault, Microsoft Azure Key Management System (KMS), and Thycotic are part of the credential plugins capability that allows an external system to lookup your secrets information. See the :ref:`ug_credential_plugins` section for further detail.
 
 
 .. _ug_credentials_aws:
@@ -165,6 +165,10 @@ AWX provides support for EC2 STS tokens (sometimes referred to as IAM STS creden
 .. warning::
 
   To use implicit IAM role credentials, do not attach AWS cloud credentials in AWX when relying on IAM roles to access the AWS API.  While it may seem to make sense to attach your AWS cloud credential to your job template, doing so will force the use of your AWS credentials and will not "fall through" to use your IAM role credentials (this is due to the use of the boto library.)
+
+AWS Secrets Manager 
+^^^^^^^^^^^^^^^^^^^^^
+This is considered part of the secret management capability. See :ref:`ug_credentials_aws_lookup` for more detail.
 
 
 Ansible Galaxy/Automation Hub API Token

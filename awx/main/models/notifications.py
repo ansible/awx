@@ -5,6 +5,7 @@ from copy import deepcopy
 import datetime
 import logging
 import json
+import traceback
 
 from django.db import models
 from django.conf import settings
@@ -484,14 +485,29 @@ class JobNotificationMixin(object):
         if msg_template:
             try:
                 msg = env.from_string(msg_template).render(**context)
-            except (TemplateSyntaxError, UndefinedError, SecurityError):
-                msg = ''
+            except (TemplateSyntaxError, UndefinedError, SecurityError) as e:
+                msg = '\r\n'.join([e.message, ''.join(traceback.format_exception(None, e, e.__traceback__).replace('\n', '\r\n'))])
 
         if body_template:
             try:
                 body = env.from_string(body_template).render(**context)
-            except (TemplateSyntaxError, UndefinedError, SecurityError):
-                body = ''
+            except (TemplateSyntaxError, UndefinedError, SecurityError) as e:
+                body = '\r\n'.join([e.message, ''.join(traceback.format_exception(None, e, e.__traceback__).replace('\n', '\r\n'))])
+
+        # https://datatracker.ietf.org/doc/html/rfc2822#section-2.2
+        # Body should have at least 2 CRLF, some clients will interpret
+        # the email incorrectly with blank body.  So we will check that
+
+        if len(body.strip().splitlines()) <= 2:
+            # blank body
+            body = '\r\n'.join(
+                [
+                    "The template rendering return a blank body.",
+                    "Please check the template.",
+                    "Refer to https://github.com/ansible/awx/issues/13983",
+                    "for further information.",
+                ]
+            )
 
         return (msg, body)
 

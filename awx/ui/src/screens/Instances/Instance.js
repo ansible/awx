@@ -12,6 +12,7 @@ import { SettingsAPI } from 'api';
 import ContentLoading from 'components/ContentLoading';
 import InstanceDetail from './InstanceDetail';
 import InstancePeerList from './InstancePeers';
+import InstanceListenerAddressList from './InstanceListenerAddressList';
 
 function Instance({ setBreadcrumb }) {
   const { me } = useConfig();
@@ -54,7 +55,12 @@ function Instance({ setBreadcrumb }) {
   }, [request]);
 
   if (isK8s) {
-    tabsArray.push({ name: t`Peers`, link: `${match.url}/peers`, id: 1 });
+    tabsArray.push({
+      name: t`Listener Addresses`,
+      link: `${match.url}/listener_addresses`,
+      id: 1,
+    });
+    tabsArray.push({ name: t`Peers`, link: `${match.url}/peers`, id: 2 });
   }
   if (isLoading) {
     return <ContentLoading />;
@@ -72,6 +78,14 @@ function Instance({ setBreadcrumb }) {
           <Route path="/instances/:id/details" key="details">
             <InstanceDetail isK8s={isK8s} setBreadcrumb={setBreadcrumb} />
           </Route>
+          {isK8s && (
+            <Route
+              path="/instances/:id/listener_addresses"
+              key="listener_addresses"
+            >
+              <InstanceListenerAddressList setBreadcrumb={setBreadcrumb} />
+            </Route>
+          )}
           {isK8s && (
             <Route path="/instances/:id/peers" key="peers">
               <InstancePeerList setBreadcrumb={setBreadcrumb} />

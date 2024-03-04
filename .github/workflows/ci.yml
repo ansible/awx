@@ -127,10 +127,6 @@ jobs:
 
       - name: Run sanity tests
         run: make test_collection_sanity
-        env:
-          # needed due to cgroupsv2. This is fixed, but a stable release
-          # with the fix has not been made yet.
-          ANSIBLE_TEST_PREFER_PODMAN: 1
 
   collection-integration:
     name: awx_collection integration

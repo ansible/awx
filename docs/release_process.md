@@ -124,9 +124,13 @@ This workflow will take the generated images and promote them to quay.io in addi
 
 ![Verify release awx.awx collection](img/galaxy.png)
 
-8. Go to awxkit's page on [PiPy](https://pypi.org/project/awxkit/#history) and validate the latest release is there:
+8. Go to awxkit's page on [PyPi](https://pypi.org/project/awxkit/#history) and validate the latest release is there:
 
 ![Verify awxkit](img/pypi.png)
+
+9. While verifying that awxkit was published on Pypi, also validate that the latest version of the [tar](https://pypi.org/project/awxkit/#files) file is there as well.
+
+![Verify awxkit files](img/pypi_files.png)
 
 ### Releasing the AWX operator
 
@@ -146,10 +150,10 @@ This workflow will take the generated images and promote them to quay.io.
 
 ## Send notifications
 Send notifications to the following groups:
-  * AWX Mailing List
+  * [Ansible Community forum](https://forum.ansible.com/)
   * #social:ansible.com IRC (@newsbot for inclusion in bullhorn)
   * #awx:ansible.com (no @newsbot in this room)
-  * #ansible-controller slack channel
+  * #aap-controller slack channel
 
 These messages are templated out for you in the output of `get_next_release.yml`.
 

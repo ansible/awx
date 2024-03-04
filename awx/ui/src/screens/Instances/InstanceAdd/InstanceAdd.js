@@ -9,6 +9,10 @@ function InstanceAdd() {
   const [formError, setFormError] = useState();
   const handleSubmit = async (values) => {
     try {
+      if (values.listener_port === undefined) {
+        values.listener_port = null;
+      }
+
       const {
         data: { id },
       } = await InstancesAPI.create(values);

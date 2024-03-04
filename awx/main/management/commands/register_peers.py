@@ -1,9 +1,7 @@
-import warnings
-
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from awx.main.models import Instance, InstanceLink
+from awx.main.models import Instance, InstanceLink, ReceptorAddress
 
 
 class Command(BaseCommand):
@@ -28,7 +26,9 @@ class Command(BaseCommand):
 
     def handle(self, **options):
         # provides a mapping of hostname to Instance objects
-        nodes = Instance.objects.in_bulk(field_name='hostname')
+        nodes = Instance.objects.all().in_bulk(field_name='hostname')
+        # provides a mapping of address to ReceptorAddress objects
+        addresses = ReceptorAddress.objects.all().in_bulk(field_name='address')
 
         if options['source'] not in nodes:
             raise CommandError(f"Host {options['source']} is not a registered instance.")
@@ -39,6 +39,14 @@ class Command(BaseCommand):
         if options['exact'] is not None and options['disconnect']:
             raise CommandError("The option --disconnect may not be used with --exact.")
 
+        # make sure each target has a receptor address
+        peers = options['peers'] or []
+        disconnect = options['disconnect'] or []
+        exact = options['exact'] or []
+        for peer in peers + disconnect + exact:
+            if peer not in addresses:
+                raise CommandError(f"Peer {peer} does not have a receptor address.")
+
         # No 1-cycles
         for collection in ('peers', 'disconnect', 'exact'):
             if options[collection] is not None and options['source'] in options[collection]:
@@ -47,9 +55,12 @@ class Command(BaseCommand):
         # No 2-cycles
         if options['peers'] or options['exact'] is not None:
             peers = set(options['peers'] or options['exact'])
-            incoming = set(InstanceLink.objects.filter(target=nodes[options['source']]).values_list('source__hostname', flat=True))
+            if options['source'] in addresses:
+                incoming = set(InstanceLink.objects.filter(target=addresses[options['source']]).values_list('source__hostname', flat=True))
+            else:
+                incoming = set()
             if peers & incoming:
-                warnings.warn(f"Source node {options['source']} should not link to nodes already peering to it: {peers & incoming}.")
+                raise CommandError(f"Source node {options['source']} should not link to nodes already peering to it: {peers & incoming}.")
 
         if options['peers']:
             missing_peers = set(options['peers']) - set(nodes)
@@ -60,7 +71,7 @@ class Command(BaseCommand):
             results = 0
             for target in options['peers']:
                 _, created = InstanceLink.objects.update_or_create(
-                    source=nodes[options['source']], target=nodes[target], defaults={'link_state': InstanceLink.States.ESTABLISHED}
+                    source=nodes[options['source']], target=addresses[target], defaults={'link_state': InstanceLink.States.ESTABLISHED}
                 )
                 if created:
                     results += 1
@@ -70,9 +81,9 @@ class Command(BaseCommand):
         if options['disconnect']:
             results = 0
             for target in options['disconnect']:
-                if target not in nodes:  # Be permissive, the node might have already been de-registered.
+                if target not in addresses:  # Be permissive, the node might have already been de-registered.
                     continue
-                n, _ = InstanceLink.objects.filter(source=nodes[options['source']], target=nodes[target]).delete()
+                n, _ = InstanceLink.objects.filter(source=nodes[options['source']], target=addresses[target]).delete()
                 results += n
 
             print(f"{results} peer links removed from the database.")
@@ -81,11 +92,11 @@ class Command(BaseCommand):
             additions = 0
             with transaction.atomic():
                 peers = set(options['exact'])
-                links = set(InstanceLink.objects.filter(source=nodes[options['source']]).values_list('target__hostname', flat=True))
-                removals, _ = InstanceLink.objects.filter(source=nodes[options['source']], target__hostname__in=links - peers).delete()
+                links = set(InstanceLink.objects.filter(source=nodes[options['source']]).values_list('target__address', flat=True))
+                removals, _ = InstanceLink.objects.filter(source=nodes[options['source']], target__instance__hostname__in=links - peers).delete()
                 for target in peers - links:
                     _, created = InstanceLink.objects.update_or_create(
-                        source=nodes[options['source']], target=nodes[target], defaults={'link_state': InstanceLink.States.ESTABLISHED}
+                        source=nodes[options['source']], target=addresses[target], defaults={'link_state': InstanceLink.States.ESTABLISHED}
                     )
                     if created:
                         additions += 1
