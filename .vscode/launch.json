@@ -86,7 +86,7 @@
       "type": "debugpy",
       "request": "launch",
       "program": "manage.py",
-      "args": ["runserver", "0.0.0.0:8052"],
+      "args": ["runserver", "127.0.0.1:8052"],
       "django": true,
       "preLaunchTask": "stop awx-uwsgi",
       "postDebugTask": "start awx-uwsgi"
@@ -96,7 +96,7 @@
       "type": "debugpy",
       "request": "launch",
       "program": "manage.py",
-      "args": ["runserver_plus", "0.0.0.0:8052"],
+      "args": ["runserver_plus", "127.0.0.1:8052"],
       "django": true,
       "preLaunchTask": "stop awx-uwsgi and install Werkzeug",
       "postDebugTask": "start awx-uwsgi"
