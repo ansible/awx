@@ -11,6 +11,9 @@ from datetime import timedelta
 
 from split_settings.tools import include
 
+# python-ldap
+import ldap
+
 
 DEBUG = True
 SQL_DEBUG = DEBUG
@@ -386,6 +389,12 @@ REST_FRAMEWORK = {
 
 AUTHENTICATION_BACKENDS = (
     'ansible_base.authentication.backend.AnsibleBaseAuth',
+    'awx.sso.backends.LDAPBackend',
+    'awx.sso.backends.LDAPBackend1',
+    'awx.sso.backends.LDAPBackend2',
+    'awx.sso.backends.LDAPBackend3',
+    'awx.sso.backends.LDAPBackend4',
+    'awx.sso.backends.LDAPBackend5',
     'awx.sso.backends.RADIUSBackend',
     'awx.sso.backends.TACACSPlusBackend',
     'social_core.backends.google.GoogleOAuth2',
@@ -410,6 +419,15 @@ OAUTH2_PROVIDER_ID_TOKEN_MODEL = "oauth2_provider.IDToken"
 
 OAUTH2_PROVIDER = {'ACCESS_TOKEN_EXPIRE_SECONDS': 31536000000, 'AUTHORIZATION_CODE_EXPIRE_SECONDS': 600, 'REFRESH_TOKEN_EXPIRE_SECONDS': 2628000}
 ALLOW_OAUTH2_FOR_EXTERNAL_USERS = False
+
+# LDAP server (default to None to skip using LDAP authentication).
+# Note: This setting may be overridden by database settings.
+AUTH_LDAP_SERVER_URI = None
+
+# Disable LDAP referrals by default (to prevent certain LDAP queries from
+# hanging with AD).
+# Note: This setting may be overridden by database settings.
+AUTH_LDAP_CONNECTION_OPTIONS = {ldap.OPT_REFERRALS: 0, ldap.OPT_NETWORK_TIMEOUT: 30}
 
 # Radius server settings (default to empty string to skip using Radius auth).
 # Note: These settings may be overridden by database settings.
