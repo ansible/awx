@@ -65,8 +65,8 @@ class Command(BaseCommand):
         return grouped_settings
 
     def is_enabled(self, settings, keys):
-        for k in keys:
-            if not settings.get(k):
+        for key, required in keys.items():
+            if required and not settings.get(key):
                 return False
         return True
 
