@@ -71,7 +71,6 @@ class Command(BaseCommand):
         return True
 
     def get_awx_saml_settings(self) -> dict[str, Any]:
-        # settings_registry.get_registered_settings(category_slug='saml', read_only=False)
         awx_saml_settings = {}
         for awx_saml_setting in settings_registry.get_registered_settings(category_slug='saml'):
             awx_saml_settings[awx_saml_setting.removeprefix("SOCIAL_AUTH_SAML_")] = getattr(settings, awx_saml_setting, None)
