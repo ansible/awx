@@ -18,6 +18,8 @@ USER root
 # Import the gpg key for DNF to work
 RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
 
+RUN dnf clean all
+
 # Install build dependencies
 RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     dnf config-manager --set-enabled crb && \
@@ -106,6 +108,8 @@ USER root
 RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
 
 ADD https://copr.fedorainfracloud.org/coprs/ansible/Rsyslog/repo/epel-9/ansible-Rsyslog-epel-9.repo /etc/yum.repos.d/ansible-Rsyslog-epel-9.repo
+
+RUN dnf clean all
 
 # Install runtime requirements
 RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
