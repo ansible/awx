@@ -107,6 +107,7 @@ def read_content(private_data_dir, raw_env, inventory_update):
             for filename in os.listdir(os.path.join(private_data_dir, subdir)):
                 filename_list.append(os.path.join(subdir, filename))
     filename_list = sorted(filename_list, key=lambda fn: inverse_env.get(os.path.join(private_data_dir, fn), [fn])[0])
+    inventory_content = ""
     for filename in filename_list:
         if filename in ('args', 'project'):
             continue  # Ansible runner
@@ -130,6 +131,7 @@ def read_content(private_data_dir, raw_env, inventory_update):
                 dir_contents[abs_file_path] = f.read()
             # Declare a reference to inventory plugin file if it exists
             if abs_file_path.endswith('.yml') and 'plugin: ' in dir_contents[abs_file_path]:
+                inventory_content = dir_contents[abs_file_path]
                 referenced_paths.add(abs_file_path)  # used as inventory file
             elif cache_file_regex.match(abs_file_path):
                 file_aliases[abs_file_path] = 'cache_file'
@@ -157,7 +159,11 @@ def read_content(private_data_dir, raw_env, inventory_update):
     content = {}
     for abs_file_path, file_content in dir_contents.items():
         # assert that all files laid down are used
-        if abs_file_path not in referenced_paths and abs_file_path not in ignore_files:
+        if (
+            abs_file_path not in referenced_paths
+            and to_container_path(abs_file_path, private_data_dir) not in inventory_content
+            and abs_file_path not in ignore_files
+        ):
             raise AssertionError(
                 "File {} is not referenced. References and files:\n{}\n{}".format(abs_file_path, json.dumps(env, indent=4), json.dumps(dir_contents, indent=4))
             )
