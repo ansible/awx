@@ -3,14 +3,18 @@ import pytest
 from unittest import mock
 import urllib.parse
 from unittest.mock import PropertyMock
+import importlib
 
 # Django
 from django.urls import resolve
 from django.http import Http404
+from django.apps import apps
 from django.core.handlers.exception import response_for_exception
 from django.contrib.auth.models import User
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.backends.sqlite3.base import SQLiteCursorWrapper
+
+from django.db.models.signals import post_migrate
 
 # AWX
 from awx.main.models.projects import Project
@@ -41,8 +45,17 @@ from awx.main.models.workflow import WorkflowJobTemplate
 from awx.main.models.ad_hoc_commands import AdHocCommand
 from awx.main.models.oauth import OAuth2Application as Application
 from awx.main.models.execution_environments import ExecutionEnvironment
+from awx.main.utils import is_testing
 
 __SWAGGER_REQUESTS__ = {}
+
+
+# HACK: the dab_resource_registry app required ServiceID in migrations which checks do not run
+dab_rr_initial = importlib.import_module('ansible_base.resource_registry.migrations.0001_initial')
+
+
+if is_testing():
+    post_migrate.connect(lambda **kwargs: dab_rr_initial.create_service_id(apps, None))
 
 
 @pytest.fixture(scope="session")

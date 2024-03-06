@@ -1,10 +1,5 @@
 # Python
-from unittest import mock
 import uuid
-
-# patch python-ldap
-with mock.patch('__main__.__builtins__.dir', return_value=[]):
-    import ldap  # NOQA
 
 # Load development settings for base variables.
 from awx.settings.development import *  # NOQA

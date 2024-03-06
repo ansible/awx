@@ -136,7 +136,7 @@ def underscore_to_camelcase(s):
 @functools.cache
 def is_testing(argv=None):
     '''Return True if running django or py.test unit tests.'''
-    if 'PYTEST_CURRENT_TEST' in os.environ.keys():
+    if os.environ.get('DJANGO_SETTINGS_MODULE') == 'awx.main.tests.settings_for_test':
         return True
     argv = sys.argv if argv is None else argv
     if len(argv) >= 1 and ('py.test' in argv[0] or 'py/test.py' in argv[0]):
