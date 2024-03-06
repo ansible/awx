@@ -36,7 +36,7 @@ stderr_logfile_maxbytes=0
 
 {% if kube_dev | bool %}
 [program:awx-autoreload]
-command = /awx_devel/tools/docker-compose/awx-autoreload /awx_devel/awx 'supervisorctl -c /etc/supervisord_rsyslog.conf restart tower-processes:*'
+command = /awx_devel/tools/docker-compose/awx-autoreload /awx_devel/awx
 autostart = true
 autorestart = true
 stopasgroup=true

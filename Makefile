@@ -216,8 +216,6 @@ collectstatic:
 	fi; \
 	$(PYTHON) manage.py collectstatic --clear --noinput > /dev/null 2>&1
 
-DEV_RELOAD_COMMAND ?= supervisorctl restart tower-processes:*
-
 uwsgi: collectstatic
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
@@ -225,7 +223,7 @@ uwsgi: collectstatic
 	uwsgi /etc/tower/uwsgi.ini
 
 awx-autoreload:
-	@/awx_devel/tools/docker-compose/awx-autoreload /awx_devel/awx "$(DEV_RELOAD_COMMAND)"
+	@/awx_devel/tools/docker-compose/awx-autoreload /awx_devel/awx
 
 daphne:
 	@if [ "$(VENV_BASE)" ]; then \
