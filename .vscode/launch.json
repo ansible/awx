@@ -101,5 +101,13 @@
       "preLaunchTask": "stop awx-uwsgi and install Werkzeug",
       "postDebugTask": "start awx-uwsgi"
     },
+    {
+      "name": "shell_plus",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "manage.py",
+      "args": ["shell_plus"],
+      "django": true,
+    },
   ]
 }
