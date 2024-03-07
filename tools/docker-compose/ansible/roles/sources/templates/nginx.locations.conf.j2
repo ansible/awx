@@ -41,6 +41,7 @@ location {{ ingress_path }} {
     error_page 502 = @fallback;
 }
 
+# Enable scenario where we shutdown uwsgi and launching runserver for debugging purposes
 location @fallback {
     # Add trailing / if missing
     rewrite ^(.*)$http_host(.*[^/])$ $1$http_host$2/ permanent;
