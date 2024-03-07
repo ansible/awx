@@ -228,7 +228,12 @@ def migrate_to_new_rbac(apps, schema_editor):
     # Create new replacement system auditor role
     new_system_auditor, created = RoleDefinition.objects.get_or_create(
         name='System Auditor',
-        defaults={'description': 'Migrated singleton role giving read permission to everything', 'created_on': migration_time, 'modified_on': migration_time},
+        defaults={
+            'description': 'Migrated singleton role giving read permission to everything',
+            'managed': True,
+            'created_on': migration_time,
+            'modified_on': migration_time,
+        },
     )
     new_system_auditor.permissions.add(*list(Permission.objects.filter(codename__startswith='view')))
 
