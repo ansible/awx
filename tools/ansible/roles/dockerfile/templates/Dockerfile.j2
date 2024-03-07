@@ -249,7 +249,7 @@ RUN for dir in \
       /var/lib/awx/.local/share/containers/storage \
       /var/run/awx-rsyslog \
       /var/log/nginx \
-      /var/lib/postgresql \
+      /var/lib/pgsql \
       /var/run/supervisor \
       /var/run/awx-receptor \
       /var/lib/nginx ; \
@@ -300,7 +300,6 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
 {% endif %}
 
 ENV HOME="/var/lib/awx"
-ENV PATH="/usr/pgsql-12/bin:${PATH}"
 
 {% if build_dev|bool %}
 ENV PATH="/var/lib/awx/venv/awx/bin/:${PATH}"

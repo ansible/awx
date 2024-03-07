@@ -629,9 +629,6 @@ clean-elk:
 	docker rm tools_elasticsearch_1
 	docker rm tools_kibana_1
 
-psql-container:
-	docker run -it --net tools_default --rm postgres:12 sh -c 'exec psql -h "postgres" -p "5432" -U postgres'
-
 VERSION:
 	@echo "awx: $(VERSION)"
 
