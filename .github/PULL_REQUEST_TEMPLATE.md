@@ -7,6 +7,14 @@ commit message and your description; but you should still explain what
 the change does.
 -->
 
+##### Depends on
+<!--- 
+Please provide links to any other PR dependanices.
+Indicating these should be merged first prior to this PR.  
+-->
+ - #12345
+ - https://github.com/xxx/yyy/pulls/1234
+
 ##### ISSUE TYPE
 <!--- Pick one below and delete the rest: -->
  - Breaking Change 
