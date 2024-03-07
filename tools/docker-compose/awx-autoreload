@@ -1,8 +1,8 @@
 #!/bin/env bash
 
-if [ $# -lt 2 ]; then
+if [ $# -lt 1 ]; then
     echo "Usage:"
-    echo "    autoreload directory command"
+    echo "    autoreload directory"
     exit 1
 fi
 
@@ -13,7 +13,6 @@ inotifywait -mrq -e create,delete,attrib,close_write,move --exclude '(/awx_devel
    since_last=$((this_reload-last_reload))
    if [[ "$file" =~ ^[^.].*\.py$ ]] && [[ "$since_last" -gt 1 ]]; then
       echo "File changed: $file"
-      # if SUPERVISOR_CONFIG_PATH is defined run `supervisorctl -c $SUPERVISOR_CONFIG_PATH` else just run `supervisorctl`
       if [ -n "$SUPERVISOR_CONFIG_PATH" ]; then
           supervisorctl_command="supervisorctl -c $SUPERVISOR_CONFIG_PATH"
       else
