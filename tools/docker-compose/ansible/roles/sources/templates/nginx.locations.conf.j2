@@ -46,4 +46,5 @@ location @fallback {
     # Add trailing / if missing
     rewrite ^(.*)$http_host(.*[^/])$ $1$http_host$2/ permanent;
     proxy_pass http://runserver;
+    proxy_set_header Host $http_host;
 }
