@@ -52,7 +52,7 @@ export const ScmCredentialFormField = ({
 
   return (
     <CredentialLookup
-      credentialTypeId={credential.typeId}
+      credentialTypeIds={credential.typeIds}
       label={t`Source Control Credential`}
       value={credential.value}
       onChange={onCredentialChange}
