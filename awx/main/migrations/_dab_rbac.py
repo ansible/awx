@@ -144,6 +144,7 @@ def migrate_to_new_rbac(apps, schema_editor):
     """
     Role = apps.get_model('main', 'Role')
     RoleDefinition = apps.get_model('dab_rbac', 'RoleDefinition')
+    RoleUserAssignment = apps.get_model('dab_rbac', 'RoleUserAssignment')
     Permission = apps.get_model('auth', 'Permission')
     migration_time = now()
 
@@ -225,7 +226,10 @@ def migrate_to_new_rbac(apps, schema_editor):
         )
 
     # Create new replacement system auditor role
-    new_system_auditor = RoleDefinition.objects.create(name='System Auditor', description='Migrated singleton role giving read permission to everything')
+    new_system_auditor, created = RoleDefinition.objects.get_or_create(
+        name='System Auditor',
+        defaults={'description': 'Migrated singleton role giving read permission to everything', 'created_on': migration_time, 'modified_on': migration_time},
+    )
     new_system_auditor.permissions.add(*list(Permission.objects.filter(codename__startswith='view')))
 
     # migrate is_system_auditor flag, because it is no longer handled by a system role

@@ -10,6 +10,7 @@ from django.db.models.signals import pre_delete  # noqa
 
 # django-ansible-base
 from ansible_base.rbac import permission_registry
+from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment
 from ansible_base.lib.utils.models import prevent_search
 from ansible_base.lib.utils.models import user_summary_fields
 
@@ -225,13 +226,14 @@ def user_is_system_auditor(user, tf):
         # time they've logged in, and we've just created the new User in this
         # request), we need one to set up the system auditor role
         user.save()
-    if user.profile.is_system_auditor != bool(tf):
-        rd = get_system_auditor_role()
-        prior_value = user.profile.is_system_auditor
-        if assignment and bool(tf) is False:
-            RoleUserAssignment.objects.filter(user=user, role_definition=rd).delete()
-        elif assignment is None and bool(tf):
-            RoleUserAssignment.objects.create(user=user, role_definition=rd)
+    rd = get_system_auditor_role()
+    assignment = RoleUserAssignment.objects.filter(user=user, role_definition=rd).first()
+    prior_value = bool(assignment)
+    if prior_value != bool(tf):
+        if assignment:
+            assignment.delete()
+        else:
+            rd.give_global_permission(user)
         user._is_system_auditor = bool(tf)
         entry = ActivityStream.objects.create(changes=json.dumps({"is_system_auditor": [prior_value, bool(tf)]}), object1='user', operation='update')
         entry.user.add(user)
