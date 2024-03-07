@@ -121,10 +121,10 @@ const getInventoryHelpTextStrings = () => ({
         <br />
         {value && (
           <div>
-            {t`If you want the Inventory Source to update on
-                      launch and on project update, click on Update on launch, and also go to`}
+            {t`If you want the Inventory Source to update on launch , click on Update on Launch, 
+            and also go to `}
             <Link to={`/projects/${value.id}/details`}> {value.name} </Link>
-            {t`and click on Update Revision on Launch`}
+            {t`and click on Update Revision on Launch.`}
           </div>
         )}
       </>
@@ -140,8 +140,8 @@ const getInventoryHelpTextStrings = () => ({
         <br />
         {value && (
           <div>
-            {t`If you want the Inventory Source to update on
-                      launch and on project update, click on Update on launch, and also go to`}
+            {t`If you want the Inventory Source to update on launch , click on Update on Launch, 
+            and also go to `}
             <Link to={`/projects/${value.id}/details`}> {value.name} </Link>
             {t`and click on Update Revision on Launch`}
           </div>
