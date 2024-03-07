@@ -6,3 +6,4 @@ git+https://github.com/ansible/ansible-runner.git@devel#egg=ansible-runner
 git+https://github.com/ansible/django-radius.git@develop#egg=django-radius
 git+https://github.com/ansible/python3-saml.git@devel#egg=python3-saml
 django-ansible-base @ git+https://github.com/ansible/django-ansible-base@devel#egg=django-ansible-base[rest_filters,jwt_consumer,resource_registry]
+metrics-utility @ git+https://github.com/ansible/metrics-utility.git
