@@ -576,9 +576,10 @@ def main():
         else:
             new_fields['project'] = module.resolve_name_to_id('projects', project)
 
-    if webhook_credential is not None and webhook_credential != '':
+    if webhook_credential is not None:
+      if webhook_credential != '' and webhook_credential != 'None' and webhook_credential != '{}':
         new_fields['webhook_credential'] = module.resolve_name_to_id('credentials', webhook_credential)
-    else:
+      else:
         new_fields['webhook_credential'] = None
 
     association_fields = {}
