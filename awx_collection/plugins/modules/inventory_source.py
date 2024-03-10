@@ -260,7 +260,11 @@ def main():
 
     # Attempt to look up the related items the user specified (these will fail the module if not found)
     if credential is not None:
+      if credential and credential != 'None':
         inventory_source_fields['credential'] = module.resolve_name_to_id('credentials', credential)
+      else:
+        inventory_source_fields['credential'] = None
+
     if ee is not None:
         inventory_source_fields['execution_environment'] = module.resolve_name_to_id('execution_environments', ee)
     if source_project is not None:
