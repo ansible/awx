@@ -7,6 +7,9 @@ import threading
 import contextlib
 import re
 
+# django-rest-framework
+from rest_framework.serializers import ValidationError
+
 # Django
 from django.db import models, transaction, connection
 from django.db.models.signals import m2m_changed
@@ -552,7 +555,15 @@ def get_role_definition(role):
     action_name = f.name.rsplit("_", 1)[0]
     rd_name = f'{obj._meta.model_name}-{action_name}-compat'
     perm_list = get_role_codenames(role)
-    rd, created = RoleDefinition.objects.get_or_create(name=rd_name, permissions=perm_list, defaults={'content_type_id': role.content_type_id})
+    defaults = {'content_type_id': role.content_type_id}
+    try:
+        rd, created = RoleDefinition.objects.get_or_create(name=rd_name, permissions=perm_list, defaults=defaults)
+    except ValidationError:
+        # This is a tricky case - practically speaking, users should not be allowed to create team roles
+        # or roles that include the team member permission.
+        # If we need to create this for compatibility purposes then we will create it as a managed non-editable role
+        defaults['managed'] = True
+        rd, created = RoleDefinition.objects.get_or_create(name=rd_name, permissions=perm_list, defaults=defaults)
     return rd
 
 

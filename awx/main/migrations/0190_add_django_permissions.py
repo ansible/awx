@@ -7,6 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
     dependencies = [
         ('main', '0189_inbound_hop_nodes'),
+        ('dab_rbac', '__first__'),
     ]
 
     operations = [

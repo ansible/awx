@@ -3141,7 +3141,6 @@ class CredentialSerializerCreate(CredentialSerializer):
         credential = super(CredentialSerializerCreate, self).create(validated_data)
 
         if user:
-            credential.admin_role.members.add(user)
             give_creator_permissions(user, credential)
         if team:
             if not credential.organization or team.organization.id != credential.organization.id:
