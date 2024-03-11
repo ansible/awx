@@ -62,6 +62,9 @@ class Command(BaseCommand):
             if new_key == "GROUP_TYPE" and value:
                 grouped_settings[index][new_key] = type(value).__name__
 
+            if new_key == "SERVER_URI" and value:
+                value = value.split(", ")
+
         return grouped_settings
 
     def is_enabled(self, settings, keys):
@@ -77,10 +80,14 @@ class Command(BaseCommand):
 
         return awx_saml_settings
 
-    def format_config_data(self, enabled, awx_settings, type, keys):
+    def format_config_data(self, enabled, awx_settings, type, keys, name):
         config = {
             "type": f"awx.authentication.authenticator_plugins.{type}",
+            "name": name,
             "enabled": enabled,
+            "create_objects": True,
+            "users_unique": False,
+            "remove_users": True,
             "configuration": {},
         }
         for k in keys:
@@ -106,18 +113,20 @@ class Command(BaseCommand):
             awx_saml_settings = self.get_awx_saml_settings()
             awx_saml_enabled = self.is_enabled(awx_saml_settings, self.DAB_SAML_AUTHENTICATOR_KEYS)
             if awx_saml_enabled:
+                awx_saml_name = awx_saml_settings["ENABLED_IDPS"]
                 data.append(
                     self.format_config_data(
                         awx_saml_enabled,
                         awx_saml_settings,
                         "saml",
                         self.DAB_SAML_AUTHENTICATOR_KEYS,
+                        awx_saml_name,
                     )
                 )
 
             # dump LDAP settings
             awx_ldap_group_settings = self.get_awx_ldap_settings()
-            for awx_ldap_settings in awx_ldap_group_settings.values():
+            for awx_ldap_name, awx_ldap_settings in enumerate(awx_ldap_group_settings.values()):
                 enabled = self.is_enabled(awx_ldap_settings, self.DAB_LDAP_AUTHENTICATOR_KEYS)
                 if enabled:
                     data.append(
@@ -126,6 +135,7 @@ class Command(BaseCommand):
                             awx_ldap_settings,
                             "ldap",
                             self.DAB_LDAP_AUTHENTICATOR_KEYS,
+                            str(awx_ldap_name),
                         )
                     )
 
