@@ -971,7 +971,6 @@ class CopyAPIView(GenericAPIView):
             None, None, self.model, obj, request.user, create_kwargs=create_kwargs, copy_name=serializer.validated_data.get('name', '')
         )
         if hasattr(new_obj, 'admin_role') and request.user not in new_obj.admin_role.members.all():
-            new_obj.admin_role.members.add(request.user)
             give_creator_permissions(request.user, new_obj)
         if sub_objs:
             permission_check_func = None

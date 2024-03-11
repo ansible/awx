@@ -33,6 +33,13 @@ def test_custom_read_role(admin_user, post):
 
 
 @pytest.mark.django_db
+def test_custom_system_roles_prohibited(admin_user, post):
+    rd_url = django_reverse('roledefinition-list')
+    resp = post(url=rd_url, data={"name": "read role made for test", "content_type": None, "permissions": ['view_inventory']}, user=admin_user, expect=400)
+    assert 'System-wide roles are not enabled' in str(resp.data)
+
+
+@pytest.mark.django_db
 def test_assign_managed_role(admin_user, alice, rando, inventory, post):
     rd = RoleDefinition.objects.get(name='inventory-admin')
     rd.give_permission(alice, inventory)
