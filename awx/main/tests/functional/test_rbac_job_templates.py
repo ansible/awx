@@ -177,7 +177,7 @@ def test_job_template_creator_access(project, organization, rando, post):
     jt_pk = response.data['id']
     jt_obj = JobTemplate.objects.get(pk=jt_pk)
     # Creating a JT should place the creator in the admin role
-    assert rando in jt_obj.admin_role.members.all()
+    assert rando in jt_obj.admin_role
 
 
 @pytest.mark.django_db
