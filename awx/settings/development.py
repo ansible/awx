@@ -74,7 +74,6 @@ AWX_CALLBACK_PROFILE = True
 AWX_DISABLE_TASK_MANAGERS = False
 
 # Needed for launching runserver in debug mode
-CSRF_TRUSTED_ORIGINS = ["https://localhost:8043"]
 # ======================!!!!!!! FOR DEVELOPMENT ONLY !!!!!!!=================================
 
 # Store a snapshot of default settings at this point before loading any
