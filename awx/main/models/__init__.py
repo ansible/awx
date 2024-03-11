@@ -11,6 +11,7 @@ from django.db.models.signals import pre_delete  # noqa
 # django-ansible-base
 from ansible_base.resource_registry.fields import AnsibleResourceField
 from ansible_base.rbac import permission_registry
+from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment
 from ansible_base.lib.utils.models import prevent_search
 from ansible_base.lib.utils.models import user_summary_fields
 
@@ -199,11 +200,21 @@ User.add_to_class('auditor_of_organizations', user_get_auditor_of_organizations)
 User.add_to_class('created', created)
 
 
+def get_system_auditor_role():
+    rd, created = RoleDefinition.objects.get_or_create(
+        name='System Auditor', defaults={'description': 'Migrated singleton role giving read permission to everything'}
+    )
+    if created:
+        rd.permissions.add(*list(permission_registry.permission_qs.filter(codename__startswith='view')))
+    return rd
+
+
 @property
 def user_is_system_auditor(user):
     if not hasattr(user, '_is_system_auditor'):
         if user.pk:
-            user._is_system_auditor = user.profile.is_system_auditor
+            rd = get_system_auditor_role()
+            user._is_system_auditor = RoleUserAssignment.objects.filter(user=user, role_definition=rd).exists()
         else:
             # Odd case where user is unsaved, this should never be relied on
             return False
@@ -217,11 +228,15 @@ def user_is_system_auditor(user, tf):
         # time they've logged in, and we've just created the new User in this
         # request), we need one to set up the system auditor role
         user.save()
-    if user.profile.is_system_auditor != bool(tf):
-        prior_value = user.profile.is_system_auditor
-        user.profile.is_system_auditor = bool(tf)
-        user.profile.save(update_fields=['is_system_auditor'])
-        user._is_system_auditor = user.profile.is_system_auditor
+    rd = get_system_auditor_role()
+    assignment = RoleUserAssignment.objects.filter(user=user, role_definition=rd).first()
+    prior_value = bool(assignment)
+    if prior_value != bool(tf):
+        if assignment:
+            assignment.delete()
+        else:
+            rd.give_global_permission(user)
+        user._is_system_auditor = bool(tf)
         entry = ActivityStream.objects.create(changes=json.dumps({"is_system_auditor": [prior_value, bool(tf)]}), object1='user', operation='update')
         entry.user.add(user)
 
