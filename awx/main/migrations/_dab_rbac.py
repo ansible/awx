@@ -144,6 +144,7 @@ def migrate_to_new_rbac(apps, schema_editor):
     """
     Role = apps.get_model('main', 'Role')
     RoleDefinition = apps.get_model('dab_rbac', 'RoleDefinition')
+    RoleUserAssignment = apps.get_model('dab_rbac', 'RoleUserAssignment')
     Permission = apps.get_model('auth', 'Permission')
     migration_time = now()
 
@@ -224,14 +225,25 @@ def migrate_to_new_rbac(apps, schema_editor):
             content_type_id=role.content_type_id,
         )
 
+    # Create new replacement system auditor role
+    new_system_auditor, created = RoleDefinition.objects.get_or_create(
+        name='System Auditor',
+        defaults={
+            'description': 'Migrated singleton role giving read permission to everything',
+            'managed': True,
+            'created_on': migration_time,
+            'modified_on': migration_time,
+        },
+    )
+    new_system_auditor.permissions.add(*list(Permission.objects.filter(codename__startswith='view')))
+
     # migrate is_system_auditor flag, because it is no longer handled by a system role
-    role = Role.objects.filter(singleton_name='system_auditor').first()
-    if role:
+    old_system_auditor = Role.objects.filter(singleton_name='system_auditor').first()
+    if old_system_auditor:
         # if the system auditor role is not present, this is a new install and no users should exist
         ct = 0
         for user in role.members.all():
-            user.profile.is_system_auditor = True
-            user.profile.save(update_fields=['is_system_auditor'])
+            RoleUserAssignment.objects.create(user=user, role_definition=new_system_auditor)
             ct += 1
         if ct:
             logger.info(f'Migrated {ct} users to new system auditor flag')

@@ -182,7 +182,6 @@ class Profile(CreatedModifiedModel):
         max_length=1024,
         default='',
     )
-    is_system_auditor = models.BooleanField(default=False, help_text=_('Can view everying in the system, proxies to User model'))
 
 
 class UserSessionMembership(BaseModel):
