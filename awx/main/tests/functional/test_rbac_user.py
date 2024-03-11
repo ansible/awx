@@ -4,7 +4,7 @@ from unittest import mock
 from django.test import TransactionTestCase
 
 from awx.main.access import UserAccess, RoleAccess, TeamAccess
-from awx.main.models import User, Organization, Inventory
+from awx.main.models import User, Organization, Inventory, get_system_auditor_role
 
 
 class TestSysAuditorTransactional(TransactionTestCase):
@@ -18,6 +18,7 @@ class TestSysAuditorTransactional(TransactionTestCase):
 
     def test_auditor_caching(self):
         rando = self.rando()
+        get_system_auditor_role()  # pre-create role, normally done by migrations
         with self.assertNumQueries(2):
             v = rando.is_system_auditor
         assert not v
