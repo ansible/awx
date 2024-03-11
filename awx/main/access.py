@@ -652,7 +652,6 @@ class UserAccess(BaseAccess):
                 User.objects.filter(pk__in=Organization.accessible_objects(self.user, 'read_role').values('member_role__members'))
                 | User.objects.filter(pk=self.user.id)
                 | User.objects.filter(is_superuser=True)
-                | User.objects.filter(profile__is_system_auditor=True)
             ).distinct()
         return qs
 
