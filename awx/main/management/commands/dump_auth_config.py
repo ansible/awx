@@ -94,6 +94,25 @@ class Command(BaseCommand):
             v = awx_settings.get(k)
             config["configuration"].update({k: v})
 
+        if type == "saml":
+            idp_to_key_mapping = {
+                "url": "IDP_URL",
+                "x509cert": "IDP_X509_CERT",
+                "entity_id": "IDP_ENTITY_ID",
+                "attr_email": "IDP_ATTR_EMAIL",
+                "attr_groups": "IDP_GROUPS",
+                "attr_username": "IDP_ATTR_USERNAME",
+                "attr_last_name": "IDP_ATTR_LAST_NAME",
+                "attr_first_name": "IDP_ATTR_FIRST_NAME",
+                "attr_user_permanent_id": "IDP_ATTR_USER_PERMANENT_ID",
+            }
+            for idp_name in awx_settings.get("ENABLED_IDPS", {}):
+                for key in idp_to_key_mapping:
+                    value = awx_settings["ENABLED_IDPS"][idp_name].get(key)
+                    if value is not None:
+                        config["name"] = idp_name
+                        config["configuration"].update({idp_to_key_mapping[key]: value})
+
         return config
 
     def add_arguments(self, parser):
