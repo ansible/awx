@@ -1164,5 +1164,13 @@ ANSIBLE_BASE_SERVICE_PREFIX = "awx"
 # Temporary, for old roles API compatibility, save child permissions at organization level
 ANSIBLE_BASE_CACHE_PARENT_PERMISSIONS = True
 
+# Currently features are enabled to keep compatibility with old system, except custom roles
+ANSIBLE_BASE_ALLOW_TEAM_ORG_ADMIN = False
+# ANSIBLE_BASE_ALLOW_CUSTOM_ROLES = True
+ANSIBLE_BASE_ALLOW_CUSTOM_TEAM_ROLES = False
+ANSIBLE_BASE_ALLOW_SINGLETON_USER_ROLES = True
+ANSIBLE_BASE_ALLOW_SINGLETON_TEAM_ROLES = False  # System auditor has always been restricted to users
+ANSIBLE_BASE_ALLOW_SINGLETON_ROLES_API = False  # Do not allow creating user-defined system-wide roles
+
 # system username for django-ansible-base
 SYSTEM_USERNAME = None
