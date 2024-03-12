@@ -2,7 +2,7 @@
 ---
 version: '2.1'
 services:
-{% if install_editable_dependencies|bool %}
+{% if editable_dependencies | length > 0 %}
   init_awx:
     image: "{{ awx_image }}:{{ awx_image_tag }}"
     container_name: tools_init_awx
@@ -55,7 +55,7 @@ services:
       - service-mesh
     working_dir: "/awx_devel"
     volumes:
-{% if install_editable_dependencies|bool%}
+{% if editable_dependencies | length > 0 %}
       - "var_lib_awx:/var/lib/awx"
 {% for editable_dependency in editable_dependencies %}
       - "{{ editable_dependency }}:/editable_dependencies/{{ editable_dependency | basename }}"
@@ -80,7 +80,7 @@ services:
       - "~/.kube/config:/var/lib/awx/.kube/config"
       - "redis_socket_{{ container_postfix }}:/var/run/redis/:rw"
     privileged: true
-{% if install_editable_dependencies|bool %}
+{% if editable_dependencies | length > 0 %}
     depends_on:
       init_awx:
         condition: service_completed_successfully
@@ -331,7 +331,7 @@ services:
 {% endif %}
 
 volumes:
-{% if install_editable_dependencies %}
+{% if editable_dependencies | length > 0 %}
   var_lib_awx:
     name: tools_var_lib_awx
 {% endif %}

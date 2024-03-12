@@ -47,6 +47,8 @@ VAULT ?= false
 VAULT_TLS ?= false
 # If set to true docker-compose will also start a tacacs+ instance
 TACACS ?= false
+# If set to true docker-compose will install editable dependencies
+EDITABLE_DEPENDENCIES ?= false
 
 VENV_BASE ?= /var/lib/awx/venv
 
@@ -542,7 +544,13 @@ docker-compose: awx/projects docker-compose-sources
 	    -e enable_vault=$(VAULT) \
 	    -e vault_tls=$(VAULT_TLS) \
 	    -e enable_ldap=$(LDAP); \
+	$(MAKE) docker-compose-up
+
+docker-compose-up:
 	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_OPTS) up $(COMPOSE_UP_OPTS) --remove-orphans
+
+docker-compose-down:
+	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_OPTS) down --remove-orphans
 
 docker-compose-credential-plugins: awx/projects docker-compose-sources
 	echo -e "\033[0;31mTo generate a CyberArk Conjur API key: docker exec -it tools_conjur_1 conjurctl account create quick-start\033[0m"
@@ -608,7 +616,7 @@ docker-clean:
 	-$(foreach image_id,$(shell docker images --filter=reference='*/*/*awx_devel*' --filter=reference='*/*awx_devel*' --filter=reference='*awx_devel*' -aq),docker rmi --force $(image_id);)
 
 docker-clean-volumes: docker-compose-clean docker-compose-container-group-clean
-	docker volume rm -f tools_awx_db tools_vault_1 tools_ldap_1 tools_grafana_storage tools_prometheus_storage $(docker volume ls --filter name=tools_redis_socket_ -q)
+	docker volume rm -f tools_var_lib_awx tools_awx_db tools_vault_1 tools_ldap_1 tools_grafana_storage tools_prometheus_storage $(docker volume ls --filter name=tools_redis_socket_ -q)
 
 docker-refresh: docker-clean docker-compose
 

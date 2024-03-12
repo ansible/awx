@@ -62,3 +62,4 @@ pgbouncer_max_pool_size: 70
 
 # editable_dependencies
 install_editable_dependencies: false
+editable_dependencies: []
