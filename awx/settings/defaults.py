@@ -880,6 +880,7 @@ LOGGING = {
     'loggers': {
         'django': {'handlers': ['console']},
         'django.request': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'WARNING'},
+        'ansible_base': {'handlers': ['console', 'file', 'tower_warnings']},
         'daphne': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'INFO'},
         'rest_framework.request': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'WARNING', 'propagate': False},
         'py.warnings': {'handlers': ['console']},
@@ -1174,3 +1175,6 @@ ANSIBLE_BASE_ALLOW_SINGLETON_ROLES_API = False  # Do not allow creating user-def
 
 # system username for django-ansible-base
 SYSTEM_USERNAME = None
+
+# Use AWX base view, to give 401 on unauthenticated requests
+ANSIBLE_BASE_CUSTOM_VIEW_PARENT = 'awx.api.generics.APIView'
