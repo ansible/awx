@@ -3,12 +3,13 @@ ansiconv==1.0.0  # UPGRADE BLOCKER: from 2013, consider replacing instead of upg
 asciichartpy
 asn1
 asyncpg
-azure-keyvault==1.1.0  # see UPGRADE BLOCKERs
+azure-identity
+azure-keyvault
 boto3
 botocore
 channels
 channels-redis==3.4.1  # see UPGRADE BLOCKERs
-cryptography>=41.0.6  # CVE-2023-49083
+cryptography>=41.0.7  # CVE-2023-49083
 Cython<3 # this is needed as a build dependency, one day we may have separated build deps
 daphne
 distro
@@ -33,6 +34,7 @@ jinja2>=3.1.3  # CVE-2024-22195
 JSON-log-formatter
 jsonschema
 Markdown  # used for formatting API help
+msrestazure
 openshift
 pexpect==4.7.0  # see library notes
 prometheus_client
