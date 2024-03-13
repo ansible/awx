@@ -5,6 +5,8 @@ from django.db import transaction
 from awx.api.versioning import reverse
 from awx.main.models.rbac import Role
 
+from django.test.utils import override_settings
+
 
 @pytest.fixture
 def role():
@@ -185,6 +187,7 @@ def test_remove_role_from_user(role, post, admin):
 
 
 @pytest.mark.django_db
+@override_settings(ANSIBLE_BASE_ALLOW_TEAM_ORG_ADMIN=True)
 def test_get_teams_roles_list(get, team, organization, admin):
     team.member_role.children.add(organization.admin_role)
     url = reverse('api:team_roles_list', kwargs={'pk': team.id})
