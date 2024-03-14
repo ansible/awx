@@ -216,23 +216,3 @@ if not hasattr(User, 'get_absolute_url'):
         return reverse('api:user_detail', kwargs={'pk': user.pk}, request=request)
 
     User.add_to_class('get_absolute_url', user_get_absolute_url)
-
-
-class DABPermission(models.Model):
-    """
-    This is a partial copy of auth.Permission to be used by DAB RBAC lib
-    and in order to be consistent with other applications
-    """
-
-    name = models.CharField("name", max_length=255)
-    content_type = models.ForeignKey(ContentType, models.CASCADE, verbose_name="content type")
-    codename = models.CharField("codename", max_length=100)
-
-    class Meta:
-        verbose_name = "permission"
-        verbose_name_plural = "permissions"
-        unique_together = [["content_type", "codename"]]
-        ordering = ["content_type__model", "codename"]
-
-    def __str__(self):
-        return f"<{self.__class__.__name__}: {self.codename}>"
