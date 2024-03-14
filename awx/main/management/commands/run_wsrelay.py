@@ -92,8 +92,6 @@ class Command(BaseCommand):
         return host_stats
 
     def handle(self, *arg, **options):
-        WebsocketsMetricsServer().start()
-
         # it's necessary to delay this import in case
         # database migrations are still running
         from awx.main.models.ha import Instance
@@ -165,6 +163,8 @@ class Command(BaseCommand):
             print('\n'.join(lines))
 
             return
+
+        WebsocketsMetricsServer().start()
 
         try:
             websocket_relay_manager = WebSocketRelayManager()
