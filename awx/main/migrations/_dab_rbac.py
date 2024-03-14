@@ -3,7 +3,6 @@ import logging
 
 from django.apps import apps as global_apps
 from django.db.models import ForeignKey
-from django.utils.timezone import now
 from ansible_base.rbac.migrations._utils import give_permissions
 from ansible_base.rbac.management import create_dab_permissions
 
@@ -147,7 +146,6 @@ def migrate_to_new_rbac(apps, schema_editor):
     RoleDefinition = apps.get_model('dab_rbac', 'RoleDefinition')
     RoleUserAssignment = apps.get_model('dab_rbac', 'RoleUserAssignment')
     Permission = apps.get_model('dab_rbac', 'DABPermission')
-    migration_time = now()
 
     # remove add premissions that are not valid for migrations from old versions
     for perm_str in ('add_organization', 'add_jobtemplate'):
@@ -209,7 +207,7 @@ def migrate_to_new_rbac(apps, schema_editor):
 
             role_definition, created = RoleDefinition.objects.get_or_create(
                 name=role_definition_name,
-                defaults={'description': description, 'content_type_id': role.content_type_id, 'created_on': migration_time, 'modified_on': migration_time},
+                defaults={'description': description, 'content_type_id': role.content_type_id},
             )
 
             if created:
@@ -229,12 +227,7 @@ def migrate_to_new_rbac(apps, schema_editor):
     # Create new replacement system auditor role
     new_system_auditor, created = RoleDefinition.objects.get_or_create(
         name='System Auditor',
-        defaults={
-            'description': 'Migrated singleton role giving read permission to everything',
-            'managed': True,
-            'created_on': migration_time,
-            'modified_on': migration_time,
-        },
+        defaults={'description': 'Migrated singleton role giving read permission to everything', 'managed': True},
     )
     new_system_auditor.permissions.add(*list(Permission.objects.filter(codename__startswith='view')))
 
