@@ -265,6 +265,8 @@ markdown==3.5.2
     # via -r /awx_devel/requirements/requirements.in
 markupsafe==2.1.5
     # via jinja2
+maturin==1.5.0
+    # via -r /awx_devel/requirements/requirements.in
 more-itertools==10.2.0
     # via
     #   irc
@@ -276,8 +278,10 @@ msal==1.26.0
     #   msal-extensions
 msal-extensions==1.1.0
     # via azure-identity
-msgpack==1.0.7
-    # via channels-redis
+msgpack==1.0.5
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #    channels-redis
 msrest==0.7.1
     # via msrestazure
 msrestazure==0.6.4
@@ -333,10 +337,12 @@ pyasn1-modules==0.3.0
     #   service-identity
 pycparser==2.21
     # via cffi
-pydantic==2.6.1
+pydantic==2.5.0
     # via inflect
-pydantic-core==2.16.2
-    # via pydantic
+pydantic-core==2.14.1
+    # via
+    #   -r /awx_devel/requirements/requirements.in
+    #   pydantic
 pygerduty==0.38.3
     # via -r /awx_devel/requirements/requirements.in
 pyjwt[crypto]==2.8.0
@@ -473,6 +479,7 @@ tempora==5.5.1
     #   jaraco-logging
 tomli==2.0.1
     # via
+    #   maturin
     #   setuptools-rust
     #   setuptools-scm
 twilio==8.13.0
@@ -522,7 +529,7 @@ zope-interface==6.2
 # The following packages are considered to be unsafe in a requirements file:
 pip==21.2.4
     # via -r /awx_devel/requirements/requirements.in
-setuptools==69.1.0
+setuptools==69.0.2
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   asciichartpy
