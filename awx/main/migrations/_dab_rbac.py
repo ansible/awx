@@ -4,7 +4,8 @@ import logging
 from django.apps import apps as global_apps
 from django.db.models import ForeignKey
 from django.utils.timezone import now
-from ansible_base.rbac.migrations._utils import give_permissions, create_custom_permissions
+from ansible_base.rbac.migrations._utils import give_permissions
+from ansible_base.rbac.management import create_dab_permissions
 
 from awx.main.fields import ImplicitRoleField
 from awx.main.constants import role_name_to_perm_mapping
@@ -14,7 +15,7 @@ logger = logging.getLogger('awx.main.migrations._dab_rbac')
 
 
 def create_permissions_as_operation(apps, schema_editor):
-    create_custom_permissions(global_apps.get_app_config("main"))
+    create_dab_permissions(global_apps.get_app_config("main"), apps=apps)
 
 
 """
@@ -108,7 +109,7 @@ def get_descendents(f, children_map):
 
 
 def get_permissions_for_role(role_field, children_map, apps):
-    Permission = apps.get_model('auth', 'Permission')
+    Permission = apps.get_model('dab_rbac', 'DABPermission')
     ContentType = apps.get_model('contenttypes', 'ContentType')
 
     perm_list = []
@@ -145,7 +146,7 @@ def migrate_to_new_rbac(apps, schema_editor):
     Role = apps.get_model('main', 'Role')
     RoleDefinition = apps.get_model('dab_rbac', 'RoleDefinition')
     RoleUserAssignment = apps.get_model('dab_rbac', 'RoleUserAssignment')
-    Permission = apps.get_model('auth', 'Permission')
+    Permission = apps.get_model('dab_rbac', 'DABPermission')
     migration_time = now()
 
     # remove add premissions that are not valid for migrations from old versions
