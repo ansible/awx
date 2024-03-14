@@ -9,7 +9,7 @@ from ansible_base.rbac.migrations._managed_definitions import setup_managed_role
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('main', '0190_add_django_permissions'),
+        ('main', '0191_add_django_permissions'),
         ('dab_rbac', '__first__'),
     ]
 
