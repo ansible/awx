@@ -194,13 +194,25 @@ def main():
     inventory_fields = {
         'name': new_name if new_name else (module.get_item_name(inventory) if inventory else name),
         'organization': org_id,
-        'kind': kind,
-        'host_filter': host_filter,
     }
+
     if prevent_instance_group_fallback is not None:
         inventory_fields['prevent_instance_group_fallback'] = prevent_instance_group_fallback
+
     if description is not None:
         inventory_fields['description'] = description
+
+    if host_filter is not None:
+        if host_filter:
+          inventory_fields['host_filter'] = host_filter
+        else:
+          inventory_fields['host_filter'] = None
+
+    if kind is not None:
+        inventory_fields['kind'] = kind
+    else:
+        inventory_fields['kind'] = ''
+
     if variables is not None:
         inventory_fields['variables'] = json.dumps(variables)
 
