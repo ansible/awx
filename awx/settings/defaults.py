@@ -353,7 +353,10 @@ INSTALLED_APPS = [
     'awx.sso',
     'solo',
     'ansible_base.rest_filters',
+    'ansible_base.jwt_consumer',
+    'ansible_base.resource_registry',
 ]
+
 
 INTERNAL_IPS = ('127.0.0.1',)
 
@@ -362,6 +365,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'awx.api.pagination.Pagination',
     'PAGE_SIZE': 25,
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'ansible_base.jwt_consumer.awx.auth.AwxJWTAuthentication',
         'awx.api.authentication.LoggedOAuth2Authentication',
         'awx.api.authentication.SessionAuthentication',
         'awx.api.authentication.LoggedBasicAuthentication',
@@ -755,6 +759,14 @@ SATELLITE6_INSTANCE_ID_VAR = 'foreman_id,foreman.id'
 INSIGHTS_INSTANCE_ID_VAR = 'insights_id'
 INSIGHTS_EXCLUDE_EMPTY_GROUPS = False
 
+# ----------------
+# -- Terraform State --
+# ----------------
+# TERRAFORM_ENABLED_VAR =
+# TERRAFORM_ENABLED_VALUE =
+TERRAFORM_INSTANCE_ID_VAR = 'id'
+TERRAFORM_EXCLUDE_EMPTY_GROUPS = True
+
 # ---------------------
 # ----- Custom -----
 # ---------------------
@@ -1108,6 +1120,7 @@ METRICS_SUBSYSTEM_CONFIG = {
 # django-ansible-base
 ANSIBLE_BASE_TEAM_MODEL = 'main.Team'
 ANSIBLE_BASE_ORGANIZATION_MODEL = 'main.Organization'
+ANSIBLE_BASE_RESOURCE_CONFIG_MODULE = 'awx.resource_api'
 
 from ansible_base.lib import dynamic_config  # noqa: E402
 

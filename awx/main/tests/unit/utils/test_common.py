@@ -121,6 +121,10 @@ def test_get_model_for_valid_type(model_type, model_class):
     assert common.get_model_for_type(model_type) == model_class
 
 
+def test_is_testing():
+    assert common.is_testing() is True
+
+
 @pytest.mark.parametrize("model_type,model_class", [(name, cls) for cls, name in TEST_MODELS])
 def test_get_capacity_type(model_type, model_class):
     if model_type in ('job', 'ad_hoc_command', 'inventory_update', 'job_template'):

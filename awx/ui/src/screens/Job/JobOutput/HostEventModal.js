@@ -3,6 +3,7 @@ import { Modal, Tab, Tabs, TabTitleText } from '@patternfly/react-core';
 import PropTypes from 'prop-types';
 import { t } from '@lingui/macro';
 import { encode } from 'html-entities';
+import { jsonToYaml } from 'util/yaml';
 import StatusLabel from '../../../components/StatusLabel';
 import { DetailList, Detail } from '../../../components/DetailList';
 import ContentEmpty from '../../../components/ContentEmpty';
@@ -144,9 +145,28 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false }) {
             <ContentEmpty title={t`No JSON Available`} />
           )}
         </Tab>
+        <Tab
+          eventKey={2}
+          title={<TabTitleText>{t`YAML`}</TabTitleText>}
+          aria-label={t`YAML tab`}
+          ouiaId="yaml-tab"
+        >
+          {activeTabKey === 2 && jsonObj ? (
+            <CodeEditor
+              mode="javascript"
+              readOnly
+              value={jsonToYaml(JSON.stringify(jsonObj))}
+              onChange={() => {}}
+              rows={20}
+              hasErrors={false}
+            />
+          ) : (
+            <ContentEmpty title={t`No YAML Available`} />
+          )}
+        </Tab>
         {stdOut?.length ? (
           <Tab
-            eventKey={2}
+            eventKey={3}
             title={<TabTitleText>{t`Output`}</TabTitleText>}
             aria-label={t`Output tab`}
             ouiaId="standard-out-tab"
@@ -163,7 +183,7 @@ function HostEventModal({ onClose, hostEvent = {}, isOpen = false }) {
         ) : null}
         {stdErr?.length ? (
           <Tab
-            eventKey={3}
+            eventKey={4}
             title={<TabTitleText>{t`Standard Error`}</TabTitleText>}
             aria-label={t`Standard error tab`}
             ouiaId="standard-error-tab"

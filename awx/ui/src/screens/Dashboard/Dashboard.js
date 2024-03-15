@@ -80,7 +80,7 @@ function Dashboard() {
           <Trans>
             <p>
               <InfoCircleIcon /> A tech preview of the new {brandName} user
-              interface can be found <a href="/ui_next/dashboard">here</a>.
+              interface can be found <a href="/ui_next">here</a>.
             </p>
           </Trans>
         </Banner>

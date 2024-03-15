@@ -216,42 +216,54 @@
     - block:
         - name: Fetch galaxy roles from roles/requirements.(yml/yaml)
           ansible.builtin.command:
-            cmd: "ansible-galaxy role install -r {{ item }} {{ verbosity }}"
+            cmd: "ansible-galaxy role install -r {{ req_file }} {{ verbosity }}"
           register: galaxy_result
-          with_fileglob:
-            - "{{ project_path | quote }}/roles/requirements.yaml"
-            - "{{ project_path | quote }}/roles/requirements.yml"
+          vars:
+            req_file: "{{ lookup('ansible.builtin.first_found', req_candidates, skip=True) }}"
+            req_candidates:
+              - "{{ project_path | quote }}/roles/requirements.yml"
+              - "{{ project_path | quote }}/roles/requirements.yaml"
           changed_when: "'was installed successfully' in galaxy_result.stdout"
-          when: roles_enabled | bool
+          when:
+            - roles_enabled | bool
+            - req_file
           tags:
             - install_roles
 
         - name: Fetch galaxy collections from collections/requirements.(yml/yaml)
           ansible.builtin.command:
-            cmd: "ansible-galaxy collection install -r {{ item }} {{ verbosity }}"
+            cmd: "ansible-galaxy collection install -r {{ req_file }} {{ verbosity }}"
           register: galaxy_collection_result
-          with_fileglob:
-            - "{{ project_path | quote }}/collections/requirements.yaml"
-            - "{{ project_path | quote }}/collections/requirements.yml"
+          vars:
+            req_file: "{{ lookup('ansible.builtin.first_found', req_candidates, skip=True) }}"
+            req_candidates:
+              - "{{ project_path | quote }}/collections/requirements.yml"
+              - "{{ project_path | quote }}/collections/requirements.yaml"
+              - "{{ project_path | quote }}/requirements.yml"
+              - "{{ project_path | quote }}/requirements.yaml"
           changed_when: "'Nothing to do.' not in galaxy_collection_result.stdout"
           when:
             - "ansible_version.full is version_compare('2.9', '>=')"
             - collections_enabled | bool
+            - req_file
           tags:
             - install_collections
 
         - name: Fetch galaxy roles and collections from requirements.(yml/yaml)
           ansible.builtin.command:
-            cmd: "ansible-galaxy install -r {{ item }} {{ verbosity }}"
+            cmd: "ansible-galaxy install -r {{ req_file }} {{ verbosity }}"
           register: galaxy_combined_result
-          with_fileglob:
-            - "{{ project_path | quote }}/requirements.yaml"
-            - "{{ project_path | quote }}/requirements.yml"
+          vars:
+            req_file: "{{ lookup('ansible.builtin.first_found', req_candidates, skip=True) }}"
+            req_candidates:
+              - "{{ project_path | quote }}/requirements.yaml"
+              - "{{ project_path | quote }}/requirements.yml"
           changed_when: "'Nothing to do.' not in galaxy_combined_result.stdout"
           when:
             - "ansible_version.full is version_compare('2.10', '>=')"
             - collections_enabled | bool
             - roles_enabled | bool
+            - req_file
           tags:
             - install_collections
             - install_roles

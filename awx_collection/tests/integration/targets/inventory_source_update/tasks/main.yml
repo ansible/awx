@@ -26,7 +26,7 @@
         name: "{{ project_name }}"
         organization: "{{ org_name }}"
         scm_type: git
-        scm_url: https://github.com/ansible/test-playbooks
+        scm_url: https://github.com/ansible/ansible-tower-samples
         wait: true
 
     - name: Create a git project with same name, different org

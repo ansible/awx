@@ -257,12 +257,17 @@ function PromptDetail({
                       numChips={5}
                       ouiaId="prompt-job-tag-chips"
                       totalChips={
-                        !overrides.job_tags || overrides.job_tags === ''
+                        overrides.job_tags === undefined ||
+                        overrides.job_tags === null ||
+                        overrides.job_tags === ''
                           ? 0
                           : overrides.job_tags.split(',').length
                       }
                     >
-                      {overrides.job_tags.length > 0 &&
+                      {overrides.job_tags !== undefined &&
+                        overrides.job_tags !== null &&
+                        overrides.job_tags !== '' &&
+                        overrides.job_tags.length > 0 &&
                         overrides.job_tags.split(',').map((jobTag) => (
                           <Chip
                             key={jobTag}
@@ -284,13 +289,18 @@ function PromptDetail({
                     <ChipGroup
                       numChips={5}
                       totalChips={
-                        !overrides.skip_tags || overrides.skip_tags === ''
+                        overrides.skip_tags === undefined ||
+                        overrides.skip_tags === null ||
+                        overrides.skip_tags === ''
                           ? 0
                           : overrides.skip_tags.split(',').length
                       }
                       ouiaId="prompt-skip-tag-chips"
                     >
-                      {overrides.skip_tags.length > 0 &&
+                      {overrides.skip_tags !== undefined &&
+                        overrides.skip_tags !== null &&
+                        overrides.skip_tags !== '' &&
+                        overrides.skip_tags.length > 0 &&
                         overrides.skip_tags.split(',').map((skipTag) => (
                           <Chip
                             key={skipTag}

@@ -7,6 +7,7 @@ import json
 import yaml
 import logging
 import time
+import psycopg
 import os
 import subprocess
 import re
@@ -23,7 +24,7 @@ from django.core.exceptions import ObjectDoesNotExist, FieldDoesNotExist
 from django.utils.dateparse import parse_datetime
 from django.utils.translation import gettext_lazy as _
 from django.utils.functional import cached_property
-from django.db import connection, transaction, ProgrammingError, IntegrityError
+from django.db import connection, DatabaseError, transaction, ProgrammingError, IntegrityError
 from django.db.models.fields.related import ForeignObjectRel, ManyToManyField
 from django.db.models.fields.related_descriptors import ForwardManyToOneDescriptor, ManyToManyDescriptor
 from django.db.models.query import QuerySet
@@ -136,7 +137,7 @@ def underscore_to_camelcase(s):
 @functools.cache
 def is_testing(argv=None):
     '''Return True if running django or py.test unit tests.'''
-    if 'PYTEST_CURRENT_TEST' in os.environ.keys():
+    if os.environ.get('DJANGO_SETTINGS_MODULE') == 'awx.main.tests.settings_for_test':
         return True
     argv = sys.argv if argv is None else argv
     if len(argv) >= 1 and ('py.test' in argv[0] or 'py/test.py' in argv[0]):
@@ -1155,11 +1156,26 @@ def create_partition(tblname, start=None):
                     f'ALTER TABLE {tblname} ATTACH PARTITION {tblname}_{partition_label} '
                     f'FOR VALUES FROM (\'{start_timestamp}\') TO (\'{end_timestamp}\');'
                 )
+
     except (ProgrammingError, IntegrityError) as e:
-        if 'already exists' in str(e):
-            logger.info(f'Caught known error due to partition creation race: {e}')
-        else:
-            raise
+        cause = e.__cause__
+        if cause and hasattr(cause, 'sqlstate'):
+            # 42P07 = DuplicateTable
+            sqlstate = cause.sqlstate
+            sqlstate_str = psycopg.errors.lookup(sqlstate)
+
+            if psycopg.errors.DuplicateTable == sqlstate:
+                logger.info(f'Caught known error due to partition creation race: {e}')
+            else:
+                logger.error('SQL Error state: {} - {}'.format(sqlstate, sqlstate_str))
+                raise
+    except DatabaseError as e:
+        cause = e.__cause__
+        if cause and hasattr(cause, 'sqlstate'):
+            sqlstate = cause.sqlstate
+            sqlstate_str = psycopg.errors.lookup(sqlstate)
+            logger.error('SQL Error state: {} - {}'.format(sqlstate, sqlstate_str))
+        raise
 
 
 def cleanup_new_process(func):
