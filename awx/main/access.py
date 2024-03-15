@@ -2940,6 +2940,9 @@ class WorkflowApprovalAccess(BaseAccess):
         if (obj.workflow_job_template and self.user in obj.workflow_job_template.approval_role) or self.user.is_superuser:
             return True
 
+    def can_delete(self, obj):
+        return self.user.is_superuser  # Not really supposed to be done
+
 
 class WorkflowApprovalTemplateAccess(BaseAccess):
     """
