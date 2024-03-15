@@ -1,7 +1,8 @@
 import pytest
 
 from awx.main.models.rbac import get_role_from_object_role
-from awx.main.models import User, Organization
+from awx.main.models import User, Organization, WorkflowJobTemplate, WorkflowJobTemplateNode
+from awx.api.versioning import reverse
 
 from ansible_base.rbac.models import RoleUserAssignment
 
@@ -59,3 +60,17 @@ def test_organization_execute_role(organization, rando):
     organization.execute_role.members.add(rando)
     assert rando in organization.execute_role
     assert set(Organization.accessible_objects(rando, 'execute_role')) == set([organization])
+
+
+@pytest.mark.django_db
+def test_workflow_approval_list(get, post, admin_user):
+    workflow_job_template = WorkflowJobTemplate.objects.create()
+    approval_node = WorkflowJobTemplateNode.objects.create(workflow_job_template=workflow_job_template)
+    url = reverse('api:workflow_job_template_node_create_approval', kwargs={'pk': approval_node.pk, 'version': 'v2'})
+    post(url, {'name': 'URL Test', 'description': 'An approval', 'timeout': 0}, user=admin_user)
+    approval_node.refresh_from_db()
+    approval_jt = approval_node.unified_job_template
+    approval_jt.create_unified_job()
+
+    r = get(url=reverse('api:workflow_approval_list'), user=admin_user, expect=200)
+    assert r.data['count'] >= 1
