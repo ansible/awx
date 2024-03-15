@@ -4,18 +4,17 @@ from django.core.management import call_command
 from django.test import TestCase, override_settings
 
 
-# SAML
-@override_settings(SOCIAL_AUTH_SAML_SP_ENTITY_ID="SP_ENTITY_ID")
-@override_settings(SOCIAL_AUTH_SAML_SP_PUBLIC_CERT="SP_PUBLIC_CERT")
-@override_settings(SOCIAL_AUTH_SAML_SP_PRIVATE_KEY="SP_PRIVATE_KEY")
-@override_settings(SOCIAL_AUTH_SAML_ORG_INFO="ORG_INFO")
-@override_settings(SOCIAL_AUTH_SAML_TECHNICAL_CONTACT="TECHNICAL_CONTACT")
-@override_settings(SOCIAL_AUTH_SAML_SUPPORT_CONTACT="SUPPORT_CONTACT")
-@override_settings(SOCIAL_AUTH_SAML_SP_EXTRA="SP_EXTRA")
-@override_settings(SOCIAL_AUTH_SAML_SECURITY_CONFIG="SECURITY_CONFIG")
-@override_settings(SOCIAL_AUTH_SAML_EXTRA_DATA="EXTRA_DATA")
-@override_settings(
-    SOCIAL_AUTH_SAML_ENABLED_IDPS={
+settings_dict = {
+    "SOCIAL_AUTH_SAML_SP_ENTITY_ID": "SP_ENTITY_ID",
+    "SOCIAL_AUTH_SAML_SP_PUBLIC_CERT": "SP_PUBLIC_CERT",
+    "SOCIAL_AUTH_SAML_SP_PRIVATE_KEY": "SP_PRIVATE_KEY",
+    "SOCIAL_AUTH_SAML_ORG_INFO": "ORG_INFO",
+    "SOCIAL_AUTH_SAML_TECHNICAL_CONTACT": "TECHNICAL_CONTACT",
+    "SOCIAL_AUTH_SAML_SUPPORT_CONTACT": "SUPPORT_CONTACT",
+    "SOCIAL_AUTH_SAML_SP_EXTRA": "SP_EXTRA",
+    "SOCIAL_AUTH_SAML_SECURITY_CONFIG": "SECURITY_CONFIG",
+    "SOCIAL_AUTH_SAML_EXTRA_DATA": "EXTRA_DATA",
+    "SOCIAL_AUTH_SAML_ENABLED_IDPS": {
         "Keycloak": {
             "attr_last_name": "last_name",
             "attr_groups": "groups",
@@ -27,28 +26,27 @@ from django.test import TestCase, override_settings
             "x509cert": "-----BEGIN CERTIFICATE-----\nMIIDDjCCAfYCCQCPBeVvpo8+VzANBgkqhkiG9w0BAQsFADBJMQswCQYDVQQGEwJV\nUzELMAkGA1UECAwCTkMxDzANBgNVBAcMBkR1cmhhbTEMMAoGA1UECgwDYXd4MQ4w\nDAYDVQQDDAVsb2NhbDAeFw0yNDAxMTgxNDA4MzFaFw0yNTAxMTcxNDA4MzFaMEkx\nCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJOQzEPMA0GA1UEBwwGRHVyaGFtMQwwCgYD\nVQQKDANhd3gxDjAMBgNVBAMMBWxvY2FsMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A\nMIIBCgKCAQEAzouj93oyFXsHEABdPESh3CYpp5QJJBM4TLYIIolk6PFOFIVwBuFY\nfExi5w7Hh4A42lPM6RkrT+u3h7LV39H9MRUfqygOSmaxICTOI0sU9ROHc44fWWzN\n756OP4B5zSiqG82q8X7nYVkcID+2F/3ekPLMOlWn53OrcdfKKDIcqavoTkQJefc2\nggXU3WgVCxGki/qCm+e5cZ1Cpl/ykSLOT8dWMEzDd12kin66zJ3KYz9F2Q5kQTh4\nKRAChnBBoEqzOfENHEAaHALiXOlVSy61VcLbtvskRMMwBtsydlnd9n/HGnktgrid\n3Ca0z5wBTHWjAOBvCKxKJuDa+jmyHEnpcQIDAQABMA0GCSqGSIb3DQEBCwUAA4IB\nAQBXvmyPWgXhC26cHYJBgQqj57dZ+n7p00kM1J+27oDMjGmbmX+XIKXLWazw/rG3\ngDjw9MXI2tVCrQMX0ohjphaULXhb/VBUPDOiW+k7C6AB3nZySFRflcR3cM4f83zF\nMoBd0549h5Red4p72FeOKNJRTN8YO4ooH9YNh5g0FQkgqn7fV9w2CNlomeKIW9zP\nm8tjFw0cJUk2wEYBVl8O7ko5rgNlzhkLoZkMvJhKa99AQJA6MAdyoLl1lv56Kq4X\njk+mMEiz9SaInp+ILQ1uQxZEwuC7DoGRW76rV4Fnie6+DLft4WKZfX1497mx8NV3\noR0abutJaKnCj07dwRu4/EsK\n-----END CERTIFICATE-----",
             "attr_first_name": "first_name",
         }
-    }
-)
-@override_settings(SOCIAL_AUTH_SAML_CALLBACK_URL="CALLBACK_URL")
-
-# LDAP
-@override_settings(AUTH_LDAP_1_SERVER_URI="SERVER_URI")
-@override_settings(AUTH_LDAP_1_BIND_DN="BIND_DN")
-@override_settings(AUTH_LDAP_1_BIND_PASSWORD="BIND_PASSWORD")
-@override_settings(AUTH_LDAP_1_GROUP_SEARCH=["GROUP_SEARCH"])
-@override_settings(AUTH_LDAP_1_GROUP_TYPE="string object")
-@override_settings(AUTH_LDAP_1_GROUP_TYPE_PARAMS={"member_attr": "member", "name_attr": "cn"})
-@override_settings(AUTH_LDAP_1_USER_DN_TEMPLATE="USER_DN_TEMPLATE")
-@override_settings(AUTH_LDAP_1_USER_SEARCH=["USER_SEARCH"])
-@override_settings(
-    AUTH_LDAP_1_USER_ATTR_MAP={
+    },
+    "SOCIAL_AUTH_SAML_CALLBACK_URL": "CALLBACK_URL",
+    "AUTH_LDAP_1_SERVER_URI": "SERVER_URI",
+    "AUTH_LDAP_1_BIND_DN": "BIND_DN",
+    "AUTH_LDAP_1_BIND_PASSWORD": "BIND_PASSWORD",
+    "AUTH_LDAP_1_GROUP_SEARCH": ["GROUP_SEARCH"],
+    "AUTH_LDAP_1_GROUP_TYPE": "string object",
+    "AUTH_LDAP_1_GROUP_TYPE_PARAMS": {"member_attr": "member", "name_attr": "cn"},
+    "AUTH_LDAP_1_USER_DN_TEMPLATE": "USER_DN_TEMPLATE",
+    "AUTH_LDAP_1_USER_SEARCH": ["USER_SEARCH"],
+    "AUTH_LDAP_1_USER_ATTR_MAP": {
         "email": "email",
         "last_name": "last_name",
         "first_name": "first_name",
-    }
-)
-@override_settings(AUTH_LDAP_1_CONNECTION_OPTIONS={})
-@override_settings(AUTH_LDAP_1_START_TLS=None)
+    },
+    "AUTH_LDAP_1_CONNECTION_OPTIONS": {},
+    "AUTH_LDAP_1_START_TLS": None,
+}
+
+
+@override_settings(**settings_dict)
 class TestDumpAuthConfigCommand(TestCase):
     def setUp(self):
         super().setUp()

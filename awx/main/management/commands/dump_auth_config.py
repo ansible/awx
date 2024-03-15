@@ -10,7 +10,7 @@ from awx.conf import settings_registry
 
 
 class Command(BaseCommand):
-    help = 'Dump the current auth configuration in django_ansible_base.authenticator format, currently support LDAP'
+    help = 'Dump the current auth configuration in django_ansible_base.authenticator format, currently supports LDAP and SAML'
 
     DAB_SAML_AUTHENTICATOR_KEYS = {
         "SP_ENTITY_ID": True,
