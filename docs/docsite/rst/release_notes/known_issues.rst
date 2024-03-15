@@ -146,7 +146,7 @@ If you have a VMware instance that uses a self-signed certificate, then you will
 
 .. code-block:: text
 
-   "source_vars": "---\nvalidate_certs: False",
+   "source_vars": ---validate_certs: False
 
 You can set this in inventory source for VMware vCenter as follows:
 
