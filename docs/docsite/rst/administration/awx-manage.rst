@@ -6,7 +6,7 @@ The *awx-manage* Utility
 .. index:: 
    single: awx-manage
 
-The ``awx-manage`` utility is used to access detailed internal information of AWX. Commands for ``awx-manage`` should run as the ``awx`` or ``root`` user.
+The ``awx-manage`` utility is used to access detailed internal information of AWX. Commands for ``awx-manage`` should run as the ``awx`` user only.
 
 .. warning:: 
          Running awx-manage commands via playbook is not recommended or supported.
