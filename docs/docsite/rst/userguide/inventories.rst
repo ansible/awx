@@ -1123,7 +1123,7 @@ This inventory source uses the `terraform_state <https://github.com/ansible-coll
   a. Create a project.
   b. Create a job template using the above project, select an AWS, GCE or s3 credential, and a specify a playbook to run. For example:
 
-  .. image:: ../common/images/ job-template-terraform-inv-source-example.png
+  .. image:: ../common/images/job-template-terraform-inv-source-example.png
 
   c. Create a workflow job template with the above job template and previously configured inventory with the Terraform source. For example:
 
