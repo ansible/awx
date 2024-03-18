@@ -342,6 +342,35 @@ If you want to clean all things once your are done, you can do:
 (host)$ make docker-compose-container-group-clean
 ```
 
+### django-ansible-base Authentication
+ django-anisble-base has been added as an option for local and LDAP authentication and will eventually handle all authentication for AWX. The current plugins available can be seen at the endpoint `/sso/authenticator_plugins/`.
+
+ To add an authenticator, go to the endpoint `/sso/authenticators/` and submit a POST request with the required settings. A GET to this endpoint also displays all currently initialized authenticators. An example of a POST request for Local auth is:
+ 
+ ```
+ {
+    "name": "Local Database Authenticator",
+    "enabled": false,
+    "create_objects": true,
+    "users_unique": false,
+    "remove_users": false,
+    "configuration": {},
+    "type": "ansible_base.authentication.authenticator_plugins.local",
+    "order": 1
+}
+ ```
+This method will be used more for authentication methods such as LDAP that need more complex configurations. There's a management command, `awx-manage authenticators` to add the basic Local authenticator. It also includes some other basic features, such as listing initialized authenticators and enabling/disbaling the Local auth.
+
+```
+(host)$ awx-manage authenticators --initialize
+Created default local authenticator
+(host)$ awx-manage authenticators --list
+
+|   ID | Enabled   | Name                         |   Order |
+|------|-----------|------------------------------|---------|
+|    1 | True      | Local Database Authenticator |       1 |
+```
+
 ### SAML and OIDC Integration
 Keycloak can be used as both a SAML and OIDC provider and can be used to test AWX social auth. This section describes how to build a reference Keycloak instance and plumb it with AWX for testing purposes.
 
@@ -362,7 +391,8 @@ After running this command the following message should appear and you should be
 CREATE DATABASE
 ```
 
-The second one time command will be to start a Keycloak container to build our admin user; be sure to set pg_username and pg_password to work for you installation. Note: the command below set the username as admin with a password of admin, you can change this if you want. Also, if you are using your own container or have changed the pg_username please update the command accordingly.
+The second one time command will be to start a Keycloak container to build our admin user; be sure to set pg_username and pg_password to work for you installation. Note: the command below set the username as admin with a password of admin, you can change this if you want. Also, if you are using your own container or have changed the pg_username please update the command accordingly. If you are on macOS _sources_default may be named sources_default instead.
+
 ```bash
 PG_PASSWORD=`cat tools/docker-compose/_sources/secrets/pg_password.yml  | cut -f 2 -d \'`
 docker run --rm -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=admin --net=_sources_default \
@@ -456,7 +486,52 @@ Once the playbook is done running LDAP should now be setup in your development e
 3. awx_ldap_auditor:audit123
 4. awx_ldap_org_admin:orgadmin123
 
-The first account is a normal user. The second account will be a super user in AWX. The third account will be a system auditor in AWX. The fourth account is an org admin. All users belong to an org called "LDAP Organization". To log in with one of these users go to the AWX login screen enter the username/password.
+The first account is a normal user. The second account will be a super user in AWX. The third account will be a system auditor in AWX. The fourth account is an org admin. All users belong to an org called "LDAP Organization". To log in with one of these users, you'll first need to initialize an LDAP authenticator. Submit a POST request with the required configuration settings to `/sso/authenticators`. An example is:
+```
+{
+    "name": "Test LDAP Auth",
+    "enabled": true,
+    "create_objects": true,
+    "users_unique": false,
+    "remove_users": true,
+    "configuration": {
+        "BIND_DN": "cn=admin,dc=example,dc=org",
+        "BIND_PASSWORD": "password",
+        "CONNECTION_OPTIONS": {
+            "OPT_REFERRALS": 0,
+            "OPT_NETWORK_TIMEOUT": 30
+        },
+        "GROUP_SEARCH": [
+            "ou=groups,dc=example,dc=org",
+            "SCOPE_SUBTREE",
+            "(objectClass=groupOfNames)"
+        ],
+        "GROUP_TYPE": "MemberDNGroupType",
+        "GROUP_TYPE_PARAMS": {
+            "name_attr": "cn",
+            "member_attr": "member"
+        },
+        "SERVER_URI": [
+            "ldap://host.docker.internal:389"
+        ],
+        "START_TLS": false,
+        "USER_ATTR_MAP": {
+            "email": "mail",
+            "last_name": "sn",
+            "first_name": "givenName"
+        },
+        "USER_DN_TEMPLATE": "cn=%(user)s,ou=users,dc=example,dc=org",
+        "USER_SEARCH": [
+            "ou=users,dc=example,dc=org",
+            "SCOPE_SUBTREE",
+            "(cn=%(user)s)"
+        ]
+    },
+    "type": "ansible_base.authenticator_plugins.ldap",
+    "order": 2
+}
+```
+You should now be able to go to the AWX login screen enter the username/password.
 
 
 ### Splunk Integration

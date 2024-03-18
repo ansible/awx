@@ -4,6 +4,7 @@
 
 # Python
 import pytest
+from rest_framework.reverse import reverse as rest_reverse
 
 # AWX
 from awx.api.versioning import reverse
@@ -68,7 +69,7 @@ def test_awx_task_env_validity(get, patch, admin, value, expected):
 
 
 @pytest.mark.django_db
-def test_ldap_settings(get, put, patch, delete, admin):
+def test_old_ldap_settings(get, put, patch, delete, admin):
     url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'ldap'})
     get(url, user=admin, expect=200)
     # The PUT below will fail at the moment because AUTH_LDAP_GROUP_TYPE
@@ -100,13 +101,13 @@ def test_ldap_settings(get, put, patch, delete, admin):
         ['INVALID'],
     ],
 )
-def test_ldap_user_flags_by_group_invalid_dn(get, patch, admin, value):
+def test_old_ldap_user_flags_by_group_invalid_dn(get, patch, admin, value):
     url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'ldap'})
     patch(url, user=admin, data={'AUTH_LDAP_USER_FLAGS_BY_GROUP': {'is_superuser': value}}, expect=400)
 
 
 @pytest.mark.django_db
-def test_ldap_user_flags_by_group_string(get, patch, admin):
+def test_old_ldap_user_flags_by_group_string(get, patch, admin):
     expected = 'CN=Admins,OU=Groups,DC=example,DC=com'
     url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'ldap'})
     patch(url, user=admin, data={'AUTH_LDAP_USER_FLAGS_BY_GROUP': {'is_superuser': expected}}, expect=200)
@@ -115,7 +116,7 @@ def test_ldap_user_flags_by_group_string(get, patch, admin):
 
 
 @pytest.mark.django_db
-def test_ldap_user_flags_by_group_list(get, patch, admin):
+def test_old_ldap_user_flags_by_group_list(get, patch, admin):
     expected = ['CN=Admins,OU=Groups,DC=example,DC=com', 'CN=Superadmins,OU=Groups,DC=example,DC=com']
     url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'ldap'})
     patch(url, user=admin, data={'AUTH_LDAP_USER_FLAGS_BY_GROUP': {'is_superuser': expected}}, expect=200)
@@ -132,7 +133,7 @@ def test_ldap_user_flags_by_group_list(get, patch, admin):
     ],
 )
 @pytest.mark.django_db
-def test_empty_ldap_dn(get, put, patch, delete, admin, setting):
+def test_empty_old_ldap_dn(get, put, patch, delete, admin, setting):
     url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'ldap'})
     patch(url, user=admin, data={setting: ''}, expect=200)
     resp = get(url, user=admin, expect=200)
@@ -141,6 +142,32 @@ def test_empty_ldap_dn(get, put, patch, delete, admin, setting):
     patch(url, user=admin, data={setting: None}, expect=200)
     resp = get(url, user=admin, expect=200)
     assert resp.data[setting] is None
+
+
+@pytest.mark.parametrize(
+    'setting, value, expected',
+    [
+        ['SERVER_URI', '', 400],
+        ['SERVER_URI', ['ldap.example.com'], 400],
+        ['SERVER_URI', ['ldap://ldap.example.com'], 200],
+        ['SERVER_URI', ['ldaps://ldap.example.com'], 200],
+        ['SERVER_URI', ['ldap://ldap.example.com:389'], 200],
+        ['SERVER_URI', ['ldaps://ldap.example.com:636'], 200],
+        ['SERVER_URI', ['ldap://ldap.example.com', 'ldap://ldap2.example.com'], 200],
+        ['SERVER_URI', ['ldap://ldap.example.com', 'ldap://ldap2.example.com'], 200],
+        ['SERVER_URI', ['ldap://ldap.example.com', 'ldap://ldap2.example.com'], 200],
+        ['BIND_DN', 'cn=Manager,dc=example,dc=com', 200],
+        ['BIND_DN', u'cn=暴力膜,dc=大新闻,dc=真的粉丝', 200],
+    ],
+)
+@pytest.mark.django_db
+def test_ldap_settings(get, patch, delete, admin, ldap_authenticator, ldap_auth_data, setting, value, expected):
+    url = rest_reverse('authenticator-detail', kwargs={'pk': ldap_authenticator.id})
+    get(url, user=admin, expect=200)
+    patch(url, user=admin, data=ldap_auth_data, expect=200)
+    ldap_auth_data['configuration'][setting] = value
+    patch(url, user=admin, data=ldap_auth_data, expect=expected)
+    delete(url, user=admin, expect=204)
 
 
 @pytest.mark.django_db
