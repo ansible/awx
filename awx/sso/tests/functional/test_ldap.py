@@ -2,7 +2,7 @@ from django.test.utils import override_settings
 import ldap
 import pytest
 
-from awx.sso.backends import OldLDAPSettings
+from awx.sso.backends import LDAPSettings as OldLDAPSettings
 from ansible_base.authentication.authenticator_plugins.ldap import LDAPSettings
 
 

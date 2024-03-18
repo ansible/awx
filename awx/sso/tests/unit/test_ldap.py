@@ -1,3 +1,4 @@
+import pytest
 import ldap
 
 from awx.sso.backends import LDAPSettings as OldLDAPSettings
@@ -27,12 +28,14 @@ def test_old_ldap_filter_validator():
     old_validate_ldap_filter('(test-uid=%(user)s)', with_user=True)
 
 
+@pytest.mark.django_db
 def test_ldap_default_settings(ldap_configuration):
     settings = LDAPSettings(defaults=ldap_configuration)
     assert settings.DENY_GROUP == None
     assert settings.USER_QUERY_FIELD == None
 
 
+@pytest.mark.django_db
 def test_ldap_default_network_timeout(ldap_configuration):
     cache.clear()  # clearing cache avoids picking up stray default for OPT_REFERRALS
     settings = LDAPSettings(defaults=ldap_configuration)
