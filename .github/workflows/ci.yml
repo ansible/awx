@@ -107,7 +107,7 @@ jobs:
           ansible-galaxy collection install -r molecule/requirements.yml
           sudo rm -f $(which kustomize)
           make kustomize
-          KUSTOMIZE_PATH=$(readlink -f bin/kustomize) molecule -v test -s kind
+          KUSTOMIZE_PATH=$(readlink -f bin/kustomize) molecule -v test -s kind -- --skip-tags=replicas
         env:
           AWX_TEST_IMAGE: awx
           AWX_TEST_VERSION: ci

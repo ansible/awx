@@ -175,9 +175,10 @@ class TestOptions(unittest.TestCase):
         assert '--verbosity {0,1,2,3,4,5}' in out.getvalue()
 
     def test_actions_with_primary_key(self):
+        page = OptionsPage.from_json({'actions': {'GET': {}, 'POST': {}}})
+        ResourceOptionsParser(None, page, 'jobs', self.parser)
+
         for method in ('get', 'modify', 'delete'):
-            page = OptionsPage.from_json({'actions': {'GET': {}, 'POST': {}}})
-            ResourceOptionsParser(None, page, 'jobs', self.parser)
             assert method in self.parser.choices
 
             out = StringIO()

@@ -302,7 +302,14 @@ class WebSocketRelayManager(object):
         self.stats_mgr.start()
 
         # Set up a pg_notify consumer for allowing web nodes to "provision" and "deprovision" themselves gracefully.
-        database_conf = settings.DATABASES['default']
+        database_conf = settings.DATABASES['default'].copy()
+        database_conf['OPTIONS'] = database_conf.get('OPTIONS', {}).copy()
+
+        for k, v in settings.LISTENER_DATABASES.get('default', {}).items():
+            database_conf[k] = v
+        for k, v in settings.LISTENER_DATABASES.get('default', {}).get('OPTIONS', {}).items():
+            database_conf['OPTIONS'][k] = v
+
         async_conn = await psycopg.AsyncConnection.connect(
             dbname=database_conf['NAME'],
             host=database_conf['HOST'],

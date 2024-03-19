@@ -191,7 +191,7 @@ function InstancePeerList({ setBreadcrumb }) {
         fetchPeers();
         addToast({
           id: instancesPeerToAssociate,
-          title: t`Peers update on ${instance.hostname}.  Please be sure to run the install bundle for ${instance.hostname} again in order to see changes take effect.`,
+          title: t`Please be sure to run the install bundle for the selected instance(s) again in order to see changes take effect.`,
           variant: AlertVariant.success,
           hasTimeout: true,
         });

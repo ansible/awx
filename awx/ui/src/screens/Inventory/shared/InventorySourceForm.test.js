@@ -38,6 +38,7 @@ describe('<InventorySourceForm />', () => {
                   ['openstack', 'OpenStack'],
                   ['rhv', 'Red Hat Virtualization'],
                   ['controller', 'Red Hat Ansible Automation Platform'],
+                  ['terraform', 'Terraform State'],
                 ],
               },
             },

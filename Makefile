@@ -1,6 +1,6 @@
 -include awx/ui_next/Makefile
 
-PYTHON := $(notdir $(shell for i in python3.9 python3; do command -v $$i; done|sed 1q))
+PYTHON := $(notdir $(shell for i in python3.11 python3; do command -v $$i; done|sed 1q))
 SHELL := bash
 DOCKER_COMPOSE ?= docker-compose
 OFFICIAL ?= no
@@ -63,7 +63,7 @@ RECEPTOR_IMAGE ?= quay.io/ansible/receptor:devel
 SRC_ONLY_PKGS ?= cffi,pycparser,psycopg,twilio
 # These should be upgraded in the AWX and Ansible venv before attempting
 # to install the actual requirements
-VENV_BOOTSTRAP ?= pip==21.2.4 setuptools==65.6.3 setuptools_scm[toml]==8.0.4 wheel==0.38.4
+VENV_BOOTSTRAP ?= pip==21.2.4 setuptools==69.0.2 setuptools_scm[toml]==8.0.4 wheel==0.42.0
 
 NAME ?= awx
 
@@ -216,8 +216,6 @@ collectstatic:
 	fi; \
 	$(PYTHON) manage.py collectstatic --clear --noinput > /dev/null 2>&1
 
-DEV_RELOAD_COMMAND ?= supervisorctl restart tower-processes:*
-
 uwsgi: collectstatic
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
@@ -225,7 +223,7 @@ uwsgi: collectstatic
 	uwsgi /etc/tower/uwsgi.ini
 
 awx-autoreload:
-	@/awx_devel/tools/docker-compose/awx-autoreload /awx_devel/awx "$(DEV_RELOAD_COMMAND)"
+	@/awx_devel/tools/docker-compose/awx-autoreload /awx_devel/awx
 
 daphne:
 	@if [ "$(VENV_BASE)" ]; then \
@@ -630,9 +628,6 @@ clean-elk:
 	docker rm tools_logstash_1
 	docker rm tools_elasticsearch_1
 	docker rm tools_kibana_1
-
-psql-container:
-	docker run -it --net tools_default --rm postgres:12 sh -c 'exec psql -h "postgres" -p "5432" -U postgres'
 
 VERSION:
 	@echo "awx: $(VERSION)"

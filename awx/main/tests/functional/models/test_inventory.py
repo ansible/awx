@@ -193,6 +193,7 @@ class TestInventorySourceInjectors:
             ('satellite6', 'theforeman.foreman.foreman'),
             ('insights', 'redhatinsights.insights.insights'),
             ('controller', 'awx.awx.tower'),
+            ('terraform', 'cloud.terraform.terraform_state'),
         ],
     )
     def test_plugin_proper_names(self, source, proper_name):

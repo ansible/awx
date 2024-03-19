@@ -20,9 +20,13 @@ jupyter
 # matplotlib - Caused issues when bumping to setuptools 58
 backports.tempfile  # support in unit tests for py32+ tempfile.TemporaryDirectory
 git+https://github.com/artefactual-labs/mockldap.git@master#egg=mockldap
-sdb
-remote-pdb
 gprof2dot
 atomicwrites==1.4.0
 flake8
 yamllint
+pip>=21.3 # PEP 660 – Editable installs for pyproject.toml based builds (wheel based)
+
+# python debuggers
+debugpy
+remote-pdb
+sdb

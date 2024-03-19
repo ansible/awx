@@ -1,8 +1,8 @@
 #!/bin/env bash
 
-if [ $# -lt 2 ]; then
+if [ $# -lt 1 ]; then
     echo "Usage:"
-    echo "    autoreload directory command"
+    echo "    autoreload directory"
     exit 1
 fi
 
@@ -13,8 +13,14 @@ inotifywait -mrq -e create,delete,attrib,close_write,move --exclude '(/awx_devel
    since_last=$((this_reload-last_reload))
    if [[ "$file" =~ ^[^.].*\.py$ ]] && [[ "$since_last" -gt 1 ]]; then
       echo "File changed: $file"
-      echo "Running command: $2"
-      eval $2
+      if [ -n "$SUPERVISOR_CONFIG_PATH" ]; then
+          supervisorctl_command="supervisorctl -c $SUPERVISOR_CONFIG_PATH"
+      else
+          supervisorctl_command="supervisorctl"
+      fi
+      tower_processes=`$supervisorctl_command status tower-processes:* | grep -v STOPPED | awk '{print $1}' | tr '\n' ' '`
+      echo echo "Running command: $supervisorctl_command restart $tower_processes"
+      eval $supervisorctl_command restart $tower_processes
       last_reload=`date +%s`
    fi
 done

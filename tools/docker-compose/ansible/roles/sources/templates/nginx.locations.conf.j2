@@ -38,4 +38,13 @@ location {{ ingress_path }} {
     uwsgi_read_timeout 120s;
     uwsgi_pass uwsgi;
     include /etc/nginx/uwsgi_params;
+    error_page 502 = @fallback;
+}
+
+# Enable scenario where we shutdown uwsgi and launching runserver for debugging purposes
+location @fallback {
+    # Add trailing / if missing
+    rewrite ^(.*)$http_host(.*[^/])$ $1$http_host$2/ permanent;
+    proxy_pass http://runserver;
+    proxy_set_header Host $http_host;
 }

@@ -419,7 +419,7 @@ def _events_table(since, full_path, until, tbl, where_column, project_job_create
                           resolved_action,
                           resolved_role,
                           -- '-' operator listed here:
-                          -- https://www.postgresql.org/docs/12/functions-json.html
+                          -- https://www.postgresql.org/docs/15/functions-json.html
                           -- note that operator is only supported by jsonb objects
                           -- https://www.postgresql.org/docs/current/datatype-json.html
                           (CASE WHEN event = 'playbook_on_stats' THEN {event_data} - 'artifact_data' END) as playbook_on_stats,

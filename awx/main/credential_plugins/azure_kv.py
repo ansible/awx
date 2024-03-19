@@ -1,9 +1,10 @@
+from azure.keyvault.secrets import SecretClient
+from azure.identity import ClientSecretCredential
+from msrestazure import azure_cloud
+
 from .plugin import CredentialPlugin
 
 from django.utils.translation import gettext_lazy as _
-from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
-from azure.common.credentials import ServicePrincipalCredentials
-from msrestazure import azure_cloud
 
 
 # https://github.com/Azure/msrestazure-for-python/blob/master/msrestazure/azure_cloud.py
@@ -54,22 +55,9 @@ azure_keyvault_inputs = {
 
 
 def azure_keyvault_backend(**kwargs):
-    url = kwargs['url']
-    [cloud] = [c for c in clouds if c.name == kwargs.get('cloud_name', default_cloud.name)]
-
-    def auth_callback(server, resource, scope):
-        credentials = ServicePrincipalCredentials(
-            url=url,
-            client_id=kwargs['client'],
-            secret=kwargs['secret'],
-            tenant=kwargs['tenant'],
-            resource=f"https://{cloud.suffixes.keyvault_dns.split('.', 1).pop()}",
-        )
-        token = credentials.token
-        return token['token_type'], token['access_token']
-
-    kv = KeyVaultClient(KeyVaultAuthentication(auth_callback))
-    return kv.get_secret(url, kwargs['secret_field'], kwargs.get('secret_version', '')).value
+    csc = ClientSecretCredential(tenant_id=kwargs['tenant'], client_id=kwargs['client'], client_secret=kwargs['secret'])
+    kv = SecretClient(credential=csc, vault_url=kwargs['url'])
+    return kv.get_secret(name=kwargs['secret_field'], version=kwargs.get('secret_version', '')).value
 
 
 azure_keyvault_plugin = CredentialPlugin('Microsoft Azure Key Vault', inputs=azure_keyvault_inputs, backend=azure_keyvault_backend)

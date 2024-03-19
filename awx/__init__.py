@@ -154,10 +154,12 @@ def manage():
     from django.conf import settings
     from django.core.management import execute_from_command_line
 
-    # enforce the postgres version is equal to 12. if not, then terminate program with exit code of 1
+    # enforce the postgres version is a minimum of 12 (we need this for partitioning); if not, then terminate program with exit code of 1
+    # In the future if we require a feature of a version of postgres > 12 this should be updated to reflect that.
+    # The return of connection.pg_version is something like 12013
     if not os.getenv('SKIP_PG_VERSION_CHECK', False) and not MODE == 'development':
         if (connection.pg_version // 10000) < 12:
-            sys.stderr.write("Postgres version 12 is required\n")
+            sys.stderr.write("At a minimum, postgres version 12 is required\n")
             sys.exit(1)
 
     if len(sys.argv) >= 2 and sys.argv[1] in ('version', '--version'):  # pragma: no cover

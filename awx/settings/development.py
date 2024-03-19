@@ -72,6 +72,8 @@ AWX_CALLBACK_PROFILE = True
 # Allows user to trigger task managers directly for debugging and profiling purposes.
 # Only works in combination with settings.SETTINGS_MODULE == 'awx.settings.development'
 AWX_DISABLE_TASK_MANAGERS = False
+
+# Needed for launching runserver in debug mode
 # ======================!!!!!!! FOR DEVELOPMENT ONLY !!!!!!!=================================
 
 # Store a snapshot of default settings at this point before loading any

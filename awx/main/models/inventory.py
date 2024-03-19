@@ -925,6 +925,7 @@ class InventorySourceOptions(BaseModel):
         ('rhv', _('Red Hat Virtualization')),
         ('controller', _('Red Hat Ansible Automation Platform')),
         ('insights', _('Red Hat Insights')),
+        ('terraform', _('Terraform State')),
     ]
 
     # From the options of the Django management base command
@@ -1627,6 +1628,20 @@ class satellite6(PluginFileInjector):
             ret['FOREMAN_SERVER'] = credential.get_input('host', default='')
             ret['FOREMAN_USER'] = credential.get_input('username', default='')
             ret['FOREMAN_PASSWORD'] = credential.get_input('password', default='')
+        return ret
+
+
+class terraform(PluginFileInjector):
+    plugin_name = 'terraform_state'
+    base_injector = 'managed'
+    namespace = 'cloud'
+    collection = 'terraform'
+    use_fqcn = True
+
+    def inventory_as_dict(self, inventory_update, private_data_dir):
+        env = super(terraform, self).get_plugin_env(inventory_update, private_data_dir, None)
+        ret = super().inventory_as_dict(inventory_update, private_data_dir)
+        ret['backend_config_files'] = env["TF_BACKEND_CONFIG_FILE"]
         return ret
 
 

@@ -202,7 +202,7 @@ The following table lists the RBAC system roles and a brief description of the h
 +-----------------------------------------------------------------------+------------------------------------------------------------------------------------------+
 | Execute Role - Job Templates                                          | Runs assigned Job Template                                                               |
 +-----------------------------------------------------------------------+------------------------------------------------------------------------------------------+
-| Member Role - Organization, Team                                      | Manages all of the settings associated with that Organization or Team                    |
+| Member Role - Organization, Team                                      | User is a member of a defined Organization or Team                                       |
 +-----------------------------------------------------------------------+------------------------------------------------------------------------------------------+
 | Read Role - Organizations, Teams, Inventory, Projects, Job Templates  | Views all aspects of a defined Organization, Team, Inventory, Project, or Job Template   |
 +-----------------------------------------------------------------------+------------------------------------------------------------------------------------------+

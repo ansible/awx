@@ -110,16 +110,6 @@ OpenID Connect work that was done in
 https://github.com/jazzband/django-oauth-toolkit/pull/915.  This may
 be fixable by creating a migration on our end?
 
-### azure-keyvault
-
-Upgrading to 4.0.0 causes error because imports changed.
-
-```
-  File "/var/lib/awx/venv/awx/lib64/python3.6/site-packages/awx/main/credential_plugins/azure_kv.py", line 4, in <module>
-  from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
-ImportError: cannot import name 'KeyVaultClient'
-```
-
 ### pip, setuptools and setuptools_scm
 
 If modifying these libraries make sure testing with the offline build is performed to confirm they are functionally working.

@@ -759,6 +759,14 @@ SATELLITE6_INSTANCE_ID_VAR = 'foreman_id,foreman.id'
 INSIGHTS_INSTANCE_ID_VAR = 'insights_id'
 INSIGHTS_EXCLUDE_EMPTY_GROUPS = False
 
+# ----------------
+# -- Terraform State --
+# ----------------
+# TERRAFORM_ENABLED_VAR =
+# TERRAFORM_ENABLED_VALUE =
+TERRAFORM_INSTANCE_ID_VAR = 'id'
+TERRAFORM_EXCLUDE_EMPTY_GROUPS = True
+
 # ---------------------
 # ----- Custom -----
 # ---------------------
