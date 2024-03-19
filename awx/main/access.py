@@ -23,6 +23,7 @@ from awx.main.models.oauth import OAuth2Application, OAuth2AccessToken
 # django-ansible-base
 from ansible_base.lib.utils.validation import to_python_boolean
 from ansible_base.rbac.models import RoleEvaluation
+from ansible_base.rbac import permission_registry
 
 # AWX
 from awx.main.utils import (
@@ -264,7 +265,11 @@ class BaseAccess(object):
         return self.can_change(obj, data)
 
     def can_delete(self, obj):
-        return self.user.has_obj_perm(obj, 'delete')
+        if self.user.is_superuser:
+            return True
+        if obj._meta.model_name in [cls._meta.model_name for cls in permission_registry.all_registered_models]:
+            return self.user.has_obj_perm(obj, 'delete')
+        return False
 
     def can_copy(self, obj):
         return self.can_add({'reference_obj': obj})
@@ -2939,9 +2944,6 @@ class WorkflowApprovalAccess(BaseAccess):
     def can_approve_or_deny(self, obj):
         if (obj.workflow_job_template and self.user in obj.workflow_job_template.approval_role) or self.user.is_superuser:
             return True
-
-    def can_delete(self, obj):
-        return self.user.is_superuser  # Not really supposed to be done
 
 
 class WorkflowApprovalTemplateAccess(BaseAccess):
