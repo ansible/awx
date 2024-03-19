@@ -7,7 +7,6 @@ from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.sessions.models import Session
-from django.contrib.contenttypes.models import ContentType
 from django.utils.timezone import now as tz_now
 from django.utils.translation import gettext_lazy as _
 
