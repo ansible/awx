@@ -25,7 +25,7 @@ def drf_reverse(viewname, args=None, kwargs=None, request=None, format=None, **e
         url = _reverse(viewname, args, kwargs, request, format, **extra)
 
     if settings.OPTIONAL_API_URLPATTERN_PREFIX and request:
-        if request._request.path.startswith(f"/api/{settings.OPTIONAL_API_URLPATTERN_PREFIX}"):
+        if request.path.startswith(f"/api/{settings.OPTIONAL_API_URLPATTERN_PREFIX}"):
             url = url.replace('/api', f"/api/{settings.OPTIONAL_API_URLPATTERN_PREFIX}")
 
     return url
