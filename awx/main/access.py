@@ -265,9 +265,11 @@ class BaseAccess(object):
         return self.can_change(obj, data)
 
     def can_delete(self, obj):
-        if obj._meta.model in [cls._meta.model_name for cls in permission_registry.all_registered_models]:
+        if self.user.is_superuser:
+            return True
+        if obj._meta.model_name in [cls._meta.model_name for cls in permission_registry.all_registered_models]:
             return self.user.has_obj_perm(obj, 'delete')
-        return self.user.is_superuser
+        return False
 
     def can_copy(self, obj):
         return self.can_add({'reference_obj': obj})
