@@ -89,6 +89,11 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         verbose_name_plural = _('inventories')
         unique_together = [('name', 'organization')]
         ordering = ('name',)
+        permissions = [
+            ('use_inventory', 'Can use inventory in a job template'),
+            ('adhoc_inventory', 'Can run ad hoc commands'),
+            ('update_inventory', 'Can update inventory sources in inventory'),
+        ]
 
     organization = models.ForeignKey(
         'Organization',
@@ -1400,7 +1405,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
         return selected_groups
 
 
-class CustomInventoryScript(CommonModelNameNotUnique, ResourceMixin):
+class CustomInventoryScript(CommonModelNameNotUnique):
     class Meta:
         app_label = 'main'
         ordering = ('name',)

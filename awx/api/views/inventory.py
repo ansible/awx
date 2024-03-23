@@ -152,6 +152,7 @@ class InventoryObjectRolesList(SubListAPIView):
     serializer_class = RoleSerializer
     parent_model = Inventory
     search_fields = ('role_field', 'content_type__model')
+    deprecated = True
 
     def get_queryset(self):
         po = self.get_parent_object()

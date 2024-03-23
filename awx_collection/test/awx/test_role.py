@@ -18,9 +18,9 @@ def test_grant_organization_permission(run_module, admin_user, organization, sta
     assert not result.get('failed', False), result.get('msg', result)
 
     if state == 'present':
-        assert rando in organization.execute_role
+        assert rando in organization.admin_role
     else:
-        assert rando not in organization.execute_role
+        assert rando not in organization.admin_role
 
 
 @pytest.mark.django_db

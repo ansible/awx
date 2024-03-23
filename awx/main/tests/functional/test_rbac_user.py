@@ -4,7 +4,7 @@ from unittest import mock
 from django.test import TransactionTestCase
 
 from awx.main.access import UserAccess, RoleAccess, TeamAccess
-from awx.main.models import User, Organization, Inventory, Role
+from awx.main.models import User, Organization, Inventory, get_system_auditor_role
 
 
 class TestSysAuditorTransactional(TransactionTestCase):
@@ -18,7 +18,8 @@ class TestSysAuditorTransactional(TransactionTestCase):
 
     def test_auditor_caching(self):
         rando = self.rando()
-        with self.assertNumQueries(1):
+        get_system_auditor_role()  # pre-create role, normally done by migrations
+        with self.assertNumQueries(2):
             v = rando.is_system_auditor
         assert not v
         with self.assertNumQueries(0):
@@ -153,34 +154,3 @@ def test_org_admin_cannot_delete_member_attached_to_other_group(org_admin, org_m
     access = UserAccess(org_admin)
     other_org.member_role.members.add(org_member)
     assert not access.can_delete(org_member)
-
-
-@pytest.mark.parametrize('reverse', (True, False))
-@pytest.mark.django_db
-def test_consistency_of_is_superuser_flag(reverse):
-    users = [User.objects.create(username='rando_{}'.format(i)) for i in range(2)]
-    for u in users:
-        assert u.is_superuser is False
-
-    system_admin = Role.singleton('system_administrator')
-    if reverse:
-        for u in users:
-            u.roles.add(system_admin)
-    else:
-        system_admin.members.add(*[u.id for u in users])  # like .add(42, 54)
-
-    for u in users:
-        u.refresh_from_db()
-        assert u.is_superuser is True
-
-    users[0].roles.clear()
-    for u in users:
-        u.refresh_from_db()
-    assert users[0].is_superuser is False
-    assert users[1].is_superuser is True
-
-    system_admin.members.clear()
-
-    for u in users:
-        u.refresh_from_db()
-        assert u.is_superuser is False

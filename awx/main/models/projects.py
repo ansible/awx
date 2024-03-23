@@ -259,6 +259,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
     class Meta:
         app_label = 'main'
         ordering = ('id',)
+        permissions = [('update_project', 'Can run a project update'), ('use_project', 'Can use project in a job template')]
 
     default_environment = models.ForeignKey(
         'ExecutionEnvironment',
