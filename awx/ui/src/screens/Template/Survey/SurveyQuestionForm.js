@@ -92,6 +92,7 @@ function AnswerTypeField() {
           },
           { key: 'integer', value: 'integer', label: t`Integer` },
           { key: 'float', value: 'float', label: t`Float` },
+          { key: 'bool', value: 'bool', label: t`Boolean` },
         ]}
       />
     </FormGroup>
