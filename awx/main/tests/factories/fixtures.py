@@ -22,6 +22,8 @@ from awx.main.models import (
     WorkflowJob,
     WorkflowJobNode,
     WorkflowJobTemplateNode,
+    SystemJobTemplate,
+    Schedule,
 )
 from awx.main.models.inventory import HostMetric, HostMetricSummaryMonthly
 
@@ -291,3 +293,23 @@ def mk_host_metric_summary(date, license_consumed=0, license_capacity=0, hosts_a
     if persisted:
         summary.save()
     return summary
+
+
+def mk_system_job_template(name, persisted=True):
+    sjt = SystemJobTemplate(name=name)
+    if persisted:
+        sjt.save()
+    return sjt
+
+
+def mk_schedule(
+    name,
+    unified_job_template,
+    rrule,
+    enabled=True,
+    persisted=True,
+):
+    schedule = Schedule(name=name, unified_job_template=unified_job_template, rrule=rrule, enabled=enabled)
+    if persisted:
+        schedule.save()
+    return schedule

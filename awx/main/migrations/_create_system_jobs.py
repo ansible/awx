@@ -4,7 +4,7 @@ from django.utils.timezone import now
 
 logger = logging.getLogger('awx.main.migrations')
 
-__all__ = ['create_clearsessions_jt', 'create_cleartokens_jt']
+__all__ = ['create_clearsessions_jt', 'create_cleartokens_jt', 'create_cleanup_schedules_jt']
 
 '''
 These methods are called by migrations to create various system job templates
@@ -69,6 +69,38 @@ def create_cleartokens_jt(apps, schema_editor):
             name='Cleanup Expired OAuth 2 Tokens',
             rrule='DTSTART:%s RRULE:FREQ=WEEKLY;INTERVAL=1' % schedule_time,
             description='Removes expired OAuth 2 access and refresh tokens',
+            enabled=True,
+            created=now_dt,
+            modified=now_dt,
+            extra_data={},
+        )
+        sched.unified_job_template = sjt
+        sched.save()
+
+
+def create_cleanup_schedules_jt(apps, schema_editor):
+    SystemJobTemplate = apps.get_model('main', 'SystemJobTemplate')
+    Schedule = apps.get_model('main', 'Schedule')
+    ContentType = apps.get_model('contenttypes', 'ContentType')
+    sjt_ct = ContentType.objects.get_for_model(SystemJobTemplate)
+    now_dt = now()
+    schedule_time = now_dt.strftime('%Y%m%dT%H%M%SZ')
+
+    sjt, created = SystemJobTemplate.objects.get_or_create(
+        job_type='cleanup_schedules',
+        defaults=dict(
+            name='Cleanup Schedules',
+            description='Removes schedules without next run',
+            polymorphic_ctype=sjt_ct,
+            created=now_dt,
+            modified=now_dt,
+        ),
+    )
+    if created:
+        sched = Schedule(
+            name='Cleanup Schedules',
+            rrule='DTSTART:%s RRULE:FREQ=WEEKLY;INTERVAL=1' % schedule_time,
+            description='Removes schedules without next run',
             enabled=True,
             created=now_dt,
             modified=now_dt,

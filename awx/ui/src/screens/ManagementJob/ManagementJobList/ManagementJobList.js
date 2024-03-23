@@ -110,9 +110,11 @@ function ManagementJobList() {
                 jobType={job_type}
                 description={description}
                 isSuperUser={me?.is_superuser}
-                isPrompted={['cleanup_activitystream', 'cleanup_jobs'].includes(
-                  job_type
-                )}
+                isPrompted={[
+                  'cleanup_activitystream',
+                  'cleanup_jobs',
+                  'cleanup_schedules',
+                ].includes(job_type)}
                 onLaunchError={setLaunchError}
               />
             )}

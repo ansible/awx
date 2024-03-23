@@ -3,18 +3,18 @@
 The *awx-manage* Utility
 -------------------------------
 
-.. index:: 
+.. index::
    single: awx-manage
 
 The ``awx-manage`` utility is used to access detailed internal information of AWX. Commands for ``awx-manage`` should run as the ``awx`` user only.
 
-.. warning:: 
+.. warning::
          Running awx-manage commands via playbook is not recommended or supported.
 
 Inventory Import
 ~~~~~~~~~~~~~~~~
 
-.. index:: 
+.. index::
    single: awx-manage; inventory import
 
 ``awx-manage`` is a mechanism by which an AWX administrator can import inventory directly into AWX, for those who cannot use Custom Inventory Scripts.
@@ -29,7 +29,7 @@ When running this command, specify either an ``--inventory-id`` or ``--inventory
 
 ::
 
-    awx-manage inventory_import --source=/ansible/inventory/ --inventory-id=1 
+    awx-manage inventory_import --source=/ansible/inventory/ --inventory-id=1
 
 By default, inventory data already stored in AWX blends with data from the external source. To use only the external data, specify ``--overwrite``. To specify that any existing hosts get variable data exclusively from the ``--source``, specify ``--overwrite_vars``. The default behavior adds any new variables from the external source, overwriting keys that already exist, but preserves any variables that were not sourced from the external data source.
 
@@ -44,10 +44,10 @@ By default, inventory data already stored in AWX blends with data from the exter
 Cleanup of old data
 ~~~~~~~~~~~~~~~~~~~
 
-.. index:: 
+.. index::
    single: awx-manage, data cleanup
 
-``awx-manage`` has a variety of commands used to clean old data from AWX. The AWX administrators can use the Management Jobs interface for access or use the command line. 
+``awx-manage`` has a variety of commands used to clean old data from AWX. The AWX administrators can use the Management Jobs interface for access or use the command line.
 
 -  ``awx-manage cleanup_jobs [--help]``
 
@@ -57,10 +57,14 @@ This permanently deletes the job details and job output for jobs older than a sp
 
 This permanently deletes any :ref:`ug_activitystreams` data older than a specific number of days.
 
+- ``manage cleanup_schedules [--help]``
+
+This permanently deletes schedules without next run. Disabled schedules can be skipped optionally.
+
 Cluster management
 ~~~~~~~~~~~~~~~~~~~~
 
-.. index:: 
+.. index::
    single: awx-manage; cluster management
 
 Refer to the :ref:`ag_clustering` section for details on the
@@ -77,7 +81,7 @@ commands.
 Token and session management
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. index:: 
+.. index::
    single: awx-manage; token management
    single: awx-manage; session management
 
@@ -102,20 +106,20 @@ Make sure you provide a valid user when creating tokens. Otherwise, you will get
 
 
 .. _ag_manage_utility_revoke_tokens:
- 
+
 
 ``revoke_oauth2_tokens``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Use this command to revoke OAuth2 tokens (both application tokens and personal access tokens (PAT)). By default, it revokes all application tokens (but not their associated refresh tokens), and revokes all personal access tokens. However, you can also specify a user for whom to revoke all tokens.
 
-To revoke all existing OAuth2 tokens: 
+To revoke all existing OAuth2 tokens:
 
 ::
 
 	$ awx-manage revoke_oauth2_tokens
 
-To revoke all OAuth2 tokens & their refresh tokens: 
+To revoke all OAuth2 tokens & their refresh tokens:
 
 ::
 
@@ -176,7 +180,7 @@ For more information on OAuth2 token management in the AWX user interface, see t
 Analytics gathering
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. index:: 
+.. index::
    single: awx-manage; data collection
    single: awx-manage; analytics gathering
 
@@ -188,7 +192,7 @@ Use this command to gather analytics on-demand outside of the predefined window 
 	$ awx-manage gather_analytics --ship
 
 
-For customers with disconnected environments who want to collect usage information about unique hosts automated across a time period, use this command: 
+For customers with disconnected environments who want to collect usage information about unique hosts automated across a time period, use this command:
 
 ::
 

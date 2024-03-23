@@ -99,7 +99,7 @@ function NodeModalForm({
       delete values.extra_vars;
     } else if (
       values.nodeType === 'system_job_template' &&
-      ['cleanup_activitystream', 'cleanup_jobs'].includes(
+      ['cleanup_activitystream', 'cleanup_jobs', 'cleanup_schedules'].includes(
         values?.nodeResource?.job_type
       )
     ) {

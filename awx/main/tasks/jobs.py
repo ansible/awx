@@ -1878,7 +1878,7 @@ class RunSystemJob(BaseTask):
                 json_vars = {}
             else:
                 json_vars = json.loads(system_job.extra_vars)
-            if system_job.job_type in ('cleanup_jobs', 'cleanup_activitystream'):
+            if system_job.job_type in ('cleanup_jobs', 'cleanup_activitystream', 'cleanup_schedules'):
                 if 'days' in json_vars:
                     args.extend(['--days', str(json_vars.get('days', 60))])
                 if 'batch_size' in json_vars:

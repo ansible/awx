@@ -24,7 +24,7 @@ export default function useDaysToKeepStep() {
 }
 function getStep(nodeResourceMeta, daysToKeepMeta) {
   if (
-    ['cleanup_activitystream', 'cleanup_jobs'].includes(
+    ['cleanup_activitystream', 'cleanup_jobs', 'cleanup_schedules'].includes(
       nodeResourceMeta?.value?.job_type
     )
   ) {
