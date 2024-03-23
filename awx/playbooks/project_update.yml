@@ -19,6 +19,17 @@
 # awx_version: Current running version of the awx or tower as a string
 # awx_license_type: "open" for AWX; else presume Tower
 # gpg_pubkey: the GPG public key to use for validation, when enabled
+# rekor_url: The URL of the Sigstore Rekor instance the signatures were logged to
+# tuf_url: The URL of the TUF instance used to retrieve Rekor and Fulcio public keys
+# rekor_root_pubkey: The PEM public key for the Rekor instance
+# certificate_chain: Chain of PEM CA certificates to verify the Fulcio signing certificate
+# cert_identity: The OIDC identity of the signer to look for in the certificate SAN (i.e. email address, GitHub Actions workflow)
+# oidc_issuer: The URL of the OIDC provider that issued the signer identity
+# github_trigger: The GitHub Actions event name that triggered the workflow
+# github_name: The name of the workflow that was triggered
+# github_repository: The repository slug that the workflow was triggered under
+# github_ref: The git ref that the workflow was invoked with
+# verify_offline: Verify signatures offline (default: False)
 
 - hosts: localhost
   gather_facts: false
@@ -176,6 +187,24 @@
         gpg_pubkey: "{{ gpg_pubkey }}"
       tags:
         - validation_gpg_public_key
+
+    - name: Verify project content using Sigstore
+      verify_project:
+        project_path: "{{ project_path | quote }}"
+        validation_type: sigstore
+        rekor_url: "{{ rekor_url }}"
+        tuf_url: "{{ tuf_url }}"
+        rekor_root_pubkey: "{{ rekor_root_pubkey }}"
+        certificate_chain: "{{ certificate_chain }}"
+        cert_identity: "{{ cert_identity }}"
+        oidc_issuer: "{{ oidc_issuer }}"
+        github_trigger: "{{ github_trigger }}"
+        github_name: "{{ github_name }}"
+        github_repository: "{{ github_repository }}"
+        github_ref: "{{ github_ref }}"
+        verify_offline: "{{ verify_offline }}"
+      tags:
+        - validation_sigstore
 
     - name: Verify project content against checksum manifest
       verify_project:

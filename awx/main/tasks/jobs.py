@@ -1300,9 +1300,44 @@ class RunProjectUpdate(BaseTask):
             # for raw archive, prevent error moving files between volumes
             extra_vars['ansible_remote_tmp'] = os.path.join(project_update.get_project_path(check_if_exists=False), '.ansible_awx', 'tmp')
 
-        if project_update.project.signature_validation_credential is not None:
-            pubkey = project_update.project.signature_validation_credential.get_input('gpg_public_key')
-            extra_vars['gpg_pubkey'] = pubkey
+        signature_validation_credential = project_update.project.signature_validation_credential
+        if signature_validation_credential is not None:
+            if signature_validation_credential.credential_type == 'cryptography':
+                pubkey = project_update.project.signature_validation_credential.get_input('gpg_public_key')
+                extra_vars['gpg_pubkey'] = pubkey
+            else:
+                rekor_url = project_update.project.signature_validation_credential.get_input('rekor_url')
+                extra_vars['rekor_url'] = rekor_url
+
+                tuf_url = project_update.project.signature_validation_credential.get_input('tuf_url', default='')
+                extra_vars['tuf_url'] = tuf_url
+
+                rekor_root_pubkey = project_update.project.signature_validation_credential.get_input('rekor_root_pubkey', default='')
+                extra_vars['rekor_root_pubkey'] = rekor_root_pubkey
+
+                certificate_chain = signature_validation_credential.get_input('certificate_chain', default='')
+                extra_vars['certificate_chain'] = certificate_chain
+
+                cert_identity = signature_validation_credential.get_input('cert_identity')
+                extra_vars['cert_identity'] = cert_identity
+
+                oidc_issuer = signature_validation_credential.get_input('oidc_issuer')
+                extra_vars['oidc_issuer'] = oidc_issuer
+
+                github_trigger = signature_validation_credential.get_input('github_trigger', default='')
+                extra_vars['github_trigger'] = github_trigger
+
+                github_name = signature_validation_credential.get_input('github_name', default='')
+                extra_vars['github_name'] = github_name
+
+                github_repository = signature_validation_credential.get_input('github_repository', default='')
+                extra_vars['github_repository'] = github_repository
+
+                github_ref = signature_validation_credential.get_input('github_ref', default='')
+                extra_vars['github_ref'] = github_ref
+
+                verify_offline = signature_validation_credential.get_input('verify_offline', default=False)
+                extra_vars['verify_offline'] = verify_offline
 
         self._write_extra_vars_file(private_data_dir, extra_vars)
 
