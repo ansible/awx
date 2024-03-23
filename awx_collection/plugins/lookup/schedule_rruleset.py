@@ -121,10 +121,13 @@ EXAMPLES = """
 """
 
 RETURN = """
-_raw:
+_list:
   description:
-    - String in the rrule format
-  type: string
+    - A list with one element which is a string in the rrule format
+  type: list
+  elements: str
+  sample:
+    - DTSTART;TZID=UTC:20220430T103045 RRULE:FREQ=DAILY;BYDAY=MO;INTERVAL=1
 """
 import re
 
@@ -351,5 +354,5 @@ class LookupModule(LookupBase):
         except Exception as e:
             raise_from(AnsibleError("Failed to parse generated rule set via rruleset {0}".format(e)), e)
 
-        # return self.get_rrule(frequency, kwargs)
-        return rruleset_str
+        # all lookup plugins are expected to return a list
+        return [rruleset_str]
