@@ -86,7 +86,7 @@ options:
       type: str
     unified_job_template:
       description:
-        - Name of unified job template to run in the workflow.
+        - Name, ID, or named URL of unified job template to run in the workflow.
         - Can be a job template, project, inventory source, etc.
         - Omit if creating an approval node.
         - This parameter is mutually exclusive with C(approval_node).
@@ -340,7 +340,7 @@ def main():
 
     unified_job_template = module.params.get('unified_job_template')
     if unified_job_template:
-        new_fields['unified_job_template'] = module.get_one('unified_job_templates', name_or_id=unified_job_template, **{'data': search_fields})['id']
+        new_fields['unified_job_template'] = module.get_exactly_one('unified_job_templates', name_or_id=unified_job_template, **{'data': search_fields})['id']
     inventory = module.params.get('inventory')
     if inventory:
         new_fields['inventory'] = module.resolve_name_to_id('inventories', inventory)
