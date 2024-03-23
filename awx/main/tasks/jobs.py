@@ -1886,9 +1886,13 @@ class RunSystemJob(BaseTask):
                 if 'dry_run' in json_vars and json_vars['dry_run']:
                     args.extend(['--dry-run'])
             if system_job.job_type == 'cleanup_jobs':
-                args.extend(
-                    ['--jobs', '--project-updates', '--inventory-updates', '--management-jobs', '--ad-hoc-commands', '--workflow-jobs', '--notifications']
-                )
+                cleanup_job_resources = ['jobs', 'project-updates', 'inventory-updates', 'management-jobs', 'ad-hoc-commands', 'workflow-jobs', 'notifications']
+                if 'resources' in json_vars and any(resource in json_vars['resources'] for resource in cleanup_job_resources):
+                    for resource in cleanup_job_resources:
+                        if resource in json_vars['resources']:
+                            args.extend(['--'+resource])
+                else:
+                    args.extend(['--jobs', '--project-updates', '--inventory-updates', '--management-jobs', '--ad-hoc-commands', '--workflow-jobs', '--notifications'])
         except Exception:
             logger.exception("{} Failed to parse system job".format(system_job.log_format))
         return args
