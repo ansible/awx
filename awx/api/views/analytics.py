@@ -65,6 +65,7 @@ class AnalyticsRootView(APIView):
         data['probe_template_for_hosts_options'] = reverse('api:analytics_probe_template_for_hosts_options')
         data['roi_templates'] = reverse('api:analytics_roi_templates_explorer')
         data['roi_templates_options'] = reverse('api:analytics_roi_templates_options')
+        data['notifications'] = reverse('api:analytics_notifications')
         return Response(data)
 
 
@@ -294,3 +295,6 @@ class AnalyticsProbeTemplateForHostsList(GetNotAllowedMixin, AnalyticsGenericLis
 
 class AnalyticsRoiTemplatesList(GetNotAllowedMixin, AnalyticsGenericListView):
     name = _("ROI Templates")
+
+class AnalyticsNotifications(AnalyticsGenericListView):
+    name = _("Analytics Notifications")
