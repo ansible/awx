@@ -12,13 +12,11 @@
 [comment]: # (*  upon build of the collection                       *)
 [comment]: # (*******************************************************)
 
-This Ansible collection allows for easy interaction with an AWX server via Ansible playbooks.
+The AWX Ansible collection allows for easy interaction with an AWX server via Ansible playbooks.
 
-This source for this collection lives in the `awx_collection` folder inside of the
-AWX GitHub repository.
-The previous home for this collection was inside the folder [lib/ansible/modules/web_infrastructure/ansible_tower](https://github.com/ansible/ansible/tree/stable-2.9/lib/ansible/modules/web_infrastructure/ansible_tower) in the Ansible repo,
-as well as other places for the inventory plugin, module utils, and
-doc fragment.
+- Ansible Galaxy: [galaxy.ansible.com/awx/awx](https://galaxy.ansible.com/awx/awx)
+- Source: [github.com/ansible/awx/./awx_collection](https://github.com/ansible/awx/tree/devel/awx_collection)
+- Docs: [`./awx_collection/README.md`](https://github.com/ansible/awx/blob/devel/awx_collection/README.md)
 
 ## Building and Installing
 
@@ -101,6 +99,24 @@ The following notes are changes that may require changes to playbooks:
  - The `notification_configuration` parameter of `tower_notification_template` has changed from a string to a dict. Please use the `lookup` plugin to read an existing file into a dict.
  - `tower_credential` no longer supports passing a file name to `ssh_key_data`.
  - The HipChat `notification_type` has been removed and can no longer be created using the `tower_notification_template` module.
+
+## Frequently Asked Questions
+### What are Ansible Collections?
+- Docs: Ansible Dev Guide > Developing Collections: https://docs.ansible.com/ansible/latest/dev_guide/developing_collections.html
+
+### What are AWX and Ansible Tower?
+- Source: https://github.com/ansible/awx :
+  > AWX provides a web-based user interface, REST API, and task engine built on top of Ansible. It is one of the upstream projects for Red Hat Ansible Automation Platform.
+  - AWX is an open source web app written in Python with Django REST Framework (DRF) and ReactJS for running Ansible tasks (as playbooks, roles, and collections thereof) on inventoried nodes with ansible-runner and searchably logging output.
+- Docs: https://docs.ansible.com/ansible-tower/
+- Docs: https://docs.ansible.com/ansible-tower/latest/html/installandreference/
+- Docs: https://docs.ansible.com/ansible-tower/latest/html/towerapi/
+- Docs: https://docs.ansible.com/ansible-tower/latest/html/towercli/
+- Docs: https://docs.ansible.com/ansible-tower/latest/html/userguide/
+- Docs: https://docs.ansible.com/ansible-tower/latest/html/administration/
+- Docs: https://docs.ansible.com/ansible-tower/latest/html/administration/logging.html
+- Docs: https://docs.ansible.com/ansible-tower/latest/html/administration/security_best_practices.html
+- Docs: https://www.ansible.com/products/awx-project/faq
 
 ## Running Unit Tests
 
