@@ -608,4 +608,36 @@ describe('<JobDetail />', () => {
     );
     expect(wrapper.find('Detail[label="Skip Tags"]').length).toBe(0);
   });
+
+  test('should render ReLaunchDropDown for job type "job"', () => {
+    wrapper = mountWithContexts(
+      <JobDetail
+        job={{
+          ...mockJobData,
+          type: 'job',
+        }}
+      />
+    );
+
+    expect(wrapper.find('ReLaunchDropDown').length).toBe(1);
+    expect(
+      wrapper.find('Button[ouiaId="job-detail-relaunch-button"]').length
+    ).toBe(0);
+  });
+
+  test('should render Button for other job types', () => {
+    wrapper = mountWithContexts(
+      <JobDetail
+        job={{
+          ...mockJobData,
+          type: 'project_update',
+        }}
+      />
+    );
+
+    expect(
+      wrapper.find('Button[ouiaId="job-detail-relaunch-button"]').length
+    ).toBe(1);
+    expect(wrapper.find('ReLaunchDropDown').length).toBe(0);
+  });
 });

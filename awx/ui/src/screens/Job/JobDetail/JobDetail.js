@@ -578,16 +578,26 @@ function JobDetail({ job, inventorySourceLabels }) {
             </LaunchButton>
           ) : (
             <LaunchButton resource={job} aria-label={t`Relaunch`}>
-              {({ handleRelaunch, isLaunching }) => (
-                <Button
-                  ouiaId="job-detail-relaunch-button"
-                  type="submit"
-                  onClick={() => handleRelaunch()}
-                  isDisabled={isLaunching}
-                >
-                  {t`Relaunch`}
-                </Button>
-              )}
+              {({ handleRelaunch, isLaunching }) =>
+                (job.type === 'job' && (
+                  <ReLaunchDropDown
+                    handleRelaunch={handleRelaunch}
+                    isLaunching={isLaunching}
+                    id={`relaunch-job-${job.id}`}
+                    isRelaunchJobType
+                    isPrimary
+                  />
+                )) || (
+                  <Button
+                    ouiaId="job-detail-relaunch-button"
+                    type="submit"
+                    onClick={() => handleRelaunch()}
+                    isDisabled={isLaunching}
+                  >
+                    {t`Relaunch`}
+                  </Button>
+                )
+              }
             </LaunchButton>
           ))}
         {isJobRunning(job.status) &&

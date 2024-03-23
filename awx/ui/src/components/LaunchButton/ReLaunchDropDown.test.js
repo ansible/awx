@@ -52,4 +52,28 @@ describe('ReLaunchDropDown', () => {
       .simulate('click');
     expect(handleRelaunch).toHaveBeenCalledWith({ hosts: 'all' });
   });
+
+  test('dropdown with isRelaunchJobType renders job type items', () => {
+    const wrapper = mountWithContexts(
+      <ReLaunchDropDown
+        isPrimary
+        isRelaunchJobType
+        handleRelaunch={handleRelaunch}
+      />
+    );
+
+    wrapper.find('button').simulate('click');
+    wrapper.update();
+    expect(wrapper.find('DropdownItem')).toHaveLength(3);
+
+    wrapper
+      .find('DropdownItem[aria-label="Relaunch with job type run"]')
+      .simulate('click');
+    expect(handleRelaunch).toHaveBeenCalledWith({ job_type: 'run' });
+
+    wrapper
+      .find('DropdownItem[aria-label="Relaunch with job type check"]')
+      .simulate('click');
+    expect(handleRelaunch).toHaveBeenCalledWith({ job_type: 'check' });
+  });
 });
