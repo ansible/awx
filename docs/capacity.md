@@ -47,6 +47,9 @@ As an example:
 So a system with 4GB of memory would be capable of running 20 forks. The value `mem_per_fork` can be controlled by setting the AWX settings value
 (or environment variable) `SYSTEM_TASK_FORKS_MEM` which defaults to `100`.
 
+The value "mem" can be controlled by configuring the SYSTEM_TASK_ABS_MEM settings.
+
+The configurations can be specified in settings in awx-config-maps of AWX deployment or be set as environment variable in the AWX deployment of AWX Kubernetes version.
 
 #### CPU-Relative Capacity
 
@@ -63,6 +66,11 @@ For example, in a 4-core system:
     4 * 4 == 16
 
 The value `fork_per_cpu` can be controlled by setting the AWX settings value (or environment variable) `SYSTEM_TASK_FORKS_CPU`, which defaults to `4`.
+
+The value "cpus" can be controlled by configuring the SYSTEM_TASK_ABS_CPU settings.
+
+The configurations can be specified in settings in awx-config-maps of AWX deployment or be set as environment variable in the AWX deployment of AWX Kubernetes version.
+
 
 ### Job Impacts Relative To Capacity
 
