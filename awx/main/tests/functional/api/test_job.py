@@ -5,6 +5,7 @@ from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from crum import impersonate
 import datetime
+import json
 
 # Django rest framework
 from rest_framework.exceptions import PermissionDenied
@@ -13,7 +14,7 @@ from django.utils import timezone
 # AWX
 from awx.api.versioning import reverse
 from awx.api.views import RelatedJobsPreventDeleteMixin, UnifiedJobDeletionMixin
-from awx.main.models import JobTemplate, User, Job, AdHocCommand, ProjectUpdate, InstanceGroup, Label, Organization
+from awx.main.models import JobTemplate, User, Job, AdHocCommand, ProjectUpdate, InstanceGroup, Label, Organization, WorkflowJob, JobLaunchConfig
 
 
 @pytest.mark.django_db
@@ -62,6 +63,17 @@ def test_label_sublist(get, admin_user, organization):
 
 
 @pytest.mark.django_db
+def test_system_job_launch(post, system_job_template, admin_user, mocker):
+    # result_stdout is not compatible with SQLite... and it is questionable to have this field in the first place
+    mocker.patch('awx.api.serializers.SystemJobSerializer.get_result_stdout', new=lambda self, obj: None)
+    r = post(reverse('api:system_job_template_launch', kwargs={'pk': system_job_template.pk}), {'extra_vars': {'days': 24}}, admin_user, expect=201)
+    assert 'id' in r.data
+    system_job = system_job_template._get_unified_job_class().objects.get(pk=r.data['id'])
+    assert json.loads(system_job.extra_vars) == {'days': 24}
+    assert system_job.launch_config.extra_data == {'days': 24}
+
+
+@pytest.mark.django_db
 def test_job_relaunch_prompts_not_accepted_response(post, get, inventory, project, credential, net_credential, machine_credential):
     jt = JobTemplate.objects.create(name='testjt', inventory=inventory, project=project)
     jt.credentials.add(machine_credential)
@@ -77,6 +89,20 @@ def test_job_relaunch_prompts_not_accepted_response(post, get, inventory, projec
     # Job has prompted credential, launch denied w/ message
     job.launch_config.credentials.add(net_credential)
     r = post(reverse('api:job_relaunch', kwargs={'pk': job.pk}), {}, jt_user, expect=403)
+
+
+@pytest.mark.django_db
+def test_slices_with_JT_values_no_prompts_via_api(slice_jt_factory, project, inventory, post, admin_user):
+    """
+    Tests that prompts are saved in the proper places when launching a sliced JT
+    when the nodes spawn jobs, they will use values from the JT, not the workflow job or nodes
+    """
+    jt = slice_jt_factory(3, jt_kwargs={'limit': 'foobar', 'project': project, 'playbook': 'helloworld.yml'})
+    r = post(url=reverse('api:job_template_launch', kwargs={'pk': jt.pk}), data={'limit': 'foobar'}, user=admin_user, expect=201)
+    wj = WorkflowJob.objects.get(pk=r.data['id'])
+    assert wj.prompts_dict() == {}
+    with pytest.raises(JobLaunchConfig.DoesNotExist):
+        assert wj.launch_config
 
 
 @pytest.mark.django_db

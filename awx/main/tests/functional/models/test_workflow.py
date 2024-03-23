@@ -44,7 +44,7 @@ class TestWorkflowDAGFunctional(TransactionTestCase):
         nodes = [WorkflowJobNode.objects.create(workflow_job=wfj, unified_job_template=jt) for i in range(0, 5)]
         for node, state in zip(nodes, states):
             if state:
-                node.job = jt.create_job()
+                node.job = jt.create_unified_job()
                 node.job.status = state
                 node.job.save()
                 node.save()
@@ -142,7 +142,7 @@ class TestWorkflowDNR:
             nodes = [WorkflowJobNode.objects.create(workflow_job=wfj, unified_job_template=jt) for i in range(0, 6)]
             for node, state in zip(nodes, states):
                 if state:
-                    node.job = jt.create_job()
+                    node.job = jt.create_unified_job()
                     node.job.status = state
                     node.job.save()
                     node.save()

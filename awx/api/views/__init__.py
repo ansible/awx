@@ -2788,7 +2788,7 @@ class JobTemplateCallback(GenericAPIView):
             kv['extra_vars'] = extra_vars_redacted
         kv['_prevent_slicing'] = True  # will only run against 1 host, so no point
         with transaction.atomic():
-            job = job_template.create_job(**kv)
+            job = job_template.create_unified_job(**kv)
 
         # Send a signal to signify that the job should be started.
         result = job.signal_start(inventory_sources_already_updated=inventory_sources_already_updated)
@@ -3151,7 +3151,7 @@ class WorkflowJobRelaunch(GenericAPIView):
             jt = obj.job_template
             if not jt:
                 raise ParseError(_('Cannot relaunch slice workflow job orphaned from job template.'))
-            elif not obj.inventory or min(obj.inventory.hosts.count(), jt.job_slice_count) != obj.workflow_nodes.count():
+            elif jt and jt.get_effective_slice_ct(obj.launch_prompts()) != obj.workflow_nodes.count():
                 raise ParseError(_('Cannot relaunch sliced workflow job after slice count has changed.'))
         new_workflow_job = obj.create_relaunch_workflow_job()
         new_workflow_job.signal_start()

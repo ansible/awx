@@ -344,10 +344,6 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
     )
 
     @classmethod
-    def _get_unified_job_class(cls):
-        return ProjectUpdate
-
-    @classmethod
     def _get_unified_job_field_names(cls):
         return set(f.name for f in ProjectOptions._meta.fields) | set(['name', 'description', 'organization'])
 
@@ -516,6 +512,8 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
     Internal job for tracking project updates from SCM.
     """
 
+    PARENT_FIELD_NAME = 'project'
+
     class Meta:
         app_label = 'main'
 
@@ -548,9 +546,6 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
 
     def _set_default_dependencies_processed(self):
         self.dependencies_processed = True
-
-    def _get_parent_field_name(self):
-        return 'project'
 
     def _update_parent_instance(self):
         if not self.project:

@@ -506,7 +506,7 @@ def test_job_not_blocking_inventory_update(controlplane_instance_group, job_temp
 def test_generate_dependencies_only_once(job_template_factory):
     objects = job_template_factory('jt', organization='org1')
 
-    job = objects.job_template.create_job()
+    job = objects.job_template.create_unified_job()
     job.status = "pending"
     job.name = "job_gen_dep"
     job.save()

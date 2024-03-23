@@ -144,9 +144,6 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
         else:
             return []
 
-    def _get_parent_field_name(self):
-        return ''
-
     @classmethod
     def _get_task_class(cls):
         from awx.main.tasks.jobs import RunAdHocCommand

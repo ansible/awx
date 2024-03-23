@@ -6,6 +6,7 @@ import json
 from awx.api.serializers import JobLaunchSerializer
 from awx.main.models import Credential, Inventory, Host, ExecutionEnvironment, Label, InstanceGroup
 from awx.main.models.jobs import Job, JobTemplate, UnifiedJobTemplate
+from awx.main.models.workflow import WorkflowJob
 
 from awx.api.versioning import reverse
 
@@ -117,7 +118,7 @@ def data_to_internal(data):
     if 'execution_environment' in data:
         internal['execution_environment'] = ExecutionEnvironment.objects.get(pk=data['execution_environment'])
     if 'labels' in data:
-        internal['labels'] = [Label.objects.get(pk=_id) for _id in data['labels']]
+        internal['labels'] = set([Label.objects.get(pk=_id) for _id in data['labels']])
     if 'instance_groups' in data:
         internal['instance_groups'] = [InstanceGroup.objects.get(pk=_id) for _id in data['instance_groups']]
     return internal
@@ -222,6 +223,60 @@ def test_slice_count_not_supported(job_template_prompts, post, admin_user):
 
     response = post(reverse('api:job_template_launch', kwargs={'pk': job_template.pk}), {'job_slice_count': 8}, admin_user, expect=400)
     assert response.data['job_slice_count'][0] == 'Job inventory does not have enough hosts for slicing'
+
+
+@pytest.mark.django_db
+@pytest.mark.job_runtime_vars
+def test_slice_with_survey(job_template_prompts, post, admin_user):
+    job_template = job_template_prompts(True)
+    my_spec = {
+        'name': 'foo',
+        'description': 'bar',
+        'spec': [
+            {'default': 'my_default_ans', 'type': 'password', 'variable': 'my_default', 'required': False, 'question_name': 'foo'},
+            {'default': 'wrong_jt_val', 'type': 'password', 'variable': 'my_answer', 'required': False, 'question_name': 'bar'},
+        ],
+    }
+    # add survey through API so we get normal encryption
+    post(reverse('api:job_template_survey_spec', kwargs={'pk': job_template.pk}), my_spec, admin_user, expect=200)
+    job_template.survey_enabled = True
+    job_template.save(update_fields=['survey_enabled'])
+    for i in range(2):
+        job_template.inventory.hosts.create(name=f'foo{i}')
+
+    response = post(
+        url=reverse('api:job_template_launch', kwargs={'pk': job_template.pk}),
+        data={'job_slice_count': 2, 'extra_vars': {'my_answer': 'my_answer_ans'}},
+        user=admin_user,
+        expect=201,
+    )
+    assert 'id' in response.data
+    assert response.data['type'] == 'workflow_job'
+    workflow_job = WorkflowJob.objects.get(pk=response.data['id'])
+    assert 'my_default' not in workflow_job.extra_vars_dict
+    assert workflow_job.extra_vars_dict['my_answer'].startswith('$encrypted$')
+    assert 'my_default_ans' not in str(workflow_job.extra_vars)
+    assert 'my_answer_ans' not in str(workflow_job.extra_vars)
+
+    node = workflow_job.workflow_nodes.first()
+    kwargs = node.get_job_kwargs()
+    assert 'survey_passwords' in kwargs
+    job = job_template.create_unified_job(**kwargs)
+    assert job.survey_passwords
+    ev = json.loads(job.extra_vars)
+    actual_ev = json.loads(job.decrypted_extra_vars())
+
+    # the survey default should have populated the extra_vars
+    assert 'my_default' in job.extra_vars
+    assert ev['my_default'].startswith('$encrypted$')
+    assert len(ev['my_default']) > 11
+    assert actual_ev['my_default'] == 'my_default_ans'
+
+    # the survey answer should be populated
+    assert 'my_answer' in job.extra_vars
+    assert ev['my_answer'].startswith('$encrypted$')
+    assert len(ev['my_answer']) > 11
+    assert actual_ev['my_answer'] == 'my_answer_ans'
 
 
 @pytest.mark.django_db
