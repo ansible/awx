@@ -27,7 +27,10 @@ DEFAULT_APPROVAL_TIMEOUT_BODY = CustomNotificationBase.DEFAULT_APPROVAL_TIMEOUT_
 DEFAULT_APPROVAL_DENIED_MSG = CustomNotificationBase.DEFAULT_APPROVAL_DENIED_MSG
 DEFAULT_APPROVAL_DENIED_BODY = CustomNotificationBase.DEFAULT_APPROVAL_DENIED_BODY
 
+logging.getLogger().setLevel(logging.DEBUG)
 logger = logging.getLogger('awx.main.notifications.grafana_backend')
+logger.setLevel(logging.DEBUG)
+logger.propagate = True
 
 
 class GrafanaBackend(AWXBaseEmailBackend, CustomNotificationBase):
@@ -53,8 +56,8 @@ class GrafanaBackend(AWXBaseEmailBackend, CustomNotificationBase):
     ):
         super(GrafanaBackend, self).__init__(fail_silently=fail_silently)
         self.grafana_key = grafana_key
-        self.dashboardId = int(dashboardId) if dashboardId is not None else None
-        self.panelId = int(panelId) if panelId is not None else None
+        self.dashboardId = int(dashboardId) if dashboardId is not None and panelId != "" else None
+        self.panelId = int(panelId) if panelId is not None and panelId != "" else None
         self.annotation_tags = annotation_tags if annotation_tags is not None else []
         self.grafana_no_verify_ssl = grafana_no_verify_ssl
         self.isRegion = isRegion
@@ -97,7 +100,11 @@ class GrafanaBackend(AWXBaseEmailBackend, CustomNotificationBase):
             r = requests.post(
                 "{}/api/annotations".format(m.recipients()[0]), json=grafana_data, headers=grafana_headers, verify=(not self.grafana_no_verify_ssl)
             )
+
             if r.status_code >= 400:
+                logger.error(r.request)
+                logger.error(r.status_code)
+                logger.error(r.content)
                 logger.error(smart_str(_("Error sending notification grafana: {}").format(r.status_code)))
                 if not self.fail_silently:
                     raise Exception(smart_str(_("Error sending notification grafana: {}").format(r.status_code)))
