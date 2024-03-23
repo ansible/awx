@@ -72,7 +72,7 @@ function OrganizationFormFields({
           tooltip={t`The maximum number of hosts allowed to be managed by this organization.
             Value defaults to 0 which means no limit. Refer to the Ansible
             documentation for more details.`}
-          validate={minMaxValue(0, Number.MAX_SAFE_INTEGER)}
+          validate={minMaxValue(0,2147483647)}
           me={me}
           isDisabled={!me.is_superuser}
         />
