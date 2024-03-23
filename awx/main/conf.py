@@ -308,6 +308,19 @@ register(
 )
 
 register(
+    'GIT_TASK_ENV',
+    field_class=fields.KeyValueField,
+    label=_('Environment Variables for Git module'),
+    help_text=_(
+        'Environment variables to use when running the ansible.builtin.git module within project updates. '
+        'Useful if you have to change a git config with GIT_CONFIG_PARAMETERS, for example, or use a proxy server.'
+    ),
+    category=_('Jobs'),
+    category_slug='jobs',
+    placeholder={'GIT_CONFIG_PARAMETERS': "'protocol.file.allow=always'"},
+)
+
+register(
     'GALAXY_TASK_ENV',
     field_class=fields.KeyValueField,
     label=_('Environment Variables for Galaxy Commands'),

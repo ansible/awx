@@ -15,6 +15,7 @@
 # scm_track_submodules: true/false
 # roles_enabled: Value of the global setting to enable roles downloading
 # collections_enabled: Value of the global setting to enable collections downloading
+# git_task_env: environment variables to use with the git module
 # galaxy_task_env: environment variables to use specifically for ansible-galaxy commands
 # awx_version: Current running version of the awx or tower as a string
 # awx_license_type: "open" for AWX; else presume Tower
@@ -24,6 +25,8 @@
   gather_facts: false
   connection: local
   name: Update source tree if necessary
+  vars:
+    git_task_env:  # configure in settings
   tasks:
     - name: Delete project directory before update
       ansible.builtin.shell: set -o pipefail && find . -delete -print | tail -2  # volume mounted, cannot delete folder itself
@@ -48,6 +51,7 @@
             track_submodules: "{{ scm_track_submodules | default(omit) }}"
             accept_hostkey: "{{ scm_accept_hostkey | default(omit) }}"
           register: git_result
+          environment: "{{ git_task_env }}"
 
         - name: Set the git repository version
           ansible.builtin.set_fact:

@@ -1286,6 +1286,7 @@ class RunProjectUpdate(BaseTask):
                 'scm_track_submodules': project_update.scm_track_submodules,
                 'roles_enabled': galaxy_creds_are_defined and settings.AWX_ROLES_ENABLED,
                 'collections_enabled': galaxy_creds_are_defined and settings.AWX_COLLECTIONS_ENABLED,
+                'git_task_env': settings.GIT_TASK_ENV,
                 'galaxy_task_env': settings.GALAXY_TASK_ENV,
             }
         )
