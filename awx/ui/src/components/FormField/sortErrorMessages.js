@@ -9,15 +9,18 @@ export default function sortErrorMessages(error, formValues = {}) {
     Object.keys(error.response.data).length > 0
   ) {
     const parsed = parseFieldErrors(error.response.data, formValues);
+
     return {
-      formError: parsed.formErrors.join('; '),
+      formError:
+        parsed.formErrors.indexOf(';') > -1
+          ? parsed.formErrors.join('; ')
+          : 'Error in fields',
       fieldErrors: Object.keys(parsed.fieldErrors).length
         ? parsed.fieldErrors
         : null,
     };
   }
-  /* eslint-disable-next-line no-console */
-  console.error(error);
+
   return {
     formError: error.message,
     fieldErrors: null,
