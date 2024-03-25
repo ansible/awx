@@ -1,6 +1,5 @@
 # Python
 import logging
-import urllib.parse
 
 # Django
 from django.utils.translation import gettext_lazy as _
@@ -961,8 +960,7 @@ def csrf_trusted_origins_validate(serializer, attrs):
         return attrs
     errors = []
     for origin in attrs['CSRF_TRUSTED_ORIGINS']:
-        parsed_origin = urllib.parse.urlparse(origin)
-        scheme = parsed_origin.scheme.rstrip(':')
+        scheme = origin.split(':')[0]
         if not scheme.startswith(('https', 'http')):
             errors.append(f'Invalid scheme for Origin "{origin}". Must start with "https://" or "http://".')
     if errors:
