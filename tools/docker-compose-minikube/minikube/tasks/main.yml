@@ -1,27 +1,27 @@
 ---
 - name: Include pre-flight checks
-  include_tasks: preflight.yml
+  ansible.builtin.include_tasks: preflight.yml
 
 - name: Create _sources directory
-  file:
+  ansible.builtin.file:
     path: "{{ sources_dest }}"
     state: 'directory'
     mode: '0700'
 
 - name: debug minikube_setup
-  debug:
+  ansible.builtin.debug:
     var: minikube_setup
 
 # Linux block
 - block:
     - name: Download Minikube
-      get_url:
+      ansible.builtin.get_url:
         url: "{{ minikube_url_linux }}"
         dest: "{{ sources_dest }}/minikube"
         mode: 0755
 
     - name: Download Kubectl
-      get_url:
+      ansible.builtin.get_url:
         url: "{{ kubectl_url_linux }}"
         dest: "{{ sources_dest }}/kubectl"
         mode: 0755
@@ -33,13 +33,13 @@
 # MacOS block
 - block:
     - name: Download Minikube
-      get_url:
+      ansible.builtin.get_url:
         url: "{{ minikube_url_macos }}"
         dest: "{{ sources_dest }}/minikube"
         mode: 0755
 
     - name: Download Kubectl
-      get_url:
+      ansible.builtin.get_url:
         url: "{{ kubectl_url_macos }}"
         dest: "{{ sources_dest }}/kubectl"
         mode: 0755
@@ -50,18 +50,18 @@
 
 - block:
     - name: Starting Minikube
-      shell: "{{ sources_dest }}/minikube start --driver={{ driver }} --install-addons=true --addons={{ addons | join(',') }}"
+      ansible.builtin.shell: "{{ sources_dest }}/minikube start --driver={{ driver }} --install-addons=true --addons={{ addons | join(',') }}"
       register: minikube_stdout
 
     - name: Enable Ingress Controller on Minikube
-      shell: "{{ sources_dest }}/minikube addons enable ingress"
+      ansible.builtin.shell: "{{ sources_dest }}/minikube addons enable ingress"
       when:
         - minikube_stdout.rc == 0
       register: _minikube_ingress
       ignore_errors: true
 
     - name: Show Minikube Ingress known-issue 7332 warning
-      pause:
+      ansible.builtin.pause:
         seconds: 5
         prompt: "The Minikube Ingress addon has been disabled since it looks like you are hitting https://github.com/kubernetes/minikube/issues/7332"
       when:
@@ -90,13 +90,13 @@
   register: _service_account_secret
 
 - name: Load Minikube Bearer Token
-  set_fact:
+  ansible.builtin.set_fact:
     service_account_token: '{{ _service_account_secret["resources"][0]["data"]["token"] | b64decode }}'
   when:
     - _service_account_secret["resources"][0]["data"] | length
 
 - name: Render minikube credential JSON template
-  template:
+  ansible.builtin.template:
     src: bootstrap_minikube.py.j2
     dest: "{{ sources_dest }}/bootstrap_minikube.py"
     mode: '0600'
