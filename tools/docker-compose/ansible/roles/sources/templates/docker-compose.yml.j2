@@ -51,7 +51,7 @@ services:
       - postgres
       - redis_{{ container_postfix }}
     networks:
-      - awx
+      - default
       - service-mesh
     working_dir: "/awx_devel"
     volumes:
@@ -103,8 +103,6 @@ services:
     volumes:
       - "../../redis/redis.conf:/usr/local/etc/redis/redis.conf:Z"
       - "redis_socket_{{ container_postfix }}:/var/run/redis/:rw"
-    networks:
-      - awx
     entrypoint: ["redis-server"]
     command: ["/usr/local/etc/redis/redis.conf"]
 {% endfor %}
@@ -114,8 +112,6 @@ services:
     user: "{{ ansible_user_uid }}"
     volumes:
       - "./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:Z"
-    networks:
-      - awx
     ports:
       - "8013:8013"
       - "8043:8043"
@@ -132,8 +128,6 @@ services:
     container_name: tools_keycloak_1
     hostname: keycloak
     user: "{{ ansible_user_uid }}"
-    networks:
-      - awx
     ports:
       - "8443:8443"
     environment:
@@ -151,8 +145,6 @@ services:
     container_name: tools_ldap_1
     hostname: ldap
     user: "{{ ansible_user_uid }}"
-    networks:
-      - awx
     ports:
       - "389:1389"
       - "636:1636"
@@ -175,8 +167,6 @@ services:
     image: splunk/splunk:latest
     container_name: tools_splunk_1
     hostname: splunk
-    networks:
-      - awx
     ports:
       - "8000:8000"
       - "8089:8089"
@@ -190,8 +180,6 @@ services:
     image: prom/prometheus:latest
     container_name: tools_prometheus_1
     hostname: prometheus
-    networks:
-      - awx
     ports:
       - "9090:9090"
     volumes:
@@ -207,8 +195,6 @@ services:
     image: grafana/grafana-enterprise:latest
     container_name: tools_grafana_1
     hostname: grafana
-    networks:
-      - awx
     ports:
       - "3001:3000"
     volumes:
@@ -244,8 +230,6 @@ services:
       POSTGRESQL_PASSWORD: {{ pg_password }}
     volumes:
       - "awx_db_15:/var/lib/pgsql/data"
-    networks:
-      - awx
     ports:
        - "${AWX_PG_PORT:-5441}:5432"
 {% if enable_pgbouncer|bool %}
@@ -253,8 +237,6 @@ services:
     image: bitnami/pgbouncer:latest
     container_name: tools_pgbouncer_1
     hostname: pgbouncer
-    networks:
-      - awx
     environment:
       POSTGRESQL_USERNAME: {{ pg_username }}
       POSTGRESQL_DATABASE: {{ pg_database }}
@@ -278,8 +260,6 @@ services:
     command: 'receptor --config /etc/receptor/receptor.conf'
     links:
       - awx_1
-    networks:
-      - awx
     ports:
       - "5555:5555"
     volumes:
@@ -295,8 +275,6 @@ services:
       RECEPTORCTL_SOCKET: {{ receptor_socket_file }}
     links:
       - receptor-hop
-    networks:
-      - awx
     volumes:
       - "../../../:/awx_devel"  # not used, but mounted so that any in-place installs can be used for whole cluster
       - "../../docker-compose/_sources/receptor/receptor-worker-{{ loop.index }}.conf:/etc/receptor/receptor.conf"
@@ -311,8 +289,6 @@ services:
     container_name: tools_vault_1
     command: server
     hostname: vault
-    networks:
-      - awx
     ports:
       - "1234:1234"
     environment:
@@ -362,7 +338,6 @@ volumes:
 {% endif %}
 
 networks:
-  awx:
   service-mesh:
     name: service-mesh
 {% if minikube_container_group|bool %}
