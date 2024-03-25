@@ -4,10 +4,10 @@
   gather_facts: False
   tasks:
     - name: Unseal the vault
-      include_role:
+      ansible.builtin.include_role:
         name: vault
         tasks_from: unseal
 
     - name: Display root token
-      debug:
+      ansible.builtin.debug:
         var: Initial_Root_Token
