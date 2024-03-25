@@ -165,9 +165,11 @@ class Command(BaseCommand):
             return
 
         WebsocketsMetricsServer().start()
+        websocket_relay_manager = WebSocketRelayManager()
 
-        try:
-            websocket_relay_manager = WebSocketRelayManager()
-            asyncio.run(websocket_relay_manager.run())
-        except KeyboardInterrupt:
-            logger.info('Terminating Websocket Relayer')
+        while True:
+            try:
+                asyncio.run(websocket_relay_manager.run())
+            except KeyboardInterrupt:
+                logger.info('Restarting Websocket Relayer')
+                time.sleep(10)
