@@ -221,8 +221,10 @@
           vars:
             req_file: "{{ lookup('ansible.builtin.first_found', req_candidates, skip=True) }}"
             req_candidates:
-              - "{{ project_path | quote }}/roles/requirements.yml"
-              - "{{ project_path | quote }}/roles/requirements.yaml"
+              files:
+                - "{{ project_path | quote }}/roles/requirements.yml"
+                - "{{ project_path | quote }}/roles/requirements.yaml"
+              skip: True
           changed_when: "'was installed successfully' in galaxy_result.stdout"
           when:
             - roles_enabled | bool
@@ -237,10 +239,10 @@
           vars:
             req_file: "{{ lookup('ansible.builtin.first_found', req_candidates, skip=True) }}"
             req_candidates:
-              - "{{ project_path | quote }}/collections/requirements.yml"
-              - "{{ project_path | quote }}/collections/requirements.yaml"
-              - "{{ project_path | quote }}/requirements.yml"
-              - "{{ project_path | quote }}/requirements.yaml"
+              files:
+                - "{{ project_path | quote }}/collections/requirements.yml"
+                - "{{ project_path | quote }}/collections/requirements.yaml"
+              skip: True
           changed_when: "'Nothing to do.' not in galaxy_collection_result.stdout"
           when:
             - "ansible_version.full is version_compare('2.9', '>=')"
@@ -249,6 +251,7 @@
           tags:
             - install_collections
 
+        # requirements.yml in project root can be either "old" (roles only) or "new" (collections+roles) format
         - name: Fetch galaxy roles and collections from requirements.(yml/yaml)
           ansible.builtin.command:
             cmd: "ansible-galaxy install -r {{ req_file }} {{ verbosity }}"
@@ -256,8 +259,10 @@
           vars:
             req_file: "{{ lookup('ansible.builtin.first_found', req_candidates, skip=True) }}"
             req_candidates:
-              - "{{ project_path | quote }}/requirements.yaml"
-              - "{{ project_path | quote }}/requirements.yml"
+              files:
+                - "{{ project_path | quote }}/requirements.yaml"
+                - "{{ project_path | quote }}/requirements.yml"
+              skip: True
           changed_when: "'Nothing to do.' not in galaxy_combined_result.stdout"
           when:
             - "ansible_version.full is version_compare('2.10', '>=')"

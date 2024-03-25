@@ -92,6 +92,7 @@ register(
     ),
     category=_('System'),
     category_slug='system',
+    required=False,
 )
 
 register(
@@ -774,6 +775,7 @@ register(
     allow_null=True,
     category=_('System'),
     category_slug='system',
+    required=False,
 )
 register(
     'AUTOMATION_ANALYTICS_LAST_ENTRIES',
@@ -815,6 +817,7 @@ register(
     help_text=_('Max jobs to allow bulk jobs to launch'),
     category=_('Bulk Actions'),
     category_slug='bulk',
+    hidden=True,
 )
 
 register(
@@ -825,6 +828,7 @@ register(
     help_text=_('Max number of hosts to allow to be created in a single bulk action'),
     category=_('Bulk Actions'),
     category_slug='bulk',
+    hidden=True,
 )
 
 register(
@@ -835,6 +839,7 @@ register(
     help_text=_('Max number of hosts to allow to be deleted in a single bulk action'),
     category=_('Bulk Actions'),
     category_slug='bulk',
+    hidden=True,
 )
 
 register(
@@ -845,6 +850,7 @@ register(
     help_text=_('Enable preview of new user interface.'),
     category=_('System'),
     category_slug='system',
+    hidden=True,
 )
 
 register(

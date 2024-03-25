@@ -93,6 +93,7 @@ register(
     default='',
     label=_('Login redirect override URL'),
     help_text=_('URL to which unauthorized users will be redirected to log in.  If blank, users will be sent to the login page.'),
+    warning_text=_('Changing the redirect URL could impact the ability to login if local authentication is also disabled.'),
     category=_('Authentication'),
     category_slug='authentication',
 )

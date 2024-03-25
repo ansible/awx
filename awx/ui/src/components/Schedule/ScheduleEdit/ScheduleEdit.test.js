@@ -6,6 +6,7 @@ import {
   InventoriesAPI,
   CredentialsAPI,
   CredentialTypesAPI,
+  JobTemplatesAPI,
 } from 'api';
 import { mountWithContexts } from '../../../../testUtils/enzymeHelpers';
 import ScheduleEdit from './ScheduleEdit';
@@ -125,6 +126,7 @@ describe('<ScheduleEdit />', () => {
         id: 27,
       },
     });
+
     await act(async () => {
       wrapper = mountWithContexts(
         <ScheduleEdit
@@ -206,7 +208,6 @@ describe('<ScheduleEdit />', () => {
     expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
       description: 'test description',
       name: 'Run once schedule',
-      extra_data: {},
       rrule:
         'DTSTART;TZID=America/New_York:20200325T100000 RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY',
     });
@@ -233,7 +234,6 @@ describe('<ScheduleEdit />', () => {
     expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
       description: 'test description',
       name: 'Run every 10 minutes 10 times',
-      extra_data: {},
       rrule:
         'DTSTART;TZID=America/New_York:20200325T103000 RRULE:INTERVAL=10;FREQ=MINUTELY;COUNT=10',
     });
@@ -262,7 +262,6 @@ describe('<ScheduleEdit />', () => {
     expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
       description: 'test description',
       name: 'Run every hour until date',
-      extra_data: {},
       rrule:
         'DTSTART;TZID=America/New_York:20200325T104500 RRULE:INTERVAL=1;FREQ=HOURLY;UNTIL=20200326T144500Z',
     });
@@ -288,7 +287,6 @@ describe('<ScheduleEdit />', () => {
     expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
       description: 'test description',
       name: 'Run daily',
-      extra_data: {},
       rrule:
         'DTSTART;TZID=America/New_York:20200325T104500 RRULE:INTERVAL=1;FREQ=DAILY',
     });
@@ -316,7 +314,6 @@ describe('<ScheduleEdit />', () => {
     expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
       description: 'test description',
       name: 'Run weekly on mon/wed/fri',
-      extra_data: {},
       rrule: `DTSTART;TZID=America/New_York:20200325T104500 RRULE:INTERVAL=1;FREQ=WEEKLY;BYDAY=${RRule.MO},${RRule.WE},${RRule.FR}`,
     });
   });
@@ -344,7 +341,6 @@ describe('<ScheduleEdit />', () => {
     expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
       description: 'test description',
       name: 'Run on the first day of the month',
-      extra_data: {},
       rrule:
         'DTSTART;TZID=America/New_York:20200401T104500 RRULE:INTERVAL=1;FREQ=MONTHLY;BYMONTHDAY=1',
     });
@@ -376,7 +372,6 @@ describe('<ScheduleEdit />', () => {
     expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
       description: 'test description',
       name: 'Run monthly on the last Tuesday',
-      extra_data: {},
       rrule:
         'DTSTART;TZID=America/New_York:20200331T110000 RRULE:INTERVAL=1;FREQ=MONTHLY;BYSETPOS=-1;BYDAY=TU',
     });
@@ -406,7 +401,6 @@ describe('<ScheduleEdit />', () => {
     expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
       description: 'test description',
       name: 'Yearly on the first day of March',
-      extra_data: {},
       rrule:
         'DTSTART;TZID=America/New_York:20200301T000000 RRULE:INTERVAL=1;FREQ=YEARLY;BYMONTH=3;BYMONTHDAY=1',
     });
@@ -437,7 +431,6 @@ describe('<ScheduleEdit />', () => {
     expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
       description: 'test description',
       name: 'Yearly on the second Friday in April',
-      extra_data: {},
       rrule:
         'DTSTART;TZID=America/New_York:20200410T111500 RRULE:INTERVAL=1;FREQ=YEARLY;BYSETPOS=2;BYDAY=FR;BYMONTH=4',
     });
@@ -468,7 +461,6 @@ describe('<ScheduleEdit />', () => {
     expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
       description: 'test description',
       name: 'Yearly on the first weekday in October',
-      extra_data: {},
       rrule:
         'DTSTART;TZID=America/New_York:20200410T111500 RRULE:INTERVAL=1;FREQ=YEARLY;BYSETPOS=1;BYDAY=MO,TU,WE,TH,FR;BYMONTH=10',
     });
@@ -562,7 +554,6 @@ describe('<ScheduleEdit />', () => {
     wrapper.update();
 
     expect(SchedulesAPI.update).toBeCalledWith(27, {
-      extra_data: {},
       name: 'mock schedule',
       rrule:
         'DTSTART;TZID=America/New_York:20210128T141500 RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY',
@@ -633,15 +624,13 @@ describe('<ScheduleEdit />', () => {
       endDateTime: undefined,
       startDateTime: undefined,
       description: '',
-      extra_data: {},
       name: 'foo',
-      inventory: 702,
       rrule:
         'DTSTART;TZID=America/New_York:20200402T144500 RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY',
     });
   });
 
-  test('should submit survey with default values properly, without opening prompt wizard', async () => {
+  test('should submit update values properly when prompt is not opened', async () => {
     let scheduleSurveyWrapper;
     await act(async () => {
       scheduleSurveyWrapper = mountWithContexts(
@@ -746,9 +735,195 @@ describe('<ScheduleEdit />', () => {
     expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
       description: 'test description',
       name: 'Run once schedule',
-      extra_data: { mc: 'first', text: 'text variable' },
       rrule:
         'DTSTART;TZID=America/New_York:20200325T100000 RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY',
+    });
+  });
+  test('should submit update values properly when survey values change', async () => {
+    JobTemplatesAPI.readSurvey.mockResolvedValue({
+      data: {
+        spec: [
+          {
+            question_name: 'text',
+            question_description: '',
+            required: true,
+            type: 'text',
+            variable: 'text',
+            min: 0,
+            max: 1024,
+            default: 'text variable',
+            choices: '',
+            new_question: true,
+          },
+        ],
+      },
+    });
+
+    JobTemplatesAPI.readLaunch.mockResolvedValue({
+      data: {
+        can_start_without_user_input: false,
+        passwords_needed_to_start: [],
+        ask_scm_branch_on_launch: false,
+        ask_variables_on_launch: false,
+        ask_tags_on_launch: false,
+        ask_diff_mode_on_launch: false,
+        ask_skip_tags_on_launch: false,
+        ask_job_type_on_launch: false,
+        ask_limit_on_launch: false,
+        ask_verbosity_on_launch: false,
+        ask_inventory_on_launch: true,
+        ask_credential_on_launch: true,
+        survey_enabled: true,
+        variables_needed_to_start: [],
+        credential_needed_to_start: true,
+        inventory_needed_to_start: true,
+        job_template_data: {
+          name: 'Demo Job Template',
+          id: 7,
+          description: '',
+        },
+        defaults: {
+          extra_vars: '---',
+          diff_mode: false,
+          limit: '',
+          job_tags: '',
+          skip_tags: '',
+          job_type: 'run',
+          verbosity: 0,
+          inventory: {
+            name: null,
+            id: null,
+          },
+          scm_branch: '',
+          credentials: [],
+        },
+      },
+    });
+
+    let scheduleSurveyWrapper;
+    await act(async () => {
+      scheduleSurveyWrapper = mountWithContexts(
+        <ScheduleEdit
+          schedule={mockSchedule}
+          resource={{
+            id: 700,
+            type: 'job_template',
+            iventory: 1,
+            summary_fields: {
+              credentials: [
+                { name: 'job template credential', id: 75, kind: 'ssh' },
+              ],
+            },
+            name: 'Foo Job Template',
+            description: '',
+          }}
+          resourceDefaultCredentials={[]}
+          launchConfig={{
+            can_start_without_user_input: false,
+            passwords_needed_to_start: [],
+            ask_scm_branch_on_launch: false,
+            ask_variables_on_launch: false,
+            ask_tags_on_launch: false,
+            ask_diff_mode_on_launch: false,
+            ask_skip_tags_on_launch: false,
+            ask_job_type_on_launch: false,
+            ask_limit_on_launch: false,
+            ask_verbosity_on_launch: false,
+            ask_inventory_on_launch: true,
+            ask_credential_on_launch: true,
+            survey_enabled: true,
+            variables_needed_to_start: [],
+            credential_needed_to_start: true,
+            inventory_needed_to_start: true,
+            job_template_data: {
+              name: 'Demo Job Template',
+              id: 7,
+              description: '',
+            },
+            defaults: {
+              extra_vars: '---',
+              diff_mode: false,
+              limit: '',
+              job_tags: '',
+              skip_tags: '',
+              job_type: 'run',
+              verbosity: 0,
+              inventory: {
+                name: null,
+                id: null,
+              },
+              scm_branch: '',
+              credentials: [],
+            },
+          }}
+          surveyConfig={{
+            spec: [
+              {
+                question_name: 'text',
+                question_description: '',
+                required: true,
+                type: 'text',
+                variable: 'text',
+                min: 0,
+                max: 1024,
+                default: 'text variable',
+                choices: '',
+                new_question: true,
+              },
+            ],
+          }}
+        />
+      );
+    });
+    scheduleSurveyWrapper.update();
+
+    await act(async () =>
+      scheduleSurveyWrapper
+        .find('Button[aria-label="Prompt"]')
+        .prop('onClick')()
+    );
+    scheduleSurveyWrapper.update();
+    expect(scheduleSurveyWrapper.find('WizardNavItem').length).toBe(4);
+    await act(async () =>
+      scheduleSurveyWrapper.find('WizardFooterInternal').prop('onNext')()
+    );
+    scheduleSurveyWrapper.update();
+    await act(async () =>
+      scheduleSurveyWrapper.find('WizardFooterInternal').prop('onNext')()
+    );
+    scheduleSurveyWrapper.update();
+    await act(async () =>
+      scheduleSurveyWrapper
+        .find('input#survey-question-text')
+        .simulate('change', {
+          target: { value: 'foo', name: 'survey_text' },
+        })
+    );
+    scheduleSurveyWrapper.update();
+    await act(async () =>
+      scheduleSurveyWrapper.find('WizardFooterInternal').prop('onNext')()
+    );
+    scheduleSurveyWrapper.update();
+    await act(async () =>
+      scheduleSurveyWrapper.find('WizardFooterInternal').prop('onNext')()
+    );
+    scheduleSurveyWrapper.update();
+
+    expect(scheduleSurveyWrapper.find('Wizard').length).toBe(0);
+
+    await act(async () =>
+      scheduleSurveyWrapper.find('Button[aria-label="Save"]').prop('onClick')()
+    );
+
+    expect(SchedulesAPI.update).toHaveBeenCalledWith(27, {
+      description: '',
+      name: 'mock schedule',
+      inventory: 702,
+      extra_data: {
+        text: 'foo',
+      },
+      rrule:
+        'DTSTART;TZID=America/New_York:20200402T144500 RRULE:INTERVAL=1;COUNT=1;FREQ=MINUTELY',
     });
   });
 });

@@ -1,7 +1,12 @@
 import yaml from 'js-yaml';
 
 export default function mergeExtraVars(extraVars = '', survey = {}) {
-  const vars = yaml.load(extraVars) || {};
+  let vars = {};
+  if (typeof extraVars === 'string') {
+    vars = yaml.load(extraVars);
+  } else if (typeof extraVars === 'object') {
+    vars = extraVars;
+  }
   return {
     ...vars,
     ...survey,

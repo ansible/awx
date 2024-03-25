@@ -55,6 +55,7 @@ register(
     # Optional; category_slug will be slugified version of category if not
     # explicitly provided.
     category_slug='cows',
+    hidden=True,
 )
 
 

@@ -105,6 +105,30 @@
   include_tasks: vault_tls.yml
   when: enable_vault | bool
 
+- name: Iterate through ../editable_dependencies and get symlinked directories and register the paths
+  find:
+    paths: "{{ playbook_dir }}/../editable_dependencies"
+    file_type: link
+    recurse: no
+  register: _editable_dependencies_links
+  when: install_editable_dependencies | bool
+
+- name: Warn about empty editable_dependnecies
+  fail:
+    msg: "[WARNING] No editable_dependencies found in ../editable_dependencies"
+  when: install_editable_dependencies | bool and not _editable_dependencies_links.files
+  ignore_errors: true
+
+- name: Set fact with editable_dependencies
+  set_fact:
+    editable_dependencies: "{{ _editable_dependencies_links.files | map(attribute='path') | list }}"
+  when: install_editable_dependencies | bool and _editable_dependencies_links.files
+
+- name: Set install_editable_dependnecies to false if no editable_dependencies are found
+  set_fact:
+    install_editable_dependencies: false
+  when: install_editable_dependencies | bool and not _editable_dependencies_links.files
+
 - name: Render Docker-Compose
   template:
     src: docker-compose.yml.j2

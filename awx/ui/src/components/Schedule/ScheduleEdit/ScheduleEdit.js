@@ -13,6 +13,18 @@ import ScheduleForm from '../shared/ScheduleForm';
 import buildRuleSet from '../shared/buildRuleSet';
 import { CardBody } from '../../Card';
 
+function generateExtraData(extra_vars, surveyValues, surveyConfiguration) {
+  const extraVars = parseVariableField(
+    yaml.dump(mergeExtraVars(extra_vars, surveyValues))
+  );
+  surveyConfiguration.spec.forEach((q) => {
+    if (!surveyValues[q.variable]) {
+      delete extraVars[q.variable];
+    }
+  });
+  return extraVars;
+}
+
 function ScheduleEdit({
   hasDaysToKeepField,
   schedule,
@@ -33,10 +45,12 @@ function ScheduleEdit({
     surveyConfiguration,
     originalInstanceGroups,
     originalLabels,
-    scheduleCredentials = []
+    scheduleCredentials = [],
+    isPromptTouched = false
   ) => {
     const {
       execution_environment,
+      extra_vars = null,
       instance_groups,
       inventory,
       credentials = [],
@@ -48,45 +62,54 @@ function ScheduleEdit({
       labels,
       ...submitValues
     } = values;
-    let extraVars;
+
     const surveyValues = getSurveyValues(values);
 
     if (
-      !Object.values(surveyValues).length &&
-      surveyConfiguration?.spec?.length
+      isPromptTouched &&
+      surveyConfiguration?.spec &&
+      launchConfiguration?.ask_variables_on_launch
     ) {
-      surveyConfiguration.spec.forEach((q) => {
-        surveyValues[q.variable] = q.default;
-      });
+      submitValues.extra_data = generateExtraData(
+        extra_vars,
+        surveyValues,
+        surveyConfiguration
+      );
+    } else if (
+      isPromptTouched &&
+      surveyConfiguration?.spec &&
+      !launchConfiguration?.ask_variables_on_launch
+    ) {
+      submitValues.extra_data = generateExtraData(
+        schedule.extra_data,
+        surveyValues,
+        surveyConfiguration
+      );
+    } else if (
+      isPromptTouched &&
+      launchConfiguration?.ask_variables_on_launch
+    ) {
+      submitValues.extra_data = parseVariableField(extra_vars);
     }
-
-    const initialExtraVars =
-      launchConfiguration?.ask_variables_on_launch &&
-      (values.extra_vars || '---');
-    if (surveyConfiguration?.spec) {
-      extraVars = yaml.dump(mergeExtraVars(initialExtraVars, surveyValues));
-    } else {
-      extraVars = yaml.dump(mergeExtraVars(initialExtraVars, {}));
-    }
-    submitValues.extra_data = extraVars && parseVariableField(extraVars);
 
     if (
-      Object.keys(submitValues.extra_data).length === 0 &&
-      Object.keys(schedule.extra_data).length > 0
+      isPromptTouched &&
+      launchConfiguration?.ask_inventory_on_launch &&
+      inventory
     ) {
-      submitValues.extra_data = schedule.extra_data;
-    }
-    delete values.extra_vars;
-    if (inventory) {
       submitValues.inventory = inventory.id;
     }
 
-    if (execution_environment) {
+    if (
+      isPromptTouched &&
+      launchConfiguration?.ask_execution_environment_on_launch &&
+      execution_environment
+    ) {
       submitValues.execution_environment = execution_environment.id;
     }
 
     try {
-      if (launchConfiguration?.ask_labels_on_launch) {
+      if (isPromptTouched && launchConfiguration?.ask_labels_on_launch) {
         const { labelIds, error } = createNewLabels(
           values.labels,
           resource.organization
@@ -120,9 +143,16 @@ function ScheduleEdit({
         }
       }
 
+      const cleanedRequestData = Object.keys(requestData)
+        .filter((key) => !key.startsWith('survey_'))
+        .reduce((acc, key) => {
+          acc[key] = requestData[key];
+          return acc;
+        }, {});
+
       const {
         data: { id: scheduleId },
-      } = await SchedulesAPI.update(schedule.id, requestData);
+      } = await SchedulesAPI.update(schedule.id, cleanedRequestData);
 
       const { added: addedCredentials, removed: removedCredentials } =
         getAddedAndRemoved(

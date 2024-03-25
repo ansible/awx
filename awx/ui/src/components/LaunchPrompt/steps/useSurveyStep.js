@@ -67,27 +67,18 @@ function getInitialValues(launchConfig, surveyConfig, resource) {
   const values = {};
   if (surveyConfig?.spec) {
     surveyConfig.spec.forEach((question) => {
-      if (question.type === 'multiselect') {
+      if (resource?.extra_data && resource?.extra_data[question.variable]) {
+        values[`survey_${question.variable}`] =
+          resource.extra_data[question.variable];
+      } else if (question.type === 'multiselect') {
         values[`survey_${question.variable}`] = question.default
           ? question.default.split('\n')
           : [];
       } else {
         values[`survey_${question.variable}`] = question.default ?? '';
       }
-      if (resource?.extra_data) {
-        Object.entries(resource.extra_data).forEach(([key, value]) => {
-          if (key === question.variable) {
-            if (question.type === 'multiselect') {
-              values[`survey_${question.variable}`] = value;
-            } else {
-              values[`survey_${question.variable}`] = value;
-            }
-          }
-        });
-      }
     });
   }
-
   return values;
 }
 

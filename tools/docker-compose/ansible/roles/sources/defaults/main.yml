@@ -59,3 +59,7 @@ scrape_interval: '5s'
 enable_pgbouncer: false
 pgbouncer_port: 6432
 pgbouncer_max_pool_size: 70
+
+# editable_dependencies
+install_editable_dependencies: false
+editable_dependencies: []
