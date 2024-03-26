@@ -171,5 +171,8 @@ class Command(BaseCommand):
             try:
                 asyncio.run(websocket_relay_manager.run())
             except KeyboardInterrupt:
-                logger.info('Restarting Websocket Relayer')
+                logger.info('Shutting down Websocket Relayer')
+                break
+            except Exception as e:
+                logger.exception('Error in Websocket Relayer, exception: {}. Restarting in 10 seconds'.format(e))
                 time.sleep(10)
