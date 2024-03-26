@@ -41,6 +41,7 @@ services:
       AWX_LOGGING_MODE: stdout
       DJANGO_SUPERUSER_PASSWORD: {{ admin_password }}
       UWSGI_MOUNT_PATH: {{ ingress_path }}
+      PROMETHEUS_DISABLE_CREATED_SERIES: {{ prometheus_disable_created_series }}
 {% if loop.index == 1 %}
       RUN_MIGRATIONS: 1
 {% endif %}
