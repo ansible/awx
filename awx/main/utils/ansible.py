@@ -75,6 +75,9 @@ def could_be_inventory(project_path, dir_path, filename):
     elif suspected_ext == '.ini' or os.access(inventory_path, os.X_OK):
         # Files with any of these extensions are always included
         return inventory_rel_path
+    elif suspected_ext in ['.yaml', '.yml', '.json']:
+        # Might be an inventory plugin file
+        pass
     elif '.' in suspected_ext:
         # If not using those extensions, inventory must have _no_ extension
         return None
@@ -88,6 +91,10 @@ def could_be_inventory(project_path, dir_path, filename):
             for i, line in enumerate(inv_file):
                 if i > 10:
                     break
+                elif 'plugin:' in line or 'all' in line:
+                    matched = True
+                    break
+                    # Probably an inventory file
                 elif valid_inventory_re.match(line):
                     matched = True
                     break
