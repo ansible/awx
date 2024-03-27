@@ -324,6 +324,7 @@ class WebSocketRelayManager(object):
                         port=database_conf['PORT'],
                         **database_conf.get("OPTIONS", {}),
                     )
+                    await async_conn.set_autocommit(True)
 
                     task = event_loop.create_task(self.on_ws_heartbeat(async_conn), name="on_ws_heartbeat")
                     logger.info("Creating `on_ws_heartbeat` task in event loop.")
