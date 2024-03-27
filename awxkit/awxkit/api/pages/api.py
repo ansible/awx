@@ -317,7 +317,10 @@ class ApiV2(base.Base):
                     if asset['natural_key']['type'] == 'project' and 'local_path' in post_data and _page['scm_type'] == post_data['scm_type']:
                         del post_data['local_path']
 
-                    _page = _page.put(post_data)
+                    if asset['natural_key']['type'] == 'user':
+                        _page = _page.patch(**post_data)
+                    else:
+                        _page = _page.put(post_data)
                     changed = True
             except (exc.Common, AssertionError) as e:
                 identifier = asset.get("name", None) or asset.get("username", None) or asset.get("hostname", None)
