@@ -18,8 +18,8 @@ from django.apps import apps
 import psycopg
 
 from awx.main.analytics.broadcast_websocket import (
-    RelayWebsocketStats,
-    RelayWebsocketStatsManager,
+    MetricsForHost,
+    MetricsManager,
 )
 
 logger = logging.getLogger('awx.main.wsrelay')
@@ -40,7 +40,7 @@ class WebsocketRelayConnection:
     def __init__(
         self,
         name,
-        stats: RelayWebsocketStats,
+        stats: MetricsForHost,
         remote_host: str,
         remote_port: int = settings.BROADCAST_WEBSOCKET_PORT,
         protocol: str = settings.BROADCAST_WEBSOCKET_PROTOCOL,
@@ -163,6 +163,7 @@ class WebsocketRelayConnection:
     async def run_producer(self, name, websocket, group):
         try:
             logger.info(f"Starting producer for {name}")
+            self.stats.record_producer_start()
 
             consumer_channel = await self.channel_layer.new_channel()
             await self.channel_layer.group_add(group, consumer_channel)
@@ -171,6 +172,7 @@ class WebsocketRelayConnection:
             while True:
                 try:
                     msg = await asyncio.wait_for(self.channel_layer.receive(consumer_channel), timeout=10)
+                    self.stats.record_message_received()
                     if not msg.get("needs_relay"):
                         # This is added in by emit_channel_notification(). It prevents us from looping
                         # in the event that we are sharing a redis with a web instance. We'll see the
@@ -210,14 +212,17 @@ class WebsocketRelayConnection:
         finally:
             await self.channel_layer.group_discard(group, consumer_channel)
             del self.producers[name]
+            self.stats.record_producer_stop()
 
 
 class WebSocketRelayManager(object):
-    def __init__(self):
+    def __init__(self, metrics_mgr: MetricsManager):
         self.local_hostname = get_local_host()
         self.relay_connections = dict()
         # hostname -> ip
         self.known_hosts: Dict[str, str] = dict()
+
+        self._metrics_mgr = metrics_mgr
 
     async def on_ws_heartbeat(self, conn):
         await conn.execute("LISTEN web_ws_heartbeat")
@@ -290,17 +295,9 @@ class WebSocketRelayManager(object):
 
         if hostname in self.known_hosts:
             del self.known_hosts[hostname]
-
-        try:
-            self.stats_mgr.delete_remote_host_stats(hostname)
-        except KeyError:
-            pass
+            self._metrics_mgr.deallocate(hostname)
 
     async def run(self):
-        event_loop = asyncio.get_running_loop()
-
-        self.stats_mgr = RelayWebsocketStatsManager(event_loop, self.local_hostname)
-        self.stats_mgr.start()
 
         # Set up a pg_notify consumer for allowing web nodes to "provision" and "deprovision" themselves gracefully.
         database_conf = deepcopy(settings.DATABASES['default'])
@@ -329,7 +326,7 @@ class WebSocketRelayManager(object):
                     )
                     await async_conn.set_autocommit(True)
 
-                    task = event_loop.create_task(self.on_ws_heartbeat(async_conn), name="on_ws_heartbeat")
+                    task = asyncio.create_task(self.on_ws_heartbeat(async_conn), name="on_ws_heartbeat")
                     logger.info("Creating `on_ws_heartbeat` task in event loop.")
 
                 except Exception as e:
@@ -364,7 +361,7 @@ class WebSocketRelayManager(object):
                 logger.info(f"Adding {new_remote_hosts} to websocket broadcast list")
 
             for h in new_remote_hosts:
-                stats = self.stats_mgr.new_remote_host_stats(h)
+                stats = self._metrics_mgr.allocate(h)
                 relay_connection = WebsocketRelayConnection(name=self.local_hostname, stats=stats, remote_host=self.known_hosts[h])
                 relay_connection.start()
                 self.relay_connections[h] = relay_connection

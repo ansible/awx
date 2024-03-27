@@ -1098,20 +1098,23 @@ HOST_METRIC_SUMMARY_TASK_INTERVAL = 7  # days
 # TODO: cmeyers, break this out into a separate django app so other
 # projects can take advantage.
 
-METRICS_SERVICE_CALLBACK_RECEIVER = 'callback_receiver'
+METRICS_SERVICE_CALLBACK_RECEIVER = 'callbackreceiver'
 METRICS_SERVICE_DISPATCHER = 'dispatcher'
-METRICS_SERVICE_WEBSOCKETS = 'websockets'
+METRICS_SERVICE_WEBSOCKET_RELAY = 'wsrelay'
 
 METRICS_SUBSYSTEM_CONFIG = {
     'server': {
         METRICS_SERVICE_CALLBACK_RECEIVER: {
             'port': 8014,
+            'address': 'localhost',
         },
         METRICS_SERVICE_DISPATCHER: {
             'port': 8015,
+            'address': 'localhost',
         },
-        METRICS_SERVICE_WEBSOCKETS: {
+        METRICS_SERVICE_WEBSOCKET_RELAY: {
             'port': 8016,
+            'address': 'localhost',
         },
     }
 }

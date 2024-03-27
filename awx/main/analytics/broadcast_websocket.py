@@ -1,23 +1,15 @@
 import datetime
-import asyncio
 import logging
-import redis
-import redis.asyncio
 import re
 
 from prometheus_client import (
-    generate_latest,
     Gauge,
     Counter,
     Enum,
     CollectorRegistry,
-    parser,
 )
 
 from django.conf import settings
-
-
-BROADCAST_WEBSOCKET_REDIS_KEY_NAME = 'broadcast_websocket_stats'
 
 
 logger = logging.getLogger('awx.analytics.broadcast_websocket')
@@ -36,134 +28,121 @@ def safe_name(s):
     return re.sub('[^0-9a-zA-Z]+', '_', s)
 
 
-# Second granularity; Per-minute
-class FixedSlidingWindow:
-    def __init__(self, start_time=None):
-        self.buckets = dict()
-        self.start_time = start_time or now_seconds()
-
-    def cleanup(self, now_bucket=None):
-        now_bucket = now_bucket or now_seconds()
-        if self.start_time + 60 < now_bucket:
-            self.start_time = now_bucket - 60
-
-            # Delete old entries
-            for k in list(self.buckets.keys()):
-                if k < self.start_time:
-                    del self.buckets[k]
-
-    def record(self, ts=None):
-        now_bucket = ts or dt_to_seconds(datetime.datetime.now())
-
-        val = self.buckets.get(now_bucket, 0)
-        self.buckets[now_bucket] = val + 1
-
-        self.cleanup(now_bucket)
-
-    def render(self, ts=None):
-        self.cleanup(now_bucket=ts)
-        return sum(self.buckets.values()) or 0
+class ConnectionState:
+    CONNECTED = 'connected'
+    DISCONNECTED = 'disconnected'
 
 
-class RelayWebsocketStatsManager:
-    def __init__(self, event_loop, local_hostname):
-        self._local_hostname = local_hostname
+class Metrics:
+    """
+    Attributes with underscores are NOT registered
+    Attributes WITHOUT underscores ARE registered
+    """
 
-        self._event_loop = event_loop
-        self._stats = dict()
-        self._redis_key = BROADCAST_WEBSOCKET_REDIS_KEY_NAME
+    CONNECTION_STATE = ConnectionState()
 
-    def new_remote_host_stats(self, remote_hostname):
-        self._stats[remote_hostname] = RelayWebsocketStats(self._local_hostname, remote_hostname)
-        return self._stats[remote_hostname]
-
-    def delete_remote_host_stats(self, remote_hostname):
-        del self._stats[remote_hostname]
-
-    async def run_loop(self):
-        try:
-            redis_conn = await redis.asyncio.Redis.from_url(settings.BROKER_URL)
-            while True:
-                stats_data_str = ''.join(stat.serialize() for stat in self._stats.values())
-                await redis_conn.set(self._redis_key, stats_data_str)
-
-                await asyncio.sleep(settings.BROADCAST_WEBSOCKET_STATS_POLL_RATE_SECONDS)
-        except Exception as e:
-            logger.warning(e)
-            await asyncio.sleep(settings.BROADCAST_WEBSOCKET_STATS_POLL_RATE_SECONDS)
-            self.start()
-
-    def start(self):
-        self.async_task = self._event_loop.create_task(self.run_loop())
-        return self.async_task
-
-    @classmethod
-    def get_stats_sync(cls):
-        """
-        Stringified verion of all the stats
-        """
-        redis_conn = redis.Redis.from_url(settings.BROKER_URL)
-        stats_str = redis_conn.get(BROADCAST_WEBSOCKET_REDIS_KEY_NAME) or b''
-        return parser.text_string_to_metric_families(stats_str.decode('UTF-8'))
-
-
-class RelayWebsocketStats:
-    def __init__(self, local_hostname, remote_hostname):
-        self._local_hostname = local_hostname
-        self._remote_hostname = remote_hostname
-        self._registry = CollectorRegistry()
-
-        # TODO: More robust replacement
-        self.name = safe_name(self._local_hostname)
-        self.remote_name = safe_name(self._remote_hostname)
-
-        self._messages_received_total = Counter(
-            f'awx_{self.remote_name}_messages_received_total',
+    def __init__(self, namespace=settings.METRICS_SERVICE_WEBSOCKET_RELAY):
+        self.messages_received_total = Counter(
+            f'{namespace}_messages_received_total',
             'Number of messages received, to be forwarded, by the broadcast websocket system',
-            registry=self._registry,
+            ['remote_host'],
+            registry=None,
         )
-        self._messages_received_current_conn = Gauge(
-            f'awx_{self.remote_name}_messages_received_currrent_conn',
-            'Number forwarded messages received by the broadcast websocket system, for the duration of the current connection',
-            registry=self._registry,
+        self.connection = Enum(
+            f'{namespace}_connection',
+            'Websocket broadcast connection established status',
+            ['remote_host'],
+            states=[self.CONNECTION_STATE.DISCONNECTED, self.CONNECTION_STATE.CONNECTED],
+            registry=None,
         )
-        self._connection = Enum(
-            f'awx_{self.remote_name}_connection', 'Websocket broadcast connection', states=['disconnected', 'connected'], registry=self._registry
+        self.connection_start = Gauge(
+            f'{namespace}_connection_start_time_seconds', 'Time the connection was established since unix epoch in seconds', ['remote_host'], registry=None
         )
-        self._connection.state('disconnected')
-        self._connection_start = Gauge(f'awx_{self.remote_name}_connection_start', 'Time the connection was established', registry=self._registry)
+        self.producers = Gauge(
+            f'{namespace}_producers_count',
+            'Number of async workers',
+            ['remote_host'],
+            registry=None,
+        )
 
-        self._messages_received_per_minute = Gauge(
-            f'awx_{self.remote_name}_messages_received_per_minute', 'Messages received per minute', registry=self._registry
-        )
-        self._internal_messages_received_per_minute = FixedSlidingWindow()
+    def record_message_received(self, remote_host):
+        self.messages_received_total.labels(remote_host=remote_host).inc()
 
-    def unregister(self):
-        self._registry.unregister(f'awx_{self.remote_name}_messages_received')
-        self._registry.unregister(f'awx_{self.remote_name}_connection')
+    def record_connection_established(self, remote_host):
+        self.connection.labels(remote_host=remote_host).state(self.CONNECTION_STATE.CONNECTED)
+        self.connection_start.labels(remote_host=remote_host).set_to_current_time()
+
+    def record_connection_lost(self, remote_host):
+        self.connection.labels(remote_host=remote_host).state(self.CONNECTION_STATE.DISCONNECTED)
+
+    def record_producer_start(self, remote_host):
+        self.producers.labels(remote_host=remote_host).inc()
+
+    def record_producer_stop(self, remote_host):
+        self.producers.labels(remote_host=remote_host).dec()
+
+    def init_host(self, remote_host):
+        self.messages_received_total.labels(remote_host=remote_host)
+        self.connection.labels(remote_host=remote_host)
+        self.connection_start.labels(remote_host=remote_host)
+
+
+class MetricsForHost:
+    def __init__(self, metrics: Metrics, remote_host):
+        self._metrics = metrics
+        self._remote_host = remote_host
+
+        self._metrics.init_host(self._remote_host)
 
     def record_message_received(self):
-        self._internal_messages_received_per_minute.record()
-        self._messages_received_current_conn.inc()
-        self._messages_received_total.inc()
+        self._metrics.record_message_received(self._remote_host)
+
+    def record_producer_start(self):
+        self._metrics.record_producer_start(self._remote_host)
+
+    def record_producer_stop(self):
+        self._metrics.record_producer_stop(self._remote_host)
 
     def record_connection_established(self):
-        self._connection.state('connected')
-        self._connection_start.set_to_current_time()
-        self._messages_received_current_conn.set(0)
+        self._metrics.record_connection_established(self._remote_host)
 
     def record_connection_lost(self):
-        self._connection.state('disconnected')
+        self._metrics.record_connection_lost(self._remote_host)
 
-    def get_connection_duration(self):
-        return (datetime.datetime.now() - self._connection_established_ts).total_seconds()
 
-    def render(self):
-        msgs_per_min = self._internal_messages_received_per_minute.render()
-        self._messages_received_per_minute.set(msgs_per_min)
+class MetricsRegistryBridge:
+    """
+    Scope: Prometheus CollectorRegistry, Metrics
+    """
 
-    def serialize(self):
-        self.render()
+    def __init__(self, metrics: Metrics, registry: CollectorRegistry, autoregister=True):
+        self._metrics = metrics
+        self._registry = registry
+        self.registered = False
 
-        registry_data = generate_latest(self._registry).decode('UTF-8')
-        return registry_data
+        if autoregister:
+            self.register_all_metrics()
+            self.registered = True
+
+    def register_all_metrics(self):
+        for metric in [v for k, v in vars(self._metrics).items() if not k.startswith('_')]:
+            self._registry.register(metric)
+
+
+class MetricsManager:
+    def __init__(self, metrics: Metrics):
+        self._metrics = metrics
+
+    def allocate(self, remote_hostname):
+        return MetricsForHost(self._metrics, safe_name(remote_hostname))
+
+    def deallocate(self, remote_hostname):
+        """
+        Intentionally do nothing.
+
+        Keep this function around. The code responsible for calling allocate() should call deallocate().
+        Knowing where deallocation should happen is useful.
+
+        It seems to be a patterns and best practice to _not_ delete metrics.
+        """
+        pass
