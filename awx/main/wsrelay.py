@@ -14,6 +14,7 @@ from channels.layers import get_channel_layer
 from django.conf import settings
 from django.apps import apps
 
+from prometheus_client import CollectorRegistry
 import psycopg
 
 from awx.main.analytics.broadcast_websocket import (
@@ -212,11 +213,12 @@ class WebsocketRelayConnection:
 
 
 class WebSocketRelayManager(object):
-    def __init__(self):
+    def __init__(self, registry: CollectorRegistry):
         self.local_hostname = get_local_host()
         self.relay_connections = dict()
         # hostname -> ip
         self.known_hosts: Dict[str, str] = dict()
+        self._registry = registry
 
     async def on_ws_heartbeat(self, conn):
         await conn.execute("LISTEN web_ws_heartbeat")
@@ -298,7 +300,7 @@ class WebSocketRelayManager(object):
     async def run(self):
         event_loop = asyncio.get_running_loop()
 
-        self.stats_mgr = RelayWebsocketStatsManager(event_loop, self.local_hostname)
+        self.stats_mgr = RelayWebsocketStatsManager(event_loop, self._registry, self.local_hostname)
         self.stats_mgr.start()
 
         # Set up a pg_notify consumer for allowing web nodes to "provision" and "deprovision" themselves gracefully.
