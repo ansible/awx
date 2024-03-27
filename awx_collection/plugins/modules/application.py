@@ -147,8 +147,12 @@ def main():
     if redirect_uris is not None:
         application_fields['redirect_uris'] = ' '.join(redirect_uris)
 
-    # If the state was present and we can let the module build or update the existing application, this will return on its own
-    module.create_or_update_if_needed(application, application_fields, endpoint='applications', item_type='application')
+    response = module.create_or_update_if_needed(application, application_fields, endpoint='applications', item_type='application', auto_exit=False)
+    if 'client_id' in response:
+        module.json_output['client_id'] = response['client_id']
+    if 'client_secret' in response:
+        module.json_output['client_secret'] = response['client_secret']
+    module.exit_json(**module.json_output)
 
 
 if __name__ == '__main__':
