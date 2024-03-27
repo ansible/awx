@@ -6,6 +6,8 @@ from django.conf import settings  # noqa
 from django.db import connection
 from django.db.models.signals import pre_delete  # noqa
 
+# django-ansible-base
+from ansible_base.resource_registry.fields import AnsibleResourceField
 from ansible_base.lib.utils.models import prevent_search
 
 # AWX
@@ -99,6 +101,7 @@ from awx.main.access import get_user_queryset, check_user_access, check_user_acc
 User.add_to_class('get_queryset', get_user_queryset)
 User.add_to_class('can_access', check_user_access)
 User.add_to_class('can_access_with_errors', check_user_access_with_errors)
+User.add_to_class('resource', AnsibleResourceField(primary_key_field="id"))
 
 
 def convert_jsonfields():
