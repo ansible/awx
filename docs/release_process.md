@@ -172,7 +172,7 @@ Note: The Slack message is the same as the Matrix message.
 * Link to PR(s) for larger features
 * `@newsbot` supports [Markdown](https://www.markdownguide.org/cheat-sheet/), so use formatted links, bullet points
 * Release Manager posts into social Matrix Channel
-* Appears in next weeks [Bulhorn](https://forum.ansible.com/c/news/bullhorn/17)
+* Appears in next weeks [Bulhorn](https://forum.ansible.com/c/news/bullhorn)
 
 
 
