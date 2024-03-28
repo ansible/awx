@@ -156,7 +156,7 @@
       "ANSIBLE_PARAMIKO_RECORD_HOST_KEYS": "False",
       "ANSIBLE_VENV_PATH": "/var/lib/awx/venv/ansible",
       "AWX_PRIVATE_DATA_DIR": "/tmp/awx_2_a4b1afiw",
-      "ANSIBLE_COLLECTIONS_PATHS": "/tmp/collections",
+      "ANSIBLE_COLLECTIONS_PATH": "/tmp/collections",
       "PYTHONPATH": "/var/lib/awx/venv/ansible/lib/python2.7/site-packages:/awx_devel/awx/lib:",
       "JOB_ID": "2",
       "INVENTORY_ID": "1",
