@@ -38,6 +38,26 @@
       tags:
         - update_git
       block:
+        - name: Get Azure access token
+          when: "lookup('ansible.builtin.env', 'AZURE_CLIENT_ID') != ''"
+          register: azure_token
+          no_log: True
+          check_mode: false
+          azure.azcollection.azure_rm_accesstoken_info:
+            scopes:
+              # This is the audience for Azure DevOps, as per
+              # https://learn.microsoft.com/en-us/rest/api/azure/devops/tokens/
+              - 499b84ac-1321-427f-aa17-267ca6975798/.default
+
+        - name: Define git environment variables
+          when: "azure_token is not skipped"
+          no_log: True
+          ansible.builtin.set_fact:
+            git_environment:
+              GIT_CONFIG_COUNT: 1
+              GIT_CONFIG_KEY_0: http.extraHeader
+              GIT_CONFIG_VALUE_0: "Authorization: Bearer {{ azure_token.access_token }}"
+
         - name: Update project using git
           ansible.builtin.git:
             dest: "{{ project_path | quote }}"
@@ -47,6 +67,7 @@
             force: "{{ scm_clean }}"
             track_submodules: "{{ scm_track_submodules | default(omit) }}"
             accept_hostkey: "{{ scm_accept_hostkey | default(omit) }}"
+          environment: "{{ git_environment | default({}) }}"
           register: git_result
 
         - name: Set the git repository version
