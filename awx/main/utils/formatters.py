@@ -3,7 +3,6 @@
 
 from copy import copy
 import json
-import json_log_formatter
 import logging
 import traceback
 import socket
@@ -13,15 +12,6 @@ from dateutil.tz import tzutc
 from django.utils.timezone import now
 from django.core.serializers.json import DjangoJSONEncoder
 from django.conf import settings
-
-
-class JobLifeCycleFormatter(json_log_formatter.JSONFormatter):
-    def json_record(self, message: str, extra: dict, record: logging.LogRecord):
-        if 'time' not in extra:
-            extra['time'] = now()
-        if record.exc_info:
-            extra['exc_info'] = self.formatException(record.exc_info)
-        return extra
 
 
 class TimeFormatter(logging.Formatter):
