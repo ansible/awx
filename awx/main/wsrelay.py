@@ -310,6 +310,9 @@ class WebSocketRelayManager(object):
         for k, v in settings.LISTENER_DATABASES.get('default', {}).get('OPTIONS', {}).items():
             database_conf['OPTIONS'][k] = v
 
+        if 'PASSWORD' in database_conf:
+            database_conf['OPTIONS']['password'] = database_conf.pop('PASSWORD')
+
         task = None
 
         # Establishes a websocket connection to /websocket/relay on all API servers
@@ -320,7 +323,6 @@ class WebSocketRelayManager(object):
                         dbname=database_conf['NAME'],
                         host=database_conf['HOST'],
                         user=database_conf['USER'],
-                        password=database_conf['PASSWORD'],
                         port=database_conf['PORT'],
                         **database_conf.get("OPTIONS", {}),
                     )
