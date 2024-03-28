@@ -1,7 +1,8 @@
 adal==1.2.7
     # via msrestazure
 aiohttp==3.9.3
-    # via -r /awx_devel/requirements/requirements.in
+    # via
+    #   -r /awx_devel/requirements/requirements.in
     #   aiohttp-retry
     #   twilio
 aiohttp-retry==2.8.3
@@ -138,6 +139,7 @@ django==4.2.6
     #   django-polymorphic
     #   django-solo
     #   djangorestframework
+    #   insights-analytics-collector
     #   social-auth-app-django
     # via -r /awx_devel/requirements/requirements_git.txt
 django-auth-ldap==4.6.0
@@ -213,6 +215,8 @@ inflect==7.0.0
     # via jaraco-text
 inflection==0.5.1
     # via django-ansible-base
+insights-analytics-collector==0.3.2
+    # via -r /awx_devel/requirements/requirements.in
 irc==20.3.1
     # via -r /awx_devel/requirements/requirements.in
 isodate==0.6.1
@@ -281,7 +285,7 @@ msal-extensions==1.1.0
 msgpack==1.0.5
     # via
     #   -r /awx_devel/requirements/requirements.in
-    #    channels-redis
+    #   channels-redis
 msrest==0.7.1
     # via msrestazure
 msrestazure==0.6.4
@@ -340,9 +344,7 @@ pycparser==2.21
 pydantic==2.5.0
     # via inflect
 pydantic-core==2.14.1
-    # via
-    #   -r /awx_devel/requirements/requirements.in
-    #   pydantic
+    # via pydantic
 pygerduty==0.38.3
     # via -r /awx_devel/requirements/requirements.in
 pyjwt[crypto]==2.8.0
@@ -412,6 +414,7 @@ requests==2.31.0
     #   azure-core
     #   django-ansible-base
     #   django-oauth-toolkit
+    #   insights-analytics-collector
     #   kubernetes
     #   msal
     #   msrest

@@ -23,7 +23,7 @@ import requests
 from awx import MODE
 from awx.api.generics import APIView
 from awx.conf.registry import settings_registry
-from awx.main.analytics import all_collectors
+from awx.main.analytics import AnalyticsCollector
 from awx.main.ha import is_ha_environment
 from awx.main.utils import get_awx_version, get_custom_venv_choices
 from awx.main.utils.licensing import validate_entitlement_manifest
@@ -289,7 +289,7 @@ class ApiV2ConfigView(APIView):
             version=get_awx_version(),
             eula=render_to_string("eula.md") if license_data.get('license_type', 'UNLICENSED') != 'open' else '',
             analytics_status=pendo_state,
-            analytics_collectors=all_collectors(),
+            analytics_collectors=AnalyticsCollector.registered_collectors(),
             become_methods=PRIVILEGE_ESCALATION_METHODS,
             ui_next=ui_next_state,
         )

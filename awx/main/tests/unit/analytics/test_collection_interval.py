@@ -3,7 +3,7 @@ import pytest
 
 from django.utils.timezone import now, timedelta
 
-from awx.main.analytics.core import calculate_collection_interval
+from awx.main.analytics import AnalyticsCollector
 
 # This is some bullshit.
 logger = logging.getLogger('awx.main.analytics')
@@ -12,7 +12,15 @@ logger.propagate = True
 epsilon = timedelta(minutes=1)
 
 
-class TestIntervalWithSinceAndUntil:
+class TestCollectionInterval:
+    @staticmethod
+    def _calculate_collection_interval(since, until):
+        collector = AnalyticsCollector()
+        collector._calculate_collection_interval(since, until)
+        return collector.gather_since, collector.gather_until, collector.last_gather
+
+
+class TestIntervalWithSinceAndUntil(TestCollectionInterval):
     @pytest.mark.parametrize('gather', [None, 2, 6])
     def test_ok(self, caplog, settings, gather):
         _now = now()
@@ -21,7 +29,7 @@ class TestIntervalWithSinceAndUntil:
         since = until - timedelta(weeks=3)
         settings.AUTOMATION_ANALYTICS_LAST_GATHER = _prior
 
-        new_since, new_until, last_gather = calculate_collection_interval(since, until)
+        new_since, new_until, last_gather = self._calculate_collection_interval(since, until)
         assert new_since == since
         assert new_until == until
 
@@ -39,7 +47,7 @@ class TestIntervalWithSinceAndUntil:
         until = since + timedelta(weeks=1)
 
         with pytest.raises(ValueError):
-            calculate_collection_interval(since, until)
+            self._calculate_collection_interval(since, until)
 
         # log message each for `since` and `until` getting chopped, then another for the empty interval
         assert len(caplog.records) == 3
@@ -51,7 +59,7 @@ class TestIntervalWithSinceAndUntil:
         since = _now - timedelta(weeks=1)
         until = _now + timedelta(weeks=1)
 
-        new_since, new_until, _ = calculate_collection_interval(since, until)
+        new_since, new_until, _ = self._calculate_collection_interval(since, until)
         assert new_since == since
         assert abs(_now - new_until) < epsilon  # `until` gets truncated to now()
 
@@ -63,7 +71,7 @@ class TestIntervalWithSinceAndUntil:
         until = now()
         since = until - timedelta(weeks=5)
 
-        new_since, new_until, _ = calculate_collection_interval(since, until)
+        new_since, new_until, _ = self._calculate_collection_interval(since, until)
         # interval is 4 weeks counting forward from explicit `since`
         assert new_since == since
         assert new_until == since + timedelta(weeks=4)
@@ -77,14 +85,14 @@ class TestIntervalWithSinceAndUntil:
         until = since - timedelta(weeks=3)
 
         with pytest.raises(ValueError):
-            calculate_collection_interval(since, until)
+            self._calculate_collection_interval(since, until)
 
         # log message for the empty interval
         assert len(caplog.records) == 1
         assert sum(1 for msg in caplog.messages if "later than the end" in msg) == 1
 
 
-class TestIntervalWithSinceOnly:
+class TestIntervalWithSinceOnly(TestCollectionInterval):
     @pytest.mark.parametrize('gather', [None, 2, 6])
     def test_ok(self, caplog, settings, gather):
         _now = now()
@@ -93,7 +101,7 @@ class TestIntervalWithSinceOnly:
         until = None  # until is going to wind up being effectively now.
         settings.AUTOMATION_ANALYTICS_LAST_GATHER = _prior
 
-        new_since, new_until, last_gather = calculate_collection_interval(since, until)
+        new_since, new_until, last_gather = self._calculate_collection_interval(since, until)
         # `since` is only 2 weeks back, so now() is within the 4-week cutoff and can be used for `until`
         assert new_since == since
         assert abs(new_until - _now) < epsilon
@@ -111,7 +119,7 @@ class TestIntervalWithSinceOnly:
         since = now() - timedelta(weeks=5)
         until = None  # until is going to wind up being effectively now.
 
-        new_since, new_until, last_gather = calculate_collection_interval(since, until)
+        new_since, new_until, last_gather = self._calculate_collection_interval(since, until)
         # interval is 4 weeks counting forward from explicit `since`
         assert new_since == since
         assert new_until == since + timedelta(weeks=4)
@@ -124,7 +132,7 @@ class TestIntervalWithSinceOnly:
         until = None
 
         with pytest.raises(ValueError):
-            calculate_collection_interval(since, until)
+            self._calculate_collection_interval(since, until)
 
         # log message for `since` getting chopped, and another for the empty interval
         assert len(caplog.records) == 2
@@ -132,7 +140,7 @@ class TestIntervalWithSinceOnly:
         assert sum(1 for msg in caplog.messages if "later than the end" in msg) == 1
 
 
-class TestIntervalWithUntilOnly:
+class TestIntervalWithUntilOnly(TestCollectionInterval):
     @pytest.mark.parametrize('gather', [None, 2, 6])
     def test_ok(self, caplog, settings, gather):
         _now = now()
@@ -141,7 +149,7 @@ class TestIntervalWithUntilOnly:
         until = _now - timedelta(weeks=1)
         settings.AUTOMATION_ANALYTICS_LAST_GATHER = _prior
 
-        new_since, new_until, last_gather = calculate_collection_interval(since, until)
+        new_since, new_until, last_gather = self._calculate_collection_interval(since, until)
         assert new_since is None  # this allows LAST_ENTRIES[key] to be the fallback
         assert new_until == until
 
@@ -160,7 +168,7 @@ class TestIntervalWithUntilOnly:
         since = None
         until = _now + timedelta(weeks=1)
 
-        new_since, new_until, _ = calculate_collection_interval(since, until)
+        new_since, new_until, _ = self._calculate_collection_interval(since, until)
         assert new_since is None  # this allows LAST_ENTRIES[key] to be the fallback
         assert abs(new_until - _now) < epsilon  # `until` gets truncated to now()
 
@@ -169,7 +177,7 @@ class TestIntervalWithUntilOnly:
         assert sum(1 for msg in caplog.messages if "is in the future" in msg) == 1
 
 
-class TestIntervalWithNoParams:
+class TestIntervalWithNoParams(TestCollectionInterval):
     @pytest.mark.parametrize('gather', [None, 2, 6])
     def test_ok(self, caplog, settings, gather):
         _now = now()
@@ -177,7 +185,7 @@ class TestIntervalWithNoParams:
         since, until = None, None
         settings.AUTOMATION_ANALYTICS_LAST_GATHER = _prior
 
-        new_since, new_until, last_gather = calculate_collection_interval(since, until)
+        new_since, new_until, last_gather = self._calculate_collection_interval(since, until)
         assert new_since is None  # this allows LAST_ENTRIES[key] to be the fallback
         assert abs(new_until - _now) < epsilon  # `until` defaults to now()
 
