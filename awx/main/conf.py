@@ -2,6 +2,7 @@
 import logging
 
 # Django
+from django.core.checks import Error
 from django.utils.translation import gettext_lazy as _
 
 # Django REST Framework
@@ -960,11 +961,18 @@ def csrf_trusted_origins_validate(serializer, attrs):
         return attrs
     errors = []
     for origin in attrs['CSRF_TRUSTED_ORIGINS']:
-        scheme = origin.split(':')[0]
-        if not scheme.startswith(('https', 'http')):
-            errors.append(f'Invalid scheme for Origin "{origin}". Must start with "https://" or "http://".')
+        if "://" not in origin:
+            errors.append(
+                Error(
+                    "As of Django 4.0, the values in the CSRF_TRUSTED_ORIGINS "
+                    "setting must start with a scheme (usually http:// or "
+                    "https://) but found %s. See the release notes for details."
+                    % origin,
+                )
+            )
     if errors:
-        raise serializers.ValidationError(_('\n'.join(errors)))
+        error_messages = [error.msg for error in errors]
+        raise serializers.ValidationError(_('\n'.join(error_messages)))
     return attrs
 
 register_validate('system', csrf_trusted_origins_validate)
