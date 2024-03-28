@@ -62,6 +62,7 @@ DEPENDENT_NONEXPORT = [
     ('Group', 'potential_children'),
     ('Host', 'all_groups'),
     ('WorkflowJobTemplateNode', 'create_approval_template'),
+    ('Credential', 'CredentialInputSource'),
 ]
 
 
