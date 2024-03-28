@@ -4,10 +4,12 @@ import logging
 import asyncio
 import datetime
 import re
+from prometheus_client import CollectorRegistry
 import redis
 import time
 from datetime import datetime as dt
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
@@ -16,7 +18,7 @@ from awx.main.analytics.broadcast_websocket import (
     RelayWebsocketStatsManager,
     safe_name,
 )
-from awx.main.analytics.subsystem_metrics import WebsocketsMetricsServer
+from awx.main.analytics.subsystem_metrics import MetricsServer
 from awx.main.wsrelay import WebSocketRelayManager
 
 
@@ -164,8 +166,9 @@ class Command(BaseCommand):
 
             return
 
-        WebsocketsMetricsServer().start()
-        websocket_relay_manager = WebSocketRelayManager()
+        registry = CollectorRegistry()
+        MetricsServer(settings.METRICS_SERVICE_WEBSOCKET_RELAY, registry).start()
+        websocket_relay_manager = WebSocketRelayManager(registry)
 
         while True:
             try:

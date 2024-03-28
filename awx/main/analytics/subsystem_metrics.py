@@ -461,10 +461,3 @@ class DispatcherMetricsServer(MetricsServer):
         registry = CollectorRegistry(auto_describe=True)
         registry.register(CustomToPrometheusMetricsCollector(CallbackReceiverMetrics(metrics_have_changed=False)))
         super().__init__(settings.METRICS_SERVICE_DISPATCHER, registry)
-
-
-class WebsocketsMetricsServer(MetricsServer):
-    def __init__(self):
-        registry = CollectorRegistry(auto_describe=True)
-        # registry.register()
-        super().__init__(settings.METRICS_SERVICE_WEBSOCKETS, registry)

@@ -1100,7 +1100,7 @@ HOST_METRIC_SUMMARY_TASK_INTERVAL = 7  # days
 
 METRICS_SERVICE_CALLBACK_RECEIVER = 'callback_receiver'
 METRICS_SERVICE_DISPATCHER = 'dispatcher'
-METRICS_SERVICE_WEBSOCKETS = 'websockets'
+METRICS_SERVICE_WEBSOCKET_RELAY = 'websocket_relay'
 
 METRICS_SUBSYSTEM_CONFIG = {
     'server': {
@@ -1110,7 +1110,7 @@ METRICS_SUBSYSTEM_CONFIG = {
         METRICS_SERVICE_DISPATCHER: {
             'port': 8015,
         },
-        METRICS_SERVICE_WEBSOCKETS: {
+        METRICS_SERVICE_WEBSOCKET_RELAY: {
             'port': 8016,
         },
     }
