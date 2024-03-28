@@ -2,6 +2,7 @@ import json
 import logging
 import asyncio
 from typing import Dict
+from copy import deepcopy
 
 import ipaddress
 
@@ -302,8 +303,8 @@ class WebSocketRelayManager(object):
         self.stats_mgr.start()
 
         # Set up a pg_notify consumer for allowing web nodes to "provision" and "deprovision" themselves gracefully.
-        database_conf = settings.DATABASES['default'].copy()
-        database_conf['OPTIONS'] = database_conf.get('OPTIONS', {}).copy()
+        database_conf = deepcopy(settings.DATABASES['default'])
+        database_conf['OPTIONS'] = deepcopy(database_conf.get('OPTIONS', {}))
 
         for k, v in settings.LISTENER_DATABASES.get('default', {}).items():
             database_conf[k] = v
