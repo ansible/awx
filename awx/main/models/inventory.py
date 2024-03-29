@@ -933,6 +933,8 @@ class InventorySourceOptions(BaseModel):
         ('controller', _('Red Hat Ansible Automation Platform')),
         ('insights', _('Red Hat Insights')),
         ('terraform', _('Terraform State')),
+        ('openshift_virtualization', _('OpenShift Virtualization')),
+
     ]
 
     # From the options of the Django management base command
@@ -1690,6 +1692,16 @@ class insights(PluginFileInjector):
     collection = 'insights'
     downstream_namespace = 'redhat'
     downstream_collection = 'insights'
+    use_fqcn = True
+
+
+class openshift_virtualization(PluginFileInjector):
+    plugin_name = 'openshift_virtualization'
+    base_injector = 'template'
+    namespace = 'kubevirt'
+    collection = 'core'
+    downstream_namespace = 'redhat'
+    downstream_collection = 'openshift_virtualization'
     use_fqcn = True
 
 
