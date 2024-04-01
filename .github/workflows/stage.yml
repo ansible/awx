@@ -49,13 +49,11 @@ jobs:
         with:
           path: awx
 
-      - name: Get python version from Makefile
-        run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
-
-      - name: Install python ${{ env.py_version }}
-        uses: actions/setup-python@v4
+      - name: Checkout awx-operator
+        uses: actions/checkout@v3
         with:
-          python-version: ${{ env.py_version }}
+          repository: ${{ github.repository_owner }}/awx-operator
+          path: awx-operator
 
       - name: Checkout awx-logos
         uses: actions/checkout@v3
@@ -63,28 +61,18 @@ jobs:
           repository: ansible/awx-logos
           path: awx-logos
 
-      - name: Checkout awx-operator
-        uses: actions/checkout@v3
+      - name: Get python version from Makefile
+        working-directory: awx
+        run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
+
+      - name: Install python ${{ env.py_version }}
+        uses: actions/setup-python@v4
         with:
-          repository: ${{ github.repository_owner }}/awx-operator
-          path: awx-operator
+          python-version: ${{ env.py_version }}
 
       - name: Install playbook dependencies
         run: |
           python3 -m pip install docker
-
-      - name: Build and stage AWX
-        working-directory: awx
-        run: |
-          ansible-playbook -v tools/ansible/build.yml \
-            -e registry=ghcr.io \
-            -e registry_username=${{ github.actor }} \
-            -e registry_password=${{ secrets.GITHUB_TOKEN }} \
-            -e awx_image=${{ github.repository }} \
-            -e awx_version=${{ github.event.inputs.version }} \
-            -e ansible_python_interpreter=$(which python3) \
-            -e push=yes \
-            -e awx_official=yes
 
       - name: Log into registry ghcr.io
         uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d    # v3.0.0
@@ -99,6 +87,30 @@ jobs:
           registry: quay.io
           username: ${{ secrets.QUAY_USER }}
           password: ${{ secrets.QUAY_TOKEN }}
+
+      - name: Copy logos for inclusion in sdist for official build
+        working-directory: awx
+        run: |
+          cp ../awx-logos/awx-logos/* awx/ui/public/static/media/
+
+      - name: Prebuild UI for awx image (to speed up build process)
+        working-directory: awx
+        run: |
+          sudo apt-get install gettext
+          make ui-release
+          make ui-next
+
+      - name: Build and stage AWX
+        working-directory: awx
+        env:
+          DOCKER_BUILDX_PUSH: true
+          HEADLESS: false
+          PLATFORMS: linux/amd64,linux/arm64
+          DEV_DOCKER_TAG_BASE: ghcr.io/${{ github.repository }}
+          COMPOSE_TAG: ${{ github.event.inputs.version }}
+          VERSION: ${{ github.event.inputs.version }}
+        run: |
+          make awx-kube-buildx
 
       - name: tag awx-ee:latest with version input
         run: |
