@@ -2780,7 +2780,10 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 if action in reversed_role_map:
                     role_names.add(reversed_role_map[action])
                 elif codename in reversed_org_map:
-                    role_names.add(codename)
+                    if isinstance(obj, Organization):
+                        role_names.add(reversed_org_map[codename])
+                        if 'view_organization' not in role_names:
+                            role_names.add('read_role')
             return list(role_names)
 
         def format_role_perm(role):
@@ -2799,10 +2802,10 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 # Singleton roles should not be managed from this view, as per copy/edit rework spec
                 role_dict['user_capabilities'] = {'unattach': False}
 
-            if role.singleton_name:
-                descendant_perms = list(Permission.objects.filter(content_type=content_type).values_list('codename', flat=True))
+            model_name = content_type.model
+            if isinstance(obj, Organization):
+                descendant_perms = [codename for codename in get_role_codenames(role) if codename.endswith(model_name) or codename.startswith('add_')]
             else:
-                model_name = content_type.model
                 descendant_perms = [codename for codename in get_role_codenames(role) if codename.endswith(model_name)]
 
             return {'role': role_dict, 'descendant_roles': get_roles_from_perms(descendant_perms)}
@@ -2866,6 +2869,35 @@ class ResourceAccessListElementSerializer(UserSerializer):
                     all_team_roles.add(old_role)
                 else:
                     ret['summary_fields']['indirect_access'].append(format_role_perm(old_role))
+
+            # In DAB RBAC, superuser is strictly a user flag, and global roles are not in the RoleEvaluation table
+            if user.is_superuser:
+                ret['summary_fields'].setdefault('indirect_access', [])
+                all_role_names = [field.name for field in obj._meta.get_fields() if isinstance(field, ImplicitRoleField)]
+                ret['summary_fields']['indirect_access'].append(
+                    {
+                        "role": {
+                            "id": None,
+                            "name": _("System Administrator"),
+                            "description": _("Can manage all aspects of the system"),
+                            "user_capabilities": {"unattach": False},
+                        },
+                        "descendant_roles": all_role_names,
+                    }
+                )
+            elif user.is_system_auditor:
+                ret['summary_fields'].setdefault('indirect_access', [])
+                ret['summary_fields']['indirect_access'].append(
+                    {
+                        "role": {
+                            "id": None,
+                            "name": _("System Auditor"),
+                            "description": _("Can view all aspects of the system"),
+                            "user_capabilities": {"unattach": False},
+                        },
+                        "descendant_roles": ["read_role"],
+                    }
+                )
 
             ret['summary_fields']['direct_access'].extend(
                 [y for x in (format_team_role_perm(r, direct_permissive_role_ids) for r in all_team_roles) for y in x]
