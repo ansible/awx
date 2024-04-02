@@ -1,6 +1,7 @@
 import pytest
 
 from awx.api.versioning import reverse
+from awx.main.models import Role
 
 
 @pytest.mark.django_db
@@ -38,7 +39,7 @@ def test_indirect_access_list(get, organization, project, team_factory, user, ad
     assert len(team_admin_res['summary_fields']['direct_access']) == 1
     assert len(team_admin_res['summary_fields']['indirect_access']) == 0
     assert len(admin_res['summary_fields']['direct_access']) == 0
-    assert len(admin_res['summary_fields']['indirect_access']) == 0  # decreased to 0 because system admin role no longer exists
+    assert len(admin_res['summary_fields']['indirect_access']) == 1
 
     project_admin_entry = project_admin_res['summary_fields']['direct_access'][0]['role']
     assert project_admin_entry['id'] == project.admin_role.id
@@ -51,3 +52,6 @@ def test_indirect_access_list(get, organization, project, team_factory, user, ad
     assert project_admin_team_member_entry['id'] == project.admin_role.id
     assert project_admin_team_member_entry['team_id'] == project_admin_team.id
     assert project_admin_team_member_entry['team_name'] == project_admin_team.name
+
+    admin_entry = admin_res['summary_fields']['indirect_access'][0]['role']
+    assert admin_entry['name'] == Role.singleton('system_administrator').name
