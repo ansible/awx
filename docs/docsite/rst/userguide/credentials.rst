@@ -676,6 +676,8 @@ The Terraform credential requires the **Backend configuration** attribute which 
 .. |Credentials - create terraform credential| image:: ../common/images/credentials-create-terraform-credential.png
     :alt: Credentials - create Terraform backend configuration credential form
 
+Saving it stores the file path to the backend configuration in an environment variable ``TF_BACKEND_CONFIG_FILE`` that is made available to any job with the credential attached.
+
 
 Thycotic DevOps Secrets Vault
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

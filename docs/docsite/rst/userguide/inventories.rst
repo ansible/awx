@@ -1106,34 +1106,18 @@ This inventory source uses the `terraform_state <https://github.com/ansible-coll
 
 4. Use the **Source Variables** field to override variables used by the ``controller`` inventory plugin. Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two. For more information on these variables, see the `terraform_state <https://github.com/ansible-collections/cloud.terraform/blob/main/plugins/inventory/terraform_state.py>`_ file for detail.
 
-  The ``backend_type`` variable is required by the Terraform state inventory plugin. This should match the remote backend configured in the Terraform backend credential, here is an example for an s3 backend:
+  The ``backend_type`` variable is required by the Terraform state inventory plugin. This should match the remote backend configured in the Terraform backend credential, here is an example for an Amazon S3 backend:
 
   ::
 
     ---
     backend_type: s3
 
-5. Enter an |ee| in the **Execution Environment** field that contains a Terraform binary. This is required for the inventory plugin to run the Terraform commands that read inventory data from the Terraform state file.
+5. Enter an |ee| in the **Execution Environment** field that contains a Terraform binary. This is required for the inventory plugin to run the Terraform commands that read inventory data from the Terraform state file. Refer to the `Terraform EE readme <https://github.com/ansible-cloud/terraform_ee>`_ that contains an example |ee| with a Terraform binary.
 
   .. image:: ../common/images/inventories-create-source-terraform-example.png
-      :width: 1400px
 
-6. To add hosts for AWS EC2, GCE, and Azure instances:
-
-  a. Create a project.
-  b. Create a job template using the above project, select an AWS, GCE or s3 credential, and a specify a playbook to run. For example:
-
-  .. image:: ../common/images/job-template-terraform-inv-source-example.png
-
-  c. Create a workflow job template with the above job template and previously configured inventory with the Terraform source. For example:
-
-  .. image:: ../common/images/inventories-wfjt-with-terraform-example.png
-
-  d. Launch the workflow job template.
-
-  Inventory hosts are updated accordingly:
-
-  .. image:: ../common/images/inventories-with-terraform-hosts.png
+6. To add hosts for AWS EC2, GCE, and Azure instances, the Terraform state file in the backend must contain state for resources already deployed to EC2, GCE, or Azure. Refer to each of the Terraform providers' respective documentation to provision instances.
 
 
 .. _ug_customscripts:
