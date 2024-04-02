@@ -2913,9 +2913,6 @@ class ResourceAccessListElementSerializer(UserSerializer):
                     }
                 )
 
-            ret['summary_fields']['direct_access'].extend(
-                [y for x in (format_team_role_perm(r, direct_permissive_role_ids) for r in all_team_roles) for y in x]
-            )
             ret['summary_fields']['direct_access'].extend([y for x in (format_team_role_perm(r, all_permissive_role_ids) for r in all_team_roles) for y in x])
 
             return ret
