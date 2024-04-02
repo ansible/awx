@@ -2,7 +2,7 @@
 
 PYTHON := $(notdir $(shell for i in python3.11 python3; do command -v $$i; done|sed 1q))
 SHELL := bash
-DOCKER_COMPOSE ?= docker-compose
+DOCKER_COMPOSE ?= docker compose
 OFFICIAL ?= no
 NODE ?= node
 NPM_BIN ?= npm
