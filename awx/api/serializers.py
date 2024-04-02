@@ -45,7 +45,8 @@ from polymorphic.models import PolymorphicModel
 
 # django-ansible-base
 from ansible_base.lib.utils.models import get_type_for_model
-from ansible_base.rbac.models import RoleEvaluation
+from ansible_base.rbac.models import RoleEvaluation, ObjectRole
+from ansible_base.rbac import permission_registry
 
 # AWX
 from awx.main.access import get_user_capabilities
@@ -2855,7 +2856,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
             new_roles_seen = set()
             all_team_roles = set()
             all_permissive_role_ids = set()
-            for evaluation in RoleEvaluation.objects.filter(role__users=user, **gfk_kwargs).prefetch_related('role'):
+            for evaluation in RoleEvaluation.objects.filter(role__in=user.has_roles.all(), **gfk_kwargs).prefetch_related('role'):
                 new_role = evaluation.role
                 if new_role.id in new_roles_seen:
                     continue
@@ -2869,6 +2870,19 @@ class ResourceAccessListElementSerializer(UserSerializer):
                     all_team_roles.add(old_role)
                 else:
                     ret['summary_fields']['indirect_access'].append(format_role_perm(old_role))
+
+            # Lazy role creation gives us a big problem, where some intermediate roles are not easy to find
+            # like when a team has indirect permission, so here we get all roles the users teams have
+            # these contribute to all potential permission-granting roles of the object
+            user_teams_qs = permission_registry.team_model.objects.filter(member_roles__in=ObjectRole.objects.filter(users=user))
+            team_obj_roles = ObjectRole.objects.filter(teams__in=user_teams_qs)
+            for evaluation in RoleEvaluation.objects.filter(role__in=team_obj_roles, **gfk_kwargs).prefetch_related('role'):
+                new_role = evaluation.role
+                if new_role.id in new_roles_seen:
+                    continue
+                new_roles_seen.add(new_role.id)
+                old_role = get_role_from_object_role(new_role)
+                all_permissive_role_ids.add(old_role.id)
 
             # In DAB RBAC, superuser is strictly a user flag, and global roles are not in the RoleEvaluation table
             if user.is_superuser:
