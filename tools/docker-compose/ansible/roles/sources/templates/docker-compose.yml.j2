@@ -2,6 +2,22 @@
 ---
 version: '2.1'
 services:
+{% if editable_dependencies | length > 0 %}
+  init_awx:
+    image: "{{ awx_image }}:{{ awx_image_tag }}"
+    container_name: tools_init_awx
+    command: /awx_devel/tools/docker-compose/editable_dependencies/install.sh
+    user: root
+    working_dir: "/"
+    environment:
+      RUN_MIGRATIONS: 1
+    volumes:
+      - "../../../:/awx_devel"
+{% for editable_dependency in editable_dependencies %}
+      - "{{ editable_dependency }}:/editable_dependencies/{{ editable_dependency | basename }}"
+{% endfor %}
+      - "var_lib_awx:/var/lib/awx"
+{% endif %}
 {% for i in range(control_plane_node_count|int) %}
   {% set container_postfix = loop.index %}
   {% set awx_sdb_port_start = 7899 + (loop.index0*1000) | int %}
@@ -39,6 +55,12 @@ services:
       - service-mesh
     working_dir: "/awx_devel"
     volumes:
+{% if editable_dependencies | length > 0 %}
+      - "var_lib_awx:/var/lib/awx"
+{% for editable_dependency in editable_dependencies %}
+      - "{{ editable_dependency }}:/editable_dependencies/{{ editable_dependency | basename }}"
+{% endfor %}
+{% endif %}
       - "../../../:/awx_devel"
       - "../../docker-compose/supervisor.conf:/etc/supervisord.conf"
       - "../../docker-compose/_sources/database.py:/etc/tower/conf.d/database.py"
@@ -58,6 +80,11 @@ services:
       - "~/.kube/config:/var/lib/awx/.kube/config"
       - "redis_socket_{{ container_postfix }}:/var/run/redis/:rw"
     privileged: true
+{% if editable_dependencies | length > 0 %}
+    depends_on:
+      init_awx:
+        condition: service_completed_successfully
+{% endif %}
     tty: true
     ports:
       - "{{ awx_sdb_port_start }}-{{ awx_sdb_port_end }}:{{ awx_sdb_port_start }}-{{ awx_sdb_port_end }}"  # sdb-listen
@@ -304,6 +331,10 @@ services:
 {% endif %}
 
 volumes:
+{% if editable_dependencies | length > 0 %}
+  var_lib_awx:
+    name: tools_var_lib_awx
+{% endif %}
 {# For the postgres 15 db upgrade we changed the mount name because 15 can't load a 12 DB #}
   awx_db_15:
     name: tools_awx_db_15
@@ -329,6 +360,7 @@ volumes:
   grafana_storage:
     name: tools_grafana_storage
 {% endif %}
+
 networks:
   awx:
   service-mesh:

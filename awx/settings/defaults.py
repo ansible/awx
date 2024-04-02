@@ -1126,3 +1126,11 @@ from ansible_base.lib import dynamic_config  # noqa: E402
 
 settings_file = os.path.join(os.path.dirname(dynamic_config.__file__), 'dynamic_settings.py')
 include(settings_file)
+
+# Add a postfix to the API URL patterns
+# example if set to '' API pattern will be /api
+# example if set to 'controller' API pattern will be /api AND /api/controller
+OPTIONAL_API_URLPATTERN_PREFIX = ''
+
+# Use AWX base view, to give 401 on unauthenticated requests
+ANSIBLE_BASE_CUSTOM_VIEW_PARENT = 'awx.api.generics.APIView'

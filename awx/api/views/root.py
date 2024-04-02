@@ -13,6 +13,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
+from django.urls import reverse as django_reverse
 
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -130,6 +131,7 @@ class ApiVersionRootView(APIView):
         data['mesh_visualizer'] = reverse('api:mesh_visualizer_view', request=request)
         data['bulk'] = reverse('api:bulk', request=request)
         data['analytics'] = reverse('api:analytics_root_view', request=request)
+        data['service_index'] = django_reverse('service-index-root')
         return Response(data)
 
 

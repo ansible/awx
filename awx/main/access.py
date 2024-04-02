@@ -639,7 +639,10 @@ class UserAccess(BaseAccess):
     """
 
     model = User
-    prefetch_related = ('profile',)
+    prefetch_related = (
+        'profile',
+        'resource',
+    )
 
     def filtered_queryset(self):
         if settings.ORG_ADMINS_CAN_SEE_ALL_USERS and (self.user.admin_of_organizations.exists() or self.user.auditor_of_organizations.exists()):
@@ -835,6 +838,7 @@ class OrganizationAccess(NotificationAttachMixin, BaseAccess):
     prefetch_related = (
         'created_by',
         'modified_by',
+        'resource',  # dab_resource_registry
     )
     # organization admin_role is not a parent of organization auditor_role
     notification_attach_roles = ['admin_role', 'auditor_role']
@@ -1303,6 +1307,7 @@ class TeamAccess(BaseAccess):
         'created_by',
         'modified_by',
         'organization',
+        'resource',  # dab_resource_registry
     )
 
     def filtered_queryset(self):

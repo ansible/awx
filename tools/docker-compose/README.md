@@ -354,7 +354,7 @@ We are now ready to run two one time commands to build and pre-populate the Keyc
 
 The first one time command will be creating a Keycloak database in your postgres database by running:
 ```bash
-docker exec tools_postgres_1 /usr/bin/psql -U awx --command "create database keycloak with encoding 'UTF8';"
+docker exec tools_postgres_1 /usr/bin/psql -U postgres --command 'CREATE DATABASE keycloak WITH OWNER=awx encoding "UTF8";'
 ```
 
 After running this command the following message should appear and you should be returned to your prompt:
@@ -365,7 +365,7 @@ CREATE DATABASE
 The second one time command will be to start a Keycloak container to build our admin user; be sure to set pg_username and pg_password to work for you installation. Note: the command below set the username as admin with a password of admin, you can change this if you want. Also, if you are using your own container or have changed the pg_username please update the command accordingly.
 ```bash
 PG_PASSWORD=`cat tools/docker-compose/_sources/secrets/pg_password.yml  | cut -f 2 -d \'`
-docker run --rm -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=admin --net=_sources_default \
+docker run --rm -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=admin --net=sources_awx \
            -e DB_VENDOR=postgres -e DB_ADDR=postgres -e DB_DATABASE=keycloak -e DB_USER=awx -e DB_PASSWORD=${PG_PASSWORD} \
            quay.io/keycloak/keycloak:15.0.2
 ```
