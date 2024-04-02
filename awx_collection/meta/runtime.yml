@@ -35,6 +35,9 @@ action_groups:
     - project
     - project_update
     - role
+    - role_definition
+    - role_team_assignment
+    - role_user_assignment
     - schedule
     - settings
     - subscriptions
