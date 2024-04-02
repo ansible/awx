@@ -44,6 +44,12 @@ jobs:
 
           exit 0
 
+      - name: Set lower case owner name
+        shell: bash
+        run: echo "OWNER_LC=${OWNER,,}" >> $GITHUB_ENV
+        env:
+          OWNER: '${{ github.repository_owner }}'
+
       - name: Checkout awx
         uses: actions/checkout@v3
         with:
@@ -81,13 +87,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Log into registry quay.io
-        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d    # v3.0.0
-        with:
-          registry: quay.io
-          username: ${{ secrets.QUAY_USER }}
-          password: ${{ secrets.QUAY_TOKEN }}
-
       - name: Copy logos for inclusion in sdist for official build
         working-directory: awx
         run: |
@@ -116,14 +115,14 @@ jobs:
         run: |
           docker buildx imagetools create \
             quay.io/ansible/awx-ee:latest \
-            --tag ghcr.io/${{ github.repository_owner }}/awx-ee:${{ github.event.inputs.version }}
+            --tag ghcr.io/${OWNER_LC}/awx-ee:${{ github.event.inputs.version }}
 
       - name: Stage awx-operator image
         working-directory: awx-operator
         run: |
           BUILD_ARGS="--build-arg DEFAULT_AWX_VERSION=${{ github.event.inputs.version}} \
               --build-arg OPERATOR_VERSION=${{ github.event.inputs.operator_version }}" \
-          IMG=ghcr.io/${{ github.repository_owner }}/awx-operator:${{ github.event.inputs.operator_version }} \
+          IMG=ghcr.io/${OWNER_LC}/awx-operator:${{ github.event.inputs.operator_version }} \
           make docker-buildx
 
       - name: Run test deployment with awx-operator
@@ -137,7 +136,7 @@ jobs:
         env:
           AWX_TEST_IMAGE: ${{ github.repository }}
           AWX_TEST_VERSION: ${{ github.event.inputs.version }}
-          AWX_EE_TEST_IMAGE: ghcr.io/${{ github.repository_owner }}/awx-ee:${{ github.event.inputs.version }}
+          AWX_EE_TEST_IMAGE: ghcr.io/${OWNER_LC}/awx-ee:${{ github.event.inputs.version }}
 
       - name: Create draft release for AWX
         working-directory: awx
