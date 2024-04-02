@@ -1,0 +1,40 @@
+---
+- name: Cleanup test RoleDefinition
+  role_definition:
+    name: testing_launch_job
+    permissions:
+      - awx.view_jobtemplate
+      - awx.execute_jobtemplate
+    content_type: awx.jobtemplate
+    description: role definition to launch job
+    state: absent
+
+- name: Create RoleDefinition
+  role_definition:
+    name: testing_launch_job
+    permissions:
+      - awx.view_jobtemplate
+      - awx.execute_jobtemplate
+    content_type: awx.jobtemplate
+    description: role definition to launch job
+    state: present
+  register: result
+
+- assert:
+    that:
+      - result is changed
+
+- name: Delete RoleDefinition
+  role_definition:
+    name: testing_launch_job
+    permissions:
+      - awx.view_jobtemplate
+      - awx.execute_jobtemplate
+    content_type: awx.jobtemplate
+    description: role definition to launch job
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - result is changed

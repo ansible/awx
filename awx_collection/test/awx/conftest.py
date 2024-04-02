@@ -17,6 +17,7 @@ import pytest
 
 from ansible.module_utils.six import raise_from
 
+from ansible_base.rbac.models import RoleDefinition, DABPermission
 from awx.main.tests.functional.conftest import _request
 from awx.main.tests.functional.conftest import credentialtype_scm, credentialtype_ssh  # noqa: F401; pylint: disable=unused-variable
 from awx.main.models import (
@@ -31,9 +32,11 @@ from awx.main.models import (
     WorkflowJobTemplate,
     NotificationTemplate,
     Schedule,
+    Team,
 )
 
 from django.db import transaction
+from django.contrib.contenttypes.models import ContentType
 
 
 HAS_TOWER_CLI = False
@@ -257,6 +260,9 @@ def inventory(organization):
 def job_template(project, inventory):
     return JobTemplate.objects.create(name='test-jt', project=project, inventory=inventory, playbook='helloworld.yml')
 
+@pytest.fixture
+def team(organization):
+    return Team.objects.create(name='test-team', organization=organization)
 
 @pytest.fixture
 def machine_credential(credentialtype_ssh, organization):  # noqa: F811
@@ -330,6 +336,13 @@ def notification_template(organization):
         ),
     )
 
+@pytest.fixture
+def job_template_role_definition():
+    rd = RoleDefinition.objects.create(name='test-launch-job', content_type=ContentType.objects.get_for_model(JobTemplate))
+    permission_codenames = ['view_jobtemplate', 'execute_jobtemplate']
+    permissions = DABPermission.objects.filter(codename__in=permission_codenames)
+    rd.permissions.add(*permissions)
+    return rd
 
 @pytest.fixture
 def scm_credential(credentialtype_scm, organization):  # noqa: F811
