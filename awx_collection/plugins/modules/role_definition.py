@@ -26,7 +26,7 @@ options:
         type: str
     permissions:
         description:
-            - List of permission ids to include in the role definition.
+            - List of permissions to include in the role definition.
         required: True
         type: list
         elements: str
