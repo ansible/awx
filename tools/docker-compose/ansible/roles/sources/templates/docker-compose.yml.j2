@@ -363,6 +363,7 @@ volumes:
 
 networks:
   awx:
+    name: awx
   service-mesh:
     name: service-mesh
 {% if minikube_container_group|bool %}
