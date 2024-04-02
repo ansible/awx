@@ -1113,7 +1113,7 @@ This inventory source uses the `terraform_state <https://github.com/ansible-coll
     ---
     backend_type: s3
 
-5. Enter an |ee| in the **Execution Environment** field that contains a Terraform binary. This is required for the inventory plugin to run the Terraform commands that read inventory data from the Terraform state file. Refer to the `Terraform EE readme <https://github.com/ansible-cloud/terraform_ee>`_ that contains an example |ee| with a Terraform binary.
+5. Enter an |ee| in the **Execution Environment** field that contains a Terraform binary. This is required for the inventory plugin to run the Terraform commands that read inventory data from the Terraform state file. Refer to the `Terraform EE readme <https://github.com/ansible-cloud/terraform_ee>`_ that contains an example |ee| configuration with a Terraform binary.
 
   .. image:: ../common/images/inventories-create-source-terraform-example.png
 
