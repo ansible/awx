@@ -27,7 +27,7 @@ services:
     user: "{{ ansible_user_uid }}"
     image: "{{ awx_image }}:{{ awx_image_tag }}"
     container_name: tools_awx_{{ container_postfix }}
-    hostname: awx_{{ container_postfix }}
+    hostname: awx-{{ container_postfix }}
     command: launch_awx.sh
     environment:
       OS: "{{ os_info.stdout }}"

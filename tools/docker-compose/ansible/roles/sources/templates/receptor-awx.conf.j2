@@ -1,9 +1,9 @@
 ---
 - node:
-    id: awx_{{ item }}
+    id: awx-{{ item }}
     firewallrules:
       - action: "reject"
-        tonode: awx_{{ item }}
+        tonode: awx-{{ item }}
         toservice: "control"
 
 - log-level: info
@@ -24,7 +24,7 @@
 
 {% for i in range(item | int + 1, control_plane_node_count | int + 1) %}
 - tcp-peer:
-    address: awx_{{ i }}:2222
+    address: awx-{{ i }}:2222
     redial: true
 {% endfor %}
 

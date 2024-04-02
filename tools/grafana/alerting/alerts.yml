@@ -179,7 +179,7 @@ groups:
             datasourceUid: awx_prometheus
             model:
               editorMode: code
-              expr: irate(callback_receiver_events_insert_db{node='awx_1'}[1m])
+              expr: irate(callback_receiver_events_insert_db{node='awx-1'}[1m])
               hide: false
               intervalMs: 1000
               legendFormat: __auto
@@ -228,7 +228,7 @@ groups:
                 type: prometheus
                 uid: awx_prometheus
               editorMode: code
-              expr: callback_receiver_events_queue_size_redis{node='awx_1'}
+              expr: callback_receiver_events_queue_size_redis{node='awx-1'}
               hide: false
               intervalMs: 1000
               legendFormat: __auto
