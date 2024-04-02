@@ -260,9 +260,11 @@ def inventory(organization):
 def job_template(project, inventory):
     return JobTemplate.objects.create(name='test-jt', project=project, inventory=inventory, playbook='helloworld.yml')
 
+
 @pytest.fixture
 def team(organization):
     return Team.objects.create(name='test-team', organization=organization)
+
 
 @pytest.fixture
 def machine_credential(credentialtype_ssh, organization):  # noqa: F811
@@ -336,6 +338,7 @@ def notification_template(organization):
         ),
     )
 
+
 @pytest.fixture
 def job_template_role_definition():
     rd = RoleDefinition.objects.create(name='test-launch-job', content_type=ContentType.objects.get_for_model(JobTemplate))
@@ -343,6 +346,7 @@ def job_template_role_definition():
     permissions = DABPermission.objects.filter(codename__in=permission_codenames)
     rd.permissions.add(*permissions)
     return rd
+
 
 @pytest.fixture
 def scm_credential(credentialtype_scm, organization):  # noqa: F811

@@ -46,6 +46,7 @@ options:
         choices:
             - present
             - absent
+        type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -70,9 +71,9 @@ def main():
     argument_spec = dict(
         name=dict(required=True, type='str'),
         permissions=dict(required=True, type='list', elements='str'),
-        content_type=dict(required=False, type='str'),
+        content_type=dict(required=True, type='str'),
         description=dict(required=False, type='str'),
-        state = dict(default='present', choices=['present', 'absent']),
+        state=dict(default='present', choices=['present', 'absent']),
     )
 
     module = ControllerAPIModule(argument_spec=argument_spec)
@@ -86,7 +87,6 @@ def main():
         description = ''
 
     role_definition = module.get_one('role_definitions', name_or_id=name)
-
 
     if state == 'absent':
         module.delete_if_needed(
@@ -108,6 +108,7 @@ def main():
             endpoint='role_definitions',
             item_type='role_definition',
         )
+
 
 if __name__ == '__main__':
     main()

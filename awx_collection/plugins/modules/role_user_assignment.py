@@ -52,6 +52,7 @@ options:
         choices:
             - present
             - absent
+        type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -76,7 +77,7 @@ def main():
         role_definition=dict(required=True, type='str'),
         object_ansible_id=dict(required=False, type='int'),
         user_ansible_id=dict(required=False, type='int'),
-        state = dict(default='present', choices=['present', 'absent']),
+        state=dict(default='present', choices=['present', 'absent']),
     )
 
     module = ControllerAPIModule(argument_spec=argument_spec)
@@ -103,7 +104,6 @@ def main():
     kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
     role_user_assignment = module.get_one('role_user_assignments', **{'data': kwargs})
-
 
     if state == 'absent':
         module.delete_if_needed(

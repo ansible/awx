@@ -4,9 +4,8 @@ __metaclass__ = type
 
 import pytest
 
-from unittest import mock
-
 from ansible_base.rbac.models import RoleUserAssignment
+
 
 @pytest.mark.django_db
 def test_create_new(run_module, admin_user, job_template, job_template_role_definition):

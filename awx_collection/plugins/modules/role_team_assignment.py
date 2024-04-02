@@ -52,6 +52,7 @@ options:
         choices:
             - present
             - absent
+        type: str
 extends_documentation_fragment: awx.awx.auth
 '''
 
@@ -76,7 +77,7 @@ def main():
         role_definition=dict(required=True, type='str'),
         object_ansible_id=dict(required=False, type='int'),
         team_ansible_id=dict(required=False, type='int'),
-        state = dict(default='present', choices=['present', 'absent']),
+        state=dict(default='present', choices=['present', 'absent']),
     )
 
     module = ControllerAPIModule(argument_spec=argument_spec)
@@ -108,7 +109,6 @@ def main():
             role_team_assignment,
             item_type='role_team_assignment',
         )
-
 
     if state == 'present':
         module.create_if_needed(

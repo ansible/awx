@@ -4,9 +4,8 @@ __metaclass__ = type
 
 import pytest
 
-from unittest import mock
-
 from ansible_base.rbac.models import RoleTeamAssignment
+
 
 @pytest.mark.django_db
 def test_create_new(run_module, admin_user, team, job_template, job_template_role_definition):
@@ -55,7 +54,6 @@ def test_delete_existing(run_module, admin_user, team, job_template, job_templat
             'role_definition': job_template_role_definition.name,
         },
         admin_user)
-
     assert result['changed']
     assert RoleTeamAssignment.objects.filter(team=team, object_id=job_template.id, role_definition=job_template_role_definition).exists()
 
@@ -68,7 +66,5 @@ def test_delete_existing(run_module, admin_user, team, job_template, job_templat
             'state': 'absent'
         },
         admin_user)
-
-
     assert result['changed']
     assert not RoleTeamAssignment.objects.filter(team=team, object_id=job_template.id, role_definition=job_template_role_definition).exists()
