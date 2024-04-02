@@ -90,7 +90,7 @@ jobs:
       - name: Copy logos for inclusion in sdist for official build
         working-directory: awx
         run: |
-          cp ../awx-logos/awx/ui/client/assets/ awx/ui/public/static/media/
+          cp ../awx-logos/awx/ui/client/assets/* awx/ui/public/static/media/
 
       - name: Prebuild UI for awx image (to speed up build process)
         working-directory: awx
