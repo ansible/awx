@@ -139,7 +139,7 @@ jobs:
           make kustomize
           KUSTOMIZE_PATH=$(readlink -f bin/kustomize) molecule test -s kind
         env:
-          AWX_TEST_IMAGE: ghcr.io/${OWNER_LC}
+          AWX_TEST_IMAGE: ghcr.io/${OWNER_LC}/awx
           AWX_TEST_VERSION: ${{ github.event.inputs.version }}
           AWX_EE_TEST_IMAGE: ghcr.io/${OWNER_LC}/awx-ee:${{ github.event.inputs.version }}
 
