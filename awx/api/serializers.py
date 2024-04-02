@@ -21,7 +21,7 @@ from jinja2.exceptions import TemplateSyntaxError, UndefinedError, SecurityError
 # Django
 from django.conf import settings
 from django.contrib.auth import update_session_auth_hash
-from django.contrib.auth.models import User, Permission
+from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password as django_validate_password
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ValidationError as DjangoValidationError
@@ -45,7 +45,8 @@ from polymorphic.models import PolymorphicModel
 
 # django-ansible-base
 from ansible_base.lib.utils.models import get_type_for_model
-from ansible_base.rbac.models import RoleEvaluation
+from ansible_base.rbac.models import RoleEvaluation, ObjectRole
+from ansible_base.rbac import permission_registry
 
 # AWX
 from awx.main.access import get_user_capabilities
@@ -2780,7 +2781,10 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 if action in reversed_role_map:
                     role_names.add(reversed_role_map[action])
                 elif codename in reversed_org_map:
-                    role_names.add(codename)
+                    if isinstance(obj, Organization):
+                        role_names.add(reversed_org_map[codename])
+                        if 'view_organization' not in role_names:
+                            role_names.add('read_role')
             return list(role_names)
 
         def format_role_perm(role):
@@ -2799,10 +2803,10 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 # Singleton roles should not be managed from this view, as per copy/edit rework spec
                 role_dict['user_capabilities'] = {'unattach': False}
 
-            if role.singleton_name:
-                descendant_perms = list(Permission.objects.filter(content_type=content_type).values_list('codename', flat=True))
+            model_name = content_type.model
+            if isinstance(obj, Organization):
+                descendant_perms = [codename for codename in get_role_codenames(role) if codename.endswith(model_name) or codename.startswith('add_')]
             else:
-                model_name = content_type.model
                 descendant_perms = [codename for codename in get_role_codenames(role) if codename.endswith(model_name)]
 
             return {'role': role_dict, 'descendant_roles': get_roles_from_perms(descendant_perms)}
@@ -2852,7 +2856,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
             new_roles_seen = set()
             all_team_roles = set()
             all_permissive_role_ids = set()
-            for evaluation in RoleEvaluation.objects.filter(role__users=user, **gfk_kwargs).prefetch_related('role'):
+            for evaluation in RoleEvaluation.objects.filter(role__in=user.has_roles.all(), **gfk_kwargs).prefetch_related('role'):
                 new_role = evaluation.role
                 if new_role.id in new_roles_seen:
                     continue
@@ -2867,9 +2871,48 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 else:
                     ret['summary_fields']['indirect_access'].append(format_role_perm(old_role))
 
-            ret['summary_fields']['direct_access'].extend(
-                [y for x in (format_team_role_perm(r, direct_permissive_role_ids) for r in all_team_roles) for y in x]
-            )
+            # Lazy role creation gives us a big problem, where some intermediate roles are not easy to find
+            # like when a team has indirect permission, so here we get all roles the users teams have
+            # these contribute to all potential permission-granting roles of the object
+            user_teams_qs = permission_registry.team_model.objects.filter(member_roles__in=ObjectRole.objects.filter(users=user))
+            team_obj_roles = ObjectRole.objects.filter(teams__in=user_teams_qs)
+            for evaluation in RoleEvaluation.objects.filter(role__in=team_obj_roles, **gfk_kwargs).prefetch_related('role'):
+                new_role = evaluation.role
+                if new_role.id in new_roles_seen:
+                    continue
+                new_roles_seen.add(new_role.id)
+                old_role = get_role_from_object_role(new_role)
+                all_permissive_role_ids.add(old_role.id)
+
+            # In DAB RBAC, superuser is strictly a user flag, and global roles are not in the RoleEvaluation table
+            if user.is_superuser:
+                ret['summary_fields'].setdefault('indirect_access', [])
+                all_role_names = [field.name for field in obj._meta.get_fields() if isinstance(field, ImplicitRoleField)]
+                ret['summary_fields']['indirect_access'].append(
+                    {
+                        "role": {
+                            "id": None,
+                            "name": _("System Administrator"),
+                            "description": _("Can manage all aspects of the system"),
+                            "user_capabilities": {"unattach": False},
+                        },
+                        "descendant_roles": all_role_names,
+                    }
+                )
+            elif user.is_system_auditor:
+                ret['summary_fields'].setdefault('indirect_access', [])
+                ret['summary_fields']['indirect_access'].append(
+                    {
+                        "role": {
+                            "id": None,
+                            "name": _("System Auditor"),
+                            "description": _("Can view all aspects of the system"),
+                            "user_capabilities": {"unattach": False},
+                        },
+                        "descendant_roles": ["read_role"],
+                    }
+                )
+
             ret['summary_fields']['direct_access'].extend([y for x in (format_team_role_perm(r, all_permissive_role_ids) for r in all_team_roles) for y in x])
 
             return ret
