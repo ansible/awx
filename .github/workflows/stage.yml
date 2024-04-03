@@ -100,14 +100,13 @@ jobs:
 
       - name: Set build env variables
         run: |
-          echo "OWNER_LC=${OWNER,,}" >> $GITHUB_ENV
-          echo "DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER_LC}" >> $GITHUB_ENV
+          echo "DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER,,}" >> $GITHUB_ENV
           echo "COMPOSE_TAG=${{ github.event.inputs.version }}" >> $GITHUB_ENV
           echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
           echo "AWX_TEST_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
-          echo "AWX_TEST_IMAGE=ghcr.io/${OWNER_LC}/awx" >> $GITHUB_ENV
-          echo "AWX_EE_TEST_IMAGE=ghcr.io/${OWNER_LC}/awx-ee:${{ github.event.inputs.version }}" >> $GITHUB_ENV
-          echo "AWX_OPERATOR_TEST_IMAGE=ghcr.io/${OWNER_LC}/awx-operator:${{ github.event.inputs.operator_version }}" >> $GITHUB_ENV
+          echo "AWX_TEST_IMAGE=ghcr.io/${OWNER,,}/awx" >> $GITHUB_ENV
+          echo "AWX_EE_TEST_IMAGE=ghcr.io/${OWNER,,}/awx-ee:${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          echo "AWX_OPERATOR_TEST_IMAGE=ghcr.io/${OWNER,,}/awx-operator:${{ github.event.inputs.operator_version }}" >> $GITHUB_ENV
 
       - name: Build and stage AWX
         working-directory: awx
