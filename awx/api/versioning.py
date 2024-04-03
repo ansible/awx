@@ -8,6 +8,13 @@ from rest_framework.reverse import _reverse
 from rest_framework.versioning import URLPathVersioning as BaseVersioning
 
 
+def is_optional_api_urlpattern_prefix_request(request):
+    if settings.OPTIONAL_API_URLPATTERN_PREFIX and request:
+        if request.path.startswith(f"/api/{settings.OPTIONAL_API_URLPATTERN_PREFIX}"):
+            return True
+    return False
+
+
 def drf_reverse(viewname, args=None, kwargs=None, request=None, format=None, **extra):
     """
     Copy and monkey-patch `rest_framework.reverse.reverse` to prevent adding unwarranted
@@ -24,9 +31,8 @@ def drf_reverse(viewname, args=None, kwargs=None, request=None, format=None, **e
     else:
         url = _reverse(viewname, args, kwargs, request, format, **extra)
 
-    if settings.OPTIONAL_API_URLPATTERN_PREFIX and request:
-        if request.path.startswith(f"/api/{settings.OPTIONAL_API_URLPATTERN_PREFIX}"):
-            url = url.replace('/api', f"/api/{settings.OPTIONAL_API_URLPATTERN_PREFIX}")
+    if is_optional_api_urlpattern_prefix_request(request):
+        url = url.replace('/api', f"/api/{settings.OPTIONAL_API_URLPATTERN_PREFIX}")
 
     return url
 

@@ -28,7 +28,7 @@ from awx.main.analytics import all_collectors
 from awx.main.ha import is_ha_environment
 from awx.main.utils import get_awx_version, get_custom_venv_choices
 from awx.main.utils.licensing import validate_entitlement_manifest
-from awx.api.versioning import reverse, drf_reverse
+from awx.api.versioning import URLPathVersioning, is_optional_api_urlpattern_prefix_request, reverse, drf_reverse
 from awx.main.constants import PRIVILEGE_ESCALATION_METHODS
 from awx.main.models import Project, Organization, Instance, InstanceGroup, JobTemplate
 from awx.main.utils import set_environ
@@ -40,19 +40,19 @@ logger = logging.getLogger('awx.api.views.root')
 class ApiRootView(APIView):
     permission_classes = (AllowAny,)
     name = _('REST API')
-    versioning_class = None
+    versioning_class = URLPathVersioning
     swagger_topic = 'Versioning'
 
     @method_decorator(ensure_csrf_cookie)
     def get(self, request, format=None):
         '''List supported API versions'''
-
-        v2 = reverse('api:api_v2_root_view', kwargs={'version': 'v2'})
+        v2 = reverse('api:api_v2_root_view', request=request, kwargs={'version': 'v2'})
         data = OrderedDict()
         data['description'] = _('AWX REST API')
         data['current_version'] = v2
         data['available_versions'] = dict(v2=v2)
-        data['oauth2'] = drf_reverse('api:oauth_authorization_root_view')
+        if not is_optional_api_urlpattern_prefix_request(request):
+            data['oauth2'] = drf_reverse('api:oauth_authorization_root_view')
         data['custom_logo'] = settings.CUSTOM_LOGO
         data['custom_login_info'] = settings.CUSTOM_LOGIN_INFO
         data['login_redirect_override'] = settings.LOGIN_REDIRECT_OVERRIDE
@@ -131,7 +131,7 @@ class ApiVersionRootView(APIView):
         data['mesh_visualizer'] = reverse('api:mesh_visualizer_view', request=request)
         data['bulk'] = reverse('api:bulk', request=request)
         data['analytics'] = reverse('api:analytics_root_view', request=request)
-        data['service_index'] = django_reverse('service-index-root')
+        data['service_index'] = django_reverse('service-index-root', request=request)
         return Response(data)
 
 
