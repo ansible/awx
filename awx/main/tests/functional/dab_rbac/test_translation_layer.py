@@ -1,6 +1,6 @@
 import pytest
 
-from awx.main.models.rbac import get_role_from_object_role
+from awx.main.models.rbac import get_role_from_object_role, give_creator_permissions
 from awx.main.models import User, Organization, WorkflowJobTemplate, WorkflowJobTemplateNode
 from awx.api.versioning import reverse
 
@@ -74,3 +74,10 @@ def test_workflow_approval_list(get, post, admin_user):
 
     r = get(url=reverse('api:workflow_approval_list'), user=admin_user, expect=200)
     assert r.data['count'] >= 1
+
+
+@pytest.mark.django_db
+def test_creator_permission(rando, admin_user, inventory):
+    give_creator_permissions(rando, inventory)
+    assert rando in inventory.admin_role
+    assert rando in inventory.admin_role.members.all()
