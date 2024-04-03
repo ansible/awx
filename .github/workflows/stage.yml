@@ -44,12 +44,6 @@ jobs:
 
           exit 0
 
-      - name: Set lower case owner name
-        shell: bash
-        run: echo "OWNER_LC=${OWNER,,}" >> $GITHUB_ENV
-        env:
-          OWNER: '${{ github.repository_owner }}'
-
       - name: Checkout awx
         uses: actions/checkout@v3
         with:
@@ -104,15 +98,23 @@ jobs:
           make ui-release
           make ui-next
 
+      - name: Set build env variables
+        run: |
+          echo "OWNER_LC=${OWNER,,}" >> $GITHUB_ENV
+          echo "DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER_LC}" >> $GITHUB_ENV
+          echo "COMPOSE_TAG=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          echo "AWX_TEST_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          echo "AWX_TEST_IMAGE=ghcr.io/${OWNER_LC}/awx" >> $GITHUB_ENV
+          echo "AWX_EE_TEST_IMAGE=ghcr.io/${OWNER_LC}/awx-ee:${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          echo "AWX_OPERATOR_TEST_IMAGE=ghcr.io/${OWNER_LC}/awx-operator:${{ github.event.inputs.operator_version }}" >> $GITHUB_ENV
+
       - name: Build and stage AWX
         working-directory: awx
         env:
           DOCKER_BUILDX_PUSH: true
           HEADLESS: false
           PLATFORMS: linux/amd64,linux/arm64
-          DEV_DOCKER_TAG_BASE: ghcr.io/${OWNER_LC}
-          COMPOSE_TAG: ${{ github.event.inputs.version }}
-          VERSION: ${{ github.event.inputs.version }}
         run: |
           make awx-kube-buildx
 
@@ -120,14 +122,14 @@ jobs:
         run: |
           docker buildx imagetools create \
             quay.io/ansible/awx-ee:latest \
-            --tag ghcr.io/${OWNER_LC}/awx-ee:${{ github.event.inputs.version }}
+            --tag ${AWX_EE_TEST_IMAGE}
 
       - name: Stage awx-operator image
         working-directory: awx-operator
         run: |
           BUILD_ARGS="--build-arg DEFAULT_AWX_VERSION=${{ github.event.inputs.version}} \
               --build-arg OPERATOR_VERSION=${{ github.event.inputs.operator_version }}" \
-          IMG=ghcr.io/${OWNER_LC}/awx-operator:${{ github.event.inputs.operator_version }} \
+          IMG=${AWX_OPERATOR_TEST_IMAGE} \
           make docker-buildx
 
       - name: Run test deployment with awx-operator
@@ -138,10 +140,6 @@ jobs:
           sudo rm -f $(which kustomize)
           make kustomize
           KUSTOMIZE_PATH=$(readlink -f bin/kustomize) molecule test -s kind
-        env:
-          AWX_TEST_IMAGE: ghcr.io/${OWNER_LC}/awx
-          AWX_TEST_VERSION: ${{ github.event.inputs.version }}
-          AWX_EE_TEST_IMAGE: ghcr.io/${OWNER_LC}/awx-ee:${{ github.event.inputs.version }}
 
       - name: Create draft release for AWX
         working-directory: awx
