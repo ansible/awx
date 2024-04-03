@@ -602,12 +602,36 @@ def give_or_remove_permission(role, actor, giving=True):
     rd.give_or_remove_permission(actor, obj, giving=giving)
 
 
+class SyncEnabled(threading.local):
+    def __init__(self):
+        self.enabled = True
+
+
+rbac_sync_enabled = SyncEnabled()
+
+
+@contextlib.contextmanager
+def disable_rbac_sync():
+    try:
+        previous_value = rbac_sync_enabled.enabled
+        rbac_sync_enabled.enabled = False
+        yield
+    finally:
+        rbac_sync_enabled.enabled = previous_value
+
+
 def give_creator_permissions(user, obj):
-    RoleDefinition.objects.give_creator_permissions(user, obj)
+    assignment = RoleDefinition.objects.give_creator_permissions(user, obj)
+    if assignment:
+        with disable_rbac_sync():
+            old_role = get_role_from_object_role(assignment.object_role)
+            old_role.members.add(user)
 
 
 def sync_members_to_new_rbac(instance, action, model, pk_set, reverse, **kwargs):
     if action.startswith('pre_'):
+        return
+    if not rbac_sync_enabled.enabled:
         return
 
     if action == 'post_add':
