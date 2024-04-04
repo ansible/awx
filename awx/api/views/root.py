@@ -131,7 +131,7 @@ class ApiVersionRootView(APIView):
         data['mesh_visualizer'] = reverse('api:mesh_visualizer_view', request=request)
         data['bulk'] = reverse('api:bulk', request=request)
         data['analytics'] = reverse('api:analytics_root_view', request=request)
-        data['service_index'] = django_reverse('service-index-root', request=request)
+        data['service_index'] = django_reverse('service-index-root')
         return Response(data)
 
 
