@@ -678,20 +678,18 @@ def sync_parents_to_new_rbac(instance, action, model, pk_set, reverse, **kwargs)
 
         # To a fault, we want to avoid running this if triggered from implicit_parents management
         # we only want to do anything if we know for sure this is a non-implicit team role
-        if parent_role.role_field not in ('member_role', 'admin_role') or parent_role.content_type.model != 'team':
-            return
+        if parent_role.role_field in 'member_role' and parent_role.content_type.model == 'team':
+            # Team member role is a parent of its read role
+            # same for admin role as parent of member role
+            # so, for the same object, this parenting
+            # will also be implicit_parents management, but teams may still be assigned permissions to other teams
+            if child_role.content_type.model == 'team' and child_role.object_id == parent_role.object_id:
+                return
 
-        # Team member role is a parent of its read role
-        # same for admin role as parent of member role
-        # so, for the same object, this parenting
-        # will also be implicit_parents management, but teams may still be assigned permissions to other teams
-        if child_role.content_type.model == 'team' and child_role.object_id == parent_role.object_id:
-            return
+            from awx.main.models.organization import Team
 
-        from awx.main.models.organization import Team
-
-        team = Team.objects.get(pk=parent_role.object_id)
-        give_or_remove_permission(child_role, team, giving=is_giving)
+            team = Team.objects.get(pk=parent_role.object_id)
+            give_or_remove_permission(child_role, team, giving=is_giving)
 
 
 m2m_changed.connect(sync_members_to_new_rbac, Role.members.through)
