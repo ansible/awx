@@ -681,9 +681,11 @@ def sync_parents_to_new_rbac(instance, action, model, pk_set, reverse, **kwargs)
         if parent_role.role_field not in ('member_role', 'admin_role') or parent_role.content_type.model != 'team':
             return
 
-        # Team member role is a parent of its read role so, for the same object, this parenting
+        # Team member role is a parent of its read role
+        # same for admin role as parent of member role
+        # so, for the same object, this parenting
         # will also be implicit_parents management, but teams may still be assigned permissions to other teams
-        if child_role.role_field == 'read_role' and child_role.content_type.model == 'team' and child_role.object_id == parent_role.object_id:
+        if child_role.content_type.model == 'team' and child_role.object_id == parent_role.object_id:
             return
 
         from awx.main.models.organization import Team

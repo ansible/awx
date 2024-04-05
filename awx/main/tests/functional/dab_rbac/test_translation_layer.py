@@ -1,3 +1,5 @@
+from unittest import mock
+
 import pytest
 
 from awx.main.models.rbac import get_role_from_object_role, give_creator_permissions
@@ -95,3 +97,11 @@ def test_team_team_read_role(rando, team, admin_user, post):
 
     # user should be able to view the first team
     assert rando in teams[0].read_role
+
+
+@pytest.mark.django_db
+def test_implicit_parents_no_assignments(organization):
+    """Through the normal course of creating models, we should not be changing DAB RBAC permissions"""
+    with mock.patch('awx.main.models.rbac.give_or_remove_permission') as mck:
+        Team.objects.create(name='random team', organization=organization)
+    mck.assert_not_called()
