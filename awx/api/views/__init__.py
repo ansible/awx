@@ -545,7 +545,6 @@ class InstanceGroupObjectRolesList(SubListAPIView):
     serializer_class = serializers.RoleSerializer
     parent_model = models.InstanceGroup
     search_fields = ('role_field', 'content_type__model')
-    deprecated = True
 
     def get_queryset(self):
         po = self.get_parent_object()

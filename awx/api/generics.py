@@ -800,6 +800,7 @@ class RetrieveUpdateDestroyAPIView(RetrieveUpdateAPIView, DestroyAPIView):
 
 
 class ResourceAccessList(ParentMixin, ListAPIView):
+    deprecated = True
     serializer_class = ResourceAccessListElementSerializer
     ordering = ('username',)
 
