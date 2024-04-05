@@ -1,7 +1,9 @@
+from unittest import mock
+
 import pytest
 
 from awx.main.models.rbac import get_role_from_object_role, give_creator_permissions
-from awx.main.models import User, Organization, WorkflowJobTemplate, WorkflowJobTemplateNode
+from awx.main.models import User, Organization, WorkflowJobTemplate, WorkflowJobTemplateNode, Team
 from awx.api.versioning import reverse
 
 from ansible_base.rbac.models import RoleUserAssignment
@@ -81,3 +83,25 @@ def test_creator_permission(rando, admin_user, inventory):
     give_creator_permissions(rando, inventory)
     assert rando in inventory.admin_role
     assert rando in inventory.admin_role.members.all()
+
+
+@pytest.mark.django_db
+def test_team_team_read_role(rando, team, admin_user, post):
+    orgs = [Organization.objects.create(name=f'foo-{i}') for i in range(2)]
+    teams = [Team.objects.create(name=f'foo-{i}', organization=orgs[i]) for i in range(2)]
+    teams[1].member_role.members.add(rando)
+
+    # give second team read permission to first team through the API for regression testing
+    url = reverse('api:role_teams_list', kwargs={'pk': teams[0].read_role.pk, 'version': 'v2'})
+    post(url, {'id': teams[1].id}, user=admin_user)
+
+    # user should be able to view the first team
+    assert rando in teams[0].read_role
+
+
+@pytest.mark.django_db
+def test_implicit_parents_no_assignments(organization):
+    """Through the normal course of creating models, we should not be changing DAB RBAC permissions"""
+    with mock.patch('awx.main.models.rbac.give_or_remove_permission') as mck:
+        Team.objects.create(name='random team', organization=organization)
+    mck.assert_not_called()
