@@ -797,7 +797,7 @@ class TeamProjectsList(SubListAPIView):
         role = ObjectRole.objects.filter(object_id=team.id, content_type=parent_ct, role_definition=rd).first()
         if role is None:
             # Team has no permissions, therefore team has no projects
-            return self.model.none()
+            return self.model.objects.none()
         else:
             project_qs = self.model.accessible_objects(self.request.user, 'read_role')
             return project_qs.filter(id__in=RoleEvaluation.objects.filter(content_type_id=model_ct.id, role=role).values_list('object_id'))
