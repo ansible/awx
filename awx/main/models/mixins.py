@@ -20,9 +20,10 @@ from ansible_base.lib.utils.models import prevent_search
 
 # AWX
 from awx.main.models.rbac import Role, RoleAncestorEntry
+from awx.main.redact import REPLACE_STR
 from awx.main.utils import parse_yaml_or_json, get_custom_venv_choices, get_licenser, polymorphic
 from awx.main.utils.execution_environments import get_default_execution_environment
-from awx.main.utils.encryption import decrypt_value, get_encryption_key, is_encrypted
+from awx.main.utils.encryption import decrypt_value, get_encryption_key, is_encrypted, encrypt_dict
 from awx.main.utils.polymorphic import build_polymorphic_ctypes_map
 from awx.main.fields import AskForField
 from awx.main.constants import ACTIVE_STATES
@@ -128,6 +129,23 @@ class SurveyJobTemplateMixin(models.Model):
                 if survey_element['type'] == 'password':
                     vars.append(survey_element['variable'])
         return vars
+
+    def handle_launch_passwords(self, prompted_extra_vars, extra_passwords):
+        """
+        Intended to be called as a part of create_unified_job for any template allowing surveys
+        encrypts any incoming prompted extra_vars that are answers to password survey questions
+        If this is ran inside a WFJT, takes extra_passwords which may have come from workflow survey, or artifacts
+        """
+        survey_passwords = {}
+        if self.survey_enabled:
+            password_list = self.survey_password_variables()
+            if password_list:
+                encrypt_dict(prompted_extra_vars, password_list)  # automatically encrypt survey fields
+                for password in password_list:
+                    survey_passwords[password] = REPLACE_STR
+        if extra_passwords:
+            survey_passwords.update(extra_passwords)
+        return survey_passwords
 
     @property
     def variables_needed_to_start(self):

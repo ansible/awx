@@ -51,10 +51,10 @@ from awx.main.utils.common import (
     get_event_partition_epoch,
     get_capacity_type,
 )
-from awx.main.utils.encryption import encrypt_dict, decrypt_field
+from awx.main.utils.encryption import decrypt_field
 from awx.main.utils import polymorphic
 from awx.main.constants import ACTIVE_STATES, CAN_CANCEL, JOB_VARIABLE_PREFIXES
-from awx.main.redact import UriCleaner, REPLACE_STR
+from awx.main.redact import UriCleaner
 from awx.main.consumers import emit_channel_notification
 from awx.main.fields import AskForField, OrderedManyToManyField
 
@@ -321,7 +321,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         """
         Return subclass of UnifiedJob that is created from this template.
         """
-        raise NotImplementedError  # Implement in subclass.
+        return unified_cls_mapping()[cls]
 
     @property
     def notification_templates(self):
@@ -333,56 +333,30 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
 
         return NotificationTemplate.objects.none()
 
-    def create_unified_job(self, instance_groups=None, **kwargs):
+    def create_unified_job(self, _eager_fields=None, instance_groups=None, survey_passwords=None, **prompts):
         """
         Create a new unified job based on this unified job template.
         """
-        # TODO: rename kwargs to prompts, to set expectation that these are runtime values
-        new_job_passwords = kwargs.pop('survey_passwords', {})
-        eager_fields = kwargs.pop('_eager_fields', None)
-
-        # automatically encrypt survey fields
-        if hasattr(self, 'survey_spec') and getattr(self, 'survey_enabled', False):
-            password_list = self.survey_password_variables()
-            encrypt_dict(kwargs.get('extra_vars', {}), password_list)
-
-        unified_job_class = self._get_unified_job_class()
         fields = self._get_unified_job_field_names()
-        parent_field_name = None
-        if "_unified_job_class" in kwargs:
-            # Special case where spawned job is different type than usual
-            # Only used for slice jobs
-            unified_job_class = kwargs.pop("_unified_job_class")
-            fields = unified_job_class._get_unified_job_field_names() & fields
-            parent_field_name = kwargs.pop('_parent_field_name')
 
-        unallowed_fields = set(kwargs.keys()) - set(fields)
-        validated_kwargs = kwargs.copy()
+        unallowed_fields = set(prompts.keys()) - set(fields)
+        unified_job_data = prompts.copy()
         if unallowed_fields:
-            if parent_field_name is None:
-                logger.warning('Fields {} are not allowed as overrides to spawn from {}.'.format(', '.join(unallowed_fields), self))
+            logger.warning('Fields {} are not allowed as overrides to spawn from {}.'.format(', '.join(unallowed_fields), self))
             for f in unallowed_fields:
-                validated_kwargs.pop(f)
+                unified_job_data.pop(f)
 
-        unified_job = copy_model_by_class(self, unified_job_class, fields, validated_kwargs)
+        unified_job = copy_model_by_class(self, self._get_unified_job_class(), fields, unified_job_data)
 
-        if eager_fields:
-            for fd, val in eager_fields.items():
+        # automatically encrypt survey fields, TODO: we should not need survey_passwords field anymore
+        if hasattr(self, 'handle_launch_passwords'):
+            unified_job.survey_passwords = self.handle_launch_passwords(prompts.get('extra_vars', {}), survey_passwords)
+
+        if _eager_fields:
+            for fd, val in _eager_fields.items():
                 setattr(unified_job, fd, val)
 
-        # NOTE: slice workflow jobs _get_parent_field_name method
-        # is not correct until this is set
-        if not parent_field_name:
-            parent_field_name = unified_job._get_parent_field_name()
-        setattr(unified_job, parent_field_name, self)
-
-        # For JobTemplate-based jobs with surveys, add passwords to list for perma-redaction
-        if hasattr(self, 'survey_spec') and getattr(self, 'survey_enabled', False):
-            for password in self.survey_password_variables():
-                new_job_passwords[password] = REPLACE_STR
-        if new_job_passwords:
-            unified_job.survey_passwords = new_job_passwords
-            kwargs['survey_passwords'] = new_job_passwords  # saved in config object for relaunch
+        setattr(unified_job, unified_job.PARENT_FIELD_NAME, self)
 
         if instance_groups:
             unified_job.preferred_instance_groups_cache = [ig.id for ig in instance_groups]
@@ -400,27 +374,36 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
             # credentials and labels
             unified_job.save()
 
-        # Labels and credentials copied here
-        if validated_kwargs.get('credentials'):
+        # TODO: Combine this with prompts combination logic in workflow model
+        # prep for Labels and credentials to be copied
+        if unified_job_data.get('credentials'):
             Credential = UnifiedJob._meta.get_field('credentials').related_model
             cred_dict = Credential.unique_dict(self.credentials.all())
-            prompted_dict = Credential.unique_dict(validated_kwargs['credentials'])
-            # combine prompted credentials with JT
+            prompted_dict = Credential.unique_dict(unified_job_data['credentials'])
+            # combine prompted credentials with JT, but overwriting creds of same type
             cred_dict.update(prompted_dict)
-            validated_kwargs['credentials'] = [cred for cred in cred_dict.values()]
-            kwargs['credentials'] = validated_kwargs['credentials']
+            unified_job_data['credentials'] = [cred for cred in cred_dict.values()]
+        elif 'credentials' in unified_job_data:
+            unified_job_data.pop('credentials')
 
+        if unified_job_data.get('labels'):
+            # Labels are additive so we are going to add any src labels in addition to the override labels
+            template_labels = set(self.labels.all())
+            prompted_labels = set(unified_job_data['labels'])
+            # combine prompted labels with JT
+            unified_job_data['labels'] = template_labels | prompted_labels
+        elif 'labels' in unified_job_data:
+            unified_job_data.pop('labels')
+
+        # Labels and credentials copied here
         with disable_activity_stream():
-            copy_m2m_relationships(self, unified_job, fields, kwargs=validated_kwargs)
+            copy_m2m_relationships(self, unified_job, fields, kwargs=unified_job_data)
 
-        if 'extra_vars' in validated_kwargs:
-            unified_job.handle_extra_data(validated_kwargs['extra_vars'])
+        if 'extra_vars' in unified_job_data:
+            unified_job.handle_extra_data(unified_job_data['extra_vars'])
 
         # Create record of provided prompts for relaunch and rescheduling
-        config = unified_job.create_config_from_prompts(kwargs, parent=self)
-        if instance_groups:
-            for ig in instance_groups:
-                config.instance_groups.add(ig)
+        unified_job.save_prompts_data(self, instance_groups=instance_groups, **prompts)
 
         # manually issue the create activity stream entry _after_ M2M relations
         # have been associated to the UJ
@@ -536,6 +519,8 @@ class UnifiedJob(
     """
     Concrete base class for unified job run by the task engine.
     """
+
+    PARENT_FIELD_NAME = ''  # some job types have no associated template
 
     STATUS_CHOICES = UnifiedJobTemplate.JOB_STATUS_CHOICES
 
@@ -774,9 +759,6 @@ class UnifiedJob(
     def capacity_type(self):
         return get_capacity_type(self)
 
-    def _get_parent_field_name(self):
-        return 'unified_job_template'  # Override in subclasses.
-
     def _get_preferred_instance_group_cache(self):
         return [ig.pk for ig in self.preferred_instance_groups]
 
@@ -802,7 +784,7 @@ class UnifiedJob(
         return '{} {} ({})'.format(get_type_for_model(type(self)), self.id, self.status)
 
     def _get_parent_instance(self):
-        return getattr(self, self._get_parent_field_name(), None)
+        return getattr(self, self.PARENT_FIELD_NAME, None)
 
     def _update_parent_instance_no_save(self, parent_instance, update_fields=None):
         if update_fields is None:
@@ -926,8 +908,10 @@ class UnifiedJob(
         """
         unified_job_class = self.__class__
         unified_jt_class = self._get_unified_job_template_class()
-        parent_field_name = self._get_parent_field_name()
-        fields = unified_jt_class._get_unified_job_field_names() | set([parent_field_name])
+        parent_field_name = self.PARENT_FIELD_NAME
+        fields = unified_jt_class._get_unified_job_field_names()
+        if parent_field_name:
+            fields |= set([parent_field_name])
 
         create_data = {}
         if _eager_fields:
@@ -965,38 +949,52 @@ class UnifiedJob(
         except JobLaunchConfig.DoesNotExist:
             return None
 
-    def create_config_from_prompts(self, kwargs, parent=None):
+    def save_prompts_data(self, parent, onto_self=False, **kwargs):
         """
         Create a launch configuration entry for this job, given prompts
         returns None if it can not be created
         """
-        JobLaunchConfig = self._meta.get_field('launch_config').related_model
-        config = JobLaunchConfig(job=self)
-        if parent is None:
-            parent = getattr(self, self._get_parent_field_name())
-        if parent is None:
-            return
-        valid_fields = list(parent.get_ask_mapping().keys())
-        # Special cases allowed for workflows
-        if hasattr(self, 'extra_vars'):
-            valid_fields.extend(['survey_passwords', 'extra_vars'])
+        if onto_self:
+            config = self
         else:
-            kwargs.pop('survey_passwords', None)
+            JobLaunchConfig = self._meta.get_field('launch_config').related_model
+            config = JobLaunchConfig(job=self)
+
+        # conservatively save survey_passwords if the job has them
+        if getattr(self, 'survey_passwords', None) and (not onto_self):
+            config.survey_passwords = self.survey_passwords
+
+        from awx.main.models.jobs import JobTemplate
+
+        valid_fields = list(JobTemplate.get_ask_mapping().keys())
+
         many_to_many_fields = []
         for field_name, value in kwargs.items():
-            if field_name not in valid_fields:
-                raise Exception('Unrecognized launch config field {}.'.format(field_name))
             field = None
             # may use extra_data as a proxy for extra_vars
             if field_name in config.SUBCLASS_FIELDS and field_name != 'extra_vars':
                 field = config._meta.get_field(field_name)
+
             if isinstance(field, models.ManyToManyField):
                 many_to_many_fields.append(field_name)
                 continue
-            if isinstance(field, (models.ForeignKey)) and (value is None):
+            elif isinstance(field, (models.ForeignKey)) and (value is None):
                 continue  # the null value indicates not-provided for ForeignKey case
+            elif value is None:
+                continue  # in standard cases None indicates not-provided
+            elif field_name not in valid_fields:
+                raise Exception('Unrecognized launch config field {}.'.format(field_name))
+
             setattr(config, field_name, value)
-        config.save()
+
+        # Actual job models have extra_vars as a text-like field, not a dict
+        if onto_self:
+            config.extra_vars = json.dumps(config.extra_vars)
+
+        from awx.main.signals import disable_activity_stream
+
+        with disable_activity_stream():
+            config.save()
 
         for field_name in many_to_many_fields:
             prompted_items = kwargs.get(field_name, [])
@@ -1009,8 +1007,7 @@ class UnifiedJob(
                     getattr(config, field_name).add(item)
             else:
                 # Assuming this field merges prompts with parent, save just the diff
-                if field_name in [field.name for field in parent._meta.get_fields()]:
-                    prompted_items = set(prompted_items) - set(getattr(parent, field_name).all())
+                prompted_items = set(prompted_items) - set(getattr(parent, field_name).all())
                 if prompted_items:
                     getattr(config, field_name).add(*prompted_items)
 
@@ -1627,3 +1624,13 @@ class UnifiedJob(
     @property
     def ancestor_job(self):
         return self.get_workflow_job().ancestor_job if self.spawned_by_workflow else self
+
+
+def unified_cls_mapping():
+    ret = {}
+    for unified_job_cls in UnifiedJob.__subclasses__():
+        parent_field_name = unified_job_cls.PARENT_FIELD_NAME
+        if parent_field_name:
+            parent_cls = getattr(unified_job_cls, parent_field_name).field.related_model
+            ret[parent_cls] = unified_job_cls
+    return ret
