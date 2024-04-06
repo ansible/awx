@@ -75,3 +75,5 @@ jobs:
       - name: Build and push AWX devel images
         run: |
           make ${{ matrix.build-targets.make-target }}
+        env:
+          DOCKER_BUILDX_PUSH: true

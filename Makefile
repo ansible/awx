@@ -77,8 +77,11 @@ SDIST_TAR_FILE ?= $(SDIST_TAR_NAME).tar.gz
 
 I18N_FLAG_FILE = .i18n_built
 
-## PLATFORMS defines the target platforms for  the manager image be build to provide support to multiple
+# PLATFORMS defines the target platforms for  the manager image be build to provide support to multiple
 PLATFORMS ?= linux/amd64,linux/arm64  # linux/ppc64le,linux/s390x
+
+# Set DOCKER_BUILDX_PUSH to "true" to push the image, set to any other value to skip pushing
+DOCKER_BUILDX_PUSH ?= false
 
 .PHONY: awx-link clean clean-tmp clean-venv requirements requirements_dev \
 	develop refresh adduser migrate dbchange \
@@ -603,7 +606,7 @@ docker-compose-buildx: Dockerfile.dev
 	- docker buildx create --name docker-compose-buildx
 	docker buildx use docker-compose-buildx
 	- docker buildx build \
-		--push \
+		$(if $(filter true,$(DOCKER_BUILDX_PUSH)),--push,--load) \
 		--build-arg BUILDKIT_INLINE_CACHE=1 \
 		--cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) \
 		--platform=$(PLATFORMS) \
@@ -675,7 +678,7 @@ awx-kube-buildx: Dockerfile
 	- docker buildx create --name awx-kube-buildx
 	docker buildx use awx-kube-buildx
 	- docker buildx build \
-		--push \
+		$(if $(filter true,$(DOCKER_BUILDX_PUSH)),--push,--load) \
 		--build-arg VERSION=$(VERSION) \
 		--build-arg SETUPTOOLS_SCM_PRETEND_VERSION=$(VERSION) \
 		--build-arg HEADLESS=$(HEADLESS) \
@@ -706,7 +709,7 @@ awx-kube-dev-buildx: Dockerfile.kube-dev
 	- docker buildx create --name awx-kube-dev-buildx
 	docker buildx use awx-kube-dev-buildx
 	- docker buildx build \
-		--push \
+		$(if $(filter true,$(DOCKER_BUILDX_PUSH)),--push,--load) \
 		--build-arg BUILDKIT_INLINE_CACHE=1 \
 		--cache-from=$(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) \
 		--platform=$(PLATFORMS) \
