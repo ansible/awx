@@ -125,6 +125,7 @@ def kubernetes_bearer_token(cred, env, private_data_dir):
 
 
 def terraform(cred, env, private_data_dir):
+    # Save credentials configuration into temporary generated file
     handle, path = tempfile.mkstemp(dir=os.path.join(private_data_dir, 'env'))
     with os.fdopen(handle, 'w') as f:
         os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
