@@ -2,10 +2,13 @@ import json
 import os
 import sys
 import re
-
 from typing import Any
+
 from django.core.management.base import BaseCommand
 from django.conf import settings
+
+from django_auth_ldap.config import LDAPSearch
+
 from awx.conf import settings_registry
 
 
@@ -40,6 +43,13 @@ class Command(BaseCommand):
         "USER_SEARCH": False,
     }
 
+
+    def is_enabled(self, settings, keys):
+        for key, required in keys.items():
+            if required and not settings.get(key):
+                return False
+        return True
+
     def get_awx_ldap_settings(self) -> dict[str, dict[str, Any]]:
         awx_ldap_settings = {}
 
@@ -64,14 +74,16 @@ class Command(BaseCommand):
 
             if new_key == "SERVER_URI" and value:
                 value = value.split(", ")
+                grouped_settings[index][new_key] = value
+
+            if type(value).__name__ == "LDAPSearch":
+                data = []
+                data.append(value.base_dn)
+                data.append("SCOPE_SUBTREE")
+                data.append(value.filterstr)
+                grouped_settings[index][new_key] = data
 
         return grouped_settings
-
-    def is_enabled(self, settings, keys):
-        for key, required in keys.items():
-            if required and not settings.get(key):
-                return False
-        return True
 
     def get_awx_saml_settings(self) -> dict[str, Any]:
         awx_saml_settings = {}
@@ -82,7 +94,7 @@ class Command(BaseCommand):
 
     def format_config_data(self, enabled, awx_settings, type, keys, name):
         config = {
-            "type": f"awx.authentication.authenticator_plugins.{type}",
+            "type": f"ansible_base.authentication.authenticator_plugins.{type}",
             "name": name,
             "enabled": enabled,
             "create_objects": True,
@@ -145,7 +157,7 @@ class Command(BaseCommand):
 
             # dump LDAP settings
             awx_ldap_group_settings = self.get_awx_ldap_settings()
-            for awx_ldap_name, awx_ldap_settings in enumerate(awx_ldap_group_settings.values()):
+            for awx_ldap_name, awx_ldap_settings in awx_ldap_group_settings.items():
                 enabled = self.is_enabled(awx_ldap_settings, self.DAB_LDAP_AUTHENTICATOR_KEYS)
                 if enabled:
                     data.append(
@@ -154,7 +166,7 @@ class Command(BaseCommand):
                             awx_ldap_settings,
                             "ldap",
                             self.DAB_LDAP_AUTHENTICATOR_KEYS,
-                            str(awx_ldap_name),
+                            f"LDAP_{awx_ldap_name}",
                         )
                     )
 
