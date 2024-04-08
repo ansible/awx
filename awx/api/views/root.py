@@ -131,10 +131,10 @@ class ApiVersionRootView(APIView):
         data['mesh_visualizer'] = reverse('api:mesh_visualizer_view', request=request)
         data['bulk'] = reverse('api:bulk', request=request)
         data['analytics'] = reverse('api:analytics_root_view', request=request)
-        data['service_index'] = django_reverse('service-index-root')
-        data['role_definitions'] = django_reverse('roledefinition-list')
-        data['role_user_assignments'] = django_reverse('roleuserassignment-list')
-        data['role_team_assignments'] = django_reverse('roleteamassignment-list')
+        data['service_index'] = reverse('service-index-root', request=request)
+        data['role_definitions'] = reverse('roledefinition-list', request=request)
+        data['role_user_assignments'] = reverse('roleuserassignment-list', request=request)
+        data['role_team_assignments'] = reverse('roleteamassignment-list', request=request)
         return Response(data)
 
 
