@@ -43,6 +43,41 @@ class Command(BaseCommand):
         "USER_SEARCH": False,
     }
 
+    DAB_TACACS_AUTHENTICATOR_KEYS = {
+        "HOST": True,
+        "PORT": False,
+        "AUTH_PROTOCOL": False,
+        "REM_ADDR": False,
+        "SECRET": True,
+        "SESSION_TIMEOUT": False,
+    }
+
+    DAB_RADIUS_AUTHENTICATOR_KEYS = {
+        "HOST": True,
+        "PORT": False,
+        "SECRET": False,
+    }
+
+    DAB_OIDC_AUTHENTICATOR_KEYS = {
+        "KEY": True,
+        "SECRET": False,
+        "OIDC_ENDPOINT": True,
+        "VERIFY_SSL": False,
+    }
+
+    DAB_AZURE_AUTHENTICATOR_KEYS = {
+        "CALLBACK_URL": False,
+        "KEY": True,
+        "SECRET": False,
+    }
+
+    DAB_OAUTH2_AUTHENTICATOR_KEYS = {
+        "CALLBACK_URL": False,
+        "KEY": True,
+        "SECRET": False,
+        "AUTH_EXTRA_ARGUMENTS": False,
+    }
+
 
     def is_enabled(self, settings, keys):
         for key, required in keys.items():
@@ -91,6 +126,41 @@ class Command(BaseCommand):
             awx_saml_settings[awx_saml_setting.removeprefix("SOCIAL_AUTH_SAML_")] = getattr(settings, awx_saml_setting, None)
 
         return awx_saml_settings
+
+    def get_awx_tacacs_settings(self) -> dict[str, Any]:
+        awx_tacacs_settings = {}
+        for awx_tacacs_setting in settings_registry.get_registered_settings(category_slug='tacacsplus'):
+            awx_tacacs_settings[awx_tacacs_setting.removeprefix("TACACSPLUS_")] = getattr(settings, awx_tacacs_setting, None)
+
+        return awx_tacacs_settings
+
+    def get_awx_radius_settings(self) -> dict[str, Any]:
+        awx_radius_settings = {}
+        for awx_radius_setting in settings_registry.get_registered_settings(category_slug='radius'):
+            awx_radius_settings[awx_radius_setting.removeprefix("RADIUS_")] = getattr(settings, awx_radius_setting, None)
+
+        return awx_radius_settings
+
+    def get_awx_oidc_settings(self) -> dict[str, Any]:
+        awx_oidc_settings = {}
+        for awx_oidc_setting in settings_registry.get_registered_settings(category_slug='oidc'):
+            awx_oidc_settings[awx_oidc_setting.removeprefix("SOCIAL_AUTH_OIDC_")] = getattr(settings, awx_oidc_setting, None)
+
+        return awx_oidc_settings
+
+    def get_awx_azure_settings(self) -> dict[str, Any]:
+        awx_azure_settings = {}
+        for awx_azure_setting in settings_registry.get_registered_settings(category_slug='azuread-oauth2'):
+            awx_azure_settings[awx_azure_setting.removeprefix("SOCIAL_AUTH_AZUREAD_OAUTH2_")] = getattr(settings, awx_azure_setting, None)
+
+        return awx_azure_settings
+
+    def get_awx_oauth2_settings(self) -> dict[str, Any]:
+        awx_oauth2_settings = {}
+        for awx_oauth2_setting in settings_registry.get_registered_settings(category_slug='google-oauth2'):
+            awx_oauth2_settings[awx_oauth2_setting.removeprefix("SOCIAL_AUTH_GOOGLE_OAUTH2_")] = getattr(settings, awx_oauth2_setting, None)
+
+        return awx_oauth2_settings
 
     def format_config_data(self, enabled, awx_settings, type, keys, name):
         config = {
@@ -169,6 +239,76 @@ class Command(BaseCommand):
                             f"LDAP_{awx_ldap_name}",
                         )
                     )
+
+            # dump TACACS settings
+            awx_tacacs_settings = self.get_awx_tacacs_settings()
+            awx_tacacs_enabled = self.is_enabled(awx_tacacs_settings, self.DAB_TACACS_AUTHENTICATOR_KEYS)
+            if awx_tacacs_enabled:
+                data.append(
+                    self.format_config_data(
+                        awx_tacacs_enabled,
+                        awx_tacacs_settings,
+                        "tacacs",
+                        self.DAB_TACACS_AUTHENTICATOR_KEYS,
+                        "TACACS",
+                    )
+                )
+
+            # dump RADIUS settings
+            awx_radius_settings = self.get_awx_radius_settings()
+            awx_radius_enabled = self.is_enabled(awx_radius_settings, self.DAB_RADIUS_AUTHENTICATOR_KEYS)
+            if awx_radius_enabled:
+                data.append(
+                    self.format_config_data(
+                        awx_radius_enabled,
+                        awx_radius_settings,
+                        "RADIUS",
+                        self.DAB_RADIUS_AUTHENTICATOR_KEYS,
+                        "RADIUS",
+                    )
+                )
+
+            # dump OIDC settings
+            awx_oidc_settings = self.get_awx_oidc_settings()
+            awx_oidc_enabled = self.is_enabled(awx_oidc_settings, self.DAB_OIDC_AUTHENTICATOR_KEYS)
+            if awx_oidc_enabled:
+                data.append(
+                    self.format_config_data(
+                        awx_oidc_enabled,
+                        awx_oidc_settings,
+                        "open_id_connect",
+                        self.DAB_OIDC_AUTHENTICATOR_KEYS,
+                        "OIDC",
+                    )
+                )
+
+            # dump AZURE settings
+            awx_azure_settings = self.get_awx_azure_settings()
+            awx_azure_enabled = self.is_enabled(awx_azure_settings, self.DAB_AZURE_AUTHENTICATOR_KEYS)
+            if awx_azure_enabled:
+                data.append(
+                    self.format_config_data(
+                        awx_azure_enabled,
+                        awx_azure_settings,
+                        "azuread",
+                        self.DAB_AZURE_AUTHENTICATOR_KEYS,
+                        "AZUREAD",
+                    )
+                )
+
+            # dump OAUTH2 settings
+            awx_oauth2_settings = self.get_awx_oauth2_settings()
+            awx_oauth2_enabled = self.is_enabled(awx_oauth2_settings, self.DAB_OAUTH2_AUTHENTICATOR_KEYS)
+            if awx_oauth2_enabled:
+                data.append(
+                    self.format_config_data(
+                        awx_oauth2_enabled,
+                        awx_oauth2_settings,
+                        "google_oauth2",
+                        self.DAB_OAUTH2_AUTHENTICATOR_KEYS,
+                        "GOOGLE_OAUTH2",
+                    )
+                )
 
             # write to file if requested
             if options["output_file"]:
