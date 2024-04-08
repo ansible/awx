@@ -23,6 +23,7 @@ from awx.main.utils.named_url_graph import generate_graph, GraphNode
 from awx.conf import fields, register
 from awx.main.utils.profiling import AWXProfiler
 from awx.main.utils.common import memoize
+from awx.urls import get_urlpatterns
 
 
 logger = logging.getLogger('awx.main.middleware')
@@ -220,3 +221,11 @@ class MigrationRanCheckMiddleware(MiddlewareMixin):
     def process_request(self, request):
         if is_migrating() and getattr(resolve(request.path), 'url_name', '') != 'migrations_notran':
             return redirect(reverse("ui:migrations_notran"))
+
+
+class OptionalURLPrefixPath(MiddlewareMixin):
+    def process_request(self, request):
+        if request.path.startswith(f"/api/{settings.OPTIONAL_API_URLPATTERN_PREFIX}"):
+            request.urlconf = tuple(get_urlpatterns(prefix=settings.OPTIONAL_API_URLPATTERN_PREFIX))
+        else:
+            request.urlconf = 'awx.urls'
