@@ -29,9 +29,7 @@ def reverse(viewname, args=None, kwargs=None, request=None, format=None, **extra
             kwargs = {}
         if 'version' not in kwargs:
             kwargs['version'] = settings.REST_FRAMEWORK['DEFAULT_VERSION']
-    url = drf_reverse(viewname, args, kwargs, request, format, **extra)
-
-    return transform_optional_api_urlpattern_prefix_url(request, url)
+    return drf_reverse(viewname, args, kwargs, request, format, **extra)
 
 
 class URLPathVersioning(BaseVersioning):

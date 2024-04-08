@@ -1,6 +1,7 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+import functools
 import logging
 import threading
 import time
@@ -18,6 +19,7 @@ from django.urls import reverse, resolve
 from awx.main import migrations
 from awx.main.utils.profiling import AWXProfiler
 from awx.main.utils.common import memoize
+from awx.urls import get_urlpatterns
 
 
 logger = logging.getLogger('awx.main.middleware')
@@ -173,3 +175,27 @@ class MigrationRanCheckMiddleware(MiddlewareMixin):
     def process_request(self, request):
         if is_migrating() and getattr(resolve(request.path), 'url_name', '') != 'migrations_notran':
             return redirect(reverse("ui:migrations_notran"))
+
+
+class OptionalURLPrefixPath(MiddlewareMixin):
+    @functools.lru_cache
+    def _url_optional(self, prefix):
+        # Relavant Django code path https://github.com/django/django/blob/stable/4.2.x/django/core/handlers/base.py#L300
+        #
+        # resolve_request(request)
+        #   get_resolver(request.urlconf)
+        #     _get_cached_resolver(request.urlconf) <-- cached via @functools.cache
+        #
+        # Django will attempt to cache the value(s) of request.urlconf
+        # Being hashable is a prerequisit for being cachable.
+        # tuple() is hashable list() is not.
+        # Hence the tuple(list()) wrap.
+        return tuple(get_urlpatterns(prefix=prefix))
+
+    def process_request(self, request):
+        prefix = settings.OPTIONAL_API_URLPATTERN_PREFIX
+
+        if request.path.startswith(f"/api/{prefix}"):
+            request.urlconf = self._url_optional(prefix)
+        else:
+            request.urlconf = 'awx.urls'
