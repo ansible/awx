@@ -1,0 +1,22 @@
+---
+- name: Authenticate with Docker registry if registry password given
+  docker_login:
+    registry: "{{ registry }}"
+    username: "{{ registry_username }}"
+    password: "{{ registry_password }}"
+    reauthorize: true
+  when:
+    - registry is defined
+    - registry_username is defined
+    - registry_password is defined
+
+- name: Tag and Push Container Images
+  docker_image:
+    name: "{{ awx_image }}:{{ awx_image_tag }}"
+    repository: "{{ registry }}/{{ awx_image }}:{{ item }}"
+    force_tag: yes
+    push: true
+    source: local
+  with_items:
+    - "latest"
+    - "{{ awx_image_tag }}"

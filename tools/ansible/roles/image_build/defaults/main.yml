@@ -1,0 +1,5 @@
+---
+awx_image: ansible/awx
+awx_image_tag: "{{ awx_version }}"
+dockerfile_name: 'Dockerfile'
+headless: no

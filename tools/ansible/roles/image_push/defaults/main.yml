@@ -1,0 +1,4 @@
+---
+registry: quay.io
+awx_image: ansible/awx
+awx_image_tag: "{{ awx_version }}"

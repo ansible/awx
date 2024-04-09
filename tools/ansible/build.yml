@@ -1,0 +1,25 @@
+---
+- name: Build AWX Docker Images
+  hosts: localhost
+  gather_facts: true
+  tasks:
+    - name: Get version from SCM if not explicitly provided
+      command: make version-for-buildyml
+      args:
+        chdir: '../../'
+      register: scm_version
+      failed_when: not scm_version.stdout
+      when: awx_version is not defined
+
+    - name: Set awx_version
+      set_fact:
+        awx_version: "{{ scm_version.stdout }}"
+      when: awx_version is not defined
+
+    - include_role:
+        name: dockerfile
+    - include_role:
+        name: image_build
+    - include_role:
+        name: image_push
+      when: push | default(false) | bool

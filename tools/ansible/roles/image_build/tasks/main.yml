@@ -1,0 +1,30 @@
+---
+- name: Verify awx-logos directory exists for official install
+  stat:
+    path: "../../../awx-logos"
+  register: logosdir
+  failed_when: logosdir.stat.isdir is not defined or not logosdir.stat.isdir
+  when: awx_official|default(false)|bool
+
+- name: Copy logos for inclusion in sdist
+  copy:
+    src: "../../../awx-logos/awx/ui/client/assets/"
+    dest: "../../awx/ui/public/static/media/"
+  when: awx_official|default(false)|bool
+
+- set_fact:
+    command_to_run: |
+      docker build -t {{ awx_image }}:{{ awx_image_tag }} \
+        -f {{ dockerfile_name }} \
+        --build-arg VERSION={{ awx_version }} \
+        --build-arg SETUPTOOLS_SCM_PRETEND_VERSION={{ awx_version }} \
+        --build-arg HEADLESS={{ headless }} \
+        .
+
+# Calling Docker directly because docker-py doesnt support BuildKit
+- name: Build AWX image
+  shell: "{{ command_to_run }}"
+  environment:
+    DOCKER_BUILDKIT: 1
+  args:
+    chdir: "{{ playbook_dir }}/../../"
