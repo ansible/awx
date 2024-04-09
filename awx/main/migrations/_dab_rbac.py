@@ -197,7 +197,7 @@ def migrate_to_new_rbac(apps, schema_editor):
             role_definition = managed_definitions[permissions]
         else:
             action = role.role_field.rsplit('_', 1)[0]  # remove the _field ending of the name
-            role_definition_name = f'{role.content_type.model}-{action}'
+            role_definition_name = f'{role.content_type.model_class().__name__} {action.title()}'
 
             description = role_descriptions[role.role_field]
             if type(description) == dict:
