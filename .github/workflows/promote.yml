@@ -47,12 +47,14 @@ jobs:
           COLLECTION_TEMPLATE_VERSION: true
         run: |
           make build_collection
-          if [ "$(curl -L --head -sw '%{http_code}' https://galaxy.ansible.com/download/${{ env.collection_namespace }}-awx-${{ github.event.release.tag_name }}.tar.gz | tail -1)" == "302" ] ; then \
-              echo "Galaxy release already done"; \
-          else \
+          curl_with_redirects=$(curl --head -sLw '%{http_code}' https://galaxy.ansible.com/download/${{ env.collection_namespace }}-awx-${{ github.event.release.tag_name }}.tar.gz | tail -1)
+          curl_without_redirects=$(curl --head -sw '%{http_code}' https://galaxy.ansible.com/download/${{ env.collection_namespace }}-awx-${{ github.event.release.tag_name }}.tar.gz | tail -1)
+          if [[ "$curl_with_redirects" == "302" ]] || [[ "$curl_without_redirects" == "302" ]]; then
+              echo "Galaxy release already done";
+          else
               ansible-galaxy collection publish \
                 --token=${{ secrets.GALAXY_TOKEN }} \
-                awx_collection_build/${{ env.collection_namespace }}-awx-${{ github.event.release.tag_name }}.tar.gz; \
+                awx_collection_build/${{ env.collection_namespace }}-awx-${{ github.event.release.tag_name }}.tar.gz;
           fi
 
       - name: Set official pypi info
