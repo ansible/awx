@@ -553,7 +553,7 @@ def get_role_definition(role):
         return
     f = obj._meta.get_field(role.role_field)
     action_name = f.name.rsplit("_", 1)[0]
-    rd_name = f'{obj._meta.model_name}-{action_name}-compat'
+    rd_name = f'{type(obj).__name__} {action_name.title()} Compat'
     perm_list = get_role_codenames(role)
     defaults = {'content_type_id': role.content_type_id}
     try:
@@ -573,23 +573,26 @@ def get_role_from_object_role(object_role):
     reverses naming from get_role_definition, and the ANSIBLE_BASE_ROLE_PRECREATE setting.
     """
     rd = object_role.role_definition
-    if rd.name.endswith('-compat'):
-        model_name, role_name, _ = rd.name.split('-')
+    if rd.name.endswith(' Compat'):
+        model_name, role_name, _ = rd.name.split()
+        role_name = role_name.lower()
         role_name += '_role'
-    elif rd.name.endswith('-admin') and rd.name.count('-') == 2:
-        # cases like "organization-project-admin"
-        model_name, target_model_name, role_name = rd.name.split('-')
+    elif rd.name.endswith(' Admin') and rd.name.count(' ') == 2:
+        # cases like "Organization Project Admin"
+        model_name, target_model_name, role_name = rd.name.split()
+        role_name = role_name.lower()
         model_cls = apps.get_model('main', target_model_name)
         target_model_name = get_type_for_model(model_cls)
         if target_model_name == 'notification_template':
             target_model_name = 'notification'  # total exception
         role_name = f'{target_model_name}_admin_role'
-    elif rd.name.endswith('-admin'):
+    elif rd.name.endswith(' Admin'):
         # cases like "project-admin"
-        model_name, _ = rd.name.rsplit('-', 1)
         role_name = 'admin_role'
     else:
-        model_name, role_name = rd.name.split('-')
+        print(rd.name)
+        model_name, role_name = rd.name.split()
+        role_name = role_name.lower()
         role_name += '_role'
     return getattr(object_role.content_object, role_name)
 
