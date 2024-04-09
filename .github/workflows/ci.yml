@@ -94,11 +94,11 @@ jobs:
       - name: Build AWX image
         working-directory: awx
         run: |
-          ansible-playbook -v tools/ansible/build.yml \
-            -e headless=yes \
-            -e awx_image=awx \
-            -e awx_image_tag=ci \
-            -e ansible_python_interpreter=$(which python3)
+          VERSION=`make version-for-buildyml` make awx-kube-build
+        env:
+          COMPOSE_TAG: ci
+          DEV_DOCKER_TAG_BASE: local
+          HEADLESS: yes
 
       - name: Run test deployment with awx-operator
         working-directory: awx-operator
@@ -109,7 +109,7 @@ jobs:
           make kustomize
           KUSTOMIZE_PATH=$(readlink -f bin/kustomize) molecule -v test -s kind -- --skip-tags=replicas
         env:
-          AWX_TEST_IMAGE: awx
+          AWX_TEST_IMAGE: local/awx
           AWX_TEST_VERSION: ci
 
   collection-sanity:
