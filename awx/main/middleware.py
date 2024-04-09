@@ -9,18 +9,13 @@ from pathlib import Path
 
 from django.conf import settings
 from django.contrib.auth import logout
-from django.contrib.auth.models import User
 from django.db.migrations.recorder import MigrationRecorder
 from django.db import connection
 from django.shortcuts import redirect
-from django.apps import apps
 from django.utils.deprecation import MiddlewareMixin
-from django.utils.translation import gettext_lazy as _
 from django.urls import reverse, resolve
 
 from awx.main import migrations
-from awx.main.utils.named_url_graph import generate_graph, GraphNode
-from awx.conf import fields, register
 from awx.main.utils.profiling import AWXProfiler
 from awx.main.utils.common import memoize
 
@@ -100,49 +95,7 @@ class DisableLocalAuthMiddleware(MiddlewareMixin):
                 logout(request)
 
 
-def _customize_graph():
-    from awx.main.models import Instance, Schedule, UnifiedJobTemplate
-
-    for model in [Schedule, UnifiedJobTemplate]:
-        if model in settings.NAMED_URL_GRAPH:
-            settings.NAMED_URL_GRAPH[model].remove_bindings()
-            settings.NAMED_URL_GRAPH.pop(model)
-    if User not in settings.NAMED_URL_GRAPH:
-        settings.NAMED_URL_GRAPH[User] = GraphNode(User, ['username'], [])
-        settings.NAMED_URL_GRAPH[User].add_bindings()
-    if Instance not in settings.NAMED_URL_GRAPH:
-        settings.NAMED_URL_GRAPH[Instance] = GraphNode(Instance, ['hostname'], [])
-        settings.NAMED_URL_GRAPH[Instance].add_bindings()
-
-
 class URLModificationMiddleware(MiddlewareMixin):
-    def __init__(self, get_response):
-        models = [m for m in apps.get_app_config('main').get_models() if hasattr(m, 'get_absolute_url')]
-        generate_graph(models)
-        _customize_graph()
-        register(
-            'NAMED_URL_FORMATS',
-            field_class=fields.DictField,
-            read_only=True,
-            label=_('Formats of all available named urls'),
-            help_text=_('Read-only list of key-value pairs that shows the standard format of all available named URLs.'),
-            category=_('Named URL'),
-            category_slug='named-url',
-        )
-        register(
-            'NAMED_URL_GRAPH_NODES',
-            field_class=fields.DictField,
-            read_only=True,
-            label=_('List of all named url graph nodes.'),
-            help_text=_(
-                'Read-only list of key-value pairs that exposes named URL graph topology.'
-                ' Use this list to programmatically generate named URLs for resources'
-            ),
-            category=_('Named URL'),
-            category_slug='named-url',
-        )
-        super().__init__(get_response)
-
     @staticmethod
     def _hijack_for_old_jt_name(node, kwargs, named_url):
         try:
