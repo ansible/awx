@@ -561,11 +561,11 @@ If you have a playbook like:
         var: the_secret_from_vault
 ```
 
-And run it through AWX with the credential `Credential From Vault via Token Auth` tied to it, the debug should result in `this_is_the_secret_value`. If you run it through AWX with the credential `Credential From Vault via Userpass Auth`, the debug should result in `this_is_the_userpass_secret_value`. 
+And run it through AWX with the credential `Credential From Vault via Token Auth` tied to it, the debug should result in `this_is_the_secret_value`. If you run it through AWX with the credential `Credential From Vault via Userpass Auth`, the debug should result in `this_is_the_userpass_secret_value`.
 
 ### HashiVault with LDAP
 
-If you wish to have your OpenLDAP container connected to the Vault container, you will first need to have the OpenLDAP container running alongside AWX and Vault. 
+If you wish to have your OpenLDAP container connected to the Vault container, you will first need to have the OpenLDAP container running alongside AWX and Vault.
 
 
 ```bash
@@ -574,7 +574,7 @@ VAULT=true LDAP=true make docker-compose
 
 ```
 
-Similar to the above, you will need to unseal the vault before we can run the other needed playbooks. 
+Similar to the above, you will need to unseal the vault before we can run the other needed playbooks.
 
 ```bash
 
@@ -582,7 +582,7 @@ ansible-playbook tools/docker-compose/ansible/unseal_vault.yml
 
 ```
 
-Now that the vault is unsealed, we can plumb the vault container now while passing true to enable_ldap extra var. 
+Now that the vault is unsealed, we can plumb the vault container now while passing true to enable_ldap extra var.
 
 
 ```bash
@@ -595,7 +595,7 @@ ansible-playbook tools/docker-compose/ansible/plumb_vault.yml -e enable_ldap=tru
 
 ```
 
-This will populate your AWX instance with LDAP specific items. 
+This will populate your AWX instance with LDAP specific items.
 
 - A vault LDAP Lookup Cred tied to the LDAP `awx_ldap_vault` user called `Vault LDAP Lookup Cred`
 - A credential called `Credential From HashiCorp Vault via LDAP Auth`  which is of the created type using the `Vault LDAP Lookup Cred` to get the secret.
@@ -613,3 +613,5 @@ docker exec -it -e VAULT_TOKEN=<token> tools_vault_1 vault kv get --address=http
 ### Prometheus and Grafana integration
 
 See docs at https://github.com/ansible/awx/blob/devel/tools/grafana/README.md
+
+<trigger ci>
