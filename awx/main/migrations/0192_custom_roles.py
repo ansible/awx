@@ -2,9 +2,7 @@
 
 from django.db import migrations
 
-from awx.main.migrations._dab_rbac import migrate_to_new_rbac, create_permissions_as_operation
-
-from ansible_base.rbac.migrations._managed_definitions import setup_managed_role_definitions
+from awx.main.migrations._dab_rbac import migrate_to_new_rbac, create_permissions_as_operation, setup_managed_role_definitions
 
 
 class Migration(migrations.Migration):
