@@ -10,19 +10,19 @@ from ansible_base.rbac.models import RoleDefinition
 
 
 @pytest.mark.django_db
-def test_managed_roles_created():
+def test_managed_roles_created(managed_roles):
     "Managed RoleDefinitions are created in post_migration signal, we expect to see them here"
     for cls in (JobTemplate, Inventory):
         ct = ContentType.objects.get_for_model(cls)
         rds = list(RoleDefinition.objects.filter(content_type=ct))
         assert len(rds) > 1
-        assert f'{cls._meta.model_name}-admin' in [rd.name for rd in rds]
+        assert f'{cls.__name__} Admin' in [rd.name for rd in rds]
         for rd in rds:
             assert rd.managed is True
 
 
 @pytest.mark.django_db
-def test_custom_read_role(admin_user, post):
+def test_custom_read_role(admin_user, post, managed_roles):
     rd_url = django_reverse('roledefinition-list')
     resp = post(
         url=rd_url, data={"name": "read role made for test", "content_type": "awx.inventory", "permissions": ['view_inventory']}, user=admin_user, expect=201
@@ -40,8 +40,8 @@ def test_custom_system_roles_prohibited(admin_user, post):
 
 
 @pytest.mark.django_db
-def test_assign_managed_role(admin_user, alice, rando, inventory, post):
-    rd = RoleDefinition.objects.get(name='inventory-admin')
+def test_assign_managed_role(admin_user, alice, rando, inventory, post, managed_roles):
+    rd = RoleDefinition.objects.get(name='Inventory Admin')
     rd.give_permission(alice, inventory)
     # Now that alice has full permissions to the inventory, she will give rando permission
     url = django_reverse('roleuserassignment-list')
@@ -63,7 +63,7 @@ def test_assign_custom_delete_role(admin_user, rando, inventory, delete, patch):
 
 
 @pytest.mark.django_db
-def test_assign_custom_add_role(admin_user, rando, organization, post):
+def test_assign_custom_add_role(admin_user, rando, organization, post, managed_roles):
     rd, _ = RoleDefinition.objects.get_or_create(
         name='inventory-add', permissions=['add_inventory', 'view_organization'], content_type=ContentType.objects.get_for_model(Organization)
     )

@@ -1145,13 +1145,16 @@ ANSIBLE_BASE_CUSTOM_VIEW_PARENT = 'awx.api.generics.APIView'
 
 # Settings for the ansible_base RBAC system
 
-# Settings for the RBAC system, override as necessary in app
+# Only used internally, names of the managed RoleDefinitions to create
 ANSIBLE_BASE_ROLE_PRECREATE = {
-    'object_admin': '{cls._meta.model_name}-admin',
-    'org_admin': 'organization-admin',
-    'org_children': 'organization-{cls._meta.model_name}-admin',
-    'special': '{cls._meta.model_name}-{action}',
+    'object_admin': '{cls.__name__} Admin',
+    'org_admin': 'Organization Admin',
+    'org_children': 'Organization {cls.__name__} Admin',
+    'special': '{cls.__name__} {action}',
 }
+
+# Name for auto-created roles that give users permissions to what they create
+ANSIBLE_BASE_ROLE_CREATOR_NAME = '{cls.__name__} Creator'
 
 # Use the new Gateway RBAC system for evaluations? You should. We will remove the old system soon.
 ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED = True
