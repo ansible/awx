@@ -24,9 +24,9 @@ def get_urlpatterns(prefix=None):
     ]
 
     urlpatterns += [
-        # path(f'api{prefix}v2/', include(resource_api_urls)),
-        path('api/v2/', include(api_version_urls)),
-        path('api/', include(api_urls)),
+        path(f'api{prefix}v2/', include(resource_api_urls)),
+        path(f'api{prefix}v2/', include(api_version_urls)),
+        path(f'api{prefix}', include(api_urls)),
         path('', include(root_urls)),
         re_path(r'^sso/', include('awx.sso.urls', namespace='sso')),
         re_path(r'^sso/', include('social_django.urls', namespace='social')),
