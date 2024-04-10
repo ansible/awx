@@ -57,6 +57,7 @@ jobs:
       - name: Build collection and publish to galaxy
         env:
           COLLECTION_NAMESPACE: ${{ env.collection_namespace }}
+          COLLECTION_VERSION: ${{ env.TAG_NAME }}
           COLLECTION_TEMPLATE_VERSION: true
         run: |
           make build_collection
