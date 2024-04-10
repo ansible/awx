@@ -277,6 +277,9 @@ SESSION_COOKIE_SECURE = True
 # Note: This setting may be overridden by database settings.
 SESSION_COOKIE_AGE = 1800
 
+# Option to change userLoggedIn cookie SameSite policy.
+USER_COOKIE_SAMESITE = 'Lax'
+
 # Name of the cookie that contains the session information.
 # Note: Changing this value may require changes to any clients.
 SESSION_COOKIE_NAME = 'awx_sessionid'
