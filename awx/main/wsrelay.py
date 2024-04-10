@@ -242,7 +242,7 @@ class WebSocketRelayManager(object):
                 # In this case, we'll be sharing a redis, no need to relay.
                 if payload.get("hostname") == self.local_hostname:
                     hostname = payload.get("hostname")
-                    logger.debug("Received a heartbeat request for {hostname}. Skipping as we use redis for local host.")
+                    logger.debug(f"Received a heartbeat request for {hostname}. Skipping as we use redis for local host.")
                     continue
 
                 action = payload.get("action")
