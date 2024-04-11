@@ -814,7 +814,7 @@ class ResourceAccessList(ParentMixin, ListAPIView):
             qs = User.objects.filter(has_roles__in=ancestors) | User.objects.filter(is_superuser=True)
             auditor_role = RoleDefinition.objects.filter(name="System Auditor").first()
             if auditor_role:
-                qs |= User.objects.filter(roleuserassignment__role_definition=auditor_role)
+                qs |= User.objects.filter(role_assignments__role_definition=auditor_role)
             return qs.distinct()
 
         roles = set(Role.objects.filter(content_type=content_type, object_id=obj.id))
