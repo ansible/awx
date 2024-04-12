@@ -1,6 +1,8 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+import json
+
 # Django
 from django.conf import settings  # noqa
 from django.db import connection
@@ -8,7 +10,10 @@ from django.db.models.signals import pre_delete  # noqa
 
 # django-ansible-base
 from ansible_base.resource_registry.fields import AnsibleResourceField
+from ansible_base.rbac import permission_registry
+from ansible_base.rbac.models import RoleDefinition, RoleUserAssignment
 from ansible_base.lib.utils.models import prevent_search
+from ansible_base.lib.utils.models import user_summary_fields
 
 # AWX
 from awx.main.models.base import BaseModel, PrimordialModel, accepts_json, CLOUD_INVENTORY_SOURCES, VERBOSITY_CHOICES  # noqa
@@ -102,6 +107,7 @@ User.add_to_class('get_queryset', get_user_queryset)
 User.add_to_class('can_access', check_user_access)
 User.add_to_class('can_access_with_errors', check_user_access_with_errors)
 User.add_to_class('resource', AnsibleResourceField(primary_key_field="id"))
+User.add_to_class('summary_fields', user_summary_fields)
 
 
 def convert_jsonfields():
@@ -194,11 +200,21 @@ User.add_to_class('auditor_of_organizations', user_get_auditor_of_organizations)
 User.add_to_class('created', created)
 
 
+def get_system_auditor_role():
+    rd, created = RoleDefinition.objects.get_or_create(
+        name='System Auditor', defaults={'description': 'Migrated singleton role giving read permission to everything'}
+    )
+    if created:
+        rd.permissions.add(*list(permission_registry.permission_qs.filter(codename__startswith='view')))
+    return rd
+
+
 @property
 def user_is_system_auditor(user):
     if not hasattr(user, '_is_system_auditor'):
         if user.pk:
-            user._is_system_auditor = user.roles.filter(singleton_name='system_auditor', role_field='system_auditor').exists()
+            rd = get_system_auditor_role()
+            user._is_system_auditor = RoleUserAssignment.objects.filter(user=user, role_definition=rd).exists()
         else:
             # Odd case where user is unsaved, this should never be relied on
             return False
@@ -212,17 +228,17 @@ def user_is_system_auditor(user, tf):
         # time they've logged in, and we've just created the new User in this
         # request), we need one to set up the system auditor role
         user.save()
-    if tf:
-        role = Role.singleton('system_auditor')
-        # must check if member to not duplicate activity stream
-        if user not in role.members.all():
-            role.members.add(user)
-        user._is_system_auditor = True
-    else:
-        role = Role.singleton('system_auditor')
-        if user in role.members.all():
-            role.members.remove(user)
-        user._is_system_auditor = False
+    rd = get_system_auditor_role()
+    assignment = RoleUserAssignment.objects.filter(user=user, role_definition=rd).first()
+    prior_value = bool(assignment)
+    if prior_value != bool(tf):
+        if assignment:
+            assignment.delete()
+        else:
+            rd.give_global_permission(user)
+        user._is_system_auditor = bool(tf)
+        entry = ActivityStream.objects.create(changes=json.dumps({"is_system_auditor": [prior_value, bool(tf)]}), object1='user', operation='update')
+        entry.user.add(user)
 
 
 User.add_to_class('is_system_auditor', user_is_system_auditor)
@@ -289,6 +305,10 @@ activity_stream_registrar.connect(WorkflowApproval)
 activity_stream_registrar.connect(WorkflowApprovalTemplate)
 activity_stream_registrar.connect(OAuth2Application)
 activity_stream_registrar.connect(OAuth2AccessToken)
+
+# Register models
+permission_registry.register(Project, Team, WorkflowJobTemplate, JobTemplate, Inventory, Organization, Credential, NotificationTemplate, ExecutionEnvironment)
+permission_registry.register(InstanceGroup, parent_field_name=None)  # Not part of an organization
 
 # prevent API filtering on certain Django-supplied sensitive fields
 prevent_search(User._meta.get_field('password'))
