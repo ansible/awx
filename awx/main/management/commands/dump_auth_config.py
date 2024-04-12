@@ -40,6 +40,13 @@ class Command(BaseCommand):
         "USER_SEARCH": False,
     }
 
+    DAB_OAUTH2_AUTHENTICATOR_KEYS = {
+        "CALLBACK_URL": False,
+        "KEY": True,
+        "SECRET": False,
+        "AUTH_EXTRA_ARGUMENTS": False,
+    }
+
     def get_awx_ldap_settings(self) -> dict[str, dict[str, Any]]:
         awx_ldap_settings = {}
 
@@ -79,6 +86,13 @@ class Command(BaseCommand):
             awx_saml_settings[awx_saml_setting.removeprefix("SOCIAL_AUTH_SAML_")] = getattr(settings, awx_saml_setting, None)
 
         return awx_saml_settings
+
+    def get_awx_oauth2_settings(self) -> dict[str, Any]:
+        awx_oauth2_settings = {}
+        for awx_oauth2_setting in settings_registry.get_registered_settings(category_slug='google-oauth2'):
+            awx_oauth2_settings[awx_oauth2_setting.removeprefix("SOCIAL_AUTH_GOOGLE_OAUTH2_")] = getattr(settings, awx_oauth2_setting, None)
+
+        return awx_oauth2_settings
 
     def format_config_data(self, enabled, awx_settings, type, keys, name):
         config = {
@@ -157,6 +171,20 @@ class Command(BaseCommand):
                             str(awx_ldap_name),
                         )
                     )
+
+            # dump OAUTH2 settings
+            awx_oauth2_settings = self.get_awx_oauth2_settings()
+            awx_oauth2_enabled = self.is_enabled(awx_oauth2_settings, self.DAB_OAUTH2_AUTHENTICATOR_KEYS)
+            if awx_oauth2_enabled:
+                data.append(
+                    self.format_config_data(
+                        awx_oauth2_enabled,
+                        awx_oauth2_settings,
+                        "google_oauth2",
+                        self.DAB_OAUTH2_AUTHENTICATOR_KEYS,
+                        "GOOGLE_OAUTH2",
+                    )
+                )
 
             # write to file if requested
             if options["output_file"]:
