@@ -113,6 +113,7 @@ jobs:
         env:
           AWX_TEST_IMAGE: local/awx
           AWX_TEST_VERSION: ci
+          AWX_EE_TEST_IMAGE: quay.io/ansible/awx-ee:latest
           STORE_DEBUG_OUTPUT: true
 
       - name: Upload debug output
