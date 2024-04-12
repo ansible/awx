@@ -47,8 +47,8 @@ class Command(BaseCommand):
             if required and not settings.get(key):
                 missing_fields.append(key)
         if missing_fields:
-            return missing_fields
-        return True
+            return False, missing_fields
+        return True, None
 
     def get_awx_ldap_settings(self) -> dict[str, dict[str, Any]]:
         awx_ldap_settings = {}
@@ -142,8 +142,8 @@ class Command(BaseCommand):
 
             # dump SAML settings
             awx_saml_settings = self.get_awx_saml_settings()
-            awx_saml_enabled = self.is_enabled(awx_saml_settings, self.DAB_SAML_AUTHENTICATOR_KEYS)
-            if isinstance(awx_saml_enabled, bool):
+            awx_saml_enabled, saml_missing_fields = self.is_enabled(awx_saml_settings, self.DAB_SAML_AUTHENTICATOR_KEYS)
+            if awx_saml_enabled:
                 awx_saml_name = awx_saml_settings["ENABLED_IDPS"]
                 data.append(
                     self.format_config_data(
@@ -155,13 +155,13 @@ class Command(BaseCommand):
                     )
                 )
             else:
-                data.append({"SAML_missing_fields": awx_saml_enabled})
+                data.append({"SAML_missing_fields": saml_missing_fields})
 
             # dump LDAP settings
             awx_ldap_group_settings = self.get_awx_ldap_settings()
             for awx_ldap_name, awx_ldap_settings in awx_ldap_group_settings.items():
-                awx_ldap_enabled = self.is_enabled(awx_ldap_settings, self.DAB_LDAP_AUTHENTICATOR_KEYS)
-                if isinstance(awx_ldap_enabled, bool):
+                awx_ldap_enabled, ldap_missing_fields = self.is_enabled(awx_ldap_settings, self.DAB_LDAP_AUTHENTICATOR_KEYS)
+                if awx_ldap_enabled:
                     data.append(
                         self.format_config_data(
                             awx_ldap_enabled,
@@ -172,7 +172,7 @@ class Command(BaseCommand):
                         )
                     )
                 else:
-                    data.append({f"LDAP_{awx_ldap_name}_missing_fields": awx_ldap_enabled})
+                    data.append({f"LDAP_{awx_ldap_name}_missing_fields": ldap_missing_fields})
 
             # write to file if requested
             if options["output_file"]:
