@@ -40,6 +40,12 @@ class Command(BaseCommand):
         "USER_SEARCH": False,
     }
 
+    DAB_AZURE_AUTHENTICATOR_KEYS = {
+        "CALLBACK_URL": False,
+        "KEY": True,
+        "SECRET": False,
+    }
+
     def get_awx_ldap_settings(self) -> dict[str, dict[str, Any]]:
         awx_ldap_settings = {}
 
@@ -79,6 +85,13 @@ class Command(BaseCommand):
             awx_saml_settings[awx_saml_setting.removeprefix("SOCIAL_AUTH_SAML_")] = getattr(settings, awx_saml_setting, None)
 
         return awx_saml_settings
+
+    def get_awx_azure_settings(self) -> dict[str, Any]:
+        awx_azure_settings = {}
+        for awx_azure_setting in settings_registry.get_registered_settings(category_slug='azuread-oauth2'):
+            awx_azure_settings[awx_azure_setting.removeprefix("SOCIAL_AUTH_AZUREAD_OAUTH2_")] = getattr(settings, awx_azure_setting, None)
+
+        return awx_azure_settings
 
     def format_config_data(self, enabled, awx_settings, type, keys, name):
         config = {
@@ -157,6 +170,20 @@ class Command(BaseCommand):
                             str(awx_ldap_name),
                         )
                     )
+
+            # dump AZURE settings
+            awx_azure_settings = self.get_awx_azure_settings()
+            awx_azure_enabled = self.is_enabled(awx_azure_settings, self.DAB_AZURE_AUTHENTICATOR_KEYS)
+            if awx_azure_enabled:
+                data.append(
+                    self.format_config_data(
+                        awx_azure_enabled,
+                        awx_azure_settings,
+                        "azuread",
+                        self.DAB_AZURE_AUTHENTICATOR_KEYS,
+                        "AZUREAD",
+                    )
+                )
 
             # write to file if requested
             if options["output_file"]:
