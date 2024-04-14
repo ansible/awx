@@ -30,7 +30,7 @@ EXPORTABLE_RESOURCES = [
 ]
 
 
-EXPORTABLE_RELATIONS = ['Roles', 'NotificationTemplates', 'WorkflowJobTemplateNodes', 'Credentials', 'Hosts', 'Groups', 'ExecutionEnvironments', 'Schedules']
+EXPORTABLE_RELATIONS = ['Roles', 'NotificationTemplates', 'WorkflowJobTemplateNodes', 'Credentials', 'Hosts', 'Groups', 'ExecutionEnvironments', 'Schedules', 'CredentialInputSource']
 
 
 # These are special-case related objects, where we want only in this
@@ -48,6 +48,7 @@ DEPENDENT_EXPORT = [
     ('Inventory', 'Host'),
     ('Inventory', 'Label'),
     ('WorkflowJobTemplateNode', 'WorkflowApprovalTemplate'),
+    ('Credential', 'CredentialInputSource'),
 ]
 
 
@@ -62,7 +63,6 @@ DEPENDENT_NONEXPORT = [
     ('Group', 'potential_children'),
     ('Host', 'all_groups'),
     ('WorkflowJobTemplateNode', 'create_approval_template'),
-    ('Credential', 'CredentialInputSource'),
 ]
 
 
