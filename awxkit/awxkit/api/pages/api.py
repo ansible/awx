@@ -27,6 +27,7 @@ EXPORTABLE_RESOURCES = [
     'execution_environments',
     'applications',
     'schedules',
+    'credential_input_sources',
 ]
 
 

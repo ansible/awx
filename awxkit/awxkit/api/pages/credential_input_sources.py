@@ -1,9 +1,11 @@
 from awxkit.api.resources import resources
+from awxkit.api.pages import Credential
 from . import base
 from . import page
 
 
 class CredentialInputSource(base.Base):
+    dependencies = [Credential]
     NATURAL_KEY=('target_credential', 'input_field_name')
     pass
 
