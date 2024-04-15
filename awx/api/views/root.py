@@ -13,6 +13,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
+from django.urls import reverse as django_reverse
 
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -27,7 +28,7 @@ from awx.main.analytics import all_collectors
 from awx.main.ha import is_ha_environment
 from awx.main.utils import get_awx_version, get_custom_venv_choices
 from awx.main.utils.licensing import validate_entitlement_manifest
-from awx.api.versioning import reverse, drf_reverse
+from awx.api.versioning import URLPathVersioning, is_optional_api_urlpattern_prefix_request, reverse, drf_reverse
 from awx.main.constants import PRIVILEGE_ESCALATION_METHODS
 from awx.main.models import Project, Organization, Instance, InstanceGroup, JobTemplate
 from awx.main.utils import set_environ
@@ -39,19 +40,19 @@ logger = logging.getLogger('awx.api.views.root')
 class ApiRootView(APIView):
     permission_classes = (AllowAny,)
     name = _('REST API')
-    versioning_class = None
+    versioning_class = URLPathVersioning
     swagger_topic = 'Versioning'
 
     @method_decorator(ensure_csrf_cookie)
     def get(self, request, format=None):
         '''List supported API versions'''
-
-        v2 = reverse('api:api_v2_root_view', kwargs={'version': 'v2'})
+        v2 = reverse('api:api_v2_root_view', request=request, kwargs={'version': 'v2'})
         data = OrderedDict()
         data['description'] = _('AWX REST API')
         data['current_version'] = v2
         data['available_versions'] = dict(v2=v2)
-        data['oauth2'] = drf_reverse('api:oauth_authorization_root_view')
+        if not is_optional_api_urlpattern_prefix_request(request):
+            data['oauth2'] = drf_reverse('api:oauth_authorization_root_view')
         data['custom_logo'] = settings.CUSTOM_LOGO
         data['custom_login_info'] = settings.CUSTOM_LOGIN_INFO
         data['login_redirect_override'] = settings.LOGIN_REDIRECT_OVERRIDE
@@ -84,6 +85,7 @@ class ApiVersionRootView(APIView):
         data['ping'] = reverse('api:api_v2_ping_view', request=request)
         data['instances'] = reverse('api:instance_list', request=request)
         data['instance_groups'] = reverse('api:instance_group_list', request=request)
+        data['receptor_addresses'] = reverse('api:receptor_addresses_list', request=request)
         data['config'] = reverse('api:api_v2_config_view', request=request)
         data['settings'] = reverse('api:setting_category_list', request=request)
         data['me'] = reverse('api:user_me_list', request=request)
@@ -129,6 +131,10 @@ class ApiVersionRootView(APIView):
         data['mesh_visualizer'] = reverse('api:mesh_visualizer_view', request=request)
         data['bulk'] = reverse('api:bulk', request=request)
         data['analytics'] = reverse('api:analytics_root_view', request=request)
+        data['service_index'] = django_reverse('service-index-root')
+        data['role_definitions'] = django_reverse('roledefinition-list')
+        data['role_user_assignments'] = django_reverse('roleuserassignment-list')
+        data['role_team_assignments'] = django_reverse('roleteamassignment-list')
         return Response(data)
 
 

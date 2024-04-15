@@ -66,6 +66,8 @@ jobs:
   awx-operator:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    env:
+      DEBUG_OUTPUT_DIR: /tmp/awx_operator_molecule_test
     steps:
       - name: Checkout awx
         uses: actions/checkout@v3
@@ -94,11 +96,11 @@ jobs:
       - name: Build AWX image
         working-directory: awx
         run: |
-          ansible-playbook -v tools/ansible/build.yml \
-            -e headless=yes \
-            -e awx_image=awx \
-            -e awx_image_tag=ci \
-            -e ansible_python_interpreter=$(which python3)
+          VERSION=`make version-for-buildyml` make awx-kube-build
+        env:
+          COMPOSE_TAG: ci
+          DEV_DOCKER_TAG_BASE: local
+          HEADLESS: yes
 
       - name: Run test deployment with awx-operator
         working-directory: awx-operator
@@ -107,10 +109,19 @@ jobs:
           ansible-galaxy collection install -r molecule/requirements.yml
           sudo rm -f $(which kustomize)
           make kustomize
-          KUSTOMIZE_PATH=$(readlink -f bin/kustomize) molecule -v test -s kind
+          KUSTOMIZE_PATH=$(readlink -f bin/kustomize) molecule -v test -s kind -- --skip-tags=replicas
         env:
-          AWX_TEST_IMAGE: awx
+          AWX_TEST_IMAGE: local/awx
           AWX_TEST_VERSION: ci
+          AWX_EE_TEST_IMAGE: quay.io/ansible/awx-ee:latest
+          STORE_DEBUG_OUTPUT: true
+
+      - name: Upload debug output
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: awx-operator-debug-output
+          path: ${{ env.DEBUG_OUTPUT_DIR }}
 
   collection-sanity:
     name: awx_collection sanity
@@ -127,10 +138,6 @@ jobs:
 
       - name: Run sanity tests
         run: make test_collection_sanity
-        env:
-          # needed due to cgroupsv2. This is fixed, but a stable release
-          # with the fix has not been made yet.
-          ANSIBLE_TEST_PREFER_PODMAN: 1
 
   collection-integration:
     name: awx_collection integration

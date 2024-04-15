@@ -7,6 +7,7 @@ Setting up LDAP Authentication
    single: LDAP
    pair: authentication; LDAP
    
+This chapter describes how to integrate LDAP authentication with AWX.
 
 .. note::
 

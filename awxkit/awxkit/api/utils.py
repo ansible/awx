@@ -15,7 +15,12 @@ def freeze(key):
 
 def parse_description(desc):
     options = {}
-    for line in desc[desc.index('POST') :].splitlines():
+    desc_lines = []
+    if 'POST' in desc:
+        desc_lines = desc[desc.index('POST') :].splitlines()
+    else:
+        desc_lines = desc.splitlines()
+    for line in desc_lines:
         match = descRE.match(line)
         if not match:
             continue

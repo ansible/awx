@@ -38,7 +38,6 @@
     controller_host: "{{ awx_host }}"
     controller_username: admin
     controller_password: "{{ admin_password }}"
-
     validate_certs: false
     injectors:
       extra_vars:
@@ -51,32 +50,127 @@
           secret: true
   register: custom_vault_cred_type
 
-- name: Create a credential of the custom type
+- name: Create a credential of the custom type for token auth
   awx.awx.credential:
     credential_type: "{{ custom_vault_cred_type.id }}"
     controller_host: "{{ awx_host }}"
     controller_username: admin
     controller_password: "{{ admin_password }}"
-
     validate_certs: false
-    name: Credential From Vault
+    name: Credential From HashiCorp Vault via Token Auth
     inputs: {}
     organization: Default
-  register: custom_credential
+  register: custom_credential_via_token
 
-- name: Use the Vault Credential For the new credential
+- name: Use the Token Vault Credential For the new credential
   awx.awx.credential_input_source:
     input_field_name: password
-    target_credential: "{{ custom_credential.id }}"
+    target_credential: "{{ custom_credential_via_token.id }}"
     source_credential: "{{ vault_cred.id }}"
     controller_host: "{{ awx_host }}"
     controller_username: admin
     controller_password: "{{ admin_password }}"
-
     validate_certs: false
     metadata:
       auth_path: ""
       secret_backend: "my_engine"
       secret_key: "my_key"
       secret_path: "/my_root/my_folder"
+      secret_version: ""
+
+- name: Create a HashiCorp Vault Credential for LDAP
+  awx.awx.credential:
+    credential_type: HashiCorp Vault Secret Lookup
+    name: Vault LDAP Lookup Cred
+    organization: Default
+    controller_host: "{{ awx_host }}"
+    controller_username: admin
+    controller_password: "{{ admin_password }}"
+    validate_certs: false
+    inputs:
+      api_version: "v1"
+      default_auth_path: "ldap"
+      kubernetes_role: ""
+      namespace: ""
+      url: "{{ vault_addr_from_container }}"
+      username: "{{ vault_ldap_username }}"
+      password: "{{ vault_ldap_password }}"
+  register: vault_ldap_cred
+  when: enable_ldap | bool
+
+- name: Create a credential from the Vault LDAP Custom Cred Type
+  awx.awx.credential:
+    credential_type: "{{ custom_vault_cred_type.id }}"
+    controller_host: "{{ awx_host }}"
+    controller_username: admin
+    controller_password: "{{ admin_password }}"
+    validate_certs: false
+    name: Credential From HashiCorp Vault via LDAP Auth
+    inputs: {}
+    organization: Default
+  register: custom_credential_via_ldap
+  when: enable_ldap | bool
+
+- name: Use the Vault LDAP Credential  the new credential
+  awx.awx.credential_input_source:
+    input_field_name: password
+    target_credential: "{{ custom_credential_via_ldap.id }}"
+    source_credential: "{{ vault_ldap_cred.id }}"
+    controller_host: "{{ awx_host }}"
+    controller_username: admin
+    controller_password: "{{ admin_password }}"
+    validate_certs: false
+    metadata:
+      auth_path: ""
+      secret_backend: "ldap_engine"
+      secret_key: "my_key"
+      secret_path: "ldaps_root/ldap_secret"
+      secret_version: ""
+  when: enable_ldap | bool
+
+- name: Create a HashiCorp Vault Credential for UserPass
+  awx.awx.credential:
+    credential_type: HashiCorp Vault Secret Lookup
+    name: Vault UserPass Lookup Cred
+    organization: Default
+    controller_host: "{{ awx_host }}"
+    controller_username: admin
+    controller_password: "{{ admin_password }}"
+    validate_certs: false
+    inputs:
+      api_version: "v1"
+      default_auth_path: "userpass"
+      kubernetes_role: ""
+      namespace: ""
+      url: "{{ vault_addr_from_container }}"
+      username: "{{ vault_userpass_username }}"
+      password: "{{ vault_userpass_password }}"
+  register: vault_userpass_cred
+
+- name: Create a credential from the Vault UserPass Custom Cred Type
+  awx.awx.credential:
+    credential_type: "{{ custom_vault_cred_type.id }}"
+    controller_host: "{{ awx_host }}"
+    controller_username: admin
+    controller_password: "{{ admin_password }}"
+    validate_certs: false
+    name: Credential From HashiCorp Vault via UserPass Auth
+    inputs: {}
+    organization: Default
+  register: custom_credential_via_userpass
+
+- name: Use the Vault UserPass Credential  the new credential
+  awx.awx.credential_input_source:
+    input_field_name: password
+    target_credential: "{{ custom_credential_via_userpass.id }}"
+    source_credential: "{{ vault_userpass_cred.id }}"
+    controller_host: "{{ awx_host }}"
+    controller_username: admin
+    controller_password: "{{ admin_password }}"
+    validate_certs: false
+    metadata:
+      auth_path: ""
+      secret_backend: "userpass_engine"
+      secret_key: "my_key"
+      secret_path: "userpass_root/userpass_secret"
       secret_version: ""

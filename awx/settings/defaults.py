@@ -11,6 +11,7 @@ from datetime import timedelta
 
 # python-ldap
 import ldap
+from split_settings.tools import include
 
 
 DEBUG = True
@@ -32,6 +33,18 @@ DATABASES = {
         'TEST': {
             # Test database cannot be :memory: for inventory tests.
             'NAME': os.path.join(BASE_DIR, 'awx_test.sqlite3')
+        },
+    }
+}
+
+# Special database overrides for dispatcher connections listening to pg_notify
+LISTENER_DATABASES = {
+    'default': {
+        'OPTIONS': {
+            'keepalives': 1,
+            'keepalives_idle': 5,
+            'keepalives_interval': 5,
+            'keepalives_count': 5,
         },
     }
 }
@@ -130,6 +143,9 @@ BULK_JOB_MAX_LAUNCH = 100
 
 # Maximum number of host that can be created in 1 bulk host create
 BULK_HOST_MAX_CREATE = 100
+
+# Maximum number of host that can be deleted in 1 bulk host delete
+BULK_HOST_MAX_DELETE = 250
 
 SITE_ID = 1
 
@@ -336,8 +352,12 @@ INSTALLED_APPS = [
     'awx.ui',
     'awx.sso',
     'solo',
-    'ansible_base',
+    'ansible_base.rest_filters',
+    'ansible_base.jwt_consumer',
+    'ansible_base.resource_registry',
+    'ansible_base.rbac',
 ]
+
 
 INTERNAL_IPS = ('127.0.0.1',)
 
@@ -346,17 +366,12 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'awx.api.pagination.Pagination',
     'PAGE_SIZE': 25,
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'ansible_base.jwt_consumer.awx.auth.AwxJWTAuthentication',
         'awx.api.authentication.LoggedOAuth2Authentication',
         'awx.api.authentication.SessionAuthentication',
         'awx.api.authentication.LoggedBasicAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': ('awx.api.permissions.ModelAccessPermission',),
-    'DEFAULT_FILTER_BACKENDS': (
-        'awx.api.filters.TypeFilterBackend',
-        'awx.api.filters.FieldLookupBackend',
-        'rest_framework.filters.SearchFilter',
-        'awx.api.filters.OrderByBackend',
-    ),
     'DEFAULT_PARSER_CLASSES': ('awx.api.parsers.JSONParser',),
     'DEFAULT_RENDERER_CLASSES': ('awx.api.renderers.DefaultJSONRenderer', 'awx.api.renderers.BrowsableAPIRenderer'),
     'DEFAULT_METADATA_CLASS': 'awx.api.metadata.Metadata',
@@ -483,6 +498,12 @@ CACHES = {'default': {'BACKEND': 'awx.main.cache.AWXRedisCache', 'LOCATION': 'un
 SOCIAL_AUTH_STRATEGY = 'social_django.strategy.DjangoStrategy'
 SOCIAL_AUTH_STORAGE = 'social_django.models.DjangoStorage'
 SOCIAL_AUTH_USER_MODEL = 'auth.User'
+ROLE_SINGLETON_USER_RELATIONSHIP = ''
+ROLE_SINGLETON_TEAM_RELATIONSHIP = ''
+
+# We want to short-circuit RBAC methods to get permission to system admins and auditors
+ROLE_BYPASS_SUPERUSER_FLAGS = ['is_superuser']
+ROLE_BYPASS_ACTION_FLAGS = {'view': 'is_system_auditor'}
 
 _SOCIAL_AUTH_PIPELINE_BASE = (
     'social_core.pipeline.social_auth.social_details',
@@ -745,6 +766,14 @@ SATELLITE6_INSTANCE_ID_VAR = 'foreman_id,foreman.id'
 INSIGHTS_INSTANCE_ID_VAR = 'insights_id'
 INSIGHTS_EXCLUDE_EMPTY_GROUPS = False
 
+# ----------------
+# -- Terraform State --
+# ----------------
+# TERRAFORM_ENABLED_VAR =
+# TERRAFORM_ENABLED_VALUE =
+TERRAFORM_INSTANCE_ID_VAR = 'id'
+TERRAFORM_EXCLUDE_EMPTY_GROUPS = True
+
 # ---------------------
 # ----- Custom -----
 # ---------------------
@@ -827,7 +856,6 @@ LOGGING = {
         'json': {'()': 'awx.main.utils.formatters.LogstashFormatter'},
         'timed_import': {'()': 'awx.main.utils.formatters.TimeFormatter', 'format': '%(relativeSeconds)9.3f %(levelname)-8s %(message)s'},
         'dispatcher': {'format': '%(asctime)s %(levelname)-8s [%(guid)s] %(name)s PID:%(process)d %(message)s'},
-        'job_lifecycle': {'()': 'awx.main.utils.formatters.JobLifeCycleFormatter'},
     },
     # Extended below based on install scenario. You probably don't want to add something directly here.
     # See 'handler_config' below.
@@ -852,6 +880,7 @@ LOGGING = {
     'loggers': {
         'django': {'handlers': ['console']},
         'django.request': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'WARNING'},
+        'ansible_base': {'handlers': ['console', 'file', 'tower_warnings']},
         'daphne': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'INFO'},
         'rest_framework.request': {'handlers': ['console', 'file', 'tower_warnings'], 'level': 'WARNING', 'propagate': False},
         'py.warnings': {'handlers': ['console']},
@@ -895,7 +924,7 @@ handler_config = {
     'wsrelay': {'filename': 'wsrelay.log'},
     'task_system': {'filename': 'task_system.log'},
     'rbac_migrations': {'filename': 'tower_rbac_migrations.log'},
-    'job_lifecycle': {'filename': 'job_lifecycle.log', 'formatter': 'job_lifecycle'},
+    'job_lifecycle': {'filename': 'job_lifecycle.log'},
     'rsyslog_configurer': {'filename': 'rsyslog_configurer.log'},
     'cache_clear': {'filename': 'cache_clear.log'},
     'ws_heartbeat': {'filename': 'ws_heartbeat.log'},
@@ -981,6 +1010,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'awx.main.middleware.DisableLocalAuthMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'awx.main.middleware.OptionalURLPrefixPath',
     'awx.sso.middleware.SocialAuthMiddleware',
     'crum.CurrentRequestUserMiddleware',
     'awx.main.middleware.URLModificationMiddleware',
@@ -1064,3 +1094,90 @@ CLEANUP_HOST_METRICS_HARD_THRESHOLD = 36  # months
 # Host metric summary monthly task - last time of run
 HOST_METRIC_SUMMARY_TASK_LAST_TS = None
 HOST_METRIC_SUMMARY_TASK_INTERVAL = 7  # days
+
+
+# TODO: cmeyers, replace with with register pattern
+# The register pattern is particularly nice for this because we need
+# to know the process to start the thread that will be the server.
+# The registration location should be the same location as we would
+# call MetricsServer.start()
+# Note: if we don't get to this TODO, then at least create constants
+# for the services strings below.
+# TODO: cmeyers, break this out into a separate django app so other
+# projects can take advantage.
+
+METRICS_SERVICE_CALLBACK_RECEIVER = 'callback_receiver'
+METRICS_SERVICE_DISPATCHER = 'dispatcher'
+METRICS_SERVICE_WEBSOCKETS = 'websockets'
+
+METRICS_SUBSYSTEM_CONFIG = {
+    'server': {
+        METRICS_SERVICE_CALLBACK_RECEIVER: {
+            'port': 8014,
+        },
+        METRICS_SERVICE_DISPATCHER: {
+            'port': 8015,
+        },
+        METRICS_SERVICE_WEBSOCKETS: {
+            'port': 8016,
+        },
+    }
+}
+
+
+# django-ansible-base
+ANSIBLE_BASE_TEAM_MODEL = 'main.Team'
+ANSIBLE_BASE_ORGANIZATION_MODEL = 'main.Organization'
+ANSIBLE_BASE_RESOURCE_CONFIG_MODULE = 'awx.resource_api'
+ANSIBLE_BASE_PERMISSION_MODEL = 'main.Permission'
+
+from ansible_base.lib import dynamic_config  # noqa: E402
+
+include(os.path.join(os.path.dirname(dynamic_config.__file__), 'dynamic_settings.py'))
+
+# Add a postfix to the API URL patterns
+# example if set to '' API pattern will be /api
+# example if set to 'controller' API pattern will be /api AND /api/controller
+OPTIONAL_API_URLPATTERN_PREFIX = ''
+
+# Use AWX base view, to give 401 on unauthenticated requests
+ANSIBLE_BASE_CUSTOM_VIEW_PARENT = 'awx.api.generics.APIView'
+
+# Settings for the ansible_base RBAC system
+
+# Only used internally, names of the managed RoleDefinitions to create
+ANSIBLE_BASE_ROLE_PRECREATE = {
+    'object_admin': '{cls.__name__} Admin',
+    'org_admin': 'Organization Admin',
+    'org_children': 'Organization {cls.__name__} Admin',
+    'special': '{cls.__name__} {action}',
+}
+
+# Name for auto-created roles that give users permissions to what they create
+ANSIBLE_BASE_ROLE_CREATOR_NAME = '{cls.__name__} Creator'
+
+# Use the new Gateway RBAC system for evaluations? You should. We will remove the old system soon.
+ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED = True
+
+# Permissions a user will get when creating a new item
+ANSIBLE_BASE_CREATOR_DEFAULTS = ['change', 'delete', 'execute', 'use', 'adhoc', 'approve', 'update', 'view']
+
+# This is a stopgap, will delete after resource registry integration
+ANSIBLE_BASE_SERVICE_PREFIX = "awx"
+
+# Temporary, for old roles API compatibility, save child permissions at organization level
+ANSIBLE_BASE_CACHE_PARENT_PERMISSIONS = True
+
+# Currently features are enabled to keep compatibility with old system, except custom roles
+ANSIBLE_BASE_ALLOW_TEAM_ORG_ADMIN = False
+# ANSIBLE_BASE_ALLOW_CUSTOM_ROLES = True
+ANSIBLE_BASE_ALLOW_CUSTOM_TEAM_ROLES = False
+ANSIBLE_BASE_ALLOW_SINGLETON_USER_ROLES = True
+ANSIBLE_BASE_ALLOW_SINGLETON_TEAM_ROLES = False  # System auditor has always been restricted to users
+ANSIBLE_BASE_ALLOW_SINGLETON_ROLES_API = False  # Do not allow creating user-defined system-wide roles
+
+# system username for django-ansible-base
+SYSTEM_USERNAME = None
+
+# Use AWX base view, to give 401 on unauthenticated requests
+ANSIBLE_BASE_CUSTOM_VIEW_PARENT = 'awx.api.generics.APIView'

@@ -1,8 +1,8 @@
 -include awx/ui_next/Makefile
 
-PYTHON := $(notdir $(shell for i in python3.9 python3; do command -v $$i; done|sed 1q))
+PYTHON := $(notdir $(shell for i in python3.11 python3; do command -v $$i; done|sed 1q))
 SHELL := bash
-DOCKER_COMPOSE ?= docker-compose
+DOCKER_COMPOSE ?= docker compose
 OFFICIAL ?= no
 NODE ?= node
 NPM_BIN ?= npm
@@ -10,7 +10,7 @@ KIND_BIN ?= $(shell which kind)
 CHROMIUM_BIN=/tmp/chrome-linux/chrome
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 MANAGEMENT_COMMAND ?= awx-manage
-VERSION ?= $(shell $(PYTHON) tools/scripts/scm_version.py)
+VERSION ?= $(shell $(PYTHON) tools/scripts/scm_version.py 2> /dev/null)
 
 # ansible-test requires semver compatable version, so we allow overrides to hack it
 COLLECTION_VERSION ?= $(shell $(PYTHON) tools/scripts/scm_version.py | cut -d . -f 1-3)
@@ -47,6 +47,8 @@ VAULT ?= false
 VAULT_TLS ?= false
 # If set to true docker-compose will also start a tacacs+ instance
 TACACS ?= false
+# If set to true docker-compose will install editable dependencies
+EDITABLE_DEPENDENCIES ?= false
 
 VENV_BASE ?= /var/lib/awx/venv
 
@@ -63,7 +65,7 @@ RECEPTOR_IMAGE ?= quay.io/ansible/receptor:devel
 SRC_ONLY_PKGS ?= cffi,pycparser,psycopg,twilio
 # These should be upgraded in the AWX and Ansible venv before attempting
 # to install the actual requirements
-VENV_BOOTSTRAP ?= pip==21.2.4 setuptools==65.6.3 setuptools_scm[toml]==7.0.5 wheel==0.38.4
+VENV_BOOTSTRAP ?= pip==21.2.4 setuptools==69.0.2 setuptools_scm[toml]==8.0.4 wheel==0.42.0
 
 NAME ?= awx
 
@@ -74,6 +76,9 @@ SDIST_COMMAND ?= sdist
 SDIST_TAR_FILE ?= $(SDIST_TAR_NAME).tar.gz
 
 I18N_FLAG_FILE = .i18n_built
+
+## PLATFORMS defines the target platforms for  the manager image be build to provide support to multiple
+PLATFORMS ?= linux/amd64,linux/arm64  # linux/ppc64le,linux/s390x
 
 .PHONY: awx-link clean clean-tmp clean-venv requirements requirements_dev \
 	develop refresh adduser migrate dbchange \
@@ -213,8 +218,6 @@ collectstatic:
 	fi; \
 	$(PYTHON) manage.py collectstatic --clear --noinput > /dev/null 2>&1
 
-DEV_RELOAD_COMMAND ?= supervisorctl restart tower-processes:*
-
 uwsgi: collectstatic
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
@@ -222,7 +225,7 @@ uwsgi: collectstatic
 	uwsgi /etc/tower/uwsgi.ini
 
 awx-autoreload:
-	@/awx_devel/tools/docker-compose/awx-autoreload /awx_devel/awx "$(DEV_RELOAD_COMMAND)"
+	@/awx_devel/tools/docker-compose/awx-autoreload /awx_devel/awx
 
 daphne:
 	@if [ "$(VENV_BASE)" ]; then \
@@ -302,7 +305,7 @@ swagger: reports
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	(set -o pipefail && py.test $(PYTEST_ARGS) awx/conf/tests/functional awx/main/tests/functional/api awx/main/tests/docs --release=$(VERSION_TARGET) | tee reports/$@.report)
+	(set -o pipefail && py.test $(PYTEST_ARGS) awx/conf/tests/functional awx/main/tests/functional/api awx/main/tests/docs | tee reports/$@.report)
 
 check: black
 
@@ -532,14 +535,22 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e enable_vault=$(VAULT) \
 	    -e vault_tls=$(VAULT_TLS) \
 	    -e enable_tacacs=$(TACACS) \
-            $(EXTRA_SOURCES_ANSIBLE_OPTS)
+	    -e install_editable_dependencies=$(EDITABLE_DEPENDENCIES) \
+	    $(EXTRA_SOURCES_ANSIBLE_OPTS)
 
 docker-compose: awx/projects docker-compose-sources
 	ansible-galaxy install --ignore-certs -r tools/docker-compose/ansible/requirements.yml;
 	ansible-playbook -i tools/docker-compose/inventory tools/docker-compose/ansible/initialize_containers.yml \
 	    -e enable_vault=$(VAULT) \
-	    -e vault_tls=$(VAULT_TLS);
+	    -e vault_tls=$(VAULT_TLS) \
+	    -e enable_ldap=$(LDAP); \
+	$(MAKE) docker-compose-up
+
+docker-compose-up:
 	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_OPTS) up $(COMPOSE_UP_OPTS) --remove-orphans
+
+docker-compose-down:
+	$(DOCKER_COMPOSE) -f tools/docker-compose/_sources/docker-compose.yml $(COMPOSE_OPTS) down --remove-orphans
 
 docker-compose-credential-plugins: awx/projects docker-compose-sources
 	echo -e "\033[0;31mTo generate a CyberArk Conjur API key: docker exec -it tools_conjur_1 conjurctl account create quick-start\033[0m"
@@ -585,12 +596,27 @@ docker-compose-build: Dockerfile.dev
 		--build-arg BUILDKIT_INLINE_CACHE=1 \
 		--cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) .
 
+
+.PHONY: docker-compose-buildx
+## Build awx_devel image for docker compose development environment for multiple architectures
+docker-compose-buildx: Dockerfile.dev
+	- docker buildx create --name docker-compose-buildx
+	docker buildx use docker-compose-buildx
+	- docker buildx build \
+		--push \
+		--build-arg BUILDKIT_INLINE_CACHE=1 \
+		--cache-from=$(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG) \
+		--platform=$(PLATFORMS) \
+		--tag $(DEVEL_IMAGE_NAME) \
+		-f Dockerfile.dev .
+	- docker buildx rm docker-compose-buildx
+
 docker-clean:
 	-$(foreach container_id,$(shell docker ps -f name=tools_awx -aq && docker ps -f name=tools_receptor -aq),docker stop $(container_id); docker rm -f $(container_id);)
 	-$(foreach image_id,$(shell docker images --filter=reference='*/*/*awx_devel*' --filter=reference='*/*awx_devel*' --filter=reference='*awx_devel*' -aq),docker rmi --force $(image_id);)
 
 docker-clean-volumes: docker-compose-clean docker-compose-container-group-clean
-	docker volume rm -f tools_awx_db tools_vault_1 tools_grafana_storage tools_prometheus_storage $(docker volume ls --filter name=tools_redis_socket_ -q)
+	docker volume rm -f tools_var_lib_awx tools_awx_db tools_awx_db_15 tools_vault_1 tools_ldap_1 tools_grafana_storage tools_prometheus_storage $(docker volume ls --filter name=tools_redis_socket_ -q)
 
 docker-refresh: docker-clean docker-compose
 
@@ -611,9 +637,6 @@ clean-elk:
 	docker rm tools_logstash_1
 	docker rm tools_elasticsearch_1
 	docker rm tools_kibana_1
-
-psql-container:
-	docker run -it --net tools_default --rm postgres:12 sh -c 'exec psql -h "postgres" -p "5432" -U postgres'
 
 VERSION:
 	@echo "awx: $(VERSION)"
@@ -647,6 +670,21 @@ awx-kube-build: Dockerfile
 		--build-arg HEADLESS=$(HEADLESS) \
 		-t $(DEV_DOCKER_TAG_BASE)/awx:$(COMPOSE_TAG) .
 
+## Build multi-arch awx image for deployment on Kubernetes environment.
+awx-kube-buildx: Dockerfile
+	- docker buildx create --name awx-kube-buildx
+	docker buildx use awx-kube-buildx
+	- docker buildx build \
+		--push \
+		--build-arg VERSION=$(VERSION) \
+		--build-arg SETUPTOOLS_SCM_PRETEND_VERSION=$(VERSION) \
+		--build-arg HEADLESS=$(HEADLESS) \
+		--platform=$(PLATFORMS) \
+		--tag $(DEV_DOCKER_TAG_BASE)/awx:$(COMPOSE_TAG) \
+		-f Dockerfile .
+	- docker buildx rm awx-kube-buildx
+
+
 .PHONY: Dockerfile.kube-dev
 ## Generate Docker.kube-dev for awx_kube_devel image
 Dockerfile.kube-dev: tools/ansible/roles/dockerfile/templates/Dockerfile.j2
@@ -663,6 +701,18 @@ awx-kube-dev-build: Dockerfile.kube-dev
 	    --cache-from=$(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) \
 	    -t $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) .
 
+## Build and push multi-arch awx_kube_devel image for development on local Kubernetes environment.
+awx-kube-dev-buildx: Dockerfile.kube-dev
+	- docker buildx create --name awx-kube-dev-buildx
+	docker buildx use awx-kube-dev-buildx
+	- docker buildx build \
+		--push \
+		--build-arg BUILDKIT_INLINE_CACHE=1 \
+		--cache-from=$(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) \
+		--platform=$(PLATFORMS) \
+		--tag $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG) \
+		-f Dockerfile.kube-dev .
+	- docker buildx rm awx-kube-dev-buildx
 
 kind-dev-load: awx-kube-dev-build
 	$(KIND_BIN) load docker-image $(DEV_DOCKER_TAG_BASE)/awx_kube_devel:$(COMPOSE_TAG)

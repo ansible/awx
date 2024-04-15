@@ -3,28 +3,50 @@ name: Build/Push Development Images
 env:
   LC_ALL: "C.UTF-8" # prevent ERROR: Ansible could not initialize the preferred locale: unsupported locale setting
 on:
+  workflow_dispatch:
   push:
     branches:
       - devel
       - release_*
       - feature_*
 jobs:
-  push:
-    if: endsWith(github.repository, '/awx') || startsWith(github.ref, 'refs/heads/release_')
+  push-development-images:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 120
     permissions:
       packages: write
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        build-targets:
+          - image-name: awx_devel
+            make-target: docker-compose-buildx
+          - image-name: awx_kube_devel
+            make-target: awx-kube-dev-buildx
+          - image-name: awx
+            make-target: awx-kube-buildx
     steps:
+
+      - name: Skipping build of awx image for non-awx repository
+        run: |
+          echo "Skipping build of awx image for non-awx repository"
+          exit 0
+        if: matrix.build-targets.image-name == 'awx' && !endsWith(github.repository, '/awx')
+
       - uses: actions/checkout@v3
 
-      - name: Get python version from Makefile
-        run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
-      - name: Set lower case owner name
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Set GITHUB_ENV variables
         run: |
-          echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
+          echo "DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER,,}" >> $GITHUB_ENV
+          echo "COMPOSE_TAG=${GITHUB_REF##*/}" >> $GITHUB_ENV
+          echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
         env:
           OWNER: '${{ github.repository_owner }}'
 
@@ -37,23 +59,19 @@ jobs:
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Pre-pull image to warm build cache
-        run: |
-          docker pull ghcr.io/${OWNER_LC}/awx_devel:${GITHUB_REF##*/} || :
-          docker pull ghcr.io/${OWNER_LC}/awx_kube_devel:${GITHUB_REF##*/} || :
-          docker pull ghcr.io/${OWNER_LC}/awx:${GITHUB_REF##*/} || :
+      - name: Setup node and npm
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.13.1'
+        if: matrix.build-targets.image-name == 'awx'
 
-      - name: Build images
+      - name: Prebuild UI for awx image (to speed up build process)
         run: |
-          DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER_LC} COMPOSE_TAG=${GITHUB_REF##*/} make docker-compose-build
-          DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER_LC} COMPOSE_TAG=${GITHUB_REF##*/} make awx-kube-dev-build
-          DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER_LC} COMPOSE_TAG=${GITHUB_REF##*/} make awx-kube-build
+          sudo apt-get install gettext
+          make ui-release
+          make ui-next
+        if: matrix.build-targets.image-name == 'awx'
 
-      - name: Push development images
+      - name: Build and push AWX devel images
         run: |
-          docker push ghcr.io/${OWNER_LC}/awx_devel:${GITHUB_REF##*/}
-          docker push ghcr.io/${OWNER_LC}/awx_kube_devel:${GITHUB_REF##*/}
-
-      - name: Push AWX k8s image, only for upstream and feature branches
-        run: docker push ghcr.io/${OWNER_LC}/awx:${GITHUB_REF##*/}
-        if: endsWith(github.repository, '/awx')
+          make ${{ matrix.build-targets.make-target }}

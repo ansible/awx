@@ -4,6 +4,7 @@ import json
 from .stdout import monitor, monitor_workflow
 from .utils import CustomRegistryMeta, color_enabled
 from awxkit import api
+from awxkit.config import config
 from awxkit.exceptions import NoContent
 
 
@@ -140,6 +141,26 @@ class BulkHostCreate(CustomAction):
 
     def perform(self, **kwargs):
         response = self.page.get().host_create.post(kwargs)
+        return response
+
+
+class BulkHostDelete(CustomAction):
+    action = 'host_delete'
+    resource = 'bulk'
+
+    @property
+    def options_endpoint(self):
+        return self.page.endpoint + '{}/'.format(self.action)
+
+    def add_arguments(self, parser, resource_options_parser):
+        options = self.page.connection.options(self.options_endpoint)
+        if options.ok:
+            options = options.json()['actions']['POST']
+            resource_options_parser.options['HOSTDELETEPOST'] = options
+            resource_options_parser.build_query_arguments(self.action, 'HOSTDELETEPOST')
+
+    def perform(self, **kwargs):
+        response = self.page.get().host_delete.post(kwargs)
         return response
 
 
@@ -459,7 +480,7 @@ class RoleMixin(object):
                     options = ', '.join(RoleMixin.roles[flag])
                     raise ValueError("invalid choice: '{}' must be one of {}".format(role, options))
                 value = kwargs[flag]
-                target = '/api/v2/{}/{}'.format(resource, value)
+                target = '{}v2/{}/{}'.format(config.api_base_path, resource, value)
                 detail = self.page.__class__(target, self.page.connection).get()
                 object_roles = detail['summary_fields']['object_roles']
                 actual_role = object_roles[role + '_role']

@@ -83,6 +83,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         app_label = 'main'
         ordering = ('name',)
         unique_together = ('organization', 'name', 'credential_type')
+        permissions = [('use_credential', 'Can use credential in a job or related resource')]
 
     PASSWORD_FIELDS = ['inputs']
     FIELDS_TO_PRESERVE_AT_COPY = ['input_sources']
@@ -954,6 +955,25 @@ ManagedCredentialType(
 )
 
 ManagedCredentialType(
+    namespace='bitbucket_dc_token',
+    kind='token',
+    name=gettext_noop('Bitbucket Data Center HTTP Access Token'),
+    managed=True,
+    inputs={
+        'fields': [
+            {
+                'id': 'token',
+                'label': gettext_noop('Token'),
+                'type': 'string',
+                'secret': True,
+                'help_text': gettext_noop('This token needs to come from your user settings in Bitbucket'),
+            }
+        ],
+        'required': ['token'],
+    },
+)
+
+ManagedCredentialType(
     namespace='insights',
     kind='insights',
     name=gettext_noop('Insights'),
@@ -1194,6 +1214,26 @@ ManagedCredentialType(
             },
         ],
         'required': ['gpg_public_key'],
+    },
+)
+
+ManagedCredentialType(
+    namespace='terraform',
+    kind='cloud',
+    name=gettext_noop('Terraform backend configuration'),
+    managed=True,
+    inputs={
+        'fields': [
+            {
+                'id': 'configuration',
+                'label': gettext_noop('Backend configuration'),
+                'type': 'string',
+                'secret': True,
+                'multiline': True,
+                'help_text': gettext_noop('Terraform backend config as Hashicorp configuration language.'),
+            },
+        ],
+        'required': ['configuration'],
     },
 )
 

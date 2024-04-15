@@ -21,7 +21,7 @@ from split_settings.tools import optional, include
 from .defaults import *  # NOQA
 
 # awx-manage shell_plus --notebook
-NOTEBOOK_ARGUMENTS = ['--NotebookApp.token=', '--ip', '0.0.0.0', '--port', '8888', '--allow-root', '--no-browser']
+NOTEBOOK_ARGUMENTS = ['--NotebookApp.token=', '--ip', '0.0.0.0', '--port', '9888', '--allow-root', '--no-browser']
 
 # print SQL queries in shell_plus
 SHELL_PLUS_PRINT_SQL = False
@@ -72,6 +72,8 @@ AWX_CALLBACK_PROFILE = True
 # Allows user to trigger task managers directly for debugging and profiling purposes.
 # Only works in combination with settings.SETTINGS_MODULE == 'awx.settings.development'
 AWX_DISABLE_TASK_MANAGERS = False
+
+# Needed for launching runserver in debug mode
 # ======================!!!!!!! FOR DEVELOPMENT ONLY !!!!!!!=================================
 
 # Store a snapshot of default settings at this point before loading any

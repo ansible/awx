@@ -89,8 +89,6 @@ Example with curl:
 
 .. code-block:: text
 
-   curl -X GET -H 'Authorization: Basic dXNlcjpwYXNzd29yZA==’ https://<awx-host>/api/v2/credentials -k -L
-
    # the --user flag adds this Authorization header for us
    curl -X GET --user 'user:password' https://<awx-host>/api/v2/credentials -k -L
 

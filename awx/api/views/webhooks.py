@@ -1,4 +1,4 @@
-from hashlib import sha1
+from hashlib import sha1, sha256
 import hmac
 import logging
 import urllib.parse
@@ -99,14 +99,31 @@ class WebhookReceiverBase(APIView):
     def get_signature(self):
         raise NotImplementedError
 
+    def must_check_signature(self):
+        return True
+
+    def is_ignored_request(self):
+        return False
+
     def check_signature(self, obj):
         if not obj.webhook_key:
             raise PermissionDenied
+        if not self.must_check_signature():
+            logger.debug("skipping signature validation")
+            return
 
-        mac = hmac.new(force_bytes(obj.webhook_key), msg=force_bytes(self.request.body), digestmod=sha1)
-        logger.debug("header signature: %s", self.get_signature())
+        hash_alg, expected_digest = self.get_signature()
+        if hash_alg == 'sha1':
+            mac = hmac.new(force_bytes(obj.webhook_key), msg=force_bytes(self.request.body), digestmod=sha1)
+        elif hash_alg == 'sha256':
+            mac = hmac.new(force_bytes(obj.webhook_key), msg=force_bytes(self.request.body), digestmod=sha256)
+        else:
+            logger.debug("Unsupported signature type, supported: sha1, sha256, received: {}".format(hash_alg))
+            raise PermissionDenied
+
+        logger.debug("header signature: %s", expected_digest)
         logger.debug("calculated signature: %s", force_bytes(mac.hexdigest()))
-        if not hmac.compare_digest(force_bytes(mac.hexdigest()), self.get_signature()):
+        if not hmac.compare_digest(force_bytes(mac.hexdigest()), expected_digest):
             raise PermissionDenied
 
     @csrf_exempt
@@ -117,6 +134,10 @@ class WebhookReceiverBase(APIView):
         logger.debug("headers: {}\ndata: {}\n".format(request.headers, request.data))
         obj = self.get_object()
         self.check_signature(obj)
+
+        if self.is_ignored_request():
+            # This was an ignored request type (e.g. ping), don't act on it
+            return Response({'message': _("Webhook ignored")}, status=status.HTTP_200_OK)
 
         event_type = self.get_event_type()
         event_guid = self.get_event_guid()
@@ -186,7 +207,7 @@ class GithubWebhookReceiver(WebhookReceiverBase):
         if hash_alg != 'sha1':
             logger.debug("Unsupported signature type, expected: sha1, received: {}".format(hash_alg))
             raise PermissionDenied
-        return force_bytes(signature)
+        return hash_alg, force_bytes(signature)
 
 
 class GitlabWebhookReceiver(WebhookReceiverBase):
@@ -214,15 +235,73 @@ class GitlabWebhookReceiver(WebhookReceiverBase):
 
         return "{}://{}/api/v4/projects/{}/statuses/{}".format(parsed.scheme, parsed.netloc, project['id'], self.get_event_ref())
 
-    def get_signature(self):
-        return force_bytes(self.request.META.get('HTTP_X_GITLAB_TOKEN') or '')
-
     def check_signature(self, obj):
         if not obj.webhook_key:
             raise PermissionDenied
 
+        token_from_request = force_bytes(self.request.META.get('HTTP_X_GITLAB_TOKEN') or '')
+
         # GitLab only returns the secret token, not an hmac hash.  Use
         # the hmac `compare_digest` helper function to prevent timing
         # analysis by attackers.
-        if not hmac.compare_digest(force_bytes(obj.webhook_key), self.get_signature()):
+        if not hmac.compare_digest(force_bytes(obj.webhook_key), token_from_request):
             raise PermissionDenied
+
+
+class BitbucketDcWebhookReceiver(WebhookReceiverBase):
+    service = 'bitbucket_dc'
+
+    ref_keys = {
+        'repo:refs_changed': 'changes.0.toHash',
+        'mirror:repo_synchronized': 'changes.0.toHash',
+        'pr:opened': 'pullRequest.toRef.latestCommit',
+        'pr:from_ref_updated': 'pullRequest.toRef.latestCommit',
+        'pr:modified': 'pullRequest.toRef.latestCommit',
+    }
+
+    def get_event_type(self):
+        return self.request.META.get('HTTP_X_EVENT_KEY')
+
+    def get_event_guid(self):
+        return self.request.META.get('HTTP_X_REQUEST_ID')
+
+    def get_event_status_api(self):
+        # https://<bitbucket-base-url>/rest/build-status/1.0/commits/<commit-hash>
+        if self.get_event_type() not in self.ref_keys.keys():
+            return
+        if self.get_event_ref() is None:
+            return
+        any_url = None
+        if 'actor' in self.request.data:
+            any_url = self.request.data['actor'].get('links', {}).get('self')
+        if any_url is None and 'repository' in self.request.data:
+            any_url = self.request.data['repository'].get('links', {}).get('self')
+        if any_url is None:
+            return
+        any_url = any_url[0].get('href')
+        if any_url is None:
+            return
+        parsed = urllib.parse.urlparse(any_url)
+
+        return "{}://{}/rest/build-status/1.0/commits/{}".format(parsed.scheme, parsed.netloc, self.get_event_ref())
+
+    def is_ignored_request(self):
+        return self.get_event_type() not in [
+            'repo:refs_changed',
+            'mirror:repo_synchronized',
+            'pr:opened',
+            'pr:from_ref_updated',
+            'pr:modified',
+        ]
+
+    def must_check_signature(self):
+        # Bitbucket does not sign ping requests...
+        return self.get_event_type() != 'diagnostics:ping'
+
+    def get_signature(self):
+        header_sig = self.request.META.get('HTTP_X_HUB_SIGNATURE')
+        if not header_sig:
+            logger.debug("Expected signature missing from header key HTTP_X_HUB_SIGNATURE")
+            raise PermissionDenied
+        hash_alg, signature = header_sig.split('=')
+        return hash_alg, force_bytes(signature)

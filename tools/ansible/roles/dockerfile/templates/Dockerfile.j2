@@ -22,6 +22,7 @@ RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
 RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     dnf config-manager --set-enabled crb && \
     dnf -y install \
+    iputils \
     gcc \
     gcc-c++ \
     git-core \
@@ -38,15 +39,18 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     patch \
     postgresql \
     postgresql-devel \
-    python3-devel \
-    python3-pip \
-    python3-setuptools \
+    python3.11 \
+    "python3.11-devel" \
+    "python3.11-pip" \
+    "python3.11-setuptools" \
+    "python3.11-packaging" \
+    "python3.11-psycopg2" \
     swig \
     unzip \
     xmlsec1-devel \
     xmlsec1-openssl-devel
 
-RUN pip3 install virtualenv build psycopg
+RUN pip3.11 install -vv build
 
 {% if image_architecture == 'ppc64le'  %}
     RUN dnf -y update && dnf install -y wget && \
@@ -86,7 +90,7 @@ WORKDIR /tmp/src/
 RUN make sdist && /var/lib/awx/venv/awx/bin/pip install dist/awx.tar.gz
 
 {% if not headless|bool %}
-RUN AWX_SETTINGS_FILE=/dev/null SKIP_SECRET_KEY_CHECK=yes SKIP_PG_VERSION_CHECK=yes /var/lib/awx/venv/awx/bin/awx-manage collectstatic --noinput --clear
+RUN DJANGO_SETTINGS_MODULE=awx.settings.defaults SKIP_SECRET_KEY_CHECK=yes SKIP_PG_VERSION_CHECK=yes /var/lib/awx/venv/awx/bin/awx-manage collectstatic --noinput --clear
 {% endif %}
 
 {% endif %}
@@ -117,10 +121,12 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     nginx \
     "openldap >= 2.6.2-3" \
     postgresql \
-    python3-devel \
-    python3-libselinux \
-    python3-pip \
-    python3-setuptools \
+    python3.11 \
+    "python3.11-devel" \
+    "python3.11-pip*" \
+    "python3.11-setuptools" \
+    "python3.11-packaging" \
+    "python3.11-psycopg2" \
     rsync \
     rsyslog-8.2102.0-106.el9 \
     subversion \
@@ -131,7 +137,7 @@ RUN dnf -y update && dnf install -y 'dnf-command(config-manager)' && \
     xmlsec1-openssl && \
     dnf -y clean all
 
-RUN pip3 install virtualenv supervisor dumb-init psycopg
+RUN pip3.11 install -vv virtualenv supervisor dumb-init build
 
 RUN rm -rf /root/.cache && rm -rf /tmp/*
 
@@ -163,7 +169,8 @@ RUN dnf -y install \
     unzip && \
     npm install -g n && n 16.13.1 && npm install -g npm@8.5.0 && dnf remove -y nodejs
 
-RUN pip3 install black git+https://github.com/coderanger/supervisor-stdout setuptools-scm
+RUN pip3.11 install -vv git+https://github.com/coderanger/supervisor-stdout.git@973ba19967cdaf46d9c1634d1675fc65b9574f6e
+RUN pip3.11 install -vv black setuptools-scm build
 
 # This package randomly fails to download.
 # It is nice to have in the dev env, but not necessary.
@@ -226,15 +233,19 @@ RUN ln -sf /awx_devel/{{ template_dest }}/supervisor_rsyslog.conf /etc/superviso
 ADD tools/ansible/roles/dockerfile/files/launch_awx_web.sh /usr/bin/launch_awx_web.sh
 ADD tools/ansible/roles/dockerfile/files/launch_awx_task.sh /usr/bin/launch_awx_task.sh
 ADD tools/ansible/roles/dockerfile/files/launch_awx_rsyslog.sh /usr/bin/launch_awx_rsyslog.sh
+ADD tools/scripts/rsyslog-4xx-recovery /usr/bin/rsyslog-4xx-recovery
 ADD {{ template_dest }}/supervisor_web.conf /etc/supervisord_web.conf
 ADD {{ template_dest }}/supervisor_task.conf /etc/supervisord_task.conf
 ADD {{ template_dest }}/supervisor_rsyslog.conf /etc/supervisord_rsyslog.conf
+ADD tools/scripts/awx-python /usr/bin/awx-python
 {% endif %}
 
 {% if (build_dev|bool) or (kube_dev|bool) %}
-RUN echo /awx_devel > /var/lib/awx/venv/awx/lib/python3.9/site-packages/awx.egg-link
-ADD tools/docker-compose/awx-manage /usr/local/bin/awx-manage
-ADD tools/scripts/awx-python /usr/bin/awx-python
+RUN echo /awx_devel > /var/lib/awx/venv/awx/lib/python3.11/site-packages/awx.egg-link
+RUN echo /awx_devel > /var/lib/awx/venv/awx/lib/python3.11/site-packages/awx.pth
+RUN ln -sf /awx_devel/tools/docker-compose/awx-manage /usr/local/bin/awx-manage
+RUN ln -sf /awx_devel/tools/scripts/awx-python /usr/bin/awx-python
+RUN ln -sf /awx_devel/tools/scripts/rsyslog-4xx-recovery /usr/bin/rsyslog-4xx-recovery
 {% endif %}
 
 # Pre-create things we need to access
@@ -245,7 +256,7 @@ RUN for dir in \
       /var/lib/awx/.local/share/containers/storage \
       /var/run/awx-rsyslog \
       /var/log/nginx \
-      /var/lib/postgresql \
+      /var/lib/pgsql \
       /var/run/supervisor \
       /var/run/awx-receptor \
       /var/lib/nginx ; \
@@ -266,8 +277,8 @@ RUN for dir in \
       /var/lib/awx/.local \
       /var/lib/awx/venv \
       /var/lib/awx/venv/awx/bin \
-      /var/lib/awx/venv/awx/lib/python3.9 \
-      /var/lib/awx/venv/awx/lib/python3.9/site-packages \
+      /var/lib/awx/venv/awx/lib/python3.11 \
+      /var/lib/awx/venv/awx/lib/python3.11/site-packages \
       /var/lib/awx/projects \
       /var/lib/awx/rsyslog \
       /var/run/awx-rsyslog \
@@ -296,7 +307,6 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
 {% endif %}
 
 ENV HOME="/var/lib/awx"
-ENV PATH="/usr/pgsql-12/bin:${PATH}"
 
 {% if build_dev|bool %}
 ENV PATH="/var/lib/awx/venv/awx/bin/:${PATH}"

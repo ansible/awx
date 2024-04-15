@@ -92,7 +92,7 @@ def test_team_accessible_by(team, user, project):
     u = user('team_member', False)
 
     team.member_role.children.add(project.use_role)
-    assert team in project.read_role
+    assert list(Project.accessible_objects(team, 'read_role')) == [project]
     assert u not in project.read_role
 
     team.member_role.members.add(u)

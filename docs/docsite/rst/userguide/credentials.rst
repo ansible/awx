@@ -128,7 +128,7 @@ The following credential types are supported with AWX:
 .. contents::
     :local:
 
-The credential types associated with Centrify, CyberArk, HashiCorp Vault, Microsoft Azure Key Management System (KMS), and Thycotic are part of the credential plugins capability that allows an external system to lookup your secrets information. See the :ref:`ug_credential_plugins` section for further detail.
+The credential types associated with AWS Secrets Manager, Centrify, CyberArk, HashiCorp Vault, Microsoft Azure Key Management System (KMS), and Thycotic are part of the credential plugins capability that allows an external system to lookup your secrets information. See the :ref:`ug_credential_plugins` section for further detail.
 
 
 .. _ug_credentials_aws:
@@ -165,6 +165,10 @@ AWX provides support for EC2 STS tokens (sometimes referred to as IAM STS creden
 .. warning::
 
   To use implicit IAM role credentials, do not attach AWS cloud credentials in AWX when relying on IAM roles to access the AWS API.  While it may seem to make sense to attach your AWS cloud credential to your job template, doing so will force the use of your AWS credentials and will not "fall through" to use your IAM role credentials (this is due to the use of the boto library.)
+
+AWS Secrets Manager 
+^^^^^^^^^^^^^^^^^^^^^
+This is considered part of the secret management capability. See :ref:`ug_credentials_aws_lookup` for more detail.
 
 
 Ansible Galaxy/Automation Hub API Token
@@ -640,6 +644,39 @@ Source Control credentials have several attributes that may be configured:
 
     Source Control credentials cannot be configured as "**Prompt on launch**". 
     If you are using a GitHub account for a Source Control credential and you have 2FA (Two Factor Authentication) enabled on your account, you will need to use your Personal Access Token in the password field rather than your account password. 
+
+
+.. _ug_credentials_terraform:
+
+Terraform backend configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. index::
+   pair: credential types; Terraform
+   pair: backend configuration; Terraform
+
+
+Terraform is a HashiCorp tool used to automate various infrastructure tasks. Select this credential type to enable synchronization with the Terraform inventory source.
+
+The Terraform credential requires the **Backend configuration** attribute which should contain the data from a `Terraform backend block <https://developer.hashicorp.com/terraform/language/settings/backends/configuration>`_. You can paste, drag a file, browse to upload a file, or click the (|key icon|) button to populate the field from an external :ref:`ug_credential_plugins`. An example configuration for an S3 backend:
+
+.. |key icon| image:: ../common/images/key-mgmt-button.png
+    :alt: Credentials - create Terraform backend configuration credential form
+
+::
+
+    bucket = "my-terraform-state-bucket"
+    key = "path/to/terraform-state-file"
+    region = "us-east-1"
+    access_key = "my-aws-access-key"
+    secret_key = "my-aws-secret-access-key"
+
+|Credentials - create terraform credential|
+
+.. |Credentials - create terraform credential| image:: ../common/images/credentials-create-terraform-credential.png
+    :alt: Credentials - create Terraform backend configuration credential form
+
+Saving it stores the file path to the backend configuration in an environment variable ``TF_BACKEND_CONFIG_FILE`` that is made available to any job with the credential attached.
 
 
 Thycotic DevOps Secrets Vault

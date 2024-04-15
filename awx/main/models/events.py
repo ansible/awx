@@ -124,8 +124,6 @@ class BasePlaybookEvent(CreatedModifiedModel):
         'parent_uuid',
         'start_line',
         'end_line',
-        'host_id',
-        'host_name',
         'verbosity',
     ]
     WRAPUP_EVENT = 'playbook_on_stats'
@@ -473,7 +471,7 @@ class JobEvent(BasePlaybookEvent):
     An event/message logged from the callback when running a job.
     """
 
-    VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['job_id', 'workflow_job_id', 'job_created']
+    VALID_KEYS = BasePlaybookEvent.VALID_KEYS + ['job_id', 'workflow_job_id', 'job_created', 'host_id', 'host_name']
     JOB_REFERENCE = 'job_id'
 
     objects = DeferJobCreatedManager()

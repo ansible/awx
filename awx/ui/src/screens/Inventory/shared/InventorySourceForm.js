@@ -23,6 +23,7 @@ import {
   SCMSubForm,
   SatelliteSubForm,
   ControllerSubForm,
+  TerraformSubForm,
   VMwareSubForm,
   VirtualizationSubForm,
 } from './InventorySourceSubForms';
@@ -212,6 +213,14 @@ const InventorySourceFormFields = ({
                     autoPopulateCredential={
                       !source?.id || source?.source !== 'controller'
                     }
+                  />
+                ),
+                terraform: (
+                  <TerraformSubForm
+                    autoPopulateCredential={
+                      !source?.id || source?.source !== 'terraform'
+                    }
+                    sourceOptions={sourceOptions}
                   />
                 ),
                 vmware: (

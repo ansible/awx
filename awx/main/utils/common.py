@@ -7,6 +7,7 @@ import json
 import yaml
 import logging
 import time
+import psycopg
 import os
 import subprocess
 import re
@@ -23,7 +24,7 @@ from django.core.exceptions import ObjectDoesNotExist, FieldDoesNotExist
 from django.utils.dateparse import parse_datetime
 from django.utils.translation import gettext_lazy as _
 from django.utils.functional import cached_property
-from django.db import connection, transaction, ProgrammingError, IntegrityError
+from django.db import connection, DatabaseError, transaction, ProgrammingError, IntegrityError
 from django.db.models.fields.related import ForeignObjectRel, ManyToManyField
 from django.db.models.fields.related_descriptors import ForwardManyToOneDescriptor, ManyToManyDescriptor
 from django.db.models.query import QuerySet
@@ -52,12 +53,10 @@ __all__ = [
     'get_awx_http_client_headers',
     'get_awx_version',
     'update_scm_url',
-    'get_type_for_model',
     'get_model_for_type',
     'copy_model_by_class',
     'copy_m2m_relationships',
     'prefetch_page_capabilities',
-    'to_python_boolean',
     'datetime_hook',
     'ignore_inventory_computed_fields',
     'ignore_inventory_group_removal',
@@ -110,18 +109,6 @@ def get_object_or_400(klass, *args, **kwargs):
         raise ParseError(*e.args)
 
 
-def to_python_boolean(value, allow_none=False):
-    value = str(value)
-    if value.lower() in ('true', '1', 't'):
-        return True
-    elif value.lower() in ('false', '0', 'f'):
-        return False
-    elif allow_none and value.lower() in ('none', 'null'):
-        return None
-    else:
-        raise ValueError(_(u'Unable to convert "%s" to boolean') % value)
-
-
 def datetime_hook(d):
     new_d = {}
     for key, value in d.items():
@@ -150,7 +137,7 @@ def underscore_to_camelcase(s):
 @functools.cache
 def is_testing(argv=None):
     '''Return True if running django or py.test unit tests.'''
-    if 'PYTEST_CURRENT_TEST' in os.environ.keys():
+    if os.environ.get('DJANGO_SETTINGS_MODULE') == 'awx.main.tests.settings_for_test':
         return True
     argv = sys.argv if argv is None else argv
     if len(argv) >= 1 and ('py.test' in argv[0] or 'py/test.py' in argv[0]):
@@ -567,14 +554,6 @@ def copy_m2m_relationships(obj1, obj2, fields, kwargs=None):
                         src_field_value = override_field_val
                 dest_field = getattr(obj2, field_name)
                 dest_field.add(*list(src_field_value.all().values_list('id', flat=True)))
-
-
-def get_type_for_model(model):
-    """
-    Return type name for a given model class.
-    """
-    opts = model._meta.concrete_model._meta
-    return camelcase_to_underscore(opts.object_name)
 
 
 def get_model_for_type(type_name):
@@ -1177,11 +1156,25 @@ def create_partition(tblname, start=None):
                     f'ALTER TABLE {tblname} ATTACH PARTITION {tblname}_{partition_label} '
                     f'FOR VALUES FROM (\'{start_timestamp}\') TO (\'{end_timestamp}\');'
                 )
+
     except (ProgrammingError, IntegrityError) as e:
-        if 'already exists' in str(e):
-            logger.info(f'Caught known error due to partition creation race: {e}')
-        else:
-            raise
+        cause = e.__cause__
+        if cause and hasattr(cause, 'sqlstate'):
+            sqlstate = cause.sqlstate
+            sqlstate_cls = psycopg.errors.lookup(sqlstate)
+
+            if psycopg.errors.DuplicateTable == sqlstate_cls or psycopg.errors.UniqueViolation == sqlstate_cls:
+                logger.info(f'Caught known error due to partition creation race: {e}')
+            else:
+                logger.error('SQL Error state: {} - {}'.format(sqlstate, sqlstate_cls))
+                raise
+    except DatabaseError as e:
+        cause = e.__cause__
+        if cause and hasattr(cause, 'sqlstate'):
+            sqlstate = cause.sqlstate
+            sqlstate_str = psycopg.errors.lookup(sqlstate)
+            logger.error('SQL Error state: {} - {}'.format(sqlstate, sqlstate_str))
+        raise
 
 
 def cleanup_new_process(func):

@@ -115,8 +115,11 @@ function SessionProvider({ children }) {
   }, [setSessionTimeout, setSessionCountdown]);
 
   useEffect(() => {
+    const isRedirectCondition = (location, histLength) =>
+      location.pathname === '/login' && histLength === 2;
+
     const unlisten = history.listen((location, action) => {
-      if (action === 'POP') {
+      if (action === 'POP' || isRedirectCondition(location, history.length)) {
         setIsRedirectLinkReceived(true);
       }
     });

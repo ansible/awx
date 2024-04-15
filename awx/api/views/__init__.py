@@ -60,6 +60,9 @@ from oauth2_provider.models import get_access_token_model
 import pytz
 from wsgiref.util import FileWrapper
 
+# django-ansible-base
+from ansible_base.rbac.models import RoleEvaluation, ObjectRole
+
 # AWX
 from awx.main.tasks.system import send_notifications, update_inventory_computed_fields
 from awx.main.access import get_user_queryset
@@ -87,6 +90,7 @@ from awx.api.generics import (
 from awx.api.views.labels import LabelSubListCreateAttachDetachView
 from awx.api.versioning import reverse
 from awx.main import models
+from awx.main.models.rbac import get_role_definition
 from awx.main.utils import (
     camelcase_to_underscore,
     extract_ansible_vars,
@@ -272,16 +276,24 @@ class DashboardJobsGraphView(APIView):
 
         success_query = user_unified_jobs.filter(status='successful')
         failed_query = user_unified_jobs.filter(status='failed')
+        canceled_query = user_unified_jobs.filter(status='canceled')
+        error_query = user_unified_jobs.filter(status='error')
 
         if job_type == 'inv_sync':
             success_query = success_query.filter(instance_of=models.InventoryUpdate)
             failed_query = failed_query.filter(instance_of=models.InventoryUpdate)
+            canceled_query = canceled_query.filter(instance_of=models.InventoryUpdate)
+            error_query = error_query.filter(instance_of=models.InventoryUpdate)
         elif job_type == 'playbook_run':
             success_query = success_query.filter(instance_of=models.Job)
             failed_query = failed_query.filter(instance_of=models.Job)
+            canceled_query = canceled_query.filter(instance_of=models.Job)
+            error_query = error_query.filter(instance_of=models.Job)
         elif job_type == 'scm_update':
             success_query = success_query.filter(instance_of=models.ProjectUpdate)
             failed_query = failed_query.filter(instance_of=models.ProjectUpdate)
+            canceled_query = canceled_query.filter(instance_of=models.ProjectUpdate)
+            error_query = error_query.filter(instance_of=models.ProjectUpdate)
 
         end = now()
         interval = 'day'
@@ -297,10 +309,12 @@ class DashboardJobsGraphView(APIView):
         else:
             return Response({'error': _('Unknown period "%s"') % str(period)}, status=status.HTTP_400_BAD_REQUEST)
 
-        dashboard_data = {"jobs": {"successful": [], "failed": []}}
+        dashboard_data = {"jobs": {"successful": [], "failed": [], "canceled": [], "error": []}}
 
         succ_list = dashboard_data['jobs']['successful']
         fail_list = dashboard_data['jobs']['failed']
+        canceled_list = dashboard_data['jobs']['canceled']
+        error_list = dashboard_data['jobs']['error']
 
         qs_s = (
             success_query.filter(finished__range=(start, end))
@@ -318,6 +332,22 @@ class DashboardJobsGraphView(APIView):
             .annotate(agg=Count('id', distinct=True))
         )
         data_f = {item['d']: item['agg'] for item in qs_f}
+        qs_c = (
+            canceled_query.filter(finished__range=(start, end))
+            .annotate(d=Trunc('finished', interval, tzinfo=end.tzinfo))
+            .order_by()
+            .values('d')
+            .annotate(agg=Count('id', distinct=True))
+        )
+        data_c = {item['d']: item['agg'] for item in qs_c}
+        qs_e = (
+            error_query.filter(finished__range=(start, end))
+            .annotate(d=Trunc('finished', interval, tzinfo=end.tzinfo))
+            .order_by()
+            .values('d')
+            .annotate(agg=Count('id', distinct=True))
+        )
+        data_e = {item['d']: item['agg'] for item in qs_e}
 
         start_date = start.replace(hour=0, minute=0, second=0, microsecond=0)
         for d in itertools.count():
@@ -326,6 +356,8 @@ class DashboardJobsGraphView(APIView):
                 break
             succ_list.append([time.mktime(date.timetuple()), data_s.get(date, 0)])
             fail_list.append([time.mktime(date.timetuple()), data_f.get(date, 0)])
+            canceled_list.append([time.mktime(date.timetuple()), data_c.get(date, 0)])
+            error_list.append([time.mktime(date.timetuple()), data_e.get(date, 0)])
 
         return Response(dashboard_data)
 
@@ -337,11 +369,19 @@ class InstanceList(ListCreateAPIView):
     search_fields = ('hostname',)
     ordering = ('id',)
 
+    def get_queryset(self):
+        qs = super().get_queryset().prefetch_related('receptor_addresses')
+        return qs
+
 
 class InstanceDetail(RetrieveUpdateAPIView):
     name = _("Instance Detail")
     model = models.Instance
     serializer_class = serializers.InstanceSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset().prefetch_related('receptor_addresses')
+        return qs
 
     def update_raw_data(self, data):
         # these fields are only valid on creation of an instance, so they unwanted on detail view
@@ -375,13 +415,37 @@ class InstanceUnifiedJobsList(SubListAPIView):
 
 
 class InstancePeersList(SubListAPIView):
-    name = _("Instance Peers")
+    name = _("Peers")
+    model = models.ReceptorAddress
+    serializer_class = serializers.ReceptorAddressSerializer
     parent_model = models.Instance
-    model = models.Instance
-    serializer_class = serializers.InstanceSerializer
     parent_access = 'read'
-    search_fields = {'hostname'}
     relationship = 'peers'
+    search_fields = ('address',)
+
+
+class InstanceReceptorAddressesList(SubListAPIView):
+    name = _("Receptor Addresses")
+    model = models.ReceptorAddress
+    parent_key = 'instance'
+    parent_model = models.Instance
+    serializer_class = serializers.ReceptorAddressSerializer
+    search_fields = ('address',)
+
+
+class ReceptorAddressesList(ListAPIView):
+    name = _("Receptor Addresses")
+    model = models.ReceptorAddress
+    serializer_class = serializers.ReceptorAddressSerializer
+    search_fields = ('address',)
+
+
+class ReceptorAddressDetail(RetrieveAPIView):
+    name = _("Receptor Address Detail")
+    model = models.ReceptorAddress
+    serializer_class = serializers.ReceptorAddressSerializer
+    parent_model = models.Instance
+    relationship = 'receptor_addresses'
 
 
 class InstanceInstanceGroupsList(InstanceGroupMembershipMixin, SubListCreateAttachDetachAPIView):
@@ -476,6 +540,7 @@ class InstanceGroupAccessList(ResourceAccessList):
 
 
 class InstanceGroupObjectRolesList(SubListAPIView):
+    deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializer
     parent_model = models.InstanceGroup
@@ -664,6 +729,7 @@ class TeamUsersList(BaseUsersList):
 
 
 class TeamRolesList(SubListAttachDetachAPIView):
+    deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializerWithParentAccess
     metadata_class = RoleMetadata
@@ -703,10 +769,12 @@ class TeamRolesList(SubListAttachDetachAPIView):
 
 
 class TeamObjectRolesList(SubListAPIView):
+    deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializer
     parent_model = models.Team
     search_fields = ('role_field', 'content_type__model')
+    deprecated = True
 
     def get_queryset(self):
         po = self.get_parent_object()
@@ -724,8 +792,15 @@ class TeamProjectsList(SubListAPIView):
         self.check_parent_access(team)
         model_ct = ContentType.objects.get_for_model(self.model)
         parent_ct = ContentType.objects.get_for_model(self.parent_model)
-        proj_roles = models.Role.objects.filter(Q(ancestors__content_type=parent_ct) & Q(ancestors__object_id=team.pk), content_type=model_ct)
-        return self.model.accessible_objects(self.request.user, 'read_role').filter(pk__in=[t.content_object.pk for t in proj_roles])
+
+        rd = get_role_definition(team.member_role)
+        role = ObjectRole.objects.filter(object_id=team.id, content_type=parent_ct, role_definition=rd).first()
+        if role is None:
+            # Team has no permissions, therefore team has no projects
+            return self.model.objects.none()
+        else:
+            project_qs = self.model.accessible_objects(self.request.user, 'read_role')
+            return project_qs.filter(id__in=RoleEvaluation.objects.filter(content_type_id=model_ct.id, role=role).values_list('object_id'))
 
 
 class TeamActivityStreamList(SubListAPIView):
@@ -740,10 +815,23 @@ class TeamActivityStreamList(SubListAPIView):
         self.check_parent_access(parent)
 
         qs = self.request.user.get_queryset(self.model)
+
         return qs.filter(
             Q(team=parent)
-            | Q(project__in=models.Project.accessible_objects(parent, 'read_role'))
-            | Q(credential__in=models.Credential.accessible_objects(parent, 'read_role'))
+            | Q(
+                project__in=RoleEvaluation.objects.filter(
+                    role__in=parent.has_roles.all(), content_type_id=ContentType.objects.get_for_model(models.Project).id, codename='view_project'
+                )
+                .values_list('object_id')
+                .distinct()
+            )
+            | Q(
+                credential__in=RoleEvaluation.objects.filter(
+                    role__in=parent.has_roles.all(), content_type_id=ContentType.objects.get_for_model(models.Credential).id, codename='view_credential'
+                )
+                .values_list('object_id')
+                .distinct()
+            )
         )
 
 
@@ -995,10 +1083,12 @@ class ProjectAccessList(ResourceAccessList):
 
 
 class ProjectObjectRolesList(SubListAPIView):
+    deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializer
     parent_model = models.Project
     search_fields = ('role_field', 'content_type__model')
+    deprecated = True
 
     def get_queryset(self):
         po = self.get_parent_object()
@@ -1156,6 +1246,7 @@ class UserTeamsList(SubListAPIView):
 
 
 class UserRolesList(SubListAttachDetachAPIView):
+    deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializerWithParentAccess
     metadata_class = RoleMetadata
@@ -1397,7 +1488,7 @@ class OrganizationCredentialList(SubListCreateAPIView):
         self.check_parent_access(organization)
 
         user_visible = models.Credential.accessible_objects(self.request.user, 'read_role').all()
-        org_set = models.Credential.accessible_objects(organization.admin_role, 'read_role').all()
+        org_set = models.Credential.objects.filter(organization=organization)
 
         if self.request.user.is_superuser or self.request.user.is_system_auditor:
             return org_set
@@ -1430,10 +1521,12 @@ class CredentialAccessList(ResourceAccessList):
 
 
 class CredentialObjectRolesList(SubListAPIView):
+    deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializer
     parent_model = models.Credential
     search_fields = ('role_field', 'content_type__model')
+    deprecated = True
 
     def get_queryset(self):
         po = self.get_parent_object()
@@ -2220,13 +2313,6 @@ class JobTemplateList(ListCreateAPIView):
     serializer_class = serializers.JobTemplateSerializer
     always_allow_superuser = False
 
-    def post(self, request, *args, **kwargs):
-        ret = super(JobTemplateList, self).post(request, *args, **kwargs)
-        if ret.status_code == 201:
-            job_template = models.JobTemplate.objects.get(id=ret.data['id'])
-            job_template.admin_role.members.add(request.user)
-        return ret
-
 
 class JobTemplateDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
     model = models.JobTemplate
@@ -2772,10 +2858,12 @@ class JobTemplateAccessList(ResourceAccessList):
 
 
 class JobTemplateObjectRolesList(SubListAPIView):
+    deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializer
     parent_model = models.JobTemplate
     search_fields = ('role_field', 'content_type__model')
+    deprecated = True
 
     def get_queryset(self):
         po = self.get_parent_object()
@@ -3158,10 +3246,12 @@ class WorkflowJobTemplateAccessList(ResourceAccessList):
 
 
 class WorkflowJobTemplateObjectRolesList(SubListAPIView):
+    deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializer
     parent_model = models.WorkflowJobTemplate
     search_fields = ('role_field', 'content_type__model')
+    deprecated = True
 
     def get_queryset(self):
         po = self.get_parent_object()
@@ -4170,6 +4260,7 @@ class ActivityStreamDetail(RetrieveAPIView):
 
 
 class RoleList(ListAPIView):
+    deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializer
     permission_classes = (IsAuthenticated,)
@@ -4177,11 +4268,13 @@ class RoleList(ListAPIView):
 
 
 class RoleDetail(RetrieveAPIView):
+    deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializer
 
 
 class RoleUsersList(SubListAttachDetachAPIView):
+    deprecated = True
     model = models.User
     serializer_class = serializers.UserSerializer
     parent_model = models.Role
@@ -4216,6 +4309,7 @@ class RoleUsersList(SubListAttachDetachAPIView):
 
 
 class RoleTeamsList(SubListAttachDetachAPIView):
+    deprecated = True
     model = models.Team
     serializer_class = serializers.TeamSerializer
     parent_model = models.Role
@@ -4260,10 +4354,12 @@ class RoleTeamsList(SubListAttachDetachAPIView):
             team.member_role.children.remove(role)
         else:
             team.member_role.children.add(role)
+
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class RoleParentsList(SubListAPIView):
+    deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializer
     parent_model = models.Role
@@ -4277,6 +4373,7 @@ class RoleParentsList(SubListAPIView):
 
 
 class RoleChildrenList(SubListAPIView):
+    deprecated = True
     model = models.Role
     serializer_class = serializers.RoleSerializer
     parent_model = models.Role

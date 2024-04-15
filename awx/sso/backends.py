@@ -68,7 +68,6 @@ class LDAPSettings(BaseLDAPSettings):
 
 
 class LDAPBackend(BaseLDAPBackend):
-
     """
     Custom LDAP backend for AWX.
     """

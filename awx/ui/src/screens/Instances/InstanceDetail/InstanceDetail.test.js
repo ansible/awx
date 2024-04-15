@@ -48,6 +48,7 @@ describe('<InstanceDetail/>', () => {
         cpu_capacity: 32,
         mem_capacity: 38,
         enabled: true,
+        managed: false,
         managed_by_policy: true,
         node_type: 'execution',
         node_state: 'ready',

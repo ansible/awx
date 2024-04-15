@@ -10,6 +10,7 @@ from awx.main.dispatch import get_task_queuename
 from awx.main.dispatch.control import Control
 from awx.main.dispatch.pool import AutoscalePool
 from awx.main.dispatch.worker import AWXConsumerPG, TaskWorker
+from awx.main.analytics.subsystem_metrics import DispatcherMetricsServer
 
 logger = logging.getLogger('awx.main.dispatch')
 
@@ -61,6 +62,8 @@ class Command(BaseCommand):
             return
 
         consumer = None
+
+        DispatcherMetricsServer().start()
 
         try:
             queues = ['tower_broadcast_all', 'tower_settings_change', get_task_queuename()]

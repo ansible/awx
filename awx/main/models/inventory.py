@@ -25,6 +25,8 @@ from django.db.models import Q
 # REST Framework
 from rest_framework.exceptions import ParseError
 
+from ansible_base.lib.utils.models import prevent_search
+
 # AWX
 from awx.api.versioning import reverse
 from awx.main.constants import CLOUD_PROVIDERS
@@ -35,7 +37,7 @@ from awx.main.fields import (
     OrderedManyToManyField,
 )
 from awx.main.managers import HostManager, HostMetricActiveManager
-from awx.main.models.base import BaseModel, CommonModelNameNotUnique, VarsDictProperty, CLOUD_INVENTORY_SOURCES, prevent_search, accepts_json
+from awx.main.models.base import BaseModel, CommonModelNameNotUnique, VarsDictProperty, CLOUD_INVENTORY_SOURCES, accepts_json
 from awx.main.models.events import InventoryUpdateEvent, UnpartitionedInventoryUpdateEvent
 from awx.main.models.unified_jobs import UnifiedJob, UnifiedJobTemplate
 from awx.main.models.mixins import (
@@ -87,6 +89,11 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         verbose_name_plural = _('inventories')
         unique_together = [('name', 'organization')]
         ordering = ('name',)
+        permissions = [
+            ('use_inventory', 'Can use inventory in a job template'),
+            ('adhoc_inventory', 'Can run ad hoc commands'),
+            ('update_inventory', 'Can update inventory sources in inventory'),
+        ]
 
     organization = models.ForeignKey(
         'Organization',
@@ -923,6 +930,7 @@ class InventorySourceOptions(BaseModel):
         ('rhv', _('Red Hat Virtualization')),
         ('controller', _('Red Hat Ansible Automation Platform')),
         ('insights', _('Red Hat Insights')),
+        ('terraform', _('Terraform State')),
     ]
 
     # From the options of the Django management base command
@@ -1397,7 +1405,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
         return selected_groups
 
 
-class CustomInventoryScript(CommonModelNameNotUnique, ResourceMixin):
+class CustomInventoryScript(CommonModelNameNotUnique):
     class Meta:
         app_label = 'main'
         ordering = ('name',)
@@ -1625,6 +1633,20 @@ class satellite6(PluginFileInjector):
             ret['FOREMAN_SERVER'] = credential.get_input('host', default='')
             ret['FOREMAN_USER'] = credential.get_input('username', default='')
             ret['FOREMAN_PASSWORD'] = credential.get_input('password', default='')
+        return ret
+
+
+class terraform(PluginFileInjector):
+    plugin_name = 'terraform_state'
+    base_injector = 'managed'
+    namespace = 'cloud'
+    collection = 'terraform'
+    use_fqcn = True
+
+    def inventory_as_dict(self, inventory_update, private_data_dir):
+        env = super(terraform, self).get_plugin_env(inventory_update, private_data_dir, None)
+        ret = super().inventory_as_dict(inventory_update, private_data_dir)
+        ret['backend_config_files'] = env["TF_BACKEND_CONFIG_FILE"]
         return ret
 
 

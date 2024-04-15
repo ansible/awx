@@ -76,7 +76,7 @@ class azure_rm(PluginFileInjector):
         user_filters = []
         old_filterables = [
             ('resource_groups', 'resource_group'),
-            ('tags', 'tags')
+            ('tags', 'tags'),
             # locations / location would be an entry
             # but this would conflict with source_regions
         ]

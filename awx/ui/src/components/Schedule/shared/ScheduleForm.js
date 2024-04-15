@@ -20,6 +20,7 @@ import UnsupportedScheduleForm from './UnsupportedScheduleForm';
 import parseRuleObj, { UnsupportedRRuleError } from './parseRuleObj';
 import buildRuleObj from './buildRuleObj';
 import buildRuleSet from './buildRuleSet';
+import mergeArraysByCredentialType from './mergeArraysByCredentialType';
 
 const NUM_DAYS_PER_FREQUENCY = {
   week: 7,
@@ -39,6 +40,7 @@ function ScheduleForm({
   resourceDefaultCredentials,
 }) {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [isPromptTouched, setIsPromptTouched] = useState(false);
   const [isSaveDisabled, setIsSaveDisabled] = useState(false);
   const originalLabels = useRef([]);
   const originalInstanceGroups = useRef([]);
@@ -350,6 +352,12 @@ function ScheduleForm({
     startDate: currentDate,
     startTime: time,
     timezone: schedule.timezone || now.zoneName,
+    credentials: mergeArraysByCredentialType(
+      resourceDefaultCredentials,
+      credentials
+    ),
+    labels: originalLabels.current,
+    instance_groups: originalInstanceGroups.current,
   };
 
   if (hasDaysToKeepField) {
@@ -485,7 +493,8 @@ function ScheduleForm({
               surveyConfig,
               originalInstanceGroups.current,
               originalLabels.current,
-              credentials
+              credentials,
+              isPromptTouched
             );
           }}
           validate={validate}
@@ -511,6 +520,7 @@ function ScheduleForm({
                     onSave={() => {
                       setIsWizardOpen(false);
                       setIsSaveDisabled(false);
+                      setIsPromptTouched(true);
                     }}
                     resourceDefaultCredentials={resourceDefaultCredentials}
                     labels={originalLabels.current}

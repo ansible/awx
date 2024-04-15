@@ -2,12 +2,10 @@
 
 ## Build & Push Image
 
-To build a custom awx image to use with the awx-operator, use the `build_image` role:
+To build a custom awx image to use with the awx-operator:
 
 ```
-$ ansible-playbook tools/ansible/build.yml \
-    -e awx_image=registry.example.com/ansible/awx \
-    -e awx_image_tag=test -v
+make awx-kube-build
 ```
 
 > Note: The development image (`make docker-compose-build`) will not work with the awx-operator, the UI is not built in that image, among other things (see Dockerfile.j2 for more info).

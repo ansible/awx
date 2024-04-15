@@ -36,6 +36,7 @@ describe('<InstanceAdd />', () => {
       });
     });
     expect(InstancesAPI.create).toHaveBeenCalledWith({
+      listener_port: null, // injected if listener_port is not set
       node_type: 'hop',
     });
     expect(history.location.pathname).toBe('/instances/13/details');

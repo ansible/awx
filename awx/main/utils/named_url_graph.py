@@ -5,7 +5,6 @@ from collections import deque
 # Django
 from django.db import models
 from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
 
 
 NAMED_URL_RES_DILIMITER = "++"
@@ -245,6 +244,8 @@ def _generate_configurations(nodes):
 
 
 def _dfs(configuration, model, graph, dead_ends, new_deadends, parents):
+    from django.contrib.contenttypes.models import ContentType
+
     parents.add(model)
     fields, fk_names = configuration[model][0][:], configuration[model][1][:]
     adj_list = []
@@ -306,3 +307,19 @@ def generate_graph(models):
 def reset_counters():
     for node in settings.NAMED_URL_GRAPH.values():
         node.counter = 0
+
+
+def _customize_graph():
+    from django.contrib.auth.models import User
+    from awx.main.models import Instance, Schedule, UnifiedJobTemplate
+
+    for model in [Schedule, UnifiedJobTemplate]:
+        if model in settings.NAMED_URL_GRAPH:
+            settings.NAMED_URL_GRAPH[model].remove_bindings()
+            settings.NAMED_URL_GRAPH.pop(model)
+    if User not in settings.NAMED_URL_GRAPH:
+        settings.NAMED_URL_GRAPH[User] = GraphNode(User, ['username'], [])
+        settings.NAMED_URL_GRAPH[User].add_bindings()
+    if Instance not in settings.NAMED_URL_GRAPH:
+        settings.NAMED_URL_GRAPH[Instance] = GraphNode(Instance, ['hostname'], [])
+        settings.NAMED_URL_GRAPH[Instance].add_bindings()

@@ -12,6 +12,8 @@ from unittest import mock
 
 from rest_framework.exceptions import ParseError
 
+from ansible_base.lib.utils.models import get_type_for_model
+
 from awx.main.utils import common
 from awx.api.validators import HostnameRegexValidator
 
@@ -106,7 +108,7 @@ TEST_MODELS = [
 # Cases relied on for scheduler dependent jobs list
 @pytest.mark.parametrize('model,name', TEST_MODELS)
 def test_get_type_for_model(model, name):
-    assert common.get_type_for_model(model) == name
+    assert get_type_for_model(model) == name
 
 
 def test_get_model_for_invalid_type():
@@ -117,6 +119,10 @@ def test_get_model_for_invalid_type():
 @pytest.mark.parametrize("model_type,model_class", [(name, cls) for cls, name in TEST_MODELS])
 def test_get_model_for_valid_type(model_type, model_class):
     assert common.get_model_for_type(model_type) == model_class
+
+
+def test_is_testing():
+    assert common.is_testing() is True
 
 
 @pytest.mark.parametrize("model_type,model_class", [(name, cls) for cls, name in TEST_MODELS])

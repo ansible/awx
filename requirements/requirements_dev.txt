@@ -8,9 +8,9 @@ ipython>=7.31.1 # https://github.com/ansible/awx/security/dependabot/30
 unittest2
 black
 pytest!=7.0.0
+pytest-asyncio
 pytest-cov
 pytest-django
-pytest-pythonpath
 pytest-mock==1.11.1
 pytest-timeout
 pytest-xdist==1.34.0 # 2.0.0 broke zuul for some reason
@@ -20,9 +20,13 @@ jupyter
 # matplotlib - Caused issues when bumping to setuptools 58
 backports.tempfile  # support in unit tests for py32+ tempfile.TemporaryDirectory
 git+https://github.com/artefactual-labs/mockldap.git@master#egg=mockldap
-sdb
-remote-pdb
 gprof2dot
 atomicwrites==1.4.0
 flake8
 yamllint
+pip>=21.3 # PEP 660 – Editable installs for pyproject.toml based builds (wheel based)
+
+# python debuggers
+debugpy
+remote-pdb
+sdb

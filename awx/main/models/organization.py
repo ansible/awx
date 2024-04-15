@@ -10,6 +10,8 @@ from django.contrib.sessions.models import Session
 from django.utils.timezone import now as tz_now
 from django.utils.translation import gettext_lazy as _
 
+# django-ansible-base
+from ansible_base.resource_registry.fields import AnsibleResourceField
 
 # AWX
 from awx.api.versioning import reverse
@@ -33,6 +35,12 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
     class Meta:
         app_label = 'main'
         ordering = ('name',)
+        permissions = [
+            ('member_organization', 'Basic participation permissions for organization'),
+            ('audit_organization', 'Audit everything inside the organization'),
+        ]
+        # Remove add permission, only superuser can add
+        default_permissions = ('change', 'delete', 'view')
 
     instance_groups = OrderedManyToManyField('InstanceGroup', blank=True, through='OrganizationInstanceGroupMembership')
     galaxy_credentials = OrderedManyToManyField(
@@ -103,6 +111,7 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
     approval_role = ImplicitRoleField(
         parent_role='admin_role',
     )
+    resource = AnsibleResourceField(primary_key_field="id")
 
     def get_absolute_url(self, request=None):
         return reverse('api:organization_detail', kwargs={'pk': self.pk}, request=request)
@@ -134,6 +143,7 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
         app_label = 'main'
         unique_together = [('organization', 'name')]
         ordering = ('organization__name', 'name')
+        permissions = [('member_team', 'Inherit all roles assigned to this team')]
 
     organization = models.ForeignKey(
         'Organization',
@@ -151,6 +161,7 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
     read_role = ImplicitRoleField(
         parent_role=['organization.auditor_role', 'member_role'],
     )
+    resource = AnsibleResourceField(primary_key_field="id")
 
     def get_absolute_url(self, request=None):
         return reverse('api:team_detail', kwargs={'pk': self.pk}, request=request)

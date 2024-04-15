@@ -49,13 +49,11 @@ jobs:
         with:
           path: awx
 
-      - name: Get python version from Makefile
-        run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
-
-      - name: Install python ${{ env.py_version }}
-        uses: actions/setup-python@v4
+      - name: Checkout awx-operator
+        uses: actions/checkout@v3
         with:
-          python-version: ${{ env.py_version }}
+          repository: ${{ github.repository_owner }}/awx-operator
+          path: awx-operator
 
       - name: Checkout awx-logos
         uses: actions/checkout@v3
@@ -63,50 +61,84 @@ jobs:
           repository: ansible/awx-logos
           path: awx-logos
 
-      - name: Checkout awx-operator
-        uses: actions/checkout@v3
+      - name: Get python version from Makefile
+        working-directory: awx
+        run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
+
+      - name: Install python ${{ env.py_version }}
+        uses: actions/setup-python@v4
         with:
-          repository: ${{ github.repository_owner }}/awx-operator
-          path: awx-operator
+          python-version: ${{ env.py_version }}
 
       - name: Install playbook dependencies
         run: |
           python3 -m pip install docker
 
-      - name: Build and stage AWX
+      - name: Log into registry ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Copy logos for inclusion in sdist for official build
         working-directory: awx
         run: |
-          ansible-playbook -v tools/ansible/build.yml \
-            -e registry=ghcr.io \
-            -e registry_username=${{ github.actor }} \
-            -e registry_password=${{ secrets.GITHUB_TOKEN }} \
-            -e awx_image=${{ github.repository }} \
-            -e awx_version=${{ github.event.inputs.version }} \
-            -e ansible_python_interpreter=$(which python3) \
-            -e push=yes \
-            -e awx_official=yes
+          cp ../awx-logos/awx/ui/client/assets/* awx/ui/public/static/media/
 
-      - name: Log in to GHCR
-        run: |
-          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Setup node and npm
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.13.1'
 
-      - name: Log in to Quay
+      - name: Prebuild UI for awx image (to speed up build process)
+        working-directory: awx
         run: |
-          echo ${{ secrets.QUAY_TOKEN }} | docker login quay.io -u ${{ secrets.QUAY_USER }} --password-stdin
+          sudo apt-get install gettext
+          make ui-release
+          make ui-next
+
+      - name: Set build env variables
+        run: |
+          echo "DEV_DOCKER_TAG_BASE=ghcr.io/${OWNER,,}" >> $GITHUB_ENV
+          echo "COMPOSE_TAG=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          echo "AWX_TEST_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          echo "AWX_TEST_IMAGE=ghcr.io/${OWNER,,}/awx" >> $GITHUB_ENV
+          echo "AWX_EE_TEST_IMAGE=ghcr.io/${OWNER,,}/awx-ee:${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          echo "AWX_OPERATOR_TEST_IMAGE=ghcr.io/${OWNER,,}/awx-operator:${{ github.event.inputs.operator_version }}" >> $GITHUB_ENV
+        env:
+          OWNER: ${{ github.repository_owner }}
+
+      - name: Build and stage AWX
+        working-directory: awx
+        env:
+          DOCKER_BUILDX_PUSH: true
+          HEADLESS: false
+          PLATFORMS: linux/amd64,linux/arm64
+        run: |
+          make awx-kube-buildx
 
       - name: tag awx-ee:latest with version input
         run: |
-          docker pull quay.io/ansible/awx-ee:latest
-          docker tag quay.io/ansible/awx-ee:latest ghcr.io/${{ github.repository_owner }}/awx-ee:${{ github.event.inputs.version }}
-          docker push ghcr.io/${{ github.repository_owner }}/awx-ee:${{ github.event.inputs.version }}
+          docker buildx imagetools create \
+            quay.io/ansible/awx-ee:latest \
+            --tag ${AWX_EE_TEST_IMAGE}
 
-      - name: Build and stage awx-operator
+      - name: Stage awx-operator image
         working-directory: awx-operator
         run: |
-          BUILD_ARGS="--build-arg DEFAULT_AWX_VERSION=${{ github.event.inputs.version }} \
-                      --build-arg OPERATOR_VERSION=${{ github.event.inputs.operator_version }}" \
-          IMAGE_TAG_BASE=ghcr.io/${{ github.repository_owner }}/awx-operator \
-          VERSION=${{ github.event.inputs.operator_version }} make docker-build docker-push
+          BUILD_ARGS="--build-arg DEFAULT_AWX_VERSION=${{ github.event.inputs.version}} \
+              --build-arg OPERATOR_VERSION=${{ github.event.inputs.operator_version }}" \
+          IMG=${AWX_OPERATOR_TEST_IMAGE} \
+          make docker-buildx
+
+      - name: Pulling images for test deployment with awx-operator
+        # awx operator molecue test expect to kind load image and buildx exports image to registry and not local
+        run: |
+          docker pull ${AWX_OPERATOR_TEST_IMAGE}
+          docker pull ${AWX_EE_TEST_IMAGE}
+          docker pull ${AWX_TEST_IMAGE}:${AWX_TEST_VERSION}
 
       - name: Run test deployment with awx-operator
         working-directory: awx-operator
@@ -116,10 +148,6 @@ jobs:
           sudo rm -f $(which kustomize)
           make kustomize
           KUSTOMIZE_PATH=$(readlink -f bin/kustomize) molecule test -s kind
-        env:
-          AWX_TEST_IMAGE: ${{ github.repository }}
-          AWX_TEST_VERSION: ${{ github.event.inputs.version }}
-          AWX_EE_TEST_IMAGE: ghcr.io/${{ github.repository_owner }}/awx-ee:${{ github.event.inputs.version }}
 
       - name: Create draft release for AWX
         working-directory: awx

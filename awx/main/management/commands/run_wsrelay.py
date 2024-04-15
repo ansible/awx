@@ -16,6 +16,7 @@ from awx.main.analytics.broadcast_websocket import (
     RelayWebsocketStatsManager,
     safe_name,
 )
+from awx.main.analytics.subsystem_metrics import WebsocketsMetricsServer
 from awx.main.wsrelay import WebSocketRelayManager
 
 
@@ -163,8 +164,15 @@ class Command(BaseCommand):
 
             return
 
-        try:
-            websocket_relay_manager = WebSocketRelayManager()
-            asyncio.run(websocket_relay_manager.run())
-        except KeyboardInterrupt:
-            logger.info('Terminating Websocket Relayer')
+        WebsocketsMetricsServer().start()
+        websocket_relay_manager = WebSocketRelayManager()
+
+        while True:
+            try:
+                asyncio.run(websocket_relay_manager.run())
+            except KeyboardInterrupt:
+                logger.info('Shutting down Websocket Relayer')
+                break
+            except Exception as e:
+                logger.exception('Error in Websocket Relayer, exception: {}. Restarting in 10 seconds'.format(e))
+                time.sleep(10)

@@ -35,12 +35,8 @@ def assets(app, exception):
         _, extension = os.path.splitext(asset)
         if extension in ('py', 'pyc'):
             continue
-        if not exception and os.path.exists(
-            os.path.join(app.outdir, '_static')
-        ):
-            copyfile(
-                os.path.join(here, asset),
-                os.path.join(app.outdir, '_static', asset))
+        if not exception and os.path.exists(os.path.join(app.outdir, '_static')):
+            copyfile(os.path.join(here, asset), os.path.join(app.outdir, '_static', asset))
 
 
 def setup(app):

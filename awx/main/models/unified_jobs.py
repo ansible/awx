@@ -30,19 +30,21 @@ from rest_framework.exceptions import ParseError
 # Django-Polymorphic
 from polymorphic.models import PolymorphicModel
 
+from ansible_base.lib.utils.models import prevent_search, get_type_for_model
+
 # AWX
-from awx.main.models.base import CommonModelNameNotUnique, PasswordFieldsModel, NotificationFieldsModel, prevent_search
+from awx.main.models.base import CommonModelNameNotUnique, PasswordFieldsModel, NotificationFieldsModel
 from awx.main.dispatch import get_task_queuename
 from awx.main.dispatch.control import Control as ControlDispatcher
 from awx.main.registrar import activity_stream_registrar
-from awx.main.models.mixins import ResourceMixin, TaskManagerUnifiedJobMixin, ExecutionEnvironmentMixin
+from awx.main.models.mixins import TaskManagerUnifiedJobMixin, ExecutionEnvironmentMixin
+from awx.main.models.rbac import to_permissions
 from awx.main.utils.common import (
     camelcase_to_underscore,
     get_model_for_type,
     _inventory_updates,
     copy_model_by_class,
     copy_m2m_relationships,
-    get_type_for_model,
     parse_yaml_or_json,
     getattr_dne,
     ScheduleDependencyManager,
@@ -209,7 +211,15 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, ExecutionEn
         # do not use this if in a subclass
         if cls != UnifiedJobTemplate:
             return super(UnifiedJobTemplate, cls).accessible_pk_qs(accessor, role_field)
-        return ResourceMixin._accessible_pk_qs(cls, accessor, role_field, content_types=cls._submodels_with_roles())
+        from ansible_base.rbac.models import RoleEvaluation
+
+        action = to_permissions[role_field]
+
+        return (
+            RoleEvaluation.objects.filter(role__in=accessor.has_roles.all(), codename__startswith=action, content_type_id__in=cls._submodels_with_roles())
+            .values_list('object_id')
+            .distinct()
+        )
 
     def _perform_unique_checks(self, unique_checks):
         # Handle the list of unique fields returned above. Replace with an
@@ -1598,7 +1608,8 @@ class UnifiedJob(
             extra["controller_node"] = self.controller_node or "NOT_SET"
         elif state == "execution_node_chosen":
             extra["execution_node"] = self.execution_node or "NOT_SET"
-        logger_job_lifecycle.info(msg, extra=extra)
+
+        logger_job_lifecycle.info(f"{msg} {json.dumps(extra)}")
 
     @property
     def launched_by(self):

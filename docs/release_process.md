@@ -124,9 +124,13 @@ This workflow will take the generated images and promote them to quay.io in addi
 
 ![Verify release awx.awx collection](img/galaxy.png)
 
-8. Go to awxkit's page on [PiPy](https://pypi.org/project/awxkit/#history) and validate the latest release is there:
+8. Go to awxkit's page on [PyPi](https://pypi.org/project/awxkit/#history) and validate the latest release is there:
 
 ![Verify awxkit](img/pypi.png)
+
+9. While verifying that awxkit was published on Pypi, also validate that the latest version of the [tar](https://pypi.org/project/awxkit/#files) file is there as well.
+
+![Verify awxkit files](img/pypi_files.png)
 
 ### Releasing the AWX operator
 
@@ -145,15 +149,32 @@ This workflow will take the generated images and promote them to quay.io.
 ![Verify released awx-operator image](img/verify-released-awx-operator-image.png)
 
 ## Send notifications
+
 Send notifications to the following groups:
-  * AWX Mailing List
-  * #social:ansible.com IRC (@newsbot for inclusion in bullhorn)
-  * #awx:ansible.com (no @newsbot in this room)
-  * #ansible-controller slack channel
+
+  * [Ansible Community forum](https://forum.ansible.com/)
+  * [#social:ansible.com](https://matrix.to/#/#social:ansible.com) `@newsbot` for inclusion in The Bullhorn)
+  * [#awx:ansible.com](https://forum.ansible.com/g/AWX/members)
+  * #aap-controller Slack channel
 
 These messages are templated out for you in the output of `get_next_release.yml`.
 
-Note: the slack message is the same as the IRC message.
+Note: The Slack message is the same as the Matrix message.
+
+### Announcements
+
+* Provide enough information for the reader
+* Include:
+  * **What:** What is this, why should someone care
+  * **Why:** Why is this important
+  * **How:** How do I use this (docs, config options)
+  * **Call to action:** What type of feedback are we looking for
+* Link to PR(s) for larger features
+* `@newsbot` supports [Markdown](https://www.markdownguide.org/cheat-sheet/), so use formatted links, bullet points
+* Release Manager posts into social Matrix Channel
+* Appears in next weeks [Bulhorn](https://forum.ansible.com/c/news/bullhorn)
+
+
 
 ## Create operator hub PRs.
 Operator hub PRs are generated via an Ansible Playbook. See someone on the AWX team for the location of the playbooks and instructions on how to run them.

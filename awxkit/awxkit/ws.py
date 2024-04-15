@@ -51,7 +51,16 @@ class WSClient(object):
     # Subscription group types
 
     def __init__(
-        self, token=None, hostname='', port=443, secure=True, session_id=None, csrftoken=None, add_received_time=False, session_cookie_name='awx_sessionid'
+        self,
+        token=None,
+        hostname='',
+        port=443,
+        secure=True,
+        ws_suffix='websocket/',
+        session_id=None,
+        csrftoken=None,
+        add_received_time=False,
+        session_cookie_name='awx_sessionid',
     ):
         # delay this import, because this is an optional dependency
         import websocket
@@ -68,6 +77,7 @@ class WSClient(object):
             hostname = result.hostname
 
         self.port = port
+        self.suffix = ws_suffix
         self._use_ssl = secure
         self.hostname = hostname
         self.token = token
@@ -85,7 +95,7 @@ class WSClient(object):
         else:
             auth_cookie = ''
         pref = 'wss://' if self._use_ssl else 'ws://'
-        url = '{0}{1.hostname}:{1.port}/websocket/'.format(pref, self)
+        url = '{0}{1.hostname}:{1.port}/{1.suffix}'.format(pref, self)
         self.ws = websocket.WebSocketApp(
             url, on_open=self._on_open, on_message=self._on_message, on_error=self._on_error, on_close=self._on_close, cookie=auth_cookie
         )

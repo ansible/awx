@@ -27,7 +27,7 @@ from awx.main.utils.common import (
 )
 from awx.main.constants import MAX_ISOLATED_PATH_COLON_DELIMITER
 from awx.main.tasks.signals import signal_state, signal_callback, SignalExit
-from awx.main.models import Instance, InstanceLink, UnifiedJob
+from awx.main.models import Instance, InstanceLink, UnifiedJob, ReceptorAddress
 from awx.main.dispatch import get_task_queuename
 from awx.main.dispatch.publish import task
 from awx.main.utils.pglock import advisory_lock
@@ -47,6 +47,70 @@ class ReceptorConnectionType(Enum):
     DATAGRAM = 0
     STREAM = 1
     STREAMTLS = 2
+
+
+"""
+Translate receptorctl messages that come in over stdout into
+structured messages. Currently, these are error messages.
+"""
+
+
+class ReceptorErrorBase:
+    _MESSAGE = 'Receptor Error'
+
+    def __init__(self, node: str = 'N/A', state_name: str = 'N/A'):
+        self.node = node
+        self.state_name = state_name
+
+    def __str__(self):
+        return f"{self.__class__.__name__} '{self._MESSAGE}' on node '{self.node}' with state '{self.state_name}'"
+
+
+class WorkUnitError(ReceptorErrorBase):
+    _MESSAGE = 'unknown work unit '
+
+    def __init__(self, work_unit_id: str, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.work_unit_id = work_unit_id
+
+    def __str__(self):
+        return f"{super().__str__()} work unit id '{self.work_unit_id}'"
+
+
+class WorkUnitCancelError(WorkUnitError):
+    _MESSAGE = 'error cancelling remote unit:  unknown work unit '
+
+
+class WorkUnitResultsError(WorkUnitError):
+    _MESSAGE = 'Failed to get results: unknown work unit '
+
+
+class UnknownError(ReceptorErrorBase):
+    _MESSAGE = 'Unknown receptor ctl error'
+
+    def __init__(self, msg, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._MESSAGE = msg
+
+
+class FuzzyError:
+    def __new__(self, e: RuntimeError, node: str, state_name: str):
+        """
+        At the time of writing this comment all of the sub-classes detection
+        is centralized in this parent class. It's like a Router().
+        Someone may find it better to push down the error detection logic into
+        each sub-class.
+        """
+        msg = e.args[0]
+
+        common_startswith = (WorkUnitCancelError, WorkUnitResultsError, WorkUnitError)
+
+        for klass in common_startswith:
+            if msg.startswith(klass._MESSAGE):
+                work_unit_id = msg[len(klass._MESSAGE) :]
+                return klass(work_unit_id, node=node, state_name=state_name)
+
+        return UnknownError(msg, node=node, state_name=state_name)
 
 
 def read_receptor_config():
@@ -185,6 +249,7 @@ def run_until_complete(node, timing_data=None, **kwargs):
         timing_data['transmit_timing'] = run_start - transmit_start
     run_timing = 0.0
     stdout = ''
+    state_name = 'local var never set'
 
     try:
         resultfile = receptor_ctl.get_work_results(unit_id)
@@ -205,13 +270,33 @@ def run_until_complete(node, timing_data=None, **kwargs):
         stdout = resultfile.read()
         stdout = str(stdout, encoding='utf-8')
 
+    except RuntimeError as e:
+        receptor_e = FuzzyError(e, node, state_name)
+        if type(receptor_e) in (
+            WorkUnitError,
+            WorkUnitResultsError,
+        ):
+            logger.warning(f'While consuming job results: {receptor_e}')
+        else:
+            raise
     finally:
         if settings.RECEPTOR_RELEASE_WORK:
-            res = receptor_ctl.simple_command(f"work release {unit_id}")
-            if res != {'released': unit_id}:
-                logger.warning(f'Could not confirm release of receptor work unit id {unit_id} from {node}, data: {res}')
+            try:
+                res = receptor_ctl.simple_command(f"work release {unit_id}")
 
-        receptor_ctl.close()
+                if res != {'released': unit_id}:
+                    logger.warning(f'Could not confirm release of receptor work unit id {unit_id} from {node}, data: {res}')
+
+                receptor_ctl.close()
+            except RuntimeError as e:
+                receptor_e = FuzzyError(e, node, state_name)
+                if type(receptor_e) in (
+                    WorkUnitError,
+                    WorkUnitCancelError,
+                ):
+                    logger.warning(f"While releasing work: {receptor_e}")
+                else:
+                    logger.error(f"While releasing work: {receptor_e}")
 
     if state_name.lower() == 'failed':
         work_detail = status.get('Detail', '')
@@ -275,7 +360,7 @@ def _convert_args_to_cli(vargs):
     args = ['cleanup']
     for option in ('exclude_strings', 'remove_images'):
         if vargs.get(option):
-            args.append('--{}={}'.format(option.replace('_', '-'), ' '.join(vargs.get(option))))
+            args.append('--{}="{}"'.format(option.replace('_', '-'), ' '.join(vargs.get(option))))
     for option in ('file_pattern', 'image_prune', 'process_isolation_executable', 'grace_period'):
         if vargs.get(option) is True:
             args.append('--{}'.format(option.replace('_', '-')))
@@ -676,36 +761,44 @@ RECEPTOR_CONFIG_STARTER = (
 )
 
 
-def should_update_config(instances):
+def should_update_config(new_config):
     '''
     checks that the list of instances matches the list of
     tcp-peers in the config
     '''
-    current_config = read_receptor_config()  # this gets receptor conf lock
-    current_peers = []
-    for config_entry in current_config:
-        for key, value in config_entry.items():
-            if key.endswith('-peer'):
-                current_peers.append(value['address'])
-    intended_peers = [f"{i.hostname}:{i.listener_port}" for i in instances]
-    logger.debug(f"Peers current {current_peers} intended {intended_peers}")
-    if set(current_peers) == set(intended_peers):
-        return False  # config file is already update to date
 
-    return True
+    current_config = read_receptor_config()  # this gets receptor conf lock
+    for config_entry in current_config:
+        if config_entry not in new_config:
+            logger.warning(f"{config_entry} should not be in receptor config. Updating.")
+            return True
+    for config_entry in new_config:
+        if config_entry not in current_config:
+            logger.warning(f"{config_entry} missing from receptor config. Updating.")
+            return True
+
+    return False
 
 
 def generate_config_data():
     # returns two values
     #   receptor config - based on current database peers
     #   should_update   - If True, receptor_config differs from the receptor conf file on disk
-    instances = Instance.objects.filter(node_type__in=(Instance.Types.EXECUTION, Instance.Types.HOP), peers_from_control_nodes=True)
+    addresses = ReceptorAddress.objects.filter(peers_from_control_nodes=True)
 
     receptor_config = list(RECEPTOR_CONFIG_STARTER)
-    for instance in instances:
-        peer = {'tcp-peer': {'address': f'{instance.hostname}:{instance.listener_port}', 'tls': 'tlsclient'}}
-        receptor_config.append(peer)
-    should_update = should_update_config(instances)
+    for address in addresses:
+        if address.get_peer_type():
+            peer = {
+                f'{address.get_peer_type()}': {
+                    'address': f'{address.get_full_address()}',
+                    'tls': 'tlsclient',
+                }
+            }
+            receptor_config.append(peer)
+        else:
+            logger.warning(f"Receptor address {address} has unsupported peer type, skipping.")
+    should_update = should_update_config(receptor_config)
     return receptor_config, should_update
 
 
@@ -747,14 +840,13 @@ def write_receptor_config():
             with lock:
                 with open(__RECEPTOR_CONF, 'w') as file:
                     yaml.dump(receptor_config, file, default_flow_style=False)
-
             reload_receptor()
 
 
 @task(queue=get_task_queuename)
 def remove_deprovisioned_node(hostname):
     InstanceLink.objects.filter(source__hostname=hostname).update(link_state=InstanceLink.States.REMOVING)
-    InstanceLink.objects.filter(target__hostname=hostname).update(link_state=InstanceLink.States.REMOVING)
+    InstanceLink.objects.filter(target__instance__hostname=hostname).update(link_state=InstanceLink.States.REMOVING)
 
     node_jobs = UnifiedJob.objects.filter(
         execution_node=hostname,

@@ -42,3 +42,29 @@ class TestMigrationSmoke:
         final_state = migrator.apply_tested_migration(final_migration)
         Instance = final_state.apps.get_model('main', 'Instance')
         assert Instance.objects.filter(hostname='foobar').count() == 1
+
+    def test_receptor_address(self, migrator):
+        old_state = migrator.apply_initial_migration(('main', '0188_add_bitbucket_dc_webhook'))
+        Instance = old_state.apps.get_model('main', 'Instance')
+        for i in range(3):
+            Instance.objects.create(hostname=f'foobar{i}', node_type='hop')
+        foo = Instance.objects.create(hostname='foo', node_type='execution', listener_port=1234)
+        bar = Instance.objects.create(hostname='bar', node_type='execution', listener_port=None)
+        bar.peers.add(foo)
+
+        new_state = migrator.apply_tested_migration(
+            ('main', '0189_inbound_hop_nodes'),
+        )
+        Instance = new_state.apps.get_model('main', 'Instance')
+        ReceptorAddress = new_state.apps.get_model('main', 'ReceptorAddress')
+
+        # We can now test how our migration worked, new field is there:
+        assert ReceptorAddress.objects.filter(address='foo', port=1234).count() == 1
+        assert not ReceptorAddress.objects.filter(address='bar').exists()
+
+        bar = Instance.objects.get(hostname='bar')
+        fooaddr = ReceptorAddress.objects.get(address='foo')
+
+        bar_peers = bar.peers.all()
+        assert len(bar_peers) == 1
+        assert fooaddr in bar_peers

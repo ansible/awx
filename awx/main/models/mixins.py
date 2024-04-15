@@ -9,7 +9,6 @@ import requests
 # Django
 from django.apps import apps
 from django.conf import settings
-from django.contrib.auth.models import User  # noqa
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -17,15 +16,17 @@ from django.db.models.query import QuerySet
 from django.utils.crypto import get_random_string
 from django.utils.translation import gettext_lazy as _
 
+from ansible_base.lib.utils.models import prevent_search
+
 # AWX
-from awx.main.models.base import prevent_search
-from awx.main.models.rbac import Role, RoleAncestorEntry
+
+from awx.main.models.rbac import Role, RoleAncestorEntry, to_permissions
 from awx.main.utils import parse_yaml_or_json, get_custom_venv_choices, get_licenser, polymorphic
 from awx.main.utils.execution_environments import get_default_execution_environment
 from awx.main.utils.encryption import decrypt_value, get_encryption_key, is_encrypted
 from awx.main.utils.polymorphic import build_polymorphic_ctypes_map
 from awx.main.fields import AskForField
-from awx.main.constants import ACTIVE_STATES
+from awx.main.constants import ACTIVE_STATES, org_role_to_permission
 
 
 logger = logging.getLogger('awx.main.models.mixins')
@@ -64,13 +65,24 @@ class ResourceMixin(models.Model):
 
     @staticmethod
     def _accessible_pk_qs(cls, accessor, role_field, content_types=None):
+        if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
+            if cls._meta.model_name == 'organization' and role_field in org_role_to_permission:
+                # Organization roles can not use the DAB RBAC shortcuts
+                # like Organization.access_qs(user, 'change_jobtemplate') is needed
+                # not just Organization.access_qs(user, 'change') is needed
+                if accessor.is_superuser:
+                    return cls.objects.values_list('id')
+
+                codename = org_role_to_permission[role_field]
+
+                return cls.access_ids_qs(accessor, codename, content_types=content_types)
+            return cls.access_ids_qs(accessor, to_permissions[role_field], content_types=content_types)
         if accessor._meta.model_name == 'user':
             ancestor_roles = accessor.roles.all()
         elif type(accessor) == Role:
             ancestor_roles = [accessor]
         else:
-            accessor_type = ContentType.objects.get_for_model(accessor)
-            ancestor_roles = Role.objects.filter(content_type__pk=accessor_type.id, object_id=accessor.id)
+            raise RuntimeError(f'Role filters only valid for users and ancestor role, received {accessor}')
 
         if content_types is None:
             ct_kwarg = dict(content_type_id=ContentType.objects.get_for_model(cls).id)
@@ -528,7 +540,6 @@ class CustomVirtualEnvMixin(models.Model):
 
 
 class RelatedJobsMixin(object):
-
     """
     This method is intended to be overwritten.
     Called by get_active_jobs()
@@ -563,6 +574,7 @@ class WebhookTemplateMixin(models.Model):
     SERVICES = [
         ('github', "GitHub"),
         ('gitlab', "GitLab"),
+        ('bitbucket_dc', "BitBucket DataCenter"),
     ]
 
     webhook_service = models.CharField(max_length=16, choices=SERVICES, blank=True, help_text=_('Service that webhook requests will be accepted from'))
@@ -623,6 +635,7 @@ class WebhookMixin(models.Model):
         service_header = {
             'github': ('Authorization', 'token {}'),
             'gitlab': ('PRIVATE-TOKEN', '{}'),
+            'bitbucket_dc': ('Authorization', 'Bearer {}'),
         }
         service_statuses = {
             'github': {
@@ -640,6 +653,14 @@ class WebhookMixin(models.Model):
                 'error': 'failed',  # GitLab doesn't have an 'error' status distinct from 'failed' :(
                 'canceled': 'canceled',
             },
+            'bitbucket_dc': {
+                'pending': 'INPROGRESS',  # Bitbucket DC doesn't have any other statuses distinct from INPROGRESS, SUCCESSFUL, FAILED :(
+                'running': 'INPROGRESS',
+                'successful': 'SUCCESSFUL',
+                'failed': 'FAILED',
+                'error': 'FAILED',
+                'canceled': 'FAILED',
+            },
         }
 
         statuses = service_statuses[self.webhook_service]
@@ -648,11 +669,18 @@ class WebhookMixin(models.Model):
             return
         try:
             license_type = get_licenser().validate().get('license_type')
-            data = {
-                'state': statuses[status],
-                'context': 'ansible/awx' if license_type == 'open' else 'ansible/tower',
-                'target_url': self.get_ui_url(),
-            }
+            if self.webhook_service == 'bitbucket_dc':
+                data = {
+                    'state': statuses[status],
+                    'key': 'ansible/awx' if license_type == 'open' else 'ansible/tower',
+                    'url': self.get_ui_url(),
+                }
+            else:
+                data = {
+                    'state': statuses[status],
+                    'context': 'ansible/awx' if license_type == 'open' else 'ansible/tower',
+                    'target_url': self.get_ui_url(),
+                }
             k, v = service_header[self.webhook_service]
             headers = {k: v.format(self.webhook_credential.get_input('token')), 'Content-Type': 'application/json'}
             response = requests.post(status_api, data=json.dumps(data), headers=headers, timeout=30)

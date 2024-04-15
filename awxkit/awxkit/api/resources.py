@@ -1,3 +1,6 @@
+from awxkit.config import config
+
+
 class Resources(object):
     _activity = r'activity_stream/\d+/'
     _activity_stream = 'activity_stream/'
@@ -281,7 +284,7 @@ class Resources(object):
     _workflow_job_workflow_nodes = r'workflow_jobs/\d+/workflow_nodes/'
     _subscriptions = 'config/subscriptions/'
     _workflow_jobs = 'workflow_jobs/'
-    api = '/api/'
+    api = str(config.api_base_path)
     common = api + r'v\d+/'
     v2 = api + 'v2/'
 

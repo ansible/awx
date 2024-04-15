@@ -17,6 +17,8 @@ from django.utils.timezone import now as tz_now
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 
+from ansible_base.lib.utils.models import get_type_for_model
+
 # AWX
 from awx.main.dispatch.reaper import reap_job
 from awx.main.models import (
@@ -34,7 +36,6 @@ from awx.main.models import (
 from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.main.utils.pglock import advisory_lock
 from awx.main.utils import (
-    get_type_for_model,
     ScheduleTaskManager,
     ScheduleWorkflowManager,
 )
@@ -67,7 +68,7 @@ class TaskBase:
         # initialize each metric to 0 and force metric_has_changed to true. This
         # ensures each task manager metric will be overridden when pipe_execute
         # is called later.
-        self.subsystem_metrics = s_metrics.Metrics(auto_pipe_execute=False)
+        self.subsystem_metrics = s_metrics.DispatcherMetrics(auto_pipe_execute=False)
         self.start_time = time.time()
 
         # We want to avoid calling settings in loops, so cache these settings at init time
@@ -104,7 +105,7 @@ class TaskBase:
             try:
                 # increment task_manager_schedule_calls regardless if the other
                 # metrics are recorded
-                s_metrics.Metrics(auto_pipe_execute=True).inc(f"{self.prefix}__schedule_calls", 1)
+                s_metrics.DispatcherMetrics(auto_pipe_execute=True).inc(f"{self.prefix}__schedule_calls", 1)
                 # Only record metrics if the last time recording was more
                 # than SUBSYSTEM_METRICS_TASK_MANAGER_RECORD_INTERVAL ago.
                 # Prevents a short-duration task manager that runs directly after a

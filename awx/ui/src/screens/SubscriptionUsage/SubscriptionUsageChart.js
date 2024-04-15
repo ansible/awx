@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
-
 import { t } from '@lingui/macro';
 import {
   Card,
@@ -47,7 +46,7 @@ function SubscriptionUsageChart() {
   const [periodSelection, setPeriodSelection] = useState('year');
   const userProfile = useUserProfile();
 
-  const calculateDateRange = () => {
+  const calculateDateRange = useCallback(() => {
     const today = new Date();
     let date = '';
     switch (periodSelection) {
@@ -77,7 +76,7 @@ function SubscriptionUsageChart() {
         break;
     }
     return date;
-  };
+  }, [periodSelection]);
 
   const {
     isLoading,
@@ -89,7 +88,7 @@ function SubscriptionUsageChart() {
         calculateDateRange()
       );
       return data.data.results;
-    }, [periodSelection]),
+    }, [calculateDateRange]),
     []
   );
 

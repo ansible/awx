@@ -3,6 +3,7 @@
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
+from awx.main.analytics.subsystem_metrics import CallbackReceiverMetricsServer
 
 from awx.main.dispatch.control import Control
 from awx.main.dispatch.worker import AWXConsumerRedis, CallbackBrokerWorker
@@ -25,6 +26,9 @@ class Command(BaseCommand):
             print(Control('callback_receiver').status())
             return
         consumer = None
+
+        CallbackReceiverMetricsServer().start()
+
         try:
             consumer = AWXConsumerRedis(
                 'callback_receiver',

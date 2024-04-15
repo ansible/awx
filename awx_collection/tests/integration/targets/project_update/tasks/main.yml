@@ -13,7 +13,7 @@
     name: "{{ project_name1 }}"
     organization: Default
     scm_type: git
-    scm_url: https://github.com/ansible/test-playbooks
+    scm_url: https://github.com/ansible/ansible-tower-samples
     wait: false
   register: project_create_result
 
