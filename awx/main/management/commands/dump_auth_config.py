@@ -2,10 +2,11 @@ import json
 import os
 import sys
 import re
-
 from typing import Any
+
 from django.core.management.base import BaseCommand
 from django.conf import settings
+
 from awx.conf import settings_registry
 
 
@@ -40,6 +41,15 @@ class Command(BaseCommand):
         "USER_SEARCH": False,
     }
 
+    def is_enabled(self, settings, keys):
+        missing_fields = []
+        for key, required in keys.items():
+            if required and not settings.get(key):
+                missing_fields.append(key)
+        if missing_fields:
+            return False, missing_fields
+        return True, None
+
     def get_awx_ldap_settings(self) -> dict[str, dict[str, Any]]:
         awx_ldap_settings = {}
 
@@ -64,14 +74,16 @@ class Command(BaseCommand):
 
             if new_key == "SERVER_URI" and value:
                 value = value.split(", ")
+                grouped_settings[index][new_key] = value
+
+            if type(value).__name__ == "LDAPSearch":
+                data = []
+                data.append(value.base_dn)
+                data.append("SCOPE_SUBTREE")
+                data.append(value.filterstr)
+                grouped_settings[index][new_key] = data
 
         return grouped_settings
-
-    def is_enabled(self, settings, keys):
-        for key, required in keys.items():
-            if required and not settings.get(key):
-                return False
-        return True
 
     def get_awx_saml_settings(self) -> dict[str, Any]:
         awx_saml_settings = {}
@@ -82,7 +94,7 @@ class Command(BaseCommand):
 
     def format_config_data(self, enabled, awx_settings, type, keys, name):
         config = {
-            "type": f"awx.authentication.authenticator_plugins.{type}",
+            "type": f"ansible_base.authentication.authenticator_plugins.{type}",
             "name": name,
             "enabled": enabled,
             "create_objects": True,
@@ -130,7 +142,7 @@ class Command(BaseCommand):
 
             # dump SAML settings
             awx_saml_settings = self.get_awx_saml_settings()
-            awx_saml_enabled = self.is_enabled(awx_saml_settings, self.DAB_SAML_AUTHENTICATOR_KEYS)
+            awx_saml_enabled, saml_missing_fields = self.is_enabled(awx_saml_settings, self.DAB_SAML_AUTHENTICATOR_KEYS)
             if awx_saml_enabled:
                 awx_saml_name = awx_saml_settings["ENABLED_IDPS"]
                 data.append(
@@ -142,21 +154,25 @@ class Command(BaseCommand):
                         awx_saml_name,
                     )
                 )
+            else:
+                data.append({"SAML_missing_fields": saml_missing_fields})
 
             # dump LDAP settings
             awx_ldap_group_settings = self.get_awx_ldap_settings()
-            for awx_ldap_name, awx_ldap_settings in enumerate(awx_ldap_group_settings.values()):
-                enabled = self.is_enabled(awx_ldap_settings, self.DAB_LDAP_AUTHENTICATOR_KEYS)
-                if enabled:
+            for awx_ldap_name, awx_ldap_settings in awx_ldap_group_settings.items():
+                awx_ldap_enabled, ldap_missing_fields = self.is_enabled(awx_ldap_settings, self.DAB_LDAP_AUTHENTICATOR_KEYS)
+                if awx_ldap_enabled:
                     data.append(
                         self.format_config_data(
-                            enabled,
+                            awx_ldap_enabled,
                             awx_ldap_settings,
                             "ldap",
                             self.DAB_LDAP_AUTHENTICATOR_KEYS,
-                            str(awx_ldap_name),
+                            f"LDAP_{awx_ldap_name}",
                         )
                     )
+                else:
+                    data.append({f"LDAP_{awx_ldap_name}_missing_fields": ldap_missing_fields})
 
             # write to file if requested
             if options["output_file"]:
