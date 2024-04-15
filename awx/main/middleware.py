@@ -1,6 +1,7 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+import functools
 import logging
 import threading
 import time
@@ -9,20 +10,16 @@ from pathlib import Path
 
 from django.conf import settings
 from django.contrib.auth import logout
-from django.contrib.auth.models import User
 from django.db.migrations.recorder import MigrationRecorder
 from django.db import connection
 from django.shortcuts import redirect
-from django.apps import apps
 from django.utils.deprecation import MiddlewareMixin
-from django.utils.translation import gettext_lazy as _
 from django.urls import reverse, resolve
 
 from awx.main import migrations
-from awx.main.utils.named_url_graph import generate_graph, GraphNode
-from awx.conf import fields, register
 from awx.main.utils.profiling import AWXProfiler
 from awx.main.utils.common import memoize
+from awx.urls import get_urlpatterns
 
 
 logger = logging.getLogger('awx.main.middleware')
@@ -100,49 +97,7 @@ class DisableLocalAuthMiddleware(MiddlewareMixin):
                 logout(request)
 
 
-def _customize_graph():
-    from awx.main.models import Instance, Schedule, UnifiedJobTemplate
-
-    for model in [Schedule, UnifiedJobTemplate]:
-        if model in settings.NAMED_URL_GRAPH:
-            settings.NAMED_URL_GRAPH[model].remove_bindings()
-            settings.NAMED_URL_GRAPH.pop(model)
-    if User not in settings.NAMED_URL_GRAPH:
-        settings.NAMED_URL_GRAPH[User] = GraphNode(User, ['username'], [])
-        settings.NAMED_URL_GRAPH[User].add_bindings()
-    if Instance not in settings.NAMED_URL_GRAPH:
-        settings.NAMED_URL_GRAPH[Instance] = GraphNode(Instance, ['hostname'], [])
-        settings.NAMED_URL_GRAPH[Instance].add_bindings()
-
-
 class URLModificationMiddleware(MiddlewareMixin):
-    def __init__(self, get_response):
-        models = [m for m in apps.get_app_config('main').get_models() if hasattr(m, 'get_absolute_url')]
-        generate_graph(models)
-        _customize_graph()
-        register(
-            'NAMED_URL_FORMATS',
-            field_class=fields.DictField,
-            read_only=True,
-            label=_('Formats of all available named urls'),
-            help_text=_('Read-only list of key-value pairs that shows the standard format of all available named URLs.'),
-            category=_('Named URL'),
-            category_slug='named-url',
-        )
-        register(
-            'NAMED_URL_GRAPH_NODES',
-            field_class=fields.DictField,
-            read_only=True,
-            label=_('List of all named url graph nodes.'),
-            help_text=_(
-                'Read-only list of key-value pairs that exposes named URL graph topology.'
-                ' Use this list to programmatically generate named URLs for resources'
-            ),
-            category=_('Named URL'),
-            category_slug='named-url',
-        )
-        super().__init__(get_response)
-
     @staticmethod
     def _hijack_for_old_jt_name(node, kwargs, named_url):
         try:
@@ -220,3 +175,27 @@ class MigrationRanCheckMiddleware(MiddlewareMixin):
     def process_request(self, request):
         if is_migrating() and getattr(resolve(request.path), 'url_name', '') != 'migrations_notran':
             return redirect(reverse("ui:migrations_notran"))
+
+
+class OptionalURLPrefixPath(MiddlewareMixin):
+    @functools.lru_cache
+    def _url_optional(self, prefix):
+        # Relavant Django code path https://github.com/django/django/blob/stable/4.2.x/django/core/handlers/base.py#L300
+        #
+        # resolve_request(request)
+        #   get_resolver(request.urlconf)
+        #     _get_cached_resolver(request.urlconf) <-- cached via @functools.cache
+        #
+        # Django will attempt to cache the value(s) of request.urlconf
+        # Being hashable is a prerequisit for being cachable.
+        # tuple() is hashable list() is not.
+        # Hence the tuple(list()) wrap.
+        return tuple(get_urlpatterns(prefix=prefix))
+
+    def process_request(self, request):
+        prefix = settings.OPTIONAL_API_URLPATTERN_PREFIX
+
+        if request.path.startswith(f"/api/{prefix}"):
+            request.urlconf = self._url_optional(prefix)
+        else:
+            request.urlconf = 'awx.urls'

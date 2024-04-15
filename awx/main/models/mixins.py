@@ -19,13 +19,14 @@ from django.utils.translation import gettext_lazy as _
 from ansible_base.lib.utils.models import prevent_search
 
 # AWX
-from awx.main.models.rbac import Role, RoleAncestorEntry
+
+from awx.main.models.rbac import Role, RoleAncestorEntry, to_permissions
 from awx.main.utils import parse_yaml_or_json, get_custom_venv_choices, get_licenser, polymorphic
 from awx.main.utils.execution_environments import get_default_execution_environment
 from awx.main.utils.encryption import decrypt_value, get_encryption_key, is_encrypted
 from awx.main.utils.polymorphic import build_polymorphic_ctypes_map
 from awx.main.fields import AskForField
-from awx.main.constants import ACTIVE_STATES
+from awx.main.constants import ACTIVE_STATES, org_role_to_permission
 
 
 logger = logging.getLogger('awx.main.models.mixins')
@@ -64,6 +65,18 @@ class ResourceMixin(models.Model):
 
     @staticmethod
     def _accessible_pk_qs(cls, accessor, role_field, content_types=None):
+        if settings.ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED:
+            if cls._meta.model_name == 'organization' and role_field in org_role_to_permission:
+                # Organization roles can not use the DAB RBAC shortcuts
+                # like Organization.access_qs(user, 'change_jobtemplate') is needed
+                # not just Organization.access_qs(user, 'change') is needed
+                if accessor.is_superuser:
+                    return cls.objects.values_list('id')
+
+                codename = org_role_to_permission[role_field]
+
+                return cls.access_ids_qs(accessor, codename, content_types=content_types)
+            return cls.access_ids_qs(accessor, to_permissions[role_field], content_types=content_types)
         if accessor._meta.model_name == 'user':
             ancestor_roles = accessor.roles.all()
         elif type(accessor) == Role:

@@ -52,7 +52,7 @@ class TestDumpAuthConfigCommand(TestCase):
         super().setUp()
         self.expected_config = [
             {
-                "type": "awx.authentication.authenticator_plugins.saml",
+                "type": "ansible_base.authentication.authenticator_plugins.saml",
                 "name": "Keycloak",
                 "enabled": True,
                 "create_objects": True,
@@ -94,14 +94,14 @@ class TestDumpAuthConfigCommand(TestCase):
                 },
             },
             {
-                "type": "awx.authentication.authenticator_plugins.ldap",
-                "name": "1",
+                "type": "ansible_base.authentication.authenticator_plugins.ldap",
+                "name": "LDAP_1",
                 "enabled": True,
                 "create_objects": True,
                 "users_unique": False,
                 "remove_users": True,
                 "configuration": {
-                    "SERVER_URI": "SERVER_URI",
+                    "SERVER_URI": ["SERVER_URI"],
                     "BIND_DN": "BIND_DN",
                     "BIND_PASSWORD": "BIND_PASSWORD",
                     "CONNECTION_OPTIONS": {},
@@ -119,4 +119,14 @@ class TestDumpAuthConfigCommand(TestCase):
     def test_json_returned_from_cmd(self):
         output = StringIO()
         call_command("dump_auth_config", stdout=output)
-        assert json.loads(output.getvalue()) == self.expected_config
+        cmmd_output = json.loads(output.getvalue())
+
+        # check configured SAML return
+        assert cmmd_output[0] == self.expected_config[0]
+
+        # check configured LDAP return
+        assert cmmd_output[2] == self.expected_config[1]
+
+        # check unconfigured LDAP return
+        assert "LDAP_0_missing_fields" in cmmd_output[1]
+        assert cmmd_output[1]["LDAP_0_missing_fields"] == ['SERVER_URI', 'GROUP_TYPE', 'GROUP_TYPE_PARAMS', 'USER_DN_TEMPLATE', 'USER_ATTR_MAP']
