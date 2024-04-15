@@ -4,10 +4,13 @@ from awx.conf.migrations._create_dab_ldap_config import create_ldap_auth_and_aut
 
 from django.db import migrations
 
+import logging
+
+logger = logging.getLogger('awx.conf.migrations')
+
 
 class Migration(migrations.Migration):
     dependencies = [
         ('conf', '0010_change_to_JSONField'),
     ]
-
-    operations = [migrations.RunPython(create_ldap_auth_and_authmap)]
+    operations = [migrations.RunPython(create_ldap_auth_and_authmap, reverse_code=migrations.RunPython.noop)]

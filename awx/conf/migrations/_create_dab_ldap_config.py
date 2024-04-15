@@ -1,10 +1,6 @@
 import re
 from typing import Any
 
-from django.conf import settings
-from awx.conf import settings_registry
-from ansible_base.authentication.models import Authenticator, AuthenticatorMap
-
 import logging
 
 logger = logging.getLogger('awx.conf.migrations')
@@ -24,13 +20,17 @@ DAB_LDAP_AUTHENTICATOR_KEYS = {
     "USER_SEARCH": False,
 }
 
+name_counter = 1
 
-def get_awx_ldap_settings() -> dict[str, dict[str, Any]]:
+
+def get_awx_ldap_settings(apps) -> dict[str, dict[str, Any]]:
     awx_ldap_settings = {}
+    Setting = apps.get_model('conf', 'Setting')
+    qs = Setting.objects.filter(key__startswith="AUTH_LDAP_")
 
-    for awx_ldap_setting in settings_registry.get_registered_settings(category_slug='ldap'):
-        key = awx_ldap_setting.removeprefix("AUTH_LDAP_")
-        value = getattr(settings, awx_ldap_setting, None)
+    for awx_ldap_setting in qs:
+        key = awx_ldap_setting.key.removeprefix("AUTH_LDAP_")
+        value = awx_ldap_setting.value
         awx_ldap_settings[key] = value
 
     grouped_settings = {}
@@ -44,11 +44,17 @@ def get_awx_ldap_settings() -> dict[str, dict[str, Any]]:
             grouped_settings[index] = {}
 
         grouped_settings[index][new_key] = value
+
+        if new_key == "BIND_PASSWORD":
+            # password is encrypted in the db. user will have to set it again
+            grouped_settings[index][new_key] = "password"
+
         if new_key == "GROUP_TYPE" and value:
-            grouped_settings[index][new_key] = type(value).__name__
+            grouped_settings[index][new_key] = value
 
         if new_key == "SERVER_URI" and value:
             value = value.split(", ")
+            grouped_settings[index][new_key] = value
 
     return grouped_settings
 
@@ -60,15 +66,17 @@ def is_enabled(settings, keys):
     return True
 
 
-def format_config_data(enabled, awx_settings, type, keys, name):
+def format_config_data(enabled, awx_settings, auth_type, keys, name):
     config = {
-        "type": f"awx.authentication.authenticator_plugins.{type}",
+        "type": f"ansible_base.authentication.authenticator_plugins.{auth_type}",
         "name": name,
         "enabled": enabled,
         "create_objects": True,
         "users_unique": False,
         "remove_users": True,
         "configuration": {},
+        "slug": name.lower(),
+        "category": auth_type,
     }
     for k in keys:
         v = awx_settings.get(k)
@@ -77,7 +85,7 @@ def format_config_data(enabled, awx_settings, type, keys, name):
     return config
 
 
-def create_auth_maps(awx_settings, authenticator_id):
+def create_auth_maps(awx_settings, authenticator):
     map_configs = []
     map_config = {}
     if "USER_FLAGS_BY_GROUP" in awx_settings:
@@ -87,7 +95,7 @@ def create_auth_maps(awx_settings, authenticator_id):
                 groups = [groups]
 
             map_config = {
-                "authenticator": authenticator_id,
+                "authenticator": authenticator,
                 "revoke": True,
                 "map_type": flag,
                 "team": None,
@@ -118,7 +126,7 @@ def create_auth_maps(awx_settings, authenticator_id):
                             triggers = {"groups": {"has_or": organization[user_type]}}
 
                         map_config = {
-                            "authenticator": authenticator_id,
+                            "authenticator": authenticator,
                             "revoke": organization.get(f'remove_{user_type}', False),
                             "map_type": "team",
                             "team": f"Organization {user_type.title()}",
@@ -143,7 +151,7 @@ def create_auth_maps(awx_settings, authenticator_id):
                     triggers = {"groups": {"has_or": team['users']}}
 
                 map_config = {
-                    "authenticator": authenticator_id,
+                    "authenticator": authenticator,
                     "revoke": team.get('remove', False),
                     "map_type": "team",
                     "team": team_name,
@@ -155,7 +163,7 @@ def create_auth_maps(awx_settings, authenticator_id):
         require_group = awx_settings.get("REQUIRE_GROUP", None)
         if require_group:
             map_config = {
-                "authenticator": authenticator_id,
+                "authenticator": authenticator,
                 "revoke": False,
                 "map_type": "allow",
                 "team": None,
@@ -167,7 +175,7 @@ def create_auth_maps(awx_settings, authenticator_id):
         deny_group = awx_settings.get("DENY_GROUP", None)
         if deny_group:
             map_config = {
-                "authenticator": authenticator_id,
+                "authenticator": authenticator,
                 "revoke": False,
                 "map_type": "allow",
                 "team": None,
@@ -180,9 +188,10 @@ def create_auth_maps(awx_settings, authenticator_id):
 
 
 def create_ldap_auth_and_authmap(apps, schema_editor):
+    global name_counter
     logger.info('Creating django-ansible-base LDAP authenticators and authenticator maps...')
-    awx_ldap_group_settings = get_awx_ldap_settings()
-    for awx_ldap_name, awx_ldap_settings in enumerate(awx_ldap_group_settings.values()):
+    awx_ldap_group_settings = get_awx_ldap_settings(apps)
+    for awx_ldap_name, awx_ldap_settings in awx_ldap_group_settings.items():
         enabled = is_enabled(awx_ldap_settings, DAB_LDAP_AUTHENTICATOR_KEYS)
         if enabled:
             ldap_config = format_config_data(
@@ -190,15 +199,20 @@ def create_ldap_auth_and_authmap(apps, schema_editor):
                 awx_ldap_settings,
                 "ldap",
                 DAB_LDAP_AUTHENTICATOR_KEYS,
-                str(awx_ldap_name),
+                f"LDAP_{awx_ldap_name}",
             )
             try:
+                Authenticator = apps.get_model('dab_authentication', 'Authenticator')
+                AuthenticatorMap = apps.get_model('dab_authentication', 'AuthenticatorMap')
                 authenticator = Authenticator.objects.create(**ldap_config)
                 authenticator.save()
+
+                ldap_auth_maps = create_auth_maps(awx_ldap_settings, authenticator)
+                for ldap_map in ldap_auth_maps:
+                    # AuthenticatorMaps need a unique name
+                    ldap_map["name"] = f"Rule #{name_counter}"
+                    name_counter += 1
+                    auth_map = AuthenticatorMap.objects.create(**ldap_map)
+                    auth_map.save()
             except Exception as ex:
                 logger.error(f"Failed to create Authenticator from LDAP config {awx_ldap_name} with error {ex}.")
-
-            ldap_auth_maps = create_auth_maps(awx_ldap_settings, authenticator.id)
-            for ldap_map in ldap_auth_maps:
-                auth_map = AuthenticatorMap.objects.create(**ldap_map)
-                auth_map.save()
