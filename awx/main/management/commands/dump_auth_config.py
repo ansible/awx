@@ -187,10 +187,12 @@ class Command(BaseCommand):
                             f"LDAP_{awx_ldap_name}",
                         )
                     )
+                else:
+                    data.append({f"LDAP_{awx_ldap_name}_missing_fields": ldap_missing_fields})
 
             # dump TACACS settings
             awx_tacacs_settings = self.get_awx_tacacs_settings()
-            awx_tacacs_enabled = self.is_enabled(awx_tacacs_settings, self.DAB_TACACS_AUTHENTICATOR_KEYS)
+            awx_tacacs_enabled, tacacs_missing_fields = self.is_enabled(awx_tacacs_settings, self.DAB_TACACS_AUTHENTICATOR_KEYS)
             if awx_tacacs_enabled:
                 data.append(
                     self.format_config_data(
@@ -201,8 +203,8 @@ class Command(BaseCommand):
                         "TACACS",
                     )
                 )
-                else:
-                    data.append({f"LDAP_{awx_ldap_name}_missing_fields": ldap_missing_fields})
+            else:
+                data.append({f"TACACS_missing_fields": tacacs_missing_fields})
 
             # write to file if requested
             if options["output_file"]:
