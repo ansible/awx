@@ -2,6 +2,7 @@ import json
 import logging
 import asyncio
 from typing import Dict
+from copy import deepcopy
 
 import ipaddress
 
@@ -302,20 +303,38 @@ class WebSocketRelayManager(object):
         self.stats_mgr.start()
 
         # Set up a pg_notify consumer for allowing web nodes to "provision" and "deprovision" themselves gracefully.
-        database_conf = settings.DATABASES['default']
-        async_conn = await psycopg.AsyncConnection.connect(
-            dbname=database_conf['NAME'],
-            host=database_conf['HOST'],
-            user=database_conf['USER'],
-            password=database_conf['PASSWORD'],
-            port=database_conf['PORT'],
-            **database_conf.get("OPTIONS", {}),
-        )
-        await async_conn.set_autocommit(True)
-        event_loop.create_task(self.on_ws_heartbeat(async_conn))
+        database_conf = deepcopy(settings.DATABASES['default'])
+        database_conf['OPTIONS'] = deepcopy(database_conf.get('OPTIONS', {}))
+
+        for k, v in settings.LISTENER_DATABASES.get('default', {}).items():
+            database_conf[k] = v
+        for k, v in settings.LISTENER_DATABASES.get('default', {}).get('OPTIONS', {}).items():
+            database_conf['OPTIONS'][k] = v
+
+        if 'PASSWORD' in database_conf:
+            database_conf['OPTIONS']['password'] = database_conf.pop('PASSWORD')
+
+        task = None
 
         # Establishes a websocket connection to /websocket/relay on all API servers
         while True:
+            if not task or task.done():
+                try:
+                    async_conn = await psycopg.AsyncConnection.connect(
+                        dbname=database_conf['NAME'],
+                        host=database_conf['HOST'],
+                        user=database_conf['USER'],
+                        port=database_conf['PORT'],
+                        **database_conf.get("OPTIONS", {}),
+                    )
+                    await async_conn.set_autocommit(True)
+
+                    task = event_loop.create_task(self.on_ws_heartbeat(async_conn), name="on_ws_heartbeat")
+                    logger.info("Creating `on_ws_heartbeat` task in event loop.")
+
+                except Exception as e:
+                    logger.warning(f"Failed to connect to database for pg_notify: {e}")
+
             future_remote_hosts = self.known_hosts.keys()
             current_remote_hosts = self.relay_connections.keys()
             deleted_remote_hosts = set(current_remote_hosts) - set(future_remote_hosts)

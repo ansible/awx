@@ -2,6 +2,22 @@
 ---
 version: '2.1'
 services:
+{% if editable_dependencies | length > 0 %}
+  init_awx:
+    image: "{{ awx_image }}:{{ awx_image_tag }}"
+    container_name: tools_init_awx
+    command: /awx_devel/tools/docker-compose/editable_dependencies/install.sh
+    user: root
+    working_dir: "/"
+    environment:
+      RUN_MIGRATIONS: 1
+    volumes:
+      - "../../../:/awx_devel"
+{% for editable_dependency in editable_dependencies %}
+      - "{{ editable_dependency }}:/editable_dependencies/{{ editable_dependency | basename }}"
+{% endfor %}
+      - "var_lib_awx:/var/lib/awx"
+{% endif %}
 {% for i in range(control_plane_node_count|int) %}
   {% set container_postfix = loop.index %}
   {% set awx_sdb_port_start = 7899 + (loop.index0*1000) | int %}
@@ -11,7 +27,7 @@ services:
     user: "{{ ansible_user_uid }}"
     image: "{{ awx_image }}:{{ awx_image_tag }}"
     container_name: tools_awx_{{ container_postfix }}
-    hostname: awx_{{ container_postfix }}
+    hostname: awx-{{ container_postfix }}
     command: launch_awx.sh
     environment:
       OS: "{{ os_info.stdout }}"
@@ -39,6 +55,12 @@ services:
       - service-mesh
     working_dir: "/awx_devel"
     volumes:
+{% if editable_dependencies | length > 0 %}
+      - "var_lib_awx:/var/lib/awx"
+{% for editable_dependency in editable_dependencies %}
+      - "{{ editable_dependency }}:/editable_dependencies/{{ editable_dependency | basename }}"
+{% endfor %}
+{% endif %}
       - "../../../:/awx_devel"
       - "../../docker-compose/supervisor.conf:/etc/supervisord.conf"
       - "../../docker-compose/_sources/database.py:/etc/tower/conf.d/database.py"
@@ -58,6 +80,11 @@ services:
       - "~/.kube/config:/var/lib/awx/.kube/config"
       - "redis_socket_{{ container_postfix }}:/var/run/redis/:rw"
     privileged: true
+{% if editable_dependencies | length > 0 %}
+    depends_on:
+      init_awx:
+        condition: service_completed_successfully
+{% endif %}
     tty: true
     ports:
       - "{{ awx_sdb_port_start }}-{{ awx_sdb_port_end }}:{{ awx_sdb_port_start }}-{{ awx_sdb_port_end }}"  # sdb-listen
@@ -207,17 +234,16 @@ services:
   #     context: ../../docker-compose
   #     dockerfile: Dockerfile-logstash
   postgres:
-    image: postgres:12
+    image: quay.io/sclorg/postgresql-15-c9s
     container_name: tools_postgres_1
     # additional logging settings for postgres can be found https://www.postgresql.org/docs/current/runtime-config-logging.html
-    command: postgres -c log_destination=stderr -c log_min_messages=info -c log_min_duration_statement={{ pg_log_min_duration_statement|default(1000) }} -c max_connections={{ pg_max_connections|default(1024) }}
+    command: run-postgresql -c log_destination=stderr -c log_min_messages=info -c log_min_duration_statement={{ pg_log_min_duration_statement|default(1000) }} -c max_connections={{ pg_max_connections|default(1024) }}
     environment:
-      POSTGRES_HOST_AUTH_METHOD: trust
-      POSTGRES_USER: {{ pg_username }}
-      POSTGRES_DB: {{ pg_database }}
-      POSTGRES_PASSWORD: {{ pg_password }}
+      POSTGRESQL_USER: {{ pg_username }}
+      POSTGRESQL_DATABASE: {{ pg_database }}
+      POSTGRESQL_PASSWORD: {{ pg_password }}
     volumes:
-      - "awx_db:/var/lib/postgresql/data"
+      - "awx_db_15:/var/lib/pgsql/data"
     networks:
       - awx
     ports:
@@ -305,8 +331,13 @@ services:
 {% endif %}
 
 volumes:
-  awx_db:
-    name: tools_awx_db
+{% if editable_dependencies | length > 0 %}
+  var_lib_awx:
+    name: tools_var_lib_awx
+{% endif %}
+{# For the postgres 15 db upgrade we changed the mount name because 15 can't load a 12 DB #}
+  awx_db_15:
+    name: tools_awx_db_15
 {% for i in range(control_plane_node_count|int) -%}
   {% set container_postfix = loop.index %}
   redis_socket_{{ container_postfix }}:
@@ -329,8 +360,10 @@ volumes:
   grafana_storage:
     name: tools_grafana_storage
 {% endif %}
+
 networks:
   awx:
+    name: awx
   service-mesh:
     name: service-mesh
 {% if minikube_container_group|bool %}

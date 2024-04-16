@@ -36,11 +36,13 @@ class Metadata(metadata.SimpleMetadata):
         field_info = OrderedDict()
         field_info['type'] = self.label_lookup[field]
         field_info['required'] = getattr(field, 'required', False)
+        field_info['hidden'] = getattr(field, 'hidden', False)
 
         text_attrs = [
             'read_only',
             'label',
             'help_text',
+            'warning_text',
             'min_length',
             'max_length',
             'min_value',

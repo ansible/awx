@@ -1,0 +1,100 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "start awx-cache-clear",
+            "type": "shell",
+            "command": "supervisorctl start tower-processes:awx-cache-clear"
+        },
+        {
+            "label": "stop awx-cache-clear",
+            "type": "shell",
+            "command": "supervisorctl stop tower-processes:awx-cache-clear"
+        },
+        {
+            "label": "start awx-daphne",
+            "type": "shell",
+            "command": "supervisorctl start tower-processes:awx-daphne"
+        },
+        {
+            "label": "stop awx-daphne",
+            "type": "shell",
+            "command": "supervisorctl stop tower-processes:awx-daphne"
+        },
+        {
+            "label": "start awx-dispatcher",
+            "type": "shell",
+            "command": "supervisorctl start tower-processes:awx-dispatcher"
+        },
+        {
+            "label": "stop awx-dispatcher",
+            "type": "shell",
+            "command": "supervisorctl stop tower-processes:awx-dispatcher"
+        },
+        {
+            "label": "start awx-receiver",
+            "type": "shell",
+            "command": "supervisorctl start tower-processes:awx-receiver"
+        },
+        {
+            "label": "stop awx-receiver",
+            "type": "shell",
+            "command": "supervisorctl stop tower-processes:awx-receiver"
+        },
+        {
+            "label": "start awx-rsyslog-configurer",
+            "type": "shell",
+            "command": "supervisorctl start tower-processes:awx-rsyslog-configurer"
+        },
+        {
+            "label": "stop awx-rsyslog-configurer",
+            "type": "shell",
+            "command": "supervisorctl stop tower-processes:awx-rsyslog-configurer"
+        },
+        {
+            "label": "start awx-rsyslogd",
+            "type": "shell",
+            "command": "supervisorctl start tower-processes:awx-rsyslogd"
+        },
+        {
+            "label": "stop awx-rsyslogd",
+            "type": "shell",
+            "command": "supervisorctl stop tower-processes:awx-rsyslogd"
+        },
+        {
+            "label": "start awx-uwsgi",
+            "type": "shell",
+            "command": "supervisorctl start tower-processes:awx-uwsgi"
+        },
+        {
+            "label": "stop awx-uwsgi",
+            "type": "shell",
+            "command": "supervisorctl stop tower-processes:awx-uwsgi"
+        },
+        {
+            "label": "stop awx-uwsgi and install Werkzeug",
+            "type": "shell",
+            "command": "pip install Werkzeug; supervisorctl stop tower-processes:awx-uwsgi"
+        },
+        {
+            "label": "start awx-ws-heartbeat",
+            "type": "shell",
+            "command": "supervisorctl start tower-processes:awx-ws-heartbeat"
+        },
+        {
+            "label": "stop awx-ws-heartbeat",
+            "type": "shell",
+            "command": "supervisorctl stop tower-processes:awx-ws-heartbeat"
+        },
+        {
+            "label": "start awx-wsrelay",
+            "type": "shell",
+            "command": "supervisorctl start tower-processes:awx-wsrelay"
+        },
+        {
+            "label": "stop awx-wsrelay",
+            "type": "shell",
+            "command": "supervisorctl stop tower-processes:awx-wsrelay"
+        }
+    ]
+}

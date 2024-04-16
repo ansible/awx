@@ -467,6 +467,10 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
 
     class Meta:
         app_label = 'main'
+        permissions = [
+            ('execute_workflowjobtemplate', 'Can run this workflow job template'),
+            ('approve_workflowjobtemplate', 'Can approve steps in this workflow job template'),
+        ]
 
     notification_templates_approvals = models.ManyToManyField(
         "NotificationTemplate",
