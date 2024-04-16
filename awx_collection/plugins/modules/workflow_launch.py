@@ -39,6 +39,16 @@ options:
       description:
         - Limit to use for the I(job_template).
       type: str
+    tags:
+      description:
+        - Specific tags to apply from the I(job_template).
+      type: list
+      elements: str
+    skip_tags:
+      description:
+        - Specific tags to skip from the I(job_template).
+      type: list
+      elements: str
     scm_branch:
       description:
         - A specific branch of the SCM project to run the template on.
@@ -100,6 +110,8 @@ def main():
         organization=dict(),
         inventory=dict(),
         limit=dict(),
+        tags=dict(type='list', elements='str'),
+        skip_tags=dict(type='list', elements='str'),
         scm_branch=dict(),
         extra_vars=dict(type='dict'),
         wait=dict(required=False, default=True, type='bool'),
@@ -128,6 +140,14 @@ def main():
         if field_val is not None:
             optional_args[field_name] = field_val
 
+    # Special treatment of tags parameters
+    job_tags = module.params.get('tags')
+    if job_tags is not None:
+        optional_args['job_tags'] = ",".join(job_tags)
+    skip_tags = module.params.get('skip_tags')
+    if skip_tags is not None:
+        optional_args['skip_tags'] = ",".join(skip_tags)
+
     # Create a datastructure to pass into our job launch
     post_data = {}
     for arg_name, arg_value in optional_args.items():
@@ -152,6 +172,8 @@ def main():
     check_vars_to_prompts = {
         'inventory': 'ask_inventory_on_launch',
         'limit': 'ask_limit_on_launch',
+        'job_tags': 'ask_tags_on_launch',
+        'skip_tags': 'ask_skip_tags_on_launch',
         'scm_branch': 'ask_scm_branch_on_launch',
     }
 
