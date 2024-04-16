@@ -27,6 +27,9 @@ class MetricsServerSettings(MetricsNamespace):
     def port(self):
         return settings.METRICS_SUBSYSTEM_CONFIG['server'][self._namespace]['port']
 
+    def address(self):
+        return settings.METRICS_SUBSYSTEM_CONFIG['server'][self._namespace]['address']
+
 
 class MetricsServer(MetricsServerSettings):
     def __init__(self, namespace, registry):
@@ -36,7 +39,7 @@ class MetricsServer(MetricsServerSettings):
     def start(self):
         try:
             # TODO: addr for ipv6 ?
-            prometheus_client.start_http_server(self.port(), addr='localhost', registry=self._registry)
+            prometheus_client.start_http_server(self.port(), addr=self.address(), registry=self._registry)
         except Exception:
             logger.error(f"MetricsServer failed to start for service '{self._namespace}.")
             raise
@@ -452,19 +455,12 @@ class CustomToPrometheusMetricsCollector(prometheus_client.registry.Collector):
 class CallbackReceiverMetricsServer(MetricsServer):
     def __init__(self):
         registry = CollectorRegistry(auto_describe=True)
-        registry.register(CustomToPrometheusMetricsCollector(DispatcherMetrics(metrics_have_changed=False)))
+        registry.register(CustomToPrometheusMetricsCollector(CallbackReceiverMetrics(metrics_have_changed=False)))
         super().__init__(settings.METRICS_SERVICE_CALLBACK_RECEIVER, registry)
 
 
 class DispatcherMetricsServer(MetricsServer):
     def __init__(self):
         registry = CollectorRegistry(auto_describe=True)
-        registry.register(CustomToPrometheusMetricsCollector(CallbackReceiverMetrics(metrics_have_changed=False)))
+        registry.register(CustomToPrometheusMetricsCollector(DispatcherMetrics(metrics_have_changed=False)))
         super().__init__(settings.METRICS_SERVICE_DISPATCHER, registry)
-
-
-class WebsocketsMetricsServer(MetricsServer):
-    def __init__(self):
-        registry = CollectorRegistry(auto_describe=True)
-        # registry.register()
-        super().__init__(settings.METRICS_SERVICE_WEBSOCKETS, registry)

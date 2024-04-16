@@ -67,6 +67,8 @@ CLUSTER_HOST_ID = socket.gethostname()
 
 AWX_CALLBACK_PROFILE = True
 
+METRICS_SUBSYSTEM_CONFIG['server'][METRICS_SERVICE_WEBSOCKET_RELAY]['address'] = '0.0.0.0'  # NOQA
+
 # ======================!!!!!!! FOR DEVELOPMENT ONLY !!!!!!!=================================
 # Disable normal scheduled/triggered task managers (DependencyManager, TaskManager, WorkflowManager).
 # Allows user to trigger task managers directly for debugging and profiling purposes.
