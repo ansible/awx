@@ -959,6 +959,8 @@ register_validate('logging', logging_validate)
 def csrf_trusted_origins_validate(serializer, attrs):
     if not serializer.instance or not hasattr(serializer.instance, 'CSRF_TRUSTED_ORIGINS'):
         return attrs
+    if 'CSRF_TRUSTED_ORIGINS' not in attrs:
+        return attrs
     errors = []
     for origin in attrs['CSRF_TRUSTED_ORIGINS']:
         if "://" not in origin:
