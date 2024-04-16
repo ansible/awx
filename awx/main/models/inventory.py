@@ -11,6 +11,8 @@ import os.path
 from urllib.parse import urljoin
 
 import yaml
+import tempfile
+import stat
 
 # Django
 from django.conf import settings
@@ -1638,16 +1640,38 @@ class satellite6(PluginFileInjector):
 
 class terraform(PluginFileInjector):
     plugin_name = 'terraform_state'
-    base_injector = 'managed'
     namespace = 'cloud'
     collection = 'terraform'
     use_fqcn = True
 
     def inventory_as_dict(self, inventory_update, private_data_dir):
-        env = super(terraform, self).get_plugin_env(inventory_update, private_data_dir, None)
         ret = super().inventory_as_dict(inventory_update, private_data_dir)
-        ret['backend_config_files'] = env["TF_BACKEND_CONFIG_FILE"]
+        credential = inventory_update.get_cloud_credential()
+        config_cred = credential.get_input('configuration')
+        if config_cred:
+            handle, path = tempfile.mkstemp(dir=os.path.join(private_data_dir, 'env'))
+            with os.fdopen(handle, 'w') as f:
+                os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
+                f.write(config_cred)
+            ret['backend_config_files'] = to_container_path(path, private_data_dir)
         return ret
+
+    def build_plugin_private_data(self, inventory_update, private_data_dir):
+        credential = inventory_update.get_cloud_credential()
+
+        private_data = {'credentials': {}}
+        gce_cred = credential.get_input('gce_credentials')
+        if gce_cred:
+            private_data['credentials'][credential] = gce_cred
+        return private_data
+
+    def get_plugin_env(self, inventory_update, private_data_dir, private_data_files):
+        env = super(terraform, self).get_plugin_env(inventory_update, private_data_dir, private_data_files)
+        credential = inventory_update.get_cloud_credential()
+        cred_data = private_data_files['credentials']
+        if cred_data[credential]:
+            env['GOOGLE_BACKEND_CREDENTIALS'] = to_container_path(cred_data[credential], private_data_dir)
+        return env
 
 
 class controller(PluginFileInjector):
