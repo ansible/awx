@@ -378,7 +378,7 @@ the team will always be assigned to the single default organization.
     }
 
 
-Team mappings may be specified separately for each account authentication backend, based on which of these you setup.  When defined, these configurations take precedence over the the global configuration above.
+Team mappings may be specified separately for each account authentication backend, based on which of these you setup.  When defined, these configurations take precedence over the global configuration above.
 
 ::
 
