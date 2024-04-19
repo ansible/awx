@@ -680,6 +680,9 @@ class ControllerAPIModule(ControllerModule):
             except KeyError as ke:
                 self.fail_json(msg="Unable to process delete of item due to missing data {0}".format(ke))
 
+            if self._diff:
+                self.json_output['diff'] = dict(before=existing_item, after={})
+
             response = self.delete_endpoint(item_url)
 
             if response['status_code'] in [202, 204]:
@@ -819,6 +822,9 @@ class ControllerAPIModule(ControllerModule):
             # We will pull the item_name out from the new_item, if it exists
             item_name = self.get_item_name(new_item, allow_unknown=True)
 
+            if self._diff:
+                self.json_output['diff'] = dict(before={}, after=new_item)
+
             response = self.post_endpoint(endpoint, **{'data': new_item})
 
             # 200 is response from approval node creation on tower 3.7.3 or awx 15.0.0 or earlier.
@@ -953,6 +959,8 @@ class ControllerAPIModule(ControllerModule):
             # If we decided the item needs to be updated, update it
             self.json_output['id'] = item_id
             if needs_patch:
+                if self._diff:
+                    self.json_output['diff'] = dict(before={key: existing_item[key] for key in new_item.keys()}, after=new_item)
                 response = self.patch_endpoint(item_url, **{'data': new_item})
                 if response['status_code'] == 200:
                     # compare apples-to-apples, old API data to new API data
