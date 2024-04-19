@@ -12,7 +12,7 @@ import AssociateModal from 'components/AssociateModal';
 import ErrorDetail from 'components/ErrorDetail';
 import AlertModal from 'components/AlertModal';
 import useToast, { AlertVariant } from 'hooks/useToast';
-import { getQSConfig, parseQueryString, mergeParams } from 'util/qs';
+import { getQSConfig, parseQueryString } from 'util/qs';
 import { useLocation, useParams } from 'react-router-dom';
 import useRequest, { useDismissableError } from 'hooks/useRequest';
 import DataListToolbar from 'components/DataListToolbar';
@@ -106,61 +106,37 @@ function InstancePeerList({ setBreadcrumb }) {
   const { selected, isAllSelected, handleSelect, clearSelected, selectAll } =
     useSelected(peers);
 
-  const fetchInstancesToAssociate = useCallback(
+  const fetchPeersToAssociate = useCallback(
     async (params) => {
       const address_list = [];
 
-      const instances = await InstancesAPI.read(
-        mergeParams(params, {
-          ...{ not__node_type: ['control', 'hybrid'] },
-        })
-      );
-      const receptors = (await ReceptorAPI.read()).data.results;
+      // do not show this instance or instances that are already peered
+      // to this instance (reverse_peers)
+      const not_instances = instance.reverse_peers;
+      not_instances.push(instance.id);
 
-      // get instance ids of the current peered receptor ids
-      const already_peered_instance_ids = [];
-      for (let h = 0; h < instance.peers.length; h++) {
-        const matched = receptors.filter((obj) => obj.id === instance.peers[h]);
-        matched.forEach((element) => {
-          already_peered_instance_ids.push(element.instance);
-        });
+      params.not__instance = not_instances;
+      params.is_internal = false;
+      // do not show the current peers
+      if (instance.peers.length > 0) {
+        params.not__id__in = instance.peers.join(',');
       }
 
-      for (let q = 0; q < receptors.length; q++) {
-        const receptor = receptors[q];
+      const receptoraddresses = await ReceptorAPI.read(params);
 
-        if (already_peered_instance_ids.includes(receptor.instance)) {
-          // ignore reverse peers
-          continue;
-        }
+      // retrieve the instances that are associated with those receptor addresses
+      const instance_ids = receptoraddresses.data.results.map(
+        (obj) => obj.instance
+      );
+      const instance_ids_str = instance_ids.join(',');
+      const instances = await InstancesAPI.read({ id__in: instance_ids_str });
 
-        if (instance.peers.includes(receptor.id)) {
-          // no links to existing links
-          continue;
-        }
-
-        if (instance.id === receptor.instance) {
-          // no links to thy self
-          continue;
-        }
-
-        if (instance.managed) {
-          // no managed nodes
-          continue;
-        }
+      for (let q = 0; q < receptoraddresses.data.results.length; q++) {
+        const receptor = receptoraddresses.data.results[q];
 
         const host = instances.data.results.filter(
           (obj) => obj.id === receptor.instance
         )[0];
-
-        if (host === undefined) {
-          // no hosts
-          continue;
-        }
-
-        if (receptor.is_internal) {
-          continue;
-        }
 
         const copy = receptor;
         copy.hostname = host.hostname;
@@ -169,9 +145,9 @@ function InstancePeerList({ setBreadcrumb }) {
         address_list.push(copy);
       }
 
-      instances.data.results = address_list;
+      receptoraddresses.data.results = address_list;
 
-      return instances;
+      return receptoraddresses;
     },
     [instance]
   );
@@ -191,7 +167,7 @@ function InstancePeerList({ setBreadcrumb }) {
         fetchPeers();
         addToast({
           id: instancesPeerToAssociate,
-          title: t`Please be sure to run the install bundle for the selected instance(s) again in order to see changes take effect.`,
+          title: t`Please be sure to run the install bundle for ${instance.hostname} again in order to see changes take effect.`,
           variant: AlertVariant.success,
           hasTimeout: true,
         });
@@ -315,13 +291,13 @@ function InstancePeerList({ setBreadcrumb }) {
       {isModalOpen && (
         <AssociateModal
           header={t`Instances`}
-          fetchRequest={fetchInstancesToAssociate}
+          fetchRequest={fetchPeersToAssociate}
           isModalOpen={isModalOpen}
           onAssociate={handlePeerAssociate}
           onClose={() => setIsModalOpen(false)}
           title={t`Select Peer Addresses`}
           optionsRequest={readInstancesOptions}
-          displayKey="hostname"
+          displayKey="address"
           columns={[
             { key: 'hostname', name: t`Name` },
             { key: 'address', name: t`Address` },
