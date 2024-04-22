@@ -204,7 +204,7 @@ class Command(BaseCommand):
                     )
                 )
             else:
-                data.append({f"TACACS_missing_fields": tacacs_missing_fields})
+                data.append({"TACACS_missing_fields": tacacs_missing_fields})
 
             # write to file if requested
             if options["output_file"]:
