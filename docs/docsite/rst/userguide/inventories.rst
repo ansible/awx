@@ -99,7 +99,6 @@ Hosts associated with the Smart Inventory are manifested at view time. If the re
 
 Variables on Host and Group are not changeable even as the local system admin user.
 
-
 .. _ug_host_filters:
 
 Smart Host Filter
