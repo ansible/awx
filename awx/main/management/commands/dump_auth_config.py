@@ -195,7 +195,7 @@ class Command(BaseCommand):
 
             # dump RADIUS settings
             awx_radius_settings = self.get_awx_radius_settings()
-            awx_radius_enabled = self.is_enabled(awx_radius_settings, self.DAB_RADIUS_AUTHENTICATOR_KEYS)
+            awx_radius_enabled, radius_missing_fields = self.is_enabled(awx_radius_settings, self.DAB_RADIUS_AUTHENTICATOR_KEYS)
             if awx_radius_enabled:
                 data.append(
                     self.format_config_data(
@@ -206,6 +206,8 @@ class Command(BaseCommand):
                         "RADIUS",
                     )
                 )
+            else:
+                data.append({"RADIUS_missing_fields": radius_missing_fields})
 
             # write to file if requested
             if options["output_file"]:
