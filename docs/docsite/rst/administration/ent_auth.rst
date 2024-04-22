@@ -17,7 +17,7 @@ This section describes setting up authentication for the following enterprise sy
 
    For LDAP authentication, see :ref:`ag_auth_ldap`.
 
-SAML, RADIUS, and TACACS+ users are categorized as 'Enterprise' users. The following rules apply to Enterprise users:
+Azure, RADIUS, SAML, and TACACS+ users are categorized as 'Enterprise' users. The following rules apply to Enterprise users:
 
 - Enterprise users can only be created via the first successful login attempt from remote authentication backend.
 - Enterprise users cannot be created/authenticated if non-enterprise users with the same name has already been created in AWX.
