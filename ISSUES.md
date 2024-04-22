@@ -80,7 +80,7 @@ If any of those items are missing your pull request will still get the `needs_tr
 Currently you can expect awxbot to add common labels such as `state:needs_triage`, `type:bug`, `component:docs`, etc...
 These labels are determined by the template data. Please use the template and fill it out as accurately as possible.
 
-The `state:needs_triage` label will will remain on your pull request until a person has looked at it.
+The `state:needs_triage` label will remain on your pull request until a person has looked at it.
 
 You can also expect the bot to CC maintainers of specific areas of the code, this will notify them that there is a pull request by placing a comment on the pull request.
 The comment will look something like `CC @matburt @wwitzel3 ...`.
