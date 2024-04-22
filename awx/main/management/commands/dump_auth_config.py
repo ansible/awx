@@ -47,12 +47,6 @@ class Command(BaseCommand):
         "SECRET": False,
     }
 
-    DAB_RADIUS_AUTHENTICATOR_KEYS = {
-        "HOST": True,
-        "PORT": False,
-        "SECRET": False,
-    }
-
     def is_enabled(self, settings, keys):
         missing_fields = []
         for key, required in keys.items():
