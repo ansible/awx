@@ -7,7 +7,11 @@ env:
 on:
   release:
     types: [published]
-
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Name for the tag of the release.'
+        required: true
 permissions:
   contents: read # to fetch code (actions/checkout)
 
@@ -17,6 +21,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
+      - name: Set GitHub Env vars for workflow_dispatch event
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          echo "TAG_NAME=${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
+
+      - name: Set GitHub Env vars if release event
+        if: ${{ github.event_name == 'release' }}
+        run: |
+          echo "TAG_NAME=${{ env.TAG_NAME }}" >> $GITHUB_ENV
+
       - name: Checkout awx
         uses: actions/checkout@v3
 
@@ -43,16 +57,18 @@ jobs:
       - name: Build collection and publish to galaxy
         env:
           COLLECTION_NAMESPACE: ${{ env.collection_namespace }}
-          COLLECTION_VERSION: ${{ github.event.release.tag_name }}
+          COLLECTION_VERSION: ${{ env.TAG_NAME }}
           COLLECTION_TEMPLATE_VERSION: true
         run: |
           make build_collection
-          if [ "$(curl -L --head -sw '%{http_code}' https://galaxy.ansible.com/download/${{ env.collection_namespace }}-awx-${{ github.event.release.tag_name }}.tar.gz | tail -1)" == "302" ] ; then \
-              echo "Galaxy release already done"; \
-          else \
+          curl_with_redirects=$(curl --head -sLw '%{http_code}' https://galaxy.ansible.com/download/${{ env.collection_namespace }}-awx-${{ env.TAG_NAME }}.tar.gz | tail -1)
+          curl_without_redirects=$(curl --head -sw '%{http_code}' https://galaxy.ansible.com/download/${{ env.collection_namespace }}-awx-${{ env.TAG_NAME }}.tar.gz | tail -1)
+          if [[ "$curl_with_redirects" == "302" ]] || [[ "$curl_without_redirects" == "302" ]]; then
+              echo "Galaxy release already done";
+          else
               ansible-galaxy collection publish \
                 --token=${{ secrets.GALAXY_TOKEN }} \
-                awx_collection_build/${{ env.collection_namespace }}-awx-${{ github.event.release.tag_name }}.tar.gz; \
+                awx_collection_build/${{ env.collection_namespace }}-awx-${{ env.TAG_NAME }}.tar.gz;
           fi
 
       - name: Set official pypi info
@@ -64,6 +80,8 @@ jobs:
         if: ${{ github.repository_owner != 'ansible' }}
 
       - name: Build awxkit and upload to pypi
+        env:
+          SETUPTOOLS_SCM_PRETEND_VERSION: ${{ env.TAG_NAME }}
         run: |
           git reset --hard
           cd awxkit && python3 setup.py sdist bdist_wheel
@@ -84,14 +102,14 @@ jobs:
       - name: Re-tag and promote awx image
         run: |
           docker buildx imagetools create \
-            ghcr.io/${{ github.repository }}:${{ github.event.release.tag_name }} \
-            --tag quay.io/${{ github.repository }}:${{ github.event.release.tag_name }}
+            ghcr.io/${{ github.repository }}:${{ env.TAG_NAME }} \
+            --tag quay.io/${{ github.repository }}:${{ env.TAG_NAME }}
           docker buildx imagetools create \
-            ghcr.io/${{ github.repository }}:${{ github.event.release.tag_name }} \
+            ghcr.io/${{ github.repository }}:${{ env.TAG_NAME }} \
             --tag quay.io/${{ github.repository }}:latest
 
       - name: Re-tag and promote awx-ee image
         run: |
           docker buildx imagetools create \
-            ghcr.io/${{ github.repository_owner }}/awx-ee:${{ github.event.release.tag_name }} \
-            --tag quay.io/${{ github.repository_owner }}/awx-ee:${{ github.event.release.tag_name }}
+            ghcr.io/${{ github.repository_owner }}/awx-ee:${{ env.TAG_NAME }} \
+            --tag quay.io/${{ github.repository_owner }}/awx-ee:${{ env.TAG_NAME }}

@@ -99,7 +99,7 @@ class TestSwaggerGeneration:
         # The number of API endpoints changes over time, but let's just check
         # for a reasonable number here; if this test starts failing, raise/lower the bounds
         paths = JSON['paths']
-        assert 250 < len(paths) < 375
+        assert 250 < len(paths) < 400
         assert set(list(paths['/api/'].keys())) == set(['get', 'parameters'])
         assert set(list(paths['/api/v2/'].keys())) == set(['get', 'parameters'])
         assert set(list(sorted(paths['/api/v2/credentials/'].keys()))) == set(['get', 'post', 'parameters'])

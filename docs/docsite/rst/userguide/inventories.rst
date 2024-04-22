@@ -481,6 +481,7 @@ Inventory updates use dynamically-generated YAML files which are parsed by their
 - :ref:`ug_source_openstack`
 - :ref:`ug_source_rhv`
 - :ref:`ug_source_rhaap`
+- :ref:`ug_source_terraform`
 
 
 Newly created configurations for inventory sources will contain the default plugin configuration values. If you want your newly created inventory sources to match the output of legacy sources, you must apply a specific set of configuration values for that source. To ensure backward compatibility, AWX uses "templates" for each of these sources to force the output of inventory plugins into the legacy format. Refer to :ref:`ir_inv_plugin_templates_reference` section of this guide for each source and their respective templates to help you migrate to the new style inventory plugin output.
@@ -1083,6 +1084,41 @@ Red Hat Ansible Automation Platform
   .. image:: ../common/images/inventories-create-source-rhaap-example.png
 
 4. Use the **Source Variables** field to override variables used by the ``controller`` inventory plugin. Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two. 
+
+
+.. _ug_source_terraform:
+
+Terraform State
+~~~~~~~~~~~~~~~~
+
+.. index::
+   pair: inventories; Terraform
+   pair: inventory source; Terraform state
+
+
+This inventory source uses the `terraform_state <https://github.com/ansible-collections/cloud.terraform/blob/main/plugins/inventory/terraform_state.py>`_ inventory plugin from the `cloud.terraform <https://github.com/ansible-collections/cloud.terraform>`_ collection. The plugin will parse a terraform state file and add hosts for AWS EC2, GCE, and Azure instances.
+
+1. To configure this type of sourced inventory, select **Terraform State** from the Source field.
+
+2. The Create new source window expands with the required **Credential** field. Choose from an existing Terraform backend Credential. For more information, refer to :ref:`ug_credentials`.
+
+3. You can optionally specify the verbosity, host filter, enabled variable/value, and update options as described in the main procedure for :ref:`adding a source <ug_add_inv_common_fields>`. For Terraform, enable **Overwrite** and **Update on launch** options.  
+
+4. Use the **Source Variables** field to override variables used by the ``controller`` inventory plugin. Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two. For more information on these variables, see the `terraform_state <https://github.com/ansible-collections/cloud.terraform/blob/main/plugins/inventory/terraform_state.py>`_ file for detail.
+
+  The ``backend_type`` variable is required by the Terraform state inventory plugin. This should match the remote backend configured in the Terraform backend credential, here is an example for an Amazon S3 backend:
+
+  ::
+
+    ---
+    backend_type: s3
+
+5. Enter an |ee| in the **Execution Environment** field that contains a Terraform binary. This is required for the inventory plugin to run the Terraform commands that read inventory data from the Terraform state file. Refer to the `Terraform EE readme <https://github.com/ansible-cloud/terraform_ee>`_ that contains an example |ee| configuration with a Terraform binary.
+
+  .. image:: ../common/images/inventories-create-source-terraform-example.png
+
+6. To add hosts for AWS EC2, GCE, and Azure instances, the Terraform state file in the backend must contain state for resources already deployed to EC2, GCE, or Azure. Refer to each of the Terraform providers' respective documentation to provision instances.
+
 
 .. _ug_customscripts:
 

@@ -6,7 +6,7 @@ from django.test import Client
 from rest_framework.test import APIRequestFactory
 
 from awx.api.generics import LoggedLoginView
-from awx.api.versioning import drf_reverse
+from rest_framework.reverse import reverse as drf_reverse
 
 
 @pytest.mark.django_db
