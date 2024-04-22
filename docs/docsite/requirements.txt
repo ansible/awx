@@ -4,7 +4,7 @@
 #
 #    pip-compile --allow-unsafe --output-file=docs/docsite/requirements.txt --strip-extras docs/docsite/requirements.in
 #
-alabaster==0.7.13
+alabaster==0.7.16
     # via sphinx
 ansible-pygments==0.1.1
     # via sphinx-ansible-theme
@@ -41,7 +41,7 @@ requests==2.31.0
     # via sphinx
 snowballstemmer==2.2.0
     # via sphinx
-sphinx==7.2.6
+sphinx==7.3.7
     # via
     #   -r requirements.in
     #   sphinx-ansible-theme
