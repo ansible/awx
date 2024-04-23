@@ -1,7 +1,8 @@
 adal==1.2.7
     # via msrestazure
 aiohttp==3.9.3
-    # via -r /awx_devel/requirements/requirements.in
+    # via
+    #   -r /awx_devel/requirements/requirements.in
     #   aiohttp-retry
     #   twilio
 aiohttp-retry==2.8.3
@@ -158,7 +159,8 @@ django-pglocks==1.0.4
     # via -r /awx_devel/requirements/requirements.in
 django-polymorphic==3.1.0
     # via -r /awx_devel/requirements/requirements.in
-    # via -r /awx_devel/requirements/requirements_git.txt
+django-radius==1.5.1
+    # via -r /awx_devel/requirements/requirements.in
 django-solo==2.2.0
     # via -r /awx_devel/requirements/requirements.in
 django-split-settings==1.0.0
@@ -281,7 +283,7 @@ msal-extensions==1.1.0
 msgpack==1.0.5
     # via
     #   -r /awx_devel/requirements/requirements.in
-    #    channels-redis
+    #   channels-redis
 msrest==0.7.1
     # via msrestazure
 msrestazure==0.6.4
@@ -340,9 +342,7 @@ pycparser==2.21
 pydantic==2.5.0
     # via inflect
 pydantic-core==2.14.1
-    # via
-    #   -r /awx_devel/requirements/requirements.in
-    #   pydantic
+    # via pydantic
 pygerduty==0.38.3
     # via -r /awx_devel/requirements/requirements.in
 pyjwt[crypto]==2.8.0

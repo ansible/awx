@@ -7,6 +7,9 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.utils.translation import gettext_lazy as _
 from django.utils.timezone import now
 
+# django-ansible-base
+from ansible_base.lib.utils.models import get_type_for_model
+
 # Django-CRUM
 from crum import get_current_user
 
@@ -138,6 +141,23 @@ class BaseModel(models.Model):
         if save and update_fields:
             self.save(update_fields=update_fields)
         return update_fields
+
+    def summary_fields(self):
+        """
+        This exists for use by django-ansible-base,
+        which has standard patterns that differ from AWX, but we enable views from DAB
+        for those views to list summary_fields for AWX models, those models need to provide this
+        """
+        from awx.api.serializers import SUMMARIZABLE_FK_FIELDS
+
+        model_name = get_type_for_model(self)
+        related_fields = SUMMARIZABLE_FK_FIELDS.get(model_name, {})
+        summary_data = {}
+        for field_name in related_fields:
+            fval = getattr(self, field_name, None)
+            if fval is not None:
+                summary_data[field_name] = fval
+        return summary_data
 
 
 class CreatedModifiedModel(BaseModel):
