@@ -48,13 +48,6 @@ class Command(BaseCommand):
         "VERIFY_SSL": False,
     }
 
-    DAB_OIDC_AUTHENTICATOR_KEYS = {
-        "KEY": True,
-        "SECRET": False,
-        "OIDC_ENDPOINT": True,
-        "VERIFY_SSL": False,
-    }
-
     def is_enabled(self, settings, keys):
         missing_fields = []
         for key, required in keys.items():
@@ -197,7 +190,7 @@ class Command(BaseCommand):
 
             # dump OIDC settings
             awx_oidc_settings = self.get_awx_oidc_settings()
-            awx_oidc_enabled = self.is_enabled(awx_oidc_settings, self.DAB_OIDC_AUTHENTICATOR_KEYS)
+            awx_oidc_enabled, oidc_missing_fields = self.is_enabled(awx_oidc_settings, self.DAB_OIDC_AUTHENTICATOR_KEYS)
             if awx_oidc_enabled:
                 data.append(
                     self.format_config_data(
@@ -208,7 +201,8 @@ class Command(BaseCommand):
                         "OIDC",
                     )
                 )
-
+            else:
+                data.append({"OIDC_missing_fields": oidc_missing_fields})
 
             # write to file if requested
             if options["output_file"]:
