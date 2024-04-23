@@ -42,7 +42,7 @@ class Command(BaseCommand):
     }
 
     DAB_RADIUS_AUTHENTICATOR_KEYS = {
-        "HOST": True,
+        "SERVER": True,
         "PORT": False,
         "SECRET": False,
     }
