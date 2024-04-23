@@ -190,7 +190,7 @@ class Command(BaseCommand):
 
             # dump OAUTH2 settings
             awx_oauth2_settings = self.get_awx_oauth2_settings()
-            awx_oauth2_enabled = self.is_enabled(awx_oauth2_settings, self.DAB_OAUTH2_AUTHENTICATOR_KEYS)
+            awx_oauth2_enabled, oauth2_missing_fields = self.is_enabled(awx_oauth2_settings, self.DAB_OAUTH2_AUTHENTICATOR_KEYS)
             if awx_oauth2_enabled:
                 data.append(
                     self.format_config_data(
@@ -201,6 +201,8 @@ class Command(BaseCommand):
                         "GOOGLE_OAUTH2",
                     )
                 )
+            else:
+                data.append({"OAUTH2_missing_fields": oauth2_missing_fields})
 
             # write to file if requested
             if options["output_file"]:
