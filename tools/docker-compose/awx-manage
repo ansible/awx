@@ -1,8 +1,17 @@
 #!/usr/bin/awx-python
-# EASY-INSTALL-ENTRY-SCRIPT: 'awx','console_scripts','awx-manage'
 import sys
-from pkg_resources import load_entry_point
-__requires__ = 'awx'
+from importlib.metadata import distribution
+
+
+def load_entry_point(dist, group, name):
+    dist_name, _, _ = dist.partition('==')
+    matches = (
+        entry_point
+        for entry_point in distribution(dist_name).entry_points
+        if entry_point.group == group and entry_point.name == name
+    )
+    return next(matches).load()
+
 
 if __name__ == '__main__':
     sys.exit(

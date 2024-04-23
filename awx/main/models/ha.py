@@ -485,6 +485,9 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin, ResourceMi
 
     class Meta:
         app_label = 'main'
+        permissions = [('use_instancegroup', 'Can use instance group in a preference list of a resource')]
+        # Since this has no direct organization field only superuser can add, so remove add permission
+        default_permissions = ('change', 'delete', 'view')
 
     def set_default_policy_fields(self):
         self.policy_instance_list = []

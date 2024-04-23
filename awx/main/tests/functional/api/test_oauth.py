@@ -8,8 +8,10 @@ from django.db import connection
 from django.test.utils import override_settings
 from django.utils.encoding import smart_str, smart_bytes
 
+from rest_framework.reverse import reverse as drf_reverse
+
 from awx.main.utils.encryption import decrypt_value, get_encryption_key
-from awx.api.versioning import reverse, drf_reverse
+from awx.api.versioning import reverse
 from awx.main.models.oauth import OAuth2Application as Application, OAuth2AccessToken as AccessToken
 from awx.main.tests.functional import immediate_on_commit
 from awx.sso.models import UserEnterpriseAuth

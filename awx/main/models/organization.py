@@ -35,6 +35,12 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
     class Meta:
         app_label = 'main'
         ordering = ('name',)
+        permissions = [
+            ('member_organization', 'Basic participation permissions for organization'),
+            ('audit_organization', 'Audit everything inside the organization'),
+        ]
+        # Remove add permission, only superuser can add
+        default_permissions = ('change', 'delete', 'view')
 
     instance_groups = OrderedManyToManyField('InstanceGroup', blank=True, through='OrganizationInstanceGroupMembership')
     galaxy_credentials = OrderedManyToManyField(
@@ -137,6 +143,7 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
         app_label = 'main'
         unique_together = [('organization', 'name')]
         ordering = ('organization__name', 'name')
+        permissions = [('member_team', 'Inherit all roles assigned to this team')]
 
     organization = models.ForeignKey(
         'Organization',

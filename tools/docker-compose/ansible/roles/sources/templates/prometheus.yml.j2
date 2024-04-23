@@ -4,12 +4,10 @@ global:
   scrape_interval: {{ scrape_interval }}  # Set the scrape interval to something faster. Default is every 1 minute.
 
 scrape_configs:
-  - job_name: 'awx'
+  - job_name: 'awx-metrics'
     static_configs:
     - targets:
-      # metrics are broadcast to all nodes in the cluster,
-      # so no need to track nodes individually.
-      - awx1:8013
+      - awx-1:8013
     metrics_path: /api/v2/metrics
     scrape_interval: {{ scrape_interval }}
     scheme: http
@@ -18,3 +16,16 @@ scrape_configs:
     basic_auth:
       username: admin
       password: {{ admin_password }}
+
+  - job_name: 'awx-wsrelay'
+    static_configs:
+    - targets:
+{% for i in range(control_plane_node_count|int) %}
+  {% set container_postfix = loop.index %}
+      - awx-{{ container_postfix }}:8016
+{% endfor %}
+    metrics_path: /
+    scrape_interval: {{ scrape_interval }}
+    scheme: http
+    params:
+      format: ['txt']

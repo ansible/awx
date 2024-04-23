@@ -83,6 +83,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         app_label = 'main'
         ordering = ('name',)
         unique_together = ('organization', 'name', 'credential_type')
+        permissions = [('use_credential', 'Can use credential in a job or related resource')]
 
     PASSWORD_FIELDS = ['inputs']
     FIELDS_TO_PRESERVE_AT_COPY = ['input_sources']
@@ -1230,6 +1231,14 @@ ManagedCredentialType(
                 'secret': True,
                 'multiline': True,
                 'help_text': gettext_noop('Terraform backend config as Hashicorp configuration language.'),
+            },
+            {
+                'id': 'gce_credentials',
+                'label': gettext_noop('Google Cloud Platform account credentials'),
+                'type': 'string',
+                'secret': True,
+                'multiline': True,
+                'help_text': gettext_noop('Google Cloud Platform account credentials in JSON format.'),
             },
         ],
         'required': ['configuration'],
