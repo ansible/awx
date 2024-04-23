@@ -189,7 +189,7 @@ class Command(BaseCommand):
 
             # dump AZURE settings
             awx_azure_settings = self.get_awx_azure_settings()
-            awx_azure_enabled = self.is_enabled(awx_azure_settings, self.DAB_AZURE_AUTHENTICATOR_KEYS)
+            awx_azure_enabled, azure_missing_fields = self.is_enabled(awx_azure_settings, self.DAB_AZURE_AUTHENTICATOR_KEYS)
             if awx_azure_enabled:
                 data.append(
                     self.format_config_data(
@@ -200,7 +200,8 @@ class Command(BaseCommand):
                         "AZUREAD",
                     )
                 )
-
+            else:
+                data.append({"AZURE_missing_fields": azure_missing_fields})
 
             # write to file if requested
             if options["output_file"]:
