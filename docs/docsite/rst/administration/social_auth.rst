@@ -11,13 +11,14 @@ Authentication methods help simplify logins for end users--offering single sign-
 
 Account authentication can be configured in the AWX User Interface and saved to the PostgreSQL database. For instructions, refer to the :ref:`ag_configure_awx` section. 
 
-Account authentication in AWX can be configured to centrally use OAuth2, while enterprise-level account authentication can be configured for SAML, RADIUS, or even LDAP as a source for authentication information. See :ref:`ag_ent_auth`.
+Account authentication in AWX can be configured to centrally use OAuth2, while enterprise-level account authentication can be configured for :ref:`Azure <ag_auth_azure>`, :ref:`RADIUS <ag_auth_radius>`, :ref:`SAML <ag_auth_saml>`, or even :ref:`LDAP <ag_auth_ldap>` as a source for authentication information. See :ref:`ag_ent_auth` for more detail.
 
 For websites, such as Microsoft Azure, Google or GitHub, that provide account information, account information is often implemented using the OAuth standard. OAuth is a secure authorization protocol which is commonly used in conjunction with account authentication to grant 3rd party applications a "session token" allowing them to make API calls to providers on the user’s behalf.
 
-SAML (Security Assertion Markup Language) is an XML-based, open-standard data format for exchanging account authentication and authorization data between  an identity provider and a service provider. 
+Security Assertion Markup Language (:ref:`SAML <ag_auth_saml>`) is an XML-based, open-standard data format for exchanging account authentication and authorization data between  an identity provider and a service provider. 
 
-The RADIUS distributed client/server system allows you to secure networks against unauthorized access and can be implemented in network environments requiring high levels of security while maintaining network access for remote users.
+The :ref:`RADIUS <ag_auth_radius>` distributed client/server system allows you to secure networks against unauthorized access and can be implemented in network environments requiring high levels of security while maintaining network access for remote users.
+
 
 .. _ag_auth_github:
 
@@ -378,7 +379,7 @@ the team will always be assigned to the single default organization.
     }
 
 
-Team mappings may be specified separately for each account authentication backend, based on which of these you setup.  When defined, these configurations take precedence over the the global configuration above.
+Team mappings may be specified separately for each account authentication backend, based on which of these you setup.  When defined, these configurations take precedence over the global configuration above.
 
 ::
 
