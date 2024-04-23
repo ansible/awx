@@ -684,8 +684,13 @@ def awx_receptor_workunit_reaper():
     jobs_with_unreleased_receptor_units = UnifiedJob.objects.filter(work_unit_id__in=unit_ids).exclude(status__in=ACTIVE_STATES)
     for job in jobs_with_unreleased_receptor_units:
         logger.debug(f"{job.log_format} is not active, reaping receptor work unit {job.work_unit_id}")
-        receptor_ctl.simple_command(f"work cancel {job.work_unit_id}")
-        receptor_ctl.simple_command(f"work release {job.work_unit_id}")
+        try:
+            receptor_ctl.simple_command(f"work cancel {job.work_unit_id}")
+            receptor_ctl.simple_command(f"work release {job.work_unit_id}")
+        except Exception as e:
+            # leave the cleaning of work unit to administrative_workunit_reaper
+            # show only an error on log side to track it
+            logger.error(f"Error on cancel or release {job.work_unit_id} with error {str(e)}.")
 
     administrative_workunit_reaper(receptor_work_list)
 

@@ -196,6 +196,7 @@ def administrative_workunit_reaper(work_list=None):
      - worker_cleanup
     These should ordinarily be released when the method finishes, but this is a
     cleanup of last-resort, in case something went awry
+    Release will be forced to be sure that everything will be relased.
     """
     receptor_ctl = get_receptor_ctl()
     if work_list is None:
@@ -219,7 +220,7 @@ def administrative_workunit_reaper(work_list=None):
             if work_data.get('StateName') in RECEPTOR_ACTIVE_STATES:
                 continue  # do not want to touch active work units
             logger.info(f'Reaping orphaned work unit {unit_id} with params {params}')
-        receptor_ctl.simple_command(f"work release {unit_id}")
+        receptor_ctl.simple_command(f"work force-release {unit_id}")
 
 
 class RemoteJobError(RuntimeError):
