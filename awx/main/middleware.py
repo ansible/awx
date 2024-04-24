@@ -58,7 +58,7 @@ class TimingMiddleware(threading.local, MiddlewareMixin):
             response['X-API-Profile-File'] = self.prof.stop()
         perf_logger.debug(
             f'request: {request}, response_time: {response["X-API-Total-Time"]}',
-            extra=dict(python_objects=dict(request=request, response=response, X_API_TOTAL_TIME=response["X-API-Total-Time"], x_request_id=request.get('x-request-id', 'not-set')),
+            extra=dict(python_objects=dict(request=request, response=response, X_API_TOTAL_TIME=response["X-API-Total-Time"], x_request_id=request.get('x-request-id', 'not-set'))),
         )
         return response
 
