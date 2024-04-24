@@ -271,7 +271,7 @@ First, determine which is the updated module you want to use from the available 
 
 Next, create a new directory, at the same directory level of your Ansible source playbooks, named ``/library``.
 
-Once this is created, copy the module you want to use and drop it into the ``/library`` directory--it will be consumed first over your system modules and can be removed once you have updated the the stable version via your normal package manager.
+Once this is created, copy the module you want to use and drop it into the ``/library`` directory--it will be consumed first over your system modules and can be removed once you have updated the stable version via your normal package manager.
 
 
 Using callback plugins with AWX

@@ -1106,6 +1106,44 @@ class TestJobCredentials(TestJobExecution):
         config = open(local_path, 'r').read()
         assert config == hcl_config
 
+    def test_terraform_gcs_backend_credentials(self, job, private_data_dir, mock_me):
+        terraform = CredentialType.defaults['terraform']()
+        hcl_config = '''
+        backend "gcs" {
+            bucket = "gce_storage"
+        }
+        '''
+        gce_backend_credentials = '''
+        {
+            "type": "service_account",
+            "project_id": "sample",
+            "private_key_id": "eeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "private_key": "-----BEGIN PRIVATE KEY-----\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n-----END PRIVATE KEY-----\n",
+            "client_email": "sample@sample.iam.gserviceaccount.com",
+            "client_id": "0123456789",
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+            "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/cloud-content-robot%40sample.iam.gserviceaccount.com",
+        }
+        '''
+        credential = Credential(pk=1, credential_type=terraform, inputs={'configuration': hcl_config, 'gce_credentials': gce_backend_credentials})
+        credential.inputs['configuration'] = encrypt_field(credential, 'configuration')
+        credential.inputs['gce_credentials'] = encrypt_field(credential, 'gce_credentials')
+        job.credentials.add(credential)
+
+        env = {}
+        safe_env = {}
+        credential.credential_type.inject_credential(credential, env, safe_env, [], private_data_dir)
+
+        local_path = to_host_path(env['TF_BACKEND_CONFIG_FILE'], private_data_dir)
+        config = open(local_path, 'r').read()
+        assert config == hcl_config
+
+        credentials_path = to_host_path(env['GOOGLE_BACKEND_CREDENTIALS'], private_data_dir)
+        credentials = open(credentials_path, 'r').read()
+        assert credentials == gce_backend_credentials
+
     def test_custom_environment_injectors_with_jinja_syntax_error(self, private_data_dir, mock_me):
         some_cloud = CredentialType(
             kind='cloud',

@@ -40,10 +40,25 @@ def test_custom_system_roles_prohibited(admin_user, post):
 
 
 @pytest.mark.django_db
-def test_assign_managed_role(admin_user, alice, rando, inventory, post, managed_roles):
+def test_assignment_to_invisible_user(admin_user, alice, rando, inventory, post, managed_roles):
+    "Alice can not see rando, and so can not give them a role assignment"
     rd = RoleDefinition.objects.get(name='Inventory Admin')
     rd.give_permission(alice, inventory)
-    # Now that alice has full permissions to the inventory, she will give rando permission
+    url = django_reverse('roleuserassignment-list')
+    r = post(url=url, data={"user": rando.id, "role_definition": rd.id, "object_id": inventory.id}, user=alice, expect=400)
+    assert 'does not exist' in str(r.data)
+    assert not rando.has_obj_perm(inventory, 'change')
+
+
+@pytest.mark.django_db
+def test_assign_managed_role(admin_user, alice, rando, inventory, post, managed_roles, organization):
+    rd = RoleDefinition.objects.get(name='Inventory Admin')
+    rd.give_permission(alice, inventory)
+    # When alice and rando are members of the same org, they can see each other
+    member_rd = RoleDefinition.objects.get(name='Organization Member')
+    for u in (alice, rando):
+        member_rd.give_permission(u, organization)
+    # Now that alice has full permissions to the inventory, and can see rando, she will give rando permission
     url = django_reverse('roleuserassignment-list')
     post(url=url, data={"user": rando.id, "role_definition": rd.id, "object_id": inventory.id}, user=alice, expect=201)
     assert rando.has_obj_perm(inventory, 'change') is True
