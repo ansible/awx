@@ -1,6 +1,7 @@
 import pytest
 
 from django_test_migrations.plan import all_migrations, nodes_to_tuples
+from django.utils.timezone import now
 
 """
 Most tests that live in here can probably be deleted at some point. They are mainly
@@ -76,7 +77,7 @@ class TestMigrationSmoke:
         # ContentType = old_state.apps.get_model('contenttypes', 'ContentType')
         User = old_state.apps.get_model('auth', 'User')
 
-        org = Organization.objects.create()
+        org = Organization.objects.create(name='arbitrary-org', created=now(), modified=now())
         user = User.objects.create(username='random-user')
         org.read_role.members.add(user)
 
