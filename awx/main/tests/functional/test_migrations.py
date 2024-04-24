@@ -84,4 +84,4 @@ class TestMigrationSmoke:
         )
 
         RoleUserAssignment = new_state.apps.get_model('dab_rbac', 'RoleUserAssignment')
-        assert RoleUserAssignment.filter(user=user.id, object_id=org.id).exists()
+        assert RoleUserAssignment.objects.filter(user=user.id, object_id=org.id).exists()
