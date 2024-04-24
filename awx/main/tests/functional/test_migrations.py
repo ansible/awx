@@ -72,9 +72,7 @@ class TestMigrationSmoke:
 
     def test_migrate_DAB_RBAC(self, migrator):
         old_state = migrator.apply_initial_migration(('main', '0190_alter_inventorysource_source_and_more'))
-        # Role = old_state.apps.get_model('main', 'Role')
         Organization = old_state.apps.get_model('main', 'Organization')
-        # ContentType = old_state.apps.get_model('contenttypes', 'ContentType')
         User = old_state.apps.get_model('auth', 'User')
 
         org = Organization.objects.create(name='arbitrary-org', created=now(), modified=now())
@@ -84,3 +82,6 @@ class TestMigrationSmoke:
         new_state = migrator.apply_tested_migration(
             ('main', '0192_custom_roles'),
         )
+
+        RoleUserAssignment = new_state.apps.get_model('dab_rbac', 'RoleUserAssignment')
+        assert RoleUserAssignment.filter(user=user.id, object_id=org.id).exists()
