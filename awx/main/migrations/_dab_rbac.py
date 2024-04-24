@@ -140,6 +140,17 @@ def get_permissions_for_role(role_field, children_map, apps):
     return perm_list
 
 
+def model_class(ct, apps):
+    """
+    You can not use model methods in migrations, so this duplicates
+    what ContentType.model_class does, using current apps
+    """
+    try:
+        return apps.get_model(ct.app_label, ct.model)
+    except LookupError:
+        return None
+
+
 def migrate_to_new_rbac(apps, schema_editor):
     """
     This method moves the assigned permissions from the old rbac.py models
@@ -197,7 +208,7 @@ def migrate_to_new_rbac(apps, schema_editor):
             role_definition = managed_definitions[permissions]
         else:
             action = role.role_field.rsplit('_', 1)[0]  # remove the _field ending of the name
-            role_definition_name = f'{role.content_type.model_class().__name__} {action.title()}'
+            role_definition_name = f'{model_class(role.content_type, apps).__name__} {action.title()}'
 
             description = role_descriptions[role.role_field]
             if type(description) == dict:
