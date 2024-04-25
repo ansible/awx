@@ -167,7 +167,7 @@ django-split-settings==1.0.0
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   django-ansible-base
-djangorestframework==3.14.0
+djangorestframework==3.15.1
     # via
     #   -r /awx_devel/requirements/requirements.in
     #   django-ansible-base
@@ -387,7 +387,6 @@ python3-openid==3.2.0
     # via -r /awx_devel/requirements/requirements_git.txt
 pytz==2024.1
     # via
-    #   djangorestframework
     #   irc
     #   tempora
 pyyaml==6.0.1
