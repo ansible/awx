@@ -2,11 +2,15 @@ from unittest import mock
 
 import pytest
 
+from django.contrib.contenttypes.models import ContentType
+
+from crum import impersonate
+
 from awx.main.models.rbac import get_role_from_object_role, give_creator_permissions
 from awx.main.models import User, Organization, WorkflowJobTemplate, WorkflowJobTemplateNode, Team
 from awx.api.versioning import reverse
 
-from ansible_base.rbac.models import RoleUserAssignment
+from ansible_base.rbac.models import RoleUserAssignment, RoleDefinition
 
 
 @pytest.mark.django_db
@@ -25,6 +29,28 @@ def test_round_trip_roles(organization, rando, role_name, managed_roles):
     print(assignment.role_definition.name)
     old_role = get_role_from_object_role(assignment.object_role)
     assert old_role.id == getattr(organization, role_name).id
+
+
+@pytest.mark.django_db
+def test_role_naming():
+    qs = RoleDefinition.objects.filter(content_type=ContentType.objects.get(model='jobtemplate'), name__endswith='dmin')
+    assert qs.count() == 1  # sanity
+    rd = qs.first()
+    assert rd.name == 'JobTemplate Admin'
+    assert rd.description
+    assert rd.created_by is None
+
+
+@pytest.mark.django_db
+def test_compat_role_naming(job_template, rando, alice):
+    with impersonate(alice):
+        job_template.read_role.members.add(rando)
+    qs = RoleDefinition.objects.filter(content_type=ContentType.objects.get(model='jobtemplate'), name__endswith='ompat')
+    assert qs.count() == 1  # sanity
+    rd = qs.first()
+    assert rd.name == 'JobTemplate Read Compat'
+    assert rd.description
+    assert rd.created_by is None
 
 
 @pytest.mark.django_db
