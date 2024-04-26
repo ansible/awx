@@ -49,6 +49,8 @@ VAULT_TLS ?= false
 TACACS ?= false
 # If set to true docker-compose will install editable dependencies
 EDITABLE_DEPENDENCIES ?= false
+# If set to true, use tls for postgres connection
+PG_TLS ?= false
 
 VENV_BASE ?= /var/lib/awx/venv
 
@@ -536,6 +538,7 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e vault_tls=$(VAULT_TLS) \
 	    -e enable_tacacs=$(TACACS) \
 	    -e install_editable_dependencies=$(EDITABLE_DEPENDENCIES) \
+	    -e pg_tls=$(PG_TLS) \
 	    $(EXTRA_SOURCES_ANSIBLE_OPTS)
 
 docker-compose: awx/projects docker-compose-sources
