@@ -208,7 +208,7 @@ EXAMPLES = '''
 RETURN = ''' # '''
 
 
-from ..module_utils.controller_api import ControllerAPIModule
+from ansible_collections.awx.awx.plugins.module_utils.controller_api import ControllerAPIModule
 
 
 def main():

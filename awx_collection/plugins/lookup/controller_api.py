@@ -120,7 +120,7 @@ from ansible.plugins.lookup import LookupBase
 from ansible.errors import AnsibleError
 from ansible.module_utils._text import to_native
 from ansible.utils.display import Display
-from ..module_utils.controller_api import ControllerAPIModule
+from ansible_collections.awx.awx.plugins.module_utils.controller_api import ControllerAPIModule
 
 
 class LookupModule(LookupBase):
