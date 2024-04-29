@@ -275,7 +275,12 @@ def setup_managed_role_definitions(apps, schema_editor):
     """
     Idepotent method to create or sync the managed role definitions
     """
-    to_create = settings.ANSIBLE_BASE_ROLE_PRECREATE
+    to_create = {
+        'object_admin': '{cls.__name__} Admin',
+        'org_admin': 'Organization Admin',
+        'org_children': 'Organization {cls.__name__} Admin',
+        'special': '{cls.__name__} {action}',
+    }
 
     ContentType = apps.get_model('contenttypes', 'ContentType')
     Permission = apps.get_model('dab_rbac', 'DABPermission')

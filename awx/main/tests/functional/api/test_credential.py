@@ -30,7 +30,7 @@ def test_idempotent_credential_type_setup():
 
 
 @pytest.mark.django_db
-def test_create_user_credential_via_credentials_list(post, get, alice, credentialtype_ssh):
+def test_create_user_credential_via_credentials_list(post, get, alice, credentialtype_ssh, setup_managed_roles):
     params = {
         'credential_type': 1,
         'inputs': {'username': 'someusername'},
@@ -81,7 +81,7 @@ def test_credential_validation_error_with_multiple_owner_fields(post, admin, ali
 
 
 @pytest.mark.django_db
-def test_create_user_credential_via_user_credentials_list(post, get, alice, credentialtype_ssh):
+def test_create_user_credential_via_user_credentials_list(post, get, alice, credentialtype_ssh, setup_managed_roles):
     params = {
         'credential_type': 1,
         'inputs': {'username': 'someusername'},
