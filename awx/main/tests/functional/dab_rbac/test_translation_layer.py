@@ -9,7 +9,6 @@ from crum import impersonate
 
 from awx.main.models.rbac import get_role_from_object_role, give_creator_permissions
 from awx.main.models import User, Organization, WorkflowJobTemplate, WorkflowJobTemplateNode, Team
-from awx.main.migrations._dab_rbac import setup_managed_role_definitions
 from awx.api.versioning import reverse
 
 from ansible_base.rbac.models import RoleUserAssignment, RoleDefinition
@@ -33,13 +32,8 @@ def test_round_trip_roles(organization, rando, role_name, managed_roles):
     assert old_role.id == getattr(organization, role_name).id
 
 
-@pytest.fixture
-def setup_managed():
-    setup_managed_role_definitions(apps, None)
-
-
 @pytest.mark.django_db
-def test_role_naming(setup_managed):
+def test_role_naming(setup_managed_roles):
     qs = RoleDefinition.objects.filter(content_type=ContentType.objects.get(model='jobtemplate'), name__endswith='dmin')
     assert qs.count() == 1  # sanity
     rd = qs.first()
@@ -49,7 +43,7 @@ def test_role_naming(setup_managed):
 
 
 @pytest.mark.django_db
-def test_action_role_naming(setup_managed):
+def test_action_role_naming(setup_managed_roles):
     qs = RoleDefinition.objects.filter(content_type=ContentType.objects.get(model='jobtemplate'), name__endswith='ecute')
     assert qs.count() == 1  # sanity
     rd = qs.first()
@@ -59,7 +53,7 @@ def test_action_role_naming(setup_managed):
 
 
 @pytest.mark.django_db
-def test_compat_role_naming(setup_managed, job_template, rando, alice):
+def test_compat_role_naming(setup_managed_roles, job_template, rando, alice):
     with impersonate(alice):
         job_template.read_role.members.add(rando)
     qs = RoleDefinition.objects.filter(content_type=ContentType.objects.get(model='jobtemplate'), name__endswith='ompat')
