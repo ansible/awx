@@ -3,7 +3,6 @@ from unittest import mock
 import pytest
 
 from django.contrib.contenttypes.models import ContentType
-from django.apps import apps
 
 from crum import impersonate
 
