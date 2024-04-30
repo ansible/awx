@@ -1,11 +1,15 @@
 from collections import Counter
 
+from awx.main.models.ha import InstanceGroup
 from awx.main.models.rbac import Role
 
 
-for r in Role.objects.all():
-    if not r.content_type:
-        continue
-    if r.id != getattr(getattr(r.content_object, r.role_field, None), 'id', None):
-        rev = getattr(r.content_object, r.role_field, None)
-        print(f"role.id={r.id}   '{r.content_type}' id={r.object_id} field={r.role_field} | obj.roleid={getattr(rev, 'id', None)} {getattr(rev, 'content_type', None)} {getattr(rev, 'object_id', None)} {getattr(rev, 'role_field', None)}")
+for ig in InstanceGroup.objects.order_by('id'):
+    for f in ('admin_role', 'use_role', 'read_role'):
+        r = getattr(ig, f, None)
+        print(f"id={ig.id} {f} // r.id={getattr(r, 'id', None)} {getattr(r, 'content_type', None)} {getattr(r, 'object_id', None)} {getattr(r, 'role_field', None)}")
+
+
+ct = ContentType.objects.get(app_label='main', model='instancegroup')
+for r in Role.objects.filter(content_type=ct).order_by('id'):
+    print(f"id={r.id} instancegroup {r.object_id} {r.role_field}")
