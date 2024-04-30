@@ -1,6 +1,5 @@
 from collections import defaultdict
 import sys
-import textwrap
 
 from django.contrib.contenttypes.models import ContentType
 
@@ -8,7 +7,7 @@ from awx.main.fields import ImplicitRoleField
 from awx.main.models.rbac import Role
 
 
-crosslinked = defaultdict(dict)
+crosslinked = defaultdict(lambda: defaultdict(dict))
 orphaned_roles = []
 
 
@@ -23,11 +22,11 @@ for ct in ContentType.objects.order_by('id'):
             r = getattr(obj, f.name, None)
             if not r:
                 sys.stderr.write(f"{cls} id={obj.id} {f.name} does not have a Role object\n")
-                crosslinked[(ct.id, obj.id)][f.name] = None
+                crosslinked[ct.id][obj.id][f'{f.name}_id'] = None
                 continue
             if r.content_object != obj:
                 sys.stderr.write(f"{cls.__name__} id={obj.id} {f.name} is pointing to a Role that is assigned to a different object: role.id={r.id} {r.content_type!r} {r.object_id} {r.role_field}\n")
-                crosslinked[(ct.id, obj.id)][f.name] = None
+                crosslinked[ct.id][obj.id][f'{f.name}_id'] = None
                 continue
 
 
@@ -42,7 +41,7 @@ for r in Role.objects.exclude(role_field__startswith='system_').order_by('id'):
         continue
     if r.id != rev.id:
         sys.stderr.write(f"Role id={r.id} {r.content_type!r} {r.object_id} {r.role_field} is pointing to an object using a different role: id={rev.id} {rev.content_type!r} {rev.object_id} {rev.role_field}\n")
-        crosslinked[(r.content_type_id, r.object_id)][r.role_field] = r.id
+        crosslinked[r.content_type_id][r.object_id][f'{r.role_field}_id'] = r.id
         continue
 
 
@@ -52,7 +51,7 @@ sys.stderr.write('===================================\n')
 print(f"""\
 from django.contrib.contenttypes.models import ContentType
 
-from awx.main.models.rbac import Role
+from awx.main.models.rbac import Role, batch_role_ancestor_rebuilding
 
 """)
 
@@ -65,9 +64,14 @@ print("\n")
 print("# Resource objects that are pointing to the wrong Role.  Some of these")
 print("# do not have corresponding Roles anywhere, so delete the foreign key.")
 print("# For those, new Roles will be constructed upon save.\n")
-for (ct, obj), kv in crosslinked.items():
-    print(f"ct = ContentType.objects.get(id={ct})")
-    print(f"obj = ct.get_object_for_this_type(id={obj})")
-    for f, val in kv.items():
-        print(f"setattr(obj, '{f}_id', {val})")
-    print(f"obj.save()\n")
+print("queue = []\n")
+for ct, objs in crosslinked.items():
+    print(f"cls = ContentType.objects.get(id={ct}).model_class()\n")
+    for obj, kv in objs.items():
+        print(f"cls.objects.filter(id={obj}).update(**{kv!r})")
+        print(f"queue.append((cls, {obj}))")
+
+print(f"\nwith batch_role_ancestor_rebuilding():")
+print(f"    for cls, obj_id in queue:")
+print(f"        obj = cls.objects.get(id=obj_id)")
+print(f"        obj.save()")
