@@ -37,12 +37,13 @@ for r in Role.objects.exclude(role_field__startswith='system_').order_by('id'):
         orphaned_roles.append(r.id)
         continue
     rev = getattr(r.content_object, r.role_field, None)
-    if not rev:
-        continue
-    if r.id != rev.id:
-        if (r.content_type_id, r.object_id, r.role_field) == (rev.content_type_id, rev.object_id, rev.role_field):
+    if rev is None or r.id != rev.id:
+        if rev and (r.content_type_id, r.object_id, r.role_field) == (rev.content_type_id, rev.object_id, rev.role_field):
             sys.stderr.write(f"Role id={r.id} {r.content_type!r} {r.object_id} {r.role_field} is an orphaned duplicate of Role id={rev.id}, which is actually being used by the assigned resource\n")
             orphaned_roles.append(r.id)
+        elif not rev:
+            sys.stderr.write(f"Role id={r.id} {r.content_type!r} {r.object_id} {r.role_field} is pointing to an object currently using no role\n")
+            crosslinked[r.content_type_id][r.object_id][f'{r.role_field}_id'] = r.id
         else:
             sys.stderr.write(f"Role id={r.id} {r.content_type!r} {r.object_id} {r.role_field} is pointing to an object using a different role: id={rev.id} {rev.content_type!r} {rev.object_id} {rev.role_field}\n")
             crosslinked[r.content_type_id][r.object_id][f'{r.role_field}_id'] = r.id
@@ -55,7 +56,7 @@ sys.stderr.write('===================================\n')
 print(f"""\
 from django.contrib.contenttypes.models import ContentType
 
-from awx.main.models.rbac import Role, batch_role_ancestor_rebuilding
+from awx.main.models.rbac import Role
 
 """)
 
@@ -76,7 +77,6 @@ for ct, objs in crosslinked.items():
         print(f"cls.objects.filter(id={obj}).update(**{kv!r})")
         print(f"queue.append((cls, {obj}))")
 
-print(f"\nwith batch_role_ancestor_rebuilding():")
-print(f"    for cls, obj_id in queue:")
-print(f"        obj = cls.objects.get(id=obj_id)")
-print(f"        obj.save()")
+print(f"\n\nfor cls, obj_id in queue:")
+print(f"    obj = cls.objects.get(id=obj_id)")
+print(f"    obj.save()")
