@@ -40,8 +40,12 @@ for r in Role.objects.exclude(role_field__startswith='system_').order_by('id'):
     if not rev:
         continue
     if r.id != rev.id:
-        sys.stderr.write(f"Role id={r.id} {r.content_type!r} {r.object_id} {r.role_field} is pointing to an object using a different role: id={rev.id} {rev.content_type!r} {rev.object_id} {rev.role_field}\n")
-        crosslinked[r.content_type_id][r.object_id][f'{r.role_field}_id'] = r.id
+        if (r.content_type_id, r.object_id, r.role_field) == (rev.content_type_id, rev.object_id, rev.role_field):
+            sys.stderr.write(f"Role id={r.id} {r.content_type!r} {r.object_id} {r.role_field} is an orphaned duplicate of Role id={rev.id}, which is actually being used by the assigned resource\n")
+            orphaned_roles.append(r.id)
+        else:
+            sys.stderr.write(f"Role id={r.id} {r.content_type!r} {r.object_id} {r.role_field} is pointing to an object using a different role: id={rev.id} {rev.content_type!r} {rev.object_id} {rev.role_field}\n")
+            crosslinked[r.content_type_id][r.object_id][f'{r.role_field}_id'] = r.id
         continue
 
 
@@ -57,6 +61,7 @@ from awx.main.models.rbac import Role, batch_role_ancestor_rebuilding
 
 print("# Role objects that are assigned to objects that do not exist")
 for r in orphaned_roles:
+    print(f"Role.objects.filter(id={r}).update(object_id=None)")
     print(f"Role.objects.filter(id={r}).delete()")
 
 
