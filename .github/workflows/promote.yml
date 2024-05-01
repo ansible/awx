@@ -54,22 +54,22 @@ jobs:
         run: echo collection_namespace=${{ github.repository_owner }} >> $GITHUB_ENV
         if: ${{ github.repository_owner != 'ansible' }}
 
-      - name: Build collection and publish to galaxy
-        env:
-          COLLECTION_NAMESPACE: ${{ env.collection_namespace }}
-          COLLECTION_VERSION: ${{ env.TAG_NAME }}
-          COLLECTION_TEMPLATE_VERSION: true
-        run: |
-          make build_collection
-          curl_with_redirects=$(curl --head -sLw '%{http_code}' https://galaxy.ansible.com/download/${{ env.collection_namespace }}-awx-${{ env.TAG_NAME }}.tar.gz | tail -1)
-          curl_without_redirects=$(curl --head -sw '%{http_code}' https://galaxy.ansible.com/download/${{ env.collection_namespace }}-awx-${{ env.TAG_NAME }}.tar.gz | tail -1)
-          if [[ "$curl_with_redirects" == "302" ]] || [[ "$curl_without_redirects" == "302" ]]; then
-              echo "Galaxy release already done";
-          else
-              ansible-galaxy collection publish \
-                --token=${{ secrets.GALAXY_TOKEN }} \
-                awx_collection_build/${{ env.collection_namespace }}-awx-${{ env.TAG_NAME }}.tar.gz;
-          fi
+      # - name: Build collection and publish to galaxy
+      #   env:
+      #     COLLECTION_NAMESPACE: ${{ env.collection_namespace }}
+      #     COLLECTION_VERSION: ${{ env.TAG_NAME }}
+      #     COLLECTION_TEMPLATE_VERSION: true
+      #   run: |
+      #     make build_collection
+      #     curl_with_redirects=$(curl --head -sLw '%{http_code}' https://galaxy.ansible.com/download/${{ env.collection_namespace }}-awx-${{ env.TAG_NAME }}.tar.gz | tail -1)
+      #     curl_without_redirects=$(curl --head -sw '%{http_code}' https://galaxy.ansible.com/download/${{ env.collection_namespace }}-awx-${{ env.TAG_NAME }}.tar.gz | tail -1)
+      #     if [[ "$curl_with_redirects" == "302" ]] || [[ "$curl_without_redirects" == "302" ]]; then
+      #         echo "Galaxy release already done";
+      #     else
+      #         ansible-galaxy collection publish \
+      #           --token=${{ secrets.GALAXY_TOKEN }} \
+      #           awx_collection_build/${{ env.collection_namespace }}-awx-${{ env.TAG_NAME }}.tar.gz;
+      #     fi
 
       - name: Set official pypi info
         run: echo pypi_repo=pypi >> $GITHUB_ENV
