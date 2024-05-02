@@ -1148,13 +1148,8 @@ ANSIBLE_BASE_CUSTOM_VIEW_PARENT = 'awx.api.generics.APIView'
 
 # Settings for the ansible_base RBAC system
 
-# Only used internally, names of the managed RoleDefinitions to create
-ANSIBLE_BASE_ROLE_PRECREATE = {
-    'object_admin': '{cls.__name__} Admin',
-    'org_admin': 'Organization Admin',
-    'org_children': 'Organization {cls.__name__} Admin',
-    'special': '{cls.__name__} {action}',
-}
+# This has been moved to data migration code
+ANSIBLE_BASE_ROLE_PRECREATE = {}
 
 # Name for auto-created roles that give users permissions to what they create
 ANSIBLE_BASE_ROLE_CREATOR_NAME = '{cls.__name__} Creator'

@@ -10,7 +10,7 @@ from ansible_base.rbac.models import RoleDefinition
 
 
 @pytest.mark.django_db
-def test_managed_roles_created(managed_roles):
+def test_managed_roles_created(setup_managed_roles):
     "Managed RoleDefinitions are created in post_migration signal, we expect to see them here"
     for cls in (JobTemplate, Inventory):
         ct = ContentType.objects.get_for_model(cls)
@@ -22,7 +22,7 @@ def test_managed_roles_created(managed_roles):
 
 
 @pytest.mark.django_db
-def test_custom_read_role(admin_user, post, managed_roles):
+def test_custom_read_role(admin_user, post, setup_managed_roles):
     rd_url = django_reverse('roledefinition-list')
     resp = post(
         url=rd_url, data={"name": "read role made for test", "content_type": "awx.inventory", "permissions": ['view_inventory']}, user=admin_user, expect=201
@@ -40,7 +40,7 @@ def test_custom_system_roles_prohibited(admin_user, post):
 
 
 @pytest.mark.django_db
-def test_assignment_to_invisible_user(admin_user, alice, rando, inventory, post, managed_roles):
+def test_assignment_to_invisible_user(admin_user, alice, rando, inventory, post, setup_managed_roles):
     "Alice can not see rando, and so can not give them a role assignment"
     rd = RoleDefinition.objects.get(name='Inventory Admin')
     rd.give_permission(alice, inventory)
@@ -51,7 +51,7 @@ def test_assignment_to_invisible_user(admin_user, alice, rando, inventory, post,
 
 
 @pytest.mark.django_db
-def test_assign_managed_role(admin_user, alice, rando, inventory, post, managed_roles, organization):
+def test_assign_managed_role(admin_user, alice, rando, inventory, post, setup_managed_roles, organization):
     rd = RoleDefinition.objects.get(name='Inventory Admin')
     rd.give_permission(alice, inventory)
     # When alice and rando are members of the same org, they can see each other
@@ -78,7 +78,7 @@ def test_assign_custom_delete_role(admin_user, rando, inventory, delete, patch):
 
 
 @pytest.mark.django_db
-def test_assign_custom_add_role(admin_user, rando, organization, post, managed_roles):
+def test_assign_custom_add_role(admin_user, rando, organization, post, setup_managed_roles):
     rd, _ = RoleDefinition.objects.get_or_create(
         name='inventory-add', permissions=['add_inventory', 'view_organization'], content_type=ContentType.objects.get_for_model(Organization)
     )

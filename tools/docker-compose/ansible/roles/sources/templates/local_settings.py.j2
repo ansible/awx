@@ -20,6 +20,10 @@
 # The UUID of the system, for HA.
 SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
 
+{% if api_urlpattern_prefix | length > 0 %}
+OPTIONAL_API_URLPATTERN_PREFIX = '{{ api_urlpattern_prefix }}'
+{% endif %}
+
 # If set, use -vvv for project updates instead of -v for more output.
 # PROJECT_UPDATE_VVV=True
 
