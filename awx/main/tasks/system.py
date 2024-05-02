@@ -688,9 +688,9 @@ def awx_receptor_workunit_reaper():
             receptor_ctl.simple_command(f"work cancel {job.work_unit_id}")
             receptor_ctl.simple_command(f"work release {job.work_unit_id}")
         except Exception as e:
-            # leave the cleaning of work unit to administrative_workunit_reaper
-            # show only an error on log side to track it
+            # force release of work unit
             logger.error(f"Error on cancel or release {job.work_unit_id} with error {str(e)}.")
+            receptor_ctl.simple_command(f"work force-release {job.work_unit_id}")
 
     administrative_workunit_reaper(receptor_work_list)
 
