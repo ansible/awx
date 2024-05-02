@@ -172,6 +172,9 @@ class Command(BaseCommand):
             except KeyboardInterrupt:
                 logger.info('Shutting down Websocket Relayer')
                 break
+            except asyncio.exceptions.CancelledError:
+                logger.info('Websocket Relayer was cancelled')
             except Exception as e:
                 logger.exception('Error in Websocket Relayer, exception: {}. Restarting in 10 seconds'.format(e))
+            finally:
                 time.sleep(10)

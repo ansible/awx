@@ -318,7 +318,7 @@ class WebSocketRelayManager(object):
         if 'PASSWORD' in database_conf:
             database_conf['OPTIONS']['password'] = database_conf.pop('PASSWORD')
 
-        task = None
+        on_ws_heartbeat_task = None
 
         # Managing the async_conn here so that we can close it if we need to restart the connection
         async_conn = None
@@ -326,7 +326,7 @@ class WebSocketRelayManager(object):
         # Establishes a websocket connection to /websocket/relay on all API servers
         try:
             while True:
-                if not task or task.done():
+                if not on_ws_heartbeat_task or on_ws_heartbeat_task.done():
                     try:
                         # Try to close the connection if it's open
                         if async_conn:
@@ -346,7 +346,7 @@ class WebSocketRelayManager(object):
                         await async_conn.set_autocommit(True)
 
                         # before creating the task that uses the connection
-                        task = event_loop.create_task(self.on_ws_heartbeat(async_conn), name="on_ws_heartbeat")
+                        on_ws_heartbeat_task = event_loop.create_task(self.on_ws_heartbeat(async_conn), name="on_ws_heartbeat")
                         logger.info("Creating `on_ws_heartbeat` task in event loop.")
 
                     except Exception as e:
@@ -387,6 +387,8 @@ class WebSocketRelayManager(object):
                     self.relay_connections[h] = relay_connection
 
                 await asyncio.sleep(settings.BROADCAST_WEBSOCKET_NEW_INSTANCE_POLL_RATE_SECONDS)
+        except Exception as e:
+            logger.exception(f"WebSocketRelayManager crashed. Exception: {e}")
         finally:
             if async_conn:
                 logger.info("Shutting down db connection for wsrelay.")
@@ -394,3 +396,10 @@ class WebSocketRelayManager(object):
                     await async_conn.close()
                 except Exception as e:
                     logger.info(f"Failed to close connection to database for pg_notify: {e}")
+            for task in asyncio.all_tasks():
+                try:
+                    task.cancel()
+                except asyncio.CancelledError:
+                    pass
+                except Exception as e:
+                    logger.exception(f"Failed to cancel task: {e}")
