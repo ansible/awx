@@ -29,7 +29,173 @@ The new DAB version of RBAC allows creation of custom roles which can be done vi
 
 If you do not want to allow custom roles, you can change the setting ``ANSIBLE_BASE_ALLOW_CUSTOM_ROLES`` to ``False``. This is still a file-based setting for now.
 
-The newly “add” permissions capability is one of the major highlights of this change. You could create a custom organization role that allows users to create all (or some) types of resources, and apply it to a particular organization. So instead of allowing a user to edit all projects, they can create a new project, and after creating it, they will automatically get admin role just for the objects they created.
+New “add” permissions are a major highlight of this change. You could create a custom organization role that allows users to create all (or some) types of resources, and apply it to a particular organization. So instead of allowing a user to edit all projects, they can create a new project, and after creating it, they will automatically get admin role just for the objects they created.
+
+
+Resource access for teams
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This section provides a reference for managing team roles within individual resources as shown in the new UI and the corresponding API calls.
+
+Access the resource's **Team Access** tab to manage the team roles.
+
+.. image:: ../common/images/rbac_jt_team_access.png
+
+To obtain a list of team role assignments from the API: 
+
+::
+
+   GET <awxAPI>/role_team_assignments/?object_id=<template_id>&content_type__model=jobtemplate
+
+The columns are arranged so that the team name appears in the first column. The role name is under ``summary_fields.role_definition.name``
+
+To revoke a role assignment for a team in the API: 
+
+::
+
+   DELETE <awxAPI>/role_team_assignments/<role_id_from_list_API_above>/
+
+
+Add roles
+^^^^^^^^^^
+
+Clicking the **Add roles** button from the **Team Access** tab opens the **Add roles** wizard, where you can select the teams to which you want to add roles.
+
+.. image:: ../common/images/rbac_team_access_add-roles.png
+
+To list the teams from the service endpoint:
+
+::
+
+   GET <awxAPI>/teams
+
+
+The next step of the wizard in the controller UI is to apply roles to the selected team(s).
+
+.. image:: ../common/images/rbac_team_access_apply-roles.png
+
+To list available role definitions for the selected resource type in the API, issue the following, but replace ``content_type`` below to match the resource type:
+
+::
+
+   GET <awxAPI>/role_definitions/?content_type__model=jobtemplate
+
+
+Finally, review your selections and click **Save** to save your changes.
+
+.. image:: ../common/images/rbac_team_access_add-roles-review.png
+
+To assign roles to selected teams in the API, you must assign a single role to individual teams separately by referencing the team ID and resource ID from the controller associated with the ``object_id`` (``jobtemplate.id`` in this example):
+
+::
+
+   POST <awxAPI>/role_team_assignments/
+
+
+A message displays to confirm the changes were successfully applied:
+
+.. image:: ../common/images/rbac_team_access_add-roles-success.png
+
+In the API, the following message displays to confirm the changes were successfully applied:
+
+::
+
+   {"team": "011-323-232", "role_definition": 4, "object_id": "123-432-233"}
+
+
+Resource access for users
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This section provides a reference for managing user roles within individual resources as shown in the new UI and the corresponding API calls.
+
+Access the resource's **User Access** tab to manage the user roles.
+
+.. image:: ../common/images/rbac_jt_user_access.png
+
+To obtain a list of user role assignments from the API: 
+
+::
+
+   GET <awxAPI>/role_user_assignments/?object_id=<template_id>&content_type__model=jobtemplate
+
+The columns are arranged so that the team name appears in the first column. The role name is under ``summary_fields.role_definition.name``
+
+To revoke a role assignment for a user in the API: 
+
+::
+
+   DELETE <awxAPI>/role_user_assignments/<role_id_from_list_API_above>/
+
+Add roles
+^^^^^^^^^^
+
+Clicking the **Add roles** button from the **User Access** tab opens the **Add roles** wizard, where you can select the users to which you want to add roles.
+
+.. image:: ../common/images/rbac_user_access_add-roles.png
+
+To list the teams from the service endpoint:
+
+::
+
+   GET <awxAPI>/users
+
+
+The next step of the wizard in the controller UI is to apply roles to the selected team(s).
+
+.. image:: ../common/images/rbac_user_access_apply-roles.png
+
+To list available role definitions for the selected resource type in the API, issue the following, but replace ``content_type`` below to match the resource type:
+
+::
+
+   GET <awxAPI>/role_definitions/?content_type__model=jobtemplate
+
+
+Finally, review your selections and click **Save** to save your changes.
+
+.. image:: ../common/images/rbac_user_access_add-roles-review.png
+
+To assign roles to selected users in the API, you must assign a single role to individual users separately by referencing the user ID and resource ID from the controller associated with the ``object_id`` (``jobtemplate.id`` in this example):
+
+::
+
+   POST <awxAPI>/role_user_assignments/
+
+
+A message displays to confirm the changes were successfully applied:
+
+.. image:: ../common/images/rbac_team_access_add-roles-success.png
+
+In the API, the following message displays to confirm the changes were successfully applied:
+
+::
+
+   {"user": "011-323-232", "role_definition": 4, "object_id": "123-432-233"}
+
+
+Custom roles
+~~~~~~~~~~~~~
+.. index::
+   single: DAB
+   single: custom roles   
+   pair: custom; roles
+
+In the DAB RBAC model, Superusers have the ability to create, modify, and delete custom roles.
+
+To create a custom role, click the **Create role** button from the **Roles** resource in the UI, and provide the details of the new role:
+
+- **Name**: Required
+- **Description**: Enter an arbitrary description as appropriate (optional)
+- **Resource Type**: Required. Select the resource type from the drop-down menu (only one resource type per role allowed). This is equivalent to ``content_type`` in ``OPTIONS <awxAPI>/role_definitions`` for choices.
+- Select permissions based on the selected of resource type. (Alan will provide an endpoint containing dictionary for available permissions based on content type (The UI can use this to maintain static readable translatable texts on the client side) TBD)
+
+Modifying a custom role only allows you to change the permissions but does not not allow changes to the content type.
+
+To delete a custom role:
+
+::
+
+   DELETE <awxAPI>/role_definitions/:id
 
 
 .. _rbac-legacy-ug:
@@ -41,11 +207,11 @@ Legacy RBAC model
    single: roles   
    pair: legacy; RBAC
 
-RBACs are easiest to think of in terms of Roles which define precisely who or what can see, change, or delete an "object" for which a specific capability is being set. RBAC is the practice of granting roles to users or teams.
+As in the name, RBAC is role-based, and roles contain a list of permissions. This is a domain-centric concept, where organization-level roles can grant you a permission (like ``update_project``) to everything in that domain, including all projects in that organizations.
 
 There are a few main concepts that you should become familiar with regarding AWX's RBAC design--roles, resources, and users. Users can be members of a role, which gives them certain access to any resources associated with that role, or any resources associated with "descendant" roles.
 
-A role is essentially a collection of capabilities. Users are granted access to these capabilities and AWX's resources through the roles to which they are assigned or through roles inherited through the role hierarchy.
+A role is essentially a list of permissions. Users are granted access to these capabilities and AWX's resources through the roles to which they are assigned or through roles inherited through the role hierarchy.
 
 Roles associate a group of capabilities with a group of users. All capabilities are derived from membership within a role. Users receive capabilities only through the roles to which they are assigned or through roles they inherit through the role hierarchy. All members of a role have all capabilities granted to that role. Within an organization, roles are relatively stable, while users and capabilities are both numerous and may change rapidly. Users can have many roles.
 
