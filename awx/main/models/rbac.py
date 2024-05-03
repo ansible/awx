@@ -10,6 +10,9 @@ import re
 # django-rest-framework
 from rest_framework.serializers import ValidationError
 
+# crum to impersonate users
+from crum import impersonate
+
 # Django
 from django.db import models, transaction, connection
 from django.db.models.signals import m2m_changed
@@ -553,17 +556,22 @@ def get_role_definition(role):
         return
     f = obj._meta.get_field(role.role_field)
     action_name = f.name.rsplit("_", 1)[0]
-    rd_name = f'{type(obj).__name__} {action_name.title()} Compat'
+    model_print = type(obj).__name__
+    rd_name = f'{model_print} {action_name.title()} Compat'
     perm_list = get_role_codenames(role)
-    defaults = {'content_type_id': role.content_type_id}
-    try:
-        rd, created = RoleDefinition.objects.get_or_create(name=rd_name, permissions=perm_list, defaults=defaults)
-    except ValidationError:
-        # This is a tricky case - practically speaking, users should not be allowed to create team roles
-        # or roles that include the team member permission.
-        # If we need to create this for compatibility purposes then we will create it as a managed non-editable role
-        defaults['managed'] = True
-        rd, created = RoleDefinition.objects.get_or_create(name=rd_name, permissions=perm_list, defaults=defaults)
+    defaults = {
+        'content_type_id': role.content_type_id,
+        'description': f'Has {action_name.title()} permission to {model_print} for backwards API compatibility',
+    }
+    with impersonate(None):
+        try:
+            rd, created = RoleDefinition.objects.get_or_create(name=rd_name, permissions=perm_list, defaults=defaults)
+        except ValidationError:
+            # This is a tricky case - practically speaking, users should not be allowed to create team roles
+            # or roles that include the team member permission.
+            # If we need to create this for compatibility purposes then we will create it as a managed non-editable role
+            defaults['managed'] = True
+            rd, created = RoleDefinition.objects.get_or_create(name=rd_name, permissions=perm_list, defaults=defaults)
     return rd
 
 
