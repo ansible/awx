@@ -13,6 +13,9 @@ orphaned_roles = []
 
 for ct in ContentType.objects.order_by('id'):
     cls = ct.model_class()
+    if cls is None:
+        sys.stderr.write(f"{ct!r} does not have a corresponding model class in the codebase. Skipping.\n")
+        continue
     if not any(isinstance(f, ImplicitRoleField) for f in cls._meta.fields):
         continue
     for obj in cls.objects.all():
