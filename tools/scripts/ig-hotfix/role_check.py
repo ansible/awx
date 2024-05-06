@@ -22,7 +22,13 @@ for ct in ContentType.objects.order_by('id'):
         for f in cls._meta.fields:
             if not isinstance(f, ImplicitRoleField):
                 continue
-            r = getattr(obj, f.name, None)
+            r_id = getattr(obj, f'{f.name}_id', None)
+            try:
+                r = getattr(obj, f.name, None)
+            except Role.DoesNotExist:
+                sys.stderr.write(f"{cls} id={obj.id} {f.name} points to Role id={r_id}, which is not in the database.")
+                crosslinked[ct.id][obj.id][f'{f.name}_id'] = None
+                continue
             if not r:
                 sys.stderr.write(f"{cls} id={obj.id} {f.name} does not have a Role object\n")
                 crosslinked[ct.id][obj.id][f'{f.name}_id'] = None
