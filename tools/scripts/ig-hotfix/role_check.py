@@ -3,6 +3,7 @@ import json
 import sys
 
 from django.contrib.contenttypes.models import ContentType
+from django.db.models.fields.related_descriptors import ManyToManyDescriptor
 
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.rbac import Role
@@ -12,6 +13,20 @@ team_ct = ContentType.objects.get(app_label='main', model='team')
 
 crosslinked = defaultdict(lambda: defaultdict(dict))
 orphaned_roles = []
+
+
+def resolve(obj, path):
+    fname, _, path = path.partition('.')
+    new_obj = getattr(obj, fname, None)
+    if new_obj is None:
+        return set()
+    if not path:
+        return {new_obj,}
+
+    if isinstance(new_obj, ManyToManyDescriptor):
+        return {x for o in new_obj.all() for x in resolve(o, path)}
+
+    return resolve(new_obj, path)
 
 
 for ct in ContentType.objects.order_by('id'):
@@ -62,19 +77,28 @@ for r in Role.objects.exclude(role_field__startswith='system_').order_by('id'):
         continue
 
     # Check the resource's role field parents for consistency with Role.parents.all().
-    # f._resolve_parent_roles() walks the f.parent_role list, splitting on dots and recursively
-    # getting those resources as well, until we are down to just the Role ids at the end.
     f = r.content_object._meta.get_field(r.role_field)
-    parent_roles = f._resolve_parent_roles(r.content_object)
-    minus = parent_roles - parents
-    if minus:
-        minus = [f"{x.content_type} {x.object_id} {x.role_field}" for x in Role.objects.filter(id__in=minus)]
-        sys.stderr.write(f"Role id={r.id} is missing parents: {minus}\n")
-    plus = parents - parent_roles
+    f_parent = set(f.parent_role) if isinstance(f.parent_role, list) else {f.parent_role,}
+    dotted = {x for p in f_parent if '.' in p for x in resolve(r.content_object, p)}
+    plus = set()
+    for p in r.parents.all():
+        if p.singleton_name:
+            if f'singleton:{p.singleton_name}' not in f_parent:
+                plus.add(p)
+        elif (p.content_type, p.role_field) == (team_ct, 'member_role'):
+            # Team has been granted this role; probably legitimate.
+            continue
+        elif (p.content_type, p.object_id) == (r.content_type, r.object_id):
+            if p.role_field not in f_parent:
+                plus.add(p)
+        elif p in dotted:
+            continue
+        else:
+            plus.add(p)
+
     if plus:
-        plus = [f"{x.content_type} {x.object_id} {x.role_field}" for x in Role.objects.filter(id__in=plus).exclude(content_type=team_ct, role_field='member_role')]
-        if plus:
-            sys.stderr.write(f"Role id={r.id} has excess parents: {plus}\n")
+        plus = [f"{x.content_type!r} {x.object_id} {x.role_field}" for x in plus]
+        sys.stderr.write(f"Role id={r.id} has cross-linked parents: {plus}\n")
 
     rev = getattr(r.content_object, r.role_field, None)
     if rev is None or r.id != rev.id:
