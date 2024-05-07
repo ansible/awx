@@ -1,4 +1,5 @@
 from collections import defaultdict
+import json
 import sys
 
 from django.contrib.contenttypes.models import ContentType
@@ -41,6 +42,18 @@ for ct in ContentType.objects.order_by('id'):
 
 sys.stderr.write('===================================\n')
 for r in Role.objects.exclude(role_field__startswith='system_').order_by('id'):
+
+    # The ancestor list should be a superset of both parents and implicit_parents
+    parents = set(r.parents.values_list('id', flat=True))
+    ancestors = set(r.ancestors.values_list('id', flat=True))
+    implicit = set(json.loads(r.implicit_parents))
+
+    if not parents <= ancestors:
+        sys.stderr.write(f"Role id={r.id} has parents that are not in the ancestor list: {parents - ancestors}\n")
+    if not implicit <= ancestors:
+        sys.stderr.write(f"Role id={r.id} has implicit_parents that are not in the ancestor list: {implicit - ancestors}\n")
+
+    # Check that the Role's generic foreign key points to a legitimate object
     if not r.content_object:
         sys.stderr.write(f"Role id={r.id} is missing a valid content_object: {r.content_type!r} {r.object_id} {r.role_field}\n")
         orphaned_roles.append(r.id)
