@@ -58,6 +58,21 @@ for r in Role.objects.exclude(role_field__startswith='system_').order_by('id'):
         sys.stderr.write(f"Role id={r.id} is missing a valid content_object: {r.content_type!r} {r.object_id} {r.role_field}\n")
         orphaned_roles.append(r.id)
         continue
+
+    # Check the resource's role field parents for consistency with Role.parents.all().
+    # f._resolve_parent_roles() walks the f.parent_role list, splitting on dots and recursively
+    # getting those resources as well, until we are down to just the Role ids at the end.
+    f = r.content_object._meta.get_field(r.role_field)
+    parent_roles = f._resolve_parent_roles(r.content_object)
+    minus = parent_roles - parents
+    if minus:
+        minus = [f"{x.content_type} {x.object_id} {x.role_field}" for x in Role.objects.filter(id__in=minus)]
+        sys.stderr.write(f"Role id={r.id} is missing parents: {minus}\n")
+    plus = parents - parent_roles
+    if plus:
+        plus = [f"{x.content_type} {x.object_id} {x.role_field}" for x in Role.objects.filter(id__in=plus)]
+        sys.stderr.write(f"Role id={r.id} has excess parents: {plus}\n")
+
     rev = getattr(r.content_object, r.role_field, None)
     if rev is None or r.id != rev.id:
         if rev and (r.content_type_id, r.object_id, r.role_field) == (rev.content_type_id, rev.object_id, rev.role_field):
