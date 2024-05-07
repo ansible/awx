@@ -8,6 +8,8 @@ from awx.main.fields import ImplicitRoleField
 from awx.main.models.rbac import Role
 
 
+team_ct = ContentType.objects.get(app_label='main', model='team')
+
 crosslinked = defaultdict(lambda: defaultdict(dict))
 orphaned_roles = []
 
@@ -70,8 +72,9 @@ for r in Role.objects.exclude(role_field__startswith='system_').order_by('id'):
         sys.stderr.write(f"Role id={r.id} is missing parents: {minus}\n")
     plus = parents - parent_roles
     if plus:
-        plus = [f"{x.content_type} {x.object_id} {x.role_field}" for x in Role.objects.filter(id__in=plus)]
-        sys.stderr.write(f"Role id={r.id} has excess parents: {plus}\n")
+        plus = [f"{x.content_type} {x.object_id} {x.role_field}" for x in Role.objects.filter(id__in=plus).exclude(content_type=team_ct, role_field='member_role')]
+        if plus:
+            sys.stderr.write(f"Role id={r.id} has excess parents: {plus}\n")
 
     rev = getattr(r.content_object, r.role_field, None)
     if rev is None or r.id != rev.id:
