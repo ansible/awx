@@ -118,7 +118,7 @@ To obtain a list of user role assignments from the API:
 
    GET <awxAPI>/role_user_assignments/?object_id=<template_id>&content_type__model=jobtemplate
 
-The columns are arranged so that the team name appears in the first column. The role name is under ``summary_fields.role_definition.name``
+The columns are arranged so that the user name appears in the first column. The role name is under ``summary_fields.role_definition.name``
 
 To revoke a role assignment for a user in the API: 
 
