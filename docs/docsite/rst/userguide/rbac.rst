@@ -45,7 +45,7 @@ To obtain a list of team role assignments from the API:
 
 ::
 
-   GET <awxAPI>/role_team_assignments/?object_id=<template_id>&content_type__model=jobtemplate
+   GET /api/v2/role_team_assignments/?object_id=<template_id>&content_type__model=jobtemplate
 
 The columns are arranged so that the team name appears in the first column. The role name is under ``summary_fields.role_definition.name``
 
@@ -53,7 +53,7 @@ To revoke a role assignment for a team in the API:
 
 ::
 
-   DELETE <awxAPI>/role_team_assignments/<role_id_from_list_API_above>/
+   DELETE /api/v2/role_team_assignments/<role_id_from_list_API_above>/
 
 
 Add roles
@@ -67,7 +67,7 @@ To list the teams from the service endpoint:
 
 ::
 
-   GET <awxAPI>/teams
+   GET /api/v2/teams
 
 
 The next step of the wizard in the controller UI is to apply roles to the selected team(s).
@@ -78,29 +78,31 @@ To list available role definitions for the selected resource type in the API, is
 
 ::
 
-   GET <awxAPI>/role_definitions/?content_type__model=jobtemplate
+   GET /api/v2/role_definitions/?content_type__model=jobtemplate
 
 
 Finally, review your selections and click **Save** to save your changes.
 
 .. image:: ../common/images/rbac_team_access_add-roles-review.png
 
-To assign roles to selected teams in the API, you must assign a single role to individual teams separately by referencing the team ID and resource ID from the controller associated with the ``object_id`` (``jobtemplate.id`` in this example):
+To assign roles to selected teams in the API, you must assign a single role to individual teams separately by referencing the team ID and resource ID from the controller associated with the ``object_id``.
+
+Make a POST request to this resource (``jobtemplate.id`` in this example):
 
 ::
 
-   POST <awxAPI>/role_team_assignments/
+   POST /api/v2/role_team_assignments/
+
+The following shows an example of the payload sent for the POST request made above:
+
+::
+
+   {"team": 25, "role_definition": 4, "object_id": "10"}
 
 
-A message displays to confirm the changes were successfully applied:
+When changes are successfully applied via the UI, a message displays to confirm the changes:
 
 .. image:: ../common/images/rbac_team_access_add-roles-success.png
-
-In the API, the following message displays to confirm the changes were successfully applied:
-
-::
-
-   {"team": "011-323-232", "role_definition": 4, "object_id": "123-432-233"}
 
 
 Resource access for users
@@ -116,7 +118,7 @@ To obtain a list of user role assignments from the API:
 
 ::
 
-   GET <awxAPI>/role_user_assignments/?object_id=<template_id>&content_type__model=jobtemplate
+   GET /api/v2/role_user_assignments/?object_id=<template_id>&content_type__model=jobtemplate
 
 The columns are arranged so that the team name appears in the first column. The role name is under ``summary_fields.role_definition.name``
 
@@ -124,7 +126,8 @@ To revoke a role assignment for a user in the API:
 
 ::
 
-   DELETE <awxAPI>/role_user_assignments/<role_id_from_list_API_above>/
+   DELETE /api/v2/role_user_assignments/<role_id_from_list_API_above>/
+
 
 Add roles
 ^^^^^^^^^^
@@ -137,7 +140,7 @@ To list the teams from the service endpoint:
 
 ::
 
-   GET <awxAPI>/users
+   GET /api/v2/users
 
 
 The next step of the wizard in the controller UI is to apply roles to the selected team(s).
@@ -148,29 +151,30 @@ To list available role definitions for the selected resource type in the API, is
 
 ::
 
-   GET <awxAPI>/role_definitions/?content_type__model=jobtemplate
+   GET /api/v2/role_definitions/?content_type__model=jobtemplate
 
 
 Finally, review your selections and click **Save** to save your changes.
 
 .. image:: ../common/images/rbac_user_access_add-roles-review.png
 
-To assign roles to selected users in the API, you must assign a single role to individual users separately by referencing the user ID and resource ID from the controller associated with the ``object_id`` (``jobtemplate.id`` in this example):
+To assign roles to selected users in the API, you must assign a single role to individual users separately by referencing the user ID and resource ID from the controller associated with the ``object_id``.
+
+Make a POST request to this resource (``jobtemplate.id`` in this example):
 
 ::
 
-   POST <awxAPI>/role_user_assignments/
+   POST /api/v2/role_user_assignments/
 
+The following shows an example of the payload sent for the POST request made above:
 
-A message displays to confirm the changes were successfully applied:
+::
+
+   {"user": 25, "role_definition": 4, "object_id": "10"}
+
+When changes are successfully applied via the UI, a message displays to confirm the changes:
 
 .. image:: ../common/images/rbac_team_access_add-roles-success.png
-
-In the API, the following message displays to confirm the changes were successfully applied:
-
-::
-
-   {"user": "011-323-232", "role_definition": 4, "object_id": "123-432-233"}
 
 
 Custom roles
@@ -186,7 +190,7 @@ To create a custom role, click the **Create role** button from the **Roles** res
 
 - **Name**: Required
 - **Description**: Enter an arbitrary description as appropriate (optional)
-- **Resource Type**: Required. Select the resource type from the drop-down menu (only one resource type per role allowed). This is equivalent to ``content_type`` in ``OPTIONS <awxAPI>/role_definitions`` for choices.
+- **Resource Type**: Required. Select the resource type from the drop-down menu (only one resource type per role allowed). This is equivalent to ``content_type`` in ``OPTIONS /api/v2/role_definitions`` for choices.
 - Select permissions based on the selected of resource type. (Alan will provide an endpoint containing dictionary for available permissions based on content type (The UI can use this to maintain static readable translatable texts on the client side) TBD)
 
 Modifying a custom role only allows you to change the permissions but does not not allow changes to the content type.
@@ -195,7 +199,7 @@ To delete a custom role:
 
 ::
 
-   DELETE <awxAPI>/role_definitions/:id
+   DELETE /api/v2/role_definitions/:id
 
 
 .. _rbac-legacy-ug:
