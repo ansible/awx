@@ -12,6 +12,7 @@ from awx.main.models.rbac import Role
 team_ct = ContentType.objects.get(app_label='main', model='team')
 
 crosslinked = defaultdict(lambda: defaultdict(dict))
+crosslinked_parents = defaultdict(list)
 orphaned_roles = []
 
 
@@ -99,6 +100,7 @@ for r in Role.objects.exclude(role_field__startswith='system_').order_by('id'):
     if plus:
         plus = [f"{x.content_type!r} {x.object_id} {x.role_field}" for x in plus]
         sys.stderr.write(f"Role id={r.id} has cross-linked parents: {plus}\n")
+        crosslinked_parents[r.id].extend(x.id for x in plus)
 
     rev = getattr(r.content_object, r.role_field, None)
     if rev is None or r.id != rev.id:
@@ -140,6 +142,10 @@ for ct, objs in crosslinked.items():
     for obj, kv in objs.items():
         print(f"cls.objects.filter(id={obj}).update(**{kv!r})")
         print(f"queue.append((cls, {obj}))")
+
+for child, parents in crosslinked_parents.items():
+    print(f"\n\nr = Role.objects.get(id={child})")
+    print(f"r.parents.remove(*Role.objects.filter(id__in={parents!r}))")
 
 print(f"\n\nfor cls, obj_id in queue:")
 print(f"    obj = cls.objects.get(id=obj_id)")
