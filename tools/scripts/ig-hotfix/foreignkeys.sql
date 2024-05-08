@@ -1,7 +1,10 @@
 DO $$
 DECLARE
+    -- add table names here when they get excluded from main / included in topology dump
     topology text[] := ARRAY['main_instance', 'main_instancegroup', 'main_instancegroup_instances'];
-    excluded text[] := ARRAY['main_instance', 'main_instancegroup', 'main_instancegroup_instances', 'main_organizationinstancegroupmembership', 'main_unifiedjobtemplateinstancegroupmembership', 'main_inventoryinstancegroupmembership'];
+
+    -- add table names here when they are handled by the special-case mapping
+    mapping text[] := ARRAY['main_organizationinstancegroupmembership', 'main_unifiedjobtemplateinstancegroupmembership', 'main_inventoryinstancegroupmembership'];
 BEGIN
     CREATE TABLE tmp_fk_from AS (
         SELECT DISTINCT
@@ -11,8 +14,8 @@ BEGIN
         JOIN information_schema.constraint_column_usage AS ccu
             ON ccu.constraint_name = tc.constraint_name
         WHERE tc.constraint_type = 'FOREIGN KEY'
-            AND tc.table_name = ANY (excluded)
-            AND NOT ccu.table_name = ANY (topology)
+            AND tc.table_name = ANY (topology)
+            AND NOT ccu.table_name = ANY (topology || mapping)
     );
 
     CREATE TABLE tmp_fk_into AS (
@@ -23,8 +26,8 @@ BEGIN
         JOIN information_schema.constraint_column_usage AS ccu
             ON ccu.constraint_name = tc.constraint_name
         WHERE tc.constraint_type = 'FOREIGN KEY'
-            AND ccu.table_name = ANY (excluded)
-            AND NOT tc.table_name = ANY (topology)
+            AND ccu.table_name = ANY (topology)
+            AND NOT tc.table_name = ANY (topology || mapping)
     );
 END $$;
 
