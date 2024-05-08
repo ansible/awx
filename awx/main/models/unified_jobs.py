@@ -823,7 +823,7 @@ class UnifiedJob(
                 update_fields.append(key)
 
         if parent_instance:
-            if self.status in ('pending', 'waiting', 'running'):
+            if self.status in ('pending', 'running'):
                 if parent_instance.current_job != self:
                     parent_instance_set('current_job', self)
                 # Update parent with all the 'good' states of it's child
@@ -860,7 +860,7 @@ class UnifiedJob(
         # If this job already exists in the database, retrieve a copy of
         # the job in its prior state.
         # If update_fields are given without status, then that indicates no change
-        if self.pk and ((not update_fields) or ('status' in update_fields)):
+        if not self.status == 'waiting' and self.pk and ((not update_fields) or ('status' in update_fields)):
             self_before = self.__class__.objects.get(pk=self.pk)
             if self_before.status != self.status:
                 status_before = self_before.status
@@ -902,7 +902,8 @@ class UnifiedJob(
                 update_fields.append('elapsed')
 
         # Ensure that the job template information is current.
-        if self.unified_job_template != self._get_parent_instance():
+        # unless status is 'waiting', because this happens in large batches at end of task manager runs and is blocking
+        if not self.status == 'waiting' and self.unified_job_template != self._get_parent_instance():
             self.unified_job_template = self._get_parent_instance()
             if 'unified_job_template' not in update_fields:
                 update_fields.append('unified_job_template')
@@ -915,8 +916,9 @@ class UnifiedJob(
         # Okay; we're done. Perform the actual save.
         result = super(UnifiedJob, self).save(*args, **kwargs)
 
-        # If status changed, update the parent instance.
-        if self.status != status_before:
+        # If status changed, update the parent instance
+        # unless status is 'waiting', because this happens in large batches at end of task manager runs and is blocking
+        if self.status != status_before and self.status != 'waiting':
             # Update parent outside of the transaction for Job w/ allow_simultaneous=True
             # This dodges lock contention at the expense of the foreign key not being
             # completely correct.
@@ -1349,7 +1351,6 @@ class UnifiedJob(
     def pre_start(self, **kwargs):
         if not self.can_start:
             self.job_explanation = u'%s is not in a startable state: %s, expecting one of %s' % (self._meta.verbose_name, self.status, str(('new', 'waiting')))
-            self.save(update_fields=['job_explanation'])
             return (False, None)
 
         # verify that any associated credentials aren't missing required field data
@@ -1364,7 +1365,7 @@ class UnifiedJob(
                 self.job_explanation = '{} cannot start because Credential {} does not provide one or more required fields ({}).'.format(
                     self._meta.verbose_name.title(), credential.name, ', '.join(sorted(missing_credential_inputs))
                 )
-                self.save(update_fields=['job_explanation'])
+                self.status = 'failed'
                 return (False, None)
 
         needed = self.get_passwords_needed_to_start()
@@ -1381,7 +1382,7 @@ class UnifiedJob(
         if not all(opts.values()):
             missing_fields = ', '.join([k for k, v in opts.items() if not v])
             self.job_explanation = u'Missing needed fields: %s.' % missing_fields
-            self.save(update_fields=['job_explanation'])
+            self.status = 'failed'
             return (False, None)
 
         if 'extra_vars' in kwargs:

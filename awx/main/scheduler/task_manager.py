@@ -433,6 +433,9 @@ class TaskManager(TaskBase):
         self.dependency_graph = DependencyGraph()
         self.tm_models = TaskManagerModels()
         self.controlplane_ig = self.tm_models.instance_groups.controlplane_ig
+        self.tasks_to_bulk_update = set()
+        self.tasks_to_save = set()
+        self.task_update_fields = ['status', 'job_explanation', 'celery_task_id', 'instance_group', 'controller_node', 'execution_node']
 
     def process_job_dep_failures(self, task):
         """If job depends on a job that has failed, mark as failed and handle misc stuff."""
@@ -446,7 +449,8 @@ class TaskManager(TaskBase):
                     dep.name,
                     dep.id,
                 )
-                task.save(update_fields=['status', 'job_explanation'])
+                # call task.save() to trigger parent class custom save code that notifies parents
+                self.tasks_to_save.add(task)
                 task.websocket_emit_status('failed')
                 self.pre_start_failed.append(task.id)
                 return True
@@ -492,11 +496,11 @@ class TaskManager(TaskBase):
             if task.job_explanation:
                 task.job_explanation += ' '
             task.job_explanation += 'Task failed pre-start check.'
-            task.save()
             self.pre_start_failed.append(task.id)
         else:
             if type(task) is WorkflowJob:
                 task.status = 'running'
+                task.log_lifecycle("running")
                 task.send_notification_templates('running')
                 logger.debug('Transitioning %s to running status.', task.log_format)
                 # Call this to ensure Workflow nodes get spawned in timely manner
@@ -507,9 +511,7 @@ class TaskManager(TaskBase):
                 logger.debug(
                     f'Submitting job {task.log_format} controlled by {task.controller_node} to instance group {instance_group.name}{execution_node_msg}.'
                 )
-            with disable_activity_stream():
                 task.celery_task_id = str(uuid.uuid4())
-                task.save()
                 task.log_lifecycle("waiting")
 
         # apply_async does a NOTIFY to the channel dispatcher is listening to
@@ -527,6 +529,8 @@ class TaskManager(TaskBase):
         # For jobs going into waiting, we omit this because of performance issues, as it should go to running quickly
         if task.status != 'waiting':
             task.websocket_emit_status(task.status)  # adds to on_commit
+            # Tasks in any state other than waiting we will individually save
+            self.tasks_to_save.add(task)
 
     @timeit
     def process_running_tasks(self, running_tasks):
@@ -538,7 +542,6 @@ class TaskManager(TaskBase):
 
     @timeit
     def process_pending_tasks(self, pending_tasks):
-        tasks_to_update_job_explanation = []
         for task in pending_tasks:
             if self.start_task_limit <= 0:
                 break
@@ -550,6 +553,9 @@ class TaskManager(TaskBase):
             if has_failed:
                 continue
 
+            # Greedily add to list of jobs we will bulk update. If individual save needed, we will remove
+            self.tasks_to_bulk_update.add(task)
+
             blocked_by = self.job_blocked_by(task)
             if blocked_by:
                 self.subsystem_metrics.inc(f"{self.prefix}_tasks_blocked", 1)
@@ -558,7 +564,6 @@ class TaskManager(TaskBase):
                 if task.job_explanation != job_explanation:
                     if task.created < (tz_now() - self.time_delta_job_explanation):
                         task.job_explanation = job_explanation
-                        tasks_to_update_job_explanation.append(task)
                 continue
 
             if isinstance(task, WorkflowJob):
@@ -578,7 +583,7 @@ class TaskManager(TaskBase):
                 task, instance_group_name=self.controlplane_ig.name, impact=control_impact, capacity_type='control'
             )
             if not control_instance:
-                self.task_needs_capacity(task, tasks_to_update_job_explanation)
+                self.task_needs_capacity(task)
                 logger.debug(f"Skipping task {task.log_format} in pending, not enough capacity left on controlplane to control new tasks")
                 continue
 
@@ -635,10 +640,9 @@ class TaskManager(TaskBase):
                         )
                     )
             if not found_acceptable_queue:
-                self.task_needs_capacity(task, tasks_to_update_job_explanation)
-        UnifiedJob.objects.bulk_update(tasks_to_update_job_explanation, ['job_explanation'])
+                self.task_needs_capacity(task)
 
-    def task_needs_capacity(self, task, tasks_to_update_job_explanation):
+    def task_needs_capacity(self, task):
         task.log_lifecycle("needs_capacity")
         job_explanation = gettext_noop("This job is not ready to start because there is not enough available capacity.")
         if task.job_explanation != job_explanation:
@@ -647,7 +651,6 @@ class TaskManager(TaskBase):
                 # Therefore we should only update the job_explanation after some time has elapsed to
                 # prevent excessive task saves.
                 task.job_explanation = job_explanation
-                tasks_to_update_job_explanation.append(task)
         logger.debug("{} couldn't be scheduled on graph, waiting for next cycle".format(task.log_format))
 
     def reap_jobs_from_orphaned_instances(self):
@@ -675,6 +678,11 @@ class TaskManager(TaskBase):
         pending_tasks = [t for t in self.all_tasks if t.status == 'pending']
 
         self.process_pending_tasks(pending_tasks)
+        # There should be no overlap between these two sets, we either bulk update or we save
+        self.tasks_to_bulk_update = self.tasks_to_bulk_update - self.tasks_to_save
+        UnifiedJob.objects.bulk_update(list(self.tasks_to_bulk_update), self.task_update_fields)
+        for task in list(self.tasks_to_save):
+            task.save(update_fields=self.task_update_fields)
         self.subsystem_metrics.inc(f"{self.prefix}_pending_processed", len(pending_tasks))
 
         if self.pre_start_failed:
