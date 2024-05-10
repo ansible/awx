@@ -94,10 +94,10 @@ In some situations, you can modify the following:
 
 - A new Host manually created on Inventory w/ inventory sources
 - In Groups that were created as a result of inventory source syncs
-- Variables on Host and Group are changeable
 
 Hosts associated with the Smart Inventory are manifested at view time. If the results of a Smart Inventory contains more than one host with identical hostnames, only one of the matching hosts will be included as part of the Smart Inventory, ordered by Host ID.
 
+Variables on Host and Group are not changeable even as the local system admin user.
 
 .. _ug_host_filters:
 

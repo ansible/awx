@@ -25,7 +25,7 @@ django-pglocks
 django-radius
 django-solo
 django-split-settings==1.0.0    # We hit a strange issue where the release process errored when upgrading past 1.0.0 see UPGRADE BLOCKERS
-djangorestframework
+djangorestframework>=3.15.0
 djangorestframework-yaml
 filelock
 GitPython>=3.1.37  # CVE-2023-41040

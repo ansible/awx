@@ -234,7 +234,7 @@ class ApiV2(base.Base):
         return endpoint.get(**{identifier: value}, all_pages=True)
 
     def export_assets(self, **kwargs):
-        self._cache = page.PageCache()
+        self._cache = page.PageCache(self.connection)
 
         # If no resource kwargs are explicitly used, export everything.
         all_resources = all(kwargs.get(resource) is None for resource in EXPORTABLE_RESOURCES)
@@ -335,7 +335,7 @@ class ApiV2(base.Base):
                 if name == 'roles':
                     indexed_roles = defaultdict(list)
                     for role in S:
-                        if 'content_object' not in role:
+                        if role.get('content_object') is None:
                             continue
                         indexed_roles[role['content_object']['type']].append(role)
                     self._roles.append((_page, indexed_roles))
@@ -411,7 +411,7 @@ class ApiV2(base.Base):
             # FIXME: deal with pruning existing relations that do not match the import set
 
     def import_assets(self, data):
-        self._cache = page.PageCache()
+        self._cache = page.PageCache(self.connection)
         self._related = []
         self._roles = []
 
@@ -420,11 +420,8 @@ class ApiV2(base.Base):
         for resource in self._dependent_resources():
             endpoint = getattr(self, resource)
 
-            # Load up existing objects, so that we can try to update or link to them
-            self._cache.get_page(endpoint)
             imported = self._import_list(endpoint, data.get(resource) or [])
             changed = changed or imported
-            # FIXME: should we delete existing unpatched assets?
 
         self._assign_related()
         self._assign_membership()
