@@ -277,6 +277,9 @@ SESSION_COOKIE_SECURE = True
 # Note: This setting may be overridden by database settings.
 SESSION_COOKIE_AGE = 1800
 
+# Option to change userLoggedIn cookie SameSite policy.
+USER_COOKIE_SAMESITE = 'Lax'
+
 # Name of the cookie that contains the session information.
 # Note: Changing this value may require changes to any clients.
 SESSION_COOKIE_NAME = 'awx_sessionid'
@@ -1145,13 +1148,8 @@ ANSIBLE_BASE_CUSTOM_VIEW_PARENT = 'awx.api.generics.APIView'
 
 # Settings for the ansible_base RBAC system
 
-# Only used internally, names of the managed RoleDefinitions to create
-ANSIBLE_BASE_ROLE_PRECREATE = {
-    'object_admin': '{cls.__name__} Admin',
-    'org_admin': 'Organization Admin',
-    'org_children': 'Organization {cls.__name__} Admin',
-    'special': '{cls.__name__} {action}',
-}
+# This has been moved to data migration code
+ANSIBLE_BASE_ROLE_PRECREATE = {}
 
 # Name for auto-created roles that give users permissions to what they create
 ANSIBLE_BASE_ROLE_CREATOR_NAME = '{cls.__name__} Creator'
@@ -1161,9 +1159,6 @@ ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED = True
 
 # Permissions a user will get when creating a new item
 ANSIBLE_BASE_CREATOR_DEFAULTS = ['change', 'delete', 'execute', 'use', 'adhoc', 'approve', 'update', 'view']
-
-# This is a stopgap, will delete after resource registry integration
-ANSIBLE_BASE_SERVICE_PREFIX = "awx"
 
 # Temporary, for old roles API compatibility, save child permissions at organization level
 ANSIBLE_BASE_CACHE_PARENT_PERMISSIONS = True
@@ -1178,6 +1173,3 @@ ANSIBLE_BASE_ALLOW_SINGLETON_ROLES_API = False  # Do not allow creating user-def
 
 # system username for django-ansible-base
 SYSTEM_USERNAME = None
-
-# Use AWX base view, to give 401 on unauthenticated requests
-ANSIBLE_BASE_CUSTOM_VIEW_PARENT = 'awx.api.generics.APIView'

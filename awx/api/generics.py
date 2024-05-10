@@ -95,7 +95,9 @@ class LoggedLoginView(auth_views.LoginView):
         ret = super(LoggedLoginView, self).post(request, *args, **kwargs)
         if request.user.is_authenticated:
             logger.info(smart_str(u"User {} logged in from {}".format(self.request.user.username, request.META.get('REMOTE_ADDR', None))))
-            ret.set_cookie('userLoggedIn', 'true', secure=getattr(settings, 'SESSION_COOKIE_SECURE', False))
+            ret.set_cookie(
+                'userLoggedIn', 'true', secure=getattr(settings, 'SESSION_COOKIE_SECURE', False), samesite=getattr(settings, 'USER_COOKIE_SAMESITE', 'Lax')
+            )
             ret.setdefault('X-API-Session-Cookie-Name', getattr(settings, 'SESSION_COOKIE_NAME', 'awx_sessionid'))
 
             return ret

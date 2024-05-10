@@ -61,6 +61,10 @@ class StringListBooleanField(ListField):
 
     def to_representation(self, value):
         try:
+            if isinstance(value, str):
+                # https://github.com/encode/django-rest-framework/commit/a180bde0fd965915718b070932418cabc831cee1
+                # DRF changed truthy and falsy lists to be capitalized
+                value = value.lower()
             if isinstance(value, (list, tuple)):
                 return super(StringListBooleanField, self).to_representation(value)
             elif value in BooleanField.TRUE_VALUES:
@@ -78,6 +82,8 @@ class StringListBooleanField(ListField):
 
     def to_internal_value(self, data):
         try:
+            if isinstance(data, str):
+                data = data.lower()
             if isinstance(data, (list, tuple)):
                 return super(StringListBooleanField, self).to_internal_value(data)
             elif data in BooleanField.TRUE_VALUES:
