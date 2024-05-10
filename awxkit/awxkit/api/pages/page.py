@@ -11,6 +11,7 @@ from awxkit.utils import PseudoNamespace, is_relative_endpoint, are_same_endpoin
 from awxkit.api import utils
 from awxkit.api.client import Connection
 from awxkit.api.registry import URLRegistry
+from awxkit.api.resources import resources
 from awxkit.config import config
 import awxkit.exceptions as exc
 
@@ -493,10 +494,11 @@ class TentativePage(str):
 
 
 class PageCache(object):
-    def __init__(self):
+    def __init__(self, connection=None):
         self.options = {}
         self.pages_by_url = {}
         self.pages_by_natural_key = {}
+        self.connection = connection or Connection(config.base_url, not config.assume_untrusted)
 
     def get_options(self, page):
         url = page.endpoint if isinstance(page, Page) else str(page)
@@ -550,7 +552,31 @@ class PageCache(object):
         return self.set_page(page)
 
     def get_by_natural_key(self, natural_key):
-        endpoint = self.pages_by_natural_key.get(utils.freeze(natural_key))
-        log.debug("get_by_natural_key: %s, endpoint: %s", repr(natural_key), endpoint)
-        if endpoint:
-            return self.get_page(endpoint)
+        page = self.pages_by_natural_key.get(utils.freeze(natural_key))
+        if page is None:
+            # We need some way to get ahold of the top-level resource
+            # list endpoint from the natural_key type.  The resources
+            # object more or less has that for each of the detail
+            # views.  Just chop off the /<id>/ bit.
+            endpoint = getattr(resources, natural_key['type'], None)
+            if endpoint is None:
+                return
+            endpoint = ''.join([endpoint.rsplit('/', 2)[0], '/'])
+            page_type = get_registered_page(endpoint)
+
+            kwargs = {}
+            for k, v in natural_key.items():
+                if isinstance(v, str) and k != 'type':
+                    kwargs[k] = v
+
+            # Do a filtered query against the list endpoint, usually
+            # with the name of the object but sometimes more.
+            list_page = page_type(self.connection, endpoint=endpoint).get(all_pages=True, **kwargs)
+            if 'results' in list_page:
+                for p in list_page.results:
+                    self.set_page(p)
+            page = self.pages_by_natural_key.get(utils.freeze(natural_key))
+
+        log.debug("get_by_natural_key: %s, endpoint: %s", repr(natural_key), page)
+        if page:
+            return self.get_page(page)

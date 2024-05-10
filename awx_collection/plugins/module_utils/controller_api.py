@@ -1038,7 +1038,10 @@ class ControllerAPIModule(ControllerModule):
         # Grab our start time to compare against for the timeout
         start = time.time()
         result = self.get_endpoint(url)
-        while not result['json']['finished']:
+        wait_on_field = 'event_processing_finished'
+        if wait_on_field not in result['json']:
+            wait_on_field = 'finished'
+        while not result['json'][wait_on_field]:
             # If we are past our time out fail with a message
             if timeout and timeout < time.time() - start:
                 # Account for Legacy messages
