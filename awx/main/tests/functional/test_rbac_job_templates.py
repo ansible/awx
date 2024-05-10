@@ -165,7 +165,7 @@ class TestOrphanJobTemplate:
 
 @pytest.mark.django_db
 @pytest.mark.job_permissions
-def test_job_template_creator_access(project, organization, rando, post):
+def test_job_template_creator_access(project, organization, rando, post, setup_managed_roles):
     project.use_role.members.add(rando)
     response = post(
         url=reverse('api:job_template_list'),
