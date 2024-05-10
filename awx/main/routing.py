@@ -63,6 +63,10 @@ websocket_urlpatterns = [
     re_path(r'api/websocket/$', consumers.EventConsumer.as_asgi()),
     re_path(r'websocket/$', consumers.EventConsumer.as_asgi()),
 ]
+
+if settings.OPTIONAL_API_URLPATTERN_PREFIX:
+    websocket_urlpatterns.append(re_path(r'api/{}/v2/websocket/$'.format(settings.OPTIONAL_API_URLPATTERN_PREFIX), consumers.EventConsumer.as_asgi()))
+
 websocket_relay_urlpatterns = [
     re_path(r'websocket/relay/$', consumers.RelayConsumer.as_asgi()),
 ]
