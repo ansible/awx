@@ -1160,9 +1160,6 @@ ANSIBLE_BASE_ROLE_SYSTEM_ACTIVATED = True
 # Permissions a user will get when creating a new item
 ANSIBLE_BASE_CREATOR_DEFAULTS = ['change', 'delete', 'execute', 'use', 'adhoc', 'approve', 'update', 'view']
 
-# This is a stopgap, will delete after resource registry integration
-ANSIBLE_BASE_SERVICE_PREFIX = "awx"
-
 # Temporary, for old roles API compatibility, save child permissions at organization level
 ANSIBLE_BASE_CACHE_PARENT_PERMISSIONS = True
 
@@ -1176,6 +1173,3 @@ ANSIBLE_BASE_ALLOW_SINGLETON_ROLES_API = False  # Do not allow creating user-def
 
 # system username for django-ansible-base
 SYSTEM_USERNAME = None
-
-# Use AWX base view, to give 401 on unauthenticated requests
-ANSIBLE_BASE_CUSTOM_VIEW_PARENT = 'awx.api.generics.APIView'
