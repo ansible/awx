@@ -45,7 +45,7 @@ for ct in ContentType.objects.order_by('id'):
             try:
                 r = getattr(obj, f.name, None)
             except Role.DoesNotExist:
-                sys.stderr.write(f"{cls} id={obj.id} {f.name} points to Role id={r_id}, which is not in the database.")
+                sys.stderr.write(f"{cls} id={obj.id} {f.name} points to Role id={r_id}, which is not in the database.\n")
                 crosslinked[ct.id][obj.id][f'{f.name}_id'] = None
                 continue
             if not r:
@@ -102,7 +102,12 @@ for r in Role.objects.exclude(role_field__startswith='system_').order_by('id'):
         sys.stderr.write(f"Role id={r.id} has cross-linked parents: {plus}\n")
         crosslinked_parents[r.id].extend(x.id for x in plus)
 
-    rev = getattr(r.content_object, r.role_field, None)
+    try:
+        rev = getattr(r.content_object, r.role_field, None)
+    except Role.DoesNotExist:
+        sys.stderr.write(f"Role id={r.id} {r.content_type!r} {r.object_id} {r.role_field} points at an object with a broken role.\n")
+        crosslinked[r.content_type_id][r.object_id][f'{r.role_field}_id'] = r.id
+        continue
     if rev is None or r.id != rev.id:
         if rev and (r.content_type_id, r.object_id, r.role_field) == (rev.content_type_id, rev.object_id, rev.role_field):
             sys.stderr.write(f"Role id={r.id} {r.content_type!r} {r.object_id} {r.role_field} is an orphaned duplicate of Role id={rev.id}, which is actually being used by the assigned resource\n")
