@@ -269,6 +269,42 @@ services:
       # pg_notify will NOT work in transaction mode.
       PGBOUNCER_POOL_MODE: session
 {% endif %}
+{% if enable_otel|bool %}
+  otel:
+    image: otel/opentelemetry-collector-contrib:0.88.0
+    container_name: tools_otel_1
+    hostname: otel
+    command: ["--config=/etc/otel-collector-config.yaml", ""]
+    networks:
+      - awx
+    ports:
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP http receiver
+      - "55679:55679" # zpages http://localhost:55679/debug/servicez /tracez
+    volumes:
+      - "../../otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml"
+    depends_on:
+      - loki
+{% endif %}
+{% if enable_loki|bool %}
+  loki:
+    image: grafana/loki:2.9.5
+    container_name: tools_loki_1
+    hostname: loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - awx
+    volumes:
+      - "loki_storage:/loki:rw"
+      #- "../../docker-compose/loki/volumes/index:/loki/index"
+      #- "../../docker-compose/loki/volumes/boltdb-cache:/loki/boltdb-cache"
+      - "../../loki/local-config.yaml:/etc/loki/local-config.yaml"
+    depends_on:
+      - grafana
+{% endif %}
+
 {% if execution_node_count|int > 0 %}
   receptor-hop:
     image: {{ receptor_image }}
@@ -359,6 +395,10 @@ volumes:
 {% if enable_grafana|bool %}
   grafana_storage:
     name: tools_grafana_storage
+{% endif %}
+{% if enable_loki|bool %}
+  loki_storage:
+    name: tools_loki_storage
 {% endif %}
 
 networks:

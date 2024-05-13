@@ -47,6 +47,10 @@ VAULT ?= false
 VAULT_TLS ?= false
 # If set to true docker-compose will also start a tacacs+ instance
 TACACS ?= false
+# If set to true docker-compose will also start an OpenTelemetry Collector instance
+OTEL ?= false
+# If set to true docker-compose will also start a Loki instance
+LOKI ?= false
 # If set to true docker-compose will install editable dependencies
 EDITABLE_DEPENDENCIES ?= false
 
@@ -535,6 +539,8 @@ docker-compose-sources: .git/hooks/pre-commit
 	    -e enable_vault=$(VAULT) \
 	    -e vault_tls=$(VAULT_TLS) \
 	    -e enable_tacacs=$(TACACS) \
+	    -e enable_otel=$(OTEL) \
+	    -e enable_loki=$(LOKI) \
 	    -e install_editable_dependencies=$(EDITABLE_DEPENDENCIES) \
 	    $(EXTRA_SOURCES_ANSIBLE_OPTS)
 
