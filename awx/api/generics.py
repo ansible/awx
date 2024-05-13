@@ -109,6 +109,9 @@ class LoggedLoginView(auth_views.LoginView):
 
 
 class LoggedLogoutView(auth_views.LogoutView):
+
+    success_url_allowed_hosts = settings.LOGOUT_ALLOWED_HOSTS
+
     def dispatch(self, request, *args, **kwargs):
         original_user = getattr(request, 'user', None)
         ret = super(LoggedLogoutView, self).dispatch(request, *args, **kwargs)
