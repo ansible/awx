@@ -224,8 +224,6 @@ ADD tools/docker-compose/start_tests.sh /start_tests.sh
 ADD tools/docker-compose/bootstrap_development.sh /usr/bin/bootstrap_development.sh
 ADD tools/docker-compose/entrypoint.sh /entrypoint.sh
 ADD tools/scripts/config-watcher /usr/bin/config-watcher
-ADD tools/docker-compose/containers.conf /etc/containers/containers.conf
-ADD tools/docker-compose/podman-containers.conf /var/lib/awx/.config/containers/containers.conf
 {% elif kube_dev|bool %}
 RUN ln -sf /awx_devel/tools/ansible/roles/dockerfile/files/launch_awx_web.sh /usr/bin/launch_awx_web.sh
 RUN ln -sf /awx_devel/tools/ansible/roles/dockerfile/files/launch_awx_task.sh /usr/bin/launch_awx_task.sh
@@ -275,9 +273,6 @@ RUN for dir in \
 
 {% if (build_dev|bool) or (kube_dev|bool) %}
 RUN for dir in \
-      /etc/containers \
-      /var/lib/awx/.config/containers \
-      /var/lib/awx/.config/cni \
       /var/lib/awx/.local \
       /var/lib/awx/venv \
       /var/lib/awx/venv/awx/bin \
@@ -294,8 +289,6 @@ RUN for dir in \
       /var/lib/awx/vendor ; \
     do mkdir -m 0775 -p $dir ; chmod g+rwx $dir ; chgrp root $dir ; done && \
     for file in \
-      /etc/containers/containers.conf \
-      /var/lib/awx/.config/containers/containers.conf \
       /var/lib/shared/overlay-images/images.lock \
       /var/lib/shared/overlay-layers/layers.lock \
       /var/lib/shared/vfs-images/images.lock \
