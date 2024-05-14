@@ -52,7 +52,7 @@ class AWSSNSBackend(AWXBaseEmailBackend, CustomNotificationBase):
         for message in messages:
             sns_topic_arn = str(message.recipients()[0])
             try:
-                client.publish(TopicArn=sns_topic_arn, Subject=message.subject, Message=json.dumps(message.body), MessageAttributes={})
+                client.publish(TopicArn=sns_topic_arn, Message=json.dumps(message.body), MessageAttributes={})
                 sent_messages += 1
             except ClientError as error:
                 if not self.fail_silently:
